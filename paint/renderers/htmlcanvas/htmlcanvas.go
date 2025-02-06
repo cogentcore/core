@@ -101,7 +101,7 @@ func (rs *Renderer) writePath(pt *render.Path) {
 	}
 }
 
-func (rs *Renderer) toStyle(clr image.Image) any {
+func (rs *Renderer) imageToStyle(clr image.Image) any {
 	if g, ok := clr.(gradient.Gradient); ok {
 		if gl, ok := g.(*gradient.Linear); ok {
 			grad := rs.ctx.Call("createLinearGradient", gl.Start.X, rs.size.Y-gl.Start.Y, gl.End.X, rs.size.Y-gl.End.Y) // TODO: are these params right?
@@ -149,7 +149,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 
 	if style.HasFill() {
 		if style.Fill.Color != rs.style.Fill.Color {
-			rs.ctx.Set("fillStyle", rs.toStyle(style.Fill.Color))
+			rs.ctx.Set("fillStyle", rs.imageToStyle(style.Fill.Color))
 			rs.style.Fill.Color = style.Fill.Color
 		}
 		rs.ctx.Call("fill")
@@ -199,7 +199,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 			rs.style.Stroke.Width = style.Stroke.Width
 		}
 		if style.Stroke.Color != rs.style.Stroke.Color {
-			rs.ctx.Set("strokeStyle", rs.toStyle(style.Stroke.Color))
+			rs.ctx.Set("strokeStyle", rs.imageToStyle(style.Stroke.Color))
 			rs.style.Stroke.Color = style.Stroke.Color
 		}
 		rs.ctx.Call("stroke")
@@ -212,7 +212,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		pt.Path = pt.Path.Stroke(style.Stroke.Width.Dots, ppath.CapFromStyle(style.Stroke.Cap), ppath.JoinFromStyle(style.Stroke.Join), 1)
 		rs.writePath(pt)
 		if style.Stroke.Color != rs.style.Fill.Color {
-			rs.ctx.Set("fillStyle", rs.toStyle(style.Stroke.Color))
+			rs.ctx.Set("fillStyle", rs.imageToStyle(style.Stroke.Color))
 			rs.style.Fill.Color = style.Stroke.Color
 		}
 		rs.ctx.Call("fill")
