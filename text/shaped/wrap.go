@@ -124,6 +124,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 				run.Background = colors.Uniform(sty.Background)
 			}
 			bb := math32.B2FromFixed(run.Bounds().Add(pos))
+			// fmt.Println(bb.Size().Y, lht)
 			ln.Bounds.ExpandByBox(bb)
 			pos = DirectionAdvance(run.Direction, pos, run.Advance)
 			ln.Runs = append(ln.Runs, run)
@@ -171,6 +172,9 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			extra := max(lht-lns.LineHeight, 0)
 			// fmt.Println("extra:", extra)
 			off.Y += lht + lgap
+			if lht < lns.LineHeight {
+				ln.Bounds.Max.Y += lns.LineHeight - lht
+			}
 			ourOff.Y += extra
 		}
 		ln.Offset = ourOff

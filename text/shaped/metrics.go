@@ -5,6 +5,7 @@
 package shaped
 
 import (
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
@@ -24,11 +25,13 @@ func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 // It includes the [text.Style] LineSpacing multiplier on the natural
 // font-derived line height, which is not generally the same as the font size.
 func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
-	run := sh.FontSize('m', sty, tsty, rts)
+	run := sh.FontSize('M', sty, tsty, rts)
 	bb := run.BoundsBox()
 	dir := goTextDirection(rich.Default, tsty)
 	if dir.IsVertical() {
-		return tsty.LineSpacing * bb.Size().X
+		return math32.Round(tsty.LineSpacing * bb.Size().X)
 	}
-	return tsty.LineSpacing * bb.Size().Y
+	lht := math32.Round(tsty.LineSpacing * bb.Size().Y)
+	// fmt.Println("lht:", tsty.LineSpacing, bb.Size().Y, lht)
+	return lht
 }

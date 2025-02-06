@@ -204,6 +204,9 @@ func (tx *Text) Init() {
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		}
+		// the above linespacing factors are based on an em-based multiplier
+		// instead, we are now using actual font height, so we need to reduce.
+		s.Text.LineSpacing /= 1.25
 	})
 	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
@@ -351,6 +354,7 @@ func (tx *Text) SizeUp() {
 		return
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
+	// fmt.Println(tx, rsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {

@@ -5,10 +5,12 @@
 package text
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 )
@@ -228,16 +230,21 @@ func (ws WhiteSpaces) KeepWhiteSpace() bool {
 func (ts *Style) SetUnitContext(uc *units.Context, sty *rich.Style) {
 	fsz := ts.FontHeight(sty)
 	if fsz == 0 {
-		// fmt.Println("fsz 0:", ts.FontSize.Dots, ts.FontSize.Value, sty.Size)
+		fmt.Println("fsz 0:", ts.FontSize.Dots, ts.FontSize.Value, sty.Size)
 		fsz = 16
 	}
 	// these numbers are from previous font system, Roboto measurements:
 	ex := 0.53 * fsz
-	ch := 0.46 * fsz
+	ch := 0.45 * fsz
 	// this is what the current system says:
 	// ex := 0.56 * fsz
 	// ch := 0.6 * fsz
+	// use nice round numbers for cleaner layout:
+	fsz = math32.Round(fsz)
+	ex = math32.Round(ex)
+	ch = math32.Round(ch)
 	uc.SetFont(fsz, ex, ch, uc.Dp(16))
+	// fmt.Println(fsz, ex, ch)
 }
 
 // TODO(text): ?
