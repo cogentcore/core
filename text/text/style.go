@@ -222,6 +222,20 @@ func (ws WhiteSpaces) KeepWhiteSpace() bool {
 	}
 }
 
+// SetUnitContext sets the font-specific information in the given
+// units.Context, based on the given styles. Just uses standardized
+// fractions of the font size for the other less common units such as ex, ch.
+func (ts *Style) SetUnitContext(uc *units.Context, sty *rich.Style) {
+	fsz := ts.FontHeight(sty)
+	if fsz == 0 {
+		fsz = 16
+	}
+	ex := 0.56 * fsz
+	ch := 0.6 * fsz
+	uc.SetFont(fsz, ex, ch, uc.Dp(16))
+}
+
+// TODO(text): ?
 // UnicodeBidi determines the type of bidirectional text support.
 // See https://pkg.go.dev/golang.org/x/text/unicode/bidi.
 // type UnicodeBidi int32 //enums:enum -trim-prefix Bidi -transform kebab

@@ -5,8 +5,6 @@
 package shaped
 
 import (
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
@@ -33,15 +31,4 @@ func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settin
 		return tsty.LineSpacing * bb.Size().X
 	}
 	return tsty.LineSpacing * bb.Size().Y
-}
-
-// SetUnitContext sets the font-specific information in the given
-// units.Context, based on the given styles, using [Shaper.FontSize].
-func (sh *Shaper) SetUnitContext(uc *units.Context, sty *rich.Style, tsty *text.Style, rts *rich.Settings) {
-	fsz := tsty.FontHeight(sty)
-	xr := sh.FontSize('x', sty, tsty, rts)
-	ex := xr.GlyphBoundsBox(&xr.Glyphs[0]).Size().Y
-	zr := sh.FontSize('0', sty, tsty, rts)
-	ch := math32.FromFixed(zr.Advance)
-	uc.SetFont(fsz, ex, ch, uc.Dp(16))
 }
