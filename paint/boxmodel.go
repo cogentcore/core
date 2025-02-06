@@ -62,7 +62,7 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 	}
 
 	pc.Stroke.Opacity = st.Opacity
-	pc.FontStyle.Opacity = st.Opacity
+	// pc.Font.Opacity = st.Opacity // todo:
 
 	// first do any shadow
 	if st.HasBoxShadow() {

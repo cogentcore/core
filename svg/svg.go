@@ -280,6 +280,7 @@ func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
 	pc.UnitContext.Defaults()
 	pc.UnitContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
 	pc.UnitContext.SetSizes(float32(sv.Geom.Size.X), float32(sv.Geom.Size.Y), el.X, el.Y, parent.X, parent.Y)
-	pc.FontStyle.SetUnitContext(&pc.UnitContext)
+	// todo:
+	// pc.Font.SetUnitContext(&pc.UnitContext)
 	pc.ToDots()
 }

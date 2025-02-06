@@ -7,7 +7,7 @@ import (
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ptext"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/aymerick/douceur/css"
@@ -264,7 +264,7 @@ func NewRoot(parent ...tree.Node) *Root { return tree.New[Root](parent...) }
 // for the SVG during rendering.
 func (t *Root) SetViewBox(v ViewBox) *Root { t.ViewBox = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextRender", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextShaped", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}}})
 
 // NewText returns a new [Text] with the given optional parent:
 // Text renders SVG text, handling both text and tspan elements.
@@ -283,9 +283,9 @@ func (t *Text) SetWidth(v float32) *Text { t.Width = v; return t }
 // text string to render
 func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
-// SetTextRender sets the [Text.TextRender]:
+// SetTextShaped sets the [Text.TextShaped]:
 // render version of text
-func (t *Text) SetTextRender(v ptext.Text) *Text { t.TextRender = v; return t }
+func (t *Text) SetTextShaped(v shaped.Lines) *Text { t.TextShaped = v; return t }
 
 // SetCharPosX sets the [Text.CharPosX]:
 // character positions along X axis, if specified

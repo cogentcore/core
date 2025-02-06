@@ -338,8 +338,9 @@ func (g *NodeBase) Style(sv *SVG) {
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
 
-	pc.Stroke.Opacity *= pc.FontStyle.Opacity // applies to all
-	pc.Fill.Opacity *= pc.FontStyle.Opacity
+	// TODO(text):
+	// pc.Stroke.Opacity *= pc.Font.Opacity // applies to all
+	// pc.Fill.Opacity *= pc.FontStyle.Opacity
 
 	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
 }

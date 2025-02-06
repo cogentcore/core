@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/ptext"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // Text renders SVG text, handling both text and tspan elements.
@@ -29,7 +29,7 @@ type Text struct {
 	Text string `xml:"text"`
 
 	// render version of text
-	TextRender ptext.Text `xml:"-" json:"-" copier:"-"`
+	TextShaped shaped.Lines `xml:"-" json:"-" copier:"-"`
 
 	// character positions along X axis, if specified
 	CharPosX []float32
@@ -103,9 +103,10 @@ func (g *Text) TextBBox() math32.Box2 {
 		return math32.Box2{}
 	}
 	g.LayoutText()
-	pc := &g.Paint
-	bb := g.TextRender.BBox
-	bb.Translate(math32.Vec2(0, -0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
+	// pc := &g.Paint
+	bb := g.TextShaped.Bounds
+	// TODO(text):
+	// bb.Translate(math32.Vec2(0, -0.8*pc.Font.Font.Face.Metrics.Height)) // adjust for baseline
 	return bb
 }
 
@@ -116,69 +117,76 @@ func (g *Text) LayoutText() {
 	if g.Text == "" {
 		return
 	}
-	pc := &g.Paint
-	pc.FontStyle.Font = ptext.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
-	if pc.Fill.Color != nil {
-		pc.FontStyle.Color = pc.Fill.Color
-	}
-	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, 0, 1)
-	sr := &(g.TextRender.Spans[0])
+	// TODO(text): need sv parent
+	// pc := &g.Paint
+	// if pc.Fill.Color != nil {
+	// 	// TODO(text):
+	// 	// pc.Style.Color = pc.Fill.Color
+	// }
+	// tx := errors.Log1(htmltext.HTMLToRich([]byte(g.Text), &pc.Font, nil))
+	// lns := pc.TextShaper.WrapLines(tx)
+	// g.TextShaped.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, 0, 1)
+	/*
+		sr := &(g.TextShaped.Spans[0])
 
-	// todo: align styling only affects multi-line text and is about how tspan is arranged within
-	// the overall text block.
+		// todo: align styling only affects multi-line text and is about how tspan is arranged within
+		// the overall text block.
 
-	if len(g.CharPosX) > 0 {
-		mx := min(len(g.CharPosX), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			sr.Render[i].RelPos.X = g.CharPosX[i]
-		}
-	}
-	if len(g.CharPosY) > 0 {
-		mx := min(len(g.CharPosY), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			sr.Render[i].RelPos.Y = g.CharPosY[i]
-		}
-	}
-	if len(g.CharPosDX) > 0 {
-		mx := min(len(g.CharPosDX), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			if i > 0 {
-				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + g.CharPosDX[i]
-			} else {
-				sr.Render[i].RelPos.X = g.CharPosDX[i] // todo: not sure this is right
+		if len(g.CharPosX) > 0 {
+			mx := min(len(g.CharPosX), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				sr.Render[i].RelPos.X = g.CharPosX[i]
 			}
 		}
-	}
-	if len(g.CharPosDY) > 0 {
-		mx := min(len(g.CharPosDY), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			if i > 0 {
-				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + g.CharPosDY[i]
-			} else {
-				sr.Render[i].RelPos.Y = g.CharPosDY[i] // todo: not sure this is right
+		if len(g.CharPosY) > 0 {
+			mx := min(len(g.CharPosY), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				sr.Render[i].RelPos.Y = g.CharPosY[i]
 			}
 		}
-	}
-	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
-
-	g.TextRender.UpdateBBox()
+		if len(g.CharPosDX) > 0 {
+			mx := min(len(g.CharPosDX), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				if i > 0 {
+					sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + g.CharPosDX[i]
+				} else {
+					sr.Render[i].RelPos.X = g.CharPosDX[i] // todo: not sure this is right
+				}
+			}
+		}
+		if len(g.CharPosDY) > 0 {
+			mx := min(len(g.CharPosDY), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				if i > 0 {
+					sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + g.CharPosDY[i]
+				} else {
+					sr.Render[i].RelPos.Y = g.CharPosDY[i] // todo: not sure this is right
+				}
+			}
+		}
+		// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
+		g.TextShaped.UpdateBBox()
+	*/
 }
 
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Painter{&sv.RenderState, &g.Paint}
 	mat := pc.Transform()
 	// note: layout of text has already been done in LocalBBox above
-	g.TextRender.Transform(mat, &pc.FontStyle, &pc.UnitContext)
+	// TODO(text):
+	// g.TextShaped.Transform(mat, &pc.FontStyle, &pc.UnitContext)
 	pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
-	if pc.TextStyle.Align == styles.Center || pc.TextStyle.Anchor == styles.AnchorMiddle {
-		pos.X -= g.TextRender.BBox.Size().X * .5
-	} else if pc.TextStyle.Align == styles.End || pc.TextStyle.Anchor == styles.AnchorEnd {
-		pos.X -= g.TextRender.BBox.Size().X
+	if pc.Text.Align == text.Center {
+		pos.X -= g.TextShaped.Bounds.Size().X * .5
+	} else if pc.Text.Align == text.End {
+		pos.X -= g.TextShaped.Bounds.Size().X
 	}
-	pc.Text(&g.TextRender, pos)
+	// TODO(text): render call
+	// pc.Text(&g.TextShaped, pos)
 	g.LastPos = pos
-	bb := g.TextRender.BBox
-	bb.Translate(math32.Vec2(pos.X, pos.Y-0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
+	bb := g.TextShaped.Bounds
+	// TODO(text):
+	// bb.Translate(math32.Vec2(pos.X, pos.Y-0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
 	g.LastBBox = bb
 	g.BBoxes(sv)
 }
