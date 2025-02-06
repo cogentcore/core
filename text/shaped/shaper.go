@@ -5,6 +5,7 @@
 package shaped
 
 import (
+	"embed"
 	"fmt"
 	"os"
 
@@ -15,6 +16,7 @@ import (
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/font/opentype"
 	"github.com/go-text/typesetting/fontscan"
 	"github.com/go-text/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
@@ -31,8 +33,8 @@ type Shaper struct {
 	outBuff []shaping.Output
 }
 
-// //go:embed fonts/*.ttf
-// var efonts embed.FS // TODO
+//go:embed fonts/*.ttf
+var efonts embed.FS
 
 // todo: per gio: systemFonts bool, collection []FontFace
 func NewShaper() *Shaper {
@@ -48,7 +50,7 @@ func NewShaper() *Shaper {
 		errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	// sh.fontMap.AddFont(errors.Log1(efonts.Open("fonts/Roboto-Regular.ttf")).(opentype.Resource), "Roboto", "Roboto") // TODO
+	sh.fontMap.AddFont(errors.Log1(efonts.Open("fonts/Roboto-Regular.ttf")).(opentype.Resource), "Roboto", "Roboto") // TODO: add more fonts
 	// for _, f := range collection {
 	// 	shaper.Load(f)
 	// 	shaper.defaultFaces = append(shaper.defaultFaces, string(f.Font.Typeface))
