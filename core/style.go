@@ -177,8 +177,8 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 		st.UnitContext.DPI = 160
 	}
 	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
-	if sc != nil && sc.Painter.State != nil {
-		sc.Painter.State.TextShaper.SetUnitContext(&st.UnitContext, &st.Font, &st.Text, &AppearanceSettings.Text)
+	if sc != nil {
+		sc.TextShaper.SetUnitContext(&st.UnitContext, &st.Font, &st.Text, &AppearanceSettings.Text)
 	}
 	// if st.Font.Face == nil || rebuild {
 	// 	st.Font = ptext.OpenFont(st.FontRender(), &st.UnitContext) // calls SetUnContext after updating metrics

@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
 
@@ -57,6 +58,11 @@ type Scene struct { //core:no-new
 
 	// paint context for rendering
 	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+
+	// TODO(text): we could protect this with a mutex if we need to:
+
+	// TextShaper is the text shaping system for this scene, for doing text layout.
+	TextShaper *shaped.Shaper
 
 	// event manager for this scene
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
@@ -168,6 +174,7 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) Init() {
 	sc.Scene = sc
+	sc.TextShaper = shaped.NewShaper()
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {

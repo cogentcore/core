@@ -307,18 +307,11 @@ func (tx *Text) Label() string {
 // configTextSize does the HTML and Layout in paintText for text,
 // using given size to constrain layout.
 func (tx *Text) configTextSize(sz math32.Vector2) {
-	// todo: last arg is CSSAgg.  Can synthesize that some other way?
-	if tx.Scene == nil || tx.Scene.Painter.State == nil {
-		return
-	}
-	pc := &tx.Scene.Painter
-	if pc.TextShaper == nil {
-		return
-	}
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
+	txs.Color = colors.ToUniform(tx.Styles.Color)
 	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
-	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
 	// fmt.Println(sz, ht)
 }
 
@@ -328,25 +321,17 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
-	if tx.Scene == nil || tx.Scene.Painter.State == nil {
-		return math32.Vector2{}
-	}
-	pc := &tx.Scene.Painter
-	if pc.TextShaper == nil {
-		return math32.Vector2{}
-	}
-	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = text.Start, text.Start
 
 	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
-	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
 
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, rsz)
+	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, rsz)
 	return rsz
 }
 

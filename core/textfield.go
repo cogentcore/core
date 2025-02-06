@@ -1825,17 +1825,8 @@ func (tf *TextField) Style() {
 }
 
 func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
-	if tf.Scene == nil || tf.Scene.Painter.State == nil {
-		return math32.Vector2{}
-	}
-	pc := &tf.Scene.Painter
-	if pc.TextShaper == nil {
-		return math32.Vector2{}
-	}
 	st := &tf.Styles
 	txs := &st.Text
-	// fs := st.FontRender()
-	// st.Font = ptext.OpenFont(fs, &st.UnitContext)
 	txt := tf.editText
 	if tf.NoEcho {
 		txt = concealDots(len(tf.editText))
@@ -1843,7 +1834,7 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = text.Start, text.Start // only works with this
 	tx := rich.NewText(&st.Font, txt)
-	tf.renderAll = pc.TextShaper.WrapLines(tx, &st.Font, txs, &AppearanceSettings.Text, sz)
+	tf.renderAll = tf.Scene.TextShaper.WrapLines(tx, &st.Font, txs, &AppearanceSettings.Text, sz)
 	txs.Align, txs.AlignV = align, alignV
 	rsz := tf.renderAll.Bounds.Size().Ceil()
 	return rsz
@@ -1946,14 +1937,28 @@ func (tf *TextField) setEffPosAndSize() {
 	tf.effPos = pos.Ceil()
 }
 
+func (tf *TextField) layoutCurrent() {
+	st := &tf.Styles
+	fs := &st.Font
+	txs := &st.Text
+
+	cur := tf.editText[tf.startPos:tf.endPos]
+	clr := st.Color
+	if len(tf.editText) == 0 && len(tf.Placeholder) > 0 {
+		clr = tf.PlaceholderColor
+		cur = []rune(tf.Placeholder)
+	} else if tf.NoEcho {
+		cur = concealDots(len(cur))
+	}
+	st.Text.Color = colors.ToUniform(clr)
+	sz := &tf.Geom.Size
+	icsz := tf.iconsSize()
+	availSz := sz.Actual.Content.Sub(icsz)
+	tx := rich.NewText(&st.Font, cur)
+	tf.renderVisible = tf.Scene.TextShaper.WrapLines(tx, fs, txs, &AppearanceSettings.Text, availSz)
+}
+
 func (tf *TextField) Render() {
-	if tf.Scene == nil || tf.Scene.Painter.State == nil {
-		return
-	}
-	pc := &tf.Scene.Painter
-	if pc.TextShaper == nil {
-		return
-	}
 	defer func() {
 		if tf.IsReadOnly() {
 			return
@@ -1965,33 +1970,13 @@ func (tf *TextField) Render() {
 		}
 	}()
 
-	st := &tf.Styles
-
 	tf.autoScroll() // inits paint with our style
-	fs := &st.Font
-	txs := &st.Text
-	// st.Font = ptext.OpenFont(fs, &st.UnitContext)
 	tf.RenderStandardBox()
 	if tf.startPos < 0 || tf.endPos > len(tf.editText) {
 		return
 	}
-	cur := tf.editText[tf.startPos:tf.endPos]
 	tf.renderSelect()
-	pos := tf.effPos
-	prevColor := st.Color
-	if len(tf.editText) == 0 && len(tf.Placeholder) > 0 {
-		st.Color = tf.PlaceholderColor
-		cur = []rune(tf.Placeholder)
-	} else if tf.NoEcho {
-		cur = concealDots(len(cur))
-	}
-	sz := &tf.Geom.Size
-	icsz := tf.iconsSize()
-	availSz := sz.Actual.Content.Sub(icsz)
-	tx := rich.NewText(&st.Font, cur)
-	tf.renderVisible = pc.TextShaper.WrapLines(tx, fs, txs, &AppearanceSettings.Text, availSz)
-	pc.TextLines(tf.renderVisible, pos)
-	st.Color = prevColor
+	tf.Scene.Painter.TextLines(tf.renderVisible, tf.effPos)
 }
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words.
