@@ -59,17 +59,17 @@ func TestBasic(t *testing.T) {
 		ul.Decoration.SetFlag(true, rich.Underline)
 
 		tx := rich.NewText(plain, sr[:4])
-		tx.Add(ital, sr[4:8])
+		tx.AddSpan(ital, sr[4:8])
 		fam := []rune("familiar")
 		ix := runes.Index(sr, fam)
-		tx.Add(ul, sr[8:ix])
-		tx.Add(boldBig, sr[ix:ix+8])
-		tx.Add(ul, sr[ix+8:])
+		tx.AddSpan(ul, sr[8:ix])
+		tx.AddSpan(boldBig, sr[ix:ix+8])
+		tx.AddSpan(ul, sr[ix+8:])
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		lns.SelectRegion(textpos.Range{7, 30})
 		lns.SelectRegion(textpos.Range{34, 40})
-		pc.NewText(lns, math32.Vec2(20, 60))
+		pc.TextLines(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }
@@ -86,7 +86,7 @@ func TestHebrew(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
-		pc.NewText(lns, math32.Vec2(20, 60))
+		pc.TextLines(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }
@@ -108,8 +108,8 @@ func TestVertical(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(150, 50))
-		// pc.NewText(lns, math32.Vec2(100, 200))
-		pc.NewText(lns, math32.Vec2(60, 100))
+		// pc.TextLines(lns, math32.Vec2(100, 200))
+		pc.TextLines(lns, math32.Vec2(60, 100))
 		pc.RenderDone()
 	})
 
@@ -125,7 +125,7 @@ func TestVertical(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
-		pc.NewText(lns, math32.Vec2(20, 60))
+		pc.TextLines(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }
@@ -141,10 +141,10 @@ func TestColors(t *testing.T) {
 		src := "The lazy fox"
 		sr := []rune(src)
 		sp := rich.NewText(stroke, sr[:4])
-		sp.Add(&big, sr[4:8]).Add(stroke, sr[8:])
+		sp.AddSpan(&big, sr[4:8]).AddSpan(stroke, sr[8:])
 
 		lns := sh.WrapLines(sp, stroke, tsty, rts, math32.Vec2(250, 250))
-		pc.NewText(lns, math32.Vec2(20, 80))
+		pc.TextLines(lns, math32.Vec2(20, 80))
 		pc.RenderDone()
 	})
 }

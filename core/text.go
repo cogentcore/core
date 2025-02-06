@@ -319,6 +319,7 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	txs := &tx.Styles.Text
 	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
 	tx.paintText = pc.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
+	fmt.Println(sz, ht)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -327,6 +328,9 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
+	if tx.Scene == nil || tx.Scene.Painter.State == nil {
+		return math32.Vector2{}
+	}
 	pc := &tx.Scene.Painter
 	if pc.TextShaper == nil {
 		return math32.Vector2{}
@@ -351,17 +355,20 @@ func (tx *Text) SizeUp() {
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		// note: using a narrow ratio of .5 to allow text to squeeze into narrow space
-		tx.configTextSize(shaped.WrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font, &tx.Styles.Text))
+		est := shaped.WrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font, &tx.Styles.Text)
+		fmt.Println("est:", est)
+		tx.configTextSize(est)
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
 	if tx.paintText == nil {
+		fmt.Println("nil")
 		return
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	if DebugSettings.LayoutTrace {
+	if true || DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }

@@ -71,14 +71,16 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	cspi := 0
 	cspSt, cspEd := tx.Range(cspi)
 	var off math32.Vector2
-	for _, lno := range lines {
+	for li, lno := range lines {
 		// fmt.Println("line:", li, off)
 		ln := Line{}
 		var lsp rich.Text
 		var pos fixed.Point26_6
 		setFirst := false
+		var maxAsc fixed.Int26_6
 		for oi := range lno {
 			out := &lno[oi]
+			maxAsc = max(out.GlyphBounds.Ascent, maxAsc)
 			run := Run{Output: *out}
 			rns := run.Runes()
 			if !setFirst {
@@ -118,6 +120,11 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			ln.Bounds.ExpandByBox(bb)
 			pos = DirectionAdvance(run.Direction, pos, run.Advance)
 			ln.Runs = append(ln.Runs, run)
+		}
+		if li == 0 { // set offset for first line based on max ascent
+			if !dir.IsVertical() { // todo: vertical!
+				off.Y = math32.FromFixed(maxAsc)
+			}
 		}
 		// go back through and give every run the expanded line-level box
 		for ri := range ln.Runs {
