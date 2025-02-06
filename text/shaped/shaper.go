@@ -30,14 +30,24 @@ type Shaper struct {
 	fontMap  *fontscan.FontMap
 	splitter shaping.Segmenter
 
-	//	outBuff is the output buffer to avoid excessive memory consumption.
+	// outBuff is the output buffer to avoid excessive memory consumption.
 	outBuff []shaping.Output
 }
 
-// TODO(text): support custom embedded fonts
-//
+// EmbeddedFonts are embedded filesystems to get fonts from. By default,
+// this includes a set of Roboto and Roboto Mono fonts. System fonts are
+// automatically supported. This is not relevant on web, which uses available
+// web fonts. Use [AddEmbeddedFonts] to add to this. This must be called before
+// [NewShaper] to have an effect.
+var EmbeddedFonts = []fs.FS{defaultFonts}
+
+// AddEmbeddedFonts adds to [EmbeddedFonts] for font loading.
+func AddEmbeddedFonts(fsys ...fs.FS) {
+	EmbeddedFonts = append(EmbeddedFonts, fsys...)
+}
+
 //go:embed fonts/*.ttf
-var efonts embed.FS
+var defaultFonts embed.FS
 
 // todo: per gio: systemFonts bool, collection []FontFace
 func NewShaper() *Shaper {
@@ -54,28 +64,30 @@ func NewShaper() *Shaper {
 		errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	errors.Log(fs.WalkDir(efonts, "fonts", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
+	for _, fsys := range EmbeddedFonts {
+		errors.Log(fs.WalkDir(fsys, "fonts", func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+			f, err := fsys.Open(path)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			resource, ok := f.(opentype.Resource)
+			if !ok {
+				return fmt.Errorf("file %q cannot be used as an opentype.Resource", path)
+			}
+			err = sh.fontMap.AddFont(resource, path, "")
+			if err != nil {
+				return err
+			}
 			return nil
-		}
-		f, err := efonts.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		resource, ok := f.(opentype.Resource)
-		if !ok {
-			return fmt.Errorf("file %q cannot be used as an opentype.Resource", path)
-		}
-		err = sh.fontMap.AddFont(resource, path, "")
-		if err != nil {
-			return err
-		}
-		return nil
-	}))
+		}))
+	}
 	// for _, f := range collection {
 	// 	shaper.Load(f)
 	// 	shaper.defaultFaces = append(shaper.defaultFaces, string(f.Font.Typeface))
