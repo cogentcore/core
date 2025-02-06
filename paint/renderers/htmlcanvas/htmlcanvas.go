@@ -11,6 +11,7 @@ package htmlcanvas
 
 import (
 	"image"
+	"strings"
 	"syscall/js"
 
 	"cogentcore.org/core/colors"
@@ -221,16 +222,24 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 
 func (rs *Renderer) RenderText(text *render.Text) {
 	// TODO: improve
-	rs.ctx.Set("font", "25px sans-serif")
 	rs.ctx.Set("fillStyle", "black")
 	for _, span := range text.Text.Source {
 		st := &rich.Style{}
 		raw := st.FromRunes(span)
+		rs.applyTextStyle(st)
 		rs.ctx.Call("fillText", string(raw), text.Position.X, text.Position.Y)
 	}
 }
 
-func jsAwait(v js.Value) (result js.Value, ok bool) {
+// applyTextStyle applies the given [rich.Style] to the HTML canvas context.
+func (rs *Renderer) applyTextStyle(s *rich.Style) {
+	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
+	// TODO: fix font size, line height, font family
+	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), "16px/" + "normal", s.Family.String()}
+	rs.ctx.Set("font", strings.Join(parts, " "))
+}
+
+func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
 	// COPIED FROM https://go-review.googlesource.com/c/go/+/150917/
 	if v.Type() != js.TypeObject || v.Get("then").Type() != js.TypeFunction {
 		return v, true
