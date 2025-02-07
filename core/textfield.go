@@ -598,6 +598,10 @@ func (tf *TextField) WidgetTooltip(pos image.Point) (string, image.Point) {
 
 ////////  Cursor Navigation
 
+func (tf *TextField) updateLinePos() {
+	tf.cursorLine = tf.renderAll.RuneToLinePos(tf.cursorPos).Line
+}
+
 // cursorForward moves the cursor forward
 func (tf *TextField) cursorForward(steps int) {
 	tf.cursorPos += steps
@@ -608,10 +612,7 @@ func (tf *TextField) cursorForward(steps int) {
 		inc := tf.cursorPos - tf.endPos
 		tf.endPos += inc
 	}
-	tp := tf.renderAll.RuneLinePos(tf.cursorPos)
-	if tp.Line >= 0 {
-		tf.cursorLine = tp.Line
-	}
+	tf.updateLinePos()
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -662,8 +663,7 @@ func (tf *TextField) cursorForwardWord(steps int) {
 		inc := tf.cursorPos - tf.endPos
 		tf.endPos += inc
 	}
-	// TODO(text):
-	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	tf.updateLinePos()
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -680,8 +680,7 @@ func (tf *TextField) cursorBackward(steps int) {
 		dec := min(tf.startPos, 8)
 		tf.startPos -= dec
 	}
-	// TODO(text):
-	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	tf.updateLinePos()
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -735,8 +734,7 @@ func (tf *TextField) cursorBackwardWord(steps int) {
 		dec := min(tf.startPos, 8)
 		tf.startPos -= dec
 	}
-	// TODO(text):
-	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	tf.updateLinePos()
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -751,12 +749,8 @@ func (tf *TextField) cursorDown(steps int) {
 	if tf.cursorLine >= tf.numLines-1 {
 		return
 	}
-
-	// TODO(text):
-	// _, ri, _ := tf.renderAll.RuneSpanPos(tf.cursorPos)
-	tf.cursorLine = min(tf.cursorLine+steps, tf.numLines-1)
-	// TODO(text):
-	// tf.cursorPos, _ = tf.renderAll.SpanPosToRuneIndex(tf.cursorLine, ri)
+	tf.cursorPos = tf.renderVisible.RuneAtLineDelta(tf.cursorPos, steps)
+	tf.updateLinePos()
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -771,12 +765,8 @@ func (tf *TextField) cursorUp(steps int) {
 	if tf.cursorLine <= 0 {
 		return
 	}
-
-	// TODO(text):
-	// _, ri, _ := tf.renderAll.RuneSpanPos(tf.cursorPos)
-	tf.cursorLine = max(tf.cursorLine-steps, 0)
-	// TODO(text):
-	// tf.cursorPos, _ = tf.renderAll.SpanPosToRuneIndex(tf.cursorLine, ri)
+	tf.cursorPos = tf.renderVisible.RuneAtLineDelta(tf.cursorPos, -steps)
+	tf.updateLinePos()
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}

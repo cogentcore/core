@@ -77,8 +77,13 @@ func TestBasic(t *testing.T) {
 		pc.TextLines(lns, pos)
 		pc.RenderDone()
 
+		assert.Equal(t, len(src), lns.RuneFromLinePos(textpos.Pos{3, 30}))
+
 		for ri, r := range src {
-			if unicode.IsSpace(r) {
+			lp := lns.RuneToLinePos(ri)
+			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
+
+			if unicode.IsSpace(r) { // todo: deal with spaces!
 				continue
 			}
 			// fmt.Println("\n####", ri, string(r))

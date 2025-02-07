@@ -34,24 +34,57 @@ func (ls *Lines) SelectReset() {
 	}
 }
 
-// RuneLinePos returns the [textpos.Pos] line and character position for given rune
-// index in Lines source. Returns [textpos.PosErr] if out of range.
-func (ls *Lines) RuneLinePos(ti int) textpos.Pos {
-	tp := textpos.PosErr
+// RuneToLinePos returns the [textpos.Pos] line and character position for given rune
+// index in Lines source. If ti >= source Len(), returns a position just after
+// the last actual rune.
+func (ls *Lines) RuneToLinePos(ti int) textpos.Pos {
+	if len(ls.Lines) == 0 {
+		return textpos.Pos{}
+	}
 	n := ls.Source.Len()
+	el := len(ls.Lines) - 1
+	ep := textpos.Pos{el, ls.Lines[el].SourceRange.End}
 	if ti >= n {
-		return tp
+		return ep
 	}
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		if !ln.SourceRange.Contains(ti) {
 			continue
 		}
-		tp.Line = li
-		tp.Char = ti - ln.SourceRange.Start
-		return tp
+		return textpos.Pos{li, ti - ln.SourceRange.Start}
 	}
-	return tp
+	return ep // shouldn't happen
+}
+
+// RuneFromLinePos returns the rune index in Lines source for given
+// [textpos.Pos] line and character position. Returns Len() of source
+// if it goes past that.
+func (ls *Lines) RuneFromLinePos(tp textpos.Pos) int {
+	if len(ls.Lines) == 0 {
+		return 0
+	}
+	n := ls.Source.Len()
+	nl := len(ls.Lines)
+	if tp.Line >= nl {
+		return n
+	}
+	ln := &ls.Lines[tp.Line]
+	return ln.SourceRange.Start + tp.Char
+}
+
+// RuneAtLineDelta returns the rune index in Lines source at given
+// relative vertical offset in lines from the current line for given rune.
+// It uses pixel locations of glyphs and the LineHeight to find the
+// rune at given vertical offset with the same horizontal position.
+// If the delta goes out of range, it will return the appropriate in-range
+// rune index at the closest horizontal position.
+func (ls *Lines) RuneAtLineDelta(ti, lineDelta int) int {
+	rp := ls.RuneBounds(ti).Center()
+	tp := rp
+	ld := float32(lineDelta) * ls.LineHeight // todo: should iterate over lines for different sizes..
+	tp.Y = math32.Clamp(tp.Y+ld, ls.Bounds.Min.Y+2, ls.Bounds.Max.Y-2)
+	return ls.RuneAtPoint(tp, math32.Vector2{})
 }
 
 // RuneBounds returns the glyph bounds for given rune index in Lines source,
