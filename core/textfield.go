@@ -540,6 +540,7 @@ func (tf *TextField) editDone() {
 
 // revert aborts editing and reverts to the last saved text.
 func (tf *TextField) revert() {
+	tf.renderVisible = nil
 	tf.editText = []rune(tf.text)
 	tf.edited = false
 	tf.startPos = 0
@@ -550,6 +551,7 @@ func (tf *TextField) revert() {
 
 // clear clears any existing text.
 func (tf *TextField) clear() {
+	tf.renderVisible = nil
 	tf.edited = true
 	tf.editText = tf.editText[:0]
 	tf.startPos = 0
@@ -1174,6 +1176,7 @@ func (tf *TextField) undo() {
 	if r != nil {
 		tf.editText = r.text
 		tf.cursorPos = r.cursorPos
+		tf.renderVisible = nil
 		tf.NeedsRender()
 	}
 }
@@ -1193,6 +1196,7 @@ func (tf *TextField) redo() {
 	if r != nil {
 		tf.editText = r.text
 		tf.cursorPos = r.cursorPos
+		tf.renderVisible = nil
 		tf.NeedsRender()
 	}
 }
@@ -1479,6 +1483,7 @@ func (tf *TextField) autoScroll() {
 		tf.startPos = 0
 		tf.endPos = n
 		if len(tf.renderAll.Lines) != tf.numLines {
+			tf.renderVisible = nil
 			tf.NeedsLayout()
 		}
 		return
@@ -1854,6 +1859,7 @@ func (tf *TextField) iconsSize() math32.Vector2 {
 }
 
 func (tf *TextField) SizeUp() {
+	tf.renderVisible = nil
 	tf.Frame.SizeUp()
 	tmptxt := tf.editText
 	if len(tf.text) == 0 && len(tf.Placeholder) > 0 {

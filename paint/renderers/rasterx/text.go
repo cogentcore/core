@@ -35,8 +35,8 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 // left baseline location of the first text item..
 func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32.Vector2) {
 	start := pos.Add(lns.Offset)
+	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
 	// tbb := lns.Bounds.Translate(start)
-	// rs.Scanner.SetClip(tbb.ToRect())
 	// rs.StrokeBounds(tbb, colors.Red)
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
@@ -65,7 +65,7 @@ func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, clr image.Image
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
 func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
-	// todo: render decoration
+	// todo: render strike-through
 	// dir := run.Direction
 	rbb := run.MaxBounds.Translate(start)
 	if run.Background != nil {
@@ -154,12 +154,14 @@ func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, bitmap font.
 		}
 	}
 	rs.Path.Stop(true)
-	rf := &rs.Raster.Filler
-	rf.SetWinding(true)
-	rf.SetColor(fill)
-	rs.Path.AddTo(rf)
-	rf.Draw()
-	rf.Clear()
+	if fill != nil {
+		rf := &rs.Raster.Filler
+		rf.SetWinding(true)
+		rf.SetColor(fill)
+		rs.Path.AddTo(rf)
+		rf.Draw()
+		rf.Clear()
+	}
 
 	if stroke != nil {
 		sw := math32.FromFixed(run.Size) / 32.0 // scale with font size
