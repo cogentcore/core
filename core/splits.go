@@ -671,6 +671,9 @@ func (sl *Splits) restoreChild(idxs ...int) {
 
 func (sl *Splits) styleSplits() {
 	nt := len(sl.Tiles)
+	if nt == 0 {
+		return
+	}
 	nh := nt - 1
 	for _, t := range sl.Tiles {
 		nh += tileNumElements[t] - 1

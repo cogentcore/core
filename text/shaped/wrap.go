@@ -106,6 +106,15 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			nsp := sty.ToRunes()
 			coff := rns.Start - cspSt
 			cend := coff + rns.Len()
+			crsz := len(cr)
+			if coff >= crsz || cend > crsz {
+				fmt.Println("out of bounds:", string(cr), crsz, coff, cend)
+				cend = min(crsz, cend)
+				coff = min(crsz, coff)
+			}
+			if cend-coff == 0 {
+				continue
+			}
 			nr := cr[coff:cend] // note: not a copy!
 			nsp = append(nsp, nr...)
 			lsp = append(lsp, nsp)

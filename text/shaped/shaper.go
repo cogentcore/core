@@ -113,7 +113,10 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 	for si, s := range tx {
 		in := shaping.Input{}
 		start, end := tx.Range(si)
-		sty.FromRunes(s)
+		rs := sty.FromRunes(s)
+		if len(rs) == 0 {
+			continue
+		}
 		q := StyleToQuery(sty, rts)
 		sh.fontMap.SetQuery(q)
 
@@ -129,7 +132,8 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 		ins := sh.splitter.Split(in, sh.fontMap) // this is essential
 		for _, in := range ins {
 			if in.Face == nil {
-				fmt.Printf("nil face for in: %#v\n", in)
+				fmt.Println("nil face in input", len(rs), string(rs))
+				// fmt.Printf("nil face for in: %#v\n", in)
 				continue
 			}
 			o := sh.shaper.Shape(in)
