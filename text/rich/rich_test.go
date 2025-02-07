@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -104,4 +105,10 @@ func TestLink(t *testing.T) {
 	for i := range src {
 		assert.Equal(t, rune(src[i]), tx.At(i))
 	}
+
+	lks := tx.GetLinks()
+	assert.Equal(t, 1, len(lks))
+	assert.Equal(t, textpos.Range{1, 2}, lks[0].Range)
+	assert.Equal(t, "link text", lks[0].Label)
+	assert.Equal(t, "https://example.com", lks[0].URL)
 }

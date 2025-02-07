@@ -5,9 +5,11 @@
 package shaped
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/shaping"
 )
 
 // SelectRegion adds the selection to given region of runes from
@@ -32,15 +34,52 @@ func (ls *Lines) SelectReset() {
 	}
 }
 
-// GlyphAtPoint returns the glyph at given rendered location, based
-// on given starting location for rendering. The Glyph.ClusterIndex is the
-// index of the rune in the original source that it corresponds to.
-// Can return nil if not within lines.
-func (ls *Lines) GlyphAtPoint(pt math32.Vector2, start math32.Vector2) *shaping.Glyph {
+// RuneBounds returns the glyph bounds for given rune index in Lines source,
+// relative to the upper-left corner of the lines bounding box.
+func (ls *Lines) RuneBounds(ti int) math32.Box2 {
+	n := ls.Source.Len()
+	zb := math32.Box2{}
+	if ti >= n {
+		return zb
+	}
+	start := ls.Offset
+	for li := range ls.Lines {
+		ln := &ls.Lines[li]
+		if !ln.SourceRange.Contains(ti) {
+			continue
+		}
+		off := start.Add(ln.Offset)
+		for ri := range ln.Runs {
+			run := &ln.Runs[ri]
+			rr := run.Runes()
+			if ti < rr.Start { // space?
+				fmt.Println("early:", ti, rr.Start)
+				off.X += math32.FromFixed(run.Advance)
+				continue
+			}
+			if ti >= rr.End {
+				off.X += math32.FromFixed(run.Advance)
+				continue
+			}
+			gis := run.GlyphsAt(ti)
+			if len(gis) == 0 {
+				fmt.Println("no glyphs")
+				return zb // nope
+			}
+			bb := run.GlyphRegionBounds(gis[0], gis[len(gis)-1])
+			return bb.Translate(off)
+		}
+	}
+	return zb
+}
+
+// RuneAtPoint returns the rune index in Lines source, at given rendered location,
+// based on given starting location for rendering. Returns -1 if not within lines.
+func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 	start.SetAdd(ls.Offset)
 	lbb := ls.Bounds.Translate(start)
 	if !lbb.ContainsPoint(pt) {
-		return nil
+		return -1
 	}
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
@@ -53,16 +92,13 @@ func (ls *Lines) GlyphAtPoint(pt math32.Vector2, start math32.Vector2) *shaping.
 			run := &ln.Runs[ri]
 			rbb := run.MaxBounds.Translate(off)
 			if !rbb.ContainsPoint(pt) {
+				off.X += math32.FromFixed(run.Advance)
 				continue
 			}
-			// in this run:
-			gi := run.FirstGlyphContainsPoint(pt, off)
-			if gi >= 0 { // someone should, given the run does
-				return &run.Glyphs[gi]
-			}
+			return run.RuneAtPoint(ls.Source, pt, off)
 		}
 	}
-	return nil
+	return -1
 }
 
 // Runes returns our rune range using textpos.Range
@@ -70,8 +106,24 @@ func (rn *Run) Runes() textpos.Range {
 	return textpos.Range{rn.Output.Runes.Offset, rn.Output.Runes.Offset + rn.Output.Runes.Count}
 }
 
-// FirstGlyphAt returns the index of the first glyph at given original source rune index.
-// returns -1 if none found.
+// GlyphsAt returns the indexs of the glyph(s) at given original source rune index.
+// Only works for non-space rendering runes. Empty if none found.
+func (rn *Run) GlyphsAt(i int) []int {
+	var gis []int
+	for gi := range rn.Glyphs {
+		g := &rn.Glyphs[gi]
+		if g.ClusterIndex > i {
+			break
+		}
+		if g.ClusterIndex == i {
+			gis = append(gis, gi)
+		}
+	}
+	return gis
+}
+
+// FirstGlyphAt returns the index of the first glyph at or above given original
+// source rune index, returns -1 if none found.
 func (rn *Run) FirstGlyphAt(i int) int {
 	for gi := range rn.Glyphs {
 		g := &rn.Glyphs[gi]
@@ -95,24 +147,30 @@ func (rn *Run) LastGlyphAt(i int) int {
 	return -1
 }
 
-// FirstGlyphContainsPoint returns the index of the first glyph that contains given point,
+// RuneAtPoint returns the index of the rune in the source, which contains given point,
 // using the maximal glyph bounding box. Off is the offset for this run within overall
 // image rendering context of point coordinates. Assumes point is already identified
 // as being within the [Run.MaxBounds].
-func (rn *Run) FirstGlyphContainsPoint(pt, off math32.Vector2) int {
+func (rn *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 	// todo: vertical case!
-	adv := float32(0)
+	adv := off.X
+	pri := 0 // todo: need starting rune of run
 	for gi := range rn.Glyphs {
 		g := &rn.Glyphs[gi]
+		cri := g.ClusterIndex
 		gb := rn.GlyphBoundsBox(g)
-		if pt.X < adv+gb.Min.X { // it is before us, in space
-			// todo: fabricate a space??
-			return gi
+		gadv := math32.FromFixed(g.XAdvance)
+		cx := adv + gb.Min.X
+		if pt.X < cx { // it is before us, in space
+			nri := cri - pri
+			ri := pri + int(math32.Round(float32(nri)*((pt.X-adv)/(cx-adv)))) // linear interpolation
+			return ri
 		}
 		if pt.X >= adv+gb.Min.X && pt.X < adv+gb.Max.X {
-			return gi // for real
+			return cri
 		}
-		adv += math32.FromFixed(g.XAdvance)
+		pri = cri
+		adv += gadv
 	}
 	return -1
 }

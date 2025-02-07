@@ -5,9 +5,9 @@
 package shaped_test
 
 import (
-	"image/color"
 	"os"
 	"testing"
+	"unicode"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/runes"
@@ -73,9 +73,26 @@ func TestBasic(t *testing.T) {
 		lns.SelectRegion(textpos.Range{7, 30})
 		lns.SelectRegion(textpos.Range{34, 40})
 		pos := math32.Vec2(20, 60)
-		pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
+		// pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
 		pc.TextLines(lns, pos)
 		pc.RenderDone()
+
+		for ri, r := range src {
+			if unicode.IsSpace(r) {
+				continue
+			}
+			// fmt.Println("\n####", ri, string(r))
+			gb := lns.RuneBounds(ri)
+			assert.NotEqual(t, gb, (math32.Box2{}))
+			if gb == (math32.Box2{}) {
+				break
+			}
+			gb = gb.Translate(pos)
+			cp := gb.Center()
+			si := lns.RuneAtPoint(cp, pos)
+			// fmt.Println(cp, si)
+			assert.Equal(t, ri, si)
+		}
 	})
 }
 

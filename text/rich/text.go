@@ -150,11 +150,6 @@ func (tx Text) Span(si int) (*Style, []rune) {
 	return NewStyleFromRunes(tx[si])
 }
 
-// Peek returns the [Style] and []rune content for the current span.
-func (tx Text) Peek() (*Style, []rune) {
-	return tx.Span(len(tx) - 1)
-}
-
 // StartSpecial adds a Span of given Special type to the Text,
 // using given style and rune text. This creates a new style
 // with the special value set, to avoid accidentally repeating
@@ -165,12 +160,37 @@ func (tx *Text) StartSpecial(s *Style, special Specials, r []rune) *Text {
 	return tx.AddSpan(&ss, r)
 }
 
-// EndSpeical adds an [End] Special to the Text, to terminate the current
+// EndSpecial adds an [End] Special to the Text, to terminate the current
 // Special. All [Specials] must be terminated with this empty end tag.
 func (tx *Text) EndSpecial() *Text {
 	s := NewStyle()
 	s.Special = End
 	return tx.AddSpan(s, nil)
+}
+
+// SpecialRange returns the range of spans for the
+// special starting at given span index. Returns -1 if span
+// at given index is not a special.
+func (tx Text) SpecialRange(si int) textpos.Range {
+	sp := RuneToSpecial(tx[si][0])
+	if sp == Nothing {
+		return textpos.Range{-1, -1}
+	}
+	depth := 1
+	n := len(tx)
+	for j := si + 1; j < n; j++ {
+		s := RuneToSpecial(tx[j][0])
+		switch s {
+		case End:
+			depth--
+			if depth == 0 {
+				return textpos.Range{si, j}
+			}
+		default:
+			depth++
+		}
+	}
+	return textpos.Range{-1, -1}
 }
 
 // AddLink adds a [Link] special with given url and label text.

@@ -41,6 +41,9 @@ type Text struct {
 	// paintText is the [shaped.Lines] for the text.
 	paintText *shaped.Lines
 
+	// Links is the list of links in the text.
+	Links []rich.LinkRec
+
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
 	normalCursor cursors.Cursor
@@ -114,7 +117,7 @@ func (tx *Text) Init() {
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
-		if tx.paintText != nil && len(tx.paintText.Links) > 0 {
+		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
 		if !tx.IsReadOnly() {
@@ -335,6 +338,7 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	txs.Align, txs.AlignV = align, alignV
 	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, rsz)
+	tx.Links = tx.paintText.Source.GetLinks()
 	return rsz
 }
 

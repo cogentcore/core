@@ -26,27 +26,21 @@ type LinkRec struct {
 // GetLinks gets all the links from the source.
 func (tx Text) GetLinks() []LinkRec {
 	var lks []LinkRec
-	n := tx.NumSpans()
-	for i := range n {
-		s, _ := tx.Span(i)
-		if s.Special != Link {
+	n := len(tx)
+	for si := range n {
+		sp := RuneToSpecial(tx[si][0])
+		if sp != Link {
 			continue
 		}
+		lr := tx.SpecialRange(si)
+		ls := tx[lr.Start:lr.End]
+		s, _ := tx.Span(si)
 		lk := LinkRec{}
 		lk.URL = s.URL
-		lk.Range.Start = i
-		for j := i + 1; j < n; j++ {
-			e, _ := tx.Span(i)
-			if e.Special == End {
-				lk.Range.End = j
-				break
-			}
-		}
-		if lk.Range.End == 0 { // shouldn't happen
-			lk.Range.End = i + 1
-		}
-		lk.Label = string(tx[lk.Range.Start:lk.Range.End].Join())
+		lk.Range = lr
+		lk.Label = string(ls.Join())
 		lks = append(lks, lk)
+		si = lr.End
 	}
 	return lks
 }
