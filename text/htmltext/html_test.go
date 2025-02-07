@@ -40,6 +40,29 @@ func TestLink(t *testing.T) {
 	// tx.DebugDump()
 
 	assert.Equal(t, trg, tx.String())
+
+	txt := tx.Join()
+	assert.Equal(t, "The link and", string(txt))
+}
+
+func TestLinkFmt(t *testing.T) {
+	src := `The <a href="https://example.com">link <b>and <i>it</i> is cool</b></a> and`
+	tx, err := HTMLToRich([]byte(src), rich.NewStyle(), nil)
+	assert.NoError(t, err)
+
+	trg := `[]: "The "
+[link [https://example.com] underline fill-color]: "link "
+[bold underline fill-color]: "and "
+[italic bold underline fill-color]: "it"
+[bold underline fill-color]: " is cool"
+[underline fill-color]: ""
+[{End Special}]: ""
+[]: " and"
+`
+	assert.Equal(t, trg, tx.String())
+
+	os := "The link and it is cool and"
+	assert.Equal(t, []rune(os), tx.Join())
 }
 
 func TestDemo(t *testing.T) {

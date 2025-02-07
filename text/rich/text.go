@@ -7,6 +7,8 @@ package rich
 import (
 	"fmt"
 	"slices"
+
+	"cogentcore.org/core/text/textpos"
 )
 
 // Text is the basic rich text representation, with spans of []rune unicode characters
@@ -27,18 +29,6 @@ func NewText(s *Style, r []rune) Text {
 	return tx
 }
 
-// Index represents the [Span][Rune] index of a given rune.
-// The Rune index can be either the actual index for [Text], taking
-// into account the leading style rune(s), or the logical index
-// into a [][]rune type with no style runes, depending on the context.
-type Index struct { //types:add
-	Span, Rune int
-}
-
-// NStyleRunes specifies the base number of style runes at the start
-// of each span: style + size.
-const NStyleRunes = 2
-
 // NumSpans returns the number of spans in this Text.
 func (tx Text) NumSpans() int {
 	return len(tx)
@@ -48,11 +38,8 @@ func (tx Text) NumSpans() int {
 func (tx Text) Len() int {
 	n := 0
 	for _, s := range tx {
-		sn := len(s)
-		rs := s[0]
-		nc := NumColors(rs)
-		ns := max(0, sn-(NStyleRunes+nc))
-		n += ns
+		_, rn := SpanLen(s)
+		n += rn
 	}
 	return n
 }
@@ -62,108 +49,87 @@ func (tx Text) Len() int {
 func (tx Text) Range(span int) (start, end int) {
 	ci := 0
 	for si, s := range tx {
-		sn := len(s)
-		rs := s[0]
-		nc := NumColors(rs)
-		ns := max(0, sn-(NStyleRunes+nc))
+		_, rn := SpanLen(s)
 		if si == span {
-			return ci, ci + ns
+			return ci, ci + rn
 		}
-		ci += ns
+		ci += rn
 	}
 	return -1, -1
 }
 
-// Index returns the span, rune slice [Index] for the given logical
-// index, as in the original source rune slice without spans or styling elements.
-// If the logical index is invalid for the text, the returned index is -1,-1.
-func (tx Text) Index(li int) Index {
+// Index returns the span, rune index (as [textpos.Pos]) for the given logical
+// index into the original source rune slice without spans or styling elements.
+// The rune index is into the source content runes for the given span, after
+// the initial style runes. If the logical index is invalid for the text,
+// the returned index is -1,-1.
+func (tx Text) Index(li int) textpos.Pos {
 	ci := 0
 	for si, s := range tx {
-		sn := len(s)
-		if sn == 0 {
-			continue
+		_, rn := SpanLen(s)
+		if li >= ci && li < ci+rn {
+			return textpos.Pos{Line: si, Char: li - ci}
 		}
-		rs := s[0]
-		nc := NumColors(rs)
-		ns := max(0, sn-(NStyleRunes+nc))
-		if li >= ci && li < ci+ns {
-			return Index{Span: si, Rune: NStyleRunes + nc + (li - ci)}
-		}
-		ci += ns
+		ci += rn
 	}
-	return Index{Span: -1, Rune: -1}
-}
-
-// At returns the rune at given logical index, as in the original
-// source rune slice without any styling elements. Returns 0
-// if index is invalid. See AtTry for a version that also returns a bool
-// indicating whether the index is valid.
-func (tx Text) At(li int) rune {
-	i := tx.Index(li)
-	if i.Span < 0 {
-		return 0
-	}
-	return tx[i.Span][i.Rune]
+	return textpos.Pos{Line: -1, Char: -1}
 }
 
 // AtTry returns the rune at given logical index, as in the original
 // source rune slice without any styling elements. Returns 0
 // and false if index is invalid.
 func (tx Text) AtTry(li int) (rune, bool) {
-	i := tx.Index(li)
-	if i.Span < 0 {
-		return 0, false
+	ci := 0
+	for _, s := range tx {
+		sn, rn := SpanLen(s)
+		if li >= ci && li < ci+rn {
+			return s[sn+(li-ci)], true
+		}
+		ci += rn
 	}
-	return tx[i.Span][i.Rune], true
+	return -1, false
+}
+
+// At returns the rune at given logical index into the original
+// source rune slice without any styling elements. Returns 0
+// if index is invalid. See AtTry for a version that also returns a bool
+// indicating whether the index is valid.
+func (tx Text) At(li int) rune {
+	r, _ := tx.AtTry(li)
+	return r
 }
 
 // Split returns the raw rune spans without any styles.
 // The rune span slices here point directly into the Text rune slices.
 // See SplitCopy for a version that makes a copy instead.
 func (tx Text) Split() [][]rune {
-	rn := make([][]rune, 0, len(tx))
+	ss := make([][]rune, 0, len(tx))
 	for _, s := range tx {
-		sn := len(s)
-		if sn == 0 {
-			continue
-		}
-		rs := s[0]
-		nc := NumColors(rs)
-		rn = append(rn, s[NStyleRunes+nc:])
+		sn, _ := SpanLen(s)
+		ss = append(ss, s[sn:])
 	}
-	return rn
+	return ss
 }
 
 // SplitCopy returns the raw rune spans without any styles.
 // The rune span slices here are new copies; see also [Text.Split].
 func (tx Text) SplitCopy() [][]rune {
-	rn := make([][]rune, 0, len(tx))
+	ss := make([][]rune, 0, len(tx))
 	for _, s := range tx {
-		sn := len(s)
-		if sn == 0 {
-			continue
-		}
-		rs := s[0]
-		nc := NumColors(rs)
-		rn = append(rn, slices.Clone(s[NStyleRunes+nc:]))
+		sn, _ := SpanLen(s)
+		ss = append(ss, slices.Clone(s[sn:]))
 	}
-	return rn
+	return ss
 }
 
 // Join returns a single slice of runes with the contents of all span runes.
 func (tx Text) Join() []rune {
-	rn := make([]rune, 0, tx.Len())
+	ss := make([]rune, 0, tx.Len())
 	for _, s := range tx {
-		sn := len(s)
-		if sn == 0 {
-			continue
-		}
-		rs := s[0]
-		nc := NumColors(rs)
-		rn = append(rn, s[NStyleRunes+nc:]...)
+		sn, _ := SpanLen(s)
+		ss = append(ss, s[sn:]...)
 	}
-	return rn
+	return ss
 }
 
 // AddSpan adds a span to the Text using the given Style and runes.

@@ -24,7 +24,6 @@ func TestStyle(t *testing.T) {
 	s := NewStyle()
 	s.Family = Maths
 	s.Special = Math
-	s.SetLink("https://example.com/readme.md")
 	s.SetBackground(colors.Blue)
 
 	sr := RuneFromSpecial(s.Special)
@@ -33,7 +32,7 @@ func TestStyle(t *testing.T) {
 
 	rs := s.ToRunes()
 
-	assert.Equal(t, 33, len(rs))
+	assert.Equal(t, 3, len(rs))
 	assert.Equal(t, 1, s.Decoration.NumColors())
 
 	ns := &Style{}
@@ -45,37 +44,64 @@ func TestStyle(t *testing.T) {
 func TestText(t *testing.T) {
 	src := "The lazy fox typed in some familiar text"
 	sr := []rune(src)
-	sp := Text{}
+	tx := Text{}
 	plain := NewStyle()
 	ital := NewStyle().SetSlant(Italic)
 	ital.SetStrokeColor(colors.Red)
 	boldBig := NewStyle().SetWeight(Bold).SetSize(1.5)
-	sp.Add(plain, sr[:4])
-	sp.Add(ital, sr[4:8])
+	tx.AddSpan(plain, sr[:4])
+	tx.AddSpan(ital, sr[4:8])
 	fam := []rune("familiar")
 	ix := runes.Index(sr, fam)
-	sp.Add(plain, sr[8:ix])
-	sp.Add(boldBig, sr[ix:ix+8])
-	sp.Add(plain, sr[ix+8:])
+	tx.AddSpan(plain, sr[8:ix])
+	tx.AddSpan(boldBig, sr[ix:ix+8])
+	tx.AddSpan(plain, sr[ix+8:])
 
-	str := sp.String()
-	trg := `[]: The 
-[italic stroke-color]: lazy
-[]:  fox typed in some 
-[1.50x bold]: familiar
-[]:  text
+	str := tx.String()
+	trg := `[]: "The "
+[italic stroke-color]: "lazy"
+[]: " fox typed in some "
+[1.50x bold]: "familiar"
+[]: " text"
 `
 	assert.Equal(t, trg, str)
 
-	os := sp.Join()
+	os := tx.Join()
 	assert.Equal(t, src, string(os))
 
-	for i := range fam {
-		assert.Equal(t, fam[i], sp.At(ix+i))
+	for i := range src {
+		assert.Equal(t, rune(src[i]), tx.At(i))
 	}
 
 	// spl := tx.Split()
 	// for i := range spl {
 	// 	fmt.Println(string(spl[i]))
 	// }
+}
+
+func TestLink(t *testing.T) {
+	src := "Pre link link text post link"
+	tx := Text{}
+	plain := NewStyle()
+	ital := NewStyle().SetSlant(Italic)
+	ital.SetStrokeColor(colors.Red)
+	boldBig := NewStyle().SetWeight(Bold).SetSize(1.5)
+	tx.AddSpan(plain, []rune("Pre link "))
+	tx.AddLink(ital, "https://example.com", "link text")
+	tx.AddSpan(boldBig, []rune(" post link"))
+
+	str := tx.String()
+	trg := `[]: "Pre link "
+[italic link [https://example.com] stroke-color]: "link text"
+[{End Special}]: ""
+[1.50x bold]: " post link"
+`
+	assert.Equal(t, trg, str)
+
+	os := tx.Join()
+	assert.Equal(t, src, string(os))
+
+	for i := range src {
+		assert.Equal(t, rune(src[i]), tx.At(i))
+	}
 }

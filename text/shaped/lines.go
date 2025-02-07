@@ -36,9 +36,8 @@ type Lines struct {
 
 	// Bounds is the bounding box for the entire set of rendered text,
 	// relative to a rendering Position (and excluding any contribution
-	// of Offset). This is centered at the baseline and the upper left
-	// typically has a negative Y. Use Size() method to get the size
-	// and ToRect() to get an [image.Rectangle].
+	// of Offset). Use Size() method to get the size and ToRect() to get
+	// an [image.Rectangle].
 	Bounds math32.Box2
 
 	// FontSize is the [rich.Context] StandardSize from the Context used

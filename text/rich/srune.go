@@ -32,10 +32,50 @@ func RuneToStyle(s *Style, r rune) {
 	s.Direction = RuneToDirection(r)
 }
 
-// NumColors returns the number of colors for decoration style encoded
-// in given rune.
-func NumColors(r rune) int {
-	return RuneToDecoration(r).NumColors()
+// SpanLen returns the length of the starting style runes and
+// following content runes for given slice of span runes.
+// Does not need to decode full style, so is very efficient.
+func SpanLen(s []rune) (sn int, rn int) {
+	r0 := s[0]
+	nc := RuneToDecoration(r0).NumColors()
+	sn = 2 + nc // style + size + nc
+	isLink := RuneToSpecial(r0) == Link
+	if !isLink {
+		rn = max(0, len(s)-sn)
+		return
+	}
+	ln := int(s[sn]) // link len
+	sn += ln + 1
+	rn = max(0, len(s)-sn)
+	return
+}
+
+// FromRunes sets the Style properties from the given rune encodings
+// which must be the proper length including colors. Any remaining
+// runes after the style runes are returned: this is the source string.
+func (s *Style) FromRunes(rs []rune) []rune {
+	RuneToStyle(s, rs[0])
+	s.Size = math.Float32frombits(uint32(rs[1]))
+	ci := 2
+	if s.Decoration.HasFlag(FillColor) {
+		s.FillColor = ColorFromRune(rs[ci])
+		ci++
+	}
+	if s.Decoration.HasFlag(StrokeColor) {
+		s.StrokeColor = ColorFromRune(rs[ci])
+		ci++
+	}
+	if s.Decoration.HasFlag(Background) {
+		s.Background = ColorFromRune(rs[ci])
+		ci++
+	}
+	if s.Special == Link {
+		ln := int(rs[ci])
+		ci++
+		s.URL = string(rs[ci : ci+ln])
+		ci += ln
+	}
+	return rs[ci:]
 }
 
 // ToRunes returns the rune(s) that encode the given style
@@ -61,34 +101,6 @@ func (s *Style) ToRunes() []rune {
 		rs = append(rs, []rune(s.URL)...)
 	}
 	return rs
-}
-
-// FromRunes sets the Style properties from the given rune encodings
-// which must be the proper length including colors. Any remaining
-// runes after the style runes are returned: this is the source string.
-func (s *Style) FromRunes(rs []rune) []rune {
-	RuneToStyle(s, rs[0])
-	s.Size = math.Float32frombits(uint32(rs[1]))
-	ci := NStyleRunes
-	if s.Decoration.HasFlag(FillColor) {
-		s.FillColor = ColorFromRune(rs[ci])
-		ci++
-	}
-	if s.Decoration.HasFlag(StrokeColor) {
-		s.StrokeColor = ColorFromRune(rs[ci])
-		ci++
-	}
-	if s.Decoration.HasFlag(Background) {
-		s.Background = ColorFromRune(rs[ci])
-		ci++
-	}
-	if s.Special == Link {
-		ln := int(rs[ci])
-		ci++
-		s.URL = string(rs[ci : ci+ln])
-		ci += ln
-	}
-	return rs[ci:]
 }
 
 // ColorToRune converts given color to a rune uint32 value.

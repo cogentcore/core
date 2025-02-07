@@ -16,11 +16,13 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
 	. "cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -143,11 +145,23 @@ func TestColors(t *testing.T) {
 
 		src := "The lazy fox"
 		sr := []rune(src)
-		sp := rich.NewText(stroke, sr[:4])
-		sp.AddSpan(&big, sr[4:8]).AddSpan(stroke, sr[8:])
+		tx := rich.NewText(stroke, sr[:4])
+		tx.AddSpan(&big, sr[4:8]).AddSpan(stroke, sr[8:])
 
-		lns := sh.WrapLines(sp, stroke, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 80))
+		lns := sh.WrapLines(tx, stroke, tsty, rts, math32.Vec2(250, 250))
+		pc.TextLines(lns, math32.Vec2(20, 10))
+		pc.RenderDone()
+	})
+}
+
+func TestLink(t *testing.T) {
+	RunTest(t, "link", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+		src := `The <a href="https://example.com">link <b>and <i>it</i> is cool</b></a> and`
+		sty := rich.NewStyle()
+		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
+		assert.NoError(t, err)
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pc.TextLines(lns, math32.Vec2(10, 10))
 		pc.RenderDone()
 	})
 }

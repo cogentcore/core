@@ -172,11 +172,3 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Specials"
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Directions", IDName: "directions", Doc: "Directions specifies the text layout direction."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Text", IDName: "text", Doc: "Text is the basic rich text representation, with spans of []rune unicode characters\nthat share a common set of text styling properties, which are represented\nby the first rune(s) in each span. If custom colors are used, they are encoded\nafter the first style and size runes.\nThis compact and efficient representation can be Join'd back into the raw\nunicode source, and indexing by rune index in the original is fast.\nIt provides a GPU-compatible representation, and is the text equivalent of\nthe [ppath.Path] encoding."})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/rich.Index", IDName: "index", Doc: "Index represents the [Span][Rune] index of a given rune.\nThe Rune index can be either the actual index for [Text], taking\ninto account the leading style rune(s), or the logical index\ninto a [][]rune type with no style runes, depending on the context.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Span"}, {Name: "Rune"}}})
-
-// SetSpan sets the [Index.Span]
-func (t *Index) SetSpan(v int) *Index { t.Span = v; return t }
-
-// SetRune sets the [Index.Rune]
-func (t *Index) SetRune(v int) *Index { t.Rune = v; return t }

@@ -21,7 +21,8 @@ import (
 // style information reflecting the contents of the source (e.g., the default family,
 // weight, etc), for use in computing the default line height. Paragraphs are extracted
 // first using standard newline markers, assumed to coincide with separate spans in the
-// source text, and wrapped separately.
+// source text, and wrapped separately. For horizontal text, the Lines will render with
+// a position offset at the upper left corner of the overall bounding box of the text.
 func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 24
