@@ -30,6 +30,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -607,8 +608,10 @@ func (tf *TextField) cursorForward(steps int) {
 		inc := tf.cursorPos - tf.endPos
 		tf.endPos += inc
 	}
-	// TODO(text):
-	// tf.cursorLine, _, _ = tf.renderAll.RuneSpanPos(tf.cursorPos)
+	tp := tf.renderAll.RuneLinePos(tf.cursorPos)
+	if tp.Line >= 0 {
+		tf.cursorLine = tp.Line
+	}
 	if tf.selectMode {
 		tf.selectRegionUpdate(tf.cursorPos)
 	}
@@ -1265,11 +1268,9 @@ func (tf *TextField) charPos(idx int) math32.Vector2 {
 	if idx <= 0 || len(tf.renderAll.Lines) == 0 {
 		return math32.Vector2{}
 	}
-	// TODO(text):
-	// pos, _, _, _ := tf.renderAll.RuneRelPos(idx)
-	// pos.Y -= tf.renderAll.Spans[0].RelPos.Y
-	// return pos
-	return math32.Vector2{}
+	bb := tf.renderAll.RuneBounds(idx)
+	// fmt.Println(idx, bb)
+	return bb.Min
 }
 
 // relCharPos returns the text width in dots between the two text string
@@ -1422,6 +1423,7 @@ func (tf *TextField) cursorSprite(on bool) *Sprite {
 
 // renderSelect renders the selected region, if any, underneath the text
 func (tf *TextField) renderSelect() {
+	tf.renderVisible.SelectReset()
 	if !tf.hasSelection() {
 		return
 	}
@@ -1436,38 +1438,8 @@ func (tf *TextField) renderSelect() {
 	if effed <= effst {
 		return
 	}
-
-	spos := tf.charRenderPos(effst, false)
-
-	pc := &tf.Scene.Painter
-	tsz := tf.relCharPos(effst, effed)
-	if !tf.hasWordWrap() || tsz.Y == 0 {
-		pc.FillBox(spos, math32.Vec2(tsz.X, tf.fontHeight), tf.SelectColor)
-		return
-	}
-	ex := float32(tf.Geom.ContentBBox.Max.X)
-	sx := float32(tf.Geom.ContentBBox.Min.X)
-	_ = ex
-	_ = sx
-	// TODO(text):
-	// ssi, _, _ := tf.renderAll.RuneSpanPos(effst)
-	// esi, _, _ := tf.renderAll.RuneSpanPos(effed)
-	ep := tf.charRenderPos(effed, false)
-	_ = ep
-
-	pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.fontHeight), tf.SelectColor)
-
-	// TODO(text):
-	// spos.X = sx
-	// spos.Y += tf.renderAll.Spans[ssi+1].RelPos.Y - tf.renderAll.Spans[ssi].RelPos.Y
-	// for si := ssi + 1; si <= esi; si++ {
-	// 	if si < esi {
-	// 		pc.FillBox(spos, math32.Vec2(ex-spos.X, tf.fontHeight), tf.SelectColor)
-	// 	} else {
-	// 		pc.FillBox(spos, math32.Vec2(ep.X-spos.X, tf.fontHeight), tf.SelectColor)
-	// 	}
-	// 	spos.Y += tf.renderAll.Spans[si].RelPos.Y - tf.renderAll.Spans[si-1].RelPos.Y
-	// }
+	// fmt.Println("sel range:", effst, effed)
+	tf.renderVisible.SelectRegion(textpos.Range{effst, effed})
 }
 
 // autoScroll scrolls the starting position to keep the cursor visible
@@ -1475,6 +1447,9 @@ func (tf *TextField) autoScroll() {
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
+	if tf.renderAll != nil {
+		availSz.Y += tf.renderAll.LineHeight * 2 // allow it to add a line
+	}
 	tf.configTextSize(availSz)
 	n := len(tf.editText)
 	tf.cursorPos = math32.Clamp(tf.cursorPos, 0, n)
@@ -1587,13 +1562,11 @@ func (tf *TextField) pixelToCursor(pt image.Point) int {
 	}
 	n := len(tf.editText)
 	if tf.hasWordWrap() {
-		// TODO(text):
-		// si, ri, ok := tf.renderAll.PosToRune(rpt)
-		// if ok {
-		// 	ix, _ := tf.renderAll.SpanPosToRuneIndex(si, ri)
-		// 	ix = min(ix, n)
-		// 	return ix
-		// }
+		ix := tf.renderAll.RuneAtPoint(ptf, tf.effPos)
+		// fmt.Println(ix, ptf, tf.effPos)
+		if ix >= 0 {
+			return ix
+		}
 		return tf.startPos
 	}
 	pr := tf.PointToRelPos(pt)
@@ -1874,12 +1847,7 @@ func (tf *TextField) SizeUp() {
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
 
-	var rsz math32.Vector2
-	if tf.hasWordWrap() {
-		rsz = tf.configTextSize(availSz) // TextWrapSizeEstimate(availSz, len(tf.EditTxt), &tf.Styles.Font))
-	} else {
-		rsz = tf.configTextSize(availSz)
-	}
+	rsz := tf.configTextSize(availSz)
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
@@ -1983,10 +1951,10 @@ func (tf *TextField) Render() {
 	if tf.startPos < 0 || tf.endPos > len(tf.editText) {
 		return
 	}
-	tf.renderSelect()
 	if tf.renderVisible == nil {
 		tf.layoutCurrent()
 	}
+	tf.renderSelect()
 	tf.Scene.Painter.TextLines(tf.renderVisible, tf.effPos)
 }
 

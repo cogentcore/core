@@ -76,7 +76,7 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 			rsel := sel.Intersect(run.Runes())
 			if rsel.Len() > 0 {
 				fi := run.FirstGlyphAt(rsel.Start)
-				li := run.LastGlyphAt(rsel.End)
+				li := run.LastGlyphAt(rsel.End - 1)
 				if fi >= 0 && li >= fi {
 					sbb := run.GlyphRegionBounds(fi, li)
 					rs.FillBounds(sbb.Translate(start), lns.SelectionColor)

@@ -34,15 +34,45 @@ func (ls *Lines) SelectReset() {
 	}
 }
 
+// RuneLinePos returns the [textpos.Pos] line and character position for given rune
+// index in Lines source. Returns [textpos.PosErr] if out of range.
+func (ls *Lines) RuneLinePos(ti int) textpos.Pos {
+	tp := textpos.PosErr
+	n := ls.Source.Len()
+	if ti >= n {
+		return tp
+	}
+	for li := range ls.Lines {
+		ln := &ls.Lines[li]
+		if !ln.SourceRange.Contains(ti) {
+			continue
+		}
+		tp.Line = li
+		tp.Char = ti - ln.SourceRange.Start
+		return tp
+	}
+	return tp
+}
+
 // RuneBounds returns the glyph bounds for given rune index in Lines source,
 // relative to the upper-left corner of the lines bounding box.
+// If the index is >= the source length, it returns a box at the end of the
+// rendered text (i.e., where a cursor should be to add more text).
 func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 	n := ls.Source.Len()
 	zb := math32.Box2{}
-	if ti >= n {
+	if len(ls.Lines) == 0 {
 		return zb
 	}
 	start := ls.Offset
+	if ti >= n { // goto end
+		ln := ls.Lines[len(ls.Lines)-1]
+		off := start.Add(ln.Offset)
+		run := &ln.Runs[len(ln.Runs)-1]
+		ep := run.MaxBounds.Max.Add(off)
+		ep.Y = run.MaxBounds.Min.Y + off.Y
+		return math32.Box2{ep, ep}
+	}
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		if !ln.SourceRange.Contains(ti) {
@@ -74,18 +104,28 @@ func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 }
 
 // RuneAtPoint returns the rune index in Lines source, at given rendered location,
-// based on given starting location for rendering. Returns -1 if not within lines.
+// based on given starting location for rendering. If the point is out of the
+// line bounds, the nearest point is returned (e.g., start of line based on Y coordinate).
 func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 	start.SetAdd(ls.Offset)
 	lbb := ls.Bounds.Translate(start)
 	if !lbb.ContainsPoint(pt) {
-		return -1
+		// smaller bb so point will be inside stuff
+		sbb := math32.Box2{lbb.Min.Add(math32.Vec2(0, 2)), lbb.Max.Sub(math32.Vec2(0, 2))}
+		pt = sbb.ClampPoint(pt)
 	}
+	nl := len(ls.Lines)
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		off := start.Add(ln.Offset)
 		lbb := ln.Bounds.Translate(off)
 		if !lbb.ContainsPoint(pt) {
+			if pt.Y >= lbb.Min.Y && pt.Y < lbb.Max.Y { // this is our line
+				if pt.X <= lbb.Min.X+2 {
+					return ln.SourceRange.Start
+				}
+				return ln.SourceRange.End
+			}
 			continue
 		}
 		for ri := range ln.Runs {
@@ -95,10 +135,15 @@ func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 				off.X += math32.FromFixed(run.Advance)
 				continue
 			}
-			return run.RuneAtPoint(ls.Source, pt, off)
+			rp := run.RuneAtPoint(ls.Source, pt, off)
+			if rp == run.Runes().End && li < nl-1 { // if not at full end, don't go past
+				rp--
+			}
+			return rp
 		}
+		return ln.SourceRange.End
 	}
-	return -1
+	return 0
 }
 
 // Runes returns our rune range using textpos.Range
@@ -154,7 +199,8 @@ func (rn *Run) LastGlyphAt(i int) int {
 func (rn *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 	// todo: vertical case!
 	adv := off.X
-	pri := 0 // todo: need starting rune of run
+	rr := rn.Runes()
+	pri := rr.Start
 	for gi := range rn.Glyphs {
 		g := &rn.Glyphs[gi]
 		cri := g.ClusterIndex
@@ -172,7 +218,7 @@ func (rn *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 		pri = cri
 		adv += gadv
 	}
-	return -1
+	return rr.End
 }
 
 // GlyphRegionBounds returns the maximal line-bounds level bounding box

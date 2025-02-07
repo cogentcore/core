@@ -1,15 +1,18 @@
 # Raster
 
+This code is all adapted from https://github.com/srwiley/rasterx Copyright 2018 by the rasterx Authors. All rights reserved. Created 2018 by S.R.Wiley
+
+The most recent version implements the `render.Renderer` interface, and handles path-based and text rendering, which also largely uses path-based rendering.
+
+This is the original README:
+
 Raster is a golang rasterizer that implements path stroking functions capable of SVG 2.0 compliant 'arc' joins and explicit loop closing. 
-
-
 
 * Paths can be explicitly closed or left open, resulting in a line join or end caps. 
 * Arc joins are supported, which causes the extending edge from a Bezier curve to follow the radius of curvature at the end point rather than a straight line miter, resulting in a more fluid looking join. 
 * Not specified in the SVG2.0 spec., but supported in raster is the arc-clip join, which is the arc join analog of a miter-clip join, both of which end the miter at a specified distance, rather than all or nothing.
 * Several cap and gap functions in addition to those specified by SVG2.0 are implemented, specifically quad and cubic caps and gaps.
 * Line start and end capping functions can be different.
-
 
 ![rasterx example](doc/TestShapes4.svg.png?raw=true "Rasterx Example")
 
@@ -56,7 +59,6 @@ BenchmarkDashFT-16    	     500     2800493 ns/op
 
 The package uses an interface called Rasterx, which is satisfied by three structs, Filler, Stroker and Dasher.  The Filler flattens Bezier curves into lines and uses an anonymously composed Scanner for the antialiasing step. The Stroker embeds a Filler and adds path stroking, and the Dasher embedds a Stroker and adds the ability to create dashed stroked curves.
 
-
 ![rasterx Scheme](doc/schematic.png?raw=true "Rasterx Scheme")
 
 Each of the Filler, Dasher, and Stroker can function on their own and each implement the Rasterx interface, so if you need just the curve filling but no stroking capability, you only need a Filler. On the other hand if you have created a Dasher and want to use it to Fill, you can just do this:
@@ -66,8 +68,8 @@ filler := &dasher.Filler
 ```
 Now filler is a filling rasterizer. Please see rasterx_test.go for examples.
 
-
 ### Non-standard library dependencies
+
 rasterx requires the following imports which are not included in the go standard library:
 
 * golang.org/x/image/math/fixed
