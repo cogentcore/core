@@ -257,17 +257,20 @@ func (tx *Text) Init() {
 // findLink finds the text link at the given scene-local position. If it
 // finds it, it returns it and its bounds; otherwise, it returns nil.
 func (tx *Text) findLink(pos image.Point) (*rich.LinkRec, image.Rectangle) {
-	// TODO(text):
-	// for _, tl := range tx.paintText.Links {
-	// 	// TODO(kai/link): is there a better way to be safe here?
-	// 	if tl.Label == "" {
-	// 		continue
-	// 	}
-	// 	tlb := tl.Bounds(&tx.paintText, tx.Geom.Pos.Content)
-	// 	if pos.In(tlb) {
-	// 		return &tl, tlb
-	// 	}
-	// }
+	if tx.paintText == nil || len(tx.Links) == 0 {
+		return nil, image.Rectangle{}
+	}
+	fmt.Println(len(tx.Links))
+	tpos := tx.Geom.Pos.Content
+	ri := tx.paintText.RuneAtPoint(math32.FromPoint(pos), tpos)
+	for li := range tx.Links {
+		lr := &tx.Links[li]
+		if !lr.Range.Contains(ri) {
+			continue
+		}
+		gb := tx.paintText.RuneBounds(ri).Translate(tpos).ToRect()
+		return lr, gb
+	}
 	return nil, image.Rectangle{}
 }
 

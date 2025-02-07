@@ -37,7 +37,9 @@ func (tx Text) GetLinks() []LinkRec {
 		s, _ := tx.Span(si)
 		lk := LinkRec{}
 		lk.URL = s.URL
-		lk.Range = lr
+		sr, _ := tx.Range(lr.Start)
+		_, er := tx.Range(lr.End)
+		lk.Range = textpos.Range{sr, er}
 		lk.Label = string(ls.Join())
 		lks = append(lks, lk)
 		si = lr.End
