@@ -164,7 +164,9 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 				curSp.AddRunes([]rune{'\n'})
 				nextIsParaStart = false
 			case "a", "q", "math", "sub", "sup": // important: any special must be ended!
-				curSp.EndSpecial()
+				nsp := rich.Text{}
+				nsp.EndSpecial()
+				spstack.Push(nsp)
 			}
 
 			if len(fstack) > 0 {

@@ -401,6 +401,9 @@ func (s *Style) SetBackground(clr color.Color) *Style {
 
 func (s *Style) String() string {
 	str := ""
+	if s.Special == End {
+		return "{End Special}"
+	}
 	if s.Size != 1 {
 		str += fmt.Sprintf("%5.2fx ", s.Size)
 	}
@@ -418,6 +421,9 @@ func (s *Style) String() string {
 	}
 	if s.Special != Nothing {
 		str += s.Special.String() + " "
+		if s.Special == Link {
+			str += "[" + s.URL + "] "
+		}
 	}
 	for d := Underline; d <= Background; d++ {
 		if s.Decoration.HasFlag(d) {

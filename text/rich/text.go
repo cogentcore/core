@@ -4,7 +4,10 @@
 
 package rich
 
-import "slices"
+import (
+	"fmt"
+	"slices"
+)
 
 // Text is the basic rich text representation, with spans of []rune unicode characters
 // that share a common set of text styling properties, which are represented
@@ -255,7 +258,7 @@ func (tx Text) String() string {
 		s := &Style{}
 		ss := s.FromRunes(rs)
 		sstr := s.String()
-		str += "[" + sstr + "]: " + string(ss) + "\n"
+		str += "[" + sstr + "]: \"" + string(ss) + "\"\n"
 	}
 	return str
 }
@@ -267,4 +270,13 @@ func Join(txts ...Text) Text {
 		nt = append(nt, tx...)
 	}
 	return nt
+}
+
+func (tx Text) DebugDump() {
+	for i := range tx {
+		s, r := tx.Span(i)
+		fmt.Println(i, len(tx[i]), tx[i])
+		fmt.Printf("style: %#v\n", s)
+		fmt.Printf("chars: %q\n", string(r))
+	}
 }
