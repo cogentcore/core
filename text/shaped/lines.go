@@ -81,8 +81,7 @@ type Line struct {
 	// are represented in this line.
 	SourceRange textpos.Range
 
-	// Runs are the shaped [Run] elements, in one-to-one correspondance with
-	// the Source spans.
+	// Runs are the shaped [Run] elements.
 	Runs []Run
 
 	// Offset specifies the relative offset from the Lines Position

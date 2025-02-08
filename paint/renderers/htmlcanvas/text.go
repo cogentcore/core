@@ -75,47 +75,27 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 		}
 	}
 
-	s := &textStyle{}
-	s.fill = clr
-	if run.FillColor != nil {
-		s.fill = run.FillColor
-	}
-	s.stroke = run.StrokeColor
-	s.slant = rich.SlantNormal
-	s.variant = "normal"
-	s.weight = rich.Normal
-	s.stretch = rich.StretchNormal
-	s.size = math32.FromFixed(run.Size)
-	s.lineHeight = 1
-	s.family = rich.SansSerif
-	// TODO: implement all style values
-	rs.applyTextStyle(s)
-
 	region := run.Runes()
+	idx := lns.Source.Index(region.Start)
+	st, _ := lns.Source.Span(idx.Line)
+
+	fill := clr
+	if run.FillColor != nil {
+		fill = run.FillColor
+	}
+	rs.applyTextStyle(st, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
+
 	raw := runes[region.Start:region.End]
 	rs.ctx.Call("fillText", string(raw), start.X, start.Y) // TODO: also stroke
 }
 
-type textStyle struct {
-	fill, stroke image.Image
-	slant        rich.Slants
-	variant      string
-	weight       rich.Weights
-	stretch      rich.Stretch
-	size         float32
-	lineHeight   float32
-	family       rich.Family
-}
-
 // applyTextStyle applies the given styles to the HTML canvas context.
-func (rs *Renderer) applyTextStyle(s *textStyle) {
+func (rs *Renderer) applyTextStyle(st *rich.Style, fill, stroke image.Image, size, lineHeight float32) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
-
-	parts := []string{s.slant.String(), s.variant, s.weight.String(), s.stretch.String(), fmt.Sprintf("%gpx/%g", s.size, s.lineHeight), s.family.String()}
-	fmt.Println(parts)
+	parts := []string{st.Slant.String(), "normal", st.Weight.String(), st.Stretch.String(), fmt.Sprintf("%gpx/%g", size, lineHeight), st.Family.String()}
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
 	// TODO: use caching like in RenderPath?
-	rs.ctx.Set("fillStyle", rs.imageToStyle(s.fill))
-	rs.ctx.Set("strokeStyle", rs.imageToStyle(s.stroke))
+	rs.ctx.Set("fillStyle", rs.imageToStyle(fill))
+	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke))
 }
