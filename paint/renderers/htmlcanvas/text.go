@@ -1,0 +1,106 @@
+// Copyright (c) 2025, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+//go:build js
+
+package htmlcanvas
+
+import (
+	"fmt"
+	"image"
+	"strings"
+
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+)
+
+// RenderText rasterizes the given Text
+func (rs *Renderer) RenderText(txt *render.Text) {
+	rs.TextLines(txt.Text, &txt.Context, txt.Position)
+}
+
+// TextLines rasterizes the given shaped.Lines.
+// The text will be drawn starting at the start pixel position, which specifies the
+// left baseline location of the first text item..
+func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32.Vector2) {
+	start := pos.Add(lns.Offset)
+	// rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
+	clr := colors.Uniform(lns.Color)
+	runes := lns.Source.Join() // TODO: bad for performance with append
+	for li := range lns.Lines {
+		ln := &lns.Lines[li]
+		rs.TextLine(ln, lns, runes, clr, start) // todo: start + offset
+	}
+}
+
+// TextLine rasterizes the given shaped.Line.
+func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, start math32.Vector2) {
+	off := start.Add(ln.Offset)
+	for ri := range ln.Runs {
+		run := &ln.Runs[ri]
+		rs.TextRun(run, ln, lns, runes, clr, off)
+		if run.Direction.IsVertical() {
+			off.Y += math32.FromFixed(run.Advance)
+		} else {
+			off.X += math32.FromFixed(run.Advance)
+		}
+	}
+}
+
+// TextRun rasterizes the given text run into the output image using the
+// font face set in the shaping.
+// The text will be drawn starting at the start pixel position.
+func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, start math32.Vector2) {
+	// todo: render strike-through
+	// dir := run.Direction
+	// rbb := run.MaxBounds.Translate(start)
+	if run.Background != nil {
+		// rs.FillBounds(rbb, run.Background) TODO
+	}
+	if len(ln.Selections) > 0 {
+		for _, sel := range ln.Selections {
+			rsel := sel.Intersect(run.Runes())
+			if rsel.Len() > 0 {
+				fi := run.FirstGlyphAt(rsel.Start)
+				li := run.LastGlyphAt(rsel.End - 1)
+				if fi >= 0 && li >= fi {
+					// sbb := run.GlyphRegionBounds(fi, li) TODO
+					// rs.FillBounds(sbb.Translate(start), lns.SelectionColor) TODO
+				}
+			}
+		}
+	}
+	// fill := clr
+	// if run.FillColor != nil {
+	// 	fill = run.FillColor
+	// }
+	// stroke := run.StrokeColor
+	// fsz := math32.FromFixed(run.Size)
+
+	region := run.Runes()
+	raw := runes[region.Start:region.End]
+	rs.ctx.Call("fillText", string(raw), start.X, start.Y)
+}
+
+// applyTextStyle applies the given [rich.Style] to the HTML canvas context.
+func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, text *render.Text) {
+	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
+	// TODO: fix font weight, font size, line height, font family
+	fmt.Println(s.Weight.String())
+	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), fmt.Sprintf("%gpx/%g", s.Size*text.Text.FontSize, text.Text.LineHeight), s.Family.String()}
+	rs.ctx.Set("font", strings.Join(parts, " "))
+
+	// TODO: use caching like in RenderPath?
+	if run.FillColor == nil {
+		run.FillColor = colors.Uniform(text.Text.Color)
+	}
+	// if run.StrokeColor == nil {
+	// 	run.StrokeColor = ctx.Style.Stroke.Color
+	// }
+	rs.ctx.Set("fillStyle", rs.imageToStyle(run.FillColor))
+	rs.ctx.Set("strokeStyle", rs.imageToStyle(run.StrokeColor))
+}
