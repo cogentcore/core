@@ -68,7 +68,7 @@ type Settings struct {
 	// "fantasy" will be added automatically as a final backup.
 	Fantasy FontName
 
-	//	Math fonts are for displaying mathematical expressions, for example
+	// Math fonts are for displaying mathematical expressions, for example
 	// superscript and subscript, brackets that cross several lines, nesting
 	// expressions, and double-struck glyphs with distinct meanings.
 	// This can be a list of comma-separated names, tried in order.

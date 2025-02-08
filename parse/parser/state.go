@@ -434,9 +434,7 @@ func (ps *State) FindNameScoped(nm string) (*syms.Symbol, bool) {
 }
 
 // FindNameTopScope searches only in top of current scope for something
-//
-//	with the given name in symbols
-//
+// with the given name in symbols
 // also looks in ps.Syms if not found in Scope stack.
 func (ps *State) FindNameTopScope(nm string) (*syms.Symbol, bool) {
 	sy := ps.Scopes.Top()

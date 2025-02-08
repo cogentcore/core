@@ -120,14 +120,14 @@ type Run struct {
 	// Decoration are the decorations from the style to apply to this run.
 	Decoration rich.Decorations
 
-	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
+	// FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
 	// Will only be non-nil if set for this run; Otherwise use default.
 	FillColor image.Image
 
-	//	StrokeColor is the color to use for glyph outline stroking, if non-nil.
+	// StrokeColor is the color to use for glyph outline stroking, if non-nil.
 	StrokeColor image.Image
 
-	//	Background is the color to use for the background region, if non-nil.
+	// Background is the color to use for the background region, if non-nil.
 	Background image.Image
 }
 

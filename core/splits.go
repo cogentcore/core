@@ -44,7 +44,7 @@ const (
 	TileFirstLong
 
 	// SecondLong has the first two elements split along the first line,
-	//	and the third with a long span along the second main axis line,
+	// and the third with a long span along the second main axis line,
 	// with a split between the two lines.  Visually, the splits form
 	// an inverted T shape for a horizontal main axis.
 	TileSecondLong

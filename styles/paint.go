@@ -26,10 +26,10 @@ type Paint struct { //types:add
 	// Text has the text styling settings.
 	Text text.Style
 
-	//	ClipPath is a clipping path for this item.
+	// ClipPath is a clipping path for this item.
 	ClipPath ppath.Path
 
-	//	Mask is a rendered image of the mask for this item.
+	// Mask is a rendered image of the mask for this item.
 	Mask image.Image
 }
 

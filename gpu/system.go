@@ -13,7 +13,7 @@ type System interface {
 	// Each Var has Value(s) containing specific instance values.
 	Vars() *Vars
 
-	//	Device is the logical device for this system, typically from
+	// Device is the logical device for this system, typically from
 	// the Renderer (Surface) or owned by a ComputeSystem.
 	Device() *Device
 

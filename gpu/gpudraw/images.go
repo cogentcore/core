@@ -9,7 +9,7 @@ type imgrec struct {
 	// img is the image, or texture
 	img any
 
-	//	index is where it is used in the Values list.
+	// index is where it is used in the Values list.
 	index int
 
 	// used flag indicates whether this image was used on last pass.
