@@ -5,10 +5,8 @@
 package shaped_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
-	"unicode"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/runes"
@@ -80,13 +78,10 @@ func TestBasic(t *testing.T) {
 
 		assert.Equal(t, len(src), lns.RuneFromLinePos(textpos.Pos{3, 30}))
 
-		for ri, r := range src {
+		for ri, _ := range src {
 			lp := lns.RuneToLinePos(ri)
 			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
 
-			if unicode.IsSpace(r) { // todo: deal with spaces!
-				continue
-			}
 			// fmt.Println("\n####", ri, string(r))
 			gb := lns.RuneBounds(ri)
 			assert.NotEqual(t, gb, (math32.Box2{}))
@@ -97,6 +92,9 @@ func TestBasic(t *testing.T) {
 			cp := gb.Center()
 			si := lns.RuneAtPoint(cp, pos)
 			// fmt.Println(cp, si)
+			// if ri != si {
+			// 	fmt.Println(ri, si, gb, cp, lns.RuneBounds(si))
+			// }
 			assert.Equal(t, ri, si)
 		}
 	})
@@ -195,10 +193,16 @@ func TestSpacePos(t *testing.T) {
 		sty := rich.NewStyle()
 		tx := rich.NewText(sty, []rune(src))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(10, 10))
+		pos := math32.Vec2(10, 10)
+		pc.TextLines(lns, pos)
 		pc.RenderDone()
 
-		sb := lns.RuneBounds(4)
-		fmt.Println("sb:", sb)
+		sb := lns.RuneBounds(3)
+		// fmt.Println("sb:", sb)
+
+		cp := sb.Center().Add(pos)
+		si := lns.RuneAtPoint(cp, pos)
+		// fmt.Println(si)
+		assert.Equal(t, 3, si)
 	})
 }

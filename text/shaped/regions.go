@@ -154,7 +154,7 @@ func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 		lbb := ln.Bounds.Translate(off)
 		if !lbb.ContainsPoint(pt) {
 			if pt.Y >= lbb.Min.Y && pt.Y < lbb.Max.Y { // this is our line
-				if pt.X <= lbb.Min.X+2 {
+				if pt.X <= lbb.Min.X {
 					return ln.SourceRange.Start
 				}
 				return ln.SourceRange.End
@@ -185,7 +185,7 @@ func (rn *Run) Runes() textpos.Range {
 }
 
 // GlyphsAt returns the indexs of the glyph(s) at given original source rune index.
-// Only works for non-space rendering runes. Empty if none found.
+// Empty if none found.
 func (rn *Run) GlyphsAt(i int) []int {
 	var gis []int
 	for gi := range rn.Glyphs {
@@ -233,24 +233,16 @@ func (rn *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 	// todo: vertical case!
 	adv := off.X
 	rr := rn.Runes()
-	pri := rr.Start
 	for gi := range rn.Glyphs {
 		g := &rn.Glyphs[gi]
 		cri := g.ClusterIndex
-		gb := rn.GlyphBoundsBox(g)
 		gadv := math32.FromFixed(g.XAdvance)
-		cx := adv + gb.Min.X
-		dx := pt.X - cx
-		if dx >= -2 && pt.X < adv+gb.Max.X+2 {
+		mx := adv + gadv
+		// fmt.Println(gi, cri, adv, mx, pt.X)
+		if pt.X >= adv && pt.X < mx {
+			// fmt.Println("fits!")
 			return cri
 		}
-		if pt.X < cx { // it is before us, in space
-			nri := cri - pri
-			ri := pri + int(math32.Round(float32(nri)*((adv-pt.X)/(cx-adv)))) // linear interpolation
-			// fmt.Println("before:", gi, ri, pri, cri, adv, cx, adv-pt.X, cx-adv)
-			return ri
-		}
-		pri = cri
 		adv += gadv
 	}
 	return rr.End

@@ -132,13 +132,17 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 	// todo: render strikethrough
 }
 
-func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, bitmap font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
+func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
 	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
 	x := pos.X
 	y := pos.Y
 
+	if len(outline.Segments) == 0 {
+		// fmt.Println("nil path:", g.GlyphID)
+		return
+	}
 	rs.Path.Clear()
-	for _, s := range bitmap.Segments {
+	for _, s := range outline.Segments {
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			rs.Path.Start(fixed.Point26_6{X: math32.ToFixed(s.Args[0].X*scale + x), Y: math32.ToFixed(-s.Args[0].Y*scale + y)})
