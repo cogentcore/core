@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"cogentcore.org/core/text/textpos"
 )
 
 // UndoTrace; set to true to get a report of undo actions
@@ -24,10 +26,10 @@ type Undo struct {
 	Off bool
 
 	// undo stack of edits
-	Stack []*Edit
+	Stack []*textpos.Edit
 
 	// undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo
-	UndoStack []*Edit
+	UndoStack []*textpos.Edit
 
 	// undo position in stack
 	Pos int
@@ -56,7 +58,7 @@ func (un *Undo) Reset() {
 
 // Save saves given edit to undo stack, with current group marker unless timer interval
 // exceeds UndoGroupDelay since last item.
-func (un *Undo) Save(tbe *Edit) {
+func (un *Undo) Save(tbe *textpos.Edit) {
 	if un.Off {
 		return
 	}
@@ -86,7 +88,7 @@ func (un *Undo) Save(tbe *Edit) {
 }
 
 // UndoPop pops the top item off of the stack for use in Undo. returns nil if none.
-func (un *Undo) UndoPop() *Edit {
+func (un *Undo) UndoPop() *textpos.Edit {
 	if un.Off {
 		return nil
 	}
@@ -104,7 +106,7 @@ func (un *Undo) UndoPop() *Edit {
 }
 
 // UndoPopIfGroup pops the top item off of the stack if it is the same as given group
-func (un *Undo) UndoPopIfGroup(gp int) *Edit {
+func (un *Undo) UndoPopIfGroup(gp int) *textpos.Edit {
 	if un.Off {
 		return nil
 	}
@@ -126,7 +128,7 @@ func (un *Undo) UndoPopIfGroup(gp int) *Edit {
 
 // SaveUndo saves given edit to UndoStack (stack of undoes that have have undone..)
 // for emacs mode.
-func (un *Undo) SaveUndo(tbe *Edit) {
+func (un *Undo) SaveUndo(tbe *textpos.Edit) {
 	un.UndoStack = append(un.UndoStack, tbe)
 }
 
@@ -152,7 +154,7 @@ func (un *Undo) UndoStackSave() {
 
 // RedoNext returns the current item on Stack for Redo, and increments the position
 // returns nil if at end of stack.
-func (un *Undo) RedoNext() *Edit {
+func (un *Undo) RedoNext() *textpos.Edit {
 	if un.Off {
 		return nil
 	}
@@ -171,7 +173,7 @@ func (un *Undo) RedoNext() *Edit {
 
 // RedoNextIfGroup returns the current item on Stack for Redo if it is same group
 // and increments the position. returns nil if at end of stack.
-func (un *Undo) RedoNextIfGroup(gp int) *Edit {
+func (un *Undo) RedoNextIfGroup(gp int) *textpos.Edit {
 	if un.Off {
 		return nil
 	}
@@ -195,7 +197,7 @@ func (un *Undo) RedoNextIfGroup(gp int) *Edit {
 // have taken place since time stamp on region (using the Undo stack).
 // If region was wholly within a deleted region, then RegionNil will be
 // returned -- otherwise it is clipped appropriately as function of deletes.
-func (un *Undo) AdjustRegion(reg Region) Region {
+func (un *Undo) AdjustRegion(reg textpos.RegionTime) textpos.RegionTime {
 	if un.Off {
 		return reg
 	}

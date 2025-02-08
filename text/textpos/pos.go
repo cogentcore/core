@@ -11,11 +11,23 @@ import (
 
 // Pos is a text position in terms of line and character index within a line,
 // using 0-based line numbers, which are converted to 1 base for the String()
-// representation. Ch positions are always in runes, not bytes, and can also
+// representation. Char positions are always in runes, and can also
 // be used for other units such as tokens, spans, or runs.
 type Pos struct {
 	Line int
 	Char int
+}
+
+// AddLine returns a Pos with Line number added.
+func (ps Pos) AddLine(ln int) Pos {
+	ps.Line += ln
+	return ps
+}
+
+// AddChar returns a Pos with Char number added.
+func (ps Pos) AddChar(ch int) Pos {
+	ps.Char += ch
+	return ps
 }
 
 // String satisfies the fmt.Stringer interferace
@@ -32,7 +44,7 @@ func (ps Pos) String() string {
 var PosErr = Pos{-1, -1}
 
 // IsLess returns true if receiver position is less than given comparison.
-func (ps *Pos) IsLess(cmp Pos) bool {
+func (ps Pos) IsLess(cmp Pos) bool {
 	switch {
 	case ps.Line < cmp.Line:
 		return true

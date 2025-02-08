@@ -11,6 +11,8 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+
+	"cogentcore.org/core/text/textpos"
 )
 
 // BytesToLineStrings returns []string lines from []byte input.
@@ -137,21 +139,21 @@ func PreCommentStart(lns [][]byte, stLn int, comLn, comSt, comEd string, lnBack 
 }
 
 // CountWordsLinesRegion counts the number of words (aka Fields, space-separated strings)
-// and lines in given region of source (lines = 1 + End.Ln - Start.Ln)
-func CountWordsLinesRegion(src [][]rune, reg Region) (words, lines int) {
+// and lines in given region of source (lines = 1 + End.Line - Start.Line)
+func CountWordsLinesRegion(src [][]rune, reg textpos.Region) (words, lines int) {
 	lns := len(src)
-	mx := min(lns-1, reg.End.Ln)
-	for ln := reg.Start.Ln; ln <= mx; ln++ {
+	mx := min(lns-1, reg.End.Line)
+	for ln := reg.Start.Line; ln <= mx; ln++ {
 		sln := src[ln]
-		if ln == reg.Start.Ln {
-			sln = sln[reg.Start.Ch:]
-		} else if ln == reg.End.Ln {
-			sln = sln[:reg.End.Ch]
+		if ln == reg.Start.Line {
+			sln = sln[reg.Start.Char:]
+		} else if ln == reg.End.Line {
+			sln = sln[:reg.End.Char]
 		}
 		flds := strings.Fields(string(sln))
 		words += len(flds)
 	}
-	lines = 1 + (reg.End.Ln - reg.Start.Ln)
+	lines = 1 + (reg.End.Line - reg.Start.Line)
 	return
 }
 

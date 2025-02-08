@@ -15,69 +15,20 @@ import (
 
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/parse/lexer"
-)
-
-// Match records one match for search within file, positions in runes
-type Match struct {
-
-	// region surrounding the match -- column positions are in runes, not bytes
-	Reg Region
-
-	// text surrounding the match, at most FileSearchContext on either side (within a single line)
-	Text []byte
-}
-
-// SearchContext is how much text to include on either side of the search match
-var SearchContext = 30
-
-var mst = []byte("<mark>")
-var mstsz = len(mst)
-var med = []byte("</mark>")
-var medsz = len(med)
-
-// NewMatch returns a new Match entry for given rune line with match starting
-// at st and ending before ed, on given line
-func NewMatch(rn []rune, st, ed, ln int) Match {
-	sz := len(rn)
-	reg := NewRegion(ln, st, ln, ed)
-	cist := max(st-SearchContext, 0)
-	cied := min(ed+SearchContext, sz)
-	sctx := []byte(string(rn[cist:st]))
-	fstr := []byte(string(rn[st:ed]))
-	ectx := []byte(string(rn[ed:cied]))
-	tlen := mstsz + medsz + len(sctx) + len(fstr) + len(ectx)
-	txt := make([]byte, tlen)
-	copy(txt, sctx)
-	ti := st - cist
-	copy(txt[ti:], mst)
-	ti += mstsz
-	copy(txt[ti:], fstr)
-	ti += len(fstr)
-	copy(txt[ti:], med)
-	ti += medsz
-	copy(txt[ti:], ectx)
-	return Match{Reg: reg, Text: txt}
-}
-
-const (
-	// IgnoreCase is passed to search functions to indicate case should be ignored
-	IgnoreCase = true
-
-	// UseCase is passed to search functions to indicate case is relevant
-	UseCase = false
+	"cogentcore.org/core/text/textpos"
 )
 
 // SearchRuneLines looks for a string (no regexp) within lines of runes,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []Match) {
+func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
 		return 0, nil
 	}
 	cnt := 0
-	var matches []Match
+	var matches []textpos.Match
 	for ln, rn := range src {
 		sz := len(rn)
 		ci := 0
@@ -105,14 +56,14 @@ func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []Match) 
 // as entire lexically tagged items,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []Match) {
+func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
 		return 0, nil
 	}
 	cnt := 0
-	var matches []Match
+	var matches []textpos.Match
 	mx := min(len(src), len(lexs))
 	for ln := 0; ln < mx; ln++ {
 		rln := src[ln]
@@ -144,14 +95,14 @@ func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase boo
 // using given case-sensitivity.
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
-func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []Match) {
+func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
 		return 0, nil
 	}
 	cnt := 0
-	var matches []Match
+	var matches []textpos.Match
 	scan := bufio.NewScanner(reader)
 	ln := 0
 	for scan.Scan() {
@@ -187,7 +138,7 @@ func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []Match) {
 // SearchFile looks for a string (no regexp) within a file, in a
 // case-sensitive way, returning number of occurrences and specific match
 // position list -- column positions are in runes.
-func SearchFile(filename string, find []byte, ignoreCase bool) (int, []Match) {
+func SearchFile(filename string, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		log.Printf("text.SearchFile: open error: %v\n", err)
@@ -200,9 +151,9 @@ func SearchFile(filename string, find []byte, ignoreCase bool) (int, []Match) {
 // SearchRegexp looks for a string (using regexp) from an io.Reader input stream.
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
-func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []Match) {
+func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []textpos.Match) {
 	cnt := 0
-	var matches []Match
+	var matches []textpos.Match
 	scan := bufio.NewScanner(reader)
 	ln := 0
 	for scan.Scan() {
@@ -242,7 +193,7 @@ func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []Match) {
 // SearchFileRegexp looks for a string (using regexp) within a file,
 // returning number of occurrences and specific match
 // position list -- column positions are in runes.
-func SearchFileRegexp(filename string, re *regexp.Regexp) (int, []Match) {
+func SearchFileRegexp(filename string, re *regexp.Regexp) (int, []textpos.Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		log.Printf("text.SearchFile: open error: %v\n", err)
@@ -255,9 +206,9 @@ func SearchFileRegexp(filename string, re *regexp.Regexp) (int, []Match) {
 // SearchByteLinesRegexp looks for a regexp within lines of bytes,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchByteLinesRegexp(src [][]byte, re *regexp.Regexp) (int, []Match) {
+func SearchByteLinesRegexp(src [][]byte, re *regexp.Regexp) (int, []textpos.Match) {
 	cnt := 0
-	var matches []Match
+	var matches []textpos.Match
 	for ln, b := range src {
 		fi := re.FindAllIndex(b, -1)
 		if fi == nil {

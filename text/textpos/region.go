@@ -4,13 +4,40 @@
 
 package textpos
 
-// Region is a contiguous region within the source file,
+// Region is a contiguous region within a source file with lines of rune chars,
 // defined by start and end [Pos] positions.
+// End.Char position is _exclusive_ so the last char is the one before End.Char.
+// End.Line position is _inclusive_, so the last line is End.Line.
 type Region struct {
-	// starting position of region
+	// Start is the starting position of region.
 	Start Pos
-	// ending position of region
+
+	// End is the ending position of region.
+	// Char position is _exclusive_ so the last char is the one before End.Char.
+	// Line position is _inclusive_, so the last line is End.Line.
 	End Pos
+}
+
+// NewRegion creates a new text region using separate line and char
+// values for start and end.
+func NewRegion(stLn, stCh, edLn, edCh int) Region {
+	tr := Region{Start: Pos{Line: stLn, Char: stCh}, End: Pos{Line: edLn, Char: edCh}}
+	return tr
+}
+
+// NewRegionPos creates a new text region using position values.
+func NewRegionPos(st, ed Pos) Region {
+	tr := Region{Start: st, End: ed}
+	return tr
+}
+
+// NewRegionLen makes a new Region from a starting point and a length
+// along same line
+func NewRegionLen(start Pos, len int) Region {
+	tr := Region{Start: start}
+	tr.End = start
+	tr.End.Char += len
+	return tr
 }
 
 // IsNil checks if the region is empty, because the start is after or equal to the end.
@@ -18,7 +45,34 @@ func (tr Region) IsNil() bool {
 	return !tr.Start.IsLess(tr.End)
 }
 
-// Contains returns true if region contains position
+// Contains returns true if region contains given position.
 func (tr Region) Contains(ps Pos) bool {
 	return ps.IsLess(tr.End) && (tr.Start == ps || tr.Start.IsLess(ps))
+}
+
+// ContainsLine returns true if line is within region
+func (tr Region) ContainsLine(ln int) bool {
+	return tr.Start.Line >= ln && ln <= tr.End.Line
+}
+
+// NumLines is the number of lines in this region, based on inclusive end line.
+func (tr Region) NumLines() int {
+	return 1 + (tr.End.Line - tr.Start.Line)
+}
+
+// ShiftLines returns a new Region with the start and End lines
+// shifted by given number of lines.
+func (tr Region) ShiftLines(ln int) Region {
+	tr.Start.Line += ln
+	tr.End.Line += ln
+	return tr
+}
+
+// MoveToLine returns a new Region with the Start line
+// set to given line.
+func (tr Region) MoveToLine(ln int) Region {
+	nl := tr.NumLines()
+	tr.Start.Line = 0
+	tr.End.Line = nl - 1
+	return tr
 }
