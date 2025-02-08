@@ -97,11 +97,6 @@ type TextField struct { //core:embedder
 	// By default, it is [colors.Scheme.OnSurfaceVariant].
 	PlaceholderColor image.Image
 
-	// SelectColor is the color used for the text selection background color.
-	// It should be set in a Styler like all other style properties.
-	// By default, it is [colors.Scheme.Select.Container].
-	SelectColor image.Image
-
 	// complete contains functions and data for text field completion.
 	// It must be set using [TextField.SetCompleter].
 	complete *Complete
@@ -216,7 +211,6 @@ func (tf *TextField) Init() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(false, abilities.ScrollableUnfocused)
 		tf.CursorWidth.Dp(1)
-		tf.SelectColor = colors.Scheme.Select.Container
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor = colors.Scheme.Primary.Base
 		s.Cursor = cursors.Text

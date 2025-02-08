@@ -24,7 +24,7 @@ import (
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's.
-func HTMLPreToRich(str []byte, sty *rich.Style, txtSty *rich.Text, cssProps map[string]any) (rich.Text, error) {
+func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text, error) {
 	sz := len(str)
 	if sz == 0 {
 		return nil, nil

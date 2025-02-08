@@ -79,6 +79,9 @@ type Style struct { //types:add
 
 	// SelectColor is the color to use for the background region of selected text.
 	SelectColor image.Image
+
+	// HighlightColor is the color to use for the background region of highlighted text.
+	HighlightColor image.Image
 }
 
 func NewStyle() *Style {
@@ -97,6 +100,7 @@ func (ts *Style) Defaults() {
 	ts.TabSize = 4
 	ts.Color = colors.ToUniform(colors.Scheme.OnSurface)
 	ts.SelectColor = colors.Scheme.Select.Container
+	ts.HighlightColor = colors.Scheme.Warn.Container
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

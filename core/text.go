@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 )
 
 // Text is a widget for rendering text. It supports full HTML styling,
@@ -38,15 +39,21 @@ type Text struct {
 	// It defaults to [TextBodyLarge].
 	Type TextTypes
 
-	// paintText is the [shaped.Lines] for the text.
-	paintText *shaped.Lines
-
 	// Links is the list of links in the text.
 	Links []rich.LinkRec
+
+	// richText is the conversion of the HTML text source.
+	richText rich.Text
+
+	// paintText is the [shaped.Lines] for the text.
+	paintText *shaped.Lines
 
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
 	normalCursor cursors.Cursor
+
+	// selectRange is the selected range.
+	selectRange textpos.Range
 }
 
 // TextTypes is an enum containing the different
@@ -116,7 +123,7 @@ func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
+		s.SetAbilities(true, abilities.Selectable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
@@ -219,15 +226,11 @@ func (tx *Text) Init() {
 	tx.HandleTextClick(func(tl *rich.LinkRec) {
 		system.TheApp.OpenURL(tl.URL)
 	})
-	tx.OnDoubleClick(func(e events.Event) {
-		tx.SetSelected(true)
-		tx.SetFocusQuiet()
-	})
 	tx.OnFocusLost(func(e events.Event) {
-		tx.SetSelected(false)
+		tx.selectReset()
 	})
 	tx.OnKeyChord(func(e events.Event) {
-		if !tx.StateIs(states.Selected) {
+		if tx.selectRange.Len() == 0 {
 			return
 		}
 		kf := keymap.Of(e.KeyChord())
@@ -244,13 +247,36 @@ func (tx *Text) Init() {
 			tx.Styles.Cursor = tx.normalCursor
 		}
 	})
+	tx.On(events.DoubleClick, func(e events.Event) {
+		e.SetHandled()
+		tx.selectWord(tx.pixelToRune(e.Pos()))
+		tx.SetFocusQuiet()
+	})
+	tx.On(events.TripleClick, func(e events.Event) {
+		e.SetHandled()
+		tx.selectAll()
+		tx.SetFocusQuiet()
+	})
+	tx.On(events.SlideStart, func(e events.Event) {
+		e.SetHandled()
+		tx.SetState(true, states.Sliding)
+		tx.selectRange.Start = tx.pixelToRune(e.Pos())
+		tx.selectRange.End = tx.selectRange.Start
+		tx.paintText.SelectReset()
+		tx.NeedsRender()
+	})
+	tx.On(events.SlideMove, func(e events.Event) {
+		e.SetHandled()
+		tx.selectUpdate(tx.pixelToRune(e.Pos()))
+		tx.NeedsRender()
+	})
 
-	// todo: ideally it would be possible to only call SetHTML once during config
-	// and then do the layout only during sizing.  However, layout starts with
-	// existing line breaks (which could come from <br> and <p> in HTML),
-	// so that is never able to undo initial word wrapping from constrained sizes.
 	tx.Updater(func() {
-		tx.configTextSize(tx.Geom.Size.Actual.Content)
+		if tx.Styles.Text.WhiteSpace.KeepWhiteSpace() {
+			tx.richText = errors.Log1(htmltext.HTMLPreToRich([]byte(tx.Text), &tx.Styles.Font, nil))
+		} else {
+			tx.richText = errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), &tx.Styles.Font, nil))
+		}
 	})
 }
 
@@ -299,7 +325,7 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 }
 
 func (tx *Text) copy() {
-	md := mimedata.NewText(tx.Text)
+	md := mimedata.NewText(tx.Text[tx.selectRange.Start:tx.selectRange.End])
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
@@ -313,14 +339,47 @@ func (tx *Text) Label() string {
 	return tx.Name
 }
 
+func (tx *Text) pixelToRune(pt image.Point) int {
+	return tx.paintText.RuneAtPoint(math32.FromPoint(pt), tx.Geom.Pos.Content)
+}
+
+// selectUpdate updates selection based on rune index
+func (tx *Text) selectUpdate(ri int) {
+	if ri >= tx.selectRange.Start {
+		tx.selectRange.End = ri
+	} else {
+		tx.selectRange.Start, tx.selectRange.End = ri, tx.selectRange.Start
+	}
+	tx.paintText.SelectReset()
+	tx.paintText.SelectRegion(tx.selectRange)
+}
+
+// selectReset resets any current selection
+func (tx *Text) selectReset() {
+	tx.selectRange.Start = 0
+	tx.selectRange.End = 0
+	tx.paintText.SelectReset()
+	tx.NeedsRender()
+}
+
+// selectAll selects entire set of text
+func (tx *Text) selectAll() {
+	tx.selectRange.Start = 0
+	tx.selectUpdate(len(tx.Text))
+	tx.NeedsRender()
+}
+
+// selectWord selects word at given rune location
+func (tx *Text) selectWord(ri int) {
+}
+
 // configTextSize does the HTML and Layout in paintText for text,
 // using given size to constrain layout.
 func (tx *Text) configTextSize(sz math32.Vector2) {
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	txs.Color = colors.ToUniform(tx.Styles.Color)
-	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
-	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, sz)
 	// fmt.Println(sz, ht)
 }
 
@@ -334,13 +393,11 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	txs := &tx.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = text.Start, text.Start
-
-	ht := errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), fs, nil))
-	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, sz)
 
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	tx.paintText = tx.Scene.TextShaper.WrapLines(ht, fs, txs, &AppearanceSettings.Text, rsz)
+	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, rsz)
 	tx.Links = tx.paintText.Source.GetLinks()
 	return rsz
 }

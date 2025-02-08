@@ -31,7 +31,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	dir := goTextDirection(rich.Default, tsty)
 
 	lht := sh.LineHeight(defSty, tsty, rts)
-	lns := &Lines{Source: tx, Color: tsty.Color, SelectionColor: colors.Scheme.Select.Container, HighlightColor: colors.Scheme.Warn.Container, LineHeight: lht}
+	lns := &Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
 
 	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
 	nlines := int(math32.Floor(size.Y / lns.LineHeight))
