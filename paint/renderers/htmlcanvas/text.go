@@ -104,4 +104,6 @@ func (rs *Renderer) applyTextStyle(st *rich.Style, fill, stroke image.Image, siz
 	// TODO: use caching like in RenderPath?
 	rs.ctx.Set("fillStyle", rs.imageToStyle(fill))
 	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke))
+
+	// TODO: text decorations?
 }
