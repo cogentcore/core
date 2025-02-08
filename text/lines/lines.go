@@ -17,12 +17,13 @@ import (
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/base/slicesx"
-	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 )
 
 const (
@@ -44,31 +45,24 @@ var (
 	markupDelay = 500 * time.Millisecond // `default:"500" min:"100" step:"100"`
 )
 
-// Lines manages multi-line text, with original source text encoded as bytes
-// and runes, and a corresponding markup representation with syntax highlighting
-// and other HTML-encoded text markup on top of the raw text.
+// Lines manages multi-line monospaced text with a given line width in runes,
+// so that all text wrapping, editing, and navigation logic can be managed
+// purely in text space, allowing rendering and GUI layout to be relatively fast.
+// This is suitable for text editing and terminal applications, among others.
+// The text encoded as runes along with a corresponding [rich.Text] markup
+// representation with syntax highlighting etc.
 // The markup is updated in a separate goroutine for efficiency.
-// Everything is protected by an overall sync.Mutex and safe to concurrent access,
+// Everything is protected by an overall sync.Mutex and is safe to concurrent access,
 // and thus nothing is exported and all access is through protected accessor functions.
 // In general, all unexported methods do NOT lock, and all exported methods do.
 type Lines struct {
+
 	// Options are the options for how text editing and viewing works.
 	Options Options
 
 	// Highlighter does the syntax highlighting markup, and contains the
 	// parameters thereof, such as the language and style.
 	Highlighter highlighting.Highlighter
-
-	// Undos is the undo manager.
-	Undos Undo
-
-	// Markup is the marked-up version of the edited text lines, after being run
-	// through the syntax highlighting process. This is what is actually rendered.
-	// You MUST access it only under a Lock()!
-	Markup [][]byte
-
-	// ParseState is the parsing state information for the file.
-	ParseState parse.FileStates
 
 	// ChangedFunc is called whenever the text content is changed.
 	// The changed flag is always updated on changes, but this can be
@@ -81,20 +75,39 @@ type Lines struct {
 	// when this is called.
 	MarkupDoneFunc func()
 
+	// width is the current line width in rune characters, used for line wrapping.
+	width int
+
+	// FontStyle is the default font styling to use for markup.
+	// Is set to use the monospace font.
+	fontStyle *rich.Style
+
+	// TextStyle is the default text styling to use for markup.
+	textStyle *text.Style
+
+	// todo: probably can unexport this?
+	// Undos is the undo manager.
+	undos Undo
+
+	// ParseState is the parsing state information for the file.
+	parseState parse.FileStates
+
 	// changed indicates whether any changes have been made.
 	// Use [IsChanged] method to access.
 	changed bool
 
-	// lineBytes are the live lines of text being edited,
-	// with the latest modifications, continuously updated
-	// back-and-forth with the lines runes.
-	lineBytes [][]byte
-
-	// Lines are the live lines of text being edited, with the latest modifications.
+	// lines are the live lines of text being edited, with the latest modifications.
 	// They are encoded as runes per line, which is necessary for one-to-one rune/glyph
-	// rendering correspondence. All TextPos positions are in rune indexes, not byte
-	// indexes.
+	// rendering correspondence. All textpos positions are in rune indexes.
 	lines [][]rune
+
+	// breaks are the indexes of the line breaks for each line. The number of display
+	// lines per logical line is the number of breaks + 1.
+	breaks [][]int
+
+	// markup is the marked-up version of the edited text lines, after being run
+	// through the syntax highlighting process. This is what is actually rendered.
+	markup []rich.Text
 
 	// tags are the extra custom tagged regions for each line.
 	tags []lexer.Line
@@ -103,7 +116,7 @@ type Lines struct {
 	hiTags []lexer.Line
 
 	// markupEdits are the edits that were made during the time it takes to generate
-	// the new markup tags -- rare but it does happen.
+	// the new markup tags. this is rare but it does happen.
 	markupEdits []*Edit
 
 	// markupDelayTimer is the markup delay timer.
@@ -123,17 +136,14 @@ func (ls *Lines) SetText(text []byte) {
 	defer ls.Unlock()
 
 	ls.bytesToLines(text)
-	ls.initFromLineBytes()
 }
 
-// SetTextLines sets linesBytes from given lines of bytes, making a copy
-// and removing any trailing \r carriage returns, to standardize.
+// SetTextLines sets the source lines from given lines of bytes.
 func (ls *Lines) SetTextLines(lns [][]byte) {
 	ls.Lock()
 	defer ls.Unlock()
 
 	ls.setLineBytes(lns)
-	ls.initFromLineBytes()
 }
 
 // Bytes returns the current text lines as a slice of bytes,
@@ -150,8 +160,8 @@ func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
 	ls.Lock()
 	defer ls.Unlock()
 
-	ls.ParseState.SetSrc(string(info.Path), "", info.Known)
-	ls.Highlighter.Init(info, &ls.ParseState)
+	ls.parseState.SetSrc(string(info.Path), "", info.Known)
+	ls.Highlighter.Init(info, &ls.parseState)
 	ls.Options.ConfigKnown(info.Known)
 	if ls.numLines() > 0 {
 		ls.initialMarkup()
@@ -226,16 +236,6 @@ func (ls *Lines) Line(ln int) []rune {
 	ls.Lock()
 	defer ls.Unlock()
 	return slices.Clone(ls.lines[ln])
-}
-
-// LineBytes returns a (copy of) specific line of bytes.
-func (ls *Lines) LineBytes(ln int) []byte {
-	if !ls.IsValidLine(ln) {
-		return nil
-	}
-	ls.Lock()
-	defer ls.Unlock()
-	return slices.Clone(ls.lineBytes[ln])
 }
 
 // strings returns the current text as []string array.
@@ -367,19 +367,10 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, matc
 
 // AppendTextMarkup appends new text to end of lines, using insert, returns
 // edit, and uses supplied markup to render it, for preformatted output.
-func (ls *Lines) AppendTextMarkup(text []byte, markup []byte) *Edit {
+func (ls *Lines) AppendTextMarkup(text [][]byte, markup []rich.Text) *Edit {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.appendTextMarkup(text, markup)
-}
-
-// AppendTextLineMarkup appends one line of new text to end of lines, using
-// insert, and appending a LF at the end of the line if it doesn't already
-// have one. User-supplied markup is used. Returns the edit region.
-func (ls *Lines) AppendTextLineMarkup(text []byte, markup []byte) *Edit {
-	ls.Lock()
-	defer ls.Unlock()
-	return ls.appendTextLineMarkup(text, markup)
 }
 
 // ReMarkup starts a background task of redoing the markup
@@ -575,7 +566,8 @@ func (ls *Lines) Search(find []byte, ignoreCase, lexItems bool) (int, []Match) {
 func (ls *Lines) SearchRegexp(re *regexp.Regexp) (int, []Match) {
 	ls.Lock()
 	defer ls.Unlock()
-	return SearchByteLinesRegexp(ls.lineBytes, re)
+	// return SearchByteLinesRegexp(ls.lineBytes, re)
+	// todo!
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner
@@ -602,9 +594,7 @@ func (ls *Lines) isValidLine(ln int) bool {
 	return ln < ls.numLines()
 }
 
-// bytesToLines sets the lineBytes from source .text,
-// making a copy of the bytes so they don't refer back to text,
-// and removing any trailing \r carriage returns, to standardize.
+// bytesToLines sets the rune lines from source text
 func (ls *Lines) bytesToLines(txt []byte) {
 	if txt == nil {
 		txt = []byte("")
@@ -612,30 +602,21 @@ func (ls *Lines) bytesToLines(txt []byte) {
 	ls.setLineBytes(bytes.Split(txt, []byte("\n")))
 }
 
-// setLineBytes sets the lineBytes from source [][]byte, making copies,
-// and removing any trailing \r carriage returns, to standardize.
-// also removes any trailing blank line if line ended with \n
+// setLineBytes sets the lines from source [][]byte.
 func (ls *Lines) setLineBytes(lns [][]byte) {
 	n := len(lns)
-	ls.lineBytes = slicesx.SetLength(ls.lineBytes, n)
-	for i, l := range lns {
-		ls.lineBytes[i] = slicesx.CopyFrom(ls.lineBytes[i], stringsx.ByteTrimCR(l))
+	if n > 1 && len(lns[n-1]) == 0 { // lines have lf at end typically
+		lns = lns[:n-1]
+		n--
 	}
-	if n > 1 && len(ls.lineBytes[n-1]) == 0 { // lines have lf at end typically
-		ls.lineBytes = ls.lineBytes[:n-1]
-	}
-}
-
-// initFromLineBytes initializes everything from lineBytes
-func (ls *Lines) initFromLineBytes() {
-	n := len(ls.lineBytes)
 	ls.lines = slicesx.SetLength(ls.lines, n)
+	ls.breaks = slicesx.SetLength(ls.breaks, n)
 	ls.tags = slicesx.SetLength(ls.tags, n)
 	ls.hiTags = slicesx.SetLength(ls.hiTags, n)
-	ls.Markup = slicesx.SetLength(ls.Markup, n)
-	for ln, txt := range ls.lineBytes {
+	ls.markup = slicesx.SetLength(ls.markup, n)
+	for ln, txt := range lns {
 		ls.lines[ln] = runes.SetFromBytes(ls.lines[ln], txt)
-		ls.Markup[ln] = highlighting.HtmlEscapeRunes(ls.lines[ln])
+		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln]) // start with raw
 	}
 	ls.initialMarkup()
 	ls.startDelayedReMarkup()
@@ -644,23 +625,15 @@ func (ls *Lines) initFromLineBytes() {
 // bytes returns the current text lines as a slice of bytes.
 // with an additional line feed at the end, per POSIX standards.
 func (ls *Lines) bytes() []byte {
-	txt := bytes.Join(ls.lineBytes, []byte("\n"))
-	// https://stackoverflow.com/questions/729692/why-should-text-files-end-with-a-newline
-	txt = append(txt, []byte("\n")...)
-	return txt
-}
-
-// lineOffsets returns the index offsets for the start of each line
-// within an overall slice of bytes (e.g., from bytes).
-func (ls *Lines) lineOffsets() []int {
-	n := len(ls.lineBytes)
-	of := make([]int, n)
-	bo := 0
-	for ln, txt := range ls.lineBytes {
-		of[ln] = bo
-		bo += len(txt) + 1 // lf
+	nb := ls.width * ls.numLines()
+	b := make([]byte, 0, nb)
+	for ln := range ls.lines {
+		b = append(b, []byte(string(ls.lines[ln]))...)
+		b = append(b, []byte("\n")...)
 	}
-	return of
+	// https://stackoverflow.com/questions/729692/why-should-text-files-end-with-a-newline
+	b = append(b, []byte("\n")...)
+	return b
 }
 
 // strings returns the current text as []string array.
@@ -676,8 +649,7 @@ func (ls *Lines) strings(addNewLine bool) []string {
 	return str
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Appending Lines
+////////   Appending Lines
 
 // endPos returns the ending position at end of lines
 func (ls *Lines) endPos() lexer.Pos {
@@ -688,54 +660,50 @@ func (ls *Lines) endPos() lexer.Pos {
 	return lexer.Pos{n - 1, len(ls.lines[n-1])}
 }
 
-// appendTextMarkup appends new text to end of lines, using insert, returns
-// edit, and uses supplied markup to render it.
-func (ls *Lines) appendTextMarkup(text []byte, markup []byte) *Edit {
+// appendTextMarkup appends new lines of text to end of lines,
+// using insert, returns edit, and uses supplied markup to render it.
+func (ls *Lines) appendTextMarkup(text [][]byte, markup []rich.Text) *Edit {
 	if len(text) == 0 {
 		return &Edit{}
 	}
 	ed := ls.endPos()
-	tbe := ls.insertText(ed, text)
+	// tbe := ls.insertText(ed, text) // todo: make this line based??
 
 	st := tbe.Reg.Start.Ln
 	el := tbe.Reg.End.Ln
 	sz := (el - st) + 1
-	msplt := bytes.Split(markup, []byte("\n"))
-	if len(msplt) < sz {
-		log.Printf("Buf AppendTextMarkup: markup text less than appended text: is: %v, should be: %v\n", len(msplt), sz)
-		el = min(st+len(msplt)-1, el)
-	}
-	for ln := st; ln <= el; ln++ {
-		ls.Markup[ln] = msplt[ln-st]
-	}
+	// todo:
+	// for ln := st; ln <= el; ln++ {
+	// 	ls.markup[ln] = msplt[ln-st]
+	// }
 	return tbe
 }
 
-// appendTextLineMarkup appends one line of new text to end of lines, using
-// insert, and appending a LF at the end of the line if it doesn't already
-// have one. User-supplied markup is used. Returns the edit region.
-func (ls *Lines) appendTextLineMarkup(text []byte, markup []byte) *Edit {
-	ed := ls.endPos()
-	sz := len(text)
-	addLF := true
-	if sz > 0 {
-		if text[sz-1] == '\n' {
-			addLF = false
-		}
-	}
-	efft := text
-	if addLF {
-		efft = make([]byte, sz+1)
-		copy(efft, text)
-		efft[sz] = '\n'
-	}
-	tbe := ls.insertText(ed, efft)
-	ls.Markup[tbe.Reg.Start.Ln] = markup
-	return tbe
-}
+// todo: use above
+// // appendTextLineMarkup appends one line of new text to end of lines, using
+// // insert, and appending a LF at the end of the line if it doesn't already
+// // have one. User-supplied markup is used. Returns the edit region.
+// func (ls *Lines) appendTextLineMarkup(text []byte, markup []byte) *Edit {
+// 	ed := ls.endPos()
+// 	sz := len(text)
+// 	addLF := true
+// 	if sz > 0 {
+// 		if text[sz-1] == '\n' {
+// 			addLF = false
+// 		}
+// 	}
+// 	efft := text
+// 	if addLF {
+// 		efft = make([]byte, sz+1)
+// 		copy(efft, text)
+// 		efft[sz] = '\n'
+// 	}
+// 	tbe := ls.insertText(ed, efft)
+// 	ls.markup[tbe.Reg.Start.Ln] = markup
+// 	return tbe
+// }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Edits
+////////   Edits
 
 // validPos returns a position that is in a valid range
 func (ls *Lines) validPos(pos lexer.Pos) lexer.Pos {
@@ -1086,12 +1054,12 @@ func (ls *Lines) saveUndo(tbe *Edit) {
 	if tbe == nil {
 		return
 	}
-	ls.Undos.Save(tbe)
+	ls.undos.Save(tbe)
 }
 
 // undo undoes next group of items on the undo stack
 func (ls *Lines) undo() []*Edit {
-	tbe := ls.Undos.UndoPop()
+	tbe := ls.undos.UndoPop()
 	if tbe == nil {
 		// note: could clear the changed flag on tbe == nil in parent
 		return nil
@@ -1104,14 +1072,14 @@ func (ls *Lines) undo() []*Edit {
 				utbe := ls.insertTextRectImpl(tbe)
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
-					ls.Undos.SaveUndo(utbe)
+					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
 			} else {
 				utbe := ls.deleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
-					ls.Undos.SaveUndo(utbe)
+					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
 			}
@@ -1120,19 +1088,19 @@ func (ls *Lines) undo() []*Edit {
 				utbe := ls.insertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
-					ls.Undos.SaveUndo(utbe)
+					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
 			} else {
 				utbe := ls.deleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
-					ls.Undos.SaveUndo(utbe)
+					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
 			}
 		}
-		tbe = ls.Undos.UndoPopIfGroup(stgp)
+		tbe = ls.undos.UndoPopIfGroup(stgp)
 		if tbe == nil {
 			break
 		}
@@ -1147,13 +1115,13 @@ func (ls *Lines) EmacsUndoSave() {
 	if !ls.Options.EmacsUndo {
 		return
 	}
-	ls.Undos.UndoStackSave()
+	ls.undos.UndoStackSave()
 }
 
 // redo redoes next group of items on the undo stack,
 // and returns the last record, nil if no more
 func (ls *Lines) redo() []*Edit {
-	tbe := ls.Undos.RedoNext()
+	tbe := ls.undos.RedoNext()
 	if tbe == nil {
 		return nil
 	}
@@ -1174,7 +1142,7 @@ func (ls *Lines) redo() []*Edit {
 			}
 		}
 		eds = append(eds, tbe)
-		tbe = ls.Undos.RedoNextIfGroup(stgp)
+		tbe = ls.undos.RedoNextIfGroup(stgp)
 		if tbe == nil {
 			break
 		}
@@ -1207,8 +1175,7 @@ func (ls *Lines) PatchFromBuffer(ob *Lines, diffs Diffs) bool {
 func (ls *Lines) linesEdited(tbe *Edit) {
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
-		ls.lineBytes[ln] = []byte(string(ls.lines[ln]))
-		ls.Markup[ln] = highlighting.HtmlEscapeRunes(ls.lines[ln])
+		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln])
 	}
 	ls.markupLines(st, ed)
 	ls.startDelayedReMarkup()
@@ -1220,14 +1187,14 @@ func (ls *Lines) linesInserted(tbe *Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 
+	// todo: breaks!
 	ls.markupEdits = append(ls.markupEdits, tbe)
-	ls.lineBytes = slices.Insert(ls.lineBytes, stln, make([][]byte, nsz)...)
-	ls.Markup = slices.Insert(ls.Markup, stln, make([][]byte, nsz)...)
+	ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
 	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
 	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
 
 	if ls.Highlighter.UsingParse() {
-		pfs := ls.ParseState.Done()
+		pfs := ls.parseState.Done()
 		pfs.Src.LinesInserted(stln, nsz)
 	}
 	ls.linesEdited(tbe)
@@ -1239,18 +1206,17 @@ func (ls *Lines) linesDeleted(tbe *Edit) {
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
-	ls.lineBytes = append(ls.lineBytes[:stln], ls.lineBytes[edln:]...)
-	ls.Markup = append(ls.Markup[:stln], ls.Markup[edln:]...)
+	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
 	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
 
 	if ls.Highlighter.UsingParse() {
-		pfs := ls.ParseState.Done()
+		pfs := ls.parseState.Done()
 		pfs.Src.LinesDeleted(stln, edln)
 	}
 	st := tbe.Reg.Start.Ln
-	ls.lineBytes[st] = []byte(string(ls.lines[st]))
-	ls.Markup[st] = highlighting.HtmlEscapeRunes(ls.lines[st])
+	// todo:
+	// ls.markup[st] = highlighting.HtmlEscapeRunes(ls.lines[st])
 	ls.markupLines(st, st)
 	ls.startDelayedReMarkup()
 }
@@ -1264,12 +1230,11 @@ func (ls *Lines) initialMarkup() {
 		return
 	}
 	if ls.Highlighter.UsingParse() {
-		fs := ls.ParseState.Done() // initialize
+		fs := ls.parseState.Done() // initialize
 		fs.Src.SetBytes(ls.bytes())
 	}
 	mxhi := min(100, ls.numLines())
-	txt := bytes.Join(ls.lineBytes[:mxhi], []byte("\n"))
-	txt = append(txt, []byte("\n")...)
+	txt := ls.bytes()
 	tags, err := ls.markupTags(txt)
 	if err == nil {
 		ls.markupApplyTags(tags)
@@ -1319,7 +1284,7 @@ func (ls *Lines) reMarkup() {
 // If region was wholly within a deleted region, then RegionNil will be
 // returned -- otherwise it is clipped appropriately as function of deletes.
 func (ls *Lines) AdjustRegion(reg Region) Region {
-	return ls.Undos.AdjustRegion(reg)
+	return ls.undos.AdjustRegion(reg)
 }
 
 // adjustedTags updates tag positions for edits, for given list of tags
@@ -1340,7 +1305,7 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 	for _, tg := range tags {
 		reg := Region{Start: lexer.Pos{Ln: ln, Ch: tg.St}, End: lexer.Pos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
-		reg = ls.Undos.AdjustRegion(reg)
+		reg = ls.undos.AdjustRegion(reg)
 		if !reg.IsNil() {
 			ntr := ntags.AddLex(tg.Token, reg.Start.Ch, reg.End.Ch)
 			ntr.Time.Now()
@@ -1382,7 +1347,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 	edits := ls.markupEdits
 	ls.markupEdits = nil
 	if ls.Highlighter.UsingParse() {
-		pfs := ls.ParseState.Done()
+		pfs := ls.parseState.Done()
 		for _, tbe := range edits {
 			if tbe.Delete {
 				stln := tbe.Reg.Start.Ln
@@ -1422,7 +1387,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.Markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln], highlighting.EscapeHTML)
+		ls.markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln], highlighting.EscapeHTML)
 	}
 }
 
@@ -1444,9 +1409,9 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			ls.hiTags[ln] = mt
-			ls.Markup[ln] = highlighting.MarkupLine(ltxt, mt, ls.adjustedTags(ln), highlighting.EscapeHTML)
+			ls.markup[ln] = highlighting.MarkupLine(ltxt, mt, ls.adjustedTags(ln), highlighting.EscapeHTML)
 		} else {
-			ls.Markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
+			ls.markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
 			allgood = false
 		}
 	}
@@ -1602,10 +1567,10 @@ func (ls *Lines) indentLine(ln, ind int) *Edit {
 // level and character position for the indent of the current line.
 func (ls *Lines) autoIndent(ln int) (tbe *Edit, indLev, chPos int) {
 	tabSz := ls.Options.TabSize
-	lp, _ := parse.LanguageSupport.Properties(ls.ParseState.Known)
+	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
-		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.ParseState, ls.lines, ls.hiTags, ln, tabSz)
+		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.parseState, ls.lines, ls.hiTags, ln, tabSz)
 	} else {
 		pInd, delInd, _, _ = lexer.BracketIndentLine(ls.lines, ls.hiTags, ln, tabSz)
 	}

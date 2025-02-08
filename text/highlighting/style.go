@@ -22,7 +22,7 @@ import (
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse/token"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/rich"
 )
 
 // Trilean value for StyleEntry value inheritance.
@@ -185,13 +185,13 @@ func (se StyleEntry) ToProperties() map[string]any {
 		pr["background-color"] = se.themeBackground
 	}
 	if se.Bold == Yes {
-		pr["font-weight"] = styles.WeightBold
+		pr["font-weight"] = rich.Bold
 	}
 	if se.Italic == Yes {
-		pr["font-style"] = styles.Italic
+		pr["font-style"] = rich.Italic
 	}
 	if se.Underline == Yes {
-		pr["text-decoration"] = 1 << uint32(styles.Underline)
+		pr["text-decoration"] = 1 << uint32(rich.Underline)
 	}
 	return pr
 }
@@ -360,6 +360,6 @@ func (hs Style) SaveJSON(filename core.Filename) error {
 // there but otherwise we use these as a fallback; typically not overridden
 var Properties = map[token.Tokens]map[string]any{
 	token.TextSpellErr: {
-		"text-decoration": 1 << uint32(styles.DecoDottedUnderline), // bitflag!
+		"text-decoration": 1 << uint32(rich.DottedUnderline), // bitflag!
 	},
 }
