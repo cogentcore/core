@@ -86,7 +86,13 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 	rs.applyTextStyle(st, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
 
 	raw := runes[region.Start:region.End]
-	rs.ctx.Call("fillText", string(raw), start.X, start.Y) // TODO: also stroke
+	sraw := string(raw)
+	if fill != nil {
+		rs.ctx.Call("fillText", sraw, start.X, start.Y)
+	}
+	if run.StrokeColor != nil {
+		rs.ctx.Call("strokeText", sraw, start.X, start.Y)
+	}
 }
 
 // applyTextStyle applies the given styles to the HTML canvas context.
