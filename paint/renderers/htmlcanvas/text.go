@@ -74,33 +74,48 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 			}
 		}
 	}
-	// fill := clr
-	// if run.FillColor != nil {
-	// 	fill = run.FillColor
-	// }
-	// stroke := run.StrokeColor
-	// fsz := math32.FromFixed(run.Size)
+
+	s := &textStyle{}
+	s.fill = clr
+	if run.FillColor != nil {
+		s.fill = run.FillColor
+	}
+	s.stroke = run.StrokeColor
+	s.slant = rich.SlantNormal
+	s.variant = "normal"
+	s.weight = rich.Normal
+	s.stretch = rich.StretchNormal
+	s.size = math32.FromFixed(run.Size)
+	s.lineHeight = 1
+	s.family = rich.SansSerif
+	// TODO: implement all style values
+	rs.applyTextStyle(s)
 
 	region := run.Runes()
 	raw := runes[region.Start:region.End]
-	rs.ctx.Call("fillText", string(raw), start.X, start.Y)
+	rs.ctx.Call("fillText", string(raw), start.X, start.Y) // TODO: also stroke
 }
 
-// applyTextStyle applies the given [rich.Style] to the HTML canvas context.
-func (rs *Renderer) applyTextStyle(s *rich.Style, run shaped.Run, text *render.Text) {
+type textStyle struct {
+	fill, stroke image.Image
+	slant        rich.Slants
+	variant      string
+	weight       rich.Weights
+	stretch      rich.Stretch
+	size         float32
+	lineHeight   float32
+	family       rich.Family
+}
+
+// applyTextStyle applies the given styles to the HTML canvas context.
+func (rs *Renderer) applyTextStyle(s *textStyle) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
-	// TODO: fix font weight, font size, line height, font family
-	fmt.Println(s.Weight.String())
-	parts := []string{s.Slant.String(), "normal", s.Weight.String(), s.Stretch.String(), fmt.Sprintf("%gpx/%g", s.Size*text.Text.FontSize, text.Text.LineHeight), s.Family.String()}
+
+	parts := []string{s.slant.String(), s.variant, s.weight.String(), s.stretch.String(), fmt.Sprintf("%gpx/%g", s.size, s.lineHeight), s.family.String()}
+	fmt.Println(parts)
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
 	// TODO: use caching like in RenderPath?
-	if run.FillColor == nil {
-		run.FillColor = colors.Uniform(text.Text.Color)
-	}
-	// if run.StrokeColor == nil {
-	// 	run.StrokeColor = ctx.Style.Stroke.Color
-	// }
-	rs.ctx.Set("fillStyle", rs.imageToStyle(run.FillColor))
-	rs.ctx.Set("strokeStyle", rs.imageToStyle(run.StrokeColor))
+	rs.ctx.Set("fillStyle", rs.imageToStyle(s.fill))
+	rs.ctx.Set("strokeStyle", rs.imageToStyle(s.stroke))
 }
