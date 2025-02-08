@@ -535,6 +535,6 @@ func (s *Style) SetTextWrap(wrap bool) {
 // SetNonSelectable turns off the Selectable and DoubleClickable
 // abilities and sets the Cursor to None.
 func (s *Style) SetNonSelectable() {
-	s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+	s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.Slideable)
 	s.Cursor = cursors.None
 }

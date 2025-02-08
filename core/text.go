@@ -123,7 +123,7 @@ func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Selectable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
@@ -286,7 +286,6 @@ func (tx *Text) findLink(pos image.Point) (*rich.LinkRec, image.Rectangle) {
 	if tx.paintText == nil || len(tx.Links) == 0 {
 		return nil, image.Rectangle{}
 	}
-	fmt.Println(len(tx.Links))
 	tpos := tx.Geom.Pos.Content
 	ri := tx.pixelToRune(pos)
 	for li := range tx.Links {
