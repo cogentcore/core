@@ -240,13 +240,15 @@ func (rn *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 		gb := rn.GlyphBoundsBox(g)
 		gadv := math32.FromFixed(g.XAdvance)
 		cx := adv + gb.Min.X
+		dx := pt.X - cx
+		if dx >= -2 && pt.X < adv+gb.Max.X+2 {
+			return cri
+		}
 		if pt.X < cx { // it is before us, in space
 			nri := cri - pri
-			ri := pri + int(math32.Round(float32(nri)*((pt.X-adv)/(cx-adv)))) // linear interpolation
+			ri := pri + int(math32.Round(float32(nri)*((adv-pt.X)/(cx-adv)))) // linear interpolation
+			// fmt.Println("before:", gi, ri, pri, cri, adv, cx, adv-pt.X, cx-adv)
 			return ri
-		}
-		if pt.X >= adv+gb.Min.X && pt.X < adv+gb.Max.X {
-			return cri
 		}
 		pri = cri
 		adv += gadv

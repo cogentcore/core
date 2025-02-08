@@ -123,7 +123,7 @@ func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Selectable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
@@ -288,7 +288,7 @@ func (tx *Text) findLink(pos image.Point) (*rich.LinkRec, image.Rectangle) {
 	}
 	fmt.Println(len(tx.Links))
 	tpos := tx.Geom.Pos.Content
-	ri := tx.paintText.RuneAtPoint(math32.FromPoint(pos), tpos)
+	ri := tx.pixelToRune(pos)
 	for li := range tx.Links {
 		lr := &tx.Links[li]
 		if !lr.Range.Contains(ri) {
@@ -371,6 +371,7 @@ func (tx *Text) selectAll() {
 
 // selectWord selects word at given rune location
 func (tx *Text) selectWord(ri int) {
+	// todo: write a general routine for this in rich.Text
 }
 
 // configTextSize does the HTML and Layout in paintText for text,
