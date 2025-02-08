@@ -5,6 +5,7 @@
 package shaped_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"unicode"
@@ -185,5 +186,19 @@ func TestLink(t *testing.T) {
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pc.TextLines(lns, math32.Vec2(10, 10))
 		pc.RenderDone()
+	})
+}
+
+func TestSpacePos(t *testing.T) {
+	RunTest(t, "space-pos", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+		src := `The and`
+		sty := rich.NewStyle()
+		tx := rich.NewText(sty, []rune(src))
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pc.TextLines(lns, math32.Vec2(10, 10))
+		pc.RenderDone()
+
+		sb := lns.RuneBounds(4)
+		fmt.Println("sb:", sb)
 	})
 }
