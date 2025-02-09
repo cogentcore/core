@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
-	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Drawer implements [system.Drawer] with a WebGPU-based drawer if available
@@ -54,16 +53,10 @@ func (a *App) InitDrawer() {
 var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")
 
 // End ends image drawing rendering process on render target.
-// This is the thing that actually does the drawing for the web
-// backup 2D image drawer.
+// This is a no-op for the 2D drawer, as the canvas rendering has already been done.
 func (dw *Drawer) End() {
 	if dw.wgpu != nil {
 		dw.wgpu.End()
-	} else {
-		sz := dw.base.Image.Bounds().Size()
-		bytes := wgpu.BytesToJS(dw.base.Image.Pix)
-		data := js.Global().Get("ImageData").New(bytes, sz.X, sz.Y)
-		dw.context2D.Call("putImageData", data, 0, 0)
 	}
 	// Only remove the loader after we have successfully rendered.
 	if loader.Truthy() {
@@ -85,7 +78,7 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 		dw.wgpu.Copy(dp, src, sr, op, unchanged)
 		return
 	}
-	dw.base.Copy(dp, src, sr, op, unchanged)
+	dw.base.Copy(dp, src, sr, op, unchanged) // TODO(text): stop doing this; everything should happen through canvas directly for base canvases
 }
 
 func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, rotateDeg float32, op draw.Op, unchanged bool) {
