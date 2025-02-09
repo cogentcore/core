@@ -6,7 +6,6 @@ package paint_test
 
 import (
 	"image"
-	"os"
 	"slices"
 	"testing"
 
@@ -17,18 +16,12 @@ import (
 	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/paint/renderers/rasterx"
+	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMain(m *testing.M) {
-	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	NewDefaultImageRenderer = rasterx.New
-	os.Exit(m.Run())
-}
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
