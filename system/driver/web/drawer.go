@@ -50,18 +50,11 @@ func (a *App) InitDrawer() {
 	a.Draw.wgpu = gpudraw.NewDrawer(gp, sf)
 }
 
-var loader = js.Global().Get("document").Call("getElementById", "app-wasm-loader")
-
 // End ends image drawing rendering process on render target.
 // This is a no-op for the 2D drawer, as the canvas rendering has already been done.
 func (dw *Drawer) End() {
 	if dw.wgpu != nil {
 		dw.wgpu.End()
-	}
-	// Only remove the loader after we have successfully rendered.
-	if loader.Truthy() {
-		loader.Call("remove")
-		loader = js.Value{}
 	}
 }
 
