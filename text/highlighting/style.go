@@ -21,8 +21,8 @@ import (
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/token"
 )
 
 // Trilean value for StyleEntry value inheritance.

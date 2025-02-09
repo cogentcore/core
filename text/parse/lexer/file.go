@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // File contains the contents of the file being parsed -- all kept in

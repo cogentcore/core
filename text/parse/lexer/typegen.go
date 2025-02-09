@@ -3,7 +3,7 @@
 package lexer
 
 import (
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )

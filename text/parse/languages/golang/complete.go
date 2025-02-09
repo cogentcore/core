@@ -17,8 +17,8 @@ import (
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/parse/parser"
 	"cogentcore.org/core/text/parse/syms"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 	"cogentcore.org/core/tree"
 )
 

@@ -19,10 +19,10 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 const (

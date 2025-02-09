@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/syms"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 	"golang.org/x/tools/go/packages"
 )
 

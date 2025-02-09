@@ -14,8 +14,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

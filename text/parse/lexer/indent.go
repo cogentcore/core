@@ -6,7 +6,7 @@ package lexer
 
 import (
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // these functions support indentation algorithms,

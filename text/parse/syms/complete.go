@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/text/parse/complete"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // AddCompleteSyms adds given symbols as matches in the given match data

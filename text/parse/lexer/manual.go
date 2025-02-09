@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // These functions provide "manual" lexing support for specific cases, such as completion, where a string must be processed further.

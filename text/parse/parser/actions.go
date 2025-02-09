@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // Actions are parsing actions to perform

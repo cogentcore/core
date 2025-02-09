@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // SymMap is a map between symbol names and their full information.

@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	_ "cogentcore.org/core/text/parse/supportedlanguages"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"

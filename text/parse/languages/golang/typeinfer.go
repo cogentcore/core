@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/parser"
 	"cogentcore.org/core/text/parse/syms"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // TypeErr indicates is the type name we use to indicate that the type could not be inferred

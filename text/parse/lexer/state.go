@@ -10,8 +10,8 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/nptime"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // LanguageLexer looks up lexer for given language; implementation in parent parse package

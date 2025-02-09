@@ -14,8 +14,8 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/nptime"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // Lex represents a single lexical element, with a token, and start and end rune positions

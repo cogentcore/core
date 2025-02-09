@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // CheckLexLine returns the Lex regions for any words that are misspelled

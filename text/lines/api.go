@@ -12,9 +12,9 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // this file contains the exported API for lines

@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/parser"
 	"cogentcore.org/core/text/parse/syms"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // TypeMeths gathers method types from the type symbol's children

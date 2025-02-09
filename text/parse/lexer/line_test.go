@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/nptime"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 	"github.com/stretchr/testify/assert"
 )
 

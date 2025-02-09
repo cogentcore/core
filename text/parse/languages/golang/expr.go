@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/parser"
 	"cogentcore.org/core/text/parse/syms"
-	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/token"
 )
 
 // TypeFromASTExprStart starts walking the ast expression to find the type.

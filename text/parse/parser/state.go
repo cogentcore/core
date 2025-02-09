@@ -9,8 +9,8 @@ import (
 
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/parse/syms"
-	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // parser.State is the state maintained for parsing
