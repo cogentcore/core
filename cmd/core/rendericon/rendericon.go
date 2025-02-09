@@ -13,15 +13,12 @@ import (
 	"strings"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/svg"
 )
 
 // Render renders the icon located at icon.svg at the given size.
 // If no such icon exists, it sets it to a placeholder icon, [icons.DefaultAppIcon].
 func Render(size int) (*image.RGBA, error) {
-	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
-
 	sv := svg.NewSVG(size, size)
 
 	spath := "icon.svg"
@@ -41,5 +38,5 @@ func Render(size int) (*image.RGBA, error) {
 	}
 
 	sv.Render()
-	return sv.Pixels, nil
+	return sv.RenderImage(), nil
 }

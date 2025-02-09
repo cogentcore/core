@@ -97,7 +97,8 @@ func NewSVG(width, height int) *SVG {
 	return sv
 }
 
-// RenderImage returns the rendered image.
+// RenderImage returns the rendered image. It does not actually render the SVG;
+// see [SVG.Render] for that.
 func (sv *SVG) RenderImage() *image.RGBA {
 	return sv.RenderState.RenderImage()
 }
@@ -193,6 +194,8 @@ func (sv *SVG) Style() {
 	})
 }
 
+// Render renders the SVG. See [SVG.RenderImage] to get the rendered image;
+// you need to call Render before RenderImage.
 func (sv *SVG) Render() {
 	sv.RenderMu.Lock()
 	sv.IsRendering = true
