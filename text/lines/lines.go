@@ -544,7 +544,7 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 		if len(lr) < st.Char {
 			lr = append(lr, runes.Repeat([]rune{' '}, st.Char-len(lr))...)
 		}
-		nt := slices.Insert(nt, st.Char, ir...)
+		nt := slices.Insert(lr, st.Char, ir...)
 		ls.lines[ln] = nt
 	}
 	re := tbe.Clone()
@@ -761,7 +761,7 @@ func (ls *Lines) initialMarkup() {
 		fs.Src.SetBytes(ls.bytes())
 	}
 	mxhi := min(100, ls.numLines())
-	txt := ls.bytes()
+	txt := ls.bytes() // todo: only the first 100 lines, and do everything based on runes!
 	tags, err := ls.markupTags(txt)
 	if err == nil {
 		ls.markupApplyTags(tags)
@@ -1235,8 +1235,8 @@ func (ls *Lines) joinParaLines(startLine, endLine int) {
 				}
 				eln := ls.lines[ep.Line]
 				ep.Char = len(eln)
-				tlb := bytes.Join(ls.lineBytes[stp.Line:ep.Line+1], []byte(" "))
-				ls.replaceText(stp, ep, stp, string(tlb), ReplaceNoMatchCase)
+				trt := runes.Join(ls.lines[stp.Line:ep.Line+1], []rune(" "))
+				ls.replaceText(stp, ep, stp, string(trt), ReplaceNoMatchCase)
 			}
 			curEd = ln
 		}
@@ -1342,14 +1342,14 @@ func (ls *Lines) patchFromBuffer(ob *Lines, diffs Diffs) bool {
 		case 'r':
 			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertText(textpos.Pos{Line: df.I1}, ot.ToBytes())
+			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
 			mods = true
 		case 'd':
 			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			mods = true
 		case 'i':
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertText(textpos.Pos{Line: df.I1}, ot.ToBytes())
+			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
 			mods = true
 		}
 	}

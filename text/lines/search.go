@@ -44,7 +44,7 @@ func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos
 			}
 			i += ci
 			ci = i + fsz
-			mat := NewMatch(rn, i, ci, ln)
+			mat := textpos.NewMatch(rn, i, ci, ln)
 			matches = append(matches, mat)
 			cnt++
 		}
@@ -69,11 +69,11 @@ func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase boo
 		rln := src[ln]
 		lxln := lexs[ln]
 		for _, lx := range lxln {
-			sz := lx.Ed - lx.St
+			sz := lx.End - lx.Start
 			if sz != fsz {
 				continue
 			}
-			rn := rln[lx.St:lx.Ed]
+			rn := rln[lx.Start:lx.End]
 			var i int
 			if ignoreCase {
 				i = runes.IndexFold(rn, fr)
@@ -83,7 +83,7 @@ func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase boo
 			if i < 0 {
 				continue
 			}
-			mat := NewMatch(rln, lx.St, lx.Ed, ln)
+			mat := textpos.NewMatch(rln, lx.Start, lx.End, ln)
 			matches = append(matches, mat)
 			cnt++
 		}
@@ -121,7 +121,7 @@ func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Matc
 			}
 			i += ci
 			ci = i + fsz
-			mat := NewMatch(rn, i, ci, ln)
+			mat := textpos.NewMatch(rn, i, ci, ln)
 			matches = append(matches, mat)
 			cnt++
 		}
@@ -176,7 +176,7 @@ func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []textpos.Match) {
 		for _, f := range fi {
 			st := f[0]
 			ed := f[1]
-			mat := NewMatch(rn, ri[st], ri[ed], ln)
+			mat := textpos.NewMatch(rn, ri[st], ri[ed], ln)
 			matches = append(matches, mat)
 			cnt++
 		}
@@ -227,7 +227,7 @@ func SearchByteLinesRegexp(src [][]byte, re *regexp.Regexp) (int, []textpos.Matc
 		for _, f := range fi {
 			st := f[0]
 			ed := f[1]
-			mat := NewMatch(rn, ri[st], ri[ed], ln)
+			mat := textpos.NewMatch(rn, ri[st], ri[ed], ln)
 			matches = append(matches, mat)
 			cnt++
 		}

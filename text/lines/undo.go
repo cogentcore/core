@@ -71,7 +71,7 @@ func (un *Undo) Save(tbe *textpos.Edit) {
 		un.Stack = un.Stack[:un.Pos]
 	}
 	if len(un.Stack) > 0 {
-		since := tbe.Reg.Since(&un.Stack[len(un.Stack)-1].Reg)
+		since := tbe.Region.Since(&un.Stack[len(un.Stack)-1].Region)
 		if since > UndoGroupDelay {
 			un.Group++
 			if UndoTrace {
@@ -100,7 +100,7 @@ func (un *Undo) UndoPop() *textpos.Edit {
 	un.Pos--
 	tbe := un.Stack[un.Pos]
 	if UndoTrace {
-		fmt.Printf("Undo: UndoPop of Gp: %v  pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
+		fmt.Printf("Undo: UndoPop of Gp: %v  pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
 	return tbe
 }
@@ -121,7 +121,7 @@ func (un *Undo) UndoPopIfGroup(gp int) *textpos.Edit {
 	}
 	un.Pos--
 	if UndoTrace {
-		fmt.Printf("Undo: UndoPopIfGroup of Gp: %v pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
+		fmt.Printf("Undo: UndoPopIfGroup of Gp: %v pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
 	return tbe
 }
@@ -165,7 +165,7 @@ func (un *Undo) RedoNext() *textpos.Edit {
 	}
 	tbe := un.Stack[un.Pos]
 	if UndoTrace {
-		fmt.Printf("Undo: RedoNext of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
+		fmt.Printf("Undo: RedoNext of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
 	un.Pos++
 	return tbe
@@ -187,7 +187,7 @@ func (un *Undo) RedoNextIfGroup(gp int) *textpos.Edit {
 		return nil
 	}
 	if UndoTrace {
-		fmt.Printf("Undo: RedoNextIfGroup of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
+		fmt.Printf("Undo: RedoNextIfGroup of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
 	un.Pos++
 	return tbe
@@ -204,8 +204,8 @@ func (un *Undo) AdjustRegion(reg textpos.Region) textpos.Region {
 	un.Mu.Lock()
 	defer un.Mu.Unlock()
 	for _, utbe := range un.Stack {
-		reg = utbe.AdjustReg(reg)
-		if reg == RegionNil {
+		reg = utbe.AdjustRegion(reg)
+		if reg == (textpos.Region{}) {
 			return reg
 		}
 	}
