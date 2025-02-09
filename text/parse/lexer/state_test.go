@@ -13,9 +13,9 @@ import (
 
 func TestReadUntil(t *testing.T) {
 	ls := &State{
-		Src: []rune(" ( Hello } , ) ] Worabcld!"),
-		Pos: 0,
-		Ch:  'H',
+		Src:  []rune(" ( Hello } , ) ] Worabcld!"),
+		Pos:  0,
+		Rune: 'H',
 	}
 
 	ls.ReadUntil("(")
@@ -39,9 +39,9 @@ func TestReadUntil(t *testing.T) {
 
 func TestReadNumber(t *testing.T) {
 	ls := &State{
-		Src: []rune("0x1234"),
-		Pos: 0,
-		Ch:  '0',
+		Src:  []rune("0x1234"),
+		Pos:  0,
+		Rune: '0',
 	}
 
 	tok := ls.ReadNumber()
@@ -49,9 +49,9 @@ func TestReadNumber(t *testing.T) {
 	assert.Equal(t, 6, ls.Pos)
 
 	ls = &State{
-		Src: []rune("0123456789"),
-		Pos: 0,
-		Ch:  '0',
+		Src:  []rune("0123456789"),
+		Pos:  0,
+		Rune: '0',
 	}
 
 	tok = ls.ReadNumber()
@@ -59,9 +59,9 @@ func TestReadNumber(t *testing.T) {
 	assert.Equal(t, 10, ls.Pos)
 
 	ls = &State{
-		Src: []rune("3.14"),
-		Pos: 0,
-		Ch:  '3',
+		Src:  []rune("3.14"),
+		Pos:  0,
+		Rune: '3',
 	}
 
 	tok = ls.ReadNumber()
@@ -69,9 +69,9 @@ func TestReadNumber(t *testing.T) {
 	assert.Equal(t, 4, ls.Pos)
 
 	ls = &State{
-		Src: []rune("1e10"),
-		Pos: 0,
-		Ch:  '1',
+		Src:  []rune("1e10"),
+		Pos:  0,
+		Rune: '1',
 	}
 
 	tok = ls.ReadNumber()
@@ -79,9 +79,9 @@ func TestReadNumber(t *testing.T) {
 	assert.Equal(t, 4, ls.Pos)
 
 	ls = &State{
-		Src: []rune("42i"),
-		Pos: 0,
-		Ch:  '4',
+		Src:  []rune("42i"),
+		Pos:  0,
+		Rune: '4',
 	}
 
 	tok = ls.ReadNumber()
@@ -91,9 +91,9 @@ func TestReadNumber(t *testing.T) {
 
 func TestReadEscape(t *testing.T) {
 	ls := &State{
-		Src: []rune(`\n \t "hello \u03B1 \U0001F600`),
-		Pos: 0,
-		Ch:  '\\',
+		Src:  []rune(`\n \t "hello \u03B1 \U0001F600`),
+		Pos:  0,
+		Rune: '\\',
 	}
 
 	assert.True(t, ls.ReadEscape('"'))

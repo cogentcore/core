@@ -1,7 +1,7 @@
 {
-  "ProjectFile": "/Users/oreilly/cogent/core/parse/languages/markdown/markdown.parseproject",
-  "ParserFile": "/Users/oreilly/cogent/core/parse/languages/markdown/markdown.parse",
-  "TestFile": "/Users/oreilly/cogent/core/parse/languages/markdown/testdata/markdown_test.md",
+  "ProjectFile": "/Users/oreilly/cogent/core/text/parse/languages/markdown/markdown.parseproject",
+  "ParserFile": "/Users/oreilly/cogent/core/text/parse/languages/markdown/markdown.parse",
+  "TestFile": "/Users/oreilly/cogent/core/text/parse/languages/markdown/testdata/markdown_test.md",
   "TraceOpts": {
     "On": false,
     "Rules": "Slice SelectExpr AddExpr",

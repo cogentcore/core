@@ -1,4 +1,4 @@
-// /Users/oreilly/cogent/core/parse/languages/tex/tex.parsegrammar Lexer
+// /Users/oreilly/cogent/core/text/parse/languages/tex/tex.parsegrammar Lexer
 
 Comment:		 Comment		 if String == "%"	 do: EOL; 
 // LetterText optimization for plain letters which are always text 
@@ -52,5 +52,5 @@ AnyText:		 Text		 if AnyRune	 do: Next;
 
 
 ///////////////////////////////////////////////////
-// /Users/oreilly/cogent/core/parse/languages/tex/tex.parsegrammar Parser
+// /Users/oreilly/cogent/core/text/parse/languages/tex/tex.parsegrammar Parser
 
