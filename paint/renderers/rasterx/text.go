@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedgt"
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
 	"github.com/go-text/typesetting/shaping"
@@ -51,12 +52,12 @@ func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, clr image.Image
 	// tbb := ln.Bounds.Translate(off)
 	// rs.StrokeBounds(tbb, colors.Blue)
 	for ri := range ln.Runs {
-		run := &ln.Runs[ri]
+		run := ln.Runs[ri].(*shapedgt.Run)
 		rs.TextRun(run, ln, lns, clr, off)
 		if run.Direction.IsVertical() {
-			off.Y += math32.FromFixed(run.Advance)
+			off.Y += run.Advance()
 		} else {
-			off.X += math32.FromFixed(run.Advance)
+			off.X += run.Advance()
 		}
 	}
 }
@@ -64,7 +65,7 @@ func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, clr image.Image
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
+func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
 	// todo: render strike-through
 	// dir := run.Direction
 	rbb := run.MaxBounds.Translate(start)
@@ -132,7 +133,7 @@ func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines,
 	// todo: render strikethrough
 }
 
-func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
+func (rs *Renderer) GlyphOutline(run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
 	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
 	x := pos.X
 	y := pos.Y
@@ -181,7 +182,7 @@ func (rs *Renderer) GlyphOutline(run *shaped.Run, g *shaping.Glyph, outline font
 	rs.Path.Clear()
 }
 
-func (rs *Renderer) GlyphBitmap(run *shaped.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) error {
+func (rs *Renderer) GlyphBitmap(run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) error {
 	// scaled glyph rect content
 	x := pos.X
 	y := pos.Y

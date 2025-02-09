@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
@@ -99,8 +100,14 @@ func NewShaper() *Shaper {
 // using given context needed for complete styling.
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
-func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaping.Output {
-	return sh.shapeText(tx, tsty, rts, tx.Join())
+func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
+	outs := sh.shapeText(tx, tsty, rts, tx.Join())
+	runs := make([]shaped.Run, len(outs))
+	for i := range outs {
+		run := &Run{Output: outs[i]}
+		runs[i] = run
+	}
+	return runs
 }
 
 // shapeText implements Shape using the full text generated from the source spans

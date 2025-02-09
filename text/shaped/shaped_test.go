@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shapedgt_test
+package shaped_test
 
 import (
 	"testing"
@@ -16,7 +16,8 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
-	. "cogentcore.org/core/text/shaped/shapedgt"
+	. "cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedgt"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
@@ -25,7 +26,7 @@ import (
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
-func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings)) {
+func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings)) {
 	rts := &rich.Settings{}
 	rts.Defaults()
 	uc := units.Context{}
@@ -35,14 +36,14 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	// fmt.Println("fsz:", tsty.FontSize.Dots)
 	pc := paint.NewPainter(width, height)
 	pc.FillBox(math32.Vector2{}, math32.Vec2(float32(width), float32(height)), colors.Uniform(colors.White))
-	sh := NewShaper()
+	sh := shapedgt.NewShaper()
 	f(pc, sh, tsty, rts)
 	pc.RenderDone()
 	imagex.Assert(t, pc.RenderImage(), nm)
 }
 
 func TestBasic(t *testing.T) {
-	RunTest(t, "basic", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "basic", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 
 		src := "The lazy fox typed in some familiar text"
 		sr := []rune(src)
@@ -94,7 +95,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestHebrew(t *testing.T) {
-	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 
 		tsty.Direction = rich.RTL
 		tsty.FontSize.Dots *= 1.5
@@ -111,7 +112,7 @@ func TestHebrew(t *testing.T) {
 }
 
 func TestVertical(t *testing.T) {
-	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		rts.Language = "ja"
 		rts.Script = language.Han
 		tsty.Direction = rich.TTB // rich.BTT // note: apparently BTT is actually never used
@@ -132,7 +133,7 @@ func TestVertical(t *testing.T) {
 		pc.RenderDone()
 	})
 
-	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		rts.Language = "ja"
 		rts.Script = language.Han
 		tsty.FontSize.Dots *= 1.5
@@ -150,7 +151,7 @@ func TestVertical(t *testing.T) {
 }
 
 func TestColors(t *testing.T) {
-	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		tsty.FontSize.Dots *= 4
 
 		stroke := rich.NewStyle().SetStrokeColor(colors.Red).SetBackground(colors.ToUniform(colors.Scheme.Select.Container))
@@ -169,7 +170,7 @@ func TestColors(t *testing.T) {
 }
 
 func TestLink(t *testing.T) {
-	RunTest(t, "link", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "link", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		src := `The <a href="https://example.com">link <b>and <i>it</i> is cool</b></a> and`
 		sty := rich.NewStyle()
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
@@ -181,7 +182,7 @@ func TestLink(t *testing.T) {
 }
 
 func TestSpacePos(t *testing.T) {
-	RunTest(t, "space-pos", 300, 300, func(pc *paint.Painter, sh *Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "space-pos", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		src := `The and`
 		sty := rich.NewStyle()
 		tx := rich.NewText(sty, []rune(src))
