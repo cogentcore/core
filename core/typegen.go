@@ -600,7 +600,7 @@ func (t *Scene) SetData(v any) *Scene { t.Data = v; return t }
 
 // SetTextShaper sets the [Scene.TextShaper]:
 // TextShaper is the text shaping system for this scene, for doing text layout.
-func (t *Scene) SetTextShaper(v *shaped.Shaper) *Scene { t.TextShaper = v; return t }
+func (t *Scene) SetTextShaper(v shaped.Shaper) *Scene { t.TextShaper = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Separator", IDName: "separator", Doc: "Separator draws a separator line. It goes in the direction\nspecified by [styles.Style.Direction].", Embeds: []types.Field{{Name: "WidgetBase"}}})
 

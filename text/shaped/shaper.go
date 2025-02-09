@@ -10,6 +10,9 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
+// NewShaper returns the correct type of shaper.
+var NewShaper func() Shaper
+
 // Shaper is a text shaping system that can shape the layout of [rich.Text],
 // including line wrapping.
 type Shaper interface {
@@ -28,4 +31,35 @@ type Shaper interface {
 	// source text, and wrapped separately. For horizontal text, the Lines will render with
 	// a position offset at the upper left corner of the overall bounding box of the text.
 	WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines
+}
+
+// WrapSizeEstimate is the size to use for layout during the SizeUp pass,
+// for word wrap case, where the sizing actually matters,
+// based on trying to fit the given number of characters into the given content size
+// with given font height, and ratio of width to height.
+// Ratio is used when csz is 0: 1.618 is golden, and smaller numbers to allow
+// for narrower, taller text columns.
+func WrapSizeEstimate(csz math32.Vector2, nChars int, ratio float32, sty *rich.Style, tsty *text.Style) math32.Vector2 {
+	chars := float32(nChars)
+	fht := tsty.FontHeight(sty)
+	if fht == 0 {
+		fht = 16
+	}
+	area := chars * fht * fht
+	if csz.X > 0 && csz.Y > 0 {
+		ratio = csz.X / csz.Y
+		// fmt.Println(lb, "content size ratio:", ratio)
+	}
+	// w = ratio * h
+	// w^2 + h^2 = a
+	// (ratio*h)^2 + h^2 = a
+	h := math32.Sqrt(area) / math32.Sqrt(ratio+1)
+	w := ratio * h
+	if w < csz.X { // must be at least this
+		w = csz.X
+		h = area / w
+		h = max(h, csz.Y)
+	}
+	sz := math32.Vec2(w, h)
+	return sz
 }

@@ -50,7 +50,7 @@ func AddEmbeddedFonts(fsys ...fs.FS) {
 var defaultFonts embed.FS
 
 // todo: per gio: systemFonts bool, collection []FontFace
-func NewShaper() *Shaper {
+func NewShaper() shaped.Shaper {
 	sh := &Shaper{}
 	sh.fontMap = fontscan.NewFontMap(nil)
 	// TODO(text): figure out cache dir situation (especially on mobile and web)

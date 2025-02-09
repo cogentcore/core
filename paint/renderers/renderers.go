@@ -9,8 +9,11 @@ package renderers
 import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/rasterx"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedgt"
 )
 
 func init() {
 	paint.NewDefaultImageRenderer = rasterx.New
+	shaped.NewShaper = shapedgt.NewShaper
 }
