@@ -34,10 +34,13 @@ type Renderer struct {
 	style styles.Paint
 }
 
-// New returns an HTMLCanvas renderer.
+// New returns an HTMLCanvas renderer. It makes a corresponding new HTML canvas element.
 func New(size math32.Vector2) render.Renderer {
 	rs := &Renderer{}
-	rs.canvas = js.Global().Get("document").Call("getElementById", "app")
+	// TODO(text): offscreen canvas?
+	document := js.Global().Get("document")
+	rs.canvas = document.Call("createElement", "canvas")
+	document.Get("body").Call("appendChild", rs.canvas)
 	rs.ctx = rs.canvas.Call("getContext", "2d")
 	rs.SetSize(units.UnitDot, size)
 	return rs
