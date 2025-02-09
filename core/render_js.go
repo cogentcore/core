@@ -8,6 +8,7 @@ package core
 
 import (
 	"fmt"
+	"slices"
 
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 )
@@ -15,22 +16,32 @@ import (
 // doRender is the implementation of the main render pass on web.
 // It ensures that all canvases are properly configured.
 func (w *renderWindow) doRender(top *Stage) {
-	w.updateCanvases(&w.mains)
+	active := map[*htmlcanvas.Renderer]bool{}
+	w.updateCanvases(&w.mains, active)
+
+	htmlcanvas.Renderers = slices.DeleteFunc(htmlcanvas.Renderers, func(rd *htmlcanvas.Renderer) bool {
+		if active[rd] {
+			return false
+		}
+		rd.Canvas.Call("remove")
+		return true
+	})
 }
 
 // updateCanvases updates all of the canvases corresponding to the given stages
 // and their popups.
-func (w *renderWindow) updateCanvases(sm *stages) {
+func (w *renderWindow) updateCanvases(sm *stages, active map[*htmlcanvas.Renderer]bool) {
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		for _, rd := range st.Scene.Painter.Renderers {
 			if hc, ok := rd.(*htmlcanvas.Renderer); ok {
+				active[hc] = true
 				w.updateCanvas(hc, st)
 			}
 		}
 		// If we own popups, update them too.
 		if st.Main == st && st.popups != nil {
-			w.updateCanvases(st.popups)
+			w.updateCanvases(st.popups, active)
 		}
 	}
 }

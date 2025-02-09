@@ -23,6 +23,10 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
+// Renderers is a list of all current HTML canvas renderers.
+// It is used in core to delete inactive canvases.
+var Renderers []*Renderer
+
 // Renderer is an HTML canvas renderer.
 type Renderer struct {
 	Canvas js.Value
@@ -35,6 +39,7 @@ type Renderer struct {
 }
 
 // New returns an HTMLCanvas renderer. It makes a corresponding new HTML canvas element.
+// It adds the renderer to [Renderers].
 func New(size math32.Vector2) render.Renderer {
 	rs := &Renderer{}
 	// TODO(text): offscreen canvas?
@@ -43,6 +48,7 @@ func New(size math32.Vector2) render.Renderer {
 	document.Get("body").Call("appendChild", rs.Canvas)
 	rs.ctx = rs.Canvas.Call("getContext", "2d")
 	rs.SetSize(units.UnitDot, size)
+	Renderers = append(Renderers, rs)
 	return rs
 }
 
