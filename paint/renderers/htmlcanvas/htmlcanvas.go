@@ -95,15 +95,15 @@ func (rs *Renderer) writePath(pt *render.Path) {
 		end := scanner.End()
 		switch scanner.Cmd() {
 		case ppath.MoveTo:
-			rs.ctx.Call("moveTo", end.X, rs.size.Y-end.Y)
+			rs.ctx.Call("moveTo", end.X, end.Y)
 		case ppath.LineTo:
-			rs.ctx.Call("lineTo", end.X, rs.size.Y-end.Y)
+			rs.ctx.Call("lineTo", end.X, end.Y)
 		case ppath.QuadTo:
 			cp := scanner.CP1()
-			rs.ctx.Call("quadraticCurveTo", cp.X, rs.size.Y-cp.Y, end.X, rs.size.Y-end.Y)
+			rs.ctx.Call("quadraticCurveTo", cp.X, cp.Y, end.X, end.Y)
 		case ppath.CubeTo:
 			cp1, cp2 := scanner.CP1(), scanner.CP2()
-			rs.ctx.Call("bezierCurveTo", cp1.X, rs.size.Y-cp1.Y, cp2.X, rs.size.Y-cp2.Y, end.X, rs.size.Y-end.Y)
+			rs.ctx.Call("bezierCurveTo", cp1.X, cp1.Y, cp2.X, cp2.Y, end.X, end.Y)
 		case ppath.Close:
 			rs.ctx.Call("closePath")
 		}
@@ -113,13 +113,13 @@ func (rs *Renderer) writePath(pt *render.Path) {
 func (rs *Renderer) imageToStyle(clr image.Image) any {
 	if g, ok := clr.(gradient.Gradient); ok {
 		if gl, ok := g.(*gradient.Linear); ok {
-			grad := rs.ctx.Call("createLinearGradient", gl.Start.X, rs.size.Y-gl.Start.Y, gl.End.X, rs.size.Y-gl.End.Y) // TODO: are these params right?
+			grad := rs.ctx.Call("createLinearGradient", gl.Start.X, gl.Start.Y, gl.End.X, gl.End.Y) // TODO: are these params right?
 			for _, stop := range gl.Stops {
 				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
 			}
 			return grad
 		} else if gr, ok := g.(*gradient.Radial); ok {
-			grad := rs.ctx.Call("createRadialGradient", gr.Center.X, rs.size.Y-gr.Center.Y, gr.Radius, gr.Focal.X, rs.size.Y-gr.Focal.Y, gr.Radius) // TODO: are these params right?
+			grad := rs.ctx.Call("createRadialGradient", gr.Center.X, gr.Center.Y, gr.Radius, gr.Focal.X, gr.Focal.Y, gr.Radius) // TODO: are these params right?
 			for _, stop := range gr.Stops {
 				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
 			}
