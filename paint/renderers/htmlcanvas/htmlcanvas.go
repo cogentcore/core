@@ -25,7 +25,7 @@ import (
 
 // Renderer is an HTML canvas renderer.
 type Renderer struct {
-	canvas js.Value
+	Canvas js.Value
 	ctx    js.Value
 	size   math32.Vector2
 
@@ -39,9 +39,9 @@ func New(size math32.Vector2) render.Renderer {
 	rs := &Renderer{}
 	// TODO(text): offscreen canvas?
 	document := js.Global().Get("document")
-	rs.canvas = document.Call("createElement", "canvas")
-	document.Get("body").Call("appendChild", rs.canvas)
-	rs.ctx = rs.canvas.Call("getContext", "2d")
+	rs.Canvas = document.Call("createElement", "canvas")
+	document.Get("body").Call("appendChild", rs.Canvas)
+	rs.ctx = rs.Canvas.Call("getContext", "2d")
 	rs.SetSize(units.UnitDot, size)
 	return rs
 }
@@ -60,8 +60,8 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	}
 	rs.size = size
 
-	rs.canvas.Set("width", size.X)
-	rs.canvas.Set("height", size.Y)
+	rs.Canvas.Set("width", size.X)
+	rs.Canvas.Set("height", size.Y)
 
 	// rs.ctx.Call("clearRect", 0, 0, size.X, size.Y)
 	// rs.ctx.Set("imageSmoothingEnabled", true)
