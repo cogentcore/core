@@ -250,7 +250,8 @@ func (ls *Lines) appendTextLineMarkup(text []rune, markup rich.Text) *textpos.Ed
 
 ////////   Edits
 
-// isValidPos returns an error if position is invalid.
+// isValidPos returns an error if position is invalid. Note that the end
+// of the line (at length) is valid.
 func (ls *Lines) isValidPos(pos textpos.Pos) error {
 	n := ls.numLines()
 	if n == 0 {
@@ -460,22 +461,23 @@ func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
 // insertText is the primary method for inserting text,
 // at given starting position.  Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (ls *Lines) insertText(st textpos.Pos, text []rune) *textpos.Edit {
-	tbe := ls.insertTextImpl(st, textpos.NewEditFromRunes(text))
+func (ls *Lines) insertText(st textpos.Pos, txt []rune) *textpos.Edit {
+	tbe := ls.insertTextImpl(st, runes.Split(txt, []rune("\n")))
 	ls.saveUndo(tbe)
 	return tbe
 }
 
-func (ls *Lines) insertTextImpl(st textpos.Pos, ins *textpos.Edit) *textpos.Edit {
+// insertTextImpl inserts the Text at given starting position.
+func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
 	if errors.Log(ls.isValidPos(st)) != nil {
 		return nil
 	}
-	// todo: fixme here
+	nl := len(txt)
 	var tbe *textpos.Edit
-	st.Char = min(len(ls.lines[st.Line]), st.Char)
-	if sz == 1 {
-		ls.lines[st.Line] = slices.Insert(ls.lines[st.Line], st.Char, lns[0]...)
-		ed.Char += len(lns[0])
+	ed := st
+	if nl == 1 {
+		ls.lines[st.Line] = slices.Insert(ls.lines[st.Line], st.Char, txt[0]...)
+		ed.Char += len(txt[0])
 		tbe = ls.region(st, ed)
 		ls.linesEdited(tbe)
 	} else {
@@ -488,10 +490,10 @@ func (ls *Lines) insertTextImpl(st textpos.Pos, ins *textpos.Edit) *textpos.Edit
 			eost = make([]rune, eostl)
 			copy(eost, ls.lines[st.Line][st.Char:])
 		}
-		ls.lines[st.Line] = append(ls.lines[st.Line][:st.Char], lns[0]...)
-		nsz := sz - 1
+		ls.lines[st.Line] = append(ls.lines[st.Line][:st.Char], txt[0]...)
+		nsz := nl - 1
 		stln := st.Line + 1
-		ls.lines = slices.Insert(ls.lines, stln, lns[1:]...)
+		ls.lines = slices.Insert(ls.lines, stln, txt[1:]...)
 		ed.Line += nsz
 		ed.Char = len(ls.lines[ed.Line])
 		if eost != nil {
