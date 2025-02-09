@@ -285,7 +285,7 @@ func (ls *Lines) region(st, ed textpos.Pos) *textpos.Edit {
 		log.Printf("lines.region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tbe := &textpos.Edit{Region: textpos.NewRegionPosTime(st, ed)}
+	tbe := &textpos.Edit{Region: textpos.NewRegionPos(st, ed)}
 	if ed.Line == st.Line {
 		sz := ed.Char - st.Char
 		tbe.Text = make([][]rune, 1)
@@ -338,7 +338,7 @@ func (ls *Lines) regionRect(st, ed textpos.Pos) *textpos.Edit {
 		log.Printf("core.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tbe := &textpos.Edit{Region: textpos.NewRegionPosTime(st, ed)}
+	tbe := &textpos.Edit{Region: textpos.NewRegionPos(st, ed)}
 	tbe.Rect = true
 	nln := tbe.Region.NumLines()
 	nch := (ed.Char - st.Char)
@@ -470,9 +470,7 @@ func (ls *Lines) insertTextImpl(st textpos.Pos, ins *textpos.Edit) *textpos.Edit
 	if errors.Log(ls.isValidPos(st)) != nil {
 		return nil
 	}
-	lns := runes.Split(text, []rune("\n"))
-	sz := len(lns)
-	ed := st
+	// todo: fixme here
 	var tbe *textpos.Edit
 	st.Char = min(len(ls.lines[st.Line]), st.Char)
 	if sz == 1 {
@@ -810,7 +808,7 @@ func (ls *Lines) reMarkup() {
 // have taken place since time stamp on region (using the Undo stack).
 // If region was wholly within a deleted region, then RegionNil will be
 // returned -- otherwise it is clipped appropriately as function of deletes.
-func (ls *Lines) AdjustRegion(reg textpos.RegionTime) textpos.RegionTime {
+func (ls *Lines) AdjustRegion(reg textpos.Region) textpos.Region {
 	return ls.undos.AdjustRegion(reg)
 }
 
@@ -830,7 +828,7 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 	}
 	ntags := make(lexer.Line, 0, sz)
 	for _, tg := range tags {
-		reg := RegionTime{Start: textpos.Pos{Ln: ln, Ch: tg.St}, End: textpos.Pos{Ln: ln, Ch: tg.Ed}}
+		reg := Region{Start: textpos.Pos{Ln: ln, Ch: tg.St}, End: textpos.Pos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
 		reg = ls.undos.AdjustRegion(reg)
 		if !reg.IsNil() {

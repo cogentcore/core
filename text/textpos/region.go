@@ -4,10 +4,20 @@
 
 package textpos
 
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"cogentcore.org/core/base/nptime"
+)
+
 // Region is a contiguous region within a source file with lines of rune chars,
 // defined by start and end [Pos] positions.
 // End.Char position is _exclusive_ so the last char is the one before End.Char.
 // End.Line position is _inclusive_, so the last line is End.Line.
+// There is a Time stamp for when the region was created as valid positions
+// into the lines source, which is critical for tracking edits in live documents.
 type Region struct {
 	// Start is the starting position of region.
 	Start Pos
@@ -16,27 +26,35 @@ type Region struct {
 	// Char position is _exclusive_ so the last char is the one before End.Char.
 	// Line position is _inclusive_, so the last line is End.Line.
 	End Pos
+
+	// Time when region was set: needed for updating locations in the text based
+	// on time stamp (using efficient non-pointer time).
+	Time nptime.Time
 }
 
 // NewRegion creates a new text region using separate line and char
-// values for start and end.
+// values for start and end. Sets timestamp to now.
 func NewRegion(stLn, stCh, edLn, edCh int) Region {
 	tr := Region{Start: Pos{Line: stLn, Char: stCh}, End: Pos{Line: edLn, Char: edCh}}
+	tr.TimeNow()
 	return tr
 }
 
 // NewRegionPos creates a new text region using position values.
+// Sets timestamp to now.
 func NewRegionPos(st, ed Pos) Region {
 	tr := Region{Start: st, End: ed}
+	tr.TimeNow()
 	return tr
 }
 
 // NewRegionLen makes a new Region from a starting point and a length
-// along same line
+// along same line. Sets timestamp to now.
 func NewRegionLen(start Pos, len int) Region {
 	tr := Region{Start: start}
 	tr.End = start
 	tr.End.Char += len
+	tr.TimeNow()
 	return tr
 }
 
@@ -75,4 +93,49 @@ func (tr Region) MoveToLine(ln int) Region {
 	tr.Start.Line = 0
 	tr.End.Line = nl - 1
 	return tr
+}
+
+////////  Time
+
+// TimeNow grabs the current time as the edit time.
+func (tr *Region) TimeNow() {
+	tr.Time.Now()
+}
+
+// IsAfterTime reports if this region's time stamp is after given time value
+// if region Time stamp has not been set, it always returns true
+func (tr *Region) IsAfterTime(t time.Time) bool {
+	if tr.Time.IsZero() {
+		return true
+	}
+	return tr.Time.Time().After(t)
+}
+
+// Ago returns how long ago this Region's time stamp is relative
+// to given time.
+func (tr *Region) Ago(t time.Time) time.Duration {
+	return t.Sub(tr.Time.Time())
+}
+
+// Age returns the time interval from [time.Now]
+func (tr *Region) Age() time.Duration {
+	return tr.Ago(time.Now())
+}
+
+// Since returns the time interval between
+// this Region's time stamp and that of the given earlier region's stamp.
+func (tr *Region) Since(earlier *Region) time.Duration {
+	return earlier.Ago(tr.Time.Time())
+}
+
+// FromString decodes text region from a string representation of form:
+// [#]LxxCxx-LxxCxx. Used in e.g., URL links -- returns true if successful
+func (tr *Region) FromString(link string) bool {
+	link = strings.TrimPrefix(link, "#")
+	fmt.Sscanf(link, "L%dC%d-L%dC%d", &tr.Start.Line, &tr.Start.Char, &tr.End.Line, &tr.End.Char)
+	tr.Start.Line--
+	tr.Start.Char--
+	tr.End.Line--
+	tr.End.Char--
+	return true
 }

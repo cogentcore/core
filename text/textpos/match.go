@@ -8,7 +8,7 @@ package textpos
 type Match struct {
 
 	// Region surrounding the match. Column positions are in runes.
-	Region RegionTime
+	Region Region
 
 	// Text surrounding the match, at most MatchContext on either side
 	// (within a single line).
@@ -27,7 +27,7 @@ var medsz = len(med)
 // at st and ending before ed, on given line
 func NewMatch(rn []rune, st, ed, ln int) Match {
 	sz := len(rn)
-	reg := NewRegionTime(ln, st, ln, ed)
+	reg := NewRegion(ln, st, ln, ed)
 	cist := max(st-MatchContext, 0)
 	cied := min(ed+MatchContext, sz)
 	sctx := []rune(string(rn[cist:st]))

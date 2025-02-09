@@ -14,7 +14,7 @@ import (
 )
 
 // Edit describes an edit action to line-based text, operating on
-// a [RegionTime] of the text.
+// a [Region] of the text.
 // Actions are only deletions and insertions (a change is a sequence
 // of each, given normal editing processes).
 type Edit struct {
@@ -22,7 +22,7 @@ type Edit struct {
 	// Region for the edit, specifying the region to delete, or the size
 	// of the region to insert, corresponding to the Text.
 	// Also contains the Time stamp for this edit.
-	Region RegionTime
+	Region Region
 
 	// Text deleted or inserted, in rune lines. For Rect this is the
 	// spanning character distance per line, times number of lines.
@@ -49,7 +49,7 @@ func NewEditFromRunes(text []rune) *Edit {
 	nl := len(lns)
 	ec := len(lns[nl-1])
 	ed := &Edit{}
-	ed.Region = NewRegionTime(0, 0, nl-1, ec)
+	ed.Region = NewRegion(0, 0, nl-1, ec)
 	ed.Text = lns
 	return ed
 }
@@ -184,7 +184,7 @@ func (te *Edit) AdjustPosIfAfterTime(pos Pos, t time.Time, del AdjustPosDel) Pos
 // If the starting position is within a deleted region, it is moved to the
 // end of the deleted region, and if the ending position was within a deleted
 // region, it is moved to the start.
-func (te *Edit) AdjustRegion(reg RegionTime) RegionTime {
+func (te *Edit) AdjustRegion(reg Region) Region {
 	if te == nil {
 		return reg
 	}
@@ -194,7 +194,7 @@ func (te *Edit) AdjustRegion(reg RegionTime) RegionTime {
 	reg.Start = te.AdjustPos(reg.Start, AdjustPosDelEnd)
 	reg.End = te.AdjustPos(reg.End, AdjustPosDelStart)
 	if reg.IsNil() {
-		return RegionTime{}
+		return Region{}
 	}
 	return reg
 }

@@ -197,7 +197,7 @@ func (un *Undo) RedoNextIfGroup(gp int) *textpos.Edit {
 // have taken place since time stamp on region (using the Undo stack).
 // If region was wholly within a deleted region, then RegionNil will be
 // returned -- otherwise it is clipped appropriately as function of deletes.
-func (un *Undo) AdjustRegion(reg textpos.RegionTime) textpos.RegionTime {
+func (un *Undo) AdjustRegion(reg textpos.Region) textpos.Region {
 	if un.Off {
 		return reg
 	}
