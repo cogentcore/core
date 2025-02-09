@@ -103,6 +103,8 @@ func (rs *Renderer) applyTextStyle(st *rich.Style, fill, stroke image.Image, siz
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
 	// TODO: use caching like in RenderPath?
+	rs.style.Fill.Color = fill
+	rs.style.Stroke.Color = stroke
 	rs.ctx.Set("fillStyle", rs.imageToStyle(fill))
 	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke))
 
