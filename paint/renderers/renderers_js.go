@@ -9,8 +9,11 @@ package renderers
 import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedgt"
 )
 
 func init() {
 	paint.NewDefaultImageRenderer = htmlcanvas.New
+	shaped.NewShaper = shapedgt.NewShaper // todo: update when new js avail
 }

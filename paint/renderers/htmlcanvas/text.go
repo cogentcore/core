@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedgt"
 )
 
 // RenderText rasterizes the given Text
@@ -41,12 +42,12 @@ func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32
 func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, start math32.Vector2) {
 	off := start.Add(ln.Offset)
 	for ri := range ln.Runs {
-		run := &ln.Runs[ri]
+		run := ln.Runs[ri].(*shapedgt.Run)
 		rs.TextRun(run, ln, lns, runes, clr, off)
 		if run.Direction.IsVertical() {
-			off.Y += math32.FromFixed(run.Advance)
+			off.Y += run.Advance()
 		} else {
-			off.X += math32.FromFixed(run.Advance)
+			off.X += run.Advance()
 		}
 	}
 }
@@ -54,7 +55,7 @@ func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, runes []rune, c
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(run *shaped.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, start math32.Vector2) {
+func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, start math32.Vector2) {
 	// todo: render strike-through
 	// dir := run.Direction
 	// rbb := run.MaxBounds.Translate(start)
