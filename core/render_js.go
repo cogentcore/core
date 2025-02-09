@@ -11,7 +11,9 @@ import (
 	"slices"
 	"syscall/js"
 
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
+	"cogentcore.org/core/styles/units"
 )
 
 // loaderRemoved is whether the HTML loader div has been removed.
@@ -60,8 +62,7 @@ func (w *renderWindow) updateCanvases(sm *stages, active map[*htmlcanvas.Rendere
 func (w *renderWindow) updateCanvas(hc *htmlcanvas.Renderer, st *Stage) {
 	screen := w.SystemWindow.Screen()
 
-	// hc.Canvas.Set("width", st.Scene.SceneGeom.Size.X)
-	// hc.Canvas.Set("height", st.Scene.SceneGeom.Size.Y)
+	hc.SetSize(units.UnitDot, math32.FromPoint(st.Scene.SceneGeom.Size))
 
 	style := hc.Canvas.Get("style")
 

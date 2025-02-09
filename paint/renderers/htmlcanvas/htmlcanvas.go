@@ -64,6 +64,7 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	if rs.size == size {
 		return
 	}
+	// TODO: truncate/round here? (HTML doesn't support fractional width/height)
 	rs.size = size
 
 	rs.Canvas.Set("width", size.X)
