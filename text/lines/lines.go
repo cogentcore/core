@@ -612,7 +612,7 @@ func (ls *Lines) undo() []*textpos.Edit {
 			}
 		} else {
 			if tbe.Delete {
-				utbe := ls.insertTextImpl(tbe.Region.Start, tbe)
+				utbe := ls.insertTextImpl(tbe.Region.Start, tbe.Text)
 				utbe.Group = stgp + tbe.Group
 				if ls.Options.EmacsUndo {
 					ls.undos.SaveUndo(utbe)
@@ -665,7 +665,7 @@ func (ls *Lines) redo() []*textpos.Edit {
 			if tbe.Delete {
 				ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
 			} else {
-				ls.insertTextImpl(tbe.Region.Start, tbe)
+				ls.insertTextImpl(tbe.Region.Start, tbe.Text)
 			}
 		}
 		eds = append(eds, tbe)
@@ -830,7 +830,7 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 	}
 	ntags := make(lexer.Line, 0, sz)
 	for _, tg := range tags {
-		reg := Region{Start: textpos.Pos{Ln: ln, Ch: tg.St}, End: textpos.Pos{Ln: ln, Ch: tg.Ed}}
+		reg := textpos.Region{Start: textpos.Pos{Line: ln, Char: tg.Start}, End: textpos.Pos{Line: ln, Char: tg.End}}
 		reg.Time = tg.Time
 		reg = ls.undos.AdjustRegion(reg)
 		if !reg.IsNil() {
@@ -1020,14 +1020,14 @@ func (ls *Lines) lexObjPathString(ln int, lx *lexer.Lex) string {
 		return ""
 	}
 	lln := len(ls.lines[ln])
-	if lx.Ed > lln {
+	if lx.End > lln {
 		return ""
 	}
 	stlx := lexer.ObjPathAt(ls.hiTags[ln], lx)
-	if stlx.St >= lx.Ed {
+	if stlx.Start >= lx.End {
 		return ""
 	}
-	return string(ls.lines[ln][stlx.St:lx.Ed])
+	return string(ls.lines[ln][stlx.Start:lx.End])
 }
 
 // hiTagAtPos returns the highlighting (markup) lexical tag at given position
@@ -1078,11 +1078,12 @@ func (ls *Lines) indentLine(ln, ind int) *textpos.Edit {
 	}
 	curind, _ := lexer.LineIndent(ls.lines[ln], tabSz)
 	if ind > curind {
-		return ls.insertText(textpos.Pos{Ln: ln}, indent.Bytes(ichr, ind-curind, tabSz))
+		txt := runes.SetFromBytes([]rune{}, indent.Bytes(ichr, ind-curind, tabSz))
+		return ls.insertText(textpos.Pos{Line: ln}, txt)
 	} else if ind < curind {
 		spos := indent.Len(ichr, ind, tabSz)
 		cpos := indent.Len(ichr, curind, tabSz)
-		return ls.deleteText(textpos.Pos{Ln: ln, Ch: spos}, textpos.Pos{Ln: ln, Ch: cpos})
+		return ls.deleteText(textpos.Pos{Line: ln, Char: spos}, textpos.Pos{Line: ln, Char: cpos})
 	}
 	return nil
 }
@@ -1170,7 +1171,8 @@ func (ls *Lines) commentRegion(start, end int) {
 
 	comst, comed := ls.Options.CommentStrings()
 	if comst == "" {
-		log.Printf("text.Lines: attempt to comment region without any comment syntax defined")
+		// log.Printf("text.Lines: attempt to comment region without any comment syntax defined")
+		comst = "// "
 		return
 	}
 
@@ -1187,23 +1189,25 @@ func (ls *Lines) commentRegion(start, end int) {
 	if ncom >= trgln {
 		doCom = false
 	}
+	rcomst := []rune(comst)
+	rcomed := []rune(comed)
 
 	for ln := start; ln < eln; ln++ {
 		if doCom {
-			ls.insertText(textpos.Pos{Ln: ln, Ch: ch}, []byte(comst))
+			ls.insertText(textpos.Pos{Line: ln, Char: ch}, rcomst)
 			if comed != "" {
 				lln := len(ls.lines[ln])
-				ls.insertText(textpos.Pos{Ln: ln, Ch: lln}, []byte(comed))
+				ls.insertText(textpos.Pos{Line: ln, Char: lln}, rcomed)
 			}
 		} else {
 			idx := ls.commentStart(ln)
 			if idx >= 0 {
-				ls.deleteText(textpos.Pos{Ln: ln, Ch: idx}, textpos.Pos{Ln: ln, Ch: idx + len(comst)})
+				ls.deleteText(textpos.Pos{Line: ln, Char: idx}, textpos.Pos{Line: ln, Char: idx + len(comst)})
 			}
 			if comed != "" {
 				idx := runes.IndexFold(ls.lines[ln], []rune(comed))
 				if idx >= 0 {
-					ls.deleteText(textpos.Pos{Ln: ln, Ch: idx}, textpos.Pos{Ln: ln, Ch: idx + len(comed)})
+					ls.deleteText(textpos.Pos{Line: ln, Char: idx}, textpos.Pos{Line: ln, Char: idx + len(comed)})
 				}
 			}
 		}
@@ -1217,15 +1221,15 @@ func (ls *Lines) joinParaLines(startLine, endLine int) {
 	// current end of region being joined == last blank line
 	curEd := endLine
 	for ln := endLine; ln >= startLine; ln-- { // reverse order
-		lb := ls.lineBytes[ln]
-		lbt := bytes.TrimSpace(lb)
-		if len(lbt) == 0 || ln == startLine {
+		lr := ls.lines[ln]
+		lrt := runes.TrimSpace(lr)
+		if len(lrt) == 0 || ln == startLine {
 			if ln < curEd-1 {
-				stp := textpos.Pos{Ln: ln + 1}
+				stp := textpos.Pos{Line: ln + 1}
 				if ln == startLine {
 					stp.Line--
 				}
-				ep := textpos.Pos{Ln: curEd - 1}
+				ep := textpos.Pos{Line: curEd - 1}
 				if curEd == endLine {
 					ep.Line = curEd
 				}
@@ -1244,8 +1248,8 @@ func (ls *Lines) tabsToSpacesLine(ln int) {
 	tabSz := ls.Options.TabSize
 
 	lr := ls.lines[ln]
-	st := textpos.Pos{Ln: ln}
-	ed := textpos.Pos{Ln: ln}
+	st := textpos.Pos{Line: ln}
+	ed := textpos.Pos{Line: ln}
 	i := 0
 	for {
 		if i >= len(lr) {
@@ -1279,8 +1283,8 @@ func (ls *Lines) spacesToTabsLine(ln int) {
 	tabSz := ls.Options.TabSize
 
 	lr := ls.lines[ln]
-	st := textpos.Pos{Ln: ln}
-	ed := textpos.Pos{Ln: ln}
+	st := textpos.Pos{Line: ln}
+	ed := textpos.Pos{Line: ln}
 	i := 0
 	nspc := 0
 	for {
@@ -1336,16 +1340,16 @@ func (ls *Lines) patchFromBuffer(ob *Lines, diffs Diffs) bool {
 		df := diffs[i]
 		switch df.Tag {
 		case 'r':
-			ls.deleteText(textpos.Pos{Ln: df.I1}, textpos.Pos{Ln: df.I2})
-			ot := ob.Region(textpos.Pos{Ln: df.J1}, textpos.Pos{Ln: df.J2})
-			ls.insertText(textpos.Pos{Ln: df.I1}, ot.ToBytes())
+			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
+			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
+			ls.insertText(textpos.Pos{Line: df.I1}, ot.ToBytes())
 			mods = true
 		case 'd':
-			ls.deleteText(textpos.Pos{Ln: df.I1}, textpos.Pos{Ln: df.I2})
+			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			mods = true
 		case 'i':
-			ot := ob.Region(textpos.Pos{Ln: df.J1}, textpos.Pos{Ln: df.J2})
-			ls.insertText(textpos.Pos{Ln: df.I1}, ot.ToBytes())
+			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
+			ls.insertText(textpos.Pos{Line: df.I1}, ot.ToBytes())
 			mods = true
 		}
 	}

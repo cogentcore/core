@@ -19,6 +19,22 @@ import (
 	"cogentcore.org/core/base/slicesx"
 )
 
+// SetFromBytes sets slice of runes from given slice of bytes,
+// using efficient memory reallocation of existing slice.
+// returns potentially modified slice: use assign to update.
+func SetFromBytes(rs []rune, s []byte) []rune {
+	n := utf8.RuneCount(s)
+	rs = slicesx.SetLength(rs, n)
+	i := 0
+	for len(s) > 0 {
+		r, l := utf8.DecodeRune(s)
+		rs[i] = r
+		i++
+		s = s[l:]
+	}
+	return rs
+}
+
 const maxInt = int(^uint(0) >> 1)
 
 // Equal reports whether a and b
@@ -64,6 +80,118 @@ func ContainsRune(b []rune, r rune) bool {
 // ContainsFunc reports whether any of the UTF-8-encoded code points r within b satisfy f(r).
 func ContainsFunc(b []rune, f func(rune) bool) bool {
 	return IndexFunc(b, f) >= 0
+}
+
+// containsRune is a simplified version of strings.ContainsRune
+// to avoid importing the strings package.
+// We avoid bytes.ContainsRune to avoid allocating a temporary copy of s.
+func containsRune(s string, r rune) bool {
+	for _, c := range s {
+		if c == r {
+			return true
+		}
+	}
+	return false
+}
+
+// Trim returns a subslice of s by slicing off all leading and
+// trailing UTF-8-encoded code points contained in cutset.
+func Trim(s []rune, cutset string) []rune {
+	if len(s) == 0 {
+		// This is what we've historically done.
+		return nil
+	}
+	if cutset == "" {
+		return s
+	}
+	return TrimLeft(TrimRight(s, cutset), cutset)
+}
+
+// TrimLeft returns a subslice of s by slicing off all leading
+// UTF-8-encoded code points contained in cutset.
+func TrimLeft(s []rune, cutset string) []rune {
+	if len(s) == 0 {
+		// This is what we've historically done.
+		return nil
+	}
+	if cutset == "" {
+		return s
+	}
+	for len(s) > 0 {
+		r := s[0]
+		if !containsRune(cutset, r) {
+			break
+		}
+		s = s[1:]
+	}
+	if len(s) == 0 {
+		// This is what we've historically done.
+		return nil
+	}
+	return s
+}
+
+// TrimRight returns a subslice of s by slicing off all trailing
+// UTF-8-encoded code points that are contained in cutset.
+func TrimRight(s []rune, cutset string) []rune {
+	if len(s) == 0 || cutset == "" {
+		return s
+	}
+	for len(s) > 0 {
+		r := s[len(s)-1]
+		if !containsRune(cutset, r) {
+			break
+		}
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
+// TrimSpace returns a subslice of s by slicing off all leading and
+// trailing white space, as defined by Unicode.
+func TrimSpace(s []rune) []rune {
+	return TrimFunc(s, unicode.IsSpace)
+}
+
+// TrimLeftFunc treats s as UTF-8-encoded bytes and returns a subslice of s by slicing off
+// all leading UTF-8-encoded code points c that satisfy f(c).
+func TrimLeftFunc(s []rune, f func(r rune) bool) []rune {
+	i := indexFunc(s, f, false)
+	if i == -1 {
+		return nil
+	}
+	return s[i:]
+}
+
+// TrimRightFunc returns a subslice of s by slicing off all trailing
+// UTF-8-encoded code points c that satisfy f(c).
+func TrimRightFunc(s []rune, f func(r rune) bool) []rune {
+	i := lastIndexFunc(s, f, false)
+	return s[0 : i+1]
+}
+
+// TrimFunc returns a subslice of s by slicing off all leading and trailing
+// UTF-8-encoded code points c that satisfy f(c).
+func TrimFunc(s []rune, f func(r rune) bool) []rune {
+	return TrimRightFunc(TrimLeftFunc(s, f), f)
+}
+
+// TrimPrefix returns s without the provided leading prefix string.
+// If s doesn't start with prefix, s is returned unchanged.
+func TrimPrefix(s, prefix []rune) []rune {
+	if HasPrefix(s, prefix) {
+		return s[len(prefix):]
+	}
+	return s
+}
+
+// TrimSuffix returns s without the provided trailing suffix string.
+// If s doesn't end with suffix, s is returned unchanged.
+func TrimSuffix(s, suffix []rune) []rune {
+	if HasSuffix(s, suffix) {
+		return s[:len(s)-len(suffix)]
+	}
+	return s
 }
 
 // Replace returns a copy of the slice s with the first n
@@ -232,22 +360,6 @@ func Repeat(r []rune, count int) []rune {
 		bp *= 2
 	}
 	return nb
-}
-
-// SetFromBytes sets slice of runes from given slice of bytes,
-// using efficient memory reallocation of existing slice.
-// returns potentially modified slice: use assign to update.
-func SetFromBytes(rs []rune, s []byte) []rune {
-	n := utf8.RuneCount(s)
-	rs = slicesx.SetLength(rs, n)
-	i := 0
-	for len(s) > 0 {
-		r, l := utf8.DecodeRune(s)
-		rs[i] = r
-		i++
-		s = s[l:]
-	}
-	return rs
 }
 
 // Generic split: splits after each instance of sep,

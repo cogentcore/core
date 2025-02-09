@@ -5,6 +5,7 @@
 package runes
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"testing"
@@ -490,6 +491,225 @@ func TestContainsFunc(t *testing.T) {
 		}) != ct.expected {
 			t.Errorf("ContainsFunc(%q, func(%q)) = %v, want %v",
 				ct.b, ct.r, !ct.expected, ct.expected)
+		}
+	}
+}
+
+type TrimTest struct {
+	f            string
+	in, arg, out string
+}
+
+var trimTests = []TrimTest{
+	{"Trim", "abba", "a", "bb"},
+	{"Trim", "abba", "ab", ""},
+	{"TrimLeft", "abba", "ab", ""},
+	{"TrimRight", "abba", "ab", ""},
+	{"TrimLeft", "abba", "a", "bba"},
+	{"TrimLeft", "abba", "b", "abba"},
+	{"TrimRight", "abba", "a", "abb"},
+	{"TrimRight", "abba", "b", "abba"},
+	{"Trim", "<tag>", "<>", "tag"},
+	{"Trim", "* listitem", " *", "listitem"},
+	{"Trim", `"quote"`, `"`, "quote"},
+	{"Trim", "\u2C6F\u2C6F\u0250\u0250\u2C6F\u2C6F", "\u2C6F", "\u0250\u0250"},
+	{"Trim", "\x80test\xff", "\xff", "test"},
+	{"Trim", " Ġ ", " ", "Ġ"},
+	{"Trim", " Ġİ0", "0 ", "Ġİ"},
+	//empty string tests
+	{"Trim", "abba", "", "abba"},
+	{"Trim", "", "123", ""},
+	{"Trim", "", "", ""},
+	{"TrimLeft", "abba", "", "abba"},
+	{"TrimLeft", "", "123", ""},
+	{"TrimLeft", "", "", ""},
+	{"TrimRight", "abba", "", "abba"},
+	{"TrimRight", "", "123", ""},
+	{"TrimRight", "", "", ""},
+	{"TrimRight", "☺\xc0", "☺", "☺\xc0"},
+	{"TrimPrefix", "aabb", "a", "abb"},
+	{"TrimPrefix", "aabb", "b", "aabb"},
+	{"TrimSuffix", "aabb", "a", "aabb"},
+	{"TrimSuffix", "aabb", "b", "aab"},
+}
+
+type TrimNilTest struct {
+	f   string
+	in  []rune
+	arg string
+	out []rune
+}
+
+var trimNilTests = []TrimNilTest{
+	{"Trim", nil, "", nil},
+	{"Trim", []rune{}, "", nil},
+	{"Trim", []rune{'a'}, "a", nil},
+	{"Trim", []rune{'a', 'a'}, "a", nil},
+	{"Trim", []rune{'a'}, "ab", nil},
+	{"Trim", []rune{'a', 'b'}, "ab", nil},
+	{"Trim", []rune("☺"), "☺", nil},
+	{"TrimLeft", nil, "", nil},
+	{"TrimLeft", []rune{}, "", nil},
+	{"TrimLeft", []rune{'a'}, "a", nil},
+	{"TrimLeft", []rune{'a', 'a'}, "a", nil},
+	{"TrimLeft", []rune{'a'}, "ab", nil},
+	{"TrimLeft", []rune{'a', 'b'}, "ab", nil},
+	{"TrimLeft", []rune("☺"), "☺", nil},
+	{"TrimRight", nil, "", nil},
+	{"TrimRight", []rune{}, "", []rune{}},
+	{"TrimRight", []rune{'a'}, "a", []rune{}},
+	{"TrimRight", []rune{'a', 'a'}, "a", []rune{}},
+	{"TrimRight", []rune{'a'}, "ab", []rune{}},
+	{"TrimRight", []rune{'a', 'b'}, "ab", []rune{}},
+	{"TrimRight", []rune("☺"), "☺", []rune{}},
+	{"TrimPrefix", nil, "", nil},
+	{"TrimPrefix", []rune{}, "", []rune{}},
+	{"TrimPrefix", []rune{'a'}, "a", []rune{}},
+	{"TrimPrefix", []rune("☺"), "☺", []rune{}},
+	{"TrimSuffix", nil, "", nil},
+	{"TrimSuffix", []rune{}, "", []rune{}},
+	{"TrimSuffix", []rune{'a'}, "a", []rune{}},
+	{"TrimSuffix", []rune("☺"), "☺", []rune{}},
+}
+
+func TestTrim(t *testing.T) {
+	toFn := func(name string) (func([]rune, string) []rune, func([]rune, []rune) []rune) {
+		switch name {
+		case "Trim":
+			return Trim, nil
+		case "TrimLeft":
+			return TrimLeft, nil
+		case "TrimRight":
+			return TrimRight, nil
+		case "TrimPrefix":
+			return nil, TrimPrefix
+		case "TrimSuffix":
+			return nil, TrimSuffix
+		default:
+			t.Errorf("Undefined trim function %s", name)
+			return nil, nil
+		}
+	}
+
+	for _, tc := range trimTests {
+		name := tc.f
+		f, fb := toFn(name)
+		if f == nil && fb == nil {
+			continue
+		}
+		var actual string
+		if f != nil {
+			actual = string(f([]rune(tc.in), tc.arg))
+		} else {
+			actual = string(fb([]rune(tc.in), []rune(tc.arg)))
+		}
+		if actual != tc.out {
+			t.Errorf("%s(%q, %q) = %q; want %q", name, tc.in, tc.arg, actual, tc.out)
+		}
+	}
+
+	for _, tc := range trimNilTests {
+		name := tc.f
+		f, fb := toFn(name)
+		if f == nil && fb == nil {
+			continue
+		}
+		var actual []rune
+		if f != nil {
+			actual = f(tc.in, tc.arg)
+		} else {
+			actual = fb(tc.in, []rune(tc.arg))
+		}
+		report := func(s []rune) string {
+			if s == nil {
+				return "nil"
+			} else {
+				return fmt.Sprintf("%q", s)
+			}
+		}
+		if len(actual) != 0 {
+			t.Errorf("%s(%s, %q) returned non-empty value", name, report(tc.in), tc.arg)
+		} else {
+			actualNil := actual == nil
+			outNil := tc.out == nil
+			if actualNil != outNil {
+				t.Errorf("%s(%s, %q) got nil %t; want nil %t", name, report(tc.in), tc.arg, actualNil, outNil)
+			}
+		}
+	}
+}
+
+type TrimFuncTest struct {
+	f        predicate
+	in       string
+	trimOut  []rune
+	leftOut  []rune
+	rightOut []rune
+}
+
+var trimFuncTests = []TrimFuncTest{
+	{isSpace, space + " hello " + space,
+		[]rune("hello"),
+		[]rune("hello " + space),
+		[]rune(space + " hello")},
+	{isDigit, "\u0e50\u0e5212hello34\u0e50\u0e51",
+		[]rune("hello"),
+		[]rune("hello34\u0e50\u0e51"),
+		[]rune("\u0e50\u0e5212hello")},
+	{isUpper, "\u2C6F\u2C6F\u2C6F\u2C6FABCDhelloEF\u2C6F\u2C6FGH\u2C6F\u2C6F",
+		[]rune("hello"),
+		[]rune("helloEF\u2C6F\u2C6FGH\u2C6F\u2C6F"),
+		[]rune("\u2C6F\u2C6F\u2C6F\u2C6FABCDhello")},
+	{not(isSpace), "hello" + space + "hello",
+		[]rune(space),
+		[]rune(space + "hello"),
+		[]rune("hello" + space)},
+	{not(isDigit), "hello\u0e50\u0e521234\u0e50\u0e51helo",
+		[]rune("\u0e50\u0e521234\u0e50\u0e51"),
+		[]rune("\u0e50\u0e521234\u0e50\u0e51helo"),
+		[]rune("hello\u0e50\u0e521234\u0e50\u0e51")},
+	{isValidRune, "ab\xc0a\xc0cd",
+		[]rune("\xc0a\xc0"),
+		[]rune("\xc0a\xc0cd"),
+		[]rune("ab\xc0a\xc0")},
+	{not(isValidRune), "\xc0a\xc0",
+		[]rune("a"),
+		[]rune("a\xc0"),
+		[]rune("\xc0a")},
+	// The nils returned by TrimLeftFunc are odd behavior, but we need
+	// to preserve backwards compatibility.
+	{isSpace, "",
+		nil,
+		nil,
+		[]rune("")},
+	{isSpace, " ",
+		nil,
+		nil,
+		[]rune("")},
+}
+
+func TestTrimFunc(t *testing.T) {
+	for _, tc := range trimFuncTests {
+		trimmers := []struct {
+			name string
+			trim func(s []rune, f func(r rune) bool) []rune
+			out  []rune
+		}{
+			{"TrimFunc", TrimFunc, tc.trimOut},
+			{"TrimLeftFunc", TrimLeftFunc, tc.leftOut},
+			{"TrimRightFunc", TrimRightFunc, tc.rightOut},
+		}
+		for _, trimmer := range trimmers {
+			actual := trimmer.trim([]rune(tc.in), tc.f.f)
+			if actual == nil && trimmer.out != nil {
+				t.Errorf("%s(%q, %q) = nil; want %q", trimmer.name, tc.in, tc.f.name, trimmer.out)
+			}
+			if actual != nil && trimmer.out == nil {
+				t.Errorf("%s(%q, %q) = %q; want nil", trimmer.name, tc.in, tc.f.name, actual)
+			}
+			if !Equal(actual, trimmer.out) {
+				t.Errorf("%s(%q, %q) = %q; want %q", trimmer.name, tc.in, tc.f.name, actual, trimmer.out)
+			}
 		}
 	}
 }

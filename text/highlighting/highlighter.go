@@ -269,8 +269,8 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line, escapeHtml bool) []byte {
 		}
 		for si := len(tstack) - 1; si >= 0; si-- {
 			ts := ttags[tstack[si]]
-			if ts.Ed <= tr.St {
-				ep := min(sz, ts.Ed)
+			if ts.End <= tr.Start {
+				ep := min(sz, ts.End)
 				if cp < ep {
 					mu = append(mu, escf(txt[cp:ep])...)
 					cp = ep
@@ -279,28 +279,28 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line, escapeHtml bool) []byte {
 				tstack = append(tstack[:si], tstack[si+1:]...)
 			}
 		}
-		if cp >= sz || tr.St >= sz {
+		if cp >= sz || tr.Start >= sz {
 			break
 		}
-		if tr.St > cp {
-			mu = append(mu, escf(txt[cp:tr.St])...)
+		if tr.Start > cp {
+			mu = append(mu, escf(txt[cp:tr.Start])...)
 		}
 		mu = append(mu, sps...)
 		clsnm := tr.Token.Token.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
-		ep := tr.Ed
+		ep := tr.End
 		addEnd := true
 		if i < nt-1 {
-			if ttags[i+1].St < tr.Ed { // next one starts before we end, add to stack
+			if ttags[i+1].Start < tr.End { // next one starts before we end, add to stack
 				addEnd = false
-				ep = ttags[i+1].St
+				ep = ttags[i+1].Start
 				if len(tstack) == 0 {
 					tstack = append(tstack, i)
 				} else {
 					for si := len(tstack) - 1; si >= 0; si-- {
 						ts := ttags[tstack[si]]
-						if tr.Ed <= ts.Ed {
+						if tr.End <= ts.End {
 							ni := si // + 1 // new index in stack -- right *before* current
 							tstack = append(tstack, i)
 							copy(tstack[ni+1:], tstack[ni:])
@@ -311,8 +311,8 @@ func MarkupLine(txt []rune, hitags, tags lexer.Line, escapeHtml bool) []byte {
 			}
 		}
 		ep = min(len(txt), ep)
-		if tr.St < ep {
-			mu = append(mu, escf(txt[tr.St:ep])...)
+		if tr.Start < ep {
+			mu = append(mu, escf(txt[tr.Start:ep])...)
 		}
 		if addEnd {
 			mu = append(mu, spe...)
