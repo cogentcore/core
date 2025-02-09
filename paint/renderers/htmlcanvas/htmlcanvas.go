@@ -257,6 +257,14 @@ func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
 }
 
 func (rs *Renderer) RenderImage(pimg *pimage.Params) {
+	if pimg.Source == nil {
+		return
+	}
+	// TODO: for some reason we are getting a non-nil interface of a nil [image.RGBA]
+	if r, ok := pimg.Source.(*image.RGBA); ok && r == nil {
+		return
+	}
+
 	// TODO: images possibly comparatively not performant on web, so there
 	// might be a better path for things like FillBox.
 	size := pimg.Rect.Size() // TODO: is this right?
