@@ -686,56 +686,7 @@ func (w *renderWindow) renderWindow() {
 
 	// pr := profile.Start("win.DrawScenes")
 
-	drw := w.SystemWindow.Drawer()
-	drw.Start()
-
-	w.fillInsets()
-
-	sm := &w.mains
-	n := sm.stack.Len()
-
-	// first, find the top-level window:
-	winIndex := 0
-	var winScene *Scene
-	for i := n - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
-		if st.Type == WindowStage {
-			if DebugSettings.WindowRenderTrace {
-				fmt.Println("GatherScenes: main Window:", st.String())
-			}
-			winScene = st.Scene
-			winScene.RenderDraw(drw, draw.Src) // first window blits
-			winIndex = i
-			for _, w := range st.Scene.directRenders {
-				w.RenderDraw(drw, draw.Over)
-			}
-			break
-		}
-	}
-
-	// then add everyone above that
-	for i := winIndex + 1; i < n; i++ {
-		st := sm.stack.ValueByIndex(i)
-		if st.Scrim && i == n-1 {
-			clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-			drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
-		}
-		st.Scene.RenderDraw(drw, draw.Over)
-		if DebugSettings.WindowRenderTrace {
-			fmt.Println("GatherScenes: overlay Stage:", st.String())
-		}
-	}
-
-	// then add the popups for the top main stage
-	for _, kv := range top.popups.stack.Order {
-		st := kv.Value
-		st.Scene.RenderDraw(drw, draw.Over)
-		if DebugSettings.WindowRenderTrace {
-			fmt.Println("GatherScenes: popup:", st.String())
-		}
-	}
-	top.Sprites.drawSprites(drw, winScene.SceneGeom.Pos)
-	drw.End()
+	w.doRender(top)
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].
