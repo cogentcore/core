@@ -5,8 +5,8 @@
 package syms
 
 import (
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // SymStack is a simple stack (slice) of symbols
@@ -27,7 +27,7 @@ func (ss *SymStack) Push(sy *Symbol) {
 }
 
 // PushNew adds a new symbol to the stack with the basic info
-func (ss *SymStack) PushNew(name string, kind token.Tokens, fname string, reg lexer.Reg) *Symbol {
+func (ss *SymStack) PushNew(name string, kind token.Tokens, fname string, reg textpos.Region) *Symbol {
 	sy := NewSymbol(name, kind, fname, reg)
 	ss.Push(sy)
 	return sy

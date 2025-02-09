@@ -12,8 +12,9 @@ import (
 	"io"
 
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/syms"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -25,10 +26,10 @@ type AST struct {
 	tree.NodeBase
 
 	// region in source lexical tokens corresponding to this AST node -- Ch = index in lex lines
-	TokReg lexer.Reg `set:"-"`
+	TokReg textpos.Region `set:"-"`
 
 	// region in source file corresponding to this AST node
-	SrcReg lexer.Reg `set:"-"`
+	SrcReg textpos.Region `set:"-"`
 
 	// source code corresponding to this AST node
 	Src string `set:"-"`
@@ -89,7 +90,7 @@ func (ast *AST) PrevAST() *AST {
 }
 
 // SetTokReg sets the token region for this rule to given region
-func (ast *AST) SetTokReg(reg lexer.Reg, src *lexer.File) {
+func (ast *AST) SetTokReg(reg textpos.Region, src *lexer.File) {
 	ast.TokReg = reg
 	ast.SrcReg = src.TokenSrcReg(ast.TokReg)
 	ast.Src = src.RegSrc(ast.SrcReg)
@@ -97,8 +98,8 @@ func (ast *AST) SetTokReg(reg lexer.Reg, src *lexer.File) {
 
 // SetTokRegEnd updates the ending token region to given position --
 // token regions are typically over-extended and get narrowed as tokens actually match
-func (ast *AST) SetTokRegEnd(pos lexer.Pos, src *lexer.File) {
-	ast.TokReg.Ed = pos
+func (ast *AST) SetTokRegEnd(pos textpos.Pos, src *lexer.File) {
+	ast.TokReg.End = pos
 	ast.SrcReg = src.TokenSrcReg(ast.TokReg)
 	ast.Src = src.RegSrc(ast.SrcReg)
 }

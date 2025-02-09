@@ -12,8 +12,9 @@ import (
 	"sort"
 	"strings"
 
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // SymMap is a map between symbol names and their full information.
@@ -39,7 +40,7 @@ func (sm *SymMap) Add(sy *Symbol) {
 }
 
 // AddNew adds a new symbol to the map with the basic info
-func (sm *SymMap) AddNew(name string, kind token.Tokens, fname string, reg lexer.Reg) *Symbol {
+func (sm *SymMap) AddNew(name string, kind token.Tokens, fname string, reg textpos.Region) *Symbol {
 	sy := NewSymbol(name, kind, fname, reg)
 	sm.Alloc()
 	(*sm)[name] = sy
@@ -196,7 +197,7 @@ func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
 // in that group.  if you specify kind = token.None then all tokens that contain
 // region will be returned.  extraLns are extra lines added to the symbol region
 // for purposes of matching.
-func (sm *SymMap) FindContainsRegion(fpath string, pos lexer.Pos, extraLns int, kind token.Tokens, matches *SymMap) {
+func (sm *SymMap) FindContainsRegion(fpath string, pos textpos.Pos, extraLns int, kind token.Tokens, matches *SymMap) {
 	if *sm == nil {
 		return
 	}
@@ -207,7 +208,7 @@ func (sm *SymMap) FindContainsRegion(fpath string, pos lexer.Pos, extraLns int, 
 		}
 		reg := sy.Region
 		if extraLns > 0 {
-			reg.Ed.Ln += extraLns
+			reg.End.Line += extraLns
 		}
 		if !reg.Contains(pos) {
 			continue

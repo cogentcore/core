@@ -10,7 +10,8 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/nptime"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // LanguageLexer looks up lexer for given language; implementation in parent parse package
@@ -46,10 +47,10 @@ type State struct {
 	Pos int
 
 	// the line within overall source that we're operating on (0 indexed)
-	Ln int
+	Line int
 
 	// the current rune read by NextRune
-	Ch rune
+	Rune rune
 
 	// state stack
 	Stack Stack
@@ -74,7 +75,7 @@ type State struct {
 func (ls *State) Init() {
 	ls.GuestLex = nil
 	ls.Stack.Reset()
-	ls.Ln = 0
+	ls.Line = 0
 	ls.SetLine(nil)
 	ls.SaveStack = nil
 	ls.Errs.Reset()
@@ -90,12 +91,12 @@ func (ls *State) SetLine(src []rune) {
 
 // LineString returns the current lex output as tagged source
 func (ls *State) LineString() string {
-	return fmt.Sprintf("[%v,%v]: %v", ls.Ln, ls.Pos, ls.Lex.TagSrc(ls.Src))
+	return fmt.Sprintf("[%v,%v]: %v", ls.Line, ls.Pos, ls.Lex.TagSrc(ls.Src))
 }
 
 // Error adds a lexing error at given position
 func (ls *State) Error(pos int, msg string, rule *Rule) {
-	ls.Errs.Add(Pos{ls.Ln, pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
+	ls.Errs.Add(textpos.Pos{ls.Line, pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
 }
 
 // AtEol returns true if current position is at end of line
@@ -115,7 +116,7 @@ func (ls *State) String(off, sz int) (string, bool) {
 }
 
 // Rune gets the rune at given offset from current position, returns false if out of range
-func (ls *State) Rune(off int) (rune, bool) {
+func (ls *State) RuneAt(off int) (rune, bool) {
 	idx := ls.Pos + off
 	if idx >= len(ls.Src) {
 		return 0, false
@@ -142,18 +143,18 @@ func (ls *State) NextRune() bool {
 		ls.Pos = sz
 		return false
 	}
-	ls.Ch = ls.Src[ls.Pos]
+	ls.Rune = ls.Src[ls.Pos]
 	return true
 }
 
 // CurRune reads the current rune into Ch and returns false if at end of line
-func (ls *State) CurRune() bool {
+func (ls *State) CurRuneAt() bool {
 	sz := len(ls.Src)
 	if ls.Pos >= sz {
 		ls.Pos = sz
 		return false
 	}
-	ls.Ch = ls.Src[ls.Pos]
+	ls.Rune = ls.Src[ls.Pos]
 	return true
 }
 
@@ -169,8 +170,8 @@ func (ls *State) Add(tok token.KeyToken, st, ed int) {
 	sz := len(*lxl)
 	if sz > 0 && tok.Token.CombineRepeats() {
 		lst := &(*lxl)[sz-1]
-		if lst.Token.Token == tok.Token && lst.Ed == st {
-			lst.Ed = ed
+		if lst.Token.Token == tok.Token && lst.End == st {
+			lst.End = ed
 			return
 		}
 	}
@@ -262,10 +263,10 @@ func (ls *State) ReadUntil(until string) {
 	}
 	for ls.NextRune() {
 		if match != 0 {
-			if ls.Ch == match {
+			if ls.Rune == match {
 				depth++
 				continue
-			} else if ls.Ch == rune(ustrs[0][0]) {
+			} else if ls.Rune == rune(ustrs[0][0]) {
 				if depth > 0 {
 					depth--
 					continue
@@ -278,7 +279,7 @@ func (ls *State) ReadUntil(until string) {
 		for _, un := range ustrs {
 			usz := len(un)
 			if usz == 0 { // ||
-				if ls.Ch == '|' {
+				if ls.Rune == '|' {
 					ls.NextRune() // move past
 					break
 				}
@@ -304,12 +305,12 @@ func (ls *State) ReadUntil(until string) {
 func (ls *State) ReadNumber() token.Tokens {
 	offs := ls.Pos
 	tok := token.LitNumInteger
-	ls.CurRune()
-	if ls.Ch == '0' {
+	ls.CurRuneAt()
+	if ls.Rune == '0' {
 		// int or float
 		offs := ls.Pos
 		ls.NextRune()
-		if ls.Ch == 'x' || ls.Ch == 'X' {
+		if ls.Rune == 'x' || ls.Rune == 'X' {
 			// hexadecimal int
 			ls.NextRune()
 			ls.ScanMantissa(16)
@@ -321,12 +322,12 @@ func (ls *State) ReadNumber() token.Tokens {
 			// octal int or float
 			seenDecimalDigit := false
 			ls.ScanMantissa(8)
-			if ls.Ch == '8' || ls.Ch == '9' {
+			if ls.Rune == '8' || ls.Rune == '9' {
 				// illegal octal int or float
 				seenDecimalDigit = true
 				ls.ScanMantissa(10)
 			}
-			if ls.Ch == '.' || ls.Ch == 'e' || ls.Ch == 'E' || ls.Ch == 'i' {
+			if ls.Rune == '.' || ls.Rune == 'e' || ls.Rune == 'E' || ls.Rune == 'i' {
 				goto fraction
 			}
 			// octal int
@@ -341,26 +342,26 @@ func (ls *State) ReadNumber() token.Tokens {
 	ls.ScanMantissa(10)
 
 fraction:
-	if ls.Ch == '.' {
+	if ls.Rune == '.' {
 		tok = token.LitNumFloat
 		ls.NextRune()
 		ls.ScanMantissa(10)
 	}
 
-	if ls.Ch == 'e' || ls.Ch == 'E' {
+	if ls.Rune == 'e' || ls.Rune == 'E' {
 		tok = token.LitNumFloat
 		ls.NextRune()
-		if ls.Ch == '-' || ls.Ch == '+' {
+		if ls.Rune == '-' || ls.Rune == '+' {
 			ls.NextRune()
 		}
-		if DigitValue(ls.Ch) < 10 {
+		if DigitValue(ls.Rune) < 10 {
 			ls.ScanMantissa(10)
 		} else {
 			ls.Error(offs, "illegal floating-point exponent", nil)
 		}
 	}
 
-	if ls.Ch == 'i' {
+	if ls.Rune == 'i' {
 		tok = token.LitNumImag
 		ls.NextRune()
 	}
@@ -382,7 +383,7 @@ func DigitValue(ch rune) int {
 }
 
 func (ls *State) ScanMantissa(base int) {
-	for DigitValue(ls.Ch) < base {
+	for DigitValue(ls.Rune) < base {
 		if !ls.NextRune() {
 			break
 		}
@@ -390,11 +391,11 @@ func (ls *State) ScanMantissa(base int) {
 }
 
 func (ls *State) ReadQuoted() {
-	delim, _ := ls.Rune(0)
+	delim, _ := ls.RuneAt(0)
 	offs := ls.Pos
 	ls.NextRune()
 	for {
-		ch := ls.Ch
+		ch := ls.Rune
 		if ch == delim {
 			ls.NextRune() // move past
 			break
@@ -418,7 +419,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 
 	var n int
 	var base, max uint32
-	switch ls.Ch {
+	switch ls.Rune {
 	case 'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', quote:
 		ls.NextRune()
 		return true
@@ -435,7 +436,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 		n, base, max = 8, 16, unicode.MaxRune
 	default:
 		msg := "unknown escape sequence"
-		if ls.Ch < 0 {
+		if ls.Rune < 0 {
 			msg = "escape sequence not terminated"
 		}
 		ls.Error(offs, msg, nil)
@@ -444,10 +445,10 @@ func (ls *State) ReadEscape(quote rune) bool {
 
 	var x uint32
 	for n > 0 {
-		d := uint32(DigitValue(ls.Ch))
+		d := uint32(DigitValue(ls.Rune))
 		if d >= base {
-			msg := fmt.Sprintf("illegal character %#U in escape sequence", ls.Ch)
-			if ls.Ch < 0 {
+			msg := fmt.Sprintf("illegal character %#U in escape sequence", ls.Rune)
+			if ls.Rune < 0 {
 				msg = "escape sequence not terminated"
 			}
 			ls.Error(ls.Pos, msg, nil)

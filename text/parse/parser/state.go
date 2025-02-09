@@ -7,9 +7,10 @@ package parser
 import (
 	"fmt"
 
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // parser.State is the state maintained for parsing
@@ -31,7 +32,7 @@ type State struct {
 	Scopes syms.SymStack
 
 	// the current lex token position
-	Pos lexer.Pos
+	Pos textpos.Pos
 
 	// any error messages accumulated during parsing specifically
 	Errs lexer.ErrorList `display:"no-inline"`
@@ -70,7 +71,7 @@ func (ps *State) Init(src *lexer.File, ast *AST) {
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
 	if ps.Src != nil {
-		ps.Pos, _ = ps.Src.ValidTokenPos(lexer.PosZero)
+		ps.Pos, _ = ps.Src.ValidTokenPos(textpos.PosZero)
 	}
 	ps.Errs.Reset()
 	ps.Trace.Init()
@@ -92,7 +93,7 @@ func (ps *State) Destroy() {
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
 	if ps.Src != nil {
-		ps.Pos, _ = ps.Src.ValidTokenPos(lexer.PosZero)
+		ps.Pos, _ = ps.Src.ValidTokenPos(textpos.PosZero)
 	}
 	ps.Errs.Reset()
 	ps.Trace.Init()
@@ -120,11 +121,11 @@ func (ps *State) AllocRules() {
 }
 
 // Error adds a parsing error at given lex token position
-func (ps *State) Error(pos lexer.Pos, msg string, rule *Rule) {
-	if pos != lexer.PosZero {
-		pos = ps.Src.TokenSrcPos(pos).St
+func (ps *State) Error(pos textpos.Pos, msg string, rule *Rule) {
+	if pos != textpos.PosZero {
+		pos = ps.Src.TokenSrcPos(pos).Start
 	}
-	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Ln), rule)
+	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Line), rule)
 	if GUIActive {
 		erstr := e.Report(ps.Src.BasePath, true, true)
 		fmt.Fprintln(ps.Trace.OutWrite, "ERROR: "+erstr)
@@ -134,7 +135,7 @@ func (ps *State) Error(pos lexer.Pos, msg string, rule *Rule) {
 // AtEof returns true if current position is at end of file -- this includes
 // common situation where it is just at the very last token
 func (ps *State) AtEof() bool {
-	if ps.Pos.Ln >= ps.Src.NLines() {
+	if ps.Pos.Line >= ps.Src.NLines() {
 		return true
 	}
 	_, ok := ps.Src.ValidTokenPos(ps.Pos)
@@ -147,13 +148,13 @@ func (ps *State) AtEofNext() bool {
 	if ps.AtEof() {
 		return true
 	}
-	return ps.Pos.Ln == ps.Src.NLines()-1
+	return ps.Pos.Line == ps.Src.NLines()-1
 }
 
 // GotoEof sets current position at EOF
 func (ps *State) GotoEof() {
-	ps.Pos.Ln = ps.Src.NLines()
-	ps.Pos.Ch = 0
+	ps.Pos.Line = ps.Src.NLines()
+	ps.Pos.Char = 0
 }
 
 // NextSrcLine returns the next line of text
@@ -163,20 +164,20 @@ func (ps *State) NextSrcLine() string {
 		return ""
 	}
 	ep := sp
-	ep.Ch = ps.Src.NTokens(ep.Ln)
-	if ep.Ch == sp.Ch+1 { // only one
+	ep.Char = ps.Src.NTokens(ep.Line)
+	if ep.Char == sp.Char+1 { // only one
 		nep, ok := ps.Src.ValidTokenPos(ep)
 		if ok {
 			ep = nep
-			ep.Ch = ps.Src.NTokens(ep.Ln)
+			ep.Char = ps.Src.NTokens(ep.Line)
 		}
 	}
-	reg := lexer.Reg{St: sp, Ed: ep}
+	reg := textpos.Region{Start: sp, End: ep}
 	return ps.Src.TokenRegSrc(reg)
 }
 
 // MatchLex is our optimized matcher method, matching tkey depth as well
-func (ps *State) MatchLex(lx *lexer.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp lexer.Pos) bool {
+func (ps *State) MatchLex(lx *lexer.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp textpos.Pos) bool {
 	if lx.Token.Depth != tkey.Depth {
 		return false
 	}
@@ -190,19 +191,19 @@ func (ps *State) MatchLex(lx *lexer.Lex, tkey token.KeyToken, isCat, isSubCat bo
 }
 
 // FindToken looks for token in given region, returns position where found, false if not.
-// Only matches when depth is same as at reg.St start at the start of the search.
+// Only matches when depth is same as at reg.Start start at the start of the search.
 // All positions in token indexes.
-func (ps *State) FindToken(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos, bool) {
+func (ps *State) FindToken(tkey token.KeyToken, reg textpos.Region) (textpos.Pos, bool) {
 	// prf := profile.Start("FindToken")
 	// defer prf.End()
-	cp, ok := ps.Src.ValidTokenPos(reg.St)
+	cp, ok := ps.Src.ValidTokenPos(reg.Start)
 	if !ok {
 		return cp, false
 	}
 	tok := tkey.Token
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
-	for cp.IsLess(reg.Ed) {
+	for cp.IsLess(reg.End) {
 		lx := ps.Src.LexAt(cp)
 		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {
 			return cp, true
@@ -217,7 +218,7 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos, bool)
 
 // MatchToken returns true if token matches at given position -- must be
 // a valid position!
-func (ps *State) MatchToken(tkey token.KeyToken, pos lexer.Pos) bool {
+func (ps *State) MatchToken(tkey token.KeyToken, pos textpos.Pos) bool {
 	tok := tkey.Token
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
@@ -226,16 +227,16 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lexer.Pos) bool {
 	return ps.MatchLex(lx, tkey, isCat, isSubCat, pos)
 }
 
-// FindTokenReverse looks *backwards* for token in given region, with same depth as reg.Ed-1 end
+// FindTokenReverse looks *backwards* for token in given region, with same depth as reg.End-1 end
 // where the search starts. Returns position where found, false if not.
 // Automatically deals with possible confusion with unary operators -- if there are two
 // ambiguous operators in a row, automatically gets the first one.  This is mainly / only used for
 // binary operator expressions (mathematical binary operators).
 // All positions are in token indexes.
-func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos, bool) {
+func (ps *State) FindTokenReverse(tkey token.KeyToken, reg textpos.Region) (textpos.Pos, bool) {
 	// prf := profile.Start("FindTokenReverse")
 	// defer prf.End()
-	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
+	cp, ok := ps.Src.PrevTokenPos(reg.End)
 	if !ok {
 		return cp, false
 	}
@@ -243,7 +244,7 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
-	for reg.St.IsLess(cp) || cp == reg.St {
+	for reg.Start.IsLess(cp) || cp == reg.Start {
 		lx := ps.Src.LexAt(cp)
 		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {
 			if isAmbigUnary { // make sure immed prior is not also!
@@ -277,7 +278,7 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos
 }
 
 // AddAST adds a child AST node to given parent AST node
-func (ps *State) AddAST(parAST *AST, rule string, reg lexer.Reg) *AST {
+func (ps *State) AddAST(parAST *AST, rule string, reg textpos.Region) *AST {
 	chAST := NewAST(parAST)
 	chAST.SetName(rule)
 	chAST.SetTokReg(reg, ps.Src)
@@ -294,7 +295,7 @@ type MatchState struct {
 	Rule *Rule
 
 	// scope for match
-	Scope lexer.Reg
+	Scope textpos.Region
 
 	// regions of match for each sub-region
 	Regs Matches
@@ -312,12 +313,12 @@ func (rs MatchState) String() string {
 type MatchStack []MatchState
 
 // Add given rule to stack
-func (rs *MatchStack) Add(pr *Rule, scope lexer.Reg, regs Matches) {
+func (rs *MatchStack) Add(pr *Rule, scope textpos.Region, regs Matches) {
 	*rs = append(*rs, MatchState{Rule: pr, Scope: scope, Regs: regs})
 }
 
 // Find looks for given rule and scope on the stack
-func (rs *MatchStack) Find(pr *Rule, scope lexer.Reg) (*MatchState, bool) {
+func (rs *MatchStack) Find(pr *Rule, scope textpos.Region) (*MatchState, bool) {
 	for i := range *rs {
 		r := &(*rs)[i]
 		if r.Rule == pr && r.Scope == scope {
@@ -328,15 +329,15 @@ func (rs *MatchStack) Find(pr *Rule, scope lexer.Reg) (*MatchState, bool) {
 }
 
 // AddMatch adds given rule to rule stack at given scope
-func (ps *State) AddMatch(pr *Rule, scope lexer.Reg, regs Matches) {
-	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
+func (ps *State) AddMatch(pr *Rule, scope textpos.Region, regs Matches) {
+	rs := &ps.Matches[scope.Start.Line][scope.Start.Char]
 	rs.Add(pr, scope, regs)
 }
 
 // IsMatch looks for rule at given scope in list of matches, if found
 // returns match state info
-func (ps *State) IsMatch(pr *Rule, scope lexer.Reg) (*MatchState, bool) {
-	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
+func (ps *State) IsMatch(pr *Rule, scope textpos.Region) (*MatchState, bool) {
+	rs := &ps.Matches[scope.Start.Line][scope.Start.Char]
 	sz := len(*rs)
 	if sz == 0 {
 		return nil, false
@@ -358,7 +359,7 @@ func (ps *State) RuleString(full bool) string {
 			for ch := 0; ch < sz; ch++ {
 				rs := ps.Matches[ln][ch]
 				sd := len(rs)
-				txt += ` "` + string(ps.Src.TokenSrc(lexer.Pos{ln, ch})) + `"`
+				txt += ` "` + string(ps.Src.TokenSrc(textpos.Pos{ln, ch})) + `"`
 				if sd == 0 {
 					txt += "-"
 				} else {
@@ -384,7 +385,7 @@ func (ps *State) RuleString(full bool) string {
 
 // ScopeRule is a scope and a rule, for storing matches / nonmatch
 type ScopeRule struct {
-	Scope lexer.Reg
+	Scope textpos.Region
 	Rule  *Rule
 }
 
@@ -392,25 +393,25 @@ type ScopeRule struct {
 type ScopeRuleSet map[ScopeRule]struct{}
 
 // Add a rule to scope set, with auto-alloc
-func (rs ScopeRuleSet) Add(scope lexer.Reg, pr *Rule) {
+func (rs ScopeRuleSet) Add(scope textpos.Region, pr *Rule) {
 	sr := ScopeRule{scope, pr}
 	rs[sr] = struct{}{}
 }
 
 // Has checks if scope rule set has given scope, rule
-func (rs ScopeRuleSet) Has(scope lexer.Reg, pr *Rule) bool {
+func (rs ScopeRuleSet) Has(scope textpos.Region, pr *Rule) bool {
 	sr := ScopeRule{scope, pr}
 	_, has := rs[sr]
 	return has
 }
 
 // AddNonMatch adds given rule to non-matching rule set for this scope
-func (ps *State) AddNonMatch(scope lexer.Reg, pr *Rule) {
+func (ps *State) AddNonMatch(scope textpos.Region, pr *Rule) {
 	ps.NonMatches.Add(scope, pr)
 }
 
 // IsNonMatch looks for rule in nonmatch list at given scope
-func (ps *State) IsNonMatch(scope lexer.Reg, pr *Rule) bool {
+func (ps *State) IsNonMatch(scope textpos.Region, pr *Rule) bool {
 	return ps.NonMatches.Has(scope, pr)
 }
 

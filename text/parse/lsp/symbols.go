@@ -11,7 +11,7 @@ package lsp
 //go:generate core generate
 
 import (
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // SymbolKind is the Language Server Protocol (LSP) SymbolKind, which

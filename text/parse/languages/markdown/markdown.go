@@ -11,13 +11,14 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/languages"
-	"cogentcore.org/core/parse/languages/bibtex"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/languages"
+	"cogentcore.org/core/text/parse/languages/bibtex"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 //go:embed markdown.parse
@@ -84,7 +85,7 @@ func (ml *MarkdownLang) HighlightLine(fss *parse.FileStates, line int, txt []run
 	return ml.LexLine(fs, line, txt)
 }
 
-func (ml *MarkdownLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos) (md complete.Matches) {
+func (ml *MarkdownLang) CompleteLine(fss *parse.FileStates, str string, pos textpos.Pos) (md complete.Matches) {
 	origStr := str
 	lfld := lexer.LastField(str)
 	str = lexer.InnerBracketScope(lfld, "[", "]")
@@ -98,7 +99,7 @@ func (ml *MarkdownLang) CompleteLine(fss *parse.FileStates, str string, pos lexe
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (ml *MarkdownLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld complete.Lookup) {
+func (ml *MarkdownLang) Lookup(fss *parse.FileStates, str string, pos textpos.Pos) (ld complete.Lookup) {
 	origStr := str
 	lfld := lexer.LastField(str)
 	str = lexer.InnerBracketScope(lfld, "[", "]")
@@ -200,9 +201,9 @@ func (ml *MarkdownLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []le
 // (bracket, brace, paren) while typing.
 // pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (ml *MarkdownLang) AutoBracket(fs *parse.FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool) {
+func (ml *MarkdownLang) AutoBracket(fs *parse.FileStates, bra rune, pos textpos.Pos, curLn []rune) (match, newLine bool) {
 	lnLen := len(curLn)
-	match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
+	match = pos.Char == lnLen || unicode.IsSpace(curLn[pos.Char]) // at end or if space after
 	newLine = false
 	return
 }

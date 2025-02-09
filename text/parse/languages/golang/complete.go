@@ -12,19 +12,20 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
 var CompleteTrace = false
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld complete.Lookup) {
+func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos textpos.Pos) (ld complete.Lookup) {
 	if str == "" {
 		return
 	}
@@ -77,7 +78,7 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 	}
 
 	pkg := fs.ParseState.Scopes[0]
-	start.SrcReg.St = pos
+	start.SrcReg.Start = pos
 
 	if start == last { // single-item
 		seed := start.Src
@@ -100,13 +101,13 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 					continue
 				}
 				if mt.Filename != "" {
-					ld.SetFile(mt.Filename, mt.Region.St.Ln, mt.Region.Ed.Ln)
+					ld.SetFile(mt.Filename, mt.Region.Start.Line, mt.Region.End.Line)
 					return
 				}
 			}
 		}
 		// fmt.Printf("got lookup type: %v, last str: %v\n", typ.String(), lststr)
-		ld.SetFile(typ.Filename, typ.Region.St.Ln, typ.Region.Ed.Ln)
+		ld.SetFile(typ.Filename, typ.Region.Start.Line, typ.Region.End.Line)
 		return
 	}
 	// see if it starts with a package name..
@@ -129,7 +130,7 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld c
 }
 
 // CompleteLine is the main api called by completion code in giv/complete.go
-func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos) (md complete.Matches) {
+func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos textpos.Pos) (md complete.Matches) {
 	if str == "" {
 		return
 	}
@@ -187,7 +188,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 	}
 
 	pkg := fs.ParseState.Scopes[0]
-	start.SrcReg.St = pos
+	start.SrcReg.Start = pos
 
 	if start == last { // single-item
 		seed := start.Src
@@ -250,7 +251,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 
 // CompletePosScope returns the scope for given position in given filename,
 // and fills in the scoping symbol(s) in scMap
-func (gl *GoLang) CompletePosScope(fs *parse.FileState, pos lexer.Pos, fpath string, scopes *syms.SymMap) token.Tokens {
+func (gl *GoLang) CompletePosScope(fs *parse.FileState, pos textpos.Pos, fpath string, scopes *syms.SymMap) token.Tokens {
 	fs.Syms.FindContainsRegion(fpath, pos, 2, token.None, scopes) // None matches any, 2 extra lines to add for new typing
 	if len(*scopes) == 0 {
 		return token.None
@@ -322,7 +323,7 @@ func (gl *GoLang) LookupString(fs *parse.FileState, pkg *syms.Symbol, scopes sym
 				for _, sy := range matches {
 					psy = sy
 				}
-				ld.SetFile(psy.Filename, psy.Region.St.Ln, psy.Region.Ed.Ln)
+				ld.SetFile(psy.Filename, psy.Region.Start.Line, psy.Region.End.Line)
 				return
 			}
 		}
@@ -341,7 +342,7 @@ func (gl *GoLang) LookupString(fs *parse.FileState, pkg *syms.Symbol, scopes sym
 		}
 	}
 	if nmatch == 1 {
-		ld.SetFile(tym.Filename, tym.Region.St.Ln, tym.Region.Ed.Ln)
+		ld.SetFile(tym.Filename, tym.Region.Start.Line, tym.Region.End.Line)
 		return
 	}
 	var matches syms.SymMap
@@ -349,7 +350,7 @@ func (gl *GoLang) LookupString(fs *parse.FileState, pkg *syms.Symbol, scopes sym
 		scopes.FindNamePrefixRecursive(str, &matches)
 		if len(matches) > 0 {
 			for _, sy := range matches {
-				ld.SetFile(sy.Filename, sy.Region.St.Ln, sy.Region.Ed.Ln) // take first
+				ld.SetFile(sy.Filename, sy.Region.Start.Line, sy.Region.End.Line) // take first
 				return
 			}
 		}
@@ -358,7 +359,7 @@ func (gl *GoLang) LookupString(fs *parse.FileState, pkg *syms.Symbol, scopes sym
 	pkg.Children.FindNamePrefixScoped(str, &matches)
 	if len(matches) > 0 {
 		for _, sy := range matches {
-			ld.SetFile(sy.Filename, sy.Region.St.Ln, sy.Region.Ed.Ln) // take first
+			ld.SetFile(sy.Filename, sy.Region.Start.Line, sy.Region.End.Line) // take first
 			return
 		}
 	}

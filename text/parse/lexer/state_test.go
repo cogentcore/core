@@ -7,7 +7,7 @@ package lexer
 import (
 	"testing"
 
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 	"github.com/stretchr/testify/assert"
 )
 

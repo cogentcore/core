@@ -15,10 +15,11 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/languages"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/languages"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 //go:embed go.parse
@@ -197,19 +198,19 @@ func (gl *GoLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Li
 // (bracket, brace, paren) while typing.
 // pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (gl *GoLang) AutoBracket(fs *parse.FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool) {
+func (gl *GoLang) AutoBracket(fs *parse.FileStates, bra rune, pos textpos.Pos, curLn []rune) (match, newLine bool) {
 	lnLen := len(curLn)
 	if bra == '{' {
-		if pos.Ch == lnLen {
-			if lnLen == 0 || unicode.IsSpace(curLn[pos.Ch-1]) {
+		if pos.Char == lnLen {
+			if lnLen == 0 || unicode.IsSpace(curLn[pos.Char-1]) {
 				newLine = true
 			}
 			match = true
 		} else {
-			match = unicode.IsSpace(curLn[pos.Ch])
+			match = unicode.IsSpace(curLn[pos.Char])
 		}
 	} else {
-		match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
+		match = pos.Char == lnLen || unicode.IsSpace(curLn[pos.Char]) // at end or if space after
 	}
 	return
 }

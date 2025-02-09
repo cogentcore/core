@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"unicode"
 
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // TypeMeths gathers method types from the type symbol's children

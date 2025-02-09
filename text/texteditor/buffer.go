@@ -20,12 +20,13 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
-	"cogentcore.org/core/spell"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/spell"
+	"cogentcore.org/core/text/textpos"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).
@@ -62,7 +63,7 @@ type Buffer struct { //types:add
 
 	// posHistory is the history of cursor positions.
 	// It can be used to move back through them.
-	posHistory []lexer.Pos
+	posHistory []textpos.Pos
 
 	// Complete is the functions and data for text completion.
 	Complete *core.Complete `json:"-" xml:"-"`
@@ -704,7 +705,7 @@ const (
 // optionally signaling views after text lines have been updated.
 // Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *lines.Edit {
+func (tb *Buffer) DeleteText(st, ed textpos.Pos, signal bool) *lines.Edit {
 	tb.FileModCheck()
 	tbe := tb.Lines.DeleteText(st, ed)
 	if tbe == nil {
@@ -721,9 +722,9 @@ func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *lines.Edit {
 
 // deleteTextRect deletes rectangular region of text between start, end
 // defining the upper-left and lower-right corners of a rectangle.
-// Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting lines.Edit to now.
+// Fails if st.Char >= ed.Ch. Sets the timestamp on resulting lines.Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *lines.Edit {
+func (tb *Buffer) deleteTextRect(st, ed textpos.Pos, signal bool) *lines.Edit {
 	tb.FileModCheck()
 	tbe := tb.Lines.DeleteTextRect(st, ed)
 	if tbe == nil {
@@ -742,7 +743,7 @@ func (tb *Buffer) deleteTextRect(st, ed lexer.Pos, signal bool) *lines.Edit {
 // It inserts new text at given starting position, optionally signaling
 // views after text has been inserted.  Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) insertText(st lexer.Pos, text []byte, signal bool) *lines.Edit {
+func (tb *Buffer) insertText(st textpos.Pos, text []byte, signal bool) *lines.Edit {
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
 	tbe := tb.Lines.InsertText(st, text)
 	if tbe == nil {
@@ -770,10 +771,10 @@ func (tb *Buffer) insertTextRect(tbe *lines.Edit, signal bool) *lines.Edit {
 		return re
 	}
 	if signal {
-		if re.Reg.End.Ln >= nln {
+		if re.Reg.End.Line >= nln {
 			ie := &lines.Edit{}
-			ie.Reg.Start.Ln = nln - 1
-			ie.Reg.End.Ln = re.Reg.End.Ln
+			ie.Reg.Start.Line = nln - 1
+			ie.Reg.End.Line = re.Reg.End.Line
 			tb.signalEditors(bufferInsert, ie)
 		} else {
 			tb.signalMods()
@@ -790,7 +791,7 @@ func (tb *Buffer) insertTextRect(tbe *lines.Edit, signal bool) *lines.Edit {
 // if matchCase is true, then the lexer.MatchCase function is called to match the
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the lines.Edit for the inserted text.
-func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, signal, matchCase bool) *lines.Edit {
+func (tb *Buffer) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, signal, matchCase bool) *lines.Edit {
 	tbe := tb.Lines.ReplaceText(delSt, delEd, insPos, insTxt, matchCase)
 	if tbe == nil {
 		return tbe
@@ -806,13 +807,13 @@ func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, sig
 
 // savePosHistory saves the cursor position in history stack of cursor positions --
 // tracks across views -- returns false if position was on same line as last one saved
-func (tb *Buffer) savePosHistory(pos lexer.Pos) bool {
+func (tb *Buffer) savePosHistory(pos textpos.Pos) bool {
 	if tb.posHistory == nil {
-		tb.posHistory = make([]lexer.Pos, 0, 1000)
+		tb.posHistory = make([]textpos.Pos, 0, 1000)
 	}
 	sz := len(tb.posHistory)
 	if sz > 0 {
-		if tb.posHistory[sz-1].Ln == pos.Ln {
+		if tb.posHistory[sz-1].Line == pos.Line {
 			return false
 		}
 	}
@@ -1003,27 +1004,27 @@ func (tb *Buffer) completeText(s string) {
 	}
 	// give the completer a chance to edit the completion before insert,
 	// also it return a number of runes past the cursor to delete
-	st := lexer.Pos{tb.Complete.SrcLn, 0}
-	en := lexer.Pos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
+	st := textpos.Pos{tb.Complete.SrcLn, 0}
+	en := textpos.Pos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
 	var tbes string
 	tbe := tb.Region(st, en)
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
 	c := tb.Complete.GetCompletion(s)
-	pos := lexer.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := textpos.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	ed := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
 	if ed.ForwardDelete > 0 {
-		delEn := lexer.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
+		delEn := textpos.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
 		tb.DeleteText(pos, delEn, EditNoSignal)
 	}
 	// now the normal completion insertion
 	st = pos
-	st.Ch -= len(tb.Complete.Seed)
+	st.Char -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, ed.NewText, EditSignal, ReplaceNoMatchCase)
 	if tb.currentEditor != nil {
 		ep := st
-		ep.Ch += len(ed.NewText) + ed.CursorAdjust
+		ep.Char += len(ed.NewText) + ed.CursorAdjust
 		tb.currentEditor.SetCursorShow(ep)
 		tb.currentEditor = nil
 	}
@@ -1032,7 +1033,7 @@ func (tb *Buffer) completeText(s string) {
 // isSpellEnabled returns true if spelling correction is enabled,
 // taking into account given position in text if it is relevant for cases
 // where it is only conditionally enabled
-func (tb *Buffer) isSpellEnabled(pos lexer.Pos) bool {
+func (tb *Buffer) isSpellEnabled(pos textpos.Pos) bool {
 	if tb.spell == nil || !tb.Options.SpellCorrect {
 		return false
 	}
@@ -1061,14 +1062,14 @@ func (tb *Buffer) setSpell() {
 
 // correctText edits the text using the string chosen from the correction menu
 func (tb *Buffer) correctText(s string) {
-	st := lexer.Pos{tb.spell.srcLn, tb.spell.srcCh} // start of word
+	st := textpos.Pos{tb.spell.srcLn, tb.spell.srcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
-	oend.Ch += len(tb.spell.word)
+	oend.Char += len(tb.spell.word)
 	tb.ReplaceText(st, oend, st, s, EditSignal, ReplaceNoMatchCase)
 	if tb.currentEditor != nil {
 		ep := st
-		ep.Ch += len(s)
+		ep.Char += len(s)
 		tb.currentEditor.SetCursorShow(ep)
 		tb.currentEditor = nil
 	}

@@ -10,8 +10,8 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/parse/languages"
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/parse/languages"
+	"cogentcore.org/core/text/parse/lexer"
 )
 
 // LanguageFlags are special properties of a given language

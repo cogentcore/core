@@ -18,13 +18,13 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ptext"
-	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/textpos"
 )
 
 // TODO: move these into an editor settings object
@@ -101,11 +101,11 @@ type Editor struct { //core:embedder
 	lineNumberRenders []ptext.Text
 
 	// CursorPos is the current cursor position.
-	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// cursorTarget is the target cursor position for externally set targets.
 	// It ensures that the target position is visible.
-	cursorTarget lexer.Pos
+	cursorTarget textpos.Pos
 
 	// cursorColumn is the desired cursor column, where the cursor was last when moved using left / right arrows.
 	// It is used when doing up / down to not always go to short line columns.
@@ -116,7 +116,7 @@ type Editor struct { //core:embedder
 
 	// selectStart is the starting point for selection, which will either be the start or end of selected region
 	// depending on subsequent selection.
-	selectStart lexer.Pos
+	selectStart textpos.Pos
 
 	// SelectRegion is the current selection region.
 	SelectRegion lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
@@ -320,7 +320,7 @@ func (ed *Editor) resetState() {
 	ed.ISearch.On = false
 	ed.QReplace.On = false
 	if ed.Buffer == nil || ed.lastFilename != ed.Buffer.Filename { // don't reset if reopening..
-		ed.CursorPos = lexer.Pos{}
+		ed.CursorPos = textpos.Pos{}
 	}
 }
 
@@ -350,7 +350,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 			ed.SetCursorShow(cp)
 		} else {
 			buf.Unlock()
-			ed.SetCursorShow(lexer.Pos{})
+			ed.SetCursorShow(textpos.Pos{})
 		}
 	}
 	ed.layoutAllLines() // relocks
@@ -360,8 +360,8 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 
 // linesInserted inserts new lines of text and reformats them
 func (ed *Editor) linesInserted(tbe *lines.Edit) {
-	stln := tbe.Reg.Start.Ln + 1
-	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+	stln := tbe.Reg.Start.Line + 1
+	nsz := (tbe.Reg.End.Line - tbe.Reg.Start.Line)
 	if stln > len(ed.renders) { // invalid
 		return
 	}
@@ -386,8 +386,8 @@ func (ed *Editor) linesInserted(tbe *lines.Edit) {
 
 // linesDeleted deletes lines of text and reformats remaining one
 func (ed *Editor) linesDeleted(tbe *lines.Edit) {
-	stln := tbe.Reg.Start.Ln
-	edln := tbe.Reg.End.Ln
+	stln := tbe.Reg.Start.Line
+	edln := tbe.Reg.End.Line
 	dsz := edln - stln
 
 	ed.renders = append(ed.renders[:stln], ed.renders[edln:]...)
@@ -414,11 +414,11 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *lines.Edit) {
 		}
 		ndup := ed.renders == nil
 		// fmt.Printf("ed %v got %v\n", ed.Nm, tbe.Reg.Start)
-		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
+		if tbe.Reg.Start.Line != tbe.Reg.End.Line {
 			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
 			ed.linesInserted(tbe) // triggers full layout
 		} else {
-			ed.layoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
+			ed.layoutLine(tbe.Reg.Start.Line) // triggers layout if line width exceeds
 		}
 		if ndup {
 			ed.Update()
@@ -428,10 +428,10 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *lines.Edit) {
 			return
 		}
 		ndup := ed.renders == nil
-		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
+		if tbe.Reg.Start.Line != tbe.Reg.End.Line {
 			ed.linesDeleted(tbe) // triggers full layout
 		} else {
-			ed.layoutLine(tbe.Reg.Start.Ln)
+			ed.layoutLine(tbe.Reg.Start.Line)
 		}
 		if ndup {
 			ed.Update()

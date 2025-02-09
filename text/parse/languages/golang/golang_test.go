@@ -14,8 +14,8 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/profile"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/lexer"
 )
 
 func init() {

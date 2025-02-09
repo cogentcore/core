@@ -34,7 +34,7 @@ func (ed *Editor) styleSizes() {
 	}
 	if lno {
 		ed.hasLineNumbers = true
-		ed.LineNumberOffset = float32(ed.lineNumberDigits+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
+		ed.LineNumberOffset = float32(ed.lineNumberDigits+3)*sty.Font.Face.Metrics.Char + spc.Left // space for icon
 	} else {
 		ed.hasLineNumbers = false
 		ed.LineNumberOffset = 0

@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // TypeFromASTExprStart starts walking the ast expression to find the type.
@@ -29,7 +29,7 @@ func (gl *GoLang) TypeFromASTExprStart(fs *parse.FileState, origPkg, pkg *syms.S
 // TypeFromASTExpr walks the ast expression to find the type.
 // It returns the type, any AST node that remained unprocessed at the end, and bool if found.
 func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST) (*syms.Type, *parser.AST, bool) {
-	pos := tyast.SrcReg.St
+	pos := tyast.SrcReg.Start
 	fpath, _ := filepath.Abs(fs.Src.Filename)
 	// containers of given region -- local scoping
 	var conts syms.SymMap

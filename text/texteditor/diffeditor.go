@@ -21,11 +21,12 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -230,7 +231,7 @@ func (dv *DiffEditor) nextDiff(ab int) bool {
 		tv = tvb
 	}
 	nd := len(dv.alignD)
-	curLn := tv.CursorPos.Ln
+	curLn := tv.CursorPos.Line
 	di, df := dv.alignD.DiffForLine(curLn)
 	if di < 0 {
 		return false
@@ -245,7 +246,7 @@ func (dv *DiffEditor) nextDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorTarget(lexer.Pos{Ln: df.I1})
+	tva.SetCursorTarget(textpos.Pos{Ln: df.I1})
 	return true
 }
 
@@ -256,7 +257,7 @@ func (dv *DiffEditor) prevDiff(ab int) bool {
 	if ab == 1 {
 		tv = tvb
 	}
-	curLn := tv.CursorPos.Ln
+	curLn := tv.CursorPos.Line
 	di, df := dv.alignD.DiffForLine(curLn)
 	if di < 0 {
 		return false
@@ -271,7 +272,7 @@ func (dv *DiffEditor) prevDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorTarget(lexer.Pos{Ln: df.I1})
+	tva.SetCursorTarget(textpos.Pos{Ln: df.I1})
 	return true
 }
 
@@ -485,7 +486,7 @@ func (dv *DiffEditor) applyDiff(ab int, line int) bool {
 		tv = tvb
 	}
 	if line < 0 {
-		line = tv.CursorPos.Ln
+		line = tv.CursorPos.Line
 	}
 	di, df := dv.alignD.DiffForLine(line)
 	if di < 0 || df.Tag == 'e' {
@@ -495,16 +496,16 @@ func (dv *DiffEditor) applyDiff(ab int, line int) bool {
 	if ab == 0 {
 		dv.bufferA.Undos.Off = false
 		// srcLen := len(dv.BufB.Lines[df.J2])
-		spos := lexer.Pos{Ln: df.I1, Ch: 0}
-		epos := lexer.Pos{Ln: df.I2, Ch: 0}
+		spos := textpos.Pos{Ln: df.I1, Ch: 0}
+		epos := textpos.Pos{Ln: df.I2, Ch: 0}
 		src := dv.bufferB.Region(spos, epos)
 		dv.bufferA.DeleteText(spos, epos, true)
 		dv.bufferA.insertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
 		dv.diffs.BtoA(di)
 	} else {
 		dv.bufferB.Undos.Off = false
-		spos := lexer.Pos{Ln: df.J1, Ch: 0}
-		epos := lexer.Pos{Ln: df.J2, Ch: 0}
+		spos := textpos.Pos{Ln: df.J1, Ch: 0}
+		epos := textpos.Pos{Ln: df.J2, Ch: 0}
 		src := dv.bufferA.Region(spos, epos)
 		dv.bufferB.DeleteText(spos, epos, true)
 		dv.bufferB.insertText(spos, src.ToBytes(), true)
@@ -675,7 +676,7 @@ func (ed *DiffTextEditor) Init() {
 		pt := ed.PointToRelPos(e.Pos())
 		if pt.X >= 0 && pt.X < int(ed.LineNumberOffset) {
 			newPos := ed.PixelToCursor(pt)
-			ln := newPos.Ln
+			ln := newPos.Line
 			dv := ed.diffEditor()
 			if dv != nil && ed.Buffer != nil {
 				if ed.Name == "text-a" {

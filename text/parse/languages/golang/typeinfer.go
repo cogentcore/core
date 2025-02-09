@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // TypeErr indicates is the type name we use to indicate that the type could not be inferred

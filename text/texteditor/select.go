@@ -9,8 +9,8 @@ import (
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/textpos"
 )
 
 //////////////////////////////////////////////////////////
@@ -80,15 +80,15 @@ func (ed *Editor) selectModeToggle() {
 
 // selectAll selects all the text
 func (ed *Editor) selectAll() {
-	ed.SelectRegion.Start = lexer.PosZero
+	ed.SelectRegion.Start = textpos.PosZero
 	ed.SelectRegion.End = ed.Buffer.EndPos()
 	ed.NeedsRender()
 }
 
-// wordBefore returns the word before the lexer.Pos
+// wordBefore returns the word before the textpos.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (ed *Editor) wordBefore(tp lexer.Pos) *lines.Edit {
-	txt := ed.Buffer.Line(tp.Ln)
+func (ed *Editor) wordBefore(tp textpos.Pos) *lines.Edit {
+	txt := ed.Buffer.Line(tp.Line)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
 	st := ch
@@ -105,24 +105,24 @@ func (ed *Editor) wordBefore(tp lexer.Pos) *lines.Edit {
 		}
 	}
 	if st != ch {
-		return ed.Buffer.Region(lexer.Pos{Ln: tp.Ln, Ch: st}, tp)
+		return ed.Buffer.Region(textpos.Pos{Ln: tp.Line, Ch: st}, tp)
 	}
 	return nil
 }
 
 // isWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (ed *Editor) isWordEnd(tp lexer.Pos) bool {
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+func (ed *Editor) isWordEnd(tp textpos.Pos) bool {
+	txt := ed.Buffer.Line(ed.CursorPos.Line)
 	sz := len(txt)
 	if sz == 0 {
 		return false
 	}
-	if tp.Ch >= len(txt) { // end of line
+	if tp.Char >= len(txt) { // end of line
 		r := txt[len(txt)-1]
 		return core.IsWordBreak(r, -1)
 	}
-	if tp.Ch == 0 { // start of line
+	if tp.Char == 0 { // start of line
 		r := txt[0]
 		return !core.IsWordBreak(r, -1)
 	}
@@ -134,16 +134,16 @@ func (ed *Editor) isWordEnd(tp lexer.Pos) bool {
 // isWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (ed *Editor) isWordMiddle(tp lexer.Pos) bool {
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+func (ed *Editor) isWordMiddle(tp textpos.Pos) bool {
+	txt := ed.Buffer.Line(ed.CursorPos.Line)
 	sz := len(txt)
 	if sz < 2 {
 		return false
 	}
-	if tp.Ch >= len(txt) { // end of line
+	if tp.Char >= len(txt) { // end of line
 		return false
 	}
-	if tp.Ch == 0 { // start of line
+	if tp.Char == 0 { // start of line
 		return false
 	}
 	r1 := txt[tp.Ch-1]
@@ -157,7 +157,7 @@ func (ed *Editor) selectWord() bool {
 	if ed.Buffer == nil {
 		return false
 	}
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Line)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -172,7 +172,7 @@ func (ed *Editor) selectWord() bool {
 func (ed *Editor) wordAt() (reg lines.Region) {
 	reg.Start = ed.CursorPos
 	reg.End = ed.CursorPos
-	txt := ed.Buffer.Line(ed.CursorPos.Ln)
+	txt := ed.Buffer.Line(ed.CursorPos.Line)
 	sz := len(txt)
 	if sz == 0 {
 		return reg
@@ -189,8 +189,8 @@ func (ed *Editor) wordAt() (reg lines.Region) {
 			}
 			sch--
 		}
-		reg.Start.Ch = sch
-		ech := ed.CursorPos.Ch + 1
+		reg.Start.Char = sch
+		ech := ed.CursorPos.Char + 1
 		for ech < sz {
 			r2 := rune(-1)
 			if ech < sz-1 {
@@ -201,9 +201,9 @@ func (ed *Editor) wordAt() (reg lines.Region) {
 			}
 			ech++
 		}
-		reg.End.Ch = ech
+		reg.End.Char = ech
 	} else { // keep the space start -- go to next space..
-		ech := ed.CursorPos.Ch + 1
+		ech := ed.CursorPos.Char + 1
 		for ech < sz {
 			if !core.IsWordBreak(txt[ech], rune(-1)) {
 				break
@@ -220,7 +220,7 @@ func (ed *Editor) wordAt() (reg lines.Region) {
 			}
 			ech++
 		}
-		reg.End.Ch = ech
+		reg.End.Char = ech
 	}
 	return reg
 }
@@ -367,7 +367,7 @@ func (ed *Editor) InsertAtCursor(txt []byte) {
 	}
 	pos := tbe.Reg.End
 	if len(txt) == 1 && txt[0] == '\n' {
-		pos.Ch = 0 // sometimes it doesn't go to the start..
+		pos.Char = 0 // sometimes it doesn't go to the start..
 	}
 	ed.SetCursorShow(pos)
 	ed.setCursorColumn(ed.CursorPos)
@@ -388,7 +388,7 @@ func (ed *Editor) CutRect() *lines.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	npos := lexer.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
+	npos := textpos.Pos{Ln: ed.SelectRegion.End.Line, Ch: ed.SelectRegion.Start.Ch}
 	cut := ed.Buffer.deleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
@@ -425,12 +425,12 @@ func (ed *Editor) PasteRect() {
 		return
 	}
 	ce := editorClipboardRect.Clone()
-	nl := ce.Reg.End.Ln - ce.Reg.Start.Ln
-	nch := ce.Reg.End.Ch - ce.Reg.Start.Ch
-	ce.Reg.Start.Ln = ed.CursorPos.Ln
-	ce.Reg.End.Ln = ed.CursorPos.Ln + nl
-	ce.Reg.Start.Ch = ed.CursorPos.Ch
-	ce.Reg.End.Ch = ed.CursorPos.Ch + nch
+	nl := ce.Reg.End.Line - ce.Reg.Start.Line
+	nch := ce.Reg.End.Char - ce.Reg.Start.Ch
+	ce.Reg.Start.Line = ed.CursorPos.Line
+	ce.Reg.End.Line = ed.CursorPos.Line + nl
+	ce.Reg.Start.Char = ed.CursorPos.Ch
+	ce.Reg.End.Char = ed.CursorPos.Char + nch
 	tbe := ed.Buffer.insertTextRect(ce, EditSignal)
 
 	pos := tbe.Reg.End

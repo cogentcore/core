@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/parse/complete"
+	"cogentcore.org/core/text/parse/complete"
 )
 
 // Complete holds the current completion data and functions to call for building

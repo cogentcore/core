@@ -5,9 +5,9 @@
 package parse
 
 import (
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/parse/syms"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
 )
 
 // Lang provides a general interface for language-specific management
@@ -58,7 +58,7 @@ type Lang interface {
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.  A stack (slice) of symbols is returned so that the completer
 	// can control the order of items presented, as compared to the SymMap.
-	CompleteLine(fs *FileState, pos lexer.Pos) syms.SymStack
+	CompleteLine(fs *FileState, pos textpos.Pos) syms.SymStack
 
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),

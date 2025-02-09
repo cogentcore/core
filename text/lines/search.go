@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/base/runes"
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/textpos"
 )
 

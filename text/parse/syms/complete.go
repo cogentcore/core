@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // AddCompleteSyms adds given symbols as matches in the given match data

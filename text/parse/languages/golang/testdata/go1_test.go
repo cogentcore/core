@@ -627,8 +627,8 @@ import (
 	core "cogentcore.org/core/core"
 	"cogentcore.org/core/system"
 	gocode "cogentcore.org/cogent/code/code"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/piv"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/piv"
 )
 
 var av1, av2 int
@@ -751,7 +751,7 @@ func tst() {
 func tst() {
 	pv.SaveParser()
 	pv.GetSettings()
-	Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
+	Trace.Out(ps, pr, Run, creg.Start, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
 }
 
 var unaryptr = 25 * *(ptr+2)  // directly to rhs or depth sub of it

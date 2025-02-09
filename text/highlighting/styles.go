@@ -14,7 +14,7 @@ import (
 	"sort"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/parse"
+	"cogentcore.org/core/text/parse"
 )
 
 //go:embed defaults.highlighting

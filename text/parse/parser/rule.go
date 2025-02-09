@@ -18,9 +18,10 @@ import (
 
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/slicesx"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -173,17 +174,17 @@ func (rl RuleList) Last() *RuleEl {
 var RuleMap map[string]*Rule
 
 // Matches encodes the regions of each match, Err for no match
-type Matches []lexer.Reg
+type Matches []textpos.Region
 
 // StartEnd returns the first and last non-zero positions in the Matches list as a region
-func (mm Matches) StartEnd() lexer.Reg {
-	reg := lexer.RegZero
+func (mm Matches) StartEnd() textpos.Region {
+	reg := textpos.RegionZero
 	for _, mp := range mm {
-		if mp.St != lexer.PosZero {
-			if reg.St == lexer.PosZero {
-				reg.St = mp.St
+		if mp.Start != textpos.PosZero {
+			if reg.Start == textpos.PosZero {
+				reg.Start = mp.Start
 			}
-			reg.Ed = mp.Ed
+			reg.End = mp.End
 		}
 	}
 	return reg
@@ -191,9 +192,9 @@ func (mm Matches) StartEnd() lexer.Reg {
 
 // StartEndExcl returns the first and last non-zero positions in the Matches list as a region
 // moves the end to next toke to make it the usual exclusive end pos
-func (mm Matches) StartEndExcl(ps *State) lexer.Reg {
+func (mm Matches) StartEndExcl(ps *State) textpos.Region {
 	reg := mm.StartEnd()
-	reg.Ed, _ = ps.Src.NextTokenPos(reg.Ed)
+	reg.End, _ = ps.Src.NextTokenPos(reg.End)
 	return reg
 }
 
@@ -211,7 +212,7 @@ func (pr *Rule) SetRuleMap(ps *State) {
 	pr.WalkDown(func(k tree.Node) bool {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Name]; has {
-			ps.Error(lexer.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
+			ps.Error(textpos.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
 		} else {
 			RuleMap[pri.Name] = pri
 		}
@@ -275,7 +276,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	for ri := range rs {
 		rn := strings.TrimSpace(rs[ri])
 		if len(rn) == 0 {
-			ps.Error(lexer.PosZero, "Compile: Rules has empty string -- make sure there is only one space between rule elements", pr)
+			ps.Error(textpos.PosZero, "Compile: Rules has empty string -- make sure there is only one space between rule elements", pr)
 			valid = false
 			break
 		}
@@ -318,7 +319,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				} else {
 					err := rr.Token.Token.SetString(tn)
 					if err != nil {
-						ps.Error(lexer.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
+						ps.Error(textpos.PosZero, fmt.Sprintf("Compile: token convert error: %v", err.Error()), pr)
 						valid = false
 					}
 				}
@@ -350,7 +351,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			rp, ok := RuleMap[rn[st:]]
 			if !ok {
-				ps.Error(lexer.PosZero, fmt.Sprintf("Compile: refers to rule %v not found", rn), pr)
+				ps.Error(textpos.PosZero, fmt.Sprintf("Compile: refers to rule %v not found", rn), pr)
 				valid = false
 			} else {
 				rr.Rule = rp
@@ -428,7 +429,7 @@ func (pr *Rule) CompileTokMap(ps *State) bool {
 		fr := kpr.Rules[0]
 		skey := fr.Token.StringKey()
 		if _, has := pr.FiTokenMap[skey]; has {
-			ps.Error(lexer.PosZero, fmt.Sprintf("CompileFirstTokenMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Token), pr)
+			ps.Error(textpos.PosZero, fmt.Sprintf("CompileFirstTokenMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Token), pr)
 			pr.FiTokenElseIndex = 0
 			valid = false
 		} else {
@@ -457,7 +458,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 	}
 
 	if ktoki < 0 {
-		ps.Error(lexer.PosZero, "CompileExcl: no token found for matching exclusion rules", pr)
+		ps.Error(textpos.PosZero, "CompileExcl: no token found for matching exclusion rules", pr)
 		return false
 	}
 
@@ -491,7 +492,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 			} else {
 				err := rr.Token.Token.SetString(tn)
 				if err != nil {
-					ps.Error(lexer.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
+					ps.Error(textpos.PosZero, fmt.Sprintf("CompileExcl: token convert error: %v", err.Error()), pr)
 					valid = false
 				}
 			}
@@ -501,7 +502,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		}
 	}
 	if ki < 0 {
-		ps.Error(lexer.PosZero, fmt.Sprintf("CompileExcl: key token: %v not found in exclusion rule", ktok), pr)
+		ps.Error(textpos.PosZero, fmt.Sprintf("CompileExcl: key token: %v not found in exclusion rule", ktok), pr)
 		valid = false
 		return valid
 	}
@@ -522,20 +523,20 @@ func (pr *Rule) Validate(ps *State) bool {
 	}
 
 	if len(pr.Rules) == 0 && !pr.HasChildren() && !tree.IsRoot(pr) {
-		ps.Error(lexer.PosZero, "Validate: rule has no rules and no children", pr)
+		ps.Error(textpos.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
 	if !pr.tokenMatchGroup && len(pr.Rules) > 0 && pr.HasChildren() {
-		ps.Error(lexer.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
+		ps.Error(textpos.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
 	if pr.reverse {
 		if len(pr.Rules) != 3 {
-			ps.Error(lexer.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
+			ps.Error(textpos.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
 			valid = false
 		} else {
 			if !pr.Rules[1].IsToken() {
-				ps.Error(lexer.PosZero, "Validate: a Reverse (-) rule must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr)
+				ps.Error(textpos.PosZero, "Validate: a Reverse (-) rule must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr)
 			}
 		}
 	}
@@ -543,7 +544,7 @@ func (pr *Rule) Validate(ps *State) bool {
 	if len(pr.Rules) > 0 {
 		if pr.Rules[0].IsRule() && (pr.Rules[0].Rule == pr || pr.ParentLevel(pr.Rules[0].Rule) >= 0) { // left recursive
 			if pr.Rules[0].Match {
-				ps.Error(lexer.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v and that sub-rule is marked as a Match -- this is infinite recursion and is not allowed!  Must use distinctive tokens in rule to match this rule, and then left-recursive elements will be filled in when the rule runs, but they cannot be used for matching rule.", pr.Rules[0].Rule.Name), pr)
+				ps.Error(textpos.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v and that sub-rule is marked as a Match -- this is infinite recursion and is not allowed!  Must use distinctive tokens in rule to match this rule, and then left-recursive elements will be filled in when the rule runs, but they cannot be used for matching rule.", pr.Rules[0].Rule.Name), pr)
 				valid = false
 			}
 			ntok := 0
@@ -553,7 +554,7 @@ func (pr *Rule) Validate(ps *State) bool {
 				}
 			}
 			if ntok == 0 {
-				ps.Error(lexer.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v, and does not have any tokens in the rule -- MUST promote tokens to this rule to disambiguate match, otherwise will just do infinite recursion!", pr.Rules[0].Rule.Name), pr)
+				ps.Error(textpos.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v, and does not have any tokens in the rule -- MUST promote tokens to this rule to disambiguate match, otherwise will just do infinite recursion!", pr.Rules[0].Rule.Name), pr)
 				valid = false
 			}
 		}
@@ -577,19 +578,19 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 	}
 	kpr := pr.Children[0].(*Rule) // first rule is special set of valid top-level matches
 	var parAST *AST
-	scope := lexer.Reg{St: ps.Pos}
+	scope := textpos.Region{Start: ps.Pos}
 	if ps.AST.HasChildren() {
 		parAST = ps.AST.ChildAST(0)
 	} else {
 		parAST = NewAST(ps.AST)
 		parAST.SetName(kpr.Name)
 		ok := false
-		scope.St, ok = ps.Src.ValidTokenPos(scope.St)
+		scope.Start, ok = ps.Src.ValidTokenPos(scope.Start)
 		if !ok {
 			ps.GotoEof()
 			return nil
 		}
-		ps.Pos = scope.St
+		ps.Pos = scope.Start
 	}
 	didErr := false
 	for {
@@ -626,13 +627,13 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 // parAST is the current ast node that we add to.
 // scope is the region to search within, defined by parent or EOS if we have a terminal
 // one
-func (pr *Rule) Parse(ps *State, parent *Rule, parAST *AST, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
+func (pr *Rule) Parse(ps *State, parent *Rule, parAST *AST, scope textpos.Region, optMap lexer.TokenMap, depth int) *Rule {
 	if pr.Off {
 		return nil
 	}
 
 	if depth >= DepthLimit {
-		ps.Error(scope.St, "depth limit exceeded -- parser rules error -- look for recursive cases", pr)
+		ps.Error(scope.Start, "depth limit exceeded -- parser rules error -- look for recursive cases", pr)
 		return nil
 	}
 
@@ -644,7 +645,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAST *AST, scope lexer.Reg, opt
 	if optMap == nil && pr.OptTokenMap {
 		optMap = ps.Src.TokenMapReg(scope)
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, scope.St, scope, parAST, fmt.Sprintf("made optmap of size: %d", len(optMap)))
+			ps.Trace.Out(ps, pr, Run, scope.Start, scope, parAST, fmt.Sprintf("made optmap of size: %d", len(optMap)))
 		}
 	}
 
@@ -659,7 +660,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAST *AST, scope lexer.Reg, opt
 }
 
 // ParseRules parses rules and returns this rule if it matches, nil if not
-func (pr *Rule) ParseRules(ps *State, parent *Rule, parAST *AST, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
+func (pr *Rule) ParseRules(ps *State, parent *Rule, parAST *AST, scope textpos.Region, optMap lexer.TokenMap, depth int) *Rule {
 	ok := false
 	if pr.setsScope {
 		scope, ok = pr.Scope(ps, parAST, scope)
@@ -667,8 +668,8 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAST *AST, scope lexer.Reg
 			return nil
 		}
 	} else if GUIActive {
-		if scope == lexer.RegZero {
-			ps.Error(scope.St, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
+		if scope == textpos.RegionZero {
+			ps.Error(scope.Start, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
 			return nil
 		}
 	}
@@ -706,7 +707,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAST *AST, scope lexer.Reg
 // Scope finds the potential scope region for looking for tokens -- either from
 // EOS position or State ScopeStack pushed from parents.
 // Returns new scope and false if no valid scope found.
-func (pr *Rule) Scope(ps *State, parAST *AST, scope lexer.Reg) (lexer.Reg, bool) {
+func (pr *Rule) Scope(ps *State, parAST *AST, scope textpos.Region) (textpos.Region, bool) {
 	// prf := profile.Start("Scope")
 	// defer prf.End()
 
@@ -714,23 +715,23 @@ func (pr *Rule) Scope(ps *State, parAST *AST, scope lexer.Reg) (lexer.Reg, bool)
 	creg := scope
 	lr := pr.Rules.Last()
 	for ei := 0; ei < lr.StInc; ei++ {
-		stlx := ps.Src.LexAt(creg.St)
-		ep, ok := ps.Src.NextEos(creg.St, stlx.Token.Depth)
+		stlx := ps.Src.LexAt(creg.Start)
+		ep, ok := ps.Src.NextEos(creg.Start, stlx.Token.Depth)
 		if !ok {
-			// ps.Error(creg.St, "could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr)
+			// ps.Error(creg.Start, "could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr)
 			return nscope, false
 		}
-		if scope.Ed != lexer.PosZero && lr.Opt && scope.Ed.IsLess(ep) {
+		if scope.End != textpos.PosZero && lr.Opt && scope.End.IsLess(ep) {
 			// optional tokens can't take us out of scope
 			return scope, true
 		}
 		if ei == lr.StInc-1 {
-			nscope.Ed = ep
+			nscope.End = ep
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, SubMatch, nscope.St, nscope, parAST, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Token.Depth))
+				ps.Trace.Out(ps, pr, SubMatch, nscope.Start, nscope, parAST, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Token.Depth))
 			}
 		} else {
-			creg.St, ok = ps.Src.NextTokenPos(ep) // advance
+			creg.Start, ok = ps.Src.NextTokenPos(ep) // advance
 			if !ok {
 				// ps.Error(scope.St, "end of file looking for EOS tokens -- premature file end?", pr)
 				return nscope, false
@@ -742,13 +743,13 @@ func (pr *Rule) Scope(ps *State, parAST *AST, scope lexer.Reg) (lexer.Reg, bool)
 
 // Match attempts to match the rule, returns true if it matches, and the
 // match positions, along with any update to the scope
-func (pr *Rule) Match(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
+func (pr *Rule) Match(ps *State, parAST *AST, scope textpos.Region, depth int, optMap lexer.TokenMap) (bool, textpos.Region, Matches) {
 	if pr.Off {
 		return false, scope, nil
 	}
 
 	if depth > DepthLimit {
-		ps.Error(scope.St, "depth limit exceeded -- parser rules error -- look for recursive cases", pr)
+		ps.Error(scope.Start, "depth limit exceeded -- parser rules error -- look for recursive cases", pr)
 		return false, scope, nil
 	}
 
@@ -800,7 +801,7 @@ func (pr *Rule) Match(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap
 		ktpos := mpos[pr.ExclKeyIndex]
 		if pr.MatchExclude(ps, scope, ktpos, depth, optMap) {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, NoMatch, ktpos.St, scope, parAST, "Exclude criteria matched")
+				ps.Trace.Out(ps, pr, NoMatch, ktpos.Start, scope, parAST, "Exclude criteria matched")
 			}
 			ps.AddNonMatch(scope, pr)
 			return false, scope, nil
@@ -810,18 +811,18 @@ func (pr *Rule) Match(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap
 	mreg := mpos.StartEnd()
 	ps.AddMatch(pr, scope, mpos)
 	if ps.Trace.On {
-		ps.Trace.Out(ps, pr, Match, mreg.St, scope, parAST, fmt.Sprintf("Full Match reg: %v", mreg))
+		ps.Trace.Out(ps, pr, Match, mreg.Start, scope, parAST, fmt.Sprintf("Full Match reg: %v", mreg))
 	}
 	return true, scope, mpos
 }
 
 // MatchOnlyToks matches rules having only tokens
-func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope textpos.Region, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	nr := len(pr.Rules)
 
 	var mpos Matches
 
-	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
+	scstlx := ps.Src.LexAt(scope.Start) // scope starting lex
 	scstDepth := scstlx.Token.Depth
 
 	creg := scope
@@ -837,17 +838,17 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope lexer.Reg, depth int
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
-			mpos[nr-1] = lexer.Reg{scope.Ed, scope.Ed}
+			mpos[nr-1] = textpos.Region{Start: scope.End, End: scope.End}
 		}
 		kt.Depth += scstDepth // always use starting scope depth
 		match, tpos := pr.MatchToken(ps, rr, ri, kt, &creg, mpos, parAST, scope, depth, optMap)
 		if !match {
 			if ps.Trace.On {
-				if tpos != lexer.PosZero {
+				if tpos != textpos.PosZero {
 					tlx := ps.Src.LexAt(tpos)
-					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v token: %v, was: %v", ri, kt.String(), tlx.String()))
+					ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v token: %v, was: %v", ri, kt.String(), tlx.String()))
 				} else {
-					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v token: %v, nil region", ri, kt.String()))
+					ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v token: %v, nil region", ri, kt.String()))
 				}
 			}
 			return false, nil
@@ -855,9 +856,9 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope lexer.Reg, depth int
 		if mpos == nil {
 			mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 		}
-		mpos[ri] = lexer.Reg{tpos, tpos}
+		mpos[ri] = textpos.Region{Start: tpos, End: tpos}
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAST, fmt.Sprintf("%v token: %v", ri, kt.String()))
+			ps.Trace.Out(ps, pr, SubMatch, creg.Start, creg, parAST, fmt.Sprintf("%v token: %v", ri, kt.String()))
 		}
 	}
 
@@ -866,46 +867,46 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope lexer.Reg, depth int
 
 // MatchToken matches one token sub-rule -- returns true for match and
 // false if no match -- and the position where it was / should have been
-func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, creg *lexer.Reg, mpos Matches, parAST *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Pos) {
+func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, creg *textpos.Region, mpos Matches, parAST *AST, scope textpos.Region, depth int, optMap lexer.TokenMap) (bool, textpos.Pos) {
 	nr := len(pr.Rules)
 	ok := false
 	matchst := false // match start of creg
 	matched := false // match end of creg
-	var tpos lexer.Pos
+	var tpos textpos.Pos
 	if ri == 0 {
 		matchst = true
 	} else if mpos != nil {
-		lpos := mpos[ri-1].Ed
-		if lpos != lexer.PosZero { // previous has matched
+		lpos := mpos[ri-1].End
+		if lpos != textpos.PosZero { // previous has matched
 			matchst = true
 		} else if ri < nr-1 && rr.FromNext {
-			lpos := mpos[ri+1].St
-			if lpos != lexer.PosZero { // previous has matched
-				creg.Ed, _ = ps.Src.PrevTokenPos(lpos)
+			lpos := mpos[ri+1].Start
+			if lpos != textpos.PosZero { // previous has matched
+				creg.End, _ = ps.Src.PrevTokenPos(lpos)
 				matched = true
 			}
 		}
 	}
 	for stinc := 0; stinc < rr.StInc; stinc++ {
-		creg.St, _ = ps.Src.NextTokenPos(creg.St)
+		creg.Start, _ = ps.Src.NextTokenPos(creg.Start)
 	}
 	if ri == nr-1 && rr.Token.Token == token.EOS {
-		return true, scope.Ed
+		return true, scope.End
 	}
 	if creg.IsNil() && !matched {
 		return false, tpos
 	}
 
 	if matchst { // start token must be right here
-		if !ps.MatchToken(kt, creg.St) {
-			return false, creg.St
+		if !ps.MatchToken(kt, creg.Start) {
+			return false, creg.Start
 		}
-		tpos = creg.St
+		tpos = creg.Start
 	} else if matched {
-		if !ps.MatchToken(kt, creg.Ed) {
-			return false, creg.Ed
+		if !ps.MatchToken(kt, creg.End) {
+			return false, creg.End
 		}
-		tpos = creg.Ed
+		tpos = creg.End
 	} else {
 		// prf := profile.Start("FindToken")
 		if pr.reverse {
@@ -918,16 +919,16 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 			return false, tpos
 		}
 	}
-	creg.St, _ = ps.Src.NextTokenPos(tpos) // always ratchet up
+	creg.Start, _ = ps.Src.NextTokenPos(tpos) // always ratchet up
 	return true, tpos
 }
 
 // MatchMixed matches mixed tokens and non-tokens
-func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	nr := len(pr.Rules)
 	var mpos Matches
 
-	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
+	scstlx := ps.Src.LexAt(scope.Start) // scope starting lex
 	scstDepth := scstlx.Token.Depth
 
 	creg := scope
@@ -959,17 +960,17 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 				}
-				mpos[nr-1] = lexer.Reg{scope.Ed, scope.Ed}
+				mpos[nr-1] = textpos.Region{Start: scope.End, End: scope.End}
 			}
 			kt.Depth += scstDepth // always use starting scope depth
 			match, tpos := pr.MatchToken(ps, rr, ri, kt, &creg, mpos, parAST, scope, depth, optMap)
 			if !match {
 				if ps.Trace.On {
-					if tpos != lexer.PosZero {
+					if tpos != textpos.PosZero {
 						tlx := ps.Src.LexAt(tpos)
-						ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v token: %v, was: %v", ri, kt.String(), tlx.String()))
+						ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v token: %v, was: %v", ri, kt.String(), tlx.String()))
 					} else {
-						ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v token: %v, nil region", ri, kt.String()))
+						ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v token: %v, nil region", ri, kt.String()))
 					}
 				}
 				return false, nil
@@ -977,9 +978,9 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
-			mpos[ri] = lexer.Reg{tpos, tpos}
+			mpos[ri] = textpos.Region{Start: tpos, End: tpos}
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAST, fmt.Sprintf("%v token: %v", ri, kt.String()))
+				ps.Trace.Out(ps, pr, SubMatch, creg.Start, creg, parAST, fmt.Sprintf("%v token: %v", ri, kt.String()))
 			}
 			continue
 		}
@@ -988,42 +989,42 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 		// Sub-Rule
 
 		if creg.IsNil() {
-			ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v sub-rule: %v, nil region", ri, rr.Rule.Name))
+			ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v sub-rule: %v, nil region", ri, rr.Rule.Name))
 			return false, nil
 		}
 
 		// first, limit region to same depth or greater as start of region -- prevents
 		// overflow beyond natural boundaries
-		stlx := ps.Src.LexAt(creg.St) // scope starting lex
-		cp, _ := ps.Src.NextTokenPos(creg.St)
+		stlx := ps.Src.LexAt(creg.Start) // scope starting lex
+		cp, _ := ps.Src.NextTokenPos(creg.Start)
 		stdp := stlx.Token.Depth
-		for cp.IsLess(creg.Ed) {
+		for cp.IsLess(creg.End) {
 			lx := ps.Src.LexAt(cp)
 			if lx.Token.Depth < stdp {
-				creg.Ed = cp
+				creg.End = cp
 				break
 			}
 			cp, _ = ps.Src.NextTokenPos(cp)
 		}
 
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAST, fmt.Sprintf("%v trying sub-rule: %v", ri, rr.Rule.Name))
+			ps.Trace.Out(ps, pr, SubMatch, creg.Start, creg, parAST, fmt.Sprintf("%v trying sub-rule: %v", ri, rr.Rule.Name))
 		}
 		match, _, smpos := rr.Rule.Match(ps, parAST, creg, depth+1, optMap)
 		if !match {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v sub-rule: %v", ri, rr.Rule.Name))
+				ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v sub-rule: %v", ri, rr.Rule.Name))
 			}
 			return false, nil
 		}
-		creg.Ed = scope.Ed // back to full scope
+		creg.End = scope.End // back to full scope
 		// look through smpos for last valid position -- use that as last match pos
 		mreg := smpos.StartEnd()
-		lmnpos, ok := ps.Src.NextTokenPos(mreg.Ed)
+		lmnpos, ok := ps.Src.NextTokenPos(mreg.End)
 		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.setsScope)) {
 			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name))
+				ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name))
 			}
 			return false, nil
 		}
@@ -1031,11 +1032,11 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 			mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 		}
 		mpos[ri] = mreg
-		creg.St = lmnpos
+		creg.Start = lmnpos
 		if ps.Trace.On {
 			msreg := mreg
-			msreg.Ed = lmnpos
-			ps.Trace.Out(ps, pr, SubMatch, mreg.St, msreg, parAST, fmt.Sprintf("%v rule: %v reg: %v", ri, rr.Rule.Name, msreg))
+			msreg.End = lmnpos
+			ps.Trace.Out(ps, pr, SubMatch, mreg.Start, msreg, parAST, fmt.Sprintf("%v rule: %v reg: %v", ri, rr.Rule.Name, msreg))
 		}
 	}
 
@@ -1043,29 +1044,29 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 }
 
 // MatchNoToks matches NoToks case -- just does single sub-rule match
-func (pr *Rule) MatchNoToks(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, Matches) {
+func (pr *Rule) MatchNoToks(ps *State, parAST *AST, scope textpos.Region, depth int, optMap lexer.TokenMap) (bool, Matches) {
 	creg := scope
 	ri := 0
 	rr := &pr.Rules[0]
 	if ps.Trace.On {
-		ps.Trace.Out(ps, pr, SubMatch, creg.St, creg, parAST, fmt.Sprintf("%v trying sub-rule: %v", ri, rr.Rule.Name))
+		ps.Trace.Out(ps, pr, SubMatch, creg.Start, creg, parAST, fmt.Sprintf("%v trying sub-rule: %v", ri, rr.Rule.Name))
 	}
 	match, _, smpos := rr.Rule.Match(ps, parAST, creg, depth+1, optMap)
 	if !match {
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAST, fmt.Sprintf("%v sub-rule: %v", ri, rr.Rule.Name))
+			ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v sub-rule: %v", ri, rr.Rule.Name))
 		}
 		return false, nil
 	}
 	if ps.Trace.On {
 		mreg := smpos.StartEnd() // todo: should this include creg start instead?
-		ps.Trace.Out(ps, pr, SubMatch, mreg.St, mreg, parAST, fmt.Sprintf("%v rule: %v reg: %v", ri, rr.Rule.Name, mreg))
+		ps.Trace.Out(ps, pr, SubMatch, mreg.Start, mreg, parAST, fmt.Sprintf("%v rule: %v reg: %v", ri, rr.Rule.Name, mreg))
 	}
 	return true, smpos
 }
 
 // MatchGroup does matching for Group rules
-func (pr *Rule) MatchGroup(ps *State, parAST *AST, scope lexer.Reg, depth int, optMap lexer.TokenMap) (bool, lexer.Reg, Matches) {
+func (pr *Rule) MatchGroup(ps *State, parAST *AST, scope textpos.Region, depth int, optMap lexer.TokenMap) (bool, textpos.Region, Matches) {
 	// prf := profile.Start("SubMatch")
 	if mst, match := ps.IsMatch(pr, scope); match {
 		// 	prf.End()
@@ -1075,12 +1076,12 @@ func (pr *Rule) MatchGroup(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 	sti := 0
 	nk := len(pr.Children)
 	if pr.FirstTokenMap {
-		stlx := ps.Src.LexAt(scope.St)
+		stlx := ps.Src.LexAt(scope.Start)
 		if kpr, has := pr.FiTokenMap[stlx.Token.StringKey()]; has {
 			match, nscope, mpos := kpr.Match(ps, parAST, scope, depth+1, optMap)
 			if match {
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, SubMatch, scope.St, scope, parAST, fmt.Sprintf("first token group child: %v", kpr.Name))
+					ps.Trace.Out(ps, pr, SubMatch, scope.Start, scope, parAST, fmt.Sprintf("first token group child: %v", kpr.Name))
 				}
 				ps.AddMatch(pr, scope, mpos)
 				return true, nscope, mpos
@@ -1095,7 +1096,7 @@ func (pr *Rule) MatchGroup(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 		match, nscope, mpos := kpr.Match(ps, parAST, scope, depth+1, optMap)
 		if match {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, SubMatch, scope.St, scope, parAST, fmt.Sprintf("group child: %v", kpr.Name))
+				ps.Trace.Out(ps, pr, SubMatch, scope.Start, scope, parAST, fmt.Sprintf("group child: %v", kpr.Name))
 			}
 			ps.AddMatch(pr, scope, mpos)
 			return true, nscope, mpos
@@ -1107,13 +1108,13 @@ func (pr *Rule) MatchGroup(ps *State, parAST *AST, scope lexer.Reg, depth int, o
 
 // MatchExclude looks for matches of exclusion tokens -- if found, they exclude this rule
 // return is true if exclude matches and rule should be excluded
-func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth int, optMap lexer.TokenMap) bool {
+func (pr *Rule) MatchExclude(ps *State, scope textpos.Region, ktpos textpos.Region, depth int, optMap lexer.TokenMap) bool {
 	nf := len(pr.ExclFwd)
 	nr := len(pr.ExclRev)
-	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
+	scstlx := ps.Src.LexAt(scope.Start) // scope starting lex
 	scstDepth := scstlx.Token.Depth
 	if nf > 0 {
-		cp, ok := ps.Src.NextTokenPos(ktpos.St)
+		cp, ok := ps.Src.NextTokenPos(ktpos.Start)
 		if !ok {
 			return false
 		}
@@ -1128,7 +1129,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 			}
 			if prevAny {
 				creg := scope
-				creg.St = cp
+				creg.Start = cp
 				pos, ok := ps.FindToken(kt, creg)
 				if !ok {
 					return false
@@ -1150,7 +1151,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 			if !ok && ri < nf-1 {
 				return false
 			}
-			if scope.Ed == cp || scope.Ed.IsLess(cp) { // out of scope -- if non-opt left, nomatch
+			if scope.End == cp || scope.End.IsLess(cp) { // out of scope -- if non-opt left, nomatch
 				ri++
 				for ; ri < nf; ri++ {
 					rr := pr.ExclFwd[ri]
@@ -1164,7 +1165,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 		}
 	}
 	if nr > 0 {
-		cp, ok := ps.Src.PrevTokenPos(ktpos.St)
+		cp, ok := ps.Src.PrevTokenPos(ktpos.Start)
 		if !ok {
 			return false
 		}
@@ -1179,7 +1180,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 			}
 			if prevAny {
 				creg := scope
-				creg.Ed = cp
+				creg.End = cp
 				pos, ok := ps.FindTokenReverse(kt, creg)
 				if !ok {
 					return false
@@ -1201,7 +1202,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 			if !ok && ri > 0 {
 				return false
 			}
-			if cp.IsLess(scope.St) {
+			if cp.IsLess(scope.Start) {
 				ri--
 				for ; ri >= 0; ri-- {
 					rr := pr.ExclRev[ri]
@@ -1219,7 +1220,7 @@ func (pr *Rule) MatchExclude(ps *State, scope lexer.Reg, ktpos lexer.Reg, depth 
 
 // DoRules after we have matched, goes through rest of the rules -- returns false if
 // there were any issues encountered
-func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg, mpos Matches, optMap lexer.TokenMap, depth int) bool {
+func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope textpos.Region, mpos Matches, optMap lexer.TokenMap, depth int) bool {
 	trcAST := parentAST
 	var ourAST *AST
 	anchorFirst := (pr.AST == AnchorFirstAST && parentAST.Name != pr.Name)
@@ -1230,11 +1231,11 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 		// prf.End()
 		trcAST = ourAST
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAST, fmt.Sprintf("running with new ast: %v", trcAST.Path()))
+			ps.Trace.Out(ps, pr, Run, scope.Start, scope, trcAST, fmt.Sprintf("running with new ast: %v", trcAST.Path()))
 		}
 	} else {
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, scope.St, scope, trcAST, fmt.Sprintf("running with parent ast: %v", trcAST.Path()))
+			ps.Trace.Out(ps, pr, Run, scope.Start, scope, trcAST, fmt.Sprintf("running with parent ast: %v", trcAST.Path()))
 		}
 	}
 
@@ -1249,7 +1250,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 		pr.DoActs(ps, ri, parent, ourAST, parentAST)
 		rr := &pr.Rules[ri]
 		if rr.IsToken() && !rr.Opt {
-			mp := mpos[ri].St
+			mp := mpos[ri].Start
 			if mp == ps.Pos {
 				ps.Pos, _ = ps.Src.NextTokenPos(ps.Pos) // already matched -- move past
 				if ps.Trace.On {
@@ -1275,12 +1276,12 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 			}
 			continue
 		}
-		creg.St = ps.Pos
-		creg.Ed = scope.Ed
+		creg.Start = ps.Pos
+		creg.End = scope.End
 		if !pr.noTokens {
 			for mi := ri + 1; mi < nr; mi++ {
-				if mpos[mi].St != lexer.PosZero {
-					creg.Ed = mpos[mi].St // only look up to point of next matching token
+				if mpos[mi].Start != textpos.PosZero {
+					creg.End = mpos[mi].Start // only look up to point of next matching token
 					break
 				}
 			}
@@ -1288,17 +1289,17 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 		if rr.IsToken() { // opt by definition here
 			if creg.IsNil() { // no tokens left..
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, Run, creg.St, scope, trcAST, fmt.Sprintf("%v: opt token: %v no more src", ri, rr.Token))
+					ps.Trace.Out(ps, pr, Run, creg.Start, scope, trcAST, fmt.Sprintf("%v: opt token: %v no more src", ri, rr.Token))
 				}
 				continue
 			}
-			stlx := ps.Src.LexAt(creg.St)
+			stlx := ps.Src.LexAt(creg.Start)
 			kt := rr.Token
 			kt.Depth += stlx.Token.Depth
 			pos, ok := ps.FindToken(kt, creg)
 			if !ok {
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parentAST, fmt.Sprintf("%v token: %v", ri, kt.String()))
+					ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parentAST, fmt.Sprintf("%v token: %v", ri, kt.String()))
 				}
 				continue
 			}
@@ -1315,11 +1316,11 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 		if creg.IsNil() { // no tokens left..
 			if rr.Opt {
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, Run, creg.St, scope, trcAST, fmt.Sprintf("%v: opt rule: %v no more src", ri, rr.Rule.Name))
+					ps.Trace.Out(ps, pr, Run, creg.Start, scope, trcAST, fmt.Sprintf("%v: opt rule: %v no more src", ri, rr.Rule.Name))
 				}
 				continue
 			}
-			ps.Error(creg.St, fmt.Sprintf("missing expected input for: %v", rr.Rule.Name), pr)
+			ps.Error(creg.Start, fmt.Sprintf("missing expected input for: %v", rr.Rule.Name), pr)
 			valid = false
 			break // no point in continuing
 		}
@@ -1331,17 +1332,17 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 		// come from a sub-sub-rule and in any case is not where you want to start
 		// because is could have been a token in the middle.
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: trying rule: %v", ri, rr.Rule.Name))
+			ps.Trace.Out(ps, pr, Run, creg.Start, creg, trcAST, fmt.Sprintf("%v: trying rule: %v", ri, rr.Rule.Name))
 		}
 		subm := rr.Rule.Parse(ps, pr, useAST, creg, optMap, depth+1)
 		if subm == nil {
 			if !rr.Opt {
-				ps.Error(creg.St, fmt.Sprintf("required element: %v did not match input", rr.Rule.Name), pr)
+				ps.Error(creg.Start, fmt.Sprintf("required element: %v did not match input", rr.Rule.Name), pr)
 				valid = false
 				break
 			}
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name))
+				ps.Trace.Out(ps, pr, Run, creg.Start, creg, trcAST, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name))
 			}
 		}
 		if !rr.Opt && ourAST != nil {
@@ -1359,7 +1360,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg
 // relative to that, and don't otherwise adjust scope or position.  In particular all
 // the position updating taking place in sup-rules is then just ignored and we set the
 // position to the end position matched by the "last" rule (which was the first processed)
-func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAST *AST, scope lexer.Reg, mpos Matches, ourAST *AST, optMap lexer.TokenMap, depth int) bool {
+func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAST *AST, scope textpos.Region, mpos Matches, ourAST *AST, optMap lexer.TokenMap, depth int) bool {
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
@@ -1368,33 +1369,33 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAST *AST, scope 
 	if ourAST != nil {
 		trcAST = ourAST
 	}
-	tokpos := mpos[1].St
+	tokpos := mpos[1].Start
 	aftMpos, ok := ps.Src.NextTokenPos(tokpos)
 	if !ok {
 		ps.Error(tokpos, "premature end of input", pr)
 		return false
 	}
 
-	epos := scope.Ed
+	epos := scope.End
 	for i := nr - 1; i >= 0; i-- {
 		rr := &pr.Rules[i]
 		if i > 1 {
-			creg.St = aftMpos // end expr is in region from key token to end of scope
-			ps.Pos = creg.St  // only works for a single rule after key token -- sub-rules not necc reverse
-			creg.Ed = scope.Ed
+			creg.Start = aftMpos // end expr is in region from key token to end of scope
+			ps.Pos = creg.Start  // only works for a single rule after key token -- sub-rules not necc reverse
+			creg.End = scope.End
 		} else if i == 1 {
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, Run, tokpos, scope, trcAST, fmt.Sprintf("%v: key token: %v", i, rr.Token))
 			}
 			continue
 		} else { // start
-			creg.St = scope.St
-			ps.Pos = creg.St
-			creg.Ed = tokpos
+			creg.Start = scope.Start
+			ps.Pos = creg.Start
+			creg.End = tokpos
 		}
 		if rr.IsRule() { // non-key tokens ignored
 			if creg.IsNil() { // no tokens left..
-				ps.Error(creg.St, fmt.Sprintf("missing expected input for: %v", rr.Rule.Name), pr)
+				ps.Error(creg.Start, fmt.Sprintf("missing expected input for: %v", rr.Rule.Name), pr)
 				valid = false
 				continue
 			}
@@ -1403,12 +1404,12 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAST *AST, scope 
 				useAST = ourAST
 			}
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, Run, creg.St, creg, trcAST, fmt.Sprintf("%v: trying rule: %v", i, rr.Rule.Name))
+				ps.Trace.Out(ps, pr, Run, creg.Start, creg, trcAST, fmt.Sprintf("%v: trying rule: %v", i, rr.Rule.Name))
 			}
 			subm := rr.Rule.Parse(ps, pr, useAST, creg, optMap, depth+1)
 			if subm == nil {
 				if !rr.Opt {
-					ps.Error(creg.St, fmt.Sprintf("required element: %v did not match input", rr.Rule.Name), pr)
+					ps.Error(creg.Start, fmt.Sprintf("required element: %v did not match input", rr.Rule.Name), pr)
 					valid = false
 				}
 			}
@@ -1529,12 +1530,12 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 	}
 	if node == nil {
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ps.Pos, lexer.RegZero, useAST, fmt.Sprintf("Act %v: ERROR: node not found at path(s): %v in node: %v", act.Act, act.Path, apath))
+			ps.Trace.Out(ps, pr, RunAct, ps.Pos, textpos.RegionZero, useAST, fmt.Sprintf("Act %v: ERROR: node not found at path(s): %v in node: %v", act.Act, act.Path, apath))
 		}
 		return false
 	}
 	ast := node.(*AST)
-	lx := ps.Src.LexAt(ast.TokReg.St)
+	lx := ps.Src.LexAt(ast.TokReg.Start)
 	useTok := lx.Token.Token
 	if act.Token != token.None {
 		useTok = act.Token
@@ -1554,8 +1555,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 	}
 	switch act.Act {
 	case ChangeToken:
-		cp := ast.TokReg.St
-		for cp.IsLess(ast.TokReg.Ed) {
+		cp := ast.TokReg.Start
+		for cp.IsLess(ast.TokReg.End) {
 			tlx := ps.Src.LexAt(cp)
 			act.ChangeToken(tlx)
 			cp, _ = ps.Src.NextTokenPos(cp)
@@ -1563,8 +1564,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 		if len(adnl) > 0 {
 			for _, pk := range adnl {
 				nast := pk.(*AST)
-				cp := nast.TokReg.St
-				for cp.IsLess(nast.TokReg.Ed) {
+				cp := nast.TokReg.Start
+				for cp.IsLess(nast.TokReg.End) {
 					tlx := ps.Src.LexAt(cp)
 					act.ChangeToken(tlx)
 					cp, _ = ps.Src.NextTokenPos(cp)
@@ -1572,7 +1573,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 			}
 		}
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Token set to: %v from path: %v = %v in node: %v", act.Token, act.Path, nm, apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Token set to: %v from path: %v = %v in node: %v", act.Token, act.Path, nm, apath))
 		}
 		return false
 	case AddSymbol:
@@ -1587,7 +1588,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 				sy.Region = ast.SrcReg
 				sy.Kind = useTok
 				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
+					ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Add sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 				}
 			} else {
 				sy = syms.NewSymbol(n, useTok, ps.Src.Filename, ast.SrcReg)
@@ -1599,13 +1600,13 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 			useAST.Syms.Push(sy)
 			sy.AST = useAST.This
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
+				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Added sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 			}
 		}
 	case PushScope:
 		sy, has := ps.FindNameTopScope(nm) // Scoped(nm)
 		if !has {
-			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg) // lexer.RegZero) // zero = tmp
+			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg) // textpos.RegionZero) // zero = tmp
 			added := sy.AddScopesStack(ps.Scopes)
 			if !added {
 				ps.Syms.Add(sy)
@@ -1614,14 +1615,14 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 		ps.Scopes.Push(sy)
 		useAST.Syms.Push(sy)
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Pushed Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Pushed Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 		}
 	case PushNewScope:
 		// add plus push
 		sy, has := ps.FindNameTopScope(nm) // Scoped(nm)
 		if has {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Push New sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
+				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Push New sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 			}
 		} else {
 			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg)
@@ -1634,18 +1635,18 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 		useAST.Syms.Push(sy)
 		sy.AST = useAST.This
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Pushed New Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Pushed New Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 		}
 	case PopScope:
 		sy := ps.Scopes.Pop()
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
 		}
 	case PopScopeReg:
 		sy := ps.Scopes.Pop()
 		sy.Region = ast.SrcReg // update source region to final -- select remains initial trigger one
 		if ps.Trace.On {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
 		}
 	case AddDetail:
 		sy := useAST.Syms.Top()
@@ -1656,17 +1657,17 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 				sy.Detail += " " + nm
 			}
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added Detail: %v to Sym: %v in node: %v", nm, sy.String(), apath))
+				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Added Detail: %v to Sym: %v in node: %v", nm, sy.String(), apath))
 			}
 		} else {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add Detail: %v ERROR -- symbol not found in node: %v", nm, apath))
+				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Add Detail: %v ERROR -- symbol not found in node: %v", nm, apath))
 			}
 		}
 	case AddType:
 		scp := ps.Scopes.Top()
 		if scp == nil {
-			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add Type: %v ERROR -- requires current scope -- none set in node: %v", nm, apath))
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Add Type: %v ERROR -- requires current scope -- none set in node: %v", nm, apath))
 			return false
 		}
 		for i := range nms {
@@ -1681,7 +1682,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 			ty.AddScopesStack(ps.Scopes)
 			scp.Types.Add(ty)
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added type: %v from path: %v = %v in node: %v", ty.String(), act.Path, n, apath))
+				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.Start, ast.TokReg, ast, fmt.Sprintf("Act: Added type: %v from path: %v = %v in node: %v", ty.String(), act.Path, n, apath))
 			}
 		}
 	}

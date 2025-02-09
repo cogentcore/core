@@ -7,11 +7,11 @@ package texteditor
 import (
 	"fmt"
 
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/parser"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/parser"
 )
 
 // completeParse uses [parse] symbols and language; the string is a line of text
@@ -36,7 +36,7 @@ func completeParse(data any, text string, posLine, posChar int) (md complete.Mat
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	md = lp.Lang.CompleteLine(sfs, text, lexer.Pos{posLine, posChar})
+	md = lp.Lang.CompleteLine(sfs, text, textpos.Pos{posLine, posChar})
 	return md
 }
 
@@ -80,7 +80,7 @@ func lookupParse(data any, txt string, posLine, posChar int) (ld complete.Lookup
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	ld = lp.Lang.Lookup(sfs, txt, lexer.Pos{posLine, posChar})
+	ld = lp.Lang.Lookup(sfs, txt, textpos.Pos{posLine, posChar})
 	if len(ld.Text) > 0 {
 		TextDialog(nil, "Lookup: "+txt, string(ld.Text))
 		return ld

@@ -11,7 +11,7 @@ import (
 	"slices"
 
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -46,7 +46,7 @@ type Type struct {
 	Filename string
 
 	// region in source encompassing this type
-	Region lexer.Reg
+	Region textpos.Region
 
 	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
 	Scopes SymNames

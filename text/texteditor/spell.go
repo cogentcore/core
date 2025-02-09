@@ -12,9 +12,10 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,10 +34,10 @@ func (ed *Editor) offerComplete() {
 		return
 	}
 
-	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
+	ed.Buffer.Complete.SrcLn = ed.CursorPos.Line
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
-	st := lexer.Pos{ed.CursorPos.Ln, 0}
-	en := lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch}
+	st := textpos.Pos{ed.CursorPos.Line, 0}
+	en := textpos.Pos{ed.CursorPos.Line, ed.CursorPos.Ch}
 	tbe := ed.Buffer.Region(st, en)
 	var s string
 	if tbe != nil {
@@ -44,14 +45,14 @@ func (ed *Editor) offerComplete() {
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 	}
 
-	//	count := ed.Buf.ByteOffs[ed.CursorPos.Ln] + ed.CursorPos.Ch
+	//	count := ed.Buf.ByteOffs[ed.CursorPos.Line] + ed.CursorPos.Ch
 	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	// ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
 	// todo: why? for above
 	ed.Buffer.currentEditor = ed
-	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
+	ed.Buffer.Complete.SrcLn = ed.CursorPos.Line
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
 	ed.Buffer.Complete.Show(ed, cpos, s)
 }
@@ -80,13 +81,13 @@ func (ed *Editor) Lookup() { //types:add
 	var ln int
 	var ch int
 	if ed.HasSelection() {
-		ln = ed.SelectRegion.Start.Ln
-		if ed.SelectRegion.End.Ln != ln {
+		ln = ed.SelectRegion.Start.Line
+		if ed.SelectRegion.End.Line != ln {
 			return // no multiline selections for lookup
 		}
 		ch = ed.SelectRegion.End.Ch
 	} else {
-		ln = ed.CursorPos.Ln
+		ln = ed.CursorPos.Line
 		if ed.isWordEnd(ed.CursorPos) {
 			ch = ed.CursorPos.Ch
 		} else {
@@ -95,8 +96,8 @@ func (ed *Editor) Lookup() { //types:add
 	}
 	ed.Buffer.Complete.SrcLn = ln
 	ed.Buffer.Complete.SrcCh = ch
-	st := lexer.Pos{ed.CursorPos.Ln, 0}
-	en := lexer.Pos{ed.CursorPos.Ln, ch}
+	st := textpos.Pos{ed.CursorPos.Line, 0}
+	en := textpos.Pos{ed.CursorPos.Line, ch}
 
 	tbe := ed.Buffer.Region(st, en)
 	var s string
@@ -105,14 +106,14 @@ func (ed *Editor) Lookup() { //types:add
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 	}
 
-	//	count := ed.Buf.ByteOffs[ed.CursorPos.Ln] + ed.CursorPos.Ch
+	//	count := ed.Buf.ByteOffs[ed.CursorPos.Line] + ed.CursorPos.Ch
 	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	// ed.Buffer.setByteOffs() // make sure the pos offset is updated!!
 	// todo: why?
 	ed.Buffer.currentEditor = ed
-	ed.Buffer.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos)
+	ed.Buffer.Complete.Lookup(s, ed.CursorPos.Line, ed.CursorPos.Ch, ed.Scene, cpos)
 }
 
 // iSpellKeyInput locates the word to spell check based on cursor position and
@@ -129,11 +130,11 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 	switch kf {
 	case keymap.MoveUp:
 		if isDoc {
-			ed.Buffer.spellCheckLineTag(tp.Ln)
+			ed.Buffer.spellCheckLineTag(tp.Line)
 		}
 	case keymap.MoveDown:
 		if isDoc {
-			ed.Buffer.spellCheckLineTag(tp.Ln)
+			ed.Buffer.spellCheckLineTag(tp.Line)
 		}
 	case keymap.MoveRight:
 		if ed.isWordEnd(tp) {
@@ -141,20 +142,20 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 			ed.spellCheck(reg)
 			break
 		}
-		if tp.Ch == 0 { // end of line
-			tp.Ln--
+		if tp.Char == 0 { // end of line
+			tp.Line--
 			if isDoc {
-				ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
+				ed.Buffer.spellCheckLineTag(tp.Line) // redo prior line
 			}
-			tp.Ch = ed.Buffer.LineLen(tp.Ln)
+			tp.Char = ed.Buffer.LineLen(tp.Line)
 			reg := ed.wordBefore(tp)
 			ed.spellCheck(reg)
 			break
 		}
-		txt := ed.Buffer.Line(tp.Ln)
+		txt := ed.Buffer.Line(tp.Line)
 		var r rune
 		atend := false
-		if tp.Ch >= len(txt) {
+		if tp.Char >= len(txt) {
 			atend = true
 			tp.Ch++
 		} else {
@@ -166,11 +167,11 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 			ed.spellCheck(reg)
 		}
 	case keymap.Enter:
-		tp.Ln--
+		tp.Line--
 		if isDoc {
-			ed.Buffer.spellCheckLineTag(tp.Ln) // redo prior line
+			ed.Buffer.spellCheckLineTag(tp.Line) // redo prior line
 		}
-		tp.Ch = ed.Buffer.LineLen(tp.Ln)
+		tp.Char = ed.Buffer.LineLen(tp.Line)
 		reg := ed.wordBefore(tp)
 		ed.spellCheck(reg)
 	case keymap.FocusNext:
@@ -212,8 +213,8 @@ func (ed *Editor) spellCheck(reg *lines.Edit) bool {
 	}
 	widx := strings.Index(wb, lwb) // adjust region for actual part looking up
 	ld := len(wb) - len(lwb)
-	reg.Reg.Start.Ch += widx
-	reg.Reg.End.Ch += widx - ld
+	reg.Reg.Start.Char += widx
+	reg.Reg.End.Char += widx - ld
 
 	sugs, knwn := ed.Buffer.spell.checkWord(lwb)
 	if knwn {
@@ -221,7 +222,7 @@ func (ed *Editor) spellCheck(reg *lines.Edit) bool {
 		return false
 	}
 	// fmt.Printf("spell err: %s\n", wb)
-	ed.Buffer.spell.setWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
+	ed.Buffer.spell.setWord(wb, sugs, reg.Reg.Start.Line, reg.Reg.Start.Ch)
 	ed.Buffer.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 	ed.Buffer.AddTagEdit(reg, token.TextSpellErr)
 	return true
@@ -254,7 +255,7 @@ func (ed *Editor) offerCorrect() bool {
 	if knwn && !ed.Buffer.spell.isLastLearned(wb) {
 		return false
 	}
-	ed.Buffer.spell.setWord(wb, sugs, tbe.Reg.Start.Ln, tbe.Reg.Start.Ch)
+	ed.Buffer.spell.setWord(wb, sugs, tbe.Reg.Start.Line, tbe.Reg.Start.Ch)
 
 	cpos := ed.charStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5

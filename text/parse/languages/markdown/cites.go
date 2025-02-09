@@ -9,14 +9,14 @@ import (
 	"strings"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/languages/bibtex"
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/languages/bibtex"
+	"cogentcore.org/core/text/textpos"
 )
 
 // CompleteCite does completion on citation
-func (ml *MarkdownLang) CompleteCite(fss *parse.FileStates, origStr, str string, pos lexer.Pos) (md complete.Matches) {
+func (ml *MarkdownLang) CompleteCite(fss *parse.FileStates, origStr, str string, pos textpos.Pos) (md complete.Matches) {
 	bfile, has := fss.MetaData("bibfile")
 	if !has {
 		return
@@ -36,7 +36,7 @@ func (ml *MarkdownLang) CompleteCite(fss *parse.FileStates, origStr, str string,
 }
 
 // LookupCite does lookup on citation
-func (ml *MarkdownLang) LookupCite(fss *parse.FileStates, origStr, str string, pos lexer.Pos) (ld complete.Lookup) {
+func (ml *MarkdownLang) LookupCite(fss *parse.FileStates, origStr, str string, pos textpos.Pos) (ld complete.Lookup) {
 	bfile, has := fss.MetaData("bibfile")
 	if !has {
 		return

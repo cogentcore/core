@@ -9,12 +9,13 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/textpos"
 )
 
-func (tl *TexLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos) (md complete.Matches) {
+func (tl *TexLang) CompleteLine(fss *parse.FileStates, str string, pos textpos.Pos) (md complete.Matches) {
 	origStr := str
 	lfld := lexer.LastField(str)
 	str = lexer.LastScopedString(str)
@@ -41,7 +42,7 @@ func (tl *TexLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (tl *TexLang) Lookup(fss *parse.FileStates, str string, pos lexer.Pos) (ld complete.Lookup) {
+func (tl *TexLang) Lookup(fss *parse.FileStates, str string, pos textpos.Pos) (ld complete.Lookup) {
 	origStr := str
 	lfld := lexer.LastField(str)
 	str = lexer.LastScopedString(str)

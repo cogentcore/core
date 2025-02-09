@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/parse"
+	"cogentcore.org/core/text/parse"
 )
 
 func main() {

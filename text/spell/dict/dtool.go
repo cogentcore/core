@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/spell"
+	"cogentcore.org/core/text/spell"
 )
 
 //go:generate core generate -add-types -add-funcs

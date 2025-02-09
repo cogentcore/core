@@ -39,9 +39,13 @@ func (ps Pos) String() string {
 	return s
 }
 
-// PosErr represents an error text position (-1 for both line and char)
-// used as a return value for cases where error positions are possible.
-var PosErr = Pos{-1, -1}
+var (
+	// PosErr represents an error text position (-1 for both line and char)
+	// used as a return value for cases where error positions are possible.
+	PosErr = Pos{-1, -1}
+
+	PosZero = Pos{}
+)
 
 // IsLess returns true if receiver position is less than given comparison.
 func (ps Pos) IsLess(cmp Pos) bool {

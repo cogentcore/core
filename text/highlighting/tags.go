@@ -5,7 +5,7 @@
 package highlighting
 
 import (
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 	"github.com/alecthomas/chroma/v2"
 )
 

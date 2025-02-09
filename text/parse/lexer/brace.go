@@ -5,7 +5,8 @@
 package lexer
 
 import (
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // BracePair returns the matching brace-like punctuation for given rune,
@@ -36,8 +37,8 @@ func BracePair(r rune) (match rune, right bool) {
 // BraceMatch finds the brace, bracket, or paren that is the partner
 // of the one passed to function, within maxLns lines of start.
 // Operates on rune source with markup lex tags per line (tags exclude comments).
-func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, found bool) {
-	en.Ln = -1
+func BraceMatch(src [][]rune, tags []Line, r rune, st textpos.Pos, maxLns int) (en textpos.Pos, found bool) {
+	en.Line = -1
 	found = false
 	match, rt := BracePair(r)
 	var left int
@@ -47,8 +48,8 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 	} else {
 		left++
 	}
-	ch := st.Ch
-	ln := st.Ln
+	ch := st.Char
+	ln := st.Line
 	nln := len(src)
 	mx := min(nln-ln, maxLns)
 	mn := min(ln, maxLns)
@@ -69,14 +70,14 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 					if lx == nil || lx.Token.Token.Cat() != token.Comment {
 						right++
 						if left == right {
-							en.Ln = l - 1
-							en.Ch = i
+							en.Line = l - 1
+							en.Char = i
 							break
 						}
 					}
 				}
 			}
-			if en.Ln >= 0 {
+			if en.Line >= 0 {
 				found = true
 				break
 			}
@@ -100,14 +101,14 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, 
 					if lx == nil || lx.Token.Token.Cat() != token.Comment {
 						left++
 						if left == right {
-							en.Ln = l + 1
-							en.Ch = i
+							en.Line = l + 1
+							en.Char = i
 							break
 						}
 					}
 				}
 			}
-			if en.Ln >= 0 {
+			if en.Line >= 0 {
 				found = true
 				break
 			}

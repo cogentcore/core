@@ -13,9 +13,9 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
-	"cogentcore.org/core/parse"
-	_ "cogentcore.org/core/parse/languages"
-	"cogentcore.org/core/parse/syms"
+	"cogentcore.org/core/text/parse"
+	_ "cogentcore.org/core/text/parse/languages"
+	"cogentcore.org/core/text/parse/syms"
 )
 
 var Excludes []string

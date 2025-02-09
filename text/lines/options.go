@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/parse"
+	"cogentcore.org/core/text/parse"
 )
 
 // Options contains options for [texteditor.Buffer]s. It contains

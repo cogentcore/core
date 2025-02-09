@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/spell"
+	"cogentcore.org/core/text/spell"
 )
 
 // initSpell ensures that the [spell.Spell] spell checker is set up.

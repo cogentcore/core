@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/text/parse/lexer"
 )
 
 //go:embed dict_en_us

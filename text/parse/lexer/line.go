@@ -9,7 +9,7 @@ import (
 	"sort"
 	"unicode"
 
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // Line is one line of Lex'd text
@@ -67,10 +67,10 @@ func (ll *Line) Clone() Line {
 // which fits a stack-based tag markup logic.
 func (ll *Line) AddSort(lx Lex) {
 	for i, t := range *ll {
-		if t.St < lx.St {
+		if t.Start < lx.Start {
 			continue
 		}
-		if t.St == lx.St && t.Ed >= lx.Ed {
+		if t.Start == lx.Start && t.End >= lx.End {
 			continue
 		}
 		*ll = append(*ll, lx)
@@ -84,7 +84,7 @@ func (ll *Line) AddSort(lx Lex) {
 // Sort sorts the lex elements by starting pos, and ending pos *decreasing* if a tie
 func (ll *Line) Sort() {
 	sort.Slice((*ll), func(i, j int) bool {
-		return (*ll)[i].St < (*ll)[j].St || ((*ll)[i].St == (*ll)[j].St && (*ll)[i].Ed > (*ll)[j].Ed)
+		return (*ll)[i].Start < (*ll)[j].Start || ((*ll)[i].Start == (*ll)[j].Start && (*ll)[i].End > (*ll)[j].End)
 	})
 }
 
@@ -109,7 +109,7 @@ func (ll *Line) DeleteToken(tok token.Tokens) {
 func (ll *Line) RuneStrings(rstr []rune) []string {
 	regs := make([]string, len(*ll))
 	for i, t := range *ll {
-		regs[i] = string(rstr[t.St:t.Ed])
+		regs[i] = string(rstr[t.Start:t.End])
 	}
 	return regs
 }
@@ -175,7 +175,7 @@ func (ll *Line) NonCodeWords(src []rune) Line {
 	wsrc := slices.Clone(src)
 	for _, t := range *ll { // blank out code parts first
 		if t.Token.Token.IsCode() {
-			for i := t.St; i < t.Ed; i++ {
+			for i := t.Start; i < t.End; i++ {
 				wsrc[i] = ' '
 			}
 		}
@@ -197,18 +197,18 @@ func RuneFields(src []rune) Line {
 		cspc = unicode.IsSpace(r)
 		if pspc {
 			if !cspc {
-				cur.St = i
+				cur.Start = i
 			}
 		} else {
 			if cspc {
-				cur.Ed = i
+				cur.End = i
 				ln.Add(cur)
 			}
 		}
 		pspc = cspc
 	}
 	if !pspc {
-		cur.Ed = len(src)
+		cur.End = len(src)
 		cur.Now()
 		ln.Add(cur)
 	}

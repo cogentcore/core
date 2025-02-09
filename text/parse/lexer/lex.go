@@ -14,7 +14,8 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/nptime"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // Lex represents a single lexical element, with a token, and start and end rune positions
@@ -26,23 +27,23 @@ type Lex struct {
 	Token token.KeyToken
 
 	// start rune index within original source line for this token
-	St int
+	Start int
 
 	// end rune index within original source line for this token (exclusive -- ends one before this)
-	Ed int
+	End int
 
 	// time when region was set -- used for updating locations in the text based on time stamp (using efficient non-pointer time)
 	Time nptime.Time
 }
 
 func NewLex(tok token.KeyToken, st, ed int) Lex {
-	lx := Lex{Token: tok, St: st, Ed: ed}
+	lx := Lex{Token: tok, Start: st, End: ed}
 	return lx
 }
 
 // Src returns the rune source for given lex item (does no validity checking)
 func (lx *Lex) Src(src []rune) []rune {
-	return src[lx.St:lx.Ed]
+	return src[lx.Start:lx.End]
 }
 
 // Now sets the time stamp to now
@@ -52,25 +53,25 @@ func (lx *Lex) Now() {
 
 // String satisfies the fmt.Stringer interface
 func (lx *Lex) String() string {
-	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Token.Depth, lx.St, lx.Ed, lx.Token.String())
+	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Token.Depth, lx.Start, lx.End, lx.Token.String())
 }
 
 // ContainsPos returns true if the Lex element contains given character position
 func (lx *Lex) ContainsPos(pos int) bool {
-	return pos >= lx.St && pos < lx.Ed
+	return pos >= lx.Start && pos < lx.End
 }
 
 // OverlapsReg returns true if the two regions overlap
 func (lx *Lex) OverlapsReg(or Lex) bool {
 	// start overlaps
-	if (lx.St >= or.St && lx.St < or.Ed) || (or.St >= lx.St && or.St < lx.Ed) {
+	if (lx.Start >= or.Start && lx.Start < or.End) || (or.Start >= lx.Start && or.Start < lx.End) {
 		return true
 	}
 	// end overlaps
-	return (lx.Ed > or.St && lx.Ed <= or.Ed) || (or.Ed > lx.St && or.Ed <= lx.Ed)
+	return (lx.End > or.Start && lx.End <= or.End) || (or.End > lx.Start && or.End <= lx.End)
 }
 
 // Region returns the region for this lexical element, at given line
-func (lx *Lex) Region(ln int) Reg {
-	return Reg{St: Pos{Ln: ln, Ch: lx.St}, Ed: Pos{Ln: ln, Ch: lx.Ed}}
+func (lx *Lex) Region(ln int) textpos.Region {
+	return textpos.Region{Start: textpos.Pos{Line: ln, Char: lx.Start}, End: textpos.Pos{Line: ln, Char: lx.End}}
 }

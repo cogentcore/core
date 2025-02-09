@@ -7,8 +7,8 @@ package spell
 import (
 	"strings"
 
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // CheckLexLine returns the Lex regions for any words that are misspelled

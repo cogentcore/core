@@ -12,6 +12,8 @@ import (
 	"cogentcore.org/core/base/nptime"
 )
 
+var RegionZero = Region{}
+
 // Region is a contiguous region within a source file with lines of rune chars,
 // defined by start and end [Pos] positions.
 // End.Char position is _exclusive_ so the last char is the one before End.Char.

@@ -11,9 +11,9 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/parse/syms"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
 )
 
 // FileState contains the full lexing and parsing state information for a given file.
@@ -108,7 +108,7 @@ func (fs *FileState) SetSrc(src [][]rune, fname, basepath string, sup fileinfo.K
 
 // LexAtEnd returns true if lexing state is now at end of source
 func (fs *FileState) LexAtEnd() bool {
-	return fs.LexState.Ln >= fs.Src.NLines()
+	return fs.LexState.Line >= fs.Src.NLines()
 }
 
 // LexLine returns the lexing output for given line, combining comments and all other tokens

@@ -18,6 +18,7 @@ import (
 	"sort"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -28,7 +29,7 @@ import (
 type Error struct {
 
 	// position where the error occurred in the source
-	Pos Pos
+	Pos textpos.Pos
 
 	// full filename with path
 	Filename string
@@ -72,12 +73,12 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 		str += fmt.Sprintf(" (rule: %v)", e.Rule.AsTree().Name)
 	}
 	ssz := len(e.Src)
-	if showSrc && ssz > 0 && ssz >= e.Pos.Ch {
+	if showSrc && ssz > 0 && ssz >= e.Pos.Char {
 		str += "<br>\n\t> "
-		if ssz > e.Pos.Ch+30 {
-			str += e.Src[e.Pos.Ch : e.Pos.Ch+30]
-		} else if ssz > e.Pos.Ch {
-			str += e.Src[e.Pos.Ch:]
+		if ssz > e.Pos.Char+30 {
+			str += e.Src[e.Pos.Char : e.Pos.Char+30]
+		} else if ssz > e.Pos.Char {
+			str += e.Src[e.Pos.Char:]
 		}
 	}
 	return str
@@ -88,7 +89,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 type ErrorList []*Error
 
 // Add adds an Error with given position and error message to an ErrorList.
-func (p *ErrorList) Add(pos Pos, fname, msg string, srcln string, rule tree.Node) *Error {
+func (p *ErrorList) Add(pos textpos.Pos, fname, msg string, srcln string, rule tree.Node) *Error {
 	e := &Error{pos, fname, msg, srcln, rule}
 	*p = append(*p, e)
 	return e
@@ -107,11 +108,11 @@ func (p ErrorList) Less(i, j int) bool {
 	if e.Filename != f.Filename {
 		return e.Filename < f.Filename
 	}
-	if e.Pos.Ln != f.Pos.Ln {
-		return e.Pos.Ln < f.Pos.Ln
+	if e.Pos.Line != f.Pos.Line {
+		return e.Pos.Line < f.Pos.Line
 	}
-	if e.Pos.Ch != f.Pos.Ch {
-		return e.Pos.Ch < f.Pos.Ch
+	if e.Pos.Char != f.Pos.Char {
+		return e.Pos.Char < f.Pos.Char
 	}
 	return e.Msg < f.Msg
 }
@@ -126,11 +127,11 @@ func (p ErrorList) Sort() {
 // RemoveMultiples sorts an ErrorList and removes all but the first error per line.
 func (p *ErrorList) RemoveMultiples() {
 	sort.Sort(p)
-	var last Pos // initial last.Ln is != any legal error line
+	var last textpos.Pos // initial last.Line is != any legal error line
 	var lastfn string
 	i := 0
 	for _, e := range *p {
-		if e.Filename != lastfn || e.Pos.Ln != last.Ln {
+		if e.Filename != lastfn || e.Pos.Line != last.Line {
 			last = e.Pos
 			lastfn = e.Filename
 			(*p)[i] = e
@@ -180,11 +181,11 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	lstln := -1
 	for ei := 0; ei < ne; ei++ {
 		er := p[ei]
-		if er.Pos.Ln == lstln {
+		if er.Pos.Line == lstln {
 			continue
 		}
 		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
-		lstln = er.Pos.Ln
+		lstln = er.Pos.Line
 		cnt++
 		if cnt > maxN {
 			break

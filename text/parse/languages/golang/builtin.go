@@ -9,9 +9,9 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/parse"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/syms"
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/syms"
 )
 
 var BuiltinTypes syms.TypeMap

@@ -36,8 +36,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -66,10 +66,10 @@ type Symbol struct {
 	Filename string
 
 	// region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it
-	Region lexer.Reg
+	Region textpos.Region
 
 	// region that should be selected when activated, etc
-	SelectReg lexer.Reg
+	SelectReg textpos.Region
 
 	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
 	Scopes SymNames
@@ -85,7 +85,7 @@ type Symbol struct {
 }
 
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region
-func NewSymbol(name string, kind token.Tokens, fname string, reg lexer.Reg) *Symbol {
+func NewSymbol(name string, kind token.Tokens, fname string, reg textpos.Region) *Symbol {
 	sy := &Symbol{Name: name, Kind: kind, Filename: fname, Region: reg, SelectReg: reg}
 	return sy
 }
@@ -107,7 +107,7 @@ func (sy *Symbol) CopyFromSrc(cp *Symbol) {
 // IsTemp returns true if this is temporary symbol that is used for scoping but is not
 // otherwise permanently added to list of symbols.  Indicated by Zero Region.
 func (sy *Symbol) IsTemp() bool {
-	return sy.Region == lexer.RegZero
+	return sy.Region == textpos.RegionZero
 }
 
 // HasChildren returns true if this symbol has children

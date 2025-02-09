@@ -13,7 +13,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
+	"cogentcore.org/core/text/textpos"
 )
 
 // File contains the contents of the file being parsed -- all kept in
@@ -250,56 +251,56 @@ func (fl *File) NTokens(ln int) int {
 }
 
 // IsLexPosValid returns true if given lexical token position is valid
-func (fl *File) IsLexPosValid(pos Pos) bool {
-	if pos.Ln < 0 || pos.Ln >= fl.NLines() {
+func (fl *File) IsLexPosValid(pos textpos.Pos) bool {
+	if pos.Line < 0 || pos.Line >= fl.NLines() {
 		return false
 	}
-	nt := fl.NTokens(pos.Ln)
-	if pos.Ch < 0 || pos.Ch >= nt {
+	nt := fl.NTokens(pos.Line)
+	if pos.Char < 0 || pos.Char >= nt {
 		return false
 	}
 	return true
 }
 
 // LexAt returns Lex item at given position, with no checking
-func (fl *File) LexAt(cp Pos) *Lex {
-	return &fl.Lexs[cp.Ln][cp.Ch]
+func (fl *File) LexAt(cp textpos.Pos) *Lex {
+	return &fl.Lexs[cp.Line][cp.Char]
 }
 
 // LexAtSafe returns the Lex item at given position, or last lex item if beyond end
-func (fl *File) LexAtSafe(cp Pos) Lex {
+func (fl *File) LexAtSafe(cp textpos.Pos) Lex {
 	nln := fl.NLines()
 	if nln == 0 {
 		return Lex{}
 	}
-	if cp.Ln >= nln {
-		cp.Ln = nln - 1
+	if cp.Line >= nln {
+		cp.Line = nln - 1
 	}
-	sz := len(fl.Lexs[cp.Ln])
+	sz := len(fl.Lexs[cp.Line])
 	if sz == 0 {
-		if cp.Ln > 0 {
-			cp.Ln--
+		if cp.Line > 0 {
+			cp.Line--
 			return fl.LexAtSafe(cp)
 		}
 		return Lex{}
 	}
-	if cp.Ch < 0 {
-		cp.Ch = 0
+	if cp.Char < 0 {
+		cp.Char = 0
 	}
-	if cp.Ch >= sz {
-		cp.Ch = sz - 1
+	if cp.Char >= sz {
+		cp.Char = sz - 1
 	}
 	return *fl.LexAt(cp)
 }
 
 // ValidTokenPos returns the next valid token position starting at given point,
 // false if at end of tokens
-func (fl *File) ValidTokenPos(pos Pos) (Pos, bool) {
-	for pos.Ch >= fl.NTokens(pos.Ln) {
-		pos.Ln++
-		pos.Ch = 0
-		if pos.Ln >= fl.NLines() {
-			pos.Ln = fl.NLines() - 1 // make valid
+func (fl *File) ValidTokenPos(pos textpos.Pos) (textpos.Pos, bool) {
+	for pos.Char >= fl.NTokens(pos.Line) {
+		pos.Line++
+		pos.Char = 0
+		if pos.Line >= fl.NLines() {
+			pos.Line = fl.NLines() - 1 // make valid
 			return pos, false
 		}
 	}
@@ -307,40 +308,40 @@ func (fl *File) ValidTokenPos(pos Pos) (Pos, bool) {
 }
 
 // NextTokenPos returns the next token position, false if at end of tokens
-func (fl *File) NextTokenPos(pos Pos) (Pos, bool) {
-	pos.Ch++
+func (fl *File) NextTokenPos(pos textpos.Pos) (textpos.Pos, bool) {
+	pos.Char++
 	return fl.ValidTokenPos(pos)
 }
 
 // PrevTokenPos returns the previous token position, false if at end of tokens
-func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
-	pos.Ch--
-	if pos.Ch < 0 {
-		pos.Ln--
-		if pos.Ln < 0 {
+func (fl *File) PrevTokenPos(pos textpos.Pos) (textpos.Pos, bool) {
+	pos.Char--
+	if pos.Char < 0 {
+		pos.Line--
+		if pos.Line < 0 {
 			return pos, false
 		}
-		for fl.NTokens(pos.Ln) == 0 {
-			pos.Ln--
-			if pos.Ln < 0 {
-				pos.Ln = 0
-				pos.Ch = 0
+		for fl.NTokens(pos.Line) == 0 {
+			pos.Line--
+			if pos.Line < 0 {
+				pos.Line = 0
+				pos.Char = 0
 				return pos, false
 			}
 		}
-		pos.Ch = fl.NTokens(pos.Ln) - 1
+		pos.Char = fl.NTokens(pos.Line) - 1
 	}
 	return pos, true
 }
 
 // Token gets lex token at given Pos (Ch = token index)
-func (fl *File) Token(pos Pos) token.KeyToken {
-	return fl.Lexs[pos.Ln][pos.Ch].Token
+func (fl *File) Token(pos textpos.Pos) token.KeyToken {
+	return fl.Lexs[pos.Line][pos.Char].Token
 }
 
 // PrevDepth returns the depth of the token immediately prior to given line
 func (fl *File) PrevDepth(ln int) int {
-	pos := Pos{ln, 0}
+	pos := textpos.Pos{ln, 0}
 	pos, ok := fl.PrevTokenPos(pos)
 	if !ok {
 		return 0
@@ -367,10 +368,10 @@ func (fl *File) PrevStack(ln int) Stack {
 // TokenMapReg creates a TokenMap of tokens in region, including their
 // Cat and SubCat levels -- err's on side of inclusiveness -- used
 // for optimizing token matching
-func (fl *File) TokenMapReg(reg Reg) TokenMap {
+func (fl *File) TokenMapReg(reg textpos.Region) TokenMap {
 	m := make(TokenMap)
-	cp, ok := fl.ValidTokenPos(reg.St)
-	for ok && cp.IsLess(reg.Ed) {
+	cp, ok := fl.ValidTokenPos(reg.Start)
+	for ok && cp.IsLess(reg.End) {
 		tok := fl.Token(cp).Token
 		m.Set(tok)
 		subc := tok.SubCat()
@@ -390,59 +391,59 @@ func (fl *File) TokenMapReg(reg Reg) TokenMap {
 //  Source access from pos, reg, tok
 
 // TokenSrc gets source runes for given token position
-func (fl *File) TokenSrc(pos Pos) []rune {
+func (fl *File) TokenSrc(pos textpos.Pos) []rune {
 	if !fl.IsLexPosValid(pos) {
 		return nil
 	}
-	lx := fl.Lexs[pos.Ln][pos.Ch]
-	return fl.Lines[pos.Ln][lx.St:lx.Ed]
+	lx := fl.Lexs[pos.Line][pos.Char]
+	return fl.Lines[pos.Line][lx.Start:lx.End]
 }
 
 // TokenSrcPos returns source reg associated with lex token at given token position
-func (fl *File) TokenSrcPos(pos Pos) Reg {
+func (fl *File) TokenSrcPos(pos textpos.Pos) textpos.Region {
 	if !fl.IsLexPosValid(pos) {
-		return Reg{}
+		return textpos.Region{}
 	}
-	lx := fl.Lexs[pos.Ln][pos.Ch]
-	return Reg{St: Pos{pos.Ln, lx.St}, Ed: Pos{pos.Ln, lx.Ed}}
+	lx := fl.Lexs[pos.Line][pos.Char]
+	return textpos.Region{Start: textpos.Pos{pos.Line, lx.Start}, End: textpos.Pos{pos.Line, lx.End}}
 }
 
 // TokenSrcReg translates a region of tokens into a region of source
-func (fl *File) TokenSrcReg(reg Reg) Reg {
-	if !fl.IsLexPosValid(reg.St) || reg.IsNil() {
-		return Reg{}
+func (fl *File) TokenSrcReg(reg textpos.Region) textpos.Region {
+	if !fl.IsLexPosValid(reg.Start) || reg.IsNil() {
+		return textpos.Region{}
 	}
-	st := fl.Lexs[reg.St.Ln][reg.St.Ch].St
-	ep, _ := fl.PrevTokenPos(reg.Ed) // ed is exclusive -- go to prev
-	ed := fl.Lexs[ep.Ln][ep.Ch].Ed
-	return Reg{St: Pos{reg.St.Ln, st}, Ed: Pos{ep.Ln, ed}}
+	st := fl.Lexs[reg.Start.Line][reg.Start.Char].Start
+	ep, _ := fl.PrevTokenPos(reg.End) // ed is exclusive -- go to prev
+	ed := fl.Lexs[ep.Line][ep.Char].End
+	return textpos.Region{Start: textpos.Pos{reg.Start.Line, st}, End: textpos.Pos{ep.Line, ed}}
 }
 
 // RegSrc returns the source (as a string) for given region
-func (fl *File) RegSrc(reg Reg) string {
-	if reg.Ed.Ln == reg.St.Ln {
-		if reg.Ed.Ch > reg.St.Ch {
-			return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
+func (fl *File) RegSrc(reg textpos.Region) string {
+	if reg.End.Line == reg.Start.Line {
+		if reg.End.Char > reg.Start.Char {
+			return string(fl.Lines[reg.End.Line][reg.Start.Char:reg.End.Char])
 		}
 		return ""
 	}
-	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
-	nln := reg.Ed.Ln - reg.St.Ln
+	src := string(fl.Lines[reg.Start.Line][reg.Start.Char:])
+	nln := reg.End.Line - reg.Start.Line
 	if nln > 10 {
-		src += "|>" + string(fl.Lines[reg.St.Ln+1]) + "..."
-		src += "|>" + string(fl.Lines[reg.Ed.Ln-1])
+		src += "|>" + string(fl.Lines[reg.Start.Line+1]) + "..."
+		src += "|>" + string(fl.Lines[reg.End.Line-1])
 		return src
 	}
-	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
+	for ln := reg.Start.Line + 1; ln < reg.End.Line; ln++ {
 		src += "|>" + string(fl.Lines[ln])
 	}
-	src += "|>" + string(fl.Lines[reg.Ed.Ln][:reg.Ed.Ch])
+	src += "|>" + string(fl.Lines[reg.End.Line][:reg.End.Char])
 	return src
 }
 
 // TokenRegSrc returns the source code associated with the given token region
-func (fl *File) TokenRegSrc(reg Reg) string {
-	if !fl.IsLexPosValid(reg.St) {
+func (fl *File) TokenRegSrc(reg textpos.Region) string {
+	if !fl.IsLexPosValid(reg.Start) {
 		return ""
 	}
 	srcreg := fl.TokenSrcReg(reg)
@@ -469,20 +470,20 @@ func (fl *File) LexTagSrc() string {
 
 // InsertEos inserts an EOS just after the given token position
 // (e.g., cp = last token in line)
-func (fl *File) InsertEos(cp Pos) Pos {
-	np := Pos{cp.Ln, cp.Ch + 1}
+func (fl *File) InsertEos(cp textpos.Pos) textpos.Pos {
+	np := textpos.Pos{cp.Line, cp.Char + 1}
 	elx := fl.LexAt(cp)
 	depth := elx.Token.Depth
-	fl.Lexs[cp.Ln].Insert(np.Ch, Lex{Token: token.KeyToken{Token: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
-	fl.EosPos[np.Ln] = append(fl.EosPos[np.Ln], np.Ch)
+	fl.Lexs[cp.Line].Insert(np.Char, Lex{Token: token.KeyToken{Token: token.EOS, Depth: depth}, Start: elx.End, End: elx.End})
+	fl.EosPos[np.Line] = append(fl.EosPos[np.Line], np.Char)
 	return np
 }
 
 // ReplaceEos replaces given token with an EOS
-func (fl *File) ReplaceEos(cp Pos) {
+func (fl *File) ReplaceEos(cp textpos.Pos) {
 	clex := fl.LexAt(cp)
 	clex.Token.Token = token.EOS
-	fl.EosPos[cp.Ln] = append(fl.EosPos[cp.Ln], cp.Ch)
+	fl.EosPos[cp.Line] = append(fl.EosPos[cp.Line], cp.Char)
 }
 
 // EnsureFinalEos makes sure that the given line ends with an EOS (if it
@@ -497,7 +498,7 @@ func (fl *File) EnsureFinalEos(ln int) {
 	if sz == 0 {
 		return // can't get depth or anything -- useless
 	}
-	ep := Pos{ln, sz - 1}
+	ep := textpos.Pos{ln, sz - 1}
 	elx := fl.LexAt(ep)
 	if elx.Token.Token == token.EOS {
 		return
@@ -506,34 +507,34 @@ func (fl *File) EnsureFinalEos(ln int) {
 }
 
 // NextEos finds the next EOS position at given depth, false if none
-func (fl *File) NextEos(stpos Pos, depth int) (Pos, bool) {
+func (fl *File) NextEos(stpos textpos.Pos, depth int) (textpos.Pos, bool) {
 	// prf := profile.Start("NextEos")
 	// defer prf.End()
 
 	ep := stpos
 	nlines := fl.NLines()
-	if stpos.Ln >= nlines {
+	if stpos.Line >= nlines {
 		return ep, false
 	}
-	eps := fl.EosPos[stpos.Ln]
+	eps := fl.EosPos[stpos.Line]
 	for i := range eps {
-		if eps[i] < stpos.Ch {
+		if eps[i] < stpos.Char {
 			continue
 		}
-		ep.Ch = eps[i]
+		ep.Char = eps[i]
 		lx := fl.LexAt(ep)
 		if lx.Token.Depth == depth {
 			return ep, true
 		}
 	}
-	for ep.Ln = stpos.Ln + 1; ep.Ln < nlines; ep.Ln++ {
-		eps := fl.EosPos[ep.Ln]
+	for ep.Line = stpos.Line + 1; ep.Line < nlines; ep.Line++ {
+		eps := fl.EosPos[ep.Line]
 		sz := len(eps)
 		if sz == 0 {
 			continue
 		}
 		for i := 0; i < sz; i++ {
-			ep.Ch = eps[i]
+			ep.Char = eps[i]
 			lx := fl.LexAt(ep)
 			if lx.Token.Depth == depth {
 				return ep, true
@@ -544,20 +545,20 @@ func (fl *File) NextEos(stpos Pos, depth int) (Pos, bool) {
 }
 
 // NextEosAnyDepth finds the next EOS at any depth
-func (fl *File) NextEosAnyDepth(stpos Pos) (Pos, bool) {
+func (fl *File) NextEosAnyDepth(stpos textpos.Pos) (textpos.Pos, bool) {
 	ep := stpos
 	nlines := fl.NLines()
-	if stpos.Ln >= nlines {
+	if stpos.Line >= nlines {
 		return ep, false
 	}
-	eps := fl.EosPos[stpos.Ln]
-	if np := eps.FindGtEq(stpos.Ch); np >= 0 {
-		ep.Ch = np
+	eps := fl.EosPos[stpos.Line]
+	if np := eps.FindGtEq(stpos.Char); np >= 0 {
+		ep.Char = np
 		return ep, true
 	}
-	ep.Ch = 0
-	for ep.Ln = stpos.Ln + 1; ep.Ln < nlines; ep.Ln++ {
-		sz := len(fl.EosPos[ep.Ln])
+	ep.Char = 0
+	for ep.Line = stpos.Line + 1; ep.Line < nlines; ep.Line++ {
+		sz := len(fl.EosPos[ep.Line])
 		if sz == 0 {
 			continue
 		}

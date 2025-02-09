@@ -11,8 +11,8 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/text/parse/lexer"
 )
 
 var (
@@ -76,7 +76,7 @@ func (ed *Editor) stopCursor() {
 }
 
 // cursorBBox returns a bounding-box for a cursor at given position
-func (ed *Editor) cursorBBox(pos lexer.Pos) image.Rectangle {
+func (ed *Editor) cursorBBox(pos textpos.Pos) image.Rectangle {
 	cpos := ed.charStartPos(pos)
 	cbmin := cpos.SubScalar(ed.CursorWidth.Dots)
 	cbmax := cpos.AddScalar(ed.CursorWidth.Dots)

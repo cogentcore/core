@@ -11,8 +11,8 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )

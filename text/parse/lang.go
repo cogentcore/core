@@ -6,9 +6,10 @@ package parse
 
 import (
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse/complete"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/syms"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/textpos"
 )
 
 // Language provides a general interface for language-specific management
@@ -57,7 +58,7 @@ type Language interface {
 	// Typically the language will call ParseLine on that line, and use the AST
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.
-	CompleteLine(fs *FileStates, text string, pos lexer.Pos) complete.Matches
+	CompleteLine(fs *FileStates, text string, pos textpos.Pos) complete.Matches
 
 	// CompleteEdit returns the completion edit data for integrating the
 	// selected completion into the source
@@ -66,7 +67,7 @@ type Language interface {
 	// Lookup returns lookup results for given text which is at given position
 	// within the file.  This can either be a file and position in file to
 	// open and view, or direct text to show.
-	Lookup(fs *FileStates, text string, pos lexer.Pos) complete.Lookup
+	Lookup(fs *FileStates, text string, pos textpos.Pos) complete.Lookup
 
 	// IndentLine returns the indentation level for given line based on
 	// previous line's indentation level, and any delta change based on
@@ -80,7 +81,7 @@ type Language interface {
 	// (bracket, brace, paren) while typing.
 	// pos = position where bra will be inserted, and curLn is the current line
 	// match = insert the matching ket, and newLine = insert a new line.
-	AutoBracket(fs *FileStates, bra rune, pos lexer.Pos, curLn []rune) (match, newLine bool)
+	AutoBracket(fs *FileStates, bra rune, pos textpos.Pos, curLn []rune) (match, newLine bool)
 
 	// below are more implementational methods not called externally typically
 

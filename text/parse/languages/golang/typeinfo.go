@@ -5,8 +5,8 @@
 package golang
 
 import (
-	"cogentcore.org/core/parse/syms"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // FuncParams returns the parameters of given function / method symbol,

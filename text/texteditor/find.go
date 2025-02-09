@@ -10,9 +10,9 @@ import (
 	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/parse/lexer"
 )
 
 // findMatches finds the matches with given search string (literal, not regex)
@@ -41,7 +41,7 @@ func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]lines.Matc
 }
 
 // matchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (ed *Editor) matchFromPos(matches []lines.Match, cpos lexer.Pos) (int, bool) {
+func (ed *Editor) matchFromPos(matches []lines.Match, cpos textpos.Pos) (int, bool) {
 	for i, m := range matches {
 		reg := ed.Buffer.AdjustRegion(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
@@ -73,7 +73,7 @@ type ISearch struct {
 	prevPos int
 
 	// starting position for search -- returns there after on cancel
-	startPos lexer.Pos
+	startPos textpos.Pos
 }
 
 // viewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -91,7 +91,7 @@ func (ed *Editor) iSearchMatches() bool {
 
 // iSearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
-func (ed *Editor) iSearchNextMatch(cpos lexer.Pos) bool {
+func (ed *Editor) iSearchNextMatch(cpos textpos.Pos) bool {
 	if len(ed.ISearch.Matches) == 0 {
 		ed.iSearchEvent()
 		return false
@@ -258,7 +258,7 @@ type QReplace struct {
 	pos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	startPos lexer.Pos
+	startPos textpos.Pos
 }
 
 var (

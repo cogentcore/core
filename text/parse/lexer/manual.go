@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 )
 
 // These functions provide "manual" lexing support for specific cases, such as completion, where a string must be processed further.
@@ -152,8 +152,8 @@ func LastField(str string) string {
 // which are used for object paths (e.g., field.field.field)
 func ObjPathAt(line Line, lx *Lex) *Lex {
 	stlx := lx
-	if lx.St > 1 {
-		_, lxidx := line.AtPos(lx.St - 1)
+	if lx.Start > 1 {
+		_, lxidx := line.AtPos(lx.Start - 1)
 		for i := lxidx; i >= 0; i-- {
 			clx := &line[i]
 			if clx.Token.Token == token.PunctSepPeriod || clx.Token.Token.InCat(token.Name) {

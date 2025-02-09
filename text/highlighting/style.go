@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/text/rich"
 )
 

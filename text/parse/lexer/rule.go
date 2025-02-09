@@ -12,7 +12,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/parse/token"
+	"cogentcore.org/core/text/parse/token"
 	"cogentcore.org/core/tree"
 )
 
@@ -321,7 +321,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return true
 	case Letter:
-		rn, ok := ls.Rune(lr.Offset)
+		rn, ok := ls.RuneAt(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -330,7 +330,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return false
 	case Digit:
-		rn, ok := ls.Rune(lr.Offset)
+		rn, ok := ls.RuneAt(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -339,7 +339,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return false
 	case WhiteSpace:
-		rn, ok := ls.Rune(lr.Offset)
+		rn, ok := ls.RuneAt(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -353,7 +353,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return false
 	case AnyRune:
-		_, ok := ls.Rune(lr.Offset)
+		_, ok := ls.RuneAt(lr.Offset)
 		return ok
 	}
 	return false

@@ -15,8 +15,9 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/iox/jsonx"
-	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/parse/parser"
+	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/textpos"
 )
 
 // Parser is the overall parser for managing the parsing
@@ -78,17 +79,17 @@ func (pr *Parser) LexInit(fs *FileState) {
 // LexNext does next step of lexing -- returns lowest-level rule that
 // matched, and nil when nomatch err or at end of source input
 func (pr *Parser) LexNext(fs *FileState) *lexer.Rule {
-	if fs.LexState.Ln >= fs.Src.NLines() {
+	if fs.LexState.Line >= fs.Src.NLines() {
 		return nil
 	}
 	for {
 		if fs.LexState.AtEol() {
-			fs.Src.SetLine(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
-			fs.LexState.Ln++
-			if fs.LexState.Ln >= fs.Src.NLines() {
+			fs.Src.SetLine(fs.LexState.Line, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
+			fs.LexState.Line++
+			if fs.LexState.Line >= fs.Src.NLines() {
 				return nil
 			}
-			fs.LexState.SetLine(fs.Src.Lines[fs.LexState.Ln])
+			fs.LexState.SetLine(fs.Src.Lines[fs.LexState.Line])
 		}
 		mrule := pr.Lexer.LexStart(&fs.LexState)
 		if mrule != nil {
@@ -104,18 +105,18 @@ func (pr *Parser) LexNext(fs *FileState) *lexer.Rule {
 // LexNextLine does next line of lexing -- returns lowest-level rule that
 // matched at end, and nil when nomatch err or at end of source input
 func (pr *Parser) LexNextLine(fs *FileState) *lexer.Rule {
-	if fs.LexState.Ln >= fs.Src.NLines() {
+	if fs.LexState.Line >= fs.Src.NLines() {
 		return nil
 	}
 	var mrule *lexer.Rule
 	for {
 		if fs.LexState.AtEol() {
-			fs.Src.SetLine(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
-			fs.LexState.Ln++
-			if fs.LexState.Ln >= fs.Src.NLines() {
+			fs.Src.SetLine(fs.LexState.Line, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
+			fs.LexState.Line++
+			if fs.LexState.Line >= fs.Src.NLines() {
 				return nil
 			}
-			fs.LexState.SetLine(fs.Src.Lines[fs.LexState.Ln])
+			fs.LexState.SetLine(fs.Src.Lines[fs.LexState.Line])
 			return mrule
 		}
 		mrule = pr.Lexer.LexStart(&fs.LexState)
@@ -157,7 +158,7 @@ func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lexer.Line {
 	fs.Src.SetLine(ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack) // before saving here
 	fs.TwoState.SetSrc(&fs.Src)
 	fs.Src.EosPos[ln] = nil // reset eos
-	pr.PassTwo.EosDetectPos(&fs.TwoState, lexer.Pos{Ln: ln}, 1)
+	pr.PassTwo.EosDetectPos(&fs.TwoState, textpos.Pos{Line: ln}, 1)
 	merge := lexer.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
 	mc := merge.Clone()
 	if len(fs.LexState.Comments) > 0 {
