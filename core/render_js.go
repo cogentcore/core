@@ -37,8 +37,21 @@ func (w *renderWindow) updateCanvases(sm *stages) {
 
 // updateCanvas ensures that the given [htmlcanvas.Renderer] is properly configured.
 func (w *renderWindow) updateCanvas(hc *htmlcanvas.Renderer, st *Stage) {
-	// screen := w.SystemWindow.Screen()
+	screen := w.SystemWindow.Screen()
+
+	// hc.Canvas.Set("width", st.Scene.SceneGeom.Size.X)
+	// hc.Canvas.Set("height", st.Scene.SceneGeom.Size.Y)
+
 	style := hc.Canvas.Get("style")
-	style.Set("left", fmt.Sprintf("%dpx", st.Scene.SceneGeom.Pos.X))
-	style.Set("top", fmt.Sprintf("%dpx", st.Scene.SceneGeom.Pos.Y))
+
+	// Dividing by the DevicePixelRatio in this way avoids rounding errors (CSS
+	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices
+	// with fractional device pixel ratios
+	// (see https://github.com/cogentcore/core/issues/779 and
+	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
+	style.Set("left", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Pos.X)/screen.DevicePixelRatio))
+	style.Set("top", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Pos.Y)/screen.DevicePixelRatio))
+
+	style.Set("width", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Size.X)/screen.DevicePixelRatio))
+	style.Set("height", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Size.Y)/screen.DevicePixelRatio))
 }
