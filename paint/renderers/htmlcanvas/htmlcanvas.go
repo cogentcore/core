@@ -267,6 +267,15 @@ func (rs *Renderer) RenderImage(pimg *pimage.Params) {
 		return
 	}
 
+	// Fast path for [image.Uniform]
+	if u, ok := pimg.Source.(*image.Uniform); ok && pimg.Mask == nil {
+		// TODO: caching?
+		rs.style.Fill.Color = u
+		rs.ctx.Set("fillStyle", rs.imageToStyle(u))
+		rs.ctx.Call("fillRect", pimg.Rect.Min.X, pimg.Rect.Min.Y, pimg.Rect.Dx(), pimg.Rect.Dy())
+		return
+	}
+
 	// TODO: images possibly comparatively not performant on web, so there
 	// might be a better path for things like FillBox.
 	// TODO: have a fast path for [image.RGBA]?
