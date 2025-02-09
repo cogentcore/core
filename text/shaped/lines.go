@@ -12,8 +12,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/shaping"
-	"golang.org/x/image/math/fixed"
 )
 
 // todo: split source at para boundaries and use wrap para on those.
@@ -108,28 +106,6 @@ type Line struct {
 	Highlights []textpos.Range
 }
 
-// Run is a span of text with the same font properties, with full rendering information.
-type Run struct {
-	shaping.Output
-
-	// MaxBounds are the maximal line-level bounds for this run, suitable for region
-	// rendering and mouse interaction detection.
-	MaxBounds math32.Box2
-
-	// Decoration are the decorations from the style to apply to this run.
-	Decoration rich.Decorations
-
-	// FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
-	// Will only be non-nil if set for this run; Otherwise use default.
-	FillColor image.Image
-
-	// StrokeColor is the color to use for glyph outline stroking, if non-nil.
-	StrokeColor image.Image
-
-	// Background is the color to use for the background region, if non-nil.
-	Background image.Image
-}
-
 func (ln *Line) String() string {
 	return ln.Source.String() + fmt.Sprintf(" runs: %d\n", len(ln.Runs))
 }
@@ -151,46 +127,4 @@ func (ls *Lines) GetLinks() []rich.LinkRec {
 	}
 	ls.Links = ls.Source.GetLinks()
 	return ls.Links
-}
-
-// GlyphBoundsBox returns the math32.Box2 version of [Run.GlyphBounds],
-// providing a tight bounding box for given glyph within this run.
-func (rn *Run) GlyphBoundsBox(g *shaping.Glyph) math32.Box2 {
-	return math32.B2FromFixed(rn.GlyphBounds(g))
-}
-
-// GlyphBounds returns the tight bounding box for given glyph within this run.
-func (rn *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
-	if rn.Direction.IsVertical() {
-		if rn.Direction.IsSideways() {
-			fmt.Println("sideways")
-			return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
-		}
-		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -g.XBearing - g.Width/2, Y: g.Height - g.YOffset}, Max: fixed.Point26_6{X: g.XBearing + g.Width/2, Y: -(g.YBearing + g.Height) - g.YOffset}}
-	}
-	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
-}
-
-// BoundsBox returns the LineBounds for given Run as a math32.Box2
-// bounding box, converted from the Bounds method.
-func (rn *Run) BoundsBox() math32.Box2 {
-	return math32.B2FromFixed(rn.Bounds())
-}
-
-// Bounds returns the LineBounds for given Run as rect bounding box.
-// See [Run.BoundsBox] for a version returning the float32 [math32.Box2].
-func (rn *Run) Bounds() fixed.Rectangle26_6 {
-	gapdec := rn.LineBounds.Descent
-	if gapdec < 0 && rn.LineBounds.Gap < 0 || gapdec > 0 && rn.LineBounds.Gap > 0 {
-		gapdec += rn.LineBounds.Gap
-	} else {
-		gapdec -= rn.LineBounds.Gap
-	}
-	if rn.Direction.IsVertical() {
-		// ascent, descent describe horizontal, advance is vertical
-		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -rn.LineBounds.Ascent, Y: 0},
-			Max: fixed.Point26_6{X: -gapdec, Y: -rn.Advance}}
-	}
-	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: -rn.LineBounds.Ascent},
-		Max: fixed.Point26_6{X: rn.Advance, Y: -gapdec}}
 }

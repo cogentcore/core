@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shaped
+package shapedgt
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/shaping"
@@ -23,7 +24,7 @@ import (
 // first using standard newline markers, assumed to coincide with separate spans in the
 // source text, and wrapped separately. For horizontal text, the Lines will render with
 // a position offset at the upper left corner of the overall bounding box of the text.
-func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines {
+func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 24
 	}
@@ -31,7 +32,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	dir := goTextDirection(rich.Default, tsty)
 
 	lht := sh.LineHeight(defSty, tsty, rts)
-	lns := &Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
+	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
 
 	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
 	nlines := int(math32.Floor(size.Y / lns.LineHeight))
@@ -79,7 +80,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	var off math32.Vector2
 	for li, lno := range lines {
 		// fmt.Println("line:", li, off)
-		ln := Line{}
+		ln := shaped.Line{}
 		var lsp rich.Text
 		var pos fixed.Point26_6
 		setFirst := false
@@ -136,8 +137,8 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			bb := math32.B2FromFixed(run.Bounds().Add(pos))
 			// fmt.Println(bb.Size().Y, lht)
 			ln.Bounds.ExpandByBox(bb)
-			pos = DirectionAdvance(run.Direction, pos, run.Advance)
-			ln.Runs = append(ln.Runs, run)
+			pos = DirectionAdvance(run.Direction, pos, run.Output.Advance)
+			ln.Runs = append(ln.Runs, &run)
 		}
 		if li == 0 { // set offset for first line based on max ascent
 			if !dir.IsVertical() { // todo: vertical!
@@ -146,8 +147,8 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		}
 		// go back through and give every run the expanded line-level box
 		for ri := range ln.Runs {
-			run := &ln.Runs[ri]
-			rb := run.BoundsBox()
+			run := ln.Runs[ri]
+			rb := run.LineBounds()
 			if dir.IsVertical() {
 				rb.Min.X, rb.Max.X = ln.Bounds.Min.X, ln.Bounds.Max.X
 				rb.Min.Y -= 2 // ensure some overlap along direction of rendering adjacent
@@ -157,7 +158,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 				rb.Min.X -= 2
 				rb.Max.Y += 2
 			}
-			run.MaxBounds = rb
+			run.AsBase().MaxBounds = rb
 		}
 		ln.Source = lsp
 		// offset has prior line's size built into it, but we need to also accommodate

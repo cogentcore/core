@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shaped
+package shapedgt
 
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 )
 
@@ -14,7 +15,7 @@ import (
 // using given rune (often the letter 'm'). The GlyphBounds field of the [Run] result
 // has the font ascent and descent information, and the BoundsBox() method returns a full
 // bounding box for the given font, centered at the baseline.
-func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) *Run {
+func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) shaped.Run {
 	tx := rich.NewText(sty, []rune{r})
 	out := sh.shapeText(tx, tsty, rts, []rune{r})
 	return &Run{Output: out[0]}
@@ -26,7 +27,7 @@ func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 // font-derived line height, which is not generally the same as the font size.
 func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
 	run := sh.FontSize('M', sty, tsty, rts)
-	bb := run.BoundsBox()
+	bb := run.LineBounds()
 	dir := goTextDirection(rich.Default, tsty)
 	if dir.IsVertical() {
 		return math32.Round(tsty.LineSpacing * bb.Size().X)

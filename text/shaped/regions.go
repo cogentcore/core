@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -101,7 +100,7 @@ func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 	if ti >= n { // goto end
 		ln := ls.Lines[len(ls.Lines)-1]
 		off := start.Add(ln.Offset)
-		run := &ln.Runs[len(ln.Runs)-1]
+		run := ln.Runs[len(ln.Runs)-1].AsBase()
 		ep := run.MaxBounds.Max.Add(off)
 		ep.Y = run.MaxBounds.Min.Y + off.Y
 		return math32.Box2{ep, ep}
@@ -113,23 +112,18 @@ func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 		}
 		off := start.Add(ln.Offset)
 		for ri := range ln.Runs {
-			run := &ln.Runs[ri]
+			run := ln.Runs[ri]
 			rr := run.Runes()
 			if ti < rr.Start { // space?
 				fmt.Println("early:", ti, rr.Start)
-				off.X += math32.FromFixed(run.Advance)
+				off.X += run.Advance()
 				continue
 			}
 			if ti >= rr.End {
-				off.X += math32.FromFixed(run.Advance)
+				off.X += run.Advance()
 				continue
 			}
-			gis := run.GlyphsAt(ti)
-			if len(gis) == 0 {
-				fmt.Println("no glyphs")
-				return zb // nope
-			}
-			bb := run.GlyphRegionBounds(gis[0], gis[len(gis)-1])
+			bb := run.RuneBounds(ti)
 			return bb.Translate(off)
 		}
 	}
@@ -162,10 +156,10 @@ func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 			continue
 		}
 		for ri := range ln.Runs {
-			run := &ln.Runs[ri]
-			rbb := run.MaxBounds.Translate(off)
+			run := ln.Runs[ri]
+			rbb := run.AsBase().MaxBounds.Translate(off)
 			if !rbb.ContainsPoint(pt) {
-				off.X += math32.FromFixed(run.Advance)
+				off.X += run.Advance()
 				continue
 			}
 			rp := run.RuneAtPoint(ls.Source, pt, off)
@@ -177,98 +171,4 @@ func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 		return ln.SourceRange.End
 	}
 	return 0
-}
-
-// Runes returns our rune range using textpos.Range
-func (rn *Run) Runes() textpos.Range {
-	return textpos.Range{rn.Output.Runes.Offset, rn.Output.Runes.Offset + rn.Output.Runes.Count}
-}
-
-// GlyphsAt returns the indexs of the glyph(s) at given original source rune index.
-// Empty if none found.
-func (rn *Run) GlyphsAt(i int) []int {
-	var gis []int
-	for gi := range rn.Glyphs {
-		g := &rn.Glyphs[gi]
-		if g.ClusterIndex > i {
-			break
-		}
-		if g.ClusterIndex == i {
-			gis = append(gis, gi)
-		}
-	}
-	return gis
-}
-
-// FirstGlyphAt returns the index of the first glyph at or above given original
-// source rune index, returns -1 if none found.
-func (rn *Run) FirstGlyphAt(i int) int {
-	for gi := range rn.Glyphs {
-		g := &rn.Glyphs[gi]
-		if g.ClusterIndex >= i {
-			return gi
-		}
-	}
-	return -1
-}
-
-// LastGlyphAt returns the index of the last glyph at given original source rune index,
-// returns -1 if none found.
-func (rn *Run) LastGlyphAt(i int) int {
-	ng := len(rn.Glyphs)
-	for gi := ng - 1; gi >= 0; gi-- {
-		g := &rn.Glyphs[gi]
-		if g.ClusterIndex <= i {
-			return gi
-		}
-	}
-	return -1
-}
-
-// RuneAtPoint returns the index of the rune in the source, which contains given point,
-// using the maximal glyph bounding box. Off is the offset for this run within overall
-// image rendering context of point coordinates. Assumes point is already identified
-// as being within the [Run.MaxBounds].
-func (rn *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
-	// todo: vertical case!
-	adv := off.X
-	rr := rn.Runes()
-	for gi := range rn.Glyphs {
-		g := &rn.Glyphs[gi]
-		cri := g.ClusterIndex
-		gadv := math32.FromFixed(g.XAdvance)
-		mx := adv + gadv
-		// fmt.Println(gi, cri, adv, mx, pt.X)
-		if pt.X >= adv && pt.X < mx {
-			// fmt.Println("fits!")
-			return cri
-		}
-		adv += gadv
-	}
-	return rr.End
-}
-
-// GlyphRegionBounds returns the maximal line-bounds level bounding box
-// between two glyphs in this run, where the st comes before the ed.
-func (rn *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
-	if rn.Direction.IsVertical() {
-		// todo: write me!
-		return math32.Box2{}
-	}
-	sg := &rn.Glyphs[st]
-	stb := rn.GlyphBoundsBox(sg)
-	mb := rn.MaxBounds
-	off := float32(0)
-	for gi := 0; gi < st; gi++ {
-		g := &rn.Glyphs[gi]
-		off += math32.FromFixed(g.XAdvance)
-	}
-	mb.Min.X = off + stb.Min.X - 2
-	for gi := st; gi <= ed; gi++ {
-		g := &rn.Glyphs[gi]
-		gb := rn.GlyphBoundsBox(g)
-		mb.Max.X = off + gb.Max.X + 2
-		off += math32.FromFixed(g.XAdvance)
-	}
-	return mb
 }

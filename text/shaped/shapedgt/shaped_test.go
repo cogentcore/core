@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shaped_test
+package shapedgt_test
 
 import (
-	"os"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -13,22 +12,16 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/renderers/rasterx"
+	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
-	. "cogentcore.org/core/text/shaped"
+	. "cogentcore.org/core/text/shaped/shapedgt"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMain(m *testing.M) {
-	// ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	paint.NewDefaultImageRenderer = rasterx.New
-	os.Exit(m.Run())
-}
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
