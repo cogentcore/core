@@ -41,6 +41,7 @@ func (dw *Drawer) AsGPUDrawer() *gpudraw.Drawer {
 // supports WebGPU and a backup 2D image drawer otherwise.
 func (a *App) InitDrawer() {
 	gp := gpu.NewGPU(nil)
+	gp = nil // TODO(text): remove
 	if gp == nil {
 		a.Draw.context2D = js.Global().Get("document").Call("querySelector", "canvas").Call("getContext", "2d")
 		return
