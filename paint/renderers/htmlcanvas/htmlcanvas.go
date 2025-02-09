@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Renderers is a list of all current HTML canvas renderers.
@@ -268,6 +269,7 @@ func (rs *Renderer) RenderImage(pimg *pimage.Params) {
 
 	// TODO: images possibly comparatively not performant on web, so there
 	// might be a better path for things like FillBox.
+	// TODO: have a fast path for [image.RGBA]?
 	size := pimg.Rect.Size() // TODO: is this right?
 	sp := pimg.SourcePos     // starting point
 	buf := make([]byte, 4*size.X*size.Y)
@@ -282,10 +284,8 @@ func (rs *Renderer) RenderImage(pimg *pimage.Params) {
 		}
 	}
 	// TODO: clean this up
-	jsBuf := js.Global().Get("Uint8Array").New(len(buf))
-	js.CopyBytesToJS(jsBuf, buf)
-	jsBufClamped := js.Global().Get("Uint8ClampedArray").New(jsBuf)
-	imageData := js.Global().Get("ImageData").New(jsBufClamped, size.X, size.Y)
+	jsBuf := wgpu.BytesToJS(buf)
+	imageData := js.Global().Get("ImageData").New(jsBuf, size.X, size.Y)
 	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
 	imageBitmap, ok := jsAwait(imageBitmapPromise)
 	if !ok {
