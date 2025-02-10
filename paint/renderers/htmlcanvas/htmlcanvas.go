@@ -304,6 +304,6 @@ func (rs *Renderer) RenderImage(pimg *pimage.Params) {
 	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
 	// m = m.Scale(rs.dpm, rs.dpm)
 	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
-	rs.ctx.Call("drawImage", imageBitmap, 0, 0)
+	rs.ctx.Call("drawImage", imageBitmap, 0, 0) // TODO: wrong position?
 	// rs.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 }
