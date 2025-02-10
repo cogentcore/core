@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	_ "cogentcore.org/core/text/parse/supportedlanguages"
@@ -24,7 +23,7 @@ import (
 type Highlighter struct {
 
 	// syntax highlighting style to use
-	StyleName core.HighlightingName
+	StyleName HighlightingName
 
 	// chroma-based language name for syntax highlighting the code
 	language string
@@ -51,7 +50,7 @@ type Highlighter struct {
 	// external toggle to turn off automatic highlighting
 	off          bool
 	lastLanguage string
-	lastStyle    core.HighlightingName
+	lastStyle    HighlightingName
 	lexer        chroma.Lexer
 	formatter    *html.Formatter
 }
@@ -108,7 +107,7 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 }
 
 // SetStyle sets the highlighting style and updates corresponding settings
-func (hi *Highlighter) SetStyle(style core.HighlightingName) {
+func (hi *Highlighter) SetStyle(style HighlightingName) {
 	if style == "" {
 		return
 	}

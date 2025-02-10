@@ -14,9 +14,9 @@ import (
 // MarkupLineRich returns the [rich.Text] styled line for each tag.
 // Takes both the hi highlighting tags and extra tags.
 // The style provides the starting default style properties.
-func MarkupLineRich(sty *rich.Style, txt []rune, hitags, tags lexer.Line) rich.Text {
+func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.Line) rich.Text {
 	if len(txt) > maxLineLen { // avoid overflow
-		return txt[:maxLineLen]
+		return rich.NewText(sty, txt[:maxLineLen])
 	}
 	sz := len(txt)
 	if sz == 0 {
@@ -29,11 +29,10 @@ func MarkupLineRich(sty *rich.Style, txt []rune, hitags, tags lexer.Line) rich.T
 		return rich.NewText(sty, txt)
 	}
 
-	csty := *sty // todo: need to keep updating the current style based on stack.
 	stys := []rich.Style{*sty}
 	tstack := []int{0} // stack of tags indexes that remain to be completed, sorted soonest at end
 
-	tx := rich.NewText(sty)
+	tx := rich.NewText(sty, nil)
 	cp := 0
 	for i, tr := range ttags {
 		if cp >= sz {
@@ -47,8 +46,8 @@ func MarkupLineRich(sty *rich.Style, txt []rune, hitags, tags lexer.Line) rich.T
 					tx.AddRunes(txt[cp:ep])
 					cp = ep
 				}
-				tstack = slices.Delete(tstack, si)
-				stys = slices.Delete(stys, si)
+				tstack = slices.Delete(tstack, si, si+1)
+				stys = slices.Delete(stys, si, si+1)
 			}
 		}
 		if cp >= sz || tr.Start >= sz {
@@ -58,13 +57,18 @@ func MarkupLineRich(sty *rich.Style, txt []rune, hitags, tags lexer.Line) rich.T
 			tx.AddRunes(txt[cp:tr.Start])
 		}
 		// todo: get style
-		nst := *sty
-		//	clsnm := tr.Token.Token.StyleName()
+		cst := stys[len(stys)-1]
+		nst := cst
+		entry := hs.Tag(tr.Token.Token)
+		if !entry.IsZero() {
+			entry.ToRichStyle(&nst)
+		}
+
 		ep := tr.End
 		if i < nt-1 {
 			if ttags[i+1].Start < tr.End { // next one starts before we end, add to stack
 				ep = ttags[i+1].Start
-				if len(tstack) == 0 {
+				if len(tstack) == 1 {
 					tstack = append(tstack, i)
 					stys = append(stys, nst)
 				} else {
@@ -86,7 +90,7 @@ func MarkupLineRich(sty *rich.Style, txt []rune, hitags, tags lexer.Line) rich.T
 		cp = ep
 	}
 	if sz > cp {
-		tx.AddRunes(sty, txt[cp:sz])
+		tx.AddSpan(sty, txt[cp:sz])
 	}
 	return tx
 }

@@ -4,7 +4,11 @@
 
 package highlighting
 
-import "cogentcore.org/core/text/parse/lexer"
+import (
+	"html"
+
+	"cogentcore.org/core/text/parse/lexer"
+)
 
 // maxLineLen prevents overflow in allocating line length
 const (
@@ -120,7 +124,7 @@ func MarkupLineHTML(txt []rune, hitags, tags lexer.Line, escapeHTML bool) []byte
 // It operates on a *copy* of the byte string and does not modify the input!
 // otherwise it causes major problems..
 func HTMLEscapeBytes(b []byte) []byte {
-	return []byte(stdhtml.EscapeString(string(b)))
+	return []byte(html.EscapeString(string(b)))
 }
 
 // HTMLEscapeRunes escapes special characters like "<" to become "&lt;". It
@@ -128,5 +132,5 @@ func HTMLEscapeBytes(b []byte) []byte {
 // It operates on a *copy* of the byte string and does not modify the input!
 // otherwise it causes major problems..
 func HTMLEscapeRunes(r []rune) []byte {
-	return []byte(stdhtml.EscapeString(string(r)))
+	return []byte(html.EscapeString(string(r)))
 }

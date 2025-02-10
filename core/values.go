@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -221,5 +222,65 @@ func (fb *FontButton) Init() {
 }
 
 // HighlightingName is a highlighting style name.
-// TODO: move this to texteditor/highlighting.
-type HighlightingName string
+type HighlightingName = highlighting.HighlightingName
+
+func init() {
+	AddValueType[HighlightingName, Button]()
+}
+
+// Button represents a [HighlightingName] with a button.
+type Button struct {
+	Button
+	HighlightingName string
+}
+
+func (hb *Button) WidgetValue() any { return &hb.HighlightingName }
+
+func (hb *Button) Init() {
+	hb.Button.Init()
+	hb.SetType(ButtonTonal).SetIcon(icons.Brush)
+	hb.Updater(func() {
+		hb.SetText(hb.HighlightingName)
+	})
+	InitValueButton(hb, false, func(d *Body) {
+		d.SetTitle("Select a syntax highlighting style")
+		si := 0
+		ls := NewList(d).SetSlice(&StyleNames).SetSelectedValue(hb.HighlightingName).BindSelect(&si)
+		ls.OnChange(func(e events.Event) {
+			hb.HighlightingName = StyleNames[si]
+		})
+	})
+}
+
+// Editor opens an editor of highlighting styles.
+func Editor(st *Styles) {
+	if RecycleMainWindow(st) {
+		return
+	}
+
+	d := NewBody("Highlighting styles").SetData(st)
+	NewText(d).SetType(TextSupporting).SetText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
+	kl := NewKeyedList(d).SetMap(st)
+	StylesChanged = false
+	kl.OnChange(func(e events.Event) {
+		StylesChanged = true
+	})
+	d.AddTopBar(func(bar *Frame) {
+		NewToolbar(bar).Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *FuncButton) {
+				w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *FuncButton) {
+				w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *FuncButton) {
+				w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
+			})
+			tree.Add(p, func(w *Separator) {})
+			kl.MakeToolbar(p)
+		})
+	})
+	d.RunWindow() // note: no context here so not dialog
+}

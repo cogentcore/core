@@ -17,13 +17,15 @@ import (
 	"os"
 	"strings"
 
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/matcolor"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/token"
 )
+
+type HighlightingName string
 
 // Trilean value for StyleEntry value inheritance.
 type Trilean int32 //enums:enum
@@ -196,6 +198,25 @@ func (se StyleEntry) ToProperties() map[string]any {
 	return pr
 }
 
+// ToRichStyle sets the StyleEntry to given [rich.Style].
+func (se StyleEntry) ToRichStyle(sty *rich.Style) {
+	if !colors.IsNil(se.themeColor) {
+		sty.SetFillColor(se.themeColor)
+	}
+	if !colors.IsNil(se.themeBackground) {
+		sty.SetBackground(se.themeBackground)
+	}
+	if se.Bold == Yes {
+		sty.Weight = rich.Bold
+	}
+	if se.Italic == Yes {
+		sty.Slant = rich.Italic
+	}
+	if se.Underline == Yes {
+		sty.Decoration.SetFlag(true, rich.Underline)
+	}
+}
+
 // Sub subtracts two style entries, returning an entry with only the differences set
 func (se StyleEntry) Sub(e StyleEntry) StyleEntry {
 	out := StyleEntry{}
@@ -257,8 +278,7 @@ func (se StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 }
 
 func (se StyleEntry) IsZero() bool {
-	return colors.IsNil(se.Color) && colors.IsNil(se.Background) && colors.IsNil(se.Border) && se.Bold == Pass && se.Italic == Pass &&
-		se.Underline == Pass && !se.NoInherit
+	return colors.IsNil(se.Color) && colors.IsNil(se.Background) && colors.IsNil(se.Border) && se.Bold == Pass && se.Italic == Pass && se.Underline == Pass && !se.NoInherit
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +351,7 @@ func (hs Style) ToProperties() map[string]any {
 }
 
 // Open hi style from a JSON-formatted file.
-func (hs Style) OpenJSON(filename core.Filename) error {
+func (hs Style) OpenJSON(filename fsx.Filename) error {
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
@@ -342,7 +362,7 @@ func (hs Style) OpenJSON(filename core.Filename) error {
 }
 
 // Save hi style to a JSON-formatted file.
-func (hs Style) SaveJSON(filename core.Filename) error {
+func (hs Style) SaveJSON(filename fsx.Filename) error {
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
 		slog.Error(err.Error()) // unlikely
