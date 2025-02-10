@@ -83,7 +83,7 @@ func NewStyle() *Style {
 // NewStyleFromRunes returns a new style initialized with data from given runes,
 // returning the remaining actual rune string content after style data.
 func NewStyleFromRunes(rs []rune) (*Style, []rune) {
-	s := &Style{}
+	s := NewStyle()
 	c := s.FromRunes(rs)
 	return s, c
 }
