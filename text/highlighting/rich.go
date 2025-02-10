@@ -5,6 +5,7 @@
 package highlighting
 
 import (
+	"fmt"
 	"slices"
 
 	"cogentcore.org/core/text/parse/lexer"
@@ -24,6 +25,7 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 	}
 
 	ttags := lexer.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
+	fmt.Println(ttags)
 	nt := len(ttags)
 	if nt == 0 || nt > maxNumTags {
 		return rich.NewText(sty, txt)
@@ -32,13 +34,14 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 	stys := []rich.Style{*sty}
 	tstack := []int{0} // stack of tags indexes that remain to be completed, sorted soonest at end
 
+	// todo: always need to be pushing onto stack
 	tx := rich.NewText(sty, nil)
 	cp := 0
 	for i, tr := range ttags {
 		if cp >= sz {
 			break
 		}
-		for si := len(tstack) - 1; si >= 0; si-- {
+		for si := len(tstack) - 1; si >= 1; si-- {
 			ts := ttags[tstack[si]]
 			if ts.End <= tr.Start {
 				ep := min(sz, ts.End)
@@ -46,6 +49,7 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 					tx.AddRunes(txt[cp:ep])
 					cp = ep
 				}
+				fmt.Println(cp, "pop:", si, len(tstack))
 				tstack = slices.Delete(tstack, si, si+1)
 				stys = slices.Delete(stys, si, si+1)
 			}
@@ -56,41 +60,37 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 		if tr.Start > cp {
 			tx.AddRunes(txt[cp:tr.Start])
 		}
-		// todo: get style
 		cst := stys[len(stys)-1]
 		nst := cst
 		entry := hs.Tag(tr.Token.Token)
 		if !entry.IsZero() {
 			entry.ToRichStyle(&nst)
 		}
-
 		ep := tr.End
+		if i > 0 && ttags[i-1].End > tr.Start { // we start before next one ends
+			fmt.Println(cp, "push", ttags[i])
+			tstack = append(tstack, i)
+			stys = append(stys, nst)
+		}
+		popMe := true
 		if i < nt-1 {
-			if ttags[i+1].Start < tr.End { // next one starts before we end, add to stack
+			if ttags[i+1].Start < tr.End { // next one starts before we end
+				popMe = false
 				ep = ttags[i+1].Start
-				if len(tstack) == 1 {
-					tstack = append(tstack, i)
-					stys = append(stys, nst)
-				} else {
-					for si := len(tstack) - 1; si >= 0; si-- {
-						ts := ttags[tstack[si]]
-						if tr.End <= ts.End {
-							ni := si // + 1 // new index in stack -- right *before* current
-							tstack = slices.Insert(tstack, ni, i)
-							stys = slices.Insert(stys, ni, nst)
-						}
-					}
-				}
 			}
 		}
 		ep = min(len(txt), ep)
-		if tr.Start < ep {
-			tx.AddSpan(&nst, txt[tr.Start:ep])
+		tx.AddSpan(&nst, txt[cp:ep])
+		if popMe && len(tstack) > 1 {
+			fmt.Println(ep, "end pop")
+			si := len(tstack) - 1
+			tstack = slices.Delete(tstack, si, si+1)
+			stys = slices.Delete(stys, si, si+1)
 		}
 		cp = ep
 	}
 	if sz > cp {
-		tx.AddSpan(sty, txt[cp:sz])
+		tx.AddSpan(&stys[len(stys)-1], txt[cp:sz])
 	}
 	return tx
 }
