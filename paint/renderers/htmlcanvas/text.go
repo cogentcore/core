@@ -99,7 +99,8 @@ func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Line
 // applyTextStyle applies the given styles to the HTML canvas context.
 func (rs *Renderer) applyTextStyle(st *rich.Style, fill, stroke image.Image, size, lineHeight float32) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
-	parts := []string{st.Slant.String(), "normal", st.Weight.String(), st.Stretch.String(), fmt.Sprintf("%gpx/%gpx", size, lineHeight), st.Family.String()}
+	// TODO: line height irrelevant?
+	parts := []string{st.Slant.String(), "normal", fmt.Sprintf("%g", st.Weight.ToFloat32()), st.Stretch.String(), fmt.Sprintf("%gpx/%gpx", size, lineHeight), st.Family.String()}
 	rs.ctx.Set("font", strings.Join(parts, " "))
 
 	// TODO: use caching like in RenderPath?
