@@ -153,7 +153,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		strokeUnsupported = true
 	}
 
-	if style.HasFill() || style.HasStroke() && !strokeUnsupported {
+	if style.HasFill() || (style.HasStroke() && !strokeUnsupported) {
 		rs.writePath(pt)
 	}
 

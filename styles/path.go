@@ -86,11 +86,11 @@ func (pc *Path) ToDotsImpl(uc *units.Context) {
 }
 
 func (pc *Path) HasFill() bool {
-	return !pc.Off && pc.Fill.Color != nil
+	return !pc.Off && pc.Fill.Color != nil && pc.Fill.Opacity > 0
 }
 
 func (pc *Path) HasStroke() bool {
-	return !pc.Off && pc.Stroke.Color != nil
+	return !pc.Off && pc.Stroke.Color != nil && pc.Stroke.Width.Dots > 0 && pc.Stroke.Opacity > 0
 }
 
 //////// Stroke and Fill Styles

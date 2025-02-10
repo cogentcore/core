@@ -108,7 +108,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 func (rs *Renderer) Stroke(pt *render.Path) {
 	pc := &pt.Context
 	sty := &pc.Style
-	if sty.Off || sty.Stroke.Color == nil {
+	if !sty.HasStroke() {
 		return
 	}
 
@@ -154,7 +154,7 @@ func (rs *Renderer) SetColor(sc Scanner, pc *render.Context, clr image.Image, op
 func (rs *Renderer) Fill(pt *render.Path) {
 	pc := &pt.Context
 	sty := &pc.Style
-	if sty.Fill.Color == nil {
+	if !sty.HasFill() {
 		return
 	}
 	rf := &rs.Raster.Filler
