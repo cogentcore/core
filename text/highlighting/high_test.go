@@ -41,7 +41,7 @@ func TestMarkup(t *testing.T) {
 
 	hitrg := `[{NameFunction: if 1 3 {0 0}} {NameBuiltin 4 7 {0 0}} {PunctGpLParen 7 8 {0 0}} {+1:Name 8 11 {0 0}} {PunctGpRParen 11 12 {0 0}} {OpRelGreater 13 14 {0 0}} {Name 15 25 {0 0}} {PunctGpLBrace 26 27 {0 0}} {+1:EOS 27 27 {0 0}} {+1:Comment 28 45 {0 0}}]`
 	assert.Equal(t, hitrg, fmt.Sprint(lex))
-	fmt.Println(lex)
+	// fmt.Println(lex)
 
 	// this "avoid" is what drives the need for depth in styles
 	// we're marking it as misspelled
@@ -53,9 +53,26 @@ func TestMarkup(t *testing.T) {
 	sty := rich.NewStyle()
 	sty.Family = rich.Monospace
 	tx := MarkupLineRich(hi.style, sty, rsrc, lex, ot)
-	fmt.Println(tx)
+
+	rtx := `[monospace]: "	"
+[monospace fill-color]: "	if "
+[monospace fill-color]: " len"
+[monospace]: "("
+[monospace]: "txt"
+[monospace]: ") "
+[monospace fill-color]: " > "
+[monospace]: " maxLineLen "
+[monospace]: " {"
+[monospace]: " "
+[monospace italic fill-color]: " // "
+[monospace italic fill-color]: "avoid"
+[monospace italic fill-color]: " overflow"
+`
+	assert.Equal(t, rtx, fmt.Sprint(tx))
+
+	rht := `	<span class="nf">if</span> <span class="nb">len</span><span class="">(</span><span class="n">txt</span><span class="">)</span> <span class="">></span> <span class="n">maxLineLen</span> <span class="">{</span><span class="EOS"></span> <span class="c">// <span class="te">avoid</span> overflow</span>`
 
 	b := MarkupLineHTML(rsrc, lex, ot, NoEscapeHTML)
-	fmt.Println(string(b))
+	assert.Equal(t, rht, fmt.Sprint(string(b)))
 
 }
