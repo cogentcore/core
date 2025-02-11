@@ -224,19 +224,15 @@ func (fb *FontButton) Init() {
 // HighlightingName is a highlighting style name.
 type HighlightingName = highlighting.HighlightingName
 
-func init() {
-	AddValueType[HighlightingName, Button]()
-}
-
-// Button represents a [HighlightingName] with a button.
-type Button struct {
+// HighlightingButton represents a [HighlightingName] with a button.
+type HighlightingButton struct {
 	Button
 	HighlightingName string
 }
 
-func (hb *Button) WidgetValue() any { return &hb.HighlightingName }
+func (hb *HighlightingButton) WidgetValue() any { return &hb.HighlightingName }
 
-func (hb *Button) Init() {
+func (hb *HighlightingButton) Init() {
 	hb.Button.Init()
 	hb.SetType(ButtonTonal).SetIcon(icons.Brush)
 	hb.Updater(func() {
@@ -245,15 +241,15 @@ func (hb *Button) Init() {
 	InitValueButton(hb, false, func(d *Body) {
 		d.SetTitle("Select a syntax highlighting style")
 		si := 0
-		ls := NewList(d).SetSlice(&StyleNames).SetSelectedValue(hb.HighlightingName).BindSelect(&si)
+		ls := NewList(d).SetSlice(&highlighting.StyleNames).SetSelectedValue(hb.HighlightingName).BindSelect(&si)
 		ls.OnChange(func(e events.Event) {
-			hb.HighlightingName = StyleNames[si]
+			hb.HighlightingName = highlighting.StyleNames[si]
 		})
 	})
 }
 
 // Editor opens an editor of highlighting styles.
-func Editor(st *Styles) {
+func HighlightingEditor(st *highlighting.Styles) {
 	if RecycleMainWindow(st) {
 		return
 	}
@@ -261,9 +257,9 @@ func Editor(st *Styles) {
 	d := NewBody("Highlighting styles").SetData(st)
 	NewText(d).SetType(TextSupporting).SetText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
 	kl := NewKeyedList(d).SetMap(st)
-	StylesChanged = false
+	highlighting.StylesChanged = false
 	kl.OnChange(func(e events.Event) {
-		StylesChanged = true
+		highlighting.StylesChanged = true
 	})
 	d.AddTopBar(func(bar *Frame) {
 		NewToolbar(bar).Maker(func(p *tree.Plan) {
@@ -275,8 +271,10 @@ func Editor(st *Styles) {
 				w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 				w.Args[0].SetTag(`extension:".highlighting"`)
 			})
-			tree.Add(p, func(w *FuncButton) {
-				w.SetFunc(st.ViewStandard).SetIcon(icons.Visibility)
+			tree.Add(p, func(w *Button) {
+				w.SetText("View standard").SetIcon(icons.Visibility).OnClick(func(e events.Event) {
+					HighlightingEditor(&highlighting.StandardStyles)
+				})
 			})
 			tree.Add(p, func(w *Separator) {})
 			kl.MakeToolbar(p)

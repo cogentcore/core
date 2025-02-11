@@ -18,26 +18,35 @@ import (
 	"cogentcore.org/core/text/parse"
 )
 
-//go:embed defaults.highlighting
-var defaults []byte
-
 // Styles is a collection of styles
 type Styles map[string]*Style
 
-// StandardStyles are the styles from chroma package
-var StandardStyles Styles
+var (
+	//go:embed defaults.highlighting
+	defaults []byte
 
-// CustomStyles are user's special styles
-var CustomStyles = Styles{}
+	// StandardStyles are the styles from chroma package
+	StandardStyles Styles
 
-// AvailableStyles are all highlighting styles
-var AvailableStyles Styles
+	// CustomStyles are user's special styles
+	CustomStyles = Styles{}
 
-// StyleDefault is the default highlighting style name
-var StyleDefault = HighlightingName("emacs")
+	// AvailableStyles are all highlighting styles
+	AvailableStyles Styles
 
-// StyleNames are all the names of all the available highlighting styles
-var StyleNames []string
+	// StyleDefault is the default highlighting style name
+	StyleDefault = HighlightingName("emacs")
+
+	// StyleNames are all the names of all the available highlighting styles
+	StyleNames []string
+
+	// SettingsStylesFilename is the name of the preferences file in App data
+	// directory for saving / loading the custom styles
+	SettingsStylesFilename = "highlighting.json"
+
+	// StylesChanged is used for gui updating while editing
+	StylesChanged = false
+)
 
 // UpdateFromTheme normalizes the colors of all style entry such that they have consistent
 // chromas and tones that guarantee sufficient text contrast in accordance with the color theme.
@@ -115,13 +124,6 @@ func (hs *Styles) SaveJSON(filename fsx.Filename) error { //types:add
 	return err
 }
 
-// SettingsStylesFilename is the name of the preferences file in App data
-// directory for saving / loading the custom styles
-var SettingsStylesFilename = "highlighting.json"
-
-// StylesChanged is used for gui updating while editing
-var StylesChanged = false
-
 // OpenSettings opens Styles from Cogent Core standard prefs directory, using SettingsStylesFilename
 func (hs *Styles) OpenSettings() error {
 	pdir := system.TheApp.CogentCoreDataDir()
@@ -169,12 +171,6 @@ func (hs *Styles) Names() []string {
 	sort.StringSlice(nms).Sort()
 	return nms
 }
-
-// ViewStandard shows the standard styles that are compiled
-// into the program via chroma package
-// func (hs *Styles) ViewStandard() {
-// 	Editor(&StandardStyles)
-// }
 
 // Init must be called to initialize the hi styles -- post startup
 // so chroma stuff is all in place, and loads custom styles

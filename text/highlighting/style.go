@@ -67,6 +67,9 @@ type StyleEntry struct {
 	// Underline.
 	Underline Trilean
 
+	// DottedUnderline
+	DottedUnderline Trilean
+
 	// NoInherit indicates to not inherit these settings from sub-category or category levels.
 	// Otherwise everything with a Pass is inherited.
 	NoInherit bool
@@ -141,6 +144,9 @@ func (se StyleEntry) String() string {
 	if se.Underline != Pass {
 		out = append(out, se.Underline.Prefix("underline"))
 	}
+	if se.DottedUnderline != Pass {
+		out = append(out, se.Underline.Prefix("dotted-underline"))
+	}
 	if se.NoInherit {
 		out = append(out, "noinherit")
 	}
@@ -173,7 +179,10 @@ func (se StyleEntry) ToCSS() string {
 	}
 	if se.Underline == Yes {
 		styles = append(styles, "text-decoration: underline")
+	} else if se.DottedUnderline == Yes {
+		styles = append(styles, "text-decoration: dotted-underline")
 	}
+
 	return strings.Join(styles, "; ")
 }
 
@@ -194,6 +203,8 @@ func (se StyleEntry) ToProperties() map[string]any {
 	}
 	if se.Underline == Yes {
 		pr["text-decoration"] = 1 << uint32(rich.Underline)
+	} else if se.Underline == Yes {
+		pr["text-decoration"] = 1 << uint32(rich.DottedUnderline)
 	}
 	return pr
 }
@@ -214,6 +225,8 @@ func (se StyleEntry) ToRichStyle(sty *rich.Style) {
 	}
 	if se.Underline == Yes {
 		sty.Decoration.SetFlag(true, rich.Underline)
+	} else if se.DottedUnderline == Yes {
+		sty.Decoration.SetFlag(true, rich.DottedUnderline)
 	}
 }
 
@@ -239,6 +252,9 @@ func (se StyleEntry) Sub(e StyleEntry) StyleEntry {
 	}
 	if e.Underline != se.Underline {
 		out.Underline = se.Underline
+	}
+	if e.DottedUnderline != se.DottedUnderline {
+		out.DottedUnderline = se.DottedUnderline
 	}
 	return out
 }
@@ -273,12 +289,15 @@ func (se StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 		if out.Underline == Pass {
 			out.Underline = ancestor.Underline
 		}
+		if out.DottedUnderline == Pass {
+			out.DottedUnderline = ancestor.DottedUnderline
+		}
 	}
 	return out
 }
 
 func (se StyleEntry) IsZero() bool {
-	return colors.IsNil(se.Color) && colors.IsNil(se.Background) && colors.IsNil(se.Border) && se.Bold == Pass && se.Italic == Pass && se.Underline == Pass && !se.NoInherit
+	return colors.IsNil(se.Color) && colors.IsNil(se.Background) && colors.IsNil(se.Border) && se.Bold == Pass && se.Italic == Pass && se.Underline == Pass && se.DottedUnderline == Pass && !se.NoInherit
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
