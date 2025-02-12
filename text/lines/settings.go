@@ -7,30 +7,31 @@ package lines
 import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/textsettings"
 )
 
-// Options contains options for [texteditor.Buffer]s. It contains
-// everything necessary to customize editing of a certain text file.
-type Options struct {
+// Settings contains settings for editing text lines.
+type Settings struct {
+	textsettings.EditorSettings
 
-	// editor settings from core settings
-	core.EditorSettings
-
-	// character(s) that start a single-line comment; if empty then multi-line comment syntax will be used
+	// CommentLine are character(s) that start a single-line comment;
+	// if empty then multi-line comment syntax will be used.
 	CommentLine string
 
-	// character(s) that start a multi-line comment or one that requires both start and end
+	// CommentStart are character(s) that start a multi-line comment
+	// or one that requires both start and end.
 	CommentStart string
 
-	// character(s) that end a multi-line comment or one that requires both start and end
+	// Commentend are character(s) that end a multi-line comment
+	// or one that requires both start and end.
 	CommentEnd string
 }
 
-// CommentStrings returns the comment start and end strings, using line-based CommentLn first if set
-// and falling back on multi-line / general purpose start / end syntax
-func (tb *Options) CommentStrings() (comst, comed string) {
+// CommentStrings returns the comment start and end strings,
+// using line-based CommentLn first if set and falling back
+// on multi-line / general purpose start / end syntax.
+func (tb *Settings) CommentStrings() (comst, comed string) {
 	comst = tb.CommentLine
 	if comst == "" {
 		comst = tb.CommentStart
@@ -40,7 +41,7 @@ func (tb *Options) CommentStrings() (comst, comed string) {
 }
 
 // IndentChar returns the indent character based on SpaceIndent option
-func (tb *Options) IndentChar() indent.Character {
+func (tb *Settings) IndentChar() indent.Character {
 	if tb.SpaceIndent {
 		return indent.Space
 	}
@@ -49,7 +50,7 @@ func (tb *Options) IndentChar() indent.Character {
 
 // ConfigKnown configures options based on the supported language info in parse.
 // Returns true if supported.
-func (tb *Options) ConfigKnown(sup fileinfo.Known) bool {
+func (tb *Settings) ConfigKnown(sup fileinfo.Known) bool {
 	if sup == fileinfo.Unknown {
 		return false
 	}

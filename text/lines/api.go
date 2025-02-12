@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/core"
+	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
@@ -52,7 +52,7 @@ func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
 
 	ls.parseState.SetSrc(string(info.Path), "", info.Known)
 	ls.Highlighter.Init(info, &ls.parseState)
-	ls.Options.ConfigKnown(info.Known)
+	ls.Settings.ConfigKnown(info.Known)
 	if ls.numLines() > 0 {
 		ls.initialMarkup()
 		ls.startDelayedReMarkup()
@@ -82,7 +82,7 @@ func (ls *Lines) SetFileExt(ext string) {
 }
 
 // SetHighlighting sets the highlighting style.
-func (ls *Lines) SetHighlighting(style core.HighlightingName) {
+func (ls *Lines) SetHighlighting(style highlighting.HighlightingName) {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.Highlighter.SetStyle(style)
@@ -347,6 +347,69 @@ func (ls *Lines) LexObjPathString(ln int, lx *lexer.Lex) string {
 	return ls.lexObjPathString(ln, lx)
 }
 
+////////   Tags
+
+// AddTag adds a new custom tag for given line, at given position.
+func (ls *Lines) AddTag(ln, st, ed int, tag token.Tokens) {
+	ls.Lock()
+	defer ls.Unlock()
+	if !ls.isValidLine(ln) {
+		return
+	}
+
+	tr := lexer.NewLex(token.KeyToken{Token: tag}, st, ed)
+	tr.Time.Now()
+	if len(ls.tags[ln]) == 0 {
+		ls.tags[ln] = append(ls.tags[ln], tr)
+	} else {
+		ls.tags[ln] = ls.adjustedTags(ln) // must re-adjust before adding new ones!
+		ls.tags[ln].AddSort(tr)
+	}
+	ls.markupLines(ln, ln)
+}
+
+// AddTagEdit adds a new custom tag for given line, using Edit for location.
+func (ls *Lines) AddTagEdit(tbe *textpos.Edit, tag token.Tokens) {
+	ls.AddTag(tbe.Region.Start.Line, tbe.Region.Start.Char, tbe.Region.End.Char, tag)
+}
+
+// RemoveTag removes tag (optionally only given tag if non-zero)
+// at given position if it exists. returns tag.
+func (ls *Lines) RemoveTag(pos textpos.Pos, tag token.Tokens) (reg lexer.Lex, ok bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	if !ls.isValidLine(pos.Line) {
+		return
+	}
+
+	ls.tags[pos.Line] = ls.adjustedTags(pos.Line) // re-adjust for current info
+	for i, t := range ls.tags[pos.Line] {
+		if t.ContainsPos(pos.Char) {
+			if tag > 0 && t.Token.Token != tag {
+				continue
+			}
+			ls.tags[pos.Line].DeleteIndex(i)
+			reg = t
+			ok = true
+			break
+		}
+	}
+	if ok {
+		ls.markupLines(pos.Line, pos.Line)
+	}
+	return
+}
+
+// SetTags tags for given line.
+func (ls *Lines) SetTags(ln int, tags lexer.Line) {
+	ls.Lock()
+	defer ls.Unlock()
+	if !ls.isValidLine(ln) {
+		return
+	}
+	ls.tags[ln] = tags
+}
+
 // AdjustedTags updates tag positions for edits, for given line
 // and returns the new tags
 func (ls *Lines) AdjustedTags(ln int) lexer.Line {
@@ -441,6 +504,24 @@ func (ls *Lines) CountWordsLinesRegion(reg textpos.Region) (words, lines int) {
 	defer ls.Unlock()
 	words, lines = CountWordsLinesRegion(ls.lines, reg)
 	return
+}
+
+// DiffBuffers computes the diff between this buffer and the other buffer,
+// reporting a sequence of operations that would convert this buffer (a) into
+// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
+// (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
+func (ls *Lines) DiffBuffers(ob *Lines) Diffs {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.diffBuffers(ob)
+}
+
+// PatchFromBuffer patches (edits) using content from other,
+// according to diff operations (e.g., as generated from DiffBufs).
+func (ls *Lines) PatchFromBuffer(ob *Lines, diffs Diffs) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.patchFromBuffer(ob, diffs)
 }
 
 ////////   Search etc

@@ -56,8 +56,8 @@ var (
 // In general, all unexported methods do NOT lock, and all exported methods do.
 type Lines struct {
 
-	// Options are the options for how text editing and viewing works.
-	Options Options
+	// Settings are the options for how text editing and viewing works.
+	Settings Settings
 
 	// Highlighter does the syntax highlighting markup, and contains the
 	// parameters thereof, such as the language and style.
@@ -609,14 +609,14 @@ func (ls *Lines) undo() []*textpos.Edit {
 			if tbe.Delete {
 				utbe := ls.insertTextRectImpl(tbe)
 				utbe.Group = stgp + tbe.Group
-				if ls.Options.EmacsUndo {
+				if ls.Settings.EmacsUndo {
 					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
 			} else {
 				utbe := ls.deleteTextRectImpl(tbe.Region.Start, tbe.Region.End)
 				utbe.Group = stgp + tbe.Group
-				if ls.Options.EmacsUndo {
+				if ls.Settings.EmacsUndo {
 					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
@@ -625,14 +625,14 @@ func (ls *Lines) undo() []*textpos.Edit {
 			if tbe.Delete {
 				utbe := ls.insertTextImpl(tbe.Region.Start, tbe.Text)
 				utbe.Group = stgp + tbe.Group
-				if ls.Options.EmacsUndo {
+				if ls.Settings.EmacsUndo {
 					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
 			} else {
 				utbe := ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
 				utbe.Group = stgp + tbe.Group
-				if ls.Options.EmacsUndo {
+				if ls.Settings.EmacsUndo {
 					ls.undos.SaveUndo(utbe)
 				}
 				eds = append(eds, utbe)
@@ -650,7 +650,7 @@ func (ls *Lines) undo() []*textpos.Edit {
 // If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
 // at the end, and moves undo to the very end -- undo is a constant stream.
 func (ls *Lines) EmacsUndoSave() {
-	if !ls.Options.EmacsUndo {
+	if !ls.Settings.EmacsUndo {
 		return
 	}
 	ls.undos.UndoStackSave()
@@ -688,26 +688,7 @@ func (ls *Lines) redo() []*textpos.Edit {
 	return eds
 }
 
-// DiffBuffers computes the diff between this buffer and the other buffer,
-// reporting a sequence of operations that would convert this buffer (a) into
-// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
-// (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
-func (ls *Lines) DiffBuffers(ob *Lines) Diffs {
-	ls.Lock()
-	defer ls.Unlock()
-	return ls.diffBuffers(ob)
-}
-
-// PatchFromBuffer patches (edits) using content from other,
-// according to diff operations (e.g., as generated from DiffBufs).
-func (ls *Lines) PatchFromBuffer(ob *Lines, diffs Diffs) bool {
-	ls.Lock()
-	defer ls.Unlock()
-	return ls.patchFromBuffer(ob, diffs)
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Syntax Highlighting Markup
+////////   Syntax Highlighting Markup
 
 // linesEdited re-marks-up lines in edit (typically only 1).
 func (ls *Lines) linesEdited(tbe *textpos.Edit) {
@@ -762,63 +743,6 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	ls.startDelayedReMarkup()
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-//  Markup
-
-// initialMarkup does the first-pass markup on the file
-func (ls *Lines) initialMarkup() {
-	if !ls.Highlighter.Has || ls.numLines() == 0 {
-		return
-	}
-	txt := ls.bytes(100)
-	if ls.Highlighter.UsingParse() {
-		fs := ls.parseState.Done() // initialize
-		fs.Src.SetBytes(txt)
-	}
-	tags, err := ls.markupTags(txt)
-	if err == nil {
-		ls.markupApplyTags(tags)
-	}
-}
-
-// startDelayedReMarkup starts a timer for doing markup after an interval.
-func (ls *Lines) startDelayedReMarkup() {
-	ls.markupDelayMu.Lock()
-	defer ls.markupDelayMu.Unlock()
-
-	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
-		return
-	}
-	if ls.markupDelayTimer != nil {
-		ls.markupDelayTimer.Stop()
-		ls.markupDelayTimer = nil
-	}
-	ls.markupDelayTimer = time.AfterFunc(markupDelay, func() {
-		ls.markupDelayTimer = nil
-		ls.asyncMarkup() // already in a goroutine
-	})
-}
-
-// StopDelayedReMarkup stops timer for doing markup after an interval
-func (ls *Lines) StopDelayedReMarkup() {
-	ls.markupDelayMu.Lock()
-	defer ls.markupDelayMu.Unlock()
-
-	if ls.markupDelayTimer != nil {
-		ls.markupDelayTimer.Stop()
-		ls.markupDelayTimer = nil
-	}
-}
-
-// reMarkup runs re-markup on text in background
-func (ls *Lines) reMarkup() {
-	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
-		return
-	}
-	ls.StopDelayedReMarkup()
-	go ls.asyncMarkup()
-}
-
 // AdjustRegion adjusts given text region for any edits that
 // have taken place since time stamp on region (using the Undo stack).
 // If region was wholly within a deleted region, then RegionNil will be
@@ -852,176 +776,6 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 		}
 	}
 	return ntags
-}
-
-// asyncMarkup does the markupTags from a separate goroutine.
-// Does not start or end with lock, but acquires at end to apply.
-func (ls *Lines) asyncMarkup() {
-	ls.Lock()
-	txt := ls.bytes(0)
-	ls.markupEdits = nil // only accumulate after this point; very rare
-	ls.Unlock()
-
-	tags, err := ls.markupTags(txt)
-	if err != nil {
-		return
-	}
-	ls.Lock()
-	ls.markupApplyTags(tags)
-	ls.Unlock()
-	if ls.MarkupDoneFunc != nil {
-		ls.MarkupDoneFunc()
-	}
-}
-
-// markupTags generates the new markup tags from the highligher.
-// this is a time consuming step, done via asyncMarkup typically.
-// does not require any locking.
-func (ls *Lines) markupTags(txt []byte) ([]lexer.Line, error) {
-	return ls.Highlighter.MarkupTagsAll(txt)
-}
-
-// markupApplyEdits applies any edits in markupEdits to the
-// tags prior to applying the tags.  returns the updated tags.
-func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
-	edits := ls.markupEdits
-	ls.markupEdits = nil
-	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
-		for _, tbe := range edits {
-			if tbe.Delete {
-				stln := tbe.Region.Start.Line
-				edln := tbe.Region.End.Line
-				pfs.Src.LinesDeleted(stln, edln)
-			} else {
-				stln := tbe.Region.Start.Line + 1
-				nlns := (tbe.Region.End.Line - tbe.Region.Start.Line)
-				pfs.Src.LinesInserted(stln, nlns)
-			}
-		}
-		for ln := range tags {
-			tags[ln] = pfs.LexLine(ln) // does clone, combines comments too
-		}
-	} else {
-		for _, tbe := range edits {
-			if tbe.Delete {
-				stln := tbe.Region.Start.Line
-				edln := tbe.Region.End.Line
-				tags = append(tags[:stln], tags[edln:]...)
-			} else {
-				stln := tbe.Region.Start.Line + 1
-				nlns := (tbe.Region.End.Line - tbe.Region.Start.Line)
-				stln = min(stln, len(tags))
-				tags = slices.Insert(tags, stln, make([]lexer.Line, nlns)...)
-			}
-		}
-	}
-	return tags
-}
-
-// markupApplyTags applies given tags to current text
-// and sets the markup lines.  Must be called under Lock.
-func (ls *Lines) markupApplyTags(tags []lexer.Line) {
-	tags = ls.markupApplyEdits(tags)
-	maxln := min(len(tags), ls.numLines())
-	for ln := range maxln {
-		ls.hiTags[ln] = tags[ln]
-		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
-	}
-}
-
-// markupLines generates markup of given range of lines.
-// end is *inclusive* line.  Called after edits, under Lock().
-// returns true if all lines were marked up successfully.
-func (ls *Lines) markupLines(st, ed int) bool {
-	n := ls.numLines()
-	if !ls.Highlighter.Has || n == 0 {
-		return false
-	}
-	if ed >= n {
-		ed = n - 1
-	}
-
-	allgood := true
-	for ln := st; ln <= ed; ln++ {
-		ltxt := ls.lines[ln]
-		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
-		if err == nil {
-			ls.hiTags[ln] = mt
-			ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ltxt, mt, ls.adjustedTags(ln))
-		} else {
-			ls.markup[ln] = rich.NewText(ls.fontStyle, ltxt)
-			allgood = false
-		}
-	}
-	// Now we trigger a background reparse of everything in a separate parse.FilesState
-	// that gets switched into the current.
-	return allgood
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Tags
-
-// AddTag adds a new custom tag for given line, at given position.
-func (ls *Lines) AddTag(ln, st, ed int, tag token.Tokens) {
-	if !ls.IsValidLine(ln) {
-		return
-	}
-	ls.Lock()
-	defer ls.Unlock()
-
-	tr := lexer.NewLex(token.KeyToken{Token: tag}, st, ed)
-	tr.Time.Now()
-	if len(ls.tags[ln]) == 0 {
-		ls.tags[ln] = append(ls.tags[ln], tr)
-	} else {
-		ls.tags[ln] = ls.adjustedTags(ln) // must re-adjust before adding new ones!
-		ls.tags[ln].AddSort(tr)
-	}
-	ls.markupLines(ln, ln)
-}
-
-// AddTagEdit adds a new custom tag for given line, using Edit for location.
-func (ls *Lines) AddTagEdit(tbe *textpos.Edit, tag token.Tokens) {
-	ls.AddTag(tbe.Region.Start.Line, tbe.Region.Start.Char, tbe.Region.End.Char, tag)
-}
-
-// RemoveTag removes tag (optionally only given tag if non-zero)
-// at given position if it exists. returns tag.
-func (ls *Lines) RemoveTag(pos textpos.Pos, tag token.Tokens) (reg lexer.Lex, ok bool) {
-	if !ls.IsValidLine(pos.Line) {
-		return
-	}
-	ls.Lock()
-	defer ls.Unlock()
-
-	ls.tags[pos.Line] = ls.adjustedTags(pos.Line) // re-adjust for current info
-	for i, t := range ls.tags[pos.Line] {
-		if t.ContainsPos(pos.Char) {
-			if tag > 0 && t.Token.Token != tag {
-				continue
-			}
-			ls.tags[pos.Line].DeleteIndex(i)
-			reg = t
-			ok = true
-			break
-		}
-	}
-	if ok {
-		ls.markupLines(pos.Line, pos.Line)
-	}
-	return
-}
-
-// SetTags tags for given line.
-func (ls *Lines) SetTags(ln int, tags lexer.Line) {
-	if !ls.IsValidLine(ln) {
-		return
-	}
-	ls.Lock()
-	defer ls.Unlock()
-	ls.tags[ln] = tags
 }
 
 // lexObjPathString returns the string at given lex, and including prior
@@ -1075,8 +829,7 @@ func (ls *Lines) inTokenCode(pos textpos.Pos) bool {
 	return lx.Token.Token.IsCode()
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Indenting
+////////   Indenting
 
 // see parse/lexer/indent.go for support functions
 
@@ -1084,9 +837,9 @@ func (ls *Lines) inTokenCode(pos textpos.Pos) bool {
 // for given tab size (if using spaces) -- either inserts or deletes to reach target.
 // Returns edit record for any change.
 func (ls *Lines) indentLine(ln, ind int) *textpos.Edit {
-	tabSz := ls.Options.TabSize
+	tabSz := ls.Settings.TabSize
 	ichr := indent.Tab
-	if ls.Options.SpaceIndent {
+	if ls.Settings.SpaceIndent {
 		ichr = indent.Space
 	}
 	curind, _ := lexer.LineIndent(ls.lines[ln], tabSz)
@@ -1107,7 +860,7 @@ func (ls *Lines) indentLine(ln, ind int) *textpos.Edit {
 // Returns any edit that took place (could be nil), along with the auto-indented
 // level and character position for the indent of the current line.
 func (ls *Lines) autoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
-	tabSz := ls.Options.TabSize
+	tabSz := ls.Settings.TabSize
 	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
@@ -1115,7 +868,7 @@ func (ls *Lines) autoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
 	} else {
 		pInd, delInd, _, _ = lexer.BracketIndentLine(ls.lines, ls.hiTags, ln, tabSz)
 	}
-	ichr := ls.Options.IndentChar()
+	ichr := ls.Settings.IndentChar()
 	indLev = pInd + delInd
 	chPos = indent.Len(ichr, indLev, tabSz)
 	tbe = ls.indentLine(ln, indLev)
@@ -1136,7 +889,7 @@ func (ls *Lines) commentStart(ln int) int {
 	if !ls.isValidLine(ln) {
 		return -1
 	}
-	comst, _ := ls.Options.CommentStrings()
+	comst, _ := ls.Settings.CommentStrings()
 	if comst == "" {
 		return -1
 	}
@@ -1171,18 +924,18 @@ func (ls *Lines) lineCommented(ln int) bool {
 
 // commentRegion inserts comment marker on given lines; end is *exclusive*.
 func (ls *Lines) commentRegion(start, end int) {
-	tabSz := ls.Options.TabSize
+	tabSz := ls.Settings.TabSize
 	ch := 0
 	ind, _ := lexer.LineIndent(ls.lines[start], tabSz)
 	if ind > 0 {
-		if ls.Options.SpaceIndent {
-			ch = ls.Options.TabSize * ind
+		if ls.Settings.SpaceIndent {
+			ch = ls.Settings.TabSize * ind
 		} else {
 			ch = ind
 		}
 	}
 
-	comst, comed := ls.Options.CommentStrings()
+	comst, comed := ls.Settings.CommentStrings()
 	if comst == "" {
 		// log.Printf("text.Lines: attempt to comment region without any comment syntax defined")
 		comst = "// "
@@ -1258,7 +1011,7 @@ func (ls *Lines) joinParaLines(startLine, endLine int) {
 
 // tabsToSpacesLine replaces tabs with spaces in the given line.
 func (ls *Lines) tabsToSpacesLine(ln int) {
-	tabSz := ls.Options.TabSize
+	tabSz := ls.Settings.TabSize
 
 	lr := ls.lines[ln]
 	st := textpos.Pos{Line: ln}
@@ -1293,7 +1046,7 @@ func (ls *Lines) tabsToSpaces(start, end int) {
 
 // spacesToTabsLine replaces spaces with tabs in the given line.
 func (ls *Lines) spacesToTabsLine(ln int) {
-	tabSz := ls.Options.TabSize
+	tabSz := ls.Settings.TabSize
 
 	lr := ls.lines[ln]
 	st := textpos.Pos{Line: ln}
