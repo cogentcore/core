@@ -36,3 +36,8 @@ type EditorSettings struct { //types:add
 	// colorize the background according to nesting depth
 	DepthColor bool `default:"true"`
 }
+
+func (es *EditorSettings) Defaults() {
+	es.TabSize = 4
+	es.SpaceIndent = false
+}

@@ -13,11 +13,18 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
 )
 
 // this file contains the exported API for lines
+
+func (ls *Lines) Defaults() {
+	ls.Settings.Defaults()
+	ls.fontStyle = rich.NewStyle().SetFamily(rich.Monospace)
+	ls.textStyle = text.NewStyle()
+}
 
 // SetText sets the text to the given bytes (makes a copy).
 // Pass nil to initialize an empty buffer.
