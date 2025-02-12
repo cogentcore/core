@@ -79,7 +79,8 @@ func TestEdit(t *testing.T) {
 	lns.DeleteText(tbe.Region.Start, tbe.Region.End)
 	assert.Equal(t, src+"\n", string(lns.Bytes()))
 
-	st = textpos.Pos{2, 16}
+	// rect insert
+
 	tbe.Region = textpos.NewRegion(2, 1, 4, 4)
 	ir := [][]rune{[]rune("abc"), []rune("def"), []rune("ghi")}
 	tbe.Text = ir
@@ -92,11 +93,10 @@ func TestEdit(t *testing.T) {
 	def	return nil
 	ghi}
 `
-	// fmt.Println(string(lns.Bytes()))
 
+	assert.Equal(t, edt+"\n", string(lns.Bytes()))
 	st.Line = 2
 	st.Char = 1
-	assert.Equal(t, edt+"\n", string(lns.Bytes()))
 	assert.Equal(t, st, tbe.Region.Start)
 	ed = st
 	ed.Line = 4
@@ -112,5 +112,43 @@ func TestEdit(t *testing.T) {
 	lns.NewUndoGroup()
 	lns.DeleteTextRect(tbe.Region.Start, tbe.Region.End)
 	assert.Equal(t, src+"\n", string(lns.Bytes()))
+
+	// at end
+	lns.NewUndoGroup()
+	tbe.Region = textpos.NewRegion(2, 16, 4, 19)
+	tbe = lns.InsertTextRect(tbe)
+
+	edt = `func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
+	tbe := ls.regionRect(st, ed)
+	if tbe == nil {abc
+		return nil    def
+	}              ghi
+`
+	// fmt.Println(string(lns.Bytes()))
+
+	assert.Equal(t, edt+"\n", string(lns.Bytes()))
+	st.Line = 2
+	st.Char = 16
+	assert.Equal(t, st, tbe.Region.Start)
+	ed = st
+	ed.Line = 4
+	ed.Char = 19
+	assert.Equal(t, ed, tbe.Region.End)
+	lns.Undo()
+
+	srcsp := `func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
+	tbe := ls.regionRect(st, ed)
+	if tbe == nil {
+		return nil    
+	}              
+`
+
+	// fmt.Println(string(lns.Bytes()))
+	assert.Equal(t, srcsp+"\n", string(lns.Bytes()))
+	lns.Redo()
+	assert.Equal(t, edt+"\n", string(lns.Bytes()))
+	lns.NewUndoGroup()
+	lns.DeleteTextRect(tbe.Region.Start, tbe.Region.End)
+	assert.Equal(t, srcsp+"\n", string(lns.Bytes()))
 
 }
