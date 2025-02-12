@@ -85,7 +85,6 @@ func (ls *Lines) SetFileExt(ext string) {
 func (ls *Lines) SetHighlighting(style core.HighlightingName) {
 	ls.Lock()
 	defer ls.Unlock()
-
 	ls.Highlighter.SetStyle(style)
 }
 
@@ -115,16 +114,18 @@ func (ls *Lines) IsValidLine(ln int) bool {
 	if ln < 0 {
 		return false
 	}
+	ls.Lock()
+	defer ls.Unlock()
 	return ls.isValidLine(ln)
 }
 
 // Line returns a (copy of) specific line of runes.
 func (ls *Lines) Line(ln int) []rune {
-	if !ls.IsValidLine(ln) {
-		return nil
-	}
 	ls.Lock()
 	defer ls.Unlock()
+	if !ls.isValidLine(ln) {
+		return nil
+	}
 	return slices.Clone(ls.lines[ln])
 }
 
@@ -138,22 +139,22 @@ func (ls *Lines) Strings(addNewLine bool) []string {
 
 // LineLen returns the length of the given line, in runes.
 func (ls *Lines) LineLen(ln int) int {
-	if !ls.IsValidLine(ln) {
-		return 0
-	}
 	ls.Lock()
 	defer ls.Unlock()
+	if !ls.isValidLine(ln) {
+		return 0
+	}
 	return len(ls.lines[ln])
 }
 
 // LineChar returns rune at given line and character position.
 // returns a 0 if character position is not valid
 func (ls *Lines) LineChar(ln, ch int) rune {
-	if !ls.IsValidLine(ln) {
-		return 0
-	}
 	ls.Lock()
 	defer ls.Unlock()
+	if !ls.isValidLine(ln) {
+		return 0
+	}
 	if len(ls.lines[ln]) <= ch {
 		return 0
 	}
@@ -162,11 +163,11 @@ func (ls *Lines) LineChar(ln, ch int) rune {
 
 // HiTags returns the highlighting tags for given line, nil if invalid
 func (ls *Lines) HiTags(ln int) lexer.Line {
-	if !ls.IsValidLine(ln) {
-		return nil
-	}
 	ls.Lock()
 	defer ls.Unlock()
+	if !ls.isValidLine(ln) {
+		return nil
+	}
 	return ls.hiTags[ln]
 }
 

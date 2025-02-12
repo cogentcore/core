@@ -100,9 +100,14 @@ type Lines struct {
 	// rendering correspondence. All textpos positions are in rune indexes.
 	lines [][]rune
 
-	// breaks are the indexes of the line breaks for each line. The number of display
-	// lines per logical line is the number of breaks + 1.
-	breaks [][]int
+	// nbreaks are the number of display lines per source line (0 if it all fits on
+	// 1 display line).
+	nbreaks []int
+
+	// layout is a mapping from lines rune index to display line and char,
+	// within the scope of each line. E.g., Line=0 is first display line,
+	// 1 is one after the first line break, etc.
+	layout [][]textpos.Pos16
 
 	// markup is the marked-up version of the edited text lines, after being run
 	// through the syntax highlighting process. This is what is actually rendered.
@@ -157,7 +162,8 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 		n--
 	}
 	ls.lines = slicesx.SetLength(ls.lines, n)
-	ls.breaks = slicesx.SetLength(ls.breaks, n)
+	ls.nbreaks = slicesx.SetLength(ls.nbreaks, n)
+	ls.layout = slicesx.SetLength(ls.layout, n)
 	ls.tags = slicesx.SetLength(ls.tags, n)
 	ls.hiTags = slicesx.SetLength(ls.hiTags, n)
 	ls.markup = slicesx.SetLength(ls.markup, n)
@@ -719,7 +725,8 @@ func (ls *Lines) linesInserted(tbe *textpos.Edit) {
 	stln := tbe.Region.Start.Line + 1
 	nsz := (tbe.Region.End.Line - tbe.Region.Start.Line)
 
-	// todo: breaks!
+	ls.nbreaks = slices.Insert(ls.nbreaks, stln, make([]int, nsz)...)
+	ls.layout = slices.Insert(ls.layout, stln, make([][]textpos.Pos16, nsz)...)
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
 	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
@@ -738,6 +745,8 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	stln := tbe.Region.Start.Line
 	edln := tbe.Region.End.Line
+	ls.nbreaks = append(ls.nbreaks[:stln], ls.nbreaks[edln:]...)
+	ls.layout = append(ls.layout[:stln], ls.layout[edln:]...)
 	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
 	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
