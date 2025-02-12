@@ -7,6 +7,7 @@ package textpos
 //go:generate core generate
 
 import (
+	"fmt"
 	"slices"
 	"time"
 
@@ -197,4 +198,19 @@ func (te *Edit) AdjustRegion(reg Region) Region {
 		return Region{}
 	}
 	return reg
+}
+
+func (te *Edit) String() string {
+	str := te.Region.String()
+	if te.Rect {
+		str += " [Rect]"
+	}
+	if te.Delete {
+		str += " [Delete]"
+	}
+	str += fmt.Sprintf(" Gp: %d\n", te.Group)
+	for li := range te.Text {
+		str += fmt.Sprintf("%d\t%s\n", li, string(te.Text[li]))
+	}
+	return str
 }

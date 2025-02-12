@@ -286,6 +286,17 @@ func (ls *Lines) ReMarkup() {
 	ls.reMarkup()
 }
 
+// NewUndoGroup increments the undo group counter for batchiung
+// the subsequent actions.
+func (ls *Lines) NewUndoGroup() {
+	ls.undos.NewGroup()
+}
+
+// UndoReset resets all current undo records.
+func (ls *Lines) UndoReset() {
+	ls.undos.Reset()
+}
+
 // Undo undoes next group of items on the undo stack,
 // and returns all the edits performed.
 func (ls *Lines) Undo() []*textpos.Edit {

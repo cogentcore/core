@@ -141,3 +141,7 @@ func (tr *Region) FromString(link string) bool {
 	tr.End.Char--
 	return true
 }
+
+func (tr *Region) String() string {
+	return fmt.Sprintf("[%s - %s]", tr.Start, tr.End)
+}

@@ -267,15 +267,18 @@ func (ls *Lines) isValidPos(pos textpos.Pos) error {
 	n := ls.numLines()
 	if n == 0 {
 		if pos.Line != 0 || pos.Char != 0 {
-			return fmt.Errorf("invalid position for empty text: %s", pos)
+			// return fmt.Errorf("invalid position for empty text: %s", pos)
+			panic(fmt.Errorf("invalid position for empty text: %s", pos).Error())
 		}
 	}
 	if pos.Line < 0 || pos.Line >= n {
-		return fmt.Errorf("invalid line number for n lines %d: %s", n, pos)
+		// return fmt.Errorf("invalid line number for n lines %d: %s", n, pos)
+		panic(fmt.Errorf("invalid line number for n lines %d: %s", n, pos).Error())
 	}
 	llen := len(ls.lines[pos.Line])
 	if pos.Char < 0 || pos.Char > llen {
-		return fmt.Errorf("invalid character position for pos %d: %s", llen, pos)
+		// return fmt.Errorf("invalid character position for pos %d: %s", llen, pos)
+		panic(fmt.Errorf("invalid character position for pos %d: %s", llen, pos).Error())
 	}
 	return nil
 }
@@ -452,15 +455,21 @@ func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
 	if tbe == nil {
 		return nil
 	}
+	// fmt.Println("del:", tbe.Region)
 	tbe.Delete = true
 	for ln := st.Line; ln <= ed.Line; ln++ {
 		l := ls.lines[ln]
+		// fmt.Println(ln, string(l))
 		if len(l) > st.Char {
-			if ed.Char < len(l)-1 {
-				ls.lines[ln] = append(l[:st.Char], l[ed.Char:]...)
+			if ed.Char <= len(l)-1 {
+				ls.lines[ln] = slices.Delete(l, st.Char, ed.Char)
+				// fmt.Println(ln, "del:", st.Char, ed.Char, string(ls.lines[ln]))
 			} else {
 				ls.lines[ln] = l[:st.Char]
+				// fmt.Println(ln, "trunc", st.Char, ed.Char, string(ls.lines[ln]))
 			}
+		} else {
+			panic(fmt.Sprintf("deleteTextRectImpl: line does not have text: %d < st.Char: %d", len(l), st.Char))
 		}
 	}
 	ls.linesEdited(tbe)
@@ -547,11 +556,14 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 		ie.Region.End.Line = ed.Line
 		ls.linesInserted(ie)
 	}
-	// nch := (ed.Char - st.Char)
+	nch := (ed.Char - st.Char)
 	for i := 0; i < nlns; i++ {
 		ln := st.Line + i
 		lr := ls.lines[ln]
 		ir := tbe.Text[i]
+		if len(ir) != nch {
+			panic(fmt.Sprintf("insertTextRectImpl: length of rect line: %d, %d != expected from region: %d", i, len(ir), nch))
+		}
 		if len(lr) < st.Char {
 			lr = append(lr, runes.Repeat([]rune{' '}, st.Char-len(lr))...)
 		}
@@ -559,6 +571,7 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 		ls.lines[ln] = nt
 	}
 	re := tbe.Clone()
+	re.Rect = true
 	re.Delete = false
 	re.Region.TimeNow()
 	ls.linesEdited(re)
@@ -584,8 +597,7 @@ func (ls *Lines) replaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 	return ls.deleteText(delSt, delEd)
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Undo
+////////   Undo
 
 // saveUndo saves given edit to undo stack
 func (ls *Lines) saveUndo(tbe *textpos.Edit) {
