@@ -169,12 +169,17 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 	ls.startDelayedReMarkup()
 }
 
-// bytes returns the current text lines as a slice of bytes.
-// with an additional line feed at the end, per POSIX standards.
-func (ls *Lines) bytes() []byte {
-	nb := ls.width * ls.numLines()
+// bytes returns the current text lines as a slice of bytes, up to
+// given number of lines if maxLines > 0.
+// Adds an additional line feed at the end, per POSIX standards.
+func (ls *Lines) bytes(maxLines int) []byte {
+	nl := ls.numLines()
+	if maxLines > 0 {
+		nl = min(nl, maxLines)
+	}
+	nb := ls.width * nl
 	b := make([]byte, 0, nb)
-	for ln := range ls.lines {
+	for ln := range nl {
 		b = append(b, []byte(string(ls.lines[ln]))...)
 		b = append(b, []byte("\n")...)
 	}
@@ -756,12 +761,11 @@ func (ls *Lines) initialMarkup() {
 	if !ls.Highlighter.Has || ls.numLines() == 0 {
 		return
 	}
+	txt := ls.bytes(100)
 	if ls.Highlighter.UsingParse() {
 		fs := ls.parseState.Done() // initialize
-		fs.Src.SetBytes(ls.bytes())
+		fs.Src.SetBytes(txt)
 	}
-	mxhi := min(100, ls.numLines())
-	txt := ls.bytes() // todo: only the first 100 lines, and do everything based on runes!
 	tags, err := ls.markupTags(txt)
 	if err == nil {
 		ls.markupApplyTags(tags)
@@ -845,7 +849,7 @@ func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
 // Does not start or end with lock, but acquires at end to apply.
 func (ls *Lines) asyncMarkup() {
 	ls.Lock()
-	txt := ls.bytes()
+	txt := ls.bytes(0)
 	ls.markupEdits = nil // only accumulate after this point; very rare
 	ls.Unlock()
 
@@ -914,7 +918,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.markup[ln] = highlighting.MarkupLine(ls.lines[ln], tags[ln], ls.tags[ln], highlighting.EscapeHTML)
+		ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
 	}
 }
 
@@ -936,9 +940,9 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			ls.hiTags[ln] = mt
-			ls.markup[ln] = highlighting.MarkupLine(ltxt, mt, ls.adjustedTags(ln), highlighting.EscapeHTML)
+			ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ltxt, mt, ls.adjustedTags(ln))
 		} else {
-			ls.markup[ln] = highlighting.HtmlEscapeRunes(ltxt)
+			ls.markup[ln] = rich.NewText(ls.fontStyle, ltxt)
 			allgood = false
 		}
 	}

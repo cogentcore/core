@@ -41,7 +41,7 @@ func (ls *Lines) SetTextLines(lns [][]byte) {
 func (ls *Lines) Bytes() []byte {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.bytes()
+	return ls.bytes(0)
 }
 
 // SetFileInfo sets the syntax highlighting and other parameters
@@ -462,8 +462,7 @@ func (ls *Lines) Search(find []byte, ignoreCase, lexItems bool) (int, []textpos.
 func (ls *Lines) SearchRegexp(re *regexp.Regexp) (int, []textpos.Match) {
 	ls.Lock()
 	defer ls.Unlock()
-	// return SearchByteLinesRegexp(ls.lineBytes, re)
-	// todo!
+	return SearchRuneLinesRegexp(ls.lines, re)
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner

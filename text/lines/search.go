@@ -203,13 +203,15 @@ func SearchFileRegexp(filename string, re *regexp.Regexp) (int, []textpos.Match)
 	return SearchRegexp(fp, re)
 }
 
-// SearchByteLinesRegexp looks for a regexp within lines of bytes,
+// SearchRuneLinesRegexp looks for a regexp within lines of runes,
 // with given case-sensitivity returning number of occurrences
-// and specific match position list.  Column positions are in runes.
-func SearchByteLinesRegexp(src [][]byte, re *regexp.Regexp) (int, []textpos.Match) {
+// and specific match position list. Column positions are in runes.
+func SearchRuneLinesRegexp(src [][]rune, re *regexp.Regexp) (int, []textpos.Match) {
 	cnt := 0
 	var matches []textpos.Match
-	for ln, b := range src {
+	for ln := range src {
+		// note: insane that we have to convert back and forth from bytes!
+		b := []byte(string(src[ln]))
 		fi := re.FindAllIndex(b, -1)
 		if fi == nil {
 			continue

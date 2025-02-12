@@ -44,8 +44,8 @@ type Highlighter struct {
 	// if supported, this is the [parse.Language] support for parsing
 	parseLanguage parse.Language
 
-	// current highlighting style
-	style *Style
+	// Style is the current highlighting style.
+	Style *Style
 
 	// external toggle to turn off automatic highlighting
 	off          bool
@@ -94,8 +94,8 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	hi.Has = true
 
 	if hi.StyleName != hi.lastStyle {
-		hi.style = AvailableStyle(hi.StyleName)
-		hi.CSSProperties = hi.style.ToProperties()
+		hi.Style = AvailableStyle(hi.StyleName)
+		hi.CSSProperties = hi.Style.ToProperties()
 		hi.lastStyle = hi.StyleName
 	}
 
@@ -117,8 +117,8 @@ func (hi *Highlighter) SetStyle(style HighlightingName) {
 		return
 	}
 	hi.StyleName = style
-	hi.style = st
-	hi.CSSProperties = hi.style.ToProperties()
+	hi.Style = st
+	hi.CSSProperties = hi.Style.ToProperties()
 	hi.lastStyle = hi.StyleName
 }
 
