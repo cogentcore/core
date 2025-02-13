@@ -91,6 +91,11 @@ type Pos16 struct {
 	Char int16
 }
 
+// ToPos returns values as [Pos]
+func (ps Pos16) ToPos() Pos {
+	return Pos{int(ps.Line), int(ps.Char)}
+}
+
 // AddLine returns a Pos with Line number added.
 func (ps Pos16) AddLine(ln int) Pos16 {
 	ps.Line += int16(ln)

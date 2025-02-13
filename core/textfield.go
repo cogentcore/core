@@ -925,11 +925,6 @@ func (tf *TextField) selectAll() {
 	tf.NeedsRender()
 }
 
-// isWordBreak defines what counts as a word break for the purposes of selecting words
-func (tf *TextField) isWordBreak(r rune) bool {
-	return unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r)
-}
-
 // selectWord selects the word (whitespace delimited) that the cursor is on
 func (tf *TextField) selectWord() {
 	sz := len(tf.editText)
@@ -1932,31 +1927,6 @@ func (tf *TextField) Render() {
 	}
 	tf.renderSelect()
 	tf.Scene.Painter.TextLines(tf.renderVisible, tf.effPos)
-}
-
-// IsWordBreak defines what counts as a word break for the purposes of selecting words.
-// r1 is the rune in question, r2 is the rune past r1 in the direction you are moving.
-// Pass -1 for r2 if there is no rune past r1.
-func IsWordBreak(r1, r2 rune) bool {
-	if r2 == -1 {
-		if unicode.IsSpace(r1) || unicode.IsSymbol(r1) || unicode.IsPunct(r1) {
-			return true
-		}
-		return false
-	}
-	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
-		return true
-	}
-	if unicode.IsPunct(r1) && r1 != rune('\'') {
-		return true
-	}
-	if unicode.IsPunct(r1) && r1 == rune('\'') {
-		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
-			return true
-		}
-		return false
-	}
-	return false
 }
 
 // concealDots creates an n-length []rune of bullet characters.

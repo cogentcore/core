@@ -142,6 +142,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	tags = ls.markupApplyEdits(tags)
 	maxln := min(len(tags), ls.numLines())
+	nln := 0
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
@@ -150,7 +151,9 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 		ls.markup[ln] = lmu
 		ls.layout[ln] = lay
 		ls.nbreaks[ln] = nbreaks
+		nln += 1 + nbreaks
 	}
+	ls.totalLines = nln
 }
 
 // markupLines generates markup of given range of lines.

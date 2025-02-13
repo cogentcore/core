@@ -27,6 +27,27 @@ func (ls *Lines) Defaults() {
 	ls.textStyle = text.NewStyle()
 }
 
+// SetWidth sets the width for line wrapping.
+func (ls *Lines) SetWidth(wd int) {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.width = wd
+}
+
+// Width returns the width for line wrapping.
+func (ls *Lines) Width() int {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.width
+}
+
+// TotalLines returns the total number of display lines.
+func (ls *Lines) TotalLines() int {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.totalLines
+}
+
 // SetText sets the text to the given bytes (makes a copy).
 // Pass nil to initialize an empty buffer.
 func (ls *Lines) SetText(text []byte) {

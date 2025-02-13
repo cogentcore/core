@@ -77,6 +77,10 @@ type Lines struct {
 	// width is the current line width in rune characters, used for line wrapping.
 	width int
 
+	// totalLines is the total number of display lines, including line breaks.
+	// this is updated during markup.
+	totalLines int
+
 	// FontStyle is the default font styling to use for markup.
 	// Is set to use the monospace font.
 	fontStyle *rich.Style
