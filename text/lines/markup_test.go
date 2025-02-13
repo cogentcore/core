@@ -8,10 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/base/fileinfo"
 	_ "cogentcore.org/core/system/driver"
-	"cogentcore.org/core/text/highlighting"
-	"cogentcore.org/core/text/parse"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,22 +20,9 @@ func TestMarkup(t *testing.T) {
 	}
 `
 
-	lns := &Lines{}
-	lns.Defaults()
+	lns := NewLinesFromBytes("dummy.go", []byte(src))
 	lns.width = 40
-
-	fi, err := fileinfo.NewFileInfo("dummy.go")
-	assert.Error(t, err)
-	var pst parse.FileStates
-	pst.SetSrc("dummy.go", "", fi.Known)
-	pst.Done()
-
-	lns.Highlighter.Init(fi, &pst)
-	lns.Highlighter.SetStyle(highlighting.HighlightingName("emacs"))
-	lns.Highlighter.Has = true
-	assert.Equal(t, true, lns.Highlighter.UsingParse())
-
-	lns.SetText([]byte(src))
+	lns.SetText([]byte(src)) // redo layout with 40
 	assert.Equal(t, src+"\n", string(lns.Bytes()))
 
 	mu := `[monospace bold fill-color]: "func "
@@ -69,26 +53,9 @@ func TestMarkup(t *testing.T) {
 
 func TestLineWrap(t *testing.T) {
 	src := `The [rich.Text](http://rich.text.com) type is the standard representation for formatted text, used as the input to the "shaped" package for text layout and rendering. It is encoded purely using "[]rune" slices for each span, with the _style_ information **represented** with special rune values at the start of each span. This is an efficient and GPU-friendly pure-value format that avoids any issues of style struct pointer management etc.
-It provides basic font styling properties.
-The "n" newline is used to mark the end of a paragraph, and in general text will be automatically wrapped to fit a given size, in the "shaped" package. If the text starting after a newline has a ParagraphStart decoration, then it will be styled according to the "text.Style" paragraph styles (indent and paragraph spacing). The HTML parser sets this as appropriate based on "<br>" vs "<p>" tags.
 `
 
-	lns := &Lines{}
-	lns.Defaults()
-	lns.width = 80
-
-	fi, err := fileinfo.NewFileInfo("dummy.md")
-	assert.Error(t, err)
-	var pst parse.FileStates
-	pst.SetSrc("dummy.md", "", fi.Known)
-	pst.Done()
-
-	lns.Highlighter.Init(fi, &pst)
-	lns.Highlighter.SetStyle(highlighting.HighlightingName("emacs"))
-	lns.Highlighter.Has = true
-	assert.Equal(t, true, lns.Highlighter.UsingParse())
-
-	lns.SetText([]byte(src))
+	lns := NewLinesFromBytes("dummy.md", []byte(src))
 	assert.Equal(t, src+"\n", string(lns.Bytes()))
 
 	mu := `[monospace]: "The "

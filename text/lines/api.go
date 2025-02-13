@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -19,6 +20,25 @@ import (
 )
 
 // this file contains the exported API for lines
+
+// NewLinesFromBytes returns a new Lines representation of given bytes of text,
+// using given filename to determine the type of content that is represented
+// in the bytes, based on the filename extension. This uses all default
+// styling settings.
+func NewLinesFromBytes(filename string, src []byte) *Lines {
+	lns := &Lines{}
+	lns.Defaults()
+
+	fi, _ := fileinfo.NewFileInfo(filename)
+	var pst parse.FileStates // todo: this api needs to be cleaner
+	pst.SetSrc(filename, "", fi.Known)
+	// pst.Done()
+	lns.Highlighter.Init(fi, &pst)
+	lns.Highlighter.SetStyle(highlighting.HighlightingName("emacs"))
+	lns.Highlighter.Has = true
+	lns.SetText(src)
+	return lns
+}
 
 func (ls *Lines) Defaults() {
 	ls.Settings.Defaults()

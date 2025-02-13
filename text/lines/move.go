@@ -96,8 +96,8 @@ func (ls *Lines) moveBackward(pos textpos.Pos, steps int) textpos.Pos {
 		pos.Char--
 		if pos.Char < 0 {
 			if pos.Line > 0 {
-				pos.Char = 0
 				pos.Line--
+				pos.Char = len(ls.lines[pos.Line])
 			} else {
 				pos.Char = 0
 				break
@@ -123,6 +123,7 @@ func (ls *Lines) moveForwardWord(pos textpos.Pos, steps int) textpos.Pos {
 		}
 		if nstep < steps {
 			pos.Line++
+			pos.Char = 0
 		}
 	}
 	return pos
@@ -139,11 +140,12 @@ func (ls *Lines) moveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
 		np, ns := textpos.BackwardWord(ls.lines[pos.Line], op, steps)
 		nstep += ns
 		pos.Char = np
-		if np == op || pos.Line == 0 {
+		if pos.Line == 0 {
 			break
 		}
 		if nstep < steps {
 			pos.Line--
+			pos.Char = len(ls.lines[pos.Line])
 		}
 	}
 	return pos
