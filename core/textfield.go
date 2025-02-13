@@ -612,44 +612,7 @@ func (tf *TextField) cursorForward(steps int) {
 
 // cursorForwardWord moves the cursor forward by words
 func (tf *TextField) cursorForwardWord(steps int) {
-	for i := 0; i < steps; i++ {
-		sz := len(tf.editText)
-		if sz > 0 && tf.cursorPos < sz {
-			ch := tf.cursorPos
-			var done = false
-			for ch < sz && !done { // if on a wb, go past
-				r1 := tf.editText[ch]
-				r2 := rune(-1)
-				if ch < sz-1 {
-					r2 = tf.editText[ch+1]
-				}
-				if IsWordBreak(r1, r2) {
-					ch++
-				} else {
-					done = true
-				}
-			}
-			done = false
-			for ch < sz && !done {
-				r1 := tf.editText[ch]
-				r2 := rune(-1)
-				if ch < sz-1 {
-					r2 = tf.editText[ch+1]
-				}
-				if !IsWordBreak(r1, r2) {
-					ch++
-				} else {
-					done = true
-				}
-			}
-			tf.cursorPos = ch
-		} else {
-			tf.cursorPos = sz
-		}
-	}
-	if tf.cursorPos > len(tf.editText) {
-		tf.cursorPos = len(tf.editText)
-	}
+	tf.cursorPos, _ = textpos.ForwardWord(tf.editText, tf.cursorPos, steps)
 	if tf.cursorPos > tf.dispRange.End {
 		inc := tf.cursorPos - tf.dispRange.End
 		tf.dispRange.End += inc
@@ -680,47 +643,7 @@ func (tf *TextField) cursorBackward(steps int) {
 
 // cursorBackwardWord moves the cursor backward by words
 func (tf *TextField) cursorBackwardWord(steps int) {
-	for i := 0; i < steps; i++ {
-		sz := len(tf.editText)
-		if sz > 0 && tf.cursorPos > 0 {
-			ch := min(tf.cursorPos, sz-1)
-			var done = false
-			for ch < sz && !done { // if on a wb, go past
-				r1 := tf.editText[ch]
-				r2 := rune(-1)
-				if ch > 0 {
-					r2 = tf.editText[ch-1]
-				}
-				if IsWordBreak(r1, r2) {
-					ch--
-					if ch == -1 {
-						done = true
-					}
-				} else {
-					done = true
-				}
-			}
-			done = false
-			for ch < sz && ch >= 0 && !done {
-				r1 := tf.editText[ch]
-				r2 := rune(-1)
-				if ch > 0 {
-					r2 = tf.editText[ch-1]
-				}
-				if !IsWordBreak(r1, r2) {
-					ch--
-				} else {
-					done = true
-				}
-			}
-			tf.cursorPos = ch
-		} else {
-			tf.cursorPos = 0
-		}
-	}
-	if tf.cursorPos < 0 {
-		tf.cursorPos = 0
-	}
+	tf.cursorPos, _ = textpos.BackwardWord(tf.editText, tf.cursorPos, steps)
 	if tf.cursorPos <= tf.dispRange.Start {
 		dec := min(tf.dispRange.Start, 8)
 		tf.dispRange.Start -= dec
@@ -932,39 +855,7 @@ func (tf *TextField) selectWord() {
 		tf.selectAll()
 		return
 	}
-	tf.selectRange.Start = tf.cursorPos
-	if tf.selectRange.Start >= sz {
-		tf.selectRange.Start = sz - 2
-	}
-	if !tf.isWordBreak(tf.editText[tf.selectRange.Start]) {
-		for tf.selectRange.Start > 0 {
-			if tf.isWordBreak(tf.editText[tf.selectRange.Start-1]) {
-				break
-			}
-			tf.selectRange.Start--
-		}
-		tf.selectRange.End = tf.cursorPos + 1
-		for tf.selectRange.End < sz {
-			if tf.isWordBreak(tf.editText[tf.selectRange.End]) {
-				break
-			}
-			tf.selectRange.End++
-		}
-	} else { // keep the space start -- go to next space..
-		tf.selectRange.End = tf.cursorPos + 1
-		for tf.selectRange.End < sz {
-			if !tf.isWordBreak(tf.editText[tf.selectRange.End]) {
-				break
-			}
-			tf.selectRange.End++
-		}
-		for tf.selectRange.End < sz { // include all trailing spaces
-			if tf.isWordBreak(tf.editText[tf.selectRange.End]) {
-				break
-			}
-			tf.selectRange.End++
-		}
-	}
+	tf.selectRange = textpos.WordAt(tf.editText, tf.cursorPos)
 	tf.selectInit = tf.selectRange.Start
 	if TheApp.SystemPlatform().IsMobile() {
 		tf.Send(events.ContextMenu)
