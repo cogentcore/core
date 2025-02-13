@@ -99,6 +99,11 @@ func (ls *Lines) markupTags(txt []byte) ([]lexer.Line, error) {
 func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 	edits := ls.markupEdits
 	ls.markupEdits = nil
+	// fmt.Println("edits:", edits)
+	if len(ls.markupEdits) == 0 {
+		return tags // todo: somehow needs to actually do process below even if no edits
+		// but I can't remember right now what the issues are.
+	}
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()
 		for _, tbe := range edits {
@@ -112,7 +117,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 				pfs.Src.LinesInserted(stln, nlns)
 			}
 		}
-		for ln := range tags {
+		for ln := range tags { // todo: something weird about this -- not working in test
 			tags[ln] = pfs.LexLine(ln) // does clone, combines comments too
 		}
 	} else {
@@ -140,7 +145,11 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
+		mu := highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
+		lmu, lay, nbreaks := ls.layoutLine(ls.lines[ln], mu)
+		ls.markup[ln] = lmu
+		ls.layout[ln] = lay
+		ls.nbreaks[ln] = nbreaks
 	}
 }
 
@@ -160,13 +169,18 @@ func (ls *Lines) markupLines(st, ed int) bool {
 	for ln := st; ln <= ed; ln++ {
 		ltxt := ls.lines[ln]
 		mt, err := ls.Highlighter.MarkupTagsLine(ln, ltxt)
+		var mu rich.Text
 		if err == nil {
 			ls.hiTags[ln] = mt
-			ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ltxt, mt, ls.adjustedTags(ln))
+			mu = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ltxt, mt, ls.adjustedTags(ln))
 		} else {
-			ls.markup[ln] = rich.NewText(ls.fontStyle, ltxt)
+			mu = rich.NewText(ls.fontStyle, ltxt)
 			allgood = false
 		}
+		lmu, lay, nbreaks := ls.layoutLine(ltxt, mu)
+		ls.markup[ln] = lmu
+		ls.layout[ln] = lay
+		ls.nbreaks[ln] = nbreaks
 	}
 	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.

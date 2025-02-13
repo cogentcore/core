@@ -22,6 +22,7 @@ import (
 
 func (ls *Lines) Defaults() {
 	ls.Settings.Defaults()
+	ls.width = 80
 	ls.fontStyle = rich.NewStyle().SetFamily(rich.Monospace)
 	ls.textStyle = text.NewStyle()
 }

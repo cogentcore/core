@@ -108,7 +108,7 @@ func TestLink(t *testing.T) {
 
 	lks := tx.GetLinks()
 	assert.Equal(t, 1, len(lks))
-	assert.Equal(t, textpos.Range{1, 2}, lks[0].Range)
+	assert.Equal(t, textpos.Range{9, 18}, lks[0].Range)
 	assert.Equal(t, "link text", lks[0].Label)
 	assert.Equal(t, "https://example.com", lks[0].URL)
 }

@@ -130,7 +130,8 @@ func (hi *Highlighter) MarkupTagsAll(txt []byte) ([]lexer.Line, error) {
 	}
 	if hi.parseLanguage != nil {
 		hi.parseLanguage.ParseFile(hi.parseState, txt) // processes in Proc(), does Switch()
-		return hi.parseState.Done().Src.Lexs, nil      // Done() is results of above
+		lex := hi.parseState.Done().Src.Lexs
+		return lex, nil // Done() is results of above
 	} else if hi.lexer != nil {
 		return hi.chromaTagsAll(txt)
 	}

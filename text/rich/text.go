@@ -58,21 +58,21 @@ func (tx Text) Range(span int) (start, end int) {
 	return -1, -1
 }
 
-// Index returns the span, rune index (as [textpos.Pos]) for the given logical
-// index into the original source rune slice without spans or styling elements.
-// The rune index is into the source content runes for the given span, after
-// the initial style runes. If the logical index is invalid for the text,
-// the returned index is -1,-1.
-func (tx Text) Index(li int) textpos.Pos {
+// Index returns the span index, number of style runes at start of span,
+// and index into actual runes within the span after style runes,
+// for the given logical index into the original source rune slice
+// without spans or styling elements.
+// If the logical index is invalid for the text returns -1,-1,-1.
+func (tx Text) Index(li int) (span, stylen, ridx int) {
 	ci := 0
 	for si, s := range tx {
-		_, rn := SpanLen(s)
+		sn, rn := SpanLen(s)
 		if li >= ci && li < ci+rn {
-			return textpos.Pos{Line: si, Char: li - ci}
+			return si, sn, sn + (li - ci)
 		}
 		ci += rn
 	}
-	return textpos.Pos{Line: -1, Char: -1}
+	return -1, -1, -1
 }
 
 // AtTry returns the rune at given logical index, as in the original
@@ -137,6 +137,15 @@ func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
 	*tx = append(*tx, nr)
+	return tx
+}
+
+// InsertSpan inserts a span to the Text at given index,
+// using the given Style and runes.
+func (tx *Text) InsertSpan(at int, s *Style, r []rune) *Text {
+	nr := s.ToRunes()
+	nr = append(nr, r...)
+	*tx = slices.Insert(*tx, at, nr)
 	return tx
 }
 
