@@ -146,8 +146,11 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
+		// fmt.Println("#####\n", ln, "tags:\n", tags[ln])
 		mu := highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
+		// fmt.Println("\nmarkup:\n", mu)
 		lmu, lay, nbreaks := ls.layoutLine(ls.lines[ln], mu)
+		// fmt.Println("\nlayout:\n", lmu)
 		ls.markup[ln] = lmu
 		ls.layout[ln] = lay
 		ls.nbreaks[ln] = nbreaks

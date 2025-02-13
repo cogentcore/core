@@ -32,9 +32,12 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 
 	stys := []rich.Style{*sty}
 	tstack := []int{0} // stack of tags indexes that remain to be completed, sorted soonest at end
-
-	tx := rich.NewText(sty, nil)
+	var tx rich.Text
 	cp := 0
+	if ttags[0].Start > 0 {
+		tx = rich.NewText(sty, txt[:ttags[0].Start])
+		cp = ttags[0].Start
+	}
 	for i, tr := range ttags {
 		if cp >= sz {
 			break

@@ -5,7 +5,7 @@
 package lines
 
 import (
-	"cogentcore.org/core/core"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -13,274 +13,175 @@ import (
 // at given source line and char: wrapped line, char.
 // returns -1, -1 for an invalid source position.
 func (ls *Lines) displayPos(pos textpos.Pos) textpos.Pos {
-	if !ls.isValidPos(pos) {
+	if errors.Log(ls.isValidPos(pos)) != nil {
 		return textpos.Pos{-1, -1}
 	}
 	return ls.layout[pos.Line][pos.Char].ToPos()
 }
 
-// todo: pass and return cursor column for up / down
+// displayToPos finds the closest source line, char position for given
+// local display position within given source line, for wrapped
+// lines with nbreaks > 0. The result will be on the target line
+// if there is text on that line, but the Char position may be
+// less than the target depending on the line length.
+func (ls *Lines) displayToPos(ln int, pos textpos.Pos) textpos.Pos {
+	nb := ls.nbreaks[ln]
+	sz := len(ls.lines[ln])
+	if sz == 0 {
+		return textpos.Pos{ln, 0}
+	}
+	pos.Char = min(pos.Char, sz-1)
+	if nb == 0 {
+		return textpos.Pos{ln, pos.Char}
+	}
+	if pos.Line >= nb { // nb is len-1 already
+		pos.Line = nb
+	}
+	lay := ls.layout[ln]
+	sp := ls.width*pos.Line + pos.Char // initial guess for starting position
+	sp = min(sp, sz-1)
+	// first get to the correct line
+	for sp < sz-1 && lay[sp].Line < int16(pos.Line) {
+		sp++
+	}
+	for sp > 0 && lay[sp].Line > int16(pos.Line) {
+		sp--
+	}
+	if lay[sp].Line != int16(pos.Line) {
+		return textpos.Pos{ln, sp}
+	}
+	// now get to the correct char
+	for sp < sz-1 && lay[sp].Line == int16(pos.Line) && lay[sp].Char < int16(pos.Char) {
+		sp++
+	}
+	if lay[sp].Line != int16(pos.Line) { // went too far
+		return textpos.Pos{ln, sp - 1}
+	}
+	for sp > 0 && lay[sp].Line == int16(pos.Line) && lay[sp].Char > int16(pos.Char) {
+		sp--
+	}
+	if lay[sp].Line != int16(pos.Line) { // went too far
+		return textpos.Pos{ln, sp + 1}
+	}
+	return textpos.Pos{ln, sp}
+}
 
-// moveForward moves given source position forward given number of steps.
+// moveForward moves given source position forward given number of rune steps.
 func (ls *Lines) moveForward(pos textpos.Pos, steps int) textpos.Pos {
-	if !ls.isValidPos(pos) {
+	if errors.Log(ls.isValidPos(pos)) != nil {
 		return pos
 	}
-	for i := range steps {
+	for range steps {
 		pos.Char++
-		llen := len(ls.lines[pos.Ln])
+		llen := len(ls.lines[pos.Line])
 		if pos.Char > llen {
 			if pos.Line < len(ls.lines)-1 {
 				pos.Char = 0
 				pos.Line++
 			} else {
 				pos.Char = llen
+				break
 			}
 		}
 	}
 	return pos
 }
 
-// moveForwardWord moves the cursor forward by words
-func (ls *Lines) moveForwardWord(pos textpos.Pos, steps int) textpos.Pos {
-	if !ls.isValidPos(pos) {
+// moveBackward moves given source position backward given number of rune steps.
+func (ls *Lines) moveBackward(pos textpos.Pos, steps int) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
 		return pos
 	}
-	for i := 0; i < steps; i++ {
-		txt := ed.Buffer.Line(pos.Line)
-		sz := len(txt)
-		if sz > 0 && pos.Char < sz {
-			ch := pos.Ch
-			var done = false
-			for ch < sz && !done { // if on a wb, go past
-				r1 := txt[ch]
-				r2 := rune(-1)
-				if ch < sz-1 {
-					r2 = txt[ch+1]
-				}
-				if core.IsWordBreak(r1, r2) { // todo: local
-					ch++
-				} else {
-					done = true
-				}
-			}
-			done = false
-			for ch < sz && !done {
-				r1 := txt[ch]
-				r2 := rune(-1)
-				if ch < sz-1 {
-					r2 = txt[ch+1]
-				}
-				if !core.IsWordBreak(r1, r2) {
-					ch++
-				} else {
-					done = true
-				}
-			}
-			pos.Char = ch
-		} else {
-			if pos.Line < ed.NumLines-1 {
-				pos.Char = 0
-				pos.Line++
-			} else {
-				pos.Char = ed.Buffer.LineLen(pos.Line)
-			}
-		}
-	}
-}
-
-// moveDown moves the cursor down line(s)
-func (ls *Lines) moveDown(steps int) {
-	if !ls.isValidPos(pos) {
-		return pos
-	}
-	org := pos
-	pos := pos
-	for i := 0; i < steps; i++ {
-		gotwrap := false
-		if wln := ed.wrappedLines(pos.Line); wln > 1 {
-			si, ri, _ := ed.wrappedLineNumber(pos)
-			if si < wln-1 {
-				si++
-				mxlen := min(len(ed.renders[pos.Line].Spans[si].Text), ed.cursorColumn)
-				if ed.cursorColumn < mxlen {
-					ri = ed.cursorColumn
-				} else {
-					ri = mxlen
-				}
-				nwc, _ := ed.renders[pos.Line].SpanPosToRuneIndex(si, ri)
-				pos.Char = nwc
-				gotwrap = true
-
-			}
-		}
-		if !gotwrap {
-			pos.Line++
-			if pos.Line >= ed.NumLines {
-				pos.Line = ed.NumLines - 1
-				break
-			}
-			mxlen := min(ed.Buffer.LineLen(pos.Line), ed.cursorColumn)
-			if ed.cursorColumn < mxlen {
-				pos.Char = ed.cursorColumn
-			} else {
-				pos.Char = mxlen
-			}
-		}
-	}
-}
-
-// cursorPageDown moves the cursor down page(s), where a page is defined abcdef
-// dynamically as just moving the cursor off the screen
-func (ls *Lines) movePageDown(steps int) {
-	if !ls.isValidPos(pos) {
-		return pos
-	}
-	org := pos
-	for i := 0; i < steps; i++ {
-		lvln := ed.lastVisibleLine(pos.Line)
-		pos.Line = lvln
-		if pos.Line >= ed.NumLines {
-			pos.Line = ed.NumLines - 1
-		}
-		pos.Char = min(ed.Buffer.LineLen(pos.Line), ed.cursorColumn)
-		ed.scrollCursorToTop()
-		ed.renderCursor(true)
-	}
-}
-
-// moveBackward moves the cursor backward
-func (ls *Lines) moveBackward(steps int) {
-	if !ls.isValidPos(pos) {
-		return pos
-	}
-	org := pos
-	for i := 0; i < steps; i++ {
-		pos.Ch--
+	for range steps {
+		pos.Char--
 		if pos.Char < 0 {
 			if pos.Line > 0 {
+				pos.Char = 0
 				pos.Line--
-				pos.Char = ed.Buffer.LineLen(pos.Line)
 			} else {
 				pos.Char = 0
-			}
-		}
-	}
-}
-
-// moveBackwardWord moves the cursor backward by words
-func (ls *Lines) moveBackwardWord(steps int) {
-	if !ls.isValidPos(pos) {
-		return pos
-	}
-	org := pos
-	for i := 0; i < steps; i++ {
-		txt := ed.Buffer.Line(pos.Line)
-		sz := len(txt)
-		if sz > 0 && pos.Char > 0 {
-			ch := min(pos.Ch, sz-1)
-			var done = false
-			for ch < sz && !done { // if on a wb, go past
-				r1 := txt[ch]
-				r2 := rune(-1)
-				if ch > 0 {
-					r2 = txt[ch-1]
-				}
-				if core.IsWordBreak(r1, r2) {
-					ch--
-					if ch == -1 {
-						done = true
-					}
-				} else {
-					done = true
-				}
-			}
-			done = false
-			for ch < sz && ch >= 0 && !done {
-				r1 := txt[ch]
-				r2 := rune(-1)
-				if ch > 0 {
-					r2 = txt[ch-1]
-				}
-				if !core.IsWordBreak(r1, r2) {
-					ch--
-				} else {
-					done = true
-				}
-			}
-			pos.Char = ch
-		} else {
-			if pos.Line > 0 {
-				pos.Line--
-				pos.Char = ed.Buffer.LineLen(pos.Line)
-			} else {
-				pos.Char = 0
-			}
-		}
-	}
-}
-
-// moveUp moves the cursor up line(s)
-func (ls *Lines) moveUp(steps int) {
-	if !ls.isValidPos(pos) {
-		return pos
-	}
-	org := pos
-	pos := pos
-	for i := 0; i < steps; i++ {
-		gotwrap := false
-		if wln := ed.wrappedLines(pos.Line); wln > 1 {
-			si, ri, _ := ed.wrappedLineNumber(pos)
-			if si > 0 {
-				ri = ed.cursorColumn
-				nwc, _ := ed.renders[pos.Line].SpanPosToRuneIndex(si-1, ri)
-				if nwc == pos.Char {
-					ed.cursorColumn = 0
-					ri = 0
-					nwc, _ = ed.renders[pos.Line].SpanPosToRuneIndex(si-1, ri)
-				}
-				pos.Char = nwc
-				gotwrap = true
-			}
-		}
-		if !gotwrap {
-			pos.Line--
-			if pos.Line < 0 {
-				pos.Line = 0
 				break
 			}
-			if wln := ed.wrappedLines(pos.Line); wln > 1 { // just entered end of wrapped line
-				si := wln - 1
-				ri := ed.cursorColumn
-				nwc, _ := ed.renders[pos.Line].SpanPosToRuneIndex(si, ri)
-				pos.Char = nwc
-			} else {
-				mxlen := min(ed.Buffer.LineLen(pos.Line), ed.cursorColumn)
-				if ed.cursorColumn < mxlen {
-					pos.Char = ed.cursorColumn
-				} else {
-					pos.Char = mxlen
+		}
+	}
+	return pos
+}
+
+// moveForwardWord moves given source position forward given number of word steps.
+func (ls *Lines) moveForwardWord(pos textpos.Pos, steps int) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return pos
+	}
+	nstep := 0
+	for nstep < steps {
+		op := pos.Char
+		np, ns := textpos.ForwardWord(ls.lines[pos.Line], op, steps)
+		nstep += ns
+		pos.Char = np
+		if np == op || pos.Line >= len(ls.lines)-1 {
+			break
+		}
+		if nstep < steps {
+			pos.Line++
+		}
+	}
+	return pos
+}
+
+// moveBackwardWord moves given source position backward given number of word steps.
+func (ls *Lines) moveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return pos
+	}
+	nstep := 0
+	for nstep < steps {
+		op := pos.Char
+		np, ns := textpos.BackwardWord(ls.lines[pos.Line], op, steps)
+		nstep += ns
+		pos.Char = np
+		if np == op || pos.Line == 0 {
+			break
+		}
+		if nstep < steps {
+			pos.Line--
+		}
+	}
+	return pos
+}
+
+// moveDown moves given source position down given number of display line steps,
+// always attempting to use the given column position if the line is long enough.
+func (ls *Lines) moveDown(pos textpos.Pos, steps, col int) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return pos
+	}
+	nl := len(ls.lines)
+	nsteps := 0
+	for nsteps < steps {
+		gotwrap := false
+		if nbreak := ls.nbreaks[pos.Line]; nbreak > 0 {
+			dp := ls.displayPos(pos)
+			if dp.Line < nbreak {
+				dp.Line++
+				dp.Char = col // shoot for col
+				pos = ls.displayToPos(pos.Line, dp)
+				adp := ls.displayPos(pos)
+				ns := adp.Line - dp.Line
+				if ns > 0 {
+					nsteps += ns
+					gotwrap = true
 				}
 			}
 		}
-	}
-}
-
-// movePageUp moves the cursor up page(s), where a page is defined
-// dynamically as just moving the cursor off the screen
-func (ls *Lines) movePageUp(steps int) {
-	if !ls.isValidPos(pos) {
-		return pos
-	}
-	org := pos
-	for i := 0; i < steps; i++ {
-		lvln := ed.firstVisibleLine(pos.Line)
-		pos.Line = lvln
-		if pos.Line <= 0 {
-			pos.Line = 0
+		if !gotwrap { // go to next source line
+			if pos.Line >= nl-1 {
+				pos.Line = nl - 1
+				break
+			}
+			pos.Char = col // try for col
+			pos.Char = min(len(ls.lines[pos.Line]), pos.Char)
+			nsteps++
 		}
-		pos.Char = min(ed.Buffer.LineLen(pos.Line), ed.cursorColumn)
-		ed.scrollCursorToBottom()
-		ed.renderCursor(true)
 	}
+	return pos
 }
