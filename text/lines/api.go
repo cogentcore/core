@@ -5,6 +5,7 @@
 package lines
 
 import (
+	"image"
 	"regexp"
 	"slices"
 	"strings"
@@ -592,6 +593,8 @@ func (ls *Lines) IndentLine(ln, ind int) *textpos.Edit {
 func (ls *Lines) AutoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	return ls.autoIndent(ln)
 }
 
@@ -599,6 +602,8 @@ func (ls *Lines) AutoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
 func (ls *Lines) AutoIndentRegion(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	ls.autoIndentRegion(start, end)
 }
 
@@ -606,6 +611,8 @@ func (ls *Lines) AutoIndentRegion(start, end int) {
 func (ls *Lines) CommentRegion(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	ls.commentRegion(start, end)
 }
 
@@ -615,6 +622,8 @@ func (ls *Lines) CommentRegion(start, end int) {
 func (ls *Lines) JoinParaLines(startLine, endLine int) {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	ls.joinParaLines(startLine, endLine)
 }
 
@@ -622,6 +631,8 @@ func (ls *Lines) JoinParaLines(startLine, endLine int) {
 func (ls *Lines) TabsToSpaces(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	ls.tabsToSpaces(start, end)
 }
 
@@ -629,6 +640,8 @@ func (ls *Lines) TabsToSpaces(start, end int) {
 func (ls *Lines) SpacesToTabs(start, end int) {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	ls.spacesToTabs(start, end)
 }
 
@@ -686,4 +699,47 @@ func (ls *Lines) BraceMatch(r rune, st textpos.Pos) (en textpos.Pos, found bool)
 	ls.Lock()
 	defer ls.Unlock()
 	return lexer.BraceMatch(ls.lines, ls.hiTags, r, st, maxScopeLines)
+}
+
+////////   LineColors
+
+// SetLineColor sets the color to use for rendering a circle next to the line
+// number at the given line.
+func (ls *Lines) SetLineColor(ln int, color image.Image) {
+	ls.Lock()
+	defer ls.Unlock()
+	if ls.lineColors == nil {
+		ls.lineColors = make(map[int]image.Image)
+	}
+	ls.lineColors[ln] = color
+}
+
+// HasLineColor checks if given line has a line color set
+func (ls *Lines) HasLineColor(ln int) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	if ln < 0 {
+		return false
+	}
+	if ls.lineColors == nil {
+		return false
+	}
+	_, has := ls.lineColors[ln]
+	return has
+}
+
+// DeleteLineColor deletes the line color at the given line.
+// Passing a -1 clears all current line colors.
+func (ls *Lines) DeleteLineColor(ln int) {
+	ls.Lock()
+	defer ls.Unlock()
+
+	if ln < 0 {
+		ls.lineColors = nil
+		return
+	}
+	if ls.lineColors == nil {
+		return
+	}
+	delete(ls.lineColors, ln)
 }

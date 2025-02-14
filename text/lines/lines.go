@@ -7,15 +7,19 @@ package lines
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"log"
 	"slices"
 	"sync"
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/base/slicesx"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
@@ -43,6 +47,14 @@ var (
 	// amount of time to wait before starting a new background markup process,
 	// after text changes within a single line (always does after line insertion / deletion)
 	markupDelay = 500 * time.Millisecond // `default:"500" min:"100" step:"100"`
+
+	// text buffer max lines to use diff-based revert to more quickly update
+	// e.g., after file has been reformatted
+	diffRevertLines = 10000 // `default:"10000" min:"0" step:"1000"`
+
+	// text buffer max diffs to use diff-based revert to more quickly update
+	// e.g., after file has been reformatted -- if too many differences, just revert.
+	diffRevertDiffs = 20 // `default:"20" min:"0" step:"1"`
 )
 
 // Lines manages multi-line monospaced text with a given line width in runes,
@@ -71,9 +83,24 @@ type Lines struct {
 	ChangedFunc func()
 
 	// MarkupDoneFunc is called when the offline markup pass is done
-	// so that the GUI can be updated accordingly.  The lock is off
+	// so that the GUI can be updated accordingly. The lock is off
 	// when this is called.
 	MarkupDoneFunc func()
+
+	// Filename is the filename of the file that was last loaded or saved.
+	// It is used when highlighting code.
+	Filename core.Filename `json:"-" xml:"-"`
+
+	// Autosave specifies whether the file should be automatically
+	// saved after changes are made.
+	Autosave bool
+
+	// ReadOnly marks the contents as not editable. This is for the outer GUI
+	// elements to consult, and is not enforced within Lines itself.
+	ReadOnly bool
+
+	// FileInfo is the full information about the current file, if one is set.
+	FileInfo fileinfo.FileInfo
 
 	// FontStyle is the default font styling to use for markup.
 	// Is set to use the monospace font.
@@ -113,6 +140,10 @@ type Lines struct {
 	// markup and layout.
 	views map[int]*view
 
+	// lineColors associate a color with a given line number (key of map),
+	// e.g., for a breakpoint or other such function.
+	lineColors map[int]image.Image
+
 	// markupEdits are the edits that were made during the time it takes to generate
 	// the new markup tags. this is rare but it does happen.
 	markupEdits []*textpos.Edit
@@ -122,6 +153,30 @@ type Lines struct {
 
 	// markupDelayMu is the mutex for updating the markup delay timer.
 	markupDelayMu sync.Mutex
+
+	// posHistory is the history of cursor positions.
+	// It can be used to move back through them.
+	posHistory []textpos.Pos
+
+	// listeners is used for sending standard system events.
+	// Change is sent for BufferDone, BufferInsert, and BufferDelete.
+	listeners events.Listeners
+
+	// Bool flags:
+
+	// autoSaving is used in atomically safe way to protect autosaving
+	autoSaving bool
+
+	// notSaved indicates if the text has been changed (edited) relative to the
+	// original, since last Save.  This can be true even when changed flag is
+	// false, because changed is cleared on EditDone, e.g., when texteditor
+	// is being monitored for OnChange and user does Control+Enter.
+	// Use IsNotSaved() method to query state.
+	notSaved bool
+
+	// fileModOK have already asked about fact that file has changed since being
+	// opened, user is ok
+	fileModOK bool
 
 	// use Lock(), Unlock() directly for overall mutex on any content updates
 	sync.Mutex

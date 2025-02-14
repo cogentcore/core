@@ -7,12 +7,7 @@ package texteditor
 import (
 	"fmt"
 	"image"
-	"io/fs"
-	"log"
-	"log/slog"
 	"os"
-	"path/filepath"
-	"slices"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -171,18 +166,6 @@ func (tb *Buffer) OnInput(fun func(e events.Event)) {
 	tb.listeners.Add(events.Input, fun)
 }
 
-// IsNotSaved returns true if buffer was changed (edited) since last Save.
-func (tb *Buffer) IsNotSaved() bool {
-	// note: could use a mutex on this if there are significant race issues
-	return tb.notSaved
-}
-
-// clearNotSaved sets Changed and NotSaved to false.
-func (tb *Buffer) clearNotSaved() {
-	tb.SetChanged(false)
-	tb.notSaved = false
-}
-
 // Init initializes the buffer.  Called automatically in SetText.
 func (tb *Buffer) Init() {
 	if tb.MarkupDoneFunc != nil {
@@ -242,60 +225,6 @@ func (tb *Buffer) signalMods() {
 	tb.signalEditors(bufferMods, nil)
 }
 
-// SetReadOnly sets whether the buffer is read-only.
-func (tb *Buffer) SetReadOnly(readonly bool) *Buffer {
-	tb.Undos.Off = readonly
-	return tb
-}
-
-// SetFilename sets the filename associated with the buffer and updates
-// the code highlighting information accordingly.
-func (tb *Buffer) SetFilename(fn string) *Buffer {
-	tb.Filename = core.Filename(fn)
-	tb.Stat()
-	tb.SetFileInfo(&tb.Info)
-	return tb
-}
-
-// Stat gets info about the file, including the highlighting language.
-func (tb *Buffer) Stat() error {
-	tb.fileModOK = false
-	err := tb.Info.InitFile(string(tb.Filename))
-	tb.ConfigKnown() // may have gotten file type info even if not existing
-	return err
-}
-
-// ConfigKnown configures options based on the supported language info in parse.
-// Returns true if supported.
-func (tb *Buffer) ConfigKnown() bool {
-	if tb.Info.Known != fileinfo.Unknown {
-		if tb.spell == nil {
-			tb.setSpell()
-		}
-		if tb.Complete == nil {
-			tb.setCompleter(&tb.ParseState, completeParse, completeEditParse, lookupParse)
-		}
-		return tb.Options.ConfigKnown(tb.Info.Known)
-	}
-	return false
-}
-
-// SetFileExt sets syntax highlighting and other parameters
-// based on the given file extension (without the . prefix),
-// for cases where an actual file with [fileinfo.FileInfo] is not
-// available.
-func (tb *Buffer) SetFileExt(ext string) *Buffer {
-	tb.Lines.SetFileExt(ext)
-	return tb
-}
-
-// SetFileType sets the syntax highlighting and other parameters
-// based on the given fileinfo.Known file type
-func (tb *Buffer) SetLanguage(ftyp fileinfo.Known) *Buffer {
-	tb.Lines.SetLanguage(ftyp)
-	return tb
-}
-
 // FileModCheck checks if the underlying file has been modified since last
 // Stat (open, save); if haven't yet prompted, user is prompted to ensure
 // that this is OK. It returns true if the file was modified.
@@ -335,79 +264,6 @@ func (tb *Buffer) FileModCheck() bool {
 	return false
 }
 
-// Open loads the given file into the buffer.
-func (tb *Buffer) Open(filename core.Filename) error { //types:add
-	err := tb.openFile(filename)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// OpenFS loads the given file in the given filesystem into the buffer.
-func (tb *Buffer) OpenFS(fsys fs.FS, filename string) error {
-	txt, err := fs.ReadFile(fsys, filename)
-	if err != nil {
-		return err
-	}
-	tb.SetFilename(filename)
-	tb.SetText(txt)
-	return nil
-}
-
-// openFile just loads the given file into the buffer, without doing
-// any markup or signaling. It is typically used in other functions or
-// for temporary buffers.
-func (tb *Buffer) openFile(filename core.Filename) error {
-	txt, err := os.ReadFile(string(filename))
-	if err != nil {
-		return err
-	}
-	tb.SetFilename(string(filename))
-	tb.SetText(txt)
-	return nil
-}
-
-// Revert re-opens text from the current file,
-// if the filename is set; returns false if not.
-// It uses an optimized diff-based update to preserve
-// existing formatting, making it very fast if not very different.
-func (tb *Buffer) Revert() bool { //types:add
-	tb.StopDelayedReMarkup()
-	tb.AutoSaveDelete() // justin case
-	if tb.Filename == "" {
-		return false
-	}
-
-	didDiff := false
-	if tb.NumLines() < diffRevertLines {
-		ob := NewBuffer()
-		err := ob.openFile(tb.Filename)
-		if errors.Log(err) != nil {
-			sc := tb.sceneFromEditor()
-			if sc != nil { // only if viewing
-				core.ErrorSnackbar(sc, err, "Error reopening file")
-			}
-			return false
-		}
-		tb.Stat() // "own" the new file..
-		if ob.NumLines() < diffRevertLines {
-			diffs := tb.DiffBuffers(&ob.Lines)
-			if len(diffs) < diffRevertDiffs {
-				tb.PatchFromBuffer(&ob.Lines, diffs)
-				didDiff = true
-			}
-		}
-	}
-	if !didDiff {
-		tb.openFile(tb.Filename)
-	}
-	tb.clearNotSaved()
-	tb.AutoSaveDelete()
-	tb.signalEditors(bufferNew, nil)
-	return true
-}
-
 // SaveAsFunc saves the current text into the given file.
 // Does an editDone first to save edits and checks for an existing file.
 // If it does exist then prompts to overwrite or not.
@@ -444,20 +300,6 @@ func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled boo
 // and checks for an existing file; if it does exist then prompts to overwrite or not.
 func (tb *Buffer) SaveAs(filename core.Filename) { //types:add
 	tb.SaveAsFunc(filename, nil)
-}
-
-// saveFile writes current buffer to file, with no prompting, etc
-func (tb *Buffer) saveFile(filename core.Filename) error {
-	err := os.WriteFile(string(filename), tb.Bytes(), 0644)
-	if err != nil {
-		core.ErrorSnackbar(tb.sceneFromEditor(), err)
-		slog.Error(err.Error())
-	} else {
-		tb.clearNotSaved()
-		tb.Filename = filename
-		tb.Stat()
-	}
-	return err
 }
 
 // Save saves the current text into the current filename associated with this buffer.
@@ -548,110 +390,6 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 	return true
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//		AutoSave
-
-// autoSaveOff turns off autosave and returns the
-// prior state of Autosave flag.
-// Call AutoSaveRestore with rval when done.
-// See BatchUpdate methods for auto-use of this.
-func (tb *Buffer) autoSaveOff() bool {
-	asv := tb.Autosave
-	tb.Autosave = false
-	return asv
-}
-
-// autoSaveRestore restores prior Autosave setting,
-// from AutoSaveOff
-func (tb *Buffer) autoSaveRestore(asv bool) {
-	tb.Autosave = asv
-}
-
-// AutoSaveFilename returns the autosave filename.
-func (tb *Buffer) AutoSaveFilename() string {
-	path, fn := filepath.Split(string(tb.Filename))
-	if fn == "" {
-		fn = "new_file"
-	}
-	asfn := filepath.Join(path, "#"+fn+"#")
-	return asfn
-}
-
-// autoSave does the autosave -- safe to call in a separate goroutine
-func (tb *Buffer) autoSave() error {
-	if tb.autoSaving {
-		return nil
-	}
-	tb.autoSaving = true
-	asfn := tb.AutoSaveFilename()
-	b := tb.Bytes()
-	err := os.WriteFile(asfn, b, 0644)
-	if err != nil {
-		log.Printf("core.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
-	}
-	tb.autoSaving = false
-	return err
-}
-
-// AutoSaveDelete deletes any existing autosave file
-func (tb *Buffer) AutoSaveDelete() {
-	asfn := tb.AutoSaveFilename()
-	err := os.Remove(asfn)
-	// the file may not exist, which is fine
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		errors.Log(err)
-	}
-}
-
-// AutoSaveCheck checks if an autosave file exists; logic for dealing with
-// it is left to larger app; call this before opening a file.
-func (tb *Buffer) AutoSaveCheck() bool {
-	asfn := tb.AutoSaveFilename()
-	if _, err := os.Stat(asfn); os.IsNotExist(err) {
-		return false // does not exist
-	}
-	return true
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Appending Lines
-
-// AppendTextMarkup appends new text to end of buffer, using insert, returns
-// edit, and uses supplied markup to render it.
-func (tb *Buffer) AppendTextMarkup(text []byte, markup []byte, signal bool) *lines.Edit {
-	tbe := tb.Lines.AppendTextMarkup(text, markup)
-	if tbe != nil && signal {
-		tb.signalEditors(bufferInsert, tbe)
-	}
-	return tbe
-}
-
-// AppendTextLineMarkup appends one line of new text to end of buffer, using
-// insert, and appending a LF at the end of the line if it doesn't already
-// have one. User-supplied markup is used. Returns the edit region.
-func (tb *Buffer) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *lines.Edit {
-	tbe := tb.Lines.AppendTextLineMarkup(text, markup)
-	if tbe != nil && signal {
-		tb.signalEditors(bufferInsert, tbe)
-	}
-	return tbe
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Editors
-
-// addEditor adds a editor of this buffer, connecting our signals to the editor
-func (tb *Buffer) addEditor(vw *Editor) {
-	tb.editors = append(tb.editors, vw)
-}
-
-// deleteEditor removes given editor from our buffer
-func (tb *Buffer) deleteEditor(vw *Editor) {
-	tb.editors = slices.DeleteFunc(tb.editors, func(e *Editor) bool {
-		return e == vw
-	})
-}
-
 // sceneFromEditor returns Scene from text editor, if avail
 func (tb *Buffer) sceneFromEditor() *core.Scene {
 	if len(tb.editors) > 0 {
@@ -668,20 +406,6 @@ func (tb *Buffer) AutoScrollEditors() {
 			ed.SetCursorTarget(tb.EndPos())
 		}
 	}
-}
-
-// batchUpdateStart call this when starting a batch of updates.
-// It calls AutoSaveOff and returns the prior state of that flag
-// which must be restored using BatchUpdateEnd.
-func (tb *Buffer) batchUpdateStart() (autoSave bool) {
-	tb.Undos.NewGroup()
-	autoSave = tb.autoSaveOff()
-	return
-}
-
-// batchUpdateEnd call to complete BatchUpdateStart
-func (tb *Buffer) batchUpdateEnd(autoSave bool) {
-	tb.autoSaveRestore(autoSave)
 }
 
 const (
@@ -849,42 +573,6 @@ func (tb *Buffer) redo() []*lines.Edit {
 		tb.signalMods()
 	}
 	return tbe
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   LineColors
-
-// SetLineColor sets the color to use for rendering a circle next to the line
-// number at the given line.
-func (tb *Buffer) SetLineColor(ln int, color image.Image) {
-	if tb.LineColors == nil {
-		tb.LineColors = make(map[int]image.Image)
-	}
-	tb.LineColors[ln] = color
-}
-
-// HasLineColor checks if given line has a line color set
-func (tb *Buffer) HasLineColor(ln int) bool {
-	if ln < 0 {
-		return false
-	}
-	if tb.LineColors == nil {
-		return false
-	}
-	_, has := tb.LineColors[ln]
-	return has
-}
-
-// DeleteLineColor deletes the line color at the given line.
-func (tb *Buffer) DeleteLineColor(ln int) {
-	if ln < 0 {
-		tb.LineColors = nil
-		return
-	}
-	if tb.LineColors == nil {
-		return
-	}
-	delete(tb.LineColors, ln)
 }
 
 /////////////////////////////////////////////////////////////////////////////
