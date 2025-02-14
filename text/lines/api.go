@@ -29,6 +29,7 @@ import (
 func NewLinesFromBytes(filename string, width int, src []byte) (*Lines, int) {
 	ls := &Lines{}
 	ls.Defaults()
+	ls.Highlighter.SetStyle(highlighting.HighlightingName("emacs"))
 	fi, _ := fileinfo.NewFileInfo(filename)
 	ls.setFileInfo(fi)
 	_, vid := ls.newView(width)
