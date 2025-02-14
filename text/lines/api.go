@@ -382,6 +382,52 @@ func (ls *Lines) Redo() []*textpos.Edit {
 	return ls.redo()
 }
 
+/////////   Moving
+
+// MoveForward moves given source position forward given number of rune steps.
+func (ls *Lines) MoveForward(pos textpos.Pos, steps int) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.moveForward(pos, steps)
+}
+
+// MoveBackward moves given source position backward given number of rune steps.
+func (ls *Lines) MoveBackward(pos textpos.Pos, steps int) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.moveBackward(pos, steps)
+}
+
+// MoveForwardWord moves given source position forward given number of word steps.
+func (ls *Lines) MoveForwardWord(pos textpos.Pos, steps int) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.moveForwardWord(pos, steps)
+}
+
+// MoveBackwardWord moves given source position backward given number of word steps.
+func (ls *Lines) MoveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.moveBackwardWord(pos, steps)
+}
+
+// MoveDown moves given source position down given number of display line steps,
+// always attempting to use the given column position if the line is long enough.
+func (ls *Lines) MoveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.moveDown(vw, pos, steps, col)
+}
+
+// MoveUp moves given source position up given number of display line steps,
+// always attempting to use the given column position if the line is long enough.
+func (ls *Lines) MoveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.moveUp(vw, pos, steps, col)
+}
+
 /////////   Edit helpers
 
 // InComment returns true if the given text position is within
