@@ -19,11 +19,11 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 `
 
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
-	_ = vid
+	vw := lns.view(vid)
 
-	// ft0 := string(lns.markup[0].Join())
-	// ft1 := string(lns.markup[1].Join())
-	// ft2 := string(lns.markup[2].Join())
+	// ft0 := string(vw.markup[0].Join())
+	// ft1 := string(vw.markup[1].Join())
+	// ft2 := string(vw.markup[2].Join())
 	// fmt.Println(ft0)
 	// fmt.Println(ft1)
 	// fmt.Println(ft2)
@@ -120,4 +120,51 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		assert.Equal(t, test.tpos, tp)
 	}
 
+	downTests := []struct {
+		pos   textpos.Pos
+		steps int
+		col   int
+		tpos  textpos.Pos
+	}{
+		{textpos.Pos{0, 0}, 1, 50, textpos.Pos{0, 128}},
+		{textpos.Pos{0, 0}, 2, 50, textpos.Pos{0, 206}},
+		{textpos.Pos{0, 0}, 4, 60, textpos.Pos{0, 371}},
+		{textpos.Pos{0, 0}, 5, 60, textpos.Pos{0, 440}},
+		{textpos.Pos{0, 371}, 2, 60, textpos.Pos{1, 42}},
+		{textpos.Pos{1, 30}, 1, 60, textpos.Pos{2, 60}},
+	}
+	for _, test := range downTests {
+		tp := lns.moveDown(vw, test.pos, test.steps, test.col)
+		// sp := test.pos
+		// stln := lns.lines[sp.Line]
+		// fmt.Println(sp, test.steps, tp, string(stln[min(test.col, len(stln)-1):min(test.col+5, len(stln))]))
+		// ln := lns.lines[tp.Line]
+		// fmt.Println(test.pos, test.steps, tp, string(ln[tp.Char:min(tp.Char+5, len(ln))]))
+		assert.Equal(t, test.tpos, tp)
+	}
+
+	upTests := []struct {
+		pos   textpos.Pos
+		steps int
+		col   int
+		tpos  textpos.Pos
+	}{
+		{textpos.Pos{0, 128}, 1, 50, textpos.Pos{0, 50}},
+		{textpos.Pos{0, 128}, 2, 50, textpos.Pos{0, 50}},
+		{textpos.Pos{0, 206}, 1, 50, textpos.Pos{0, 128}},
+		{textpos.Pos{0, 371}, 1, 60, textpos.Pos{0, 294}},
+		{textpos.Pos{1, 5}, 1, 60, textpos.Pos{0, 440}},
+		{textpos.Pos{1, 5}, 1, 20, textpos.Pos{0, 410}},
+		{textpos.Pos{1, 5}, 2, 60, textpos.Pos{0, 371}},
+		{textpos.Pos{1, 5}, 3, 50, textpos.Pos{0, 284}},
+	}
+	for _, test := range upTests {
+		tp := lns.moveUp(vw, test.pos, test.steps, test.col)
+		// sp := test.pos
+		// stln := lns.lines[sp.Line]
+		// fmt.Println(sp, test.steps, tp, string(stln[min(test.col, len(stln)-1):min(test.col+5, len(stln))]))
+		// ln := lns.lines[tp.Line]
+		// fmt.Println(test.pos, test.steps, tp, string(ln[tp.Char:min(tp.Char+5, len(ln))]))
+		assert.Equal(t, test.tpos, tp)
+	}
 }

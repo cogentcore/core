@@ -16,7 +16,13 @@ func (ls *Lines) displayPos(vw *view, pos textpos.Pos) textpos.Pos {
 	if errors.Log(ls.isValidPos(pos)) != nil {
 		return textpos.Pos{-1, -1}
 	}
-	return vw.layout[pos.Line][pos.Char].ToPos()
+	ln := vw.layout[pos.Line]
+	if pos.Char == len(ln) { // eol
+		dp := ln[pos.Char-1]
+		dp.Char++
+		return dp.ToPos()
+	}
+	return ln[pos.Char].ToPos()
 }
 
 // displayToPos finds the closest source line, char position for given
@@ -62,6 +68,9 @@ func (ls *Lines) displayToPos(vw *view, ln int, pos textpos.Pos) textpos.Pos {
 	}
 	if lay[sp].Line != int16(pos.Line) { // went too far
 		return textpos.Pos{ln, sp + 1}
+	}
+	if sp == sz-1 && lay[sp].Char < int16(pos.Char) { // go to the end
+		sp++
 	}
 	return textpos.Pos{ln, sp}
 }
@@ -163,25 +172,73 @@ func (ls *Lines) moveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos
 		gotwrap := false
 		if nbreak := vw.nbreaks[pos.Line]; nbreak > 0 {
 			dp := ls.displayPos(vw, pos)
+			odp := dp
+			// fmt.Println("dp:", dp, "pos;", pos, "nb:", nbreak)
 			if dp.Line < nbreak {
 				dp.Line++
 				dp.Char = col // shoot for col
 				pos = ls.displayToPos(vw, pos.Line, dp)
 				adp := ls.displayPos(vw, pos)
-				ns := adp.Line - dp.Line
+				// fmt.Println("d2p:", adp, "pos:", pos, "dp:", dp)
+				ns := adp.Line - odp.Line
 				if ns > 0 {
 					nsteps += ns
 					gotwrap = true
 				}
 			}
 		}
+		// fmt.Println("gotwrap:", gotwrap, pos)
 		if !gotwrap { // go to next source line
 			if pos.Line >= nl-1 {
 				pos.Line = nl - 1
 				break
 			}
+			pos.Line++
 			pos.Char = col // try for col
 			pos.Char = min(len(ls.lines[pos.Line]), pos.Char)
+			nsteps++
+		}
+	}
+	return pos
+}
+
+// moveUp moves given source position up given number of display line steps,
+// always attempting to use the given column position if the line is long enough.
+func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return pos
+	}
+	nsteps := 0
+	for nsteps < steps {
+		gotwrap := false
+		if nbreak := vw.nbreaks[pos.Line]; nbreak > 0 {
+			dp := ls.displayPos(vw, pos)
+			odp := dp
+			// fmt.Println("dp:", dp, "pos;", pos, "nb:", nbreak)
+			if dp.Line > 0 {
+				dp.Line--
+				dp.Char = col // shoot for col
+				pos = ls.displayToPos(vw, pos.Line, dp)
+				adp := ls.displayPos(vw, pos)
+				// fmt.Println("d2p:", adp, "pos:", pos, "dp:", dp)
+				ns := odp.Line - adp.Line
+				if ns > 0 {
+					nsteps += ns
+					gotwrap = true
+				}
+			}
+		}
+		// fmt.Println("gotwrap:", gotwrap, pos)
+		if !gotwrap { // go to next source line
+			if pos.Line <= 0 {
+				pos.Line = 0
+				break
+			}
+			pos.Line--
+			pos.Char = len(ls.lines[pos.Line]) - 1
+			dp := ls.displayPos(vw, pos)
+			dp.Char = col
+			pos = ls.displayToPos(vw, pos.Line, dp)
 			nsteps++
 		}
 	}
