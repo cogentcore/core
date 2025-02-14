@@ -63,6 +63,9 @@ func (hi *Highlighter) UsingParse() bool {
 
 // Init initializes the syntax highlighting for current params
 func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
+	if hi.Style == nil {
+		hi.SetStyle(DefaultStyle)
+	}
 	hi.parseState = pist
 
 	if info.Known != fileinfo.Unknown {

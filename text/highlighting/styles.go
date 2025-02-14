@@ -18,6 +18,9 @@ import (
 	"cogentcore.org/core/text/parse"
 )
 
+// DefaultStyle is the initial default style.
+var DefaultStyle = HighlightingName("emacs")
+
 // Styles is a collection of styles
 type Styles map[string]*Style
 
