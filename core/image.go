@@ -106,7 +106,7 @@ func (im *Image) Render() {
 		rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
 		im.prevRenderImage = rimg
 	}
-	draw.Draw(im.Scene.Pixels, r, rimg, sp, draw.Over)
+	im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)
 }
 
 func (im *Image) MakeToolbar(p *tree.Plan) {

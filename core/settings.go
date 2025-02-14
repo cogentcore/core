@@ -26,8 +26,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/textsettings"
 	"cogentcore.org/core/tree"
 )
 
@@ -261,11 +262,13 @@ type AppearanceSettingsData struct { //types:add
 	// text highlighting style / theme.
 	Highlighting HighlightingName `default:"emacs"`
 
-	// Font is the default font family to use.
-	Font FontName `default:"Roboto"`
+	// Text specifies text settings including the language and
+	// font families for different styles of fonts.
+	Text rich.Settings `display:"add-fields"`
+}
 
-	// MonoFont is the default mono-spaced font family to use.
-	MonoFont FontName `default:"Roboto Mono"`
+func (as *AppearanceSettingsData) Defaults() {
+	as.Text.Defaults()
 }
 
 // ConstantSpacing returns a spacing value (padding, margin, gap)
@@ -489,7 +492,7 @@ type SystemSettingsData struct { //types:add
 	SettingsBase
 
 	// text editor settings
-	Editor EditorSettings
+	Editor textsettings.EditorSettings
 
 	// whether to use a 24-hour clock (instead of AM and PM)
 	Clock24 bool `label:"24-hour clock"`
@@ -564,12 +567,13 @@ func (ss *SystemSettingsData) Defaults() {
 
 // Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //types:add
-	if ss.FontPaths != nil {
-		paths := append(ss.FontPaths, paint.FontPaths...)
-		paint.FontLibrary.InitFontPaths(paths...)
-	} else {
-		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
-	}
+	// TODO(text):
+	// if ss.FontPaths != nil {
+	// 	paths := append(ss.FontPaths, ptext.FontPaths...)
+	// 	ptext.FontLibrary.InitFontPaths(paths...)
+	// } else {
+	// 	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
+	// }
 
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
@@ -612,37 +616,6 @@ type User struct { //types:add
 
 	// default email address -- e.g., for recording changes in a version control system
 	Email string
-}
-
-// EditorSettings contains text editor settings.
-type EditorSettings struct { //types:add
-
-	// size of a tab, in chars; also determines indent level for space indent
-	TabSize int `default:"4"`
-
-	// use spaces for indentation, otherwise tabs
-	SpaceIndent bool
-
-	// wrap lines at word boundaries; otherwise long lines scroll off the end
-	WordWrap bool `default:"true"`
-
-	// whether to show line numbers
-	LineNumbers bool `default:"true"`
-
-	// use the completion system to suggest options while typing
-	Completion bool `default:"true"`
-
-	// suggest corrections for unknown words while typing
-	SpellCorrect bool `default:"true"`
-
-	// automatically indent lines when enter, tab, }, etc pressed
-	AutoIndent bool `default:"true"`
-
-	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
-	EmacsUndo bool
-
-	// colorize the background according to nesting depth
-	DepthColor bool `default:"true"`
 }
 
 ////////  FavoritePaths

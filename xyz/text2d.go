@@ -14,7 +14,9 @@ import (
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -44,7 +46,7 @@ type Text2D struct {
 	TextPos math32.Vector2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
-	TextRender paint.Text `set:"-" xml:"-" json:"-"`
+	TextRender ptext.Text `set:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
 	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
@@ -157,18 +159,18 @@ func (txt *Text2D) RenderText() {
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
-		rs.Init(szpt.X, szpt.Y, img)
+		rs.InitImageRaster(nil, szpt.X, szpt.Y, img)
 	}
-	rs.PushBounds(bounds)
+	rs.PushContext(nil, paint.NewBoundsRect(bounds, sides.NewFloats()))
 	pt := styles.Paint{}
 	pt.Defaults()
 	pt.FromStyle(st)
-	ctx := &paint.Context{State: rs, Paint: &pt}
+	ctx := &paint.Painter{State: rs, Paint: &pt}
 	if st.Background != nil {
 		draw.Draw(img, bounds, st.Background, image.Point{}, draw.Src)
 	}
 	txt.TextRender.Render(ctx, txt.TextPos)
-	rs.PopBounds()
+	rs.PopContext()
 }
 
 // Validate checks that text has valid mesh and texture settings, etc

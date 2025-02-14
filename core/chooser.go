@@ -23,11 +23,12 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/parse/complete"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -179,7 +180,7 @@ func (ch *Chooser) Init() {
 				s.SetAbilities(true, abilities.Focusable)
 			}
 		}
-		s.Text.Align = styles.Center
+		s.Text.Align = text.Center
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		s.CenterAll()

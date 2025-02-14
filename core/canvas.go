@@ -7,6 +7,7 @@ package core
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/image/draw"
@@ -21,10 +22,10 @@ type Canvas struct {
 	// canvas every time that it is rendered. The paint context
 	// is automatically normalized to the size of the canvas,
 	// so you should specify points on a 0-1 scale.
-	Draw func(pc *paint.Context)
+	Draw func(pc *paint.Painter)
 
-	// context is the paint context used for drawing.
-	context *paint.Context
+	// painter is the paint painter used for drawing.
+	painter *paint.Painter
 }
 
 func (c *Canvas) Init() {
@@ -39,12 +40,14 @@ func (c *Canvas) Render() {
 
 	sz := c.Geom.Size.Actual.Content
 	szp := c.Geom.Size.Actual.Content.ToPoint()
-	c.context = paint.NewContext(szp.X, szp.Y)
-	c.context.UnitContext = c.Styles.UnitContext
-	c.context.ToDots()
-	c.context.PushTransform(math32.Scale2D(sz.X, sz.Y))
-	c.context.VectorEffect = styles.VectorEffectNonScalingStroke
-	c.Draw(c.context)
+	c.painter = paint.NewPainter(szp.X, szp.Y)
+	c.painter.Paint.Transform = math32.Scale2D(sz.X, sz.Y)
+	c.painter.Context().Transform = math32.Scale2D(sz.X, sz.Y)
+	c.painter.UnitContext = c.Styles.UnitContext
+	c.painter.ToDots()
+	c.painter.VectorEffect = ppath.VectorEffectNonScalingStroke
+	c.Draw(c.painter)
 
-	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.context.Image, c.Geom.ScrollOffset(), draw.Over)
+	// todo: direct render for painter to painter
+	c.Scene.Painter.DrawImage(c.painter.RenderImage(), c.Geom.ContentBBox, c.Geom.ScrollOffset(), draw.Over)
 }

@@ -28,8 +28,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/highlighting"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 )
 

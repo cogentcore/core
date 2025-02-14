@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/diffbrowser"
+	"cogentcore.org/core/text/diffbrowser"
+	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 )
 

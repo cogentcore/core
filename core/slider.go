@@ -295,7 +295,7 @@ func (sr *Slider) Init() {
 		}
 		tree.AddAt(p, "icon", func(w *Icon) {
 			w.Styler(func(s *styles.Style) {
-				s.Font.Size.Dp(24)
+				s.Text.FontSize.Dp(24)
 				s.Color = sr.ThumbColor
 			})
 			w.Updater(func() {
@@ -484,7 +484,7 @@ func (sr *Slider) scrollScale(del float32) float32 {
 func (sr *Slider) Render() {
 	sr.setPosFromValue(sr.Value)
 
-	pc := &sr.Scene.PaintContext
+	pc := &sr.Scene.Painter
 	st := &sr.Styles
 
 	dim := sr.Styles.Direction.Dim()
@@ -495,7 +495,7 @@ func (sr *Slider) Render() {
 	pabg := sr.parentActualBackground()
 
 	if sr.Type == SliderScrollbar {
-		pc.DrawStandardBox(st, pos, sz, pabg) // track
+		pc.StandardBox(st, pos, sz, pabg) // track
 		if sr.ValueColor != nil {
 			thsz := sr.slideThumbSize()
 			osz := sr.thumbSizeDots().Dim(od)
@@ -508,7 +508,7 @@ func (sr *Slider) Render() {
 			tsz.SetDim(od, osz)
 			tpos = tpos.AddDim(od, 0.5*(osz-origsz))
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
-			pc.FillStyle.Color = vabg
+			pc.Fill.Color = vabg
 			sr.RenderBoxGeom(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
 		}
 	} else {
@@ -529,13 +529,13 @@ func (sr *Slider) Render() {
 		bsz.SetDim(od, trsz)
 		bpos := pos
 		bpos = bpos.AddDim(od, .5*(sz.Dim(od)-trsz))
-		pc.FillStyle.Color = st.ActualBackground
+		pc.Fill.Color = st.ActualBackground
 		sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius}) // track
 
 		if sr.ValueColor != nil {
 			bsz.SetDim(dim, sr.pos)
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
-			pc.FillStyle.Color = vabg
+			pc.Fill.Color = vabg
 			sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius})
 		}
 
@@ -553,7 +553,7 @@ func (sr *Slider) Render() {
 			ic.setBBoxes()
 		} else {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
-			pc.FillStyle.Color = tabg
+			pc.Fill.Color = tabg
 			tpos.SetSub(thsz.MulScalar(0.5))
 			sr.RenderBoxGeom(tpos, thsz, styles.Border{Radius: st.Border.Radius})
 		}
@@ -566,8 +566,7 @@ func (sr *Slider) ApplyScenePos() {
 		return
 	}
 	pwb := sr.parentWidget()
-	zr := image.Rectangle{}
-	if !pwb.IsVisible() || pwb.Geom.TotalBBox == zr {
+	if !pwb.IsVisible() || pwb.Geom.TotalBBox == (image.Rectangle{}) {
 		return
 	}
 	sbw := math32.Ceil(sr.Styles.ScrollbarWidth.Dots)

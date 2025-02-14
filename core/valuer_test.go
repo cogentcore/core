@@ -36,7 +36,7 @@ func TestNewValue(t *testing.T) {
 		{"rune-slice", []rune("hello"), ""},
 		{"nil", (*int)(nil), ""},
 		{"icon", icons.Add, ""},
-		{"font", AppearanceSettings.Font, ""},
+		// {"font", AppearanceSettings.Font, ""}, // TODO(text):
 		{"file", Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},
 		{"option", option.New("an option"), ""},

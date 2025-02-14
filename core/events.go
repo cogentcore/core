@@ -1106,10 +1106,13 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keymap.WinSnapshot:
-		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
-		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
-		if errors.Log(imagex.Save(sc.Pixels, fnm)) == nil {
-			fmt.Println("Saved screenshot to", strings.ReplaceAll(fnm, " ", `\ `))
+		img := sc.Painter.State.RenderImage()
+		if img != nil {
+			dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
+			fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
+			if errors.Log(imagex.Save(img, fnm)) == nil {
+				fmt.Println("Saved screenshot to", strings.ReplaceAll(fnm, " ", `\ `))
+			}
 		}
 		e.SetHandled()
 	case keymap.ZoomIn:

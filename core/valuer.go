@@ -164,4 +164,5 @@ func init() {
 	AddValueType[FontName, FontButton]()
 	AddValueType[keymap.MapName, KeyMapButton]()
 	AddValueType[key.Chord, KeyChordButton]()
+	AddValueType[HighlightingName, HighlightingButton]()
 }

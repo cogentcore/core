@@ -88,14 +88,12 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 }
 
 func (g *Marker) Render(sv *SVG) {
-	pc := &g.Paint
-	rs := &sv.RenderState
-	rs.PushTransform(pc.Transform)
+	_, rs := g.PushContext(sv)
 
 	g.RenderChildren(sv)
 	g.BBoxes(sv) // must come after render
 
-	rs.PopTransform()
+	rs.PopContext()
 }
 
 func (g *Marker) BBoxes(sv *SVG) {

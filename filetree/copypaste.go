@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/texteditor"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,
