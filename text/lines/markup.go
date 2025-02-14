@@ -8,6 +8,7 @@ import (
 	"slices"
 	"time"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
@@ -138,29 +139,23 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 }
 
 // markupApplyTags applies given tags to current text
-// and sets the markup lines.  Must be called under Lock.
+// and sets the markup lines. Must be called under Lock.
 func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	tags = ls.markupApplyEdits(tags)
 	maxln := min(len(tags), ls.numLines())
-	nln := 0
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
 		// fmt.Println("#####\n", ln, "tags:\n", tags[ln])
-		mu := highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
-		// fmt.Println("\nmarkup:\n", mu)
-		lmu, lay, nbreaks := ls.layoutLine(ls.lines[ln], mu)
-		// fmt.Println("\nlayout:\n", lmu)
-		ls.markup[ln] = lmu
-		ls.layout[ln] = lay
-		ls.nbreaks[ln] = nbreaks
-		nln += 1 + nbreaks
+		ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
 	}
-	ls.totalLines = nln
+	for _, vw := range ls.views {
+		ls.layoutAllLines(vw)
+	}
 }
 
 // markupLines generates markup of given range of lines.
-// end is *inclusive* line.  Called after edits, under Lock().
+// end is *inclusive* line. Called after edits, under Lock().
 // returns true if all lines were marked up successfully.
 func (ls *Lines) markupLines(st, ed int) bool {
 	n := ls.numLines()
@@ -170,7 +165,6 @@ func (ls *Lines) markupLines(st, ed int) bool {
 	if ed >= n {
 		ed = n - 1
 	}
-
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
 		ltxt := ls.lines[ln]
@@ -183,12 +177,53 @@ func (ls *Lines) markupLines(st, ed int) bool {
 			mu = rich.NewText(ls.fontStyle, ltxt)
 			allgood = false
 		}
-		lmu, lay, nbreaks := ls.layoutLine(ltxt, mu)
-		ls.markup[ln] = lmu
-		ls.layout[ln] = lay
-		ls.nbreaks[ln] = nbreaks
+		ls.markup[ln] = mu
+	}
+	for _, vw := range ls.views {
+		ls.layoutLines(vw, st, ed)
 	}
 	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.
 	return allgood
+}
+
+// layoutLines performs view-specific layout of current markup.
+// the view must already have allocated space for these lines.
+// it updates the current number of total lines based on any changes from
+// the current number of lines withing given range.
+func (ls *Lines) layoutLines(vw *view, st, ed int) {
+	inln := 0
+	for ln := st; ln <= ed; ln++ {
+		inln += 1 + vw.nbreaks[ln]
+	}
+	nln := 0
+	for ln := st; ln <= ed; ln++ {
+		ltxt := ls.lines[ln]
+		lmu, lay, nbreaks := ls.layoutLine(vw.width, ltxt, ls.markup[ln])
+		vw.markup[ln] = lmu
+		vw.layout[ln] = lay
+		vw.nbreaks[ln] = nbreaks
+		nln += 1 + nbreaks
+	}
+	vw.totalLines += nln - inln
+}
+
+// layoutAllLines performs view-specific layout of all lines of current markup.
+// ensures that view has capacity to hold all lines, so it can be called on a
+// new view.
+func (ls *Lines) layoutAllLines(vw *view) {
+	n := len(vw.markup)
+	vw.markup = slicesx.SetLength(vw.markup, n)
+	vw.layout = slicesx.SetLength(vw.layout, n)
+	vw.nbreaks = slicesx.SetLength(vw.nbreaks, n)
+	nln := 0
+	for ln, mu := range ls.markup {
+		lmu, lay, nbreaks := ls.layoutLine(vw.width, ls.lines[ln], mu)
+		// fmt.Println("\nlayout:\n", lmu)
+		vw.markup[ln] = lmu
+		vw.layout[ln] = lay
+		vw.nbreaks[ln] = nbreaks
+		nln += 1 + nbreaks
+	}
+	vw.totalLines = nln
 }

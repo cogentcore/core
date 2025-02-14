@@ -42,30 +42,40 @@ func NewLinesFromBytes(filename string, src []byte) *Lines {
 
 func (ls *Lines) Defaults() {
 	ls.Settings.Defaults()
-	ls.width = 80
 	ls.fontStyle = rich.NewStyle().SetFamily(rich.Monospace)
 	ls.textStyle = text.NewStyle()
 }
 
-// SetWidth sets the width for line wrapping.
-func (ls *Lines) SetWidth(wd int) {
+// SetWidth sets the width for line wrapping, for given view id.
+func (ls *Lines) SetWidth(vid int, wd int) {
 	ls.Lock()
 	defer ls.Unlock()
-	ls.width = wd
+	vw := ls.view(vid)
+	if vw != nil {
+		vw.width = wd
+	}
 }
 
-// Width returns the width for line wrapping.
-func (ls *Lines) Width() int {
+// Width returns the width for line wrapping for given view id.
+func (ls *Lines) Width(vid int) int {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.width
+	vw := ls.view(vid)
+	if vw != nil {
+		return vw.width
+	}
+	return 0
 }
 
-// TotalLines returns the total number of display lines.
-func (ls *Lines) TotalLines() int {
+// TotalLines returns the total number of display lines, for given view id.
+func (ls *Lines) TotalLines(vid int) int {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.totalLines
+	vw := ls.view(vid)
+	if vw != nil {
+		return vw.totalLines
+	}
+	return 0
 }
 
 // SetText sets the text to the given bytes (makes a copy).

@@ -12,11 +12,11 @@ import (
 // displayPos returns the local display position of rune
 // at given source line and char: wrapped line, char.
 // returns -1, -1 for an invalid source position.
-func (ls *Lines) displayPos(pos textpos.Pos) textpos.Pos {
+func (ls *Lines) displayPos(vw *view, pos textpos.Pos) textpos.Pos {
 	if errors.Log(ls.isValidPos(pos)) != nil {
 		return textpos.Pos{-1, -1}
 	}
-	return ls.layout[pos.Line][pos.Char].ToPos()
+	return vw.layout[pos.Line][pos.Char].ToPos()
 }
 
 // displayToPos finds the closest source line, char position for given
@@ -24,9 +24,9 @@ func (ls *Lines) displayPos(pos textpos.Pos) textpos.Pos {
 // lines with nbreaks > 0. The result will be on the target line
 // if there is text on that line, but the Char position may be
 // less than the target depending on the line length.
-func (ls *Lines) displayToPos(ln int, pos textpos.Pos) textpos.Pos {
-	nb := ls.nbreaks[ln]
-	sz := len(ls.lines[ln])
+func (ls *Lines) displayToPos(vw *view, ln int, pos textpos.Pos) textpos.Pos {
+	nb := vw.nbreaks[ln]
+	sz := len(vw.layout[ln])
 	if sz == 0 {
 		return textpos.Pos{ln, 0}
 	}
@@ -37,8 +37,8 @@ func (ls *Lines) displayToPos(ln int, pos textpos.Pos) textpos.Pos {
 	if pos.Line >= nb { // nb is len-1 already
 		pos.Line = nb
 	}
-	lay := ls.layout[ln]
-	sp := ls.width*pos.Line + pos.Char // initial guess for starting position
+	lay := vw.layout[ln]
+	sp := vw.width*pos.Line + pos.Char // initial guess for starting position
 	sp = min(sp, sz-1)
 	// first get to the correct line
 	for sp < sz-1 && lay[sp].Line < int16(pos.Line) {
@@ -153,7 +153,7 @@ func (ls *Lines) moveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
 
 // moveDown moves given source position down given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
-func (ls *Lines) moveDown(pos textpos.Pos, steps, col int) textpos.Pos {
+func (ls *Lines) moveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 	if errors.Log(ls.isValidPos(pos)) != nil {
 		return pos
 	}
@@ -161,13 +161,13 @@ func (ls *Lines) moveDown(pos textpos.Pos, steps, col int) textpos.Pos {
 	nsteps := 0
 	for nsteps < steps {
 		gotwrap := false
-		if nbreak := ls.nbreaks[pos.Line]; nbreak > 0 {
-			dp := ls.displayPos(pos)
+		if nbreak := vw.nbreaks[pos.Line]; nbreak > 0 {
+			dp := ls.displayPos(vw, pos)
 			if dp.Line < nbreak {
 				dp.Line++
 				dp.Char = col // shoot for col
-				pos = ls.displayToPos(pos.Line, dp)
-				adp := ls.displayPos(pos)
+				pos = ls.displayToPos(vw, pos.Line, dp)
+				adp := ls.displayPos(vw, pos)
 				ns := adp.Line - dp.Line
 				if ns > 0 {
 					nsteps += ns

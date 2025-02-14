@@ -40,7 +40,8 @@ var (
 	// maximum number of lines to apply syntax highlighting markup on
 	maxMarkupLines = 10000 // `default:"10000" min:"1000" step:"1000"`
 
-	// amount of time to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
+	// amount of time to wait before starting a new background markup process,
+	// after text changes within a single line (always does after line insertion / deletion)
 	markupDelay = 500 * time.Millisecond // `default:"500" min:"100" step:"100"`
 )
 
@@ -74,13 +75,6 @@ type Lines struct {
 	// when this is called.
 	MarkupDoneFunc func()
 
-	// width is the current line width in rune characters, used for line wrapping.
-	width int
-
-	// totalLines is the total number of display lines, including line breaks.
-	// this is updated during markup.
-	totalLines int
-
 	// FontStyle is the default font styling to use for markup.
 	// Is set to use the monospace font.
 	fontStyle *rich.Style
@@ -88,8 +82,7 @@ type Lines struct {
 	// TextStyle is the default text styling to use for markup.
 	textStyle *text.Style
 
-	// todo: probably can unexport this?
-	// Undos is the undo manager.
+	// undos is the undo manager.
 	undos Undo
 
 	// ParseState is the parsing state information for the file.
@@ -104,24 +97,21 @@ type Lines struct {
 	// rendering correspondence. All textpos positions are in rune indexes.
 	lines [][]rune
 
-	// nbreaks are the number of display lines per source line (0 if it all fits on
-	// 1 display line).
-	nbreaks []int
-
-	// layout is a mapping from lines rune index to display line and char,
-	// within the scope of each line. E.g., Line=0 is first display line,
-	// 1 is one after the first line break, etc.
-	layout [][]textpos.Pos16
-
-	// markup is the marked-up version of the edited text lines, after being run
-	// through the syntax highlighting process. This is what is actually rendered.
-	markup []rich.Text
-
 	// tags are the extra custom tagged regions for each line.
 	tags []lexer.Line
 
 	// hiTags are the syntax highlighting tags, which are auto-generated.
 	hiTags []lexer.Line
+
+	// markup is the [rich.Text] encoded marked-up version of the text lines,
+	// with the results of syntax highlighting. It just has the raw markup without
+	// additional layout for a specific line width, which goes in a [view].
+	markup []rich.Text
+
+	// views are the distinct views of the lines, accessed via a unique view handle,
+	// which is the key in the map. Each view can have its own width, and thus its own
+	// markup and layout.
+	views map[int]*view
 
 	// markupEdits are the edits that were made during the time it takes to generate
 	// the new markup tags. this is rare but it does happen.
@@ -166,14 +156,17 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 		n--
 	}
 	ls.lines = slicesx.SetLength(ls.lines, n)
-	ls.nbreaks = slicesx.SetLength(ls.nbreaks, n)
-	ls.layout = slicesx.SetLength(ls.layout, n)
 	ls.tags = slicesx.SetLength(ls.tags, n)
 	ls.hiTags = slicesx.SetLength(ls.hiTags, n)
 	ls.markup = slicesx.SetLength(ls.markup, n)
 	for ln, txt := range lns {
 		ls.lines[ln] = runes.SetFromBytes(ls.lines[ln], txt)
 		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln]) // start with raw
+	}
+	for _, vw := range ls.views {
+		vw.markup = slicesx.SetLength(vw.markup, n)
+		vw.nbreaks = slicesx.SetLength(vw.nbreaks, n)
+		vw.layout = slicesx.SetLength(vw.layout, n)
 	}
 	ls.initialMarkup()
 	ls.startDelayedReMarkup()
@@ -187,7 +180,7 @@ func (ls *Lines) bytes(maxLines int) []byte {
 	if maxLines > 0 {
 		nl = min(nl, maxLines)
 	}
-	nb := ls.width * nl
+	nb := 80 * nl
 	b := make([]byte, 0, nb)
 	for ln := range nl {
 		b = append(b, []byte(string(ls.lines[ln]))...)
@@ -722,12 +715,16 @@ func (ls *Lines) linesInserted(tbe *textpos.Edit) {
 	stln := tbe.Region.Start.Line + 1
 	nsz := (tbe.Region.End.Line - tbe.Region.Start.Line)
 
-	ls.nbreaks = slices.Insert(ls.nbreaks, stln, make([]int, nsz)...)
-	ls.layout = slices.Insert(ls.layout, stln, make([][]textpos.Pos16, nsz)...)
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
 	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
 	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
+
+	for _, vw := range ls.views {
+		vw.markup = slices.Insert(vw.markup, stln, make([]rich.Text, nsz)...)
+		vw.nbreaks = slices.Insert(vw.nbreaks, stln, make([]int, nsz)...)
+		vw.layout = slices.Insert(vw.layout, stln, make([][]textpos.Pos16, nsz)...)
+	}
 
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()
@@ -742,11 +739,15 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	stln := tbe.Region.Start.Line
 	edln := tbe.Region.End.Line
-	ls.nbreaks = append(ls.nbreaks[:stln], ls.nbreaks[edln:]...)
-	ls.layout = append(ls.layout[:stln], ls.layout[edln:]...)
 	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
 	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
+
+	for _, vw := range ls.views {
+		vw.markup = append(vw.markup[:stln], vw.markup[edln:]...)
+		vw.nbreaks = append(vw.nbreaks[:stln], vw.nbreaks[edln:]...)
+		vw.layout = append(vw.layout[:stln], vw.layout[edln:]...)
+	}
 
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()

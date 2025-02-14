@@ -26,8 +26,9 @@ func NextSpace(txt []rune, pos int) int {
 
 // layoutLine performs layout and line wrapping on the given text, with the
 // given markup rich.Text, with the layout implemented in the markup that is returned.
-// This modifies the given markup rich text input directly.
-func (ls *Lines) layoutLine(txt []rune, mu rich.Text) (rich.Text, []textpos.Pos16, int) {
+// This clones and then modifies the given markup rich text.
+func (ls *Lines) layoutLine(width int, txt []rune, mu rich.Text) (rich.Text, []textpos.Pos16, int) {
+	mu = mu.Clone()
 	spc := []rune{' '}
 	n := len(txt)
 	nbreak := 0
@@ -62,7 +63,7 @@ func (ls *Lines) layoutLine(txt []rune, mu rich.Text) (rich.Text, []textpos.Pos1
 			ns := NextSpace(txt, i)
 			wlen := ns - i // length of word
 			// fmt.Println("word at:", i, "ns:", ns, string(txt[i:ns]))
-			if cp.Char+int16(wlen) > int16(ls.width) { // need to wrap
+			if cp.Char+int16(wlen) > int16(width) { // need to wrap
 				// fmt.Println("\n****\nline wrap width:", cp.Char+int16(wlen))
 				cp.Char = 0
 				cp.Line++
@@ -84,7 +85,7 @@ func (ls *Lines) layoutLine(txt []rune, mu rich.Text) (rich.Text, []textpos.Pos1
 				}
 			}
 			for j := i; j < ns; j++ {
-				// if cp.Char >= int16(ls.width) {
+				// if cp.Char >= int16(width) {
 				// 	cp.Char = 0
 				// 	cp.Line++
 				// 	nbreak++
