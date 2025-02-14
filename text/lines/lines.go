@@ -15,10 +15,10 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/base/slicesx"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse"
@@ -87,9 +87,16 @@ type Lines struct {
 	// when this is called.
 	MarkupDoneFunc func()
 
+	// FileModPromptFunc is called when a file has been modified in the filesystem
+	// and it is about to be modified through an edit, in the fileModCheck function.
+	// The prompt should determine whether the user wants to revert, overwrite, or
+	// save current version as a different file. It must block until the user responds,
+	// and it is called under the mutex lock to prevent other edits.
+	FileModPromptFunc func()
+
 	// Filename is the filename of the file that was last loaded or saved.
 	// It is used when highlighting code.
-	Filename core.Filename `json:"-" xml:"-"`
+	Filename fsx.Filename `json:"-" xml:"-"`
 
 	// Autosave specifies whether the file should be automatically
 	// saved after changes are made.
@@ -163,6 +170,10 @@ type Lines struct {
 	listeners events.Listeners
 
 	// Bool flags:
+
+	// batchUpdating indicates that a batch update is under way,
+	// so Input signals are not sent until the end.
+	batchUpdating bool
 
 	// autoSaving is used in atomically safe way to protect autosaving
 	autoSaving bool
@@ -651,12 +662,14 @@ func (ls *Lines) replaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 
 ////////   Undo
 
-// saveUndo saves given edit to undo stack
+// saveUndo saves given edit to undo stack.
+// also does SendInput because this is called for each edit.
 func (ls *Lines) saveUndo(tbe *textpos.Edit) {
 	if tbe == nil {
 		return
 	}
 	ls.undos.Save(tbe)
+	ls.SendInput()
 }
 
 // undo undoes next group of items on the undo stack

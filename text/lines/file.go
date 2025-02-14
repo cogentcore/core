@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
@@ -27,8 +28,8 @@ func (ls *Lines) IsNotSaved() bool {
 	return ls.notSaved
 }
 
-// clearNotSaved sets Changed and NotSaved to false.
-func (ls *Lines) clearNotSaved() {
+// ClearNotSaved sets Changed and NotSaved to false.
+func (ls *Lines) ClearNotSaved() {
 	ls.SetChanged(false)
 	ls.notSaved = false
 }
@@ -141,7 +142,7 @@ func (ls *Lines) Revert() bool { //types:add
 	if !didDiff {
 		ls.openFile(ls.Filename)
 	}
-	ls.clearNotSaved()
+	ls.ClearNotSaved()
 	ls.AutoSaveDelete()
 	// ls.signalEditors(bufferNew, nil)
 	return true
@@ -154,12 +155,38 @@ func (ls *Lines) saveFile(filename fsx.Filename) error {
 		// core.ErrorSnackbar(tb.sceneFromEditor(), err)
 		slog.Error(err.Error())
 	} else {
-		ls.clearNotSaved()
+		ls.ClearNotSaved()
 		ls.Filename = filename
 		ls.Stat()
 	}
 	return err
 }
+
+// fileModCheck checks if the underlying file has been modified since last
+// Stat (open, save); if haven't yet prompted, user is prompted to ensure
+// that this is OK. It returns true if the file was modified.
+func (ls *Lines) fileModCheck() bool {
+	if ls.Filename == "" || ls.fileModOK {
+		return false
+	}
+	info, err := os.Stat(string(ls.Filename))
+	if err != nil {
+		return false
+	}
+	if info.ModTime() != time.Time(ls.FileInfo.ModTime) {
+		if !ls.IsNotSaved() { // we haven't edited: just revert
+			ls.Revert()
+			return true
+		}
+		if ls.FileModPromptFunc != nil {
+			ls.FileModPromptFunc()
+		}
+		return true
+	}
+	return false
+}
+
+//////// Autosave
 
 // autoSaveOff turns off autosave and returns the
 // prior state of Autosave flag.
@@ -221,18 +248,4 @@ func (ls *Lines) AutoSaveCheck() bool {
 		return false // does not exist
 	}
 	return true
-}
-
-// batchUpdateStart call this when starting a batch of updates.
-// It calls AutoSaveOff and returns the prior state of that flag
-// which must be restored using BatchUpdateEnd.
-func (ls *Lines) batchUpdateStart() (autoSave bool) {
-	ls.undos.NewGroup()
-	autoSave = ls.autoSaveOff()
-	return
-}
-
-// batchUpdateEnd call to complete BatchUpdateStart
-func (ls *Lines) batchUpdateEnd(autoSave bool) {
-	ls.autoSaveRestore(autoSave)
 }

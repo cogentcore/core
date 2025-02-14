@@ -105,19 +105,25 @@ func (ls *Lines) TotalLines(vid int) int {
 
 // SetText sets the text to the given bytes (makes a copy).
 // Pass nil to initialize an empty buffer.
-func (ls *Lines) SetText(text []byte) {
+func (ls *Lines) SetText(text []byte) *Lines {
 	ls.Lock()
 	defer ls.Unlock()
-
 	ls.bytesToLines(text)
+	ls.SendChange()
+	return ls
+}
+
+// SetString sets the text to the given string.
+func (ls *Lines) SetString(txt string) *Lines {
+	return ls.SetText([]byte(txt))
 }
 
 // SetTextLines sets the source lines from given lines of bytes.
 func (ls *Lines) SetTextLines(lns [][]byte) {
 	ls.Lock()
 	defer ls.Unlock()
-
 	ls.setLineBytes(lns)
+	ls.SendChange()
 }
 
 // Bytes returns the current text lines as a slice of bytes,
@@ -126,6 +132,21 @@ func (ls *Lines) Bytes() []byte {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.bytes(0)
+}
+
+// Text returns the current text as a []byte array, applying all current
+// changes by calling editDone, which will generate a signal if there have been
+// changes.
+func (ls *Lines) Text() []byte {
+	ls.EditDone()
+	return ls.Bytes()
+}
+
+// String returns the current text as a string, applying all current
+// changes by calling editDone, which will generate a signal if there have been
+// changes.
+func (ls *Lines) String() string {
+	return string(ls.Text())
 }
 
 // SetFileInfo sets the syntax highlighting and other parameters
@@ -288,7 +309,12 @@ func (ls *Lines) RegionRect(st, ed textpos.Pos) *textpos.Edit {
 func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.deleteText(st, ed)
+	ls.fileModCheck()
+	tbe := ls.deleteText(st, ed)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // DeleteTextRect deletes rectangular region of text between start, end
@@ -298,7 +324,12 @@ func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.deleteTextRect(st, ed)
+	ls.fileModCheck()
+	tbe := ls.deleteTextRect(st, ed)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // InsertTextBytes is the primary method for inserting text,
@@ -307,7 +338,12 @@ func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.insertText(st, []rune(string(text)))
+	ls.fileModCheck()
+	tbe := ls.insertText(st, []rune(string(text)))
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // InsertText is the primary method for inserting text,
@@ -316,7 +352,12 @@ func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.insertText(st, text)
+	ls.fileModCheck()
+	tbe := ls.insertText(st, text)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // InsertTextRect inserts a rectangle of text defined in given Edit record,
@@ -326,7 +367,12 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.insertTextRect(tbe)
+	ls.fileModCheck()
+	tbe = ls.insertTextRect(tbe)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // ReplaceText does DeleteText for given region, and then InsertText at given position
@@ -338,7 +384,12 @@ func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, matchCase bool) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.replaceText(delSt, delEd, insPos, insTxt, matchCase)
+	ls.fileModCheck()
+	tbe := ls.replaceText(delSt, delEd, insPos, insTxt, matchCase)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // AppendTextMarkup appends new text to end of lines, using insert, returns
@@ -346,7 +397,12 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 func (ls *Lines) AppendTextMarkup(text []rune, markup []rich.Text) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.appendTextMarkup(text, markup)
+	ls.fileModCheck()
+	tbe := ls.appendTextMarkup(text, markup)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	return tbe
 }
 
 // ReMarkup starts a background task of redoing the markup
@@ -359,11 +415,15 @@ func (ls *Lines) ReMarkup() {
 // NewUndoGroup increments the undo group counter for batchiung
 // the subsequent actions.
 func (ls *Lines) NewUndoGroup() {
+	ls.Lock()
+	defer ls.Unlock()
 	ls.undos.NewGroup()
 }
 
 // UndoReset resets all current undo records.
 func (ls *Lines) UndoReset() {
+	ls.Lock()
+	defer ls.Unlock()
 	ls.undos.Reset()
 }
 
@@ -372,7 +432,15 @@ func (ls *Lines) UndoReset() {
 func (ls *Lines) Undo() []*textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.undo()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
+	tbe := ls.undo()
+	if tbe == nil || ls.undos.Pos == 0 { // no more undo = fully undone
+		ls.SetChanged(false)
+		ls.notSaved = false
+		ls.AutoSaveDelete()
+	}
+	return tbe
 }
 
 // Redo redoes next group of items on the undo stack,
@@ -380,6 +448,8 @@ func (ls *Lines) Undo() []*textpos.Edit {
 func (ls *Lines) Redo() []*textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	return ls.redo()
 }
 
@@ -582,6 +652,8 @@ func (ls *Lines) StartDelayedReMarkup() {
 func (ls *Lines) IndentLine(ln, ind int) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
+	autoSave := ls.batchUpdateStart()
+	defer ls.batchUpdateEnd(autoSave)
 	return ls.indentLine(ln, ind)
 }
 

@@ -137,35 +137,6 @@ const (
 	bufferClosed
 )
 
-// signalEditors sends the given signal and optional edit info
-// to all the [Editor]s for this [Buffer]
-func (tb *Buffer) signalEditors(sig bufferSignals, edit *lines.Edit) {
-	for _, vw := range tb.editors {
-		if vw != nil && vw.This != nil { // editor can be deleting
-			vw.bufferSignal(sig, edit)
-		}
-	}
-	if sig == bufferDone {
-		e := &events.Base{Typ: events.Change}
-		e.Init()
-		tb.listeners.Call(e)
-	} else if sig == bufferInsert || sig == bufferDelete {
-		e := &events.Base{Typ: events.Input}
-		e.Init()
-		tb.listeners.Call(e)
-	}
-}
-
-// OnChange adds an event listener function for the [events.Change] event.
-func (tb *Buffer) OnChange(fun func(e events.Event)) {
-	tb.listeners.Add(events.Change, fun)
-}
-
-// OnInput adds an event listener function for the [events.Input] event.
-func (tb *Buffer) OnInput(fun func(e events.Event)) {
-	tb.listeners.Add(events.Input, fun)
-}
-
 // Init initializes the buffer.  Called automatically in SetText.
 func (tb *Buffer) Init() {
 	if tb.MarkupDoneFunc != nil {
@@ -179,51 +150,15 @@ func (tb *Buffer) Init() {
 	}
 }
 
+// todo: need the init somehow.
+
 // SetText sets the text to the given bytes.
 // Pass nil to initialize an empty buffer.
-func (tb *Buffer) SetText(text []byte) *Buffer {
-	tb.Init()
-	tb.Lines.SetText(text)
-	tb.signalEditors(bufferNew, nil)
-	return tb
-}
-
-// SetString sets the text to the given string.
-func (tb *Buffer) SetString(txt string) *Buffer {
-	return tb.SetText([]byte(txt))
-}
-
-func (tb *Buffer) Update() {
-	tb.signalMods()
-}
-
-// editDone finalizes any current editing, sends signal
-func (tb *Buffer) editDone() {
-	tb.AutoSaveDelete()
-	tb.SetChanged(false)
-	tb.signalEditors(bufferDone, nil)
-}
-
-// Text returns the current text as a []byte array, applying all current
-// changes by calling editDone, which will generate a signal if there have been
-// changes.
-func (tb *Buffer) Text() []byte {
-	tb.editDone()
-	return tb.Bytes()
-}
-
-// String returns the current text as a string, applying all current
-// changes by calling editDone, which will generate a signal if there have been
-// changes.
-func (tb *Buffer) String() string {
-	return string(tb.Text())
-}
-
-// signalMods sends the BufMods signal for misc, potentially
-// widespread modifications to buffer.
-func (tb *Buffer) signalMods() {
-	tb.signalEditors(bufferMods, nil)
-}
+// func (tb *Buffer) SetText(text []byte) *Buffer {
+// 	tb.Init()
+// 	tb.Lines.SetText(text)
+// 	return tb
+// }
 
 // FileModCheck checks if the underlying file has been modified since last
 // Stat (open, save); if haven't yet prompted, user is prompted to ensure
@@ -424,111 +359,6 @@ const (
 	ReplaceNoMatchCase = false
 )
 
-// DeleteText is the primary method for deleting text from the buffer.
-// It deletes region of text between start and end positions,
-// optionally signaling views after text lines have been updated.
-// Sets the timestamp on resulting Edit to now.
-// An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) DeleteText(st, ed textpos.Pos, signal bool) *lines.Edit {
-	tb.FileModCheck()
-	tbe := tb.Lines.DeleteText(st, ed)
-	if tbe == nil {
-		return tbe
-	}
-	if signal {
-		tb.signalEditors(bufferDelete, tbe)
-	}
-	if tb.Autosave {
-		go tb.autoSave()
-	}
-	return tbe
-}
-
-// deleteTextRect deletes rectangular region of text between start, end
-// defining the upper-left and lower-right corners of a rectangle.
-// Fails if st.Char >= ed.Ch. Sets the timestamp on resulting lines.Edit to now.
-// An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) deleteTextRect(st, ed textpos.Pos, signal bool) *lines.Edit {
-	tb.FileModCheck()
-	tbe := tb.Lines.DeleteTextRect(st, ed)
-	if tbe == nil {
-		return tbe
-	}
-	if signal {
-		tb.signalMods()
-	}
-	if tb.Autosave {
-		go tb.autoSave()
-	}
-	return tbe
-}
-
-// insertText is the primary method for inserting text into the buffer.
-// It inserts new text at given starting position, optionally signaling
-// views after text has been inserted.  Sets the timestamp on resulting Edit to now.
-// An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) insertText(st textpos.Pos, text []byte, signal bool) *lines.Edit {
-	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tbe := tb.Lines.InsertText(st, text)
-	if tbe == nil {
-		return tbe
-	}
-	if signal {
-		tb.signalEditors(bufferInsert, tbe)
-	}
-	if tb.Autosave {
-		go tb.autoSave()
-	}
-	return tbe
-}
-
-// insertTextRect inserts a rectangle of text defined in given lines.Edit record,
-// (e.g., from RegionRect or DeleteRect), optionally signaling
-// views after text has been inserted.
-// Returns a copy of the Edit record with an updated timestamp.
-// An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) insertTextRect(tbe *lines.Edit, signal bool) *lines.Edit {
-	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	nln := tb.NumLines()
-	re := tb.Lines.InsertTextRect(tbe)
-	if re == nil {
-		return re
-	}
-	if signal {
-		if re.Reg.End.Line >= nln {
-			ie := &lines.Edit{}
-			ie.Reg.Start.Line = nln - 1
-			ie.Reg.End.Line = re.Reg.End.Line
-			tb.signalEditors(bufferInsert, ie)
-		} else {
-			tb.signalMods()
-		}
-	}
-	if tb.Autosave {
-		go tb.autoSave()
-	}
-	return re
-}
-
-// ReplaceText does DeleteText for given region, and then InsertText at given position
-// (typically same as delSt but not necessarily), optionally emitting a signal after the insert.
-// if matchCase is true, then the lexer.MatchCase function is called to match the
-// case (upper / lower) of the new inserted text to that of the text being replaced.
-// returns the lines.Edit for the inserted text.
-func (tb *Buffer) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, signal, matchCase bool) *lines.Edit {
-	tbe := tb.Lines.ReplaceText(delSt, delEd, insPos, insTxt, matchCase)
-	if tbe == nil {
-		return tbe
-	}
-	if signal {
-		tb.signalMods() // todo: could be more specific?
-	}
-	if tb.Autosave {
-		go tb.autoSave()
-	}
-	return tbe
-}
-
 // savePosHistory saves the cursor position in history stack of cursor positions --
 // tracks across views -- returns false if position was on same line as last one saved
 func (tb *Buffer) savePosHistory(pos textpos.Pos) bool {
@@ -544,93 +374,6 @@ func (tb *Buffer) savePosHistory(pos textpos.Pos) bool {
 	tb.posHistory = append(tb.posHistory, pos)
 	// fmt.Printf("saved pos hist: %v\n", pos)
 	return true
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Undo
-
-// undo undoes next group of items on the undo stack
-func (tb *Buffer) undo() []*lines.Edit {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tbe := tb.Lines.Undo()
-	if tbe == nil || tb.Undos.Pos == 0 { // no more undo = fully undone
-		tb.SetChanged(false)
-		tb.notSaved = false
-		tb.AutoSaveDelete()
-	}
-	tb.signalMods()
-	return tbe
-}
-
-// redo redoes next group of items on the undo stack,
-// and returns the last record, nil if no more
-func (tb *Buffer) redo() []*lines.Edit {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tbe := tb.Lines.Redo()
-	if tbe != nil {
-		tb.signalMods()
-	}
-	return tbe
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//   Indenting
-
-// see parse/lexer/indent.go for support functions
-
-// indentLine indents line by given number of tab stops, using tabs or spaces,
-// for given tab size (if using spaces) -- either inserts or deletes to reach target.
-// Returns edit record for any change.
-func (tb *Buffer) indentLine(ln, ind int) *lines.Edit {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tbe := tb.Lines.IndentLine(ln, ind)
-	tb.signalMods()
-	return tbe
-}
-
-// AutoIndentRegion does auto-indent over given region; end is *exclusive*
-func (tb *Buffer) AutoIndentRegion(start, end int) {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tb.Lines.AutoIndentRegion(start, end)
-	tb.signalMods()
-}
-
-// CommentRegion inserts comment marker on given lines; end is *exclusive*
-func (tb *Buffer) CommentRegion(start, end int) {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tb.Lines.CommentRegion(start, end)
-	tb.signalMods()
-}
-
-// JoinParaLines merges sequences of lines with hard returns forming paragraphs,
-// separated by blank lines, into a single line per paragraph,
-// within the given line regions; endLine is *inclusive*
-func (tb *Buffer) JoinParaLines(startLine, endLine int) {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tb.Lines.JoinParaLines(startLine, endLine)
-	tb.signalMods()
-}
-
-// TabsToSpaces replaces tabs with spaces over given region; end is *exclusive*
-func (tb *Buffer) TabsToSpaces(start, end int) {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tb.Lines.TabsToSpaces(start, end)
-	tb.signalMods()
-}
-
-// SpacesToTabs replaces tabs with spaces over given region; end is *exclusive*
-func (tb *Buffer) SpacesToTabs(start, end int) {
-	autoSave := tb.batchUpdateStart()
-	defer tb.batchUpdateEnd(autoSave)
-	tb.Lines.SpacesToTabs(start, end)
-	tb.signalMods()
 }
 
 // DiffBuffersUnified computes the diff between this buffer and the other buffer,
