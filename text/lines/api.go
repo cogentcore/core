@@ -11,7 +11,6 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/text/highlighting"
-	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -23,21 +22,18 @@ import (
 
 // NewLinesFromBytes returns a new Lines representation of given bytes of text,
 // using given filename to determine the type of content that is represented
-// in the bytes, based on the filename extension. This uses all default
-// styling settings.
-func NewLinesFromBytes(filename string, src []byte) *Lines {
-	lns := &Lines{}
-	lns.Defaults()
-
+// in the bytes, based on the filename extension, and given initial display width.
+// A width-specific view is created, with the unique view id returned: this id
+// must be used for all subsequent view-specific calls.
+// This uses all default styling settings.
+func NewLinesFromBytes(filename string, width int, src []byte) (*Lines, int) {
+	ls := &Lines{}
+	ls.Defaults()
 	fi, _ := fileinfo.NewFileInfo(filename)
-	var pst parse.FileStates // todo: this api needs to be cleaner
-	pst.SetSrc(filename, "", fi.Known)
-	// pst.Done()
-	lns.Highlighter.Init(fi, &pst)
-	lns.Highlighter.SetStyle(highlighting.HighlightingName("emacs"))
-	lns.Highlighter.Has = true
-	lns.SetText(src)
-	return lns
+	ls.setFileInfo(fi)
+	_, vid := ls.newView(width)
+	ls.bytesToLines(src)
+	return ls, vid
 }
 
 func (ls *Lines) Defaults() {
@@ -46,14 +42,42 @@ func (ls *Lines) Defaults() {
 	ls.textStyle = text.NewStyle()
 }
 
+// NewView makes a new view with given initial width,
+// with a layout of the existing text at this width.
+// The return value is a unique int handle that must be
+// used for all subsequent calls that depend on the view.
+func (ls *Lines) NewView(width int) int {
+	ls.Lock()
+	defer ls.Unlock()
+	_, vid := ls.newView(width)
+	return vid
+}
+
+// DeleteView deletes view for given unique view id.
+// It is important to delete unused views to maintain efficient updating of
+// existing views.
+func (ls *Lines) DeleteView(vid int) {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.deleteView(vid)
+}
+
 // SetWidth sets the width for line wrapping, for given view id.
-func (ls *Lines) SetWidth(vid int, wd int) {
+// If the width is different than current, the layout is updated,
+// and a true is returned, else false.
+func (ls *Lines) SetWidth(vid int, wd int) bool {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
 	if vw != nil {
+		if vw.width == wd {
+			return false
+		}
 		vw.width = wd
+		ls.layoutAll(vw)
+		return true
 	}
+	return false
 }
 
 // Width returns the width for line wrapping for given view id.
@@ -104,18 +128,11 @@ func (ls *Lines) Bytes() []byte {
 }
 
 // SetFileInfo sets the syntax highlighting and other parameters
-// based on the type of file specified by given fileinfo.FileInfo.
+// based on the type of file specified by given [fileinfo.FileInfo].
 func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
 	ls.Lock()
 	defer ls.Unlock()
-
-	ls.parseState.SetSrc(string(info.Path), "", info.Known)
-	ls.Highlighter.Init(info, &ls.parseState)
-	ls.Settings.ConfigKnown(info.Known)
-	if ls.numLines() > 0 {
-		ls.initialMarkup()
-		ls.startDelayedReMarkup()
-	}
+	ls.setFileInfo(info)
 }
 
 // SetFileType sets the syntax highlighting and other parameters

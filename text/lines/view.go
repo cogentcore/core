@@ -56,6 +56,11 @@ func (ls *Lines) newView(width int) (*view, int) {
 	id := mxi + 1
 	vw := &view{width: width}
 	ls.views[id] = vw
-	ls.layoutAllLines(vw)
+	ls.layoutAll(vw)
 	return vw, id
+}
+
+// deleteView deletes view with given view id.
+func (ls *Lines) deleteView(vid int) {
+	delete(ls.views, vid)
 }

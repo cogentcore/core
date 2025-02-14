@@ -275,3 +275,13 @@ func (tx Text) DebugDump() {
 		fmt.Printf("chars: %q\n", string(r))
 	}
 }
+
+// Clone returns a deep copy clone of the current text, safe for subsequent
+// modification without affecting this one.
+func (tx Text) Clone() Text {
+	ct := make(Text, len(tx))
+	for i := range tx {
+		ct[i] = slices.Clone(tx[i])
+	}
+	return ct
+}

@@ -150,5 +150,4 @@ func TestEdit(t *testing.T) {
 	lns.NewUndoGroup()
 	lns.DeleteTextRect(tbe.Region.Start, tbe.Region.End)
 	assert.Equal(t, srcsp+"\n", string(lns.Bytes()))
-
 }

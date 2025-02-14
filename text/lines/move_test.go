@@ -18,8 +18,8 @@ It provides basic font styling properties.
 The "n" newline is used to mark the end of a paragraph, and in general text will be automatically wrapped to fit a given size, in the "shaped" package. If the text starting after a newline has a ParagraphStart decoration, then it will be styled according to the "text.Style" paragraph styles (indent and paragraph spacing). The HTML parser sets this as appropriate based on "<br>" vs "<p>" tags.
 `
 
-	lns := NewLinesFromBytes("dummy.md", []byte(src))
-	_ = lns
+	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
+	_ = vid
 
 	// ft0 := string(lns.markup[0].Join())
 	// ft1 := string(lns.markup[1].Join())

@@ -9,19 +9,53 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/runes"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )
 
-func NextSpace(txt []rune, pos int) int {
-	n := len(txt)
-	for i := pos; i < n; i++ {
-		r := txt[i]
-		if unicode.IsSpace(r) {
-			return i
-		}
+// layoutLines performs view-specific layout of given lines of current markup.
+// the view must already have allocated space for these lines.
+// it updates the current number of total lines based on any changes from
+// the current number of lines withing given range.
+func (ls *Lines) layoutLines(vw *view, st, ed int) {
+	inln := 0
+	for ln := st; ln <= ed; ln++ {
+		inln += 1 + vw.nbreaks[ln]
 	}
-	return n
+	nln := 0
+	for ln := st; ln <= ed; ln++ {
+		ltxt := ls.lines[ln]
+		lmu, lay, nbreaks := ls.layoutLine(vw.width, ltxt, ls.markup[ln])
+		vw.markup[ln] = lmu
+		vw.layout[ln] = lay
+		vw.nbreaks[ln] = nbreaks
+		nln += 1 + nbreaks
+	}
+	vw.totalLines += nln - inln
+}
+
+// layoutAll performs view-specific layout of all lines of current markup.
+// ensures that view has capacity to hold all lines, so it can be called on a
+// new view.
+func (ls *Lines) layoutAll(vw *view) {
+	n := len(vw.markup)
+	if n == 0 {
+		return
+	}
+	vw.markup = slicesx.SetLength(vw.markup, n)
+	vw.layout = slicesx.SetLength(vw.layout, n)
+	vw.nbreaks = slicesx.SetLength(vw.nbreaks, n)
+	nln := 0
+	for ln, mu := range ls.markup {
+		lmu, lay, nbreaks := ls.layoutLine(vw.width, ls.lines[ln], mu)
+		// fmt.Println("\nlayout:\n", lmu)
+		vw.markup[ln] = lmu
+		vw.layout[ln] = lay
+		vw.nbreaks[ln] = nbreaks
+		nln += 1 + nbreaks
+	}
+	vw.totalLines = nln
 }
 
 // layoutLine performs layout and line wrapping on the given text, with the
@@ -98,4 +132,15 @@ func (ls *Lines) layoutLine(width int, txt []rune, mu rich.Text) (rich.Text, []t
 		}
 	}
 	return mu, lay, nbreak
+}
+
+func NextSpace(txt []rune, pos int) int {
+	n := len(txt)
+	for i := pos; i < n; i++ {
+		r := txt[i]
+		if unicode.IsSpace(r) {
+			return i
+		}
+	}
+	return n
 }
