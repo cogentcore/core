@@ -553,3 +553,10 @@ func (tb *Tab) tabs() *Tabs {
 	}
 	return nil
 }
+
+func (tb *Tab) Label() string {
+	if tb.Text != "" {
+		return tb.Text
+	}
+	return tb.Name
+}
