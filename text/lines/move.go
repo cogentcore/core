@@ -9,72 +9,6 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// displayPos returns the local display position of rune
-// at given source line and char: wrapped line, char.
-// returns -1, -1 for an invalid source position.
-func (ls *Lines) displayPos(vw *view, pos textpos.Pos) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
-		return textpos.Pos{-1, -1}
-	}
-	ln := vw.layout[pos.Line]
-	if pos.Char == len(ln) { // eol
-		dp := ln[pos.Char-1]
-		dp.Char++
-		return dp.ToPos()
-	}
-	return ln[pos.Char].ToPos()
-}
-
-// displayToPos finds the closest source line, char position for given
-// local display position within given source line, for wrapped
-// lines with nbreaks > 0. The result will be on the target line
-// if there is text on that line, but the Char position may be
-// less than the target depending on the line length.
-func (ls *Lines) displayToPos(vw *view, ln int, pos textpos.Pos) textpos.Pos {
-	nb := vw.nbreaks[ln]
-	sz := len(vw.layout[ln])
-	if sz == 0 {
-		return textpos.Pos{ln, 0}
-	}
-	pos.Char = min(pos.Char, sz-1)
-	if nb == 0 {
-		return textpos.Pos{ln, pos.Char}
-	}
-	if pos.Line >= nb { // nb is len-1 already
-		pos.Line = nb
-	}
-	lay := vw.layout[ln]
-	sp := vw.width*pos.Line + pos.Char // initial guess for starting position
-	sp = min(sp, sz-1)
-	// first get to the correct line
-	for sp < sz-1 && lay[sp].Line < int16(pos.Line) {
-		sp++
-	}
-	for sp > 0 && lay[sp].Line > int16(pos.Line) {
-		sp--
-	}
-	if lay[sp].Line != int16(pos.Line) {
-		return textpos.Pos{ln, sp}
-	}
-	// now get to the correct char
-	for sp < sz-1 && lay[sp].Line == int16(pos.Line) && lay[sp].Char < int16(pos.Char) {
-		sp++
-	}
-	if lay[sp].Line != int16(pos.Line) { // went too far
-		return textpos.Pos{ln, sp - 1}
-	}
-	for sp > 0 && lay[sp].Line == int16(pos.Line) && lay[sp].Char > int16(pos.Char) {
-		sp--
-	}
-	if lay[sp].Line != int16(pos.Line) { // went too far
-		return textpos.Pos{ln, sp + 1}
-	}
-	if sp == sz-1 && lay[sp].Char < int16(pos.Char) { // go to the end
-		sp++
-	}
-	return textpos.Pos{ln, sp}
-}
-
 // moveForward moves given source position forward given number of rune steps.
 func (ls *Lines) moveForward(pos textpos.Pos, steps int) textpos.Pos {
 	if errors.Log(ls.isValidPos(pos)) != nil {
@@ -243,4 +177,87 @@ func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 		}
 	}
 	return pos
+}
+
+// SavePosHistory saves the cursor position in history stack of cursor positions.
+// Tracks across views. Returns false if position was on same line as last one saved.
+func (ls *Lines) SavePosHistory(pos textpos.Pos) bool {
+	if ls.posHistory == nil {
+		ls.posHistory = make([]textpos.Pos, 0, 1000)
+	}
+	sz := len(ls.posHistory)
+	if sz > 0 {
+		if ls.posHistory[sz-1].Line == pos.Line {
+			return false
+		}
+	}
+	ls.posHistory = append(ls.posHistory, pos)
+	// fmt.Printf("saved pos hist: %v\n", pos)
+	return true
+}
+
+// displayPos returns the local display position of rune
+// at given source line and char: wrapped line, char.
+// returns -1, -1 for an invalid source position.
+func (ls *Lines) displayPos(vw *view, pos textpos.Pos) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return textpos.Pos{-1, -1}
+	}
+	ln := vw.layout[pos.Line]
+	if pos.Char == len(ln) { // eol
+		dp := ln[pos.Char-1]
+		dp.Char++
+		return dp.ToPos()
+	}
+	return ln[pos.Char].ToPos()
+}
+
+// displayToPos finds the closest source line, char position for given
+// local display position within given source line, for wrapped
+// lines with nbreaks > 0. The result will be on the target line
+// if there is text on that line, but the Char position may be
+// less than the target depending on the line length.
+func (ls *Lines) displayToPos(vw *view, ln int, pos textpos.Pos) textpos.Pos {
+	nb := vw.nbreaks[ln]
+	sz := len(vw.layout[ln])
+	if sz == 0 {
+		return textpos.Pos{ln, 0}
+	}
+	pos.Char = min(pos.Char, sz-1)
+	if nb == 0 {
+		return textpos.Pos{ln, pos.Char}
+	}
+	if pos.Line >= nb { // nb is len-1 already
+		pos.Line = nb
+	}
+	lay := vw.layout[ln]
+	sp := vw.width*pos.Line + pos.Char // initial guess for starting position
+	sp = min(sp, sz-1)
+	// first get to the correct line
+	for sp < sz-1 && lay[sp].Line < int16(pos.Line) {
+		sp++
+	}
+	for sp > 0 && lay[sp].Line > int16(pos.Line) {
+		sp--
+	}
+	if lay[sp].Line != int16(pos.Line) {
+		return textpos.Pos{ln, sp}
+	}
+	// now get to the correct char
+	for sp < sz-1 && lay[sp].Line == int16(pos.Line) && lay[sp].Char < int16(pos.Char) {
+		sp++
+	}
+	if lay[sp].Line != int16(pos.Line) { // went too far
+		return textpos.Pos{ln, sp - 1}
+	}
+	for sp > 0 && lay[sp].Line == int16(pos.Line) && lay[sp].Char > int16(pos.Char) {
+		sp--
+	}
+	if lay[sp].Line != int16(pos.Line) { // went too far
+		return textpos.Pos{ln, sp + 1}
+	}
+	if sp == sz-1 && lay[sp].Char < int16(pos.Char) { // go to the end
+		sp++
+	}
+	return textpos.Pos{ln, sp}
 }

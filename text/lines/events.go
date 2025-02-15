@@ -10,11 +10,15 @@ import "cogentcore.org/core/events"
 // This is used for large-scale changes in the text, such as opening a
 // new file or setting new text, or EditDone or Save.
 func (ls *Lines) OnChange(fun func(e events.Event)) {
+	ls.Lock()
+	defer ls.Unlock()
 	ls.listeners.Add(events.Change, fun)
 }
 
 // OnInput adds an event listener function for the [events.Input] event.
 func (ls *Lines) OnInput(fun func(e events.Event)) {
+	ls.Lock()
+	defer ls.Unlock()
 	ls.listeners.Add(events.Input, fun)
 }
 
@@ -22,9 +26,9 @@ func (ls *Lines) OnInput(fun func(e events.Event)) {
 // that the text has changed. This is used for large-scale changes in the
 // text, such as opening a new file or setting new text, or EditoDone or Save.
 func (ls *Lines) SendChange() {
-	e := &events.Base{Typ: events.Change}
-	e.Init()
-	ls.listeners.Call(e)
+	ls.Lock()
+	defer ls.Unlock()
+	ls.SendChange()
 }
 
 // SendInput sends a new [events.Input] event, which is used to signal
@@ -32,6 +36,34 @@ func (ls *Lines) SendChange() {
 // in the text, and is used by text widgets to drive updates. It is blocked
 // during batchUpdating and sent at batchUpdateEnd.
 func (ls *Lines) SendInput() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.sendInput()
+}
+
+// EditDone finalizes any current editing, sends Changed event.
+func (ls *Lines) EditDone() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.editDone()
+}
+
+//////// unexported api
+
+// sendChange sends a new [events.Change] event, which is used to signal
+// that the text has changed. This is used for large-scale changes in the
+// text, such as opening a new file or setting new text, or EditoDone or Save.
+func (ls *Lines) sendChange() {
+	e := &events.Base{Typ: events.Change}
+	e.Init()
+	ls.listeners.Call(e)
+}
+
+// sendInput sends a new [events.Input] event, which is used to signal
+// that the text has changed. This is sent after every fine-grained change in
+// in the text, and is used by text widgets to drive updates. It is blocked
+// during batchUpdating and sent at batchUpdateEnd.
+func (ls *Lines) sendInput() {
 	if ls.batchUpdating {
 		return
 	}
@@ -40,11 +72,11 @@ func (ls *Lines) SendInput() {
 	ls.listeners.Call(e)
 }
 
-// EditDone finalizes any current editing, sends signal
-func (ls *Lines) EditDone() {
-	ls.AutoSaveDelete()
-	ls.SetChanged(false)
-	ls.SendChange()
+// editDone finalizes any current editing, sends Changed event.
+func (ls *Lines) editDone() {
+	ls.autosaveDelete()
+	ls.changed = true
+	ls.sendChange()
 }
 
 // batchUpdateStart call this when starting a batch of updates.
@@ -61,5 +93,5 @@ func (ls *Lines) batchUpdateStart() (autoSave bool) {
 func (ls *Lines) batchUpdateEnd(autoSave bool) {
 	ls.autoSaveRestore(autoSave)
 	ls.batchUpdating = false
-	ls.SendInput()
+	ls.sendInput()
 }

@@ -15,7 +15,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/base/slicesx"
@@ -24,7 +23,6 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
 )
@@ -76,6 +74,10 @@ type Lines struct {
 	// parameters thereof, such as the language and style.
 	Highlighter highlighting.Highlighter
 
+	// Autosave specifies whether an autosave copy of the file should
+	// be automatically saved after changes are made.
+	Autosave bool
+
 	// ChangedFunc is called whenever the text content is changed.
 	// The changed flag is always updated on changes, but this can be
 	// used for other flags or events that need to be tracked. The
@@ -94,32 +96,25 @@ type Lines struct {
 	// and it is called under the mutex lock to prevent other edits.
 	FileModPromptFunc func()
 
-	// Filename is the filename of the file that was last loaded or saved.
-	// It is used when highlighting code.
-	Filename fsx.Filename `json:"-" xml:"-"`
-
-	// Autosave specifies whether the file should be automatically
-	// saved after changes are made.
-	Autosave bool
-
-	// ReadOnly marks the contents as not editable. This is for the outer GUI
-	// elements to consult, and is not enforced within Lines itself.
-	ReadOnly bool
-
-	// FileInfo is the full information about the current file, if one is set.
-	FileInfo fileinfo.FileInfo
-
 	// FontStyle is the default font styling to use for markup.
 	// Is set to use the monospace font.
 	fontStyle *rich.Style
 
-	// TextStyle is the default text styling to use for markup.
-	textStyle *text.Style
-
 	// undos is the undo manager.
 	undos Undo
 
-	// ParseState is the parsing state information for the file.
+	// filename is the filename of the file that was last loaded or saved.
+	// If this is empty then no file-related functionality is engaged.
+	filename string
+
+	// readOnly marks the contents as not editable. This is for the outer GUI
+	// elements to consult, and is not enforced within Lines itself.
+	readOnly bool
+
+	// fileInfo is the full information about the current file, if one is set.
+	fileInfo fileinfo.FileInfo
+
+	// parseState is the parsing state information for the file.
 	parseState parse.FileStates
 
 	// changed indicates whether any changes have been made.
@@ -169,8 +164,6 @@ type Lines struct {
 	// Change is sent for BufferDone, BufferInsert, and BufferDelete.
 	listeners events.Listeners
 
-	// Bool flags:
-
 	// batchUpdating indicates that a batch update is under way,
 	// so Input signals are not sent until the end.
 	batchUpdating bool
@@ -206,7 +199,16 @@ func (ls *Lines) isValidLine(ln int) bool {
 	return ln < ls.numLines()
 }
 
-// bytesToLines sets the rune lines from source text
+// setText sets the rune lines from source text,
+// and triggers initial markup and delayed full markup.
+func (ls *Lines) setText(txt []byte) {
+	ls.bytesToLines(txt)
+	ls.initialMarkup()
+	ls.startDelayedReMarkup()
+}
+
+// bytesToLines sets the rune lines from source text.
+// it does not trigger any markup but does allocate everything.
 func (ls *Lines) bytesToLines(txt []byte) {
 	if txt == nil {
 		txt = []byte("")
@@ -234,8 +236,6 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 		vw.nbreaks = slicesx.SetLength(vw.nbreaks, n)
 		vw.layout = slicesx.SetLength(vw.layout, n)
 	}
-	ls.initialMarkup()
-	ls.startDelayedReMarkup()
 }
 
 // bytes returns the current text lines as a slice of bytes, up to
@@ -669,7 +669,7 @@ func (ls *Lines) saveUndo(tbe *textpos.Edit) {
 		return
 	}
 	ls.undos.Save(tbe)
-	ls.SendInput()
+	ls.sendInput()
 }
 
 // undo undoes next group of items on the undo stack

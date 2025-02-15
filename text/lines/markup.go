@@ -60,8 +60,8 @@ func (ls *Lines) startDelayedReMarkup() {
 	})
 }
 
-// StopDelayedReMarkup stops timer for doing markup after an interval
-func (ls *Lines) StopDelayedReMarkup() {
+// stopDelayedReMarkup stops timer for doing markup after an interval
+func (ls *Lines) stopDelayedReMarkup() {
 	ls.markupDelayMu.Lock()
 	defer ls.markupDelayMu.Unlock()
 
@@ -76,7 +76,7 @@ func (ls *Lines) reMarkup() {
 	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
 		return
 	}
-	ls.StopDelayedReMarkup()
+	ls.stopDelayedReMarkup()
 	go ls.asyncMarkup()
 }
 

@@ -359,23 +359,6 @@ const (
 	ReplaceNoMatchCase = false
 )
 
-// savePosHistory saves the cursor position in history stack of cursor positions --
-// tracks across views -- returns false if position was on same line as last one saved
-func (tb *Buffer) savePosHistory(pos textpos.Pos) bool {
-	if tb.posHistory == nil {
-		tb.posHistory = make([]textpos.Pos, 0, 1000)
-	}
-	sz := len(tb.posHistory)
-	if sz > 0 {
-		if tb.posHistory[sz-1].Line == pos.Line {
-			return false
-		}
-	}
-	tb.posHistory = append(tb.posHistory, pos)
-	// fmt.Printf("saved pos hist: %v\n", pos)
-	return true
-}
-
 // DiffBuffersUnified computes the diff between this buffer and the other buffer,
 // returning a unified diff with given amount of context (default of 3 will be
 // used if -1)

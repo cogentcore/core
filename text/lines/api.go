@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
 )
@@ -33,14 +32,13 @@ func NewLinesFromBytes(filename string, width int, src []byte) (*Lines, int) {
 	fi, _ := fileinfo.NewFileInfo(filename)
 	ls.setFileInfo(fi)
 	_, vid := ls.newView(width)
-	ls.bytesToLines(src)
+	ls.setText(src)
 	return ls, vid
 }
 
 func (ls *Lines) Defaults() {
 	ls.Settings.Defaults()
 	ls.fontStyle = rich.NewStyle().SetFamily(rich.Monospace)
-	ls.textStyle = text.NewStyle()
 }
 
 // NewView makes a new view with given initial width,
@@ -103,13 +101,14 @@ func (ls *Lines) TotalLines(vid int) int {
 	return 0
 }
 
-// SetText sets the text to the given bytes (makes a copy).
+// SetText sets the text to the given bytes, and does
+// full markup update and sends a Change event.
 // Pass nil to initialize an empty buffer.
 func (ls *Lines) SetText(text []byte) *Lines {
 	ls.Lock()
 	defer ls.Unlock()
-	ls.bytesToLines(text)
-	ls.SendChange()
+	ls.setText(text)
+	ls.sendChange()
 	return ls
 }
 
@@ -412,6 +411,13 @@ func (ls *Lines) ReMarkup() {
 	ls.reMarkup()
 }
 
+// SetUndoOn turns on or off the recording of undo records for every edit.
+func (ls *Lines) SetUndoOn(on bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.undos.Off = !on
+}
+
 // NewUndoGroup increments the undo group counter for batchiung
 // the subsequent actions.
 func (ls *Lines) NewUndoGroup() {
@@ -436,9 +442,9 @@ func (ls *Lines) Undo() []*textpos.Edit {
 	defer ls.batchUpdateEnd(autoSave)
 	tbe := ls.undo()
 	if tbe == nil || ls.undos.Pos == 0 { // no more undo = fully undone
-		ls.SetChanged(false)
+		ls.changed = false
 		ls.notSaved = false
-		ls.AutoSaveDelete()
+		ls.autosaveDelete()
 	}
 	return tbe
 }
