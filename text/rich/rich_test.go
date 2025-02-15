@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
 )

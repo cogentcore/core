@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/base/runes"
 	_ "cogentcore.org/core/system/driver"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/token"
 	"github.com/stretchr/testify/assert"
 )

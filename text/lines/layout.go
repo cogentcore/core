@@ -8,9 +8,9 @@ import (
 	"slices"
 	"unicode"
 
-	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
 )
 

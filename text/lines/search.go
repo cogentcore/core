@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
 )
 

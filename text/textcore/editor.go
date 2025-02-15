@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/textpos"
 )
@@ -72,14 +73,42 @@ type Editor struct { //core:embedder
 	// wrap-around, so these are logical lines, not display lines).
 	renders []*shaped.Lines
 
+	// viewId is the unique id of the Lines view.
+	viewId int
+
+	// charSize is the render size of one character (rune).
+	// Y = line height, X = total glyph advance.
+	charSize math32.Vector2
+
+	// visSize is the height in lines and width in chars of the visible area.
+	visSize image.Point
+
+	// linesSize is the height in lines and width in chars of the visible area.
+	linesSize image.Point
+
+	// lineNumberOffset is the horizontal offset in chars for the start of text
+	// after line numbers.
+	lineNumberOffset int
+
+	// linesSize is the total size of all lines as rendered.
+	linesSize math32.Vector2
+
+	// totalSize is the LinesSize plus extra space and line numbers etc.
+	totalSize math32.Vector2
+
+	// lineLayoutSize is the Geom.Size.Alloc.Total subtracting extra space,
+	// available for rendering text lines and line numbers.
+	lineLayoutSize math32.Vector2
+
+	// lastlineLayoutSize is the last LineLayoutSize used in laying out lines.
+	// It is used to trigger a new layout only when needed.
+	lastlineLayoutSize math32.Vector2
+
 	// lineNumberDigits is the number of line number digits needed.
 	lineNumberDigits int
 
-	// LineNumberOffset is the horizontal offset for the start of text after line numbers.
-	LineNumberOffset float32 `set:"-" display:"-" json:"-" xml:"-"`
-
 	// lineNumberRenders are the renderers for line numbers, per visible line.
-	lineNumberRenders []ptext.Text
+	lineNumberRenders []*shaped.Lines
 
 	// CursorPos is the current cursor position.
 	CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
@@ -114,7 +143,7 @@ type Editor struct { //core:embedder
 
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.
-	LinkHandler func(tl *ptext.TextLink)
+	LinkHandler func(tl *rich.Link)
 
 	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
@@ -124,23 +153,6 @@ type Editor struct { //core:embedder
 
 	// selectMode is a boolean indicating whether to select text as the cursor moves.
 	selectMode bool
-
-	// nLinesChars is the height in lines and width in chars of the visible area.
-	nLinesChars image.Point
-
-	// linesSize is the total size of all lines as rendered.
-	linesSize math32.Vector2
-
-	// totalSize is the LinesSize plus extra space and line numbers etc.
-	totalSize math32.Vector2
-
-	// lineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.
-	// This is what LayoutStdLR sees for laying out each line.
-	lineLayoutSize math32.Vector2
-
-	// lastlineLayoutSize is the last LineLayoutSize used in laying out lines.
-	// It is used to trigger a new layout only when needed.
-	lastlineLayoutSize math32.Vector2
 
 	// blinkOn oscillates between on and off for blinking.
 	blinkOn bool

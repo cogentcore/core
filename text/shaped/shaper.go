@@ -31,6 +31,18 @@ type Shaper interface {
 	// source text, and wrapped separately. For horizontal text, the Lines will render with
 	// a position offset at the upper left corner of the overall bounding box of the text.
 	WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines
+
+	// FontSize returns the font shape sizing information for given font and text style,
+	// using given rune (often the letter 'm'). The GlyphBounds field of the [Run] result
+	// has the font ascent and descent information, and the BoundsBox() method returns a full
+	// bounding box for the given font, centered at the baseline.
+	FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) Run
+
+	// LineHeight returns the line height for given font and text style.
+	// For vertical text directions, this is actually the line width.
+	// It includes the [text.Style] LineSpacing multiplier on the natural
+	// font-derived line height, which is not generally the same as the font size.
+	LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32
 }
 
 // WrapSizeEstimate is the size to use for layout during the SizeUp pass,

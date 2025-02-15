@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -16,6 +15,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/runes"
 	. "cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/shaped/shapedgt"
 	"cogentcore.org/core/text/text"
