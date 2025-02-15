@@ -211,3 +211,106 @@ func (un *Undo) AdjustRegion(reg textpos.Region) textpos.Region {
 	}
 	return reg
 }
+
+////////   Lines api
+
+// saveUndo saves given edit to undo stack.
+func (ls *Lines) saveUndo(tbe *textpos.Edit) {
+	if tbe == nil {
+		return
+	}
+	ls.undos.Save(tbe)
+}
+
+// undo undoes next group of items on the undo stack
+func (ls *Lines) undo() []*textpos.Edit {
+	tbe := ls.undos.UndoPop()
+	if tbe == nil {
+		// note: could clear the changed flag on tbe == nil in parent
+		return nil
+	}
+	stgp := tbe.Group
+	var eds []*textpos.Edit
+	for {
+		if tbe.Rect {
+			if tbe.Delete {
+				utbe := ls.insertTextRectImpl(tbe)
+				utbe.Group = stgp + tbe.Group
+				if ls.Settings.EmacsUndo {
+					ls.undos.SaveUndo(utbe)
+				}
+				eds = append(eds, utbe)
+			} else {
+				utbe := ls.deleteTextRectImpl(tbe.Region.Start, tbe.Region.End)
+				utbe.Group = stgp + tbe.Group
+				if ls.Settings.EmacsUndo {
+					ls.undos.SaveUndo(utbe)
+				}
+				eds = append(eds, utbe)
+			}
+		} else {
+			if tbe.Delete {
+				utbe := ls.insertTextImpl(tbe.Region.Start, tbe.Text)
+				utbe.Group = stgp + tbe.Group
+				if ls.Settings.EmacsUndo {
+					ls.undos.SaveUndo(utbe)
+				}
+				eds = append(eds, utbe)
+			} else {
+				utbe := ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
+				utbe.Group = stgp + tbe.Group
+				if ls.Settings.EmacsUndo {
+					ls.undos.SaveUndo(utbe)
+				}
+				eds = append(eds, utbe)
+			}
+		}
+		tbe = ls.undos.UndoPopIfGroup(stgp)
+		if tbe == nil {
+			break
+		}
+	}
+	return eds
+}
+
+// EmacsUndoSave is called by View at end of latest set of undo commands.
+// If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
+// at the end, and moves undo to the very end -- undo is a constant stream.
+func (ls *Lines) EmacsUndoSave() {
+	if !ls.Settings.EmacsUndo {
+		return
+	}
+	ls.undos.UndoStackSave()
+}
+
+// redo redoes next group of items on the undo stack,
+// and returns the last record, nil if no more
+func (ls *Lines) redo() []*textpos.Edit {
+	tbe := ls.undos.RedoNext()
+	if tbe == nil {
+		return nil
+	}
+	var eds []*textpos.Edit
+	stgp := tbe.Group
+	for {
+		if tbe.Rect {
+			if tbe.Delete {
+				ls.deleteTextRectImpl(tbe.Region.Start, tbe.Region.End)
+			} else {
+				ls.insertTextRectImpl(tbe)
+			}
+		} else {
+			if tbe.Delete {
+				ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
+			} else {
+				ls.insertTextImpl(tbe.Region.Start, tbe.Text)
+			}
+		}
+		eds = append(eds, tbe)
+		tbe = ls.undos.RedoNextIfGroup(stgp)
+		if tbe == nil {
+			break
+		}
+	}
+	return eds
+}

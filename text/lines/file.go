@@ -44,8 +44,8 @@ func (ls *Lines) ConfigKnown() bool {
 // Open loads the given file into the buffer.
 func (ls *Lines) Open(filename string) error { //types:add
 	ls.Lock()
-	defer ls.Unlock()
 	err := ls.openFile(filename)
+	ls.Unlock()
 	ls.sendChange()
 	return err
 }
@@ -53,8 +53,8 @@ func (ls *Lines) Open(filename string) error { //types:add
 // OpenFS loads the given file in the given filesystem into the buffer.
 func (ls *Lines) OpenFS(fsys fs.FS, filename string) error {
 	ls.Lock()
-	defer ls.Unlock()
 	err := ls.openFileFS(fsys, filename)
+	ls.Unlock()
 	ls.sendChange()
 	return err
 }
@@ -65,8 +65,8 @@ func (ls *Lines) OpenFS(fsys fs.FS, filename string) error {
 // existing formatting, making it very fast if not very different.
 func (ls *Lines) Revert() bool { //types:add
 	ls.Lock()
-	defer ls.Unlock()
 	did := ls.revert()
+	ls.Unlock()
 	ls.sendChange()
 	return did
 }
@@ -83,6 +83,16 @@ func (ls *Lines) ClearNotSaved() {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.clearNotSaved()
+}
+
+// EditDone is called externally (e.g., by Editor widget) when the user
+// has indicated that editing is done, and the results have been consumed.
+func (ls *Lines) EditDone() {
+	ls.Lock()
+	ls.autosaveDelete()
+	ls.changed = true
+	ls.Unlock()
+	ls.sendChange()
 }
 
 // SetReadOnly sets whether the buffer is read-only.

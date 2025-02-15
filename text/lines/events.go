@@ -6,77 +6,61 @@ package lines
 
 import "cogentcore.org/core/events"
 
-// OnChange adds an event listener function for the [events.Change] event.
+// OnChange adds an event listener function to the view with given
+// unique id, for the [events.Change] event.
 // This is used for large-scale changes in the text, such as opening a
 // new file or setting new text, or EditDone or Save.
-func (ls *Lines) OnChange(fun func(e events.Event)) {
+func (ls *Lines) OnChange(vid int, fun func(e events.Event)) {
 	ls.Lock()
 	defer ls.Unlock()
-	ls.listeners.Add(events.Change, fun)
+	vw := ls.view(vid)
+	if vw != nil {
+		vw.listeners.Add(events.Change, fun)
+	}
 }
 
-// OnInput adds an event listener function for the [events.Input] event.
-func (ls *Lines) OnInput(fun func(e events.Event)) {
+// OnInput adds an event listener function to the view with given
+// unique id, for the [events.Input] event.
+// This is sent after every fine-grained change in the text,
+// and is used by text widgets to drive updates. It is blocked
+// during batchUpdating.
+func (ls *Lines) OnInput(vid int, fun func(e events.Event)) {
 	ls.Lock()
 	defer ls.Unlock()
-	ls.listeners.Add(events.Input, fun)
-}
-
-// SendChange sends a new [events.Change] event, which is used to signal
-// that the text has changed. This is used for large-scale changes in the
-// text, such as opening a new file or setting new text, or EditoDone or Save.
-func (ls *Lines) SendChange() {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.SendChange()
-}
-
-// SendInput sends a new [events.Input] event, which is used to signal
-// that the text has changed. This is sent after every fine-grained change in
-// in the text, and is used by text widgets to drive updates. It is blocked
-// during batchUpdating and sent at batchUpdateEnd.
-func (ls *Lines) SendInput() {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.sendInput()
-}
-
-// EditDone finalizes any current editing, sends Changed event.
-func (ls *Lines) EditDone() {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.editDone()
+	vw := ls.view(vid)
+	if vw != nil {
+		vw.listeners.Add(events.Input, fun)
+	}
 }
 
 //////// unexported api
 
-// sendChange sends a new [events.Change] event, which is used to signal
-// that the text has changed. This is used for large-scale changes in the
-// text, such as opening a new file or setting new text, or EditoDone or Save.
+// sendChange sends a new [events.Change] event to all views listeners.
+// Must never be called with the mutex lock in place!
+// This is used to signal that the text has changed, for large-scale changes,
+// such as opening a new file or setting new text, or EditoDone or Save.
 func (ls *Lines) sendChange() {
 	e := &events.Base{Typ: events.Change}
 	e.Init()
-	ls.listeners.Call(e)
+	for _, vw := range ls.views {
+		vw.listeners.Call(e)
+	}
 }
 
-// sendInput sends a new [events.Input] event, which is used to signal
-// that the text has changed. This is sent after every fine-grained change in
-// in the text, and is used by text widgets to drive updates. It is blocked
-// during batchUpdating and sent at batchUpdateEnd.
+// sendInput sends a new [events.Input] event to all views listeners.
+// Must never be called with the mutex lock in place!
+// This is used to signal fine-grained changes in the text,
+// and is used by text widgets to drive updates. It is blocked
+// during batchUpdating.
 func (ls *Lines) sendInput() {
 	if ls.batchUpdating {
 		return
 	}
 	e := &events.Base{Typ: events.Input}
 	e.Init()
-	ls.listeners.Call(e)
-}
-
-// editDone finalizes any current editing, sends Changed event.
-func (ls *Lines) editDone() {
-	ls.autosaveDelete()
-	ls.changed = true
-	ls.sendChange()
+	for _, vw := range ls.views {
+		vw.listeners.Call(e)
+	}
 }
 
 // batchUpdateStart call this when starting a batch of updates.
@@ -93,5 +77,4 @@ func (ls *Lines) batchUpdateStart() (autoSave bool) {
 func (ls *Lines) batchUpdateEnd(autoSave bool) {
 	ls.autoSaveRestore(autoSave)
 	ls.batchUpdating = false
-	ls.sendInput()
 }

@@ -5,6 +5,7 @@
 package lines
 
 import (
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )
@@ -31,6 +32,9 @@ type view struct {
 	// markup is the layout-specific version of the [rich.Text] markup,
 	// specific to the width of this view.
 	markup []rich.Text
+
+	// listeners is used for sending Change and Input events
+	listeners events.Listeners
 }
 
 // initViews ensures that the views map is constructed.
@@ -41,9 +45,9 @@ func (ls *Lines) initViews() {
 }
 
 // view returns view for given unique view id. nil if not found.
-func (ls *Lines) view(id int) *view {
+func (ls *Lines) view(vid int) *view {
 	ls.initViews()
-	return ls.views[id]
+	return ls.views[vid]
 }
 
 // newView makes a new view with next available id, using given initial width.

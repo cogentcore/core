@@ -6,8 +6,6 @@ package textcore
 
 import (
 	"image"
-	"slices"
-	"sync"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
@@ -15,14 +13,12 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/textpos"
 )
@@ -80,29 +76,28 @@ type Editor struct { //core:embedder
 	// Y = line height, X = total glyph advance.
 	charSize math32.Vector2
 
+	// visSizeAlloc is the Geom.Size.Alloc.Total subtracting extra space,
+	// available for rendering text lines and line numbers.
+	visSizeAlloc math32.Vector2
+
+	// lastVisSizeAlloc is the last visSizeAlloc used in laying out lines.
+	// It is used to trigger a new layout only when needed.
+	lastVisSizeAlloc math32.Vector2
+
 	// visSize is the height in lines and width in chars of the visible area.
 	visSize image.Point
 
-	// linesSize is the height in lines and width in chars of the visible area.
+	// linesSize is the height in lines and width in chars of the Lines text area,
+	// (including line numbers), which can be larger than the visSize.
 	linesSize image.Point
 
 	// lineNumberOffset is the horizontal offset in chars for the start of text
-	// after line numbers.
+	// after line numbers. This is 0 if no line numbers.
 	lineNumberOffset int
 
-	// linesSize is the total size of all lines as rendered.
-	linesSize math32.Vector2
-
-	// totalSize is the LinesSize plus extra space and line numbers etc.
+	// totalSize is total size of all text, including line numbers,
+	// multiplied by charSize.
 	totalSize math32.Vector2
-
-	// lineLayoutSize is the Geom.Size.Alloc.Total subtracting extra space,
-	// available for rendering text lines and line numbers.
-	lineLayoutSize math32.Vector2
-
-	// lastlineLayoutSize is the last LineLayoutSize used in laying out lines.
-	// It is used to trigger a new layout only when needed.
-	lastlineLayoutSize math32.Vector2
 
 	// lineNumberDigits is the number of line number digits needed.
 	lineNumberDigits int
@@ -110,95 +105,97 @@ type Editor struct { //core:embedder
 	// lineNumberRenders are the renderers for line numbers, per visible line.
 	lineNumberRenders []*shaped.Lines
 
-	// CursorPos is the current cursor position.
-	CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	/*
+		// CursorPos is the current cursor position.
+		CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// cursorTarget is the target cursor position for externally set targets.
-	// It ensures that the target position is visible.
-	cursorTarget textpos.Pos
+		// cursorTarget is the target cursor position for externally set targets.
+		// It ensures that the target position is visible.
+		cursorTarget textpos.Pos
 
-	// cursorColumn is the desired cursor column, where the cursor was last when moved using left / right arrows.
-	// It is used when doing up / down to not always go to short line columns.
-	cursorColumn int
+		// cursorColumn is the desired cursor column, where the cursor was last when moved using left / right arrows.
+		// It is used when doing up / down to not always go to short line columns.
+		cursorColumn int
 
-	// posHistoryIndex is the current index within PosHistory.
-	posHistoryIndex int
+		// posHistoryIndex is the current index within PosHistory.
+		posHistoryIndex int
 
-	// selectStart is the starting point for selection, which will either be the start or end of selected region
-	// depending on subsequent selection.
-	selectStart textpos.Pos
+		// selectStart is the starting point for selection, which will either be the start or end of selected region
+		// depending on subsequent selection.
+		selectStart textpos.Pos
 
-	// SelectRegion is the current selection region.
-	SelectRegion lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
+		// SelectRegion is the current selection region.
+		SelectRegion lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// previousSelectRegion is the previous selection region that was actually rendered.
-	// It is needed to update the render.
-	previousSelectRegion lines.Region
+		// previousSelectRegion is the previous selection region that was actually rendered.
+		// It is needed to update the render.
+		previousSelectRegion lines.Region
 
-	// Highlights is a slice of regions representing the highlighted regions, e.g., for search results.
-	Highlights []lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
+		// Highlights is a slice of regions representing the highlighted regions, e.g., for search results.
+		Highlights []lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// scopelights is a slice of regions representing the highlighted regions specific to scope markers.
-	scopelights []lines.Region
+		// scopelights is a slice of regions representing the highlighted regions specific to scope markers.
+		scopelights []lines.Region
 
-	// LinkHandler handles link clicks.
-	// If it is nil, they are sent to the standard web URL handler.
-	LinkHandler func(tl *rich.Link)
+		// LinkHandler handles link clicks.
+		// If it is nil, they are sent to the standard web URL handler.
+		LinkHandler func(tl *rich.Link)
 
-	// ISearch is the interactive search data.
-	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
+		// ISearch is the interactive search data.
+		ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// QReplace is the query replace data.
-	QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
+		// QReplace is the query replace data.
+		QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// selectMode is a boolean indicating whether to select text as the cursor moves.
-	selectMode bool
+		// selectMode is a boolean indicating whether to select text as the cursor moves.
+		selectMode bool
 
-	// blinkOn oscillates between on and off for blinking.
-	blinkOn bool
+		// blinkOn oscillates between on and off for blinking.
+		blinkOn bool
 
-	// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
-	cursorMu sync.Mutex
+		// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
+		cursorMu sync.Mutex
 
-	// hasLinks is a boolean indicating if at least one of the renders has links.
-	// It determines if we set the cursor for hand movements.
-	hasLinks bool
+		// hasLinks is a boolean indicating if at least one of the renders has links.
+		// It determines if we set the cursor for hand movements.
+		hasLinks bool
 
-	// hasLineNumbers indicates that this editor has line numbers
-	// (per [Buffer] option)
-	hasLineNumbers bool // TODO: is this really necessary?
+		// hasLineNumbers indicates that this editor has line numbers
+		// (per [Buffer] option)
+		hasLineNumbers bool // TODO: is this really necessary?
 
-	// needsLayout is set by NeedsLayout: Editor does significant
-	// internal layout in LayoutAllLines, and its layout is simply based
-	// on what it gets allocated, so it does not affect the rest
-	// of the Scene.
-	needsLayout bool
+		// needsLayout is set by NeedsLayout: Editor does significant
+		// internal layout in LayoutAllLines, and its layout is simply based
+		// on what it gets allocated, so it does not affect the rest
+		// of the Scene.
+		needsLayout bool
 
-	// lastWasTabAI indicates that last key was a Tab auto-indent
-	lastWasTabAI bool
+		// lastWasTabAI indicates that last key was a Tab auto-indent
+		lastWasTabAI bool
 
-	// lastWasUndo indicates that last key was an undo
-	lastWasUndo bool
+		// lastWasUndo indicates that last key was an undo
+		lastWasUndo bool
 
-	// targetSet indicates that the CursorTarget is set
-	targetSet bool
+		// targetSet indicates that the CursorTarget is set
+		targetSet bool
 
-	lastRecenter   int
-	lastAutoInsert rune
-	lastFilename   core.Filename
+		lastRecenter   int
+		lastAutoInsert rune
+		lastFilename   core.Filename
+	*/
 }
 
-func (ed *Editor) WidgetValue() any { return ed.Buffer.Text() }
+func (ed *Editor) WidgetValue() any { return ed.Lines.Text() }
 
 func (ed *Editor) SetWidgetValue(value any) error {
-	ed.Buffer.SetString(reflectx.ToString(value))
+	ed.Lines.SetString(reflectx.ToString(value))
 	return nil
 }
 
 func (ed *Editor) Init() {
 	ed.Frame.Init()
 	ed.AddContextMenu(ed.contextMenu)
-	ed.SetBuffer(NewBuffer())
+	ed.SetLines(lines.NewLines(80))
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(false, abilities.ScrollableUnfocused)
@@ -210,11 +207,11 @@ func (ed *Editor) Init() {
 
 		s.Cursor = cursors.Text
 		s.VirtualKeyboard = styles.KeyboardMultiLine
-		if core.SystemSettings.Editor.WordWrap {
-			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-		} else {
-			s.Text.WhiteSpace = styles.WhiteSpacePre
-		}
+		// if core.SystemSettings.Editor.WordWrap {
+		// 	s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+		// } else {
+		// 	s.Text.WhiteSpace = styles.WhiteSpacePre
+		// }
 		s.SetMono(true)
 		s.Grow.Set(1, 0)
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
@@ -260,8 +257,8 @@ func (ed *Editor) Destroy() {
 // editDone completes editing and copies the active edited text to the text;
 // called when the return key is pressed or goes out of focus
 func (ed *Editor) editDone() {
-	if ed.Buffer != nil {
-		ed.Buffer.editDone()
+	if ed.Lines != nil {
+		ed.Lines.EditDone()
 	}
 	ed.clearSelected()
 	ed.clearCursor()
@@ -272,27 +269,24 @@ func (ed *Editor) editDone() {
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
 func (ed *Editor) reMarkup() {
-	if ed.Buffer == nil {
+	if ed.Lines == nil {
 		return
 	}
-	ed.Buffer.ReMarkup()
+	ed.Lines.ReMarkup()
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save.
 func (ed *Editor) IsNotSaved() bool {
-	return ed.Buffer != nil && ed.Buffer.IsNotSaved()
+	return ed.Lines != nil && ed.Lines.IsNotSaved()
 }
 
 // Clear resets all the text in the buffer for this editor.
 func (ed *Editor) Clear() {
-	if ed.Buffer == nil {
+	if ed.Lines == nil {
 		return
 	}
-	ed.Buffer.SetText([]byte{})
+	ed.Lines.SetText([]byte{})
 }
-
-///////////////////////////////////////////////////////////////////////////////
-//  Buffer communication
 
 // resetState resets all the random state variables, when opening a new buffer etc
 func (ed *Editor) resetState() {
@@ -300,82 +294,38 @@ func (ed *Editor) resetState() {
 	ed.Highlights = nil
 	ed.ISearch.On = false
 	ed.QReplace.On = false
-	if ed.Buffer == nil || ed.lastFilename != ed.Buffer.Filename { // don't reset if reopening..
+	if ed.Lines == nil || ed.lastFilename != ed.Lines.Filename { // don't reset if reopening..
 		ed.CursorPos = textpos.Pos{}
 	}
 }
 
-// SetBuffer sets the [Buffer] that this is an editor of, and interconnects their events.
-func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
-	oldbuf := ed.Buffer
-	if ed == nil || buf != nil && oldbuf == buf {
+// SetLines sets the [lines.Lines] that this is an editor of,
+// creating a new view for this editor and connecting to events.
+func (ed *Editor) SetLines(buf *lines.Lines) *Editor {
+	oldbuf := ed.Lines
+	if ed == nil || (buf != nil && oldbuf == buf) {
 		return ed
 	}
-	// had := false
 	if oldbuf != nil {
-		// had = true
-		oldbuf.Lock()
-		oldbuf.deleteEditor(ed)
-		oldbuf.Unlock() // done with oldbuf now
+		oldbuf.DeleteView(ed.viewId)
 	}
-	ed.Buffer = buf
+	ed.Lines = buf
 	ed.resetState()
 	if buf != nil {
-		buf.Lock()
-		buf.addEditor(ed)
-		bhl := len(buf.posHistory)
-		if bhl > 0 {
-			cp := buf.posHistory[bhl-1]
-			ed.posHistoryIndex = bhl - 1
-			buf.Unlock()
-			ed.SetCursorShow(cp)
-		} else {
-			buf.Unlock()
-			ed.SetCursorShow(textpos.Pos{})
-		}
+		ed.viewId = buf.NewView()
+		// bhl := len(buf.posHistory)
+		// if bhl > 0 {
+		// 	cp := buf.posHistory[bhl-1]
+		// 	ed.posHistoryIndex = bhl - 1
+		// 	buf.Unlock()
+		// 	ed.SetCursorShow(cp)
+		// } else {
+		// 	ed.SetCursorShow(textpos.Pos{})
+		// }
 	}
 	ed.layoutAllLines() // relocks
-	ed.NeedsLayout()
+	ed.NeedsRender()
 	return ed
-}
-
-// linesInserted inserts new lines of text and reformats them
-func (ed *Editor) linesInserted(tbe *lines.Edit) {
-	stln := tbe.Reg.Start.Line + 1
-	nsz := (tbe.Reg.End.Line - tbe.Reg.Start.Line)
-	if stln > len(ed.renders) { // invalid
-		return
-	}
-	ed.renders = slices.Insert(ed.renders, stln, make([]ptext.Text, nsz)...)
-
-	// Offs
-	tmpof := make([]float32, nsz)
-	ov := float32(0)
-	if stln < len(ed.offsets) {
-		ov = ed.offsets[stln]
-	} else {
-		ov = ed.offsets[len(ed.offsets)-1]
-	}
-	for i := range tmpof {
-		tmpof[i] = ov
-	}
-	ed.offsets = slices.Insert(ed.offsets, stln, tmpof...)
-
-	ed.NumLines += nsz
-	ed.NeedsLayout()
-}
-
-// linesDeleted deletes lines of text and reformats remaining one
-func (ed *Editor) linesDeleted(tbe *lines.Edit) {
-	stln := tbe.Reg.Start.Line
-	edln := tbe.Reg.End.Line
-	dsz := edln - stln
-
-	ed.renders = append(ed.renders[:stln], ed.renders[edln:]...)
-	ed.offsets = append(ed.offsets[:stln], ed.offsets[edln:]...)
-
-	ed.NumLines -= dsz
-	ed.NeedsLayout()
 }
 
 // bufferSignal receives a signal from the Buffer when the underlying text
@@ -429,7 +379,7 @@ func (ed *Editor) bufferSignal(sig bufferSignals, tbe *lines.Edit) {
 
 // undo undoes previous action
 func (ed *Editor) undo() {
-	tbes := ed.Buffer.undo()
+	tbes := ed.Lines.undo()
 	if tbes != nil {
 		tbe := tbes[len(tbes)-1]
 		if tbe.Delete { // now an insert
@@ -447,7 +397,7 @@ func (ed *Editor) undo() {
 
 // redo redoes previously undone action
 func (ed *Editor) redo() {
-	tbes := ed.Buffer.redo()
+	tbes := ed.Lines.redo()
 	if tbes != nil {
 		tbe := tbes[len(tbes)-1]
 		if tbe.Delete {
@@ -466,8 +416,8 @@ func (ed *Editor) redo() {
 func (ed *Editor) styleEditor() {
 	if ed.NeedsRebuild() {
 		highlighting.UpdateFromTheme()
-		if ed.Buffer != nil {
-			ed.Buffer.SetHighlighting(highlighting.StyleDefault)
+		if ed.Lines != nil {
+			ed.Lines.SetHighlighting(highlighting.StyleDefault)
 		}
 	}
 	ed.Frame.Style()

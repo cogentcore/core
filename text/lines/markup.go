@@ -12,6 +12,8 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/text/token"
 )
 
 // setFileInfo sets the syntax highlighting and other parameters
@@ -95,9 +97,7 @@ func (ls *Lines) asyncMarkup() {
 	ls.Lock()
 	ls.markupApplyTags(tags)
 	ls.Unlock()
-	if ls.MarkupDoneFunc != nil {
-		ls.MarkupDoneFunc()
-	}
+	ls.sendChange()
 }
 
 // markupTags generates the new markup tags from the highligher.
@@ -197,4 +197,151 @@ func (ls *Lines) markupLines(st, ed int) bool {
 	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.
 	return allgood
+}
+
+////////  Lines and tags
+
+// linesEdited re-marks-up lines in edit (typically only 1).
+func (ls *Lines) linesEdited(tbe *textpos.Edit) {
+	st, ed := tbe.Region.Start.Line, tbe.Region.End.Line
+	for ln := st; ln <= ed; ln++ {
+		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln])
+	}
+	ls.markupLines(st, ed)
+	ls.startDelayedReMarkup()
+}
+
+// linesInserted inserts new lines for all other line-based slices
+// corresponding to lines inserted in the lines slice.
+func (ls *Lines) linesInserted(tbe *textpos.Edit) {
+	stln := tbe.Region.Start.Line + 1
+	nsz := (tbe.Region.End.Line - tbe.Region.Start.Line)
+
+	ls.markupEdits = append(ls.markupEdits, tbe)
+	ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
+	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
+	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
+
+	for _, vw := range ls.views {
+		vw.markup = slices.Insert(vw.markup, stln, make([]rich.Text, nsz)...)
+		vw.nbreaks = slices.Insert(vw.nbreaks, stln, make([]int, nsz)...)
+		vw.layout = slices.Insert(vw.layout, stln, make([][]textpos.Pos16, nsz)...)
+	}
+
+	if ls.Highlighter.UsingParse() {
+		pfs := ls.parseState.Done()
+		pfs.Src.LinesInserted(stln, nsz)
+	}
+	ls.linesEdited(tbe)
+}
+
+// linesDeleted deletes lines in Markup corresponding to lines
+// deleted in Lines text.
+func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
+	ls.markupEdits = append(ls.markupEdits, tbe)
+	stln := tbe.Region.Start.Line
+	edln := tbe.Region.End.Line
+	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
+	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
+	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
+
+	for _, vw := range ls.views {
+		vw.markup = append(vw.markup[:stln], vw.markup[edln:]...)
+		vw.nbreaks = append(vw.nbreaks[:stln], vw.nbreaks[edln:]...)
+		vw.layout = append(vw.layout[:stln], vw.layout[edln:]...)
+	}
+
+	if ls.Highlighter.UsingParse() {
+		pfs := ls.parseState.Done()
+		pfs.Src.LinesDeleted(stln, edln)
+	}
+	st := tbe.Region.Start.Line
+	ls.markupLines(st, st)
+	ls.startDelayedReMarkup()
+}
+
+// AdjustRegion adjusts given text region for any edits that
+// have taken place since time stamp on region (using the Undo stack).
+// If region was wholly within a deleted region, then RegionNil will be
+// returned -- otherwise it is clipped appropriately as function of deletes.
+func (ls *Lines) AdjustRegion(reg textpos.Region) textpos.Region {
+	return ls.undos.AdjustRegion(reg)
+}
+
+// adjustedTags updates tag positions for edits, for given list of tags
+func (ls *Lines) adjustedTags(ln int) lexer.Line {
+	if !ls.isValidLine(ln) {
+		return nil
+	}
+	return ls.adjustedTagsLine(ls.tags[ln], ln)
+}
+
+// adjustedTagsLine updates tag positions for edits, for given list of tags
+func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
+	sz := len(tags)
+	if sz == 0 {
+		return nil
+	}
+	ntags := make(lexer.Line, 0, sz)
+	for _, tg := range tags {
+		reg := textpos.Region{Start: textpos.Pos{Line: ln, Char: tg.Start}, End: textpos.Pos{Line: ln, Char: tg.End}}
+		reg.Time = tg.Time
+		reg = ls.undos.AdjustRegion(reg)
+		if !reg.IsNil() {
+			ntr := ntags.AddLex(tg.Token, reg.Start.Char, reg.End.Char)
+			ntr.Time.Now()
+		}
+	}
+	return ntags
+}
+
+// lexObjPathString returns the string at given lex, and including prior
+// lex-tagged regions that include sequences of PunctSepPeriod and NameTag
+// which are used for object paths -- used for e.g., debugger to pull out
+// variable expressions that can be evaluated.
+func (ls *Lines) lexObjPathString(ln int, lx *lexer.Lex) string {
+	if !ls.isValidLine(ln) {
+		return ""
+	}
+	lln := len(ls.lines[ln])
+	if lx.End > lln {
+		return ""
+	}
+	stlx := lexer.ObjPathAt(ls.hiTags[ln], lx)
+	if stlx.Start >= lx.End {
+		return ""
+	}
+	return string(ls.lines[ln][stlx.Start:lx.End])
+}
+
+// hiTagAtPos returns the highlighting (markup) lexical tag at given position
+// using current Markup tags, and index, -- could be nil if none or out of range
+func (ls *Lines) hiTagAtPos(pos textpos.Pos) (*lexer.Lex, int) {
+	if !ls.isValidLine(pos.Line) {
+		return nil, -1
+	}
+	return ls.hiTags[pos.Line].AtPos(pos.Char)
+}
+
+// inTokenSubCat returns true if the given text position is marked with lexical
+// type in given SubCat sub-category.
+func (ls *Lines) inTokenSubCat(pos textpos.Pos, subCat token.Tokens) bool {
+	lx, _ := ls.hiTagAtPos(pos)
+	return lx != nil && lx.Token.Token.InSubCat(subCat)
+}
+
+// inLitString returns true if position is in a string literal
+func (ls *Lines) inLitString(pos textpos.Pos) bool {
+	return ls.inTokenSubCat(pos, token.LitStr)
+}
+
+// inTokenCode returns true if position is in a Keyword,
+// Name, Operator, or Punctuation.
+// This is useful for turning off spell checking in docs
+func (ls *Lines) inTokenCode(pos textpos.Pos) bool {
+	lx, _ := ls.hiTagAtPos(pos)
+	if lx == nil {
+		return false
+	}
+	return lx.Token.Token.IsCode()
 }

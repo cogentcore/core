@@ -14,11 +14,11 @@ A widget will get its own view via the `NewView` method, and use `SetWidth` to u
 
 ## Events
 
-Two standard events are sent by the `Lines`:
+Two standard events are sent to listeners attached to views (always with no mutex lock on Lines):
 * `events.Input` (use `OnInput` to register a function to receive) is sent for every edit large or small.
 * `events.Change` (`OnChange`) is sent for major changes: new text, opening files, saving files, `EditDone`.
 
-Widgets should listen to these to update rendering and send their own events.
+Widgets should listen to these to update rendering and send their own events. Other widgets etc should only listen to events on the Widgets, not on the underlying Lines object, in general.
 
 ## Files
 

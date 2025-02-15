@@ -20,6 +20,14 @@ import (
 
 // this file contains the exported API for lines
 
+// NewLines returns a new empty Lines, with no views.
+func NewLines() *Lines {
+	ls := &Lines{}
+	ls.Defaults()
+	ls.setText([]byte(""))
+	return ls
+}
+
 // NewLinesFromBytes returns a new Lines representation of given bytes of text,
 // using given filename to determine the type of content that is represented
 // in the bytes, based on the filename extension, and given initial display width.
@@ -106,8 +114,8 @@ func (ls *Lines) TotalLines(vid int) int {
 // Pass nil to initialize an empty buffer.
 func (ls *Lines) SetText(text []byte) *Lines {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.setText(text)
+	ls.Unlock()
 	ls.sendChange()
 	return ls
 }
@@ -120,9 +128,9 @@ func (ls *Lines) SetString(txt string) *Lines {
 // SetTextLines sets the source lines from given lines of bytes.
 func (ls *Lines) SetTextLines(lns [][]byte) {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.setLineBytes(lns)
-	ls.SendChange()
+	ls.Unlock()
+	ls.sendChange()
 }
 
 // Bytes returns the current text lines as a slice of bytes,
@@ -305,14 +313,16 @@ func (ls *Lines) RegionRect(st, ed textpos.Pos) *textpos.Edit {
 // It deletes region of text between start and end positions.
 // Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.deleteText(st, ed)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
@@ -320,42 +330,48 @@ func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 // defining the upper-left and lower-right corners of a rectangle.
 // Fails if st.Char >= ed.Char. Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.deleteTextRect(st, ed)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
 // InsertTextBytes is the primary method for inserting text,
 // at given starting position. Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.insertText(st, []rune(string(text)))
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
 // InsertText is the primary method for inserting text,
 // at given starting position. Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.insertText(st, text)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
@@ -363,14 +379,16 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 // (e.g., from RegionRect or DeleteRect).
 // Returns a copy of the Edit record with an updated timestamp.
 // An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe = ls.insertTextRect(tbe)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
@@ -380,27 +398,31 @@ func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the Edit for the inserted text.
 // An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, matchCase bool) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.replaceText(delSt, delEd, insPos, insTxt, matchCase)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
 // AppendTextMarkup appends new text to end of lines, using insert, returns
 // edit, and uses supplied markup to render it, for preformatted output.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) AppendTextMarkup(text []rune, markup []rich.Text) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.appendTextMarkup(text, markup)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
@@ -435,28 +457,33 @@ func (ls *Lines) UndoReset() {
 
 // Undo undoes next group of items on the undo stack,
 // and returns all the edits performed.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) Undo() []*textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
 	tbe := ls.undo()
 	if tbe == nil || ls.undos.Pos == 0 { // no more undo = fully undone
 		ls.changed = false
 		ls.notSaved = false
 		ls.autosaveDelete()
 	}
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
 	return tbe
 }
 
 // Redo redoes next group of items on the undo stack,
 // and returns all the edits performed.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) Redo() []*textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
-	return ls.redo()
+	tbe := ls.redo()
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
+	return tbe
 }
 
 /////////   Moving
@@ -653,76 +680,93 @@ func (ls *Lines) StartDelayedReMarkup() {
 }
 
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
-// for given tab size (if using spaces) -- either inserts or deletes to reach target.
+// for given tab size (if using spaces). Either inserts or deletes to reach target.
 // Returns edit record for any change.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) IndentLine(ln, ind int) *textpos.Edit {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
-	return ls.indentLine(ln, ind)
+	tbe := ls.indentLine(ln, ind)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
+	return tbe
 }
 
-// autoIndent indents given line to the level of the prior line, adjusted
+// AutoIndent indents given line to the level of the prior line, adjusted
 // appropriately if the current line starts with one of the given un-indent
 // strings, or the prior line ends with one of the given indent strings.
 // Returns any edit that took place (could be nil), along with the auto-indented
 // level and character position for the indent of the current line.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) AutoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
-	return ls.autoIndent(ln)
+	tbe, indLev, chPos = ls.autoIndent(ln)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
+	return
 }
 
 // AutoIndentRegion does auto-indent over given region; end is *exclusive*.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) AutoIndentRegion(start, end int) {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
 	ls.autoIndentRegion(start, end)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
 }
 
 // CommentRegion inserts comment marker on given lines; end is *exclusive*.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) CommentRegion(start, end int) {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
 	ls.commentRegion(start, end)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
 }
 
 // JoinParaLines merges sequences of lines with hard returns forming paragraphs,
 // separated by blank lines, into a single line per paragraph,
 // within the given line regions; endLine is *inclusive*.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) JoinParaLines(startLine, endLine int) {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
 	ls.joinParaLines(startLine, endLine)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
 }
 
 // TabsToSpaces replaces tabs with spaces over given region; end is *exclusive*.
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) TabsToSpaces(start, end int) {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
 	ls.tabsToSpaces(start, end)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
 }
 
 // SpacesToTabs replaces tabs with spaces over given region; end is *exclusive*
+// Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) SpacesToTabs(start, end int) {
 	ls.Lock()
-	defer ls.Unlock()
 	autoSave := ls.batchUpdateStart()
-	defer ls.batchUpdateEnd(autoSave)
 	ls.spacesToTabs(start, end)
+	ls.batchUpdateEnd(autoSave)
+	ls.Unlock()
+	ls.sendInput()
 }
 
+// CountWordsLinesRegion returns the count of words and lines in given region.
 func (ls *Lines) CountWordsLinesRegion(reg textpos.Region) (words, lines int) {
 	ls.Lock()
 	defer ls.Unlock()

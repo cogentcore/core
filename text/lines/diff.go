@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/text/difflib"
+	"cogentcore.org/core/text/textpos"
 )
 
 // note: original difflib is: "github.com/pmezard/go-difflib/difflib"
@@ -168,4 +169,41 @@ func (pt Patch) Apply(astr []string) []string {
 		}
 	}
 	return bstr
+}
+
+////////  Lines api
+
+// diffBuffers computes the diff between this buffer and the other buffer,
+// reporting a sequence of operations that would convert this buffer (a) into
+// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
+// (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
+func (ls *Lines) diffBuffers(ob *Lines) Diffs {
+	astr := ls.strings(false)
+	bstr := ob.strings(false)
+	return DiffLines(astr, bstr)
+}
+
+// patchFromBuffer patches (edits) using content from other,
+// according to diff operations (e.g., as generated from DiffBufs).
+func (ls *Lines) patchFromBuffer(ob *Lines, diffs Diffs) bool {
+	sz := len(diffs)
+	mods := false
+	for i := sz - 1; i >= 0; i-- { // go in reverse so changes are valid!
+		df := diffs[i]
+		switch df.Tag {
+		case 'r':
+			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
+			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
+			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
+			mods = true
+		case 'd':
+			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
+			mods = true
+		case 'i':
+			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
+			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
+			mods = true
+		}
+	}
+	return mods
 }

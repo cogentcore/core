@@ -15,16 +15,13 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/slicesx"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
-	"cogentcore.org/core/text/token"
 )
 
 const (
@@ -78,17 +75,6 @@ type Lines struct {
 	// be automatically saved after changes are made.
 	Autosave bool
 
-	// ChangedFunc is called whenever the text content is changed.
-	// The changed flag is always updated on changes, but this can be
-	// used for other flags or events that need to be tracked. The
-	// Lock is off when this is called.
-	ChangedFunc func()
-
-	// MarkupDoneFunc is called when the offline markup pass is done
-	// so that the GUI can be updated accordingly. The lock is off
-	// when this is called.
-	MarkupDoneFunc func()
-
 	// FileModPromptFunc is called when a file has been modified in the filesystem
 	// and it is about to be modified through an edit, in the fileModCheck function.
 	// The prompt should determine whether the user wants to revert, overwrite, or
@@ -96,7 +82,7 @@ type Lines struct {
 	// and it is called under the mutex lock to prevent other edits.
 	FileModPromptFunc func()
 
-	// FontStyle is the default font styling to use for markup.
+	// fontStyle is the default font styling to use for markup.
 	// Is set to use the monospace font.
 	fontStyle *rich.Style
 
@@ -159,10 +145,6 @@ type Lines struct {
 	// posHistory is the history of cursor positions.
 	// It can be used to move back through them.
 	posHistory []textpos.Pos
-
-	// listeners is used for sending standard system events.
-	// Change is sent for BufferDone, BufferInsert, and BufferDelete.
-	listeners events.Listeners
 
 	// batchUpdating indicates that a batch update is under way,
 	// so Input signals are not sent until the end.
@@ -440,17 +422,6 @@ func (ls *Lines) regionRect(st, ed textpos.Pos) *textpos.Edit {
 	return tbe
 }
 
-// callChangedFunc calls the ChangedFunc if it is set,
-// starting from a Lock state, losing and then regaining the lock.
-func (ls *Lines) callChangedFunc() {
-	if ls.ChangedFunc == nil {
-		return
-	}
-	ls.Unlock()
-	ls.ChangedFunc()
-	ls.Lock()
-}
-
 // deleteText is the primary method for deleting text,
 // between start and end positions.
 // An Undo record is automatically saved depending on Undo.Off setting.
@@ -499,7 +470,6 @@ func (ls *Lines) deleteTextImpl(st, ed textpos.Pos) *textpos.Edit {
 		ls.linesDeleted(tbe)
 	}
 	ls.changed = true
-	ls.callChangedFunc()
 	return tbe
 }
 
@@ -537,7 +507,6 @@ func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
 	}
 	ls.linesEdited(tbe)
 	ls.changed = true
-	ls.callChangedFunc()
 	return tbe
 }
 
@@ -586,7 +555,6 @@ func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
 		ls.linesInserted(tbe)
 	}
 	ls.changed = true
-	ls.callChangedFunc()
 	return tbe
 }
 
@@ -658,551 +626,4 @@ func (ls *Lines) replaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 		return ls.insertText(insPos, []rune(insTxt))
 	}
 	return ls.deleteText(delSt, delEd)
-}
-
-////////   Undo
-
-// saveUndo saves given edit to undo stack.
-// also does SendInput because this is called for each edit.
-func (ls *Lines) saveUndo(tbe *textpos.Edit) {
-	if tbe == nil {
-		return
-	}
-	ls.undos.Save(tbe)
-	ls.sendInput()
-}
-
-// undo undoes next group of items on the undo stack
-func (ls *Lines) undo() []*textpos.Edit {
-	tbe := ls.undos.UndoPop()
-	if tbe == nil {
-		// note: could clear the changed flag on tbe == nil in parent
-		return nil
-	}
-	stgp := tbe.Group
-	var eds []*textpos.Edit
-	for {
-		if tbe.Rect {
-			if tbe.Delete {
-				utbe := ls.insertTextRectImpl(tbe)
-				utbe.Group = stgp + tbe.Group
-				if ls.Settings.EmacsUndo {
-					ls.undos.SaveUndo(utbe)
-				}
-				eds = append(eds, utbe)
-			} else {
-				utbe := ls.deleteTextRectImpl(tbe.Region.Start, tbe.Region.End)
-				utbe.Group = stgp + tbe.Group
-				if ls.Settings.EmacsUndo {
-					ls.undos.SaveUndo(utbe)
-				}
-				eds = append(eds, utbe)
-			}
-		} else {
-			if tbe.Delete {
-				utbe := ls.insertTextImpl(tbe.Region.Start, tbe.Text)
-				utbe.Group = stgp + tbe.Group
-				if ls.Settings.EmacsUndo {
-					ls.undos.SaveUndo(utbe)
-				}
-				eds = append(eds, utbe)
-			} else {
-				utbe := ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
-				utbe.Group = stgp + tbe.Group
-				if ls.Settings.EmacsUndo {
-					ls.undos.SaveUndo(utbe)
-				}
-				eds = append(eds, utbe)
-			}
-		}
-		tbe = ls.undos.UndoPopIfGroup(stgp)
-		if tbe == nil {
-			break
-		}
-	}
-	return eds
-}
-
-// EmacsUndoSave is called by View at end of latest set of undo commands.
-// If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
-// at the end, and moves undo to the very end -- undo is a constant stream.
-func (ls *Lines) EmacsUndoSave() {
-	if !ls.Settings.EmacsUndo {
-		return
-	}
-	ls.undos.UndoStackSave()
-}
-
-// redo redoes next group of items on the undo stack,
-// and returns the last record, nil if no more
-func (ls *Lines) redo() []*textpos.Edit {
-	tbe := ls.undos.RedoNext()
-	if tbe == nil {
-		return nil
-	}
-	var eds []*textpos.Edit
-	stgp := tbe.Group
-	for {
-		if tbe.Rect {
-			if tbe.Delete {
-				ls.deleteTextRectImpl(tbe.Region.Start, tbe.Region.End)
-			} else {
-				ls.insertTextRectImpl(tbe)
-			}
-		} else {
-			if tbe.Delete {
-				ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
-			} else {
-				ls.insertTextImpl(tbe.Region.Start, tbe.Text)
-			}
-		}
-		eds = append(eds, tbe)
-		tbe = ls.undos.RedoNextIfGroup(stgp)
-		if tbe == nil {
-			break
-		}
-	}
-	return eds
-}
-
-////////   Syntax Highlighting Markup
-
-// linesEdited re-marks-up lines in edit (typically only 1).
-func (ls *Lines) linesEdited(tbe *textpos.Edit) {
-	st, ed := tbe.Region.Start.Line, tbe.Region.End.Line
-	for ln := st; ln <= ed; ln++ {
-		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln])
-	}
-	ls.markupLines(st, ed)
-	ls.startDelayedReMarkup()
-}
-
-// linesInserted inserts new lines for all other line-based slices
-// corresponding to lines inserted in the lines slice.
-func (ls *Lines) linesInserted(tbe *textpos.Edit) {
-	stln := tbe.Region.Start.Line + 1
-	nsz := (tbe.Region.End.Line - tbe.Region.Start.Line)
-
-	ls.markupEdits = append(ls.markupEdits, tbe)
-	ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
-	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
-	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
-
-	for _, vw := range ls.views {
-		vw.markup = slices.Insert(vw.markup, stln, make([]rich.Text, nsz)...)
-		vw.nbreaks = slices.Insert(vw.nbreaks, stln, make([]int, nsz)...)
-		vw.layout = slices.Insert(vw.layout, stln, make([][]textpos.Pos16, nsz)...)
-	}
-
-	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
-		pfs.Src.LinesInserted(stln, nsz)
-	}
-	ls.linesEdited(tbe)
-}
-
-// linesDeleted deletes lines in Markup corresponding to lines
-// deleted in Lines text.
-func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
-	ls.markupEdits = append(ls.markupEdits, tbe)
-	stln := tbe.Region.Start.Line
-	edln := tbe.Region.End.Line
-	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
-	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
-	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
-
-	for _, vw := range ls.views {
-		vw.markup = append(vw.markup[:stln], vw.markup[edln:]...)
-		vw.nbreaks = append(vw.nbreaks[:stln], vw.nbreaks[edln:]...)
-		vw.layout = append(vw.layout[:stln], vw.layout[edln:]...)
-	}
-
-	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
-		pfs.Src.LinesDeleted(stln, edln)
-	}
-	st := tbe.Region.Start.Line
-	// todo:
-	// ls.markup[st] = highlighting.HtmlEscapeRunes(ls.lines[st])
-	ls.markupLines(st, st)
-	ls.startDelayedReMarkup()
-}
-
-// AdjustRegion adjusts given text region for any edits that
-// have taken place since time stamp on region (using the Undo stack).
-// If region was wholly within a deleted region, then RegionNil will be
-// returned -- otherwise it is clipped appropriately as function of deletes.
-func (ls *Lines) AdjustRegion(reg textpos.Region) textpos.Region {
-	return ls.undos.AdjustRegion(reg)
-}
-
-// adjustedTags updates tag positions for edits, for given list of tags
-func (ls *Lines) adjustedTags(ln int) lexer.Line {
-	if !ls.isValidLine(ln) {
-		return nil
-	}
-	return ls.adjustedTagsLine(ls.tags[ln], ln)
-}
-
-// adjustedTagsLine updates tag positions for edits, for given list of tags
-func (ls *Lines) adjustedTagsLine(tags lexer.Line, ln int) lexer.Line {
-	sz := len(tags)
-	if sz == 0 {
-		return nil
-	}
-	ntags := make(lexer.Line, 0, sz)
-	for _, tg := range tags {
-		reg := textpos.Region{Start: textpos.Pos{Line: ln, Char: tg.Start}, End: textpos.Pos{Line: ln, Char: tg.End}}
-		reg.Time = tg.Time
-		reg = ls.undos.AdjustRegion(reg)
-		if !reg.IsNil() {
-			ntr := ntags.AddLex(tg.Token, reg.Start.Char, reg.End.Char)
-			ntr.Time.Now()
-		}
-	}
-	return ntags
-}
-
-// lexObjPathString returns the string at given lex, and including prior
-// lex-tagged regions that include sequences of PunctSepPeriod and NameTag
-// which are used for object paths -- used for e.g., debugger to pull out
-// variable expressions that can be evaluated.
-func (ls *Lines) lexObjPathString(ln int, lx *lexer.Lex) string {
-	if !ls.isValidLine(ln) {
-		return ""
-	}
-	lln := len(ls.lines[ln])
-	if lx.End > lln {
-		return ""
-	}
-	stlx := lexer.ObjPathAt(ls.hiTags[ln], lx)
-	if stlx.Start >= lx.End {
-		return ""
-	}
-	return string(ls.lines[ln][stlx.Start:lx.End])
-}
-
-// hiTagAtPos returns the highlighting (markup) lexical tag at given position
-// using current Markup tags, and index, -- could be nil if none or out of range
-func (ls *Lines) hiTagAtPos(pos textpos.Pos) (*lexer.Lex, int) {
-	if !ls.isValidLine(pos.Line) {
-		return nil, -1
-	}
-	return ls.hiTags[pos.Line].AtPos(pos.Char)
-}
-
-// inTokenSubCat returns true if the given text position is marked with lexical
-// type in given SubCat sub-category.
-func (ls *Lines) inTokenSubCat(pos textpos.Pos, subCat token.Tokens) bool {
-	lx, _ := ls.hiTagAtPos(pos)
-	return lx != nil && lx.Token.Token.InSubCat(subCat)
-}
-
-// inLitString returns true if position is in a string literal
-func (ls *Lines) inLitString(pos textpos.Pos) bool {
-	return ls.inTokenSubCat(pos, token.LitStr)
-}
-
-// inTokenCode returns true if position is in a Keyword,
-// Name, Operator, or Punctuation.
-// This is useful for turning off spell checking in docs
-func (ls *Lines) inTokenCode(pos textpos.Pos) bool {
-	lx, _ := ls.hiTagAtPos(pos)
-	if lx == nil {
-		return false
-	}
-	return lx.Token.Token.IsCode()
-}
-
-////////   Indenting
-
-// see parse/lexer/indent.go for support functions
-
-// indentLine indents line by given number of tab stops, using tabs or spaces,
-// for given tab size (if using spaces) -- either inserts or deletes to reach target.
-// Returns edit record for any change.
-func (ls *Lines) indentLine(ln, ind int) *textpos.Edit {
-	tabSz := ls.Settings.TabSize
-	ichr := indent.Tab
-	if ls.Settings.SpaceIndent {
-		ichr = indent.Space
-	}
-	curind, _ := lexer.LineIndent(ls.lines[ln], tabSz)
-	if ind > curind {
-		txt := runes.SetFromBytes([]rune{}, indent.Bytes(ichr, ind-curind, tabSz))
-		return ls.insertText(textpos.Pos{Line: ln}, txt)
-	} else if ind < curind {
-		spos := indent.Len(ichr, ind, tabSz)
-		cpos := indent.Len(ichr, curind, tabSz)
-		return ls.deleteText(textpos.Pos{Line: ln, Char: spos}, textpos.Pos{Line: ln, Char: cpos})
-	}
-	return nil
-}
-
-// autoIndent indents given line to the level of the prior line, adjusted
-// appropriately if the current line starts with one of the given un-indent
-// strings, or the prior line ends with one of the given indent strings.
-// Returns any edit that took place (could be nil), along with the auto-indented
-// level and character position for the indent of the current line.
-func (ls *Lines) autoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
-	tabSz := ls.Settings.TabSize
-	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
-	var pInd, delInd int
-	if lp != nil && lp.Lang != nil {
-		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.parseState, ls.lines, ls.hiTags, ln, tabSz)
-	} else {
-		pInd, delInd, _, _ = lexer.BracketIndentLine(ls.lines, ls.hiTags, ln, tabSz)
-	}
-	ichr := ls.Settings.IndentChar()
-	indLev = pInd + delInd
-	chPos = indent.Len(ichr, indLev, tabSz)
-	tbe = ls.indentLine(ln, indLev)
-	return
-}
-
-// autoIndentRegion does auto-indent over given region; end is *exclusive*
-func (ls *Lines) autoIndentRegion(start, end int) {
-	end = min(ls.numLines(), end)
-	for ln := start; ln < end; ln++ {
-		ls.autoIndent(ln)
-	}
-}
-
-// commentStart returns the char index where the comment
-// starts on given line, -1 if no comment.
-func (ls *Lines) commentStart(ln int) int {
-	if !ls.isValidLine(ln) {
-		return -1
-	}
-	comst, _ := ls.Settings.CommentStrings()
-	if comst == "" {
-		return -1
-	}
-	return runes.Index(ls.lines[ln], []rune(comst))
-}
-
-// inComment returns true if the given text position is within
-// a commented region.
-func (ls *Lines) inComment(pos textpos.Pos) bool {
-	if ls.inTokenSubCat(pos, token.Comment) {
-		return true
-	}
-	cs := ls.commentStart(pos.Line)
-	if cs < 0 {
-		return false
-	}
-	return pos.Char > cs
-}
-
-// lineCommented returns true if the given line is a full-comment
-// line (i.e., starts with a comment).
-func (ls *Lines) lineCommented(ln int) bool {
-	if !ls.isValidLine(ln) {
-		return false
-	}
-	tags := ls.hiTags[ln]
-	if len(tags) == 0 {
-		return false
-	}
-	return tags[0].Token.Token.InCat(token.Comment)
-}
-
-// commentRegion inserts comment marker on given lines; end is *exclusive*.
-func (ls *Lines) commentRegion(start, end int) {
-	tabSz := ls.Settings.TabSize
-	ch := 0
-	ind, _ := lexer.LineIndent(ls.lines[start], tabSz)
-	if ind > 0 {
-		if ls.Settings.SpaceIndent {
-			ch = ls.Settings.TabSize * ind
-		} else {
-			ch = ind
-		}
-	}
-
-	comst, comed := ls.Settings.CommentStrings()
-	if comst == "" {
-		// log.Printf("text.Lines: attempt to comment region without any comment syntax defined")
-		comst = "// "
-		return
-	}
-
-	eln := min(ls.numLines(), end)
-	ncom := 0
-	nln := eln - start
-	for ln := start; ln < eln; ln++ {
-		if ls.lineCommented(ln) {
-			ncom++
-		}
-	}
-	trgln := max(nln-2, 1)
-	doCom := true
-	if ncom >= trgln {
-		doCom = false
-	}
-	rcomst := []rune(comst)
-	rcomed := []rune(comed)
-
-	for ln := start; ln < eln; ln++ {
-		if doCom {
-			ls.insertText(textpos.Pos{Line: ln, Char: ch}, rcomst)
-			if comed != "" {
-				lln := len(ls.lines[ln])
-				ls.insertText(textpos.Pos{Line: ln, Char: lln}, rcomed)
-			}
-		} else {
-			idx := ls.commentStart(ln)
-			if idx >= 0 {
-				ls.deleteText(textpos.Pos{Line: ln, Char: idx}, textpos.Pos{Line: ln, Char: idx + len(comst)})
-			}
-			if comed != "" {
-				idx := runes.IndexFold(ls.lines[ln], []rune(comed))
-				if idx >= 0 {
-					ls.deleteText(textpos.Pos{Line: ln, Char: idx}, textpos.Pos{Line: ln, Char: idx + len(comed)})
-				}
-			}
-		}
-	}
-}
-
-// joinParaLines merges sequences of lines with hard returns forming paragraphs,
-// separated by blank lines, into a single line per paragraph,
-// within the given line regions; endLine is *inclusive*.
-func (ls *Lines) joinParaLines(startLine, endLine int) {
-	// current end of region being joined == last blank line
-	curEd := endLine
-	for ln := endLine; ln >= startLine; ln-- { // reverse order
-		lr := ls.lines[ln]
-		lrt := runes.TrimSpace(lr)
-		if len(lrt) == 0 || ln == startLine {
-			if ln < curEd-1 {
-				stp := textpos.Pos{Line: ln + 1}
-				if ln == startLine {
-					stp.Line--
-				}
-				ep := textpos.Pos{Line: curEd - 1}
-				if curEd == endLine {
-					ep.Line = curEd
-				}
-				eln := ls.lines[ep.Line]
-				ep.Char = len(eln)
-				trt := runes.Join(ls.lines[stp.Line:ep.Line+1], []rune(" "))
-				ls.replaceText(stp, ep, stp, string(trt), ReplaceNoMatchCase)
-			}
-			curEd = ln
-		}
-	}
-}
-
-// tabsToSpacesLine replaces tabs with spaces in the given line.
-func (ls *Lines) tabsToSpacesLine(ln int) {
-	tabSz := ls.Settings.TabSize
-
-	lr := ls.lines[ln]
-	st := textpos.Pos{Line: ln}
-	ed := textpos.Pos{Line: ln}
-	i := 0
-	for {
-		if i >= len(lr) {
-			break
-		}
-		r := lr[i]
-		if r == '\t' {
-			po := i % tabSz
-			nspc := tabSz - po
-			st.Char = i
-			ed.Char = i + 1
-			ls.replaceText(st, ed, st, indent.Spaces(1, nspc), ReplaceNoMatchCase)
-			i += nspc
-			lr = ls.lines[ln]
-		} else {
-			i++
-		}
-	}
-}
-
-// tabsToSpaces replaces tabs with spaces over given region; end is *exclusive*.
-func (ls *Lines) tabsToSpaces(start, end int) {
-	end = min(ls.numLines(), end)
-	for ln := start; ln < end; ln++ {
-		ls.tabsToSpacesLine(ln)
-	}
-}
-
-// spacesToTabsLine replaces spaces with tabs in the given line.
-func (ls *Lines) spacesToTabsLine(ln int) {
-	tabSz := ls.Settings.TabSize
-
-	lr := ls.lines[ln]
-	st := textpos.Pos{Line: ln}
-	ed := textpos.Pos{Line: ln}
-	i := 0
-	nspc := 0
-	for {
-		if i >= len(lr) {
-			break
-		}
-		r := lr[i]
-		if r == ' ' {
-			nspc++
-			if nspc == tabSz {
-				st.Char = i - (tabSz - 1)
-				ed.Char = i + 1
-				ls.replaceText(st, ed, st, "\t", ReplaceNoMatchCase)
-				i -= tabSz - 1
-				lr = ls.lines[ln]
-				nspc = 0
-			} else {
-				i++
-			}
-		} else {
-			nspc = 0
-			i++
-		}
-	}
-}
-
-// spacesToTabs replaces tabs with spaces over given region; end is *exclusive*
-func (ls *Lines) spacesToTabs(start, end int) {
-	end = min(ls.numLines(), end)
-	for ln := start; ln < end; ln++ {
-		ls.spacesToTabsLine(ln)
-	}
-}
-
-////////  Diff
-
-// diffBuffers computes the diff between this buffer and the other buffer,
-// reporting a sequence of operations that would convert this buffer (a) into
-// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
-// (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
-func (ls *Lines) diffBuffers(ob *Lines) Diffs {
-	astr := ls.strings(false)
-	bstr := ob.strings(false)
-	return DiffLines(astr, bstr)
-}
-
-// patchFromBuffer patches (edits) using content from other,
-// according to diff operations (e.g., as generated from DiffBufs).
-func (ls *Lines) patchFromBuffer(ob *Lines, diffs Diffs) bool {
-	sz := len(diffs)
-	mods := false
-	for i := sz - 1; i >= 0; i-- { // go in reverse so changes are valid!
-		df := diffs[i]
-		switch df.Tag {
-		case 'r':
-			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
-			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
-			mods = true
-		case 'd':
-			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
-			mods = true
-		case 'i':
-			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
-			mods = true
-		}
-	}
-	return mods
 }
