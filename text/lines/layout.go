@@ -71,9 +71,9 @@ func (ls *Lines) layoutLine(ln, width int, txt []rune, mu rich.Text) ([]rich.Tex
 	i := 0
 	for i < n {
 		r := txt[i]
-		si, sn, rn := lt.Index(i)
-		startOfSpan := sn == rn
-		// fmt.Println("\n####\n", i, cp, si, sn, rn, string(lt[si][rn:]))
+		si, sn, ri := lt.Index(i)
+		startOfSpan := sn == ri
+		// fmt.Printf("\n####\n%d\tclen:%d\tsi:%dsn:%d\tri:%d\t%v %v, sisrc: %q txt: %q\n", i, clen, si, sn, ri, startOfSpan, prevWasTab, string(lt[si][ri:]), string(txt[i:min(i+5, n)]))
 		switch {
 		case start && r == '\t':
 			clen += ls.Settings.TabSize

@@ -172,16 +172,16 @@ func (tx *Text) InsertSpan(at int, s *Style, r []rune) *Text {
 // The Text is modified for convenience in the high-frequency use-case.
 // Clone first to avoid changing the original.
 func (tx *Text) SplitSpan(li int) *Text {
-	si, sn, rn := tx.Index(li)
+	si, sn, ri := tx.Index(li)
 	if si < 0 {
 		return tx
 	}
-	if sn == rn { // already the start
+	if sn == ri { // already the start
 		return tx
 	}
 	nr := slices.Clone((*tx)[si][:sn]) // style runes
-	nr = append(nr, (*tx)[si][rn:]...)
-	(*tx)[si] = (*tx)[si][:rn] // truncate
+	nr = append(nr, (*tx)[si][ri:]...)
+	(*tx)[si] = (*tx)[si][:ri] // truncate
 	*tx = slices.Insert(*tx, si+1, nr)
 	return tx
 }

@@ -80,7 +80,11 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 
 // posFromView returns the original source position from given
 // view position in terms of viewLines and Char offset into that view line.
+// If the Char position is beyond the end of the line, it returns the
+// end of the given line.
 func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
+	vlen := ls.viewLineLen(vw, vp.Line)
+	vp.Char = min(vp.Char, vlen)
 	pos := vp
 	sp := vw.vlineStarts[vp.Line]
 	pos.Line = sp.Line

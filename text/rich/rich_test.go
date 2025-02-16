@@ -46,9 +46,10 @@ func TestText(t *testing.T) {
 	src := "The lazy fox typed in some familiar text"
 	sr := []rune(src)
 	tx := Text{}
-	plain := NewStyle()
+	plain := NewStyle() // .SetFamily(Monospace)
 	ital := NewStyle().SetSlant(Italic)
 	ital.SetStrokeColor(colors.Red)
+	// ital.SetFillColor(colors.Red)
 	boldBig := NewStyle().SetWeight(Bold).SetSize(1.5)
 	tx.AddSpan(plain, sr[:4])
 	tx.AddSpan(ital, sr[4:8])
@@ -84,6 +85,32 @@ func TestText(t *testing.T) {
 `
 	// fmt.Println(tx)
 	assert.Equal(t, trg, tx.String())
+
+	idxTests := []struct {
+		idx int
+		si  int
+		sn  int
+		ri  int
+	}{
+		{0, 0, 2, 2},
+		{2, 0, 2, 4},
+		{4, 1, 3, 3},
+		{7, 1, 3, 6},
+		{8, 2, 2, 2},
+		{9, 2, 2, 3},
+		{11, 2, 2, 5},
+		{16, 3, 2, 6},
+	}
+	for _, test := range idxTests {
+		si, sn, ri := tx.Index(test.idx)
+		stx := string(tx[si][ri:])
+		trg := string(sr[test.idx : test.idx+3])
+		// fmt.Printf("%d\tsi:%d\tsn:%d\tri:%d\tsisrc: %q txt: %q\n", test.idx, si, sn, ri, stx, trg)
+		assert.Equal(t, test.si, si)
+		assert.Equal(t, test.sn, sn)
+		assert.Equal(t, test.ri, ri)
+		assert.Equal(t, trg[0], stx[0])
+	}
 
 	// spl := tx.Split()
 	// for i := range spl {

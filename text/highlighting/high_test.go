@@ -55,21 +55,29 @@ func TestMarkup(t *testing.T) {
 	tx := MarkupLineRich(hi.Style, sty, rsrc, lex, ot)
 
 	rtx := `[monospace]: "	"
-[monospace fill-color]: "if "
+[monospace fill-color]: "if"
 [monospace fill-color]: " len"
 [monospace]: "("
 [monospace]: "txt"
-[monospace]: ") "
-[monospace fill-color]: " > "
-[monospace]: " maxLineLen "
+[monospace]: ")"
+[monospace fill-color]: " >"
+[monospace]: " maxLineLen"
 [monospace]: " {"
-[monospace]: " "
+[monospace]: ""
 [monospace italic fill-color]: " // "
 [monospace italic fill-color]: "avoid"
 [monospace italic fill-color]: " overflow"
 `
 	// fmt.Println(tx)
 	assert.Equal(t, rtx, fmt.Sprint(tx))
+
+	for i, r := range rsrc {
+		si, sn, ri := tx.Index(i)
+		if tx[si][ri] != r {
+			fmt.Println(i, string(r), string(tx[si][ri]), si, ri, sn)
+		}
+		assert.Equal(t, string(r), string(tx[si][ri]))
+	}
 
 	rht := `	<span class="nf">if</span> <span class="nb">len</span><span class="">(</span><span class="n">txt</span><span class="">)</span> <span class="">></span> <span class="n">maxLineLen</span> <span class="">{</span><span class="EOS"></span> <span class="c">// <span class="te">avoid</span> overflow</span>`
 

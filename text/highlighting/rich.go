@@ -58,7 +58,8 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 		if cp >= sz || tr.Start >= sz {
 			break
 		}
-		if tr.Start > cp { // finish any existing before pushing new
+		if tr.Start > cp+1 { // finish any existing before pushing new
+			// fmt.Printf("add: %d - %d: %q\n", cp, tr.Start, string(txt[cp:tr.Start]))
 			tx.AddRunes(txt[cp:tr.Start])
 		}
 		cst := stys[len(stys)-1]
