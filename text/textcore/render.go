@@ -5,7 +5,6 @@
 package textcore
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -75,11 +74,7 @@ func (ed *Base) renderStartPos() math32.Vector2 {
 
 // renderBBox is the render region
 func (ed *Base) renderBBox() image.Rectangle {
-	bb := ed.Geom.ContentBBox
-	spc := ed.Styles.BoxSpace().Size().ToPointCeil()
-	// bb.Min = bb.Min.Add(spc)
-	bb.Max = bb.Max.Sub(spc)
-	return bb
+	return ed.Geom.ContentBBox
 }
 
 // charStartPos returns the starting (top left) render coords for the given
@@ -365,7 +360,7 @@ func (ed *Base) renderAllLines() {
 	pos := ed.renderStartPos()
 	stln := int(math32.Floor(ed.scrollPos))
 	edln := min(ed.linesSize.Y, stln+ed.visSize.Y+1)
-	fmt.Println("lines size:", ed.linesSize.Y, edln, "stln:", stln)
+	// fmt.Println("render lines size:", ed.linesSize.Y, edln, "stln:", stln, "bb:", bb, "pos:", pos)
 
 	pc := &ed.Scene.Painter
 	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))

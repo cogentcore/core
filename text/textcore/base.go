@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
@@ -197,6 +198,7 @@ func (ed *Base) SetWidgetValue(value any) error {
 
 func (ed *Base) Init() {
 	ed.Frame.Init()
+	ed.Styles.Font.Family = rich.Monospace // critical
 	// ed.AddContextMenu(ed.contextMenu)
 	ed.SetLines(lines.NewLines())
 	ed.Styler(func(s *styles.Style) {
@@ -216,7 +218,7 @@ func (ed *Base) Init() {
 		// 	s.Text.WhiteSpace = styles.WhiteSpacePre
 		// }
 		s.Text.WhiteSpace = text.WrapNever
-		s.SetMono(true)
+		s.Font.Family = rich.Monospace
 		s.Grow.Set(1, 0)
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
 		s.Border.Radius = styles.BorderRadiusLarge

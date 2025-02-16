@@ -498,26 +498,6 @@ func (s *Style) CenterAll() {
 // to interact with them.
 var SettingsFont, SettingsMonoFont *string
 
-// SetMono sets whether the font is monospace, using the [SettingsFont]
-// and [SettingsMonoFont] pointers if possible, and falling back on "mono"
-// and "sans-serif" otherwise.
-func (s *Style) SetMono(mono bool) {
-	// todo: fixme
-	// if mono {
-	// 	if SettingsMonoFont != nil {
-	// 		s.Font.Family = *SettingsMonoFont
-	// 		return
-	// 	}
-	// 	s.Font.Family = "mono"
-	// 	return
-	// }
-	// if SettingsFont != nil {
-	// 	s.Font.Family = *SettingsFont
-	// 	return
-	// }
-	// s.Font.Family = "sans-serif"
-}
-
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
 // a coordinated manner.  If wrap == true, then WhiteSpaceNormal
 // and GrowWrap = true; else WhiteSpaceNowrap and GrowWrap = false, which

@@ -24,20 +24,34 @@ import (
 // 	b.AssertRender(t, "set-text")
 // }
 
-func TestBaseSetLanguage(t *testing.T) {
+func TestBaseLayout(t *testing.T) {
 	b := core.NewBody()
 	ed := NewBase(b)
-	ed.Lines.SetLanguage(fileinfo.Go).SetString(`package main
-
-func main() {
-	fmt.Println("Hello, world!")
+	ed.Lines.SetLanguage(fileinfo.Go).SetString(`testing width
+012345678 012345678 012345678 012345678
+    fmt.Println("Hello, world!")
 }
 `)
 	ed.Styler(func(s *styles.Style) {
-		s.Min.X.Ch(40)
+		s.Min.X.Em(25)
 	})
-	b.AssertRender(t, "set-lang")
+	b.AssertRender(t, "layout")
 }
+
+// func TestBaseSetLanguage(t *testing.T) {
+// 	b := core.NewBody()
+// 	ed := NewBase(b)
+// 	ed.Lines.SetLanguage(fileinfo.Go).SetString(`package main
+//
+// func main() {
+//     fmt.Println("Hello, world!")
+// }
+// `)
+// 	ed.Styler(func(s *styles.Style) {
+// 		s.Min.X.Em(29)
+// 	})
+// 	b.AssertRender(t, "set-lang")
+// }
 
 /*
 //go:embed editor.go

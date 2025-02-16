@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
 
@@ -65,7 +66,7 @@ func handleRecover(r any) {
 		NewButton(bar).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			d := NewBody("Crash details")
 			NewText(d).SetText(body).Styler(func(s *styles.Style) {
-				s.SetMono(true)
+				s.Font.Family = rich.Monospace
 				s.Text.WhiteSpace = text.WhiteSpacePreWrap
 			})
 			d.AddBottomBar(func(bar *Frame) {

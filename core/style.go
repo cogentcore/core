@@ -92,8 +92,7 @@ func (wb *WidgetBase) resetStyleWidget() {
 	// which the developer can override in their stylers
 	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 	s.StateLayer = s.State.StateLayer()
-
-	s.SetMono(false)
+	// s.Font.Family = rich.SansSerif
 }
 
 // runStylers runs the [WidgetBase.Stylers].

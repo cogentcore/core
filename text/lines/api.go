@@ -5,11 +5,11 @@
 package lines
 
 import (
-	"fmt"
 	"image"
 	"regexp"
 	"slices"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
@@ -82,7 +82,7 @@ func (ls *Lines) SetWidth(vid int, wd int) bool {
 		}
 		vw.width = wd
 		ls.layoutAll(vw)
-		fmt.Println("set width:", vw.width, "lines:", vw.viewLines, "mu:", len(vw.markup), len(vw.vlineStarts))
+		// fmt.Println("set width:", vw.width, "lines:", vw.viewLines, "mu:", len(vw.markup), len(vw.vlineStarts))
 		return true
 	}
 	return false
@@ -108,6 +108,19 @@ func (ls *Lines) ViewLines(vid int) int {
 		return vw.viewLines
 	}
 	return 0
+}
+
+// SetFontStyle sets the font style to use in styling and rendering text.
+// The Family of the font MUST be set to Monospace.
+func (ls *Lines) SetFontStyle(fs *rich.Style) *Lines {
+	ls.Lock()
+	defer ls.Unlock()
+	if fs.Family != rich.Monospace {
+		errors.Log(errors.New("lines.Lines font style MUST be Monospace. Setting that but should fix upstream"))
+		fs.Family = rich.Monospace
+	}
+	ls.fontStyle = fs
+	return ls
 }
 
 // SetText sets the text to the given bytes, and does

@@ -23,6 +23,7 @@ func (ed *Base) styleSizes() {
 	lno := true
 	if ed.Lines != nil {
 		lno = ed.Lines.Settings.LineNumbers
+		ed.Lines.SetFontStyle(&ed.Styles.Font)
 	}
 	if lno {
 		ed.hasLineNumbers = true
@@ -45,25 +46,18 @@ func (ed *Base) styleSizes() {
 
 // visSizeFromAlloc updates visSize based on allocated size.
 func (ed *Base) visSizeFromAlloc() {
-	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
-	spsz := sty.BoxSpace().Size()
-	asz.SetSub(spsz)
 	sbw := math32.Ceil(ed.Styles.ScrollbarWidth.Dots)
-	asz.X -= sbw
+	if ed.HasScroll[math32.Y] {
+		asz.X -= sbw
+	}
 	if ed.HasScroll[math32.X] {
 		asz.Y -= sbw
 	}
 	ed.visSizeAlloc = asz
-
-	if asz == (math32.Vector2{}) {
-		fmt.Println("does this happen?")
-		ed.visSize.Y = 20
-		ed.visSize.X = 80
-	} else {
-		ed.visSize.Y = int(math32.Floor(float32(asz.Y) / ed.charSize.Y))
-		ed.visSize.X = int(math32.Floor(float32(asz.X) / ed.charSize.X))
-	}
+	ed.visSize.Y = int(math32.Floor(float32(asz.Y) / ed.charSize.Y))
+	ed.visSize.X = int(math32.Floor(float32(asz.X) / ed.charSize.X))
+	// fmt.Println("vis size:", ed.visSize, "alloc:", asz, "charSize:", ed.charSize, "grow:", sty.Grow)
 }
 
 // layoutAllLines uses the visSize width to update the line wrapping
@@ -71,7 +65,6 @@ func (ed *Base) visSizeFromAlloc() {
 func (ed *Base) layoutAllLines() {
 	ed.visSizeFromAlloc()
 	if ed.visSize.Y == 0 || ed.Lines == nil || ed.Lines.NumLines() == 0 {
-		fmt.Println("bail:", ed.visSize)
 		return
 	}
 	ed.lastFilename = ed.Lines.Filename()
@@ -84,7 +77,6 @@ func (ed *Base) layoutAllLines() {
 	ed.linesSize.X = ed.visSize.X - ed.lineNumberOffset // width
 	buf.SetWidth(ed.viewId, ed.linesSize.X)             // inexpensive if same, does update
 	ed.linesSize.Y = buf.ViewLines(ed.viewId)
-	fmt.Println("lay lines size:", ed.linesSize)
 	ed.totalSize.X = ed.charSize.X * float32(ed.visSize.X)
 	ed.totalSize.Y = ed.charSize.Y * float32(ed.linesSize.Y)
 
@@ -136,7 +128,6 @@ func (ed *Base) SizeUp() {
 }
 
 func (ed *Base) SizeDown(iter int) bool {
-	fmt.Println("size down")
 	if iter == 0 {
 		ed.layoutAllLines()
 	} else {
