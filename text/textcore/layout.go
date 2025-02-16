@@ -71,6 +71,7 @@ func (ed *Base) visSizeFromAlloc() {
 func (ed *Base) layoutAllLines() {
 	ed.visSizeFromAlloc()
 	if ed.visSize.Y == 0 || ed.Lines == nil || ed.Lines.NumLines() == 0 {
+		fmt.Println("bail:", ed.visSize)
 		return
 	}
 	ed.lastFilename = ed.Lines.Filename()
@@ -83,6 +84,7 @@ func (ed *Base) layoutAllLines() {
 	ed.linesSize.X = ed.visSize.X - ed.lineNumberOffset // width
 	buf.SetWidth(ed.viewId, ed.linesSize.X)             // inexpensive if same, does update
 	ed.linesSize.Y = buf.ViewLines(ed.viewId)
+	fmt.Println("lay lines size:", ed.linesSize)
 	ed.totalSize.X = ed.charSize.X * float32(ed.visSize.X)
 	ed.totalSize.Y = ed.charSize.Y * float32(ed.linesSize.Y)
 
@@ -134,6 +136,7 @@ func (ed *Base) SizeUp() {
 }
 
 func (ed *Base) SizeDown(iter int) bool {
+	fmt.Println("size down")
 	if iter == 0 {
 		ed.layoutAllLines()
 	} else {

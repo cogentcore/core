@@ -51,32 +51,33 @@ func (ls *Lines) ConfigKnown() bool {
 
 // SetFileInfo sets the syntax highlighting and other parameters
 // based on the type of file specified by given [fileinfo.FileInfo].
-func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
+func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) *Lines {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.setFileInfo(info)
+	return ls
 }
 
 // SetFileType sets the syntax highlighting and other parameters
 // based on the given fileinfo.Known file type
-func (ls *Lines) SetLanguage(ftyp fileinfo.Known) {
-	ls.SetFileInfo(fileinfo.NewFileInfoType(ftyp))
+func (ls *Lines) SetLanguage(ftyp fileinfo.Known) *Lines {
+	return ls.SetFileInfo(fileinfo.NewFileInfoType(ftyp))
 }
 
 // SetFileExt sets syntax highlighting and other parameters
 // based on the given file extension (without the . prefix),
 // for cases where an actual file with [fileinfo.FileInfo] is not
 // available.
-func (ls *Lines) SetFileExt(ext string) {
+func (ls *Lines) SetFileExt(ext string) *Lines {
 	if len(ext) == 0 {
-		return
+		return ls
 	}
 	if ext[0] == '.' {
 		ext = ext[1:]
 	}
 	fn := "_fake." + strings.ToLower(ext)
 	fi, _ := fileinfo.NewFileInfo(fn)
-	ls.SetFileInfo(fi)
+	return ls.SetFileInfo(fi)
 }
 
 // Open loads the given file into the buffer.

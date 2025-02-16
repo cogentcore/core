@@ -5,6 +5,7 @@
 package lines
 
 import (
+	"fmt"
 	"unicode"
 
 	"cogentcore.org/core/base/slicesx"
@@ -39,6 +40,7 @@ func (ls *Lines) layoutLines(vw *view, st, ed int) {
 func (ls *Lines) layoutAll(vw *view) {
 	n := len(ls.markup)
 	if n == 0 {
+		fmt.Println("layoutall bail 0")
 		return
 	}
 	vw.markup = vw.markup[:0]
@@ -47,11 +49,10 @@ func (ls *Lines) layoutAll(vw *view) {
 	nln := 0
 	for ln, mu := range ls.markup {
 		muls, vst := ls.layoutLine(ln, vw.width, ls.lines[ln], mu)
-		// fmt.Println("\nlayout:\n", lmu)
 		vw.lineToVline[ln] = len(vw.vlineStarts)
 		vw.markup = append(vw.markup, muls...)
 		vw.vlineStarts = append(vw.vlineStarts, vst...)
-		nln += len(vw.vlineStarts)
+		nln += len(vst)
 	}
 	vw.viewLines = nln
 }

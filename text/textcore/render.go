@@ -5,6 +5,7 @@
 package textcore
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 
@@ -364,6 +365,7 @@ func (ed *Base) renderAllLines() {
 	pos := ed.renderStartPos()
 	stln := int(math32.Floor(ed.scrollPos))
 	edln := min(ed.linesSize.Y, stln+ed.visSize.Y+1)
+	fmt.Println("lines size:", ed.linesSize.Y, edln, "stln:", stln)
 
 	pc := &ed.Scene.Painter
 	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))
@@ -402,6 +404,7 @@ func (ed *Base) renderAllLines() {
 		pc.TextLines(lns, rpos)
 		rpos.Y += ed.charSize.Y
 	}
+	buf.Unlock()
 	// if ed.hasLineNumbers {
 	// 	pc.PopContext()
 	// }
