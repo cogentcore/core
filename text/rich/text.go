@@ -132,7 +132,19 @@ func (tx Text) Join() []rune {
 	return ss
 }
 
+// Span returns the [Style] and []rune content for given span index.
+// Returns nil if out of range.
+func (tx Text) Span(si int) (*Style, []rune) {
+	n := len(tx)
+	if si < 0 || si >= n || len(tx[si]) == 0 {
+		return nil, nil
+	}
+	return NewStyleFromRunes(tx[si])
+}
+
 // AddSpan adds a span to the Text using the given Style and runes.
+// The Text is modified for convenience in the high-frequency use-case.
+// Clone first to avoid changing the original.
 func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
@@ -142,6 +154,8 @@ func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 
 // InsertSpan inserts a span to the Text at given index,
 // using the given Style and runes.
+// The Text is modified for convenience in the high-frequency use-case.
+// Clone first to avoid changing the original.
 func (tx *Text) InsertSpan(at int, s *Style, r []rune) *Text {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
@@ -149,14 +163,27 @@ func (tx *Text) InsertSpan(at int, s *Style, r []rune) *Text {
 	return tx
 }
 
-// Span returns the [Style] and []rune content for given span index.
-// Returns nil if out of range.
-func (tx Text) Span(si int) (*Style, []rune) {
-	n := len(tx)
-	if si < 0 || si >= n || len(tx[si]) == 0 {
-		return nil, nil
+// SplitSpan splits an existing span at the given logical source index,
+// with the span containing that logical index truncated to contain runes
+// just before the index, and a new span inserted starting at that index,
+// with the remaining contents of the original containing span.
+// If that logical index is already the start of a span, or the logical
+// index is invalid, nothing happens.
+// The Text is modified for convenience in the high-frequency use-case.
+// Clone first to avoid changing the original.
+func (tx *Text) SplitSpan(li int) *Text {
+	si, sn, rn := tx.Index(li)
+	if si < 0 {
+		return tx
 	}
-	return NewStyleFromRunes(tx[si])
+	if sn == rn { // already the start
+		return tx
+	}
+	nr := slices.Clone((*tx)[si][:sn]) // style runes
+	nr = append(nr, (*tx)[si][rn:]...)
+	(*tx)[si] = (*tx)[si][:rn] // truncate
+	*tx = slices.Insert(*tx, si+1, nr)
+	return tx
 }
 
 // StartSpecial adds a Span of given Special type to the Text,

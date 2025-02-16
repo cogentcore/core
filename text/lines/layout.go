@@ -5,12 +5,10 @@
 package lines
 
 import (
-	"slices"
 	"unicode"
 
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -19,119 +17,126 @@ import (
 // it updates the current number of total lines based on any changes from
 // the current number of lines withing given range.
 func (ls *Lines) layoutLines(vw *view, st, ed int) {
-	inln := 0
-	for ln := st; ln <= ed; ln++ {
-		inln += 1 + vw.nbreaks[ln]
-	}
-	nln := 0
-	for ln := st; ln <= ed; ln++ {
-		ltxt := ls.lines[ln]
-		lmu, lay, nbreaks := ls.layoutLine(vw.width, ltxt, ls.markup[ln])
-		vw.markup[ln] = lmu
-		vw.layout[ln] = lay
-		vw.nbreaks[ln] = nbreaks
-		nln += 1 + nbreaks
-	}
-	vw.totalLines += nln - inln
+	// todo:
+	// inln := 0
+	// for ln := st; ln <= ed; ln++ {
+	// 	inln += 1 + vw.nbreaks[ln]
+	// }
+	// nln := 0
+	// for ln := st; ln <= ed; ln++ {
+	// 	ltxt := ls.lines[ln]
+	// 	lmu, lay, nbreaks := ls.layoutLine(vw.width, ltxt, ls.markup[ln])
+	// 	vw.markup[ln] = lmu
+	// 	vw.layout[ln] = lay
+	// 	vw.nbreaks[ln] = nbreaks
+	// 	nln += 1 + nbreaks
+	// }
+	// vw.totalLines += nln - inln
 }
 
-// layoutAll performs view-specific layout of all lines of current markup.
-// ensures that view has capacity to hold all lines, so it can be called on a
-// new view.
+// layoutAll performs view-specific layout of all lines of current lines markup.
+// This manages its own memory allocation, so it can be called on a new view.
 func (ls *Lines) layoutAll(vw *view) {
-	n := len(vw.markup)
+	n := len(ls.markup)
 	if n == 0 {
 		return
 	}
-	vw.markup = slicesx.SetLength(vw.markup, n)
-	vw.layout = slicesx.SetLength(vw.layout, n)
-	vw.nbreaks = slicesx.SetLength(vw.nbreaks, n)
+	vw.markup = vw.markup[:0]
+	vw.vlineStarts = vw.vlineStarts[:0]
+	vw.lineToVline = slicesx.SetLength(vw.lineToVline, n)
 	nln := 0
 	for ln, mu := range ls.markup {
-		lmu, lay, nbreaks := ls.layoutLine(vw.width, ls.lines[ln], mu)
+		muls, vst := ls.layoutLine(ln, vw.width, ls.lines[ln], mu)
 		// fmt.Println("\nlayout:\n", lmu)
-		vw.markup[ln] = lmu
-		vw.layout[ln] = lay
-		vw.nbreaks[ln] = nbreaks
-		nln += 1 + nbreaks
+		vw.lineToVline[ln] = len(vw.vlineStarts)
+		vw.markup = append(vw.markup, muls...)
+		vw.vlineStarts = append(vw.vlineStarts, vst...)
+		nln += len(vw.vlineStarts)
 	}
-	vw.totalLines = nln
+	vw.viewLines = nln
 }
 
 // layoutLine performs layout and line wrapping on the given text, with the
 // given markup rich.Text, with the layout implemented in the markup that is returned.
 // This clones and then modifies the given markup rich text.
-func (ls *Lines) layoutLine(width int, txt []rune, mu rich.Text) (rich.Text, []textpos.Pos16, int) {
-	mu = mu.Clone()
-	spc := []rune{' '}
+func (ls *Lines) layoutLine(ln, width int, txt []rune, mu rich.Text) ([]rich.Text, []textpos.Pos) {
+	lt := mu.Clone()
 	n := len(txt)
-	nbreak := 0
-	lay := make([]textpos.Pos16, n)
-	var cp textpos.Pos16
+	sp := textpos.Pos{Line: ln, Char: 0} // source starting position
+	vst := []textpos.Pos{sp}             // start with this line
+	breaks := []int{}                    // line break indexes into lt spans
+	clen := 0                            // current line length so far
 	start := true
+	prevWasTab := false
 	i := 0
 	for i < n {
 		r := txt[i]
-		lay[i] = cp
-		si, sn, rn := mu.Index(i + nbreak) // extra char for each break
-		// fmt.Println("\n####\n", i, cp, si, sn, rn, string(mu[si][rn:]))
+		si, sn, rn := lt.Index(i)
+		startOfSpan := sn == rn
+		// fmt.Println("\n####\n", i, cp, si, sn, rn, string(lt[si][rn:]))
 		switch {
 		case start && r == '\t':
-			cp.Char += int16(ls.Settings.TabSize) - 1
-			mu[si] = slices.Delete(mu[si], rn, rn+1) // remove tab
-			mu[si] = slices.Insert(mu[si], rn, runes.Repeat(spc, ls.Settings.TabSize)...)
+			clen += ls.Settings.TabSize
+			if !startOfSpan {
+				lt.SplitSpan(i) // each tab gets its own
+			}
+			prevWasTab = true
 			i++
 		case r == '\t':
-			tp := (cp.Char + 1) / 8
+			tp := (clen + 1) / 8
 			tp *= 8
-			cp.Char = tp
-			mu[si] = slices.Delete(mu[si], rn, rn+1) // remove tab
-			mu[si] = slices.Insert(mu[si], rn, runes.Repeat(spc, int(tp-cp.Char))...)
+			clen = tp
+			if !startOfSpan {
+				lt.SplitSpan(i)
+			}
+			prevWasTab = true
 			i++
 		case unicode.IsSpace(r):
 			start = false
-			cp.Char++
+			clen++
+			if prevWasTab && !startOfSpan {
+				lt.SplitSpan(i)
+			}
+			prevWasTab = false
 			i++
 		default:
 			start = false
+			didSplit := false
+			if prevWasTab && !startOfSpan {
+				lt.SplitSpan(i)
+				didSplit = true
+				si++
+			}
+			prevWasTab = false
 			ns := NextSpace(txt, i)
 			wlen := ns - i // length of word
 			// fmt.Println("word at:", i, "ns:", ns, string(txt[i:ns]))
-			if cp.Char+int16(wlen) > int16(width) { // need to wrap
-				// fmt.Println("\n****\nline wrap width:", cp.Char+int16(wlen))
-				cp.Char = 0
-				cp.Line++
-				nbreak++
-				if rn == sn+1 { // word is at start of span, insert \n in prior
-					if si > 0 {
-						mu[si-1] = append(mu[si-1], '\n')
-						// _, ps := mu.Span(si - 1)
-						// fmt.Printf("break prior span: %q", string(ps))
-					}
-				} else { // split current span at word, rn is start of word at idx i in span si
-					sty, _ := mu.Span(si)
-					rtx := mu[si][rn:] // skip past the one space we replace with \n
-					mu.InsertSpan(si+1, sty, rtx)
-					mu[si] = append(mu[si][:rn], '\n')
-					// _, cs := mu.Span(si)
-					// _, ns := mu.Span(si + 1)
-					// fmt.Printf("insert span break:\n%q\n%q", string(cs), string(ns))
+			if clen+wlen > width { // need to wrap
+				clen = 0
+				sp.Char = i
+				vst = append(vst, sp)
+				if !startOfSpan && !didSplit {
+					lt.SplitSpan(i)
+					si++
 				}
+				breaks = append(breaks, si)
 			}
-			for j := i; j < ns; j++ {
-				// if cp.Char >= int16(width) {
-				// 	cp.Char = 0
-				// 	cp.Line++
-				// 	nbreak++
-				// 	// todo: split long
-				// }
-				lay[j] = cp
-				cp.Char++
-			}
+			clen += wlen
 			i = ns
 		}
 	}
-	return mu, lay, nbreak
+	nb := len(breaks)
+	if nb == 0 {
+		return []rich.Text{lt}, vst
+	}
+	muls := make([]rich.Text, 0, nb+1)
+	last := 0
+	for _, si := range breaks {
+		muls = append(muls, lt[last:si])
+		last = si
+	}
+	muls = append(muls, lt[last:])
+	return muls, vst
 }
 
 func NextSpace(txt []rune, pos int) int {

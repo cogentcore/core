@@ -33,6 +33,18 @@ func (ls *Lines) OnInput(vid int, fun func(e events.Event)) {
 	}
 }
 
+// OnClose adds an event listener function to the view with given
+// unique id, for the [events.Close] event.
+// This event is sent in the Close function.
+func (ls *Lines) OnClose(vid int, fun func(e events.Event)) {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	if vw != nil {
+		vw.listeners.Add(events.Close, fun)
+	}
+}
+
 //////// unexported api
 
 // sendChange sends a new [events.Change] event to all views listeners.
@@ -57,6 +69,17 @@ func (ls *Lines) sendInput() {
 		return
 	}
 	e := &events.Base{Typ: events.Input}
+	e.Init()
+	for _, vw := range ls.views {
+		vw.listeners.Call(e)
+	}
+}
+
+// sendClose sends a new [events.Close] event to all views listeners.
+// Must never be called with the mutex lock in place!
+// Only sent in the Close function.
+func (ls *Lines) sendClose() {
+	e := &events.Base{Typ: events.Close}
 	e.Init()
 	for _, vw := range ls.views {
 		vw.listeners.Call(e)

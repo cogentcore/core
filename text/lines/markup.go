@@ -222,11 +222,12 @@ func (ls *Lines) linesInserted(tbe *textpos.Edit) {
 	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
 	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
 
-	for _, vw := range ls.views {
-		vw.markup = slices.Insert(vw.markup, stln, make([]rich.Text, nsz)...)
-		vw.nbreaks = slices.Insert(vw.nbreaks, stln, make([]int, nsz)...)
-		vw.layout = slices.Insert(vw.layout, stln, make([][]textpos.Pos16, nsz)...)
-	}
+	// todo:
+	// for _, vw := range ls.views {
+	// 	vw.markup = slices.Insert(vw.markup, stln, make([]rich.Text, nsz)...)
+	// 	vw.nbreaks = slices.Insert(vw.nbreaks, stln, make([]int, nsz)...)
+	// 	vw.layout = slices.Insert(vw.layout, stln, make([][]textpos.Pos16, nsz)...)
+	// }
 
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()
@@ -245,11 +246,12 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
 
-	for _, vw := range ls.views {
-		vw.markup = append(vw.markup[:stln], vw.markup[edln:]...)
-		vw.nbreaks = append(vw.nbreaks[:stln], vw.nbreaks[edln:]...)
-		vw.layout = append(vw.layout[:stln], vw.layout[edln:]...)
-	}
+	// todo:
+	// for _, vw := range ls.views {
+	// 	vw.markup = append(vw.markup[:stln], vw.markup[edln:]...)
+	// 	vw.nbreaks = append(vw.nbreaks[:stln], vw.nbreaks[edln:]...)
+	// 	vw.layout = append(vw.layout[:stln], vw.layout[edln:]...)
+	// }
 
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()

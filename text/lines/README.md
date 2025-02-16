@@ -10,13 +10,14 @@ Everything is protected by an overall `sync.Mutex` and is safe to concurrent acc
 
 Multiple different views onto the same underlying text content are supported, through the unexported `view` type. Each view can have a different width of characters in its formatting, which is the extent of formatting support for the view: it just manages line wrapping and maintains the total number of display lines (wrapped lines). The `Lines` object manages its own views directly, to ensure everything is updated when the content changes, with a unique ID (int) assigned to each view, which is passed with all view-related methods.
 
-A widget will get its own view via the `NewView` method, and use `SetWidth` to update the view width accordingly (no problem to call even when no change in width). See the [textcore](../textcore) `Editor` for a base widget implementation.
+A widget will get its own view via the `NewView` method, and use `SetWidth` to update the view width accordingly (no problem to call even when no change in width). See the [textcore](../textcore) `Base` for a base widget implementation.
 
 ## Events
 
-Two standard events are sent to listeners attached to views (always with no mutex lock on Lines):
+Three standard events are sent to listeners attached to views (always with no mutex lock on Lines):
 * `events.Input` (use `OnInput` to register a function to receive) is sent for every edit large or small.
 * `events.Change` (`OnChange`) is sent for major changes: new text, opening files, saving files, `EditDone`.
+* `events.Close` is sent when the Lines is closed (e.g., a user closes a file and is done editing it). The viewer should clear any pointers to the Lines at this point.
 
 Widgets should listen to these to update rendering and send their own events. Other widgets etc should only listen to events on the Widgets, not on the underlying Lines object, in general.
 
@@ -27,6 +28,11 @@ Full support for a file associated with the text lines is engaged by calling `Se
 ## Syntax highlighting
 
 Syntax highlighting depends on detecting the type of text represented. This happens automatically via SetFilename, but must also be triggered using ?? TODO.
+
+### Tabs
+
+The markup rich.Text spans are organized so that each tab in the input occupies its own individual span. The rendering GUI is responsible for positioning these tabs and subsequent text at the correct location, with _initial_ tabs at the start of a source line indenting by `Settings.TabSize`, but any _subsequent_ tabs after that are positioned at a modulo 8 position. This is how the word wrapping layout is computed.
+
 
 ## Editing
 

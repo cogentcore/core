@@ -74,6 +74,17 @@ func TestText(t *testing.T) {
 		assert.Equal(t, rune(src[i]), tx.At(i))
 	}
 
+	tx.SplitSpan(12)
+	trg = `[]: "The "
+[italic stroke-color]: "lazy"
+[]: " fox"
+[]: " typed in some "
+[1.50x bold]: "familiar"
+[]: " text"
+`
+	// fmt.Println(tx)
+	assert.Equal(t, trg, tx.String())
+
 	// spl := tx.Split()
 	// for i := range spl {
 	// 	fmt.Println(string(spl[i]))

@@ -98,13 +98,13 @@ func (ls *Lines) Width(vid int) int {
 	return 0
 }
 
-// TotalLines returns the total number of display lines, for given view id.
-func (ls *Lines) TotalLines(vid int) int {
+// ViewLines returns the total number of line-wrapped view lines, for given view id.
+func (ls *Lines) ViewLines(vid int) int {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
 	if vw != nil {
-		return vw.totalLines
+		return vw.viewLines
 	}
 	return 0
 }
@@ -191,6 +191,28 @@ func (ls *Lines) SetHighlighting(style highlighting.HighlightingName) {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.Highlighter.SetStyle(style)
+}
+
+// Close should be called when done using the Lines.
+// It first sends Close events to all views.
+// An Editor widget will likely want to check IsNotSaved()
+// and prompt the user to save or cancel first.
+func (ls *Lines) Close() {
+	ls.stopDelayedReMarkup()
+	ls.sendClose()
+	ls.Lock()
+	ls.views = make(map[int]*view)
+	ls.lines = nil
+	ls.tags = nil
+	ls.hiTags = nil
+	ls.markup = nil
+	// ls.parseState.Reset() // todo
+	ls.undos.Reset()
+	ls.markupEdits = nil
+	ls.posHistory = nil
+	ls.filename = ""
+	ls.notSaved = false
+	ls.Unlock()
 }
 
 // IsChanged reports whether any edits have been applied to text

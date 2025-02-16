@@ -29,16 +29,16 @@ var (
 	clipboardHistoryMax = 100 // `default:"100" min:"0" max:"1000" step:"5"`
 )
 
-// Editor is a widget with basic infrastructure for viewing and editing
+// Base is a widget with basic infrastructure for viewing and editing
 // [lines.Lines] of monospaced text, used in [texteditor.Editor] and
-// terminal. There can be multiple Editor widgets for each lines buffer.
+// terminal. There can be multiple Base widgets for each lines buffer.
 //
 // Use NeedsRender to drive an render update for any change that does
 // not change the line-level layout of the text.
 //
-// All updating in the Editor should be within a single goroutine,
+// All updating in the Base should be within a single goroutine,
 // as it would require extensive protections throughout code otherwise.
-type Editor struct { //core:embedder
+type Base struct { //core:embedder
 	core.Frame
 
 	// Lines is the text lines content for this editor.
@@ -164,12 +164,6 @@ type Editor struct { //core:embedder
 		// (per [Buffer] option)
 		hasLineNumbers bool // TODO: is this really necessary?
 
-		// needsLayout is set by NeedsLayout: Editor does significant
-		// internal layout in LayoutAllLines, and its layout is simply based
-		// on what it gets allocated, so it does not affect the rest
-		// of the Scene.
-		needsLayout bool
-
 		// lastWasTabAI indicates that last key was a Tab auto-indent
 		lastWasTabAI bool
 
@@ -185,14 +179,14 @@ type Editor struct { //core:embedder
 	*/
 }
 
-func (ed *Editor) WidgetValue() any { return ed.Lines.Text() }
+func (ed *Base) WidgetValue() any { return ed.Lines.Text() }
 
-func (ed *Editor) SetWidgetValue(value any) error {
+func (ed *Base) SetWidgetValue(value any) error {
 	ed.Lines.SetString(reflectx.ToString(value))
 	return nil
 }
 
-func (ed *Editor) Init() {
+func (ed *Base) Init() {
 	ed.Frame.Init()
 	ed.AddContextMenu(ed.contextMenu)
 	ed.SetLines(lines.NewLines(80))
@@ -207,7 +201,7 @@ func (ed *Editor) Init() {
 
 		s.Cursor = cursors.Text
 		s.VirtualKeyboard = styles.KeyboardMultiLine
-		// if core.SystemSettings.Editor.WordWrap {
+		// if core.SystemSettings.Base.WordWrap {
 		// 	s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		// } else {
 		// 	s.Text.WhiteSpace = styles.WhiteSpacePre
@@ -222,7 +216,7 @@ func (ed *Editor) Init() {
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
 		s.Text.AlignV = styles.Start
-		s.Text.TabSize = core.SystemSettings.Editor.TabSize
+		s.Text.TabSize = core.SystemSettings.Base.TabSize
 		s.Color = colors.Scheme.OnSurface
 		s.Min.X.Em(10)
 
@@ -249,14 +243,14 @@ func (ed *Editor) Init() {
 	ed.Updater(ed.NeedsLayout)
 }
 
-func (ed *Editor) Destroy() {
+func (ed *Base) Destroy() {
 	ed.stopCursor()
 	ed.Frame.Destroy()
 }
 
 // editDone completes editing and copies the active edited text to the text;
 // called when the return key is pressed or goes out of focus
-func (ed *Editor) editDone() {
+func (ed *Base) editDone() {
 	if ed.Lines != nil {
 		ed.Lines.EditDone()
 	}
@@ -268,7 +262,7 @@ func (ed *Editor) editDone() {
 // reMarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
-func (ed *Editor) reMarkup() {
+func (ed *Base) reMarkup() {
 	if ed.Lines == nil {
 		return
 	}
@@ -276,12 +270,12 @@ func (ed *Editor) reMarkup() {
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save.
-func (ed *Editor) IsNotSaved() bool {
+func (ed *Base) IsNotSaved() bool {
 	return ed.Lines != nil && ed.Lines.IsNotSaved()
 }
 
 // Clear resets all the text in the buffer for this editor.
-func (ed *Editor) Clear() {
+func (ed *Base) Clear() {
 	if ed.Lines == nil {
 		return
 	}
@@ -289,7 +283,7 @@ func (ed *Editor) Clear() {
 }
 
 // resetState resets all the random state variables, when opening a new buffer etc
-func (ed *Editor) resetState() {
+func (ed *Base) resetState() {
 	ed.SelectReset()
 	ed.Highlights = nil
 	ed.ISearch.On = false
@@ -301,7 +295,7 @@ func (ed *Editor) resetState() {
 
 // SetLines sets the [lines.Lines] that this is an editor of,
 // creating a new view for this editor and connecting to events.
-func (ed *Editor) SetLines(buf *lines.Lines) *Editor {
+func (ed *Base) SetLines(buf *lines.Lines) *Base {
 	oldbuf := ed.Lines
 	if ed == nil || (buf != nil && oldbuf == buf) {
 		return ed
@@ -313,7 +307,16 @@ func (ed *Editor) SetLines(buf *lines.Lines) *Editor {
 	ed.resetState()
 	if buf != nil {
 		ed.viewId = buf.NewView()
-		// bhl := len(buf.posHistory)
+		buf.OnChange(ed.viewId, func(e events.Event) {
+			ed.NeedsRender()
+		})
+		buf.OnInput(ed.viewId, func(e events.Event) {
+			ed.NeedsRender()
+		})
+		buf.OnClose(ed.viewId, func(e events.Event) {
+			ed.SetLines(nil)
+		})
+		// bhl := len(buf.posHistory) // todo:
 		// if bhl > 0 {
 		// 	cp := buf.posHistory[bhl-1]
 		// 	ed.posHistoryIndex = bhl - 1
@@ -322,63 +325,18 @@ func (ed *Editor) SetLines(buf *lines.Lines) *Editor {
 		// } else {
 		// 	ed.SetCursorShow(textpos.Pos{})
 		// }
+	} else {
+		ed.viewId = -1
 	}
-	ed.layoutAllLines() // relocks
 	ed.NeedsRender()
 	return ed
-}
-
-// bufferSignal receives a signal from the Buffer when the underlying text
-// is changed.
-func (ed *Editor) bufferSignal(sig bufferSignals, tbe *lines.Edit) {
-	switch sig {
-	case bufferDone:
-	case bufferNew:
-		ed.resetState()
-		ed.SetCursorShow(ed.CursorPos)
-		ed.NeedsLayout()
-	case bufferMods:
-		ed.NeedsLayout()
-	case bufferInsert:
-		if ed == nil || ed.This == nil || !ed.IsVisible() {
-			return
-		}
-		ndup := ed.renders == nil
-		// fmt.Printf("ed %v got %v\n", ed.Nm, tbe.Reg.Start)
-		if tbe.Reg.Start.Line != tbe.Reg.End.Line {
-			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
-			ed.linesInserted(tbe) // triggers full layout
-		} else {
-			ed.layoutLine(tbe.Reg.Start.Line) // triggers layout if line width exceeds
-		}
-		if ndup {
-			ed.Update()
-		}
-	case bufferDelete:
-		if ed == nil || ed.This == nil || !ed.IsVisible() {
-			return
-		}
-		ndup := ed.renders == nil
-		if tbe.Reg.Start.Line != tbe.Reg.End.Line {
-			ed.linesDeleted(tbe) // triggers full layout
-		} else {
-			ed.layoutLine(tbe.Reg.Start.Line)
-		}
-		if ndup {
-			ed.Update()
-		}
-	case bufferMarkupUpdated:
-		ed.NeedsLayout() // comes from another goroutine
-	case bufferClosed:
-		ed.SetBuffer(nil)
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //    Undo / Redo
 
 // undo undoes previous action
-func (ed *Editor) undo() {
+func (ed *Base) undo() {
 	tbes := ed.Lines.undo()
 	if tbes != nil {
 		tbe := tbes[len(tbes)-1]
@@ -396,7 +354,7 @@ func (ed *Editor) undo() {
 }
 
 // redo redoes previously undone action
-func (ed *Editor) redo() {
+func (ed *Base) redo() {
 	tbes := ed.Lines.redo()
 	if tbes != nil {
 		tbe := tbes[len(tbes)-1]
@@ -412,8 +370,8 @@ func (ed *Editor) redo() {
 	ed.NeedsRender()
 }
 
-// styleEditor applies the editor styles.
-func (ed *Editor) styleEditor() {
+// styleBase applies the editor styles.
+func (ed *Base) styleBase() {
 	if ed.NeedsRebuild() {
 		highlighting.UpdateFromTheme()
 		if ed.Lines != nil {
@@ -424,7 +382,7 @@ func (ed *Editor) styleEditor() {
 	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 
-func (ed *Editor) Style() {
-	ed.styleEditor()
+func (ed *Base) Style() {
+	ed.styleBase()
 	ed.styleSizes()
 }

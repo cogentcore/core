@@ -11,8 +11,6 @@ import (
 
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
@@ -23,33 +21,30 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// Rendering Notes: all rendering is done in Render call.
-// Layout must be called whenever content changes across lines.
-
-// NeedsLayout indicates that the [Editor] needs a new layout pass.
-func (ed *Editor) NeedsLayout() {
+// NeedsLayout indicates that the [Base] needs a new layout pass.
+func (ed *Base) NeedsLayout() {
 	ed.NeedsRender()
-	ed.needsLayout = true
 }
 
-func (ed *Editor) renderLayout() {
-	chg := ed.ManageOverflow(3, true)
-	ed.layoutAllLines()
-	ed.ConfigScrolls()
-	if chg {
-		ed.Frame.NeedsLayout() // required to actually update scrollbar vs not
-	}
-}
+// todo: manage scrollbar ourselves!
+// func (ed *Base) renderLayout() {
+// 	chg := ed.ManageOverflow(3, true)
+// 	ed.layoutAllLines()
+// 	ed.ConfigScrolls()
+// 	if chg {
+// 		ed.Frame.NeedsLayout() // required to actually update scrollbar vs not
+// 	}
+// }
 
-func (ed *Editor) RenderWidget() {
+func (ed *Base) RenderWidget() {
 	if ed.StartRender() {
-		if ed.needsLayout {
-			ed.renderLayout()
-			ed.needsLayout = false
-		}
-		if ed.targetSet {
-			ed.scrollCursorToTarget()
-		}
+		// if ed.needsLayout {
+		// 	ed.renderLayout()
+		// 	ed.needsLayout = false
+		// }
+		// if ed.targetSet {
+		// 	ed.scrollCursorToTarget()
+		// }
 		ed.PositionScrolls()
 		ed.renderAllLines()
 		if ed.StateIs(states.Focused) {
@@ -66,7 +61,7 @@ func (ed *Editor) RenderWidget() {
 }
 
 // textStyleProperties returns the styling properties for text based on HiStyle Markup
-func (ed *Editor) textStyleProperties() map[string]any {
+func (ed *Base) textStyleProperties() map[string]any {
 	if ed.Buffer == nil {
 		return nil
 	}
@@ -75,12 +70,12 @@ func (ed *Editor) textStyleProperties() map[string]any {
 
 // renderStartPos is absolute rendering start position from our content pos with scroll
 // This can be offscreen (left, up) based on scrolling.
-func (ed *Editor) renderStartPos() math32.Vector2 {
+func (ed *Base) renderStartPos() math32.Vector2 {
 	return ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
 }
 
 // renderBBox is the render region
-func (ed *Editor) renderBBox() image.Rectangle {
+func (ed *Base) renderBBox() image.Rectangle {
 	bb := ed.Geom.ContentBBox
 	spc := ed.Styles.BoxSpace().Size().ToPointCeil()
 	// bb.Min = bb.Min.Add(spc)
@@ -91,98 +86,102 @@ func (ed *Editor) renderBBox() image.Rectangle {
 // charStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (ed *Editor) charStartPos(pos textpos.Pos) math32.Vector2 {
+func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	spos := ed.renderStartPos()
-	spos.X += ed.LineNumberOffset
-	if pos.Line >= len(ed.offsets) {
-		if len(ed.offsets) > 0 {
-			pos.Line = len(ed.offsets) - 1
-		} else {
-			return spos
-		}
-	} else {
-		spos.Y += ed.offsets[pos.Line]
-	}
-	if pos.Line >= len(ed.renders) {
-		return spos
-	}
-	rp := &ed.renders[pos.Line]
-	if len(rp.Spans) > 0 {
-		// note: Y from rune pos is baseline
-		rrp, _, _, _ := ed.renders[pos.Line].RuneRelPos(pos.Ch)
-		spos.X += rrp.X
-		spos.Y += rrp.Y - ed.renders[pos.Line].Spans[0].RelPos.Y // relative
-	}
+	// todo:
+	// spos.X += ed.LineNumberOffset
+	// if pos.Line >= len(ed.offsets) {
+	// 	if len(ed.offsets) > 0 {
+	// 		pos.Line = len(ed.offsets) - 1
+	// 	} else {
+	// 		return spos
+	// 	}
+	// } else {
+	// 	spos.Y += ed.offsets[pos.Line]
+	// }
+	// if pos.Line >= len(ed.renders) {
+	// 	return spos
+	// }
+	// rp := &ed.renders[pos.Line]
+	// if len(rp.Spans) > 0 {
+	// 	// note: Y from rune pos is baseline
+	// 	rrp, _, _, _ := ed.renders[pos.Line].RuneRelPos(pos.Ch)
+	// 	spos.X += rrp.X
+	// 	spos.Y += rrp.Y - ed.renders[pos.Line].Spans[0].RelPos.Y // relative
+	// }
 	return spos
 }
 
 // charStartPosVisible returns the starting pos for given position
 // that is currently visible, based on bounding boxes.
-func (ed *Editor) charStartPosVisible(pos textpos.Pos) math32.Vector2 {
+func (ed *Base) charStartPosVisible(pos textpos.Pos) math32.Vector2 {
 	spos := ed.charStartPos(pos)
-	bb := ed.renderBBox()
-	bbmin := math32.FromPoint(bb.Min)
-	bbmin.X += ed.LineNumberOffset
-	bbmax := math32.FromPoint(bb.Max)
-	spos.SetMax(bbmin)
-	spos.SetMin(bbmax)
+	// todo:
+	// bb := ed.renderBBox()
+	// bbmin := math32.FromPoint(bb.Min)
+	// bbmin.X += ed.LineNumberOffset
+	// bbmax := math32.FromPoint(bb.Max)
+	// spos.SetMax(bbmin)
+	// spos.SetMin(bbmax)
 	return spos
 }
 
 // charEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (ed *Editor) charEndPos(pos textpos.Pos) math32.Vector2 {
+func (ed *Base) charEndPos(pos textpos.Pos) math32.Vector2 {
 	spos := ed.renderStartPos()
-	pos.Line = min(pos.Line, ed.NumLines-1)
-	if pos.Line < 0 {
-		spos.Y += float32(ed.linesSize.Y)
-		spos.X += ed.LineNumberOffset
-		return spos
-	}
-	if pos.Line >= len(ed.offsets) {
-		spos.Y += float32(ed.linesSize.Y)
-		spos.X += ed.LineNumberOffset
-		return spos
-	}
-	spos.Y += ed.offsets[pos.Line]
-	spos.X += ed.LineNumberOffset
-	r := ed.renders[pos.Line]
-	if len(r.Spans) > 0 {
-		// note: Y from rune pos is baseline
-		rrp, _, _, _ := r.RuneEndPos(pos.Ch)
-		spos.X += rrp.X
-		spos.Y += rrp.Y - r.Spans[0].RelPos.Y // relative
-	}
-	spos.Y += ed.lineHeight // end of that line
+	// todo:
+	// pos.Line = min(pos.Line, ed.NumLines-1)
+	// if pos.Line < 0 {
+	// 	spos.Y += float32(ed.linesSize.Y)
+	// 	spos.X += ed.LineNumberOffset
+	// 	return spos
+	// }
+	// if pos.Line >= len(ed.offsets) {
+	// 	spos.Y += float32(ed.linesSize.Y)
+	// 	spos.X += ed.LineNumberOffset
+	// 	return spos
+	// }
+	// spos.Y += ed.offsets[pos.Line]
+	// spos.X += ed.LineNumberOffset
+	// r := ed.renders[pos.Line]
+	// if len(r.Spans) > 0 {
+	// 	// note: Y from rune pos is baseline
+	// 	rrp, _, _, _ := r.RuneEndPos(pos.Ch)
+	// 	spos.X += rrp.X
+	// 	spos.Y += rrp.Y - r.Spans[0].RelPos.Y // relative
+	// }
+	// spos.Y += ed.lineHeight // end of that line
 	return spos
 }
 
 // lineBBox returns the bounding box for given line
-func (ed *Editor) lineBBox(ln int) math32.Box2 {
+func (ed *Base) lineBBox(ln int) math32.Box2 {
 	tbb := ed.renderBBox()
-	var bb math32.Box2
-	bb.Min = ed.renderStartPos()
-	bb.Min.X += ed.LineNumberOffset
-	bb.Max = bb.Min
-	bb.Max.Y += ed.lineHeight
-	bb.Max.X = float32(tbb.Max.X)
-	if ln >= len(ed.offsets) {
-		if len(ed.offsets) > 0 {
-			ln = len(ed.offsets) - 1
-		} else {
-			return bb
-		}
-	} else {
-		bb.Min.Y += ed.offsets[ln]
-		bb.Max.Y += ed.offsets[ln]
-	}
-	if ln >= len(ed.renders) {
-		return bb
-	}
-	rp := &ed.renders[ln]
-	bb.Max = bb.Min.Add(rp.BBox.Size())
-	return bb
+	// var bb math32.Box2
+	// bb.Min = ed.renderStartPos()
+	// bb.Min.X += ed.LineNumberOffset
+	// bb.Max = bb.Min
+	// bb.Max.Y += ed.lineHeight
+	// bb.Max.X = float32(tbb.Max.X)
+	// if ln >= len(ed.offsets) {
+	// 	if len(ed.offsets) > 0 {
+	// 		ln = len(ed.offsets) - 1
+	// 	} else {
+	// 		return bb
+	// 	}
+	// } else {
+	// 	bb.Min.Y += ed.offsets[ln]
+	// 	bb.Max.Y += ed.offsets[ln]
+	// }
+	// if ln >= len(ed.renders) {
+	// 	return bb
+	// }
+	// rp := &ed.renders[ln]
+	// bb.Max = bb.Min.Add(rp.BBox.Size())
+	// return bb
+	return tbb
 }
 
 // TODO: make viewDepthColors HCT based?
@@ -202,160 +201,162 @@ var viewDepthColors = []color.RGBA{
 }
 
 // renderDepthBackground renders the depth background color.
-func (ed *Editor) renderDepthBackground(stln, edln int) {
-	if ed.Buffer == nil {
-		return
-	}
-	if !ed.Buffer.Options.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
-		return
-	}
-	buf := ed.Buffer
-
-	bb := ed.renderBBox()
-	bln := buf.NumLines()
-	sty := &ed.Styles
-	isDark := matcolor.SchemeIsDark
-	nclrs := len(viewDepthColors)
-	lstdp := 0
-	for ln := stln; ln <= edln; ln++ {
-		lst := ed.charStartPos(textpos.Pos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + math32.Max(ed.renders[ln].BBox.Size().Y, ed.lineHeight)
-		if int(math32.Ceil(led)) < bb.Min.Y {
-			continue
-		}
-		if int(math32.Floor(lst)) > bb.Max.Y {
-			continue
-		}
-		if ln >= bln { // may be out of sync
-			continue
-		}
-		ht := buf.HiTags(ln)
-		lsted := 0
-		for ti := range ht {
-			lx := &ht[ti]
-			if lx.Token.Depth > 0 {
-				var vdc color.RGBA
-				if isDark { // reverse order too
-					vdc = viewDepthColors[nclrs-1-lx.Token.Depth%nclrs]
-				} else {
-					vdc = viewDepthColors[lx.Token.Depth%nclrs]
-				}
-				bg := gradient.Apply(sty.Background, func(c color.Color) color.Color {
-					if isDark { // reverse order too
-						return colors.Add(c, vdc)
-					}
-					return colors.Sub(c, vdc)
-				})
-
-				st := min(lsted, lx.St)
-				reg := lines.Region{Start: textpos.Pos{Ln: ln, Ch: st}, End: textpos.Pos{Ln: ln, Ch: lx.Ed}}
-				lsted = lx.Ed
-				lstdp = lx.Token.Depth
-				ed.renderRegionBoxStyle(reg, sty, bg, true) // full width alway
-			}
-		}
-		if lstdp > 0 {
-			ed.renderRegionToEnd(textpos.Pos{Ln: ln, Ch: lsted}, sty, sty.Background)
-		}
-	}
+func (ed *Base) renderDepthBackground(stln, edln int) {
+	// if ed.Buffer == nil {
+	// 	return
+	// }
+	// if !ed.Buffer.Options.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
+	// 	return
+	// }
+	// buf := ed.Buffer
+	//
+	// bb := ed.renderBBox()
+	// bln := buf.NumLines()
+	// sty := &ed.Styles
+	// isDark := matcolor.SchemeIsDark
+	// nclrs := len(viewDepthColors)
+	// lstdp := 0
+	// for ln := stln; ln <= edln; ln++ {
+	// 	lst := ed.charStartPos(textpos.Pos{Ln: ln}).Y // note: charstart pos includes descent
+	// 	led := lst + math32.Max(ed.renders[ln].BBox.Size().Y, ed.lineHeight)
+	// 	if int(math32.Ceil(led)) < bb.Min.Y {
+	// 		continue
+	// 	}
+	// 	if int(math32.Floor(lst)) > bb.Max.Y {
+	// 		continue
+	// 	}
+	// 	if ln >= bln { // may be out of sync
+	// 		continue
+	// 	}
+	// 	ht := buf.HiTags(ln)
+	// 	lsted := 0
+	// 	for ti := range ht {
+	// 		lx := &ht[ti]
+	// 		if lx.Token.Depth > 0 {
+	// 			var vdc color.RGBA
+	// 			if isDark { // reverse order too
+	// 				vdc = viewDepthColors[nclrs-1-lx.Token.Depth%nclrs]
+	// 			} else {
+	// 				vdc = viewDepthColors[lx.Token.Depth%nclrs]
+	// 			}
+	// 			bg := gradient.Apply(sty.Background, func(c color.Color) color.Color {
+	// 				if isDark { // reverse order too
+	// 					return colors.Add(c, vdc)
+	// 				}
+	// 				return colors.Sub(c, vdc)
+	// 			})
+	//
+	// 			st := min(lsted, lx.St)
+	// 			reg := lines.Region{Start: textpos.Pos{Ln: ln, Ch: st}, End: textpos.Pos{Ln: ln, Ch: lx.Ed}}
+	// 			lsted = lx.Ed
+	// 			lstdp = lx.Token.Depth
+	// 			ed.renderRegionBoxStyle(reg, sty, bg, true) // full width alway
+	// 		}
+	// 	}
+	// 	if lstdp > 0 {
+	// 		ed.renderRegionToEnd(textpos.Pos{Ln: ln, Ch: lsted}, sty, sty.Background)
+	// 	}
+	// }
 }
 
+// todo: select and highlights handled by lines shaped directly.
+
 // renderSelect renders the selection region as a selected background color.
-func (ed *Editor) renderSelect() {
-	if !ed.HasSelection() {
-		return
-	}
-	ed.renderRegionBox(ed.SelectRegion, ed.SelectColor)
+func (ed *Base) renderSelect() {
+	// if !ed.HasSelection() {
+	// 	return
+	// }
+	// ed.renderRegionBox(ed.SelectRegion, ed.SelectColor)
 }
 
 // renderHighlights renders the highlight regions as a
 // highlighted background color.
-func (ed *Editor) renderHighlights(stln, edln int) {
-	for _, reg := range ed.Highlights {
-		reg := ed.Buffer.AdjustRegion(reg)
-		if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
-			continue
-		}
-		ed.renderRegionBox(reg, ed.HighlightColor)
-	}
+func (ed *Base) renderHighlights(stln, edln int) {
+	// for _, reg := range ed.Highlights {
+	// 	reg := ed.Buffer.AdjustRegion(reg)
+	// 	if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
+	// 		continue
+	// 	}
+	// 	ed.renderRegionBox(reg, ed.HighlightColor)
+	// }
 }
 
 // renderScopelights renders a highlight background color for regions
 // in the Scopelights list.
-func (ed *Editor) renderScopelights(stln, edln int) {
-	for _, reg := range ed.scopelights {
-		reg := ed.Buffer.AdjustRegion(reg)
-		if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
-			continue
-		}
-		ed.renderRegionBox(reg, ed.HighlightColor)
-	}
+func (ed *Base) renderScopelights(stln, edln int) {
+	// for _, reg := range ed.scopelights {
+	// 	reg := ed.Buffer.AdjustRegion(reg)
+	// 	if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
+	// 		continue
+	// 	}
+	// 	ed.renderRegionBox(reg, ed.HighlightColor)
+	// }
 }
 
 // renderRegionBox renders a region in background according to given background
-func (ed *Editor) renderRegionBox(reg lines.Region, bg image.Image) {
-	ed.renderRegionBoxStyle(reg, &ed.Styles, bg, false)
+func (ed *Base) renderRegionBox(reg lines.Region, bg image.Image) {
+	// ed.renderRegionBoxStyle(reg, &ed.Styles, bg, false)
 }
 
 // renderRegionBoxStyle renders a region in given style and background
-func (ed *Editor) renderRegionBoxStyle(reg lines.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
-	st := reg.Start
-	end := reg.End
-	spos := ed.charStartPosVisible(st)
-	epos := ed.charStartPosVisible(end)
-	epos.Y += ed.lineHeight
-	bb := ed.renderBBox()
-	stx := math32.Ceil(float32(bb.Min.X) + ed.LineNumberOffset)
-	if int(math32.Ceil(epos.Y)) < bb.Min.Y || int(math32.Floor(spos.Y)) > bb.Max.Y {
-		return
-	}
-	ex := float32(bb.Max.X)
-	if fullWidth {
-		epos.X = ex
-	}
-
-	pc := &ed.Scene.Painter
-	stsi, _, _ := ed.wrappedLineNumber(st)
-	edsi, _, _ := ed.wrappedLineNumber(end)
-	if st.Line == end.Line && stsi == edsi {
-		pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
-		return
-	}
-	// on diff lines: fill to end of stln
-	seb := spos
-	seb.Y += ed.lineHeight
-	seb.X = ex
-	pc.FillBox(spos, seb.Sub(spos), bg)
-	sfb := seb
-	sfb.X = stx
-	if sfb.Y < epos.Y { // has some full box
-		efb := epos
-		efb.Y -= ed.lineHeight
-		efb.X = ex
-		pc.FillBox(sfb, efb.Sub(sfb), bg)
-	}
-	sed := epos
-	sed.Y -= ed.lineHeight
-	sed.X = stx
-	pc.FillBox(sed, epos.Sub(sed), bg)
+func (ed *Base) renderRegionBoxStyle(reg lines.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
+	// st := reg.Start
+	// end := reg.End
+	// spos := ed.charStartPosVisible(st)
+	// epos := ed.charStartPosVisible(end)
+	// epos.Y += ed.lineHeight
+	// bb := ed.renderBBox()
+	// stx := math32.Ceil(float32(bb.Min.X) + ed.LineNumberOffset)
+	// if int(math32.Ceil(epos.Y)) < bb.Min.Y || int(math32.Floor(spos.Y)) > bb.Max.Y {
+	// 	return
+	// }
+	// ex := float32(bb.Max.X)
+	// if fullWidth {
+	// 	epos.X = ex
+	// }
+	//
+	// pc := &ed.Scene.Painter
+	// stsi, _, _ := ed.wrappedLineNumber(st)
+	// edsi, _, _ := ed.wrappedLineNumber(end)
+	// if st.Line == end.Line && stsi == edsi {
+	// 	pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
+	// 	return
+	// }
+	// // on diff lines: fill to end of stln
+	// seb := spos
+	// seb.Y += ed.lineHeight
+	// seb.X = ex
+	// pc.FillBox(spos, seb.Sub(spos), bg)
+	// sfb := seb
+	// sfb.X = stx
+	// if sfb.Y < epos.Y { // has some full box
+	// 	efb := epos
+	// 	efb.Y -= ed.lineHeight
+	// 	efb.X = ex
+	// 	pc.FillBox(sfb, efb.Sub(sfb), bg)
+	// }
+	// sed := epos
+	// sed.Y -= ed.lineHeight
+	// sed.X = stx
+	// pc.FillBox(sed, epos.Sub(sed), bg)
 }
 
 // renderRegionToEnd renders a region in given style and background, to end of line from start
-func (ed *Editor) renderRegionToEnd(st textpos.Pos, sty *styles.Style, bg image.Image) {
-	spos := ed.charStartPosVisible(st)
-	epos := spos
-	epos.Y += ed.lineHeight
-	vsz := epos.Sub(spos)
-	if vsz.X <= 0 || vsz.Y <= 0 {
-		return
-	}
-	pc := &ed.Scene.Painter
-	pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
+func (ed *Base) renderRegionToEnd(st textpos.Pos, sty *styles.Style, bg image.Image) {
+	// spos := ed.charStartPosVisible(st)
+	// epos := spos
+	// epos.Y += ed.lineHeight
+	// vsz := epos.Sub(spos)
+	// if vsz.X <= 0 || vsz.Y <= 0 {
+	// 	return
+	// }
+	// pc := &ed.Scene.Painter
+	// pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 }
 
 // renderAllLines displays all the visible lines on the screen,
 // after StartRender has already been called.
-func (ed *Editor) renderAllLines() {
+func (ed *Base) renderAllLines() {
 	ed.RenderStandardBox()
 	pc := &ed.Scene.Painter
 	bb := ed.renderBBox()
@@ -422,7 +423,7 @@ func (ed *Editor) renderAllLines() {
 }
 
 // renderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
-func (ed *Editor) renderLineNumbersBoxAll() {
+func (ed *Base) renderLineNumbersBoxAll() {
 	if !ed.hasLineNumbers {
 		return
 	}
@@ -441,7 +442,7 @@ func (ed *Editor) renderLineNumbersBoxAll() {
 // renderLineNumber renders given line number; called within context of other render.
 // if defFill is true, it fills box color for default background color (use false for
 // batch mode).
-func (ed *Editor) renderLineNumber(li, ln int, defFill bool) {
+func (ed *Base) renderLineNumber(li, ln int, defFill bool) {
 	if !ed.hasLineNumbers || ed.Buffer == nil {
 		return
 	}
@@ -510,7 +511,7 @@ func (ed *Editor) renderLineNumber(li, ln int, defFill bool) {
 // firstVisibleLine finds the first visible line, starting at given line
 // (typically cursor -- if zero, a visible line is first found) -- returns
 // stln if nothing found above it.
-func (ed *Editor) firstVisibleLine(stln int) int {
+func (ed *Base) firstVisibleLine(stln int) int {
 	bb := ed.renderBBox()
 	if stln == 0 {
 		perln := float32(ed.linesSize.Y) / float32(ed.NumLines)
@@ -539,7 +540,7 @@ func (ed *Editor) firstVisibleLine(stln int) int {
 
 // lastVisibleLine finds the last visible line, starting at given line
 // (typically cursor) -- returns stln if nothing found beyond it.
-func (ed *Editor) lastVisibleLine(stln int) int {
+func (ed *Base) lastVisibleLine(stln int) int {
 	bb := ed.renderBBox()
 	lastln := stln
 	for ln := stln + 1; ln < ed.NumLines; ln++ {
@@ -556,7 +557,7 @@ func (ed *Editor) lastVisibleLine(stln int) int {
 // PixelToCursor finds the cursor position that corresponds to the given pixel
 // location (e.g., from mouse click) which has had ScBBox.Min subtracted from
 // it (i.e, relative to upper left of text area)
-func (ed *Editor) PixelToCursor(pt image.Point) textpos.Pos {
+func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	if ed.NumLines == 0 {
 		return textpos.PosZero
 	}

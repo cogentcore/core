@@ -10,31 +10,82 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// view provides a view onto a shared [Lines] text buffer, with different
-// with and markup layout for each view. Views are managed by the Lines.
+// view provides a view onto a shared [Lines] text buffer,
+// with a representation of view lines that are the wrapped versions of
+// the original [Lines.lines] source lines, with wrapping according to
+// the view width. Views are managed by the Lines.
 type view struct {
 	// width is the current line width in rune characters, used for line wrapping.
 	width int
 
-	// totalLines is the total number of display lines, including line breaks.
-	// this is updated during markup.
-	totalLines int
+	// viewLines is the total number of line-wrapped lines.
+	viewLines int
 
-	// nbreaks are the number of display lines per source line (0 if it all fits on
-	// 1 display line).
-	nbreaks []int
+	// vlineStarts are the positions in the original [Lines.lines] source for
+	// the start of each view line. This slice is viewLines in length.
+	vlineStarts []textpos.Pos
 
-	// layout is a mapping from lines rune index to display line and char,
-	// within the scope of each line. E.g., Line=0 is first display line,
-	// 1 is one after the first line break, etc.
-	layout [][]textpos.Pos16
-
-	// markup is the layout-specific version of the [rich.Text] markup,
-	// specific to the width of this view.
+	// markup is the view-specific version of the [Lines.markup] markup for
+	// each view line (len = viewLines).
 	markup []rich.Text
+
+	// lineToVline maps the source [Lines.lines] indexes to the wrapped
+	// viewLines. Each slice value contains the index into the viewLines space,
+	// such that vlineStarts of that index is the start of the original source line.
+	// Any subsequent vlineStarts with the same Line and Char > 0 following this
+	// starting line represent additional wrapped content from the same source line.
+	lineToVline []int
 
 	// listeners is used for sending Change and Input events
 	listeners events.Listeners
+}
+
+// viewLineLen returns the length in chars (runes) of the given view line.
+func (ls *Lines) viewLineLen(vw *view, vl int) int {
+	vp := vw.vlineStarts[vl]
+	sl := ls.lines[vp.Line]
+	if vl == vw.viewLines-1 {
+		return len(sl) - vp.Char
+	}
+	np := vw.vlineStarts[vl+1]
+	if np.Line == vp.Line {
+		return np.Char - vp.Char
+	}
+	return len(sl) - vp.Char
+}
+
+// posToView returns the view position in terms of viewLines and Char
+// offset into that view line for given source line, char position.
+func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
+	vp := pos
+	vl := vw.lineToVline[pos.Line]
+	vp.Line = vl
+	vlen := ls.viewLineLen(vw, vl)
+	if pos.Char < vlen {
+		return vp
+	}
+	nl := vl + 1
+	for nl < vw.viewLines && vw.vlineStarts[nl].Line == pos.Line {
+		np := vw.vlineStarts[nl]
+		vlen := ls.viewLineLen(vw, nl)
+		if pos.Char >= np.Char && pos.Char < np.Char+vlen {
+			np.Char = pos.Char - np.Char
+			return np
+		}
+		nl++
+	}
+	// todo: error? check?
+	return vp
+}
+
+// posFromView returns the original source position from given
+// view position in terms of viewLines and Char offset into that view line.
+func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
+	pos := vp
+	sp := vw.vlineStarts[vp.Line]
+	pos.Line = sp.Line
+	pos.Char = sp.Char + vp.Char
+	return pos
 }
 
 // initViews ensures that the views map is constructed.

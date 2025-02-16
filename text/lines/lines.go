@@ -213,11 +213,6 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 		ls.lines[ln] = runes.SetFromBytes(ls.lines[ln], txt)
 		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln]) // start with raw
 	}
-	for _, vw := range ls.views {
-		vw.markup = slicesx.SetLength(vw.markup, n)
-		vw.nbreaks = slicesx.SetLength(vw.nbreaks, n)
-		vw.layout = slicesx.SetLength(vw.layout, n)
-	}
 }
 
 // bytes returns the current text lines as a slice of bytes, up to

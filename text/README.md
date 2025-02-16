@@ -18,11 +18,11 @@ This directory contains all of the text processing and rendering functionality, 
 
 ## Uses:
 
-*  `texteditor.Editor`, planned `Terminal`: just need pure text, line-oriented results. This is the easy path and we don't need to discuss further.  Can use our new rich text span element instead of managing html for the highlighting / markup rendering.
-
 * `core.Text`, `core.TextField`: pure text (no images) but ideally supports full arbitrary text layout. The overall layout engine is the core widget layout system, optimized for GUI-level layout, and in general there are challenges to integrating the text layout with this GUI layout, due to bidirectional constraints (text shape changes based on how much area it has, and how much area it has influences the overall widget layout). Knuth's algorithm explicitly handles the interdependencies through a dynamic programming approach.
 
 * `svg.Text`: similar to core.Text but also requires arbitrary rotation and scaling parameters in the output, in addition to arbitrary x,y locations per-glyph that can be transformed overall.
+
+* [textcore](textcore): has all the core widgets for more complex Line-based text cases, including an `Editor` and  `Terminal`, both of which share a `Base` type for the basic interface with `lines.Lines`. Putting these in the same package allows this shared Base usage without either exporting or wrapping everything in Base.
 
 * `htmlcore` and `content`: ideally would support LaTeX quality full rich text layout that includes images, "div" level grouping structures, tables, etc.
 

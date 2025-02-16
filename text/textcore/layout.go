@@ -18,7 +18,7 @@ const maxGrowLines = 25
 
 // styleSizes gets the charSize based on Style settings,
 // and updates lineNumberOffset.
-func (ed *Editor) styleSizes() {
+func (ed *Base) styleSizes() {
 	ed.lineNumberDigits = max(1+int(math32.Log10(float32(ed.NumLines))), 3)
 	lno := true
 	if ed.Lines != nil {
@@ -44,7 +44,7 @@ func (ed *Editor) styleSizes() {
 }
 
 // visSizeFromAlloc updates visSize based on allocated size.
-func (ed *Editor) visSizeFromAlloc() {
+func (ed *Base) visSizeFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
 	spsz := sty.BoxSpace().Size()
@@ -68,7 +68,7 @@ func (ed *Editor) visSizeFromAlloc() {
 
 // layoutAllLines uses the visSize width to update the line wrapping
 // of the Lines text, getting the total height.
-func (ed *Editor) layoutAllLines() {
+func (ed *Base) layoutAllLines() {
 	ed.visSizeFromAlloc()
 	if ed.visSize.Y == 0 || ed.Lines == nil || ed.Lines.NumLines() == 0 {
 		return
@@ -94,13 +94,13 @@ func (ed *Editor) layoutAllLines() {
 	ed.internalSizeFromLines()
 }
 
-func (ed *Editor) internalSizeFromLines() {
+func (ed *Base) internalSizeFromLines() {
 	ed.Geom.Size.Internal = ed.totalSize
 	// ed.Geom.Size.Internal.Y += ed.lineHeight
 }
 
 // reLayoutAllLines updates the Renders Layout given current size, if changed
-func (ed *Editor) reLayoutAllLines() {
+func (ed *Base) reLayoutAllLines() {
 	ed.visSizeFromAlloc()
 	if ed.visSize.Y == 0 || ed.Lines == nil || ed.Lines.NumLines() == 0 {
 		return
@@ -116,7 +116,7 @@ func (ed *Editor) reLayoutAllLines() {
 
 // sizeToLines sets the Actual.Content size based on number of lines of text,
 // for the non-grow case.
-func (ed *Editor) sizeToLines() {
+func (ed *Base) sizeToLines() {
 	if ed.Styles.Grow.Y > 0 {
 		return
 	}
@@ -131,11 +131,11 @@ func (ed *Editor) sizeToLines() {
 	sz.Actual.Content.Y = ty
 	sz.Actual.Total.Y = sz.Actual.Content.Y + sz.Space.Y
 	if core.DebugSettings.LayoutTrace {
-		fmt.Println(ed, "textcore.Editor sizeToLines targ:", ty, "nln:", nln, "Actual:", sz.Actual.Content)
+		fmt.Println(ed, "textcore.Base sizeToLines targ:", ty, "nln:", nln, "Actual:", sz.Actual.Content)
 	}
 }
 
-func (ed *Editor) SizeUp() {
+func (ed *Base) SizeUp() {
 	ed.Frame.SizeUp() // sets Actual size based on styles
 	if ed.Lines == nil || ed.Lines.NumLines() == 0 {
 		return
@@ -143,7 +143,7 @@ func (ed *Editor) SizeUp() {
 	ed.sizeToLines()
 }
 
-func (ed *Editor) SizeDown(iter int) bool {
+func (ed *Base) SizeDown(iter int) bool {
 	if iter == 0 {
 		ed.layoutAllLines()
 	} else {
@@ -156,17 +156,17 @@ func (ed *Editor) SizeDown(iter int) bool {
 	return redo || chg
 }
 
-func (ed *Editor) SizeFinal() {
+func (ed *Base) SizeFinal() {
 	ed.Frame.SizeFinal()
 	ed.reLayoutAllLines()
 }
 
-func (ed *Editor) Position() {
+func (ed *Base) Position() {
 	ed.Frame.Position()
 	ed.ConfigScrolls()
 }
 
-func (ed *Editor) ApplyScenePos() {
+func (ed *Base) ApplyScenePos() {
 	ed.Frame.ApplyScenePos()
 	ed.PositionScrolls()
 }
