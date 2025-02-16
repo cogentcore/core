@@ -5,8 +5,10 @@
 package textcore
 
 import (
+	"embed"
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
@@ -53,22 +55,26 @@ func TestBaseLayout(t *testing.T) {
 // 	b.AssertRender(t, "set-lang")
 // }
 
-/*
-//go:embed editor.go
+//go:embed base.go
 var myFile embed.FS
 
-func TestBaseOpenFS(t *testing.T) {
-	b := core.NewBody()
-	errors.Log(NewBase(b).Lines.OpenFS(myFile, "editor.go"))
-	b.AssertRender(t, "open-fs")
-}
+// func TestBaseOpenFS(t *testing.T) {
+// 	b := core.NewBody()
+// 	errors.Log(NewBase(b).Lines.OpenFS(myFile, "base.go"))
+// 	b.AssertRender(t, "open-fs")
+// }
 
 func TestBaseOpen(t *testing.T) {
 	b := core.NewBody()
-	errors.Log(NewBase(b).Lines.Open("editor.go"))
+	ed := NewBase(b)
+	ed.Styler(func(s *styles.Style) {
+		s.Min.X.Em(25)
+	})
+	errors.Log(ed.Lines.Open("base.go"))
 	b.AssertRender(t, "open")
 }
 
+/*
 func TestBaseMulti(t *testing.T) {
 	b := core.NewBody()
 	tb := NewLines().SetString("Hello, world!")

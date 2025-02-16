@@ -135,9 +135,8 @@ func (ed *Base) SizeDown(iter int) bool {
 	}
 	ed.sizeToLines()
 	redo := ed.Frame.SizeDown(iter)
-	// todo: redo sizeToLines again?
-	// chg := ed.ManageOverflow(iter, true)
-	return redo
+	chg := ed.ManageOverflow(iter, true)
+	return redo || chg
 }
 
 func (ed *Base) SizeFinal() {
@@ -162,6 +161,7 @@ func (ed *Base) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
 	maxSize = float32(max(ed.linesSize.Y, 1))
 	visSize = float32(ed.visSize.Y)
 	visPct = visSize / maxSize
+	// fmt.Println("scroll values:", maxSize, visSize, visPct)
 	return
 }
 
@@ -172,6 +172,21 @@ func (ed *Base) ScrollChanged(d math32.Dims, sb *core.Slider) {
 	}
 	ed.scrollPos = sb.Value
 	ed.NeedsRender()
+}
+
+func (ed *Base) SetScrollParams(d math32.Dims, sb *core.Slider) {
+	if d == math32.X {
+		ed.Frame.SetScrollParams(d, sb)
+		return
+	}
+	sb.Min = 0
+	sb.Step = 1
+	if ed.visSize.Y > 0 {
+		sb.PageStep = float32(ed.visSize.Y)
+	} else {
+		sb.PageStep = 10
+	}
+	sb.InputThreshold = sb.Step
 }
 
 // updateScroll sets the scroll position to given value, in lines.
