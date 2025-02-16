@@ -1839,10 +1839,10 @@ func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float3
 }
 
 func (lg *ListGrid) updateScroll(idx int) {
-	if !lg.HasScroll[math32.Y] || lg.scrolls[math32.Y] == nil {
+	if !lg.HasScroll[math32.Y] || lg.Scrolls[math32.Y] == nil {
 		return
 	}
-	sb := lg.scrolls[math32.Y]
+	sb := lg.Scrolls[math32.Y]
 	sb.SetValue(float32(idx))
 }
 

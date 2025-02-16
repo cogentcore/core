@@ -8,7 +8,6 @@ import (
 	"image"
 	"regexp"
 	"slices"
-	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/text/highlighting"
@@ -154,36 +153,6 @@ func (ls *Lines) Text() []byte {
 // changes.
 func (ls *Lines) String() string {
 	return string(ls.Text())
-}
-
-// SetFileInfo sets the syntax highlighting and other parameters
-// based on the type of file specified by given [fileinfo.FileInfo].
-func (ls *Lines) SetFileInfo(info *fileinfo.FileInfo) {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.setFileInfo(info)
-}
-
-// SetFileType sets the syntax highlighting and other parameters
-// based on the given fileinfo.Known file type
-func (ls *Lines) SetLanguage(ftyp fileinfo.Known) {
-	ls.SetFileInfo(fileinfo.NewFileInfoType(ftyp))
-}
-
-// SetFileExt sets syntax highlighting and other parameters
-// based on the given file extension (without the . prefix),
-// for cases where an actual file with [fileinfo.FileInfo] is not
-// available.
-func (ls *Lines) SetFileExt(ext string) {
-	if len(ext) == 0 {
-		return
-	}
-	if ext[0] == '.' {
-		ext = ext[1:]
-	}
-	fn := "_fake." + strings.ToLower(ext)
-	fi, _ := fileinfo.NewFileInfo(fn)
-	ls.SetFileInfo(fi)
 }
 
 // SetHighlighting sets the highlighting style.

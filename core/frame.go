@@ -51,8 +51,8 @@ type Frame struct {
 	// HasScroll is whether scrollbars exist for each dimension.
 	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// scrolls are the scroll bars, which are fully managed as needed.
-	scrolls [2]*Slider
+	// Scrolls are the scroll bars, which are fully managed as needed.
+	Scrolls [2]*Slider
 
 	// accumulated name to search for when keys are typed
 	focusName string
@@ -182,8 +182,8 @@ func (fr *Frame) Init() {
 func (fr *Frame) Style() {
 	fr.WidgetBase.Style()
 	for d := math32.X; d <= math32.Y; d++ {
-		if fr.HasScroll[d] && fr.scrolls[d] != nil {
-			fr.scrolls[d].Style()
+		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
+			fr.Scrolls[d].Style()
 		}
 	}
 }
@@ -197,12 +197,12 @@ func (fr *Frame) Destroy() {
 
 // deleteScroll deletes scrollbar along given dimesion.
 func (fr *Frame) deleteScroll(d math32.Dims) {
-	if fr.scrolls[d] == nil {
+	if fr.Scrolls[d] == nil {
 		return
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	sb.This.Destroy()
-	fr.scrolls[d] = nil
+	fr.Scrolls[d] = nil
 }
 
 func (fr *Frame) RenderChildren() {

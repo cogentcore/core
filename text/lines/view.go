@@ -123,3 +123,11 @@ func (ls *Lines) newView(width int) (*view, int) {
 func (ls *Lines) deleteView(vid int) {
 	delete(ls.views, vid)
 }
+
+// ViewMarkupLine returns the markup [rich.Text] line for given view and
+// view line number. This must be called under the mutex Lock! It is the
+// api for rendering the lines.
+func (ls *Lines) ViewMarkupLine(vid, line int) rich.Text {
+	vw := ls.view(vid)
+	return vw.markup[line]
+}

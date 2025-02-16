@@ -19,10 +19,10 @@ const maxGrowLines = 25
 // styleSizes gets the charSize based on Style settings,
 // and updates lineNumberOffset.
 func (ed *Base) styleSizes() {
-	ed.lineNumberDigits = max(1+int(math32.Log10(float32(ed.NumLines))), 3)
+	ed.lineNumberDigits = max(1+int(math32.Log10(float32(ed.NumLines()))), 3)
 	lno := true
 	if ed.Lines != nil {
-		lno = ed.Lines.Settings.ineNumbers
+		lno = ed.Lines.Settings.LineNumbers
 	}
 	if lno {
 		ed.hasLineNumbers = true
@@ -76,27 +76,18 @@ func (ed *Base) layoutAllLines() {
 	ed.lastFilename = ed.Lines.Filename()
 	sty := &ed.Styles
 	buf := ed.Lines
-	// buf.Lock()
 	// todo: self-lock method for this, and general better api
 	buf.Highlighter.TabSize = sty.Text.TabSize
 
 	// todo: may want to support horizontal scroll and min width
 	ed.linesSize.X = ed.visSize.X - ed.lineNumberOffset // width
 	buf.SetWidth(ed.viewId, ed.linesSize.X)             // inexpensive if same, does update
-	ed.linesSize.Y = buf.TotalLines(ed.viewId)
-	et.totalSize.X = float32(ed.charSize.X) * ed.visSize.X
-	et.totalSize.Y = float32(ed.charSize.Y) * ed.linesSize.Y
+	ed.linesSize.Y = buf.ViewLines(ed.viewId)
+	ed.totalSize.X = ed.charSize.X * float32(ed.visSize.X)
+	ed.totalSize.Y = ed.charSize.Y * float32(ed.linesSize.Y)
 
-	// don't bother with rendering now -- just do JIT in render
-	// buf.Unlock()
 	// ed.hasLinks = false // todo: put on lines
 	ed.lastVisSizeAlloc = ed.visSizeAlloc
-	ed.internalSizeFromLines()
-}
-
-func (ed *Base) internalSizeFromLines() {
-	ed.Geom.Size.Internal = ed.totalSize
-	// ed.Geom.Size.Internal.Y += ed.lineHeight
 }
 
 // reLayoutAllLines updates the Renders Layout given current size, if changed
@@ -106,7 +97,6 @@ func (ed *Base) reLayoutAllLines() {
 		return
 	}
 	if ed.lastVisSizeAlloc == ed.visSizeAlloc {
-		ed.internalSizeFromLines()
 		return
 	}
 	ed.layoutAllLines()
@@ -115,7 +105,7 @@ func (ed *Base) reLayoutAllLines() {
 // note: Layout reverts to basic Widget behavior for layout if no kids, like us..
 
 // sizeToLines sets the Actual.Content size based on number of lines of text,
-// for the non-grow case.
+// subject to maxGrowLines, for the non-grow case.
 func (ed *Base) sizeToLines() {
 	if ed.Styles.Grow.Y > 0 {
 		return
@@ -125,7 +115,7 @@ func (ed *Base) sizeToLines() {
 		nln = ed.linesSize.Y
 	}
 	nln = min(maxGrowLines, nln)
-	maxh := nln * ed.charSize.Y
+	maxh := float32(nln) * ed.charSize.Y
 	sz := &ed.Geom.Size
 	ty := styles.ClampMin(styles.ClampMax(maxh, sz.Max.Y), sz.Min.Y)
 	sz.Actual.Content.Y = ty
@@ -152,8 +142,8 @@ func (ed *Base) SizeDown(iter int) bool {
 	ed.sizeToLines()
 	redo := ed.Frame.SizeDown(iter)
 	// todo: redo sizeToLines again?
-	chg := ed.ManageOverflow(iter, true)
-	return redo || chg
+	// chg := ed.ManageOverflow(iter, true)
+	return redo
 }
 
 func (ed *Base) SizeFinal() {
@@ -169,4 +159,32 @@ func (ed *Base) Position() {
 func (ed *Base) ApplyScenePos() {
 	ed.Frame.ApplyScenePos()
 	ed.PositionScrolls()
+}
+
+func (ed *Base) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
+	if d == math32.X {
+		return ed.Frame.ScrollValues(d)
+	}
+	maxSize = float32(max(ed.linesSize.Y, 1))
+	visSize = float32(ed.visSize.Y)
+	visPct = visSize / maxSize
+	return
+}
+
+func (ed *Base) ScrollChanged(d math32.Dims, sb *core.Slider) {
+	if d == math32.X {
+		ed.Frame.ScrollChanged(d, sb)
+		return
+	}
+	ed.scrollPos = sb.Value
+	ed.NeedsRender()
+}
+
+// updateScroll sets the scroll position to given value, in lines.
+func (ed *Base) updateScroll(idx int) {
+	if !ed.HasScroll[math32.Y] || ed.Scrolls[math32.Y] == nil {
+		return
+	}
+	sb := ed.Scrolls[math32.Y]
+	sb.SetValue(float32(idx))
 }

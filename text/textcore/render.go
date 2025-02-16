@@ -5,19 +5,14 @@
 package textcore
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
-	"cogentcore.org/core/base/slicesx"
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
-	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -45,33 +40,36 @@ func (ed *Base) RenderWidget() {
 		// if ed.targetSet {
 		// 	ed.scrollCursorToTarget()
 		// }
-		ed.PositionScrolls()
+		// ed.PositionScrolls()
 		ed.renderAllLines()
-		if ed.StateIs(states.Focused) {
-			ed.startCursor()
-		} else {
-			ed.stopCursor()
-		}
+		// if ed.StateIs(states.Focused) {
+		// 	ed.startCursor()
+		// } else {
+		// 	ed.stopCursor()
+		// }
 		ed.RenderChildren()
 		ed.RenderScrolls()
 		ed.EndRender()
 	} else {
-		ed.stopCursor()
+		// ed.stopCursor()
 	}
 }
 
 // textStyleProperties returns the styling properties for text based on HiStyle Markup
 func (ed *Base) textStyleProperties() map[string]any {
-	if ed.Buffer == nil {
+	if ed.Lines == nil {
 		return nil
 	}
-	return ed.Buffer.Highlighter.CSSProperties
+	return ed.Lines.Highlighter.CSSProperties
 }
 
 // renderStartPos is absolute rendering start position from our content pos with scroll
 // This can be offscreen (left, up) based on scrolling.
 func (ed *Base) renderStartPos() math32.Vector2 {
-	return ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
+	pos := ed.Geom.Pos.Content
+	pos.X += ed.Geom.Scroll.X
+	pos.Y += ed.scrollPos * ed.charSize.Y
+	return pos
 }
 
 // renderBBox is the render region
@@ -156,6 +154,10 @@ func (ed *Base) charEndPos(pos textpos.Pos) math32.Vector2 {
 	return spos
 }
 
+func (ed *Base) lineNumberPixels() float32 {
+	return float32(ed.lineNumberOffset) * ed.charSize.X
+}
+
 // lineBBox returns the bounding box for given line
 func (ed *Base) lineBBox(ln int) math32.Box2 {
 	tbb := ed.renderBBox()
@@ -181,7 +183,7 @@ func (ed *Base) lineBBox(ln int) math32.Box2 {
 	// rp := &ed.renders[ln]
 	// bb.Max = bb.Min.Add(rp.BBox.Size())
 	// return bb
-	return tbb
+	return math32.B2FromRect(tbb)
 }
 
 // TODO: make viewDepthColors HCT based?
@@ -202,13 +204,13 @@ var viewDepthColors = []color.RGBA{
 
 // renderDepthBackground renders the depth background color.
 func (ed *Base) renderDepthBackground(stln, edln int) {
-	// if ed.Buffer == nil {
+	// if ed.Lines == nil {
 	// 	return
 	// }
-	// if !ed.Buffer.Options.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
+	// if !ed.Lines.Options.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
 	// 	return
 	// }
-	// buf := ed.Buffer
+	// buf := ed.Lines
 	//
 	// bb := ed.renderBBox()
 	// bln := buf.NumLines()
@@ -273,7 +275,7 @@ func (ed *Base) renderSelect() {
 // highlighted background color.
 func (ed *Base) renderHighlights(stln, edln int) {
 	// for _, reg := range ed.Highlights {
-	// 	reg := ed.Buffer.AdjustRegion(reg)
+	// 	reg := ed.Lines.AdjustRegion(reg)
 	// 	if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
 	// 		continue
 	// 	}
@@ -285,7 +287,7 @@ func (ed *Base) renderHighlights(stln, edln int) {
 // in the Scopelights list.
 func (ed *Base) renderScopelights(stln, edln int) {
 	// for _, reg := range ed.scopelights {
-	// 	reg := ed.Buffer.AdjustRegion(reg)
+	// 	reg := ed.Lines.AdjustRegion(reg)
 	// 	if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
 	// 		continue
 	// 	}
@@ -294,12 +296,12 @@ func (ed *Base) renderScopelights(stln, edln int) {
 }
 
 // renderRegionBox renders a region in background according to given background
-func (ed *Base) renderRegionBox(reg lines.Region, bg image.Image) {
+func (ed *Base) renderRegionBox(reg textpos.Region, bg image.Image) {
 	// ed.renderRegionBoxStyle(reg, &ed.Styles, bg, false)
 }
 
 // renderRegionBoxStyle renders a region in given style and background
-func (ed *Base) renderRegionBoxStyle(reg lines.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
+func (ed *Base) renderRegionBoxStyle(reg textpos.Region, sty *styles.Style, bg image.Image, fullWidth bool) {
 	// st := reg.Start
 	// end := reg.End
 	// spos := ed.charStartPosVisible(st)
@@ -358,67 +360,51 @@ func (ed *Base) renderRegionToEnd(st textpos.Pos, sty *styles.Style, bg image.Im
 // after StartRender has already been called.
 func (ed *Base) renderAllLines() {
 	ed.RenderStandardBox()
-	pc := &ed.Scene.Painter
 	bb := ed.renderBBox()
 	pos := ed.renderStartPos()
-	stln := -1
-	edln := -1
-	for ln := 0; ln < ed.NumLines; ln++ {
-		if ln >= len(ed.offsets) || ln >= len(ed.renders) {
-			break
-		}
-		lst := pos.Y + ed.offsets[ln]
-		led := lst + math32.Max(ed.renders[ln].BBox.Size().Y, ed.lineHeight)
-		if int(math32.Ceil(led)) < bb.Min.Y {
-			continue
-		}
-		if int(math32.Floor(lst)) > bb.Max.Y {
-			continue
-		}
-		if stln < 0 {
-			stln = ln
-		}
-		edln = ln
-	}
+	stln := int(math32.Floor(ed.scrollPos))
+	edln := min(ed.linesSize.Y, stln+ed.visSize.Y+1)
 
-	if stln < 0 || edln < 0 { // shouldn't happen.
-		return
-	}
+	pc := &ed.Scene.Painter
 	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))
+	sh := ed.Scene.TextShaper
 
-	if ed.hasLineNumbers {
-		ed.renderLineNumbersBoxAll()
-		nln := 1 + edln - stln
-		ed.lineNumberRenders = slicesx.SetLength(ed.lineNumberRenders, nln)
-		li := 0
-		for ln := stln; ln <= edln; ln++ {
-			ed.renderLineNumber(li, ln, false) // don't re-render std fill boxes
-			li++
-		}
-	}
+	// if ed.hasLineNumbers {
+	// 	ed.renderLineNumbersBoxAll()
+	// 	nln := 1 + edln - stln
+	// 	ed.lineNumberRenders = slicesx.SetLength(ed.lineNumberRenders, nln)
+	// 	li := 0
+	// 	for ln := stln; ln <= edln; ln++ {
+	// 		ed.renderLineNumber(li, ln, false) // don't re-render std fill boxes
+	// 		li++
+	// 	}
+	// }
 
-	ed.renderDepthBackground(stln, edln)
-	ed.renderHighlights(stln, edln)
-	ed.renderScopelights(stln, edln)
-	ed.renderSelect()
-	if ed.hasLineNumbers {
-		tbb := bb
-		tbb.Min.X += int(ed.LineNumberOffset)
-		pc.PushContext(nil, render.NewBoundsRect(tbb, sides.NewFloats()))
+	// ed.renderDepthBackground(stln, edln)
+	// ed.renderHighlights(stln, edln)
+	// ed.renderScopelights(stln, edln)
+	// ed.renderSelect()
+	// if ed.hasLineNumbers {
+	// 	tbb := bb
+	// 	tbb.Min.X += int(ed.LineNumberOffset)
+	// 	pc.PushContext(nil, render.NewBoundsRect(tbb, sides.NewFloats()))
+	// }
+
+	buf := ed.Lines
+	buf.Lock()
+	rpos := pos
+	rpos.X += ed.lineNumberPixels()
+	sz := ed.charSize
+	sz.X *= float32(ed.linesSize.X)
+	for ln := stln; ln < edln; ln++ {
+		tx := buf.ViewMarkupLine(ed.viewId, ln)
+		lns := sh.WrapLines(tx, &ed.Styles.Font, &ed.Styles.Text, &core.AppearanceSettings.Text, sz)
+		pc.TextLines(lns, rpos)
+		rpos.Y += ed.charSize.Y
 	}
-	for ln := stln; ln <= edln; ln++ {
-		lst := pos.Y + ed.offsets[ln]
-		lp := pos
-		lp.Y = lst
-		lp.X += ed.LineNumberOffset
-		if lp.Y+ed.fontAscent > float32(bb.Max.Y) {
-			break
-		}
-		pc.Text(&ed.renders[ln], lp) // not top pos; already has baseline offset
-	}
-	if ed.hasLineNumbers {
-		pc.PopContext()
-	}
+	// if ed.hasLineNumbers {
+	// 	pc.PopContext()
+	// }
 	pc.PopContext()
 }
 
@@ -431,7 +417,7 @@ func (ed *Base) renderLineNumbersBoxAll() {
 	bb := ed.renderBBox()
 	spos := math32.FromPoint(bb.Min)
 	epos := math32.FromPoint(bb.Max)
-	epos.X = spos.X + ed.LineNumberOffset
+	epos.X = spos.X + ed.lineNumberPixels()
 
 	sz := epos.Sub(spos)
 	pc.Fill.Color = ed.LineNumberColor
@@ -443,176 +429,179 @@ func (ed *Base) renderLineNumbersBoxAll() {
 // if defFill is true, it fills box color for default background color (use false for
 // batch mode).
 func (ed *Base) renderLineNumber(li, ln int, defFill bool) {
-	if !ed.hasLineNumbers || ed.Buffer == nil {
+	if !ed.hasLineNumbers || ed.Lines == nil {
 		return
 	}
-	bb := ed.renderBBox()
-	tpos := math32.Vector2{
-		X: float32(bb.Min.X), // + spc.Pos().X
-		Y: ed.charEndPos(textpos.Pos{Ln: ln}).Y - ed.fontDescent,
-	}
-	if tpos.Y > float32(bb.Max.Y) {
-		return
-	}
-
-	sc := ed.Scene
-	sty := &ed.Styles
-	fst := sty.FontRender()
-	pc := &sc.Painter
-
-	fst.Background = nil
-	lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)
-	lfmt = "%" + lfmt + "d"
-	lnstr := fmt.Sprintf(lfmt, ln+1)
-
-	if ed.CursorPos.Line == ln {
-		fst.Color = colors.Scheme.Primary.Base
-		fst.Weight = styles.WeightBold
-		// need to open with new weight
-		fst.Font = ptext.OpenFont(fst, &ed.Styles.UnitContext)
-	} else {
-		fst.Color = colors.Scheme.OnSurfaceVariant
-	}
-	lnr := &ed.lineNumberRenders[li]
-	lnr.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
-
-	pc.Text(lnr, tpos)
-
-	// render circle
-	lineColor := ed.Buffer.LineColors[ln]
-	if lineColor != nil {
-		start := ed.charStartPos(textpos.Pos{Ln: ln})
-		end := ed.charEndPos(textpos.Pos{Ln: ln + 1})
-
-		if ln < ed.NumLines-1 {
-			end.Y -= ed.lineHeight
-		}
-		if end.Y >= float32(bb.Max.Y) {
-			return
-		}
-
-		// starts at end of line number text
-		start.X = tpos.X + lnr.BBox.Size().X
-		// ends at end of line number offset
-		end.X = float32(bb.Min.X) + ed.LineNumberOffset
-
-		r := (end.X - start.X) / 2
-		center := start.AddScalar(r)
-
-		// cut radius in half so that it doesn't look too big
-		r /= 2
-
-		pc.Fill.Color = lineColor
-		pc.Circle(center.X, center.Y, r)
-		pc.PathDone()
-	}
+	// bb := ed.renderBBox()
+	// tpos := math32.Vector2{
+	// 	X: float32(bb.Min.X), // + spc.Pos().X
+	// 	Y: ed.charEndPos(textpos.Pos{Ln: ln}).Y - ed.fontDescent,
+	// }
+	// if tpos.Y > float32(bb.Max.Y) {
+	// 	return
+	// }
+	//
+	// sc := ed.Scene
+	// sty := &ed.Styles
+	// fst := sty.FontRender()
+	// pc := &sc.Painter
+	//
+	// fst.Background = nil
+	// lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)
+	// lfmt = "%" + lfmt + "d"
+	// lnstr := fmt.Sprintf(lfmt, ln+1)
+	//
+	// if ed.CursorPos.Line == ln {
+	// 	fst.Color = colors.Scheme.Primary.Base
+	// 	fst.Weight = styles.WeightBold
+	// 	// need to open with new weight
+	// 	fst.Font = ptext.OpenFont(fst, &ed.Styles.UnitContext)
+	// } else {
+	// 	fst.Color = colors.Scheme.OnSurfaceVariant
+	// }
+	// lnr := &ed.lineNumberRenders[li]
+	// lnr.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
+	//
+	// pc.Text(lnr, tpos)
+	//
+	// // render circle
+	// lineColor := ed.Lines.LineColors[ln]
+	// if lineColor != nil {
+	// 	start := ed.charStartPos(textpos.Pos{Ln: ln})
+	// 	end := ed.charEndPos(textpos.Pos{Ln: ln + 1})
+	//
+	// 	if ln < ed.NumLines-1 {
+	// 		end.Y -= ed.lineHeight
+	// 	}
+	// 	if end.Y >= float32(bb.Max.Y) {
+	// 		return
+	// 	}
+	//
+	// 	// starts at end of line number text
+	// 	start.X = tpos.X + lnr.BBox.Size().X
+	// 	// ends at end of line number offset
+	// 	end.X = float32(bb.Min.X) + ed.LineNumberOffset
+	//
+	// 	r := (end.X - start.X) / 2
+	// 	center := start.AddScalar(r)
+	//
+	// 	// cut radius in half so that it doesn't look too big
+	// 	r /= 2
+	//
+	// 	pc.Fill.Color = lineColor
+	// 	pc.Circle(center.X, center.Y, r)
+	// 	pc.PathDone()
+	// }
 }
 
 // firstVisibleLine finds the first visible line, starting at given line
 // (typically cursor -- if zero, a visible line is first found) -- returns
 // stln if nothing found above it.
 func (ed *Base) firstVisibleLine(stln int) int {
-	bb := ed.renderBBox()
-	if stln == 0 {
-		perln := float32(ed.linesSize.Y) / float32(ed.NumLines)
-		stln = int(ed.Geom.Scroll.Y/perln) - 1
-		if stln < 0 {
-			stln = 0
-		}
-		for ln := stln; ln < ed.NumLines; ln++ {
-			lbb := ed.lineBBox(ln)
-			if int(math32.Ceil(lbb.Max.Y)) > bb.Min.Y { // visible
-				stln = ln
-				break
-			}
-		}
-	}
-	lastln := stln
-	for ln := stln - 1; ln >= 0; ln-- {
-		cpos := ed.charStartPos(textpos.Pos{Ln: ln})
-		if int(math32.Ceil(cpos.Y)) < bb.Min.Y { // top just offscreen
-			break
-		}
-		lastln = ln
-	}
-	return lastln
+	// bb := ed.renderBBox()
+	// if stln == 0 {
+	// 	perln := float32(ed.linesSize.Y) / float32(ed.NumLines)
+	// 	stln = int(ed.Geom.Scroll.Y/perln) - 1
+	// 	if stln < 0 {
+	// 		stln = 0
+	// 	}
+	// 	for ln := stln; ln < ed.NumLines; ln++ {
+	// 		lbb := ed.lineBBox(ln)
+	// 		if int(math32.Ceil(lbb.Max.Y)) > bb.Min.Y { // visible
+	// 			stln = ln
+	// 			break
+	// 		}
+	// 	}
+	// }
+	// lastln := stln
+	// for ln := stln - 1; ln >= 0; ln-- {
+	// 	cpos := ed.charStartPos(textpos.Pos{Ln: ln})
+	// 	if int(math32.Ceil(cpos.Y)) < bb.Min.Y { // top just offscreen
+	// 		break
+	// 	}
+	// 	lastln = ln
+	// }
+	// return lastln
+	return 0
 }
 
 // lastVisibleLine finds the last visible line, starting at given line
 // (typically cursor) -- returns stln if nothing found beyond it.
 func (ed *Base) lastVisibleLine(stln int) int {
-	bb := ed.renderBBox()
-	lastln := stln
-	for ln := stln + 1; ln < ed.NumLines; ln++ {
-		pos := textpos.Pos{Ln: ln}
-		cpos := ed.charStartPos(pos)
-		if int(math32.Floor(cpos.Y)) > bb.Max.Y { // just offscreen
-			break
-		}
-		lastln = ln
-	}
-	return lastln
+	// bb := ed.renderBBox()
+	// lastln := stln
+	// for ln := stln + 1; ln < ed.NumLines; ln++ {
+	// 	pos := textpos.Pos{Ln: ln}
+	// 	cpos := ed.charStartPos(pos)
+	// 	if int(math32.Floor(cpos.Y)) > bb.Max.Y { // just offscreen
+	// 		break
+	// 	}
+	// 	lastln = ln
+	// }
+	// return lastln
+	return 0
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel
 // location (e.g., from mouse click) which has had ScBBox.Min subtracted from
 // it (i.e, relative to upper left of text area)
 func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
-	if ed.NumLines == 0 {
-		return textpos.PosZero
-	}
-	bb := ed.renderBBox()
-	sty := &ed.Styles
-	yoff := float32(bb.Min.Y)
-	xoff := float32(bb.Min.X)
-	stln := ed.firstVisibleLine(0)
-	cln := stln
-	fls := ed.charStartPos(textpos.Pos{Ln: stln}).Y - yoff
-	if pt.Y < int(math32.Floor(fls)) {
-		cln = stln
-	} else if pt.Y > bb.Max.Y {
-		cln = ed.NumLines - 1
-	} else {
-		got := false
-		for ln := stln; ln < ed.NumLines; ln++ {
-			ls := ed.charStartPos(textpos.Pos{Ln: ln}).Y - yoff
-			es := ls
-			es += math32.Max(ed.renders[ln].BBox.Size().Y, ed.lineHeight)
-			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
-				got = true
-				cln = ln
-				break
-			}
-		}
-		if !got {
-			cln = ed.NumLines - 1
-		}
-	}
-	// fmt.Printf("cln: %v  pt: %v\n", cln, pt)
-	if cln >= len(ed.renders) {
-		return textpos.Pos{Ln: cln, Ch: 0}
-	}
-	lnsz := ed.Buffer.LineLen(cln)
-	if lnsz == 0 || sty.Font.Face == nil {
-		return textpos.Pos{Ln: cln, Ch: 0}
-	}
-	scrl := ed.Geom.Scroll.Y
-	nolno := float32(pt.X - int(ed.LineNumberOffset))
-	sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
-	sc -= sc / 4
-	sc = max(0, sc)
-	cch := sc
-
-	lnst := ed.charStartPos(textpos.Pos{Ln: cln})
-	lnst.Y -= yoff
-	lnst.X -= xoff
-	rpt := math32.FromPoint(pt).Sub(lnst)
-
-	si, ri, ok := ed.renders[cln].PosToRune(rpt)
-	if ok {
-		cch, _ := ed.renders[cln].SpanPosToRuneIndex(si, ri)
-		return textpos.Pos{Ln: cln, Ch: cch}
-	}
-
-	return textpos.Pos{Ln: cln, Ch: cch}
+	return textpos.Pos{}
+	// if ed.NumLines == 0 {
+	// 	return textpos.PosZero
+	// }
+	// bb := ed.renderBBox()
+	// sty := &ed.Styles
+	// yoff := float32(bb.Min.Y)
+	// xoff := float32(bb.Min.X)
+	// stln := ed.firstVisibleLine(0)
+	// cln := stln
+	// fls := ed.charStartPos(textpos.Pos{Ln: stln}).Y - yoff
+	// if pt.Y < int(math32.Floor(fls)) {
+	// 	cln = stln
+	// } else if pt.Y > bb.Max.Y {
+	// 	cln = ed.NumLines - 1
+	// } else {
+	// 	got := false
+	// 	for ln := stln; ln < ed.NumLines; ln++ {
+	// 		ls := ed.charStartPos(textpos.Pos{Ln: ln}).Y - yoff
+	// 		es := ls
+	// 		es += math32.Max(ed.renders[ln].BBox.Size().Y, ed.lineHeight)
+	// 		if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
+	// 			got = true
+	// 			cln = ln
+	// 			break
+	// 		}
+	// 	}
+	// 	if !got {
+	// 		cln = ed.NumLines - 1
+	// 	}
+	// }
+	// // fmt.Printf("cln: %v  pt: %v\n", cln, pt)
+	// if cln >= len(ed.renders) {
+	// 	return textpos.Pos{Ln: cln, Ch: 0}
+	// }
+	// lnsz := ed.Lines.LineLen(cln)
+	// if lnsz == 0 || sty.Font.Face == nil {
+	// 	return textpos.Pos{Ln: cln, Ch: 0}
+	// }
+	// scrl := ed.Geom.Scroll.Y
+	// nolno := float32(pt.X - int(ed.LineNumberOffset))
+	// sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
+	// sc -= sc / 4
+	// sc = max(0, sc)
+	// cch := sc
+	//
+	// lnst := ed.charStartPos(textpos.Pos{Ln: cln})
+	// lnst.Y -= yoff
+	// lnst.X -= xoff
+	// rpt := math32.FromPoint(pt).Sub(lnst)
+	//
+	// si, ri, ok := ed.renders[cln].PosToRune(rpt)
+	// if ok {
+	// 	cch, _ := ed.renders[cln].SpanPosToRuneIndex(si, ri)
+	// 	return textpos.Pos{Ln: cln, Ch: cch}
+	// }
+	//
+	// return textpos.Pos{Ln: cln, Ch: cch}
 }

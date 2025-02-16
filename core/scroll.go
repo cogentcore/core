@@ -59,11 +59,11 @@ func (fr *Frame) ConfigScrolls() {
 
 // configScroll configures scroll for given dimension
 func (fr *Frame) configScroll(d math32.Dims) {
-	if fr.scrolls[d] != nil {
+	if fr.Scrolls[d] != nil {
 		return
 	}
-	fr.scrolls[d] = NewSlider()
-	sb := fr.scrolls[d]
+	fr.Scrolls[d] = NewSlider()
+	sb := fr.Scrolls[d]
 	tree.SetParent(sb, fr)
 	// sr.SetFlag(true, tree.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
@@ -109,10 +109,10 @@ func (fr *Frame) ScrollChanged(d math32.Dims, sb *Slider) {
 // based on the current Geom.Scroll value for that dimension.
 // This can be used to programatically update the scroll value.
 func (fr *Frame) ScrollUpdateFromGeom(d math32.Dims) {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	cv := fr.Geom.Scroll.Dim(d)
 	sb.setValueEvent(-cv)
 	fr.This.(Layouter).ApplyScenePos() // computes updated positions
@@ -143,7 +143,7 @@ func (fr *Frame) SetScrollParams(d math32.Dims, sb *Slider) {
 // PositionScrolls arranges scrollbars
 func (fr *Frame) PositionScrolls() {
 	for d := math32.X; d <= math32.Y; d++ {
-		if fr.HasScroll[d] && fr.scrolls[d] != nil {
+		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
 			fr.positionScroll(d)
 		} else {
 			fr.Geom.Scroll.SetDim(d, 0)
@@ -152,7 +152,7 @@ func (fr *Frame) PositionScrolls() {
 }
 
 func (fr *Frame) positionScroll(d math32.Dims) {
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	pos, ssz := fr.This.(Layouter).ScrollGeom(d)
 	maxSize, _, visPct := fr.This.(Layouter).ScrollValues(d)
 	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.visiblePercent == visPct {
@@ -184,8 +184,8 @@ func (fr *Frame) positionScroll(d math32.Dims) {
 // RenderScrolls renders the scrollbars.
 func (fr *Frame) RenderScrolls() {
 	for d := math32.X; d <= math32.Y; d++ {
-		if fr.HasScroll[d] && fr.scrolls[d] != nil {
-			fr.scrolls[d].RenderWidget()
+		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
+			fr.Scrolls[d].RenderWidget()
 		}
 	}
 }
@@ -200,8 +200,8 @@ func (fr *Frame) setScrollsOff() {
 // scrollActionDelta moves the scrollbar in given dimension by given delta.
 // returns whether actually scrolled.
 func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) bool {
-	if fr.HasScroll[d] && fr.scrolls[d] != nil {
-		sb := fr.scrolls[d]
+	if fr.HasScroll[d] && fr.Scrolls[d] != nil {
+		sb := fr.Scrolls[d]
 		nval := sb.Value + sb.scrollScale(delta)
 		chg := sb.setValueEvent(nval)
 		if chg {
@@ -309,10 +309,10 @@ func (fr *Frame) scrollToWidget(w Widget) bool {
 // autoScrollDim auto-scrolls along one dimension, based on the current
 // position value, which is in the current scroll value range.
 func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	smax := sb.effectiveMax()
 	ssz := sb.scrollThumbValue()
 	dst := sb.Step * autoScrollRate
@@ -366,10 +366,10 @@ func (fr *Frame) AutoScroll(pos math32.Vector2) bool {
 // scrollToBoxDim scrolls to ensure that given target [min..max] range
 // along one dimension is in view. Returns true if scrolling was needed
 func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	if sb == nil || sb.This == nil {
 		return false
 	}
@@ -425,7 +425,7 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 	if pos == cmin {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	trg := math32.Clamp(sb.Value+(pos-cmin), 0, sb.effectiveMax())
 	sb.setValueEvent(trg)
 	return true
@@ -434,10 +434,10 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 // ScrollDimToContentStart is a helper function that scrolls the layout to the
 // start of its content (ie: moves the scrollbar to the very start).
 func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	sb.setValueEvent(0)
 	return true
 }
@@ -446,7 +446,7 @@ func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible. Returns true if scrolling was needed.
 func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
 	}
 	pos := float32(posi)
@@ -454,7 +454,7 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 	if pos == cmax {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	trg := math32.Clamp(sb.Value+(pos-cmax), 0, sb.effectiveMax())
 	sb.setValueEvent(trg)
 	return true
@@ -463,10 +463,10 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 // ScrollDimToContentEnd is a helper function that scrolls the layout to the
 // end of its content (ie: moves the scrollbar to the very end).
 func (fr *Frame) ScrollDimToContentEnd(d math32.Dims) bool {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	sb.setValueEvent(sb.effectiveMax())
 	return true
 }
@@ -475,7 +475,7 @@ func (fr *Frame) ScrollDimToContentEnd(d math32.Dims) bool {
 // middle of a view box) at the center of our scroll area, to the extent
 // possible. Returns true if scrolling was needed.
 func (fr *Frame) ScrollDimToCenter(d math32.Dims, posi int) bool {
-	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
 	}
 	pos := float32(posi)
@@ -484,7 +484,7 @@ func (fr *Frame) ScrollDimToCenter(d math32.Dims, posi int) bool {
 	if pos == mid {
 		return false
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	trg := math32.Clamp(sb.Value+(pos-mid), 0, sb.effectiveMax())
 	sb.setValueEvent(trg)
 	return true

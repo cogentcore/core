@@ -178,8 +178,8 @@ func (wb *WidgetBase) doNeedsRender() {
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
-				if ly.HasScroll[d] && ly.scrolls[d] != nil {
-					ly.scrolls[d].doNeedsRender()
+				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
+					ly.Scrolls[d].doNeedsRender()
 				}
 			}
 		}

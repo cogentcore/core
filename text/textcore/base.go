@@ -4,8 +4,11 @@
 
 package textcore
 
+//go:generate core generate
+
 import (
 	"image"
+	"sync"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
@@ -20,6 +23,7 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -88,8 +92,16 @@ type Base struct { //core:embedder
 	visSize image.Point
 
 	// linesSize is the height in lines and width in chars of the Lines text area,
-	// (including line numbers), which can be larger than the visSize.
+	// (excluding line numbers), which can be larger than the visSize.
 	linesSize image.Point
+
+	// scrollPos is the position of the scrollbar, in units of lines of text.
+	// fractional scrolling is supported.
+	scrollPos float32
+
+	// hasLineNumbers indicates that this editor has line numbers
+	// (per [Editor] option)
+	hasLineNumbers bool
 
 	// lineNumberOffset is the horizontal offset in chars for the start of text
 	// after line numbers. This is 0 if no line numbers.
@@ -105,9 +117,16 @@ type Base struct { //core:embedder
 	// lineNumberRenders are the renderers for line numbers, per visible line.
 	lineNumberRenders []*shaped.Lines
 
+	// CursorPos is the current cursor position.
+	CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+
+	// blinkOn oscillates between on and off for blinking.
+	blinkOn bool
+
+	// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
+	cursorMu sync.Mutex
+
 	/*
-		// CursorPos is the current cursor position.
-		CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 		// cursorTarget is the target cursor position for externally set targets.
 		// It ensures that the target position is visible.
@@ -150,19 +169,9 @@ type Base struct { //core:embedder
 		// selectMode is a boolean indicating whether to select text as the cursor moves.
 		selectMode bool
 
-		// blinkOn oscillates between on and off for blinking.
-		blinkOn bool
-
-		// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
-		cursorMu sync.Mutex
-
 		// hasLinks is a boolean indicating if at least one of the renders has links.
 		// It determines if we set the cursor for hand movements.
 		hasLinks bool
-
-		// hasLineNumbers indicates that this editor has line numbers
-		// (per [Buffer] option)
-		hasLineNumbers bool // TODO: is this really necessary?
 
 		// lastWasTabAI indicates that last key was a Tab auto-indent
 		lastWasTabAI bool
@@ -175,8 +184,8 @@ type Base struct { //core:embedder
 
 		lastRecenter   int
 		lastAutoInsert rune
-		lastFilename   core.Filename
 	*/
+	lastFilename string
 }
 
 func (ed *Base) WidgetValue() any { return ed.Lines.Text() }
@@ -188,8 +197,8 @@ func (ed *Base) SetWidgetValue(value any) error {
 
 func (ed *Base) Init() {
 	ed.Frame.Init()
-	ed.AddContextMenu(ed.contextMenu)
-	ed.SetLines(lines.NewLines(80))
+	// ed.AddContextMenu(ed.contextMenu)
+	ed.SetLines(lines.NewLines())
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(false, abilities.ScrollableUnfocused)
@@ -206,6 +215,7 @@ func (ed *Base) Init() {
 		// } else {
 		// 	s.Text.WhiteSpace = styles.WhiteSpacePre
 		// }
+		s.Text.WhiteSpace = text.WrapNever
 		s.SetMono(true)
 		s.Grow.Set(1, 0)
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
@@ -214,9 +224,9 @@ func (ed *Base) Init() {
 		s.Padding.Set(units.Em(0.5))
 		s.Align.Content = styles.Start
 		s.Align.Items = styles.Start
-		s.Text.Align = styles.Start
-		s.Text.AlignV = styles.Start
-		s.Text.TabSize = core.SystemSettings.Base.TabSize
+		s.Text.Align = text.Start
+		s.Text.AlignV = text.Start
+		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
 		s.Min.X.Em(10)
 
@@ -232,10 +242,10 @@ func (ed *Base) Init() {
 		}
 	})
 
-	ed.handleKeyChord()
-	ed.handleMouse()
-	ed.handleLinkCursor()
-	ed.handleFocus()
+	// ed.handleKeyChord()
+	// ed.handleMouse()
+	// ed.handleLinkCursor()
+	// ed.handleFocus()
 	ed.OnClose(func(e events.Event) {
 		ed.editDone()
 	})
@@ -248,13 +258,20 @@ func (ed *Base) Destroy() {
 	ed.Frame.Destroy()
 }
 
+func (ed *Base) NumLines() int {
+	if ed.Lines != nil {
+		return ed.Lines.NumLines()
+	}
+	return 0
+}
+
 // editDone completes editing and copies the active edited text to the text;
 // called when the return key is pressed or goes out of focus
 func (ed *Base) editDone() {
 	if ed.Lines != nil {
 		ed.Lines.EditDone()
 	}
-	ed.clearSelected()
+	// ed.clearSelected()
 	ed.clearCursor()
 	ed.SendChange()
 }
@@ -284,13 +301,29 @@ func (ed *Base) Clear() {
 
 // resetState resets all the random state variables, when opening a new buffer etc
 func (ed *Base) resetState() {
-	ed.SelectReset()
-	ed.Highlights = nil
-	ed.ISearch.On = false
-	ed.QReplace.On = false
-	if ed.Lines == nil || ed.lastFilename != ed.Lines.Filename { // don't reset if reopening..
+	// todo:
+	// ed.SelectReset()
+	// ed.Highlights = nil
+	// ed.ISearch.On = false
+	// ed.QReplace.On = false
+	if ed.Lines == nil || ed.lastFilename != ed.Lines.Filename() { // don't reset if reopening..
 		ed.CursorPos = textpos.Pos{}
 	}
+}
+
+// SendInput sends the [events.Input] event, for fine-grained updates.
+func (ed *Base) SendInput() {
+	ed.Send(events.Input, nil)
+}
+
+// SendChange sends the [events.Change] event, for big changes.
+// func (ed *Base) SendChange() {
+// 	ed.Send(events.Change, nil)
+// }
+
+// SendClose sends the [events.Close] event, when lines buffer is closed.
+func (ed *Base) SendClose() {
+	ed.Send(events.Close, nil)
 }
 
 // SetLines sets the [lines.Lines] that this is an editor of,
@@ -306,15 +339,22 @@ func (ed *Base) SetLines(buf *lines.Lines) *Base {
 	ed.Lines = buf
 	ed.resetState()
 	if buf != nil {
-		ed.viewId = buf.NewView()
+		wd := ed.linesSize.X
+		if wd == 0 {
+			wd = 80
+		}
+		ed.viewId = buf.NewView(wd)
 		buf.OnChange(ed.viewId, func(e events.Event) {
 			ed.NeedsRender()
+			ed.SendChange()
 		})
 		buf.OnInput(ed.viewId, func(e events.Event) {
 			ed.NeedsRender()
+			ed.SendInput()
 		})
 		buf.OnClose(ed.viewId, func(e events.Event) {
 			ed.SetLines(nil)
+			ed.SendClose()
 		})
 		// bhl := len(buf.posHistory) // todo:
 		// if bhl > 0 {
@@ -332,41 +372,40 @@ func (ed *Base) SetLines(buf *lines.Lines) *Base {
 	return ed
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//    Undo / Redo
+////////    Undo / Redo
 
 // undo undoes previous action
 func (ed *Base) undo() {
-	tbes := ed.Lines.undo()
+	tbes := ed.Lines.Undo()
 	if tbes != nil {
 		tbe := tbes[len(tbes)-1]
 		if tbe.Delete { // now an insert
-			ed.SetCursorShow(tbe.Reg.End)
+			ed.SetCursorShow(tbe.Region.End)
 		} else {
-			ed.SetCursorShow(tbe.Reg.Start)
+			ed.SetCursorShow(tbe.Region.Start)
 		}
 	} else {
-		ed.cursorMovedEvent() // updates status..
+		ed.SendInput() // updates status..
 		ed.scrollCursorToCenterIfHidden()
 	}
-	ed.savePosHistory(ed.CursorPos)
+	// ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 
 // redo redoes previously undone action
 func (ed *Base) redo() {
-	tbes := ed.Lines.redo()
+	tbes := ed.Lines.Redo()
 	if tbes != nil {
 		tbe := tbes[len(tbes)-1]
 		if tbe.Delete {
-			ed.SetCursorShow(tbe.Reg.Start)
+			ed.SetCursorShow(tbe.Region.Start)
 		} else {
-			ed.SetCursorShow(tbe.Reg.End)
+			ed.SetCursorShow(tbe.Region.End)
 		}
 	} else {
 		ed.scrollCursorToCenterIfHidden()
 	}
-	ed.savePosHistory(ed.CursorPos)
+	// ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 

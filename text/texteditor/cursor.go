@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/text/parse/lexer"
+	"cogentcore.org/core/text/textpos"
 )
 
 var (
