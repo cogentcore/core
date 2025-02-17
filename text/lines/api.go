@@ -569,17 +569,19 @@ func (ls *Lines) MoveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
 
 // MoveDown moves given source position down given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
-func (ls *Lines) MoveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
+func (ls *Lines) MoveDown(vid int, pos textpos.Pos, steps, col int) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
+	vw := ls.view(vid)
 	return ls.moveDown(vw, pos, steps, col)
 }
 
 // MoveUp moves given source position up given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
-func (ls *Lines) MoveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
+func (ls *Lines) MoveUp(vid int, pos textpos.Pos, steps, col int) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
+	vw := ls.view(vid)
 	return ls.moveUp(vw, pos, steps, col)
 }
 
