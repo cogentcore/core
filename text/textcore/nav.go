@@ -530,3 +530,8 @@ func (ed *Base) cursorTranspose() {
 	// }
 	ed.NeedsRender()
 }
+
+// cursorTranspose swaps the character at the cursor with the one before it
+func (ed *Base) cursorTransposeWord() {
+	// todo:
+}

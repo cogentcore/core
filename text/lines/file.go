@@ -26,6 +26,13 @@ func (ls *Lines) Filename() string {
 	return ls.filename
 }
 
+// FileInfo returns the current fileinfo
+func (ls *Lines) FileInfo() *fileinfo.FileInfo {
+	ls.Lock()
+	defer ls.Unlock()
+	return &ls.fileInfo
+}
+
 // SetFilename sets the filename associated with the buffer and updates
 // the code highlighting information accordingly.
 func (ls *Lines) SetFilename(fn string) *Lines {
