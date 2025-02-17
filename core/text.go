@@ -40,7 +40,7 @@ type Text struct {
 	Type TextTypes
 
 	// Links is the list of links in the text.
-	Links []rich.LinkRec
+	Links []rich.Hyperlink
 
 	// richText is the conversion of the HTML text source.
 	richText rich.Text
@@ -223,7 +223,7 @@ func (tx *Text) Init() {
 		// tx.paintText.UpdateColors(s.FontRender()) TODO(text):
 	})
 
-	tx.HandleTextClick(func(tl *rich.LinkRec) {
+	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
@@ -282,7 +282,7 @@ func (tx *Text) Init() {
 
 // findLink finds the text link at the given scene-local position. If it
 // finds it, it returns it and its bounds; otherwise, it returns nil.
-func (tx *Text) findLink(pos image.Point) (*rich.LinkRec, image.Rectangle) {
+func (tx *Text) findLink(pos image.Point) (*rich.Hyperlink, image.Rectangle) {
 	if tx.paintText == nil || len(tx.Links) == 0 {
 		return nil, image.Rectangle{}
 	}
@@ -301,7 +301,7 @@ func (tx *Text) findLink(pos image.Point) (*rich.LinkRec, image.Rectangle) {
 
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (tx *Text) HandleTextClick(openLink func(tl *rich.LinkRec)) {
+func (tx *Text) HandleTextClick(openLink func(tl *rich.Hyperlink)) {
 	tx.OnClick(func(e events.Event) {
 		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {

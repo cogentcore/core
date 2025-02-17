@@ -105,7 +105,7 @@ func (ed *Base) renderCursor(on bool) {
 	if !ed.IsVisible() {
 		return
 	}
-	if ed.renders == nil {
+	if !ed.posIsVisible(ed.CursorPos) {
 		return
 	}
 	ed.cursorMu.Lock()
@@ -159,27 +159,29 @@ func (ed *Base) cursorSprite(on bool) *core.Sprite {
 // setCursor sets a new cursor position, enforcing it in range.
 // This is the main final pathway for all cursor movement.
 func (ed *Base) setCursor(pos textpos.Pos) {
-	// if ed.NumLines == 0 || ed.Buffer == nil {
-	// 	ed.CursorPos = textpos.PosZero
-	// 	return
-	// }
-	//
-	// ed.clearScopelights()
-	// ed.CursorPos = ed.Buffer.ValidPos(pos)
-	// ed.cursorMovedEvent()
-	// txt := ed.Buffer.Line(ed.CursorPos.Line)
-	// ch := ed.CursorPos.Ch
+	if ed.Lines == nil {
+		ed.CursorPos = textpos.PosZero
+		return
+	}
+
+	ed.clearScopelights()
+	// ed.CursorPos = ed.Lines.ValidPos(pos) // todo
+	ed.CursorPos = pos
+	ed.SendInput()
+	// todo:
+	// txt := ed.Lines.Line(ed.CursorPos.Line)
+	// ch := ed.CursorPos.Char
 	// if ch < len(txt) {
 	// 	r := txt[ch]
 	// 	if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
-	// 		tp, found := ed.Buffer.BraceMatch(txt[ch], ed.CursorPos)
+	// 		tp, found := ed.Lines.BraceMatch(txt[ch], ed.CursorPos)
 	// 		if found {
-	// 			ed.scopelights = append(ed.scopelights, lines.NewRegionPos(ed.CursorPos, textpos.Pos{ed.CursorPos.Line, ed.CursorPos.Char+ 1}))
-	// 			ed.scopelights = append(ed.scopelights, lines.NewRegionPos(tp, textpos.Pos{tp.Line, tp.Char+ 1}))
+	// 			ed.scopelights = append(ed.scopelights, lines.NewRegionPos(ed.CursorPos, textpos.Pos{ed.CursorPos.Line, ed.CursorPos.Char + 1}))
+	// 			ed.scopelights = append(ed.scopelights, lines.NewRegionPos(tp, textpos.Pos{tp.Line, tp.Char + 1}))
 	// 		}
 	// 	}
 	// }
-	// ed.NeedsRender()
+	ed.NeedsRender()
 }
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
@@ -194,28 +196,28 @@ func (ed *Base) SetCursorShow(pos textpos.Pos) {
 // so, scrolls to the center, along both dimensions.
 func (ed *Base) scrollCursorToCenterIfHidden() bool {
 	return false
-	// curBBox := ed.cursorBBox(ed.CursorPos)
-	// did := false
-	// lht := int(ed.lineHeight)
-	// bb := ed.renderBBox()
-	// if bb.Size().Y <= lht {
-	// 	return false
-	// }
-	// if (curBBox.Min.Y-lht) < bb.Min.Y || (curBBox.Max.Y+lht) > bb.Max.Y {
-	// 	did = ed.scrollCursorToVerticalCenter()
-	// 	// fmt.Println("v min:", curBBox.Min.Y, bb.Min.Y, "max:", curBBox.Max.Y+lht, bb.Max.Y, did)
-	// }
-	// if curBBox.Max.X < bb.Min.X+int(ed.LineNumberOffset) {
-	// 	did2 := ed.scrollCursorToRight()
-	// 	// fmt.Println("h max", curBBox.Max.X, bb.Min.X+int(ed.LineNumberOffset), did2)
-	// 	did = did || did2
-	// } else if curBBox.Min.X > bb.Max.X {
-	// 	did2 := ed.scrollCursorToRight()
-	// 	// fmt.Println("h min", curBBox.Min.X, bb.Max.X, did2)
-	// 	did = did || did2
-	// }
-	// if did {
-	// 	// fmt.Println("scroll to center", did)
-	// }
-	// return did
+	curBBox := ed.cursorBBox(ed.CursorPos)
+	did := false
+	lht := int(ed.charSize.Y)
+	bb := ed.Geom.ContentBBox
+	if bb.Size().Y <= lht {
+		return false
+	}
+	if (curBBox.Min.Y-lht) < bb.Min.Y || (curBBox.Max.Y+lht) > bb.Max.Y {
+		did = ed.scrollCursorToVerticalCenter()
+		// fmt.Println("v min:", curBBox.Min.Y, bb.Min.Y, "max:", curBBox.Max.Y+lht, bb.Max.Y, did)
+	}
+	if curBBox.Max.X < bb.Min.X+int(ed.lineNumberPixels()) {
+		did2 := ed.scrollCursorToRight()
+		// fmt.Println("h max", curBBox.Max.X, bb.Min.X+int(ed.LineNumberOffset), did2)
+		did = did || did2
+	} else if curBBox.Min.X > bb.Max.X {
+		did2 := ed.scrollCursorToRight()
+		// fmt.Println("h min", curBBox.Min.X, bb.Max.X, did2)
+		did = did || did2
+	}
+	if did {
+		// fmt.Println("scroll to center", did)
+	}
+	return did
 }

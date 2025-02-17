@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 )
@@ -69,11 +68,6 @@ type Base struct { //core:embedder
 	// This should be set in Stylers like all other style properties.
 	CursorColor image.Image
 
-	// renders is a slice of shaped.Lines representing the renders of the
-	// visible text lines, with one render per line (each line could visibly
-	// wrap-around, so these are logical lines, not display lines).
-	renders []*shaped.Lines
-
 	// viewId is the unique id of the Lines view.
 	viewId int
 
@@ -115,9 +109,6 @@ type Base struct { //core:embedder
 	// lineNumberDigits is the number of line number digits needed.
 	lineNumberDigits int
 
-	// lineNumberRenders are the renderers for line numbers, per visible line.
-	lineNumberRenders []*shaped.Lines
-
 	// CursorPos is the current cursor position.
 	CursorPos textpos.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
@@ -127,66 +118,66 @@ type Base struct { //core:embedder
 	// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
 	cursorMu sync.Mutex
 
-	/*
+	// cursorTarget is the target cursor position for externally set targets.
+	// It ensures that the target position is visible.
+	cursorTarget textpos.Pos
 
-		// cursorTarget is the target cursor position for externally set targets.
-		// It ensures that the target position is visible.
-		cursorTarget textpos.Pos
+	// cursorColumn is the desired cursor column, where the cursor was
+	// last when moved using left / right arrows.
+	// It is used when doing up / down to not always go to short line columns.
+	cursorColumn int
 
-		// cursorColumn is the desired cursor column, where the cursor was last when moved using left / right arrows.
-		// It is used when doing up / down to not always go to short line columns.
-		cursorColumn int
+	// posHistoryIndex is the current index within PosHistory.
+	posHistoryIndex int
 
-		// posHistoryIndex is the current index within PosHistory.
-		posHistoryIndex int
+	// selectStart is the starting point for selection, which will either
+	// be the start or end of selected region depending on subsequent selection.
+	selectStart textpos.Pos
 
-		// selectStart is the starting point for selection, which will either be the start or end of selected region
-		// depending on subsequent selection.
-		selectStart textpos.Pos
+	// SelectRegion is the current selection region.
+	SelectRegion textpos.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-		// SelectRegion is the current selection region.
-		SelectRegion lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	// previousSelectRegion is the previous selection region that was actually rendered.
+	// It is needed to update the render.
+	previousSelectRegion textpos.Region
 
-		// previousSelectRegion is the previous selection region that was actually rendered.
-		// It is needed to update the render.
-		previousSelectRegion lines.Region
+	// Highlights is a slice of regions representing the highlighted
+	// regions, e.g., for search results.
+	Highlights []textpos.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-		// Highlights is a slice of regions representing the highlighted regions, e.g., for search results.
-		Highlights []lines.Region `set:"-" edit:"-" json:"-" xml:"-"`
+	// scopelights is a slice of regions representing the highlighted
+	// regions specific to scope markers.
+	scopelights []textpos.Region
 
-		// scopelights is a slice of regions representing the highlighted regions specific to scope markers.
-		scopelights []lines.Region
+	// LinkHandler handles link clicks.
+	// If it is nil, they are sent to the standard web URL handler.
+	LinkHandler func(tl *rich.Hyperlink)
 
-		// LinkHandler handles link clicks.
-		// If it is nil, they are sent to the standard web URL handler.
-		LinkHandler func(tl *rich.Link)
+	// ISearch is the interactive search data.
+	// ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
 
-		// ISearch is the interactive search data.
-		ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
+	// QReplace is the query replace data.
+	// QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
-		// QReplace is the query replace data.
-		QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
+	// selectMode is a boolean indicating whether to select text as the cursor moves.
+	selectMode bool
 
-		// selectMode is a boolean indicating whether to select text as the cursor moves.
-		selectMode bool
+	// hasLinks is a boolean indicating if at least one of the renders has links.
+	// It determines if we set the cursor for hand movements.
+	hasLinks bool
 
-		// hasLinks is a boolean indicating if at least one of the renders has links.
-		// It determines if we set the cursor for hand movements.
-		hasLinks bool
+	// lastWasTabAI indicates that last key was a Tab auto-indent
+	lastWasTabAI bool
 
-		// lastWasTabAI indicates that last key was a Tab auto-indent
-		lastWasTabAI bool
+	// lastWasUndo indicates that last key was an undo
+	lastWasUndo bool
 
-		// lastWasUndo indicates that last key was an undo
-		lastWasUndo bool
+	// targetSet indicates that the CursorTarget is set
+	targetSet bool
 
-		// targetSet indicates that the CursorTarget is set
-		targetSet bool
-
-		lastRecenter   int
-		lastAutoInsert rune
-	*/
-	lastFilename string
+	lastRecenter   int
+	lastAutoInsert rune
+	lastFilename   string
 }
 
 func (ed *Base) WidgetValue() any { return ed.Lines.Text() }
@@ -341,6 +332,7 @@ func (ed *Base) SetLines(buf *lines.Lines) *Base {
 	ed.Lines = buf
 	ed.resetState()
 	if buf != nil {
+		buf.Settings.EditorSettings = core.SystemSettings.Editor
 		wd := ed.linesSize.X
 		if wd == 0 {
 			wd = 80
@@ -390,7 +382,7 @@ func (ed *Base) undo() {
 		ed.SendInput() // updates status..
 		ed.scrollCursorToCenterIfHidden()
 	}
-	// ed.savePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 
@@ -407,7 +399,7 @@ func (ed *Base) redo() {
 	} else {
 		ed.scrollCursorToCenterIfHidden()
 	}
-	// ed.savePosHistory(ed.CursorPos)
+	ed.savePosHistory(ed.CursorPos)
 	ed.NeedsRender()
 }
 

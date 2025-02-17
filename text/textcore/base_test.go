@@ -68,9 +68,10 @@ func TestBaseOpen(t *testing.T) {
 	b := core.NewBody()
 	ed := NewBase(b)
 	ed.Styler(func(s *styles.Style) {
-		s.Min.X.Em(25)
+		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open("base.go"))
+	ed.scrollPos = 20
 	b.AssertRender(t, "open")
 }
 

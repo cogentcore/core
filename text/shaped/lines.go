@@ -53,7 +53,7 @@ type Lines struct {
 	Direction rich.Directions
 
 	// Links holds any hyperlinks within shaped text.
-	Links []rich.LinkRec
+	Links []rich.Hyperlink
 
 	// Color is the default fill color to use for inking text.
 	Color color.Color
@@ -121,7 +121,7 @@ func (ls *Lines) String() string {
 }
 
 // GetLinks gets the links for these lines, which are cached in Links.
-func (ls *Lines) GetLinks() []rich.LinkRec {
+func (ls *Lines) GetLinks() []rich.Hyperlink {
 	if ls.Links != nil {
 		return ls.Links
 	}

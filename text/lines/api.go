@@ -230,6 +230,31 @@ func (ls *Lines) IsValidLine(ln int) bool {
 	return ls.isValidLine(ln)
 }
 
+// ValidPos returns a position based on given pos that is valid.
+func (ls *Lines) ValidPos(pos textpos.Pos) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+
+	n := ls.numLines()
+	if n == 0 {
+		return textpos.Pos{}
+	}
+	if pos.Line < 0 {
+		pos.Line = 0
+	}
+	if pos.Line >= n {
+		pos.Line = n - 1
+	}
+	llen := len(ls.lines[pos.Line])
+	if pos.Char < 0 {
+		pos.Char = 0
+	}
+	if pos.Char > llen {
+		pos.Char = llen // end of line is valid
+	}
+	return pos
+}
+
 // Line returns a (copy of) specific line of runes.
 func (ls *Lines) Line(ln int) []rune {
 	ls.Lock()
@@ -294,6 +319,26 @@ func (ls *Lines) IsValidPos(pos textpos.Pos) error {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.isValidPos(pos)
+}
+
+// PosToView returns the view position in terms of ViewLines and Char
+// offset into that view line for given source line, char position.
+func (ls *Lines) PosToView(vid int, pos textpos.Pos) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.posToView(vw, pos)
+}
+
+// PosFromView returns the original source position from given
+// view position in terms of ViewLines and Char offset into that view line.
+// If the Char position is beyond the end of the line, it returns the
+// end of the given line.
+func (ls *Lines) PosFromView(vid int, pos textpos.Pos) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.posFromView(vw, pos)
 }
 
 // Region returns a Edit representation of text between start and end positions.
@@ -536,6 +581,43 @@ func (ls *Lines) MoveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.moveUp(vw, pos, steps, col)
+}
+
+// PosHistorySave saves the cursor position in history stack of cursor positions.
+// Tracks across views. Returns false if position was on same line as last one saved.
+func (ls *Lines) PosHistorySave(pos textpos.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	if ls.posHistory == nil {
+		ls.posHistory = make([]textpos.Pos, 0, 1000)
+	}
+	sz := len(ls.posHistory)
+	if sz > 0 {
+		if ls.posHistory[sz-1].Line == pos.Line {
+			return false
+		}
+	}
+	ls.posHistory = append(ls.posHistory, pos)
+	// fmt.Printf("saved pos hist: %v\n", pos)
+	return true
+}
+
+// PosHistoryLen returns the length of the position history stack.
+func (ls *Lines) PosHistoryLen() int {
+	ls.Lock()
+	defer ls.Unlock()
+	return len(ls.posHistory)
+}
+
+// PosHistoryAt returns the position history at given index.
+// returns false if not a valid index.
+func (ls *Lines) PosHistoryAt(idx int) (textpos.Pos, bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	if idx < 0 || idx >= len(ls.posHistory) {
+		return textpos.Pos{}, false
+	}
+	return ls.posHistory[idx], true
 }
 
 /////////   Edit helpers
@@ -842,18 +924,18 @@ func (ls *Lines) SetLineColor(ln int, color image.Image) {
 	ls.lineColors[ln] = color
 }
 
-// HasLineColor checks if given line has a line color set
-func (ls *Lines) HasLineColor(ln int) bool {
+// LineColor returns the line color for given line, and bool indicating if set.
+func (ls *Lines) LineColor(ln int) (image.Image, bool) {
 	ls.Lock()
 	defer ls.Unlock()
 	if ln < 0 {
-		return false
+		return nil, false
 	}
 	if ls.lineColors == nil {
-		return false
+		return nil, false
 	}
-	_, has := ls.lineColors[ln]
-	return has
+	clr, has := ls.lineColors[ln]
+	return clr, has
 }
 
 // DeleteLineColor deletes the line color at the given line.

@@ -122,20 +122,3 @@ func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 	dp := ls.posFromView(vw, nvp)
 	return dp
 }
-
-// SavePosHistory saves the cursor position in history stack of cursor positions.
-// Tracks across views. Returns false if position was on same line as last one saved.
-func (ls *Lines) SavePosHistory(pos textpos.Pos) bool {
-	if ls.posHistory == nil {
-		ls.posHistory = make([]textpos.Pos, 0, 1000)
-	}
-	sz := len(ls.posHistory)
-	if sz > 0 {
-		if ls.posHistory[sz-1].Line == pos.Line {
-			return false
-		}
-	}
-	ls.posHistory = append(ls.posHistory, pos)
-	// fmt.Printf("saved pos hist: %v\n", pos)
-	return true
-}

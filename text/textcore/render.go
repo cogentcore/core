@@ -5,14 +5,18 @@
 package textcore
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -40,146 +44,168 @@ func (ed *Base) RenderWidget() {
 		// if ed.targetSet {
 		// 	ed.scrollCursorToTarget()
 		// }
-		// ed.PositionScrolls()
-		ed.renderAllLines()
-		// if ed.StateIs(states.Focused) {
-		// 	ed.startCursor()
-		// } else {
-		// 	ed.stopCursor()
-		// }
+		ed.PositionScrolls()
+		ed.renderLines()
+		if ed.StateIs(states.Focused) {
+			ed.startCursor()
+		} else {
+			ed.stopCursor()
+		}
 		ed.RenderChildren()
 		ed.RenderScrolls()
 		ed.EndRender()
 	} else {
-		// ed.stopCursor()
+		ed.stopCursor()
 	}
 }
 
-// textStyleProperties returns the styling properties for text based on HiStyle Markup
-func (ed *Base) textStyleProperties() map[string]any {
-	if ed.Lines == nil {
-		return nil
-	}
-	return ed.Lines.Highlighter.CSSProperties
-}
-
-// renderStartPos is absolute rendering start position from our content pos with scroll
-// This can be offscreen (left, up) based on scrolling.
-func (ed *Base) renderStartPos() math32.Vector2 {
-	pos := ed.Geom.Pos.Content
-	pos.X += ed.Geom.Scroll.X
-	pos.Y += ed.scrollPos * ed.charSize.Y
-	return pos
-}
-
-// renderBBox is the render region
 func (ed *Base) renderBBox() image.Rectangle {
 	return ed.Geom.ContentBBox
 }
 
-// charStartPos returns the starting (top left) render coords for the given
-// position -- makes no attempt to rationalize that pos (i.e., if not in
-// visible range, position will be out of range too)
+// charStartPos returns the starting (top left) render coords for the
+// given source text position.
 func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
-	spos := ed.renderStartPos()
-	// todo:
-	// spos.X += ed.LineNumberOffset
-	// if pos.Line >= len(ed.offsets) {
-	// 	if len(ed.offsets) > 0 {
-	// 		pos.Line = len(ed.offsets) - 1
-	// 	} else {
-	// 		return spos
-	// 	}
-	// } else {
-	// 	spos.Y += ed.offsets[pos.Line]
-	// }
-	// if pos.Line >= len(ed.renders) {
-	// 	return spos
-	// }
-	// rp := &ed.renders[pos.Line]
-	// if len(rp.Spans) > 0 {
-	// 	// note: Y from rune pos is baseline
-	// 	rrp, _, _, _ := ed.renders[pos.Line].RuneRelPos(pos.Ch)
-	// 	spos.X += rrp.X
-	// 	spos.Y += rrp.Y - ed.renders[pos.Line].Spans[0].RelPos.Y // relative
-	// }
+	if ed.Lines == nil {
+		return math32.Vector2{}
+	}
+	vpos := ed.Lines.PosToView(ed.viewId, pos)
+	spos := ed.Geom.Pos.Content
+	spos.X += ed.lineNumberPixels() + float32(vpos.Char)*ed.charSize.X
+	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
 	return spos
 }
 
-// charStartPosVisible returns the starting pos for given position
-// that is currently visible, based on bounding boxes.
-func (ed *Base) charStartPosVisible(pos textpos.Pos) math32.Vector2 {
-	spos := ed.charStartPos(pos)
-	// todo:
-	// bb := ed.renderBBox()
-	// bbmin := math32.FromPoint(bb.Min)
-	// bbmin.X += ed.LineNumberOffset
-	// bbmax := math32.FromPoint(bb.Max)
-	// spos.SetMax(bbmin)
-	// spos.SetMin(bbmax)
-	return spos
+// posIsVisible returns true if given position is visible,
+// in terms of the vertical lines in view.
+func (ed *Base) posIsVisible(pos textpos.Pos) bool {
+	if ed.Lines == nil {
+		return false
+	}
+	vpos := ed.Lines.PosToView(ed.viewId, pos)
+	sp := int(math32.Floor(ed.scrollPos))
+	return vpos.Line >= sp && vpos.Line < sp+ed.visSize.Y
 }
 
-// charEndPos returns the ending (bottom right) render coords for the given
-// position -- makes no attempt to rationalize that pos (i.e., if not in
-// visible range, position will be out of range too)
-func (ed *Base) charEndPos(pos textpos.Pos) math32.Vector2 {
-	spos := ed.renderStartPos()
-	// todo:
-	// pos.Line = min(pos.Line, ed.NumLines-1)
-	// if pos.Line < 0 {
-	// 	spos.Y += float32(ed.linesSize.Y)
-	// 	spos.X += ed.LineNumberOffset
-	// 	return spos
-	// }
-	// if pos.Line >= len(ed.offsets) {
-	// 	spos.Y += float32(ed.linesSize.Y)
-	// 	spos.X += ed.LineNumberOffset
-	// 	return spos
-	// }
-	// spos.Y += ed.offsets[pos.Line]
-	// spos.X += ed.LineNumberOffset
-	// r := ed.renders[pos.Line]
-	// if len(r.Spans) > 0 {
-	// 	// note: Y from rune pos is baseline
-	// 	rrp, _, _, _ := r.RuneEndPos(pos.Ch)
-	// 	spos.X += rrp.X
-	// 	spos.Y += rrp.Y - r.Spans[0].RelPos.Y // relative
-	// }
-	// spos.Y += ed.lineHeight // end of that line
-	return spos
+// renderLines renders the visible lines and line numbers.
+func (ed *Base) renderLines() {
+	ed.RenderStandardBox()
+	bb := ed.renderBBox()
+	pos := ed.Geom.Pos.Content
+	stln := int(math32.Floor(ed.scrollPos))
+	edln := min(ed.linesSize.Y, stln+ed.visSize.Y+1)
+	// fmt.Println("render lines size:", ed.linesSize.Y, edln, "stln:", stln, "bb:", bb, "pos:", pos)
+
+	pc := &ed.Scene.Painter
+	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))
+	sh := ed.Scene.TextShaper
+
+	if ed.hasLineNumbers {
+		ed.renderLineNumbersBox()
+		li := 0
+		for ln := stln; ln <= edln; ln++ {
+			ed.renderLineNumber(li, ln, false) // don't re-render std fill boxes
+			li++
+		}
+	}
+
+	ed.renderDepthBackground(stln, edln)
+	// ed.renderHighlights(stln, edln)
+	// ed.renderScopelights(stln, edln)
+	// ed.renderSelect()
+	if ed.hasLineNumbers {
+		tbb := bb
+		tbb.Min.X += int(ed.lineNumberPixels())
+		pc.PushContext(nil, render.NewBoundsRect(tbb, sides.NewFloats()))
+	}
+
+	buf := ed.Lines
+	buf.Lock()
+	rpos := pos
+	rpos.X += ed.lineNumberPixels()
+	sz := ed.charSize
+	sz.X *= float32(ed.linesSize.X)
+	for ln := stln; ln < edln; ln++ {
+		tx := buf.ViewMarkupLine(ed.viewId, ln)
+		lns := sh.WrapLines(tx, &ed.Styles.Font, &ed.Styles.Text, &core.AppearanceSettings.Text, sz)
+		pc.TextLines(lns, rpos)
+		rpos.Y += ed.charSize.Y
+	}
+	buf.Unlock()
+	if ed.hasLineNumbers {
+		pc.PopContext()
+	}
+	pc.PopContext()
+}
+
+// renderLineNumbersBox renders the background for the line numbers in the LineNumberColor
+func (ed *Base) renderLineNumbersBox() {
+	if !ed.hasLineNumbers {
+		return
+	}
+	pc := &ed.Scene.Painter
+	bb := ed.renderBBox()
+	spos := math32.FromPoint(bb.Min)
+	epos := math32.FromPoint(bb.Max)
+	epos.X = spos.X + ed.lineNumberPixels()
+
+	sz := epos.Sub(spos)
+	pc.Fill.Color = ed.LineNumberColor
+	pc.RoundedRectangleSides(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
+	pc.PathDone()
+}
+
+// renderLineNumber renders given line number; called within context of other render.
+// if defFill is true, it fills box color for default background color (use false for
+// batch mode).
+func (ed *Base) renderLineNumber(li, ln int, defFill bool) {
+	if !ed.hasLineNumbers || ed.Lines == nil {
+		return
+	}
+	bb := ed.renderBBox()
+	spos := math32.FromPoint(bb.Min)
+	spos.Y += float32(li) * ed.charSize.Y
+
+	sty := &ed.Styles
+	pc := &ed.Scene.Painter
+	sh := ed.Scene.TextShaper
+	fst := sty.Font
+
+	fst.Background = nil
+	lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)
+	lfmt = "%" + lfmt + "d"
+	lnstr := fmt.Sprintf(lfmt, ln+1)
+
+	if ed.CursorPos.Line == ln {
+		fst.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
+		fst.Weight = rich.Bold
+	} else {
+		fst.SetFillColor(colors.ToUniform(colors.Scheme.OnSurfaceVariant))
+	}
+	sz := ed.charSize
+	sz.X *= float32(ed.lineNumberOffset)
+	tx := rich.NewText(&fst, []rune(lnstr))
+	lns := sh.WrapLines(tx, &fst, &sty.Text, &core.AppearanceSettings.Text, sz)
+	pc.TextLines(lns, spos)
+
+	// render circle
+	lineColor, has := ed.Lines.LineColor(ln)
+	if has {
+		spos.X += float32(ed.lineNumberDigits) * ed.charSize.X
+		r := 0.5 * ed.charSize.X
+		center := spos.AddScalar(r)
+
+		// cut radius in half so that it doesn't look too big
+		r /= 2
+
+		pc.Fill.Color = lineColor
+		pc.Circle(center.X, center.Y, r)
+		pc.PathDone()
+	}
 }
 
 func (ed *Base) lineNumberPixels() float32 {
 	return float32(ed.lineNumberOffset) * ed.charSize.X
-}
-
-// lineBBox returns the bounding box for given line
-func (ed *Base) lineBBox(ln int) math32.Box2 {
-	tbb := ed.renderBBox()
-	// var bb math32.Box2
-	// bb.Min = ed.renderStartPos()
-	// bb.Min.X += ed.LineNumberOffset
-	// bb.Max = bb.Min
-	// bb.Max.Y += ed.lineHeight
-	// bb.Max.X = float32(tbb.Max.X)
-	// if ln >= len(ed.offsets) {
-	// 	if len(ed.offsets) > 0 {
-	// 		ln = len(ed.offsets) - 1
-	// 	} else {
-	// 		return bb
-	// 	}
-	// } else {
-	// 	bb.Min.Y += ed.offsets[ln]
-	// 	bb.Max.Y += ed.offsets[ln]
-	// }
-	// if ln >= len(ed.renders) {
-	// 	return bb
-	// }
-	// rp := &ed.renders[ln]
-	// bb.Max = bb.Min.Add(rp.BBox.Size())
-	// return bb
-	return math32.B2FromRect(tbb)
 }
 
 // TODO: make viewDepthColors HCT based?
@@ -350,194 +376,6 @@ func (ed *Base) renderRegionToEnd(st textpos.Pos, sty *styles.Style, bg image.Im
 	// }
 	// pc := &ed.Scene.Painter
 	// pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
-}
-
-// renderAllLines displays all the visible lines on the screen,
-// after StartRender has already been called.
-func (ed *Base) renderAllLines() {
-	ed.RenderStandardBox()
-	bb := ed.renderBBox()
-	pos := ed.renderStartPos()
-	stln := int(math32.Floor(ed.scrollPos))
-	edln := min(ed.linesSize.Y, stln+ed.visSize.Y+1)
-	// fmt.Println("render lines size:", ed.linesSize.Y, edln, "stln:", stln, "bb:", bb, "pos:", pos)
-
-	pc := &ed.Scene.Painter
-	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))
-	sh := ed.Scene.TextShaper
-
-	// if ed.hasLineNumbers {
-	// 	ed.renderLineNumbersBoxAll()
-	// 	nln := 1 + edln - stln
-	// 	ed.lineNumberRenders = slicesx.SetLength(ed.lineNumberRenders, nln)
-	// 	li := 0
-	// 	for ln := stln; ln <= edln; ln++ {
-	// 		ed.renderLineNumber(li, ln, false) // don't re-render std fill boxes
-	// 		li++
-	// 	}
-	// }
-
-	// ed.renderDepthBackground(stln, edln)
-	// ed.renderHighlights(stln, edln)
-	// ed.renderScopelights(stln, edln)
-	// ed.renderSelect()
-	// if ed.hasLineNumbers {
-	// 	tbb := bb
-	// 	tbb.Min.X += int(ed.LineNumberOffset)
-	// 	pc.PushContext(nil, render.NewBoundsRect(tbb, sides.NewFloats()))
-	// }
-
-	buf := ed.Lines
-	buf.Lock()
-	rpos := pos
-	rpos.X += ed.lineNumberPixels()
-	sz := ed.charSize
-	sz.X *= float32(ed.linesSize.X)
-	for ln := stln; ln < edln; ln++ {
-		tx := buf.ViewMarkupLine(ed.viewId, ln)
-		lns := sh.WrapLines(tx, &ed.Styles.Font, &ed.Styles.Text, &core.AppearanceSettings.Text, sz)
-		pc.TextLines(lns, rpos)
-		rpos.Y += ed.charSize.Y
-	}
-	buf.Unlock()
-	// if ed.hasLineNumbers {
-	// 	pc.PopContext()
-	// }
-	pc.PopContext()
-}
-
-// renderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
-func (ed *Base) renderLineNumbersBoxAll() {
-	if !ed.hasLineNumbers {
-		return
-	}
-	pc := &ed.Scene.Painter
-	bb := ed.renderBBox()
-	spos := math32.FromPoint(bb.Min)
-	epos := math32.FromPoint(bb.Max)
-	epos.X = spos.X + ed.lineNumberPixels()
-
-	sz := epos.Sub(spos)
-	pc.Fill.Color = ed.LineNumberColor
-	pc.RoundedRectangleSides(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
-	pc.PathDone()
-}
-
-// renderLineNumber renders given line number; called within context of other render.
-// if defFill is true, it fills box color for default background color (use false for
-// batch mode).
-func (ed *Base) renderLineNumber(li, ln int, defFill bool) {
-	if !ed.hasLineNumbers || ed.Lines == nil {
-		return
-	}
-	// bb := ed.renderBBox()
-	// tpos := math32.Vector2{
-	// 	X: float32(bb.Min.X), // + spc.Pos().X
-	// 	Y: ed.charEndPos(textpos.Pos{Ln: ln}).Y - ed.fontDescent,
-	// }
-	// if tpos.Y > float32(bb.Max.Y) {
-	// 	return
-	// }
-	//
-	// sc := ed.Scene
-	// sty := &ed.Styles
-	// fst := sty.FontRender()
-	// pc := &sc.Painter
-	//
-	// fst.Background = nil
-	// lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)
-	// lfmt = "%" + lfmt + "d"
-	// lnstr := fmt.Sprintf(lfmt, ln+1)
-	//
-	// if ed.CursorPos.Line == ln {
-	// 	fst.Color = colors.Scheme.Primary.Base
-	// 	fst.Weight = styles.WeightBold
-	// 	// need to open with new weight
-	// 	fst.Font = ptext.OpenFont(fst, &ed.Styles.UnitContext)
-	// } else {
-	// 	fst.Color = colors.Scheme.OnSurfaceVariant
-	// }
-	// lnr := &ed.lineNumberRenders[li]
-	// lnr.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
-	//
-	// pc.Text(lnr, tpos)
-	//
-	// // render circle
-	// lineColor := ed.Lines.LineColors[ln]
-	// if lineColor != nil {
-	// 	start := ed.charStartPos(textpos.Pos{Ln: ln})
-	// 	end := ed.charEndPos(textpos.Pos{Ln: ln + 1})
-	//
-	// 	if ln < ed.NumLines-1 {
-	// 		end.Y -= ed.lineHeight
-	// 	}
-	// 	if end.Y >= float32(bb.Max.Y) {
-	// 		return
-	// 	}
-	//
-	// 	// starts at end of line number text
-	// 	start.X = tpos.X + lnr.BBox.Size().X
-	// 	// ends at end of line number offset
-	// 	end.X = float32(bb.Min.X) + ed.LineNumberOffset
-	//
-	// 	r := (end.X - start.X) / 2
-	// 	center := start.AddScalar(r)
-	//
-	// 	// cut radius in half so that it doesn't look too big
-	// 	r /= 2
-	//
-	// 	pc.Fill.Color = lineColor
-	// 	pc.Circle(center.X, center.Y, r)
-	// 	pc.PathDone()
-	// }
-}
-
-// firstVisibleLine finds the first visible line, starting at given line
-// (typically cursor -- if zero, a visible line is first found) -- returns
-// stln if nothing found above it.
-func (ed *Base) firstVisibleLine(stln int) int {
-	// bb := ed.renderBBox()
-	// if stln == 0 {
-	// 	perln := float32(ed.linesSize.Y) / float32(ed.NumLines)
-	// 	stln = int(ed.Geom.Scroll.Y/perln) - 1
-	// 	if stln < 0 {
-	// 		stln = 0
-	// 	}
-	// 	for ln := stln; ln < ed.NumLines; ln++ {
-	// 		lbb := ed.lineBBox(ln)
-	// 		if int(math32.Ceil(lbb.Max.Y)) > bb.Min.Y { // visible
-	// 			stln = ln
-	// 			break
-	// 		}
-	// 	}
-	// }
-	// lastln := stln
-	// for ln := stln - 1; ln >= 0; ln-- {
-	// 	cpos := ed.charStartPos(textpos.Pos{Ln: ln})
-	// 	if int(math32.Ceil(cpos.Y)) < bb.Min.Y { // top just offscreen
-	// 		break
-	// 	}
-	// 	lastln = ln
-	// }
-	// return lastln
-	return 0
-}
-
-// lastVisibleLine finds the last visible line, starting at given line
-// (typically cursor) -- returns stln if nothing found beyond it.
-func (ed *Base) lastVisibleLine(stln int) int {
-	// bb := ed.renderBBox()
-	// lastln := stln
-	// for ln := stln + 1; ln < ed.NumLines; ln++ {
-	// 	pos := textpos.Pos{Ln: ln}
-	// 	cpos := ed.charStartPos(pos)
-	// 	if int(math32.Floor(cpos.Y)) > bb.Max.Y { // just offscreen
-	// 		break
-	// 	}
-	// 	lastln = ln
-	// }
-	// return lastln
-	return 0
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel

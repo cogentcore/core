@@ -6,8 +6,8 @@ package rich
 
 import "cogentcore.org/core/text/textpos"
 
-// LinkRec represents a hyperlink within shaped text.
-type LinkRec struct {
+// Hyperlink represents a hyperlink within shaped text.
+type Hyperlink struct {
 	// Label is the text label for the link.
 	Label string
 
@@ -24,8 +24,8 @@ type LinkRec struct {
 }
 
 // GetLinks gets all the links from the source.
-func (tx Text) GetLinks() []LinkRec {
-	var lks []LinkRec
+func (tx Text) GetLinks() []Hyperlink {
+	var lks []Hyperlink
 	n := len(tx)
 	for si := range n {
 		sp := RuneToSpecial(tx[si][0])
@@ -35,7 +35,7 @@ func (tx Text) GetLinks() []LinkRec {
 		lr := tx.SpecialRange(si)
 		ls := tx[lr.Start:lr.End]
 		s, _ := tx.Span(si)
-		lk := LinkRec{}
+		lk := Hyperlink{}
 		lk.URL = s.URL
 		sr, _ := tx.Range(lr.Start)
 		_, er := tx.Range(lr.End)
