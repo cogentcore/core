@@ -12,12 +12,13 @@ import (
 )
 
 // validateCursor sets current cursor to a valid cursor position
-func (ed *Base) validateCursor() {
+func (ed *Base) validateCursor() textpos.Pos {
 	if ed.Lines != nil {
 		ed.CursorPos = ed.Lines.ValidPos(ed.CursorPos)
 	} else {
 		ed.CursorPos = textpos.Pos{}
 	}
+	return ed.CursorPos
 }
 
 // setCursor sets a new cursor position, enforcing it in range.
@@ -244,94 +245,78 @@ func (ed *Base) cursorSelect(org textpos.Pos) {
 	ed.selectRegionUpdate(ed.CursorPos)
 }
 
-// cursorForward moves the cursor forward
-func (ed *Base) cursorForward(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
-	ed.CursorPos = ed.Lines.MoveForward(org, steps)
-	ed.setCursorColumn(ed.CursorPos)
+// cursorSelectShow does SetCursorShow, cursorSelect, and NeedsRender.
+// This is typically called for move actions.
+func (ed *Base) cursorSelectShow(org textpos.Pos) {
 	ed.SetCursorShow(ed.CursorPos)
 	ed.cursorSelect(org)
 	ed.NeedsRender()
+}
+
+// cursorForward moves the cursor forward
+func (ed *Base) cursorForward(steps int) {
+	org := ed.validateCursor()
+	ed.CursorPos = ed.Lines.MoveForward(org, steps)
+	ed.setCursorColumn(ed.CursorPos)
+	ed.cursorSelectShow(org)
 }
 
 // cursorForwardWord moves the cursor forward by words
 func (ed *Base) cursorForwardWord(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveForwardWord(org, steps)
 	ed.setCursorColumn(ed.CursorPos)
-	ed.SetCursorShow(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorBackward moves the cursor backward
 func (ed *Base) cursorBackward(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveBackward(org, steps)
 	ed.setCursorColumn(ed.CursorPos)
-	ed.SetCursorShow(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorBackwardWord moves the cursor backward by words
 func (ed *Base) cursorBackwardWord(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveBackwardWord(org, steps)
 	ed.setCursorColumn(ed.CursorPos)
-	ed.SetCursorShow(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorDown moves the cursor down line(s)
 func (ed *Base) cursorDown(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveDown(ed.viewId, org, steps, ed.cursorColumn)
-	ed.SetCursorShow(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorPageDown moves the cursor down page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (ed *Base) cursorPageDown(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	for range steps {
 		ed.CursorPos = ed.Lines.MoveDown(ed.viewId, ed.CursorPos, ed.visSize.Y, ed.cursorColumn)
 	}
-	ed.setCursor(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorUp moves the cursor up line(s)
 func (ed *Base) cursorUp(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveUp(ed.viewId, org, steps, ed.cursorColumn)
-	ed.SetCursorShow(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (ed *Base) cursorPageUp(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	for range steps {
 		ed.CursorPos = ed.Lines.MoveUp(ed.viewId, ed.CursorPos, ed.visSize.Y, ed.cursorColumn)
 	}
-	ed.setCursor(ed.CursorPos)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorRecenter re-centers the view around the cursor position, toggling
@@ -354,56 +339,41 @@ func (ed *Base) cursorRecenter() {
 // cursorLineStart moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (ed *Base) cursorLineStart() {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveLineStart(ed.viewId, org)
-	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToRight()
-	ed.renderCursor(true)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (ed *Base) CursorStartDoc() {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos.Line = 0
 	ed.CursorPos.Char = 0
 	ed.cursorColumn = ed.CursorPos.Char
-	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToTop()
-	ed.renderCursor(true)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorLineEnd moves the cursor to the end of the text
 func (ed *Base) cursorLineEnd() {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveLineEnd(ed.viewId, org)
-	ed.setCursor(ed.CursorPos)
+	ed.cursorColumn = ed.CursorPos.Char
 	ed.scrollCursorToRight()
-	ed.renderCursor(true)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // cursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
 func (ed *Base) cursorEndDoc() {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	ed.CursorPos.Line = max(ed.NumLines()-1, 0)
 	ed.CursorPos.Char = ed.Lines.LineLen(ed.CursorPos.Line)
 	ed.cursorColumn = ed.CursorPos.Char
-	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToBottom()
-	ed.renderCursor(true)
-	ed.cursorSelect(org)
-	ed.NeedsRender()
+	ed.cursorSelectShow(org)
 }
 
 // todo: ctrl+backspace = delete word
@@ -412,8 +382,7 @@ func (ed *Base) cursorEndDoc() {
 
 // cursorBackspace deletes character(s) immediately before cursor
 func (ed *Base) cursorBackspace(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	if ed.HasSelection() {
 		org = ed.SelectRegion.Start
 		ed.deleteSelection()
@@ -430,13 +399,12 @@ func (ed *Base) cursorBackspace(steps int) {
 
 // cursorDelete deletes character(s) immediately after the cursor
 func (ed *Base) cursorDelete(steps int) {
-	ed.validateCursor()
+	org := ed.validateCursor()
 	if ed.HasSelection() {
 		ed.deleteSelection()
 		return
 	}
 	// note: no update b/c signal from buf will drive update
-	org := ed.CursorPos
 	ed.cursorForward(steps)
 	ed.Lines.DeleteText(org, ed.CursorPos)
 	ed.SetCursorShow(org)
@@ -445,14 +413,12 @@ func (ed *Base) cursorDelete(steps int) {
 
 // cursorBackspaceWord deletes words(s) immediately before cursor
 func (ed *Base) cursorBackspaceWord(steps int) {
-	ed.validateCursor()
-	org := ed.CursorPos
+	org := ed.validateCursor()
 	if ed.HasSelection() {
 		ed.deleteSelection()
 		ed.SetCursorShow(org)
 		return
 	}
-	// note: no update b/c signal from buf will drive update
 	ed.cursorBackwardWord(steps)
 	ed.scrollCursorToCenterIfHidden()
 	ed.renderCursor(true)
@@ -462,13 +428,11 @@ func (ed *Base) cursorBackspaceWord(steps int) {
 
 // cursorDeleteWord deletes word(s) immediately after the cursor
 func (ed *Base) cursorDeleteWord(steps int) {
-	ed.validateCursor()
+	org := ed.validateCursor()
 	if ed.HasSelection() {
 		ed.deleteSelection()
 		return
 	}
-	// note: no update b/c signal from buf will drive update
-	org := ed.CursorPos
 	ed.cursorForwardWord(steps)
 	ed.Lines.DeleteText(org, ed.CursorPos)
 	ed.SetCursorShow(org)

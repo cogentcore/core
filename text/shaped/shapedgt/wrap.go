@@ -50,7 +50,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		brk = shaping.Always
 	}
 	if brk == shaping.Never {
-		maxSize = 1000
+		maxSize = 100000
 		nlines = 1
 	}
 	// fmt.Println(brk, nlines, maxSize)

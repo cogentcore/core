@@ -89,12 +89,12 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 		np := vw.vlineStarts[nl]
 		vlen := ls.viewLineLen(vw, nl)
 		if pos.Char >= np.Char && pos.Char < np.Char+vlen {
+			np.Line = nl
 			np.Char = pos.Char - np.Char
 			return np
 		}
 		nl++
 	}
-	// todo: error? check?
 	return vp
 }
 
@@ -112,7 +112,10 @@ func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
 		vl = n - 1
 	}
 	vlen := ls.viewLineLen(vw, vl)
-	vp.Char = min(vp.Char, vlen)
+	if vlen == 0 {
+		vlen = 1
+	}
+	vp.Char = min(vp.Char, vlen-1)
 	pos := vp
 	sp := vw.vlineStarts[vl]
 	pos.Line = sp.Line

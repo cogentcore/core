@@ -5,6 +5,7 @@
 package lines
 
 import (
+	"fmt"
 	"testing"
 
 	_ "cogentcore.org/core/system/driver"
@@ -21,12 +22,49 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
 	vw := lns.view(vid)
 
-	// ft0 := string(vw.markup[0].Join())
-	// ft1 := string(vw.markup[1].Join())
-	// ft2 := string(vw.markup[2].Join())
-	// fmt.Println(ft0)
-	// fmt.Println(ft1)
-	// fmt.Println(ft2)
+	for ln := range vw.viewLines {
+		ft := string(vw.markup[ln].Join())
+		fmt.Println(ft)
+	}
+
+	posTests := []struct {
+		pos  textpos.Pos
+		vpos textpos.Pos
+	}{
+		{textpos.Pos{0, 0}, textpos.Pos{0, 0}},
+		{textpos.Pos{0, 90}, textpos.Pos{1, 12}},
+		{textpos.Pos{0, 180}, textpos.Pos{2, 24}},
+		{textpos.Pos{0, 260}, textpos.Pos{3, 26}},
+		{textpos.Pos{0, 438}, textpos.Pos{5, 48}},
+		{textpos.Pos{1, 10}, textpos.Pos{6, 10}},
+		{textpos.Pos{1, 41}, textpos.Pos{6, 41}},
+		{textpos.Pos{2, 42}, textpos.Pos{7, 42}},
+	}
+	for _, test := range posTests {
+		vp := lns.posToView(vw, test.pos)
+		// ln := vw.markup[vp.Line]
+		// txt := ln.Join()
+		// fmt.Println(test.pos, vp, string(txt[vp.Char:min(len(txt), vp.Char+8)]))
+		assert.Equal(t, test.vpos, vp)
+
+		sp := lns.posFromView(vw, vp)
+		assert.Equal(t, test.pos, sp)
+	}
+
+	vposTests := []struct {
+		vpos textpos.Pos
+		pos  textpos.Pos
+	}{
+		{textpos.Pos{0, 0}, textpos.Pos{0, 0}},
+		{textpos.Pos{0, 90}, textpos.Pos{0, 77}},
+		{textpos.Pos{1, 90}, textpos.Pos{0, 155}},
+	}
+	for _, test := range vposTests {
+		sp := lns.posFromView(vw, test.vpos)
+		txt := lns.lines[sp.Line]
+		fmt.Println(test.vpos, sp, string(txt[sp.Char:min(len(txt), sp.Char+8)]))
+		assert.Equal(t, test.pos, sp)
+	}
 
 	fwdTests := []struct {
 		pos   textpos.Pos
@@ -120,8 +158,6 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		assert.Equal(t, test.tpos, tp)
 	}
 
-	return
-	// todo: fix tests!
 	downTests := []struct {
 		pos   textpos.Pos
 		steps int
@@ -131,8 +167,8 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		{textpos.Pos{0, 0}, 1, 50, textpos.Pos{0, 128}},
 		{textpos.Pos{0, 0}, 2, 50, textpos.Pos{0, 206}},
 		{textpos.Pos{0, 0}, 4, 60, textpos.Pos{0, 371}},
-		{textpos.Pos{0, 0}, 5, 60, textpos.Pos{0, 440}},
-		{textpos.Pos{0, 371}, 2, 60, textpos.Pos{1, 42}},
+		{textpos.Pos{0, 0}, 5, 60, textpos.Pos{0, 439}},
+		{textpos.Pos{0, 371}, 2, 60, textpos.Pos{1, 41}},
 		{textpos.Pos{1, 30}, 1, 60, textpos.Pos{2, 60}},
 	}
 	for _, test := range downTests {
@@ -155,7 +191,7 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		{textpos.Pos{0, 128}, 2, 50, textpos.Pos{0, 50}},
 		{textpos.Pos{0, 206}, 1, 50, textpos.Pos{0, 128}},
 		{textpos.Pos{0, 371}, 1, 60, textpos.Pos{0, 294}},
-		{textpos.Pos{1, 5}, 1, 60, textpos.Pos{0, 440}},
+		{textpos.Pos{1, 5}, 1, 60, textpos.Pos{0, 439}},
 		{textpos.Pos{1, 5}, 1, 20, textpos.Pos{0, 410}},
 		{textpos.Pos{1, 5}, 2, 60, textpos.Pos{0, 371}},
 		{textpos.Pos{1, 5}, 3, 50, textpos.Pos{0, 284}},
