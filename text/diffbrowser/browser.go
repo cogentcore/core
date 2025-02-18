@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/text/texteditor"
+	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 )
 

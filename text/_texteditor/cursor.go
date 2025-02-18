@@ -20,7 +20,7 @@ var (
 	editorBlinker = core.Blinker{}
 
 	// editorSpriteName is the name of the window sprite used for the cursor
-	editorSpriteName = "texteditor.Editor.Cursor"
+	editorSpriteName = "textcore.Editor.Cursor"
 )
 
 func init() {

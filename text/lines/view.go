@@ -42,6 +42,13 @@ type view struct {
 
 // viewLineLen returns the length in chars (runes) of the given view line.
 func (ls *Lines) viewLineLen(vw *view, vl int) int {
+	n := len(vw.vlineStarts)
+	if n == 0 {
+		return 0
+	}
+	if vl >= n {
+		vl = n - 1
+	}
 	vp := vw.vlineStarts[vl]
 	sl := ls.lines[vp.Line]
 	if vl == vw.viewLines-1 {
@@ -83,10 +90,18 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 // If the Char position is beyond the end of the line, it returns the
 // end of the given line.
 func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
-	vlen := ls.viewLineLen(vw, vp.Line)
+	n := len(vw.vlineStarts)
+	if n == 0 {
+		return textpos.Pos{}
+	}
+	vl := vp.Line
+	if vl >= n {
+		vl = n - 1
+	}
+	vlen := ls.viewLineLen(vw, vl)
 	vp.Char = min(vp.Char, vlen)
 	pos := vp
-	sp := vw.vlineStarts[vp.Line]
+	sp := vw.vlineStarts[vl]
 	pos.Line = sp.Line
 	pos.Char = sp.Char + vp.Char
 	return pos

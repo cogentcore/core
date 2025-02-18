@@ -29,6 +29,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 )
@@ -44,13 +45,13 @@ type Node struct { //core:embedder
 	core.Tree
 
 	// Filepath is the full path to this file.
-	Filepath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Filepath core.Filename `edit:"-" set:"s-" json:"-" xml:"-" copier:"-"`
 
 	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// Buffer is the file buffer for editing this file.
-	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Buffer *lines.Lines `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.

@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore"
@@ -247,7 +248,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		initIcon(w).SetIcon(icons.Devices)
 	})
 
-	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *texteditor.Editor) {
+	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *textcore.Editor) {
 		w.Buffer.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
 core.NewButton(b).SetText("Hello, World!")
 b.RunMainWindow()`)

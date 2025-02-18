@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
@@ -109,7 +110,7 @@ func handleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			ed := New[texteditor.Editor](ctx)
+			ed := New[textcore.Editor](ctx)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
@@ -238,7 +239,7 @@ func handleElement(ctx *Context) {
 	case "textarea":
 		buf := texteditor.NewBuffer()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[texteditor.Editor](ctx).SetBuffer(buf)
+		New[textcore.Editor](ctx).SetBuffer(buf)
 	default:
 		ctx.NewParent = ctx.Parent()
 	}
@@ -336,4 +337,4 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 // BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
 // when importing yaegicore, which provides interactive editing functionality for Go
 // code blocks in text editors.
-var BindTextEditor func(ed *texteditor.Editor, parent *core.Frame, language string)
+var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)

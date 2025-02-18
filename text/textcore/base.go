@@ -34,7 +34,7 @@ var (
 )
 
 // Base is a widget with basic infrastructure for viewing and editing
-// [lines.Lines] of monospaced text, used in [texteditor.Editor] and
+// [lines.Lines] of monospaced text, used in [textcore.Editor] and
 // terminal. There can be multiple Base widgets for each lines buffer.
 //
 // Use NeedsRender to drive an render update for any change that does
@@ -152,12 +152,6 @@ type Base struct { //core:embedder
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.
 	LinkHandler func(tl *rich.Hyperlink)
-
-	// ISearch is the interactive search data.
-	// ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
-
-	// QReplace is the query replace data.
-	// QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// selectMode is a boolean indicating whether to select text as the cursor moves.
 	selectMode bool

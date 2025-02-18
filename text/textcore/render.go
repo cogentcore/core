@@ -93,6 +93,8 @@ func (ed *Base) renderLines() {
 	bb := ed.renderBBox()
 	pos := ed.Geom.Pos.Content
 	stln := int(math32.Floor(ed.scrollPos))
+	off := (ed.scrollPos - float32(stln)) // fractional bit
+	pos.Y -= off * ed.charSize.Y
 	edln := min(ed.linesSize.Y, stln+ed.visSize.Y+1)
 	// fmt.Println("render lines size:", ed.linesSize.Y, edln, "stln:", stln, "bb:", bb, "pos:", pos)
 
@@ -104,7 +106,10 @@ func (ed *Base) renderLines() {
 		ed.renderLineNumbersBox()
 		li := 0
 		for ln := stln; ln <= edln; ln++ {
-			ed.renderLineNumber(li, ln, false) // don't re-render std fill boxes
+			sp := ed.Lines.PosFromView(ed.viewId, textpos.Pos{Line: ln})
+			if sp.Char == 0 { // this means it is the start of a source line
+				ed.renderLineNumber(pos, li, sp.Line)
+			}
 			li++
 		}
 	}
@@ -155,16 +160,12 @@ func (ed *Base) renderLineNumbersBox() {
 	pc.PathDone()
 }
 
-// renderLineNumber renders given line number; called within context of other render.
-// if defFill is true, it fills box color for default background color (use false for
-// batch mode).
-func (ed *Base) renderLineNumber(li, ln int, defFill bool) {
+// renderLineNumber renders given line number at given li index.
+func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	if !ed.hasLineNumbers || ed.Lines == nil {
 		return
 	}
-	bb := ed.renderBBox()
-	spos := math32.FromPoint(bb.Min)
-	spos.Y += float32(li) * ed.charSize.Y
+	pos.Y += float32(li) * ed.charSize.Y
 
 	sty := &ed.Styles
 	pc := &ed.Scene.Painter
@@ -186,14 +187,14 @@ func (ed *Base) renderLineNumber(li, ln int, defFill bool) {
 	sz.X *= float32(ed.lineNumberOffset)
 	tx := rich.NewText(&fst, []rune(lnstr))
 	lns := sh.WrapLines(tx, &fst, &sty.Text, &core.AppearanceSettings.Text, sz)
-	pc.TextLines(lns, spos)
+	pc.TextLines(lns, pos)
 
 	// render circle
 	lineColor, has := ed.Lines.LineColor(ln)
 	if has {
-		spos.X += float32(ed.lineNumberDigits) * ed.charSize.X
+		pos.X += float32(ed.lineNumberDigits) * ed.charSize.X
 		r := 0.5 * ed.charSize.X
-		center := spos.AddScalar(r)
+		center := pos.AddScalar(r)
 
 		// cut radius in half so that it doesn't look too big
 		r /= 2
