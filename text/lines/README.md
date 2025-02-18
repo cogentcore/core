@@ -8,9 +8,20 @@ Everything is protected by an overall `sync.Mutex` and is safe to concurrent acc
 
 ## Views
 
-Multiple different views onto the same underlying text content are supported, through the unexported `view` type. Each view can have a different width of characters in its formatting, which is the extent of formatting support for the view: it just manages line wrapping and maintains the total number of display lines (wrapped lines). The `Lines` object manages its own views directly, to ensure everything is updated when the content changes, with a unique ID (int) assigned to each view, which is passed with all view-related methods.
+Multiple different views onto the same underlying text content are supported, through the unexported `view` type. Each view can have a different width of characters in its formatting, which is the extent of formatting support for the view: it just manages line wrapping and maintains the total number of view lines (wrapped lines). The `Lines` object manages its own views directly, to ensure everything is updated when the content changes, with a unique ID (int) assigned to each view, which is passed with all view-related methods.
 
 A widget will get its own view via the `NewView` method, and use `SetWidth` to update the view width accordingly (no problem to call even when no change in width). See the [textcore](../textcore) `Base` for a base widget implementation.
+
+With a view, there are two coordinate systems:
+* Original source line and char position, in `Lines` object and `lines` runes slices.
+* View position, where the line and char are for the wrapped lines and char offset within that view line.
+
+The runes remain in 1-to-1 correspondence between these views, and can be translated using these methods:
+
+* `PosToView` maps a source position to a view position
+* `PosFromView` maps a view position to a source position.
+
+Note that the view position is not quite a render location, due to the special behavior of tabs, which upset the basic "one rune, one display letter" principle.
 
 ## Events
 
@@ -31,8 +42,9 @@ Syntax highlighting depends on detecting the type of text represented. This happ
 
 ### Tabs
 
-The markup rich.Text spans are organized so that each tab in the input occupies its own individual span. The rendering GUI is responsible for positioning these tabs and subsequent text at the correct location, with _initial_ tabs at the start of a source line indenting by `Settings.TabSize`, but any _subsequent_ tabs after that are positioned at a modulo 8 position. This is how the word wrapping layout is computed.
+The markup `rich.Text` spans are organized so that each tab in the input occupies its own individual span. The rendering GUI is responsible for positioning these tabs and subsequent text at the correct location, with _initial_ tabs at the start of a source line indenting by `Settings.TabSize`, but any _subsequent_ tabs after that are positioned at a modulo 8 position. This is how the word wrapping layout is computed.
 
+The presence of tabs means that you cannot directly map from a view Char index to a final rendered location on the screen: tabs will occupy more than one such char location and shift everyone else over correspondingly.
 
 ## Editing
 

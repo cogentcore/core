@@ -80,6 +80,18 @@ func (tr Region) NumLines() int {
 	return 1 + (tr.End.Line - tr.Start.Line)
 }
 
+// Intersect returns the intersection of this region with given region.
+func (tr Region) Intersect(or Region) Region {
+	tr.Start.Line = max(tr.Start.Line, or.Start.Line)
+	tr.Start.Char = max(tr.Start.Char, or.Start.Char)
+	tr.End.Line = min(tr.End.Line, or.End.Line)
+	tr.End.Char = min(tr.End.Char, or.End.Char)
+	if tr.IsNil() {
+		return Region{}
+	}
+	return tr
+}
+
 // ShiftLines returns a new Region with the start and End lines
 // shifted by given number of lines.
 func (tr Region) ShiftLines(ln int) Region {

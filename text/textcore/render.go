@@ -116,15 +116,18 @@ func (ed *Base) renderLines() {
 	}
 
 	buf := ed.Lines
-	buf.Lock()
 	ctx := &core.AppearanceSettings.Text
 	ts := ed.Lines.Settings.TabSize
 	rpos := spos
 	rpos.X += ed.lineNumberPixels()
 	sz := ed.charSize
 	sz.X *= float32(ed.linesSize.X)
+	vsel := buf.RegionToView(ed.viewId, ed.SelectRegion)
+	buf.Lock()
 	for ln := stln; ln < edln; ln++ {
 		tx := buf.ViewMarkupLine(ed.viewId, ln)
+		vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
+		vseli := vlr.Intersect(vsel)
 		indent := 0
 		for si := range tx { // tabs encoded as single chars at start
 			sn, rn := rich.SpanLen(tx[si])
@@ -148,6 +151,9 @@ func (ed *Base) renderLines() {
 		lsz := sz
 		lsz.X -= ic
 		lns := sh.WrapLines(rtx, &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
+		if !vseli.IsNil() {
+			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char, End: vseli.End.Char})
+		}
 		pc.TextLines(lns, lpos)
 		rpos.Y += ed.charSize.Y
 	}

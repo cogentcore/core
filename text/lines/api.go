@@ -273,7 +273,7 @@ func (ls *Lines) Strings(addNewLine bool) []string {
 	return ls.strings(addNewLine)
 }
 
-// LineLen returns the length of the given line, in runes.
+// LineLen returns the length of the given source line, in runes.
 func (ls *Lines) LineLen(ln int) int {
 	ls.Lock()
 	defer ls.Unlock()
@@ -350,6 +350,45 @@ func (ls *Lines) PosFromView(vid int, pos textpos.Pos) textpos.Pos {
 	defer ls.Unlock()
 	vw := ls.view(vid)
 	return ls.posFromView(vw, pos)
+}
+
+// ViewLineLen returns the length in chars (runes) of the given view line.
+func (ls *Lines) ViewLineLen(vid int, vln int) int {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.viewLineLen(vw, vln)
+}
+
+// ViewLineRegion returns the region in view coordinates of the given view line.
+func (ls *Lines) ViewLineRegion(vid int, vln int) textpos.Region {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.viewLineRegion(vw, vln)
+}
+
+// ViewLineRegionLocked returns the region in view coordinates of the given view line,
+// for case where Lines is already locked.
+func (ls *Lines) ViewLineRegionLocked(vid int, vln int) textpos.Region {
+	vw := ls.view(vid)
+	return ls.viewLineRegion(vw, vln)
+}
+
+// RegionToView converts the given region in source coordinates into view coordinates.
+func (ls *Lines) RegionToView(vid int, reg textpos.Region) textpos.Region {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.regionToView(vw, reg)
+}
+
+// RegionFromView converts the given region in view coordinates into source coordinates.
+func (ls *Lines) RegionFromView(vid int, reg textpos.Region) textpos.Region {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.regionFromView(vw, reg)
 }
 
 // Region returns a Edit representation of text between start and end positions.

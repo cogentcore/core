@@ -61,6 +61,19 @@ func (ls *Lines) viewLineLen(vw *view, vl int) int {
 	return len(sl) - vp.Char
 }
 
+// viewLinesRange returns the start and end view lines for given
+// source line number, using only lineToVline. ed is inclusive.
+func (ls *Lines) viewLinesRange(vw *view, ln int) (st, ed int) {
+	n := len(vw.lineToVline)
+	st = vw.lineToVline[ln]
+	if ln+1 < n {
+		ed = vw.lineToVline[ln+1] - 1
+	} else {
+		ed = vw.viewLines - 1
+	}
+	return
+}
+
 // posToView returns the view position in terms of viewLines and Char
 // offset into that view line for given source line, char position.
 func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
@@ -85,19 +98,6 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 	return vp
 }
 
-// viewLinesRange returns the start and end view lines for given
-// source line number, using only lineToVline. ed is inclusive.
-func (ls *Lines) viewLinesRange(vw *view, ln int) (st, ed int) {
-	n := len(vw.lineToVline)
-	st = vw.lineToVline[ln]
-	if ln+1 < n {
-		ed = vw.lineToVline[ln+1] - 1
-	} else {
-		ed = vw.viewLines - 1
-	}
-	return
-}
-
 // posFromView returns the original source position from given
 // view position in terms of viewLines and Char offset into that view line.
 // If the Char position is beyond the end of the line, it returns the
@@ -118,6 +118,22 @@ func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
 	pos.Line = sp.Line
 	pos.Char = sp.Char + vp.Char
 	return pos
+}
+
+// regionToView converts the given region in source coordinates into view coordinates.
+func (ls *Lines) regionToView(vw *view, reg textpos.Region) textpos.Region {
+	return textpos.Region{Start: ls.posToView(vw, reg.Start), End: ls.posToView(vw, reg.End)}
+}
+
+// regionFromView converts the given region in view coordinates into source coordinates.
+func (ls *Lines) regionFromView(vw *view, reg textpos.Region) textpos.Region {
+	return textpos.Region{Start: ls.posFromView(vw, reg.Start), End: ls.posFromView(vw, reg.End)}
+}
+
+// viewLineRegion returns the region in view coordinates of the given view line.
+func (ls *Lines) viewLineRegion(vw *view, vln int) textpos.Region {
+	llen := ls.viewLineLen(vw, vln)
+	return textpos.Region{Start: textpos.Pos{Line: vln}, End: textpos.Pos{Line: vln, Char: llen}}
 }
 
 // initViews ensures that the views map is constructed.
