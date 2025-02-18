@@ -307,6 +307,17 @@ func (ls *Lines) HiTags(ln int) lexer.Line {
 	return ls.hiTags[ln]
 }
 
+// LineLexDepth returns the starting lexical depth in terms of brackets, parens, etc
+func (ls *Lines) LineLexDepth(ln int) int {
+	ls.Lock()
+	defer ls.Unlock()
+	n := len(ls.hiTags)
+	if ln >= n || len(ls.hiTags[ln]) == 0 {
+		return 0
+	}
+	return ls.hiTags[ln][0].Token.Depth
+}
+
 // EndPos returns the ending position at end of lines.
 func (ls *Lines) EndPos() textpos.Pos {
 	ls.Lock()
