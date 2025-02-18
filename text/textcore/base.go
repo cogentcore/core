@@ -284,11 +284,8 @@ func (ed *Base) Clear() {
 
 // resetState resets all the random state variables, when opening a new buffer etc
 func (ed *Base) resetState() {
-	// todo:
-	// ed.SelectReset()
-	// ed.Highlights = nil
-	// ed.ISearch.On = false
-	// ed.QReplace.On = false
+	ed.SelectReset()
+	ed.Highlights = nil
 	if ed.Lines == nil || ed.lastFilename != ed.Lines.Filename() { // don't reset if reopening..
 		ed.CursorPos = textpos.Pos{}
 	}

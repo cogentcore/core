@@ -5,9 +5,6 @@
 package textcore
 
 import (
-	"image"
-
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -127,113 +124,6 @@ func (ed *Base) setCursorColumn(pos textpos.Pos) {
 	ed.cursorColumn = vpos.Char
 }
 
-////////    Scrolling -- Vertical
-
-// scrollInView tells any parent scroll layout to scroll to get given box
-// (e.g., cursor BBox) in view -- returns true if scrolled
-func (ed *Base) scrollInView(bbox image.Rectangle) bool {
-	return ed.ScrollToBox(bbox)
-}
-
-// scrollToTop tells any parent scroll layout to scroll to get given vertical
-// coordinate at top of view to extent possible -- returns true if scrolled
-func (ed *Base) scrollToTop(pos int) bool {
-	ed.NeedsRender()
-	return ed.ScrollDimToStart(math32.Y, pos)
-}
-
-// scrollCursorToTop tells any parent scroll layout to scroll to get cursor
-// at top of view to extent possible -- returns true if scrolled.
-func (ed *Base) scrollCursorToTop() bool {
-	curBBox := ed.cursorBBox(ed.CursorPos)
-	return ed.scrollToTop(curBBox.Min.Y)
-}
-
-// scrollToBottom tells any parent scroll layout to scroll to get given
-// vertical coordinate at bottom of view to extent possible -- returns true if
-// scrolled
-func (ed *Base) scrollToBottom(pos int) bool {
-	ed.NeedsRender()
-	return ed.ScrollDimToEnd(math32.Y, pos)
-}
-
-// scrollCursorToBottom tells any parent scroll layout to scroll to get cursor
-// at bottom of view to extent possible -- returns true if scrolled.
-func (ed *Base) scrollCursorToBottom() bool {
-	curBBox := ed.cursorBBox(ed.CursorPos)
-	return ed.scrollToBottom(curBBox.Max.Y)
-}
-
-// scrollToVerticalCenter tells any parent scroll layout to scroll to get given
-// vertical coordinate to center of view to extent possible -- returns true if
-// scrolled
-func (ed *Base) scrollToVerticalCenter(pos int) bool {
-	ed.NeedsRender()
-	return ed.ScrollDimToCenter(math32.Y, pos)
-}
-
-// scrollCursorToVerticalCenter tells any parent scroll layout to scroll to get
-// cursor at vert center of view to extent possible -- returns true if
-// scrolled.
-func (ed *Base) scrollCursorToVerticalCenter() bool {
-	curBBox := ed.cursorBBox(ed.CursorPos)
-	mid := (curBBox.Min.Y + curBBox.Max.Y) / 2
-	return ed.scrollToVerticalCenter(mid)
-}
-
-func (ed *Base) scrollCursorToTarget() {
-	// fmt.Println(ed, "to target:", ed.CursorTarg)
-	ed.CursorPos = ed.cursorTarget
-	ed.scrollCursorToVerticalCenter()
-	ed.targetSet = false
-}
-
-// scrollCursorToCenterIfHidden checks if the cursor is not visible, and if
-// so, scrolls to the center, along both dimensions.
-func (ed *Base) scrollCursorToCenterIfHidden() bool {
-	return false
-	curBBox := ed.cursorBBox(ed.CursorPos)
-	did := false
-	lht := int(ed.charSize.Y)
-	bb := ed.Geom.ContentBBox
-	if bb.Size().Y <= lht {
-		return false
-	}
-	if (curBBox.Min.Y-lht) < bb.Min.Y || (curBBox.Max.Y+lht) > bb.Max.Y {
-		did = ed.scrollCursorToVerticalCenter()
-		// fmt.Println("v min:", curBBox.Min.Y, bb.Min.Y, "max:", curBBox.Max.Y+lht, bb.Max.Y, did)
-	}
-	if curBBox.Max.X < bb.Min.X+int(ed.lineNumberPixels()) {
-		did2 := ed.scrollCursorToRight()
-		// fmt.Println("h max", curBBox.Max.X, bb.Min.X+int(ed.LineNumberOffset), did2)
-		did = did || did2
-	} else if curBBox.Min.X > bb.Max.X {
-		did2 := ed.scrollCursorToRight()
-		// fmt.Println("h min", curBBox.Min.X, bb.Max.X, did2)
-		did = did || did2
-	}
-	if did {
-		// fmt.Println("scroll to center", did)
-	}
-	return did
-}
-
-////////    Scrolling -- Horizontal
-
-// scrollToRight tells any parent scroll layout to scroll to get given
-// horizontal coordinate at right of view to extent possible -- returns true
-// if scrolled
-func (ed *Base) scrollToRight(pos int) bool {
-	return ed.ScrollDimToEnd(math32.X, pos)
-}
-
-// scrollCursorToRight tells any parent scroll layout to scroll to get cursor
-// at right of view to extent possible -- returns true if scrolled.
-func (ed *Base) scrollCursorToRight() bool {
-	curBBox := ed.cursorBBox(ed.CursorPos)
-	return ed.scrollToRight(curBBox.Max.X)
-}
-
 ////////  cursor moving
 
 // cursorSelect updates selection based on cursor movements, given starting
@@ -329,7 +219,7 @@ func (ed *Base) cursorRecenter() {
 	case 0:
 		ed.scrollCursorToBottom()
 	case 1:
-		ed.scrollCursorToVerticalCenter()
+		ed.scrollCursorToCenter()
 	case 2:
 		ed.scrollCursorToTop()
 	}
@@ -441,27 +331,8 @@ func (ed *Base) cursorDeleteWord(steps int) {
 
 // cursorKill deletes text from cursor to end of text
 func (ed *Base) cursorKill() {
-	ed.validateCursor()
-	org := ed.CursorPos
-
-	// todo:
-	// atEnd := false
-	// if wln := ed.wrappedLines(pos.Line); wln > 1 {
-	// 	si, ri, _ := ed.wrappedLineNumber(pos)
-	// 	llen := len(ed.renders[pos.Line].Spans[si].Text)
-	// 	if si == wln-1 {
-	// 		llen--
-	// 	}
-	// 	atEnd = (ri == llen)
-	// } else {
-	// 	llen := ed.Lines.LineLen(pos.Line)
-	// 	atEnd = (ed.CursorPos.Char == llen)
-	// }
-	// if atEnd {
-	// 	ed.cursorForward(1)
-	// } else {
-	// 	ed.cursorLineEnd()
-	// }
+	org := ed.validateCursor()
+	ed.cursorLineEnd()
 	ed.Lines.DeleteText(org, ed.CursorPos)
 	ed.SetCursorShow(org)
 	ed.NeedsRender()

@@ -349,7 +349,7 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	}
 	vpos := ed.Lines.PosToView(ed.viewId, pos)
 	spos := ed.Geom.Pos.Content
-	spos.X += ed.lineNumberPixels()
+	spos.X += ed.lineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
 	ts := ed.Lines.Settings.TabSize

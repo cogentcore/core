@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/textpos"
 )
 
 // maxGrowLines is the maximum number of lines to grow to
@@ -190,10 +191,129 @@ func (ed *Base) SetScrollParams(d math32.Dims, sb *core.Slider) {
 }
 
 // updateScroll sets the scroll position to given value, in lines.
-func (ed *Base) updateScroll(idx int) {
+// calls a NeedsRender if changed.
+func (ed *Base) updateScroll(idx int) bool {
 	if !ed.HasScroll[math32.Y] || ed.Scrolls[math32.Y] == nil {
-		return
+		return false
 	}
 	sb := ed.Scrolls[math32.Y]
-	sb.SetValue(float32(idx))
+	ixf := float32(idx)
+	if sb.Value != ixf {
+		sb.SetValue(ixf)
+		ed.scrollPos = ixf
+		ed.NeedsRender()
+		return true
+	}
+	return false
+}
+
+////////    Scrolling -- Vertical
+
+// scrollLineToTop positions scroll so that given view line is at the top
+// (to the extent possible).
+func (ed *Base) scrollLineToTop(ln int) bool {
+	return ed.updateScroll(ln)
+}
+
+// scrollCursorToTop positions scroll so the cursor line is at the top.
+func (ed *Base) scrollCursorToTop() bool {
+	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	return ed.scrollLineToTop(vp.Line)
+}
+
+// scrollLineToBottom positions scroll so the given view line is at the bottom.
+func (ed *Base) scrollLineToBottom(ln int) bool {
+	return ed.updateScroll(ln + ed.linesSize.Y - 1)
+}
+
+// scrollCursorToBottom positions scroll so cursor line is at the bottom.
+func (ed *Base) scrollCursorToBottom() bool {
+	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	return ed.scrollLineToBottom(vp.Line)
+}
+
+// scrollLineToCenter positions scroll so given view line is in the center.
+func (ed *Base) scrollLineToCenter(ln int) bool {
+	return ed.updateScroll(ln + ed.linesSize.Y/2)
+}
+
+func (ed *Base) scrollCursorToCenter() bool {
+	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	return ed.scrollLineToCenter(vp.Line)
+}
+
+func (ed *Base) scrollCursorToTarget() {
+	// fmt.Println(ed, "to target:", ed.CursorTarg)
+	ed.CursorPos = ed.cursorTarget
+	ed.scrollCursorToCenter()
+	ed.targetSet = false
+}
+
+// scrollToCenterIfHidden checks if the given position is not in view,
+// and scrolls to center if so. returns false if in view already.
+func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
+	spos := ed.Geom.ContentBBox.Min.Y
+	spos += int(ed.lineNumberPixels())
+	epos := ed.Geom.ContentBBox.Max.X
+	csp := ed.charStartPos(pos).ToPoint()
+	if pos.Line >= int(ed.scrollPos) && pos.Line < int(ed.scrollPos)+ed.linesSize.Y {
+		if csp.X >= spos && csp.X < epos {
+			return false
+		}
+	} else {
+		ed.scrollCursorToCenter()
+	}
+	if csp.X < spos {
+		ed.scrollCursorToRight()
+	} else if csp.X > epos {
+		// ed.scrollCursorToLeft()
+	}
+	return true
+	//
+	// curBBox := ed.cursorBBox(ed.CursorPos)
+	// did := false
+	// lht := int(ed.charSize.Y)
+	// bb := ed.Geom.ContentBBox
+	// if bb.Size().Y <= lht {
+	// 	return false
+	// }
+	// if (curBBox.Min.Y-lht) < bb.Min.Y || (curBBox.Max.Y+lht) > bb.Max.Y {
+	// 	did = ed.scrollCursorToVerticalCenter()
+	// 	// fmt.Println("v min:", curBBox.Min.Y, bb.Min.Y, "max:", curBBox.Max.Y+lht, bb.Max.Y, did)
+	// }
+	// if curBBox.Max.X < bb.Min.X+int(ed.lineNumberPixels()) {
+	// 	did2 := ed.scrollCursorToRight()
+	// 	// fmt.Println("h max", curBBox.Max.X, bb.Min.X+int(ed.LineNumberOffset), did2)
+	// 	did = did || did2
+	// } else if curBBox.Min.X > bb.Max.X {
+	// 	did2 := ed.scrollCursorToRight()
+	// 	// fmt.Println("h min", curBBox.Min.X, bb.Max.X, did2)
+	// 	did = did || did2
+	// }
+	// if did {
+	// 	// fmt.Println("scroll to center", did)
+	// }
+	// return did
+}
+
+// scrollCursorToCenterIfHidden checks if the cursor position is not in view,
+// and scrolls to center if so. returns false if in view already.
+func (ed *Base) scrollCursorToCenterIfHidden() bool {
+	return ed.scrollToCenterIfHidden(ed.CursorPos)
+}
+
+////////    Scrolling -- Horizontal
+
+// scrollToRight tells any parent scroll layout to scroll to get given
+// horizontal coordinate at right of view to extent possible -- returns true
+// if scrolled
+func (ed *Base) scrollToRight(pos int) bool {
+	return ed.ScrollDimToEnd(math32.X, pos)
+}
+
+// scrollCursorToRight tells any parent scroll layout to scroll to get cursor
+// at right of view to extent possible -- returns true if scrolled.
+func (ed *Base) scrollCursorToRight() bool {
+	curBBox := ed.cursorBBox(ed.CursorPos)
+	return ed.scrollToRight(curBBox.Max.X)
 }
