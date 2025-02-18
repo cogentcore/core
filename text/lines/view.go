@@ -85,6 +85,19 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 	return vp
 }
 
+// viewLinesRange returns the start and end view lines for given
+// source line number. ed is inclusive.
+func (ls *Lines) viewLinesRange(vw *view, ln int) (st, ed int) {
+	n := len(vw.lineToVline)
+	st = vw.lineToVline[ln]
+	if ln+1 < n {
+		ed = vw.lineToVline[ln+1] - 1
+	} else {
+		ed = vw.viewLines - 1
+	}
+	return
+}
+
 // posFromView returns the original source position from given
 // view position in terms of viewLines and Char offset into that view line.
 // If the Char position is beyond the end of the line, it returns the

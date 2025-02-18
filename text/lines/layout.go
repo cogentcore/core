@@ -6,6 +6,7 @@ package lines
 
 import (
 	"fmt"
+	"slices"
 	"unicode"
 
 	"cogentcore.org/core/base/slicesx"
@@ -18,21 +19,25 @@ import (
 // it updates the current number of total lines based on any changes from
 // the current number of lines withing given range.
 func (ls *Lines) layoutLines(vw *view, st, ed int) {
-	// todo:
-	// inln := 0
-	// for ln := st; ln <= ed; ln++ {
-	// 	inln += 1 + vw.nbreaks[ln]
-	// }
-	// nln := 0
-	// for ln := st; ln <= ed; ln++ {
-	// 	ltxt := ls.lines[ln]
-	// 	lmu, lay, nbreaks := ls.layoutLine(vw.width, ltxt, ls.markup[ln])
-	// 	vw.markup[ln] = lmu
-	// 	vw.layout[ln] = lay
-	// 	vw.nbreaks[ln] = nbreaks
-	// 	nln += 1 + nbreaks
-	// }
-	// vw.totalLines += nln - inln
+	svln, _ := ls.viewLinesRange(vw, st)
+	_, evln := ls.viewLinesRange(vw, ed)
+	inln := 1 + evln - svln
+	slices.Delete(vw.markup, svln, evln+1)
+	slices.Delete(vw.vlineStarts, svln, evln+1)
+	nln := 0
+	mus := make([]rich.Text, 0, inln)
+	vls := make([]textpos.Pos, 0, inln)
+	for ln := st; ln <= ed; ln++ {
+		mu := ls.markup[ln]
+		muls, vst := ls.layoutLine(ln, vw.width, ls.lines[ln], mu)
+		vw.lineToVline[ln] = svln + nln
+		mus = append(mus, muls...)
+		vls = append(vls, vst...)
+		nln += len(vst)
+	}
+	slices.Insert(vw.markup, svln, mus...)
+	slices.Insert(vw.vlineStarts, svln, vls...)
+	vw.viewLines += nln - inln
 }
 
 // layoutAll performs view-specific layout of all lines of current lines markup.

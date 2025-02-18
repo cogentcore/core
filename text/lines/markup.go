@@ -108,15 +108,12 @@ func (ls *Lines) markupTags(txt []byte) ([]lexer.Line, error) {
 }
 
 // markupApplyEdits applies any edits in markupEdits to the
-// tags prior to applying the tags.  returns the updated tags.
+// tags prior to applying the tags. returns the updated tags.
+// For parse-based updates, this is critical for getting full tags
+// even if there aren't any markupEdits.
 func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 	edits := ls.markupEdits
 	ls.markupEdits = nil
-	// fmt.Println("edits:", edits)
-	if len(ls.markupEdits) == 0 {
-		return tags // todo: somehow needs to actually do process below even if no edits
-		// but I can't remember right now what the issues are.
-	}
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()
 		for _, tbe := range edits {

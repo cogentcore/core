@@ -5,7 +5,7 @@
 package textpos
 
 // Range defines a range with a start and end index, where end is typically
-// inclusive, as in standard slice indexing and for loop conventions.
+// exclusive, as in standard slice indexing and for loop conventions.
 type Range struct {
 	// St is the starting index of the range.
 	Start int
@@ -19,7 +19,7 @@ func (r Range) Len() int {
 	return r.End - r.Start
 }
 
-// Contains returns true if range contains given index.
+// Contains returns true if range cesontains given index.
 func (r Range) Contains(i int) bool {
 	return i >= r.Start && i < r.End
 }
