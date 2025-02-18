@@ -596,6 +596,24 @@ func (ls *Lines) MoveUp(vid int, pos textpos.Pos, steps, col int) textpos.Pos {
 	return ls.moveUp(vw, pos, steps, col)
 }
 
+// MoveLineStart moves given source position to start of view line.
+func (ls *Lines) MoveLineStart(vid int, pos textpos.Pos) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.moveLineStart(vw, pos)
+}
+
+// MoveLineEnd moves given source position to end of view line.
+func (ls *Lines) MoveLineEnd(vid int, pos textpos.Pos) textpos.Pos {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.moveLineEnd(vw, pos)
+}
+
+////////  PosHistory
+
 // PosHistorySave saves the cursor position in history stack of cursor positions.
 // Tracks across views. Returns false if position was on same line as last one saved.
 func (ls *Lines) PosHistorySave(pos textpos.Pos) bool {

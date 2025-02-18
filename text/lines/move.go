@@ -122,3 +122,23 @@ func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 	dp := ls.posFromView(vw, nvp)
 	return dp
 }
+
+// moveLineStart moves given source position to start of view line.
+func (ls *Lines) moveLineStart(vw *view, pos textpos.Pos) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return pos
+	}
+	vp := ls.posToView(vw, pos)
+	vp.Char = 0
+	return ls.posFromView(vw, vp)
+}
+
+// moveLineEnd moves given source position to end of view line.
+func (ls *Lines) moveLineEnd(vw *view, pos textpos.Pos) textpos.Pos {
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return pos
+	}
+	vp := ls.posToView(vw, pos)
+	vp.Char = ls.viewLineLen(vw, vp.Line)
+	return ls.posFromView(vw, vp)
+}

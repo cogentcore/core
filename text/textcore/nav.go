@@ -351,12 +351,12 @@ func (ed *Base) cursorRecenter() {
 	ed.lastRecenter = cur
 }
 
-// cursorStartLine moves the cursor to the start of the line, updating selection
+// cursorLineStart moves the cursor to the start of the line, updating selection
 // if select mode is active
-func (ed *Base) cursorStartLine() {
+func (ed *Base) cursorLineStart() {
 	ed.validateCursor()
 	org := ed.CursorPos
-	// todo: do this in lines!
+	ed.CursorPos = ed.Lines.MoveLineStart(ed.viewId, org)
 	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToRight()
 	ed.renderCursor(true)
@@ -379,11 +379,11 @@ func (ed *Base) CursorStartDoc() {
 	ed.NeedsRender()
 }
 
-// cursorEndLine moves the cursor to the end of the text
-func (ed *Base) cursorEndLine() {
+// cursorLineEnd moves the cursor to the end of the text
+func (ed *Base) cursorLineEnd() {
 	ed.validateCursor()
 	org := ed.CursorPos
-	// todo: do this in lines!
+	ed.CursorPos = ed.Lines.MoveLineEnd(ed.viewId, org)
 	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToRight()
 	ed.renderCursor(true)
@@ -496,7 +496,7 @@ func (ed *Base) cursorKill() {
 	// if atEnd {
 	// 	ed.cursorForward(1)
 	// } else {
-	// 	ed.cursorEndLine()
+	// 	ed.cursorLineEnd()
 	// }
 	ed.Lines.DeleteText(org, ed.CursorPos)
 	ed.SetCursorShow(org)

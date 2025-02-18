@@ -189,13 +189,13 @@ func (ed *Editor) keyInput(e events.Event) {
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.cursorStartLine()
+		ed.cursorLineStart()
 		ed.shiftSelectExtend(e)
 	case keymap.End:
 		cancelAll()
 		e.SetHandled()
 		ed.shiftSelect(e)
-		ed.cursorEndLine()
+		ed.cursorLineEnd()
 		ed.shiftSelectExtend(e)
 	case keymap.DocHome:
 		cancelAll()
