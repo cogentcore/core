@@ -5,7 +5,6 @@
 package lines
 
 import (
-	"slices"
 	"unicode"
 
 	"cogentcore.org/core/base/slicesx"
@@ -13,59 +12,10 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// layoutLines performs view-specific layout of given lines of current markup.
-// It updates the current number of total lines based on any changes from
-// the current number of lines withing given range.
-func (ls *Lines) layoutLines(vw *view, st, ed int) {
-	svln, _ := ls.viewLinesRange(vw, st)
-	_, evln := ls.viewLinesRange(vw, ed)
-	inln := 1 + evln - svln
-	slices.Delete(vw.markup, svln, evln+1)
-	slices.Delete(vw.vlineStarts, svln, evln+1)
-	nln := 0
-	mus := make([]rich.Text, 0, inln)
-	vls := make([]textpos.Pos, 0, inln)
-	for ln := st; ln <= ed; ln++ {
-		mu := ls.markup[ln]
-		muls, vst := ls.layoutLine(ln, vw.width, ls.lines[ln], mu)
-		vw.lineToVline[ln] = svln + nln
-		mus = append(mus, muls...)
-		vls = append(vls, vst...)
-		nln += len(vst)
-	}
-	slices.Insert(vw.markup, svln, mus...)
-	slices.Insert(vw.vlineStarts, svln, vls...)
-	delta := nln - inln
-	if delta != 0 {
-		n := ls.numLines()
-		for ln := ed + 1; ln < n; ln++ {
-			vw.lineToVline[ln] += delta
-		}
-		vw.viewLines += delta
-	}
-}
-
-// deleteLayoutLines removes existing layout lines in given range.
-func (ls *Lines) deleteLayoutLines(vw *view, st, ed int) {
-	svln, _ := ls.viewLinesRange(vw, st)
-	_, evln := ls.viewLinesRange(vw, ed)
-	inln := evln - svln
-	// fmt.Println("delete:", st, ed, svln, evln, inln)
-	if ed > st {
-		slices.Delete(vw.lineToVline, st, ed)
-	}
-	slices.Delete(vw.markup, svln, evln)
-	slices.Delete(vw.vlineStarts, svln, evln)
-	n := ls.numLines()
-	for ln := st + 1; ln < n; ln++ {
-		vw.lineToVline[ln] -= inln
-	}
-	vw.viewLines -= inln
-}
-
-// layoutAll performs view-specific layout of all lines of current lines markup.
+// layoutViewLines performs view-specific layout of all lines of current lines markup.
 // This manages its own memory allocation, so it can be called on a new view.
-func (ls *Lines) layoutAll(vw *view) {
+// It must be called after any update to the source text or view layout parameters.
+func (ls *Lines) layoutViewLines(vw *view) {
 	n := len(ls.markup)
 	if n == 0 {
 		return
@@ -75,7 +25,7 @@ func (ls *Lines) layoutAll(vw *view) {
 	vw.lineToVline = slicesx.SetLength(vw.lineToVline, n)
 	nln := 0
 	for ln, mu := range ls.markup {
-		muls, vst := ls.layoutLine(ln, vw.width, ls.lines[ln], mu)
+		muls, vst := ls.layoutViewLine(ln, vw.width, ls.lines[ln], mu)
 		vw.lineToVline[ln] = len(vw.vlineStarts)
 		vw.markup = append(vw.markup, muls...)
 		vw.vlineStarts = append(vw.vlineStarts, vst...)
@@ -84,10 +34,11 @@ func (ls *Lines) layoutAll(vw *view) {
 	vw.viewLines = nln
 }
 
-// layoutLine performs layout and line wrapping on the given text, with the
-// given markup rich.Text, with the layout implemented in the markup that is returned.
+// layoutViewLine performs layout and line wrapping on the given text,
+// for given view text, with the given markup rich.Text.
+// The layout is implemented in the markup that is returned.
 // This clones and then modifies the given markup rich text.
-func (ls *Lines) layoutLine(ln, width int, txt []rune, mu rich.Text) ([]rich.Text, []textpos.Pos) {
+func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich.Text, []textpos.Pos) {
 	lt := mu.Clone()
 	n := len(txt)
 	sp := textpos.Pos{Line: ln, Char: 0} // source starting position

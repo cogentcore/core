@@ -159,7 +159,7 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 		ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
 	}
 	for _, vw := range ls.views {
-		ls.layoutAll(vw)
+		ls.layoutViewLines(vw)
 	}
 }
 
@@ -189,7 +189,7 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		ls.markup[ln] = mu
 	}
 	for _, vw := range ls.views {
-		ls.layoutLines(vw, st, ed)
+		ls.layoutViewLines(vw)
 	}
 	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.
@@ -241,19 +241,14 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 		ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
 		ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 		ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
-
-		for _, vw := range ls.views {
-			ls.deleteLayoutLines(vw, stln, edln)
-		}
 		if ls.Highlighter.UsingParse() {
 			pfs := ls.parseState.Done()
 			pfs.Src.LinesDeleted(stln, edln)
 		}
 	}
-	// note: this remarkup of start line does not work:
-	// need a different layout logic.
-	// st := tbe.Region.Start.Line
-	// ls.markupLines(st, st)
+	// remarkup of start line:
+	st := tbe.Region.Start.Line
+	ls.markupLines(st, st)
 	ls.startDelayedReMarkup()
 }
 

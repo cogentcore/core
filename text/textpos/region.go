@@ -80,14 +80,32 @@ func (tr Region) NumLines() int {
 	return 1 + (tr.End.Line - tr.Start.Line)
 }
 
-// Intersect returns the intersection of this region with given region.
-func (tr Region) Intersect(or Region) Region {
-	tr.Start.Line = max(tr.Start.Line, or.Start.Line)
-	tr.Start.Char = max(tr.Start.Char, or.Start.Char)
-	tr.End.Line = min(tr.End.Line, or.End.Line)
-	tr.End.Char = min(tr.End.Char, or.End.Char)
-	if tr.IsNil() {
-		return Region{}
+// Intersect returns the intersection of this region with given
+// other region, where the other region is assumed to be the larger,
+// constraining region, within which you are fitting the receiver region.
+// Char level start / end are only constrained if on same Start / End line.
+// The given endChar value is used for the end of an interior line.
+func (tr Region) Intersect(or Region, endChar int) Region {
+	switch {
+	case tr.Start.Line < or.Start.Line:
+		tr.Start = or.Start
+	case tr.Start.Line == or.Start.Line:
+		tr.Start.Char = max(tr.Start.Char, or.Start.Char)
+	case tr.Start.Line < or.End.Line:
+		tr.Start.Char = 0
+	case tr.Start.Line == or.End.Line:
+		tr.Start.Char = min(tr.Start.Char, or.End.Char-1)
+	default:
+		return Region{} // not in bounds
+	}
+	if tr.End.Line == tr.Start.Line { // keep valid
+		tr.End.Char = max(tr.End.Char, tr.Start.Char)
+	}
+	switch {
+	case tr.End.Line < or.End.Line:
+		tr.End.Char = endChar
+	case tr.End.Line == or.End.Line:
+		tr.End.Char = min(tr.End.Char, or.End.Char)
 	}
 	return tr
 }

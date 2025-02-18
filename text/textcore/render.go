@@ -127,7 +127,7 @@ func (ed *Base) renderLines() {
 	for ln := stln; ln < edln; ln++ {
 		tx := buf.ViewMarkupLine(ed.viewId, ln)
 		vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
-		vseli := vlr.Intersect(vsel)
+		vseli := vlr.Intersect(vsel, ed.linesSize.X)
 		indent := 0
 		for si := range tx { // tabs encoded as single chars at start
 			sn, rn := rich.SpanLen(tx[si])

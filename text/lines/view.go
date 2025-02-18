@@ -162,7 +162,7 @@ func (ls *Lines) newView(width int) (*view, int) {
 	id := mxi + 1
 	vw := &view{width: width}
 	ls.views[id] = vw
-	ls.layoutAll(vw)
+	ls.layoutViewLines(vw)
 	return vw, id
 }
 

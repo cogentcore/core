@@ -81,7 +81,7 @@ func (ls *Lines) SetWidth(vid int, wd int) bool {
 			return false
 		}
 		vw.width = wd
-		ls.layoutAll(vw)
+		ls.layoutViewLines(vw)
 		// fmt.Println("set width:", vw.width, "lines:", vw.viewLines, "mu:", len(vw.markup), len(vw.vlineStarts))
 		return true
 	}
