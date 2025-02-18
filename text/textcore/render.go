@@ -76,19 +76,6 @@ func (ed *Base) renderLineStartEnd() (stln, edln int, spos math32.Vector2) {
 	return
 }
 
-// charStartPos returns the starting (top left) render coords for the
-// given source text position.
-func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
-	if ed.Lines == nil {
-		return math32.Vector2{}
-	}
-	vpos := ed.Lines.PosToView(ed.viewId, pos)
-	spos := ed.Geom.Pos.Content
-	spos.X += ed.lineNumberPixels() + float32(vpos.Char)*ed.charSize.X
-	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
-	return spos
-}
-
 // posIsVisible returns true if given position is visible,
 // in terms of the vertical lines in view.
 func (ed *Base) posIsVisible(pos textpos.Pos) bool {
@@ -130,6 +117,8 @@ func (ed *Base) renderLines() {
 
 	buf := ed.Lines
 	buf.Lock()
+	ctx := &core.AppearanceSettings.Text
+	ts := ed.Lines.Settings.TabSize
 	rpos := spos
 	rpos.X += ed.lineNumberPixels()
 	sz := ed.charSize
@@ -140,15 +129,25 @@ func (ed *Base) renderLines() {
 		for si := range tx { // tabs encoded as single chars at start
 			sn, rn := rich.SpanLen(tx[si])
 			if rn == 1 && tx[si][sn] == '\t' {
+				lpos := rpos
+				ic := float32(ts*indent) * ed.charSize.X
+				lpos.X += ic
+				lsz := sz
+				lsz.X -= ic
+				lns := sh.WrapLines(tx[si:si+1], &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
+				pc.TextLines(lns, lpos)
 				indent++
 			} else {
 				break
 			}
 		}
-		// etx := tx[indent:] // todo: this is not quite right -- need a char at each point
+		rtx := tx[indent:]
 		lpos := rpos
-		lpos.X += float32(ed.Lines.Settings.TabSize*indent) * ed.charSize.X
-		lns := sh.WrapLines(tx, &ed.Styles.Font, &ed.Styles.Text, &core.AppearanceSettings.Text, sz)
+		ic := float32(ts*indent) * ed.charSize.X
+		lpos.X += ic
+		lsz := sz
+		lsz.X -= ic
+		lns := sh.WrapLines(rtx, &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
 		pc.TextLines(lns, lpos)
 		rpos.Y += ed.charSize.Y
 	}
@@ -311,6 +310,56 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	spos.X += ed.lineNumberPixels()
 	ptf := math32.FromPoint(pt)
 	cp := ptf.Sub(spos).Div(ed.charSize)
-	vpos := textpos.Pos{Line: stln + int(cp.Y), Char: int(cp.X)}
+	vpos := textpos.Pos{Line: stln + int(math32.Floor(cp.Y)), Char: int(math32.Round(cp.X))}
+	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
+	indent := 0
+	for si := range tx { // tabs encoded as single chars at start
+		sn, rn := rich.SpanLen(tx[si])
+		if rn == 1 && tx[si][sn] == '\t' {
+			indent++
+		} else {
+			break
+		}
+	}
+	if indent == 0 {
+		return ed.Lines.PosFromView(ed.viewId, vpos)
+	}
+	ts := ed.Lines.Settings.TabSize
+	ic := indent * ts
+	if vpos.Char >= ic {
+		vpos.Char -= (ic - indent)
+		return ed.Lines.PosFromView(ed.viewId, vpos)
+	}
+	ip := vpos.Char / ts
+	vpos.Char = ip
 	return ed.Lines.PosFromView(ed.viewId, vpos)
+}
+
+// charStartPos returns the starting (top left) render coords for the
+// given source text position.
+func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
+	if ed.Lines == nil {
+		return math32.Vector2{}
+	}
+	vpos := ed.Lines.PosToView(ed.viewId, pos)
+	spos := ed.Geom.Pos.Content
+	spos.X += ed.lineNumberPixels()
+	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
+	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
+	ts := ed.Lines.Settings.TabSize
+	indent := 0
+	for si := range tx { // tabs encoded as single chars at start
+		sn, rn := rich.SpanLen(tx[si])
+		if rn == 1 && tx[si][sn] == '\t' {
+			if vpos.Char == si {
+				spos.X += float32(indent*ts) * ed.charSize.X
+				return spos
+			}
+			indent++
+		} else {
+			break
+		}
+	}
+	spos.X += float32(indent*ts+(vpos.Char-indent)) * ed.charSize.X
+	return spos
 }
