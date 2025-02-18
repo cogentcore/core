@@ -113,11 +113,10 @@ func (ed *Editor) keyInput(e events.Event) {
 
 	// cancelAll cancels search, completer, and..
 	cancelAll := func() {
-		// todo:
-		// ed.CancelComplete()
-		// ed.cancelCorrect()
-		// ed.iSearchCancel()
-		// ed.qReplaceCancel()
+		ed.CancelComplete()
+		ed.cancelCorrect()
+		ed.iSearchCancel()
+		ed.qReplaceCancel()
 		ed.lastAutoInsert = 0
 	}
 

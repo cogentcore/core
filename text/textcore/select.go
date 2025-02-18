@@ -95,6 +95,8 @@ func (ed *Base) selectAll() {
 	ed.NeedsRender()
 }
 
+// todo: cleanup
+
 // isWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
 func (ed *Base) isWordEnd(tp textpos.Pos) bool {
@@ -223,6 +225,43 @@ func (ed *Base) SelectReset() {
 	}
 	ed.SelectRegion = textpos.Region{}
 	ed.previousSelectRegion = textpos.Region{}
+}
+
+////////    Undo / Redo
+
+// undo undoes previous action
+func (ed *Base) undo() {
+	tbes := ed.Lines.Undo()
+	if tbes != nil {
+		tbe := tbes[len(tbes)-1]
+		if tbe.Delete { // now an insert
+			ed.SetCursorShow(tbe.Region.End)
+		} else {
+			ed.SetCursorShow(tbe.Region.Start)
+		}
+	} else {
+		ed.SendInput() // updates status..
+		ed.scrollCursorToCenterIfHidden()
+	}
+	ed.savePosHistory(ed.CursorPos)
+	ed.NeedsRender()
+}
+
+// redo redoes previously undone action
+func (ed *Base) redo() {
+	tbes := ed.Lines.Redo()
+	if tbes != nil {
+		tbe := tbes[len(tbes)-1]
+		if tbe.Delete {
+			ed.SetCursorShow(tbe.Region.Start)
+		} else {
+			ed.SetCursorShow(tbe.Region.End)
+		}
+	} else {
+		ed.scrollCursorToCenterIfHidden()
+	}
+	ed.savePosHistory(ed.CursorPos)
+	ed.NeedsRender()
 }
 
 ////////    Cut / Copy / Paste

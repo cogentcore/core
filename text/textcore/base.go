@@ -229,10 +229,6 @@ func (ed *Base) Init() {
 		}
 	})
 
-	// ed.handleKeyChord()
-	// ed.handleMouse()
-	// ed.handleLinkCursor()
-	// ed.handleFocus()
 	ed.OnClose(func(e events.Event) {
 		ed.editDone()
 	})
@@ -344,57 +340,19 @@ func (ed *Base) SetLines(buf *lines.Lines) *Base {
 			ed.SetLines(nil)
 			ed.SendClose()
 		})
-		// bhl := len(buf.posHistory) // todo:
-		// if bhl > 0 {
-		// 	cp := buf.posHistory[bhl-1]
-		// 	ed.posHistoryIndex = bhl - 1
-		// 	buf.Unlock()
-		// 	ed.SetCursorShow(cp)
-		// } else {
-		// 	ed.SetCursorShow(textpos.Pos{})
-		// }
+		phl := buf.PosHistoryLen()
+		if phl > 0 {
+			cp, _ := buf.PosHistoryAt(phl - 1)
+			ed.posHistoryIndex = phl - 1
+			ed.SetCursorShow(cp)
+		} else {
+			ed.SetCursorShow(textpos.Pos{})
+		}
 	} else {
 		ed.viewId = -1
 	}
 	ed.NeedsRender()
 	return ed
-}
-
-////////    Undo / Redo
-
-// undo undoes previous action
-func (ed *Base) undo() {
-	tbes := ed.Lines.Undo()
-	if tbes != nil {
-		tbe := tbes[len(tbes)-1]
-		if tbe.Delete { // now an insert
-			ed.SetCursorShow(tbe.Region.End)
-		} else {
-			ed.SetCursorShow(tbe.Region.Start)
-		}
-	} else {
-		ed.SendInput() // updates status..
-		ed.scrollCursorToCenterIfHidden()
-	}
-	ed.savePosHistory(ed.CursorPos)
-	ed.NeedsRender()
-}
-
-// redo redoes previously undone action
-func (ed *Base) redo() {
-	tbes := ed.Lines.Redo()
-	if tbes != nil {
-		tbe := tbes[len(tbes)-1]
-		if tbe.Delete {
-			ed.SetCursorShow(tbe.Region.Start)
-		} else {
-			ed.SetCursorShow(tbe.Region.End)
-		}
-	} else {
-		ed.scrollCursorToCenterIfHidden()
-	}
-	ed.savePosHistory(ed.CursorPos)
-	ed.NeedsRender()
 }
 
 // styleBase applies the editor styles.
