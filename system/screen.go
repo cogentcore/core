@@ -176,12 +176,10 @@ func (sc *Screen) WindowSizeFromPixels(sz image.Point) image.Point {
 func (sc *Screen) ConstrainWindowGeometry(pos, sz image.Point) (cpos, csz image.Point) {
 	scSize := sc.Geometry.Size() // in window coords size
 	if TheApp.Platform() == Windows {
-		// these are windows-specific special numbers for minimized windows
-		// can be sent here for WinGeom saved geom.
-		if pos.X == -32000 {
+		if pos.X == WindowsMinimizedPosition {
 			pos.X = 0
 		}
-		if pos.Y == -32000 {
+		if pos.Y == WindowsMinimizedPosition {
 			pos.Y = 50
 		}
 	}
