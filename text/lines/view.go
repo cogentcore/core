@@ -86,7 +86,7 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 }
 
 // viewLinesRange returns the start and end view lines for given
-// source line number. ed is inclusive.
+// source line number, using only lineToVline. ed is inclusive.
 func (ls *Lines) viewLinesRange(vw *view, ln int) (st, ed int) {
 	n := len(vw.lineToVline)
 	st = vw.lineToVline[ln]

@@ -215,20 +215,18 @@ func (ls *Lines) linesInserted(tbe *textpos.Edit) {
 	nsz := (tbe.Region.End.Line - tbe.Region.Start.Line)
 
 	ls.markupEdits = append(ls.markupEdits, tbe)
-	ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
-	ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
-	ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
+	if nsz > 0 {
+		ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
+		ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
+		ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
 
-	// todo:
-	// for _, vw := range ls.views {
-	// 	vw.markup = slices.Insert(vw.markup, stln, make([]rich.Text, nsz)...)
-	// 	vw.nbreaks = slices.Insert(vw.nbreaks, stln, make([]int, nsz)...)
-	// 	vw.layout = slices.Insert(vw.layout, stln, make([][]textpos.Pos16, nsz)...)
-	// }
-
-	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
-		pfs.Src.LinesInserted(stln, nsz)
+		for _, vw := range ls.views {
+			vw.lineToVline = slices.Insert(vw.lineToVline, stln, make([]int, nsz)...)
+		}
+		if ls.Highlighter.UsingParse() {
+			pfs := ls.parseState.Done()
+			pfs.Src.LinesInserted(stln, nsz)
+		}
 	}
 	ls.linesEdited(tbe)
 }
@@ -239,23 +237,23 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	stln := tbe.Region.Start.Line
 	edln := tbe.Region.End.Line
-	ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
-	ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
-	ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
+	if edln > stln {
+		ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
+		ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
+		ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
 
-	// todo:
-	// for _, vw := range ls.views {
-	// 	vw.markup = append(vw.markup[:stln], vw.markup[edln:]...)
-	// 	vw.nbreaks = append(vw.nbreaks[:stln], vw.nbreaks[edln:]...)
-	// 	vw.layout = append(vw.layout[:stln], vw.layout[edln:]...)
-	// }
-
-	if ls.Highlighter.UsingParse() {
-		pfs := ls.parseState.Done()
-		pfs.Src.LinesDeleted(stln, edln)
+		for _, vw := range ls.views {
+			ls.deleteLayoutLines(vw, stln, edln)
+		}
+		if ls.Highlighter.UsingParse() {
+			pfs := ls.parseState.Done()
+			pfs.Src.LinesDeleted(stln, edln)
+		}
 	}
-	st := tbe.Region.Start.Line
-	ls.markupLines(st, st)
+	// note: this remarkup of start line does not work:
+	// need a different layout logic.
+	// st := tbe.Region.Start.Line
+	// ls.markupLines(st, st)
 	ls.startDelayedReMarkup()
 }
 

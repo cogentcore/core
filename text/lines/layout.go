@@ -5,7 +5,6 @@
 package lines
 
 import (
-	"fmt"
 	"slices"
 	"unicode"
 
@@ -15,8 +14,7 @@ import (
 )
 
 // layoutLines performs view-specific layout of given lines of current markup.
-// the view must already have allocated space for these lines.
-// it updates the current number of total lines based on any changes from
+// It updates the current number of total lines based on any changes from
 // the current number of lines withing given range.
 func (ls *Lines) layoutLines(vw *view, st, ed int) {
 	svln, _ := ls.viewLinesRange(vw, st)
@@ -37,7 +35,32 @@ func (ls *Lines) layoutLines(vw *view, st, ed int) {
 	}
 	slices.Insert(vw.markup, svln, mus...)
 	slices.Insert(vw.vlineStarts, svln, vls...)
-	vw.viewLines += nln - inln
+	delta := nln - inln
+	if delta != 0 {
+		n := ls.numLines()
+		for ln := ed + 1; ln < n; ln++ {
+			vw.lineToVline[ln] += delta
+		}
+		vw.viewLines += delta
+	}
+}
+
+// deleteLayoutLines removes existing layout lines in given range.
+func (ls *Lines) deleteLayoutLines(vw *view, st, ed int) {
+	svln, _ := ls.viewLinesRange(vw, st)
+	_, evln := ls.viewLinesRange(vw, ed)
+	inln := evln - svln
+	// fmt.Println("delete:", st, ed, svln, evln, inln)
+	if ed > st {
+		slices.Delete(vw.lineToVline, st, ed)
+	}
+	slices.Delete(vw.markup, svln, evln)
+	slices.Delete(vw.vlineStarts, svln, evln)
+	n := ls.numLines()
+	for ln := st + 1; ln < n; ln++ {
+		vw.lineToVline[ln] -= inln
+	}
+	vw.viewLines -= inln
 }
 
 // layoutAll performs view-specific layout of all lines of current lines markup.
@@ -45,7 +68,6 @@ func (ls *Lines) layoutLines(vw *view, st, ed int) {
 func (ls *Lines) layoutAll(vw *view) {
 	n := len(ls.markup)
 	if n == 0 {
-		fmt.Println("layoutall bail 0")
 		return
 	}
 	vw.markup = vw.markup[:0]
