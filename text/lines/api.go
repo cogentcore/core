@@ -651,6 +651,106 @@ func (ls *Lines) MoveLineEnd(vid int, pos textpos.Pos) textpos.Pos {
 	return ls.moveLineEnd(vw, pos)
 }
 
+////////  Words
+
+// IsWordEnd returns true if the cursor is just past the last letter of a word.
+func (ls *Lines) IsWordEnd(pos textpos.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return false
+	}
+	txt := ls.lines[pos.Line]
+	sz := len(txt)
+	if sz == 0 {
+		return false
+	}
+	if pos.Char >= len(txt) { // end of line
+		r := txt[len(txt)-1]
+		return textpos.IsWordBreak(r, -1)
+	}
+	if pos.Char == 0 { // start of line
+		r := txt[0]
+		return !textpos.IsWordBreak(r, -1)
+	}
+	r1 := txt[pos.Char-1]
+	r2 := txt[pos.Char]
+	return !textpos.IsWordBreak(r1, rune(-1)) && textpos.IsWordBreak(r2, rune(-1))
+}
+
+// IsWordMiddle returns true if the cursor is anywhere inside a word,
+// i.e. the character before the cursor and the one after the cursor
+// are not classified as word break characters
+func (ls *Lines) IsWordMiddle(pos textpos.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return false
+	}
+	txt := ls.lines[pos.Line]
+	sz := len(txt)
+	if sz < 2 {
+		return false
+	}
+	if pos.Char >= len(txt) { // end of line
+		return false
+	}
+	if pos.Char == 0 { // start of line
+		return false
+	}
+	r1 := txt[pos.Char-1]
+	r2 := txt[pos.Char]
+	return !textpos.IsWordBreak(r1, rune(-1)) && !textpos.IsWordBreak(r2, rune(-1))
+}
+
+// WordAt returns a Region for a word starting at given position.
+// If the current position is a word break then go to next
+// break after the first non-break.
+func (ls *Lines) WordAt(pos textpos.Pos) textpos.Region {
+	ls.Lock()
+	defer ls.Unlock()
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return textpos.Region{}
+	}
+	txt := ls.lines[pos.Line]
+	rng := textpos.WordAt(txt, pos.Char)
+	st := pos
+	st.Char = rng.Start
+	ed := pos
+	ed.Char = rng.End
+	return textpos.NewRegionPos(st, ed)
+}
+
+// WordBefore returns the word before the given source position.
+// uses IsWordBreak to determine the bounds of the word
+func (ls *Lines) WordBefore(pos textpos.Pos) *textpos.Edit {
+	ls.Lock()
+	defer ls.Unlock()
+	if errors.Log(ls.isValidPos(pos)) != nil {
+		return &textpos.Edit{}
+	}
+	txt := ls.lines[pos.Line]
+	ch := pos.Char
+	ch = min(ch, len(txt))
+	st := ch
+	for i := ch - 1; i >= 0; i-- {
+		if i == 0 { // start of line
+			st = 0
+			break
+		}
+		r1 := txt[i]
+		r2 := txt[i-1]
+		if textpos.IsWordBreak(r1, r2) {
+			st = i + 1
+			break
+		}
+	}
+	if st != ch {
+		return ls.region(textpos.Pos{Line: pos.Line, Char: st}, pos)
+	}
+	return nil
+}
+
 ////////  PosHistory
 
 // PosHistorySave saves the cursor position in history stack of cursor positions.

@@ -29,8 +29,8 @@ func CheckLexLine(src []rune, tags lexer.Line) lexer.Line {
 			t.Token.Token = token.TextSpellErr
 			widx := strings.Index(wrd, lwrd)
 			ld := len(wrd) - len(lwrd)
-			t.St += widx
-			t.Ed += widx - ld
+			t.Start += widx
+			t.End += widx - ld
 			t.Now()
 			ser = append(ser, t)
 		}

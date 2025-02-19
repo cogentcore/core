@@ -95,126 +95,16 @@ func (ed *Base) selectAll() {
 	ed.NeedsRender()
 }
 
-// todo: cleanup
-
-// isWordEnd returns true if the cursor is just past the last letter of a word
-// word is a string of characters none of which are classified as a word break
-func (ed *Base) isWordEnd(tp textpos.Pos) bool {
-	return false
-	// todo
-	// txt := ed.Lines.Line(ed.CursorPos.Line)
-	// sz := len(txt)
-	// if sz == 0 {
-	// 	return false
-	// }
-	// if tp.Char >= len(txt) { // end of line
-	// 	r := txt[len(txt)-1]
-	// 	return core.IsWordBreak(r, -1)
-	// }
-	// if tp.Char == 0 { // start of line
-	// 	r := txt[0]
-	// 	return !core.IsWordBreak(r, -1)
-	// }
-	// r1 := txt[tp.Ch-1]
-	// r2 := txt[tp.Ch]
-	// return !core.IsWordBreak(r1, rune(-1)) && core.IsWordBreak(r2, rune(-1))
-}
-
-// isWordMiddle - returns true if the cursor is anywhere inside a word,
-// i.e. the character before the cursor and the one after the cursor
-// are not classified as word break characters
-func (ed *Base) isWordMiddle(tp textpos.Pos) bool {
-	return false
-	// todo:
-	// txt := ed.Lines.Line(ed.CursorPos.Line)
-	// sz := len(txt)
-	// if sz < 2 {
-	// 	return false
-	// }
-	// if tp.Char >= len(txt) { // end of line
-	// 	return false
-	// }
-	// if tp.Char == 0 { // start of line
-	// 	return false
-	// }
-	// r1 := txt[tp.Ch-1]
-	// r2 := txt[tp.Ch]
-	// return !core.IsWordBreak(r1, rune(-1)) && !core.IsWordBreak(r2, rune(-1))
-}
-
 // selectWord selects the word (whitespace, punctuation delimited) that the cursor is on.
 // returns true if word selected
 func (ed *Base) selectWord() bool {
-	// if ed.Lines == nil {
-	// 	return false
-	// }
-	// txt := ed.Lines.Line(ed.CursorPos.Line)
-	// sz := len(txt)
-	// if sz == 0 {
-	// 	return false
-	// }
-	// reg := ed.wordAt()
-	// ed.SelectRegion = reg
-	// ed.selectStart = ed.SelectRegion.Start
+	if ed.Lines == nil {
+		return false
+	}
+	reg := ed.Lines.WordAt(ed.CursorPos)
+	ed.SelectRegion = reg
+	ed.selectStart = ed.SelectRegion.Start
 	return true
-}
-
-// wordAt finds the region of the word at the current cursor position
-func (ed *Base) wordAt() (reg textpos.Region) {
-	return textpos.Region{}
-	// reg.Start = ed.CursorPos
-	// reg.End = ed.CursorPos
-	// txt := ed.Lines.Line(ed.CursorPos.Line)
-	// sz := len(txt)
-	// if sz == 0 {
-	// 	return reg
-	// }
-	// sch := min(ed.CursorPos.Ch, sz-1)
-	// if !core.IsWordBreak(txt[sch], rune(-1)) {
-	// 	for sch > 0 {
-	// 		r2 := rune(-1)
-	// 		if sch-2 >= 0 {
-	// 			r2 = txt[sch-2]
-	// 		}
-	// 		if core.IsWordBreak(txt[sch-1], r2) {
-	// 			break
-	// 		}
-	// 		sch--
-	// 	}
-	// 	reg.Start.Char = sch
-	// 	ech := ed.CursorPos.Char + 1
-	// 	for ech < sz {
-	// 		r2 := rune(-1)
-	// 		if ech < sz-1 {
-	// 			r2 = rune(txt[ech+1])
-	// 		}
-	// 		if core.IsWordBreak(txt[ech], r2) {
-	// 			break
-	// 		}
-	// 		ech++
-	// 	}
-	// 	reg.End.Char = ech
-	// } else { // keep the space start -- go to next space..
-	// 	ech := ed.CursorPos.Char + 1
-	// 	for ech < sz {
-	// 		if !core.IsWordBreak(txt[ech], rune(-1)) {
-	// 			break
-	// 		}
-	// 		ech++
-	// 	}
-	// 	for ech < sz {
-	// 		r2 := rune(-1)
-	// 		if ech < sz-1 {
-	// 			r2 = rune(txt[ech+1])
-	// 		}
-	// 		if core.IsWordBreak(txt[ech], r2) {
-	// 			break
-	// 		}
-	// 		ech++
-	// 	}
-	// 	reg.End.Char = ech
-	// }
-	// return reg
 }
 
 // SelectReset resets the selection

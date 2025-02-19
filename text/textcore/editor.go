@@ -45,6 +45,12 @@ type Editor struct { //core:embedder
 
 	// QReplace is the query replace data.
 	QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
+
+	// Complete is the functions and data for text completion.
+	Complete *core.Complete `json:"-" xml:"-"`
+
+	// spell is the functions and data for spelling correction.
+	spell *spellCheck
 }
 
 func (ed *Editor) Init() {
