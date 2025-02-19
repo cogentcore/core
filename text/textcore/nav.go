@@ -186,10 +186,17 @@ func (ed *Base) cursorDown(steps int) {
 // dynamically as just moving the cursor off the screen
 func (ed *Base) cursorPageDown(steps int) {
 	org := ed.validateCursor()
+	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	cpr := max(0, vp.Line-int(ed.scrollPos))
+	nln := max(1, ed.visSize.Y-cpr)
 	for range steps {
-		ed.CursorPos = ed.Lines.MoveDown(ed.viewId, ed.CursorPos, ed.visSize.Y, ed.cursorColumn)
+		ed.CursorPos = ed.Lines.MoveDown(ed.viewId, ed.CursorPos, nln, ed.cursorColumn)
 	}
-	ed.cursorSelectShow(org)
+	ed.setCursor(ed.CursorPos)
+	ed.scrollCursorToTop()
+	ed.renderCursor(true)
+	ed.cursorSelect(org)
+	ed.NeedsRender()
 }
 
 // cursorUp moves the cursor up line(s)
@@ -203,10 +210,17 @@ func (ed *Base) cursorUp(steps int) {
 // dynamically as just moving the cursor off the screen
 func (ed *Base) cursorPageUp(steps int) {
 	org := ed.validateCursor()
+	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	cpr := max(0, vp.Line-int(ed.scrollPos))
+	nln := max(1, cpr)
 	for range steps {
-		ed.CursorPos = ed.Lines.MoveUp(ed.viewId, ed.CursorPos, ed.visSize.Y, ed.cursorColumn)
+		ed.CursorPos = ed.Lines.MoveUp(ed.viewId, ed.CursorPos, nln, ed.cursorColumn)
 	}
-	ed.cursorSelectShow(org)
+	ed.setCursor(ed.CursorPos)
+	ed.scrollCursorToBottom()
+	ed.renderCursor(true)
+	ed.cursorSelect(org)
+	ed.NeedsRender()
 }
 
 // cursorRecenter re-centers the view around the cursor position, toggling

@@ -11,7 +11,9 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/textpos"
 )
 
 // func TestBase(t *testing.T) {
@@ -71,8 +73,24 @@ func TestBaseOpen(t *testing.T) {
 		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open("base.go"))
-	ed.scrollPos = 20
 	b.AssertRender(t, "open")
+}
+
+func TestBaseScroll(t *testing.T) {
+	b := core.NewBody()
+	ed := NewBase(b)
+	ed.Styler(func(s *styles.Style) {
+		s.Min.X.Em(40)
+	})
+	errors.Log(ed.Lines.Open("base.go"))
+	ed.OnShow(func(e events.Event) {
+		ed.scrollToCenterIfHidden(textpos.Pos{Line: 40})
+	})
+	b.AssertRender(t, "scroll-40")
+	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 42})
+	// b.AssertRender(t, "scroll-42")
+	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 20})
+	// b.AssertRender(t, "scroll-20")
 }
 
 /*

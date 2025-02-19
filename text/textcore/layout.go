@@ -200,7 +200,7 @@ func (ed *Base) updateScroll(idx int) bool {
 	ixf := float32(idx)
 	if sb.Value != ixf {
 		sb.SetValue(ixf)
-		ed.scrollPos = ixf
+		ed.scrollPos = sb.Value
 		ed.NeedsRender()
 		return true
 	}
@@ -209,37 +209,39 @@ func (ed *Base) updateScroll(idx int) bool {
 
 ////////    Scrolling -- Vertical
 
-// scrollLineToTop positions scroll so that given view line is at the top
-// (to the extent possible).
-func (ed *Base) scrollLineToTop(ln int) bool {
-	return ed.updateScroll(ln)
+// scrollLineToTop positions scroll so that the line of given source position
+// is at the top (to the extent possible).
+func (ed *Base) scrollLineToTop(pos textpos.Pos) bool {
+	vp := ed.Lines.PosToView(ed.viewId, pos)
+	return ed.updateScroll(vp.Line)
 }
 
 // scrollCursorToTop positions scroll so the cursor line is at the top.
 func (ed *Base) scrollCursorToTop() bool {
-	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
-	return ed.scrollLineToTop(vp.Line)
+	return ed.scrollLineToTop(ed.CursorPos)
 }
 
-// scrollLineToBottom positions scroll so the given view line is at the bottom.
-func (ed *Base) scrollLineToBottom(ln int) bool {
-	return ed.updateScroll(ln + ed.linesSize.Y - 1)
+// scrollLineToBottom positions scroll so that the line of given source position
+// is at the bottom (to the extent possible).
+func (ed *Base) scrollLineToBottom(pos textpos.Pos) bool {
+	vp := ed.Lines.PosToView(ed.viewId, pos)
+	return ed.updateScroll(vp.Line - ed.visSize.Y + 1)
 }
 
 // scrollCursorToBottom positions scroll so cursor line is at the bottom.
 func (ed *Base) scrollCursorToBottom() bool {
-	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
-	return ed.scrollLineToBottom(vp.Line)
+	return ed.scrollLineToBottom(ed.CursorPos)
 }
 
-// scrollLineToCenter positions scroll so given view line is in the center.
-func (ed *Base) scrollLineToCenter(ln int) bool {
-	return ed.updateScroll(ln + ed.linesSize.Y/2)
+// scrollLineToCenter positions scroll so that the line of given source position
+// is at the center (to the extent possible).
+func (ed *Base) scrollLineToCenter(pos textpos.Pos) bool {
+	vp := ed.Lines.PosToView(ed.viewId, pos)
+	return ed.updateScroll(vp.Line - ed.visSize.Y/2)
 }
 
 func (ed *Base) scrollCursorToCenter() bool {
-	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
-	return ed.scrollLineToCenter(vp.Line)
+	return ed.scrollLineToCenter(ed.CursorPos)
 }
 
 func (ed *Base) scrollCursorToTarget() {
@@ -252,16 +254,17 @@ func (ed *Base) scrollCursorToTarget() {
 // scrollToCenterIfHidden checks if the given position is not in view,
 // and scrolls to center if so. returns false if in view already.
 func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
+	vp := ed.Lines.PosToView(ed.viewId, pos)
 	spos := ed.Geom.ContentBBox.Min.Y
 	spos += int(ed.lineNumberPixels())
 	epos := ed.Geom.ContentBBox.Max.X
 	csp := ed.charStartPos(pos).ToPoint()
-	if pos.Line >= int(ed.scrollPos) && pos.Line < int(ed.scrollPos)+ed.linesSize.Y {
+	if vp.Line >= int(ed.scrollPos) && vp.Line < int(ed.scrollPos)+ed.visSize.Y {
 		if csp.X >= spos && csp.X < epos {
 			return false
 		}
 	} else {
-		ed.scrollCursorToCenter()
+		ed.scrollLineToCenter(pos)
 	}
 	if csp.X < spos {
 		ed.scrollCursorToRight()
