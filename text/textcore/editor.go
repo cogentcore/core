@@ -759,7 +759,7 @@ func (ed *Editor) handleLinkCursor() {
 // the selection updating etc.
 func (ed *Editor) setCursorFromMouse(pt image.Point, newPos textpos.Pos, selMode events.SelectModes) {
 	oldPos := ed.CursorPos
-	if newPos == oldPos {
+	if newPos == oldPos || newPos == textpos.PosErr {
 		return
 	}
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)

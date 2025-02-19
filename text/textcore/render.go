@@ -306,12 +306,15 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel
-// location (e.g., from mouse click), in scene-relative coordinates.
+// location (e.g., from mouse click), in widget-relative coordinates.
 func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
-	stln, _, spos := ed.renderLineStartEnd()
-	spos.X += ed.lineNumberPixels()
+	stln, _, _ := ed.renderLineStartEnd()
 	ptf := math32.FromPoint(pt)
-	cp := ptf.Sub(spos).Div(ed.charSize)
+	ptf.SetSub(math32.Vec2(ed.lineNumberPixels(), 0))
+	if ptf.X < 0 {
+		return textpos.PosErr
+	}
+	cp := ptf.Div(ed.charSize)
 	if cp.Y < 0 {
 		return textpos.PosErr
 	}

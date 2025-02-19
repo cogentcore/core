@@ -4,6 +4,8 @@
 
 package lines
 
+//go:generate core generate -add-types
+
 import (
 	"bytes"
 	"fmt"
