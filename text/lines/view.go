@@ -78,7 +78,12 @@ func (ls *Lines) viewLinesRange(vw *view, ln int) (st, ed int) {
 // offset into that view line for given source line, char position.
 func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 	vp := pos
-	vl := vw.lineToVline[pos.Line]
+	var vl int
+	if pos.Line >= len(vw.lineToVline) {
+		vl = vw.viewLines - 1
+	} else {
+		vl = vw.lineToVline[pos.Line]
+	}
 	vp.Line = vl
 	vlen := ls.viewLineLen(vw, vl)
 	if pos.Char < vlen {
@@ -176,5 +181,8 @@ func (ls *Lines) deleteView(vid int) {
 // api for rendering the lines.
 func (ls *Lines) ViewMarkupLine(vid, line int) rich.Text {
 	vw := ls.view(vid)
-	return vw.markup[line]
+	if line >= 0 && len(vw.markup) > line {
+		return vw.markup[line]
+	}
+	return rich.Text{}
 }

@@ -65,14 +65,14 @@ func (ed *Base) renderBBox() image.Rectangle {
 	return ed.Geom.ContentBBox
 }
 
-// renderLineStartEnd returns the starting and ending lines to render,
+// renderLineStartEnd returns the starting and ending (inclusive) lines to render,
 // based on the scroll position. Also returns the starting upper left position
 // for rendering the first line.
 func (ed *Base) renderLineStartEnd() (stln, edln int, spos math32.Vector2) {
 	spos = ed.Geom.Pos.Content
 	stln = int(math32.Floor(ed.scrollPos))
 	spos.Y += (float32(stln) - ed.scrollPos) * ed.charSize.Y
-	edln = min(ed.linesSize.Y, stln+ed.visSize.Y+1)
+	edln = min(ed.linesSize.Y-1, stln+ed.visSize.Y)
 	return
 }
 
@@ -99,10 +99,13 @@ func (ed *Base) renderLines() {
 	if ed.hasLineNumbers {
 		ed.renderLineNumbersBox()
 		li := 0
+		lastln := -1
 		for ln := stln; ln <= edln; ln++ {
 			sp := ed.Lines.PosFromView(ed.viewId, textpos.Pos{Line: ln})
-			if sp.Char == 0 { // this means it is the start of a source line
+			if sp.Char == 0 && sp.Line != lastln { // Char=0 is start of source line
+				// but also get 0 for out-of-range..
 				ed.renderLineNumber(spos, li, sp.Line)
+				lastln = sp.Line
 			}
 			li++
 		}
@@ -124,7 +127,7 @@ func (ed *Base) renderLines() {
 	sz.X *= float32(ed.linesSize.X)
 	vsel := buf.RegionToView(ed.viewId, ed.SelectRegion)
 	buf.Lock()
-	for ln := stln; ln < edln; ln++ {
+	for ln := stln; ln <= edln; ln++ {
 		tx := buf.ViewMarkupLine(ed.viewId, ln)
 		vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
 		vseli := vlr.Intersect(vsel, ed.linesSize.X)
