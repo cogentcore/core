@@ -55,28 +55,6 @@ func (ls *Lines) HighlightReset() {
 	}
 }
 
-// ScopelightRegion adds the selection to given region of runes from
-// the original source runes. Use ScopelightReset to clear first if desired.
-func (ls *Lines) ScopelightRegion(r textpos.Range) {
-	nr := ls.Source.Len()
-	r = r.Intersect(textpos.Range{0, nr})
-	for li := range ls.Lines {
-		ln := &ls.Lines[li]
-		lr := r.Intersect(ln.SourceRange)
-		if lr.Len() > 0 {
-			ln.Scopelights = append(ln.Scopelights, lr)
-		}
-	}
-}
-
-// ScopelightReset removes all existing selected regions.
-func (ls *Lines) ScopelightReset() {
-	for li := range ls.Lines {
-		ln := &ls.Lines[li]
-		ln.Scopelights = nil
-	}
-}
-
 // RuneToLinePos returns the [textpos.Pos] line and character position for given rune
 // index in Lines source. If ti >= source Len(), returns a position just after
 // the last actual rune.

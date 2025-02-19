@@ -42,6 +42,11 @@ func (ed *Base) clearScopelights() {
 	ed.NeedsRender()
 }
 
+func (ed *Base) addScopelights(st, end textpos.Pos) {
+	ed.scopelights = append(ed.scopelights, textpos.NewRegionPos(st, textpos.Pos{st.Line, st.Char + 1}))
+	ed.scopelights = append(ed.scopelights, textpos.NewRegionPos(end, textpos.Pos{end.Line, end.Char + 1}))
+}
+
 //////// Selection
 
 // clearSelected resets both the global selected flag and any current selection

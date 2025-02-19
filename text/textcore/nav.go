@@ -27,22 +27,12 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 	}
 
 	ed.clearScopelights()
-	// ed.CursorPos = ed.Lines.ValidPos(pos) // todo
 	ed.CursorPos = pos
+	bm, has := ed.Lines.BraceMatch(pos)
+	if has {
+		ed.addScopelights(pos, bm)
+	}
 	ed.SendInput()
-	// todo:
-	// txt := ed.Lines.Line(ed.CursorPos.Line)
-	// ch := ed.CursorPos.Char
-	// if ch < len(txt) {
-	// 	r := txt[ch]
-	// 	if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
-	// 		tp, found := ed.Lines.BraceMatch(txt[ch], ed.CursorPos)
-	// 		if found {
-	// 			ed.scopelights = append(ed.scopelights, lines.NewRegionPos(ed.CursorPos, textpos.Pos{ed.CursorPos.Line, ed.CursorPos.Char + 1}))
-	// 			ed.scopelights = append(ed.scopelights, lines.NewRegionPos(tp, textpos.Pos{tp.Line, tp.Char + 1}))
-	// 		}
-	// 	}
-	// }
 	ed.NeedsRender()
 }
 

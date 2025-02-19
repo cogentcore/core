@@ -138,6 +138,7 @@ func (ed *Base) renderLines() {
 	}
 	hlts := rtoview(ed.Highlights)
 	slts := rtoview(ed.scopelights)
+	hlts = append(hlts, slts...)
 	buf.Lock()
 	for ln := stln; ln <= edln; ln++ {
 		tx := buf.ViewMarkupLine(ed.viewId, ln)
@@ -167,18 +168,12 @@ func (ed *Base) renderLines() {
 		lsz.X -= ic
 		lns := sh.WrapLines(rtx, &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
 		if !vseli.IsNil() {
-			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char, End: vseli.End.Char})
+			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - indent, End: vseli.End.Char - indent})
 		}
 		for _, hlrg := range hlts {
 			hlsi := vlr.Intersect(hlrg, ed.linesSize.X)
 			if !hlsi.IsNil() {
-				lns.HighlightRegion(textpos.Range{Start: hlsi.Start.Char, End: hlsi.End.Char})
-			}
-		}
-		for _, hlrg := range slts {
-			hlsi := vlr.Intersect(hlrg, ed.linesSize.X)
-			if !hlsi.IsNil() {
-				lns.ScopelightRegion(textpos.Range{Start: hlsi.Start.Char, End: hlsi.End.Char})
+				lns.HighlightRegion(textpos.Range{Start: hlsi.Start.Char - indent, End: hlsi.End.Char - indent})
 			}
 		}
 		pc.TextLines(lns, lpos)

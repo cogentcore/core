@@ -337,3 +337,16 @@ func (ls *Lines) inTokenCode(pos textpos.Pos) bool {
 	}
 	return lx.Token.Token.IsCode()
 }
+
+func (ls *Lines) braceMatch(pos textpos.Pos) (textpos.Pos, bool) {
+	txt := ls.lines[pos.Line]
+	ch := pos.Char
+	if ch >= len(txt) {
+		return textpos.Pos{}, false
+	}
+	r := txt[ch]
+	if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
+		return lexer.BraceMatch(ls.lines, ls.hiTags, r, pos, maxScopeLines)
+	}
+	return textpos.Pos{}, false
+}

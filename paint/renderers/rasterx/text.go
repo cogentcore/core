@@ -67,6 +67,9 @@ func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, clr image.Image
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
 func (rs *Renderer) TextRegionFill(run *shapedgt.Run, start math32.Vector2, fill image.Image, ranges []textpos.Range) {
+	if fill == nil {
+		return
+	}
 	for _, sel := range ranges {
 		rsel := sel.Intersect(run.Runes())
 		if rsel.Len() == 0 {
@@ -93,7 +96,6 @@ func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Line
 	}
 	rs.TextRegionFill(run, start, lns.SelectionColor, ln.Selections)
 	rs.TextRegionFill(run, start, lns.HighlightColor, ln.Highlights)
-	rs.TextRegionFill(run, start, lns.ScopelightColor, ln.Scopelights)
 	fill := clr
 	if run.FillColor != nil {
 		fill = run.FillColor

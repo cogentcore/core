@@ -1090,11 +1090,19 @@ func (ls *Lines) SearchRegexp(re *regexp.Regexp) (int, []textpos.Match) {
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner
-// of the one passed to function.
-func (ls *Lines) BraceMatch(r rune, st textpos.Pos) (en textpos.Pos, found bool) {
+// of the one at the given position, if there is one of those at this position.
+func (ls *Lines) BraceMatch(pos textpos.Pos) (textpos.Pos, bool) {
 	ls.Lock()
 	defer ls.Unlock()
-	return lexer.BraceMatch(ls.lines, ls.hiTags, r, st, maxScopeLines)
+	return ls.braceMatch(pos)
+}
+
+// BraceMatchRune finds the brace, bracket, or parens that is the partner
+// of the given rune, starting at given position.
+func (ls *Lines) BraceMatchRune(r rune, pos textpos.Pos) (textpos.Pos, bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	return lexer.BraceMatch(ls.lines, ls.hiTags, r, pos, maxScopeLines)
 }
 
 ////////   LineColors
