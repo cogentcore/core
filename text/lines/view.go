@@ -46,6 +46,9 @@ func (ls *Lines) viewLineLen(vw *view, vl int) int {
 	if n == 0 {
 		return 0
 	}
+	if vl < 0 {
+		vl = 0
+	}
 	if vl >= n {
 		vl = n - 1
 	}

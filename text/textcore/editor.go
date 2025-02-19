@@ -7,8 +7,12 @@ package textcore
 import (
 	"fmt"
 	"image"
+	"os"
+	"time"
 	"unicode"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -60,6 +64,74 @@ func (ed *Editor) Init() {
 	ed.handleMouse()
 	ed.handleLinkCursor()
 	ed.handleFocus()
+}
+
+// SaveAsFunc saves the current text into the given file.
+// Does an editDone first to save edits and checks for an existing file.
+// If it does exist then prompts to overwrite or not.
+// If afterFunc is non-nil, then it is called with the status of the user action.
+func (ed *Editor) SaveAsFunc(filename string, afterFunc func(canceled bool)) {
+	ed.editDone()
+	if !errors.Log1(fsx.FileExists(filename)) {
+		ed.Lines.SaveFile(filename)
+		if afterFunc != nil {
+			afterFunc(false)
+		}
+	} else {
+		d := core.NewBody("File exists")
+		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("The file already exists; do you want to overwrite it?  File: %v", filename))
+		d.AddBottomBar(func(bar *core.Frame) {
+			d.AddCancel(bar).OnClick(func(e events.Event) {
+				if afterFunc != nil {
+					afterFunc(true)
+				}
+			})
+			d.AddOK(bar).OnClick(func(e events.Event) {
+				ed.Lines.SaveFile(filename)
+				if afterFunc != nil {
+					afterFunc(false)
+				}
+			})
+		})
+		d.RunDialog(ed.Scene)
+	}
+}
+
+// SaveAs saves the current text into given file; does an editDone first to save edits
+// and checks for an existing file; if it does exist then prompts to overwrite or not.
+func (ed *Editor) SaveAs(filename core.Filename) { //types:add
+	ed.SaveAsFunc(string(filename), nil)
+}
+
+// Save saves the current text into the current filename associated with this buffer.
+func (ed *Editor) Save() error { //types:add
+	fname := ed.Lines.Filename()
+	if fname == "" {
+		return errors.New("core.Editor: filename is empty for Save")
+	}
+	ed.editDone()
+	info, err := os.Stat(fname)
+	if err == nil && info.ModTime() != time.Time(ed.Lines.FileInfo().ModTime) {
+		sc := ed.Scene
+		d := core.NewBody("File Changed on Disk")
+		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File has changed on disk since you opened or saved it; what do you want to do?  File: %v", fname))
+		d.AddBottomBar(func(bar *core.Frame) {
+			core.NewButton(bar).SetText("Save to different file").OnClick(func(e events.Event) {
+				d.Close()
+				core.CallFunc(sc, ed.SaveAs)
+			})
+			core.NewButton(bar).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
+				d.Close()
+				ed.Lines.Revert()
+			})
+			core.NewButton(bar).SetText("Save file, overwriting").OnClick(func(e events.Event) {
+				d.Close()
+				ed.Lines.SaveFile(fname)
+			})
+		})
+		d.RunDialog(sc)
+	}
+	return ed.Lines.SaveFile(fname)
 }
 
 func (ed *Editor) handleFocus() {
@@ -586,6 +658,9 @@ func (ed *Editor) handleMouse() {
 		ed.SetFocus()
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
+		if newPos == textpos.PosErr {
+			return
+		}
 		switch e.MouseButton() {
 		case events.Left:
 			_, got := ed.OpenLinkAt(newPos)
@@ -764,9 +839,8 @@ func (ed *Editor) contextMenu(m *core.Scene) {
 				ed.Paste()
 			})
 		core.NewSeparator(m)
-		// todo:
-		// core.NewFuncButton(m).SetFunc(ed.Lines.Save).SetIcon(icons.Save)
-		// core.NewFuncButton(m).SetFunc(ed.Lines.SaveAs).SetIcon(icons.SaveAs)
+		core.NewFuncButton(m).SetFunc(ed.Save).SetIcon(icons.Save)
+		core.NewFuncButton(m).SetFunc(ed.SaveAs).SetIcon(icons.SaveAs)
 		core.NewFuncButton(m).SetFunc(ed.Lines.Open).SetIcon(icons.Open)
 		core.NewFuncButton(m).SetFunc(ed.Lines.Revert).SetIcon(icons.Reset)
 	} else {

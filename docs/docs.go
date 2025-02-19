@@ -24,8 +24,9 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textcore"
-	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore"
 	"cogentcore.org/core/yaegicore/coresymbols"
@@ -98,15 +99,15 @@ func main() {
 	ctx.ElementHandlers["home-page"] = homePage
 	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)
-		ed := texteditor.NewEditor(splits)
+		ed := textcore.NewEditor(splits)
 		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
-		err := ed.Buffer.Open(core.Filename(playgroundFile))
+		err := ed.Lines.Open(playgroundFile)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				err := os.WriteFile(playgroundFile, []byte(defaultPlaygroundCode), 0666)
 				core.ErrorSnackbar(ed, err, "Error creating code file")
 				if err == nil {
-					err := ed.Buffer.Open(core.Filename(playgroundFile))
+					err := ed.Lines.Open(playgroundFile)
 					core.ErrorSnackbar(ed, err, "Error loading code")
 				}
 			} else {
@@ -114,7 +115,7 @@ func main() {
 			}
 		}
 		ed.OnChange(func(e events.Event) {
-			core.ErrorSnackbar(ed, ed.Buffer.Save(), "Error saving code")
+			core.ErrorSnackbar(ed, ed.Save(), "Error saving code")
 		})
 		parent := core.NewFrame(splits)
 		yaegicore.BindTextEditor(ed, parent, "Go")
@@ -159,7 +160,7 @@ func main() {
 
 var home *core.Frame
 
-func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T), url ...string) {
+func makeBlock[T tree.NodeValue](title, txt string, graphic func(w *T), url ...string) {
 	if len(url) > 0 {
 		title = `<a target="_blank" href="` + url[0] + `">` + title + `</a>`
 	}
@@ -179,18 +180,18 @@ func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T), url ...
 			tree.Add(p, func(w *core.Frame) {
 				w.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
-					s.Text.Align = styles.Start
+					s.Text.Align = text.Start
 					s.Grow.Set(1, 1)
 				})
 				tree.AddChild(w, func(w *core.Text) {
 					w.SetType(core.TextHeadlineLarge).SetText(title)
 					w.Styler(func(s *styles.Style) {
-						s.Font.Weight = styles.WeightBold
+						s.Font.Weight = rich.Bold
 						s.Color = colors.Scheme.Primary.Base
 					})
 				})
 				tree.AddChild(w, func(w *core.Text) {
-					w.SetType(core.TextTitleLarge).SetText(text)
+					w.SetType(core.TextTitleLarge).SetText(txt)
 				})
 			})
 			if !graphicFirst {
@@ -249,11 +250,11 @@ func homePage(ctx *htmlcore.Context) bool {
 	})
 
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *textcore.Editor) {
-		w.Buffer.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
+		w.Lines.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
 core.NewButton(b).SetText("Hello, World!")
 b.RunMainWindow()`)
 		w.SetReadOnly(true)
-		w.Buffer.Options.LineNumbers = false
+		w.Lines.Settings.LineNumbers = false
 		w.Styler(func(s *styles.Style) {
 			if w.SizeClass() != core.SizeCompact {
 				s.Min.X.Em(20)

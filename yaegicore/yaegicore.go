@@ -109,7 +109,7 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		}
 
 		parent.DeleteChildren()
-		str := ed.Buffer.String()
+		str := ed.Lines.String()
 		// all Go code must be in a function for declarations to be handled correctly
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"

@@ -254,7 +254,7 @@ func (ed *Base) editDone() {
 	if ed.Lines != nil {
 		ed.Lines.EditDone()
 	}
-	// ed.clearSelected()
+	ed.clearSelected()
 	ed.clearCursor()
 	ed.SendChange()
 }

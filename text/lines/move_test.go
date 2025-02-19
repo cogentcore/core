@@ -5,7 +5,6 @@
 package lines
 
 import (
-	"fmt"
 	"testing"
 
 	_ "cogentcore.org/core/system/driver"
@@ -22,10 +21,10 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
 	vw := lns.view(vid)
 
-	for ln := range vw.viewLines {
-		ft := string(vw.markup[ln].Join())
-		fmt.Println(ft)
-	}
+	// for ln := range vw.viewLines {
+	// 	ft := string(vw.markup[ln].Join())
+	// 	fmt.Println(ft)
+	// }
 
 	posTests := []struct {
 		pos  textpos.Pos
@@ -61,8 +60,8 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 	}
 	for _, test := range vposTests {
 		sp := lns.posFromView(vw, test.vpos)
-		txt := lns.lines[sp.Line]
-		fmt.Println(test.vpos, sp, string(txt[sp.Char:min(len(txt), sp.Char+8)]))
+		// txt := lns.lines[sp.Line]
+		// fmt.Println(test.vpos, sp, string(txt[sp.Char:min(len(txt), sp.Char+8)]))
 		assert.Equal(t, test.pos, sp)
 	}
 
@@ -167,8 +166,8 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		{textpos.Pos{0, 0}, 1, 50, textpos.Pos{0, 128}},
 		{textpos.Pos{0, 0}, 2, 50, textpos.Pos{0, 206}},
 		{textpos.Pos{0, 0}, 4, 60, textpos.Pos{0, 371}},
-		{textpos.Pos{0, 0}, 5, 60, textpos.Pos{0, 439}},
-		{textpos.Pos{0, 371}, 2, 60, textpos.Pos{1, 41}},
+		{textpos.Pos{0, 0}, 5, 60, textpos.Pos{0, 440}},
+		{textpos.Pos{0, 371}, 2, 60, textpos.Pos{1, 42}},
 		{textpos.Pos{1, 30}, 1, 60, textpos.Pos{2, 60}},
 	}
 	for _, test := range downTests {
@@ -191,7 +190,7 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		{textpos.Pos{0, 128}, 2, 50, textpos.Pos{0, 50}},
 		{textpos.Pos{0, 206}, 1, 50, textpos.Pos{0, 128}},
 		{textpos.Pos{0, 371}, 1, 60, textpos.Pos{0, 294}},
-		{textpos.Pos{1, 5}, 1, 60, textpos.Pos{0, 439}},
+		{textpos.Pos{1, 5}, 1, 60, textpos.Pos{0, 440}},
 		{textpos.Pos{1, 5}, 1, 20, textpos.Pos{0, 410}},
 		{textpos.Pos{1, 5}, 2, 60, textpos.Pos{0, 371}},
 		{textpos.Pos{1, 5}, 3, 50, textpos.Pos{0, 284}},

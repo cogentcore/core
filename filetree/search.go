@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -43,7 +44,7 @@ const (
 type SearchResults struct {
 	Node    *Node
 	Count   int
-	Matches []lines.Match
+	Matches []textpos.Match
 }
 
 // Search returns list of all nodes starting at given node of given
@@ -101,7 +102,7 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation,
 			// }
 		}
 		var cnt int
-		var matches []lines.Match
+		var matches []textpos.Match
 		if sfn.isOpen() && sfn.Buffer != nil {
 			if regExp {
 				cnt, matches = sfn.Buffer.SearchRegexp(re)
@@ -178,7 +179,7 @@ func findAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo
 		}
 		ofn := openPath(path)
 		var cnt int
-		var matches []lines.Match
+		var matches []textpos.Match
 		if ofn != nil && ofn.Buffer != nil {
 			if regExp {
 				cnt, matches = ofn.Buffer.SearchRegexp(re)

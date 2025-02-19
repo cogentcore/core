@@ -17,12 +17,13 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textcore"
-	"cogentcore.org/core/text/texteditor"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
@@ -114,11 +115,11 @@ func handleElement(ctx *Context) {
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
-				ed.Buffer.SetFileExt(lang)
+				ed.Lines.SetFileExt(lang)
 			}
-			ed.Buffer.SetString(ExtractText(ctx))
+			ed.Lines.SetString(ExtractText(ctx))
 			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
-				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines()) // Go uses tabs
+				ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
 				parent := core.NewFrame(ed.Parent)
 				parent.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
@@ -141,7 +142,7 @@ func handleElement(ctx *Context) {
 				BindTextEditor(ed, parent, lang)
 			} else {
 				ed.SetReadOnly(true)
-				ed.Buffer.Options.LineNumbers = false
+				ed.Lines.Settings.LineNumbers = false
 				ed.Styler(func(s *styles.Style) {
 					s.Border.Width.Zero()
 					s.MaxBorder.Width.Zero()
@@ -151,7 +152,7 @@ func handleElement(ctx *Context) {
 			}
 		} else {
 			handleText(ctx).Styler(func(s *styles.Style) {
-				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+				s.Text.WhiteSpace = text.WhiteSpacePreWrap
 			})
 		}
 	case "li":
@@ -237,9 +238,9 @@ func handleElement(ctx *Context) {
 			New[core.TextField](ctx).SetText(val)
 		}
 	case "textarea":
-		buf := texteditor.NewBuffer()
+		buf := lines.NewLines()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[textcore.Editor](ctx).SetBuffer(buf)
+		New[textcore.Editor](ctx).SetLines(buf)
 	default:
 		ctx.NewParent = ctx.Parent()
 	}
@@ -260,7 +261,7 @@ func textStyler(s *styles.Style) {
 func handleText(ctx *Context) *core.Text {
 	tx := New[core.Text](ctx).SetText(ExtractText(ctx))
 	tx.Styler(textStyler)
-	tx.HandleTextClick(func(tl *ptext.TextLink) {
+	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
@@ -276,7 +277,7 @@ func handleTextTag(ctx *Context) *core.Text {
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
 	tx.Styler(textStyler)
-	tx.HandleTextClick(func(tl *ptext.TextLink) {
+	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx

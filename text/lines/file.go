@@ -105,6 +105,15 @@ func (ls *Lines) OpenFS(fsys fs.FS, filename string) error {
 	return err
 }
 
+// SaveFile writes current buffer to file, with no prompting, etc
+func (ls *Lines) SaveFile(filename string) error {
+	ls.Lock()
+	err := ls.saveFile(filename)
+	ls.Unlock()
+	ls.sendChange()
+	return err
+}
+
 // Revert re-opens text from the current file,
 // if the filename is set; returns false if not.
 // It uses an optimized diff-based update to preserve

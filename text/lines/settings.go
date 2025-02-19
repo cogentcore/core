@@ -8,12 +8,12 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/text/parse"
-	"cogentcore.org/core/text/textsettings"
+	"cogentcore.org/core/text/text"
 )
 
 // Settings contains settings for editing text lines.
 type Settings struct {
-	textsettings.EditorSettings
+	text.EditorSettings
 
 	// CommentLine are character(s) that start a single-line comment;
 	// if empty then multi-line comment syntax will be used.

@@ -3,12 +3,53 @@
 package text
 
 import (
+	"image"
+	"image/color"
+
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.Style", IDName: "style", Doc: "Style is used for text layout styling.\nMost of these are inherited", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-setters"}}, {Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Align", Doc: "Align specifies how to align text along the default direction (inherited).\nThis *only* applies to the text within its containing element,\nand is relevant only for multi-line text."}, {Name: "AlignV", Doc: "AlignV specifies \"vertical\" (orthogonal to default direction)\nalignment of text (inherited).\nThis *only* applies to the text within its containing element:\nif that element does not have a specified size\nthat is different from the text size, then this has *no effect*."}, {Name: "FontSize", Doc: "FontSize is the default font size. The rich text styling specifies\nsizes relative to this value, with the normal text size factor = 1."}, {Name: "LineSpacing", Doc: "LineSpacing is a multiplier on the default font size for spacing between lines.\nIf there are larger font elements within a line, they will be accommodated, with\nthe same amount of total spacing added above that maximum size as if it was all\nthe same height. The default of 1.2 is typical for \"single spaced\" text."}, {Name: "ParaSpacing", Doc: "ParaSpacing is the line spacing between paragraphs (inherited).\nThis will be copied from [Style.Margin] if that is non-zero,\nor can be set directly. Like [LineSpacing], this is a multiplier on\nthe default font size."}, {Name: "WhiteSpace", Doc: "WhiteSpace (not inherited) specifies how white space is processed,\nand how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.\nSee info about interactions with Grow.X setting for this and the NoWrap case."}, {Name: "Direction", Doc: "Direction specifies the default text direction, which can be overridden if the\nunicode text is typically written in a different direction."}, {Name: "Indent", Doc: "Indent specifies how much to indent the first line in a paragraph (inherited)."}, {Name: "TabSize", Doc: "TabSize specifies the tab size, in number of characters (inherited)."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.EditorSettings", IDName: "editor-settings", Doc: "EditorSettings contains text editor settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "TabSize", Doc: "size of a tab, in chars; also determines indent level for space indent"}, {Name: "SpaceIndent", Doc: "use spaces for indentation, otherwise tabs"}, {Name: "WordWrap", Doc: "wrap lines at word boundaries; otherwise long lines scroll off the end"}, {Name: "LineNumbers", Doc: "whether to show line numbers"}, {Name: "Completion", Doc: "use the completion system to suggest options while typing"}, {Name: "SpellCorrect", Doc: "suggest corrections for unknown words while typing"}, {Name: "AutoIndent", Doc: "automatically indent lines when enter, tab, }, etc pressed"}, {Name: "EmacsUndo", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"}, {Name: "DepthColor", Doc: "colorize the background according to nesting depth"}}})
+
+// SetTabSize sets the [EditorSettings.TabSize]:
+// size of a tab, in chars; also determines indent level for space indent
+func (t *EditorSettings) SetTabSize(v int) *EditorSettings { t.TabSize = v; return t }
+
+// SetSpaceIndent sets the [EditorSettings.SpaceIndent]:
+// use spaces for indentation, otherwise tabs
+func (t *EditorSettings) SetSpaceIndent(v bool) *EditorSettings { t.SpaceIndent = v; return t }
+
+// SetWordWrap sets the [EditorSettings.WordWrap]:
+// wrap lines at word boundaries; otherwise long lines scroll off the end
+func (t *EditorSettings) SetWordWrap(v bool) *EditorSettings { t.WordWrap = v; return t }
+
+// SetLineNumbers sets the [EditorSettings.LineNumbers]:
+// whether to show line numbers
+func (t *EditorSettings) SetLineNumbers(v bool) *EditorSettings { t.LineNumbers = v; return t }
+
+// SetCompletion sets the [EditorSettings.Completion]:
+// use the completion system to suggest options while typing
+func (t *EditorSettings) SetCompletion(v bool) *EditorSettings { t.Completion = v; return t }
+
+// SetSpellCorrect sets the [EditorSettings.SpellCorrect]:
+// suggest corrections for unknown words while typing
+func (t *EditorSettings) SetSpellCorrect(v bool) *EditorSettings { t.SpellCorrect = v; return t }
+
+// SetAutoIndent sets the [EditorSettings.AutoIndent]:
+// automatically indent lines when enter, tab, }, etc pressed
+func (t *EditorSettings) SetAutoIndent(v bool) *EditorSettings { t.AutoIndent = v; return t }
+
+// SetEmacsUndo sets the [EditorSettings.EmacsUndo]:
+// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
+func (t *EditorSettings) SetEmacsUndo(v bool) *EditorSettings { t.EmacsUndo = v; return t }
+
+// SetDepthColor sets the [EditorSettings.DepthColor]:
+// colorize the background according to nesting depth
+func (t *EditorSettings) SetDepthColor(v bool) *EditorSettings { t.DepthColor = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.Style", IDName: "style", Doc: "Style is used for text layout styling.\nMost of these are inherited", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-setters"}}, {Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Align", Doc: "Align specifies how to align text along the default direction (inherited).\nThis *only* applies to the text within its containing element,\nand is relevant only for multi-line text."}, {Name: "AlignV", Doc: "AlignV specifies \"vertical\" (orthogonal to default direction)\nalignment of text (inherited).\nThis *only* applies to the text within its containing element:\nif that element does not have a specified size\nthat is different from the text size, then this has *no effect*."}, {Name: "FontSize", Doc: "FontSize is the default font size. The rich text styling specifies\nsizes relative to this value, with the normal text size factor = 1."}, {Name: "LineSpacing", Doc: "LineSpacing is a multiplier on the default font size for spacing between lines.\nIf there are larger font elements within a line, they will be accommodated, with\nthe same amount of total spacing added above that maximum size as if it was all\nthe same height. This spacing is in addition to the default spacing, specified\nby each font. The default of 1 represents \"single spaced\" text."}, {Name: "ParaSpacing", Doc: "ParaSpacing is the line spacing between paragraphs (inherited).\nThis will be copied from [Style.Margin] if that is non-zero,\nor can be set directly. Like [LineSpacing], this is a multiplier on\nthe default font size."}, {Name: "WhiteSpace", Doc: "WhiteSpace (not inherited) specifies how white space is processed,\nand how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.\nSee info about interactions with Grow.X setting for this and the NoWrap case."}, {Name: "Direction", Doc: "Direction specifies the default text direction, which can be overridden if the\nunicode text is typically written in a different direction."}, {Name: "Indent", Doc: "Indent specifies how much to indent the first line in a paragraph (inherited)."}, {Name: "TabSize", Doc: "TabSize specifies the tab size, in number of characters (inherited)."}, {Name: "Color", Doc: "Color is the default font fill color, used for inking fonts unless otherwise\nspecified in the [rich.Style]."}, {Name: "SelectColor", Doc: "SelectColor is the color to use for the background region of selected text."}, {Name: "HighlightColor", Doc: "HighlightColor is the color to use for the background region of highlighted text."}}})
 
 // SetAlign sets the [Style.Align]:
 // Align specifies how to align text along the default direction (inherited).
@@ -33,7 +74,8 @@ func (t *Style) SetFontSize(v units.Value) *Style { t.FontSize = v; return t }
 // LineSpacing is a multiplier on the default font size for spacing between lines.
 // If there are larger font elements within a line, they will be accommodated, with
 // the same amount of total spacing added above that maximum size as if it was all
-// the same height. The default of 1.2 is typical for "single spaced" text.
+// the same height. This spacing is in addition to the default spacing, specified
+// by each font. The default of 1 represents "single spaced" text.
 func (t *Style) SetLineSpacing(v float32) *Style { t.LineSpacing = v; return t }
 
 // SetParaSpacing sets the [Style.ParaSpacing]:
@@ -61,6 +103,19 @@ func (t *Style) SetIndent(v units.Value) *Style { t.Indent = v; return t }
 // SetTabSize sets the [Style.TabSize]:
 // TabSize specifies the tab size, in number of characters (inherited).
 func (t *Style) SetTabSize(v int) *Style { t.TabSize = v; return t }
+
+// SetColor sets the [Style.Color]:
+// Color is the default font fill color, used for inking fonts unless otherwise
+// specified in the [rich.Style].
+func (t *Style) SetColor(v color.Color) *Style { t.Color = v; return t }
+
+// SetSelectColor sets the [Style.SelectColor]:
+// SelectColor is the color to use for the background region of selected text.
+func (t *Style) SetSelectColor(v image.Image) *Style { t.SelectColor = v; return t }
+
+// SetHighlightColor sets the [Style.HighlightColor]:
+// HighlightColor is the color to use for the background region of highlighted text.
+func (t *Style) SetHighlightColor(v image.Image) *Style { t.HighlightColor = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.Aligns", IDName: "aligns", Doc: "Aligns has the different types of alignment and justification for\nthe text."})
 

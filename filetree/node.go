@@ -30,7 +30,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
-	"cogentcore.org/core/text/texteditor"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -44,14 +44,19 @@ var NodeHighlighting = highlighting.StyleDefault
 type Node struct { //core:embedder
 	core.Tree
 
+	// todo: make Filepath a string! it is not directly edited
+
 	// Filepath is the full path to this file.
-	Filepath core.Filename `edit:"-" set:"s-" json:"-" xml:"-" copier:"-"`
+	Filepath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// Buffer is the file buffer for editing this file.
 	Buffer *lines.Lines `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+
+	// BufferViewId is the view into the buffer for this node.
+	BufferViewId int
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
@@ -172,10 +177,10 @@ func (fn *Node) Init() {
 	tree.AddChildInit(fn.Parts, "text", func(w *core.Text) {
 		w.Styler(func(s *styles.Style) {
 			if fn.IsExec() && !fn.IsDir() {
-				s.Font.Weight = styles.WeightBold
+				s.Font.Weight = rich.Bold
 			}
 			if fn.Buffer != nil {
-				s.Font.Style = styles.Italic
+				s.Font.Slant = rich.Italic
 			}
 		})
 	})
@@ -493,19 +498,20 @@ func (fn *Node) OpenBuf() (bool, error) {
 		return false, err
 	}
 	if fn.Buffer != nil {
-		if fn.Buffer.Filename == fn.Filepath { // close resets filename
+		if fn.Buffer.Filename() == string(fn.Filepath) { // close resets filename
 			return false, nil
 		}
 	} else {
-		fn.Buffer = texteditor.NewBuffer()
-		fn.Buffer.OnChange(func(e events.Event) {
+		fn.Buffer = lines.NewLines()
+		fn.BufferViewId = fn.Buffer.NewView(80) // 80 default width
+		fn.Buffer.OnChange(fn.BufferViewId, func(e events.Event) {
 			if fn.Info.VCS == vcs.Stored {
 				fn.Info.VCS = vcs.Modified
 			}
 		})
 	}
 	fn.Buffer.SetHighlighting(NodeHighlighting)
-	return true, fn.Buffer.Open(fn.Filepath)
+	return true, fn.Buffer.Open(string(fn.Filepath))
 }
 
 // removeFromExterns removes file from list of external files
@@ -526,7 +532,7 @@ func (fn *Node) closeBuf() bool {
 	if fn.Buffer == nil {
 		return false
 	}
-	fn.Buffer.Close(nil)
+	fn.Buffer.Close()
 	fn.Buffer = nil
 	return true
 }

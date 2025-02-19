@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package textsettings
-
-//go:generate core generate
+package text
 
 // EditorSettings contains text editor settings.
 type EditorSettings struct { //types:add

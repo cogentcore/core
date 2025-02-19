@@ -8,5 +8,5 @@ command extract {
 
 yaegi extract image image/color image/draw
 
-extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree text/texteditor htmlcore content paint base/iox/imagex
+extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree text/textcore htmlcore content paint base/iox/imagex
 

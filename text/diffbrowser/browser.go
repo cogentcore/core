@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
 
@@ -90,17 +90,17 @@ func (br *Browser) MakeToolbar(p *tree.Plan) {
 	// })
 }
 
-// ViewDiff views diff for given file Node, returning a texteditor.DiffEditor
-func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffEditor {
+// ViewDiff views diff for given file Node, returning a textcore.DiffEditor
+func (br *Browser) ViewDiff(fn *Node) *textcore.DiffEditor {
 	df := fsx.DirAndFile(fn.FileA)
 	tabs := br.Tabs()
 	tab := tabs.RecycleTab(df)
 	if tab.HasChildren() {
-		dv := tab.Child(1).(*texteditor.DiffEditor)
+		dv := tab.Child(1).(*textcore.DiffEditor)
 		return dv
 	}
 	tb := core.NewToolbar(tab)
-	de := texteditor.NewDiffEditor(tab)
+	de := textcore.NewDiffEditor(tab)
 	tb.Maker(de.MakeToolbar)
 	de.SetFileA(fn.FileA).SetFileB(fn.FileB).SetRevisionA(fn.RevA).SetRevisionB(fn.RevB)
 	de.DiffStrings(stringsx.SplitLines(fn.TextA), stringsx.SplitLines(fn.TextB))

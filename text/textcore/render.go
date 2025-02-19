@@ -131,8 +131,11 @@ func (ed *Base) renderLines() {
 			return nil
 		}
 		hlts := make([]textpos.Region, 0, len(rs))
-		for _, rg := range rs {
-			hlts = append(hlts, buf.RegionToView(ed.viewId, rg))
+		for _, reg := range rs {
+			reg := ed.Lines.AdjustRegion(reg)
+			if !reg.IsNil() {
+				hlts = append(hlts, buf.RegionToView(ed.viewId, reg))
+			}
 		}
 		return hlts
 	}
@@ -307,30 +310,6 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 	}
 }
 
-// renderHighlights renders the highlight regions as a
-// highlighted background color.
-func (ed *Base) renderHighlights(stln, edln int) {
-	// for _, reg := range ed.Highlights {
-	// 	reg := ed.Lines.AdjustRegion(reg)
-	// 	if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
-	// 		continue
-	// 	}
-	// 	ed.renderRegionBox(reg, ed.HighlightColor)
-	// }
-}
-
-// renderScopelights renders a highlight background color for regions
-// in the Scopelights list.
-func (ed *Base) renderScopelights(stln, edln int) {
-	// for _, reg := range ed.scopelights {
-	// 	reg := ed.Lines.AdjustRegion(reg)
-	// 	if reg.IsNil() || (stln >= 0 && (reg.Start.Line > edln || reg.End.Line < stln)) {
-	// 		continue
-	// 	}
-	// 	ed.renderRegionBox(reg, ed.HighlightColor)
-	// }
-}
-
 // PixelToCursor finds the cursor position that corresponds to the given pixel
 // location (e.g., from mouse click), in scene-relative coordinates.
 func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
@@ -338,6 +317,9 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	spos.X += ed.lineNumberPixels()
 	ptf := math32.FromPoint(pt)
 	cp := ptf.Sub(spos).Div(ed.charSize)
+	if cp.Y < 0 {
+		return textpos.PosErr
+	}
 	vpos := textpos.Pos{Line: stln + int(math32.Floor(cp.Y)), Char: int(math32.Round(cp.X))}
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
 	indent := 0
