@@ -264,12 +264,12 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 	for ln := stln; ln <= edln; ln++ {
 		sp := ed.Lines.PosFromView(ed.viewId, textpos.Pos{Line: ln})
 		depth := buf.LineLexDepth(sp.Line)
-		if depth == 0 {
+		if depth <= 0 {
 			continue
 		}
 		var vdc color.RGBA
 		if isDark { // reverse order too
-			vdc = viewDepthColors[nclrs-1-depth%nclrs]
+			vdc = viewDepthColors[(nclrs-1)-(depth%nclrs)]
 		} else {
 			vdc = viewDepthColors[depth%nclrs]
 		}

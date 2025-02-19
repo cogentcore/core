@@ -343,10 +343,16 @@ func (ed *Base) cursorDeleteWord(steps int) {
 	ed.NeedsRender()
 }
 
-// cursorKill deletes text from cursor to end of text
+// cursorKill deletes text from cursor to end of text.
+// if line is empty, deletes the line.
 func (ed *Base) cursorKill() {
 	org := ed.validateCursor()
-	ed.cursorLineEnd()
+	llen := ed.Lines.LineLen(ed.CursorPos.Line)
+	if ed.CursorPos.Char == llen { // at end
+		ed.cursorForward(1)
+	} else {
+		ed.cursorLineEnd()
+	}
 	ed.Lines.DeleteText(org, ed.CursorPos)
 	ed.SetCursorShow(org)
 	ed.NeedsRender()

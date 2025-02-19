@@ -49,16 +49,16 @@ func (ls *Lines) viewLineLen(vw *view, vl int) int {
 	if vl >= n {
 		vl = n - 1
 	}
-	vp := vw.vlineStarts[vl]
-	sl := ls.lines[vp.Line]
+	vs := vw.vlineStarts[vl]
+	sl := ls.lines[vs.Line]
 	if vl == vw.viewLines-1 {
-		return len(sl) - vp.Char
+		return len(sl) - vs.Char
 	}
 	np := vw.vlineStarts[vl+1]
-	if np.Line == vp.Line {
-		return np.Char - vp.Char
+	if np.Line == vs.Line {
+		return np.Char - vs.Char
 	}
-	return len(sl) - vp.Char
+	return len(sl) + 1 - vs.Char
 }
 
 // viewLinesRange returns the start and end view lines for given
