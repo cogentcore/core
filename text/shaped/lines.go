@@ -63,6 +63,9 @@ type Lines struct {
 
 	// HighlightColor is the color to use for rendering highlighted regions.
 	HighlightColor image.Image
+
+	// ScopelightColor is the color to use for rendering scopelighted regions.
+	ScopelightColor image.Image
 }
 
 // Line is one line of shaped text, containing multiple Runs.
@@ -104,6 +107,11 @@ type Line struct {
 	// and will be rendered with the [Lines.HighlightColor] background,
 	// replacing any other background color that might have been specified.
 	Highlights []textpos.Range
+
+	// Scopelights specifies region(s) of runes within this line that are highlighted,
+	// and will be rendered with the [Lines.ScopelightColor] background,
+	// replacing any other background color that might have been specified.
+	Scopelights []textpos.Range
 }
 
 func (ln *Line) String() string {

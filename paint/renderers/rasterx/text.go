@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/shaped/shapedgt"
+	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
 	"github.com/go-text/typesetting/shaping"
@@ -65,6 +66,24 @@ func (rs *Renderer) TextLine(ln *shaped.Line, lns *shaped.Lines, clr image.Image
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
+func (rs *Renderer) TextRegionFill(run *shapedgt.Run, start math32.Vector2, fill image.Image, ranges []textpos.Range) {
+	for _, sel := range ranges {
+		rsel := sel.Intersect(run.Runes())
+		if rsel.Len() == 0 {
+			continue
+		}
+		fi := run.FirstGlyphAt(rsel.Start)
+		li := run.LastGlyphAt(rsel.End - 1)
+		if fi >= 0 && li >= fi {
+			sbb := run.GlyphRegionBounds(fi, li)
+			rs.FillBounds(sbb.Translate(start), fill)
+		}
+	}
+}
+
+// TextRun rasterizes the given text run into the output image using the
+// font face set in the shaping.
+// The text will be drawn starting at the start pixel position.
 func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
 	// todo: render strike-through
 	// dir := run.Direction
@@ -72,19 +91,9 @@ func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Line
 	if run.Background != nil {
 		rs.FillBounds(rbb, run.Background)
 	}
-	if len(ln.Selections) > 0 {
-		for _, sel := range ln.Selections {
-			rsel := sel.Intersect(run.Runes())
-			if rsel.Len() > 0 {
-				fi := run.FirstGlyphAt(rsel.Start)
-				li := run.LastGlyphAt(rsel.End - 1)
-				if fi >= 0 && li >= fi {
-					sbb := run.GlyphRegionBounds(fi, li)
-					rs.FillBounds(sbb.Translate(start), lns.SelectionColor)
-				}
-			}
-		}
-	}
+	rs.TextRegionFill(run, start, lns.SelectionColor, ln.Selections)
+	rs.TextRegionFill(run, start, lns.HighlightColor, ln.Highlights)
+	rs.TextRegionFill(run, start, lns.ScopelightColor, ln.Scopelights)
 	fill := clr
 	if run.FillColor != nil {
 		fill = run.FillColor
