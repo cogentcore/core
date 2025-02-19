@@ -77,8 +77,8 @@ func (rs *Renderer) TextRun(run *shapedgt.Run, ln *shaped.Line, lns *shaped.Line
 	}
 
 	region := run.Runes()
-	idx := lns.Source.Index(region.Start)
-	st, _ := lns.Source.Span(idx.Line)
+	si, _, _ := lns.Source.Index(region.Start)
+	st, _ := lns.Source.Span(si)
 
 	fill := clr
 	if run.FillColor != nil {
