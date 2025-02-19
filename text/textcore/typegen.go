@@ -4,8 +4,12 @@ package textcore
 
 import (
 	"image"
+	"io"
+	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -72,7 +76,39 @@ func (t *Base) SetCursorColor(v image.Image) *Base { t.CursorColor = v; return t
 // If it is nil, they are sent to the standard web URL handler.
 func (t *Base) SetLinkHandler(v func(tl *rich.Hyperlink)) *Base { t.LinkHandler = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/textcore.Editor", IDName: "editor", Doc: "Editor is a widget for editing multiple lines of complicated text (as compared to\n[core.TextField] for a single line of simple text).  The Editor is driven by a\n[lines.Lines] buffer which contains all the text, and manages all the edits,\nsending update events out to the editors.\n\nUse NeedsRender to drive an render update for any change that does\nnot change the line-level layout of the text.\n\nMultiple editors can be attached to a given buffer.  All updating in the\nEditor should be within a single goroutine, as it would require\nextensive protections throughout code otherwise.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "iSpellKeyInput", Doc: "iSpellKeyInput locates the word to spell check based on cursor position and\nthe key input, then passes the text region to SpellCheck", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"kt"}}}, Embeds: []types.Field{{Name: "Base"}}, Fields: []types.Field{{Name: "ISearch", Doc: "ISearch is the interactive search data."}, {Name: "QReplace", Doc: "QReplace is the query replace data."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/textcore.DiffEditor", IDName: "diff-editor", Doc: "DiffEditor presents two side-by-side [Editor]s showing the differences\nbetween two files (represented as lines of strings).", Methods: []types.Method{{Name: "saveFileA", Doc: "saveFileA saves the current state of file A to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "saveFileB", Doc: "saveFileB saves the current state of file B to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevisionA", Doc: "revision for first file, if relevant"}, {Name: "RevisionB", Doc: "revision for second file, if relevant"}, {Name: "bufferA", Doc: "[Buffer] for A showing the aligned edit view"}, {Name: "bufferB", Doc: "[Buffer] for B showing the aligned edit view"}, {Name: "alignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "diffs", Doc: "diffs applied"}, {Name: "inInputEvent"}, {Name: "toolbar"}}})
+
+// NewDiffEditor returns a new [DiffEditor] with the given optional parent:
+// DiffEditor presents two side-by-side [Editor]s showing the differences
+// between two files (represented as lines of strings).
+func NewDiffEditor(parent ...tree.Node) *DiffEditor { return tree.New[DiffEditor](parent...) }
+
+// SetFileA sets the [DiffEditor.FileA]:
+// first file name being compared
+func (t *DiffEditor) SetFileA(v string) *DiffEditor { t.FileA = v; return t }
+
+// SetFileB sets the [DiffEditor.FileB]:
+// second file name being compared
+func (t *DiffEditor) SetFileB(v string) *DiffEditor { t.FileB = v; return t }
+
+// SetRevisionA sets the [DiffEditor.RevisionA]:
+// revision for first file, if relevant
+func (t *DiffEditor) SetRevisionA(v string) *DiffEditor { t.RevisionA = v; return t }
+
+// SetRevisionB sets the [DiffEditor.RevisionB]:
+// revision for second file, if relevant
+func (t *DiffEditor) SetRevisionB(v string) *DiffEditor { t.RevisionB = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/textcore.DiffTextEditor", IDName: "diff-text-editor", Doc: "DiffTextEditor supports double-click based application of edits from one\nbuffer to the other.", Embeds: []types.Field{{Name: "Editor"}}})
+
+// NewDiffTextEditor returns a new [DiffTextEditor] with the given optional parent:
+// DiffTextEditor supports double-click based application of edits from one
+// buffer to the other.
+func NewDiffTextEditor(parent ...tree.Node) *DiffTextEditor {
+	return tree.New[DiffTextEditor](parent...)
+}
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/textcore.Editor", IDName: "editor", Doc: "Editor is a widget for editing multiple lines of complicated text (as compared to\n[core.TextField] for a single line of simple text).  The Editor is driven by a\n[lines.Lines] buffer which contains all the text, and manages all the edits,\nsending update events out to the editors.\n\nUse NeedsRender to drive an render update for any change that does\nnot change the line-level layout of the text.\n\nMultiple editors can be attached to a given buffer.  All updating in the\nEditor should be within a single goroutine, as it would require\nextensive protections throughout code otherwise.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Lookup", Doc: "Lookup attempts to lookup symbol at current location, popping up a window\nif something is found.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Base"}}, Fields: []types.Field{{Name: "ISearch", Doc: "ISearch is the interactive search data."}, {Name: "QReplace", Doc: "QReplace is the query replace data."}, {Name: "Complete", Doc: "Complete is the functions and data for text completion."}, {Name: "spell", Doc: "spell is the functions and data for spelling correction."}}})
 
 // NewEditor returns a new [Editor] with the given optional parent:
 // Editor is a widget for editing multiple lines of complicated text (as compared to
@@ -104,3 +140,43 @@ func AsEditor(n tree.Node) *Editor {
 
 // AsEditor satisfies the [EditorEmbedder] interface
 func (t *Editor) AsEditor() *Editor { return t }
+
+// SetComplete sets the [Editor.Complete]:
+// Complete is the functions and data for text completion.
+func (t *Editor) SetComplete(v *core.Complete) *Editor { t.Complete = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/textcore.OutputBuffer", IDName: "output-buffer", Doc: "OutputBuffer is a [Buffer] that records the output from an [io.Reader] using\n[bufio.Scanner]. It is optimized to combine fast chunks of output into\nlarge blocks of updating. It also supports an arbitrary markup function\nthat operates on each line of output bytes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Output", Doc: "the output that we are reading from, as an io.Reader"}, {Name: "Buffer", Doc: "the [Buffer] that we output to"}, {Name: "Batch", Doc: "how much time to wait while batching output (default: 200ms)"}, {Name: "MarkupFunc", Doc: "optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input"}, {Name: "currentOutputLines", Doc: "current buffered output raw lines, which are not yet sent to the Buffer"}, {Name: "currentOutputMarkupLines", Doc: "current buffered output markup lines, which are not yet sent to the Buffer"}, {Name: "mu", Doc: "mutex protecting updating of CurrentOutputLines and Buffer, and timer"}, {Name: "lastOutput", Doc: "time when last output was sent to buffer"}, {Name: "afterTimer", Doc: "time.AfterFunc that is started after new input is received and not immediately output -- ensures that it will get output if no further burst happens"}}})
+
+// SetOutput sets the [OutputBuffer.Output]:
+// the output that we are reading from, as an io.Reader
+func (t *OutputBuffer) SetOutput(v io.Reader) *OutputBuffer { t.Output = v; return t }
+
+// SetBuffer sets the [OutputBuffer.Buffer]:
+// the [Buffer] that we output to
+func (t *OutputBuffer) SetBuffer(v *lines.Lines) *OutputBuffer { t.Buffer = v; return t }
+
+// SetBatch sets the [OutputBuffer.Batch]:
+// how much time to wait while batching output (default: 200ms)
+func (t *OutputBuffer) SetBatch(v time.Duration) *OutputBuffer { t.Batch = v; return t }
+
+// SetMarkupFunc sets the [OutputBuffer.MarkupFunc]:
+// optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input
+func (t *OutputBuffer) SetMarkupFunc(v OutputBufferMarkupFunc) *OutputBuffer {
+	t.MarkupFunc = v
+	return t
+}
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/textcore.TwinEditors", IDName: "twin-editors", Doc: "TwinEditors presents two side-by-side [Editor]s in [core.Splits]\nthat scroll in sync with each other.", Embeds: []types.Field{{Name: "Splits"}}, Fields: []types.Field{{Name: "BufferA", Doc: "[Buffer] for A"}, {Name: "BufferB", Doc: "[Buffer] for B"}, {Name: "inInputEvent"}}})
+
+// NewTwinEditors returns a new [TwinEditors] with the given optional parent:
+// TwinEditors presents two side-by-side [Editor]s in [core.Splits]
+// that scroll in sync with each other.
+func NewTwinEditors(parent ...tree.Node) *TwinEditors { return tree.New[TwinEditors](parent...) }
+
+// SetBufferA sets the [TwinEditors.BufferA]:
+// [Buffer] for A
+func (t *TwinEditors) SetBufferA(v *lines.Lines) *TwinEditors { t.BufferA = v; return t }
+
+// SetBufferB sets the [TwinEditors.BufferB]:
+// [Buffer] for B
+func (t *TwinEditors) SetBufferB(v *lines.Lines) *TwinEditors { t.BufferB = v; return t }

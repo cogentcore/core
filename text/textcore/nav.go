@@ -54,6 +54,15 @@ func (ed *Base) SetCursorShow(pos textpos.Pos) {
 	ed.renderCursor(true)
 }
 
+// SetCursorTarget sets a new cursor target position, ensures that it is visible
+func (ed *Base) SetCursorTarget(pos textpos.Pos) {
+	ed.targetSet = true
+	ed.cursorTarget = pos
+	ed.SetCursorShow(pos)
+	ed.NeedsRender()
+	// fmt.Println(ed, "set target:", ed.CursorTarg)
+}
+
 // savePosHistory saves the cursor position in history stack of cursor positions.
 // Tracks across views. Returns false if position was on same line as last one saved.
 func (ed *Base) savePosHistory(pos textpos.Pos) bool {

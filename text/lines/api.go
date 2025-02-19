@@ -476,6 +476,22 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 	return tbe
 }
 
+// InsertTextLines is the primary method for inserting text,
+// at given starting position. Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
+// Calls sendInput to send an Input event to views, so they update.
+func (ls *Lines) InsertTextLines(st textpos.Pos, text [][]rune) *textpos.Edit {
+	ls.Lock()
+	ls.fileModCheck()
+	tbe := ls.insertTextImpl(st, text)
+	if tbe != nil && ls.Autosave {
+		go ls.autoSave()
+	}
+	ls.Unlock()
+	ls.sendInput()
+	return tbe
+}
+
 // InsertTextRect inserts a rectangle of text defined in given Edit record,
 // (e.g., from RegionRect or DeleteRect).
 // Returns a copy of the Edit record with an updated timestamp.
