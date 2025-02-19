@@ -240,8 +240,6 @@ func (ls *Lines) openFileOnly(filename string) error {
 
 // openFileFS loads the given file in the given filesystem into the buffer.
 func (ls *Lines) openFileFS(fsys fs.FS, filename string) error {
-	ls.Lock()
-	defer ls.Unlock()
 	txt, err := fs.ReadFile(fsys, filename)
 	if err != nil {
 		return err

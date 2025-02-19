@@ -21,11 +21,6 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// NeedsLayout indicates that the [Base] needs a new layout pass.
-func (ed *Base) NeedsLayout() {
-	ed.NeedsRender()
-}
-
 // todo: manage scrollbar ourselves!
 // func (ed *Base) renderLayout() {
 // 	chg := ed.ManageOverflow(3, true)

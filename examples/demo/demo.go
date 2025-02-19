@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -24,8 +25,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-
-	// "cogentcore.org/core/text/texteditor"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
 
@@ -258,10 +258,8 @@ func textEditors(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
 
 	sp := core.NewSplits(tab)
-	_ = sp
-
-	// errors.Log(texteditor.NewEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
-	// texteditor.NewEditor(sp).Buffer.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
+	errors.Log(textcore.NewEditor(sp).Lines.OpenFS(demoFile, "demo.go"))
+	textcore.NewEditor(sp).Lines.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
 }
 
 func valueBinding(ts *core.Tabs) {

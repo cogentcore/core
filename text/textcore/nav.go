@@ -244,6 +244,7 @@ func (ed *Base) cursorRecenter() {
 func (ed *Base) cursorLineStart() {
 	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveLineStart(ed.viewId, org)
+	ed.cursorColumn = 0
 	ed.scrollCursorToRight()
 	ed.cursorSelectShow(org)
 }
@@ -254,7 +255,7 @@ func (ed *Base) CursorStartDoc() {
 	org := ed.validateCursor()
 	ed.CursorPos.Line = 0
 	ed.CursorPos.Char = 0
-	ed.cursorColumn = ed.CursorPos.Char
+	ed.cursorColumn = 0
 	ed.scrollCursorToTop()
 	ed.cursorSelectShow(org)
 }
@@ -263,7 +264,7 @@ func (ed *Base) CursorStartDoc() {
 func (ed *Base) cursorLineEnd() {
 	org := ed.validateCursor()
 	ed.CursorPos = ed.Lines.MoveLineEnd(ed.viewId, org)
-	ed.cursorColumn = ed.CursorPos.Char
+	ed.setCursorColumn(ed.CursorPos)
 	ed.scrollCursorToRight()
 	ed.cursorSelectShow(org)
 }
@@ -274,7 +275,7 @@ func (ed *Base) cursorEndDoc() {
 	org := ed.validateCursor()
 	ed.CursorPos.Line = max(ed.NumLines()-1, 0)
 	ed.CursorPos.Char = ed.Lines.LineLen(ed.CursorPos.Line)
-	ed.cursorColumn = ed.CursorPos.Char
+	ed.setCursorColumn(ed.CursorPos)
 	ed.scrollCursorToBottom()
 	ed.cursorSelectShow(org)
 }

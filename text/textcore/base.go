@@ -233,7 +233,7 @@ func (ed *Base) Init() {
 		ed.editDone()
 	})
 
-	ed.Updater(ed.NeedsLayout)
+	ed.Updater(ed.NeedsRender)
 }
 
 func (ed *Base) Destroy() {

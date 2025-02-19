@@ -885,7 +885,6 @@ func (ed *Editor) JumpToLinePrompt() {
 func (ed *Editor) jumpToLine(ln int) {
 	ed.SetCursorShow(textpos.Pos{Line: ln - 1})
 	ed.savePosHistory(ed.CursorPos)
-	ed.NeedsLayout()
 }
 
 // findNextLink finds next link after given position, returns false if no such links

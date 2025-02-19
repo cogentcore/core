@@ -10,5 +10,8 @@ The Lines handles all layout and markup styling, so the Base just needs to rende
 
 * dynamic scroll re-layout
 * link handling
+* outputbuffer formatting
 * within text tabs
+* xyz text rendering
+* lab/plot rendering
 
