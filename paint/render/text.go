@@ -11,14 +11,17 @@ import (
 
 // Text is a text rendering render item.
 type Text struct {
-	// todo: expand to a collection of lines!
+	// Text contains shaped Lines of text to be rendered, as produced by a
+	// [shaped.Shaper]. Typically this text is  configured so that the
+	// Postion is at the upper left corner of the resulting text rendering.
 	Text *shaped.Lines
 
-	// Position to render, which specifies the baseline of the starting line.
+	// Position to render, which typically specifies the upper left corner of
+	// the Text.
 	Position math32.Vector2
 
 	// Context has the full accumulated style, transform, etc parameters
-	// for rendering the path, combining the current state context (e.g.,
+	// for rendering, combining the current state context (e.g.,
 	// from any higher-level groups) with the current element's style parameters.
 	Context Context
 }

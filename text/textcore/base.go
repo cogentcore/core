@@ -184,7 +184,6 @@ func (ed *Base) SetWidgetValue(value any) error {
 func (ed *Base) Init() {
 	ed.Frame.Init()
 	ed.Styles.Font.Family = rich.Monospace // critical
-	// ed.AddContextMenu(ed.contextMenu)
 	ed.SetLines(lines.NewLines())
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
@@ -233,7 +232,7 @@ func (ed *Base) Init() {
 		ed.editDone()
 	})
 
-	ed.Updater(ed.NeedsRender)
+	// ed.Updater(ed.NeedsRender)
 }
 
 func (ed *Base) Destroy() {

@@ -85,3 +85,47 @@ func TestMarkup(t *testing.T) {
 	assert.Equal(t, rht, fmt.Sprint(string(b)))
 
 }
+
+func TestMarkupSpaces(t *testing.T) {
+
+	src := `Name        string`
+	rsrc := []rune(src)
+
+	fi, err := fileinfo.NewFileInfo("dummy.go")
+	assert.Error(t, err)
+
+	var pst parse.FileStates
+	pst.SetSrc("dummy.go", "", fi.Known)
+
+	hi := Highlighter{}
+	hi.Init(fi, &pst)
+	hi.SetStyle(HighlightingName("emacs"))
+
+	fs := pst.Done() // initialize
+	fs.Src.SetBytes([]byte(src))
+
+	lex, err := hi.MarkupTagsLine(0, rsrc)
+	assert.NoError(t, err)
+
+	hitrg := `[{Name 0 4 {0 0}} {KeywordType: string 12 18 {0 0}} {EOS 18 18 {0 0}}]`
+	assert.Equal(t, hitrg, fmt.Sprint(lex))
+	// fmt.Println(lex)
+
+	sty := rich.NewStyle()
+	sty.Family = rich.Monospace
+	tx := MarkupLineRich(hi.Style, sty, rsrc, lex, nil)
+
+	rtx := `[monospace]: "Name        "
+[monospace bold fill-color]: "string"
+`
+	// fmt.Println(tx)
+	assert.Equal(t, rtx, fmt.Sprint(tx))
+
+	for i, r := range rsrc {
+		si, sn, ri := tx.Index(i)
+		if tx[si][ri] != r {
+			fmt.Println(i, string(r), string(tx[si][ri]), si, ri, sn)
+		}
+		assert.Equal(t, string(r), string(tx[si][ri]))
+	}
+}

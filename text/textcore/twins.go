@@ -7,7 +7,6 @@ package textcore
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/tree"
@@ -68,8 +67,7 @@ func (te *TwinEditors) syncEditors(typ events.Types, e events.Event, name string
 	}
 	switch typ {
 	case events.Scroll:
-		other.Geom.Scroll.Y = me.Geom.Scroll.Y
-		other.ScrollUpdateFromGeom(math32.Y)
+		other.updateScroll(me.scrollPos)
 	case events.Input:
 		if te.inInputEvent {
 			return

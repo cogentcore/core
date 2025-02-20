@@ -192,15 +192,14 @@ func (ed *Base) SetScrollParams(d math32.Dims, sb *core.Slider) {
 
 // updateScroll sets the scroll position to given value, in lines.
 // calls a NeedsRender if changed.
-func (ed *Base) updateScroll(idx int) bool {
+func (ed *Base) updateScroll(pos float32) bool {
 	if !ed.HasScroll[math32.Y] || ed.Scrolls[math32.Y] == nil {
 		return false
 	}
 	sb := ed.Scrolls[math32.Y]
-	ixf := float32(idx)
-	if sb.Value != ixf {
-		sb.SetValue(ixf)
-		ed.scrollPos = sb.Value
+	if sb.Value != pos {
+		sb.SetValue(pos)
+		ed.scrollPos = sb.Value // does clamping, etc
 		ed.NeedsRender()
 		return true
 	}
@@ -213,7 +212,7 @@ func (ed *Base) updateScroll(idx int) bool {
 // is at the top (to the extent possible).
 func (ed *Base) scrollLineToTop(pos textpos.Pos) bool {
 	vp := ed.Lines.PosToView(ed.viewId, pos)
-	return ed.updateScroll(vp.Line)
+	return ed.updateScroll(float32(vp.Line))
 }
 
 // scrollCursorToTop positions scroll so the cursor line is at the top.
@@ -225,7 +224,7 @@ func (ed *Base) scrollCursorToTop() bool {
 // is at the bottom (to the extent possible).
 func (ed *Base) scrollLineToBottom(pos textpos.Pos) bool {
 	vp := ed.Lines.PosToView(ed.viewId, pos)
-	return ed.updateScroll(vp.Line - ed.visSize.Y + 1)
+	return ed.updateScroll(float32(vp.Line - ed.visSize.Y + 1))
 }
 
 // scrollCursorToBottom positions scroll so cursor line is at the bottom.
@@ -237,7 +236,7 @@ func (ed *Base) scrollCursorToBottom() bool {
 // is at the center (to the extent possible).
 func (ed *Base) scrollLineToCenter(pos textpos.Pos) bool {
 	vp := ed.Lines.PosToView(ed.viewId, pos)
-	return ed.updateScroll(vp.Line - ed.visSize.Y/2)
+	return ed.updateScroll(float32(vp.Line - ed.visSize.Y/2))
 }
 
 func (ed *Base) scrollCursorToCenter() bool {
@@ -272,31 +271,6 @@ func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
 		// ed.scrollCursorToLeft()
 	}
 	return true
-	//
-	// curBBox := ed.cursorBBox(ed.CursorPos)
-	// did := false
-	// lht := int(ed.charSize.Y)
-	// bb := ed.Geom.ContentBBox
-	// if bb.Size().Y <= lht {
-	// 	return false
-	// }
-	// if (curBBox.Min.Y-lht) < bb.Min.Y || (curBBox.Max.Y+lht) > bb.Max.Y {
-	// 	did = ed.scrollCursorToVerticalCenter()
-	// 	// fmt.Println("v min:", curBBox.Min.Y, bb.Min.Y, "max:", curBBox.Max.Y+lht, bb.Max.Y, did)
-	// }
-	// if curBBox.Max.X < bb.Min.X+int(ed.lineNumberPixels()) {
-	// 	did2 := ed.scrollCursorToRight()
-	// 	// fmt.Println("h max", curBBox.Max.X, bb.Min.X+int(ed.LineNumberOffset), did2)
-	// 	did = did || did2
-	// } else if curBBox.Min.X > bb.Max.X {
-	// 	did2 := ed.scrollCursorToRight()
-	// 	// fmt.Println("h min", curBBox.Min.X, bb.Max.X, did2)
-	// 	did = did || did2
-	// }
-	// if did {
-	// 	// fmt.Println("scroll to center", did)
-	// }
-	// return did
 }
 
 // scrollCursorToCenterIfHidden checks if the cursor position is not in view,

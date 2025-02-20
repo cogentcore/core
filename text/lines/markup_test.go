@@ -5,6 +5,7 @@
 package lines
 
 import (
+	"fmt"
 	"testing"
 
 	_ "cogentcore.org/core/system/driver"
@@ -108,4 +109,20 @@ any issues of style struct pointer management etc.
 	}
 	// fmt.Println(jtxt)
 	assert.Equal(t, join, jtxt)
+}
+
+func TestMarkupSpaces(t *testing.T) {
+	src := `Name           string
+`
+
+	lns, vid := NewLinesFromBytes("dummy.go", 40, []byte(src))
+	vw := lns.view(vid)
+	assert.Equal(t, src+"\n", lns.String())
+
+	mu0 := `[monospace]: "Name          "
+[monospace bold fill-color]: "string"
+`
+	fmt.Println(lns.markup[0])
+	fmt.Println(vw.markup[0])
+	assert.Equal(t, mu0, vw.markup[0].String())
 }
