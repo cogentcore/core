@@ -221,6 +221,7 @@ func (tx *Text) Init() {
 	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
 		// tx.paintText.UpdateColors(s.FontRender()) TODO(text):
+		tx.updateRichText() // note: critical to update with final styles
 	})
 
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
@@ -272,12 +273,17 @@ func (tx *Text) Init() {
 	})
 
 	tx.Updater(func() {
-		if tx.Styles.Text.WhiteSpace.KeepWhiteSpace() {
-			tx.richText = errors.Log1(htmltext.HTMLPreToRich([]byte(tx.Text), &tx.Styles.Font, nil))
-		} else {
-			tx.richText = errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), &tx.Styles.Font, nil))
-		}
+		tx.updateRichText()
 	})
+}
+
+// updateRichText gets the richtext from Text, using HTML parsing.
+func (tx *Text) updateRichText() {
+	if tx.Styles.Text.WhiteSpace.KeepWhiteSpace() {
+		tx.richText = errors.Log1(htmltext.HTMLPreToRich([]byte(tx.Text), &tx.Styles.Font, nil))
+	} else {
+		tx.richText = errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), &tx.Styles.Font, nil))
+	}
 }
 
 // findLink finds the text link at the given scene-local position. If it
@@ -373,14 +379,13 @@ func (tx *Text) selectWord(ri int) {
 	// todo: write a general routine for this in rich.Text
 }
 
-// configTextSize does the HTML and Layout in paintText for text,
+// configTextSize does the text shaping layout for text,
 // using given size to constrain layout.
 func (tx *Text) configTextSize(sz math32.Vector2) {
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	txs.Color = colors.ToUniform(tx.Styles.Color)
 	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, sz)
-	// fmt.Println(sz, ht)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -406,19 +411,18 @@ func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
-		// note: using a narrow ratio of .5 to allow text to squeeze into narrow space
-		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), 0.5, &tx.Styles.Font, &tx.Styles.Text)
-		// fmt.Println("est:", est)
+		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), 1.6, &tx.Styles.Font, &tx.Styles.Text)
+		// if DebugSettings.LayoutTrace {
+		// 	fmt.Println(tx, "Text SizeUp Estimate:", est)
+		// }
 		tx.configTextSize(est)
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
 	if tx.paintText == nil {
-		// fmt.Println("nil")
 		return
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
-	// fmt.Println(tx, rsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {

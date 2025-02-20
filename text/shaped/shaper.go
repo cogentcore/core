@@ -60,13 +60,14 @@ func WrapSizeEstimate(csz math32.Vector2, nChars int, ratio float32, sty *rich.S
 	area := chars * fht * fht
 	if csz.X > 0 && csz.Y > 0 {
 		ratio = csz.X / csz.Y
-		// fmt.Println(lb, "content size ratio:", ratio)
 	}
 	// w = ratio * h
-	// w^2 + h^2 = a
-	// (ratio*h)^2 + h^2 = a
-	h := math32.Sqrt(area) / math32.Sqrt(ratio+1)
-	w := ratio * h
+	// w * h = a
+	// h^2 = a / r
+	// h = sqrt(a / r)
+	h := math32.Sqrt(area / ratio)
+	h = max(fht*math32.Floor(h/fht), fht)
+	w := area / h
 	if w < csz.X { // must be at least this
 		w = csz.X
 		h = area / w

@@ -35,7 +35,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
 
 	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
-	nlines := int(math32.Floor(size.Y / lns.LineHeight))
+	nlines := int(math32.Floor(size.Y/lns.LineHeight)) * 2
 	maxSize := int(size.X)
 	if dir.IsVertical() {
 		nlines = int(math32.Floor(size.X / lns.LineHeight))

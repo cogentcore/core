@@ -33,6 +33,9 @@ func (tx Text) GetLinks() []Hyperlink {
 			continue
 		}
 		lr := tx.SpecialRange(si)
+		if lr.End < 0 || lr.End <= lr.Start {
+			continue
+		}
 		ls := tx[lr.Start:lr.End]
 		s, _ := tx.Span(si)
 		lk := Hyperlink{}
