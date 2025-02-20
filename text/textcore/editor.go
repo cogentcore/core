@@ -6,7 +6,6 @@ package textcore
 
 import (
 	"fmt"
-	"image"
 	"os"
 	"time"
 	"unicode"
@@ -21,7 +20,6 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
@@ -43,6 +41,8 @@ import (
 // extensive protections throughout code otherwise.
 type Editor struct { //core:embedder
 	Base
+
+	// todo: unexport below, pending cogent code update
 
 	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
@@ -755,58 +755,7 @@ func (ed *Editor) handleLinkCursor() {
 	})
 }
 
-// setCursorFromMouse sets cursor position from mouse mouse action -- handles
-// the selection updating etc.
-func (ed *Editor) setCursorFromMouse(pt image.Point, newPos textpos.Pos, selMode events.SelectModes) {
-	oldPos := ed.CursorPos
-	if newPos == oldPos || newPos == textpos.PosErr {
-		return
-	}
-	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
-	defer ed.NeedsRender()
-
-	if !ed.selectMode && selMode == events.ExtendContinuous {
-		if ed.SelectRegion == (textpos.Region{}) {
-			ed.selectStart = ed.CursorPos
-		}
-		ed.setCursor(newPos)
-		ed.selectRegionUpdate(ed.CursorPos)
-		ed.renderCursor(true)
-		return
-	}
-
-	ed.setCursor(newPos)
-	if ed.selectMode || selMode != events.SelectOne {
-		if !ed.selectMode && selMode != events.SelectOne {
-			ed.selectMode = true
-			ed.selectStart = newPos
-			ed.selectRegionUpdate(ed.CursorPos)
-		}
-		if !ed.StateIs(states.Sliding) && selMode == events.SelectOne {
-			ln := ed.CursorPos.Line
-			ch := ed.CursorPos.Char
-			if ln != ed.SelectRegion.Start.Line || ch < ed.SelectRegion.Start.Char || ch > ed.SelectRegion.End.Char {
-				ed.SelectReset()
-			}
-		} else {
-			ed.selectRegionUpdate(ed.CursorPos)
-		}
-		if ed.StateIs(states.Sliding) {
-			ed.AutoScroll(math32.FromPoint(pt).Sub(ed.Geom.Scroll))
-		} else {
-			ed.scrollCursorToCenterIfHidden()
-		}
-	} else if ed.HasSelection() {
-		ln := ed.CursorPos.Line
-		ch := ed.CursorPos.Char
-		if ln != ed.SelectRegion.Start.Line || ch < ed.SelectRegion.Start.Char || ch > ed.SelectRegion.End.Char {
-			ed.SelectReset()
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////
-//  Context Menu
+////////  Context Menu
 
 // ShowContextMenu displays the context menu with options dependent on situation
 func (ed *Editor) ShowContextMenu(e events.Event) {

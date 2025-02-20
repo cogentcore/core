@@ -5,6 +5,11 @@
 package textcore
 
 import (
+	"image"
+
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -389,4 +394,56 @@ func (ed *Base) cursorTranspose() {
 // cursorTranspose swaps the character at the cursor with the one before it
 func (ed *Base) cursorTransposeWord() {
 	// todo:
+}
+
+// setCursorFromMouse sets cursor position from mouse mouse action -- handles
+// the selection updating etc.
+func (ed *Base) setCursorFromMouse(pt image.Point, newPos textpos.Pos, selMode events.SelectModes) {
+	oldPos := ed.CursorPos
+	if newPos == oldPos || newPos == textpos.PosErr {
+		return
+	}
+	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
+	defer ed.NeedsRender()
+
+	if !ed.selectMode && selMode == events.ExtendContinuous {
+		if ed.SelectRegion == (textpos.Region{}) {
+			ed.selectStart = ed.CursorPos
+		}
+		ed.setCursor(newPos)
+		ed.selectRegionUpdate(ed.CursorPos)
+		ed.renderCursor(true)
+		return
+	}
+
+	ed.setCursor(newPos)
+	if ed.selectMode || selMode != events.SelectOne {
+		if !ed.selectMode && selMode != events.SelectOne {
+			ed.selectMode = true
+			ed.selectStart = newPos
+			ed.selectRegionUpdate(ed.CursorPos)
+		}
+		if !ed.StateIs(states.Sliding) && selMode == events.SelectOne {
+			ln := ed.CursorPos.Line
+			ch := ed.CursorPos.Char
+			if ln != ed.SelectRegion.Start.Line || ch < ed.SelectRegion.Start.Char || ch > ed.SelectRegion.End.Char {
+				ed.SelectReset()
+			}
+		} else {
+			ed.selectRegionUpdate(ed.CursorPos)
+		}
+		if ed.StateIs(states.Sliding) {
+			scPos := math32.FromPoint(pt).Sub(ed.Geom.Scroll)
+			scPos.Y = float32(ed.CursorPos.Line)
+			ed.AutoScroll(scPos)
+		} else {
+			ed.scrollCursorToCenterIfHidden()
+		}
+	} else if ed.HasSelection() {
+		ln := ed.CursorPos.Line
+		ch := ed.CursorPos.Char
+		if ln != ed.SelectRegion.Start.Line || ch < ed.SelectRegion.Start.Char || ch > ed.SelectRegion.End.Char {
+			ed.SelectReset()
+		}
+	}
 }

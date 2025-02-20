@@ -77,16 +77,23 @@ func (ls *Lines) viewLinesRange(vw *view, ln int) (st, ed int) {
 	return
 }
 
+// validViewLine returns a view line that is in range based on given
+// source line.
+func (ls *Lines) validViewLine(vw *view, ln int) int {
+	if ln < 0 {
+		return 0
+	} else if ln >= len(vw.lineToVline) {
+		return vw.viewLines - 1
+	}
+	return vw.lineToVline[ln]
+}
+
 // posToView returns the view position in terms of viewLines and Char
 // offset into that view line for given source line, char position.
+// Is robust to out-of-range positions.
 func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 	vp := pos
-	var vl int
-	if pos.Line >= len(vw.lineToVline) {
-		vl = vw.viewLines - 1
-	} else {
-		vl = vw.lineToVline[pos.Line]
-	}
+	vl := ls.validViewLine(vw, pos.Line)
 	vp.Line = vl
 	vlen := ls.viewLineLen(vw, vl)
 	if pos.Char < vlen {
@@ -116,7 +123,9 @@ func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
 		return textpos.Pos{}
 	}
 	vl := vp.Line
-	if vl >= n {
+	if vl < 0 {
+		vl = 0
+	} else if vl >= n {
 		vl = n - 1
 	}
 	vlen := ls.viewLineLen(vw, vl)

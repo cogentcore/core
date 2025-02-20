@@ -232,7 +232,7 @@ func (ed *Base) Init() {
 		ed.editDone()
 	})
 
-	// ed.Updater(ed.NeedsRender)
+	// ed.Updater(ed.NeedsRender) // todo: delete me
 }
 
 func (ed *Base) Destroy() {
