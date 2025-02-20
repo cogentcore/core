@@ -141,11 +141,11 @@ func (ls *Lines) ClearNotSaved() {
 }
 
 // EditDone is called externally (e.g., by Editor widget) when the user
-// has indicated that editing is done, and the results have been consumed.
+// has indicated that editing is done, and the results are to be consumed.
 func (ls *Lines) EditDone() {
 	ls.Lock()
 	ls.autosaveDelete()
-	ls.changed = true
+	ls.changed = false
 	ls.Unlock()
 	ls.sendChange()
 }
@@ -291,7 +291,7 @@ func (ls *Lines) revert() bool {
 
 // saveFile writes current buffer to file, with no prompting, etc
 func (ls *Lines) saveFile(filename string) error {
-	err := os.WriteFile(string(filename), ls.Bytes(), 0644)
+	err := os.WriteFile(string(filename), ls.bytes(0), 0644)
 	if err != nil {
 		// core.ErrorSnackbar(tb.sceneFromEditor(), err) // todo:
 		slog.Error(err.Error())

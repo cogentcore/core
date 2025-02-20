@@ -179,7 +179,7 @@ const (
 )
 
 // Weights are the degree of blackness or stroke thickness of a font.
-// This value ranges from 100.0 to 900.0, with 400.0 as normal.
+// The corresponding value ranges from 100.0 to 900.0, with 400.0 as normal.
 type Weights int32 //enums:enum Weight -transform kebab
 
 const (

@@ -8,7 +8,7 @@ You can change any style properties of a widget:
 
 ```Go
 core.NewText(b).SetText("Bold text").Styler(func(s *styles.Style) {
-    s.Font.Weight = styles.WeightBold
+    s.Font.Weight = rich.Bold
 })
 ```
 

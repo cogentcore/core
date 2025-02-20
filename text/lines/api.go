@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/text/token"
 )
 
-// this file contains the exported API for lines
+// this file contains the exported API for Lines
 
 // NewLines returns a new empty Lines, with no views.
 func NewLines() *Lines {
@@ -147,25 +147,19 @@ func (ls *Lines) SetTextLines(lns [][]byte) {
 	ls.sendChange()
 }
 
-// Bytes returns the current text lines as a slice of bytes,
+// Text returns the current text lines as a slice of bytes,
 // with an additional line feed at the end, per POSIX standards.
-func (ls *Lines) Bytes() []byte {
+// It does NOT call EditDone or send a Change event: that should
+// happen prior or separately from this call.
+func (ls *Lines) Text() []byte {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.bytes(0)
 }
 
-// Text returns the current text as a []byte array, applying all current
-// changes by calling editDone, which will generate a signal if there have been
-// changes.
-func (ls *Lines) Text() []byte {
-	ls.EditDone()
-	return ls.Bytes()
-}
-
-// String returns the current text as a string, applying all current
-// changes by calling editDone, which will generate a signal if there have been
-// changes.
+// String returns the current text as a string.
+// It does NOT call EditDone or send a Change event: that should
+// happen prior or separately from this call.
 func (ls *Lines) String() string {
 	return string(ls.Text())
 }

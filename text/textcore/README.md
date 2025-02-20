@@ -8,6 +8,7 @@ The Lines handles all layout and markup styling, so the Base just needs to rende
 
 # TODO
 
+* autoscroll too sensitive / biased
 * dynamic scroll re-layout
 * link handling
 * outputbuffer formatting

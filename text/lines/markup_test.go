@@ -21,7 +21,7 @@ func TestMarkup(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.go", 40, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", string(lns.Bytes()))
+	assert.Equal(t, src+"\n", lns.String())
 
 	mu0 := `[monospace bold fill-color]: "func"
 [monospace]: " ("
@@ -59,7 +59,7 @@ func TestLineWrap(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", string(lns.Bytes()))
+	assert.Equal(t, src+"\n", lns.String())
 
 	tmu := []string{`[monospace]: "The "
 [monospace fill-color]: "[rich.Text]"
