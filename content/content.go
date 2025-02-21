@@ -10,12 +10,16 @@ package content
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
 	"io/fs"
 	"net/http"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/maps"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -58,6 +62,10 @@ type Content struct {
 
 	// pagesByCategory has the [bcontent.Page]s for each of all [bcontent.Page.Categories].
 	pagesByCategory map[string][]*bcontent.Page
+
+	// categories has all unique [bcontent.Page.Categories], sorted such that the categories
+	// with the most pages are listed first.
+	categories []string
 
 	// history is the history of pages that have been visited.
 	// The oldest page is first.
@@ -205,6 +213,11 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		}
 		return nil
 	}))
+	ct.categories = maps.Keys(ct.pagesByCategory)
+	slices.SortFunc(ct.categories, func(a, b string) int {
+		return cmp.Compare(len(ct.pagesByCategory[b]), len(ct.pagesByCategory[a]))
+	})
+
 	if url := ct.getWebURL(); url != "" {
 		ct.Open(url)
 		return ct
@@ -354,23 +367,24 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 
 // makeCategories makes the categories tree for the current page and adds it to [Content.leftFrame].
 func (ct *Content) makeCategories() {
-	if len(ct.currentPage.Categories) == 0 {
+	if len(ct.categories) == 0 {
 		return
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
-	for _, cat := range ct.currentPage.Categories {
-		catTree := core.NewTree(cats).SetText(cat)
+	for _, cat := range ct.categories {
+		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.Open(catPage.URL)
 			}
 		})
 		for _, pg := range ct.pagesByCategory[cat] {
-			if pg == ct.currentPage {
-				continue
-			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
+			if pg == ct.currentPage {
+				pgTree.SetSelected(true)
+				catTree.SetClosed(false)
+			}
 			pgTree.OnSelect(func(e events.Event) {
 				ct.Open(pg.URL)
 			})
