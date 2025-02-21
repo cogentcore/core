@@ -374,6 +374,10 @@ func (ct *Content) makeCategories() {
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
 	for _, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
+		if ct.currentPage.Name == cat {
+			catTree.SetSelected(true)
+			catTree.SetClosed(false) // needs to happen after SetSelected since that overrides
+		}
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.Open(catPage.URL)
