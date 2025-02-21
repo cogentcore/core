@@ -138,11 +138,11 @@ type DiffEditor struct {
 	// revision for second file, if relevant
 	RevisionB string
 
-	// [Buffer] for A showing the aligned edit view
-	bufferA *lines.Lines
+	// [lines.Lines] for A showing the aligned edit view
+	linesA *lines.Lines
 
-	// [Buffer] for B showing the aligned edit view
-	bufferB *lines.Lines
+	// [lines.Lines] for B showing the aligned edit view
+	linesB *lines.Lines
 
 	// aligned diffs records diff for aligned lines
 	alignD lines.Diffs
@@ -156,10 +156,10 @@ type DiffEditor struct {
 
 func (dv *DiffEditor) Init() {
 	dv.Frame.Init()
-	dv.bufferA = lines.NewLines()
-	dv.bufferB = lines.NewLines()
-	dv.bufferA.Settings.LineNumbers = true
-	dv.bufferB.Settings.LineNumbers = true
+	dv.linesA = lines.NewLines()
+	dv.linesB = lines.NewLines()
+	dv.linesA.Settings.LineNumbers = true
+	dv.linesB.Settings.LineNumbers = true
 
 	dv.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
@@ -181,8 +181,8 @@ func (dv *DiffEditor) Init() {
 			})
 		})
 	}
-	f("text-a", dv.bufferA)
-	f("text-b", dv.bufferB)
+	f("text-a", dv.linesA)
+	f("text-b", dv.linesB)
 }
 
 func (dv *DiffEditor) updateToolbar() {
@@ -195,10 +195,10 @@ func (dv *DiffEditor) updateToolbar() {
 // setFilenames sets the filenames and updates markup accordingly.
 // Called in DiffStrings
 func (dv *DiffEditor) setFilenames() {
-	dv.bufferA.SetFilename(dv.FileA)
-	dv.bufferB.SetFilename(dv.FileB)
-	dv.bufferA.Stat()
-	dv.bufferB.Stat()
+	dv.linesA.SetFilename(dv.FileA)
+	dv.linesB.SetFilename(dv.FileB)
+	dv.linesA.Stat()
+	dv.linesB.Stat()
 }
 
 // syncEditors synchronizes the text [Editor] scrolling and cursor positions
@@ -326,8 +326,8 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 	dv.setFilenames()
 	dv.diffs.SetStringLines(astr, bstr)
 
-	dv.bufferA.DeleteLineColor(-1)
-	dv.bufferB.DeleteLineColor(-1)
+	dv.linesA.DeleteLineColor(-1)
+	dv.linesB.DeleteLineColor(-1)
 	del := colors.Scheme.Error.Base
 	ins := colors.Scheme.Success.Base
 	chg := colors.Scheme.Primary.Base
@@ -350,8 +350,8 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + dj
 			dv.alignD[i] = ad
 			for i := 0; i < mx; i++ {
-				dv.bufferA.SetLineColor(absln+i, chg)
-				dv.bufferB.SetLineColor(absln+i, chg)
+				dv.linesA.SetLineColor(absln+i, chg)
+				dv.linesB.SetLineColor(absln+i, chg)
 				blen := 0
 				alen := 0
 				if i < di {
@@ -380,8 +380,8 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + di
 			dv.alignD[i] = ad
 			for i := 0; i < di; i++ {
-				dv.bufferA.SetLineColor(absln+i, ins)
-				dv.bufferB.SetLineColor(absln+i, del)
+				dv.linesA.SetLineColor(absln+i, ins)
+				dv.linesB.SetLineColor(absln+i, del)
 				aln := []byte(astr[df.I1+i])
 				alen := len(aln)
 				ab = append(ab, aln)
@@ -397,8 +397,8 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + dj
 			dv.alignD[i] = ad
 			for i := 0; i < dj; i++ {
-				dv.bufferA.SetLineColor(absln+i, del)
-				dv.bufferB.SetLineColor(absln+i, ins)
+				dv.linesA.SetLineColor(absln+i, del)
+				dv.linesB.SetLineColor(absln+i, ins)
 				bln := []byte(bstr[df.J1+i])
 				blen := len(bln)
 				bb = append(bb, bln)
@@ -420,11 +420,11 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			absln += di
 		}
 	}
-	dv.bufferA.SetTextLines(ab) // don't copy
-	dv.bufferB.SetTextLines(bb) // don't copy
+	dv.linesA.SetTextLines(ab) // don't copy
+	dv.linesB.SetTextLines(bb) // don't copy
 	dv.tagWordDiffs()
-	dv.bufferA.ReMarkup()
-	dv.bufferB.ReMarkup()
+	dv.linesA.ReMarkup()
+	dv.linesB.ReMarkup()
 }
 
 // tagWordDiffs goes through replace diffs and tags differences at the
@@ -440,8 +440,8 @@ func (dv *DiffEditor) tagWordDiffs() {
 		stln := df.I1
 		for i := 0; i < mx; i++ {
 			ln := stln + i
-			ra := dv.bufferA.Line(ln)
-			rb := dv.bufferB.Line(ln)
+			ra := dv.linesA.Line(ln)
+			rb := dv.linesB.Line(ln)
 			lna := lexer.RuneFields(ra)
 			lnb := lexer.RuneFields(rb)
 			fla := lna.RuneStrings(ra)
@@ -457,25 +457,25 @@ func (dv *DiffEditor) tagWordDiffs() {
 				case 'r':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.bufferA.AddTag(ln, sla.Start, ela.End, token.TextStyleError)
+					dv.linesA.AddTag(ln, sla.Start, ela.End, token.TextStyleError)
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.bufferB.AddTag(ln, slb.Start, elb.End, token.TextStyleError)
+					dv.linesB.AddTag(ln, slb.Start, elb.End, token.TextStyleError)
 				case 'd':
 					sla := lna[ld.I1]
 					ela := lna[ld.I2-1]
-					dv.bufferA.AddTag(ln, sla.Start, ela.End, token.TextStyleDeleted)
+					dv.linesA.AddTag(ln, sla.Start, ela.End, token.TextStyleDeleted)
 				case 'i':
 					slb := lnb[ld.J1]
 					elb := lnb[ld.J2-1]
-					dv.bufferB.AddTag(ln, slb.Start, elb.End, token.TextStyleDeleted)
+					dv.linesB.AddTag(ln, slb.Start, elb.End, token.TextStyleDeleted)
 				}
 			}
 		}
 	}
 }
 
-// applyDiff applies change from the other buffer to the buffer for given file
+// applyDiff applies change from the other lines to the lines for given file
 // name, from diff that includes given line.
 func (dv *DiffEditor) applyDiff(ab int, line int) bool {
 	tva, tvb := dv.textEditors()
@@ -492,21 +492,21 @@ func (dv *DiffEditor) applyDiff(ab int, line int) bool {
 	}
 
 	if ab == 0 {
-		dv.bufferA.SetUndoOn(true)
+		dv.linesA.SetUndoOn(true)
 		// srcLen := len(dv.BufB.Lines[df.J2])
 		spos := textpos.Pos{Line: df.I1, Char: 0}
 		epos := textpos.Pos{Line: df.I2, Char: 0}
-		src := dv.bufferB.Region(spos, epos)
-		dv.bufferA.DeleteText(spos, epos)
-		dv.bufferA.InsertTextLines(spos, src.Text) // we always just copy, is blank for delete..
+		src := dv.linesB.Region(spos, epos)
+		dv.linesA.DeleteText(spos, epos)
+		dv.linesA.InsertTextLines(spos, src.Text) // we always just copy, is blank for delete..
 		dv.diffs.BtoA(di)
 	} else {
-		dv.bufferB.SetUndoOn(true)
+		dv.linesB.SetUndoOn(true)
 		spos := textpos.Pos{Line: df.J1, Char: 0}
 		epos := textpos.Pos{Line: df.J2, Char: 0}
-		src := dv.bufferA.Region(spos, epos)
-		dv.bufferB.DeleteText(spos, epos)
-		dv.bufferB.InsertTextLines(spos, src.Text)
+		src := dv.linesA.Region(spos, epos)
+		dv.linesB.DeleteText(spos, epos)
+		dv.linesB.InsertTextLines(spos, src.Text)
 		dv.diffs.AtoB(di)
 	}
 	dv.updateToolbar()
@@ -576,7 +576,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			dv.undoDiff(0)
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferA.IsNotSaved(), states.Disabled)
+			s.SetState(!dv.linesA.IsNotSaved(), states.Disabled)
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
@@ -587,7 +587,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferA.IsNotSaved(), states.Disabled)
+			s.SetState(!dv.linesA.IsNotSaved(), states.Disabled)
 		})
 	})
 
@@ -634,7 +634,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			dv.undoDiff(1)
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferB.IsNotSaved(), states.Disabled)
+			s.SetState(!dv.linesB.IsNotSaved(), states.Disabled)
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
@@ -645,7 +645,7 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 			fb.CallFunc()
 		})
 		w.Styler(func(s *styles.Style) {
-			s.SetState(!dv.bufferB.IsNotSaved(), states.Disabled)
+			s.SetState(!dv.linesB.IsNotSaved(), states.Disabled)
 		})
 	})
 }
@@ -656,11 +656,10 @@ func (dv *DiffEditor) textEditors() (*DiffTextEditor, *DiffTextEditor) {
 	return av, bv
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//   DiffTextEditor
+////////   DiffTextEditor
 
 // DiffTextEditor supports double-click based application of edits from one
-// buffer to the other.
+// lines to the other.
 type DiffTextEditor struct {
 	Editor
 }
@@ -672,7 +671,7 @@ func (ed *DiffTextEditor) Init() {
 	})
 	ed.OnDoubleClick(func(e events.Event) {
 		pt := ed.PointToRelPos(e.Pos())
-		if pt.X >= 0 && pt.X < int(ed.lineNumberPixels()) {
+		if pt.X >= 0 && pt.X < int(ed.LineNumberPixels()) {
 			newPos := ed.PixelToCursor(pt)
 			ln := newPos.Line
 			dv := ed.diffEditor()

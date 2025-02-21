@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"strings"
 
+	"cogentcore.org/core/colors"
 	"github.com/go-text/typesetting/di"
 )
 
@@ -396,6 +397,14 @@ func (s *Style) SetStrokeColor(clr color.Color) *Style {
 func (s *Style) SetBackground(clr color.Color) *Style {
 	s.Background = clr
 	s.Decoration.SetFlag(true, Background)
+	return s
+}
+
+// SetLink sets the default hyperlink styling: primary.Base color (e.g., blue)
+// and Underline.
+func (s *Style) SetLink() *Style {
+	s.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
+	s.Decoration.SetFlag(true, Underline)
 	return s
 }
 

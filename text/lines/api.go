@@ -124,9 +124,16 @@ func (ls *Lines) SetFontStyle(fs *rich.Style) *Lines {
 	return ls
 }
 
+// FontStyle returns the font style used for this lines.
+func (ls *Lines) FontStyle() *rich.Style {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.fontStyle
+}
+
 // SetText sets the text to the given bytes, and does
 // full markup update and sends a Change event.
-// Pass nil to initialize an empty buffer.
+// Pass nil to initialize an empty lines.
 func (ls *Lines) SetText(text []byte) *Lines {
 	ls.Lock()
 	ls.setText(text)
@@ -206,6 +213,22 @@ func (ls *Lines) SetChanged(changed bool) {
 	ls.Lock()
 	defer ls.Unlock()
 	ls.changed = changed
+}
+
+// SendChange sends an [event.Change] to the views of this lines,
+// causing them to update.
+func (ls *Lines) SendChange() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.sendChange()
+}
+
+// SendInput sends an [event.Input] to the views of this lines,
+// causing them to update.
+func (ls *Lines) SendInput() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.sendInput()
 }
 
 // NumLines returns the number of lines.
@@ -970,6 +993,15 @@ func (ls *Lines) StartDelayedReMarkup() {
 	ls.startDelayedReMarkup()
 }
 
+// StopDelayedReMarkup stops the timer for doing markup after an interval.
+func (ls *Lines) StopDelayedReMarkup() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.stopDelayedReMarkup()
+}
+
+//////// Misc edit functions
+
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces). Either inserts or deletes to reach target.
 // Returns edit record for any change.
@@ -1065,22 +1097,33 @@ func (ls *Lines) CountWordsLinesRegion(reg textpos.Region) (words, lines int) {
 	return
 }
 
-// DiffBuffers computes the diff between this buffer and the other buffer,
-// reporting a sequence of operations that would convert this buffer (a) into
-// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
+// Diffs computes the diff between this lines and the other lines,
+// reporting a sequence of operations that would convert this lines (a) into
+// the other lines (b).  Each operation is either an 'r' (replace), 'd'
 // (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
-func (ls *Lines) DiffBuffers(ob *Lines) Diffs {
+func (ls *Lines) Diffs(ob *Lines) Diffs {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.diffBuffers(ob)
+	return ls.diffs(ob)
 }
 
-// PatchFromBuffer patches (edits) using content from other,
-// according to diff operations (e.g., as generated from DiffBufs).
-func (ls *Lines) PatchFromBuffer(ob *Lines, diffs Diffs) bool {
+// PatchFrom patches (edits) using content from other,
+// according to diff operations (e.g., as generated from Diffs).
+func (ls *Lines) PatchFrom(ob *Lines, diffs Diffs) bool {
 	ls.Lock()
 	defer ls.Unlock()
-	return ls.patchFromBuffer(ob, diffs)
+	return ls.patchFrom(ob, diffs)
+}
+
+// DiffsUnified computes the diff between this lines and the other lines,
+// returning a unified diff with given amount of context (default of 3 will be
+// used if -1)
+func (ls *Lines) DiffsUnified(ob *Lines, context int) []byte {
+	astr := ls.Strings(true) // needs newlines for some reason
+	bstr := ob.Strings(true)
+
+	return DiffLinesUnified(astr, bstr, context, ls.Filename(), ls.FileInfo().ModTime.String(),
+		ob.Filename(), ob.FileInfo().ModTime.String())
 }
 
 ////////   Search etc
@@ -1144,6 +1187,13 @@ func (ls *Lines) PrevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.prevLink(pos)
+}
+
+// Links returns the full list of hyperlinks
+func (ls *Lines) Links() map[int][]rich.Hyperlink {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.links
 }
 
 ////////   LineColors

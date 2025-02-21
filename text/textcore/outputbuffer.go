@@ -18,9 +18,9 @@ import (
 // of a given line of output text by adding html tags. It is essential
 // that it ONLY adds tags, and otherwise has the exact same visible bytes
 // as the input.
-type OutputBufferMarkupFunc func(line []rune) rich.Text
+type OutputBufferMarkupFunc func(buf *lines.Lines, line []rune) rich.Text
 
-// OutputBuffer is a [Buffer] that records the output from an [io.Reader] using
+// OutputBuffer is a buffer that records the output from an [io.Reader] using
 // [bufio.Scanner]. It is optimized to combine fast chunks of output into
 // large blocks of updating. It also supports an arbitrary markup function
 // that operates on each line of output bytes.
@@ -29,8 +29,8 @@ type OutputBuffer struct { //types:add -setters
 	// the output that we are reading from, as an io.Reader
 	Output io.Reader
 
-	// the [Buffer] that we output to
-	Buffer *lines.Lines
+	// the [lines.Lines] that we output to
+	Lines *lines.Lines
 
 	// how much time to wait while batching output (default: 200ms)
 	Batch time.Duration
@@ -76,10 +76,10 @@ func (ob *OutputBuffer) MonitorOutput() {
 		}
 		ob.bufferedLines = append(ob.bufferedLines, rln)
 		if ob.MarkupFunc != nil {
-			mup := ob.MarkupFunc(rln)
+			mup := ob.MarkupFunc(ob.Lines, rln)
 			ob.bufferedMarkup = append(ob.bufferedMarkup, mup)
 		} else {
-			mup := rich.NewText(rich.NewStyle(), rln)
+			mup := rich.NewPlainText(rln)
 			ob.bufferedMarkup = append(ob.bufferedMarkup, mup)
 		}
 		lag := time.Since(ob.lastOutput)
@@ -106,9 +106,8 @@ func (ob *OutputBuffer) outputToBuffer() {
 	if len(ob.bufferedLines) == 0 {
 		return
 	}
-	ob.Buffer.SetUndoOn(false)
-	ob.Buffer.AppendTextMarkup(ob.bufferedLines, ob.bufferedMarkup)
-	// ob.Buffer.AutoScrollEditors() // todo
+	ob.Lines.SetUndoOn(false)
+	ob.Lines.AppendTextMarkup(ob.bufferedLines, ob.bufferedMarkup)
 	ob.bufferedLines = make([][]rune, 0, 100)
 	ob.bufferedMarkup = make([]rich.Text, 0, 100)
 }

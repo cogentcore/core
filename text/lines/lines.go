@@ -283,29 +283,6 @@ func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 	return tbe
 }
 
-// appendTextLineMarkup appends one line of new text to end of lines, using
-// insert, and appending a LF at the end of the line if it doesn't already
-// have one. User-supplied markup is used. Returns the edit region.
-func (ls *Lines) appendTextLineMarkup(text []rune, markup rich.Text) *textpos.Edit {
-	ed := ls.endPos()
-	sz := len(text)
-	addLF := true
-	if sz > 0 {
-		if text[sz-1] == '\n' {
-			addLF = false
-		}
-	}
-	efft := text
-	if addLF {
-		efft = make([]rune, sz+1)
-		copy(efft, text)
-		efft[sz] = '\n'
-	}
-	tbe := ls.insertText(ed, efft)
-	ls.markup[tbe.Region.Start.Line] = markup
-	return tbe
-}
-
 ////////   Edits
 
 // isValidPos returns an error if position is invalid. Note that the end

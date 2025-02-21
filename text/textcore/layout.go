@@ -255,7 +255,7 @@ func (ed *Base) scrollCursorToTarget() {
 func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
 	vp := ed.Lines.PosToView(ed.viewId, pos)
 	spos := ed.Geom.ContentBBox.Min.Y
-	spos += int(ed.lineNumberPixels())
+	spos += int(ed.LineNumberPixels())
 	epos := ed.Geom.ContentBBox.Max.X
 	csp := ed.charStartPos(pos).ToPoint()
 	if vp.Line >= int(ed.scrollPos) && vp.Line < int(ed.scrollPos)+ed.visSize.Y {

@@ -53,10 +53,10 @@ type Node struct { //core:embedder
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// Buffer is the file buffer for editing this file.
-	Buffer *lines.Lines `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Lines *lines.Lines `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// BufferViewId is the view into the buffer for this node.
-	BufferViewId int
+	// LinesViewId is the view into the buffer for this node.
+	LinesViewId int
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
@@ -179,7 +179,7 @@ func (fn *Node) Init() {
 			if fn.IsExec() && !fn.IsDir() {
 				s.Font.Weight = rich.Bold
 			}
-			if fn.Buffer != nil {
+			if fn.Lines != nil {
 				s.Font.Slant = rich.Italic
 			}
 		})
@@ -288,7 +288,7 @@ func (fn *Node) isOpen() bool {
 
 // IsNotSaved returns true if the file is open and has been changed (edited) since last Save
 func (fn *Node) IsNotSaved() bool {
-	return fn.Buffer != nil && fn.Buffer.IsNotSaved()
+	return fn.Lines != nil && fn.Lines.IsNotSaved()
 }
 
 // isAutoSave returns true if file is an auto-save file (starts and ends with #)
@@ -497,21 +497,21 @@ func (fn *Node) OpenBuf() (bool, error) {
 		log.Println(err)
 		return false, err
 	}
-	if fn.Buffer != nil {
-		if fn.Buffer.Filename() == string(fn.Filepath) { // close resets filename
+	if fn.Lines != nil {
+		if fn.Lines.Filename() == string(fn.Filepath) { // close resets filename
 			return false, nil
 		}
 	} else {
-		fn.Buffer = lines.NewLines()
-		fn.BufferViewId = fn.Buffer.NewView(80) // 80 default width
-		fn.Buffer.OnChange(fn.BufferViewId, func(e events.Event) {
+		fn.Lines = lines.NewLines()
+		fn.LinesViewId = fn.Lines.NewView(80) // 80 default width
+		fn.Lines.OnChange(fn.LinesViewId, func(e events.Event) {
 			if fn.Info.VCS == vcs.Stored {
 				fn.Info.VCS = vcs.Modified
 			}
 		})
 	}
-	fn.Buffer.SetHighlighting(NodeHighlighting)
-	return true, fn.Buffer.Open(string(fn.Filepath))
+	fn.Lines.SetHighlighting(NodeHighlighting)
+	return true, fn.Lines.Open(string(fn.Filepath))
 }
 
 // removeFromExterns removes file from list of external files
@@ -529,11 +529,11 @@ func (fn *Node) removeFromExterns() { //types:add
 // closeBuf closes the file in its buffer if it is open.
 // returns true if closed.
 func (fn *Node) closeBuf() bool {
-	if fn.Buffer == nil {
+	if fn.Lines == nil {
 		return false
 	}
-	fn.Buffer.Close()
-	fn.Buffer = nil
+	fn.Lines.Close()
+	fn.Lines = nil
 	return true
 }
 

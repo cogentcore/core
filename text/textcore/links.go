@@ -5,9 +5,12 @@
 package textcore
 
 import (
+	"slices"
+
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
+	"golang.org/x/exp/maps"
 )
 
 // openLink opens given link, using the LinkHandler if non-nil,
@@ -48,6 +51,21 @@ func (ed *Base) highlightLink(lk *rich.Hyperlink, ln int) {
 	ed.HighlightRegion(reg)
 	ed.SetCursorTarget(reg.Start)
 	ed.savePosHistory(reg.Start)
+}
+
+// HighlightAllLinks highlights all hyperlinks.
+func (ed *Base) HighlightAllLinks() {
+	ed.Highlights = nil
+	lks := ed.Lines.Links()
+	lns := maps.Keys(lks)
+	slices.Sort(lns)
+	for _, ln := range lns {
+		ll := lks[ln]
+		for li := range ll {
+			lk := &ll[li]
+			ed.highlightLink(lk, ln)
+		}
+	}
 }
 
 // CursorNextLink moves cursor to next link. wraparound wraps around to top of

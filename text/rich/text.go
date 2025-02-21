@@ -29,6 +29,12 @@ func NewText(s *Style, r []rune) Text {
 	return tx
 }
 
+// NewPlainText returns a new [Text] starting with default style and runes string,
+// which can be empty.
+func NewPlainText(r []rune) Text {
+	return NewText(NewStyle(), r)
+}
+
 // NumSpans returns the number of spans in this Text.
 func (tx Text) NumSpans() int {
 	return len(tx)

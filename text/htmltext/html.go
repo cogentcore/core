@@ -15,7 +15,6 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/stack"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/text/rich"
 	"golang.org/x/net/html/charset"
@@ -83,8 +82,7 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 				switch nm {
 				case "a":
 					special = rich.Link
-					fs.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
-					fs.Decoration.SetFlag(true, rich.Underline)
+					fs.SetLink()
 					for _, attr := range se.Attr {
 						if attr.Name.Local == "href" {
 							linkURL = attr.Value

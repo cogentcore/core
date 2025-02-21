@@ -173,19 +173,19 @@ func (pt Patch) Apply(astr []string) []string {
 
 ////////  Lines api
 
-// diffBuffers computes the diff between this buffer and the other buffer,
-// reporting a sequence of operations that would convert this buffer (a) into
-// the other buffer (b).  Each operation is either an 'r' (replace), 'd'
+// diffs computes the diff between this lines and the other lines,
+// reporting a sequence of operations that would convert this lines (a) into
+// the other lines (b).  Each operation is either an 'r' (replace), 'd'
 // (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
-func (ls *Lines) diffBuffers(ob *Lines) Diffs {
+func (ls *Lines) diffs(ob *Lines) Diffs {
 	astr := ls.strings(false)
 	bstr := ob.strings(false)
 	return DiffLines(astr, bstr)
 }
 
-// patchFromBuffer patches (edits) using content from other,
+// patchFrom patches (edits) using content from other,
 // according to diff operations (e.g., as generated from DiffBufs).
-func (ls *Lines) patchFromBuffer(ob *Lines, diffs Diffs) bool {
+func (ls *Lines) patchFrom(ob *Lines, diffs Diffs) bool {
 	sz := len(diffs)
 	mods := false
 	for i := sz - 1; i >= 0; i-- { // go in reverse so changes are valid!

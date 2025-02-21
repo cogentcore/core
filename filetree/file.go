@@ -105,7 +105,7 @@ func (fn *Node) deleteFilesImpl() {
 			if !ok {
 				continue
 			}
-			if sn.Buffer != nil {
+			if sn.Lines != nil {
 				sn.closeBuf()
 			}
 		}

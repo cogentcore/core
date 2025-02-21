@@ -133,6 +133,61 @@ func (ed *Editor) Save() error { //types:add
 	return ed.Lines.SaveFile(fname)
 }
 
+// Close closes the lines viewed by this editor, prompting to save if there are changes.
+// If afterFun is non-nil, then it is called with the status of the user action.
+func (ed *Editor) Close(afterFun func(canceled bool)) bool {
+	if ed.Lines.IsNotSaved() {
+		ed.Lines.StopDelayedReMarkup()
+		sc := ed.Scene
+		fname := ed.Lines.Filename()
+		if fname != "" {
+			d := core.NewBody("Close without saving?")
+			core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("Do you want to save your changes to file: %v?", fname))
+			d.AddBottomBar(func(bar *core.Frame) {
+				core.NewButton(bar).SetText("Cancel").OnClick(func(e events.Event) {
+					d.Close()
+					if afterFun != nil {
+						afterFun(true)
+					}
+				})
+				core.NewButton(bar).SetText("Close without saving").OnClick(func(e events.Event) {
+					d.Close()
+					ed.Lines.ClearNotSaved()
+					ed.Lines.AutosaveDelete()
+					ed.Close(afterFun)
+				})
+				core.NewButton(bar).SetText("Save").OnClick(func(e events.Event) {
+					ed.Save()
+					ed.Close(afterFun) // 2nd time through won't prompt
+				})
+			})
+			d.RunDialog(sc)
+		} else {
+			d := core.NewBody("Close without saving?")
+			core.NewText(d).SetType(core.TextSupporting).SetText("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As")
+			d.AddBottomBar(func(bar *core.Frame) {
+				d.AddCancel(bar).OnClick(func(e events.Event) {
+					if afterFun != nil {
+						afterFun(true)
+					}
+				})
+				d.AddOK(bar).SetText("Close without saving").OnClick(func(e events.Event) {
+					ed.Lines.ClearNotSaved()
+					ed.Lines.AutosaveDelete()
+					ed.Close(afterFun)
+				})
+			})
+			d.RunDialog(sc)
+		}
+		return false // awaiting decisions..
+	}
+	ed.Lines.Close()
+	if afterFun != nil {
+		afterFun(false)
+	}
+	return true
+}
+
 func (ed *Editor) handleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {

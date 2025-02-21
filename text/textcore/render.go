@@ -113,7 +113,7 @@ func (ed *Base) renderLines() {
 	ed.renderDepthBackground(spos, stln, edln)
 	if ed.hasLineNumbers {
 		tbb := bb
-		tbb.Min.X += int(ed.lineNumberPixels())
+		tbb.Min.X += int(ed.LineNumberPixels())
 		pc.PushContext(nil, render.NewBoundsRect(tbb, sides.NewFloats()))
 	}
 
@@ -121,7 +121,7 @@ func (ed *Base) renderLines() {
 	ctx := &core.AppearanceSettings.Text
 	ts := ed.Lines.Settings.TabSize
 	rpos := spos
-	rpos.X += ed.lineNumberPixels()
+	rpos.X += ed.LineNumberPixels()
 	sz := ed.charSize
 	sz.X *= float32(ed.linesSize.X)
 	vsel := buf.RegionToView(ed.viewId, ed.SelectRegion)
@@ -197,7 +197,7 @@ func (ed *Base) renderLineNumbersBox() {
 	bb := ed.renderBBox()
 	spos := math32.FromPoint(bb.Min)
 	epos := math32.FromPoint(bb.Max)
-	epos.X = spos.X + ed.lineNumberPixels()
+	epos.X = spos.X + ed.LineNumberPixels()
 
 	sz := epos.Sub(spos)
 	pc.Fill.Color = ed.LineNumberColor
@@ -250,7 +250,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	}
 }
 
-func (ed *Base) lineNumberPixels() float32 {
+func (ed *Base) LineNumberPixels() float32 {
 	return float32(ed.lineNumberOffset) * ed.charSize.X
 }
 
@@ -275,7 +275,7 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 	if !ed.Lines.Settings.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
 		return
 	}
-	pos.X += ed.lineNumberPixels()
+	pos.X += ed.LineNumberPixels()
 	buf := ed.Lines
 	bbmax := float32(ed.Geom.ContentBBox.Max.X)
 	pc := &ed.Scene.Painter
@@ -314,7 +314,7 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	stln, _, _ := ed.renderLineStartEnd()
 	ptf := math32.FromPoint(pt)
-	ptf.SetSub(math32.Vec2(ed.lineNumberPixels(), 0))
+	ptf.SetSub(math32.Vec2(ed.LineNumberPixels(), 0))
 	if ptf.X < 0 {
 		return textpos.PosErr
 	}
@@ -355,7 +355,7 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	}
 	vpos := ed.Lines.PosToView(ed.viewId, pos)
 	spos := ed.Geom.Pos.Content
-	spos.X += ed.lineNumberPixels() - ed.Geom.Scroll.X
+	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
 	ts := ed.Lines.Settings.TabSize

@@ -50,6 +50,20 @@ func (ls *Lines) ParseState() (*parse.LanguageProperties, *parse.FileStates) {
 	return nil, nil
 }
 
+// ParseFileState returns the parsed file state if this is a
+// parse-supported known language, nil otherwise.
+// Note: this API will change when LSP is implemented, and current
+// use is likely to create race conditions / conflicts with markup.
+func (ls *Lines) ParseFileState() *parse.FileState {
+	ls.Lock()
+	defer ls.Unlock()
+	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
+	if lp != nil && lp.Lang != nil {
+		return ls.parseState.Done()
+	}
+	return nil
+}
+
 // SetFilename sets the filename associated with the buffer and updates
 // the code highlighting information accordingly.
 func (ls *Lines) SetFilename(fn string) *Lines {
@@ -181,6 +195,21 @@ func (ls *Lines) AutosaveFilename() string {
 	return ls.autosaveFilename()
 }
 
+// AutosaveDelete deletes any existing autosave file.
+func (ls *Lines) AutosaveDelete() {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.autosaveDelete()
+}
+
+// AutosaveCheck checks if an autosave file exists; logic for dealing with
+// it is left to larger app; call this before opening a file.
+func (ls *Lines) AutosaveCheck() bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.autosaveCheck()
+}
+
 ////////  Unexported implementation
 
 // clearNotSaved sets Changed and NotSaved to false.
@@ -291,9 +320,9 @@ func (ls *Lines) revert() bool {
 		}
 		ls.stat() // "own" the new file..
 		if ob.NumLines() < diffRevertLines {
-			diffs := ls.DiffBuffers(ob)
+			diffs := ls.diffs(ob)
 			if len(diffs) < diffRevertDiffs {
-				ls.PatchFromBuffer(ob, diffs)
+				ls.patchFrom(ob, diffs)
 				didDiff = true
 			}
 		}

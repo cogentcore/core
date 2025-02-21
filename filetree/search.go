@@ -103,11 +103,11 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation,
 		}
 		var cnt int
 		var matches []textpos.Match
-		if sfn.isOpen() && sfn.Buffer != nil {
+		if sfn.isOpen() && sfn.Lines != nil {
 			if regExp {
-				cnt, matches = sfn.Buffer.SearchRegexp(re)
+				cnt, matches = sfn.Lines.SearchRegexp(re)
 			} else {
-				cnt, matches = sfn.Buffer.Search(fb, ignoreCase, false)
+				cnt, matches = sfn.Lines.Search(fb, ignoreCase, false)
 			}
 		} else {
 			if regExp {
@@ -180,11 +180,11 @@ func findAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo
 		ofn := openPath(path)
 		var cnt int
 		var matches []textpos.Match
-		if ofn != nil && ofn.Buffer != nil {
+		if ofn != nil && ofn.Lines != nil {
 			if regExp {
-				cnt, matches = ofn.Buffer.SearchRegexp(re)
+				cnt, matches = ofn.Lines.SearchRegexp(re)
 			} else {
-				cnt, matches = ofn.Buffer.Search(fb, ignoreCase, false)
+				cnt, matches = ofn.Lines.Search(fb, ignoreCase, false)
 			}
 		} else {
 			if regExp {
