@@ -36,7 +36,7 @@ type view struct {
 	// starting line represent additional wrapped content from the same source line.
 	lineToVline []int
 
-	// listeners is used for sending Change and Input events
+	// listeners is used for sending Change, Input, and Close events to views.
 	listeners events.Listeners
 }
 

@@ -171,6 +171,14 @@ func (ls *Lines) ClearNotSaved() {
 	ls.clearNotSaved()
 }
 
+// SetFileModOK sets the flag indicating that it is OK to edit even though
+// the underlying file on disk has been edited.
+func (ls *Lines) SetFileModOK(ok bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.fileModOK = ok
+}
+
 // EditDone is called externally (e.g., by Editor widget) when the user
 // has indicated that editing is done, and the results are to be consumed.
 func (ls *Lines) EditDone() {
@@ -366,7 +374,9 @@ func (ls *Lines) fileModCheck() bool {
 			return true
 		}
 		if ls.FileModPromptFunc != nil {
-			ls.FileModPromptFunc() // todo: this could be called under lock -- need to figure out!
+			ls.Unlock() // note: we assume anything getting here will be under lock
+			ls.FileModPromptFunc()
+			ls.Lock()
 		}
 		return true
 	}

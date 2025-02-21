@@ -1,8 +1,8 @@
-# lines
+# lines: manages lines of text
 
-The lines package manages multi-line monospaced text with a given line width in runes, so that all text wrapping, editing, and navigation logic can be managed purely in text space, allowing rendering and GUI layout to be relatively fast.
+The lines package manages multi-line monospaced text with a given line width in runes, so that all text wrapping, editing, and navigation logic can be managed purely in text space, allowing rendering and GUI layout to be relatively fast. `lines` does not import [core](../../core), and does not directly have any GUI functionality: it is focused purely on the text-level representation, using [rich](../rich) `Text` to represent styled text.
 
-This is suitable for text editing and terminal applications, among others. The text is encoded as runes along with a corresponding [rich.Text] markup representation with syntax highlighting, using either chroma or the [parse](../parse) package where available. A subsequent update will add support for the [gopls](https://pkg.go.dev/golang.org/x/tools/gopls) system and LSP more generally. The markup is updated in a separate goroutine for efficiency.
+This package is suitable for text editing and terminal applications, among others. The text is encoded as runes along with a corresponding [rich.Text] markup representation with syntax highlighting, using either [chroma](https://github.com/alecthomas/chroma) or the [parse](../parse) package where available. A subsequent update will add support for the [gopls](https://pkg.go.dev/golang.org/x/tools/gopls) system and LSP more generally. The markup is updated in a separate goroutine for efficiency.
 
 Everything is protected by an overall `sync.Mutex` and is safe to concurrent access, and thus nothing is exported and all access is through protected accessor functions. In general, all unexported methods do NOT lock, and all exported methods do.
 
@@ -25,16 +25,20 @@ Note that the view position is not quite a render location, due to the special b
 
 ## Events
 
-Three standard events are sent to listeners attached to views (always with no mutex lock on Lines):
+Three standard events are sent to listeners (always with no mutex lock on Lines):
 * `events.Input` (use `OnInput` to register a function to receive) is sent for every edit large or small.
 * `events.Change` (`OnChange`) is sent for major changes: new text, opening files, saving files, `EditDone`.
 * `events.Close` is sent when the Lines is closed (e.g., a user closes a file and is done editing it). The viewer should clear any pointers to the Lines at this point.
+
+The listeners are attached to a specific view so that they are naturally removed when the view is deleted (it is not possible to delete listeners because function pointers are not comparable)
 
 Widgets should listen to these to update rendering and send their own events. Other widgets etc should only listen to events on the Widgets, not on the underlying Lines object, in general.
 
 ## Files
 
 Full support for a file associated with the text lines is engaged by calling `SetFilename`. This will then cause it to check if the file has been modified prior to making any changes, and to save an autosave file (in a separate goroutine) after modifications, if `SetAutosave` is set.  Otherwise, no such file-related behavior occurs.
+
+An Editor dealing with file-backed Lines should set the `FileModPromptFunc` to a function that prompts the user for what they want to do if the file on disk has been modified at the point when an edit is made to the in-memory Lines. The [textcore](../textcore) package has standard functions for this, and other file-specific GUI functions.
 
 ## Syntax highlighting
 

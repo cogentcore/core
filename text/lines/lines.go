@@ -80,8 +80,7 @@ type Lines struct {
 	// FileModPromptFunc is called when a file has been modified in the filesystem
 	// and it is about to be modified through an edit, in the fileModCheck function.
 	// The prompt should determine whether the user wants to revert, overwrite, or
-	// save current version as a different file. It must block until the user responds,
-	// and it is called under the mutex lock to prevent other edits.
+	// save current version as a different file. It must block until the user responds.
 	FileModPromptFunc func()
 
 	// fontStyle is the default font styling to use for markup.

@@ -1,4 +1,4 @@
-# textcore
+# textcore: core GUI widgets for text
 
 Textcore has various text-based `core.Widget`s, including:
 * `Base` is a base implementation that views `lines.Lines` text content.
@@ -11,9 +11,12 @@ A critical design feature is that the Base widget can switch efficiently among d
 
 The `Lines` handles all layout and markup styling, so the Base just renders the results of that. Thus, there is no need for the Editor to ever drive a NeedsLayout call itself: everything is handled in the Render step, including the presence or absence of the scrollbar, which is a little bit complicated because adding a scrollbar changes the effective width and thus the internal layout.
 
-# TODO
+## Files
 
-* outputbuffer formatting
+The underlying `lines.Lines` object does not have any core dependencies, and is designed to manage lines in memory. See [files.go](files.go) for standard functions to provide GUI-based interactions for prompting when a file has been modified on a disk, and prompts for saving a file. These functions can be used on a Lines without any specific widget.
+
+## TODO
+
 * within line tab rendering
 * xyz text rendering
 * svg text rendering, markers, lab plot text rotation

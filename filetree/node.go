@@ -52,11 +52,8 @@ type Node struct { //core:embedder
 	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// Buffer is the file buffer for editing this file.
+	// Lines is the lines of text of the file, for an editor.
 	Lines *lines.Lines `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
-
-	// LinesViewId is the view into the buffer for this node.
-	LinesViewId int
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
@@ -503,12 +500,11 @@ func (fn *Node) OpenBuf() (bool, error) {
 		}
 	} else {
 		fn.Lines = lines.NewLines()
-		fn.LinesViewId = fn.Lines.NewView(80) // 80 default width
-		fn.Lines.OnChange(fn.LinesViewId, func(e events.Event) {
-			if fn.Info.VCS == vcs.Stored {
-				fn.Info.VCS = vcs.Modified
-			}
-		})
+		// fn.Lines.OnChange(fn.LinesViewId, func(e events.Event) {
+		// 	if fn.Info.VCS == vcs.Stored {
+		// 		fn.Info.VCS = vcs.Modified
+		// 	}
+		// })
 	}
 	fn.Lines.SetHighlighting(NodeHighlighting)
 	return true, fn.Lines.Open(string(fn.Filepath))

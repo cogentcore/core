@@ -6,12 +6,8 @@ package textcore
 
 import (
 	"fmt"
-	"os"
-	"time"
 	"unicode"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -22,6 +18,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/textpos"
@@ -65,127 +62,35 @@ func (ed *Editor) Init() {
 	ed.handleFocus()
 }
 
-// SaveAsFunc saves the current text into the given file.
-// Does an editDone first to save edits and checks for an existing file.
-// If it does exist then prompts to overwrite or not.
-// If afterFunc is non-nil, then it is called with the status of the user action.
-func (ed *Editor) SaveAsFunc(filename string, afterFunc func(canceled bool)) {
-	ed.editDone()
-	if !errors.Log1(fsx.FileExists(filename)) {
-		ed.Lines.SaveFile(filename)
-		if afterFunc != nil {
-			afterFunc(false)
+// SetLines sets the [lines.Lines] that this is an editor of,
+// creating a new view for this editor and connecting to events.
+func (ed *Editor) SetLines(buf *lines.Lines) *Editor {
+	ed.Base.SetLines(buf)
+	if ed.Lines != nil {
+		ed.Lines.FileModPromptFunc = func() {
+			FileModPrompt(ed.Scene, ed.Lines)
 		}
-	} else {
-		d := core.NewBody("File exists")
-		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("The file already exists; do you want to overwrite it?  File: %v", filename))
-		d.AddBottomBar(func(bar *core.Frame) {
-			d.AddCancel(bar).OnClick(func(e events.Event) {
-				if afterFunc != nil {
-					afterFunc(true)
-				}
-			})
-			d.AddOK(bar).OnClick(func(e events.Event) {
-				ed.Lines.SaveFile(filename)
-				if afterFunc != nil {
-					afterFunc(false)
-				}
-			})
-		})
-		d.RunDialog(ed.Scene)
 	}
+	return ed
 }
 
 // SaveAs saves the current text into given file; does an editDone first to save edits
 // and checks for an existing file; if it does exist then prompts to overwrite or not.
 func (ed *Editor) SaveAs(filename core.Filename) { //types:add
-	ed.SaveAsFunc(string(filename), nil)
+	ed.editDone()
+	SaveAs(ed.Scene, ed.Lines, string(filename), nil)
 }
 
 // Save saves the current text into the current filename associated with this buffer.
 func (ed *Editor) Save() error { //types:add
-	fname := ed.Lines.Filename()
-	if fname == "" {
-		return errors.New("core.Editor: filename is empty for Save")
-	}
 	ed.editDone()
-	info, err := os.Stat(fname)
-	if err == nil && info.ModTime() != time.Time(ed.Lines.FileInfo().ModTime) {
-		sc := ed.Scene
-		d := core.NewBody("File Changed on Disk")
-		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File has changed on disk since you opened or saved it; what do you want to do?  File: %v", fname))
-		d.AddBottomBar(func(bar *core.Frame) {
-			core.NewButton(bar).SetText("Save to different file").OnClick(func(e events.Event) {
-				d.Close()
-				core.CallFunc(sc, ed.SaveAs)
-			})
-			core.NewButton(bar).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
-				d.Close()
-				ed.Lines.Revert()
-			})
-			core.NewButton(bar).SetText("Save file, overwriting").OnClick(func(e events.Event) {
-				d.Close()
-				ed.Lines.SaveFile(fname)
-			})
-		})
-		d.RunDialog(sc)
-	}
-	return ed.Lines.SaveFile(fname)
+	return Save(ed.Scene, ed.Lines)
 }
 
 // Close closes the lines viewed by this editor, prompting to save if there are changes.
-// If afterFun is non-nil, then it is called with the status of the user action.
-func (ed *Editor) Close(afterFun func(canceled bool)) bool {
-	if ed.Lines.IsNotSaved() {
-		ed.Lines.StopDelayedReMarkup()
-		sc := ed.Scene
-		fname := ed.Lines.Filename()
-		if fname != "" {
-			d := core.NewBody("Close without saving?")
-			core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("Do you want to save your changes to file: %v?", fname))
-			d.AddBottomBar(func(bar *core.Frame) {
-				core.NewButton(bar).SetText("Cancel").OnClick(func(e events.Event) {
-					d.Close()
-					if afterFun != nil {
-						afterFun(true)
-					}
-				})
-				core.NewButton(bar).SetText("Close without saving").OnClick(func(e events.Event) {
-					d.Close()
-					ed.Lines.ClearNotSaved()
-					ed.Lines.AutosaveDelete()
-					ed.Close(afterFun)
-				})
-				core.NewButton(bar).SetText("Save").OnClick(func(e events.Event) {
-					ed.Save()
-					ed.Close(afterFun) // 2nd time through won't prompt
-				})
-			})
-			d.RunDialog(sc)
-		} else {
-			d := core.NewBody("Close without saving?")
-			core.NewText(d).SetType(core.TextSupporting).SetText("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As")
-			d.AddBottomBar(func(bar *core.Frame) {
-				d.AddCancel(bar).OnClick(func(e events.Event) {
-					if afterFun != nil {
-						afterFun(true)
-					}
-				})
-				d.AddOK(bar).SetText("Close without saving").OnClick(func(e events.Event) {
-					ed.Lines.ClearNotSaved()
-					ed.Lines.AutosaveDelete()
-					ed.Close(afterFun)
-				})
-			})
-			d.RunDialog(sc)
-		}
-		return false // awaiting decisions..
-	}
-	ed.Lines.Close()
-	if afterFun != nil {
-		afterFun(false)
-	}
-	return true
+// If afterFunc is non-nil, then it is called with the status of the user action.
+func (ed *Editor) Close(afterFunc func(canceled bool)) bool {
+	return Close(ed.Scene, ed.Lines, afterFunc)
 }
 
 func (ed *Editor) handleFocus() {

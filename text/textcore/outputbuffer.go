@@ -15,15 +15,14 @@ import (
 )
 
 // OutputBufferMarkupFunc is a function that returns a marked-up version
-// of a given line of output text by adding html tags. It is essential
-// that it ONLY adds tags, and otherwise has the exact same visible bytes
-// as the input.
+// of a given line of output text. It is essential that it not add any
+// new text, just splits into spans with different styles.
 type OutputBufferMarkupFunc func(buf *lines.Lines, line []rune) rich.Text
 
 // OutputBuffer is a buffer that records the output from an [io.Reader] using
 // [bufio.Scanner]. It is optimized to combine fast chunks of output into
 // large blocks of updating. It also supports an arbitrary markup function
-// that operates on each line of output bytes.
+// that operates on each line of output text.
 type OutputBuffer struct { //types:add -setters
 
 	// the output that we are reading from, as an io.Reader
@@ -35,9 +34,9 @@ type OutputBuffer struct { //types:add -setters
 	// how much time to wait while batching output (default: 200ms)
 	Batch time.Duration
 
-	// optional markup function that adds html tags to given line of output.
-	// It is essential that it ONLY adds tags, and otherwise has the exact
-	// same visible bytes as the input.
+	// MarkupFunc is an optional markup function that adds html tags to given line
+	// of output. It is essential that it not add any new text, just splits into spans
+	// with different styles.
 	MarkupFunc OutputBufferMarkupFunc
 
 	// current buffered output raw lines, which are not yet sent to the Buffer
@@ -46,15 +45,15 @@ type OutputBuffer struct { //types:add -setters
 	// current buffered output markup lines, which are not yet sent to the Buffer
 	bufferedMarkup []rich.Text
 
-	// mutex protecting updating of CurrentOutputLines and Buffer, and timer
-	mu sync.Mutex
-
 	// time when last output was sent to buffer
 	lastOutput time.Time
 
 	// time.AfterFunc that is started after new input is received and not
 	// immediately output. Ensures that it will get output if no further burst happens.
 	afterTimer *time.Timer
+
+	// mutex protecting updates
+	sync.Mutex
 }
 
 // MonitorOutput monitors the output and updates the [Buffer].
@@ -69,7 +68,7 @@ func (ob *OutputBuffer) MonitorOutput() {
 		b := outscan.Bytes()
 		rln := []rune(string(b))
 
-		ob.mu.Lock()
+		ob.Lock()
 		if ob.afterTimer != nil {
 			ob.afterTimer.Stop()
 			ob.afterTimer = nil
@@ -88,16 +87,18 @@ func (ob *OutputBuffer) MonitorOutput() {
 			ob.outputToBuffer()
 		} else {
 			ob.afterTimer = time.AfterFunc(ob.Batch*2, func() {
-				ob.mu.Lock()
+				ob.Lock()
 				ob.lastOutput = time.Now()
 				ob.outputToBuffer()
 				ob.afterTimer = nil
-				ob.mu.Unlock()
+				ob.Unlock()
 			})
 		}
-		ob.mu.Unlock()
+		ob.Unlock()
 	}
+	ob.Lock()
 	ob.outputToBuffer()
+	ob.Unlock()
 }
 
 // outputToBuffer sends the current output to Buffer.
