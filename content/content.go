@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -444,8 +445,11 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 	}
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.Search).SetKey(keymap.Menu)
-		w.SetTooltip("Search")
+		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu)
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.SurfaceContainerHighest
+			s.Padding.Right.Em(5)
+		})
 		w.OnClick(func(e events.Event) {
 			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
 		})
