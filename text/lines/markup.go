@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
+	"golang.org/x/exp/maps"
 )
 
 // setFileInfo sets the syntax highlighting and other parameters
@@ -97,7 +98,7 @@ func (ls *Lines) asyncMarkup() {
 	ls.Lock()
 	ls.markupApplyTags(tags)
 	ls.Unlock()
-	ls.sendChange()
+	ls.sendInput()
 }
 
 // markupTags generates the new markup tags from the highligher.
@@ -152,11 +153,17 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	tags = ls.markupApplyEdits(tags)
 	maxln := min(len(tags), ls.numLines())
+	ls.links = make(map[int][]rich.Hyperlink)
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
 		// fmt.Println("#####\n", ln, "tags:\n", tags[ln])
-		ls.markup[ln] = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
+		mu := highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
+		ls.markup[ln] = mu
+		lks := mu.GetLinks()
+		if len(lks) > 0 {
+			ls.links[ln] = lks
+		}
 	}
 	for _, vw := range ls.views {
 		ls.layoutViewLines(vw)
@@ -182,6 +189,10 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		if err == nil {
 			ls.hiTags[ln] = mt
 			mu = highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ltxt, mt, ls.adjustedTags(ln))
+			lks := mu.GetLinks()
+			if len(lks) > 0 {
+				ls.links[ln] = lks
+			}
 		} else {
 			mu = rich.NewText(ls.fontStyle, ltxt)
 			allgood = false
@@ -250,14 +261,6 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	st := tbe.Region.Start.Line
 	ls.markupLines(st, st)
 	ls.startDelayedReMarkup()
-}
-
-// AdjustRegion adjusts given text region for any edits that
-// have taken place since time stamp on region (using the Undo stack).
-// If region was wholly within a deleted region, then RegionNil will be
-// returned -- otherwise it is clipped appropriately as function of deletes.
-func (ls *Lines) AdjustRegion(reg textpos.Region) textpos.Region {
-	return ls.undos.AdjustRegion(reg)
 }
 
 // adjustedTags updates tag positions for edits, for given list of tags
@@ -349,4 +352,74 @@ func (ls *Lines) braceMatch(pos textpos.Pos) (textpos.Pos, bool) {
 		return lexer.BraceMatch(ls.lines, ls.hiTags, r, pos, maxScopeLines)
 	}
 	return textpos.Pos{}, false
+}
+
+// linkAt returns a hyperlink at given source position, if one exists,
+// nil otherwise. this is fast so no problem to call frequently.
+func (ls *Lines) linkAt(pos textpos.Pos) *rich.Hyperlink {
+	ll := ls.links[pos.Line]
+	if len(ll) == 0 {
+		return nil
+	}
+	for _, l := range ll {
+		if l.Range.Contains(pos.Char) {
+			return &l
+		}
+	}
+	return nil
+}
+
+// nextLink returns the next hyperlink after given source position,
+// if one exists, and the line it is on. nil, -1 otherwise.
+func (ls *Lines) nextLink(pos textpos.Pos) (*rich.Hyperlink, int) {
+	cl := ls.linkAt(pos)
+	if cl != nil {
+		pos.Char = cl.Range.End
+	}
+	ll := ls.links[pos.Line]
+	for _, l := range ll {
+		if l.Range.Start >= pos.Char {
+			return &l, pos.Line
+		}
+	}
+	// find next line
+	lns := maps.Keys(ls.links)
+	slices.Sort(lns)
+	for _, ln := range lns {
+		if ln <= pos.Line {
+			continue
+		}
+		return &ls.links[ln][0], ln
+	}
+	return nil, -1
+}
+
+// prevLink returns the previous hyperlink before given source position,
+// if one exists, and the line it is on. nil, -1 otherwise.
+func (ls *Lines) prevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
+	cl := ls.linkAt(pos)
+	if cl != nil {
+		if cl.Range.Start == 0 {
+			pos = ls.MoveBackward(pos, 1)
+		} else {
+			pos.Char = cl.Range.Start - 1
+		}
+	}
+	ll := ls.links[pos.Line]
+	for _, l := range ll {
+		if l.Range.End <= pos.Char {
+			return &l, pos.Line
+		}
+	}
+	// find prev line
+	lns := maps.Keys(ls.links)
+	slices.Sort(lns)
+	nl := len(lns)
+	for ln := nl - 1; ln >= 0; ln-- {
+		if ln >= pos.Line {
+			continue
+		}
+		return &ls.links[ln][0], ln
+	}
+	return nil, -1
 }

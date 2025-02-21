@@ -68,6 +68,9 @@ type Base struct { //core:embedder
 	// This should be set in Stylers like all other style properties.
 	CursorColor image.Image
 
+	// AutoscrollOnInput scrolls the display to the end when Input events are received.
+	AutoscrollOnInput bool
+
 	// viewId is the unique id of the Lines view.
 	viewId int
 
@@ -155,10 +158,6 @@ type Base struct { //core:embedder
 
 	// selectMode is a boolean indicating whether to select text as the cursor moves.
 	selectMode bool
-
-	// hasLinks is a boolean indicating if at least one of the renders has links.
-	// It determines if we set the cursor for hand movements.
-	hasLinks bool
 
 	// lastWasTabAI indicates that last key was a Tab auto-indent
 	lastWasTabAI bool
@@ -329,6 +328,9 @@ func (ed *Base) SetLines(buf *lines.Lines) *Base {
 			ed.SendChange()
 		})
 		buf.OnInput(ed.viewId, func(e events.Event) {
+			if ed.AutoscrollOnInput {
+				ed.cursorEndDoc()
+			}
 			ed.NeedsRender()
 			ed.SendInput()
 		})

@@ -13,13 +13,10 @@ The `Lines` handles all layout and markup styling, so the Base just renders the 
 
 # TODO
 
-* autoscroll too sensitive / biased
-* dynamic scroll re-layout
-* base horizontal scrolling
-* link handling
-* cleanup unused base stuff
 * outputbuffer formatting
 * within line tab rendering
 * xyz text rendering
 * svg text rendering, markers, lab plot text rotation
+* base horizontal scrolling
+* cleanup unused base stuff
 

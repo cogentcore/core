@@ -273,16 +273,6 @@ func (ls *Lines) undo() []*textpos.Edit {
 	return eds
 }
 
-// EmacsUndoSave is called by View at end of latest set of undo commands.
-// If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
-// at the end, and moves undo to the very end -- undo is a constant stream.
-func (ls *Lines) EmacsUndoSave() {
-	if !ls.Settings.EmacsUndo {
-		return
-	}
-	ls.undos.UndoStackSave()
-}
-
 // redo redoes next group of items on the undo stack,
 // and returns the last record, nil if no more
 func (ls *Lines) redo() []*textpos.Edit {

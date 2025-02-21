@@ -148,6 +148,11 @@ type Lines struct {
 	// It can be used to move back through them.
 	posHistory []textpos.Pos
 
+	// links is the collection of all hyperlinks within the markup source,
+	// indexed by the markup source line.
+	// only updated at the full markup sweep.
+	links map[int][]rich.Hyperlink
+
 	// batchUpdating indicates that a batch update is under way,
 	// so Input signals are not sent until the end.
 	batchUpdating bool
@@ -262,12 +267,12 @@ func (ls *Lines) endPos() textpos.Pos {
 
 // appendTextMarkup appends new lines of text to end of lines,
 // using insert, returns edit, and uses supplied markup to render it.
-func (ls *Lines) appendTextMarkup(text []rune, markup []rich.Text) *textpos.Edit {
+func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Edit {
 	if len(text) == 0 {
 		return &textpos.Edit{}
 	}
 	ed := ls.endPos()
-	tbe := ls.insertText(ed, text)
+	tbe := ls.insertTextImpl(ed, text)
 
 	st := tbe.Region.Start.Line
 	el := tbe.Region.End.Line

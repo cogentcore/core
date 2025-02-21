@@ -15,7 +15,7 @@ type Hyperlink struct {
 	URL string
 
 	// Properties are additional properties defined for the link,
-	// e.g., from the parsed HTML attributes.
+	// e.g., from the parsed HTML attributes. TODO: resolve
 	// Properties map[string]any
 
 	// Range defines the starting and ending positions of the link,

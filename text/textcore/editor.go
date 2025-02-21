@@ -22,9 +22,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -437,17 +436,16 @@ func (ed *Editor) keyInput(e events.Event) {
 		if !e.HasAnyModifier(key.Control, key.Meta) {
 			e.SetHandled()
 			if ed.Lines.Settings.AutoIndent {
-				// todo:
-				// lp, _ := parse.LanguageSupport.Properties(ed.Lines.ParseState.Known)
-				// if lp != nil && lp.Lang != nil && lp.HasFlag(parse.ReAutoIndent) {
-				// 	// only re-indent current line for supported types
-				// 	tbe, _, _ := ed.Lines.AutoIndent(ed.CursorPos.Line) // reindent current line
-				// 	if tbe != nil {
-				// 		// go back to end of line!
-				// 		npos := textpos.Pos{Line: ed.CursorPos.Line, Char: ed.Lines.LineLen(ed.CursorPos.Line)}
-				// 		ed.setCursor(npos)
-				// 	}
-				// }
+				lp, _ := ed.Lines.ParseState()
+				if lp != nil && lp.Lang != nil && lp.HasFlag(parse.ReAutoIndent) {
+					// only re-indent current line for supported types
+					tbe, _, _ := ed.Lines.AutoIndent(ed.CursorPos.Line) // reindent current line
+					if tbe != nil {
+						// go back to end of line!
+						npos := textpos.Pos{Line: ed.CursorPos.Line, Char: ed.Lines.LineLen(ed.CursorPos.Line)}
+						ed.setCursor(npos)
+					}
+				}
 				ed.InsertAtCursor([]byte("\n"))
 				tbe, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
 				if tbe != nil {
@@ -509,12 +507,10 @@ func (ed *Editor) keyInputInsertBracket(kt events.Event) {
 	newLine := false
 	curLn := ed.Lines.Line(pos.Line)
 	lnLen := len(curLn)
-	// todo:
-	// lp, _ := parse.LanguageSupport.Properties(ed.Lines.ParseState.Known)
-	// if lp != nil && lp.Lang != nil {
-	// 	match, newLine = lp.Lang.AutoBracket(&ed.Lines.ParseState, kt.KeyRune(), pos, curLn)
-	// } else {
-	{
+	lp, ps := ed.Lines.ParseState()
+	if lp != nil && lp.Lang != nil {
+		match, newLine = lp.Lang.AutoBracket(ps, kt.KeyRune(), pos, curLn)
+	} else {
 		if kt.KeyRune() == '{' {
 			if pos.Char == lnLen {
 				if lnLen == 0 || unicode.IsSpace(curLn[pos.Char-1]) {
@@ -597,61 +593,6 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 	}
 }
 
-// openLink opens given link, either by sending LinkSig signal if there are
-// receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
-// non-nil (which by default opens user's default browser via
-// system/App.OpenURL())
-func (ed *Editor) openLink(tl *rich.Hyperlink) {
-	if ed.LinkHandler != nil {
-		ed.LinkHandler(tl)
-	} else {
-		system.TheApp.OpenURL(tl.URL)
-	}
-}
-
-// linkAt returns link at given cursor position, if one exists there --
-// returns true and the link if there is a link, and false otherwise
-func (ed *Editor) linkAt(pos textpos.Pos) (*rich.Hyperlink, bool) {
-	// todo:
-	// if !(pos.Line < len(ed.renders) && len(ed.renders[pos.Line].Links) > 0) {
-	// 	return nil, false
-	// }
-	cpos := ed.charStartPos(pos).ToPointCeil()
-	cpos.Y += 2
-	cpos.X += 2
-	lpos := ed.charStartPos(textpos.Pos{Line: pos.Line})
-	_ = lpos
-	// rend := &ed.renders[pos.Line]
-	// for ti := range rend.Links {
-	// 	tl := &rend.Links[ti]
-	// 	tlb := tl.Bounds(rend, lpos)
-	// 	if cpos.In(tlb) {
-	// 		return tl, true
-	// 	}
-	// }
-	return nil, false
-}
-
-// OpenLinkAt opens a link at given cursor position, if one exists there --
-// returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (ed *Editor) OpenLinkAt(pos textpos.Pos) (*rich.Hyperlink, bool) {
-	tl, ok := ed.linkAt(pos)
-	if !ok {
-		return tl, ok
-	}
-	// todo:
-	// rend := &ed.renders[pos.Line]
-	// st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
-	// end, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-	// reg := lines.NewRegion(pos.Line, st, pos.Line, end)
-	// _ = reg
-	// ed.HighlightRegion(reg)
-	// ed.SetCursorTarget(pos)
-	// ed.savePosHistory(ed.CursorPos)
-	// ed.openLink(tl)
-	return tl, ok
-}
-
 // handleMouse handles mouse events
 func (ed *Editor) handleMouse() {
 	ed.OnClick(func(e events.Event) {
@@ -663,8 +604,8 @@ func (ed *Editor) handleMouse() {
 		}
 		switch e.MouseButton() {
 		case events.Left:
-			_, got := ed.OpenLinkAt(newPos)
-			if !got {
+			lk, _ := ed.OpenLinkAt(newPos)
+			if lk == nil {
 				ed.setCursorFromMouse(pt, newPos, e.SelectMode())
 				ed.savePosHistory(ed.CursorPos)
 			}
@@ -726,28 +667,13 @@ func (ed *Editor) handleMouse() {
 
 func (ed *Editor) handleLinkCursor() {
 	ed.On(events.MouseMove, func(e events.Event) {
-		if !ed.hasLinks {
-			return
-		}
 		pt := ed.PointToRelPos(e.Pos())
-		mpos := ed.PixelToCursor(pt)
-		if mpos.Line >= ed.NumLines() {
+		newPos := ed.PixelToCursor(pt)
+		if newPos == textpos.PosErr {
 			return
 		}
-		// todo:
-		// pos := ed.renderStartPos()
-		// pos.Y += ed.offsets[mpos.Line]
-		// pos.X += ed.LineNumberOffset
-		// rend := &ed.renders[mpos.Line]
-		inLink := false
-		// for _, tl := range rend.Links {
-		// 	tlb := tl.Bounds(rend, pos)
-		// 	if e.Pos().In(tlb) {
-		// 		inLink = true
-		// 		break
-		// 	}
-		// }
-		if inLink {
+		lk, _ := ed.OpenLinkAt(newPos)
+		if lk != nil {
 			ed.Styles.Cursor = cursors.Pointer
 		} else {
 			ed.Styles.Cursor = cursors.Text
@@ -759,13 +685,11 @@ func (ed *Editor) handleLinkCursor() {
 
 // ShowContextMenu displays the context menu with options dependent on situation
 func (ed *Editor) ShowContextMenu(e events.Event) {
-	// if ed.Lines.spell != nil && !ed.HasSelection() && ed.Lines.isSpellEnabled(ed.CursorPos) {
-	// 	if ed.Lines.spell != nil {
-	// 		if ed.offerCorrect() {
-	// 			return
-	// 		}
-	// 	}
-	// }
+	if ed.spell != nil && !ed.HasSelection() && ed.isSpellEnabled(ed.CursorPos) {
+		if ed.offerCorrect() {
+			return
+		}
+	}
 	ed.WidgetBase.ShowContextMenu(e)
 }
 
@@ -834,109 +758,4 @@ func (ed *Editor) JumpToLinePrompt() {
 func (ed *Editor) jumpToLine(ln int) {
 	ed.SetCursorShow(textpos.Pos{Line: ln - 1})
 	ed.savePosHistory(ed.CursorPos)
-}
-
-// findNextLink finds next link after given position, returns false if no such links
-func (ed *Editor) findNextLink(pos textpos.Pos) (textpos.Pos, textpos.Region, bool) {
-	for ln := pos.Line; ln < ed.NumLines(); ln++ {
-		// if len(ed.renders[ln].Links) == 0 {
-		// 	pos.Char = 0
-		// 	pos.Line = ln + 1
-		// 	continue
-		// }
-		// rend := &ed.renders[ln]
-		// si, ri, _ := rend.RuneSpanPos(pos.Char)
-		// for ti := range rend.Links {
-		// 	tl := &rend.Links[ti]
-		// 	if tl.StartSpan >= si && tl.StartIndex >= ri {
-		// 		st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
-		// 		ed, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-		// 		reg := lines.NewRegion(ln, st, ln, ed)
-		// 		pos.Char = st + 1 // get into it so next one will go after..
-		// 		return pos, reg, true
-		// 	}
-		// }
-		pos.Line = ln + 1
-		pos.Char = 0
-	}
-	return pos, textpos.Region{}, false
-}
-
-// findPrevLink finds previous link before given position, returns false if no such links
-func (ed *Editor) findPrevLink(pos textpos.Pos) (textpos.Pos, textpos.Region, bool) {
-	// for ln := pos.Line - 1; ln >= 0; ln-- {
-	// 	if len(ed.renders[ln].Links) == 0 {
-	// 		if ln-1 >= 0 {
-	// 			pos.Char = ed.Buffer.LineLen(ln-1) - 2
-	// 		} else {
-	// 			ln = ed.NumLines
-	// 			pos.Char = ed.Buffer.LineLen(ln - 2)
-	// 		}
-	// 		continue
-	// 	}
-	// 	rend := &ed.renders[ln]
-	// 	si, ri, _ := rend.RuneSpanPos(pos.Char)
-	// 	nl := len(rend.Links)
-	// 	for ti := nl - 1; ti >= 0; ti-- {
-	// 		tl := &rend.Links[ti]
-	// 		if tl.StartSpan <= si && tl.StartIndex < ri {
-	// 			st, _ := rend.SpanPosToRuneIndex(tl.StartSpan, tl.StartIndex)
-	// 			ed, _ := rend.SpanPosToRuneIndex(tl.EndSpan, tl.EndIndex)
-	// 			reg := lines.NewRegion(ln, st, ln, ed)
-	// 			pos.Line = ln
-	// 			pos.Char = st + 1
-	// 			return pos, reg, true
-	// 		}
-	// 	}
-	// }
-	return pos, textpos.Region{}, false
-}
-
-// CursorNextLink moves cursor to next link. wraparound wraps around to top of
-// buffer if none found -- returns true if found
-func (ed *Editor) CursorNextLink(wraparound bool) bool {
-	if ed.NumLines() == 0 {
-		return false
-	}
-	ed.validateCursor()
-	npos, reg, has := ed.findNextLink(ed.CursorPos)
-	if !has {
-		if !wraparound {
-			return false
-		}
-		npos, reg, has = ed.findNextLink(textpos.Pos{}) // wraparound
-		if !has {
-			return false
-		}
-	}
-	ed.HighlightRegion(reg)
-	ed.SetCursorShow(npos)
-	ed.savePosHistory(ed.CursorPos)
-	ed.NeedsRender()
-	return true
-}
-
-// CursorPrevLink moves cursor to previous link. wraparound wraps around to
-// bottom of buffer if none found. returns true if found
-func (ed *Editor) CursorPrevLink(wraparound bool) bool {
-	if ed.NumLines() == 0 {
-		return false
-	}
-	ed.validateCursor()
-	npos, reg, has := ed.findPrevLink(ed.CursorPos)
-	if !has {
-		if !wraparound {
-			return false
-		}
-		npos, reg, has = ed.findPrevLink(textpos.Pos{}) // wraparound
-		if !has {
-			return false
-		}
-	}
-
-	ed.HighlightRegion(reg)
-	ed.SetCursorShow(npos)
-	ed.savePosHistory(ed.CursorPos)
-	ed.NeedsRender()
-	return true
 }

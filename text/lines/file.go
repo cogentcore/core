@@ -15,9 +15,12 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/text/parse"
 )
 
 //////// exported file api
+
+// todo: cleanup and simplify the logic about language support!
 
 // Filename returns the current filename
 func (ls *Lines) Filename() string {
@@ -31,6 +34,20 @@ func (ls *Lines) FileInfo() *fileinfo.FileInfo {
 	ls.Lock()
 	defer ls.Unlock()
 	return &ls.fileInfo
+}
+
+// ParseState returns the current language properties and ParseState
+// if it is a parse-supported known language, nil otherwise.
+// Note: this API will change when LSP is implemented, and current
+// use is likely to create race conditions / conflicts with markup.
+func (ls *Lines) ParseState() (*parse.LanguageProperties, *parse.FileStates) {
+	ls.Lock()
+	defer ls.Unlock()
+	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
+	if lp != nil && lp.Lang != nil {
+		return lp, &ls.parseState
+	}
+	return nil, nil
 }
 
 // SetFilename sets the filename associated with the buffer and updates

@@ -47,6 +47,7 @@ func NewLinesFromBytes(filename string, width int, src []byte) (*Lines, int) {
 func (ls *Lines) Defaults() {
 	ls.Settings.Defaults()
 	ls.fontStyle = rich.NewStyle().SetFamily(rich.Monospace)
+	ls.links = make(map[int][]rich.Hyperlink)
 }
 
 // NewView makes a new view with given initial width,
@@ -176,9 +177,9 @@ func (ls *Lines) SetHighlighting(style highlighting.HighlightingName) {
 // An Editor widget will likely want to check IsNotSaved()
 // and prompt the user to save or cancel first.
 func (ls *Lines) Close() {
-	ls.stopDelayedReMarkup()
 	ls.sendClose()
 	ls.Lock()
+	ls.stopDelayedReMarkup()
 	ls.views = make(map[int]*view)
 	ls.lines = nil
 	ls.tags = nil
@@ -402,6 +403,16 @@ func (ls *Lines) RegionRect(st, ed textpos.Pos) *textpos.Edit {
 	return ls.regionRect(st, ed)
 }
 
+// AdjustRegion adjusts given text region for any edits that
+// have taken place since time stamp on region (using the Undo stack).
+// If region was wholly within a deleted region, then RegionNil will be
+// returned, otherwise it is clipped appropriately as function of deletes.
+func (ls *Lines) AdjustRegion(reg textpos.Region) textpos.Region {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.undos.AdjustRegion(reg)
+}
+
 ////////   Edits
 
 // DeleteText is the primary method for deleting text from the lines.
@@ -525,7 +536,7 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 // AppendTextMarkup appends new text to end of lines, using insert, returns
 // edit, and uses supplied markup to render it, for preformatted output.
 // Calls sendInput to send an Input event to views, so they update.
-func (ls *Lines) AppendTextMarkup(text []rune, markup []rich.Text) *textpos.Edit {
+func (ls *Lines) AppendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
 	tbe := ls.appendTextMarkup(text, markup)
@@ -595,6 +606,18 @@ func (ls *Lines) Redo() []*textpos.Edit {
 	ls.Unlock()
 	ls.sendInput()
 	return tbe
+}
+
+// EmacsUndoSave is called by an editor at end of latest set of undo commands.
+// If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
+// at the end, and moves undo to the very end; undo is a constant stream.
+func (ls *Lines) EmacsUndoSave() {
+	ls.Lock()
+	defer ls.Unlock()
+	if !ls.Settings.EmacsUndo {
+		return
+	}
+	ls.undos.UndoStackSave()
 }
 
 /////////   Moving
@@ -1097,6 +1120,30 @@ func (ls *Lines) BraceMatchRune(r rune, pos textpos.Pos) (textpos.Pos, bool) {
 	ls.Lock()
 	defer ls.Unlock()
 	return lexer.BraceMatch(ls.lines, ls.hiTags, r, pos, maxScopeLines)
+}
+
+// LinkAt returns a hyperlink at given source position, if one exists,
+// nil otherwise. this is fast so no problem to call frequently.
+func (ls *Lines) LinkAt(pos textpos.Pos) *rich.Hyperlink {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.linkAt(pos)
+}
+
+// NextLink returns the next hyperlink after given source position,
+// if one exists, and the line it is on. nil, -1 otherwise.
+func (ls *Lines) NextLink(pos textpos.Pos) (*rich.Hyperlink, int) {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.nextLink(pos)
+}
+
+// PrevLink returns the previous hyperlink before given source position,
+// if one exists, and the line it is on. nil, -1 otherwise.
+func (ls *Lines) PrevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.prevLink(pos)
 }
 
 ////////   LineColors

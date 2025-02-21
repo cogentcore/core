@@ -21,25 +21,29 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// todo: manage scrollbar ourselves!
-// func (ed *Base) renderLayout() {
-// 	chg := ed.ManageOverflow(3, true)
-// 	ed.layoutAllLines()
-// 	ed.ConfigScrolls()
-// 	if chg {
-// 		ed.Frame.NeedsLayout() // required to actually update scrollbar vs not
-// 	}
-// }
+func (ed *Base) reLayout() {
+	lns := ed.Lines.ViewLines(ed.viewId)
+	if lns == ed.linesSize.Y {
+		return
+	}
+	// fmt.Println("relayout", lns, ed.linesSize.Y)
+	ed.layoutAllLines()
+	chg := ed.ManageOverflow(1, true)
+	// fmt.Println(chg)
+	if chg {
+		ed.NeedsLayout()
+		if !ed.HasScroll[math32.Y] {
+			ed.scrollPos = 0
+		}
+	}
+}
 
 func (ed *Base) RenderWidget() {
 	if ed.StartRender() {
-		// if ed.needsLayout {
-		// 	ed.renderLayout()
-		// 	ed.needsLayout = false
-		// }
-		// if ed.targetSet {
-		// 	ed.scrollCursorToTarget()
-		// }
+		ed.reLayout()
+		if ed.targetSet {
+			ed.scrollCursorToTarget()
+		}
 		ed.PositionScrolls()
 		ed.renderLines()
 		if ed.StateIs(states.Focused) {
