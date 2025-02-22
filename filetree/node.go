@@ -29,7 +29,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/highlighting"
-	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
@@ -52,8 +51,8 @@ type Node struct { //core:embedder
 	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// Lines is the lines of text of the file, for an editor.
-	Lines *lines.Lines `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	// FileIsOpen indicates that this file has been opened, indicated by Italics.
+	FileIsOpen bool
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
@@ -176,7 +175,7 @@ func (fn *Node) Init() {
 			if fn.IsExec() && !fn.IsDir() {
 				s.Font.Weight = rich.Bold
 			}
-			if fn.Lines != nil {
+			if fn.FileIsOpen {
 				s.Font.Slant = rich.Italic
 			}
 		})
@@ -281,11 +280,6 @@ func (fn *Node) IsExec() bool {
 // isOpen returns true if file is flagged as open
 func (fn *Node) isOpen() bool {
 	return !fn.Closed
-}
-
-// IsNotSaved returns true if the file is open and has been changed (edited) since last Save
-func (fn *Node) IsNotSaved() bool {
-	return fn.Lines != nil && fn.Lines.IsNotSaved()
 }
 
 // isAutoSave returns true if file is an auto-save file (starts and ends with #)
@@ -494,20 +488,22 @@ func (fn *Node) OpenBuf() (bool, error) {
 		log.Println(err)
 		return false, err
 	}
-	if fn.Lines != nil {
-		if fn.Lines.Filename() == string(fn.Filepath) { // close resets filename
-			return false, nil
-		}
-	} else {
-		fn.Lines = lines.NewLines()
-		// fn.Lines.OnChange(fn.LinesViewId, func(e events.Event) {
-		// 	if fn.Info.VCS == vcs.Stored {
-		// 		fn.Info.VCS = vcs.Modified
-		// 	}
-		// })
-	}
-	fn.Lines.SetHighlighting(NodeHighlighting)
-	return true, fn.Lines.Open(string(fn.Filepath))
+	// todo:
+	// if fn.Lines != nil {
+	// 	if fn.Lines.Filename() == string(fn.Filepath) { // close resets filename
+	// 		return false, nil
+	// 	}
+	// } else {
+	// 	fn.Lines = lines.NewLines()
+	// 	// fn.Lines.OnChange(fn.LinesViewId, func(e events.Event) {
+	// 	// 	if fn.Info.VCS == vcs.Stored {
+	// 	// 		fn.Info.VCS = vcs.Modified
+	// 	// 	}
+	// 	// })
+	// }
+	// fn.Lines.SetHighlighting(NodeHighlighting)
+	// return true, fn.Lines.Open(string(fn.Filepath))
+	return true, nil
 }
 
 // removeFromExterns removes file from list of external files
@@ -525,11 +521,12 @@ func (fn *Node) removeFromExterns() { //types:add
 // closeBuf closes the file in its buffer if it is open.
 // returns true if closed.
 func (fn *Node) closeBuf() bool {
-	if fn.Lines == nil {
-		return false
-	}
-	fn.Lines.Close()
-	fn.Lines = nil
+	// todo: send a signal instead
+	// if fn.Lines == nil {
+	// 	return false
+	// }
+	// fn.Lines.Close()
+	// fn.Lines = nil
 	return true
 }
 

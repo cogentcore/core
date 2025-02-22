@@ -218,6 +218,15 @@ func (ls *Lines) AutosaveCheck() bool {
 	return ls.autosaveCheck()
 }
 
+// FileModCheck checks if the underlying file has been modified since last
+// Stat (open, save); if haven't yet prompted, user is prompted to ensure
+// that this is OK. It returns true if the file was modified.
+func (ls *Lines) FileModCheck() bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.fileModCheck()
+}
+
 ////////  Unexported implementation
 
 // clearNotSaved sets Changed and NotSaved to false.

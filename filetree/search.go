@@ -5,19 +5,8 @@
 package filetree
 
 import (
-	"fmt"
-	"io/fs"
-	"log"
-	"path/filepath"
-	"regexp"
-	"sort"
-	"strings"
-
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/core"
-	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/textpos"
-	"cogentcore.org/core/tree"
 )
 
 // FindLocation corresponds to the search scope
@@ -51,80 +40,82 @@ type SearchResults struct {
 // language(s) that contain the given string, sorted in descending order by number
 // of occurrences; ignoreCase transforms everything into lowercase
 func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation, activeDir string, langs []fileinfo.Known, openPath func(path string) *Node) []SearchResults {
-	fb := []byte(find)
-	fsz := len(find)
-	if fsz == 0 {
-		return nil
-	}
-	if loc == FindLocationAll {
-		return findAll(start, find, ignoreCase, regExp, langs, openPath)
-	}
-	var re *regexp.Regexp
-	var err error
-	if regExp {
-		re, err = regexp.Compile(find)
-		if err != nil {
-			log.Println(err)
-			return nil
-		}
-	}
-	mls := make([]SearchResults, 0)
-	start.WalkDown(func(k tree.Node) bool {
-		sfn := AsNode(k)
-		if sfn == nil {
-			return tree.Continue
-		}
-		if sfn.IsDir() && !sfn.isOpen() {
-			// fmt.Printf("dir: %v closed\n", sfn.FPath)
-			return tree.Break // don't go down into closed directories!
-		}
-		if sfn.IsDir() || sfn.IsExec() || sfn.Info.Kind == "octet-stream" || sfn.isAutoSave() || sfn.Info.Generated {
-			// fmt.Printf("dir: %v opened\n", sfn.Nm)
-			return tree.Continue
-		}
-		if int(sfn.Info.Size) > core.SystemSettings.BigFileSize {
-			return tree.Continue
-		}
-		if strings.HasSuffix(sfn.Name, ".code") { // exclude self
-			return tree.Continue
-		}
-		if !fileinfo.IsMatchList(langs, sfn.Info.Known) {
-			return tree.Continue
-		}
-		if loc == FindLocationDir {
-			cdir, _ := filepath.Split(string(sfn.Filepath))
-			if activeDir != cdir {
-				return tree.Continue
-			}
-		} else if loc == FindLocationNotTop {
-			// if level == 1 { // todo
-			// 	return tree.Continue
-			// }
-		}
-		var cnt int
-		var matches []textpos.Match
-		if sfn.isOpen() && sfn.Lines != nil {
-			if regExp {
-				cnt, matches = sfn.Lines.SearchRegexp(re)
-			} else {
-				cnt, matches = sfn.Lines.Search(fb, ignoreCase, false)
-			}
-		} else {
-			if regExp {
-				cnt, matches = lines.SearchFileRegexp(string(sfn.Filepath), re)
-			} else {
-				cnt, matches = lines.SearchFile(string(sfn.Filepath), fb, ignoreCase)
-			}
-		}
-		if cnt > 0 {
-			mls = append(mls, SearchResults{sfn, cnt, matches})
-		}
-		return tree.Continue
-	})
-	sort.Slice(mls, func(i, j int) bool {
-		return mls[i].Count > mls[j].Count
-	})
-	return mls
+	// fb := []byte(find)
+	// fsz := len(find)
+	// if fsz == 0 {
+	// 	return nil
+	// }
+	// if loc == FindLocationAll {
+	// 	return findAll(start, find, ignoreCase, regExp, langs, openPath)
+	// }
+	// var re *regexp.Regexp
+	// var err error
+	// if regExp {
+	// 	re, err = regexp.Compile(find)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		return nil
+	// 	}
+	// }
+	// mls := make([]SearchResults, 0)
+	// start.WalkDown(func(k tree.Node) bool {
+	// 	sfn := AsNode(k)
+	// 	if sfn == nil {
+	// 		return tree.Continue
+	// 	}
+	// 	if sfn.IsDir() && !sfn.isOpen() {
+	// 		// fmt.Printf("dir: %v closed\n", sfn.FPath)
+	// 		return tree.Break // don't go down into closed directories!
+	// 	}
+	// 	if sfn.IsDir() || sfn.IsExec() || sfn.Info.Kind == "octet-stream" || sfn.isAutoSave() || sfn.Info.Generated {
+	// 		// fmt.Printf("dir: %v opened\n", sfn.Nm)
+	// 		return tree.Continue
+	// 	}
+	// 	if int(sfn.Info.Size) > core.SystemSettings.BigFileSize {
+	// 		return tree.Continue
+	// 	}
+	// 	if strings.HasSuffix(sfn.Name, ".code") { // exclude self
+	// 		return tree.Continue
+	// 	}
+	// 	if !fileinfo.IsMatchList(langs, sfn.Info.Known) {
+	// 		return tree.Continue
+	// 	}
+	// 	if loc == FindLocationDir {
+	// 		cdir, _ := filepath.Split(string(sfn.Filepath))
+	// 		if activeDir != cdir {
+	// 			return tree.Continue
+	// 		}
+	// 	} else if loc == FindLocationNotTop {
+	// 		// if level == 1 { // todo
+	// 		// 	return tree.Continue
+	// 		// }
+	// 	}
+	// 	var cnt int
+	// 	var matches []textpos.Match
+	// todo: need alt search mech
+	// if sfn.isOpen() && sfn.Lines != nil {
+	// 	if regExp {
+	// 		cnt, matches = sfn.Lines.SearchRegexp(re)
+	// 	} else {
+	// 		cnt, matches = sfn.Lines.Search(fb, ignoreCase, false)
+	// 	}
+	// } else {
+	// 	if regExp {
+	// 		cnt, matches = lines.SearchFileRegexp(string(sfn.Filepath), re)
+	// 	} else {
+	// 		cnt, matches = lines.SearchFile(string(sfn.Filepath), fb, ignoreCase)
+	// 	}
+	// }
+	// if cnt > 0 {
+	// 	mls = append(mls, SearchResults{sfn, cnt, matches})
+	// }
+	// return tree.Continue
+	// })
+	// sort.Slice(mls, func(i, j int) bool {
+	// 	return mls[i].Count > mls[j].Count
+	// })
+	// return mls
+	return nil
 }
 
 // findAll returns list of all files (regardless of what is currently open)
@@ -132,83 +123,84 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLocation,
 // sorted in descending order by number of occurrences. ignoreCase transforms
 // everything into lowercase.
 func findAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo.Known, openPath func(path string) *Node) []SearchResults {
-	fb := []byte(find)
-	fsz := len(find)
-	if fsz == 0 {
-		return nil
-	}
-	var re *regexp.Regexp
-	var err error
-	if regExp {
-		re, err = regexp.Compile(find)
-		if err != nil {
-			log.Println(err)
-			return nil
-		}
-	}
-	mls := make([]SearchResults, 0)
-	spath := string(start.Filepath) // note: is already Abs
-	filepath.Walk(spath, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.Name() == ".git" {
-			return filepath.SkipDir
-		}
-		if info.IsDir() {
-			return nil
-		}
-		if int(info.Size()) > core.SystemSettings.BigFileSize {
-			return nil
-		}
-		if strings.HasSuffix(info.Name(), ".code") { // exclude self
-			return nil
-		}
-		if fileinfo.IsGeneratedFile(path) {
-			return nil
-		}
-		if len(langs) > 0 {
-			mtyp, _, err := fileinfo.MimeFromFile(path)
-			if err != nil {
-				return nil
-			}
-			known := fileinfo.MimeKnown(mtyp)
-			if !fileinfo.IsMatchList(langs, known) {
-				return nil
-			}
-		}
-		ofn := openPath(path)
-		var cnt int
-		var matches []textpos.Match
-		if ofn != nil && ofn.Lines != nil {
-			if regExp {
-				cnt, matches = ofn.Lines.SearchRegexp(re)
-			} else {
-				cnt, matches = ofn.Lines.Search(fb, ignoreCase, false)
-			}
-		} else {
-			if regExp {
-				cnt, matches = lines.SearchFileRegexp(path, re)
-			} else {
-				cnt, matches = lines.SearchFile(path, fb, ignoreCase)
-			}
-		}
-		if cnt > 0 {
-			if ofn != nil {
-				mls = append(mls, SearchResults{ofn, cnt, matches})
-			} else {
-				sfn, found := start.FindFile(path)
-				if found {
-					mls = append(mls, SearchResults{sfn, cnt, matches})
-				} else {
-					fmt.Println("file not found in FindFile:", path)
-				}
-			}
-		}
-		return nil
-	})
-	sort.Slice(mls, func(i, j int) bool {
-		return mls[i].Count > mls[j].Count
-	})
-	return mls
+	// fb := []byte(find)
+	// fsz := len(find)
+	// if fsz == 0 {
+	// 	return nil
+	// }
+	// var re *regexp.Regexp
+	// var err error
+	// if regExp {
+	// 	re, err = regexp.Compile(find)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		return nil
+	// 	}
+	// }
+	// mls := make([]SearchResults, 0)
+	// spath := string(start.Filepath) // note: is already Abs
+	// filepath.Walk(spath, func(path string, info fs.FileInfo, err error) error {
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if info.Name() == ".git" {
+	// 		return filepath.SkipDir
+	// 	}
+	// 	if info.IsDir() {
+	// 		return nil
+	// 	}
+	// 	if int(info.Size()) > core.SystemSettings.BigFileSize {
+	// 		return nil
+	// 	}
+	// 	if strings.HasSuffix(info.Name(), ".code") { // exclude self
+	// 		return nil
+	// 	}
+	// 	if fileinfo.IsGeneratedFile(path) {
+	// 		return nil
+	// 	}
+	// 	if len(langs) > 0 {
+	// 		mtyp, _, err := fileinfo.MimeFromFile(path)
+	// 		if err != nil {
+	// 			return nil
+	// 		}
+	// 		known := fileinfo.MimeKnown(mtyp)
+	// 		if !fileinfo.IsMatchList(langs, known) {
+	// 			return nil
+	// 		}
+	// 	}
+	// 	ofn := openPath(path)
+	// 	var cnt int
+	// 	var matches []textpos.Match
+	// if ofn != nil && ofn.Lines != nil {
+	// 	if regExp {
+	// 		cnt, matches = ofn.Lines.SearchRegexp(re)
+	// 	} else {
+	// 		cnt, matches = ofn.Lines.Search(fb, ignoreCase, false)
+	// 	}
+	// } else {
+	// 	if regExp {
+	// 		cnt, matches = lines.SearchFileRegexp(path, re)
+	// 	} else {
+	// 		cnt, matches = lines.SearchFile(path, fb, ignoreCase)
+	// 	}
+	// }
+	// if cnt > 0 {
+	// 	if ofn != nil {
+	// 		mls = append(mls, SearchResults{ofn, cnt, matches})
+	// 	} else {
+	// 		sfn, found := start.FindFile(path)
+	// 		if found {
+	// 			mls = append(mls, SearchResults{sfn, cnt, matches})
+	// 		} else {
+	// 			fmt.Println("file not found in FindFile:", path)
+	// 		}
+	// 	}
+	// }
+	// return nil
+	// })
+	// sort.Slice(mls, func(i, j int) bool {
+	// 	return mls[i].Count > mls[j].Count
+	// })
+	// return mls
+	return nil
 }

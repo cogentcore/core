@@ -97,18 +97,19 @@ func (fn *Node) deleteFilesImpl() {
 			sn.deleteFile()
 			return
 		}
-		var fns []string
-		sn.Info.Filenames(&fns)
-		ft := sn.FileRoot()
-		for _, filename := range fns {
-			sn, ok := ft.FindFile(filename)
-			if !ok {
-				continue
-			}
-			if sn.Lines != nil {
-				sn.closeBuf()
-			}
-		}
+		// var fns []string
+		// sn.Info.Filenames(&fns)
+		// ft := sn.FileRoot()
+		// for _, filename := range fns {
+		// todo:
+		// sn, ok := ft.FindFile(filename)
+		// if !ok {
+		// 	continue
+		// }
+		// if sn.Lines != nil {
+		// 	sn.closeBuf()
+		// }
+		// }
 		sn.deleteFile()
 	})
 }

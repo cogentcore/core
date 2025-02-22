@@ -207,9 +207,10 @@ func (fn *Node) revertVCS() (err error) {
 	} else if fn.Info.VCS == vcs.Added {
 		// do nothing - leave in "added" state
 	}
-	if fn.Lines != nil {
-		fn.Lines.Revert()
-	}
+	// todo:
+	// if fn.Lines != nil {
+	// 	fn.Lines.Revert()
+	// }
 	fn.Update()
 	return err
 }
@@ -236,7 +237,8 @@ func (fn *Node) diffVCS(rev_a, rev_b string) error {
 	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath), fn.Lines, rev_a, rev_b)
+	// todo:
+	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath) /*fn.Lines*/, nil, rev_a, rev_b)
 	return err
 }
 
