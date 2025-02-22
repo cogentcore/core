@@ -18,6 +18,20 @@ import (
 )
 
 func (ct *Content) MakeToolbar(p *tree.Plan) {
+	if ct.SizeClass() == core.SizeCompact {
+		tree.Add(p, func(w *core.Button) {
+			w.SetIcon(icons.Menu)
+			w.SetTooltip("Navigate pages and headings")
+			w.OnClick(func(e events.Event) {
+				d := core.NewBody("Navigate")
+				// tree.MoveToParent(ct.leftFrame, d)
+				d.AddBottomBar(func(bar *core.Frame) {
+					d.AddCancel(bar)
+				})
+				d.RunDialog(w)
+			})
+		})
+	}
 	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.Icon(core.AppIcon))
 		w.SetTooltip("Home")
