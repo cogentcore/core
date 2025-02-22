@@ -115,7 +115,7 @@ func (ed *Editor) spellCheck(reg *textpos.Edit) bool {
 	ld := len(wb) - len(lwb)
 	reg.Region.Start.Char += widx
 	reg.Region.End.Char += widx - ld
-	//
+
 	sugs, knwn := ed.spell.checkWord(lwb)
 	if knwn {
 		ed.Lines.RemoveTag(reg.Region.Start, token.TextSpellErr)

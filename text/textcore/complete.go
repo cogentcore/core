@@ -52,6 +52,7 @@ func (ed *Editor) deleteCompleter() {
 	if ed.Complete == nil {
 		return
 	}
+	ed.Complete.Cancel()
 	ed.Complete = nil
 }
 

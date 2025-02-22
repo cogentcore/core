@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"unicode"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -38,8 +39,6 @@ import (
 type Editor struct { //core:embedder
 	Base
 
-	// todo: unexport below, pending cogent code update
-
 	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
 
@@ -51,10 +50,15 @@ type Editor struct { //core:embedder
 
 	// spell is the functions and data for spelling correction.
 	spell *spellCheck
+
+	// curFilename is the current filename from Lines. Used to detect changed file.
+	curFilename string
 }
 
 func (ed *Editor) Init() {
 	ed.Base.Init()
+	ed.editorSetLines(ed.Lines)
+	ed.setSpell()
 	ed.AddContextMenu(ed.contextMenu)
 	ed.handleKeyChord()
 	ed.handleMouse()
@@ -62,16 +66,49 @@ func (ed *Editor) Init() {
 	ed.handleFocus()
 }
 
+// updateNewFile checks if there is a new file in the Lines editor and updates
+// any relevant editor settings accordingly.
+func (ed *Editor) updateNewFile() {
+	ln := ed.Lines
+	if ln == nil {
+		ed.curFilename = ""
+		ed.viewId = -1
+		return
+	}
+	fnm := ln.Filename()
+	if ed.curFilename == fnm {
+		return
+	}
+	ed.curFilename = fnm
+	if ln.FileInfo().Known != fileinfo.Unknown {
+		_, ps := ln.ParseState()
+		fmt.Println("set completer")
+		ed.setCompleter(ps, completeParse, completeEditParse, lookupParse)
+	} else {
+		ed.deleteCompleter()
+	}
+}
+
 // SetLines sets the [lines.Lines] that this is an editor of,
 // creating a new view for this editor and connecting to events.
-func (ed *Editor) SetLines(buf *lines.Lines) *Editor {
-	ed.Base.SetLines(buf)
-	if ed.Lines != nil {
-		ed.Lines.FileModPromptFunc = func() {
-			FileModPrompt(ed.Scene, ed.Lines)
-		}
-	}
+func (ed *Editor) SetLines(ln *lines.Lines) *Editor {
+	ed.Base.SetLines(ln)
+	ed.editorSetLines(ln)
 	return ed
+}
+
+// editorSetLines does the editor specific part of SetLines.
+func (ed *Editor) editorSetLines(ln *lines.Lines) {
+	if ln == nil {
+		ed.curFilename = ""
+		return
+	}
+	ln.OnChange(ed.viewId, func(e events.Event) {
+		ed.updateNewFile()
+	})
+	ln.FileModPromptFunc = func() {
+		FileModPrompt(ed.Scene, ln)
+	}
 }
 
 // SaveAs saves the current text into given file; does an editDone first to save edits

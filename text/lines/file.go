@@ -264,12 +264,6 @@ func (ls *Lines) stat() error {
 // Returns true if supported.
 func (ls *Lines) configKnown() bool {
 	if ls.fileInfo.Known != fileinfo.Unknown {
-		// if ls.spell == nil {
-		// 	ls.setSpell()
-		// }
-		// if ls.Complete == nil {
-		// 	ls.setCompleter(&ls.ParseState, completeParse, completeEditParse, lookupParse)
-		// }
 		return ls.Settings.ConfigKnown(ls.fileInfo.Known)
 	}
 	return false

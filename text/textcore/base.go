@@ -230,8 +230,6 @@ func (ed *Base) Init() {
 	ed.OnClose(func(e events.Event) {
 		ed.editDone()
 	})
-
-	// ed.Updater(ed.NeedsRender) // todo: delete me
 }
 
 func (ed *Base) Destroy() {
@@ -306,48 +304,47 @@ func (ed *Base) SendClose() {
 
 // SetLines sets the [lines.Lines] that this is an editor of,
 // creating a new view for this editor and connecting to events.
-func (ed *Base) SetLines(buf *lines.Lines) *Base {
-	oldbuf := ed.Lines
-	if ed == nil || (buf != nil && oldbuf == buf) {
+func (ed *Base) SetLines(ln *lines.Lines) *Base {
+	oldln := ed.Lines
+	if ed == nil || (ln != nil && oldln == ln) {
 		return ed
 	}
-	if oldbuf != nil {
-		oldbuf.DeleteView(ed.viewId)
+	if oldln != nil {
+		oldln.DeleteView(ed.viewId)
+		ed.viewId = -1
 	}
-	ed.Lines = buf
+	ed.Lines = ln
 	ed.resetState()
-	if buf != nil {
-		buf.Settings.EditorSettings = core.SystemSettings.Editor
+	if ln != nil {
+		ln.Settings.EditorSettings = core.SystemSettings.Editor
 		wd := ed.linesSize.X
 		if wd == 0 {
 			wd = 80
 		}
-		ed.viewId = buf.NewView(wd)
-		buf.OnChange(ed.viewId, func(e events.Event) {
+		ed.viewId = ln.NewView(wd)
+		ln.OnChange(ed.viewId, func(e events.Event) {
 			ed.NeedsRender()
 			ed.SendChange()
 		})
-		buf.OnInput(ed.viewId, func(e events.Event) {
+		ln.OnInput(ed.viewId, func(e events.Event) {
 			if ed.AutoscrollOnInput {
 				ed.cursorEndDoc()
 			}
 			ed.NeedsRender()
 			ed.SendInput()
 		})
-		buf.OnClose(ed.viewId, func(e events.Event) {
+		ln.OnClose(ed.viewId, func(e events.Event) {
 			ed.SetLines(nil)
 			ed.SendClose()
 		})
-		phl := buf.PosHistoryLen()
+		phl := ln.PosHistoryLen()
 		if phl > 0 {
-			cp, _ := buf.PosHistoryAt(phl - 1)
+			cp, _ := ln.PosHistoryAt(phl - 1)
 			ed.posHistoryIndex = phl - 1
 			ed.SetCursorShow(cp)
 		} else {
 			ed.SetCursorShow(textpos.Pos{})
 		}
-	} else {
-		ed.viewId = -1
 	}
 	ed.NeedsRender()
 	return ed
