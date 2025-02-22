@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse"
@@ -82,6 +83,12 @@ type Lines struct {
 	// The prompt should determine whether the user wants to revert, overwrite, or
 	// save current version as a different file. It must block until the user responds.
 	FileModPromptFunc func()
+
+	// Meta can be used to maintain misc metadata associated with the Lines text,
+	// which allows the Lines object to be the primary data type for applications
+	// dealing with text data, if there are just a few additional data elements needed.
+	// Use standard Go camel-case key names, standards in [metadata].
+	Meta metadata.Data
 
 	// fontStyle is the default font styling to use for markup.
 	// Is set to use the monospace font.
@@ -173,6 +180,8 @@ type Lines struct {
 	// use Lock(), Unlock() directly for overall mutex on any content updates
 	sync.Mutex
 }
+
+func (ls *Lines) Metadata() *metadata.Data { return &ls.Meta }
 
 // numLines returns number of lines
 func (ls *Lines) numLines() int {
