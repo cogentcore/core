@@ -24,13 +24,10 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
-	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -427,64 +424,4 @@ func (ct *Content) setStageTitle() {
 		}
 		rw.SetStageTitle(name)
 	}
-}
-
-func (ct *Content) MakeToolbar(p *tree.Plan) {
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.Icon(core.AppIcon))
-		w.SetTooltip("Home")
-		w.OnClick(func(e events.Event) {
-			ct.Open("")
-		})
-	})
-	// Superseded by browser navigation on web.
-	if core.TheApp.Platform() != system.Web {
-		tree.Add(p, func(w *core.Button) {
-			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
-			w.SetTooltip("Back")
-			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex > 0)
-			})
-			w.OnClick(func(e events.Event) {
-				ct.historyIndex--
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
-			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
-			w.SetTooltip("Forward")
-			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex < len(ct.history)-1)
-			})
-			w.OnClick(func(e events.Event) {
-				ct.historyIndex++
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
-			})
-		})
-	}
-	tree.Add(p, func(w *core.Button) {
-		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu)
-		w.Styler(func(s *styles.Style) {
-			s.Background = colors.Scheme.SurfaceVariant
-			s.Padding.Right.Em(5)
-		})
-		w.OnClick(func(e events.Event) {
-			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
-		})
-	})
-}
-
-func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
-	newItems := make([]core.ChooserItem, len(ct.pages))
-	for i, pg := range ct.pages {
-		newItems[i] = core.ChooserItem{
-			Value: pg,
-			Text:  pg.Name,
-			Icon:  icons.Article,
-			Func: func() {
-				ct.Open(pg.URL)
-			},
-		}
-	}
-	*items = append(newItems, *items...)
 }
