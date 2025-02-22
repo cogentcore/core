@@ -88,6 +88,10 @@ type Content struct {
 	// currentHeading is the currently selected heading in the table of contents,
 	// if any (in kebab-case).
 	currentHeading string
+
+	// The previous and next page, if applicable. They must be stored on this struct
+	// to avoid stale local closure variables.
+	prevPage, nextPage *bcontent.Page
 }
 
 func init() {
@@ -161,6 +165,7 @@ func (ct *Content) Init() {
 						errors.Log(ct.loadPage(w))
 					})
 				})
+				ct.makeBottomButtons(p)
 			})
 		})
 	})

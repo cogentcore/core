@@ -5,6 +5,8 @@
 package content
 
 import (
+	"slices"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -73,4 +75,53 @@ func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
 		}
 	}
 	*items = append(newItems, *items...)
+}
+
+// makeBottomButtons makes the previous and next buttons if relevant.
+func (ct *Content) makeBottomButtons(p *tree.Plan) {
+	if len(ct.currentPage.Categories) == 0 {
+		return
+	}
+	cat := ct.currentPage.Categories[0]
+	pages := ct.pagesByCategory[cat]
+	idx := slices.Index(pages, ct.currentPage)
+
+	ct.prevPage, ct.nextPage = nil, nil
+
+	if idx > 0 {
+		ct.prevPage = pages[idx-1]
+	}
+	if idx < len(pages)-1 {
+		ct.nextPage = pages[idx+1]
+	}
+
+	if ct.prevPage == nil && ct.nextPage == nil {
+		return
+	}
+
+	tree.Add(p, func(w *core.Frame) {
+		w.Styler(func(s *styles.Style) {
+			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
+		})
+		w.Maker(func(p *tree.Plan) {
+			if ct.prevPage != nil {
+				tree.Add(p, func(w *core.Button) {
+					w.SetText("Previous").SetIcon(icons.ArrowBack).SetType(core.ButtonTonal)
+					ct.Context.LinkButtonUpdating(w, func() string { // needed to prevent stale URL variable
+						return ct.prevPage.URL
+					})
+				})
+			}
+			if ct.nextPage != nil {
+				tree.Add(p, func(w *core.Stretch) {})
+				tree.Add(p, func(w *core.Button) {
+					w.SetText("Next").SetIcon(icons.ArrowForward).SetType(core.ButtonTonal)
+					ct.Context.LinkButtonUpdating(w, func() string { // needed to prevent stale URL variable
+						return ct.nextPage.URL
+					})
+				})
+			}
+		})
+	})
 }
