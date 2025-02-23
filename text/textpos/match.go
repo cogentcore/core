@@ -15,6 +15,10 @@ type Match struct {
 	Text []rune
 }
 
+func (m *Match) String() string {
+	return m.Region.String() + ": " + string(m.Text)
+}
+
 // MatchContext is how much text to include on either side of the match.
 var MatchContext = 30
 

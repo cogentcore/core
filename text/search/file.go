@@ -7,6 +7,7 @@ package search
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -23,6 +24,14 @@ type Results struct {
 	Filepath string
 	Count    int
 	Matches  []textpos.Match
+}
+
+func (r *Results) String() string {
+	str := fmt.Sprintf("%s: %d", r.Filepath, r.Count)
+	for _, m := range r.Matches {
+		str += "\n" + m.String()
+	}
+	return str
 }
 
 // RuneLines looks for a string (no regexp) within lines of runes,
