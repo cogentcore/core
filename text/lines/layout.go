@@ -41,7 +41,7 @@ func (ls *Lines) layoutViewLines(vw *view) {
 func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich.Text, []textpos.Pos) {
 	lt := mu.Clone()
 	n := len(txt)
-	sp := textpos.Pos{Line: ln, Char: 0} // source starting position
+	sp := textpos.Pos{Line: ln, Char: 0} // source startinng position
 	vst := []textpos.Pos{sp}             // start with this line
 	breaks := []int{}                    // line break indexes into lt spans
 	clen := 0                            // current line length so far

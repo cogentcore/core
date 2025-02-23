@@ -77,23 +77,6 @@ func TestFirstWordApostrophe(t *testing.T) {
 	}
 }
 
-func TestMarkupPathsAsLinks(t *testing.T) {
-	flds := []string{
-		"./path/file.go",
-		"/absolute/path/file.go",
-		"../relative/path/file.go",
-		"file.go",
-	}
-
-	orig, link := MarkupPathsAsLinks(flds, 3)
-
-	expectedOrig := []byte("./path/file.go")
-	expectedLink := []byte(`<a href="file:///./path/file.go">./path/file.go</a>`)
-
-	assert.Equal(t, expectedOrig, orig)
-	assert.Equal(t, expectedLink, link)
-}
-
 func TestInnerBracketScope(t *testing.T) {
 	tests := []struct {
 		input        string

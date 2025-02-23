@@ -82,7 +82,6 @@ func (ed *Editor) updateNewFile() {
 	ed.curFilename = fnm
 	if ln.FileInfo().Known != fileinfo.Unknown {
 		_, ps := ln.ParseState()
-		fmt.Println("set completer")
 		ed.setCompleter(ps, completeParse, completeEditParse, lookupParse)
 	} else {
 		ed.deleteCompleter()

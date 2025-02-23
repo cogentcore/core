@@ -82,7 +82,7 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 				switch nm {
 				case "a":
 					special = rich.Link
-					fs.SetLink()
+					fs.SetLinkStyle()
 					for _, attr := range se.Attr {
 						if attr.Name.Local == "href" {
 							linkURL = attr.Value
@@ -114,6 +114,7 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 				default:
 					err := fmt.Errorf("%q tag not recognized", nm)
 					errs = append(errs, err)
+					panic(err.Error())
 				}
 			}
 			if len(se.Attr) > 0 {

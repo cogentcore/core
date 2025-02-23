@@ -61,14 +61,15 @@ func (ob *OutputBuffer) MonitorOutput() {
 	if ob.Batch == 0 {
 		ob.Batch = 200 * time.Millisecond
 	}
-	outscan := bufio.NewScanner(ob.Output) // line at a time
+	sty := ob.Lines.FontStyle()
 	ob.bufferedLines = make([][]rune, 0, 100)
 	ob.bufferedMarkup = make([]rich.Text, 0, 100)
+	outscan := bufio.NewScanner(ob.Output) // line at a time
 	for outscan.Scan() {
+		ob.Lock()
 		b := outscan.Bytes()
 		rln := []rune(string(b))
 
-		ob.Lock()
 		if ob.afterTimer != nil {
 			ob.afterTimer.Stop()
 			ob.afterTimer = nil
@@ -78,7 +79,7 @@ func (ob *OutputBuffer) MonitorOutput() {
 			mup := ob.MarkupFunc(ob.Lines, rln)
 			ob.bufferedMarkup = append(ob.bufferedMarkup, mup)
 		} else {
-			mup := rich.NewPlainText(rln)
+			mup := rich.NewText(sty, rln)
 			ob.bufferedMarkup = append(ob.bufferedMarkup, mup)
 		}
 		lag := time.Since(ob.lastOutput)

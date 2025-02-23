@@ -320,7 +320,7 @@ func (ls *Lines) revert() bool {
 
 	didDiff := false
 	if ls.numLines() < diffRevertLines {
-		ob := &Lines{}
+		ob := NewLines()
 		err := ob.openFileOnly(ls.filename)
 		if errors.Log(err) != nil {
 			// sc := tb.sceneFromEditor() // todo:

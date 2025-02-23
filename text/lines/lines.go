@@ -220,6 +220,9 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 		lns = lns[:n-1]
 		n--
 	}
+	if ls.fontStyle == nil {
+		ls.Defaults()
+	}
 	ls.lines = slicesx.SetLength(ls.lines, n)
 	ls.tags = slicesx.SetLength(ls.tags, n)
 	ls.hiTags = slicesx.SetLength(ls.hiTags, n)
@@ -270,7 +273,7 @@ func (ls *Lines) endPos() textpos.Pos {
 	if n == 0 {
 		return textpos.Pos{}
 	}
-	return textpos.Pos{n - 1, len(ls.lines[n-1])}
+	return textpos.Pos{Line: n - 1, Char: len(ls.lines[n-1])}
 }
 
 // appendTextMarkup appends new lines of text to end of lines,
@@ -279,13 +282,16 @@ func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 	if len(text) == 0 {
 		return &textpos.Edit{}
 	}
+	text = append(text, []rune{})
 	ed := ls.endPos()
 	tbe := ls.insertTextImpl(ed, text)
-
+	if tbe == nil {
+		fmt.Println("nil insert", ed, text)
+		return nil
+	}
 	st := tbe.Region.Start.Line
 	el := tbe.Region.End.Line
-	// n := (el - st) + 1
-	for ln := st; ln <= el; ln++ {
+	for ln := st; ln < el; ln++ {
 		ls.markup[ln] = markup[ln-st]
 	}
 	return tbe

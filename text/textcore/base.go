@@ -328,7 +328,7 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 		})
 		ln.OnInput(ed.viewId, func(e events.Event) {
 			if ed.AutoscrollOnInput {
-				ed.cursorEndDoc()
+				ed.SetCursorTarget(textpos.PosErr) // special code to go to end
 			}
 			ed.NeedsRender()
 			ed.SendInput()
@@ -355,7 +355,7 @@ func (ed *Base) styleBase() {
 	if ed.NeedsRebuild() {
 		highlighting.UpdateFromTheme()
 		if ed.Lines != nil {
-			ed.Lines.SetHighlighting(highlighting.StyleDefault)
+			ed.Lines.SetHighlighting(core.AppearanceSettings.Highlighting)
 		}
 	}
 	ed.Frame.Style()

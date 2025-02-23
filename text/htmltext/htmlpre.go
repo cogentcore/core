@@ -123,7 +123,7 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 					switch stag {
 					case "a":
 						special = rich.Link
-						fs.SetLink()
+						fs.SetLinkStyle()
 						if nattr > 0 {
 							sprop := make(map[string]any, len(parts)-1)
 							for ai := 0; ai < nattr; ai++ {

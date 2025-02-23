@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/token"
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -120,6 +121,56 @@ func TestMarkupSpaces(t *testing.T) {
 `
 	// fmt.Println(tx)
 	assert.Equal(t, rtx, fmt.Sprint(tx))
+
+	for i, r := range rsrc {
+		si, sn, ri := tx.Index(i)
+		if tx[si][ri] != r {
+			fmt.Println(i, string(r), string(tx[si][ri]), si, ri, sn)
+		}
+		assert.Equal(t, string(r), string(tx[si][ri]))
+	}
+}
+
+func TestMarkupPathsAsLinks(t *testing.T) {
+	flds := []string{
+		"./path/file.go",
+		"/absolute/path/file.go",
+		"../relative/path/file.go",
+		"file.go",
+	}
+
+	for i, fld := range flds {
+		rfd := []rune(fld)
+		mu := rich.NewPlainText(rfd)
+		nmu := MarkupPathsAsLinks(rfd, mu, 2)
+		fmt.Println(i, nmu)
+	}
+}
+
+func TestMarkupDiff(t *testing.T) {
+	src := `diff --git a/code/cdebug/cdelve/cdelve.go b/code/cdebug/cdelve/cdelve.goindex 83ee192..6d2e820 100644"`
+	rsrc := []rune(src)
+
+	hi := Highlighter{}
+	hi.SetStyle(HighlightingName("emacs"))
+
+	clex := lexers.Get("diff")
+	ctags, _ := ChromaTagsLine(clex, src)
+
+	// hitrg := `[{Name 0 4 {0 0}} {KeywordType: string 12 18 {0 0}} {EOS 18 18 {0 0}}]`
+	// assert.Equal(t, hitrg, fmt.Sprint(lex))
+	fmt.Println(ctags)
+
+	sty := rich.NewStyle()
+	sty.Family = rich.Monospace
+	tx := MarkupLineRich(hi.Style, sty, rsrc, ctags, nil)
+
+	rtx := `[monospace]: "Name        "
+[monospace bold fill-color]: "string"
+`
+	_ = rtx
+	fmt.Println(tx)
+	// assert.Equal(t, rtx, fmt.Sprint(tx))
 
 	for i, r := range rsrc {
 		si, sn, ri := tx.Index(i)

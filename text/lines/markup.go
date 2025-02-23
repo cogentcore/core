@@ -32,6 +32,7 @@ func (ls *Lines) setFileInfo(info *fileinfo.FileInfo) {
 // initialMarkup does the first-pass markup on the file
 func (ls *Lines) initialMarkup() {
 	if !ls.Highlighter.Has || ls.numLines() == 0 {
+		ls.layoutViews()
 		return
 	}
 	txt := ls.bytes(100)
@@ -51,6 +52,7 @@ func (ls *Lines) startDelayedReMarkup() {
 	defer ls.markupDelayMu.Unlock()
 
 	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
+		ls.layoutViews()
 		return
 	}
 	if ls.markupDelayTimer != nil {
@@ -157,7 +159,6 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
-		// fmt.Println("#####\n", ln, "tags:\n", tags[ln])
 		mu := highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
 		ls.markup[ln] = mu
 		lks := mu.GetLinks()
@@ -165,6 +166,11 @@ func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 			ls.links[ln] = lks
 		}
 	}
+	ls.layoutViews()
+}
+
+// layoutViews updates layout of all view lines.
+func (ls *Lines) layoutViews() {
 	for _, vw := range ls.views {
 		ls.layoutViewLines(vw)
 	}
@@ -211,6 +217,9 @@ func (ls *Lines) markupLines(st, ed int) bool {
 
 // linesEdited re-marks-up lines in edit (typically only 1).
 func (ls *Lines) linesEdited(tbe *textpos.Edit) {
+	if tbe == nil {
+		return
+	}
 	st, ed := tbe.Region.Start.Line, tbe.Region.End.Line
 	for ln := st; ln <= ed; ln++ {
 		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln])

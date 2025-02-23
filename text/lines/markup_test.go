@@ -5,7 +5,6 @@
 package lines
 
 import (
-	"fmt"
 	"testing"
 
 	_ "cogentcore.org/core/system/driver"
@@ -119,10 +118,10 @@ func TestMarkupSpaces(t *testing.T) {
 	vw := lns.view(vid)
 	assert.Equal(t, src+"\n", lns.String())
 
-	mu0 := `[monospace]: "Name          "
+	mu0 := `[monospace]: "Name           "
 [monospace bold fill-color]: "string"
 `
-	fmt.Println(lns.markup[0])
-	fmt.Println(vw.markup[0])
+	// fmt.Println(lns.markup[0])
+	// fmt.Println(vw.markup[0])
 	assert.Equal(t, mu0, vw.markup[0].String())
 }

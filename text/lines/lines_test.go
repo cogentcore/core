@@ -19,7 +19,7 @@ func TestEdit(t *testing.T) {
     }
 `
 
-	lns := &Lines{}
+	lns := NewLines()
 	lns.Defaults()
 	lns.SetText([]byte(src))
 	assert.Equal(t, src+"\n", lns.String())

@@ -116,6 +116,17 @@ func TestText(t *testing.T) {
 	// for i := range spl {
 	// 	fmt.Println(string(spl[i]))
 	// }
+
+	tx.SetSpanStyle(3, ital)
+	trg = `[]: "The "
+[italic stroke-color]: "lazy"
+[]: " fox"
+[italic stroke-color]: " typed in some "
+[1.50x bold]: "familiar"
+[]: " text"
+`
+	// fmt.Println(tx)
+	assert.Equal(t, trg, tx.String())
 }
 
 func TestLink(t *testing.T) {

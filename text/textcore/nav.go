@@ -49,12 +49,18 @@ func (ed *Base) SetCursorShow(pos textpos.Pos) {
 	ed.renderCursor(true)
 }
 
-// SetCursorTarget sets a new cursor target position, ensures that it is visible
+// SetCursorTarget sets a new cursor target position, ensures that it is visible.
+// Setting the textpos.PosErr value causes it to go the end of doc, the position
+// of which may not be known at the time the target is set.
 func (ed *Base) SetCursorTarget(pos textpos.Pos) {
 	ed.targetSet = true
 	ed.cursorTarget = pos
-	ed.SetCursorShow(pos)
 	ed.NeedsRender()
+	if pos == textpos.PosErr {
+		ed.cursorEndDoc()
+		return
+	}
+	ed.SetCursorShow(pos)
 	// fmt.Println(ed, "set target:", ed.CursorTarg)
 }
 

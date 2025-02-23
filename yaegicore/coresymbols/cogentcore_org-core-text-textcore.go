@@ -12,15 +12,19 @@ func init() {
 		// function, constant and variable definitions
 		"AsBase":                   reflect.ValueOf(textcore.AsBase),
 		"AsEditor":                 reflect.ValueOf(textcore.AsEditor),
+		"Close":                    reflect.ValueOf(textcore.Close),
 		"DiffEditorDialog":         reflect.ValueOf(textcore.DiffEditorDialog),
 		"DiffEditorDialogFromRevs": reflect.ValueOf(textcore.DiffEditorDialogFromRevs),
 		"DiffFiles":                reflect.ValueOf(textcore.DiffFiles),
+		"FileModPrompt":            reflect.ValueOf(textcore.FileModPrompt),
 		"NewBase":                  reflect.ValueOf(textcore.NewBase),
 		"NewDiffEditor":            reflect.ValueOf(textcore.NewDiffEditor),
 		"NewDiffTextEditor":        reflect.ValueOf(textcore.NewDiffTextEditor),
 		"NewEditor":                reflect.ValueOf(textcore.NewEditor),
 		"NewTwinEditors":           reflect.ValueOf(textcore.NewTwinEditors),
 		"PrevISearchString":        reflect.ValueOf(&textcore.PrevISearchString).Elem(),
+		"Save":                     reflect.ValueOf(textcore.Save),
+		"SaveAs":                   reflect.ValueOf(textcore.SaveAs),
 		"TextDialog":               reflect.ValueOf(textcore.TextDialog),
 
 		// type definitions

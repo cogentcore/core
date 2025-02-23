@@ -37,7 +37,6 @@ func init() {
 		"Edit":         reflect.ValueOf((*textpos.Edit)(nil)),
 		"Match":        reflect.ValueOf((*textpos.Match)(nil)),
 		"Pos":          reflect.ValueOf((*textpos.Pos)(nil)),
-		"Pos16":        reflect.ValueOf((*textpos.Pos16)(nil)),
 		"Range":        reflect.ValueOf((*textpos.Range)(nil)),
 		"Region":       reflect.ValueOf((*textpos.Region)(nil)),
 	}

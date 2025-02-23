@@ -22,11 +22,13 @@ import (
 )
 
 func (ed *Base) reLayout() {
+	if ed.Lines == nil {
+		return
+	}
 	lns := ed.Lines.ViewLines(ed.viewId)
 	if lns == ed.linesSize.Y {
 		return
 	}
-	// fmt.Println("relayout", lns, ed.linesSize.Y)
 	ed.layoutAllLines()
 	chg := ed.ManageOverflow(1, true)
 	// fmt.Println(chg)
@@ -89,6 +91,9 @@ func (ed *Base) posIsVisible(pos textpos.Pos) bool {
 // renderLines renders the visible lines and line numbers.
 func (ed *Base) renderLines() {
 	ed.RenderStandardBox()
+	if ed.Lines == nil {
+		return
+	}
 	bb := ed.renderBBox()
 	stln, edln, spos := ed.renderLineStartEnd()
 	pc := &ed.Scene.Painter
@@ -312,6 +317,9 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 // PixelToCursor finds the cursor position that corresponds to the given pixel
 // location (e.g., from mouse click), in widget-relative coordinates.
 func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
+	if ed.Lines == nil {
+		return textpos.PosErr
+	}
 	stln, _, _ := ed.renderLineStartEnd()
 	ptf := math32.FromPoint(pt)
 	ptf.SetSub(math32.Vec2(ed.LineNumberPixels(), 0))

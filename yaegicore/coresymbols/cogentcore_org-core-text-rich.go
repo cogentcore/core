@@ -58,6 +58,7 @@ func init() {
 		"Maths":              reflect.ValueOf(rich.Maths),
 		"Medium":             reflect.ValueOf(rich.Medium),
 		"Monospace":          reflect.ValueOf(rich.Monospace),
+		"NewPlainText":       reflect.ValueOf(rich.NewPlainText),
 		"NewStyle":           reflect.ValueOf(rich.NewStyle),
 		"NewStyleFromRunes":  reflect.ValueOf(rich.NewStyleFromRunes),
 		"NewText":            reflect.ValueOf(rich.NewText),

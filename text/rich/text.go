@@ -148,6 +148,16 @@ func (tx Text) Span(si int) (*Style, []rune) {
 	return NewStyleFromRunes(tx[si])
 }
 
+// SetSpanStyle sets the style for given span, updating the runes to encode it.
+func (tx *Text) SetSpanStyle(si int, nsty *Style) *Text {
+	sty, r := tx.Span(si)
+	*sty = *nsty
+	nr := sty.ToRunes()
+	nr = append(nr, r...)
+	(*tx)[si] = nr
+	return tx
+}
+
 // AddSpan adds a span to the Text using the given Style and runes.
 // The Text is modified for convenience in the high-frequency use-case.
 // Clone first to avoid changing the original.
@@ -158,7 +168,7 @@ func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 	return tx
 }
 
-// InsertSpan inserts a span to the Text at given index,
+// InsertSpan inserts a span to the Text at given span index,
 // using the given Style and runes.
 // The Text is modified for convenience in the high-frequency use-case.
 // Clone first to avoid changing the original.
@@ -174,22 +184,21 @@ func (tx *Text) InsertSpan(at int, s *Style, r []rune) *Text {
 // just before the index, and a new span inserted starting at that index,
 // with the remaining contents of the original containing span.
 // If that logical index is already the start of a span, or the logical
-// index is invalid, nothing happens.
-// The Text is modified for convenience in the high-frequency use-case.
-// Clone first to avoid changing the original.
-func (tx *Text) SplitSpan(li int) *Text {
+// index is invalid, nothing happens. Returns the index of span,
+// which will be negative if the logical index is out of range.
+func (tx *Text) SplitSpan(li int) int {
 	si, sn, ri := tx.Index(li)
 	if si < 0 {
-		return tx
+		return si
 	}
 	if sn == ri { // already the start
-		return tx
+		return si
 	}
 	nr := slices.Clone((*tx)[si][:sn]) // style runes
 	nr = append(nr, (*tx)[si][ri:]...)
 	(*tx)[si] = (*tx)[si][:ri] // truncate
 	*tx = slices.Insert(*tx, si+1, nr)
-	return tx
+	return si
 }
 
 // StartSpecial adds a Span of given Special type to the Text,
@@ -208,6 +217,15 @@ func (tx *Text) EndSpecial() *Text {
 	s := NewStyle()
 	s.Special = End
 	return tx.AddSpan(s, nil)
+}
+
+// InsertEndSpecial inserts an [End] Special to the Text at given span
+// index, to terminate the current Special. All [Specials] must be
+// terminated with this empty end tag.
+func (tx *Text) InsertEndSpecial(at int) *Text {
+	s := NewStyle()
+	s.Special = End
+	return tx.InsertSpan(at, s, nil)
 }
 
 // SpecialRange returns the range of spans for the

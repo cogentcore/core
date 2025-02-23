@@ -245,9 +245,13 @@ func (ed *Base) scrollCursorToCenter() bool {
 
 func (ed *Base) scrollCursorToTarget() {
 	// fmt.Println(ed, "to target:", ed.CursorTarg)
+	ed.targetSet = false
+	if ed.cursorTarget == textpos.PosErr {
+		ed.cursorEndDoc()
+		return
+	}
 	ed.CursorPos = ed.cursorTarget
 	ed.scrollCursorToCenter()
-	ed.targetSet = false
 }
 
 // scrollToCenterIfHidden checks if the given position is not in view,

@@ -400,12 +400,20 @@ func (s *Style) SetBackground(clr color.Color) *Style {
 	return s
 }
 
-// SetLink sets the default hyperlink styling: primary.Base color (e.g., blue)
+// SetLinkStyle sets the default hyperlink styling: primary.Base color (e.g., blue)
 // and Underline.
-func (s *Style) SetLink() *Style {
+func (s *Style) SetLinkStyle() *Style {
 	s.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
 	s.Decoration.SetFlag(true, Underline)
 	return s
+}
+
+// SetLink sets the given style as a hyperlink, with given URL, and
+// default link styling.
+func (s *Style) SetLink(url string) *Style {
+	s.URL = url
+	s.Special = Link
+	return s.SetLinkStyle()
 }
 
 func (s *Style) String() string {
