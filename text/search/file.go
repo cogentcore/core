@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package filesearch
+package search
 
 import (
 	"bufio"
@@ -18,10 +18,17 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
-// SearchRuneLines looks for a string (no regexp) within lines of runes,
+// Results is used to report search results.
+type Results struct {
+	Filepath string
+	Count    int
+	Matches  []textpos.Match
+}
+
+// RuneLines looks for a string (no regexp) within lines of runes,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func RuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -52,11 +59,11 @@ func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos
 	return cnt, matches
 }
 
-// SearchLexItems looks for a string (no regexp),
+// LexItems looks for a string (no regexp),
 // as entire lexically tagged items,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -91,11 +98,11 @@ func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase boo
 	return cnt, matches
 }
 
-// Search looks for a string (no regexp) from an io.Reader input stream,
+// Reader looks for a literal string (no regexp) from an io.Reader input stream,
 // using given case-sensitivity.
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
-func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func Reader(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -127,31 +134,27 @@ func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Matc
 		}
 		ln++
 	}
-	if err := scan.Err(); err != nil {
-		// note: we expect: bufio.Scanner: token too long  when reading binary files
-		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("core.FileSearch error: %v\n", err)
-	}
 	return cnt, matches
 }
 
-// SearchFile looks for a string (no regexp) within a file, in a
+// File looks for a literal string (no regexp) within a file, in given
 // case-sensitive way, returning number of occurrences and specific match
-// position list -- column positions are in runes.
-func SearchFile(filename string, find []byte, ignoreCase bool) (int, []textpos.Match) {
+// position list. Column positions are in runes.
+func File(filename string, find []byte, ignoreCase bool) (int, []textpos.Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
-		log.Printf("text.SearchFile: open error: %v\n", err)
+		log.Printf("search.File: open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()
-	return Search(fp, find, ignoreCase)
+	return Reader(fp, find, ignoreCase)
 }
 
-// SearchRegexp looks for a string (using regexp) from an io.Reader input stream.
+// ReaderRegexp looks for a string using Go regexp expression,
+// from an io.Reader input stream.
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
-func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []textpos.Match) {
+func ReaderRegexp(reader io.Reader, re *regexp.Regexp) (int, []textpos.Match) {
 	cnt := 0
 	var matches []textpos.Match
 	scan := bufio.NewScanner(reader)
@@ -182,31 +185,26 @@ func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []textpos.Match) {
 		}
 		ln++
 	}
-	if err := scan.Err(); err != nil {
-		// note: we expect: bufio.Scanner: token too long  when reading binary files
-		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("core.FileSearch error: %v\n", err)
-	}
 	return cnt, matches
 }
 
-// SearchFileRegexp looks for a string (using regexp) within a file,
-// returning number of occurrences and specific match
-// position list -- column positions are in runes.
-func SearchFileRegexp(filename string, re *regexp.Regexp) (int, []textpos.Match) {
+// FileRegexp looks for a string using Go regexp expression
+// within a file, returning number of occurrences and specific match
+// position list. Column positions are in runes.
+func FileRegexp(filename string, re *regexp.Regexp) (int, []textpos.Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
-		log.Printf("text.SearchFile: open error: %v\n", err)
+		log.Printf("search.FileRegexp: open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()
-	return SearchRegexp(fp, re)
+	return ReaderRegexp(fp, re)
 }
 
-// SearchRuneLinesRegexp looks for a regexp within lines of runes,
+// RuneLinesRegexp looks for a regexp within lines of runes,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list. Column positions are in runes.
-func SearchRuneLinesRegexp(src [][]rune, re *regexp.Regexp) (int, []textpos.Match) {
+func RuneLinesRegexp(src [][]rune, re *regexp.Regexp) (int, []textpos.Match) {
 	cnt := 0
 	var matches []textpos.Match
 	for ln := range src {
