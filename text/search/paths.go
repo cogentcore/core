@@ -38,9 +38,9 @@ func excludeFile(exclude *[]string, fname, fpath string) (bool, error) {
 	return false, errors.Join(errs...)
 }
 
-// langCheck checks if file matches list of target languages: true if
+// LangCheck checks if file matches list of target languages: true if
 // matches (or no langs)
-func langCheck(fi *fileinfo.FileInfo, langs []fileinfo.Known) bool {
+func LangCheck(fi *fileinfo.FileInfo, langs []fileinfo.Known) bool {
 	if len(langs) == 0 {
 		return true
 	}
@@ -102,7 +102,7 @@ func Paths(paths []string, find string, ignoreCase, regExp bool, langs []fileinf
 			if fi.Generated {
 				continue
 			}
-			if !langCheck(fi, langs) {
+			if !LangCheck(fi, langs) {
 				continue
 			}
 			var cnt int

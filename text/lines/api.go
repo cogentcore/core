@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/search"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
 )
@@ -1135,9 +1136,9 @@ func (ls *Lines) Search(find []byte, ignoreCase, lexItems bool) (int, []textpos.
 	ls.Lock()
 	defer ls.Unlock()
 	if lexItems {
-		return SearchLexItems(ls.lines, ls.hiTags, find, ignoreCase)
+		return search.LexItems(ls.lines, ls.hiTags, find, ignoreCase)
 	}
-	return SearchRuneLines(ls.lines, find, ignoreCase)
+	return search.RuneLines(ls.lines, find, ignoreCase)
 }
 
 // SearchRegexp looks for a string (regexp) within buffer,
@@ -1146,7 +1147,7 @@ func (ls *Lines) Search(find []byte, ignoreCase, lexItems bool) (int, []textpos.
 func (ls *Lines) SearchRegexp(re *regexp.Regexp) (int, []textpos.Match) {
 	ls.Lock()
 	defer ls.Unlock()
-	return SearchRuneLinesRegexp(ls.lines, re)
+	return search.RuneLinesRegexp(ls.lines, re)
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner

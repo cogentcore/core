@@ -64,7 +64,7 @@ func All(root string, find string, ignoreCase, regExp bool, langs []fileinfo.Kno
 		if fi.Generated {
 			return nil
 		}
-		if !langCheck(fi, langs) {
+		if !LangCheck(fi, langs) {
 			return nil
 		}
 		var cnt int
