@@ -218,6 +218,7 @@ func (a *App) Cursor(win system.Window) system.Cursor {
 }
 
 func (a *App) IsDark() bool {
+	// See https://stackoverflow.com/a/57795495
 	return js.Global().Get("matchMedia").Truthy() &&
 		js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Get("matches").Truthy()
 }
