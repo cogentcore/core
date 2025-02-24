@@ -88,7 +88,6 @@ func (a *App) SetSystemWindow() {
 	a.Resize()
 	a.InitDrawer()
 	a.Event.Window(events.WinShow)
-	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
 }
 
