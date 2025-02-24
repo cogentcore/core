@@ -338,6 +338,8 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
 			ct.rightFrame.ScrollDimToContentStart(math32.Y)
+			ct.currentHeading = ""
+			ct.saveWebURL()
 		}
 	})
 	// last is the most recent tree node for each heading level, used for nesting.
