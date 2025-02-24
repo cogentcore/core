@@ -32,6 +32,7 @@ func (ls *Lines) setFileInfo(info *fileinfo.FileInfo) {
 // initialMarkup does the first-pass markup on the file
 func (ls *Lines) initialMarkup() {
 	if !ls.Highlighter.Has || ls.numLines() == 0 {
+		ls.collectLinks()
 		ls.layoutViews()
 		return
 	}
@@ -52,6 +53,7 @@ func (ls *Lines) startDelayedReMarkup() {
 	defer ls.markupDelayMu.Unlock()
 
 	if !ls.Highlighter.Has || ls.numLines() == 0 || ls.numLines() > maxMarkupLines {
+		ls.collectLinks()
 		ls.layoutViews()
 		return
 	}
@@ -155,18 +157,25 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 func (ls *Lines) markupApplyTags(tags []lexer.Line) {
 	tags = ls.markupApplyEdits(tags)
 	maxln := min(len(tags), ls.numLines())
-	ls.links = make(map[int][]rich.Hyperlink)
 	for ln := range maxln {
 		ls.hiTags[ln] = tags[ln]
 		ls.tags[ln] = ls.adjustedTags(ln)
 		mu := highlighting.MarkupLineRich(ls.Highlighter.Style, ls.fontStyle, ls.lines[ln], tags[ln], ls.tags[ln])
 		ls.markup[ln] = mu
+	}
+	ls.collectLinks()
+	ls.layoutViews()
+}
+
+// collectLinks finds all the links in markup into links.
+func (ls *Lines) collectLinks() {
+	ls.links = make(map[int][]rich.Hyperlink)
+	for ln, mu := range ls.markup {
 		lks := mu.GetLinks()
 		if len(lks) > 0 {
 			ls.links[ln] = lks
 		}
 	}
-	ls.layoutViews()
 }
 
 // layoutViews updates layout of all view lines.
@@ -409,7 +418,7 @@ func (ls *Lines) prevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 	cl := ls.linkAt(pos)
 	if cl != nil {
 		if cl.Range.Start == 0 {
-			pos = ls.MoveBackward(pos, 1)
+			pos = ls.moveBackward(pos, 1)
 		} else {
 			pos.Char = cl.Range.Start - 1
 		}
@@ -424,7 +433,8 @@ func (ls *Lines) prevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 	lns := maps.Keys(ls.links)
 	slices.Sort(lns)
 	nl := len(lns)
-	for ln := nl - 1; ln >= 0; ln-- {
+	for i := nl - 1; i >= 0; i-- {
+		ln := lns[i]
 		if ln >= pos.Line {
 			continue
 		}

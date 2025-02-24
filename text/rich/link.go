@@ -4,7 +4,9 @@
 
 package rich
 
-import "cogentcore.org/core/text/textpos"
+import (
+	"cogentcore.org/core/text/textpos"
+)
 
 // Hyperlink represents a hyperlink within shaped text.
 type Hyperlink struct {

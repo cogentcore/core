@@ -668,7 +668,7 @@ func (ed *Editor) handleLinkCursor() {
 		if newPos == textpos.PosErr {
 			return
 		}
-		lk, _ := ed.OpenLinkAt(newPos)
+		lk, _ := ed.linkAt(newPos)
 		if lk != nil {
 			ed.Styles.Cursor = cursors.Pointer
 		} else {

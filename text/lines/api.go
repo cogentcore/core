@@ -567,6 +567,7 @@ func (ls *Lines) AppendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}
+	ls.collectLinks()
 	ls.Unlock()
 	ls.sendInput()
 	return tbe
