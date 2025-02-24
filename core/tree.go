@@ -90,7 +90,10 @@ func AsTree(n tree.Node) *Tree {
 //
 // Standard [events.Event]s are sent to any listeners, including
 // [events.Select], [events.Change], and [events.DoubleClick].
-// The selected nodes are in the root [Tree.SelectedNodes] list.
+// The selected nodes are in the root [Tree.SelectedNodes] list;
+// select events are sent to both selected nodes and the root node.
+// See [Tree.IsRootSelected] to check whether a select event on the root
+// node corresponds to the root node or another node.
 type Tree struct {
 	WidgetBase
 
@@ -669,6 +672,15 @@ func (tr *Tree) RenderWidget() {
 }
 
 ////////  Selection
+
+// IsRootSelected returns whether the root node is the only node selected.
+// This can be used in [events.Select] event handlers to check whether a
+// select event on the root node truly corresponds to the root node or whether
+// it is for another node, as select events are sent to the root when any node
+// is selected.
+func (tr *Tree) IsRootSelected() bool {
+	return len(tr.SelectedNodes) == 1 && tr.SelectedNodes[0] == tr.Root
+}
 
 // GetSelectedNodes returns a slice of the currently selected
 // Trees within the entire tree, using a list maintained

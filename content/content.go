@@ -10,12 +10,16 @@ package content
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
 	"io/fs"
 	"net/http"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/maps"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -24,8 +28,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
-	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -58,6 +60,10 @@ type Content struct {
 	// pagesByCategory has the [bcontent.Page]s for each of all [bcontent.Page.Categories].
 	pagesByCategory map[string][]*bcontent.Page
 
+	// categories has all unique [bcontent.Page.Categories], sorted such that the categories
+	// with the most pages are listed first.
+	categories []string
+
 	// history is the history of pages that have been visited.
 	// The oldest page is first.
 	history []*bcontent.Page
@@ -72,8 +78,12 @@ type Content struct {
 	renderedPage *bcontent.Page
 
 	// leftFrame is the frame on the left side of the widget,
-	// used for displaying the table of contents.
+	// used for displaying the table of contents and the categories.
 	leftFrame *core.Frame
+
+	// rightFrame is the frame on the right side of the widget,
+	// used for displaying the page content.
+	rightFrame *core.Frame
 
 	// tocNodes are all of the tree nodes in the table of contents
 	// by kebab-case heading name.
@@ -82,6 +92,10 @@ type Content struct {
 	// currentHeading is the currently selected heading in the table of contents,
 	// if any (in kebab-case).
 	currentHeading string
+
+	// The previous and next page, if applicable. They must be stored on this struct
+	// to avoid stale local closure variables.
+	prevPage, nextPage *bcontent.Page
 }
 
 func init() {
@@ -137,6 +151,7 @@ func (ct *Content) Init() {
 			ct.leftFrame = w
 		})
 		tree.Add(p, func(w *core.Frame) {
+			ct.rightFrame = w
 			w.Maker(func(p *tree.Plan) {
 				if ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
@@ -155,6 +170,7 @@ func (ct *Content) Init() {
 						errors.Log(ct.loadPage(w))
 					})
 				})
+				ct.makeBottomButtons(p)
 			})
 		})
 	})
@@ -204,6 +220,11 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		}
 		return nil
 	}))
+	ct.categories = maps.Keys(ct.pagesByCategory)
+	slices.SortFunc(ct.categories, func(a, b string) int {
+		return cmp.Compare(len(ct.pagesByCategory[b]), len(ct.pagesByCategory[a]))
+	})
+
 	if url := ct.getWebURL(); url != "" {
 		ct.Open(url)
 		return ct
@@ -275,6 +296,7 @@ func (ct *Content) open(url string, history bool) {
 
 func (ct *Content) openHeading(heading string) {
 	if heading == "" {
+		ct.rightFrame.ScrollDimToContentStart(math32.Y)
 		return
 	}
 	tr := ct.tocNodes[strcase.ToKebab(heading)]
@@ -300,7 +322,6 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return err
 	}
 
-	w.Parent.(*core.Frame).ScrollDimToContentStart(math32.Y) // the parent is the one that scrolls
 	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)
 	ct.makeCategories()
@@ -314,6 +335,13 @@ func (ct *Content) loadPage(w *core.Frame) error {
 func (ct *Content) makeTableOfContents(w *core.Frame) {
 	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	contents.OnSelect(func(e events.Event) {
+		if contents.IsRootSelected() {
+			ct.rightFrame.ScrollDimToContentStart(math32.Y)
+			ct.currentHeading = ""
+			ct.saveWebURL()
+		}
+	})
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
 	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
@@ -353,23 +381,32 @@ func (ct *Content) makeTableOfContents(w *core.Frame) {
 
 // makeCategories makes the categories tree for the current page and adds it to [Content.leftFrame].
 func (ct *Content) makeCategories() {
-	if len(ct.currentPage.Categories) == 0 {
+	if len(ct.categories) == 0 {
 		return
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
-	for _, cat := range ct.currentPage.Categories {
-		catTree := core.NewTree(cats).SetText(cat)
+	cats.OnSelect(func(e events.Event) {
+		if cats.IsRootSelected() {
+			ct.Open("")
+		}
+	})
+	for _, cat := range ct.categories {
+		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
+		if ct.currentPage.Name == cat {
+			catTree.SetSelected(true)
+		}
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.Open(catPage.URL)
 			}
 		})
 		for _, pg := range ct.pagesByCategory[cat] {
-			if pg == ct.currentPage {
-				continue
-			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
+			if pg == ct.currentPage {
+				pgTree.SetSelected(true)
+				catTree.SetClosed(false)
+			}
 			pgTree.OnSelect(func(e events.Event) {
 				ct.Open(pg.URL)
 			})
@@ -408,61 +445,4 @@ func (ct *Content) setStageTitle() {
 		}
 		rw.SetStageTitle(name)
 	}
-}
-
-func (ct *Content) MakeToolbar(p *tree.Plan) {
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.Icon(core.AppIcon))
-		w.SetTooltip("Home")
-		w.OnClick(func(e events.Event) {
-			ct.Open("")
-		})
-	})
-	// Superseded by browser navigation on web.
-	if core.TheApp.Platform() != system.Web {
-		tree.Add(p, func(w *core.Button) {
-			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
-			w.SetTooltip("Back")
-			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex > 0)
-			})
-			w.OnClick(func(e events.Event) {
-				ct.historyIndex--
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
-			})
-		})
-		tree.Add(p, func(w *core.Button) {
-			w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
-			w.SetTooltip("Forward")
-			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex < len(ct.history)-1)
-			})
-			w.OnClick(func(e events.Event) {
-				ct.historyIndex++
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
-			})
-		})
-	}
-	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.Search).SetKey(keymap.Menu)
-		w.SetTooltip("Search")
-		w.OnClick(func(e events.Event) {
-			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
-		})
-	})
-}
-
-func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
-	newItems := make([]core.ChooserItem, len(ct.pages))
-	for i, pg := range ct.pages {
-		newItems[i] = core.ChooserItem{
-			Value: pg,
-			Text:  pg.Name,
-			Icon:  icons.Article,
-			Func: func() {
-				ct.Open(pg.URL)
-			},
-		}
-	}
-	*items = append(newItems, *items...)
 }
