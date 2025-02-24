@@ -296,6 +296,7 @@ func (ct *Content) open(url string, history bool) {
 
 func (ct *Content) openHeading(heading string) {
 	if heading == "" {
+		ct.rightFrame.ScrollDimToContentStart(math32.Y)
 		return
 	}
 	tr := ct.tocNodes[strcase.ToKebab(heading)]
@@ -321,7 +322,6 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return err
 	}
 
-	ct.rightFrame.ScrollDimToContentStart(math32.Y)
 	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)
 	ct.makeCategories()
