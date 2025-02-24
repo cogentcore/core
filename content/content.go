@@ -378,7 +378,6 @@ func (ct *Content) makeCategories() {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
 		if ct.currentPage.Name == cat {
 			catTree.SetSelected(true)
-			catTree.SetClosed(false) // needs to happen after SetSelected since that overrides
 		}
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
