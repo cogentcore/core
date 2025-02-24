@@ -18,7 +18,7 @@ import (
 )
 
 func (ct *Content) MakeToolbar(p *tree.Plan) {
-	if ct.SizeClass() == core.SizeCompact {
+	if false && ct.SizeClass() == core.SizeCompact { // TODO: implement hamburger menu for compact
 		tree.Add(p, func(w *core.Button) {
 			w.SetIcon(icons.Menu)
 			w.SetTooltip("Navigate pages and headings")
