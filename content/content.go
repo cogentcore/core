@@ -78,8 +78,12 @@ type Content struct {
 	renderedPage *bcontent.Page
 
 	// leftFrame is the frame on the left side of the widget,
-	// used for displaying the table of contents.
+	// used for displaying the table of contents and the categories.
 	leftFrame *core.Frame
+
+	// rightFrame is the frame on the right side of the widget,
+	// used for displaying the page content.
+	rightFrame *core.Frame
 
 	// tocNodes are all of the tree nodes in the table of contents
 	// by kebab-case heading name.
@@ -147,6 +151,7 @@ func (ct *Content) Init() {
 			ct.leftFrame = w
 		})
 		tree.Add(p, func(w *core.Frame) {
+			ct.rightFrame = w
 			w.Maker(func(p *tree.Plan) {
 				if ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
@@ -316,7 +321,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return err
 	}
 
-	w.Parent.(*core.Frame).ScrollDimToContentStart(math32.Y) // the parent is the one that scrolls
+	ct.rightFrame.ScrollDimToContentStart(math32.Y)
 	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w)
 	ct.makeCategories()
@@ -330,6 +335,11 @@ func (ct *Content) loadPage(w *core.Frame) error {
 func (ct *Content) makeTableOfContents(w *core.Frame) {
 	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	contents.OnSelect(func(e events.Event) {
+		if contents.IsRootSelected() {
+			ct.rightFrame.ScrollDimToContentStart(math32.Y)
+		}
+	})
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
 	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
@@ -374,6 +384,11 @@ func (ct *Content) makeCategories() {
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
+	cats.OnSelect(func(e events.Event) {
+		if cats.IsRootSelected() {
+			ct.Open("")
+		}
+	})
 	for _, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
 		if ct.currentPage.Name == cat {
