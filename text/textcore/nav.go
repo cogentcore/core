@@ -31,7 +31,7 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 		return
 	}
 
-	ed.clearScopelights()
+	ed.scopelightsReset()
 	ed.CursorPos = pos
 	bm, has := ed.Lines.BraceMatch(pos)
 	if has {
@@ -284,8 +284,6 @@ func (ed *Base) cursorLineEnd() {
 // select mode is active
 func (ed *Base) cursorEndDoc() {
 	org := ed.validateCursor()
-	ed.CursorPos.Line = max(ed.NumLines()-1, 0)
-	ed.CursorPos.Char = ed.Lines.LineLen(ed.CursorPos.Line)
 	ed.setCursorColumn(ed.CursorPos)
 	ed.scrollCursorToBottom()
 	ed.cursorSelectShow(org)

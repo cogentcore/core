@@ -15,15 +15,15 @@ import (
 
 //////// Regions
 
-// HighlightRegion creates a new highlighted region,
-// triggers updating.
+// HighlightRegion adds a new highlighted region. Use HighlightsReset to
+// clear any existing prior to this if only one region desired.
 func (ed *Base) HighlightRegion(reg textpos.Region) {
-	ed.Highlights = []textpos.Region{reg}
+	ed.Highlights = append(ed.Highlights, reg)
 	ed.NeedsRender()
 }
 
-// ClearHighlights clears the Highlights slice of all regions
-func (ed *Base) ClearHighlights() {
+// HighlightsReset resets the list of all highlighted regions.
+func (ed *Base) HighlightsReset() {
 	if len(ed.Highlights) == 0 {
 		return
 	}
@@ -31,8 +31,8 @@ func (ed *Base) ClearHighlights() {
 	ed.NeedsRender()
 }
 
-// clearScopelights clears the scopelights slice of all regions
-func (ed *Base) clearScopelights() {
+// scopelightsReset clears the scopelights slice of all regions
+func (ed *Base) scopelightsReset() {
 	if len(ed.scopelights) == 0 {
 		return
 	}

@@ -40,22 +40,22 @@ func (ed *Base) OpenLinkAt(pos textpos.Pos) (*rich.Hyperlink, int) {
 	if tl == nil {
 		return nil, -1
 	}
+	ed.HighlightsReset()
 	ed.highlightLink(tl, ln)
 	ed.openLink(tl)
 	return tl, pos.Line
 }
 
 // highlightLink highlights given hyperlink
-func (ed *Base) highlightLink(lk *rich.Hyperlink, ln int) {
+func (ed *Base) highlightLink(lk *rich.Hyperlink, ln int) textpos.Region {
 	reg := textpos.NewRegion(ln, lk.Range.Start, ln, lk.Range.End)
 	ed.HighlightRegion(reg)
-	ed.SetCursorTarget(reg.Start)
-	ed.savePosHistory(reg.Start)
+	return reg
 }
 
 // HighlightAllLinks highlights all hyperlinks.
 func (ed *Base) HighlightAllLinks() {
-	ed.Highlights = nil
+	ed.HighlightsReset()
 	lks := ed.Lines.Links()
 	lns := maps.Keys(lks)
 	slices.Sort(lns)
@@ -85,7 +85,10 @@ func (ed *Base) CursorNextLink(wraparound bool) bool {
 			return false
 		}
 	}
-	ed.highlightLink(nl, ln)
+	ed.HighlightsReset()
+	reg := ed.highlightLink(nl, ln)
+	ed.SetCursorTarget(reg.Start)
+	ed.savePosHistory(reg.Start)
 	ed.NeedsRender()
 	return true
 }
@@ -102,12 +105,15 @@ func (ed *Base) CursorPrevLink(wraparound bool) bool {
 		if !wraparound {
 			return false
 		}
-		nl, ln = ed.Lines.PrevLink(textpos.Pos{}) // wraparound
+		nl, ln = ed.Lines.PrevLink(ed.Lines.EndPos()) // wraparound
 		if nl == nil {
 			return false
 		}
 	}
-	ed.highlightLink(nl, ln)
+	ed.HighlightsReset()
+	reg := ed.highlightLink(nl, ln)
+	ed.SetCursorTarget(reg.Start)
+	ed.savePosHistory(reg.Start)
 	ed.NeedsRender()
 	return true
 }

@@ -396,7 +396,7 @@ func (ls *Lines) nextLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 	}
 	ll := ls.links[pos.Line]
 	for _, l := range ll {
-		if l.Range.Start >= pos.Char {
+		if l.Range.Contains(pos.Char) {
 			return &l, pos.Line
 		}
 	}
@@ -407,7 +407,8 @@ func (ls *Lines) nextLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 		if ln <= pos.Line {
 			continue
 		}
-		return &ls.links[ln][0], ln
+		l := &ls.links[ln][0]
+		return l, ln
 	}
 	return nil, -1
 }
