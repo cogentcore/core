@@ -43,11 +43,11 @@ type Treer interface { //types:add
 	// to perform lazy building of the tree.
 	CanOpen() bool
 
-	// OnOpen is called when a node is opened.
+	// OnOpen is called when a node is toggled open.
 	// The base version does nothing.
 	OnOpen()
 
-	// OnClose is called when a node is closed
+	// OnClose is called when a node is toggled closed.
 	// The base version does nothing.
 	OnClose()
 

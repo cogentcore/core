@@ -43,8 +43,6 @@ var NodeHighlighting = highlighting.StyleDefault
 type Node struct { //core:embedder
 	core.Tree
 
-	// todo: make Filepath a string! it is not directly edited
-
 	// Filepath is the full path to this file.
 	Filepath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
@@ -122,10 +120,10 @@ func (fn *Node) Init() {
 		if !fn.IsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
-				fn.deleteFiles()
+				fn.This.(Filer).DeleteFiles()
 				e.SetHandled()
 			case keymap.Backspace:
-				fn.deleteFiles()
+				fn.This.(Filer).DeleteFiles()
 				e.SetHandled()
 			case keymap.Duplicate:
 				fn.duplicateFiles()
@@ -480,32 +478,6 @@ func (fn *Node) openAll() { //types:add
 	fn.FileRoot().inOpenAll = false
 }
 
-// OpenBuf opens the file in its buffer if it is not already open.
-// returns true if file is newly opened
-func (fn *Node) OpenBuf() (bool, error) {
-	if fn.IsDir() {
-		err := fmt.Errorf("filetree.Node cannot open directory in editor: %v", fn.Filepath)
-		log.Println(err)
-		return false, err
-	}
-	// todo:
-	// if fn.Lines != nil {
-	// 	if fn.Lines.Filename() == string(fn.Filepath) { // close resets filename
-	// 		return false, nil
-	// 	}
-	// } else {
-	// 	fn.Lines = lines.NewLines()
-	// 	// fn.Lines.OnChange(fn.LinesViewId, func(e events.Event) {
-	// 	// 	if fn.Info.VCS == vcs.Stored {
-	// 	// 		fn.Info.VCS = vcs.Modified
-	// 	// 	}
-	// 	// })
-	// }
-	// fn.Lines.SetHighlighting(NodeHighlighting)
-	// return true, fn.Lines.Open(string(fn.Filepath))
-	return true, nil
-}
-
 // removeFromExterns removes file from list of external files
 func (fn *Node) removeFromExterns() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
@@ -513,21 +485,8 @@ func (fn *Node) removeFromExterns() { //types:add
 			return
 		}
 		sn.FileRoot().removeExternalFile(string(sn.Filepath))
-		sn.closeBuf()
 		sn.Delete()
 	})
-}
-
-// closeBuf closes the file in its buffer if it is open.
-// returns true if closed.
-func (fn *Node) closeBuf() bool {
-	// todo: send a signal instead
-	// if fn.Lines == nil {
-	// 	return false
-	// }
-	// fn.Lines.Close()
-	// fn.Lines = nil
-	return true
 }
 
 // RelativePathFrom returns the relative path from node for given full path

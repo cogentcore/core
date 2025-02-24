@@ -301,6 +301,6 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 			continue
 		}
 		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.Path(), sfn.FPath)
-		sfn.deleteFile()
+		sfn.DeleteFile()
 	}
 }
