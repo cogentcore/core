@@ -160,15 +160,11 @@ func (tr *Region) Since(earlier *Region) time.Duration {
 	return earlier.Ago(tr.Time.Time())
 }
 
-// FromString decodes text region from a string representation of form:
-// [#]LxxCxx-LxxCxx. Used in e.g., URL links -- returns true if successful
-func (tr *Region) FromString(link string) bool {
+// FromStringURL decodes text region from a string representation of form:
+// [#]LxxCxx-LxxCxx. Used in e.g., URL links. returns true if successful
+func (tr *Region) FromStringURL(link string) bool {
 	link = strings.TrimPrefix(link, "#")
 	fmt.Sscanf(link, "L%dC%d-L%dC%d", &tr.Start.Line, &tr.Start.Char, &tr.End.Line, &tr.End.Char)
-	tr.Start.Line--
-	tr.Start.Char--
-	tr.End.Line--
-	tr.End.Char--
 	return true
 }
 

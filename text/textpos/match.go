@@ -7,7 +7,7 @@ package textpos
 // Match records one match for search within file, positions in runes.
 type Match struct {
 
-	// Region surrounding the match. Column positions are in runes.
+	// Region of the match. Column positions are in runes.
 	Region Region
 
 	// Text surrounding the match, at most MatchContext on either side
