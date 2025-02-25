@@ -137,6 +137,9 @@ func (ed *Base) SizeDown(iter int) bool {
 	ed.sizeToLines()
 	redo := ed.Frame.SizeDown(iter)
 	chg := ed.ManageOverflow(iter, true)
+	if !ed.HasScroll[math32.Y] {
+		ed.scrollPos = 0
+	}
 	return redo || chg
 }
 

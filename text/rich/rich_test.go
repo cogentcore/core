@@ -75,7 +75,7 @@ func TestText(t *testing.T) {
 		assert.Equal(t, rune(src[i]), tx.At(i))
 	}
 
-	tx.SplitSpan(12)
+	ssi := tx.SplitSpan(12)
 	trg = `[]: "The "
 [italic stroke-color]: "lazy"
 []: " fox"
@@ -84,6 +84,7 @@ func TestText(t *testing.T) {
 []: " text"
 `
 	// fmt.Println(tx)
+	assert.Equal(t, 3, ssi)
 	assert.Equal(t, trg, tx.String())
 
 	idxTests := []struct {

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/gpu"
@@ -113,7 +112,7 @@ func (txt *Text2D) RenderText() {
 	fs := &txt.Styles.Font
 	txs := &txt.Styles.Text
 	sz := math32.Vec2(10000, 5000) // just a big size
-	txt.richText = errors.Log1(htmltext.HTMLToRich([]byte(txt.Text), fs, nil))
+	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), fs, nil)
 	txt.TextRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &core.AppearanceSettings.Text, sz)
 	// rsz := txt.TextRender.Bounds.Size().Ceil()
 	// if rsz != sz {

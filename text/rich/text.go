@@ -198,7 +198,7 @@ func (tx *Text) SplitSpan(li int) int {
 	nr = append(nr, (*tx)[si][ri:]...)
 	(*tx)[si] = (*tx)[si][:ri] // truncate
 	*tx = slices.Insert(*tx, si+1, nr)
-	return si
+	return si + 1
 }
 
 // StartSpecial adds a Span of given Special type to the Text,

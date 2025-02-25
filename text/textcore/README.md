@@ -17,9 +17,12 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* shaped random crash
+* better job finding path fragments from file links.
 * within line tab rendering
 * xyz text rendering
 * svg text rendering, markers, lab plot text rotation
 * base horizontal scrolling
 * cleanup unused base stuff
+
 

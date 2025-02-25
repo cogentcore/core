@@ -282,6 +282,7 @@ func (ed *Base) Clear() {
 func (ed *Base) resetState() {
 	ed.SelectReset()
 	ed.Highlights = nil
+	ed.scopelights = nil
 	if ed.Lines == nil || ed.lastFilename != ed.Lines.Filename() { // don't reset if reopening..
 		ed.CursorPos = textpos.Pos{}
 	}

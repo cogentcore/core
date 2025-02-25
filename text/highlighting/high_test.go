@@ -137,6 +137,7 @@ func TestMarkupPathsAsLinks(t *testing.T) {
 		"/absolute/path/file.go",
 		"../relative/path/file.go",
 		"file.go",
+		"./commands.go:68:6: ps redeclared in this block",
 	}
 
 	for i, fld := range flds {

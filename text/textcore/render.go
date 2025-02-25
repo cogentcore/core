@@ -320,12 +320,13 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	if ed.Lines == nil {
 		return textpos.PosErr
 	}
-	stln, _, _ := ed.renderLineStartEnd()
+	stln, _, spos := ed.renderLineStartEnd()
 	ptf := math32.FromPoint(pt)
 	ptf.SetSub(math32.Vec2(ed.LineNumberPixels(), 0))
 	if ptf.X < 0 {
 		return textpos.PosErr
 	}
+	ptf.Y -= (spos.Y - ed.Geom.Pos.Content.Y) // fractional bit
 	cp := ptf.Div(ed.charSize)
 	if cp.Y < 0 {
 		return textpos.PosErr

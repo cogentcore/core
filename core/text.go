@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -281,9 +280,9 @@ func (tx *Text) Init() {
 // updateRichText gets the richtext from Text, using HTML parsing.
 func (tx *Text) updateRichText() {
 	if tx.Styles.Text.WhiteSpace.KeepWhiteSpace() {
-		tx.richText = errors.Log1(htmltext.HTMLPreToRich([]byte(tx.Text), &tx.Styles.Font, nil))
+		tx.richText, _ = htmltext.HTMLPreToRich([]byte(tx.Text), &tx.Styles.Font, nil)
 	} else {
-		tx.richText = errors.Log1(htmltext.HTMLToRich([]byte(tx.Text), &tx.Styles.Font, nil))
+		tx.richText, _ = htmltext.HTMLToRich([]byte(tx.Text), &tx.Styles.Font, nil)
 	}
 }
 
@@ -395,6 +394,9 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
+	if tx.Scene == nil || tx.Scene.TextShaper == nil {
+		return sz
+	}
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
