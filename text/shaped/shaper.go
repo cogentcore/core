@@ -14,7 +14,7 @@ import (
 var NewShaper func() Shaper
 
 // Shaper is a text shaping system that can shape the layout of [rich.Text],
-// including line wrapping.
+// including line wrapping. All functions are protected by a mutex.
 type Shaper interface {
 
 	// Shape turns given input spans into [Runs] of rendered text,

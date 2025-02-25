@@ -25,13 +25,16 @@ import (
 // source text, and wrapped separately. For horizontal text, the Lines will render with
 // a position offset at the upper left corner of the overall bounding box of the text.
 func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
+	sh.Lock()
+	defer sh.Unlock()
+
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 24
 	}
 	fsz := tsty.FontSize.Dots
 	dir := goTextDirection(rich.Default, tsty)
 
-	lht := sh.LineHeight(defSty, tsty, rts)
+	lht := sh.lineHeight(defSty, tsty, rts)
 	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
 
 	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing

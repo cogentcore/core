@@ -16,9 +16,9 @@ import (
 // has the font ascent and descent information, and the BoundsBox() method returns a full
 // bounding box for the given font, centered at the baseline.
 func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) shaped.Run {
-	tx := rich.NewText(sty, []rune{r})
-	out := sh.shapeText(tx, tsty, rts, []rune{r})
-	return &Run{Output: out[0]}
+	sh.Lock()
+	defer sh.Unlock()
+	return sh.fontSize(r, sty, tsty, rts)
 }
 
 // LineHeight returns the line height for given font and text style.
@@ -26,7 +26,27 @@ func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 // It includes the [text.Style] LineSpacing multiplier on the natural
 // font-derived line height, which is not generally the same as the font size.
 func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
-	run := sh.FontSize('M', sty, tsty, rts)
+	sh.Lock()
+	defer sh.Unlock()
+	return sh.lineHeight(sty, tsty, rts)
+}
+
+// fontSize returns the font shape sizing information for given font and text style,
+// using given rune (often the letter 'm'). The GlyphBounds field of the [Run] result
+// has the font ascent and descent information, and the BoundsBox() method returns a full
+// bounding box for the given font, centered at the baseline.
+func (sh *Shaper) fontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) shaped.Run {
+	tx := rich.NewText(sty, []rune{r})
+	out := sh.shapeText(tx, tsty, rts, []rune{r})
+	return &Run{Output: out[0]}
+}
+
+// lineHeight returns the line height for given font and text style.
+// For vertical text directions, this is actually the line width.
+// It includes the [text.Style] LineSpacing multiplier on the natural
+// font-derived line height, which is not generally the same as the font size.
+func (sh *Shaper) lineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
+	run := sh.fontSize('M', sty, tsty, rts)
 	bb := run.LineBounds()
 	dir := goTextDirection(rich.Default, tsty)
 	if dir.IsVertical() {

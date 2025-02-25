@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
@@ -32,6 +33,8 @@ type Shaper struct {
 
 	// outBuff is the output buffer to avoid excessive memory consumption.
 	outBuff []shaping.Output
+
+	sync.Mutex
 }
 
 // EmbeddedFonts are embedded filesystems to get fonts from. By default,
@@ -101,6 +104,9 @@ func NewShaper() shaped.Shaper {
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
+	sh.Lock()
+	defer sh.Unlock()
+
 	outs := sh.shapeText(tx, tsty, rts, tx.Join())
 	runs := make([]shaped.Run, len(outs))
 	for i := range outs {

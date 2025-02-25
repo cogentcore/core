@@ -144,7 +144,7 @@ func TestMarkupPathsAsLinks(t *testing.T) {
 		rfd := []rune(fld)
 		mu := rich.NewPlainText(rfd)
 		nmu := MarkupPathsAsLinks(rfd, mu, 2)
-		fmt.Println(i, nmu)
+		fmt.Println(i, nmu) // todo: make it a test
 	}
 }
 
