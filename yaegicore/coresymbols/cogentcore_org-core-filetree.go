@@ -17,30 +17,20 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/filetree/filetree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"AsNode":             reflect.ValueOf(filetree.AsNode),
-		"AsTree":             reflect.ValueOf(filetree.AsTree),
-		"FindLocationAll":    reflect.ValueOf(filetree.FindLocationAll),
-		"FindLocationDir":    reflect.ValueOf(filetree.FindLocationDir),
-		"FindLocationFile":   reflect.ValueOf(filetree.FindLocationFile),
-		"FindLocationN":      reflect.ValueOf(filetree.FindLocationN),
-		"FindLocationNotTop": reflect.ValueOf(filetree.FindLocationNotTop),
-		"FindLocationOpen":   reflect.ValueOf(filetree.FindLocationOpen),
-		"FindLocationValues": reflect.ValueOf(filetree.FindLocationValues),
-		"NewNode":            reflect.ValueOf(filetree.NewNode),
-		"NewTree":            reflect.ValueOf(filetree.NewTree),
-		"NewVCSLog":          reflect.ValueOf(filetree.NewVCSLog),
-		"NodeHighlighting":   reflect.ValueOf(&filetree.NodeHighlighting).Elem(),
-		"NodeNameCountSort":  reflect.ValueOf(filetree.NodeNameCountSort),
-		"Search":             reflect.ValueOf(filetree.Search),
+		"AsNode":            reflect.ValueOf(filetree.AsNode),
+		"AsTree":            reflect.ValueOf(filetree.AsTree),
+		"NewNode":           reflect.ValueOf(filetree.NewNode),
+		"NewTree":           reflect.ValueOf(filetree.NewTree),
+		"NewVCSLog":         reflect.ValueOf(filetree.NewVCSLog),
+		"NodeHighlighting":  reflect.ValueOf(&filetree.NodeHighlighting).Elem(),
+		"NodeNameCountSort": reflect.ValueOf(filetree.NodeNameCountSort),
 
 		// type definitions
 		"DirFlagMap":    reflect.ValueOf((*filetree.DirFlagMap)(nil)),
 		"Filer":         reflect.ValueOf((*filetree.Filer)(nil)),
-		"FindLocation":  reflect.ValueOf((*filetree.FindLocation)(nil)),
 		"Node":          reflect.ValueOf((*filetree.Node)(nil)),
 		"NodeEmbedder":  reflect.ValueOf((*filetree.NodeEmbedder)(nil)),
 		"NodeNameCount": reflect.ValueOf((*filetree.NodeNameCount)(nil)),
-		"SearchResults": reflect.ValueOf((*filetree.SearchResults)(nil)),
 		"Tree":          reflect.ValueOf((*filetree.Tree)(nil)),
 		"Treer":         reflect.ValueOf((*filetree.Treer)(nil)),
 		"VCSLog":        reflect.ValueOf((*filetree.VCSLog)(nil)),
@@ -66,6 +56,7 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WCopy             func()
 	WCopyFieldsFrom   func(from tree.Node)
 	WCut              func()
+	WDeleteFiles      func()
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
@@ -107,6 +98,7 @@ func (W _cogentcore_org_core_filetree_Filer) ContextMenuPos(e events.Event) imag
 func (W _cogentcore_org_core_filetree_Filer) Copy()                           { W.WCopy() }
 func (W _cogentcore_org_core_filetree_Filer) CopyFieldsFrom(from tree.Node)   { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_filetree_Filer) Cut()                            { W.WCut() }
+func (W _cogentcore_org_core_filetree_Filer) DeleteFiles()                    { W.WDeleteFiles() }
 func (W _cogentcore_org_core_filetree_Filer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_filetree_Filer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_filetree_Filer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }

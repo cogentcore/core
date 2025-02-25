@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -42,11 +43,11 @@ type Treer interface { //types:add
 	// to perform lazy building of the tree.
 	CanOpen() bool
 
-	// OnOpen is called when a node is opened.
+	// OnOpen is called when a node is toggled open.
 	// The base version does nothing.
 	OnOpen()
 
-	// OnClose is called when a node is closed
+	// OnClose is called when a node is toggled closed.
 	// The base version does nothing.
 	OnClose()
 
@@ -219,7 +220,7 @@ func (tr *Tree) Init() {
 		s.Padding.Left.Dp(ConstantSpacing(4))
 		s.Padding.SetVertical(units.Dp(4))
 		s.Padding.Right.Zero()
-		s.Text.Align = styles.Start
+		s.Text.Align = text.Start
 
 		// need to copy over to actual and then clear styles one
 		if s.Is(states.Selected) {
@@ -458,7 +459,7 @@ func (tr *Tree) Init() {
 		if tr.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(24)
+					s.Text.FontSize.Dp(24)
 					s.Color = colors.Scheme.Primary.Base
 					s.Align.Self = styles.Center
 				})
@@ -631,7 +632,7 @@ func (tr *Tree) ApplyScenePos() {
 }
 
 func (tr *Tree) Render() {
-	pc := &tr.Scene.PaintContext
+	pc := &tr.Scene.Painter
 	st := &tr.Styles
 
 	pabg := tr.parentActualBackground()
@@ -643,7 +644,7 @@ func (tr *Tree) Render() {
 	}
 	tr.Styles.ComputeActualBackground(pabg)
 
-	pc.DrawStandardBox(st, tr.Geom.Pos.Total, tr.Geom.Size.Actual.Total, pabg)
+	pc.StandardBox(st, tr.Geom.Pos.Total, tr.Geom.Size.Actual.Total, pabg)
 
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
@@ -652,7 +653,7 @@ func (tr *Tree) Render() {
 }
 
 func (tr *Tree) RenderWidget() {
-	if tr.PushBounds() {
+	if tr.StartRender() {
 		tr.Render()
 		if tr.Parts != nil {
 			// we must copy from actual values in parent
@@ -662,9 +663,9 @@ func (tr *Tree) RenderWidget() {
 			}
 			tr.renderParts()
 		}
-		tr.PopBounds()
+		tr.EndRender()
 	}
-	// We have to render our children outside of `if PushBounds`
+	// We have to render our children outside of `if StartRender`
 	// since we could be out of scope but they could still be in!
 	if !tr.Closed {
 		tr.renderChildren()

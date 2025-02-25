@@ -15,8 +15,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/diffbrowser"
+	"cogentcore.org/core/text/diffbrowser"
+	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
 
@@ -129,11 +130,11 @@ func (lv *VCSLog) Init() {
 				return
 			}
 			d := core.NewBody("Commit Info: " + cmt.Rev)
-			buf := texteditor.NewBuffer()
-			buf.Filename = core.Filename(lv.File)
-			buf.Options.LineNumbers = true
+			buf := lines.NewLines()
+			buf.SetFilename(lv.File)
+			buf.Settings.LineNumbers = true
 			buf.Stat()
-			texteditor.NewEditor(d).SetBuffer(buf).Styler(func(s *styles.Style) {
+			textcore.NewEditor(d).SetLines(buf).Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
 			buf.SetText(cinfo)
@@ -232,7 +233,7 @@ func (lv *VCSLog) makeToolbar(p *tree.Plan) {
 				if lv.File == "" {
 					diffbrowser.NewDiffBrowserVCS(lv.Repo, lv.revisionA, lv.revisionB)
 				} else {
-					texteditor.DiffEditorDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.revisionA, lv.revisionB)
+					textcore.DiffEditorDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.revisionA, lv.revisionB)
 				}
 			})
 	})
@@ -269,8 +270,8 @@ func fileAtRevisionDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *cor
 	title := "File at VCS Revision: " + fsx.DirAndFile(file) + "@" + rev
 	d := core.NewBody(title)
 
-	tb := texteditor.NewBuffer().SetText(fb).SetFilename(file) // file is key for getting lang
-	texteditor.NewEditor(d).SetBuffer(tb).SetReadOnly(true).Styler(func(s *styles.Style) {
+	tb := lines.NewLines().SetText(fb).SetFilename(file) // file is key for getting lang
+	textcore.NewEditor(d).SetLines(tb).SetReadOnly(true).Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	d.RunWindowDialog(ctx)

@@ -28,8 +28,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/highlighting"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -49,8 +49,8 @@ type Node struct { //core:embedder
 	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// Buffer is the file buffer for editing this file.
-	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	// FileIsOpen indicates that this file has been opened, indicated by Italics.
+	FileIsOpen bool
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
@@ -120,10 +120,10 @@ func (fn *Node) Init() {
 		if !fn.IsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
-				fn.deleteFiles()
+				fn.This.(Filer).DeleteFiles()
 				e.SetHandled()
 			case keymap.Backspace:
-				fn.deleteFiles()
+				fn.This.(Filer).DeleteFiles()
 				e.SetHandled()
 			case keymap.Duplicate:
 				fn.duplicateFiles()
@@ -171,10 +171,10 @@ func (fn *Node) Init() {
 	tree.AddChildInit(fn.Parts, "text", func(w *core.Text) {
 		w.Styler(func(s *styles.Style) {
 			if fn.IsExec() && !fn.IsDir() {
-				s.Font.Weight = styles.WeightBold
+				s.Font.Weight = rich.Bold
 			}
-			if fn.Buffer != nil {
-				s.Font.Style = styles.Italic
+			if fn.FileIsOpen {
+				s.Font.Slant = rich.Italic
 			}
 		})
 	})
@@ -278,11 +278,6 @@ func (fn *Node) IsExec() bool {
 // isOpen returns true if file is flagged as open
 func (fn *Node) isOpen() bool {
 	return !fn.Closed
-}
-
-// IsNotSaved returns true if the file is open and has been changed (edited) since last Save
-func (fn *Node) IsNotSaved() bool {
-	return fn.Buffer != nil && fn.Buffer.IsNotSaved()
 }
 
 // isAutoSave returns true if file is an auto-save file (starts and ends with #)
@@ -483,30 +478,6 @@ func (fn *Node) openAll() { //types:add
 	fn.FileRoot().inOpenAll = false
 }
 
-// OpenBuf opens the file in its buffer if it is not already open.
-// returns true if file is newly opened
-func (fn *Node) OpenBuf() (bool, error) {
-	if fn.IsDir() {
-		err := fmt.Errorf("filetree.Node cannot open directory in editor: %v", fn.Filepath)
-		log.Println(err)
-		return false, err
-	}
-	if fn.Buffer != nil {
-		if fn.Buffer.Filename == fn.Filepath { // close resets filename
-			return false, nil
-		}
-	} else {
-		fn.Buffer = texteditor.NewBuffer()
-		fn.Buffer.OnChange(func(e events.Event) {
-			if fn.Info.VCS == vcs.Stored {
-				fn.Info.VCS = vcs.Modified
-			}
-		})
-	}
-	fn.Buffer.SetHighlighting(NodeHighlighting)
-	return true, fn.Buffer.Open(fn.Filepath)
-}
-
 // removeFromExterns removes file from list of external files
 func (fn *Node) removeFromExterns() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
@@ -514,20 +485,8 @@ func (fn *Node) removeFromExterns() { //types:add
 			return
 		}
 		sn.FileRoot().removeExternalFile(string(sn.Filepath))
-		sn.closeBuf()
 		sn.Delete()
 	})
-}
-
-// closeBuf closes the file in its buffer if it is open.
-// returns true if closed.
-func (fn *Node) closeBuf() bool {
-	if fn.Buffer == nil {
-		return false
-	}
-	fn.Buffer.Close(nil)
-	fn.Buffer = nil
-	return true
 }
 
 // RelativePathFrom returns the relative path from node for given full path

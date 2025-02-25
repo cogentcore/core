@@ -15,13 +15,15 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
 
 // Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,
-// which renders into its [Scene.Pixels] image. The [Scene] is set in a
+// which renders into its own [paint.Painter]. The [Scene] is set in a
 // [Stage], which the [Scene] has a pointer to.
 //
 // Each [Scene] contains state specific to its particular usage
@@ -45,7 +47,7 @@ type Scene struct { //core:no-new
 	// Bars are functions for creating control bars,
 	// attached to different sides of a [Scene]. Functions
 	// are called in forward order so first added are called first.
-	Bars styles.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
+	Bars sides.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
@@ -55,10 +57,12 @@ type Scene struct { //core:no-new
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
-	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
-	// live pixels that we render into
-	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	// TODO(text): we could protect this with a mutex if we need to:
+
+	// TextShaper is the text shaping system for this scene, for doing text layout.
+	TextShaper shaped.Shaper
 
 	// event manager for this scene
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
@@ -90,7 +94,7 @@ type Scene struct { //core:no-new
 	showIter int
 
 	// directRenders are widgets that render directly to the [RenderWindow]
-	// instead of rendering into the Scene Pixels image.
+	// instead of rendering into the Scene Painter.
 	directRenders []Widget
 
 	// flags are atomic bit flags for [Scene] state.
@@ -170,6 +174,7 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) Init() {
 	sc.Scene = sc
+	sc.TextShaper = shaped.NewShaper()
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
@@ -269,28 +274,28 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return false
 	}
-	if sc.PaintContext.State == nil {
-		sc.PaintContext.State = &paint.State{}
+	if sc.Painter.State == nil {
+		sc.Painter.State = &paint.State{}
 	}
-	if sc.PaintContext.Paint == nil {
-		sc.PaintContext.Paint = &styles.Paint{}
+	if sc.Painter.Paint == nil {
+		sc.Painter.Paint = styles.NewPaint()
 	}
 	sc.SceneGeom.Pos = geom.Pos
-	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
-		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
-	} else {
+	isz := sc.Painter.State.RenderImageSize()
+	if isz == geom.Size {
 		return false
 	}
-	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
+	sc.Painter.InitImageRaster(nil, geom.Size.X, geom.Size.Y)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
 	sc.applyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
-	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584), to get
-	// windows on Windows (OS) to update after a window snap (see https://github.com/cogentcore/core/issues/497),
-	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
-	// and Android in different contexts.
+	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584),
+	// to get windows on Windows (OS) to update after a window snap (see
+	// https://github.com/cogentcore/core/issues/497),
+	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered
+	// on both iOS and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()

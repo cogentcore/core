@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
@@ -137,8 +138,8 @@ func main() {
 	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> framework`).
 		SetType(core.TextHeadlineSmall).
 		Styler(func(s *styles.Style) {
-			s.Text.Align = styles.Center
-			s.Text.AlignV = styles.Center
+			s.Text.Align = text.Center
+			s.Text.AlignV = text.Center
 		})
 
 	core.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
@@ -249,7 +250,7 @@ func main() {
 	trs.Material.Color.A = 200
 
 	txt := xyz.NewText2D(sc).SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-	txt.Styles.Text.Align = styles.Center
+	txt.Styles.Text.Align = text.Center
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.SetPos(0, 2.2, 0)
 

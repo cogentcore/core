@@ -99,6 +99,12 @@ func (b Box2) ToRect() image.Rectangle {
 	return rect
 }
 
+// ToFixed returns fixed.Rectangle26_6 version of this bbox.
+func (b Box2) ToFixed() fixed.Rectangle26_6 {
+	rect := fixed.Rectangle26_6{Min: b.Min.ToFixed(), Max: b.Max.ToFixed()}
+	return rect
+}
+
 // RectInNotEmpty returns true if rect r is contained within b box
 // and r is not empty.
 // The existing image.Rectangle.In method returns true if r is empty,

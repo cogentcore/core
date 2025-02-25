@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
 
@@ -101,6 +102,9 @@ type Scene struct {
 	// the gpu render frame holding the rendered scene
 	Frame *gpu.RenderTexture `set:"-"`
 
+	// TextShaper is the text shaping system for this scene, for doing text layout.
+	TextShaper shaped.Shaper
+
 	// image used to hold a copy of the Frame image, for ImageCopy() call.
 	// This is re-used across calls to avoid large memory allocations,
 	// so it will automatically update after every ImageCopy call.
@@ -112,6 +116,7 @@ func (sc *Scene) Init() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.Background = colors.Scheme.Surface
+	sc.TextShaper = shaped.NewShaper()
 }
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen
