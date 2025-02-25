@@ -44,6 +44,9 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 		}
 		if tp.Char == 0 { // end of line
 			tp.Line--
+			if tp.Line < 0 {
+				tp.Line = 0
+			}
 			if isDoc {
 				ed.spellCheckLineTag(tp.Line) // redo prior line
 			}
@@ -63,11 +66,17 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 		}
 		if atend || textpos.IsWordBreak(r, rune(-1)) {
 			tp.Char-- // we are one past the end of word
+			if tp.Char < 0 {
+				tp.Char = 0
+			}
 			reg := ed.Lines.WordBefore(tp)
 			ed.spellCheck(reg)
 		}
 	case keymap.Enter:
 		tp.Line--
+		if tp.Line < 0 {
+			tp.Line = 0
+		}
 		if isDoc {
 			ed.spellCheckLineTag(tp.Line) // redo prior line
 		}
@@ -76,6 +85,9 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 		ed.spellCheck(reg)
 	case keymap.FocusNext:
 		tp.Char-- // we are one past the end of word
+		if tp.Char < 0 {
+			tp.Char = 0
+		}
 		reg := ed.Lines.WordBefore(tp)
 		ed.spellCheck(reg)
 	case keymap.Backspace, keymap.Delete:
@@ -89,6 +101,9 @@ func (ed *Editor) iSpellKeyInput(kt events.Event) {
 	case keymap.None:
 		if unicode.IsSpace(kt.KeyRune()) || unicode.IsPunct(kt.KeyRune()) && kt.KeyRune() != '\'' { // contractions!
 			tp.Char-- // we are one past the end of word
+			if tp.Char < 0 {
+				tp.Char = 0
+			}
 			reg := ed.Lines.WordBefore(tp)
 			ed.spellCheck(reg)
 		} else {

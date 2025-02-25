@@ -7,13 +7,13 @@ package htmltext
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"html"
 	"io"
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/text/rich"
@@ -111,10 +111,11 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 					curSp = rich.NewText(fs, []rune{'\n'}) // br is standalone: do it!
 					spstack.Push(curSp)
 					nextIsParaStart = false
+				case "err":
+					// custom; used to mark errors
 				default:
 					err := fmt.Errorf("%q tag not recognized", nm)
 					errs = append(errs, err)
-					panic(err.Error())
 				}
 			}
 			if len(se.Attr) > 0 {

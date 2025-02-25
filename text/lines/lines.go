@@ -309,6 +309,9 @@ func (ls *Lines) isValidPos(pos textpos.Pos) error {
 			panic(fmt.Errorf("invalid position for empty text: %s", pos).Error())
 		}
 	}
+	if pos.Line == n && pos.Char == 0 { // end line is ok
+		return nil
+	}
 	if pos.Line < 0 || pos.Line >= n {
 		// return fmt.Errorf("invalid line number for n lines %d: %s", n, pos)
 		panic(fmt.Errorf("invalid line number for n lines %d: %s", n, pos).Error())
@@ -328,6 +331,7 @@ func (ls *Lines) region(st, ed textpos.Pos) *textpos.Edit {
 	if errors.Log(ls.isValidPos(st)) != nil {
 		return nil
 	}
+
 	if errors.Log(ls.isValidPos(ed)) != nil {
 		return nil
 	}
