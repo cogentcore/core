@@ -57,7 +57,6 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 
 	w.Event.WindowResize()
 	w.Event.Window(events.WinShow)
-	w.Event.Window(events.ScreenUpdate)
 	w.Event.Window(events.WinFocus)
 
 	go w.WinLoop()
