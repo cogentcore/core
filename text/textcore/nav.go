@@ -286,6 +286,7 @@ func (ed *Base) cursorLineEnd() {
 // select mode is active
 func (ed *Base) cursorEndDoc() {
 	org := ed.validateCursor()
+	ed.CursorPos = ed.Lines.EndPos()
 	ed.setCursorColumn(ed.CursorPos)
 	ed.scrollCursorToBottom()
 	ed.cursorSelectShow(org)

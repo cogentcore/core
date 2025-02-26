@@ -370,6 +370,7 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	}
 	stln, _, spos := ed.renderLineStartEnd()
 	ptf := math32.FromPoint(pt)
+	ptf.X += ed.Geom.Pos.Content.X
 	ptf.Y -= (spos.Y - ed.Geom.Pos.Content.Y) // fractional bit
 	cp := ptf.Div(ed.charSize)
 	if cp.Y < 0 {

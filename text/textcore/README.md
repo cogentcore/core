@@ -17,20 +17,13 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* comment italics code cursor position is off by 1 to far right.
+* diff crash
+* svg text rendering, markers, lab plot text rotation
 * better job finding path fragments from file links -- iteratively try stuff.
-* within line tab rendering
 * core/values.go/FontButton -- need font list.
 * xyz text rendering
-* svg text rendering, markers, lab plot text rotation
 * base horizontal scrolling
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
-
-DONE?
-* shaped random crash: protect with mutex
-
-
-
 
 
