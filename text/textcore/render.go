@@ -224,7 +224,7 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 		}
 		spos := lpos
 		spos.X += float32(cc-scc) * ed.charSize.X
-		if rn == 0 || rtx[si][sn] != '\t' {
+		if rtx[si][sn] != '\t' {
 			ssz := ed.charSize.Mul(math32.Vec2(float32(rn), 1))
 			rendSpan(rtx[si:si+1], spos, ssz, coff)
 			cc += rn
@@ -431,6 +431,7 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	}
 	rtx := tx[indent:]
 	lpos := spos
+	lpos.X += float32(ts*indent) * ed.charSize.X
 	coff := indent
 	cc := ts * indent
 	scc := cc
@@ -441,7 +442,7 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 		}
 		spos := lpos
 		spos.X += float32(cc-scc) * ed.charSize.X
-		if rn == 0 || rtx[si][sn] != '\t' {
+		if rtx[si][sn] != '\t' {
 			rc := vpos.Char - coff
 			if rc >= 0 && rc < rn {
 				spos.X += float32(rc) * ed.charSize.X
@@ -452,14 +453,15 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 			continue
 		}
 		for ri := range rn {
-			tcc := ((cc / 8) + 1) * 8
-			spos.X += float32(tcc-cc) * ed.charSize.X
 			if ri == vpos.Char-coff {
 				return spos
 			}
+			tcc := ((cc / 8) + 1) * 8
 			cc = tcc
 			coff++
 		}
 	}
+	spos = lpos
+	spos.X += float32(cc-scc) * ed.charSize.X
 	return spos
 }
