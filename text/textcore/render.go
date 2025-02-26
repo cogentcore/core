@@ -370,38 +370,31 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	}
 	stln, _, spos := ed.renderLineStartEnd()
 	ptf := math32.FromPoint(pt)
-	ptf.SetSub(math32.Vec2(ed.LineNumberPixels(), 0))
-	if ptf.X < 0 {
-		return textpos.PosErr
-	}
 	ptf.Y -= (spos.Y - ed.Geom.Pos.Content.Y) // fractional bit
 	cp := ptf.Div(ed.charSize)
 	if cp.Y < 0 {
 		return textpos.PosErr
 	}
-	vpos := textpos.Pos{Line: stln + int(math32.Floor(cp.Y)), Char: int(math32.Round(cp.X))}
-	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
-	indent := 0
-	for si := range tx { // tabs encoded as single chars at start
-		sn, rn := rich.SpanLen(tx[si])
-		if rn == 1 && tx[si][sn] == '\t' {
-			indent++
-		} else {
-			break
+	vln := stln + int(math32.Floor(cp.Y))
+	vpos := textpos.Pos{Line: vln, Char: 0}
+	srcp := ed.Lines.PosFromView(ed.viewId, vpos)
+	stp := ed.charStartPos(srcp)
+	if ptf.X < stp.X {
+		return srcp
+	}
+	scc := srcp.Char
+	hc := 0.5 * ed.charSize.X
+	vll := ed.Lines.ViewLineLen(ed.viewId, vln)
+	for cc := range vll {
+		srcp.Char = scc + cc
+		edp := ed.charStartPos(textpos.Pos{Line: srcp.Line, Char: scc + cc + 1})
+		if ptf.X >= stp.X-hc && ptf.X < edp.X-hc {
+			return srcp
 		}
+		stp = edp
 	}
-	if indent == 0 {
-		return ed.Lines.PosFromView(ed.viewId, vpos)
-	}
-	ts := ed.Lines.Settings.TabSize
-	ic := indent * ts
-	if vpos.Char >= ic {
-		vpos.Char -= (ic - indent)
-		return ed.Lines.PosFromView(ed.viewId, vpos)
-	}
-	ip := vpos.Char / ts
-	vpos.Char = ip
-	return ed.Lines.PosFromView(ed.viewId, vpos)
+	srcp.Char = scc + vll
+	return srcp
 }
 
 // charStartPos returns the starting (top left) render coords for the
