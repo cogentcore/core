@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
+	"golang.org/x/image/math/fixed"
 )
 
 // todo: split source at para boundaries and use wrap para on those.
@@ -118,6 +119,18 @@ func (ls *Lines) String() string {
 		str += ln.String()
 	}
 	return str
+}
+
+// SetGlyphXAdvance sets the x advance on all glyphs to given value:
+// for monospaced case.
+func (ls *Lines) SetGlyphXAdvance(adv fixed.Int26_6) {
+	for li := range ls.Lines {
+		ln := &ls.Lines[li]
+		for ri := range ln.Runs {
+			rn := ln.Runs[ri]
+			rn.SetGlyphXAdvance(adv)
+		}
+	}
 }
 
 // GetLinks gets the links for these lines, which are cached in Links.

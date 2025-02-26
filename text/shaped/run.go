@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
+	"golang.org/x/image/math/fixed"
 )
 
 // Run is a span of shaped text with the same font properties,
@@ -35,6 +36,10 @@ type Run interface {
 	// based on given starting location for rendering. If the point is out of the
 	// line bounds, the nearest point is returned (e.g., start of line based on Y coordinate).
 	RuneAtPoint(src rich.Text, pt math32.Vector2, start math32.Vector2) int
+
+	// SetGlyphXAdvance sets the x advance on all glyphs to given value:
+	// for monospaced case.
+	SetGlyphXAdvance(adv fixed.Int26_6)
 }
 
 // Run is a span of text with the same font properties, with full rendering information.

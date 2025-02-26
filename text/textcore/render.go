@@ -66,7 +66,7 @@ func (ed *Base) renderBBox() image.Rectangle {
 	return ed.Geom.ContentBBox
 }
 
-// renderLineStartEnd returns the starting and ending (inclusive) lines to render,
+// renderLineStartEnd returns the starting and ending (inclusive) lines to render
 // based on the scroll position. Also returns the starting upper left position
 // for rendering the first line.
 func (ed *Base) renderLineStartEnd() (stln, edln int, spos math32.Vector2) {
@@ -161,6 +161,7 @@ func (ed *Base) renderLines() {
 				lsz := sz
 				lsz.X -= ic
 				lns := sh.WrapLines(tx[si:si+1], &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
+				lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
 				pc.TextLines(lns, lpos)
 				indent++
 			} else {
@@ -174,6 +175,7 @@ func (ed *Base) renderLines() {
 		lsz := sz
 		lsz.X -= ic
 		lns := sh.WrapLines(rtx, &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
+		lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
 		if !vseli.IsNil() {
 			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - indent, End: vseli.End.Char - indent})
 		}

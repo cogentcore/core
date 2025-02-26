@@ -118,6 +118,16 @@ func (run *Run) LastGlyphAt(i int) int {
 	return -1
 }
 
+// SetGlyphXAdvance sets the x advance on all glyphs to given value:
+// for monospaced case.
+func (run *Run) SetGlyphXAdvance(adv fixed.Int26_6) {
+	for gi := range run.Glyphs {
+		g := &run.Glyphs[gi]
+		g.XAdvance = adv
+	}
+	run.Output.Advance = adv * fixed.Int26_6(len(run.Glyphs))
+}
+
 // RuneAtPoint returns the index of the rune in the source, which contains given point,
 // using the maximal glyph bounding box. Off is the offset for this run within overall
 // image rendering context of point coordinates. Assumes point is already identified

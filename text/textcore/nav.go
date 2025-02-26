@@ -32,7 +32,7 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 	}
 
 	ed.scopelightsReset()
-	ed.CursorPos = pos
+	ed.CursorPos = ed.Lines.ValidPos(pos)
 	bm, has := ed.Lines.BraceMatch(pos)
 	if has {
 		ed.addScopelights(pos, bm)
