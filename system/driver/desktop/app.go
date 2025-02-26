@@ -28,6 +28,8 @@ func Init() {
 
 	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
+
+	go TheApp.IsDarkMonitor()
 }
 
 // TheApp is the single [system.App] for the desktop platform
