@@ -5,7 +5,10 @@
 package filetree
 
 import (
+	"os"
+	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 )
 
@@ -100,15 +103,41 @@ func (dm *DirFlagMap) setSortBy(path string, modTime bool) {
 	dm.Map[path] = df
 }
 
-// OpenPaths returns a list of open paths
-func (dm *DirFlagMap) OpenPaths() []string {
+// openPaths returns a list of open paths
+func (dm *DirFlagMap) openPaths(root string) []string {
 	dm.init()
 	defer dm.Unlock()
+
 	paths := make([]string, 0, len(dm.Map))
 	for fn, df := range dm.Map {
-		if df.HasFlag(dirIsOpen) {
-			paths = append(paths, fn)
+		if !df.HasFlag(dirIsOpen) {
+			continue
 		}
+		fpath := filepath.Join(root, fn)
+		_, err := os.Stat(fpath)
+		if err != nil {
+			delete(dm.Map, fn)
+			continue
+		}
+		rootClosed := false
+		par := fn
+		for {
+			par, _ = filepath.Split(par)
+			par = strings.TrimSuffix(par, "/")
+			if par == "" || par == "." {
+				break
+			}
+			if pdf, ook := dm.Map[par]; ook {
+				if !pdf.HasFlag(dirIsOpen) {
+					rootClosed = true
+					break
+				}
+			}
+		}
+		if rootClosed {
+			continue
+		}
+		paths = append(paths, fpath)
 	}
 	slices.Sort(paths)
 	return paths

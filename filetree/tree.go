@@ -194,6 +194,11 @@ func (ft *Tree) UpdatePath(path string) {
 	// core.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
 }
 
+// OpenPaths returns a list of open paths.
+func (ft *Tree) OpenPaths() []string {
+	return ft.Dirs.openPaths(string(ft.Filepath))
+}
+
 // configWatcher configures a new watcher for tree
 func (ft *Tree) configWatcher() error {
 	if ft.watcher != nil {

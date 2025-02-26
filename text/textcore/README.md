@@ -19,13 +19,16 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * comment italics code cursor position is off by 1 to far right.
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
-* shaped random crash: protect with mutex
-* better job finding path fragments from file links.
+* better job finding path fragments from file links -- iteratively try stuff.
 * within line tab rendering
 * xyz text rendering
 * svg text rendering, markers, lab plot text rotation
 * base horizontal scrolling
 * cleanup unused base stuff
+
+DONE?
+* shaped random crash: protect with mutex
+
 
 
 
