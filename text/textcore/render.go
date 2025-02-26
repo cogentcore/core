@@ -98,7 +98,6 @@ func (ed *Base) renderLines() {
 	stln, edln, spos := ed.renderLineStartEnd()
 	pc := &ed.Scene.Painter
 	pc.PushContext(nil, render.NewBoundsRect(bb, sides.NewFloats()))
-	sh := ed.Scene.TextShaper
 
 	if ed.hasLineNumbers {
 		ed.renderLineNumbersBox()
@@ -123,12 +122,8 @@ func (ed *Base) renderLines() {
 	}
 
 	buf := ed.Lines
-	ctx := &core.AppearanceSettings.Text
-	ts := ed.Lines.Settings.TabSize
 	rpos := spos
 	rpos.X += ed.LineNumberPixels()
-	sz := ed.charSize
-	sz.X *= float32(ed.linesSize.X)
 	vsel := buf.RegionToView(ed.viewId, ed.SelectRegion)
 	rtoview := func(rs []textpos.Region) []textpos.Region {
 		if len(rs) == 0 {
@@ -148,44 +143,7 @@ func (ed *Base) renderLines() {
 	hlts = append(hlts, slts...)
 	buf.Lock()
 	for ln := stln; ln <= edln; ln++ {
-		tx := buf.ViewMarkupLine(ed.viewId, ln)
-		vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
-		vseli := vlr.Intersect(vsel, ed.linesSize.X)
-		indent := 0
-		for si := range tx { // tabs encoded as single chars at start
-			sn, rn := rich.SpanLen(tx[si])
-			if rn == 1 && tx[si][sn] == '\t' {
-				lpos := rpos
-				ic := float32(ts*indent) * ed.charSize.X
-				lpos.X += ic
-				lsz := sz
-				lsz.X -= ic
-				lns := sh.WrapLines(tx[si:si+1], &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
-				lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
-				pc.TextLines(lns, lpos)
-				indent++
-			} else {
-				break
-			}
-		}
-		rtx := tx[indent:]
-		lpos := rpos
-		ic := float32(ts*indent) * ed.charSize.X
-		lpos.X += ic
-		lsz := sz
-		lsz.X -= ic
-		lns := sh.WrapLines(rtx, &ed.Styles.Font, &ed.Styles.Text, ctx, lsz)
-		lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
-		if !vseli.IsNil() {
-			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - indent, End: vseli.End.Char - indent})
-		}
-		for _, hlrg := range hlts {
-			hlsi := vlr.Intersect(hlrg, ed.linesSize.X)
-			if !hlsi.IsNil() {
-				lns.HighlightRegion(textpos.Range{Start: hlsi.Start.Char - indent, End: hlsi.End.Char - indent})
-			}
-		}
-		pc.TextLines(lns, lpos)
+		ed.renderLine(ln, rpos, vsel, hlts)
 		rpos.Y += ed.charSize.Y
 	}
 	buf.Unlock()
@@ -193,6 +151,94 @@ func (ed *Base) renderLines() {
 		pc.PopContext()
 	}
 	pc.PopContext()
+}
+
+// renderLine renders given line, dealing with tab stops etc
+func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlts []textpos.Region) {
+	buf := ed.Lines
+	sh := ed.Scene.TextShaper
+	pc := &ed.Scene.Painter
+	sz := ed.charSize
+	sz.X *= float32(ed.linesSize.X)
+	vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
+	vseli := vlr.Intersect(vsel, ed.linesSize.X)
+	tx := buf.ViewMarkupLine(ed.viewId, ln)
+	ctx := &core.AppearanceSettings.Text
+	ts := ed.Lines.Settings.TabSize
+	indent := 0
+
+	rendSpan := func(stx rich.Text, pos math32.Vector2, ssz math32.Vector2, coff int) {
+		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
+		lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
+		if !vseli.IsNil() {
+			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - coff, End: vseli.End.Char - coff})
+		}
+		for _, hlrg := range hlts {
+			hlsi := vlr.Intersect(hlrg, ed.linesSize.X)
+			if !hlsi.IsNil() {
+				lns.HighlightRegion(textpos.Range{Start: hlsi.Start.Char - coff, End: hlsi.End.Char - coff})
+			}
+		}
+		pc.TextLines(lns, pos)
+	}
+
+	for si := range tx { // tabs encoded as single chars at start
+		sn, rn := rich.SpanLen(tx[si])
+		if rn == 1 && tx[si][sn] == '\t' {
+			lpos := rpos
+			ic := float32(ts*indent) * ed.charSize.X
+			lpos.X += ic
+			lsz := sz
+			lsz.X -= ic
+			rendSpan(tx[si:si+1], lpos, lsz, indent)
+			indent++
+		} else {
+			break
+		}
+	}
+	rtx := tx[indent:]
+	lpos := rpos
+	ic := float32(ts*indent) * ed.charSize.X
+	lpos.X += ic
+	lsz := sz
+	lsz.X -= ic
+	hasTab := false
+	for si := range rtx {
+		sn, rn := rich.SpanLen(tx[si])
+		if rn > 0 && tx[si][sn] == '\t' {
+			hasTab = true
+			break
+		}
+	}
+	if !hasTab {
+		rendSpan(rtx, lpos, lsz, indent)
+		return
+	}
+	coff := indent
+	cc := ts * indent
+	scc := cc
+	for si := range rtx {
+		sn, rn := rich.SpanLen(rtx[si])
+		if rn == 0 {
+			continue
+		}
+		spos := lpos
+		spos.X += float32(cc-scc) * ed.charSize.X
+		if rn == 0 || rtx[si][sn] != '\t' {
+			ssz := ed.charSize.Mul(math32.Vec2(float32(rn), 1))
+			rendSpan(rtx[si:si+1], spos, ssz, coff)
+			cc += rn
+			coff += rn
+			continue
+		}
+		for range rn {
+			tcc := ((cc / 8) + 1) * 8
+			spos.X += float32(tcc-cc) * ed.charSize.X
+			cc = tcc
+			rendSpan(rtx[si:si+1], spos, ed.charSize, coff)
+			coff++
+		}
+	}
 }
 
 // renderLineNumbersBox renders the background for the line numbers in the LineNumberColor
@@ -383,6 +429,37 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 			break
 		}
 	}
-	spos.X += float32(indent*ts+(vpos.Char-indent)) * ed.charSize.X
+	rtx := tx[indent:]
+	lpos := spos
+	coff := indent
+	cc := ts * indent
+	scc := cc
+	for si := range rtx {
+		sn, rn := rich.SpanLen(rtx[si])
+		if rn == 0 {
+			continue
+		}
+		spos := lpos
+		spos.X += float32(cc-scc) * ed.charSize.X
+		if rn == 0 || rtx[si][sn] != '\t' {
+			rc := vpos.Char - coff
+			if rc >= 0 && rc < rn {
+				spos.X += float32(rc) * ed.charSize.X
+				return spos
+			}
+			cc += rn
+			coff += rn
+			continue
+		}
+		for ri := range rn {
+			tcc := ((cc / 8) + 1) * 8
+			spos.X += float32(tcc-cc) * ed.charSize.X
+			if ri == vpos.Char-coff {
+				return spos
+			}
+			cc = tcc
+			coff++
+		}
+	}
 	return spos
 }

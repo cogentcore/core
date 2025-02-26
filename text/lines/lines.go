@@ -243,12 +243,19 @@ func (ls *Lines) bytes(maxLines int) []byte {
 	}
 	nb := 80 * nl
 	b := make([]byte, 0, nb)
+	lastEmpty := false
 	for ln := range nl {
-		b = append(b, []byte(string(ls.lines[ln]))...)
+		ll := []byte(string(ls.lines[ln]))
+		if len(ll) == 0 {
+			lastEmpty = true
+		}
+		b = append(b, ll...)
 		b = append(b, []byte("\n")...)
 	}
 	// https://stackoverflow.com/questions/729692/why-should-text-files-end-with-a-newline
-	b = append(b, []byte("\n")...)
+	if !lastEmpty {
+		b = append(b, []byte("\n")...)
+	}
 	return b
 }
 

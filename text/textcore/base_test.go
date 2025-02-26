@@ -12,8 +12,11 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/textpos"
+	"github.com/stretchr/testify/assert"
 )
 
 // func TestBase(t *testing.T) {
@@ -40,6 +43,16 @@ func TestBaseLayout(t *testing.T) {
 		s.Min.X.Em(25)
 	})
 	b.AssertRender(t, "layout")
+}
+
+func TestBaseTabs(t *testing.T) {
+	b := core.NewBody()
+	ed := NewBase(b)
+	ed.Lines.SetLanguage(fileinfo.Go).SetString("\t\tinitial tabs are ok\nin\ttabs\n0123456\t\tdoubletab\tand\tmore")
+	ed.Styler(func(s *styles.Style) {
+		s.Min.X.Em(25)
+	})
+	b.AssertRender(t, "tabs1")
 }
 
 // func TestBaseSetLanguage(t *testing.T) {
@@ -93,18 +106,17 @@ func TestBaseScroll(t *testing.T) {
 	// b.AssertRender(t, "scroll-20")
 }
 
-/*
 func TestBaseMulti(t *testing.T) {
 	b := core.NewBody()
-	tb := NewLines().SetString("Hello, world!")
+	tb := lines.NewLines().SetString("Hello, world!")
 	NewBase(b).SetLines(tb)
 	NewBase(b).SetLines(tb)
 	b.AssertRender(t, "multi")
 }
 
-func TestBaseChange(t *testing.T) {
+func TestEditorChange(t *testing.T) {
 	b := core.NewBody()
-	ed := NewBase(b)
+	ed := NewEditor(b)
 	n := 0
 	text := ""
 	ed.OnChange(func(e events.Event) {
@@ -129,9 +141,9 @@ func TestBaseChange(t *testing.T) {
 	})
 }
 
-func TestBaseInput(t *testing.T) {
+func TestEditorInput(t *testing.T) {
 	b := core.NewBody()
-	ed := NewBase(b)
+	ed := NewEditor(b)
 	n := 0
 	text := ""
 	ed.OnInput(func(e events.Event) {
@@ -141,14 +153,12 @@ func TestBaseInput(t *testing.T) {
 	b.AssertRender(t, "input", func() {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 1, n)
-		assert.Equal(t, "G\n", text)
+		assert.Equal(t, "G\n\n", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		assert.Equal(t, 2, n)
-		assert.Equal(t, "Go\n", text)
+		assert.Equal(t, "Go\n\n", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
-		assert.Equal(t, 3, n)
+		assert.Equal(t, 4, n)
 		assert.Equal(t, "Go\n\n", text)
 	})
 }
-
-*/

@@ -52,10 +52,16 @@ func AddEmbeddedFonts(fsys ...fs.FS) {
 //go:embed fonts/*.ttf
 var defaultFonts embed.FS
 
+type nilLogger struct{}
+
+func (nl *nilLogger) Printf(format string, args ...any) {
+
+}
+
 // todo: per gio: systemFonts bool, collection []FontFace
 func NewShaper() shaped.Shaper {
 	sh := &Shaper{}
-	sh.fontMap = fontscan.NewFontMap(nil)
+	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
 	// TODO(text): figure out cache dir situation (especially on mobile and web)
 	str, err := os.UserCacheDir()
 	if errors.Log(err) != nil {

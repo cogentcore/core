@@ -248,11 +248,10 @@ func (ed *Base) NumLines() int {
 // called when the return key is pressed or goes out of focus
 func (ed *Base) editDone() {
 	if ed.Lines != nil {
-		ed.Lines.EditDone()
+		ed.Lines.EditDone() // sends the change event
 	}
 	ed.clearSelected()
 	ed.clearCursor()
-	ed.SendChange()
 }
 
 // reMarkup triggers a complete re-markup of the entire text --

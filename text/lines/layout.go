@@ -62,7 +62,7 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 			prevWasTab = true
 			i++
 		case r == '\t':
-			tp := (clen + 1) / 8
+			tp := (clen / 8) + 1
 			tp *= 8
 			clen = tp
 			if !startOfSpan {

@@ -37,7 +37,6 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 	if has {
 		ed.addScopelights(pos, bm)
 	}
-	ed.SendInput()
 	ed.NeedsRender()
 }
 
@@ -150,6 +149,7 @@ func (ed *Base) cursorSelect(org textpos.Pos) {
 func (ed *Base) cursorSelectShow(org textpos.Pos) {
 	ed.SetCursorShow(ed.CursorPos)
 	ed.cursorSelect(org)
+	ed.SendInput()
 	ed.NeedsRender()
 }
 
@@ -206,6 +206,7 @@ func (ed *Base) cursorPageDown(steps int) {
 	ed.scrollCursorToTop()
 	ed.renderCursor(true)
 	ed.cursorSelect(org)
+	ed.SendInput()
 	ed.NeedsRender()
 }
 
@@ -230,6 +231,7 @@ func (ed *Base) cursorPageUp(steps int) {
 	ed.scrollCursorToBottom()
 	ed.renderCursor(true)
 	ed.cursorSelect(org)
+	ed.SendInput()
 	ed.NeedsRender()
 }
 
