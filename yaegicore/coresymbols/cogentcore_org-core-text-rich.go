@@ -27,6 +27,7 @@ func init() {
 		"DecorationsN":       reflect.ValueOf(rich.DecorationsN),
 		"DecorationsValues":  reflect.ValueOf(rich.DecorationsValues),
 		"Default":            reflect.ValueOf(rich.Default),
+		"DefaultSettings":    reflect.ValueOf(&rich.DefaultSettings).Elem(),
 		"DirectionMask":      reflect.ValueOf(constant.MakeFromLiteral("4026531840", token.INT, 0)),
 		"DirectionStart":     reflect.ValueOf(constant.MakeFromLiteral("28", token.INT, 0)),
 		"DirectionsN":        reflect.ValueOf(rich.DirectionsN),

@@ -90,6 +90,14 @@ func Rotate2D(angle float32) Matrix2 {
 	}
 }
 
+// Rotate2DAround returns a Matrix2 2D matrix with given rotation, specified in radians,
+// around given offset point that is translated to and from.
+// This uses the standard graphics convention where increasing Y goes _down_ instead
+// of up, in contrast with the mathematical coordinate system where Y is up.
+func Rotate2DAround(angle float32, pos Vector2) Matrix2 {
+	return Identity2().Translate(pos.X, pos.Y).Rotate(angle).Translate(-pos.X, -pos.Y)
+}
+
 // Shear2D returns a Matrix2 2D matrix with given shearing
 func Shear2D(x, y float32) Matrix2 {
 	return Matrix2{

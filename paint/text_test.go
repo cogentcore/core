@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,10 +33,13 @@ func TestText(t *testing.T) {
 		tx, err := htmltext.HTMLToRich([]byte("This is <a>HTML</a> <b>formatted</b> <i>text</i> with <u>underline</u> and <s>strikethrough</s>"), fsty, nil)
 		assert.NoError(t, err)
 		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+		lns.SelectRegion(textpos.Range{Start: 5, End: 20})
 		// if tsz.X != 100 || tsz.Y != 40 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
 		// txt.HasOverflow = true
-		pc.TextLines(lns, math32.Vector2{})
+		pos := math32.Vector2{10, 200}
+		pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
+		pc.TextLines(lns, pos)
 	})
 }

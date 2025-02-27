@@ -131,6 +131,7 @@ func init() {
 		"RectInNotEmpty":           reflect.ValueOf(math32.RectInNotEmpty),
 		"Remainder":                reflect.ValueOf(math32.Remainder),
 		"Rotate2D":                 reflect.ValueOf(math32.Rotate2D),
+		"Rotate2DAround":           reflect.ValueOf(math32.Rotate2DAround),
 		"Round":                    reflect.ValueOf(math32.Round),
 		"RoundToEven":              reflect.ValueOf(math32.RoundToEven),
 		"SRGBFromLinear":           reflect.ValueOf(math32.SRGBFromLinear),

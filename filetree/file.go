@@ -303,6 +303,6 @@ func (fn *Node) showFileInfo() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		d := core.NewBody("File info")
 		core.NewForm(d).SetStruct(&sn.Info).SetReadOnly(true)
-		d.AddOKOnly().RunFullDialog(sn)
+		d.AddOKOnly().RunWindowDialog(sn)
 	})
 }

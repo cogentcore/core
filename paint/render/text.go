@@ -22,19 +22,14 @@ type Text struct {
 	// active transform matrix. See also PositionAbs
 	Position math32.Vector2
 
-	// PositionAbs is an additional absolute position offset added to
-	// the starting position, which is not transformed by the active transform
-	// matrix.
-	PositionAbs math32.Vector2
-
 	// Context has the full accumulated style, transform, etc parameters
 	// for rendering, combining the current state context (e.g.,
 	// from any higher-level groups) with the current element's style parameters.
 	Context Context
 }
 
-func NewText(txt *shaped.Lines, sty *styles.Paint, ctx *Context, pos, abs math32.Vector2) *Text {
-	nt := &Text{Text: txt, Position: pos, PositionAbs: abs}
+func NewText(txt *shaped.Lines, sty *styles.Paint, ctx *Context, pos math32.Vector2) *Text {
+	nt := &Text{Text: txt, Position: pos}
 	nt.Context.Init(sty, nil, ctx)
 	return nt
 }

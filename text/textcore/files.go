@@ -68,7 +68,7 @@ func Save(sc *core.Scene, lns *lines.Lines) error {
 				fv.OnSelect(func(e events.Event) {
 					SaveAs(sc, lns, fv.SelectedFile(), nil)
 				})
-				fd.RunFullDialog(sc)
+				fd.RunWindowDialog(sc)
 			})
 			core.NewButton(bar).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
 				d.Close()
@@ -156,7 +156,7 @@ func FileModPrompt(sc *core.Scene, lns *lines.Lines) bool {
 			fv.OnSelect(func(e events.Event) {
 				SaveAs(sc, lns, fv.SelectedFile(), nil)
 			})
-			fd.RunFullDialog(sc)
+			fd.RunWindowDialog(sc)
 		})
 		core.NewButton(bar).SetText("Revert from disk").OnClick(func(e events.Event) {
 			d.Close()

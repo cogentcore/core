@@ -378,7 +378,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 					fn := fp.files[w.SelectedIndex]
 					d := NewBody("Info: " + fn.Name)
 					NewForm(d).SetStruct(&fn).SetReadOnly(true)
-					d.AddOKOnly().RunFullDialog(w)
+					d.AddOKOnly().RunWindowDialog(w)
 				})
 			NewSeparator(m)
 			NewFuncButton(m).SetFunc(fp.newFolder).SetIcon(icons.CreateNewFolder)

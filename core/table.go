@@ -552,7 +552,7 @@ func (tb *Table) editIndex(idx int) {
 		d.AddCancel(bar)
 		d.AddOK(bar)
 	})
-	d.RunFullDialog(tb)
+	d.RunWindowDialog(tb)
 }
 
 func (tb *Table) contextMenu(m *Scene) {
