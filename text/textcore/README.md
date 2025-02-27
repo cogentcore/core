@@ -17,18 +17,21 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* can't go to end of line at very end of file
+* cleanup other stuff in render/text with abs position etc.
 * arcs are off in various places: core.Meter, switches with segmented buttons, paint_test render.
 * lab plot text sizing with rotation
 * find autosave file on opening 
 * dotted underline for misspelling
-* diff crash -- not yet reproducing.
 * better job finding path fragments from file links -- iteratively try stuff.
 * core/values.go/FontButton -- need font list.
 * xyz text rendering
-* base horizontal scrolling
+* textcore base horizontal scrolling and wrap long no-space lines
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
 * optimized next level up render
 * optimized goroutine render
+* diff crash -- not yet reproducing.
+* text render highlight region fill in blanks better
 
 

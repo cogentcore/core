@@ -579,10 +579,16 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 
 /////// Text
 
-// TextLines adds given text lines to the rendering list, at given position
-// (which is subject to the current active transform), and an additional
-// absolute position that is not subject to further transformation, which is
-// useful for applying transformations just to the text (e.g., rotations).
-func (pc *Painter) TextLines(tx *shaped.Lines, pos, abs math32.Vector2) {
-	pc.Render.Add(render.NewText(tx, pc.Paint, pc.Context(), pos, abs))
+// TextLines adds given [shaped] text lines to the rendering list,
+// at given position, which is subject to the current active transform.
+// See [Painter.TextLinesAbsolute] for a version with an absolute position.
+func (pc *Painter) TextLines(tx *shaped.Lines, pos math32.Vector2) {
+	pc.Render.Add(render.NewText(tx, pc.Paint, pc.Context(), pos, math32.Vector2{}))
+}
+
+// TextLinesAbsolute adds given [shaped] text lines to the rendering list,
+// at given absolute position, which is NOT subject to the current active transform.
+// This is useful for applying transformations just to the text (e.g., rotations).
+func (pc *Painter) TextLinesAbsolute(tx *shaped.Lines, abs math32.Vector2) {
+	pc.Render.Add(render.NewText(tx, pc.Paint, pc.Context(), math32.Vector2{}, abs))
 }

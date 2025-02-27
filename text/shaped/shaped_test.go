@@ -67,7 +67,7 @@ func TestBasic(t *testing.T) {
 		lns.SelectRegion(textpos.Range{34, 40})
 		pos := math32.Vec2(20, 60)
 		// pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
-		pc.TextLines(lns, pos, math32.Vector2{})
+		pc.TextLines(lns, pos)
 		pc.RenderDone()
 
 		assert.Equal(t, len(src), lns.RuneFromLinePos(textpos.Pos{3, 30}))
@@ -106,7 +106,7 @@ func TestHebrew(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 60), math32.Vector2{})
+		pc.TextLines(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }
@@ -128,8 +128,8 @@ func TestVertical(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(150, 50))
-		// pc.TextLines(lns, math32.Vec2(100, 200), math32.Vector2{})
-		pc.TextLines(lns, math32.Vec2(60, 100), math32.Vector2{})
+		// pc.TextLines(lns, math32.Vec2(100, 200))
+		pc.TextLines(lns, math32.Vec2(60, 100))
 		pc.RenderDone()
 	})
 
@@ -145,7 +145,7 @@ func TestVertical(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 60), math32.Vector2{})
+		pc.TextLines(lns, math32.Vec2(20, 60))
 		pc.RenderDone()
 	})
 }
@@ -164,7 +164,7 @@ func TestColors(t *testing.T) {
 		tx.AddSpan(&big, sr[4:8]).AddSpan(stroke, sr[8:])
 
 		lns := sh.WrapLines(tx, stroke, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 10), math32.Vector2{})
+		pc.TextLines(lns, math32.Vec2(20, 10))
 		pc.RenderDone()
 	})
 }
@@ -176,7 +176,7 @@ func TestLink(t *testing.T) {
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
 		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(10, 10), math32.Vector2{})
+		pc.TextLines(lns, math32.Vec2(10, 10))
 		pc.RenderDone()
 	})
 }
