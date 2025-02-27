@@ -146,6 +146,24 @@ var styleFuncs = map[string]styleprops.Func{
 		}
 		fs.Background = colors.ToUniform(errors.Log1(gradient.FromAny(val, cc)))
 	},
+	"opacity": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Style)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			return
+		}
+		fv, _ := reflectx.ToFloat(val)
+		if fv < 1 {
+			if fs.Background != nil {
+				fs.Background = colors.ApplyOpacity(fs.Background, float32(fv))
+			}
+			if fs.StrokeColor != nil {
+				fs.StrokeColor = colors.ApplyOpacity(fs.StrokeColor, float32(fv))
+			}
+			if fs.FillColor != nil {
+				fs.FillColor = colors.ApplyOpacity(fs.FillColor, float32(fv))
+			}
+		}
+	},
 }
 
 // SetFromHTMLTag sets the styling parameters for simple HTML style tags.

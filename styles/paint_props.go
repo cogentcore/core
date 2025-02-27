@@ -119,6 +119,8 @@ var styleStrokeFuncs = map[string]styleprops.Func{
 	},
 	"stroke-opacity": styleprops.Float(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
+	"opacity": styleprops.Float(float32(1),
+		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
 	"stroke-width": styleprops.Units(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
 	"stroke-min-width": styleprops.Units(units.Dp(1),
@@ -167,6 +169,8 @@ var styleFillFuncs = map[string]styleprops.Func{
 		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"fill-opacity": styleprops.Float(float32(1),
+		func(obj *Fill) *float32 { return &(obj.Opacity) }),
+	"opacity": styleprops.Float(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
 	"fill-rule": styleprops.Enum(ppath.NonZero,
 		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),

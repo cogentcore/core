@@ -56,17 +56,17 @@ type Style struct { //types:add
 	// Direction is the direction to render the text.
 	Direction Directions
 
-	//	FillColor is the color to use for glyph fill (i.e., the standard "ink" color)
+	// FillColor is the color to use for glyph fill (i.e., the standard "ink" color)
 	// if the Decoration FillColor flag is set. This will be encoded in a uint32 following
 	// the style rune, in rich.Text spans.
 	FillColor color.Color `set:"-"`
 
-	//	StrokeColor is the color to use for glyph outline stroking if the
+	// StrokeColor is the color to use for glyph outline stroking if the
 	// Decoration StrokeColor flag is set. This will be encoded in a uint32
 	// following the style rune, in rich.Text spans.
 	StrokeColor color.Color `set:"-"`
 
-	//	Background is the color to use for the background region if the Decoration
+	// Background is the color to use for the background region if the Decoration
 	// Background flag is set. This will be encoded in a uint32 following the style rune,
 	// in rich.Text spans.
 	Background color.Color `set:"-"`
