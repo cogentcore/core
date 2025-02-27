@@ -17,9 +17,10 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* arcs are off in various places: core.Meter, switches with segmented buttons, paint_test render.
+* lab plot text sizing with rotation
 * find autosave file on opening 
 * dotted underline for misspelling
-* svg text rendering, markers, lab plot text rotation
 * diff crash -- not yet reproducing.
 * better job finding path fragments from file links -- iteratively try stuff.
 * core/values.go/FontButton -- need font list.

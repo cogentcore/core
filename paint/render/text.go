@@ -6,6 +6,7 @@ package render
 
 import (
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/shaped"
 )
 
@@ -17,8 +18,14 @@ type Text struct {
 	Text *shaped.Lines
 
 	// Position to render, which typically specifies the upper left corner of
-	// the Text.
+	// the Text. This is added directly to the offsets and is transformed by the
+	// active transform matrix. See also PositionAbs
 	Position math32.Vector2
+
+	// PositionAbs is an additional absolute position offset added to
+	// the starting position, which is not transformed by the active transform
+	// matrix.
+	PositionAbs math32.Vector2
 
 	// Context has the full accumulated style, transform, etc parameters
 	// for rendering, combining the current state context (e.g.,
@@ -26,8 +33,10 @@ type Text struct {
 	Context Context
 }
 
-func NewText(txt *shaped.Lines, ctx *Context, pos math32.Vector2) *Text {
-	return &Text{Text: txt, Context: *ctx, Position: pos}
+func NewText(txt *shaped.Lines, sty *styles.Paint, ctx *Context, pos, abs math32.Vector2) *Text {
+	nt := &Text{Text: txt, Position: pos, PositionAbs: abs}
+	nt.Context.Init(sty, nil, ctx)
+	return nt
 }
 
 // interface assertion.

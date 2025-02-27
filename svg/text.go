@@ -184,7 +184,7 @@ func (g *Text) RenderText(sv *SVG, pc *paint.Painter) {
 	} else if pc.Text.Align == text.End {
 		pos.X -= bsz.X
 	}
-	pc.TextLines(g.TextShaped, pos)
+	pc.TextLines(g.TextShaped, pos, math32.Vector2{})
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

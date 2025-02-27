@@ -21,7 +21,7 @@ import (
 
 // RenderText rasterizes the given Text
 func (rs *Renderer) RenderText(txt *render.Text) {
-	rs.TextLines(txt.Text, &txt.Context, txt.Position)
+	rs.TextLines(txt.Text, &txt.Context, txt.Position, math32.Vector2{})
 }
 
 // TextLines rasterizes the given shaped.Lines.

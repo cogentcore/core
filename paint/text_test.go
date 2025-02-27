@@ -36,6 +36,6 @@ func TestText(t *testing.T) {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
 		// txt.HasOverflow = true
-		pc.TextLines(lns, math32.Vector2{})
+		pc.TextLines(lns, math32.Vector2{}, math32.Vector2{})
 	})
 }

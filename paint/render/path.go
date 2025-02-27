@@ -4,7 +4,10 @@
 
 package render
 
-import "cogentcore.org/core/paint/ppath"
+import (
+	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/styles"
+)
 
 // Path is a path drawing render item: responsible for all vector graphics
 // drawing functionality.
@@ -23,8 +26,10 @@ type Path struct {
 	Context Context
 }
 
-func NewPath(pt ppath.Path, ctx *Context) *Path {
-	return &Path{Path: pt, Context: *ctx}
+func NewPath(pt ppath.Path, sty *styles.Paint, ctx *Context) *Path {
+	pe := &Path{Path: pt}
+	pe.Context.Init(sty, nil, ctx)
+	return pe
 }
 
 // interface assertion.

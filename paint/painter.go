@@ -104,8 +104,7 @@ func (pc *Painter) Close() {
 // settings present at this point, which will be used to render the path,
 // and creates a new current path.
 func (pc *Painter) PathDone() {
-	pt := &render.Path{Path: pc.State.Path.Clone()}
-	pt.Context.Init(pc.Paint, nil, pc.Context())
+	pt := render.NewPath(pc.State.Path.Clone(), pc.Paint, pc.Context())
 	pc.Render.Add(pt)
 	pc.State.Path.Reset()
 }
@@ -580,7 +579,10 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 
 /////// Text
 
-// TextLines adds given text lines to the rendering list, at given baseline position.
-func (pc *Painter) TextLines(tx *shaped.Lines, pos math32.Vector2) {
-	pc.Render.Add(render.NewText(tx, pc.Context(), pos))
+// TextLines adds given text lines to the rendering list, at given position
+// (which is subject to the current active transform), and an additional
+// absolute position that is not subject to further transformation, which is
+// useful for applying transformations just to the text (e.g., rotations).
+func (pc *Painter) TextLines(tx *shaped.Lines, pos, abs math32.Vector2) {
+	pc.Render.Add(render.NewText(tx, pc.Paint, pc.Context(), pos, abs))
 }

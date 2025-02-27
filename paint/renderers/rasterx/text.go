@@ -28,32 +28,32 @@ import (
 
 // RenderText rasterizes the given Text
 func (rs *Renderer) RenderText(txt *render.Text) {
-	rs.TextLines(&txt.Context, txt.Text, txt.Position)
+	rs.TextLines(&txt.Context, txt.Text, txt.Position, txt.PositionAbs)
 }
 
 // TextLines rasterizes the given shaped.Lines.
 // The text will be drawn starting at the start pixel position, which specifies the
 // left baseline location of the first text item..
-func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32.Vector2) {
-	start := pos.Add(lns.Offset)
+func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos, abs math32.Vector2) {
+	off := pos.Add(lns.Offset)
 	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
 	// tbb := lns.Bounds.Translate(start)
 	// rs.StrokeBounds(ctx, tbb, colors.Red)
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
-		rs.TextLine(ctx, ln, lns, clr, start) // todo: start + offset
+		rs.TextLine(ctx, ln, lns, clr, off, abs)
 	}
 }
 
 // TextLine rasterizes the given shaped.Line.
-func (rs *Renderer) TextLine(ctx *render.Context, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
-	off := start.Add(ln.Offset)
+func (rs *Renderer) TextLine(ctx *render.Context, ln *shaped.Line, lns *shaped.Lines, clr image.Image, off, abs math32.Vector2) {
+	off.SetAdd(ln.Offset)
 	// tbb := ln.Bounds.Translate(off)
 	// rs.StrokeBounds(ctx, tbb, colors.Blue)
 	for ri := range ln.Runs {
 		run := ln.Runs[ri].(*shapedgt.Run)
-		rs.TextRun(ctx, run, ln, lns, clr, off)
+		rs.TextRun(ctx, run, ln, lns, clr, off, abs)
 		if run.Direction.IsVertical() {
 			off.Y += run.Advance()
 		} else {
@@ -86,15 +86,15 @@ func (rs *Renderer) TextRegionFill(ctx *render.Context, run *shapedgt.Run, start
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
+func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, off, abs math32.Vector2) {
 	// todo: render strike-through
 	// dir := run.Direction
-	rbb := run.MaxBounds.Translate(start)
+	rbb := run.MaxBounds.Translate(off)
 	if run.Background != nil {
 		rs.FillBounds(ctx, rbb, run.Background)
 	}
-	rs.TextRegionFill(ctx, run, start, lns.SelectionColor, ln.Selections)
-	rs.TextRegionFill(ctx, run, start, lns.HighlightColor, ln.Highlights)
+	rs.TextRegionFill(ctx, run, off, lns.SelectionColor, ln.Selections)
+	rs.TextRegionFill(ctx, run, off, lns.HighlightColor, ln.Highlights)
 	fill := clr
 	if run.FillColor != nil {
 		fill = run.FillColor
@@ -111,53 +111,53 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		if run.Direction.IsVertical() {
 
 		} else {
-			dec := start.Y + 2
-			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
+			dec := off.Y + 2
+			rs.StrokeTextLine(ctx, abs, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
 		}
 	}
 	if run.Decoration.HasFlag(rich.Overline) {
 		if run.Direction.IsVertical() {
 		} else {
-			dec := start.Y - 0.7*rbb.Size().Y
-			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+			dec := off.Y - 0.7*rbb.Size().Y
+			rs.StrokeTextLine(ctx, abs, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
 		}
 	}
 
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		pos := start.Add(math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset)))
+		pos := off.Add(math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset)))
 		// top := yPos - math32.FromFixed(g.YBearing)
 		// bottom := top - math32.FromFixed(g.Height)
 		// right := xPos + math32.FromFixed(g.Width)
 		// rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
-		bb := run.GlyphBoundsBox(g).Translate(start)
+		bb := run.GlyphBoundsBox(g).Translate(off)
 		// rs.StrokeBounds(ctx, bb, colors.Yellow)
 
 		data := run.Face.GlyphData(g.GlyphID)
 		switch format := data.(type) {
 		case font.GlyphOutline:
-			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos)
+			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos, abs)
 		case font.GlyphBitmap:
 			fmt.Println("bitmap")
-			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos)
+			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, abs)
 		case font.GlyphSVG:
 			fmt.Println("svg", format)
-			// 	_ = rs.GlyphSVG(ctx, g, format, fill, stroke, bb, pos)
+			// 	_ = rs.GlyphSVG(ctx, g, format, fill, stroke, bb, pos, abs)
 		}
-		start.X += math32.FromFixed(g.XAdvance)
-		start.Y -= math32.FromFixed(g.YAdvance)
+		off.X += math32.FromFixed(g.XAdvance)
+		off.Y -= math32.FromFixed(g.YAdvance)
 	}
 
 	if run.Decoration.HasFlag(rich.LineThrough) {
 		if run.Direction.IsVertical() {
 		} else {
-			dec := start.Y - 0.2*rbb.Size().Y
-			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+			dec := off.Y - 0.2*rbb.Size().Y
+			rs.StrokeTextLine(ctx, abs, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
 		}
 	}
 }
 
-func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
+func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos, abs math32.Vector2) {
 	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
 	x := pos.X
 	y := pos.Y
@@ -169,18 +169,18 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	rs.Path.Clear()
 	m := ctx.Transform
 	for _, s := range outline.Segments {
-		p0 := m.MulVector2AsPoint(math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y))
+		p0 := m.MulVector2AsPoint(math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y)).Add(abs)
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			rs.Path.Start(p0.ToFixed())
 		case opentype.SegmentOpLineTo:
 			rs.Path.Line(p0.ToFixed())
 		case opentype.SegmentOpQuadTo:
-			p1 := m.MulVector2AsPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y))
+			p1 := m.MulVector2AsPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y)).Add(abs)
 			rs.Path.QuadBezier(p0.ToFixed(), p1.ToFixed())
 		case opentype.SegmentOpCubeTo:
-			p1 := m.MulVector2AsPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y))
-			p2 := m.MulVector2AsPoint(math32.Vec2(s.Args[2].X*scale+x, -s.Args[2].Y*scale+y))
+			p1 := m.MulVector2AsPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y)).Add(abs)
+			p2 := m.MulVector2AsPoint(math32.Vec2(s.Args[2].X*scale+x, -s.Args[2].Y*scale+y)).Add(abs)
 			rs.Path.CubeBezier(p0.ToFixed(), p1.ToFixed(), p2.ToFixed())
 		}
 	}
@@ -208,7 +208,7 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	rs.Path.Clear()
 }
 
-func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) error {
+func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos, abs math32.Vector2) error {
 	// scaled glyph rect content
 	x := pos.X
 	y := pos.Y
@@ -236,7 +236,7 @@ func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shapi
 	}
 
 	if bitmap.Outline != nil {
-		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos)
+		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, abs)
 	}
 	return nil
 }
@@ -263,10 +263,10 @@ func (rs *Renderer) StrokeBounds(ctx *render.Context, bb math32.Box2, clr color.
 }
 
 // StrokeTextLine strokes a line for text decoration.
-func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
+func (rs *Renderer) StrokeTextLine(ctx *render.Context, abs, sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
 	m := ctx.Transform
-	sp = m.MulVector2AsPoint(sp)
-	ep = m.MulVector2AsPoint(ep)
+	sp = m.MulVector2AsPoint(sp).Add(abs)
+	ep = m.MulVector2AsPoint(ep).Add(abs)
 	width *= MeanScale(m)
 	rs.Raster.SetStroke(
 		math32.ToFixed(width),
