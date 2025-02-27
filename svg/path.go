@@ -64,35 +64,29 @@ func (g *Path) Render(sv *SVG) {
 	pc.PathDone()
 
 	// todo: use path algos for this:
-	// if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
-	// 	// todo: could look for close-path at end and find angle from there..
-	// 	stv, ang := PathDataStart(g.Data)
-	// 	mrk.RenderMarker(sv, stv, ang, g.Paint.Stroke.Width.Dots)
-	// }
-	// if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
-	// 	env, ang := PathDataEnd(g.Data)
-	// 	mrk.RenderMarker(sv, env, ang, g.Paint.Stroke.Width.Dots)
-	// }
-	// if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
-	// 	var ptm2, ptm1, pt math32.Vector2
-	// 	gotidx := 0
-	// 	PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIndex int, cp math32.Vector2, ctrls []math32.Vector2) bool {
-	// 		ptm2 = ptm1
-	// 		ptm1 = pt
-	// 		pt = cp
-	// 		if gotidx < 2 {
-	// 			gotidx++
-	// 			return true
-	// 		}
-	// 		if idx >= sz-3 { // todo: this is approximate...
-	// 			return false
-	// 		}
-	// 		ang := 0.5 * (math32.Atan2(pt.Y-ptm1.Y, pt.X-ptm1.X) + math32.Atan2(ptm1.Y-ptm2.Y, ptm1.X-ptm2.X))
-	// 		mrk.RenderMarker(sv, ptm1, ang, g.Paint.Stroke.Width.Dots)
-	// 		gotidx++
-	// 		return true
-	// 	})
-	// }
+	mrk_start := sv.MarkerByName(g, "marker-start")
+	mrk_end := sv.MarkerByName(g, "marker-end")
+	mrk_mid := sv.MarkerByName(g, "marker-mid")
+
+	if mrk_start != nil || mrk_end != nil || mrk_mid != nil {
+		pos := g.Data.Coords()
+		dir := g.Data.CoordDirections()
+		np := len(pos)
+		if mrk_start != nil && np > 0 {
+			ang := ppath.Angle(dir[0])
+			mrk_start.RenderMarker(sv, pos[0], ang, g.Paint.Stroke.Width.Dots)
+		}
+		if mrk_end != nil && np > 1 {
+			ang := ppath.Angle(dir[np-1])
+			mrk_end.RenderMarker(sv, pos[np-1], ang, g.Paint.Stroke.Width.Dots)
+		}
+		if mrk_mid != nil && np > 2 {
+			for i := 1; i < np-2; i++ {
+				ang := ppath.Angle(dir[i])
+				mrk_mid.RenderMarker(sv, pos[i], ang, g.Paint.Stroke.Width.Dots)
+			}
+		}
+	}
 
 	g.RenderChildren(sv)
 }
