@@ -10,6 +10,14 @@ import (
 	"github.com/go-text/typesetting/language"
 )
 
+func init() {
+	DefaultSettings.Defaults()
+}
+
+// DefaultSettings contains the default global text settings.
+// This will be updated from rich.DefaultSettings.
+var DefaultSettings Settings
+
 // FontName is a special string that provides a font chooser.
 // It is aliased to [core.FontName] as well.
 type FontName string

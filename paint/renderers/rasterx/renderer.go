@@ -163,6 +163,7 @@ func (rs *Renderer) Fill(pt *render.Path) {
 	rs.Path.AddTo(rf)
 	rs.SetColor(rf, pc, sty.Fill.Color, sty.Fill.Opacity)
 	rf.Draw()
+	rf.Clear()
 }
 
 // StrokeWidth obtains the current stoke width subject to transform (or not

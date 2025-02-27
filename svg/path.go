@@ -43,7 +43,7 @@ func (g *Path) SetData(data string) error {
 	return err
 }
 
-func (g *Path) LocalBBox() math32.Box2 {
+func (g *Path) LocalBBox(sv *SVG) math32.Box2 {
 	bb := g.Data.FastBounds()
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min.SetSubScalar(hlw)
@@ -62,8 +62,6 @@ func (g *Path) Render(sv *SVG) {
 	}
 	pc.State.Path = g.Data
 	pc.PathDone()
-
-	g.BBoxes(sv)
 
 	// todo: use path algos for this:
 	// if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {

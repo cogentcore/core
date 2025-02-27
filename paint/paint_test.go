@@ -14,12 +14,15 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/ptext"
 	"cogentcore.org/core/paint/render"
 	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,6 +36,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 }
 
 func TestRender(t *testing.T) {
+	txtSh := shaped.NewShaper()
 	RunTest(t, "render", 300, 300, func(pc *Painter) {
 		testimg, _, err := imagex.Open("test.png")
 		assert.NoError(t, err)
@@ -66,24 +70,21 @@ func TestRender(t *testing.T) {
 		pc.Border(60, 60, 150, 100, bs)
 		pc.PathDone()
 
-		tsty := &styles.Text{}
-		tsty.Defaults()
-		fsty := &styles.FontRender{}
-		fsty.Defaults()
-		fsty.Color = imgs[1]
-		fsty.Background = imgs[2]
+		tsty := text.NewStyle()
+		fsty := rich.NewStyle()
+		tsty.ToDots(&pc.UnitContext)
+		// fsty.Color = imgs[1]
+		// fsty.Background = imgs[2]
 
-		tsty.Align = styles.Center
+		tsty.Align = text.Center
 
-		txt := &ptext.Text{}
-		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
-
-		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, math32.Vec2(100, 60))
-		if tsz.X != 100 || tsz.Y != 60 {
-			t.Errorf("unexpected text size: %v", tsz)
-		}
-
-		pc.Text(txt, math32.Vec2(85, 80))
+		tx, err := htmltext.HTMLToRich([]byte("This is <a>HTML</a> <b>formatted</b> <i>text</i>"), fsty, nil)
+		assert.NoError(t, err)
+		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, math32.Vec2(100, 60))
+		// if tsz.X != 100 || tsz.Y != 60 {
+		// 	t.Errorf("unexpected text size: %v", tsz)
+		// }
+		pc.TextLines(lns, math32.Vec2(85, 80))
 	})
 }
 

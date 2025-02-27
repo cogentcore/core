@@ -7,9 +7,7 @@ package svg
 import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
-	"cogentcore.org/core/styles/units"
 )
 
 // Rect is a SVG rectangle, optionally with rounded corners
@@ -41,7 +39,7 @@ func (g *Rect) SetNodeSize(sz math32.Vector2) {
 	g.Size = sz
 }
 
-func (g *Rect) LocalBBox() math32.Box2 {
+func (g *Rect) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(hlw)
@@ -54,12 +52,6 @@ func (g *Rect) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	// TODO: figure out a better way to do this
-	bs := styles.Border{}
-	bs.Style.Set(styles.BorderSolid)
-	bs.Width.Set(pc.Stroke.Width)
-	bs.Color.Set(pc.Stroke.Color)
-	bs.Radius.Set(units.Dp(g.Radius.X))
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.Rectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
@@ -69,7 +61,6 @@ func (g *Rect) Render(sv *SVG) {
 		pc.RoundedRectangleSides(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, sides.NewFloats(g.Radius.X))
 	}
 	pc.PathDone()
-	g.BBoxes(sv)
 	g.RenderChildren(sv)
 }
 

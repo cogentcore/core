@@ -333,16 +333,18 @@ func (ed *Editor) keyInput(e events.Event) {
 		case kf == keymap.FocusNext: // tab
 			e.SetHandled()
 			ed.CursorNextLink(true)
+			ed.OpenLinkAt(ed.CursorPos)
 		case kf == keymap.FocusPrev: // tab
 			e.SetHandled()
 			ed.CursorPrevLink(true)
+			ed.OpenLinkAt(ed.CursorPos)
 		case kf == keymap.None && ed.ISearch.On:
 			if unicode.IsPrint(e.KeyRune()) && !e.HasAnyModifier(key.Control, key.Meta) {
 				ed.iSearchKeyInput(e)
 			}
 		case e.KeyRune() == ' ' || kf == keymap.Accept || kf == keymap.Enter:
 			e.SetHandled()
-			ed.CursorPos.Char--
+			ed.CursorPos = ed.Lines.MoveBackward(ed.CursorPos, 1)
 			ed.CursorNextLink(true) // todo: cursorcurlink
 			ed.OpenLinkAt(ed.CursorPos)
 		}

@@ -611,8 +611,7 @@ func (ls *Lines) Undo() []*textpos.Edit {
 	autoSave := ls.batchUpdateStart()
 	tbe := ls.undo()
 	if tbe == nil || ls.undos.Pos == 0 { // no more undo = fully undone
-		ls.changed = false
-		ls.notSaved = false
+		ls.clearNotSaved()
 		ls.autosaveDelete()
 	}
 	ls.batchUpdateEnd(autoSave)

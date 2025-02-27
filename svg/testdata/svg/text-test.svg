@@ -6,23 +6,6 @@
   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns="http://www.w3.org/2000/svg">
-  <defs
-    id="Defs">
-    <linearGradient
-      id="linearGradient318"
-      x1="0"
-      y1="0"
-      x2="0"
-      y2="0"
-      gradientUnits="objectBoundingBox">
-      <stop
-        style="stop-color:#FFFFFF;stop-opacity:1;"
-        offset="0" />
-      <stop
-        style="stop-color:#0000FF;stop-opacity:1;"
-        offset="1" />
-    </linearGradient>
-  </defs>
   <sodipodi:namedview
     id="namedview300"
     inkscape:cx="0"
@@ -70,3 +53,4 @@
       y="42.305298">Text</tspan>
   </text>
 </svg>
+

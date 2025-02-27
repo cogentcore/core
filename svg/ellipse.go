@@ -35,7 +35,7 @@ func (g *Ellipse) SetNodeSize(sz math32.Vector2) {
 	g.Radii = sz.MulScalar(0.5)
 }
 
-func (g *Ellipse) LocalBBox() math32.Box2 {
+func (g *Ellipse) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.Sub(g.Radii.AddScalar(hlw))
@@ -50,8 +50,6 @@ func (g *Ellipse) Render(sv *SVG) {
 	}
 	pc.Ellipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.PathDone()
-
-	g.BBoxes(sv)
 	g.RenderChildren(sv)
 }
 

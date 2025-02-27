@@ -26,7 +26,6 @@ func (g *Polygon) Render(sv *SVG) {
 	}
 	pc.Polygon(g.Points...)
 	pc.PathDone()
-	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]

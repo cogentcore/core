@@ -167,7 +167,7 @@ type Lines struct {
 	autoSaving bool
 
 	// notSaved indicates if the text has been changed (edited) relative to the
-	// original, since last Save.  This can be true even when changed flag is
+	// original, since last Save. This can be true even when changed flag is
 	// false, because changed is cleared on EditDone, e.g., when texteditor
 	// is being monitored for OnChange and user does Control+Enter.
 	// Use IsNotSaved() method to query state.
@@ -474,7 +474,7 @@ func (ls *Lines) deleteTextImpl(st, ed textpos.Pos) *textpos.Edit {
 		}
 		ls.linesDeleted(tbe)
 	}
-	ls.changed = true
+	ls.setChanged()
 	return tbe
 }
 
@@ -511,7 +511,7 @@ func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
 		}
 	}
 	ls.linesEdited(tbe)
-	ls.changed = true
+	ls.setChanged()
 	return tbe
 }
 
@@ -559,7 +559,7 @@ func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
 		tbe = ls.region(st, ed)
 		ls.linesInserted(tbe)
 	}
-	ls.changed = true
+	ls.setChanged()
 	return tbe
 }
 
@@ -580,7 +580,7 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 	if nlns <= 0 {
 		return nil
 	}
-	ls.changed = true
+	ls.setChanged()
 	// make sure there are enough lines -- add as needed
 	cln := ls.numLines()
 	if cln <= ed.Line {

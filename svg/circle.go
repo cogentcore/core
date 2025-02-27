@@ -34,7 +34,7 @@ func (g *Circle) SetNodeSize(sz math32.Vector2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
 }
 
-func (g *Circle) LocalBBox() math32.Box2 {
+func (g *Circle) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(g.Radius + hlw)
@@ -49,8 +49,6 @@ func (g *Circle) Render(sv *SVG) {
 	}
 	pc.Circle(g.Pos.X, g.Pos.Y, g.Radius)
 	pc.PathDone()
-
-	g.BBoxes(sv)
 	g.RenderChildren(sv)
 }
 

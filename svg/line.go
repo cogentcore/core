@@ -35,7 +35,7 @@ func (g *Line) SetSize(sz math32.Vector2) {
 	g.End = g.Start.Add(sz)
 }
 
-func (g *Line) LocalBBox() math32.Box2 {
+func (g *Line) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.B2Empty()
 	bb.ExpandByPoint(g.Start)
 	bb.ExpandByPoint(g.End)
@@ -52,7 +52,6 @@ func (g *Line) Render(sv *SVG) {
 	}
 	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.PathDone()
-	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)

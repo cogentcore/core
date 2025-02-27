@@ -17,13 +17,17 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* diff crash
+* find autosave file on opening 
+* dotted underline for misspelling
 * svg text rendering, markers, lab plot text rotation
+* diff crash -- not yet reproducing.
 * better job finding path fragments from file links -- iteratively try stuff.
 * core/values.go/FontButton -- need font list.
 * xyz text rendering
 * base horizontal scrolling
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
+* optimized next level up render
+* optimized goroutine render
 
 

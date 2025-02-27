@@ -14,18 +14,15 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
-	"cogentcore.org/core/paint/ptext"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSVG(t *testing.T) {
-	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-
 	dir := filepath.Join("testdata", "svg")
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		// if fn != "text-test.svg" {
+		// if fn != "rect.svg" {
 		// 	continue
 		// }
 		sv := NewSVG(640, 480)
@@ -42,8 +39,6 @@ func TestSVG(t *testing.T) {
 }
 
 func TestViewBox(t *testing.T) {
-	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-
 	dir := filepath.Join("testdata", "svg")
 	sfn := "fig_necker_cube.svg"
 	file := filepath.Join(dir, sfn)

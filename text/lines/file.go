@@ -229,6 +229,12 @@ func (ls *Lines) FileModCheck() bool {
 
 ////////  Unexported implementation
 
+// setChanged sets the changed and notSaved flags
+func (ls *Lines) setChanged() {
+	ls.changed = true
+	ls.notSaved = true
+}
+
 // clearNotSaved sets Changed and NotSaved to false.
 func (ls *Lines) clearNotSaved() {
 	ls.changed = false

@@ -327,8 +327,9 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 		colors.SetScheme(system.TheApp.IsDark())
 	}
 	if as.Highlighting == "" {
-		as.Highlighting = "emacs" // todo: need light / dark versions
+		as.Highlighting = "emacs"
 	}
+	rich.DefaultSettings = as.Text
 
 	// TODO(kai): move HiStyle to a separate text editor settings
 	// if TheViewInterface != nil {

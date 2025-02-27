@@ -112,7 +112,7 @@ func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
 	return image.Rectangle{posi, maxi}.Canon()
 }
 
-func (g *Image) LocalBBox() math32.Box2 {
+func (g *Image) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	bb.Min = g.Pos
 	bb.Max = g.Pos.Add(g.Size)
@@ -125,7 +125,6 @@ func (g *Image) Render(sv *SVG) {
 		return
 	}
 	g.DrawImage(sv)
-	g.BBoxes(sv)
 	g.RenderChildren(sv)
 }
 

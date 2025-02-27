@@ -5,8 +5,6 @@
 package svg
 
 import (
-	"image"
-
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 )
@@ -22,24 +20,8 @@ func (g *Group) SVGName() string { return "g" }
 
 func (g *Group) EnforceSVGName() bool { return false }
 
-// BBoxFromChildren sets the Group BBox from children
-func BBoxFromChildren(n Node) image.Rectangle {
-	bb := image.Rectangle{}
-	for i, kid := range n.AsTree().Children {
-		kn := kid.(Node)
-		knb := kn.AsNodeBase()
-		if i == 0 {
-			bb = knb.BBox
-		} else {
-			bb = bb.Union(knb.BBox)
-		}
-	}
-	return bb
-}
-
-func (g *Group) NodeBBox(sv *SVG) image.Rectangle {
-	bb := BBoxFromChildren(g)
-	return bb
+func (g *Group) BBoxes(sv *SVG) {
+	g.BBoxesFromChildren(sv)
 }
 
 func (g *Group) Render(sv *SVG) {
@@ -47,10 +29,7 @@ func (g *Group) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-
 	g.RenderChildren(sv)
-	g.BBoxes(sv) // must come after render
-
 	rs.PopContext()
 }
 

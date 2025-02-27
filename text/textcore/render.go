@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles/sides"
@@ -163,7 +162,7 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 	vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
 	vseli := vlr.Intersect(vsel, ed.linesSize.X)
 	tx := buf.ViewMarkupLine(ed.viewId, ln)
-	ctx := &core.AppearanceSettings.Text
+	ctx := &rich.DefaultSettings
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
 
@@ -284,7 +283,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	sz := ed.charSize
 	sz.X *= float32(ed.lineNumberOffset)
 	tx := rich.NewText(&fst, []rune(lnstr))
-	lns := sh.WrapLines(tx, &fst, &sty.Text, &core.AppearanceSettings.Text, sz)
+	lns := sh.WrapLines(tx, &fst, &sty.Text, &rich.DefaultSettings, sz)
 	pc.TextLines(lns, pos)
 
 	// render circle

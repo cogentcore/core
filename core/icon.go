@@ -79,6 +79,7 @@ func (ic *Icon) renderSVG() {
 	}
 
 	sv := &ic.svg
+	sv.TextShaper = ic.Scene.TextShaper
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	if !ic.NeedsRebuild() { // if rebuilding then rebuild

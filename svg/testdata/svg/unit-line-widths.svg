@@ -1,0 +1,41 @@
+<svg
+  width="4cm"
+  height="4cm"
+  viewBox="0 0 400 400"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs
+    id="Defs" />
+  <sodipodi:namedview
+    id="namedview449"
+    inkscape:cx="0"
+    inkscape:cy="0"
+    inkscape:zoom="3.9725"
+    inkscape:document-units="cm"
+    inkscape:current-layer="">
+    <inkscape:grid
+      id="grid830"
+      spacingx="12"
+      spacingy="12"
+      type="xygrid"
+      units="cm" />
+  </sodipodi:namedview>
+  <path
+    id="path28"
+    style="stroke:#000000;stroke-opacity:1;stroke-width:1.6Mm;fill:none;"
+    d="m 36.75267,192.52277 120.32723,0 " />
+  <path
+    id="path696"
+    style="stroke:#000000;stroke-opacity:1;stroke-width:4.5Pt;fill:none;"
+    d="m 36.75267,156.59576 120.32723,0 " />
+  <path
+    id="path538"
+    style="stroke-width:10Dp;fill:none;stroke:#000000;stroke-opacity:1;"
+    d="m 36.75267,120.67128 120.32723,0 " />
+  <path
+    id="path336"
+    style="stroke:#000000;stroke-opacity:1;stroke-width:6px;fill:none;"
+    d="m 36.75267,84.49759 120.32723,0 " />
+</svg>

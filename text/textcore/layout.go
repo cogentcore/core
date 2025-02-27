@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -40,9 +41,9 @@ func (ed *Base) styleSizes() {
 	}
 	sty := &ed.Styles
 	sh := ed.Scene.TextShaper
-	r := sh.FontSize('M', &sty.Font, &sty.Text, &core.AppearanceSettings.Text)
+	r := sh.FontSize('M', &sty.Font, &sty.Text, &rich.DefaultSettings)
 	ed.charSize.X = r.Advance()
-	ed.charSize.Y = sh.LineHeight(&sty.Font, &sty.Text, &core.AppearanceSettings.Text)
+	ed.charSize.Y = sh.LineHeight(&sty.Font, &sty.Text, &rich.DefaultSettings)
 }
 
 // visSizeFromAlloc updates visSize based on allocated size.

@@ -323,6 +323,7 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 		}
 		ed.viewId = ln.NewView(wd)
 		ln.OnChange(ed.viewId, func(e events.Event) {
+			ed.validateCursor() // could have changed with remarkup
 			ed.NeedsRender()
 			ed.SendChange()
 		})

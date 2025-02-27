@@ -29,17 +29,14 @@ type Node interface {
 	// without requiring interface methods.
 	AsNodeBase() *NodeBase
 
+	// BBoxes computes BBox and VisBBox, prior to render.
+	BBoxes(sv *SVG)
+
 	// Render draws the node to the svg image.
 	Render(sv *SVG)
 
-	// BBoxes computes BBox and VisBBox during Render.
-	BBoxes(sv *SVG)
-
 	// LocalBBox returns the bounding box of node in local dimensions.
-	LocalBBox() math32.Box2
-
-	// NodeBBox returns the bounding box in image coordinates for this node.
-	NodeBBox(sv *SVG) image.Rectangle
+	LocalBBox(sv *SVG) math32.Box2
 
 	// SetNodePos sets the upper left effective position of this element, in local dimensions.
 	SetNodePos(pos math32.Vector2)
@@ -129,7 +126,7 @@ func (g *NodeBase) SetPos(pos math32.Vector2) {
 func (g *NodeBase) SetSize(sz math32.Vector2) {
 }
 
-func (g *NodeBase) LocalBBox() math32.Box2 {
+func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	return bb
 }
@@ -308,8 +305,7 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 	return cn
 }
 
-//////////////////////////////////////////////////////////////////
-// Standard Node infrastructure
+//////// Standard Node infrastructure
 
 // Style styles the Paint values directly from node properties
 func (g *NodeBase) Style(sv *SVG) {
@@ -337,12 +333,11 @@ func (g *NodeBase) Style(sv *SVG) {
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
-
 	// TODO(text):
 	// pc.Stroke.Opacity *= pc.Font.Opacity // applies to all
 	// pc.Fill.Opacity *= pc.FontStyle.Opacity
-
 	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
+
 }
 
 // AggCSS aggregates css properties
@@ -392,12 +387,6 @@ func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
 	return bb.MulMatrix2(mxi).ToRect()
 }
 
-func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
-	// rs := &sv.RenderState
-	// return rs.LastRenderBBox // todo!
-	return image.Rectangle{Max: image.Point{100, 100}}
-}
-
 func (g *NodeBase) SetNodePos(pos math32.Vector2) {
 	// no-op by default
 }
@@ -415,16 +404,10 @@ func (g *NodeBase) LocalLineWidth() float32 {
 	return pc.Stroke.Width.Dots
 }
 
-// ComputeBBox is called by default in render to compute bounding boxes for
-// gui interaction -- can only be done in rendering because that is when all
-// the proper transforms are all in place -- VpBBox is intersected with parent SVG
 func (g *NodeBase) BBoxes(sv *SVG) {
-	if g.This == nil {
-		return
-	}
 	ni := g.This.(Node)
-	g.BBox = ni.NodeBBox(sv)
-	g.BBox.Canon()
+	lbb := ni.LocalBBox(sv)
+	g.BBox = g.LocalBBoxToWin(lbb)
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
@@ -432,26 +415,20 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // out of bounds. If visible, returns the Painter for painting.
 // Must be called as first step in Render.
 func (g *NodeBase) IsVisible(sv *SVG) (bool, *paint.Painter) {
-	g.BBox = image.Rectangle{}
 	if g.Paint.Off || g == nil || g.This == nil {
 		return false, nil
 	}
-	ni := g.This.(Node)
-	lbb := ni.LocalBBox()
-	g.BBox = g.LocalBBoxToWin(lbb)
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 	nvis := g.VisBBox == image.Rectangle{}
-
-	_ = nvis
-	// if nvis && !g.isDef {
-	// 	return false, nil
-	// }
+	if nvis && !g.isDef {
+		// fmt.Println("invisible:", g.Name, g.BBox, g.VisBBox)
+		return false, nil
+	}
 	pc := &paint.Painter{&sv.RenderState, &g.Paint}
 	return true, pc
 }
 
 // PushContext checks our bounding box and visibility, returning false if
-// out of bounds.  If visible, pushes us as Context.
+// out of bounds. If visible, pushes us as Context.
 // Must be called as first step in Render.
 func (g *NodeBase) PushContext(sv *SVG) (bool, *paint.Painter) {
 	vis, pc := g.IsVisible(sv)
@@ -460,6 +437,22 @@ func (g *NodeBase) PushContext(sv *SVG) (bool, *paint.Painter) {
 	}
 	pc.PushContext(&g.Paint, nil)
 	return true, pc
+}
+
+func (g *NodeBase) BBoxesFromChildren(sv *SVG) {
+	var bb image.Rectangle
+	for i, kid := range g.Children {
+		ni := kid.(Node)
+		ni.BBoxes(sv)
+		nb := ni.AsNodeBase()
+		if i == 0 {
+			bb = nb.BBox
+		} else {
+			bb = bb.Union(nb.BBox)
+		}
+	}
+	g.BBox = bb
+	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
@@ -474,6 +467,5 @@ func (g *NodeBase) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	g.BBoxes(sv)
 	g.RenderChildren(sv)
 }

@@ -9,7 +9,6 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
@@ -113,7 +112,7 @@ func (txt *Text2D) RenderText() {
 	txs := &txt.Styles.Text
 	sz := math32.Vec2(10000, 5000) // just a big size
 	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), fs, nil)
-	txt.TextRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &core.AppearanceSettings.Text, sz)
+	txt.TextRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &rich.DefaultSettings, sz)
 	// rsz := txt.TextRender.Bounds.Size().Ceil()
 	// if rsz != sz {
 	// 	sz = rsz

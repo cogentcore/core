@@ -121,9 +121,7 @@ func (sv *SVG) renderSVG() {
 	if sv.SVG == nil {
 		return
 	}
-	// need to make the image again to prevent it from
-	// rendering over itself
-	// sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
+	sv.SVG.TextShaper = sv.Scene.TextShaper
 	sz := sv.SVG.Geom.Bounds().Size()
 	sv.SVG.RenderState.InitImageRaster(nil, sz.X, sz.Y)
 	sv.SVG.Render()

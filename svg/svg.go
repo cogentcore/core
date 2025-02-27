@@ -19,6 +19,7 @@ import (
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
 
@@ -67,6 +68,10 @@ type SVG struct {
 
 	// render state for rendering
 	RenderState paint.State `copier:"-" json:"-" xml:"-" edit:"-"`
+
+	// TextShaper for shaping svg text. Can set to shared external one,
+	// or else one is made in Render.
+	TextShaper shaped.Shaper
 
 	// all defs defined elements go here (gradients, symbols, etc)
 	Defs *Group
@@ -199,9 +204,13 @@ func (sv *SVG) Style() {
 func (sv *SVG) Render() {
 	sv.RenderMu.Lock()
 	sv.IsRendering = true
+	if sv.TextShaper == nil {
+		sv.TextShaper = shaped.NewShaper()
+	}
 
 	sv.Style()
 	sv.SetRootTransform()
+	sv.Root.BBoxes(sv)
 
 	if sv.Background != nil {
 		sv.FillViewport()
@@ -270,11 +279,6 @@ type Root struct {
 func (g *Root) SVGName() string { return "svg" }
 
 func (g *Root) EnforceSVGName() bool { return false }
-
-func (g *Root) NodeBBox(sv *SVG) image.Rectangle {
-	// todo: return viewbox
-	return sv.Geom.SizeRect()
-}
 
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel

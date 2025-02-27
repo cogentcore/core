@@ -27,7 +27,7 @@ func (g *Polyline) SetSize(sz math32.Vector2) {
 	// todo: scale bbox
 }
 
-func (g *Polyline) LocalBBox() math32.Box2 {
+func (g *Polyline) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.B2Empty()
 	for _, pt := range g.Points {
 		bb.ExpandByPoint(pt)
@@ -49,7 +49,6 @@ func (g *Polyline) Render(sv *SVG) {
 	}
 	pc.Polyline(g.Points...)
 	pc.PathDone()
-	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
