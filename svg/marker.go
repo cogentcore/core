@@ -92,10 +92,10 @@ func (g *Marker) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 func (g *Marker) Render(sv *SVG) {
-	_, rs := g.PushContext(sv)
+	_, pc := g.PushContext(sv)
 
 	g.RenderChildren(sv)
-	rs.PopContext()
+	pc.PopContext()
 }
 
 ////////  SVG marker management

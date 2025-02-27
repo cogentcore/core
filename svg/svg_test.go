@@ -56,7 +56,7 @@ func TestViewBox(t *testing.T) {
 		sv.Root.ViewBox.PreserveAspectRatio.SetString(ts)
 		sv.Render()
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
-		imfn := filepath.Join("png", fnm)
+		imfn := filepath.Join("png", filepath.Join("viewbox", fnm))
 		imagex.Assert(t, sv.RenderImage(), imfn)
 	}
 }

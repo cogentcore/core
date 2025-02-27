@@ -104,9 +104,9 @@ func (g *Image) DrawImage(sv *SVG) {
 }
 
 func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
-	rs := sv.RenderState.Context()
-	pos := rs.Transform.MulVector2AsPoint(g.Pos)
-	max := rs.Transform.MulVector2AsPoint(g.Pos.Add(g.Size))
+	pc := sv.RenderState.Context()
+	pos := pc.Transform.MulVector2AsPoint(g.Pos)
+	max := pc.Transform.MulVector2AsPoint(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
 	return image.Rectangle{posi, maxi}.Canon()

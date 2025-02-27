@@ -25,12 +25,12 @@ func (g *Group) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 func (g *Group) Render(sv *SVG) {
-	vis, rs := g.PushContext(sv)
+	vis, pc := g.PushContext(sv)
 	if !vis {
 		return
 	}
 	g.RenderChildren(sv)
-	rs.PopContext()
+	pc.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

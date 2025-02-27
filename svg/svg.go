@@ -223,7 +223,8 @@ func (sv *SVG) Render() {
 }
 
 func (sv *SVG) FillViewport() {
-	pc := &paint.Painter{&sv.RenderState, &sv.Root.Paint}
+	sty := styles.NewPaint()
+	pc := &paint.Painter{&sv.RenderState, sty}
 	pc.FillBox(math32.Vector2{}, math32.FromPoint(sv.Geom.Size), sv.Background)
 }
 
