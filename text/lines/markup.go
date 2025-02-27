@@ -360,6 +360,9 @@ func (ls *Lines) inTokenCode(pos textpos.Pos) bool {
 }
 
 func (ls *Lines) braceMatch(pos textpos.Pos) (textpos.Pos, bool) {
+	if !ls.isValidPos(pos) {
+		return textpos.Pos{}, false
+	}
 	txt := ls.lines[pos.Line]
 	ch := pos.Char
 	if ch >= len(txt) {

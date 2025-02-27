@@ -344,8 +344,8 @@ func (ls *Lines) EndPos() textpos.Pos {
 	return ls.endPos()
 }
 
-// IsValidPos returns an error if the position is not valid.
-func (ls *Lines) IsValidPos(pos textpos.Pos) error {
+// IsValidPos returns an true if the position is valid.
+func (ls *Lines) IsValidPos(pos textpos.Pos) bool {
 	ls.Lock()
 	defer ls.Unlock()
 	return ls.isValidPos(pos)
@@ -715,7 +715,7 @@ func (ls *Lines) MoveLineEnd(vid int, pos textpos.Pos) textpos.Pos {
 func (ls *Lines) IsWordEnd(pos textpos.Pos) bool {
 	ls.Lock()
 	defer ls.Unlock()
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return false
 	}
 	txt := ls.lines[pos.Line]
@@ -742,7 +742,7 @@ func (ls *Lines) IsWordEnd(pos textpos.Pos) bool {
 func (ls *Lines) IsWordMiddle(pos textpos.Pos) bool {
 	ls.Lock()
 	defer ls.Unlock()
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return false
 	}
 	txt := ls.lines[pos.Line]
@@ -767,7 +767,7 @@ func (ls *Lines) IsWordMiddle(pos textpos.Pos) bool {
 func (ls *Lines) WordAt(pos textpos.Pos) textpos.Region {
 	ls.Lock()
 	defer ls.Unlock()
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return textpos.Region{}
 	}
 	txt := ls.lines[pos.Line]
@@ -784,7 +784,7 @@ func (ls *Lines) WordAt(pos textpos.Pos) textpos.Region {
 func (ls *Lines) WordBefore(pos textpos.Pos) *textpos.Edit {
 	ls.Lock()
 	defer ls.Unlock()
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return &textpos.Edit{}
 	}
 	txt := ls.lines[pos.Line]

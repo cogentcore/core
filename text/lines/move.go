@@ -5,13 +5,12 @@
 package lines
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/text/textpos"
 )
 
 // moveForward moves given source position forward given number of rune steps.
 func (ls *Lines) moveForward(pos textpos.Pos, steps int) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	for range steps {
@@ -32,7 +31,7 @@ func (ls *Lines) moveForward(pos textpos.Pos, steps int) textpos.Pos {
 
 // moveBackward moves given source position backward given number of rune steps.
 func (ls *Lines) moveBackward(pos textpos.Pos, steps int) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	for range steps {
@@ -52,7 +51,7 @@ func (ls *Lines) moveBackward(pos textpos.Pos, steps int) textpos.Pos {
 
 // moveForwardWord moves given source position forward given number of word steps.
 func (ls *Lines) moveForwardWord(pos textpos.Pos, steps int) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	nstep := 0
@@ -74,7 +73,7 @@ func (ls *Lines) moveForwardWord(pos textpos.Pos, steps int) textpos.Pos {
 
 // moveBackwardWord moves given source position backward given number of word steps.
 func (ls *Lines) moveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	nstep := 0
@@ -97,7 +96,7 @@ func (ls *Lines) moveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
 // moveDown moves given source position down given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
 func (ls *Lines) moveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	vl := vw.viewLines
@@ -112,7 +111,7 @@ func (ls *Lines) moveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos
 // moveUp moves given source position up given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
 func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	vp := ls.posToView(vw, pos)
@@ -125,7 +124,7 @@ func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 
 // moveLineStart moves given source position to start of view line.
 func (ls *Lines) moveLineStart(vw *view, pos textpos.Pos) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	vp := ls.posToView(vw, pos)
@@ -135,7 +134,7 @@ func (ls *Lines) moveLineStart(vw *view, pos textpos.Pos) textpos.Pos {
 
 // moveLineEnd moves given source position to end of view line.
 func (ls *Lines) moveLineEnd(vw *view, pos textpos.Pos) textpos.Pos {
-	if errors.Log(ls.isValidPos(pos)) != nil {
+	if !ls.isValidPos(pos) {
 		return pos
 	}
 	vp := ls.posToView(vw, pos)

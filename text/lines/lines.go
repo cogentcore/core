@@ -15,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/metadata"
 	"cogentcore.org/core/base/slicesx"
@@ -306,26 +305,43 @@ func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 
 ////////   Edits
 
-// isValidPos returns an error if position is invalid. Note that the end
-// of the line (at length) is valid.
-func (ls *Lines) isValidPos(pos textpos.Pos) error {
+// isValidPos returns true if position is valid. Note that the end
+// of the line (at length) is valid. This version does not panic or emit
+// an error message, and should be used for cases where a position can
+// legitimately be invalid, and is managed.
+func (ls *Lines) isValidPos(pos textpos.Pos) bool {
 	n := ls.numLines()
 	if n == 0 {
 		if pos.Line != 0 || pos.Char != 0 {
-			// return fmt.Errorf("invalid position for empty text: %s", pos)
-			panic(fmt.Errorf("invalid position for empty text: %s", pos).Error())
+			return false
 		}
 	}
 	if pos.Line < 0 || pos.Line >= n {
-		// return fmt.Errorf("invalid line number for n lines %d: %s", n, pos)
-		panic(fmt.Errorf("invalid line number for n lines %d: %s", n, pos).Error())
+		return false
 	}
 	llen := len(ls.lines[pos.Line])
 	if pos.Char < 0 || pos.Char > llen {
-		// return fmt.Errorf("invalid character position for pos %d: %s", llen, pos)
-		panic(fmt.Errorf("invalid character position for pos %d: %s", llen, pos).Error())
+		return false
 	}
-	return nil
+	return true
+}
+
+// mustValidPos panics if the position is invalid. Note that the end
+// of the line (at length) is valid.
+func (ls *Lines) mustValidPos(pos textpos.Pos) {
+	n := ls.numLines()
+	if n == 0 {
+		if pos.Line != 0 || pos.Char != 0 {
+			panic("invalid position for empty text: " + pos.String())
+		}
+	}
+	if pos.Line < 0 || pos.Line >= n {
+		panic(fmt.Sprintf("invalid line number for n lines %d: pos: %s", n, pos))
+	}
+	llen := len(ls.lines[pos.Line])
+	if pos.Char < 0 || pos.Char > llen {
+		panic(fmt.Sprintf("invalid character position for pos, len: %d: pos: %s", llen, pos))
+	}
 }
 
 // region returns a Edit representation of text between start and end positions
@@ -333,16 +349,12 @@ func (ls *Lines) isValidPos(pos textpos.Pos) error {
 // sets the timestamp on the Edit to now
 func (ls *Lines) region(st, ed textpos.Pos) *textpos.Edit {
 	n := ls.numLines()
-	if errors.Log(ls.isValidPos(st)) != nil {
-		return nil
-	}
+	ls.mustValidPos(st)
 	if ed.Line == n && ed.Char == 0 { // end line: goes to endpos
 		ed.Line = n - 1
 		ed.Char = len(ls.lines[ed.Line])
 	}
-	if errors.Log(ls.isValidPos(ed)) != nil {
-		return nil
-	}
+	ls.mustValidPos(ed)
 	if st == ed {
 		return nil
 	}
@@ -390,12 +402,8 @@ func (ls *Lines) region(st, ed textpos.Pos) *textpos.Edit {
 // returns nil and logs an error if not a valid region.
 // sets the timestamp on the Edit to now
 func (ls *Lines) regionRect(st, ed textpos.Pos) *textpos.Edit {
-	if errors.Log(ls.isValidPos(st)) != nil {
-		return nil
-	}
-	if errors.Log(ls.isValidPos(ed)) != nil {
-		return nil
-	}
+	ls.mustValidPos(st)
+	ls.mustValidPos(ed)
 	if st == ed {
 		return nil
 	}
@@ -526,9 +534,7 @@ func (ls *Lines) insertText(st textpos.Pos, txt []rune) *textpos.Edit {
 
 // insertTextImpl inserts the Text at given starting position.
 func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
-	if errors.Log(ls.isValidPos(st)) != nil {
-		return nil
-	}
+	ls.mustValidPos(st)
 	nl := len(txt)
 	var tbe *textpos.Edit
 	ed := st

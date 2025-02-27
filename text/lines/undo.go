@@ -6,6 +6,7 @@ package lines
 
 import (
 	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -257,6 +258,11 @@ func (ls *Lines) undo() []*textpos.Edit {
 				}
 				eds = append(eds, utbe)
 			} else {
+				if !ls.isValidPos(tbe.Region.End) {
+					fmt.Println("lines.undo: invalid end region for undo. stack:", len(ls.undos.Stack), "tbe:", tbe)
+					debug.PrintStack()
+					break
+				}
 				utbe := ls.deleteTextImpl(tbe.Region.Start, tbe.Region.End)
 				utbe.Group = stgp + tbe.Group
 				if ls.Settings.EmacsUndo {
