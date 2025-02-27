@@ -87,8 +87,8 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 	mrk.Render(sv)
 }
 
-func (g *Marker) BBoxes(sv *SVG) {
-	g.BBoxesFromChildren(sv)
+func (g *Marker) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	g.BBoxesFromChildren(sv, parTransform)
 }
 
 func (g *Marker) Render(sv *SVG) {

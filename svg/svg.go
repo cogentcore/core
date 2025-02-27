@@ -210,7 +210,7 @@ func (sv *SVG) Render() {
 
 	sv.Style()
 	sv.SetRootTransform()
-	sv.Root.BBoxes(sv)
+	sv.Root.BBoxes(sv, math32.Identity2())
 
 	if sv.Background != nil {
 		sv.FillViewport()

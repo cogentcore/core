@@ -264,7 +264,7 @@ func NewRoot(parent ...tree.Node) *Root { return tree.New[Root](parent...) }
 // for the SVG during rendering.
 func (t *Root) SetViewBox(v ViewBox) *Root { t.ViewBox = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text, where text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextShaped", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}, {Name: "layoutText", Doc: "layoutText is the last test that has been laid out."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text, where text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextShaped", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}}})
 
 // NewText returns a new [Text] with the given optional parent:
 // Text renders SVG text, handling both text and tspan elements.
@@ -314,11 +314,3 @@ func (t *Text) SetTextLength(v float32) *Text { t.TextLength = v; return t }
 // SetAdjustGlyphs sets the [Text.AdjustGlyphs]:
 // in attempting to match TextLength, should we adjust glyphs in addition to spacing?
 func (t *Text) SetAdjustGlyphs(v bool) *Text { t.AdjustGlyphs = v; return t }
-
-// SetLastPos sets the [Text.LastPos]:
-// last text render position -- lower-left baseline of start
-func (t *Text) SetLastPos(v math32.Vector2) *Text { t.LastPos = v; return t }
-
-// SetLastBBox sets the [Text.LastBBox]:
-// last actual bounding box in display units (dots)
-func (t *Text) SetLastBBox(v math32.Box2) *Text { t.LastBBox = v; return t }

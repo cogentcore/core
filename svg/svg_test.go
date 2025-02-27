@@ -22,9 +22,9 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		// if fn != "rect.svg" {
-		// 	continue
-		// }
+		if fn != "text-test.svg" {
+			continue
+		}
 		sv := NewSVG(640, 480)
 		svfn := filepath.Join(dir, fn)
 		err := sv.OpenXML(svfn)

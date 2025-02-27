@@ -20,8 +20,8 @@ func (g *Group) SVGName() string { return "g" }
 
 func (g *Group) EnforceSVGName() bool { return false }
 
-func (g *Group) BBoxes(sv *SVG) {
-	g.BBoxesFromChildren(sv)
+func (g *Group) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	g.BBoxesFromChildren(sv, parTransform)
 }
 
 func (g *Group) Render(sv *SVG) {

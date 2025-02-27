@@ -30,7 +30,7 @@ type Node interface {
 	AsNodeBase() *NodeBase
 
 	// BBoxes computes BBox and VisBBox, prior to render.
-	BBoxes(sv *SVG)
+	BBoxes(sv *SVG, parTransform math32.Matrix2)
 
 	// Render draws the node to the svg image.
 	Render(sv *SVG)
@@ -153,10 +153,10 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 	g.SetProperty(prop, colors.AsHex(clr))
 }
 
-// ParTransform returns the full compounded 2D transform matrix for all
-// of the parents of this node.  If self is true, then include our
+// ParentTransform returns the full compounded 2D transform matrix for all
+// of the parents of this node. If self is true, then include our
 // own transform too.
-func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
+func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
 	n := g.This.(Node)
@@ -187,11 +187,11 @@ func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
 // DeltaTransform computes the net transform matrix for given delta transform parameters
-// and the transformed version of the reference point.  If self is true, then
-// include the current node self transform, otherwise don't.  Groups do not
+// and the transformed version of the reference point. If self is true, then
+// include the current node self transform, otherwise don't. Groups do not
 // but regular rendering nodes do.
 func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
-	mxi := g.ParTransform(self)
+	mxi := g.ParentTransform(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
 	ldel := mxi.MulVector2AsVector(trans)
@@ -381,12 +381,6 @@ func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
 	g.ApplyCSS(sv, idnm, css)
 }
 
-// LocalBBoxToWin converts a local bounding box to SVG coordinates
-func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
-	mxi := g.ParTransform(true) // include self
-	return bb.MulMatrix2(mxi).ToRect()
-}
-
 func (g *NodeBase) SetNodePos(pos math32.Vector2) {
 	// no-op by default
 }
@@ -404,10 +398,11 @@ func (g *NodeBase) LocalLineWidth() float32 {
 	return pc.Stroke.Width.Dots
 }
 
-func (g *NodeBase) BBoxes(sv *SVG) {
+func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	g.BBox = g.LocalBBoxToWin(lbb)
+	g.BBox = lbb.MulMatrix2(xf).ToRect()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
@@ -439,11 +434,12 @@ func (g *NodeBase) PushContext(sv *SVG) (bool, *paint.Painter) {
 	return true, pc
 }
 
-func (g *NodeBase) BBoxesFromChildren(sv *SVG) {
+func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
+	xf := parTransform.Mul(g.Paint.Transform)
 	var bb image.Rectangle
 	for i, kid := range g.Children {
 		ni := kid.(Node)
-		ni.BBoxes(sv)
+		ni.BBoxes(sv, xf)
 		nb := ni.AsNodeBase()
 		if i == 0 {
 			bb = nb.BBox
