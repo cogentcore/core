@@ -92,7 +92,6 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	}
 	pc := &g.Paint
 	fs := pc.Font
-	fs.Defaults()
 	if pc.Fill.Color != nil {
 		fs.SetFillColor(colors.ToUniform(pc.Fill.Color))
 	}
@@ -155,8 +154,6 @@ func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	// todo: apply transform to text itself here
-	// g.TextShaped.Transform(mat, &pc.FontStyle, &pc.UnitContext)
 	g.BBox = lbb.MulMatrix2(xf).ToRect()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
@@ -179,8 +176,7 @@ func (g *Text) Render(sv *SVG) {
 }
 
 func (g *Text) RenderText(sv *SVG, pc *paint.Painter) {
-	// mat := pc.Transform()
-	// pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
+	// note: transform is managed entirely in the render side function!
 	pos := g.Pos
 	bsz := g.TextShaped.Bounds.Size()
 	if pc.Text.Align == text.Center {

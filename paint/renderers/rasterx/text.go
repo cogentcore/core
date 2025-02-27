@@ -38,7 +38,7 @@ func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32
 	start := pos.Add(lns.Offset)
 	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
 	// tbb := lns.Bounds.Translate(start)
-	// rs.StrokeBounds(tbb, colors.Red)
+	// rs.StrokeBounds(ctx, tbb, colors.Red)
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
@@ -50,7 +50,7 @@ func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32
 func (rs *Renderer) TextLine(ctx *render.Context, ln *shaped.Line, lns *shaped.Lines, clr image.Image, start math32.Vector2) {
 	off := start.Add(ln.Offset)
 	// tbb := ln.Bounds.Translate(off)
-	// rs.StrokeBounds(tbb, colors.Blue)
+	// rs.StrokeBounds(ctx, tbb, colors.Blue)
 	for ri := range ln.Runs {
 		run := ln.Runs[ri].(*shapedgt.Run)
 		rs.TextRun(ctx, run, ln, lns, clr, off)
@@ -115,6 +115,13 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
 		}
 	}
+	if run.Decoration.HasFlag(rich.Overline) {
+		if run.Direction.IsVertical() {
+		} else {
+			dec := start.Y - 0.7*rbb.Size().Y
+			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+		}
+	}
 
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
@@ -124,7 +131,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		// right := xPos + math32.FromFixed(g.Width)
 		// rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
 		bb := run.GlyphBoundsBox(g).Translate(start)
-		// rs.StrokeBounds(bb, colors.Yellow)
+		// rs.StrokeBounds(ctx, bb, colors.Yellow)
 
 		data := run.Face.GlyphData(g.GlyphID)
 		switch format := data.(type) {
@@ -140,7 +147,14 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		start.X += math32.FromFixed(g.XAdvance)
 		start.Y -= math32.FromFixed(g.YAdvance)
 	}
-	// todo: render strikethrough
+
+	if run.Decoration.HasFlag(rich.LineThrough) {
+		if run.Direction.IsVertical() {
+		} else {
+			dec := start.Y - 0.2*rbb.Size().Y
+			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+		}
+	}
 }
 
 func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
@@ -233,20 +247,27 @@ func bitAt(b []byte, i int) byte {
 }
 
 // StrokeBounds strokes a bounding box in the given color. Useful for debugging.
-func (rs *Renderer) StrokeBounds(bb math32.Box2, clr color.Color) {
+func (rs *Renderer) StrokeBounds(ctx *render.Context, bb math32.Box2, clr color.Color) {
 	rs.Raster.SetStroke(
 		math32.ToFixed(1),
 		math32.ToFixed(10),
 		ButtCap, nil, nil, Miter,
 		nil, 0)
 	rs.Raster.SetColor(colors.Uniform(clr))
-	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rs.Raster)
+	m := ctx.Transform
+	mn := m.MulVector2AsPoint(bb.Min)
+	mx := m.MulVector2AsPoint(bb.Max)
+	AddRect(mn.X, mn.Y, mx.X, mx.Y, 0, rs.Raster)
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 }
 
 // StrokeTextLine strokes a line for text decoration.
 func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
+	m := ctx.Transform
+	sp = m.MulVector2AsPoint(sp)
+	ep = m.MulVector2AsPoint(ep)
+	width *= MeanScale(m)
 	rs.Raster.SetStroke(
 		math32.ToFixed(width),
 		math32.ToFixed(10),
@@ -264,7 +285,10 @@ func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, w
 func (rs *Renderer) FillBounds(ctx *render.Context, bb math32.Box2, clr image.Image) {
 	rf := &rs.Raster.Filler
 	rf.SetColor(clr)
-	AddRect(bb.Min.X, bb.Min.Y, bb.Max.X, bb.Max.Y, 0, rf)
+	m := ctx.Transform
+	mn := m.MulVector2AsPoint(bb.Min)
+	mx := m.MulVector2AsPoint(bb.Max)
+	AddRect(mn.X, mn.Y, mx.X, mx.Y, 0, rf)
 	rf.Draw()
 	rf.Clear()
 }

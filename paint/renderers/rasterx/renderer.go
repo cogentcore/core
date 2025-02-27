@@ -166,6 +166,11 @@ func (rs *Renderer) Fill(pt *render.Path) {
 	rf.Clear()
 }
 
+func MeanScale(m math32.Matrix2) float32 {
+	scx, scy := m.ExtractScale()
+	return 0.5 * (math32.Abs(scx) + math32.Abs(scy))
+}
+
 // StrokeWidth obtains the current stoke width subject to transform (or not
 // depending on VecEffNonScalingStroke)
 func (rs *Renderer) StrokeWidth(pt *render.Path) float32 {
@@ -178,8 +183,7 @@ func (rs *Renderer) StrokeWidth(pt *render.Path) float32 {
 	if sty.VectorEffect == ppath.VectorEffectNonScalingStroke {
 		return dw
 	}
-	scx, scy := pc.Transform.ExtractScale()
-	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
+	sc := MeanScale(pt.Context.Transform)
 	lw := math32.Max(sc*dw, sty.Stroke.MinWidth.Dots)
 	return lw
 }

@@ -39,12 +39,13 @@ func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.
 	}
 }
 
-// styleFuncs are functions for styling the rich.Style object.
+// styleFuncs are functions for styling the text.Style object.
 var styleFuncs = map[string]styleprops.Func{
 	"text-align": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.Align }),
 	"text-vertical-align": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.AlignV }),
+	// note: text-style reads the font-size setting for regular units cases.
 	"font-size": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.FontSize }),
 	"line-height": styleprops.Float(float32(1.2),

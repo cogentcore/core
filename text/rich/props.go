@@ -54,6 +54,7 @@ var FontSizes = map[string]float32{
 
 // styleFuncs are functions for styling the rich.Style object.
 var styleFuncs = map[string]styleprops.Func{
+	// note: text.Style handles the standard units-based font-size settings
 	"font-size": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
@@ -68,13 +69,7 @@ var styleFuncs = map[string]styleprops.Func{
 		case string:
 			if psz, ok := FontSizes[vt]; ok {
 				fs.Size = psz
-			} else {
-				fv, _ := reflectx.ToFloat(val)
-				fs.Size = float32(fv)
 			}
-		default:
-			fv, _ := reflectx.ToFloat(val)
-			fs.Size = float32(fv)
 		}
 	},
 	"font-family": styleprops.Enum(SansSerif,
