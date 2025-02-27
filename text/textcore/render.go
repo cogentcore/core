@@ -290,12 +290,10 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	lineColor, has := ed.Lines.LineColor(ln)
 	if has {
 		pos.X += float32(ed.lineNumberDigits) * ed.charSize.X
-		r := 0.5 * ed.charSize.X
+		r := 0.7 * ed.charSize.X
 		center := pos.AddScalar(r)
-
-		// cut radius in half so that it doesn't look too big
-		r /= 2
-
+		center.Y += 0.3 * ed.charSize.Y
+		center.X += 0.3 * ed.charSize.X
 		pc.Fill.Color = lineColor
 		pc.Circle(center.X, center.Y, r)
 		pc.PathDone()

@@ -17,10 +17,11 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* prompt on quitting modified file hangs
+* transpose doesn't work
 * can't go to end of line at very end of file
 * cleanup other stuff in render/text with abs position etc.
 * arcs are off in various places: core.Meter, switches with segmented buttons, paint_test render.
-* find autosave file on opening 
 * dotted underline for misspelling
 * better job finding path fragments from file links -- iteratively try stuff.
 * core/values.go/FontButton -- need font list.

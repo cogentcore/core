@@ -63,7 +63,6 @@ func (g *Path) Render(sv *SVG) {
 	pc.State.Path = g.Data
 	pc.PathDone()
 
-	// todo: use path algos for this:
 	mrk_start := sv.MarkerByName(g, "marker-start")
 	mrk_end := sv.MarkerByName(g, "marker-end")
 	mrk_mid := sv.MarkerByName(g, "marker-mid")

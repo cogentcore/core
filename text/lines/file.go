@@ -140,6 +140,9 @@ func (ls *Lines) OpenFS(fsys fs.FS, filename string) error {
 func (ls *Lines) SaveFile(filename string) error {
 	ls.Lock()
 	err := ls.saveFile(filename)
+	if err == nil {
+		ls.autosaveDelete()
+	}
 	ls.Unlock()
 	ls.sendChange()
 	return err
@@ -183,7 +186,6 @@ func (ls *Lines) SetFileModOK(ok bool) {
 // has indicated that editing is done, and the results are to be consumed.
 func (ls *Lines) EditDone() {
 	ls.Lock()
-	ls.autosaveDelete()
 	ls.changed = false
 	ls.Unlock()
 	ls.sendChange()

@@ -132,6 +132,7 @@ func Close(sc *core.Scene, lns *lines.Lines, afterFunc func(canceled bool)) bool
 			Close(sc, lns, afterFunc)
 		})
 		core.NewButton(bar).SetText("Save").OnClick(func(e events.Event) {
+			d.Close()
 			Save(sc, lns)
 			Close(sc, lns, afterFunc) // 2nd time through won't prompt
 		})
