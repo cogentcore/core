@@ -101,7 +101,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	sz := math32.Vec2(10000, 10000)
 	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
 	// baseOff := g.TextShaped.Lines[0].Offset
-	g.TextShaped.Lines[0].Offset = math32.Vector2{} // remove top-left offset
+	g.TextShaped.StartAtBaseline() // remove top-left offset
 	// fmt.Println("baseoff:", baseOff)
 	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)
 
@@ -179,8 +179,9 @@ func (g *Text) Render(sv *SVG) {
 }
 
 func (g *Text) RenderText(sv *SVG, pc *paint.Painter) {
-	mat := pc.Transform()
-	pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
+	// mat := pc.Transform()
+	// pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
+	pos := g.Pos
 	bsz := g.TextShaped.Bounds.Size()
 	if pc.Text.Align == text.Center {
 		pos.X -= bsz.X * .5

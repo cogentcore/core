@@ -121,6 +121,16 @@ func (ls *Lines) String() string {
 	return str
 }
 
+// StartAtBaseline removes the offset from the first line that causes
+// the lines to be rendered starting at the upper left corner, so they
+// will instead be rendered starting at the baseline position.
+func (ls *Lines) StartAtBaseline() {
+	if len(ls.Lines) == 0 {
+		return
+	}
+	ls.Lines[0].Offset = math32.Vector2{}
+}
+
 // SetGlyphXAdvance sets the x advance on all glyphs to given value:
 // for monospaced case.
 func (ls *Lines) SetGlyphXAdvance(adv fixed.Int26_6) {
