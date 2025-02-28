@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -128,14 +128,15 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
 	ChildBackground(child Widget) image.Image
 
-	// RenderDraw draws the current image onto the RenderWindow window,
-	// using the [system.Drawer] interface methods, typically [Drawer.Copy].
-	// The given draw operation is suggested by the RenderWindow, with the
-	// first main window using draw.Src and the rest using draw.Over.
-	// Individual draw methods are free to ignore if necessary.
-	// Optimized direct rendering widgets can register by doing
-	// [Scene.AddDirectRender] to directly draw into the window texture.
-	RenderDraw(drw system.Drawer, op draw.Op)
+	// RenderState returns the self-contained [render.Render] state for this widget,
+	// which is capable of rendering the contents of this widget in a self-contained
+	// manner. The base widget returns nil, and the [Scene] widget returns the
+	// [paint.Painter] rendering results.
+	// Widgets that do direct rendering instead of drawing onto
+	// the Scene painter should return a suitable render state.
+	// Use [Scene.AddDirectRender] to register such widgets with the Scene.
+	// The given draw operation is the suggested way to Draw onto existing images.
+	RenderState(op draw.Op) render.Render
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -418,14 +419,15 @@ func (wb *WidgetBase) IsVisible() bool {
 	return wb.parentWidget().IsVisible()
 }
 
-// RenderDraw draws the current image onto the RenderWindow window,
-// using the [system.Drawer] interface methods, typically [Drawer.Copy].
-// The given draw operation is suggested by the RenderWindow, with the
-// first main window using draw.Src and the rest using draw.Over.
-// Individual draw methods are free to ignore if necessary.
-// Optimized direct rendering widgets can register by doing
-// [Scene.AddDirectRender] to directly draw into the window texture.
-func (wb *WidgetBase) RenderDraw(drw system.Drawer, op draw.Op) {}
+// RenderState returns the self-contained [render.Render] state for this widget,
+// which is capable of rendering the contents of this widget in a self-contained
+// manner. The base widget returns nil, and the [Scene] widget returns the
+// [paint.Painter] rendering results.
+// Widgets that do direct rendering instead of drawing onto
+// the Scene painter should return a suitable render state.
+// Use [Scene.AddDirectRender] to register such widgets with the Scene.
+// The given draw operation is the suggested way to Draw onto existing images.
+func (wb *WidgetBase) RenderState(op draw.Op) render.Render { return nil }
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

@@ -213,13 +213,17 @@ func (sm *stages) resize(rg math32.Geom2DInt) bool {
 	return resized
 }
 
-// updateAll iterates through all Stages and calls DoUpdate on them.
+// updateAll is the primary updating function to update all scenes
+// and determine if any updates were actually made.
+// This [stages] is the mains of the [renderWindow] or the popups
+// of a list of popups within a main stage.
+// It iterates through all Stages and calls doUpdate on them.
 // returns stageMods = true if any Stages have been modified (Main or Popup),
 // and sceneMods = true if any Scenes have been modified.
-// Stage calls DoUpdate on its Scene, ensuring everything is updated at the
-// Widget level.  If nothing is needed, nothing is done.
-// This is called only during RenderWindow.RenderWindow,
-// under the global RenderContext.Mu Write lock so nothing else can happen.
+// Stage calls doUpdate on its [Scene], ensuring everything is updated at the
+// Widget level. If nothing is needed, nothing is done.
+// This is called only during [renderWindow.renderWindow],
+// under the global RenderContext.Mu lock so nothing else can happen.
 func (sm *stages) updateAll() (stageMods, sceneMods bool) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()

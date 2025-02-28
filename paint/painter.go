@@ -109,14 +109,15 @@ func (pc *Painter) PathDone() {
 	pc.State.Path.Reset()
 }
 
-// RenderDone sends the entire current Render to the renderers.
-// This is when the drawing actually happens: don't forget to call!
-func (pc *Painter) RenderDone() {
-	for _, rnd := range pc.Renderers {
-		rnd.Render(pc.Render)
-	}
+// RenderDone should be called when the full set of rendering for this painter
+// is done. It returns a self-contained [render.PaintRender] representing
+// the entire rendering state, suitable for offline rendering.
+// It resets the current painter state so that it is ready for new rendering.
+func (pc *Painter) RenderDone() *render.PaintRender {
+	npr := pc.Render.Clone()
 	pc.Render.Reset()
 	pc.State.Path.Reset()
+	return npr
 }
 
 //////// basic shape functions

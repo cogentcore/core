@@ -178,16 +178,16 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
-var _renderWindowFlagsValues = []renderWindowFlags{0}
+var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3}
 
 // renderWindowFlagsN is the highest valid value for type renderWindowFlags, plus one.
-const renderWindowFlagsN renderWindowFlags = 1
+const renderWindowFlagsN renderWindowFlags = 4
 
-var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`winIsRendering`: 0}
+var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`winIsRendering`: 0, `winStopEventLoop`: 1, `winClosing`: 2, `winGotFocus`: 3}
 
-var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the doRender function is running.`}
+var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the doRender function is running.`, 1: `winStopEventLoop indicates that the event loop should be stopped.`, 2: `winClosing is whether the window is closing.`, 3: `winGotFocus indicates that have we received focus.`}
 
-var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `winIsRendering`}
+var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `winIsRendering`, 1: `winStopEventLoop`, 2: `winClosing`, 3: `winGotFocus`}
 
 // String returns the string representation of this renderWindowFlags value.
 func (i renderWindowFlags) String() string { return enums.BitFlagString(i, _renderWindowFlagsValues) }

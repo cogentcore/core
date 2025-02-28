@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// Path is a path drawing render item: responsible for all vector graphics
+// Path is a path drawing render [Item]: responsible for all vector graphics
 // drawing functionality.
 type Path struct {
 	// Path specifies the shape(s) to be drawn, using commands:

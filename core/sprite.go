@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
@@ -204,16 +205,28 @@ func (ss *Sprites) InactivateSprite(name string) {
 	}
 }
 
-// drawSprites draws sprites
-func (ss *Sprites) drawSprites(drw system.Drawer, scpos image.Point) {
+// renderSprites adds active sprites to given renderScene
+func (ss *Sprites) renderSprites(renderScene *render.Scene, scpos image.Point) {
 	for _, kv := range ss.Order {
 		sp := kv.Value
 		if !sp.Active {
 			continue
 		}
-		// note: in general we assume sprites are static, so Unchanged.
-		// if needed, could add a "dynamic" flag or something.
-		drw.Copy(sp.Geom.Pos.Add(scpos), sp.Pixels, sp.Pixels.Bounds(), draw.Over, system.Unchanged)
+		// note: may need to copy pixels but hoping not..
+		sr := &SpriteRender{DrawPos: sp.Geom.Pos.Add(scpos), Pixels: sp.Pixels}
+		renderScene.Add(sr)
 	}
 	ss.Modified = false
+}
+
+// SpriteRender is a [render.Render] implementation for sprites.
+type SpriteRender struct {
+	DrawPos image.Point
+	Pixels  *image.RGBA
+}
+
+func (sr *SpriteRender) Render() {}
+
+func (sr *SpriteRender) Draw(drw system.Drawer) {
+	drw.Copy(sr.DrawPos, sr.Pixels, sr.Pixels.Bounds(), draw.Over, system.Unchanged)
 }

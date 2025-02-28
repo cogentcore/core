@@ -17,9 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* repeated Open search narrows scope
+* prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
-* prompt on quitting modified file hangs
 * diff next doesn't scroll both
 
 * render/images needs transform updates?
@@ -33,8 +32,9 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
 * optimized next level up render
-* optimized goroutine render
 * diff crash -- not yet reproducing.
 * text render highlight region fill in blanks better
+
+* optimized goroutine render -- requires a copy of full scene stack structure..
 
 

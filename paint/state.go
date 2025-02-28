@@ -23,16 +23,14 @@ var NewDefaultImageRenderer func(size math32.Vector2) render.Renderer
 // while painting. The [Paint] embeds a pointer to this.
 type State struct {
 
-	// Renderers are the current renderers.
-	Renderers []render.Renderer
+	// Render holds the current [render.PaintRender] state that we are building.
+	// and has the list of [render.Renderer]s that we render to.
+	Render render.PaintRender
 
 	// Stack provides the SVG "stacking context" as a stack of [Context]s.
 	// There is always an initial base-level Context element for the overall
 	// rendering context.
 	Stack []*render.Context
-
-	// Render is the current render state that we are building.
-	Render render.Render
 
 	// Path is the current path state we are adding to.
 	Path ppath.Path
@@ -46,16 +44,16 @@ type State struct {
 func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
 	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
-	if len(rs.Renderers) == 0 {
+	if len(rs.Render.Renderers) == 0 {
 		rd := NewDefaultImageRenderer(sz)
-		rs.Renderers = append(rs.Renderers, rd)
+		rs.Render.Renderers = append(rs.Render.Renderers, rd)
 		rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
 		return
 	}
 	ctx := rs.Context()
 	ctx.SetBounds(bounds)
-	for _, rd := range rs.Renderers {
-		if !rd.IsImage() {
+	for _, rd := range rs.Render.Renderers {
+		if rd.Type() == render.Code {
 			continue
 		}
 		rd.SetSize(units.UnitDot, sz)
@@ -67,31 +65,17 @@ func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
 }
 
-// ImageRenderer returns the first ImageRenderer present, or nil if none.
-func (rs *State) ImageRenderer() render.Renderer {
-	for _, rd := range rs.Renderers {
-		if rd.IsImage() {
-			return rd
-		}
-	}
-	return nil
-}
-
 // RenderImage returns the current render image from the first
 // Image renderer present, or nil if none.
 // This may be somewhat expensive for some rendering types.
 func (rs *State) RenderImage() *image.RGBA {
-	rd := rs.ImageRenderer()
-	if rd == nil {
-		return nil
-	}
-	return rd.Image()
+	return rs.Render.Image()
 }
 
 // RenderImageSize returns the size of the current render image
 // from the first Image renderer present.
 func (rs *State) RenderImageSize() image.Point {
-	rd := rs.ImageRenderer()
+	rd := rs.Render.ImageRenderer()
 	if rd == nil {
 		return image.Point{}
 	}

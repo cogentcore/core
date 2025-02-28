@@ -38,7 +38,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	pc.FillBox(math32.Vector2{}, math32.Vec2(float32(width), float32(height)), colors.Uniform(colors.White))
 	sh := shapedgt.NewShaper()
 	f(pc, sh, tsty, rts)
-	pc.RenderDone()
+	pc.RenderDone().Render()
 	imagex.Assert(t, pc.RenderImage(), nm)
 }
 
@@ -68,7 +68,7 @@ func TestBasic(t *testing.T) {
 		pos := math32.Vec2(20, 60)
 		// pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
 		pc.TextLines(lns, pos)
-		pc.RenderDone()
+		pc.RenderDone().Render()
 
 		assert.Equal(t, len(src), lns.RuneFromLinePos(textpos.Pos{3, 30}))
 
@@ -107,7 +107,7 @@ func TestHebrew(t *testing.T) {
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		pc.TextLines(lns, math32.Vec2(20, 60))
-		pc.RenderDone()
+		pc.RenderDone().Render()
 	})
 }
 
@@ -130,7 +130,7 @@ func TestVertical(t *testing.T) {
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(150, 50))
 		// pc.TextLines(lns, math32.Vec2(100, 200))
 		pc.TextLines(lns, math32.Vec2(60, 100))
-		pc.RenderDone()
+		pc.RenderDone().Render()
 	})
 
 	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
@@ -146,7 +146,7 @@ func TestVertical(t *testing.T) {
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
 		pc.TextLines(lns, math32.Vec2(20, 60))
-		pc.RenderDone()
+		pc.RenderDone().Render()
 	})
 }
 
@@ -165,7 +165,7 @@ func TestColors(t *testing.T) {
 
 		lns := sh.WrapLines(tx, stroke, tsty, rts, math32.Vec2(250, 250))
 		pc.TextLines(lns, math32.Vec2(20, 10))
-		pc.RenderDone()
+		pc.RenderDone().Render()
 	})
 }
 
@@ -177,7 +177,7 @@ func TestLink(t *testing.T) {
 		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pc.TextLines(lns, math32.Vec2(10, 10))
-		pc.RenderDone()
+		pc.RenderDone().Render()
 	})
 }
 
@@ -189,7 +189,7 @@ func TestSpacePos(t *testing.T) {
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.TextLines(lns, pos)
-		pc.RenderDone()
+		pc.RenderDone().Render()
 
 		sb := lns.RuneBounds(3)
 		// fmt.Println("sb:", sb)

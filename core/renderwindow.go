@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
@@ -625,15 +626,6 @@ func (rc *renderContext) String() string {
 	return str
 }
 
-func (sc *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
-	unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)
-	img := sc.Painter.RenderImage()
-	if img != nil {
-		drw.Copy(sc.SceneGeom.Pos, img, img.Bounds(), op, unchanged)
-	}
-	sc.setFlag(false, sceneImageUpdated)
-}
-
 func (w *renderWindow) renderContext() *renderContext {
 	return w.mains.renderContext
 }
@@ -643,6 +635,9 @@ func (w *renderWindow) renderContext() *renderContext {
 // there is a moment for other goroutines to acquire the lock and get necessary
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
+	if w.flags.HasFlag(winIsRendering) { // still doing the last one
+		return
+	}
 	rc := w.renderContext()
 	rc.lock()
 	defer func() {
@@ -651,7 +646,6 @@ func (w *renderWindow) renderWindow() {
 	}()
 	rebuild := rc.rebuild
 
-	// note: for now this is dowing the RenderDone step which has the render time overhead
 	stageMods, sceneMods := w.mains.updateAll() // handles all Scene / Widget updates!
 	top := w.mains.top()
 	if top == nil || w.mains.stack.Len() == 0 {
@@ -682,15 +676,74 @@ func (w *renderWindow) renderWindow() {
 	}
 	defer w.SystemWindow.Unlock()
 
-	// pr := profile.Start("win.DrawScenes")
+	if w.flags.HasFlag(winIsRendering) { // still busy, bail
+		return
+	}
 
-	// note: cannot yet offload all rendering to a separate goroutine
-	// because it all depends on the structure of the scene stacks
-	// so we would need to capture all of that structure in an offline
-	// representation, along with all the render info.
-	// if !w.flags.HasFlag(winIsRendering) {
-	w.doRender(top)
-	// }
+	// now we go in the proper bottom-up order to generate the [render.Scene]
+	rs := render.Scene{}
+	sm := &w.mains
+	n := sm.stack.Len()
+
+	// first, find the top-level window:
+	winIndex := 0
+	var winScene *Scene
+	for i := n - 1; i >= 0; i-- {
+		st := sm.stack.ValueByIndex(i)
+		if st.Type == WindowStage {
+			if DebugSettings.WindowRenderTrace {
+				fmt.Println("GatherScenes: main Window:", st.String())
+			}
+			winScene = st.Scene
+			winIndex = i
+			rs.Add(winScene.RenderState(draw.Src))
+			for _, dr := range winScene.directRenders {
+				rs.Add(dr.RenderState(draw.Over))
+			}
+			break
+		}
+	}
+
+	// then add everyone above that
+	for i := winIndex + 1; i < n; i++ {
+		st := sm.stack.ValueByIndex(i)
+		// todo: need scrimrender
+		// if st.Scrim && i == n-1 {
+		// 	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
+		// 	drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
+		// }
+		rs.Add(st.Scene.RenderState(draw.Over))
+		if DebugSettings.WindowRenderTrace {
+			fmt.Println("GatherScenes: overlay Stage:", st.String())
+		}
+	}
+
+	// then add the popups for the top main stage
+	for _, kv := range top.popups.stack.Order {
+		st := kv.Value
+		rs.Add(st.Scene.RenderState(draw.Over))
+		if DebugSettings.WindowRenderTrace {
+			fmt.Println("GatherScenes: popup:", st.String())
+		}
+	}
+	top.Sprites.renderSprites(&rs, winScene.SceneGeom.Pos)
+
+	if !w.flags.HasFlag(winIsRendering) {
+		go w.doRender(rs)
+	}
+}
+
+// RenderState returns the render.Render state from the [Scene.Painter].
+func (sc *Scene) RenderState(op draw.Op) render.Render {
+	// todo: may need this:
+	// unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)
+	sc.setFlag(false, sceneImageUpdated)
+	pr := sc.Painter.RenderDone()
+	if pr != nil {
+		pr.DrawOp = op
+		pr.DrawPos = sc.SceneGeom.Pos
+	}
+	return pr
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].

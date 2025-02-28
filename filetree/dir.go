@@ -123,7 +123,7 @@ func (dm *DirFlagMap) openPaths(root string) []string {
 		par := fn
 		for {
 			par, _ = filepath.Split(par)
-			par = strings.TrimSuffix(par, "/")
+			par = strings.TrimSuffix(par, string(filepath.Separator))
 			if par == "" || par == "." {
 				break
 			}

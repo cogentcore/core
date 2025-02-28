@@ -6,6 +6,7 @@ package rasterx
 
 import (
 	"image"
+	"image/draw"
 	"slices"
 
 	"cogentcore.org/core/colors/gradient"
@@ -15,6 +16,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 )
 
 type Renderer struct {
@@ -40,12 +42,19 @@ func New(size math32.Vector2) render.Renderer {
 	return rs
 }
 
-func (rs *Renderer) IsImage() bool      { return true }
-func (rs *Renderer) Image() *image.RGBA { return rs.image }
-func (rs *Renderer) Code() []byte       { return nil }
-
+func (rs *Renderer) Type() render.RendererTypes { return render.Image }
+func (rs *Renderer) Image() *image.RGBA         { return rs.image }
+func (rs *Renderer) Code() []byte               { return nil }
 func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 	return units.UnitDot, rs.size
+}
+
+func (rs *Renderer) Draw(r render.Render, drw system.Drawer, op draw.Op) {
+	pr, ok := r.(*render.PaintRender)
+	if !ok {
+		return
+	}
+	pr.DrawImage(drw, op)
 }
 
 func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
@@ -62,7 +71,11 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 
 // Render is the main rendering function.
 func (rs *Renderer) Render(r render.Render) {
-	for _, ri := range r {
+	pr, ok := r.(*render.PaintRender)
+	if !ok {
+		return
+	}
+	for _, ri := range pr.Items {
 		switch x := ri.(type) {
 		case *render.Path:
 			rs.RenderPath(x)
