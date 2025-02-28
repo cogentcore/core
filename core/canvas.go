@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"golang.org/x/image/draw"
 )
 
 // Canvas is a widget that can be arbitrarily drawn to by setting
@@ -39,15 +38,11 @@ func (c *Canvas) Render() {
 	c.WidgetBase.Render()
 
 	sz := c.Geom.Size.Actual.Content
-	szp := c.Geom.Size.Actual.Content.ToPoint()
-	c.painter = paint.NewPainter(szp.X, szp.Y)
-	c.painter.Paint.Transform = math32.Scale2D(sz.X, sz.Y)
-	c.painter.Context().Transform = math32.Scale2D(sz.X, sz.Y)
-	c.painter.UnitContext = c.Styles.UnitContext
-	c.painter.ToDots()
+	c.painter = &c.Scene.Painter
+	sty := styles.NewPaint()
+	sty.Transform = math32.Translate2D(c.Geom.Pos.Content.X, c.Geom.Pos.Content.Y).Scale(sz.X, sz.Y)
+	c.painter.PushContext(sty, nil)
 	c.painter.VectorEffect = ppath.VectorEffectNonScalingStroke
 	c.Draw(c.painter)
-
-	// todo: direct render for painter to painter
-	c.Scene.Painter.DrawImage(c.painter.RenderImage(), c.Geom.ContentBBox, c.Geom.ScrollOffset(), draw.Over)
+	c.painter.PopContext()
 }

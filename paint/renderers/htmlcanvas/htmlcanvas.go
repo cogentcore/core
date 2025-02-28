@@ -72,7 +72,8 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	rs.Canvas.Set("height", size.Y)
 
 	// rs.ctx.Call("clearRect", 0, 0, size.X, size.Y)
-	// rs.ctx.Set("imageSmoothingEnabled", true)
+	rs.ctx.Set("imageSmoothingEnabled", false)
+	rs.ctx.Set("textRendering", "geometricPrecision")
 	// rs.ctx.Set("imageSmoothingQuality", "high")
 }
 
