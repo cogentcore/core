@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"golang.org/x/image/math/fixed"
 )
@@ -150,4 +151,26 @@ func (ls *Lines) GetLinks() []rich.Hyperlink {
 	}
 	ls.Links = ls.Source.GetLinks()
 	return ls.Links
+}
+
+// AlignXFactor aligns the lines along X axis according to alignment factor,
+// as a proportion of size difference to add to offset (0.5 = center,
+// 1 = right)
+func (ls *Lines) AlignXFactor(fact float32) {
+	wd := ls.Bounds.Size().X
+	for li := range ls.Lines {
+		ln := &ls.Lines[li]
+		lwd := ln.Bounds.Size().X
+		if lwd < wd {
+			ln.Offset.X += fact * (wd - lwd)
+		}
+	}
+}
+
+// AlignX aligns the lines along X axis according to text style.
+func (ls *Lines) AlignX(tsty *text.Style) {
+	fact, _ := tsty.AlignFactors()
+	if fact > 0 {
+		ls.AlignXFactor(fact)
+	}
 }

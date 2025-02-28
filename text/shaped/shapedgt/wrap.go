@@ -197,5 +197,6 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		lns.Lines = append(lns.Lines, ln)
 	}
 	// fmt.Println(lns.Bounds)
+	lns.AlignX(tsty)
 	return lns
 }

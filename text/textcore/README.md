@@ -17,7 +17,7 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* text shape center, right align not working.
+* repeated Open search narrows scope
 
 * prompt on quitting modified file hangs
 * diff next doesn't scroll both
