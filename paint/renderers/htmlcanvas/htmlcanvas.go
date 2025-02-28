@@ -142,14 +142,16 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	if !ppath.ArcToCubeImmediate {
 		p = p.ReplaceArcs() // TODO: should we do this in writePath?
 	}
-	m := pt.Context.Transform // TODO: do we need to do more transform handling of m?
+	m := pt.Context.Transform                                       // TODO: do we need to do more transform handling of m?
+	rs.ctx.Call("setTransform", m.XX, m.YX, m.XY, m.YY, m.X0, m.Y0) // TODO: cache
 
 	strokeUnsupported := false
 	// if m.IsSimilarity() { // TODO: implement
 	if true {
 		scale := math32.Sqrt(math32.Abs(m.Det()))
-		style.Stroke.Width.Dots *= scale
-		style.Stroke.DashOffset, style.Stroke.Dashes = ppath.ScaleDash(style.Stroke.Width.Dots, style.Stroke.DashOffset, style.Stroke.Dashes)
+		// TODO: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
+		style.Stroke.Width.Dots /= scale
+		// style.Stroke.DashOffset, style.Stroke.Dashes = ppath.ScaleDash(style.Stroke.Width.Dots, style.Stroke.DashOffset, style.Stroke.Dashes)
 	} else {
 		strokeUnsupported = true
 	}
