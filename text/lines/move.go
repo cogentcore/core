@@ -141,3 +141,23 @@ func (ls *Lines) moveLineEnd(vw *view, pos textpos.Pos) textpos.Pos {
 	vp.Char = ls.viewLineLen(vw, vp.Line)
 	return ls.posFromView(vw, vp)
 }
+
+// transposeChar swaps the character at the cursor with the one before it.
+func (ls *Lines) transposeChar(vw *view, pos textpos.Pos) bool {
+	if !ls.isValidPos(pos) {
+		return false
+	}
+	vp := ls.posToView(vw, pos)
+	pvp := vp
+	pvp.Char--
+	if pvp.Char < 0 {
+		return false
+	}
+	ppos := ls.posFromView(vw, pvp)
+	chr := ls.lines[pos.Line][pos.Char]
+	pchr := ls.lines[ppos.Line][ppos.Char]
+	repl := string([]rune{chr, pchr})
+	pos.Char++
+	ls.replaceText(ppos, pos, ppos, repl, ReplaceMatchCase)
+	return true
+}

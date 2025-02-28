@@ -17,9 +17,9 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* text shape center, right align not working.
+
 * prompt on quitting modified file hangs
-* transpose doesn't work
-* can't go to end of line at very end of file
 * diff next doesn't scroll both
 
 * render/images needs transform updates?
@@ -30,7 +30,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * core/values.go/FontButton -- need font list.
 * xyz text rendering
 * textcore base horizontal scrolling and wrap long no-space lines
-* text shape center, right align not working.
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
 * optimized next level up render

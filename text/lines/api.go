@@ -709,6 +709,14 @@ func (ls *Lines) MoveLineEnd(vid int, pos textpos.Pos) textpos.Pos {
 	return ls.moveLineEnd(vw, pos)
 }
 
+// TransposeChar swaps the character at the cursor with the one before it.
+func (ls *Lines) TransposeChar(vid int, pos textpos.Pos) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	return ls.transposeChar(vw, pos)
+}
+
 ////////  Words
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word.

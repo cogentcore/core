@@ -370,31 +370,15 @@ func (ed *Base) cursorKill() {
 	ed.NeedsRender()
 }
 
-// cursorTranspose swaps the character at the cursor with the one before it
+// cursorTranspose swaps the character at the cursor with the one before it.
 func (ed *Base) cursorTranspose() {
 	ed.validateCursor()
 	pos := ed.CursorPos
 	if pos.Char == 0 {
 		return
 	}
-	// todo:
-	// ppos := pos
-	// ppos.Ch--
-	// lln := ed.Lines.LineLen(pos.Line)
-	// end := false
-	// if pos.Char >= lln {
-	// 	end = true
-	// 	pos.Char = lln - 1
-	// 	ppos.Char = lln - 2
-	// }
-	// chr := ed.Lines.LineChar(pos.Line, pos.Ch)
-	// pchr := ed.Lines.LineChar(pos.Line, ppos.Ch)
-	// repl := string([]rune{chr, pchr})
-	// pos.Ch++
-	// ed.Lines.ReplaceText(ppos, pos, ppos, repl, EditSignal, ReplaceMatchCase)
-	// if !end {
-	// 	ed.SetCursorShow(pos)
-	// }
+	ed.Lines.TransposeChar(ed.viewId, pos)
+	// ed.SetCursorShow(pos)
 	ed.NeedsRender()
 }
 
