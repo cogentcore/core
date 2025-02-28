@@ -198,7 +198,7 @@ func (pc *Painter) Ellipse(cx, cy, rx, ry float32) {
 	pc.State.Path.Ellipse(cx, cy, rx, ry)
 }
 
-// CircularArc adds a circular arc at given coordinates with radius r
+// CircularArc adds a circular arc centered at given coordinates with radius r
 // and theta0 and theta1 as the angles in degrees of the ellipse
 // (before rot is applied) between which the arc will run.
 // If theta0 < theta1, the arc will run in a CCW direction.
@@ -210,7 +210,7 @@ func (pc *Painter) CircularArc(x, y, r, theta0, theta1 float32) {
 	pc.State.Path.EllipticalArc(x, y, r, r, 0, theta0, theta1)
 }
 
-// EllipticalArc adds an elliptical arc at given coordinates with
+// EllipticalArc adds an elliptical arc centered at given coordinates with
 // radii rx and ry, with rot the counter clockwise rotation in degrees,
 // and theta0 and theta1 the angles in degrees of the ellipse
 // (before rot is applied) between which the arc will run.

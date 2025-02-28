@@ -76,6 +76,7 @@ func TestRender(t *testing.T) {
 		// fsty.Color = imgs[1]
 		// fsty.Background = imgs[2]
 
+		// todo: center align not working
 		tsty.Align = text.Center
 
 		tx, err := htmltext.HTMLToRich([]byte("This is <a>HTML</a> <b>formatted</b> <i>text</i>"), fsty, nil)
@@ -189,12 +190,12 @@ func TestPaintFill(t *testing.T) {
 
 	test("fill", func(pc *Painter) {
 		pc.Fill.Color = colors.Uniform(colors.Purple)
-		pc.Stroke.Color = colors.Uniform(colors.Orange)
+		pc.Stroke.Color = nil
 		pc.Rectangle(50, 25, 150, 200)
 		pc.PathDone()
 	})
 	test("stroke", func(pc *Painter) {
-		pc.Fill.Color = colors.Uniform(colors.Purple)
+		pc.Fill.Color = nil
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.Rectangle(50, 25, 150, 200)
 		pc.PathDone()

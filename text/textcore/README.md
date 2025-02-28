@@ -29,6 +29,7 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * core/values.go/FontButton -- need font list.
 * xyz text rendering
 * textcore base horizontal scrolling and wrap long no-space lines
+* text shape center, right align not working.
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
 * optimized next level up render
