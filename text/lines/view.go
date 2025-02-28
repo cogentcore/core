@@ -55,7 +55,7 @@ func (ls *Lines) viewLineLen(vw *view, vl int) int {
 	vs := vw.vlineStarts[vl]
 	sl := ls.lines[vs.Line]
 	if vl == vw.viewLines-1 {
-		return len(sl) - vs.Char
+		return len(sl) + 1 - vs.Char
 	}
 	np := vw.vlineStarts[vl+1]
 	if np.Line == vs.Line {
@@ -100,6 +100,10 @@ func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
 		return vp
 	}
 	nl := vl + 1
+	if nl == vw.viewLines {
+		vp.Char = pos.Char
+		return vp
+	}
 	for nl < vw.viewLines && vw.vlineStarts[nl].Line == pos.Line {
 		np := vw.vlineStarts[nl]
 		vlen := ls.viewLineLen(vw, nl)

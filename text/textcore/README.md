@@ -23,6 +23,7 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * diff next doesn't scroll both
 
 * render/images needs transform updates?
+* svg opacity processing
 
 * dotted underline for misspelling
 * better job finding path fragments from file links -- iteratively try stuff.
