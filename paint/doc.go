@@ -4,10 +4,13 @@
 
 /*
 Package paint is the rendering package for Cogent Core.
-It renders to an image.RGBA using styles defined in [styles].
-
-Original rendering borrows heavily from: https://github.com/fogleman/gg
-and has been integrated with raster, which
-provides fully SVG compliant and fast rendering.
+The Painter provides the rendering state, styling parameters, and methods for
+painting. The [State] contains a list of Renderers that will actually
+render the paint commands. For improved performance, and sensible results
+with document-style renderers (e.g., SVG, PDF), an entire scene should be
+rendered, followed by a RenderDone call that actually performs the rendering
+using a list of rendering commands stored in the [State.Render]. Also ensure
+that items used in a rendering pass remain valid through the RenderDone step,
+and are not reused within a single pass.
 */
 package paint

@@ -7,9 +7,9 @@ package core
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"golang.org/x/image/draw"
 )
 
 // Canvas is a widget that can be arbitrarily drawn to by setting
@@ -21,10 +21,10 @@ type Canvas struct {
 	// canvas every time that it is rendered. The paint context
 	// is automatically normalized to the size of the canvas,
 	// so you should specify points on a 0-1 scale.
-	Draw func(pc *paint.Context)
+	Draw func(pc *paint.Painter)
 
-	// context is the paint context used for drawing.
-	context *paint.Context
+	// painter is the paint painter used for drawing.
+	painter *paint.Painter
 }
 
 func (c *Canvas) Init() {
@@ -38,13 +38,11 @@ func (c *Canvas) Render() {
 	c.WidgetBase.Render()
 
 	sz := c.Geom.Size.Actual.Content
-	szp := c.Geom.Size.Actual.Content.ToPoint()
-	c.context = paint.NewContext(szp.X, szp.Y)
-	c.context.UnitContext = c.Styles.UnitContext
-	c.context.ToDots()
-	c.context.PushTransform(math32.Scale2D(sz.X, sz.Y))
-	c.context.VectorEffect = styles.VectorEffectNonScalingStroke
-	c.Draw(c.context)
-
-	draw.Draw(c.Scene.Pixels, c.Geom.ContentBBox, c.context.Image, c.Geom.ScrollOffset(), draw.Over)
+	c.painter = &c.Scene.Painter
+	sty := styles.NewPaint()
+	sty.Transform = math32.Translate2D(c.Geom.Pos.Content.X, c.Geom.Pos.Content.Y).Scale(sz.X, sz.Y)
+	c.painter.PushContext(sty, nil)
+	c.painter.VectorEffect = ppath.VectorEffectNonScalingStroke
+	c.Draw(c.painter)
+	c.painter.PopContext()
 }

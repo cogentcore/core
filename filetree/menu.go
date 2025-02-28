@@ -62,37 +62,66 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 }
 
 func (fn *Node) contextMenu(m *core.Scene) {
-	core.NewFuncButton(m).SetFunc(fn.showFileInfo).SetText("Info").SetIcon(icons.Info).SetEnabled(fn.HasSelection())
-	open := core.NewFuncButton(m).SetFunc(fn.OpenFilesDefault).SetText("Open").SetIcon(icons.Open)
+	core.NewFuncButton(m).SetFunc(fn.showFileInfo).SetText("Info").
+		SetIcon(icons.Info).SetEnabled(fn.HasSelection())
+
+	open := core.NewFuncButton(m).SetFunc(fn.OpenFilesDefault).SetText("Open").
+		SetIcon(icons.Open)
 	open.SetEnabled(fn.HasSelection())
+
 	if core.TheApp.Platform() == system.Web {
 		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 	}
+
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.duplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.deleteFiles).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.This.(Filer).RenameFiles).SetText("Rename").SetIcon(icons.NewLabel).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.duplicateFiles).SetText("Duplicate").
+		SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
+
+	core.NewFuncButton(m).SetFunc(fn.This.(Filer).DeleteFiles).SetText("Delete").
+		SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
+
+	core.NewFuncButton(m).SetFunc(fn.This.(Filer).RenameFiles).SetText("Rename").
+		SetIcon(icons.NewLabel).SetEnabled(fn.HasSelection())
+
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.openAll).SetText("Open all").SetIcon(icons.KeyboardArrowDown).SetEnabled(fn.HasSelection() && fn.IsDir())
-	core.NewFuncButton(m).SetFunc(fn.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(fn.HasSelection() && fn.IsDir())
-	core.NewFuncButton(m).SetFunc(fn.sortBys).SetText("Sort by").SetIcon(icons.Sort).SetEnabled(fn.HasSelection() && fn.IsDir())
+	core.NewFuncButton(m).SetFunc(fn.openAll).SetText("Open all").
+		SetIcon(icons.KeyboardArrowDown).SetEnabled(fn.HasSelection() && fn.IsDir())
+
+	core.NewFuncButton(m).SetFunc(fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetEnabled(fn.HasSelection() && fn.IsDir())
+
+	core.NewFuncButton(m).SetFunc(fn.sortBys).SetText("Sort by").
+		SetIcon(icons.Sort).SetEnabled(fn.HasSelection() && fn.IsDir())
+
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.newFiles).SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.newFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.newFiles).SetText("New file").
+		SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection())
+
+	core.NewFuncButton(m).SetFunc(fn.newFolders).SetText("New folder").
+		SetIcon(icons.CreateNewFolder).SetEnabled(fn.HasSelection())
+
 	core.NewSeparator(m)
 
 	fn.VCSContextMenu(m)
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.removeFromExterns).SetIcon(icons.Delete).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.removeFromExterns).
+		SetIcon(icons.Delete).SetEnabled(fn.HasSelection())
 
 	core.NewSeparator(m)
-	core.NewFuncButton(m).SetFunc(fn.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetEnabled(fn.HasSelection())
-	paste := core.NewFuncButton(m).SetFunc(fn.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(fn.HasSelection())
+
+	core.NewFuncButton(m).SetFunc(fn.Copy).SetIcon(icons.Copy).
+		SetKey(keymap.Copy).SetEnabled(fn.HasSelection())
+
+	core.NewFuncButton(m).SetFunc(fn.Cut).SetIcon(icons.Cut).
+		SetKey(keymap.Cut).SetEnabled(fn.HasSelection())
+
+	paste := core.NewFuncButton(m).SetFunc(fn.Paste).
+		SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(fn.HasSelection())
+
 	cb := fn.Events().Clipboard()
 	if cb != nil {
 		paste.SetState(cb.IsEmpty(), states.Disabled)

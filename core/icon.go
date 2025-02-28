@@ -20,7 +20,7 @@ import (
 // Icon renders an [icons.Icon].
 // The rendered version is cached for the current size.
 // Icons do not render a background or border independent of their SVG object.
-// The size of an Icon is determined by the [styles.Font.Size] property.
+// The size of an Icon is determined by the [styles.Text.FontSize] property.
 type Icon struct {
 	WidgetBase
 
@@ -58,7 +58,6 @@ func (ic *Icon) readIcon() {
 		return
 	}
 	if !ic.Icon.IsSet() {
-		ic.svg.Pixels = nil
 		ic.svg.DeleteAll()
 		ic.prevIcon = ic.Icon
 		return
@@ -80,10 +79,11 @@ func (ic *Icon) renderSVG() {
 	}
 
 	sv := &ic.svg
+	sv.TextShaper = ic.Scene.TextShaper
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	if !ic.NeedsRebuild() && sv.Pixels != nil { // if rebuilding then rebuild
-		isz := sv.Pixels.Bounds().Size()
+	if !ic.NeedsRebuild() { // if rebuilding then rebuild
+		isz := sv.Geom.Size
 		// if nothing has changed, we don't need to re-render
 		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {
 			return
@@ -93,16 +93,9 @@ func (ic *Icon) renderSVG() {
 	if sz == (image.Point{}) {
 		return
 	}
-	// ensure that we have new pixels to render to in order to prevent
-	// us from rendering over ourself
-	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	sv.RenderState.Init(sz.X, sz.Y, sv.Pixels)
 	sv.Geom.Size = sz // make sure
-
-	sv.Resize(sz) // does Config if needed
-
+	sv.Resize(sz)     // does Config if needed
 	sv.Color = clr
-
 	sv.Scale = 1
 	sv.Render()
 	sv.Name = string(ic.Icon)
@@ -111,10 +104,11 @@ func (ic *Icon) renderSVG() {
 func (ic *Icon) Render() {
 	ic.renderSVG()
 
-	if ic.svg.Pixels == nil {
+	img := ic.svg.RenderImage()
+	if img == nil {
 		return
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	draw.Draw(ic.Scene.Pixels, r, ic.svg.Pixels, sp, draw.Over)
+	ic.Scene.Painter.DrawImage(img, r, sp, draw.Over)
 }

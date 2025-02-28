@@ -87,29 +87,18 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 	mrk.Render(sv)
 }
 
+func (g *Marker) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	g.BBoxesFromChildren(sv, parTransform)
+}
+
 func (g *Marker) Render(sv *SVG) {
-	pc := &g.Paint
-	rs := &sv.RenderState
-	rs.PushTransform(pc.Transform)
+	_, pc := g.PushContext(sv)
 
 	g.RenderChildren(sv)
-	g.BBoxes(sv) // must come after render
-
-	rs.PopTransform()
+	pc.PopContext()
 }
 
-func (g *Marker) BBoxes(sv *SVG) {
-	if g.This == nil {
-		return
-	}
-	ni := g.This.(Node)
-	g.BBox = ni.NodeBBox(sv)
-	g.BBox.Canon()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
-}
-
-//////////////////////////////////////////////////////////
-// 	SVG marker management
+////////  SVG marker management
 
 // MarkerByName finds marker property of given name, or generic "marker"
 // type, and if set, attempts to find that marker and return it

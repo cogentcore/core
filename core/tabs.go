@@ -494,7 +494,7 @@ func (tb *Tab) Init() {
 		if tb.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(18)
+					s.Text.FontSize.Dp(18)
 				})
 				w.Updater(func() {
 					w.SetIcon(tb.Icon)

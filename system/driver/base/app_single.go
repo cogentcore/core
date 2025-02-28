@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
 )
 
@@ -39,7 +39,7 @@ type AppSingle[D system.Drawer, W system.Window] struct {
 	Scrn *system.Screen `label:"Screen"`
 
 	// Insets are the size of any insets on the sides of the screen.
-	Insets styles.Sides[int]
+	Insets sides.Sides[int]
 }
 
 // AppSingler describes the common functionality implemented by [AppSingle]

@@ -16,8 +16,12 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
+	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
 
@@ -40,7 +44,7 @@ type SVG struct {
 	Color image.Image
 
 	// Size is size of image, Pos is offset within any parent viewport.
-	// Node bounding boxes are based on 0 Pos offset within Pixels image
+	// Node bounding boxes are based on 0 Pos offset within RenderImage
 	Geom math32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed.
@@ -67,8 +71,9 @@ type SVG struct {
 	// render state for rendering
 	RenderState paint.State `copier:"-" json:"-" xml:"-" edit:"-"`
 
-	// live pixels that we render into
-	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
+	// TextShaper for shaping svg text. Can set to shared external one,
+	// or else one is made in Render.
+	TextShaper shaped.Shaper
 
 	// all defs defined elements go here (gradients, symbols, etc)
 	Defs *Group
@@ -92,11 +97,17 @@ type SVG struct {
 	RenderMu sync.Mutex `display:"-" json:"-" xml:"-"`
 }
 
-// NewSVG creates a SVG with Pixels Image of the specified width and height
+// NewSVG creates a SVG with the specified width and height.
 func NewSVG(width, height int) *SVG {
 	sv := &SVG{}
 	sv.Config(width, height)
 	return sv
+}
+
+// RenderImage returns the rendered image. It does not actually render the SVG;
+// see [SVG.Render] for that.
+func (sv *SVG) RenderImage() *image.RGBA {
+	return sv.RenderState.RenderImage()
 }
 
 // Config configures the SVG, setting image to given size
@@ -105,12 +116,11 @@ func (sv *SVG) Config(width, height int) {
 	sz := image.Point{width, height}
 	sv.Geom.Size = sz
 	sv.Scale = 1
-	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	sv.RenderState.Init(width, height, sv.Pixels)
 	sv.Root = NewRoot()
 	sv.Root.SetName("svg")
 	sv.Defs = NewGroup()
 	sv.Defs.SetName("defs")
+	sv.RenderState.InitImageRaster(&sv.Root.Paint, width, height)
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
@@ -122,15 +132,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}
-	if sv.Pixels != nil {
-		ib := sv.Pixels.Bounds().Size()
-		if ib == nwsz {
-			sv.Geom.Size = nwsz // make sure
-			return              // already good
-		}
-	}
-	sv.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	sv.RenderState.Init(nwsz.X, nwsz.Y, sv.Pixels)
+	sv.RenderState.InitImageRaster(&sv.Root.Paint, nwsz.X, nwsz.Y)
 	sv.Geom.Size = nwsz // make sure
 }
 
@@ -199,26 +201,32 @@ func (sv *SVG) Style() {
 	})
 }
 
+// Render renders the SVG. See [SVG.RenderImage] to get the rendered image;
+// you need to call Render before RenderImage.
 func (sv *SVG) Render() {
 	sv.RenderMu.Lock()
 	sv.IsRendering = true
+	if sv.TextShaper == nil {
+		sv.TextShaper = shaped.NewShaper()
+	}
 
 	sv.Style()
 	sv.SetRootTransform()
+	sv.Root.BBoxes(sv, math32.Identity2())
 
-	rs := &sv.RenderState
-	rs.PushBounds(sv.Pixels.Bounds())
 	if sv.Background != nil {
 		sv.FillViewport()
 	}
 	sv.Root.Render(sv)
-	rs.PopBounds()
+	pc := &paint.Painter{&sv.RenderState, &sv.Root.Paint}
+	pc.RenderDone() // actually render..
 	sv.RenderMu.Unlock()
 	sv.IsRendering = false
 }
 
 func (sv *SVG) FillViewport() {
-	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
+	sty := styles.NewPaint()
+	pc := &paint.Painter{&sv.RenderState, sty}
 	pc.FillBox(math32.Vector2{}, math32.FromPoint(sv.Geom.Size), sv.Background)
 }
 
@@ -256,9 +264,9 @@ func (sv *SVG) SetDPITransform(logicalDPI float32) {
 	pc.Transform = math32.Scale2D(dpisc, dpisc)
 }
 
-// SavePNG saves the Pixels to a PNG file
+// SavePNG saves the RenderImage to a PNG file
 func (sv *SVG) SavePNG(fname string) error {
-	return imagex.Save(sv.Pixels, fname)
+	return imagex.Save(sv.RenderImage(), fname)
 }
 
 // Root represents the root of an SVG tree.
@@ -275,23 +283,21 @@ func (g *Root) SVGName() string { return "svg" }
 
 func (g *Root) EnforceSVGName() bool { return false }
 
-func (g *Root) NodeBBox(sv *SVG) image.Rectangle {
-	// todo: return viewbox
-	return sv.Geom.SizeRect()
-}
-
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
 func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
 	pc.UnitContext.Defaults()
 	pc.UnitContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
-	if sv.RenderState.Image != nil {
-		sz := sv.RenderState.Image.Bounds().Size()
-		pc.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
-	} else {
-		pc.UnitContext.SetSizes(0, 0, el.X, el.Y, parent.X, parent.Y)
-	}
-	pc.FontStyle.SetUnitContext(&pc.UnitContext)
+	pc.UnitContext.SetSizes(float32(sv.Geom.Size.X), float32(sv.Geom.Size.Y), el.X, el.Y, parent.X, parent.Y)
+	// todo:
+	// pc.Font.SetUnitContext(&pc.UnitContext)
 	pc.ToDots()
+}
+
+func (g *Root) Render(sv *SVG) {
+	pc := &paint.Painter{&sv.RenderState, &g.Paint}
+	pc.PushContext(&g.Paint, render.NewBoundsRect(sv.Geom.Bounds(), sides.NewFloats()))
+	g.RenderChildren(sv)
+	pc.PopContext()
 }
