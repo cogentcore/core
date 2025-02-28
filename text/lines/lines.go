@@ -305,6 +305,32 @@ func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 
 ////////   Edits
 
+// validCharPos returns the position with a valid Char position,
+// if it is not valid. if the line is invalid, it returns false.
+func (ls *Lines) validCharPos(pos textpos.Pos) (textpos.Pos, bool) {
+	n := ls.numLines()
+	if n == 0 {
+		if pos.Line != 0 {
+			return pos, false
+		}
+		pos.Char = 0
+		return pos, true
+	}
+	if pos.Line < 0 || pos.Line >= n {
+		return pos, false
+	}
+	llen := len(ls.lines[pos.Line])
+	if pos.Char < 0 {
+		pos.Char = 0
+		return pos, true
+	}
+	if pos.Char > llen {
+		pos.Char = llen
+		return pos, true
+	}
+	return pos, true
+}
+
 // isValidPos returns true if position is valid. Note that the end
 // of the line (at length) is valid. This version does not panic or emit
 // an error message, and should be used for cases where a position can

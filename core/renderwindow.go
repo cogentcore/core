@@ -94,14 +94,11 @@ type renderWindow struct {
 	// for event handling in tests.
 	noEventsChan chan struct{}
 
-	// closing is whether the window is closing.
-	closing bool
+	// flags are atomic renderWindow flags.
+	flags renderWindowFlags
 
-	// gotFocus indicates that have we received focus.
-	gotFocus bool
-
-	// stopEventLoop indicates that the event loop should be stopped.
-	stopEventLoop bool
+	// renderMu is the mutex for rendering.
+	renderMu sync.Mutex
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -122,14 +119,14 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 	w.SystemWindow.SetCloseReqFunc(func(win system.Window) {
 		rc := w.renderContext()
 		rc.lock()
-		w.closing = true
+		w.flags.SetFlag(true, winClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.mains.stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {
-				w.closing = false
+				w.flags.SetFlag(false, winClosing)
 				return
 			}
 		}
@@ -373,7 +370,7 @@ func (w *renderWindow) isClosed() bool {
 
 // isVisible is the main visibility check; don't do any window updates if not visible!
 func (w *renderWindow) isVisible() bool {
-	if w == nil || w.SystemWindow == nil || w.isClosed() || w.closing || !w.SystemWindow.IsVisible() {
+	if w == nil || w.SystemWindow == nil || w.isClosed() || w.flags.HasFlag(winClosing) || !w.SystemWindow.IsVisible() {
 		return false
 	}
 	return true
@@ -404,13 +401,13 @@ func (w *renderWindow) eventLoop() {
 	d := &w.SystemWindow.Events().Deque
 
 	for {
-		if w.stopEventLoop {
-			w.stopEventLoop = false
+		if w.flags.HasFlag(winStopEventLoop) {
+			w.flags.SetFlag(false, winStopEventLoop)
 			break
 		}
 		e := d.NextEvent()
-		if w.stopEventLoop {
-			w.stopEventLoop = false
+		if w.flags.HasFlag(winStopEventLoop) {
+			w.flags.SetFlag(false, winStopEventLoop)
 			break
 		}
 		w.handleEvent(e)
@@ -475,7 +472,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
-			w.stopEventLoop = true
+			w.flags.SetFlag(true, winStopEventLoop)
 			w.closed()
 		case events.WinMinimize:
 			e.SetHandled()
@@ -505,8 +502,8 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 				AllRenderWindows.delete(w)
 				AllRenderWindows.add(w)
 			}
-			if !w.gotFocus {
-				w.gotFocus = true
+			if !w.flags.HasFlag(winGotFocus) {
+				w.flags.SetFlag(true, winGotFocus)
 				w.sendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.name)
@@ -521,7 +518,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
-			w.gotFocus = false
+			w.flags.SetFlag(false, winGotFocus)
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WindowEventTrace {
@@ -654,6 +651,7 @@ func (w *renderWindow) renderWindow() {
 	}()
 	rebuild := rc.rebuild
 
+	// note: for now this is dowing the RenderDone step which has the render time overhead
 	stageMods, sceneMods := w.mains.updateAll() // handles all Scene / Widget updates!
 	top := w.mains.top()
 	if top == nil || w.mains.stack.Len() == 0 {
@@ -686,7 +684,13 @@ func (w *renderWindow) renderWindow() {
 
 	// pr := profile.Start("win.DrawScenes")
 
+	// note: cannot yet offload all rendering to a separate goroutine
+	// because it all depends on the structure of the scene stacks
+	// so we would need to capture all of that structure in an offline
+	// representation, along with all the render info.
+	// if !w.flags.HasFlag(winIsRendering) {
 	w.doRender(top)
+	// }
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].
@@ -717,3 +721,21 @@ func (w *renderWindow) fillInsets() {
 	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
 	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 }
+
+// renderWindowFlags are atomic bit flags for [renderWindow] state.
+// They must be atomic to prevent race conditions.
+type renderWindowFlags int64 //enums:bitflag -trim-prefix scene
+
+const (
+	// winIsRendering indicates that the doRender function is running.
+	winIsRendering renderWindowFlags = iota
+
+	// winStopEventLoop indicates that the event loop should be stopped.
+	winStopEventLoop
+
+	// winClosing is whether the window is closing.
+	winClosing
+
+	// winGotFocus indicates that have we received focus.
+	winGotFocus
+)

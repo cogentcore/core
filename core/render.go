@@ -242,6 +242,7 @@ func (sc *Scene) doUpdate() bool {
 	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++ // just go 1 past the iters cutoff
 	}
+	sc.Painter.RenderDone()
 	return true
 }
 
@@ -378,7 +379,6 @@ func (wb *WidgetBase) EndRender() {
 		}
 	}
 
-	pc.RenderDone()
 	pc.PopContext()
 	if wb.hasFlag(widgetFirstRender) {
 		pc.PopContext()

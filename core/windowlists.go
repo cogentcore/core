@@ -78,7 +78,7 @@ func (wl *renderWindowList) focused() (*renderWindow, int) {
 	defer renderWindowGlobalMu.Unlock()
 
 	for i, fw := range *wl {
-		if fw.gotFocus {
+		if fw.flags.HasFlag(winGotFocus) {
 			return fw, i
 		}
 	}

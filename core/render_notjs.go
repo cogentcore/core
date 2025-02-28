@@ -17,6 +17,16 @@ import (
 
 // doRender is the implementation of the main render pass on non-web platforms.
 func (w *renderWindow) doRender(top *Stage) {
+	// note: see comment in renderwindow.go where this is called.
+	// w.renderMu.Lock()
+	// w.flags.SetFlag(true, winIsRendering)
+	//
+	//
+	// defer func() {
+	// 	w.flags.SetFlag(false, winIsRendering)
+	// 	w.renderMu.Unlock()
+	// }()
+
 	drw := w.SystemWindow.Drawer()
 	drw.Start()
 

@@ -305,10 +305,13 @@ func (ls *Lines) commentRegion(start, end int) {
 
 	for ln := start; ln < eln; ln++ {
 		if doCom {
-			ls.insertText(textpos.Pos{Line: ln, Char: ch}, rcomst)
-			if comed != "" {
-				lln := len(ls.lines[ln])
-				ls.insertText(textpos.Pos{Line: ln, Char: lln}, rcomed)
+			ipos, ok := ls.validCharPos(textpos.Pos{Line: ln, Char: ch})
+			if ok {
+				ls.insertText(ipos, rcomst)
+				if comed != "" {
+					lln := len(ls.lines[ln]) // automatically ok
+					ls.insertText(textpos.Pos{Line: ln, Char: lln}, rcomed)
+				}
 			}
 		} else {
 			idx := ls.commentStart(ln)
