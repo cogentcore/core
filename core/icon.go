@@ -68,7 +68,7 @@ func (ic *Icon) readIcon() {
 	if errors.Log(err) != nil {
 		return
 	}
-	icons.Used[ic.Icon] = true
+	icons.Used[ic.Icon] = struct{}{}
 	ic.prevIcon = ic.Icon
 }
 
