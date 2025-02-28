@@ -116,6 +116,7 @@ func (pc *Painter) RenderDone() {
 		rnd.Render(pc.Render)
 	}
 	pc.Render.Reset()
+	pc.State.Path.Reset()
 }
 
 //////// basic shape functions

@@ -60,7 +60,7 @@ func (g *Path) Render(sv *SVG) {
 	if !vis {
 		return
 	}
-	pc.State.Path = g.Data
+	pc.State.Path = g.Data.Clone()
 	pc.PathDone()
 
 	mrk_start := sv.MarkerByName(g, "marker-start")

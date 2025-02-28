@@ -16,8 +16,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
@@ -291,4 +293,11 @@ func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
 	// todo:
 	// pc.Font.SetUnitContext(&pc.UnitContext)
 	pc.ToDots()
+}
+
+func (g *Root) Render(sv *SVG) {
+	pc := &paint.Painter{&sv.RenderState, &g.Paint}
+	pc.PushContext(&g.Paint, render.NewBoundsRect(sv.Geom.Bounds(), sides.NewFloats()))
+	g.RenderChildren(sv)
+	pc.PopContext()
 }

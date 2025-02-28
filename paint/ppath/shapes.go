@@ -175,7 +175,7 @@ func (p *Path) Ellipse(cx, cy, rx, ry float32) *Path {
 	return p
 }
 
-// CircularArc adds a circular arc at given coordinates with radius r
+// CircularArc adds a circular arc centered at given coordinates with radius r
 // and theta0 and theta1 as the angles in degrees of the ellipse
 // (before rot is applied) between which the arc will run.
 // If theta0 < theta1, the arc will run in a CCW direction.
@@ -187,7 +187,7 @@ func (p *Path) CircularArc(x, y, r, theta0, theta1 float32) *Path {
 	return p.EllipticalArc(x, y, r, r, 0, theta0, theta1)
 }
 
-// EllipticalArc adds an elliptical arc at given coordinates with
+// EllipticalArc adds an elliptical arc centered at given coordinates with
 // radii rx and ry, with rot the counter clockwise rotation in radians,
 // and theta0 and theta1 the angles in radians of the ellipse
 // (before rot is applied) between which the arc will run.
@@ -197,7 +197,10 @@ func (p *Path) CircularArc(x, y, r, theta0, theta1 float32) *Path {
 // e.g. a difference of 810 degrees will draw one full circle and an arc
 // over 90 degrees.
 func (p *Path) EllipticalArc(x, y, rx, ry, rot, theta0, theta1 float32) *Path {
-	p.MoveTo(x+rx, y)
+	sins, coss := math32.Sincos(theta0)
+	sx := rx * coss
+	sy := ry * sins
+	p.MoveTo(x+sx, y+sy)
 	p.Arc(rx, ry, rot, theta0, theta1)
 	return p
 }

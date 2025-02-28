@@ -146,7 +146,10 @@ func TestPaintPath(t *testing.T) {
 		pc.Ellipse(150, 150, 100, 80)
 	})
 	test("elliptical-arc", func(pc *Painter) {
-		pc.EllipticalArc(150, 150, 100, 80, 0, 0.0*math32.Pi, 1.5*math32.Pi)
+		pc.EllipticalArc(150, 150, 100, 80, 0, 0.5*math32.Pi, 1.5*math32.Pi)
+	})
+	test("circular-arc", func(pc *Painter) {
+		pc.CircularArc(150, 150, 100, 0.5*math32.Pi, 1.5*math32.Pi)
 	})
 }
 
