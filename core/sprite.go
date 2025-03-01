@@ -213,20 +213,20 @@ func (ss *Sprites) renderSprites(renderScene *render.Scene, scpos image.Point) {
 			continue
 		}
 		// note: may need to copy pixels but hoping not..
-		sr := &SpriteRender{DrawPos: sp.Geom.Pos.Add(scpos), Pixels: sp.Pixels}
+		sr := &spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
 		renderScene.Add(sr)
 	}
 	ss.Modified = false
 }
 
-// SpriteRender is a [render.Render] implementation for sprites.
-type SpriteRender struct {
-	DrawPos image.Point
-	Pixels  *image.RGBA
+// spriteRender is a [render.Render] implementation for sprites.
+type spriteRender struct {
+	drawPos image.Point
+	pixels  *image.RGBA
 }
 
-func (sr *SpriteRender) Render() {}
+func (sr *spriteRender) Render() {}
 
-func (sr *SpriteRender) Draw(drw system.Drawer) {
-	drw.Copy(sr.DrawPos, sr.Pixels, sr.Pixels.Bounds(), draw.Over, system.Unchanged)
+func (sr *spriteRender) Draw(drw system.Drawer) {
+	drw.Copy(sr.drawPos, sr.pixels, sr.pixels.Bounds(), draw.Over, system.Unchanged)
 }

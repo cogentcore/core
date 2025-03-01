@@ -707,11 +707,10 @@ func (w *renderWindow) renderWindow() {
 	// then add everyone above that
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
-		// todo: need scrimrender
-		// if st.Scrim && i == n-1 {
-		// 	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-		// 	drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
-		// }
+		if st.Scrim && i == n-1 {
+			sr := &scrimRender{bbox: winScene.Geom.TotalBBox}
+			rs.Add(sr)
+		}
 		rs.Add(st.Scene.RenderState(draw.Over))
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
@@ -744,6 +743,18 @@ func (sc *Scene) RenderState(op draw.Op) render.Render {
 		pr.DrawPos = sc.SceneGeom.Pos
 	}
 	return pr
+}
+
+// scrimRender is a [render.Render] implementation for scrim.
+type scrimRender struct {
+	bbox image.Rectangle
+}
+
+func (sr *scrimRender) Render() {}
+
+func (sr *scrimRender) Draw(drw system.Drawer) {
+	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
+	drw.Copy(image.Point{}, clr, sr.bbox, draw.Over, system.Unchanged)
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].

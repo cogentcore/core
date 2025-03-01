@@ -163,14 +163,18 @@ type Style struct { //types:add
 	// and it is nil (transparent) by default.
 	Background image.Image
 
-	// alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
+	// alpha value between 0 and 1 to apply to the foreground and background
+	// of this element and all of its children.
 	Opacity float32
 
-	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the
-	// color Color (or StateColor if it defined). It is automatically set based on State, but can be overridden in stylers.
+	// StateLayer, if above zero, indicates to create a state layer over
+	// the element with this much opacity (on a scale of 0-1) and the
+	// color Color (or StateColor if it defined). It is automatically
+	// set based on State, but can be overridden in stylers.
 	StateLayer float32
 
-	// StateColor, if not nil, is the color to use for the StateLayer instead of Color. If you want to disable state layers
+	// StateColor, if not nil, is the color to use for the StateLayer
+	// instead of Color. If you want to disable state layers
 	// for an element, do not use this; instead, set StateLayer to 0.
 	StateColor image.Image
 
