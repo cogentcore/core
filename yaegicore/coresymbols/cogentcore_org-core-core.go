@@ -7,8 +7,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"github.com/cogentcore/yaegi/interp"
 	"go/constant"
@@ -381,7 +381,7 @@ type _cogentcore_org_core_core_Layouter struct {
 	WPlanName          func() string
 	WPosition          func()
 	WRender            func()
-	WRenderDraw        func(drw system.Drawer, op draw.Op)
+	WRenderState       func(op draw.Op) render.Render
 	WRenderWidget      func()
 	WScrollChanged     func(d math32.Dims, sb *core.Slider)
 	WScrollGeom        func(d math32.Dims) (pos math32.Vector2, sz math32.Vector2)
@@ -421,8 +421,8 @@ func (W _cogentcore_org_core_core_Layouter) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Layouter) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Layouter) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Layouter) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Layouter) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Layouter) RenderState(op draw.Op) render.Render {
+	return W.WRenderState(op)
 }
 func (W _cogentcore_org_core_core_Layouter) RenderWidget() { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Layouter) ScrollChanged(d math32.Dims, sb *core.Slider) {
@@ -654,7 +654,7 @@ type _cogentcore_org_core_core_Treer struct {
 	WPlanName         func() string
 	WPosition         func()
 	WRender           func()
-	WRenderDraw       func(drw system.Drawer, op draw.Op)
+	WRenderState      func(op draw.Op) render.Render
 	WRenderWidget     func()
 	WShowContextMenu  func(e events.Event)
 	WSizeDown         func(iter int) bool
@@ -693,8 +693,8 @@ func (W _cogentcore_org_core_core_Treer) Paste()           { W.WPaste() }
 func (W _cogentcore_org_core_core_Treer) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Treer) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Treer) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Treer) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Treer) RenderState(op draw.Op) render.Render {
+	return W.WRenderState(op)
 }
 func (W _cogentcore_org_core_core_Treer) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Treer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
@@ -730,7 +730,7 @@ type _cogentcore_org_core_core_Value struct {
 	WPlanName        func() string
 	WPosition        func()
 	WRender          func()
-	WRenderDraw      func(drw system.Drawer, op draw.Op)
+	WRenderState     func(op draw.Op) render.Render
 	WRenderWidget    func()
 	WShowContextMenu func(e events.Event)
 	WSizeDown        func(iter int) bool
@@ -760,8 +760,8 @@ func (W _cogentcore_org_core_core_Value) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Value) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Value) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Value) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Value) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Value) RenderState(op draw.Op) render.Render {
+	return W.WRenderState(op)
 }
 func (W _cogentcore_org_core_core_Value) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Value) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
@@ -808,7 +808,7 @@ type _cogentcore_org_core_core_Widget struct {
 	WPlanName        func() string
 	WPosition        func()
 	WRender          func()
-	WRenderDraw      func(drw system.Drawer, op draw.Op)
+	WRenderState     func(op draw.Op) render.Render
 	WRenderWidget    func()
 	WShowContextMenu func(e events.Event)
 	WSizeDown        func(iter int) bool
@@ -837,8 +837,8 @@ func (W _cogentcore_org_core_core_Widget) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Widget) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Widget) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Widget) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Widget) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Widget) RenderState(op draw.Op) render.Render {
+	return W.WRenderState(op)
 }
 func (W _cogentcore_org_core_core_Widget) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Widget) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }

@@ -7,7 +7,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
-	"cogentcore.org/core/system"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/tree"
 	"image"
 	"image/draw"
@@ -73,7 +73,7 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WPosition         func()
 	WRenameFiles      func()
 	WRender           func()
-	WRenderDraw       func(drw system.Drawer, op draw.Op)
+	WRenderState      func(op draw.Op) render.Render
 	WRenderWidget     func()
 	WShowContextMenu  func(e events.Event)
 	WSizeDown         func(iter int) bool
@@ -117,8 +117,8 @@ func (W _cogentcore_org_core_filetree_Filer) PlanName() string { return W.WPlanN
 func (W _cogentcore_org_core_filetree_Filer) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_filetree_Filer) RenameFiles()     { W.WRenameFiles() }
 func (W _cogentcore_org_core_filetree_Filer) Render()          { W.WRender() }
-func (W _cogentcore_org_core_filetree_Filer) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_filetree_Filer) RenderState(op draw.Op) render.Render {
+	return W.WRenderState(op)
 }
 func (W _cogentcore_org_core_filetree_Filer) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_filetree_Filer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }

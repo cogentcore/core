@@ -516,6 +516,9 @@ func (pc *Painter) SetPixel(x, y int) {
 // the given draw operration: Over = overlay (alpha blend with destination)
 // Src = copy source directly, overwriting destination pixels.
 func (pc *Painter) DrawImage(src image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) {
+	if rect == (image.Rectangle{}) {
+		panic("empty image")
+	}
 	pc.Render.Add(pimage.NewDraw(rect, src, srcStart, op))
 }
 

@@ -94,6 +94,9 @@ func (im *Image) Render() {
 		return
 	}
 	r := im.Geom.ContentBBox
+	if r == (image.Rectangle{}) || im.Image.Bounds().Size() == (image.Point{}) {
+		return
+	}
 	sp := im.Geom.ScrollOffset()
 
 	var rimg image.Image
