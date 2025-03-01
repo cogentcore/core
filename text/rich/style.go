@@ -380,7 +380,7 @@ func (d Directions) ToGoText() di.Direction {
 // flag and the color value.
 func (s *Style) SetFillColor(clr color.Color) *Style {
 	s.FillColor = clr
-	s.Decoration.SetFlag(true, FillColor)
+	s.Decoration.SetFlag(clr != nil, FillColor)
 	return s
 }
 
@@ -388,7 +388,7 @@ func (s *Style) SetFillColor(clr color.Color) *Style {
 // flag and the color value.
 func (s *Style) SetStrokeColor(clr color.Color) *Style {
 	s.StrokeColor = clr
-	s.Decoration.SetFlag(true, StrokeColor)
+	s.Decoration.SetFlag(clr != nil, StrokeColor)
 	return s
 }
 
@@ -396,7 +396,7 @@ func (s *Style) SetStrokeColor(clr color.Color) *Style {
 // flag and the color value.
 func (s *Style) SetBackground(clr color.Color) *Style {
 	s.Background = clr
-	s.Decoration.SetFlag(true, Background)
+	s.Decoration.SetFlag(clr != nil, Background)
 	return s
 }
 

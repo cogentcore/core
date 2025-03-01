@@ -269,7 +269,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	sh := ed.Scene.TextShaper
 	fst := sty.Font
 
-	fst.Background = nil
+	fst.SetBackground(nil)
 	lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
