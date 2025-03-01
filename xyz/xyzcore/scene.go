@@ -155,9 +155,10 @@ func (sw *Scene) RenderState(op draw.Op) render.Render {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return nil
 	}
-	bb, sbb, empty := sw.DirectRenderDrawBBoxes(sw.XYZ.Frame.Frames[0].Format.Bounds())
+	tex, _ := sw.XYZ.Frame.GetCurrentTextureObject()
+	bb, sbb, empty := sw.DirectRenderDrawBBoxes(tex.Format.Bounds())
 	if empty {
 		return nil
 	}
-	return &xyzRender{destBBox: bb, srcBBox: sbb, texture: sw.XYZ.Frame.Frames[0]}
+	return &xyzRender{destBBox: bb, srcBBox: sbb, texture: tex}
 }

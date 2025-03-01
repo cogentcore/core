@@ -17,23 +17,24 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* shaped crashing with <br> html text
+* textcore base horizontal scrolling and wrap long no-space lines
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
 * diff next doesn't scroll both
 
-* render/images needs transform updates?
+* renderx/images needs transform updates?
 * svg opacity processing
+
+* optimized next level up render
 
 * dotted underline for misspelling
 * better job finding path fragments from file links -- iteratively try stuff.
 * core/values.go/FontButton -- need font list.
-* xyz text rendering
-* textcore base horizontal scrolling and wrap long no-space lines
 * cleanup unused base stuff
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
-* optimized next level up render
-* diff crash -- not yet reproducing.
-* text render highlight region fill in blanks better
+* text render highlight region fill in blanks better: hard b/c at run level, doesn't have context.
 
+* xyz physics GrabEyeImg causes crashing with goroutine doRender in renderwindow, but otherwise is ok
 
 

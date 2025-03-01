@@ -728,7 +728,7 @@ func (w *renderWindow) renderWindow() {
 	top.Sprites.renderSprites(&rs, winScene.SceneGeom.Pos)
 
 	if !w.flags.HasFlag(winIsRendering) {
-		go w.doRender(rs)
+		w.doRender(rs)
 	}
 }
 
