@@ -7,8 +7,10 @@ package render
 import (
 	"image"
 	"image/draw"
+	"reflect"
 	"slices"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/system"
 )
 
@@ -73,9 +75,14 @@ func (pr *PaintRender) Clone() *PaintRender {
 	return npr
 }
 
-// Add adds item(s) to render.
+// Add adds item(s) to render. Filters any nil items.
 func (pr *PaintRender) Add(item ...Item) *PaintRender {
-	pr.Items = append(pr.Items, item...)
+	for _, it := range item {
+		if reflectx.IsNil(reflect.ValueOf(it)) {
+			continue
+		}
+		pr.Items = append(pr.Items, it)
+	}
 	return pr
 }
 

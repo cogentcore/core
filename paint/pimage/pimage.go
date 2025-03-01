@@ -67,36 +67,58 @@ type Params struct {
 
 func (pr *Params) IsRenderItem() {}
 
+// NewClear returns a new Clear that renders entire image with given source image.
+func NewClear(src image.Image, sp image.Point, op draw.Op) *Params {
+	pr := &Params{Cmd: Draw, Rect: image.Rectangle{}, Source: src, SourcePos: sp, Op: op}
+	return pr
+}
+
 // NewDraw returns a new Draw operation with given parameters.
-// If the target rect is empty then the full destination image is used.
+// Does nothing if rect is empty.
 func NewDraw(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op) *Params {
+	if rect == (image.Rectangle{}) {
+		return nil
+	}
 	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op}
 	return pr
 }
 
 // NewDrawMask returns a new DrawMask operation with given parameters.
-// If the target rect is empty then the full destination image is used.
+// Does nothing if rect is empty.
 func NewDrawMask(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op, mask image.Image, mp image.Point) *Params {
+	if rect == (image.Rectangle{}) {
+		return nil
+	}
 	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op, Mask: mask, MaskPos: mp}
 	return pr
 }
 
 // NewTransform returns a new Transform operation with given parameters.
-// If the target rect is empty then the full destination image is used.
+// Does nothing if rect is empty.
 func NewTransform(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op) *Params {
+	if rect == (image.Rectangle{}) {
+		return nil
+	}
 	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op}
 	return pr
 }
 
 // NewTransformMask returns a new Transform Mask operation with given parameters.
-// If the target rect is empty then the full destination image is used.
+// Does nothing if rect is empty.
 func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
+	if rect == (image.Rectangle{}) {
+		panic("nil rect")
+	}
 	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op, Mask: mask, MaskPos: mp}
 	return pr
 }
 
 // NewBlur returns a new Blur operation with given parameters.
+// Does nothing if rect is empty.
 func NewBlur(rect image.Rectangle, blurRadius float32) *Params {
+	if rect == (image.Rectangle{}) {
+		return nil
+	}
 	pr := &Params{Cmd: Blur, Rect: rect, BlurRadius: blurRadius}
 	return pr
 }

@@ -445,11 +445,8 @@ func (pc *Painter) BlitBox(pos, size math32.Vector2, img image.Image) {
 
 // DrawBox performs an optimized fill/blit of the given rectangular region
 // with the given image, using the given draw operation.
+// If the image is nil, a new transparent color is used.
 func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op) {
-	nilsize := size == (math32.Vector2{})
-	// if nilsize { // note: nil size == fill entire box -- make sure it is intentional
-	// 	fmt.Println("nil size")
-	// }
 	if img == nil {
 		img = colors.Uniform(color.RGBA{})
 	}
@@ -458,7 +455,7 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	br := math32.RectFromPosSizeMax(pos, size)
 	cb := pc.Context().Bounds.Rect.ToRect()
 	b := cb.Intersect(br)
-	if !nilsize && b.Size() == (image.Point{}) { // we got nil from intersection, bail
+	if b.Size() == (image.Point{}) {
 		return
 	}
 	if g, ok := img.(gradient.Gradient); ok {
@@ -503,7 +500,7 @@ func (pc *Painter) SetMask(mask *image.Alpha) error {
 // Clear fills the entire image with the current fill color.
 func (pc *Painter) Clear() {
 	src := pc.Fill.Color
-	pc.Render.Add(pimage.NewDraw(image.Rectangle{}, src, image.Point{}, draw.Src))
+	pc.Render.Add(pimage.NewClear(src, image.Point{}, draw.Src))
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
@@ -516,9 +513,6 @@ func (pc *Painter) SetPixel(x, y int) {
 // the given draw operration: Over = overlay (alpha blend with destination)
 // Src = copy source directly, overwriting destination pixels.
 func (pc *Painter) DrawImage(src image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) {
-	if rect == (image.Rectangle{}) {
-		panic("empty image")
-	}
 	pc.Render.Add(pimage.NewDraw(rect, src, srcStart, op))
 }
 

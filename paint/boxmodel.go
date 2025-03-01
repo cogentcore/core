@@ -25,6 +25,9 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 	tm := st.TotalMargin().Round()
 	mpos := pos.Add(tm.Pos())
 	msize := size.Sub(tm.Size())
+	if msize == (math32.Vector2{}) {
+		return
+	}
 	radius := st.Border.Radius.Dots()
 	if encroach { // if we encroach, we must limit ourselves to the parent radius
 		radius = radius.Max(pr)
