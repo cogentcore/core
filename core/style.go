@@ -122,7 +122,7 @@ func (wb *WidgetBase) resetStyleSettings() {
 // and [AppearanceSettingsData.FontSize] to the style values for the widget.
 func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
-
+	s.SetFontColors() // font from base color, opacity
 	spc := AppearanceSettings.Spacing / 100
 	s.Margin.Top.Value *= spc
 	s.Margin.Right.Value *= spc

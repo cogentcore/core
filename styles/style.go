@@ -367,6 +367,18 @@ func (s *Style) ToDots() {
 	s.ToDotsImpl(&s.UnitContext)
 }
 
+// SetFontColors sets the Font colors from style parameters.
+func (s *Style) SetFontColors() {
+	if s.Color != nil {
+		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
+		s.Font.SetFillColor(clr)
+	}
+	if s.Background != nil {
+		clr := colors.ApplyOpacity(colors.ToUniform(s.Background), s.Opacity)
+		s.Font.SetBackground(clr)
+	}
+}
+
 // BoxSpace returns the extra space around the central content in the box model in dots.
 // It rounds all of the sides first.
 func (s *Style) BoxSpace() sides.Floats {
@@ -495,12 +507,6 @@ func (s *Style) CenterAll() {
 	s.Text.Align = text.Center
 	s.Text.AlignV = text.Center
 }
-
-// SettingsFont and SettingsMonoFont are pointers to Font and MonoFont in
-// [core.AppearanceSettings], which are used in [Style.SetMono] if non-nil.
-// They are set automatically by core, so end users should typically not have
-// to interact with them.
-var SettingsFont, SettingsMonoFont *string
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
 // a coordinated manner.  If wrap == true, then WhiteSpaceNormal

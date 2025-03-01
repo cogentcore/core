@@ -219,8 +219,7 @@ func (tx *Text) Init() {
 	})
 	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
-		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
-		s.Font.SetFillColor(clr)
+		s.SetFontColors()
 		tx.updateRichText() // note: critical to update with final styles
 	})
 
