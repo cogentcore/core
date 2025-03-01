@@ -9,12 +9,14 @@ package xyzcore
 
 import (
 	"errors"
+	"image"
 	"image/draw"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
@@ -130,21 +132,32 @@ func (sw *Scene) Render() {
 	sw.XYZ.DoUpdate()
 }
 
-// RenderDraw draws the current image to RenderWindow drawer
-func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
-	if sw.XYZ.Frame == nil || !sw.IsVisible() {
-		return
-	}
+// xyzRender implements [render.Render] for core direct rendering.
+type xyzRender struct {
+	destBBox, srcBBox image.Rectangle
+	texture           *gpu.Texture
+}
+
+func (xr *xyzRender) Render() {}
+
+func (xr *xyzRender) Draw(drw system.Drawer) {
 	agd, ok := drw.(gpudraw.AsGPUDrawer)
-	if !ok || agd.AsGPUDrawer() == nil {
-		core.ErrorSnackbar(sw, errors.New("xyz.Scene.RenderDraw: no WebGPU drawer available"))
-		return
-	}
-	bb, sbb, empty := sw.DirectRenderDrawBBoxes(sw.XYZ.Frame.Frames[0].Format.Bounds())
-	if empty {
+	if !ok {
 		return
 	}
 	gdrw := agd.AsGPUDrawer()
-	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
-	gdrw.CopyUsed(bb.Min, sbb, draw.Src, false)
+	gdrw.UseTexture(xr.texture)
+	gdrw.CopyUsed(xr.destBBox.Min, xr.srcBBox, draw.Src, false)
+}
+
+// RenderState returns the [render.Render] state for direct rendering.
+func (sw *Scene) RenderState(op draw.Op) render.Render {
+	if sw.XYZ.Frame == nil || !sw.IsVisible() {
+		return nil
+	}
+	bb, sbb, empty := sw.DirectRenderDrawBBoxes(sw.XYZ.Frame.Frames[0].Format.Bounds())
+	if empty {
+		return nil
+	}
+	return &xyzRender{destBBox: bb, srcBBox: sbb, texture: sw.XYZ.Frame.Frames[0]}
 }

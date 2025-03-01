@@ -732,7 +732,7 @@ func (w *renderWindow) renderWindow() {
 	}
 }
 
-// RenderState returns the render.Render state from the [Scene.Painter].
+// RenderState returns the [render.Render] state from the [Scene.Painter].
 func (sc *Scene) RenderState(op draw.Op) render.Render {
 	// todo: may need this:
 	// unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)

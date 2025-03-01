@@ -249,7 +249,7 @@ func main() {
 	trs.SetName("torus")
 	trs.Material.Color.A = 200
 
-	txt := xyz.NewText2D(sc).SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	txt := xyz.NewText2D(sc).SetText("Text2D can put <b>HTML</b> formatted Text anywhere you might <i>want</i>")
 	txt.Styles.Text.Align = text.Center
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.SetPos(0, 2.2, 0)

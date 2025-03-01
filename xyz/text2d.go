@@ -13,7 +13,9 @@ import (
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
@@ -50,10 +52,10 @@ type Text2D struct {
 	richText rich.Text
 
 	// render data for text label
-	TextRender *shaped.Lines `set:"-" xml:"-" json:"-"`
+	textRender *shaped.Lines `set:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
-	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
+	renderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
 
 	// automatically set to true if the font render color is the default
 	// colors.Scheme.OnSurface.  If so, it is automatically updated if the default
@@ -101,35 +103,45 @@ func (txt *Text2D) Config() {
 }
 
 func (txt *Text2D) RenderText() {
+	if txt.Scene == nil || txt.Scene.TextShaper == nil {
+		return
+	}
 	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
 	st := &txt.Styles
 	if !st.Font.Decoration.HasFlag(rich.FillColor) {
 		txt.usesDefaultColor = true
 	}
 	st.ToDots()
-
 	fs := &txt.Styles.Font
 	txs := &txt.Styles.Text
-	sz := math32.Vec2(10000, 5000) // just a big size
+	sz := math32.Vec2(10000, 1000) // just a big size
 	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), fs, nil)
-	txt.TextRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &rich.DefaultSettings, sz)
-	// rsz := txt.TextRender.Bounds.Size().Ceil()
-	// if rsz != sz {
-	// 	sz = rsz
-	// 	txt.TextRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
-	// 	if txt.TextRender.BBox.Size() != sz {
-	// 		sz = txt.TextRender.BBox.Size()
-	// 	}
-	// }
-	marg := txt.Styles.TotalMargin()
-	sz.SetAdd(marg.Size())
-	txt.TextPos = marg.Pos().Round()
+	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &rich.DefaultSettings, sz)
+	sz = txt.textRender.Bounds.Size().Ceil()
 	szpt := sz.ToPointRound()
 	if szpt == (image.Point{}) {
 		szpt = image.Point{10, 10}
 	}
 	bounds := image.Rectangle{Max: szpt}
-	var img *image.RGBA
+	marg := txt.Styles.TotalMargin()
+	sz.SetAdd(marg.Size())
+	txt.TextPos = marg.Pos().Round()
+	sty := styles.NewPaint()
+	sty.FromStyle(&txt.Styles)
+	pc := paint.Painter{State: &txt.renderState, Paint: sty}
+	pc.InitImageRaster(sty, szpt.X, szpt.Y)
+	pc.PushContext(nil, render.NewBoundsRect(bounds, sides.NewFloats()))
+	pt := styles.Paint{}
+	pt.Defaults()
+	pt.FromStyle(st)
+	if txt.Styles.Background != nil {
+		pc.Fill.Color = txt.Styles.Background
+		pc.Clear()
+	}
+	pc.TextLines(txt.textRender, txt.TextPos)
+	pc.PopContext()
+	pc.RenderDone().Render()
+	img := pc.RenderImage()
 	var tx Texture
 	var err error
 	if txt.Material.Texture == nil {
@@ -137,7 +149,6 @@ func (txt *Text2D) RenderText() {
 		tx, err = txt.Scene.TextureByName(txname)
 		if err != nil {
 			tx = &TextureBase{Name: txname}
-			img = image.NewRGBA(bounds)
 			tx.AsTextureBase().RGBA = img
 			txt.Scene.SetTexture(tx)
 			txt.Material.SetTexture(tx)
@@ -146,34 +157,12 @@ func (txt *Text2D) RenderText() {
 				fmt.Printf("xyz.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Material.SetTexture(tx)
-			img = tx.Image()
 		}
 	} else {
 		tx = txt.Material.Texture
-		img = tx.Image()
-		if img.Bounds() != bounds {
-			img = image.NewRGBA(bounds)
-		}
 		tx.AsTextureBase().RGBA = img
 		txt.Scene.Phong.SetTexture(tx.AsTextureBase().Name, phong.NewTexture(img))
 	}
-	// todo: need direct render
-	/*
-		rs := &txt.RenderState
-		if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
-			rs.InitImageRaster(nil, szpt.X, szpt.Y, img)
-		}
-		rs.PushContext(nil, paint.NewBoundsRect(bounds, sides.NewFloats()))
-		pt := styles.Paint{}
-		pt.Defaults()
-		pt.FromStyle(st)
-		ctx := &paint.Painter{State: rs, Paint: &pt}
-		if st.Background != nil {
-			draw.Draw(img, bounds, st.Background, image.Point{}, draw.Src)
-		}
-		txt.TextRender.Render(ctx, txt.TextPos)
-		rs.PopContext()
-	*/
 }
 
 // Validate checks that text has valid mesh and texture settings, etc

@@ -285,7 +285,7 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if isz == geom.Size {
 		return false
 	}
-	sc.Painter.InitImageRaster(nil, geom.Size.X, geom.Size.Y)
+	sc.Painter.InitImageRaster(sc.Painter.Paint, geom.Size.X, geom.Size.Y)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
