@@ -373,10 +373,10 @@ func (s *Style) SetFontColors() {
 		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
 		s.Font.SetFillColor(clr)
 	}
-	if s.Background != nil {
-		clr := colors.ApplyOpacity(colors.ToUniform(s.Background), s.Opacity)
-		s.Font.SetBackground(clr)
-	}
+	// if s.Background != nil {
+	// 	clr := colors.ApplyOpacity(colors.ToUniform(s.Background), s.Opacity)
+	// 	s.Font.SetBackground(clr)
+	// }
 }
 
 // BoxSpace returns the extra space around the central content in the box model in dots.
