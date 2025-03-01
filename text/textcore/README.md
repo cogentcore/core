@@ -38,6 +38,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * dreaded shadow accumulation on popup dialogs. very subtle. e.g. commit dialog -- only input not the ctrl+m chooser.
 * text render highlight region fill in blanks better: hard b/c at run level, doesn't have context.
 
-* xyz physics GrabEyeImg causes crashing with goroutine doRender in renderwindow, but otherwise is ok
+* xyz physics GrabEyeImg causes crashing with goroutine renderAsync in renderwindow, but otherwise is ok
 
 

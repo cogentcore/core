@@ -728,8 +728,22 @@ func (w *renderWindow) renderWindow() {
 	top.Sprites.renderSprites(&rs, winScene.SceneGeom.Pos)
 
 	if !w.flags.HasFlag(winIsRendering) {
-		go w.doRender(rs)
+		go w.renderAsync(rs)
 	}
+}
+
+// renderAsync is the implementation of the main render pass,
+// which must be called in a goroutine. It relies on the platform-specific
+// [renderWindow.doRender].
+func (w *renderWindow) renderAsync(rs render.Scene) {
+	w.renderMu.Lock()
+	w.flags.SetFlag(true, winIsRendering)
+	defer func() {
+		w.flags.SetFlag(false, winIsRendering)
+		w.renderMu.Unlock()
+	}()
+
+	w.doRender(rs)
 }
 
 // RenderState returns the [render.Render] state from the [Scene.Painter].
@@ -791,7 +805,7 @@ func (w *renderWindow) fillInsets() {
 type renderWindowFlags int64 //enums:bitflag -trim-prefix scene
 
 const (
-	// winIsRendering indicates that the doRender function is running.
+	// winIsRendering indicates that the renderAsync function is running.
 	winIsRendering renderWindowFlags = iota
 
 	// winStopEventLoop indicates that the event loop should be stopped.
