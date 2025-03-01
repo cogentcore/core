@@ -17,8 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* new render: filetree menu is not updating enabled / disabled state correctly, but cursor is accurate.
-
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
 * diff next doesn't scroll both
