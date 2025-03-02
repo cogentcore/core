@@ -26,9 +26,9 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 
 func (ss *spritesSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
-	for _, sd := range ss.sprites {
+	for _, sr := range ss.sprites {
 		elem := cw.Element(ss, "div") // TODO: support full images
-		elem.Set("style", "background-color: "+colors.AsHex(colors.ToUniform(sd.pixels)))
+		elem.Set("style", "background-color: "+colors.AsHex(colors.ToUniform(sr.pixels)))
 	}
 }
 

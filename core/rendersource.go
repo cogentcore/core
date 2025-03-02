@@ -67,8 +67,8 @@ func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
 			continue
 		}
 		// note: may need to copy pixels but hoping not..
-		sd := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
-		ss.sprites = append(ss.sprites, sd)
+		sr := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
+		ss.sprites = append(ss.sprites, sr)
 	}
 	sprites.Modified = false
 	return ss
