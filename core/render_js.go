@@ -27,14 +27,15 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	clr := colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5)
 	elem := cw.Element(ss, "div")
-	elem.Get("style").Set("backgroundColor", colors.AsHex(clr))
 	cw.SetElementGeom(elem, ss.bbox.Min, ss.bbox.Size(), 1)
+	elem.Get("style").Set("backgroundColor", colors.AsHex(clr))
 }
 
 func (ss *spritesSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	for _, sr := range ss.sprites {
 		elem := cw.Element(ss, "div") // TODO: support full images
+		cw.SetElementGeom(elem, sr.drawPos, sr.pixels.Bounds().Size(), 1)
 		elem.Get("style").Set("backgroundColor", colors.AsHex(colors.ToUniform(sr.pixels)))
 	}
 }
