@@ -695,9 +695,9 @@ func (w *renderWindow) renderWindow() {
 			}
 			winScene = st.Scene
 			winIndex = i
-			cp.Add(winScene.RenderSource(draw.Src))
+			cp.Add(winScene.RenderSource(draw.Src), winScene)
 			for _, dr := range winScene.directRenders {
-				cp.Add(dr.RenderSource(draw.Over))
+				cp.Add(dr.RenderSource(draw.Over), dr)
 			}
 			break
 		}
@@ -707,9 +707,9 @@ func (w *renderWindow) renderWindow() {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			cp.Add(ScrimSource(winScene.Geom.TotalBBox))
+			cp.Add(ScrimSource(winScene.Geom.TotalBBox), &st.Scrim)
 		}
-		cp.Add(st.Scene.RenderSource(draw.Over))
+		cp.Add(st.Scene.RenderSource(draw.Over), st.Scene)
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -718,12 +718,12 @@ func (w *renderWindow) renderWindow() {
 	// then add the popups for the top main stage
 	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
-		cp.Add(st.Scene.RenderSource(draw.Over))
+		cp.Add(st.Scene.RenderSource(draw.Over), st.Scene)
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos))
+	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
 	if !w.flags.HasFlag(winIsRendering) {
 		go w.renderAsync(cp)

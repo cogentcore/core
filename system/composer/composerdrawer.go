@@ -18,7 +18,7 @@ func (cd *ComposerDrawer) Start() {
 	cd.Sources = cd.Sources[:0]
 }
 
-func (cd *ComposerDrawer) Add(s Source) {
+func (cd *ComposerDrawer) Add(s Source, ctx any) {
 	if s == nil { // TODO: necessary?
 		return
 	}

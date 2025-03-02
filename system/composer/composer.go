@@ -17,8 +17,11 @@ type Composer interface {
 	Start()
 
 	// Add adds a [Source] for the current compose run. It must be called
-	// after [Composer.Start].
-	Add(s Source)
+	// after [Composer.Start]. It takes a context argument, which is used
+	// to create a unique identifier in [ComposerWeb], so the context argument
+	// must simply be a pointer unique to this [Source] (the pointer is not
+	// actually used for dereferencing anything).
+	Add(s Source, ctx any)
 
 	// Compose does the composition of the sources added through [Composer.Add].
 	// It must be called after [Composer.Start].
