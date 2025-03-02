@@ -6,17 +6,7 @@
 
 package web
 
-import (
-	"image"
-	"image/draw"
-	"syscall/js"
-
-	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/gpu/gpudraw"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/system"
-)
-
+/* TODO
 // Drawer implements [system.Drawer] with a WebGPU-based drawer if available
 // and a backup 2D image drawer if not.
 type Drawer struct {
@@ -96,3 +86,4 @@ func (dw *Drawer) Renderer() any {
 	}
 	return nil
 }
+*/

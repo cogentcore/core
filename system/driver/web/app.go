@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 	"cogentcore.org/core/system/driver/web/jsfs"
 )
@@ -48,11 +49,11 @@ func Init() {
 }
 
 // TheApp is the single [system.App] for the web platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*composer.ComposerWeb, *Window]()}
 
 // App is the [system.App] implementation for the web platform
 type App struct {
-	base.AppSingle[*Drawer, *Window]
+	base.AppSingle[*composer.ComposerWeb, *Window]
 
 	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)
 	UnderlyingPlatform system.Platforms
@@ -84,9 +85,9 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
-	a.Draw = &Drawer{}
+	a.Compose = &composer.ComposerWeb{}
 	a.Resize()
-	a.InitDrawer()
+	// a.InitDrawer() TODO
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -149,17 +150,19 @@ func (a *App) Resize() {
 	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.X)/a.Scrn.DevicePixelRatio))
 	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.Y)/a.Scrn.DevicePixelRatio))
 
-	if a.Draw.wgpu != nil {
-		a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixelSize)
-	} else {
-		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixelSize})
-	}
+	// TODO
+	// if a.Draw.wgpu != nil {
+	// 	a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixelSize)
+	// } else {
+	// 	a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixelSize})
+	// }
 
 	a.Event.WindowResize()
 }
 
 func (a *App) GPUDevice() any {
-	return a.Draw.wgpu
+	return nil // TODO
+	// return a.Draw.wgpu
 }
 
 func (a *App) DataDir() string {
