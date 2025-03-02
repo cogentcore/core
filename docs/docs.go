@@ -278,7 +278,7 @@ b.RunMainWindow()`)
 		initIcon(w).SetIcon(icons.PlayCircle)
 	})
 
-	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.", func(w *core.Icon) {
+	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run at fast speeds. All apps compile to machine code, allowing them to run without any overhead.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Bolt)
 	})
 
