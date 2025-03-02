@@ -15,7 +15,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-func (ps *painterSource) Draw(c composer.Composer) {
+func (ps *paintSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
 	rd := ps.renderer.(*rasterx.Renderer)
 
@@ -26,8 +26,6 @@ func (ps *painterSource) Draw(c composer.Composer) {
 	img := rd.Image()
 	cd.Drawer.Copy(ps.drawPos, img, img.Bounds(), ps.drawOp, unchanged)
 }
-
-//////// Scrim
 
 func (ss *scrimSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)

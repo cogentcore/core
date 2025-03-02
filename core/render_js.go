@@ -11,13 +11,11 @@ import (
 	"cogentcore.org/core/system/composer"
 )
 
-func (ps *painterSource) Draw(c composer.Composer) {
+func (ps *paintSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	cw.Element(ps, "canvas")
 	ps.renderer.Render(ps.render)
 }
-
-//////// Scrim
 
 func (ss *scrimSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)

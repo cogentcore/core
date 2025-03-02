@@ -12,6 +12,8 @@ import (
 	"golang.org/x/image/draw"
 )
 
+//////// Scene
+
 // SceneSource returns a [composer.Source] for the given scene
 // using the given suggested draw operation.
 func SceneSource(sc *Scene, op draw.Op) composer.Source {
@@ -20,11 +22,11 @@ func SceneSource(sc *Scene, op draw.Op) composer.Source {
 	}
 	rd := sc.Painter.State.Renderers[0]
 	render := sc.Painter.RenderDone()
-	return &painterSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
+	return &paintSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
 }
 
-// painterSource is the [composer.Source] for [paint.Painter] content.
-type painterSource struct {
+// paintSource is the [composer.Source] for [paint.Painter] content, such as for a [Scene].
+type paintSource struct {
 
 	// render is the render content.
 	render render.Render
