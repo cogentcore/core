@@ -24,6 +24,14 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	elem.Set("style", "background-color: "+colors.AsHex(clr))
 }
 
+func (ss *spritesSource) Draw(c composer.Composer) {
+	cw := c.(*composer.ComposerWeb)
+	for _, sd := range ss.sprites {
+		elem := cw.Element(ss, "div") // TODO: support full images
+		elem.Set("style", "background-color: "+colors.AsHex(colors.ToUniform(sd.pixels)))
+	}
+}
+
 /*
 
 // doRender is the implementation of the main render pass on web.
