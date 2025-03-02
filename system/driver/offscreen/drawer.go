@@ -7,12 +7,12 @@ package offscreen
 import (
 	"image"
 
-	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 )
 
 // Drawer is the implementation of [system.Drawer] for the offscreen platform
 type Drawer struct {
-	system.DrawerBase
+	composer.DrawerBase
 
 	Window *Window
 }
