@@ -9,14 +9,10 @@ package xyzcore
 
 import (
 	"errors"
-	"image"
-	"image/draw"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/gpu/gpudraw"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
@@ -130,35 +126,4 @@ func (sw *Scene) Render() {
 		return
 	}
 	sw.XYZ.DoUpdate()
-}
-
-// xyzRender implements [render.Render] for core direct rendering.
-type xyzRender struct {
-	destBBox, srcBBox image.Rectangle
-	texture           *gpu.Texture
-}
-
-func (xr *xyzRender) Render() {}
-
-func (xr *xyzRender) Draw(drw system.Drawer) {
-	agd, ok := drw.(gpudraw.AsGPUDrawer)
-	if !ok {
-		return
-	}
-	gdrw := agd.AsGPUDrawer()
-	gdrw.UseTexture(xr.texture)
-	gdrw.CopyUsed(xr.destBBox.Min, xr.srcBBox, draw.Src, false)
-}
-
-// RenderSource returns the [render.Render] state for direct rendering.
-func (sw *Scene) RenderSource(op draw.Op) render.Render {
-	if sw.XYZ.Frame == nil || !sw.IsVisible() {
-		return nil
-	}
-	tex, _ := sw.XYZ.Frame.GetCurrentTextureObject()
-	bb, sbb, empty := sw.DirectRenderDrawBBoxes(tex.Format.Bounds())
-	if empty {
-		return nil
-	}
-	return &xyzRender{destBBox: bb, srcBBox: sbb, texture: tex}
 }

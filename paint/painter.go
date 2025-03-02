@@ -49,7 +49,7 @@ type Painter struct {
 func NewPainter(width, height int) *Painter {
 	pc := &Painter{&State{}, styles.NewPaint()}
 	sz := image.Pt(width, height)
-	pc.InitImageRaster(pc.Paint, width, height)
+	pc.InitImageRender(pc.Paint, width, height)
 	pc.SetUnitContextExt(sz)
 	return pc
 }

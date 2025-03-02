@@ -129,7 +129,7 @@ func (txt *Text2D) RenderText() {
 	sty := styles.NewPaint()
 	sty.FromStyle(&txt.Styles)
 	pc := paint.Painter{State: &txt.renderState, Paint: sty}
-	pc.InitImageRaster(sty, szpt.X, szpt.Y)
+	pc.InitImageRender(sty, szpt.X, szpt.Y)
 	pc.PushContext(nil, render.NewBoundsRect(bounds, sides.NewFloats()))
 	pt := styles.Paint{}
 	pt.Defaults()

@@ -44,12 +44,12 @@ type State struct {
 	Path ppath.Path
 }
 
-// InitImageRaster initializes the [State] and ensures that there is
+// InitImageRender initializes the [State] and ensures that there is
 // a [rasterx.Renderer] that rasterizes [Painter] items to a
 // Go [image.RGBA].
 // If renderers exist, then the size is updated for the first one
 // (no cost if same size). This must be called whenever the image size changes.
-func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
+func (rs *State) InitImageRender(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
 	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
 	if len(rs.Renderers) == 0 {
@@ -63,11 +63,11 @@ func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
 	rs.Renderers[0].SetSize(units.UnitDot, sz)
 }
 
-// InitSourceRaster initializes the [State] and creates a [composer.Source]
+// InitSourceRender initializes the [State] and creates a [composer.Source]
 // renderer appropriate for the current platform if none exist.
 // If renderers exist, then the size is updated (no cost if size is the same).
 // This must be called whenever the image size changes.
-func (rs *State) InitSourceRaster(sty *styles.Paint, width, height int) {
+func (rs *State) InitSourceRender(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
 	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
 	if len(rs.Renderers) == 0 {

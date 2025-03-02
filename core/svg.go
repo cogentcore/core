@@ -123,7 +123,7 @@ func (sv *SVG) renderSVG() {
 	}
 	sv.SVG.TextShaper = sv.Scene.TextShaper
 	sz := sv.SVG.Geom.Bounds().Size()
-	sv.SVG.RenderState.InitImageRaster(nil, sz.X, sz.Y)
+	sv.SVG.RenderState.InitImageRender(nil, sz.X, sz.Y)
 	sv.SVG.Render()
 	sv.prevSize = sz
 }

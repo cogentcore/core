@@ -120,7 +120,7 @@ func (sv *SVG) Config(width, height int) {
 	sv.Root.SetName("svg")
 	sv.Defs = NewGroup()
 	sv.Defs.SetName("defs")
-	sv.RenderState.InitImageRaster(&sv.Root.Paint, width, height)
+	sv.RenderState.InitImageRender(&sv.Root.Paint, width, height)
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
@@ -132,7 +132,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}
-	sv.RenderState.InitImageRaster(&sv.Root.Paint, nwsz.X, nwsz.Y)
+	sv.RenderState.InitImageRender(&sv.Root.Paint, nwsz.X, nwsz.Y)
 	sv.Geom.Size = nwsz // make sure
 }
 
