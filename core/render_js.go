@@ -8,7 +8,6 @@ package core
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 )
@@ -19,7 +18,7 @@ func (ps *paintSource) Draw(c composer.Composer) {
 
 	elem := cw.Element(ps, "canvas")
 	_, size := ps.renderer.Size()
-	cw.SetElementGeom(elem, math32.FromPoint(ps.drawPos), size, 1) // TODO(newpaint): dpr
+	cw.SetElementGeom(elem, ps.drawPos, size.ToPoint(), 1) // TODO(newpaint): dpr
 	rd.SetCanvas(elem)
 	ps.renderer.Render(ps.render)
 }
@@ -29,7 +28,7 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	clr := colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5)
 	elem := cw.Element(ss, "div")
 	elem.Get("style").Set("backgroundColor", colors.AsHex(clr))
-	cw.SetElementGeom(elem, math32.FromPoint(ss.bbox.Min), math32.FromPoint(ss.bbox.Size()), 1)
+	cw.SetElementGeom(elem, ss.bbox.Min, ss.bbox.Size(), 1)
 }
 
 func (ss *spritesSource) Draw(c composer.Composer) {

@@ -8,10 +8,9 @@ package composer
 
 import (
 	"fmt"
+	"image"
 	"reflect"
 	"syscall/js"
-
-	"cogentcore.org/core/math32"
 )
 
 // loaderRemoved is whether the HTML loader div has been removed.
@@ -102,12 +101,12 @@ func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
 }
 
 // SetElementGeom sets the geometry of the given element using the given device pixel ratio.
-func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size math32.Vector2, dpr float32) {
+func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point, dpr float32) {
 	if !elem.Get("width").IsUndefined() {
-		if elem.Get("width").Int() != int(size.X) {
+		if elem.Get("width").Int() != size.X {
 			elem.Set("width", size.X)
 		}
-		if elem.Get("height").Int() != int(size.Y) {
+		if elem.Get("height").Int() != size.Y {
 			elem.Set("height", size.Y)
 		}
 	}
@@ -118,10 +117,12 @@ func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size math32.Vector2, d
 	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices
 	// with fractional device pixel ratios
 	// (see https://github.com/cogentcore/core/issues/779 and
-	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
-	style.Set("left", fmt.Sprintf("%gpx", pos.X/dpr))
-	style.Set("top", fmt.Sprintf("%gpx", pos.Y/dpr))
+	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313).
+	// By starting with the integer pixel size used in HTML and dividing through floats from there, we guarantee
+	// that we are correctly aligned with the HTML pixel values.
+	style.Set("left", fmt.Sprintf("%gpx", float32(pos.X)/dpr))
+	style.Set("top", fmt.Sprintf("%gpx", float32(pos.Y)/dpr))
 
-	style.Set("width", fmt.Sprintf("%gpx", size.X/dpr))
-	style.Set("height", fmt.Sprintf("%gpx", size.Y/dpr))
+	style.Set("width", fmt.Sprintf("%gpx", float32(size.X)/dpr))
+	style.Set("height", fmt.Sprintf("%gpx", float32(size.Y)/dpr))
 }
