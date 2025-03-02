@@ -15,29 +15,15 @@ import (
 	"golang.org/x/image/draw"
 )
 
-type rasterxSource painterSource[*rasterx.Renderer]
-
-// SceneSource returns a [composer.Source] for the given scene
-// using the given suggested draw operation.
-func SceneSource(sc *Scene, op draw.Op) composer.Source {
-	if sc.Painter.State == nil || len(sc.Painter.State.Renderers) == 0 {
-		return nil
-	}
-	rd, ok := sc.Painter.State.Renderers[0].(*rasterx.Renderer)
-	if !ok {
-		return nil
-	}
-	render := sc.Painter.RenderDone()
-	return &rasterxSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
-}
-
-func (ps *rasterxSource) Draw(c composer.Composer) {
+func (ps *painterSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
+	rd := ps.renderer.(*rasterx.Renderer)
+
 	unchanged := len(ps.render) == 0
 	if !unchanged {
-		ps.renderer.Render(ps.render)
+		rd.Render(ps.render)
 	}
-	img := ps.renderer.Image()
+	img := rd.Image()
 	cd.Drawer.Copy(ps.drawPos, img, img.Bounds(), ps.drawOp, unchanged)
 }
 

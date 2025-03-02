@@ -12,14 +12,25 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// SceneSource returns a [composer.Source] for the given scene
+// using the given suggested draw operation.
+func SceneSource(sc *Scene, op draw.Op) composer.Source {
+	if sc.Painter.State == nil || len(sc.Painter.State.Renderers) == 0 {
+		return nil
+	}
+	rd := sc.Painter.State.Renderers[0]
+	render := sc.Painter.RenderDone()
+	return &painterSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
+}
+
 // painterSource is the [composer.Source] for [paint.Painter] content.
-type painterSource[R render.Renderer] struct {
+type painterSource struct {
 
 	// render is the render content.
 	render render.Render
 
 	// renderer is the renderer for drawing the painter content.
-	renderer R
+	renderer render.Renderer
 
 	// drawOp is the [draw.Op] operation: [draw.Src] to copy source,
 	// [draw.Over] to alpha blend.

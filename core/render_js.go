@@ -8,22 +8,10 @@ package core
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
-	"golang.org/x/image/draw"
 )
 
-type canvasSource painterSource[*htmlcanvas.Renderer]
-
-// SceneSource returns a [composer.Source] for the given scene
-// using the given suggested draw operation.
-func SceneSource(sc *Scene, op draw.Op) composer.Source {
-	rd := sc.Painter.Renderers[0].(*htmlcanvas.Renderer)
-	render := sc.Painter.RenderDone()
-	return &canvasSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
-}
-
-func (ps *canvasSource) Draw(c composer.Composer) {
+func (ps *painterSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	cw.Element(ps, "canvas")
 	ps.renderer.Render(ps.render)
