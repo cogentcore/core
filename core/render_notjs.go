@@ -17,7 +17,7 @@ import (
 
 type rasterxSource painterSource[*rasterx.Renderer]
 
-// SceneSource returns the [composer.Source] for the given scene
+// SceneSource returns a [composer.Source] for the given scene
 // using the given suggested draw operation.
 func SceneSource(sc *Scene, op draw.Op) composer.Source {
 	if sc.Painter.State == nil || len(sc.Painter.State.Renderers) == 0 {
@@ -42,15 +42,6 @@ func (ps *rasterxSource) Draw(c composer.Composer) {
 }
 
 //////// Scrim
-
-func ScrimSource(bbox image.Rectangle) composer.Source {
-	return &scrimSource{bbox: bbox}
-}
-
-// scrimSource is a [composer.Source] implementation for scrim.
-type scrimSource struct {
-	bbox image.Rectangle
-}
 
 func (sr *scrimSource) Draw(c composer.Composer) {
 	cd, ok := c.(*composer.ComposerDrawer)

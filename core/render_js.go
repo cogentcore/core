@@ -14,7 +14,7 @@ import (
 
 type canvasSource painterSource[*htmlcanvas.Renderer]
 
-// SceneSource returns the [composer.Source] for the given scene
+// SceneSource returns a [composer.Source] for the given scene
 // using the given suggested draw operation.
 func SceneSource(sc *Scene, op draw.Op) composer.Source {
 	rd := sc.Painter.Renderers[0].(*htmlcanvas.Renderer)

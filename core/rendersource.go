@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
 )
 
@@ -27,4 +28,14 @@ type painterSource[R render.Renderer] struct {
 	// drawPos is the position offset for the [Image] renderer to
 	// use in its Draw to a [composer.Drawer] (i.e., the [Scene] position).
 	drawPos image.Point
+}
+
+// ScrimSource returns a [composer.Source] for a scrim with the given bounding box.
+func ScrimSource(bbox image.Rectangle) composer.Source {
+	return &scrimSource{bbox: bbox}
+}
+
+// scrimSource is a [composer.Source] implementation for scrim.
+type scrimSource struct {
+	bbox image.Rectangle
 }
