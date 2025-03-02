@@ -29,12 +29,11 @@ body {
   }
 }
 
-body > canvas {
+body > * {
   position: fixed;
-  top: 0;
-  /* width: 100vw;
-  height: 100vh; */
+}
 
+body > canvas {
   /* no selection of canvas */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -47,7 +46,6 @@ body > canvas {
 }
 
 body > #app-text-field {
-  position: fixed;
   opacity: 0;
   top: -10px;
   left: -10px;
@@ -58,7 +56,6 @@ body > #app-text-field {
 body > #app-crash-dialog {
   width: 100vw;
   height: 100vh;
-  position: fixed;
   top: 0;
   background-color: inherit;
   overflow: auto;
@@ -68,7 +65,6 @@ body > #app-crash-dialog {
 /* Loader: */
 
 #app-wasm-loader {
-  position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;

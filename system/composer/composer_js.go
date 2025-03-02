@@ -103,11 +103,13 @@ func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
 
 // SetElementGeom sets the geometry of the given element using the given device pixel ratio.
 func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size math32.Vector2, dpr float32) {
-	if elem.Get("width").Int() != int(size.X) {
-		elem.Set("width", size.X)
-	}
-	if elem.Get("height").Int() != int(size.Y) {
-		elem.Set("height", size.Y)
+	if !elem.Get("width").IsUndefined() {
+		if elem.Get("width").Int() != int(size.X) {
+			elem.Set("width", size.X)
+		}
+		if elem.Get("height").Int() != int(size.Y) {
+			elem.Set("height", size.Y)
+		}
 	}
 
 	style := elem.Get("style") // TODO(newpaint): check if pos and size have changed before setting styles?
