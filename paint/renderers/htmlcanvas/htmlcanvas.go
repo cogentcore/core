@@ -43,11 +43,6 @@ type Renderer struct {
 // It adds the renderer to [Renderers].
 func New(size math32.Vector2) render.Renderer {
 	rs := &Renderer{}
-	// TODO(text): offscreen canvas?
-	document := js.Global().Get("document")
-	rs.Canvas = document.Call("createElement", "canvas")
-	document.Get("body").Call("appendChild", rs.Canvas)
-	rs.ctx = rs.Canvas.Call("getContext", "2d")
 	rs.SetSize(units.UnitDot, size)
 	Renderers = append(Renderers, rs)
 	return rs

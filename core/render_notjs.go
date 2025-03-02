@@ -16,8 +16,8 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// SceneSource returns the [composer.Source] for given scene
-// using given suggested draw operation.
+// SceneSource returns the [composer.Source] for the given scene
+// using the given suggested draw operation.
 func SceneSource(sc *Scene, op draw.Op) composer.Source {
 	if sc.Painter.State == nil || len(sc.Painter.State.Renderers) == 0 {
 		return nil
@@ -37,23 +37,20 @@ type painterSource struct {
 	// render is the render content.
 	render render.Render
 
-	// renderer is the renderer for drawing the painter content
+	// renderer is the renderer for drawing the painter content.
 	renderer *rasterx.Renderer
 
-	// DrawOp is the [draw.Op] operation: [draw.Src] to copy source,
+	// drawOp is the [draw.Op] operation: [draw.Src] to copy source,
 	// [draw.Over] to alpha blend.
 	drawOp draw.Op
 
-	// DrawPos is the position offset for the [Image] renderer to
-	// use in its Draw to a [system.Drawer] (i.e., the [core.Scene] position).
+	// drawPos is the position offset for the [Image] renderer to
+	// use in its Draw to a [composer.Drawer] (i.e., the [Scene] position).
 	drawPos image.Point
 }
 
 func (ps *painterSource) Draw(c composer.Composer) {
-	cd, ok := c.(*composer.ComposerDrawer)
-	if !ok {
-		return
-	}
+	cd := c.(*composer.ComposerDrawer)
 	unchanged := len(ps.render) == 0
 	if !unchanged {
 		ps.renderer.Render(ps.render)

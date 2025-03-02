@@ -21,7 +21,7 @@ type ComposerWeb struct {
 	// in one-to-one correspondence with [ComposerWeb.Sources].
 	// These pointers are not actually used for dereferencing anything; they
 	// are merely a unique identifier.
-	Pointers []uint64
+	Pointers map[Source]uint64
 
 	// Elements are the HTML elements coresponding to each pointer for source context values
 	// (see [ComposerWeb.Pointers]). Unlike [ComposerWeb.Sources]
@@ -32,7 +32,7 @@ type ComposerWeb struct {
 
 func (cw *ComposerWeb) Start() {
 	cw.Sources = cw.Sources[:0]
-	cw.Pointers = cw.Pointers[:0]
+	clear(cw.Pointers)
 }
 
 func (cw *ComposerWeb) Add(s Source, ctx any) {
@@ -40,7 +40,7 @@ func (cw *ComposerWeb) Add(s Source, ctx any) {
 		return
 	}
 	cw.Sources = append(cw.Sources, s)
-	cw.Pointers = append(cw.Pointers, uint64(reflect.ValueOf(ctx).Pointer()))
+	cw.Pointers[s] = uint64(reflect.ValueOf(ctx).Pointer())
 }
 
 func (cw *ComposerWeb) Compose() {
