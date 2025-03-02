@@ -5,12 +5,6 @@
 // Package composer provides composition of source rendering elements.
 package composer
 
-import (
-	"reflect"
-
-	"cogentcore.org/core/base/reflectx"
-)
-
 // Composer performs composition of an ordered list of [Source]
 // elements into a target rendering destination such as a window.
 // Composer has two main implementations: [ComposerDrawer] and
@@ -29,23 +23,4 @@ type Composer interface {
 	// Compose does the composition of the sources added through [Composer.Add].
 	// It must be called after [Composer.Start].
 	Compose()
-}
-
-// ComposerBase is the base implementation of Composer
-// which manages sources.
-type ComposerBase struct {
-	Sources []Source
-}
-
-// different platforms define ComposerGPU, ComposerWeb, ComposerOffscreen,
-
-func (cp *ComposerBase) Start() {
-	cp.Sources = cp.Sources[:0]
-}
-
-func (cp *ComposerBase) Add(s Source) {
-	if reflectx.IsNil(reflect.ValueOf(s)) {
-		return
-	}
-	cp.Sources = append(cp.Sources, s)
 }
