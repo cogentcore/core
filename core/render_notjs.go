@@ -43,13 +43,10 @@ func (ps *rasterxSource) Draw(c composer.Composer) {
 
 //////// Scrim
 
-func (sr *scrimSource) Draw(c composer.Composer) {
-	cd, ok := c.(*composer.ComposerDrawer)
-	if !ok {
-		return
-	}
+func (ss *scrimSource) Draw(c composer.Composer) {
+	cd := c.(*composer.ComposerDrawer)
 	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-	cd.Drawer.Copy(image.Point{}, clr, sr.bbox, draw.Over, composer.Unchanged)
+	cd.Drawer.Copy(image.Point{}, clr, ss.bbox, draw.Over, composer.Unchanged)
 }
 
 //////// Sprites

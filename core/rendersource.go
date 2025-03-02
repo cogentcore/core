@@ -30,6 +30,8 @@ type painterSource[R render.Renderer] struct {
 	drawPos image.Point
 }
 
+//////// Scrim
+
 // ScrimSource returns a [composer.Source] for a scrim with the given bounding box.
 func ScrimSource(bbox image.Rectangle) composer.Source {
 	return &scrimSource{bbox: bbox}

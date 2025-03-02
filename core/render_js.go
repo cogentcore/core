@@ -7,6 +7,7 @@
 package core
 
 import (
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
@@ -26,6 +27,15 @@ func (ps *canvasSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	cw.Element(ps, "canvas")
 	ps.renderer.Render(ps.render)
+}
+
+//////// Scrim
+
+func (ss *scrimSource) Draw(c composer.Composer) {
+	cw := c.(*composer.ComposerWeb)
+	clr := colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5)
+	elem := cw.Element(ss, "div")
+	elem.Set("style", "background-color: "+colors.AsHex(clr))
 }
 
 /*
