@@ -47,19 +47,12 @@ func (ps *painterSource) Draw(c composer.Composer) {
 }
 
 /*
-// loaderRemoved is whether the HTML loader div has been removed.
-var loaderRemoved = false
 
 // doRender is the implementation of the main render pass on web.
 // It ensures that all canvases are properly configured.
 func (w *renderWindow) doRender(top *Stage) {
 	w.updateCanvases(&w.mains, active)
 
-	// Only remove the loader after we have successfully rendered.
-	if !loaderRemoved {
-		loaderRemoved = true
-		js.Global().Get("document").Call("getElementById", "app-wasm-loader").Call("remove")
-	}
 }
 
 // updateCanvases updates all of the canvases corresponding to the given stages

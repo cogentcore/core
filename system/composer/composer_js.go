@@ -11,6 +11,9 @@ import (
 	"syscall/js"
 )
 
+// loaderRemoved is whether the HTML loader div has been removed.
+var loaderRemoved = false
+
 // ComposerWeb is the web implementation of [Composer].
 type ComposerWeb struct {
 
@@ -50,15 +53,23 @@ func (cw *ComposerWeb) Add(s Source, ctx any) {
 
 func (cw *ComposerWeb) Compose() {
 	cw.active = map[uint64]struct{}{}
+
 	for _, s := range cw.Sources {
 		s.Draw(cw)
 	}
+
 	for ptr, elem := range cw.Elements {
 		if _, ok := cw.active[ptr]; ok {
 			continue
 		}
 		elem.Call("remove")
 		delete(cw.Elements, ptr)
+	}
+
+	// Only remove the loader after we have successfully rendered.
+	if !loaderRemoved {
+		loaderRemoved = true
+		js.Global().Get("document").Call("getElementById", "app-wasm-loader").Call("remove")
 	}
 }
 
