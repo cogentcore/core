@@ -19,7 +19,7 @@ func (cd *ComposerDrawer) Start() {
 }
 
 func (cd *ComposerDrawer) Add(s Source) {
-	if s == nil {
+	if s == nil { // TODO: necessary?
 		return
 	}
 	cd.Sources = append(cd.Sources, s)
