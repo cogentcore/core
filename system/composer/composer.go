@@ -1,7 +1,8 @@
-// Copyright 2025 Cogent Core. All rights reserved.
+// Copyright (c) 2025, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package composer provides composition of source rendering elements.
 package composer
 
 import (
@@ -10,17 +11,23 @@ import (
 	"cogentcore.org/core/base/reflectx"
 )
 
-// Composer performs compositing of an ordered stack of [Source]
-// elements into a target rendering destination (e.g., window).
+// Composer performs composition of an ordered list of [Source]
+// elements into a target rendering destination such as a window.
+// Composer has two main implementations: [ComposerDrawer] and
+// [ComposerWeb].
 type Composer interface {
 
-	// Start is called at the start of a new compose run
+	// Start must be called at the start of each new composition run,
+	// before any [Composer.Add] calls. It resets the list of [Source]
+	// elements.
 	Start()
 
-	// Add adds a source for the current compose run
+	// Add adds a [Source] for the current compose run. It must be called
+	// after [Composer.Start].
 	Add(s Source)
 
-	// Compose does the composition of the added sources.
+	// Compose does the composition of the sources added through [Composer.Add].
+	// It must be called after [Composer.Start].
 	Compose()
 }
 
