@@ -193,8 +193,10 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		}
 		ln.Offset = ourOff
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
-		// todo: rest of it
 		lns.Lines = append(lns.Lines, ln)
+	}
+	if lns.Bounds.Size().Y < lht {
+		lns.Bounds.Max.Y = lns.Bounds.Min.Y + lht
 	}
 	// fmt.Println(lns.Bounds)
 	lns.AlignX(tsty)

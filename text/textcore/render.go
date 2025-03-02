@@ -28,10 +28,11 @@ func (ed *Base) reLayout() {
 	if lns == ed.linesSize.Y {
 		return
 	}
+	prevLines := ed.linesSize.Y
 	ed.layoutAllLines()
 	chg := ed.ManageOverflow(1, true)
-	// fmt.Println(chg)
-	if chg {
+	// fmt.Println(chg, lns, ed.visSize.Y, ed.linesSize.Y)
+	if chg || prevLines != ed.linesSize.Y {
 		ed.NeedsLayout()
 		if !ed.HasScroll[math32.Y] {
 			ed.scrollPos = 0
@@ -84,7 +85,7 @@ func (ed *Base) posIsVisible(pos textpos.Pos) bool {
 	}
 	vpos := ed.Lines.PosToView(ed.viewId, pos)
 	sp := int(math32.Floor(ed.scrollPos))
-	return vpos.Line >= sp && vpos.Line < sp+ed.visSize.Y
+	return vpos.Line >= sp && vpos.Line <= sp+ed.visSize.Y
 }
 
 // renderLines renders the visible lines and line numbers.

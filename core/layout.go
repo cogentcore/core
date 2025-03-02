@@ -1228,7 +1228,7 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 		// note: this shouldn't happen -- just have this in here for monitoring
 		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 		case styles.OverflowAuto:
-			if ofd <= 1 {
+			if ofd < 0.5 {
 				if fr.HasScroll[d] {
 					if DebugSettings.LayoutTrace {
 						fmt.Println(fr, "turned off scroll", d)
