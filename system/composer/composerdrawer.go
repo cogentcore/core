@@ -4,15 +4,11 @@
 
 package composer
 
-import (
-	"cogentcore.org/core/system"
-)
-
-// ComposerDrawer implements [Composer] using a [system.Drawer].
+// ComposerDrawer implements [Composer] using a [Drawer].
 type ComposerDrawer struct {
 
-	// Drawer is the [system.Drawer] used for composition.
-	Drawer system.Drawer
+	// Drawer is the [Drawer] used for composition.
+	Drawer Drawer
 
 	// Sources are the composition [Source]s.
 	Sources []Source

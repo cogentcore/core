@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package system
+package composer
 
 import (
 	"image"
@@ -25,7 +25,7 @@ const (
 // functionality, which is implemented for the GPU in
 // [*cogentcore.org/core/gpu/gpudraw.Drawer] and in offscreen drivers.
 // This is used for compositing the stack of images that together comprise
-// the content of a window.
+// the content of a window. It is used in [ComposerDrawer].
 type Drawer interface {
 
 	// Start starts recording a sequence of draw / fill actions,
