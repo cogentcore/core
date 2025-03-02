@@ -144,9 +144,11 @@ func (ed *Base) cursorSprite(on bool) *core.Sprite {
 			bbsz.X = 2
 		}
 		sp = core.NewSprite(spnm, bbsz, image.Point{})
-		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, ed.CursorColor, image.Point{}, draw.Src)
-		ms.Sprites.Add(sp)
+		if ed.CursorColor != nil {
+			ibox := sp.Pixels.Bounds()
+			draw.Draw(sp.Pixels, ibox, ed.CursorColor, image.Point{}, draw.Src)
+			ms.Sprites.Add(sp)
+		}
 	}
 	if on {
 		ms.Sprites.ActivateSprite(sp.Name)
