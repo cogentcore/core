@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -105,7 +106,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	}
 
 	w := &Window{
-		WindowMulti:  base.NewWindowMulti[*App, *gpudraw.Drawer](a, opts),
+		WindowMulti:  base.NewWindowMulti[*App, *composer.ComposerDrawer](a, opts),
 		ScreenWindow: sc.Name,
 	}
 	w.This = w
@@ -131,7 +132,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		// no multisample and no depth
 		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
 		w.Draw = gpudraw.NewDrawer(a.GPU, sf)
-		w.Compose = &base.ComposerDrawer{Drawer: w.Draw}
+		w.Compose = &composer.ComposerDrawer{Drawer: w.Draw}
 	})
 
 	// w.Flgs.SetFlag(true, system.Focused) // starts out focused
