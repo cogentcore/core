@@ -724,7 +724,7 @@ func (w *renderWindow) renderWindow() {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	SpritesSource(&top.Sprites, winScene.SceneGeom.Pos)
+	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos))
 
 	if !w.flags.HasFlag(winIsRendering) {
 		go w.renderAsync(cp)
