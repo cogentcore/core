@@ -193,11 +193,6 @@ type Window interface {
 	// window surface.
 	Composer() composer.Composer
 
-	// Drawer returns the drawing system attached to this window surface.
-	// This is typically used for high-performance rendering to the surface.
-	// Wrap access in Lock() / Unlock() calls.
-	Drawer() Drawer
-
 	// Lock attempts to grab the overall window Mutex lock
 	// and returns true if the window is still open and ready for business.
 	// Otherwise, it might have been closed and any further use should be

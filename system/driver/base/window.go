@@ -160,7 +160,7 @@ func (w *Window[A]) Is(flag system.WindowFlags) bool {
 }
 
 func (w *Window[A]) IsClosed() bool {
-	return w == nil || w.This == nil || w.This.Drawer() == nil
+	return w == nil || w.This == nil || w.This.Composer() == nil
 }
 
 func (w *Window[A]) IsVisible() bool {

@@ -16,11 +16,12 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 )
 
 // WindowSingle contains the data and logic common to all implementations of [system.Window]
-// on single-window platforms (mobile, web, and offscreen), as opposed to multi-window
-// platforms (desktop), for which you should use [WindowSingle].
+// on single-window platforms (mobile and web), as opposed to multi-window
+// platforms (desktop and offscreen), for which you should use [WindowSingle].
 // A WindowSingle is associated with a corresponding [AppSingler] type.
 type WindowSingle[A AppSingler] struct {
 	Window[A]
@@ -37,8 +38,8 @@ func (w *WindowSingle[A]) Events() *events.Source {
 	return w.App.Events()
 }
 
-func (w *WindowSingle[A]) Drawer() system.Drawer {
-	return w.App.Drawer()
+func (w *WindowSingle[A]) Composer() composer.Composer {
+	return w.App.Composer()
 }
 
 func (w *WindowSingle[A]) Screen() *system.Screen {

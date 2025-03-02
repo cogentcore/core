@@ -19,22 +19,18 @@ import (
 )
 
 // WindowMulti contains the data and logic common to all implementations of [system.Window]
-// on multi-window platforms (desktop), as opposed to single-window
-// platforms (mobile, web, and offscreen), for which you should use [WindowSingle].
+// on multi-window platforms (desktop and offscreen), as opposed to single-window
+// platforms (mobile and web), for which you should use [WindowSingle].
 // A WindowMulti is associated with a corresponding [system.App] type.
 // The [system.App] type should embed [AppMulti].
-type WindowMulti[A system.App, D system.Drawer] struct {
+type WindowMulti[A system.App, C composer.Composer] struct {
 	Window[A]
 
 	// Event is the event manager for the window
 	Event events.Source `label:"Event manger"`
 
-	// todo: replace Drawer in WindowMulti with composer type,
-	// sort all that out per platform etc.
-	Compose *ComposerDrawer
-
-	// Draw is the [system.Drawer] used for this window.
-	Draw D `label:"Drawer"`
+	// Compose is the [composer.Composer] for this window.
+	Compose C `label:"Composer"`
 
 	// Pos is the position of the window
 	Pos image.Point `label:"Position"`
@@ -66,8 +62,8 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 }
 
 // NewWindowMulti makes a new [WindowMulti] for the given app with the given options.
-func NewWindowMulti[A system.App, D system.Drawer](a A, opts *system.NewWindowOptions) WindowMulti[A, D] {
-	return WindowMulti[A, D]{
+func NewWindowMulti[A system.App, C composer.Composer](a A, opts *system.NewWindowOptions) WindowMulti[A, C] {
+	return WindowMulti[A, C]{
 		Window: NewWindow(a, opts),
 	}
 }
@@ -78,10 +74,6 @@ func (w *WindowMulti[A, D]) Composer() composer.Composer {
 
 func (w *WindowMulti[A, D]) Events() *events.Source {
 	return &w.Event
-}
-
-func (w *WindowMulti[A, D]) Drawer() system.Drawer {
-	return w.Draw
 }
 
 func (w *WindowMulti[A, D]) Size() image.Point {
