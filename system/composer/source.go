@@ -4,9 +4,12 @@
 
 package composer
 
-// note: Widget RenderState -> RenderSource returns the Source
-
 // Source is a source of input to the Composer.
+// Different platforms define Draw functions to draw
+// to a platform-appropriate destination. The source
+// object MUST be fully self-contained and not have
+// any pointers into other state: it should fully describe
+// the rendering, and be runnable in a separate goroutine.
 type Source interface {
 	Draw(c Composer)
 }

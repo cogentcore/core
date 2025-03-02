@@ -140,7 +140,7 @@ func (txt *Text2D) RenderText() {
 	}
 	pc.TextLines(txt.textRender, txt.TextPos)
 	pc.PopContext()
-	pc.RenderDone().Render()
+	pc.RenderToImage()
 	img := pc.RenderImage()
 	var tx Texture
 	var err error

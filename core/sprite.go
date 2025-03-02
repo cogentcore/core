@@ -10,8 +10,6 @@ import (
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
 
@@ -205,28 +203,8 @@ func (ss *Sprites) InactivateSprite(name string) {
 	}
 }
 
-// renderSprites adds active sprites to given renderScene
-func (ss *Sprites) renderSprites(renderScene *render.Scene, scpos image.Point) {
-	for _, kv := range ss.Order {
-		sp := kv.Value
-		if !sp.Active {
-			continue
-		}
-		// note: may need to copy pixels but hoping not..
-		sr := &spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
-		renderScene.Add(sr)
-	}
-	ss.Modified = false
-}
-
-// spriteRender is a [render.Render] implementation for sprites.
+// spriteRender holds info sufficient for rendering a sprite.
 type spriteRender struct {
 	drawPos image.Point
 	pixels  *image.RGBA
-}
-
-func (sr *spriteRender) Render() {}
-
-func (sr *spriteRender) Draw(drw system.Drawer) {
-	drw.Copy(sr.drawPos, sr.pixels, sr.pixels.Bounds(), draw.Over, system.Unchanged)
 }

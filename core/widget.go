@@ -16,11 +16,11 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -128,15 +128,14 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
 	ChildBackground(child Widget) image.Image
 
-	// RenderState returns the self-contained [render.Render] state for this widget,
-	// which is capable of rendering the contents of this widget in a self-contained
-	// manner. The base widget returns nil, and the [Scene] widget returns the
-	// [paint.Painter] rendering results.
+	// RenderSource returns the self-contained [composer.Source] for
+	// rendering this widget. The base widget returns nil, and the [Scene]
+	// widget returns the [paint.Painter] rendering results.
 	// Widgets that do direct rendering instead of drawing onto
-	// the Scene painter should return a suitable render state.
+	// the Scene painter should return a suitable render source.
 	// Use [Scene.AddDirectRender] to register such widgets with the Scene.
 	// The given draw operation is the suggested way to Draw onto existing images.
-	RenderState(op draw.Op) render.Render
+	RenderSource(op draw.Op) composer.Source
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -419,15 +418,14 @@ func (wb *WidgetBase) IsVisible() bool {
 	return wb.parentWidget().IsVisible()
 }
 
-// RenderState returns the self-contained [render.Render] state for this widget,
-// which is capable of rendering the contents of this widget in a self-contained
-// manner. The base widget returns nil, and the [Scene] widget returns the
-// [paint.Painter] rendering results.
+// RenderSource returns the self-contained [composer.Source] for
+// rendering this widget. The base widget returns nil, and the [Scene]
+// widget returns the [paint.Painter] rendering results.
 // Widgets that do direct rendering instead of drawing onto
-// the Scene painter should return a suitable render state.
+// the Scene painter should return a suitable render source.
 // Use [Scene.AddDirectRender] to register such widgets with the Scene.
 // The given draw operation is the suggested way to Draw onto existing images.
-func (wb *WidgetBase) RenderState(op draw.Op) render.Render { return nil }
+func (wb *WidgetBase) RenderSource(op draw.Op) composer.Source { return nil }
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

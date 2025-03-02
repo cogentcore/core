@@ -281,9 +281,12 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 		sc.Painter.Paint = styles.NewPaint()
 	}
 	sc.SceneGeom.Pos = geom.Pos
-	isz := sc.Painter.State.RenderImageSize()
-	if isz == geom.Size {
-		return false
+	img := sc.Painter.State.RenderImage()
+	if img != nil {
+		isz := img.Bounds().Size()
+		if isz == geom.Size {
+			return false
+		}
 	}
 	sc.Painter.InitImageRaster(sc.Painter.Paint, geom.Size.X, geom.Size.Y)
 	sc.SceneGeom.Size = geom.Size // make sure

@@ -110,14 +110,27 @@ func (pc *Painter) PathDone() {
 }
 
 // RenderDone should be called when the full set of rendering for this painter
-// is done. It returns a self-contained [render.PaintRender] representing
+// is done. It returns a self-contained [render.Render] representing
 // the entire rendering state, suitable for offline rendering.
 // It resets the current painter state so that it is ready for new rendering.
-func (pc *Painter) RenderDone() *render.PaintRender {
+func (pc *Painter) RenderDone() render.Render {
 	npr := pc.Render.Clone()
 	pc.Render.Reset()
 	pc.State.Path.Reset()
 	return npr
+}
+
+// RenderToImage renders the current painter items to the image renderer
+// if it is the first one in Renderers. Returns the image, which is also
+// available via the RenderImage method.
+func (pc *Painter) RenderToImage() *image.RGBA {
+	rd := pc.ImageRenderer()
+	if rd == nil {
+		return nil
+	}
+	rend := pc.RenderDone()
+	rd.Render(rend)
+	return pc.RenderImage()
 }
 
 //////// basic shape functions

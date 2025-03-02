@@ -150,8 +150,8 @@ func (xr *xyzRender) Draw(drw system.Drawer) {
 	gdrw.CopyUsed(xr.destBBox.Min, xr.srcBBox, draw.Src, false)
 }
 
-// RenderState returns the [render.Render] state for direct rendering.
-func (sw *Scene) RenderState(op draw.Op) render.Render {
+// RenderSource returns the [render.Render] state for direct rendering.
+func (sw *Scene) RenderSource(op draw.Op) render.Render {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return nil
 	}

@@ -5,31 +5,8 @@
 package render
 
 import (
-	"image"
-	"image/draw"
-
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
-)
-
-//go:generate core generate
-
-// RendererTypes are types of rendererers.
-type RendererTypes int32 //enums:enum
-
-const (
-	// Image is a rasterizing renderer capable of returning a standard
-	// go *image.RGBA image.
-	Image RendererTypes = iota
-
-	// Drawer is a direct renderer that uses the [system.Drawer] to
-	// render directly, potentially only for a GPU drawer (e.g., [xyz]).
-	Drawer
-
-	// Code is a renderer that generates some kind of structured code
-	// to represent the render, as in SVG or PDF. The output is []byte.
-	Code
 )
 
 // Renderer is the interface for all backend rendering outputs.
@@ -37,23 +14,6 @@ type Renderer interface {
 
 	// Render renders the given Render data.
 	Render(r Render)
-
-	// Type returns the type of renderer this is.
-	Type() RendererTypes
-
-	// Image returns the current rendered image as an image.RGBA,
-	// if this is an [Image] renderer.
-	Image() *image.RGBA
-
-	// Code returns the current rendered image data representation
-	// for [Code] renderers, e.g., the SVG file.
-	Code() []byte
-
-	// Draw draws the render to the given [system.Drawer] using given
-	// compositing operation: Over = alpha blend with current,
-	// Src = copy source. This is supported for [Image] and [Drawer]
-	// rendering types.
-	Draw(r Render, drw system.Drawer, op draw.Op)
 
 	// Size returns the size of the render target, in its preferred units.
 	// For [Image] types, it will be [units.UnitDot] to indicate the actual

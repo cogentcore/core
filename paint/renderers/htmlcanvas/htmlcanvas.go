@@ -53,10 +53,6 @@ func New(size math32.Vector2) render.Renderer {
 	return rs
 }
 
-func (rs *Renderer) IsImage() bool      { return true }
-func (rs *Renderer) Image() *image.RGBA { return nil } // TODO
-func (rs *Renderer) Code() []byte       { return nil }
-
 func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 	return units.UnitDot, rs.size // TODO: is Dot right?
 }

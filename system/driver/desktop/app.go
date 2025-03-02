@@ -131,6 +131,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		// no multisample and no depth
 		sf := gpu.NewSurface(a.GPU, surf, fbsz, 1, gpu.UndefinedType)
 		w.Draw = gpudraw.NewDrawer(a.GPU, sf)
+		w.Compose = &base.ComposerDrawer{Drawer: w.Draw}
 	})
 
 	// w.Flgs.SetFlag(true, system.Focused) // starts out focused

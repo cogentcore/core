@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/system/composer"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -187,6 +188,10 @@ type Window interface {
 
 	// IsCursorEnabled returns true or false if cursor is enabled
 	IsCursorEnabled() bool
+
+	// Composer returns the [composer.Composer] for rendering to this
+	// window surface.
+	Composer() composer.Composer
 
 	// Drawer returns the drawing system attached to this window surface.
 	// This is typically used for high-performance rendering to the surface.

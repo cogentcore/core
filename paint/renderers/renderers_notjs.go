@@ -14,6 +14,6 @@ import (
 )
 
 func init() {
-	paint.NewDefaultImageRenderer = rasterx.New
+	paint.NewSourceRenderer = rasterx.New
 	shaped.NewShaper = shapedgt.NewShaper
 }

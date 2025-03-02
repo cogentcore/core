@@ -31,7 +31,7 @@ import (
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)) {
 	pc := NewPainter(width, height)
 	f(pc)
-	pc.RenderDone().Render()
+	pc.RenderToImage()
 	imagex.Assert(t, pc.RenderImage(), nm)
 }
 

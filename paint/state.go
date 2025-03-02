@@ -11,13 +11,18 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 )
 
-// NewDefaultImageRenderer is a function that returns the default image renderer
-var NewDefaultImageRenderer func(size math32.Vector2) render.Renderer
+var (
+	// NewSourceRenderer returns the [composer.Source] renderer
+	// for [Painter] source content, for the current platform.
+	// This is created first for Source painters.
+	NewSourceRenderer func(size math32.Vector2) render.Renderer
+)
 
 // The State holds all the current rendering state information used
 // while painting. The [Paint] embeds a pointer to this.
@@ -25,7 +30,10 @@ type State struct {
 
 	// Render holds the current [render.PaintRender] state that we are building.
 	// and has the list of [render.Renderer]s that we render to.
-	Render render.PaintRender
+	Render render.Render
+
+	// Renderers is the list of [Renderer]s that we render to.
+	Renderers []render.Renderer
 
 	// Stack provides the SVG "stacking context" as a stack of [Context]s.
 	// There is always an initial base-level Context element for the overall
@@ -37,27 +45,40 @@ type State struct {
 }
 
 // InitImageRaster initializes the [State] and ensures that there is
-// at least one image-based renderer present, creating the default type if not,
-// using the [NewDefaultImageRenderer] function.
-// If renderers exist, then the size is updated for any image-based ones.
-// This must be called whenever the image size changes.
+// a [rasterx.Renderer] that rasterizes [Painter] items to a
+// Go [image.RGBA].
+// If renderers exist, then the size is updated for the first one
+// (no cost if same size). This must be called whenever the image size changes.
 func (rs *State) InitImageRaster(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
 	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
-	if len(rs.Render.Renderers) == 0 {
-		rd := NewDefaultImageRenderer(sz)
-		rs.Render.Renderers = append(rs.Render.Renderers, rd)
+	if len(rs.Renderers) == 0 {
+		rd := rasterx.New(sz)
+		rs.Renderers = append(rs.Renderers, rd)
 		rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
 		return
 	}
 	ctx := rs.Context()
 	ctx.SetBounds(bounds)
-	for _, rd := range rs.Render.Renderers {
-		if rd.Type() == render.Code {
-			continue
-		}
-		rd.SetSize(units.UnitDot, sz)
+	rs.Renderers[0].SetSize(units.UnitDot, sz)
+}
+
+// InitSourceRaster initializes the [State] and creates a [composer.Source]
+// renderer appropriate for the current platform if none exist.
+// If renderers exist, then the size is updated (no cost if size is the same).
+// This must be called whenever the image size changes.
+func (rs *State) InitSourceRaster(sty *styles.Paint, width, height int) {
+	sz := math32.Vec2(float32(width), float32(height))
+	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
+	if len(rs.Renderers) == 0 {
+		rd := NewSourceRenderer(sz)
+		rs.Renderers = append(rs.Renderers, rd)
+		rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
+		return
 	}
+	ctx := rs.Context()
+	ctx.SetBounds(bounds)
+	rs.Renderers[0].SetSize(units.UnitDot, sz)
 }
 
 // Context() returns the currently active [render.Context] state (top of Stack).
@@ -65,22 +86,27 @@ func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
 }
 
-// RenderImage returns the current render image from the first
-// Image renderer present, or nil if none.
-// This may be somewhat expensive for some rendering types.
-func (rs *State) RenderImage() *image.RGBA {
-	return rs.Render.Image()
+// ImageRenderer returns the [rasterx.Renderer] image rasterizer if it is
+// the first renderer, or nil.
+func (rs *State) ImageRenderer() render.Renderer {
+	if len(rs.Renderers) == 0 {
+		return nil
+	}
+	rd, ok := rs.Renderers[0].(*rasterx.Renderer)
+	if !ok {
+		return nil
+	}
+	return rd
 }
 
-// RenderImageSize returns the size of the current render image
-// from the first Image renderer present.
-func (rs *State) RenderImageSize() image.Point {
-	rd := rs.Render.ImageRenderer()
+// RenderImage returns the Go [image.RGBA] from the first [Image] renderer
+// if present, else nil.
+func (rs *State) RenderImage() *image.RGBA {
+	rd := rs.ImageRenderer()
 	if rd == nil {
-		return image.Point{}
+		return nil
 	}
-	_, sz := rd.Size()
-	return sz.ToPoint()
+	return rd.(*rasterx.Renderer).Image()
 }
 
 // PushContext pushes a new [render.Context] onto the stack using given styles and bounds.

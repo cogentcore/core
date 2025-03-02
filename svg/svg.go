@@ -219,7 +219,7 @@ func (sv *SVG) Render() {
 	}
 	sv.Root.Render(sv)
 	pc := &paint.Painter{&sv.RenderState, &sv.Root.Paint}
-	pc.RenderDone().Render() // leaves image avail in renderer.image
+	pc.RenderToImage() // leaves image avail in renderer.image
 	sv.RenderMu.Unlock()
 	sv.IsRendering = false
 }

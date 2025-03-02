@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 )
 
 // WindowMulti contains the data and logic common to all implementations of [system.Window]
@@ -27,6 +28,10 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 
 	// Event is the event manager for the window
 	Event events.Source `label:"Event manger"`
+
+	// todo: replace Drawer in WindowMulti with composer type,
+	// sort all that out per platform etc.
+	Compose *ComposerDrawer
 
 	// Draw is the [system.Drawer] used for this window.
 	Draw D `label:"Drawer"`
@@ -65,6 +70,10 @@ func NewWindowMulti[A system.App, D system.Drawer](a A, opts *system.NewWindowOp
 	return WindowMulti[A, D]{
 		Window: NewWindow(a, opts),
 	}
+}
+
+func (w *WindowMulti[A, D]) Composer() composer.Composer {
+	return w.Compose
 }
 
 func (w *WindowMulti[A, D]) Events() *events.Source {

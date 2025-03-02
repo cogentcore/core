@@ -10,10 +10,10 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/paint/paint"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"ClampBorderRadius":       reflect.ValueOf(paint.ClampBorderRadius),
-		"EdgeBlurFactors":         reflect.ValueOf(paint.EdgeBlurFactors),
-		"NewDefaultImageRenderer": reflect.ValueOf(&paint.NewDefaultImageRenderer).Elem(),
-		"NewPainter":              reflect.ValueOf(paint.NewPainter),
+		"ClampBorderRadius": reflect.ValueOf(paint.ClampBorderRadius),
+		"EdgeBlurFactors":   reflect.ValueOf(paint.EdgeBlurFactors),
+		"NewPainter":        reflect.ValueOf(paint.NewPainter),
+		"NewSourceRenderer": reflect.ValueOf(&paint.NewSourceRenderer).Elem(),
 
 		// type definitions
 		"Painter": reflect.ValueOf((*paint.Painter)(nil)),

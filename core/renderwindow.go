@@ -16,8 +16,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
 )
 
@@ -676,14 +676,14 @@ func (w *renderWindow) renderWindow() {
 	}
 	defer w.SystemWindow.Unlock()
 
-	if w.flags.HasFlag(winIsRendering) { // still busy, bail
-		return
-	}
-
 	// now we go in the proper bottom-up order to generate the [render.Scene]
-	rs := render.Scene{}
+	cp := w.SystemWindow.Composer()
+	cp.Start()
 	sm := &w.mains
 	n := sm.stack.Len()
+
+	// todo: add a source for this, that is self-contained
+	// w.fillInsets()
 
 	// first, find the top-level window:
 	winIndex := 0
@@ -696,9 +696,9 @@ func (w *renderWindow) renderWindow() {
 			}
 			winScene = st.Scene
 			winIndex = i
-			rs.Add(winScene.RenderState(draw.Src))
+			cp.Add(winScene.RenderSource(draw.Src))
 			for _, dr := range winScene.directRenders {
-				rs.Add(dr.RenderState(draw.Over))
+				cp.Add(dr.RenderSource(draw.Over))
 			}
 			break
 		}
@@ -708,10 +708,9 @@ func (w *renderWindow) renderWindow() {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			sr := &scrimRender{bbox: winScene.Geom.TotalBBox}
-			rs.Add(sr)
+			cp.Add(ScrimSource(winScene.Geom.TotalBBox))
 		}
-		rs.Add(st.Scene.RenderState(draw.Over))
+		cp.Add(st.Scene.RenderSource(draw.Over))
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -720,22 +719,22 @@ func (w *renderWindow) renderWindow() {
 	// then add the popups for the top main stage
 	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
-		rs.Add(st.Scene.RenderState(draw.Over))
+		cp.Add(st.Scene.RenderSource(draw.Over))
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	top.Sprites.renderSprites(&rs, winScene.SceneGeom.Pos)
+	SpritesSource(&top.Sprites, winScene.SceneGeom.Pos)
 
 	if !w.flags.HasFlag(winIsRendering) {
-		go w.renderAsync(rs)
+		go w.renderAsync(cp)
 	}
 }
 
 // renderAsync is the implementation of the main render pass,
 // which must be called in a goroutine. It relies on the platform-specific
 // [renderWindow.doRender].
-func (w *renderWindow) renderAsync(rs render.Scene) {
+func (w *renderWindow) renderAsync(cp composer.Composer) {
 	w.renderMu.Lock()
 	w.flags.SetFlag(true, winIsRendering)
 	defer func() {
@@ -743,32 +742,13 @@ func (w *renderWindow) renderAsync(rs render.Scene) {
 		w.renderMu.Unlock()
 	}()
 
-	w.doRender(rs)
+	cp.Compose()
 }
 
-// RenderState returns the [render.Render] state from the [Scene.Painter].
-func (sc *Scene) RenderState(op draw.Op) render.Render {
-	// todo: may need this:
-	// unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)
+// RenderSource returns the [render.Render] state from the [Scene.Painter].
+func (sc *Scene) RenderSource(op draw.Op) composer.Source {
 	sc.setFlag(false, sceneImageUpdated)
-	pr := sc.Painter.RenderDone()
-	if pr != nil {
-		pr.DrawOp = op
-		pr.DrawPos = sc.SceneGeom.Pos
-	}
-	return pr
-}
-
-// scrimRender is a [render.Render] implementation for scrim.
-type scrimRender struct {
-	bbox image.Rectangle
-}
-
-func (sr *scrimRender) Render() {}
-
-func (sr *scrimRender) Draw(drw system.Drawer) {
-	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-	drw.Copy(image.Point{}, clr, sr.bbox, draw.Over, system.Unchanged)
+	return SceneSource(sc, op)
 }
 
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].

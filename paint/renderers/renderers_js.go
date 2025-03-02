@@ -14,6 +14,6 @@ import (
 )
 
 func init() {
-	paint.NewDefaultImageRenderer = htmlcanvas.New
+	paint.NewSourceRenderer = htmlcanvas.New
 	shaped.NewShaper = shapedgt.NewShaper // todo: update when new js avail
 }
