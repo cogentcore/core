@@ -8,7 +8,6 @@ package core
 
 import (
 	"image"
-	"syscall/js"
 
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
@@ -43,15 +42,7 @@ type painterSource struct {
 
 func (ps *painterSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
-	ptr := cw.Pointers[ps]
-	elem := cw.Elements[ptr]
-	if elem.IsUndefined() {
-		// TODO: offscreen canvas?
-		document := js.Global().Get("document")
-		elem = document.Call("createElement", "canvas")
-		document.Get("body").Call("appendChild", elem)
-		cw.Elements[ptr] = elem
-	}
+	cw.Element(ps, "canvas")
 	ps.renderer.Render(ps.render)
 }
 

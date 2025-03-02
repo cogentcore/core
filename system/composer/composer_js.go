@@ -20,7 +20,8 @@ type ComposerWeb struct {
 	// Pointers are the pointers for source context values, with indices
 	// in one-to-one correspondence with [ComposerWeb.Sources].
 	// These pointers are not actually used for dereferencing anything; they
-	// are merely a unique identifier.
+	// are merely a unique identifier. This is necessary because the [Source]
+	// is new each time, but the context pointer stays the same.
 	Pointers map[Source]uint64
 
 	// Elements are the HTML elements coresponding to each pointer for source context values
@@ -47,4 +48,20 @@ func (cw *ComposerWeb) Compose() {
 	for _, s := range cw.Sources {
 		s.Draw(cw)
 	}
+}
+
+// Element returns the HTML element for the given [Source], making it with the given
+// tag if it doesn't exist yet.
+func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
+	ptr := cw.Pointers[s]
+	elem := cw.Elements[ptr]
+	if !elem.IsUndefined() {
+		return elem
+	}
+	// TODO: offscreen canvas?
+	document := js.Global().Get("document")
+	elem = document.Call("createElement", tag)
+	document.Get("body").Call("appendChild", elem)
+	cw.Elements[ptr] = elem
+	return elem
 }
