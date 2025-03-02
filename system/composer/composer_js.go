@@ -29,6 +29,10 @@ type ComposerWeb struct {
 	// and [ComposerWeb.Pointers], this is persistent to [ComposerWeb.Start], as this allows
 	// us to re-use the same HTML elements when possible.
 	Elements map[uint64]js.Value
+
+	// active contains the active HTML elements, keyed using the corresponding source
+	// context pointer. It is used in [ComposerWeb.Compose].
+	active map[uint64]struct{}
 }
 
 func (cw *ComposerWeb) Start() {
@@ -45,8 +49,16 @@ func (cw *ComposerWeb) Add(s Source, ctx any) {
 }
 
 func (cw *ComposerWeb) Compose() {
+	cw.active = map[uint64]struct{}{}
 	for _, s := range cw.Sources {
 		s.Draw(cw)
+	}
+	for ptr, elem := range cw.Elements {
+		if _, ok := cw.active[ptr]; ok {
+			continue
+		}
+		elem.Call("remove")
+		delete(cw.Elements, ptr)
 	}
 }
 
@@ -54,6 +66,7 @@ func (cw *ComposerWeb) Compose() {
 // tag if it doesn't exist yet.
 func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
 	ptr := cw.Pointers[s]
+	cw.active[ptr] = struct{}{}
 	elem := cw.Elements[ptr]
 	if !elem.IsUndefined() {
 		return elem

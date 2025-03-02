@@ -53,16 +53,7 @@ var loaderRemoved = false
 // doRender is the implementation of the main render pass on web.
 // It ensures that all canvases are properly configured.
 func (w *renderWindow) doRender(top *Stage) {
-	active := map[*htmlcanvas.Renderer]bool{}
 	w.updateCanvases(&w.mains, active)
-
-	htmlcanvas.Renderers = slices.DeleteFunc(htmlcanvas.Renderers, func(rd *htmlcanvas.Renderer) bool {
-		if active[rd] {
-			return false
-		}
-		rd.Canvas.Call("remove")
-		return true
-	})
 
 	// Only remove the loader after we have successfully rendered.
 	if !loaderRemoved {
