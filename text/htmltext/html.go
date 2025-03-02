@@ -108,9 +108,7 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 					// todo: detect <p> at end of paragraph only
 					fs.Decoration.SetFlag(true, rich.ParagraphStart)
 				case "br":
-					curSp = rich.NewText(fs, []rune{'\n'}) // br is standalone: do it!
-					spstack.Push(curSp)
-					nextIsParaStart = false
+					// handled in end: standalone <br> is in both start and end
 				case "err":
 					// custom; used to mark errors
 				default:

@@ -5,6 +5,7 @@
 package shaped_test
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -204,9 +205,11 @@ func TestSpacePos(t *testing.T) {
 
 func TestLinefeed(t *testing.T) {
 	RunTest(t, "linefeed", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		src := "This text has a\nlinefeed in the middle"
+		src := "Text2D can put <b>HTML</b> <br>formatted<br>Text anywhere you might <i>want</i>"
 		sty := rich.NewStyle()
-		tx := rich.NewText(sty, []rune(src))
+		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
+		fmt.Println(tx)
+		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.TextLines(lns, pos)

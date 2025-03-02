@@ -84,3 +84,23 @@ func TestDemo(t *testing.T) {
 
 	assert.Equal(t, trg, tx.String())
 }
+
+func TestBreak(t *testing.T) {
+	src := "Text2D can put <b>HTML</b> <br>formatted<br>Text anywhere you might <i>want</i>"
+	tx, err := HTMLToRich([]byte(src), rich.NewStyle(), nil)
+	assert.NoError(t, err)
+
+	trg := `[]: "Text2D can put "
+[bold]: "HTML"
+[]: " "
+[]: "
+"
+[]: "formatted"
+[]: "
+"
+[]: "Text anywhere you might "
+[italic]: "want"
+[]: ""
+`
+	assert.Equal(t, trg, tx.String())
+}

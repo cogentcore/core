@@ -20,7 +20,7 @@ require (
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
-	github.com/go-text/typesetting v0.2.1
+	github.com/go-text/typesetting v0.3.0
 	github.com/gomarkdown/markdown v0.0.0-20240930133441-72d49d9543d8
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
@@ -36,7 +36,7 @@ require (
 	github.com/tdewolff/parse/v2 v2.7.19
 	golang.org/x/crypto v0.32.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
-	golang.org/x/image v0.18.0
+	golang.org/x/image v0.23.0
 	golang.org/x/net v0.33.0
 	golang.org/x/oauth2 v0.20.0
 	golang.org/x/sys v0.29.0

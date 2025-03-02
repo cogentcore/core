@@ -17,13 +17,14 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* shaped crashing with <br> html text
 * textcore base horizontal scrolling and wrap long no-space lines
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
 * undo bug is due to diff updating not tracking undo state? seems to happen after significant diff revert update.
 
 * filetree 3x update and slow repo open
+
+* shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
 
 * diff next doesn't scroll both
 
