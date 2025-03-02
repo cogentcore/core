@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"unicode"
 
 	"cogentcore.org/core/base/fileinfo"
@@ -74,13 +73,12 @@ func (gl *GoLang) ParseFile(fss *parse.FileStates, txt []byte) {
 	pr.ParseAll(pfs)
 	// pprf.End()
 	fss.EndProc() // only symbols still need locking, done separately
-	path, _ := filepath.Split(pfs.Src.Filename)
+	path := filepath.Dir(pfs.Src.Filename)
 	// fmt.Println("done parse")
 	if len(pfs.ParseState.Scopes) > 0 { // should be for complete files, not for snippets
 		pkg := pfs.ParseState.Scopes[0]
 		pfs.Syms[pkg.Name] = pkg // keep around..
 		// fmt.Printf("main pkg name: %v\n", pkg.Name)
-		path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
 		pfs.WaitGp.Add(1)
 		go func() {
 			gl.AddPathToSyms(pfs, path)

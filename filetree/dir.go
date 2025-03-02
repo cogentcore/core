@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 	"sync"
 )
 
@@ -122,8 +121,7 @@ func (dm *DirFlagMap) openPaths(root string) []string {
 		rootClosed := false
 		par := fn
 		for {
-			par, _ = filepath.Split(par)
-			par = strings.TrimSuffix(par, string(filepath.Separator))
+			par = filepath.Dir(par)
 			if par == "" || par == "." {
 				break
 			}

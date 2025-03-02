@@ -186,6 +186,7 @@ func (ls *Lines) diffs(ob *Lines) Diffs {
 // patchFrom patches (edits) using content from other,
 // according to diff operations (e.g., as generated from DiffBufs).
 func (ls *Lines) patchFrom(ob *Lines, diffs Diffs) bool {
+	ls.undos.NewGroup()
 	sz := len(diffs)
 	mods := false
 	for i := sz - 1; i >= 0; i-- { // go in reverse so changes are valid!
@@ -194,16 +195,19 @@ func (ls *Lines) patchFrom(ob *Lines, diffs Diffs) bool {
 		case 'r':
 			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
+			ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
 			mods = true
 		case 'd':
 			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			mods = true
 		case 'i':
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertTextImpl(textpos.Pos{Line: df.I1}, ot.Text)
+			ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
 			mods = true
 		}
+	}
+	if mods {
+		ls.undos.NewGroup()
 	}
 	return mods
 }

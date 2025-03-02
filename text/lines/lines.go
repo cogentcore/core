@@ -290,7 +290,7 @@ func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 	}
 	text = append(text, []rune{})
 	ed := ls.endPos()
-	tbe := ls.insertTextImpl(ed, text)
+	tbe := ls.insertTextLines(ed, text)
 	if tbe == nil {
 		fmt.Println("nil insert", ed, text)
 		return nil
@@ -550,10 +550,22 @@ func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
 }
 
 // insertText is the primary method for inserting text,
-// at given starting position.  Sets the timestamp on resulting Edit to now.
+// at given starting position. Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
 func (ls *Lines) insertText(st textpos.Pos, txt []rune) *textpos.Edit {
 	tbe := ls.insertTextImpl(st, runes.Split(txt, []rune("\n")))
+	ls.saveUndo(tbe)
+	return tbe
+}
+
+// insertTextLines is the primary method for inserting text,
+// at given starting position, for text source that is already split
+// into lines. Do NOT use Impl unless you really don't want to save
+// the undo: in general very bad not to!
+// Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
+func (ls *Lines) insertTextLines(st textpos.Pos, txt [][]rune) *textpos.Edit {
+	tbe := ls.insertTextImpl(st, txt)
 	ls.saveUndo(tbe)
 	return tbe
 }

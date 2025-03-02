@@ -512,7 +512,7 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 func (ls *Lines) InsertTextLines(st textpos.Pos, text [][]rune) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
-	tbe := ls.insertTextImpl(st, text)
+	tbe := ls.insertTextLines(st, text)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
 	}

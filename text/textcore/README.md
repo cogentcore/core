@@ -17,12 +17,14 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* can get zombie nil open buffers in code -- remove them
+* textcore editor vertical scroll enabled off by 1
+
+* undo bug is due to diff updating on revert not tracking undo state?  100% reproducible.
 
 * textcore base horizontal scrolling and wrap long no-space lines
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
-* undo bug is due to diff updating not tracking undo state? seems to happen after significant diff revert update.
+* can get zombie nil open buffers in code -- under what circumstances?? autosave renames?
 
 * filetree 3x update and slow repo open
 
