@@ -7,8 +7,11 @@
 package composer
 
 import (
+	"fmt"
 	"reflect"
 	"syscall/js"
+
+	"cogentcore.org/core/math32"
 )
 
 // loaderRemoved is whether the HTML loader div has been removed.
@@ -96,4 +99,27 @@ func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
 	document.Get("body").Call("appendChild", elem)
 	cw.Elements[ptr] = elem
 	return elem
+}
+
+// SetElementGeom sets the geometry of the given element using the given device pixel ratio.
+func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size math32.Vector2, dpr float32) {
+	if elem.Get("width").Int() != int(size.X) {
+		elem.Set("width", size.X)
+	}
+	if elem.Get("height").Int() != int(size.Y) {
+		elem.Set("height", size.Y)
+	}
+
+	style := elem.Get("style") // TODO(newpaint): check if pos and size have changed before setting styles?
+
+	// Dividing by the DevicePixelRatio in this way avoids rounding errors (CSS
+	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices
+	// with fractional device pixel ratios
+	// (see https://github.com/cogentcore/core/issues/779 and
+	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
+	style.Set("left", fmt.Sprintf("%gpx", pos.X/dpr))
+	style.Set("top", fmt.Sprintf("%gpx", pos.Y/dpr))
+
+	style.Set("width", fmt.Sprintf("%gpx", size.X/dpr))
+	style.Set("height", fmt.Sprintf("%gpx", size.Y/dpr))
 }

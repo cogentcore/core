@@ -53,14 +53,13 @@ func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 }
 
 func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
-	if true || rs.size == size { // TODO(newpaint)
+	if rs.size == size {
 		return
 	}
 	// TODO: truncate/round here? (HTML doesn't support fractional width/height)
 	rs.size = size
 
-	rs.Canvas.Set("width", size.X)
-	rs.Canvas.Set("height", size.Y)
+	return // TODO(newpaint)
 
 	// rs.ctx.Call("clearRect", 0, 0, size.X, size.Y)
 	rs.ctx.Set("imageSmoothingEnabled", false)

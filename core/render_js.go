@@ -8,6 +8,7 @@ package core
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 )
@@ -16,7 +17,10 @@ func (ps *paintSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	rd := ps.renderer.(*htmlcanvas.Renderer)
 
-	rd.SetCanvas(cw.Element(ps, "canvas"))
+	elem := cw.Element(ps, "canvas")
+	_, size := ps.renderer.Size()
+	cw.SetElementGeom(elem, math32.FromPoint(ps.drawPos), size, 1)
+	rd.SetCanvas(elem)
 	ps.renderer.Render(ps.render)
 }
 
@@ -68,17 +72,6 @@ func (w *renderWindow) updateCanvas(hc *htmlcanvas.Renderer, st *Stage) {
 
 	hc.SetSize(units.UnitDot, math32.FromPoint(st.Scene.SceneGeom.Size))
 
-	style := hc.Canvas.Get("style")
 
-	// Dividing by the DevicePixelRatio in this way avoids rounding errors (CSS
-	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices
-	// with fractional device pixel ratios
-	// (see https://github.com/cogentcore/core/issues/779 and
-	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
-	style.Set("left", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Pos.X)/screen.DevicePixelRatio))
-	style.Set("top", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Pos.Y)/screen.DevicePixelRatio))
-
-	style.Set("width", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Size.X)/screen.DevicePixelRatio))
-	style.Set("height", fmt.Sprintf("%gpx", float32(st.Scene.SceneGeom.Size.Y)/screen.DevicePixelRatio))
 }
 */
