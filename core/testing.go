@@ -1,4 +1,4 @@
-// Copyright 2023 Cogent Core. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/system/composer"
 )
 
 // getImager is implemented by offscreen.Drawer for [Body.AssertRender].
@@ -45,7 +46,7 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.AsyncUnlock()
 	rw.renderWindow()
 
-	dw := b.Scene.RenderWindow().SystemWindow.Drawer()
+	dw := b.Scene.RenderWindow().SystemWindow.Composer().(*composer.ComposerDrawer).Drawer
 	img := dw.(getImager).GetImage()
 	imagex.Assert(t, img, filename)
 

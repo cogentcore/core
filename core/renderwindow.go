@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -751,6 +750,7 @@ func (sc *Scene) RenderSource(op draw.Op) composer.Source {
 	return SceneSource(sc, op)
 }
 
+/* TODO
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].
 // called within the overall drawer.Start() render pass.
 func (w *renderWindow) fillInsets() {
@@ -779,6 +779,7 @@ func (w *renderWindow) fillInsets() {
 	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
 	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 }
+*/
 
 // renderWindowFlags are atomic bit flags for [renderWindow] state.
 // They must be atomic to prevent race conditions.

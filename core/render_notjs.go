@@ -12,9 +12,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/rasterx"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
-	"cogentcore.org/core/system/driver/base"
 	"golang.org/x/image/draw"
 )
 
@@ -52,7 +50,7 @@ type painterSource struct {
 }
 
 func (ps *painterSource) Draw(c composer.Composer) {
-	cd, ok := c.(*base.ComposerDrawer)
+	cd, ok := c.(*composer.ComposerDrawer)
 	if !ok {
 		return
 	}
@@ -76,12 +74,12 @@ type scrimSource struct {
 }
 
 func (sr *scrimSource) Draw(c composer.Composer) {
-	cd, ok := c.(*base.ComposerDrawer)
+	cd, ok := c.(*composer.ComposerDrawer)
 	if !ok {
 		return
 	}
 	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-	cd.Drawer.Copy(image.Point{}, clr, sr.bbox, draw.Over, system.Unchanged)
+	cd.Drawer.Copy(image.Point{}, clr, sr.bbox, draw.Over, composer.Unchanged)
 }
 
 //////// Sprites
@@ -109,11 +107,11 @@ type spriteSource struct {
 }
 
 func (sr *spriteSource) Draw(c composer.Composer) {
-	cd, ok := c.(*base.ComposerDrawer)
+	cd, ok := c.(*composer.ComposerDrawer)
 	if !ok {
 		return
 	}
 	for _, sd := range sr.sprites {
-		cd.Drawer.Copy(sd.drawPos, sd.pixels, sd.pixels.Bounds(), draw.Over, system.Unchanged)
+		cd.Drawer.Copy(sd.drawPos, sd.pixels, sd.pixels.Bounds(), draw.Over, composer.Unchanged)
 	}
 }

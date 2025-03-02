@@ -31,7 +31,7 @@ type Window struct {
 	Glw *glfw.Window
 
 	// Draw is the [gpudraw.Drawer] used for the Composer.
-	Draw *gpudraw.Drawer
+	Draw *gpudraw.Drawer // TODO: really need this separately?
 
 	// ScreenName is the name of the last known screen this window was on
 	ScreenWindow string
