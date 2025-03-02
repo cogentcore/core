@@ -7,40 +7,22 @@
 package core
 
 import (
-	"image"
-
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
 )
+
+type canvasSource painterSource[*htmlcanvas.Renderer]
 
 // SceneSource returns the [composer.Source] for the given scene
 // using the given suggested draw operation.
 func SceneSource(sc *Scene, op draw.Op) composer.Source {
 	rd := sc.Painter.Renderers[0].(*htmlcanvas.Renderer)
 	render := sc.Painter.RenderDone()
-	return &painterSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
+	return &canvasSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
 }
 
-type painterSource struct {
-
-	// render is the render content.
-	render render.Render
-
-	// renderer is the renderer for drawing the painter content.
-	renderer *htmlcanvas.Renderer
-
-	// drawOp is the [draw.Op] operation: [draw.Src] to copy source,
-	// [draw.Over] to alpha blend.
-	drawOp draw.Op
-
-	// drawPos is the position offset for the [Image] renderer to
-	// use in its Draw to a [composer.Drawer] (i.e., the [Scene] position).
-	drawPos image.Point
-}
-
-func (ps *painterSource) Draw(c composer.Composer) {
+func (ps *canvasSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	cw.Element(ps, "canvas")
 	ps.renderer.Render(ps.render)

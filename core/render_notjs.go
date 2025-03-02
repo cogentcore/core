@@ -10,11 +10,12 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
 )
+
+type rasterxSource painterSource[*rasterx.Renderer]
 
 // SceneSource returns the [composer.Source] for the given scene
 // using the given suggested draw operation.
@@ -27,29 +28,10 @@ func SceneSource(sc *Scene, op draw.Op) composer.Source {
 		return nil
 	}
 	render := sc.Painter.RenderDone()
-	rs := &painterSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
-	return rs
+	return &rasterxSource{render: render, renderer: rd, drawOp: op, drawPos: sc.SceneGeom.Pos}
 }
 
-// painterSource is the [composer.Source] for [paint.Painter] content.
-type painterSource struct {
-
-	// render is the render content.
-	render render.Render
-
-	// renderer is the renderer for drawing the painter content.
-	renderer *rasterx.Renderer
-
-	// drawOp is the [draw.Op] operation: [draw.Src] to copy source,
-	// [draw.Over] to alpha blend.
-	drawOp draw.Op
-
-	// drawPos is the position offset for the [Image] renderer to
-	// use in its Draw to a [composer.Drawer] (i.e., the [Scene] position).
-	drawPos image.Point
-}
-
-func (ps *painterSource) Draw(c composer.Composer) {
+func (ps *rasterxSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
 	unchanged := len(ps.render) == 0
 	if !unchanged {
