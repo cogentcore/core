@@ -53,7 +53,7 @@ func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 }
 
 func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
-	if rs.size == size {
+	if true || rs.size == size { // TODO(newpaint)
 		return
 	}
 	// TODO: truncate/round here? (HTML doesn't support fractional width/height)
@@ -66,6 +66,11 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	rs.ctx.Set("imageSmoothingEnabled", false)
 	rs.ctx.Set("textRendering", "geometricPrecision")
 	// rs.ctx.Set("imageSmoothingQuality", "high")
+}
+
+func (rs *Renderer) SetCanvas(c js.Value) {
+	rs.Canvas = c
+	rs.ctx = rs.Canvas.Call("getContext", "2d")
 }
 
 // Render is the main rendering function.

@@ -8,12 +8,15 @@ package core
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 )
 
 func (ps *paintSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
-	cw.Element(ps, "canvas")
+	rd := ps.renderer.(*htmlcanvas.Renderer)
+
+	rd.SetCanvas(cw.Element(ps, "canvas"))
 	ps.renderer.Render(ps.render)
 }
 

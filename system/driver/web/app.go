@@ -85,7 +85,7 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
-	a.Compose = &composer.ComposerWeb{}
+	a.Compose = composer.NewComposerWeb()
 	a.Resize()
 	// a.InitDrawer() TODO
 	a.Event.Window(events.WinShow)

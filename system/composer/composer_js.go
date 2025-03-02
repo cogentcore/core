@@ -38,6 +38,14 @@ type ComposerWeb struct {
 	active map[uint64]struct{}
 }
 
+// NewComposerWeb returns a new [ComposerWeb] with empty maps.
+func NewComposerWeb() *ComposerWeb {
+	return &ComposerWeb{
+		Pointers: map[Source]uint64{},
+		Elements: map[uint64]js.Value{},
+	}
+}
+
 func (cw *ComposerWeb) Start() {
 	cw.Sources = cw.Sources[:0]
 	clear(cw.Pointers)
