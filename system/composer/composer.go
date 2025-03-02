@@ -4,6 +4,12 @@
 
 package composer
 
+import (
+	"reflect"
+
+	"cogentcore.org/core/base/reflectx"
+)
+
 // Composer performs compositing of an ordered stack of [Source]
 // elements into a target rendering destination (e.g., window).
 type Composer interface {
@@ -31,5 +37,8 @@ func (cp *ComposerBase) Start() {
 }
 
 func (cp *ComposerBase) Add(s Source) {
+	if reflectx.IsNil(reflect.ValueOf(s)) {
+		return
+	}
 	cp.Sources = append(cp.Sources, s)
 }
