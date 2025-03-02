@@ -17,6 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* can get zombie nil open buffers in code -- remove them
+
 * textcore base horizontal scrolling and wrap long no-space lines
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
@@ -25,8 +27,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * filetree 3x update and slow repo open
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
-
-* diff next doesn't scroll both
 
 * renderx/images needs transform updates?
 * svg opacity processing

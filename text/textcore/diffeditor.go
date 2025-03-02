@@ -245,6 +245,7 @@ func (dv *DiffEditor) nextDiff(ab int) bool {
 		}
 	}
 	tva.SetCursorTarget(textpos.Pos{Line: df.I1})
+	tvb.SetCursorTarget(textpos.Pos{Line: df.I1})
 	return true
 }
 
@@ -271,6 +272,7 @@ func (dv *DiffEditor) prevDiff(ab int) bool {
 		}
 	}
 	tva.SetCursorTarget(textpos.Pos{Line: df.I1})
+	tvb.SetCursorTarget(textpos.Pos{Line: df.I1})
 	return true
 }
 
