@@ -58,23 +58,23 @@ type scrimSource struct {
 //////// Sprites
 
 // SpritesSource returns a [composer.Source] for rendering [Sprites].
-func SpritesSource(ss *Sprites, scpos image.Point) composer.Source {
-	sr := &spriteSource{}
-	sr.sprites = make([]spriteRender, 0, len(ss.Order))
-	for _, kv := range ss.Order {
+func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
+	ss := &spritesSource{}
+	ss.sprites = make([]spriteRender, 0, len(sprites.Order))
+	for _, kv := range sprites.Order {
 		sp := kv.Value
 		if !sp.Active {
 			continue
 		}
 		// note: may need to copy pixels but hoping not..
 		sd := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
-		sr.sprites = append(sr.sprites, sd)
+		ss.sprites = append(ss.sprites, sd)
 	}
-	ss.Modified = false
-	return sr
+	sprites.Modified = false
+	return ss
 }
 
-// spriteSource is a [composer.Source] implementation for sprites.
-type spriteSource struct {
+// spritesSource is a [composer.Source] implementation for [Sprites].
+type spritesSource struct {
 	sprites []spriteRender
 }

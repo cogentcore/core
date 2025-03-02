@@ -33,9 +33,9 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	cd.Drawer.Copy(image.Point{}, clr, ss.bbox, draw.Over, composer.Unchanged)
 }
 
-func (sr *spriteSource) Draw(c composer.Composer) {
+func (ss *spritesSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
-	for _, sd := range sr.sprites {
+	for _, sd := range ss.sprites {
 		cd.Drawer.Copy(sd.drawPos, sd.pixels, sd.pixels.Bounds(), draw.Over, composer.Unchanged)
 	}
 }
