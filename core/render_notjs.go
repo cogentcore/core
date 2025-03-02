@@ -33,35 +33,8 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	cd.Drawer.Copy(image.Point{}, clr, ss.bbox, draw.Over, composer.Unchanged)
 }
 
-//////// Sprites
-
-// SpritesSource returns a [composer.Source] for rendering Sprites
-func SpritesSource(ss *Sprites, scpos image.Point) composer.Source {
-	sr := &spriteSource{}
-	sr.sprites = make([]spriteRender, 0, len(ss.Order))
-	for _, kv := range ss.Order {
-		sp := kv.Value
-		if !sp.Active {
-			continue
-		}
-		// note: may need to copy pixels but hoping not..
-		sd := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
-		sr.sprites = append(sr.sprites, sd)
-	}
-	ss.Modified = false
-	return sr
-}
-
-// spriteSource is a [composer.Source] implementation for sprites.
-type spriteSource struct {
-	sprites []spriteRender
-}
-
 func (sr *spriteSource) Draw(c composer.Composer) {
-	cd, ok := c.(*composer.ComposerDrawer)
-	if !ok {
-		return
-	}
+	cd := c.(*composer.ComposerDrawer)
 	for _, sd := range sr.sprites {
 		cd.Drawer.Copy(sd.drawPos, sd.pixels, sd.pixels.Bounds(), draw.Over, composer.Unchanged)
 	}

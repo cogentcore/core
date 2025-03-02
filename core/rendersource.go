@@ -50,7 +50,31 @@ func ScrimSource(bbox image.Rectangle) composer.Source {
 	return &scrimSource{bbox: bbox}
 }
 
-// scrimSource is a [composer.Source] implementation for scrim.
+// scrimSource is a [composer.Source] implementation for a scrim.
 type scrimSource struct {
 	bbox image.Rectangle
+}
+
+//////// Sprites
+
+// SpritesSource returns a [composer.Source] for rendering [Sprites].
+func SpritesSource(ss *Sprites, scpos image.Point) composer.Source {
+	sr := &spriteSource{}
+	sr.sprites = make([]spriteRender, 0, len(ss.Order))
+	for _, kv := range ss.Order {
+		sp := kv.Value
+		if !sp.Active {
+			continue
+		}
+		// note: may need to copy pixels but hoping not..
+		sd := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
+		sr.sprites = append(sr.sprites, sd)
+	}
+	ss.Modified = false
+	return sr
+}
+
+// spriteSource is a [composer.Source] implementation for sprites.
+type spriteSource struct {
+	sprites []spriteRender
 }
