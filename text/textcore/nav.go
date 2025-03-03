@@ -52,6 +52,7 @@ func (ed *Base) SetCursorShow(pos textpos.Pos) {
 // Setting the textpos.PosErr value causes it to go the end of doc, the position
 // of which may not be known at the time the target is set.
 func (ed *Base) SetCursorTarget(pos textpos.Pos) {
+	ed.isScrolling = false
 	ed.targetSet = true
 	ed.cursorTarget = pos
 	ed.NeedsRender()
