@@ -277,31 +277,13 @@ func (rs *Renderer) RenderImage(pimg *pimage.Params) {
 	// TODO: images possibly comparatively not performant on web, so there
 	// might be a better path for things like FillBox.
 	// TODO: have a fast path for [image.RGBA]?
-	size := pimg.Rect.Size() // TODO: is this right?
-	sp := pimg.SourcePos     // starting point
-	buf := make([]byte, 4*size.X*size.Y)
-	for y := 0; y < size.Y; y++ {
-		for x := 0; x < size.X; x++ {
-			i := (y*size.X + x) * 4
-			rgba := colors.AsRGBA(pimg.Source.At(sp.X+x, sp.Y+y)) // TODO: is this performant?
-			buf[i+0] = rgba.R
-			buf[i+1] = rgba.G
-			buf[i+2] = rgba.B
-			buf[i+3] = rgba.A
-		}
-	}
+	// size := pimg.Rect.Size() // TODO: is this right?
 	// TODO: clean this up
-	jsBuf := wgpu.BytesToJS(buf)
-	imageData := js.Global().Get("ImageData").New(jsBuf, size.X, size.Y)
-	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
-	imageBitmap, ok := jsAwait(imageBitmapPromise)
-	if !ok {
-		panic("error while waiting for createImageBitmap promise")
-	}
-
+	jsBuf := wgpu.BytesToJS(pimg.Source.(*image.RGBA).Pix)
+	imageData := js.Global().Get("ImageData").New(jsBuf, pimg.Source.Bounds().Dx(), pimg.Source.Bounds().Dy())
 	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
 	// m = m.Scale(rs.dpm, rs.dpm)
 	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
-	rs.ctx.Call("drawImage", imageBitmap, pimg.Rect.Min.X, pimg.Rect.Min.Y)
+	rs.ctx.Call("putImageData", imageData, pimg.Rect.Min.X, pimg.Rect.Min.Y)
 	// rs.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 }
