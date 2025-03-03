@@ -211,31 +211,31 @@ func (sc *Scene) doUpdate() bool {
 
 	switch {
 	case rc.rebuild:
-		pr := profile.Start("rebuild")
+		// pr := profile.Start("rebuild")
 		sc.doRebuild()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
-		pr.End()
+		// pr.End()
 	case sc.lastRender.needsRestyle(rc):
-		pr := profile.Start("restyle")
+		// pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.layoutRenderScene()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
 		sc.lastRender.saveRender(rc)
-		pr.End()
+		// pr.End()
 	case sc.hasFlag(sceneNeedsLayout):
-		pr := profile.Start("layout")
+		// pr := profile.Start("layout")
 		sc.layoutRenderScene()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
-		pr.End()
+		// pr.End()
 	case sc.hasFlag(sceneNeedsRender):
-		pr := profile.Start("render")
+		// pr := profile.Start("render")
 		sc.doNeedsRender()
 		sc.setFlag(false, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
-		pr.End()
+		// pr.End()
 	default:
 		return false
 	}

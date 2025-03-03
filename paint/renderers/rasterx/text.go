@@ -28,7 +28,9 @@ import (
 
 // RenderText rasterizes the given Text
 func (rs *Renderer) RenderText(txt *render.Text) {
+	// pr := profile.Start("RenderText")
 	rs.TextLines(&txt.Context, txt.Text, txt.Position)
+	// pr.End()
 }
 
 // TextLines rasterizes the given shaped.Lines.

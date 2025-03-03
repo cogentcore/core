@@ -131,6 +131,9 @@ func (ed *Base) SizeUp() {
 
 func (ed *Base) SizeDown(iter int) bool {
 	if iter == 0 {
+		if ed.NeedsRebuild() && ed.Lines != nil {
+			ed.Lines.ReMarkup()
+		}
 		ed.layoutAllLines()
 	} else {
 		ed.reLayoutAllLines()

@@ -22,6 +22,7 @@ type benchTableStruct struct {
 	File  Filename
 }
 
+// Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 func BenchmarkTable(bm *testing.B) {
 	b := NewBody()
 	table := make([]benchTableStruct, 50)
@@ -30,14 +31,15 @@ func BenchmarkTable(bm *testing.B) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(bm, "table/benchmark", func() {
-		b.AsyncLock()
+		w := b.Scene.RenderWindow()
 		for range bm.N {
-			b.Scene.RenderWidget()
+			b.Scene.NeedsRender()
+			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
-		b.AsyncUnlock()
 	})
 }
 
+// Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 func BenchmarkForm(bm *testing.B) {
 	b := NewBody()
 	s := styles.NewStyle()
@@ -48,14 +50,15 @@ func BenchmarkForm(bm *testing.B) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(bm, "form/benchmark", func() {
-		b.AsyncLock()
+		w := b.Scene.RenderWindow()
 		for range bm.N {
-			b.Scene.RenderWidget()
+			b.Scene.NeedsRender()
+			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
-		b.AsyncUnlock()
 	})
 }
 
+// Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 func TestProfileForm(t *testing.T) {
 	b := NewBody()
 	s := styles.NewStyle()
@@ -66,18 +69,19 @@ func TestProfileForm(t *testing.T) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(t, "form/profile", func() {
-		b.AsyncLock()
-		startCPUMemoryProfile()
+		w := b.Scene.RenderWindow()
+		// startCPUMemoryProfile()
 		startTargetedProfile()
 		for range 200 {
-			b.Scene.RenderWidget()
+			b.Scene.NeedsRender()
+			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
-		endCPUMemoryProfile()
 		endTargetedProfile()
-		b.AsyncUnlock()
+		// endCPUMemoryProfile()
 	})
 }
 
+// Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 func TestProfileTable(t *testing.T) {
 	b := NewBody()
 	table := make([]benchTableStruct, 50)
@@ -86,14 +90,14 @@ func TestProfileTable(t *testing.T) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(t, "table/profile", func() {
-		b.AsyncLock()
+		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
 		startTargetedProfile()
 		for range 200 {
-			b.Scene.RenderWidget()
+			b.Scene.NeedsRender()
+			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
-		// endCPUMemoryProfile()
 		endTargetedProfile()
-		b.AsyncUnlock()
+		// endCPUMemoryProfile()
 	})
 }
