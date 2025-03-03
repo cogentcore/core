@@ -35,6 +35,11 @@ func (ss *spritesSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	for _, sr := range ss.sprites {
 		elem := cw.Element(ss, "div") // TODO: support full images
+		if !sr.active {
+			elem.Get("style").Set("display", "none")
+			continue
+		}
+		elem.Get("style").Set("display", "initial")
 		cw.SetElementGeom(elem, sr.drawPos, sr.pixels.Bounds().Size(), 1)
 		elem.Get("style").Set("backgroundColor", colors.AsHex(colors.ToUniform(sr.pixels)))
 	}

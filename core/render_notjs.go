@@ -36,6 +36,9 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 func (ss *spritesSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
 	for _, sr := range ss.sprites {
+		if !sr.active {
+			continue
+		}
 		cd.Drawer.Copy(sr.drawPos, sr.pixels, sr.pixels.Bounds(), draw.Over, composer.Unchanged)
 	}
 }

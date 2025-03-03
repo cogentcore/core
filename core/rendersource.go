@@ -60,15 +60,12 @@ type scrimSource struct {
 // SpritesSource returns a [composer.Source] for rendering [Sprites].
 func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
 	ss := &spritesSource{}
-	ss.sprites = make([]spriteRender, 0, len(sprites.Order))
-	for _, kv := range sprites.Order {
+	ss.sprites = make([]spriteRender, len(sprites.Order))
+	for i, kv := range sprites.Order {
 		sp := kv.Value
-		if !sp.Active {
-			continue
-		}
 		// note: may need to copy pixels but hoping not..
-		sr := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels}
-		ss.sprites = append(ss.sprites, sr)
+		sr := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels, active: sp.Active}
+		ss.sprites[i] = sr
 	}
 	sprites.Modified = false
 	return ss
@@ -77,4 +74,11 @@ func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
 // spritesSource is a [composer.Source] implementation for [Sprites].
 type spritesSource struct {
 	sprites []spriteRender
+}
+
+// spriteRender holds info sufficient for rendering a sprite.
+type spriteRender struct {
+	drawPos image.Point
+	pixels  *image.RGBA
+	active  bool
 }

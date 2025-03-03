@@ -202,9 +202,3 @@ func (ss *Sprites) InactivateSprite(name string) {
 		ss.Modified = true
 	}
 }
-
-// spriteRender holds info sufficient for rendering a sprite.
-type spriteRender struct {
-	drawPos image.Point
-	pixels  *image.RGBA
-}
