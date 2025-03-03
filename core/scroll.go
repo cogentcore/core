@@ -136,8 +136,8 @@ func (fr *Frame) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) 
 // but can also set others as needed.
 // Max and VisiblePct are automatically set based on ScrollValues maxSize, visPct.
 func (fr *Frame) SetScrollParams(d math32.Dims, sb *Slider) {
-	sb.Step = fr.Styles.Text.FontSize.Dots // step by lines
-	sb.PageStep = 10.0 * sb.Step           // todo: more dynamic
+	sb.Step = 0.5 * fr.Styles.Text.FontSize.Dots // step by lines
+	sb.PageStep = 10.0 * sb.Step                 // todo: more dynamic
 }
 
 // PositionScrolls arranges scrollbars
