@@ -20,19 +20,23 @@ import (
 )
 
 func TestTextSimple(t *testing.T) {
-	size := image.Point{100, 100}
+	size := image.Point{250, 100}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
 	RunTest(t, "text-simple", size.X, size.Y, func(pc *Painter) {
 		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
 		tsty := text.NewStyle()
 		fsty := rich.NewStyle()
-		tsty.FontSize.Dp(24)
 		tsty.ToDots(&pc.UnitContext)
-		tx, err := htmltext.HTMLToRich([]byte("Text"), fsty, nil)
+		tx, err := htmltext.HTMLToRich([]byte("abcdefghijklmnopqrstuvwxyz.,:;!"), fsty, nil)
 		assert.NoError(t, err)
 		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
-		pos := math32.Vector2{10, 5}
+		pos := math32.Vector2{5, 5}
+		pc.TextLines(lns, pos)
+		tx, err = htmltext.HTMLToRich([]byte("ABCDEFGHIJKLMNOPQRSTUV."), fsty, nil)
+		assert.NoError(t, err)
+		lns = txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+		pos = math32.Vector2{5, 50}
 		pc.TextLines(lns, pos)
 	})
 }

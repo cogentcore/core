@@ -20,23 +20,31 @@ import (
 
 var (
 	// TheGlyphCache is the shared font glyph bitmap render cache.
-	TheGlyphCache GlyphCache
+	theGlyphCache glyphCache
 
 	// UseGlyphCache determines if the glyph cache is used.
 	UseGlyphCache = true
 )
 
+const (
+	// glyphMaxSize is the max size in either dim for the render mask.
+	glyphMaxSize = 30
+
+	// glyphMaskBorder is the extra amount on each side to include around the glyph bounds.
+	glyphMaskBorder = 4
+
+	// glyphMaskOffsets is the number of different offsets to render, in each axis.
+	glyphMaskOffsets = 2
+)
+
 func init() {
-	TheGlyphCache.Init()
+	theGlyphCache.init()
 }
 
 // GlyphCache holds cached rendered font glyphs.
-type GlyphCache struct {
-	// Faces is a map of faces.
-	Faces map[*font.Face]*FaceCache
-
-	// rendering:
-	MaxSize    image.Point
+type glyphCache struct {
+	glyphs     map[*font.Face]map[glyphKey]*image.Alpha
+	maxSize    image.Point
 	image      *image.RGBA
 	scanner    *scan.Scanner
 	imgSpanner *scan.ImgSpanner
@@ -44,21 +52,19 @@ type GlyphCache struct {
 	sync.Mutex
 }
 
-type sizeGID struct {
-	size image.Point
-	gid  font.GID
+// glyphKey is the key for encoding a mask render.
+type glyphKey struct {
+	gid font.GID // uint32
+	sx  uint8    // size
+	sy  uint8
+	ox  uint8 // offset
+	oy  uint8
 }
 
-// FaceCache holds the cached glyphs for given face.
-type FaceCache struct {
-	Face   *font.Face
-	Glyphs map[sizeGID]*image.Alpha
-}
-
-func (fc *GlyphCache) Init() {
-	fc.Faces = make(map[*font.Face]*FaceCache)
-	fc.MaxSize = image.Point{30, 30}
-	sz := fc.MaxSize
+func (fc *glyphCache) init() {
+	fc.glyphs = make(map[*font.Face]map[glyphKey]*image.Alpha)
+	fc.maxSize = image.Point{glyphMaxSize, glyphMaxSize}
+	sz := fc.maxSize
 	fc.image = image.NewRGBA(image.Rectangle{Max: sz})
 	fc.imgSpanner = scan.NewImgSpanner(fc.image)
 	fc.scanner = scan.NewScanner(fc.imgSpanner, sz.X, sz.Y)
@@ -67,45 +73,62 @@ func (fc *GlyphCache) Init() {
 	fc.filler.SetColor(colors.Uniform(color.Black))
 }
 
-// Glyph returns an existing cached glyph or a newly rendered one.
-func (gc *GlyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.GlyphOutline, scale float32) *image.Alpha {
+// Glyph returns an existing cached glyph or a newly rendered one,
+// and the top-left rendering position to use, based on pos arg.
+// fractional offsets are supported to improve quality.
+func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.GlyphOutline, scale float32, pos math32.Vector2) (*image.Alpha, image.Point) {
 	gc.Lock()
 	defer gc.Unlock()
 
 	// fmt.Printf("g: %#v\n", g)
 	fsize := image.Point{X: int(g.Width.Ceil()), Y: -int(g.Height.Ceil())}
-	size := fsize.Add(image.Point{8, 8})
-	if size.X > gc.MaxSize.X || size.Y > gc.MaxSize.Y {
-		return nil
+	size := fsize.Add(image.Point{2 * glyphMaskBorder, 2 * glyphMaskBorder})
+	if size.X > glyphMaxSize || size.Y > glyphMaxSize {
+		return nil, image.Point{}
 	}
-	szgid := sizeGID{size: fsize, gid: g.GlyphID}
+	// fmt.Println("wd, ht:", math32.FromFixed(g.Width), -math32.FromFixed(g.Height), "size:", size)
 
-	fc, hasfc := gc.Faces[face]
+	pf := pos.Floor()
+	pi := pf.ToPoint().Sub(image.Point{glyphMaskBorder, glyphMaskBorder})
+	pi.X -= g.XBearing.Round()
+	pi.Y -= g.YBearing.Round()
+	off := pos.Sub(pf)
+	oi := off.MulScalar(glyphMaskOffsets).Floor().ToPoint()
+	// fmt.Println("pos:", pos, "oi:", oi, "pi:", pi)
+
+	key := glyphKey{gid: g.GlyphID, sx: uint8(fsize.X), sy: uint8(fsize.Y), ox: uint8(oi.X), oy: uint8(oi.Y)}
+
+	fc, hasfc := gc.glyphs[face]
 	if hasfc {
-		mask := fc.Glyphs[szgid]
+		mask := fc[key]
 		if mask != nil {
-			return mask
+			return mask, pi
+		}
+	} else {
+		fc = make(map[glyphKey]*image.Alpha)
+	}
+
+	rkey := key
+	for yo := range glyphMaskOffsets {
+		for xo := range glyphMaskOffsets {
+			mask := gc.renderGlyph(face, g.GlyphID, g, outline, size, scale, xo, yo)
+			rkey.ox = uint8(xo)
+			rkey.oy = uint8(yo)
+			fc[rkey] = mask
 		}
 	}
-	mask := gc.renderGlyph(face, g.GlyphID, g, outline, size, scale)
-	if !hasfc {
-		fc = &FaceCache{Face: face}
-		fc.Glyphs = make(map[sizeGID]*image.Alpha)
-	}
-	fc.Glyphs[szgid] = mask
-	gc.Faces[face] = fc
-	return mask
+	gc.glyphs[face] = fc
+	return fc[key], pi
 }
 
 // renderGlyph renders the given glyph and caches the result.
-func (gc *GlyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph, outline font.GlyphOutline, size image.Point, scale float32) *image.Alpha {
+func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph, outline font.GlyphOutline, size image.Point, scale float32, xo, yo int) *image.Alpha {
 	// clear target:
 	draw.Draw(gc.image, gc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
 
-	pos := math32.Vec2(math32.FromFixed(g.XOffset)+math32.FromFixed(g.XBearing), -math32.FromFixed(g.YOffset)+math32.FromFixed(g.YBearing))
-	// fmt.Println(pos)
-	x := pos.X + 4
-	y := pos.Y + 4
+	od := float32(1) / glyphMaskOffsets
+	x := float32(g.XBearing.Round()) + float32(xo)*od + glyphMaskBorder
+	y := float32(g.YBearing.Round()) + float32(yo)*od + glyphMaskBorder
 	rs := gc.filler
 	rs.Clear()
 	for _, s := range outline.Segments {

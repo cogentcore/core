@@ -185,9 +185,9 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	}
 
 	if UseGlyphCache && identity && stroke == nil {
-		mask := TheGlyphCache.Glyph(run.Face, g, outline, scale)
+		mask, pi := theGlyphCache.Glyph(run.Face, g, outline, scale, pos)
 		if mask != nil {
-			rs.GlyphMask(ctx, run, g, fill, stroke, bb, pos, mask)
+			rs.GlyphMask(ctx, run, g, fill, stroke, bb, pi, mask)
 			return
 		}
 	}
@@ -234,12 +234,14 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	rs.Path.Clear()
 }
 
-func (rs *Renderer) GlyphMask(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, mask *image.Alpha) error {
-	y := math32.Round(pos.Y - 4)
-	top := y - math32.Round(math32.FromFixed(g.YBearing))
-	dp := image.Point{int(math32.Round(pos.X - 4)), int(top)}
+func (rs *Renderer) GlyphMask(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, fill, stroke image.Image, bb math32.Box2, pos image.Point, mask *image.Alpha) error {
+	if g.XOffset != 0 || g.YOffset != 0 {
+		fmt.Println("mask offset:", math32.FromFixed(g.XOffset), math32.FromFixed(g.YOffset), "bearing:", math32.FromFixed(g.XBearing), math32.FromFixed(g.YBearing))
+	}
+	pos.X += g.XOffset.Round()
+	pos.Y += g.YOffset.Round()
 	mbb := mask.Bounds()
-	dbb := mbb.Add(dp)
+	dbb := mbb.Add(pos)
 	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())
 	if ibb == (image.Rectangle{}) {
 		return nil

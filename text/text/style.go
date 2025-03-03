@@ -106,6 +106,7 @@ func (ts *Style) Defaults() {
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ts *Style) ToDots(uc *units.Context) {
 	ts.FontSize.ToDots(uc)
+	ts.FontSize.Dots = math32.Round(ts.FontSize.Dots)
 	ts.Indent.ToDots(uc)
 }
 
