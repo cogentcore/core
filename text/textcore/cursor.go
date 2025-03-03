@@ -90,14 +90,14 @@ func (ed *Base) renderCursor(on bool) {
 	if ed == nil || ed.This == nil {
 		return
 	}
+	if ed.Scene == nil {
+		return
+	}
+	ms := ed.Scene.Stage.Main
+	if ms == nil {
+		return
+	}
 	if !on {
-		if ed.Scene == nil {
-			return
-		}
-		ms := ed.Scene.Stage.Main
-		if ms == nil {
-			return
-		}
 		spnm := ed.cursorSpriteName()
 		ms.Sprites.InactivateSprite(spnm)
 		return
@@ -129,7 +129,7 @@ func (ed *Base) cursorSpriteName() string {
 // depending on render status.
 func (ed *Base) cursorSprite(on bool) *core.Sprite {
 	sc := ed.Scene
-	if sc == nil {
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
 		return nil
 	}
 	ms := sc.Stage.Main

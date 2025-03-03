@@ -173,8 +173,8 @@ func (wb *WidgetBase) doNeedsRender() {
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
-			cw.RenderWidget()
-			return tree.Break // don't go any deeper
+			cw.AsWidget().RenderWidget() // Top()
+			return tree.Break            // don't go any deeper
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
@@ -393,6 +393,37 @@ func (wb *WidgetBase) EndRender() {
 // renders the standard box model.
 func (wb *WidgetBase) Render() {
 	wb.RenderStandardBox()
+}
+
+// RenderWidgetTop is called on the top widget in the tree that needs
+// to be rendered. It goes up to find a suitable parent widget to render.
+func (wb *WidgetBase) RenderWidgetTop() {
+	if wb == nil || wb.This == nil {
+		return
+	}
+	wb.setFlag(false, widgetNeedsRender) // done!
+	sz := math32.FromPoint(wb.Geom.TotalBBox.Size())
+	if sz == (math32.Vector2{}) {
+		// fmt.Println("nil size no render:", wb, sz)
+		return
+	}
+	// fmt.Println("\nstart:", wb, "sz:", sz)
+	prelThr := float32(1.3)
+	prev := wb
+	par := wb.parentWidget()
+	for par != nil {
+		psz := math32.FromPoint(par.Geom.TotalBBox.Size())
+		prel := psz.Div(sz)
+		prmax := min(prel.X, prel.Y)
+		// fmt.Println("par:", par, "prmax:", prmax)
+		if prmax > prelThr {
+			break
+		}
+		prev = par
+		par = par.parentWidget()
+	}
+	// fmt.Println("render prev:", prev)
+	prev.This.(Widget).RenderWidget()
 }
 
 // RenderWidget renders the widget and any parts and children that it has.

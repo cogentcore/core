@@ -17,23 +17,27 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* optimized next level up render
+* dotted underline for misspelling
+* core/values.go/FontButton -- need font list.
+
 * textcore base horizontal scrolling and wrap long no-space lines
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
-
-* can get zombie nil open buffers in code -- under what circumstances?? autosave renames?
 
 * filetree 3x update and slow repo open
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
 
-* renderx/images needs transform updates?
 * svg opacity processing
 
-* optimized next level up render
-
-* dotted underline for misspelling
 * better job finding path fragments from file links -- iteratively try stuff.
-* core/values.go/FontButton -- need font list.
+
+* can get zombie nil open buffers in code -- under what circumstances?? autosave renames?
+
+* renderx/images needs transform updates?
+
+### Lowpri
+
 * cleanup unused base stuff
 
 * textfield NewLayout causes dreaded shadow accumulation on popup dialogs. mostly fixed by getting the initial layout size correct, but when it wraps, it will cause this.
