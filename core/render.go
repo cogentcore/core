@@ -173,8 +173,8 @@ func (wb *WidgetBase) doNeedsRender() {
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
-			cw.AsWidget().RenderWidget() // Top()
-			return tree.Break            // don't go any deeper
+			cw.RenderWidget() // Top()
+			return tree.Break // don't go any deeper
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {

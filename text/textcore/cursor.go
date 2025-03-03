@@ -90,13 +90,10 @@ func (ed *Base) renderCursor(on bool) {
 	if ed == nil || ed.This == nil {
 		return
 	}
-	if ed.Scene == nil {
+	if ed.Scene == nil || ed.Scene.Stage == nil || ed.Scene.Stage.Main == nil {
 		return
 	}
 	ms := ed.Scene.Stage.Main
-	if ms == nil {
-		return
-	}
 	if !on {
 		spnm := ed.cursorSpriteName()
 		ms.Sprites.InactivateSprite(spnm)

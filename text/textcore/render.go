@@ -24,15 +24,18 @@ func (ed *Base) reLayout() {
 	if ed.Lines == nil {
 		return
 	}
+	prevLines := ed.linesSize.Y
 	lns := ed.Lines.ViewLines(ed.viewId)
-	if lns == ed.linesSize.Y {
+	if lns == prevLines {
 		return
 	}
-	prevLines := ed.linesSize.Y
 	ed.layoutAllLines()
 	chg := ed.ManageOverflow(1, true)
-	// fmt.Println(chg, lns, ed.visSize.Y, ed.linesSize.Y)
-	if chg || prevLines != ed.linesSize.Y {
+	if ed.Styles.Grow.Y == 0 && lns < maxGrowLines || prevLines < maxGrowLines {
+		chg = prevLines != ed.linesSize.Y || chg
+	}
+	if chg {
+		// fmt.Println(chg, lns, prevLines, ed.visSize.Y, ed.linesSize.Y)
 		ed.NeedsLayout()
 		if !ed.HasScroll[math32.Y] {
 			ed.scrollPos = 0
@@ -46,6 +49,7 @@ func (ed *Base) RenderWidget() {
 		if ed.targetSet {
 			ed.scrollCursorToTarget()
 		}
+		ed.scrollCursorToCenterIfHidden()
 		ed.PositionScrolls()
 		ed.renderLines()
 		if ed.StateIs(states.Focused) {

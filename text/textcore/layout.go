@@ -106,10 +106,10 @@ func (ed *Base) sizeToLines() {
 	if ed.Styles.Grow.Y > 0 {
 		return
 	}
-	nln := ed.Lines.NumLines()
-	if ed.linesSize.Y > 0 { // we have already been through layout
-		nln = ed.linesSize.Y
-	}
+	nln := ed.Lines.ViewLines(ed.viewId)
+	// if ed.linesSize.Y > 0 { // we have already been through layout
+	// 	nln = ed.linesSize.Y
+	// }
 	nln = min(maxGrowLines, nln)
 	maxh := float32(nln) * ed.charSize.Y
 	sz := &ed.Geom.Size
@@ -261,6 +261,9 @@ func (ed *Base) scrollCursorToTarget() {
 // scrollToCenterIfHidden checks if the given position is not in view,
 // and scrolls to center if so. returns false if in view already.
 func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
+	if ed.Lines == nil {
+		return false
+	}
 	vp := ed.Lines.PosToView(ed.viewId, pos)
 	spos := ed.Geom.ContentBBox.Min.Y
 	spos += int(ed.LineNumberPixels())
