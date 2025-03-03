@@ -48,11 +48,16 @@ func BenchmarkForm(bm *testing.B) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(bm, "form/benchmark", func() {
-		b.AsyncLock()
+		w := b.Scene.RenderWindow()
 		for range bm.N {
-			b.Scene.RenderWidget()
+			b.Scene.NeedsRender()
+			w.renderWindow()
 		}
-		b.AsyncUnlock()
+		// b.AsyncLock()
+		// for range bm.N {
+		// 	b.Scene.RenderWidget()
+		// }
+		// b.AsyncUnlock()
 	})
 }
 
@@ -66,15 +71,20 @@ func TestProfileForm(t *testing.T) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
 	b.AssertRender(t, "form/profile", func() {
-		b.AsyncLock()
-		startCPUMemoryProfile()
+		// b.AsyncLock()
+		// startCPUMemoryProfile()
 		startTargetedProfile()
-		for range 1 {
-			b.Scene.RenderWidget()
+		w := b.Scene.RenderWindow()
+		for range 200 {
+			b.Scene.NeedsRender()
+			w.renderWindow()
 		}
-		endCPUMemoryProfile()
+		// for range 1 {
+		// 	b.Scene.RenderWidget()
+		// }
 		endTargetedProfile()
-		b.AsyncUnlock()
+		// endCPUMemoryProfile()
+		// b.AsyncUnlock()
 	})
 }
 
