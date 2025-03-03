@@ -49,7 +49,9 @@ func (ed *Base) RenderWidget() {
 		if ed.targetSet {
 			ed.scrollCursorToTarget()
 		}
-		ed.scrollCursorToCenterIfHidden()
+		if !ed.isScrolling {
+			ed.scrollCursorToCenterIfHidden()
+		}
 		ed.PositionScrolls()
 		ed.renderLines()
 		if ed.StateIs(states.Focused) {

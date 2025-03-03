@@ -172,6 +172,7 @@ func (ed *Editor) shiftSelectExtend(kt events.Event) {
 
 // keyInput handles keyboard input into the text field and from the completion menu
 func (ed *Editor) keyInput(e events.Event) {
+	ed.isScrolling = false
 	if core.DebugSettings.KeyEventTrace {
 		fmt.Printf("View KeyInput: %v\n", ed.Path())
 	}
@@ -639,9 +640,13 @@ func (ed *Editor) handleMouse() {
 		}
 		ed.NeedsRender()
 	})
+	ed.On(events.Scroll, func(e events.Event) {
+		ed.isScrolling = true
+	})
 	ed.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
 		ed.SetState(true, states.Sliding)
+		ed.isScrolling = true
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		if ed.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
@@ -660,6 +665,10 @@ func (ed *Editor) handleMouse() {
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		ed.setCursorFromMouse(pt, newPos, events.SelectOne)
+	})
+	ed.On(events.SlideStop, func(e events.Event) {
+		e.SetHandled()
+		ed.isScrolling = false
 	})
 }
 

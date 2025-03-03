@@ -121,6 +121,10 @@ type Base struct { //core:embedder
 	// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
 	cursorMu sync.Mutex
 
+	// isScrolling is true when scrolling: prevents keeping current cursor position
+	// in view.
+	isScrolling bool
+
 	// cursorTarget is the target cursor position for externally set targets.
 	// It ensures that the target position is visible.
 	cursorTarget textpos.Pos

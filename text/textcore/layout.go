@@ -29,7 +29,7 @@ func (ed *Base) styleSizes() {
 	}
 	if lno {
 		ed.hasLineNumbers = true
-		ed.lineNumberOffset = ed.lineNumberDigits + 3
+		ed.lineNumberOffset = ed.lineNumberDigits + 2
 	} else {
 		ed.hasLineNumbers = false
 		ed.lineNumberOffset = 0
@@ -171,6 +171,7 @@ func (ed *Base) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
 }
 
 func (ed *Base) ScrollChanged(d math32.Dims, sb *core.Slider) {
+	ed.isScrolling = true
 	if d == math32.X {
 		ed.Frame.ScrollChanged(d, sb)
 		return

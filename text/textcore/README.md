@@ -17,6 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* mouse scrolling doesn't work for the in view logic
+
 * dotted underline for misspelling
 * core/values.go/FontButton -- need font list.
 
