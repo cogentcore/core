@@ -17,7 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* optimized next level up render
 * dotted underline for misspelling
 * core/values.go/FontButton -- need font list.
 
@@ -46,6 +45,7 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * xyz physics GrabEyeImg causes crashing with goroutine renderAsync in renderwindow, but otherwise is ok
 
+* optimized next level up render: no clear advantage; not clear what the point is?
 
 Check:
 * textcore editor vertical scroll enabled off by 1 -- changed scrollbar logic -- test if ok
