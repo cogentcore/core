@@ -18,14 +18,20 @@ import (
 	"github.com/go-text/typesetting/shaping"
 )
 
-var TheFontCache FontCache
+var (
+	// TheGlyphCache is the shared font glyph bitmap render cache.
+	TheGlyphCache GlyphCache
+
+	// UseGlyphCache determines if the glyph cache is used.
+	UseGlyphCache = true
+)
 
 func init() {
-	TheFontCache.Init()
+	TheGlyphCache.Init()
 }
 
-// FontCache holds cached rendered font glyphs.
-type FontCache struct {
+// GlyphCache holds cached rendered font glyphs.
+type GlyphCache struct {
 	// Faces is a map of faces.
 	Faces map[*font.Face]*FaceCache
 
@@ -49,57 +55,58 @@ type FaceCache struct {
 	Glyphs map[sizeGID]*image.Alpha
 }
 
-func (fc *FontCache) Init() {
+func (fc *GlyphCache) Init() {
 	fc.Faces = make(map[*font.Face]*FaceCache)
-	fc.MaxSize = image.Point{100, 100}
+	fc.MaxSize = image.Point{30, 30}
 	sz := fc.MaxSize
 	fc.image = image.NewRGBA(image.Rectangle{Max: sz})
 	fc.imgSpanner = scan.NewImgSpanner(fc.image)
 	fc.scanner = scan.NewScanner(fc.imgSpanner, sz.X, sz.Y)
 	fc.filler = NewFiller(sz.X, sz.Y, fc.scanner)
 	fc.filler.SetWinding(true)
-	fc.filler.SetColor(color.Black)
+	fc.filler.SetColor(colors.Uniform(color.Black))
 }
 
-// GetRenderGlyph returns an existing cached glyph or a newly rendered one.
-func (cc *FontCache) GetRenderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph, outline font.GlyphOutline, scale float32) *image.Alpha {
-	cc.Lock()
-	defer cc.Unlock()
+// Glyph returns an existing cached glyph or a newly rendered one.
+func (gc *GlyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.GlyphOutline, scale float32) *image.Alpha {
+	gc.Lock()
+	defer gc.Unlock()
 
-	size := image.Point{X: int(g.Width.Ceil()), Y: int(g.Height.Ceil())}
-	szgid := sizeGID{size: size, gid: gid}
-	gc := cc.glyph(face, szgid)
-	if gc != nil {
-		return gc
+	// fmt.Printf("g: %#v\n", g)
+	fsize := image.Point{X: int(g.Width.Ceil()), Y: -int(g.Height.Ceil())}
+	size := fsize.Add(image.Point{8, 8})
+	if size.X > gc.MaxSize.X || size.Y > gc.MaxSize.Y {
+		return nil
 	}
-	mask := cc.renderGlyph(face, gid, g, outline, size, scale)
-	fc, ok := cc.Faces[face]
-	if !ok {
+	szgid := sizeGID{size: fsize, gid: g.GlyphID}
+
+	fc, hasfc := gc.Faces[face]
+	if hasfc {
+		mask := fc.Glyphs[szgid]
+		if mask != nil {
+			return mask
+		}
+	}
+	mask := gc.renderGlyph(face, g.GlyphID, g, outline, size, scale)
+	if !hasfc {
 		fc = &FaceCache{Face: face}
 		fc.Glyphs = make(map[sizeGID]*image.Alpha)
 	}
 	fc.Glyphs[szgid] = mask
-	return gc
-}
-
-// glyph returns a cached glyph.
-func (cc *FontCache) glyph(face *font.Face, szgid sizeGID) *image.Alpha {
-	fc, ok := cc.Faces[face]
-	if !ok {
-		return nil
-	}
-	return fc.Glyphs[szgid]
+	gc.Faces[face] = fc
+	return mask
 }
 
 // renderGlyph renders the given glyph and caches the result.
-func (cc *FontCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph, outline font.GlyphOutline, size image.Point, scale float32) *image.Alpha {
+func (gc *GlyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph, outline font.GlyphOutline, size image.Point, scale float32) *image.Alpha {
 	// clear target:
-	draw.Draw(cc.image, cc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
+	draw.Draw(gc.image, gc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
 
-	pos := math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset))
-	x := pos.X
-	y := pos.Y
-	rs := cc.filler
+	pos := math32.Vec2(math32.FromFixed(g.XOffset)+math32.FromFixed(g.XBearing), -math32.FromFixed(g.YOffset)+math32.FromFixed(g.YBearing))
+	// fmt.Println(pos)
+	x := pos.X + 4
+	y := pos.Y + 4
+	rs := gc.filler
 	rs.Clear()
 	for _, s := range outline.Segments {
 		p0 := math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y)
@@ -122,6 +129,8 @@ func (cc *FontCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph
 	rs.Clear()
 	bb := image.Rectangle{Max: size}
 	mask := image.NewAlpha(bb)
-	draw.Draw(mask, bb, cc.image, image.Point{}, draw.Src)
+	draw.Draw(mask, bb, gc.image, image.Point{}, draw.Src)
+	// fmt.Println("size:", size, *mask)
+	// fmt.Println("render:", gid, size)
 	return mask
 }

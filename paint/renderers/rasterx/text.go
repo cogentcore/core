@@ -35,6 +35,8 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 // The text will be drawn starting at the start pixel position, which specifies the
 // left baseline location of the first text item..
 func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32.Vector2) {
+	m := ctx.Transform
+	identity := m == math32.Identity2()
 	off := pos.Add(lns.Offset)
 	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
 	// tbb := lns.Bounds.Translate(off)
@@ -42,12 +44,12 @@ func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32
 	clr := colors.Uniform(lns.Color)
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
-		rs.TextLine(ctx, ln, lns, clr, off)
+		rs.TextLine(ctx, ln, lns, clr, off, identity)
 	}
 }
 
 // TextLine rasterizes the given shaped.Line.
-func (rs *Renderer) TextLine(ctx *render.Context, ln *shaped.Line, lns *shaped.Lines, clr image.Image, off math32.Vector2) {
+func (rs *Renderer) TextLine(ctx *render.Context, ln *shaped.Line, lns *shaped.Lines, clr image.Image, off math32.Vector2, identity bool) {
 	start := off.Add(ln.Offset)
 	off = start
 	// tbb := ln.Bounds.Translate(off)
@@ -64,7 +66,7 @@ func (rs *Renderer) TextLine(ctx *render.Context, ln *shaped.Line, lns *shaped.L
 	off = start
 	for ri := range ln.Runs {
 		run := ln.Runs[ri].(*shapedgt.Run)
-		rs.TextRun(ctx, run, ln, lns, clr, off)
+		rs.TextRun(ctx, run, ln, lns, clr, off, identity)
 		if run.Direction.IsVertical() {
 			off.Y += run.Advance()
 		} else {
@@ -106,7 +108,7 @@ func (rs *Renderer) TextRunRegions(ctx *render.Context, run *shapedgt.Run, ln *s
 // TextRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, off math32.Vector2) {
+func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, clr image.Image, off math32.Vector2, identity bool) {
 	// dir := run.Direction
 	rbb := run.MaxBounds.Translate(off)
 	fill := clr
@@ -150,10 +152,10 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		data := run.Face.GlyphData(g.GlyphID)
 		switch format := data.(type) {
 		case font.GlyphOutline:
-			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos)
+			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos, identity)
 		case font.GlyphBitmap:
 			fmt.Println("bitmap")
-			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos)
+			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
 		case font.GlyphSVG:
 			fmt.Println("svg", format)
 			// 	_ = rs.GlyphSVG(ctx, g, format, fill, stroke, bb, pos)
@@ -171,15 +173,23 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	}
 }
 
-func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) {
+func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, identity bool) {
 	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
 	x := pos.X
 	y := pos.Y
-
 	if len(outline.Segments) == 0 {
 		// fmt.Println("nil path:", g.GlyphID)
 		return
 	}
+
+	if UseGlyphCache && identity && stroke == nil {
+		mask := TheGlyphCache.Glyph(run.Face, g, outline, scale)
+		if mask != nil {
+			rs.GlyphMask(ctx, run, g, fill, stroke, bb, pos, mask)
+			return
+		}
+	}
+
 	rs.Path.Clear()
 	m := ctx.Transform
 	for _, s := range outline.Segments {
@@ -222,7 +232,22 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	rs.Path.Clear()
 }
 
-func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2) error {
+func (rs *Renderer) GlyphMask(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, mask *image.Alpha) error {
+	y := math32.Round(pos.Y - 4)
+	top := y - math32.Round(math32.FromFixed(g.YBearing))
+	dp := image.Point{int(math32.Round(pos.X - 4)), int(top)}
+	mbb := mask.Bounds()
+	dbb := mbb.Add(dp)
+	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())
+	if ibb == (image.Rectangle{}) {
+		return nil
+	}
+	mp := ibb.Min.Sub(dbb.Min)
+	draw.DrawMask(rs.image, ibb, fill, image.Point{}, mask, mp, draw.Over)
+	return nil
+}
+
+func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, identity bool) error {
 	// scaled glyph rect content
 	// todo: this needs serious work to function with transforms etc.
 	x := pos.X
@@ -251,7 +276,7 @@ func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shapi
 	}
 
 	if bitmap.Outline != nil {
-		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos)
+		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)
 	}
 	return nil
 }
