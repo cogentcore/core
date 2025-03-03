@@ -38,6 +38,10 @@ type ComposerWeb struct {
 	// active contains the active HTML elements, keyed using the corresponding source
 	// context pointer. It is used in [ComposerWeb.Compose].
 	active map[uint64]struct{}
+
+	// DPR is the device pixel ratio, which defaults to 1 and should
+	// be set by the consumer of this type.
+	DPR float32
 }
 
 // NewComposerWeb returns a new [ComposerWeb] with empty maps.
@@ -45,6 +49,7 @@ func NewComposerWeb() *ComposerWeb {
 	return &ComposerWeb{
 		Pointers: map[Source]uint64{},
 		Elements: map[uint64]js.Value{},
+		DPR:      1,
 	}
 }
 
@@ -100,8 +105,8 @@ func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
 	return elem
 }
 
-// SetElementGeom sets the geometry of the given element using the given device pixel ratio.
-func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point, dpr float32) {
+// SetElementGeom sets the geometry of the given element.
+func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point) {
 	if !elem.Get("width").IsUndefined() {
 		if elem.Get("width").Int() != size.X {
 			elem.Set("width", size.X)
@@ -120,9 +125,9 @@ func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point, dpr 
 	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313).
 	// By starting with the integer pixel size used in HTML and dividing through floats from there, we guarantee
 	// that we are correctly aligned with the HTML pixel values.
-	style.Set("left", fmt.Sprintf("%gpx", float32(pos.X)/dpr))
-	style.Set("top", fmt.Sprintf("%gpx", float32(pos.Y)/dpr))
+	style.Set("left", fmt.Sprintf("%gpx", float32(pos.X)/cw.DPR))
+	style.Set("top", fmt.Sprintf("%gpx", float32(pos.Y)/cw.DPR))
 
-	style.Set("width", fmt.Sprintf("%gpx", float32(size.X)/dpr))
-	style.Set("height", fmt.Sprintf("%gpx", float32(size.Y)/dpr))
+	style.Set("width", fmt.Sprintf("%gpx", float32(size.X)/cw.DPR))
+	style.Set("height", fmt.Sprintf("%gpx", float32(size.Y)/cw.DPR))
 }

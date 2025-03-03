@@ -115,6 +115,7 @@ func UserAgentToOS(ua string) system.Platforms {
 // Resize updates the app sizing information and sends a Resize event.
 func (a *App) Resize() {
 	a.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	a.Compose.DPR = a.Scrn.DevicePixelRatio
 	dpi := 160 * a.Scrn.DevicePixelRatio
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
