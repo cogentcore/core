@@ -111,18 +111,11 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 		fc = make(map[glyphKey]*image.Alpha)
 	}
 
-	rkey := key
-	for yo := range glyphMaskOffsets {
-		for xo := range glyphMaskOffsets {
-			mask := gc.renderGlyph(face, g.GlyphID, g, outline, size, scale, xo, yo)
-			rkey.ox = uint8(xo)
-			rkey.oy = uint8(yo)
-			fc[rkey] = mask
-		}
-	}
+	mask := gc.renderGlyph(face, g.GlyphID, g, outline, size, scale, oi.X, oi.Y)
+	fc[key] = mask
 	gc.glyphs[face] = fc
 	// fmt.Println(gc.CacheSize())
-	return fc[key], pi
+	return mask, pi
 }
 
 // renderGlyph renders the given glyph and caches the result.

@@ -50,7 +50,3 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * optimized next level up render: no clear advantage; not clear what the point is?
 
-Check:
-* textcore editor vertical scroll enabled off by 1 -- changed scrollbar logic -- test if ok
-
-

@@ -56,7 +56,7 @@ func TestTextMarkup(t *testing.T) {
 	size := image.Point{480, 400}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
-	RunTest(t, "text-markup", size.X, size.Y, func(pc *Painter) {
+	RunTest(t, "text/markup", size.X, size.Y, func(pc *Painter) {
 		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
 		tsty := text.NewStyle()
 		fsty := rich.NewStyle()
