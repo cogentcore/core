@@ -13,6 +13,7 @@ import (
 	_ "image/jpeg" // load image formats for users of the API
 	_ "image/png"
 
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
@@ -28,9 +29,9 @@ import (
 
 // RenderText rasterizes the given Text
 func (rs *Renderer) RenderText(txt *render.Text) {
-	// pr := profile.Start("RenderText")
+	pr := profile.Start("RenderText")
 	rs.TextLines(&txt.Context, txt.Text, txt.Position)
-	// pr.End()
+	pr.End()
 }
 
 // TextLines rasterizes the given shaped.Lines.

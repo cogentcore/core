@@ -28,10 +28,10 @@ var (
 
 const (
 	// glyphMaxSize is the max size in either dim for the render mask.
-	glyphMaxSize = 64
+	glyphMaxSize = 128
 
 	// glyphMaskBorder is the extra amount on each side to include around the glyph bounds.
-	glyphMaskBorder = 4
+	glyphMaskBorder = 2
 
 	// glyphMaskOffsets is the number of different subpixel offsets to render, in each axis.
 	// The memory usage goes as the square of this number, and 4 produces very good results,
@@ -94,6 +94,7 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 	// note: we just ignore the XBearing -- it has no bearing on rendering..
 	pf := pos.Floor()
 	pi := pf.ToPoint().Sub(image.Point{glyphMaskBorder, glyphMaskBorder})
+	pi.X += g.XBearing.Round()
 	pi.Y -= g.YBearing.Round()
 	off := pos.Sub(pf)
 	oi := off.MulScalar(glyphMaskOffsets).Floor().ToPoint()
@@ -124,7 +125,7 @@ func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyp
 	draw.Draw(gc.image, gc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
 
 	od := float32(1) / glyphMaskOffsets
-	x := float32(xo)*od + glyphMaskBorder
+	x := -float32(g.XBearing.Round()) + float32(xo)*od + glyphMaskBorder
 	y := float32(g.YBearing.Round()) + float32(yo)*od + glyphMaskBorder
 	rs := gc.filler
 	rs.Clear()

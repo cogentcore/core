@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -741,9 +742,9 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 		w.renderMu.Unlock()
 	}()
 
-	// pr := profile.Start("Compose")
+	pr := profile.Start("Compose")
 	cp.Compose()
-	// pr.End()
+	pr.End()
 }
 
 // RenderSource returns the [render.Render] state from the [Scene.Painter].
