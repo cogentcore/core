@@ -183,7 +183,7 @@ func TestMarkupDiff(t *testing.T) {
 }
 
 func TestMarkupSpellErr(t *testing.T) {
-	src := `this is a mispel word and anotherr bad word`
+	src := `this is a mispel word [test](link) and anotherr bad word`
 	rsrc := []rune(src)
 
 	hi := Highlighter{}
@@ -193,7 +193,7 @@ func TestMarkupSpellErr(t *testing.T) {
 	ctags, _ := ChromaTagsLine(clex, src)
 	etags := lexer.Line{}
 	etags.AddLex(token.KeyToken{Token: token.TextSpellErr}, 10, 16)
-	etags.AddLex(token.KeyToken{Token: token.TextSpellErr}, 26, 34)
+	etags.AddLex(token.KeyToken{Token: token.TextSpellErr}, 39, 47)
 
 	sty := rich.NewStyle()
 	sty.Family = rich.Monospace
@@ -201,7 +201,11 @@ func TestMarkupSpellErr(t *testing.T) {
 
 	rtx := `[monospace]: "this is a "
 [monospace dotted-underline]: "mispel"
-[monospace]: " word and "
+[monospace]: " word ["
+[monospace fill-color]: "test"
+[monospace]: "]("
+[monospace fill-color]: "link"
+[monospace]: ") and "
 [monospace dotted-underline]: "anotherr"
 [monospace]: " bad word"
 `

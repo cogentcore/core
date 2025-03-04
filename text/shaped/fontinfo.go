@@ -4,32 +4,68 @@
 
 package shaped
 
-import "cogentcore.org/core/text/rich"
+import (
+	"cmp"
+	"slices"
 
-// FontInfo contains basic font information for choosing a given font.
-// displayed in the font chooser dialog.
+	"cogentcore.org/core/text/rich"
+)
+
+// FontInfo contains basic font information for aviailable fonts.
 type FontInfo struct {
 
-	// official regularized name of font
-	Name string
+	// Family name.
+	Family string
 
-	// weight: normal, bold, etc
+	// Weight: normal, bold, etc
 	Weight rich.Weights
 
-	// slant: normal or italic
+	// Slant: normal or italic
 	Slant rich.Slants
 
-	// stretch: normal, expanded, condensed, etc
+	// Stretch: normal, expanded, condensed, etc
 	Stretch rich.Stretch
+}
 
-	// example text -- styled according to font params in chooser
+// FontFamily is used for selecting a font family in a font chooser.
+type FontFamily struct {
+
+	// Family name.
+	Family string
+
+	// example text, styled according to font family in chooser.
 	Example string
 }
 
-// FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
+// FontInfoExample is example text to demonstrate fonts.
 var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"
 
 // Label satisfies the Labeler interface
 func (fi FontInfo) Label() string {
-	return fi.Name
+	return fi.Family
+}
+
+// Label satisfies the Labeler interface
+func (fi FontFamily) Label() string {
+	return fi.Family
+}
+
+// FontFamilies returns a list of FontFamily with one representative per family.
+func FontFamilies(fi []FontInfo) []FontFamily {
+	slices.SortFunc(fi, func(a, b FontInfo) int {
+		return cmp.Compare(a.Family, b.Family)
+	})
+	n := len(fi)
+	ff := make([]FontFamily, 0, n)
+	for i := 0; i < n; i++ {
+		cur := fi[i].Family
+		ff = append(ff, FontFamily{Family: cur, Example: FontInfoExample})
+		for i < n-1 {
+			if fi[i+1].Family != cur {
+				break
+			}
+			i++
+		}
+	}
+	return ff
 }

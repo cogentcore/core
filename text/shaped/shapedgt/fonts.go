@@ -19,13 +19,12 @@ func (sh *Shaper) FontList() []shaped.FontInfo {
 	ft := errors.Log1(fontscan.SystemFonts(nil, str))
 	fi := make([]shaped.FontInfo, len(ft))
 	for i := range ft {
-		fi[i].Name = ft[i].Family
+		fi[i].Family = ft[i].Family
 		as := ft[i].Aspect
 		fi[i].Weight = rich.Weights(int(as.Weight / 100.0))
 		fi[i].Slant = rich.Slants(as.Style - 1)
 		// fi[i].Stretch = rich.Stretch() // not avail
 		fi[i].Stretch = rich.StretchNormal
-		fi[i].Example = shaped.FontInfoExample
 	}
 	return fi
 }

@@ -56,7 +56,7 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 			if ts.End <= tr.Start {
 				ep := min(sz, ts.End)
 				if cp < ep {
-					// fmt.Println("adding runes to prior:", cp, ep)
+					// fmt.Println("adding runes to prior:", cp, ep, string(txt[cp:ep]))
 					tx.AddRunes(txt[cp:ep])
 					cp = ep
 				}
@@ -92,7 +92,7 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 			ep = ttags[i+1].Start
 		}
 		tx.AddSpan(&nst, txt[cp:ep])
-		// fmt.Println("added:", cp, ep, string(txt[cp:ep]))
+		// fmt.Println("added tag span:", cp, ep, string(txt[cp:ep]))
 		cp = ep
 	}
 	if cp < sz {
@@ -101,6 +101,7 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 			esp = esp - 1
 		}
 		tx.AddSpan(&stys[esp], txt[cp:sz])
+		// fmt.Println("added final span:", cp, sz, string(txt[cp:sz]))
 	}
 	return tx
 }

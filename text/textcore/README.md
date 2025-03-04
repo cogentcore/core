@@ -17,6 +17,30 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* selection crash after undo:
+
+panic: invalid character position for pos, len: 30: pos: 217:37 [recovered]
+	panic: invalid character position for pos, len: 30: pos: 217:37
+cogentcore.org/core/text/lines.(*Lines).mustValidPos(0x140b56f7798?, {0xd8, 0x25})
+	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:369 +0xd4
+cogentcore.org/core/text/lines.(*Lines).region(0x1407a536008, {0xd6, 0x0}, {0xd8, 0x25})
+	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:383 +0xa8
+cogentcore.org/core/text/lines.(*Lines).deleteTextImpl(0x1407a536008, {0x101282fec?, 0x14001d38240?}, {0x38?, 0x140b56f7978?})
+	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:474 +0x34
+cogentcore.org/core/text/lines.(*Lines).deleteText(0x1407a536008, {0x100d36bd0?, 0x140b56f7a88?}, {0x1012b2548?, 0x0?})
+	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:468 +0x20
+cogentcore.org/core/text/lines.(*Lines).DeleteText(0x1407a536008, {0x0?, 0x0?}, {0x0?, 0x0?})
+	/Users/oreilly/go/src/cogentcore.org/core/text/lines/api.go:450 +0xb4
+cogentcore.org/core/text/textcore.(*Base).deleteSelection(0x14000d69108)
+	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/select.go:248 +0x38
+cogentcore.org/core/text/textcore.(*Base).InsertAtCursor(0x14000d69108, {0x140b56f7ac0, 0x1, 0x0?})
+	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/select.go:284 +0x4c
+cogentcore.org/core/text/textcore.(*Editor).keyInputInsertRune(0x14000d69108, {0x102e69e00, 0x140f902bdc0})
+	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/editor.go:576 +0x288
+
+
+* rebuild highlight change needs to update all OpenFiles in code.
+
 * js text measuring
 
 * textcore base horizontal scrolling and wrap long no-space lines
@@ -35,6 +59,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * renderx/images needs transform updates?
 
 ### Lowpri
+
+* TestMarkupSpellErr: still some rich tag format issues but mostly working.. why is this so hard!?
 
 * cleanup unused base stuff
 

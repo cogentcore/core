@@ -157,10 +157,15 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		case font.GlyphOutline:
 			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos, identity)
 		case font.GlyphBitmap:
-			fmt.Println("bitmap")
-			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
+			if format.Outline != nil {
+				rs.GlyphOutline(ctx, run, g, *format.Outline, fill, stroke, bb, pos, identity)
+			} else {
+				// note: on mac, the GB18030 Bitmap font was the only one in this category
+				fmt.Println("rasterx/text.go: bitmap font:", run.Face.Describe().Family)
+				rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
+			}
 		case font.GlyphSVG:
-			fmt.Println("svg", format)
+			fmt.Println("rasterx/text.go: svg font:", run.Face.Describe().Family, format)
 			// 	_ = rs.GlyphSVG(ctx, g, format, fill, stroke, bb, pos)
 		}
 		off.X += math32.FromFixed(g.XAdvance)
@@ -274,10 +279,9 @@ func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shapi
 		// scale.BiLinear.Scale(img, bb, pix, pix.Bounds(), draw.Over, nil)
 		draw.Draw(rs.image, pix.Bounds(), pix, image.Point{int(x), int(top)}, draw.Over)
 	}
-
-	if bitmap.Outline != nil {
-		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)
-	}
+	// if bitmap.Outline != nil {
+	// 	rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)
+	// }
 	return nil
 }
 
