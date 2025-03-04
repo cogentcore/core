@@ -134,7 +134,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	pc := &pt.Context
 	rs.ctx.Call("save") // save clip region prior to using
 	br := pc.Bounds.Rect.ToRect()
-	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Max.X, br.Max.Y)
+	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Dx(), br.Dy())
 	rs.ctx.Call("clip")
 
 	style := &pt.Context.Style
