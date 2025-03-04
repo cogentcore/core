@@ -150,7 +150,7 @@ func (fr *Frame) Init() {
 	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
 		// We must negate the delta for "natural" scrolling behavior.
-		del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
+		del := math32.FromPoint(e.PrevDelta()).Negate()
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
