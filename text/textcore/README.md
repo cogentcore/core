@@ -19,7 +19,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * js text measuring
 
-* dotted underline for misspelling
 * core/values.go/FontButton -- need font list.
 
 * textcore base horizontal scrolling and wrap long no-space lines

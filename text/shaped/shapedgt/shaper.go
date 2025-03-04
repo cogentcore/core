@@ -136,7 +136,7 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 		if len(rs) == 0 {
 			continue
 		}
-		q := StyleToQuery(sty, rts)
+		q := StyleToQuery(sty, tsty, rts)
 		sh.fontMap.SetQuery(q)
 
 		in.Text = txt
@@ -184,9 +184,15 @@ func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) 
 }
 
 // StyleToQuery translates the rich.Style to go-text fontscan.Query parameters.
-func StyleToQuery(sty *rich.Style, rts *rich.Settings) fontscan.Query {
+func StyleToQuery(sty *rich.Style, tsty *text.Style, rts *rich.Settings) fontscan.Query {
 	q := fontscan.Query{}
-	q.Families = rich.FamiliesToList(sty.FontFamily(rts))
+	fam := ""
+	if sty.Family == rich.Custom {
+		fam = string(tsty.CustomFont)
+	} else {
+		fam = sty.FontFamily(rts)
+	}
+	q.Families = rich.FamiliesToList(fam)
 	q.Aspect = StyleToAspect(sty)
 	return q
 }

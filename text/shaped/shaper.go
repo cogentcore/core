@@ -10,6 +10,8 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
+//go:generate core generate
+
 // NewShaper returns the correct type of shaper.
 var NewShaper func() Shaper
 
@@ -43,6 +45,9 @@ type Shaper interface {
 	// It includes the [text.Style] LineSpacing multiplier on the natural
 	// font-derived line height, which is not generally the same as the font size.
 	LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32
+
+	// FontFamilies returns a list of available font family names on this system.
+	FontList() []FontInfo
 }
 
 // WrapSizeEstimate is the size to use for layout during the SizeUp pass,

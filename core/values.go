@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
@@ -195,30 +196,29 @@ type FontButton struct {
 func (fb *FontButton) WidgetValue() any { return &fb.Text }
 
 func (fb *FontButton) Init() {
-	// TODO(text): need font api
-	// fb.Button.Init()
-	// fb.SetType(ButtonTonal)
-	// InitValueButton(fb, false, func(d *Body) {
-	// 	d.SetTitle("Select a font family")
-	// 	si := 0
-	// 	fi := shaped.FontList()
-	// 	tb := NewTable(d)
-	// 	tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
-	// 	tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
-	// 		if col != 4 {
-	// 			return
-	// 		}
-	// 		// TODO(text): this won't work here
-	// 		// s.Font.Family = fi[row].Name
-	// 		s.Font.Stretch = fi[row].Stretch
-	// 		s.Font.Weight = fi[row].Weight
-	// 		s.Font.Slant = fi[row].Slant
-	// 		s.Text.FontSize.Pt(18)
-	// 	})
-	// 	tb.OnChange(func(e events.Event) {
-	// 		fb.Text = fi[si].Name
-	// 	})
-	// })
+	fb.Button.Init()
+	fb.SetType(ButtonTonal)
+	InitValueButton(fb, false, func(d *Body) {
+		d.SetTitle("Select a font family")
+		si := 0
+		fi := fb.Scene.TextShaper.FontList()
+		tb := NewTable(d)
+		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
+		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
+			if col != 4 {
+				return
+			}
+			s.Text.CustomFont = rich.FontName(fi[row].Name)
+			s.Font.Family = rich.Custom
+			s.Font.Stretch = fi[row].Stretch // not avail
+			s.Font.Weight = fi[row].Weight
+			s.Font.Slant = fi[row].Slant
+			s.Text.FontSize.Pt(18)
+		})
+		tb.OnChange(func(e events.Event) {
+			fb.Text = fi[si].Name
+		})
+	})
 }
 
 // HighlightingName is a highlighting style name.

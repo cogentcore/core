@@ -94,9 +94,6 @@ type Settings struct {
 	// This can be a list of comma-separated names, tried in order.
 	// "fangsong" will be added automatically as a final backup.
 	Fangsong FontName
-
-	// Custom is a custom font name.
-	Custom FontName
 }
 
 func (rts *Settings) Defaults() {
@@ -149,8 +146,6 @@ func (rts *Settings) Family(fam Family) string {
 		return AddFamily(rts.Emoji, "emoji")
 	case Fangsong:
 		return AddFamily(rts.Fangsong, "fangsong")
-	case Custom:
-		return string(rts.Custom)
 	}
 	return "sans-serif"
 }

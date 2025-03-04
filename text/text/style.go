@@ -82,6 +82,9 @@ type Style struct { //types:add
 
 	// HighlightColor is the color to use for the background region of highlighted text.
 	HighlightColor image.Image
+
+	// CustomFont specifies the Custom font name for rich.Style.Family = Custom.
+	CustomFont rich.FontName
 }
 
 func NewStyle() *Style {
