@@ -66,7 +66,7 @@ func TestMarkup(t *testing.T) {
 [monospace]: " {"
 [monospace]: ""
 [monospace italic fill-color]: " // "
-[monospace italic fill-color]: "avoid"
+[monospace italic dotted-underline fill-color]: "avoid"
 [monospace italic fill-color]: " overflow"
 `
 	// fmt.Println(tx)
@@ -116,7 +116,8 @@ func TestMarkupSpaces(t *testing.T) {
 	sty.Family = rich.Monospace
 	tx := MarkupLineRich(hi.Style, sty, rsrc, lex, nil)
 
-	rtx := `[monospace]: "Name        "
+	rtx := `[monospace]: "Name"
+[monospace]: "        "
 [monospace bold fill-color]: "string"
 `
 	// fmt.Println(tx)
@@ -160,18 +161,53 @@ func TestMarkupDiff(t *testing.T) {
 
 	// hitrg := `[{Name 0 4 {0 0}} {KeywordType: string 12 18 {0 0}} {EOS 18 18 {0 0}}]`
 	// assert.Equal(t, hitrg, fmt.Sprint(lex))
-	fmt.Println(ctags)
+	// fmt.Println(ctags)
 
 	sty := rich.NewStyle()
 	sty.Family = rich.Monospace
 	tx := MarkupLineRich(hi.Style, sty, rsrc, ctags, nil)
 
-	rtx := `[monospace]: "Name        "
-[monospace bold fill-color]: "string"
+	rtx := `[monospace bold fill-color]: "diff --git a/code/cdebug/cdelve/cdelve.go b/code/cdebug/cdelve/cdelve.goindex 83ee192..6d2e820 100644""
+`
+	// _ = rtx
+	// fmt.Println(tx)
+	assert.Equal(t, rtx, fmt.Sprint(tx))
+
+	for i, r := range rsrc {
+		si, sn, ri := tx.Index(i)
+		if tx[si][ri] != r {
+			fmt.Println(i, string(r), string(tx[si][ri]), si, ri, sn)
+		}
+		assert.Equal(t, string(r), string(tx[si][ri]))
+	}
+}
+
+func TestMarkupSpellErr(t *testing.T) {
+	src := `this is a mispel word and anotherr bad word`
+	rsrc := []rune(src)
+
+	hi := Highlighter{}
+	hi.SetStyle(HighlightingName("emacs"))
+
+	clex := lexers.Get("markdown")
+	ctags, _ := ChromaTagsLine(clex, src)
+	etags := lexer.Line{}
+	etags.AddLex(token.KeyToken{Token: token.TextSpellErr}, 10, 16)
+	etags.AddLex(token.KeyToken{Token: token.TextSpellErr}, 26, 34)
+
+	sty := rich.NewStyle()
+	sty.Family = rich.Monospace
+	tx := MarkupLineRich(hi.Style, sty, rsrc, ctags, etags)
+
+	rtx := `[monospace]: "this is a "
+[monospace dotted-underline]: "mispel"
+[monospace]: " word and "
+[monospace dotted-underline]: "anotherr"
+[monospace]: " bad word"
 `
 	_ = rtx
-	fmt.Println(tx)
-	// assert.Equal(t, rtx, fmt.Sprint(tx))
+	// fmt.Println(tx)
+	assert.Equal(t, rtx, fmt.Sprint(tx))
 
 	for i, r := range rsrc {
 		si, sn, ri := tx.Index(i)

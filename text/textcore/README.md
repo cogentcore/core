@@ -17,7 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* js bounds clipping
 * js text measuring
 
 * dotted underline for misspelling

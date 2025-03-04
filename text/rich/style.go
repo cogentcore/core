@@ -51,7 +51,7 @@ type Style struct { //types:add
 
 	// Decorations are underline, line-through, etc, as bit flags
 	// that must be set using [Decorations.SetFlag].
-	Decoration Decorations
+	Decoration Decorations `set:"-"`
 
 	// Direction is the direction to render the text.
 	Direction Directions
@@ -374,6 +374,12 @@ const (
 // ToGoText returns the go-text version of direction.
 func (d Directions) ToGoText() di.Direction {
 	return di.Direction(d)
+}
+
+// SetDecoration sets given decoration flag on.
+func (s *Style) SetDecoration(deco Decorations) *Style {
+	s.Decoration.SetFlag(true, deco)
+	return s
 }
 
 // SetFillColor sets the fill color to given color, setting the Decoration

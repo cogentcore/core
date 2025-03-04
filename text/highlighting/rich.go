@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
+	"cogentcore.org/core/text/token"
 )
 
 // MarkupLineRich returns the [rich.Text] styled line for each tag.
@@ -43,6 +44,7 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 		tx = rich.NewText(sty, txt[:ttags[0].Start])
 		cp = ttags[0].Start
 	}
+	// fmt.Println("start")
 	for i, tr := range ttags {
 		if cp >= sz {
 			break
@@ -50,12 +52,15 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 		// pop anyone off the stack who ends before we start
 		for si := len(tstack) - 1; si >= 1; si-- {
 			ts := ttags[tstack[si]]
+			// fmt.Println("pop potential:", si, ts)
 			if ts.End <= tr.Start {
 				ep := min(sz, ts.End)
 				if cp < ep {
+					// fmt.Println("adding runes to prior:", cp, ep)
 					tx.AddRunes(txt[cp:ep])
 					cp = ep
 				}
+				// fmt.Println("delete style")
 				tstack = slices.Delete(tstack, si, si+1)
 				stys = slices.Delete(stys, si, si+1)
 			}
@@ -63,16 +68,21 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 		if cp >= sz || tr.Start >= sz {
 			break
 		}
+		cst := stys[len(stys)-1]
 		if tr.Start > cp+1 { // finish any existing before pushing new
 			// fmt.Printf("add: %d - %d: %q\n", cp, tr.Start, string(txt[cp:tr.Start]))
-			tx.AddRunes(txt[cp:tr.Start])
+			tx.AddSpan(&cst, txt[cp:tr.Start])
 			cp = tr.Start
 		}
-		cst := stys[len(stys)-1]
 		nst := cst
 		entry := hs.Tag(tr.Token.Token)
 		if !entry.IsZero() {
 			entry.ToRichStyle(&nst)
+		} else {
+			if tr.Token.Token == token.TextSpellErr {
+				nst.SetDecoration(rich.DottedUnderline)
+				// fmt.Println(i, tr)
+			}
 		}
 		tstack = append(tstack, i)
 		stys = append(stys, nst)
@@ -82,10 +92,15 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 			ep = ttags[i+1].Start
 		}
 		tx.AddSpan(&nst, txt[cp:ep])
+		// fmt.Println("added:", cp, ep, string(txt[cp:ep]))
 		cp = ep
 	}
 	if cp < sz {
-		tx.AddSpan(&stys[len(stys)-1], txt[cp:sz])
+		esp := len(stys) - 1
+		if esp > 0 {
+			esp = esp - 1
+		}
+		tx.AddSpan(&stys[esp], txt[cp:sz])
 	}
 	return tx
 }
