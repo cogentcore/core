@@ -76,6 +76,8 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	if !ppath.ArcToCubeImmediate {
 		p = p.ReplaceArcs()
 	}
+	pc := &pt.Context
+	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	m := pt.Context.Transform
 	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
@@ -124,7 +126,6 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 		math32.ToFixed(sty.Stroke.MiterLimit),
 		capfunc(sty.Stroke.Cap), nil, nil, joinmode(sty.Stroke.Join),
 		dash, 0)
-	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rs.Raster)
 	rs.SetColor(rs.Raster, pc, sty.Stroke.Color, sty.Stroke.Opacity)
 	rs.Raster.Draw()
@@ -156,7 +157,6 @@ func (rs *Renderer) Fill(pt *render.Path) {
 	}
 	rf := &rs.Raster.Filler
 	rf.SetWinding(sty.Fill.Rule == ppath.NonZero)
-	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 	rs.Path.AddTo(rf)
 	rs.SetColor(rf, pc, sty.Fill.Color, sty.Fill.Opacity)
 	rf.Draw()

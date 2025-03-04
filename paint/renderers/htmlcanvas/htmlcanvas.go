@@ -131,6 +131,11 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	if pt.Path.Empty() {
 		return
 	}
+	pc := &pt.Context
+	rs.ctx.Call("save") // save clip region prior to using
+	br := pc.Bounds.Rect.ToRect()
+	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Max.X, br.Max.Y)
+	rs.ctx.Call("clip")
 
 	style := &pt.Context.Style
 	p := pt.Path
@@ -225,6 +230,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		}
 		rs.ctx.Call("fill")
 	}
+	rs.ctx.Call("restore") // restore clip region
 }
 
 func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
