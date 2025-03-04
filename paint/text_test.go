@@ -19,33 +19,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTextSimple(t *testing.T) {
-	size := image.Point{250, 100}
+func TestTextAscii(t *testing.T) {
+	size := image.Point{300, 100}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
-	RunTest(t, "text-simple", size.X, size.Y, func(pc *Painter) {
-		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
-		tsty := text.NewStyle()
-		fsty := rich.NewStyle()
-		tsty.ToDots(&pc.UnitContext)
-		tx, err := htmltext.HTMLToRich([]byte("abcdefghijklmnopqrstuvwxyz.,:;!"), fsty, nil)
-		assert.NoError(t, err)
-		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
-		pos := math32.Vector2{5, 5}
-		pc.TextLines(lns, pos)
-		tx, err = htmltext.HTMLToRich([]byte("ABCDEFGHIJKLMNOPQRSTUV."), fsty, nil)
-		assert.NoError(t, err)
-		lns = txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
-		pos = math32.Vector2{5, 50}
-		pc.TextLines(lns, pos)
-	})
+	lines := []string{
+		"`0123456789-=~!@#$%^&*()_+",
+		"[]\\;',./{}|:\"<>?",
+		"ABCDEFGHIJKLMNOPQRSTUV",
+		"abcdefghijklmnopqrstuvwxyz",
+	}
+	for fam := rich.SansSerif; fam < rich.FamilyN; fam++ {
+		// if fam != rich.Monospace {
+		// 	continue
+		// }
+		fnm := fam.String()
+		RunTest(t, "text/ascii-"+fnm, size.X, size.Y, func(pc *Painter) {
+			pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
+			tsty := text.NewStyle()
+			fsty := rich.NewStyle()
+			fsty.SetFamily(fam)
+			tsty.ToDots(&pc.UnitContext)
+			y := float32(5)
+			for _, ts := range lines {
+				tx := rich.NewText(fsty, []rune(ts))
+				lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+				pos := math32.Vector2{5, y}
+				pc.TextLines(lns, pos)
+				y += 20
+			}
+		})
+	}
 }
 
-func TestText(t *testing.T) {
+func TestTextMarkup(t *testing.T) {
 	size := image.Point{480, 400}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
-	RunTest(t, "text", size.X, size.Y, func(pc *Painter) {
+	RunTest(t, "text-markup", size.X, size.Y, func(pc *Painter) {
 		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
 		tsty := text.NewStyle()
 		fsty := rich.NewStyle()

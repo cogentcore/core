@@ -177,7 +177,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 
 func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, outline font.GlyphOutline, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, identity bool) {
 	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
-	x := pos.X
+	x := pos.X // note: has offsets already added
 	y := pos.Y
 	if len(outline.Segments) == 0 {
 		// fmt.Println("nil path:", g.GlyphID)
@@ -235,11 +235,6 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 }
 
 func (rs *Renderer) GlyphMask(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, fill, stroke image.Image, bb math32.Box2, pos image.Point, mask *image.Alpha) error {
-	if g.XOffset != 0 || g.YOffset != 0 {
-		fmt.Println("mask offset:", math32.FromFixed(g.XOffset), math32.FromFixed(g.YOffset), "bearing:", math32.FromFixed(g.XBearing), math32.FromFixed(g.YBearing))
-	}
-	pos.X += g.XOffset.Round()
-	pos.Y += g.YOffset.Round()
 	mbb := mask.Bounds()
 	dbb := mbb.Add(pos)
 	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())

@@ -726,7 +726,7 @@ func (w *renderWindow) renderWindow() {
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
 	if !w.flags.HasFlag(winIsRendering) {
-		go w.renderAsync(cp)
+		w.renderAsync(cp)
 	}
 }
 

@@ -28,13 +28,15 @@ var (
 
 const (
 	// glyphMaxSize is the max size in either dim for the render mask.
-	glyphMaxSize = 30
+	glyphMaxSize = 64
 
 	// glyphMaskBorder is the extra amount on each side to include around the glyph bounds.
 	glyphMaskBorder = 4
 
-	// glyphMaskOffsets is the number of different offsets to render, in each axis.
-	glyphMaskOffsets = 2
+	// glyphMaskOffsets is the number of different subpixel offsets to render, in each axis.
+	// The memory usage goes as the square of this number, and 4 produces very good results,
+	// while 2 is acceptable, and is significantly better than 1. 8 is overkill.
+	glyphMaskOffsets = 4
 )
 
 func init() {
@@ -71,6 +73,7 @@ func (fc *glyphCache) init() {
 	fc.filler = NewFiller(sz.X, sz.Y, fc.scanner)
 	fc.filler.SetWinding(true)
 	fc.filler.SetColor(colors.Uniform(color.Black))
+	fc.scanner.SetClip(fc.image.Bounds())
 }
 
 // Glyph returns an existing cached glyph or a newly rendered one,
@@ -80,17 +83,17 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 	gc.Lock()
 	defer gc.Unlock()
 
-	// fmt.Printf("g: %#v\n", g)
 	fsize := image.Point{X: int(g.Width.Ceil()), Y: -int(g.Height.Ceil())}
 	size := fsize.Add(image.Point{2 * glyphMaskBorder, 2 * glyphMaskBorder})
 	if size.X > glyphMaxSize || size.Y > glyphMaxSize {
 		return nil, image.Point{}
 	}
-	// fmt.Println("wd, ht:", math32.FromFixed(g.Width), -math32.FromFixed(g.Height), "size:", size)
+	// fmt.Println(face.Describe().Family, g.GlyphID, "wd, ht:", math32.FromFixed(g.Width), -math32.FromFixed(g.Height), "size:", size)
+	// fmt.Printf("g: %#v\n", g)
 
+	// note: we just ignore the XBearing -- it has no bearing on rendering..
 	pf := pos.Floor()
 	pi := pf.ToPoint().Sub(image.Point{glyphMaskBorder, glyphMaskBorder})
-	pi.X -= g.XBearing.Round()
 	pi.Y -= g.YBearing.Round()
 	off := pos.Sub(pf)
 	oi := off.MulScalar(glyphMaskOffsets).Floor().ToPoint()
@@ -118,6 +121,7 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 		}
 	}
 	gc.glyphs[face] = fc
+	// fmt.Println(gc.CacheSize())
 	return fc[key], pi
 }
 
@@ -127,7 +131,7 @@ func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyp
 	draw.Draw(gc.image, gc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
 
 	od := float32(1) / glyphMaskOffsets
-	x := float32(g.XBearing.Round()) + float32(xo)*od + glyphMaskBorder
+	x := float32(xo)*od + glyphMaskBorder
 	y := float32(g.YBearing.Round()) + float32(yo)*od + glyphMaskBorder
 	rs := gc.filler
 	rs.Clear()
@@ -156,4 +160,19 @@ func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyp
 	// fmt.Println("size:", size, *mask)
 	// fmt.Println("render:", gid, size)
 	return mask
+}
+
+// CacheSize reports the total number of bytes used for image masks.
+// For example, the cogent core docs took about 3.5mb using 4
+func (gc *glyphCache) CacheSize() int {
+	gc.Lock()
+	defer gc.Unlock()
+	total := 0
+	for _, fc := range gc.glyphs {
+		for _, mask := range fc {
+			sz := mask.Bounds().Size()
+			total += sz.X * sz.Y
+		}
+	}
+	return total
 }
