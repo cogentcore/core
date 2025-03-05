@@ -38,15 +38,12 @@ cogentcore.org/core/text/textcore.(*Base).InsertAtCursor(0x14000d69108, {0x140b5
 cogentcore.org/core/text/textcore.(*Editor).keyInputInsertRune(0x14000d69108, {0x102e69e00, 0x140f902bdc0})
 	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/editor.go:576 +0x288
 
-
-* rebuild highlight change needs to update all OpenFiles in code.
+* filetree 3x update and slow repo open
 
 * js text measuring
 
 * textcore base horizontal scrolling and wrap long no-space lines
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
-
-* filetree 3x update and slow repo open
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
 
@@ -59,6 +56,8 @@ cogentcore.org/core/text/textcore.(*Editor).keyInputInsertRune(0x14000d69108, {0
 * renderx/images needs transform updates?
 
 ### Lowpri
+
+* code: Markup colors are baked in when output is generated -- no remarkup possible!
 
 * TestMarkupSpellErr: still some rich tag format issues but mostly working.. why is this so hard!?
 

@@ -65,7 +65,7 @@ func (fn *Node) detectVCSRepo(updateFiles bool) bool {
 	}
 	fn.DirRepo = repo
 	if updateFiles {
-		fn.updateRepoFiles()
+		repo.Files(nil)
 	}
 	return true
 }
@@ -108,7 +108,7 @@ func (fn *Node) updateRepoFiles() {
 	if fn.DirRepo == nil {
 		return
 	}
-	fn.repoFiles, _ = fn.DirRepo.Files()
+	fn.DirRepo.Files(nil)
 }
 
 // addToVCSSelected adds selected files to version control system
@@ -128,6 +128,7 @@ func (fn *Node) AddToVCS() {
 	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added
+		fmt.Println("updating:", fn.Filepath)
 		fn.Update()
 	}
 }

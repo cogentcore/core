@@ -44,7 +44,13 @@ func (gr *SvnRepo) CharToStat(stat byte) FileStatus {
 	}
 }
 
-func (gr *SvnRepo) Files() (Files, error) {
+// Files returns a map of the current files and their status,
+// using a cached version of the file list if available.
+// nil will be returned immediately if no cache is available.
+// The given onUpdated function will be called from a separate
+// goroutine when the updated list of the files is available
+// (an update is always triggered even if the function is nil).
+func (gr *SvnRepo) Files(onUpdated func(Files)) (Files, error) {
 	f := make(Files)
 
 	lpath := gr.LocalPath()
@@ -73,6 +79,13 @@ func (gr *SvnRepo) Files() (Files, error) {
 		f[fn] = gr.CharToStat(stat)
 	}
 	return f, nil
+}
+
+// StatusFast returns file status based on the cached file info,
+// which might be slightly stale. Much faster than Status.
+// Returns Untracked if no cached files.
+func (gr *SvnRepo) StatusFast(fname string) FileStatus {
+	return Untracked
 }
 
 // Status returns status of given file; returns Untracked on any error

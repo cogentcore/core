@@ -55,11 +55,6 @@ type Node struct { //core:embedder
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
-
-	// repoFiles has the version control system repository file status,
-	// providing a much faster way to get file status, vs. the repo.Status
-	// call which is exceptionally slow.
-	repoFiles vcs.Files
 }
 
 func (fn *Node) AsFileNode() *Node {
@@ -78,30 +73,7 @@ func (fn *Node) Init() {
 	fn.ContextMenus = nil // do not include tree
 	fn.AddContextMenu(fn.contextMenu)
 	fn.Styler(func(s *styles.Style) {
-		status := fn.Info.VCS
-		hex := ""
-		switch {
-		case status == vcs.Untracked:
-			hex = "#808080"
-		case status == vcs.Modified:
-			hex = "#4b7fd1"
-		case status == vcs.Added:
-			hex = "#008800"
-		case status == vcs.Deleted:
-			hex = "#ff4252"
-		case status == vcs.Conflicted:
-			hex = "#ce8020"
-		case status == vcs.Updated:
-			hex = "#008060"
-		case status == vcs.Stored:
-			s.Color = colors.Scheme.OnSurface
-		}
-		if fn.Info.Generated {
-			hex = "#8080C0"
-		}
-		if hex != "" {
-			s.Color = colors.Uniform(colors.ToBase(errors.Must1(colors.FromHex(hex))))
-		}
+		fn.styleFromStatus()
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
 		if core.DebugSettings.KeyEventTrace {
@@ -190,6 +162,10 @@ func (fn *Node) Init() {
 			fn.This.(Filer).GetFileInfo()
 		}
 		fn.Text = fn.Info.Name
+		fn.styleFromStatus()
+		if fn.Parts != nil {
+			fn.Parts.StyleTree()
+		}
 	})
 
 	fn.Maker(func(p *tree.Plan) {
@@ -241,6 +217,39 @@ func (fn *Node) Init() {
 			})
 		}
 	})
+}
+
+// styleFromStatus updates font color from
+func (fn *Node) styleFromStatus() {
+	status := fn.Info.VCS
+	if strings.Contains(string(fn.Filepath), "newfile") {
+		fmt.Println(fn.Filepath, status)
+	}
+	hex := ""
+	switch {
+	case status == vcs.Untracked:
+		hex = "#808080"
+	case status == vcs.Modified:
+		hex = "#4b7fd1"
+	case status == vcs.Added:
+		hex = "#008800"
+	case status == vcs.Deleted:
+		hex = "#ff4252"
+	case status == vcs.Conflicted:
+		hex = "#ce8020"
+	case status == vcs.Updated:
+		hex = "#008060"
+	case status == vcs.Stored:
+		fn.Styles.Color = colors.Scheme.OnSurface
+	}
+	if fn.Info.Generated {
+		hex = "#8080C0"
+	}
+	if hex != "" {
+		fn.Styles.Color = colors.Uniform(colors.ToBase(errors.Must1(colors.FromHex(hex))))
+	} else {
+		fn.Styles.Color = colors.Scheme.OnSurface
+	}
 }
 
 // IsDir returns true if file is a directory (folder)
@@ -408,8 +417,9 @@ func (fn *Node) InitFileInfo() error {
 		if fn.IsDir() {
 			fn.Info.VCS = vcs.Stored // always
 		} else {
-			rstat := rnode.repoFiles.Status(repo, string(fn.Filepath))
+			rstat := rnode.DirRepo.StatusFast(string(fn.Filepath))
 			if rstat != fn.Info.VCS {
+				// fmt.Println("updated repo status:", fn.Filepath, rstat)
 				fn.Info.VCS = rstat
 				fn.NeedsRender()
 			}
