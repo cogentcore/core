@@ -13,12 +13,16 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/Masterminds/vcs"
 )
 
 type SvnRepo struct {
 	vcs.SvnRepo
+	files        Files
+	gettingFiles bool
+	sync.Mutex
 }
 
 func (gr *SvnRepo) Type() Types {
@@ -48,43 +52,78 @@ func (gr *SvnRepo) CharToStat(stat byte) FileStatus {
 // using a cached version of the file list if available.
 // nil will be returned immediately if no cache is available.
 // The given onUpdated function will be called from a separate
-// goroutine when the updated list of the files is available
-// (an update is always triggered even if the function is nil).
-func (gr *SvnRepo) Files(onUpdated func(Files)) (Files, error) {
+// goroutine when the updated list of the files is available,
+// if an update is not already under way. An update is always triggered
+// if no files have yet been cached, even if the function is nil.
+func (gr *SvnRepo) Files(onUpdated func(f Files)) (Files, error) {
+	gr.Lock()
+	if gr.files != nil {
+		f := gr.files
+		gr.Unlock()
+		if onUpdated != nil {
+			go gr.updateFiles(onUpdated)
+		}
+		return f, nil
+	}
+	gr.Unlock()
+	go gr.updateFiles(onUpdated)
+	return nil, nil
+}
+
+func (gr *SvnRepo) updateFiles(onUpdated func(f Files)) {
+	gr.Lock()
+	if gr.gettingFiles {
+		gr.Unlock()
+		return
+	}
+	gr.gettingFiles = true
+	gr.Unlock()
+
 	f := make(Files)
 
 	lpath := gr.LocalPath()
 	allfs, err := allFiles(lpath) // much faster than svn list --recursive
-	if err != nil {
-		return nil, err
-	}
-	for _, fn := range allfs {
-		rpath, _ := filepath.Rel(lpath, fn)
-		f[rpath] = Stored
+	if err == nil {
+		for _, fn := range allfs {
+			rpath, _ := filepath.Rel(lpath, fn)
+			f[rpath] = Stored
+		}
 	}
 
 	out, err := gr.RunFromDir("svn", "status", "-u")
-	if err != nil {
-		return nil, err
-	}
-	scan := bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		ln := string(scan.Bytes())
-		flds := strings.Fields(ln)
-		if len(flds) < 2 {
-			continue // shouldn't happend
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			ln := string(scan.Bytes())
+			flds := strings.Fields(ln)
+			if len(flds) < 2 {
+				continue // shouldn't happend
+			}
+			stat := flds[0][0]
+			fn := flds[len(flds)-1]
+			f[fn] = gr.CharToStat(stat)
 		}
-		stat := flds[0][0]
-		fn := flds[len(flds)-1]
-		f[fn] = gr.CharToStat(stat)
 	}
-	return f, nil
+	gr.Lock()
+	gr.files = f
+	gr.gettingFiles = false
+	gr.Unlock()
+	if onUpdated != nil {
+		onUpdated(f)
+	}
 }
 
 // StatusFast returns file status based on the cached file info,
 // which might be slightly stale. Much faster than Status.
 // Returns Untracked if no cached files.
 func (gr *SvnRepo) StatusFast(fname string) FileStatus {
+	var ff Files
+	gr.Lock()
+	ff = gr.files
+	gr.Unlock()
+	if ff != nil {
+		return ff.Status(gr, fname)
+	}
 	return Untracked
 }
 
