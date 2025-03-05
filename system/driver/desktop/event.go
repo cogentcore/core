@@ -103,14 +103,12 @@ func (w *Window) MouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, acti
 }
 
 func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
+	delta := math32.Vec2(float32(xoff), float32(yoff)).MulScalar(-10)
 	if TheApp.Platform() == system.MacOS {
-		xoff *= float64(events.ScrollWheelSpeed)
-		yoff *= float64(events.ScrollWheelSpeed)
-	} else { // others have lower multipliers in general
-		xoff *= 4 * float64(events.ScrollWheelSpeed)
-		yoff *= 4 * float64(events.ScrollWheelSpeed)
+		delta.SetMulScalar(w.DevicePixelRatio)
+	} else {
+		delta.SetMulScalar(4) // other platforms need a bigger multiplier in general
 	}
-	delta := math32.Vec2(float32(-xoff), float32(-yoff)).MulScalar(5 * w.DevicePixelRatio)
 	where := w.CurMousePosPoint(gw)
 	w.Event.Scroll(where, delta)
 	glfw.PostEmptyEvent()
