@@ -162,8 +162,9 @@ func (fn *Node) Init() {
 			fn.This.(Filer).GetFileInfo()
 		}
 		fn.Text = fn.Info.Name
+		cc := fn.Styles.Color
 		fn.styleFromStatus()
-		if fn.Parts != nil {
+		if fn.Styles.Color != cc && fn.Parts != nil {
 			fn.Parts.StyleTree()
 		}
 	})
@@ -211,7 +212,7 @@ func (fn *Node) Init() {
 				w.This.(Filer).GetFileInfo()
 				if w.FileRoot().FS == nil {
 					if w.IsDir() && repo == nil {
-						w.detectVCSRepo(true) // update files
+						w.detectVCSRepo()
 					}
 				}
 			})

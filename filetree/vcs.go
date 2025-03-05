@@ -33,7 +33,7 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 		if sfn == nil {
 			return tree.Continue
 		}
-		sfn.detectVCSRepo(false)
+		sfn.detectVCSRepo()
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -44,10 +44,37 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 	return repo, rnode
 }
 
+// GetAllVCSFiles calls Files() on all VCS repositories, and then calls
+// update when the files are updated.
+func (fn *Node) GetAllVCSFiles() {
+	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		sfn := AsNode(cw)
+		if sfn == nil {
+			return tree.Continue
+		}
+		if !sfn.IsDir() {
+			return tree.Continue
+		}
+		if sfn.DirRepo == nil {
+			if !sfn.detectVCSRepo() {
+				return tree.Continue
+			}
+		}
+		repo := sfn.DirRepo
+		repo.Files(func(f vcs.Files) {
+			fr := fn.FileRoot()
+			fr.AsyncLock()
+			fn.Update()
+			fr.AsyncUnlock()
+			fn.NeedsRender()
+		})
+		return tree.Break
+	})
+}
+
 // detectVCSRepo detects and configures DirRepo if this directory is root of
-// a VCS repository.  if updateFiles is true, gets the files in the dir.
-// returns true if a repository was newly found here.
-func (fn *Node) detectVCSRepo(updateFiles bool) bool {
+// a VCS repository. returns true if a repository was newly found here.
+func (fn *Node) detectVCSRepo() bool {
 	repo, _ := fn.Repo()
 	if repo != nil {
 		return false
@@ -64,10 +91,6 @@ func (fn *Node) detectVCSRepo(updateFiles bool) bool {
 		return false
 	}
 	fn.DirRepo = repo
-	if updateFiles {
-		repo.Files(func(f vcs.Files) {
-		})
-	}
 	return true
 }
 
@@ -369,7 +392,7 @@ func (fn *Node) UpdateAllVCS() {
 			return tree.Continue
 		}
 		if sfn.DirRepo == nil {
-			if !sfn.detectVCSRepo(false) {
+			if !sfn.detectVCSRepo() {
 				return tree.Continue
 			}
 		}

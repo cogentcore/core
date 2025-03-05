@@ -99,7 +99,7 @@ func (fn *Node) contextMenu(m *core.Scene) {
 
 	fb := core.NewFuncButton(m).SetFunc(fn.newFiles)
 	fb.SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection())
-	fb.Args[1].SetValue(true)
+	fb.Args[1].SetValue(true) // todo: not working
 
 	core.NewFuncButton(m).SetFunc(fn.newFolders).SetText("New folder").
 		SetIcon(icons.CreateNewFolder).SetEnabled(fn.HasSelection())

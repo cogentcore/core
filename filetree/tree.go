@@ -149,10 +149,11 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	ft.FS = nil
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
-	ft.detectVCSRepo(true)
+	ft.detectVCSRepo()
 	ft.This.(Filer).GetFileInfo()
 	ft.Open()
 	ft.Update()
+	ft.GetAllVCSFiles()
 	return ft
 }
 
