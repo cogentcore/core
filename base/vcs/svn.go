@@ -153,6 +153,11 @@ func (gr *SvnRepo) Add(fname string) error {
 		log.Println(string(stdoutStderr))
 		return err
 	}
+	gr.Lock()
+	if gr.files != nil {
+		gr.files[fname] = Added
+	}
+	gr.Unlock()
 	return nil
 }
 

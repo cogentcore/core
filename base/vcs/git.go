@@ -181,6 +181,11 @@ func (gr *GitRepo) Add(fname string) error {
 		log.Println(string(out))
 		return err
 	}
+	gr.Lock()
+	if gr.files != nil {
+		gr.files[fname] = Added
+	}
+	gr.Unlock()
 	return nil
 }
 

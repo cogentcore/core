@@ -223,9 +223,6 @@ func (fn *Node) Init() {
 // styleFromStatus updates font color from
 func (fn *Node) styleFromStatus() {
 	status := fn.Info.VCS
-	if strings.Contains(string(fn.Filepath), "newfile") {
-		fmt.Println(fn.Filepath, status)
-	}
 	hex := ""
 	switch {
 	case status == vcs.Untracked:
