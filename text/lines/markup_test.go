@@ -125,3 +125,53 @@ func TestMarkupSpaces(t *testing.T) {
 	// fmt.Println(vw.markup[0])
 	assert.Equal(t, mu0, vw.markup[0].String())
 }
+
+func TestLongLineWrap(t *testing.T) {
+	src := `The [rich.Text](http://rich.text.com) type is the standard representation for formatted text, usedastheinputtotheshapedpackagefortextlayoutandrenderingItisencodedpurelyusingruneslicesforeachspanwiththestyleinformationrepresentedwithspecial rune values at the start of each span. This is an efficient and GPU-friendly pure-value format that avoids any issues of style struct pointer management etc.
+`
+
+	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
+	vw := lns.view(vid)
+	assert.Equal(t, src+"\n", lns.String())
+
+	tmu := []string{`[monospace]: "The "
+[monospace fill-color]: "[rich.Text]"
+[monospace fill-color]: "(http://rich.text.com)"
+[monospace]: " type is the standard representation for "
+`,
+
+		`[monospace]: "formatted text, "
+`,
+
+		`[monospace]: "usedastheinputtotheshapedpackagefortextlayoutandrenderingItisencodedpurelyusingr"
+`,
+
+		`[monospace]: "uneslicesforeachspanwiththestyleinformationrepresentedwithspecial "
+`,
+
+		`[monospace]: "rune values at the start of each span. This is an efficient and GPU-friendly "
+`,
+		`[monospace]: "pure-value format that avoids any issues of style struct pointer management etc."
+`,
+	}
+
+	assert.Equal(t, 6, vw.viewLines)
+
+	join := `The [rich.Text](http://rich.text.com) type is the standard representation for 
+formatted text, 
+usedastheinputtotheshapedpackagefortextlayoutandrenderingItisencodedpurelyusingr
+uneslicesforeachspanwiththestyleinformationrepresentedwithspecial 
+rune values at the start of each span. This is an efficient and GPU-friendly 
+pure-value format that avoids any issues of style struct pointer management etc.
+`
+
+	jtxt := ""
+	for i := range vw.viewLines {
+		trg := tmu[i]
+		// fmt.Println(vw.markup[i])
+		assert.Equal(t, trg, vw.markup[i].String())
+		jtxt += string(vw.markup[i].Join()) + "\n"
+	}
+	// fmt.Println(jtxt)
+	assert.Equal(t, join, jtxt)
+}

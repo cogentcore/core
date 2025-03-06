@@ -17,8 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* code splits does not reopen correctly: slight growing
-
 * js text measuring
 
 * textcore base horizontal scrolling and wrap long no-space lines
