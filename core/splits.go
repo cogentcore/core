@@ -227,8 +227,8 @@ func (sl *Splits) Init() {
 // as there are children, though fewer could be passed.
 func (sl *Splits) SetSplits(splits ...float32) *Splits {
 	sl.updateSplits()
-	ntc, _ := sl.tilesTotal()
-	if ntc == 0 {
+	_, hasNonSpans := sl.tilesTotal()
+	if !hasNonSpans {
 		nc := len(splits)
 		sl.TileSplits = slicesx.SetLength(sl.TileSplits, nc)
 		copy(sl.TileSplits, splits)
