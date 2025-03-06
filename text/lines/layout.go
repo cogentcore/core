@@ -103,8 +103,11 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 					nb := wlen / width
 					bp := i + width
 					for range nb {
-						lt.SplitSpan(bp)
-						si++
+						si, sn, ri := lt.Index(bp)
+						if sn != ri { // not start of span already
+							lt.SplitSpan(bp)
+							si++
+						}
 						breaks = append(breaks, si)
 						sp.Char = bp
 						vst = append(vst, sp)

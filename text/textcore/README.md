@@ -19,7 +19,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * js text measuring
 
-* textcore base horizontal scrolling and wrap long no-space lines
+* textcore base test horizontal scrolling
+
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 

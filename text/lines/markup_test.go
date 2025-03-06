@@ -118,7 +118,8 @@ func TestMarkupSpaces(t *testing.T) {
 	vw := lns.view(vid)
 	assert.Equal(t, src+"\n", lns.String())
 
-	mu0 := `[monospace]: "Name           "
+	mu0 := `[monospace]: "Name"
+[monospace]: "           "
 [monospace bold fill-color]: "string"
 `
 	// fmt.Println(lns.markup[0])
