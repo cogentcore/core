@@ -176,3 +176,75 @@ pure-value format that avoids any issues of style struct pointer management etc.
 	// fmt.Println(jtxt)
 	assert.Equal(t, join, jtxt)
 }
+
+func TestLineWrapSVG(t *testing.T) {
+	src := `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 1 1"><path d="M.833.675a.35.35 0 1 1 0-.35" style="stroke:#005bc0;stroke-width:.27;fill:none"/><circle cx=".53" cy=".5" r=".23" style="fill:#fbbd0e;stroke:none"/></svg>
+`
+
+	lns, vid := NewLinesFromBytes("dummy.svg", 44, []byte(src))
+	vw := lns.view(vid)
+	assert.Equal(t, src+"\n", lns.String())
+
+	tmu := []string{`[monospace fill-color]: "<svg"
+[monospace fill-color]: " xmlns="
+[monospace fill-color]: ""http://www.w3.org/2000/svg""
+[monospace fill-color]: " "
+`,
+
+		`[monospace fill-color]: "width="
+[monospace fill-color]: ""256""
+[monospace fill-color]: " height="
+[monospace fill-color]: ""256""
+[monospace fill-color]: " viewBox="
+[monospace fill-color]: ""0 0 1 "
+`,
+
+		`[monospace fill-color]: "1""
+[monospace fill-color]: "><path"
+[monospace fill-color]: " d="
+[monospace fill-color]: ""M.833.675a.35.35 0 1 1 0-.35""
+[monospace fill-color]: " "
+`,
+
+		`[monospace fill-color]: "style="
+[monospace fill-color]: ""stroke:#005bc0;stroke-width:.27;fill:"
+`,
+
+		`[monospace fill-color]: "none""
+[monospace fill-color]: "/><circle"
+[monospace fill-color]: " "
+`,
+		`[monospace fill-color]: "cx="
+[monospace fill-color]: "".53""
+[monospace fill-color]: " cy="
+[monospace fill-color]: "".5""
+[monospace fill-color]: " r="
+[monospace fill-color]: "".23""
+[monospace fill-color]: " "
+`,
+		`[monospace fill-color]: "style="
+[monospace fill-color]: ""fill:#fbbd0e;stroke:none""
+[monospace fill-color]: "/></svg>"
+`,
+	}
+	assert.Equal(t, 7, vw.viewLines)
+
+	join := `<svg xmlns="http://www.w3.org/2000/svg" 
+width="256" height="256" viewBox="0 0 1 
+1"><path d="M.833.675a.35.35 0 1 1 0-.35" 
+style="stroke:#005bc0;stroke-width:.27;fill:
+none"/><circle 
+cx=".53" cy=".5" r=".23" 
+style="fill:#fbbd0e;stroke:none"/></svg>
+`
+
+	jtxt := ""
+	for i := range vw.viewLines {
+		trg := tmu[i]
+		// fmt.Println(vw.markup[i])
+		assert.Equal(t, trg, vw.markup[i].String())
+		jtxt += string(vw.markup[i].Join()) + "\n"
+	}
+	// fmt.Println(jtxt)
+	assert.Equal(t, join, jtxt)
+}

@@ -101,6 +101,9 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 				breaks = append(breaks, si)
 				if wlen > width {
 					nb := wlen / width
+					if nb*width == wlen {
+						nb--
+					}
 					bp := i + width
 					for range nb {
 						si, sn, ri := lt.Index(bp)
