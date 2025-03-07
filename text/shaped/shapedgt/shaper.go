@@ -186,12 +186,7 @@ func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) 
 // StyleToQuery translates the rich.Style to go-text fontscan.Query parameters.
 func StyleToQuery(sty *rich.Style, tsty *text.Style, rts *rich.Settings) fontscan.Query {
 	q := fontscan.Query{}
-	fam := ""
-	if sty.Family == rich.Custom {
-		fam = string(tsty.CustomFont)
-	} else {
-		fam = sty.FontFamily(rts)
-	}
+	fam := tsty.FontFamily(sty)
 	q.Families = rich.FamiliesToList(fam)
 	q.Aspect = StyleToAspect(sty)
 	return q

@@ -29,7 +29,8 @@ type Style struct { //types:add
 	Size float32
 
 	// Family indicates the generic family of typeface to use, where the
-	// specific named values to use for each are provided in the Settings.
+	// specific named values to use for each are provided in the [Settings],
+	// or [text.Style] for [Custom].
 	Family Family
 
 	// Slant allows italic or oblique faces to be selected.
@@ -162,7 +163,8 @@ const (
 	// for government documents.
 	Fangsong
 
-	// Custom is a custom font name that can be set in Settings.
+	// Custom is a custom font name that is specified in the [text.Style]
+	// CustomFont name.
 	Custom
 )
 
