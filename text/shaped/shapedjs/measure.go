@@ -19,16 +19,54 @@ import (
 
 // Metrics are html canvas MeasureText metrics.
 type Metrics struct {
-	Width                    float32
-	ActualBoundingBoxLeft    float32
-	ActualBoundingBoxRight   float32
-	FontBoundingBoxAscent    float32
-	FontBoundingboxDescent   float32
-	ActualBoundingBoxAscent  float32
+	Width float32
+
+	// ActualBoundingBoxLeft is the distance parallel to the baseline from the
+	// alignment point given by the CanvasRenderingContext2D.textAlign property
+	// to the left side of the bounding rectangle of the given text, in CSS pixels.
+	// Positive numbers indicating a distance going left from the given alignment point.
+	ActualBoundingBoxLeft float32
+
+	// ActualBoundingBoxRight is the distance from the alignment point given by the
+	// CanvasRenderingContext2D.textAlign property to the right side of the bounding
+	// rectangle of the given text, in CSS pixels.
+	// The distance is measured parallel to the baseline.
+	ActualBoundingBoxRight float32
+
+	// FontBoundingBoxAscent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the top of the
+	// highest bounding rectangle of all the fonts used to render the text, in CSS pixels.
+	FontBoundingBoxAscent float32
+
+	// FontBoundingBoxDescent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the
+	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
+	FontBoundingBoxDescent float32
+
+	// ActualBoundingBoxAscent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the top of the
+	// highest bounding rectangle of the actual text, in CSS pixels.
+	ActualBoundingBoxAscent float32
+
+	// ActualBoundingBoxDescent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the
+	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
 	ActualBoundingBoxDescent float32
-	HangingBaseline          float32
-	AlphabeticBaseline       float32
-	IdeographicBaseline      float32
+
+	// HangingBaseline is the distance from the horizontal line indicated by the
+	// CanvasRenderingContext2D.textBaseline property to the hanging baseline
+	// of the line box, in CSS pixels.
+	HangingBaseline float32
+
+	// AlphabeticBaseline is the distance from the horizontal line indicated by the
+	// CanvasRenderingContext2D.textBaseline property to the alphabetic baseline
+	// of the line box, in CSS pixels.
+	AlphabeticBaseline float32
+
+	// IdeographicBaseline is the distance from the horizontal line indicated by the
+	// CanvasRenderingContext2D.textBaseline property to the ideographic baseline
+	// of the line box, in CSS pixels.
+	IdeographicBaseline float32
 
 	// not widely supported:
 	// EmHeightAscent           float32
@@ -58,7 +96,7 @@ func MeasureText(ctx js.Value, txt string) *Metrics {
 		ActualBoundingBoxLeft:    float32(jm.Get("actualBoundingBoxLeft").Float()),
 		ActualBoundingBoxRight:   float32(jm.Get("actualBoundingBoxRight").Float()),
 		FontBoundingBoxAscent:    float32(jm.Get("fontBoundingBoxAscent").Float()),
-		FontBoundingboxDescent:   float32(jm.Get("fontBoundingBoxDescent").Float()),
+		FontBoundingBoxDescent:   float32(jm.Get("fontBoundingBoxDescent").Float()),
 		ActualBoundingBoxAscent:  float32(jm.Get("actualBoundingBoxAscent").Float()),
 		ActualBoundingBoxDescent: float32(jm.Get("actualBoundingBoxDescent").Float()),
 		HangingBaseline:          float32(jm.Get("hangingBaseline").Float()),

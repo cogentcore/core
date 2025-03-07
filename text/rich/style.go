@@ -378,6 +378,11 @@ func (d Directions) ToGoText() di.Direction {
 	return di.Direction(d)
 }
 
+// IsVertical returns true if given text is vertical.
+func (d Directions) IsVertical() bool {
+	return d >= TTB && d <= BTT
+}
+
 // SetDecoration sets given decoration flag on.
 func (s *Style) SetDecoration(deco Decorations) *Style {
 	s.Decoration.SetFlag(true, deco)

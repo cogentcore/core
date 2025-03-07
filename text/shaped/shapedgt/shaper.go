@@ -54,11 +54,9 @@ var defaultFonts embed.FS
 
 type nilLogger struct{}
 
-func (nl *nilLogger) Printf(format string, args ...any) {
+func (nl *nilLogger) Printf(format string, args ...any) {}
 
-}
-
-// todo: per gio: systemFonts bool, collection []FontFace
+// NewShaper returns a new text shaper.
 func NewShaper() shaped.Shaper {
 	sh := &Shaper{}
 	sh.fontMap = fontscan.NewFontMap(&nilLogger{})

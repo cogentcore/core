@@ -153,7 +153,6 @@ func (fn *Node) AddToVCS() {
 	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added
-		fmt.Println("updating:", fn.Filepath)
 		fn.Update()
 	}
 }

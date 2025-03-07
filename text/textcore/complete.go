@@ -134,10 +134,15 @@ func (ed *Editor) CancelComplete() {
 // Lookup attempts to lookup symbol at current location, popping up a window
 // if something is found.
 func (ed *Editor) Lookup() { //types:add
-	if ed.Complete == nil || ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
+	if ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
 		return
 	}
-
+	if ed.offerCorrect() {
+		return
+	}
+	if ed.Complete == nil {
+		return
+	}
 	var ln int
 	var ch int
 	if ed.HasSelection() {

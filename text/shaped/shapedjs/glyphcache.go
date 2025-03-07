@@ -52,9 +52,15 @@ func (gc *glyphCache) Glyph(ctx js.Value, fn *Font, tsty *text.Style, rn rune) *
 func (gc *glyphCache) measureGlyph(ctx js.Value, fn *Font, tsty *text.Style, rn rune) *Glyph {
 	SetFontStyle(ctx, fn, tsty, 0)
 	m := MeasureText(ctx, string([]rune{rn}))
-	g := &Glyph{}
-	g.Width = m.Width
-	g.Height = m.ActualBoundingBoxAscent + m.ActualBoundingBoxDescent
-	// todo: set values from meas
+	g := &Glyph{Width: m.Width}
+	g.Height = -(m.ActualBoundingBoxAscent + m.ActualBoundingBoxDescent)
+	g.XBearing = m.ActualBoundingBoxLeft
+	g.YBearing = m.HangingBaseline
+	// todo: conditional on vertical / horiz
+	g.XAdvance = m.Width // ?
+	g.YAdvance = 0
+	g.RuneCount = 1
+	g.ClusterIndex = 0
+	g.GlyphID = uint32(rn)
 	return g
 }

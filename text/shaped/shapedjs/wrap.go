@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shapedgt
+//go:build js
+
+package shapedjs
 
 import (
 	"fmt"
@@ -13,7 +15,6 @@ import (
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -46,37 +47,17 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		// fmt.Println(lht, nlines, maxSize)
 	}
 	// fmt.Println("lht:", lns.LineHeight, lgap, nlines)
-	brk := shaping.WhenNecessary
+	brk := true
 	if !tsty.WhiteSpace.HasWordWrap() {
-		brk = shaping.Never
-	} else if tsty.WhiteSpace == text.WrapAlways {
-		brk = shaping.Always
+		brk = false
 	}
-	if brk == shaping.Never {
+	if !brk {
 		maxSize = 100000
 		nlines = 1
 	}
-	// fmt.Println(brk, nlines, maxSize)
-	cfg := shaping.WrapConfig{
-		Direction:                     dir,
-		TruncateAfterLines:            nlines,
-		TextContinues:                 false, // todo! no effect if TruncateAfterLines is 0
-		BreakPolicy:                   brk,   // or Never, Always
-		DisableTrailingWhitespaceTrim: tsty.WhiteSpace.KeepWhiteSpace(),
-	}
-	// from gio:
-	// if wc.TruncateAfterLines > 0 {
-	// 	if len(params.Truncator) == 0 {
-	// 		params.Truncator = "…"
-	// 	}
-	// 	// We only permit a single run as the truncator, regardless of whether more were generated.
-	// 	// Just use the first one.
-	// 	wc.Truncator = s.shapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
-	// }
 	txt := tx.Join()
 	outs := sh.shapeText(tx, tsty, rts, txt)
-	// todo: WrapParagraph does NOT handle vertical text! file issue.
-	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
+	lines, truncate := sh.WrapParagraph(brk, nlines, maxSize, txt, outs)
 	lns.Truncated = truncate > 0
 	cspi := 0
 	cspSt, cspEd := tx.Range(cspi)

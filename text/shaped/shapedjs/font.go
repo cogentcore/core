@@ -12,6 +12,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 )
 
@@ -68,4 +69,9 @@ func SetFontStyle(ctx js.Value, fn *Font, tsty *text.Style, lineHeight float32) 
 	fspec := strings.Join(parts, " ")
 	fmt.Println("fspec:", fspec)
 	ctx.Set("font", fspec)
+}
+
+// FontList returns the list of fonts that have been loaded.
+func (sh *Shaper) FontList() []shaped.FontInfo {
+	return nil
 }
