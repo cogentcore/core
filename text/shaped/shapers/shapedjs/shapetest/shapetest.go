@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	_ "cogentcore.org/core/system/driver"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/shaped/shapedjs"
+	"cogentcore.org/core/text/shaped/shapers/shapedjs"
 	"cogentcore.org/core/text/text"
 )
 

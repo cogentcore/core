@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
-	"cogentcore.org/core/text/shaped/shapedgt"
+	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/text"
 )
 

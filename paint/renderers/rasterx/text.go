@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
-	"cogentcore.org/core/text/shaped/shapedgt"
+	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
