@@ -37,8 +37,8 @@ func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settin
 // bounding box for the given font, centered at the baseline.
 func (sh *Shaper) fontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) shaped.Run {
 	tx := rich.NewText(sty, []rune{r})
-	out := sh.shapeText(tx, tsty, rts, []rune{r})
-	return &Run{Output: out[0]}
+	out := sh.ShapeText(tx, tsty, rts, []rune{r})
+	return out[0]
 }
 
 // lineHeight returns the line height for given font and text style.
@@ -48,7 +48,7 @@ func (sh *Shaper) fontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 func (sh *Shaper) lineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
 	run := sh.fontSize('M', sty, tsty, rts)
 	bb := run.LineBounds()
-	dir := goTextDirection(rich.Default, tsty)
+	dir := shaped.GoTextDirection(rich.Default, tsty)
 	if dir.IsVertical() {
 		return math32.Round(tsty.LineSpacing * bb.Size().X)
 	}

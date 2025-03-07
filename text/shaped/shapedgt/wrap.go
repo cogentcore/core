@@ -7,7 +7,6 @@ package shapedgt
 import (
 	"fmt"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
@@ -32,7 +31,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 	fsz := tsty.FontSize.Dots
-	dir := goTextDirection(rich.Default, tsty)
+	dir := shaped.GoTextDirection(rich.Default, tsty)
 
 	lht := sh.lineHeight(defSty, tsty, rts)
 	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
@@ -71,10 +70,10 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	// 	}
 	// 	// We only permit a single run as the truncator, regardless of whether more were generated.
 	// 	// Just use the first one.
-	// 	wc.Truncator = s.shapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
+	// 	wc.Truncator = s.ShapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
 	// }
 	txt := tx.Join()
-	outs := sh.shapeText(tx, tsty, rts, txt)
+	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
 	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
 	lns.Truncated = truncate > 0
@@ -127,16 +126,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			if cend > (cspEd - cspSt) { // shouldn't happen, to combine multiple original spans
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
-			run.Decoration = sty.Decoration
-			if sty.Decoration.HasFlag(rich.FillColor) {
-				run.FillColor = colors.Uniform(sty.FillColor)
-			}
-			if sty.Decoration.HasFlag(rich.StrokeColor) {
-				run.StrokeColor = colors.Uniform(sty.StrokeColor)
-			}
-			if sty.Decoration.HasFlag(rich.Background) {
-				run.Background = colors.Uniform(sty.Background)
-			}
+			run.SetFromStyle(sty, tsty)
 			bb := math32.B2FromFixed(run.Bounds().Add(pos))
 			// fmt.Println(bb.Size().Y, lht)
 			ln.Bounds.ExpandByBox(bb)

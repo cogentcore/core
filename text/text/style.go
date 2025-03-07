@@ -255,13 +255,6 @@ func (ts *Style) SetUnitContext(uc *units.Context, sty *rich.Style) {
 	// fmt.Println(fsz, ex, ch)
 }
 
-func (ts *Style) FontFamily(sty *rich.Style) string {
-	if sty.Family == rich.Custom {
-		return string(ts.CustomFont)
-	}
-	return sty.FontFamily(&rich.DefaultSettings)
-}
-
 // TODO(text): ?
 // UnicodeBidi determines the type of bidirectional text support.
 // See https://pkg.go.dev/golang.org/x/text/unicode/bidi.

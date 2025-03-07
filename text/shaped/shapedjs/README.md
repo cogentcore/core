@@ -10,7 +10,8 @@ The basic layout problem is tricky because:
 
 * Layout and line wrapping requires assembling these spans and breaking them up at the right spots, which requires splitting spans and thus the ability to measure smaller chunks of text to figure out where to split. Doing this the right way in an internationalized text context requires knowledge of graphemes, and re-shaping spans after splitting them, etc. There is lots of complex logic in go-text for doing all of this.
 
-* Therefore, **we cannot rely on the canvas functions to do layout**. We could do some basic rune-based replication, but it wouldn't work for more complex languages.
+* Thus, it would be so much better to use go-text to manage all the layout, but that is not possible because there is no way to actually determine the font being used:  [stackoverflow](https://stackoverflow.com/questions/7444451/how-to-get-the-actual-rendered-font-when-its-not-defined-in-css) nor is it possible to even get a list of fonts that might be used: [stackoverflow](https://stackoverflow.com/questions/53638179/supported-fonts-in-html5-canvas-text)
 
-* By far the best way forward is to get the font metric information into go-text and do everything there.
+One potential strategy is to use go-text for first-pass layout and line wrapping, and then go back through with html measureText on the actual chunks, and fix the discrepancies.
+
 

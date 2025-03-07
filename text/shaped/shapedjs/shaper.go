@@ -7,20 +7,21 @@
 package shapedjs
 
 import (
-	"sync"
+	"fmt"
 	"syscall/js"
 
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedgt"
 	"cogentcore.org/core/text/text"
-	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/di"
 )
 
 var (
 	canvasInited bool
 	canvas       js.Value
 	ctx          js.Value
+	debug        = true
 )
 
 // initCanvas ensures that the shared text measuring canvas is available.
@@ -37,17 +38,18 @@ func initCanvas() {
 	canvasInited = true
 }
 
+// Shaper is the html canvas version of text shaping,
+// which bootstraps off of the go-text version and corrects
+// the results using the results of measuring the text.
 type Shaper struct {
-	// outBuff is the output buffer to avoid excessive memory consumption.
-	outBuff []Output
-	sync.Mutex
+	shapedgt.Shaper
 }
 
 // NewShaper returns a new text shaper.
 func NewShaper() shaped.Shaper {
 	initCanvas()
-	sh := &Shaper{}
-	return sh
+	sh := shapedgt.NewShaper()
+	return &Shaper{Shaper: *sh.(*shapedgt.Shaper)}
 }
 
 // Shape turns given input spans into [Runs] of rendered text,
@@ -57,56 +59,68 @@ func NewShaper() shaped.Shaper {
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
+	return sh.ShapeAdjust(tx, tsty, rts, tx.Join())
+}
 
-	outs := sh.shapeText(tx, tsty, rts, tx.Join())
-	runs := make([]shaped.Run, len(outs))
-	for i := range outs {
-		run := &Run{Output: outs[i]}
-		runs[i] = run
+// ShapeAdjust turns given input spans into [Runs] of rendered text,
+// using given context needed for complete styling.
+// The results are only valid until the next call to Shape or WrapParagraph:
+// use slices.Clone if needed longer than that.
+func (sh *Shaper) ShapeAdjust(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
+	sh.Lock()
+	defer sh.Unlock()
+	return sh.AdjustRuns(sh.ShapeText(tx, tsty, rts, txt), tx, tsty, rts)
+}
+
+// AdjustRuns adjusts the given run metrics based on the html measureText results.
+func (sh *Shaper) AdjustRuns(runs []shaped.Run, tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
+	for _, run := range runs {
+		sh.AdjustRun(run, tx, tsty, rts)
 	}
 	return runs
 }
 
-// shapeText implements Shape using the full text generated from the source spans.
-func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []Output {
-	if tx.Len() == 0 {
-		return nil
-	}
-	sty := rich.NewStyle()
-	sh.outBuff = sh.outBuff[:0]
-	for si, s := range tx {
-		start, end := tx.Range(si)
-		rs := sty.FromRunes(s)
-		if len(rs) == 0 {
-			continue
-		}
-		fn := NewFont(sty, tsty, rts)
-		SetFontStyle(ctx, fn, tsty, 0)
+// AdjustRun adjusts the given run metrics based on the html measureText results.
+func (sh *Shaper) AdjustRun(run shaped.Run, tx rich.Text, tsty *text.Style, rts *rich.Settings) {
+	grun := run.(*shapedgt.Run)
+	gout := &grun.Output
+	rng := run.Runes()
+	si, _, ri := tx.Index(rng.Start)
+	sty, stx := tx.Span(si)
+	grun.SetFromStyle(sty, tsty)
+	rtx := stx[ri : ri+rng.Len()]
+	SetFontStyle(ctx, &grun.Font, tsty, 0)
+	fmt.Println("si:", si, ri, sty, string(rtx))
 
-		spm := MeasureText(ctx, string(rs))
-		out := Output{Advance: spm.Width, Size: fn.Size, Direction: sty.Direction, Runes: textpos.Range{Start: start, End: end}}
-		out.LineBounds.Ascent = spm.FontBoundingBoxAscent
-		out.LineBounds.Descent = spm.FontBoundingBoxDescent
-		// todo: gap
-		out.GlyphBounds.Ascent = spm.ActualBoundingBoxAscent
-		out.GlyphBounds.Descent = spm.ActualBoundingBoxDescent
-		// actual gap = 0 always
-		gs := make([]Glyph, len(rs))
-		for ri, rn := range rs {
-			g := theGlyphCache.Glyph(ctx, fn, tsty, rn)
-			gs[ri] = *g
+	spm := MeasureText(ctx, string(rtx))
+	if debug {
+		fmt.Println("\nrun:", string(rtx))
+		fmt.Println("lba:\t", math32.FromFixed(gout.LineBounds.Ascent), "\t=\t", spm.FontBoundingBoxAscent)
+		fmt.Println("lbd:\t", math32.FromFixed(gout.LineBounds.Descent), "\t=\t", spm.FontBoundingBoxDescent)
+	}
+	gout.LineBounds.Ascent = math32.ToFixed(spm.FontBoundingBoxAscent)
+	gout.LineBounds.Descent = math32.ToFixed(spm.FontBoundingBoxDescent)
+	gout.GlyphBounds.Ascent = math32.ToFixed(spm.ActualBoundingBoxAscent)
+	gout.GlyphBounds.Descent = math32.ToFixed(spm.ActualBoundingBoxDescent)
+	gout.Advance = math32.ToFixed(spm.Width)
+	gout.Size = math32.ToFixed(spm.ActualBoundingBoxAscent + spm.ActualBoundingBoxDescent)
+	ng := len(gout.Glyphs)
+	for gi := 0; gi < ng; gi++ {
+		g := &gout.Glyphs[gi]
+		gri := g.ClusterIndex - rng.Start
+		gtx := rtx[ri+gri : ri+gri+g.GlyphCount]
+		gm := theGlyphCache.Glyph(ctx, &grun.Font, tsty, gtx, g.GlyphID)
+		if g.GlyphCount > 1 {
+			gi += g.GlyphCount - 1
 		}
-		out.Glyphs = gs
-		sh.outBuff = append(sh.outBuff, out)
+		if debug {
+			fmt.Println("\ngi:", gi, string(gtx))
+			fmt.Println("adv:\t", math32.FromFixed(g.XAdvance), "\t=\t", gm.Width)
+		}
+		// todo: conditional on vertical / horiz
+		g.XAdvance = math32.ToFixed(gm.Width)
+		// g.Height = -(m.ActualBoundingBoxAscent + m.ActualBoundingBoxDescent)
+		// g.XBearing = m.ActualBoundingBoxLeft
+		// g.YBearing = m.HangingBaseline
 	}
-	return sh.outBuff
-}
-
-// goTextDirection gets the proper go-text direction value from styles.
-func goTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
-	dir := tsty.Direction
-	if rdir != rich.Default {
-		dir = rdir
-	}
-	return dir.ToGoText()
 }

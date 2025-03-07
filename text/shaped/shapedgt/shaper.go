@@ -110,18 +110,27 @@ func NewShaper() shaped.Shaper {
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
+	return sh.ShapeText(tx, tsty, rts, tx.Join())
+}
 
-	outs := sh.shapeText(tx, tsty, rts, tx.Join())
+// ShapeText shapes the spans in the given text using given style and settings,
+// returning [shaped.Run] results.
+func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
+	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	runs := make([]shaped.Run, len(outs))
 	for i := range outs {
 		run := &Run{Output: outs[i]}
+		si, _, _ := tx.Index(run.Runes().Start)
+		sty, _ := tx.Span(si)
+		run.SetFromStyle(sty, tsty)
 		runs[i] = run
 	}
 	return runs
 }
 
-// shapeText implements Shape using the full text generated from the source spans
-func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
+// ShapeTextOutput shapes the spans in the given text using given style and settings,
+// returning raw go-text [shaping.Output].
+func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
 	if tx.Len() == 0 {
 		return nil
 	}
@@ -130,8 +139,8 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 	for si, s := range tx {
 		in := shaping.Input{}
 		start, end := tx.Range(si)
-		rs := sty.FromRunes(s)
-		if len(rs) == 0 {
+		stx := sty.FromRunes(s) // sets sty, returns runes for span
+		if len(stx) == 0 {
 			continue
 		}
 		q := StyleToQuery(sty, tsty, rts)
@@ -140,7 +149,7 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 		in.Text = txt
 		in.RunStart = start
 		in.RunEnd = end
-		in.Direction = goTextDirection(sty.Direction, tsty)
+		in.Direction = shaped.GoTextDirection(sty.Direction, tsty)
 		fsz := tsty.FontSize.Dots * sty.Size
 		in.Size = math32.ToFixed(fsz)
 		in.Script = rts.Script
@@ -149,7 +158,7 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 		ins := sh.splitter.Split(in, sh.fontMap) // this is essential
 		for _, in := range ins {
 			if in.Face == nil {
-				fmt.Println("nil face in input", len(rs), string(rs))
+				fmt.Println("nil face in input", len(stx), string(stx))
 				// fmt.Printf("nil face for in: %#v\n", in)
 				continue
 			}
@@ -158,15 +167,6 @@ func (sh *Shaper) shapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 		}
 	}
 	return sh.outBuff
-}
-
-// goTextDirection gets the proper go-text direction value from styles.
-func goTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
-	dir := tsty.Direction
-	if rdir != rich.Default {
-		dir = rdir
-	}
-	return dir.ToGoText()
 }
 
 // todo: do the paragraph splitting!  write fun in rich.Text

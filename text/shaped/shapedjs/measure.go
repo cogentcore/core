@@ -19,6 +19,8 @@ import (
 
 // Metrics are html canvas MeasureText metrics.
 type Metrics struct {
+	// Width is the actual width of the text span, which appears to be equivalent to the
+	// Advance in go-text.
 	Width float32
 
 	// ActualBoundingBoxLeft is the distance parallel to the baseline from the
@@ -80,7 +82,7 @@ func MeasureTest(txt string) {
 	uc := units.Context{}
 	uc.Defaults()
 	tsty.ToDots(&uc)
-	fn := NewFont(fsty, tsty, &rich.DefaultSettings)
+	fn := text.NewFont(fsty, tsty)
 	SetFontStyle(ctx, fn, tsty, 0)
 	m := MeasureText(ctx, txt)
 	fmt.Printf("%#v\n", m)

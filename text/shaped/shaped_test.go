@@ -17,8 +17,9 @@ import (
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
+	"cogentcore.org/core/text/shaped"
 	. "cogentcore.org/core/text/shaped"
-	"cogentcore.org/core/text/shaped/shapedgt"
+	_ "cogentcore.org/core/text/shaped/shapers"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
@@ -37,7 +38,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	// fmt.Println("fsz:", tsty.FontSize.Dots)
 	pc := paint.NewPainter(width, height)
 	pc.FillBox(math32.Vector2{}, math32.Vec2(float32(width), float32(height)), colors.Uniform(colors.White))
-	sh := shapedgt.NewShaper()
+	sh := shaped.NewShaper()
 	f(pc, sh, tsty, rts)
 	pc.RenderToImage()
 	imagex.Assert(t, pc.RenderImage(), nm)

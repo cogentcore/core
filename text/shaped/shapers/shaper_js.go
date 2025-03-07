@@ -4,14 +4,13 @@
 
 //go:build js
 
-package renderers
+package shapers
 
 import (
-	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/renderers/htmlcanvas"
-	_ "cogentcore.org/core/text/shaped/shapers"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapedjs"
 )
 
 func init() {
-	paint.NewSourceRenderer = htmlcanvas.New
+	shaped.NewShaper = shapedjs.NewShaper
 }

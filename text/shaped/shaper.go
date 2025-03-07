@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
+	"github.com/go-text/typesetting/di"
 )
 
 //go:generate core generate
@@ -80,4 +81,13 @@ func WrapSizeEstimate(csz math32.Vector2, nChars int, ratio float32, sty *rich.S
 	}
 	sz := math32.Vec2(w, h)
 	return sz
+}
+
+// GoTextDirection gets the proper go-text direction value from styles.
+func GoTextDirection(rdir rich.Directions, tsty *text.Style) di.Direction {
+	dir := tsty.Direction
+	if rdir != rich.Default {
+		dir = rdir
+	}
+	return dir.ToGoText()
 }
