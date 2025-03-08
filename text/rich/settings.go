@@ -131,7 +131,8 @@ func FamiliesToList(fam string) []string {
 func (rts *Settings) Family(fam Family) string {
 	switch fam {
 	case SansSerif:
-		return AddFamily(rts.SansSerif, "sans-serif")
+		return AddFamily(rts.SansSerif, `-apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen,
+  Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`)
 	case Serif:
 		return AddFamily(rts.Serif, "serif")
 	case Monospace:

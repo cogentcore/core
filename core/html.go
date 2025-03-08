@@ -160,7 +160,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		}
 	}
 	if se.Name.Local == "textarea" && idName == "editor" {
-		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Buffer").Interface().(fmt.Stringer).String())
+		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Lines").Interface().(fmt.Stringer).String())
 	}
 
 	if handleChildren {
