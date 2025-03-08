@@ -71,6 +71,7 @@ func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []sh
 // use slices.Clone if needed longer than that.
 func (sh *Shaper) ShapeAdjust(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
 	return sh.AdjustRuns(sh.ShapeText(tx, tsty, rts, txt), tx, tsty, rts)
+	// return sh.ShapeText(tx, tsty, rts, txt)
 }
 
 // AdjustRuns adjusts the given run metrics based on the html measureText results.
@@ -98,6 +99,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
+	lht := sh.lineHeight(defSty, tsty, rts) // note: this overwrites output buffer so must do outs after!
 	txt := tx.Join()
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	for oi := range outs {
@@ -107,7 +109,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		fnt := text.NewFont(sty, tsty)
 		sh.AdjustOutput(out, fnt, tx, tsty, rts)
 	}
-	lns := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
+	lns := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
 	// todo: adjust again?
 	return lns
 }
@@ -116,12 +118,12 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 func (sh *Shaper) AdjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text, tsty *text.Style, rts *rich.Settings) {
 	rng := textpos.Range{out.Runes.Offset, out.Runes.Offset + out.Runes.Count}
 	si, sn, ri := tx.Index(rng.Start)
-	sty, stx := tx.Span(si)
+	_, stx := tx.Span(si)
 	ri -= sn
-	fmt.Println(string(stx))
+	// fmt.Println(string(stx))
 	rtx := stx[ri : ri+rng.Len()]
 	SetFontStyle(ctx, fnt, tsty, 0)
-	fmt.Println("si:", si, ri, sty, string(rtx))
+	// fmt.Println("si:", si, ri, sty, string(rtx))
 
 	spm := MeasureText(ctx, string(rtx))
 	msz := spm.FontBoundingBoxAscent + spm.FontBoundingBoxDescent

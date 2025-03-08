@@ -30,17 +30,17 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
+	lht := sh.lineHeight(defSty, tsty, rts) // note: this overwrites output buffer so must do outs after!
 	txt := tx.Join()
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
-	return sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
+	return sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
 }
 
-func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
+func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, lht float32, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
 
 	fsz := tsty.FontSize.Dots
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 
-	lht := sh.lineHeight(defSty, tsty, rts)
 	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
 
 	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
