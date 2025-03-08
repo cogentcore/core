@@ -37,18 +37,6 @@ type Shaper struct {
 	sync.Mutex
 }
 
-// EmbeddedFonts are embedded filesystems to get fonts from. By default,
-// this includes a set of Roboto and Roboto Mono fonts. System fonts are
-// automatically supported. This is not relevant on web, which uses available
-// web fonts. Use [AddEmbeddedFonts] to add to this. This must be called before
-// [NewShaper] to have an effect.
-var EmbeddedFonts = []fs.FS{fonts.DefaultFonts}
-
-// AddEmbeddedFonts adds to [EmbeddedFonts] for font loading.
-func AddEmbeddedFonts(fsys ...fs.FS) {
-	EmbeddedFonts = append(EmbeddedFonts, fsys...)
-}
-
 type nilLogger struct{}
 
 func (nl *nilLogger) Printf(format string, args ...any) {}
@@ -70,7 +58,7 @@ func NewShaper() shaped.Shaper {
 		// errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	for _, fsys := range EmbeddedFonts {
+	for _, fsys := range fonts.EmbeddedFonts {
 		errors.Log(fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
