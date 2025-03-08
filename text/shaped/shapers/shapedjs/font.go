@@ -16,14 +16,14 @@ import (
 
 // SetFontStyle sets the html canvas font style from [text.Font] and
 // [text.Style], with optional lineHeight
-func SetFontStyle(ctx js.Value, fn *text.Font, tsty *text.Style, lineHeight float32) {
+func SetFontStyle(ctx js.Value, fnt *text.Font, tsty *text.Style, lineHeight float32) {
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/font
-	fsty := fn.Style(tsty)
+	fsty := fnt.Style(tsty)
 	fsz := ""
 	if lineHeight > 0 {
-		fsz = fmt.Sprintf("%gpx/%gpx", fn.Size, lineHeight)
+		fsz = fmt.Sprintf("%gpx/%gpx", fnt.Size, lineHeight)
 	} else {
-		fsz = fmt.Sprintf("%gpx", fn.Size)
+		fsz = fmt.Sprintf("%gpx", fnt.Size)
 	}
 	fam := tsty.FontFamily(fsty)
 	// note: no fsty.Stretch.String(), here:

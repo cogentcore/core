@@ -109,9 +109,17 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		fnt := text.NewFont(sty, tsty)
 		sh.AdjustOutput(out, fnt, tx, tsty, rts)
 	}
-	lns := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
-	// todo: adjust again?
-	return lns
+	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
+	for _, lno := range lines {
+		for oi := range lno {
+			out := &lno[oi]
+			si, _, _ := tx.Index(out.Runes.Offset)
+			sty, _ := tx.Span(si)
+			fnt := text.NewFont(sty, tsty)
+			sh.AdjustOutput(out, fnt, tx, tsty, rts)
+		}
+	}
+	return sh.LinesBounds(lines, truncated, tx, tsty, lht)
 }
 
 // AdjustOutput adjusts the given run metrics based on the html measureText results.
@@ -146,7 +154,9 @@ func (sh *Shaper) AdjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 	for gi := 0; gi < ng; gi++ {
 		g := &out.Glyphs[gi]
 		gri := g.ClusterIndex - rng.Start
-		gtx := rtx[ri+gri : ri+gri+g.GlyphCount]
+		// nrtx := len(rtx)
+		ed := gri + g.GlyphCount
+		gtx := rtx[gri:ed]
 		gm := theGlyphCache.Glyph(ctx, fnt, tsty, gtx, g.GlyphID)
 		if g.GlyphCount > 1 {
 			gi += g.GlyphCount - 1

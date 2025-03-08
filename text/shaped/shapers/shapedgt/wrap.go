@@ -33,21 +33,18 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	lht := sh.lineHeight(defSty, tsty, rts) // note: this overwrites output buffer so must do outs after!
 	txt := tx.Join()
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
-	return sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
+	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
+	return sh.LinesBounds(lines, truncated, tx, tsty, lht)
 }
 
-func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, lht float32, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
+func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, lht float32, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
 
-	fsz := tsty.FontSize.Dots
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 
-	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
-
-	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
-	nlines := int(math32.Floor(size.Y/lns.LineHeight)) * 2
+	nlines := int(math32.Floor(size.Y/lht)) * 2
 	maxSize := int(size.X)
 	if dir.IsVertical() {
-		nlines = int(math32.Floor(size.X / lns.LineHeight))
+		nlines = int(math32.Floor(size.X / lht))
 		maxSize = int(size.Y)
 		// fmt.Println(lht, nlines, maxSize)
 	}
@@ -80,8 +77,18 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	// 	wc.Truncator = s.ShapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
 	// }
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
-	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
-	lns.Truncated = truncate > 0
+	lines, truncated := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
+	return lines, truncated
+}
+
+func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, tsty *text.Style, lht float32) *shaped.Lines {
+	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
+	lns.Truncated = truncated > 0
+
+	fsz := tsty.FontSize.Dots
+	dir := shaped.GoTextDirection(rich.Default, tsty)
+	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
+
 	cspi := 0
 	cspSt, cspEd := tx.Range(cspi)
 	var off math32.Vector2
