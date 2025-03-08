@@ -26,10 +26,17 @@ import (
 func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
 	sh.Lock()
 	defer sh.Unlock()
-
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 16
 	}
+
+	txt := tx.Join()
+	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
+	return sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
+}
+
+func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
+
 	fsz := tsty.FontSize.Dots
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 
@@ -72,8 +79,6 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	// 	// Just use the first one.
 	// 	wc.Truncator = s.ShapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
 	// }
-	txt := tx.Join()
-	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
 	lines, truncate := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
 	lns.Truncated = truncate > 0

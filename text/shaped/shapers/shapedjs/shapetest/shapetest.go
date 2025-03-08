@@ -7,6 +7,8 @@
 package main
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/styles/units"
 	_ "cogentcore.org/core/system/driver"
 	"cogentcore.org/core/text/rich"
@@ -21,6 +23,7 @@ func main() {
 	uc := units.Context{}
 	uc.Defaults()
 	tx := rich.NewPlainText([]rune("This is a Test"))
+	fmt.Println("test case:", tx)
 	tsty := text.NewStyle()
 	tsty.ToDots(&uc)
 	runs := sh.Shape(tx, tsty, &rich.DefaultSettings)

@@ -700,7 +700,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
-				if ly.HasScroll[d] {
+				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					sb := ly.Scrolls[d]
 					em.getMouseInBBox(sb, pos)
 				}

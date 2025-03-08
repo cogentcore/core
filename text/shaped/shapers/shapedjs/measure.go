@@ -55,6 +55,8 @@ type Metrics struct {
 	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
 	ActualBoundingBoxDescent float32
 
+	// todo: probably could get rid of these baselines:
+
 	// HangingBaseline is the distance from the horizontal line indicated by the
 	// CanvasRenderingContext2D.textBaseline property to the hanging baseline
 	// of the line box, in CSS pixels.
