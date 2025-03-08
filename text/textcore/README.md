@@ -19,8 +19,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * fix the toml icon after all
 
-* font/metricsonly
-
 * emoji, svg, bitmap font rendering
 
 * SVG, PDF backends
