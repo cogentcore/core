@@ -17,7 +17,13 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* js text measuring
+* fix the toml icon after all
+
+* font/metricsonly
+
+* emoji, svg, bitmap font rendering
+
+* SVG, PDF backends
 
 * textcore base test horizontal scrolling
 
@@ -28,8 +34,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * svg opacity processing
 
 * better job finding path fragments from file links -- iteratively try stuff.
-
-* can get zombie nil open buffers in code -- under what circumstances?? autosave renames?
 
 * renderx/images needs transform updates?
 

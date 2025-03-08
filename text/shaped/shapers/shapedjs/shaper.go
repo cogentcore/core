@@ -52,6 +52,9 @@ type Shaper struct {
 func NewShaper() shaped.Shaper {
 	initCanvas()
 	sh := shapedgt.NewShaper()
+	if sh == nil {
+		panic("nil gt shaper!")
+	}
 	return &Shaper{Shaper: *sh.(*shapedgt.Shaper)}
 }
 

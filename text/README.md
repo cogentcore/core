@@ -28,13 +28,27 @@ This directory contains all of the text processing and rendering functionality, 
 
 ## Organization:
 
-* `text/rich`: the `rich.Text` is a `[][]rune` type that encodes the local font-level styling properties (bold, underline, etc) for the basic chunks of text _input_. This is the input for harfbuzz shaping and all text rendering. Each `rich.Text` typically represents either an individual line of text, for line-oriented uses, or a paragraph for unconstrained text layout. The SplitParagraphs method generates paragraph-level splits for this case.
+* [rich](rich): the `rich.Text` is a `[][]rune` type that encodes the local font-level styling properties (bold, underline, etc) for the basic chunks of text _input_. This is the input for harfbuzz shaping and all text rendering. Each `rich.Text` typically represents either an individual line of text, for line-oriented uses, or a paragraph for unconstrained text layout. The SplitParagraphs method generates paragraph-level splits for this case.
 
-* `text/shaped`: contains representations of shaped text, suitable for subsequent rendering, organized at multiple levels: `Lines`, `Line`, and `Run`. A `Run` is the shaped version of a Span, and is the basic unit of text rendering, containing `go-text` `shaping.Output` and `Glyph` data. A `Line` is a collection of `Run` elements, and `Lines` has multiple such Line elements, each of which has bounding boxes and functions for locating and selecting text elements at different levels. The actual font rendering is managed by `paint/renderer` types using these shaped representations. It looks like most fonts these days use outline-based rendering, which our rasterx renderer performs.
+* [text](text): has a `Style` object containing general text layout styling parameters, used in shaped for wrapping text into lines. `text.Style` and `rich.Style` work together, with `text.Style` applying to an overall paragraph (or more) of text, and `rich.Style` applying to individual spans within the paragraph. `text.Style` "carries some water" for the span style so it can be efficiently represented in a few runes.
 
-* `text/lines`: manages `rich.Text` and `shaped.Lines` for line-oriented uses (texteditor, terminal). TODO: Need to move `parse/lexer/Pos` into lines, along with probably some of the other stuff from lexer, and move `parser/tokens` into `text/tokens` as it is needed to be our fully general token library for all markup. Probably just move parse under text too?
+* [shaped](shaped): contains representations of shaped text, suitable for subsequent rendering, organized at multiple levels: `Lines`, `Line`, and `Run`. A `Run` is the shaped version of a Span, and is the basic unit of text rendering, containing `go-text` `shaping.Output` and `Glyph` data. A `Line` is a collection of `Run` elements, and `Lines` has multiple such Line elements, each of which has bounding boxes and functions for locating and selecting text elements at different levels. The actual font rendering is managed by `paint/renderer` types using these shaped representations. It looks like most fonts these days use outline-based rendering, which our rasterx renderer performs, with a caching mechanism that gives a 5x speedup.
 
-* `text/text`: is the general unconstrained text layout framework. It has a `Style` object containing general text layout styling parameters, used in shaped for wrapping text into lines. We may also want to leverage the tdewolff/canvas LaTeX layout system, with arbitrary textobject elements that can include Widgets etc, for doing `content` layout in an optimized way, e.g., doing direct translation of markdown into this augmented rich text format that is then just rendered directly.
+* [lines](lines): manages `rich.Text` and `shaped.Lines` for line-oriented uses (texteditor, terminal). TODO: Need to move `parse/lexer/Pos` into lines, along with probably some of the other stuff from lexer, and move `parser/tokens` into `text/tokens` as it is needed to be our fully general token library for all markup. Probably just move parse under text too?
 
-* `text/htmltext`: has functions for translating HTML formatted strings into corresponding `rich.Text` rich text representations.
+* [htmltext](htmltext): has functions for translating HTML formatted strings into corresponding `rich.Text` rich text representations.
+
+* [parse](parse): is a general-purpose parsing system that provides markup and completion support for a few core languages, including Go, Markdown, and LaTeX.
+
+* [highlighting](highlighting): interfaces with the [chroma](https://github.com/alecthomas/chroma) markup system to provide syntax highlighting for the `textcore.Base` editor.
+
+* [difflib](difflib): is used for generating "diffs" differences between files. it is a fork of [go-difflib](https://github.com/ianbruene/go-difflib).
+
+* [runes](runes): is a partial translation of the standard Go library `bytes` / `strings` functions for the `[]rune` type, so you don't have to keep converting back and forth. Most of the `text` library functionality deals directly with `[]rune` representations.
+
+## Future plans
+
+* Leverage the tdewolff/canvas LaTeX layout system, with arbitrary textobject elements that can include Widgets etc, for doing `content` layout in an optimized way, e.g., doing direct translation of markdown into this augmented rich text format that is then just rendered directly. This would provide a better typesetting-level output, e.g., for direct to PDF rendering.
+
+* Speaking of which, need to add the PDF & SVG backends.
 

@@ -5,7 +5,6 @@
 package shapedgt
 
 import (
-	"embed"
 	"fmt"
 	"io/fs"
 	"os"
@@ -13,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
@@ -42,15 +42,12 @@ type Shaper struct {
 // automatically supported. This is not relevant on web, which uses available
 // web fonts. Use [AddEmbeddedFonts] to add to this. This must be called before
 // [NewShaper] to have an effect.
-var EmbeddedFonts = []fs.FS{defaultFonts}
+var EmbeddedFonts = []fs.FS{fonts.DefaultFonts}
 
 // AddEmbeddedFonts adds to [EmbeddedFonts] for font loading.
 func AddEmbeddedFonts(fsys ...fs.FS) {
 	EmbeddedFonts = append(EmbeddedFonts, fsys...)
 }
-
-//go:embed fonts/*.ttf
-var defaultFonts embed.FS
 
 type nilLogger struct{}
 
@@ -68,11 +65,13 @@ func NewShaper() shaped.Shaper {
 	}
 	// fmt.Println("cache dir:", str)
 	if err := sh.fontMap.UseSystemFonts(str); err != nil {
-		errors.Log(err)
+		// note: we expect this error on js platform -- could do something exclusive here
+		// under a separate build tag file..
+		// errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
 	for _, fsys := range EmbeddedFonts {
-		errors.Log(fs.WalkDir(fsys, "fonts", func(path string, d fs.DirEntry, err error) error {
+		errors.Log(fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}

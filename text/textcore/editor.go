@@ -424,12 +424,11 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.Complete:
 		ed.iSearchCancel()
 		e.SetHandled()
-		// todo:
-		// if ed.Lines.isSpellEnabled(ed.CursorPos) {
-		// 	ed.offerCorrect()
-		// } else {
-		// 	ed.offerComplete()
-		// }
+		if ed.isSpellEnabled(ed.CursorPos) {
+			ed.offerCorrect()
+		} else {
+			ed.offerComplete()
+		}
 	case keymap.Enter:
 		cancelAll()
 		if !e.HasAnyModifier(key.Control, key.Meta) {
