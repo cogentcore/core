@@ -200,7 +200,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		lns.Lines = append(lns.Lines, ln)
 	}
-	if lns.Bounds.Size().Y < lht {
+	if nlines > 1 && lns.Bounds.Size().Y < lht {
 		lns.Bounds.Max.Y = lns.Bounds.Min.Y + lht
 	}
 	// fmt.Println(lns.Bounds)
