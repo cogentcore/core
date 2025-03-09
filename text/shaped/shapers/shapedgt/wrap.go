@@ -92,6 +92,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 	cspi := 0
 	cspSt, cspEd := tx.Range(cspi)
 	var off math32.Vector2
+	nlines := len(lines)
 	for li, lno := range lines {
 		// fmt.Println("line:", li, off)
 		ln := shaped.Line{}
@@ -187,11 +188,13 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			lht := ln.Bounds.Size().Y
 			extra := max(lht-lns.LineHeight, 0)
 			// fmt.Println("extra:", extra)
-			off.Y += lht + lgap
-			if lht < lns.LineHeight {
-				ln.Bounds.Max.Y += lns.LineHeight - lht
+			if nlines > 1 {
+				off.Y += lht + lgap
+				if lht < lns.LineHeight {
+					ln.Bounds.Max.Y += lns.LineHeight - lht
+				}
+				ourOff.Y += extra
 			}
-			ourOff.Y += extra
 		}
 		ln.Offset = ourOff
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
