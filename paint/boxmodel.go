@@ -119,11 +119,11 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 // boundsEncroachParent returns whether the current box encroaches on the
 // parent bounds, taking into account the parent radius, which is also returned.
 func (pc *Painter) boundsEncroachParent(pos, size math32.Vector2) (bool, sides.Floats) {
-	if len(pc.Stack) == 1 {
+	if len(pc.Stack) <= 1 {
 		return false, sides.Floats{}
 	}
 
-	ctx := pc.Stack[len(pc.Stack)-1]
+	ctx := pc.Stack[len(pc.Stack)-2]
 	pr := ctx.Bounds.Radius
 	if sides.AreZero(pr.Sides) {
 		return false, pr
