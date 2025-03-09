@@ -48,9 +48,8 @@ type Style struct { //types:add
 	// LineSpacing is a multiplier on the default font size for spacing between lines.
 	// If there are larger font elements within a line, they will be accommodated, with
 	// the same amount of total spacing added above that maximum size as if it was all
-	// the same height. This spacing is in addition to the default spacing, specified
-	// by each font. The default of 1 represents "single spaced" text.
-	LineSpacing float32 `default:"1"`
+	// the same height. The default of 1.2 represents standard "single spaced" text.
+	LineSpacing float32 `default:"1.2"`
 
 	// ParaSpacing is the line spacing between paragraphs (inherited).
 	// This will be copied from [Style.Margin] if that is non-zero,
@@ -97,7 +96,7 @@ func (ts *Style) Defaults() {
 	ts.Align = Start
 	ts.AlignV = Start
 	ts.FontSize.Dp(16)
-	ts.LineSpacing = 1
+	ts.LineSpacing = 1.2
 	ts.ParaSpacing = 1.2
 	ts.Direction = rich.LTR
 	ts.TabSize = 4

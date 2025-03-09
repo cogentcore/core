@@ -63,11 +63,11 @@ func (run *Run) LineBounds() math32.Box2 {
 func (run *Run) Bounds() fixed.Rectangle26_6 {
 	lb := &run.Output.LineBounds
 	gapdec := lb.Descent
-	if gapdec < 0 && lb.Gap < 0 || gapdec > 0 && lb.Gap > 0 {
-		gapdec += lb.Gap
-	} else {
-		gapdec -= lb.Gap
-	}
+	// if gapdec < 0 && lb.Gap < 0 || gapdec > 0 && lb.Gap > 0 {
+	// 	gapdec += lb.Gap
+	// } else {
+	// 	gapdec -= lb.Gap
+	// }
 	if run.Direction.IsVertical() {
 		// ascent, descent describe horizontal, advance is vertical
 		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -lb.Ascent, Y: 0},
