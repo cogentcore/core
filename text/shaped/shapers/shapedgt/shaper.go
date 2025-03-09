@@ -41,7 +41,7 @@ type nilLogger struct{}
 
 func (nl *nilLogger) Printf(format string, args ...any) {}
 
-var didDebug = true
+var didDebug = false
 
 // NewShaper returns a new text shaper.
 func NewShaper() shaped.Shaper {

@@ -15,6 +15,7 @@ func init() {
 		"Center":            reflect.ValueOf(text.Center),
 		"End":               reflect.ValueOf(text.End),
 		"Justify":           reflect.ValueOf(text.Justify),
+		"NewFont":           reflect.ValueOf(text.NewFont),
 		"NewStyle":          reflect.ValueOf(text.NewStyle),
 		"Start":             reflect.ValueOf(text.Start),
 		"WhiteSpacePre":     reflect.ValueOf(text.WhiteSpacePre),
@@ -29,6 +30,7 @@ func init() {
 		// type definitions
 		"Aligns":         reflect.ValueOf((*text.Aligns)(nil)),
 		"EditorSettings": reflect.ValueOf((*text.EditorSettings)(nil)),
+		"Font":           reflect.ValueOf((*text.Font)(nil)),
 		"Style":          reflect.ValueOf((*text.Style)(nil)),
 		"WhiteSpaces":    reflect.ValueOf((*text.WhiteSpaces)(nil)),
 	}

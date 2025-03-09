@@ -85,7 +85,6 @@ func init() {
 		"OverflowVisible":           reflect.ValueOf(styles.OverflowVisible),
 		"OverflowsN":                reflect.ValueOf(styles.OverflowsN),
 		"OverflowsValues":           reflect.ValueOf(styles.OverflowsValues),
-		"PrefFontFamily":            reflect.ValueOf(&styles.PrefFontFamily).Elem(),
 		"Row":                       reflect.ValueOf(styles.Row),
 		"SetClampMax":               reflect.ValueOf(styles.SetClampMax),
 		"SetClampMaxVector":         reflect.ValueOf(styles.SetClampMaxVector),
