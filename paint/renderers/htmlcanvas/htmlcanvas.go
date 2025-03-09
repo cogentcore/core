@@ -67,7 +67,7 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 
 func (rs *Renderer) SetCanvas(c js.Value) {
 	rs.Canvas = c
-	rs.ctx = rs.Canvas.Call("getContext", "2d")
+	rs.ctx = rs.Canvas.Call("getContext", "2d", "alpha", "true")
 	// todo: make this a font options.
 	// rs.ctx.Set("imageSmoothingEnabled", false)
 	// rs.ctx.Set("textRendering", "geometricPrecision")
@@ -83,8 +83,24 @@ func (rs *Renderer) Render(r render.Render) {
 			rs.RenderImage(x)
 		case *render.Text:
 			rs.RenderText(x)
+		case *render.ContextPush:
+			rs.PushContext(x)
+		case *render.ContextPop:
+			rs.PopContext(x)
 		}
 	}
+}
+
+func (rs *Renderer) PushContext(pt *render.ContextPush) {
+	pc := &pt.Context
+	rs.ctx.Call("save") // save clip region prior to using
+	br := pc.Bounds.Rect.ToRect()
+	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Dx(), br.Dy())
+	rs.ctx.Call("clip")
+}
+
+func (rs *Renderer) PopContext(pt *render.ContextPop) {
+	rs.ctx.Call("restore") // restore clip region
 }
 
 func (rs *Renderer) writePath(pt *render.Path) {
@@ -132,12 +148,6 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	if pt.Path.Empty() {
 		return
 	}
-	pc := &pt.Context
-	rs.ctx.Call("save") // save clip region prior to using
-	br := pc.Bounds.Rect.ToRect()
-	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Dx(), br.Dy())
-	rs.ctx.Call("clip")
-
 	style := &pt.Context.Style
 	p := pt.Path
 	if !ppath.ArcToCubeImmediate {
@@ -231,7 +241,6 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		}
 		rs.ctx.Call("fill")
 	}
-	rs.ctx.Call("restore") // restore clip region
 }
 
 func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version

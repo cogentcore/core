@@ -20,15 +20,7 @@ import (
 
 // RenderText rasterizes the given Text
 func (rs *Renderer) RenderText(txt *render.Text) {
-	pc := &txt.Context
-	rs.ctx.Call("save") // save clip region prior to using
-	br := pc.Bounds.Rect.ToRect()
-	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Dx(), br.Dy())
-	rs.ctx.Call("clip")
-
 	rs.TextLines(txt.Text, &txt.Context, txt.Position)
-
-	rs.ctx.Call("restore") // restore clip region
 }
 
 // TextLines rasterizes the given shaped.Lines.
@@ -36,7 +28,6 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 // left baseline location of the first text item..
 func (rs *Renderer) TextLines(lns *shaped.Lines, ctx *render.Context, pos math32.Vector2) {
 	start := pos.Add(lns.Offset)
-	// rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
 	clr := colors.Uniform(lns.Color)
 	runes := lns.Source.Join() // TODO: bad for performance with append
 	for li := range lns.Lines {

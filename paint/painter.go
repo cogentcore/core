@@ -408,6 +408,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 func (pc *Painter) RoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h float32, r sides.Floats) {
 	if blurSigma <= 0 || radiusFactor <= 0 {
 		pc.RoundedRectangleSides(x, y, w, h, r)
+		pc.PathDone()
 		return
 	}
 	x = math32.Floor(x)
