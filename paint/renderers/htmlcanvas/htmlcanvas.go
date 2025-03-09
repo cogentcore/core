@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Renderers is a list of all current HTML canvas renderers.
@@ -270,46 +269,4 @@ func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
 	v.Call("then", onResolve, onReject)
 	<-done
 	return
-}
-
-func (rs *Renderer) RenderImage(pimg *pimage.Params) {
-	if pimg.Source == nil {
-		return
-	}
-	// TODO: for some reason we are getting a non-nil interface of a nil [image.RGBA]
-	if r, ok := pimg.Source.(*image.RGBA); ok && r == nil {
-		return
-	}
-
-	// Fast path for [image.Uniform]
-	if u, ok := pimg.Source.(*image.Uniform); ok && pimg.Mask == nil {
-		// TODO: caching?
-		rs.style.Fill.Color = u
-		rs.ctx.Set("fillStyle", rs.imageToStyle(u))
-		rs.ctx.Call("fillRect", pimg.Rect.Min.X, pimg.Rect.Min.Y, pimg.Rect.Dx(), pimg.Rect.Dy())
-		return
-	}
-
-	// TODO: images possibly comparatively not performant on web, so there
-	// might be a better path for things like FillBox.
-	// TODO: have a fast path for [image.RGBA]?
-	// size := pimg.Rect.Size() // TODO: is this right?
-	// TODO: clean this up
-	jsBuf := wgpu.BytesToJS(pimg.Source.(*image.RGBA).Pix)
-	sbb := pimg.Source.Bounds()
-	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
-	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
-	imageBitmap, ok := jsAwait(imageBitmapPromise)
-	if !ok {
-		panic("error while waiting for createImageBitmap promise")
-	}
-
-	sw := min(pimg.Rect.Dx(), sbb.Dx())
-	sh := min(pimg.Rect.Dy(), sbb.Dy())
-	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
-	// m = m.Scale(rs.dpm, rs.dpm)
-	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
-	rs.ctx.Call("drawImage", imageBitmap, pimg.SourcePos.X, pimg.SourcePos.Y, sw, sh, pimg.Rect.Min.X, pimg.Rect.Min.Y, sw, sh)
-	// rs.ctx.Call("putImageData", imageData, pimg.Rect.Min.X, pimg.Rect.Min.Y)
-	// rs.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 }
