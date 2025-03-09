@@ -10,5 +10,7 @@ import "embed"
 
 // todo: figure out a more general policy here
 
+// sf/*.ttf
+
 //go:embed roboto/*.ttf
 var DefaultFonts embed.FS

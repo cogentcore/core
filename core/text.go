@@ -401,9 +401,15 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	txs := &tx.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = text.Start, text.Start
+	if TheApp.Platform() == system.Web {
+		sz.X *= .95
+	}
 	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, sz)
 
 	rsz := tx.paintText.Bounds.Size().Ceil()
+	if TheApp.Platform() == system.Web {
+		rsz.X *= 1.05
+	}
 	txs.Align, txs.AlignV = align, alignV
 	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, rsz)
 	tx.Links = tx.paintText.Source.GetLinks()

@@ -54,6 +54,9 @@ func ExtractMetrics(fname, outfile string, debug bool) error {
 		}
 		tables[i].Tag = tag
 		tables[i].Content, err = font.RawTable(tag)
+		if tag.String() == "name" {
+			fmt.Println("name:", string(tables[i].Content))
+		}
 	}
 	if debug {
 		fmt.Println("\t", taglist)

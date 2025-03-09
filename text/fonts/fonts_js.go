@@ -10,5 +10,7 @@ import "embed"
 
 // todo: figure out a more general policy here
 
-//go:embed robotojs/*.ttf arialjs/*.ttf sfjs/*.ttf
+// arialjs/*.ttf sfjs/*.ttf
+
+//go:embed robotojs/*.ttf
 var DefaultFonts embed.FS

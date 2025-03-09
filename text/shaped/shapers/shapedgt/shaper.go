@@ -41,6 +41,8 @@ type nilLogger struct{}
 
 func (nl *nilLogger) Printf(format string, args ...any) {}
 
+var didDebug = true
+
 // NewShaper returns a new text shaper.
 func NewShaper() shaped.Shaper {
 	sh := &Shaper{}
@@ -87,6 +89,11 @@ func NewShaper() shaped.Shaper {
 	// 	shaper.defaultFaces = append(shaper.defaultFaces, string(f.Font.Typeface))
 	// }
 	sh.shaper.SetFontCacheSize(32)
+
+	if !didDebug {
+		sh.FontDebug()
+		didDebug = true
+	}
 	return sh
 }
 

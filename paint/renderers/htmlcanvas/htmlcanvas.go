@@ -62,14 +62,15 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	return // TODO(newpaint)
 
 	// rs.ctx.Call("clearRect", 0, 0, size.X, size.Y)
-	rs.ctx.Set("imageSmoothingEnabled", false)
-	rs.ctx.Set("textRendering", "geometricPrecision")
 	// rs.ctx.Set("imageSmoothingQuality", "high")
 }
 
 func (rs *Renderer) SetCanvas(c js.Value) {
 	rs.Canvas = c
 	rs.ctx = rs.Canvas.Call("getContext", "2d")
+	// todo: make this a font options.
+	// rs.ctx.Set("imageSmoothingEnabled", false)
+	// rs.ctx.Set("textRendering", "geometricPrecision")
 }
 
 // Render is the main rendering function.

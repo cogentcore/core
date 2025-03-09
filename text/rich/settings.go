@@ -99,7 +99,7 @@ type Settings struct {
 func (rts *Settings) Defaults() {
 	rts.Language = language.DefaultLanguage()
 	// rts.Script = language.Latin
-	rts.SansSerif = "Roboto"
+	rts.SansSerif = ""
 	rts.Monospace = "Roboto Mono"
 	// rts.Serif = "Times New Roman"
 }
