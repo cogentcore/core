@@ -1778,7 +1778,7 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	}
 	allocHt := lg.Geom.Size.Alloc.Content.Y - lg.Geom.Size.InnerSpace.Y
 	if allocHt > lg.rowHeight {
-		lg.visibleRows = int(math32.Floor(allocHt / lg.rowHeight))
+		lg.visibleRows = int(math32.Ceil(allocHt / lg.rowHeight))
 	}
 	lg.visibleRows = max(lg.visibleRows, lg.minRows)
 	minHt := lg.rowHeight * float32(lg.minRows)
@@ -1808,8 +1808,8 @@ func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float3
 		return lg.Frame.ScrollValues(d)
 	}
 	ls := lg.list()
-	maxSize = float32(max(ls.SliceSize, 1)) * lg.rowHeight
-	visSize = float32(lg.visibleRows) * lg.rowHeight
+	maxSize = float32(max(ls.SliceSize, 1))*lg.rowHeight + lg.Geom.Size.InnerSpace.Y
+	visSize = lg.Geom.Size.Alloc.Content.Y
 	visPct = visSize / maxSize
 	return
 }
