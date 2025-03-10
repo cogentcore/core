@@ -50,6 +50,10 @@ func (a *AppMulti[W]) Screen(n int) *system.Screen {
 	if n >= 0 && n < len(a.Screens) {
 		return a.Screens[n]
 	}
+
+	// this is pretty dangerous and it might panic
+	// because Screens slice might have zero length at some point of time.
+	// fail fast keeps it as is.
 	return a.Screens[0]
 }
 
