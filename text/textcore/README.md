@@ -17,6 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* js region render, lines render.
+
 * editor: detect overwide glyphs and shrink them
 
 * check for negative advance and highlighting issues / tests

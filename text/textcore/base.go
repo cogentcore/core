@@ -204,6 +204,7 @@ func (ed *Base) Init() {
 		// } else {
 		// 	s.Text.WhiteSpace = styles.WhiteSpacePre
 		// }
+		s.Text.LineHeight = 1.3
 		s.Text.WhiteSpace = text.WrapNever
 		s.Font.Family = rich.Monospace
 		s.Grow.Set(1, 0)

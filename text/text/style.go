@@ -48,14 +48,14 @@ type Style struct { //types:add
 	// LineHeight is a multiplier on the default font size for spacing between lines.
 	// If there are larger font elements within a line, they will be accommodated, with
 	// the same amount of total spacing added above that maximum size as if it was all
-	// the same height. The default of 1.2 represents standard "single spaced" text.
-	LineHeight float32 `default:"1.2"`
+	// the same height. The default of 1.3 represents standard "single spaced" text.
+	LineHeight float32 `default:"1.3"`
 
 	// ParaSpacing is the line spacing between paragraphs (inherited).
 	// This will be copied from [Style.Margin] if that is non-zero,
 	// or can be set directly. Like [LineHeight], this is a multiplier on
 	// the default font size.
-	ParaSpacing float32 `default:"1.2"`
+	ParaSpacing float32 `default:"1.5"`
 
 	// WhiteSpace (not inherited) specifies how white space is processed,
 	// and how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.
@@ -96,8 +96,8 @@ func (ts *Style) Defaults() {
 	ts.Align = Start
 	ts.AlignV = Start
 	ts.FontSize.Dp(16)
-	ts.LineHeight = 1.2
-	ts.ParaSpacing = 1.2
+	ts.LineHeight = 1.3
+	ts.ParaSpacing = 1.5
 	ts.Direction = rich.LTR
 	ts.TabSize = 4
 	ts.Color = colors.ToUniform(colors.Scheme.OnSurface)
