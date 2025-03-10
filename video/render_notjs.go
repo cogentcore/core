@@ -11,7 +11,6 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/system/composer"
-	"cogentcore.org/core/system/driver/base"
 )
 
 // videoSource implements [composer.Source] for core direct rendering.
@@ -23,10 +22,7 @@ type videoSource struct {
 }
 
 func (vs *videoSource) Draw(c composer.Composer) {
-	cd, ok := c.(*base.ComposerDrawer)
-	if !ok {
-		return
-	}
+	cd := c.(*composer.ComposerDrawer)
 	cd.Drawer.Scale(vs.destBBox, vs.frame, vs.srcBBox, vs.rotation, draw.Src, vs.unchanged)
 }
 
