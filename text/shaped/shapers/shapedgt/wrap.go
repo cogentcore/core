@@ -88,8 +88,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 
 	fsz := tsty.FontSize.Dots
 	dir := shaped.GoTextDirection(rich.Default, tsty)
-	// lpad := 0.5 * (lns.LineHeight - fsz)
-	// fmt.Println(fsz, lht, lht/fsz, lpad, tsty.LineHeight)
+	// fmt.Println(fsz, lht, lht/fsz, tsty.LineHeight)
 
 	cspi := 0
 	cspSt, cspEd := tx.Range(cspi)
@@ -186,13 +185,14 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				ourOff.X -= extra
 			}
 		} else { // always top-down, no progression issues
-			lby := ln.Bounds.Size().Y
-			lpad := 0.5 * (lns.LineHeight - lby)
-			actualLht := max(lby, lns.LineHeight)
-			ourOff.Y += lpad + max(lby-lns.LineHeight, 0)
-			off.Y += actualLht
-			ln.Bounds.Max.Y += actualLht - lby
-			// fmt.Println("lby:", lby, lpad, ln.Bounds.Size().Y)
+			lby := ln.Bounds.Size().Y // the result at this point is centered with this height
+			// which includes the natural line height property of the font itself.
+			lpd := 0.5 * (lns.LineHeight - lby) // half of diff
+			ourOff.Y += lpd
+			ln.Bounds.Min.Y -= lpd
+			ln.Bounds.Max.Y += lpd
+			off.Y += lns.LineHeight
+			// fmt.Println("lby:", lby, fsz, lns.LineHeight, lpd, ourOff.Y)
 		}
 		ln.Offset = ourOff
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))

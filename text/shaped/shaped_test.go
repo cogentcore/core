@@ -5,7 +5,6 @@
 package shaped_test
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -209,7 +208,7 @@ func TestLinefeed(t *testing.T) {
 		src := "Text2D can put <b>HTML</b> <br>formatted<br>Text anywhere you might <i>want</i>"
 		sty := rich.NewStyle()
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
-		fmt.Println(tx)
+		// fmt.Println(tx)
 		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
@@ -222,5 +221,18 @@ func TestLinefeed(t *testing.T) {
 		// si := lns.RuneAtPoint(cp, pos)
 		// fmt.Println(si)
 		// assert.Equal(t, 3, si)
+	})
+}
+
+func TestLineCentering(t *testing.T) {
+	RunTest(t, "linecentering", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		src := "This is Line Centering"
+		// src := "aceg"
+		sty := rich.NewStyle()
+		tsty.LineHeight = 3
+		tx := rich.NewText(sty, []rune(src))
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 10)
+		pc.TextLines(lns, pos)
 	})
 }
