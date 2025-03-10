@@ -1788,21 +1788,6 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	return csz
 }
 
-func (lg *ListGrid) SetScrollParams(d math32.Dims, sb *Slider) {
-	if d == math32.X {
-		lg.Frame.SetScrollParams(d, sb)
-		return
-	}
-	sb.Min = 0
-	sb.Step = 1
-	if lg.visibleRows > 0 {
-		sb.PageStep = float32(lg.visibleRows)
-	} else {
-		sb.PageStep = 10
-	}
-	sb.InputThreshold = sb.Step
-}
-
 func (lg *ListGrid) list() (Lister, *ListBase) {
 	ls := tree.ParentByType[Lister](lg)
 	if ls == nil {
@@ -1820,7 +1805,7 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	if sv == nil {
 		return
 	}
-	sv.StartIndex = int(math32.Round(sb.Value))
+	sv.StartIndex = int(math32.Round(sb.Value / lg.rowHeight))
 	sv.Update()
 }
 
@@ -1832,8 +1817,8 @@ func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float3
 	if sv == nil {
 		return
 	}
-	maxSize = float32(max(sv.SliceSize, 1))
-	visSize = float32(lg.visibleRows)
+	maxSize = float32(max(sv.SliceSize, 1)) * lg.rowHeight
+	visSize = float32(lg.visibleRows) * lg.rowHeight
 	visPct = visSize / maxSize
 	return
 }
