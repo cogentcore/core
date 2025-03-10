@@ -91,7 +91,7 @@ func (rs *Renderer) TextRegionFill(ctx *render.Context, run *shapedgt.Run, off m
 		fi := run.FirstGlyphAt(rsel.Start)
 		li := run.LastGlyphAt(rsel.End - 1)
 		if fi >= 0 && li >= fi {
-			sbb := run.GlyphRegionBounds(fi, li)
+			sbb := run.GlyphRegionBounds(fi, li).Canon()
 			rs.FillBounds(ctx, sbb.Translate(off), fill)
 		}
 	}

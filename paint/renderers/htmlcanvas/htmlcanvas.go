@@ -102,24 +102,65 @@ func (rs *Renderer) PopContext(pt *render.ContextPop) {
 	rs.ctx.Call("restore") // restore clip region
 }
 
-func (rs *Renderer) writePath(pt *render.Path) {
-	rs.ctx.Call("beginPath")
-	for scanner := pt.Path.Scanner(); scanner.Scan(); {
-		end := scanner.End()
-		switch scanner.Cmd() {
-		case ppath.MoveTo:
-			rs.ctx.Call("moveTo", end.X, end.Y)
-		case ppath.LineTo:
-			rs.ctx.Call("lineTo", end.X, end.Y)
-		case ppath.QuadTo:
-			cp := scanner.CP1()
-			rs.ctx.Call("quadraticCurveTo", cp.X, cp.Y, end.X, end.Y)
-		case ppath.CubeTo:
-			cp1, cp2 := scanner.CP1(), scanner.CP2()
-			rs.ctx.Call("bezierCurveTo", cp1.X, cp1.Y, cp2.X, cp2.Y, end.X, end.Y)
-		case ppath.Close:
-			rs.ctx.Call("closePath")
+func (rs *Renderer) setTransform(ctx *render.Context) {
+	m := ctx.Transform
+	rs.ctx.Call("setTransform", m.XX, m.YX, m.XY, m.YY, m.X0, m.Y0)
+}
+
+func (rs *Renderer) setFill(clr image.Image) {
+	if rs.style.Fill.Color != clr {
+		rs.style.Fill.Color = clr
+		rs.ctx.Set("fillStyle", rs.imageToStyle(clr))
+	}
+}
+
+func (rs *Renderer) setStroke(stroke *styles.Stroke) {
+	if stroke.Cap != rs.style.Stroke.Cap {
+		rs.ctx.Set("lineCap", stroke.Cap.String())
+		rs.style.Stroke.Cap = stroke.Cap
+	}
+
+	if stroke.Join != rs.style.Stroke.Join {
+		rs.ctx.Set("lineJoin", stroke.Join.String())
+		if stroke.Join == ppath.JoinMiter && !math32.IsNaN(stroke.MiterLimit) {
+			rs.ctx.Set("miterLimit", stroke.MiterLimit)
 		}
+		rs.style.Stroke.Join = stroke.Join
+	}
+
+	// TODO: all of this could be more efficient
+	dashesEqual := len(stroke.Dashes) == len(rs.style.Stroke.Dashes)
+	if dashesEqual {
+		for i, dash := range stroke.Dashes {
+			if dash != rs.style.Stroke.Dashes[i] {
+				dashesEqual = false
+				break
+			}
+		}
+	}
+
+	if !dashesEqual {
+		dashes := []any{}
+		for _, dash := range stroke.Dashes {
+			dashes = append(dashes, dash)
+		}
+		jsDashes := js.Global().Get("Array").New(dashes...)
+		rs.ctx.Call("setLineDash", jsDashes)
+		rs.style.Stroke.Dashes = stroke.Dashes
+	}
+
+	if stroke.DashOffset != rs.style.Stroke.DashOffset {
+		rs.ctx.Set("lineDashOffset", stroke.DashOffset)
+		rs.style.Stroke.DashOffset = stroke.DashOffset
+	}
+
+	if stroke.Width.Dots != rs.style.Stroke.Width.Dots {
+		rs.ctx.Set("lineWidth", stroke.Width.Dots)
+		rs.style.Stroke.Width = stroke.Width
+	}
+	if stroke.Color != rs.style.Stroke.Color {
+		rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke.Color))
+		rs.style.Stroke.Color = stroke.Color
 	}
 }
 
@@ -141,105 +182,6 @@ func (rs *Renderer) imageToStyle(clr image.Image) any {
 	}
 	// TODO: handle more cases for things like pattern functions and [image.RGBA] images?
 	return colors.AsHex(colors.ToUniform(clr))
-}
-
-func (rs *Renderer) RenderPath(pt *render.Path) {
-	if pt.Path.Empty() {
-		return
-	}
-	style := &pt.Context.Style
-	p := pt.Path
-	if !ppath.ArcToCubeImmediate {
-		p = p.ReplaceArcs() // TODO: should we do this in writePath?
-	}
-	m := pt.Context.Transform                                       // TODO: do we need to do more transform handling of m?
-	rs.ctx.Call("setTransform", m.XX, m.YX, m.XY, m.YY, m.X0, m.Y0) // TODO: cache
-
-	strokeUnsupported := false
-	// if m.IsSimilarity() { // TODO: implement
-	if true {
-		scale := math32.Sqrt(math32.Abs(m.Det()))
-		// TODO: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
-		style.Stroke.Width.Dots /= scale
-		// style.Stroke.DashOffset, style.Stroke.Dashes = ppath.ScaleDash(style.Stroke.Width.Dots, style.Stroke.DashOffset, style.Stroke.Dashes)
-	} else {
-		strokeUnsupported = true
-	}
-
-	if style.HasFill() || (style.HasStroke() && !strokeUnsupported) {
-		rs.writePath(pt)
-	}
-
-	if style.HasFill() {
-		if style.Fill.Color != rs.style.Fill.Color {
-			rs.ctx.Set("fillStyle", rs.imageToStyle(style.Fill.Color))
-			rs.style.Fill.Color = style.Fill.Color
-		}
-		rs.ctx.Call("fill")
-	}
-	if style.HasStroke() && !strokeUnsupported {
-		if style.Stroke.Cap != rs.style.Stroke.Cap {
-			rs.ctx.Set("lineCap", style.Stroke.Cap.String())
-			rs.style.Stroke.Cap = style.Stroke.Cap
-		}
-
-		if style.Stroke.Join != rs.style.Stroke.Join {
-			rs.ctx.Set("lineJoin", style.Stroke.Join.String())
-			if style.Stroke.Join == ppath.JoinMiter && !math32.IsNaN(style.Stroke.MiterLimit) {
-				rs.ctx.Set("miterLimit", style.Stroke.MiterLimit)
-			}
-			rs.style.Stroke.Join = style.Stroke.Join
-		}
-
-		// TODO: all of this could be more efficient
-		dashesEqual := len(style.Stroke.Dashes) == len(rs.style.Stroke.Dashes)
-		if dashesEqual {
-			for i, dash := range style.Stroke.Dashes {
-				if dash != rs.style.Stroke.Dashes[i] {
-					dashesEqual = false
-					break
-				}
-			}
-		}
-
-		if !dashesEqual {
-			dashes := []any{}
-			for _, dash := range style.Stroke.Dashes {
-				dashes = append(dashes, dash)
-			}
-			jsDashes := js.Global().Get("Array").New(dashes...)
-			rs.ctx.Call("setLineDash", jsDashes)
-			rs.style.Stroke.Dashes = style.Stroke.Dashes
-		}
-
-		if style.Stroke.DashOffset != rs.style.Stroke.DashOffset {
-			rs.ctx.Set("lineDashOffset", style.Stroke.DashOffset)
-			rs.style.Stroke.DashOffset = style.Stroke.DashOffset
-		}
-
-		if style.Stroke.Width.Dots != rs.style.Stroke.Width.Dots {
-			rs.ctx.Set("lineWidth", style.Stroke.Width.Dots)
-			rs.style.Stroke.Width = style.Stroke.Width
-		}
-		if style.Stroke.Color != rs.style.Stroke.Color {
-			rs.ctx.Set("strokeStyle", rs.imageToStyle(style.Stroke.Color))
-			rs.style.Stroke.Color = style.Stroke.Color
-		}
-		rs.ctx.Call("stroke")
-	} else if style.HasStroke() {
-		// stroke settings unsupported by HTML Canvas, draw stroke explicitly
-		// TODO: check when this is happening, maybe remove or use rasterx?
-		if len(style.Stroke.Dashes) > 0 {
-			pt.Path = pt.Path.Dash(style.Stroke.DashOffset, style.Stroke.Dashes...)
-		}
-		pt.Path = pt.Path.Stroke(style.Stroke.Width.Dots, ppath.CapFromStyle(style.Stroke.Cap), ppath.JoinFromStyle(style.Stroke.Join), 1)
-		rs.writePath(pt)
-		if style.Stroke.Color != rs.style.Fill.Color {
-			rs.ctx.Set("fillStyle", rs.imageToStyle(style.Stroke.Color))
-			rs.style.Fill.Color = style.Stroke.Color
-		}
-		rs.ctx.Call("fill")
-	}
 }
 
 func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
