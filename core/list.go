@@ -1788,12 +1788,9 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	return csz
 }
 
-func (lg *ListGrid) list() (Lister, *ListBase) {
+func (lg *ListGrid) list() *ListBase {
 	ls := tree.ParentByType[Lister](lg)
-	if ls == nil {
-		return nil, nil
-	}
-	return ls, ls.AsListBase()
+	return ls.AsListBase()
 }
 
 func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
@@ -1801,23 +1798,17 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		lg.Frame.ScrollChanged(d, sb)
 		return
 	}
-	_, sv := lg.list()
-	if sv == nil {
-		return
-	}
-	sv.StartIndex = int(math32.Round(sb.Value / lg.rowHeight))
-	sv.Update()
+	ls := lg.list()
+	ls.StartIndex = int(math32.Round(sb.Value / lg.rowHeight))
+	ls.Update()
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
 	if d == math32.X {
 		return lg.Frame.ScrollValues(d)
 	}
-	_, sv := lg.list()
-	if sv == nil {
-		return
-	}
-	maxSize = float32(max(sv.SliceSize, 1)) * lg.rowHeight
+	ls := lg.list()
+	maxSize = float32(max(ls.SliceSize, 1)) * lg.rowHeight
 	visSize = float32(lg.visibleRows) * lg.rowHeight
 	visPct = visSize / maxSize
 	return
@@ -1887,15 +1878,11 @@ func (lg *ListGrid) rowBackground(sel, stripe, hover bool) image.Image {
 }
 
 func (lg *ListGrid) ChildBackground(child Widget) image.Image {
-	bg := lg.Styles.ActualBackground
-	_, sv := lg.list()
-	if sv == nil {
-		return bg
-	}
+	ls := lg.list()
 	lg.updateBackgrounds()
-	row, _ := sv.widgetIndex(child)
-	si := row + sv.StartIndex
-	return lg.rowBackground(sv.indexIsSelected(si), si%2 == 1, row == sv.hoverRow)
+	row, _ := ls.widgetIndex(child)
+	si := row + ls.StartIndex
+	return lg.rowBackground(ls.indexIsSelected(si), si%2 == 1, row == ls.hoverRow)
 }
 
 func (lg *ListGrid) renderStripes() {
@@ -1911,10 +1898,10 @@ func (lg *ListGrid) renderStripes() {
 	cols := lg.layout.Shape.X
 	st := pos
 	offset := 0
-	_, sv := lg.list()
+	ls := lg.list()
 	startIndex := 0
-	if sv != nil {
-		startIndex = sv.StartIndex
+	if ls != nil {
+		startIndex = ls.StartIndex
 		offset = startIndex % 2
 	}
 	for r := 0; r < rows; r++ {
@@ -1935,7 +1922,7 @@ func (lg *ListGrid) renderStripes() {
 		ssz := sz
 		ssz.Y = ht
 		stripe := (r+offset)%2 == 1
-		sbg := lg.rowBackground(sv.indexIsSelected(si), stripe, r == sv.hoverRow)
+		sbg := lg.rowBackground(ls.indexIsSelected(si), stripe, r == ls.hoverRow)
 		pc.BlitBox(st, ssz, sbg)
 		st.Y += ht + lg.layout.Gap.Y
 	}
