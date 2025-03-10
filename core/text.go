@@ -198,7 +198,7 @@ func (tx *Text) Init() {
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplayLarge:
-			s.Text.LineHeight = 64.0 / 57
+			s.Text.LineHeight = 70.0 / 57 // 64.0 / 57  64 not big enough! must be > 1.2
 			s.Text.FontSize.Dp(57)
 			// s.Text.LetterSpacing.Dp(-0.25)
 			s.Font.Weight = rich.Normal

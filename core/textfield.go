@@ -156,8 +156,8 @@ type TextField struct { //core:embedder
 	// number of lines from last render update, for word-wrap version
 	numLines int
 
-	// fontHeight is the font height cached during styling.
-	fontHeight float32
+	// lineHeight is the line height cached during styling.
+	lineHeight float32
 
 	// blinkOn oscillates between on and off for blinking.
 	blinkOn bool
@@ -228,6 +228,7 @@ func (tf *TextField) Init() {
 		if tf.TrailingIcon.IsSet() {
 			s.Padding.Right.Dp(12)
 		}
+		s.Text.LineHeight = 1.4
 		s.Text.Align = text.Start
 		s.Align.Items = styles.Center
 		s.Color = colors.Scheme.OnSurface
@@ -1235,7 +1236,7 @@ func (tf *TextField) renderCursor(on bool) {
 		if ms == nil {
 			return
 		}
-		spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.fontHeight)
+		spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
@@ -1265,11 +1266,11 @@ func (tf *TextField) cursorSprite(on bool) *Sprite {
 	if ms == nil {
 		return nil // only MainStage has sprites
 	}
-	spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.fontHeight)
+	spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	// TODO: figure out how to update caret color on color scheme change
 	if !ok {
-		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.fontHeight))}
+		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.lineHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
@@ -1712,7 +1713,7 @@ func (tf *TextField) SizeUp() {
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	tf.fontHeight = tf.Styles.Text.FontHeight(&tf.Styles.Font)
+	tf.lineHeight = tf.Styles.Text.LineHeightDots(&tf.Styles.Font)
 	tf.editText = tmptxt
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
@@ -1768,7 +1769,7 @@ func (tf *TextField) setEffPosAndSize() {
 		tf.numLines = len(tf.renderAll.Lines)
 	}
 	if tf.numLines <= 1 {
-		pos.Y += 0.5 * (sz.Y - tf.fontHeight) // center
+		pos.Y += 0.5 * (sz.Y - tf.lineHeight) // center
 	}
 	tf.effSize = sz.Ceil()
 	tf.effPos = pos.Ceil()

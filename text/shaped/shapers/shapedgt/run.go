@@ -52,6 +52,25 @@ func (run *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
 }
 
+// GlyphLineBoundsBox returns the math32.Box2 version of [Run.GlyphLineBounds],
+// providing a line-level bounding box for given glyph within this run.
+func (run *Run) GlyphLineBoundsBox(g *shaping.Glyph) math32.Box2 {
+	return math32.B2FromFixed(run.GlyphLineBounds(g))
+}
+
+// GlyphLineBounds returns the line-level bounding box for given glyph within this run.
+func (run *Run) GlyphLineBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
+	rb := run.Bounds()
+	if run.Direction.IsVertical() { // todo: fixme
+		if run.Direction.IsSideways() {
+			fmt.Println("sideways")
+			return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
+		}
+		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -g.XBearing - g.Width/2, Y: g.Height - g.YOffset}, Max: fixed.Point26_6{X: g.XBearing + g.Width/2, Y: -(g.YBearing + g.Height) - g.YOffset}}
+	}
+	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: rb.Min.Y}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: rb.Max.Y}}
+}
+
 // LineBounds returns the LineBounds for given Run as a math32.Box2
 // bounding box
 func (run *Run) LineBounds() math32.Box2 {
@@ -61,20 +80,28 @@ func (run *Run) LineBounds() math32.Box2 {
 // Bounds returns the LineBounds for given Run as rect bounding box.
 // See [Run.BoundsBox] for a version returning the float32 [math32.Box2].
 func (run *Run) Bounds() fixed.Rectangle26_6 {
+	mb := run.MaxBounds
+	if run.Direction.IsVertical() {
+		// ascent, descent describe horizontal, advance is vertical
+		// return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -lb.Ascent, Y: 0},
+		// 	Max: fixed.Point26_6{X: -gapdec, Y: -run.Output.Advance}}
+	}
+	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: mb.Min.ToFixed().Y},
+		Max: fixed.Point26_6{X: run.Output.Advance, Y: mb.Max.ToFixed().Y}}
+}
+
+// RunBounds returns the Advance-based Bounds for this Run as rect bounding box,
+// that reflects the total space of the run, using Ascent & Descent for font
+// for the vertical dimension in horizontal text.
+func (run *Run) RunBounds() fixed.Rectangle26_6 {
 	lb := &run.Output.LineBounds
-	gapdec := lb.Descent
-	// if gapdec < 0 && lb.Gap < 0 || gapdec > 0 && lb.Gap > 0 {
-	// 	gapdec += lb.Gap
-	// } else {
-	// 	gapdec -= lb.Gap
-	// }
 	if run.Direction.IsVertical() {
 		// ascent, descent describe horizontal, advance is vertical
 		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -lb.Ascent, Y: 0},
-			Max: fixed.Point26_6{X: -gapdec, Y: -run.Output.Advance}}
+			Max: fixed.Point26_6{X: -lb.Descent, Y: -run.Output.Advance}}
 	}
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: -lb.Ascent},
-		Max: fixed.Point26_6{X: run.Output.Advance, Y: -gapdec}}
+		Max: fixed.Point26_6{X: run.Output.Advance, Y: -lb.Descent}}
 }
 
 // GlyphsAt returns the indexs of the glyph(s) at given original source rune index.
@@ -169,7 +196,7 @@ func (run *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
 		return math32.Box2{}
 	}
 	sg := &run.Glyphs[st]
-	stb := run.GlyphBoundsBox(sg)
+	stb := run.GlyphLineBoundsBox(sg)
 	mb := run.MaxBounds
 	off := float32(0)
 	for gi := 0; gi < st; gi++ {

@@ -140,7 +140,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
 			run.SetFromStyle(sty, tsty)
-			bb := math32.B2FromFixed(run.Bounds().Add(pos))
+			bb := math32.B2FromFixed(run.RunBounds().Add(pos))
 			// fmt.Println(bb.Size().Y, lht)
 			ln.Bounds.ExpandByBox(bb)
 			pos = DirectionAdvance(run.Direction, pos, run.Output.Advance)
@@ -150,21 +150,6 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			if !dir.IsVertical() { // todo: vertical!
 				off.Y = math32.FromFixed(maxAsc)
 			}
-		}
-		// go back through and give every run the expanded line-level box
-		for ri := range ln.Runs {
-			run := ln.Runs[ri]
-			rb := run.LineBounds()
-			if dir.IsVertical() {
-				rb.Min.X, rb.Max.X = ln.Bounds.Min.X, ln.Bounds.Max.X
-				rb.Min.Y -= 2 // ensure some overlap along direction of rendering adjacent
-				rb.Max.Y += 2
-			} else {
-				rb.Min.Y, rb.Max.Y = ln.Bounds.Min.Y, ln.Bounds.Max.Y
-				rb.Min.X -= 2
-				rb.Max.Y += 2
-			}
-			run.AsBase().MaxBounds = rb
 		}
 		ln.Source = lsp
 		// offset has prior line's size built into it, but we need to also accommodate
@@ -194,13 +179,28 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			off.Y += lns.LineHeight
 			// fmt.Println("lby:", lby, fsz, lns.LineHeight, lpd, ourOff.Y)
 		}
+		// go back through and give every run the expanded line-level box
+		for ri := range ln.Runs {
+			run := ln.Runs[ri]
+			rb := run.LineBounds()
+			if dir.IsVertical() {
+				rb.Min.X, rb.Max.X = ln.Bounds.Min.X, ln.Bounds.Max.X
+				rb.Min.Y -= 2 // ensure some overlap along direction of rendering adjacent
+				rb.Max.Y += 2
+			} else {
+				rb.Min.Y, rb.Max.Y = ln.Bounds.Min.Y, ln.Bounds.Max.Y
+				rb.Min.X -= 2
+				rb.Max.Y += 2
+			}
+			run.AsBase().MaxBounds = rb
+		}
 		ln.Offset = ourOff
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		lns.Lines = append(lns.Lines, ln)
 	}
-	// if lns.Bounds.Size().Y < lht {
-	// 	lns.Bounds.Max.Y = lns.Bounds.Min.Y + lht
-	// }
+	if lns.Bounds.Size().Y < lht {
+		lns.Bounds.Max.Y = lns.Bounds.Min.Y + lht
+	}
 	// fmt.Println(lns.Bounds)
 	lns.AlignX(tsty)
 	return lns
