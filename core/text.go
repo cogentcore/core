@@ -135,22 +135,22 @@ func (tx *Text) Init() {
 		// We use Em for line height so that it scales properly with font size changes.
 		switch tx.Type {
 		case TextLabelLarge:
-			s.Text.LineSpacing = 20.0 / 14
+			s.Text.LineHeight = 20.0 / 14
 			s.Text.FontSize.Dp(14)
 			// s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = rich.Medium
 		case TextLabelMedium:
-			s.Text.LineSpacing = 16.0 / 12
+			s.Text.LineHeight = 16.0 / 12
 			s.Text.FontSize.Dp(12)
 			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Medium
 		case TextLabelSmall:
-			s.Text.LineSpacing = 16.0 / 11
+			s.Text.LineHeight = 16.0 / 11
 			s.Text.FontSize.Dp(11)
 			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Medium
 		case TextBodyLarge:
-			s.Text.LineSpacing = 24.0 / 16
+			s.Text.LineHeight = 24.0 / 16
 			s.Text.FontSize.Dp(16)
 			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Normal
@@ -158,57 +158,57 @@ func (tx *Text) Init() {
 			s.Color = colors.Scheme.OnSurfaceVariant
 			fallthrough
 		case TextBodyMedium:
-			s.Text.LineSpacing = 20.0 / 14
+			s.Text.LineHeight = 20.0 / 14
 			s.Text.FontSize.Dp(14)
 			// s.Text.LetterSpacing.Dp(0.25)
 			s.Font.Weight = rich.Normal
 		case TextBodySmall:
-			s.Text.LineSpacing = 16.0 / 12
+			s.Text.LineHeight = 16.0 / 12
 			s.Text.FontSize.Dp(12)
 			// s.Text.LetterSpacing.Dp(0.4)
 			s.Font.Weight = rich.Normal
 		case TextTitleLarge:
-			s.Text.LineSpacing = 28.0 / 22
+			s.Text.LineHeight = 28.0 / 22
 			s.Text.FontSize.Dp(22)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextTitleMedium:
-			s.Text.LineSpacing = 24.0 / 16
+			s.Text.LineHeight = 24.0 / 16
 			s.Text.FontSize.Dp(16)
 			// s.Text.LetterSpacing.Dp(0.15)
 			s.Font.Weight = rich.Bold
 		case TextTitleSmall:
-			s.Text.LineSpacing = 20.0 / 14
+			s.Text.LineHeight = 20.0 / 14
 			s.Text.FontSize.Dp(14)
 			// s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = rich.Medium
 		case TextHeadlineLarge:
-			s.Text.LineSpacing = 40.0 / 32
+			s.Text.LineHeight = 40.0 / 32
 			s.Text.FontSize.Dp(32)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextHeadlineMedium:
-			s.Text.LineSpacing = 36.0 / 28
+			s.Text.LineHeight = 36.0 / 28
 			s.Text.FontSize.Dp(28)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextHeadlineSmall:
-			s.Text.LineSpacing = 32.0 / 24
+			s.Text.LineHeight = 32.0 / 24
 			s.Text.FontSize.Dp(24)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplayLarge:
-			s.Text.LineSpacing = 64.0 / 57
+			s.Text.LineHeight = 64.0 / 57
 			s.Text.FontSize.Dp(57)
 			// s.Text.LetterSpacing.Dp(-0.25)
 			s.Font.Weight = rich.Normal
 		case TextDisplayMedium:
-			s.Text.LineSpacing = 52.0 / 45
+			s.Text.LineHeight = 52.0 / 45
 			s.Text.FontSize.Dp(45)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplaySmall:
-			s.Text.LineSpacing = 44.0 / 36
+			s.Text.LineHeight = 44.0 / 36
 			s.Text.FontSize.Dp(36)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal

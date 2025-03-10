@@ -88,14 +88,14 @@ func (m *Meter) Init() {
 			s.Min.Set(units.Dp(128))
 			m.Width.Dp(8)
 			s.Text.FontSize.Dp(32)
-			s.Text.LineSpacing = 40.0 / 32
+			s.Text.LineHeight = 40.0 / 32
 			s.Text.Align = text.Center
 			s.Text.AlignV = text.Center
 		case MeterSemicircle:
 			s.Min.Set(units.Dp(112), units.Dp(64))
 			m.Width.Dp(16)
 			s.Text.FontSize.Dp(22)
-			s.Text.LineSpacing = 28.0 / 22
+			s.Text.LineHeight = 28.0 / 22
 			s.Text.Align = text.Center
 			s.Text.AlignV = text.Center
 		}

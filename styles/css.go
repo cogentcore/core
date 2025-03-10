@@ -79,7 +79,7 @@ func ToCSS(s *Style, idName, htmlName string) string {
 	} else {
 		add("font-weight", s.Font.Weight.String())
 	}
-	add("line-height", fmt.Sprintf("%g", s.Text.LineSpacing))
+	add("line-height", fmt.Sprintf("%g", s.Text.LineHeight))
 	add("text-align", s.Text.Align.String())
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())

@@ -25,7 +25,7 @@ func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 
 // LineHeight returns the line height for given font and text style.
 // For vertical text directions, this is actually the line width.
-// It includes the [text.Style] LineSpacing multiplier on the natural
+// It includes the [text.Style] LineHeight multiplier on the natural
 // font-derived line height, which is not generally the same as the font size.
 func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
 	sh.Lock()
@@ -44,16 +44,16 @@ func (sh *Shaper) fontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 
 // lineHeight returns the line height for given font and text style.
 // For vertical text directions, this is actually the line width.
-// It includes the [text.Style] LineSpacing multiplier on the natural
+// It includes the [text.Style] LineHeight multiplier on the natural
 // font-derived line height, which is not generally the same as the font size.
 func (sh *Shaper) lineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
 	run := sh.fontSize('M', sty, tsty, rts)
 	bb := run.LineBounds()
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 	if dir.IsVertical() {
-		return math32.Round(tsty.LineSpacing * bb.Size().X)
+		return math32.Round(tsty.LineHeight * bb.Size().X)
 	}
-	lht := math32.Round(tsty.LineSpacing * bb.Size().Y)
-	// fmt.Println("lht:", tsty.LineSpacing, bb.Size().Y, lht)
+	lht := math32.Round(tsty.LineHeight * bb.Size().Y)
+	// fmt.Println("lht:", tsty.LineHeight, bb.Size().Y, lht)
 	return lht
 }

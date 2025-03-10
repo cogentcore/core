@@ -45,15 +45,15 @@ type Style struct { //types:add
 	// sizes relative to this value, with the normal text size factor = 1.
 	FontSize units.Value
 
-	// LineSpacing is a multiplier on the default font size for spacing between lines.
+	// LineHeight is a multiplier on the default font size for spacing between lines.
 	// If there are larger font elements within a line, they will be accommodated, with
 	// the same amount of total spacing added above that maximum size as if it was all
 	// the same height. The default of 1.2 represents standard "single spaced" text.
-	LineSpacing float32 `default:"1.2"`
+	LineHeight float32 `default:"1.2"`
 
 	// ParaSpacing is the line spacing between paragraphs (inherited).
 	// This will be copied from [Style.Margin] if that is non-zero,
-	// or can be set directly. Like [LineSpacing], this is a multiplier on
+	// or can be set directly. Like [LineHeight], this is a multiplier on
 	// the default font size.
 	ParaSpacing float32 `default:"1.2"`
 
@@ -96,7 +96,7 @@ func (ts *Style) Defaults() {
 	ts.Align = Start
 	ts.AlignV = Start
 	ts.FontSize.Dp(16)
-	ts.LineSpacing = 1.2
+	ts.LineHeight = 1.2
 	ts.ParaSpacing = 1.2
 	ts.Direction = rich.LTR
 	ts.TabSize = 4
@@ -116,7 +116,7 @@ func (ts *Style) ToDots(uc *units.Context) {
 func (ts *Style) InheritFields(parent *Style) {
 	ts.Align = parent.Align
 	ts.AlignV = parent.AlignV
-	ts.LineSpacing = parent.LineSpacing
+	ts.LineHeight = parent.LineHeight
 	ts.ParaSpacing = parent.ParaSpacing
 	// ts.WhiteSpace = par.WhiteSpace // todo: we can't inherit this b/c label base default then gets overwritten
 	ts.Direction = parent.Direction
@@ -128,6 +128,12 @@ func (ts *Style) InheritFields(parent *Style) {
 // FontSize * [rich.Style] Size multiplier.
 func (ts *Style) FontHeight(sty *rich.Style) float32 {
 	return ts.FontSize.Dots * sty.Size
+}
+
+// LineHeightDots returns the effective line height in dots (actual pixels)
+// as FontHeight * LineHeight
+func (ts *Style) LineHeightDots(sty *rich.Style) float32 {
+	return ts.FontHeight(sty) * ts.LineHeight
 }
 
 // AlignFactors gets basic text alignment factors

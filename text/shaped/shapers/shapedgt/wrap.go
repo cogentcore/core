@@ -30,17 +30,16 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
-	lht := sh.lineHeight(defSty, tsty, rts) // note: this overwrites output buffer so must do outs after!
 	txt := tx.Join()
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
-	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
-	return sh.LinesBounds(lines, truncated, tx, tsty, lht)
+	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
+	return sh.LinesBounds(lines, truncated, tx, defSty, tsty)
 }
 
-func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, lht float32, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
+func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
 
+	lht := tsty.LineHeightDots(defSty)
 	dir := shaped.GoTextDirection(rich.Default, tsty)
-
 	nlines := int(math32.Floor(size.Y/lht)) * 2
 	maxSize := int(size.X)
 	if dir.IsVertical() {
@@ -81,18 +80,20 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	return lines, truncated
 }
 
-func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, tsty *text.Style, lht float32) *shaped.Lines {
+func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, defSty *rich.Style, tsty *text.Style) *shaped.Lines {
+
+	lht := tsty.LineHeightDots(defSty)
 	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
 	lns.Truncated = truncated > 0
 
 	fsz := tsty.FontSize.Dots
 	dir := shaped.GoTextDirection(rich.Default, tsty)
-	lgap := lns.LineHeight - (lns.LineHeight / tsty.LineSpacing) // extra added for spacing
+	// lpad := 0.5 * (lns.LineHeight - fsz)
+	// fmt.Println(fsz, lht, lht/fsz, lpad, tsty.LineHeight)
 
 	cspi := 0
 	cspSt, cspEd := tx.Range(cspi)
 	var off math32.Vector2
-	nlines := len(lines)
 	for li, lno := range lines {
 		// fmt.Println("line:", li, off)
 		ln := shaped.Line{}
@@ -177,32 +178,29 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			extra := max(lwd-lns.LineHeight, 0)
 			if dir.Progression() == di.FromTopLeft {
 				// fmt.Println("ftl lwd:", lwd, off.X)
-				off.X += lwd + lgap
+				off.X += lwd // ?
 				ourOff.X += extra
 			} else {
 				// fmt.Println("!ftl lwd:", lwd, off.X)
-				off.X -= lwd + lgap
+				off.X -= lwd // ?
 				ourOff.X -= extra
 			}
 		} else { // always top-down, no progression issues
-			lht := ln.Bounds.Size().Y
-			extra := max(lht-lns.LineHeight, 0)
-			// fmt.Println("extra:", extra)
-			if nlines > 1 {
-				off.Y += lht + lgap
-				if lht < lns.LineHeight {
-					ln.Bounds.Max.Y += lns.LineHeight - lht
-				}
-				ourOff.Y += extra
-			}
+			lby := ln.Bounds.Size().Y
+			lpad := 0.5 * (lns.LineHeight - lby)
+			actualLht := max(lby, lns.LineHeight)
+			ourOff.Y += lpad + max(lby-lns.LineHeight, 0)
+			off.Y += actualLht
+			ln.Bounds.Max.Y += actualLht - lby
+			// fmt.Println("lby:", lby, lpad, ln.Bounds.Size().Y)
 		}
 		ln.Offset = ourOff
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		lns.Lines = append(lns.Lines, ln)
 	}
-	if nlines > 1 && lns.Bounds.Size().Y < lht {
-		lns.Bounds.Max.Y = lns.Bounds.Min.Y + lht
-	}
+	// if lns.Bounds.Size().Y < lht {
+	// 	lns.Bounds.Max.Y = lns.Bounds.Min.Y + lht
+	// }
 	// fmt.Println(lns.Bounds)
 	lns.AlignX(tsty)
 	return lns
