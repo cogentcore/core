@@ -17,7 +17,7 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* js region render, lines render.
+* core.Text word select on double-triple click, and click off. and figure out logic to support slide scrolling and text selection.
 
 * editor: detect overwide glyphs and shrink them
 

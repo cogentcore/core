@@ -367,13 +367,21 @@ func (tx *Text) selectReset() {
 // selectAll selects entire set of text
 func (tx *Text) selectAll() {
 	tx.selectRange.Start = 0
-	tx.selectUpdate(len(tx.Text))
+	txt := tx.richText.Join()
+	tx.selectUpdate(len(txt))
 	tx.NeedsRender()
 }
 
 // selectWord selects word at given rune location
 func (tx *Text) selectWord(ri int) {
-	// todo: write a general routine for this in rich.Text
+	tx.paintText.SelectReset()
+	txt := tx.richText.Join()
+	wr := textpos.WordAt(txt, ri)
+	if wr.Start >= 0 {
+		tx.selectRange = wr
+		tx.paintText.SelectRegion(tx.selectRange)
+	}
+	tx.NeedsRender()
 }
 
 // configTextSize does the text shaping layout for text,
