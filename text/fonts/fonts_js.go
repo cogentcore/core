@@ -12,5 +12,5 @@ import "embed"
 
 // arialjs/*.ttf sfjs/*.ttf
 
-//go:embed robotojs/*.ttf
+//go:embed robotojs/*.ttf notojs/*.ttf
 var DefaultFonts embed.FS

@@ -7,6 +7,7 @@ package rich
 import (
 	"fmt"
 	"slices"
+	"unicode"
 
 	"cogentcore.org/core/text/textpos"
 )
@@ -335,4 +336,25 @@ func (tx Text) Clone() Text {
 		ct[i] = slices.Clone(tx[i])
 	}
 	return ct
+}
+
+// SplitSpaces splits this text after first unicode space after non-space.
+func (tx *Text) SplitSpaces() {
+	txt := tx.Join()
+	if len(txt) == 0 {
+		return
+	}
+	prevSp := unicode.IsSpace(txt[0])
+	for i, r := range txt {
+		isSp := unicode.IsSpace(r)
+		if prevSp && isSp {
+			continue
+		}
+		if isSp {
+			prevSp = true
+			tx.SplitSpan(i + 1) // already doesn't re-split
+		} else {
+			prevSp = false
+		}
+	}
 }

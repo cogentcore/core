@@ -162,3 +162,17 @@ func TestLink(t *testing.T) {
 	assert.Equal(t, "link text", lks[0].Label)
 	assert.Equal(t, "https://example.com", lks[0].URL)
 }
+
+func TestSplitSpaces(t *testing.T) {
+	src := "Pre link text post link "
+	tx := NewPlainText([]rune(src))
+	tx.SplitSpaces()
+	trg := `[]: "Pre "
+[]: "link "
+[]: "text "
+[]: "post "
+[]: "link "
+`
+	// fmt.Println(tx)
+	assert.Equal(t, trg, tx.String())
+}

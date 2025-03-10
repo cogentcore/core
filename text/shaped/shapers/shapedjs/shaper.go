@@ -102,8 +102,9 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
-	lht := sh.lineHeight(defSty, tsty, rts) // note: this overwrites output buffer so must do outs after!
 	txt := tx.Join()
+	// sptx := tx.Clone()
+	// sptx.SplitSpaces() // no advantage to doing this
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	for oi := range outs {
 		out := &outs[oi]
@@ -112,7 +113,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		fnt := text.NewFont(sty, tsty)
 		sh.AdjustOutput(out, fnt, tx, tsty, rts)
 	}
-	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, lht, rts, size)
+	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
 	for _, lno := range lines {
 		for oi := range lno {
 			out := &lno[oi]
@@ -122,7 +123,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			sh.AdjustOutput(out, fnt, tx, tsty, rts)
 		}
 	}
-	return sh.LinesBounds(lines, truncated, tx, tsty, lht)
+	return sh.LinesBounds(lines, truncated, tx, defSty, tsty)
 }
 
 // AdjustOutput adjusts the given run metrics based on the html measureText results.
