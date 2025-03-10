@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/shaped/shapers/shapedjs"
@@ -98,32 +99,36 @@ func (rs *Renderer) TextRunRegions(ctx *render.Context, run *shapedgt.Run, ln *s
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
 func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
-	// todo: render strike-through
 	// dir := run.Direction
-	// rbb := run.MaxBounds.Translate(start)
-	if run.Background != nil {
-		// rs.FillBounds(rbb, run.Background) TODO
-	}
-	if len(ln.Selections) > 0 {
-		for _, sel := range ln.Selections {
-			rsel := sel.Intersect(run.Runes())
-			if rsel.Len() > 0 {
-				fi := run.FirstGlyphAt(rsel.Start)
-				li := run.LastGlyphAt(rsel.End - 1)
-				if fi >= 0 && li >= fi {
-					// sbb := run.GlyphRegionBounds(fi, li) TODO
-					// rs.FillBounds(sbb.Translate(start), lns.SelectionColor) TODO
-				}
-			}
-		}
-	}
-
 	region := run.Runes()
-
+	rbb := run.MaxBounds.Translate(off)
 	fill := clr
 	if run.FillColor != nil {
 		fill = run.FillColor
 	}
+	fsz := math32.FromFixed(run.Size)
+	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
+
+	if run.Decoration.HasFlag(rich.Underline) || run.Decoration.HasFlag(rich.DottedUnderline) {
+		dash := []float32{2, 2}
+		if run.Decoration.HasFlag(rich.Underline) {
+			dash = nil
+		}
+		if run.Direction.IsVertical() {
+
+		} else {
+			dec := off.Y + 2
+			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
+		}
+	}
+	if run.Decoration.HasFlag(rich.Overline) {
+		if run.Direction.IsVertical() {
+		} else {
+			dec := off.Y - 0.7*rbb.Size().Y
+			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+		}
+	}
+
 	rs.applyTextStyle(&run.Font, &ctx.Style.Text, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
 
 	raw := runes[region.Start:region.End]
@@ -133,6 +138,13 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	}
 	if run.StrokeColor != nil {
 		rs.ctx.Call("strokeText", sraw, off.X, off.Y)
+	}
+	if run.Decoration.HasFlag(rich.LineThrough) {
+		if run.Direction.IsVertical() {
+		} else {
+			dec := off.Y - 0.2*rbb.Size().Y
+			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+		}
 	}
 }
 
