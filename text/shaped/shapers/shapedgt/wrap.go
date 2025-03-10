@@ -185,12 +185,12 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			rb := run.LineBounds()
 			if dir.IsVertical() {
 				rb.Min.X, rb.Max.X = ln.Bounds.Min.X, ln.Bounds.Max.X
-				rb.Min.Y -= 2 // ensure some overlap along direction of rendering adjacent
-				rb.Max.Y += 2
+				rb.Min.Y -= 1 // ensure some overlap along direction of rendering adjacent
+				rb.Max.Y += 1
 			} else {
 				rb.Min.Y, rb.Max.Y = ln.Bounds.Min.Y, ln.Bounds.Max.Y
-				rb.Min.X -= 2
-				rb.Max.Y += 2
+				rb.Min.X -= 1
+				rb.Max.Y += 1
 			}
 			run.AsBase().MaxBounds = rb
 		}

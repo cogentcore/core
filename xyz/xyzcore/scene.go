@@ -8,15 +8,11 @@ package xyzcore
 //go:generate core generate
 
 import (
-	"errors"
-
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/xyz"
 )
 
@@ -83,20 +79,7 @@ func (sw *Scene) Init() {
 		} else {
 			doRebuild = false // will be done automatically b/c Frame == nil
 		}
-
-		win := sw.WidgetBase.Scene.Events.RenderWindow()
-		if win == nil {
-			return
-		}
-		drw := win.SystemWindow.Drawer()
-		system.TheApp.RunOnMain(func() {
-			sf, ok := drw.Renderer().(*gpu.Surface)
-			if !ok {
-				core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))
-				return
-			}
-			sw.XYZ.ConfigFrameFromSurface(sf) // does a full build if Frame == nil, else just new size
-		})
+		sw.configFrame()
 		if doRebuild {
 			sw.XYZ.Rebuild()
 		}

@@ -17,8 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* core.Text figure out logic to support slide scrolling and text selection: focus?
-
 * editor: detect overwide glyphs and shrink them
 
 * check for negative advance and highlighting issues / tests
