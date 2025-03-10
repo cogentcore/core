@@ -122,10 +122,11 @@ func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Selectable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Focusable, abilities.Selectable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
+		s.SetAbilities(false, abilities.ScrollableUnfocused)
 		if !tx.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
@@ -245,11 +246,19 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.On(events.DoubleClick, func(e events.Event) {
+		if !tx.StateIs(states.Focused) {
+			tx.SetFocus()
+			tx.Send(events.Focus, e) // sets focused flag
+		}
 		e.SetHandled()
 		tx.selectWord(tx.pixelToRune(e.Pos()))
 		tx.SetFocusQuiet()
 	})
 	tx.On(events.TripleClick, func(e events.Event) {
+		if !tx.StateIs(states.Focused) {
+			tx.SetFocus()
+			tx.Send(events.Focus, e) // sets focused flag
+		}
 		e.SetHandled()
 		tx.selectAll()
 		tx.SetFocusQuiet()
