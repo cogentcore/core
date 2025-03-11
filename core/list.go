@@ -1799,8 +1799,12 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		return
 	}
 	ls := lg.list()
-	ls.StartIndex = int(math32.Round(sb.Value / lg.rowHeight))
-	ls.Update()
+	rht := lg.rowHeight + lg.layout.Gap.Y
+	quo := sb.Value / rht
+	floor := math32.Floor(quo)
+	ls.StartIndex = int(floor)
+	lg.Geom.Scroll.Y = (floor - quo) * rht
+	ls.Update() // TODO: remove?
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
@@ -1808,7 +1812,7 @@ func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float3
 		return lg.Frame.ScrollValues(d)
 	}
 	ls := lg.list()
-	maxSize = float32(max(ls.SliceSize, 1))*lg.rowHeight + lg.Geom.Size.InnerSpace.Y
+	maxSize = float32(max(ls.SliceSize, 1)) * (lg.rowHeight + lg.layout.Gap.Y) // TODO: off by one on Gap?
 	visSize = lg.Geom.Size.Alloc.Content.Y
 	visPct = visSize / maxSize
 	return
