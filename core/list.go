@@ -1804,7 +1804,8 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	floor := math32.Floor(quo)
 	ls.StartIndex = int(floor)
 	lg.Geom.Scroll.Y = (floor - quo) * rht
-	ls.Update() // TODO: remove?
+	ls.UpdateTree()
+	ls.NeedsRender()
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {

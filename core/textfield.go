@@ -150,6 +150,9 @@ type TextField struct { //core:embedder
 	// renderVisible is the render version of just the visible text in dispRange.
 	renderVisible *shaped.Lines
 
+	// renderedText is the
+	renderedText []rune
+
 	// renderedRange is the dispRange last rendered.
 	renderedRange textpos.Range
 
@@ -1304,8 +1307,15 @@ func (tf *TextField) renderSelect() {
 	tf.renderVisible.SelectRegion(textpos.Range{effst, effed})
 }
 
-// autoScroll scrolls the starting position to keep the cursor visible
+// autoScroll scrolls the starting position to keep the cursor visible,
+// and does various other state-updating steps to ensure everything is updated.
+// This is called during Render().
 func (tf *TextField) autoScroll() {
+	if tf.renderVisible != nil {
+		if slices.Compare(tf.renderedText, tf.editText) != 0 {
+			tf.renderVisible = nil // need to redo
+		}
+	}
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
@@ -1795,6 +1805,7 @@ func (tf *TextField) layoutCurrent() {
 	tx := rich.NewText(&st.Font, cur)
 	tf.renderVisible = tf.Scene.TextShaper.WrapLines(tx, fs, txs, &AppearanceSettings.Text, availSz)
 	tf.renderedRange = tf.dispRange
+	tf.renderedText = tf.editText
 }
 
 func (tf *TextField) Render() {
@@ -1809,7 +1820,7 @@ func (tf *TextField) Render() {
 		}
 	}()
 
-	tf.autoScroll() // inits paint with our style
+	tf.autoScroll() // does all update checking, inits paint with our style
 	tf.RenderStandardBox()
 	if tf.dispRange.Start < 0 || tf.dispRange.End > len(tf.editText) {
 		return

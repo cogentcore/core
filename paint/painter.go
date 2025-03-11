@@ -44,7 +44,7 @@ type Painter struct {
 	*styles.Paint
 }
 
-// NewPainter returns a new [Painter] using default image rasterizer,
+// NewPainter returns a new [Painter] using the default image rasterizer,
 // with the given width and height.
 func NewPainter(width, height int) *Painter {
 	pc := &Painter{&State{}, styles.NewPaint()}
