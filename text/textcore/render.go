@@ -317,14 +317,14 @@ func (ed *Base) LineNumberPixels() float32 {
 // depths. For dark mode, these are increments, for light mode they are decrements.
 var viewDepthColors = []color.RGBA{
 	{0, 0, 0, 0},
-	{5, 5, 0, 0},
-	{15, 15, 0, 0},
-	{5, 15, 0, 0},
-	{0, 15, 5, 0},
-	{0, 15, 15, 0},
-	{0, 5, 15, 0},
-	{5, 0, 15, 0},
-	{5, 0, 5, 0},
+	{4, 4, 0, 0},
+	{8, 8, 0, 0},
+	{4, 8, 0, 0},
+	{0, 8, 4, 0},
+	{0, 8, 8, 0},
+	{0, 4, 8, 0},
+	{4, 0, 8, 0},
+	{4, 0, 4, 0},
 }
 
 // renderDepthBackground renders the depth background color.
