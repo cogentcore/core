@@ -18,7 +18,7 @@ import (
 )
 
 // autoScrollRate determines the rate of auto-scrolling of layouts
-var autoScrollRate = float32(1)
+var autoScrollRate = float32(10)
 
 // hasAnyScroll returns true if the frame has any scrollbars.
 func (fr *Frame) hasAnyScroll() bool {
@@ -307,8 +307,9 @@ func (fr *Frame) scrollToWidget(w Widget) bool {
 	return fr.ScrollToBox(box)
 }
 
-// autoScrollDim auto-scrolls along one dimension, based on the current
-// position value, which is in the current scroll value range.
+// autoScrollDim auto-scrolls along one dimension, based on a position value
+// relative to the visible dimensions of the frame
+// (i.e., subtracting ed.Geom.Pos.Content).
 func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
@@ -318,20 +319,16 @@ func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 	ssz := sb.scrollThumbValue()
 	dst := sb.Step * autoScrollRate
 
-	mind := max(0, (pos - sb.Value))
-	maxd := max(0, (sb.Value+ssz)-pos)
-
-	if mind <= maxd {
-		pct := mind / ssz
-		// fmt.Println("as mind", mind, pct, pos, sb.Value, ssz)
+	fromMax := ssz - pos                      // distance from max in visible window
+	if pos < 0 || pos < math32.Abs(fromMax) { // pushing toward min
+		pct := pos / ssz
 		if pct < .1 && sb.Value > 0 {
 			dst = min(dst, sb.Value)
 			sb.setValueEvent(sb.Value - dst)
 			return true
 		}
 	} else {
-		pct := maxd / ssz
-		// fmt.Println("as maxd", maxd, pct, pos, sb.Value, ssz)
+		pct := fromMax / ssz
 		if pct < .1 && sb.Value < smax {
 			dst = min(dst, (smax - sb.Value))
 			sb.setValueEvent(sb.Value + dst)

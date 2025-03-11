@@ -303,11 +303,12 @@ func (lb *ListBase) Init() {
 		}
 	})
 	lb.On(events.MouseDrag, func(e events.Event) {
-		row, idx, isValid := lb.rowFromEventPos(e)
+		row, _, isValid := lb.rowFromEventPos(e)
 		if !isValid {
 			return
 		}
-		lb.ListGrid.AutoScroll(math32.Vec2(0, float32(idx))) // todo: fixme
+		pt := lb.PointToRelPos(e.Pos())
+		lb.ListGrid.AutoScroll(math32.FromPoint(pt))
 		prevHoverRow := lb.hoverRow
 		if !isValid {
 			lb.hoverRow = -1
