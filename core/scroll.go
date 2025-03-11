@@ -60,7 +60,6 @@ func (fr *Frame) ConfigScrolls() {
 // configScroll configures scroll for given dimension
 func (fr *Frame) configScroll(d math32.Dims) {
 	if fr.Scrolls[d] != nil {
-		fr.Geom.Scroll.SetDim(d, 0)
 		return
 	}
 	fr.Scrolls[d] = NewSlider()
