@@ -203,6 +203,9 @@ func (ed *Base) updateScroll(pos float32) bool {
 	if !ed.HasScroll[math32.Y] || ed.Scrolls[math32.Y] == nil {
 		return false
 	}
+	if pos < 0 {
+		pos = 0
+	}
 	ed.scrollPos = pos
 	ppos := pos * ed.charSize.Y
 	sb := ed.Scrolls[math32.Y]
@@ -245,7 +248,7 @@ func (ed *Base) scrollCursorToBottom() bool {
 // is at the center (to the extent possible).
 func (ed *Base) scrollLineToCenter(pos textpos.Pos) bool {
 	vp := ed.Lines.PosToView(ed.viewId, pos)
-	return ed.updateScroll(float32(vp.Line - ed.visSize.Y/2))
+	return ed.updateScroll(float32(max(vp.Line-ed.visSize.Y/2, 0)))
 }
 
 func (ed *Base) scrollCursorToCenter() bool {
