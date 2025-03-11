@@ -604,6 +604,9 @@ func (ed *Editor) handleMouse() {
 		case events.Left:
 			lk, _ := ed.OpenLinkAt(newPos)
 			if lk == nil {
+				if !e.HasAnyModifier(key.Shift, key.Meta, key.Alt) {
+					ed.SelectReset()
+				}
 				ed.setCursorFromMouse(pt, newPos, e.SelectMode())
 				ed.savePosHistory(ed.CursorPos)
 			}
