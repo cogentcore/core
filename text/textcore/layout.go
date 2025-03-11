@@ -208,6 +208,7 @@ func (ed *Base) updateScroll(pos float32) bool {
 	}
 	sb := ed.Scrolls[math32.Y]
 	if sb.Value != pos {
+		ed.isScrolling = true
 		sb.SetValue(pos)
 		ed.scrollPos = sb.Value // does clamping, etc
 		ed.NeedsRender()

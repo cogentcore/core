@@ -210,6 +210,7 @@ func (dv *DiffEditor) syncEditors(typ events.Types, e events.Event, name string)
 	}
 	switch typ {
 	case events.Scroll:
+		other.isScrolling = true
 		other.updateScroll(me.scrollPos)
 	case events.Input:
 		if dv.inInputEvent {
