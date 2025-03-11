@@ -60,6 +60,7 @@ func (fr *Frame) ConfigScrolls() {
 // configScroll configures scroll for given dimension
 func (fr *Frame) configScroll(d math32.Dims) {
 	if fr.Scrolls[d] != nil {
+		fr.Geom.Scroll.SetDim(d, 0)
 		return
 	}
 	fr.Scrolls[d] = NewSlider()
@@ -136,6 +137,7 @@ func (fr *Frame) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) 
 // but can also set others as needed.
 // Max and VisiblePct are automatically set based on ScrollValues maxSize, visPct.
 func (fr *Frame) SetScrollParams(d math32.Dims, sb *Slider) {
+	sb.Min = 0
 	sb.Step = 1
 	sb.PageStep = float32(fr.Geom.ContentBBox.Dy())
 }

@@ -168,8 +168,8 @@ func (ed *Base) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
 	if d == math32.X {
 		return ed.Frame.ScrollValues(d)
 	}
-	maxSize = float32(max(ed.linesSize.Y, 1))
-	visSize = float32(ed.visSize.Y)
+	maxSize = float32(max(ed.linesSize.Y, 1)) * ed.charSize.Y
+	visSize = float32(ed.visSize.Y) * ed.charSize.Y
 	visPct = visSize / maxSize
 	// fmt.Println("scroll values:", maxSize, visSize, visPct)
 	return
@@ -181,7 +181,7 @@ func (ed *Base) ScrollChanged(d math32.Dims, sb *core.Slider) {
 		ed.Frame.ScrollChanged(d, sb)
 		return
 	}
-	ed.scrollPos = sb.Value
+	ed.scrollPos = sb.Value / ed.charSize.Y
 	ed.NeedsRender()
 }
 
@@ -193,11 +193,8 @@ func (ed *Base) SetScrollParams(d math32.Dims, sb *core.Slider) {
 	sb.Min = 0
 	sb.Step = 1
 	if ed.visSize.Y > 0 {
-		sb.PageStep = float32(ed.visSize.Y)
-	} else {
-		sb.PageStep = 10
+		sb.PageStep = float32(ed.visSize.Y) * ed.charSize.Y
 	}
-	sb.InputThreshold = sb.Step
 }
 
 // updateScroll sets the scroll position to given value, in lines.
@@ -206,11 +203,12 @@ func (ed *Base) updateScroll(pos float32) bool {
 	if !ed.HasScroll[math32.Y] || ed.Scrolls[math32.Y] == nil {
 		return false
 	}
+	ed.scrollPos = pos
+	ppos := pos * ed.charSize.Y
 	sb := ed.Scrolls[math32.Y]
-	if sb.Value != pos {
+	if sb.Value != ppos {
 		ed.isScrolling = true
-		sb.SetValue(pos)
-		ed.scrollPos = sb.Value // does clamping, etc
+		sb.SetValue(ppos)
 		ed.NeedsRender()
 		return true
 	}
