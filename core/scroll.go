@@ -323,6 +323,7 @@ func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 
 	if mind <= maxd {
 		pct := mind / ssz
+		// fmt.Println("as mind", mind, pct, pos, sb.Value, ssz)
 		if pct < .1 && sb.Value > 0 {
 			dst = min(dst, sb.Value)
 			sb.setValueEvent(sb.Value - dst)
@@ -330,6 +331,7 @@ func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 		}
 	} else {
 		pct := maxd / ssz
+		// fmt.Println("as maxd", maxd, pct, pos, sb.Value, ssz)
 		if pct < .1 && sb.Value < smax {
 			dst = min(dst, (smax - sb.Value))
 			sb.setValueEvent(sb.Value + dst)

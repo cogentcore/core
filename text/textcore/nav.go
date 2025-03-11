@@ -5,6 +5,7 @@
 package textcore
 
 import (
+	"fmt"
 	"image"
 
 	"cogentcore.org/core/events"
@@ -426,7 +427,8 @@ func (ed *Base) setCursorFromMouse(pt image.Point, newPos textpos.Pos, selMode e
 		}
 		if ed.StateIs(states.Sliding) {
 			scPos := math32.FromPoint(pt).Sub(ed.Geom.Scroll)
-			scPos.Y = float32(ed.CursorPos.Line)
+			// scPos.Y = float32(ed.CursorPos.Line)
+			fmt.Println("auto scroll", scPos)
 			ed.AutoScroll(scPos)
 		} else {
 			ed.scrollCursorToCenterIfHidden()
