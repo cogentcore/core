@@ -150,9 +150,6 @@ type TextField struct { //core:embedder
 	// renderVisible is the render version of just the visible text in dispRange.
 	renderVisible *shaped.Lines
 
-	// renderedText is the
-	renderedText []rune
-
 	// renderedRange is the dispRange last rendered.
 	renderedRange textpos.Range
 
@@ -430,6 +427,9 @@ func (tf *TextField) Init() {
 		} else {
 			tf.trailingIconButton = nil
 		}
+	})
+	tf.Updater(func() {
+		tf.renderVisible = nil // ensures re-render
 	})
 }
 
@@ -1311,11 +1311,6 @@ func (tf *TextField) renderSelect() {
 // and does various other state-updating steps to ensure everything is updated.
 // This is called during Render().
 func (tf *TextField) autoScroll() {
-	if tf.renderVisible != nil {
-		if slices.Compare(tf.renderedText, tf.editText) != 0 {
-			tf.renderVisible = nil // need to redo
-		}
-	}
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
@@ -1805,7 +1800,6 @@ func (tf *TextField) layoutCurrent() {
 	tx := rich.NewText(&st.Font, cur)
 	tf.renderVisible = tf.Scene.TextShaper.WrapLines(tx, fs, txs, &AppearanceSettings.Text, availSz)
 	tf.renderedRange = tf.dispRange
-	tf.renderedText = tf.editText
 }
 
 func (tf *TextField) Render() {
