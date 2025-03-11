@@ -12,6 +12,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -50,6 +52,10 @@ type Text struct {
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
 	normalCursor cursors.Cursor
+
+	// after a long press or multiple clicks, this toggles to true,
+	// enabling slide actions to update selection instead of scrolling.
+	selectMode bool
 
 	// selectRange is the selected range.
 	selectRange textpos.Range
@@ -120,11 +126,15 @@ func (tx *Text) WidgetValue() any { return &tx.Text }
 
 func (tx *Text) Init() {
 	tx.WidgetBase.Init()
+	tx.AddContextMenu(tx.contextMenu)
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Selectable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable)
 		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
+		}
+		if tx.selectMode {
+			s.SetAbilities(true, abilities.Slideable)
 		}
 		if !tx.IsReadOnly() {
 			s.Cursor = cursors.Text
@@ -224,6 +234,19 @@ func (tx *Text) Init() {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
+		if e.HasAnyModifier(key.Shift, key.Meta, key.Alt) { // todo: not working
+			return // no reset
+		}
+		// fmt.Println(tx, "focus lost")
+		tx.setSelectMode(false)
+		tx.selectReset()
+	})
+	tx.OnSelect(func(e events.Event) {
+		if e.HasAnyModifier(key.Shift, key.Meta, key.Alt) {
+			return // no reset
+		}
+		// fmt.Println(tx, "select")
+		tx.setSelectMode(false)
 		tx.selectReset()
 	})
 	tx.OnKeyChord(func(e events.Event) {
@@ -245,14 +268,19 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.On(events.DoubleClick, func(e events.Event) {
+		tx.setSelectMode(true)
 		e.SetHandled()
 		tx.selectWord(tx.pixelToRune(e.Pos()))
 		tx.SetFocusQuiet()
 	})
 	tx.On(events.TripleClick, func(e events.Event) {
+		tx.setSelectMode(true)
 		e.SetHandled()
 		tx.selectAll()
 		tx.SetFocusQuiet()
+	})
+	tx.On(events.LongPressStart, func(e events.Event) {
+		tx.setSelectMode(true)
 	})
 	tx.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
@@ -326,12 +354,20 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return tl.URL, bounds.Min
 }
 
-func (tx *Text) copy() {
+func (tx *Text) contextMenu(m *Scene) {
+	NewFuncButton(m).SetFunc(tx.copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetState(!tx.hasSelection(), states.Disabled)
+}
+
+func (tx *Text) copy() { //types:add
+	if !tx.hasSelection() {
+		return
+	}
 	md := mimedata.NewText(tx.Text[tx.selectRange.Start:tx.selectRange.End])
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
 	}
+	tx.selectReset()
 }
 
 func (tx *Text) Label() string {
@@ -354,6 +390,17 @@ func (tx *Text) selectUpdate(ri int) {
 	}
 	tx.paintText.SelectReset()
 	tx.paintText.SelectRegion(tx.selectRange)
+}
+
+// setSelectMode updates the select mode and restyles so behavior is updated.
+func (tx *Text) setSelectMode(selMode bool) {
+	tx.selectMode = selMode
+	tx.Style()
+}
+
+// hasSelection returns true if there is an active selection.
+func (tx *Text) hasSelection() bool {
+	return tx.selectRange.Len() > 0
 }
 
 // selectReset resets any current selection
