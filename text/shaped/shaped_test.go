@@ -236,3 +236,17 @@ func TestLineCentering(t *testing.T) {
 		pc.TextLines(lns, pos)
 	})
 }
+
+func TestEmoji(t *testing.T) {
+	RunTest(t, "emoji", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		src := "😀"
+		sty := rich.NewStyle()
+		sty.Family = rich.SansSerif
+		// rts.SansSerif = "Noto Color Emoji"
+		sty.Size = 3
+		tx := rich.NewText(sty, []rune(src))
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 10)
+		pc.TextLines(lns, pos)
+	})
+}

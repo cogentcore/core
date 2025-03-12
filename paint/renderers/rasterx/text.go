@@ -190,6 +190,14 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 		return
 	}
 
+	wd := math32.FromFixed(g.Width)
+	xadv := math32.Abs(math32.FromFixed(g.XAdvance))
+	if wd > xadv {
+		if run.Font.Style(&ctx.Style.Text).Family == rich.Monospace {
+			scale *= 0.95 * xadv / wd
+		}
+	}
+
 	if UseGlyphCache && identity && stroke == nil {
 		mask, pi := theGlyphCache.Glyph(run.Face, g, outline, scale, pos)
 		if mask != nil {
