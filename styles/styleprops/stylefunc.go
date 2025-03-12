@@ -10,6 +10,7 @@ package styleprops
 import (
 	"log/slog"
 	"reflect"
+	"strings"
 
 	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/base/reflectx"
@@ -54,7 +55,8 @@ func Int[T any, F num.Integer](initVal F, getField func(obj *T) *F) Func {
 	}
 }
 
-// Float returns a style function for any numerical value
+// Float returns a style function for any numerical value.
+// Automatically removes a trailing % -- see FloatProportion.
 func Float[T any, F num.Float](initVal F, getField func(obj *T) *F) Func {
 	return func(obj any, key string, val any, parent any, cc colors.Context) {
 		fp := getField(obj.(*T))
@@ -66,7 +68,36 @@ func Float[T any, F num.Float](initVal F, getField func(obj *T) *F) Func {
 			}
 			return
 		}
+		if vstr, ok := val.(string); ok {
+			val = strings.TrimSuffix(vstr, "%")
+		}
 		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
+		*fp = F(fv)
+	}
+}
+
+// FloatProportion returns a style function for a proportion that can be
+// represented as a percentage (divides value by 100).
+func FloatProportion[T any, F num.Float](initVal F, getField func(obj *T) *F) Func {
+	return func(obj any, key string, val any, parent any, cc colors.Context) {
+		fp := getField(obj.(*T))
+		if inh, init := InhInit(val, parent); inh || init {
+			if inh {
+				*fp = *getField(parent.(*T))
+			} else if init {
+				*fp = initVal
+			}
+			return
+		}
+		isPct := false
+		if vstr, ok := val.(string); ok {
+			val = strings.TrimSuffix(vstr, "%")
+			isPct = true
+		}
+		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
+		if isPct {
+			fv /= 100
+		}
 		*fp = F(fv)
 	}
 }
