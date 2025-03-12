@@ -195,15 +195,19 @@ func (ls *Lines) patchFrom(ob *Lines, diffs Diffs) bool {
 		case 'r':
 			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
-			mods = true
+			if ot != nil {
+				ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
+				mods = true
+			}
 		case 'd':
 			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
 			mods = true
 		case 'i':
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
-			mods = true
+			if ot != nil {
+				ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
+				mods = true
+			}
 		}
 	}
 	if mods {

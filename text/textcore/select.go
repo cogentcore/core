@@ -60,10 +60,17 @@ func (ed *Base) HasSelection() bool {
 	return ed.SelectRegion.Start.IsLess(ed.SelectRegion.End)
 }
 
+// validateSelection ensures that the selection region is still valid.
+func (ed *Base) validateSelection() {
+	ed.SelectRegion.Start = ed.Lines.ValidPos(ed.SelectRegion.Start)
+	ed.SelectRegion.End = ed.Lines.ValidPos(ed.SelectRegion.End)
+}
+
 // Selection returns the currently selected text as a textpos.Edit, which
 // captures start, end, and full lines in between -- nil if no selection
 func (ed *Base) Selection() *textpos.Edit {
 	if ed.HasSelection() {
+		ed.validateSelection()
 		return ed.Lines.Region(ed.SelectRegion.Start, ed.SelectRegion.End)
 	}
 	return nil
@@ -229,6 +236,7 @@ func (ed *Base) Cut() *textpos.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
+	ed.validateSelection()
 	org := ed.SelectRegion.Start
 	cut := ed.deleteSelection()
 	if cut != nil {
@@ -245,6 +253,7 @@ func (ed *Base) Cut() *textpos.Edit {
 // deleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as textpos.Edit (nil if none)
 func (ed *Base) deleteSelection() *textpos.Edit {
+	ed.validateSelection()
 	tbe := ed.Lines.DeleteText(ed.SelectRegion.Start, ed.SelectRegion.End)
 	ed.SelectReset()
 	return tbe
@@ -310,6 +319,7 @@ func (ed *Base) CutRect() *textpos.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
+	ed.validateSelection()
 	npos := textpos.Pos{Line: ed.SelectRegion.End.Line, Char: ed.SelectRegion.Start.Char}
 	cut := ed.Lines.DeleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if cut != nil {
@@ -326,6 +336,7 @@ func (ed *Base) CutRect() *textpos.Edit {
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
 func (ed *Base) CopyRect(reset bool) *textpos.Edit {
+	ed.validateSelection()
 	tbe := ed.Lines.RegionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if tbe == nil {
 		return nil

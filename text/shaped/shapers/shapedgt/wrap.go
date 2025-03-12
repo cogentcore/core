@@ -195,7 +195,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			run.AsBase().MaxBounds = rb
 		}
 		ln.Offset = ourOff
-		if size.X > 0 && ln.Bounds.Size().X > size.X {
+		if tsty.WhiteSpace.HasWordWrap() && size.X > 0 && ln.Bounds.Size().X > size.X {
 			// fmt.Println("size exceeded:", ln.Bounds.Size().X, size.X)
 			ln.Bounds.Max.X -= ln.Bounds.Size().X - size.X
 		}
