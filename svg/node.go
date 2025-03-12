@@ -333,11 +333,9 @@ func (g *NodeBase) Style(sv *SVG) {
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
-	// TODO(text):
-	// pc.Stroke.Opacity *= pc.Font.Opacity // applies to all
-	// pc.Fill.Opacity *= pc.FontStyle.Opacity
+	pc.Stroke.Opacity *= pc.Opacity // applies to all
+	pc.Fill.Opacity *= pc.Opacity
 	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
-
 }
 
 // AggCSS aggregates css properties

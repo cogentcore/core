@@ -31,6 +31,9 @@ type Path struct { //types:add
 	// Fill (region filling) parameters.
 	Fill Fill
 
+	// Opacity is a global transparency alpha factor that applies to stroke and fill.
+	Opacity float32
+
 	// Transform has our additions to the transform stack.
 	Transform math32.Matrix2
 
@@ -53,6 +56,7 @@ func (pc *Path) Defaults() {
 	pc.Display = true
 	pc.Stroke.Defaults()
 	pc.Fill.Defaults()
+	pc.Opacity = 1
 	pc.Transform = math32.Identity2()
 	pc.StyleSet = false
 }

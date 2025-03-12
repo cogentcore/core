@@ -119,8 +119,6 @@ var styleStrokeFuncs = map[string]styleprops.Func{
 	},
 	"stroke-opacity": styleprops.Float(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
-	"opacity": styleprops.Float(float32(1),
-		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
 	"stroke-width": styleprops.Units(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
 	"stroke-min-width": styleprops.Units(units.Dp(1),
@@ -170,8 +168,6 @@ var styleFillFuncs = map[string]styleprops.Func{
 	},
 	"fill-opacity": styleprops.Float(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
-	"opacity": styleprops.Float(float32(1),
-		func(obj *Fill) *float32 { return &(obj.Opacity) }),
 	"fill-rule": styleprops.Enum(ppath.NonZero,
 		func(obj *Fill) enums.EnumSetter { return &(obj.Rule) }),
 }
@@ -182,6 +178,8 @@ var styleFillFuncs = map[string]styleprops.Func{
 var stylePathFuncs = map[string]styleprops.Func{
 	"vector-effect": styleprops.Enum(ppath.VectorEffectNone,
 		func(obj *Path) enums.EnumSetter { return &(obj.VectorEffect) }),
+	"opacity": styleprops.Float(float32(1),
+		func(obj *Path) *float32 { return &(obj.Opacity) }),
 	"transform": func(obj any, key string, val any, parent any, cc colors.Context) {
 		pc := obj.(*Path)
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
