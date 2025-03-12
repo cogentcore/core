@@ -29,8 +29,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
 
-* svg opacity processing
-
 * better job finding path fragments from file links -- iteratively try stuff.
 
 * renderx/images needs transform updates?
