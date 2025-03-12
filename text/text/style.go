@@ -127,13 +127,13 @@ func (ts *Style) InheritFields(parent *Style) {
 // FontHeight returns the effective font height based on
 // FontSize * [rich.Style] Size multiplier.
 func (ts *Style) FontHeight(sty *rich.Style) float32 {
-	return ts.FontSize.Dots * sty.Size
+	return math32.Ceil(ts.FontSize.Dots * sty.Size)
 }
 
 // LineHeightDots returns the effective line height in dots (actual pixels)
 // as FontHeight * LineHeight
 func (ts *Style) LineHeightDots(sty *rich.Style) float32 {
-	return ts.FontHeight(sty) * ts.LineHeight
+	return math32.Ceil(ts.FontHeight(sty) * ts.LineHeight)
 }
 
 // AlignFactors gets basic text alignment factors

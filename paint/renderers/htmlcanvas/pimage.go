@@ -13,6 +13,7 @@ import (
 	"image"
 	"syscall/js"
 
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/paint/pimage"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -35,6 +36,21 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		rs.style.Fill.Color = u
 		rs.ctx.Set("fillStyle", rs.imageToStyle(u))
 		rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
+		return
+	}
+
+	if gr, ok := pr.Source.(gradient.Gradient); ok {
+		_ = gr
+		// TODO: fill with gradient
+		// rs.style.Fill.Color = u
+		// rs.ctx.Set("fillStyle", rs.imageToStyle(u))
+		// rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
+		return
+	}
+
+	if nimg, ok := pr.Source.(*image.NRGBA); ok {
+		_ = nimg
+		// TODO: this happens on docs/color
 		return
 	}
 

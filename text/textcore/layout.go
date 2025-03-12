@@ -44,7 +44,7 @@ func (ed *Base) styleSizes() {
 	lht := sty.Text.LineHeightDots(&sty.Font)
 	tx := rich.NewText(&sty.Font, []rune{'M'})
 	r := sh.Shape(tx, &sty.Text, &rich.DefaultSettings)
-	ed.charSize.X = r[0].Advance()
+	ed.charSize.X = math32.Ceil(r[0].Advance())
 	ed.charSize.Y = lht
 }
 
