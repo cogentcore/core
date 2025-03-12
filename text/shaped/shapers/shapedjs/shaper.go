@@ -123,7 +123,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			sh.AdjustOutput(out, fnt, tx, tsty, rts)
 		}
 	}
-	return sh.LinesBounds(lines, truncated, tx, defSty, tsty)
+	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 
 // AdjustOutput adjusts the given run metrics based on the html measureText results.

@@ -33,7 +33,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	txt := tx.Join()
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
-	return sh.LinesBounds(lines, truncated, tx, defSty, tsty)
+	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
@@ -80,7 +80,7 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	return lines, truncated
 }
 
-func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, defSty *rich.Style, tsty *text.Style) *shaped.Lines {
+func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) *shaped.Lines {
 
 	lht := tsty.LineHeightDots(defSty)
 	lns := &shaped.Lines{Source: tx, Color: tsty.Color, SelectionColor: tsty.SelectColor, HighlightColor: tsty.HighlightColor, LineHeight: lht}
@@ -195,6 +195,10 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			run.AsBase().MaxBounds = rb
 		}
 		ln.Offset = ourOff
+		if size.X > 0 && ln.Bounds.Size().X > size.X {
+			// fmt.Println("size exceeded:", ln.Bounds.Size().X, size.X)
+			ln.Bounds.Max.X -= ln.Bounds.Size().X - size.X
+		}
 		lns.Bounds.ExpandByBox(ln.Bounds.Translate(ln.Offset))
 		lns.Lines = append(lns.Lines, ln)
 	}
