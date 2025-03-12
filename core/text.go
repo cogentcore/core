@@ -437,7 +437,9 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	txs.Color = colors.ToUniform(tx.Styles.Color)
-	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, sz)
+	etxs := *txs
+	etxs.Align, etxs.AlignV = text.Start, text.Start
+	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, sz)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -451,21 +453,16 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	}
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
-	align, alignV := txs.Align, txs.AlignV
-	txs.Align, txs.AlignV = text.Start, text.Start
-	if TheApp.Platform() == system.Web {
-		sz.X *= .95
+	rsz := sz
+	if txs.Align != text.Start && txs.AlignV != text.Start {
+		etxs := *txs
+		etxs.Align, etxs.AlignV = text.Start, text.Start
+		tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, rsz)
+		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
-	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, sz)
-
-	rsz := tx.paintText.Bounds.Size().Ceil()
-	if TheApp.Platform() == system.Web {
-		rsz.X *= 1.05
-	}
-	txs.Align, txs.AlignV = align, alignV
 	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, rsz)
 	tx.Links = tx.paintText.Source.GetLinks()
-	return rsz
+	return tx.paintText.Bounds.Size().Ceil()
 }
 
 func (tx *Text) SizeUp() {
@@ -484,6 +481,9 @@ func (tx *Text) SizeUp() {
 		return
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
+	// if TheApp.Platform() == system.Web { // report more
+	// 	rsz.X *= 1.01
+	// }
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
@@ -496,7 +496,8 @@ func (tx *Text) SizeDown(iter int) bool {
 		return false
 	}
 	sz := &tx.Geom.Size
-	rsz := tx.configTextAlloc(sz.Alloc.Content) // use allocation
+	asz := sz.Alloc.Content
+	rsz := tx.configTextAlloc(asz) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.setInitContentMin(tx.Styles.Min.Dots().Ceil())

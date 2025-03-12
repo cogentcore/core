@@ -32,7 +32,7 @@ import (
 	"cogentcore.org/core/yaegicore/coresymbols"
 )
 
-//go:embed content 😀
+//go:embed content
 var econtent embed.FS
 
 //go:embed *.svg name.png weld-icon.png
