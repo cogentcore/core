@@ -17,10 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* autoscroll should be fixed in textcore.Base by using pixels instead of lines -- currently broken esp in demo.go
-
-* also single click outside of region is not getting out of select mode.
-
 * editor: detect overwide glyphs and shrink them
 
 * check for negative advance and highlighting issues / tests

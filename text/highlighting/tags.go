@@ -5,19 +5,24 @@
 package highlighting
 
 import (
+	"sync"
+
 	"cogentcore.org/core/text/token"
 	"github.com/alecthomas/chroma/v2"
 )
 
 // FromChroma converts a chroma.TokenType to a parse token.Tokens
 func TokenFromChroma(ct chroma.TokenType) token.Tokens {
-	if ChromaToTokensMap == nil {
-		ChromaToTokensMap = make(map[chroma.TokenType]token.Tokens, len(TokensToChromaMap))
+	chromaToTokensMu.Lock()
+	defer chromaToTokensMu.Unlock()
+
+	if chromaToTokensMap == nil {
+		chromaToTokensMap = make(map[chroma.TokenType]token.Tokens, len(TokensToChromaMap))
 		for k, v := range TokensToChromaMap {
-			ChromaToTokensMap[v] = k
+			chromaToTokensMap[v] = k
 		}
 	}
-	tok := ChromaToTokensMap[ct]
+	tok := chromaToTokensMap[ct]
 	return tok
 }
 
@@ -26,8 +31,11 @@ func TokenToChroma(tok token.Tokens) chroma.TokenType {
 	return TokensToChromaMap[tok]
 }
 
-// ChromaToTokensMap maps from chroma.TokenType to Tokens -- built from opposite map
-var ChromaToTokensMap map[chroma.TokenType]token.Tokens
+var (
+	// chromaToTokensMap maps from chroma.TokenType to Tokens -- built from opposite map
+	chromaToTokensMap map[chroma.TokenType]token.Tokens
+	chromaToTokensMu  sync.Mutex
+)
 
 // TokensToChromaMap maps from Tokens to chroma.TokenType
 var TokensToChromaMap = map[token.Tokens]chroma.TokenType{
