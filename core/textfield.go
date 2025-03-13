@@ -1188,7 +1188,7 @@ func init() {
 		}
 		tf := AsTextField(w)
 		tf.AsyncLock()
-		if !w.AsWidget().StateIs(states.Focused) || !w.AsWidget().IsDisplayable() {
+		if !tf.StateIs(states.Focused) || !tf.IsVisible() {
 			tf.blinkOn = false
 			tf.renderCursor(false)
 		} else {
@@ -1204,7 +1204,7 @@ func (tf *TextField) startCursor() {
 	if tf == nil || tf.This == nil {
 		return
 	}
-	if !tf.IsDisplayable() {
+	if !tf.IsVisible() {
 		return
 	}
 	tf.blinkOn = true
@@ -1250,7 +1250,7 @@ func (tf *TextField) renderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !tf.IsDisplayable() {
+	if !tf.IsVisible() {
 		return
 	}
 

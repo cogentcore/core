@@ -33,7 +33,7 @@ func init() {
 		}
 		ed := AsBase(w)
 		ed.AsyncLock()
-		if !w.AsWidget().StateIs(states.Focused) || !w.AsWidget().IsDisplayable() {
+		if !ed.StateIs(states.Focused) || !ed.IsVisible() {
 			ed.blinkOn = false
 			ed.renderCursor(false)
 		} else {
@@ -49,7 +49,7 @@ func (ed *Base) startCursor() {
 	if ed == nil || ed.This == nil {
 		return
 	}
-	if !ed.IsDisplayable() {
+	if !ed.IsVisible() {
 		return
 	}
 	ed.blinkOn = true
@@ -99,7 +99,7 @@ func (ed *Base) renderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !ed.IsDisplayable() {
+	if !ed.IsVisible() {
 		return
 	}
 	if !ed.posIsVisible(ed.CursorPos) {

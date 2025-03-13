@@ -242,10 +242,10 @@ func (ev *Env) ViewDepth(depth []float32) {
 
 // UpdateViews updates the 2D and 3D views of the scene
 func (ev *Env) UpdateViews() {
-	if ev.SceneEditor.IsDisplayable() {
+	if ev.SceneEditor.IsVisible() {
 		ev.SceneEditor.NeedsRender()
 	}
-	if ev.Scene2D.IsDisplayable() {
+	if ev.Scene2D.IsVisible() {
 		ev.Scene2D.NeedsRender()
 	}
 }

@@ -688,7 +688,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !cwb.IsDisplayable() {
+		if !cwb.IsVisible() {
 			return tree.Break
 		}
 		if !cwb.posInScBBox(pos) {
@@ -733,7 +733,7 @@ func (em *Events) cancelRepeatClick() {
 }
 
 func (em *Events) startRepeatClickTimer() {
-	if em.repeatClick == nil || !em.repeatClick.AsWidget().IsDisplayable() {
+	if em.repeatClick == nil || !em.repeatClick.AsWidget().IsVisible() {
 		return
 	}
 	delay := DeviceSettings.RepeatClickTime
@@ -741,7 +741,7 @@ func (em *Events) startRepeatClickTimer() {
 		delay *= 8
 	}
 	em.repeatClickTimer = time.AfterFunc(delay, func() {
-		if em.repeatClick == nil || !em.repeatClick.AsWidget().IsDisplayable() {
+		if em.repeatClick == nil || !em.repeatClick.AsWidget().IsVisible() {
 			return
 		}
 		em.repeatClick.AsWidget().Send(events.Click)
