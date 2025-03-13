@@ -70,6 +70,9 @@ type Scene struct { //core:no-new
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// Animations are the currently active [Animation]s in this scene.
+	Animations []*Animation `json:"-" xml:"-" set:"-"`
+
 	// renderBBoxes indicates to render colored bounding boxes for all of the widgets
 	// in the scene. This is enabled by the [Inspector] in select element mode.
 	renderBBoxes bool
