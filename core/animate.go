@@ -55,7 +55,7 @@ func (sc *Scene) runAnimations() {
 		if a.Done || !a.Widget.IsVisible() {
 			continue
 		}
-		a.Delta = 10 * time.Millisecond // TODO
+		a.Delta = time.Second / 60 // TODO
 		a.Func(a)
 	}
 
