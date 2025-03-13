@@ -401,7 +401,7 @@ func (wb *WidgetBase) parentWidget() *WidgetBase {
 }
 
 // IsDisplayable returns whether the widget has the potential of being displayed.
-// If it or any of its parents are deleted or lack [states.Displayable], it is not
+// If it or any of its parents are deleted or [states.Invisible], it is not
 // displayable. Otherwise, it is displayable.
 //
 // This does *not* check if the widget is actually currently visible, for which you
