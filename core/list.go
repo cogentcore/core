@@ -1764,20 +1764,17 @@ func (lg *ListGrid) Init() {
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	csz := lg.Frame.SizeFromChildren(iter, pass)
 	rht, err := lg.layout.rowHeight(0, 0)
+	rht += lg.layout.Gap.Y
 	if err != nil {
 		// fmt.Println("ListGrid Sizing Error:", err)
 		lg.rowHeight = 42
 	}
-	if lg.NeedsRebuild() { // rebuilding = reset
-		lg.rowHeight = rht
-	} else {
-		lg.rowHeight = rht // max(lg.rowHeight, rht) // todo: we are currently testing not having this.
-	}
+	lg.rowHeight = rht
 	if lg.rowHeight == 0 {
 		// fmt.Println("ListGrid Sizing Error: RowHeight should not be 0!", sg)
 		lg.rowHeight = 42
 	}
-	allocHt := lg.Geom.Size.Alloc.Content.Y - lg.Geom.Size.InnerSpace.Y
+	allocHt := lg.Geom.Size.Alloc.Content.Y
 	if allocHt > lg.rowHeight {
 		lg.visibleRows = int(math32.Ceil(allocHt / lg.rowHeight))
 	}
@@ -1800,7 +1797,7 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		return
 	}
 	ls := lg.list()
-	rht := lg.rowHeight + lg.layout.Gap.Y
+	rht := lg.rowHeight
 	quo := sb.Value / rht
 	floor := math32.Floor(quo)
 	ls.StartIndex = int(floor)
@@ -1808,6 +1805,9 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	ls.ApplyScenePos()
 	ls.UpdateTree()
 	ls.NeedsRender()
+	// ls.NeedsLayout() // needed to recompute size after resize
+	// fmt.Println(lg.rowHeight, rht, sb.Value)
+	// 29 31 907
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
@@ -1815,7 +1815,7 @@ func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float3
 		return lg.Frame.ScrollValues(d)
 	}
 	ls := lg.list()
-	maxSize = float32(max(ls.SliceSize, 1)) * (lg.rowHeight + lg.layout.Gap.Y) // TODO: off by one on Gap?
+	maxSize = float32(max(ls.SliceSize, 1)) * lg.rowHeight
 	visSize = lg.Geom.Size.Alloc.Content.Y
 	visPct = visSize / maxSize
 	return
@@ -1913,7 +1913,7 @@ func (lg *ListGrid) renderStripes() {
 	}
 	for r := 0; r < rows; r++ {
 		si := r + startIndex
-		ht, _ := lg.layout.rowHeight(r, 0)
+		ht := lg.rowHeight
 		miny := st.Y
 		for c := 0; c < cols; c++ {
 			ki := r*cols + c
@@ -1963,8 +1963,7 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	st := math32.Vector2{}
 	got := false
 	for r := 0; r < rows; r++ {
-		ht, _ := lg.layout.rowHeight(r, 0)
-		ht += lg.layout.Gap.Y
+		ht := lg.rowHeight
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {
