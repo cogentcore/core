@@ -26,7 +26,7 @@ type Animation struct {
 	Widget *WidgetBase
 
 	// Delta is the amount of time that has passed since the
-	// last animation frame/step.
+	// last animation frame/step/tick.
 	Delta time.Duration
 
 	// Done can be set to true to permanently stop the animation; the [Animation] object
