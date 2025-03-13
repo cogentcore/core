@@ -76,12 +76,10 @@ c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Fill.Color = colors.Scheme.Success.Base
     pc.PathDone()
 })
-go func() {
-    for range time.Tick(time.Second/60) {
-        t++
-        c.NeedsRender()
-    }
-}()
+c.Animate(func(a *core.Animation) {
+    t++
+    c.NeedsRender()
+})
 ```
 
 You can draw ellipses:

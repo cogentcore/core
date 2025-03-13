@@ -222,6 +222,7 @@ func init() {
 		"WindowStage":                   reflect.ValueOf(core.WindowStage),
 
 		// type definitions
+		"Animation":              reflect.ValueOf((*core.Animation)(nil)),
 		"App":                    reflect.ValueOf((*core.App)(nil)),
 		"AppearanceSettingsData": reflect.ValueOf((*core.AppearanceSettingsData)(nil)),
 		"BarFuncs":               reflect.ValueOf((*core.BarFuncs)(nil)),

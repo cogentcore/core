@@ -201,7 +201,7 @@ func (sc *Scene) doUpdate() bool {
 	sc.setFlag(true, sceneUpdating) // prevent rendering
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
-	sc.Send(events.WindowPaint)
+	sc.runAnimations()
 	rc := sc.renderContext()
 
 	if sc.showIter < sceneShowIters {
