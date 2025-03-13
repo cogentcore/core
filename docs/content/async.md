@@ -13,8 +13,11 @@ text.Updater(func() {
 })
 go func() {
     for range time.Tick(time.Second) {
+        if !text.IsVisible() {
+            continue
+        }
         text.AsyncLock()
-        text.Update()
+        text.UpdateRender()
         text.AsyncUnlock()
     }
 }()
