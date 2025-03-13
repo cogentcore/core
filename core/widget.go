@@ -418,6 +418,10 @@ func (wb *WidgetBase) IsVisible() bool {
 	return wb.parentWidget().IsVisible()
 }
 
+func (wb *WidgetBase) IsActuallyVisible() bool {
+	return wb.IsVisible() && !wb.Geom.TotalBBox.Empty()
+}
+
 // RenderSource returns the self-contained [composer.Source] for
 // rendering this widget. The base widget returns nil, and the [Scene]
 // widget returns the [paint.Painter] rendering results.

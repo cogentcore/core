@@ -309,13 +309,7 @@ func (wb *WidgetBase) StartRender() bool {
 		return false
 	}
 	wb.setFlag(false, widgetNeedsRender) // done!
-	if !wb.IsVisible() {                 // checks deleted etc
-		return false
-	}
-	if wb.Geom.TotalBBox.Empty() {
-		if DebugSettings.RenderTrace {
-			fmt.Printf("Render empty bbox: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
-		}
+	if !wb.IsActuallyVisible() {
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
