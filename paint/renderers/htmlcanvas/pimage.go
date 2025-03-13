@@ -12,6 +12,7 @@ package htmlcanvas
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"syscall/js"
 
 	"cogentcore.org/core/colors"
@@ -64,18 +65,24 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	jsBuf := wgpu.BytesToJS(pr.Source.(*image.RGBA).Pix)
 	sbb := pr.Source.Bounds()
 	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
-	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
-	imageBitmap, ok := jsAwait(imageBitmapPromise)
-	if !ok {
-		panic("error while waiting for createImageBitmap promise")
-	}
 
 	sw := min(pr.Rect.Dx(), sbb.Dx())
 	sh := min(pr.Rect.Dy(), sbb.Dy())
+	// fmt.Println(pr.Cmd, pr.Rect, pr.Op, pr.SourcePos, sw, sh, sbb)
+
 	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
 	// m = m.Scale(rs.dpm, rs.dpm)
 	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
-	rs.ctx.Call("drawImage", imageBitmap, pr.SourcePos.X, pr.SourcePos.Y, sw, sh, pr.Rect.Min.X, pr.Rect.Min.Y, sw, sh)
+	if pr.Op == draw.Over {
+		imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
+		imageBitmap, ok := jsAwait(imageBitmapPromise)
+		if !ok {
+			panic("error while waiting for createImageBitmap promise")
+		}
+		rs.ctx.Call("drawImage", imageBitmap, pr.SourcePos.X, pr.SourcePos.Y, sw, sh, pr.Rect.Min.X, pr.Rect.Min.Y, sw, sh)
+	} else {
+		rs.ctx.Call("putImageData", imageData, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)
+	}
 	// rs.ctx.Call("putImageData", imageData, pr.Rect.Min.X, pr.Rect.Min.Y)
 	// rs.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 }

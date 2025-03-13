@@ -64,7 +64,12 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 
 	if style.HasFill() {
 		rs.setFill(style.Fill.Color)
-		rs.ctx.Call("fill")
+		// fmt.Println("fill:", pt.Context.Bounds.Rect, style.Fill.Color)
+		rule := "nonzero"
+		if style.Fill.Rule == ppath.EvenOdd {
+			rule = "evenodd"
+		}
+		rs.ctx.Call("fill", rule)
 	}
 	if style.HasStroke() && !strokeUnsupported {
 		rs.setStroke(&style.Stroke)

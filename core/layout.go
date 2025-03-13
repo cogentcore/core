@@ -989,7 +989,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		sz := cwb.Geom.Size.Actual.Total
 		grw := cwb.Styles.Grow
 		if pass == SizeFinalPass {
-			if grw.X == 0 {
+			if grw.X == 0 && !cwb.Styles.GrowWrap {
 				sz.X = cwb.Geom.Size.Alloc.Total.X
 			}
 			if grw.Y == 0 {
