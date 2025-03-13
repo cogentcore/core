@@ -987,10 +987,15 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		sz := cwb.Geom.Size.Actual.Total
-		if pass == SizeFinalPass {
-			sz = cwb.Geom.Size.Alloc.Total
-		}
 		grw := cwb.Styles.Grow
+		if pass == SizeFinalPass {
+			if grw.X == 0 {
+				sz.X = cwb.Geom.Size.Alloc.Total.X
+			}
+			if grw.Y == 0 {
+				sz.Y = cwb.Geom.Size.Alloc.Total.Y
+			}
+		}
 		if pass <= SizeDownPass && iter == 0 && cwb.Styles.GrowWrap {
 			grw.Set(1, 0)
 		}

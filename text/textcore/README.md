@@ -17,13 +17,13 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* textfield end of line is not good.
+* List scrolling is not making it to the bottom of the list/table: Update() does it but other stuff doesn't. Just need one Update to make it work.
 
-* Scroll doesn't go all the way to the bottom in forms and in inputs page on demo: chooser.
+* textfield end of line is not good.
 
 * tweak underlining on web? looks strange (not far down enough)
 
-* Circular and semicircular meters render incorrectly
+* on web: Circular and semicircular meters render incorrectly
 
 * scroll animation uses new Animator struct objs that have a func that is called in Paint loop, use delta-dist / dt^2 accelleration factor for remaining scroll drift
 
@@ -31,17 +31,13 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * dialog shadows are accumulating: BlitBox nil image is not filling most likely.
 
-* I will tone down textcore depth highlighting which is too close to selection color.
-
 * we need to fix line width on our core.Canvas and cleanup junk in htmlcanvas code.
 
-* we need to do xyz and video on web per my comment above.
-
-* List scrolling is not making it to the bottom of the list/table: Update() does it but other stuff doesn't.  Just need one Update to make it work.
+* we need to do xyz and video on web.
 
 * Text editor is not rendering a lot of stuff on Retina display: base.onsurface color is not updating -- need to figure out why.
 
-* Border width too small on many widgets: need DPR multiplier.
+* web Border width too small on many widgets on Retina: need DPR multiplier.
 
 * High precision text rendering on web?  Kai do benchmarks.
 
