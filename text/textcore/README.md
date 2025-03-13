@@ -19,8 +19,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * List scrolling is not making it to the bottom of the list/table: Update() does it but other stuff doesn't. Just need one Update to make it work.
 
-* textfield end of line is not good.
-
 * tweak underlining on web? looks strange (not far down enough)
 
 * on web: Circular and semicircular meters render incorrectly

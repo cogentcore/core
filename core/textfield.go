@@ -1140,6 +1140,13 @@ func (tf *TextField) charPos(idx int) math32.Vector2 {
 		return math32.Vector2{}
 	}
 	bb := tf.renderAll.RuneBounds(idx)
+	if idx >= len(tf.editText) {
+		if tf.numLines > 1 && tf.editText[len(tf.editText)-1] == ' ' {
+			bb.Max.X += tf.lineHeight * 0.2
+			return bb.Max
+		}
+		return bb.Max
+	}
 	return bb.Min
 }
 
@@ -1430,7 +1437,6 @@ func (tf *TextField) pixelToCursor(pt image.Point) int {
 	n := len(tf.editText)
 	if tf.hasWordWrap() {
 		ix := tf.renderAll.RuneAtPoint(ptf, tf.effPos)
-		// fmt.Println(ix, ptf, tf.effPos)
 		if ix >= 0 {
 			return ix
 		}
