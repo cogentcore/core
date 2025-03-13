@@ -184,6 +184,16 @@ func (ch *Chooser) Init() {
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		s.CenterAll()
+		// textfield handles everything
+		if ch.Editable {
+			s.RenderBox = false
+			s.Border = styles.Border{}
+			s.MaxBorder = s.Border
+			s.Background = nil
+			s.StateLayer = 0
+			s.Padding.Zero()
+			s.Border.Radius.Zero()
+		}
 		if !s.IsReadOnly() {
 			s.Cursor = cursors.Pointer
 			switch ch.Type {
@@ -197,16 +207,6 @@ func (ch *Chooser) Init() {
 					s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 				}
 			}
-		}
-		// textfield handles everything
-		if ch.Editable {
-			s.RenderBox = false
-			s.Border = styles.Border{}
-			s.MaxBorder = s.Border
-			s.Background = nil
-			s.StateLayer = 0
-			s.Padding.Zero()
-			s.Border.Radius.Zero()
 		}
 	})
 

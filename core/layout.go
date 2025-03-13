@@ -952,7 +952,7 @@ func (fr *Frame) setInitCellsGrid() {
 // sizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
 // to update Actual and Internal size based on this.
 func (fr *Frame) sizeFromChildrenFit(iter int, pass LayoutPasses) {
-	ksz := fr.This.(Layouter).SizeFromChildren(iter, SizeDownPass)
+	ksz := fr.This.(Layouter).SizeFromChildren(iter, pass)
 	fr.laySetContentFitOverflow(ksz, pass)
 	if DebugSettings.LayoutTrace {
 		sz := &fr.Geom.Size
@@ -987,6 +987,9 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		sz := cwb.Geom.Size.Actual.Total
+		if pass == SizeFinalPass {
+			sz = cwb.Geom.Size.Alloc.Total
+		}
 		grw := cwb.Styles.Grow
 		if pass <= SizeDownPass && iter == 0 && cwb.Styles.GrowWrap {
 			grw.Set(1, 0)

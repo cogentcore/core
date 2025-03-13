@@ -19,13 +19,37 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * textfield end of line is not good.
 
+* Scroll doesn't go all the way to the bottom in forms and in inputs page on demo: chooser.
+
+* tweak underlining on web? looks strange (not far down enough)
+
+* Circular and semicircular meters render incorrectly
+
+* scroll animation uses new Animator struct objs that have a func that is called in Paint loop, use delta-dist / dt^2 accelleration factor for remaining scroll drift
+
+* even fixed elements with no scroll can be pulled down with scrolling, for the "pull down refresh" action; animation restores to prior location
+
+* dialog shadows are accumulating: BlitBox nil image is not filling most likely.
+
+* I will tone down textcore depth highlighting which is too close to selection color.
+
+* we need to fix line width on our core.Canvas and cleanup junk in htmlcanvas code.
+
+* we need to do xyz and video on web per my comment above.
+
+* List scrolling is not making it to the bottom of the list/table: Update() does it but other stuff doesn't.  Just need one Update to make it work.
+
+* Text editor is not rendering a lot of stuff on Retina display: base.onsurface color is not updating -- need to figure out why.
+
+* Border width too small on many widgets: need DPR multiplier.
+
+* High precision text rendering on web?  Kai do benchmarks.
+
+* Spinner plus buttons sometimes erroneously render black backgrounds, especially when scrolling in table in demo
+
 * move shaper to renderwindow so popup menus etc don't need to make their own? SVG too!? is every icon getting a shaper?
 
 * svg marker glitch is last remaining bug: debugit!
-
-* check for negative advance and highlighting issues / tests
-
-* emoji, svg, bitmap font rendering: could not get color emoji to work
 
 * SVG, PDF backends
 
@@ -35,47 +59,24 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
 
-* better job finding path fragments from file links -- iteratively try stuff.
-
-* renderx/images needs transform updates?
-
 ### Lowpri
 
-* code newFiles AddToVCS should default on -- not working
+* better job finding path fragments from file links -- iteratively try stuff.
 
-* code: Markup colors are baked in when output is generated -- no remarkup possible!
+* check for negative advance and highlighting issues / tests
+
+* emoji, svg, bitmap font rendering: could not get color emoji to work
+
+* code newFiles AddToVCS should default on -- not working
 
 * TestMarkupSpellErr: still some rich tag format issues but mostly working.. why is this so hard!?
 
 * cleanup unused base stuff
 
-* textfield NewLayout causes dreaded shadow accumulation on popup dialogs. mostly fixed by getting the initial layout size correct, but when it wraps, it will cause this.
-
 * text render highlight region fill in blanks better: hard b/c at run level, doesn't have context.
 
 * xyz physics GrabEyeImg causes crashing with goroutine renderAsync in renderwindow, but otherwise is ok
 
-* optimized next level up render: no clear advantage; not clear what the point is?
+* code: Markup colors are baked in when output is generated -- no remarkup possible!
 
-
-* selection crash after undo:
-
-panic: invalid character position for pos, len: 30: pos: 217:37 [recovered]
-	panic: invalid character position for pos, len: 30: pos: 217:37
-cogentcore.org/core/text/lines.(*Lines).mustValidPos(0x140b56f7798?, {0xd8, 0x25})
-	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:369 +0xd4
-cogentcore.org/core/text/lines.(*Lines).region(0x1407a536008, {0xd6, 0x0}, {0xd8, 0x25})
-	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:383 +0xa8
-cogentcore.org/core/text/lines.(*Lines).deleteTextImpl(0x1407a536008, {0x101282fec?, 0x14001d38240?}, {0x38?, 0x140b56f7978?})
-	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:474 +0x34
-cogentcore.org/core/text/lines.(*Lines).deleteText(0x1407a536008, {0x100d36bd0?, 0x140b56f7a88?}, {0x1012b2548?, 0x0?})
-	/Users/oreilly/go/src/cogentcore.org/core/text/lines/lines.go:468 +0x20
-cogentcore.org/core/text/lines.(*Lines).DeleteText(0x1407a536008, {0x0?, 0x0?}, {0x0?, 0x0?})
-	/Users/oreilly/go/src/cogentcore.org/core/text/lines/api.go:450 +0xb4
-cogentcore.org/core/text/textcore.(*Base).deleteSelection(0x14000d69108)
-	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/select.go:248 +0x38
-cogentcore.org/core/text/textcore.(*Base).InsertAtCursor(0x14000d69108, {0x140b56f7ac0, 0x1, 0x0?})
-	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/select.go:284 +0x4c
-cogentcore.org/core/text/textcore.(*Editor).keyInputInsertRune(0x14000d69108, {0x102e69e00, 0x140f902bdc0})
-	/Users/oreilly/go/src/cogentcore.org/core/text/textcore/editor.go:576 +0x288
 
