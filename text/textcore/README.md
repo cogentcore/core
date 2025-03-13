@@ -17,6 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* textfield end of line is not good.
+
 * move shaper to renderwindow so popup menus etc don't need to make their own? SVG too!? is every icon getting a shaper?
 
 * svg marker glitch is last remaining bug: debugit!

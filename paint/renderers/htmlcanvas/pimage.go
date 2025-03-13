@@ -11,29 +11,31 @@ package htmlcanvas
 
 import (
 	"image"
+	"image/color"
 	"syscall/js"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/paint/pimage"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func (rs *Renderer) RenderImage(pr *pimage.Params) {
-	if pr.Source == nil {
-		return
-	}
-	// TODO: for some reason we are getting a non-nil interface of a nil [image.RGBA]
+	nilSrc := pr.Source == nil
 	if r, ok := pr.Source.(*image.RGBA); ok && r == nil {
-		return
+		nilSrc = true
 	}
 	if pr.Rect == (image.Rectangle{}) {
 		pr.Rect = image.Rectangle{Max: rs.size.ToPoint()}
 	}
 
 	// Fast path for [image.Uniform]
-	if u, ok := pr.Source.(*image.Uniform); ok && pr.Mask == nil {
-		// TODO: caching?
-		rs.style.Fill.Color = u
+	if u, ok := pr.Source.(*image.Uniform); nilSrc || ok && pr.Mask == nil {
+		if nilSrc {
+			rs.style.Fill.Color = colors.Uniform(color.Transparent)
+		} else {
+			rs.style.Fill.Color = u
+		}
 		rs.ctx.Set("fillStyle", rs.imageToStyle(u))
 		rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		return
