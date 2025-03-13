@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-You can **animate** any [[widget]] by specifying an animation function, which is run at the refresh rate of the monitor.
+You can **animate** any [[widget]] by specifying an animation function, which is typically run at the refresh rate of the monitor.
 
 The most commonly animated widget is a [[canvas]]:
 
@@ -68,6 +68,25 @@ c.Animate(func(a *core.Animation) {
 ```
 
 Also, animations associated with deleted widgets will automatically be permanently stopped.
+
+## Other widgets
+
+Any type of widget can be animated:
+
+```Go
+t := time.Duration(0)
+tx := core.NewText(b).SetText("0")
+tx.Styler(func(s *styles.Style) {
+	s.Min.X.Em(10)
+})
+tx.Animate(func(a *core.Animation) {
+    t += a.Delta
+    tx.SetText(t.String())
+    tx.UpdateRender()
+})
+```
+
+Note: in that example, we use [[doc:core.WidgetBase.UpdateRender]] instead of [[doc:core.WidgetBase.Update]] to optimize performance. See [[update]] for more information. The [[styles#min]] setting is necessary to give the text enough space without redoing the layout every frame.
 
 ## Details
 
