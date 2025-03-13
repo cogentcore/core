@@ -19,25 +19,55 @@ c.Animate(func(a *core.Animation) {
 })
 ```
 
+## Pause
+
+If you want to temporarily pause an animation, you can simply return early from your animation function:
+
+```Go
+pause := false
+core.Bind(&pause, core.NewSwitch(b)).SetText("Pause")
+
+t := float32(0)
+c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
+    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t))
+    pc.Fill.Color = colors.Scheme.Warn.Base
+    pc.PathDone()
+})
+c.Animate(func(a *core.Animation) {
+    if pause {
+        return
+    }
+    t += float32(a.Delta.Seconds())
+    c.NeedsRender()
+})
+```
+
+Also, animations associated with widgets that are currently not visible will automatically be paused.
+
 ## Stop
 
 You can permanently stop an animation by setting the [[doc:core.Animation.Done]] field to true:
 
 ```Go
+stop := false
+core.NewButton(b).SetText("Stop").OnClick(func(e events.Event) {
+    stop = true
+})
+
 t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.5, 0.5, 0.5*math32.Sin(t))
-    pc.Fill.Color = colors.Scheme.Success.Base
+    pc.Fill.Color = colors.Scheme.Error.Base
     pc.PathDone()
 })
 c.Animate(func(a *core.Animation) {
     t += float32(a.Delta.Seconds())
     c.NeedsRender()
-    if t > 3 {
-        a.Done = true
-    }
+    a.Done = stop
 })
 ```
+
+Also, animations associated with deleted widgets will automatically be permanently stopped.
 
 ## Details
 
