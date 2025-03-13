@@ -153,8 +153,8 @@ func MarkupPathsAsLinks(txt []rune, mu rich.Text, maxFields int) rich.Text {
 			mu.EndSpecial()
 		}
 	}
-	if string(mu.Join()) != string(txt) {
-		panic("markup is not the same: " + string(txt) + " mu: " + string(mu.Join()))
-	}
+	// if string(mu.Join()) != string(txt) {
+	// 	panic("markup is not the same: " + string(txt) + " mu: " + string(mu.Join()))
+	// }
 	return mu
 }

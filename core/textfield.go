@@ -1678,12 +1678,12 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	if tf.NoEcho {
 		txt = concealDots(len(tf.editText))
 	}
-	align, alignV := txs.Align, txs.AlignV
-	txs.Align, txs.AlignV = text.Start, text.Start // only works with this
+	etxs := *txs
+	etxs.Align, etxs.AlignV = text.Start, text.Start // only works with this
 	tx := rich.NewText(&st.Font, txt)
-	tf.renderAll = tf.Scene.TextShaper.WrapLines(tx, &st.Font, txs, &AppearanceSettings.Text, sz)
-	txs.Align, txs.AlignV = align, alignV
+	tf.renderAll = tf.Scene.TextShaper.WrapLines(tx, &st.Font, &etxs, &AppearanceSettings.Text, sz)
 	rsz := tf.renderAll.Bounds.Size().Ceil()
+	// fmt.Println(tf, sz, rsz)
 	return rsz
 }
 
@@ -1726,28 +1726,37 @@ func (tf *TextField) SizeUp() {
 }
 
 func (tf *TextField) SizeDown(iter int) bool {
-	if !tf.hasWordWrap() {
-		return tf.Frame.SizeDown(iter)
-	}
 	sz := &tf.Geom.Size
-	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
-	icsz := tf.iconsSize()
 	prevContent := sz.Actual.Content
+	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
+	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content) // get before update
+	sdp := tf.Frame.SizeDown(iter)
+	if !tf.hasWordWrap() {
+		return sdp
+	}
+	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)
 	rsz := tf.configTextSize(availSz)
 	rsz.SetAdd(icsz)
 	// start over so we don't reflect hysteresis of prior guess
-	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
-	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
 		if DebugSettings.LayoutTrace {
 			fmt.Println(tf, "TextField Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
-	sdp := tf.Frame.SizeDown(iter)
+	sz.FitSizeMax(&sz.Actual.Content, rsz)
+	sz.setTotalFromContent(&sz.Actual)
 	return chg || sdp
+}
+
+func (tf *TextField) SizeFinal() {
+	tf.Geom.RelPos.SetZero()
+	tf.sizeFinalChildren()
+	// tf.sizeFromChildrenFit(0, SizeFinalPass) // key to omit
+	tf.growToAlloc()
+	tf.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
+	tf.sizeFinalParts()
 }
 
 func (tf *TextField) ApplyScenePos() {
@@ -1815,7 +1824,7 @@ func (tf *TextField) Render() {
 	}()
 
 	tf.autoScroll() // does all update checking, inits paint with our style
-	tf.RenderStandardBox()
+	tf.RenderAllocBox()
 	if tf.dispRange.Start < 0 || tf.dispRange.End > len(tf.editText) {
 		return
 	}

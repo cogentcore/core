@@ -503,10 +503,20 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 	wb.Scene.Painter.Border(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
-// RenderStandardBox renders the standard box model.
+// RenderStandardBox renders the standard box model, using Actual size.
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
+	if sz == (math32.Vector2{}) {
+		return
+	}
+	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// RenderAllocBox renders the standard box model using Alloc size, instead of Actual.
+func (wb *WidgetBase) RenderAllocBox() {
+	pos := wb.Geom.Pos.Total
+	sz := wb.Geom.Size.Alloc.Total
 	if sz == (math32.Vector2{}) {
 		return
 	}
