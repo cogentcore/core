@@ -4,7 +4,10 @@
 
 package core
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 // Animation represents the data for a widget animation.
 // You can call [WidgetBase.Animate] to create a widget animation.
@@ -20,7 +23,7 @@ type Animation struct {
 
 	// Widget is the widget associated with the animation. The animation will
 	// pause if the widget is not visible, and it will end if the widget is destroyed.
-	Widget Widget
+	Widget *WidgetBase
 
 	// Delta is the amount of time that has passed since the
 	// last animation frame/step.
@@ -38,7 +41,25 @@ type Animation struct {
 func (wb *WidgetBase) Animate(f func(a *Animation)) {
 	a := &Animation{
 		Func:   f,
-		Widget: wb.This.(Widget),
+		Widget: wb,
 	}
 	wb.Scene.Animations = append(wb.Scene.Animations, a)
+}
+
+// runAnimations runs the [Scene.Animations].
+func (sc *Scene) runAnimations() {
+	for _, a := range sc.Animations {
+		if a.Widget == nil || a.Widget.This == nil {
+			a.Done = true
+		}
+		if a.Done || !a.Widget.IsVisible() {
+			continue
+		}
+		a.Delta = 10 * time.Millisecond // TODO
+		a.Func(a)
+	}
+
+	sc.Animations = slices.DeleteFunc(sc.Animations, func(a *Animation) bool {
+		return a.Done
+	})
 }
