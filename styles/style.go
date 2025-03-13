@@ -214,10 +214,10 @@ type Style struct { //types:add
 	// to [DefaultScrollbarWidth], and it is inherited.
 	ScrollbarWidth units.Value
 
-	// font styling parameters
+	// Font styling parameters applicable to individual spans of text.
 	Font rich.Style
 
-	// text styling parameters
+	// Text styling parameters applicable to a paragraph of text.
 	Text text.Style
 
 	// unit context: parameters necessary for anchoring relative units
