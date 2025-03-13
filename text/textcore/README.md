@@ -17,8 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* tweak underlining on web? looks strange (not far down enough)
-
 * scroll animation uses new Animator struct objs that have a func that is called in Paint loop, use delta-dist / dt^2 accelleration factor for remaining scroll drift
 
 * even fixed elements with no scroll can be pulled down with scrolling, for the "pull down refresh" action; animation restores to prior location
@@ -30,8 +28,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * web: do xyz and video sources.
 
 * Text editor is not rendering a lot of stuff on Retina display: base.onsurface color is not updating -- need to figure out why.
-
-* web Border width too small on many widgets on Retina: need DPR multiplier.
 
 * High precision text rendering on web?  Kai do benchmarks.
 
