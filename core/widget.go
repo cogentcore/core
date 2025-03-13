@@ -400,26 +400,32 @@ func (wb *WidgetBase) parentWidget() *WidgetBase {
 	return nil // the parent may be a non-widget in [tree.UnmarshalRootJSON]
 }
 
-// IsVisible returns true if a widget is visible for rendering according
-// to the [states.Invisible] flag on it or any of its parents.
-// This flag is also set by [styles.DisplayNone] during [WidgetBase.Style].
-// This does *not* check for an empty TotalBBox, indicating that the widget
-// is out of render range; that is done by [WidgetBase.StartRender] prior to rendering.
-// Non-visible nodes are automatically not rendered and do not get
+// IsDisplayable returns whether the widget has the potential of being displayed.
+// If it or any of its parents are deleted or lack [states.Displayable], it is not
+// displayable. Otherwise, it is displayable.
+//
+// This does *not* check if the widget is actually currently visible, for which you
+// can use [WidgetBase.IsVisible]. In other words, if a widget is currently offscreen
+// but can be scrolled onscreen, it is still displayable, but it is not visible until
+// its bounding box is actually onscreen.
+//
+// Widgets that are not displayable are automatically not rendered and do not get
 // window events.
-// This call recursively calls the parent, which is typically a short path.
-func (wb *WidgetBase) IsVisible() bool {
+//
+// [styles.DisplayNone] can be set for [styles.Style.Display] to make a widget
+// not displayable.
+func (wb *WidgetBase) IsDisplayable() bool {
 	if wb == nil || wb.This == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
 	if wb.Parent == nil {
 		return true
 	}
-	return wb.parentWidget().IsVisible()
+	return wb.parentWidget().IsDisplayable()
 }
 
 func (wb *WidgetBase) IsActuallyVisible() bool {
-	return wb.IsVisible() && !wb.Geom.TotalBBox.Empty()
+	return wb.IsDisplayable() && !wb.Geom.TotalBBox.Empty()
 }
 
 // RenderSource returns the self-contained [composer.Source] for

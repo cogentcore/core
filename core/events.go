@@ -192,7 +192,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 	if em.focus != nil {
 		em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
 			wb := AsWidget(k)
-			if !wb.IsVisible() {
+			if !wb.IsDisplayable() {
 				return tree.Break
 			}
 			wb.firstHandleEvent(e)
@@ -204,7 +204,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 		if !e.IsHandled() {
 			em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
 				wb := AsWidget(k)
-				if !wb.IsVisible() {
+				if !wb.IsDisplayable() {
 					return tree.Break
 				}
 				wb.finalHandleEvent(e)
@@ -688,7 +688,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !cwb.IsVisible() {
+		if !cwb.IsDisplayable() {
 			return tree.Break
 		}
 		if !cwb.posInScBBox(pos) {
@@ -733,7 +733,7 @@ func (em *Events) cancelRepeatClick() {
 }
 
 func (em *Events) startRepeatClickTimer() {
-	if em.repeatClick == nil || !em.repeatClick.AsWidget().IsVisible() {
+	if em.repeatClick == nil || !em.repeatClick.AsWidget().IsDisplayable() {
 		return
 	}
 	delay := DeviceSettings.RepeatClickTime
@@ -741,7 +741,7 @@ func (em *Events) startRepeatClickTimer() {
 		delay *= 8
 	}
 	em.repeatClickTimer = time.AfterFunc(delay, func() {
-		if em.repeatClick == nil || !em.repeatClick.AsWidget().IsVisible() {
+		if em.repeatClick == nil || !em.repeatClick.AsWidget().IsDisplayable() {
 			return
 		}
 		em.repeatClick.AsWidget().Send(events.Click)
@@ -975,7 +975,7 @@ func (em *Events) focusNext() bool {
 func (em *Events) FocusNextFrom(from Widget) bool {
 	next := widgetNextFunc(from, func(w Widget) bool {
 		wb := w.AsWidget()
-		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
+		return wb.IsDisplayable() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
 	em.setFocus(next)
 	return next != nil
@@ -989,7 +989,7 @@ func (em *Events) focusOnOrNext(foc Widget) bool {
 		return true
 	}
 	wb := AsWidget(foc)
-	if !wb.IsVisible() {
+	if !wb.IsDisplayable() {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
@@ -1007,7 +1007,7 @@ func (em *Events) focusOnOrPrev(foc Widget) bool {
 		return true
 	}
 	wb := AsWidget(foc)
-	if !wb.IsVisible() {
+	if !wb.IsDisplayable() {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
@@ -1031,7 +1031,7 @@ func (em *Events) focusPrev() bool {
 func (em *Events) focusPrevFrom(from Widget) bool {
 	prev := widgetPrevFunc(from, func(w Widget) bool {
 		wb := w.AsWidget()
-		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
+		return wb.IsDisplayable() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
 	em.setFocus(prev)
 	return prev != nil

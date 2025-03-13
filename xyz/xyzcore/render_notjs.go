@@ -44,7 +44,7 @@ func (xr *xyzSource) Draw(c composer.Composer) {
 
 // RenderSource returns the [composer.Source] for direct rendering.
 func (sw *Scene) RenderSource(op draw.Op) composer.Source {
-	if sw.XYZ.Frame == nil || !sw.IsVisible() {
+	if sw.XYZ.Frame == nil || !sw.IsDisplayable() {
 		return nil
 	}
 	tex, _ := sw.XYZ.Frame.GetCurrentTextureObject()

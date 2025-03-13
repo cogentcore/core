@@ -64,7 +64,7 @@ func (v *Video) Destroy() {
 // CurrentFrame returns the current frame (for rendering),
 // and whether it is unchanged or not.
 func (v *Video) CurrentFrame() (*image.RGBA, bool) {
-	if !v.IsVisible() {
+	if !v.IsDisplayable() {
 		return nil, true
 	}
 	frame := v.lastFrame
