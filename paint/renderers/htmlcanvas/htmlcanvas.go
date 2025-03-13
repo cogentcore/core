@@ -32,10 +32,6 @@ type Renderer struct {
 	Canvas js.Value
 	ctx    js.Value
 	size   math32.Vector2
-
-	// style is a cached style of the most recently used styles for rendering,
-	// which allows for avoiding unnecessary JS calls.
-	style styles.Paint
 }
 
 // New returns an HTMLCanvas renderer. It makes a corresponding new HTML canvas element.
@@ -108,60 +104,24 @@ func (rs *Renderer) setTransform(ctx *render.Context) {
 }
 
 func (rs *Renderer) setFill(clr image.Image) {
-	if rs.style.Fill.Color != clr {
-		rs.style.Fill.Color = clr
-		rs.ctx.Set("fillStyle", rs.imageToStyle(clr))
-	}
+	rs.ctx.Set("fillStyle", rs.imageToStyle(clr))
 }
 
 func (rs *Renderer) setStroke(stroke *styles.Stroke) {
-	if stroke.Cap != rs.style.Stroke.Cap {
-		rs.ctx.Set("lineCap", stroke.Cap.String())
-		rs.style.Stroke.Cap = stroke.Cap
+	rs.ctx.Set("lineCap", stroke.Cap.String())
+	rs.ctx.Set("lineJoin", stroke.Join.String())
+	if stroke.Join == ppath.JoinMiter && !math32.IsNaN(stroke.MiterLimit) {
+		rs.ctx.Set("miterLimit", stroke.MiterLimit)
 	}
-
-	if stroke.Join != rs.style.Stroke.Join {
-		rs.ctx.Set("lineJoin", stroke.Join.String())
-		if stroke.Join == ppath.JoinMiter && !math32.IsNaN(stroke.MiterLimit) {
-			rs.ctx.Set("miterLimit", stroke.MiterLimit)
-		}
-		rs.style.Stroke.Join = stroke.Join
+	dashes := []any{}
+	for _, dash := range stroke.Dashes {
+		dashes = append(dashes, dash)
 	}
-
-	// TODO: all of this could be more efficient
-	dashesEqual := len(stroke.Dashes) == len(rs.style.Stroke.Dashes)
-	if dashesEqual {
-		for i, dash := range stroke.Dashes {
-			if dash != rs.style.Stroke.Dashes[i] {
-				dashesEqual = false
-				break
-			}
-		}
-	}
-
-	if !dashesEqual {
-		dashes := []any{}
-		for _, dash := range stroke.Dashes {
-			dashes = append(dashes, dash)
-		}
-		jsDashes := js.Global().Get("Array").New(dashes...)
-		rs.ctx.Call("setLineDash", jsDashes)
-		rs.style.Stroke.Dashes = stroke.Dashes
-	}
-
-	if stroke.DashOffset != rs.style.Stroke.DashOffset {
-		rs.ctx.Set("lineDashOffset", stroke.DashOffset)
-		rs.style.Stroke.DashOffset = stroke.DashOffset
-	}
-
-	if stroke.Width.Dots != rs.style.Stroke.Width.Dots {
-		rs.ctx.Set("lineWidth", stroke.Width.Dots)
-		rs.style.Stroke.Width = stroke.Width
-	}
-	if stroke.Color != rs.style.Stroke.Color {
-		rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke.Color))
-		rs.style.Stroke.Color = stroke.Color
-	}
+	jsDashes := js.Global().Get("Array").New(dashes...)
+	rs.ctx.Call("setLineDash", jsDashes)
+	rs.ctx.Set("lineDashOffset", stroke.DashOffset)
+	rs.ctx.Set("lineWidth", stroke.Width.Dots)
+	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke.Color))
 }
 
 func (rs *Renderer) imageToStyle(clr image.Image) any {

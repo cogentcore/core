@@ -64,7 +64,6 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 
 	if style.HasFill() {
 		rs.setFill(style.Fill.Color)
-		// fmt.Println("fill:", pt.Context.Bounds.Rect, style.Fill.Color)
 		rule := "nonzero"
 		if style.Fill.Rule == ppath.EvenOdd {
 			rule = "evenodd"
@@ -82,10 +81,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		}
 		pt.Path = pt.Path.Stroke(style.Stroke.Width.Dots, ppath.CapFromStyle(style.Stroke.Cap), ppath.JoinFromStyle(style.Stroke.Join), 1)
 		rs.writePath(pt)
-		if style.Stroke.Color != rs.style.Fill.Color {
-			rs.ctx.Set("fillStyle", rs.imageToStyle(style.Stroke.Color))
-			rs.style.Fill.Color = style.Stroke.Color
-		}
+		rs.ctx.Set("fillStyle", rs.imageToStyle(style.Stroke.Color))
 		rs.ctx.Call("fill")
 	}
 }

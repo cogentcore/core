@@ -17,8 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* Spinner plus buttons sometimes erroneously render black backgrounds, especially when scrolling in table in demo
-
 * tweak underlining on web? looks strange (not far down enough)
 
 * scroll animation uses new Animator struct objs that have a func that is called in Paint loop, use delta-dist / dt^2 accelleration factor for remaining scroll drift

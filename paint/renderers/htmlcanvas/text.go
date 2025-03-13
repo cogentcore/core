@@ -152,9 +152,6 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 func (rs *Renderer) applyTextStyle(fnt *text.Font, tsty *text.Style, fill, stroke image.Image, size, lineHeight float32) {
 	shapedjs.SetFontStyle(rs.ctx, fnt, tsty, lineHeight)
 
-	// TODO: use caching like in RenderPath?
-	rs.style.Fill.Color = fill
-	rs.style.Stroke.Color = stroke
 	rs.ctx.Set("fillStyle", rs.imageToStyle(fill))
 	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke))
 	// note: text decorations not available in canvas
