@@ -12,6 +12,8 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 )
 
@@ -75,6 +77,7 @@ func (m *Meter) Init() {
 		m.ValueColor = colors.Scheme.Primary.Base
 		s.Background = colors.Scheme.SurfaceVariant
 		s.Border.Radius = styles.BorderRadiusFull
+		s.SetTextWrap(false)
 	})
 	m.FinalStyler(func(s *styles.Style) {
 		switch m.Type {
@@ -134,18 +137,17 @@ func (m *Meter) Render() {
 	}
 
 	pc.Stroke.Width = m.Width
-	sw := m.Width.Dots // pc.StrokeWidth() // TODO(text):
+	sw := m.Width.Dots
 	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
+	pc.Fill.Color = colors.Scheme.Surface
 
-	// var txt *ptext.Text
-	// var toff math32.Vector2
+	var txt *shaped.Lines
+	var toff math32.Vector2
 	if m.Text != "" {
-		// TODO(text):
-		// txt = &ptext.Text{}
-		// txt.SetHTML(m.Text, st.FontRender(), &st.Text, &st.UnitContext, nil)
-		// tsz := txt.Layout(&st.Text, st.FontRender(), &st.UnitContext, size)
-		// toff = tsz.DivScalar(2)
+		tx, _ := htmltext.HTMLToRich([]byte(m.Text), &m.Styles.Font, nil)
+		txt = m.Scene.TextShaper.WrapLines(tx, &m.Styles.Font, &m.Styles.Text, &AppearanceSettings.Text, size)
+		toff = txt.Bounds.Size().DivScalar(2)
 	}
 
 	if m.Type == MeterCircle {
@@ -161,10 +163,9 @@ func (m *Meter) Render() {
 			pc.Stroke.Color = m.ValueColor
 			pc.PathDone()
 		}
-		// TODO(text):
-		// if txt != nil {
-		// 	pc.Text(txt, c.Sub(toff))
-		// }
+		if txt != nil {
+			pc.TextLines(txt, c.Sub(toff))
+		}
 		return
 	}
 
@@ -180,8 +181,7 @@ func (m *Meter) Render() {
 		pc.Stroke.Color = m.ValueColor
 		pc.PathDone()
 	}
-	// TODO(text):
-	// if txt != nil {
-	// 	pc.Text(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
-	// }
+	if txt != nil {
+		pc.TextLines(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
+	}
 }

@@ -17,11 +17,9 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* List scrolling is not making it to the bottom of the list/table: Update() does it but other stuff doesn't. Just need one Update to make it work.
+* Spinner plus buttons sometimes erroneously render black backgrounds, especially when scrolling in table in demo
 
 * tweak underlining on web? looks strange (not far down enough)
-
-* on web: Circular and semicircular meters render incorrectly
 
 * scroll animation uses new Animator struct objs that have a func that is called in Paint loop, use delta-dist / dt^2 accelleration factor for remaining scroll drift
 
@@ -31,15 +29,13 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * we need to fix line width on our core.Canvas and cleanup junk in htmlcanvas code.
 
-* we need to do xyz and video on web.
+* web: do xyz and video sources.
 
 * Text editor is not rendering a lot of stuff on Retina display: base.onsurface color is not updating -- need to figure out why.
 
 * web Border width too small on many widgets on Retina: need DPR multiplier.
 
 * High precision text rendering on web?  Kai do benchmarks.
-
-* Spinner plus buttons sometimes erroneously render black backgrounds, especially when scrolling in table in demo
 
 * move shaper to renderwindow so popup menus etc don't need to make their own? SVG too!? is every icon getting a shaper?
 
