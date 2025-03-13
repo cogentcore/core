@@ -424,7 +424,13 @@ func (wb *WidgetBase) IsDisplayable() bool {
 	return wb.parentWidget().IsDisplayable()
 }
 
-func (wb *WidgetBase) IsActuallyVisible() bool {
+// IsVisible returns whether the widget is actually currently visible.
+// A widget is visible if and only if it is both [WidgetBase.IsDisplayable]
+// and it has a non-empty rendering bounding box (ie: it is currently onscreen).
+// This means that widgets currently not visible due to scrolling will return false
+// for this function, even though they are still displayable and return true for
+// [WidgetBase.IsDisplayable].
+func (wb *WidgetBase) IsVisible() bool {
 	return wb.IsDisplayable() && !wb.Geom.TotalBBox.Empty()
 }
 

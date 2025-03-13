@@ -309,7 +309,7 @@ func (wb *WidgetBase) StartRender() bool {
 		return false
 	}
 	wb.setFlag(false, widgetNeedsRender) // done!
-	if !wb.IsActuallyVisible() {
+	if !wb.IsVisible() {
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())

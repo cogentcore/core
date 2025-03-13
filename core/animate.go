@@ -52,7 +52,7 @@ func (sc *Scene) runAnimations() {
 		if a.Widget == nil || a.Widget.This == nil {
 			a.Done = true
 		}
-		if a.Done || !a.Widget.IsActuallyVisible() {
+		if a.Done || !a.Widget.IsVisible() {
 			continue
 		}
 		a.Delta = time.Second / 60 // TODO
