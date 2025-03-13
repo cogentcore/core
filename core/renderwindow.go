@@ -577,9 +577,9 @@ type renderContext struct {
 	geom math32.Geom2DInt
 
 	// mu is mutex for locking out rendering and any destructive updates.
-	// It is locked at the RenderWindow level during rendering and
+	// It is locked at the [renderWindow] level during rendering and
 	// event processing to provide exclusive blocking of external updates.
-	// Use AsyncLock from any outside routine to grab the lock before
+	// Use [WidgetBase.AsyncLock] from any outside routine to grab the lock before
 	// doing modifications.
 	mu sync.Mutex
 
