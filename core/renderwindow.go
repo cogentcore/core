@@ -636,6 +636,10 @@ func (w *renderWindow) renderContext() *renderContext {
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
 	if w.flags.HasFlag(winIsRendering) { // still doing the last one
+		w.flags.SetFlag(true, winRenderSkipped)
+		if DebugSettings.WindowRenderTrace {
+			fmt.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
+		}
 		return
 	}
 	rc := w.renderContext()
@@ -654,7 +658,11 @@ func (w *renderWindow) renderWindow() {
 
 	if !top.Sprites.Modified && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
-		return
+		if w.flags.HasFlag(winRenderSkipped) {
+			w.flags.SetFlag(false, winRenderSkipped)
+		} else {
+			return
+		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WindowRenderTrace {
@@ -726,9 +734,7 @@ func (w *renderWindow) renderWindow() {
 	}
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
-	if !w.flags.HasFlag(winIsRendering) {
-		go w.renderAsync(cp)
-	}
+	go w.renderAsync(cp)
 }
 
 // renderAsync is the implementation of the main render pass,
@@ -791,6 +797,10 @@ type renderWindowFlags int64 //enums:bitflag -trim-prefix scene
 const (
 	// winIsRendering indicates that the renderAsync function is running.
 	winIsRendering renderWindowFlags = iota
+
+	// winRenderSkipped indicates that a render update was skipped, so
+	// another update will be run to ensure full updating.
+	winRenderSkipped
 
 	// winStopEventLoop indicates that the event loop should be stopped.
 	winStopEventLoop

@@ -77,6 +77,10 @@ type Slider struct {
 	// by values less than 1 (0.5 default).
 	TrackSize float32 `default:"0.5"`
 
+	// ChangeOnSlide sends [events.Change] events while sliding, instead of only
+	// at the end when done sliding.
+	ChangeOnSlide bool
+
 	// InputThreshold is the threshold for the amount of change in scroll
 	// value before emitting an input event.
 	InputThreshold float32
@@ -209,12 +213,11 @@ func (sr *Slider) Init() {
 		}
 	})
 
-	sr.On(events.MouseDown, func(e events.Event) {
+	sr.On(events.SlideStart, func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
 		sr.setSliderPosEvent(pos)
 		sr.slideStartPos = sr.pos
 	})
-	// note: not doing anything in particular on SlideStart
 	sr.On(events.SlideMove, func(e events.Event) {
 		del := e.StartDelta()
 		if sr.Styles.Direction == styles.Row {
@@ -222,6 +225,18 @@ func (sr *Slider) Init() {
 		} else {
 			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
 		}
+		if sr.ChangeOnSlide {
+			sr.sendChange()
+		}
+	})
+	sr.On(events.SlideStop, func(e events.Event) {
+		del := e.StartDelta()
+		if sr.Styles.Direction == styles.Row {
+			sr.setSliderPosEvent(sr.slideStartPos + float32(del.X))
+		} else {
+			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
+		}
+		sr.SendChange()
 	})
 	// we need to send change events for both SlideStop and Click
 	// to handle the no-slide click case

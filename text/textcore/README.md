@@ -23,13 +23,11 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * dialog shadows are accumulating: BlitBox nil image is not filling most likely.
 
-* we need to fix line width on our core.Canvas and cleanup junk in htmlcanvas code.
+* cleanup junk in htmlcanvas code.
 
 * web: do xyz and video sources.
 
 * Text editor is not rendering a lot of stuff on Retina display: base.onsurface color is not updating -- need to figure out why.
-
-* High precision text rendering on web?  Kai do benchmarks.
 
 * move shaper to renderwindow so popup menus etc don't need to make their own? SVG too!? is every icon getting a shaper?
 

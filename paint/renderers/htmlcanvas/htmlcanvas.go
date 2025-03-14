@@ -65,7 +65,7 @@ func (rs *Renderer) SetCanvas(c js.Value) {
 	rs.ctx = rs.Canvas.Call("getContext", "2d", "alpha", "true")
 	// todo: make this a font options.
 	// rs.ctx.Set("imageSmoothingEnabled", false)
-	// rs.ctx.Set("textRendering", "geometricPrecision")
+	rs.ctx.Set("textRendering", "geometricPrecision")
 }
 
 // Render is the main rendering function.
