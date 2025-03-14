@@ -72,12 +72,12 @@ You can [[animate]] a canvas (see that page for more information):
 ```Go
 t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
-    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t))
+    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Success.Base
     pc.PathDone()
 })
 c.Animate(func(a *core.Animation) {
-    t += float32(a.Delta.Seconds())
+    t += a.Dt
     c.NeedsRender()
 })
 ```

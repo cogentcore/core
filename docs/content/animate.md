@@ -9,12 +9,12 @@ The most commonly animated widget is a [[canvas]]:
 ```Go
 t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
-    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t))
+    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Success.Base
     pc.PathDone()
 })
 c.Animate(func(a *core.Animation) {
-    t += float32(a.Delta.Seconds())
+    t += a.Dt
     c.NeedsRender()
 })
 ```
@@ -29,7 +29,7 @@ core.Bind(&pause, core.NewSwitch(b)).SetText("Pause")
 
 t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
-    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t))
+    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Warn.Base
     pc.PathDone()
 })
@@ -37,7 +37,7 @@ c.Animate(func(a *core.Animation) {
     if pause {
         return
     }
-    t += float32(a.Delta.Seconds())
+    t += a.Dt
     c.NeedsRender()
 })
 ```
@@ -56,12 +56,12 @@ core.NewButton(b).SetText("Stop").OnClick(func(e events.Event) {
 
 t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
-    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t))
+    pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Error.Base
     pc.PathDone()
 })
 c.Animate(func(a *core.Animation) {
-    t += float32(a.Delta.Seconds())
+    t += a.Dt
     c.NeedsRender()
     a.Done = stop
 })
@@ -74,14 +74,14 @@ Also, animations associated with deleted widgets will automatically be permanent
 Any type of widget can be animated:
 
 ```Go
-t := time.Duration(0)
+t := float32(0)
 tx := core.NewText(b).SetText("0")
 tx.Styler(func(s *styles.Style) {
 	s.Min.X.Em(10)
 })
 tx.Animate(func(a *core.Animation) {
-    t += a.Delta
-    tx.SetText(t.String())
+    t += a.Dt
+    tx.SetText(fmt.Sprintf("%g", t))
     tx.UpdateRender()
 })
 ```

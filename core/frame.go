@@ -154,28 +154,27 @@ func (fr *Frame) Init() {
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
-		// If we have enough velocity, we continue scrolling over the
-		// next second in a goroutine while slowly decelerating for a
+		// If we have enough acceleration, we continue scrolling over the
+		// next second in an animation while slowly decelerating for a
 		// smoother experience.
-		vel := math32.FromPoint(e.StartDelta()).DivScalar(float32(e.SinceStart().Seconds()) * 20).Negate()
-		if math32.Abs(vel.X) < 1 && math32.Abs(vel.Y) < 1 {
+		dx := math32.FromPoint(e.StartDelta())
+		dt := float32(e.SinceStart().Seconds())
+		vel := dx.DivScalar(dt).Negate()
+		accel := dx.DivScalar(dt)
+		if math32.Abs(accel.X) < 1 && math32.Abs(accel.Y) < 1 {
 			return
 		}
-		go func() {
-			i := 0
-			tick := time.NewTicker(time.Second / 60)
-			for range tick.C {
-				fr.AsyncLock()
-				fr.scrollDelta(events.NewScroll(e.WindowPos(), vel, e.Modifiers()))
-				fr.AsyncUnlock()
-				vel.SetMulScalar(0.95)
-				i++
-				if i > 120 {
-					tick.Stop()
-					break
-				}
+		i := 0
+		totalTime := float32(0)
+		fr.Animate(func(a *Animation) {
+			totalTime += a.Dt
+			dx := vel.MulScalar(a.Dt * (1 - totalTime))
+			fr.scrollDelta(events.NewScroll(e.WindowPos(), dx, e.Modifiers()))
+			i++
+			if totalTime > 1 {
+				a.Done = true
 			}
-		}()
+		})
 	})
 }
 

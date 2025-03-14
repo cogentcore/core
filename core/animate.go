@@ -25,9 +25,9 @@ type Animation struct {
 	// pause if the widget is not visible, and it will end if the widget is destroyed.
 	Widget *WidgetBase
 
-	// Delta is the amount of time that has passed since the
+	// Dt is the amount of time in milliseconds that has passed since the
 	// last animation frame/step/tick.
-	Delta time.Duration
+	Dt float32
 
 	// Done can be set to true to permanently stop the animation; the [Animation] object
 	// will be removed from the [Scene] at the next frame.
@@ -55,7 +55,7 @@ func (sc *Scene) runAnimations() {
 		if a.Done || !a.Widget.IsVisible() {
 			continue
 		}
-		a.Delta = time.Second / 60 // TODO
+		a.Dt = float32((time.Second / 60).Milliseconds()) // TODO
 		a.Func(a)
 	}
 
