@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 	"unicode"
@@ -147,31 +148,33 @@ func (fr *Frame) Init() {
 			fr.scrollDelta(e)
 		}
 	})
+	var prevMove events.Event
 	// We treat slide events on frames as scroll events.
 	fr.On(events.SlideMove, func(e events.Event) {
+		prevMove = e
 		// We must negate the delta for "natural" scrolling behavior.
 		del := math32.FromPoint(e.PrevDelta()).Negate()
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
-		// If we have enough acceleration, we continue scrolling over the
-		// next second in an animation while slowly decelerating for a
+		// If we have enough instantaneous velocity, we continue scrolling
+		// in an animation while slowly decelerating for a
 		// smoother experience.
-		dx := math32.FromPoint(e.StartDelta())
-		dt := float32(e.SinceStart().Seconds())
-		vel := dx.DivScalar(dt).Negate()
-		accel := dx.DivScalar(dt)
-		if math32.Abs(accel.X) < 1 && math32.Abs(accel.Y) < 1 {
+		dx := math32.FromPoint(prevMove.PrevDelta()).Negate()
+		dt := float32(prevMove.SincePrev().Milliseconds())
+		vel := dx.DivScalar(dt)
+		fmt.Println(vel, dx, dt)
+		if vel.Length() < 2 {
 			return
 		}
 		i := 0
-		totalTime := float32(0)
+		t := float32(0)
 		fr.Animate(func(a *Animation) {
-			totalTime += a.Dt
-			dx := vel.MulScalar(a.Dt * (1 - totalTime))
+			t += a.Dt
+			dx := vel.MulScalar(a.Dt * (1 - t/500))
 			fr.scrollDelta(events.NewScroll(e.WindowPos(), dx, e.Modifiers()))
 			i++
-			if totalTime > 1 {
+			if t > 500 {
 				a.Done = true
 			}
 		})
