@@ -104,6 +104,7 @@ func (pc *Painter) Close() {
 // settings present at this point, which will be used to render the path,
 // and creates a new current path.
 func (pc *Painter) PathDone() {
+	pc.Paint.ToDots()
 	pt := render.NewPath(pc.State.Path.Clone(), pc.Paint, pc.Context())
 	pc.Render.Add(pt)
 	pc.State.Path.Reset()
