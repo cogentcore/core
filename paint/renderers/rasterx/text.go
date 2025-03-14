@@ -130,7 +130,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		if run.Direction.IsVertical() {
 
 		} else {
-			dec := off.Y + 4
+			dec := off.Y + 3
 			rs.StrokeTextLine(ctx, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
 		}
 	}
