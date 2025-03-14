@@ -83,16 +83,16 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 		return ""
 	}
 	fln := string(pfs.Src.Lines[0])
-	if fln != "---" {
+	if !(fln == "---" || fln == "+++") {
 		return ""
 	}
-	trg := `bibfile: `
+	trg := `bibfile`
 	trgln := len(trg)
 	mx := min(nlines, 100)
 	for i := 1; i < mx; i++ {
 		sln := pfs.Src.Lines[i]
 		lstr := string(sln)
-		if lstr == "---" {
+		if lstr == "---" || lstr == "+++" {
 			return ""
 		}
 		lnln := len(sln)
@@ -101,10 +101,23 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 		}
 		if strings.HasPrefix(lstr, trg) {
 			fnm := lstr[trgln:lnln]
-			if !strings.HasSuffix(fnm, ".bib") {
-				fnm += ".bib"
+			if fnm[0] == ':' {
+				if !strings.HasSuffix(fnm, ".bib") {
+					fnm += ".bib"
+				}
+				return fnm
 			}
-			return fnm
+			flds := strings.Fields(fnm)
+			if len(flds) != 2 || flds[0] != "=" {
+				continue
+			}
+			if flds[1][0] == '"' {
+				fnm = flds[1][1 : len(flds[1])-1]
+				if !strings.HasSuffix(fnm, ".bib") {
+					fnm += ".bib"
+				}
+				return fnm
+			}
 		}
 	}
 	return ""
