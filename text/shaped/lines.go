@@ -174,3 +174,19 @@ func (ls *Lines) AlignX(tsty *text.Style) {
 		ls.AlignXFactor(fact)
 	}
 }
+
+// Clone returns a Clone copy of the Lines, with new Lines elements
+// that still point to the same underlying Runs.
+func (ls *Lines) Clone() *Lines {
+	nls := &Lines{}
+	*nls = *ls
+	nln := len(ls.Lines)
+	if nln > 0 {
+		nln := make([]Line, nln)
+		for i := range ls.Lines {
+			nln[i] = ls.Lines[i]
+		}
+		nls.Lines = nln
+	}
+	return nls
+}

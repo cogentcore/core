@@ -184,8 +184,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 
 	shapeTab := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
 		if ed.tabRender != nil {
-			// todo: need a Clone() method so selection can be updated for each.
-			return ed.tabRender
+			return ed.tabRender.Clone()
 		}
 		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
 		ed.tabRender = lns
@@ -193,11 +192,9 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	}
 	shapeSpan := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
 		txt := stx.Join()
-		if li < len(ed.lineRenders) {
-			rc := ed.lineRenders[li]
-			if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
-				return rc.lns
-			}
+		rc := ed.lineRenders[li]
+		if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
+			return rc.lns
 		}
 		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
 		ed.lineRenders[li] = renderCache{tx: txt, lns: lns}
@@ -205,6 +202,8 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	}
 
 	rendSpan := func(lns *shaped.Lines, pos math32.Vector2, coff int) {
+		lns.SelectReset()
+		lns.HighlightReset()
 		lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
 		if !vseli.IsNil() {
 			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - coff, End: vseli.End.Char - coff})
@@ -319,8 +318,15 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	}
 	sz := ed.charSize
 	sz.X *= float32(ed.lineNumberOffset)
+	var lns *shaped.Lines
+	rc := ed.lineNoRenders[li]
 	tx := rich.NewText(&fst, []rune(lnstr))
-	lns := sh.WrapLines(tx, &fst, &sty.Text, &rich.DefaultSettings, sz)
+	if rc.lns != nil && slices.Compare(rc.tx, tx[0]) == 0 { // captures styling
+		lns = rc.lns
+	} else {
+		lns = sh.WrapLines(tx, &fst, &sty.Text, &rich.DefaultSettings, sz)
+		ed.lineNoRenders[li] = renderCache{tx: tx[0], lns: lns}
+	}
 	pc.TextLines(lns, pos)
 
 	// render circle

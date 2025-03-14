@@ -161,8 +161,11 @@ type Base struct { //core:embedder
 	// If it is nil, they are sent to the standard web URL handler.
 	LinkHandler func(tl *rich.Hyperlink)
 
-	// lineRenders are the cached rendered lines of text
+	// lineRenders are the cached rendered lines of text.
 	lineRenders []renderCache
+
+	// lineNoRenders are the cached rendered line numbers
+	lineNoRenders []renderCache
 
 	// tabRender is a shaped tab
 	tabRender *shaped.Lines

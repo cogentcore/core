@@ -84,6 +84,7 @@ func (ed *Base) layoutAllLines() {
 	ed.totalSize.X = ed.charSize.X * float32(ed.visSize.X)
 	ed.totalSize.Y = ed.charSize.Y * float32(ed.linesSize.Y)
 	ed.lineRenders = make([]renderCache, ed.visSize.Y+1)
+	ed.lineNoRenders = make([]renderCache, ed.visSize.Y+1)
 
 	// ed.hasLinks = false // todo: put on lines
 	ed.lastVisSizeAlloc = ed.visSizeAlloc
@@ -184,6 +185,7 @@ func (ed *Base) ScrollChanged(d math32.Dims, sb *core.Slider) {
 	}
 	ed.scrollPos = sb.Value / ed.charSize.Y
 	ed.lineRenders = make([]renderCache, ed.visSize.Y+1)
+	ed.lineNoRenders = make([]renderCache, ed.visSize.Y+1)
 	ed.NeedsRender()
 }
 
