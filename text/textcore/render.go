@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"slices"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -17,6 +18,7 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -148,9 +150,11 @@ func (ed *Base) renderLines() {
 	slts := rtoview(ed.scopelights)
 	hlts = append(hlts, slts...)
 	buf.Lock()
+	li := 0
 	for ln := stln; ln <= edln; ln++ {
-		ed.renderLine(ln, rpos, vsel, hlts)
+		ed.renderLine(li, ln, rpos, vsel, hlts)
 		rpos.Y += ed.charSize.Y
+		li++
 	}
 	buf.Unlock()
 	if ed.hasLineNumbers {
@@ -159,8 +163,13 @@ func (ed *Base) renderLines() {
 	pc.PopContext()
 }
 
+type renderCache struct {
+	tx  []rune
+	lns *shaped.Lines
+}
+
 // renderLine renders given line, dealing with tab stops etc
-func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlts []textpos.Region) {
+func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region, hlts []textpos.Region) {
 	buf := ed.Lines
 	sh := ed.Scene.TextShaper
 	pc := &ed.Scene.Painter
@@ -173,8 +182,29 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
 
-	rendSpan := func(stx rich.Text, pos math32.Vector2, ssz math32.Vector2, coff int) {
+	shapeTab := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
+		if ed.tabRender != nil {
+			// todo: need a Clone() method so selection can be updated for each.
+			return ed.tabRender
+		}
 		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
+		ed.tabRender = lns
+		return lns
+	}
+	shapeSpan := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
+		txt := stx.Join()
+		if li < len(ed.lineRenders) {
+			rc := ed.lineRenders[li]
+			if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
+				return rc.lns
+			}
+		}
+		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
+		ed.lineRenders[li] = renderCache{tx: txt, lns: lns}
+		return lns
+	}
+
+	rendSpan := func(lns *shaped.Lines, pos math32.Vector2, coff int) {
 		lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
 		if !vseli.IsNil() {
 			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - coff, End: vseli.End.Char - coff})
@@ -196,7 +226,7 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 			lpos.X += ic
 			lsz := sz
 			lsz.X -= ic
-			rendSpan(tx[si:si+1], lpos, lsz, indent)
+			rendSpan(shapeTab(tx[si:si+1], lsz), lpos, indent)
 			indent++
 		} else {
 			break
@@ -217,7 +247,7 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 		}
 	}
 	if !hasTab {
-		rendSpan(rtx, lpos, lsz, indent)
+		rendSpan(shapeSpan(rtx, lsz), lpos, indent)
 		return
 	}
 	coff := indent
@@ -232,7 +262,7 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 		spos.X += float32(cc-scc) * ed.charSize.X
 		if rtx[si][sn] != '\t' {
 			ssz := ed.charSize.Mul(math32.Vec2(float32(rn), 1))
-			rendSpan(rtx[si:si+1], spos, ssz, coff)
+			rendSpan(shapeSpan(rtx[si:si+1], ssz), spos, coff)
 			cc += rn
 			coff += rn
 			continue
@@ -241,7 +271,7 @@ func (ed *Base) renderLine(ln int, rpos math32.Vector2, vsel textpos.Region, hlt
 			tcc := ((cc / 8) + 1) * 8
 			spos.X += float32(tcc-cc) * ed.charSize.X
 			cc = tcc
-			rendSpan(rtx[si:si+1], spos, ed.charSize, coff)
+			rendSpan(shapeTab(rtx[si:si+1], ed.charSize), spos, coff)
 			coff++
 		}
 	}

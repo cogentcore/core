@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 )
@@ -159,6 +160,12 @@ type Base struct { //core:embedder
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.
 	LinkHandler func(tl *rich.Hyperlink)
+
+	// lineRenders are the cached rendered lines of text
+	lineRenders []renderCache
+
+	// tabRender is a shaped tab
+	tabRender *shaped.Lines
 
 	// selectMode is a boolean indicating whether to select text as the cursor moves.
 	selectMode bool
