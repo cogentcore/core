@@ -4,6 +4,8 @@
 
 package core
 
+import "cogentcore.org/core/styles"
+
 // Collapser is a widget that can be collapsed or expanded.
 // The [Collapser.Summary] is always visible, and the [Collapser.Details]
 // are only visible when the [Collapser] is expanded with [Collapser.Open]
@@ -23,4 +25,20 @@ type Collapser struct {
 	// Details is the part of the collapser that is only visible when
 	// the collapser is expanded.
 	Details *Frame `set:"-"`
+}
+
+func (cl *Collapser) Init() {
+	cl.Frame.Init()
+
+	cl.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Grow.Set(1, 0)
+	})
+}
+
+func (cl *Collapser) OnAdd() {
+	cl.Frame.OnAdd()
+
+	cl.Summary = NewFrame(cl)
+	cl.Details = NewFrame(cl)
 }
