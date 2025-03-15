@@ -151,6 +151,22 @@ func (t *Chooser) SetAllowNew(v bool) *Chooser { t.AllowNew = v; return t }
 // but the history of prior values can also be useful.
 func (t *Chooser) SetDefaultNew(v bool) *Chooser { t.DefaultNew = v; return t }
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Collapser", IDName: "collapser", Doc: "Collapser is a widget that can be collapsed or expanded.\nThe [Collapser.Summary] is always visible, and the [Collapser.Details]\nare only visible when the [Collapser] is expanded with [Collapser.Open]\nequal to true.\n\nYou can directly add any widgets to the [Collapser.Summary] and [Collapser.Details]\nby specifying one of them as the parent in calls to New{WidgetName}.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Open", Doc: "Open is whether the collapser is currently expanded. It defaults to false."}, {Name: "Summary", Doc: "Summary is the part of the collapser that is always visible."}, {Name: "Details", Doc: "Details is the part of the collapser that is only visible when\nthe collapser is expanded."}}})
+
+// NewCollapser returns a new [Collapser] with the given optional parent:
+// Collapser is a widget that can be collapsed or expanded.
+// The [Collapser.Summary] is always visible, and the [Collapser.Details]
+// are only visible when the [Collapser] is expanded with [Collapser.Open]
+// equal to true.
+//
+// You can directly add any widgets to the [Collapser.Summary] and [Collapser.Details]
+// by specifying one of them as the parent in calls to New{WidgetName}.
+func NewCollapser(parent ...tree.Node) *Collapser { return tree.New[Collapser](parent...) }
+
+// SetOpen sets the [Collapser.Open]:
+// Open is whether the collapser is currently expanded. It defaults to false.
+func (t *Collapser) SetOpen(v bool) *Collapser { t.Open = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorMapButton", IDName: "color-map-button", Doc: "ColorMapButton displays a [colormap.Map] and can be clicked on\nto display a dialog for selecting different color map options.\nIt represents a [ColorMapName] value.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MapName"}}})
 
 // NewColorMapButton returns a new [ColorMapButton] with the given optional parent:
