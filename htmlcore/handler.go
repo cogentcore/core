@@ -111,7 +111,9 @@ func handleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			ed := New[textcore.Editor](ctx)
+			cl := New[core.Collapser](ctx)
+			core.NewText(cl.Summary).SetText("Code")
+			ed := textcore.NewEditor(cl.Details)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
@@ -120,7 +122,7 @@ func handleElement(ctx *Context) {
 			ed.Lines.SetString(ExtractText(ctx))
 			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
 				ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
-				parent := core.NewFrame(ed.Parent)
+				parent := core.NewFrame(cl.Parent)
 				parent.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
 					s.Grow.Set(1, 0)
