@@ -4,7 +4,13 @@
 
 package core
 
-import "cogentcore.org/core/styles"
+import (
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
+)
 
 // Collapser is a widget that can be collapsed or expanded by a user.
 // The [Collapser.Summary] is always visible, and the [Collapser.Details]
@@ -41,5 +47,28 @@ func (cl *Collapser) OnAdd() {
 	cl.Frame.OnAdd()
 
 	cl.Summary = NewFrame(cl)
+	cl.Summary.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Align.Content = styles.Center
+		s.Align.Items = styles.Center
+	})
+
+	toggle := NewSwitch(cl.Summary).SetType(SwitchCheckbox).SetIconOn(icons.KeyboardArrowDown).SetIconOff(icons.KeyboardArrowRight)
+	toggle.SetName("toggle")
+	Bind(&cl.Open, toggle)
+	toggle.Styler(func(s *styles.Style) {
+		s.Color = colors.Scheme.Primary.Base
+	})
+	toggle.OnChange(func(e events.Event) {
+		cl.Update()
+	})
+
 	cl.Details = NewFrame(cl)
+	cl.Details.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
+	})
+	cl.Details.Updater(func() {
+		cl.Details.SetState(!cl.Open, states.Invisible)
+	})
 }
