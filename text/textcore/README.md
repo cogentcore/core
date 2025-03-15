@@ -17,6 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
+* listgrid mouse selection is off with new rowheight paradigm
+
 * even fixed elements with no scroll can be pulled down with scrolling, for the "pull down refresh" action; animation restores to prior location
 
 * dialog shadows are accumulating: BlitBox nil image is not filling most likely.
