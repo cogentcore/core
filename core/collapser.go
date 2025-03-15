@@ -6,13 +6,14 @@ package core
 
 import "cogentcore.org/core/styles"
 
-// Collapser is a widget that can be collapsed or expanded.
+// Collapser is a widget that can be collapsed or expanded by a user.
 // The [Collapser.Summary] is always visible, and the [Collapser.Details]
 // are only visible when the [Collapser] is expanded with [Collapser.Open]
 // equal to true.
 //
 // You can directly add any widgets to the [Collapser.Summary] and [Collapser.Details]
 // by specifying one of them as the parent in calls to New{WidgetName}.
+// Collapser is similar to HTML's <details> and <summary> tags.
 type Collapser struct {
 	Frame
 
