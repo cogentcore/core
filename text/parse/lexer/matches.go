@@ -71,11 +71,14 @@ const (
 	MiddleOfWord
 )
 
-//////////////////////////////////////////////////////////////////////////////
-// Match functions -- see also state for more complex ones
+//////// Match functions -- see also state for more complex ones
 
 func IsLetter(ch rune) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch)
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || (ch >= utf8.RuneSelf && unicode.IsLetter(ch))
+}
+
+func IsLetterNoUnderbar(ch rune) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || (ch >= utf8.RuneSelf && unicode.IsLetter(ch))
 }
 
 func IsDigit(ch rune) bool {

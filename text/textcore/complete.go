@@ -137,9 +137,6 @@ func (ed *Editor) Lookup() { //types:add
 	if ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
 		return
 	}
-	if ed.offerCorrect() {
-		return
-	}
 	if ed.Complete == nil {
 		return
 	}

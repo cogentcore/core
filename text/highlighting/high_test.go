@@ -57,15 +57,19 @@ func TestMarkup(t *testing.T) {
 
 	rtx := `[monospace]: "	"
 [monospace fill-color]: "if"
-[monospace fill-color]: " len"
+[monospace]: " "
+[monospace fill-color]: "len"
 [monospace]: "("
 [monospace]: "txt"
 [monospace]: ")"
-[monospace fill-color]: " >"
-[monospace]: " maxLineLen"
-[monospace]: " {"
-[monospace]: ""
-[monospace italic fill-color]: " // "
+[monospace]: " "
+[monospace fill-color]: ">"
+[monospace]: " "
+[monospace]: "maxLineLen"
+[monospace]: " "
+[monospace]: "{"
+[monospace]: " "
+[monospace italic fill-color]: "// "
 [monospace italic dotted-underline fill-color]: "avoid"
 [monospace italic fill-color]: " overflow"
 `
@@ -141,11 +145,30 @@ func TestMarkupPathsAsLinks(t *testing.T) {
 		"./commands.go:68:6: ps redeclared in this block",
 	}
 
+	res := []string{
+		`[link [file:///./path/file.go] underline fill-color]: "./path/file.go"
+[{End Special}]: ""
+`,
+		`[link [file:////absolute/path/file.go] underline fill-color]: "/absolute/path/file.go"
+[{End Special}]: ""
+`,
+		`[link [file:///../relative/path/file.go] underline fill-color]: "../relative/path/file.go"
+[{End Special}]: ""
+`,
+		`[]: "file.go"
+`,
+		`[link [file:///./commands.go#L68C6] underline fill-color]: "./commands.go:68:6:"
+[{End Special}]: ""
+[]: " ps redeclared in this block"
+`,
+	}
+
 	for i, fld := range flds {
 		rfd := []rune(fld)
 		mu := rich.NewPlainText(rfd)
 		nmu := MarkupPathsAsLinks(rfd, mu, 2)
-		fmt.Println(i, nmu) // todo: make it a test
+		// fmt.Println(i, nmu) // todo: make it a test
+		assert.Equal(t, res[i], nmu.String())
 	}
 }
 

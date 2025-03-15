@@ -6,11 +6,11 @@ package highlighting
 
 import (
 	"fmt"
-	"slices"
 
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
 )
 
@@ -36,74 +36,122 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 		return rich.NewText(sty, txt)
 	}
 
-	stys := []rich.Style{*sty}
-	tstack := []int{0} // stack of tags indexes that remain to be completed, sorted soonest at end
+	// first ensure text has spans for each tag region.
 	var tx rich.Text
 	cp := 0
-	if ttags[0].Start > 0 {
-		tx = rich.NewText(sty, txt[:ttags[0].Start])
-		cp = ttags[0].Start
-	}
-	// fmt.Println("start")
-	for i, tr := range ttags {
-		if cp >= sz {
-			break
-		}
-		// pop anyone off the stack who ends before we start
-		for si := len(tstack) - 1; si >= 1; si-- {
-			ts := ttags[tstack[si]]
-			// fmt.Println("pop potential:", si, ts)
-			if ts.End <= tr.Start {
-				ep := min(sz, ts.End)
-				if cp < ep {
-					// fmt.Println("adding runes to prior:", cp, ep, string(txt[cp:ep]))
-					tx.AddRunes(txt[cp:ep])
-					cp = ep
-				}
-				// fmt.Println("delete style")
-				tstack = slices.Delete(tstack, si, si+1)
-				stys = slices.Delete(stys, si, si+1)
-			}
-		}
-		if cp >= sz || tr.Start >= sz {
-			break
-		}
-		cst := stys[len(stys)-1]
-		if tr.Start > cp+1 { // finish any existing before pushing new
-			// fmt.Printf("add: %d - %d: %q\n", cp, tr.Start, string(txt[cp:tr.Start]))
-			tx.AddSpan(&cst, txt[cp:tr.Start])
+	for _, tr := range ttags {
+		if tr.Start > cp {
+			tx.AddSpan(sty, txt[cp:tr.Start])
 			cp = tr.Start
+		} else if tr.Start < cp {
+			tx.SplitSpan(tr.Start)
 		}
-		nst := cst
-		entry := hs.Tag(tr.Token.Token)
-		if !entry.IsZero() {
-			entry.ToRichStyle(&nst)
+		if tr.End > cp {
+			tx.AddSpan(sty, txt[cp:tr.End])
+			cp = tr.End
 		} else {
-			if tr.Token.Token == token.TextSpellErr {
-				nst.SetDecoration(rich.DottedUnderline)
-				// fmt.Println(i, tr)
+			tx.SplitSpan(tr.End)
+		}
+	}
+	if cp < len(txt) {
+		tx.AddSpan(sty, txt[cp:])
+	}
+
+	// next, accumulate styles for each span
+	for si := range tx {
+		s, e := tx.Range(si)
+		srng := textpos.Range{Start: s, End: e}
+		cst := *sty
+		for _, tr := range ttags {
+			trng := textpos.Range{Start: tr.Start, End: tr.End}
+			if srng.Intersect(trng).Len() <= 0 {
+				continue
+			}
+			entry := hs.Tag(tr.Token.Token)
+			if !entry.IsZero() {
+				entry.ToRichStyle(&cst)
+			} else {
+				if tr.Token.Token == token.TextSpellErr {
+					cst.SetDecoration(rich.DottedUnderline)
+					// fmt.Println(i, tr)
+				}
 			}
 		}
-		tstack = append(tstack, i)
-		stys = append(stys, nst)
-
-		ep := tr.End
-		if i < nt-1 && ttags[i+1].Start < ep {
-			ep = ttags[i+1].Start
-		}
-		tx.AddSpan(&nst, txt[cp:ep])
-		// fmt.Println("added tag span:", cp, ep, string(txt[cp:ep]))
-		cp = ep
-	}
-	if cp < sz {
-		esp := len(stys) - 1
-		if esp > 0 {
-			esp = esp - 1
-		}
-		tx.AddSpan(&stys[esp], txt[cp:sz])
-		// fmt.Println("added final span:", cp, sz, string(txt[cp:sz]))
+		tx.SetSpanStyle(si, &cst)
 	}
 	return tx
+	// stys := []rich.Style{*sty}
+	// tstack := []int{0} // stack of tags indexes that remain to be completed, sorted soonest at end
+	// cp := 0
+	//
+	//	if ttags[0].Start > 0 {
+	//		tx = rich.NewText(sty, txt[:ttags[0].Start])
+	//		cp = ttags[0].Start
+	//	}
+	//
+	// // fmt.Println("start")
+	//
+	//	for i, tr := range ttags {
+	//		if cp >= sz {
+	//			break
+	//		}
+	//		// pop anyone off the stack who ends before we start
+	//		for si := len(tstack) - 1; si >= 1; si-- {
+	//			ts := ttags[tstack[si]]
+	//			// fmt.Println("pop potential:", si, ts)
+	//			if ts.End <= tr.Start {
+	//				ep := min(sz, ts.End)
+	//				if cp < ep {
+	//					// fmt.Println("adding runes to prior:", cp, ep, string(txt[cp:ep]))
+	//					tx.AddRunes(txt[cp:ep])
+	//					cp = ep
+	//				}
+	//				// fmt.Println("delete style")
+	//				tstack = slices.Delete(tstack, si, si+1)
+	//				stys = slices.Delete(stys, si, si+1)
+	//			}
+	//		}
+	//		if cp >= sz || tr.Start >= sz {
+	//			break
+	//		}
+	//		cst := stys[len(stys)-1]
+	//		if tr.Start > cp+1 { // finish any existing before pushing new
+	//			// fmt.Printf("add: %d - %d: %q\n", cp, tr.Start, string(txt[cp:tr.Start]))
+	//			tx.AddSpan(&cst, txt[cp:tr.Start])
+	//			cp = tr.Start
+	//		}
+	//		nst := cst
+	//		entry := hs.Tag(tr.Token.Token)
+	//		if !entry.IsZero() {
+	//			entry.ToRichStyle(&nst)
+	//		} else {
+	//			if tr.Token.Token == token.TextSpellErr {
+	//				nst.SetDecoration(rich.DottedUnderline)
+	//				// fmt.Println(i, tr)
+	//			}
+	//		}
+	//		tstack = append(tstack, i)
+	//		stys = append(stys, nst)
+	//
+	//		ep := tr.End
+	//		if i < nt-1 && ttags[i+1].Start < ep {
+	//			ep = ttags[i+1].Start
+	//		}
+	//		tx.AddSpan(&nst, txt[cp:ep])
+	//		// fmt.Println("added tag span:", cp, ep, string(txt[cp:ep]))
+	//		cp = ep
+	//	}
+	//
+	//	if cp < sz {
+	//		esp := len(stys) - 1
+	//		if esp > 0 {
+	//			esp = esp - 1
+	//		}
+	//		tx.AddSpan(&stys[esp], txt[cp:sz])
+	//		// fmt.Println("added final span:", cp, sz, string(txt[cp:sz]))
+	//	}
+	//
+	// return tx
 }
 
 // MarkupPathsAsLinks adds hyperlink span styles to given markup of given text,

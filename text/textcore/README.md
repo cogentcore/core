@@ -17,8 +17,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* scroll animation uses new Animator struct objs that have a func that is called in Paint loop, use delta-dist / dt^2 accelleration factor for remaining scroll drift
-
 * even fixed elements with no scroll can be pulled down with scrolling, for the "pull down refresh" action; animation restores to prior location
 
 * dialog shadows are accumulating: BlitBox nil image is not filling most likely.
@@ -50,8 +48,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * emoji, svg, bitmap font rendering: could not get color emoji to work
 
 * code newFiles AddToVCS should default on -- not working
-
-* TestMarkupSpellErr: still some rich tag format issues but mostly working.. why is this so hard!?
 
 * cleanup unused base stuff
 

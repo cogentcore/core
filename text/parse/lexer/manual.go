@@ -52,11 +52,12 @@ func FirstWordDigits(str string) string {
 
 // FirstWordApostrophe returns the first contiguous sequence of purely
 // [unicode.IsLetter] runes that can also contain an apostrophe within
-// the word but not at the end.
+// the word but not at the end. This is for spell checking: also excludes
+// any _ values.
 func FirstWordApostrophe(str string) string {
 	rstr := ""
 	for _, s := range str {
-		if !(IsLetter(s) || s == '\'') {
+		if !(IsLetterNoUnderbar(s) || s == '\'') {
 			if len(rstr) == 0 {
 				continue
 			}
