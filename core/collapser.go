@@ -51,6 +51,7 @@ func (cl *Collapser) OnAdd() {
 		s.Grow.Set(1, 0)
 		s.Align.Content = styles.Center
 		s.Align.Items = styles.Center
+		s.Gap.X.Em(0.1)
 	})
 
 	toggle := NewSwitch(cl.Summary).SetType(SwitchCheckbox).SetIconOn(icons.KeyboardArrowDown).SetIconOff(icons.KeyboardArrowRight)
@@ -58,6 +59,7 @@ func (cl *Collapser) OnAdd() {
 	Bind(&cl.Open, toggle)
 	toggle.Styler(func(s *styles.Style) {
 		s.Color = colors.Scheme.Primary.Base
+		s.Padding.Zero()
 	})
 	toggle.OnChange(func(e events.Event) {
 		cl.Update()
