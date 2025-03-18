@@ -109,8 +109,7 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 				attrs := parts[1:]
 				attr := strings.Split(strings.Join(attrs, " "), "=")
 				nattr := len(attr) / 2
-				fs := rich.NewStyle() // new style for new element
-				*fs = *fstack.Peek()
+				fs := fstack.Peek().Clone() // new style for new element
 				atStart := curSp.Len() == 0
 				if nextIsParaStart && atStart {
 					fs.Decoration.SetFlag(true, rich.ParagraphStart)
@@ -195,12 +194,12 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 					spstack.Pop()
 				}
 				if special != rich.Nothing {
-					ss := *fs // key about specials: make a new one-off style so special doesn't repeat
+					ss := fs.Clone() // key about specials: make a new one-off style so special doesn't repeat
 					ss.Special = special
 					if special == rich.Link {
 						ss.URL = linkURL
 					}
-					curSp = rich.NewText(&ss, insertText)
+					curSp = rich.NewText(ss, insertText)
 				} else {
 					curSp = rich.NewText(fs, insertText)
 				}

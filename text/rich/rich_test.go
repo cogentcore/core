@@ -47,10 +47,10 @@ func TestText(t *testing.T) {
 	sr := []rune(src)
 	tx := Text{}
 	plain := NewStyle() // .SetFamily(Monospace)
-	ital := NewStyle().SetSlant(Italic)
+	ital := plain.Clone().SetSlant(Italic)
 	ital.SetStrokeColor(colors.Red)
 	// ital.SetFillColor(colors.Red)
-	boldBig := NewStyle().SetWeight(Bold).SetSize(1.5)
+	boldBig := plain.Clone().SetWeight(Bold).SetSize(1.5)
 	tx.AddSpan(plain, sr[:4])
 	tx.AddSpan(ital, sr[4:8])
 	fam := []rune("familiar")
@@ -137,9 +137,9 @@ func TestLink(t *testing.T) {
 	ital := NewStyle().SetSlant(Italic)
 	ital.SetStrokeColor(colors.Red)
 	boldBig := NewStyle().SetWeight(Bold).SetSize(1.5)
-	tx.AddSpan(plain, []rune("Pre link "))
+	tx.AddSpanString(plain, "Pre link ")
 	tx.AddLink(ital, "https://example.com", "link text")
-	tx.AddSpan(boldBig, []rune(" post link"))
+	tx.AddSpanString(boldBig, " post link")
 
 	str := tx.String()
 	trg := `[]: "Pre link "

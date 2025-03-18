@@ -75,7 +75,10 @@ func (s *Style) FromRunes(rs []rune) []rune {
 		s.URL = string(rs[ci : ci+ln])
 		ci += ln
 	}
-	return rs[ci:]
+	if ci < len(rs) {
+		return rs[ci:]
+	}
+	return nil
 }
 
 // ToRunes returns the rune(s) that encode the given style

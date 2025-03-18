@@ -4,6 +4,8 @@
 
 package csl
 
+import "strings"
+
 // The CSL input model supports two different date representations:
 // an EDTF string (preferred), and a more structured alternative.
 type Date struct {
@@ -15,11 +17,26 @@ type Date struct {
 }
 
 func (dt *Date) Year() string {
-	// todo: look in literal etc
 	if len(dt.DateParts) > 0 {
 		if len(dt.DateParts[0]) > 0 {
 			return dt.DateParts[0][0].(string) // this is normally it
 		}
 	}
-	return ""
+	str := dt.Literal
+	if str == "" {
+		str = dt.Raw
+	}
+	if str == "" {
+		str = dt.Circa
+	}
+	if str == "" {
+		return "undated"
+	}
+	fs := strings.Fields(str)
+	for _, s := range fs {
+		if len(s) == 4 {
+			return s
+		}
+	}
+	return str
 }

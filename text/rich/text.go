@@ -134,7 +134,9 @@ func (tx Text) Join() []rune {
 	ss := make([]rune, 0, tx.Len())
 	for _, s := range tx {
 		sn, _ := SpanLen(s)
-		ss = append(ss, s[sn:]...)
+		if sn < len(s) {
+			ss = append(ss, s[sn:]...)
+		}
 	}
 	return ss
 }
@@ -165,6 +167,16 @@ func (tx *Text) SetSpanStyle(si int, nsty *Style) *Text {
 func (tx *Text) AddSpan(s *Style, r []rune) *Text {
 	nr := s.ToRunes()
 	nr = append(nr, r...)
+	*tx = append(*tx, nr)
+	return tx
+}
+
+// AddSpanString adds a span to the Text using the given Style and string content.
+// The Text is modified for convenience in the high-frequency use-case.
+// Clone first to avoid changing the original.
+func (tx *Text) AddSpanString(s *Style, r string) *Text {
+	nr := s.ToRunes()
+	nr = append(nr, []rune(r)...)
 	*tx = append(*tx, nr)
 	return tx
 }

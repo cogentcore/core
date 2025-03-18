@@ -82,6 +82,13 @@ func NewStyle() *Style {
 	return s
 }
 
+// Clone returns a copy of this style.
+func (s *Style) Clone() *Style {
+	ns := &Style{}
+	*ns = *s
+	return ns
+}
+
 // NewStyleFromRunes returns a new style initialized with data from given runes,
 // returning the remaining actual rune string content after style data.
 func NewStyleFromRunes(rs []rune) (*Style, []rune) {
