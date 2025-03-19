@@ -235,9 +235,7 @@ func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
 	if addToVCS {
 		fn.FileRoot().UpdatePath(ppath)
 		nfn, ok := fn.FileRoot().FindFile(np)
-		// fmt.Println("adding to vcs:", np, ok, "nfn path:", nfn.Filepath)
 		if ok && !nfn.IsRoot() && string(nfn.Filepath) == np {
-			// todo: this is where it is erroneously adding too many files to vcs!
 			core.MessageSnackbar(fn, "Adding new file to VCS: "+fsx.DirAndFile(string(nfn.Filepath)))
 			nfn.AddToVCS()
 		}

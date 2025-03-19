@@ -250,7 +250,7 @@ func (tr *Tree) Init() {
 	tr.On(events.DragEnter, func(e events.Event) { e.SetHandled() })
 	tr.On(events.DragLeave, func(e events.Event) { e.SetHandled() })
 	tr.On(events.Drop, func(e events.Event) { e.SetHandled() })
-	tr.On(events.DropDeleteSource, func(e events.Event) { tr.DropDeleteSource(e) })
+	tr.On(events.DropDeleteSource, func(e events.Event) { tr.This.(Treer).DropDeleteSource(e) })
 	tr.On(events.KeyChord, func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
