@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"log/slog"
 	"time"
 	"unicode"
@@ -172,7 +171,7 @@ func (fr *Frame) Init() {
 		dx := math32.FromPoint(prevMove.PrevDelta()).Negate()
 		dt := float32(prevMove.SincePrev().Milliseconds())
 		vel := dx.DivScalar(dt)
-		fmt.Println(vel, dx, dt)
+		// fmt.Println(vel, dx, dt)
 		if vel.Length() < 2 {
 			return
 		}
