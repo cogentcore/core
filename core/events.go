@@ -373,6 +373,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 				hovs = append(hovs, w)
 			}
 		}
+		if em.drag != nil { // this means we missed the drop
+			em.dragHovers = em.updateHovers(hovs, em.dragHovers, e, events.DragEnter, events.DragLeave)
+			em.dragDrop(em.drag, e)
+			break
+		}
 		if sc.renderBBoxes {
 			pselw := sc.selectedWidget
 			if len(em.hovers) > 0 {
@@ -758,10 +763,10 @@ func (em *Events) dragStartCheck(e events.Event, dur time.Duration, dist int) bo
 	return dst >= dist
 }
 
-// dragStart starts a drag event, capturing a sprite image of the given widget
+// DragStart starts a drag event, capturing a sprite image of the given widget
 // and storing the data for later use during Drop.
 // A drag does not officially start until this is called.
-func (em *Events) dragStart(w Widget, data any, e events.Event) {
+func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	ms := em.scene.Stage.Main
 	if ms == nil {
 		return
@@ -801,7 +806,8 @@ func (em *Events) dragClearSprite() {
 	ms.Sprites.InactivateSprite(dragSpriteName)
 }
 
-func (em *Events) dragMenuAddModText(m *Scene, mod events.DropMods) {
+// DragMenuAddModText adds info about key modifiers for a drag drop menu.
+func (em *Events) DragMenuAddModText(m *Scene, mod events.DropMods) {
 	text := ""
 	switch mod {
 	case events.DropCopy:
@@ -821,6 +827,13 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	em.dragClearSprite()
 	data := em.dragData
 	em.drag = nil
+	em.scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.dragStateReset()
+		return tree.Continue
+	})
+	em.scene.StyleTree()
+	em.scene.NeedsRender()
+
 	if len(em.dragHovers) == 0 {
 		if DebugSettings.EventTrace {
 			fmt.Println(drag, "Drop has no target")
@@ -841,10 +854,10 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	targ.AsWidget().HandleEvent(de)
 }
 
-// dropFinalize should be called as the last step in the Drop event processing,
+// DropFinalize should be called as the last step in the Drop event processing,
 // to send the DropDeleteSource event to the source in case of DropMod == DropMove.
 // Otherwise, nothing actually happens.
-func (em *Events) dropFinalize(de *events.DragDrop) {
+func (em *Events) DropFinalize(de *events.DragDrop) {
 	if de.DropMod != events.DropMove {
 		return
 	}

@@ -1534,7 +1534,7 @@ func (tr *Tree) dragStart(e events.Event) {
 			}
 		}
 	}
-	tr.Scene.Events.dragStart(tr.This.(Widget), md, e)
+	tr.Scene.Events.DragStart(tr.This.(Widget), md, e)
 }
 
 // dropExternal is not handled by base case but could be in derived
@@ -1544,8 +1544,8 @@ func (tr *Tree) dropExternal(md mimedata.Mimes, mod events.DropMods) {
 
 // dragClearStates clears the drag-drop related states for this widget
 func (tr *Tree) dragClearStates() {
-	tr.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
-	tr.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
+	tr.dragStateReset()
+	tr.Parts.dragStateReset()
 	tr.Style()
 	tr.NeedsRender()
 }
@@ -1561,7 +1561,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *Scene) {
-		tr.Scene.Events.dragMenuAddModText(m, de.DropMod)
+		tr.Scene.Events.DragMenuAddModText(m, de.DropMod)
 		tr.makePasteMenu(m, md, func() {
 			tr.DropFinalize(de)
 		})
@@ -1575,7 +1575,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 func (tr *Tree) DropFinalize(de *events.DragDrop) {
 	tr.UnselectAll()
 	tr.dragClearStates()
-	tr.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
+	tr.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

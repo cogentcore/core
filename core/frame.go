@@ -55,6 +55,11 @@ type Frame struct {
 	// Scrolls are the scroll bars, which are fully managed as needed.
 	Scrolls [2]*Slider
 
+	// handleKeyNav indicates whether this frame should handle keyboard
+	// navigation events using the default handlers. Set to false to allow
+	// custom event handling.
+	handleKeyNav bool
+
 	// accumulated name to search for when keys are typed
 	focusName string
 
@@ -67,6 +72,7 @@ type Frame struct {
 
 func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
+	fr.handleKeyNav = true
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
@@ -74,6 +80,9 @@ func (fr *Frame) Init() {
 		}
 	})
 	fr.OnFinal(events.KeyChord, func(e events.Event) {
+		if !fr.handleKeyNav {
+			return
+		}
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
 			slog.Info("Layout KeyInput", "widget", fr, "keyFunction", kf)

@@ -936,7 +936,7 @@ func (lb *ListBase) ScrollToIndexNoUpdate(idx int) bool {
 		lb.updateScroll()
 		return true
 	}
-	if idx >= lb.StartIndex+lb.VisibleRows {
+	if idx >= lb.StartIndex+(lb.VisibleRows-1) {
 		lb.StartIndex = idx - (lb.VisibleRows - 4)
 		lb.StartIndex = max(0, lb.StartIndex)
 		lb.updateScroll()
@@ -996,6 +996,9 @@ func (lb *ListBase) moveDownEvent(selMode events.SelectModes) int {
 // moveUp moves the selection up to previous idx, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (lb *ListBase) moveUp(selMode events.SelectModes) int {
+	if lb.SelectedIndex < 0 {
+		lb.SelectedIndex = lb.lastClick
+	}
 	if lb.SelectedIndex <= 0 {
 		lb.SelectedIndex = 0
 		return -1
@@ -1472,7 +1475,7 @@ func (lb *ListBase) dragStart(e events.Event) {
 	md := lb.This.(Lister).CopySelectToMime()
 	w, ok := lb.rowFirstWidget(ixs[0] - lb.StartIndex)
 	if ok {
-		lb.Scene.Events.dragStart(w, md, e)
+		lb.Scene.Events.DragStart(w, md, e)
 		e.SetHandled()
 		// } else {
 		// 	fmt.Println("List DND programmer error")
@@ -1492,7 +1495,7 @@ func (lb *ListBase) dragDrop(e events.Event) {
 		lb.saveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *Scene) {
-			lb.Scene.Events.dragMenuAddModText(m, de.DropMod)
+			lb.Scene.Events.DragMenuAddModText(m, de.DropMod)
 			lb.makePasteMenu(m, md, idx, de.DropMod, func() {
 				lb.dropFinalize(de)
 			})
@@ -1507,7 +1510,7 @@ func (lb *ListBase) dragDrop(e events.Event) {
 func (lb *ListBase) dropFinalize(de *events.DragDrop) {
 	lb.NeedsLayout()
 	lb.unselectAllIndexes()
-	lb.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
+	lb.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // dropDeleteSource handles delete source event for DropMove case
@@ -1756,6 +1759,7 @@ type ListGrid struct { //core:no-new
 
 func (lg *ListGrid) Init() {
 	lg.Frame.Init()
+	lg.handleKeyNav = false
 	lg.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
 	})
@@ -1806,8 +1810,6 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	ls.UpdateTree()
 	ls.NeedsRender()
 	// ls.NeedsLayout() // needed to recompute size after resize
-	// fmt.Println(lg.rowHeight, rht, sb.Value)
-	// 29 31 907
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
@@ -1827,7 +1829,6 @@ func (lg *ListGrid) updateScroll(idx int) {
 	}
 	sb := lg.Scrolls[math32.Y]
 	sb.SetValue(float32(idx) * lg.rowHeight)
-	fmt.Println("update scroll:", float32(idx)*lg.rowHeight)
 }
 
 func (lg *ListGrid) updateBackgrounds() {
