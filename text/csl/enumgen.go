@@ -45,6 +45,49 @@ func (i Styles) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Styles) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Styles") }
 
+var _CiteStylesValues = []CiteStyles{0, 1}
+
+// CiteStylesN is the highest valid value for type CiteStyles, plus one.
+const CiteStylesN CiteStyles = 2
+
+var _CiteStylesValueMap = map[string]CiteStyles{`Parenthetical`: 0, `Narrative`: 1}
+
+var _CiteStylesDescMap = map[CiteStyles]string{0: `Parenthetical means that the citation is placed within parentheses. This is default for most styles. In the APA style for example, it adds a comma before the year, e.g., &#34;(Smith, 1989)&#34;. Note that the parentheses or other outer bracket syntax are NOT generated directly, because often multiple are included together in the same group.`, 1: `Narrative is an active, &#34;inline&#34; form of citation where the cited content is used as the subject of a sentence. In the APA style this puts the year in parentheses, e.g., &#34;Smith (1989) invented the...&#34; In this case the parentheses are generated.`}
+
+var _CiteStylesMap = map[CiteStyles]string{0: `Parenthetical`, 1: `Narrative`}
+
+// String returns the string representation of this CiteStyles value.
+func (i CiteStyles) String() string { return enums.String(i, _CiteStylesMap) }
+
+// SetString sets the CiteStyles value from its string representation,
+// and returns an error if the string is invalid.
+func (i *CiteStyles) SetString(s string) error {
+	return enums.SetString(i, s, _CiteStylesValueMap, "CiteStyles")
+}
+
+// Int64 returns the CiteStyles value as an int64.
+func (i CiteStyles) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the CiteStyles value from an int64.
+func (i *CiteStyles) SetInt64(in int64) { *i = CiteStyles(in) }
+
+// Desc returns the description of the CiteStyles value.
+func (i CiteStyles) Desc() string { return enums.Desc(i, _CiteStylesDescMap) }
+
+// CiteStylesValues returns all possible values for the type CiteStyles.
+func CiteStylesValues() []CiteStyles { return _CiteStylesValues }
+
+// Values returns all possible values for the type CiteStyles.
+func (i CiteStyles) Values() []enums.Enum { return enums.Values(_CiteStylesValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i CiteStyles) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *CiteStyles) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "CiteStyles")
+}
+
 var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44}
 
 // TypesN is the highest valid value for type Types, plus one.

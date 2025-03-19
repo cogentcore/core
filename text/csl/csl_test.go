@@ -67,7 +67,7 @@ func TestCiteAPA(t *testing.T) {
 		// if it.Type != PaperConference {
 		// 	continue
 		// }
-		cite := CiteAPA(it)
+		cite := CiteAPA(Parenthetical, it)
 		ref := RefAPA(it)
 		fmt.Println(it.Type.String()+": ", cite)
 		fmt.Println(ref)

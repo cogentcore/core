@@ -128,13 +128,18 @@ func (ct *Content) Init() {
 			return "", ""
 		}
 		ref := text[1:]
+		cs := csl.Parenthetical
+		if len(ref) > 1 && ref[0] == '^' {
+			cs = csl.Narrative
+			ref = ref[1:]
+		}
 		url = "ref://" + ref
 		if ct.References == nil {
 			return url, ref
 		}
 		it, has := ct.References.AtTry(ref)
 		if has {
-			return url, csl.CiteDefault(it)
+			return url, csl.CiteDefault(cs, it)
 		}
 		return url, ref
 	})

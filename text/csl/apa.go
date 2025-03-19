@@ -13,12 +13,23 @@ import (
 // definitive reference:
 // https://apastyle.apa.org/style-grammar-guidelines/references/examples
 
-// CiteAPA generates a APA-style citation, as Last[ & Last|et al.], Year
-func CiteAPA(it *Item) string {
+// CiteAPA generates a APA-style citation, as Last[ & Last|et al.] Year
+// with a , before Year in Parenthetical style, and Parens around the Year
+// in Narrative style.
+func CiteAPA(cs CiteStyles, it *Item) string {
+	c := ""
 	if len(it.Author) > 0 {
-		return NamesCiteEtAl(it.Author) + ", " + it.Issued.Year()
+		c = NamesCiteEtAl(it.Author)
+	} else {
+		c = NamesCiteEtAl(it.Editor)
 	}
-	return NamesCiteEtAl(it.Editor) + ", " + it.Issued.Year()
+	switch cs {
+	case Parenthetical:
+		c += ", " + it.Issued.Year()
+	case Narrative:
+		c += " (" + it.Issued.Year() + ")"
+	}
+	return c
 }
 
 // RefAPA generates an APA-style reference entry from the given item,
