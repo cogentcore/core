@@ -12,6 +12,7 @@ import (
 )
 
 func TestGenerateTest(t *testing.T) {
+	t.Skip("only when regenerating")
 	items, err := Open("/Users/oreilly/ccnlab_bib/ccnlab.json")
 	fullTest := false
 	assert.NoError(t, err)

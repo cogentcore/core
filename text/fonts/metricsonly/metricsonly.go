@@ -66,9 +66,14 @@ func ExtractMetrics(fname, outfile string, debug bool) error {
 }
 
 type Config struct {
-	Files  []string `flag:"f,files" posarg:"all"`
-	Output string   `flag:"output,o"`
-	Debug  bool     `flag:"d,debug"`
+	// Files to extract metrics from.
+	Files []string `flag:"f,files" posarg:"all"`
+
+	// directory to output the metrics only files.
+	Output string `flag:"output,o"`
+
+	// emit debug info while processing. todo: use verbose for this!
+	Debug bool `flag:"d,debug"`
 }
 
 // Extract reads fonts and extracts metrics, saving to given output directory.

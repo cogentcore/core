@@ -8,7 +8,9 @@ import (
 	"log"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/text/parse/languages/bibtex"
@@ -21,39 +23,71 @@ func (ml *MarkdownLang) CompleteCite(fss *parse.FileStates, origStr, str string,
 	if !has {
 		return
 	}
-	bf, err := ml.Bibs.Open(bfile)
-	if err != nil {
+	if strings.HasSuffix(bfile, ".bib") {
+		bf, err := ml.Bibs.Open(bfile)
+		if err != nil {
+			return
+		}
+		md.Seed = str
+		for _, be := range bf.BibTex.Entries {
+			if strings.HasPrefix(be.CiteName, str) {
+				c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: icons.Field}
+				md.Matches = append(md.Matches, c)
+			}
+		}
+		return md
+	}
+	bf, err := ml.CSLs.Open(bfile)
+	if errors.Log(err) != nil {
 		return
 	}
 	md.Seed = str
-	for _, be := range bf.BibTex.Entries {
-		if strings.HasPrefix(be.CiteName, str) {
-			c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: icons.Field}
+	for _, it := range bf.Items.Values {
+		if strings.HasPrefix(it.CitationKey, str) {
+			c := complete.Completion{Text: it.CitationKey, Label: it.CitationKey, Icon: icons.Field}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	return md
 }
 
-// LookupCite does lookup on citation
+// LookupCite does lookup on citation.
 func (ml *MarkdownLang) LookupCite(fss *parse.FileStates, origStr, str string, pos textpos.Pos) (ld complete.Lookup) {
 	bfile, has := fss.MetaData("bibfile")
 	if !has {
 		return
 	}
-	bf, err := ml.Bibs.Open(bfile)
+	if strings.HasSuffix(bfile, ".bib") {
+		bf, err := ml.Bibs.Open(bfile)
+		if err != nil {
+			return
+		}
+		lkbib := bibtex.NewBibTex()
+		for _, be := range bf.BibTex.Entries {
+			if strings.HasPrefix(be.CiteName, str) {
+				lkbib.Entries = append(lkbib.Entries, be)
+			}
+		}
+		if len(lkbib.Entries) > 0 {
+			ld.SetFile(fss.Filename, 0, 0)
+			ld.Text = []byte(lkbib.PrettyString())
+		}
+		return ld
+	}
+	bf, err := ml.CSLs.Open(bfile)
 	if err != nil {
 		return
 	}
-	lkbib := bibtex.NewBibTex()
-	for _, be := range bf.BibTex.Entries {
-		if strings.HasPrefix(be.CiteName, str) {
-			lkbib.Entries = append(lkbib.Entries, be)
+	var items []csl.Item
+	for _, be := range bf.Items.Values {
+		if strings.HasPrefix(be.CitationKey, str) {
+			items = append(items, *be)
 		}
 	}
-	if len(lkbib.Entries) > 0 {
+	if len(items) > 0 {
+		kl := csl.NewKeyList(items)
 		ld.SetFile(fss.Filename, 0, 0)
-		ld.Text = []byte(lkbib.PrettyString())
+		ld.Text = []byte(kl.PrettyString())
 	}
 	return ld
 }
@@ -66,7 +100,17 @@ func (ml *MarkdownLang) OpenBibfile(fss *parse.FileStates, pfs *parse.FileState)
 		fss.DeleteMetaData("bibfile")
 		return nil
 	}
-	_, err := ml.Bibs.Open(bfile)
+	if strings.HasSuffix(bfile, ".bib") {
+		_, err := ml.Bibs.Open(bfile)
+		if err != nil {
+			log.Println(err)
+			fss.DeleteMetaData("bibfile")
+			return err
+		}
+		fss.SetMetaData("bibfile", bfile)
+		return nil
+	}
+	_, err := ml.CSLs.Open(bfile)
 	if err != nil {
 		log.Println(err)
 		fss.DeleteMetaData("bibfile")
@@ -102,9 +146,6 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 		if strings.HasPrefix(lstr, trg) {
 			fnm := lstr[trgln:lnln]
 			if fnm[0] == ':' {
-				if !strings.HasSuffix(fnm, ".bib") {
-					fnm += ".bib"
-				}
 				return fnm
 			}
 			flds := strings.Fields(fnm)
@@ -113,9 +154,6 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 			}
 			if flds[1][0] == '"' {
 				fnm = flds[1][1 : len(flds[1])-1]
-				if !strings.HasSuffix(fnm, ".bib") {
-					fnm += ".bib"
-				}
 				return fnm
 			}
 		}

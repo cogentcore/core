@@ -10,6 +10,9 @@ import (
 	"cogentcore.org/core/text/rich"
 )
 
+// definitive reference:
+// https://apastyle.apa.org/style-grammar-guidelines/references/examples
+
 // CiteAPA generates a APA-style citation, as Last[ & Last|et al.], Year
 func CiteAPA(it *Item) string {
 	if len(it.Author) > 0 {
@@ -35,6 +38,21 @@ func RefAPA(it *Item) rich.Text {
 	default:
 		return RefAPAMisc(it)
 	}
+}
+
+// RefsAPA generates a list of APA-style reference entries
+// and correspondingly ordered items for given keylist.
+// APA uses alpha sort order.
+func RefsAPA(kl *KeyList) ([]rich.Text, []*Item) {
+	refs := make([]rich.Text, kl.Len())
+	items := make([]*Item, kl.Len())
+	ks := kl.AlphaKeys()
+	for i, k := range ks {
+		it := kl.At(k)
+		refs[i] = RefAPA(it)
+		items[i] = it
+	}
+	return refs, items
 }
 
 func RefLinks(it *Item, tx *rich.Text) {

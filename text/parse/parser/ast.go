@@ -50,6 +50,18 @@ func (ast *AST) ChildAST(idx int) *AST {
 	return ast.Child(idx).(*AST)
 }
 
+// ChildASTTry returns the Child at given index as an AST,
+// nil if not in range.
+func (ast *AST) ChildASTTry(idx int) *AST {
+	if ast == nil {
+		return nil
+	}
+	if idx < 0 || idx >= len(ast.Children) {
+		return nil
+	}
+	return ast.Child(idx).(*AST)
+}
+
 // ParentAST returns the Parent as an AST.
 func (ast *AST) ParentAST() *AST {
 	if ast.Parent == nil {

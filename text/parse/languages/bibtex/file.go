@@ -5,6 +5,7 @@
 package bibtex
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,7 +37,7 @@ func FullPath(fname string) (string, error) {
 			bin = os.Getenv("TEXINPUTS")
 		}
 		if bin == "" {
-			return "", nfErr
+			return "", errors.New("BIBINPUTS and TEXINPUTS variables are empty")
 		}
 		pth := filepath.SplitList(bin)
 		got := false
@@ -101,8 +102,7 @@ func (fl *File) Open(fname string) error {
 	return nil
 }
 
-//////////////////////////////////////////////////////////////////////
-// Files
+//////// Files
 
 // Files is a map of bibtex files
 type Files map[string]*File

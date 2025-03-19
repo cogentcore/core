@@ -66,9 +66,9 @@ func (ed *Editor) Init() {
 	ed.handleFocus()
 }
 
-// updateNewFile checks if there is a new file in the Lines editor and updates
+// UpdateNewFile checks if there is a new file in the Lines editor and updates
 // any relevant editor settings accordingly.
-func (ed *Editor) updateNewFile() {
+func (ed *Editor) UpdateNewFile() {
 	ln := ed.Lines
 	if ln == nil {
 		ed.curFilename = ""
@@ -103,7 +103,7 @@ func (ed *Editor) editorSetLines(ln *lines.Lines) {
 		return
 	}
 	ln.OnChange(ed.viewId, func(e events.Event) {
-		ed.updateNewFile()
+		ed.UpdateNewFile()
 	})
 	ln.FileModPromptFunc = func() {
 		FileModPrompt(ed.Scene, ln)

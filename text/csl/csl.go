@@ -2,49 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package csl provides support for citation and reference generation
+// using the industry-standard Citation Style Language.
 package csl
-
-import (
-	"io/fs"
-
-	"cogentcore.org/core/base/iox/jsonx"
-)
 
 //go:generate core generate
 
 // https://citationstyles.org/developers/ -- implementations of CSL citation code -- none in go..
 // https://github.com/citation-style-language/schema/blob/master/schemas/input/csl-data.json
 // http://json-schema.org/draft-07/schema#",
-
-// Open opens CSL data items from a .json formatted CSL file.
-func Open(filename string) ([]Item, error) {
-	var its []Item
-	err := jsonx.Open(&its, filename)
-	return its, err
-}
-
-// OpenFS opens CSL data items from a .json formatted CSL file from given
-// filesystem.
-func OpenFS(fsys fs.FS, filename string) ([]Item, error) {
-	var its []Item
-	err := jsonx.OpenFS(&its, fsys, filename)
-	return its, err
-}
-
-// Save saves items to given filename.
-func Save(items []Item, filename string) error {
-	return jsonx.SaveIndent(items, filename)
-}
-
-// KeyMap returns a citation key map of CSL items.
-func KeyMap(items []Item) map[string]*Item {
-	m := make(map[string]*Item, len(items))
-	for i := range items {
-		it := &items[i]
-		m[it.CitationKey] = it
-	}
-	return m
-}
 
 // Item represents one item of CSL data.
 type Item struct {

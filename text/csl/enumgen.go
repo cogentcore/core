@@ -6,6 +6,45 @@ import (
 	"cogentcore.org/core/enums"
 )
 
+var _StylesValues = []Styles{0}
+
+// StylesN is the highest valid value for type Styles, plus one.
+const StylesN Styles = 1
+
+var _StylesValueMap = map[string]Styles{`APA`: 0}
+
+var _StylesDescMap = map[Styles]string{0: ``}
+
+var _StylesMap = map[Styles]string{0: `APA`}
+
+// String returns the string representation of this Styles value.
+func (i Styles) String() string { return enums.String(i, _StylesMap) }
+
+// SetString sets the Styles value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Styles) SetString(s string) error { return enums.SetString(i, s, _StylesValueMap, "Styles") }
+
+// Int64 returns the Styles value as an int64.
+func (i Styles) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Styles value from an int64.
+func (i *Styles) SetInt64(in int64) { *i = Styles(in) }
+
+// Desc returns the description of the Styles value.
+func (i Styles) Desc() string { return enums.Desc(i, _StylesDescMap) }
+
+// StylesValues returns all possible values for the type Styles.
+func StylesValues() []Styles { return _StylesValues }
+
+// Values returns all possible values for the type Styles.
+func (i Styles) Values() []enums.Enum { return enums.Values(_StylesValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Styles) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Styles) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Styles") }
+
 var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44}
 
 // TypesN is the highest valid value for type Types, plus one.

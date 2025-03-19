@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
+	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/text/parse/languages"
@@ -28,8 +29,13 @@ var parserBytes []byte
 type MarkdownLang struct {
 	Pr *parse.Parser
 
-	// bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate
+	// BibBeX bibliography files that have been loaded,
+	// keyed by file path from bibfile metadata stored in filestate.
 	Bibs bibtex.Files
+
+	// CSL bibliography files that have been loaded,
+	// keyed by file path from bibfile metadata stored in filestate.
+	CSLs csl.Files
 }
 
 // TheMarkdownLang is the instance variable providing support for the Markdown language

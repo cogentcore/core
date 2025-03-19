@@ -37,23 +37,26 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 	}
 
 	// first ensure text has spans for each tag region.
+	ln := len(txt)
 	var tx rich.Text
 	cp := 0
 	for _, tr := range ttags {
-		if tr.Start > cp {
-			tx.AddSpan(sty, txt[cp:tr.Start])
-			cp = tr.Start
-		} else if tr.Start < cp {
-			tx.SplitSpan(tr.Start)
+		st := min(tr.Start, ln)
+		if st > cp {
+			tx.AddSpan(sty, txt[cp:st])
+			cp = st
+		} else if st < cp {
+			tx.SplitSpan(st)
 		}
-		if tr.End > cp {
-			tx.AddSpan(sty, txt[cp:tr.End])
-			cp = tr.End
+		ed := min(tr.End, ln)
+		if ed > cp {
+			tx.AddSpan(sty, txt[cp:ed])
+			cp = ed
 		} else {
-			tx.SplitSpan(tr.End)
+			tx.SplitSpan(ed)
 		}
 	}
-	if cp < len(txt) {
+	if cp < ln {
 		tx.AddSpan(sty, txt[cp:])
 	}
 

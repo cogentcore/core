@@ -35,13 +35,13 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * SVG, PDF backends
 
-* textcore base test horizontal scrolling
-
 * prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
 
 * shaped does not process `\n` https://github.com/go-text/typesetting/issues/185 
 
 ### Lowpri
+
+* textcore base test horizontal scrolling
 
 * better job finding path fragments from file links -- iteratively try stuff.
 

@@ -153,7 +153,7 @@ func (gl *GoLang) InitTypeFromAST(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 
 // SubTypeFromAST returns a subtype from child ast at given index, nil if failed
 func (gl *GoLang) SubTypeFromAST(fs *parse.FileState, pkg *syms.Symbol, ast *parser.AST, idx int) (*syms.Type, bool) {
-	sast := ast.ChildAST(idx)
+	sast := ast.ChildASTTry(idx)
 	if sast == nil {
 		if TraceTypes {
 			fmt.Printf("TraceTypes: could not find child %d on ast %v", idx, ast)
