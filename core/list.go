@@ -532,7 +532,7 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			s.Min.Y.Em(6)
 		})
 		oc := func(e events.Event) {
-			lb.SetFocus()
+			// lb.SetFocus()
 			row, _, isValid := w.indexFromPixel(e.Pos())
 			if isValid {
 				lb.updateSelectRow(row, e.SelectMode())
@@ -1826,7 +1826,8 @@ func (lg *ListGrid) updateScroll(idx int) {
 		return
 	}
 	sb := lg.Scrolls[math32.Y]
-	sb.SetValue(float32(idx))
+	sb.SetValue(float32(idx) * lg.rowHeight)
+	fmt.Println("update scroll:", float32(idx)*lg.rowHeight)
 }
 
 func (lg *ListGrid) updateBackgrounds() {
@@ -1931,7 +1932,7 @@ func (lg *ListGrid) renderStripes() {
 		stripe := (r+offset)%2 == 1
 		sbg := lg.rowBackground(ls.indexIsSelected(si), stripe, r == ls.hoverRow)
 		pc.BlitBox(st, ssz, sbg)
-		st.Y += ht + lg.layout.Gap.Y
+		st.Y += ht
 	}
 }
 
@@ -1961,6 +1962,7 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	rows := lg.layout.Shape.Y
 	cols := lg.layout.Shape.X
 	st := math32.Vector2{}
+	st.Y = lg.Geom.Scroll.Y
 	got := false
 	for r := 0; r < rows; r++ {
 		ht := lg.rowHeight
