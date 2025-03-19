@@ -51,3 +51,9 @@ func Cite(s Styles, it *Item) string {
 	}
 	return ""
 }
+
+// CiteDefault generates the citation text for given item,
+// according to the [DefaultStyle] style.
+func CiteDefault(it *Item) string {
+	return Cite(DefaultStyle, it)
+}

@@ -6,7 +6,6 @@ package csl
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -21,13 +20,10 @@ import (
 // from .md markdown files in given directory, looking up in given source [KeyList],
 // and writing the results in given style to given .md file (references.md default).
 // Heading is written first: must include the appropriate markdown heading level
-// (## typically). Defaults to ## References.
+// (## typically).
 func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) error {
 	if dir == "" {
 		dir = "./"
-	}
-	if heading == "" {
-		heading = "## References"
 	}
 	mds := fsx.Filenames(dir, ".md")
 	if len(mds) == 0 {
@@ -41,7 +37,6 @@ func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) err
 	if refFile == "" {
 		refFile = filepath.Join(dir, "references.md")
 	}
-	fmt.Println(trg.Len())
 	of, err := os.Create(refFile)
 	if err != nil {
 		return err
@@ -98,11 +93,11 @@ func WriteRefsMarkdown(w io.Writer, kl *KeyList, sty Styles) error {
 	refs, items := Refs(sty, kl)
 	for i, ref := range refs {
 		it := items[i]
-		_, err := w.Write([]byte("##### " + Cite(sty, it) + "\n"))
+		_, err := w.Write([]byte(`<p id="` + it.CitationKey + `">`))
 		if err != nil {
 			return err
 		}
-		_, err = w.Write([]byte(string(ref.Join()) + "\n\n")) // todo: ref to markdown!!
+		_, err = w.Write([]byte(string(ref.Join()) + "</p>\n\n")) // todo: ref to markdown!!
 		if err != nil {
 			return err
 		}

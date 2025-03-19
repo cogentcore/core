@@ -30,7 +30,9 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/tree"
 )
 
@@ -45,6 +47,10 @@ type Content struct {
 	// Context is the [htmlcore.Context] used to render the content,
 	// which can be modified for things such as adding wikilink handlers.
 	Context *htmlcore.Context `set:"-"`
+
+	// References is a list of references used for generating citation text
+	// for literature reference wikilinks in the format [[@CiteKey]].
+	References *csl.KeyList
 
 	// pages are the pages that constitute the content.
 	pages []*bcontent.Page
@@ -117,6 +123,21 @@ func (ct *Content) Init() {
 	ct.Context.GetURL = func(url string) (*http.Response, error) {
 		return htmlcore.GetURLFromFS(ct.Source, url)
 	}
+	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
+		if len(text) > 0 && text[0] != '@' {
+			return "", ""
+		}
+		ref := text[1:]
+		url = "ref://" + ref
+		if ct.References == nil {
+			return url, ref
+		}
+		it, has := ct.References.AtTry(ref)
+		if has {
+			return url, csl.CiteDefault(it)
+		}
+		return url, ref
+	})
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
 		name, label, _ := strings.Cut(text, "|")
 		name, heading, _ := strings.Cut(name, "#")
@@ -257,6 +278,10 @@ func (ct *Content) open(url string, history bool) {
 		core.TheApp.OpenURL(url)
 		return
 	}
+	if strings.HasPrefix(url, "ref://") {
+		ct.openRef(url)
+		return
+	}
 	url = strings.ReplaceAll(url, "/#", "#")
 	url, heading, _ := strings.Cut(url, "#")
 	pg := ct.pagesByURL[url]
@@ -282,15 +307,36 @@ func (ct *Content) open(url string, history bool) {
 	}
 	ct.currentPage = pg
 	if history {
-		ct.historyIndex = len(ct.history)
-		ct.history = append(ct.history, pg)
-		ct.saveWebURL()
+		ct.addHistory(pg)
 	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
 		ct.setStageTitle()
 		ct.openHeading(heading)
+	})
+}
+
+func (ct *Content) addHistory(pg *bcontent.Page) {
+	ct.historyIndex = len(ct.history)
+	ct.history = append(ct.history, pg)
+	ct.saveWebURL()
+}
+
+// openRef opens a ref:// reference url.
+func (ct *Content) openRef(url string) {
+	pg := ct.pagesByURL["references"]
+	if pg == nil {
+		core.MessageSnackbar(ct, "references page not generated, use mdcite in csl package")
+		return
+	}
+	ref := strings.TrimPrefix(url, "ref://")
+	ct.currentPage = pg
+	ct.addHistory(pg)
+	ct.Scene.Update()
+	ct.Defer(func() {
+		ct.setStageTitle()
+		ct.openID(ref)
 	})
 }
 
@@ -305,6 +351,23 @@ func (ct *Content) openHeading(heading string) {
 		return
 	}
 	tr.SelectEvent(events.SelectOne)
+}
+
+func (ct *Content) openID(id string) {
+	if id == "" {
+		ct.rightFrame.ScrollDimToContentStart(math32.Y)
+		return
+	}
+	ct.rightFrame.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		if cwb.Name != id {
+			return tree.Continue
+		}
+		cwb.SetFocus()
+		cwb.SetState(true, states.Active)
+		cwb.Style()
+		cwb.NeedsRender()
+		return tree.Break
+	})
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
