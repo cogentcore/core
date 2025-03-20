@@ -1755,10 +1755,8 @@ func (tf *TextField) SizeDown(iter int) bool {
 	}
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	alc := sz.Alloc
 	sz.Alloc = sz.Actual // this is important for constraining our children layout:
 	redo := tf.Frame.SizeDown(iter)
-	sz.Alloc = alc
 	return chg || redo
 }
 
