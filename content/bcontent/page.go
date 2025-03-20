@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -55,6 +57,13 @@ type Page struct {
 
 	// Categories are the categories that the page belongs to.
 	Categories []string
+
+	// Specials are special content elements for each page
+	// that have names with an underscore-delimited key name,
+	// such as figure_, table_, sim_ etc, and can be referred
+	// to using the #id component of a wikilink. They are rendered
+	// using the index of each such element (e.g., Figure 1) in the link.
+	Specials map[string][]string
 }
 
 // PreRenderPage contains the data for each page printed in JSON by a content app
@@ -146,3 +155,54 @@ func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
 	}
 	return res
 }
+
+// SpecialName extracts a special element type name from given element name,
+// defined as the part before the first underscore _ character.
+func SpecialName(name string) string {
+	usi := strings.Index(name, "_")
+	if usi < 0 {
+		return ""
+	}
+	return name[:usi]
+}
+
+// SpecialToKebab does strcase.ToKebab on parts after specialName if present.
+func SpecialToKebab(name string) string {
+	usi := strings.Index(name, "_")
+	if usi < 0 {
+		return strcase.ToKebab(name)
+	}
+	return name[:usi+1] + strcase.ToKebab(name[usi+1:])
+}
+
+func SpecialLabel(name string, pg *Page) string {
+	snm := SpecialName(name)
+	if snm == "" {
+		return ""
+	}
+	sl := pg.Specials[snm]
+	if sl == nil {
+		return ""
+	}
+	i := slices.Index(sl, name)
+	if i < 0 {
+		return ""
+	}
+	return strcase.ToSentence(snm) + " " + strconv.Itoa(i+1)
+}
+
+// func getSpecials(pg *bcontent.Page) {
+// 	if pg.Specials != nil {
+// 		return
+// 	}
+// w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+// 	if updtSpecials {
+// 		snm := specialName(cwb.Name)
+// 		if snm != "" {
+// 			sm := pg.Specials[snm]
+// 			sm = append(sm, cwb.Name)
+// 			pg.Specials[snm] = sm
+// 		}
+// 	}
+// }
+// }

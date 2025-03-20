@@ -9,9 +9,11 @@ package content
 //go:generate core generate
 
 import (
+	"bufio"
 	"bytes"
 	"cmp"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"path/filepath"
@@ -19,6 +21,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/exp/maps"
 
 	"cogentcore.org/core/base/errors"
@@ -146,12 +149,20 @@ func (ct *Content) Init() {
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
 		name, label, _ := strings.Cut(text, "|")
 		name, heading, _ := strings.Cut(name, "#")
+		noName := false
 		if name == "" { // A link with a blank page links to the current page
 			name = ct.currentPage.Name
+			noName = true
 		}
 		if label == "" {
 			if heading != "" {
 				label = heading
+				if noName {
+					sl := bcontent.SpecialLabel(heading, ct.currentPage)
+					if sl != "" {
+						label = sl
+					}
+				}
 			} else {
 				label = name
 			}
@@ -167,6 +178,36 @@ func (ct *Content) Init() {
 	ct.Context.ElementHandlers["embed-page"] = func(ctx *htmlcore.Context) bool {
 		errors.Log(ct.embedPage(ctx))
 		return true
+	}
+	ct.Context.AttributeHandlers["id"] = func(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
+		if ct.currentPage == nil {
+			return false
+		}
+		snm := bcontent.SpecialName(value)
+		if snm == "" {
+			return false
+		}
+		lbl := bcontent.SpecialLabel(value, ct.currentPage)
+		// fmt.Println("id:", snm, value, lbl)
+		// fmt.Printf("%#v\n", node)
+		ch := node.GetChildren()
+		if !entering && len(ch) == 2 {
+			if img, ok := ch[1].(*ast.Image); ok {
+				// fmt.Printf("Image: %s\n", string(img.Destination))
+				cp := "\n<p><b>" + lbl + ":</b>"
+				// fmt.Printf("Image: %#v\n", img)
+				nc := len(img.Children)
+				if nc > 0 {
+					if txt, ok := img.Children[0].(*ast.Text); ok {
+						// fmt.Printf("text: %s\n", string(txt.Literal)) // not formatted!
+						cp += " " + string(txt.Literal) // todo: not formatted!
+					}
+				}
+				cp += "</p>"
+				w.Write([]byte(cp))
+			}
+		}
+		return false
 	}
 
 	ct.Maker(func(p *tree.Plan) {
@@ -304,7 +345,7 @@ func (ct *Content) open(url string, history bool) {
 			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", url))
 		}
 	}
-	heading = strcase.ToKebab(heading)
+	heading = bcontent.SpecialToKebab(heading)
 	ct.currentHeading = heading
 	if ct.currentPage == pg {
 		ct.openHeading(heading)
@@ -391,22 +432,60 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
+	ct.getSpecials(b)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
 	}
 
 	ct.leftFrame.DeleteChildren()
-	ct.makeTableOfContents(w)
+	ct.makeTableOfContents(w, ct.currentPage)
 	ct.makeCategories()
 	ct.leftFrame.Update()
 	ct.renderedPage = ct.currentPage
 	return nil
 }
 
+// getSpecials manually parses specials before rendering md
+// because they are needed in advance for wikilinks.
+func (ct *Content) getSpecials(b []byte) {
+	ct.currentPage.Specials = make(map[string][]string)
+	scan := bufio.NewScanner(bytes.NewReader(b))
+	idt := []byte(`{id="`)
+	idn := len(idt)
+	for scan.Scan() {
+		ln := scan.Bytes()
+		n := len(ln)
+		if n < idn+1 {
+			continue
+		}
+		if !bytes.HasPrefix(ln, idt) {
+			continue
+		}
+		id := bytes.TrimSpace(ln[idn:])
+		n = len(id)
+		if n < 2 {
+			continue
+		}
+		if id[n-1] != '}' || id[n-2] != '"' {
+			continue
+		}
+		id = id[:n-2]
+		sid := string(id)
+		snm := bcontent.SpecialName(sid)
+		if snm == "" {
+			continue
+		}
+		// fmt.Println("id:", snm, sid)
+		sl := ct.currentPage.Specials[snm]
+		sl = append(sl, sid)
+		ct.currentPage.Specials[snm] = sl
+	}
+}
+
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
-func (ct *Content) makeTableOfContents(w *core.Frame) {
+func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
 	contents.OnSelect(func(e events.Event) {
