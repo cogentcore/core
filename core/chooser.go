@@ -302,8 +302,7 @@ func (ch *Chooser) Init() {
 				w.SetPlaceholder(ch.placeholder)
 				w.Styler(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
-					s.Min = ch.Styles.Min
-					s.Max.X.Zero() // constrained by parent
+					s.Max.X.Zero()          // constrained by parent
 					s.SetTextWrap(false)
 				})
 				w.SetValidator(func() error {

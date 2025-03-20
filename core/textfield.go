@@ -1681,6 +1681,9 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	st := &tf.Styles
 	txs := &st.Text
 	txt := tf.editText
+	if len(txt) == 0 && len(tf.Placeholder) > 0 {
+		txt = []rune(tf.Placeholder)
+	}
 	if tf.NoEcho {
 		txt = concealDots(len(tf.editText))
 	}
@@ -1689,7 +1692,6 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	tx := rich.NewText(&st.Font, txt)
 	tf.renderAll = tf.Scene.TextShaper.WrapLines(tx, &st.Font, &etxs, &AppearanceSettings.Text, sz)
 	rsz := tf.renderAll.Bounds.Size().Ceil()
-	// fmt.Println(tf, sz, rsz)
 	return rsz
 }
 
@@ -1707,14 +1709,12 @@ func (tf *TextField) iconsSize() math32.Vector2 {
 func (tf *TextField) SizeUp() {
 	tf.renderVisible = nil
 	tf.Frame.SizeUp()
-	tmptxt := tf.editText
-	if len(tf.text) == 0 && len(tf.Placeholder) > 0 {
-		tf.editText = []rune(tf.Placeholder)
-	} else {
-		tf.editText = []rune(tf.text)
+	txt := tf.editText
+	if len(txt) == 0 && len(tf.Placeholder) > 0 {
+		txt = []rune(tf.Placeholder)
 	}
 	tf.dispRange.Start = 0
-	tf.dispRange.End = len(tf.editText)
+	tf.dispRange.End = len(txt)
 
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
@@ -1725,7 +1725,6 @@ func (tf *TextField) SizeUp() {
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	tf.lineHeight = tf.Styles.Text.LineHeightDots(&tf.Styles.Font)
-	tf.editText = tmptxt
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
