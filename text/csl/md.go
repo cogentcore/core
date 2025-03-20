@@ -20,38 +20,38 @@ import (
 // from .md markdown files in given directory, looking up in given source [KeyList],
 // and writing the results in given style to given .md file (references.md default).
 // Heading is written first: must include the appropriate markdown heading level
-// (## typically).
-func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) error {
+// (## typically). Returns the [KeyList] of references that were cited.
+func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) (*KeyList, error) {
+	cited := &KeyList{}
 	if dir == "" {
 		dir = "./"
 	}
 	mds := fsx.Filenames(dir, ".md")
 	if len(mds) == 0 {
-		return errors.New("No .md files found in: " + dir)
+		return cited, errors.New("No .md files found in: " + dir)
 	}
 	for i := range mds {
 		mds[i] = filepath.Join(dir, mds[i])
 	}
-	trg := &KeyList{}
-	err := ExtractMarkdownCites(mds, kl, trg)
+	err := ExtractMarkdownCites(mds, kl, cited)
 	if refFile == "" {
 		refFile = filepath.Join(dir, "references.md")
 	}
 	of, err := os.Create(refFile)
 	if err != nil {
-		return err
+		return cited, err
 	}
 	defer of.Close()
 	if heading != "" {
 		of.WriteString(heading + "\n\n")
 	}
-	err = WriteRefsMarkdown(of, trg, sty)
-	return err
+	err = WriteRefsMarkdown(of, cited, sty)
+	return cited, err
 }
 
 // ExtractMarkdownCites extracts markdown citations in the format [@Ref; @Ref]
-// from given list of .md files, looking up in given source [KeyList], adding to target.
-func ExtractMarkdownCites(files []string, src, trg *KeyList) error {
+// from given list of .md files, looking up in given source [KeyList], adding to cited.
+func ExtractMarkdownCites(files []string, src, cited *KeyList) error {
 	exp := regexp.MustCompile(`\[(@([[:alnum:]]+-?)+(;[[:blank:]]+)?)+\]`)
 	var errs []error
 	for _, fn := range files {
@@ -78,7 +78,7 @@ func ExtractMarkdownCites(files []string, src, trg *KeyList) error {
 						errs = append(errs, err)
 						continue
 					}
-					trg.Add(a, it)
+					cited.Add(a, it)
 				}
 			}
 		}

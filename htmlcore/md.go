@@ -35,6 +35,7 @@ func mdToHTML(ctx *Context, md []byte) []byte {
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
 	htm := mdToHTML(ctx, b)
+	// os.WriteFile("htmlcore_tmp.html", htm, 0666)
 	buf := bytes.NewBuffer(htm)
 	return ReadHTML(ctx, parent, buf)
 }
@@ -66,4 +67,24 @@ func (ctx *Context) mdRenderHook(w io.Writer, node ast.Node, entering bool) (ast
 		return ctx.attrRenderHooks(leaf.Attribute, w, node, entering)
 	}
 	return ast.GoToNext, false
+}
+
+// MDGetAttr gets the given attribute from the given markdown node, returning ""
+// if the attribute is not found.
+func MDGetAttr(n ast.Node, attr string) string {
+	res := ""
+	cont := n.AsContainer()
+	if cont != nil {
+		if cont.Attribute != nil {
+			res = string(cont.Attribute.Attrs[attr])
+		}
+	} else {
+		leaf := n.AsLeaf()
+		if leaf != nil {
+			if leaf.Attribute != nil {
+				res = string(leaf.Attribute.Attrs[attr])
+			}
+		}
+	}
+	return res
 }

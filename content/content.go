@@ -9,7 +9,6 @@ package content
 //go:generate core generate
 
 import (
-	"bufio"
 	"bytes"
 	"cmp"
 	"fmt"
@@ -158,7 +157,7 @@ func (ct *Content) Init() {
 			if heading != "" {
 				label = heading
 				if noName {
-					sl := bcontent.SpecialLabel(heading, ct.currentPage)
+					sl := ct.currentPage.SpecialLabel(heading)
 					if sl != "" {
 						label = sl
 					}
@@ -183,18 +182,17 @@ func (ct *Content) Init() {
 		if ct.currentPage == nil {
 			return false
 		}
-		snm := bcontent.SpecialName(value)
-		if snm == "" {
-			return false
-		}
-		lbl := bcontent.SpecialLabel(value, ct.currentPage)
-		// fmt.Println("id:", snm, value, lbl)
+		lbl := ct.currentPage.SpecialLabel(value)
+		// fmt.Println("id:", value, lbl)
 		// fmt.Printf("%#v\n", node)
+		cp := "\n<p><b>" + lbl + ":</b>"
 		ch := node.GetChildren()
-		if !entering && len(ch) == 2 {
+		if len(ch) == 2 { // image
+			if entering {
+				return false
+			}
 			if img, ok := ch[1].(*ast.Image); ok {
 				// fmt.Printf("Image: %s\n", string(img.Destination))
-				cp := "\n<p><b>" + lbl + ":</b>"
 				// fmt.Printf("Image: %#v\n", img)
 				nc := len(img.Children)
 				if nc > 0 {
@@ -203,9 +201,16 @@ func (ct *Content) Init() {
 						cp += " " + string(txt.Literal) // todo: not formatted!
 					}
 				}
-				cp += "</p>"
-				w.Write([]byte(cp))
 			}
+			cp += "</p>\n"
+			w.Write([]byte(cp))
+		} else if entering {
+			title := htmlcore.MDGetAttr(node, "title")
+			if title != "" {
+				cp += " " + title
+			}
+			cp += "</p>\n"
+			w.Write([]byte(cp))
 		}
 		return false
 	}
@@ -432,7 +437,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
-	ct.getSpecials(b)
+	ct.currentPage.ParseSpecials(b)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
@@ -444,43 +449,6 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	ct.leftFrame.Update()
 	ct.renderedPage = ct.currentPage
 	return nil
-}
-
-// getSpecials manually parses specials before rendering md
-// because they are needed in advance for wikilinks.
-func (ct *Content) getSpecials(b []byte) {
-	ct.currentPage.Specials = make(map[string][]string)
-	scan := bufio.NewScanner(bytes.NewReader(b))
-	idt := []byte(`{id="`)
-	idn := len(idt)
-	for scan.Scan() {
-		ln := scan.Bytes()
-		n := len(ln)
-		if n < idn+1 {
-			continue
-		}
-		if !bytes.HasPrefix(ln, idt) {
-			continue
-		}
-		id := bytes.TrimSpace(ln[idn:])
-		n = len(id)
-		if n < 2 {
-			continue
-		}
-		if id[n-1] != '}' || id[n-2] != '"' {
-			continue
-		}
-		id = id[:n-2]
-		sid := string(id)
-		snm := bcontent.SpecialName(sid)
-		if snm == "" {
-			continue
-		}
-		// fmt.Println("id:", snm, sid)
-		sl := ct.currentPage.Specials[snm]
-		sl = append(sl, sid)
-		ct.currentPage.Specials[snm] = sl
-	}
 }
 
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]

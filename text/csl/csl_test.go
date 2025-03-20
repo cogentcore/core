@@ -40,14 +40,14 @@ func TestGenerateTest(t *testing.T) {
 		types[hash] = true
 		nit = append(nit, *it)
 	}
-	err = Save(nit, "testdata/test.json")
+	err = SaveItems(nit, "testdata/test.json")
 	assert.NoError(t, err)
 }
 
 func TestOpen(t *testing.T) {
 	items, err := Open("testdata/test.json")
 	assert.NoError(t, err)
-	err = Save(items, "testdata/save.json")
+	err = SaveItems(items, "testdata/save.json")
 	assert.NoError(t, err)
 	titems, err := Open("testdata/save.json")
 	assert.NoError(t, err)

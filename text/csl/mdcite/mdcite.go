@@ -20,9 +20,13 @@ type Config struct {
 	// Defaults to current directory if empty.
 	Dir string `flag:"d,dir" required:"-"`
 
-	// File name to write the references to.
+	// File name to write the formatted references to.
 	// Defaults to references.md if empty.
 	Output string `flag:"o,output" required:"-"`
+
+	// File name to write the subset of cited reference data to.
+	// Defaults to citedrefs.json if empty.
+	CitedData string `flag:"c,cited" required:"-"`
 
 	// heading to add to the top of the references file.
 	// Include markdown heading syntax, e.g., ##
@@ -41,7 +45,13 @@ func Generate(c *Config) error {
 		return err
 	}
 	kl := csl.NewKeyList(refs)
-	return csl.GenerateMarkdown(c.Dir, c.Output, c.Heading, kl, c.Style)
+	cited, err := csl.GenerateMarkdown(c.Dir, c.Output, c.Heading, kl, c.Style)
+	cf := c.CitedData
+	if cf == "" {
+		cf = "citedrefs.json"
+	}
+	csl.SaveKeyList(cited, cf)
+	return err
 }
 
 func main() { //types:skip

@@ -115,6 +115,10 @@ func handleElement(ctx *Context) {
 			core.NewText(cl.Summary).SetText("Code")
 			ed := textcore.NewEditor(cl.Details)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
+			id := GetAttr(ctx.Node, "id")
+			if id != "" {
+				cl.Summary.Name = id
+			}
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
 				ed.Lines.SetFileExt(lang)

@@ -175,7 +175,9 @@ func SpecialToKebab(name string) string {
 	return name[:usi+1] + strcase.ToKebab(name[usi+1:])
 }
 
-func SpecialLabel(name string, pg *Page) string {
+// SpecialLabel returns the label for given special element, using
+// the index of the element in the list of specials, e.g., "Figure 1"
+func (pg *Page) SpecialLabel(name string) string {
 	snm := SpecialName(name)
 	if snm == "" {
 		return ""
@@ -191,18 +193,43 @@ func SpecialLabel(name string, pg *Page) string {
 	return strcase.ToSentence(snm) + " " + strconv.Itoa(i+1)
 }
 
-// func getSpecials(pg *bcontent.Page) {
-// 	if pg.Specials != nil {
-// 		return
-// 	}
-// w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-// 	if updtSpecials {
-// 		snm := specialName(cwb.Name)
-// 		if snm != "" {
-// 			sm := pg.Specials[snm]
-// 			sm = append(sm, cwb.Name)
-// 			pg.Specials[snm] = sm
-// 		}
-// 	}
-// }
-// }
+// ParseSpecials manually parses specials before rendering md
+// because they are needed in advance of generating from md file,
+// e.g., for wikilinks.
+func (pg *Page) ParseSpecials(b []byte) {
+	pg.Specials = make(map[string][]string)
+	scan := bufio.NewScanner(bytes.NewReader(b))
+	idt := []byte(`{id="`)
+	idn := len(idt)
+	for scan.Scan() {
+		ln := scan.Bytes()
+		n := len(ln)
+		if n < idn+1 {
+			continue
+		}
+		if !bytes.HasPrefix(ln, idt) {
+			continue
+		}
+		fs := bytes.Fields(ln) // multiple attributes possible
+		ln = fs[0]             // only deal with first one
+		id := bytes.TrimSpace(ln[idn:])
+		n = len(id)
+		if n < 2 {
+			continue
+		}
+		ed := n - 1 // quotes
+		if len(fs) == 1 {
+			ed = n - 2 // brace
+		}
+		id = id[:ed]
+		sid := string(id)
+		snm := SpecialName(sid)
+		if snm == "" {
+			continue
+		}
+		// fmt.Println("id:", snm, sid)
+		sl := pg.Specials[snm]
+		sl = append(sl, sid)
+		pg.Specials[snm] = sl
+	}
+}

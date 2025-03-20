@@ -28,9 +28,14 @@ func OpenFS(fsys fs.FS, filename string) ([]Item, error) {
 	return its, err
 }
 
-// Save saves items to given filename.
-func Save(items []Item, filename string) error {
+// SaveItems saves items to given filename.
+func SaveItems(items []Item, filename string) error {
 	return jsonx.SaveIndent(items, filename)
+}
+
+// SaveKeyList saves items to given filename.
+func SaveKeyList(kl *KeyList, filename string) error {
+	return jsonx.SaveIndent(kl.Values, filename)
 }
 
 ////////  File
