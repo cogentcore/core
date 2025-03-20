@@ -17,7 +17,8 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 ## TODO
 
-* demo/collections/table, select file -- scrolling doesn't update cleanly.
+* list not setting min size effectively
+* demo/collections/table, select file -- scrolling doesn't update cleanly. same issue.
 
 * resizing is super janky
 

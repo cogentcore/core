@@ -1736,9 +1736,6 @@ func (tf *TextField) SizeDown(iter int) bool {
 	prevContent := sz.Actual.Content
 	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
 	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content) // get before update
-	// if !tf.hasWordWrap() {
-	// 	return sdp
-	// }
 	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)
 	rsz := tf.configTextSize(availSz)
@@ -1750,12 +1747,18 @@ func (tf *TextField) SizeDown(iter int) bool {
 			fmt.Println(tf, "TextField Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
+	if tf.Styles.Grow.X > 0 {
+		rsz.X = max(pgrow.X, rsz.X)
+	}
+	if tf.Styles.Grow.Y > 0 {
+		rsz.Y = max(pgrow.Y, rsz.Y)
+	}
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	sz.Alloc = sz.Actual
+	alc := sz.Alloc
+	sz.Alloc = sz.Actual // this is important for constraining our children layout:
 	redo := tf.Frame.SizeDown(iter)
-	// tf.This.(Layouter).SizeDownSetAllocs(iter)
-	// redo := tf.sizeDownChildren(iter)
+	sz.Alloc = alc
 	return chg || redo
 }
 
