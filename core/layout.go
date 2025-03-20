@@ -294,13 +294,13 @@ func (ls *geomState) contentRangeDim(d math32.Dims) (cmin, cmax float32) {
 // totalRect returns Pos.Total -- Size.Actual.Total
 // as an image.Rectangle, e.g., for bounding box
 func (ls *geomState) totalRect() image.Rectangle {
-	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Alloc.Total)
+	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
 }
 
 // contentRect returns Pos.Content, Size.Actual.Content
 // as an image.Rectangle, e.g., for bounding box.
 func (ls *geomState) contentRect() image.Rectangle {
-	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Alloc.Content)
+	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
 }
 
 // ScrollOffset computes the net scrolling offset as a function of

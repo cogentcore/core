@@ -1736,10 +1736,9 @@ func (tf *TextField) SizeDown(iter int) bool {
 	prevContent := sz.Actual.Content
 	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
 	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content) // get before update
-	sdp := tf.Frame.SizeDown(iter)
-	if !tf.hasWordWrap() {
-		return sdp
-	}
+	// if !tf.hasWordWrap() {
+	// 	return sdp
+	// }
 	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)
 	rsz := tf.configTextSize(availSz)
@@ -1753,14 +1752,18 @@ func (tf *TextField) SizeDown(iter int) bool {
 	}
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	return chg || sdp
+	sz.Alloc = sz.Actual
+	redo := tf.Frame.SizeDown(iter)
+	// tf.This.(Layouter).SizeDownSetAllocs(iter)
+	// redo := tf.sizeDownChildren(iter)
+	return chg || redo
 }
 
 func (tf *TextField) SizeFinal() {
 	tf.Geom.RelPos.SetZero()
-	tf.sizeFinalChildren()
 	// tf.sizeFromChildrenFit(0, SizeFinalPass) // key to omit
 	tf.growToAlloc()
+	tf.sizeFinalChildren()
 	tf.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
 	tf.sizeFinalParts()
 }
