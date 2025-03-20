@@ -15,7 +15,7 @@ import (
 
 func mdToHTML(ctx *Context, md []byte) []byte {
 	// create markdown parser with extensions
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.Attributes
 	p := parser.NewWithExtensions(extensions)
 	prev := p.RegisterInline('[', nil)
 	p.RegisterInline('[', wikilink(ctx, prev))

@@ -124,7 +124,7 @@ func (ct *Content) Init() {
 		return htmlcore.GetURLFromFS(ct.Source, url)
 	}
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
-		if len(text) > 0 && text[0] != '@' {
+		if len(text) > 0 && text[0] != '@' { // @CiteKey reference citations
 			return "", ""
 		}
 		ref := text[1:]
@@ -352,17 +352,21 @@ func (ct *Content) openHeading(heading string) {
 	}
 	tr := ct.tocNodes[strcase.ToKebab(heading)]
 	if tr == nil {
-		errors.Log(fmt.Errorf("heading %q not found", heading))
+		found := ct.openID(heading)
+		if !found {
+			errors.Log(fmt.Errorf("heading %q not found", heading))
+		}
 		return
 	}
 	tr.SelectEvent(events.SelectOne)
 }
 
-func (ct *Content) openID(id string) {
+func (ct *Content) openID(id string) bool {
 	if id == "" {
 		ct.rightFrame.ScrollDimToContentStart(math32.Y)
-		return
+		return true
 	}
+	found := false
 	ct.rightFrame.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		if cwb.Name != id {
 			return tree.Continue
@@ -371,8 +375,10 @@ func (ct *Content) openID(id string) {
 		cwb.SetState(true, states.Active)
 		cwb.Style()
 		cwb.NeedsRender()
+		found = true
 		return tree.Break
 	})
+	return found
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.

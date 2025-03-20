@@ -191,7 +191,7 @@ func RefAPAArticle(it *Item) rich.Text {
 	tx := rich.NewText(sty, []rune(NamesLastFirstInitialCommaAmpersand(it.Author)+" "))
 	tx.AddSpanString(sty, "("+it.Issued.Year()+"). ")
 	if it.Title != "" {
-		tx.AddSpanString(sty, EnsurePeriod(it.Title))
+		tx.AddSpanString(sty, EnsurePeriod(it.Title)+" ")
 	}
 	jt := ""
 	if it.ContainerTitle != "" {

@@ -21,7 +21,7 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-text/typesetting v0.3.0
-	github.com/gomarkdown/markdown v0.0.0-20240930133441-72d49d9543d8
+	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
