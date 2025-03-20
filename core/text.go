@@ -296,7 +296,7 @@ func (tx *Text) Init() {
 		tx.NeedsRender()
 	})
 
-	tx.Updater(func() {
+	tx.FinalUpdater(func() {
 		tx.updateRichText()
 		tx.configTextAlloc(tx.Geom.Size.Alloc.Content)
 	})

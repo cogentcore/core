@@ -191,13 +191,14 @@ func (tb *Table) UpdateMaxWidths() {
 	if tb.SliceSize == 0 {
 		return
 	}
+	updated := false
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		field := tb.visibleFields[fli]
-		tb.colMaxWidths[fli] = 0
 		val := tb.sliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
 		isString := fval.Type().Kind() == reflect.String && fval.Type() != reflect.TypeFor[icons.Icon]()
 		if !isString {
+			tb.colMaxWidths[fli] = 0
 			continue
 		}
 		mxw := 0
@@ -206,7 +207,13 @@ func (tb *Table) UpdateMaxWidths() {
 			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
 			mxw = max(mxw, len(str))
 		}
-		tb.colMaxWidths[fli] = mxw
+		if mxw != tb.colMaxWidths[fli] {
+			tb.colMaxWidths[fli] = mxw
+			updated = true
+		}
+	}
+	if updated {
+		tb.Update()
 	}
 }
 
