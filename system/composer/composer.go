@@ -26,4 +26,8 @@ type Composer interface {
 	// Compose does the composition of the sources added through [Composer.Add].
 	// It must be called after [Composer.Start].
 	Compose()
+
+	// Redraw re-renders the last composition. This is called during
+	// resizing, for example.
+	Redraw()
 }

@@ -32,3 +32,7 @@ func (cd *ComposerDrawer) Compose() {
 	}
 	cd.Drawer.End()
 }
+
+func (cd *ComposerDrawer) Redraw() {
+	cd.Drawer.Redraw()
+}

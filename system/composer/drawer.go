@@ -36,6 +36,9 @@ type Drawer interface {
 	// End ends image drawing rendering process on render target.
 	End()
 
+	// Redraw re-renders the last draw
+	Redraw()
+
 	// Copy copies the given Go source image to the render target, with the
 	// same semantics as golang.org/x/image/draw.Copy, with the destination
 	// implicit in the Drawer target.

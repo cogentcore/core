@@ -630,6 +630,8 @@ func (w *renderWindow) renderContext() *renderContext {
 	return w.mains.renderContext
 }
 
+////////  renderWindow
+
 // renderWindow performs all rendering based on current Stages config.
 // It locks and unlocks the renderContext itself, which is necessary so that
 // there is a moment for other goroutines to acquire the lock and get necessary

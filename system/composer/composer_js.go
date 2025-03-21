@@ -88,6 +88,10 @@ func (cw *ComposerWeb) Compose() {
 	}
 }
 
+func (cw *ComposerWeb) Redraw() {
+	// nop, right?
+}
+
 // Element returns the HTML element for the given [Source], making it with the given
 // tag if it doesn't exist yet.
 func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
