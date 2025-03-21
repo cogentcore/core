@@ -178,16 +178,16 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
-var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4}
+var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4, 5}
 
 // renderWindowFlagsN is the highest valid value for type renderWindowFlags, plus one.
-const renderWindowFlagsN renderWindowFlags = 5
+const renderWindowFlagsN renderWindowFlags = 6
 
-var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`winIsRendering`: 0, `winRenderSkipped`: 1, `winStopEventLoop`: 2, `winClosing`: 3, `winGotFocus`: 4}
+var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`winIsRendering`: 0, `winRenderSkipped`: 1, `winResize`: 2, `winStopEventLoop`: 3, `winClosing`: 4, `winGotFocus`: 5}
 
-var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the renderAsync function is running.`, 1: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`, 2: `winStopEventLoop indicates that the event loop should be stopped.`, 3: `winClosing is whether the window is closing.`, 4: `winGotFocus indicates that have we received focus.`}
+var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the renderAsync function is running.`, 1: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`, 2: `winResize indicates that the window was just resized.`, 3: `winStopEventLoop indicates that the event loop should be stopped.`, 4: `winClosing is whether the window is closing.`, 5: `winGotFocus indicates that have we received focus.`}
 
-var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `winIsRendering`, 1: `winRenderSkipped`, 2: `winStopEventLoop`, 3: `winClosing`, 4: `winGotFocus`}
+var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `winIsRendering`, 1: `winRenderSkipped`, 2: `winResize`, 3: `winStopEventLoop`, 4: `winClosing`, 5: `winGotFocus`}
 
 // String returns the string representation of this renderWindowFlags value.
 func (i renderWindowFlags) String() string { return enums.BitFlagString(i, _renderWindowFlagsValues) }

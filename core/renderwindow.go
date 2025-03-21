@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"sync"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/profile"
@@ -97,6 +98,9 @@ type renderWindow struct {
 
 	// flags are atomic renderWindow flags.
 	flags renderWindowFlags
+
+	// lastResize is the time stamp of last resize event -- used for efficient updating.a
+	lastResize time.Time
 
 	// renderMu is the mutex for rendering.
 	renderMu sync.Mutex
@@ -314,6 +318,7 @@ func (w *renderWindow) resized() {
 	}
 	rc.geom = rg
 	rc.visible = true
+	w.flags.SetFlag(true, winResize)
 	w.mains.resize(rg)
 	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
@@ -644,6 +649,14 @@ func (w *renderWindow) renderWindow() {
 		}
 		return
 	}
+
+	sinceResize := time.Now().Sub(w.lastResize)
+	if sinceResize < 100*time.Millisecond {
+		w.flags.SetFlag(true, winRenderSkipped)
+		w.SystemWindow.Composer().Redraw()
+		return
+	}
+
 	rc := w.renderContext()
 	rc.lock()
 	defer func() {
@@ -736,7 +749,15 @@ func (w *renderWindow) renderWindow() {
 	}
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
-	go w.renderAsync(cp)
+	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
+		w.renderAsync(cp)
+		if w.flags.HasFlag(winResize) {
+			w.lastResize = time.Now()
+		}
+		w.flags.SetFlag(false, winResize)
+	} else {
+		go w.renderAsync(cp)
+	}
 }
 
 // renderAsync is the implementation of the main render pass,
@@ -803,6 +824,9 @@ const (
 	// winRenderSkipped indicates that a render update was skipped, so
 	// another update will be run to ensure full updating.
 	winRenderSkipped
+
+	// winResize indicates that the window was just resized.
+	winResize
 
 	// winStopEventLoop indicates that the event loop should be stopped.
 	winStopEventLoop
