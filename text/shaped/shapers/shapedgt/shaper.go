@@ -6,7 +6,6 @@ package shapedgt
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"sync"
 
@@ -18,7 +17,6 @@ import (
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/font/opentype"
 	"github.com/go-text/typesetting/fontscan"
 	"github.com/go-text/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
@@ -60,34 +58,7 @@ func NewShaper() shaped.Shaper {
 		// errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	for _, fsys := range fonts.EmbeddedFonts {
-		errors.Log(fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if d.IsDir() {
-				return nil
-			}
-			f, err := fsys.Open(path)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			resource, ok := f.(opentype.Resource)
-			if !ok {
-				return fmt.Errorf("file %q cannot be used as an opentype.Resource", path)
-			}
-			err = sh.fontMap.AddFont(resource, path, "")
-			if err != nil {
-				return err
-			}
-			return nil
-		}))
-	}
-	// for _, f := range collection {
-	// 	shaper.Load(f)
-	// 	shaper.defaultFaces = append(shaper.defaultFaces, string(f.Font.Typeface))
-	// }
+	errors.Log(fonts.UseEmbeddedFonts(sh.fontMap))
 	sh.shaper.SetFontCacheSize(32)
 
 	if !didDebug {
