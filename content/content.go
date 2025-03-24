@@ -548,12 +548,16 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	if pg == nil {
 		return fmt.Errorf("page %q not found", src)
 	}
+	title := htmlcore.GetAttr(ctx.Node, "title")
+	if title == "" {
+		title = pg.Name
+	}
 	b, err := pg.ReadContent(ct.pagesByCategory)
 	if err != nil {
 		return err
 	}
 	lead, _, _ := bytes.Cut(b, []byte("\n#"))
-	heading := fmt.Sprintf("## %s\n\n*Main page: [[%s]]*\n\n", pg.Name, pg.Name)
+	heading := fmt.Sprintf("## %s\n\n*Main page: [[%s]]*\n\n", title, pg.Name)
 	res := append([]byte(heading), lead...)
 	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
 }
