@@ -8,18 +8,27 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"sync"
 
 	"cogentcore.org/core/paint/ppath"
 	"star-tex.org/x/tex"
 )
 
-var preamble = `\nopagenumbers
+var (
+	// theDVIFonts are the DVI fonts, as a shared resource.
+	theDVIFonts   *dviFonts
+	theDVIFontsMu sync.Mutex
+
+	preamble = `\nopagenumbers
 
 \def\frac#1#2{{{#1}\over{#2}}}
 `
+)
 
 // ParseLaTeX parse a LaTeX formula (that what is between $...$) and returns a path.
-func ParseLaTeX(formula string) (*ppath.Path, error) {
+// fontSizeDots specifies the actual font size in dots (actual pixels)
+// for a 10pt font in the DVI system.
+func ParseLaTeX(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	r := strings.NewReader(fmt.Sprintf(`%s $%s$`, preamble, formula))
 	w := &bytes.Buffer{}
 	stdout := &bytes.Buffer{}
@@ -29,7 +38,12 @@ func ParseLaTeX(formula string) (*ppath.Path, error) {
 		return nil, err
 	}
 
-	p, err := DVI2Path(w.Bytes(), newFonts())
+	theDVIFontsMu.Lock()
+	defer theDVIFontsMu.Unlock()
+	if theDVIFonts == nil {
+		theDVIFonts = newFonts()
+	}
+	p, err := DVIToPath(w.Bytes(), theDVIFonts, fontSizeDots)
 	if err != nil {
 		fmt.Println(stdout.String())
 		return nil, err

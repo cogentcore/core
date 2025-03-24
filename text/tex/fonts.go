@@ -11,7 +11,6 @@ package tex
 import (
 	"bytes"
 	"fmt"
-	"math"
 	"strconv"
 	"sync"
 
@@ -73,8 +72,7 @@ import (
 	"github.com/go-text/typesetting/font/opentype"
 )
 
-// const mmPerPt = 25.4 / 72.0
-const mmPerPt = .1
+const mmPerPt = 25.4 / 72.0
 
 var (
 	once       sync.Once
@@ -178,6 +176,26 @@ func register(ttf []byte) {
 
 //////// dviFonts
 
+// dviFonts supports rendering of following standard DVI fonts:
+//
+//	cmr: Roman (5--10pt)
+//	cmmi: Math Italic (5--10pt)
+//	cmsy: Math Symbols (5--10pt)
+//	cmex: Math Extension (10pt)
+//	cmss: Sans serif (10pt)
+//	cmssqi: Sans serif quote italic (8pt)
+//	cmssi: Sans serif Italic (10pt)
+//	cmbx: Bold Extended (10pt)
+//	cmtt: Typewriter (8--10pt)
+//	cmsltt: Slanted typewriter (10pt)
+//	cmsl: Slanted roman (8--10pt)
+//	cmti: Text italic (7--10pt)
+//	cmu: Unslanted text italic (10pt)
+//	cmmib: Bold math italic (10pt)
+//	cmbsy: Bold math symbols (10pt)
+//	cmcsc: Caps and Small caps (10pt)
+//	cmssbx: Sans serif bold extended (10pt)
+//	cmdunh: Dunhill style (10pt)
 type dviFonts struct {
 	font map[string]*dviFont
 }
@@ -195,7 +213,7 @@ func newFonts() *dviFonts {
 	}
 }
 
-func (fs *dviFonts) Get(name string, scale float32) DVIFont {
+func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 	i := 0
 	for i < len(name) && 'a' <= name[i] && name[i] <= 'z' {
 		i++
@@ -205,6 +223,7 @@ func (fs *dviFonts) Get(name string, scale float32) DVIFont {
 	if ifontsize, err := strconv.Atoi(name[i:]); err == nil {
 		fontsize = float32(ifontsize)
 	}
+	fmt.Println("font name:", fontname, fontsize, scale)
 
 	cmap := cmapCMR
 	f, ok := fs.font[name]
@@ -376,7 +395,7 @@ func (fs *dviFonts) Get(name string, scale float32) DVIFont {
 			fmt.Println("ERROR: %w", err)
 		}
 		face := faces[0]
-		fsize := scale * fontsize * mmPerPt
+		fsize := scale * fontsize
 		isItalic := 0 < len(fontname) && fontname[len(fontname)-1] == 'i'
 		fsizeCorr := float32(1.0)
 
@@ -386,9 +405,7 @@ func (fs *dviFonts) Get(name string, scale float32) DVIFont {
 	return f
 }
 
-func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32) float32 {
-	x += 100
-	y += 100
+func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) float32 {
 	r := f.cmap[cid]
 	face := f.face
 	gid, ok := face.Cmap.Lookup(r)
@@ -397,31 +414,39 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32) float32 {
 	}
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
+	sc := scale * f.size / float32(face.Upem())
+	// fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
+
+	// this random hack fixes the \sum formatting but the source of the problem
+	// is in star-tex, not here:
+	// ext, ok := face.FontHExtents()
+	// fmt.Printf("%#v\n", ext)
+	// y += sc * (float32(ext.LineGap) + (1123 - ext.Ascender) + (292 + ext.Descender))
 
 	if f.italic {
 		// angle := f.face.Post.ItalicAngle
-		angle := float32(-15) // degrees
-		x -= f.size * face.LineMetric(font.XHeight) / 2.0 * math32.Tan(-angle*math.Pi/180.0)
+		// angle := float32(-15) // degrees
+		// x -= scale * f.size * face.LineMetric(font.XHeight) / 2.0 * math32.Tan(-angle*math.Pi/180.0)
 	}
 
-	scale := 50 * f.size / float32(face.Upem())
 	for _, s := range outline.Segments {
-		p0 := math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y)
+		p0 := math32.Vec2(s.Args[0].X*sc+x, -s.Args[0].Y*sc+y)
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			p.MoveTo(p0.X, p0.Y)
 		case opentype.SegmentOpLineTo:
 			p.LineTo(p0.X, p0.Y)
 		case opentype.SegmentOpQuadTo:
-			p1 := math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y)
+			p1 := math32.Vec2(s.Args[1].X*sc+x, -s.Args[1].Y*sc+y)
 			p.QuadTo(p0.X, p0.Y, p1.X, p1.Y)
 		case opentype.SegmentOpCubeTo:
-			p1 := math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y)
-			p2 := math32.Vec2(s.Args[2].X*scale+x, -s.Args[2].Y*scale+y)
+			p1 := math32.Vec2(s.Args[1].X*sc+x, -s.Args[1].Y*sc+y)
+			p2 := math32.Vec2(s.Args[2].X*sc+x, -s.Args[2].Y*sc+y)
 			p.CubeTo(p0.X, p0.Y, p1.X, p1.Y, p2.X, p2.Y)
 		}
 	}
 	p.Close()
-	adv := 0.5 * scale * face.HorizontalAdvance(gid)
+	adv := sc * face.HorizontalAdvance(gid)
+	fmt.Println("hadv:", face.HorizontalAdvance(gid), "adv:", adv)
 	return adv
 }

@@ -14,49 +14,25 @@ import (
 	"cogentcore.org/core/paint/ppath"
 )
 
-// DVIFonts gets a font according to its font name and font size in points. Font names include:
-//
-//	cmr: Roman (5--10pt)
-//	cmmi: Math Italic (5--10pt)
-//	cmsy: Math Symbols (5--10pt)
-//	cmex: Math Extension (10pt)
-//	cmss: Sans serif (10pt)
-//	cmssqi: Sans serif quote italic (8pt)
-//	cmssi: Sans serif Italic (10pt)
-//	cmbx: Bold Extended (10pt)
-//	cmtt: Typewriter (8--10pt)
-//	cmsltt: Slanted typewriter (10pt)
-//	cmsl: Slanted roman (8--10pt)
-//	cmti: Text italic (7--10pt)
-//	cmu: Unslanted text italic (10pt)
-//	cmmib: Bold math italic (10pt)
-//	cmbsy: Bold math symbols (10pt)
-//	cmcsc: Caps and Small caps (10pt)
-//	cmssbx: Sans serif bold extended (10pt)
-//	cmdunh: Dunhill style (10pt)
-type DVIFonts interface {
-	Get(string, float32) DVIFont
-}
-
-// DVIFont draws a rune/glyph to the Pather at a position in millimeters.
-type DVIFont interface {
-	Draw(*ppath.Path, float32, float32, uint32) float32
-}
-
 type state struct {
 	h, v, w, x, y, z int32
 }
 
-// DVI2Path parses a DVI file (output from TeX) and returns *ppath.Path.
-func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
+// DVIToPath parses a DVI file (output from TeX) and returns *ppath.Path.
+// fontSizeDots specifies the actual font size in dots (actual pixels)
+// for a 10pt font in the DVI system.
+func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, error) {
 	// state
 	var fnt uint32 // font index
 	s := state{}
 	stack := []state{}
 
-	f := float32(1.0)            // scale factor in mm/units
-	mag := uint32(1000)          // is set explicitly in preamble
-	fnts := map[uint32]DVIFont{} // selected fonts for indices
+	f := float32(1.0)             // scale factor in mm/units
+	mag := uint32(1000)           // is set explicitly in preamble
+	fnts := map[uint32]*dviFont{} // selected fonts for indices
+
+	fontScale := fontSizeDots / 8         // factor for scaling font itself
+	fontScaleFactor := fontSizeDots / 2.8 // factor for scaling the math
 
 	// first position of baseline which will be the path's origin
 	firstChar := true
@@ -77,7 +53,8 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			w := int32(fnts[fnt].Draw(p, f*float32(s.h), -f*float32(s.v), c) / f)
+			fmt.Println("print:", string(rune(c)), s.v)
+			w := int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 			s.h += w
 		} else if 128 <= cmd && cmd <= 131 {
 			// set
@@ -93,16 +70,17 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			s.h += int32(fnts[fnt].Draw(p, f*float32(s.h), -f*float32(s.v), c) / f)
+			fmt.Println("print:", string(rune(c)), s.v)
+			s.h += int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 		} else if cmd == 132 {
 			// set_rule
 			height := r.readInt32()
 			width := r.readInt32()
 			if 0 < width && 0 < height {
-				p.MoveTo(f*float32(s.h), -f*float32(s.v))
-				p.LineTo(f*float32(s.h+width), -f*float32(s.v))
-				p.LineTo(f*float32(s.h+width), -f*float32(s.v-height))
-				p.LineTo(f*float32(s.h), -f*float32(s.v-height))
+				p.MoveTo(f*float32(s.h), f*float32(s.v))
+				p.LineTo(f*float32(s.h+width), f*float32(s.v))
+				p.LineTo(f*float32(s.h+width), f*float32(s.v-height))
+				p.LineTo(f*float32(s.h), f*float32(s.v-height))
 				p.Close()
 			}
 			s.h += width
@@ -120,16 +98,17 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			fnts[fnt].Draw(p, f*float32(s.h), -f*float32(s.v), c)
+			fmt.Println("print:", string(rune(c)), s.v)
+			fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale)
 		} else if cmd == 137 {
 			// put_rule
 			height := r.readInt32()
 			width := r.readInt32()
 			if 0 < width && 0 < height {
-				p.MoveTo(f*float32(s.h), -f*float32(s.v))
-				p.LineTo(f*float32(s.h+width), -f*float32(s.v))
-				p.LineTo(f*float32(s.h+width), -f*float32(s.v-height))
-				p.LineTo(f*float32(s.h), -f*float32(s.v-height))
+				p.MoveTo(f*float32(s.h), f*float32(s.v))
+				p.LineTo(f*float32(s.h+width), f*float32(s.v))
+				p.LineTo(f*float32(s.h+width), f*float32(s.v-height))
+				p.LineTo(f*float32(s.h), f*float32(s.v-height))
 				p.Close()
 			}
 		} else if cmd == 138 {
@@ -194,10 +173,12 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 				return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 			}
 			d := r.readInt32N(n)
+			fmt.Println("down:", d, s.v)
 			s.v += d
 		} else if 161 <= cmd && cmd <= 165 {
 			// y
 			if cmd == 161 {
+				fmt.Println("y down:", s.y, s.v)
 				s.v += s.y
 			} else {
 				n := int(cmd - 152)
@@ -205,6 +186,7 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 					return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 				}
 				d := r.readInt32N(n)
+				fmt.Println("y down 2:", d, s.v)
 				s.y = d
 				s.v += d
 			}
@@ -212,12 +194,14 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 			// z
 			if cmd == 166 {
 				s.v += s.z
+				fmt.Println("z down", s.z, s.v)
 			} else {
 				n := int(cmd - 166)
 				if r.len() < n {
 					return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 				}
 				d := r.readInt32N(n)
+				fmt.Println("y down 2:", d, s.v)
 				s.z = d
 				s.v += d
 			}
@@ -258,15 +242,19 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 				return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 			}
 			_ = r.readString(int(a)) // area
+			fscale := float32(mag) * float32(size) / 1000.0 / float32(design)
+			// this is 1 for 10pt font:
+			// fmt.Println("mag:", mag, "size:", size, "design:", design, "scale:", fscale)
 			name := r.readString(int(l))
-			fnts[k] = fonts.Get(name, float32(mag)*float32(size)/1000.0/float32(design))
+			fnts[k] = fonts.Get(name, fscale)
 		} else if cmd == 247 {
 			// pre
 			_ = r.readByte() // version
 			num := r.readUint32()
 			den := r.readUint32()
 			mag = r.readUint32()
-			f = float32(num) / float32(den) * float32(mag) / 1000.0 / 10000.0 // in units/mm
+			f = fontScaleFactor * float32(num) / float32(den) * float32(mag) / 1000.0 / 10000.0 // in units/mm
+			// fmt.Println("num:", num, "mag:", mag, "den:", den, "f:", f)
 			n := int(r.readByte())
 			_ = r.readString(n) // comment
 		} else if cmd == 248 {
@@ -290,9 +278,9 @@ func DVI2Path(b []byte, fonts DVIFonts) (*ppath.Path, error) {
 			return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 		}
 	}
-	// _ = h0
-	// _ = v0
-	*p = p.Translate(-f*float32(h0), f*float32(v0))
+	fmt.Println("start offsets:", h0, v0)
+	*p = p.Translate(-f*float32(h0), 0.1*f*float32(v0))
+	// *p = p.Translate(0, 20+f*float32(v0))
 	// *p = p.Translate(100, 100)
 	return p, nil
 }
