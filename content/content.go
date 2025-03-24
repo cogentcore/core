@@ -536,9 +536,11 @@ func (ct *Content) makeCategories() {
 }
 
 // embedPage handles an <embed-page> element by embedding the lead section
-// (content before the first heading) into the current page, with a
-// *Main page: [[Name]]* link added at the start as well. The name of the
-// embedded page is the src attribute of the current html element.
+// (content before the first heading) into the current page, with a heading
+// and a *Main page: [[Name]]* link added at the start as well. The name of
+// the embedded page is the case-insensitive src attribute of the current
+// html element. A title attribute may also be specified to override the
+// heading text.
 func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	src := htmlcore.GetAttr(ctx.Node, "src")
 	if src == "" {
@@ -546,7 +548,7 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	}
 	pg := ct.pageByName(src)
 	if pg == nil {
-		return fmt.Errorf("page %q not found", src)
+		return fmt.Errorf("page %q not found in <embed-page>", src)
 	}
 	title := htmlcore.GetAttr(ctx.Node, "title")
 	if title == "" {
