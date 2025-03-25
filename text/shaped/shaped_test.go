@@ -250,3 +250,16 @@ func TestEmoji(t *testing.T) {
 		pc.TextLines(lns, pos)
 	})
 }
+
+func TestMath(t *testing.T) {
+	RunTest(t, "math", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		src := "y = f(x^2)"
+		sty := rich.NewStyle()
+		tx := rich.NewText(sty, []rune("math: "))
+		tx.AddMath(sty, src)
+		tx.AddSpan(sty, []rune(" done"))
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 10)
+		pc.TextLines(lns, pos)
+	})
+}

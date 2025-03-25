@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
@@ -86,8 +87,11 @@ func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 	for i := range outs {
 		run := &Run{Output: outs[i]}
 		si, _, _ := tx.Index(run.Runes().Start)
-		sty, _ := tx.Span(si)
+		sty, stx := tx.Span(si)
 		run.SetFromStyle(sty, tsty)
+		if sty.Special == rich.Math {
+			sh.ShapeMathRun(run, sty, tsty, stx)
+		}
 		runs[i] = run
 	}
 	return runs
@@ -106,6 +110,14 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		start, end := tx.Range(si)
 		stx := sty.FromRunes(s) // sets sty, returns runes for span
 		if len(stx) == 0 {
+			continue
+		}
+		if sty.Special == rich.Math {
+			o := shaping.Output{}
+			o.Runes.Offset = start
+			o.Runes.Count = end - start
+			sh.outBuff = append(sh.outBuff, o)
+			si++ // skip the end special
 			continue
 		}
 		q := StyleToQuery(sty, tsty, rts)
@@ -132,6 +144,15 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		}
 	}
 	return sh.outBuff
+}
+
+// ShapeMathRun runs tex math to get path for math special
+func (sh *Shaper) ShapeMathRun(run *Run, sty *rich.Style, tsty *text.Style, stx []rune) {
+	p := errors.Log1(tex.ParseLaTeX(string(stx), tsty.FontSize.Dots*sty.Size))
+	run.Path = p
+	bb := p.FastBounds()
+	run.MaxBounds = bb
+	run.Output.Advance = math32.ToFixed(bb.Size().X)
 }
 
 // todo: do the paragraph splitting!  write fun in rich.Text

@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
@@ -56,6 +57,10 @@ type RunBase struct {
 
 	// Decoration are the decorations from the style to apply to this run.
 	Decoration rich.Decorations
+
+	// Path is an optional rendering of the text directly in glyph paths,
+	// which is used for Math formatting via the tex package.
+	Path *ppath.Path
 
 	// FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
 	// Will only be non-nil if set for this run; Otherwise use default.

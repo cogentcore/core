@@ -140,10 +140,18 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
 			run.SetFromStyle(sty, tsty)
-			bb := math32.B2FromFixed(run.RunBounds().Add(pos))
-			// fmt.Println(bb.Size().Y, lht)
-			ln.Bounds.ExpandByBox(bb)
-			pos = DirectionAdvance(run.Direction, pos, run.Output.Advance)
+			if sty.Special == rich.Math {
+				sh.ShapeMathRun(&run, sty, tsty, nr)
+				bb := run.MaxBounds.Translate(math32.Vector2FromFixed(pos))
+				ln.Bounds.ExpandByBox(bb)
+				pos.X += math32.ToFixed(run.MaxBounds.Size().X)
+				// fmt.Println("math bb:", bb, pos, ln.Bounds)
+			} else {
+				bb := math32.B2FromFixed(run.RunBounds().Add(pos))
+				// fmt.Println(bb.Size().Y, lht)
+				ln.Bounds.ExpandByBox(bb)
+				pos = DirectionAdvance(run.Direction, pos, run.Output.Advance)
+			}
 			ln.Runs = append(ln.Runs, &run)
 		}
 		if li == 0 { // set offset for first line based on max ascent

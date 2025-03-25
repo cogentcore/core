@@ -223,7 +223,7 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 	if ifontsize, err := strconv.Atoi(name[i:]); err == nil {
 		fontsize = float32(ifontsize)
 	}
-	fmt.Println("font name:", fontname, fontsize, scale)
+	// fmt.Println("font name:", fontname, fontsize, scale)
 
 	cmap := cmapCMR
 	f, ok := fs.font[name]
@@ -447,6 +447,6 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	}
 	p.Close()
 	adv := sc * face.HorizontalAdvance(gid)
-	fmt.Println("hadv:", face.HorizontalAdvance(gid), "adv:", adv)
+	// fmt.Println("hadv:", face.HorizontalAdvance(gid), "adv:", adv)
 	return adv
 }

@@ -6,6 +6,10 @@ This is a sample _MD_ (markdown) **document** displayed using `htmlcore`.
 
 This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), which you can _click_ on to see helpful **documentation** and examples for the *Cogent Core* framework.
 
+You can include math: $ a = f(x^2) $ inline and:
+$$ a = f(x^2) $$
+as a standalone item.
+
 # Heading 1
 ## Heading 2
 ### Heading 3

@@ -122,6 +122,9 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 					case "style":
 						styleprops.FromXMLString(attr.Value, sprop)
 					case "class":
+						if attr.Value == "math inline" {
+							special = rich.Math
+						}
 						if cssProps != nil {
 							clnm := "." + attr.Value
 							if aggp, ok := SubProperties(clnm, cssProps); ok {

@@ -78,30 +78,33 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 	pc := &pt.Context
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
-	m := pt.Context.Transform
-	for s := p.Scanner(); s.Scan(); {
-		cmd := s.Cmd()
-		end := m.MulVector2AsPoint(s.End())
-		switch cmd {
-		case ppath.MoveTo:
-			rs.Path.Start(end.ToFixed())
-		case ppath.LineTo:
-			rs.Path.Line(end.ToFixed())
-		case ppath.QuadTo:
-			cp1 := m.MulVector2AsPoint(s.CP1())
-			rs.Path.QuadBezier(cp1.ToFixed(), end.ToFixed())
-		case ppath.CubeTo:
-			cp1 := m.MulVector2AsPoint(s.CP1())
-			cp2 := m.MulVector2AsPoint(s.CP2())
-			rs.Path.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
-		case ppath.Close:
-			rs.Path.Stop(true)
-		}
-	}
+	PathToRasterx(&rs.Path, p, pt.Context.Transform, math32.Vector2{})
 	rs.Fill(pt)
 	rs.Stroke(pt)
 	rs.Path.Clear()
 	rs.Raster.Clear()
+}
+
+func PathToRasterx(rs Adder, p ppath.Path, m math32.Matrix2, off math32.Vector2) {
+	for s := p.Scanner(); s.Scan(); {
+		cmd := s.Cmd()
+		end := m.MulVector2AsPoint(s.End()).Add(off)
+		switch cmd {
+		case ppath.MoveTo:
+			rs.Start(end.ToFixed())
+		case ppath.LineTo:
+			rs.Line(end.ToFixed())
+		case ppath.QuadTo:
+			cp1 := m.MulVector2AsPoint(s.CP1()).Add(off)
+			rs.QuadBezier(cp1.ToFixed(), end.ToFixed())
+		case ppath.CubeTo:
+			cp1 := m.MulVector2AsPoint(s.CP1()).Add(off)
+			cp2 := m.MulVector2AsPoint(s.CP2()).Add(off)
+			rs.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
+		case ppath.Close:
+			rs.Stop(true)
+		}
+	}
 }
 
 func (rs *Renderer) Stroke(pt *render.Path) {

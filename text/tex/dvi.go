@@ -53,7 +53,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			fmt.Println("print:", string(rune(c)), s.v)
+			// fmt.Println("print:", string(rune(c)), s.v)
 			w := int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 			s.h += w
 		} else if 128 <= cmd && cmd <= 131 {
@@ -70,7 +70,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			fmt.Println("print:", string(rune(c)), s.v)
+			// fmt.Println("print:", string(rune(c)), s.v)
 			s.h += int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 		} else if cmd == 132 {
 			// set_rule
@@ -98,7 +98,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			fmt.Println("print:", string(rune(c)), s.v)
+			// fmt.Println("print:", string(rune(c)), s.v)
 			fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale)
 		} else if cmd == 137 {
 			// put_rule
@@ -173,12 +173,11 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 				return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 			}
 			d := r.readInt32N(n)
-			fmt.Println("down:", d, s.v)
+			// fmt.Println("down:", d, s.v)
 			s.v += d
 		} else if 161 <= cmd && cmd <= 165 {
 			// y
 			if cmd == 161 {
-				fmt.Println("y down:", s.y, s.v)
 				s.v += s.y
 			} else {
 				n := int(cmd - 152)
@@ -186,7 +185,6 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 					return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 				}
 				d := r.readInt32N(n)
-				fmt.Println("y down 2:", d, s.v)
 				s.y = d
 				s.v += d
 			}
@@ -201,7 +199,6 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 					return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 				}
 				d := r.readInt32N(n)
-				fmt.Println("y down 2:", d, s.v)
 				s.z = d
 				s.v += d
 			}
@@ -278,10 +275,8 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 		}
 	}
-	fmt.Println("start offsets:", h0, v0)
-	*p = p.Translate(-f*float32(h0), 0.1*f*float32(v0))
-	// *p = p.Translate(0, 20+f*float32(v0))
-	// *p = p.Translate(100, 100)
+	// fmt.Println("start offsets:", h0, v0)
+	*p = p.Translate(-f*float32(h0), -f*float32(v0))
 	return p, nil
 }
 
