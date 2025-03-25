@@ -257,7 +257,7 @@ func TestMath(t *testing.T) {
 		sty := rich.NewStyle()
 		tx := rich.NewText(sty, []rune("math: "))
 		tx.AddMath(sty, src)
-		tx.AddSpan(sty, []rune(" done"))
+		tx.AddSpan(sty, []rune(" and we should check like wrapping too"))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.TextLines(lns, pos)

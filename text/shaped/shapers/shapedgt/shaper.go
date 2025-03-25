@@ -116,6 +116,11 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 			o := shaping.Output{}
 			o.Runes.Offset = start
 			o.Runes.Count = end - start
+			// todo: need to render this first and get bb, but we don't have
+			// any place to stick it yet, b/c just have output and not run.
+			// it is possible go-text may include an Output interface so we
+			// could stick it there.
+			// o.Advance = math32.ToFixed(bb.Size().X)
 			sh.outBuff = append(sh.outBuff, o)
 			si++ // skip the end special
 			continue
