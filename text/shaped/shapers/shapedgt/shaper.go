@@ -112,19 +112,20 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		if len(stx) == 0 {
 			continue
 		}
-		if sty.Special == rich.Math {
-			o := shaping.Output{}
-			o.Runes.Offset = start
-			o.Runes.Count = end - start
-			// todo: need to render this first and get bb, but we don't have
-			// any place to stick it yet, b/c just have output and not run.
-			// it is possible go-text may include an Output interface so we
-			// could stick it there.
-			// o.Advance = math32.ToFixed(bb.Size().X)
-			sh.outBuff = append(sh.outBuff, o)
-			si++ // skip the end special
-			continue
-		}
+		// todo: reenable when go-text updated..
+		// if sty.Special == rich.Math {
+		// 	o := shaping.Output{}
+		// 	o.Runes.Offset = start
+		// 	o.Runes.Count = end - start
+		// 	// todo: need to render this first and get bb, but we don't have
+		// 	// any place to stick it yet, b/c just have output and not run.
+		// 	// it is possible go-text may include an Output interface so we
+		// 	// could stick it there.
+		// 	// o.Advance = math32.ToFixed(bb.Size().X)
+		// 	sh.outBuff = append(sh.outBuff, o)
+		// 	si++ // skip the end special
+		// 	continue
+		// }
 		q := StyleToQuery(sty, tsty, rts)
 		sh.fontMap.SetQuery(q)
 
