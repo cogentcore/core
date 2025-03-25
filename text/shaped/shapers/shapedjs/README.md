@@ -12,6 +12,6 @@ The basic layout problem is tricky because:
 
 * Thus, it would be so much better to use go-text to manage all the layout, but that is not possible because there is no way to actually determine the font being used:  [stackoverflow](https://stackoverflow.com/questions/7444451/how-to-get-the-actual-rendered-font-when-its-not-defined-in-css) nor is it possible to even get a list of fonts that might be used: [stackoverflow](https://stackoverflow.com/questions/53638179/supported-fonts-in-html5-canvas-text)
 
-One potential strategy is to use go-text for first-pass layout and line wrapping, and then go back through with html measureText on the actual chunks, and fix the discrepancies.
+Fortunately, a simple strategy that works well in practice is to use go-text for first-pass layout and line wrapping, via the [shapedgt](../shapedgt) package, and then go back through with html measureText on the actual chunks produced by that, and adjust the sizes accordingly. This is done in the `AdjustOutput` function.
 
 

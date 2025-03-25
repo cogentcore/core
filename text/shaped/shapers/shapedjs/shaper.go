@@ -7,7 +7,6 @@
 package shapedjs
 
 import (
-	"fmt"
 	"syscall/js"
 
 	"cogentcore.org/core/math32"
@@ -23,7 +22,6 @@ var (
 	canvasInited bool
 	canvas       js.Value
 	ctx          js.Value
-	debug        = false
 )
 
 // initCanvas ensures that the shared text measuring canvas is available.
@@ -32,11 +30,6 @@ func initCanvas() {
 		return
 	}
 	canvas = js.Global().Get("OffscreenCanvas").New(1000, 100)
-	// todo: replace this with an offscreen canvas!
-	// document := js.Global().Get("document")
-	// app := document.Call("getElementById", "app")
-	// canvas = app // document.Call("createElement", "canvas")
-	// document.Get("body").Call("appendChild", elem)
 	ctx = canvas.Call("getContext", "2d")
 	canvasInited = true
 }
@@ -74,7 +67,6 @@ func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []sh
 // use slices.Clone if needed longer than that.
 func (sh *Shaper) ShapeAdjust(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
 	return sh.AdjustRuns(sh.ShapeText(tx, tsty, rts, txt), tx, tsty, rts)
-	// return sh.ShapeText(tx, tsty, rts, txt)
 }
 
 // AdjustRuns adjusts the given run metrics based on the html measureText results.
@@ -132,22 +124,11 @@ func (sh *Shaper) AdjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 	si, sn, ri := tx.Index(rng.Start)
 	_, stx := tx.Span(si)
 	ri -= sn
-	// fmt.Println(string(stx))
 	rtx := stx[ri : ri+rng.Len()]
 	SetFontStyle(ctx, fnt, tsty, 0)
-	// fmt.Println("si:", si, ri, sty, string(rtx))
 
 	spm := MeasureText(ctx, string(rtx))
 	msz := spm.FontBoundingBoxAscent + spm.FontBoundingBoxDescent
-	if debug {
-		fmt.Println("\nrun:", string(rtx))
-		fmt.Println("adv:\t", math32.FromFixed(out.Advance), "\t=\t", spm.Width)
-		fmt.Println("siz:\t", math32.FromFixed(out.Size), "\t=\t", msz)
-		fmt.Println("lba:\t", math32.FromFixed(out.LineBounds.Ascent), "\t=\t", spm.FontBoundingBoxAscent)
-		fmt.Println("lbd:\t", math32.FromFixed(out.LineBounds.Descent), "\t=\t", -spm.FontBoundingBoxDescent)
-		fmt.Println("gba:\t", math32.FromFixed(out.GlyphBounds.Ascent), "\t=\t", spm.ActualBoundingBoxAscent)
-		fmt.Println("gbd:\t", math32.FromFixed(out.GlyphBounds.Descent), "\t=\t", -spm.ActualBoundingBoxDescent)
-	}
 	out.Advance = math32.ToFixed(spm.Width)
 	out.Size = math32.ToFixed(msz)
 	out.LineBounds.Ascent = math32.ToFixed(spm.FontBoundingBoxAscent)
@@ -167,15 +148,6 @@ func (sh *Shaper) AdjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 		}
 		msz := gm.ActualBoundingBoxAscent + gm.ActualBoundingBoxDescent
 		mwd := -gm.ActualBoundingBoxLeft + gm.ActualBoundingBoxRight
-		if debug {
-			fmt.Println("\ngi:", gi, string(gtx))
-			fmt.Println("adv:\t", math32.FromFixed(g.XAdvance), "\t=\t", gm.Width)
-			// yadv = 0
-			fmt.Println("wdt:\t", math32.FromFixed(g.Width), "\t=\t", mwd)
-			fmt.Println("hgt:\t", math32.FromFixed(g.Height), "\t=\t", -msz)
-			fmt.Println("xbr:\t", math32.FromFixed(g.XBearing), "\t=\t", -gm.ActualBoundingBoxLeft)
-			fmt.Println("ybr:\t", math32.FromFixed(g.YBearing), "\t=\t", gm.ActualBoundingBoxAscent)
-		}
 		// todo: conditional on vertical / horiz
 		g.XAdvance = math32.ToFixed(gm.Width)
 		g.Width = math32.ToFixed(mwd)
