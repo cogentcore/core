@@ -42,3 +42,9 @@ sw.OnChange(func(e events.Event) {
     core.MessageSnackbar(sw, fmt.Sprintf("Switch is %v", sw.IsChecked()))
 })
 ```
+
+You can make a switch read-only to prevent users from changing it:
+
+```Go
+core.NewSwitch(b).SetReadOnly(true)
+```

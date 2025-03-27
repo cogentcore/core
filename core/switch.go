@@ -86,8 +86,8 @@ func (sw *Switch) OnBind(value any, tags reflect.StructTag) {
 func (sw *Switch) Init() {
 	sw.Frame.Init()
 	sw.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		if !sw.IsReadOnly() {
+			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 			s.Cursor = cursors.Pointer
 		}
 		s.Text.Align = styles.Start
@@ -123,6 +123,9 @@ func (sw *Switch) Init() {
 
 	sw.HandleClickOnEnterSpace()
 	sw.OnFinal(events.Click, func(e events.Event) {
+		if sw.IsReadOnly() {
+			return
+		}
 		sw.SetChecked(sw.IsChecked())
 		if sw.Type == SwitchChip || sw.Type == SwitchSegmentedButton {
 			sw.updateStackTop() // must update here
