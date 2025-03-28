@@ -297,7 +297,7 @@ func (wb *WidgetBase) posInScBBox(pos image.Point) bool {
 // If Selectable, updates state and sends Select, Deselect.
 func (wb *WidgetBase) handleWidgetClick() {
 	wb.OnClick(func(e events.Event) {
-		if wb.AbilityIs(abilities.Checkable) {
+		if wb.AbilityIs(abilities.Checkable) && !wb.IsReadOnly() {
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
 		if wb.AbilityIs(abilities.Focusable) {
