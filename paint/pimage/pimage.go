@@ -139,6 +139,9 @@ func (pr *Params) Render(dest *image.RGBA) {
 		if pr.Mask != nil {
 			draw.DrawMask(dest, pr.Rect, pr.Source, pr.SourcePos, pr.Mask, pr.MaskPos, pr.Op)
 		} else {
+			if pr.Source == nil {
+				return
+			}
 			draw.Draw(dest, pr.Rect, pr.Source, pr.SourcePos, pr.Op)
 		}
 	case Transform:

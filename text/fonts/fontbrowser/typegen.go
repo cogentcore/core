@@ -5,6 +5,7 @@ package main
 import (
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/go-text/typesetting/font"
@@ -25,7 +26,7 @@ func (t *GlyphInfo) SetHAdvance(v float32) *GlyphInfo { t.HAdvance = v; return t
 // SetExtents sets the [GlyphInfo.Extents]
 func (t *GlyphInfo) SetExtents(v opentype.GlyphExtents) *GlyphInfo { t.Extents = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Rune"}, {Name: "GID"}, {Name: "Browser"}}})
+var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Canvas"}}, Fields: []types.Field{{Name: "Rune"}, {Name: "GID"}, {Name: "Outline"}, {Name: "Browser"}}})
 
 // NewGlyph returns a new [Glyph] with the given optional parent:
 // Glyph displays an individual glyph in the browser
@@ -37,10 +38,13 @@ func (t *Glyph) SetRune(v rune) *Glyph { t.Rune = v; return t }
 // SetGID sets the [Glyph.GID]
 func (t *Glyph) SetGID(v font.GID) *Glyph { t.GID = v; return t }
 
+// SetOutline sets the [Glyph.Outline]
+func (t *Glyph) SetOutline(v ...math32.Vector2) *Glyph { t.Outline = v; return t }
+
 // SetBrowser sets the [Glyph.Browser]
 func (t *Glyph) SetBrowser(v *Browser) *Glyph { t.Browser = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "main.Browser", IDName: "browser", Doc: "Browser is a font browser.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filename"}, {Name: "Font"}, {Name: "RuneMap"}}})
+var _ = types.AddType(&types.Type{Name: "main.Browser", IDName: "browser", Doc: "Browser is a font browser.", Methods: []types.Method{{Name: "OpenFile", Doc: "OpenFile opens a font file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filename"}, {Name: "Font"}, {Name: "RuneMap"}}})
 
 // NewBrowser returns a new [Browser] with the given optional parent:
 // Browser is a font browser.
