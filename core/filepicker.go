@@ -27,9 +27,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/tree"
 )
 
@@ -378,7 +378,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 					fn := fp.files[w.SelectedIndex]
 					d := NewBody("Info: " + fn.Name)
 					NewForm(d).SetStruct(&fn).SetReadOnly(true)
-					d.AddOKOnly().RunFullDialog(w)
+					d.AddOKOnly().RunWindowDialog(w)
 				})
 			NewSeparator(m)
 			NewFuncButton(m).SetFunc(fp.newFolder).SetIcon(icons.CreateNewFolder)

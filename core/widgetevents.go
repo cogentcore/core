@@ -370,16 +370,6 @@ func (wb *WidgetBase) handleWidgetStateFromMouse() {
 			wb.SetState(false, states.Sliding, states.Active)
 		}
 	})
-	wb.On(events.DragStart, func(e events.Event) {
-		if wb.AbilityIs(abilities.Draggable) {
-			wb.SetState(true, states.Dragging)
-		}
-	})
-	wb.On(events.Drop, func(e events.Event) {
-		if wb.AbilityIs(abilities.Draggable) {
-			wb.SetState(false, states.Dragging, states.Active)
-		}
-	})
 }
 
 // handleLongHoverTooltip listens for LongHover and LongPress events and
@@ -473,6 +463,11 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 			wb.Send(events.Click, e)
 		}
 	})
+}
+
+// dragStateReset resets the drag related state flags, including [states.Active].
+func (wb *WidgetBase) dragStateReset() {
+	wb.SetState(false, states.Active, states.DragHovered, states.Dragging)
 }
 
 ////////	Focus

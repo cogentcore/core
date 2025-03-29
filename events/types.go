@@ -147,6 +147,9 @@ const (
 
 	// Scroll is for scroll wheel or other scrolling events (gestures).
 	// These are not unique and Delta is updated during compression.
+	// The [MouseScroll.Delta] on scroll events is always in real pixel/dot units;
+	// low-level sources may be in lines or pages, but we normalize everything
+	// to real pixels/dots.
 	Scroll
 
 	// KeyDown is when a key is pressed down.

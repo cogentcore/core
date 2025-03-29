@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"cmp"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"path/filepath"
@@ -19,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/exp/maps"
 
 	"cogentcore.org/core/base/errors"
@@ -30,7 +32,9 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/tree"
 )
 
@@ -45,6 +49,10 @@ type Content struct {
 	// Context is the [htmlcore.Context] used to render the content,
 	// which can be modified for things such as adding wikilink handlers.
 	Context *htmlcore.Context `set:"-"`
+
+	// References is a list of references used for generating citation text
+	// for literature reference wikilinks in the format [[@CiteKey]].
+	References *csl.KeyList
 
 	// pages are the pages that constitute the content.
 	pages []*bcontent.Page
@@ -118,14 +126,42 @@ func (ct *Content) Init() {
 		return htmlcore.GetURLFromFS(ct.Source, url)
 	}
 	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
+		if len(text) > 0 && text[0] != '@' { // @CiteKey reference citations
+			return "", ""
+		}
+		ref := text[1:]
+		cs := csl.Parenthetical
+		if len(ref) > 1 && ref[0] == '^' {
+			cs = csl.Narrative
+			ref = ref[1:]
+		}
+		url = "ref://" + ref
+		if ct.References == nil {
+			return url, ref
+		}
+		it, has := ct.References.AtTry(ref)
+		if has {
+			return url, csl.CiteDefault(cs, it)
+		}
+		return url, ref
+	})
+	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
 		name, label, _ := strings.Cut(text, "|")
 		name, heading, _ := strings.Cut(name, "#")
+		noName := false
 		if name == "" { // A link with a blank page links to the current page
 			name = ct.currentPage.Name
+			noName = true
 		}
 		if label == "" {
 			if heading != "" {
 				label = heading
+				if noName {
+					sl := ct.currentPage.SpecialLabel(heading)
+					if sl != "" {
+						label = sl
+					}
+				}
 			} else {
 				label = name
 			}
@@ -141,6 +177,42 @@ func (ct *Content) Init() {
 	ct.Context.ElementHandlers["embed-page"] = func(ctx *htmlcore.Context) bool {
 		errors.Log(ct.embedPage(ctx))
 		return true
+	}
+	ct.Context.AttributeHandlers["id"] = func(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
+		if ct.currentPage == nil {
+			return false
+		}
+		lbl := ct.currentPage.SpecialLabel(value)
+		// fmt.Println("id:", value, lbl)
+		// fmt.Printf("%#v\n", node)
+		cp := "\n<p><b>" + lbl + ":</b>"
+		ch := node.GetChildren()
+		if len(ch) == 2 { // image
+			if entering {
+				return false
+			}
+			if img, ok := ch[1].(*ast.Image); ok {
+				// fmt.Printf("Image: %s\n", string(img.Destination))
+				// fmt.Printf("Image: %#v\n", img)
+				nc := len(img.Children)
+				if nc > 0 {
+					if txt, ok := img.Children[0].(*ast.Text); ok {
+						// fmt.Printf("text: %s\n", string(txt.Literal)) // not formatted!
+						cp += " " + string(txt.Literal) // todo: not formatted!
+					}
+				}
+			}
+			cp += "</p>\n"
+			w.Write([]byte(cp))
+		} else if entering {
+			title := htmlcore.MDGetAttr(node, "title")
+			if title != "" {
+				cp += " " + title
+			}
+			cp += "</p>\n"
+			w.Write([]byte(cp))
+		}
+		return false
 	}
 
 	ct.Maker(func(p *tree.Plan) {
@@ -257,6 +329,10 @@ func (ct *Content) open(url string, history bool) {
 		core.TheApp.OpenURL(url)
 		return
 	}
+	if strings.HasPrefix(url, "ref://") {
+		ct.openRef(url)
+		return
+	}
 	url = strings.ReplaceAll(url, "/#", "#")
 	url, heading, _ := strings.Cut(url, "#")
 	pg := ct.pagesByURL[url]
@@ -274,7 +350,7 @@ func (ct *Content) open(url string, history bool) {
 			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", url))
 		}
 	}
-	heading = strcase.ToKebab(heading)
+	heading = bcontent.SpecialToKebab(heading)
 	ct.currentHeading = heading
 	if ct.currentPage == pg {
 		ct.openHeading(heading)
@@ -282,15 +358,36 @@ func (ct *Content) open(url string, history bool) {
 	}
 	ct.currentPage = pg
 	if history {
-		ct.historyIndex = len(ct.history)
-		ct.history = append(ct.history, pg)
-		ct.saveWebURL()
+		ct.addHistory(pg)
 	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
 		ct.setStageTitle()
 		ct.openHeading(heading)
+	})
+}
+
+func (ct *Content) addHistory(pg *bcontent.Page) {
+	ct.historyIndex = len(ct.history)
+	ct.history = append(ct.history, pg)
+	ct.saveWebURL()
+}
+
+// openRef opens a ref:// reference url.
+func (ct *Content) openRef(url string) {
+	pg := ct.pagesByURL["references"]
+	if pg == nil {
+		core.MessageSnackbar(ct, "references page not generated, use mdcite in csl package")
+		return
+	}
+	ref := strings.TrimPrefix(url, "ref://")
+	ct.currentPage = pg
+	ct.addHistory(pg)
+	ct.Scene.Update()
+	ct.Defer(func() {
+		ct.setStageTitle()
+		ct.openID(ref)
 	})
 }
 
@@ -301,10 +398,33 @@ func (ct *Content) openHeading(heading string) {
 	}
 	tr := ct.tocNodes[strcase.ToKebab(heading)]
 	if tr == nil {
-		errors.Log(fmt.Errorf("heading %q not found", heading))
+		found := ct.openID(heading)
+		if !found {
+			errors.Log(fmt.Errorf("heading %q not found", heading))
+		}
 		return
 	}
 	tr.SelectEvent(events.SelectOne)
+}
+
+func (ct *Content) openID(id string) bool {
+	if id == "" {
+		ct.rightFrame.ScrollDimToContentStart(math32.Y)
+		return true
+	}
+	found := false
+	ct.rightFrame.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		if cwb.Name != id {
+			return tree.Continue
+		}
+		cwb.SetFocus()
+		cwb.SetState(true, states.Active)
+		cwb.Style()
+		cwb.NeedsRender()
+		found = true
+		return tree.Break
+	})
+	return found
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
@@ -317,13 +437,14 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if err != nil {
 		return err
 	}
+	ct.currentPage.ParseSpecials(b)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
 	}
 
 	ct.leftFrame.DeleteChildren()
-	ct.makeTableOfContents(w)
+	ct.makeTableOfContents(w, ct.currentPage)
 	ct.makeCategories()
 	ct.leftFrame.Update()
 	ct.renderedPage = ct.currentPage
@@ -332,7 +453,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
-func (ct *Content) makeTableOfContents(w *core.Frame) {
+func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
 	contents.OnSelect(func(e events.Event) {
@@ -415,9 +536,11 @@ func (ct *Content) makeCategories() {
 }
 
 // embedPage handles an <embed-page> element by embedding the lead section
-// (content before the first heading) into the current page, with a
-// *Main page: [[Name]]* link added at the start as well. The name of the
-// embedded page is the src attribute of the current html element.
+// (content before the first heading) into the current page, with a heading
+// and a *Main page: [[Name]]* link added at the start as well. The name of
+// the embedded page is the case-insensitive src attribute of the current
+// html element. A title attribute may also be specified to override the
+// heading text.
 func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	src := htmlcore.GetAttr(ctx.Node, "src")
 	if src == "" {
@@ -425,14 +548,19 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	}
 	pg := ct.pageByName(src)
 	if pg == nil {
-		return fmt.Errorf("page %q not found", src)
+		return fmt.Errorf("page %q not found in <embed-page>", src)
+	}
+	title := htmlcore.GetAttr(ctx.Node, "title")
+	if title == "" {
+		title = pg.Name
 	}
 	b, err := pg.ReadContent(ct.pagesByCategory)
 	if err != nil {
 		return err
 	}
 	lead, _, _ := bytes.Cut(b, []byte("\n#"))
-	res := append([]byte(fmt.Sprintf("*Main page: [[%s]]*", pg.Name)), lead...)
+	heading := fmt.Sprintf("## %s\n\n*Main page: [[%s]]*\n\n", title, pg.Name)
+	res := append([]byte(heading), lead...)
 	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
 }
 

@@ -14,18 +14,16 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSVG(t *testing.T) {
-	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
-
 	dir := filepath.Join("testdata", "svg")
 	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
-		// if fn != "zoom-in.svg" {
+		// if fn != "fig_cortex_lobes.svg" {
 		// 	continue
 		// }
 		sv := NewSVG(640, 480)
@@ -37,17 +35,14 @@ func TestSVG(t *testing.T) {
 		}
 		sv.Render()
 		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
-		imagex.Assert(t, sv.Pixels, imfn)
+		imagex.Assert(t, sv.RenderImage(), imfn)
 	}
 }
 
 func TestViewBox(t *testing.T) {
-	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
-
 	dir := filepath.Join("testdata", "svg")
 	sfn := "fig_necker_cube.svg"
 	file := filepath.Join(dir, sfn)
-
 	tests := []string{"none", "xMinYMin", "xMidYMid", "xMaxYMax", "xMaxYMax slice"}
 	sv := NewSVG(640, 480)
 	sv.Background = colors.Uniform(colors.White)
@@ -56,13 +51,17 @@ func TestViewBox(t *testing.T) {
 		t.Error("error opening xml:", err)
 		return
 	}
-	fpre := strings.TrimSuffix(sfn, ".svg")
 	for _, ts := range tests {
+		// if ts != "xMinYMin" {
+		// 	continue
+		// }
+		fpre := strings.TrimSuffix(sfn, ".svg")
 		sv.Root.ViewBox.PreserveAspectRatio.SetString(ts)
 		sv.Render()
+
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
-		imfn := filepath.Join("png", fnm)
-		imagex.Assert(t, sv.Pixels, imfn)
+		imfn := filepath.Join("png", filepath.Join("viewbox", fnm))
+		imagex.Assert(t, sv.RenderImage(), imfn)
 	}
 }
 
@@ -89,14 +88,13 @@ func TestCoreLogo(t *testing.T) {
 	core := hct.New(hctOuter.Hue+180, hctOuter.Chroma, hctOuter.Tone+40) // #FBBD0E
 
 	x := float32(0.53)
-	sw := float32(0.27)
+	sw := float32(0.40)
 
 	o := NewPath(sv.Root)
 	o.SetProperty("stroke", colors.AsHex(colors.ToUniform(outer)))
 	o.SetProperty("stroke-width", sw)
 	o.SetProperty("fill", "none")
-	o.AddPath(PcM, x, 0.5)
-	o.AddPathArc(0.35, 30, 330)
+	o.Data.CircularArc(x, 0.5, 0.35, math32.DegToRad(30), math32.DegToRad(330))
 	o.UpdatePathString()
 
 	c := NewCircle(sv.Root)
@@ -109,9 +107,9 @@ func TestCoreLogo(t *testing.T) {
 
 	sv.Background = colors.Uniform(colors.Black)
 	sv.Render()
-	imagex.Assert(t, sv.Pixels, "logo-black")
+	imagex.Assert(t, sv.RenderImage(), "logo-black")
 
 	sv.Background = colors.Uniform(colors.White)
 	sv.Render()
-	imagex.Assert(t, sv.Pixels, "logo-white")
+	imagex.Assert(t, sv.RenderImage(), "logo-white")
 }

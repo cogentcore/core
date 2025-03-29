@@ -35,8 +35,18 @@ type Repo interface {
 	// Type returns the type of repo we are using
 	Type() Types
 
-	// Files returns a map of the current files and their status.
-	Files() (Files, error)
+	// Files returns a map of the current files and their status,
+	// using a cached version of the file list if available.
+	// nil will be returned immediately if no cache is available.
+	// The given onUpdated function will be called from a separate
+	// goroutine when the updated list of the files is available
+	// (an update is always triggered even if the function is nil).
+	Files(onUpdated func(f Files)) (Files, error)
+
+	// StatusFast returns file status based on the cached file info,
+	// which might be slightly stale. Much faster than Status.
+	// Returns Untracked if no cached files.
+	StatusFast(fname string) FileStatus
 
 	// Status returns status of given file -- returns Untracked and error
 	// message on any error. FileStatus is a summary status category,

@@ -18,6 +18,7 @@ import (
 )
 
 // Filer is an interface for file tree file actions that all [Node]s satisfy.
+// This allows apps to intervene and apply any additional logic for these actions.
 type Filer interface { //types:add
 	core.Treer
 
@@ -27,6 +28,9 @@ type Filer interface { //types:add
 	// RenameFiles renames any selected files.
 	RenameFiles()
 
+	// DeleteFiles deletes any selected files.
+	DeleteFiles()
+
 	// GetFileInfo updates the .Info for this file
 	GetFileInfo() error
 
@@ -35,6 +39,20 @@ type Filer interface { //types:add
 }
 
 var _ Filer = (*Node)(nil)
+
+// SelectedPaths returns the paths of selected nodes.
+func (fn *Node) SelectedPaths() []string {
+	sels := fn.GetSelectedNodes()
+	n := len(sels)
+	if n == 0 {
+		return nil
+	}
+	paths := make([]string, n)
+	fn.SelectedFunc(func(sn *Node) {
+		paths = append(paths, string(sn.Filepath))
+	})
+	return paths
+}
 
 // OpenFilesDefault opens selected files with default app for that file type (os defined).
 // runs open on Mac, xdg-open on Linux, and start on Windows
@@ -75,46 +93,34 @@ func (fn *Node) duplicateFile() error {
 	return err
 }
 
-// deletes any selected files or directories. If any directory is selected,
+// DeleteFiles deletes any selected files or directories. If any directory is selected,
 // all files and subdirectories in that directory are also deleted.
-func (fn *Node) deleteFiles() { //types:add
+func (fn *Node) DeleteFiles() { //types:add
 	d := core.NewBody("Delete Files?")
 	core.NewText(d).SetType(core.TextSupporting).SetText("OK to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Delete Files").OnClick(func(e events.Event) {
-			fn.deleteFilesImpl()
+			fn.DeleteFilesNoPrompts()
 		})
 	})
 	d.RunDialog(fn)
 }
 
-// deleteFilesImpl does the actual deletion, no prompts
-func (fn *Node) deleteFilesImpl() {
+// DeleteFilesNoPrompts does the actual deletion, no prompts.
+func (fn *Node) DeleteFilesNoPrompts() {
 	fn.FileRoot().NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
 		if !sn.Info.IsDir() {
-			sn.deleteFile()
+			sn.DeleteFile()
 			return
 		}
-		var fns []string
-		sn.Info.Filenames(&fns)
-		ft := sn.FileRoot()
-		for _, filename := range fns {
-			sn, ok := ft.FindFile(filename)
-			if !ok {
-				continue
-			}
-			if sn.Buffer != nil {
-				sn.closeBuf()
-			}
-		}
-		sn.deleteFile()
+		sn.DeleteFile()
 	})
 }
 
-// deleteFile deletes this file
-func (fn *Node) deleteFile() error {
+// DeleteFile deletes this file
+func (fn *Node) DeleteFile() error {
 	if fn.isExternal() {
 		return nil
 	}
@@ -123,7 +129,6 @@ func (fn *Node) deleteFile() error {
 	if pari != nil {
 		parent = AsNode(pari)
 	}
-	fn.closeBuf()
 	repo, _ := fn.Repo()
 	var err error
 	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
@@ -159,7 +164,6 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	}
 	root := fn.FileRoot()
 	var err error
-	fn.closeBuf() // invalid after this point
 	orgpath := fn.Filepath
 	newpath, err = fn.Info.Rename(newpath)
 	if len(newpath) == 0 || err != nil {
@@ -229,15 +233,14 @@ func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
 		return
 	}
 	if addToVCS {
+		fn.FileRoot().UpdatePath(ppath)
 		nfn, ok := fn.FileRoot().FindFile(np)
 		if ok && !nfn.IsRoot() && string(nfn.Filepath) == np {
-			// todo: this is where it is erroneously adding too many files to vcs!
-			fmt.Println("Adding new file to VCS:", nfn.Filepath)
 			core.MessageSnackbar(fn, "Adding new file to VCS: "+fsx.DirAndFile(string(nfn.Filepath)))
 			nfn.AddToVCS()
 		}
 	}
-	fn.FileRoot().UpdatePath(np)
+	fn.FileRoot().UpdatePath(ppath)
 }
 
 // makes a new folder in the given selected directory
@@ -299,6 +302,6 @@ func (fn *Node) showFileInfo() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		d := core.NewBody("File info")
 		core.NewForm(d).SetStruct(&sn.Info).SetReadOnly(true)
-		d.AddOKOnly().RunFullDialog(sn)
+		d.AddOKOnly().RunWindowDialog(sn)
 	})
 }

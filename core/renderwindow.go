@@ -9,14 +9,16 @@ import (
 	"image"
 	"log"
 	"sync"
+	"time"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
 )
 
@@ -94,14 +96,14 @@ type renderWindow struct {
 	// for event handling in tests.
 	noEventsChan chan struct{}
 
-	// closing is whether the window is closing.
-	closing bool
+	// flags are atomic renderWindow flags.
+	flags renderWindowFlags
 
-	// gotFocus indicates that have we received focus.
-	gotFocus bool
+	// lastResize is the time stamp of last resize event -- used for efficient updating.a
+	lastResize time.Time
 
-	// stopEventLoop indicates that the event loop should be stopped.
-	stopEventLoop bool
+	// renderMu is the mutex for rendering.
+	renderMu sync.Mutex
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -122,14 +124,14 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 	w.SystemWindow.SetCloseReqFunc(func(win system.Window) {
 		rc := w.renderContext()
 		rc.lock()
-		w.closing = true
+		w.flags.SetFlag(true, winClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.mains.stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {
-				w.closing = false
+				w.flags.SetFlag(false, winClosing)
 				return
 			}
 		}
@@ -316,6 +318,7 @@ func (w *renderWindow) resized() {
 	}
 	rc.geom = rg
 	rc.visible = true
+	w.flags.SetFlag(true, winResize)
 	w.mains.resize(rg)
 	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
@@ -373,7 +376,7 @@ func (w *renderWindow) isClosed() bool {
 
 // isVisible is the main visibility check; don't do any window updates if not visible!
 func (w *renderWindow) isVisible() bool {
-	if w == nil || w.SystemWindow == nil || w.isClosed() || w.closing || !w.SystemWindow.IsVisible() {
+	if w == nil || w.SystemWindow == nil || w.isClosed() || w.flags.HasFlag(winClosing) || !w.SystemWindow.IsVisible() {
 		return false
 	}
 	return true
@@ -404,13 +407,13 @@ func (w *renderWindow) eventLoop() {
 	d := &w.SystemWindow.Events().Deque
 
 	for {
-		if w.stopEventLoop {
-			w.stopEventLoop = false
+		if w.flags.HasFlag(winStopEventLoop) {
+			w.flags.SetFlag(false, winStopEventLoop)
 			break
 		}
 		e := d.NextEvent()
-		if w.stopEventLoop {
-			w.stopEventLoop = false
+		if w.flags.HasFlag(winStopEventLoop) {
+			w.flags.SetFlag(false, winStopEventLoop)
 			break
 		}
 		w.handleEvent(e)
@@ -475,7 +478,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
-			w.stopEventLoop = true
+			w.flags.SetFlag(true, winStopEventLoop)
 			w.closed()
 		case events.WinMinimize:
 			e.SetHandled()
@@ -505,8 +508,8 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 				AllRenderWindows.delete(w)
 				AllRenderWindows.add(w)
 			}
-			if !w.gotFocus {
-				w.gotFocus = true
+			if !w.flags.HasFlag(winGotFocus) {
+				w.flags.SetFlag(true, winGotFocus)
 				w.sendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.name)
@@ -521,7 +524,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
-			w.gotFocus = false
+			w.flags.SetFlag(false, winGotFocus)
 			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WindowEventTrace {
@@ -579,9 +582,9 @@ type renderContext struct {
 	geom math32.Geom2DInt
 
 	// mu is mutex for locking out rendering and any destructive updates.
-	// It is locked at the RenderWindow level during rendering and
+	// It is locked at the [renderWindow] level during rendering and
 	// event processing to provide exclusive blocking of external updates.
-	// Use AsyncLock from any outside routine to grab the lock before
+	// Use [WidgetBase.AsyncLock] from any outside routine to grab the lock before
 	// doing modifications.
 	mu sync.Mutex
 
@@ -628,21 +631,32 @@ func (rc *renderContext) String() string {
 	return str
 }
 
-func (sc *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
-	unchanged := !sc.hasFlag(sceneImageUpdated) || sc.hasFlag(sceneUpdating)
-	drw.Copy(sc.SceneGeom.Pos, sc.Pixels, sc.Pixels.Bounds(), op, unchanged)
-	sc.setFlag(false, sceneImageUpdated)
-}
-
 func (w *renderWindow) renderContext() *renderContext {
 	return w.mains.renderContext
 }
+
+////////  renderWindow
 
 // renderWindow performs all rendering based on current Stages config.
 // It locks and unlocks the renderContext itself, which is necessary so that
 // there is a moment for other goroutines to acquire the lock and get necessary
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
+	if w.flags.HasFlag(winIsRendering) { // still doing the last one
+		w.flags.SetFlag(true, winRenderSkipped)
+		if DebugSettings.WindowRenderTrace {
+			fmt.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
+		}
+		return
+	}
+
+	sinceResize := time.Now().Sub(w.lastResize)
+	if sinceResize < 100*time.Millisecond {
+		w.flags.SetFlag(true, winRenderSkipped)
+		w.SystemWindow.Composer().Redraw()
+		return
+	}
+
 	rc := w.renderContext()
 	rc.lock()
 	defer func() {
@@ -659,7 +673,11 @@ func (w *renderWindow) renderWindow() {
 
 	if !top.Sprites.Modified && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
-		return
+		if w.flags.HasFlag(winRenderSkipped) {
+			w.flags.SetFlag(false, winRenderSkipped)
+		} else {
+			return
+		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WindowRenderTrace {
@@ -681,15 +699,14 @@ func (w *renderWindow) renderWindow() {
 	}
 	defer w.SystemWindow.Unlock()
 
-	// pr := profile.Start("win.DrawScenes")
-
-	drw := w.SystemWindow.Drawer()
-	drw.Start()
-
-	w.fillInsets()
-
+	// now we go in the proper bottom-up order to generate the [render.Scene]
+	cp := w.SystemWindow.Composer()
+	cp.Start()
 	sm := &w.mains
 	n := sm.stack.Len()
+
+	// todo: add a source for this, that is self-contained
+	// w.fillInsets()
 
 	// first, find the top-level window:
 	winIndex := 0
@@ -701,10 +718,10 @@ func (w *renderWindow) renderWindow() {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
-			winScene.RenderDraw(drw, draw.Src) // first window blits
 			winIndex = i
-			for _, w := range st.Scene.directRenders {
-				w.RenderDraw(drw, draw.Over)
+			cp.Add(winScene.RenderSource(draw.Src), winScene)
+			for _, dr := range winScene.directRenders {
+				cp.Add(dr.RenderSource(draw.Over), dr)
 			}
 			break
 		}
@@ -714,10 +731,9 @@ func (w *renderWindow) renderWindow() {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-			drw.Copy(image.Point{}, clr, winScene.Geom.TotalBBox, draw.Over, system.Unchanged)
+			cp.Add(ScrimSource(winScene.Geom.TotalBBox), &st.Scrim)
 		}
-		st.Scene.RenderDraw(drw, draw.Over)
+		cp.Add(st.Scene.RenderSource(draw.Over), st.Scene)
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -726,15 +742,49 @@ func (w *renderWindow) renderWindow() {
 	// then add the popups for the top main stage
 	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
-		st.Scene.RenderDraw(drw, draw.Over)
+		cp.Add(st.Scene.RenderSource(draw.Over), st.Scene)
 		if DebugSettings.WindowRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	top.Sprites.drawSprites(drw, winScene.SceneGeom.Pos)
-	drw.End()
+	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
+
+	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
+		w.renderAsync(cp)
+		if w.flags.HasFlag(winResize) {
+			w.lastResize = time.Now()
+		}
+		w.flags.SetFlag(false, winResize)
+	} else {
+		go w.renderAsync(cp)
+	}
 }
 
+// renderAsync is the implementation of the main render pass,
+// which must be called in a goroutine. It relies on the platform-specific
+// [renderWindow.doRender].
+func (w *renderWindow) renderAsync(cp composer.Composer) {
+	w.renderMu.Lock()
+	w.flags.SetFlag(true, winIsRendering)
+	defer func() {
+		w.flags.SetFlag(false, winIsRendering)
+		w.flags.SetFlag(false, winIsRendering)
+		w.flags.SetFlag(false, winIsRendering)
+		w.renderMu.Unlock()
+	}()
+
+	pr := profile.Start("Compose")
+	cp.Compose()
+	pr.End()
+}
+
+// RenderSource returns the [render.Render] state from the [Scene.Painter].
+func (sc *Scene) RenderSource(op draw.Op) composer.Source {
+	sc.setFlag(false, sceneImageUpdated)
+	return SceneSource(sc, op)
+}
+
+/* TODO
 // fillInsets fills the window insets, if any, with [colors.Scheme.Background].
 // called within the overall drawer.Start() render pass.
 func (w *renderWindow) fillInsets() {
@@ -763,3 +813,29 @@ func (w *renderWindow) fillInsets() {
 	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
 	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 }
+*/
+
+// renderWindowFlags are atomic bit flags for [renderWindow] state.
+// They must be atomic to prevent race conditions.
+type renderWindowFlags int64 //enums:bitflag -trim-prefix scene
+
+const (
+	// winIsRendering indicates that the renderAsync function is running.
+	winIsRendering renderWindowFlags = iota
+
+	// winRenderSkipped indicates that a render update was skipped, so
+	// another update will be run to ensure full updating.
+	winRenderSkipped
+
+	// winResize indicates that the window was just resized.
+	winResize
+
+	// winStopEventLoop indicates that the event loop should be stopped.
+	winStopEventLoop
+
+	// winClosing is whether the window is closing.
+	winClosing
+
+	// winGotFocus indicates that have we received focus.
+	winGotFocus
+)

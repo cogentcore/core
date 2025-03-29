@@ -13,13 +13,13 @@ import "cogentcore.org/core/enums"
 type States int64 //enums:bitflag
 
 const (
-	// Invisible elements are not displayed, and thus do not present
-	// a target for GUI events.  It is identical to css display:none.
-	// This can also be set when the item is out of visible display
-	// as in scrolling or collapsing elements.
-	// Elements can be made visible by toggling this flag and thus
-	// in general should be constructed and styled, but a new layout
-	// step must generally be taken after visibility status has changed.
+	// Invisible elements are not displayable, and thus do not present
+	// a target for GUI events. It is identical to CSS display:none.
+	// It is often used for elements such as tabs to hide elements in
+	// tabs that are not open. Elements can be made visible by toggling
+	// this flag and thus in general should be constructed and styled,
+	// but a new layout step must generally be taken after visibility
+	// status has changed. See also [cogentcore.org/core/core.WidgetBase.IsDisplayable].
 	Invisible States = iota
 
 	// Disabled elements cannot be interacted with or selected,

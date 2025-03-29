@@ -294,13 +294,13 @@ func (ls *geomState) contentRangeDim(d math32.Dims) (cmin, cmax float32) {
 // totalRect returns Pos.Total -- Size.Actual.Total
 // as an image.Rectangle, e.g., for bounding box
 func (ls *geomState) totalRect() image.Rectangle {
-	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Alloc.Total)
+	return math32.RectFromPosSizeMax(ls.Pos.Total, ls.Size.Actual.Total)
 }
 
 // contentRect returns Pos.Content, Size.Actual.Content
 // as an image.Rectangle, e.g., for bounding box.
 func (ls *geomState) contentRect() image.Rectangle {
-	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Alloc.Content)
+	return math32.RectFromPosSizeMax(ls.Pos.Content, ls.Size.Actual.Content)
 }
 
 // ScrollOffset computes the net scrolling offset as a function of
@@ -952,7 +952,7 @@ func (fr *Frame) setInitCellsGrid() {
 // sizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
 // to update Actual and Internal size based on this.
 func (fr *Frame) sizeFromChildrenFit(iter int, pass LayoutPasses) {
-	ksz := fr.This.(Layouter).SizeFromChildren(iter, SizeDownPass)
+	ksz := fr.This.(Layouter).SizeFromChildren(iter, pass)
 	fr.laySetContentFitOverflow(ksz, pass)
 	if DebugSettings.LayoutTrace {
 		sz := &fr.Geom.Size
@@ -988,6 +988,14 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		cidx := cwb.Geom.Cell
 		sz := cwb.Geom.Size.Actual.Total
 		grw := cwb.Styles.Grow
+		if pass == SizeFinalPass {
+			if grw.X == 0 && !cwb.Styles.GrowWrap {
+				sz.X = cwb.Geom.Size.Alloc.Total.X
+			}
+			if grw.Y == 0 {
+				sz.Y = cwb.Geom.Size.Alloc.Total.Y
+			}
+		}
 		if pass <= SizeDownPass && iter == 0 && cwb.Styles.GrowWrap {
 			grw.Set(1, 0)
 		}
@@ -1228,7 +1236,7 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 		// note: this shouldn't happen -- just have this in here for monitoring
 		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 		case styles.OverflowAuto:
-			if ofd <= 1 {
+			if ofd < 0.5 {
 				if fr.HasScroll[d] {
 					if DebugSettings.LayoutTrace {
 						fmt.Println(fr, "turned off scroll", d)

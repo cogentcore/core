@@ -11,11 +11,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"image"
-	"image/draw"
 	"time"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/system"
 	"github.com/cogentcore/reisen"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
@@ -63,20 +61,21 @@ func (v *Video) Destroy() {
 	v.WidgetBase.Destroy()
 }
 
-// RenderDraw draws the current image to RenderWindow drawer
-func (v *Video) RenderDraw(drw system.Drawer, op draw.Op) {
+// CurrentFrame returns the current frame (for rendering),
+// and whether it is unchanged or not.
+func (v *Video) CurrentFrame() (*image.RGBA, bool) {
 	if !v.IsVisible() {
-		return
+		return nil, true
 	}
 	frame := v.lastFrame
 	unchanged := true
 	if v.framePlayed >= v.frameTarg && frame == nil {
-		return
+		return nil, true
 	}
 	newFrame, ok := <-v.frameBuffer
 	if !ok && frame == nil {
 		v.Stop = true
-		return
+		return nil, true
 	}
 	if ok {
 		frame = newFrame
@@ -84,11 +83,7 @@ func (v *Video) RenderDraw(drw system.Drawer, op draw.Op) {
 		unchanged = false
 	}
 	v.framePlayed++
-	bb, sbb, empty := v.DirectRenderDrawBBoxes(frame.Bounds())
-	if empty {
-		return
-	}
-	drw.Scale(bb, frame, sbb, v.Rotation, draw.Src, unchanged)
+	return frame, unchanged
 }
 
 // Open opens the video specified by the given filepath.
