@@ -768,6 +768,8 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 	w.flags.SetFlag(true, winIsRendering)
 	defer func() {
 		w.flags.SetFlag(false, winIsRendering)
+		w.flags.SetFlag(false, winIsRendering)
+		w.flags.SetFlag(false, winIsRendering)
 		w.renderMu.Unlock()
 	}()
 
