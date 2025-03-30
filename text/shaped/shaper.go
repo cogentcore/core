@@ -6,6 +6,7 @@ package shaped
 
 import (
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
@@ -36,7 +37,7 @@ type Shaper interface {
 	WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines
 
 	// FontFamilies returns a list of available font family names on this system.
-	FontList() []FontInfo
+	FontList() []fonts.FontInfo
 }
 
 // WrapSizeEstimate is the size to use for layout during the SizeUp pass,

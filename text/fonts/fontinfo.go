@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shaped
+package fonts
 
 import (
+	"bytes"
 	"cmp"
 	"slices"
 
 	"cogentcore.org/core/text/rich"
+	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/fontscan"
 )
 
 // FontInfo contains basic font information for aviailable fonts.
@@ -25,6 +28,9 @@ type FontInfo struct {
 
 	// Stretch: normal, expanded, condensed, etc
 	Stretch rich.Stretch
+
+	// Font contains info about
+	Font fontscan.Footprint `display:"-"`
 }
 
 // FontFamily is used for selecting a font family in a font chooser.
@@ -68,4 +74,36 @@ func FontFamilies(fi []FontInfo) []FontFamily {
 		}
 	}
 	return ff
+}
+
+// FontData contains font information for embedded font data.
+type FontData struct {
+
+	// Family name.
+	Family string
+
+	// Weight: normal, bold, etc.
+	Weight rich.Weights
+
+	// Slant: normal or italic.
+	Slant rich.Slants
+
+	// Stretch: normal, expanded, condensed, etc.
+	Stretch rich.Stretch
+
+	// Data contains the font data.
+	Data []byte `display:"-"`
+
+	// Font contains the loaded font face(s).
+	Fonts []*font.Face
+}
+
+// Load loads the data, setting the Font.
+func (fd *FontData) Load() error {
+	faces, err := font.ParseTTC(bytes.NewReader(fd.Data))
+	if err != nil {
+		return err
+	}
+	fd.Fonts = faces
+	return nil
 }

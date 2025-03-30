@@ -12,10 +12,11 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-	"sync"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/text/fonts"
 	"github.com/go-fonts/latin-modern/lmmath"
 	"github.com/go-fonts/latin-modern/lmmono10italic"
 	"github.com/go-fonts/latin-modern/lmmono10regular"
@@ -74,104 +75,89 @@ import (
 
 const mmPerPt = 25.4 / 72.0
 
-var (
-	once       sync.Once
-	collection []*font.Face
-)
-
-// FontCollection returns a collection of all of the cmr TeX fonts for math.
-// This can be used by go-text font shaping.
-func FontCollection() []*font.Face {
-	once.Do(func() {
-		// cmbsy
-		register(lmmath.TTF)
-		// cmr
-		register(lmroman17regular.TTF)
-		register(lmroman12regular.TTF)
-		register(lmroman10regular.TTF)
-		register(lmroman9regular.TTF)
-		register(lmroman8regular.TTF)
-		register(lmroman7regular.TTF)
-		register(lmroman6regular.TTF)
-		register(lmroman5regular.TTF)
-		// cmb, cmbx
-		register(lmroman12bold.TTF)
-		register(lmroman10bold.TTF)
-		register(lmroman9bold.TTF)
-		register(lmroman8bold.TTF)
-		register(lmroman7bold.TTF)
-		register(lmroman6bold.TTF)
-		register(lmroman5bold.TTF)
-		// cmti
-		register(lmroman12italic.TTF)
-		register(lmroman10italic.TTF)
-		register(lmroman9italic.TTF)
-		register(lmroman8italic.TTF)
-		register(lmroman7italic.TTF)
-		// cmsl
-		register(lmromanslant17regular.TTF)
-		register(lmromanslant12regular.TTF)
-		register(lmromanslant10regular.TTF)
-		register(lmromanslant9regular.TTF)
-		register(lmromanslant8regular.TTF)
-		// cmbxsl
-		register(lmromanslant10bold.TTF)
-		// cmbxti, cmmib with cmapCMMI
-		register(lmroman10bolditalic.TTF)
-		// cmcsc
-		register(lmromancaps10regular.TTF)
-		// cmdunh
-		register(lmromandunh10regular.TTF)
-		// cmu
-		register(lmromanunsl10regular.TTF)
-
-		// cmss
-		register(lmsans17regular.TTF)
-		register(lmsans12regular.TTF)
-		register(lmsans10regular.TTF)
-		register(lmsans9regular.TTF)
-		register(lmsans8regular.TTF)
-		// cmssb, cmssbx
-		register(lmsans10bold.TTF)
-		// cmssdc
-		register(lmsansdemicond10regular.TTF)
-		// cmssi
-		register(lmsans17oblique.TTF)
-		register(lmsans12oblique.TTF)
-		register(lmsans10oblique.TTF)
-		register(lmsans9oblique.TTF)
-		register(lmsans8oblique.TTF)
-		// cmssq
-		register(lmsansquot8regular.TTF)
-		// cmssqi
-		register(lmsansquot8oblique.TTF)
-
-		// cmtt
-		register(lmmono12regular.TTF)
-		register(lmmono10regular.TTF)
-		register(lmmono9regular.TTF)
-		register(lmmono8regular.TTF)
-		// cmti
-		// register(lmmono12italic.TTF)
-		register(lmmono10italic.TTF)
-		// register(lmmono9italic.TTF)
-		// register(lmmono8italic.TTF)
-		// cmtcsc
-		register(lmmonocaps10regular.TTF)
-
-		// Ensure that any outside appends will not reuse the backing store.
-		n := len(collection)
-		collection = collection[:n:n]
-	})
-	return collection
+// LMFontsLoad loads the LMFonts.
+func LMFontsLoad() {
+	for i := range LMFonts {
+		fd := &LMFonts[i]
+		errors.Log(fd.Load())
+	}
 }
 
-func register(ttf []byte) {
-	faces, err := font.ParseTTC(bytes.NewReader(ttf))
-	if err != nil {
-		panic(fmt.Errorf("failed to parse font: %v", err))
-	}
-	collection = append(collection, faces[0])
+// LMFonts are tex latin-modern fonts.
+var LMFonts = []fonts.FontData{
+	{Family: "cmbsy", Data: lmmath.TTF},
+	{Family: "cmr17", Data: lmroman17regular.TTF},
+	{Family: "cmr12", Data: lmroman12regular.TTF},
+	{Family: "cmr10", Data: lmroman10regular.TTF},
+	{Family: "cmr9", Data: lmroman9regular.TTF},
+	{Family: "cmr8", Data: lmroman8regular.TTF},
+	{Family: "cmr7", Data: lmroman7regular.TTF},
+	{Family: "cmr6", Data: lmroman6regular.TTF},
+	{Family: "cmr5", Data: lmroman5regular.TTF},
+	// cmb, cmbx
+	{Family: "cmb12", Data: lmroman12bold.TTF},
+	{Family: "cmb10", Data: lmroman10bold.TTF},
+	{Family: "cmb9", Data: lmroman9bold.TTF},
+	{Family: "cmb8", Data: lmroman8bold.TTF},
+	{Family: "cmb7", Data: lmroman7bold.TTF},
+	{Family: "cmb6", Data: lmroman6bold.TTF},
+	{Family: "cmb5", Data: lmroman5bold.TTF},
+	// cmti
+	{Family: "cmti12", Data: lmroman12italic.TTF},
+	{Family: "cmti10", Data: lmroman10italic.TTF},
+	{Family: "cmti9", Data: lmroman9italic.TTF},
+	{Family: "cmti8", Data: lmroman8italic.TTF},
+	{Family: "cmti7", Data: lmroman7italic.TTF},
+	// cmsl
+	{Family: "cmsl17", Data: lmromanslant17regular.TTF},
+	{Family: "cmsl12", Data: lmromanslant12regular.TTF},
+	{Family: "cmsl10", Data: lmromanslant10regular.TTF},
+	{Family: "cmsl9", Data: lmromanslant9regular.TTF},
+	{Family: "cmsl8", Data: lmromanslant8regular.TTF},
+	// cmbxsl
+	{Family: "cmbxsl10", Data: lmromanslant10bold.TTF},
+	// cmbxti, cmmib with cmapCMMI
+	{Family: "cmmib10", Data: lmroman10bolditalic.TTF},
+	// cmcsc
+	{Family: "cmcsc10", Data: lmromancaps10regular.TTF},
+	// cmdunh
+	{Family: "cmdunh10", Data: lmromandunh10regular.TTF},
+	// cmu
+	{Family: "cmu10", Data: lmromanunsl10regular.TTF},
+
+	// cmss
+	{Family: "cmss17", Data: lmsans17regular.TTF},
+	{Family: "cmss12", Data: lmsans12regular.TTF},
+	{Family: "cmss10", Data: lmsans10regular.TTF},
+	{Family: "cmss9", Data: lmsans9regular.TTF},
+	{Family: "cmss8", Data: lmsans8regular.TTF},
+	// cmssb, cmssbx
+	{Family: "cmssb10", Data: lmsans10bold.TTF},
+	// cmssdc
+	{Family: "cmssdc10", Data: lmsansdemicond10regular.TTF},
+	// cmssi
+	{Family: "cmssi17", Data: lmsans17oblique.TTF},
+	{Family: "cmssi12", Data: lmsans12oblique.TTF},
+	{Family: "cmssi10", Data: lmsans10oblique.TTF},
+	{Family: "cmssi9", Data: lmsans9oblique.TTF},
+	{Family: "cmssi8", Data: lmsans8oblique.TTF},
+	// cmssq
+	{Family: "cmssq8", Data: lmsansquot8regular.TTF},
+	// cmssqi
+	{Family: "cmssqi8", Data: lmsansquot8oblique.TTF},
+
+	// cmtt
+	{Family: "cmtt12", Data: lmmono12regular.TTF},
+	{Family: "cmtt10", Data: lmmono10regular.TTF},
+	{Family: "cmtt9", Data: lmmono9regular.TTF},
+	{Family: "cmtt8", Data: lmmono8regular.TTF},
+	// cmti
+	// {Family: "cmti", Data: lmmono12italic.TTF},
+	{Family: "cmti10", Data: lmmono10italic.TTF},
+	// {Family: "cmti", Data: lmmono9italic.TTF},
+	// {Family: "cmti", Data: lmmono8italic.TTF},
+	// cmtcsc
+	{Family: "cmtcsc10", Data: lmmonocaps10regular.TTF},
 }
 
 //////// dviFonts
@@ -412,6 +398,7 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	if !ok {
 		fmt.Println("rune not found:", string(r))
 	}
+	fmt.Println("rune:", string(rune(cid)), "gid:", gid, int(r))
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
 	sc := scale * f.size / float32(face.Upem())

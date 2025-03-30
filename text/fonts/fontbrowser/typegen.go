@@ -12,19 +12,42 @@ import (
 	"github.com/go-text/typesetting/font/opentype"
 )
 
-var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune"}, {Name: "GID"}, {Name: "HAdvance"}, {Name: "Extents"}}})
+var _ = types.AddType(&types.Type{Name: "main.Browser", IDName: "browser", Doc: "Browser is a font browser.", Methods: []types.Method{{Name: "OpenFile", Doc: "OpenFile opens a font file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}, Returns: []string{"error"}}, {Name: "OpenFileIndex", Doc: "OpenFileIndex opens a font file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname", "index"}, Returns: []string{"error"}}, {Name: "SelectFont", Doc: "SelectFont selects a font from among a loaded list.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "SelectRune", Doc: "SelectRune selects a rune in current font (first char) of string.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"r"}}, {Name: "SelectRuneInt", Doc: "SelectRuneInt selects a rune in current font by number", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"r"}}, {Name: "SelectGlyphID", Doc: "SelectGlyphID selects glyphID in current font.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"gid"}}, {Name: "SelectEmbedded", Doc: "SelectEmbedded selects an embedded font from a list.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filename"}, {Name: "Font"}, {Name: "RuneMap"}}})
 
-// SetRune sets the [GlyphInfo.Rune]
+// NewBrowser returns a new [Browser] with the given optional parent:
+// Browser is a font browser.
+func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
+
+// SetFilename sets the [Browser.Filename]
+func (t *Browser) SetFilename(v core.Filename) *Browser { t.Filename = v; return t }
+
+// SetFont sets the [Browser.Font]
+func (t *Browser) SetFont(v *font.Face) *Browser { t.Font = v; return t }
+
+// SetRuneMap sets the [Browser.RuneMap]
+func (t *Browser) SetRuneMap(v *keylist.List[rune, font.GID]) *Browser { t.RuneMap = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune", Doc: "Rune is the unicode code point."}, {Name: "GID", Doc: "GID is the glyph ID, specific to each Font."}, {Name: "HAdvance", Doc: "HAdvance is the horizontal advance."}, {Name: "Extents", Doc: "Extents give the size of the glyph."}, {Name: "Outline", Doc: "Outline has the end points of each segment of the outline."}}})
+
+// SetRune sets the [GlyphInfo.Rune]:
+// Rune is the unicode code point.
 func (t *GlyphInfo) SetRune(v rune) *GlyphInfo { t.Rune = v; return t }
 
-// SetGID sets the [GlyphInfo.GID]
+// SetGID sets the [GlyphInfo.GID]:
+// GID is the glyph ID, specific to each Font.
 func (t *GlyphInfo) SetGID(v font.GID) *GlyphInfo { t.GID = v; return t }
 
-// SetHAdvance sets the [GlyphInfo.HAdvance]
+// SetHAdvance sets the [GlyphInfo.HAdvance]:
+// HAdvance is the horizontal advance.
 func (t *GlyphInfo) SetHAdvance(v float32) *GlyphInfo { t.HAdvance = v; return t }
 
-// SetExtents sets the [GlyphInfo.Extents]
+// SetExtents sets the [GlyphInfo.Extents]:
+// Extents give the size of the glyph.
 func (t *GlyphInfo) SetExtents(v opentype.GlyphExtents) *GlyphInfo { t.Extents = v; return t }
+
+// SetOutline sets the [GlyphInfo.Outline]:
+// Outline has the end points of each segment of the outline.
+func (t *GlyphInfo) SetOutline(v ...math32.Vector2) *GlyphInfo { t.Outline = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Canvas"}}, Fields: []types.Field{{Name: "Rune"}, {Name: "GID"}, {Name: "Outline"}, {Name: "Browser"}}})
 
@@ -43,18 +66,3 @@ func (t *Glyph) SetOutline(v ...math32.Vector2) *Glyph { t.Outline = v; return t
 
 // SetBrowser sets the [Glyph.Browser]
 func (t *Glyph) SetBrowser(v *Browser) *Glyph { t.Browser = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "main.Browser", IDName: "browser", Doc: "Browser is a font browser.", Methods: []types.Method{{Name: "OpenFile", Doc: "OpenFile opens a font file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filename"}, {Name: "Font"}, {Name: "RuneMap"}}})
-
-// NewBrowser returns a new [Browser] with the given optional parent:
-// Browser is a font browser.
-func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
-
-// SetFilename sets the [Browser.Filename]
-func (t *Browser) SetFilename(v core.Filename) *Browser { t.Filename = v; return t }
-
-// SetFont sets the [Browser.Font]
-func (t *Browser) SetFont(v *font.Face) *Browser { t.Font = v; return t }
-
-// SetRuneMap sets the [Browser.RuneMap]
-func (t *Browser) SetRuneMap(v *keylist.List[rune, font.GID]) *Browser { t.RuneMap = v; return t }

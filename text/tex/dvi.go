@@ -53,7 +53,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			// fmt.Println("print:", string(rune(c)), s.v)
+			fmt.Println("print:", string(rune(c)), s.v)
 			w := int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 			s.h += w
 		} else if 128 <= cmd && cmd <= 131 {
@@ -243,6 +243,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			// this is 1 for 10pt font:
 			// fmt.Println("mag:", mag, "size:", size, "design:", design, "scale:", fscale)
 			name := r.readString(int(l))
+			fmt.Println("font:", name, "size:", size)
 			fnts[k] = fonts.Get(name, fscale)
 		} else if cmd == 247 {
 			// pre

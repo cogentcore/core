@@ -13,9 +13,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"golang.org/x/exp/maps"
@@ -207,7 +207,7 @@ func (fb *FontButton) Init() {
 	InitValueButton(fb, false, func(d *Body) {
 		d.SetTitle("Select a font family")
 		si := 0
-		fi := shaped.FontFamilies(fb.Scene.TextShaper.FontList())
+		fi := fonts.FontFamilies(fb.Scene.TextShaper.FontList())
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Family").SetSelectedValue(fb.Text).BindSelect(&si)
 		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
