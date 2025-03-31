@@ -24,8 +24,14 @@ import (
 
 // GlyphInfo returns info about a glyph.
 type GlyphInfo struct {
-	// Rune is the unicode code point.
-	Rune rune
+	// Rune is the unicode rune as a string
+	Rune string
+
+	// RuneInt is the unicode code point, int number.
+	RuneInt rune
+
+	// RuneHex is the unicode code point, hexidecimal number.
+	RuneHex rune `format:"%0X"`
 
 	// GID is the glyph ID, specific to each Font.
 	GID font.GID
@@ -51,7 +57,9 @@ func NewGlyphInfo(face *font.Face, r rune, gid font.GID) *GlyphInfo {
 
 // Set sets the info from given [font.Face] and gid.
 func (gi *GlyphInfo) Set(face *font.Face, r rune, gid font.GID) {
-	gi.Rune = r
+	gi.Rune = string(r)
+	gi.RuneInt = r
+	gi.RuneHex = r
 	gi.GID = gid
 	gi.HAdvance = face.HorizontalAdvance(gid)
 	gi.HExtents, _ = face.FontHExtents()
@@ -177,11 +185,16 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 	bb := gp.Bounds()
 	sx := float32(1)
 	sy := float32(1)
-	if bb.Max.X > 1 {
+	if bb.Max.X >= 0.98 {
 		sx = 0.9 / bb.Max.X
 	}
+	if bb.Min.Y < 0 {
+		sy = 0.9 * (1 + bb.Min.Y) / 1.0
+		gp = gp.Translate(0, -bb.Min.Y/sy)
+		y -= bb.Min.Y / sy
+	}
 	if bb.Max.Y > 1 {
-		sy = 0.9 / bb.Max.Y
+		sy *= 0.9 / bb.Max.Y
 	}
 	if sx != 1 || sy != 1 {
 		gp = gp.Scale(sx, sy)

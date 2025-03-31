@@ -27,11 +27,19 @@ func (t *Browser) SetFont(v *font.Face) *Browser { t.Font = v; return t }
 // SetRuneMap sets the [Browser.RuneMap]
 func (t *Browser) SetRuneMap(v *keylist.List[rune, font.GID]) *Browser { t.RuneMap = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune", Doc: "Rune is the unicode code point."}, {Name: "GID", Doc: "GID is the glyph ID, specific to each Font."}, {Name: "HAdvance", Doc: "HAdvance is the horizontal advance."}, {Name: "Extents", Doc: "Extents give the size of the glyph."}, {Name: "HExtents", Doc: "Extents are the horizontal font size parameters."}, {Name: "Outline", Doc: "Outline has the end points of each segment of the outline."}}})
+var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune", Doc: "Rune is the unicode rune as a string"}, {Name: "RuneInt", Doc: "RuneInt is the unicode code point, int number."}, {Name: "RuneHex", Doc: "RuneHex is the unicode code point, hexidecimal number."}, {Name: "GID", Doc: "GID is the glyph ID, specific to each Font."}, {Name: "HAdvance", Doc: "HAdvance is the horizontal advance."}, {Name: "Extents", Doc: "Extents give the size of the glyph."}, {Name: "HExtents", Doc: "Extents are the horizontal font size parameters."}, {Name: "Outline", Doc: "Outline has the end points of each segment of the outline."}}})
 
 // SetRune sets the [GlyphInfo.Rune]:
-// Rune is the unicode code point.
-func (t *GlyphInfo) SetRune(v rune) *GlyphInfo { t.Rune = v; return t }
+// Rune is the unicode rune as a string
+func (t *GlyphInfo) SetRune(v string) *GlyphInfo { t.Rune = v; return t }
+
+// SetRuneInt sets the [GlyphInfo.RuneInt]:
+// RuneInt is the unicode code point, int number.
+func (t *GlyphInfo) SetRuneInt(v rune) *GlyphInfo { t.RuneInt = v; return t }
+
+// SetRuneHex sets the [GlyphInfo.RuneHex]:
+// RuneHex is the unicode code point, hexidecimal number.
+func (t *GlyphInfo) SetRuneHex(v rune) *GlyphInfo { t.RuneHex = v; return t }
 
 // SetGID sets the [GlyphInfo.GID]:
 // GID is the glyph ID, specific to each Font.
