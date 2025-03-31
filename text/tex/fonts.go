@@ -191,6 +191,7 @@ type dviFont struct {
 	cmap   map[uint32]rune
 	size   float32
 	italic bool
+	ex     bool
 }
 
 func newFonts() *dviFonts {
@@ -384,11 +385,43 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 		fsize := scale * fontsize
 		isItalic := 0 < len(fontname) && fontname[len(fontname)-1] == 'i'
 		fsizeCorr := float32(1.0)
+		isEx := fontname == "cmex"
 
-		f = &dviFont{face, cmap, fsizeCorr * fsize, isItalic}
+		f = &dviFont{face, cmap, fsizeCorr * fsize, isItalic, isEx}
 		fs.font[name] = f
 	}
 	return f
+}
+
+var cmexScales = map[uint32]float32{
+	0x10: 1.5,
+	0x11: 1.5,
+	0x12: 1.8,
+	0x13: 1.8,
+	0x14: 1.5,
+	0x15: 1.5,
+	0x16: 1.8,
+	0x17: 1.8,
+	0x20: 2.2,
+	0x21: 2.2,
+	0x23: 2.2,
+	0x24: 2.2,
+	0x25: 2.0,
+	0x26: 2.0,
+	0x47: 1.5,
+	0x49: 1.5,
+	0x4B: 1.5,
+	0x4D: 1.5,
+	0x4F: 1.5,
+	0x58: 1.5,
+	0x59: 1.5,
+	0x5A: 1.5,
+	0x5B: 1.5,
+	0x5C: 1.5,
+	0x5D: 1.5,
+	0x5E: 1.5,
+	0x5F: 1.5,
+	0x61: 1.5,
 }
 
 func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) float32 {
@@ -398,17 +431,21 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	if !ok {
 		fmt.Println("rune not found:", string(r))
 	}
-	fmt.Println("rune:", string(rune(cid)), "gid:", gid, int(r))
+	fmt.Printf("rune: 0x%0x gid: %d, r: %d\n", cid, gid, int(r))
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
 	sc := scale * f.size / float32(face.Upem())
-	// fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
+	fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
 
-	// this random hack fixes the \sum formatting but the source of the problem
-	// is in star-tex, not here:
-	// ext, ok := face.FontHExtents()
-	// fmt.Printf("%#v\n", ext)
-	// y += sc * (float32(ext.LineGap) + (1123 - ext.Ascender) + (292 + ext.Descender))
+	if f.ex {
+		ext, _ := face.GlyphExtents(gid)
+		exsc, has := cmexScales[cid]
+		if has {
+			fmt.Println("mag:", exsc)
+			sc *= exsc
+		}
+		y += sc * ext.YBearing
+	}
 
 	if f.italic {
 		// angle := f.face.Post.ItalicAngle

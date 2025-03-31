@@ -5,7 +5,6 @@
 package tex_test
 
 import (
-	"fmt"
 	"image/color"
 	"testing"
 
@@ -14,8 +13,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	_ "cogentcore.org/core/paint/renderers"
-	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/shaped"
 	. "cogentcore.org/core/text/tex"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,21 +28,40 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 }
 
 func TestTex(t *testing.T) {
-	RunTest(t, "basic", 300, 100, func(pc *paint.Painter) {
-		pc.Fill.Color = colors.Uniform(color.Black)
-		fmt.Println("font size dots:", pc.Text.FontSize.Dots)
-		// pp, err := ParseLaTeX(`a = \left[ \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right]`, pc.Text.FontSize.Dots)
+	tests := []struct {
+		name string
+		tex  string
+	}{
+		{`sum-text`, `y = \sum_{i=0}^{100} f(x_i)`},
+		{`sum-disp`, `$y = \sum_{i=0}^{100} f(x_i)$`},
+		{`int-text`, `y = \int_{i=0}^{100} f(x_i)`},
+		{`int-disp`, `$y = \int_{i=0}^{100} f(x_i)$`},
+		{`ops-text`, `y = \prod_i^j \coprod \int \oint \bigcap \bigcup`},
+		{`ops-disp`, `$y = \prod_i^j \coprod \int \oint \bigcap \bigcup$`},
+		{`ops2-text`, `y = \bigsqcup \bigvee \bigwedge \bigodot \bigotimes \bigoplus \biguplus`},
+		{`ops2-disp`, `$y = \bigsqcup \bigvee \bigwedge \bigodot \bigotimes \bigoplus \biguplus$`},
+		{`lb-sum-text`, `y = \left( \sum_{i=0}^{100} f(x_i) \right)`},
+		{`lb-sum-disp`, `$y = \left( \sum_{i=0}^{100} f(x_i) \right)$`},
+		// `a = \left[ \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right]`
+	}
 
-		pp, err := ParseLaTeX(`a = \sum_i^j f^i_j`, pc.Text.FontSize.Dots)
-		assert.NoError(t, err)
-		*pp = pp.Translate(0, 40)
-		pc.State.Path = *pp
-		pc.PathDone()
-
-		// reference text
-		sh := shaped.NewShaper()
-		tx := rich.NewText(&pc.Font, []rune("a=x"))
-		lns := sh.WrapLines(tx, &pc.Font, &pc.Text, &rich.DefaultSettings, math32.Vec2(1000, 50))
-		pc.TextLines(lns, math32.Vec2(0, 70))
-	})
+	for _, test := range tests {
+		// if test.name != "lb-sum-disp" {
+		// 	continue
+		// }
+		RunTest(t, test.name, 300, 100, func(pc *paint.Painter) {
+			pc.Fill.Color = colors.Uniform(color.Black)
+			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
+			pp, err := ParseLaTeX(test.tex, pc.Text.FontSize.Dots)
+			assert.NoError(t, err)
+			*pp = pp.Translate(0, 40)
+			pc.State.Path = *pp
+			pc.PathDone()
+			// reference text
+			// sh := shaped.NewShaper()
+			// tx := rich.NewText(&pc.Font, []rune("a=x"))
+			// lns := sh.WrapLines(tx, &pc.Font, &pc.Text, &rich.DefaultSettings, math32.Vec2(1000, 50))
+			// pc.TextLines(lns, math32.Vec2(0, 70))
+		})
+	}
 }

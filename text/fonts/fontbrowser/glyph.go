@@ -35,6 +35,9 @@ type GlyphInfo struct {
 	// Extents give the size of the glyph.
 	Extents opentype.GlyphExtents
 
+	// Extents are the horizontal font size parameters.
+	HExtents font.FontExtents
+
 	// Outline has the end points of each segment of the outline.
 	Outline []math32.Vector2
 }
@@ -50,6 +53,7 @@ func (gi *GlyphInfo) Set(face *font.Face, r rune, gid font.GID) {
 	gi.Rune = r
 	gi.GID = gid
 	gi.HAdvance = face.HorizontalAdvance(gid)
+	gi.HExtents, _ = face.FontHExtents()
 	gi.Extents, _ = face.GlyphExtents(gid)
 }
 

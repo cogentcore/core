@@ -99,8 +99,11 @@ type renderWindow struct {
 	// flags are atomic renderWindow flags.
 	flags renderWindowFlags
 
-	// lastResize is the time stamp of last resize event -- used for efficient updating.a
+	// lastResize is the time stamp of last resize event -- used for efficient updating.
 	lastResize time.Time
+
+	// lastRenderSkip is the last time we skipped rendering. tracking weird bug..
+	lastRenderSkip time.Time
 
 	// renderMu is the mutex for rendering.
 	renderMu sync.Mutex
@@ -643,12 +646,18 @@ func (w *renderWindow) renderContext() *renderContext {
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
 	if w.flags.HasFlag(winIsRendering) { // still doing the last one
+		if time.Now().Sub(w.lastRenderSkip) > 2*time.Second {
+			fmt.Println("render skip > 2 second, resetting!")
+			w.flags.SetFlag(false, winIsRendering)
+		}
+		w.lastRenderSkip = time.Now()
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
 		}
 		return
 	}
+	w.lastRenderSkip = time.Now()
 
 	sinceResize := time.Now().Sub(w.lastResize)
 	if sinceResize < 100*time.Millisecond {
@@ -766,16 +775,13 @@ func (w *renderWindow) renderWindow() {
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	w.renderMu.Lock()
 	w.flags.SetFlag(true, winIsRendering)
-	defer func() {
-		w.flags.SetFlag(false, winIsRendering)
-		w.flags.SetFlag(false, winIsRendering)
-		w.flags.SetFlag(false, winIsRendering)
-		w.renderMu.Unlock()
-	}()
 
 	pr := profile.Start("Compose")
 	cp.Compose()
 	pr.End()
+
+	w.flags.SetFlag(false, winIsRendering)
+	w.renderMu.Unlock()
 }
 
 // RenderSource returns the [render.Render] state from the [Scene.Painter].
