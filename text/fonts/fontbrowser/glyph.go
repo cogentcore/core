@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -61,9 +62,21 @@ func (gi *GlyphInfo) Set(face *font.Face, r rune, gid font.GID) {
 type Glyph struct {
 	core.Canvas
 
-	Rune    rune
-	GID     font.GID
+	// Rune is the rune to render.
+	Rune rune
+
+	// GID is the glyph ID of the Rune
+	GID font.GID
+
+	// Outline is the set of control points (end points only).
 	Outline []math32.Vector2
+
+	// Stroke only renders the outline of the glyph, not the standard fill.
+	Stroke bool
+
+	// Points plots the control points.
+	Points bool
+
 	Browser *Browser
 }
 
@@ -80,71 +93,164 @@ func (gi *Glyph) Init() {
 		fonts.FontStyle(gi.Browser.Font, &s.Font, &s.Text)
 	})
 	gi.OnClick(func(e events.Event) {
-		if gi.Browser == nil || gi.Browser.Font == nil {
+		if gi.Stroke || gi.Browser == nil || gi.Browser.Font == nil {
 			return
 		}
 		gli := NewGlyphInfo(gi.Browser.Font, gi.Rune, gi.GID)
 		gli.Outline = gi.Outline
 		d := core.NewBody("Glyph Info")
-		bg := NewGlyph(d).SetBrowser(gi.Browser).SetRune(gi.Rune).SetGID(gi.GID)
+		bg := NewGlyph(d).SetBrowser(gi.Browser).SetRune(gi.Rune).SetGID(gi.GID).
+			SetStroke(true).SetPoints(true)
 		bg.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Em(40))
 		})
-		core.NewForm(d).SetStruct(gli)
+		core.NewForm(d).SetStruct(gli).StartFocus()
 		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddOK(bar)
 		})
-		d.RunDialog(gi.Browser)
+		d.RunWindowDialog(gi.Browser)
 	})
-	gi.SetDraw(func(pc *paint.Painter) {
-		if gi.Browser == nil || gi.Browser.Font == nil {
-			return
-		}
-		data := gi.Browser.Font.GlyphData(gi.GID)
-		gd, ok := data.(font.GlyphOutline)
-		if !ok {
-			return
-		}
-		scale := 0.7 / float32(gi.Browser.Font.Upem())
-		x := float32(0.1)
-		y := float32(0.8)
-		gi.Outline = slicesx.SetLength(gi.Outline, len(gd.Segments))
-		pc.Fill.Color = colors.Scheme.Surface
-		if gi.StateIs(states.Active) || gi.StateIs(states.Focused) || gi.StateIs(states.Selected) {
-			pc.Fill.Color = colors.Scheme.Select.Container
-		}
+	gi.SetDraw(gi.draw)
+}
+
+func (gi *Glyph) draw(pc *paint.Painter) {
+	if gi.Browser == nil || gi.Browser.Font == nil {
+		return
+	}
+	face := gi.Browser.Font
+	data := face.GlyphData(gi.GID)
+	gd, ok := data.(font.GlyphOutline)
+	if !ok {
+		return
+	}
+	scale := 0.7 / float32(face.Upem())
+	x := float32(0.1)
+	y := float32(0.8)
+	gi.Outline = slicesx.SetLength(gi.Outline, len(gd.Segments))
+	pc.Fill.Color = colors.Scheme.Surface
+	if gi.StateIs(states.Active) || gi.StateIs(states.Focused) || gi.StateIs(states.Selected) {
+		pc.Fill.Color = colors.Scheme.Select.Container
+	}
+	pc.Stroke.Color = colors.Scheme.OnSurface
+	pc.Rectangle(0, 0, 1, 1)
+	pc.PathDone()
+	pc.Fill.Color = nil
+	pc.Line(0, y, 1, y)
+	pc.PathDone()
+	if gi.Stroke {
+		pc.Stroke.Width.Dp(2)
 		pc.Stroke.Color = colors.Scheme.OnSurface
-		pc.Rectangle(0, 0, 1, 1)
-		pc.PathDone()
 		pc.Fill.Color = nil
-		pc.Line(0, y, 1, y)
-		pc.PathDone()
+	} else {
 		pc.Stroke.Color = nil
 		pc.Fill.Color = colors.Scheme.OnSurface
-		for i, s := range gd.Segments {
-			px := s.Args[0].X*scale + x
-			py := -s.Args[0].Y*scale + y
-			switch s.Op {
-			case opentype.SegmentOpMoveTo:
-				pc.MoveTo(px, py)
-				gi.Outline[i] = math32.Vec2(px, py)
-			case opentype.SegmentOpLineTo:
-				pc.LineTo(px, py)
-				gi.Outline[i] = math32.Vec2(px, py)
-			case opentype.SegmentOpQuadTo:
-				p1x := s.Args[1].X*scale + x
-				p1y := -s.Args[1].Y*scale + y
-				pc.QuadTo(px, py, p1x, p1y)
-				gi.Outline[i] = math32.Vec2(p1x, p1y)
-			case opentype.SegmentOpCubeTo:
-				p1x := s.Args[1].X*scale + x
-				p1y := -s.Args[1].Y*scale + y
-				p2x := s.Args[2].X*scale + x
-				p2y := -s.Args[2].Y*scale + y
-				pc.CubeTo(px, py, p1x, p1y, p2x, p2y)
-				gi.Outline[i] = math32.Vec2(p2x, p2y)
-			}
+	}
+	ext, _ := face.GlyphExtents(gi.GID)
+	if ext.XBearing < 0 {
+		x -= scale * ext.XBearing
+	}
+	var gp ppath.Path
+	for i, s := range gd.Segments {
+		px := s.Args[0].X*scale + x
+		py := -s.Args[0].Y*scale + y
+		switch s.Op {
+		case opentype.SegmentOpMoveTo:
+			gp.MoveTo(px, py)
+			gi.Outline[i] = math32.Vec2(px, py)
+		case opentype.SegmentOpLineTo:
+			gp.LineTo(px, py)
+			gi.Outline[i] = math32.Vec2(px, py)
+		case opentype.SegmentOpQuadTo:
+			p1x := s.Args[1].X*scale + x
+			p1y := -s.Args[1].Y*scale + y
+			gp.QuadTo(px, py, p1x, p1y)
+			gi.Outline[i] = math32.Vec2(p1x, p1y)
+		case opentype.SegmentOpCubeTo:
+			p1x := s.Args[1].X*scale + x
+			p1y := -s.Args[1].Y*scale + y
+			p2x := s.Args[2].X*scale + x
+			p2y := -s.Args[2].Y*scale + y
+			gp.CubeTo(px, py, p1x, p1y, p2x, p2y)
+			gi.Outline[i] = math32.Vec2(p2x, p2y)
 		}
-		pc.PathDone()
-	})
+	}
+	bb := gp.Bounds()
+	sx := float32(1)
+	sy := float32(1)
+	if bb.Max.X > 1 {
+		sx = 0.9 / bb.Max.X
+	}
+	if bb.Max.Y > 1 {
+		sy = 0.9 / bb.Max.Y
+	}
+	if sx != 1 || sy != 1 {
+		gp = gp.Scale(sx, sy)
+	}
+	pc.State.Path = gp
+	pc.PathDone()
+
+	// Points
+	if !gi.Points {
+		return
+	}
+	pc.Stroke.Color = nil
+	pc.Fill.Color = colors.Scheme.Primary.Base
+	radius := float32(0.01)
+	for _, s := range gd.Segments {
+		px := sx * (s.Args[0].X*scale + x)
+		py := sy * (-s.Args[0].Y*scale + y)
+		switch s.Op {
+		case opentype.SegmentOpMoveTo, opentype.SegmentOpLineTo:
+			pc.Circle(px, py, radius)
+		case opentype.SegmentOpQuadTo:
+			p1x := sx * (s.Args[1].X*scale + x)
+			p1y := sy * (-s.Args[1].Y*scale + y)
+			pc.Circle(p1x, p1y, radius)
+		case opentype.SegmentOpCubeTo:
+			p2x := sx * (s.Args[2].X*scale + x)
+			p2y := sy * (-s.Args[2].Y*scale + y)
+			pc.Circle(p2x, p2y, radius)
+		}
+	}
+	pc.PathDone()
+
+	radius *= 0.8
+	pc.Stroke.Color = nil
+	pc.Fill.Color = colors.Scheme.Error.Base
+	for _, s := range gd.Segments {
+		px := sx * (s.Args[0].X*scale + x)
+		py := sy * (-s.Args[0].Y*scale + y)
+		switch s.Op {
+		case opentype.SegmentOpQuadTo:
+			pc.Circle(px, py, radius)
+		case opentype.SegmentOpCubeTo:
+			p1x := sx * (s.Args[1].X*scale + x)
+			p1y := sy * (-s.Args[1].Y*scale + y)
+			pc.Circle(px, py, radius)
+			pc.Circle(p1x, p1y, radius)
+		}
+	}
+	pc.PathDone()
+
+	pc.Stroke.Color = colors.Scheme.Error.Base
+	pc.Fill.Color = nil
+	for _, s := range gd.Segments {
+		px := sx * (s.Args[0].X*scale + x)
+		py := sy * (-s.Args[0].Y*scale + y)
+		switch s.Op {
+		case opentype.SegmentOpQuadTo:
+			p1x := sx * (s.Args[1].X*scale + x)
+			p1y := sy * (-s.Args[1].Y*scale + y)
+			pc.Line(p1x, p1y, px, py)
+		case opentype.SegmentOpCubeTo:
+			p1x := sx * (s.Args[1].X*scale + x)
+			p1y := sy * (-s.Args[1].Y*scale + y)
+			p2x := sx * (s.Args[2].X*scale + x)
+			p2y := sy * (-s.Args[2].Y*scale + y)
+			pc.Line(px, py, p2x, p2y)
+			pc.Line(p1x, p1y, p2x, p2y)
+		}
+	}
+	pc.PathDone()
+
 }

@@ -27,7 +27,7 @@ func (t *Browser) SetFont(v *font.Face) *Browser { t.Font = v; return t }
 // SetRuneMap sets the [Browser.RuneMap]
 func (t *Browser) SetRuneMap(v *keylist.List[rune, font.GID]) *Browser { t.RuneMap = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune", Doc: "Rune is the unicode code point."}, {Name: "GID", Doc: "GID is the glyph ID, specific to each Font."}, {Name: "HAdvance", Doc: "HAdvance is the horizontal advance."}, {Name: "Extents", Doc: "Extents give the size of the glyph."}, {Name: "Outline", Doc: "Outline has the end points of each segment of the outline."}}})
+var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune", Doc: "Rune is the unicode code point."}, {Name: "GID", Doc: "GID is the glyph ID, specific to each Font."}, {Name: "HAdvance", Doc: "HAdvance is the horizontal advance."}, {Name: "Extents", Doc: "Extents give the size of the glyph."}, {Name: "HExtents", Doc: "Extents are the horizontal font size parameters."}, {Name: "Outline", Doc: "Outline has the end points of each segment of the outline."}}})
 
 // SetRune sets the [GlyphInfo.Rune]:
 // Rune is the unicode code point.
@@ -45,24 +45,39 @@ func (t *GlyphInfo) SetHAdvance(v float32) *GlyphInfo { t.HAdvance = v; return t
 // Extents give the size of the glyph.
 func (t *GlyphInfo) SetExtents(v opentype.GlyphExtents) *GlyphInfo { t.Extents = v; return t }
 
+// SetHExtents sets the [GlyphInfo.HExtents]:
+// Extents are the horizontal font size parameters.
+func (t *GlyphInfo) SetHExtents(v font.FontExtents) *GlyphInfo { t.HExtents = v; return t }
+
 // SetOutline sets the [GlyphInfo.Outline]:
 // Outline has the end points of each segment of the outline.
 func (t *GlyphInfo) SetOutline(v ...math32.Vector2) *GlyphInfo { t.Outline = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Canvas"}}, Fields: []types.Field{{Name: "Rune"}, {Name: "GID"}, {Name: "Outline"}, {Name: "Browser"}}})
+var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Canvas"}}, Fields: []types.Field{{Name: "Rune", Doc: "Rune is the rune to render."}, {Name: "GID", Doc: "GID is the glyph ID of the Rune"}, {Name: "Outline", Doc: "Outline is the set of control points (end points only)."}, {Name: "Stroke", Doc: "Stroke only renders the outline of the glyph, not the standard fill."}, {Name: "Points", Doc: "Points plots the control points."}, {Name: "Browser"}}})
 
 // NewGlyph returns a new [Glyph] with the given optional parent:
 // Glyph displays an individual glyph in the browser
 func NewGlyph(parent ...tree.Node) *Glyph { return tree.New[Glyph](parent...) }
 
-// SetRune sets the [Glyph.Rune]
+// SetRune sets the [Glyph.Rune]:
+// Rune is the rune to render.
 func (t *Glyph) SetRune(v rune) *Glyph { t.Rune = v; return t }
 
-// SetGID sets the [Glyph.GID]
+// SetGID sets the [Glyph.GID]:
+// GID is the glyph ID of the Rune
 func (t *Glyph) SetGID(v font.GID) *Glyph { t.GID = v; return t }
 
-// SetOutline sets the [Glyph.Outline]
+// SetOutline sets the [Glyph.Outline]:
+// Outline is the set of control points (end points only).
 func (t *Glyph) SetOutline(v ...math32.Vector2) *Glyph { t.Outline = v; return t }
+
+// SetStroke sets the [Glyph.Stroke]:
+// Stroke only renders the outline of the glyph, not the standard fill.
+func (t *Glyph) SetStroke(v bool) *Glyph { t.Stroke = v; return t }
+
+// SetPoints sets the [Glyph.Points]:
+// Points plots the control points.
+func (t *Glyph) SetPoints(v bool) *Glyph { t.Points = v; return t }
 
 // SetBrowser sets the [Glyph.Browser]
 func (t *Glyph) SetBrowser(v *Browser) *Glyph { t.Browser = v; return t }
