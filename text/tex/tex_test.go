@@ -51,14 +51,16 @@ func TestTex(t *testing.T) {
 		{`braces-all`, `$\left\{\vbox to 27pt{}\left\{\vbox to 24pt{}\left\{\vbox to 21pt{}
 \Biggl\{\biggl\{\Bigl\{\bigl\{\{{\scriptstyle\{{\scriptscriptstyle\{\hskip3pt
 \}}\}}\}\bigr\}\Bigr\}\biggr\}\Biggr\}\right\}\right\}\right\}$`},
-		// `a = \left[ \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right]`
+		{`sqrt-all`, `$\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+x}}}}}}}$`},
+		{`frac-text`, `a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)`},
+		{`frac-disp`, `$a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)$`},
 	}
 
 	for _, test := range tests {
-		// if test.name != "brackets-all" {
+		// if test.name != "sqrt-all" {
 		// 	continue
 		// }
-		RunTest(t, test.name, 300, 150, func(pc *paint.Painter) {
+		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			pc.Fill.Color = colors.Uniform(color.Black)
 			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
 			pp, err := ParseLaTeX(test.tex, pc.Text.FontSize.Dots)

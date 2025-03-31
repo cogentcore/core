@@ -504,12 +504,12 @@ var cmexScales = map[uint32]float32{
 	0x6E: mag3, // {
 	0x6F: mag3, // }
 
-	0x71: mag2, // √
+	0x71: mag3, // √
 	0x72: mag4, // √
 	0x73: mag5, // √
-	0x74: mag2, // ⎷
-	// 0x75: mag2, // ⏐
-	// 0x76: mag2, // ⌜
+	0x74: mag1, // ⎷
+	0x75: mag1, // ⏐
+	0x76: mag1, // ⌜
 
 }
 
@@ -521,11 +521,12 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 		fmt.Println("rune not found:", string(r))
 	}
 	hadv := face.HorizontalAdvance(gid)
-	fmt.Printf("rune: 0x%0x gid: %d, r: 0x%0X\n", cid, gid, int(r))
+	// fmt.Printf("rune: 0x%0x gid: %d, r: 0x%0X\n", cid, gid, int(r))
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
 	sc := scale * f.size / float32(face.Upem())
-	fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
+	xsc := float32(1)
+	// fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
 
 	if f.ex {
 		ext, _ := face.GlyphExtents(gid)
@@ -537,12 +538,34 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 			switch cid {
 			case 0x5A, 0x49: // \int and \oint are off in large size
 				yb += 200
+			case 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F:
+				xsc = .7
+			case 0x20, 0x21, 0x22, 0x23, 0x28, 0x29, 0x2A, 0x2B:
+				xsc = .6
 			case 0x3C, 0x3D:
+				// xsc = .5
 				yb += 150
 			case 0x3A, 0x3B:
 				yb += 400
-				// case 0x3E:
-				// yb += 300
+				// xsc = .5
+			case 0x3E:
+				// xsc = .5
+			case 0x71:
+				x += sc * 80
+				xsc = .6
+			case 0x72:
+				x -= sc * 80
+				xsc = .6
+			case 0x73:
+				x -= sc * 80
+				xsc = .5
+			case 0x74:
+				yb += 600
+			case 0x75:
+				x += sc * 560
+			case 0x76:
+				x += sc * 400
+				yb -= 36
 			}
 		}
 		y += sc * yb
@@ -555,18 +578,18 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	}
 
 	for _, s := range outline.Segments {
-		p0 := math32.Vec2(s.Args[0].X*sc+x, -s.Args[0].Y*sc+y)
+		p0 := math32.Vec2(s.Args[0].X*xsc*sc+x, -s.Args[0].Y*sc+y)
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			p.MoveTo(p0.X, p0.Y)
 		case opentype.SegmentOpLineTo:
 			p.LineTo(p0.X, p0.Y)
 		case opentype.SegmentOpQuadTo:
-			p1 := math32.Vec2(s.Args[1].X*sc+x, -s.Args[1].Y*sc+y)
+			p1 := math32.Vec2(s.Args[1].X*xsc*sc+x, -s.Args[1].Y*sc+y)
 			p.QuadTo(p0.X, p0.Y, p1.X, p1.Y)
 		case opentype.SegmentOpCubeTo:
-			p1 := math32.Vec2(s.Args[1].X*sc+x, -s.Args[1].Y*sc+y)
-			p2 := math32.Vec2(s.Args[2].X*sc+x, -s.Args[2].Y*sc+y)
+			p1 := math32.Vec2(s.Args[1].X*xsc*sc+x, -s.Args[1].Y*sc+y)
+			p2 := math32.Vec2(s.Args[2].X*xsc*sc+x, -s.Args[2].Y*sc+y)
 			p.CubeTo(p0.X, p0.Y, p1.X, p1.Y, p2.X, p2.Y)
 		}
 	}
