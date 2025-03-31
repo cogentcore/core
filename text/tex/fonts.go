@@ -396,8 +396,8 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 const (
 	mag1 = 1.2
 	mag2 = 1.2 * 1.2
-	mag3 = 2
-	mag4 = 2.5
+	mag3 = 1.2 * 1.2 * 1.2
+	mag4 = 1.2 * 1.2 * 1.2 * 1.2 * 1.2
 	mag5 = 3.2
 )
 
@@ -424,41 +424,44 @@ var cmexScales = map[uint32]float32{
 	0x13: mag4, // )
 	0x14: mag4, // [
 	0x15: mag4, // ]
-	0x16: mag4, // ⌊ U+230A = 0x04
-	0x17: mag4, // ⌋ U+230B = 0x05
-	0x18: mag4, // ⌈ U+2308 = 0x06
-	0x19: mag4, // ⌉ U+2309 = 0x07
+	0x16: mag4, // ⌊
+	0x17: mag4, // ⌋
+	0x18: mag4, // ⌈
+	0x19: mag4, // ⌉
 	0x1A: mag4, // {
 	0x1B: mag4, // }
-	0x1C: mag4, // 〈 U+2329 = 0x0A
-	0x1D: mag4, // 〉 U+232A = 0x0B
-	0x1E: mag4, // ∕ U+2215 = 0x0E
-	0x1F: mag4, // \ U+2216 = 0x0F
+	0x1C: mag4, // 〈
+	0x1D: mag4, // 〉
+	0x1E: mag4, // ∕
+	0x1F: mag4, // \
 
 	0x20: mag5, // (
 	0x21: mag5, // )
 	0x22: mag5, // [
 	0x23: mag5, // ]
-	0x24: mag5, // ⌊ U+230A = 0x04
-	0x25: mag5, // ⌋ U+230B = 0x05
-	0x26: mag5, // ⌈ U+2308 = 0x06
-	0x27: mag5, // ⌉ U+2309 = 0x07
-	0x28: mag5, // { = 0x08
-	0x29: mag5, // } = 0x09
-	0x2A: mag5, // 〈 U+2329 = 0x0A
-	0x2B: mag5, // 〉 U+232A = 0x0B
-	0x2C: mag5, // ∕ U+2215 = 0x0E
-	0x2D: mag5, // \ U+2216 = 0x0F
-	0x2E: mag3, // ∕ U+2215 = 0x0E
-	0x2F: mag3, // \ U+2216 = 0x0F
+	0x24: mag5, // ⌊
+	0x25: mag5, // ⌋
+	0x26: mag5, // ⌈
+	0x27: mag5, // ⌉
+	0x28: mag5, // {
+	0x29: mag5, // }
+	0x2A: mag5, // 〈
+	0x2B: mag5, // 〉
+	0x2C: mag5, // ∕
+	0x2D: mag5, // \
+	0x2E: mag3, // ∕
+	0x2F: mag3, // \
 
-	0x30: mag2, // ⎛ U+239B
-	0x31: mag2, // ⎞ U+239E
-	0x32: mag2, // ⌈ U+2308 = 0x06
-	0x33: mag2, // ⌉ U+2309 = 0x07
+	0x30: mag2, // ⎛
+	0x31: mag2, // ⎞
+	0x32: mag2, // ⌈
+	0x33: mag2, // ⌉
 	0x34: mag2, // ⌊
 	0x35: mag2, // ⌋
-	0x38: mag2, // ⎧
+	0x36: mag2, // ⎢
+	0x37: mag2, // ⎥
+
+	0x38: mag2, // ⎧ // big braces start
 	0x39: mag2, // ⎫
 	0x3A: mag2, // ⎩
 	0x3B: mag2, // ⎭
@@ -467,7 +470,7 @@ var cmexScales = map[uint32]float32{
 	0x3E: mag2, // ⎪
 	0x3F: mag2, // ∣ ?? unclear
 
-	0x40: mag2, // ⎝
+	0x40: mag2, // ⎝ // big parens
 	0x41: mag2, // ⎠
 	0x42: mag2, // ⎜
 	0x43: mag2, // ⎟
@@ -493,13 +496,13 @@ var cmexScales = map[uint32]float32{
 	0x64: mag4, // ̂
 	0x66: mag2, // ˜
 	0x67: mag4, // ˜
-	0x68: mag2, // [
-	0x69: mag2, // ]
+	0x68: mag3, // [
+	0x69: mag3, // ]
 	0x6B: mag2, // ⌋
 	0x6C: mag2, // ⌈
 	0x6D: mag2, // ⌉
-	0x6E: mag2, // {
-	0x6F: mag2, // }
+	0x6E: mag3, // {
+	0x6F: mag3, // }
 
 	0x71: mag2, // √
 	0x72: mag4, // √
@@ -517,7 +520,8 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	if !ok {
 		fmt.Println("rune not found:", string(r))
 	}
-	fmt.Printf("rune: 0x%0x gid: %d, r: %d\n", cid, gid, int(r))
+	hadv := face.HorizontalAdvance(gid)
+	fmt.Printf("rune: 0x%0x gid: %d, r: 0x%0X\n", cid, gid, int(r))
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
 	sc := scale * f.size / float32(face.Upem())
@@ -530,8 +534,15 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 		if has {
 			// fmt.Println("mag:", exsc)
 			sc *= exsc
-			if cid == 0x5A || cid == 0x49 { // \int and \oint are off in large size
-				yb += 200 // off
+			switch cid {
+			case 0x5A, 0x49: // \int and \oint are off in large size
+				yb += 200
+			case 0x3C, 0x3D:
+				yb += 150
+			case 0x3A, 0x3B:
+				yb += 400
+				// case 0x3E:
+				// yb += 300
 			}
 		}
 		y += sc * yb
@@ -560,7 +571,7 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 		}
 	}
 	p.Close()
-	adv := sc * face.HorizontalAdvance(gid)
+	adv := sc * hadv
 	// fmt.Println("hadv:", face.HorizontalAdvance(gid), "adv:", adv)
 	return adv
 }

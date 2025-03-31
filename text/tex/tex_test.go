@@ -42,49 +42,23 @@ func TestTex(t *testing.T) {
 		{`ops2-disp`, `$y = \bigsqcup \bigvee \bigwedge \bigodot \bigotimes \bigoplus \biguplus$`},
 		{`lb-sum-text`, `y = \left( \sum_{i=0}^{100} f(x_i) \right)`},
 		{`lb-sum-disp`, `$y = \left( \sum_{i=0}^{100} f(x_i) \right)$`},
-		// `a = \left[ \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right]`
-	}
-
-	for _, test := range tests {
-		// if test.name != "lb-sum-disp" {
-		// 	continue
-		// }
-		RunTest(t, test.name, 300, 100, func(pc *paint.Painter) {
-			pc.Fill.Color = colors.Uniform(color.Black)
-			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
-			pp, err := ParseLaTeX(test.tex, pc.Text.FontSize.Dots)
-			assert.NoError(t, err)
-			*pp = pp.Translate(0, 40)
-			pc.State.Path = *pp
-			pc.PathDone()
-			// reference text
-			// sh := shaped.NewShaper()
-			// tx := rich.NewText(&pc.Font, []rune("a=x"))
-			// lns := sh.WrapLines(tx, &pc.Font, &pc.Text, &rich.DefaultSettings, math32.Vec2(1000, 50))
-			// pc.TextLines(lns, math32.Vec2(0, 70))
-		})
-	}
-}
-
-func TestTexBig(t *testing.T) {
-	tests := []struct {
-		name string
-		tex  string
-	}{
-		{`delims-disp`, `\displaystyle\left(\vbox to 27pt{}\left(\vbox to 24pt{}\left(\vbox to 21pt{}
+		{`parens-all`, `$\left(\vbox to 27pt{}\left(\vbox to 24pt{}\left(\vbox to 21pt{}
 \Biggl(\biggl(\Bigl(\bigl(({\scriptstyle({\scriptscriptstyle(\hskip3pt
-)})})\bigr)\Bigr)\biggr)\Biggr)\right)\right)\right)
-\left\{\vbox to 27pt{}\left\{\vbox to 24pt{}\left\{\vbox to 21pt{}
+)})})\bigr)\Bigr)\biggr)\Biggr)\right)\right)\right)$`},
+		{`brackets-all`, `$\left[\vbox to 27pt{}\left[\vbox to 24pt{}\left[\vbox to 21pt{}
+\Biggl[\biggl[\Bigl[\bigl[{\scriptstyle[{\scriptscriptstyle[\hskip3pt
+]}]}]\bigr]\Bigr]\biggr]\Biggr]\right]\right]\right]$`},
+		{`braces-all`, `$\left\{\vbox to 27pt{}\left\{\vbox to 24pt{}\left\{\vbox to 21pt{}
 \Biggl\{\biggl\{\Bigl\{\bigl\{\{{\scriptstyle\{{\scriptscriptstyle\{\hskip3pt
-\}}\}}\}\bigr\}\Bigr\}\biggr\}\Biggr\}\right\}\right\}\right\}`},
+\}}\}}\}\bigr\}\Bigr\}\biggr\}\Biggr\}\right\}\right\}\right\}$`},
 		// `a = \left[ \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right]`
 	}
 
 	for _, test := range tests {
-		// if test.name != "lb-sum-disp" {
+		// if test.name != "brackets-all" {
 		// 	continue
 		// }
-		RunTest(t, test.name, 600, 200, func(pc *paint.Painter) {
+		RunTest(t, test.name, 300, 150, func(pc *paint.Painter) {
 			pc.Fill.Color = colors.Uniform(color.Black)
 			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
 			pp, err := ParseLaTeX(test.tex, pc.Text.FontSize.Dots)
