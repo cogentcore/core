@@ -253,13 +253,25 @@ func TestEmoji(t *testing.T) {
 
 func TestMath(t *testing.T) {
 	RunTest(t, "math", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		src := "y = f(x^2)"
+		src := `y = f(x^2)`
 		sty := rich.NewStyle()
 		tx := rich.NewText(sty, []rune("math: "))
-		tx.AddMath(sty, src)
+		tx.AddMathInline(sty, src)
 		tx.AddSpan(sty, []rune(" and we should check like wrapping too"))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
+		pc.TextLines(lns, pos)
+	})
+}
+
+func TestMathDisplay(t *testing.T) {
+	RunTest(t, "math-display", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		src := `y = \frac{1}{N} \left( \sum_{i=0}^{100} \frac{f(x^2)}{\sum x^2} \right)`
+		sty := rich.NewStyle()
+		var tx rich.Text
+		tx.AddMathDisplay(sty, src)
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 30)
 		pc.TextLines(lns, pos)
 	})
 }

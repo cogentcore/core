@@ -11,11 +11,11 @@ var _FamilyValues = []Family{0, 1, 2, 3, 4, 5, 6, 7, 8}
 // FamilyN is the highest valid value for type Family, plus one.
 const FamilyN Family = 9
 
-var _FamilyValueMap = map[string]Family{`sans-serif`: 0, `serif`: 1, `monospace`: 2, `cursive`: 3, `fantasy`: 4, `maths`: 5, `emoji`: 6, `fangsong`: 7, `custom`: 8}
+var _FamilyValueMap = map[string]Family{`sans-serif`: 0, `serif`: 1, `monospace`: 2, `cursive`: 3, `fantasy`: 4, `math`: 5, `emoji`: 6, `fangsong`: 7, `custom`: 8}
 
-var _FamilyDescMap = map[Family]string{0: `SansSerif is a font without serifs, where glyphs have plain stroke endings, without ornamentation. Example sans-serif fonts include Arial, Helvetica, Open Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Liberation Sans, and Nimbus Sans L.`, 1: `Serif is a small line or stroke attached to the end of a larger stroke in a letter. In serif fonts, glyphs have finishing strokes, flared or tapering ends. Examples include Times New Roman, Lucida Bright, Lucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.`, 2: `Monospace fonts have all glyphs with he same fixed width. Example monospace fonts include Fira Mono, DejaVu Sans Mono, Menlo, Consolas, Liberation Mono, Monaco, and Lucida Console.`, 3: `Cursive glyphs generally have either joining strokes or other cursive characteristics beyond those of italic typefaces. The glyphs are partially or completely connected, and the result looks more like handwritten pen or brush writing than printed letter work. Example cursive fonts include Brush Script MT, Brush Script Std, Lucida Calligraphy, Lucida Handwriting, and Apple Chancery.`, 4: `Fantasy fonts are primarily decorative fonts that contain playful representations of characters. Example fantasy fonts include Papyrus, Herculanum, Party LET, Curlz MT, and Harrington.`, 5: `Maths fonts are for displaying mathematical expressions, for example superscript and subscript, brackets that cross several lines, nesting expressions, and double-struck glyphs with distinct meanings.`, 6: `Emoji fonts are specifically designed to render emoji.`, 7: `Fangsong are a particular style of Chinese characters that are between serif-style Song and cursive-style Kai forms. This style is often used for government documents.`, 8: `Custom is a custom font name that can be set in Settings.`}
+var _FamilyDescMap = map[Family]string{0: `SansSerif is a font without serifs, where glyphs have plain stroke endings, without ornamentation. Example sans-serif fonts include Arial, Helvetica, Open Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Liberation Sans, and Nimbus Sans L.`, 1: `Serif is a small line or stroke attached to the end of a larger stroke in a letter. In serif fonts, glyphs have finishing strokes, flared or tapering ends. Examples include Times New Roman, Lucida Bright, Lucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.`, 2: `Monospace fonts have all glyphs with he same fixed width. Example monospace fonts include Fira Mono, DejaVu Sans Mono, Menlo, Consolas, Liberation Mono, Monaco, and Lucida Console.`, 3: `Cursive glyphs generally have either joining strokes or other cursive characteristics beyond those of italic typefaces. The glyphs are partially or completely connected, and the result looks more like handwritten pen or brush writing than printed letter work. Example cursive fonts include Brush Script MT, Brush Script Std, Lucida Calligraphy, Lucida Handwriting, and Apple Chancery.`, 4: `Fantasy fonts are primarily decorative fonts that contain playful representations of characters. Example fantasy fonts include Papyrus, Herculanum, Party LET, Curlz MT, and Harrington.`, 5: `Math fonts are for displaying mathematical expressions, for example superscript and subscript, brackets that cross several lines, nesting expressions, and double-struck glyphs with distinct meanings.`, 6: `Emoji fonts are specifically designed to render emoji.`, 7: `Fangsong are a particular style of Chinese characters that are between serif-style Song and cursive-style Kai forms. This style is often used for government documents.`, 8: `Custom is a custom font name that is specified in the [text.Style] CustomFont name.`}
 
-var _FamilyMap = map[Family]string{0: `sans-serif`, 1: `serif`, 2: `monospace`, 3: `cursive`, 4: `fantasy`, 5: `maths`, 6: `emoji`, 7: `fangsong`, 8: `custom`}
+var _FamilyMap = map[Family]string{0: `sans-serif`, 1: `serif`, 2: `monospace`, 3: `cursive`, 4: `fantasy`, 5: `math`, 6: `emoji`, 7: `fangsong`, 8: `custom`}
 
 // String returns the string representation of this Family value.
 func (i Family) String() string { return enums.String(i, _FamilyMap) }
@@ -225,16 +225,16 @@ func (i *Decorations) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Decorations")
 }
 
-var _SpecialsValues = []Specials{0, 1, 2, 3, 4, 5, 6}
+var _SpecialsValues = []Specials{0, 1, 2, 3, 4, 5, 6, 7}
 
 // SpecialsN is the highest valid value for type Specials, plus one.
-const SpecialsN Specials = 7
+const SpecialsN Specials = 8
 
-var _SpecialsValueMap = map[string]Specials{`nothing`: 0, `super`: 1, `sub`: 2, `link`: 3, `math`: 4, `quote`: 5, `end`: 6}
+var _SpecialsValueMap = map[string]Specials{`nothing`: 0, `super`: 1, `sub`: 2, `link`: 3, `math-inline`: 4, `math-display`: 5, `quote`: 6, `end`: 7}
 
-var _SpecialsDescMap = map[Specials]string{0: `Nothing special.`, 1: `Super starts super-scripted text.`, 2: `Sub starts sub-scripted text.`, 3: `Link starts a hyperlink, which is in the URL field of the style, and encoded in the runes after the style runes. It also identifies this span for functional interactions such as hovering and clicking. It does not specify the styling, which therefore must be set in addition.`, 4: `Math starts a LaTeX formatted math sequence.`, 5: `Quote starts an indented paragraph-level quote.`, 6: `End must be added to terminate the last Special started: use [Text.AddEnd]. The renderer maintains a stack of special elements.`}
+var _SpecialsDescMap = map[Specials]string{0: `Nothing special.`, 1: `Super starts super-scripted text.`, 2: `Sub starts sub-scripted text.`, 3: `Link starts a hyperlink, which is in the URL field of the style, and encoded in the runes after the style runes. It also identifies this span for functional interactions such as hovering and clicking. It does not specify the styling, which therefore must be set in addition.`, 4: `MathInline starts a TeX formatted math sequence, styled for inclusion inline with other text.`, 5: `MathDisplay starts a TeX formatted math sequence, styled as a larger standalone display.`, 6: `Quote starts an indented paragraph-level quote.`, 7: `End must be added to terminate the last Special started: use [Text.AddEnd]. The renderer maintains a stack of special elements.`}
 
-var _SpecialsMap = map[Specials]string{0: `nothing`, 1: `super`, 2: `sub`, 3: `link`, 4: `math`, 5: `quote`, 6: `end`}
+var _SpecialsMap = map[Specials]string{0: `nothing`, 1: `super`, 2: `sub`, 3: `link`, 4: `math-inline`, 5: `math-display`, 6: `quote`, 7: `end`}
 
 // String returns the string representation of this Specials value.
 func (i Specials) String() string { return enums.String(i, _SpecialsMap) }

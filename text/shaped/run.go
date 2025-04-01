@@ -45,6 +45,12 @@ type Run interface {
 	SetGlyphXAdvance(adv fixed.Int26_6)
 }
 
+// Math holds the output of a TeX math expression.
+type Math struct {
+	Path *ppath.Path
+	BBox math32.Box2
+}
+
 // Run is a span of text with the same font properties, with full rendering information.
 type RunBase struct {
 
@@ -58,9 +64,8 @@ type RunBase struct {
 	// Decoration are the decorations from the style to apply to this run.
 	Decoration rich.Decorations
 
-	// Path is an optional rendering of the text directly in glyph paths,
-	// which is used for Math formatting via the tex package.
-	Path *ppath.Path
+	// Math holds the output of Math formatting via the tex package.
+	Math Math
 
 	// FillColor is the color to use for glyph fill (i.e., the standard "ink" color).
 	// Will only be non-nil if set for this run; Otherwise use default.

@@ -139,7 +139,7 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 					case "q":
 						special = rich.Quote
 					case "math":
-						special = rich.Math
+						special = rich.MathInline
 					case "sup":
 						special = rich.Super
 						fs.Size = 0.8
@@ -172,6 +172,12 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 						case "style":
 							styleprops.FromXMLString(vl, sprop)
 						case "class":
+							if vl == "math inline" {
+								special = rich.MathInline
+							}
+							if vl == "math display" {
+								special = rich.MathDisplay
+							}
 							if cssProps != nil {
 								clnm := "." + vl
 								if aggp, ok := SubProperties(clnm, cssProps); ok {

@@ -140,8 +140,10 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				fmt.Println("combined original span:", cend, cspEd-cspSt, cspi, string(cr), "prev:", string(nr), "next:", string(cr[cend:]))
 			}
 			run.SetFromStyle(sty, tsty)
-			if sty.Special == rich.Math {
-				sh.ShapeMathRun(&run, sty, tsty, nr)
+			if sty.IsMath() {
+				mt := sh.maths[cspi]
+				run.Math = *mt
+				run.MaxBounds = mt.BBox
 				bb := run.MaxBounds.Translate(math32.Vector2FromFixed(pos))
 				ln.Bounds.ExpandByBox(bb)
 				pos.X += math32.ToFixed(run.MaxBounds.Size().X)

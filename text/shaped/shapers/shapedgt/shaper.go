@@ -29,6 +29,7 @@ type Shaper struct {
 	wrapper  shaping.LineWrapper
 	fontMap  *fontscan.FontMap
 	splitter shaping.Segmenter
+	maths    map[int]*shaped.Math
 
 	// outBuff is the output buffer to avoid excessive memory consumption.
 	outBuff []shaping.Output
@@ -87,10 +88,13 @@ func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 	for i := range outs {
 		run := &Run{Output: outs[i]}
 		si, _, _ := tx.Index(run.Runes().Start)
-		sty, stx := tx.Span(si)
+		sty, _ := tx.Span(si)
 		run.SetFromStyle(sty, tsty)
-		if sty.Special == rich.Math {
-			sh.ShapeMathRun(run, sty, tsty, stx)
+		if sty.IsMath() {
+			mt := sh.maths[si]
+			run.Math = *mt
+			run.MaxBounds = mt.BBox
+			run.Output.Advance = math32.ToFixed(mt.BBox.Size().X)
 		}
 		runs[i] = run
 	}
@@ -103,6 +107,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 	if tx.Len() == 0 {
 		return nil
 	}
+	sh.ShapeMaths(tx, tsty)
 	sty := rich.NewStyle()
 	sh.outBuff = sh.outBuff[:0]
 	for si, s := range tx {
@@ -112,20 +117,16 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		if len(stx) == 0 {
 			continue
 		}
-		// todo: reenable when go-text updated..
-		// if sty.Special == rich.Math {
-		// 	o := shaping.Output{}
-		// 	o.Runes.Offset = start
-		// 	o.Runes.Count = end - start
-		// 	// todo: need to render this first and get bb, but we don't have
-		// 	// any place to stick it yet, b/c just have output and not run.
-		// 	// it is possible go-text may include an Output interface so we
-		// 	// could stick it there.
-		// 	// o.Advance = math32.ToFixed(bb.Size().X)
-		// 	sh.outBuff = append(sh.outBuff, o)
-		// 	si++ // skip the end special
-		// 	continue
-		// }
+		if sty.IsMath() {
+			mt := sh.maths[si]
+			o := shaping.Output{}
+			o.Runes.Offset = start
+			o.Runes.Count = end - start
+			o.Advance = math32.ToFixed(mt.BBox.Size().X)
+			sh.outBuff = append(sh.outBuff, o)
+			si++ // skip the end special
+			continue
+		}
 		q := StyleToQuery(sty, tsty, rts)
 		sh.fontMap.SetQuery(q)
 
@@ -152,13 +153,29 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 	return sh.outBuff
 }
 
-// ShapeMathRun runs tex math to get path for math special
-func (sh *Shaper) ShapeMathRun(run *Run, sty *rich.Style, tsty *text.Style, stx []rune) {
-	p := errors.Log1(tex.ParseLaTeX(string(stx), tsty.FontSize.Dots*sty.Size))
-	run.Path = p
+// ShapeMaths runs TeX on all Math specials, saving results in maths
+// map indexed by the span index.
+func (sh *Shaper) ShapeMaths(tx rich.Text, tsty *text.Style) {
+	sh.maths = make(map[int]*shaped.Math)
+	for si, _ := range tx {
+		sty, stx := tx.Span(si)
+		if sty.IsMath() {
+			mt := sh.ShapeMath(sty, tsty, stx)
+			sh.maths[si] = mt
+			si++ // skip past special
+		}
+	}
+}
+
+// ShapeMath runs tex math to get path for math special
+func (sh *Shaper) ShapeMath(sty *rich.Style, tsty *text.Style, stx []rune) *shaped.Math {
+	mstr := string(stx)
+	if sty.Special == rich.MathDisplay {
+		mstr = "$" + mstr + "$"
+	}
+	p := errors.Log1(tex.ParseLaTeX(mstr, tsty.FontSize.Dots*sty.Size))
 	bb := p.FastBounds()
-	run.MaxBounds = bb
-	run.Output.Advance = math32.ToFixed(bb.Size().X)
+	return &shaped.Math{Path: p, BBox: bb}
 }
 
 // todo: do the paragraph splitting!  write fun in rich.Text

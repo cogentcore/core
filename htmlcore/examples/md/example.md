@@ -7,7 +7,11 @@ This is a sample _MD_ (markdown) **document** displayed using `htmlcore`.
 This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), which you can _click_ on to see helpful **documentation** and examples for the *Cogent Core* framework.
 
 You can include math: $ a = f(x^2) $ inline and:
-$$ a = f(x^2) $$
+
+$$
+a = \frac{f(x^2)}{\sum_i^j f(x_i^2)}
+$$
+
 as a standalone item.
 
 # Heading 1

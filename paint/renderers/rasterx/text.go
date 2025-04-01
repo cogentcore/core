@@ -121,9 +121,9 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	stroke := run.StrokeColor
 	fsz := math32.FromFixed(run.Size)
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		rs.Path.Clear()
-		PathToRasterx(&rs.Path, *run.Path, ctx.Transform, off)
+		PathToRasterx(&rs.Path, *run.Math.Path, ctx.Transform, off)
 		rf := &rs.Raster.Filler
 		rf.SetWinding(true)
 		rf.SetColor(fill)

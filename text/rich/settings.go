@@ -141,7 +141,7 @@ func (rts *Settings) Family(fam Family) string {
 		return AddFamily(rts.Cursive, "cursive")
 	case Fantasy:
 		return AddFamily(rts.Fantasy, "fantasy")
-	case Maths:
+	case Math:
 		return AddFamily(rts.Math, "math")
 	case Emoji:
 		return AddFamily(rts.Emoji, "emoji")

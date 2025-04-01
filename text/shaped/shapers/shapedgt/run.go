@@ -37,7 +37,7 @@ func (run *Run) Runes() textpos.Range {
 // GlyphBoundsBox returns the math32.Box2 version of [Run.GlyphBounds],
 // providing a tight bounding box for given glyph within this run.
 func (run *Run) GlyphBoundsBox(g *shaping.Glyph) math32.Box2 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds
 	}
 	return math32.B2FromFixed(run.GlyphBounds(g))
@@ -45,7 +45,7 @@ func (run *Run) GlyphBoundsBox(g *shaping.Glyph) math32.Box2 {
 
 // GlyphBounds returns the tight bounding box for given glyph within this run.
 func (run *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds.ToFixed()
 	}
 	if run.Direction.IsVertical() {
@@ -61,7 +61,7 @@ func (run *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 // GlyphLineBoundsBox returns the math32.Box2 version of [Run.GlyphLineBounds],
 // providing a line-level bounding box for given glyph within this run.
 func (run *Run) GlyphLineBoundsBox(g *shaping.Glyph) math32.Box2 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds
 	}
 	return math32.B2FromFixed(run.GlyphLineBounds(g))
@@ -69,7 +69,7 @@ func (run *Run) GlyphLineBoundsBox(g *shaping.Glyph) math32.Box2 {
 
 // GlyphLineBounds returns the line-level bounding box for given glyph within this run.
 func (run *Run) GlyphLineBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds.ToFixed()
 	}
 	rb := run.Bounds()
@@ -86,7 +86,7 @@ func (run *Run) GlyphLineBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 // LineBounds returns the LineBounds for given Run as a math32.Box2
 // bounding box
 func (run *Run) LineBounds() math32.Box2 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds
 	}
 	return math32.B2FromFixed(run.Bounds())
@@ -95,7 +95,7 @@ func (run *Run) LineBounds() math32.Box2 {
 // Bounds returns the LineBounds for given Run as rect bounding box.
 // See [Run.BoundsBox] for a version returning the float32 [math32.Box2].
 func (run *Run) Bounds() fixed.Rectangle26_6 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds.ToFixed()
 	}
 	mb := run.MaxBounds
@@ -112,7 +112,7 @@ func (run *Run) Bounds() fixed.Rectangle26_6 {
 // that reflects the total space of the run, using Ascent & Descent for font
 // for the vertical dimension in horizontal text.
 func (run *Run) RunBounds() fixed.Rectangle26_6 {
-	if run.Path != nil {
+	if run.Math.Path != nil {
 		return run.MaxBounds.ToFixed()
 	}
 	lb := &run.Output.LineBounds

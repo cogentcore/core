@@ -23,8 +23,8 @@ func TestColors(t *testing.T) {
 
 func TestStyle(t *testing.T) {
 	s := NewStyle()
-	s.Family = Maths
-	s.Special = Math
+	s.Family = Math
+	s.Special = MathInline
 	s.SetBackground(colors.Blue)
 
 	sr := RuneFromSpecial(s.Special)

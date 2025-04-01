@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/runes"
 	"golang.org/x/net/html/charset"
 )
 
@@ -92,7 +93,7 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 				case "q":
 					special = rich.Quote
 				case "math":
-					special = rich.Math
+					special = rich.MathInline
 				case "sup":
 					special = rich.Super
 					fs.Size = 0.8
@@ -123,7 +124,10 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 						styleprops.FromXMLString(attr.Value, sprop)
 					case "class":
 						if attr.Value == "math inline" {
-							special = rich.Math
+							special = rich.MathInline
+						}
+						if attr.Value == "math display" {
+							special = rich.MathDisplay
 						}
 						if cssProps != nil {
 							clnm := "." + attr.Value
@@ -167,6 +171,21 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 				nsp := rich.Text{}
 				nsp.EndSpecial()
 				spstack.Push(nsp)
+			case "span":
+				sty, stx := curSp.Span(0)
+				if sty.Special != rich.Nothing {
+					if sty.IsMath() {
+						stx = runes.TrimPrefix(stx, []rune("\\("))
+						stx = runes.TrimSuffix(stx, []rune("\\)"))
+						stx = runes.TrimPrefix(stx, []rune("\\["))
+						stx = runes.TrimSuffix(stx, []rune("\\]"))
+						fmt.Println("math:", string(stx))
+						curSp.SetSpanRunes(0, stx)
+					}
+					nsp := rich.Text{}
+					nsp.EndSpecial()
+					spstack.Push(nsp)
+				}
 			}
 
 			if len(fstack) > 0 {

@@ -157,10 +157,10 @@ const (
 	// Herculanum, Party LET, Curlz MT, and Harrington.
 	Fantasy
 
-	//	Maths fonts are for displaying mathematical expressions, for example
+	//	Math fonts are for displaying mathematical expressions, for example
 	// superscript and subscript, brackets that cross several lines, nesting
 	// expressions, and double-struck glyphs with distinct meanings.
-	Maths
+	Math
 
 	// Emoji fonts are specifically designed to render emoji.
 	Emoji
@@ -347,8 +347,13 @@ const (
 	// which therefore must be set in addition.
 	Link
 
-	// Math starts a LaTeX formatted math sequence.
-	Math
+	// MathInline starts a TeX formatted math sequence, styled for
+	// inclusion inline with other text.
+	MathInline
+
+	// MathDisplay starts a TeX formatted math sequence, styled as
+	// a larger standalone display.
+	MathDisplay
 
 	// Quote starts an indented paragraph-level quote.
 	Quote
@@ -434,6 +439,11 @@ func (s *Style) SetLink(url string) *Style {
 	s.URL = url
 	s.Special = Link
 	return s.SetLinkStyle()
+}
+
+// IsMath returns true if is a Special MathInline or MathDisplay.
+func (s *Style) IsMath() bool {
+	return s.Special == MathInline || s.Special == MathDisplay
 }
 
 func (s *Style) String() string {

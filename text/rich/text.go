@@ -161,6 +161,15 @@ func (tx *Text) SetSpanStyle(si int, nsty *Style) *Text {
 	return tx
 }
 
+// SetSpanRunes sets the runes for given span.
+func (tx *Text) SetSpanRunes(si int, r []rune) *Text {
+	sty, _ := tx.Span(si)
+	nr := sty.ToRunes()
+	nr = append(nr, r...)
+	(*tx)[si] = nr
+	return tx
+}
+
 // AddSpan adds a span to the Text using the given Style and runes.
 // The Text is modified for convenience in the high-frequency use-case.
 // Clone first to avoid changing the original.
@@ -292,11 +301,19 @@ func (tx *Text) AddSub(s *Style, text string) *Text {
 	return tx.EndSpecial()
 }
 
-// AddMath adds a [Math] special with given text.
+// AddMathInline adds a [MathInline] special with given text.
 // This calls StartSpecial and EndSpecial for you. If the Math requires
 // further formatting, use those functions separately.
-func (tx *Text) AddMath(s *Style, text string) *Text {
-	tx.StartSpecial(s, Math, []rune(text))
+func (tx *Text) AddMathInline(s *Style, text string) *Text {
+	tx.StartSpecial(s, MathInline, []rune(text))
+	return tx.EndSpecial()
+}
+
+// AddMathDisplay adds a [MathDisplay] special with given text.
+// This calls StartSpecial and EndSpecial for you. If the Math requires
+// further formatting, use those functions separately.
+func (tx *Text) AddMathDisplay(s *Style, text string) *Text {
+	tx.StartSpecial(s, MathDisplay, []rune(text))
 	return tx.EndSpecial()
 }
 
