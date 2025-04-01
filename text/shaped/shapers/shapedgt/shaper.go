@@ -94,7 +94,7 @@ func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 			mt := sh.maths[si]
 			run.Math = *mt
 			run.MaxBounds = mt.BBox
-			run.Output.Advance = math32.ToFixed(mt.BBox.Size().X)
+			run.Output.Advance = math32.ToFixed(mt.BBox.Size().X + 5)
 		}
 		runs[i] = run
 	}
@@ -122,7 +122,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 			o := shaping.Output{}
 			o.Runes.Offset = start
 			o.Runes.Count = end - start
-			o.Advance = math32.ToFixed(mt.BBox.Size().X)
+			o.Advance = math32.ToFixed(mt.BBox.Size().X + 5)
 			sh.outBuff = append(sh.outBuff, o)
 			si++ // skip the end special
 			continue

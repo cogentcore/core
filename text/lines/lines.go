@@ -540,8 +540,6 @@ func (ls *Lines) deleteTextRectImpl(st, ed textpos.Pos) *textpos.Edit {
 				ls.lines[ln] = l[:st.Char]
 				// fmt.Println(ln, "trunc", st.Char, ed.Char, string(ls.lines[ln]))
 			}
-		} else {
-			panic(fmt.Sprintf("deleteTextRectImpl: line does not have text: %d < st.Char: %d", len(l), st.Char))
 		}
 	}
 	ls.linesEdited(tbe)

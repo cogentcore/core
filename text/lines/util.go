@@ -214,7 +214,7 @@ func (ls *Lines) autoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
 		pInd, delInd, _, _ = lexer.BracketIndentLine(ls.lines, ls.hiTags, ln, tabSz)
 	}
 	ichr := ls.Settings.IndentChar()
-	indLev = pInd + delInd
+	indLev = max(pInd+delInd, 0)
 	chPos = indent.Len(ichr, indLev, tabSz)
 	tbe = ls.indentLine(ln, indLev)
 	return
