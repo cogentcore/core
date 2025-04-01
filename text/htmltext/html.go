@@ -179,7 +179,7 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 						stx = runes.TrimSuffix(stx, []rune("\\)"))
 						stx = runes.TrimPrefix(stx, []rune("\\["))
 						stx = runes.TrimSuffix(stx, []rune("\\]"))
-						fmt.Println("math:", string(stx))
+						// fmt.Println("math:", string(stx))
 						curSp.SetSpanRunes(0, stx)
 					}
 					nsp := rich.Text{}

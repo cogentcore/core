@@ -9,7 +9,7 @@ This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), 
 You can include math: $ a = f(x^2) $ inline and:
 
 $$
-a = \frac{f(x^2)}{\sum_i^j f(x_i^2)}
+a = b_j^2 f(x^2)
 $$
 
 as a standalone item.
