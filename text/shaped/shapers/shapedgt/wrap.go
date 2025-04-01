@@ -100,6 +100,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 		var pos fixed.Point26_6
 		setFirst := false
 		var maxAsc fixed.Int26_6
+		maxLHt := lht
 		for oi := range lno {
 			out := &lno[oi]
 			if !dir.IsVertical() { // todo: vertical
@@ -151,6 +152,8 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				// fmt.Println("math ysz:", ysz, "maxAsc:", maxAsc)
 				maxAsc = max(maxAsc, math32.ToFixed(ysz))
 			} else {
+				llht := tsty.LineHeightDots(sty)
+				maxLHt = max(maxLHt, llht)
 				bb := math32.B2FromFixed(run.RunBounds().Add(pos))
 				// fmt.Println(bb.Size().Y, lht)
 				ln.Bounds.ExpandByBox(bb)
@@ -184,12 +187,12 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 		} else { // always top-down, no progression issues
 			lby := ln.Bounds.Size().Y // the result at this point is centered with this height
 			// which includes the natural line height property of the font itself.
-			lpd := 0.5 * (lns.LineHeight - lby) // half of diff
-			ourOff.Y += lpd
+			lpd := 0.5 * (maxLHt - lby) // half of diff
+			ourOff.Y += (lpd + (maxLHt - lns.LineHeight))
 			ln.Bounds.Min.Y -= lpd
 			ln.Bounds.Max.Y += lpd
-			off.Y += lns.LineHeight
-			// fmt.Println("lby:", lby, fsz, lns.LineHeight, lpd, ourOff.Y)
+			off.Y += maxLHt
+			// fmt.Println("lby:", lby, fsz, maxLHt, lpd, ourOff.Y)
 		}
 		// go back through and give every run the expanded line-level box
 		for ri := range ln.Runs {
