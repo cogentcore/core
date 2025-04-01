@@ -55,7 +55,7 @@ func TestBasic(t *testing.T) {
 		ul := rich.NewStyle()
 		ul.Decoration.SetFlag(true, rich.Underline)
 
-		tx := rich.NewText(plain, sr[:4])
+		tx := rich.NewText(boldBig, sr[:4])
 		tx.AddSpan(ital, sr[4:8])
 		fam := []rune("familiar")
 		ix := runes.Index(sr, fam)

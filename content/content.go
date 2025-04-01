@@ -203,12 +203,12 @@ func (ct *Content) Init() {
 			cp += "</p>\n"
 			w.Write([]byte(cp))
 		} else if entering {
-			cp := "\n<p id=\"" + value + "\"><b>" + lbl + ":</b>"
+			cp := "\n<span id=\"" + value + "\"><b>" + lbl + ":</b>"
 			title := htmlcore.MDGetAttr(node, "title")
 			if title != "" {
 				cp += " " + title
 			}
-			cp += "</p>\n"
+			cp += "</span>\n"
 			w.Write([]byte(cp))
 			// fmt.Println("id:", value, lbl)
 			// fmt.Printf("%#v\n", node)

@@ -150,7 +150,8 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				pos.X += math32.ToFixed(run.MaxBounds.Size().X)
 				ysz := bb.Size().Y
 				// fmt.Println("math ysz:", ysz, "maxAsc:", maxAsc)
-				maxAsc = max(maxAsc, math32.ToFixed(ysz))
+				maxAsc = max(maxAsc, math32.ToFixed(-bb.Min.Y))
+				maxLHt = max(maxLHt, ysz)
 			} else {
 				llht := tsty.LineHeightDots(sty)
 				maxLHt = max(maxLHt, llht)
@@ -188,7 +189,9 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			lby := ln.Bounds.Size().Y // the result at this point is centered with this height
 			// which includes the natural line height property of the font itself.
 			lpd := 0.5 * (maxLHt - lby) // half of diff
-			ourOff.Y += (lpd + (maxLHt - lns.LineHeight))
+			if li > 0 {
+				ourOff.Y += (lpd + (maxLHt - lns.LineHeight))
+			}
 			ln.Bounds.Min.Y -= lpd
 			ln.Bounds.Max.Y += lpd
 			off.Y += maxLHt
