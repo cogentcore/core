@@ -147,7 +147,9 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				bb := run.MaxBounds.Translate(math32.Vector2FromFixed(pos))
 				ln.Bounds.ExpandByBox(bb)
 				pos.X += math32.ToFixed(run.MaxBounds.Size().X)
-				// fmt.Println("math bb:", bb, pos, ln.Bounds)
+				ysz := bb.Size().Y
+				// fmt.Println("math ysz:", ysz, "maxAsc:", maxAsc)
+				maxAsc = max(maxAsc, math32.ToFixed(ysz))
 			} else {
 				bb := math32.B2FromFixed(run.RunBounds().Add(pos))
 				// fmt.Println(bb.Size().Y, lht)
