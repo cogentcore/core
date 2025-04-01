@@ -183,14 +183,12 @@ func (ct *Content) Init() {
 			return false
 		}
 		lbl := ct.currentPage.SpecialLabel(value)
-		// fmt.Println("id:", value, lbl)
-		// fmt.Printf("%#v\n", node)
-		cp := "\n<p><b>" + lbl + ":</b>"
 		ch := node.GetChildren()
 		if len(ch) == 2 { // image
 			if entering {
 				return false
 			}
+			cp := "\n<p><b>" + lbl + ":</b>"
 			if img, ok := ch[1].(*ast.Image); ok {
 				// fmt.Printf("Image: %s\n", string(img.Destination))
 				// fmt.Printf("Image: %#v\n", img)
@@ -205,12 +203,15 @@ func (ct *Content) Init() {
 			cp += "</p>\n"
 			w.Write([]byte(cp))
 		} else if entering {
+			cp := "\n<p id=\"" + value + "\"><b>" + lbl + ":</b>"
 			title := htmlcore.MDGetAttr(node, "title")
 			if title != "" {
 				cp += " " + title
 			}
 			cp += "</p>\n"
 			w.Write([]byte(cp))
+			// fmt.Println("id:", value, lbl)
+			// fmt.Printf("%#v\n", node)
 		}
 		return false
 	}
