@@ -258,7 +258,11 @@ func textEditors(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
 
 	sp := core.NewSplits(tab)
-	errors.Log(textcore.NewEditor(sp).Lines.OpenFS(demoFile, "demo.go"))
+	ed := textcore.NewEditor(sp)
+	ed.Styler(func(s *styles.Style) {
+		s.Padding.Set(units.Em(core.ConstantSpacing(1)))
+	})
+	ed.Lines.OpenFS(demoFile, "demo.go")
 	textcore.NewEditor(sp).Lines.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
 }
 

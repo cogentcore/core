@@ -28,15 +28,18 @@ func (fr *Frame) hasAnyScroll() bool {
 // ScrollGeom returns the target position and size for scrollbars
 func (fr *Frame) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
 	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
+	sbwb := sbw + fr.Styles.Border.Width.Right.Dots + fr.Styles.Margin.Right.Dots
 	od := d.Other()
 	bbmin := math32.FromPoint(fr.Geom.ContentBBox.Min)
 	bbmax := math32.FromPoint(fr.Geom.ContentBBox.Max)
+	bbtmax := math32.FromPoint(fr.Geom.TotalBBox.Max)
 	if fr.This != fr.Scene.This { // if not the scene, keep inside the scene
 		bbmin.SetMax(math32.FromPoint(fr.Scene.Geom.ContentBBox.Min))
-		bbmax.SetMin(math32.FromPoint(fr.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
+		bbmax.SetMin(math32.FromPoint(fr.Scene.Geom.ContentBBox.Max))
+		bbtmax.SetMin(math32.FromPoint(fr.Scene.Geom.TotalBBox.Max))
 	}
 	pos.SetDim(d, bbmin.Dim(d))
-	pos.SetDim(od, bbmax.Dim(od))
+	pos.SetDim(od, bbtmax.Dim(od)-sbwb) // base from total
 	bbsz := bbmax.Sub(bbmin)
 	sz.SetDim(d, bbsz.Dim(d)-4)
 	sz.SetDim(od, sbw)
