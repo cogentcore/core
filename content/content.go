@@ -33,6 +33,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/tree"
@@ -237,6 +238,7 @@ func (ct *Content) Init() {
 				tree.Add(p, func(w *core.Frame) {
 					w.Styler(func(s *styles.Style) {
 						s.Direction = styles.Column
+						s.Margin.SetHorizontal(units.Em(core.ConstantSpacing(2)))
 						s.Grow.Set(1, 1)
 					})
 					w.Updater(func() {
