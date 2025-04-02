@@ -269,8 +269,9 @@ func handleElement(ctx *Context) {
 	}
 }
 
-func textStyler(s *styles.Style) {
+func (ctx *Context) textStyler(s *styles.Style) {
 	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+	s.Font.Size = ctx.FontScale
 	// TODO: it would be ideal for htmlcore to automatically save a scale factor
 	// in general and for each domain, that is applied only to page content
 	// scale := float32(1.2)
@@ -283,7 +284,7 @@ func textStyler(s *styles.Style) {
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context) *core.Text {
 	tx := New[core.Text](ctx).SetText(ExtractText(ctx))
-	tx.Styler(textStyler)
+	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -299,7 +300,7 @@ func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
-	tx.Styler(textStyler)
+	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})

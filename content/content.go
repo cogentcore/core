@@ -238,7 +238,7 @@ func (ct *Content) Init() {
 				tree.Add(p, func(w *core.Frame) {
 					w.Styler(func(s *styles.Style) {
 						s.Direction = styles.Column
-						s.Margin.SetHorizontal(units.Em(core.ConstantSpacing(2)))
+						s.Padding.SetHorizontal(units.Em(core.ConstantSpacing(2)))
 						s.Grow.Set(1, 1)
 					})
 					w.Updater(func() {
