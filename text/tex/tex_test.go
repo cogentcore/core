@@ -54,10 +54,11 @@ func TestTex(t *testing.T) {
 		{`sqrt-all`, `$\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+\sqrt{1+x}}}}}}}$`},
 		{`frac-text`, `a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)`},
 		{`frac-disp`, `$a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)$`},
+		{`partial-text`, `y = \partial x`},
 	}
 
 	for _, test := range tests {
-		// if test.name != "sqrt-all" {
+		// if test.name != "partial-text" {
 		// 	continue
 		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {

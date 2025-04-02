@@ -183,15 +183,17 @@ var LMFonts = []fonts.FontData{
 //	cmssbx: Sans serif bold extended (10pt)
 //	cmdunh: Dunhill style (10pt)
 type dviFonts struct {
-	font map[string]*dviFont
+	font     map[string]*dviFont
+	mathSyms *dviFont // always available as backup for any rune
 }
 
 type dviFont struct {
-	face   *font.Face
-	cmap   map[uint32]rune
-	size   float32
-	italic bool
-	ex     bool
+	face     *font.Face
+	cmap     map[uint32]rune
+	size     float32
+	italic   bool
+	ex       bool
+	mathSyms *dviFont // always available as backup for any rune
 }
 
 func newFonts() *dviFonts {
@@ -211,6 +213,10 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 		fontsize = float32(ifontsize)
 	}
 	// fmt.Println("font name:", fontname, fontsize, scale)
+
+	if fs.mathSyms == nil {
+		fs.mathSyms = fs.loadFont("cmsy", cmapCMSY, 10.0, scale, lmmath.TTF)
+	}
 
 	cmap := cmapCMR
 	f, ok := fs.font[name]
@@ -375,22 +381,23 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				size = isize
 			}
 		}
-
-		// load font
-		faces, err := font.ParseTTC(bytes.NewReader(data))
-		if err != nil {
-			fmt.Println("ERROR: %w", err)
-		}
-		face := faces[0]
-		fsize := scale * fontsize
-		isItalic := 0 < len(fontname) && fontname[len(fontname)-1] == 'i'
-		fsizeCorr := float32(1.0)
-		isEx := fontname == "cmex"
-
-		f = &dviFont{face, cmap, fsizeCorr * fsize, isItalic, isEx}
+		f = fs.loadFont(fontname, cmap, fontsize, scale, data)
 		fs.font[name] = f
 	}
 	return f
+}
+
+func (fs *dviFonts) loadFont(fontname string, cmap map[uint32]rune, fontsize, scale float32, data []byte) *dviFont {
+	faces, err := font.ParseTTC(bytes.NewReader(data))
+	if err != nil { // todo: should still work presumably?
+		errors.Log(err)
+	}
+	face := faces[0]
+	fsize := scale * fontsize
+	isItalic := 0 < len(fontname) && fontname[len(fontname)-1] == 'i'
+	isEx := fontname == "cmex"
+
+	return &dviFont{face: face, cmap: cmap, size: fsize, italic: isItalic, ex: isEx, mathSyms: fs.mathSyms}
 }
 
 const (
@@ -518,7 +525,15 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	face := f.face
 	gid, ok := face.Cmap.Lookup(r)
 	if !ok {
-		fmt.Println("rune not found:", string(r))
+		if f.mathSyms != nil {
+			face = f.mathSyms.face
+			gid, ok = face.Cmap.Lookup(r)
+			if !ok {
+				fmt.Println("rune not found in mathSyms:", string(r))
+			}
+		} else {
+			fmt.Println("rune not found:", string(r))
+		}
 	}
 	hadv := face.HorizontalAdvance(gid)
 	// fmt.Printf("rune: 0x%0x gid: %d, r: 0x%0X\n", cid, gid, int(r))
