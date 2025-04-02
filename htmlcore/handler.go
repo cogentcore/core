@@ -111,29 +111,45 @@ func handleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			cl := New[core.Collapser](ctx)
-			core.NewText(cl.Summary).SetText("Code")
-			ed := textcore.NewEditor(cl.Details)
-			ctx.Node = ctx.Node.FirstChild // go to the code element
-			id := GetAttr(ctx.Node, "id")
-			if id != "" {
-				cl.Summary.Name = id
+			codeEl := ctx.Node.FirstChild
+			collapsed := GetAttr(codeEl, "collapsed")
+			lang := getLanguage(GetAttr(codeEl, "class"))
+			id := GetAttr(codeEl, "id")
+			var ed *textcore.Editor
+			var parent tree.Node
+			if collapsed != "" {
+				cl := New[core.Collapser](ctx)
+				core.NewText(cl.Summary).SetText("Code")
+				ed = textcore.NewEditor(cl.Details)
+				if id != "" {
+					cl.Summary.Name = id
+				}
+				parent = cl.Parent
+				if collapsed == "false" || collapsed == "-" {
+					cl.Open = true
+				}
+			} else {
+				ed = New[textcore.Editor](ctx)
+				if id != "" {
+					ed.Name = id
+				}
+				parent = ed.Parent
 			}
-			lang := getLanguage(GetAttr(ctx.Node, "class"))
+			ctx.Node = codeEl
 			if lang != "" {
 				ed.Lines.SetFileExt(lang)
 			}
 			ed.Lines.SetString(ExtractText(ctx))
 			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
 				ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
-				parent := core.NewFrame(cl.Parent)
-				parent.Styler(func(s *styles.Style) {
+				parFrame := core.NewFrame(parent)
+				parFrame.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
 					s.Grow.Set(1, 0)
 				})
 				// we inherit our Grow.Y from our first child so that
 				// elements that want to grow can do so
-				parent.SetOnChildAdded(func(n tree.Node) {
+				parFrame.SetOnChildAdded(func(n tree.Node) {
 					if _, ok := n.(*core.Body); ok { // Body should not grow
 						return
 					}
@@ -142,10 +158,10 @@ func handleElement(ctx *Context) {
 						return
 					}
 					wb.FinalStyler(func(s *styles.Style) {
-						parent.Styles.Grow.Y = s.Grow.Y
+						parFrame.Styles.Grow.Y = s.Grow.Y
 					})
 				})
-				BindTextEditor(ed, parent, lang)
+				BindTextEditor(ed, parFrame, lang)
 			} else {
 				ed.SetReadOnly(true)
 				ed.Lines.Settings.LineNumbers = false

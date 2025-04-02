@@ -548,23 +548,21 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 		exsc, has := cmexScales[cid]
 		yb := ext.YBearing
 		if has {
-			// fmt.Println("mag:", exsc)
 			sc *= exsc
 			switch cid {
 			case 0x5A, 0x49: // \int and \oint are off in large size
 				yb += 200
 			case 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F:
+				// larger delims are too thick
 				xsc = .7
 			case 0x20, 0x21, 0x22, 0x23, 0x28, 0x29, 0x2A, 0x2B:
+				// same for even larger ones
 				xsc = .6
-			case 0x3C, 0x3D:
-				// xsc = .5
+			case 0x3C, 0x3D: // braces middles need shifting
 				yb += 150
-			case 0x3A, 0x3B:
+			case 0x3A, 0x3B: // braces bottom shifting
 				yb += 400
-				// xsc = .5
-			case 0x3E:
-				// xsc = .5
+			// below are fixes for all the square root elements
 			case 0x71:
 				x += sc * 80
 				xsc = .6

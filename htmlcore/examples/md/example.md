@@ -54,6 +54,19 @@ func main() {
 }
 ```
 
+### This is a collapsed code block:
+
+{collapsed="true"}
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+```
+
 ### This is an image of the Go Gopher: 
 
 ![Image of the Go Gopher](https://miro.medium.com/v2/resize:fit:1000/0*YISbBYJg5hkJGcQd.png)
