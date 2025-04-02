@@ -21,7 +21,7 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
-	github.com/go-text/typesetting v0.3.0
+	github.com/go-text/typesetting v0.3.1-0.20250402122313-7a0f05577ff5
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
@@ -33,7 +33,6 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.10.0
-	github.com/tdewolff/font v0.0.0-20250120192450-68a3ecdf9008
 	github.com/tdewolff/minify/v2 v2.21.3
 	github.com/tdewolff/parse/v2 v2.7.19
 	golang.org/x/crypto v0.32.0
@@ -48,12 +47,10 @@ require (
 )
 
 require (
-	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
-	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect
 	github.com/hack-pad/safejs v0.1.1 // indirect
