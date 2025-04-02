@@ -200,7 +200,7 @@ func (ed *Base) Init() {
 	ed.SetLines(lines.NewLines())
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
-		s.SetAbilities(false, abilities.ScrollableUnfocused)
+		s.SetAbilities(false, abilities.ScrollableUnattended)
 		ed.CursorWidth.Dp(1)
 		ed.LineNumberColor = colors.Uniform(colors.Transparent)
 		ed.SelectColor = colors.Scheme.Select.Container

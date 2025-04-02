@@ -267,7 +267,6 @@ func (wb *WidgetBase) Init() {
 		// TODO(kai): what about context menus on mobile?
 		tt, _ := wb.This.(Widget).WidgetTooltip(image.Pt(-1, -1))
 		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
-		s.SetAbilities(true, abilities.ScrollableUnfocused)
 
 		if s.Is(states.Selected) {
 			s.Background = colors.Scheme.Select.Container
@@ -291,6 +290,7 @@ func (wb *WidgetBase) Init() {
 	wb.handleWidgetStateFromMouse()
 	wb.handleLongHoverTooltip()
 	wb.handleWidgetStateFromFocus()
+	wb.handleWidgetStateFromAttend()
 	wb.handleWidgetContextMenu()
 	wb.handleWidgetMagnify()
 	wb.handleValueOnChange()

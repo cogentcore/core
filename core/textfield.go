@@ -209,7 +209,7 @@ func (tf *TextField) Init() {
 
 	tf.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
-		s.SetAbilities(false, abilities.ScrollableUnfocused)
+		s.SetAbilities(false, abilities.ScrollableUnattended)
 		tf.CursorWidth.Dp(1)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor = colors.Scheme.Primary.Base

@@ -72,6 +72,9 @@ type Frame struct {
 func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
 	fr.handleKeyNav = true
+	fr.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.ScrollableUnattended)
+	})
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
@@ -152,7 +155,7 @@ func (fr *Frame) Init() {
 		fr.focusOnName(e)
 	})
 	fr.On(events.Scroll, func(e events.Event) {
-		if fr.AbilityIs(abilities.ScrollableUnfocused) || fr.StateIs(states.Focused) {
+		if fr.AbilityIs(abilities.ScrollableUnattended) || fr.StateIs(states.Focused) {
 			fr.scrollDelta(e)
 		}
 	})

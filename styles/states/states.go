@@ -54,8 +54,15 @@ const (
 	// It should also still be [Active].
 	Sliding
 
-	// Focused elements receive keyboard input.
+	// The current Focused element receives keyboard input.
+	// Only one element can be Focused at a time.
 	Focused
+
+	// Attended is the last Pressable element to be clicked on.
+	// Only one element can be Attended at a time.
+	// The main effect of Attended is on scrolling events:
+	// see [abilities.ScrollableUnattended]
+	Attended
 
 	// Checked is for check boxes or radio buttons or other similar state.
 	Checked

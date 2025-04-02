@@ -121,8 +121,11 @@ type Events struct {
 	// the timer for RepeatClickable items.
 	repeatClickTimer *time.Timer
 
-	// widget receiving keyboard events.  Use SetFocus, CurFocus.
+	// widget receiving keyboard events. Use SetFocus.
 	focus Widget
+
+	// currently attended widget. Use SetAttend.
+	attended Widget
 
 	// widget to focus on at start when no other focus has been
 	// set yet. Use SetStartFocus.
@@ -325,7 +328,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				dragPress = w
 			}
 			if slidePress == nil && wb.AbilityIs(abilities.Slideable) {
-				if !wb.AbilityIs(abilities.ScrollableUnfocused) && !wb.StateIs(states.Focused) {
+				if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
 					continue
 				}
 				slidePress = w
@@ -340,6 +343,9 @@ func (em *Events) handlePosEvent(e events.Event) {
 				up = w
 			}
 		case events.Scroll:
+			if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+				continue
+			}
 			if e.IsHandled() {
 				if em.scroll == nil {
 					em.scroll = w
@@ -352,6 +358,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 	case events.MouseDown:
 		if press != nil {
 			em.press = press
+			em.setAttend(press)
 		}
 		if dragPress != nil {
 			em.dragPress = dragPress
@@ -954,9 +961,6 @@ func (em *Events) setFocusImpl(w Widget, sendEvent bool) bool {
 		if DebugSettings.FocusTrace {
 			fmt.Println(em.scene, "Already Focus:", cfoc)
 		}
-		// if sendEvent { // still send event
-		// 	w.Send(events.Focus)
-		// }
 		return false
 	}
 	if cfoc != nil {
@@ -1088,6 +1092,54 @@ func (em *Events) activateStartFocus() bool {
 	} else {
 		// fmt.Println("start focus on:", sf)
 		em.setFocus(sf)
+	}
+	return true
+}
+
+// setAttended sets attended to given item, and returns true if attended changed.
+// If item is nil, then nothing is attended.
+// This sends the [events.Attend] event to the widget.
+func (em *Events) setAttend(w Widget) bool {
+	if DebugSettings.FocusTrace {
+		fmt.Println(em.scene, "SetAttendEvent:", w)
+	}
+	got := em.setAttendImpl(w, true) // sends event
+	if !got {
+		if DebugSettings.FocusTrace {
+			fmt.Println(em.scene, "SetAttendEvent: Failed", w)
+		}
+		return false
+	}
+	if w != nil {
+		w.AsWidget().ScrollToThis()
+	}
+	return got
+}
+
+// setAttendImpl sets attended to given item, and returns true if attended changed.
+// If item is nil, then nothing has attended.
+// sendEvent determines whether the events.Attend event is sent to the focused item.
+func (em *Events) setAttendImpl(w Widget, sendEvent bool) bool {
+	catd := em.attended
+	if catd == nil {
+		em.attended = nil
+		catd = nil
+	}
+	if catd != nil && w != nil && catd == w {
+		if DebugSettings.FocusTrace {
+			fmt.Println(em.scene, "Already Attend:", catd)
+		}
+		return false
+	}
+	if catd != nil {
+		if DebugSettings.FocusTrace {
+			fmt.Println(em.scene, "Losing attend:", catd)
+		}
+		catd.AsWidget().Send(events.AttendLost)
+	}
+	em.attended = w
+	if sendEvent && w != nil {
+		w.AsWidget().Send(events.Attend)
 	}
 	return true
 }
