@@ -205,7 +205,7 @@ func TestSpacePos(t *testing.T) {
 
 func TestLinefeed(t *testing.T) {
 	RunTest(t, "linefeed", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		src := "Text2D can put <b>HTML</b> <br>formatted<br>Text anywhere you might <i>want</i>"
+		src := "Text2D can put <b>HTML</b> <br>formatted Text anywhere you might <i>want</i>"
 		sty := rich.NewStyle()
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
 		// fmt.Println(tx)

@@ -229,7 +229,7 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 					}
 				case '\n': // todo absorb other line endings
 					unestr := html.UnescapeString(string(tmpbuf))
-					curSp.AddRunes([]rune(unestr))
+					curSp.AddRunes([]rune(unestr + "\n"))
 					curSp = rich.NewText(fstack.Peek(), nil)
 					spstack.Push(curSp) // start a new span with previous style
 					tmpbuf = tmpbuf[0:0]
