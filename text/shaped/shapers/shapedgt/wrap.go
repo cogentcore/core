@@ -143,15 +143,17 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			run.SetFromStyle(sty, tsty)
 			if sty.IsMath() {
 				mt := sh.maths[cspi]
-				run.Math = *mt
-				run.MaxBounds = mt.BBox
-				bb := run.MaxBounds.Translate(math32.Vector2FromFixed(pos))
-				ln.Bounds.ExpandByBox(bb)
-				pos.X += math32.ToFixed(run.MaxBounds.Size().X)
-				ysz := bb.Size().Y
-				// fmt.Println("math ysz:", ysz, "maxAsc:", maxAsc)
-				maxAsc = max(maxAsc, math32.ToFixed(-bb.Min.Y))
-				maxLHt = max(maxLHt, ysz)
+				if mt != nil {
+					run.Math = *mt
+					run.MaxBounds = mt.BBox
+					bb := run.MaxBounds.Translate(math32.Vector2FromFixed(pos))
+					ln.Bounds.ExpandByBox(bb)
+					pos.X += math32.ToFixed(run.MaxBounds.Size().X)
+					ysz := bb.Size().Y
+					// fmt.Println("math ysz:", ysz, "maxAsc:", maxAsc)
+					maxAsc = max(maxAsc, math32.ToFixed(-bb.Min.Y))
+					maxLHt = max(maxLHt, ysz)
+				}
 			} else {
 				llht := tsty.LineHeightDots(sty)
 				maxLHt = max(maxLHt, llht)

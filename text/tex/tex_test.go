@@ -63,7 +63,7 @@ func TestTex(t *testing.T) {
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			pc.Fill.Color = colors.Uniform(color.Black)
 			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
-			pp, err := ParseLaTeX(test.tex, pc.Text.FontSize.Dots)
+			pp, err := TeXMath(test.tex, pc.Text.FontSize.Dots)
 			assert.NoError(t, err)
 			*pp = pp.Translate(0, 40)
 			pc.State.Path = *pp

@@ -92,9 +92,11 @@ func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 		run.SetFromStyle(sty, tsty)
 		if sty.IsMath() {
 			mt := sh.maths[si]
-			run.Math = *mt
-			run.MaxBounds = mt.BBox
-			run.Output.Advance = math32.ToFixed(mt.BBox.Size().X + 5)
+			if mt != nil {
+				run.Math = *mt
+				run.MaxBounds = mt.BBox
+				run.Output.Advance = math32.ToFixed(mt.BBox.Size().X)
+			}
 		}
 		runs[i] = run
 	}
@@ -122,7 +124,9 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 			o := shaping.Output{}
 			o.Runes.Offset = start
 			o.Runes.Count = end - start
-			o.Advance = math32.ToFixed(mt.BBox.Size().X + 5)
+			if mt != nil {
+				o.Advance = math32.ToFixed(mt.BBox.Size().X)
+			}
 			sh.outBuff = append(sh.outBuff, o)
 			si++ // skip the end special
 			continue
@@ -161,8 +165,8 @@ func (sh *Shaper) ShapeMaths(tx rich.Text, tsty *text.Style) {
 		sty, stx := tx.Span(si)
 		if sty.IsMath() {
 			mt := sh.ShapeMath(sty, tsty, stx)
-			sh.maths[si] = mt
-			si++ // skip past special
+			sh.maths[si] = mt // can be nil if error
+			si++              // skip past special
 		}
 	}
 }
@@ -173,9 +177,13 @@ func (sh *Shaper) ShapeMath(sty *rich.Style, tsty *text.Style, stx []rune) *shap
 	if sty.Special == rich.MathDisplay {
 		mstr = "$" + mstr + "$"
 	}
-	p := errors.Log1(tex.ParseLaTeX(mstr, tsty.FontSize.Dots*sty.Size))
-	bb := p.FastBounds()
-	return &shaped.Math{Path: p, BBox: bb}
+	p := errors.Log1(tex.TeXMath(mstr, tsty.FontSize.Dots*sty.Size))
+	if p != nil {
+		bb := p.FastBounds()
+		bb.Max.X += 5 // extra space
+		return &shaped.Math{Path: p, BBox: bb}
+	}
+	return nil
 }
 
 // todo: do the paragraph splitting!  write fun in rich.Text
