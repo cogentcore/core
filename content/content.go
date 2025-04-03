@@ -178,6 +178,16 @@ func (ct *Content) Init() {
 		})
 		tree.Add(p, func(w *core.Frame) {
 			ct.rightFrame = w
+			w.Styler(func(s *styles.Style) {
+				switch w.SizeClass() {
+				case core.SizeCompact:
+					s.Padding.SetHorizontal(units.Em(1))
+				case core.SizeMedium:
+					s.Padding.SetHorizontal(units.Em(2))
+				case core.SizeExpanded:
+					s.Padding.SetHorizontal(units.Em(5))
+				}
+			})
 			w.Maker(func(p *tree.Plan) {
 				if ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
@@ -190,7 +200,6 @@ func (ct *Content) Init() {
 				tree.Add(p, func(w *core.Frame) {
 					w.Styler(func(s *styles.Style) {
 						s.Direction = styles.Column
-						s.Padding.SetHorizontal(units.Em(core.ConstantSpacing(2)))
 						s.Grow.Set(1, 1)
 					})
 					w.Updater(func() {

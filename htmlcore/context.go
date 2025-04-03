@@ -91,7 +91,7 @@ type Context struct {
 func NewContext() *Context {
 	return &Context{
 		styles:            map[*html.Node][]*css.Rule{},
-		FontScale:         1.2,
+		FontScale:         1,
 		OpenURL:           system.TheApp.OpenURL,
 		GetURL:            http.Get,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
