@@ -30,9 +30,6 @@ type Context struct {
 	// Node is the node that is currently being read.
 	Node *html.Node
 
-	// FontScale is a font size multiplier for text elements.
-	FontScale float32
-
 	// styles are the CSS styling rules for each node.
 	styles map[*html.Node][]*css.Rule
 
@@ -91,7 +88,6 @@ type Context struct {
 func NewContext() *Context {
 	return &Context{
 		styles:            map[*html.Node][]*css.Rule{},
-		FontScale:         1,
 		OpenURL:           system.TheApp.OpenURL,
 		GetURL:            http.Get,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},

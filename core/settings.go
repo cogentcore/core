@@ -249,6 +249,12 @@ type AppearanceSettingsData struct { //types:add
 	// of the default font size (higher numbers lead to larger text).
 	FontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
+	// font size factor applied specifically to documentation and other
+	// denser text contexts, vs GUI elements which only get the base FontSize factor.
+	// It is a percentage of the default font size (higher numbers lead to larger text),
+	// and operates on top of the base FontSize multiplier.
+	DocsFontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
+
 	// the amount that alternating rows are highlighted when showing
 	// tabular data (set to 0 to disable zebra striping).
 	ZebraStripes float32 `default:"0" min:"0" max:"100" step:"10" format:"%g%%"`

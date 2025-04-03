@@ -271,7 +271,7 @@ func handleElement(ctx *Context) {
 
 func (ctx *Context) textStyler(s *styles.Style) {
 	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
-	s.Font.Size = ctx.FontScale
+	s.Font.Size = core.AppearanceSettings.DocsFontSize / 100
 	// TODO: it would be ideal for htmlcore to automatically save a scale factor
 	// in general and for each domain, that is applied only to page content
 	// scale := float32(1.2)

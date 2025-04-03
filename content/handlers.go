@@ -229,9 +229,6 @@ func (ct *Content) elementInSpecial(sp *core.WidgetBase, element string) *core.W
 		if found != nil {
 			return tree.Break
 		}
-		if !hasPath && !cwb.IsVisible() {
-			return tree.Break
-		}
 		if hasPath && !strings.Contains(cw.AsTree().Path(), pathPrefix) {
 			return tree.Continue
 		}
