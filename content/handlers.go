@@ -23,7 +23,7 @@ import (
 
 // citeWikilink processes citation links, which start with @
 func (ct *Content) citeWikilink(text string) (url string, label string) {
-	if len(text) > 0 && text[0] != '@' { // @CiteKey reference citations
+	if len(text) == 0 || text[0] != '@' { // @CiteKey reference citations
 		return "", ""
 	}
 	ref := text[1:]
@@ -190,6 +190,9 @@ func (ct *Content) openID(id, element string) bool {
 	}
 	var found *core.WidgetBase
 	ct.rightFrame.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		// if found != nil {
+		// 	return tree.Break
+		// }
 		if cwb.Name != id {
 			return tree.Continue
 		}
@@ -228,6 +231,9 @@ func (ct *Content) elementInSpecial(sp *core.WidgetBase, element string) *core.W
 	sp.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		if found != nil {
 			return tree.Break
+		}
+		if !cwb.IsDisplayable() {
+			return tree.Continue
 		}
 		if hasPath && !strings.Contains(cw.AsTree().Path(), pathPrefix) {
 			return tree.Continue
