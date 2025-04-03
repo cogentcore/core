@@ -172,7 +172,14 @@ func SpecialToKebab(name string) string {
 	if usi < 0 {
 		return strcase.ToKebab(name)
 	}
-	return name[:usi+1] + strcase.ToKebab(name[usi+1:])
+	spec := name[:usi+1]
+	name = name[usi+1:]
+	colon := strings.Index(name, ":")
+	if colon > 0 {
+		return spec + strcase.ToKebab(name[:colon]) + name[colon:]
+	} else {
+		return spec + strcase.ToKebab(name)
+	}
 }
 
 // SpecialLabel returns the label for given special element, using

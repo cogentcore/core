@@ -32,7 +32,6 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
@@ -126,55 +125,8 @@ func (ct *Content) Init() {
 	ct.Context.GetURL = func(url string) (*http.Response, error) {
 		return htmlcore.GetURLFromFS(ct.Source, url)
 	}
-	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
-		if len(text) > 0 && text[0] != '@' { // @CiteKey reference citations
-			return "", ""
-		}
-		ref := text[1:]
-		cs := csl.Parenthetical
-		if len(ref) > 1 && ref[0] == '^' {
-			cs = csl.Narrative
-			ref = ref[1:]
-		}
-		url = "ref://" + ref
-		if ct.References == nil {
-			return url, ref
-		}
-		it, has := ct.References.AtTry(ref)
-		if has {
-			return url, csl.CiteDefault(cs, it)
-		}
-		return url, ref
-	})
-	ct.Context.AddWikilinkHandler(func(text string) (url string, label string) {
-		name, label, _ := strings.Cut(text, "|")
-		name, heading, _ := strings.Cut(name, "#")
-		noName := false
-		if name == "" { // A link with a blank page links to the current page
-			name = ct.currentPage.Name
-			noName = true
-		}
-		if label == "" {
-			if heading != "" {
-				label = heading
-				if noName {
-					sl := ct.currentPage.SpecialLabel(heading)
-					if sl != "" {
-						label = sl
-					}
-				}
-			} else {
-				label = name
-			}
-		}
-		if pg := ct.pageByName(name); pg != nil {
-			if heading != "" {
-				return pg.URL + "#" + heading, label
-			}
-			return pg.URL, label
-		}
-		return "", ""
-	})
+	ct.Context.AddWikilinkHandler(ct.citeWikilink)
+	ct.Context.AddWikilinkHandler(ct.mainWikilink)
 	ct.Context.ElementHandlers["embed-page"] = func(ctx *htmlcore.Context) bool {
 		errors.Log(ct.embedPage(ctx))
 		return true
@@ -325,109 +277,10 @@ func (ct *Content) Open(url string) *Content {
 	return ct
 }
 
-// open opens the page with the given URL and updates the display.
-// It optionally adds the page to the history.
-func (ct *Content) open(url string, history bool) {
-	if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
-		core.TheApp.OpenURL(url)
-		return
-	}
-	if strings.HasPrefix(url, "ref://") {
-		ct.openRef(url)
-		return
-	}
-	url = strings.ReplaceAll(url, "/#", "#")
-	url, heading, _ := strings.Cut(url, "#")
-	pg := ct.pagesByURL[url]
-	if pg == nil {
-		// We want only the URL after the last slash for automatic redirects
-		// (old URLs could have nesting).
-		last := url
-		if li := strings.LastIndex(url, "/"); li >= 0 {
-			last = url[li+1:]
-		}
-		pg = ct.similarPage(last)
-		if pg == nil {
-			core.ErrorSnackbar(ct, errors.New("no pages available"))
-		} else {
-			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", url))
-		}
-	}
-	heading = bcontent.SpecialToKebab(heading)
-	ct.currentHeading = heading
-	if ct.currentPage == pg {
-		ct.openHeading(heading)
-		return
-	}
-	ct.currentPage = pg
-	if history {
-		ct.addHistory(pg)
-	}
-	ct.Scene.Update() // need to update the whole scene to also update the toolbar
-	// We can only scroll to the heading after the page layout has been updated, so we defer.
-	ct.Defer(func() {
-		ct.setStageTitle()
-		ct.openHeading(heading)
-	})
-}
-
 func (ct *Content) addHistory(pg *bcontent.Page) {
 	ct.historyIndex = len(ct.history)
 	ct.history = append(ct.history, pg)
 	ct.saveWebURL()
-}
-
-// openRef opens a ref:// reference url.
-func (ct *Content) openRef(url string) {
-	pg := ct.pagesByURL["references"]
-	if pg == nil {
-		core.MessageSnackbar(ct, "references page not generated, use mdcite in csl package")
-		return
-	}
-	ref := strings.TrimPrefix(url, "ref://")
-	ct.currentPage = pg
-	ct.addHistory(pg)
-	ct.Scene.Update()
-	ct.Defer(func() {
-		ct.setStageTitle()
-		ct.openID(ref)
-	})
-}
-
-func (ct *Content) openHeading(heading string) {
-	if heading == "" {
-		ct.rightFrame.ScrollDimToContentStart(math32.Y)
-		return
-	}
-	tr := ct.tocNodes[strcase.ToKebab(heading)]
-	if tr == nil {
-		found := ct.openID(heading)
-		if !found {
-			errors.Log(fmt.Errorf("heading %q not found", heading))
-		}
-		return
-	}
-	tr.SelectEvent(events.SelectOne)
-}
-
-func (ct *Content) openID(id string) bool {
-	if id == "" {
-		ct.rightFrame.ScrollDimToContentStart(math32.Y)
-		return true
-	}
-	found := false
-	ct.rightFrame.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		if cwb.Name != id {
-			return tree.Continue
-		}
-		cwb.SetFocus()
-		cwb.SetState(true, states.Active)
-		cwb.Style()
-		cwb.NeedsRender()
-		found = true
-		return tree.Break
-	})
-	return found
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
