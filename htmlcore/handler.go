@@ -208,19 +208,31 @@ func handleElement(ctx *Context) {
 		}
 		text.SetText(start + text.Text)
 	case "img":
-		img := New[core.Image](ctx)
 		n := ctx.Node
-		img.SetTooltip(GetAttr(n, "alt"))
+		src := GetAttr(n, "src")
+		alt := GetAttr(n, "alt")
+		// Can be either image or svg.
+		var img *core.Image
+		var svg *core.SVG
+		if strings.HasSuffix(src, ".svg") {
+			svg = New[core.SVG](ctx)
+			svg.SetTooltip(alt)
+		} else {
+			img = New[core.Image](ctx)
+			img.SetTooltip(alt)
+		}
 
 		go func() {
-			src := GetAttr(n, "src")
 			resp, err := Get(ctx, src)
 			if errors.Log(err) != nil {
 				return
 			}
 			defer resp.Body.Close()
-			if strings.Contains(resp.Header.Get("Content-Type"), "svg") {
-				// TODO(kai/htmlcore): support svg
+			if svg != nil {
+				svg.AsyncLock()
+				svg.Read(resp.Body)
+				svg.Update()
+				svg.AsyncUnlock()
 			} else {
 				im, _, err := imagex.Read(resp.Body)
 				if err != nil {
