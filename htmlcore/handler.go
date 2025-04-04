@@ -181,8 +181,10 @@ func handleElement(ctx *Context) {
 		// if we have a p as our first or second child, which is typical
 		// for markdown-generated HTML, we use it directly for data extraction
 		// to prevent double elements and unnecessary line breaks.
+		hasPChild := false
 		if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "p" {
 			ctx.Node = ctx.Node.FirstChild
+			hasPChild = true
 		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
@@ -207,6 +209,19 @@ func handleElement(ctx *Context) {
 			}
 		}
 		text.SetText(start + text.Text)
+		if hasPChild { // handle potential additional <p> blocks that should be indented
+			cnode := ctx.Node
+			ctx.BlockParent = text.Parent.(core.Widget)
+			for cnode.NextSibling != nil {
+				cnode = cnode.NextSibling
+				ctx.Node = cnode
+				if cnode.Data != "p" {
+					continue
+				}
+				txt := handleText(ctx)
+				txt.SetText("&nbsp;&nbsp; " + txt.Text)
+			}
+		}
 	case "img":
 		n := ctx.Node
 		src := GetAttr(n, "src")

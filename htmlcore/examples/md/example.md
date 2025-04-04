@@ -42,6 +42,13 @@ as a standalone item.
     2. Sub list item 2
 
 
+* List item that has indented item below it.
+
+	Indented list item that should follow the indentation from above but not have a *
+
+> quote element
+	
+	
 ### This is a code block:
 
 ```go
