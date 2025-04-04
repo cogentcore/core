@@ -86,6 +86,7 @@ func main() {
 
 Here is some text
 
+{style="min-height:5em;max-height:10em"}
 <div>
 
 This _text_ is in a `div`. it should be **fine**, just in a separate frame.

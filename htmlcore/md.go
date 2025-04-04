@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"bytes"
 	"io"
+	"regexp"
 
 	"cogentcore.org/core/core"
 	"github.com/gomarkdown/markdown"
@@ -21,6 +22,9 @@ func mdToHTML(ctx *Context, md []byte) []byte {
 	p := parser.NewWithExtensions(extensions)
 	prev := p.RegisterInline('[', nil)
 	p.RegisterInline('[', wikilink(ctx, prev))
+	// this allows div to work properly:
+	// https://github.com/gomarkdown/markdown/issues/5
+	md = bytes.ReplaceAll(md, []byte("</div>"), []byte("</div><!-- dummy -->"))
 	doc := p.Parse(md)
 
 	// create HTML renderer with extensions
@@ -28,7 +32,11 @@ func mdToHTML(ctx *Context, md []byte) []byte {
 	opts := html.RendererOptions{Flags: htmlFlags, RenderNodeHook: ctx.mdRenderHook}
 	renderer := html.NewRenderer(opts)
 
-	return markdown.Render(doc, renderer)
+	htm := markdown.Render(doc, renderer)
+	htm = bytes.ReplaceAll(htm, []byte("<p></div><!-- dummy --></p>"), []byte("</div>"))
+	divr := regexp.MustCompile("<p(.*)><div></p>")
+	htm = divr.ReplaceAll(htm, []byte("<div${1}>"))
+	return htm
 }
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
