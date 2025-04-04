@@ -82,18 +82,23 @@ func handleElement(ctx *Context) {
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
-		if tag == "body" {
+		switch tag {
+		case "body":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
-		}
-		if tag == "ol" || tag == "ul" {
+		case "ol", "ul":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 			})
-		}
-		if tag == "blockquote" {
+		case "div":
+			w.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 1)
+				s.Overflow.Y = styles.OverflowAuto
+			})
+		case "blockquote":
 			w.Styler(func(s *styles.Style) { // todo: need a better marker
+				s.Grow.Set(1, 0)
 				s.Background = colors.Scheme.SurfaceContainer
 			})
 		}
