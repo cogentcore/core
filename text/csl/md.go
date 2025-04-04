@@ -52,7 +52,7 @@ func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) (*K
 // ExtractMarkdownCites extracts markdown citations in the format [@Ref; @Ref]
 // from given list of .md files, looking up in given source [KeyList], adding to cited.
 func ExtractMarkdownCites(files []string, src, cited *KeyList) error {
-	exp := regexp.MustCompile(`\[(@([[:alnum:]]+-?)+(;[[:blank:]]+)?)+\]`)
+	exp := regexp.MustCompile(`\[(@\^?([[:alnum:]]+-?)+(;[[:blank:]]+)?)+\]`)
 	var errs []error
 	for _, fn := range files {
 		f, err := os.Open(fn)
@@ -71,6 +71,9 @@ func ExtractMarkdownCites(files []string, src, cited *KeyList) error {
 					a = strings.TrimSuffix(a, ";")
 					if a == "" {
 						continue
+					}
+					if a[0] == '^' {
+						a = a[1:]
 					}
 					it, has := src.AtTry(a)
 					if !has {

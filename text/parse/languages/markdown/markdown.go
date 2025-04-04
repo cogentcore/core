@@ -91,14 +91,28 @@ func (ml *MarkdownLang) HighlightLine(fss *parse.FileStates, line int, txt []run
 	return ml.LexLine(fs, line, txt)
 }
 
+// citeKeyStr returns a string with a citation key of the form @[^]Ref
+// or empty string if not of this form.
+func citeKeyStr(str string) string {
+	if len(str) < 2 {
+		return ""
+	}
+	if str[0] != '@' {
+		return ""
+	}
+	str = str[1:]
+	if str[0] == '^' { // narrative cite
+		str = str[1:]
+	}
+	return str
+}
+
 func (ml *MarkdownLang) CompleteLine(fss *parse.FileStates, str string, pos textpos.Pos) (md complete.Matches) {
 	origStr := str
 	lfld := lexer.LastField(str)
-	str = lexer.InnerBracketScope(lfld, "[", "]")
-	if len(str) > 1 {
-		if str[0] == '@' {
-			return ml.CompleteCite(fss, origStr, str[1:], pos)
-		}
+	str = citeKeyStr(lexer.InnerBracketScope(lfld, "[", "]"))
+	if str != "" {
+		return ml.CompleteCite(fss, origStr, str, pos)
 	}
 	// n/a
 	return md
@@ -108,11 +122,9 @@ func (ml *MarkdownLang) CompleteLine(fss *parse.FileStates, str string, pos text
 func (ml *MarkdownLang) Lookup(fss *parse.FileStates, str string, pos textpos.Pos) (ld complete.Lookup) {
 	origStr := str
 	lfld := lexer.LastField(str)
-	str = lexer.InnerBracketScope(lfld, "[", "]")
-	if len(str) > 1 {
-		if str[0] == '@' {
-			return ml.LookupCite(fss, origStr, str[1:], pos)
-		}
+	str = citeKeyStr(lexer.InnerBracketScope(lfld, "[", "]"))
+	if str != "" {
+		return ml.LookupCite(fss, origStr, str, pos)
 	}
 	return
 }
