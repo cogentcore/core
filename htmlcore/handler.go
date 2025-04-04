@@ -92,6 +92,11 @@ func handleElement(ctx *Context) {
 				s.Grow.Set(1, 0)
 			})
 		}
+		if tag == "blockquote" {
+			w.Styler(func(s *styles.Style) { // todo: need a better marker
+				s.Background = colors.Scheme.SurfaceContainer
+			})
+		}
 	case "button":
 		New[core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
