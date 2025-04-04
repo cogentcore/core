@@ -81,3 +81,16 @@ func main() {
 <h3 style="color:red">This is some HTML:</h3>
 
 <button>Click me!</button>
+
+## Divs
+
+Here is some text
+
+<div>
+
+This _text_ is in a `div`. it should be **fine**, just in a separate frame.
+
+</div>
+
+This is the text after the div.
+

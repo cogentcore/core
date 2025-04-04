@@ -205,7 +205,8 @@ func (ls *Lines) patchFrom(ob *Lines, diffs Diffs) bool {
 		case 'i':
 			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
 			if ot != nil {
-				ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
+				ln := min(ls.numLines(), df.I1)
+				ls.insertTextLines(textpos.Pos{Line: ln}, ot.Text)
 				mods = true
 			}
 		}
