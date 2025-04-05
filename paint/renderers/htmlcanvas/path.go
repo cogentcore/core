@@ -15,9 +15,9 @@ import (
 	"cogentcore.org/core/paint/render"
 )
 
-func (rs *Renderer) writePath(pt *render.Path) {
+func (rs *Renderer) writePath(pt *ppath.Path) {
 	rs.ctx.Call("beginPath")
-	for scanner := pt.Path.Scanner(); scanner.Scan(); {
+	for scanner := pt.Scanner(); scanner.Scan(); {
 		end := scanner.End()
 		switch scanner.Cmd() {
 		case ppath.MoveTo:
@@ -59,7 +59,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 
 	if style.HasFill() || (style.HasStroke() && !strokeUnsupported) {
-		rs.writePath(pt)
+		rs.writePath(&pt.Path)
 	}
 
 	if style.HasFill() {
@@ -80,7 +80,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 			pt.Path = pt.Path.Dash(style.Stroke.DashOffset, style.Stroke.Dashes...)
 		}
 		pt.Path = pt.Path.Stroke(style.Stroke.Width.Dots, ppath.CapFromStyle(style.Stroke.Cap), ppath.JoinFromStyle(style.Stroke.Join), 1)
-		rs.writePath(pt)
+		rs.writePath(&pt.Path)
 		rs.ctx.Set("fillStyle", rs.imageToStyle(style.Stroke.Color))
 		rs.ctx.Call("fill")
 	}

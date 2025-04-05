@@ -66,6 +66,7 @@ func TestTex(t *testing.T) {
 			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
 			pp, err := TeXMath(test.tex, pc.Text.FontSize.Dots)
 			assert.NoError(t, err)
+			assert.NotNil(t, pp)
 			*pp = pp.Translate(0, 40)
 			pc.State.Path = *pp
 			pc.PathDone()

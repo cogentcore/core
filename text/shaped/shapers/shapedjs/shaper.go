@@ -122,7 +122,10 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 func (sh *Shaper) AdjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text, tsty *text.Style, rts *rich.Settings) {
 	rng := textpos.Range{out.Runes.Offset, out.Runes.Offset + out.Runes.Count}
 	si, sn, ri := tx.Index(rng.Start)
-	_, stx := tx.Span(si)
+	sty, stx := tx.Span(si)
+	if sty.IsMath() {
+		return
+	}
 	ri -= sn
 	rtx := stx[ri : ri+rng.Len()]
 	SetFontStyle(ctx, fnt, tsty, 0)

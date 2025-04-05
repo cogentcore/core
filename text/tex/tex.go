@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	// theDVIFonts are the DVI fonts, as a shared resource.
-	theDVIFonts   *dviFonts
-	theDVIFontsMu sync.Mutex
+	texEngine *tex.Engine
+	texFonts  *dviFonts
+	texMu     sync.Mutex
 
 	preamble = `\nopagenumbers
 
@@ -34,21 +34,27 @@ var (
 // fontSizeDots specifies the actual font size in dots (actual pixels)
 // for a 10pt font in the DVI system.
 func TeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
-	r := strings.NewReader(fmt.Sprintf(`%s $%s$`, preamble, formula))
+	texMu.Lock()
+	defer texMu.Unlock()
+
+	r := strings.NewReader(fmt.Sprintf(`%s $%s$
+\bye
+`, preamble, formula))
 	w := &bytes.Buffer{}
 	stdout := &bytes.Buffer{}
-	engine := tex.NewEngine(stdout, bytes.NewReader([]byte{}))
-	if err := engine.Process(w, r); err != nil {
+	if texEngine == nil {
+		texEngine = tex.New()
+	}
+	texEngine.Stdout = stdout
+	if err := texEngine.Process(w, r); err != nil {
 		fmt.Println(stdout.String())
 		return nil, err
 	}
 
-	theDVIFontsMu.Lock()
-	defer theDVIFontsMu.Unlock()
-	if theDVIFonts == nil {
-		theDVIFonts = newFonts()
+	if texFonts == nil {
+		texFonts = newFonts()
 	}
-	p, err := DVIToPath(w.Bytes(), theDVIFonts, fontSizeDots)
+	p, err := DVIToPath(w.Bytes(), texFonts, fontSizeDots)
 	if err != nil {
 		fmt.Println(stdout.String())
 		return nil, err

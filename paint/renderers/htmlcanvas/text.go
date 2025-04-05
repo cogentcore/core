@@ -108,6 +108,18 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	}
 	fsz := math32.FromFixed(run.Size)
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
+	if run.Math.Path != nil {
+		m := ctx.Transform
+		ctx.Transform.X0 += off.X
+		ctx.Transform.Y0 += off.Y
+		rs.setTransform(ctx)
+		rs.writePath(run.Math.Path)
+		rs.setFill(fill)
+		rs.ctx.Call("fill", "nonzero")
+		ctx.Transform = m
+		rs.setTransform(ctx)
+		return
+	}
 
 	if run.Decoration.HasFlag(rich.Underline) || run.Decoration.HasFlag(rich.DottedUnderline) {
 		dash := []float32{2, 2}
