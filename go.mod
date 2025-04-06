@@ -1,6 +1,6 @@
 module cogentcore.org/core
 
-go 1.22
+go 1.23.0
 
 require (
 	github.com/Bios-Marcel/wastebasket v0.0.4-0.20240213135800-f26f1ae0a7c4
@@ -35,12 +35,12 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tdewolff/minify/v2 v2.21.3
 	github.com/tdewolff/parse/v2 v2.7.19
-	golang.org/x/crypto v0.32.0
+	golang.org/x/crypto v0.36.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.25.0
-	golang.org/x/net v0.33.0
+	golang.org/x/net v0.37.0
 	golang.org/x/oauth2 v0.20.0
-	golang.org/x/sys v0.29.0
+	golang.org/x/sys v0.31.0
 	golang.org/x/tools v0.23.0
 	gopkg.in/yaml.v3 v3.0.1
 	star-tex.org/x/tex v0.6.0

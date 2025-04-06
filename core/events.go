@@ -1198,6 +1198,8 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	case keymap.WinFocusNext:
 		e.SetHandled()
 		AllRenderWindows.focusNext()
+	case keymap.Copy:
+	case keymap.Cut:
 	}
 	if !e.IsHandled() {
 		em.triggerShortcut(cs)
