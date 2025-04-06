@@ -394,7 +394,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		opts.Size = wgp.Size
 		opts.Pos = wgp.Pos
 		opts.StdPixels = false
-		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
+		if w := AllRenderWindows.FindName(title); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}

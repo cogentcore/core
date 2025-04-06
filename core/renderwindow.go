@@ -208,7 +208,9 @@ func (w *renderWindow) setTitle(title string) {
 // SetStageTitle sets the title of the underlying [system.Window] to the given stage title
 // combined with the [renderWindow] title.
 func (w *renderWindow) SetStageTitle(title string) {
-	if title != w.title {
+	if title == "" {
+		title = w.title
+	} else if title != w.title {
 		title = title + " • " + w.title
 	}
 	w.SystemWindow.SetTitle(title)

@@ -32,13 +32,14 @@ func (wl *renderWindowList) delete(w *renderWindow) {
 	})
 }
 
-// FindName finds the window with the given name on the list (case sensitive).
+// FindName finds the window with the given name or title
+// on the list (case sensitive).
 // It returns the window if found and nil otherwise.
 func (wl *renderWindowList) FindName(name string) *renderWindow {
 	renderWindowGlobalMu.Lock()
 	defer renderWindowGlobalMu.Unlock()
 	for _, w := range *wl {
-		if w.name == name {
+		if w.name == name || w.title == name {
 			return w
 		}
 	}
