@@ -86,6 +86,16 @@ func (cw *ComposerWeb) Compose() {
 		delete(cw.Elements, ptr)
 	}
 
+	for i, s := range cw.Sources {
+		elem := cw.Elements[cw.Pointers[s]]
+		if elem.IsUndefined() {
+			continue
+		}
+		// Elements can get out of order (such as in xyzcore), so this
+		// ensures they are correctly ordered.
+		elem.Get("style").Set("z-index", i)
+	}
+
 	// Only remove the loader after we have successfully rendered.
 	if !loaderRemoved {
 		loaderRemoved = true
