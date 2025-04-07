@@ -7,6 +7,7 @@
 package xyzcore
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 
@@ -18,11 +19,16 @@ import (
 
 // xyzSource implements [composer.Source] for core direct rendering.
 type xyzSource struct {
-	sc *Scene
+	sw *Scene
 }
 
 func (xr *xyzSource) Draw(c composer.Composer) {
-	// nop?
+	// cw := c.(*composer.ComposerWeb)
+	sw := xr.sw
+	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
+	sw.XYZ.SetSize(sz)
+	fmt.Println("size:", sz)
+	// cw.SetElementGeom(elem, ps.drawPos, size.ToPoint())
 }
 
 // RenderSource returns the [composer.Source] for direct rendering.
@@ -30,7 +36,7 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return nil
 	}
-	return &xyzSource{sc: sw}
+	return &xyzSource{sw: sw}
 }
 
 // configFrame configures the render frame in a platform-specific manner.
