@@ -63,7 +63,11 @@ func (cw *ComposerWeb) Add(s Source, ctx any) {
 		return
 	}
 	cw.Sources = append(cw.Sources, s)
-	cw.Pointers[s] = uint64(reflect.ValueOf(ctx).Pointer())
+	cw.Pointers[s] = ctxPointer(ctx)
+}
+
+func ctxPointer(ctx any) uint64 {
+	return uint64(reflect.ValueOf(ctx).Pointer())
 }
 
 func (cw *ComposerWeb) Compose() {
@@ -92,10 +96,26 @@ func (cw *ComposerWeb) Redraw() {
 	// nop, right?
 }
 
-// Element returns the HTML element for the given [Source], making it with the given
-// tag if it doesn't exist yet.
+// Element returns the HTML element for the given [Source], making
+// it with the given tag if it doesn't exist yet. See
+// [ComposerWeb.ElementContext] for a version that takes a context
+// value instead of a [Source].
 func (cw *ComposerWeb) Element(s Source, tag string) js.Value {
 	ptr := cw.Pointers[s]
+	return cw.ElementPointer(ptr, tag)
+}
+
+// ElementContext is like [ComposerWeb.Element], but it takes a context
+// value instead of a [Source]. It is used less frequently than
+// [ComposerWeb.Element].
+func (cw *ComposerWeb) ElementContext(ctx any, tag string) js.Value {
+	return cw.ElementPointer(ctxPointer(ctx), tag)
+}
+
+// ElementPointer is like [ComposerWeb.ElementContext], but it takes a context
+// pointer uint64 representation instead of the actual pointer. You should
+// typically use [ComposerWeb.ElementContext] instead.
+func (cw *ComposerWeb) ElementPointer(ptr uint64, tag string) js.Value {
 	cw.active[ptr] = struct{}{}
 	elem := cw.Elements[ptr]
 	if !elem.IsUndefined() {
