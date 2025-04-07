@@ -7,9 +7,9 @@
 package xyzcore
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
+	"syscall/js"
 
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
@@ -23,12 +23,18 @@ type xyzSource struct {
 }
 
 func (xr *xyzSource) Draw(c composer.Composer) {
-	// cw := c.(*composer.ComposerWeb)
 	sw := xr.sw
+	if sw.jscanvas == nil {
+		return
+	}
 	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
 	sw.XYZ.SetSize(sz)
-	fmt.Println("size:", sz)
-	// cw.SetElementGeom(elem, ps.drawPos, size.ToPoint())
+	// fmt.Println("size:", sz)
+	jsctx := sw.jscanvas.(js.Value)
+	canvas := jsctx.Get("canvas")
+
+	cw := c.(*composer.ComposerWeb)
+	cw.SetElementGeom(canvas, sw.Geom.Pos.Total.ToPoint(), sz)
 }
 
 // RenderSource returns the [composer.Source] for direct rendering.
@@ -42,6 +48,7 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 // configFrame configures the render frame in a platform-specific manner.
 func (sw *Scene) configFrame(sz image.Point) {
 	wsurf := gpu.Instance().CreateSurface(&wgpu.SurfaceDescriptor{})
+	sw.jscanvas = wsurf.CanvasContext()
 	gp := gpu.NewGPU(nil)
 	sc := sw.XYZ
 	sc.Frame = gpu.NewSurface(gp, wsurf, sz, 4, gpu.Depth32)
