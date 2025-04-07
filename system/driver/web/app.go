@@ -132,32 +132,6 @@ func (a *App) Resize() {
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	// TODO(newpaint): remove all this
-	// canvas := js.Global().Get("document").Call("getElementById", "app")
-	// canvas.Set("width", a.Scrn.PixelSize.X)
-	// canvas.Set("height", a.Scrn.PixelSize.Y)
-
-	// We need to manually set the style width and height of the canvas
-	// instead of using 100vw and 100vh because vw and vh are incorrect on mobile browsers
-	// due to the address bar but visualViewport.width and height are correct
-	// (see https://stackoverflow.com/questions/43575363/css-100vh-is-too-tall-on-mobile-due-to-browser-ui)
-	//
-	// We also need to divide by the pixel size by the pixel ratio again instead of just
-	// using visualViewport.width and height so that there are no rounding errors (CSS
-	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices with fractional device pixel ratios
-	// (see https://github.com/cogentcore/core/issues/779 and
-	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
-	// cstyle := canvas.Get("style")
-	// cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.X)/a.Scrn.DevicePixelRatio))
-	// cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.Y)/a.Scrn.DevicePixelRatio))
-
-	// TODO
-	// if a.Draw.wgpu != nil {
-	// 	a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixelSize)
-	// } else {
-	// 	a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixelSize})
-	// }
-
 	a.Event.WindowResize()
 }
 
