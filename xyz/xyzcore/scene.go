@@ -36,8 +36,6 @@ type Scene struct {
 
 	// parameters for selection / manipulation box
 	SelectionParams SelectionParams `display:"inline"`
-
-	jscanvas any
 }
 
 func (sw *Scene) Init() {

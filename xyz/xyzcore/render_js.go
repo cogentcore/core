@@ -9,8 +9,8 @@ package xyzcore
 import (
 	"image"
 	"image/draw"
-	"syscall/js"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/system/composer"
@@ -22,19 +22,11 @@ type xyzSource struct {
 	sw *Scene
 }
 
-func (xr *xyzSource) Draw(c composer.Composer) {
-	sw := xr.sw
-	if sw.jscanvas == nil {
-		return
-	}
-	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
-	sw.XYZ.SetSize(sz)
-	// fmt.Println("size:", sz)
-	jsctx := sw.jscanvas.(js.Value)
-	canvas := jsctx.Get("canvas")
-
+func (xs *xyzSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
-	cw.SetElementGeom(canvas, sw.Geom.Pos.Total.ToPoint(), sz)
+
+	elem := cw.Element(xs, "canvas")
+	cw.SetElementGeom(elem, xs.sw.Geom.ContentBBox.Min, xs.sw.Geom.ContentBBox.Size())
 }
 
 // RenderSource returns the [composer.Source] for direct rendering.
@@ -47,8 +39,15 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 
 // configFrame configures the render frame in a platform-specific manner.
 func (sw *Scene) configFrame(sz image.Point) {
-	wsurf := gpu.Instance().CreateSurface(&wgpu.SurfaceDescriptor{})
-	sw.jscanvas = wsurf.CanvasContext()
+	// Even though we are not in [xyzSource.Draw], we can get the Composer
+	// and use it to make the canvas element, which we may need before we
+	// get to [xyzSource.Draw]. Because we pass sw to ElementContext, we
+	// will have the same element as in [xyzSource.Draw], and so no duplicate
+	// elements will be created.
+	cw := core.TheApp.Window(0).Composer().(*composer.ComposerWeb)
+	elem := cw.ElementContext(sw.This, "canvas")
+
+	wsurf := gpu.Instance().CreateSurface(&wgpu.SurfaceDescriptor{Canvas: elem})
 	gp := gpu.NewGPU(nil)
 	sc := sw.XYZ
 	sc.Frame = gpu.NewSurface(gp, wsurf, sz, 4, gpu.Depth32)
