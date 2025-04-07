@@ -70,7 +70,7 @@ func (sw *Scene) Init() {
 
 		doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
 		if sw.XYZ.Frame != nil {
-			cursz := sw.XYZ.Frame.Format.Size
+			cursz := sw.XYZ.Frame.Render().Format.Size
 			if cursz == sz && !doRebuild {
 				sw.XYZ.Update()
 				sw.NeedsRender()
@@ -79,7 +79,7 @@ func (sw *Scene) Init() {
 		} else {
 			doRebuild = false // will be done automatically b/c Frame == nil
 		}
-		sw.configFrame()
+		sw.configFrame(sz)
 		if doRebuild {
 			sw.XYZ.Rebuild()
 		}

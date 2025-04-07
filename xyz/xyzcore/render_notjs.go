@@ -47,7 +47,8 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 	if sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return nil
 	}
-	tex, _ := sw.XYZ.Frame.GetCurrentTextureObject()
+	rt := sw.XYZ.Frame.(*gpu.RenderTexture)
+	tex, _ := rt.GetCurrentTextureObject()
 	bb, sbb, empty := sw.DirectRenderDrawBBoxes(tex.Format.Bounds())
 	if empty {
 		return nil
@@ -56,7 +57,7 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 }
 
 // configFrame configures the render frame in a platform-specific manner.
-func (sw *Scene) configFrame() {
+func (sw *Scene) configFrame(sz image.Point) {
 	win := sw.WidgetBase.Scene.Events.RenderWindow()
 	if win == nil {
 		return
@@ -71,6 +72,6 @@ func (sw *Scene) configFrame() {
 			core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))
 			return
 		}
-		sw.XYZ.ConfigFrameFromSurface(sf) // does a full build if Frame == nil, else just new size
+		sw.XYZ.ConfigOffscreenFromSurface(sf) // does a full build if Frame == nil, else just new size
 	})
 }

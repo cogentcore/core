@@ -105,6 +105,9 @@ type renderWindow struct {
 	// lastRenderSkip is the last time we skipped rendering. tracking weird bug..
 	lastRenderSkip time.Time
 
+	// lastRender is the last time we rendered the scene
+	lastRender time.Time
+
 	// renderMu is the mutex for rendering.
 	renderMu sync.Mutex
 }
@@ -687,15 +690,21 @@ func (w *renderWindow) renderWindow() {
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
 		} else {
-			return
+			if time.Now().Sub(w.lastRender) > 2*time.Second {
+				fmt.Print(".")
+			} else {
+				return
+			}
 		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
+		fmt.Println("invisible", w)
 		return
 	}
+	w.lastRender = time.Now()
 
 	if DebugSettings.WindowRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.name)

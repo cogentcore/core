@@ -31,7 +31,8 @@ var Update3DTrace = false
 // further config steps.
 
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own gpu.RenderTexture.
+// It can render offscreen to its own gpu.RenderTexture, or to an
+// onscreen surface.
 // The Image of this Frame is usable directly or, via xyzcore.Scene,
 // where it is copied into an overall core.Scene image.
 //
@@ -100,7 +101,7 @@ type Scene struct {
 	Phong *phong.Phong `set:"-"`
 
 	// the gpu render frame holding the rendered scene
-	Frame *gpu.RenderTexture `set:"-"`
+	Frame gpu.Renderer `set:"-"` // *gpu.RenderTexture `set:"-"`
 
 	// TextShaper is the text shaping system for this scene, for doing text layout.
 	TextShaper shaped.Shaper
@@ -128,7 +129,7 @@ func NewOffscreenScene() *Scene {
 		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing gpu.NoDisplayGPU: %w", err))
 	}
 	sc := NewScene().SetSize(image.Pt(1280, 960))
-	sc.ConfigFrame(gpu, device)
+	sc.ConfigOffscreen(gpu, device)
 	return sc
 }
 
@@ -208,7 +209,7 @@ func (sc *Scene) SetSize(sz image.Point) *Scene {
 		return sc
 	}
 	if sc.Frame != nil {
-		csz := sc.Frame.Format.Size
+		csz := sc.Frame.Render().Format.Size
 		if csz == sz {
 			sc.Geom.Size = sz // make sure
 			return sc
