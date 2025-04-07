@@ -18,7 +18,7 @@ import (
 
 // FileState contains the full lexing and parsing state information for a given file.
 // It is the master state record for everything that happens in parse.  One of these
-// should be maintained for each file; texteditor.Buf has one as ParseState field.
+// should be maintained for each file; [lines.Lines] has one as parseState field.
 //
 // Separate State structs are maintained for each stage (Lexing, PassTwo, Parsing) and
 // the final output of Parsing goes into the AST and Syms fields.
