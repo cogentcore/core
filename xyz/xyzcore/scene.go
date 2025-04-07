@@ -62,7 +62,7 @@ func (sw *Scene) Init() {
 	sw.handleSelectEvents()
 
 	sw.Updater(func() {
-		sz := sw.Geom.Size.Actual.Content.ToPointFloor()
+		sz := sw.Geom.ContentBBox.Size()
 		if sz.X <= 0 || sz.Y <= 0 {
 			return
 		}

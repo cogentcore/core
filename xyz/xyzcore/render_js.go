@@ -46,6 +46,7 @@ func (sw *Scene) configFrame(sz image.Point) {
 	// elements will be created.
 	cw := core.TheApp.Window(0).Composer().(*composer.ComposerWeb)
 	elem := cw.ElementContext(sw.This, "canvas")
+	cw.SetElementGeom(elem, sw.Geom.ContentBBox.Min, sz)
 
 	wsurf := gpu.Instance().CreateSurface(&wgpu.SurfaceDescriptor{Canvas: elem})
 	gp := gpu.NewGPU(nil)
