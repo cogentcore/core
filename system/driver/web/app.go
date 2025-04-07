@@ -8,7 +8,6 @@
 package web
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
 	"os"
@@ -133,9 +132,10 @@ func (a *App) Resize() {
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Set("width", a.Scrn.PixelSize.X)
-	canvas.Set("height", a.Scrn.PixelSize.Y)
+	// TODO(newpaint): remove all this
+	// canvas := js.Global().Get("document").Call("getElementById", "app")
+	// canvas.Set("width", a.Scrn.PixelSize.X)
+	// canvas.Set("height", a.Scrn.PixelSize.Y)
 
 	// We need to manually set the style width and height of the canvas
 	// instead of using 100vw and 100vh because vw and vh are incorrect on mobile browsers
@@ -147,9 +147,9 @@ func (a *App) Resize() {
 	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices with fractional device pixel ratios
 	// (see https://github.com/cogentcore/core/issues/779 and
 	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
-	cstyle := canvas.Get("style")
-	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.X)/a.Scrn.DevicePixelRatio))
-	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.Y)/a.Scrn.DevicePixelRatio))
+	// cstyle := canvas.Get("style")
+	// cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.X)/a.Scrn.DevicePixelRatio))
+	// cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.Y)/a.Scrn.DevicePixelRatio))
 
 	// TODO
 	// if a.Draw.wgpu != nil {

@@ -49,6 +49,7 @@ func NewComposerWeb() *ComposerWeb {
 	return &ComposerWeb{
 		Pointers: map[Source]uint64{},
 		Elements: map[uint64]js.Value{},
+		active:   map[uint64]struct{}{},
 		DPR:      1,
 	}
 }
