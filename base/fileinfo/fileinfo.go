@@ -38,7 +38,7 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/icons"
-	"github.com/Bios-Marcel/wastebasket"
+	"github.com/Bios-Marcel/wastebasket/v2"
 )
 
 // FileInfo represents the information about a given file / directory,
