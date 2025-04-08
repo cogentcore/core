@@ -3,7 +3,7 @@ module cogentcore.org/core
 go 1.23.4
 
 require (
-	github.com/Bios-Marcel/wastebasket/v2 v2.0.2
+	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3
 	github.com/adrg/strutil v0.3.1
