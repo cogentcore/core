@@ -139,6 +139,13 @@ func (ct *Content) Init() {
 		ch := node.GetChildren()
 		if len(ch) == 2 { // image
 			if entering {
+				sty := htmlcore.MDGetAttr(node, "style")
+				if sty != "" {
+					if img, ok := ch[1].(*ast.Image); ok {
+						htmlcore.MDSetAttr(img, "style", sty)
+						delete(node.AsContainer().Attribute.Attrs, "style")
+					}
+				}
 				return false
 			}
 			cp := "\n<p><b>" + lbl + ":</b>"

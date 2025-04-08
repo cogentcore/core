@@ -236,6 +236,10 @@ func handleElement(ctx *Context) {
 		n := ctx.Node
 		src := GetAttr(n, "src")
 		alt := GetAttr(n, "alt")
+		psty := GetAttr(n.Parent, "style")
+		if psty != "" {
+			fmt.Println("par sty:", psty)
+		}
 		// Can be either image or svg.
 		var img *core.Image
 		var svg *core.SVG

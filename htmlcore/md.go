@@ -82,17 +82,39 @@ func (ctx *Context) mdRenderHook(w io.Writer, node ast.Node, entering bool) (ast
 func MDGetAttr(n ast.Node, attr string) string {
 	res := ""
 	cont := n.AsContainer()
+	leaf := n.AsLeaf()
 	if cont != nil {
 		if cont.Attribute != nil {
 			res = string(cont.Attribute.Attrs[attr])
 		}
-	} else {
-		leaf := n.AsLeaf()
-		if leaf != nil {
-			if leaf.Attribute != nil {
-				res = string(leaf.Attribute.Attrs[attr])
-			}
+	} else if leaf != nil {
+		if leaf.Attribute != nil {
+			res = string(leaf.Attribute.Attrs[attr])
 		}
 	}
 	return res
+}
+
+// MDSetAttr sets the given attribute on the given markdown node
+func MDSetAttr(n ast.Node, attr, value string) {
+	var attrs *ast.Attribute
+	cont := n.AsContainer()
+	leaf := n.AsLeaf()
+	if cont != nil {
+		attrs = cont.Attribute
+	} else if leaf != nil {
+		attrs = leaf.Attribute
+	}
+	if attrs == nil {
+		attrs = &ast.Attribute{}
+	}
+	if attrs.Attrs == nil {
+		attrs.Attrs = make(map[string][]byte)
+	}
+	attrs.Attrs[attr] = []byte(value)
+	if cont != nil {
+		cont.Attribute = attrs
+	} else if leaf != nil {
+		leaf.Attribute = attrs
+	}
 }
