@@ -3,7 +3,7 @@ center {
 }
 
 html, head, body, p, div, article, aside, footer, header, hgroup, main, nav, section, address, blockquote, figcaption, figure, center, hr,
-h1, h2, h3, h4, h5, h6, ul, ol, li, menu, dir, dd, dl, dt, form, legend, fieldset, pre, xmp, plaintext, listing, frameset, frame, details, summary {
+h1, h2, h3, h4, h5, h6, ul, ol, li, menu, dir, dd, dl, dt, form, legend, fieldset, pre, xmp, plaintext, listing, frameset, frame, details, summary, img {
     display: block;
 }
 
