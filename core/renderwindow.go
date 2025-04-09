@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
+	"cogentcore.org/core/text/shaped"
 	"golang.org/x/image/draw"
 )
 
@@ -129,7 +130,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 	w.SystemWindow.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	w.SystemWindow.SetCloseReqFunc(func(win system.Window) {
 		rc := w.renderContext()
-		rc.lock()
+		rc.Lock()
 		w.flags.SetFlag(true, winClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.mains.stack.Order {
@@ -141,7 +142,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 				return
 			}
 		}
-		rc.unlock()
+		rc.Unlock()
 		win.Close()
 	})
 	return w
@@ -355,9 +356,9 @@ func (w *renderWindow) minimize() {
 // [renderWindow.SystemWin.closeReq] should be called directly instead.
 func (w *renderWindow) closeReq() {
 	rc := w.renderContext()
-	rc.unlock()
+	rc.Unlock()
 	w.SystemWindow.CloseReq()
-	rc.lock()
+	rc.Lock()
 }
 
 // closed frees any resources after the window has been closed.
@@ -445,7 +446,7 @@ func (w *renderWindow) eventLoop() {
 // the lock protection.
 func (w *renderWindow) handleEvent(e events.Event) {
 	rc := w.renderContext()
-	rc.lock()
+	rc.Lock()
 	// we manually handle Unlock's in this function instead of deferring
 	// it to avoid a cryptic "sync: can't unlock an already unlocked Mutex"
 	// error when panicking in the rendering goroutine. This is critical for
@@ -457,12 +458,12 @@ func (w *renderWindow) handleEvent(e events.Event) {
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.handleWindowEvents(e)
-		rc.unlock()
+		rc.Unlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.mains.mainHandleEvent(e)
-	rc.unlock()
+	rc.Unlock()
 }
 
 func (w *renderWindow) handleWindowEvents(e events.Event) {
@@ -471,9 +472,9 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 	case events.WindowPaint:
 		e.SetHandled()
 		rc := w.renderContext()
-		rc.unlock() // one case where we need to break lock
+		rc.Unlock() // one case where we need to break lock
 		w.renderWindow()
-		rc.lock()
+		rc.Lock()
 		w.mains.runDeferred() // note: must be outside of locks in renderWindow
 
 	case events.WindowResize:
@@ -589,18 +590,22 @@ type renderContext struct {
 	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
 	geom math32.Geom2DInt
 
-	// mu is mutex for locking out rendering and any destructive updates.
-	// It is locked at the [renderWindow] level during rendering and
-	// event processing to provide exclusive blocking of external updates.
-	// Use [WidgetBase.AsyncLock] from any outside routine to grab the lock before
-	// doing modifications.
-	mu sync.Mutex
-
 	// visible is whether the window is visible and should be rendered to.
 	visible bool
 
 	// rebuild is whether to force a rebuild of all Scene elements.
 	rebuild bool
+
+	// TextShaper is the text shaping system for the render context,
+	// for doing text layout.
+	textShaper shaped.Shaper
+
+	// render mutex for locking out rendering and any destructive updates.
+	// It is locked at the [renderWindow] level during rendering and
+	// event processing to provide exclusive blocking of external updates.
+	// Use [WidgetBase.AsyncLock] from any outside routine to grab the lock before
+	// doing modifications.
+	sync.Mutex
 }
 
 // newRenderContext returns a new [renderContext] initialized according to
@@ -618,20 +623,8 @@ func newRenderContext() *renderContext {
 		rc.logicalDPI = 160
 	}
 	rc.visible = true
+	rc.textShaper = shaped.NewShaper()
 	return rc
-}
-
-// lock is called by RenderWindow during RenderWindow and HandleEvent
-// when updating all widgets and rendering the screen.
-// Any outside access to window contents / scene must acquire this
-// lock first.  In general, use AsyncLock to do this.
-func (rc *renderContext) lock() {
-	rc.mu.Lock()
-}
-
-// unlock must be called for each Lock, when done.
-func (rc *renderContext) unlock() {
-	rc.mu.Unlock()
 }
 
 func (rc *renderContext) String() string {
@@ -672,10 +665,10 @@ func (w *renderWindow) renderWindow() {
 	}
 
 	rc := w.renderContext()
-	rc.lock()
+	rc.Lock()
 	defer func() {
 		rc.rebuild = false
-		rc.unlock()
+		rc.Unlock()
 	}()
 	rebuild := rc.rebuild
 

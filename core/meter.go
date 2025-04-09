@@ -146,7 +146,7 @@ func (m *Meter) Render() {
 	var toff math32.Vector2
 	if m.Text != "" {
 		tx, _ := htmltext.HTMLToRich([]byte(m.Text), &m.Styles.Font, nil)
-		txt = m.Scene.TextShaper.WrapLines(tx, &m.Styles.Font, &m.Styles.Text, &AppearanceSettings.Text, size)
+		txt = m.Scene.TextShaper().WrapLines(tx, &m.Styles.Font, &m.Styles.Text, &AppearanceSettings.Text, size)
 		toff = txt.Bounds.Size().DivScalar(2)
 	}
 

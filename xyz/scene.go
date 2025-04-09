@@ -117,7 +117,7 @@ func (sc *Scene) Init() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.Background = colors.Scheme.Surface
-	sc.TextShaper = shaped.NewShaper()
+	initTextShaper(sc)
 }
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen

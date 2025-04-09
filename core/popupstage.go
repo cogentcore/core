@@ -37,8 +37,8 @@ func (st *Stage) runPopupAsync() *Stage {
 	}
 	ms := ctx.Scene.Stage.Main
 	rc := ms.renderContext
-	rc.lock()
-	defer rc.unlock()
+	rc.Lock()
+	defer rc.Unlock()
 	return st.runPopup()
 }
 
@@ -172,8 +172,8 @@ func (st *Stage) runPopup() *Stage {
 // for example in a delayed callback AfterFunc etc.
 func (st *Stage) closePopupAsync() {
 	rc := st.Mains.renderContext
-	rc.lock()
-	defer rc.unlock()
+	rc.Lock()
+	defer rc.Unlock()
 	st.ClosePopup()
 }
 

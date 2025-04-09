@@ -207,7 +207,7 @@ func (fb *FontButton) Init() {
 	InitValueButton(fb, false, func(d *Body) {
 		d.SetTitle("Select a font family")
 		si := 0
-		fi := fonts.FontFamilies(fb.Scene.TextShaper.FontList())
+		fi := fonts.FontFamilies(fb.Scene.TextShaper().FontList())
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Family").SetSelectedValue(fb.Text).BindSelect(&si)
 		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {

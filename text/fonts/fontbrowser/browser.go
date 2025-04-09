@@ -57,7 +57,7 @@ func (fb *Browser) SelectFont() { //types:add
 	d := core.NewBody("Select Font")
 	d.SetTitle("Select a font family")
 	si := 0
-	fl := fb.Scene.TextShaper.FontList()
+	fl := fb.Scene.TextShaper().FontList()
 	fi := fonts.FontFamilies(fl)
 	tb := core.NewTable(d)
 	tb.SetSlice(&fi).SetSelectedField("Family").

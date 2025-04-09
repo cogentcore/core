@@ -40,12 +40,14 @@ func (ed *Base) styleSizes() {
 		return
 	}
 	sty := &ed.Styles
-	sh := ed.Scene.TextShaper
-	lht := sty.Text.LineHeightDots(&sty.Font)
-	tx := rich.NewText(&sty.Font, []rune{'M'})
-	r := sh.Shape(tx, &sty.Text, &rich.DefaultSettings)
-	ed.charSize.X = math32.Ceil(r[0].Advance())
-	ed.charSize.Y = lht
+	sh := ed.Scene.TextShaper()
+	if sh != nil {
+		lht := sty.Text.LineHeightDots(&sty.Font)
+		tx := rich.NewText(&sty.Font, []rune{'M'})
+		r := sh.Shape(tx, &sty.Text, &rich.DefaultSettings)
+		ed.charSize.X = math32.Ceil(r[0].Advance())
+		ed.charSize.Y = lht
+	}
 }
 
 // visSizeFromAlloc updates visSize based on allocated size.

@@ -6,6 +6,7 @@ package shapedgt
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"sync"
 
@@ -68,6 +69,21 @@ func NewShaper() shaped.Shaper {
 		didDebug = true
 	}
 	return sh
+}
+
+// NewShaperWithFonts returns a new text shaper using
+// given filesystem with fonts.
+func NewShaperWithFonts(fss []fs.FS) shaped.Shaper {
+	sh := &Shaper{}
+	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
+	errors.Log(fonts.AddFontsToMap(sh.fontMap, fss))
+	sh.shaper.SetFontCacheSize(32)
+	return sh
+}
+
+// FontMap returns the font map used for this shaper
+func (sh *Shaper) FontMap() *fontscan.FontMap {
+	return sh.fontMap
 }
 
 // Shape turns given input spans into [Runs] of rendered text,

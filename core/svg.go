@@ -121,7 +121,7 @@ func (sv *SVG) renderSVG() {
 	if sv.SVG == nil {
 		return
 	}
-	sv.SVG.TextShaper = sv.Scene.TextShaper
+	sv.SVG.TextShaper = sv.Scene.TextShaper()
 	sz := sv.SVG.Geom.Bounds().Size()
 	sv.SVG.RenderState.InitImageRender(nil, sz.X, sz.Y)
 	sv.SVG.Render()

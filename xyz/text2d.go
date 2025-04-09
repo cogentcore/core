@@ -118,10 +118,13 @@ func (txt *Text2D) RenderText() {
 	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), fs, nil)
 	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &rich.DefaultSettings, sz)
 	sz = txt.textRender.Bounds.Size().Ceil()
-	szpt := sz.ToPointRound()
-	if szpt == (image.Point{}) {
-		szpt = image.Point{10, 10}
+	if sz.X == 0 {
+		sz.X = 10
 	}
+	if sz.Y == 0 {
+		sz.Y = 10
+	}
+	szpt := sz.ToPointRound()
 	bounds := image.Rectangle{Max: szpt}
 	marg := txt.Styles.TotalMargin()
 	sz.SetAdd(marg.Size())

@@ -171,7 +171,7 @@ type renderCache struct {
 // renderLine renders given line, dealing with tab stops etc
 func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region, hlts []textpos.Region) {
 	buf := ed.Lines
-	sh := ed.Scene.TextShaper
+	sh := ed.Scene.TextShaper()
 	pc := &ed.Scene.Painter
 	sz := ed.charSize
 	sz.X *= float32(ed.linesSize.X)
@@ -302,7 +302,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 
 	sty := &ed.Styles
 	pc := &ed.Scene.Painter
-	sh := ed.Scene.TextShaper
+	sh := ed.Scene.TextShaper()
 	fst := sty.Font
 
 	fst.SetBackground(nil)

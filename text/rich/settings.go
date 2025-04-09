@@ -36,11 +36,11 @@ type Settings struct {
 
 	// SansSerif is a font without serifs, where glyphs have plain stroke endings,
 	// without ornamentation. Example sans-serif fonts include Arial, Helvetica,
-	// Open Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS,
-	// Liberation Sans, and Nimbus Sans L.
+	// Noto Sans, Open Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS,
+	// Liberation Sans, Nimbus Sans L, Roboto.
 	// This can be a list of comma-separated names, tried in order.
 	// "sans-serif" will be added automatically as a final backup.
-	SansSerif FontName `default:"Roboto"`
+	SansSerif FontName `default:"Noto Sans"`
 
 	// Serif is a small line or stroke attached to the end of a larger stroke
 	// in a letter. In serif fonts, glyphs have finishing strokes, flared or
@@ -51,7 +51,7 @@ type Settings struct {
 	Serif FontName
 
 	// Monospace fonts have all glyphs with he same fixed width.
-	// Example monospace fonts include Fira Mono, DejaVu Sans Mono,
+	// Example monospace fonts include Roboto Mono, Fira Mono, DejaVu Sans Mono,
 	// Menlo, Consolas, Liberation Mono, Monaco, and Lucida Console.
 	// This can be a list of comma-separated names. serif will be added
 	// automatically as a final backup.

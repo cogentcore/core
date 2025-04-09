@@ -57,9 +57,9 @@ func (wb *WidgetBase) AsyncLock() {
 		wb.AsyncLock() // try again
 		return
 	}
-	rc.lock()
+	rc.Lock()
 	if wb.This == nil {
-		rc.unlock()
+		rc.Unlock()
 		if DebugSettings.UpdateTrace {
 			fmt.Println("AsyncLock: widget deleted; blocking forever:", wb)
 		}
@@ -79,7 +79,7 @@ func (wb *WidgetBase) AsyncUnlock() {
 	if wb.Scene != nil {
 		wb.Scene.setFlag(false, sceneUpdating)
 	}
-	rc.unlock()
+	rc.Unlock()
 }
 
 // NeedsRender specifies that the widget needs to be rendered.

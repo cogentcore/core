@@ -439,7 +439,7 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	txs.Color = colors.ToUniform(tx.Styles.Color)
 	etxs := *txs
 	etxs.Align, etxs.AlignV = text.Start, text.Start
-	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, sz)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -448,19 +448,20 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
 func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
-	if tx.Scene == nil || tx.Scene.TextShaper == nil {
+	if tx.Scene == nil || tx.Scene.TextShaper() == nil {
 		return sz
 	}
+	tsh := tx.Scene.TextShaper()
 	fs := &tx.Styles.Font
 	txs := &tx.Styles.Text
 	rsz := sz
 	if txs.Align != text.Start && txs.AlignV != text.Start {
 		etxs := *txs
 		etxs.Align, etxs.AlignV = text.Start, text.Start
-		tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, rsz)
+		tx.paintText = tsh.WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, rsz)
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
-	tx.paintText = tx.Scene.TextShaper.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, rsz)
+	tx.paintText = tsh.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, rsz)
 	tx.Links = tx.paintText.Source.GetLinks()
 	return tx.paintText.Bounds.Size().Ceil()
 }

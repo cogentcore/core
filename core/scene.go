@@ -59,11 +59,6 @@ type Scene struct { //core:no-new
 	// paint context for rendering
 	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
-	// TODO(text): we could protect this with a mutex if we need to:
-
-	// TextShaper is the text shaping system for this scene, for doing text layout.
-	TextShaper shaped.Shaper
-
 	// event manager for this scene
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -177,7 +172,6 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) Init() {
 	sc.Scene = sc
-	sc.TextShaper = shaped.NewShaper()
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
@@ -246,6 +240,16 @@ func (sc *Scene) renderContext() *renderContext {
 		return nil
 	}
 	return sm.renderContext
+}
+
+// TextShaper returns the current [shaped.TextShaper], for text shaping.
+// may be nil if not yet initialized.
+func (sc *Scene) TextShaper() shaped.Shaper {
+	rc := sc.renderContext()
+	if rc != nil {
+		return rc.textShaper
+	}
+	return nil
 }
 
 // RenderWindow returns the current render window for this scene.
