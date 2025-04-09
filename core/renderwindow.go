@@ -683,18 +683,18 @@ func (w *renderWindow) renderWindow() {
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
 		} else {
-			if time.Now().Sub(w.lastRender) > 2*time.Second {
-				fmt.Print(".")
-			} else {
-				return
-			}
+			// if time.Now().Sub(w.lastRender) > 2*time.Second {
+			// 	fmt.Print(".")
+			// } else {
+			return
+			// }
 		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WindowRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
-		fmt.Println("invisible", w)
+		// fmt.Println("invisible", w)
 		return
 	}
 	w.lastRender = time.Now()
