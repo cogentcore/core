@@ -282,6 +282,7 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	}
 	if sc.Painter.Paint == nil {
 		sc.Painter.Paint = styles.NewPaint()
+		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	}
 	sc.SceneGeom.Pos = geom.Pos
 	img := sc.Painter.State.RenderImage()

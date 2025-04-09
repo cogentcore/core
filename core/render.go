@@ -267,6 +267,9 @@ func (sc *Scene) applyStyleScene() {
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.StyleTree()
+	if sc.Painter.Paint != nil {
+		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+	}
 	sc.setFlag(true, sceneNeedsLayout)
 }
 
