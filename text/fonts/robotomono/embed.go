@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !js
-
-package fonts
+package robotomono
 
 import "embed"
 
-//go:embed noto/*.ttf robotomono/*.ttf
-var DefaultFonts embed.FS
+//go:embed *.ttf
+var Embedded embed.FS

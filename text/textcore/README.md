@@ -27,8 +27,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * web: do video sources -- need url
 
-* SVG too!? is every icon getting a shaper?
-
 * svg marker glitch is last remaining bug: debugit!
 
 * SVG, PDF backends

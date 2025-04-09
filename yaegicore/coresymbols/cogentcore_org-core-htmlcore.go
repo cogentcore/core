@@ -18,6 +18,7 @@ func init() {
 		"GoDocWikilink":  reflect.ValueOf(htmlcore.GoDocWikilink),
 		"HasAttr":        reflect.ValueOf(htmlcore.HasAttr),
 		"MDGetAttr":      reflect.ValueOf(htmlcore.MDGetAttr),
+		"MDSetAttr":      reflect.ValueOf(htmlcore.MDSetAttr),
 		"NewContext":     reflect.ValueOf(htmlcore.NewContext),
 		"ReadHTML":       reflect.ValueOf(htmlcore.ReadHTML),
 		"ReadHTMLString": reflect.ValueOf(htmlcore.ReadHTMLString),

@@ -8,9 +8,5 @@ package fonts
 
 import "embed"
 
-// todo: figure out a more general policy here
-
-// arialjs/*.ttf sfjs/*.ttf notojs/*.ttf
-
-//go:embed robotojs/*.ttf
+//go:embed notojs/*.ttf robotomonojs/*.ttf
 var DefaultFonts embed.FS

@@ -9,10 +9,11 @@ package xyz
 import (
 	"io/fs"
 
-	"cogentcore.org/core/text/fonts/roboto"
+	"cogentcore.org/core/text/fonts/noto"
+	"cogentcore.org/core/text/fonts/robotomono"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 )
 
 func initTextShaper(sc *Scene) {
-	sc.TextShaper = shapedgt.NewShaperWithFonts([]fs.FS{roboto.EmbeddedFonts})
+	sc.TextShaper = shapedgt.NewShaperWithFonts([]fs.FS{noto.Embedded, robotomono.Embedded})
 }

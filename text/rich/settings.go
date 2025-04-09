@@ -98,10 +98,8 @@ type Settings struct {
 
 func (rts *Settings) Defaults() {
 	rts.Language = language.DefaultLanguage()
-	// rts.Script = language.Latin
 	rts.SansSerif = "Noto Sans"
 	rts.Monospace = "Roboto Mono"
-	// rts.Serif = "Times New Roman"
 }
 
 // AddFamily adds a family specifier to the given font string,
@@ -110,7 +108,11 @@ func AddFamily(rts FontName, fam string) string {
 	if rts == "" {
 		return fam
 	}
-	return string(rts) + ", " + fam
+	s := string(rts)
+	if strings.Contains(s, " ") {
+		s = `"` + s + `"`
+	}
+	return s + ", " + fam
 }
 
 // FamiliesToList returns a list of the families, split by comma and space removed.
@@ -131,8 +133,7 @@ func FamiliesToList(fam string) []string {
 func (rts *Settings) Family(fam Family) string {
 	switch fam {
 	case SansSerif:
-		return AddFamily(rts.SansSerif, `-apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen,
-  Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`)
+		return AddFamily(rts.SansSerif, `-apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`)
 	case Serif:
 		return AddFamily(rts.Serif, "serif")
 	case Monospace:

@@ -22,6 +22,9 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// todo: rewrite svg.SVG to accept an external painter to render to,
+// and use that for this, so it renders directly instead of via image.
+
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // By default, it is [states.ReadOnly].

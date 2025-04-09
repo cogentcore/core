@@ -9,7 +9,7 @@ import "cogentcore.org/core/core"
 func main() {
 	b := core.NewBody()
 	fb := NewBrowser(b)
-	fb.OpenFile("../roboto/Roboto-Regular.ttf")
+	fb.OpenFile("../noto/NotoSans-Regular.ttf")
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(fb.MakeToolbar)
 	})
