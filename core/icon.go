@@ -30,85 +30,70 @@ type Icon struct {
 	// prevIcon is the previously rendered icon.
 	prevIcon icons.Icon
 
-	// svg drawing of the icon
-	svg svg.SVG
+	// image representation of the icon, cached for faster drawing.
+	pixels *image.RGBA
 }
 
 func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
 func (ic *Icon) Init() {
 	ic.WidgetBase.Init()
-	ic.svg.Scale = 1
-
-	ic.Updater(ic.readIcon)
 	ic.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))
 	})
-	ic.FinalStyler(func(s *styles.Style) {
-		if ic.svg.Root != nil {
-			ic.svg.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
-		}
-	})
 }
 
-// readIcon reads the [Icon.Icon] if necessary.
-func (ic *Icon) readIcon() {
-	if ic.Icon == ic.prevIcon {
-		// if nothing has changed, we don't need to read it
-		return
-	}
-	if !ic.Icon.IsSet() {
-		ic.svg.DeleteAll()
-		ic.prevIcon = ic.Icon
-		return
-	}
+// RerenderSVG forcibly renders the icon, returning the [svg.SVG]
+// used to render.
+func (ic *Icon) RerenderSVG() *svg.SVG {
+	ic.pixels = nil
+	ic.prevIcon = ""
+	return ic.renderSVG()
+}
 
-	ic.svg.Config(2, 2)
-	err := ic.svg.ReadXML(strings.NewReader(string(ic.Icon)))
-	if errors.Log(err) != nil {
-		return
+// renderSVG renders the icon if necessary, returning the [svg.SVG]
+// used to render if it was rendered, otherwise nil.
+func (ic *Icon) renderSVG() *svg.SVG {
+	sz := ic.Geom.Size.Actual.Content.ToPoint()
+	if sz == (image.Point{}) {
+		return nil
+	}
+	var isz image.Point
+	if ic.pixels != nil {
+		isz = ic.pixels.Bounds().Size()
+	}
+	if ic.Icon == ic.prevIcon && sz == isz && !ic.NeedsRebuild() {
+		return nil
+	}
+	ic.pixels = nil
+	if !ic.Icon.IsSet() {
+		ic.prevIcon = ic.Icon
+		return nil
+	}
+	sv := svg.NewSVG(sz.X, sz.Y)
+	err := sv.ReadXML(strings.NewReader(string(ic.Icon)))
+	if errors.Log(err) != nil || sv.Root == nil || !sv.Root.HasChildren() {
+		return nil
 	}
 	icons.Used[ic.Icon] = struct{}{}
 	ic.prevIcon = ic.Icon
-}
-
-// renderSVG renders the [Icon.svg] if necessary.
-func (ic *Icon) renderSVG() {
-	if ic.svg.Root == nil || !ic.svg.Root.HasChildren() {
-		return
-	}
-
-	sv := &ic.svg
+	sv.Root.ViewBox.PreserveAspectRatio.SetFromStyle(&ic.Styles)
 	sv.TextShaper = ic.Scene.TextShaper()
-	sz := ic.Geom.Size.Actual.Content.ToPoint()
+	// todo: we aren't rebuilding on color change
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	if !ic.NeedsRebuild() { // if rebuilding then rebuild
-		isz := sv.Geom.Size
-		// if nothing has changed, we don't need to re-render
-		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {
-			return
-		}
-	}
-
-	if sz == (image.Point{}) {
-		return
-	}
-	sv.Geom.Size = sz // make sure
-	sv.Resize(sz)     // does Config if needed
 	sv.Color = clr
 	sv.Scale = 1
 	sv.Render()
-	sv.Name = string(ic.Icon)
+	ic.pixels = sv.RenderImage()
+	return sv
 }
 
 func (ic *Icon) Render() {
 	ic.renderSVG()
-
-	img := ic.svg.RenderImage()
-	if img == nil {
+	if ic.pixels == nil {
 		return
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	ic.Scene.Painter.DrawImage(img, r, sp, draw.Over)
+	ic.Scene.Painter.DrawImage(ic.pixels, r, sp, draw.Over)
 }

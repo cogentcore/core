@@ -25,11 +25,9 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 
 * cleanup junk in htmlcanvas code.
 
-* web: do xyz and video sources.
+* web: do video sources -- need url
 
-* Text editor is not rendering a lot of stuff on Retina display: base.onsurface color is not updating -- need to figure out why.
-
-* move shaper to renderwindow so popup menus etc don't need to make their own? SVG too!? is every icon getting a shaper?
+* SVG too!? is every icon getting a shaper?
 
 * svg marker glitch is last remaining bug: debugit!
 
@@ -42,8 +40,6 @@ The underlying `lines.Lines` object does not have any core dependencies, and is 
 * textcore base test horizontal scrolling
 
 * better job finding path fragments from file links -- iteratively try stuff.
-
-* check for negative advance and highlighting issues / tests
 
 * emoji, svg, bitmap font rendering: could not get color emoji to work
 
