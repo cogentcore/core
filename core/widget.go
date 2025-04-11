@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -128,14 +128,14 @@ type Widget interface {
 	// specifically for the child (e.g., for zebra stripes in [ListGrid]).
 	ChildBackground(child Widget) image.Image
 
-	// RenderDraw draws the current image onto the RenderWindow window,
-	// using the [system.Drawer] interface methods, typically [Drawer.Copy].
-	// The given draw operation is suggested by the RenderWindow, with the
-	// first main window using draw.Src and the rest using draw.Over.
-	// Individual draw methods are free to ignore if necessary.
-	// Optimized direct rendering widgets can register by doing
-	// [Scene.AddDirectRender] to directly draw into the window texture.
-	RenderDraw(drw system.Drawer, op draw.Op)
+	// RenderSource returns the self-contained [composer.Source] for
+	// rendering this widget. The base widget returns nil, and the [Scene]
+	// widget returns the [paint.Painter] rendering results.
+	// Widgets that do direct rendering instead of drawing onto
+	// the Scene painter should return a suitable render source.
+	// Use [Scene.AddDirectRender] to register such widgets with the Scene.
+	// The given draw operation is the suggested way to Draw onto existing images.
+	RenderSource(op draw.Op) composer.Source
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -267,7 +267,6 @@ func (wb *WidgetBase) Init() {
 		// TODO(kai): what about context menus on mobile?
 		tt, _ := wb.This.(Widget).WidgetTooltip(image.Pt(-1, -1))
 		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
-		s.SetAbilities(true, abilities.ScrollableUnfocused)
 
 		if s.Is(states.Selected) {
 			s.Background = colors.Scheme.Select.Container
@@ -291,6 +290,7 @@ func (wb *WidgetBase) Init() {
 	wb.handleWidgetStateFromMouse()
 	wb.handleLongHoverTooltip()
 	wb.handleWidgetStateFromFocus()
+	wb.handleWidgetStateFromAttend()
 	wb.handleWidgetContextMenu()
 	wb.handleWidgetMagnify()
 	wb.handleValueOnChange()
@@ -400,32 +400,48 @@ func (wb *WidgetBase) parentWidget() *WidgetBase {
 	return nil // the parent may be a non-widget in [tree.UnmarshalRootJSON]
 }
 
-// IsVisible returns true if a widget is visible for rendering according
-// to the [states.Invisible] flag on it or any of its parents.
-// This flag is also set by [styles.DisplayNone] during [WidgetBase.Style].
-// This does *not* check for an empty TotalBBox, indicating that the widget
-// is out of render range; that is done by [WidgetBase.PushBounds] prior to rendering.
-// Non-visible nodes are automatically not rendered and do not get
+// IsDisplayable returns whether the widget has the potential of being displayed.
+// If it or any of its parents are deleted or [states.Invisible], it is not
+// displayable. Otherwise, it is displayable.
+//
+// This does *not* check if the widget is actually currently visible, for which you
+// can use [WidgetBase.IsVisible]. In other words, if a widget is currently offscreen
+// but can be scrolled onscreen, it is still displayable, but it is not visible until
+// its bounding box is actually onscreen.
+//
+// Widgets that are not displayable are automatically not rendered and do not get
 // window events.
-// This call recursively calls the parent, which is typically a short path.
-func (wb *WidgetBase) IsVisible() bool {
+//
+// [styles.DisplayNone] can be set for [styles.Style.Display] to make a widget
+// not displayable.
+func (wb *WidgetBase) IsDisplayable() bool {
 	if wb == nil || wb.This == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
 	if wb.Parent == nil {
 		return true
 	}
-	return wb.parentWidget().IsVisible()
+	return wb.parentWidget().IsDisplayable()
 }
 
-// RenderDraw draws the current image onto the RenderWindow window,
-// using the [system.Drawer] interface methods, typically [Drawer.Copy].
-// The given draw operation is suggested by the RenderWindow, with the
-// first main window using draw.Src and the rest using draw.Over.
-// Individual draw methods are free to ignore if necessary.
-// Optimized direct rendering widgets can register by doing
-// [Scene.AddDirectRender] to directly draw into the window texture.
-func (wb *WidgetBase) RenderDraw(drw system.Drawer, op draw.Op) {}
+// IsVisible returns whether the widget is actually currently visible.
+// A widget is visible if and only if it is both [WidgetBase.IsDisplayable]
+// and it has a non-empty rendering bounding box (ie: it is currently onscreen).
+// This means that widgets currently not visible due to scrolling will return false
+// for this function, even though they are still displayable and return true for
+// [WidgetBase.IsDisplayable].
+func (wb *WidgetBase) IsVisible() bool {
+	return wb.IsDisplayable() && !wb.Geom.TotalBBox.Empty()
+}
+
+// RenderSource returns the self-contained [composer.Source] for
+// rendering this widget. The base widget returns nil, and the [Scene]
+// widget returns the [paint.Painter] rendering results.
+// Widgets that do direct rendering instead of drawing onto
+// the Scene painter should return a suitable render source.
+// Use [Scene.AddDirectRender] to register such widgets with the Scene.
+// The given draw operation is the suggested way to Draw onto existing images.
+func (wb *WidgetBase) RenderSource(op draw.Op) composer.Source { return nil }
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

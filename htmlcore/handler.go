@@ -17,11 +17,13 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
@@ -80,14 +82,24 @@ func handleElement(ctx *Context) {
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
-		if tag == "body" {
+		switch tag {
+		case "body":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
-		}
-		if tag == "ol" || tag == "ul" {
+		case "ol", "ul":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
+			})
+		case "div":
+			w.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 1)
+				s.Overflow.Y = styles.OverflowAuto
+			})
+		case "blockquote":
+			w.Styler(func(s *styles.Style) { // todo: need a better marker
+				s.Grow.Set(1, 0)
+				s.Background = colors.Scheme.SurfaceContainer
 			})
 		}
 	case "button":
@@ -109,23 +121,45 @@ func handleElement(ctx *Context) {
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
-			ed := New[texteditor.Editor](ctx)
-			ctx.Node = ctx.Node.FirstChild // go to the code element
-			lang := getLanguage(GetAttr(ctx.Node, "class"))
-			if lang != "" {
-				ed.Buffer.SetFileExt(lang)
+			codeEl := ctx.Node.FirstChild
+			collapsed := GetAttr(codeEl, "collapsed")
+			lang := getLanguage(GetAttr(codeEl, "class"))
+			id := GetAttr(codeEl, "id")
+			var ed *textcore.Editor
+			var parent tree.Node
+			if collapsed != "" {
+				cl := New[core.Collapser](ctx)
+				core.NewText(cl.Summary).SetText("Code")
+				ed = textcore.NewEditor(cl.Details)
+				if id != "" {
+					cl.Summary.Name = id
+				}
+				parent = cl.Parent
+				if collapsed == "false" || collapsed == "-" {
+					cl.Open = true
+				}
+			} else {
+				ed = New[textcore.Editor](ctx)
+				if id != "" {
+					ed.Name = id
+				}
+				parent = ed.Parent
 			}
-			ed.Buffer.SetString(ExtractText(ctx))
+			ctx.Node = codeEl
+			if lang != "" {
+				ed.Lines.SetFileExt(lang)
+			}
+			ed.Lines.SetString(ExtractText(ctx))
 			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
-				ed.Buffer.SpacesToTabs(0, ed.Buffer.NumLines()) // Go uses tabs
-				parent := core.NewFrame(ed.Parent)
-				parent.Styler(func(s *styles.Style) {
+				ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
+				parFrame := core.NewFrame(parent)
+				parFrame.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
 					s.Grow.Set(1, 0)
 				})
 				// we inherit our Grow.Y from our first child so that
 				// elements that want to grow can do so
-				parent.SetOnChildAdded(func(n tree.Node) {
+				parFrame.SetOnChildAdded(func(n tree.Node) {
 					if _, ok := n.(*core.Body); ok { // Body should not grow
 						return
 					}
@@ -134,13 +168,13 @@ func handleElement(ctx *Context) {
 						return
 					}
 					wb.FinalStyler(func(s *styles.Style) {
-						parent.Styles.Grow.Y = s.Grow.Y
+						parFrame.Styles.Grow.Y = s.Grow.Y
 					})
 				})
-				BindTextEditor(ed, parent, lang)
+				BindTextEditor(ed, parFrame, lang)
 			} else {
 				ed.SetReadOnly(true)
-				ed.Buffer.Options.LineNumbers = false
+				ed.Lines.Settings.LineNumbers = false
 				ed.Styler(func(s *styles.Style) {
 					s.Border.Width.Zero()
 					s.MaxBorder.Width.Zero()
@@ -150,15 +184,17 @@ func handleElement(ctx *Context) {
 			}
 		} else {
 			handleText(ctx).Styler(func(s *styles.Style) {
-				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+				s.Text.WhiteSpace = text.WhiteSpacePreWrap
 			})
 		}
 	case "li":
 		// if we have a p as our first or second child, which is typical
 		// for markdown-generated HTML, we use it directly for data extraction
 		// to prevent double elements and unnecessary line breaks.
+		hasPChild := false
 		if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "p" {
 			ctx.Node = ctx.Node.FirstChild
+			hasPChild = true
 		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
@@ -183,19 +219,45 @@ func handleElement(ctx *Context) {
 			}
 		}
 		text.SetText(start + text.Text)
+		if hasPChild { // handle potential additional <p> blocks that should be indented
+			cnode := ctx.Node
+			ctx.BlockParent = text.Parent.(core.Widget)
+			for cnode.NextSibling != nil {
+				cnode = cnode.NextSibling
+				ctx.Node = cnode
+				if cnode.Data != "p" {
+					continue
+				}
+				txt := handleText(ctx)
+				txt.SetText("&nbsp;&nbsp; " + txt.Text)
+			}
+		}
 	case "img":
-		img := New[core.Image](ctx)
 		n := ctx.Node
-		img.SetTooltip(GetAttr(n, "alt"))
+		src := GetAttr(n, "src")
+		alt := GetAttr(n, "alt")
+		// Can be either image or svg.
+		var img *core.Image
+		var svg *core.SVG
+		if strings.HasSuffix(src, ".svg") {
+			svg = New[core.SVG](ctx)
+			svg.SetTooltip(alt)
+		} else {
+			img = New[core.Image](ctx)
+			img.SetTooltip(alt)
+		}
+
 		go func() {
-			src := GetAttr(n, "src")
 			resp, err := Get(ctx, src)
 			if errors.Log(err) != nil {
 				return
 			}
 			defer resp.Body.Close()
-			if strings.Contains(resp.Header.Get("Content-Type"), "svg") {
-				// TODO(kai/htmlcore): support svg
+			if svg != nil {
+				svg.AsyncLock()
+				svg.Read(resp.Body)
+				svg.Update()
+				svg.AsyncUnlock()
 			} else {
 				im, _, err := imagex.Read(resp.Body)
 				if err != nil {
@@ -236,16 +298,17 @@ func handleElement(ctx *Context) {
 			New[core.TextField](ctx).SetText(val)
 		}
 	case "textarea":
-		buf := texteditor.NewBuffer()
+		buf := lines.NewLines()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[texteditor.Editor](ctx).SetBuffer(buf)
+		New[textcore.Editor](ctx).SetLines(buf)
 	default:
 		ctx.NewParent = ctx.Parent()
 	}
 }
 
-func textStyler(s *styles.Style) {
+func (ctx *Context) textStyler(s *styles.Style) {
 	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+	s.Font.Size = core.AppearanceSettings.DocsFontSize / 100
 	// TODO: it would be ideal for htmlcore to automatically save a scale factor
 	// in general and for each domain, that is applied only to page content
 	// scale := float32(1.2)
@@ -258,8 +321,8 @@ func textStyler(s *styles.Style) {
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context) *core.Text {
 	tx := New[core.Text](ctx).SetText(ExtractText(ctx))
-	tx.Styler(textStyler)
-	tx.HandleTextClick(func(tl *paint.TextLink) {
+	tx.Styler(ctx.textStyler)
+	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
@@ -274,8 +337,8 @@ func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
-	tx.Styler(textStyler)
-	tx.HandleTextClick(func(tl *paint.TextLink) {
+	tx.Styler(ctx.textStyler)
+	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
@@ -336,4 +399,4 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 // BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
 // when importing yaegicore, which provides interactive editing functionality for Go
 // code blocks in text editors.
-var BindTextEditor func(ed *texteditor.Editor, parent *core.Frame, language string)
+var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)

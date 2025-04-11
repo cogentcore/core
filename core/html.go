@@ -149,9 +149,13 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		b.WriteString(w.Text)
 	case *Icon:
 		w.Styles.Min.Zero() // do not specify any size for the inner svg object
-		err := writeSVG(&w.svg)
-		if err != nil {
-			return err
+		// note: the above should have no effect until restyle and layout.
+		sv := w.RerenderSVG()
+		if sv != nil {
+			err := writeSVG(sv)
+			if err != nil {
+				return err
+			}
 		}
 	case *SVG:
 		err := writeSVG(w.SVG)
@@ -160,7 +164,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		}
 	}
 	if se.Name.Local == "textarea" && idName == "editor" {
-		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Buffer").Interface().(fmt.Stringer).String())
+		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Lines").Interface().(fmt.Stringer).String())
 	}
 
 	if handleChildren {

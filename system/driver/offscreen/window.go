@@ -6,12 +6,13 @@ package offscreen
 
 import (
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 )
 
 // Window is the implementation of [system.Window] for the offscreen platform.
 type Window struct {
-	base.WindowMulti[*App, *Drawer]
+	base.WindowMulti[*App, *composer.ComposerDrawer]
 }
 
 func (w *Window) Screen() *system.Screen {

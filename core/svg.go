@@ -22,6 +22,9 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// todo: rewrite svg.SVG to accept an external painter to render to,
+// and use that for this, so it renders directly instead of via image.
+
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // By default, it is [states.ReadOnly].
@@ -121,12 +124,11 @@ func (sv *SVG) renderSVG() {
 	if sv.SVG == nil {
 		return
 	}
-	// need to make the image again to prevent it from
-	// rendering over itself
-	sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
-	sv.SVG.RenderState.Init(sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
+	sv.SVG.TextShaper = sv.Scene.TextShaper()
+	sz := sv.SVG.Geom.Bounds().Size()
+	sv.SVG.RenderState.InitImageRender(nil, sz.X, sz.Y)
 	sv.SVG.Render()
-	sv.prevSize = sv.SVG.Pixels.Rect.Size()
+	sv.prevSize = sz
 }
 
 func (sv *SVG) Render() {
@@ -136,10 +138,11 @@ func (sv *SVG) Render() {
 	}
 	needsRender := !sv.IsReadOnly()
 	if !needsRender {
-		if sv.SVG.Pixels == nil {
+		img := sv.SVG.RenderImage()
+		if img == nil {
 			needsRender = true
 		} else {
-			sz := sv.SVG.Pixels.Bounds().Size()
+			sz := img.Bounds().Size()
 			if sz != sv.prevSize || sz == (image.Point{}) {
 				needsRender = true
 			}
@@ -150,7 +153,8 @@ func (sv *SVG) Render() {
 	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
-	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
+	img := sv.SVG.RenderImage()
+	sv.Scene.Painter.DrawImage(img, r, sp, draw.Over)
 }
 
 func (sv *SVG) MakeToolbar(p *tree.Plan) {

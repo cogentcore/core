@@ -29,6 +29,7 @@ func init() {
 		"IsLocal":       reflect.ValueOf(filepath.IsLocal),
 		"Join":          reflect.ValueOf(filepath.Join),
 		"ListSeparator": reflect.ValueOf(constant.MakeFromLiteral("58", token.INT, 0)),
+		"Localize":      reflect.ValueOf(filepath.Localize),
 		"Match":         reflect.ValueOf(filepath.Match),
 		"Rel":           reflect.ValueOf(filepath.Rel),
 		"Separator":     reflect.ValueOf(constant.MakeFromLiteral("47", token.INT, 0)),

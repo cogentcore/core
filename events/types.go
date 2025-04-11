@@ -147,6 +147,9 @@ const (
 
 	// Scroll is for scroll wheel or other scrolling events (gestures).
 	// These are not unique and Delta is updated during compression.
+	// The [MouseScroll.Delta] on scroll events is always in real pixel/dot units;
+	// low-level sources may be in lines or pages, but we normalize everything
+	// to real pixels/dots.
 	Scroll
 
 	// KeyDown is when a key is pressed down.
@@ -197,6 +200,17 @@ const (
 
 	// FocusLost is sent when a Focusable element loses keyboard focus.
 	FocusLost
+
+	// Attend is sent when a Pressable element is programmatically set
+	// as Attended through an event. Typically the Attended state is engaged
+	// by clicking. Attention is like Focus, in that there is only 1 element
+	// at a time in the Attended state, but it does not direct keyboard input.
+	// The primary effect of attention is on scrolling events via
+	// [abilities.ScrollableUnattended].
+	Attend
+
+	// AttendLost is sent when a different Pressable element is Attended.
+	AttendLost
 
 	// Change is when a value represented by the element has been changed
 	// by the user and committed (for example, someone has typed text in a

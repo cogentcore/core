@@ -1,0 +1,114 @@
+// Copyright (c) 2025, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+//go:build js
+
+package shapedjs
+
+import (
+	"fmt"
+	"syscall/js"
+
+	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
+)
+
+// https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
+
+// Metrics are html canvas MeasureText metrics.
+type Metrics struct {
+	// Width is the actual width of the text span, which appears to be equivalent to the
+	// Advance in go-text.
+	Width float32
+
+	// ActualBoundingBoxLeft is the distance parallel to the baseline from the
+	// alignment point given by the CanvasRenderingContext2D.textAlign property
+	// to the left side of the bounding rectangle of the given text, in CSS pixels.
+	// Positive numbers indicating a distance going left from the given alignment point.
+	ActualBoundingBoxLeft float32
+
+	// ActualBoundingBoxRight is the distance from the alignment point given by the
+	// CanvasRenderingContext2D.textAlign property to the right side of the bounding
+	// rectangle of the given text, in CSS pixels.
+	// The distance is measured parallel to the baseline.
+	ActualBoundingBoxRight float32
+
+	// FontBoundingBoxAscent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the top of the
+	// highest bounding rectangle of all the fonts used to render the text, in CSS pixels.
+	FontBoundingBoxAscent float32
+
+	// FontBoundingBoxDescent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the
+	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
+	FontBoundingBoxDescent float32
+
+	// ActualBoundingBoxAscent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the top of the
+	// highest bounding rectangle of the actual text, in CSS pixels.
+	ActualBoundingBoxAscent float32
+
+	// ActualBoundingBoxDescent is the distance from the horizontal line indicated
+	// by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the
+	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
+	ActualBoundingBoxDescent float32
+
+	// todo: probably could get rid of these baselines:
+
+	// HangingBaseline is the distance from the horizontal line indicated by the
+	// CanvasRenderingContext2D.textBaseline property to the hanging baseline
+	// of the line box, in CSS pixels.
+	HangingBaseline float32
+
+	// AlphabeticBaseline is the distance from the horizontal line indicated by the
+	// CanvasRenderingContext2D.textBaseline property to the alphabetic baseline
+	// of the line box, in CSS pixels.
+	AlphabeticBaseline float32
+
+	// IdeographicBaseline is the distance from the horizontal line indicated by the
+	// CanvasRenderingContext2D.textBaseline property to the ideographic baseline
+	// of the line box, in CSS pixels.
+	IdeographicBaseline float32
+
+	// not widely supported:
+	// EmHeightAscent           float32
+	// EmHeightDescent          float32
+}
+
+func MeasureTest(txt string) {
+	ctx := js.Global().Get("document").Call("getElementById", "app").Call("getContext", "2d") // todo
+	fsty := rich.NewStyle()
+	tsty := text.NewStyle()
+	uc := units.Context{}
+	uc.Defaults()
+	tsty.ToDots(&uc)
+	fn := text.NewFont(fsty, tsty)
+	SetFontStyle(ctx, fn, tsty, 0)
+	m := MeasureText(ctx, txt)
+	fmt.Printf("%#v\n", m)
+}
+
+// MeasureText calls html canvas MeasureText functon on given canvas context,
+// using currently set font.
+func MeasureText(ctx js.Value, txt string) *Metrics {
+	jm := ctx.Call("measureText", txt)
+
+	m := &Metrics{
+		Width:                    float32(jm.Get("width").Float()),
+		ActualBoundingBoxLeft:    float32(jm.Get("actualBoundingBoxLeft").Float()),
+		ActualBoundingBoxRight:   float32(jm.Get("actualBoundingBoxRight").Float()),
+		FontBoundingBoxAscent:    float32(jm.Get("fontBoundingBoxAscent").Float()),
+		FontBoundingBoxDescent:   float32(jm.Get("fontBoundingBoxDescent").Float()),
+		ActualBoundingBoxAscent:  float32(jm.Get("actualBoundingBoxAscent").Float()),
+		ActualBoundingBoxDescent: float32(jm.Get("actualBoundingBoxDescent").Float()),
+		HangingBaseline:          float32(jm.Get("hangingBaseline").Float()),
+		AlphabeticBaseline:       float32(jm.Get("alphabeticBaseline").Float()),
+		IdeographicBaseline:      float32(jm.Get("ideographicBaseline").Float()),
+	}
+	// note: these are not widely supported.
+	// EmHeightAscent:           float32(jm.Get("emHeightAscent").Float()),
+	// EmHeightDescent:     float32(jm.Get("emHeightDescent").Float()),
+	return m
+}

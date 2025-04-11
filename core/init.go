@@ -5,7 +5,6 @@
 package core
 
 import (
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
 
@@ -15,6 +14,6 @@ func init() {
 	TheApp.CogentCoreDataDir()                                    // ensure it exists
 	theWindowGeometrySaver.needToReload()                         // gets time stamp associated with open, so it doesn't re-open
 	theWindowGeometrySaver.open()
-	styles.SettingsFont = (*string)(&AppearanceSettings.Font)
-	styles.SettingsMonoFont = (*string)(&AppearanceSettings.MonoFont)
+	// styles.SettingsFont = (*string)(&AppearanceSettings.Font)
+	// styles.SettingsMonoFont = (*string)(&AppearanceSettings.MonoFont)
 }

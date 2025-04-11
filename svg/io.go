@@ -26,7 +26,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html/charset"
 )
@@ -850,7 +850,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	_, ismark := n.(*Marker)
 	if !isgp {
 		if issvg && !ismark {
-			sp := styles.StylePropertiesXML(properties)
+			sp := styleprops.ToXMLString(properties)
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
@@ -875,7 +875,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	switch nd := n.(type) {
 	case *Path:
 		nm = "path"
-		nd.DataStr = PathDataString(nd.Data)
+		nd.DataStr = nd.Data.ToSVG()
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
@@ -1130,7 +1130,10 @@ func SetStandardXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Properties))
+		if nb.Properties == nil {
+			nb.Properties = make(map[string]any)
+		}
+		styleprops.FromXMLString(val, nb.Properties)
 		return true
 	}
 	return false

@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 )
 
@@ -45,9 +46,9 @@ type App struct {
 func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	defer func() { system.HandleRecover(recover()) }()
 
-	w := &Window{base.NewWindowMulti[*App, *Drawer](a, opts)}
+	w := &Window{base.NewWindowMulti[*App, *composer.ComposerDrawer](a, opts)}
 	w.This = w
-	w.Draw = &Drawer{Window: w}
+	w.Compose = &composer.ComposerDrawer{Drawer: &Drawer{Window: w}}
 	w.PixelSize = opts.Size
 
 	a.Mu.Lock()

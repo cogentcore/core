@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
 
@@ -81,7 +80,8 @@ func (sp *Sprite) grabRenderFrom(w Widget) {
 // If it returns nil, then the image could not be fetched.
 func grabRenderFrom(w Widget) *image.RGBA {
 	wb := w.AsWidget()
-	if wb.Scene.Pixels == nil {
+	scimg := wb.Scene.Painter.RenderImage()
+	if scimg == nil {
 		return nil
 	}
 	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
@@ -89,7 +89,7 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	}
 	sz := wb.Geom.TotalBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), wb.Scene.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
 	return img
 }
 
@@ -201,18 +201,4 @@ func (ss *Sprites) InactivateSprite(name string) {
 		sp.Active = false
 		ss.Modified = true
 	}
-}
-
-// drawSprites draws sprites
-func (ss *Sprites) drawSprites(drw system.Drawer, scpos image.Point) {
-	for _, kv := range ss.Order {
-		sp := kv.Value
-		if !sp.Active {
-			continue
-		}
-		// note: in general we assume sprites are static, so Unchanged.
-		// if needed, could add a "dynamic" flag or something.
-		drw.Copy(sp.Geom.Pos.Add(scpos), sp.Pixels, sp.Pixels.Bounds(), draw.Over, system.Unchanged)
-	}
-	ss.Modified = false
 }

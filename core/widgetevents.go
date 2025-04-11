@@ -254,7 +254,7 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 		})
 	})
 
-	if s.State != state {
+	if s.State != state && !(e.Type() == events.Attend || e.Type() == events.AttendLost) {
 		wb.Restyle()
 	}
 }
@@ -370,16 +370,6 @@ func (wb *WidgetBase) handleWidgetStateFromMouse() {
 			wb.SetState(false, states.Sliding, states.Active)
 		}
 	})
-	wb.On(events.DragStart, func(e events.Event) {
-		if wb.AbilityIs(abilities.Draggable) {
-			wb.SetState(true, states.Dragging)
-		}
-	})
-	wb.On(events.Drop, func(e events.Event) {
-		if wb.AbilityIs(abilities.Draggable) {
-			wb.SetState(false, states.Dragging, states.Active)
-		}
-	})
 }
 
 // handleLongHoverTooltip listens for LongHover and LongPress events and
@@ -439,6 +429,21 @@ func (wb *WidgetBase) handleWidgetStateFromFocus() {
 	})
 }
 
+// handleWidgetStateFromAttend updates standard State flags based on Attend events
+func (wb *WidgetBase) handleWidgetStateFromAttend() {
+	wb.On(events.Attend, func(e events.Event) {
+		if wb.Styles.Abilities.IsPressable() {
+			wb.ScrollToThis()
+			wb.SetState(true, states.Attended)
+		}
+	})
+	wb.On(events.AttendLost, func(e events.Event) {
+		if wb.Styles.Abilities.IsPressable() {
+			wb.SetState(false, states.Attended)
+		}
+	})
+}
+
 // HandleWidgetMagnifyEvent calls [renderWindow.stepZoom] on [events.Magnify]
 func (wb *WidgetBase) handleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
@@ -473,6 +478,11 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 			wb.Send(events.Click, e)
 		}
 	})
+}
+
+// dragStateReset resets the drag related state flags, including [states.Active].
+func (wb *WidgetBase) dragStateReset() {
+	wb.SetState(false, states.Active, states.DragHovered, states.Dragging)
 }
 
 ////////	Focus
@@ -583,4 +593,23 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	}
 	plev := cur.AsTree().ParentLevel(wb.This)
 	return plev >= 0
+}
+
+// SetAttend sets the keyboard input attend on this item or the first item within it
+// that can be attended (if none, then just sets attend to this widget).
+// This sends an [events.Attend] event, which typically results in
+// the widget being styled as attended. See [WidgetBase.SetAttendQuiet] for
+// a version that does not. Also see [WidgetBase.StartAttend].
+//
+// SetAttend only fully works for widgets that have already been shown, so for newly
+// created widgets, you should use [WidgetBase.StartAttend], or [WidgetBase.Defer] your
+// SetAttend call.
+func (wb *WidgetBase) SetAttend() {
+	if !wb.Styles.Abilities.IsPressable() {
+		return
+	}
+	em := wb.Events()
+	if em != nil {
+		em.setAttend(wb.This.(Widget))
+	}
 }

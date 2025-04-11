@@ -121,8 +121,11 @@ type Events struct {
 	// the timer for RepeatClickable items.
 	repeatClickTimer *time.Timer
 
-	// widget receiving keyboard events.  Use SetFocus, CurFocus.
+	// widget receiving keyboard events. Use SetFocus.
 	focus Widget
+
+	// currently attended widget. Use SetAttend.
+	attended Widget
 
 	// widget to focus on at start when no other focus has been
 	// set yet. Use SetStartFocus.
@@ -192,7 +195,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 	if em.focus != nil {
 		em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
 			wb := AsWidget(k)
-			if !wb.IsVisible() {
+			if !wb.IsDisplayable() {
 				return tree.Break
 			}
 			wb.firstHandleEvent(e)
@@ -204,7 +207,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 		if !e.IsHandled() {
 			em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
 				wb := AsWidget(k)
-				if !wb.IsVisible() {
+				if !wb.IsDisplayable() {
 					return tree.Break
 				}
 				wb.finalHandleEvent(e)
@@ -325,7 +328,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				dragPress = w
 			}
 			if slidePress == nil && wb.AbilityIs(abilities.Slideable) {
-				if !wb.AbilityIs(abilities.ScrollableUnfocused) && !wb.StateIs(states.Focused) {
+				if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
 					continue
 				}
 				slidePress = w
@@ -340,6 +343,9 @@ func (em *Events) handlePosEvent(e events.Event) {
 				up = w
 			}
 		case events.Scroll:
+			if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+				continue
+			}
 			if e.IsHandled() {
 				if em.scroll == nil {
 					em.scroll = w
@@ -352,6 +358,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 	case events.MouseDown:
 		if press != nil {
 			em.press = press
+			em.setAttend(press)
 		}
 		if dragPress != nil {
 			em.dragPress = dragPress
@@ -372,6 +379,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 			if wb.Styles.Abilities.IsHoverable() || sc.renderBBoxes {
 				hovs = append(hovs, w)
 			}
+		}
+		if em.drag != nil { // this means we missed the drop
+			em.dragHovers = em.updateHovers(hovs, em.dragHovers, e, events.DragEnter, events.DragLeave)
+			em.dragDrop(em.drag, e)
+			break
 		}
 		if sc.renderBBoxes {
 			pselw := sc.selectedWidget
@@ -667,8 +679,8 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 			return
 		}
 		rc := win.renderContext() // have to get this one first
-		rc.lock()
-		defer rc.unlock()
+		rc.Lock()
+		defer rc.Unlock()
 
 		em.timerMu.Lock() // then can get this
 		defer em.timerMu.Unlock()
@@ -700,8 +712,8 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
-				if ly.HasScroll[d] {
-					sb := ly.scrolls[d]
+				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
+					sb := ly.Scrolls[d]
 					em.getMouseInBBox(sb, pos)
 				}
 			}
@@ -758,10 +770,10 @@ func (em *Events) dragStartCheck(e events.Event, dur time.Duration, dist int) bo
 	return dst >= dist
 }
 
-// dragStart starts a drag event, capturing a sprite image of the given widget
+// DragStart starts a drag event, capturing a sprite image of the given widget
 // and storing the data for later use during Drop.
 // A drag does not officially start until this is called.
-func (em *Events) dragStart(w Widget, data any, e events.Event) {
+func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	ms := em.scene.Stage.Main
 	if ms == nil {
 		return
@@ -801,7 +813,8 @@ func (em *Events) dragClearSprite() {
 	ms.Sprites.InactivateSprite(dragSpriteName)
 }
 
-func (em *Events) dragMenuAddModText(m *Scene, mod events.DropMods) {
+// DragMenuAddModText adds info about key modifiers for a drag drop menu.
+func (em *Events) DragMenuAddModText(m *Scene, mod events.DropMods) {
 	text := ""
 	switch mod {
 	case events.DropCopy:
@@ -821,6 +834,13 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	em.dragClearSprite()
 	data := em.dragData
 	em.drag = nil
+	em.scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.dragStateReset()
+		return tree.Continue
+	})
+	em.scene.StyleTree()
+	em.scene.NeedsRender()
+
 	if len(em.dragHovers) == 0 {
 		if DebugSettings.EventTrace {
 			fmt.Println(drag, "Drop has no target")
@@ -841,10 +861,10 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	targ.AsWidget().HandleEvent(de)
 }
 
-// dropFinalize should be called as the last step in the Drop event processing,
+// DropFinalize should be called as the last step in the Drop event processing,
 // to send the DropDeleteSource event to the source in case of DropMod == DropMove.
 // Otherwise, nothing actually happens.
-func (em *Events) dropFinalize(de *events.DragDrop) {
+func (em *Events) DropFinalize(de *events.DragDrop) {
 	if de.DropMod != events.DropMove {
 		return
 	}
@@ -941,9 +961,6 @@ func (em *Events) setFocusImpl(w Widget, sendEvent bool) bool {
 		if DebugSettings.FocusTrace {
 			fmt.Println(em.scene, "Already Focus:", cfoc)
 		}
-		// if sendEvent { // still send event
-		// 	w.Send(events.Focus)
-		// }
 		return false
 	}
 	if cfoc != nil {
@@ -975,7 +992,7 @@ func (em *Events) focusNext() bool {
 func (em *Events) FocusNextFrom(from Widget) bool {
 	next := widgetNextFunc(from, func(w Widget) bool {
 		wb := w.AsWidget()
-		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
+		return wb.IsDisplayable() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
 	em.setFocus(next)
 	return next != nil
@@ -989,7 +1006,7 @@ func (em *Events) focusOnOrNext(foc Widget) bool {
 		return true
 	}
 	wb := AsWidget(foc)
-	if !wb.IsVisible() {
+	if !wb.IsDisplayable() {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
@@ -1007,7 +1024,7 @@ func (em *Events) focusOnOrPrev(foc Widget) bool {
 		return true
 	}
 	wb := AsWidget(foc)
-	if !wb.IsVisible() {
+	if !wb.IsDisplayable() {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
@@ -1031,7 +1048,7 @@ func (em *Events) focusPrev() bool {
 func (em *Events) focusPrevFrom(from Widget) bool {
 	prev := widgetPrevFunc(from, func(w Widget) bool {
 		wb := w.AsWidget()
-		return wb.IsVisible() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
+		return wb.IsDisplayable() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
 	})
 	em.setFocus(prev)
 	return prev != nil
@@ -1079,6 +1096,54 @@ func (em *Events) activateStartFocus() bool {
 	return true
 }
 
+// setAttended sets attended to given item, and returns true if attended changed.
+// If item is nil, then nothing is attended.
+// This sends the [events.Attend] event to the widget.
+func (em *Events) setAttend(w Widget) bool {
+	if DebugSettings.FocusTrace {
+		fmt.Println(em.scene, "SetAttendEvent:", w)
+	}
+	got := em.setAttendImpl(w, true) // sends event
+	if !got {
+		if DebugSettings.FocusTrace {
+			fmt.Println(em.scene, "SetAttendEvent: Failed", w)
+		}
+		return false
+	}
+	if w != nil {
+		w.AsWidget().ScrollToThis()
+	}
+	return got
+}
+
+// setAttendImpl sets attended to given item, and returns true if attended changed.
+// If item is nil, then nothing has attended.
+// sendEvent determines whether the events.Attend event is sent to the focused item.
+func (em *Events) setAttendImpl(w Widget, sendEvent bool) bool {
+	catd := em.attended
+	if catd == nil {
+		em.attended = nil
+		catd = nil
+	}
+	if catd != nil && w != nil && catd == w {
+		if DebugSettings.FocusTrace {
+			fmt.Println(em.scene, "Already Attend:", catd)
+		}
+		return false
+	}
+	if catd != nil {
+		if DebugSettings.FocusTrace {
+			fmt.Println(em.scene, "Losing attend:", catd)
+		}
+		catd.AsWidget().Send(events.AttendLost)
+	}
+	em.attended = w
+	if sendEvent && w != nil {
+		w.AsWidget().Send(events.Attend)
+	}
+	return true
+}
+
 // MangerKeyChordEvents handles lower-priority manager-level key events.
 // Mainly tab, shift-tab, and Inspector and Settings.
 // event will be marked as processed if handled here.
@@ -1106,10 +1171,13 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keymap.WinSnapshot:
-		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
-		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
-		if errors.Log(imagex.Save(sc.Pixels, fnm)) == nil {
-			fmt.Println("Saved screenshot to", strings.ReplaceAll(fnm, " ", `\ `))
+		img := sc.Painter.State.RenderImage()
+		if img != nil {
+			dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
+			fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
+			if errors.Log(imagex.Save(img, fnm)) == nil {
+				fmt.Println("Saved screenshot to", strings.ReplaceAll(fnm, " ", `\ `))
+			}
 		}
 		e.SetHandled()
 	case keymap.ZoomIn:
@@ -1130,6 +1198,8 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	case keymap.WinFocusNext:
 		e.SetHandled()
 		AllRenderWindows.focusNext()
+	case keymap.Copy:
+	case keymap.Cut:
 	}
 	if !e.IsHandled() {
 		em.triggerShortcut(cs)

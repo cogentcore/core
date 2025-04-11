@@ -37,13 +37,13 @@ func (tp *TimePicker) Init() {
 	tp.Frame.Init()
 	spinnerInit := func(w *Spinner) {
 		w.Styler(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
+			s.Text.FontSize.Dp(57)
 			s.Min.X.Ch(7)
 		})
 		buttonInit := func(w *Button) {
 			tree.AddChildInit(w, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(32)
+					s.Text.FontSize.Dp(32)
 				})
 			})
 		}

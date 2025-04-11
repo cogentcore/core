@@ -1,0 +1,54 @@
+# textcore: core GUI widgets for text
+
+Textcore has various text-based `core.Widget`s, including:
+* `Base` is a base implementation that views `lines.Lines` text content.
+* `Editor` is a full-featured text editor built on Base.
+* `DiffEditor` provides side-by-side Editors showing the diffs between files.
+* `TwinEditors` provides two side-by-side Editors that sync their scrolling.
+* `Terminal` provides a VT100-style terminal built on Base (TODO).
+
+A critical design feature is that the Base widget can switch efficiently among different `lines.Lines` content. For example, in Cogent Code there are 2 editor widgets that are reused for all files, including viewing the same file across both editors. Thus, all of the state comes from the underlying Lines buffers.
+
+The `Lines` handles all layout and markup styling, so the Base just renders the results of that. Thus, there is no need for the Editor to ever drive a NeedsLayout call itself: everything is handled in the Render step, including the presence or absence of the scrollbar, which is a little bit complicated because adding a scrollbar changes the effective width and thus the internal layout.
+
+## Files
+
+The underlying `lines.Lines` object does not have any core dependencies, and is designed to manage lines in memory. See [files.go](files.go) for standard functions to provide GUI-based interactions for prompting when a file has been modified on a disk, and prompts for saving a file. These functions can be used on a Lines without any specific widget.
+
+## TODO
+
+* editor: at start of scrolling, it is jumping back to current cursor -- scrolling flag is not set early enough?
+
+* even fixed elements with no scroll can be pulled down with scrolling, for the "pull down refresh" action; animation restores to prior location
+
+* dialog shadows are accumulating: BlitBox nil image is not filling most likely.
+
+* cleanup junk in htmlcanvas code.
+
+* web: do video sources -- need url
+
+* svg marker glitch is last remaining bug: debugit!
+
+* SVG, PDF backends
+
+* prompt on quitting modified file hangs: can't figure it out: dialog is called but never opens, then it hangs
+
+### Lowpri
+
+* textcore base test horizontal scrolling
+
+* better job finding path fragments from file links -- iteratively try stuff.
+
+* emoji, svg, bitmap font rendering: could not get color emoji to work
+
+* code newFiles AddToVCS should default on -- not working
+
+* cleanup unused base stuff
+
+* text render highlight region fill in blanks better: hard b/c at run level, doesn't have context.
+
+* xyz physics GrabEyeImg causes crashing with goroutine renderAsync in renderwindow, but otherwise is ok
+
+* code: Markup colors are baked in when output is generated -- no remarkup possible!
+
+

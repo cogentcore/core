@@ -7,12 +7,12 @@ package offscreen
 import (
 	"image"
 
-	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 )
 
 // Drawer is the implementation of [system.Drawer] for the offscreen platform
 type Drawer struct {
-	system.DrawerBase
+	composer.DrawerBase
 
 	Window *Window
 }
@@ -26,6 +26,8 @@ func (dw *Drawer) Start() {
 }
 
 func (dw *Drawer) End() {} // no-op
+
+func (dw *Drawer) Redraw() {} // no-op
 
 // GetImage returns the rendered image. It is called through an interface
 // in core.Body.AssertRender.

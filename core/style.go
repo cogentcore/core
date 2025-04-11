@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
@@ -93,8 +92,7 @@ func (wb *WidgetBase) resetStyleWidget() {
 	// which the developer can override in their stylers
 	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 	s.StateLayer = s.State.StateLayer()
-
-	s.SetMono(false)
+	// s.Font.Family = rich.SansSerif
 }
 
 // runStylers runs the [WidgetBase.Stylers].
@@ -117,14 +115,14 @@ func (wb *WidgetBase) resetStyleSettings() {
 		return
 	}
 	fsz := AppearanceSettings.FontSize / 100
-	wb.Styles.Font.Size.Value /= fsz
+	wb.Styles.Text.FontSize.Value /= fsz
 }
 
 // styleSettings applies [AppearanceSettingsData.Spacing]
 // and [AppearanceSettingsData.FontSize] to the style values for the widget.
 func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
-
+	s.SetFontColors() // font from base color, opacity
 	spc := AppearanceSettings.Spacing / 100
 	s.Margin.Top.Value *= spc
 	s.Margin.Right.Value *= spc
@@ -138,7 +136,7 @@ func (wb *WidgetBase) styleSettings() {
 	s.Gap.Y.Value *= spc
 
 	fsz := AppearanceSettings.FontSize / 100
-	s.Font.Size.Value *= fsz
+	s.Text.FontSize.Value *= fsz
 }
 
 // StyleTree calls [WidgetBase.Style] on every widget in tree
@@ -164,11 +162,11 @@ func (wb *WidgetBase) Restyle() {
 // dots for rendering.
 // Zero values for element and parent size are ignored.
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
-	rebuild := false
+	// rebuild := false
 	var rc *renderContext
 	sz := image.Point{1920, 1080}
 	if sc != nil {
-		rebuild = sc.NeedsRebuild()
+		// rebuild = sc.NeedsRebuild()
 		rc = sc.renderContext()
 		sz = sc.SceneGeom.Size
 	}
@@ -178,9 +176,8 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 		st.UnitContext.DPI = 160
 	}
 	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
-	if st.Font.Face == nil || rebuild {
-		st.Font = paint.OpenFont(st.FontRender(), &st.UnitContext) // calls SetUnContext after updating metrics
-	}
+	st.Text.ToDots(&st.UnitContext) // key to set first
+	st.Text.SetUnitContext(&st.UnitContext, &st.Font)
 	st.ToDots()
 }
 
