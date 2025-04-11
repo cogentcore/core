@@ -109,9 +109,9 @@ func AddFamily(rts FontName, fam string) string {
 		return fam
 	}
 	s := string(rts)
-	if strings.Contains(s, " ") {
-		s = `"` + s + `"`
-	}
+	// if strings.Contains(s, " ") { // no! this is bad
+	// 	s = `"` + s + `"`
+	// }
 	return s + ", " + fam
 }
 
