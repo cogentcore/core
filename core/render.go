@@ -278,8 +278,8 @@ func (sc *Scene) applyStyleScene() {
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) doRebuild() {
 	sc.Stage.Sprites.Reset()
-	sc.updateScene()
 	sc.applyStyleScene()
+	sc.updateScene()
 	sc.layoutRenderScene()
 }
 
@@ -291,8 +291,8 @@ func (sc *Scene) contentSize(initSz image.Point) image.Point {
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.setFlag(true, sceneContentSizing)
-	sc.updateScene()
 	sc.applyStyleScene()
+	sc.updateScene()
 	sc.layoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total

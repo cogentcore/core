@@ -220,6 +220,7 @@ func (st *Stage) configMainStage() {
 		st.Scrim = false
 	}
 	sc.makeSceneBars()
+	sc.applyStyleScene()
 	sc.updateScene()
 }
 

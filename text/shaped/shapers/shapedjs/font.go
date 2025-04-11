@@ -30,6 +30,7 @@ func SetFontStyle(ctx js.Value, fnt *text.Font, tsty *text.Style, lineHeight flo
 	// font: font-style font-variant font-weight font-size/line-height font-family
 	parts := []string{fsty.Slant.String(), "normal", fmt.Sprintf("%g", fsty.Weight.ToFloat32()), fsz, fam}
 	fspec := strings.Join(parts, " ")
+	// fmt.Println("measure:", tsty.FontSize.Dots, fnt.Size, lineHeight, fam)
 	// fmt.Println("fspec:", fspec)
 	ctx.Set("font", fspec)
 }

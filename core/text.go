@@ -435,6 +435,9 @@ func (tx *Text) selectWord(ri int) {
 // using given size to constrain layout.
 func (tx *Text) configTextSize(sz math32.Vector2) {
 	fs := &tx.Styles.Font
+	if fs.Size == 0 { // not init
+		return
+	}
 	txs := &tx.Styles.Text
 	txs.Color = colors.ToUniform(tx.Styles.Color)
 	etxs := *txs
@@ -453,6 +456,9 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	}
 	tsh := tx.Scene.TextShaper()
 	fs := &tx.Styles.Font
+	if fs.Size == 0 {
+		return sz // not init
+	}
 	txs := &tx.Styles.Text
 	rsz := sz
 	if txs.Align != text.Start && txs.AlignV != text.Start {
