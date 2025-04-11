@@ -221,7 +221,6 @@ func (st *Stage) configMainStage() {
 	}
 	sc.makeSceneBars()
 	sc.updateScene()
-	sc.applyStyleScene()
 }
 
 // runWindow runs a Window with current settings.
