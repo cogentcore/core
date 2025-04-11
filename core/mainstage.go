@@ -220,8 +220,8 @@ func (st *Stage) configMainStage() {
 		st.Scrim = false
 	}
 	sc.makeSceneBars()
-	sc.applyStyleScene()
 	sc.updateScene()
+	sc.applyStyleScene()
 }
 
 // runWindow runs a Window with current settings.

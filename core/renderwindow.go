@@ -461,6 +461,9 @@ func (w *renderWindow) handleEvent(e events.Event) {
 		rc.Unlock()
 		return
 	}
+	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
+		fmt.Println("got event while invisible:", e)
+	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.mains.mainHandleEvent(e)
 	rc.Unlock()
