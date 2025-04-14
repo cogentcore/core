@@ -293,7 +293,8 @@ func (ed *Base) InsertAtCursor(txt []byte) {
 		tbe := ed.deleteSelection()
 		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textpos.AdjustPosDelStart) // move to start if in reg
 	}
-	tbe := ed.Lines.InsertText(ed.CursorPos, []rune(string(txt)))
+	cp := ed.validateCursor()
+	tbe := ed.Lines.InsertText(cp, []rune(string(txt)))
 	if tbe == nil {
 		return
 	}

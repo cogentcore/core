@@ -96,3 +96,15 @@ This _text_ is in a `div`. it should be **fine**, just in a separate frame.
 
 This is the text after the div.
 
+## Tables
+
+| Channel Type     | Tau (ms) |
+|------------------|----------|
+| Fast (M-type)    | 50       |
+| Medium (Slick)   | 200      |
+| Slow (Slack)     | 1000     |
+| more | 2000 |
+| and  | 100 |
+
+Here is text after the table
+

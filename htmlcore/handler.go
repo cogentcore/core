@@ -301,6 +301,37 @@ func handleElement(ctx *Context) {
 		buf := lines.NewLines()
 		buf.SetText([]byte(ExtractText(ctx)))
 		New[textcore.Editor](ctx).SetLines(buf)
+	case "table":
+		w := New[core.Frame](ctx)
+		ctx.NewParent = w
+		ctx.TableParent = w
+		ctx.firstRow = true
+		w.SetProperty("cols", 0)
+		w.Styler(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Grow.Set(1, 1)
+			s.Columns = w.Property("cols").(int)
+		})
+	case "th", "td":
+		if ctx.TableParent != nil && ctx.firstRow {
+			cols := ctx.TableParent.Property("cols").(int)
+			cols++
+			ctx.TableParent.SetProperty("cols", cols)
+		}
+		tx := handleText(ctx)
+		if tag == "th" {
+			tx.Styler(func(s *styles.Style) {
+				s.Font.Weight = rich.Bold
+				s.Border.Width.Bottom.Dp(2)
+			})
+		}
+	case "thead", "tbody":
+		ctx.NewParent = ctx.TableParent
+	case "tr":
+		if ctx.TableParent != nil && ctx.firstRow && ctx.TableParent.NumChildren() > 0 {
+			ctx.firstRow = false
+		}
+		ctx.NewParent = ctx.TableParent
 	default:
 		ctx.NewParent = ctx.Parent()
 	}

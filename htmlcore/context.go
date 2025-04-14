@@ -41,6 +41,11 @@ type Context struct {
 	// should be added to.
 	BlockParent core.Widget
 
+	// TableParent is the current table being generated.
+	TableParent *core.Frame
+
+	firstRow bool
+
 	// inlineParent is the current parent widget that inline
 	// elements should be added to; it must be got through
 	// [Context.InlineParent], as it may need to be constructed
