@@ -684,7 +684,7 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 
 		em.timerMu.Lock() // then can get this
 		defer em.timerMu.Unlock()
-		if *w == nil {
+		if *w == nil || (*w).AsWidget().This == nil {
 			return
 		}
 		(*w).AsWidget().Send(styp, e)

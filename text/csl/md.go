@@ -30,23 +30,31 @@ func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) (*K
 	if len(mds) == 0 {
 		return cited, errors.New("No .md files found in: " + dir)
 	}
+	var errs []error
 	for i := range mds {
 		mds[i] = filepath.Join(dir, mds[i])
 	}
 	err := ExtractMarkdownCites(mds, kl, cited)
+	if err != nil {
+		errs = append(errs, err)
+	}
 	if refFile == "" {
 		refFile = filepath.Join(dir, "references.md")
 	}
 	of, err := os.Create(refFile)
 	if err != nil {
-		return cited, err
+		errs = append(errs, err)
+		return cited, errors.Join(errs...)
 	}
 	defer of.Close()
 	if heading != "" {
 		of.WriteString(heading + "\n\n")
 	}
 	err = WriteRefsMarkdown(of, cited, sty)
-	return cited, err
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return cited, errors.Join(errs...)
 }
 
 // ExtractMarkdownCites extracts markdown citations in the format [@Ref; @Ref]

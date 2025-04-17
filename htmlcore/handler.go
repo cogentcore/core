@@ -311,6 +311,8 @@ func handleElement(ctx *Context) {
 			s.Display = styles.Grid
 			s.Grow.Set(1, 1)
 			s.Columns = w.Property("cols").(int)
+			s.Gap.X.Dp(core.ConstantSpacing(6))
+			s.Justify.Content = styles.Center
 		})
 	case "th", "td":
 		if ctx.TableParent != nil && ctx.firstRow {
@@ -323,6 +325,13 @@ func handleElement(ctx *Context) {
 			tx.Styler(func(s *styles.Style) {
 				s.Font.Weight = rich.Bold
 				s.Border.Width.Bottom.Dp(2)
+				s.Margin.Bottom.Dp(6)
+				s.Margin.Top.Dp(6)
+			})
+		} else {
+			tx.Styler(func(s *styles.Style) {
+				s.Margin.Bottom.Dp(6)
+				s.Margin.Top.Dp(6)
 			})
 		}
 	case "thead", "tbody":

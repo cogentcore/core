@@ -137,7 +137,7 @@ func (ct *Content) Init() {
 		}
 		lbl := ct.currentPage.SpecialLabel(value)
 		ch := node.GetChildren()
-		if len(ch) == 2 { // image
+		if len(ch) == 2 { // image or table
 			if entering {
 				sty := htmlcore.MDGetAttr(node, "style")
 				if sty != "" {
@@ -158,6 +158,11 @@ func (ct *Content) Init() {
 						// fmt.Printf("text: %s\n", string(txt.Literal)) // not formatted!
 						cp += " " + string(txt.Literal) // todo: not formatted!
 					}
+				}
+			} else {
+				title := htmlcore.MDGetAttr(node, "title")
+				if title != "" {
+					cp += " " + title
 				}
 			}
 			cp += "</p>\n"

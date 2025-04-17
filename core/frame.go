@@ -171,6 +171,9 @@ func (fr *Frame) Init() {
 		// If we have enough instantaneous velocity, we continue scrolling
 		// in an animation while slowly decelerating for a
 		// smoother experience.
+		if prevMove == nil {
+			return
+		}
 		dx := math32.FromPoint(prevMove.PrevDelta()).Negate()
 		dt := float32(prevMove.SincePrev().Milliseconds())
 		vel := dx.DivScalar(dt)
