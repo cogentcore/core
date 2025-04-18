@@ -436,6 +436,7 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 
 // ScrollDimToContentStart is a helper function that scrolls the layout to the
 // start of its content (ie: moves the scrollbar to the very start).
+// See also [Frame.IsDimAtContentStart].
 func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
 	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
@@ -443,6 +444,16 @@ func (fr *Frame) ScrollDimToContentStart(d math32.Dims) bool {
 	sb := fr.Scrolls[d]
 	sb.setValueEvent(0)
 	return true
+}
+
+// IsDimAtContentStart returns whether the given dimension is scrolled to the
+// start of its content. See also [Frame.ScrollDimToContentStart].
+func (fr *Frame) IsDimAtContentStart(d math32.Dims) bool {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
+		return false
+	}
+	sb := fr.Scrolls[d]
+	return sb.Value == 0
 }
 
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
@@ -465,6 +476,7 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 
 // ScrollDimToContentEnd is a helper function that scrolls the layout to the
 // end of its content (ie: moves the scrollbar to the very end).
+// See also [Frame.IsDimAtContentEnd].
 func (fr *Frame) ScrollDimToContentEnd(d math32.Dims) bool {
 	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
 		return false
@@ -472,6 +484,16 @@ func (fr *Frame) ScrollDimToContentEnd(d math32.Dims) bool {
 	sb := fr.Scrolls[d]
 	sb.setValueEvent(sb.effectiveMax())
 	return true
+}
+
+// IsDimAtContentEnd returns whether the given dimension is scrolled to the
+// end of its content. See also [Frame.ScrollDimToContentEnd].
+func (fr *Frame) IsDimAtContentEnd(d math32.Dims) bool {
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
+		return false
+	}
+	sb := fr.Scrolls[d]
+	return sb.Value == sb.effectiveMax()
 }
 
 // ScrollDimToCenter scrolls to put the given child coordinate position (eg.,
