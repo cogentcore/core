@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"sync"
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
@@ -148,7 +149,9 @@ type Sprites struct {
 	ordmap.Map[string, *Sprite]
 
 	// set to true if sprites have been modified since last config
-	Modified bool
+	modified bool
+
+	sync.Mutex
 }
 
 // Add adds sprite to list, and returns the image index and
@@ -156,27 +159,35 @@ type Sprites struct {
 // exists on list, then it is returned, with size allocation
 // updated as needed.
 func (ss *Sprites) Add(sp *Sprite) {
+	ss.Lock()
 	ss.Init()
 	ss.Map.Add(sp.Name, sp)
-	ss.Modified = true
+	ss.modified = true
+	ss.Unlock()
 }
 
 // Delete deletes sprite by name, returning indexes where it was located.
 // All sprite images must be updated when this occurs, as indexes may have shifted.
 func (ss *Sprites) Delete(sp *Sprite) {
+	ss.Lock()
 	ss.DeleteKey(sp.Name)
-	ss.Modified = true
+	ss.modified = true
+	ss.Unlock()
 }
 
 // SpriteByName returns the sprite by name
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
+	ss.Lock()
+	defer ss.Unlock()
 	return ss.ValueByKeyTry(name)
 }
 
 // reset removes all sprites
 func (ss *Sprites) reset() {
+	ss.Lock()
 	ss.Reset()
-	ss.Modified = true
+	ss.modified = true
+	ss.Unlock()
 }
 
 // ActivateSprite flags the sprite as active, setting Modified if wasn't before.
@@ -185,10 +196,12 @@ func (ss *Sprites) ActivateSprite(name string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
+	ss.Lock()
 	if !sp.Active {
 		sp.Active = true
-		ss.Modified = true
+		ss.modified = true
 	}
+	ss.Unlock()
 }
 
 // InactivateSprite flags the sprite as inactive, setting Modified if wasn't before.
@@ -197,8 +210,17 @@ func (ss *Sprites) InactivateSprite(name string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
+	ss.Lock()
 	if sp.Active {
 		sp.Active = false
-		ss.Modified = true
+		ss.modified = true
 	}
+	ss.Unlock()
+}
+
+// IsModified returns whether the sprites have been modified.
+func (ss *Sprites) IsModified() bool {
+	ss.Lock()
+	defer ss.Unlock()
+	return ss.modified
 }

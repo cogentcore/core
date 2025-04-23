@@ -454,7 +454,7 @@ func (w *renderWindow) handleEvent(e events.Event) {
 
 	et := e.Type()
 	if DebugSettings.EventTrace && et != events.WindowPaint && et != events.MouseMove {
-		fmt.Println("Window got event", e)
+		log.Println("Window got event", e)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.handleWindowEvents(e)
@@ -462,7 +462,8 @@ func (w *renderWindow) handleEvent(e events.Event) {
 		return
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
-		fmt.Println("got event while invisible:", e)
+		log.Println("got event while invisible:", e)
+		log.Println("w.isClosed:", w.isClosed(), "winClosing flag:", w.flags.HasFlag(winClosing), "syswin !isvis:", !w.SystemWindow.IsVisible(), "minimized:", w.SystemWindow.Is(system.Minimized))
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.mains.mainHandleEvent(e)
@@ -648,13 +649,13 @@ func (w *renderWindow) renderContext() *renderContext {
 func (w *renderWindow) renderWindow() {
 	if w.flags.HasFlag(winIsRendering) { // still doing the last one
 		if time.Now().Sub(w.lastRenderSkip) > 2*time.Second {
-			fmt.Println("render skip > 2 second, resetting!")
+			log.Println("render skip > 2 second, resetting!")
 			w.flags.SetFlag(false, winIsRendering)
 		}
 		w.lastRenderSkip = time.Now()
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
-			fmt.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
+			log.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
 		}
 		return
 	}
@@ -680,9 +681,10 @@ func (w *renderWindow) renderWindow() {
 	if top == nil || w.mains.stack.Len() == 0 {
 		return
 	}
+	spriteMods := top.Sprites.IsModified()
 
-	if !top.Sprites.Modified && !rebuild && !stageMods && !sceneMods { // nothing to do!
-		// fmt.Println("no mods") // note: get a ton of these..
+	if !spriteMods && !rebuild && !stageMods && !sceneMods { // nothing to do!
+		// log.Println("no mods") // note: get a ton of these..
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
 		} else {
@@ -695,21 +697,21 @@ func (w *renderWindow) renderWindow() {
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WindowRenderTrace {
-			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
+			log.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
-		// fmt.Println("invisible", w)
+		// log.Println("invisible", w)
 		return
 	}
 	w.lastRender = time.Now()
 
 	if DebugSettings.WindowRenderTrace {
-		fmt.Println("RenderWindow: doing render:", w.name)
-		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
+		log.Println("RenderWindow: doing render:", w.name)
+		log.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
 
 	if !w.SystemWindow.Lock() {
 		if DebugSettings.WindowRenderTrace {
-			fmt.Printf("RenderWindow: window was closed: %v\n", w.name)
+			log.Printf("RenderWindow: window was closed: %v\n", w.name)
 		}
 		return
 	}
@@ -731,7 +733,7 @@ func (w *renderWindow) renderWindow() {
 		st := sm.stack.ValueByIndex(i)
 		if st.Type == WindowStage {
 			if DebugSettings.WindowRenderTrace {
-				fmt.Println("GatherScenes: main Window:", st.String())
+				log.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
 			winIndex = i
@@ -751,7 +753,7 @@ func (w *renderWindow) renderWindow() {
 		}
 		cp.Add(st.Scene.RenderSource(draw.Over), st.Scene)
 		if DebugSettings.WindowRenderTrace {
-			fmt.Println("GatherScenes: overlay Stage:", st.String())
+			log.Println("GatherScenes: overlay Stage:", st.String())
 		}
 	}
 
@@ -760,7 +762,7 @@ func (w *renderWindow) renderWindow() {
 		st := kv.Value
 		cp.Add(st.Scene.RenderSource(draw.Over), st.Scene)
 		if DebugSettings.WindowRenderTrace {
-			fmt.Println("GatherScenes: popup:", st.String())
+			log.Println("GatherScenes: popup:", st.String())
 		}
 	}
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)

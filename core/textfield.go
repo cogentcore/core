@@ -1187,7 +1187,6 @@ func init() {
 			return
 		}
 		tf := AsTextField(w)
-		tf.AsyncLock()
 		if !tf.StateIs(states.Focused) || !tf.IsVisible() {
 			tf.blinkOn = false
 			tf.renderCursor(false)
@@ -1195,7 +1194,6 @@ func init() {
 			tf.blinkOn = !tf.blinkOn
 			tf.renderCursor(tf.blinkOn)
 		}
-		tf.AsyncUnlock()
 	}
 }
 

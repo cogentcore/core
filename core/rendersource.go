@@ -59,6 +59,8 @@ type scrimSource struct {
 
 // SpritesSource returns a [composer.Source] for rendering [Sprites].
 func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
+	sprites.Lock()
+	defer sprites.Unlock()
 	ss := &spritesSource{}
 	ss.sprites = make([]spriteRender, len(sprites.Order))
 	for i, kv := range sprites.Order {
@@ -67,7 +69,7 @@ func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
 		sr := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels, active: sp.Active}
 		ss.sprites[i] = sr
 	}
-	sprites.Modified = false
+	sprites.modified = false
 	return ss
 }
 

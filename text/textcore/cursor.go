@@ -32,7 +32,6 @@ func init() {
 			return
 		}
 		ed := AsBase(w)
-		ed.AsyncLock()
 		if !ed.StateIs(states.Focused) || !ed.IsVisible() {
 			ed.blinkOn = false
 			ed.renderCursor(false)
@@ -40,7 +39,6 @@ func init() {
 			ed.blinkOn = !ed.blinkOn
 			ed.renderCursor(ed.blinkOn)
 		}
-		ed.AsyncUnlock()
 	}
 }
 
