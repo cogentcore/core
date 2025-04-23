@@ -339,6 +339,7 @@ func (st *Stage) runDialog() *Stage {
 			minx := int(ctx.Scene.Styles.UnitContext.Dp(400))
 			sz.X = max(sz.X, minx)
 		}
+		sc.SceneGeom.Pos = sc.SceneGeom.Pos.Sub(sz.Div(2))
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
 		screen := st.targetScreen()
 		if screen != nil {

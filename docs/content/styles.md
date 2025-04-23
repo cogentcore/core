@@ -21,6 +21,7 @@ You can set the background color of a [[widget]]:
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Background = colors.Scheme.Warn.Container
+    s.Min.Set(units.Em(5))
 })
 ```
 
