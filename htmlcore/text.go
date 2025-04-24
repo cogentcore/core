@@ -33,7 +33,7 @@ func extractText(ctx *Context, n *html.Node) string {
 	if !it {
 		readHTMLNode(ctx, ctx.Parent(), n)
 		// readHTMLNode already handles children and siblings, so we return.
-		// TODO: for something like <h1><button>A</button>B</h1> this will not
+		// TODO: for something like [TestButtonInHeadingBug] this will not
 		// have the right behavior, but that is a rare use case and this
 		// heuristic is much simpler.
 		return str
