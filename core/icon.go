@@ -6,9 +6,11 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -29,6 +31,12 @@ type Icon struct {
 
 	// prevIcon is the previously rendered icon.
 	prevIcon icons.Icon
+
+	// prevColor is the previously rendered color, as uniform.
+	prevColor color.RGBA
+
+	// prevOpacity is the previously rendered opacity.
+	prevOpacity float32
 
 	// image representation of the icon, cached for faster drawing.
 	pixels *image.RGBA
@@ -62,7 +70,8 @@ func (ic *Icon) renderSVG() *svg.SVG {
 	if ic.pixels != nil {
 		isz = ic.pixels.Bounds().Size()
 	}
-	if ic.Icon == ic.prevIcon && sz == isz && !ic.NeedsRebuild() {
+	cc := colors.ToUniform(ic.Styles.Color)
+	if ic.Icon == ic.prevIcon && sz == isz && ic.prevColor == cc && ic.prevOpacity == ic.Styles.Opacity && !ic.NeedsRebuild() {
 		return nil
 	}
 	ic.pixels = nil
@@ -79,12 +88,13 @@ func (ic *Icon) renderSVG() *svg.SVG {
 	ic.prevIcon = ic.Icon
 	sv.Root.ViewBox.PreserveAspectRatio.SetFromStyle(&ic.Styles)
 	sv.TextShaper = ic.Scene.TextShaper()
-	// todo: we aren't rebuilding on color change
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	sv.Color = clr
 	sv.Scale = 1
 	sv.Render()
 	ic.pixels = sv.RenderImage()
+	ic.prevColor = cc
+	ic.prevOpacity = ic.Styles.Opacity
 	return sv
 }
 

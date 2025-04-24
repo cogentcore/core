@@ -228,6 +228,9 @@ func (tx *Text) Init() {
 		tx.normalCursor = s.Cursor
 		s.SetFontColors()
 		tx.updateRichText() // note: critical to update with final styles
+		if tx.paintText != nil && tx.Text != "" {
+			tx.paintText.UpdateStyle(tx.richText, &s.Text)
+		}
 	})
 
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {

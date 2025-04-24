@@ -83,11 +83,17 @@ func (run *RunBase) SetFromStyle(sty *rich.Style, tsty *text.Style) {
 	run.Font = *text.NewFont(sty, tsty)
 	if sty.Decoration.HasFlag(rich.FillColor) {
 		run.FillColor = colors.Uniform(sty.FillColor)
+	} else {
+		run.FillColor = nil
 	}
 	if sty.Decoration.HasFlag(rich.StrokeColor) {
 		run.StrokeColor = colors.Uniform(sty.StrokeColor)
+	} else {
+		run.StrokeColor = nil
 	}
 	if sty.Decoration.HasFlag(rich.Background) {
 		run.Background = colors.Uniform(sty.Background)
+	} else {
+		run.Background = nil
 	}
 }

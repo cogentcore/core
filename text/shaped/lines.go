@@ -190,3 +190,37 @@ func (ls *Lines) Clone() *Lines {
 	}
 	return nls
 }
+
+// UpdateStyle updates the Decoration, Fill and Stroke colors from the given
+// rich.Text Styles for each line and given text style.
+// This rich.Text must match the content of the shaped one, and differ only
+// in these non-layout styles.
+func (ls *Lines) UpdateStyle(tx rich.Text, tsty *text.Style) {
+	ls.Source = tx
+	for i := range ls.Lines {
+		ln := &ls.Lines[i]
+		ln.UpdateStyle(tx, tsty)
+	}
+}
+
+// UpdateStyle updates the Decoration, Fill and Stroke colors from the current
+// rich.Text Style for each run  and given text style.
+// This rich.Text must match the content of the shaped one, and differ only
+// in these non-layout styles.
+func (ln *Line) UpdateStyle(tx rich.Text, tsty *text.Style) {
+	ln.Source = tx
+	for ri, rn := range ln.Runs {
+		fs := ln.RunStyle(ln.Source, ri)
+		rb := rn.AsBase()
+		rb.SetFromStyle(fs, tsty)
+	}
+}
+
+// RunStyle returns the rich text style for given run index.
+func (ln *Line) RunStyle(tx rich.Text, ri int) *rich.Style {
+	rn := ln.Runs[ri]
+	rs := rn.Runes().Start
+	si, _, _ := tx.Index(rs)
+	sty, _ := tx.Span(si)
+	return sty
+}
