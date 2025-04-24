@@ -30,3 +30,11 @@ func TestDoubleButtonBug(t *testing.T) {
 	assert.NoError(t, ReadMDString(NewContext(), b, `<button>A</button><button>B</button>`))
 	b.AssertRender(t, "md/double-button-bug")
 }
+
+func TestExtraNewlineBug(t *testing.T) {
+	b := core.NewBody()
+	assert.NoError(t, ReadMDString(NewContext(), b, `A
+
+<button>B</button>`))
+	b.AssertRender(t, "md/extra-newline-bug")
+}
