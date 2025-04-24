@@ -32,8 +32,13 @@ func extractText(ctx *Context, n *html.Node) string {
 	it := isText(n)
 	if !it {
 		readHTMLNode(ctx, ctx.Parent(), n)
+		// readHTMLNode already handles children and siblings, so we return.
+		// TODO: for something like <h1><button>A</button>B</h1> this will not
+		// have the right behavior, but that is a rare use case and this
+		// heuristic is much simpler.
+		return str
 	}
-	if it && n.FirstChild != nil {
+	if n.FirstChild != nil {
 		start, end := nodeString(n)
 		str = start + extractText(ctx, n.FirstChild) + end
 	}
