@@ -16,6 +16,8 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
+var divRegex = regexp.MustCompile("<p(.*?)><div></p>")
+
 func mdToHTML(ctx *Context, md []byte) []byte {
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.Attributes | parser.Mmark
@@ -34,8 +36,7 @@ func mdToHTML(ctx *Context, md []byte) []byte {
 
 	htm := markdown.Render(doc, renderer)
 	htm = bytes.ReplaceAll(htm, []byte("<p></div><!-- dummy --></p>"), []byte("</div>"))
-	divr := regexp.MustCompile("<p(.*)><div></p>")
-	htm = divr.ReplaceAll(htm, []byte("<div${1}>"))
+	htm = divRegex.ReplaceAll(htm, []byte("<div${1}>"))
 	return htm
 }
 
