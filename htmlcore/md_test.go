@@ -24,3 +24,9 @@ func TestMD(t *testing.T) {
 		b.AssertRender(t, "md/"+nm)
 	}
 }
+
+func TestDoubleButtonBug(t *testing.T) {
+	b := core.NewBody()
+	assert.NoError(t, ReadMDString(NewContext(), b, `<button>A</button><button>B</button>`))
+	b.AssertRender(t, "md/double-button-bug")
+}
