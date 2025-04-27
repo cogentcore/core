@@ -203,7 +203,6 @@ func (ct *Content) openID(id, element string) bool {
 		return false
 	}
 	if element != "" {
-		// fmt.Println("looking for el:", element, "in:", found)
 		el := ct.elementInSpecial(found, element)
 		if el != nil {
 			found = el
@@ -223,8 +222,13 @@ func (ct *Content) elementInSpecial(sp *core.WidgetBase, element string) *core.W
 	if strings.Contains(element, "/") {
 		pathPrefix, element, hasPath = strings.Cut(element, "/")
 	}
-	if _, ok := sp.Parent.(*core.Collapser); ok { // for code
-		sp = sp.Parent.AsTree().Parent.(core.Widget).AsWidget()
+	if cl, ok := sp.Parent.(*core.Collapser); ok { // for code
+		nxt := tree.NextSibling(cl)
+		if nxt != nil {
+			sp = nxt.(core.Widget).AsWidget()
+		} else {
+			sp = cl.Parent.(core.Widget).AsWidget() // todo: not sure when this is good
+		}
 	}
 
 	var found *core.WidgetBase
