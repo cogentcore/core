@@ -232,7 +232,15 @@ func (ct *Content) Init() {
 
 // pageByName returns [Content.pagesByName] of the lowercase version of the given name.
 func (ct *Content) pageByName(name string) *bcontent.Page {
-	return ct.pagesByName[strings.ToLower(name)]
+	ln := strings.ToLower(name)
+	if pg, ok := ct.pagesByName[ln]; ok {
+		return pg
+	}
+	nd := strings.ReplaceAll(ln, "-", " ")
+	if pg, ok := ct.pagesByName[nd]; ok {
+		return pg
+	}
+	return nil
 }
 
 // SetSource sets the source filesystem for the content.
