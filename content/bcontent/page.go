@@ -145,6 +145,9 @@ func (pg *Page) ReadContent(pagesByCategory map[string][]*Page) ([]byte, error) 
 // returns markdown containing a list of links to all pages in that category.
 // Otherwise, it returns nil.
 func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
+	if pagesByCategory == nil {
+		return nil
+	}
 	cpages := pagesByCategory[pg.Name]
 	if cpages == nil {
 		return nil
@@ -189,6 +192,13 @@ func (pg *Page) SpecialLabel(name string) string {
 	if snm == "" {
 		return ""
 	}
+	if pg.Specials == nil {
+		b, err := pg.ReadContent(nil)
+		if err != nil {
+			return ""
+		}
+		pg.ParseSpecials(b)
+	}
 	sl := pg.Specials[snm]
 	if sl == nil {
 		return ""
@@ -204,6 +214,9 @@ func (pg *Page) SpecialLabel(name string) string {
 // because they are needed in advance of generating from md file,
 // e.g., for wikilinks.
 func (pg *Page) ParseSpecials(b []byte) {
+	if pg.Specials != nil {
+		return
+	}
 	pg.Specials = make(map[string][]string)
 	scan := bufio.NewScanner(bytes.NewReader(b))
 	idt := []byte(`{id="`)
