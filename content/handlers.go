@@ -54,39 +54,48 @@ func (ct *Content) citeWikilink(text string) (url string, label string) {
 func (ct *Content) mainWikilink(text string) (url string, label string) {
 	name, label, _ := strings.Cut(text, "|")
 	name, heading, _ := strings.Cut(name, "#")
-	noName := false
 	if name == "" { // A link with a blank page links to the current page
 		name = ct.currentPage.Name
-		noName = true
+	} else if heading == "" {
+		if pg := ct.pageByName(name); pg == ct.currentPage {
+			// if just a link to current page, don't render link
+			// this can happen for embedded pages that refer to embedder
+			return "", ""
+		}
+	}
+	pg := ct.pageByName(name)
+	if pg == nil {
+		return "", ""
 	}
 	if label == "" {
 		if heading != "" {
-			label = heading
-			if noName {
-				sl := ct.currentPage.SpecialLabel(heading)
-				if sl != "" {
-					label = sl
-				} else {
-					colon := strings.Index(heading, ":")
-					if colon > 0 {
-						sl = ct.currentPage.SpecialLabel(heading[:colon])
-						if sl != "" {
-							label = sl + ":" + heading[colon+1:]
-						}
-					}
-				}
-			}
+			label = ct.wikilinkLabel(pg, heading)
 		} else {
 			label = name
 		}
 	}
-	if pg := ct.pageByName(name); pg != nil {
-		if heading != "" {
-			return pg.URL + "#" + heading, label
-		}
-		return pg.URL, label
+	if heading != "" {
+		return pg.URL + "#" + heading, label
 	}
-	return "", ""
+	return pg.URL, label
+}
+
+// wikilinkLabel returns a label for given heading, for given page.
+func (ct *Content) wikilinkLabel(pg *bcontent.Page, heading string) string {
+	label := heading
+	sl := pg.SpecialLabel(heading)
+	if sl != "" {
+		label = sl
+	} else {
+		colon := strings.Index(heading, ":")
+		if colon > 0 {
+			sl = pg.SpecialLabel(heading[:colon])
+			if sl != "" {
+				label = sl + ":" + heading[colon+1:]
+			}
+		}
+	}
+	return label
 }
 
 // open opens the page with the given URL and updates the display.
