@@ -20,6 +20,7 @@ import (
 
 	"log/slog"
 
+	"cogentcore.org/core/events"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -68,6 +69,7 @@ func (a *App) IsDarkMonitor() {
 				if isDark != wasDark {
 					a.Dark = isDark
 					wasDark = isDark
+					a.Window(0).Events().Window(events.ScreenUpdate)
 				}
 			}
 		case err, ok := <-watcher.Errors:
