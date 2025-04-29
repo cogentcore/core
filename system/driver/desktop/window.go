@@ -308,12 +308,13 @@ func (w *Window) SetGeometry(fullscreen bool, pos, size image.Point, screen *sys
 }
 
 func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
-	if w.IsClosed() || w.Is(system.Fullscreen) || w.Is(system.Maximized) {
+	if w.IsClosed() ||
+		w.Is(system.Fullscreen) ||
+		w.Is(system.Maximized) ||
+		w.Is(system.Minimized) {
 		return w.FrameSize
 	}
-	if TheApp.Platform() == system.Windows && w.Pos.X == -32000 || w.Pos.Y == -32000 {
-		return w.FrameSize
-	}
+
 	l, t, r, b := w.Glw.GetFrameSize()
 	w.FrameSize.Set(t, r, b, l)
 	sc := w.Screen()
