@@ -78,9 +78,14 @@ type RunBase struct {
 	Background image.Image
 }
 
+// SetFromStyle sets the run styling parameters from given styles.
+// Will also update non-Font elements, but font can only be set first time
+// in the initial shaping process, otherwise the render is off.
 func (run *RunBase) SetFromStyle(sty *rich.Style, tsty *text.Style) {
 	run.Decoration = sty.Decoration
-	run.Font = *text.NewFont(sty, tsty)
+	if run.Font.Size == 0 {
+		run.Font = *text.NewFont(sty, tsty)
+	}
 	if sty.Decoration.HasFlag(rich.FillColor) {
 		run.FillColor = colors.Uniform(sty.FillColor)
 	} else {
