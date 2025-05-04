@@ -457,6 +457,9 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) ForWidgetChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
 	for i, c := range wb.Children {
+		if tree.IsNil(c) {
+			continue
+		}
 		w, cwb := c.(Widget), AsWidget(c)
 		if !fun(i, w, cwb) {
 			break
@@ -469,8 +472,11 @@ func (wb *WidgetBase) ForWidgetChildren(fun func(i int, cw Widget, cwb *WidgetBa
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) forVisibleChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
-	for i, k := range wb.Children {
-		w, cwb := k.(Widget), AsWidget(k)
+	for i, c := range wb.Children {
+		if tree.IsNil(c) {
+			continue
+		}
+		w, cwb := c.(Widget), AsWidget(c)
 		if cwb.StateIs(states.Invisible) {
 			continue
 		}

@@ -95,9 +95,6 @@ func (ct *Content) wikilinkLabel(pg *bcontent.Page, heading string) string {
 			}
 		}
 	}
-	if pg != ct.currentPage {
-		label = pg.Name + "/" + label
-	}
 	return label
 }
 

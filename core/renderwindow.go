@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -785,9 +784,9 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 	w.renderMu.Lock()
 	w.flags.SetFlag(true, winIsRendering)
 
-	pr := profile.Start("Compose")
+	// pr := profile.Start("Compose")
 	cp.Compose()
-	pr.End()
+	// pr.End()
 
 	w.flags.SetFlag(false, winIsRendering)
 	w.renderMu.Unlock()
