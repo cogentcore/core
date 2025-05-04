@@ -25,7 +25,7 @@ func setJSImageBitmap(pr *Params) {
 		imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
 		pr.jsImageData = imageData
 		imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
-		imageBitmap, ok := jsAwait(imageBitmapPromise)
+		imageBitmap, ok := wgpu.AwaitJS(imageBitmapPromise)
 		if ok {
 			pr.jsImageBitmap = imageBitmap
 		}
@@ -44,33 +44,4 @@ func GetJSImageBitmap(pr *Params) js.Value {
 		return js.Undefined()
 	}
 	return pr.jsImageBitmap.(js.Value)
-}
-
-func jsAwait(v js.Value) (result js.Value, ok bool) { // TODO: use wgpu version
-	// COPIED FROM https://go-review.googlesource.com/c/go/+/150917/
-	if v.Type() != js.TypeObject || v.Get("then").Type() != js.TypeFunction {
-		return v, true
-	}
-
-	done := make(chan struct{})
-
-	onResolve := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		result = args[0]
-		ok = true
-		close(done)
-		return nil
-	})
-	defer onResolve.Release()
-
-	onReject := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		result = args[0]
-		ok = false
-		close(done)
-		return nil
-	})
-	defer onReject.Release()
-
-	v.Call("then", onResolve, onReject)
-	<-done
-	return
 }
