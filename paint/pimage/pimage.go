@@ -63,6 +63,9 @@ type Params struct {
 
 	// BlurRadius is the Gaussian standard deviation for Blur function
 	BlurRadius float32
+
+	jsImageData   any
+	jsImageBitmap any
 }
 
 func (pr *Params) IsRenderItem() {}
@@ -70,6 +73,7 @@ func (pr *Params) IsRenderItem() {}
 // NewClear returns a new Clear that renders entire image with given source image.
 func NewClear(src image.Image, sp image.Point, op draw.Op) *Params {
 	pr := &Params{Cmd: Draw, Rect: image.Rectangle{}, Source: src, SourcePos: sp, Op: op}
+	pr.UpdateSource()
 	return pr
 }
 
@@ -80,6 +84,7 @@ func NewDraw(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op) 
 		return nil
 	}
 	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op}
+	pr.UpdateSource()
 	return pr
 }
 
@@ -90,6 +95,7 @@ func NewDrawMask(rect image.Rectangle, src image.Image, sp image.Point, op draw.
 		return nil
 	}
 	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op, Mask: mask, MaskPos: mp}
+	pr.UpdateSource()
 	return pr
 }
 
@@ -100,6 +106,7 @@ func NewTransform(m math32.Matrix2, rect image.Rectangle, src image.Image, op dr
 		return nil
 	}
 	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op}
+	pr.UpdateSource()
 	return pr
 }
 
@@ -110,6 +117,7 @@ func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src image.Image, o
 		panic("nil rect")
 	}
 	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op, Mask: mask, MaskPos: mp}
+	pr.UpdateSource()
 	return pr
 }
 
@@ -120,6 +128,7 @@ func NewBlur(rect image.Rectangle, blurRadius float32) *Params {
 		return nil
 	}
 	pr := &Params{Cmd: Blur, Rect: rect, BlurRadius: blurRadius}
+	pr.UpdateSource()
 	return pr
 }
 

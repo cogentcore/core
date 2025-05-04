@@ -12,11 +12,9 @@ package htmlcanvas
 import (
 	"image"
 	"image/draw"
-	"syscall/js"
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/paint/pimage"
-	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func (rs *Renderer) RenderImage(pr *pimage.Params) {
@@ -50,14 +48,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		return
 	}
 
-	// TODO: images possibly comparatively not performant on web, so there
-	// might be a better path for things like FillBox.
-	// TODO: have a fast path for [image.RGBA]?
-	// size := pr.Rect.Size() // TODO: is this right?
-	// TODO: clean this up
-	jsBuf := wgpu.BytesToJS(pr.Source.(*image.RGBA).Pix)
 	sbb := pr.Source.Bounds()
-	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
 
 	sw := min(pr.Rect.Dx(), sbb.Dx())
 	sh := min(pr.Rect.Dy(), sbb.Dy())
@@ -67,15 +58,14 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	// m = m.Scale(rs.dpm, rs.dpm)
 	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
 	if pr.Op == draw.Over {
-		imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
-		imageBitmap, ok := jsAwait(imageBitmapPromise)
-		if !ok {
-			panic("error while waiting for createImageBitmap promise")
+		imageBitmap := pimage.GetJSImageBitmap(pr)
+		if !imageBitmap.IsUndefined() {
+			rs.ctx.Call("drawImage", imageBitmap, pr.SourcePos.X, pr.SourcePos.Y, sw, sh, pr.Rect.Min.X, pr.Rect.Min.Y, sw, sh)
 		}
-		rs.ctx.Call("drawImage", imageBitmap, pr.SourcePos.X, pr.SourcePos.Y, sw, sh, pr.Rect.Min.X, pr.Rect.Min.Y, sw, sh)
 	} else {
-		rs.ctx.Call("putImageData", imageData, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)
+		imageData := pimage.GetJSImageData(pr)
+		if !imageData.IsUndefined() {
+			rs.ctx.Call("putImageData", imageData, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)
+		}
 	}
-	// rs.ctx.Call("putImageData", imageData, pr.Rect.Min.X, pr.Rect.Min.Y)
-	// rs.ctx.Call("setTransform", 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 }
