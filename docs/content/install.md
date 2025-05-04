@@ -30,6 +30,7 @@ If you want to install manually instead, the commands for each distro are listed
 
 <!-- To update this, copy the output of [cogentcore.org/core/cmd/core/cmd.TestLinuxDistroString]; DO NOT EDIT manually -->
 
+{collapsed="true"}
 ```sh
 Debian/Ubuntu:  sudo apt install gcc libgl1-mesa-dev libegl1-mesa-dev mesa-vulkan-drivers xorg-dev
 Fedora:         sudo dnf install gcc libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel libXi-devel libXxf86vm-devel mesa-vulkan-drivers
