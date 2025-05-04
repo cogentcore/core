@@ -33,8 +33,8 @@ type Image struct {
 	// how to scale and align the image
 	ViewBox ViewBox `xml:"viewbox"`
 
-	// the image pixels
-	Pixels *image.RGBA `xml:"-" json:"-" display:"-"`
+	// Pixels are the image pixels, which has imagex.WrapJS already applied.
+	Pixels imagex.Image `xml:"-" json:"-" display:"-"`
 }
 
 func (g *Image) SVGName() string { return "image" }
@@ -47,27 +47,31 @@ func (g *Image) SetNodeSize(sz math32.Vector2) {
 	g.Size = sz
 }
 
-// SetImageSize sets size of the bitmap image.
-// This does not resize any existing image, just makes a new image
-// if the size is different
-func (g *Image) SetImageSize(nwsz image.Point) {
+// pixelsOfSize returns the Pixels as an imagex.Image of given size.
+// makes a new one if not already the correct size.
+func (g *Image) pixelsOfSize(nwsz image.Point) imagex.Image {
 	if nwsz.X == 0 || nwsz.Y == 0 {
-		return
+		return nil
 	}
 	if g.Pixels != nil && g.Pixels.Bounds().Size() == nwsz {
-		return
+		return g.Pixels
 	}
-	g.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	g.Pixels = imagex.WrapJS(image.NewRGBA(image.Rectangle{Max: nwsz}))
+	return g.Pixels
 }
 
 // SetImage sets an image for the bitmap, and resizes to the size of the image
-// or the specified size -- pass 0 for width and/or height to use the actual image size
-// for that dimension.  Copies from given image into internal image for this bitmap.
+// or the specified size. Pass 0 for width and/or height to use the actual image size
+// for that dimension. Copies from given image into internal image for this bitmap.
 func (g *Image) SetImage(img image.Image, width, height float32) {
+	if img == nil {
+		return
+	}
+	img = imagex.Unwrap(img)
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
-		g.SetImageSize(sz)
-		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.Point{}, draw.Src)
+		cp := imagex.CloneAsRGBA(img)
+		g.Pixels = imagex.WrapJS(cp)
 		if g.Size.X == 0 && g.Size.Y == 0 {
 			g.Size = math32.FromPoint(sz)
 		}
@@ -84,10 +88,11 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 			scy = height / float32(sz.Y)
 			tsz.Y = int(height)
 		}
-		g.SetImageSize(tsz)
+		pxi := g.pixelsOfSize(tsz)
+		px := pxi.Underlying().(*image.RGBA)
 		m := math32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
-		transformer.Transform(g.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
+		transformer.Transform(px, s2d, img, img.Bounds(), draw.Over, nil)
 		if g.Size.X == 0 && g.Size.Y == 0 {
 			g.Size = math32.FromPoint(tsz)
 		}

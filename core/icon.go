@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
@@ -39,7 +40,7 @@ type Icon struct {
 	prevOpacity float32
 
 	// image representation of the icon, cached for faster drawing.
-	pixels *image.RGBA
+	pixels imagex.Image
 }
 
 func (ic *Icon) WidgetValue() any { return &ic.Icon }

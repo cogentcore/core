@@ -9,6 +9,7 @@ package pimage
 import (
 	"image"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -50,10 +51,10 @@ type Params struct {
 	Op draw.Op
 
 	// Source to draw.
-	Source image.Image
+	Source imagex.Image
 
 	// Mask, used if non-nil.
-	Mask image.Image
+	Mask imagex.Image
 
 	// MaskPos is the position for the mask
 	MaskPos image.Point
@@ -63,17 +64,13 @@ type Params struct {
 
 	// BlurRadius is the Gaussian standard deviation for Blur function
 	BlurRadius float32
-
-	jsImageData   any
-	jsImageBitmap any
 }
 
 func (pr *Params) IsRenderItem() {}
 
 // NewClear returns a new Clear that renders entire image with given source image.
 func NewClear(src image.Image, sp image.Point, op draw.Op) *Params {
-	pr := &Params{Cmd: Draw, Rect: image.Rectangle{}, Source: src, SourcePos: sp, Op: op}
-	pr.UpdateSource()
+	pr := &Params{Cmd: Draw, Rect: image.Rectangle{}, Source: imagex.WrapJS(src), SourcePos: sp, Op: op}
 	return pr
 }
 
@@ -83,8 +80,7 @@ func NewDraw(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op) 
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op}
-	pr.UpdateSource()
+	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), SourcePos: sp, Op: op}
 	return pr
 }
 
@@ -94,8 +90,7 @@ func NewDrawMask(rect image.Rectangle, src image.Image, sp image.Point, op draw.
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Draw, Rect: rect, Source: src, SourcePos: sp, Op: op, Mask: mask, MaskPos: mp}
-	pr.UpdateSource()
+	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), SourcePos: sp, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
@@ -105,8 +100,7 @@ func NewTransform(m math32.Matrix2, rect image.Rectangle, src image.Image, op dr
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op}
-	pr.UpdateSource()
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Op: op}
 	return pr
 }
 
@@ -116,8 +110,7 @@ func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src image.Image, o
 	if rect == (image.Rectangle{}) {
 		panic("nil rect")
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: src, Op: op, Mask: mask, MaskPos: mp}
-	pr.UpdateSource()
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
@@ -128,13 +121,12 @@ func NewBlur(rect image.Rectangle, blurRadius float32) *Params {
 		return nil
 	}
 	pr := &Params{Cmd: Blur, Rect: rect, BlurRadius: blurRadius}
-	pr.UpdateSource()
 	return pr
 }
 
 // NewSetPixel returns a new SetPixel operation with given parameters.
 func NewSetPixel(at image.Point, clr image.Image) *Params {
-	pr := &Params{Cmd: SetPixel, SourcePos: at, Source: clr}
+	pr := &Params{Cmd: SetPixel, SourcePos: at, Source: imagex.NewPlainWrap(clr)}
 	return pr
 }
 
@@ -146,24 +138,24 @@ func (pr *Params) Render(dest *image.RGBA) {
 			pr.Rect = dest.Bounds()
 		}
 		if pr.Mask != nil {
-			draw.DrawMask(dest, pr.Rect, pr.Source, pr.SourcePos, pr.Mask, pr.MaskPos, pr.Op)
+			draw.DrawMask(dest, pr.Rect, imagex.Unwrap(pr.Source), pr.SourcePos, imagex.Unwrap(pr.Mask), pr.MaskPos, pr.Op)
 		} else {
 			if pr.Source == nil {
 				return
 			}
-			draw.Draw(dest, pr.Rect, pr.Source, pr.SourcePos, pr.Op)
+			draw.Draw(dest, pr.Rect, imagex.Unwrap(pr.Source), pr.SourcePos, pr.Op)
 		}
 	case Transform:
 		m := pr.Transform
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		tdraw := draw.BiLinear
 		if pr.Mask != nil {
-			tdraw.Transform(dest, s2d, pr.Source, pr.Rect, pr.Op, &draw.Options{
-				DstMask:  pr.Mask,
+			tdraw.Transform(dest, s2d, imagex.Unwrap(pr.Source), pr.Rect, pr.Op, &draw.Options{
+				DstMask:  imagex.Unwrap(pr.Mask),
 				DstMaskP: pr.MaskPos,
 			})
 		} else {
-			tdraw.Transform(dest, s2d, pr.Source, pr.Rect, pr.Op, nil)
+			tdraw.Transform(dest, s2d, imagex.Unwrap(pr.Source), pr.Rect, pr.Op, nil)
 		}
 	case Blur:
 		sub := dest.SubImage(pr.Rect)
@@ -172,6 +164,6 @@ func (pr *Params) Render(dest *image.RGBA) {
 	case SetPixel:
 		x := pr.SourcePos.X
 		y := pr.SourcePos.Y
-		dest.Set(x, y, pr.Source.At(x, y))
+		dest.Set(x, y, imagex.Unwrap(pr.Source).At(x, y))
 	}
 }

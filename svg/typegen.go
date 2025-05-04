@@ -3,8 +3,7 @@
 package svg
 
 import (
-	"image"
-
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/shaped"
@@ -108,7 +107,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Group", IDName:
 // and shared style properties.
 func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "ViewBox", Doc: "how to scale and align the image"}, {Name: "Pixels", Doc: "the image pixels"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "ViewBox", Doc: "how to scale and align the image"}, {Name: "Pixels", Doc: "Pixels are the image pixels, which has imagex.WrapJS already applied."}}})
 
 // NewImage returns a new [Image] with the given optional parent:
 // Image is an SVG image (bitmap)
@@ -131,8 +130,8 @@ func (t *Image) SetFilename(v string) *Image { t.Filename = v; return t }
 func (t *Image) SetViewBox(v ViewBox) *Image { t.ViewBox = v; return t }
 
 // SetPixels sets the [Image.Pixels]:
-// the image pixels
-func (t *Image) SetPixels(v *image.RGBA) *Image { t.Pixels = v; return t }
+// Pixels are the image pixels, which has imagex.WrapJS already applied.
+func (t *Image) SetPixels(v imagex.Image) *Image { t.Pixels = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Line", IDName: "line", Doc: "Line is a SVG line", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Start", Doc: "position of the start of the line"}, {Name: "End", Doc: "position of the end of the line"}}})
 

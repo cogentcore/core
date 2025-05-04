@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -124,7 +125,7 @@ func (pc *Painter) RenderDone() render.Render {
 // RenderToImage renders the current painter items to the image renderer
 // if it is the first one in Renderers. Returns the image, which is also
 // available via the RenderImage method.
-func (pc *Painter) RenderToImage() *image.RGBA {
+func (pc *Painter) RenderToImage() imagex.Image {
 	rd := pc.ImageRenderer()
 	if rd == nil {
 		return nil

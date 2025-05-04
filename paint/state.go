@@ -5,9 +5,9 @@
 package paint
 
 import (
-	"image"
 	"log/slog"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
@@ -99,14 +99,15 @@ func (rs *State) ImageRenderer() render.Renderer {
 	return rd
 }
 
-// RenderImage returns the Go [image.RGBA] from the first [Image] renderer
+// RenderImage returns the imagex.Image from the first [Image] renderer
 // if present, else nil.
-func (rs *State) RenderImage() *image.RGBA {
+func (rs *State) RenderImage() imagex.Image {
 	rd := rs.ImageRenderer()
 	if rd == nil {
 		return nil
 	}
-	return rd.(*rasterx.Renderer).Image()
+	// todo: this could be a pure platform-side image (e.g., all on JS or GPU)
+	return imagex.WrapJS(rd.(*rasterx.Renderer).Image())
 }
 
 // PushContext pushes a new [render.Context] onto the stack using given styles and bounds.

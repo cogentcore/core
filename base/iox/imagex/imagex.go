@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
@@ -98,13 +97,14 @@ func OpenFS(fsys fs.FS, filename string) (image.Image, Formats, error) {
 // The format is inferred automatically,
 // and is returned using the Formats enum.
 // png, jpeg, gif, tiff, bmp, and webp are supported.
+// WrapJS is used to establish JS pointers for the data.
 func Read(r io.Reader) (image.Image, Formats, error) {
 	im, ext, err := image.Decode(r)
 	if err != nil {
 		return im, None, err
 	}
 	f, err := ExtToFormat(ext)
-	return im, f, err
+	return WrapJS(im), f, err
 }
 
 // Save saves the image to the given filename,
@@ -128,7 +128,9 @@ func Save(im image.Image, filename string) error {
 
 // Write writes the image to the given writer using the given foramt.
 // png, jpeg, gif, tiff, and bmp are supported.
+// Unwraps imagex.Image wrapped images.
 func Write(im image.Image, w io.Writer, f Formats) error {
+	im = Unwrap(im)
 	switch f {
 	case PNG:
 		return png.Encode(w, im)
@@ -143,12 +145,4 @@ func Write(im image.Image, w io.Writer, f Formats) error {
 	default:
 		return fmt.Errorf("iox/imagex.Save: format %q not valid", f)
 	}
-}
-
-// CloneAsRGBA returns an RGBA copy of the supplied image.
-func CloneAsRGBA(src image.Image) *image.RGBA {
-	bounds := src.Bounds()
-	img := image.NewRGBA(bounds)
-	draw.Draw(img, bounds, src, bounds.Min, draw.Src)
-	return img
 }
