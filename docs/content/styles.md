@@ -102,7 +102,7 @@ Min specifies the minimum size that a widget must receive:
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(5))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -112,7 +112,7 @@ Min (and Max and Grow) can be specified for each dimension:
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(10), units.Em(3))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -125,7 +125,7 @@ fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Grow.Set(1, 1)
     s.Min.Set(units.Em(5))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -139,7 +139,7 @@ fr.Styler(func(s *styles.Style) {
     s.Grow.Set(1, 1)
     s.Min.Set(units.Em(5))
     s.Max.Set(units.Em(10))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
