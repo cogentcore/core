@@ -50,7 +50,12 @@ type PlainWrap struct {
 }
 
 // NewPlainWrap returns a new PlainWrap around given image.
+// If image is already a PlainWrap then it uses the underlying Image
+// of the source.
 func NewPlainWrap(src image.Image) *PlainWrap {
+	if x, ok := src.(*PlainWrap); ok {
+		return &PlainWrap{Image: x.Image}
+	}
 	return &PlainWrap{Image: src}
 }
 
