@@ -10,36 +10,25 @@ import (
 	"image"
 	"syscall/js"
 
-	"cogentcore.org/core/colors/gradient"
 	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func (pr *Params) UpdateSource() {
-	SetJSImageBitmap(pr)
+	setJSImageBitmap(pr)
 }
 
-func SetJSImageBitmap(pr *Params) {
-	if pr.Source == nil {
-		return
-	}
-	if _, ok := pr.Source.(*image.Uniform); ok {
-		return
-	}
-	if _, ok := pr.Source.(gradient.Gradient); ok {
-		return
-	}
-	if _, ok := pr.Source.(*image.NRGBA); ok {
-		// todo: need to support!
-		return
-	}
-	jsBuf := wgpu.BytesToJS(pr.Source.(*image.RGBA).Pix)
-	sbb := pr.Source.Bounds()
-	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
-	pr.jsImageData = imageData
-	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
-	imageBitmap, ok := jsAwait(imageBitmapPromise)
-	if ok {
-		pr.jsImageBitmap = imageBitmap
+func setJSImageBitmap(pr *Params) {
+	// TODO: support [*image.NRGBA]
+	if src, ok := pr.Source.(*image.RGBA); ok {
+		jsBuf := wgpu.BytesToJS(src.Pix)
+		sbb := pr.Source.Bounds()
+		imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
+		pr.jsImageData = imageData
+		imageBitmapPromise := js.Global().Call("createImageBitmap", imageData)
+		imageBitmap, ok := jsAwait(imageBitmapPromise)
+		if ok {
+			pr.jsImageBitmap = imageBitmap
+		}
 	}
 }
 
