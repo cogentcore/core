@@ -229,6 +229,9 @@ func (tx *Text) Init() {
 		s.SetFontColors()
 		tx.updateRichText() // note: critical to update with final styles
 		if tx.paintText != nil && tx.Text != "" {
+			if s.Text.FontSize.Dots == 0 {
+				s.Text.ToDots(&s.UnitContext)
+			}
 			tx.paintText.UpdateStyle(tx.richText, &s.Text)
 		}
 	})
