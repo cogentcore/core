@@ -129,7 +129,10 @@ func handleElement(ctx *Context) {
 			var parent tree.Node
 			if collapsed != "" {
 				cl := New[core.Collapser](ctx)
-				core.NewText(cl.Summary).SetText("Code")
+				summary := core.NewText(cl.Summary).SetText("Code")
+				if title := GetAttr(codeEl, "title"); title != "" {
+					summary.SetText(title)
+				}
 				ed = textcore.NewEditor(cl.Details)
 				if id != "" {
 					cl.Summary.Name = id
