@@ -477,7 +477,7 @@ func (tx *Text) SizeUp() {
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		sty, tsty := tx.Styles.NewRichText()
-		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), 1.6, sty, tsty)
+		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), .5, sty, tsty)
 		// if DebugSettings.LayoutTrace {
 		// 	fmt.Println(tx, "Text SizeUp Estimate:", est)
 		// }
