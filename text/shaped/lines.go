@@ -197,6 +197,7 @@ func (ls *Lines) Clone() *Lines {
 // in these non-layout styles.
 func (ls *Lines) UpdateStyle(tx rich.Text, tsty *text.Style) {
 	ls.Source = tx
+	ls.Color = tsty.Color
 	for i := range ls.Lines {
 		ln := &ls.Lines[i]
 		ln.UpdateStyle(tx, tsty)
