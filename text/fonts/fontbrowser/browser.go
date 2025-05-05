@@ -66,9 +66,9 @@ func (fb *Browser) SelectFont() { //types:add
 		if col != 1 {
 			return
 		}
-		s.Text.CustomFont = rich.FontName(fi[row].Family)
+		s.Font.CustomFont = rich.FontName(fi[row].Family)
 		s.Font.Family = rich.Custom
-		s.Text.FontSize.Dp(24)
+		s.Font.Size.Dp(24)
 	})
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddOK(bar).OnClick(func(e events.Event) {

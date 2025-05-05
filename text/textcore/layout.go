@@ -22,10 +22,11 @@ const maxGrowLines = 25
 // and updates lineNumberOffset.
 func (ed *Base) styleSizes() {
 	ed.lineNumberDigits = max(1+int(math32.Log10(float32(ed.NumLines()))), 3)
+	sty, tsty := ed.Styles.NewRichText()
 	lno := true
 	if ed.Lines != nil {
 		lno = ed.Lines.Settings.LineNumbers
-		ed.Lines.SetFontStyle(&ed.Styles.Font)
+		ed.Lines.SetFontStyle(sty)
 	}
 	if lno {
 		ed.hasLineNumbers = true
@@ -39,13 +40,12 @@ func (ed *Base) styleSizes() {
 		ed.charSize.Set(16, 22)
 		return
 	}
-	sty := &ed.Styles
 	sh := ed.Scene.TextShaper()
 	if sh != nil {
-		lht := sty.Text.LineHeightDots(&sty.Font)
-		tx := rich.NewText(&sty.Font, []rune{'M'})
-		r := sh.Shape(tx, &sty.Text, &rich.DefaultSettings)
-		ed.charSize.X = math32.Ceil(r[0].Advance())
+		lht := ed.Styles.LineHeightDots()
+		tx := rich.NewText(sty, []rune{'M'})
+		r := sh.Shape(tx, tsty, &rich.DefaultSettings)
+		ed.charSize.X = math32.Round(r[0].Advance())
 		ed.charSize.Y = lht
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/svg"
 )
@@ -38,5 +39,5 @@ func Render(size int) (*image.RGBA, error) {
 	}
 
 	sv.Render()
-	return sv.RenderImage(), nil
+	return imagex.Unwrap(sv.RenderImage()).(*image.RGBA), nil
 }

@@ -146,22 +146,22 @@ func (tx *Text) Init() {
 		switch tx.Type {
 		case TextLabelLarge:
 			s.Text.LineHeight = 20.0 / 14
-			s.Text.FontSize.Dp(14)
+			s.Font.Size.Dp(14)
 			// s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = rich.Medium
 		case TextLabelMedium:
 			s.Text.LineHeight = 16.0 / 12
-			s.Text.FontSize.Dp(12)
+			s.Font.Size.Dp(12)
 			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Medium
 		case TextLabelSmall:
 			s.Text.LineHeight = 16.0 / 11
-			s.Text.FontSize.Dp(11)
+			s.Font.Size.Dp(11)
 			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Medium
 		case TextBodyLarge:
 			s.Text.LineHeight = 24.0 / 16
-			s.Text.FontSize.Dp(16)
+			s.Font.Size.Dp(16)
 			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Normal
 		case TextSupporting:
@@ -169,67 +169,67 @@ func (tx *Text) Init() {
 			fallthrough
 		case TextBodyMedium:
 			s.Text.LineHeight = 20.0 / 14
-			s.Text.FontSize.Dp(14)
+			s.Font.Size.Dp(14)
 			// s.Text.LetterSpacing.Dp(0.25)
 			s.Font.Weight = rich.Normal
 		case TextBodySmall:
 			s.Text.LineHeight = 16.0 / 12
-			s.Text.FontSize.Dp(12)
+			s.Font.Size.Dp(12)
 			// s.Text.LetterSpacing.Dp(0.4)
 			s.Font.Weight = rich.Normal
 		case TextTitleLarge:
 			s.Text.LineHeight = 28.0 / 22
-			s.Text.FontSize.Dp(22)
+			s.Font.Size.Dp(22)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextTitleMedium:
 			s.Text.LineHeight = 24.0 / 16
-			s.Text.FontSize.Dp(16)
+			s.Font.Size.Dp(16)
 			// s.Text.LetterSpacing.Dp(0.15)
 			s.Font.Weight = rich.Bold
 		case TextTitleSmall:
 			s.Text.LineHeight = 20.0 / 14
-			s.Text.FontSize.Dp(14)
+			s.Font.Size.Dp(14)
 			// s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = rich.Medium
 		case TextHeadlineLarge:
 			s.Text.LineHeight = 40.0 / 32
-			s.Text.FontSize.Dp(32)
+			s.Font.Size.Dp(32)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextHeadlineMedium:
 			s.Text.LineHeight = 36.0 / 28
-			s.Text.FontSize.Dp(28)
+			s.Font.Size.Dp(28)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextHeadlineSmall:
 			s.Text.LineHeight = 32.0 / 24
-			s.Text.FontSize.Dp(24)
+			s.Font.Size.Dp(24)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplayLarge:
 			s.Text.LineHeight = 70.0 / 57 // 64.0 / 57  64 not big enough! must be > 1.2
-			s.Text.FontSize.Dp(57)
+			s.Font.Size.Dp(57)
 			// s.Text.LetterSpacing.Dp(-0.25)
 			s.Font.Weight = rich.Normal
 		case TextDisplayMedium:
 			s.Text.LineHeight = 52.0 / 45
-			s.Text.FontSize.Dp(45)
+			s.Font.Size.Dp(45)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplaySmall:
 			s.Text.LineHeight = 44.0 / 36
-			s.Text.FontSize.Dp(36)
+			s.Font.Size.Dp(36)
 			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		}
 	})
 	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
-		s.SetFontColors()
 		tx.updateRichText() // note: critical to update with final styles
 		if tx.paintText != nil && tx.Text != "" {
-			tx.paintText.UpdateStyle(tx.richText, &s.Text)
+			_, tsty := s.NewRichText()
+			tx.paintText.UpdateStyle(tx.richText, tsty)
 		}
 	})
 
@@ -307,10 +307,11 @@ func (tx *Text) Init() {
 
 // updateRichText gets the richtext from Text, using HTML parsing.
 func (tx *Text) updateRichText() {
-	if tx.Styles.Text.WhiteSpace.KeepWhiteSpace() {
-		tx.richText, _ = htmltext.HTMLPreToRich([]byte(tx.Text), &tx.Styles.Font, nil)
+	sty, tsty := tx.Styles.NewRichText()
+	if tsty.WhiteSpace.KeepWhiteSpace() {
+		tx.richText, _ = htmltext.HTMLPreToRich([]byte(tx.Text), sty, nil)
 	} else {
-		tx.richText, _ = htmltext.HTMLToRich([]byte(tx.Text), &tx.Styles.Font, nil)
+		tx.richText, _ = htmltext.HTMLToRich([]byte(tx.Text), sty, nil)
 	}
 }
 
@@ -437,15 +438,12 @@ func (tx *Text) selectWord(ri int) {
 // configTextSize does the text shaping layout for text,
 // using given size to constrain layout.
 func (tx *Text) configTextSize(sz math32.Vector2) {
-	fs := &tx.Styles.Font
-	if fs.Size == 0 { // not init
+	if tx.Styles.Font.Size.Dots == 0 { // not init
 		return
 	}
-	txs := &tx.Styles.Text
-	txs.Color = colors.ToUniform(tx.Styles.Color)
-	etxs := *txs
-	etxs.Align, etxs.AlignV = text.Start, text.Start
-	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, sz)
+	sty, tsty := tx.Styles.NewRichText()
+	tsty.Align, tsty.AlignV = text.Start, text.Start
+	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, sz)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -457,20 +455,19 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	if tx.Scene == nil || tx.Scene.TextShaper() == nil {
 		return sz
 	}
-	tsh := tx.Scene.TextShaper()
-	fs := &tx.Styles.Font
-	if fs.Size == 0 {
+	if tx.Styles.Font.Size.Dots == 0 {
 		return sz // not init
 	}
-	txs := &tx.Styles.Text
+	tsh := tx.Scene.TextShaper()
+	sty, tsty := tx.Styles.NewRichText()
 	rsz := sz
-	if txs.Align != text.Start && txs.AlignV != text.Start {
-		etxs := *txs
+	if tsty.Align != text.Start && tsty.AlignV != text.Start {
+		etxs := *tsty
 		etxs.Align, etxs.AlignV = text.Start, text.Start
-		tx.paintText = tsh.WrapLines(tx.richText, fs, &etxs, &AppearanceSettings.Text, rsz)
+		tx.paintText = tsh.WrapLines(tx.richText, sty, &etxs, &AppearanceSettings.Text, rsz)
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
-	tx.paintText = tsh.WrapLines(tx.richText, fs, txs, &AppearanceSettings.Text, rsz)
+	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, rsz)
 	tx.Links = tx.paintText.Source.GetLinks()
 	return tx.paintText.Bounds.Size().Ceil()
 }
@@ -479,7 +476,8 @@ func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
 	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
-		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), 1.6, &tx.Styles.Font, &tx.Styles.Text)
+		sty, tsty := tx.Styles.NewRichText()
+		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), 1.6, sty, tsty)
 		// if DebugSettings.LayoutTrace {
 		// 	fmt.Println(tx, "Text SizeUp Estimate:", est)
 		// }

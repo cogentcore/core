@@ -34,7 +34,7 @@ type Image struct {
 	ViewBox ViewBox `xml:"viewbox"`
 
 	// Pixels are the image pixels, which has imagex.WrapJS already applied.
-	Pixels imagex.Image `xml:"-" json:"-" display:"-"`
+	Pixels image.Image `xml:"-" json:"-" display:"-"`
 }
 
 func (g *Image) SVGName() string { return "image" }
@@ -49,7 +49,7 @@ func (g *Image) SetNodeSize(sz math32.Vector2) {
 
 // pixelsOfSize returns the Pixels as an imagex.Image of given size.
 // makes a new one if not already the correct size.
-func (g *Image) pixelsOfSize(nwsz image.Point) imagex.Image {
+func (g *Image) pixelsOfSize(nwsz image.Point) image.Image {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return nil
 	}
@@ -89,7 +89,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 			tsz.Y = int(height)
 		}
 		pxi := g.pixelsOfSize(tsz)
-		px := pxi.Underlying().(*image.RGBA)
+		px := imagex.Unwrap(pxi).(*image.RGBA)
 		m := math32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(px, s2d, img, img.Bounds(), draw.Over, nil)

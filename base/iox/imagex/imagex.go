@@ -104,7 +104,7 @@ func Read(r io.Reader) (image.Image, Formats, error) {
 		return im, None, err
 	}
 	f, err := ExtToFormat(ext)
-	return WrapJS(im), f, err
+	return im, f, err
 }
 
 // Save saves the image to the given filename,

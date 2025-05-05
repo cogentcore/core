@@ -381,7 +381,7 @@ func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 	if tmin >= cmin && tmax <= cmax {
 		return false
 	}
-	h := fr.Styles.Text.FontSize.Dots
+	h := fr.Styles.Font.Size.Dots
 	if tmin < cmin { // favors scrolling to start
 		trg := sb.Value + tmin - cmin - h
 		if trg < 0 {

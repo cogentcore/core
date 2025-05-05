@@ -181,12 +181,13 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	ctx := &rich.DefaultSettings
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
+	sty, tsty := ed.Styles.NewRichText()
 
 	shapeTab := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
 		if ed.tabRender != nil {
 			return ed.tabRender.Clone()
 		}
-		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
+		lns := sh.WrapLines(stx, sty, tsty, ctx, ssz)
 		ed.tabRender = lns
 		return lns
 	}
@@ -196,7 +197,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
 			return rc.lns
 		}
-		lns := sh.WrapLines(stx, &ed.Styles.Font, &ed.Styles.Text, ctx, ssz)
+		lns := sh.WrapLines(stx, sty, tsty, ctx, ssz)
 		ed.lineRenders[li] = renderCache{tx: txt, lns: lns}
 		return lns
 	}
@@ -300,31 +301,30 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	}
 	pos.Y += float32(li) * ed.charSize.Y
 
-	sty := &ed.Styles
 	pc := &ed.Scene.Painter
 	sh := ed.Scene.TextShaper()
-	fst := sty.Font
+	sty, tsty := ed.Styles.NewRichText()
 
-	fst.SetBackground(nil)
+	sty.SetBackground(nil)
 	lfmt := fmt.Sprintf("%d", ed.lineNumberDigits)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 
 	if ed.CursorPos.Line == ln {
-		fst.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
-		fst.Weight = rich.Bold
+		sty.SetFillColor(colors.ToUniform(colors.Scheme.Primary.Base))
+		sty.Weight = rich.Bold
 	} else {
-		fst.SetFillColor(colors.ToUniform(colors.Scheme.OnSurfaceVariant))
+		sty.SetFillColor(colors.ToUniform(colors.Scheme.OnSurfaceVariant))
 	}
 	sz := ed.charSize
 	sz.X *= float32(ed.lineNumberOffset)
 	var lns *shaped.Lines
 	rc := ed.lineNoRenders[li]
-	tx := rich.NewText(&fst, []rune(lnstr))
+	tx := rich.NewText(sty, []rune(lnstr))
 	if rc.lns != nil && slices.Compare(rc.tx, tx[0]) == 0 { // captures styling
 		lns = rc.lns
 	} else {
-		lns = sh.WrapLines(tx, &fst, &sty.Text, &rich.DefaultSettings, sz)
+		lns = sh.WrapLines(tx, sty, tsty, &rich.DefaultSettings, sz)
 		ed.lineNoRenders[li] = renderCache{tx: tx[0], lns: lns}
 	}
 	pc.TextLines(lns, pos)

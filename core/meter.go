@@ -90,14 +90,14 @@ func (m *Meter) Init() {
 		case MeterCircle:
 			s.Min.Set(units.Dp(128))
 			m.Width.Dp(8)
-			s.Text.FontSize.Dp(32)
+			s.Font.Size.Dp(32)
 			s.Text.LineHeight = 40.0 / 32
 			s.Text.Align = text.Center
 			s.Text.AlignV = text.Center
 		case MeterSemicircle:
 			s.Min.Set(units.Dp(112), units.Dp(64))
 			m.Width.Dp(16)
-			s.Text.FontSize.Dp(22)
+			s.Font.Size.Dp(22)
 			s.Text.LineHeight = 28.0 / 22
 			s.Text.Align = text.Center
 			s.Text.AlignV = text.Center
@@ -145,8 +145,9 @@ func (m *Meter) Render() {
 	var txt *shaped.Lines
 	var toff math32.Vector2
 	if m.Text != "" {
-		tx, _ := htmltext.HTMLToRich([]byte(m.Text), &m.Styles.Font, nil)
-		txt = m.Scene.TextShaper().WrapLines(tx, &m.Styles.Font, &m.Styles.Text, &AppearanceSettings.Text, size)
+		sty, tsty := m.Styles.NewRichText()
+		tx, _ := htmltext.HTMLToRich([]byte(m.Text), sty, nil)
+		txt = m.Scene.TextShaper().WrapLines(tx, sty, tsty, &AppearanceSettings.Text, size)
 		toff = txt.Bounds.Size().DivScalar(2)
 	}
 

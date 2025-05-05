@@ -5,7 +5,6 @@
 package text
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -43,6 +42,7 @@ type Style struct { //types:add
 
 	// FontSize is the default font size. The rich text styling specifies
 	// sizes relative to this value, with the normal text size factor = 1.
+	// In the [styles.Style.Text] context, this is copied from [styles.Font.Size].
 	FontSize units.Value
 
 	// LineHeight is a multiplier on the default font size for spacing between lines.
@@ -76,10 +76,10 @@ type Style struct { //types:add
 	// specified in the [rich.Style].
 	Color color.Color
 
-	// SelectColor is the color to use for the background region of selected text.
+	// SelectColor is the color to use for the background region of selected text (inherited).
 	SelectColor image.Image
 
-	// HighlightColor is the color to use for the background region of highlighted text.
+	// HighlightColor is the color to use for the background region of highlighted text (inherited).
 	HighlightColor image.Image
 
 	// CustomFont specifies the Custom font name for rich.Style.Family = Custom.
@@ -108,7 +108,7 @@ func (ts *Style) Defaults() {
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ts *Style) ToDots(uc *units.Context) {
 	ts.FontSize.ToDots(uc)
-	ts.FontSize.Dots = math32.Round(ts.FontSize.Dots)
+	ts.FontSize.Dots = math32.Ceil(ts.FontSize.Dots)
 	ts.Indent.ToDots(uc)
 }
 
@@ -122,12 +122,14 @@ func (ts *Style) InheritFields(parent *Style) {
 	ts.Direction = parent.Direction
 	ts.Indent = parent.Indent
 	ts.TabSize = parent.TabSize
+	ts.SelectColor = parent.SelectColor
+	ts.HighlightColor = parent.HighlightColor
 }
 
 // FontHeight returns the effective font height based on
 // FontSize * [rich.Style] Size multiplier.
 func (ts *Style) FontHeight(sty *rich.Style) float32 {
-	return math32.Ceil(ts.FontSize.Dots * sty.Size)
+	return math32.Round(ts.FontSize.Dots * sty.Size)
 }
 
 // LineHeightDots returns the effective line height in dots (actual pixels)
@@ -138,15 +140,7 @@ func (ts *Style) LineHeightDots(sty *rich.Style) float32 {
 
 // AlignFactors gets basic text alignment factors
 func (ts *Style) AlignFactors() (ax, ay float32) {
-	ax = 0.0
-	ay = 0.0
-	hal := ts.Align
-	switch hal {
-	case Center:
-		ax = 0.5 // todo: determine if font is horiz or vert..
-	case End:
-		ax = 1.0
-	}
+	ax = ts.Align.Factor()
 	val := ts.AlignV
 	switch val {
 	case Start:
@@ -176,6 +170,19 @@ const (
 	// Justify spreads words to cover the entire text region.
 	Justify
 )
+
+// Factor returns the alignment factor (0, .5, 1).
+func (al Aligns) Factor() float32 {
+	switch al {
+	case Start:
+		return 0
+	case Center:
+		return 0.5
+	case End:
+		return 1
+	}
+	return 0
+}
 
 // WhiteSpaces determine how white space is processed and line wrapping
 // occurs, either only at whitespace or within words.
@@ -240,24 +247,12 @@ func (ws WhiteSpaces) KeepWhiteSpace() bool {
 // SetUnitContext sets the font-specific information in the given
 // units.Context, based on the given styles. Just uses standardized
 // fractions of the font size for the other less common units such as ex, ch.
-func (ts *Style) SetUnitContext(uc *units.Context, sty *rich.Style) {
-	fsz := ts.FontHeight(sty)
+func (ts *Style) SetUnitContext(uc *units.Context) {
+	fsz := math32.Round(ts.FontSize.Dots)
 	if fsz == 0 {
-		fmt.Println("fsz 0:", ts.FontSize.Dots, ts.FontSize.Value, sty.Size)
 		fsz = 16
 	}
-	// these numbers are from previous font system, Roboto measurements:
-	ex := 0.53 * fsz
-	ch := 0.45 * fsz
-	// this is what the current system says:
-	// ex := 0.56 * fsz
-	// ch := 0.6 * fsz
-	// use nice round numbers for cleaner layout:
-	fsz = math32.Round(fsz)
-	ex = math32.Round(ex)
-	ch = math32.Round(ch)
-	uc.SetFont(fsz, ex, ch, uc.Dp(16))
-	// fmt.Println(fsz, ex, ch)
+	uc.SetFont(fsz)
 }
 
 // TODO(text): ?

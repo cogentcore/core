@@ -68,10 +68,22 @@ var styleFuncs = map[string]styleprops.Func{
 			if inh {
 				fs.SelectColor = parent.(*Style).SelectColor
 			} else if init {
-				fs.SelectColor = colors.Uniform(colors.Black)
+				fs.SelectColor = colors.Scheme.Select.Container
 			}
 			return
 		}
 		fs.SelectColor = errors.Log1(gradient.FromAny(val, cc))
+	},
+	"highlight-color": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Style)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.HighlightColor = parent.(*Style).HighlightColor
+			} else if init {
+				fs.HighlightColor = colors.Scheme.Warn.Container
+			}
+			return
+		}
+		fs.HighlightColor = errors.Log1(gradient.FromAny(val, cc))
 	},
 }

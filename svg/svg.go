@@ -106,7 +106,7 @@ func NewSVG(width, height int) *SVG {
 
 // RenderImage returns the rendered image. It does not actually render the SVG;
 // see [SVG.Render] for that.
-func (sv *SVG) RenderImage() imagex.Image {
+func (sv *SVG) RenderImage() image.Image {
 	return sv.RenderState.RenderImage()
 }
 

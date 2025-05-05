@@ -10,6 +10,7 @@ import (
 	"errors"
 	"image"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
@@ -79,7 +80,7 @@ func (vw *View) Image() (*image.RGBA, error) {
 	if img == nil {
 		return nil, errors.New("eve2d.View Image: is nil")
 	}
-	return img, nil
+	return imagex.Unwrap(img).(*image.RGBA), nil
 }
 
 // ProjectXY sets 2D projection to reflect 3D X,Y coords

@@ -423,7 +423,7 @@ func (t *Handle) SetMax(v float32) *Handle { t.Max = v; return t }
 // scale of [Handle.Min] to [Handle.Max].
 func (t *Handle) SetPos(v float32) *Handle { t.Pos = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", IDName: "icon", Doc: "Icon renders an [icons.Icon].\nThe rendered version is cached for the current size.\nIcons do not render a background or border independent of their SVG object.\nThe size of an Icon is determined by the [styles.Text.FontSize] property.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Icon", Doc: "Icon is the [icons.Icon] used to render the [Icon]."}, {Name: "prevIcon", Doc: "prevIcon is the previously rendered icon."}, {Name: "pixels", Doc: "image representation of the icon, cached for faster drawing."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", IDName: "icon", Doc: "Icon renders an [icons.Icon].\nThe rendered version is cached for the current size.\nIcons do not render a background or border independent of their SVG object.\nThe size of an Icon is determined by the [styles.Text.FontSize] property.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Icon", Doc: "Icon is the [icons.Icon] used to render the [Icon]."}, {Name: "prevIcon", Doc: "prevIcon is the previously rendered icon."}, {Name: "prevColor", Doc: "prevColor is the previously rendered color, as uniform."}, {Name: "prevOpacity", Doc: "prevOpacity is the previously rendered opacity."}, {Name: "pixels", Doc: "image representation of the icon, cached for faster drawing."}}})
 
 // NewIcon returns a new [Icon] with the given optional parent:
 // Icon renders an [icons.Icon].
@@ -444,10 +444,6 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image", IDName
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch).
 func NewImage(parent ...tree.Node) *Image { return tree.New[Image](parent...) }
-
-// SetImage sets the [Image.Image]:
-// Image is the [image.Image].
-func (t *Image) SetImage(v image.Image) *Image { t.Image = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.InlineList", IDName: "inline-list", Doc: "InlineList represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}})
 

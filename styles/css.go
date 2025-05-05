@@ -61,8 +61,8 @@ func ToCSS(s *Style, idName, htmlName string) string {
 	add("padding-bottom", s.Padding.Bottom.StringCSS())
 	add("padding-left", s.Padding.Left.StringCSS())
 	add("margin", s.Margin.Top.StringCSS())
-	if s.Text.FontSize.Value != 16 || s.Text.FontSize.Unit != units.UnitDp {
-		add("font-size", s.Text.FontSize.StringCSS())
+	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
+		add("font-size", s.Font.Size.StringCSS())
 	}
 	// todo:
 	// if s.Font.Family != "" && s.Font.Family != "Roboto" {

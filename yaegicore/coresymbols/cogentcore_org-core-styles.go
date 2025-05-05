@@ -64,6 +64,7 @@ func init() {
 		"FitNone":                   reflect.ValueOf(styles.FitNone),
 		"FitScaleDown":              reflect.ValueOf(styles.FitScaleDown),
 		"Flex":                      reflect.ValueOf(styles.Flex),
+		"FontSizePoints":            reflect.ValueOf(&styles.FontSizePoints).Elem(),
 		"Grid":                      reflect.ValueOf(styles.Grid),
 		"ItemAlign":                 reflect.ValueOf(styles.ItemAlign),
 		"KeyboardEmail":             reflect.ValueOf(styles.KeyboardEmail),
@@ -109,6 +110,7 @@ func init() {
 		"Directions":       reflect.ValueOf((*styles.Directions)(nil)),
 		"Displays":         reflect.ValueOf((*styles.Displays)(nil)),
 		"Fill":             reflect.ValueOf((*styles.Fill)(nil)),
+		"Font":             reflect.ValueOf((*styles.Font)(nil)),
 		"ObjectFits":       reflect.ValueOf((*styles.ObjectFits)(nil)),
 		"Overflows":        reflect.ValueOf((*styles.Overflows)(nil)),
 		"Paint":            reflect.ValueOf((*styles.Paint)(nil)),
@@ -116,6 +118,7 @@ func init() {
 		"Shadow":           reflect.ValueOf((*styles.Shadow)(nil)),
 		"Stroke":           reflect.ValueOf((*styles.Stroke)(nil)),
 		"Style":            reflect.ValueOf((*styles.Style)(nil)),
+		"Text":             reflect.ValueOf((*styles.Text)(nil)),
 		"VirtualKeyboards": reflect.ValueOf((*styles.VirtualKeyboards)(nil)),
 	}
 }

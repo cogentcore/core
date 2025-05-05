@@ -20,8 +20,8 @@ import (
 
 // StyleFromProperty sets style field values based on the given property key and value
 func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.Context) {
-	var pfont *rich.Style
-	var ptext *text.Style
+	var pfont *Font
+	var ptext *Text
 	if parent != nil {
 		pfont = &parent.Font
 		ptext = &parent.Text
@@ -262,8 +262,7 @@ var styleBorderFuncs = map[string]styleprops.Func{
 	},
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Outline
+////////  Outline
 
 // styleOutlineFuncs are functions for styling the OutlineStyle object
 var styleOutlineFuncs = map[string]styleprops.Func{
@@ -332,8 +331,7 @@ var styleOutlineFuncs = map[string]styleprops.Func{
 	},
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Shadow
+////////  Shadow
 
 // styleShadowFuncs are functions for styling the Shadow object
 var styleShadowFuncs = map[string]styleprops.Func{
@@ -359,4 +357,192 @@ var styleShadowFuncs = map[string]styleprops.Func{
 	},
 	"box-shadow.inset": styleprops.Bool(false,
 		func(obj *Shadow) *bool { return &obj.Inset }),
+}
+
+//////// Font
+
+// StyleFromProperties sets style field values based on the given property list.
+func (s *Font) StyleFromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
+	for key, val := range properties {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		s.StyleFromProperty(parent, key, val, ctxt)
+	}
+}
+
+// StyleFromProperty sets style field values based on the given property key and value.
+func (s *Font) StyleFromProperty(parent *Font, key string, val any, cc colors.Context) {
+	if sfunc, ok := styleFontFuncs[key]; ok {
+		if parent != nil {
+			sfunc(s, key, val, parent, cc)
+		} else {
+			sfunc(s, key, val, nil, cc)
+		}
+		return
+	}
+}
+
+// FontSizePoints maps standard font names to standard point sizes -- we use
+// dpi zoom scaling instead of rescaling "medium" font size, so generally use
+// these values as-is.  smaller and larger relative scaling can move in 2pt increments
+var FontSizePoints = map[string]float32{
+	"xx-small": 7,
+	"x-small":  7.5,
+	"small":    10, // small is also "smaller"
+	"smallf":   10, // smallf = small font size..
+	"medium":   12,
+	"large":    14,
+	"x-large":  18,
+	"xx-large": 24,
+}
+
+// styleFontFuncs are functions for styling the Font object.
+var styleFontFuncs = map[string]styleprops.Func{
+	// note: text.Style handles the standard units-based font-size settings
+	"font-size": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Font)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.Size = parent.(*Font).Size
+			} else if init {
+				fs.Size.Set(16, units.UnitDp)
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			if psz, ok := FontSizePoints[vt]; ok {
+				fs.Size = units.Pt(psz)
+			} else {
+				fs.Size.SetAny(val, key) // also processes string
+			}
+		}
+	},
+	"font-family": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Font)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.Family = parent.(*Font).Family
+			} else if init {
+				fs.Family = rich.SansSerif // font has defaults
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			fs.CustomFont = rich.FontName(vt)
+			fs.Family = rich.Custom
+		default:
+			// todo: process enum
+		}
+	},
+	"font-style": styleprops.Enum(rich.SlantNormal,
+		func(obj *Font) enums.EnumSetter { return &obj.Slant }),
+	"font-weight": styleprops.Enum(rich.Normal,
+		func(obj *Font) enums.EnumSetter { return &obj.Weight }),
+	"font-stretch": styleprops.Enum(rich.StretchNormal,
+		func(obj *Font) enums.EnumSetter { return &obj.Stretch }),
+	"text-decoration": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Font)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.Decoration = parent.(*Font).Decoration
+			} else if init {
+				fs.Decoration = 0
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			if vt == "none" {
+				fs.Decoration = 0
+			} else {
+				fs.Decoration.SetString(vt)
+			}
+		case rich.Decorations:
+			fs.Decoration.SetFlag(true, vt)
+		default:
+			iv, err := reflectx.ToInt(val)
+			if err == nil {
+				fs.Decoration.SetFlag(true, rich.Decorations(iv))
+			} else {
+				styleprops.SetError(key, val, err)
+			}
+		}
+	},
+}
+
+// StyleFromProperties sets style field values based on the given property list.
+func (s *Text) StyleFromProperties(parent *Text, properties map[string]any, ctxt colors.Context) {
+	for key, val := range properties {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		s.StyleFromProperty(parent, key, val, ctxt)
+	}
+}
+
+// StyleFromProperty sets style field values based on the given property key and value.
+func (s *Text) StyleFromProperty(parent *Text, key string, val any, cc colors.Context) {
+	if sfunc, ok := styleFuncs[key]; ok {
+		if parent != nil {
+			sfunc(s, key, val, parent, cc)
+		} else {
+			sfunc(s, key, val, nil, cc)
+		}
+		return
+	}
+}
+
+// styleFuncs are functions for styling the Text object.
+var styleFuncs = map[string]styleprops.Func{
+	"text-align": styleprops.Enum(Start,
+		func(obj *Text) enums.EnumSetter { return &obj.Align }),
+	"text-vertical-align": styleprops.Enum(Start,
+		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
+	"line-height": styleprops.FloatProportion(float32(1.2),
+		func(obj *Text) *float32 { return &obj.LineHeight }),
+	"line-spacing": styleprops.FloatProportion(float32(1.2),
+		func(obj *Text) *float32 { return &obj.LineHeight }),
+	"para-spacing": styleprops.FloatProportion(float32(1.2),
+		func(obj *Text) *float32 { return &obj.ParaSpacing }),
+	"white-space": styleprops.Enum(text.WrapAsNeeded,
+		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
+	"direction": styleprops.Enum(rich.LTR,
+		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
+	"text-indent": styleprops.Units(units.Value{},
+		func(obj *Text) *units.Value { return &obj.Indent }),
+	"tab-size": styleprops.Int(int(4),
+		func(obj *Text) *int { return &obj.TabSize }),
+	"select-color": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Text)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.SelectColor = parent.(*Text).SelectColor
+			} else if init {
+				fs.SelectColor = colors.Scheme.Select.Container
+			}
+			return
+		}
+		fs.SelectColor = errors.Log1(gradient.FromAny(val, cc))
+	},
+	"highlight-color": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Text)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.HighlightColor = parent.(*Text).HighlightColor
+			} else if init {
+				fs.HighlightColor = colors.Scheme.Warn.Container
+			}
+			return
+		}
+		fs.HighlightColor = errors.Log1(gradient.FromAny(val, cc))
+	},
 }

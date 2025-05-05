@@ -72,10 +72,8 @@ func (pc *Paint) SetStyleProperties(parent *Paint, properties map[string]any, ct
 }
 
 func (pc *Paint) FromStyle(st *Style) {
-	st.SetFontColors()
 	pc.UnitContext = st.UnitContext
-	pc.Font = st.Font
-	pc.Text = st.Text
+	st.SetRichText(&pc.Font, &pc.Text)
 }
 
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels

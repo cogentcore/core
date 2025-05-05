@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
@@ -71,7 +72,7 @@ func (txt *Text2D) Defaults() {
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
 	txt.Styles.Defaults()
-	txt.Styles.Text.FontSize.Pt(36)
+	txt.Styles.Font.Size.Pt(36)
 	txt.Styles.Margin.Set(units.Dp(2))
 	txt.Material.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
@@ -86,7 +87,7 @@ func (txt *Text2D) TextSize() (math32.Vector2, bool) {
 		return sz, false
 	}
 	tsz := tx.Image().Bounds().Size()
-	fsz := float32(txt.Styles.Text.FontSize.Dots)
+	fsz := txt.Styles.Font.FontHeight()
 	if fsz == 0 {
 		fsz = 36
 	}
@@ -112,11 +113,10 @@ func (txt *Text2D) RenderText() {
 		txt.usesDefaultColor = true
 	}
 	st.ToDots()
-	fs := &txt.Styles.Font
-	txs := &txt.Styles.Text
+	sty, tsty := st.NewRichText()
 	sz := math32.Vec2(10000, 1000) // just a big size
-	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), fs, nil)
-	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, fs, txs, &rich.DefaultSettings, sz)
+	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), sty, nil)
+	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, sty, tsty, &rich.DefaultSettings, sz)
 	sz = txt.textRender.Bounds.Size().Ceil()
 	if sz.X == 0 {
 		sz.X = 10
@@ -129,10 +129,10 @@ func (txt *Text2D) RenderText() {
 	marg := txt.Styles.TotalMargin()
 	sz.SetAdd(marg.Size())
 	txt.TextPos = marg.Pos().Round()
-	sty := styles.NewPaint()
-	sty.FromStyle(&txt.Styles)
-	pc := paint.Painter{State: &txt.renderState, Paint: sty}
-	pc.InitImageRender(sty, szpt.X, szpt.Y)
+	psty := styles.NewPaint()
+	psty.FromStyle(&txt.Styles)
+	pc := paint.Painter{State: &txt.renderState, Paint: psty}
+	pc.InitImageRender(psty, szpt.X, szpt.Y)
 	pc.PushContext(nil, render.NewBoundsRect(bounds, sides.NewFloats()))
 	pt := styles.Paint{}
 	pt.Defaults()
@@ -144,7 +144,7 @@ func (txt *Text2D) RenderText() {
 	pc.TextLines(txt.textRender, txt.TextPos)
 	pc.PopContext()
 	pc.RenderToImage()
-	img := pc.RenderImage()
+	img := imagex.Unwrap(pc.RenderImage()).(*image.RGBA)
 	var tx Texture
 	var err error
 	if txt.Material.Texture == nil {
@@ -178,7 +178,8 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	sz, ok := txt.TextSize()
 	if ok {
 		sc := math32.Vec3(sz.X, sz.Y, txt.Pose.Scale.Z)
-		ax, ay := txt.Styles.Text.AlignFactors()
+		ax := txt.Styles.Text.Align.Factor()
+		ay := float32(0.0)
 		al := txt.Styles.Text.AlignV
 		switch al {
 		case text.Start:

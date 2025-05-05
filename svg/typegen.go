@@ -3,7 +3,8 @@
 package svg
 
 import (
-	"cogentcore.org/core/base/iox/imagex"
+	"image"
+
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/shaped"
@@ -131,7 +132,7 @@ func (t *Image) SetViewBox(v ViewBox) *Image { t.ViewBox = v; return t }
 
 // SetPixels sets the [Image.Pixels]:
 // Pixels are the image pixels, which has imagex.WrapJS already applied.
-func (t *Image) SetPixels(v imagex.Image) *Image { t.Pixels = v; return t }
+func (t *Image) SetPixels(v image.Image) *Image { t.Pixels = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Line", IDName: "line", Doc: "Line is a SVG line", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Start", Doc: "position of the start of the line"}, {Name: "End", Doc: "position of the end of the line"}}})
 

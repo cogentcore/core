@@ -1676,8 +1676,6 @@ func (tf *TextField) Style() {
 }
 
 func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
-	st := &tf.Styles
-	txs := &st.Text
 	txt := tf.editText
 	if len(txt) == 0 && len(tf.Placeholder) > 0 {
 		txt = []rune(tf.Placeholder)
@@ -1685,10 +1683,11 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	if tf.NoEcho {
 		txt = concealDots(len(tf.editText))
 	}
-	etxs := *txs
+	sty, tsty := tf.Styles.NewRichText()
+	etxs := *tsty
 	etxs.Align, etxs.AlignV = text.Start, text.Start // only works with this
-	tx := rich.NewText(&st.Font, txt)
-	tf.renderAll = tf.Scene.TextShaper().WrapLines(tx, &st.Font, &etxs, &AppearanceSettings.Text, sz)
+	tx := rich.NewText(sty, txt)
+	tf.renderAll = tf.Scene.TextShaper().WrapLines(tx, sty, &etxs, &AppearanceSettings.Text, sz)
 	rsz := tf.renderAll.Bounds.Size().Ceil()
 	return rsz
 }
@@ -1722,7 +1721,7 @@ func (tf *TextField) SizeUp() {
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
-	tf.lineHeight = tf.Styles.Text.LineHeightDots(&tf.Styles.Font)
+	tf.lineHeight = tf.Styles.LineHeightDots()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
@@ -1797,24 +1796,21 @@ func (tf *TextField) setEffPosAndSize() {
 }
 
 func (tf *TextField) layoutCurrent() {
-	st := &tf.Styles
-	fs := &st.Font
-	txs := &st.Text
-
 	cur := tf.editText[tf.dispRange.Start:tf.dispRange.End]
-	clr := st.Color
+	clr := tf.Styles.Color
 	if len(tf.editText) == 0 && len(tf.Placeholder) > 0 {
 		clr = tf.PlaceholderColor
 		cur = []rune(tf.Placeholder)
 	} else if tf.NoEcho {
 		cur = concealDots(len(cur))
 	}
-	st.Text.Color = colors.ToUniform(clr)
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
-	tx := rich.NewText(&st.Font, cur)
-	tf.renderVisible = tf.Scene.TextShaper().WrapLines(tx, fs, txs, &AppearanceSettings.Text, availSz)
+	sty, tsty := tf.Styles.NewRichText()
+	tsty.Color = colors.ToUniform(clr)
+	tx := rich.NewText(sty, cur)
+	tf.renderVisible = tf.Scene.TextShaper().WrapLines(tx, sty, tsty, &AppearanceSettings.Text, availSz)
 	tf.renderedRange = tf.dispRange
 }
 

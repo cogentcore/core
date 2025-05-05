@@ -9,10 +9,10 @@ import (
 	"image/draw"
 )
 
-// Image extends the image.Image interface with two methods that manage
+// Wrapped extends the image.Image interface with two methods that manage
 // the wrapping of an underlying Go image.Image. This can be used for images that
 // are actually GPU textures, and to manage JavaScript pointers on the js platform.
-type Image interface {
+type Wrapped interface {
 	image.Image
 
 	// Update is called whenever the image data has been updated,
@@ -28,47 +28,23 @@ type Image interface {
 	Underlying() image.Image
 }
 
-// Update calls Update on a wrapped [imagex.Image] if it is one.
+// Update calls Update on a wrapped [imagex.Wrapped] if it is one.
 func Update(src image.Image) {
-	if im, ok := src.(Image); ok {
+	if im, ok := src.(Wrapped); ok {
 		im.Update()
 	}
 }
 
-// Unwrap calls Underlying on a wrapped [imagex.Image] if it is one.
+// Unwrap calls Underlying on a wrapped [imagex.Wrapped] if it is one.
 func Unwrap(src image.Image) image.Image {
-	if im, ok := src.(Image); ok {
+	if im, ok := src.(Wrapped); ok {
 		return im.Underlying()
 	}
 	return src
 }
 
-// PlainWrap is a transparent wrapper around an image that just returns
-// the underlying image. Used for WrapJS on non-web platforms.
-type PlainWrap struct {
-	image.Image
-}
-
-// NewPlainWrap returns a new PlainWrap around given image.
-// If image is already a PlainWrap then it uses the underlying Image
-// of the source.
-func NewPlainWrap(src image.Image) *PlainWrap {
-	if x, ok := src.(*PlainWrap); ok {
-		return &PlainWrap{Image: x.Image}
-	}
-	return &PlainWrap{Image: src}
-}
-
-func (pw *PlainWrap) Update() {}
-func (pw *PlainWrap) Underlying() image.Image {
-	if pw == nil {
-		return nil
-	}
-	return pw.Image
-}
-
 // CloneAsRGBA returns an RGBA copy of the supplied image.
-// Unwraps imagex.Image wrapped images.
+// Unwraps imagex.Wrapped wrapped images.
 func CloneAsRGBA(src image.Image) *image.RGBA {
 	ui := Unwrap(src)
 	if ui == nil {
@@ -82,7 +58,7 @@ func CloneAsRGBA(src image.Image) *image.RGBA {
 
 // AsRGBA returns the image as an RGBA: if it already is one, then
 // it returns that image directly. Otherwise it returns a clone.
-// Unwraps imagex.Image wrapped images.
+// Unwraps imagex.Wrapped wrapped images.
 func AsRGBA(src image.Image) *image.RGBA {
 	if src == nil {
 		return nil

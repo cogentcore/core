@@ -25,7 +25,7 @@ type Image struct {
 	WidgetBase
 
 	// Image is the [image.Image].
-	Image image.Image `xml:"-" json:"-"`
+	Image image.Image `xml:"-" json:"-" set:"-"`
 
 	// prevImage is the cached last [Image.Image].
 	prevImage image.Image
@@ -54,6 +54,11 @@ func (im *Image) Init() {
 			s.Min.Y.Dp(float32(sz.Y))
 		}
 	})
+}
+
+// SetImage sets the image.
+func (im *Image) SetImage(si image.Image) {
+	im.Image = imagex.WrapJS(si)
 }
 
 // Open sets the image to the image located at the given filename.

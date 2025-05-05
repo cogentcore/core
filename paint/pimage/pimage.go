@@ -51,10 +51,10 @@ type Params struct {
 	Op draw.Op
 
 	// Source to draw.
-	Source imagex.Image
+	Source image.Image
 
 	// Mask, used if non-nil.
-	Mask imagex.Image
+	Mask image.Image
 
 	// MaskPos is the position for the mask
 	MaskPos image.Point
@@ -126,7 +126,7 @@ func NewBlur(rect image.Rectangle, blurRadius float32) *Params {
 
 // NewSetPixel returns a new SetPixel operation with given parameters.
 func NewSetPixel(at image.Point, clr image.Image) *Params {
-	pr := &Params{Cmd: SetPixel, SourcePos: at, Source: imagex.NewPlainWrap(clr)}
+	pr := &Params{Cmd: SetPixel, SourcePos: at, Source: clr}
 	return pr
 }
 

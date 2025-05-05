@@ -93,7 +93,7 @@ func (st *Stage) runPopup() *Stage {
 		bigPopup = true
 	}
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
-	fontHt := sc.Styles.Text.FontHeight(&sc.Styles.Font)
+	fontHt := sc.Styles.Font.FontHeight()
 	if fontHt == 0 {
 		fontHt = 16
 	}

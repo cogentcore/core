@@ -395,9 +395,11 @@ func (d Directions) IsVertical() bool {
 	return d >= TTB && d <= BTT
 }
 
-// SetDecoration sets given decoration flag on.
-func (s *Style) SetDecoration(deco Decorations) *Style {
-	s.Decoration.SetFlag(true, deco)
+// SetDecoration sets given decoration flag(s) on.
+func (s *Style) SetDecoration(deco ...Decorations) *Style {
+	for _, d := range deco {
+		s.Decoration.SetFlag(true, d)
+	}
 	return s
 }
 

@@ -115,14 +115,13 @@ func (wb *WidgetBase) resetStyleSettings() {
 		return
 	}
 	fsz := AppearanceSettings.FontSize / 100
-	wb.Styles.Text.FontSize.Value /= fsz
+	wb.Styles.Font.Size.Value /= fsz
 }
 
 // styleSettings applies [AppearanceSettingsData.Spacing]
 // and [AppearanceSettingsData.FontSize] to the style values for the widget.
 func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
-	s.SetFontColors() // font from base color, opacity
 	spc := AppearanceSettings.Spacing / 100
 	s.Margin.Top.Value *= spc
 	s.Margin.Right.Value *= spc
@@ -136,7 +135,7 @@ func (wb *WidgetBase) styleSettings() {
 	s.Gap.Y.Value *= spc
 
 	fsz := AppearanceSettings.FontSize / 100
-	s.Text.FontSize.Value *= fsz
+	s.Font.Size.Value *= fsz
 }
 
 // StyleTree calls [WidgetBase.Style] on every widget in tree
@@ -176,8 +175,8 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 		st.UnitContext.DPI = 160
 	}
 	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
-	st.Text.ToDots(&st.UnitContext) // key to set first
-	st.Text.SetUnitContext(&st.UnitContext, &st.Font)
+	st.Font.ToDots(&st.UnitContext) // key to set first
+	st.Font.SetUnitContext(&st.UnitContext)
 	st.ToDots()
 }
 

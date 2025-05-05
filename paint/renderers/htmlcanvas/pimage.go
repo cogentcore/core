@@ -19,13 +19,15 @@ import (
 )
 
 func (rs *Renderer) RenderImage(pr *pimage.Params) {
-	var usrc, umask image.Image
-	if pr.Source != nil {
-		usrc = pr.Source.Underlying()
-	}
-	if pr.Mask != nil {
-		umask = pr.Mask.Underlying()
-	}
+	// var usrc, umask image.Image
+	// if pr.Source != nil {
+	// 	usrc = pr.Source.Underlying()
+	// }
+	// if pr.Mask != nil {
+	// 	umask = pr.Mask.Underlying()
+	// }
+	usrc := imagex.Unwrap(pr.Source)
+	umask := imagex.Unwrap(pr.Mask)
 
 	nilSrc := usrc == nil
 	if r, ok := usrc.(*image.RGBA); ok && r == nil {

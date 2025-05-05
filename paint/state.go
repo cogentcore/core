@@ -5,6 +5,7 @@
 package paint
 
 import (
+	"image"
 	"log/slog"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -101,7 +102,7 @@ func (rs *State) ImageRenderer() render.Renderer {
 
 // RenderImage returns the imagex.Image from the first [Image] renderer
 // if present, else nil.
-func (rs *State) RenderImage() imagex.Image {
+func (rs *State) RenderImage() image.Image {
 	rd := rs.ImageRenderer()
 	if rd == nil {
 		return nil

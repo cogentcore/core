@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
 
@@ -215,10 +214,10 @@ type Style struct { //types:add
 	ScrollbarWidth units.Value
 
 	// Font styling parameters applicable to individual spans of text.
-	Font rich.Style
+	Font Font
 
 	// Text styling parameters applicable to a paragraph of text.
-	Text text.Style
+	Text Text
 
 	// unit context: parameters necessary for anchoring relative units
 	UnitContext units.Context
@@ -349,6 +348,7 @@ func (s *Style) InheritFields(parent *Style) {
 // ToDotsImpl runs ToDots on unit values, to compile down to raw pixels
 func (s *Style) ToDotsImpl(uc *units.Context) {
 	s.LayoutToDots(uc)
+	s.Font.ToDots(uc)
 	s.Text.ToDots(uc)
 	s.Border.ToDots(uc)
 	s.MaxBorder.ToDots(uc)
@@ -365,18 +365,6 @@ func (s *Style) ToDots() {
 		slog.Error("styling error: cannot use Ew or Eh for Min size -- that is self-referential!")
 	}
 	s.ToDotsImpl(&s.UnitContext)
-}
-
-// SetFontColors sets the Font colors from style parameters.
-func (s *Style) SetFontColors() {
-	if s.Color != nil {
-		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
-		s.Font.SetFillColor(clr)
-	}
-	// if s.Background != nil {
-	// 	clr := colors.ApplyOpacity(colors.ToUniform(s.Background), s.Opacity)
-	// 	s.Font.SetBackground(clr)
-	// }
 }
 
 // BoxSpace returns the extra space around the central content in the box model in dots.

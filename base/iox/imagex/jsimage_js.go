@@ -16,9 +16,9 @@ import (
 
 // WrapJS returns a JavaScript optimized wrapper around the given
 // image.Image on web platform, and just returns the image otherwise.
-func WrapJS(src image.Image) Image {
+func WrapJS(src image.Image) image.Image {
 	if src == nil {
-		return NewPlainWrap(src)
+		return src
 	}
 	switch x := src.(type) {
 	case *JSRGBA:
@@ -30,7 +30,7 @@ func WrapJS(src image.Image) Image {
 	case *image.NRGBA:
 		return NewJSRGBA(x)
 	default:
-		return NewPlainWrap(src)
+		return src
 	}
 }
 
