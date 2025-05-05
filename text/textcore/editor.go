@@ -319,6 +319,10 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.HistPrev:
 		cancelAll()
 		e.SetHandled()
+		if ed.Lines != nil && ed.posHistoryIndex == ed.Lines.PosHistoryLen()-1 {
+			ed.savePosHistory(ed.CursorPos) // save current if end
+			ed.posHistoryIndex--
+		}
 		ed.CursorToHistoryPrev()
 	case keymap.HistNext:
 		cancelAll()

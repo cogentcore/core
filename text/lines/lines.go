@@ -490,8 +490,6 @@ func (ls *Lines) deleteTextImpl(st, ed textpos.Pos) *textpos.Edit {
 		ls.lines[st.Line] = ls.lines[st.Line][:st.Char]
 		eoedl := 0
 		if ed.Line >= nl {
-			// todo: somehow this is happening in patch diffs -- can't figure out why
-			// fmt.Println("err in range:", ed.Line, nl, ed.Char)
 			ed.Line = nl - 1
 		}
 		if ed.Char < len(ls.lines[ed.Line]) {
@@ -568,8 +566,22 @@ func (ls *Lines) insertTextLines(st textpos.Pos, txt [][]rune) *textpos.Edit {
 	return tbe
 }
 
+// appendLines appends given number of lines at the end.
+func (ls *Lines) appendLines(n int) {
+	ls.lines = append(ls.lines, make([][]rune, n)...)
+	ls.markup = append(ls.markup, make([]rich.Text, n)...)
+	ls.tags = append(ls.tags, make([]lexer.Line, n)...)
+	ls.hiTags = append(ls.hiTags, make([]lexer.Line, n)...)
+	for _, vw := range ls.views {
+		vw.lineToVline = append(vw.lineToVline, make([]int, n)...)
+	}
+}
+
 // insertTextImpl inserts the Text at given starting position.
 func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
+	if st.Line == ls.numLines() && st.Char == 0 { // adding new line
+		ls.appendLines(1)
+	}
 	ls.mustValidPos(st)
 	nl := len(txt)
 	var tbe *textpos.Edit

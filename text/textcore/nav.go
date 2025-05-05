@@ -70,9 +70,11 @@ func (ed *Base) savePosHistory(pos textpos.Pos) bool {
 	if ed.Lines == nil {
 		return false
 	}
-	return ed.Lines.PosHistorySave(pos)
-	ed.posHistoryIndex = ed.Lines.PosHistoryLen() - 1
-	return true
+	did := ed.Lines.PosHistorySave(pos)
+	if did {
+		ed.posHistoryIndex = ed.Lines.PosHistoryLen() - 1
+	}
+	return did
 }
 
 // CursorToHistoryPrev moves cursor to previous position on history list.
@@ -86,7 +88,6 @@ func (ed *Base) CursorToHistoryPrev() bool {
 	if sz == 0 {
 		return false
 	}
-	ed.posHistoryIndex--
 	if ed.posHistoryIndex < 0 {
 		ed.posHistoryIndex = 0
 		return false
@@ -94,9 +95,12 @@ func (ed *Base) CursorToHistoryPrev() bool {
 	ed.posHistoryIndex = min(sz-1, ed.posHistoryIndex)
 	pos, _ := ed.Lines.PosHistoryAt(ed.posHistoryIndex)
 	ed.CursorPos = ed.Lines.ValidPos(pos)
-	ed.SendInput()
+	if ed.posHistoryIndex > 0 {
+		ed.posHistoryIndex--
+	}
 	ed.scrollCursorToCenterIfHidden()
 	ed.renderCursor(true)
+	ed.SendInput()
 	return true
 }
 
@@ -114,13 +118,12 @@ func (ed *Base) CursorToHistoryNext() bool {
 	ed.posHistoryIndex++
 	if ed.posHistoryIndex >= sz-1 {
 		ed.posHistoryIndex = sz - 1
-		return false
 	}
 	pos, _ := ed.Lines.PosHistoryAt(ed.posHistoryIndex)
 	ed.CursorPos = ed.Lines.ValidPos(pos)
-	ed.SendInput()
 	ed.scrollCursorToCenterIfHidden()
 	ed.renderCursor(true)
+	ed.SendInput()
 	return true
 }
 

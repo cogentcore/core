@@ -460,7 +460,7 @@ func (w *renderWindow) handleEvent(e events.Event) {
 		rc.Unlock()
 		return
 	}
-	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
+	if DebugSettings.EventTrace && (!w.isVisible() || w.SystemWindow.Is(system.Minimized)) {
 		log.Println("got event while invisible:", e)
 		log.Println("w.isClosed:", w.isClosed(), "winClosing flag:", w.flags.HasFlag(winClosing), "syswin !isvis:", !w.SystemWindow.IsVisible(), "minimized:", w.SystemWindow.Is(system.Minimized))
 	}
