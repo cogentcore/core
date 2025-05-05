@@ -767,12 +767,17 @@ func (w *renderWindow) renderWindow() {
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
 	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
+		w.flags.SetFlag(true, winIsRendering)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
 			w.lastResize = time.Now()
 		}
 		w.flags.SetFlag(false, winResize)
 	} else {
+		// note: it is critical to set *before* going into loop
+		// because otherwise we can lose an entire pass before the goroutine starts!
+		// function will turn flag off when it finishes.
+		w.flags.SetFlag(true, winIsRendering)
 		go w.renderAsync(cp)
 	}
 }
@@ -782,13 +787,11 @@ func (w *renderWindow) renderWindow() {
 // [renderWindow.doRender].
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	w.renderMu.Lock()
-	w.flags.SetFlag(true, winIsRendering)
-
 	// pr := profile.Start("Compose")
+	// fmt.Println("start compose")
 	cp.Compose()
 	// pr.End()
-
-	w.flags.SetFlag(false, winIsRendering)
+	w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
 	w.renderMu.Unlock()
 }
 

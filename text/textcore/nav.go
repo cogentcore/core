@@ -30,14 +30,17 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 		ed.CursorPos = textpos.PosZero
 		return
 	}
-
-	ed.scopelightsReset()
+	oldPos := ed.CursorPos
 	ed.CursorPos = ed.Lines.ValidPos(pos)
+	if ed.CursorPos == oldPos {
+		return
+	}
+	ed.scopelightsReset()
 	bm, has := ed.Lines.BraceMatch(pos)
 	if has {
 		ed.addScopelights(pos, bm)
+		ed.NeedsRender()
 	}
-	ed.NeedsRender()
 }
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
@@ -55,7 +58,6 @@ func (ed *Base) SetCursorTarget(pos textpos.Pos) {
 	ed.isScrolling = false
 	ed.targetSet = true
 	ed.cursorTarget = pos
-	ed.NeedsRender()
 	if pos == textpos.PosErr {
 		ed.cursorEndDoc()
 		return

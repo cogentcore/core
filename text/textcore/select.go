@@ -31,7 +31,8 @@ func (ed *Base) HighlightsReset() {
 	ed.NeedsRender()
 }
 
-// scopelightsReset clears the scopelights slice of all regions
+// scopelightsReset clears the scopelights slice of all regions.
+// does needsrender if actually reset.
 func (ed *Base) scopelightsReset() {
 	if len(ed.scopelights) == 0 {
 		return

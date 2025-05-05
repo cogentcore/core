@@ -353,8 +353,8 @@ func (st *Stage) doUpdate() (stageMods, sceneMods bool) {
 	}
 	scMods := st.Scene.doUpdate()
 	sceneMods = sceneMods || scMods
-	// if scMods {
-	// 	fmt.Println("scene mod", st.Scene.Name)
+	// if stageMods || sceneMods {
+	// 	fmt.Println("scene mod", st.Scene.Name, stageMods, scMods)
 	// }
 	return
 }
