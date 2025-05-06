@@ -11,7 +11,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/jsx"
 )
 
 // WrapJS returns a JavaScript optimized wrapper around the given
@@ -82,11 +82,11 @@ type JSImageData struct {
 
 // setImageData sets the JavaScript pointers from given bytes.
 func (im *JSImageData) SetImageData(src []byte, sbb image.Rectangle, options map[string]any) {
-	jsBuf := wgpu.BytesToJS(src)
+	jsBuf := jsx.BytesToJS(src)
 	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
 	im.Data = imageData
 	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData, options)
-	imageBitmap, ok := wgpu.AwaitJS(imageBitmapPromise)
+	imageBitmap, ok := jsx.Await(imageBitmapPromise)
 	if ok {
 		im.Bitmap = imageBitmap
 	} else {

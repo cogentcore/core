@@ -36,12 +36,6 @@ type Text struct { //types:add
 	// the same height. The default of 1.3 represents standard "single spaced" text.
 	LineHeight float32 `default:"1.3"`
 
-	// ParaSpacing is the line spacing between paragraphs (inherited).
-	// This will be copied from [Style.Margin] if that is non-zero,
-	// or can be set directly. Like [LineHeight], this is a multiplier on
-	// the default font size.
-	ParaSpacing float32 `default:"1.5"`
-
 	// WhiteSpace (not inherited) specifies how white space is processed,
 	// and how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
@@ -50,9 +44,6 @@ type Text struct { //types:add
 	// Direction specifies the default text direction, which can be overridden if the
 	// unicode text is typically written in a different direction.
 	Direction rich.Directions
-
-	// Indent specifies how much to indent the first line in a paragraph (inherited).
-	Indent units.Value
 
 	// TabSize specifies the tab size, in number of characters (inherited).
 	TabSize int
@@ -68,7 +59,6 @@ func (ts *Text) Defaults() {
 	ts.Align = text.Start
 	ts.AlignV = text.Start
 	ts.LineHeight = 1.3
-	ts.ParaSpacing = 1.5
 	ts.Direction = rich.LTR
 	ts.TabSize = 4
 	ts.SelectColor = colors.Scheme.Select.Container
@@ -77,7 +67,6 @@ func (ts *Text) Defaults() {
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ts *Text) ToDots(uc *units.Context) {
-	ts.Indent.ToDots(uc)
 }
 
 // InheritFields from parent
@@ -85,10 +74,8 @@ func (ts *Text) InheritFields(parent *Text) {
 	ts.Align = parent.Align
 	ts.AlignV = parent.AlignV
 	ts.LineHeight = parent.LineHeight
-	ts.ParaSpacing = parent.ParaSpacing
 	// ts.WhiteSpace = par.WhiteSpace // note: we can't inherit this b/c label base default then gets overwritten
 	ts.Direction = parent.Direction
-	ts.Indent = parent.Indent
 	ts.TabSize = parent.TabSize
 	ts.SelectColor = parent.SelectColor
 	ts.HighlightColor = parent.HighlightColor
@@ -99,10 +86,8 @@ func (ts *Text) SetText(tsty *text.Style) {
 	tsty.Align = ts.Align
 	tsty.AlignV = ts.AlignV
 	tsty.LineHeight = ts.LineHeight
-	tsty.ParaSpacing = ts.ParaSpacing
 	tsty.WhiteSpace = ts.WhiteSpace
 	tsty.Direction = ts.Direction
-	tsty.Indent = ts.Indent
 	tsty.TabSize = ts.TabSize
 	tsty.SelectColor = ts.SelectColor
 	tsty.HighlightColor = ts.HighlightColor
