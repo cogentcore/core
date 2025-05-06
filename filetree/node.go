@@ -156,7 +156,7 @@ func (fn *Node) Init() {
 		if fn.IsDir() {
 			repo, rnode := fn.Repo()
 			if repo != nil && rnode.This == fn.This {
-				go rnode.updateRepoFiles()
+				rnode.updateRepoFiles()
 			}
 		} else {
 			fn.This.(Filer).GetFileInfo()
@@ -248,6 +248,10 @@ func (fn *Node) styleFromStatus() {
 	} else {
 		fn.Styles.Color = colors.Scheme.OnSurface
 	}
+	// if fn.Name == "test.go" {
+	// 	rep, err := fn.Repo()
+	// 	fmt.Println("style updt:", status, hex, rep != nil, err)
+	// }
 }
 
 // IsDir returns true if file is a directory (folder)
@@ -417,7 +421,6 @@ func (fn *Node) InitFileInfo() error {
 		} else {
 			rstat := rnode.DirRepo.StatusFast(string(fn.Filepath))
 			if rstat != fn.Info.VCS {
-				// fmt.Println("updated repo status:", fn.Filepath, rstat)
 				fn.Info.VCS = rstat
 				fn.NeedsRender()
 			}

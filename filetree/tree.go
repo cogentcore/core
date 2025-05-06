@@ -153,7 +153,6 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	ft.This.(Filer).GetFileInfo()
 	ft.Open()
 	ft.Update()
-	ft.GetAllVCSFiles()
 	return ft
 }
 

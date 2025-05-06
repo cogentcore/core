@@ -44,34 +44,6 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 	return repo, rnode
 }
 
-// GetAllVCSFiles calls Files() on all VCS repositories, and then calls
-// update when the files are updated.
-func (fn *Node) GetAllVCSFiles() {
-	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		sfn := AsNode(cw)
-		if sfn == nil {
-			return tree.Continue
-		}
-		if !sfn.IsDir() {
-			return tree.Continue
-		}
-		if sfn.DirRepo == nil {
-			if !sfn.detectVCSRepo() {
-				return tree.Continue
-			}
-		}
-		repo := sfn.DirRepo
-		repo.Files(func(f vcs.Files) {
-			fr := fn.FileRoot()
-			fr.AsyncLock()
-			fn.Update()
-			fr.AsyncUnlock()
-			fn.NeedsRender()
-		})
-		return tree.Break
-	})
-}
-
 // detectVCSRepo detects and configures DirRepo if this directory is root of
 // a VCS repository. returns true if a repository was newly found here.
 func (fn *Node) detectVCSRepo() bool {
@@ -132,7 +104,11 @@ func (fn *Node) updateRepoFiles() {
 	if fn.DirRepo == nil {
 		return
 	}
-	fn.DirRepo.Files(func(vcs.Files) { // need the func to make it work
+	fn.DirRepo.Files(func(f vcs.Files) { // need the func to make it work
+		fr := fn.FileRoot()
+		fr.AsyncLock()
+		fn.Update()
+		fr.AsyncUnlock()
 	})
 }
 
@@ -149,7 +125,6 @@ func (fn *Node) AddToVCS() {
 	if repo == nil {
 		return
 	}
-	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added

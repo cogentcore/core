@@ -119,11 +119,13 @@ func (gr *GitRepo) updateFiles(onUpdated func(f Files)) {
 
 	gr.Lock()
 	gr.files = f
-	gr.gettingFiles = false
 	gr.Unlock()
 	if onUpdated != nil {
 		onUpdated(f)
 	}
+	gr.Lock()
+	gr.gettingFiles = false
+	gr.Unlock()
 }
 
 func (gr *GitRepo) charToStat(stat byte) FileStatus {
@@ -176,7 +178,8 @@ func (gr *GitRepo) Status(fname string) (FileStatus, string) {
 
 // Add adds the file to the repo
 func (gr *GitRepo) Add(fname string) error {
-	out, err := gr.RunFromDir("git", "add", relPath(gr, fname))
+	fname = relPath(gr, fname)
+	out, err := gr.RunFromDir("git", "add", fname)
 	if err != nil {
 		log.Println(string(out))
 		return err
