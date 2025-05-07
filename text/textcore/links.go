@@ -38,7 +38,8 @@ func (ed *Base) OpenLinkAt(pos textpos.Pos) (*rich.Hyperlink, int) {
 		return nil, -1
 	}
 	ed.HighlightsReset()
-	ed.highlightLink(tl, ln)
+	reg := ed.highlightLink(tl, ln)
+	ed.SetCursorShow(reg.Start)
 	ed.openLink(tl)
 	return tl, pos.Line
 }
