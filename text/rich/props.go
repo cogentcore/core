@@ -120,7 +120,7 @@ var styleFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.FillColor = colors.ToUniform(errors.Log1(gradient.FromAny(val, cc)))
+		fs.SetFillColor(colors.ToUniform(errors.Log1(gradient.FromAny(val, cc))))
 	},
 	"stroke-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
@@ -132,7 +132,7 @@ var styleFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.StrokeColor = colors.ToUniform(errors.Log1(gradient.FromAny(val, cc)))
+		fs.SetStrokeColor(colors.ToUniform(errors.Log1(gradient.FromAny(val, cc))))
 	},
 	"background-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
@@ -144,7 +144,7 @@ var styleFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.Background = colors.ToUniform(errors.Log1(gradient.FromAny(val, cc)))
+		fs.SetBackground(colors.ToUniform(errors.Log1(gradient.FromAny(val, cc))))
 	},
 	"opacity": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)

@@ -121,11 +121,7 @@ func (s *Style) SetRichText(sty *rich.Style, tsty *text.Style) {
 		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
 		tsty.Color = clr
 	}
-	// not doing:
-	// if s.Background != nil {
-	// 	clr := colors.ApplyOpacity(colors.ToUniform(s.Background), s.Opacity)
-	// 	s.Font.SetBackground(clr)
-	// }
+	// note: no default background color here
 }
 
 // NewRichText sets the rich.Style and text.Style properties from the style props.

@@ -12,7 +12,7 @@ import (
 )
 
 func TestHTML(t *testing.T) {
-	src := `The <i>lazy</i> fox typed in some <span style="font-size:x-large;font-weight:bold">familiar</span> text`
+	src := `The <i>lazy</i> fox typed in some <span style="font-size:x-large;font-weight:bold">familiar</span> text with <span style="color:red;background-color:yellow">custom styling</span>`
 	tx, err := HTMLToRich([]byte(src), rich.NewStyle(), nil)
 	assert.NoError(t, err)
 
@@ -20,7 +20,9 @@ func TestHTML(t *testing.T) {
 [italic]: "lazy"
 []: " fox typed in some "
 [1.50x bold]: "familiar"
-[]: " text"
+[]: " text with "
+[fill-color background]: "custom styling"
+[]: ""
 `
 	// fmt.Println(tx.String())
 	assert.Equal(t, trg, tx.String())
