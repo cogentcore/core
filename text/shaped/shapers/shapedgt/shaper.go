@@ -154,7 +154,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		in.RunStart = start
 		in.RunEnd = end
 		in.Direction = shaped.GoTextDirection(sty.Direction, tsty)
-		fsz := math32.Round(tsty.FontSize.Dots * sty.Size)
+		fsz := tsty.FontHeight(sty)
 		in.Size = math32.ToFixed(fsz)
 		in.Script = rts.Script
 		in.Language = rts.Language
@@ -193,7 +193,7 @@ func (sh *Shaper) ShapeMath(sty *rich.Style, tsty *text.Style, stx []rune) *shap
 	if sty.Special == rich.MathDisplay {
 		mstr = "$" + mstr + "$"
 	}
-	p := errors.Log1(tex.TeXMath(mstr, tsty.FontSize.Dots*sty.Size))
+	p := errors.Log1(tex.TeXMath(mstr, tsty.FontHeight(sty)))
 	if p != nil {
 		bb := p.FastBounds()
 		bb.Max.X += 5 // extra space
