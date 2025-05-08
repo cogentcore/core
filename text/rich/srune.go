@@ -58,15 +58,15 @@ func (s *Style) FromRunes(rs []rune) []rune {
 	s.Size = math.Float32frombits(uint32(rs[1]))
 	ci := 2
 	if s.Decoration.HasFlag(FillColor) {
-		s.FillColor = ColorFromRune(rs[ci])
+		s.fillColor = ColorFromRune(rs[ci])
 		ci++
 	}
 	if s.Decoration.HasFlag(StrokeColor) {
-		s.StrokeColor = ColorFromRune(rs[ci])
+		s.strokeColor = ColorFromRune(rs[ci])
 		ci++
 	}
 	if s.Decoration.HasFlag(Background) {
-		s.Background = ColorFromRune(rs[ci])
+		s.background = ColorFromRune(rs[ci])
 		ci++
 	}
 	if s.Special == Link {
@@ -91,13 +91,13 @@ func (s *Style) ToRunes() []rune {
 		return rs
 	}
 	if s.Decoration.HasFlag(FillColor) {
-		rs = append(rs, ColorToRune(s.FillColor))
+		rs = append(rs, ColorToRune(s.fillColor))
 	}
 	if s.Decoration.HasFlag(StrokeColor) {
-		rs = append(rs, ColorToRune(s.StrokeColor))
+		rs = append(rs, ColorToRune(s.strokeColor))
 	}
 	if s.Decoration.HasFlag(Background) {
-		rs = append(rs, ColorToRune(s.Background))
+		rs = append(rs, ColorToRune(s.background))
 	}
 	if s.Special == Link {
 		rs = append(rs, rune(len(s.URL)))

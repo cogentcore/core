@@ -114,9 +114,9 @@ var styleFuncs = map[string]styleprops.Func{
 		fs := obj.(*Style)
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
-				fs.FillColor = parent.(*Style).FillColor
+				fs.SetFillColor(parent.(*Style).FillColor())
 			} else if init {
-				fs.FillColor = nil
+				fs.SetFillColor(nil)
 			}
 			return
 		}
@@ -126,9 +126,9 @@ var styleFuncs = map[string]styleprops.Func{
 		fs := obj.(*Style)
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
-				fs.StrokeColor = parent.(*Style).StrokeColor
+				fs.SetStrokeColor(parent.(*Style).StrokeColor())
 			} else if init {
-				fs.StrokeColor = nil
+				fs.SetStrokeColor(nil)
 			}
 			return
 		}
@@ -138,9 +138,9 @@ var styleFuncs = map[string]styleprops.Func{
 		fs := obj.(*Style)
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
-				fs.Background = parent.(*Style).Background
+				fs.SetBackground(parent.(*Style).Background())
 			} else if init {
-				fs.Background = nil
+				fs.SetBackground(nil)
 			}
 			return
 		}
@@ -153,14 +153,14 @@ var styleFuncs = map[string]styleprops.Func{
 		}
 		fv, _ := reflectx.ToFloat(val)
 		if fv < 1 {
-			if fs.Background != nil {
-				fs.Background = colors.ApplyOpacity(fs.Background, float32(fv))
+			if fs.background != nil {
+				fs.background = colors.ApplyOpacity(fs.background, float32(fv))
 			}
-			if fs.StrokeColor != nil {
-				fs.StrokeColor = colors.ApplyOpacity(fs.StrokeColor, float32(fv))
+			if fs.strokeColor != nil {
+				fs.strokeColor = colors.ApplyOpacity(fs.strokeColor, float32(fv))
 			}
-			if fs.FillColor != nil {
-				fs.FillColor = colors.ApplyOpacity(fs.FillColor, float32(fv))
+			if fs.fillColor != nil {
+				fs.fillColor = colors.ApplyOpacity(fs.fillColor, float32(fv))
 			}
 		}
 	},

@@ -57,20 +57,20 @@ type Style struct { //types:add
 	// Direction is the direction to render the text.
 	Direction Directions
 
-	// FillColor is the color to use for glyph fill (i.e., the standard "ink" color)
-	// if the Decoration FillColor flag is set. This will be encoded in a uint32 following
-	// the style rune, in rich.Text spans.
-	FillColor color.Color `set:"-"`
+	// fillColor is the color to use for glyph fill (i.e., the standard "ink" color).
+	// Must use SetFillColor to set Decoration FillColor flag.
+	// This will be encoded in a uint32 following the style rune, in rich.Text spans.
+	fillColor color.Color
 
-	// StrokeColor is the color to use for glyph outline stroking if the
-	// Decoration StrokeColor flag is set. This will be encoded in a uint32
-	// following the style rune, in rich.Text spans.
-	StrokeColor color.Color `set:"-"`
+	// strokeColor is the color to use for glyph outline stroking.
+	// Must use SetStrokeColor to set Decoration StrokeColor flag.
+	// This will be encoded in a uint32 following the style rune, in rich.Text spans.
+	strokeColor color.Color
 
-	// Background is the color to use for the background region if the Decoration
-	// Background flag is set. This will be encoded in a uint32 following the style rune,
-	// in rich.Text spans.
-	Background color.Color `set:"-"`
+	// background is the color to use for the background region.
+	// Must use SetBackground to set the Decoration Background flag.
+	// This will be encoded in a uint32 following the style rune, in rich.Text spans.
+	background color.Color `set:"-"`
 
 	// URL is the URL for a link element. It is encoded in runes after the style runes.
 	URL string
@@ -290,20 +290,17 @@ const (
 	// and therefore may be indented according to [text.Style] settings.
 	ParagraphStart
 
-	// FillColor means that the fill color of the glyph is set to FillColor,
-	// which encoded in the rune following the style rune, rather than the default.
+	// FillColor means that the fill color of the glyph is set.
 	// The standard font rendering uses this fill color (compare to StrokeColor).
 	FillColor
 
-	// StrokeColor means that the stroke color of the glyph is set to StrokeColor,
-	// which is encoded in the rune following the style rune. This is normally not rendered:
-	// it looks like an outline of the glyph at larger font sizes, it will
-	// make smaller font sizes look significantly thicker.
+	// StrokeColor means that the stroke color of the glyph is set.
+	// This is normally not rendered: it looks like an outline of the glyph at
+	// larger font sizes, and will make smaller font sizes look significantly thicker.
 	StrokeColor
 
-	// Background means that the background region behind the text is colored to
-	// Background, which is encoded in the rune following the style rune.
-	// The background is not normally colored.
+	// Background means that the background region behind the text is colored.
+	// The background is not normally colored so it renders over any background.
 	Background
 )
 
@@ -403,26 +400,33 @@ func (s *Style) SetDecoration(deco ...Decorations) *Style {
 	return s
 }
 
+func (s *Style) FillColor() color.Color   { return s.fillColor }
+func (s *Style) StrokeColor() color.Color { return s.strokeColor }
+func (s *Style) Background() color.Color  { return s.background }
+
 // SetFillColor sets the fill color to given color, setting the Decoration
 // flag and the color value.
 func (s *Style) SetFillColor(clr color.Color) *Style {
-	s.FillColor = clr
+	s.fillColor = clr
 	s.Decoration.SetFlag(clr != nil, FillColor)
 	return s
 }
 
 // SetStrokeColor sets the stroke color to given color, setting the Decoration
 // flag and the color value.
+// This is normally not set: it looks like an outline of the glyph at
+// larger font sizes, and will make smaller font sizes look significantly thicker.
 func (s *Style) SetStrokeColor(clr color.Color) *Style {
-	s.StrokeColor = clr
+	s.strokeColor = clr
 	s.Decoration.SetFlag(clr != nil, StrokeColor)
 	return s
 }
 
 // SetBackground sets the background color to given color, setting the Decoration
 // flag and the color value.
+// The background is not normally colored so it renders over any background.
 func (s *Style) SetBackground(clr color.Color) *Style {
-	s.Background = clr
+	s.background = clr
 	s.Decoration.SetFlag(clr != nil, Background)
 	return s
 }
