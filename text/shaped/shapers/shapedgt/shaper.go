@@ -154,7 +154,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		in.RunStart = start
 		in.RunEnd = end
 		in.Direction = shaped.GoTextDirection(sty.Direction, tsty)
-		fsz := tsty.FontSize.Dots * sty.Size
+		fsz := math32.Round(tsty.FontSize.Dots * sty.Size)
 		in.Size = math32.ToFixed(fsz)
 		in.Script = rts.Script
 		in.Language = rts.Language

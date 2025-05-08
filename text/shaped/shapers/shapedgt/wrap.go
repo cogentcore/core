@@ -39,6 +39,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
 
 	lht := tsty.LineHeightDots(defSty)
+	fmt.Println("lht:", lht)
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 	nlines := int(math32.Floor(size.Y/lht)) * 2
 	maxSize := int(size.X)
