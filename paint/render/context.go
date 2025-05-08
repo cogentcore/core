@@ -25,8 +25,6 @@ type Bounds struct {
 
 	// Path is the computed clipping path for the Rect and Radius.
 	Path ppath.Path
-
-	// todo: probably need an image here for text
 }
 
 func NewBounds(x, y, w, h float32, radius sides.Floats) *Bounds {

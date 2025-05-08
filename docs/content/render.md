@@ -2,11 +2,23 @@
 Categories = ["Architecture"]
 +++
 
-**Rendering** is the process of converting [[widget]]s into images uploaded to a window. This page documents low-level [[architecture]] details of rendering.
+**Rendering** is the process of converting [[widget]]s (or other sources, such as SVG) into images uploaded to a window. This page documents low-level [[architecture]] details of rendering.
 
-Almost all of rendering is pure Go and does **not** depend on a WebView or any other system APIs; instead, [[scene]]s are rendered to images using custom logic written in Go (see [[doc:paint]]). The rendered images are then combined as necessary before being uploaded to a window. Only at the final stage of uploading to the system window does Cogent Core using system APIs. Given that almost all of the rendering process is platform-independent, widgets look the same on all platforms.
+All rendering goes through the `Painter` object in the [[doc:paint]] package, which provides a standard set of drawing functions, operating on a `State` that has a stack of `Context` to provide context for these drawing functions (style, transform, bounds, clipping, and mask). Each of these drawing functions is recorded in a `Render` list of render `Item`s (see [[doc:render]]), which provides the intermediate representation of everything that needs to be rendered in a given render update pass. There are three basic types of render `Item`s:
 
-## Rendering logic
+* `Path` encodes all vector graphics operations, which ultimately reduce to only four fundamental drawing functions: `MoveTo`, `LineTo`, `QuadTo`, and `CubeTo`. We adapted the extensive [canvas](https://github.com/tdewolff/canvas) package's Path implementation, which also provides an `ArcTo` primitive that is then compiled down into a `QuadTo`.
+
+* `Text` encodes [[doc:shaped]] line(s) of text, which are most often rendered using automatically-cached images of rendered font glyph outlines (svg and bitmap representations are also supported).
+
+* `Image` drawing and related raster-based operations are supported by the [[doc:pimage]] package.
+
+This standardized intermediate representation of every rendering step then allows different platforms to actually render the resulting _rasterized_ result (what you actually see on the screen as pixels of different colors) using the most efficient rasterization mechanism for that platform. In addition, this internal representation has sufficient structure to generate `SVG` and `PDF` document outputs, which are typically more compact than a rasterized version, and critically allow further editing etc.
+
+On most platforms (desktop, mobile), the standard rasterization uses our version of the [rasterx](https://github.com/srwiley/rasterx) Go-based rasterizer, which extensive testing has determined to be significantly faster than other Go-based alternatives, and for most GUI rendering cases, is fast enough to not be a major factor in overall updating time. Nevertheless, we will eventually explore a WebGPU based implementation based on the highly optimized [vello](https://github.com/linebender/vello) framework in Rust.
+
+On the web browser (`js` platform), we take advantage of the standardized, typically GPU-optimized rendering provided by the html canvas element (see [[doc:htmlcanvas]]). This is significantly faster than earlier versions of Cogent Core that uploaded Go-rendered images, and provides a fluid rendering speed comparable to the desktop platform. This includes text rendering which requires a careful integration of Go and web-based mechanisms to perform internationalized text shaping (see [[doc:shapedjs]]).
+
+## Core Scene and Widget rendering logic
 
 At the highest level, rendering is made robust by having a completely separate, mutex lock-protected pass where all render-level updating takes place.  This render pass is triggered by [[doc:events.WindowPaint]] events that are sent regularly at 60 FPS (frames per second).  If nothing needs to be updated, nothing happens (which is the typical case for most frames), so it is not a significant additional cost.
 
