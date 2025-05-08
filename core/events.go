@@ -310,9 +310,15 @@ func (em *Events) handlePosEvent(e events.Event) {
 		if wb.StateIs(states.Disabled) && !sc.renderBBoxes {
 			continue
 		}
-
-		w.AsWidget().HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
-		if tree.IsNil(w) {          // died while handling
+		// everyone gets the primary event who is in scope, deepest first
+		if et == events.Scroll {
+			if wb.AbilityIs(abilities.ScrollableUnattended) || (wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+				w.AsWidget().HandleEvent(e)
+			}
+		} else {
+			w.AsWidget().HandleEvent(e)
+		}
+		if tree.IsNil(w) { // died while handling
 			continue
 		}
 		switch et {
