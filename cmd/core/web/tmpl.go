@@ -138,6 +138,7 @@ type indexHTMLData struct {
 	Title                  string
 	SiteName               string
 	Image                  string
+	Styles                 []string
 	VanityURL              string
 	GithubVanityRepository string
 	PreRenderHTML          string
@@ -164,6 +165,7 @@ func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPag
 		Title:                  prp.Name,
 		SiteName:               c.Name,
 		Image:                  c.Web.Image,
+		Styles:                 c.Web.Styles,
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
 		PreRenderHTML:          prp.HTML,
