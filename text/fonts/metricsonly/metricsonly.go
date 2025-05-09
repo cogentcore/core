@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Command metricsonly extracts font metrics from font files,
+// discarding all the glyph outlines and other data.
 package main
 
 import (
@@ -97,6 +99,6 @@ func Extract(c *Config) error {
 }
 
 func main() { //types:skip
-	opts := cli.DefaultOptions("metricsonly", "metricsonly extracts font metrics from font files, discarding all the glyph outline or other data.")
+	opts := cli.DefaultOptions("metricsonly", "metricsonly extracts font metrics from font files, discarding all the glyph outlines and other data.")
 	cli.Run(opts, &Config{}, Extract)
 }
