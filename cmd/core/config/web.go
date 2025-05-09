@@ -42,6 +42,10 @@ type Web struct { //types:add
 	// linking the app.
 	Image string
 
+	// Styles is a list of URLs to CSS stylesheets that are loaded in the HTML page.
+	// This is often used for custom fonts; see https://cogentcore.org/core/font.
+	Styles []string
+
 	// The interval between each app auto-update while running in a web browser.
 	// Zero or negative values deactivate the auto-update mechanism. The auto-update
 	// mechanism updates the WASM file for the app from the server if it has changed.
