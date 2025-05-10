@@ -22,7 +22,7 @@ import (
 // Icon renders an [icons.Icon].
 // The rendered version is cached for the current size.
 // Icons do not render a background or border independent of their SVG object.
-// The size of an Icon is determined by the [styles.Text.FontSize] property.
+// The size of an Icon is determined by the [styles.Font.Size] property.
 type Icon struct {
 	WidgetBase
 

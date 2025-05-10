@@ -847,8 +847,7 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 		cwb.dragStateReset()
 		return tree.Continue
 	})
-	em.scene.StyleTree()
-	em.scene.NeedsRender()
+	em.scene.Restyle()
 
 	if len(em.dragHovers) == 0 {
 		if DebugSettings.EventTrace {
@@ -1105,7 +1104,7 @@ func (em *Events) activateStartFocus() bool {
 	return true
 }
 
-// setAttended sets attended to given item, and returns true if attended changed.
+// setAttend sets attended to given item, and returns true if attended changed.
 // If item is nil, then nothing is attended.
 // This sends the [events.Attend] event to the widget.
 func (em *Events) setAttend(w Widget) bool {
