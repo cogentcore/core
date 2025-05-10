@@ -24,7 +24,8 @@ import (
 type Image struct {
 	WidgetBase
 
-	// Image is the [image.Image].
+	// Image is the [image.Image]. It should be set using [Image.SetImage]
+	// for performance reasons.
 	Image image.Image `xml:"-" json:"-" set:"-"`
 
 	// prevImage is the cached last [Image.Image].
@@ -56,9 +57,10 @@ func (im *Image) Init() {
 	})
 }
 
-// SetImage sets the image.
-func (im *Image) SetImage(si image.Image) {
+// SetImage sets the image. It uses [imagex.WrapJS] for faster web performance.
+func (im *Image) SetImage(si image.Image) *Image {
 	im.Image = imagex.WrapJS(si)
+	return im
 }
 
 // Open sets the image to the image located at the given filename.

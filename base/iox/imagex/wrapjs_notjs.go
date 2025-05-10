@@ -9,7 +9,7 @@ package imagex
 import "image"
 
 // WrapJS returns a JavaScript optimized wrapper around the given
-// [image.Image] on web, and just returns the image otherwise.
+// [image.Image] on web, and just returns the image on other platforms.
 func WrapJS(src image.Image) image.Image {
 	return src
 }
