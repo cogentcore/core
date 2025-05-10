@@ -6,7 +6,8 @@ package imagex
 
 import (
 	"image"
-	"image/draw"
+
+	"github.com/anthonynsimon/bild/clone"
 )
 
 // Wrapped extends the [image.Image] interface with two methods that manage
@@ -45,35 +46,15 @@ func Unwrap(src image.Image) image.Image {
 	return src
 }
 
-// CloneAsRGBA returns an RGBA copy of the supplied image.
-// Unwraps imagex.Wrapped wrapped images.
+// CloneAsRGBA returns an [*image.RGBA] copy of the supplied image.
+// It calls [Unwrap] first. See also [AsRGBA].
 func CloneAsRGBA(src image.Image) *image.RGBA {
-	ui := Unwrap(src)
-	if ui == nil {
-		return nil
-	}
-	bounds := ui.Bounds()
-	img := image.NewRGBA(bounds)
-	draw.Draw(img, bounds, ui, bounds.Min, draw.Src)
-	return img
+	return clone.AsRGBA(Unwrap(src))
 }
 
-// AsRGBA returns the image as an RGBA: if it already is one, then
+// AsRGBA returns the image as an [*image.RGBA]. If it already is one,
 // it returns that image directly. Otherwise it returns a clone.
-// Unwraps imagex.Wrapped wrapped images.
+// It calls [Unwrap] first. See also [CloneAsRGBA].
 func AsRGBA(src image.Image) *image.RGBA {
-	if src == nil {
-		return nil
-	}
-	ui := Unwrap(src)
-	if rgba, ok := ui.(*image.RGBA); ok {
-		return rgba
-	}
-	return CloneAsRGBA(ui)
+	return clone.AsShallowRGBA(Unwrap(src))
 }
-
-// note: defined in _js and _notjs:
-
-// WrapJS returns a JavaScript optimized wrapper around the given
-// image.Image on web platform, and just returns the image otherwise.
-// func WrapJS(src image.Image) image.Image
