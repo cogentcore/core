@@ -39,5 +39,5 @@ func Render(size int) (*image.RGBA, error) {
 	}
 
 	sv.Render()
-	return imagex.Unwrap(sv.RenderImage()).(*image.RGBA), nil
+	return imagex.AsRGBA(sv.RenderImage()), nil
 }
