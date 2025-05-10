@@ -7,7 +7,6 @@ package gpu
 import (
 	"image"
 
-	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 )
 
@@ -131,14 +130,4 @@ func SetTextureSRGBToLinear(img *image.RGBA) {
 		img.Pix[i+2] = ImgCompToUint8(bs)
 		img.Pix[i+3] = a
 	}
-}
-
-// ImageToRGBA returns image.RGBA version of given image
-// either because it already is one, or by converting it.
-func ImageToRGBA(img image.Image) *image.RGBA {
-	rimg, ok := img.(*image.RGBA)
-	if !ok {
-		rimg = imagex.CloneAsRGBA(img)
-	}
-	return rimg
 }

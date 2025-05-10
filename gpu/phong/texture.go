@@ -9,7 +9,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/base/iox/imagex"
 )
 
 // Texture has texture image and other params.
@@ -25,7 +25,7 @@ func NewTexture(img image.Image) *Texture {
 
 // Set sets texture from Go image.
 func (tx *Texture) Set(img image.Image) *Texture {
-	tx.Image = gpu.ImageToRGBA(img)
+	tx.Image = imagex.AsRGBA(img)
 	return tx
 }
 
