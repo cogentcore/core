@@ -15,7 +15,7 @@ import (
 )
 
 // WrapJS returns a JavaScript optimized wrapper around the given
-// image.Image on web platform, and just returns the image otherwise.
+// [image.Image] on web, and just returns the image otherwise.
 func WrapJS(src image.Image) image.Image {
 	if src == nil {
 		return src
@@ -34,15 +34,15 @@ func WrapJS(src image.Image) image.Image {
 	}
 }
 
-// JSRGBA is a wrapper around image.RGBA that adds JSImageData pointers.
-// It implements the imagex.Image wrapping interface.
+// JSRGBA is a wrapper around [image.RGBA] that adds [JSImageData] pointers.
+// It implements the [Wrapped] interface.
 type JSRGBA struct {
-	image.RGBA
+	*image.RGBA
 	JS JSImageData
 }
 
-// NewJSRGBA returns a new wrapped JSRGBA image from original source image.
-// If the source is already a wrapped JSRGBA image, it returns a shallow
+// NewJSRGBA returns a new [Wrapped] [JSRGBA] image from original source image.
+// If the source is already a wrapped [JSRGBA] image, it returns a shallow
 // copy of that original data, re-using the pixels and js pointers.
 // Returns nil if the source image is nil.
 func NewJSRGBA(src image.Image) *JSRGBA {
@@ -54,21 +54,19 @@ func NewJSRGBA(src image.Image) *JSRGBA {
 		*im = *x
 		return im
 	}
-	im.RGBA = *AsRGBA(src)
+	im.RGBA = AsRGBA(src)
 	im.Update()
 	return im
 }
 
 // Update must be called any time the image has been updated!
 func (im *JSRGBA) Update() {
-	im.JS.SetRGBA(&im.RGBA)
+	im.JS.SetRGBA(im.RGBA)
 }
 
 func (im *JSRGBA) Underlying() image.Image {
-	return &im.RGBA
+	return im.RGBA
 }
-
-//////// JSImageData
 
 // JSImageData has JavaScript pointers to the image bytes and an ImageBitmap
 // (gpu texture) of an image.
