@@ -183,11 +183,11 @@ var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4, 5}
 // renderWindowFlagsN is the highest valid value for type renderWindowFlags, plus one.
 const renderWindowFlagsN renderWindowFlags = 6
 
-var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`winIsRendering`: 0, `winRenderSkipped`: 1, `winResize`: 2, `winStopEventLoop`: 3, `winClosing`: 4, `winGotFocus`: 5}
+var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`IsRendering`: 0, `RenderSkipped`: 1, `Resize`: 2, `StopEventLoop`: 3, `Closing`: 4, `GotFocus`: 5}
 
 var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the renderAsync function is running.`, 1: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`, 2: `winResize indicates that the window was just resized.`, 3: `winStopEventLoop indicates that the event loop should be stopped.`, 4: `winClosing is whether the window is closing.`, 5: `winGotFocus indicates that have we received focus.`}
 
-var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `winIsRendering`, 1: `winRenderSkipped`, 2: `winResize`, 3: `winStopEventLoop`, 4: `winClosing`, 5: `winGotFocus`}
+var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `IsRendering`, 1: `RenderSkipped`, 2: `Resize`, 3: `StopEventLoop`, 4: `Closing`, 5: `GotFocus`}
 
 // String returns the string representation of this renderWindowFlags value.
 func (i renderWindowFlags) String() string { return enums.BitFlagString(i, _renderWindowFlagsValues) }

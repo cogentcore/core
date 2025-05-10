@@ -834,7 +834,7 @@ func (w *renderWindow) fillInsets() {
 
 // renderWindowFlags are atomic bit flags for [renderWindow] state.
 // They must be atomic to prevent race conditions.
-type renderWindowFlags int64 //enums:bitflag -trim-prefix scene
+type renderWindowFlags int64 //enums:bitflag -trim-prefix win
 
 const (
 	// winIsRendering indicates that the renderAsync function is running.
