@@ -84,7 +84,7 @@ func LMFontsLoad() {
 }
 
 // LMFonts are tex latin-modern fonts.
-var LMFonts = []fonts.FontData{
+var LMFonts = []fonts.Data{
 	{Family: "cmbsy", Data: lmmath.TTF},
 	{Family: "cmr17", Data: lmroman17regular.TTF},
 	{Family: "cmr12", Data: lmroman12regular.TTF},

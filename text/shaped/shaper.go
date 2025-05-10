@@ -37,7 +37,7 @@ type Shaper interface {
 	WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines
 
 	// FontFamilies returns a list of available font family names on this system.
-	FontList() []fonts.FontInfo
+	FontList() []fonts.Info
 }
 
 // WrapSizeEstimate is the size to use for layout during the SizeUp pass,

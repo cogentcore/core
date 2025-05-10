@@ -10,8 +10,8 @@ import (
 	"github.com/go-text/typesetting/font"
 )
 
-// FontStyle sets the [rich.Style] and [text.Style] for the given [font.Face].
-func FontStyle(face *font.Face, sty *rich.Style, tsty *text.Style) {
+// Style sets the [rich.Style] and [text.Style] for the given [font.Face].
+func Style(face *font.Face, sty *rich.Style, tsty *text.Style) {
 	if face == nil {
 		return
 	}

@@ -16,10 +16,10 @@ import (
 )
 
 // FontList returns the list of fonts that have been loaded.
-func (sh *Shaper) FontList() []fonts.FontInfo {
+func (sh *Shaper) FontList() []fonts.Info {
 	str := errors.Log1(os.UserCacheDir())
 	ft := errors.Log1(fontscan.SystemFonts(nil, str))
-	fi := make([]fonts.FontInfo, len(ft))
+	fi := make([]fonts.Info, len(ft))
 	for i := range ft {
 		fi[i].Family = ft[i].Family
 		as := ft[i].Aspect

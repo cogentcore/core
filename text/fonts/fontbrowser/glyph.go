@@ -99,7 +99,7 @@ func (gi *Glyph) Init() {
 		}
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Selectable)
 		sty, tsty := s.NewRichText()
-		fonts.FontStyle(gi.Browser.Font, sty, tsty)
+		fonts.Style(gi.Browser.Font, sty, tsty)
 	})
 	gi.OnClick(func(e events.Event) {
 		if gi.Stroke || gi.Browser == nil || gi.Browser.Font == nil {
