@@ -9,4 +9,4 @@ package fonts
 import "embed"
 
 //go:embed noto/*.ttf robotomono/*.ttf
-var DefaultFonts embed.FS
+var Default embed.FS

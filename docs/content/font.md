@@ -29,7 +29,7 @@ import (
 var MyFontName embed.FS
 
 func init() {
-    fonts.AddEmbeddedFonts(MyFontName)
+    fonts.AddEmbedded(MyFontName)
 }
 ```
 
@@ -91,6 +91,6 @@ import (
 var MyFontNameJS embed.FS
 
 func init() {
-    fonts.AddEmbeddedFonts(MyFontNameJS)
+    fonts.AddEmbedded(MyFontNameJS)
 }
 ```

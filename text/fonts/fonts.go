@@ -13,21 +13,24 @@ import (
 	"github.com/go-text/typesetting/fontscan"
 )
 
-// EmbeddedFonts are embedded filesystems to get fonts from. By default,
-// this includes a set of Roboto and Roboto Mono fonts. System fonts are
-// automatically supported. This is not relevant on web, which uses available
-// web fonts. Use [AddEmbeddedFonts] to add to this. This must be called before
-// [NewShaper] to have an effect.
-var EmbeddedFonts = []fs.FS{DefaultFonts}
+// Embedded are embedded filesystems to get fonts from. By default,
+// this includes a set of Noto Sans and Roboto Mono fonts. System fonts are
+// automatically supported separate from this. Use [AddEmbedded] to add
+// to this. This must be called before the text shaper is created to have an effect.
+//
+// On web, Embedded is only used for font metrics, as the actual font
+// rendering happens through web fonts. See https://cogentcore.org/core/font for
+// more information.
+var Embedded = []fs.FS{Default}
 
-// AddEmbeddedFonts adds to [EmbeddedFonts] for font loading.
-func AddEmbeddedFonts(fsys ...fs.FS) {
-	EmbeddedFonts = append(EmbeddedFonts, fsys...)
+// AddEmbedded adds to [Embedded] for font loading.
+func AddEmbedded(fsys ...fs.FS) {
+	Embedded = append(Embedded, fsys...)
 }
 
 // UseEmbeddedFonts uses the current EmbeddedFonts list in given map.
 func UseEmbeddedFonts(fontMap *fontscan.FontMap) error {
-	return AddFontsToMap(fontMap, EmbeddedFonts)
+	return AddFontsToMap(fontMap, Embedded)
 }
 
 // AddFontsToMap adds the fonts from given file systems to the given map.
