@@ -36,8 +36,10 @@ func init() {
 ### Web
 
 1. Find or make a CSS file that includes your font.
-    - If your font is available on [Google Fonts](https://fonts.google.com/), you can click on `Get font` from the font's page, and then click on `Get embed code`. In the `Web` section under `Embed code in the <head> of your html`, you can find the download URL for the font as the `href` attribute of the last `<link>` element. Copy that URL. It should look something like this: `https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap`
-    - If your font is not on Google Fonts, then you can make a CSS file with [@font-face](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face) to load the font. Host that CSS file on your website or somewhere else and then copy its URL (it can be relative or absolute).
+
+If your font is available on [Google Fonts](https://fonts.google.com/), you can click on `Get font` from the font's page, and then click on `Get embed code`. In the `Web` section under `Embed code in the &lt;head&gt; of your html`, you can find the download URL for the font as the `href` attribute of the last `&lt;link&gt;` element. Copy that URL. It should look something like this: `https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap`
+
+Otherwise, if your font is not on Google Fonts, you can make a CSS file with [font-face](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face) to load the font. Host that CSS file on your website or somewhere else and then copy its URL (it can be relative or absolute).
 
 2. If you don't already have one, make a `core.toml` file in your app directory.
 
@@ -48,7 +50,7 @@ func init() {
   Styles = ["the_url_that_you_copied_in_step_one"]
 ```
 
-#### Web metrics
+### Web metrics
 
 To get more accurate text layout on web for your custom font, you can embed the font metrics. This is not always necessary, and you only need to do this if your text is getting positioned strangely.
 
