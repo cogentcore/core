@@ -306,7 +306,7 @@ func (sc *Scene) contentSize(initSz image.Point) image.Point {
 // StartRender starts the rendering process in the Painter, if the
 // widget is visible, otherwise it returns false.
 // It pushes our context and bounds onto the render stack.
-// This must be called as the first step in Render implementations.
+// This must be called as the first step in [Widget.RenderWidget] implementations.
 func (wb *WidgetBase) StartRender() bool {
 	if wb == nil || wb.This == nil {
 		return false
@@ -336,7 +336,7 @@ func (wb *WidgetBase) StartRender() bool {
 	return true
 }
 
-// EndRender is the last step in Render implementations after
+// EndRender is the last step in [Widget.RenderWidget] implementations after
 // rendering children. It pops our state off of the render stack.
 func (wb *WidgetBase) EndRender() {
 	if wb == nil || wb.This == nil {
