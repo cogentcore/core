@@ -177,6 +177,7 @@ type Stage struct { //types:add -setters
 	// Pos is the default target position for the [Stage] to be placed within
 	// the surrounding window or screen in raw pixels. For a new window on desktop
 	// platforms, the automatically saved user previous window position takes precedence.
+	// For dialogs, this position is the target center position, not the upper-left corner.
 	Pos image.Point
 
 	// If a popup stage, this is the main stage that owns it (via its [Stage.popups]).
