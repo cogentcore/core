@@ -9,8 +9,8 @@ import (
 	"image/draw"
 )
 
-// Wrapped extends the image.Image interface with two methods that manage
-// the wrapping of an underlying Go image.Image. This can be used for images that
+// Wrapped extends the [image.Image] interface with two methods that manage
+// the wrapping of an underlying Go [image.Image]. This can be used for images that
 // are actually GPU textures, and to manage JavaScript pointers on the js platform.
 type Wrapped interface {
 	image.Image
@@ -23,22 +23,24 @@ type Wrapped interface {
 	// Underlying returns the underlying image.Image, which should
 	// be called whenever passing the image to some other Go-based
 	// function that is likely to be optimized for different image types,
-	// such as draw.Draw. Do NOT use this for functions that will
+	// such as [draw.Draw]. Do NOT use this for functions that will
 	// directly handle the wrapped image!
 	Underlying() image.Image
 }
 
-// Update calls Update on a wrapped [imagex.Wrapped] if it is one.
+// Update calls [Wrapped.Update] on a [Wrapped] if it is one.
+// It does nothing otherwise.
 func Update(src image.Image) {
-	if im, ok := src.(Wrapped); ok {
-		im.Update()
+	if wr, ok := src.(Wrapped); ok {
+		wr.Update()
 	}
 }
 
-// Unwrap calls Underlying on a wrapped [imagex.Wrapped] if it is one.
+// Unwrap calls [Wrapped.Underlying] on a [Wrapped] if it is one.
+// It returns the original image otherwise.
 func Unwrap(src image.Image) image.Image {
-	if im, ok := src.(Wrapped); ok {
-		return im.Underlying()
+	if wr, ok := src.(Wrapped); ok {
+		return wr.Underlying()
 	}
 	return src
 }
