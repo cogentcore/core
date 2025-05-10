@@ -224,9 +224,9 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 		// fmt.Printf("parsing file: %v\n", fnm)
 		// stt := time.Now()
 		pr.LexAll(fs)
-		// lxdur := time.Now().Sub(stt)
+		// lxdur := time.Since(stt)
 		pr.ParseAll(fs)
-		// prdur := time.Now().Sub(stt)
+		// prdur := time.Since(stt)
 		// if prdur > 500*time.Millisecond {
 		// 	fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
 		// }

@@ -151,7 +151,7 @@ func (v *Video) Play(width, height float32) error {
 			if v.Stop {
 				return
 			}
-			d := time.Now().Sub(start)
+			d := time.Since(start)
 			td := time.Duration(v.frameTarg) * spf
 			shouldStop := v.frameStop > 0 && v.frameTarg >= v.frameStop
 			if d > td && !shouldStop {

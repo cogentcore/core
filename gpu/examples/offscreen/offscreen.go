@@ -172,7 +172,7 @@ func main() {
 		drw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, false)
 		drw.End()
 
-		// fmt.Printf("present %v\n\n", time.Now().Sub(rt))
+		// fmt.Printf("present %v\n\n", time.Since(rt))
 		frameCount++
 		eTime := time.Now()
 		dur := float64(eTime.Sub(stTime)) / float64(time.Second)

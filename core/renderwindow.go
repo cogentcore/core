@@ -647,7 +647,7 @@ func (w *renderWindow) renderContext() *renderContext {
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
 	if w.flags.HasFlag(winIsRendering) { // still doing the last one
-		if time.Now().Sub(w.lastRenderSkip) > 2*time.Second {
+		if time.Since(w.lastRenderSkip) > 2*time.Second {
 			log.Println("render skip > 2 second, resetting!")
 			w.flags.SetFlag(false, winIsRendering)
 		}
@@ -660,7 +660,7 @@ func (w *renderWindow) renderWindow() {
 	}
 	w.lastRenderSkip = time.Now()
 
-	sinceResize := time.Now().Sub(w.lastResize)
+	sinceResize := time.Since(w.lastResize)
 	if sinceResize < 100*time.Millisecond {
 		w.flags.SetFlag(true, winRenderSkipped)
 		w.SystemWindow.Composer().Redraw()
@@ -687,7 +687,7 @@ func (w *renderWindow) renderWindow() {
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
 		} else {
-			// if time.Now().Sub(w.lastRender) > 2*time.Second {
+			// if time.Since(w.lastRender) > 2*time.Second {
 			// 	fmt.Print(".")
 			// } else {
 			return
