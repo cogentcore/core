@@ -61,7 +61,7 @@ func NewShaper() shaped.Shaper {
 		// errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	errors.Log(fonts.UseEmbeddedFonts(sh.fontMap))
+	errors.Log(fonts.UseEmbeddedInMap(sh.fontMap))
 	sh.shaper.SetFontCacheSize(32)
 
 	if !didDebug {
@@ -76,7 +76,7 @@ func NewShaper() shaped.Shaper {
 func NewShaperWithFonts(fss []fs.FS) shaped.Shaper {
 	sh := &Shaper{}
 	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
-	errors.Log(fonts.AddFontsToMap(sh.fontMap, fss))
+	errors.Log(fonts.UseInMap(sh.fontMap, fss))
 	sh.shaper.SetFontCacheSize(32)
 	return sh
 }

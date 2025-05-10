@@ -28,13 +28,13 @@ func AddEmbedded(fsys ...fs.FS) {
 	Embedded = append(Embedded, fsys...)
 }
 
-// UseEmbeddedFonts uses the current EmbeddedFonts list in given map.
-func UseEmbeddedFonts(fontMap *fontscan.FontMap) error {
-	return AddFontsToMap(fontMap, Embedded)
+// UseEmbeddedInMap adds the fonts from the current [Embedded] list to the given map.
+func UseEmbeddedInMap(fontMap *fontscan.FontMap) error {
+	return UseInMap(fontMap, Embedded)
 }
 
-// AddFontsToMap adds the fonts from given file systems to the given map.
-func AddFontsToMap(fontMap *fontscan.FontMap, fss []fs.FS) error {
+// UseInMap adds the fonts from given file systems to the given map.
+func UseInMap(fontMap *fontscan.FontMap, fss []fs.FS) error {
 	var errs []error
 	for _, fsys := range fss {
 		err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
