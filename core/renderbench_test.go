@@ -37,6 +37,18 @@ func BenchmarkTable(bm *testing.B) {
 			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
 	})
+	return // comment to do profile too
+	b.AssertRender(bm, "table/profile", func() {
+		w := b.Scene.RenderWindow()
+		// startCPUMemoryProfile()
+		startTargetedProfile()
+		for range 200 {
+			b.Scene.NeedsRender()
+			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
+		}
+		endTargetedProfile()
+		// endCPUMemoryProfile()
+	})
 }
 
 // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
@@ -56,40 +68,8 @@ func BenchmarkForm(bm *testing.B) {
 			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
 	})
-}
-
-// Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
-func TestProfileForm(t *testing.T) {
-	b := NewBody()
-	s := styles.NewStyle()
-	s.SetState(true, states.Active)
-	s.SetAbilities(true, abilities.Checkable)
-	NewForm(b).SetStruct(s)
-	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(1280), units.Dp(720))
-	})
-	b.AssertRender(t, "form/profile", func() {
-		w := b.Scene.RenderWindow()
-		// startCPUMemoryProfile()
-		startTargetedProfile()
-		for range 200 {
-			b.Scene.NeedsRender()
-			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
-		}
-		endTargetedProfile()
-		// endCPUMemoryProfile()
-	})
-}
-
-// Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
-func TestProfileTable(t *testing.T) {
-	b := NewBody()
-	table := make([]benchTableStruct, 50)
-	NewTable(b).SetSlice(&table)
-	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(1280), units.Dp(720))
-	})
-	b.AssertRender(t, "table/profile", func() {
+	return // comment to do profile too
+	b.AssertRender(bm, "form/profile", func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
 		startTargetedProfile()
