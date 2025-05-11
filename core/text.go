@@ -147,22 +147,18 @@ func (tx *Text) Init() {
 		case TextLabelLarge:
 			s.Text.LineHeight = 20.0 / 14
 			s.Font.Size.Dp(14)
-			// s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = rich.Medium
 		case TextLabelMedium:
 			s.Text.LineHeight = 16.0 / 12
 			s.Font.Size.Dp(12)
-			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Medium
 		case TextLabelSmall:
 			s.Text.LineHeight = 16.0 / 11
 			s.Font.Size.Dp(11)
-			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Medium
 		case TextBodyLarge:
 			s.Text.LineHeight = 24.0 / 16
 			s.Font.Size.Dp(16)
-			// s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = rich.Normal
 		case TextSupporting:
 			s.Color = colors.Scheme.OnSurfaceVariant
@@ -170,57 +166,46 @@ func (tx *Text) Init() {
 		case TextBodyMedium:
 			s.Text.LineHeight = 20.0 / 14
 			s.Font.Size.Dp(14)
-			// s.Text.LetterSpacing.Dp(0.25)
 			s.Font.Weight = rich.Normal
 		case TextBodySmall:
 			s.Text.LineHeight = 16.0 / 12
 			s.Font.Size.Dp(12)
-			// s.Text.LetterSpacing.Dp(0.4)
 			s.Font.Weight = rich.Normal
 		case TextTitleLarge:
 			s.Text.LineHeight = 28.0 / 22
 			s.Font.Size.Dp(22)
-			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextTitleMedium:
 			s.Text.LineHeight = 24.0 / 16
 			s.Font.Size.Dp(16)
-			// s.Text.LetterSpacing.Dp(0.15)
 			s.Font.Weight = rich.Bold
 		case TextTitleSmall:
 			s.Text.LineHeight = 20.0 / 14
 			s.Font.Size.Dp(14)
-			// s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = rich.Medium
 		case TextHeadlineLarge:
 			s.Text.LineHeight = 40.0 / 32
 			s.Font.Size.Dp(32)
-			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextHeadlineMedium:
 			s.Text.LineHeight = 36.0 / 28
 			s.Font.Size.Dp(28)
-			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextHeadlineSmall:
 			s.Text.LineHeight = 32.0 / 24
 			s.Font.Size.Dp(24)
-			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplayLarge:
-			s.Text.LineHeight = 70.0 / 57 // 64.0 / 57  64 not big enough! must be > 1.2
+			s.Text.LineHeight = 70.0 / 57
 			s.Font.Size.Dp(57)
-			// s.Text.LetterSpacing.Dp(-0.25)
 			s.Font.Weight = rich.Normal
 		case TextDisplayMedium:
 			s.Text.LineHeight = 52.0 / 45
 			s.Font.Size.Dp(45)
-			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		case TextDisplaySmall:
 			s.Text.LineHeight = 44.0 / 36
 			s.Font.Size.Dp(36)
-			// s.Text.LetterSpacing.Zero()
 			s.Font.Weight = rich.Normal
 		}
 	})
@@ -359,7 +344,7 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 }
 
 func (tx *Text) contextMenu(m *Scene) {
-	NewFuncButton(m).SetFunc(tx.copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetState(!tx.hasSelection(), states.Disabled)
+	NewFuncButton(m).SetFunc(tx.copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tx.hasSelection())
 }
 
 func (tx *Text) copy() { //types:add
