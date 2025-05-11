@@ -155,7 +155,7 @@ func (fr *Frame) Init() {
 		fr.focusOnName(e)
 	})
 	fr.On(events.Scroll, func(e events.Event) {
-		if fr.AbilityIs(abilities.ScrollableUnattended) || fr.StateIs(states.Focused) {
+		if fr.AbilityIs(abilities.ScrollableUnattended) || (fr.StateIs(states.Focused) || fr.StateIs(states.Attended)) {
 			fr.scrollDelta(e)
 		}
 	})
