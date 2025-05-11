@@ -52,7 +52,7 @@ type Frame struct {
 	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Scrolls are the scroll bars, which are fully managed as needed.
-	Scrolls [2]*Slider
+	Scrolls [2]*Slider `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// handleKeyNav indicates whether this frame should handle keyboard
 	// navigation events using the default handlers. Set to false to allow

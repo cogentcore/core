@@ -41,7 +41,7 @@ type Text struct {
 	Type TextTypes
 
 	// Links is the list of links in the text.
-	Links []rich.Hyperlink
+	Links []rich.Hyperlink `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// richText is the conversion of the HTML text source.
 	richText rich.Text
