@@ -11,8 +11,9 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/parse"
@@ -157,8 +158,7 @@ func (hs *Styles) SaveAll(dir fsx.Filename) {
 func (hs *Styles) OpenDefaults() error {
 	err := json.Unmarshal(defaults, hs)
 	if err != nil {
-		slog.Error(err.Error())
-		return err
+		return errors.Log(err)
 	}
 	return err
 }
@@ -171,7 +171,7 @@ func (hs *Styles) Names() []string {
 		nms[idx] = nm
 		idx++
 	}
-	sort.StringSlice(nms).Sort()
+	slices.Sort(nms)
 	return nms
 }
 
