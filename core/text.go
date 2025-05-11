@@ -463,9 +463,6 @@ func (tx *Text) SizeUp() {
 	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		sty, tsty := tx.Styles.NewRichText()
 		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), .5, sty, tsty)
-		// if DebugSettings.LayoutTrace {
-		// 	fmt.Println(tx, "Text SizeUp Estimate:", est)
-		// }
 		tx.configTextSize(est)
 	} else {
 		tx.configTextSize(sz.Actual.Content)
@@ -474,9 +471,6 @@ func (tx *Text) SizeUp() {
 		return
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
-	// if TheApp.Platform() == system.Web { // report more
-	// 	rsz.X *= 1.01
-	// }
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.setTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
