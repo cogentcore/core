@@ -162,11 +162,9 @@ func (wb *WidgetBase) Restyle() {
 // dots for rendering.
 // Zero values for element and parent size are ignored.
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
-	// rebuild := false
 	var rc *renderContext
 	sz := image.Point{1920, 1080}
 	if sc != nil {
-		// rebuild = sc.NeedsRebuild()
 		rc = sc.renderContext()
 		sz = sc.SceneGeom.Size
 	}
