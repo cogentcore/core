@@ -671,22 +671,16 @@ func (w *renderWindow) renderWindow() {
 	spriteMods := top.Sprites.IsModified()
 
 	if !spriteMods && !rebuild && !stageMods && !sceneMods { // nothing to do!
-		// log.Println("no mods") // note: get a ton of these..
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
 		} else {
-			// if time.Since(w.lastRender) > 2*time.Second {
-			// 	fmt.Print(".")
-			// } else {
 			return
-			// }
 		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
-		// log.Println("invisible", w)
 		return
 	}
 
