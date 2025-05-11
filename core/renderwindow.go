@@ -650,6 +650,8 @@ func (w *renderWindow) renderWindow() {
 
 	sinceResize := time.Since(w.lastResize)
 	if sinceResize < 100*time.Millisecond {
+		// get many rapid updates during resizing, so just rerender last one if so.
+		// this works best in practice after a lot of experimentation.
 		w.flags.SetFlag(true, winRenderSkipped)
 		w.SystemWindow.Composer().Redraw()
 		return
