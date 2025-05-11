@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,12 +32,12 @@ func TestNewValue(t *testing.T) {
 		{"slider", 0.4, `display:"slider"`},
 		{"enum", ButtonElevated, ""},
 		{"bitflag", states.States(0), ""},
-		// {"type", types.For[Button](), ""},
+		{"type", types.For[Button](), ""},
 		{"byte-slice", []byte("hello"), ""},
 		{"rune-slice", []rune("hello"), ""},
 		{"nil", (*int)(nil), ""},
 		{"icon", icons.Add, ""},
-		// {"font", AppearanceSettings.Font, ""}, // TODO(text):
+		{"font", AppearanceSettings.Text.SansSerif, ""},
 		{"file", Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},
 		{"option", option.New("an option"), ""},
