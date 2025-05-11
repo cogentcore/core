@@ -697,7 +697,6 @@ func (w *renderWindow) renderWindow() {
 		}
 		return
 	}
-	defer w.SystemWindow.Unlock()
 
 	// now we go in the proper bottom-up order to generate the [render.Scene]
 	cp := w.SystemWindow.Composer()
@@ -749,6 +748,7 @@ func (w *renderWindow) renderWindow() {
 	}
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
+	w.SystemWindow.Unlock() // re-acquired in renderAsync
 	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
 		w.flags.SetFlag(true, winIsRendering)
 		w.renderAsync(cp)
@@ -769,6 +769,10 @@ func (w *renderWindow) renderWindow() {
 // which must be called in a goroutine. It relies on the platform-specific
 // [renderWindow.doRender].
 func (w *renderWindow) renderAsync(cp composer.Composer) {
+	if !w.SystemWindow.Lock() {
+		return
+	}
+	defer w.SystemWindow.Unlock()
 	w.renderMu.Lock()
 	// pr := profile.Start("Compose")
 	// fmt.Println("start compose")
