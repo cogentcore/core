@@ -62,7 +62,7 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-You can specify different border properties for different sides of a widget (see the documentation for [[doc:sides.Sides.Set]]):
+You can specify different border properties for different sides of a widget (see the documentation for [[doc:styles/sides.Sides.Set]]):
 
 ```Go
 fr := core.NewFrame(b)
