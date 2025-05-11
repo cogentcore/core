@@ -45,6 +45,9 @@ func (t Trilean) Prefix(s string) string {
 	return ""
 }
 
+// TODO(go1.24): use omitzero instead of omitempty in [StyleEntry]
+// once we update to go1.24
+
 // StyleEntry is one value in the map of highlight style values
 type StyleEntry struct {
 
