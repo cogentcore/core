@@ -49,30 +49,30 @@ func (t Trilean) Prefix(s string) string {
 type StyleEntry struct {
 
 	// Color is the text color.
-	Color color.RGBA
+	Color color.RGBA `json:",omitempty"`
 
 	// Background color.
 	// In general it is not good to use this because it obscures highlighting.
-	Background color.RGBA
+	Background color.RGBA `json:",omitempty"`
 
 	// Border color? not sure what this is -- not really used.
-	Border color.RGBA `display:"-"`
+	Border color.RGBA `display:"-" json:",omitempty"`
 
 	// Bold font.
-	Bold Trilean
+	Bold Trilean `json:",omitempty"`
 
 	// Italic font.
-	Italic Trilean
+	Italic Trilean `json:",omitempty"`
 
 	// Underline.
-	Underline Trilean
+	Underline Trilean `json:",omitempty"`
 
 	// DottedUnderline
-	DottedUnderline Trilean
+	DottedUnderline Trilean `json:",omitempty"`
 
 	// NoInherit indicates to not inherit these settings from sub-category or category levels.
 	// Otherwise everything with a Pass is inherited.
-	NoInherit bool
+	NoInherit bool `json:",omitempty"`
 
 	// themeColor is the theme-adjusted text color.
 	themeColor color.RGBA
