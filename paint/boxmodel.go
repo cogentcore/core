@@ -17,7 +17,7 @@ import (
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, text fields, etc in a GUI.
 func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32.Vector2, pabg image.Image) {
-	if !st.RenderBox {
+	if !st.RenderBox || size == (math32.Vector2{}) {
 		return
 	}
 

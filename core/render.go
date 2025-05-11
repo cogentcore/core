@@ -173,7 +173,7 @@ func (wb *WidgetBase) doNeedsRender() {
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
-			cw.RenderWidget() // Top()
+			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
 		if ly := AsFrame(cw); ly != nil {
@@ -392,37 +392,6 @@ func (wb *WidgetBase) Render() {
 	wb.RenderStandardBox()
 }
 
-// RenderWidgetTop is called on the top widget in the tree that needs
-// to be rendered. It goes up to find a suitable parent widget to render.
-func (wb *WidgetBase) RenderWidgetTop() {
-	if wb == nil || wb.This == nil {
-		return
-	}
-	wb.setFlag(false, widgetNeedsRender) // done!
-	sz := math32.FromPoint(wb.Geom.TotalBBox.Size())
-	if sz == (math32.Vector2{}) {
-		// fmt.Println("nil size no render:", wb, sz)
-		return
-	}
-	// fmt.Println("\nstart:", wb, "sz:", sz)
-	prelThr := float32(1.3)
-	prev := wb
-	par := wb.parentWidget()
-	for par != nil {
-		psz := math32.FromPoint(par.Geom.TotalBBox.Size())
-		prel := psz.Div(sz)
-		prmax := min(prel.X, prel.Y)
-		// fmt.Println("par:", par, "prmax:", prmax)
-		if prmax > prelThr {
-			break
-		}
-		prev = par
-		par = par.parentWidget()
-	}
-	// fmt.Println("render prev:", prev)
-	prev.This.(Widget).RenderWidget()
-}
-
 // RenderWidget renders the widget and any parts and children that it has.
 // It does not render if the widget is invisible. It calls Widget.Render]
 // for widget-specific rendering.
@@ -504,9 +473,6 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	if sz == (math32.Vector2{}) {
-		return
-	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
@@ -514,9 +480,6 @@ func (wb *WidgetBase) RenderStandardBox() {
 func (wb *WidgetBase) RenderAllocBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Alloc.Total
-	if sz == (math32.Vector2{}) {
-		return
-	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
