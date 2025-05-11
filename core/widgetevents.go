@@ -595,15 +595,7 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	return plev >= 0
 }
 
-// SetAttend sets the keyboard input attend on this item or the first item within it
-// that can be attended (if none, then just sets attend to this widget).
-// This sends an [events.Attend] event, which typically results in
-// the widget being styled as attended. See [WidgetBase.SetAttendQuiet] for
-// a version that does not. Also see [WidgetBase.StartAttend].
-//
-// SetAttend only fully works for widgets that have already been shown, so for newly
-// created widgets, you should use [WidgetBase.StartAttend], or [WidgetBase.Defer] your
-// SetAttend call.
+// SetAttend sends [events.Attend] to this widget if it is pressable.
 func (wb *WidgetBase) SetAttend() {
 	if !wb.Styles.Abilities.IsPressable() {
 		return
