@@ -245,11 +245,11 @@ func homePage(ctx *htmlcore.Context) bool {
 		return w
 	}
 
-	makeBlock("CODE ONCE, RUN EVERYWHERE (CORE)", "With Cogent Core, you can write your app once and it will run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single Go codebase.", func(w *core.Icon) {
+	makeBlock("CODE ONCE, RUN EVERYWHERE (CORE)", "With Cogent Core, you can write your app once and it will run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in multiple languages, you can write and maintain a single Go codebase.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Devices)
 	})
 
-	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that doesn't get in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and three lines of simple code.", func(w *textcore.Editor) {
+	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with type safety and a robust design that doesn't get in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and three lines of simple code.", func(w *textcore.Editor) {
 		w.Lines.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
 core.NewButton(b).SetText("Hello, World!")
 b.RunMainWindow()`)
@@ -270,19 +270,19 @@ b.RunMainWindow()`)
 
 	})
 
-	makeBlock("POWERFUL FEATURES", "Cogent Core comes with a powerful set of features that allow you to make text editors, video players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for data binding and app inspection.", func(w *core.Icon) {
+	makeBlock("POWERFUL FEATURES", "Cogent Core supports text editors, video players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for data binding and app inspection.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.ScatterPlot)
 	})
 
-	makeBlock("OPTIMIZED EXPERIENCE", "Cogent Core has a set of editable interactive example-based documentation, video tutorials, command line tools specialized for Cogent Core, and support from the developers.", func(w *core.Icon) {
+	makeBlock("OPTIMIZED EXPERIENCE", "Cogent Core has editable, interactive, example-based documentation, video tutorials, command line tools, and support from the developers.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.PlayCircle)
 	})
 
-	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run at high speeds. All apps compile to machine code, allowing them to run without overhead.", func(w *core.Icon) {
+	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run at high speeds. Apps compile to machine code, allowing them to run without overhead.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Bolt)
 	})
 
-	makeBlock("FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally. We believe that software works best when everyone can use it.", func(w *core.Icon) {
+	makeBlock("FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Code)
 	})
 
@@ -294,11 +294,11 @@ b.RunMainWindow()`)
 		w.SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
 	})
 
-	makeBlock("COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
+	makeBlock("COGENT CODE", "Cogent Code is a Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "code-icon.svg"))
 	}, "https://cogentcore.org/cogent/code")
 
-	makeBlock("COGENT CANVAS", "Cogent Canvas is a powerful vector graphics editor with support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
+	makeBlock("COGENT CANVAS", "Cogent Canvas is a vector graphics editor with support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "canvas-icon.svg"))
 	}, "https://cogentcore.org/cogent/canvas")
 
@@ -333,7 +333,7 @@ b.RunMainWindow()`)
 		initIcon(w).SetIcon(icons.Problem)
 	})
 
-	makeBlock("THE SOLUTION", "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
+	makeBlock("THE SOLUTION", "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Lightbulb)
 	})
 
