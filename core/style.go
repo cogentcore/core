@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -92,7 +93,7 @@ func (wb *WidgetBase) resetStyleWidget() {
 	// which the developer can override in their stylers
 	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 	s.StateLayer = s.State.StateLayer()
-	// s.Font.Family = rich.SansSerif
+	s.Font.Family = rich.SansSerif
 }
 
 // runStylers runs the [WidgetBase.Stylers].
