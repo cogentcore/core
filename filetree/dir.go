@@ -107,7 +107,7 @@ func (dm *DirFlagMap) openPaths(root string) []string {
 	dm.init()
 	defer dm.Unlock()
 
-	paths := make([]string, 0, len(dm.Map))
+	var paths []string
 	for fn, df := range dm.Map {
 		if !df.HasFlag(dirIsOpen) {
 			continue
