@@ -102,12 +102,6 @@ type renderWindow struct {
 	// lastResize is the time stamp of last resize event -- used for efficient updating.
 	lastResize time.Time
 
-	// lastRenderSkip is the last time we skipped rendering. tracking weird bug..
-	lastRenderSkip time.Time
-
-	// lastRender is the last time we rendered the scene
-	lastRender time.Time
-
 	// renderMu is the mutex for rendering.
 	renderMu sync.Mutex
 }
@@ -647,18 +641,12 @@ func (w *renderWindow) renderContext() *renderContext {
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
 	if w.flags.HasFlag(winIsRendering) { // still doing the last one
-		if time.Since(w.lastRenderSkip) > 2*time.Second {
-			log.Println("render skip > 2 second, resetting!")
-			w.flags.SetFlag(false, winIsRendering)
-		}
-		w.lastRenderSkip = time.Now()
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
 		}
 		return
 	}
-	w.lastRenderSkip = time.Now()
 
 	sinceResize := time.Since(w.lastResize)
 	if sinceResize < 100*time.Millisecond {
@@ -701,7 +689,6 @@ func (w *renderWindow) renderWindow() {
 		// log.Println("invisible", w)
 		return
 	}
-	w.lastRender = time.Now()
 
 	if DebugSettings.WindowRenderTrace {
 		log.Println("RenderWindow: doing render:", w.name)
