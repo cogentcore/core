@@ -311,7 +311,7 @@ func (m Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
 	if Abs(m.YX) < 1.0e-7 && Abs(m.XY) < 1.0e-7 {
 		return m.XX, m.YY, Vector2{1.0, 0.0}, Vector2{0.0, 1.0}
 	}
-	//
+
 	lambda1, lambda2 := solveQuadraticFormula(1.0, -m.XX-m.YY, m.Det())
 	if IsNaN(lambda1) && IsNaN(lambda2) {
 		// either m.XX or m.YY is NaN or the the affine matrix has no real eigenvalues
@@ -319,7 +319,7 @@ func (m Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
 	} else if IsNaN(lambda2) {
 		lambda2 = lambda1
 	}
-	//
+
 	// see http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
 	var v1, v2 Vector2
 	if m.YX != 0 {
