@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/text/shaped"
 	. "cogentcore.org/core/text/shaped"
 	_ "cogentcore.org/core/text/shaped/shapers"
+	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
@@ -239,10 +240,12 @@ func TestLineCentering(t *testing.T) {
 
 func TestEmoji(t *testing.T) {
 	RunTest(t, "emoji", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		src := "😀"
+		// src := "the " + "🧁" + "cake ✌️"
+		// src := "the " + "🧁"
+		src := "🧁"
 		sty := rich.NewStyle()
 		sty.Family = rich.SansSerif
-		// rts.SansSerif = "Noto Color Emoji"
+		rts.SansSerif = "Noto Color Emoji"
 		sty.Size = 3
 		tx := rich.NewText(sty, []rune(src))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))

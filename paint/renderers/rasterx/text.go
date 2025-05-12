@@ -175,9 +175,9 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 				rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
 			}
 		case font.GlyphSVG:
-			fmt.Println("rasterx/text.go: svg font:", run.Face.Describe().Family, string(format.Source))
-			rs.GlyphOutline(ctx, run, g, format.Outline, fill, stroke, bb, pos, identity)
-			// 	_ = rs.GlyphSVG(ctx, g, format, fill, stroke, bb, pos)
+			// fmt.Println("rasterx/text.go: svg font:", run.Face.Describe().Family, string(format.Source))
+			rs.SVG(ctx, run, string(format.Source), bb, pos, identity)
+			// rs.GlyphOutline(ctx, run, g, format.Outline, fill, stroke, bb, pos, identity)
 		}
 		off.X += math32.FromFixed(g.XAdvance)
 		off.Y -= math32.FromFixed(g.YAdvance)
