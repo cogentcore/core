@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
@@ -52,10 +51,6 @@ type Text struct {
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
 	normalCursor cursors.Cursor
-
-	// after a long press or multiple clicks, this toggles to true,
-	// enabling slide actions to update selection instead of scrolling.
-	selectMode bool
 
 	// selectRange is the selected range.
 	selectRange textpos.Range
@@ -219,19 +214,6 @@ func (tx *Text) Init() {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
-		if e.HasAnyModifier(key.Shift, key.Meta, key.Alt) { // todo: not working
-			return // no reset
-		}
-		// fmt.Println(tx, "focus lost")
-		tx.setSelectMode(false)
-		tx.selectReset()
-	})
-	tx.OnSelect(func(e events.Event) {
-		if e.HasAnyModifier(key.Shift, key.Meta, key.Alt) {
-			return // no reset
-		}
-		// fmt.Println(tx, "select")
-		tx.setSelectMode(false)
 		tx.selectReset()
 	})
 	tx.OnKeyChord(func(e events.Event) {
@@ -253,23 +235,19 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.On(events.DoubleClick, func(e events.Event) {
-		tx.setSelectMode(true)
 		e.SetHandled()
 		tx.selectWord(tx.pixelToRune(e.Pos()))
 		tx.SetFocusQuiet()
 	})
 	tx.On(events.TripleClick, func(e events.Event) {
-		tx.setSelectMode(true)
 		e.SetHandled()
 		tx.selectAll()
 		tx.SetFocusQuiet()
 	})
-	tx.On(events.LongPressStart, func(e events.Event) {
-		tx.setSelectMode(true)
-	})
 	tx.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
 		tx.SetState(true, states.Sliding)
+		tx.SetFocusQuiet()
 		tx.selectRange.Start = tx.pixelToRune(e.Pos())
 		tx.selectRange.End = tx.selectRange.Start
 		tx.paintText.SelectReset()
@@ -377,12 +355,6 @@ func (tx *Text) selectUpdate(ri int) {
 	}
 	tx.paintText.SelectReset()
 	tx.paintText.SelectRegion(tx.selectRange)
-}
-
-// setSelectMode updates the select mode and restyles so behavior is updated.
-func (tx *Text) setSelectMode(selMode bool) {
-	tx.selectMode = selMode
-	tx.Style()
 }
 
 // hasSelection returns true if there is an active selection.
