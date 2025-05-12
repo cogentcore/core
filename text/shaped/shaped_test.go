@@ -5,6 +5,7 @@
 package shaped_test
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -72,9 +73,9 @@ func TestBasic(t *testing.T) {
 		pc.TextLines(lns, pos)
 		pc.RenderToImage()
 
-		assert.Equal(t, len(src), lns.RuneFromLinePos(textpos.Pos{3, 30}))
+		assert.Equal(t, len(sr), lns.RuneFromLinePos(textpos.Pos{3, 30}))
 
-		for ri, _ := range src {
+		for ri, _ := range sr {
 			lp := lns.RuneToLinePos(ri)
 			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
 
@@ -240,18 +241,38 @@ func TestLineCentering(t *testing.T) {
 
 func TestEmoji(t *testing.T) {
 	RunTest(t, "emoji", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		// src := "the " + "🧁" + "cake ✌️"
-		// src := "the " + "🧁"
-		src := "🧁"
-		// src :=
+		// src := "the \U0001F615\U0001F618\U0001F616 !!" // smileys
+		src := "the 🎁, !!"
 		sty := rich.NewStyle()
-		sty.Family = rich.SansSerif
-		rts.SansSerif = "Noto Color Emoji"
-		sty.Size = 3
+		// sty.Size = 3
+		// sty.Family = rich.Monospace
 		tx := rich.NewText(sty, []rune(src))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		// fmt.Println(lns)
 		pos := math32.Vec2(10, 10)
 		pc.TextLines(lns, pos)
+
+		sr := tx.Join() // as runes
+		for ri, _ := range sr {
+			lp := lns.RuneToLinePos(ri)
+			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
+
+			// fmt.Printf("\n####\t%d\t%q\n", ri, string(r))
+			gb := lns.RuneBounds(ri)
+			assert.NotEqual(t, gb, (math32.Box2{}))
+			if gb == (math32.Box2{}) {
+				break
+			}
+			gb = gb.Translate(pos)
+			cp := gb.Center()
+			cp.X += 1
+			si := lns.RuneAtPoint(cp, pos)
+			// fmt.Println(cp, si)
+			if ri != si {
+				fmt.Println(ri, si, gb, cp, lns.RuneBounds(si))
+			}
+			assert.Equal(t, ri, si)
+		}
 	})
 }
 

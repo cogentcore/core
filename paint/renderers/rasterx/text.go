@@ -6,12 +6,13 @@ package rasterx
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	_ "image/jpeg" // load image formats for users of the API
 	_ "image/png"
+
+	scale "golang.org/x/image/draw"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -155,10 +156,6 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
 		pos := off.Add(math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset)))
-		// top := yPos - math32.FromFixed(g.YBearing)
-		// bottom := top - math32.FromFixed(g.Height)
-		// right := xPos + math32.FromFixed(g.Width)
-		// rect := image.Rect(int(xPos)-4, int(top)-4, int(right)+4, int(bottom)+4) // don't cut off
 		bb := run.GlyphBoundsBox(g).Translate(off)
 		// rs.StrokeBounds(ctx, bb, colors.Yellow)
 
@@ -170,14 +167,10 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 			if format.Outline != nil {
 				rs.GlyphOutline(ctx, run, g, *format.Outline, fill, stroke, bb, pos, identity)
 			} else {
-				// note: on mac, the GB18030 Bitmap font was the only one in this category
-				fmt.Println("rasterx/text.go: bitmap font:", run.Face.Describe().Family)
 				rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
 			}
 		case font.GlyphSVG:
-			// fmt.Println("rasterx/text.go: svg font:", run.Face.Describe().Family, string(format.Source))
 			rs.GlyphSVG(ctx, run, g, string(format.Source), bb, pos, identity)
-			// rs.GlyphOutline(ctx, run, g, format.Outline, fill, stroke, bb, pos, identity)
 		}
 		off.X += math32.FromFixed(g.XAdvance)
 		off.Y -= math32.FromFixed(g.YAdvance)
@@ -272,11 +265,12 @@ func (rs *Renderer) GlyphMask(ctx *render.Context, run *shapedgt.Run, g *shaping
 }
 
 func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, identity bool) error {
-	// scaled glyph rect content
-	// todo: this needs serious work to function with transforms etc.
+	// todo: this needs serious work to function with transforms
 	x := pos.X
 	y := pos.Y
 	top := y - math32.FromFixed(g.YBearing)
+	bottom := top - math32.FromFixed(g.Height)
+	right := x + math32.FromFixed(g.Width)
 	switch bitmap.Format {
 	case font.BlackAndWhite:
 		rec := image.Rect(0, 0, bitmap.Width, bitmap.Height)
@@ -285,22 +279,20 @@ func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shapi
 		for i := range sub.Pix {
 			sub.Pix[i] = bitAt(bitmap.Data, i)
 		}
-		// todo: does it need scale? presumably not
-		// scale.NearestNeighbor.Scale(img, bb, sub, sub.Bounds(), int(top)}, draw.Over, nil)
-		draw.Draw(rs.image, sub.Bounds(), sub, image.Point{int(x), int(top)}, draw.Over)
+		rect := image.Rect(int(x), int(top), int(right), int(bottom))
+		// note: NearestNeighbor is better than bilinear
+		scale.NearestNeighbor.Scale(rs.image, rect, sub, sub.Bounds(), draw.Over, nil)
 	case font.JPG, font.PNG, font.TIFF:
-		fmt.Println("img")
-		// todo: how often?
 		pix, _, err := image.Decode(bytes.NewReader(bitmap.Data))
 		if err != nil {
 			return err
 		}
-		// scale.BiLinear.Scale(img, bb, pix, pix.Bounds(), draw.Over, nil)
-		draw.Draw(rs.image, pix.Bounds(), pix, image.Point{int(x), int(top)}, draw.Over)
+		rect := image.Rect(int(x), int(top), int(right), int(bottom))
+		scale.NearestNeighbor.Scale(rs.image, rect, pix, pix.Bounds(), draw.Over, nil)
 	}
-	// if bitmap.Outline != nil {
-	// 	rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)
-	// }
+	if bitmap.Outline != nil {
+		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)
+	}
 	return nil
 }
 

@@ -773,6 +773,7 @@ func (w *renderWindow) renderWindow() {
 // [renderWindow.doRender].
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	if !w.SystemWindow.Lock() {
+		w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
 		return
 	}
 	w.renderMu.Lock()

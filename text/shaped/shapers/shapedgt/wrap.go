@@ -103,6 +103,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 		maxLHt := lht
 		for oi := range lno {
 			out := &lno[oi]
+			FixOutputZeros(out)
 			if !dir.IsVertical() { // todo: vertical
 				maxAsc = max(out.LineBounds.Ascent, maxAsc)
 			}
@@ -158,8 +159,8 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 				llht := tsty.LineHeightDots(sty)
 				maxLHt = max(maxLHt, llht)
 				bb := math32.B2FromFixed(run.RunBounds().Add(pos))
-				// fmt.Println(bb.Size().Y, lht)
 				ln.Bounds.ExpandByBox(bb)
+				// fmt.Println("adv:", pos, run.Output.Advance, bb.Size().X)
 				pos = DirectionAdvance(run.Direction, pos, run.Output.Advance)
 			}
 			ln.Runs = append(ln.Runs, &run)

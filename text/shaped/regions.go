@@ -5,8 +5,6 @@
 package shaped
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/textpos"
 )
@@ -122,9 +120,8 @@ func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 	if ti >= n { // goto end
 		ln := ls.Lines[len(ls.Lines)-1]
 		off := start.Add(ln.Offset)
-		run := ln.Runs[len(ln.Runs)-1].AsBase()
-		ep := run.MaxBounds.Max.Add(off)
-		ep.Y = run.MaxBounds.Min.Y + off.Y
+		ep := ln.Bounds.Max.Add(off)
+		ep.Y = ln.Bounds.Min.Y + off.Y
 		return math32.Box2{ep, ep}
 	}
 	for li := range ls.Lines {
@@ -136,11 +133,6 @@ func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 		for ri := range ln.Runs {
 			run := ln.Runs[ri]
 			rr := run.Runes()
-			if ti < rr.Start { // space?
-				fmt.Println("early:", ti, rr.Start)
-				off.X += run.Advance()
-				continue
-			}
 			if ti >= rr.End {
 				off.X += run.Advance()
 				continue

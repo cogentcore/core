@@ -671,23 +671,30 @@ func (n *NodeBase) CopyFrom(from Node) {
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(to, from Node) {
-	fc := from.AsTree().Children
+	tot := to.AsTree()
+	fromt := from.AsTree()
+	fc := fromt.Children
 	if len(fc) == 0 {
-		to.AsTree().DeleteChildren()
+		tot.DeleteChildren()
 	} else {
 		p := make(TypePlan, len(fc))
 		for i, c := range fc {
 			p[i].Type = c.AsTree().NodeType()
 			p[i].Name = c.AsTree().Name
 		}
-		UpdateSlice(&to.AsTree().Children, to, p)
+		UpdateSlice(&tot.Children, to, p)
 	}
 
-	maps.Copy(to.AsTree().Properties, from.AsTree().Properties)
+	if fromt.Properties != nil {
+		if tot.Properties == nil {
+			tot.Properties = map[string]any{}
+		}
+		maps.Copy(tot.Properties, fromt.Properties)
+	}
 
-	to.AsTree().This.CopyFieldsFrom(from)
-	for i, kid := range to.AsTree().Children {
-		fmk := from.AsTree().Child(i)
+	tot.This.CopyFieldsFrom(from)
+	for i, kid := range tot.Children {
+		fmk := fromt.Child(i)
 		copyFrom(kid, fmk)
 	}
 }

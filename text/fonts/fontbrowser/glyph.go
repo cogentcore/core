@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/fonts"
+	"cogentcore.org/core/text/rich"
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
 )
@@ -122,6 +123,16 @@ func (gi *Glyph) Init() {
 	gi.SetDraw(gi.draw)
 }
 
+func (gi *Glyph) drawShaped(pc *paint.Painter) {
+	sty, tsty := gi.Styles.NewRichText()
+	fonts.Style(gi.Browser.Font, sty, tsty)
+	sz := gi.Geom.Size.Actual.Content
+	sty.Size = float32(sz.X) / tsty.FontSize.Dots
+	tx := rich.NewText(sty, []rune{gi.Rune})
+	lns := gi.Scene.TextShaper().WrapLines(tx, sty, tsty, &core.AppearanceSettings.Text, sz)
+	pc.TextLines(lns, gi.Geom.Pos.Content)
+}
+
 func (gi *Glyph) draw(pc *paint.Painter) {
 	if gi.Browser == nil || gi.Browser.Font == nil {
 		return
@@ -130,6 +141,7 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 	data := face.GlyphData(gi.GID)
 	gd, ok := data.(font.GlyphOutline)
 	if !ok {
+		gi.drawShaped(pc)
 		return
 	}
 	scale := 0.7 / float32(face.Upem())

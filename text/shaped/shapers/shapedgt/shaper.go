@@ -166,6 +166,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 				continue
 			}
 			o := sh.shaper.Shape(in)
+			FixOutputZeros(&o)
 			sh.outBuff = append(sh.outBuff, o)
 		}
 	}
@@ -235,4 +236,19 @@ func StyleToAspect(sty *rich.Style) font.Aspect {
 	as.Weight = font.Weight(sty.Weight.ToFloat32())
 	as.Stretch = font.Stretch(sty.Stretch.ToFloat32())
 	return as
+}
+
+// FixOutputZeros fixes zero values in output, which can happen with emojis.
+func FixOutputZeros(o *shaping.Output) {
+	for gi := range o.Glyphs {
+		g := &o.Glyphs[gi]
+		if g.Width == 0 {
+			// fmt.Println(gi, g.GlyphID, "fixed width:", g.XAdvance)
+			g.Width = g.XAdvance
+		}
+		if g.Height == 0 {
+			// fmt.Println(gi, "fixed height:", o.Size)
+			g.Height = o.Size
+		}
+	}
 }

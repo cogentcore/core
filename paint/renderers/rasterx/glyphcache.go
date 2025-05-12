@@ -91,7 +91,6 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 	// fmt.Println(face.Describe().Family, g.GlyphID, "wd, ht:", math32.FromFixed(g.Width), -math32.FromFixed(g.Height), "size:", size)
 	// fmt.Printf("g: %#v\n", g)
 
-	// note: we just ignore the XBearing -- it has no bearing on rendering..
 	pf := pos.Floor()
 	pi := pf.ToPoint().Sub(image.Point{glyphMaskBorder, glyphMaskBorder})
 	pi.X += g.XBearing.Round()
