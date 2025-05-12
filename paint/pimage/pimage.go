@@ -15,6 +15,7 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
+// Cmds are possible commands to perform for [Params].
 type Cmds int32 //enums:enum
 
 const (
