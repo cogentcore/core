@@ -447,13 +447,15 @@ func (pc *Painter) RoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h float32
 //////// Image drawing
 
 // FillBox performs an optimized fill of the given
-// rectangular region with the given image.
+// rectangular region with the given image. It is equivalent
+// to [Painter.DrawBox] with [draw.Over].
 func (pc *Painter) FillBox(pos, size math32.Vector2, img image.Image) {
 	pc.DrawBox(pos, size, img, draw.Over)
 }
 
 // BlitBox performs an optimized overwriting fill (blit) of the given
-// rectangular region with the given image.
+// rectangular region with the given image. It is equivalent
+// to [Painter.DrawBox] with [draw.Src].
 func (pc *Painter) BlitBox(pos, size math32.Vector2, img image.Image) {
 	pc.DrawBox(pos, size, img, draw.Src)
 }
