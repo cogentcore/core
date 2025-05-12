@@ -392,6 +392,10 @@ func (wb *WidgetBase) handleLongHoverTooltip() {
 	})
 
 	wb.On(events.LongPressStart, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
 		wb.Send(events.ContextMenu, e)
 		wi := wb.This.(Widget)
 		tt, pos := wi.WidgetTooltip(e.Pos())
@@ -402,6 +406,10 @@ func (wb *WidgetBase) handleLongHoverTooltip() {
 		newTooltip(wi, tt, pos).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
 		if wb.Scene.Stage != nil {
 			wb.Scene.Stage.popups.popDeleteType(TooltipStage)
 		}
