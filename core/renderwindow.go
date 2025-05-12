@@ -482,10 +482,13 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		ev := e.(*events.WindowEvent)
 		switch ev.Action {
 		case events.WinClose:
-			// fmt.Printf("got close event for window %v \n", w.Name)
-			e.SetHandled()
-			w.flags.SetFlag(true, winStopEventLoop)
-			w.closed()
+			if w.SystemWindow.Lock() {
+				// fmt.Printf("got close event for window %v \n", w.name)
+				e.SetHandled()
+				w.flags.SetFlag(true, winStopEventLoop)
+				w.closed()
+				w.SystemWindow.Unlock()
+			}
 		case events.WinMinimize:
 			e.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
@@ -697,7 +700,6 @@ func (w *renderWindow) renderWindow() {
 		}
 		return
 	}
-	defer w.SystemWindow.Unlock()
 
 	// now we go in the proper bottom-up order to generate the [render.Scene]
 	cp := w.SystemWindow.Composer()
@@ -749,6 +751,7 @@ func (w *renderWindow) renderWindow() {
 	}
 	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
 
+	w.SystemWindow.Unlock()
 	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
 		w.flags.SetFlag(true, winIsRendering)
 		w.renderAsync(cp)
@@ -769,6 +772,9 @@ func (w *renderWindow) renderWindow() {
 // which must be called in a goroutine. It relies on the platform-specific
 // [renderWindow.doRender].
 func (w *renderWindow) renderAsync(cp composer.Composer) {
+	if !w.SystemWindow.Lock() {
+		return
+	}
 	w.renderMu.Lock()
 	// pr := profile.Start("Compose")
 	// fmt.Println("start compose")
@@ -776,6 +782,7 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 	// pr.End()
 	w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
 	w.renderMu.Unlock()
+	w.SystemWindow.Unlock()
 }
 
 // RenderSource returns the [render.Render] state from the [Scene.Painter].
