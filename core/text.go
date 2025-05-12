@@ -298,6 +298,7 @@ func (tx *Text) updateRichText() {
 	} else {
 		tx.richText, _ = htmltext.HTMLToRich([]byte(tx.Text), sty, nil)
 	}
+	tx.Links = tx.richText.GetLinks()
 }
 
 // findLink finds the text link at the given scene-local position. If it
@@ -453,7 +454,6 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
 	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, rsz)
-	tx.Links = tx.paintText.Source.GetLinks()
 	return tx.paintText.Bounds.Size().Ceil()
 }
 
