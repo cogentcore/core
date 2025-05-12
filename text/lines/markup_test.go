@@ -24,27 +24,33 @@ func TestMarkup(t *testing.T) {
 	assert.Equal(t, src+"\n", lns.String())
 
 	mu0 := `[monospace bold fill-color]: "func"
-[monospace]: " ("
+[monospace]: " "
+[monospace]: "("
 [monospace]: "ls"
-[monospace fill-color]: " *"
+[monospace]: " "
+[monospace fill-color]: "*"
 [monospace]: "Lines"
 [monospace]: ")"
-[monospace]: " deleteTextRectImpl"
+[monospace]: " "
+[monospace]: "deleteTextRectImpl"
 [monospace]: "("
 [monospace]: "st"
 [monospace]: ","
 [monospace]: " "
 `
 	mu1 := `[monospace]: "ed"
-[monospace]: " textpos"
+[monospace]: " "
+[monospace]: "textpos"
 [monospace]: "."
 [monospace]: "Pos"
 [monospace]: ")"
-[monospace fill-color]: " *"
+[monospace]: " "
+[monospace fill-color]: "*"
 [monospace]: "textpos"
 [monospace]: "."
 [monospace]: "Edit"
-[monospace]: " {"
+[monospace]: " "
+[monospace]: "{"
 `
 	// fmt.Println(vw.markup[0])
 	assert.Equal(t, mu0, vw.markup[0].String())
@@ -186,24 +192,28 @@ func TestLineWrapSVG(t *testing.T) {
 	assert.Equal(t, src+"\n", lns.String())
 
 	tmu := []string{`[monospace fill-color]: "<svg"
-[monospace fill-color]: " xmlns="
+[monospace]: " "
+[monospace fill-color]: "xmlns="
 [monospace fill-color]: ""http://www.w3.org/2000/svg""
-[monospace fill-color]: " "
+[monospace]: " "
 `,
 
 		`[monospace fill-color]: "width="
 [monospace fill-color]: ""256""
-[monospace fill-color]: " height="
+[monospace]: " "
+[monospace fill-color]: "height="
 [monospace fill-color]: ""256""
-[monospace fill-color]: " viewBox="
+[monospace]: " "
+[monospace fill-color]: "viewBox="
 [monospace fill-color]: ""0 0 1 "
 `,
 
 		`[monospace fill-color]: "1""
 [monospace fill-color]: "><path"
-[monospace fill-color]: " d="
+[monospace]: " "
+[monospace fill-color]: "d="
 [monospace fill-color]: ""M.833.675a.35.35 0 1 1 0-.35""
-[monospace fill-color]: " "
+[monospace]: " "
 `,
 
 		`[monospace fill-color]: "style="
@@ -212,15 +222,17 @@ func TestLineWrapSVG(t *testing.T) {
 
 		`[monospace fill-color]: "none""
 [monospace fill-color]: "/><circle"
-[monospace fill-color]: " "
+[monospace]: " "
 `,
 		`[monospace fill-color]: "cx="
 [monospace fill-color]: "".53""
-[monospace fill-color]: " cy="
+[monospace]: " "
+[monospace fill-color]: "cy="
 [monospace fill-color]: "".5""
-[monospace fill-color]: " r="
+[monospace]: " "
+[monospace fill-color]: "r="
 [monospace fill-color]: "".23""
-[monospace fill-color]: " "
+[monospace]: " "
 `,
 		`[monospace fill-color]: "style="
 [monospace fill-color]: ""fill:#fbbd0e;stroke:none""
