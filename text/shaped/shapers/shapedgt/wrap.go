@@ -126,7 +126,7 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			cend := coff + rns.Len()
 			crsz := len(cr)
 			if coff >= crsz || cend > crsz {
-				fmt.Println("out of bounds:", string(cr), crsz, coff, cend)
+				// fmt.Println("out of bounds:", string(cr), crsz, coff, cend)
 				cend = min(crsz, cend)
 				coff = min(crsz, coff)
 			}

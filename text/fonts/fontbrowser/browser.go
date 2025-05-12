@@ -9,9 +9,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
-	"unicode"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/keylist"
@@ -108,16 +109,23 @@ func (fb *Browser) UpdateRuneMap() {
 	if fb.Font == nil {
 		return
 	}
-	for _, pr := range unicode.PrintRanges {
-		for _, rv := range pr.R16 {
-			for r := rv.Lo; r <= rv.Hi; r += rv.Stride {
-				gid, has := fb.Font.NominalGlyph(rune(r))
-				if !has {
-					continue
-				}
-				fb.RuneMap.Add(rune(r), gid)
-			}
+	// for _, pr := range unicode.PrintRanges {
+	// 	for _, rv := range pr.R16 {
+	// 		for r := rv.Lo; r <= rv.Hi; r += rv.Stride {
+	// 			gid, has := fb.Font.NominalGlyph(rune(r))
+	// 			if !has {
+	// 				continue
+	// 			}
+	// 			fb.RuneMap.Add(rune(r), gid)
+	// 		}
+	// 	}
+	// }
+	for r := rune(0); r < math.MaxInt16; r++ {
+		gid, has := fb.Font.NominalGlyph(r)
+		if !has {
+			continue
 		}
+		fb.RuneMap.Add(r, gid)
 	}
 }
 
@@ -172,6 +180,15 @@ func (fb *Browser) SelectGlyphID(gid opentype.GID) { //types:add
 	core.MessageSnackbar(fb, fmt.Sprintf("rune %s at index: %d GID: %d", r, ix, fb.RuneMap.Values[ix]))
 }
 
+// SaveUnicodes saves all the unicodes in hex format to a file called unicodes.md
+func (fb *Browser) SaveUnicodes() { //types:add
+	var b strings.Builder
+	for _, r := range fb.RuneMap.Keys {
+		b.WriteString(fmt.Sprintf("%X\n", r))
+	}
+	os.WriteFile("unicodes.md", []byte(b.String()), 0666)
+}
+
 func (fb *Browser) Init() {
 	fb.Frame.Init()
 	fb.Styler(func(s *styles.Style) {
@@ -214,5 +231,8 @@ func (fb *Browser) MakeToolbar(p *tree.Plan) {
 	})
 	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(fb.SelectGlyphID).SetIcon(icons.Select)
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(fb.SaveUnicodes).SetIcon(icons.Save)
 	})
 }
