@@ -129,12 +129,9 @@ func (tx *Text) Init() {
 	tx.AddContextMenu(tx.contextMenu)
 	tx.SetType(TextBodyLarge)
 	tx.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable)
+		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable, abilities.Slideable)
 		if len(tx.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
-		}
-		if tx.selectMode {
-			s.SetAbilities(true, abilities.Slideable)
 		}
 		if !tx.IsReadOnly() {
 			s.Cursor = cursors.Text
