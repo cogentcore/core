@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
-	"cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
@@ -177,6 +176,9 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 // map indexed by the span index.
 func (sh *Shaper) ShapeMaths(tx rich.Text, tsty *text.Style) {
 	sh.maths = make(map[int]*shaped.Math)
+	if shaped.ShapeMath == nil {
+		return
+	}
 	for si, _ := range tx {
 		sty, stx := tx.Span(si)
 		if sty.IsMath() {
@@ -189,11 +191,14 @@ func (sh *Shaper) ShapeMaths(tx rich.Text, tsty *text.Style) {
 
 // ShapeMath runs tex math to get path for math special
 func (sh *Shaper) ShapeMath(sty *rich.Style, tsty *text.Style, stx []rune) *shaped.Math {
+	if shaped.ShapeMath == nil {
+		return nil
+	}
 	mstr := string(stx)
 	if sty.Special == rich.MathDisplay {
 		mstr = "$" + mstr + "$"
 	}
-	p := errors.Log1(tex.TeXMath(mstr, tsty.FontHeight(sty)))
+	p := errors.Log1(shaped.ShapeMath(mstr, tsty.FontHeight(sty)))
 	if p != nil {
 		bb := p.FastBounds()
 		bb.Max.X += 5 // extra space

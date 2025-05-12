@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore"
+	_ "cogentcore.org/core/text/tex" // include this to get math
 )
 
 //go:embed example.md

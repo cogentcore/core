@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/text/shaped"
 	"star-tex.org/x/tex"
 )
 
@@ -24,6 +25,10 @@ var (
 \def\frac#1#2{{{#1}\over{#2}}}
 `
 )
+
+func init() {
+	shaped.ShapeMath = TeXMath
+}
 
 // TeXMath parses a plain TeX math expression and returns a path
 // rendering that expression. This is NOT LaTeX and only \frac is defined

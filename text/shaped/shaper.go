@@ -6,6 +6,7 @@ package shaped
 
 import (
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -14,8 +15,17 @@ import (
 
 //go:generate core generate
 
-// NewShaper returns the correct type of shaper.
-var NewShaper func() Shaper
+var (
+	// NewShaper returns the correct type of shaper.
+	NewShaper func() Shaper
+
+	// ShapeMath is a function that returns a path representing the
+	// given math expression, in TeX syntax.
+	// Import _ cogentcore.org/core/text/tex to set this function
+	// (incurs a significant additional memory footprint due to fonts
+	// and other packages).
+	ShapeMath func(expr string, fontHeight float32) (*ppath.Path, error)
+)
 
 // Shaper is a text shaping system that can shape the layout of [rich.Text],
 // including line wrapping. All functions are protected by a mutex.
