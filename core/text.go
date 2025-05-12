@@ -258,6 +258,11 @@ func (tx *Text) Init() {
 		tx.selectUpdate(tx.pixelToRune(e.Pos()))
 		tx.NeedsRender()
 	})
+	tx.On(events.SlideStop, func(e events.Event) {
+		if TheApp.SystemPlatform().IsMobile() {
+			tx.Send(events.ContextMenu, e)
+		}
+	})
 
 	tx.FinalUpdater(func() {
 		tx.updateRichText()
