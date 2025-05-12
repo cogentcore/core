@@ -160,14 +160,22 @@ func (fr *Frame) Init() {
 		}
 	})
 	var prevMove events.Event
-	// We treat slide events on frames as scroll events.
+	// We treat slide events on frames as scroll events on mobile.
 	fr.On(events.SlideMove, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
 		prevMove = e
 		// We must negate the delta for "natural" scrolling behavior.
 		del := math32.FromPoint(e.PrevDelta()).Negate()
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
 		// If we have enough instantaneous velocity, we continue scrolling
 		// in an animation while slowly decelerating for a
 		// smoother experience.
