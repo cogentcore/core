@@ -78,7 +78,10 @@ func (fr *Frame) Init() {
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
-			s.SetAbilities(true, abilities.Scrollable, abilities.Slideable)
+			s.SetAbilities(true, abilities.Scrollable)
+			if TheApp.SystemPlatform().IsMobile() {
+				s.SetAbilities(true, abilities.Slideable)
+			}
 		}
 	})
 	fr.OnFinal(events.KeyChord, func(e events.Event) {
