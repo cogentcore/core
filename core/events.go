@@ -337,7 +337,9 @@ func (em *Events) handlePosEvent(e events.Event) {
 				dragPress = w
 			}
 			if tree.IsNil(slidePress) && wb.AbilityIs(abilities.Slideable) {
-				if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+				// On mobile, sliding results in scrolling, so we must have the appropriate
+				// scrolling attention to allow sliding.
+				if TheApp.SystemPlatform().IsMobile() && !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
 					continue
 				}
 				slidePress = w
