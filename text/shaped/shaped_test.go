@@ -243,6 +243,7 @@ func TestEmoji(t *testing.T) {
 		// src := "the " + "🧁" + "cake ✌️"
 		// src := "the " + "🧁"
 		src := "🧁"
+		// src :=
 		sty := rich.NewStyle()
 		sty.Family = rich.SansSerif
 		rts.SansSerif = "Noto Color Emoji"

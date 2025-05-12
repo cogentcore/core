@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -125,13 +126,13 @@ func (pc *Painter) RenderDone() render.Render {
 // if it is the first one in Renderers. Returns the image, which is also
 // available via the RenderImage method.
 func (pc *Painter) RenderToImage() image.Image {
-	rd := pc.ImageRenderer()
-	if rd == nil {
+	if len(pc.Renderers) == 0 {
 		return nil
 	}
+	rd := pc.Renderers[0]
 	rend := pc.RenderDone()
 	rd.Render(rend)
-	return pc.RenderImage()
+	return imagex.WrapJS(rd.Image())
 }
 
 //////// basic shape functions

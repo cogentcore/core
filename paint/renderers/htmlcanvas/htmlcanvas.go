@@ -54,6 +54,9 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	// rs.ctx.Set("imageSmoothingQuality", "high")
 }
 
+// todo: could return wrapped JS image grabbed from canvas.
+func (rs *Renderer) Image() image.Image { return nil }
+
 func (rs *Renderer) SetCanvas(c js.Value) {
 	rs.Canvas = c
 	rs.ctx = rs.Canvas.Call("getContext", "2d", "alpha", "true")

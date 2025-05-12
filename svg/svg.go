@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/render"
-	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"

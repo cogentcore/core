@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -23,6 +22,10 @@ var (
 	// for [Painter] source content, for the current platform.
 	// This is created first for Source painters.
 	NewSourceRenderer func(size math32.Vector2) render.Renderer
+
+	// NewImageRenderer returns the renderer for [Painter] image content,
+	// which is used for generating images locally in Go regardless of platform.
+	NewImageRenderer func(size math32.Vector2) render.Renderer
 )
 
 // The State holds all the current rendering state information used
@@ -46,15 +49,15 @@ type State struct {
 }
 
 // InitImageRender initializes the [State] and ensures that there is
-// a [rasterx.Renderer] that rasterizes [Painter] items to a
-// Go [image.RGBA].
+// an image renderer that rasterizes [Painter] items to a Go [image.RGBA]
+// (defaults to [rasterx.Renderer]).
 // If renderers exist, then the size is updated for the first one
 // (no cost if same size). This must be called whenever the image size changes.
 func (rs *State) InitImageRender(sty *styles.Paint, width, height int) {
 	sz := math32.Vec2(float32(width), float32(height))
 	bounds := render.NewBounds(0, 0, float32(width), float32(height), sides.Floats{})
 	if len(rs.Renderers) == 0 {
-		rd := rasterx.New(sz)
+		rd := NewImageRenderer(sz)
 		rs.Renderers = append(rs.Renderers, rd)
 		rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
 		return
@@ -87,28 +90,15 @@ func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
 }
 
-// ImageRenderer returns the [rasterx.Renderer] image rasterizer if it is
-// the first renderer, or nil.
-func (rs *State) ImageRenderer() render.Renderer {
+// RenderImage returns the image.Image from the first [Image] renderer
+// if present, else nil.
+func (rs *State) RenderImage() image.Image {
 	if len(rs.Renderers) == 0 {
 		return nil
 	}
-	rd, ok := rs.Renderers[0].(*rasterx.Renderer)
-	if !ok {
-		return nil
-	}
-	return rd
-}
-
-// RenderImage returns the imagex.Image from the first [Image] renderer
-// if present, else nil.
-func (rs *State) RenderImage() image.Image {
-	rd := rs.ImageRenderer()
-	if rd == nil {
-		return nil
-	}
+	rd := rs.Renderers[0]
 	// todo: this could be a pure platform-side image (e.g., all on JS or GPU)
-	return imagex.WrapJS(rd.(*rasterx.Renderer).Image())
+	return imagex.WrapJS(rd.Image())
 }
 
 // PushContext pushes a new [render.Context] onto the stack using given styles and bounds.

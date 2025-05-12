@@ -176,7 +176,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 			}
 		case font.GlyphSVG:
 			// fmt.Println("rasterx/text.go: svg font:", run.Face.Describe().Family, string(format.Source))
-			rs.SVG(ctx, run, string(format.Source), bb, pos, identity)
+			rs.GlyphSVG(ctx, run, g, string(format.Source), bb, pos, identity)
 			// rs.GlyphOutline(ctx, run, g, format.Outline, fill, stroke, bb, pos, identity)
 		}
 		off.X += math32.FromFixed(g.XAdvance)

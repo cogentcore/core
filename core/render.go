@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
+	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )

@@ -14,4 +14,5 @@ import (
 
 func init() {
 	paint.NewSourceRenderer = rasterx.New
+	paint.NewImageRenderer = rasterx.New
 }

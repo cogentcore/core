@@ -9,9 +9,11 @@ package renderers
 import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
+	"cogentcore.org/core/paint/renderers/rasterx"
 	_ "cogentcore.org/core/text/shaped/shapers"
 )
 
 func init() {
 	paint.NewSourceRenderer = htmlcanvas.New
+	paint.NewImageRenderer = rasterx.New
 }

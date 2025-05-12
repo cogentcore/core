@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package svg
+package svg_test
 
 import (
 	"fmt"
@@ -15,6 +15,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/math32"
+	_ "cogentcore.org/core/paint/renderers" // installs default renderer
+	. "cogentcore.org/core/svg"
 	"github.com/stretchr/testify/assert"
 )
 

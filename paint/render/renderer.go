@@ -5,6 +5,8 @@
 package render
 
 import (
+	"image"
+
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 )
@@ -26,6 +28,10 @@ type Renderer interface {
 	// This is used for resizing [Image] and [Draw] renderers when
 	// the relevant Scene size changes.
 	SetSize(un units.Units, size math32.Vector2)
+
+	// Image returns the rendered image after rendering.
+	// If nil, then images are not supported by this renderer.
+	Image() image.Image
 }
 
 // Registry of renderers

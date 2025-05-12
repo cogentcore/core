@@ -40,7 +40,7 @@ func New(size math32.Vector2) render.Renderer {
 	return rs
 }
 
-func (rs *Renderer) Image() *image.RGBA { return rs.image }
+func (rs *Renderer) Image() image.Image { return rs.image }
 func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 	return units.UnitDot, rs.size
 }

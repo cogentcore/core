@@ -5,52 +5,43 @@
 package rasterx
 
 import (
-	"strings"
+	"bytes"
+	"image"
+	"image/draw"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
+	"cogentcore.org/core/svg"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
+	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/shaping"
 )
 
-func (rs *Renderer) SVG(ctx *render.Context, run *shapedgt.Run, svgCmds string, bb math32.Box2, pos math32.Vector2, identity bool) {
-	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
-	tx := ctx.Transform.Scale(scale, scale)
-	paths := strings.Split(svgCmds, "<path d=")
-	for i, p := range paths {
-		if i == 0 {
-			continue
-		}
-		d := p[1:]
-		eq := strings.LastIndex(d, `"`)
-		d = d[:eq]
-		eq = strings.LastIndex(d, `"`)
-		fill := ""
-		if eq > 0 {
-			fill = d[eq+1:]
-			d = d[:eq]
-			eq = strings.LastIndex(d, `"`)
-			d = d[:eq]
-			fi := strings.Index(fill, `fill="`)
-			if fi >= 0 {
-				fill = fill[fi+6:]
-			}
-			// fmt.Println("path d=\n", d, "\nfill=", fill)
-		}
-		pp, _ := ppath.ParseSVGPath(d)
-		rs.Path.Clear()
-		PathToRasterx(&rs.Path, pp, tx, pos)
-		rs.Path.Stop(true)
-		rf := &rs.Raster.Filler
-		rf.SetWinding(true)
-		clr := errors.Log1(colors.FromHex(fill[1:]))
-		rf.SetColor(colors.Uniform(clr))
-		rs.Path.AddTo(rf)
-		rf.Draw()
-		rf.Clear()
-	}
+var svgGlyphs map[font.GID]*svg.SVG
 
-	rs.Path.Clear()
+func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, svgCmds string, bb math32.Box2, pos math32.Vector2, identity bool) {
+	if svgGlyphs == nil {
+		svgGlyphs = make(map[font.GID]*svg.SVG)
+	}
+	size := run.Size.Floor()
+	scale := math32.FromFixed(run.Size) / float32(run.Face.Upem())
+	top := pos.Y - math32.FromFixed(g.YBearing)
+	sv, ok := svgGlyphs[g.GlyphID]
+	if !ok {
+		sv = svg.NewSVG(size, size)
+		b := bytes.NewBufferString(svgCmds)
+		err := sv.ReadXML(b)
+		errors.Log(err)
+		sv.Scale = scale
+		sv.Render()
+		svgGlyphs[g.GlyphID] = sv
+	}
+	if sv.Geom.Size.X != size || sv.Scale != scale {
+		sv.Resize(image.Point{size, size})
+		sv.Scale = scale
+		sv.Render()
+	}
+	img := sv.RenderImage()
+	draw.Draw(rs.image, img.Bounds(), img, image.Point{int(pos.X), int(top)}, draw.Over)
 }
