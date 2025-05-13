@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/styles/styleprops"
 )
 
-// StyleFromProperties sets style field values based on the given property list.
-func (s *Style) StyleFromProperties(parent *Style, properties map[string]any, ctxt colors.Context) {
+// FromProperties sets style field values based on the given property list.
+func (s *Style) FromProperties(parent *Style, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -22,12 +22,12 @@ func (s *Style) StyleFromProperties(parent *Style, properties map[string]any, ct
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		s.StyleFromProperty(parent, key, val, ctxt)
+		s.FromProperty(parent, key, val, ctxt)
 	}
 }
 
-// StyleFromProperty sets style field values based on the given property key and value.
-func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.Context) {
+// FromProperty sets style field values based on the given property key and value.
+func (s *Style) FromProperty(parent *Style, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFuncs[key]; ok {
 		if parent != nil {
 			sfunc(s, key, val, parent, cc)

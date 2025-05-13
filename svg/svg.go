@@ -303,6 +303,12 @@ func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
 	// todo:
 	// pc.Font.SetUnitContext(&pc.UnitContext)
 	pc.ToDots()
+	sv.ToDots(&pc.UnitContext)
+}
+
+func (sv *SVG) ToDots(uc *units.Context) {
+	sv.PhysicalWidth.ToDots(uc)
+	sv.PhysicalHeight.ToDots(uc)
 }
 
 func (g *Root) Render(sv *SVG) {

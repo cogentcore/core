@@ -70,13 +70,20 @@ func (pc *Path) CopyStyleFrom(cp *Path) {
 	pc.VectorEffect = cp.VectorEffect
 }
 
-// SetStyleProperties sets path values based on given property map (name: value
+// SetProperties sets path values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Path) SetStyleProperties(parent *Path, properties map[string]any, ctxt colors.Context) {
-	pc.styleFromProperties(parent, properties, ctxt)
+func (pc *Path) SetProperties(parent *Path, properties map[string]any, ctxt colors.Context) {
+	pc.fromProperties(parent, properties, ctxt)
 	pc.PropertiesNil = (len(properties) == 0)
 	pc.StyleSet = true
+}
+
+// GetProperties gets properties values from current style settings,
+// for any non-default settings, setting name-value pairs in given map,
+// which must be non-nil.
+func (pc *Path) GetProperties(properties map[string]any) {
+	pc.toProperties(properties)
 }
 
 func (pc *Path) FromStyle(st *Style) {
@@ -130,7 +137,7 @@ func (fs *Fill) ToDots(uc *units.Context) {
 
 // IMPORTANT: any changes here must be updated below in StyleStrokeFuncs
 
-// Stroke contains all the properties for painting a line
+// Stroke contains all the properties for painting a line.
 type Stroke struct {
 
 	// stroke color image specification; stroking is off if nil

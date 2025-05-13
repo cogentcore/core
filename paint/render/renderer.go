@@ -32,6 +32,11 @@ type Renderer interface {
 	// Image returns the rendered image after rendering.
 	// If nil, then images are not supported by this renderer.
 	Image() image.Image
+
+	// Source returns the document source code representation
+	// of the rendering output. This is supported by e.g., SVG
+	// and PDF renderers.
+	Source() []byte
 }
 
 // Registry of renderers

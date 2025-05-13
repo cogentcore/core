@@ -58,17 +58,24 @@ func (pc *Paint) InheritFields(parent *Paint) {
 	pc.Text.InheritFields(&parent.Text)
 }
 
-// SetStyleProperties sets paint values based on given property map (name: value
+// SetProperties sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProperties(parent *Paint, properties map[string]any, ctxt colors.Context) {
+func (pc *Paint) SetProperties(parent *Paint, properties map[string]any, ctxt colors.Context) {
 	if !pc.StyleSet && parent != nil { // first time
 		pc.InheritFields(parent)
 	}
-	pc.styleFromProperties(parent, properties, ctxt)
+	pc.fromProperties(parent, properties, ctxt)
 
 	pc.PropertiesNil = (len(properties) == 0)
 	pc.StyleSet = true
+}
+
+// GetProperties gets properties values from current style settings,
+// for any non-default settings, setting name-value pairs in given map,
+// which must be non-nil.
+func (pc *Paint) GetProperties(properties map[string]any) {
+	pc.toProperties(properties)
 }
 
 func (pc *Paint) FromStyle(st *Style) {

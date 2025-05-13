@@ -181,14 +181,14 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 							if cssProps != nil {
 								clnm := "." + vl
 								if aggp, ok := SubProperties(clnm, cssProps); ok {
-									fs.StyleFromProperties(nil, aggp, nil)
+									fs.FromProperties(nil, aggp, nil)
 								}
 							}
 						default:
 							sprop[nm] = vl
 						}
 					}
-					fs.StyleFromProperties(nil, sprop, nil)
+					fs.FromProperties(nil, sprop, nil)
 				}
 				if cssProps != nil {
 					FontStyleCSS(fs, stag, cssProps)

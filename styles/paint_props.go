@@ -22,10 +22,10 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
-/////// see style_properties.go for master version
+/////// see style_props.go for master version
 
-// styleFromProperties sets style field values based on map[string]any properties
-func (pc *Path) styleFromProperties(parent *Path, properties map[string]any, cc colors.Context) {
+// fromProperties sets style field values based on map[string]any properties
+func (pc *Path) fromProperties(parent *Path, properties map[string]any, cc colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -76,8 +76,8 @@ func (pc *Path) styleFromProperties(parent *Path, properties map[string]any, cc 
 	}
 }
 
-// styleFromProperties sets style field values based on map[string]any properties
-func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
+// fromProperties sets style field values based on map[string]any properties
+func (pc *Paint) fromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
 	var ppath *Path
 	var pfont *rich.Style
 	var ptext *text.Style
@@ -86,9 +86,9 @@ func (pc *Paint) styleFromProperties(parent *Paint, properties map[string]any, c
 		pfont = &parent.Font
 		ptext = &parent.Text
 	}
-	pc.Path.styleFromProperties(ppath, properties, cc)
-	pc.Font.StyleFromProperties(pfont, properties, cc)
-	pc.Text.StyleFromProperties(ptext, properties, cc)
+	pc.Path.fromProperties(ppath, properties, cc)
+	pc.Font.FromProperties(pfont, properties, cc)
+	pc.Text.FromProperties(ptext, properties, cc)
 	for key, val := range properties {
 		_ = val
 		if len(key) == 0 {
@@ -217,4 +217,68 @@ func parseDashesString(str string) []float32 {
 		dl[i] = float32(d)
 	}
 	return dl
+}
+
+////////  ToProperties
+
+// toProperties sets map[string]any properties based on non-default style values.
+// properties map must be non-nil.
+func (pc *Path) toProperties(p map[string]any) {
+	if !pc.Display {
+		p["display"] = "none"
+		return
+	}
+	pc.Stroke.toProperties(p)
+	pc.Fill.toProperties(p)
+}
+
+// toProperties sets map[string]any properties based on non-default style values.
+// properties map must be non-nil.
+func (pc *Paint) toProperties(p map[string]any) {
+	pc.Path.toProperties(p)
+	if !pc.Display {
+		return
+	}
+	// font, text
+}
+
+// toProperties sets map[string]any properties based on non-default style values.
+// properties map must be non-nil.
+func (pc *Stroke) toProperties(p map[string]any) {
+	if pc.Color == nil {
+		return
+	}
+	// todo: gradients!
+	p["stroke"] = colors.AsHex(colors.ToUniform(pc.Color))
+	if pc.Opacity != 1 {
+		p["stroke-opacity"] = reflectx.ToString(pc.Opacity)
+	}
+	if pc.Width.Unit != units.UnitDp || pc.Width.Value != 1 {
+		p["stroke-width"] = pc.Width.StringCSS()
+	}
+	if pc.MinWidth.Unit != units.UnitDp || pc.MinWidth.Value != 1 {
+		p["stroke-min-width"] = pc.MinWidth.StringCSS()
+	}
+	// todo: dashes
+	if pc.Cap != ppath.CapButt {
+		p["stroke-linecap"] = pc.Cap.String()
+	}
+	if pc.Join != ppath.JoinMiter {
+		p["stroke-linecap"] = pc.Cap.String()
+	}
+}
+
+// toProperties sets map[string]any properties based on non-default style values.
+// properties map must be non-nil.
+func (pc *Fill) toProperties(p map[string]any) {
+	if pc.Color == nil {
+		return
+	}
+	p["fill"] = colors.AsHex(colors.ToUniform(pc.Color))
+	if pc.Opacity != 1 {
+		p["fill-opacity"] = reflectx.ToString(pc.Opacity)
+	}
+	if pc.Rule != ppath.NonZero {
+		p["fill-rule"] = pc.Rule.String()
+	}
 }

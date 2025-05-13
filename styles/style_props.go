@@ -18,16 +18,16 @@ import (
 
 // These functions set styles from map[string]any which are used for styling
 
-// StyleFromProperty sets style field values based on the given property key and value
-func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.Context) {
+// FromProperty sets style field values based on the given property key and value
+func (s *Style) FromProperty(parent *Style, key string, val any, cc colors.Context) {
 	var pfont *Font
 	var ptext *Text
 	if parent != nil {
 		pfont = &parent.Font
 		ptext = &parent.Text
 	}
-	s.Font.StyleFromProperty(pfont, key, val, cc)
-	s.Text.StyleFromProperty(ptext, key, val, cc)
+	s.Font.FromProperty(pfont, key, val, cc)
+	s.Text.FromProperty(ptext, key, val, cc)
 	if sfunc, ok := styleLayoutFuncs[key]; ok {
 		if parent != nil {
 			sfunc(s, key, val, parent, cc)
@@ -361,8 +361,8 @@ var styleShadowFuncs = map[string]styleprops.Func{
 
 //////// Font
 
-// StyleFromProperties sets style field values based on the given property list.
-func (s *Font) StyleFromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
+// FromProperties sets style field values based on the given property list.
+func (s *Font) FromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -370,12 +370,12 @@ func (s *Font) StyleFromProperties(parent *Font, properties map[string]any, ctxt
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		s.StyleFromProperty(parent, key, val, ctxt)
+		s.FromProperty(parent, key, val, ctxt)
 	}
 }
 
-// StyleFromProperty sets style field values based on the given property key and value.
-func (s *Font) StyleFromProperty(parent *Font, key string, val any, cc colors.Context) {
+// FromProperty sets style field values based on the given property key and value.
+func (s *Font) FromProperty(parent *Font, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFontFuncs[key]; ok {
 		if parent != nil {
 			sfunc(s, key, val, parent, cc)
@@ -476,8 +476,8 @@ var styleFontFuncs = map[string]styleprops.Func{
 	},
 }
 
-// StyleFromProperties sets style field values based on the given property list.
-func (s *Text) StyleFromProperties(parent *Text, properties map[string]any, ctxt colors.Context) {
+// FromProperties sets style field values based on the given property list.
+func (s *Text) FromProperties(parent *Text, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -485,12 +485,12 @@ func (s *Text) StyleFromProperties(parent *Text, properties map[string]any, ctxt
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		s.StyleFromProperty(parent, key, val, ctxt)
+		s.FromProperty(parent, key, val, ctxt)
 	}
 }
 
-// StyleFromProperty sets style field values based on the given property key and value.
-func (s *Text) StyleFromProperty(parent *Text, key string, val any, cc colors.Context) {
+// FromProperty sets style field values based on the given property key and value.
+func (s *Text) FromProperty(parent *Text, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFuncs[key]; ok {
 		if parent != nil {
 			sfunc(s, key, val, parent, cc)

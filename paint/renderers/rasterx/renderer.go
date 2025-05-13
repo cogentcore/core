@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
+// Renderer is the rasterx renderer.
 type Renderer struct {
 	size  math32.Vector2
 	image *image.RGBA
@@ -41,6 +42,8 @@ func New(size math32.Vector2) render.Renderer {
 }
 
 func (rs *Renderer) Image() image.Image { return rs.image }
+func (rs *Renderer) Source() []byte     { return nil }
+
 func (rs *Renderer) Size() (units.Units, math32.Vector2) {
 	return units.UnitDot, rs.size
 }

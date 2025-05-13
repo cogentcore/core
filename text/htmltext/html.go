@@ -132,14 +132,14 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 						if cssProps != nil {
 							clnm := "." + attr.Value
 							if aggp, ok := SubProperties(clnm, cssProps); ok {
-								fs.StyleFromProperties(nil, aggp, nil)
+								fs.FromProperties(nil, aggp, nil)
 							}
 						}
 					default:
 						sprop[attr.Name.Local] = attr.Value
 					}
 				}
-				fs.StyleFromProperties(nil, sprop, nil)
+				fs.FromProperties(nil, sprop, nil)
 			}
 			if cssProps != nil {
 				FontStyleCSS(fs, nm, cssProps)
@@ -236,6 +236,6 @@ func FontStyleCSS(fs *rich.Style, tag string, cssProps map[string]any) bool {
 	if !ok {
 		return false
 	}
-	fs.StyleFromProperties(nil, pmap, nil)
+	fs.FromProperties(nil, pmap, nil)
 	return true
 }

@@ -320,9 +320,9 @@ func (g *NodeBase) Style(sv *SVG) {
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.AsNodeBase().PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProperties(pp, g.Properties, ctxt)
+		pc.SetProperties(pp, g.Properties, ctxt)
 	} else {
-		pc.SetStyleProperties(nil, g.Properties, ctxt)
+		pc.SetProperties(nil, g.Properties, ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -361,9 +361,9 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	ctxt := colors.Context(sv)
 	if g.Parent != sv.Root.This {
 		pp := g.Parent.(Node).AsNodeBase().PaintStyle()
-		pc.SetStyleProperties(pp, pmap, ctxt)
+		pc.SetProperties(pp, pmap, ctxt)
 	} else {
-		pc.SetStyleProperties(nil, pmap, ctxt)
+		pc.SetProperties(nil, pmap, ctxt)
 	}
 	return true
 }

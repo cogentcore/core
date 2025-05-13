@@ -6,6 +6,8 @@ package paint_test
 
 import (
 	"image"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -30,9 +32,17 @@ import (
 // function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)) {
 	pc := NewPainter(width, height)
+	sv := pc.AddSVGRenderer(width, height)
 	f(pc)
-	pc.RenderToImage()
+	rend := pc.RenderDone()
+	pc.Renderers[0].Render(rend)
+	sv.Render(rend)
 	imagex.Assert(t, pc.RenderImage(), nm)
+	svdir := filepath.Join("testdata", "svg")
+	os.MkdirAll(svdir, 0777)
+	svfnm := filepath.Join(svdir, nm) + ".svg"
+	err := os.WriteFile(svfnm, sv.Source(), 0666)
+	assert.NoError(t, err)
 }
 
 func TestRender(t *testing.T) {

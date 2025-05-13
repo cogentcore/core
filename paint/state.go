@@ -19,13 +19,17 @@ import (
 
 var (
 	// NewSourceRenderer returns the [composer.Source] renderer
-	// for [Painter] source content, for the current platform.
+	// for [Painter] rendering, for the current platform.
 	// This is created first for Source painters.
 	NewSourceRenderer func(size math32.Vector2) render.Renderer
 
-	// NewImageRenderer returns the renderer for [Painter] image content,
-	// which is used for generating images locally in Go regardless of platform.
+	// NewImageRenderer returns a painter renderer for generating
+	// images locally in Go regardless of platform.
 	NewImageRenderer func(size math32.Vector2) render.Renderer
+
+	// NewSVGRenderer returns a structured SVG renderer that can
+	// generate an SVG vector graphics document from painter content.
+	NewSVGRenderer func(size math32.Vector2) render.Renderer
 )
 
 // The State holds all the current rendering state information used
@@ -85,6 +89,14 @@ func (rs *State) InitSourceRender(sty *styles.Paint, width, height int) {
 	rs.Renderers[0].SetSize(units.UnitDot, sz)
 }
 
+// DeleteExtraRenderers deletes any renderers beyond the first one.
+func (rs *State) DeleteExtraRenderers() {
+	if len(rs.Renderers) <= 1 {
+		return
+	}
+	rs.Renderers = []render.Renderer{rs.Renderers[0]}
+}
+
 // Context() returns the currently active [render.Context] state (top of Stack).
 func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
@@ -124,4 +136,15 @@ func (rs *State) PopContext() {
 	}
 	rs.Stack = rs.Stack[:n-1]
 	rs.Render.Add(&render.ContextPop{})
+}
+
+// todo: units!
+
+// AddSVGRender adds an SVG renderer to the list of renderers.
+// Assumes state is already initialized with another renderer.
+func (rs *State) AddSVGRenderer(width, height int) render.Renderer {
+	sz := math32.Vec2(float32(width), float32(height))
+	rd := NewSVGRenderer(sz)
+	rs.Renderers = append(rs.Renderers, rd)
+	return rd
 }

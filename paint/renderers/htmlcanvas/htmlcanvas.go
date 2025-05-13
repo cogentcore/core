@@ -38,7 +38,7 @@ func New(size math32.Vector2) render.Renderer {
 }
 
 func (rs *Renderer) Size() (units.Units, math32.Vector2) {
-	return units.UnitDot, rs.size // TODO: is Dot right?
+	return units.UnitDot, rs.size
 }
 
 func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
@@ -56,6 +56,7 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 
 // todo: could return wrapped JS image grabbed from canvas.
 func (rs *Renderer) Image() image.Image { return nil }
+func (rs *Renderer) Source() []byte     { return nil }
 
 func (rs *Renderer) SetCanvas(c js.Value) {
 	rs.Canvas = c
