@@ -59,7 +59,7 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	}
 	clip := js.Global().Get("navigator").Get("clipboard")
 	if clip.IsUndefined() {
-		return errors.New("web.Clipboard.Write: navigator.clipboard unsupported")
+		return errors.Log(errors.New("web.Clipboard.Write: navigator.clipboard unsupported"))
 	}
 	clip.Call("writeText", str)
 	return nil
