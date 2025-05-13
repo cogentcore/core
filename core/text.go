@@ -243,6 +243,9 @@ func (tx *Text) Init() {
 		e.SetHandled()
 		tx.selectAll()
 		tx.SetFocusQuiet()
+		if TheApp.SystemPlatform().IsMobile() {
+			tx.Send(events.ContextMenu, e)
+		}
 	})
 	tx.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
