@@ -5,7 +5,10 @@
 package svg_test
 
 import (
+	"bytes"
 	"fmt"
+	"math"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -17,6 +20,7 @@ import (
 	"cogentcore.org/core/math32"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	. "cogentcore.org/core/svg"
+	"github.com/go-text/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -114,4 +118,71 @@ func TestCoreLogo(t *testing.T) {
 	sv.Background = colors.Uniform(colors.White)
 	sv.Render()
 	imagex.Assert(t, sv.RenderImage(), "logo-white")
+}
+
+func TestEmoji(t *testing.T) {
+	// t.Skip("special-case testing -- requires link to noto-emoji files")
+	// dir := filepath.Join("testdata", "noto-emoji")
+	dir := filepath.Join("testdata", "emoji-bad")
+	// dir := filepath.Join("testdata", "font-emoji-src")
+	files := fsx.Filenames(dir, ".svg")
+
+	for _, fn := range files {
+		// if fn != "femoji-23.svg" {
+		// 	continue
+		// }
+		sv := NewSVG(512, 512)
+		svfn := filepath.Join(dir, fn)
+		fmt.Println(svfn)
+		err := sv.OpenXML(svfn)
+		if err != nil {
+			fmt.Println("error opening xml:", err)
+			continue
+		}
+		sv.Render()
+		// imfn := filepath.Join("png/noto-emoji", strings.TrimSuffix(fn, ".svg"))
+		imfn := filepath.Join("png/emoji-bad", strings.TrimSuffix(fn, ".svg"))
+		imagex.Assert(t, sv.RenderImage(), imfn)
+	}
+}
+
+func TestFontEmoji(t *testing.T) {
+	// t.Skip("special-case testing -- requires link to noto-emoji files")
+	// dir := filepath.Join("testdata", "noto-emoji")
+	os.MkdirAll("testdata/font-emoji-src", 0777)
+	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
+	b, err := os.ReadFile(fname)
+	assert.NoError(t, err)
+	faces, err := font.ParseTTC(bytes.NewReader(b))
+	assert.NoError(t, err)
+	face := faces[0]
+	for r := rune(0); r < math.MaxInt32; r++ {
+		gid, has := face.NominalGlyph(r)
+		if !has {
+			continue
+		}
+		data := face.GlyphData(gid)
+		gd, ok := data.(font.GlyphSVG)
+		if !ok {
+			continue
+		}
+		fn := fmt.Sprintf("femoji-%x", r)
+		// if !strings.Contains(fn, "203c") {
+		// 	continue
+		// }
+		sv := NewSVG(512, 512)
+		sv.Translate.Y = 1024
+		sv.Scale = 0.080078125
+		sv.GroupFilter = fmt.Sprintf("glyph%d", gid)
+		sfn := filepath.Join("testdata/font-emoji-src", fn+".svg")
+		// fmt.Println(sfn, "gid:", sv.GroupFilter, "len:", len(gd.Source))
+		b := bytes.NewBuffer(gd.Source)
+		err := sv.ReadXML(b)
+		assert.NoError(t, err)
+		sv.Render()
+		imfn := filepath.Join("png/font-emoji", strings.TrimSuffix(fn, ".svg"))
+		imagex.Assert(t, sv.RenderImage(), imfn)
+		sv.SaveXML(sfn)
+		// os.WriteFile(sfn, gd.Source, 0666)
+	}
 }

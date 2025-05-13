@@ -6,6 +6,7 @@ package rasterx
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/draw"
 
@@ -19,9 +20,12 @@ import (
 	"github.com/go-text/typesetting/shaping"
 )
 
+// todo: cache at different sizes and reload to re-render b/c keeping around the
+// svg elements is not tenable -- crazy huge memory load.
+
 var svgGlyphs map[font.GID]*svg.SVG
 
-func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, svgCmds string, bb math32.Box2, pos math32.Vector2, identity bool) {
+func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, svgCmds []byte, bb math32.Box2, pos math32.Vector2, identity bool) {
 	if svgGlyphs == nil {
 		svgGlyphs = make(map[font.GID]*svg.SVG)
 	}
@@ -34,7 +38,8 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 	sv, ok := svgGlyphs[g.GlyphID]
 	if !ok {
 		sv = svg.NewSVG(fsize.X, fsize.Y)
-		b := bytes.NewBufferString(svgCmds)
+		sv.GroupFilter = fmt.Sprintf("glyph%d", g.GlyphID) // critical: for filtering items with many glyphs
+		b := bytes.NewBuffer(svgCmds)
 		err := sv.ReadXML(b)
 		errors.Log(err)
 		sv.Translate.Y = float32(run.Face.Upem())

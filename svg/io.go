@@ -23,6 +23,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -128,6 +129,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	inTspn := false
 	var curTspn *Text
 	var defPrevPar Node // previous parent before a def encountered
+	var groupStack stack.Stack[string]
 
 	for {
 		var t xml.Token
@@ -148,6 +150,47 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 		switch se := t.(type) {
 		case xml.StartElement:
 			nm := se.Name.Local
+			if nm == "g" {
+				name := ""
+				if sv.GroupFilter != "" {
+					for _, attr := range se.Attr {
+						if attr.Name.Local != "id" {
+							continue
+						}
+						name = attr.Value
+						if name != sv.GroupFilter {
+							sv.groupFilterSkip = true
+							sv.groupFilterSkipName = name
+							// fmt.Println("skipping:", attr.Value, sv.GroupFilter)
+							break
+							// } else {
+							// 	fmt.Println("including:", attr.Value, sv.GroupFilter)
+						}
+					}
+				}
+				if name == "" {
+					name = fmt.Sprintf("tmp%d", len(groupStack)+1)
+				}
+				groupStack.Push(name)
+				if sv.groupFilterSkip {
+					break
+				}
+				curPar = NewGroup(curPar)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
+				break
+			}
+			if sv.groupFilterSkip {
+				break
+			}
+
 			switch {
 			case nm == "svg":
 				// if curPar != sv.This {
@@ -187,17 +230,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				inDef = true
 				defPrevPar = curPar
 				curPar = sv.Defs
-			case nm == "g":
-				curPar = NewGroup(curPar)
-				for _, attr := range se.Attr {
-					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
-						continue
-					}
-					switch attr.Name.Local {
-					default:
-						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
-					}
-				}
 			case nm == "rect":
 				rect := NewRect(curPar)
 				var x, y, w, h, rx, ry float32
@@ -371,6 +403,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					switch attr.Name.Local {
 					case "d":
 						path.SetData(attr.Value)
+						// fmt.Println("path:", attr.Value)
 					default:
 						path.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -629,6 +662,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					cln := itm.AsTree().Clone().(Node)
 					if cln != nil {
 						curPar.AsTree().AddChild(cln)
+						// fmt.Println("added use:", link)
 						for _, attr := range se.Attr {
 							if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
 								continue
@@ -639,6 +673,8 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							}
 						}
 					}
+				} else {
+					fmt.Println("can't find use:", link)
 				}
 			case nm == "Work":
 				fallthrough
@@ -707,7 +743,35 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				// IconAutoOpen = false
 			}
 		case xml.EndElement:
-			switch se.Name.Local {
+			nm := se.Name.Local
+			if nm == "g" {
+				cg := groupStack.Pop()
+				if sv.groupFilterSkip {
+					if sv.groupFilterSkipName == cg {
+						// fmt.Println("unskip:", cg)
+						sv.groupFilterSkip = false
+					}
+					break
+				}
+				if curPar == sv.Root.This {
+					break
+				}
+				if curPar.AsTree().Parent == nil {
+					break
+				}
+				curPar = curPar.AsTree().Parent.(Node)
+				if curPar == sv.Root.This {
+					break
+				}
+				r := tree.ParentByType[*Root](curPar)
+				if r != nil {
+					curSvg = r
+				}
+			}
+			if sv.groupFilterSkip {
+				break
+			}
+			switch nm {
 			case "title":
 				inTitle = false
 			case "desc":

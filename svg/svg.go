@@ -80,6 +80,17 @@ type SVG struct {
 	// Root is the root of the svg tree, which has the top-level viewbox and styles.
 	Root *Root
 
+	// GroupFilter is used to filter group names, skipping any that don't contain
+	// this string, if non-empty. This is needed e.g., for reading SVG font files
+	// which pack many elements into the same file.
+	GroupFilter string
+
+	// groupFilterSkip is whether to skip the current group based on GroupFilter.
+	groupFilterSkip bool
+
+	// groupFilterSkipName is name of group currently skipping.
+	groupFilterSkipName string
+
 	// map of def names to index. uses starting index to find element.
 	// always updated after each search.
 	DefIndexes map[string]int `display:"-" json:"-" xml:"-"`
