@@ -52,7 +52,7 @@ type Text struct {
 	// is no link being hovered.
 	normalCursor cursors.Cursor
 
-	// selectRange is the selected range.
+	// selectRange is the selected range, in _runes_, which must be applied
 	selectRange textpos.Range
 }
 
@@ -332,7 +332,8 @@ func (tx *Text) copy() { //types:add
 	if !tx.hasSelection() {
 		return
 	}
-	md := mimedata.NewText(tx.Text[tx.selectRange.Start:tx.selectRange.End])
+	// note: selectRange is in runes, not string indexes.
+	md := mimedata.NewText(string([]rune(tx.Text)[tx.selectRange.Start:tx.selectRange.End]))
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)

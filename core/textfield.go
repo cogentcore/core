@@ -938,7 +938,7 @@ func (tf *TextField) copy() { //types:add
 		return
 	}
 
-	md := mimedata.NewText(tf.Text())
+	md := mimedata.NewText(tf.selection())
 	tf.Clipboard().Write(md)
 }
 
