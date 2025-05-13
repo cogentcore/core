@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/icons"
+	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/svg"
 )
 

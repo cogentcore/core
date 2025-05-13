@@ -130,7 +130,8 @@ body > #app-crash-dialog {
   background-color: var(--primary-color);
 }
 
-#app-wasm-loader > main {
+#app-wasm-loader > main,
+#app-wasm-loader > content {
   overflow: auto;
 }
 
