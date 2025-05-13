@@ -658,23 +658,39 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "use":
 				link := gradient.XMLAttr("href", se.Attr)
 				itm := sv.FindNamedElement(link)
-				if itm != nil {
-					cln := itm.AsTree().Clone().(Node)
-					if cln != nil {
-						curPar.AsTree().AddChild(cln)
-						// fmt.Println("added use:", link)
-						for _, attr := range se.Attr {
-							if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
-								continue
-							}
-							switch attr.Name.Local {
-							default:
-								cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
-							}
-						}
-					}
-				} else {
+				if itm == nil {
 					fmt.Println("can't find use:", link)
+					break
+				}
+				cln := itm.AsTree().Clone().(Node)
+				if cln == nil {
+					break
+				}
+				curPar.AsTree().AddChild(cln)
+				var xo, yo float64
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "x":
+						xo, _ = reflectx.ToFloat(attr.Value)
+					case "y":
+						yo, _ = reflectx.ToFloat(attr.Value)
+					default:
+						cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
+				if xo != 0 || yo != 0 {
+					xf := math32.Translate2D(float32(xo), float32(yo))
+					if txp, has := cln.AsTree().Properties["transform"]; has {
+						exf := math32.Identity2()
+						exf.SetString(txp.(string))
+						exf = exf.Translate(float32(xo), float32(yo))
+						cln.AsTree().SetProperty("transform", exf.String())
+					} else {
+						cln.AsTree().SetProperty("transform", xf.String())
+					}
 				}
 			case nm == "Work":
 				fallthrough
@@ -767,6 +783,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if r != nil {
 					curSvg = r
 				}
+				break
 			}
 			if sv.groupFilterSkip {
 				break
@@ -1134,7 +1151,13 @@ func MarshalXMLTree(n Node, enc *XMLEncoder, setName string) (string, error) {
 		return "", nil
 	}
 	for _, k := range n.AsTree().Children {
-		knm, err := MarshalXMLTree(k.(Node), enc, "")
+		kn := k.(Node)
+		if setName == "defs" {
+			if _, ok := kn.(*Path); ok { // skip paths in defs b/c just for use and copied
+				continue
+			}
+		}
+		knm, err := MarshalXMLTree(kn, enc, "")
 		if knm != "" {
 			enc.WriteEnd(knm)
 		}

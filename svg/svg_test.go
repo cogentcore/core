@@ -147,7 +147,7 @@ func TestEmoji(t *testing.T) {
 }
 
 func TestFontEmoji(t *testing.T) {
-	// t.Skip("special-case testing -- requires link to noto-emoji files")
+	t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
@@ -175,7 +175,7 @@ func TestFontEmoji(t *testing.T) {
 		sv.Scale = 0.080078125
 		sv.GroupFilter = fmt.Sprintf("glyph%d", gid)
 		sfn := filepath.Join("testdata/font-emoji-src", fn+".svg")
-		// fmt.Println(sfn, "gid:", sv.GroupFilter, "len:", len(gd.Source))
+		fmt.Println(sfn, "gid:", sv.GroupFilter, "len:", len(gd.Source))
 		b := bytes.NewBuffer(gd.Source)
 		err := sv.ReadXML(b)
 		assert.NoError(t, err)
