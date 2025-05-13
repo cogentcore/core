@@ -7,9 +7,9 @@
 package web
 
 import (
-	"log/slog"
 	"syscall/js"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/system"
 )
@@ -26,12 +26,17 @@ type Clipboard struct {
 
 func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	str := make(chan string)
-	js.Global().Get("navigator").Get("clipboard").Call("readText").
+	clip := js.Global().Get("navigator").Get("clipboard")
+	if clip.IsUndefined() {
+		errors.Log(errors.New("web.Clipboard.Read: navigator.clipboard unsupported"))
+		return mimedata.NewText("")
+	}
+	clip.Call("readText").
 		Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
 			str <- args[0].String()
 			return nil
 		}), js.FuncOf(func(this js.Value, args []js.Value) any {
-			slog.Error("unable to read clipboard text")
+			errors.Log(errors.New("web.Clipboard.Read: unable to read clipboard text"))
 			str <- ""
 			return nil
 		}))
@@ -52,6 +57,10 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 			str = string(d.Data)
 		}
 	}
-	js.Global().Get("navigator").Get("clipboard").Call("writeText", str)
+	clip := js.Global().Get("navigator").Get("clipboard")
+	if clip.IsUndefined() {
+		return errors.New("web.Clipboard.Write: navigator.clipboard unsupported")
+	}
+	clip.Call("writeText", str)
 	return nil
 }
