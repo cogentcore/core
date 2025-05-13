@@ -34,6 +34,7 @@ type Browser struct {
 	core.Frame
 
 	Filename core.Filename
+	IsEmoji  bool // true if an emoji font
 	Font     *font.Face
 	RuneMap  *keylist.List[rune, font.GID]
 }
@@ -50,6 +51,10 @@ func (fb *Browser) OpenFileIndex(fname core.Filename, index int) error { //types
 		return err
 	}
 	fb.Filename = fname
+	fb.IsEmoji = strings.Contains(strings.ToLower(string(fb.Filename)), "emoji")
+	if fb.IsEmoji {
+		core.MessageSnackbar(fb, "Opening emoji font: "+string(fb.Filename)+" will take a while to render..")
+	}
 	return fb.OpenFontData(b, index)
 }
 
@@ -120,12 +125,23 @@ func (fb *Browser) UpdateRuneMap() {
 	// 		}
 	// 	}
 	// }
-	for r := rune(0); r < math.MaxInt16; r++ {
-		gid, has := fb.Font.NominalGlyph(r)
-		if !has {
-			continue
+	if fb.IsEmoji {
+		// for r := rune(0); r < math.MaxInt16; r++ {
+		for r := rune(0); r < math.MaxInt32; r++ { // takes a LONG time..
+			gid, has := fb.Font.NominalGlyph(r)
+			if !has {
+				continue
+			}
+			fb.RuneMap.Add(r, gid)
 		}
-		fb.RuneMap.Add(r, gid)
+	} else {
+		for r := rune(0); r < math.MaxInt16; r++ {
+			gid, has := fb.Font.NominalGlyph(r)
+			if !has {
+				continue
+			}
+			fb.RuneMap.Add(r, gid)
+		}
 	}
 }
 

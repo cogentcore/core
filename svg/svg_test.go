@@ -147,7 +147,7 @@ func TestEmoji(t *testing.T) {
 }
 
 func TestFontEmoji(t *testing.T) {
-	t.Skip("special-case testing -- requires noto-emoji file")
+	// t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
@@ -167,9 +167,9 @@ func TestFontEmoji(t *testing.T) {
 			continue
 		}
 		fn := fmt.Sprintf("femoji-%x", r)
-		// if !strings.Contains(fn, "203c") {
-		// 	continue
-		// }
+		if !strings.Contains(fn, "203c") {
+			continue
+		}
 		sv := NewSVG(512, 512)
 		sv.Translate.Y = 1024
 		sv.Scale = 0.080078125
@@ -182,7 +182,7 @@ func TestFontEmoji(t *testing.T) {
 		sv.Render()
 		imfn := filepath.Join("png/font-emoji", strings.TrimSuffix(fn, ".svg"))
 		imagex.Assert(t, sv.RenderImage(), imfn)
-		sv.SaveXML(sfn)
+		// sv.SaveXML(sfn)
 		// os.WriteFile(sfn, gd.Source, 0666)
 	}
 }

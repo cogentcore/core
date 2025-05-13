@@ -242,9 +242,9 @@ func TestLineCentering(t *testing.T) {
 func TestEmoji(t *testing.T) {
 	RunTest(t, "emoji", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		// src := "the \U0001F615\U0001F618\U0001F616 !!" // smileys
-		src := "the 🎁, !!"
+		src := "the 🎁🎉, !!"
 		sty := rich.NewStyle()
-		// sty.Size = 3
+		sty.Size = 3
 		// sty.Family = rich.Monospace
 		tx := rich.NewText(sty, []rune(src))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))

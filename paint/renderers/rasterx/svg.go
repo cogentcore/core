@@ -16,28 +16,26 @@ import (
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
-	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/shaping"
 )
 
-// todo: cache at different sizes and reload to re-render b/c keeping around the
-// svg elements is not tenable -- crazy huge memory load.
-
-var svgGlyphs map[font.GID]*svg.SVG
+var svgGlyphCache map[glyphKey]image.Image
 
 func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, svgCmds []byte, bb math32.Box2, pos math32.Vector2, identity bool) {
-	if svgGlyphs == nil {
-		svgGlyphs = make(map[font.GID]*svg.SVG)
+	if svgGlyphCache == nil {
+		svgGlyphCache = make(map[glyphKey]image.Image)
 	}
 	size := run.Size.Floor()
 	fsize := image.Point{X: size, Y: size}
 	scale := 82.0 / float32(run.Face.Upem())
-	if run.Font.Style(&ctx.Style.Text).Family == rich.Monospace {
+	fam := run.Font.Style(&ctx.Style.Text).Family
+	if fam == rich.Monospace {
 		scale *= 0.8
 	}
-	sv, ok := svgGlyphs[g.GlyphID]
+	gk := glyphKey{gid: g.GlyphID, sx: uint8(size / 256), sy: uint8(size % 256), ox: uint8(fam)}
+	img, ok := svgGlyphCache[gk]
 	if !ok {
-		sv = svg.NewSVG(fsize.X, fsize.Y)
+		sv := svg.NewSVG(fsize.X, fsize.Y)
 		sv.GroupFilter = fmt.Sprintf("glyph%d", g.GlyphID) // critical: for filtering items with many glyphs
 		b := bytes.NewBuffer(svgCmds)
 		err := sv.ReadXML(b)
@@ -45,21 +43,16 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 		sv.Translate.Y = float32(run.Face.Upem())
 		sv.Scale = scale
 		sv.Render()
-		svgGlyphs[g.GlyphID] = sv
+		img = sv.RenderImage()
+		svgGlyphCache[gk] = img
 	}
-	if sv.Geom.Size != fsize || sv.Scale != scale {
-		// fmt.Println("re-render:", sv.Geom.Size, fsize, sv.Scale, scale)
-		sv.Resize(fsize)
-		sv.Translate.Y = float32(run.Face.Upem())
-		sv.Scale = scale
-		sv.Render()
-	}
-	img := sv.RenderImage()
-	// fmt.Printf("%#v\n", g)
-	// fmt.Printf("%#v\n", run)
 	left := int(math32.Round(pos.X + math32.FromFixed(g.XBearing)))
 	desc := run.Output.LineBounds.Descent
 	top := int(math32.Round(pos.Y - math32.FromFixed(g.YBearing+desc) - float32(fsize.Y)))
-	db := img.Bounds().Add(image.Point{left, top})
-	draw.Draw(rs.image, db, img, image.Point{}, draw.Over)
+	dbb := img.Bounds().Add(image.Point{left, top})
+	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())
+	if ibb == (image.Rectangle{}) {
+		return
+	}
+	draw.Draw(rs.image, ibb, img, image.Point{}, draw.Over)
 }

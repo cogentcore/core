@@ -402,8 +402,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "d":
-						path.SetData(attr.Value)
-						// fmt.Println("path:", attr.Value)
+						if inDef {
+							path.DataStr = attr.Value
+						} else {
+							path.SetData(attr.Value)
+						}
 					default:
 						path.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -691,6 +694,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					} else {
 						cln.AsTree().SetProperty("transform", xf.String())
 					}
+				}
+				if p, ok := cln.(*Path); ok {
+					p.SetData(p.DataStr) // defs don't apply paths
 				}
 			case nm == "Work":
 				fallthrough

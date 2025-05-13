@@ -271,6 +271,11 @@ func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shapi
 	top := y - math32.FromFixed(g.YBearing)
 	bottom := top - math32.FromFixed(g.Height)
 	right := x + math32.FromFixed(g.Width)
+	dbb := image.Rect(int(x), int(top), int(right), int(bottom))
+	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())
+	if ibb == (image.Rectangle{}) {
+		return nil
+	}
 	switch bitmap.Format {
 	case font.BlackAndWhite:
 		rec := image.Rect(0, 0, bitmap.Width, bitmap.Height)
@@ -279,16 +284,14 @@ func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shapi
 		for i := range sub.Pix {
 			sub.Pix[i] = bitAt(bitmap.Data, i)
 		}
-		rect := image.Rect(int(x), int(top), int(right), int(bottom))
 		// note: NearestNeighbor is better than bilinear
-		scale.NearestNeighbor.Scale(rs.image, rect, sub, sub.Bounds(), draw.Over, nil)
+		scale.NearestNeighbor.Scale(rs.image, ibb, sub, sub.Bounds(), draw.Over, nil)
 	case font.JPG, font.PNG, font.TIFF:
 		pix, _, err := image.Decode(bytes.NewReader(bitmap.Data))
 		if err != nil {
 			return err
 		}
-		rect := image.Rect(int(x), int(top), int(right), int(bottom))
-		scale.NearestNeighbor.Scale(rs.image, rect, pix, pix.Bounds(), draw.Over, nil)
+		scale.NearestNeighbor.Scale(rs.image, ibb, pix, pix.Bounds(), draw.Over, nil)
 	}
 	if bitmap.Outline != nil {
 		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)

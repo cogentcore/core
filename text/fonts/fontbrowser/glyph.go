@@ -127,10 +127,21 @@ func (gi *Glyph) drawShaped(pc *paint.Painter) {
 	sty, tsty := gi.Styles.NewRichText()
 	fonts.Style(gi.Browser.Font, sty, tsty)
 	sz := gi.Geom.Size.Actual.Content
-	sty.Size = float32(sz.X) / tsty.FontSize.Dots
+	msz := min(sz.X, sz.Y)
+	sty.Size = float32(msz) / tsty.FontSize.Dots
+	sty.Size *= 0.85
 	tx := rich.NewText(sty, []rune{gi.Rune})
 	lns := gi.Scene.TextShaper().WrapLines(tx, sty, tsty, &core.AppearanceSettings.Text, sz)
-	pc.TextLines(lns, gi.Geom.Pos.Content)
+	off := math32.Vec2(0, 0)
+	if msz > 200 {
+		o := 0.2 * float32(msz)
+		if gi.Browser.IsEmoji {
+			off = math32.Vec2(.5*o, -1.5*o)
+		} else { // for bitmap fonts, kinda random
+			off = math32.Vec2(o, o)
+		}
+	}
+	pc.TextLines(lns, gi.Geom.Pos.Content.Add(off))
 }
 
 func (gi *Glyph) draw(pc *paint.Painter) {
