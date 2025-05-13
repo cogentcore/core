@@ -54,5 +54,6 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 	if ibb == (image.Rectangle{}) {
 		return
 	}
-	draw.Draw(rs.image, ibb, img, image.Point{}, draw.Over)
+	sp := ibb.Min.Sub(dbb.Min)
+	draw.Draw(rs.image, ibb, img, sp, draw.Over)
 }
