@@ -197,6 +197,7 @@ func (fr *Frame) Init() {
 			vel.SetAdd(vi)
 		}
 		vel.SetDivScalar(float32(len(prevVels)))
+		prevVels = prevVels[:0] // reset for next scroll
 
 		if vel.Length() < 2 {
 			return
@@ -205,10 +206,12 @@ func (fr *Frame) Init() {
 		t := float32(0)
 		fr.Animate(func(a *Animation) {
 			t += a.Dt
-			dx := vel.MulScalar(a.Dt * (1 - t/500))
+			// See https://medium.com/@esskeetit/scrolling-mechanics-of-uiscrollview-142adee1142c
+			vel.SetMulScalar(math32.Pow(0.998, a.Dt)) // TODO: avoid computing Pow each time?
+			dx := vel.MulScalar(a.Dt)
 			fr.scrollDelta(events.NewScroll(e.WindowPos(), dx, e.Modifiers()))
 			i++
-			if t > 500 {
+			if t > 2000 {
 				a.Done = true
 			}
 		})
