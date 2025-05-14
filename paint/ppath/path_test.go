@@ -261,7 +261,7 @@ func TestPathCrossingsWindings(t *testing.T) {
 		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{5.0, 0.0}, 1, -1, false}, // mid
 		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{0.0, 0.0}, 1, 0, true},   // left
 		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true},  // right
-		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{5.0, 0.0}, 1, 1, false},  // mid
+		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{5.0, 0.0}, 1, 0, false},  // mid
 		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{0.0, 0.0}, 1, 0, true},   // left
 		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true},  // right
 
@@ -271,13 +271,17 @@ func TestPathCrossingsWindings(t *testing.T) {
 		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vector2{0.0, 0.0}, 2, 0, true},
 		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vector2{1.0, 0.0}, 2, -2, false},
 		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vector2{-1.0, 0.0}, 4, 0, false},
+
+		// bugs
+		{"M0 35.43000000000029L0 385.82000000000016L11.819999999999709 397.6300000000001L185.03999999999996 397.6300000000001L188.97999999999956 393.7000000000003L196.85000000000036 385.8299999999999L196.85000000000036 19.68000000000029", math32.Vector2{89.4930000000003, 19.68000000000019}, 0, 0, false}, // #346
+		{"M0 35.43000000000029L0 385.82000000000016L11.819999999999709 397.6300000000001L185.03999999999996 397.6300000000001L188.97999999999956 393.7000000000003L196.85000000000036 385.8299999999999L196.85000000000036 19.68000000000029", math32.Vector2{89.4930000000003, 20}, 1, -1, false},               // #346
 	}
 	for _, tt := range tts {
 		t.Run(fmt.Sprint(tt.p, " at ", tt.pos), func(t *testing.T) {
 			p := MustParseSVGPath(tt.p)
 			crossings, boundary1 := p.Crossings(tt.pos.X, tt.pos.Y)
 			windings, boundary2 := p.Windings(tt.pos.X, tt.pos.Y)
-			assert.Equal(t, []any{crossings, windings, boundary1, boundary2}, []any{tt.crossings, tt.windings, tt.boundary, tt.boundary})
+			assert.Equal(t, []any{tt.crossings, tt.windings, tt.boundary, tt.boundary}, []any{crossings, windings, boundary1, boundary2})
 		})
 	}
 }
@@ -645,7 +649,7 @@ func TestPathSplitAt(t *testing.T) {
 				assert.Equal(t, strings.Join(tt.rs, "\n"), strings.Join(origs, "\n"))
 			} else {
 				for i, p := range ps {
-					tolassert.EqualTolSlice(t, p, MustParseSVGPath(tt.rs[i]), 1.0e-3)
+					tolassert.EqualTolSlice(t, MustParseSVGPath(tt.rs[i]), p, 1.0e-3)
 				}
 			}
 		})

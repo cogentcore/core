@@ -248,7 +248,7 @@ func windings(zs []Intersection) (int, bool) {
 			if !z.Same {
 				n += d
 			}
-		} else {
+		} else if i+1 < len(zs) {
 			same := z.Same || (len(zs) > i+1 && zs[i+1].Same)
 			if !same && len(zs) > i+1 {
 				if z.Into() == zs[i+1].Into() {
