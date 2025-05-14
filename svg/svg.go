@@ -7,6 +7,7 @@ package svg
 //go:generate core generate
 
 import (
+	"bytes"
 	"image"
 	"image/color"
 	"strings"
@@ -23,6 +24,16 @@ import (
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
+
+// SVGToImage generates an image from given svg source,
+// with given width and height size.
+func SVGToImage(svg []byte, width, height int) (image.Image, error) {
+	sv := NewSVG(width, height)
+	b := bytes.NewBuffer(svg)
+	err := sv.ReadXML(b)
+	sv.Render()
+	return sv.RenderImage(), err
+}
 
 // SVG is an SVG object.
 type SVG struct {
