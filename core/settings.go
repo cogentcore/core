@@ -268,9 +268,9 @@ type AppearanceSettingsData struct { //types:add
 	// text highlighting style / theme.
 	Highlighting HighlightingName `default:"emacs"`
 
-	// Text specifies text settings including the language and
+	// Text specifies text settings including the language, and the
 	// font families for different styles of fonts.
-	Text rich.Settings `display:"add-fields"`
+	Text rich.Settings
 }
 
 func (as *AppearanceSettingsData) Defaults() {
