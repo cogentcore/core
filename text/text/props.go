@@ -6,6 +6,7 @@ package text
 
 import (
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
@@ -86,4 +87,54 @@ var styleFuncs = map[string]styleprops.Func{
 		}
 		fs.HighlightColor = errors.Log1(gradient.FromAny(val, cc))
 	},
+}
+
+// ToProperties sets map[string]any properties based on non-default style values.
+// properties map must be non-nil.
+func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
+	if s.FontSize.Unit != units.UnitDp || s.FontSize.Value != 16 || sty.Size != 1 {
+		sz := s.FontSize
+		sz.Value *= sty.Size
+		p["font-size"] = sz.StringCSS()
+	}
+	if sty.Family == rich.Custom && s.CustomFont != "" {
+		p["font-family"] = s.CustomFont
+	}
+	if sty.Slant != rich.SlantNormal {
+		p["font-style"] = sty.Slant.String()
+	}
+	if sty.Weight != rich.Normal {
+		p["font-weight"] = sty.Weight.String()
+	}
+	if sty.Stretch != rich.StretchNormal {
+		p["font-stretch"] = sty.Stretch.String()
+	}
+	if sty.Decoration != 0 {
+		p["text-decoration"] = sty.Decoration.String()
+	}
+	if s.Align != Start {
+		p["text-align"] = s.Align.String()
+	}
+	if s.AlignV != Start {
+		p["text-vertical-align"] = s.AlignV.String()
+	}
+	if s.LineHeight != 1.2 {
+		p["line-height"] = reflectx.ToString(s.LineHeight)
+	}
+	if s.WhiteSpace != WrapAsNeeded {
+		p["white-space"] = s.WhiteSpace.String()
+	}
+	if sty.Direction != rich.LTR {
+		p["direction"] = s.Direction.String()
+	}
+	if s.TabSize != 4 {
+		p["tab-size"] = reflectx.ToString(s.TabSize)
+	}
+	p["fill"] = colors.AsHex(s.Color)
+	if s.SelectColor != nil {
+		p["select-color"] = colors.AsHex(colors.ToUniform(s.SelectColor))
+	}
+	if s.HighlightColor != nil {
+		p["highlight-color"] = colors.AsHex(colors.ToUniform(s.HighlightColor))
+	}
 }

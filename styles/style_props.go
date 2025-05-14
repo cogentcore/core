@@ -542,28 +542,3 @@ var styleFuncs = map[string]styleprops.Func{
 		fs.HighlightColor = errors.Log1(gradient.FromAny(val, cc))
 	},
 }
-
-////////  ToProperties
-
-// toProperties sets map[string]any properties based on non-default style values.
-// properties map must be non-nil.
-func (pc *Font) toProperties(p map[string]any) {
-	if pc.Size.Unit != units.UnitDp || pc.Size.Value != 16 {
-		p["font-size"] = pc.Size.StringCSS()
-	}
-	if pc.Family == rich.Custom && pc.CustomFont != "" {
-		p["font-family"] = pc.CustomFont
-	}
-	if pc.Slant != rich.SlantNormal {
-		p["font-style"] = pc.Slant.String()
-	}
-	if pc.Weight != rich.Normal {
-		p["font-weight"] = pc.Weight.String()
-	}
-	if pc.Stretch != rich.StretchNormal {
-		p["font-stretch"] = pc.Stretch.String()
-	}
-	if pc.Decoration != 0 {
-		p["text-decoration"] = pc.Decoration.String()
-	}
-}

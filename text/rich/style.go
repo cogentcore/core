@@ -226,6 +226,14 @@ func (w Weights) ToFloat32() float32 {
 	return float32((w + 1) * 100)
 }
 
+func (w Weights) HTMLTag() string {
+	switch w {
+	case Bold:
+		return "b"
+	}
+	return ""
+}
+
 // Stretch is the width of a font as an approximate fraction of the normal width.
 // Widths range from 0.5 to 2.0 inclusive, with 1.0 as the normal width.
 type Stretch int32 //enums:enum -trim-prefix Stretch -transform kebab

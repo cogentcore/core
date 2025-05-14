@@ -239,7 +239,6 @@ func (pc *Paint) toProperties(p map[string]any) {
 	if !pc.Display {
 		return
 	}
-	// font, text
 }
 
 // toProperties sets map[string]any properties based on non-default style values.

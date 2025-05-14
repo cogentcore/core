@@ -6,8 +6,8 @@ package svgrender
 
 import (
 	"bytes"
-	"fmt"
 	"image"
+	"maps"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
+	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 )
 
 // Renderer is the SVG renderer.
@@ -117,19 +118,37 @@ func (rs *Renderer) PopContext(pt *render.ContextPop) {
 func (rs *Renderer) RenderText(pt *render.Text) {
 	pc := &pt.Context
 	cg := rs.gpStack.Peek()
-	st := svg.NewText(cg)
-	st.Text = string(pt.Text.Source.Join())
-	// todo: we're losing all the rich formatting here -- need to regenerate from rich!
-	st.Width = pt.Text.Bounds.Size().X
-	fmt.Println("wd:", st.Width)
+	tg := svg.NewGroup(cg)
 	props := map[string]any{}
-	pt.Context.Style.GetProperties(props)
 	if !pc.Transform.IsIdentity() {
 		props["transform"] = pc.Transform.String()
 	}
-	props["x"] = reflectx.ToString(pt.Position.X)
-	props["y"] = reflectx.ToString(pt.Position.Y)
-	st.Pos = pt.Position
-	st.Properties = props
-	// rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
+	pt.Context.Style.GetProperties(props)
+	pos := pt.Position
+	tx := pt.Text.Source
+	txt := tx.Join()
+	for li := range pt.Text.Lines {
+		ln := &pt.Text.Lines[li]
+		lpos := pos.Add(ln.Offset)
+		rpos := lpos
+		for ri := range ln.Runs {
+			run := ln.Runs[ri].(*shapedgt.Run)
+			rs := run.Runes().Start
+			re := run.Runes().End
+			si, _, _ := tx.Index(rs)
+			sty, _ := tx.Span(si)
+			rtxt := txt[rs:re]
+
+			st := svg.NewText(tg)
+			st.Text = string(rtxt)
+			rprops := maps.Clone(props)
+			pt.Context.Style.Text.ToProperties(sty, rprops)
+			rprops["x"] = reflectx.ToString(rpos.X)
+			rprops["y"] = reflectx.ToString(rpos.Y)
+			st.Pos = rpos
+			st.Properties = rprops
+
+			rpos.X += run.Advance()
+		}
+	}
 }
