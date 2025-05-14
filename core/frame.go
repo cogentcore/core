@@ -162,33 +162,42 @@ func (fr *Frame) Init() {
 			fr.scrollDelta(e)
 		}
 	})
-	var prevMove events.Event
 	// We treat slide events on frames as scroll events on mobile.
+	prevVels := []math32.Vector2{}
 	fr.On(events.SlideMove, func(e events.Event) {
 		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
 
-		prevMove = e
 		// We must negate the delta for "natural" scrolling behavior.
 		del := math32.FromPoint(e.PrevDelta()).Negate()
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+
+		time := float32(e.SincePrev().Milliseconds())
+		vel := del.DivScalar(time)
+		if len(prevVels) >= 3 {
+			prevVels = append(prevVels[1:], vel)
+		} else {
+			prevVels = append(prevVels, vel)
+		}
 	})
 	fr.On(events.SlideStop, func(e events.Event) {
 		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
 
-		// If we have enough instantaneous velocity, we continue scrolling
-		// in an animation while slowly decelerating for a
-		// smoother experience.
-		if prevMove == nil {
+		// If we have enough velocity over the last few scroll events,
+		// we continue scrolling in an animation while slowly decelerating
+		// for a smoother experience.
+		if len(prevVels) == 0 {
 			return
 		}
-		dx := math32.FromPoint(prevMove.PrevDelta()).Negate()
-		dt := float32(prevMove.SincePrev().Milliseconds())
-		vel := dx.DivScalar(dt)
-		// fmt.Println(vel, dx, dt)
+		vel := math32.Vector2{}
+		for _, vi := range prevVels {
+			vel.SetAdd(vi)
+		}
+		vel.SetDivScalar(float32(len(prevVels)))
+
 		if vel.Length() < 2 {
 			return
 		}
