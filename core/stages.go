@@ -98,6 +98,8 @@ func (sm *stages) deleteStage(st *Stage) bool {
 	if !got {
 		return false
 	}
+	// After closing a full window stage on web, the top stage behind
+	// needs to be rerendered, or else nothing will show up.
 	if fullWindow && TheApp.Platform() == system.Web {
 		sz := sm.renderWindow.mains.stack.Len()
 		if sz > 0 {
