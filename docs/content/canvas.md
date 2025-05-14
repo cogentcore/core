@@ -96,7 +96,7 @@ You can draw elliptical arcs:
 
 ```Go
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
-    pc.EllipticalArc(0.5, 0.5, 0.5, 0.25, math32.Pi, 2*math32.Pi)
+    pc.EllipticalArc(0.5, 0.25, 0.5, 0.25, math32.Pi/4, math32.Pi, 2*math32.Pi)
     pc.Fill.Color = colors.Scheme.Success.Base
     pc.Draw()
 })
@@ -106,7 +106,7 @@ You can draw regular polygons:
 
 ```Go
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
-    pc.RegularPolygon(6, 0.5, 0.5, 0.5, math32.Pi)
+    pc.RegularPolygon(0.5, 0.5, 6, 0.5, true)
     pc.Fill.Color = colors.Scheme.Success.Base
     pc.Draw()
 })
