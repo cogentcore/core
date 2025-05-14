@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -25,14 +26,17 @@ func Init() {
 }
 
 // TheApp is the single [system.App] for the Android platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*gpudraw.Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*composer.ComposerDrawer, *Window]()}
 
 // App is the [system.App] implementation for the Android platform
 type App struct {
-	base.AppSingle[*gpudraw.Drawer, *Window]
+	base.AppSingle[*composer.ComposerDrawer, *Window]
 
 	// GPU is the system GPU used for the app
 	GPU *gpu.GPU
+
+	// Draw is the GPU drawer associated with the [composer.ComposerDrawer].
+	Draw *gpudraw.Drawer
 
 	// Winptr is the pointer to the underlying system window
 	Winptr uintptr
@@ -49,6 +53,7 @@ func (a *App) DestroyGPU() {
 	defer a.Mu.Unlock()
 	a.Draw.Release()
 	a.Draw = nil
+	a.Compose = nil
 }
 
 // FullDestroyGPU destroys all GPU things for when the app is fully quit.
@@ -90,6 +95,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	wsf := gpu.Instance().CreateSurface(wsd)
 	sf := gpu.NewSurface(a.GPU, wsf, image.Pt(512, 512), 1, gpu.UndefinedType) // placeholder size
 	a.Draw = gpudraw.NewDrawer(a.GPU, sf)
+	a.Compose = &composer.ComposerDrawer{Drawer: a.Draw}
 
 	a.Winptr = winptr
 
