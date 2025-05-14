@@ -931,9 +931,6 @@ func (em *Events) setFocusQuiet(w Widget) bool {
 		}
 		return false
 	}
-	if !tree.IsNil(w) {
-		w.AsWidget().ScrollToThis()
-	}
 	return got
 }
 
@@ -1119,9 +1116,6 @@ func (em *Events) setAttend(w Widget) bool {
 			fmt.Println(em.scene, "SetAttendEvent: Failed", w)
 		}
 		return false
-	}
-	if !tree.IsNil(w) {
-		w.AsWidget().ScrollToThis()
 	}
 	return got
 }

@@ -441,7 +441,6 @@ func (wb *WidgetBase) handleWidgetStateFromFocus() {
 func (wb *WidgetBase) handleWidgetStateFromAttend() {
 	wb.On(events.Attend, func(e events.Event) {
 		if wb.Styles.Abilities.IsPressable() {
-			wb.ScrollToThis()
 			wb.SetState(true, states.Attended)
 		}
 	})
