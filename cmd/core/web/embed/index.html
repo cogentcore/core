@@ -20,6 +20,11 @@
         content="{{.VanityURL}} https://github.com/{{.GithubVanityRepository}} https://github.com/{{.GithubVanityRepository}}/tree/master{/dir} https://github.com/{{.GithubVanityRepository}}/blob/master{/dir}/{file}#L{line}">
     {{- end}}
     <link type="text/css" rel="preload" href="{{.BasePath}}app.css" as="style">
+    <link rel="icon" href="{{.BasePath}}icons/32.png" type="image/png">
+    <link rel="icon" href="{{.BasePath}}icons/svg.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{.BasePath}}icons/192.png">
+    <link rel="manifest" href="{{.BasePath}}manifest.webmanifest">
+    <link rel="stylesheet" type="text/css" href="{{.BasePath}}app.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
@@ -27,11 +32,6 @@
     {{ range $url := .Styles }}
     <link rel="stylesheet" href="{{$url}}">
     {{ end }}
-    <link rel="icon" href="{{.BasePath}}icons/32.png" type="image/png">
-    <link rel="icon" href="{{.BasePath}}icons/svg.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{.BasePath}}icons/192.png">
-    <link rel="manifest" href="{{.BasePath}}manifest.webmanifest">
-    <link rel="stylesheet" type="text/css" href="{{.BasePath}}app.css">
     <script defer src="{{.BasePath}}wasm_exec.js"></script>
     <script defer src="{{.BasePath}}app.js"></script>
 </head>
