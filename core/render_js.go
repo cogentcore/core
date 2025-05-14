@@ -44,3 +44,7 @@ func (ss *spritesSource) Draw(c composer.Composer) {
 		elem.Get("style").Set("backgroundColor", colors.AsHex(colors.ToUniform(sr.pixels)))
 	}
 }
+
+func (w *renderWindow) fillInsets(c composer.Composer) {
+	// no-op
+}

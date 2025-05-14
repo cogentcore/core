@@ -707,8 +707,7 @@ func (w *renderWindow) renderWindow() {
 	sm := &w.mains
 	n := sm.stack.Len()
 
-	// todo: add a source for this, that is self-contained
-	// w.fillInsets()
+	w.fillInsets(cp) // only does something on non-js
 
 	// first, find the top-level window:
 	winIndex := 0
@@ -792,37 +791,6 @@ func (sc *Scene) RenderSource(op draw.Op) composer.Source {
 	sc.setFlag(false, sceneImageUpdated)
 	return SceneSource(sc, op)
 }
-
-/* TODO
-// fillInsets fills the window insets, if any, with [colors.Scheme.Background].
-// called within the overall drawer.Start() render pass.
-func (w *renderWindow) fillInsets() {
-	// render geom and window geom
-	rg := w.SystemWindow.RenderGeom()
-	wg := math32.Geom2DInt{Size: w.SystemWindow.Size()}
-
-	// if our window geom is the same as our render geom, we have no
-	// window insets to fill
-	if wg == rg {
-		return
-	}
-
-	drw := w.SystemWindow.Drawer()
-	fill := func(x0, y0, x1, y1 int) {
-		r := image.Rect(x0, y0, x1, y1)
-		if r.Dx() == 0 || r.Dy() == 0 {
-			return
-		}
-		drw.Copy(image.Point{}, colors.Scheme.Background, r, draw.Src, system.Unchanged)
-	}
-	rb := rg.Bounds()
-	wb := wg.Bounds()
-	fill(0, 0, wb.Max.X, rb.Min.Y)        // top
-	fill(0, rb.Max.Y, wb.Max.X, wb.Max.Y) // bottom
-	fill(rb.Max.X, 0, wb.Max.X, wb.Max.Y) // right
-	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
-}
-*/
 
 // renderWindowFlags are atomic bit flags for [renderWindow] state.
 // They must be atomic to prevent race conditions.
