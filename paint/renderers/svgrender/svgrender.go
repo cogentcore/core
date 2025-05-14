@@ -6,8 +6,10 @@ package svgrender
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
@@ -70,7 +72,7 @@ func (rs *Renderer) Render(r render.Render) {
 		case *pimage.Params:
 			// x.Render(rs.image)
 		case *render.Text:
-			// rs.RenderText(x)
+			rs.RenderText(x)
 		case *render.ContextPush:
 			rs.PushContext(x)
 		case *render.ContextPop:
@@ -87,16 +89,11 @@ func (rs *Renderer) PushGroup() *svg.Group {
 	return g
 }
 
-func (rs *Renderer) NewPath() *svg.Path {
-	cg := rs.gpStack.Peek()
-	p := svg.NewPath(cg)
-	return p
-}
-
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	p := pt.Path
 	pc := &pt.Context
-	sp := rs.NewPath()
+	cg := rs.gpStack.Peek()
+	sp := svg.NewPath(cg)
 	sp.Data = p.Clone()
 	props := map[string]any{}
 	pt.Context.Style.GetProperties(props)
@@ -115,4 +112,24 @@ func (rs *Renderer) PushContext(pt *render.ContextPush) {
 
 func (rs *Renderer) PopContext(pt *render.ContextPop) {
 	rs.gpStack.Pop()
+}
+
+func (rs *Renderer) RenderText(pt *render.Text) {
+	pc := &pt.Context
+	cg := rs.gpStack.Peek()
+	st := svg.NewText(cg)
+	st.Text = string(pt.Text.Source.Join())
+	// todo: we're losing all the rich formatting here -- need to regenerate from rich!
+	st.Width = pt.Text.Bounds.Size().X
+	fmt.Println("wd:", st.Width)
+	props := map[string]any{}
+	pt.Context.Style.GetProperties(props)
+	if !pc.Transform.IsIdentity() {
+		props["transform"] = pc.Transform.String()
+	}
+	props["x"] = reflectx.ToString(pt.Position.X)
+	props["y"] = reflectx.ToString(pt.Position.Y)
+	st.Pos = pt.Position
+	st.Properties = props
+	// rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
 }
