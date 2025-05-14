@@ -47,18 +47,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 	rs.setTransform(&pt.Context)
 
-	strokeUnsupported := false
-	// if m.IsSimilarity() { // TODO: implement
-	if true {
-		scale := math32.Sqrt(math32.Abs(pt.Context.Transform.Det()))
-		// TODO: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
-		style.Stroke.Width.Dots /= scale
-		// style.Stroke.DashOffset, style.Stroke.Dashes = ppath.ScaleDash(style.Stroke.Width.Dots, style.Stroke.DashOffset, style.Stroke.Dashes)
-	} else {
-		strokeUnsupported = true
-	}
-
-	if style.HasFill() || (style.HasStroke() && !strokeUnsupported) {
+	if style.HasFill() || style.HasStroke() {
 		rs.writePath(&pt.Path)
 	}
 
@@ -70,18 +59,11 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		}
 		rs.ctx.Call("fill", rule)
 	}
-	if style.HasStroke() && !strokeUnsupported {
+	if style.HasStroke() {
+		scale := math32.Sqrt(math32.Abs(pt.Context.Transform.Det()))
+		// note: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
+		style.Stroke.Width.Dots /= scale
 		rs.setStroke(&style.Stroke)
 		rs.ctx.Call("stroke")
-	} else if style.HasStroke() {
-		// stroke settings unsupported by HTML Canvas, draw stroke explicitly
-		// TODO: check when this is happening, maybe remove or use rasterx?
-		if len(style.Stroke.Dashes) > 0 {
-			pt.Path = pt.Path.Dash(style.Stroke.DashOffset, style.Stroke.Dashes...)
-		}
-		pt.Path = pt.Path.Stroke(style.Stroke.Width.Dots, ppath.CapFromStyle(style.Stroke.Cap), ppath.JoinFromStyle(style.Stroke.Join), 1)
-		rs.writePath(&pt.Path)
-		rs.ctx.Set("fillStyle", rs.imageToStyle(style.Stroke.Color))
-		rs.ctx.Call("fill")
 	}
 }
