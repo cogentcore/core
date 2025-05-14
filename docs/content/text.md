@@ -30,7 +30,7 @@ You can use one of the 15 preset text types to customize the appearance of text:
 core.NewText(b).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
 ```
 
-You can also use a [[style]]r to further customize the appearance of text:
+You can also use a [[style]]r to further customize the appearance of text (see [[styles#text|text styles]] for more details):
 
 ```Go
 core.NewText(b).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {

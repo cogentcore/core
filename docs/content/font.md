@@ -6,11 +6,11 @@ Apps come with the default **fonts** of [Noto Sans](https://fonts.google.com/not
 
 ## Styles
 
-To specify the font used for [[text]], see [[styles#font family]] styles.
+To specify the font used for [[text]], see [[styles#font family|font family styles]].
 
 ## Custom fonts
 
-**Note:** after you get your custom font set up by following the steps below, see [[styles#font family]] for how to use it.
+**Note:** after you get your custom font set up by following the steps below, see [[styles#font family|font family styles]] for how to use it.
 
 ### Desktop and mobile
 
