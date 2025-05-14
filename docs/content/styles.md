@@ -286,3 +286,39 @@ core.NewButton(fr).SetText("Third")
 core.NewButton(fr).SetText("Fourth")
 core.NewButton(fr).SetText("Fifth")
 ```
+
+## Text
+
+You can customize the appearance of text with various properties.
+
+### Font family
+
+You can change the font family category of text:
+
+```Go
+tx := core.NewText(b).SetText("Monospaced text")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Family = rich.Monospace
+})
+```
+
+You can use a specific font family:
+
+```Go
+tx := core.NewText(b).SetText("Specific font")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Family = rich.Custom
+    s.Font.CustomFont = "Arial"
+})
+```
+
+You can also embed [[font#custom fonts]] and use them (see that page for details):
+
+```go
+fonts.AddEmbedded(MyFontName)
+tx := core.NewText(b).SetText("Custom font")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Family = rich.Custom
+    s.Font.CustomFont = "My Font Name"
+})
+```
