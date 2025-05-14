@@ -11,7 +11,7 @@ t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Success.Base
-    pc.PathDone()
+    pc.Draw()
 })
 c.Animate(func(a *core.Animation) {
     t += a.Dt
@@ -31,7 +31,7 @@ t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Warn.Base
-    pc.PathDone()
+    pc.Draw()
 })
 c.Animate(func(a *core.Animation) {
     if pause {
@@ -58,7 +58,7 @@ t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Error.Base
-    pc.PathDone()
+    pc.Draw()
 })
 c.Animate(func(a *core.Animation) {
     t += a.Dt

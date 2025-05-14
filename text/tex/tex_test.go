@@ -69,7 +69,7 @@ func TestTex(t *testing.T) {
 			assert.NotNil(t, pp)
 			*pp = pp.Translate(0, 40)
 			pc.State.Path = *pp
-			pc.PathDone()
+			pc.Draw()
 			// reference text
 			// sh := shaped.NewShaper()
 			// tx := rich.NewText(&pc.Font, []rune("a=x"))

@@ -104,10 +104,10 @@ func (pc *Painter) Close() {
 	pc.State.Path.Close()
 }
 
-// PathDone puts the current path on the render stack, capturing the style
+// Draw puts the current path on the render stack, capturing the style
 // settings present at this point, which will be used to render the path,
 // and creates a new current path.
-func (pc *Painter) PathDone() {
+func (pc *Painter) Draw() {
 	pc.Paint.ToDots()
 	pt := render.NewPath(pc.State.Path.Clone(), pc.Paint, pc.Context())
 	pc.Render.Add(pt)
@@ -315,13 +315,13 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 		} else {
 			pc.RoundedRectangleSides(x, y, w, h, r)
 		}
-		pc.PathDone()
+		pc.Draw()
 		return
 	}
 
 	// use consistent rounded rectangle for fill, and then draw borders side by side
 	pc.RoundedRectangleSides(x, y, w, h, r)
-	pc.PathDone()
+	pc.Draw()
 
 	r = ClampBorderRadius(r, w, h)
 
@@ -356,7 +356,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 	}
 	// if the color or width is changing for the next one, we have to stroke now
 	if bs.Color.Top != bs.Color.Right || bs.Width.Top.Dots != bs.Width.Right.Dots {
-		pc.PathDone()
+		pc.Draw()
 		pc.MoveTo(xtr, ytri)
 	}
 
@@ -369,7 +369,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 		pc.CircularArc(xbri, ybri, r.Bottom, math32.DegToRad(0), math32.DegToRad(90))
 	}
 	if bs.Color.Right != bs.Color.Bottom || bs.Width.Right.Dots != bs.Width.Bottom.Dots {
-		pc.PathDone()
+		pc.Draw()
 		pc.MoveTo(xbri, ybr)
 	}
 
@@ -382,7 +382,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 		pc.CircularArc(xbli, ybli, r.Left, math32.DegToRad(90), math32.DegToRad(180))
 	}
 	if bs.Color.Bottom != bs.Color.Left || bs.Width.Bottom.Dots != bs.Width.Left.Dots {
-		pc.PathDone()
+		pc.Draw()
 		pc.MoveTo(xbl, ybli)
 	}
 
@@ -395,7 +395,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 		pc.CircularArc(xtli, ytli, r.Top, math32.DegToRad(180), math32.DegToRad(270))
 	}
 	pc.LineTo(xtli, ytl)
-	pc.PathDone()
+	pc.Draw()
 }
 
 // RoundedShadowBlur draws a standard rounded rectangle
@@ -413,7 +413,7 @@ func (pc *Painter) Border(x, y, w, h float32, bs styles.Border) {
 func (pc *Painter) RoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h float32, r sides.Floats) {
 	if blurSigma <= 0 || radiusFactor <= 0 {
 		pc.RoundedRectangleSides(x, y, w, h, r)
-		pc.PathDone()
+		pc.Draw()
 		return
 	}
 	x = math32.Floor(x)
@@ -433,7 +433,7 @@ func (pc *Painter) RoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h float32
 
 	pc.Stroke.Color = nil
 	pc.RoundedRectangleSides(x+br, y+br, w-2*br, h-2*br, r)
-	pc.PathDone()
+	pc.Draw()
 	pc.Stroke.Color = pc.Fill.Color
 	pc.Fill.Color = nil
 	pc.Stroke.Width.Dots = 1.5 // 1.5 is the key number: 1 makes lines very transparent overall
@@ -441,7 +441,7 @@ func (pc *Painter) RoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h float32
 		bo := br - float32(i)
 		pc.Stroke.Opacity = b * origOpacity
 		pc.RoundedRectangleSides(x+bo, y+bo, w-2*bo, h-2*bo, r)
-		pc.PathDone()
+		pc.Draw()
 
 	}
 	pc.Stroke = origStroke

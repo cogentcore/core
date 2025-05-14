@@ -61,7 +61,7 @@ func (g *Path) Render(sv *SVG) {
 		return
 	}
 	pc.State.Path = g.Data.Clone()
-	pc.PathDone()
+	pc.Draw()
 
 	mrk_start := sv.MarkerByName(g, "marker-start")
 	mrk_end := sv.MarkerByName(g, "marker-end")

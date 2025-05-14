@@ -51,7 +51,7 @@ func (g *Line) Render(sv *SVG) {
 		return
 	}
 	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	pc.PathDone()
+	pc.Draw()
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)

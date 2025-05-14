@@ -67,7 +67,7 @@ func TestRender(t *testing.T) {
 		pc.Fill.Color = colors.Uniform(colors.White)
 		// pc.Stroke.Width.SetDot(1) // use dots directly to render in literal pixels
 		pc.Border(0, 0, 300, 300, bs)
-		pc.PathDone() // actually render path that has been setup
+		pc.Draw() // actually render path that has been setup
 
 		slices.Reverse(imgs)
 		// next draw a rounded rectangle
@@ -78,7 +78,7 @@ func TestRender(t *testing.T) {
 		pc.Stroke.Width.Dot(10)
 		bs.ToDots(&pc.UnitContext)
 		pc.Border(60, 60, 150, 100, bs)
-		pc.PathDone()
+		pc.Draw()
 
 		tsty := text.NewStyle()
 		fsty := rich.NewStyle()
@@ -107,7 +107,7 @@ func TestPaintPath(t *testing.T) {
 			pc.Fill.Color = colors.Uniform(colors.Yellow)
 			pc.Stroke.Width.Dot(3)
 			f(pc)
-			pc.PathDone()
+			pc.Draw()
 		})
 	}
 	test("line-to", func(pc *Painter) {
@@ -147,7 +147,7 @@ func TestPaintPath(t *testing.T) {
 	test("clip-bounds", func(pc *Painter) {
 		pc.PushContext(pc.Paint, render.NewBounds(50, 50, 100, 80, sides.NewFloats(5.0, 10.0, 15.0, 20.0)))
 		pc.RoundedRectangleSides(50, 50, 100, 80, sides.NewFloats(10.0, 20.0, 15.0, 5.0))
-		pc.PathDone()
+		pc.Draw()
 		pc.PopContext()
 	})
 	test("circle", func(pc *Painter) {
@@ -202,13 +202,13 @@ func TestPaintFill(t *testing.T) {
 		pc.Fill.Color = colors.Uniform(colors.Purple)
 		pc.Stroke.Color = nil
 		pc.Rectangle(50, 25, 150, 200)
-		pc.PathDone()
+		pc.Draw()
 	})
 	test("stroke", func(pc *Painter) {
 		pc.Fill.Color = nil
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.Rectangle(50, 25, 150, 200)
-		pc.PathDone()
+		pc.Draw()
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear
@@ -216,12 +216,12 @@ func TestPaintFill(t *testing.T) {
 		pc.Fill.Color = colors.Uniform(colors.Purple)
 		pc.Stroke.Color = nil
 		pc.Rectangle(50, 25, 150, 200)
-		pc.PathDone()
+		pc.Draw()
 	})
 	test("fill-stroke-clear-stroke", func(pc *Painter) {
 		pc.Fill.Color = nil
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.Rectangle(50, 25, 150, 200)
-		pc.PathDone()
+		pc.Draw()
 	})
 }

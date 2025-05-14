@@ -157,12 +157,12 @@ func (m *Meter) Render() {
 
 		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, 0, 2*math32.Pi)
 		pc.Stroke.Color = st.Background
-		pc.PathDone()
+		pc.Draw()
 
 		if m.ValueColor != nil {
 			pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
 			pc.Stroke.Color = m.ValueColor
-			pc.PathDone()
+			pc.Draw()
 		}
 		if txt != nil {
 			pc.TextLines(txt, c.Sub(toff))
@@ -175,12 +175,12 @@ func (m *Meter) Render() {
 
 	pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, math32.Pi, 2*math32.Pi)
 	pc.Stroke.Color = st.Background
-	pc.PathDone()
+	pc.Draw()
 
 	if m.ValueColor != nil {
 		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, math32.Pi, (1+prop)*math32.Pi)
 		pc.Stroke.Color = m.ValueColor
-		pc.PathDone()
+		pc.Draw()
 	}
 	if txt != nil {
 		pc.TextLines(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))

@@ -60,7 +60,7 @@ func (g *Rect) Render(sv *SVG) {
 		// although that would be easy to add TODO:
 		pc.RoundedRectangleSides(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, sides.NewFloats(g.Radius.X))
 	}
-	pc.PathDone()
+	pc.Draw()
 	g.RenderChildren(sv)
 }
 

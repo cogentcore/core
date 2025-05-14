@@ -165,10 +165,10 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 	}
 	pc.Stroke.Color = colors.Scheme.OnSurface
 	pc.Rectangle(0, 0, 1, 1)
-	pc.PathDone()
+	pc.Draw()
 	pc.Fill.Color = nil
 	pc.Line(0, y, 1, y)
-	pc.PathDone()
+	pc.Draw()
 	if gi.Stroke {
 		pc.Stroke.Width.Dp(2)
 		pc.Stroke.Color = colors.Scheme.OnSurface
@@ -224,7 +224,7 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 		gp = gp.Scale(sx, sy)
 	}
 	pc.State.Path = gp
-	pc.PathDone()
+	pc.Draw()
 
 	// Points
 	if !gi.Points {
@@ -249,7 +249,7 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 			pc.Circle(p2x, p2y, radius)
 		}
 	}
-	pc.PathDone()
+	pc.Draw()
 
 	radius *= 0.8
 	pc.Stroke.Color = nil
@@ -267,7 +267,7 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 			pc.Circle(p1x, p1y, radius)
 		}
 	}
-	pc.PathDone()
+	pc.Draw()
 
 	pc.Stroke.Color = colors.Scheme.Error.Base
 	pc.Fill.Color = nil
@@ -288,6 +288,6 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 			pc.Line(p1x, p1y, p2x, p2y)
 		}
 	}
-	pc.PathDone()
+	pc.Draw()
 
 }

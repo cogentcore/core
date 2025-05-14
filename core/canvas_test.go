@@ -18,13 +18,13 @@ func TestCanvas(t *testing.T) {
 		pc.Stroke.Color = colors.Uniform(colors.Blue)
 		pc.MoveTo(0.15, 0.3)
 		pc.LineTo(0.3, 0.15)
-		pc.PathDone()
+		pc.Draw()
 		pc.Stroke.Color = nil
 
 		pc.FillBox(math32.Vec2(0.7, 0.3), math32.Vec2(0.2, 0.5), colors.Scheme.Success.Container)
 		pc.Fill.Color = colors.Uniform(colors.Orange)
 		pc.Circle(0.4, 0.5, 0.15)
-		pc.PathDone()
+		pc.Draw()
 	})
 	b.AssertRender(t, "canvas/basic")
 }

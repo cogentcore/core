@@ -23,7 +23,7 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.MoveTo(0, 0)
     pc.LineTo(1, 1)
     pc.Stroke.Color = colors.Scheme.Error.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -36,7 +36,7 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Stroke.Color = colors.Scheme.Error.Base
     pc.Stroke.Width.Dp(8)
     pc.ToDots()
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -46,7 +46,7 @@ You can draw circles:
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.5, 0.5, 0.5)
     pc.Fill.Color = colors.Scheme.Success.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -56,14 +56,14 @@ You can combine any number of canvas rendering operations:
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.6, 0.6, 0.15)
     pc.Fill.Color = colors.Scheme.Warn.Base
-    pc.PathDone()
+    pc.Draw()
 
     pc.MoveTo(0.7, 0.2)
     pc.LineTo(0.2, 0.7)
     pc.Stroke.Color = colors.Scheme.Primary.Base
     pc.Stroke.Width.Dp(16)
     pc.ToDots()
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -74,7 +74,7 @@ t := float32(0)
 c := core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Circle(0.5, 0.5, 0.5*math32.Sin(t/500))
     pc.Fill.Color = colors.Scheme.Success.Base
-    pc.PathDone()
+    pc.Draw()
 })
 c.Animate(func(a *core.Animation) {
     t += a.Dt
@@ -88,7 +88,7 @@ You can draw ellipses:
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.Ellipse(0.5, 0.5, 0.5, 0.25)
     pc.Fill.Color = colors.Scheme.Success.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -98,7 +98,7 @@ You can draw elliptical arcs:
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.EllipticalArc(0.5, 0.5, 0.5, 0.25, math32.Pi, 2*math32.Pi)
     pc.Fill.Color = colors.Scheme.Success.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -108,7 +108,7 @@ You can draw regular polygons:
 core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.RegularPolygon(6, 0.5, 0.5, 0.5, math32.Pi)
     pc.Fill.Color = colors.Scheme.Success.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -119,7 +119,7 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.MoveTo(0, 0)
     pc.QuadTo(0.5, 0.25, 1, 1)
     pc.Stroke.Color = colors.Scheme.Error.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 
@@ -130,7 +130,7 @@ core.NewCanvas(b).SetDraw(func(pc *paint.Painter) {
     pc.MoveTo(0, 0)
     pc.CubeTo(0.5, 0.25, 0.25, 0.5, 1, 1)
     pc.Stroke.Color = colors.Scheme.Error.Base
-    pc.PathDone()
+    pc.Draw()
 })
 ```
 

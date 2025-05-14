@@ -372,7 +372,7 @@ func (wb *WidgetBase) EndRender() {
 			pc.Fill.Opacity = 0.2
 		}
 		pc.Rectangle(pos.X, pos.Y, sz.X, sz.Y)
-		pc.PathDone()
+		pc.Draw()
 		// restore
 		pc.Fill.Opacity = pcop
 		pc.Fill.Color = pcfc

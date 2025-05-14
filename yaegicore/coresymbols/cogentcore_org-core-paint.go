@@ -12,7 +12,9 @@ func init() {
 		// function, constant and variable definitions
 		"ClampBorderRadius": reflect.ValueOf(paint.ClampBorderRadius),
 		"EdgeBlurFactors":   reflect.ValueOf(paint.EdgeBlurFactors),
+		"NewImageRenderer":  reflect.ValueOf(&paint.NewImageRenderer).Elem(),
 		"NewPainter":        reflect.ValueOf(paint.NewPainter),
+		"NewSVGRenderer":    reflect.ValueOf(&paint.NewSVGRenderer).Elem(),
 		"NewSourceRenderer": reflect.ValueOf(&paint.NewSourceRenderer).Elem(),
 
 		// type definitions

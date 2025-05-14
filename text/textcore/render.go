@@ -291,7 +291,7 @@ func (ed *Base) renderLineNumbersBox() {
 	sz := epos.Sub(spos)
 	pc.Fill.Color = ed.LineNumberColor
 	pc.RoundedRectangleSides(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
-	pc.PathDone()
+	pc.Draw()
 }
 
 // renderLineNumber renders given line number at given li index.
@@ -339,7 +339,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 		center.X += 0.3 * ed.charSize.X
 		pc.Fill.Color = lineColor
 		pc.Circle(center.X, center.Y, r)
-		pc.PathDone()
+		pc.Draw()
 	}
 }
 

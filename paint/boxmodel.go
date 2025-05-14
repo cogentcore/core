@@ -58,7 +58,7 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 		if encroach { // if we encroach, we must limit ourselves to the parent radius
 			pc.Fill.Color = pabg
 			pc.RoundedRectangleSides(pos.X, pos.Y, size.X, size.Y, radius)
-			pc.PathDone()
+			pc.Draw()
 		} else {
 			pc.BlitBox(pos, size, pabg)
 		}
@@ -103,7 +103,7 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 		pc.Fill.Color = st.ActualBackground
 		// no border; fill on
 		pc.RoundedRectangleSides(mpos.X, mpos.Y, msize.X, msize.Y, radius)
-		pc.PathDone()
+		pc.Draw()
 	}
 
 	// now that we have drawn background color
