@@ -102,7 +102,9 @@ func (fb *Browser) OpenFontData(b []byte, index int) error {
 	if errors.Log(err) != nil {
 		return err
 	}
+	// fmt.Println("number of faces:", len(faces), "index:", index)
 	fb.Font = faces[index]
+	// fb.Font = faces[0]
 	fb.UpdateRuneMap()
 	fb.Update()
 	return nil

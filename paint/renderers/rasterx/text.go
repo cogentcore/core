@@ -164,11 +164,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		case font.GlyphOutline:
 			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos, identity)
 		case font.GlyphBitmap:
-			if format.Outline != nil {
-				rs.GlyphOutline(ctx, run, g, *format.Outline, fill, stroke, bb, pos, identity)
-			} else {
-				rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
-			}
+			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
 		case font.GlyphSVG:
 			rs.GlyphSVG(ctx, run, g, format.Source, bb, pos, identity)
 		}
