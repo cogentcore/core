@@ -14,6 +14,7 @@ import (
 	"image/draw"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/paint/pimage"
 )
@@ -41,8 +42,12 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	// Fast path for [image.Uniform]
 	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
-		rs.ctx.Set("fillStyle", rs.imageToStyle(u))
-		rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
+		if u.C == colors.Transparent {
+			rs.ctx.Call("clearRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
+		} else {
+			rs.ctx.Set("fillStyle", rs.imageToStyle(u))
+			rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
+		}
 		return
 	}
 
