@@ -201,8 +201,8 @@ func (sc *Scene) Init() {
 		if sm == nil {
 			return
 		}
-		sm.mu.RLock()
-		defer sm.mu.RUnlock()
+		sm.Lock()
+		defer sm.Unlock()
 
 		if sm.stack.Len() < 2 {
 			return
