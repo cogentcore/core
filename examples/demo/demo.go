@@ -78,9 +78,9 @@ func text(ts *core.Tabs) {
 		s := strcase.ToSentence(typ.String())
 		core.NewText(tab).SetType(typ).SetText(s)
 	}
-	core.NewText(tab).SetText("Emojis: 🧁🍰🎁 !!")
-	core.NewText(tab).SetText("Hebrew and other RTL text: אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, Let there be light וּבְכָל-נַפְשְׁךָ,")
-	core.NewText(tab).SetText("Asian characters: 国際化活動")
+	core.NewText(tab).SetText("Emojis: 🧁🍰🎁")
+	core.NewText(tab).SetText("Hebrew/RTL: אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, Let there be light וּבְכָל-נַפְשְׁךָ,")
+	core.NewText(tab).SetText("Chinese/Japanese/Korean: 国際化活動・計算機科学を勉強する・한국어")
 }
 
 func makeRow(parent core.Widget) *core.Frame {
