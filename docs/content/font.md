@@ -4,7 +4,13 @@ Categories = ["Concepts"]
 
 Apps come with the default **fonts** of [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans) and [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono). Apps automatically use system fonts for international text and emojis, so all characters are rendered in some font if possible. You can add custom fonts to your app on all platforms.
 
+## Styles
+
+To specify the font used for [[text]], see [[styles#font family]] styles.
+
 ## Custom fonts
+
+**Note:** after you get your custom font set up by following the steps below, see [[styles#font family]] for how to use it.
 
 ### Desktop and mobile
 

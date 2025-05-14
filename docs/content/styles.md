@@ -289,7 +289,7 @@ core.NewButton(fr).SetText("Fifth")
 
 ## Text
 
-You can customize the appearance of text with various properties.
+You can customize the appearance of [[text]] with various properties.
 
 ### Font family
 
