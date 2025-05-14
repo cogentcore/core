@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -164,6 +165,14 @@ func (sc *Scene) layoutScene() {
 func (sc *Scene) layoutRenderScene() {
 	sc.layoutScene()
 	sc.RenderWidget()
+}
+
+func (sc *Scene) Render() {
+	if TheApp.Platform() == system.Web {
+		sc.Painter.Fill.Color = colors.Uniform(colors.Transparent)
+		sc.Painter.Clear()
+	}
+	sc.RenderStandardBox()
 }
 
 // doNeedsRender calls Render on tree from me for nodes

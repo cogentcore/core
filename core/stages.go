@@ -83,6 +83,7 @@ func (sm *stages) deleteStage(st *Stage) bool {
 	defer sm.Unlock()
 
 	l := sm.stack.Len()
+	fullWindow := st.FullWindow
 	got := false
 	for i := l - 1; i >= 0; i-- {
 		s := sm.stack.ValueByIndex(i)
@@ -97,7 +98,7 @@ func (sm *stages) deleteStage(st *Stage) bool {
 	if !got {
 		return false
 	}
-	if TheApp.Platform() == system.Web {
+	if fullWindow && TheApp.Platform() == system.Web {
 		sz := sm.renderWindow.mains.stack.Len()
 		if sz > 0 {
 			ts := sm.renderWindow.mains.stack.ValueByIndex(sz - 1)
