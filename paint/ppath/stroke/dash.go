@@ -5,7 +5,12 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
-package ppath
+package stroke
+
+import (
+	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/paint/ppath/intersect"
+)
 
 // Dash returns a new path that consists of dashes.
 // The elements in d specify the width of the dashes and gaps.
@@ -14,12 +19,12 @@ package ppath
 // twice in sequence. The offset specifies the offset used into d
 // (or negative offset into the path).
 // Dash will be applied to each subpath independently.
-func (p Path) Dash(offset float32, d ...float32) Path {
+func Dash(p ppath.Path, offset float32, d ...float32) ppath.Path {
 	offset, d = dashCanonical(offset, d)
 	if len(d) == 0 {
 		return p
 	} else if len(d) == 1 && d[0] == 0.0 {
-		return Path{}
+		return ppath.Path{}
 	}
 
 	if len(d)%2 == 1 {
@@ -29,14 +34,14 @@ func (p Path) Dash(offset float32, d ...float32) Path {
 
 	i0, pos0 := dashStart(offset, d)
 
-	q := Path{}
+	q := ppath.Path{}
 	for _, ps := range p.Split() {
 		i := i0
 		pos := pos0
 
 		t := []float32{}
-		length := ps.Length()
-		for pos+d[i]+Epsilon < length {
+		length := intersect.Length(ps)
+		for pos+d[i]+ppath.Epsilon < length {
 			pos += d[i]
 			if 0.0 < pos {
 				t = append(t, pos)
@@ -53,8 +58,8 @@ func (p Path) Dash(offset float32, d ...float32) Path {
 			j0 = 1
 		}
 
-		qd := Path{}
-		pd := ps.SplitAt(t...)
+		qd := ppath.Path{}
+		pd := intersect.SplitAt(ps, t...)
 		for j := j0; j < len(pd)-1; j += 2 {
 			qd = qd.Append(pd[j])
 		}
@@ -98,7 +103,7 @@ func dashCanonical(offset float32, d []float32) (float32, []float32) {
 
 	// remove zeros except first and last
 	for i := 1; i < len(d)-1; i++ {
-		if Equal(d[i], 0.0) {
+		if ppath.Equal(d[i], 0.0) {
 			d[i-1] += d[i+1]
 			d = append(d[:i], d[i+2:]...)
 			i--
@@ -106,7 +111,7 @@ func dashCanonical(offset float32, d []float32) (float32, []float32) {
 	}
 
 	// remove first zero, collapse with second and last
-	if Equal(d[0], 0.0) {
+	if ppath.Equal(d[0], 0.0) {
 		if len(d) < 3 {
 			return 0.0, []float32{0.0}
 		}
@@ -116,7 +121,7 @@ func dashCanonical(offset float32, d []float32) (float32, []float32) {
 	}
 
 	// remove last zero, collapse with fist and second to last
-	if Equal(d[len(d)-1], 0.0) {
+	if ppath.Equal(d[len(d)-1], 0.0) {
 		if len(d) < 3 {
 			return 0.0, []float32{}
 		}
@@ -127,7 +132,7 @@ func dashCanonical(offset float32, d []float32) (float32, []float32) {
 
 	// if there are zeros or negatives, don't draw any dashes
 	for i := 0; i < len(d); i++ {
-		if d[i] < 0.0 || Equal(d[i], 0.0) {
+		if d[i] < 0.0 || ppath.Equal(d[i], 0.0) {
 			return 0.0, []float32{0.0}
 		}
 	}
@@ -137,7 +142,7 @@ REPEAT:
 	for len(d)%2 == 0 {
 		mid := len(d) / 2
 		for i := 0; i < mid; i++ {
-			if !Equal(d[i], d[mid+i]) {
+			if !ppath.Equal(d[i], d[mid+i]) {
 				break REPEAT
 			}
 		}
@@ -146,7 +151,7 @@ REPEAT:
 	return offset, d
 }
 
-func (p Path) checkDash(offset float32, d []float32) ([]float32, bool) {
+func checkDash(p ppath.Path, offset float32, d []float32) ([]float32, bool) {
 	offset, d = dashCanonical(offset, d)
 	if len(d) == 0 {
 		return d, true // stroke without dashes
@@ -154,7 +159,7 @@ func (p Path) checkDash(offset float32, d []float32) ([]float32, bool) {
 		return d[:0], false // no dashes, no stroke
 	}
 
-	length := p.Length()
+	length := intersect.Length(p)
 	i, pos := dashStart(offset, d)
 	if length <= d[i]-pos {
 		if i%2 == 0 {

@@ -61,8 +61,8 @@ func CmdLen(cmd float32) int {
 	return cmdLens[int(cmd)]
 }
 
-// toArcFlags converts to the largeArc and sweep boolean flags given its value in the path.
-func toArcFlags(cmd float32) (bool, bool) {
+// ToArcFlags converts to the largeArc and sweep boolean flags given its value in the path.
+func ToArcFlags(cmd float32) (bool, bool) {
 	large := (cmd == 1.0 || cmd == 3.0)
 	sweep := (cmd == 2.0 || cmd == 3.0)
 	return large, sweep
@@ -290,7 +290,7 @@ func (p Path) Join(q Path) Path {
 	case CubeTo:
 		p.CubeTo(d[1], d[2], d[3], d[4], d[5], d[6])
 	case ArcTo:
-		large, sweep := toArcFlags(d[4])
+		large, sweep := ToArcFlags(d[4])
 		p.ArcTo(d[1], d[2], d[3], large, sweep, d[5], d[6])
 	case Close:
 		p.Close()
@@ -378,7 +378,7 @@ func (p Path) ArcToPoints(i int) (rx, ry, phi float32, large, sweep bool, end ma
 	rx = p[i+1]
 	ry = p[i+2]
 	phi = p[i+3]
-	large, sweep = toArcFlags(p[i+4])
+	large, sweep = ToArcFlags(p[i+4])
 	end = math32.Vec2(p[i+5], p[i+6])
 	return
 }
@@ -448,7 +448,7 @@ func (p *Path) QuadTo(cpx, cpy, x, y float32) {
 	end := math32.Vector2{x, y}
 	if EqualPoint(start, end) && EqualPoint(start, cp) {
 		return
-	} else if !EqualPoint(start, end) && (EqualPoint(start, cp) || angleEqual(AngleBetween(end.Sub(start), cp.Sub(start)), 0.0)) && (EqualPoint(end, cp) || angleEqual(AngleBetween(end.Sub(start), end.Sub(cp)), 0.0)) {
+	} else if !EqualPoint(start, end) && (EqualPoint(start, cp) || AngleEqual(AngleBetween(end.Sub(start), cp.Sub(start)), 0.0)) && (EqualPoint(end, cp) || AngleEqual(AngleBetween(end.Sub(start), end.Sub(cp)), 0.0)) {
 		p.LineTo(end.X, end.Y)
 		return
 	}
@@ -470,7 +470,7 @@ func (p *Path) CubeTo(cpx1, cpy1, cpx2, cpy2, x, y float32) {
 	end := math32.Vector2{x, y}
 	if EqualPoint(start, end) && EqualPoint(start, cp1) && EqualPoint(start, cp2) {
 		return
-	} else if !EqualPoint(start, end) && (EqualPoint(start, cp1) || EqualPoint(end, cp1) || angleEqual(AngleBetween(end.Sub(start), cp1.Sub(start)), 0.0) && angleEqual(AngleBetween(end.Sub(start), end.Sub(cp1)), 0.0)) && (EqualPoint(start, cp2) || EqualPoint(end, cp2) || angleEqual(AngleBetween(end.Sub(start), cp2.Sub(start)), 0.0) && angleEqual(AngleBetween(end.Sub(start), end.Sub(cp2)), 0.0)) {
+	} else if !EqualPoint(start, end) && (EqualPoint(start, cp1) || EqualPoint(end, cp1) || AngleEqual(AngleBetween(end.Sub(start), cp1.Sub(start)), 0.0) && AngleEqual(AngleBetween(end.Sub(start), end.Sub(cp1)), 0.0)) && (EqualPoint(start, cp2) || EqualPoint(end, cp2) || AngleEqual(AngleBetween(end.Sub(start), cp2.Sub(start)), 0.0) && AngleEqual(AngleBetween(end.Sub(start), end.Sub(cp2)), 0.0)) {
 		p.LineTo(end.X, end.Y)
 		return
 	}
@@ -508,13 +508,13 @@ func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 		rot += math32.Pi / 2.0
 	}
 
-	phi := angleNorm(rot)
+	phi := AngleNorm(rot)
 	if math32.Pi <= phi { // phi is canonical within 0 <= phi < 180
 		phi -= math32.Pi
 	}
 
 	// scale ellipse if rx and ry are too small
-	lambda := ellipseRadiiCorrection(start, rx, ry, phi, end)
+	lambda := EllipseRadiiCorrection(start, rx, ry, phi, end)
 	if lambda > 1.0 {
 		rx *= lambda
 		ry *= lambda
@@ -620,44 +620,4 @@ func (p *Path) Close() {
 		}
 	}
 	*p = append(*p, Close, end.X, end.Y, Close)
-}
-
-// optimizeClose removes a superfluous first line segment in-place
-// of a subpath. If both the first and last segment are line segments
-// and are colinear, move the start of the path forward one segment
-func (p *Path) optimizeClose() {
-	if len(*p) == 0 || (*p)[len(*p)-1] != Close {
-		return
-	}
-
-	// find last MoveTo
-	end := math32.Vector2{}
-	iMoveTo := len(*p)
-	for 0 < iMoveTo {
-		cmd := (*p)[iMoveTo-1]
-		iMoveTo -= CmdLen(cmd)
-		if cmd == MoveTo {
-			end = math32.Vec2((*p)[iMoveTo+1], (*p)[iMoveTo+2])
-			break
-		}
-	}
-
-	if (*p)[iMoveTo] == MoveTo && (*p)[iMoveTo+CmdLen(MoveTo)] == LineTo && iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo) < len(*p)-CmdLen(Close) {
-		// replace Close + MoveTo + LineTo by Close + MoveTo if equidirectional
-		// move Close and MoveTo forward along the path
-		start := math32.Vec2((*p)[len(*p)-CmdLen(Close)-3], (*p)[len(*p)-CmdLen(Close)-2])
-		nextEnd := math32.Vec2((*p)[iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo)-3], (*p)[iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo)-2])
-		if Equal(AngleBetween(end.Sub(start), nextEnd.Sub(end)), 0.0) {
-			// update Close
-			(*p)[len(*p)-3] = nextEnd.X
-			(*p)[len(*p)-2] = nextEnd.Y
-
-			// update MoveTo
-			(*p)[iMoveTo+1] = nextEnd.X
-			(*p)[iMoveTo+2] = nextEnd.Y
-
-			// remove LineTo
-			*p = append((*p)[:iMoveTo+CmdLen(MoveTo)], (*p)[iMoveTo+CmdLen(MoveTo)+CmdLen(LineTo):]...)
-		}
-	}
 }

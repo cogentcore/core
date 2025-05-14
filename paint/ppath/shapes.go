@@ -301,16 +301,7 @@ func (p *Path) Grid(w, h float32, nx, ny int, r float32) *Path {
 	return p
 }
 
-// EllipsePos adds the position on the ellipse at angle theta.
-func EllipsePos(rx, ry, phi, cx, cy, theta float32) math32.Vector2 {
-	sintheta, costheta := math32.Sincos(theta)
-	sinphi, cosphi := math32.Sincos(phi)
-	x := cx + rx*costheta*cosphi - ry*sintheta*sinphi
-	y := cy + rx*costheta*sinphi + ry*sintheta*cosphi
-	return math32.Vector2{x, y}
-}
-
-func arcToQuad(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
+func ArcToQuad(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
 	p := Path{}
 	p.MoveTo(start.X, start.Y)
 	for _, bezier := range ellipseToQuadraticBeziers(start, rx, ry, phi, large, sweep, end) {
@@ -319,7 +310,7 @@ func arcToQuad(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end
 	return p
 }
 
-func arcToCube(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
+func ArcToCube(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
 	p := Path{}
 	p.MoveTo(start.X, start.Y)
 	for _, bezier := range ellipseToCubicBeziers(start, rx, ry, phi, large, sweep, end) {

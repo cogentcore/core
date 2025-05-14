@@ -9,11 +9,37 @@ package ppath
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"cogentcore.org/core/math32"
 	"github.com/tdewolff/parse/v2/strconv"
 )
+
+type num float32
+
+func (f num) String() string {
+	s := fmt.Sprintf("%.*g", Precision, f)
+	if num(math.MaxInt32) < f || f < num(math.MinInt32) {
+		if i := strings.IndexAny(s, ".eE"); i == -1 {
+			s += ".0"
+		}
+	}
+	return string(MinifyNumber([]byte(s), Precision))
+}
+
+type dec float32
+
+func (f dec) String() string {
+	s := fmt.Sprintf("%.*f", Precision, f)
+	s = string(MinifyDecimal([]byte(s), Precision))
+	if dec(math.MaxInt32) < f || f < dec(math.MinInt32) {
+		if i := strings.IndexByte(s, '.'); i == -1 {
+			s += ".0"
+		}
+	}
+	return s
+}
 
 func skipCommaWhitespace(path []byte) int {
 	i := 0
@@ -222,7 +248,7 @@ func (p Path) String() string {
 			fmt.Fprintf(&sb, "C%g %g %g %g %g %g", p[i+1], p[i+2], p[i+3], p[i+4], p[i+5], p[i+6])
 		case ArcTo:
 			rot := math32.RadToDeg(p[i+3])
-			large, sweep := toArcFlags(p[i+4])
+			large, sweep := ToArcFlags(p[i+4])
 			sLarge := "0"
 			if large {
 				sLarge = "1"
@@ -275,7 +301,7 @@ func (p Path) ToSVG() string {
 		case ArcTo:
 			rx, ry := p[i+1], p[i+2]
 			rot := math32.RadToDeg(p[i+3])
-			large, sweep := toArcFlags(p[i+4])
+			large, sweep := ToArcFlags(p[i+4])
 			x, y = p[i+5], p[i+6]
 			sLarge := "0"
 			if large {
@@ -321,7 +347,7 @@ func (p Path) ToPS() string {
 			start = math32.Vector2{x, y}
 			if cmd == QuadTo {
 				x, y = p[i+3], p[i+4]
-				cp1, cp2 = quadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
+				cp1, cp2 = QuadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
 			} else {
 				cp1 = math32.Vec2(p[i+1], p[i+2])
 				cp2 = math32.Vec2(p[i+3], p[i+4])
@@ -331,10 +357,10 @@ func (p Path) ToPS() string {
 		case ArcTo:
 			x0, y0 := x, y
 			rx, ry, phi := p[i+1], p[i+2], p[i+3]
-			large, sweep := toArcFlags(p[i+4])
+			large, sweep := ToArcFlags(p[i+4])
 			x, y = p[i+5], p[i+6]
 
-			cx, cy, theta0, theta1 := ellipseToCenter(x0, y0, rx, ry, phi, large, sweep, x, y)
+			cx, cy, theta0, theta1 := EllipseToCenter(x0, y0, rx, ry, phi, large, sweep, x, y)
 			theta0 = math32.RadToDeg(theta0)
 			theta1 = math32.RadToDeg(theta1)
 			rot := math32.RadToDeg(phi)
@@ -375,7 +401,7 @@ func (p Path) ToPDF() string {
 			start = math32.Vector2{x, y}
 			if cmd == QuadTo {
 				x, y = p[i+3], p[i+4]
-				cp1, cp2 = quadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
+				cp1, cp2 = QuadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
 			} else {
 				cp1 = math32.Vec2(p[i+1], p[i+2])
 				cp2 = math32.Vec2(p[i+3], p[i+4])

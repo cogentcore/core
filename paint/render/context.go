@@ -103,8 +103,9 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 		bounds = &parent.Bounds
 	}
 	ctx.SetBounds(bounds)
+	// todo: not clear if following are needed:
 	// ctx.Bounds.Path = ctx.Bounds.Path.And(parent.Bounds.Path) // intersect
-	ctx.ClipPath = ctx.Style.ClipPath.And(parent.ClipPath)
+	// ctx.ClipPath = ctx.Style.ClipPath.And(parent.ClipPath)
 	ctx.Mask = parent.Mask // todo: intersect with our own mask
 }
 

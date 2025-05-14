@@ -79,7 +79,7 @@ func (s *Scanner) Arc() (float32, float32, float32, bool, bool) {
 		panic("must be arc")
 	}
 	i := s.i - CmdLen(s.p[s.i]) + 1
-	large, sweep := toArcFlags(s.p[i+4])
+	large, sweep := ToArcFlags(s.p[i+4])
 	return s.p[i+1], s.p[i+2], s.p[i+3], large, sweep
 }
 
@@ -160,7 +160,7 @@ func (s *ReverseScanner) Arc() (float32, float32, float32, bool, bool) {
 	if s.p[s.i] != ArcTo {
 		panic("must be arc")
 	}
-	large, sweep := toArcFlags(s.p[s.i+4])
+	large, sweep := ToArcFlags(s.p[s.i+4])
 	return s.p[s.i+1], s.p[s.i+2], s.p[s.i+3], large, sweep
 }
 

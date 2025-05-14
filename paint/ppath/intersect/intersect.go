@@ -5,7 +5,7 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
-package ppath
+package intersect
 
 import (
 	"fmt"
@@ -16,6 +16,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 )
 
 // BentleyOttmannEpsilon is the snap rounding grid used by the Bentley-Ottmann algorithm.
@@ -27,48 +28,48 @@ var BentleyOttmannEpsilon = float32(1e-8)
 // An intersection is tangent only when it is at (x,y), i.e. the start of the ray. The parameter T
 // along the ray is zero at the start but NaN otherwise. Intersections are sorted along the ray.
 // This function runs in O(n) with n the number of path segments.
-func (p Path) RayIntersections(x, y float32) []Intersection {
+func RayIntersections(p ppath.Path, x, y float32) []Intersection {
 	var start, end, cp1, cp2 math32.Vector2
 	var zs []Intersection
 	for i := 0; i < len(p); {
 		cmd := p[i]
 		switch cmd {
-		case MoveTo:
+		case ppath.MoveTo:
 			end = p.EndPoint(i)
-		case LineTo, Close:
+		case ppath.LineTo, ppath.Close:
 			end = p.EndPoint(i)
 			ymin := math32.Min(start.Y, end.Y)
 			ymax := math32.Max(start.Y, end.Y)
 			xmax := math32.Max(start.X, end.X)
-			if InInterval(y, ymin, ymax) && x <= xmax+Epsilon {
+			if inInterval(y, ymin, ymax) && x <= xmax+ppath.Epsilon {
 				zs = intersectionLineLine(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, end)
 			}
-		case QuadTo:
+		case ppath.QuadTo:
 			cp1, end = p.QuadToPoints(i)
 			ymin := math32.Min(math32.Min(start.Y, end.Y), cp1.Y)
 			ymax := math32.Max(math32.Max(start.Y, end.Y), cp1.Y)
 			xmax := math32.Max(math32.Max(start.X, end.X), cp1.X)
-			if InInterval(y, ymin, ymax) && x <= xmax+Epsilon {
+			if inInterval(y, ymin, ymax) && x <= xmax+ppath.Epsilon {
 				zs = intersectionLineQuad(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, cp1, end)
 			}
-		case CubeTo:
+		case ppath.CubeTo:
 			cp1, cp2, end = p.CubeToPoints(i)
 			ymin := math32.Min(math32.Min(start.Y, end.Y), math32.Min(cp1.Y, cp2.Y))
 			ymax := math32.Max(math32.Max(start.Y, end.Y), math32.Max(cp1.Y, cp2.Y))
 			xmax := math32.Max(math32.Max(start.X, end.X), math32.Max(cp1.X, cp2.X))
-			if InInterval(y, ymin, ymax) && x <= xmax+Epsilon {
+			if inInterval(y, ymin, ymax) && x <= xmax+ppath.Epsilon {
 				zs = intersectionLineCube(zs, math32.Vector2{x, y}, math32.Vector2{xmax + 1.0, y}, start, cp1, cp2, end)
 			}
-		case ArcTo:
+		case ppath.ArcTo:
 			var rx, ry, phi float32
 			var large, sweep bool
 			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
-			cx, cy, theta0, theta1 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
-			if InInterval(y, cy-math32.Max(rx, ry), cy+math32.Max(rx, ry)) && x <= cx+math32.Max(rx, ry)+Epsilon {
+			cx, cy, theta0, theta1 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
+			if inInterval(y, cy-math32.Max(rx, ry), cy+math32.Max(rx, ry)) && x <= cx+math32.Max(rx, ry)+ppath.Epsilon {
 				zs = intersectionLineEllipse(zs, math32.Vector2{x, y}, math32.Vector2{cx + rx + 1.0, y}, math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1)
 			}
 		}
-		i += CmdLen(cmd)
+		i += ppath.CmdLen(cmd)
 		start = end
 	}
 	for i := range zs {
@@ -77,7 +78,7 @@ func (p Path) RayIntersections(x, y float32) []Intersection {
 		}
 	}
 	sort.SliceStable(zs, func(i, j int) bool {
-		if Equal(zs[i].X, zs[j].X) {
+		if ppath.Equal(zs[i].X, zs[j].X) {
 			return false
 		}
 		return zs[i].X < zs[j].X
@@ -125,85 +126,85 @@ var boInitPoolsOnce = sync.OnceFunc(func() {
 
 // Settle returns the "settled" path. It removes all self-intersections, orients all filling paths
 // CCW and all holes CW, and tries to split into subpaths if possible. Note that path p is
-// flattened unless q is already flat. Path q is implicitly closed. It runs in O((n + k) log n),
+// flattened unless q is already flat. ppath.Path q is implicitly closed. It runs in O((n + k) log n),
 // with n the sum of the number of segments, and k the number of intersections.
-func (p Path) Settle(fillRule FillRules) Path {
+func Settle(p ppath.Path, fillRule ppath.FillRules) ppath.Path {
 	return bentleyOttmann(p.Split(), nil, opSettle, fillRule)
 }
 
-// Settle is the same as Path.Settle, but faster if paths are already split.
-func (ps Paths) Settle(fillRule FillRules) Path {
+// SettlePaths is the same as [Settle], but faster if paths are already split.
+func SettlePaths(ps ppath.Paths, fillRule ppath.FillRules) ppath.Path {
 	return bentleyOttmann(ps, nil, opSettle, fillRule)
 }
 
 // And returns the boolean path operation of path p AND q, i.e. the intersection of both. It
 // removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. Path
+// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
 // q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
 // and k the number of intersections.
-func (p Path) And(q Path) Path {
-	return bentleyOttmann(p.Split(), q.Split(), opAND, NonZero)
+func And(p ppath.Path, q ppath.Path) ppath.Path {
+	return bentleyOttmann(p.Split(), q.Split(), opAND, ppath.NonZero)
 }
 
-// And is the same as Path.And, but faster if paths are already split.
-func (ps Paths) And(qs Paths) Path {
-	return bentleyOttmann(ps, qs, opAND, NonZero)
+// AndPaths is the same as [And], but faster if paths are already split.
+func AndPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
+	return bentleyOttmann(ps, qs, opAND, ppath.NonZero)
 }
 
 // Or returns the boolean path operation of path p OR q, i.e. the union of both. It
 // removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. Path
+// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
 // q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
 // and k the number of intersections.
-func (p Path) Or(q Path) Path {
-	return bentleyOttmann(p.Split(), q.Split(), opOR, NonZero)
+func Or(p ppath.Path, q ppath.Path) ppath.Path {
+	return bentleyOttmann(p.Split(), q.Split(), opOR, ppath.NonZero)
 }
 
-// Or is the same as Path.Or, but faster if paths are already split.
-func (ps Paths) Or(qs Paths) Path {
-	return bentleyOttmann(ps, qs, opOR, NonZero)
+// OrPaths is the same as ppath.Path.Or, but faster if paths are already split.
+func OrPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
+	return bentleyOttmann(ps, qs, opOR, ppath.NonZero)
 }
 
 // Xor returns the boolean path operation of path p XOR q, i.e. the symmetric difference of both.
 // It removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. Path
+// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
 // q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
 // and k the number of intersections.
-func (p Path) Xor(q Path) Path {
-	return bentleyOttmann(p.Split(), q.Split(), opXOR, NonZero)
+func Xor(p ppath.Path, q ppath.Path) ppath.Path {
+	return bentleyOttmann(p.Split(), q.Split(), opXOR, ppath.NonZero)
 }
 
-// Xor is the same as Path.Xor, but faster if paths are already split.
-func (ps Paths) Xor(qs Paths) Path {
-	return bentleyOttmann(ps, qs, opXOR, NonZero)
+// XorPaths is the same as [Xor], but faster if paths are already split.
+func XorPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
+	return bentleyOttmann(ps, qs, opXOR, ppath.NonZero)
 }
 
 // Not returns the boolean path operation of path p NOT q, i.e. the difference of both.
 // It removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. Path
+// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
 // q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
 // and k the number of intersections.
-func (p Path) Not(q Path) Path {
-	return bentleyOttmann(p.Split(), q.Split(), opNOT, NonZero)
+func Not(p ppath.Path, q ppath.Path) ppath.Path {
+	return bentleyOttmann(p.Split(), q.Split(), opNOT, ppath.NonZero)
 }
 
-// Not is the same as Path.Not, but faster if paths are already split.
-func (ps Paths) Not(qs Paths) Path {
-	return bentleyOttmann(ps, qs, opNOT, NonZero)
+// NotPaths is the same as ppath.Path.Not, but faster if paths are already split.
+func NotPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
+	return bentleyOttmann(ps, qs, opNOT, ppath.NonZero)
 }
 
 // DivideBy returns the boolean path operation of path p DIV q, i.e. p divided by q.
 // It removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. Path
+// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
 // q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
 // and k the number of intersections.
-func (p Path) DivideBy(q Path) Path {
-	return bentleyOttmann(p.Split(), q.Split(), opDIV, NonZero)
+func DivideBy(p ppath.Path, q ppath.Path) ppath.Path {
+	return bentleyOttmann(p.Split(), q.Split(), opDIV, ppath.NonZero)
 }
 
-// DivideBy is the same as PathivideBy, but faster if paths are already split.
-func (ps Paths) DivideBy(qs Paths) Path {
-	return bentleyOttmann(ps, qs, opDIV, NonZero)
+// DivideByPaths is the same as [DivideBy] but faster if paths are already split.
+func DivideByPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
+	return bentleyOttmann(ps, qs, opDIV, ppath.NonZero)
 }
 
 type SweepPoint struct {
@@ -301,7 +302,7 @@ func (q SweepEvents) Swap(i, j int) {
 	q[i], q[j] = q[j], q[i]
 }
 
-func (q *SweepEvents) AddPathEndpoints(p Path, seg int, clipping bool) int {
+func (q *SweepEvents) AddPathEndpoints(p ppath.Path, seg int, clipping bool) int {
 	if len(p) == 0 {
 		return seg
 	}
@@ -321,11 +322,11 @@ func (q *SweepEvents) AddPathEndpoints(p Path, seg int, clipping bool) int {
 		panic("path has NaN or Inf")
 	}
 	for i := 4; i < len(p); {
-		if p[i] != LineTo && p[i] != Close {
+		if p[i] != ppath.LineTo && p[i] != ppath.Close {
 			panic("non-flat paths not supported")
 		}
 
-		n := CmdLen(p[i])
+		n := ppath.CmdLen(p[i])
 		end := math32.Vector2{p[i+n-3], p[i+n-2]}
 		if math32.IsNaN(end.X) || math32.IsInf(end.X, 0.0) || math32.IsNaN(end.Y) || math32.IsInf(end.Y, 0.0) {
 			panic("path has NaN or Inf")
@@ -1568,7 +1569,7 @@ func (a eventSliceH) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
-func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule FillRules) {
+func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule ppath.FillRules) {
 	// cur is left-endpoint
 	if !cur.open {
 		cur.selfWindings = 1
@@ -1601,7 +1602,7 @@ func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule 
 	cur.other.inResult = cur.inResult
 }
 
-func (s *SweepPoint) InResult(op pathOp, fillRule FillRules) uint8 {
+func (s *SweepPoint) InResult(op pathOp, fillRule ppath.FillRules) uint8 {
 	lowerWindings, lowerOtherWindings := s.windings, s.otherWindings
 	upperWindings, upperOtherWindings := s.windings+s.selfWindings, s.otherWindings+s.otherSelfWindings
 	if s.clipping {
@@ -1662,7 +1663,7 @@ func (s *SweepPoint) InResult(op pathOp, fillRule FillRules) uint8 {
 	return 0
 }
 
-func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule FillRules) {
+func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule ppath.FillRules) {
 	// When merging overlapping segments, the order of the right-endpoints may have changed and
 	// thus be different from the order used to compute the sweep fields, here we reset the values
 	// for windings and otherWindings to be taken from the segment below (prev) which was updated
@@ -1711,7 +1712,7 @@ func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule FillRules) {
 	s.prev = prev
 }
 
-func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
+func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppath.Path {
 	// TODO: make public and add grid spacing argument
 	// TODO: support OpDIV, keeping only subject, or both subject and clipping subpaths
 	// TODO: add Intersects/Touches functions (return bool)
@@ -1752,7 +1753,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 	// - Segments may be vertical.
 	// - The clipping path is implicitly closed, it makes no sense if it is an open path.
 	// - The subject path is currently implicitly closed, but it is WIP to support open paths.
-	// - Paths are currently flattened, but supporting Bézier or elliptical arcs is a WIP.
+	// - ppath.Paths are currently flattened, but supporting Bézier or elliptical arcs is a WIP.
 
 	// An unaddressed problem in those works is that of numerical accuracies. The main problem is
 	// that calculating the intersections is not precise; the imprecision of the initial endpoints
@@ -1832,15 +1833,15 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 		qs = nil
 	} else if qs.Empty() {
 		if op == opAND {
-			return Path{}
+			return ppath.Path{}
 		}
-		return ps.Settle(fillRule)
+		return SettlePaths(ps, fillRule)
 	}
 	if ps.Empty() {
 		if qs != nil && (op == opOR || op == opXOR) {
-			return qs.Settle(fillRule)
+			return SettlePaths(qs, fillRule)
 		}
-		return Path{}
+		return ppath.Path{}
 	}
 
 	// ensure that X-monotone property holds for Béziers and arcs by breaking them up at their
@@ -1856,7 +1857,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 		}
 	}
 	for i := range ps {
-		ps[i] = ps[i].Flatten(Tolerance)
+		ps[i] = Flatten(ps[i], ppath.Tolerance)
 	}
 	if qs != nil {
 		for i, iMax := 0, len(qs); i < iMax; i++ {
@@ -1867,14 +1868,14 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 			}
 		}
 		for i := range qs {
-			qs[i] = qs[i].Flatten(Tolerance)
+			qs[i] = Flatten(qs[i], ppath.Tolerance)
 		}
 	}
 
 	// check for path bounding boxes to overlap
 	// TODO: cluster paths that overlap and treat non-overlapping clusters separately, this
 	// makes the algorithm "more linear"
-	R := Path{}
+	R := ppath.Path{}
 	var pOverlaps, qOverlaps []bool
 	if qs != nil {
 		pBounds := make([]math32.Box2, len(ps))
@@ -1889,20 +1890,20 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 		qOverlaps = make([]bool, len(qs))
 		for i := range ps {
 			for j := range qs {
-				if Touches(pBounds[i], qBounds[j]) {
+				if touches(pBounds[i], qBounds[j]) {
 					pOverlaps[i] = true
 					qOverlaps[j] = true
 				}
 			}
 			if !pOverlaps[i] && (op == opOR || op == opXOR || op == opNOT) {
 				// path bounding boxes do not overlap, thus no intersections
-				R = R.Append(ps[i].Settle(fillRule))
+				R = R.Append(Settle(ps[i], fillRule))
 			}
 		}
 		for j := range qs {
 			if !qOverlaps[j] && (op == opOR || op == opXOR) {
 				// path bounding boxes do not overlap, thus no intersections
-				R = R.Append(qs[j].Settle(fillRule))
+				R = R.Append(Settle(qs[j], fillRule))
 			}
 		}
 	}
@@ -2188,7 +2189,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 	status.Clear() // release all nodes (but not SweepPoints)
 
 	// build resulting polygons
-	var Ropen Path
+	var Ropen ppath.Path
 	for _, square := range squares {
 		for _, cur := range square.Events {
 			if cur.inResult == 0 {
@@ -2275,7 +2276,7 @@ func bentleyOttmann(ps, qs Paths, op pathOp, fillRule FillRules) Path {
 					for _, cur2 := range square.Events {
 						if 0 < cur2.inResult && cur2.open {
 							cur = cur2
-							Ropen = make(Path, len(R)-indexR-4)
+							Ropen = make(ppath.Path, len(R)-indexR-4)
 							copy(Ropen, R[indexR+4:])
 							R = R[:indexR]
 							goto BuildPath

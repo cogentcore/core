@@ -5,12 +5,13 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
-package ppath
+package intersect
 
 import (
 	"fmt"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 )
 
 // see https://github.com/signavio/svg-intersections
@@ -19,65 +20,65 @@ import (
 
 // intersect for path segments a and b, starting at a0 and b0.
 // Note that all intersection functions return up to two intersections.
-func intersectionSegment(zs Intersections, a0 math32.Vector2, a Path, b0 math32.Vector2, b Path) Intersections {
+func IntersectionSegment(zs Intersections, a0 math32.Vector2, a ppath.Path, b0 math32.Vector2, b ppath.Path) Intersections {
 	n := len(zs)
 	swapCurves := false
-	if a[0] == LineTo || a[0] == Close {
-		if b[0] == LineTo || b[0] == Close {
+	if a[0] == ppath.LineTo || a[0] == ppath.Close {
+		if b[0] == ppath.LineTo || b[0] == ppath.Close {
 			zs = intersectionLineLine(zs, a0, math32.Vec2(a[1], a[2]), b0, math32.Vec2(b[1], b[2]))
-		} else if b[0] == QuadTo {
+		} else if b[0] == ppath.QuadTo {
 			zs = intersectionLineQuad(zs, a0, math32.Vec2(a[1], a[2]), b0, math32.Vec2(b[1], b[2]), math32.Vec2(b[3], b[4]))
-		} else if b[0] == CubeTo {
+		} else if b[0] == ppath.CubeTo {
 			zs = intersectionLineCube(zs, a0, math32.Vec2(a[1], a[2]), b0, math32.Vec2(b[1], b[2]), math32.Vec2(b[3], b[4]), math32.Vec2(b[5], b[6]))
-		} else if b[0] == ArcTo {
+		} else if b[0] == ppath.ArcTo {
 			rx := b[1]
 			ry := b[2]
 			phi := b[3]
-			large, sweep := toArcFlags(b[4])
-			cx, cy, theta0, theta1 := ellipseToCenter(b0.X, b0.Y, rx, ry, phi, large, sweep, b[5], b[6])
+			large, sweep := ppath.ToArcFlags(b[4])
+			cx, cy, theta0, theta1 := ppath.EllipseToCenter(b0.X, b0.Y, rx, ry, phi, large, sweep, b[5], b[6])
 			zs = intersectionLineEllipse(zs, a0, math32.Vec2(a[1], a[2]), math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1)
 		}
-	} else if a[0] == QuadTo {
-		if b[0] == LineTo || b[0] == Close {
+	} else if a[0] == ppath.QuadTo {
+		if b[0] == ppath.LineTo || b[0] == ppath.Close {
 			zs = intersectionLineQuad(zs, b0, math32.Vec2(b[1], b[2]), a0, math32.Vec2(a[1], a[2]), math32.Vec2(a[3], a[4]))
 			swapCurves = true
-		} else if b[0] == QuadTo {
+		} else if b[0] == ppath.QuadTo {
 			panic("unsupported intersection for quad-quad")
-		} else if b[0] == CubeTo {
+		} else if b[0] == ppath.CubeTo {
 			panic("unsupported intersection for quad-cube")
-		} else if b[0] == ArcTo {
+		} else if b[0] == ppath.ArcTo {
 			panic("unsupported intersection for quad-arc")
 		}
-	} else if a[0] == CubeTo {
-		if b[0] == LineTo || b[0] == Close {
+	} else if a[0] == ppath.CubeTo {
+		if b[0] == ppath.LineTo || b[0] == ppath.Close {
 			zs = intersectionLineCube(zs, b0, math32.Vec2(b[1], b[2]), a0, math32.Vec2(a[1], a[2]), math32.Vec2(a[3], a[4]), math32.Vec2(a[5], a[6]))
 			swapCurves = true
-		} else if b[0] == QuadTo {
+		} else if b[0] == ppath.QuadTo {
 			panic("unsupported intersection for cube-quad")
-		} else if b[0] == CubeTo {
+		} else if b[0] == ppath.CubeTo {
 			panic("unsupported intersection for cube-cube")
-		} else if b[0] == ArcTo {
+		} else if b[0] == ppath.ArcTo {
 			panic("unsupported intersection for cube-arc")
 		}
-	} else if a[0] == ArcTo {
+	} else if a[0] == ppath.ArcTo {
 		rx := a[1]
 		ry := a[2]
 		phi := a[3]
-		large, sweep := toArcFlags(a[4])
-		cx, cy, theta0, theta1 := ellipseToCenter(a0.X, a0.Y, rx, ry, phi, large, sweep, a[5], a[6])
-		if b[0] == LineTo || b[0] == Close {
+		large, sweep := ppath.ToArcFlags(a[4])
+		cx, cy, theta0, theta1 := ppath.EllipseToCenter(a0.X, a0.Y, rx, ry, phi, large, sweep, a[5], a[6])
+		if b[0] == ppath.LineTo || b[0] == ppath.Close {
 			zs = intersectionLineEllipse(zs, b0, math32.Vec2(b[1], b[2]), math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1)
 			swapCurves = true
-		} else if b[0] == QuadTo {
+		} else if b[0] == ppath.QuadTo {
 			panic("unsupported intersection for arc-quad")
-		} else if b[0] == CubeTo {
+		} else if b[0] == ppath.CubeTo {
 			panic("unsupported intersection for arc-cube")
-		} else if b[0] == ArcTo {
+		} else if b[0] == ppath.ArcTo {
 			rx2 := b[1]
 			ry2 := b[2]
 			phi2 := b[3]
-			large2, sweep2 := toArcFlags(b[4])
-			cx2, cy2, theta20, theta21 := ellipseToCenter(b0.X, b0.Y, rx2, ry2, phi2, large2, sweep2, b[5], b[6])
+			large2, sweep2 := ppath.ToArcFlags(b[4])
+			cx2, cy2, theta20, theta21 := ppath.EllipseToCenter(b0.X, b0.Y, rx2, ry2, phi2, large2, sweep2, b[5], b[6])
 			zs = intersectionEllipseEllipse(zs, math32.Vector2{cx, cy}, math32.Vector2{rx, ry}, phi, theta0, theta1, math32.Vector2{cx2, cy2}, math32.Vector2{rx2, ry2}, phi2, theta20, theta21)
 		}
 	}
@@ -111,7 +112,7 @@ func (z Intersection) Into() bool {
 }
 
 func (z Intersection) Equals(o Intersection) bool {
-	return EqualPoint(z.Vector2, o.Vector2) && Equal(z.T[0], o.T[0]) && Equal(z.T[1], o.T[1]) && angleEqual(z.Dir[0], o.Dir[0]) && angleEqual(z.Dir[1], o.Dir[1]) && z.Tangent == o.Tangent && z.Same == o.Same
+	return ppath.EqualPoint(z.Vector2, o.Vector2) && ppath.Equal(z.T[0], o.T[0]) && ppath.Equal(z.T[1], o.T[1]) && ppath.AngleEqual(z.Dir[0], o.Dir[0]) && ppath.AngleEqual(z.Dir[1], o.Dir[1]) && z.Tangent == o.Tangent && z.Same == o.Same
 }
 
 func (z Intersection) String() string {
@@ -122,7 +123,7 @@ func (z Intersection) String() string {
 	if z.Same {
 		extra = " Same"
 	}
-	return fmt.Sprintf("({%v,%v} t={%v,%v} dir={%v°,%v°}%v)", numEps(z.Vector2.X), numEps(z.Vector2.Y), numEps(z.T[0]), numEps(z.T[1]), numEps(math32.RadToDeg(angleNorm(z.Dir[0]))), numEps(math32.RadToDeg(angleNorm(z.Dir[1]))), extra)
+	return fmt.Sprintf("({%v,%v} t={%v,%v} dir={%v°,%v°}%v)", numEps(z.Vector2.X), numEps(z.Vector2.Y), numEps(z.T[0]), numEps(z.T[1]), numEps(math32.RadToDeg(ppath.AngleNorm(z.Dir[0]))), numEps(math32.RadToDeg(ppath.AngleNorm(z.Dir[1]))), extra)
 }
 
 type Intersections []Intersection
@@ -154,14 +155,14 @@ func (zs Intersections) HasTangent() bool {
 
 func (zs Intersections) add(pos math32.Vector2, ta, tb, dira, dirb float32, tangent, same bool) Intersections {
 	// normalise T values between [0,1]
-	if ta < 0.0 { // || Equal(ta, 0.0) {
+	if ta < 0.0 { // || ppath.Equal(ta, 0.0) {
 		ta = 0.0
-	} else if 1.0 <= ta { // || Equal(ta, 1.0) {
+	} else if 1.0 <= ta { // || ppath.Equal(ta, 1.0) {
 		ta = 1.0
 	}
-	if tb < 0.0 { // || Equal(tb, 0.0) {
+	if tb < 0.0 { // || ppath.Equal(tb, 0.0) {
 		tb = 0.0
-	} else if 1.0 < tb { // || Equal(tb, 1.0) {
+	} else if 1.0 < tb { // || ppath.Equal(tb, 1.0) {
 		tb = 1.0
 	}
 	return append(zs, Intersection{pos, [2]float32{ta, tb}, [2]float32{dira, dirb}, tangent, same})
@@ -256,19 +257,19 @@ func intersectionLineLineBentleyOttmann(zs []math32.Vector2, a0, a1, b0, b1 math
 
 	// find intersections within +-Epsilon to avoid missing near intersections
 	ta := C.Cross(B) / denom
-	if ta < -Epsilon || 1.0+Epsilon < ta {
+	if ta < -ppath.Epsilon || 1.0+ppath.Epsilon < ta {
 		return zs
 	}
 
 	tb := A.Cross(C) / denom
-	if tb < -Epsilon || 1.0+Epsilon < tb {
+	if tb < -ppath.Epsilon || 1.0+ppath.Epsilon < tb {
 		return zs
 	}
 
 	// ta is snapped to 0.0 or 1.0 if very close
-	if ta <= Epsilon {
+	if ta <= ppath.Epsilon {
 		ta = 0.0
-	} else if 1.0-Epsilon <= ta {
+	} else if 1.0-ppath.Epsilon <= ta {
 		ta = 1.0
 	}
 
@@ -313,60 +314,60 @@ func intersectionLineLineBentleyOttmann(zs []math32.Vector2, a0, a1, b0, b1 math
 }
 
 func intersectionLineLine(zs Intersections, a0, a1, b0, b1 math32.Vector2) Intersections {
-	if EqualPoint(a0, a1) || EqualPoint(b0, b1) {
+	if ppath.EqualPoint(a0, a1) || ppath.EqualPoint(b0, b1) {
 		return zs // zero-length Close
 	}
 
 	da := a1.Sub(a0)
 	db := b1.Sub(b0)
-	anglea := Angle(da)
-	angleb := Angle(db)
+	anglea := ppath.Angle(da)
+	angleb := ppath.Angle(db)
 	div := da.Cross(db)
 
 	// divide by length^2 since otherwise the perpdot between very small segments may be
 	// below Epsilon
-	if length := da.Length() * db.Length(); Equal(div/length, 0.0) {
+	if length := da.Length() * db.Length(); ppath.Equal(div/length, 0.0) {
 		// parallel
-		if Equal(b0.Sub(a0).Cross(db), 0.0) {
+		if ppath.Equal(b0.Sub(a0).Cross(db), 0.0) {
 			// overlap, rotate to x-axis
 			a := a0.Rot(-anglea, math32.Vector2{}).X
 			b := a1.Rot(-anglea, math32.Vector2{}).X
 			c := b0.Rot(-anglea, math32.Vector2{}).X
 			d := b1.Rot(-anglea, math32.Vector2{}).X
-			if InInterval(a, c, d) && InInterval(b, c, d) {
+			if inInterval(a, c, d) && inInterval(b, c, d) {
 				// a-b in c-d or a-b == c-d
 				zs = zs.add(a0, 0.0, (a-c)/(d-c), anglea, angleb, true, true)
 				zs = zs.add(a1, 1.0, (b-c)/(d-c), anglea, angleb, true, true)
-			} else if InInterval(c, a, b) && InInterval(d, a, b) {
+			} else if inInterval(c, a, b) && inInterval(d, a, b) {
 				// c-d in a-b
 				zs = zs.add(b0, (c-a)/(b-a), 0.0, anglea, angleb, true, true)
 				zs = zs.add(b1, (d-a)/(b-a), 1.0, anglea, angleb, true, true)
-			} else if InInterval(a, c, d) {
+			} else if inInterval(a, c, d) {
 				// a in c-d
-				same := a < d-Epsilon || a < c-Epsilon
+				same := a < d-ppath.Epsilon || a < c-ppath.Epsilon
 				zs = zs.add(a0, 0.0, (a-c)/(d-c), anglea, angleb, true, same)
-				if a < d-Epsilon {
+				if a < d-ppath.Epsilon {
 					zs = zs.add(b1, (d-a)/(b-a), 1.0, anglea, angleb, true, true)
-				} else if a < c-Epsilon {
+				} else if a < c-ppath.Epsilon {
 					zs = zs.add(b0, (c-a)/(b-a), 0.0, anglea, angleb, true, true)
 				}
-			} else if InInterval(b, c, d) {
+			} else if inInterval(b, c, d) {
 				// b in c-d
-				same := c < b-Epsilon || d < b-Epsilon
-				if c < b-Epsilon {
+				same := c < b-ppath.Epsilon || d < b-ppath.Epsilon
+				if c < b-ppath.Epsilon {
 					zs = zs.add(b0, (c-a)/(b-a), 0.0, anglea, angleb, true, true)
-				} else if d < b-Epsilon {
+				} else if d < b-ppath.Epsilon {
 					zs = zs.add(b1, (d-a)/(b-a), 1.0, anglea, angleb, true, true)
 				}
 				zs = zs.add(a1, 1.0, (b-c)/(d-c), anglea, angleb, true, same)
 			}
 		}
 		return zs
-	} else if EqualPoint(a1, b0) {
+	} else if ppath.EqualPoint(a1, b0) {
 		// handle common cases with endpoints to avoid numerical issues
 		zs = zs.add(a1, 1.0, 0.0, anglea, angleb, true, false)
 		return zs
-	} else if EqualPoint(a0, b1) {
+	} else if ppath.EqualPoint(a0, b1) {
 		// handle common cases with endpoints to avoid numerical issues
 		zs = zs.add(a0, 0.0, 1.0, anglea, angleb, true, false)
 		return zs
@@ -374,8 +375,8 @@ func intersectionLineLine(zs Intersections, a0, a1, b0, b1 math32.Vector2) Inter
 
 	ta := db.Cross(a0.Sub(b0)) / div
 	tb := da.Cross(a0.Sub(b0)) / div
-	if InInterval(ta, 0.0, 1.0) && InInterval(tb, 0.0, 1.0) {
-		tangent := Equal(ta, 0.0) || Equal(ta, 1.0) || Equal(tb, 0.0) || Equal(tb, 1.0)
+	if inInterval(ta, 0.0, 1.0) && inInterval(tb, 0.0, 1.0) {
+		tangent := ppath.Equal(ta, 0.0) || ppath.Equal(ta, 1.0) || ppath.Equal(tb, 0.0) || ppath.Equal(tb, 1.0)
 		zs = zs.add(a0.Lerp(a1, ta), ta, tb, anglea, angleb, tangent, false)
 	}
 	return zs
@@ -383,7 +384,7 @@ func intersectionLineLine(zs Intersections, a0, a1, b0, b1 math32.Vector2) Inter
 
 // https://www.particleincell.com/2013/cubic-line-intersection/
 func intersectionLineQuad(zs Intersections, l0, l1, p0, p1, p2 math32.Vector2) Intersections {
-	if EqualPoint(l0, l1) {
+	if ppath.EqualPoint(l0, l1) {
 		return zs // zero-length Close
 	}
 
@@ -404,10 +405,10 @@ func intersectionLineQuad(zs Intersections, l0, l1, p0, p1, p2 math32.Vector2) I
 		}
 	}
 
-	dira := Angle(l1.Sub(l0))
+	dira := ppath.Angle(l1.Sub(l0))
 	horizontal := math32.Abs(l1.Y-l0.Y) <= math32.Abs(l1.X-l0.X)
 	for _, root := range roots {
-		if InInterval(root, 0.0, 1.0) {
+		if inInterval(root, 0.0, 1.0) {
 			var s float32
 			pos := quadraticBezierPos(p0, p1, p2, root)
 			if horizontal {
@@ -415,21 +416,21 @@ func intersectionLineQuad(zs Intersections, l0, l1, p0, p1, p2 math32.Vector2) I
 			} else {
 				s = (pos.Y - l0.Y) / (l1.Y - l0.Y)
 			}
-			if InInterval(s, 0.0, 1.0) {
-				deriv := quadraticBezierDeriv(p0, p1, p2, root)
-				dirb := Angle(deriv)
-				endpoint := Equal(root, 0.0) || Equal(root, 1.0) || Equal(s, 0.0) || Equal(s, 1.0)
+			if inInterval(s, 0.0, 1.0) {
+				deriv := ppath.QuadraticBezierDeriv(p0, p1, p2, root)
+				dirb := ppath.Angle(deriv)
+				endpoint := ppath.Equal(root, 0.0) || ppath.Equal(root, 1.0) || ppath.Equal(s, 0.0) || ppath.Equal(s, 1.0)
 				if endpoint {
 					// deviate angle slightly at endpoint when aligned to properly set Into
 					deriv2 := quadraticBezierDeriv2(p0, p1, p2)
-					if (0.0 <= deriv.Cross(deriv2)) == (Equal(root, 0.0) || !Equal(root, 1.0) && Equal(s, 0.0)) {
-						dirb += Epsilon * 2.0 // t=0 and CCW, or t=1 and CW
+					if (0.0 <= deriv.Cross(deriv2)) == (ppath.Equal(root, 0.0) || !ppath.Equal(root, 1.0) && ppath.Equal(s, 0.0)) {
+						dirb += ppath.Epsilon * 2.0 // t=0 and CCW, or t=1 and CW
 					} else {
-						dirb -= Epsilon * 2.0 // t=0 and CW, or t=1 and CCW
+						dirb -= ppath.Epsilon * 2.0 // t=0 and CW, or t=1 and CCW
 					}
-					dirb = angleNorm(dirb)
+					dirb = ppath.AngleNorm(dirb)
 				}
-				zs = zs.add(pos, s, root, dira, dirb, endpoint || Equal(A.Dot(deriv), 0.0), false)
+				zs = zs.add(pos, s, root, dira, dirb, endpoint || ppath.Equal(A.Dot(deriv), 0.0), false)
 			}
 		}
 	}
@@ -438,7 +439,7 @@ func intersectionLineQuad(zs Intersections, l0, l1, p0, p1, p2 math32.Vector2) I
 
 // https://www.particleincell.com/2013/cubic-line-intersection/
 func intersectionLineCube(zs Intersections, l0, l1, p0, p1, p2, p3 math32.Vector2) Intersections {
-	if EqualPoint(l0, l1) {
+	if ppath.EqualPoint(l0, l1) {
 		return zs // zero-length Close
 	}
 
@@ -463,10 +464,10 @@ func intersectionLineCube(zs Intersections, l0, l1, p0, p1, p2, p3 math32.Vector
 		}
 	}
 
-	dira := Angle(l1.Sub(l0))
+	dira := ppath.Angle(l1.Sub(l0))
 	horizontal := math32.Abs(l1.Y-l0.Y) <= math32.Abs(l1.X-l0.X)
 	for _, root := range roots {
-		if InInterval(root, 0.0, 1.0) {
+		if inInterval(root, 0.0, 1.0) {
 			var s float32
 			pos := cubicBezierPos(p0, p1, p2, p3, root)
 			if horizontal {
@@ -474,31 +475,31 @@ func intersectionLineCube(zs Intersections, l0, l1, p0, p1, p2, p3 math32.Vector
 			} else {
 				s = (pos.Y - l0.Y) / (l1.Y - l0.Y)
 			}
-			if InInterval(s, 0.0, 1.0) {
-				deriv := cubicBezierDeriv(p0, p1, p2, p3, root)
-				dirb := Angle(deriv)
-				tangent := Equal(A.Dot(deriv), 0.0)
-				endpoint := Equal(root, 0.0) || Equal(root, 1.0) || Equal(s, 0.0) || Equal(s, 1.0)
+			if inInterval(s, 0.0, 1.0) {
+				deriv := ppath.CubicBezierDeriv(p0, p1, p2, p3, root)
+				dirb := ppath.Angle(deriv)
+				tangent := ppath.Equal(A.Dot(deriv), 0.0)
+				endpoint := ppath.Equal(root, 0.0) || ppath.Equal(root, 1.0) || ppath.Equal(s, 0.0) || ppath.Equal(s, 1.0)
 				if endpoint {
 					// deviate angle slightly at endpoint when aligned to properly set Into
 					deriv2 := cubicBezierDeriv2(p0, p1, p2, p3, root)
-					if (0.0 <= deriv.Cross(deriv2)) == (Equal(root, 0.0) || !Equal(root, 1.0) && Equal(s, 0.0)) {
-						dirb += Epsilon * 2.0 // t=0 and CCW, or t=1 and CW
+					if (0.0 <= deriv.Cross(deriv2)) == (ppath.Equal(root, 0.0) || !ppath.Equal(root, 1.0) && ppath.Equal(s, 0.0)) {
+						dirb += ppath.Epsilon * 2.0 // t=0 and CCW, or t=1 and CW
 					} else {
-						dirb -= Epsilon * 2.0 // t=0 and CW, or t=1 and CCW
+						dirb -= ppath.Epsilon * 2.0 // t=0 and CW, or t=1 and CCW
 					}
-				} else if angleEqual(dira, dirb) || angleEqual(dira, dirb+math32.Pi) {
+				} else if ppath.AngleEqual(dira, dirb) || ppath.AngleEqual(dira, dirb+math32.Pi) {
 					// directions are parallel but the paths do cross (inflection point)
 					// TODO: test better
 					deriv2 := cubicBezierDeriv2(p0, p1, p2, p3, root)
-					if Equal(deriv2.X, 0.0) && Equal(deriv2.Y, 0.0) {
+					if ppath.Equal(deriv2.X, 0.0) && ppath.Equal(deriv2.Y, 0.0) {
 						deriv3 := cubicBezierDeriv3(p0, p1, p2, p3, root)
 						if 0.0 < deriv.Cross(deriv3) {
-							dirb += Epsilon * 2.0
+							dirb += ppath.Epsilon * 2.0
 						} else {
-							dirb -= Epsilon * 2.0
+							dirb -= ppath.Epsilon * 2.0
 						}
-						dirb = angleNorm(dirb)
+						dirb = ppath.AngleNorm(dirb)
 						tangent = false
 					}
 				}
@@ -512,33 +513,33 @@ func intersectionLineCube(zs Intersections, l0, l1, p0, p1, p2, p3 math32.Vector
 // handle line-arc intersections and their peculiarities regarding angles
 func addLineArcIntersection(zs Intersections, pos math32.Vector2, dira, dirb, t, t0, t1, angle, theta0, theta1 float32, tangent bool) Intersections {
 	if theta0 <= theta1 {
-		angle = theta0 - Epsilon + angleNorm(angle-theta0+Epsilon)
+		angle = theta0 - ppath.Epsilon + ppath.AngleNorm(angle-theta0+ppath.Epsilon)
 	} else {
-		angle = theta1 - Epsilon + angleNorm(angle-theta1+Epsilon)
+		angle = theta1 - ppath.Epsilon + ppath.AngleNorm(angle-theta1+ppath.Epsilon)
 	}
-	endpoint := Equal(t, t0) || Equal(t, t1) || Equal(angle, theta0) || Equal(angle, theta1)
+	endpoint := ppath.Equal(t, t0) || ppath.Equal(t, t1) || ppath.Equal(angle, theta0) || ppath.Equal(angle, theta1)
 	if endpoint {
 		// deviate angle slightly at endpoint when aligned to properly set Into
-		if (theta0 <= theta1) == (Equal(angle, theta0) || !Equal(angle, theta1) && Equal(t, t0)) {
-			dirb += Epsilon * 2.0 // t=0 and CCW, or t=1 and CW
+		if (theta0 <= theta1) == (ppath.Equal(angle, theta0) || !ppath.Equal(angle, theta1) && ppath.Equal(t, t0)) {
+			dirb += ppath.Epsilon * 2.0 // t=0 and CCW, or t=1 and CW
 		} else {
-			dirb -= Epsilon * 2.0 // t=0 and CW, or t=1 and CCW
+			dirb -= ppath.Epsilon * 2.0 // t=0 and CW, or t=1 and CCW
 		}
-		dirb = angleNorm(dirb)
+		dirb = ppath.AngleNorm(dirb)
 	}
 
 	// snap segment parameters to 0.0 and 1.0 to avoid numerical issues
 	var s float32
-	if Equal(t, t0) {
+	if ppath.Equal(t, t0) {
 		t = 0.0
-	} else if Equal(t, t1) {
+	} else if ppath.Equal(t, t1) {
 		t = 1.0
 	} else {
 		t = (t - t0) / (t1 - t0)
 	}
-	if Equal(angle, theta0) {
+	if ppath.Equal(angle, theta0) {
 		s = 0.0
-	} else if Equal(angle, theta1) {
+	} else if ppath.Equal(angle, theta1) {
 		s = 1.0
 	} else {
 		s = (angle - theta0) / (theta1 - theta0)
@@ -548,7 +549,7 @@ func addLineArcIntersection(zs Intersections, pos math32.Vector2, dira, dirb, t,
 
 // https://www.geometrictools.com/GTE/Mathematics/IntrLine2Circle2.h
 func intersectionLineCircle(zs Intersections, l0, l1, center math32.Vector2, radius, theta0, theta1 float32) Intersections {
-	if EqualPoint(l0, l1) {
+	if ppath.EqualPoint(l0, l1) {
 		return zs // zero-length Close
 	}
 
@@ -571,7 +572,7 @@ func intersectionLineCircle(zs Intersections, l0, l1, center math32.Vector2, rad
 	r0, r1 := solveQuadraticFormula(a, b, c)
 	if !math32.IsNaN(r0) {
 		roots = append(roots, r0)
-		if !math32.IsNaN(r1) && !Equal(r0, r1) {
+		if !math32.IsNaN(r1) && !ppath.Equal(r0, r1) {
 			roots = append(roots, r1)
 		}
 	}
@@ -579,14 +580,14 @@ func intersectionLineCircle(zs Intersections, l0, l1, center math32.Vector2, rad
 	// handle common cases with endpoints to avoid numerical issues
 	// snap closest root to path's start or end
 	if 0 < len(roots) {
-		if pos := l0.Sub(center); Equal(pos.Length(), radius) {
+		if pos := l0.Sub(center); ppath.Equal(pos.Length(), radius) {
 			if len(roots) == 1 || math32.Abs(roots[0]) < math32.Abs(roots[1]) {
 				roots[0] = 0.0
 			} else {
 				roots[1] = 0.0
 			}
 		}
-		if pos := l1.Sub(center); Equal(pos.Length(), radius) {
+		if pos := l1.Sub(center); ppath.Equal(pos.Length(), radius) {
 			if len(roots) == 1 || math32.Abs(roots[0]-length) < math32.Abs(roots[1]-length) {
 				roots[0] = length
 			} else {
@@ -596,14 +597,14 @@ func intersectionLineCircle(zs Intersections, l0, l1, center math32.Vector2, rad
 	}
 
 	// add intersections
-	dira := Angle(dir)
+	dira := ppath.Angle(dir)
 	tangent := len(roots) == 1
 	for _, root := range roots {
 		pos := diff.Add(dir.MulScalar(root / length))
 		angle := math32.Atan2(pos.Y*radius, pos.X*radius)
-		if InInterval(root, 0.0, length) && angleBetween(angle, theta0, theta1) {
+		if inInterval(root, 0.0, length) && ppath.IsAngleBetween(angle, theta0, theta1) {
 			pos = center.Add(pos)
-			dirb := Angle(ellipseDeriv(radius, radius, 0.0, theta0 <= theta1, angle))
+			dirb := ppath.Angle(ppath.EllipseDeriv(radius, radius, 0.0, theta0 <= theta1, angle))
 			zs = addLineArcIntersection(zs, pos, dira, dirb, root, 0.0, length, angle, theta0, theta1, tangent)
 		}
 	}
@@ -611,19 +612,19 @@ func intersectionLineCircle(zs Intersections, l0, l1, center math32.Vector2, rad
 }
 
 func intersectionLineEllipse(zs Intersections, l0, l1, center, radius math32.Vector2, phi, theta0, theta1 float32) Intersections {
-	if Equal(radius.X, radius.Y) {
+	if ppath.Equal(radius.X, radius.Y) {
 		return intersectionLineCircle(zs, l0, l1, center, radius.X, theta0, theta1)
-	} else if EqualPoint(l0, l1) {
+	} else if ppath.EqualPoint(l0, l1) {
 		return zs // zero-length Close
 	}
 
 	// TODO: needs more testing
 	// TODO: intersection inconsistency due to numerical stability in finding tangent collisions for subsequent paht segments (line -> ellipse), or due to the endpoint of a line not touching with another arc, but the subsequent segment does touch with its starting point
-	dira := Angle(l1.Sub(l0))
+	dira := ppath.Angle(l1.Sub(l0))
 
 	// we take the ellipse center as the origin and counter-rotate by phi
-	l0 = l0.Sub(center).Rot(-phi, Origin)
-	l1 = l1.Sub(center).Rot(-phi, Origin)
+	l0 = l0.Sub(center).Rot(-phi, ppath.Origin)
+	l1 = l1.Sub(center).Rot(-phi, ppath.Origin)
 
 	// line: cx + dy + e = 0
 	c := l0.Y - l1.Y
@@ -654,7 +655,7 @@ func intersectionLineEllipse(zs Intersections, l0, l1, center, radius math32.Vec
 	r0, r1 := solveQuadraticFormula(A, B, C)
 	if !math32.IsNaN(r0) {
 		roots = append(roots, r0)
-		if !math32.IsNaN(r1) && !Equal(r0, r1) {
+		if !math32.IsNaN(r1) && !ppath.Equal(r0, r1) {
 			roots = append(roots, r1)
 		}
 	}
@@ -674,11 +675,11 @@ func intersectionLineEllipse(zs Intersections, l0, l1, center, radius math32.Vec
 			t1 = l1.Y
 		}
 
-		tangent := Equal(root, 0.0)
+		tangent := ppath.Equal(root, 0.0)
 		angle := math32.Atan2(y*radius.X, x*radius.Y)
-		if InInterval(root, t0, t1) && angleBetween(angle, theta0, theta1) {
-			pos := math32.Vector2{x, y}.Rot(phi, Origin).Add(center)
-			dirb := Angle(ellipseDeriv(radius.X, radius.Y, phi, theta0 <= theta1, angle))
+		if inInterval(root, t0, t1) && ppath.IsAngleBetween(angle, theta0, theta1) {
+			pos := math32.Vector2{x, y}.Rot(phi, ppath.Origin).Add(center)
+			dirb := ppath.Angle(ppath.EllipseDeriv(radius.X, radius.Y, phi, theta0 <= theta1, angle))
 			zs = addLineArcIntersection(zs, pos, dira, dirb, root, t0, t1, angle, theta0, theta1, tangent)
 		}
 	}
@@ -687,7 +688,7 @@ func intersectionLineEllipse(zs Intersections, l0, l1, center, radius math32.Vec
 
 func intersectionEllipseEllipse(zs Intersections, c0, r0 math32.Vector2, phi0, thetaStart0, thetaEnd0 float32, c1, r1 math32.Vector2, phi1, thetaStart1, thetaEnd1 float32) Intersections {
 	// TODO: needs more testing
-	if !Equal(r0.X, r0.Y) || !Equal(r1.X, r1.Y) {
+	if !ppath.Equal(r0.X, r0.Y) || !ppath.Equal(r1.X, r1.Y) {
 		panic("not handled") // ellipses
 	}
 
@@ -696,18 +697,18 @@ func intersectionEllipseEllipse(zs Intersections, c0, r0 math32.Vector2, phi0, t
 		if !sweep {
 			theta -= math32.Pi
 		}
-		return angleNorm(theta)
+		return ppath.AngleNorm(theta)
 	}
 
 	dtheta0 := thetaEnd0 - thetaStart0
-	thetaStart0 = angleNorm(thetaStart0 + phi0)
+	thetaStart0 = ppath.AngleNorm(thetaStart0 + phi0)
 	thetaEnd0 = thetaStart0 + dtheta0
 
 	dtheta1 := thetaEnd1 - thetaStart1
-	thetaStart1 = angleNorm(thetaStart1 + phi1)
+	thetaStart1 = ppath.AngleNorm(thetaStart1 + phi1)
 	thetaEnd1 = thetaStart1 + dtheta1
 
-	if EqualPoint(c0, c1) && EqualPoint(r0, r1) {
+	if ppath.EqualPoint(c0, c1) && ppath.EqualPoint(r0, r1) {
 		// parallel
 		tOffset1 := float32(0.0)
 		dirOffset1 := float32(0.0)
@@ -718,29 +719,29 @@ func intersectionEllipseEllipse(zs Intersections, c0, r0 math32.Vector2, phi0, t
 		}
 
 		// will add either 1 (when touching) or 2 (when overlapping) intersections
-		if t := angleTime(thetaStart0, thetaStart1, thetaEnd1); InInterval(t, 0.0, 1.0) {
+		if t := angleTime(thetaStart0, thetaStart1, thetaEnd1); inInterval(t, 0.0, 1.0) {
 			// ellipse0 starts within/on border of ellipse1
 			dir := arcAngle(thetaStart0, 0.0 <= dtheta0)
-			pos := EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaStart0)
-			zs = zs.add(pos, 0.0, math32.Abs(t-tOffset1), dir, angleNorm(dir+dirOffset1), true, true)
+			pos := ppath.EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaStart0)
+			zs = zs.add(pos, 0.0, math32.Abs(t-tOffset1), dir, ppath.AngleNorm(dir+dirOffset1), true, true)
 		}
-		if t := angleTime(thetaStart1, thetaStart0, thetaEnd0); InIntervalExclusive(t, 0.0, 1.0) {
+		if t := angleTime(thetaStart1, thetaStart0, thetaEnd0); inIntervalExclusive(t, 0.0, 1.0) {
 			// ellipse1 starts within ellipse0
 			dir := arcAngle(thetaStart1, 0.0 <= dtheta0)
-			pos := EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaStart1)
-			zs = zs.add(pos, t, tOffset1, dir, angleNorm(dir+dirOffset1), true, true)
+			pos := ppath.EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaStart1)
+			zs = zs.add(pos, t, tOffset1, dir, ppath.AngleNorm(dir+dirOffset1), true, true)
 		}
-		if t := angleTime(thetaEnd1, thetaStart0, thetaEnd0); InIntervalExclusive(t, 0.0, 1.0) {
+		if t := angleTime(thetaEnd1, thetaStart0, thetaEnd0); inIntervalExclusive(t, 0.0, 1.0) {
 			// ellipse1 ends within ellipse0
 			dir := arcAngle(thetaEnd1, 0.0 <= dtheta0)
-			pos := EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaEnd1)
-			zs = zs.add(pos, t, 1.0-tOffset1, dir, angleNorm(dir+dirOffset1), true, true)
+			pos := ppath.EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaEnd1)
+			zs = zs.add(pos, t, 1.0-tOffset1, dir, ppath.AngleNorm(dir+dirOffset1), true, true)
 		}
-		if t := angleTime(thetaEnd0, thetaStart1, thetaEnd1); InInterval(t, 0.0, 1.0) {
+		if t := angleTime(thetaEnd0, thetaStart1, thetaEnd1); inInterval(t, 0.0, 1.0) {
 			// ellipse0 ends within/on border of ellipse1
 			dir := arcAngle(thetaEnd0, 0.0 <= dtheta0)
-			pos := EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaEnd0)
-			zs = zs.add(pos, 1.0, math32.Abs(t-tOffset1), dir, angleNorm(dir+dirOffset1), true, true)
+			pos := ppath.EllipsePos(r0.X, r0.Y, 0.0, c0.X, c0.Y, thetaEnd0)
+			zs = zs.add(pos, 1.0, math32.Abs(t-tOffset1), dir, ppath.AngleNorm(dir+dirOffset1), true, true)
 		}
 		return zs
 	}
@@ -761,27 +762,27 @@ func intersectionEllipseEllipse(zs Intersections, c0, r0 math32.Vector2, phi0, t
 	mid := c1.Sub(c0).MulScalar(a + b)
 	dev := math32.Vector2{c1.Y - c0.Y, c0.X - c1.X}.MulScalar(c)
 
-	tangent := EqualPoint(dev, math32.Vector2{})
-	anglea0 := Angle(mid.Add(dev))
-	anglea1 := Angle(c0.Sub(c1).Add(mid).Add(dev))
+	tangent := ppath.EqualPoint(dev, math32.Vector2{})
+	anglea0 := ppath.Angle(mid.Add(dev))
+	anglea1 := ppath.Angle(c0.Sub(c1).Add(mid).Add(dev))
 	ta0 := angleTime(anglea0, thetaStart0, thetaEnd0)
 	ta1 := angleTime(anglea1, thetaStart1, thetaEnd1)
-	if InInterval(ta0, 0.0, 1.0) && InInterval(ta1, 0.0, 1.0) {
+	if inInterval(ta0, 0.0, 1.0) && inInterval(ta1, 0.0, 1.0) {
 		dir0 := arcAngle(anglea0, 0.0 <= dtheta0)
 		dir1 := arcAngle(anglea1, 0.0 <= dtheta1)
-		endpoint := Equal(ta0, 0.0) || Equal(ta0, 1.0) || Equal(ta1, 0.0) || Equal(ta1, 1.0)
+		endpoint := ppath.Equal(ta0, 0.0) || ppath.Equal(ta0, 1.0) || ppath.Equal(ta1, 0.0) || ppath.Equal(ta1, 1.0)
 		zs = zs.add(c0.Add(mid).Add(dev), ta0, ta1, dir0, dir1, tangent || endpoint, false)
 	}
 
 	if !tangent {
-		angleb0 := Angle(mid.Sub(dev))
-		angleb1 := Angle(c0.Sub(c1).Add(mid).Sub(dev))
+		angleb0 := ppath.Angle(mid.Sub(dev))
+		angleb1 := ppath.Angle(c0.Sub(c1).Add(mid).Sub(dev))
 		tb0 := angleTime(angleb0, thetaStart0, thetaEnd0)
 		tb1 := angleTime(angleb1, thetaStart1, thetaEnd1)
-		if InInterval(tb0, 0.0, 1.0) && InInterval(tb1, 0.0, 1.0) {
+		if inInterval(tb0, 0.0, 1.0) && inInterval(tb1, 0.0, 1.0) {
 			dir0 := arcAngle(angleb0, 0.0 <= dtheta0)
 			dir1 := arcAngle(angleb1, 0.0 <= dtheta1)
-			endpoint := Equal(tb0, 0.0) || Equal(tb0, 1.0) || Equal(tb1, 0.0) || Equal(tb1, 1.0)
+			endpoint := ppath.Equal(tb0, 0.0) || ppath.Equal(tb0, 1.0) || ppath.Equal(tb1, 0.0) || ppath.Equal(tb1, 1.0)
 			zs = zs.add(c0.Add(mid).Sub(dev), tb0, tb1, dir0, dir1, endpoint, false)
 		}
 	}
@@ -796,24 +797,24 @@ func intersectionEllipseEllipse(zs Intersections, c0, r0 math32.Vector2, phi0, t
 // see T.W. Sederberg and T. Nishita, "Curve intersection using Bézier clipping", 1990
 // see T.W. Sederberg and S.R. Parry, "Comparison of three curve intersection algorithms", 1986
 
-func intersectionRayLine(a0, a1, b0, b1 math32.Vector2) (math32.Vector2, bool) {
+func IntersectionRayLine(a0, a1, b0, b1 math32.Vector2) (math32.Vector2, bool) {
 	da := a1.Sub(a0)
 	db := b1.Sub(b0)
 	div := da.Cross(db)
-	if Equal(div, 0.0) {
+	if ppath.Equal(div, 0.0) {
 		// parallel
 		return math32.Vector2{}, false
 	}
 
 	tb := da.Cross(a0.Sub(b0)) / div
-	if InInterval(tb, 0.0, 1.0) {
+	if inInterval(tb, 0.0, 1.0) {
 		return b0.Lerp(b1, tb), true
 	}
 	return math32.Vector2{}, false
 }
 
 // https://mathworld.wolfram.com/Circle-LineIntersection.html
-func intersectionRayCircle(l0, l1, c math32.Vector2, r float32) (math32.Vector2, math32.Vector2, bool) {
+func IntersectionRayCircle(l0, l1, c math32.Vector2, r float32) (math32.Vector2, math32.Vector2, bool) {
 	d := l1.Sub(l0).Normal() // along line direction, anchored in l0, its length is 1
 	D := l0.Sub(c).Cross(d)
 	discriminant := r*r - D*D
@@ -834,9 +835,9 @@ func intersectionRayCircle(l0, l1, c math32.Vector2, r float32) (math32.Vector2,
 
 // https://math32.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
 // https://gist.github.com/jupdike/bfe5eb23d1c395d8a0a1a4ddd94882ac
-func intersectionCircleCircle(c0 math32.Vector2, r0 float32, c1 math32.Vector2, r1 float32) (math32.Vector2, math32.Vector2, bool) {
+func IntersectionCircleCircle(c0 math32.Vector2, r0 float32, c1 math32.Vector2, r1 float32) (math32.Vector2, math32.Vector2, bool) {
 	R := c0.Sub(c1).Length()
-	if R < math32.Abs(r0-r1) || r0+r1 < R || EqualPoint(c0, c1) {
+	if R < math32.Abs(r0-r1) || r0+r1 < R || ppath.EqualPoint(c0, c1) {
 		return math32.Vector2{}, math32.Vector2{}, false
 	}
 	R2 := R * R

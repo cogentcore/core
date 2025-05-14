@@ -8,8 +8,6 @@
 package ppath
 
 import (
-	"slices"
-
 	"cogentcore.org/core/math32"
 )
 
@@ -65,7 +63,7 @@ func (p Path) Transform(m math32.Matrix2) Path {
 				rx, ry = ry, rx
 				phi = Angle(v2)
 			}
-			phi = angleNorm(phi)
+			phi = AngleNorm(phi)
 			if math32.Pi <= phi { // phi is canonical within 0 <= phi < 180
 				phi -= math32.Pi
 			}
@@ -97,44 +95,12 @@ func (p Path) Scale(x, y float32) Path {
 	return p.Transform(math32.Identity2().Scale(x, y))
 }
 
-// Flatten flattens all Bézier and arc curves into linear segments
-// and returns a new path. It uses tolerance as the maximum deviation.
-func (p Path) Flatten(tolerance float32) Path {
-	quad := func(p0, p1, p2 math32.Vector2) Path {
-		return FlattenQuadraticBezier(p0, p1, p2, tolerance)
-	}
-	cube := func(p0, p1, p2, p3 math32.Vector2) Path {
-		return FlattenCubicBezier(p0, p1, p2, p3, tolerance)
-	}
-	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
-		return FlattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
-	}
-	return p.replace(nil, quad, cube, arc)
-}
-
 // ReplaceArcs replaces ArcTo commands by CubeTo commands and returns a new path.
 func (p *Path) ReplaceArcs() Path {
-	return p.replace(nil, nil, nil, arcToCube)
+	return p.Replace(nil, nil, nil, ArcToCube)
 }
 
-// XMonotone replaces all Bézier and arc segments to be x-monotone
-// and returns a new path, that is each path segment is either increasing
-// or decreasing with X while moving across the segment.
-// This is always true for line segments.
-func (p Path) XMonotone() Path {
-	quad := func(p0, p1, p2 math32.Vector2) Path {
-		return xmonotoneQuadraticBezier(p0, p1, p2)
-	}
-	cube := func(p0, p1, p2, p3 math32.Vector2) Path {
-		return xmonotoneCubicBezier(p0, p1, p2, p3)
-	}
-	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
-		return xmonotoneEllipticArc(start, rx, ry, phi, large, sweep, end)
-	}
-	return p.replace(nil, quad, cube, arc)
-}
-
-// replace replaces path segments by their respective functions,
+// Replace replaces path segments by their respective functions,
 // each returning the path that will replace the segment or nil
 // if no replacement is to be performed. The line function will
 // take the start and end points. The bezier function will take
@@ -148,7 +114,7 @@ func (p Path) XMonotone() Path {
 // with the last end point of the base path before the replacement.
 // If the end point of the replacing path is different that the end point
 // of what is replaced, the path that follows will be displaced.
-func (p Path) replace(
+func (p Path) Replace(
 	line func(math32.Vector2, math32.Vector2) Path,
 	quad func(math32.Vector2, math32.Vector2, math32.Vector2) Path,
 	cube func(math32.Vector2, math32.Vector2, math32.Vector2, math32.Vector2) Path,
@@ -211,34 +177,6 @@ func (p Path) replace(
 	return p
 }
 
-// Markers returns an array of start, mid and end marker paths along
-// the path at the coordinates between commands.
-// Align will align the markers with the path direction so that
-// the markers orient towards the path's left.
-func (p Path) Markers(first, mid, last Path, align bool) []Path {
-	markers := []Path{}
-	coordPos := p.Coords()
-	coordDir := p.CoordDirections()
-	for i := range coordPos {
-		q := mid
-		if i == 0 {
-			q = first
-		} else if i == len(coordPos)-1 {
-			q = last
-		}
-
-		if q != nil {
-			pos, dir := coordPos[i], coordDir[i]
-			m := math32.Identity2().Translate(pos.X, pos.Y)
-			if align {
-				m = m.Rotate(Angle(dir))
-			}
-			markers = append(markers, q.Clone().Transform(m))
-		}
-	}
-	return markers
-}
-
 // Split splits the path into its independent subpaths.
 // The path is split before each MoveTo command.
 func (p Path) Split() []Path {
@@ -259,174 +197,6 @@ func (p Path) Split() []Path {
 		ps = append(ps, p[i:j:j])
 	}
 	return ps
-}
-
-// SplitAt splits the path into separate paths at the specified
-// intervals (given in millimeters) along the path.
-func (p Path) SplitAt(ts ...float32) []Path {
-	if len(ts) == 0 {
-		return []Path{p}
-	}
-
-	slices.Sort(ts)
-	if ts[0] == 0.0 {
-		ts = ts[1:]
-	}
-
-	j := 0            // index into ts
-	T := float32(0.0) // current position along curve
-
-	qs := []Path{}
-	q := Path{}
-	push := func() {
-		qs = append(qs, q)
-		q = Path{}
-	}
-
-	if 0 < len(p) && p[0] == MoveTo {
-		q.MoveTo(p[1], p[2])
-	}
-	for _, ps := range p.Split() {
-		var start, end math32.Vector2
-		for i := 0; i < len(ps); {
-			cmd := ps[i]
-			switch cmd {
-			case MoveTo:
-				end = math32.Vec2(p[i+1], p[i+2])
-			case LineTo, Close:
-				end = math32.Vec2(p[i+1], p[i+2])
-
-				if j == len(ts) {
-					q.LineTo(end.X, end.Y)
-				} else {
-					dT := end.Sub(start).Length()
-					Tcurve := T
-					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
-						tpos := (ts[j] - T) / dT
-						pos := start.Lerp(end, tpos)
-						Tcurve = ts[j]
-
-						q.LineTo(pos.X, pos.Y)
-						push()
-						q.MoveTo(pos.X, pos.Y)
-						j++
-					}
-					if Tcurve < T+dT {
-						q.LineTo(end.X, end.Y)
-					}
-					T += dT
-				}
-			case QuadTo:
-				cp := math32.Vec2(p[i+1], p[i+2])
-				end = math32.Vec2(p[i+3], p[i+4])
-
-				if j == len(ts) {
-					q.QuadTo(cp.X, cp.Y, end.X, end.Y)
-				} else {
-					speed := func(t float32) float32 {
-						return quadraticBezierDeriv(start, cp, end, t).Length()
-					}
-					invL, dT := invSpeedPolynomialChebyshevApprox(20, gaussLegendre7, speed, 0.0, 1.0)
-
-					t0 := float32(0.0)
-					r0, r1, r2 := start, cp, end
-					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
-						t := invL(ts[j] - T)
-						tsub := (t - t0) / (1.0 - t0)
-						t0 = t
-
-						var q1 math32.Vector2
-						_, q1, _, r0, r1, r2 = quadraticBezierSplit(r0, r1, r2, tsub)
-
-						q.QuadTo(q1.X, q1.Y, r0.X, r0.Y)
-						push()
-						q.MoveTo(r0.X, r0.Y)
-						j++
-					}
-					if !Equal(t0, 1.0) {
-						q.QuadTo(r1.X, r1.Y, r2.X, r2.Y)
-					}
-					T += dT
-				}
-			case CubeTo:
-				cp1 := math32.Vec2(p[i+1], p[i+2])
-				cp2 := math32.Vec2(p[i+3], p[i+4])
-				end = math32.Vec2(p[i+5], p[i+6])
-
-				if j == len(ts) {
-					q.CubeTo(cp1.X, cp1.Y, cp2.X, cp2.Y, end.X, end.Y)
-				} else {
-					speed := func(t float32) float32 {
-						// splitting on inflection points does not improve output
-						return cubicBezierDeriv(start, cp1, cp2, end, t).Length()
-					}
-					N := 20 + 20*cubicBezierNumInflections(start, cp1, cp2, end) // TODO: needs better N
-					invL, dT := invSpeedPolynomialChebyshevApprox(N, gaussLegendre7, speed, 0.0, 1.0)
-
-					t0 := float32(0.0)
-					r0, r1, r2, r3 := start, cp1, cp2, end
-					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
-						t := invL(ts[j] - T)
-						tsub := (t - t0) / (1.0 - t0)
-						t0 = t
-
-						var q1, q2 math32.Vector2
-						_, q1, q2, _, r0, r1, r2, r3 = cubicBezierSplit(r0, r1, r2, r3, tsub)
-
-						q.CubeTo(q1.X, q1.Y, q2.X, q2.Y, r0.X, r0.Y)
-						push()
-						q.MoveTo(r0.X, r0.Y)
-						j++
-					}
-					if !Equal(t0, 1.0) {
-						q.CubeTo(r1.X, r1.Y, r2.X, r2.Y, r3.X, r3.Y)
-					}
-					T += dT
-				}
-			case ArcTo:
-				var rx, ry, phi float32
-				var large, sweep bool
-				rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
-				cx, cy, theta1, theta2 := ellipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
-
-				if j == len(ts) {
-					q.ArcTo(rx, ry, phi, large, sweep, end.X, end.Y)
-				} else {
-					speed := func(theta float32) float32 {
-						return ellipseDeriv(rx, ry, 0.0, true, theta).Length()
-					}
-					invL, dT := invSpeedPolynomialChebyshevApprox(10, gaussLegendre7, speed, theta1, theta2)
-
-					startTheta := theta1
-					nextLarge := large
-					for j < len(ts) && T < ts[j] && ts[j] <= T+dT {
-						theta := invL(ts[j] - T)
-						mid, large1, large2, ok := ellipseSplit(rx, ry, phi, cx, cy, startTheta, theta2, theta)
-						if !ok {
-							panic("theta not in elliptic arc range for splitting")
-						}
-
-						q.ArcTo(rx, ry, phi, large1, sweep, mid.X, mid.Y)
-						push()
-						q.MoveTo(mid.X, mid.Y)
-						startTheta = theta
-						nextLarge = large2
-						j++
-					}
-					if !Equal(startTheta, theta2) {
-						q.ArcTo(rx, ry, phi*180.0/math32.Pi, nextLarge, sweep, end.X, end.Y)
-					}
-					T += dT
-				}
-			}
-			i += CmdLen(cmd)
-			start = end
-		}
-	}
-	if CmdLen(MoveTo) < len(q) {
-		push()
-	}
-	return qs
 }
 
 // Reverse returns a new path that is the same path as p but in the reverse direction.
