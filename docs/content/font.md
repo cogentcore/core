@@ -8,7 +8,7 @@ Apps come with the default **fonts** of [Noto Sans](https://fonts.google.com/not
 
 ### Desktop and mobile
 
-To add a custom font to your app, you need one or more `.ttf` (TrueType Font) files. We currently do *not* support variable fonts, although we [plan to](https://github.com/go-text/typesetting/issues/151) at some point.
+To add a custom font to your app, you need one or more `.ttf` (TrueType Font) files (`.otf` files also work). We currently do *not* support variable fonts, although we [plan to](https://github.com/go-text/typesetting/issues/151) at some point.
 
 1. Place all of your `.ttf` files in a new folder in your app directory called `myfontname` (ex: `opensans`).
 
