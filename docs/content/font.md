@@ -65,13 +65,13 @@ go install cogentcore.org/core/text/fonts/metricsonly@main
 2. Run `metricsonly` on your `myfontname` directory:
 
 ```sh
-metricsonly myfontname/* -o myfontnamejs
+metricsonly myfontname/*.ttf -o myfontnamejs
 ```
 
 For example:
 
 ```sh
-metricsonly opensans/* -o opensansjs
+metricsonly opensans/*.ttf -o opensansjs
 ```
 
 3. Make a new file in your app directory called `myfontname_js.go` and add this code, replacing `myfontname` with your font name:

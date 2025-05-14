@@ -12,5 +12,8 @@ rendered, followed by a RenderDone call that actually performs the rendering
 using a list of rendering commands stored in the [State.Render]. Also ensure
 that items used in a rendering pass remain valid through the RenderDone step,
 and are not reused within a single pass.
+
+You must import _ "cogentcore.org/core/paint/renderers" to get the default
+renderers if using this outside of core which already does this for you.
 */
 package paint
