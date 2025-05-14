@@ -140,3 +140,8 @@ body > #app-crash-dialog {
   margin-block: unset;
   font-family: unset;
 }
+
+#app-wasm-loader textarea {
+  font-family: Roboto Mono, monospace;
+  font-size: 16px;
+}
