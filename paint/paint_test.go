@@ -31,13 +31,15 @@ import (
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)) {
-	pc := NewPainter(width, height)
-	sv := pc.AddSVGRenderer(width, height)
+	size := math32.Vec2(float32(width), float32(height))
+	pc := NewPainter(size)
 	f(pc)
 	rend := pc.RenderDone()
-	pc.Renderers[0].Render(rend)
+	ir := NewImageRenderer(size)
+	sv := NewSVGRenderer(size)
+	ir.Render(rend)
 	sv.Render(rend)
-	imagex.Assert(t, pc.RenderImage(), nm)
+	imagex.Assert(t, ir.Image(), nm)
 	svdir := filepath.Join("testdata", "svg")
 	os.MkdirAll(svdir, 0777)
 	svfnm := filepath.Join(svdir, nm) + ".svg"

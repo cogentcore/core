@@ -43,10 +43,11 @@ func (g *Polyline) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, pc := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	pc.Polyline(g.Points...)
 	pc.Draw()
 

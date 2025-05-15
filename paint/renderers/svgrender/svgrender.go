@@ -12,9 +12,9 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/paint/render"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
@@ -22,8 +22,11 @@ import (
 
 // Renderer is the SVG renderer.
 type Renderer struct {
-	size    math32.Vector2
-	SVG     *svg.SVG
+	size math32.Vector2
+
+	SVG *svg.SVG
+
+	// gpStack is a stack of groups used while building the svg
 	gpStack stack.Stack[*svg.Group]
 }
 
@@ -33,7 +36,15 @@ func New(size math32.Vector2) render.Renderer {
 	return rs
 }
 
-func (rs *Renderer) Image() image.Image { return rs.SVG.RenderImage() }
+func (rs *Renderer) Image() image.Image {
+	if rs.SVG == nil {
+		return nil
+	}
+	pc := rs.SVG.Render(nil)
+	ir := paint.NewImageRenderer(rs.size)
+	ir.Render(pc.RenderDone())
+	return ir.Image()
+}
 
 func (rs *Renderer) Source() []byte {
 	if rs.SVG == nil {
@@ -56,13 +67,8 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 }
 
 // Render is the main rendering function.
-func (rs *Renderer) Render(r render.Render) {
-	rs.SVG = svg.NewSVG(int(rs.size.X), int(rs.size.Y))
-	rs.SVG.PhysicalWidth.Dot(rs.size.X)
-	rs.SVG.PhysicalHeight.Dot(rs.size.Y)
-	ps := styles.NewPaint()
-	ps.Defaults()
-	rs.SVG.SetUnitContext(ps, rs.size, rs.size)
+func (rs *Renderer) Render(r render.Render) render.Renderer {
+	rs.SVG = svg.NewSVG(rs.size)
 	rs.gpStack = nil
 	bg := svg.NewGroup(rs.SVG.Root)
 	rs.gpStack.Push(bg)
@@ -80,7 +86,10 @@ func (rs *Renderer) Render(r render.Render) {
 			rs.PopContext(x)
 		}
 	}
-	rs.SVG.Render()
+	// pc := paint.NewPainter(rs.size)
+	// rs.SVG.Render(pc)
+	// rs.rend = pc.RenderDone()
+	return rs
 }
 
 func (rs *Renderer) PushGroup() *svg.Group {

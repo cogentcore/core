@@ -46,10 +46,11 @@ func (g *Line) LocalBBox(sv *SVG) math32.Box2 {
 }
 
 func (g *Line) Render(sv *SVG) {
-	vis, pc := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Draw()
 

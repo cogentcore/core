@@ -43,10 +43,11 @@ func (g *Circle) LocalBBox(sv *SVG) math32.Box2 {
 }
 
 func (g *Circle) Render(sv *SVG) {
-	vis, pc := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	pc.Circle(g.Pos.X, g.Pos.Y, g.Radius)
 	pc.Draw()
 	g.RenderChildren(sv)

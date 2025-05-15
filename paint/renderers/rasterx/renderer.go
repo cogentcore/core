@@ -61,7 +61,7 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 }
 
 // Render is the main rendering function.
-func (rs *Renderer) Render(r render.Render) {
+func (rs *Renderer) Render(r render.Render) render.Renderer {
 	for _, ri := range r {
 		switch x := ri.(type) {
 		case *render.Path:
@@ -72,6 +72,7 @@ func (rs *Renderer) Render(r render.Render) {
 			rs.RenderText(x)
 		}
 	}
+	return rs
 }
 
 func (rs *Renderer) RenderPath(pt *render.Path) {

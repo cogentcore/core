@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -56,7 +57,7 @@ type Scene struct { //core:no-new
 	// Size and position relative to overall rendering context.
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
-	// paint context for rendering
+	// painter for rendering
 	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// event manager for this scene
@@ -82,6 +83,9 @@ type Scene struct { //core:no-new
 	// selectedWidgetChan is the channel on which the selected widget through the inspect editor
 	// selection mode is transmitted to the inspect editor after the user is done selecting.
 	selectedWidgetChan chan Widget `json:"-" xml:"-"`
+
+	// source renderer for rendering the scene
+	renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
@@ -281,22 +285,20 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return false
 	}
+	sz := math32.FromPoint(geom.Size)
 	if sc.Painter.State == nil {
-		sc.Painter.State = &paint.State{}
-	}
-	if sc.Painter.Paint == nil {
-		sc.Painter.Paint = styles.NewPaint()
+		sc.Painter = *paint.NewPainter(sz)
 		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	}
-	sc.SceneGeom.Pos = geom.Pos
-	img := sc.Painter.State.RenderImage()
-	if img != nil {
-		isz := img.Bounds().Size()
-		if isz == geom.Size {
-			return false
-		}
+	if sc.renderer == nil {
+		sc.renderer = paint.NewSourceRenderer(sz)
 	}
-	sc.Painter.InitSourceRender(sc.Painter.Paint, geom.Size.X, geom.Size.Y)
+	sc.SceneGeom.Pos = geom.Pos
+	if sc.Painter.State.Size == sz {
+		return false
+	}
+	sc.Painter.State.Init(sc.Painter.Paint, sz)
+	sc.renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()

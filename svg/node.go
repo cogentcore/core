@@ -405,31 +405,34 @@ func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 // IsVisible checks our bounding box and visibility, returning false if
-// out of bounds. If visible, returns the Painter for painting.
-// Must be called as first step in Render.
-func (g *NodeBase) IsVisible(sv *SVG) (bool, *paint.Painter) {
+// out of bounds. Must be called as first step in Render.
+func (g *NodeBase) IsVisible(sv *SVG) bool {
 	if g.Paint.Off || g == nil || g.This == nil {
-		return false, nil
+		return false
 	}
 	nvis := g.VisBBox == image.Rectangle{}
 	if nvis && !g.isDef {
 		// fmt.Println("invisible:", g.Name, g.BBox, g.VisBBox)
-		return false, nil
+		return false
 	}
-	pc := &paint.Painter{&sv.RenderState, &g.Paint}
-	return true, pc
+	return true
+}
+
+// Painter returns a new Painter using my styles.
+func (g *NodeBase) Painter(sv *SVG) *paint.Painter {
+	return &paint.Painter{sv.painter.State, &g.Paint}
 }
 
 // PushContext checks our bounding box and visibility, returning false if
 // out of bounds. If visible, pushes us as Context.
 // Must be called as first step in Render.
-func (g *NodeBase) PushContext(sv *SVG) (bool, *paint.Painter) {
-	vis, pc := g.IsVisible(sv)
+func (g *NodeBase) PushContext(sv *SVG) bool {
+	vis := g.IsVisible(sv)
 	if !vis {
-		return vis, pc
+		return vis
 	}
-	pc.PushContext(&g.Paint, nil)
-	return true, pc
+	sv.painter.PushContext(&g.Paint, nil)
+	return true
 }
 
 func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
@@ -457,7 +460,7 @@ func (g *NodeBase) RenderChildren(sv *SVG) {
 }
 
 func (g *NodeBase) Render(sv *SVG) {
-	vis, _ := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}

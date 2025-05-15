@@ -206,7 +206,7 @@ func (gi *Glyph) draw(pc *paint.Painter) {
 			gi.Outline[i] = math32.Vec2(p2x, p2y)
 		}
 	}
-	bb := gp.Bounds()
+	bb := gp.FastBounds()
 	sx := float32(1)
 	sy := float32(1)
 	if bb.Max.X >= 0.98 {

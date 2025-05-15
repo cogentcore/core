@@ -4,6 +4,10 @@ Categories = ["Architecture"]
 
 **Rendering** is the process of converting [[widget]]s (or other sources, such as SVG) into images uploaded to a window. This page documents low-level [[architecture]] details of rendering.
 
+The overall flow of rendering is:
+
+* Source (SVG, `core.Scene`, etc) -> `Painter` -> `render.Renderer` (`image.Image`, SVG, PDF)
+
 All rendering goes through the `Painter` object in the [[doc:paint]] package, which provides a standard set of drawing functions, operating on a `State` that has a stack of `Context` to provide context for these drawing functions (style, transform, bounds, clipping, and mask). Each of these drawing functions is recorded in a `Render` list of render `Item`s (see [[doc:paint/render]]), which provides the intermediate representation of everything that needs to be rendered in a given render update pass. There are three basic types of render `Item`s:
 
 * `Path` encodes all vector graphics operations, which ultimately reduce to only four fundamental drawing functions: `MoveTo`, `LineTo`, `QuadTo`, and `CubeTo`. We adapted the extensive [canvas](https://github.com/tdewolff/canvas) package's Path implementation, which also provides an `ArcTo` primitive that is then compiled down into a `QuadTo`.
@@ -13,6 +17,8 @@ All rendering goes through the `Painter` object in the [[doc:paint]] package, wh
 * `Image` drawing and related raster-based operations are supported by the [[doc:paint/pimage]] package.
 
 This standardized intermediate representation of every rendering step then allows different platforms to actually render the resulting _rasterized_ result (what you actually see on the screen as pixels of different colors) using the most efficient rasterization mechanism for that platform. In addition, this internal representation has sufficient structure to generate `SVG` and `PDF` document outputs, which are typically more compact than a rasterized version, and critically allow further editing etc.
+
+The [[doc:paint/render]] package defines a `Renderer` interface that is implemented by the different types of renderers, which take the `render.Render` from the `paint.Painter` `RenderDone()` method as input and generate the different outputs.
 
 On most platforms (desktop, mobile), the standard rasterization uses our version of the [rasterx](https://github.com/srwiley/rasterx) Go-based rasterizer, which extensive testing has determined to be significantly faster than other Go-based alternatives, and for most GUI rendering cases, is fast enough to not be a major factor in overall updating time. Nevertheless, we will eventually explore a WebGPU based implementation based on the highly optimized [vello](https://github.com/linebender/vello) framework in Rust (see [jello](https://github.com/dominikh/jello) for a Go port).
 

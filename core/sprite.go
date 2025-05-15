@@ -81,7 +81,7 @@ func (sp *Sprite) grabRenderFrom(w Widget) {
 // If it returns nil, then the image could not be fetched.
 func grabRenderFrom(w Widget) *image.RGBA {
 	wb := w.AsWidget()
-	scimg := wb.Scene.Painter.RenderImage()
+	scimg := wb.Scene.renderer.Image() // todo: need to make this real on JS
 	if scimg == nil {
 		return nil
 	}

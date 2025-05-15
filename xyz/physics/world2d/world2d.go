@@ -263,7 +263,7 @@ func (vw *View) ConfigView(wn physics.Node, vn svg.Node) {
 		}
 	}
 	sz := vw.Scene.Geom.Size
-	vw.Scene.Config(sz.X, sz.Y)
+	vw.Scene.Init(math32.FromPoint(sz))
 }
 
 // SyncNode updates the view tree to match the world tree, using

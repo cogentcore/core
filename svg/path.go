@@ -56,10 +56,11 @@ func (g *Path) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, pc := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	pc.State.Path = g.Data.Clone()
 	pc.Draw()
 

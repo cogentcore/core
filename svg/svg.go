@@ -25,17 +25,26 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+var (
+	// svgShaper is a shared text shaper.
+	svgShaper shaped.Shaper
+
+	// mutex for sharing the svgShaper.
+	shaperMu sync.Mutex
+)
+
 // SVGToImage generates an image from given svg source,
 // with given width and height size.
-func SVGToImage(svg []byte, width, height int) (image.Image, error) {
-	sv := NewSVG(width, height)
-	b := bytes.NewBuffer(svg)
-	err := sv.ReadXML(b)
-	sv.Render()
+func SVGToImage(svg []byte, size math32.Vector2) (image.Image, error) {
+	sv := NewSVG(size)
+	err := sv.ReadXML(bytes.NewBuffer(svg))
 	return sv.RenderImage(), err
 }
 
-// SVG is an SVG object.
+// SVG represents a structured SVG vector graphics drawing,
+// with nodes allocated for each element.
+// It renders to a [paint.Painter] via the Render method.
+// Any supported representation can then be rendered from that.
 type SVG struct {
 	// Name is the name of the SVG -- e.g., the filename if loaded
 	Name string
@@ -78,8 +87,8 @@ type SVG struct {
 	// and its ViewBox transform.
 	Scale float32
 
-	// render state for rendering
-	RenderState paint.State `copier:"-" json:"-" xml:"-" edit:"-"`
+	// painter is the current painter being used, which is only valid during rendering.
+	painter *paint.Painter
 
 	// TextShaper for shaping svg text. Can set to shared external one,
 	// or else one is made in Render.
@@ -111,50 +120,34 @@ type SVG struct {
 	// See NewUniqueID, GatherIDs
 	UniqueIDs map[int]struct{} `display:"-" json:"-" xml:"-"`
 
-	// flag is set when the SVG is rendering
-	IsRendering bool
-
 	// mutex for protecting rendering
-	RenderMu sync.Mutex `display:"-" json:"-" xml:"-"`
+	sync.Mutex
 }
 
-// NewSVG creates a SVG with the specified width and height.
-func NewSVG(width, height int) *SVG {
+// NewSVG creates a SVG with the given viewport size,
+// which is typically in pixel dots.
+func NewSVG(size math32.Vector2) *SVG {
 	sv := &SVG{}
-	sv.Config(width, height)
+	sv.Init(size)
 	return sv
 }
 
-// RenderImage returns the rendered image. It does not actually render the SVG;
-// see [SVG.Render] for that.
-func (sv *SVG) RenderImage() image.Image {
-	return sv.RenderState.RenderImage()
-}
-
-// Config configures the SVG, setting image to given size
-// and initializing all relevant fields.
-func (sv *SVG) Config(width, height int) {
-	sz := image.Point{width, height}
-	sv.Geom.Size = sz
+// Init initializes the SVG with given viewport size,
+// which is typically in pixel dots.
+func (sv *SVG) Init(size math32.Vector2) {
+	sv.Geom.Size = size.ToPointCeil()
 	sv.Scale = 1
 	sv.Root = NewRoot()
 	sv.Root.SetName("svg")
 	sv.Defs = NewGroup()
 	sv.Defs.SetName("defs")
-	sv.RenderState.InitImageRender(&sv.Root.Paint, width, height)
+	sv.SetUnitContext(&sv.Root.Paint)
 }
 
-// Resize resizes the viewport, creating a new image -- updates Geom Size
-func (sv *SVG) Resize(nwsz image.Point) {
-	if nwsz.X == 0 || nwsz.Y == 0 {
-		return
-	}
-	if sv.Root == nil || sv.Root.This == nil {
-		sv.Config(nwsz.X, nwsz.Y)
-		return
-	}
-	sv.RenderState.InitImageRender(&sv.Root.Paint, nwsz.X, nwsz.Y)
-	sv.Geom.Size = nwsz // make sure
+// SetSize updates the viewport size.
+func (sv *SVG) SetSize(size math32.Vector2) {
+	sv.Geom.Size = size.ToPointCeil()
+	sv.SetUnitContext(&sv.Root.Paint)
 }
 
 // DeleteAll deletes any existing elements in this svg
@@ -213,7 +206,7 @@ func (sv *SVG) Style() {
 		sv.Root.SetColorProperties("stroke", colors.AsHex(c))
 		sv.Root.SetColorProperties("fill", colors.AsHex(c))
 	}
-	sv.SetUnitContext(&sv.Root.Paint, math32.Vector2{}, math32.Vector2{})
+	sv.SetUnitContext(&sv.Root.Paint)
 
 	sv.Root.WalkDown(func(k tree.Node) bool {
 		sn := k.(Node)
@@ -222,13 +215,29 @@ func (sv *SVG) Style() {
 	})
 }
 
-// Render renders the SVG. See [SVG.RenderImage] to get the rendered image;
-// you need to call Render before RenderImage.
-func (sv *SVG) Render() {
-	sv.RenderMu.Lock()
-	sv.IsRendering = true
+// Render renders the SVG to given Painter, which can be nil
+// to have a new one created. Returns the painter used.
+// Set the TextShaper prior to calling to use an existing one,
+// otherwise it will use shared svgShaper under a lock.
+func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
+	sv.Lock()
+	defer sv.Unlock()
+
+	if pc != nil {
+		sv.painter = pc
+	} else {
+		sv.painter = paint.NewPainter(math32.FromPoint(sv.Geom.Size))
+	}
 	if sv.TextShaper == nil {
-		sv.TextShaper = shaped.NewShaper()
+		shaperMu.Lock()
+		if svgShaper == nil {
+			svgShaper = shaped.NewShaper()
+		}
+		sv.TextShaper = svgShaper
+		defer func() {
+			sv.TextShaper = nil
+			shaperMu.Unlock()
+		}()
 	}
 
 	sv.Style()
@@ -239,15 +248,27 @@ func (sv *SVG) Render() {
 		sv.FillViewport()
 	}
 	sv.Root.Render(sv)
-	pc := &paint.Painter{&sv.RenderState, &sv.Root.Paint}
-	pc.RenderToImage() // leaves image avail in renderer.image
-	sv.RenderMu.Unlock()
-	sv.IsRendering = false
+
+	ptr := sv.painter
+	sv.painter = nil
+
+	return ptr
+}
+
+// RenderImage renders the SVG to an image and returns it.
+func (sv *SVG) RenderImage() image.Image {
+	return paint.RenderToImage(sv.Render(nil))
+}
+
+// SaveImage renders the SVG to an image and saves it to given filename,
+// using the filename extension to determine the file type.
+func (sv *SVG) SaveImage(fname string) error {
+	return imagex.Save(sv.RenderImage(), fname)
 }
 
 func (sv *SVG) FillViewport() {
 	sty := styles.NewPaint() // has no transform
-	pc := &paint.Painter{&sv.RenderState, sty}
+	pc := &paint.Painter{sv.painter.State, sty}
 	pc.FillBox(math32.Vector2{}, math32.FromPoint(sv.Geom.Size), sv.Background)
 }
 
@@ -285,11 +306,6 @@ func (sv *SVG) SetDPITransform(logicalDPI float32) {
 	pc.Transform = math32.Scale2D(dpisc, dpisc)
 }
 
-// SavePNG saves the RenderImage to a PNG file
-func (sv *SVG) SavePNG(fname string) error {
-	return imagex.Save(sv.RenderImage(), fname)
-}
-
 // Root represents the root of an SVG tree.
 type Root struct {
 	Group
@@ -307,12 +323,12 @@ func (g *Root) EnforceSVGName() bool { return false }
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
+func (sv *SVG) SetUnitContext(pc *styles.Paint) {
 	pc.UnitContext.Defaults()
 	pc.UnitContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
-	pc.UnitContext.SetSizes(float32(sv.Geom.Size.X), float32(sv.Geom.Size.Y), el.X, el.Y, parent.X, parent.Y)
-	// todo:
-	// pc.Font.SetUnitContext(&pc.UnitContext)
+	wd := float32(sv.Geom.Size.X)
+	ht := float32(sv.Geom.Size.Y)
+	pc.UnitContext.SetSizes(wd, ht, wd, ht, wd, ht) // self, element, parent -- all same
 	pc.ToDots()
 	sv.ToDots(&pc.UnitContext)
 }
@@ -323,7 +339,7 @@ func (sv *SVG) ToDots(uc *units.Context) {
 }
 
 func (g *Root) Render(sv *SVG) {
-	pc := &paint.Painter{&sv.RenderState, &g.Paint}
+	pc := g.Painter(sv)
 	pc.PushContext(&g.Paint, render.NewBoundsRect(sv.Geom.Bounds(), sides.NewFloats()))
 	g.RenderChildren(sv)
 	pc.PopContext()

@@ -1,4 +1,4 @@
-// Copyright (c) 2018, Cogent Core. All rights reserved.
+// Copyright (c) 2025, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/color"
 
-	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -33,28 +32,28 @@ Copyright (c) 2015 Taco de Wolff, under an MIT License.
 */
 
 // Painter provides the rendering state, styling parameters, and methods for
-// painting. The [State] contains a list of Renderers that will actually
-// render the paint commands. For improved performance, and sensible results
-// with document-style renderers (e.g., SVG, PDF), an entire scene should be
-// rendered, followed by a RenderDone call that actually performs the rendering
-// using a list of rendering commands stored in the [State.Render]. Also ensure
-// that items used in a rendering pass remain valid through the RenderDone step,
-// and are not reused within a single pass.
+// painting. It accumulates all painting actions in a [render.Render]
+// list, which should be obtained by a call to the [Painter.RenderDone] method
+// when  done painting (resets list to start fresh).
+//
+// Pass this [render.Render] list to one or more [render.Renderers] to actually
+// generate the resulting output. Renderers are independent of the Painter
+// and the [render.Render] state is entirely self-contained, so rendering
+// can be done in a separate goroutine etc.
 //
 // You must import _ "cogentcore.org/core/paint/renderers" to get the default
 // renderers if using this outside of core which already does this for you.
+// This sets the New*Renderer functions to point to default implementations.
 type Painter struct {
 	*State
 	*styles.Paint
 }
 
-// NewPainter returns a new [Painter] using the default image rasterizer,
-// with the given width and height.
-func NewPainter(width, height int) *Painter {
+// NewPainter returns a new [Painter] with default styles and given size.
+func NewPainter(size math32.Vector2) *Painter {
 	pc := &Painter{&State{}, styles.NewPaint()}
-	sz := image.Pt(width, height)
-	pc.InitImageRender(pc.Paint, width, height)
-	pc.SetUnitContextExt(sz)
+	pc.State.Init(pc.Paint, size)
+	pc.SetUnitContextExt(size.ToPointCeil())
 	return pc
 }
 
@@ -112,30 +111,6 @@ func (pc *Painter) Draw() {
 	pt := render.NewPath(pc.State.Path.Clone(), pc.Paint, pc.Context())
 	pc.Render.Add(pt)
 	pc.State.Path.Reset()
-}
-
-// RenderDone should be called when the full set of rendering for this painter
-// is done. It returns a self-contained [render.Render] representing
-// the entire rendering state, suitable for offline rendering.
-// It resets the current painter state so that it is ready for new rendering.
-func (pc *Painter) RenderDone() render.Render {
-	npr := pc.Render.Clone()
-	pc.Render.Reset()
-	pc.State.Path.Reset()
-	return npr
-}
-
-// RenderToImage renders the current painter items to the image renderer
-// if it is the first one in Renderers. Returns the image, which is also
-// available via the RenderImage method.
-func (pc *Painter) RenderToImage() image.Image {
-	if len(pc.Renderers) == 0 {
-		return nil
-	}
-	rd := pc.Renderers[0]
-	rend := pc.RenderDone()
-	rd.Render(rend)
-	return imagex.WrapJS(rd.Image())
 }
 
 //////// basic shape functions

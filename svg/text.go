@@ -159,10 +159,11 @@ func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 func (g *Text) Render(sv *SVG) {
-	vis, pc := g.PushContext(sv)
+	vis := g.PushContext(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	if g.IsParText() {
 		g.RenderChildren(sv)
 		pc.PopContext()

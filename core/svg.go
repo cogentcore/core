@@ -13,6 +13,9 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -34,13 +37,18 @@ type SVG struct {
 	// SVG is the SVG drawing to display.
 	SVG *svg.SVG `set:"-"`
 
+	// image renderer
+	renderer render.Renderer
+
 	// prevSize is the cached allocated size for the last rendered image.
 	prevSize image.Point `xml:"-" json:"-" set:"-"`
 }
 
 func (sv *SVG) Init() {
 	sv.WidgetBase.Init()
-	sv.SVG = svg.NewSVG(10, 10)
+	sz := math32.Vec2(10, 10)
+	sv.SVG = svg.NewSVG(sz)
+	sv.renderer = paint.NewImageRenderer(sz)
 	sv.SetReadOnly(true)
 	sv.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
@@ -109,14 +117,17 @@ func (sv *SVG) SaveSVG(filename Filename) error { //types:add
 	return sv.SVG.SaveXML(string(filename))
 }
 
-// SavePNG saves the current rendered SVG image to an PNG image file.
+// SaveImage saves the current rendered SVG image to an image file,
+// using the filename extension to determine the file type.
 func (sv *SVG) SavePNG(filename Filename) error { //types:add
-	return sv.SVG.SavePNG(string(filename))
+	return sv.SVG.SaveImage(string(filename))
 }
 
 func (sv *SVG) SizeFinal() {
 	sv.WidgetBase.SizeFinal()
-	sv.SVG.Resize(sv.Geom.Size.Actual.Content.ToPoint())
+	sz := sv.Geom.Size.Actual.Content
+	sv.SVG.SetSize(sz)
+	sv.renderer.SetSize(units.UnitDot, sz)
 }
 
 // renderSVG renders the SVG
@@ -125,10 +136,8 @@ func (sv *SVG) renderSVG() {
 		return
 	}
 	sv.SVG.TextShaper = sv.Scene.TextShaper()
-	sz := sv.SVG.Geom.Bounds().Size()
-	sv.SVG.RenderState.InitImageRender(nil, sz.X, sz.Y)
-	sv.SVG.Render()
-	sv.prevSize = sz
+	sv.renderer.Render(sv.SVG.Render(nil).RenderDone())
+	sv.prevSize = sv.renderer.Image().Bounds().Size()
 }
 
 func (sv *SVG) Render() {
@@ -138,7 +147,7 @@ func (sv *SVG) Render() {
 	}
 	needsRender := !sv.IsReadOnly()
 	if !needsRender {
-		img := sv.SVG.RenderImage()
+		img := sv.renderer.Image()
 		if img == nil {
 			needsRender = true
 		} else {
@@ -153,7 +162,7 @@ func (sv *SVG) Render() {
 	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
-	img := sv.SVG.RenderImage()
+	img := sv.renderer.Image()
 	sv.Scene.Painter.DrawImage(img, r, sp, draw.Over)
 }
 

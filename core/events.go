@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -22,6 +23,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -1175,14 +1177,23 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keymap.WinSnapshot:
-		img := sc.Painter.State.RenderImage()
+		img := sc.renderer.Image()
+		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
+		var sz string
 		if img != nil {
-			dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
+			sz = fmt.Sprint(img.Bounds().Size())
 			fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
 			if errors.Log(imagex.Save(img, fnm)) == nil {
-				fmt.Println("Saved screenshot to", strings.ReplaceAll(fnm, " ", `\ `))
+				MessageSnackbar(sc, "Saved screenshot to: "+strings.ReplaceAll(fnm, " ", `\ `)+sz)
 			}
+		} else {
+			MessageSnackbar(sc, "Save screenshot: no render image")
 		}
+		sc.RenderWidget()
+		sv := paint.RenderToSVG(&sc.Painter)
+		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".svg")
+		errors.Log(os.WriteFile(fnm, sv, 0666))
+		MessageSnackbar(sc, "Saved SVG screenshot to: "+strings.ReplaceAll(fnm, " ", `\ `)+sz)
 		e.SetHandled()
 	case keymap.ZoomIn:
 		win.stepZoom(1)

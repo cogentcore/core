@@ -69,7 +69,7 @@ func (rs *Renderer) SetCanvas(c js.Value) {
 }
 
 // Render is the main rendering function.
-func (rs *Renderer) Render(r render.Render) {
+func (rs *Renderer) Render(r render.Render) render.Renderer {
 	for _, ri := range r {
 		switch x := ri.(type) {
 		case *render.Path:
@@ -84,6 +84,7 @@ func (rs *Renderer) Render(r render.Render) {
 			rs.PopContext(x)
 		}
 	}
+	return rs
 }
 
 func (rs *Renderer) PushContext(pt *render.ContextPush) {

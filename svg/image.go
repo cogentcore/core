@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )
@@ -103,29 +102,19 @@ func (g *Image) DrawImage(sv *SVG) {
 	if g.Pixels == nil {
 		return
 	}
-
-	pc := &paint.Painter{&sv.RenderState, &g.Paint}
+	pc := g.Painter(sv)
 	pc.DrawImageScaled(g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
-}
-
-func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
-	pc := sv.RenderState.Context()
-	pos := pc.Transform.MulVector2AsPoint(g.Pos)
-	max := pc.Transform.MulVector2AsPoint(g.Pos.Add(g.Size))
-	posi := pos.ToPointCeil()
-	maxi := max.ToPointCeil()
-	return image.Rectangle{posi, maxi}.Canon()
 }
 
 func (g *Image) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	bb.Min = g.Pos
 	bb.Max = g.Pos.Add(g.Size)
-	return bb
+	return bb.Canon()
 }
 
 func (g *Image) Render(sv *SVG) {
-	vis, _ := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}

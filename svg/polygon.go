@@ -20,10 +20,11 @@ func (g *Polygon) Render(sv *SVG) {
 	if sz < 2 {
 		return
 	}
-	vis, pc := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	pc.Polygon(g.Points...)
 	pc.Draw()
 

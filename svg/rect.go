@@ -48,10 +48,11 @@ func (g *Rect) LocalBBox(sv *SVG) math32.Box2 {
 }
 
 func (g *Rect) Render(sv *SVG) {
-	vis, pc := g.IsVisible(sv)
+	vis := g.IsVisible(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.Rectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {

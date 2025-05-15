@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
 	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/svg"
 )
@@ -21,7 +22,7 @@ import (
 // Render renders the icon located at icon.svg at the given size.
 // If no such icon exists, it sets it to a placeholder icon, [icons.DefaultAppIcon].
 func Render(size int) (*image.RGBA, error) {
-	sv := svg.NewSVG(size, size)
+	sv := svg.NewSVG(math32.Vec2(float32(size), float32(size)))
 
 	spath := "icon.svg"
 	err := sv.OpenXML(spath)
@@ -39,6 +40,5 @@ func Render(size int) (*image.RGBA, error) {
 		}
 	}
 
-	sv.Render()
 	return imagex.AsRGBA(sv.RenderImage()), nil
 }

@@ -6,7 +6,6 @@ package xyz
 
 import (
 	"fmt"
-	"image"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
@@ -14,9 +13,7 @@ import (
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
@@ -25,7 +22,7 @@ import (
 )
 
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
-// Call SetText() which calls RenderText to update fortext changes (re-renders texture).
+// Call SetText() which calls RenderText to update for text changes (re-renders texture).
 // The native scale is such that a unit height value is the height of the default font
 // set by the font-size property, and the X axis is scaled proportionally based on the
 // rendered text size to maintain the aspect ratio.  Further scaling can be applied on
@@ -54,9 +51,6 @@ type Text2D struct {
 
 	// render data for text label
 	textRender *shaped.Lines `set:"-" xml:"-" json:"-"`
-
-	// render state for rendering text
-	renderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
 
 	// automatically set to true if the font render color is the default
 	// colors.Scheme.OnSurface.  If so, it is automatically updated if the default
@@ -124,27 +118,20 @@ func (txt *Text2D) RenderText() {
 	if sz.Y == 0 {
 		sz.Y = 10
 	}
-	szpt := sz.ToPointRound()
-	bounds := image.Rectangle{Max: szpt}
 	marg := txt.Styles.TotalMargin()
 	sz.SetAdd(marg.Size())
 	txt.TextPos = marg.Pos().Round()
+
 	psty := styles.NewPaint()
 	psty.FromStyle(&txt.Styles)
-	pc := paint.Painter{State: &txt.renderState, Paint: psty}
-	pc.InitImageRender(psty, szpt.X, szpt.Y)
-	pc.PushContext(nil, render.NewBoundsRect(bounds, sides.NewFloats()))
-	pt := styles.Paint{}
-	pt.Defaults()
-	pt.FromStyle(st)
+	pc := paint.NewPainter(sz)
+	pc.Paint = psty
 	if txt.Styles.Background != nil {
 		pc.Fill.Color = txt.Styles.Background
 		pc.Clear()
 	}
 	pc.TextLines(txt.textRender, txt.TextPos)
-	pc.PopContext()
-	pc.RenderToImage()
-	img := imagex.Unwrap(pc.RenderImage()).(*image.RGBA)
+	img := imagex.AsRGBA(paint.RenderToImage(pc))
 	var tx Texture
 	var err error
 	if txt.Material.Texture == nil {

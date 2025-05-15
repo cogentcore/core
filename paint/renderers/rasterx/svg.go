@@ -35,14 +35,13 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 	gk := glyphKey{gid: g.GlyphID, sx: uint8(size / 256), sy: uint8(size % 256), ox: uint8(fam)}
 	img, ok := svgGlyphCache[gk]
 	if !ok {
-		sv := svg.NewSVG(fsize.X, fsize.Y)
+		sv := svg.NewSVG(math32.FromPoint(fsize))
 		sv.GroupFilter = fmt.Sprintf("glyph%d", g.GlyphID) // critical: for filtering items with many glyphs
 		b := bytes.NewBuffer(svgCmds)
 		err := sv.ReadXML(b)
 		errors.Log(err)
 		sv.Translate.Y = float32(run.Face.Upem())
 		sv.Scale = scale
-		sv.Render()
 		img = sv.RenderImage()
 		svgGlyphCache[gk] = img
 	}

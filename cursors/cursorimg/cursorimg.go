@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/svg"
 )
@@ -61,7 +62,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 		hot = image.Pt(128, 128)
 	}
 
-	sv := svg.NewSVG(size, size)
+	sv := svg.NewSVG(math32.Vec2(float32(size), float32(size)))
 	b, err := fs.ReadFile(cursors.Cursors, "svg/"+name+".svg")
 	if err != nil {
 		return nil, err
@@ -71,7 +72,6 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
 	}
-	sv.Render()
 	img := sv.RenderImage()
 
 	blurRadius := size / 16

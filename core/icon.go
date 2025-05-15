@@ -79,7 +79,7 @@ func (ic *Icon) renderSVG() *svg.SVG {
 		ic.prevIcon = ic.Icon
 		return nil
 	}
-	sv := svg.NewSVG(sz.X, sz.Y)
+	sv := svg.NewSVG(ic.Geom.Size.Actual.Content)
 	err := sv.ReadXML(strings.NewReader(string(ic.Icon)))
 	if errors.Log(err) != nil || sv.Root == nil || !sv.Root.HasChildren() {
 		return nil
@@ -91,7 +91,6 @@ func (ic *Icon) renderSVG() *svg.SVG {
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	sv.Color = clr
 	sv.Scale = 1
-	sv.Render()
 	ic.pixels = sv.RenderImage()
 	ic.prevColor = cc
 	ic.prevOpacity = ic.Styles.Opacity

@@ -25,10 +25,11 @@ func (g *Group) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 func (g *Group) Render(sv *SVG) {
-	vis, pc := g.PushContext(sv)
+	vis := g.PushContext(sv)
 	if !vis {
 		return
 	}
+	pc := g.Painter(sv)
 	g.RenderChildren(sv)
 	pc.PopContext()
 }

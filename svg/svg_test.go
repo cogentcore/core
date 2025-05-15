@@ -24,24 +24,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func RunTest(t *testing.T, width, height int, dir, fname string) {
+	sv := NewSVG(math32.Vec2(float32(width), float32(height)))
+	svfn := filepath.Join("testdata", dir, fname)
+	err := sv.OpenXML(svfn)
+	assert.NoError(t, err)
+	img := sv.RenderImage()
+	imfn := filepath.Join(dir, "png", strings.TrimSuffix(fname, ".svg"))
+	fmt.Println(svfn, imfn)
+	imagex.Assert(t, img, imfn)
+}
+
 func TestSVG(t *testing.T) {
-	dir := filepath.Join("testdata", "svg")
-	files := fsx.Filenames(dir, ".svg")
+	dir := "svg"
+	files := fsx.Filenames(filepath.Join("testdata", dir), ".svg")
 
 	for _, fn := range files {
 		// if fn != "fig_cortex_lobes.svg" {
 		// 	continue
 		// }
-		sv := NewSVG(640, 480)
-		svfn := filepath.Join(dir, fn)
-		err := sv.OpenXML(svfn)
-		if err != nil {
-			fmt.Println("error opening xml:", err)
-			continue
-		}
-		sv.Render()
-		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
-		imagex.Assert(t, sv.RenderImage(), imfn)
+		RunTest(t, 640, 480, dir, fn)
 	}
 }
 
@@ -50,24 +52,22 @@ func TestViewBox(t *testing.T) {
 	sfn := "fig_necker_cube.svg"
 	file := filepath.Join(dir, sfn)
 	tests := []string{"none", "xMinYMin", "xMidYMid", "xMaxYMax", "xMaxYMax slice"}
-	sv := NewSVG(640, 480)
+	sv := NewSVG(math32.Vec2(640, 480))
 	sv.Background = colors.Uniform(colors.White)
 	err := sv.OpenXML(file)
-	if err != nil {
-		t.Error("error opening xml:", err)
-		return
-	}
+	assert.NoError(t, err)
 	for _, ts := range tests {
 		// if ts != "xMinYMin" {
 		// 	continue
 		// }
 		fpre := strings.TrimSuffix(sfn, ".svg")
 		sv.Root.ViewBox.PreserveAspectRatio.SetString(ts)
-		sv.Render()
+		img := sv.RenderImage()
 
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
-		imfn := filepath.Join("png", filepath.Join("viewbox", fnm))
-		imagex.Assert(t, sv.RenderImage(), imfn)
+		imfn := filepath.Join("svg", "png", "viewbox", fnm)
+		// fmt.Println(imfn)
+		imagex.Assert(t, img, imfn)
 	}
 }
 
@@ -84,7 +84,7 @@ func TestViewBoxParse(t *testing.T) {
 }
 
 func TestCoreLogo(t *testing.T) {
-	sv := NewSVG(720, 720)
+	sv := NewSVG(math32.Vec2(720, 720))
 	sv.PhysicalWidth.Dp(256)
 	sv.PhysicalHeight.Dp(256)
 	sv.Root.ViewBox.Size.Set(1, 1)
@@ -112,42 +112,31 @@ func TestCoreLogo(t *testing.T) {
 	sv.SaveXML("testdata/logo.svg")
 
 	sv.Background = colors.Uniform(colors.Black)
-	sv.Render()
-	imagex.Assert(t, sv.RenderImage(), "logo-black")
+	img := sv.RenderImage()
+	imagex.Assert(t, img, "logo-black")
 
 	sv.Background = colors.Uniform(colors.White)
-	sv.Render()
-	imagex.Assert(t, sv.RenderImage(), "logo-white")
+	img = sv.RenderImage()
+	imagex.Assert(t, img, "logo-white")
 }
 
 func TestEmoji(t *testing.T) {
-	// t.Skip("special-case testing -- requires link to noto-emoji files")
-	// dir := filepath.Join("testdata", "noto-emoji")
-	dir := filepath.Join("testdata", "emoji-bad")
-	// dir := filepath.Join("testdata", "font-emoji-src")
-	files := fsx.Filenames(dir, ".svg")
+	// dir := "noto-emoji"
+	dir := "emoji-bad"
+	// dir := "font-emoji-src"
+	files := fsx.Filenames(filepath.Join("testdata", dir), ".svg")
 
 	for _, fn := range files {
 		// if fn != "femoji-23.svg" {
 		// 	continue
 		// }
-		sv := NewSVG(512, 512)
-		svfn := filepath.Join(dir, fn)
-		fmt.Println(svfn)
-		err := sv.OpenXML(svfn)
-		if err != nil {
-			fmt.Println("error opening xml:", err)
-			continue
-		}
-		sv.Render()
-		// imfn := filepath.Join("png/noto-emoji", strings.TrimSuffix(fn, ".svg"))
-		imfn := filepath.Join("png/emoji-bad", strings.TrimSuffix(fn, ".svg"))
-		imagex.Assert(t, sv.RenderImage(), imfn)
+		RunTest(t, 512, 512, dir, fn)
+		fmt.Println(fn)
 	}
 }
 
 func TestFontEmoji(t *testing.T) {
-	// t.Skip("special-case testing -- requires noto-emoji file")
+	t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
@@ -170,7 +159,7 @@ func TestFontEmoji(t *testing.T) {
 		if !strings.Contains(fn, "203c") {
 			continue
 		}
-		sv := NewSVG(512, 512)
+		sv := NewSVG(math32.Vec2(512, 512))
 		sv.Translate.Y = 1024
 		sv.Scale = 0.080078125
 		sv.GroupFilter = fmt.Sprintf("glyph%d", gid)
@@ -179,9 +168,9 @@ func TestFontEmoji(t *testing.T) {
 		b := bytes.NewBuffer(gd.Source)
 		err := sv.ReadXML(b)
 		assert.NoError(t, err)
-		sv.Render()
-		imfn := filepath.Join("png/font-emoji", strings.TrimSuffix(fn, ".svg"))
-		imagex.Assert(t, sv.RenderImage(), imfn)
+		img := sv.RenderImage()
+		imfn := filepath.Join("svg", "png", "font-emoji", strings.TrimSuffix(fn, ".svg"))
+		imagex.Assert(t, img, imfn)
 		// sv.SaveXML(sfn)
 		// os.WriteFile(sfn, gd.Source, 0666)
 	}

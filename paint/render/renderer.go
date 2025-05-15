@@ -15,7 +15,7 @@ import (
 type Renderer interface {
 
 	// Render renders the given Render data.
-	Render(r Render)
+	Render(r Render) Renderer
 
 	// Size returns the size of the render target, in its preferred units.
 	// For [Image] types, it will be [units.UnitDot] to indicate the actual
