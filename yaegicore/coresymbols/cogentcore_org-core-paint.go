@@ -16,6 +16,8 @@ func init() {
 		"NewPainter":        reflect.ValueOf(paint.NewPainter),
 		"NewSVGRenderer":    reflect.ValueOf(&paint.NewSVGRenderer).Elem(),
 		"NewSourceRenderer": reflect.ValueOf(&paint.NewSourceRenderer).Elem(),
+		"RenderToImage":     reflect.ValueOf(paint.RenderToImage),
+		"RenderToSVG":       reflect.ValueOf(paint.RenderToSVG),
 
 		// type definitions
 		"Painter": reflect.ValueOf((*paint.Painter)(nil)),

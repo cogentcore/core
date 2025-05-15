@@ -130,7 +130,11 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if s.TabSize != 4 {
 		p["tab-size"] = reflectx.ToString(s.TabSize)
 	}
-	p["fill"] = colors.AsHex(s.Color)
+	if sty.Decoration.HasFlag(rich.FillColor) {
+		p["fill"] = colors.AsHex(sty.FillColor())
+	} else {
+		p["fill"] = colors.AsHex(s.Color)
+	}
 	if s.SelectColor != nil {
 		p["select-color"] = colors.AsHex(colors.ToUniform(s.SelectColor))
 	}

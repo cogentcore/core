@@ -110,3 +110,34 @@ func TestTextLines(t *testing.T) {
 		pc.TextLines(lns, pos)
 	})
 }
+
+func TestTextColors(t *testing.T) {
+	size := image.Point{480, 80}
+	sizef := math32.FromPoint(size)
+	txtSh := shaped.NewShaper()
+	RunTest(t, "text/colors", size.X, size.Y, func(pc *Painter) {
+		pc.BlitBox(math32.Vector2{}, sizef, colors.Uniform(colors.White))
+		tsty := text.NewStyle()
+		fsty := rich.NewStyle()
+		tsty.FontSize.Dp(16)
+		tsty.ToDots(&pc.UnitContext)
+
+		rd := *fsty
+		rd.SetFillColor(colors.Red)
+
+		bl := *fsty
+		bl.SetFillColor(colors.Blue)
+
+		gr := *fsty
+		gr.SetFillColor(colors.Green)
+
+		tx := rich.NewText(fsty, []rune("Plain "))
+		tx.AddSpan(&rd, []rune("Red")).AddSpan(fsty, []rune(" and ")).AddSpan(&bl, []rune("Blue"))
+		tx.AddSpan(fsty, []rune(" and ")).AddSpan(&gr, []rune("Green"))
+
+		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+		pos := math32.Vector2{10, 10}
+		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
+		pc.TextLines(lns, pos)
+	})
+}
