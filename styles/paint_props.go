@@ -245,6 +245,7 @@ func (pc *Paint) toProperties(p map[string]any) {
 // properties map must be non-nil.
 func (pc *Stroke) toProperties(p map[string]any) {
 	if pc.Color == nil {
+		p["stroke"] = "none"
 		return
 	}
 	// todo: gradients!
@@ -271,6 +272,7 @@ func (pc *Stroke) toProperties(p map[string]any) {
 // properties map must be non-nil.
 func (pc *Fill) toProperties(p map[string]any) {
 	if pc.Color == nil {
+		p["fill"] = "none"
 		return
 	}
 	p["fill"] = colors.AsHex(colors.ToUniform(pc.Color))
