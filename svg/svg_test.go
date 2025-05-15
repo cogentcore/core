@@ -31,7 +31,7 @@ func RunTest(t *testing.T, width, height int, dir, fname string) {
 	assert.NoError(t, err)
 	img := sv.RenderImage()
 	imfn := filepath.Join(dir, "png", strings.TrimSuffix(fname, ".svg"))
-	fmt.Println(svfn, imfn)
+	// fmt.Println(svfn, imfn)
 	imagex.Assert(t, img, imfn)
 }
 
@@ -40,7 +40,7 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(filepath.Join("testdata", dir), ".svg")
 
 	for _, fn := range files {
-		// if fn != "fig_cortex_lobes.svg" {
+		// if fn != "marker1.svg" {
 		// 	continue
 		// }
 		RunTest(t, 640, 480, dir, fn)

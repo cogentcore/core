@@ -402,7 +402,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "d":
-						if inDef {
+						if sv.GroupFilter != "" && inDef { // font optimization
 							path.DataStr = attr.Value
 						} else {
 							path.SetData(attr.Value)
