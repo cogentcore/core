@@ -55,7 +55,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 func TestRender(t *testing.T) {
 	txtSh := shaped.NewShaper()
 	RunTest(t, "render", 300, 300, func(pc *Painter) {
-		testimg, _, err := imagex.Open("test.png")
+		testimg, _, err := imagex.Open("testdata/test.png")
 		assert.NoError(t, err)
 		linear := gradient.NewLinear()
 		linear.AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(math32.Rotate2D(90))

@@ -251,7 +251,6 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 
 	ptr := sv.painter
 	sv.painter = nil
-
 	return ptr
 }
 

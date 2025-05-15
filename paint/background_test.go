@@ -29,7 +29,7 @@ func TestBackgroundColor(t *testing.T) {
 }
 
 func TestBackgroundImage(t *testing.T) {
-	img, _, err := imagex.Open("test.png")
+	img, _, err := imagex.Open("testdata/test.png")
 	assert.NoError(t, err)
 	RunTest(t, "background-image", 1260, 200, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
@@ -54,7 +54,7 @@ func TestBackgroundImage(t *testing.T) {
 }
 
 func TestObjectFit(t *testing.T) {
-	img, _, err := imagex.Open("test.png")
+	img, _, err := imagex.Open("testdata/test.png")
 	// obj := math32.FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
 	RunTest(t, "object-fit", 1260, 300, func(pc *Painter) {
