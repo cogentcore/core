@@ -128,18 +128,15 @@ func (rs *Renderer) setStroke(stroke *styles.Stroke) {
 	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke.Color))
 }
 
+// toJSer is satisfied by [gradient.Gradient] on JS.
+type toJSer interface {
+	ToJS(ctx js.Value) js.Value
+}
+
 func (rs *Renderer) imageToStyle(clr image.Image) any {
 	if g, ok := clr.(gradient.Gradient); ok {
 		g.Update(1, math32.B2FromRect(rs.curRect), math32.Identity2()) // TODO: opacity, transform?
-		if gl, ok := g.(*gradient.Linear); ok {
-			return gl.ToJS(rs.ctx)
-		} else if gr, ok := g.(*gradient.Radial); ok {
-			grad := rs.ctx.Call("createRadialGradient", gr.Center.X, gr.Center.Y, gr.Radius.X, gr.Focal.X, gr.Focal.Y, gr.Radius.X) // TODO: specify different radius for start and end circles
-			for _, stop := range gr.Stops {
-				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
-			}
-			return grad
-		}
+		return g.(toJSer).ToJS(rs.ctx)
 	}
 	// TODO: handle more cases for things like pattern functions and [image.RGBA] images?
 	return colors.AsHex(colors.ToUniform(clr))

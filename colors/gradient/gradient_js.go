@@ -20,3 +20,12 @@ func (l *Linear) ToJS(ctx js.Value) js.Value {
 	}
 	return grad
 }
+
+// ToJS converts the gradient to a JavaScript object.
+func (r *Radial) ToJS(ctx js.Value) js.Value {
+	grad := ctx.Call("createRadialGradient", r.rCenter.X, r.rCenter.Y, r.rRadius.X, r.rFocal.X, r.rFocal.Y, r.rRadius.X) // TODO: specify different radius for start and end circles?
+	for _, stop := range r.Stops {
+		grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
+	}
+	return grad
+}
