@@ -58,6 +58,9 @@ type SourceState struct {
 	// time of last move
 	MouseMoveTime nptime.Time
 
+	// PaintTime is the time of the last [WindowPaint] event.
+	PaintTime nptime.Time
+
 	// keyboard modifiers (Shift, Alt, etc)
 	Mods key.Modifiers
 
@@ -190,12 +193,13 @@ func (es *Source) Window(act WinActions) {
 	es.Deque.SendFirst(ev)
 }
 
-// WindowPaint sends a [NewWindowPaint] event with the given time
-// of the last paint event.
-func (es *Source) WindowPaint(prevTime nptime.Time) {
+// WindowPaint sends a [NewWindowPaint] event.
+func (es *Source) WindowPaint() {
 	ev := NewWindowPaint()
 	ev.Init()
-	ev.PrvTime = prevTime
+	ev.PrvTime = es.Last.PaintTime
+	es.Last.PaintTime = ev.GenTime
+
 	if TraceWindowPaint {
 		fmt.Printf(".")
 		es.PaintCount++
