@@ -171,7 +171,7 @@ func (bt *Button) Init() {
 		}
 	})
 
-	bt.HandleClickOnEnterSpace()
+	bt.SendClickOnEnter()
 	bt.OnClick(func(e events.Event) {
 		if bt.openMenu(e) {
 			e.SetHandled()

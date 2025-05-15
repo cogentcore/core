@@ -469,17 +469,17 @@ func (wb *WidgetBase) handleValueOnChange() {
 	})
 }
 
-// HandleClickOnEnterSpace adds a key event handler for Enter and Space
+// SendClickOnEnter adds a key event handler for Enter and Space
 // keys to generate an [events.Click] event. This is not added by default,
 // but is added in [Button] and [Switch] for example.
-func (wb *WidgetBase) HandleClickOnEnterSpace() {
+func (wb *WidgetBase) SendClickOnEnter() {
 	wb.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("WidgetBase HandleClickOnEnterSpace", "widget", wb, "keyFunction", kf)
+			slog.Info("WidgetBase.SendClickOnEnter", "widget", wb, "keyFunction", kf)
 		}
 		if kf == keymap.Accept {
-			wb.Send(events.Click, e) // don't handle
+			wb.Send(events.Click, e) // don't SetHandled
 		} else if kf == keymap.Enter || e.KeyRune() == ' ' {
 			e.SetHandled()
 			wb.Send(events.Click, e)

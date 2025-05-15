@@ -122,7 +122,7 @@ func (sw *Switch) Init() {
 		}
 	})
 
-	sw.HandleClickOnEnterSpace()
+	sw.SendClickOnEnter()
 	sw.OnFinal(events.Click, func(e events.Event) {
 		if sw.IsReadOnly() {
 			return
