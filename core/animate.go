@@ -32,6 +32,9 @@ type Animation struct {
 	// Done can be set to true to permanently stop the animation; the [Animation] object
 	// will be removed from the [Scene] at the next frame.
 	Done bool
+
+	// lastTime is the last time this animation was run.
+	lastTime time.Time
 }
 
 // Animate adds a new [Animation] to the [Scene] for the widget. The given function is run
@@ -52,7 +55,6 @@ func (sc *Scene) runAnimations() {
 		return
 	}
 
-	se := sc.SystemEvents()
 	for _, a := range sc.Animations {
 		if a.Widget == nil || a.Widget.This == nil {
 			a.Done = true
@@ -60,10 +62,10 @@ func (sc *Scene) runAnimations() {
 		if a.Done || !a.Widget.IsVisible() {
 			continue
 		}
-		a.Dt = float32(time.Since(se.Last.PaintTime.Time()).Milliseconds())
+		a.Dt = float32(time.Since(a.lastTime).Milliseconds())
 		a.Func(a)
+		a.lastTime = time.Now()
 	}
-	se.Last.PaintTime.SetTime(time.Now())
 
 	sc.Animations = slices.DeleteFunc(sc.Animations, func(a *Animation) bool {
 		return a.Done

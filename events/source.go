@@ -58,9 +58,6 @@ type SourceState struct {
 	// time of last move
 	MouseMoveTime nptime.Time
 
-	// PaintTime is the time of the last [WindowPaint] event.
-	PaintTime nptime.Time
-
 	// keyboard modifiers (Shift, Alt, etc)
 	Mods key.Modifiers
 
