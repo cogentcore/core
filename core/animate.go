@@ -65,7 +65,7 @@ func (sc *Scene) runAnimations() {
 		if a.lastTime.IsZero() {
 			a.Dt = 16.66666667 // 60 FPS fallback
 		} else {
-			a.Dt = float32(time.Since(a.lastTime).Milliseconds())
+			a.Dt = float32(time.Since(a.lastTime).Seconds()) * 1000
 		}
 		a.Func(a)
 		a.lastTime = time.Now()
