@@ -52,11 +52,9 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	}
 
 	if gr, ok := usrc.(gradient.Gradient); ok {
-		_ = gr
-		// TODO: fill with gradient
-		// rs.style.Fill.Color = u
-		// rs.ctx.Set("fillStyle", rs.imageToStyle(u))
-		// rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
+		rs.curRect = pr.Rect
+		rs.ctx.Set("fillStyle", rs.imageToStyle(gr))
+		rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		return
 	}
 

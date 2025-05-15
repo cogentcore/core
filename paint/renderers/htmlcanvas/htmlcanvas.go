@@ -28,6 +28,9 @@ type Renderer struct {
 	Canvas js.Value
 	ctx    js.Value
 	size   math32.Vector2
+
+	// curRect is the rectangle of the current object.
+	curRect image.Rectangle
 }
 
 // New returns an HTMLCanvas renderer.
@@ -127,14 +130,11 @@ func (rs *Renderer) setStroke(stroke *styles.Stroke) {
 
 func (rs *Renderer) imageToStyle(clr image.Image) any {
 	if g, ok := clr.(gradient.Gradient); ok {
+		g.Update(1, math32.B2FromRect(rs.curRect), math32.Identity2()) // TODO: opacity, transform?
 		if gl, ok := g.(*gradient.Linear); ok {
-			grad := rs.ctx.Call("createLinearGradient", gl.Start.X, gl.Start.Y, gl.End.X, gl.End.Y) // TODO: are these params right?
-			for _, stop := range gl.Stops {
-				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
-			}
-			return grad
+			return gl.ToJS(rs.ctx)
 		} else if gr, ok := g.(*gradient.Radial); ok {
-			grad := rs.ctx.Call("createRadialGradient", gr.Center.X, gr.Center.Y, gr.Radius, gr.Focal.X, gr.Focal.Y, gr.Radius) // TODO: are these params right?
+			grad := rs.ctx.Call("createRadialGradient", gr.Center.X, gr.Center.Y, gr.Radius.X, gr.Focal.X, gr.Focal.Y, gr.Radius.X) // TODO: specify different radius for start and end circles
 			for _, stop := range gr.Stops {
 				grad.Call("addColorStop", stop.Pos, colors.AsHex(stop.Color))
 			}
