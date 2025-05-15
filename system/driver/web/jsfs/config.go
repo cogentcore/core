@@ -32,6 +32,7 @@ func Config(jfs js.Value) (*FS, error) {
 	constants.Set("O_TRUNC", syscall.O_TRUNC)
 	constants.Set("O_APPEND", syscall.O_APPEND)
 	constants.Set("O_EXCL", syscall.O_EXCL)
+	constants.Set("O_DIRECTORY", syscall.O_DIRECTORY)
 
 	SetFunc(jfs, "chmod", fs.Chmod)
 	SetFunc(jfs, "chown", fs.Chown)
