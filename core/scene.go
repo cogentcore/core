@@ -290,12 +290,17 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 		sc.Painter = *paint.NewPainter(sz)
 		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	}
-	if sc.renderer == nil {
-		sc.renderer = paint.NewSourceRenderer(sz)
-	}
 	sc.SceneGeom.Pos = geom.Pos
-	if sc.Painter.State.Size == sz {
-		return false
+	if sc.renderer != nil {
+		img := sc.renderer.Image()
+		if img != nil {
+			isz := img.Bounds().Size()
+			if isz == geom.Size {
+				return false
+			}
+		}
+	} else {
+		sc.renderer = paint.NewSourceRenderer(sz)
 	}
 	sc.Painter.State.Init(sc.Painter.Paint, sz)
 	sc.renderer.SetSize(units.UnitDot, sz)
