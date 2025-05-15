@@ -192,12 +192,10 @@ func (ct *Content) Init() {
 			ct.rightFrame = w
 			w.Styler(func(s *styles.Style) {
 				switch w.SizeClass() {
-				case core.SizeCompact:
-					s.Padding.SetHorizontal(units.Em(1))
-				case core.SizeMedium:
-					s.Padding.SetHorizontal(units.Em(2))
+				case core.SizeCompact, core.SizeMedium:
+					s.Padding.SetHorizontal(units.Em(0.5))
 				case core.SizeExpanded:
-					s.Padding.SetHorizontal(units.Em(5))
+					s.Padding.SetHorizontal(units.Em(3))
 				}
 			})
 			w.Maker(func(p *tree.Plan) {
