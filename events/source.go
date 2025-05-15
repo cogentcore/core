@@ -190,9 +190,12 @@ func (es *Source) Window(act WinActions) {
 	es.Deque.SendFirst(ev)
 }
 
-func (es *Source) WindowPaint() {
+// WindowPaint sends a [NewWindowPaint] event with the given time
+// of the last paint event.
+func (es *Source) WindowPaint(prevTime nptime.Time) {
 	ev := NewWindowPaint()
 	ev.Init()
+	ev.PrvTime = prevTime
 	if TraceWindowPaint {
 		fmt.Printf(".")
 		es.PaintCount++
