@@ -2,6 +2,8 @@ The [[doc:gpu]] package provides a higher-level interface to [WebGPU](https://ww
 
 The `gpu` package manages all the details of WebGPU to provide a higher-level interface where you can specify the data variables and values, shader pipelines, and other parameters that tell the GPU what to do, without having to worry about all the lower-level implementational details. It maps directly onto the underlying WebGPU structure, and does not decrease performance in any way. It supports both graphics and compute functionality.
 
+The [[xyz]] package provides an even higher-level 3D graphics abstraction on top of `gpu`, which is what most users will typically want to use.
+
 The main gpu code is in the top-level `gpu` package, with the following sub-packages available:
 
 * [[doc:gpu.phong]] is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higher-level [[xyz]] 3D scenegraph system.
