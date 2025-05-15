@@ -41,6 +41,11 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 	sv.Render(rend)
 	imagex.Assert(t, ir.Image(), nm)
 	svdir := filepath.Join("testdata", "svg")
+	dp, fno := filepath.Split(nm)
+	if dp != "" {
+		svdir = filepath.Join(svdir, dp)
+		nm = fno
+	}
 	os.MkdirAll(svdir, 0777)
 	svfnm := filepath.Join(svdir, nm) + ".svg"
 	err := os.WriteFile(svfnm, sv.Source(), 0666)
