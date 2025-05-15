@@ -92,6 +92,6 @@ Note: in that example, we use [[doc:core.WidgetBase.UpdateRender]] instead of [[
 
 Note that, unlike for goroutines, the animation function is run in the main event loop and thus does *not* require any [[async]] protection. Using the animation API is better than using a goroutine since it automatically lines up with the app rendering timing, and it adapts to the screen refresh rate across platforms.
 
-Using the [[doc:core.Animation.Delta]] field of the animation allows the animation to run at the same speed across refresh rates; faster refresh rates will lead to a smoother animation, but the overall speed will be the same.
+Using the [[doc:core.Animation.Dt]] field of the animation allows the animation to run at the same speed across refresh rates; faster refresh rates will lead to a smoother animation, but the overall speed will be the same.
 
 If the animation is too intensive for the system to keep up, the animation rate will be automatically reduced, so it is not guaranteed to be exactly the refresh rate of the monitor. As such, unlike a goroutine, an animation should not cause any app hanging, even on web.

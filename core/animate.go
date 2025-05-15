@@ -17,7 +17,7 @@ type Animation struct {
 	// Func is the animation function, which is run every time the [Scene]
 	// receives a paint tick, which is usually at the same rate as the refresh
 	// rate of the monitor. It receives the [Animation] object so that
-	// it can references things such as [Animation.Delta] and set things such as
+	// it can references things such as [Animation.Dt] and set things such as
 	// [Animation.Done].
 	Func func(a *Animation)
 
@@ -36,7 +36,7 @@ type Animation struct {
 
 // Animate adds a new [Animation] to the [Scene] for the widget. The given function is run
 // at every tick, and it receives the [Animation] object so that it can reference and modify
-// things on it; see the [Animation] docs for more information on things such as [Animation.Delta]
+// things on it; see the [Animation] docs for more information on things such as [Animation.Dt]
 // and [Animation.Done].
 func (wb *WidgetBase) Animate(f func(a *Animation)) {
 	a := &Animation{
