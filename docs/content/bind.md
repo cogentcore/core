@@ -26,4 +26,4 @@ core.Bind(&on, core.NewSwitch(b)).OnChange(func(e events.Event) {
 })
 ```
 
-Note that value binding goes both ways: not only is the value of the widget updated in [[doc:core.WidgetBase.Update]], the value of the bound variable is updated before [[doc:core.WidgetBase.OnChange]]. This two-way updating makes value binding very useful for creating interactive widgets that represent some underlying value.
+Note that value binding goes both ways: not only is the value of the widget updated in [[doc:core.WidgetBase.Update]], the value of the bound variable is updated on [[events#change]] events. This two-way updating makes value binding very useful for creating interactive widgets that represent some underlying value.
