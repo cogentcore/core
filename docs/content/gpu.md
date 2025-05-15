@@ -1,22 +1,18 @@
-# GPU for Graphics and Compute
+The [[doc:gpu]] package provides a higher-level interface to [WebGPU](https://www.w3.org/TR/webgpu/), which provides GPU (_graphical processing unit_) hardware-accelerated graphics and compute processing on both desktop and web platforms, using the same unified api.
 
-The `gpu` package manages all the details of [WebGPU](https://www.w3.org/TR/webgpu/) to provide a higher-level interface where you can specify the data variables and values, shader pipelines, and other parameters that tell the GPU what to do, without having to worry about all the lower-level implementational details.  It maps directly onto the underlying WebGPU structure, and does not decrease performance in any way.  It supports both graphics and compute functionality.
+The `gpu` package manages all the details of WebGPU to provide a higher-level interface where you can specify the data variables and values, shader pipelines, and other parameters that tell the GPU what to do, without having to worry about all the lower-level implementational details. It maps directly onto the underlying WebGPU structure, and does not decrease performance in any way. It supports both graphics and compute functionality.
 
 The main gpu code is in the top-level `gpu` package, with the following sub-packages available:
 
-* [phong](phong) is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higherlevel [xyz](https://github.com/cogentcore/core/tree/main/xyz) 3D scenegraph system.
+* [[doc:gpu.phong]] is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higher-level [[xyz]] 3D scenegraph system.
 
-* [shape](shape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu.  It only has a dependency on the [math32](../math32) package and could be used for anything.
+* [[doc:gpu.shape]] generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates. You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu. It only has a dependency on the [math32](../math32) package and could be used for anything.
 
-* [gpudraw](gpudraw) implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api.  This is used for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window.
+* [[doc:gpu.gpudraw]] implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api. This is used by the `Composer` framework for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window (see [[render]] for details).
 
-# Platforms
+We maintain a separate [webgpu](https://github.com/cogentcore/webgpu) package that provides a Go and JS wrapper around the rust-based [wgpu](https://github.com/gfx-rs/wgpu) and [wgpu-native](https://github.com/gfx-rs/wgpu-native) packages that actually implement WebGPU itself on the desktop and mobile. This "native" version is just as performant as the much more difficult-to-use [Vulkan](https://www.vulkan.org/) framework, which we used to use.
 
-* On desktop (mac, windows, linux), [glfw](https://github.com/go-gl/glfw) is used for initializing the GPU.
-* Mobile (android, ios)...
-  - When developing for Android on macOS, it is critical to set `Emulated Performance` -> `Graphics` to `Software` in the `Android Virtual Device Manager (AVD)`; otherwise, the app will crash on startup. This is because macOS does not support direct access to the underlying hardware GPU in the Android Emulator. You can see more information how to do this [in the Android developer documentation](https://developer.android.com/studio/run/emulator-acceleration). Please note that this issue will not affect end-users of your app, only you while you develop it. Also, due to the typically bad performance of the emulated device GPU on macOS, it is recommended that you use a more modern emulated device than the default Pixel 3a. Finally, you should always test your app on a real mobile device if possible to see what it is actually like.
-
-# Selecting a GPU Device
+## Selecting a GPU Device
 
 For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used. To see what is available and their properties, use:
 
@@ -44,7 +40,7 @@ For compute usage, if there are multiple discrete devices, then they are ordered
 
 There are many distinct mechanisms for graphics vs. compute functionality, so we review the Graphics system first, then the Compute.
 
-# Graphics System
+## Graphics System
 
 * `GraphicsSystem` manages multiple `GraphicsPipeline`s and associated variables (`Var`) and `Value`s, to accomplish a complete overall rendering / computational job.  The `Vars` and `Values` are shared across all pipelines within a System, which is more efficient and usually what you want.  A given shader can simply ignore the variables it doesn't need.
     + `GraphicsPipeline` performs a specific chain of operations, using `Shader` program(s).  In the graphics context, each pipeline typically handles a different type of material or other variation in rendering (textured vs. not, transparent vs. solid, etc).
@@ -79,7 +75,7 @@ Note that all errors are logged in the gpu system, because in general GPU-level 
 
 ## Var and Value data
 
-The single most important constraint in thinking about how the GPU works, is that *all resources (data in buffers, textures) must be uploaded to the GPU at the _start_ of the render pass*.
+The single most important constraint in thinking about how the GPU works, is that _all resources (data in buffers, textures) must be uploaded to the GPU at the _start_ of the render pass_.
 
 Thus, you must configure all the vars and values prior to a render pass, and if anything changes, these need to be reconfigured.
 
@@ -125,33 +121,17 @@ Which is consistent with the [standard cartesian coordinate system](https://en.w
  v
 ```
 
-You can think of this as having vertical "stacks" of standard X-Y coordinates, stacked up along the Z axis, like a big book of graph paper.  In some cases, e.g., neural network layers, where this "stack" analog is particularly relevant, it can be useful to adopt this version of the coordinate system.
-
-However, the advantage of our "Y+ up" system is that the X-Y 2D cartesian plane then maps directly onto the actual 2D screen that the user is looking at, with Z being the "extra" depth axis.  Given the primacy and universal standard way of understanding the 2D plane, this consistency seems like a nice advantage.
+You can think of this as having vertical "stacks" of standard X-Y coordinates, stacked up along the Z axis, like a big book of graph paper. The advantage of our "Y+ up" system is that the X-Y 2D cartesian plane then maps directly onto the actual 2D screen that the user is looking at, with Z being the "extra" depth axis.  Given the primacy and universal standard way of understanding the 2D plane, this consistency seems like a nice advantage.
 
 In this coordinate system, the standard _front face winding order_ is clockwise (CW), so the default is set to: `pl.SetFrontFace(wgpu.FrontFaceCW)` in the `GraphicsPipeline`.  
 
-The above coordinate system is consistent with OpenGL, but other 3D rendering frameworks, including the default in WebGPU, have other systems, as documented here: https://github.com/gpuweb/gpuweb/issues/416.  WebGPU is consistent with DirectX and Metal (by design), and is a _left handed_ coordinate system (using `FrontFaceCCW` by default), which conflicts with the near-universal [right-hand-rule](https://en.wikipedia.org/wiki/Right-hand_rule) used in physics and engineering.  Vulkan has its own peculiar coordinate system, with the "up" Y direction being _negative_, which turns it into a right-handed system, but one that doesn't make a lot of intuitive sense.
+The above coordinate system is consistent with OpenGL, but other 3D rendering frameworks, including the default in WebGPU, have other systems, as documented here: https://github.com/gpuweb/gpuweb/issues/416. WebGPU is consistent with DirectX and Metal (by design), and is a _left handed_ coordinate system (using `FrontFaceCCW` by default), which conflicts with the near-universal [right-hand-rule](https://en.wikipedia.org/wiki/Right-hand_rule) used in physics and engineering.  Vulkan has its own peculiar coordinate system, with the "up" Y direction being _negative_, which turns it into a right-handed system, but one that doesn't make a lot of intuitive sense.
 
-For reference, this is the default [WebGPU coordinate system](https://www.w3.org/TR/webgpu/#coordinate-systems):
+## Compute system
 
-```
-    ^
- Y+ | 
-    |
-    +-------->
-   /      X+
-  / Z-
- v
-```
+See `examples/compute1` for a very simple compute shader.
 
-Obviously every system can be converted into every other with the proper combination of camera projection matricies and winding order settings, so it isn't a problem that we use something different than WebGPU natively uses -- it just requires a different winding order setting.
-
-# Compute System
-
-See `examples/compute1` for a very simple compute shader, and [compute.go](gpu/compute.go) for the `ComputeSystem` that manages compute-only use of the GPU.
-
-See [gosl] for a tool that converts Go code into WGSL shader code, so you can effectively run Go on the GPU.
+See the `gosl` system in [Cogent Lab](https://github.com/cogentcore/lab) for a tool that converts Go code into WGSL shader code, so you can effectively run Go on the GPU.
 
 Here's how it works:
 
@@ -159,31 +139,21 @@ Here's how it works:
 
 * The `Vars` and `Values` in the `System` hold all the data structures your shaders operate on, and must be configured and data uploaded before running.  In general, it is best to have a single static set of Vars that cover everything you'll need, and different shaders can operate on different subsets of these, minimizing the amount of memory transfer.
 
-* Because the `Queue.Submit` call is by far the most expensive call in WebGPU, it should be minimized. This means combining as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted *once*, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
+* Because the `Queue.Submit` call is by far the most expensive call in WebGPU, it should be minimized. This means combining as much of your computation into one big Command sequence, with calls to various different `Pipeline` shaders (which can all be put in one command buffer) that gets submitted _once_, rather than submitting separate commands for each shader.  Ideally this also involves combining memory transfers to / from the GPU in the same command buffer as well.
 
 * There are no explicit sync mechanisms on the command, CPU side WebGPU (they only exist in the WGSL shaders), but it is designed so that shader compute is automatically properly synced with prior and subsequent memory transfer commands, so it automatically does the right thing for most use cases.
 
-* Compute is particularly taxing on memory transfer in general, and overall the best strategy is to rely on the optimized `WriteBuffer` command to transfer from CPU to GPU, and then use a staging buffer to read data back from the GPU. E.g., see [this reddit post](https://www.reddit.com/r/wgpu/comments/13zqe1u/can_someone_please_explain_to_me_the_whole_buffer/).  Critically, the write commands are queued and any staging buffers are managed internally, so it shouldn't be much slower than manually doing all the staging.  For reading, we have to implement everything ourselves, and here it is critical to batch the `ReadSync` calls for all relevant values, so they all happen at once.  Use ad-hoc `ValueGroup`s to organize these batched read operations efficiently for the different groups of values that need to be read back in the different compute stages.
+* Compute is particularly taxing on memory transfer in general, and overall the best strategy is to rely on the optimized `WriteBuffer` command to transfer from CPU to GPU, and then use a staging buffer to read data back from the GPU. E.g., see [this reddit post](https://www.reddit.com/r/wgpu/comments/13zqe1u/can_someone_please_explain_to_me_the_whole_buffer/).  Critically, the write commands are queued and any staging buffers are managed internally, so it shouldn't be much slower than manually doing all the staging. For reading, we have to implement everything ourselves, and here it is critical to batch the `ReadSync` calls for all relevant values, so they all happen at once. Use ad-hoc `ValueGroup`s to organize these batched read operations efficiently for the different groups of values that need to be read back in the different compute stages.
 
 * For large numbers of items to compute, there is a strong constraint that only 65_536 (2^16) workgroups can be submitted, _per dimension_ at a time. For unstructured 1D indexing, we typically use `[64,1,1]` for the workgroup size (which must be hard-coded into the shader and coordinated with the Go side code), which gives 64 * 65_536 = 4_194_304 max items. For more than that number, more than 1 needs to be used for the second dimension. The NumWorkgroups* functions return appropriate sizes with a minimum remainder. See [examples/compute](examples/compute) for the logic needed to get the overall global index from the workgroup sizes.
 
-# Gamma Correction (sRGB vs Linear) and Headless / Offscreen Rendering
-
-It is hard to find this info very clearly stated:
-
-* All internal computation in shaders is done in a *linear* color space.
-* Textures are assumed to be sRGB and are automatically converted to linear on upload.
-* Other colors that are passed in should be converted from sRGB to linear (the [phong](phong) shader does this for the PerVertex case).
-* The `Surface` automatically converts from Linear to sRGB for actual rendering.
-* A `RenderTexture` for offscreen / headless rendering *must* use `wgpu.TextureFormatRGBA8UnormSrgb` for the format, in order to get back an image that is automatically converted back to sRGB format.
-
-# Naming conventions
+## Naming conventions
 
 * `New*` returns a new object.
 * `Config` operates on an existing object and settings, and does everything to get it configured for use.
 * `Release` releases allocated WebGPU objects.  The usual Go simplicity of not having to worry about freeing memory does not apply to these objects.
 
-# Limits
+## Limits
 
 See https://web3dsurvey.com/webgpu for a browser of limits across different platforms, _for the web platform_.  Note that the native version typically will have higher limits for many things across these same platforms, but because we want to maintain full interoperability across web and native, it is the lower web limits that constrain.
 
@@ -191,15 +161,4 @@ See https://web3dsurvey.com/webgpu for a browser of limits across different plat
 * https://web3dsurvey.com/webgpu/limits/maxBindingsPerBindGroup 640 low end: plenty of room for all your variables, you just have to put them in relatively few top-level groups.
 * https://web3dsurvey.com/webgpu/limits/maxDynamicUniformBuffersPerPipelineLayout 8: should be plenty.
 * https://web3dsurvey.com/webgpu/limits/maxVertexBuffers 8: can't stuff too many vars into the vertex group, but typically not a problem.
-
-# WebGPU Links
-
-* https://google.github.io/tour-of-wgsl/ -- much more concise and clear vs. reading the spec!
-* https://webgpu.rocks/
-* https://gpuweb.github.io/gpuweb/wgsl/
-* https://www.w3.org/TR/webgpu
-* https://web3dsurvey.com/webgpu
-* https://toji.dev/webgpu-best-practices/ -- very helpful tutorial info
-* https://sotrh.github.io/learn-wgpu/beginner/tutorial5-textures/
-* https://webgpu.github.io/webgpu-samples/
 

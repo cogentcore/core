@@ -90,8 +90,8 @@ type SVG struct {
 	// painter is the current painter being used, which is only valid during rendering.
 	painter *paint.Painter
 
-	// TextShaper for shaping svg text. Can set to shared external one,
-	// or else one is made in Render.
+	// TextShaper for shaping text. Can set to a shared external one,
+	// or else the shared svgShaper is used under a mutex lock during Render.
 	TextShaper shaped.Shaper
 
 	// all defs defined elements go here (gradients, symbols, etc)
