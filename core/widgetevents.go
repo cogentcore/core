@@ -469,6 +469,16 @@ func (wb *WidgetBase) handleValueOnChange() {
 	})
 }
 
+// SendChangeOnInput adds an event handler that does [WidgetBase.SendChange]
+// in [WidgetBase.OnInput]. This is not done by default, but you can call it
+// if you want [events.Input] to trigger full change events, such as in a [Bind]
+// context.
+func (wb *WidgetBase) SendChangeOnInput() {
+	wb.OnInput(func(e events.Event) {
+		wb.SendChange(e)
+	})
+}
+
 // SendClickOnEnter adds a key event handler for Enter and Space
 // keys to generate an [events.Click] event. This is not added by default,
 // but is added in [Button] and [Switch] for example.
