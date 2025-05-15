@@ -164,6 +164,18 @@ func (fr *Frame) Init() {
 	})
 	// We treat slide events on frames as scroll events on mobile.
 	prevVels := []math32.Vector2{}
+	fr.On(events.SlideStart, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
+		// Stop any existing scroll animations for this frame.
+		for _, anim := range fr.Scene.Animations {
+			if anim.Widget.This == fr.This {
+				anim.Done = true
+			}
+		}
+	})
 	fr.On(events.SlideMove, func(e events.Event) {
 		if !TheApp.SystemPlatform().IsMobile() {
 			return
@@ -186,7 +198,7 @@ func (fr *Frame) Init() {
 			return
 		}
 
-		// If we have enough velocity over the last few scroll events,
+		// If we have enough velocity over the last few slide events,
 		// we continue scrolling in an animation while slowly decelerating
 		// for a smoother experience.
 		if len(prevVels) == 0 {
