@@ -51,6 +51,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		rs.writePath(&pt.Path)
 	}
 
+	rs.curRect = pt.Path.FastBounds().ToRect() // TODO: more performance optimized approach (such as only computing for gradients)?
 	if style.HasFill() {
 		rs.setFill(style.Fill.Color)
 		rule := "nonzero"
