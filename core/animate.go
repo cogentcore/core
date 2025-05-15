@@ -48,6 +48,11 @@ func (wb *WidgetBase) Animate(f func(a *Animation)) {
 
 // runAnimations runs the [Scene.Animations].
 func (sc *Scene) runAnimations() {
+	if len(sc.Animations) == 0 {
+		return
+	}
+
+	se := sc.SystemEvents()
 	for _, a := range sc.Animations {
 		if a.Widget == nil || a.Widget.This == nil {
 			a.Done = true
@@ -55,9 +60,10 @@ func (sc *Scene) runAnimations() {
 		if a.Done || !a.Widget.IsVisible() {
 			continue
 		}
-		a.Dt = float32((time.Second / 60).Milliseconds()) // TODO
+		a.Dt = float32(time.Since(se.Last.PaintTime.Time()).Milliseconds())
 		a.Func(a)
 	}
+	se.Last.PaintTime.SetTime(time.Now())
 
 	sc.Animations = slices.DeleteFunc(sc.Animations, func(a *Animation) bool {
 		return a.Done

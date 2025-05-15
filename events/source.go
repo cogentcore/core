@@ -197,8 +197,6 @@ func (es *Source) Window(act WinActions) {
 func (es *Source) WindowPaint() {
 	ev := NewWindowPaint()
 	ev.Init()
-	ev.PrvTime = es.Last.PaintTime
-	es.Last.PaintTime = ev.GenTime
 
 	if TraceWindowPaint {
 		fmt.Printf(".")
