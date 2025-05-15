@@ -77,10 +77,6 @@ type Slider struct {
 	// by values less than 1 (0.5 default).
 	TrackSize float32 `default:"0.5"`
 
-	// ChangeOnSlide sends [events.Change] events while sliding, instead of only
-	// at the end when done sliding.
-	ChangeOnSlide bool
-
 	// InputThreshold is the threshold for the amount of change in scroll
 	// value before emitting an input event.
 	InputThreshold float32
@@ -224,9 +220,6 @@ func (sr *Slider) Init() {
 			sr.setSliderPosEvent(sr.slideStartPos + float32(del.X))
 		} else {
 			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
-		}
-		if sr.ChangeOnSlide {
-			sr.sendChange()
 		}
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
