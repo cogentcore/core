@@ -131,7 +131,6 @@ func TestEmoji(t *testing.T) {
 		// 	continue
 		// }
 		RunTest(t, 512, 512, dir, fn)
-		fmt.Println(fn)
 	}
 }
 

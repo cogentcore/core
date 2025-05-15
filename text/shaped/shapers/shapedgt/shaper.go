@@ -89,6 +89,7 @@ func (sh *Shaper) FontMap() *fontscan.FontMap {
 // using given context needed for complete styling.
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
+// This is called under a mutex lock, so it is safe for parallel use.
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
@@ -97,6 +98,8 @@ func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []sh
 
 // ShapeText shapes the spans in the given text using given style and settings,
 // returning [shaped.Run] results.
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
 func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
 	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
 	runs := make([]shaped.Run, len(outs))
@@ -120,11 +123,13 @@ func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 
 // ShapeTextOutput shapes the spans in the given text using given style and settings,
 // returning raw go-text [shaping.Output].
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
 func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
 	if tx.Len() == 0 {
 		return nil
 	}
-	sh.ShapeMaths(tx, tsty)
+	sh.shapeMaths(tx, tsty)
 	sty := rich.NewStyle()
 	sh.outBuff = sh.outBuff[:0]
 	for si, s := range tx {
@@ -173,9 +178,9 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 	return sh.outBuff
 }
 
-// ShapeMaths runs TeX on all Math specials, saving results in maths
+// shapeMaths runs TeX on all Math specials, saving results in maths
 // map indexed by the span index.
-func (sh *Shaper) ShapeMaths(tx rich.Text, tsty *text.Style) {
+func (sh *Shaper) shapeMaths(tx rich.Text, tsty *text.Style) {
 	sh.maths = make(map[int]*shaped.Math)
 	if shaped.ShapeMath == nil {
 		return
@@ -183,15 +188,15 @@ func (sh *Shaper) ShapeMaths(tx rich.Text, tsty *text.Style) {
 	for si, _ := range tx {
 		sty, stx := tx.Span(si)
 		if sty.IsMath() {
-			mt := sh.ShapeMath(sty, tsty, stx)
+			mt := sh.shapeMath(sty, tsty, stx)
 			sh.maths[si] = mt // can be nil if error
 			si++              // skip past special
 		}
 	}
 }
 
-// ShapeMath runs tex math to get path for math special
-func (sh *Shaper) ShapeMath(sty *rich.Style, tsty *text.Style, stx []rune) *shaped.Math {
+// shapeMath runs tex math to get path for math special
+func (sh *Shaper) shapeMath(sty *rich.Style, tsty *text.Style, stx []rune) *shaped.Math {
 	if shaped.ShapeMath == nil {
 		return nil
 	}

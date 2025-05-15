@@ -23,6 +23,7 @@ import (
 // first using standard newline markers, assumed to coincide with separate spans in the
 // source text, and wrapped separately. For horizontal text, the Lines will render with
 // a position offset at the upper left corner of the overall bounding box of the text.
+// This is called under a mutex lock, so it is safe for parallel use.
 func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
 	sh.Lock()
 	defer sh.Unlock()
@@ -36,6 +37,8 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
 
 	lht := tsty.LineHeightDots(defSty)
@@ -80,6 +83,8 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	return lines, truncated
 }
 
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
 func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) *shaped.Lines {
 
 	lht := tsty.LineHeightDots(defSty)

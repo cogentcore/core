@@ -55,27 +55,30 @@ func NewShaper() shaped.Shaper {
 // using given context needed for complete styling.
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
+// This is called under a mutex lock, so it is safe for parallel use.
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
-	return sh.ShapeAdjust(tx, tsty, rts, tx.Join())
+	return sh.shapeAdjust(tx, tsty, rts, tx.Join())
 }
 
-// ShapeAdjust turns given input spans into [Runs] of rendered text,
+// shapeAdjust turns given input spans into [Runs] of rendered text,
 // using given context needed for complete styling.
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
-func (sh *Shaper) ShapeAdjust(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
-	return sh.AdjustRuns(sh.ShapeText(tx, tsty, rts, txt), tx, tsty, rts)
+func (sh *Shaper) shapeAdjust(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
+	return sh.adjustRuns(sh.ShapeText(tx, tsty, rts, txt), tx, tsty, rts)
 }
 
-// AdjustRuns adjusts the given run metrics based on the html measureText results.
-func (sh *Shaper) AdjustRuns(runs []shaped.Run, tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
+// adjustRuns adjusts the given run metrics based on the html measureText results.
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
+func (sh *Shaper) adjustRuns(runs []shaped.Run, tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
 	for _, run := range runs {
 		grun := run.(*shapedgt.Run)
 		out := &grun.Output
 		fnt := &grun.Font
-		sh.AdjustOutput(out, fnt, tx, tsty, rts)
+		sh.adjustOutput(out, fnt, tx, tsty, rts)
 	}
 	return runs
 }
@@ -87,6 +90,7 @@ func (sh *Shaper) AdjustRuns(runs []shaped.Run, tx rich.Text, tsty *text.Style, 
 // first using standard newline markers, assumed to coincide with separate spans in the
 // source text, and wrapped separately. For horizontal text, the Lines will render with
 // a position offset at the upper left corner of the overall bounding box of the text.
+// This is called under a mutex lock, so it is safe for parallel use.
 func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
 	sh.Lock()
 	defer sh.Unlock()
@@ -103,7 +107,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		si, _, _ := tx.Index(out.Runes.Offset)
 		sty, _ := tx.Span(si)
 		fnt := text.NewFont(sty, tsty)
-		sh.AdjustOutput(out, fnt, tx, tsty, rts)
+		sh.adjustOutput(out, fnt, tx, tsty, rts)
 	}
 	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
 	for _, lno := range lines {
@@ -112,14 +116,16 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			si, _, _ := tx.Index(out.Runes.Offset)
 			sty, _ := tx.Span(si)
 			fnt := text.NewFont(sty, tsty)
-			sh.AdjustOutput(out, fnt, tx, tsty, rts)
+			sh.adjustOutput(out, fnt, tx, tsty, rts)
 		}
 	}
 	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 
-// AdjustOutput adjusts the given run metrics based on the html measureText results.
-func (sh *Shaper) AdjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text, tsty *text.Style, rts *rich.Settings) {
+// adjustOutput adjusts the given run metrics based on the html measureText results.
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
+func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text, tsty *text.Style, rts *rich.Settings) {
 	rng := textpos.Range{out.Runes.Offset, out.Runes.Offset + out.Runes.Count}
 	si, sn, ri := tx.Index(rng.Start)
 	sty, stx := tx.Span(si)

@@ -29,7 +29,7 @@ var (
 	// svgShaper is a shared text shaper.
 	svgShaper shaped.Shaper
 
-	// mutex for sharing the svgShaper.
+	// mutex for initializing the svgShaper.
 	shaperMu sync.Mutex
 )
 
@@ -91,7 +91,7 @@ type SVG struct {
 	painter *paint.Painter
 
 	// TextShaper for shaping text. Can set to a shared external one,
-	// or else the shared svgShaper is used under a mutex lock during Render.
+	// or else the shared svgShaper is used.
 	TextShaper shaped.Shaper
 
 	// all defs defined elements go here (gradients, symbols, etc)
@@ -218,7 +218,7 @@ func (sv *SVG) Style() {
 // Render renders the SVG to given Painter, which can be nil
 // to have a new one created. Returns the painter used.
 // Set the TextShaper prior to calling to use an existing one,
-// otherwise it will use shared svgShaper under a lock.
+// otherwise it will use shared svgShaper.
 func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 	sv.Lock()
 	defer sv.Unlock()
@@ -227,6 +227,7 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 		sv.painter = pc
 	} else {
 		sv.painter = paint.NewPainter(math32.FromPoint(sv.Geom.Size))
+		pc = sv.painter
 	}
 	if sv.TextShaper == nil {
 		shaperMu.Lock()
@@ -234,9 +235,9 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 			svgShaper = shaped.NewShaper()
 		}
 		sv.TextShaper = svgShaper
+		shaperMu.Unlock()
 		defer func() {
 			sv.TextShaper = nil
-			shaperMu.Unlock()
 		}()
 	}
 
@@ -249,9 +250,8 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 	}
 	sv.Root.Render(sv)
 
-	ptr := sv.painter
 	sv.painter = nil
-	return ptr
+	return pc
 }
 
 // RenderImage renders the SVG to an image and returns it.
