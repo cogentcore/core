@@ -41,7 +41,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// w.SetFPS(20) // 60 default
 
 	var sf *gpu.Surface
 	var sy *gpu.GraphicsSystem

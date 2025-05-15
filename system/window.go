@@ -208,12 +208,6 @@ type Window interface {
 	// to destroying the drawer and surface.
 	SetDestroyGPUResourcesFunc(f func())
 
-	// SetFPS sets the frames per second for Paint events that drive
-	// updating of the window at regular intervals.  60 is default.
-	// 0 disables -- no regular Paint events are sent.
-	// This only takes effect prior to opening a new window.
-	SetFPS(fps int)
-
 	// SetTitleBarIsDark sets whether the color theme of the window
 	// title bar is dark (as opposed to light).
 	SetTitleBarIsDark(isDark bool)

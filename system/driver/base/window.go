@@ -53,9 +53,6 @@ type Window[A system.App] struct {
 	// Flgs contains the flags associated with the window
 	Flgs system.WindowFlags `label:"Flags" table:"-"`
 
-	// FPS is the FPS (frames per second) for rendering the window
-	FPS int
-
 	// DestroyGPUFunc should be set to a function that will destroy GPU resources
 	// in the main thread prior to destroying the drawer
 	// and the surface; otherwise it is difficult to
@@ -73,7 +70,6 @@ func NewWindow[A system.App](a A, opts *system.NewWindowOptions) Window[A] {
 		App:           a,
 		Titl:          opts.GetTitle(),
 		Flgs:          opts.Flags,
-		FPS:           60,
 		CursorEnabled: true,
 	}
 }
@@ -82,12 +78,11 @@ func NewWindow[A system.App](a A, opts *system.NewWindowOptions) Window[A] {
 func (w *Window[A]) WinLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
-	var winPaint *time.Ticker
-	if w.FPS > 0 {
-		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
-	} else {
-		winPaint = &time.Ticker{C: make(chan time.Time)} // no-op
+	fps := w.This.Screen().RefreshRate
+	if fps <= 0 {
+		fps = 60
 	}
+	winPaint := time.NewTicker(time.Second / time.Duration(fps))
 outer:
 	for {
 		select {
@@ -165,10 +160,6 @@ func (w *Window[A]) IsClosed() bool {
 
 func (w *Window[A]) IsVisible() bool {
 	return !w.This.IsClosed() && !w.Is(system.Minimized)
-}
-
-func (w *Window[A]) SetFPS(fps int) {
-	w.FPS = fps
 }
 
 func (w *Window[A]) SetDestroyGPUResourcesFunc(f func()) {
