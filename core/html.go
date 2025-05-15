@@ -139,8 +139,8 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		if err != nil {
 			return err
 		}
-		io.Copy(b, sb)
-		return nil
+		_, err = io.Copy(b, sb)
+		return err
 	}
 
 	switch w := w.(type) {
@@ -148,15 +148,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		b.WriteString(w.Text)
 	case *Icon:
-		w.Styles.Min.Zero() // do not specify any size for the inner svg object
-		// note: the above should have no effect until restyle and layout.
-		sv := w.RerenderSVG()
-		if sv != nil {
-			err := writeSVG(sv)
-			if err != nil {
-				return err
-			}
-		}
+		b.WriteString(string(w.Icon))
 	case *SVG:
 		err := writeSVG(w.SVG)
 		if err != nil {
