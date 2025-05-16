@@ -438,7 +438,7 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
+	if tx.Styles.Text.WhiteSpace != text.WrapNever {
 		sty, tsty := tx.Styles.NewRichText()
 		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), .5, sty, tsty)
 		tx.configTextSize(est)
@@ -457,7 +457,7 @@ func (tx *Text) SizeUp() {
 }
 
 func (tx *Text) SizeDown(iter int) bool {
-	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || iter > 1 {
+	if tx.Styles.Text.WhiteSpace == text.WrapNever || iter > 1 {
 		return false
 	}
 	sz := &tx.Geom.Size

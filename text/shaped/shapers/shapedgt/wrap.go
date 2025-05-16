@@ -38,7 +38,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 }
 
 // This should already have the mutex lock, and is used by shapedjs but is
-// not an end-user call.
+// not an end-user call. Returns new lines and number of truncations.
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
 
 	lht := tsty.LineHeightDots(defSty)
@@ -52,11 +52,12 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	}
 	// fmt.Println("lht:", lns.LineHeight, lgap, nlines)
 	brk := shaping.WhenNecessary
-	if !tsty.WhiteSpace.HasWordWrap() {
+	if tsty.WhiteSpace == text.WrapNever {
 		brk = shaping.Never
 	} else if tsty.WhiteSpace == text.WrapAlways {
 		brk = shaping.Always
 	}
+	// todo: WhiteSpacePre will actually wrap -- needs special handling not supported by go-text
 	if brk == shaping.Never {
 		maxSize = 100000
 		nlines = 1
@@ -79,8 +80,8 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	// 	wc.Truncator = s.ShapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
 	// }
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
-	lines, truncated := sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
-	return lines, truncated
+
+	return sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
 }
 
 // This should already have the mutex lock, and is used by shapedjs but is

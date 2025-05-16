@@ -319,3 +319,18 @@ func TestMathDisplay(t *testing.T) {
 		})
 	}
 }
+
+func TestWhiteSpacePre(t *testing.T) {
+	RunTest(t, "whitespacepre", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		// todo: whitespacepre will actually wrap -- needs special handling
+		tsty.WhiteSpace = text.WhiteSpacePre
+		src := "This is\nWhiteSpacePre"
+		sty := rich.NewStyle()
+		tx, err := htmltext.HTMLPreToRich([]byte(src), sty, nil)
+		assert.NoError(t, err)
+		// fmt.Println(tx)
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 10)
+		pc.TextLines(lns, pos)
+	})
+}

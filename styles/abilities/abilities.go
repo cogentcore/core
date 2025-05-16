@@ -80,6 +80,13 @@ const (
 	ScrollableUnattended
 )
 
+var (
+	// Pressable is the list of abilities that makes something Pressable
+	Pressable = []Abilities{Selectable, Activatable, DoubleClickable, TripleClickable, Draggable, Slideable, Checkable, Clickable}
+
+	pressableBits = []enums.BitFlag{Selectable, Activatable, DoubleClickable, TripleClickable, Draggable, Slideable, Checkable, Clickable}
+)
+
 // Is is a shortcut for HasFlag for Abilities
 func (ab *Abilities) Is(flag enums.BitFlag) bool {
 	return ab.HasFlag(flag)
@@ -88,7 +95,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 // IsPressable returns true when an element is Selectable, Activatable,
 // DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(TripleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable)
+	return enums.HasAnyFlags((*int64)(ab), pressableBits...)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable
