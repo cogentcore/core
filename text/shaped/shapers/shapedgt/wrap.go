@@ -58,6 +58,7 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 		brk = shaping.Always
 	}
 	// todo: WhiteSpacePre will actually wrap -- needs special handling not supported by go-text
+	// https://github.com/cogentcore/core/issues/1513
 	if brk == shaping.Never {
 		maxSize = 100000
 		nlines = 1
