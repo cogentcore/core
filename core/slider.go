@@ -208,7 +208,6 @@ func (sr *Slider) Init() {
 			}
 		}
 	})
-
 	sr.On(events.SlideStart, func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
 		sr.setSliderPosEvent(pos)
@@ -229,17 +228,13 @@ func (sr *Slider) Init() {
 		} else {
 			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
 		}
-		sr.SendChange()
+		sr.sendChange()
 	})
-	// we need to send change events for both SlideStop and Click
-	// to handle the no-slide click case
-	change := func(e events.Event) {
+	sr.On(events.Click, func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
 		sr.setSliderPosEvent(pos)
 		sr.sendChange()
-	}
-	sr.On(events.SlideStop, change)
-	sr.On(events.Click, change)
+	})
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()

@@ -76,6 +76,7 @@ func init() {
 		"KeyboardSingleLine":        reflect.ValueOf(styles.KeyboardSingleLine),
 		"KeyboardURL":               reflect.ValueOf(styles.KeyboardURL),
 		"NewPaint":                  reflect.ValueOf(styles.NewPaint),
+		"NewPaintWithContext":       reflect.ValueOf(styles.NewPaintWithContext),
 		"NewStyle":                  reflect.ValueOf(styles.NewStyle),
 		"ObjectFitsN":               reflect.ValueOf(styles.ObjectFitsN),
 		"ObjectFitsValues":          reflect.ValueOf(styles.ObjectFitsValues),
