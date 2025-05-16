@@ -11,6 +11,7 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/styles"
@@ -148,7 +149,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		b.WriteString(w.Text)
 	case *Icon:
-		b.WriteString(string(w.Icon))
+		// TODO: just remove the width and height attributes from the source SVGs?
+		icon := strings.ReplaceAll(string(w.Icon), ` width="48" height="48"`, "")
+		b.WriteString(icon)
 	case *SVG:
 		err := writeSVG(w.SVG)
 		if err != nil {
