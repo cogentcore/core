@@ -748,7 +748,11 @@ func (w *renderWindow) renderWindow() {
 			log.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	cp.Add(SpritesSource(&top.Sprites, winScene.SceneGeom.Pos), &top.Sprites)
+	scpos := winScene.SceneGeom.Pos
+	if TheApp.Platform().IsMobile() {
+		scpos = image.Point{}
+	}
+	cp.Add(SpritesSource(&top.Sprites, scpos), &top.Sprites)
 
 	w.SystemWindow.Unlock()
 	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
