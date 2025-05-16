@@ -54,27 +54,6 @@ type Metrics struct {
 	// by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the
 	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
 	ActualBoundingBoxDescent float32
-
-	// todo: probably could get rid of these baselines:
-
-	// HangingBaseline is the distance from the horizontal line indicated by the
-	// CanvasRenderingContext2D.textBaseline property to the hanging baseline
-	// of the line box, in CSS pixels.
-	HangingBaseline float32
-
-	// AlphabeticBaseline is the distance from the horizontal line indicated by the
-	// CanvasRenderingContext2D.textBaseline property to the alphabetic baseline
-	// of the line box, in CSS pixels.
-	AlphabeticBaseline float32
-
-	// IdeographicBaseline is the distance from the horizontal line indicated by the
-	// CanvasRenderingContext2D.textBaseline property to the ideographic baseline
-	// of the line box, in CSS pixels.
-	IdeographicBaseline float32
-
-	// not widely supported:
-	// EmHeightAscent           float32
-	// EmHeightDescent          float32
 }
 
 func MeasureTest(txt string) {
@@ -103,9 +82,6 @@ func MeasureText(ctx js.Value, txt string) *Metrics {
 		FontBoundingBoxDescent:   float32(jm.Get("fontBoundingBoxDescent").Float()),
 		ActualBoundingBoxAscent:  float32(jm.Get("actualBoundingBoxAscent").Float()),
 		ActualBoundingBoxDescent: float32(jm.Get("actualBoundingBoxDescent").Float()),
-		HangingBaseline:          float32(jm.Get("hangingBaseline").Float()),
-		AlphabeticBaseline:       float32(jm.Get("alphabeticBaseline").Float()),
-		IdeographicBaseline:      float32(jm.Get("ideographicBaseline").Float()),
 	}
 	// note: these are not widely supported.
 	// EmHeightAscent:           float32(jm.Get("emHeightAscent").Float()),
