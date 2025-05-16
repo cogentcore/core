@@ -114,10 +114,9 @@ func main() {
 				core.ErrorSnackbar(ed, err, "Error loading code")
 			}
 		}
-		// note: ed.Save() drives OnChange event so can't do this:
-		// ed.OnChange(func(e events.Event) {
-		// 	core.ErrorSnackbar(ed, ed.Save(), "Error saving code")
-		// })
+		ed.OnChange(func(e events.Event) {
+			core.ErrorSnackbar(ed, ed.SaveQuiet(), "Error saving code")
+		})
 		parent := core.NewFrame(splits)
 		yaegicore.BindTextEditor(ed, parent, "Go")
 		return true

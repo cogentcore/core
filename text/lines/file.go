@@ -144,7 +144,6 @@ func (ls *Lines) SaveFile(filename string) error {
 		ls.autosaveDelete()
 	}
 	ls.Unlock()
-	ls.sendChange()
 	return err
 }
 

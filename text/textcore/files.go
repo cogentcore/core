@@ -17,11 +17,9 @@ import (
 )
 
 // SaveAs saves the given Lines text into the given file.
-// Does an EditDone on the Lines first to save edits and checks for an existing file.
-// If it does exist then prompts to overwrite or not.
+// Checks for an existing file: If it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
 func SaveAs(sc *core.Scene, lns *lines.Lines, filename string, afterFunc func(canceled bool)) {
-	lns.EditDone()
 	if !errors.Log1(fsx.FileExists(filename)) {
 		lns.SaveFile(filename)
 		if afterFunc != nil {
@@ -47,15 +45,13 @@ func SaveAs(sc *core.Scene, lns *lines.Lines, filename string, afterFunc func(ca
 	}
 }
 
-// Save saves the given LInes into the current filename associated with this buffer,
-// prompting if the file is changed on disk since the last save. Does an EditDone
-// on the lines.
+// Save saves the given Lines into the current filename associated with this buffer,
+// prompting if the file is changed on disk since the last save.
 func Save(sc *core.Scene, lns *lines.Lines) error {
 	fname := lns.Filename()
 	if fname == "" {
 		return errors.New("core.Editor: filename is empty for Save")
 	}
-	lns.EditDone()
 	info, err := os.Stat(fname)
 	if err == nil && info.ModTime() != time.Time(lns.FileInfo().ModTime) {
 		d := core.NewBody("File Changed on Disk")

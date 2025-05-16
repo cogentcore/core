@@ -118,8 +118,19 @@ func (ed *Editor) SaveAs(filename core.Filename) { //types:add
 }
 
 // Save saves the current text into the current filename associated with this buffer.
+// Do NOT use this in an OnChange event handler as it emits a Change event! Use
+// [Editor.SaveQuiet] instead.
 func (ed *Editor) Save() error { //types:add
 	ed.editDone()
+	return Save(ed.Scene, ed.Lines)
+}
+
+// SaveQuiet saves the current text into the current filename associated with this buffer.
+// This version does not emit a change event, so it is safe to use
+// in an OnChange event handler, unlike [Editor.Save].
+func (ed *Editor) SaveQuiet() error { //types:add
+	ed.clearSelected()
+	ed.clearCursor()
 	return Save(ed.Scene, ed.Lines)
 }
 
