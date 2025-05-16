@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
@@ -179,6 +180,7 @@ func (sc *Scene) Init() {
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable) // this is critical to enable click-off to turn off focus.
 		s.Cursor = cursors.Arrow
 		s.Background = colors.Scheme.Background
 		s.Color = colors.Scheme.OnBackground

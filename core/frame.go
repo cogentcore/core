@@ -73,7 +73,7 @@ func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
 	fr.handleKeyNav = true
 	fr.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.ScrollableUnattended, abilities.Clickable)
+		s.SetAbilities(true, abilities.ScrollableUnattended)
 	})
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable

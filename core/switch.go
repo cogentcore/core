@@ -147,8 +147,6 @@ func (sw *Switch) Init() {
 
 		tree.AddAt(p, "stack", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
-				// if stack is pressable, it steals our clicks!
-				s.SetAbilities(false, abilities.Pressable...)
 				s.Display = styles.Stacked
 				s.Gap.Zero()
 			})
