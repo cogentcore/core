@@ -71,11 +71,11 @@ type Context struct {
 // NewContext returns a new Context using given paint style, bounds, and
 // parent Context. See [Context.Init] for details.
 func NewContext(sty *styles.Paint, bounds *Bounds, parent *Context) *Context {
-	if sty == nil {
-		sty = styles.NewPaint()
-	}
-	ctx := &Context{Style: *sty}
+	ctx := &Context{}
 	ctx.Init(sty, bounds, parent)
+	if sty == nil && parent != nil {
+		ctx.Style.UnitContext = parent.Style.UnitContext
+	}
 	return ctx
 }
 
@@ -97,7 +97,7 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 		ctx.Mask = sty.Mask
 		return
 	}
-	ctx.Transform = parent.Transform.Mul(sty.Transform)
+	ctx.Transform = parent.Transform.Mul(ctx.Style.Transform)
 	ctx.Style.InheritFields(&parent.Style)
 	if bounds == nil {
 		bounds = &parent.Bounds

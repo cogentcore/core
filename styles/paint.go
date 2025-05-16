@@ -39,6 +39,14 @@ func NewPaint() *Paint {
 	return pc
 }
 
+// NewPaintWithContext returns a new Paint style with [units.Context]
+// initialized from given. Pass the Styles context for example.
+func NewPaintWithContext(uc *units.Context) *Paint {
+	pc := NewPaint()
+	pc.UnitContext = *uc
+	return pc
+}
+
 func (pc *Paint) Defaults() {
 	pc.Path.Defaults()
 	pc.Font.Defaults()

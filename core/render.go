@@ -330,11 +330,12 @@ func (wb *WidgetBase) StartRender() bool {
 	if pc.State == nil {
 		return false
 	}
-	if len(pc.Stack) == 0 && wb.Parent != nil {
+	if len(pc.Stack) == 1 && wb.Parent != nil {
 		wb.setFlag(true, widgetFirstRender)
 		// push our parent's bounds if we are the first to render
 		pw := wb.parentWidget()
-		pc.PushContext(nil, render.NewBoundsRect(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots()))
+		sty := styles.NewPaintWithContext(&wb.Styles.UnitContext)
+		pc.PushContext(sty, render.NewBoundsRect(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots()))
 	} else {
 		wb.setFlag(false, widgetFirstRender)
 	}

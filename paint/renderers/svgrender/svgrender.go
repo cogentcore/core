@@ -129,10 +129,10 @@ func (rs *Renderer) RenderText(pt *render.Text) {
 	cg := rs.gpStack.Peek()
 	tg := svg.NewGroup(cg)
 	props := map[string]any{}
+	pt.Context.Style.GetProperties(props)
 	if !pc.Transform.IsIdentity() {
 		props["transform"] = pc.Transform.String()
 	}
-	pt.Context.Style.GetProperties(props)
 	pos := pt.Position
 	tx := pt.Text.Source
 	txt := tx.Join()
@@ -151,6 +151,9 @@ func (rs *Renderer) RenderText(pt *render.Text) {
 			st := svg.NewText(tg)
 			st.Text = string(rtxt)
 			rprops := maps.Clone(props)
+			if pc.Style.UnitContext.DPI != 160 {
+				sty.Size *= pc.Style.UnitContext.DPI / 160
+			}
 			pt.Context.Style.Text.ToProperties(sty, rprops)
 			rprops["x"] = reflectx.ToString(rpos.X)
 			rprops["y"] = reflectx.ToString(rpos.Y)

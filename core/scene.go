@@ -302,6 +302,7 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	} else {
 		sc.renderer = paint.NewSourceRenderer(sz)
 	}
+	sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	sc.Painter.State.Init(sc.Painter.Paint, sz)
 	sc.renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
