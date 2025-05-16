@@ -5,14 +5,11 @@
 package rasterx
 
 import (
-	"bytes"
 	"image"
 	"image/color"
 	"image/draw"
 	_ "image/jpeg" // load image formats for users of the API
 	_ "image/png"
-
-	scale "golang.org/x/image/draw"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -258,46 +255,6 @@ func (rs *Renderer) GlyphMask(ctx *render.Context, run *shapedgt.Run, g *shaping
 	mp := ibb.Min.Sub(dbb.Min)
 	draw.DrawMask(rs.image, ibb, fill, image.Point{}, mask, mp, draw.Over)
 	return nil
-}
-
-func (rs *Renderer) GlyphBitmap(ctx *render.Context, run *shapedgt.Run, g *shaping.Glyph, bitmap font.GlyphBitmap, fill, stroke image.Image, bb math32.Box2, pos math32.Vector2, identity bool) error {
-	// todo: this needs serious work to function with transforms
-	x := pos.X
-	y := pos.Y
-	top := y - math32.FromFixed(g.YBearing)
-	bottom := top - math32.FromFixed(g.Height)
-	right := x + math32.FromFixed(g.Width)
-	dbb := image.Rect(int(x), int(top), int(right), int(bottom))
-	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())
-	if ibb == (image.Rectangle{}) {
-		return nil
-	}
-	switch bitmap.Format {
-	case font.BlackAndWhite:
-		rec := image.Rect(0, 0, bitmap.Width, bitmap.Height)
-		sub := image.NewPaletted(rec, color.Palette{color.Transparent, colors.ToUniform(fill)})
-
-		for i := range sub.Pix {
-			sub.Pix[i] = bitAt(bitmap.Data, i)
-		}
-		// note: NearestNeighbor is better than bilinear
-		scale.NearestNeighbor.Scale(rs.image, ibb, sub, sub.Bounds(), draw.Over, nil)
-	case font.JPG, font.PNG, font.TIFF:
-		pix, _, err := image.Decode(bytes.NewReader(bitmap.Data))
-		if err != nil {
-			return err
-		}
-		scale.NearestNeighbor.Scale(rs.image, ibb, pix, pix.Bounds(), draw.Over, nil)
-	}
-	if bitmap.Outline != nil {
-		rs.GlyphOutline(ctx, run, g, *bitmap.Outline, fill, stroke, bb, pos, identity)
-	}
-	return nil
-}
-
-// bitAt returns the bit at the given index in the byte slice.
-func bitAt(b []byte, i int) byte {
-	return (b[i/8] >> (7 - i%8)) & 1
 }
 
 // StrokeBounds strokes a bounding box in the given color. Useful for debugging.
