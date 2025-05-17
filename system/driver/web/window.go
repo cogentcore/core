@@ -23,12 +23,8 @@ type Window struct {
 func (w *Window) WinLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
-	// prev := 0
-
 	var f js.Func
 	f = js.FuncOf(func(this js.Value, args []js.Value) any {
-		// fmt.Println(1000 / (args[0].Int() - prev))
-		// prev = args[0].Int()
 		w.SendPaintEvent()
 		js.Global().Call("requestAnimationFrame", f)
 		return nil
