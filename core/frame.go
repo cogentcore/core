@@ -185,7 +185,7 @@ func (fr *Frame) Init() {
 		del := math32.FromPoint(e.PrevDelta()).Negate()
 		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 
-		time := float32(e.SincePrev().Milliseconds())
+		time := float32(e.SincePrev().Seconds()) * 1000
 		vel := del.DivScalar(time)
 		if len(prevVels) >= 3 {
 			prevVels = append(prevVels[1:], vel)
@@ -211,7 +211,7 @@ func (fr *Frame) Init() {
 		vel.SetDivScalar(float32(len(prevVels)))
 		prevVels = prevVels[:0] // reset for next scroll
 
-		if vel.Length() < 2 {
+		if vel.Length() < 1 {
 			return
 		}
 		i := 0
