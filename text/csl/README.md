@@ -16,6 +16,4 @@ The `KeyList` type provides an ordered list of unique citation items, using the 
 
 The default, primary style is [APA](https://apastyle.apa.org/style-grammar-guidelines/references/examples), with the `RefAPA` and `CiteAPA` methods for generating a reference or a citation. References are generated in alpha sorted order.
 
-TODO: APA provides a parenthetical citation format `(Smith & Jones, 2021)` and a narrative format as in `Smith & Jones (2021)` -- markdown does not allow us to denote these different citation types so we need to figure this out.
-
 

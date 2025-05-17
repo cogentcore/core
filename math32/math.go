@@ -44,7 +44,7 @@ const (
 
 // Floating-point limit values.
 // Max is the largest finite value representable by the type.
-// SmallestNonZero is the smallest positive, non-zero value representable by the type.
+// SmallestNonzero is the smallest positive, non-zero value representable by the type.
 const (
 	MaxFloat32             = math.MaxFloat32
 	SmallestNonzeroFloat32 = math.SmallestNonzeroFloat32
