@@ -71,7 +71,7 @@ func TestBasic(t *testing.T) {
 		lns.SelectRegion(textpos.Range{34, 40})
 		pos := math32.Vec2(20, 60)
 		// pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 
 		assert.Equal(t, len(sr), lns.RuneFromLinePos(textpos.Pos{3, 30}))
 
@@ -110,7 +110,7 @@ func TestHebrew(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 60))
+		pc.DrawText(lns, math32.Vec2(20, 60))
 	})
 }
 
@@ -131,8 +131,8 @@ func TestVertical(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(150, 50))
-		// pc.TextLines(lns, math32.Vec2(100, 200))
-		pc.TextLines(lns, math32.Vec2(60, 100))
+		// pc.DrawText(lns, math32.Vec2(100, 200))
+		pc.DrawText(lns, math32.Vec2(60, 100))
 	})
 
 	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
@@ -147,7 +147,7 @@ func TestVertical(t *testing.T) {
 		tx := rich.NewText(plain, sr)
 
 		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 60))
+		pc.DrawText(lns, math32.Vec2(20, 60))
 	})
 }
 
@@ -165,7 +165,7 @@ func TestColors(t *testing.T) {
 		tx.AddSpan(&big, sr[4:8]).AddSpan(stroke, sr[8:])
 
 		lns := sh.WrapLines(tx, stroke, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(20, 10))
+		pc.DrawText(lns, math32.Vec2(20, 10))
 	})
 }
 
@@ -176,7 +176,7 @@ func TestLink(t *testing.T) {
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
 		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
-		pc.TextLines(lns, math32.Vec2(10, 10))
+		pc.DrawText(lns, math32.Vec2(10, 10))
 	})
 }
 
@@ -187,7 +187,7 @@ func TestSpacePos(t *testing.T) {
 		tx := rich.NewText(sty, []rune(src))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 
 		sb := lns.RuneBounds(3)
 		// fmt.Println("sb:", sb)
@@ -208,7 +208,7 @@ func TestLinefeed(t *testing.T) {
 		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 
 		// sb := lns.RuneBounds(3)
 		// // fmt.Println("sb:", sb)
@@ -228,7 +228,7 @@ func TestLineCentering(t *testing.T) {
 		tx := rich.NewText(sty, []rune(src))
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 	})
 }
 
@@ -243,7 +243,7 @@ func TestEmoji(t *testing.T) {
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		// fmt.Println(lns)
 		pos := math32.Vec2(10, 10)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 
 		sr := tx.Join() // as runes
 		for ri, _ := range sr {
@@ -290,7 +290,7 @@ func TestMathInline(t *testing.T) {
 			tx.AddSpan(sty, []rune(" and we should check line wrapping too"))
 			lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 			pos := math32.Vec2(10, 10)
-			pc.TextLines(lns, pos)
+			pc.DrawText(lns, pos)
 		})
 	}
 }
@@ -315,7 +315,7 @@ func TestMathDisplay(t *testing.T) {
 			tx.AddMathDisplay(sty, src)
 			lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 			pos := math32.Vec2(10, 10)
-			pc.TextLines(lns, pos)
+			pc.DrawText(lns, pos)
 		})
 	}
 }
@@ -331,6 +331,6 @@ func TestWhiteSpacePre(t *testing.T) {
 		// fmt.Println(tx)
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 	})
 }

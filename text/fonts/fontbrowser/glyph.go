@@ -141,7 +141,7 @@ func (gi *Glyph) drawShaped(pc *paint.Painter) {
 			off = math32.Vec2(o, o)
 		}
 	}
-	pc.TextLines(lns, gi.Geom.Pos.Content.Add(off))
+	pc.DrawText(lns, gi.Geom.Pos.Content.Add(off))
 }
 
 func (gi *Glyph) draw(pc *paint.Painter) {

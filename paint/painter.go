@@ -572,13 +572,13 @@ func (pc *Painter) BoundingBoxFromPoints(points []math32.Vector2) image.Rectangl
 	return pc.BoundingBox(min.X, min.Y, max.X, max.Y)
 }
 
-/////// Text
+/////// DrawText
 
-// TextLines adds given [shaped] text lines to the rendering list,
+// DrawText adds given [shaped] text lines to the rendering list,
 // at given position. Note that all rendering is subject to the
 // current active transform, including the position:
 // e.g., use math32.Rotate2DAround to just rotate the text at a given
 // absolute position offset.
-func (pc *Painter) TextLines(tx *shaped.Lines, pos math32.Vector2) {
+func (pc *Painter) DrawText(tx *shaped.Lines, pos math32.Vector2) {
 	pc.Render.Add(render.NewText(tx, pc.Paint, pc.Context(), pos))
 }

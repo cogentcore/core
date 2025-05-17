@@ -130,7 +130,7 @@ func (txt *Text2D) RenderText() {
 		pc.Fill.Color = txt.Styles.Background
 		pc.Clear()
 	}
-	pc.TextLines(txt.textRender, txt.TextPos)
+	pc.DrawText(txt.textRender, txt.TextPos)
 	img := imagex.AsRGBA(paint.RenderToImage(pc))
 	var tx Texture
 	var err error

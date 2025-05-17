@@ -102,7 +102,7 @@ func TestRender(t *testing.T) {
 		// if tsz.X != 100 || tsz.Y != 60 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
-		pc.TextLines(lns, math32.Vec2(85, 80))
+		pc.DrawText(lns, math32.Vec2(85, 80))
 	})
 }
 

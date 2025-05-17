@@ -109,7 +109,7 @@ func NewTransform(m math32.Matrix2, rect image.Rectangle, src image.Image, op dr
 // Does nothing if rect is empty.
 func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
 	if rect == (image.Rectangle{}) {
-		panic("nil rect")
+		return nil
 	}
 	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr

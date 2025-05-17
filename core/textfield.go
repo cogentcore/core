@@ -1835,7 +1835,7 @@ func (tf *TextField) Render() {
 		tf.layoutCurrent()
 	}
 	tf.renderSelect()
-	tf.Scene.Painter.TextLines(tf.renderVisible, tf.effPos)
+	tf.Scene.Painter.DrawText(tf.renderVisible, tf.effPos)
 }
 
 // concealDots creates an n-length []rune of bullet characters.

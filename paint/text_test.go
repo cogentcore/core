@@ -46,7 +46,7 @@ func TestTextAscii(t *testing.T) {
 				tx := rich.NewText(fsty, []rune(ts))
 				lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
 				pos := math32.Vector2{5, y}
-				pc.TextLines(lns, pos)
+				pc.DrawText(lns, pos)
 				y += 20
 			}
 		})
@@ -74,7 +74,7 @@ func TestTextMarkup(t *testing.T) {
 		// txt.HasOverflow = true
 		pos := math32.Vector2{10, 200}
 		pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 	})
 }
 
@@ -107,7 +107,7 @@ func TestTextLines(t *testing.T) {
 		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
 		pos := math32.Vector2{10, 10}
 		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 	})
 }
 
@@ -138,6 +138,6 @@ func TestTextColors(t *testing.T) {
 		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
 		pos := math32.Vector2{10, 10}
 		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 	})
 }

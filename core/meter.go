@@ -165,7 +165,7 @@ func (m *Meter) Render() {
 			pc.Draw()
 		}
 		if txt != nil {
-			pc.TextLines(txt, c.Sub(toff))
+			pc.DrawText(txt, c.Sub(toff))
 		}
 		return
 	}
@@ -183,6 +183,6 @@ func (m *Meter) Render() {
 		pc.Draw()
 	}
 	if txt != nil {
-		pc.TextLines(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
+		pc.DrawText(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
 	}
 }

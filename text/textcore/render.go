@@ -215,7 +215,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 				lns.HighlightRegion(textpos.Range{Start: hlsi.Start.Char - coff, End: hlsi.End.Char - coff})
 			}
 		}
-		pc.TextLines(lns, pos)
+		pc.DrawText(lns, pos)
 	}
 
 	for si := range tx { // tabs encoded as single chars at start
@@ -327,7 +327,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 		lns = sh.WrapLines(tx, sty, tsty, &rich.DefaultSettings, sz)
 		ed.lineNoRenders[li] = renderCache{tx: tx[0], lns: lns}
 	}
-	pc.TextLines(lns, pos)
+	pc.DrawText(lns, pos)
 
 	// render circle
 	lineColor, has := ed.Lines.LineColor(ln)

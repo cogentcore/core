@@ -74,7 +74,7 @@ func TestTex(t *testing.T) {
 			// sh := shaped.NewShaper()
 			// tx := rich.NewText(&pc.Font, []rune("a=x"))
 			// lns := sh.WrapLines(tx, &pc.Font, &pc.Text, &rich.DefaultSettings, math32.Vec2(1000, 50))
-			// pc.TextLines(lns, math32.Vec2(0, 70))
+			// pc.DrawText(lns, math32.Vec2(0, 70))
 		})
 	}
 }
