@@ -113,7 +113,7 @@ func (im *Image) Render() {
 		im.prevImage = im.Image
 		im.prevObjectFit = im.Styles.ObjectFit
 		im.prevSize = im.Geom.Size.Actual.Content
-		rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
+		rimg = imagex.WrapJS(im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content))
 		im.prevRenderImage = rimg
 	}
 	im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)

@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"strings"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -39,6 +40,9 @@ type SVG struct {
 
 	// image renderer
 	renderer render.Renderer
+
+	// cached rendered image
+	image image.Image
 
 	// prevSize is the cached allocated size for the last rendered image.
 	prevSize image.Point `xml:"-" json:"-" set:"-"`
@@ -137,7 +141,8 @@ func (sv *SVG) renderSVG() {
 	}
 	sv.SVG.TextShaper = sv.Scene.TextShaper()
 	sv.renderer.Render(sv.SVG.Render(nil).RenderDone())
-	sv.prevSize = sv.renderer.Image().Bounds().Size()
+	sv.image = imagex.WrapJS(sv.renderer.Image())
+	sv.prevSize = sv.image.Bounds().Size()
 }
 
 func (sv *SVG) Render() {
@@ -147,11 +152,10 @@ func (sv *SVG) Render() {
 	}
 	needsRender := !sv.IsReadOnly()
 	if !needsRender {
-		img := sv.renderer.Image()
-		if img == nil {
+		if sv.image == nil {
 			needsRender = true
 		} else {
-			sz := img.Bounds().Size()
+			sz := sv.image.Bounds().Size()
 			if sz != sv.prevSize || sz == (image.Point{}) {
 				needsRender = true
 			}
@@ -162,8 +166,7 @@ func (sv *SVG) Render() {
 	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
-	img := sv.renderer.Image()
-	sv.Scene.Painter.DrawImage(img, r, sp, draw.Over)
+	sv.Scene.Painter.DrawImage(sv.image, r, sp, draw.Over)
 }
 
 func (sv *SVG) MakeToolbar(p *tree.Plan) {
