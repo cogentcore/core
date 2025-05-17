@@ -52,13 +52,14 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	}
 	// fmt.Println("lht:", lns.LineHeight, lgap, nlines)
 	brk := shaping.WhenNecessary
-	if tsty.WhiteSpace == text.WrapNever {
+	switch tsty.WhiteSpace {
+	case text.WrapNever:
 		brk = shaping.Never
-	} else if tsty.WhiteSpace == text.WrapAlways {
+	case text.WhiteSpacePre:
+		maxSize = 100000
+	case text.WrapAlways:
 		brk = shaping.Always
 	}
-	// todo: WhiteSpacePre will actually wrap -- needs special handling not supported by go-text
-	// https://github.com/cogentcore/core/issues/1513
 	if brk == shaping.Never {
 		maxSize = 100000
 		nlines = 1
