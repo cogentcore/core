@@ -24,7 +24,7 @@ We maintain a separate [webgpu](https://github.com/cogentcore/webgpu) package th
 For systems with multiple GPU devices, by default the discrete device is selected, and if multiple of those are present, the one with the most RAM is used. To see what is available and their properties, use:
 
 ```
-$ go run cogentcore.org/core/gpu/cmd/webgpuinfo@latest
+$ go run cogentcore.org/core/gpu/cmd/webgpuinfo@main
 ```
 
 (you can `install` that tool for later use as well)
