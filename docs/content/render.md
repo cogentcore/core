@@ -42,7 +42,7 @@ The result of the `renderWindow()` function for each Scene is a `render.Render` 
 
 ## Composer and sources
 
-The [[doc:system.composer]] framework manages the final rendering to the platform-specific window that you actually see as a user. It maintains a list of `Source` elements that provide platform-specific rendering logic, with one such source for each active Scene in a GUI (e.g., a dialog Scene could be on top of a main window Scene).
+The [[doc:system/composer]] manages the final rendering to the platform-specific window that you actually see as a user. It maintains a list of `Source` elements that provide platform-specific rendering logic, with one such source for each active Scene in a GUI (e.g., a dialog Scene could be on top of a main window Scene).
 
 There are special Sources for _direct rendering_ elements such as the [[xyz]] 3D Scene, or a [[video]] element, which render directly to the screen in an optimized, no-overhead manner.
 
