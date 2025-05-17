@@ -9,8 +9,10 @@ import (
 	"image"
 	"maps"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pimage"
@@ -77,7 +79,7 @@ func (rs *Renderer) Render(r render.Render) render.Renderer {
 		case *render.Path:
 			rs.RenderPath(x)
 		case *pimage.Params:
-			// x.Render(rs.image)
+			rs.RenderImage(x)
 		case *render.Text:
 			rs.RenderText(x)
 		case *render.ContextPush:
@@ -163,4 +165,39 @@ func (rs *Renderer) RenderText(pt *render.Text) {
 			rpos.X += run.Advance()
 		}
 	}
+}
+
+func (rs *Renderer) RenderImage(pr *pimage.Params) {
+	usrc := imagex.Unwrap(pr.Source)
+	umask := imagex.Unwrap(pr.Mask)
+	cg := rs.gpStack.Peek()
+
+	nilSrc := usrc == nil
+	if r, ok := usrc.(*image.RGBA); ok && r == nil {
+		nilSrc = true
+	}
+	if pr.Rect == (image.Rectangle{}) {
+		pr.Rect = image.Rectangle{Max: rs.size.ToPoint()}
+	}
+
+	// todo: handle masks!
+
+	// Fast path for [image.Uniform]
+	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
+		_ = u
+		return
+	}
+
+	if gr, ok := usrc.(gradient.Gradient); ok {
+		_ = gr
+		// todo: handle:
+		return
+	}
+
+	sz := pr.Rect.Size()
+
+	simg := svg.NewImage(cg)
+	simg.SetImage(usrc, float32(sz.X), float32(sz.Y))
+	simg.Pos = math32.FromPoint(pr.Rect.Min)
+	// todo: ViewBox?
 }
