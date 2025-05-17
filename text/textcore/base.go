@@ -228,7 +228,7 @@ func (ed *Base) Init() {
 		s.Text.AlignV = text.Start
 		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.Scheme.OnSurface
-		s.Min.X.Em(5)
+		s.Min.X.Em(10)
 
 		s.MaxBorder.Width.Set(units.Dp(2))
 		s.Background = colors.Scheme.SurfaceContainerLow

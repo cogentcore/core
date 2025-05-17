@@ -54,11 +54,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.curRect = pt.Path.FastBounds().ToRect() // TODO: more performance optimized approach (such as only computing for gradients)?
 	if style.HasFill() {
 		rs.setFill(style.Fill.Color)
-		rule := "nonzero"
-		if style.Fill.Rule == ppath.EvenOdd {
-			rule = "evenodd"
-		}
-		rs.ctx.Call("fill", rule)
+		rs.ctx.Call("fill", style.Fill.Rule.String())
 	}
 	if style.HasStroke() {
 		scale := math32.Sqrt(math32.Abs(pt.Context.Transform.Det()))

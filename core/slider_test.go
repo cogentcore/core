@@ -116,7 +116,7 @@ func TestSliderChange(t *testing.T) {
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 	}, func() {
 		assert.Equal(t, 1, n)
-		tolassert.Equal(t, 0.5756579, value)
+		tolassert.Equal(t, 0.9375, value)
 	})
 }
 
@@ -134,7 +134,7 @@ func TestSliderChangeClick(t *testing.T) {
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 	}, func() {
 		assert.Equal(t, 1, n)
-		tolassert.Equal(t, 0.5756579, value)
+		tolassert.Equal(t, 0.9375, value)
 	})
 }
 

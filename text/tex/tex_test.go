@@ -20,11 +20,12 @@ import (
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Painter)) {
-	pc := paint.NewPainter(width, height)
-	pc.FillBox(math32.Vector2{}, math32.Vec2(float32(width), float32(height)), colors.Uniform(colors.White))
+	sz := math32.Vec2(float32(width), float32(height))
+	pc := paint.NewPainter(sz)
+	pc.FillBox(math32.Vector2{}, sz, colors.Uniform(colors.White))
 	f(pc)
-	pc.RenderToImage()
-	imagex.Assert(t, pc.RenderImage(), nm)
+	img := paint.RenderToImage(pc)
+	imagex.Assert(t, img, nm)
 }
 
 func TestTex(t *testing.T) {

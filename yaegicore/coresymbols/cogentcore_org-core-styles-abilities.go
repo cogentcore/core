@@ -22,6 +22,7 @@ func init() {
 		"Hoverable":            reflect.ValueOf(abilities.Hoverable),
 		"LongHoverable":        reflect.ValueOf(abilities.LongHoverable),
 		"LongPressable":        reflect.ValueOf(abilities.LongPressable),
+		"Pressable":            reflect.ValueOf(&abilities.Pressable).Elem(),
 		"RepeatClickable":      reflect.ValueOf(abilities.RepeatClickable),
 		"Scrollable":           reflect.ValueOf(abilities.Scrollable),
 		"ScrollableUnattended": reflect.ValueOf(abilities.ScrollableUnattended),

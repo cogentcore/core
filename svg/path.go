@@ -57,7 +57,7 @@ func (g *Path) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
-	pc.State.Path = g.Data.Clone()
+	pc.State.Path = g.Data.Clone() // note: yes this Clone() is absolutely necessary.
 	pc.Draw()
 
 	g.PushContext(sv)

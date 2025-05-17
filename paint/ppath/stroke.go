@@ -18,7 +18,7 @@ import "cogentcore.org/core/math32"
 // The EvenOdd rule will fill any point that is being enclosed by an uneven number
 // of paths, whichever their direction. Positive fills only counter clock-wise
 // oriented paths, while Negative fills only clock-wise oriented paths.
-type FillRules int32 //enums:enum -transform kebab
+type FillRules int32 //enums:enum -transform lower
 
 const (
 	NonZero FillRules = iota
