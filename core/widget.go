@@ -232,10 +232,6 @@ const (
 
 	// widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.
 	widgetNeedsRender
-
-	// widgetFirstRender indicates that we were the first to render, and pushed our parent's
-	// bounds, which then need to be popped.
-	widgetFirstRender
 )
 
 // hasFlag returns whether the given flag is set.

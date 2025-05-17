@@ -679,16 +679,16 @@ func (i *TextFieldTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "TextFieldTypes")
 }
 
-var _widgetFlagsValues = []widgetFlags{0, 1, 2}
+var _widgetFlagsValues = []widgetFlags{0, 1}
 
 // widgetFlagsN is the highest valid value for type widgetFlags, plus one.
-const widgetFlagsN widgetFlags = 3
+const widgetFlagsN widgetFlags = 2
 
-var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1, `FirstRender`: 2}
+var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1}
 
-var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`, 2: `widgetFirstRender indicates that we were the first to render, and pushed our parent&#39;s bounds, which then need to be popped.`}
+var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`}
 
-var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`, 2: `FirstRender`}
+var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`}
 
 // String returns the string representation of this widgetFlags value.
 func (i widgetFlags) String() string { return enums.BitFlagString(i, _widgetFlagsValues) }
