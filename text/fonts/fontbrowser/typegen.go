@@ -30,8 +30,27 @@ func (t *Browser) SetRuneMap(v *keylist.List[rune, font.GID]) *Browser { t.RuneM
 
 var _ = types.AddType(&types.Type{Name: "main.GlyphInfo", IDName: "glyph-info", Doc: "GlyphInfo returns info about a glyph.", Fields: []types.Field{{Name: "Rune", Doc: "Rune is the unicode rune as a string"}, {Name: "RuneInt", Doc: "RuneInt is the unicode code point, int number."}, {Name: "RuneHex", Doc: "RuneHex is the unicode code point, hexidecimal number."}, {Name: "GID", Doc: "GID is the glyph ID, specific to each Font."}, {Name: "HAdvance", Doc: "HAdvance is the horizontal advance."}, {Name: "Extents", Doc: "Extents give the size of the glyph."}, {Name: "HExtents", Doc: "Extents are the horizontal font size parameters."}, {Name: "Outline", Doc: "Outline has the end points of each segment of the outline."}}})
 
-var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Canvas"}}, Fields: []types.Field{{Name: "Rune", Doc: "Rune is the rune to render."}, {Name: "GID", Doc: "GID is the glyph ID of the Rune"}, {Name: "Outline", Doc: "Outline is the set of control points (end points only)."}, {Name: "Stroke", Doc: "Stroke only renders the outline of the glyph, not the standard fill."}, {Name: "Points", Doc: "Points plots the control points."}, {Name: "browser"}}})
+var _ = types.AddType(&types.Type{Name: "main.Glyph", IDName: "glyph", Doc: "Glyph displays an individual glyph in the browser", Embeds: []types.Field{{Name: "Canvas"}}, Fields: []types.Field{{Name: "Rune", Doc: "Rune is the rune to render."}, {Name: "GID", Doc: "GID is the glyph ID of the Rune"}, {Name: "Outline", Doc: "Outline is the set of control points (end points only)."}, {Name: "Stroke", Doc: "Stroke only renders the outline of the glyph, not the standard fill."}, {Name: "Points", Doc: "Points plots the control points."}, {Name: "Browser"}}})
 
 // NewGlyph returns a new [Glyph] with the given optional parent:
 // Glyph displays an individual glyph in the browser
 func NewGlyph(parent ...tree.Node) *Glyph { return tree.New[Glyph](parent...) }
+
+// SetRune sets the [Glyph.Rune]:
+// Rune is the rune to render.
+func (t *Glyph) SetRune(v rune) *Glyph { t.Rune = v; return t }
+
+// SetGID sets the [Glyph.GID]:
+// GID is the glyph ID of the Rune
+func (t *Glyph) SetGID(v font.GID) *Glyph { t.GID = v; return t }
+
+// SetStroke sets the [Glyph.Stroke]:
+// Stroke only renders the outline of the glyph, not the standard fill.
+func (t *Glyph) SetStroke(v bool) *Glyph { t.Stroke = v; return t }
+
+// SetPoints sets the [Glyph.Points]:
+// Points plots the control points.
+func (t *Glyph) SetPoints(v bool) *Glyph { t.Points = v; return t }
+
+// SetBrowser sets the [Glyph.Browser]
+func (t *Glyph) SetBrowser(v *Browser) *Glyph { t.Browser = v; return t }
