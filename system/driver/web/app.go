@@ -114,6 +114,12 @@ func UserAgentToOS(ua string) system.Platforms {
 // Resize updates the app sizing information and sends a Resize event.
 func (a *App) Resize() {
 	a.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	// On Android web, the rendering performance is not great, so we cap the DPR
+	// at 1.5 to improve performance while still keeping the quality reasonable.
+	// TODO: profile on Android web and revisit if this is necessary.
+	if a.SystemPlatform() == system.Android {
+		a.Scrn.DevicePixelRatio = min(a.Scrn.DevicePixelRatio, 1.5)
+	}
 	a.Compose.DPR = a.Scrn.DevicePixelRatio
 	dpi := 160 * a.Scrn.DevicePixelRatio
 	a.Scrn.PhysicalDPI = dpi
