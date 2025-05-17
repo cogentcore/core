@@ -521,9 +521,6 @@ type SystemSettingsData struct { //types:add
 	// maximum number of saved paths to save in FilePicker
 	SavedPathsMax int `default:"50"`
 
-	// extra font paths, beyond system defaults -- searched first
-	FontPaths []string
-
 	// user info, which is partially filled-out automatically if empty
 	// when settings are first created.
 	User User
@@ -581,14 +578,6 @@ func (ss *SystemSettingsData) Defaults() {
 
 // Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //types:add
-	// TODO(text):
-	// if ss.FontPaths != nil {
-	// 	paths := append(ss.FontPaths, ptext.FontPaths...)
-	// 	ptext.FontLibrary.InitFontPaths(paths...)
-	// } else {
-	// 	ptext.FontLibrary.InitFontPaths(ptext.FontPaths...)
-	// }
-
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
 		if ss.FavPaths[i].Icon == "" || ss.FavPaths[i].Icon == "folder" {
