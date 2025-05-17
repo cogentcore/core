@@ -119,7 +119,7 @@ func (sv *SVG) SaveSVG(filename Filename) error { //types:add
 
 // SaveImage saves the current rendered SVG image to an image file,
 // using the filename extension to determine the file type.
-func (sv *SVG) SavePNG(filename Filename) error { //types:add
+func (sv *SVG) SaveImage(filename Filename) error { //types:add
 	return sv.SVG.SaveImage(string(filename))
 }
 
@@ -183,6 +183,6 @@ func (sv *SVG) MakeToolbar(p *tree.Plan) {
 		w.SetFunc(sv.SaveSVG).SetIcon(icons.Save)
 	})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(sv.SavePNG).SetIcon(icons.Save)
+		w.SetFunc(sv.SaveImage).SetIcon(icons.Save)
 	})
 }
