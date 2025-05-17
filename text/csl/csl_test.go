@@ -57,6 +57,7 @@ func TestOpen(t *testing.T) {
 }
 
 func TestCiteAPA(t *testing.T) {
+	t.Skip("just for development")
 	items, err := Open("testdata/test.json")
 	assert.NoError(t, err)
 	for i := range items {

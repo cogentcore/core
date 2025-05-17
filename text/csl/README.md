@@ -8,9 +8,11 @@ The result is a set of Go structs that represent the data, with `csl.Item` repre
 
 The main feature of CSL is the ability to define new reference styles in the CSL language, which unfortunately is rather complex and requires significant infrastructure to process, and there is no extant Go native implementation.
 
-Therefore, for the time being (ever), we are just using hand-written generators in Go that create a **Reference** from an Item (i.e., the text that goes in the References section) and a **Citation** (the text that goes in the body of a document that cites the reference). The `Styles` type represents available styles, and there is are `Ref` and `Cite` functions that take a style and an item to generate according to the style.
+Therefore, for the time being (ever), we are just using hand-written generators in Go that create a **Reference** from an Item (i.e., the text that goes in the References section) and a **Citation** (the text that goes in the body of a document that cites the reference). The `Styles` type represents available styles, and there are `Ref` and `Cite` functions that take a style and an item to generate according to the style.
 
 The `KeyList` type provides an ordered list of unique citation items, using the `CitationKey` field, which can be used for collecting items by processing source files for references, and adding only unique entries in usage order. Some citation styles use order, and others are alpha sorted, so this provides either option.
+
+There are two different types of `CiteStyles` that handle `Parenthetical` references (which go in parentheses) (Smith et al., 1985) versus `Narrative` citations: Smith et al. (1985) in APA format.
 
 ## APA: American Psychological Association
 

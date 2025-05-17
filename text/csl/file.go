@@ -30,12 +30,12 @@ func OpenFS(fsys fs.FS, filename string) ([]Item, error) {
 
 // SaveItems saves items to given filename.
 func SaveItems(items []Item, filename string) error {
-	return jsonx.SaveIndent(items, filename)
+	return jsonx.Save(items, filename)
 }
 
 // SaveKeyList saves items to given filename.
 func SaveKeyList(kl *KeyList, filename string) error {
-	return jsonx.SaveIndent(kl.Values, filename)
+	return jsonx.Save(kl.Values, filename)
 }
 
 ////////  File
