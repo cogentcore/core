@@ -48,8 +48,7 @@ func (g *Rect) LocalBBox(sv *SVG) math32.Box2 {
 }
 
 func (g *Rect) Render(sv *SVG) {
-	vis := g.IsVisible(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
 	pc := g.Painter(sv)
@@ -62,7 +61,6 @@ func (g *Rect) Render(sv *SVG) {
 		pc.RoundedRectangleSides(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, sides.NewFloats(g.Radius.X))
 	}
 	pc.Draw()
-	g.RenderChildren(sv)
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

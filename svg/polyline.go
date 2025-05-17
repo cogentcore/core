@@ -40,17 +40,14 @@ func (g *Polyline) LocalBBox(sv *SVG) math32.Box2 {
 
 func (g *Polyline) Render(sv *SVG) {
 	sz := len(g.Points)
-	if sz < 2 {
-		return
-	}
-	vis := g.IsVisible(sv)
-	if !vis {
+	if sz < 2 || !g.IsVisible(sv) {
 		return
 	}
 	pc := g.Painter(sv)
 	pc.Polyline(g.Points...)
 	pc.Draw()
 
+	g.PushContext(sv)
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
 		ptn := g.Points[1]
@@ -72,8 +69,7 @@ func (g *Polyline) Render(sv *SVG) {
 			mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 		}
 	}
-
-	g.RenderChildren(sv)
+	pc.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

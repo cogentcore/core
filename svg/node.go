@@ -427,11 +427,11 @@ func (g *NodeBase) Painter(sv *SVG) *paint.Painter {
 // out of bounds. If visible, pushes us as Context.
 // Must be called as first step in Render.
 func (g *NodeBase) PushContext(sv *SVG) bool {
-	vis := g.IsVisible(sv)
-	if !vis {
-		return vis
+	if !g.IsVisible(sv) {
+		return false
 	}
-	sv.painter.PushContext(&g.Paint, nil)
+	pc := g.Painter(sv)
+	pc.PushContext(&g.Paint, nil)
 	return true
 }
 
@@ -460,8 +460,7 @@ func (g *NodeBase) RenderChildren(sv *SVG) {
 }
 
 func (g *NodeBase) Render(sv *SVG) {
-	vis := g.IsVisible(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
 	g.RenderChildren(sv)

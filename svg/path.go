@@ -53,17 +53,14 @@ func (g *Path) LocalBBox(sv *SVG) math32.Box2 {
 
 func (g *Path) Render(sv *SVG) {
 	sz := len(g.Data)
-	if sz < 2 {
-		return
-	}
-	vis := g.IsVisible(sv)
-	if !vis {
+	if sz < 2 || !g.IsVisible(sv) {
 		return
 	}
 	pc := g.Painter(sv)
-	pc.State.Path = g.Data.Clone()
+	pc.State.Path = g.Data
 	pc.Draw()
 
+	g.PushContext(sv)
 	mrk_start := sv.MarkerByName(g, "marker-start")
 	mrk_end := sv.MarkerByName(g, "marker-end")
 	mrk_mid := sv.MarkerByName(g, "marker-mid")
@@ -87,8 +84,7 @@ func (g *Path) Render(sv *SVG) {
 			}
 		}
 	}
-
-	g.RenderChildren(sv)
+	pc.PopContext()
 }
 
 // UpdatePathString sets the path string from the Data

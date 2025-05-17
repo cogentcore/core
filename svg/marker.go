@@ -83,7 +83,7 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 
 	mrk.Paint.Transform = mrk.Transform
 
-	// fmt.Println("render marker:", mrk.Name, strokeWidth, vertexPos, vertexAng, mrk.Transform)
+	// fmt.Println("render marker:", mrk.Name, strokeWidth, mrk.EffSize, mrk.Transform)
 	mrk.Render(sv)
 }
 
@@ -92,8 +92,8 @@ func (g *Marker) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 func (g *Marker) Render(sv *SVG) {
-	g.PushContext(sv)
 	pc := g.Painter(sv)
+	pc.PushContext(&g.Paint, nil)
 	g.RenderChildren(sv)
 	pc.PopContext()
 }

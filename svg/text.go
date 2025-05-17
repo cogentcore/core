@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
@@ -143,7 +142,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	*/
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 	// g.TextShaped.UpdateBBox()
-	return g.TextShaped.Bounds
+	return g.TextShaped.Bounds.Translate(g.Pos)
 }
 
 func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
@@ -159,25 +158,26 @@ func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 }
 
 func (g *Text) Render(sv *SVG) {
-	vis := g.PushContext(sv)
-	if !vis {
-		return
-	}
-	pc := g.Painter(sv)
 	if g.IsParText() {
+		if !g.PushContext(sv) {
+			return
+		}
+		pc := g.Painter(sv)
 		g.RenderChildren(sv)
 		pc.PopContext()
 		return
 	}
-	if len(g.Text) > 0 {
-		g.RenderText(sv, pc)
+	if !g.IsVisible(sv) {
+		return
 	}
-	g.RenderChildren(sv)
-	pc.PopContext()
+	if len(g.Text) > 0 {
+		g.RenderText(sv)
+	}
 }
 
-func (g *Text) RenderText(sv *SVG, pc *paint.Painter) {
+func (g *Text) RenderText(sv *SVG) {
 	// note: transform is managed entirely in the render side function!
+	pc := g.Painter(sv)
 	pos := g.Pos
 	bsz := g.TextShaped.Bounds.Size()
 	if pc.Text.Align == text.Center {

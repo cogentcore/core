@@ -44,14 +44,12 @@ func (g *Ellipse) LocalBBox(sv *SVG) math32.Box2 {
 }
 
 func (g *Ellipse) Render(sv *SVG) {
-	vis := g.IsVisible(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
 	pc := g.Painter(sv)
 	pc.Ellipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.Draw()
-	g.RenderChildren(sv)
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

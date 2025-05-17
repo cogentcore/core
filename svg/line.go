@@ -46,14 +46,14 @@ func (g *Line) LocalBBox(sv *SVG) math32.Box2 {
 }
 
 func (g *Line) Render(sv *SVG) {
-	vis := g.IsVisible(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
 	pc := g.Painter(sv)
 	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Draw()
 
+	g.PushContext(sv)
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(sv, g.Start, ang, g.Paint.Stroke.Width.Dots)
@@ -62,8 +62,7 @@ func (g *Line) Render(sv *SVG) {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(sv, g.End, ang, g.Paint.Stroke.Width.Dots)
 	}
-
-	g.RenderChildren(sv)
+	pc.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
