@@ -4,6 +4,8 @@ Categories = ["Architecture"]
 
 **Rendering** is the process of converting [[widget]]s (or other sources, such as SVG) into images uploaded to a window. This page documents low-level [[architecture]] details of rendering.
 
+On all platforms except web, the core rendering logic is pure Go, with cgo used for pushing images to the system window. On web, we use HTML canvas, as discussed later.
+
 The overall flow of rendering is:
 
 * Source (SVG, `core.Scene`, etc) -> `Painter` (`render.Render`) -> `render.Renderer` (`image.Image`, SVG, PDF)
@@ -22,7 +24,7 @@ The [[doc:paint/render]] package defines a `Renderer` interface that is implemen
 
 On most platforms (desktop, mobile), the standard rasterization uses our version of the [rasterx](https://github.com/srwiley/rasterx) Go-based rasterizer, which extensive testing has determined to be significantly faster than other Go-based alternatives, and for most GUI rendering cases, is fast enough to not be a major factor in overall updating time. Nevertheless, we will eventually explore a WebGPU based implementation based on the highly optimized [vello](https://github.com/linebender/vello) framework in Rust (see [jello](https://github.com/dominikh/jello) for a Go port).
 
-On the web browser (`js` platform), we take advantage of the standardized, typically GPU-optimized rendering provided by the html canvas element (see [[doc:paint/renderers/htmlcanvas]]). This is significantly faster than earlier versions of Cogent Core that uploaded Go-rendered images, and provides a hardware-accelerated rendering speed often faster than the desktop platform. This includes text rendering which requires a careful integration of Go and web-based mechanisms to perform internationalized text shaping (see [[doc:text/shaped/shapers/shapedjs]]).
+On the web (`js` platform), we take advantage of the standardized, typically GPU-optimized rendering provided by the html canvas element (see [[doc:paint/renderers/htmlcanvas]]). This is significantly faster than earlier versions of Cogent Core that uploaded Go-rendered images, and provides a hardware-accelerated rendering speed often faster than the desktop platform. This includes text rendering which requires a careful integration of Go and web-based mechanisms to perform internationalized text shaping (see [[doc:text/shaped/shapers/shapedjs]]).
 
 ## Core Scene and Widget rendering logic
 
