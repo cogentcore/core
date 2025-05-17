@@ -52,10 +52,6 @@ func (a *App) SendEmptyEvent() {
 	glfw.PostEmptyEvent()
 }
 
-func (a *App) GPUDevice() any {
-	return a.GPU
-}
-
 // MainLoop starts running event loop on main thread (must be called
 // from the main thread).
 func (a *App) MainLoop() {

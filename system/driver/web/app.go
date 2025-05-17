@@ -86,7 +86,6 @@ func (a *App) SetSystemWindow() {
 
 	a.Compose = composer.NewComposerWeb()
 	a.Resize()
-	// a.InitDrawer() TODO
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -139,11 +138,6 @@ func (a *App) Resize() {
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
 	a.Event.WindowResize()
-}
-
-func (a *App) GPUDevice() any {
-	return nil // TODO
-	// return a.Draw.wgpu
 }
 
 func (a *App) DataDir() string {
