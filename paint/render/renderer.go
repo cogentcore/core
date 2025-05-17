@@ -38,6 +38,3 @@ type Renderer interface {
 	// and PDF renderers.
 	Source() []byte
 }
-
-// Registry of renderers
-var Renderers map[string]Renderer

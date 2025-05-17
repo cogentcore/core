@@ -11,11 +11,11 @@ The [[xyz]] package provides an even higher-level 3D graphics abstraction on top
 
 The main gpu code is in the top-level `gpu` package, with the following sub-packages available:
 
-* [[doc:gpu.phong]] is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higher-level [[xyz]] 3D scenegraph system.
+* [[doc:gpu/phong]] is a Blinn-Phong lighting model implementation on top of `gpu`, which then serves as the basis for the higher-level [[xyz]] 3D scenegraph system.
 
-* [[doc:gpu.shape]] generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates. You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu. It only has a dependency on the [math32](../math32) package and could be used for anything.
+* [[doc:gpu/shape]] generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates. You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by gpu. It only has a dependency on the [math32](../math32) package and could be used for anything.
 
-* [[doc:gpu.gpudraw]] implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api. This is used by the `Composer` framework for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window (see [[render]] for details).
+* [[doc:gpu/gpudraw]] implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api. This is used by the `Composer` framework for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window (see [[render]] for details).
 
 We maintain a separate [webgpu](https://github.com/cogentcore/webgpu) package that provides a Go and JS wrapper around the rust-based [wgpu](https://github.com/gfx-rs/wgpu) and [wgpu-native](https://github.com/gfx-rs/wgpu-native) packages that actually implement WebGPU itself on the desktop and mobile. This "native" version is just as performant as the much more difficult-to-use [Vulkan](https://www.vulkan.org/) framework, which we used to use.
 
