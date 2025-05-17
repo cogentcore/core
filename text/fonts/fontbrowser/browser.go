@@ -4,7 +4,7 @@
 
 package main
 
-//go:generate core generate -add-types -setters
+//go:generate core generate -add-types
 
 import (
 	"bytes"

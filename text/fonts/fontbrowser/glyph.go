@@ -72,21 +72,21 @@ type Glyph struct {
 	core.Canvas
 
 	// Rune is the rune to render.
-	Rune rune
+	Rune rune `set:"-"`
 
 	// GID is the glyph ID of the Rune
-	GID font.GID
+	GID font.GID `set:"-"`
 
 	// Outline is the set of control points (end points only).
-	Outline []math32.Vector2
+	Outline []math32.Vector2 `set:"-"`
 
 	// Stroke only renders the outline of the glyph, not the standard fill.
-	Stroke bool
+	Stroke bool `set:"-"`
 
 	// Points plots the control points.
-	Points bool
+	Points bool `set:"-"`
 
-	Browser *Browser
+	browser *Browser
 }
 
 func (gi *Glyph) Init() {
@@ -95,21 +95,21 @@ func (gi *Glyph) Init() {
 		s.Min.Set(units.Em(3))
 		s.SetTextWrap(false)
 		s.Cursor = cursors.Pointer
-		if gi.Browser == nil {
+		if gi.browser == nil {
 			return
 		}
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Selectable)
 		sty, tsty := s.NewRichText()
-		fonts.Style(gi.Browser.Font, sty, tsty)
+		fonts.Style(gi.browser.Font, sty, tsty)
 	})
 	gi.OnClick(func(e events.Event) {
-		if gi.Stroke || gi.Browser == nil || gi.Browser.Font == nil {
+		if gi.Stroke || gi.browser == nil || gi.browser.Font == nil {
 			return
 		}
-		gli := NewGlyphInfo(gi.Browser.Font, gi.Rune, gi.GID)
+		gli := NewGlyphInfo(gi.browser.Font, gi.Rune, gi.GID)
 		gli.Outline = gi.Outline
 		d := core.NewBody("Glyph Info")
-		bg := NewGlyph(d).SetBrowser(gi.Browser).SetRune(gi.Rune).SetGID(gi.GID).
+		bg := NewGlyph(d).SetBrowser(gi.browser).SetRune(gi.Rune).SetGID(gi.GID).
 			SetStroke(true).SetPoints(true)
 		bg.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Em(40))
@@ -118,14 +118,14 @@ func (gi *Glyph) Init() {
 		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddOK(bar)
 		})
-		d.RunWindowDialog(gi.Browser)
+		d.RunWindowDialog(gi.browser)
 	})
 	gi.SetDraw(gi.draw)
 }
 
 func (gi *Glyph) drawShaped(pc *paint.Painter) {
 	sty, tsty := gi.Styles.NewRichText()
-	fonts.Style(gi.Browser.Font, sty, tsty)
+	fonts.Style(gi.browser.Font, sty, tsty)
 	sz := gi.Geom.Size.Actual.Content
 	msz := min(sz.X, sz.Y)
 	sty.Size = float32(msz) / tsty.FontSize.Dots
@@ -135,7 +135,7 @@ func (gi *Glyph) drawShaped(pc *paint.Painter) {
 	off := math32.Vec2(0, 0)
 	if msz > 200 {
 		o := 0.2 * float32(msz)
-		if gi.Browser.IsEmoji {
+		if gi.browser.IsEmoji {
 			off = math32.Vec2(0.5*o, -o)
 		} else { // for bitmap fonts, kinda random
 			off = math32.Vec2(o, o)
@@ -145,10 +145,10 @@ func (gi *Glyph) drawShaped(pc *paint.Painter) {
 }
 
 func (gi *Glyph) draw(pc *paint.Painter) {
-	if gi.Browser == nil || gi.Browser.Font == nil {
+	if gi.browser == nil || gi.browser.Font == nil {
 		return
 	}
-	face := gi.Browser.Font
+	face := gi.browser.Font
 	data := face.GlyphData(gi.GID)
 	gd, ok := data.(font.GlyphOutline)
 	if !ok {

@@ -15,6 +15,7 @@ import (
 )
 
 // Info contains basic font information for aviailable fonts.
+// This is used for a chooser for example.
 type Info struct {
 
 	// Family name.
@@ -29,7 +30,7 @@ type Info struct {
 	// Stretch: normal, expanded, condensed, etc
 	Stretch rich.Stretch
 
-	// Font contains info about
+	// Font contains info about the location, family, etc of the font file.
 	Font fontscan.Footprint `display:"-"`
 }
 
