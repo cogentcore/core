@@ -457,7 +457,7 @@ func (tx *Text) SizeUp() {
 }
 
 func (tx *Text) SizeDown(iter int) bool {
-	if tx.Styles.Text.WhiteSpace.HasWordWrap() || iter > 1 {
+	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || iter > 1 {
 		return false
 	}
 	sz := &tx.Geom.Size

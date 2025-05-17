@@ -272,7 +272,7 @@ func (x *ImgSpanner) SetColor(c image.Image) {
 		return
 	}
 	x.FgColor = color.RGBA{}
-	x.ColorImage = c.(image.Image)
+	x.ColorImage = c
 }
 
 // GetSpanFunc returns the function that consumes a span described by the parameters.
