@@ -44,7 +44,7 @@ const (
 	TileFirstLong
 
 	// SecondLong has the first two elements split along the first line,
-	//	and the third with a long span along the second main axis line,
+	// and the third with a long span along the second main axis line,
 	// with a split between the two lines.  Visually, the splits form
 	// an inverted T shape for a horizontal main axis.
 	TileSecondLong
@@ -227,8 +227,8 @@ func (sl *Splits) Init() {
 // as there are children, though fewer could be passed.
 func (sl *Splits) SetSplits(splits ...float32) *Splits {
 	sl.updateSplits()
-	ntc, _ := sl.tilesTotal()
-	if ntc == 0 {
+	_, hasNonSpans := sl.tilesTotal()
+	if !hasNonSpans {
 		nc := len(splits)
 		sl.TileSplits = slicesx.SetLength(sl.TileSplits, nc)
 		copy(sl.TileSplits, splits)
@@ -671,6 +671,9 @@ func (sl *Splits) restoreChild(idxs ...int) {
 
 func (sl *Splits) styleSplits() {
 	nt := len(sl.Tiles)
+	if nt == 0 {
+		return
+	}
 	nh := nt - 1
 	for _, t := range sl.Tiles {
 		nh += tileNumElements[t] - 1
@@ -874,13 +877,13 @@ func (sl *Splits) Position() {
 }
 
 func (sl *Splits) RenderWidget() {
-	if sl.PushBounds() {
+	if sl.StartRender() {
 		sl.ForWidgetChildren(func(i int, kwi Widget, cwb *WidgetBase) bool {
 			cwb.SetState(sl.ChildIsCollapsed(i), states.Invisible)
 			kwi.RenderWidget()
 			return tree.Continue
 		})
 		sl.renderParts()
-		sl.PopBounds()
+		sl.EndRender()
 	}
 }

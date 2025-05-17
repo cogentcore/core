@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 )
 
 func TestTextTypes(t *testing.T) {
@@ -29,12 +30,12 @@ func TestTextRem(t *testing.T) {
 }
 
 func TestTextDecoration(t *testing.T) {
-	for d := styles.Underline; d <= styles.LineThrough; d++ {
-		for st := styles.FontNormal; st <= styles.Italic; st++ {
+	for d := rich.Underline; d <= rich.LineThrough; d++ {
+		for st := rich.SlantNormal; st <= rich.Italic; st++ {
 			b := NewBody()
 			NewText(b).SetText("Test").Styler(func(s *styles.Style) {
 				s.Font.SetDecoration(d)
-				s.Font.Style = st
+				s.Font.Slant = st
 			})
 			b.AssertRender(t, "text/decoration/"+d.BitIndexString()+"-"+st.String())
 		}

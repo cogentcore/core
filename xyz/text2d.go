@@ -6,9 +6,8 @@ package xyz
 
 import (
 	"fmt"
-	"image"
-	"image/draw"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
@@ -16,10 +15,14 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
-// Call SetText() which calls RenderText to update fortext changes (re-renders texture).
+// Call SetText() which calls RenderText to update for text changes (re-renders texture).
 // The native scale is such that a unit height value is the height of the default font
 // set by the font-size property, and the X axis is scaled proportionally based on the
 // rendered text size to maintain the aspect ratio.  Further scaling can be applied on
@@ -43,11 +46,11 @@ type Text2D struct {
 	// position offset of start of text rendering relative to upper-left corner
 	TextPos math32.Vector2 `set:"-" xml:"-" json:"-"`
 
-	// render data for text label
-	TextRender paint.Text `set:"-" xml:"-" json:"-"`
+	// richText is the conversion of the HTML text source.
+	richText rich.Text
 
-	// render state for rendering text
-	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
+	// render data for text label
+	textRender *shaped.Lines `set:"-" xml:"-" json:"-"`
 
 	// automatically set to true if the font render color is the default
 	// colors.Scheme.OnSurface.  If so, it is automatically updated if the default
@@ -78,7 +81,7 @@ func (txt *Text2D) TextSize() (math32.Vector2, bool) {
 		return sz, false
 	}
 	tsz := tx.Image().Bounds().Size()
-	fsz := float32(txt.Styles.Font.Size.Dots)
+	fsz := txt.Styles.Font.FontHeight()
 	if fsz == 0 {
 		fsz = 36
 	}
@@ -95,39 +98,40 @@ func (txt *Text2D) Config() {
 }
 
 func (txt *Text2D) RenderText() {
+	if txt.Scene == nil || txt.Scene.TextShaper == nil {
+		return
+	}
 	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
 	st := &txt.Styles
-	fr := st.FontRender()
-	if fr.Color == colors.Scheme.OnSurface {
+	if !st.Font.Decoration.HasFlag(rich.FillColor) {
 		txt.usesDefaultColor = true
 	}
-	if txt.usesDefaultColor {
-		fr.Color = colors.Scheme.OnSurface
-	}
-	if st.Font.Face == nil {
-		st.Font = paint.OpenFont(fr, &st.UnitContext)
-	}
 	st.ToDots()
-
-	txt.TextRender.SetHTML(txt.Text, fr, &txt.Styles.Text, &txt.Styles.UnitContext, nil)
-	sz := txt.TextRender.BBox.Size()
-	txt.TextRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
-	if txt.TextRender.BBox.Size() != sz {
-		sz = txt.TextRender.BBox.Size()
-		txt.TextRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
-		if txt.TextRender.BBox.Size() != sz {
-			sz = txt.TextRender.BBox.Size()
-		}
+	sty, tsty := st.NewRichText()
+	sz := math32.Vec2(10000, 1000) // just a big size
+	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), sty, nil)
+	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, sty, tsty, &rich.DefaultSettings, sz)
+	sz = txt.textRender.Bounds.Size().Ceil()
+	if sz.X == 0 {
+		sz.X = 10
+	}
+	if sz.Y == 0 {
+		sz.Y = 10
 	}
 	marg := txt.Styles.TotalMargin()
 	sz.SetAdd(marg.Size())
 	txt.TextPos = marg.Pos().Round()
-	szpt := sz.ToPointRound()
-	if szpt == (image.Point{}) {
-		szpt = image.Point{10, 10}
+
+	psty := styles.NewPaint()
+	psty.FromStyle(&txt.Styles)
+	pc := paint.NewPainter(sz)
+	pc.Paint = psty
+	if txt.Styles.Background != nil {
+		pc.Fill.Color = txt.Styles.Background
+		pc.Clear()
 	}
-	bounds := image.Rectangle{Max: szpt}
-	var img *image.RGBA
+	pc.DrawText(txt.textRender, txt.TextPos)
+	img := imagex.AsRGBA(paint.RenderToImage(pc))
 	var tx Texture
 	var err error
 	if txt.Material.Texture == nil {
@@ -135,7 +139,6 @@ func (txt *Text2D) RenderText() {
 		tx, err = txt.Scene.TextureByName(txname)
 		if err != nil {
 			tx = &TextureBase{Name: txname}
-			img = image.NewRGBA(bounds)
 			tx.AsTextureBase().RGBA = img
 			txt.Scene.SetTexture(tx)
 			txt.Material.SetTexture(tx)
@@ -144,31 +147,12 @@ func (txt *Text2D) RenderText() {
 				fmt.Printf("xyz.Text2D: error: texture name conflict: %s\n", txname)
 			}
 			txt.Material.SetTexture(tx)
-			img = tx.Image()
 		}
 	} else {
 		tx = txt.Material.Texture
-		img = tx.Image()
-		if img.Bounds() != bounds {
-			img = image.NewRGBA(bounds)
-		}
 		tx.AsTextureBase().RGBA = img
 		txt.Scene.Phong.SetTexture(tx.AsTextureBase().Name, phong.NewTexture(img))
 	}
-	rs := &txt.RenderState
-	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
-		rs.Init(szpt.X, szpt.Y, img)
-	}
-	rs.PushBounds(bounds)
-	pt := styles.Paint{}
-	pt.Defaults()
-	pt.FromStyle(st)
-	ctx := &paint.Context{State: rs, Paint: &pt}
-	if st.Background != nil {
-		draw.Draw(img, bounds, st.Background, image.Point{}, draw.Src)
-	}
-	txt.TextRender.Render(ctx, txt.TextPos)
-	rs.PopBounds()
 }
 
 // Validate checks that text has valid mesh and texture settings, etc
@@ -181,14 +165,15 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	sz, ok := txt.TextSize()
 	if ok {
 		sc := math32.Vec3(sz.X, sz.Y, txt.Pose.Scale.Z)
-		ax, ay := txt.Styles.Text.AlignFactors()
+		ax := txt.Styles.Text.Align.Factor()
+		ay := float32(0.0)
 		al := txt.Styles.Text.AlignV
 		switch al {
-		case styles.Start:
+		case text.Start:
 			ay = -0.5
-		case styles.Center:
+		case text.Center:
 			ay = 0
-		case styles.End:
+		case text.End:
 			ay = 0.5
 		}
 		ps := txt.Pose.Pos

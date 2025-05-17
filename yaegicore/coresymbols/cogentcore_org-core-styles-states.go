@@ -11,6 +11,7 @@ func init() {
 	Symbols["cogentcore.org/core/styles/states/states"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Active":        reflect.ValueOf(states.Active),
+		"Attended":      reflect.ValueOf(states.Attended),
 		"Checked":       reflect.ValueOf(states.Checked),
 		"Disabled":      reflect.ValueOf(states.Disabled),
 		"DragHovered":   reflect.ValueOf(states.DragHovered),

@@ -24,3 +24,25 @@ func TestMD(t *testing.T) {
 		b.AssertRender(t, "md/"+nm)
 	}
 }
+
+func TestDoubleButtonBug(t *testing.T) {
+	b := core.NewBody()
+	assert.NoError(t, ReadMDString(NewContext(), b, `<button>A</button><button>B</button>`))
+	b.AssertRender(t, "md/double-button-bug")
+}
+
+func TestExtraNewlineBug(t *testing.T) {
+	b := core.NewBody()
+	assert.NoError(t, ReadMDString(NewContext(), b, `A
+
+<button>B</button>`))
+	b.AssertRender(t, "md/extra-newline-bug")
+}
+
+func TestButtonInHeadingBug(t *testing.T) {
+	// TODO: this does not work correctly due to a minor bug in [extractText]
+	// (see the comment there).
+	b := core.NewBody()
+	assert.NoError(t, ReadMDString(NewContext(), b, `<h1><button>A</button>B</h1>`))
+	b.AssertRender(t, "md/button-in-heading-bug")
+}

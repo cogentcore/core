@@ -19,6 +19,6 @@ func NoDisplayScene(gp *gpu.GPU, dev *gpu.Device) *xyz.Scene {
 	sc := xyz.NewScene()
 	sc.MultiSample = 4
 	sc.Geom.Size = image.Point{1024, 768}
-	sc.ConfigFrame(gp, dev)
+	sc.ConfigOffscreen(gp, dev)
 	return sc
 }

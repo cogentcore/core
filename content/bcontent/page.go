@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -55,6 +57,13 @@ type Page struct {
 
 	// Categories are the categories that the page belongs to.
 	Categories []string
+
+	// Specials are special content elements for each page
+	// that have names with an underscore-delimited key name,
+	// such as figure_, table_, sim_ etc, and can be referred
+	// to using the #id component of a wikilink. They are rendered
+	// using the index of each such element (e.g., Figure 1) in the link.
+	Specials map[string][]string
 }
 
 // PreRenderPage contains the data for each page printed in JSON by a content app
@@ -136,6 +145,9 @@ func (pg *Page) ReadContent(pagesByCategory map[string][]*Page) ([]byte, error) 
 // returns markdown containing a list of links to all pages in that category.
 // Otherwise, it returns nil.
 func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
+	if pagesByCategory == nil {
+		return nil
+	}
 	cpages := pagesByCategory[pg.Name]
 	if cpages == nil {
 		return nil
@@ -145,4 +157,99 @@ func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
 		res = append(res, fmt.Sprintf("* [[%s]]\n", cpage.Name)...)
 	}
 	return res
+}
+
+// SpecialName extracts a special element type name from given element name,
+// defined as the part before the first underscore _ character.
+func SpecialName(name string) string {
+	usi := strings.Index(name, "_")
+	if usi < 0 {
+		return ""
+	}
+	return name[:usi]
+}
+
+// SpecialToKebab does strcase.ToKebab on parts after specialName if present.
+func SpecialToKebab(name string) string {
+	usi := strings.Index(name, "_")
+	if usi < 0 {
+		return strcase.ToKebab(name)
+	}
+	spec := name[:usi+1]
+	name = name[usi+1:]
+	colon := strings.Index(name, ":")
+	if colon > 0 {
+		return spec + strcase.ToKebab(name[:colon]) + name[colon:]
+	} else {
+		return spec + strcase.ToKebab(name)
+	}
+}
+
+// SpecialLabel returns the label for given special element, using
+// the index of the element in the list of specials, e.g., "Figure 1"
+func (pg *Page) SpecialLabel(name string) string {
+	snm := SpecialName(name)
+	if snm == "" {
+		return ""
+	}
+	if pg.Specials == nil {
+		b, err := pg.ReadContent(nil)
+		if err != nil {
+			return ""
+		}
+		pg.ParseSpecials(b)
+	}
+	sl := pg.Specials[snm]
+	if sl == nil {
+		return ""
+	}
+	i := slices.Index(sl, name)
+	if i < 0 {
+		return ""
+	}
+	return strcase.ToSentence(snm) + " " + strconv.Itoa(i+1)
+}
+
+// ParseSpecials manually parses specials before rendering md
+// because they are needed in advance of generating from md file,
+// e.g., for wikilinks.
+func (pg *Page) ParseSpecials(b []byte) {
+	if pg.Specials != nil {
+		return
+	}
+	pg.Specials = make(map[string][]string)
+	scan := bufio.NewScanner(bytes.NewReader(b))
+	idt := []byte(`{id="`)
+	idn := len(idt)
+	for scan.Scan() {
+		ln := scan.Bytes()
+		n := len(ln)
+		if n < idn+1 {
+			continue
+		}
+		if !bytes.HasPrefix(ln, idt) {
+			continue
+		}
+		fs := bytes.Fields(ln) // multiple attributes possible
+		ln = fs[0]             // only deal with first one
+		id := bytes.TrimSpace(ln[idn:])
+		n = len(id)
+		if n < 2 {
+			continue
+		}
+		ed := n - 1 // quotes
+		if len(fs) == 1 {
+			ed = n - 2 // brace
+		}
+		id = id[:ed]
+		sid := string(id)
+		snm := SpecialName(sid)
+		if snm == "" {
+			continue
+		}
+		// fmt.Println("id:", snm, sid)
+		sl := pg.Specials[snm]
+		sl = append(sl, sid)
+		pg.Specials[snm] = sl
+	}
 }

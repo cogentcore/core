@@ -13,10 +13,10 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/tree"
 )
 
@@ -51,8 +51,13 @@ type Frame struct {
 	// HasScroll is whether scrollbars exist for each dimension.
 	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// scrolls are the scroll bars, which are fully managed as needed.
-	scrolls [2]*Slider
+	// Scrolls are the scroll bars, which are fully managed as needed.
+	Scrolls [2]*Slider `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// handleKeyNav indicates whether this frame should handle keyboard
+	// navigation events using the default handlers. Set to false to allow
+	// custom event handling.
+	handleKeyNav bool
 
 	// accumulated name to search for when keys are typed
 	focusName string
@@ -66,13 +71,23 @@ type Frame struct {
 
 func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
+	fr.handleKeyNav = true
+	fr.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.ScrollableUnattended)
+	})
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
-			s.SetAbilities(true, abilities.Scrollable, abilities.Slideable)
+			s.SetAbilities(true, abilities.Scrollable)
+			if TheApp.SystemPlatform().IsMobile() {
+				s.SetAbilities(true, abilities.Slideable)
+			}
 		}
 	})
 	fr.OnFinal(events.KeyChord, func(e events.Event) {
+		if !fr.handleKeyNav {
+			return
+		}
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
 			slog.Info("Layout KeyInput", "widget", fr, "keyFunction", kf)
@@ -143,47 +158,83 @@ func (fr *Frame) Init() {
 		fr.focusOnName(e)
 	})
 	fr.On(events.Scroll, func(e events.Event) {
-		if fr.AbilityIs(abilities.ScrollableUnfocused) || fr.StateIs(states.Focused) {
+		if fr.AbilityIs(abilities.ScrollableUnattended) || (fr.StateIs(states.Focused) || fr.StateIs(states.Attended)) {
 			fr.scrollDelta(e)
 		}
 	})
-	// We treat slide events on frames as scroll events.
-	fr.On(events.SlideMove, func(e events.Event) {
-		// We must negate the delta for "natural" scrolling behavior.
-		del := math32.FromPoint(e.PrevDelta()).MulScalar(-0.034)
-		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
-	})
-	fr.On(events.SlideStop, func(e events.Event) {
-		// If we have enough velocity, we continue scrolling over the
-		// next second in a goroutine while slowly decelerating for a
-		// smoother experience.
-		vel := math32.FromPoint(e.StartDelta()).DivScalar(1.5 * float32(e.SinceStart().Milliseconds())).Negate()
-		if math32.Abs(vel.X) < 1 && math32.Abs(vel.Y) < 1 {
+	// We treat slide events on frames as scroll events on mobile.
+	prevVels := []math32.Vector2{}
+	fr.On(events.SlideStart, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
-		go func() {
-			i := 0
-			tick := time.NewTicker(time.Second / 60)
-			for range tick.C {
-				fr.AsyncLock()
-				fr.scrollDelta(events.NewScroll(e.WindowPos(), vel, e.Modifiers()))
-				fr.AsyncUnlock()
-				vel.SetMulScalar(0.95)
-				i++
-				if i > 120 {
-					tick.Stop()
-					break
-				}
+
+		// Stop any existing scroll animations for this frame.
+		for _, anim := range fr.Scene.Animations {
+			if anim.Widget.This == fr.This {
+				anim.Done = true
 			}
-		}()
+		}
+	})
+	fr.On(events.SlideMove, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
+		// We must negate the delta for "natural" scrolling behavior.
+		del := math32.FromPoint(e.PrevDelta()).Negate()
+		fr.scrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+
+		time := float32(e.SincePrev().Seconds()) * 1000
+		vel := del.DivScalar(time)
+		if len(prevVels) >= 3 {
+			prevVels = append(prevVels[1:], vel)
+		} else {
+			prevVels = append(prevVels, vel)
+		}
+	})
+	fr.On(events.SlideStop, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
+		// If we have enough velocity over the last few slide events,
+		// we continue scrolling in an animation while slowly decelerating
+		// for a smoother experience.
+		if len(prevVels) == 0 {
+			return
+		}
+		vel := math32.Vector2{}
+		for _, vi := range prevVels {
+			vel.SetAdd(vi)
+		}
+		vel.SetDivScalar(float32(len(prevVels)))
+		prevVels = prevVels[:0] // reset for next scroll
+
+		if vel.Length() < 1 {
+			return
+		}
+		i := 0
+		t := float32(0)
+		fr.Animate(func(a *Animation) {
+			t += a.Dt
+			// See https://medium.com/@esskeetit/scrolling-mechanics-of-uiscrollview-142adee1142c
+			vel.SetMulScalar(math32.Pow(0.998, a.Dt)) // TODO: avoid computing Pow each time?
+			dx := vel.MulScalar(a.Dt)
+			fr.scrollDelta(events.NewScroll(e.WindowPos(), dx, e.Modifiers()))
+			i++
+			if t > 2000 {
+				a.Done = true
+			}
+		})
 	})
 }
 
 func (fr *Frame) Style() {
 	fr.WidgetBase.Style()
 	for d := math32.X; d <= math32.Y; d++ {
-		if fr.HasScroll[d] && fr.scrolls[d] != nil {
-			fr.scrolls[d].Style()
+		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
+			fr.Scrolls[d].Style()
 		}
 	}
 }
@@ -197,12 +248,12 @@ func (fr *Frame) Destroy() {
 
 // deleteScroll deletes scrollbar along given dimesion.
 func (fr *Frame) deleteScroll(d math32.Dims) {
-	if fr.scrolls[d] == nil {
+	if fr.Scrolls[d] == nil {
 		return
 	}
-	sb := fr.scrolls[d]
+	sb := fr.Scrolls[d]
 	sb.This.Destroy()
-	fr.scrolls[d] = nil
+	fr.Scrolls[d] = nil
 }
 
 func (fr *Frame) RenderChildren() {
@@ -220,12 +271,12 @@ func (fr *Frame) RenderChildren() {
 }
 
 func (fr *Frame) RenderWidget() {
-	if fr.PushBounds() {
+	if fr.StartRender() {
 		fr.This.(Widget).Render()
 		fr.RenderChildren()
 		fr.renderParts()
 		fr.RenderScrolls()
-		fr.PopBounds()
+		fr.EndRender()
 	}
 }
 

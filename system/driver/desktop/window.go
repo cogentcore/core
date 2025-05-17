@@ -16,18 +16,22 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 // Window is the implementation of [system.Window] for the desktop platform.
 type Window struct {
-	base.WindowMulti[*App, *gpudraw.Drawer]
+	base.WindowMulti[*App, *composer.ComposerDrawer]
 
 	// Glw is the glfw window associated with this window
 	Glw *glfw.Window
+
+	// Draw is the [gpudraw.Drawer] used for the Composer.
+	Draw *gpudraw.Drawer // TODO: really need this separately?
 
 	// ScreenName is the name of the last known screen this window was on
 	ScreenWindow string
@@ -307,7 +311,7 @@ func (w *Window) SetGeometry(fullscreen bool, pos, size image.Point, screen *sys
 	})
 }
 
-func (w *Window) ConstrainFrame(topOnly bool) styles.Sides[int] {
+func (w *Window) ConstrainFrame(topOnly bool) sides.Sides[int] {
 	if w.IsClosed() || w.Is(system.Fullscreen) || w.Is(system.Maximized) {
 		return w.FrameSize
 	}
@@ -422,6 +426,7 @@ func (w *Window) Close() {
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil
+		w.Compose = nil
 	})
 }
 

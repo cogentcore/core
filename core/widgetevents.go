@@ -254,7 +254,7 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 		})
 	})
 
-	if s.State != state {
+	if s.State != state && !(e.Type() == events.Attend || e.Type() == events.AttendLost) {
 		wb.Restyle()
 	}
 }
@@ -370,16 +370,6 @@ func (wb *WidgetBase) handleWidgetStateFromMouse() {
 			wb.SetState(false, states.Sliding, states.Active)
 		}
 	})
-	wb.On(events.DragStart, func(e events.Event) {
-		if wb.AbilityIs(abilities.Draggable) {
-			wb.SetState(true, states.Dragging)
-		}
-	})
-	wb.On(events.Drop, func(e events.Event) {
-		if wb.AbilityIs(abilities.Draggable) {
-			wb.SetState(false, states.Dragging, states.Active)
-		}
-	})
 }
 
 // handleLongHoverTooltip listens for LongHover and LongPress events and
@@ -402,6 +392,10 @@ func (wb *WidgetBase) handleLongHoverTooltip() {
 	})
 
 	wb.On(events.LongPressStart, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
 		wb.Send(events.ContextMenu, e)
 		wi := wb.This.(Widget)
 		tt, pos := wi.WidgetTooltip(e.Pos())
@@ -412,6 +406,10 @@ func (wb *WidgetBase) handleLongHoverTooltip() {
 		newTooltip(wi, tt, pos).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+
 		if wb.Scene.Stage != nil {
 			wb.Scene.Stage.popups.popDeleteType(TooltipStage)
 		}
@@ -439,6 +437,20 @@ func (wb *WidgetBase) handleWidgetStateFromFocus() {
 	})
 }
 
+// handleWidgetStateFromAttend updates standard State flags based on Attend events
+func (wb *WidgetBase) handleWidgetStateFromAttend() {
+	wb.On(events.Attend, func(e events.Event) {
+		if wb.Styles.Abilities.IsPressable() {
+			wb.SetState(true, states.Attended)
+		}
+	})
+	wb.On(events.AttendLost, func(e events.Event) {
+		if wb.Styles.Abilities.IsPressable() {
+			wb.SetState(false, states.Attended)
+		}
+	})
+}
+
 // HandleWidgetMagnifyEvent calls [renderWindow.stepZoom] on [events.Magnify]
 func (wb *WidgetBase) handleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
@@ -457,22 +469,37 @@ func (wb *WidgetBase) handleValueOnChange() {
 	})
 }
 
-// HandleClickOnEnterSpace adds a key event handler for Enter and Space
+// SendChangeOnInput adds an event handler that does [WidgetBase.SendChange]
+// in [WidgetBase.OnInput]. This is not done by default, but you can call it
+// if you want [events.Input] to trigger full change events, such as in a [Bind]
+// context.
+func (wb *WidgetBase) SendChangeOnInput() {
+	wb.OnInput(func(e events.Event) {
+		wb.SendChange(e)
+	})
+}
+
+// SendClickOnEnter adds a key event handler for Enter and Space
 // keys to generate an [events.Click] event. This is not added by default,
 // but is added in [Button] and [Switch] for example.
-func (wb *WidgetBase) HandleClickOnEnterSpace() {
+func (wb *WidgetBase) SendClickOnEnter() {
 	wb.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("WidgetBase HandleClickOnEnterSpace", "widget", wb, "keyFunction", kf)
+			slog.Info("WidgetBase.SendClickOnEnter", "widget", wb, "keyFunction", kf)
 		}
 		if kf == keymap.Accept {
-			wb.Send(events.Click, e) // don't handle
+			wb.Send(events.Click, e) // don't SetHandled
 		} else if kf == keymap.Enter || e.KeyRune() == ' ' {
 			e.SetHandled()
 			wb.Send(events.Click, e)
 		}
 	})
+}
+
+// dragStateReset resets the drag related state flags, including [states.Active].
+func (wb *WidgetBase) dragStateReset() {
+	wb.SetState(false, states.Active, states.DragHovered, states.Dragging)
 }
 
 ////////	Focus
@@ -583,4 +610,15 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	}
 	plev := cur.AsTree().ParentLevel(wb.This)
 	return plev >= 0
+}
+
+// SetAttend sends [events.Attend] to this widget if it is pressable.
+func (wb *WidgetBase) SetAttend() {
+	if !wb.Styles.Abilities.IsPressable() {
+		return
+	}
+	em := wb.Events()
+	if em != nil {
+		em.setAttend(wb.This.(Widget))
+	}
 }

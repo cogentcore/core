@@ -110,6 +110,9 @@ void pasteWriteAddText(char* data, int len) {
     }
     
     ns_clip = [[NSString alloc] initWithBytes:data length:len encoding:NSUTF8StringEncoding];
+	if(ns_clip == NULL) {
+		return;
+	}
     [pasteWriteItems addObject:ns_clip];
 	[ns_clip release]; // pastewrite owns
 }	

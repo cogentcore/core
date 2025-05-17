@@ -56,6 +56,7 @@ func init() {
 		"SelectSend":      reflect.ValueOf(reflect.SelectSend),
 		"SendDir":         reflect.ValueOf(reflect.SendDir),
 		"Slice":           reflect.ValueOf(reflect.Slice),
+		"SliceAt":         reflect.ValueOf(reflect.SliceAt),
 		"SliceOf":         reflect.ValueOf(reflect.SliceOf),
 		"String":          reflect.ValueOf(reflect.String),
 		"Struct":          reflect.ValueOf(reflect.Struct),
@@ -99,6 +100,8 @@ type _reflect_Type struct {
 	WAlign           func() int
 	WAssignableTo    func(u reflect.Type) bool
 	WBits            func() int
+	WCanSeq          func() bool
+	WCanSeq2         func() bool
 	WChanDir         func() reflect.ChanDir
 	WComparable      func() bool
 	WConvertibleTo   func(u reflect.Type) bool
@@ -122,6 +125,10 @@ type _reflect_Type struct {
 	WNumMethod       func() int
 	WNumOut          func() int
 	WOut             func(i int) reflect.Type
+	WOverflowComplex func(x complex128) bool
+	WOverflowFloat   func(x float64) bool
+	WOverflowInt     func(x int64) bool
+	WOverflowUint    func(x uint64) bool
 	WPkgPath         func() string
 	WSize            func() uintptr
 	WString          func() string
@@ -130,6 +137,8 @@ type _reflect_Type struct {
 func (W _reflect_Type) Align() int                                   { return W.WAlign() }
 func (W _reflect_Type) AssignableTo(u reflect.Type) bool             { return W.WAssignableTo(u) }
 func (W _reflect_Type) Bits() int                                    { return W.WBits() }
+func (W _reflect_Type) CanSeq() bool                                 { return W.WCanSeq() }
+func (W _reflect_Type) CanSeq2() bool                                { return W.WCanSeq2() }
 func (W _reflect_Type) ChanDir() reflect.ChanDir                     { return W.WChanDir() }
 func (W _reflect_Type) Comparable() bool                             { return W.WComparable() }
 func (W _reflect_Type) ConvertibleTo(u reflect.Type) bool            { return W.WConvertibleTo(u) }
@@ -157,6 +166,10 @@ func (W _reflect_Type) NumIn() int                                    { return W
 func (W _reflect_Type) NumMethod() int                                { return W.WNumMethod() }
 func (W _reflect_Type) NumOut() int                                   { return W.WNumOut() }
 func (W _reflect_Type) Out(i int) reflect.Type                        { return W.WOut(i) }
+func (W _reflect_Type) OverflowComplex(x complex128) bool             { return W.WOverflowComplex(x) }
+func (W _reflect_Type) OverflowFloat(x float64) bool                  { return W.WOverflowFloat(x) }
+func (W _reflect_Type) OverflowInt(x int64) bool                      { return W.WOverflowInt(x) }
+func (W _reflect_Type) OverflowUint(x uint64) bool                    { return W.WOverflowUint(x) }
 func (W _reflect_Type) PkgPath() string                               { return W.WPkgPath() }
 func (W _reflect_Type) Size() uintptr                                 { return W.WSize() }
 func (W _reflect_Type) String() string {

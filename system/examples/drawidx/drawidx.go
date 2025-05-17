@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	_ "cogentcore.org/core/system/driver"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -40,7 +41,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// w.SetFPS(20) // 60 default
 
 	var sf *gpu.Surface
 	var sy *gpu.GraphicsSystem
@@ -49,7 +49,11 @@ func main() {
 	var camo CamView
 
 	make := func() {
-		sf = w.Drawer().Renderer().(*gpu.Surface)
+		dc, ok := w.Composer().(*composer.ComposerDrawer)
+		if ok {
+			sf = dc.Drawer.Renderer().(*gpu.Surface)
+		}
+		// todo: web version
 		sy = gpu.NewGraphicsSystem(sf.GPU, "drawidx", sf)
 		destroy := func() {
 			sy.Release()

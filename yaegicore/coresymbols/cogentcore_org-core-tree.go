@@ -25,6 +25,7 @@ func init() {
 		"IndexByName":       reflect.ValueOf(tree.IndexByName),
 		"IndexOf":           reflect.ValueOf(tree.IndexOf),
 		"InitNode":          reflect.ValueOf(tree.InitNode),
+		"IsNil":             reflect.ValueOf(tree.IsNil),
 		"IsNode":            reflect.ValueOf(tree.IsNode),
 		"IsRoot":            reflect.ValueOf(tree.IsRoot),
 		"Last":              reflect.ValueOf(tree.Last),

@@ -484,7 +484,7 @@ func (tb *Tab) Init() {
 		}
 	})
 
-	tb.HandleClickOnEnterSpace()
+	tb.SendClickOnEnter()
 
 	tb.Maker(func(p *tree.Plan) {
 		if tb.maxChars > 0 { // TODO: find a better time to do this?

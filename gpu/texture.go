@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/slicesx"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -75,7 +76,7 @@ func (tx *Texture) ConfigGoImage(sz image.Point, layers int) {
 // formats will be converted as necessary.
 // This starts the full WriteTexture call to upload to device.
 func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
-	rimg := ImageToRGBA(img)
+	rimg := imagex.AsRGBA(img)
 	sz := rimg.Rect.Size()
 
 	nfmt := TextureFormat{Size: sz, Format: wgpu.TextureFormatRGBA8UnormSrgb, Layers: 1, Samples: 1}

@@ -76,3 +76,51 @@ func TestFrameNoGrow(t *testing.T) {
 	frameTestButtons(fr)
 	b.AssertRender(t, "frame/no-grow")
 }
+
+func TestFrameScrollNoMargin(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Border.Width.Set(units.Dp(4))
+		s.Max.Set(units.Dp(40))
+	})
+	NewFrame(fr).Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(80))
+		s.Background = colors.Scheme.Select.Container
+	})
+	b.AssertRender(t, "frame/scroll-no-margin")
+}
+
+func TestFrameScrollMargin(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Border.Width.Set(units.Dp(4))
+		s.Margin.Set(units.Dp(8))
+		s.Max.Set(units.Dp(40))
+	})
+	NewFrame(fr).Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(80))
+		s.Background = colors.Scheme.Select.Container
+	})
+	b.AssertRender(t, "frame/scroll-margin")
+}
+
+func TestFrameScrollMarginPadding(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Border.Width.Set(units.Dp(4))
+		s.Margin.Set(units.Dp(8))
+		s.Padding.Set(units.Dp(16))
+		s.Max.Set(units.Dp(40))
+	})
+	NewFrame(fr).Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(80))
+		s.Background = colors.Scheme.Select.Container
+	})
+	b.AssertRender(t, "frame/scroll-margin-padding")
+}

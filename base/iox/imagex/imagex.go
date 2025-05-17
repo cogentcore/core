@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
@@ -128,7 +127,9 @@ func Save(im image.Image, filename string) error {
 
 // Write writes the image to the given writer using the given foramt.
 // png, jpeg, gif, tiff, and bmp are supported.
+// It [Unwrap]s any [Wrapped] images.
 func Write(im image.Image, w io.Writer, f Formats) error {
+	im = Unwrap(im)
 	switch f {
 	case PNG:
 		return png.Encode(w, im)
@@ -143,12 +144,4 @@ func Write(im image.Image, w io.Writer, f Formats) error {
 	default:
 		return fmt.Errorf("iox/imagex.Save: format %q not valid", f)
 	}
-}
-
-// CloneAsRGBA returns an RGBA copy of the supplied image.
-func CloneAsRGBA(src image.Image) *image.RGBA {
-	bounds := src.Bounds()
-	img := image.NewRGBA(bounds)
-	draw.Draw(img, bounds, src, bounds.Min, draw.Src)
-	return img
 }

@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/system"
 )
@@ -58,23 +59,21 @@ func appIconImages() []image.Image {
 
 	res := make([]image.Image, 3)
 
-	sv := svg.NewSVG(16, 16)
+	sv := svg.NewSVG(math32.Vec2(16, 16))
 	sv.Color = colors.Uniform(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 	err := sv.ReadXML(strings.NewReader(AppIcon))
 	if errors.Log(err) != nil {
 		return nil
 	}
 
-	sv.Render()
-	res[0] = sv.Pixels
+	res[0] = sv.RenderImage()
 
-	sv.Resize(image.Pt(32, 32))
-	sv.Render()
-	res[1] = sv.Pixels
+	sv.SetSize(math32.Vec2(32, 32))
+	res[1] = sv.RenderImage()
 
-	sv.Resize(image.Pt(48, 48))
-	sv.Render()
-	res[2] = sv.Pixels
+	sv.SetSize(math32.Vec2(48, 48))
+	res[2] = sv.RenderImage()
+
 	appIconImagesCache = res
 	return res
 }

@@ -73,18 +73,18 @@ type NodeBase struct {
 	// in [NodeBase.RunUpdaters] to update the node. You can use [NodeBase.Updater],
 	// [NodeBase.FirstUpdater], or [NodeBase.FinalUpdater] to add one. This typically
 	// typically contains [NodeBase.UpdateFromMake] at the start of the normal list.
-	Updaters tiered.Tiered[[]func()] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
+	Updaters tiered.Tiered[[]func()] `table:"-" copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// Makers is a tiered set of functions called in sequential ascending order
 	// in [NodeBase.Make] to make the plan for how the node's children should
 	// be configured. You can use [NodeBase.Maker], [NodeBase.FirstMaker], or
 	// [NodeBase.FinalMaker] to add one.
-	Makers tiered.Tiered[[]func(p *Plan)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
+	Makers tiered.Tiered[[]func(p *Plan)] `table:"-" copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// OnChildAdded is called when a node is added as a direct child of this node.
 	// When a node is added to a parent, it calls [Node.OnAdd] on itself and then
 	// this function on its parent if it is non-nil.
-	OnChildAdded func(n Node) `copier:"-" json:"-" xml:"-" edit:"-"`
+	OnChildAdded func(n Node) `table:"-" copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
@@ -671,23 +671,30 @@ func (n *NodeBase) CopyFrom(from Node) {
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(to, from Node) {
-	fc := from.AsTree().Children
+	tot := to.AsTree()
+	fromt := from.AsTree()
+	fc := fromt.Children
 	if len(fc) == 0 {
-		to.AsTree().DeleteChildren()
+		tot.DeleteChildren()
 	} else {
 		p := make(TypePlan, len(fc))
 		for i, c := range fc {
 			p[i].Type = c.AsTree().NodeType()
 			p[i].Name = c.AsTree().Name
 		}
-		UpdateSlice(&to.AsTree().Children, to, p)
+		UpdateSlice(&tot.Children, to, p)
 	}
 
-	maps.Copy(to.AsTree().Properties, from.AsTree().Properties)
+	if fromt.Properties != nil {
+		if tot.Properties == nil {
+			tot.Properties = map[string]any{}
+		}
+		maps.Copy(tot.Properties, fromt.Properties)
+	}
 
-	to.AsTree().This.CopyFieldsFrom(from)
-	for i, kid := range to.AsTree().Children {
-		fmk := from.AsTree().Child(i)
+	tot.This.CopyFieldsFrom(from)
+	for i, kid := range tot.Children {
+		fmk := fromt.Child(i)
 		copyFrom(kid, fmk)
 	}
 }

@@ -13,23 +13,24 @@ import (
 	"image"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 )
 
 // WindowMulti contains the data and logic common to all implementations of [system.Window]
-// on multi-window platforms (desktop), as opposed to single-window
-// platforms (mobile, web, and offscreen), for which you should use [WindowSingle].
+// on multi-window platforms (desktop and offscreen), as opposed to single-window
+// platforms (mobile and web), for which you should use [WindowSingle].
 // A WindowMulti is associated with a corresponding [system.App] type.
 // The [system.App] type should embed [AppMulti].
-type WindowMulti[A system.App, D system.Drawer] struct {
+type WindowMulti[A system.App, C composer.Composer] struct {
 	Window[A]
 
 	// Event is the event manager for the window
 	Event events.Source `label:"Event manger"`
 
-	// Draw is the [system.Drawer] used for this window.
-	Draw D `label:"Drawer"`
+	// Compose is the [composer.Composer] for this window.
+	Compose C `label:"Composer"`
 
 	// Pos is the position of the window
 	Pos image.Point `label:"Position"`
@@ -41,7 +42,7 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 	PixelSize image.Point `label:"Pixel size"`
 
 	// FrameSize of the window frame: Min = left, top; Max = right, bottom.
-	FrameSize styles.Sides[int]
+	FrameSize sides.Sides[int]
 
 	// DevicePixelRatio is a factor that scales the screen's
 	// "natural" pixel coordinates into actual device pixels.
@@ -61,18 +62,18 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 }
 
 // NewWindowMulti makes a new [WindowMulti] for the given app with the given options.
-func NewWindowMulti[A system.App, D system.Drawer](a A, opts *system.NewWindowOptions) WindowMulti[A, D] {
-	return WindowMulti[A, D]{
+func NewWindowMulti[A system.App, C composer.Composer](a A, opts *system.NewWindowOptions) WindowMulti[A, C] {
+	return WindowMulti[A, C]{
 		Window: NewWindow(a, opts),
 	}
 }
 
-func (w *WindowMulti[A, D]) Events() *events.Source {
-	return &w.Event
+func (w *WindowMulti[A, D]) Composer() composer.Composer {
+	return w.Compose
 }
 
-func (w *WindowMulti[A, D]) Drawer() system.Drawer {
-	return w.Draw
+func (w *WindowMulti[A, D]) Events() *events.Source {
+	return &w.Event
 }
 
 func (w *WindowMulti[A, D]) Size() image.Point {
@@ -144,9 +145,9 @@ func (w *WindowMulti[A, D]) SetGeometry(fullscreen bool, pos image.Point, size i
 	w.Pos = pos
 }
 
-func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) styles.Sides[int] {
+func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) sides.Sides[int] {
 	// no-op
-	return styles.Sides[int]{}
+	return sides.Sides[int]{}
 }
 
 func (w *WindowMulti[A, D]) IsVisible() bool {

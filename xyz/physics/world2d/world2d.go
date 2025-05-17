@@ -10,6 +10,7 @@ import (
 	"errors"
 	"image"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
@@ -75,11 +76,11 @@ func (vw *View) UpdateBodyView(bodyNames ...string) {
 
 // Image returns the current rendered image
 func (vw *View) Image() (*image.RGBA, error) {
-	img := vw.Scene.Pixels
+	img := vw.Scene.RenderImage()
 	if img == nil {
 		return nil, errors.New("eve2d.View Image: is nil")
 	}
-	return img, nil
+	return imagex.Unwrap(img).(*image.RGBA), nil
 }
 
 // ProjectXY sets 2D projection to reflect 3D X,Y coords
@@ -262,7 +263,7 @@ func (vw *View) ConfigView(wn physics.Node, vn svg.Node) {
 		}
 	}
 	sz := vw.Scene.Geom.Size
-	vw.Scene.Config(sz.X, sz.Y)
+	vw.Scene.Init(math32.FromPoint(sz))
 }
 
 // SyncNode updates the view tree to match the world tree, using

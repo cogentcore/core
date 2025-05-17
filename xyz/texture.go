@@ -13,7 +13,6 @@ import (
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
 )
 
@@ -109,7 +108,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
 	}
-	tx.RGBA = gpu.ImageToRGBA(img)
+	tx.RGBA = imagex.AsRGBA(img)
 	return tx.RGBA
 }
 

@@ -8,7 +8,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/tree"
 	"github.com/cogentcore/yaegi/interp"
 	"go/constant"
@@ -60,9 +60,9 @@ func init() {
 		"FilePickerExtensionOnlyFilter": reflect.ValueOf(core.FilePickerExtensionOnlyFilter),
 		"ForceAppColor":                 reflect.ValueOf(&core.ForceAppColor).Elem(),
 		"FunctionalTabs":                reflect.ValueOf(core.FunctionalTabs),
+		"HighlightingEditor":            reflect.ValueOf(core.HighlightingEditor),
 		"InitValueButton":               reflect.ValueOf(core.InitValueButton),
 		"InspectorWindow":               reflect.ValueOf(core.InspectorWindow),
-		"IsWordBreak":                   reflect.ValueOf(core.IsWordBreak),
 		"LayoutPassesN":                 reflect.ValueOf(core.LayoutPassesN),
 		"LayoutPassesValues":            reflect.ValueOf(core.LayoutPassesValues),
 		"ListColProperty":               reflect.ValueOf(constant.MakeFromLiteral("\"ls-col\"", token.STRING, 0)),
@@ -83,6 +83,7 @@ func init() {
 		"NewButton":                     reflect.ValueOf(core.NewButton),
 		"NewCanvas":                     reflect.ValueOf(core.NewCanvas),
 		"NewChooser":                    reflect.ValueOf(core.NewChooser),
+		"NewCollapser":                  reflect.ValueOf(core.NewCollapser),
 		"NewColorButton":                reflect.ValueOf(core.NewColorButton),
 		"NewColorMapButton":             reflect.ValueOf(core.NewColorMapButton),
 		"NewColorPicker":                reflect.ValueOf(core.NewColorPicker),
@@ -97,6 +98,7 @@ func init() {
 		"NewFrame":                      reflect.ValueOf(core.NewFrame),
 		"NewFuncButton":                 reflect.ValueOf(core.NewFuncButton),
 		"NewHandle":                     reflect.ValueOf(core.NewHandle),
+		"NewHighlightingButton":         reflect.ValueOf(core.NewHighlightingButton),
 		"NewIcon":                       reflect.ValueOf(core.NewIcon),
 		"NewIconButton":                 reflect.ValueOf(core.NewIconButton),
 		"NewImage":                      reflect.ValueOf(core.NewImage),
@@ -144,6 +146,8 @@ func init() {
 		"RecycleMainWindow":             reflect.ValueOf(core.RecycleMainWindow),
 		"ResetWidgetValue":              reflect.ValueOf(core.ResetWidgetValue),
 		"SaveSettings":                  reflect.ValueOf(core.SaveSettings),
+		"SceneSource":                   reflect.ValueOf(core.SceneSource),
+		"ScrimSource":                   reflect.ValueOf(core.ScrimSource),
 		"SettingsEditor":                reflect.ValueOf(core.SettingsEditor),
 		"SettingsWindow":                reflect.ValueOf(core.SettingsWindow),
 		"SizeClassesN":                  reflect.ValueOf(core.SizeClassesN),
@@ -161,6 +165,7 @@ func init() {
 		"SnackbarStage":                 reflect.ValueOf(core.SnackbarStage),
 		"SplitsTilesN":                  reflect.ValueOf(core.SplitsTilesN),
 		"SplitsTilesValues":             reflect.ValueOf(core.SplitsTilesValues),
+		"SpritesSource":                 reflect.ValueOf(core.SpritesSource),
 		"StageTypesN":                   reflect.ValueOf(core.StageTypesN),
 		"StageTypesValues":              reflect.ValueOf(core.StageTypesValues),
 		"StandardTabs":                  reflect.ValueOf(core.StandardTabs),
@@ -218,6 +223,7 @@ func init() {
 		"WindowStage":                   reflect.ValueOf(core.WindowStage),
 
 		// type definitions
+		"Animation":              reflect.ValueOf((*core.Animation)(nil)),
 		"App":                    reflect.ValueOf((*core.App)(nil)),
 		"AppearanceSettingsData": reflect.ValueOf((*core.AppearanceSettingsData)(nil)),
 		"BarFuncs":               reflect.ValueOf((*core.BarFuncs)(nil)),
@@ -230,6 +236,7 @@ func init() {
 		"Chooser":                reflect.ValueOf((*core.Chooser)(nil)),
 		"ChooserItem":            reflect.ValueOf((*core.ChooserItem)(nil)),
 		"ChooserTypes":           reflect.ValueOf((*core.ChooserTypes)(nil)),
+		"Collapser":              reflect.ValueOf((*core.Collapser)(nil)),
 		"ColorButton":            reflect.ValueOf((*core.ColorButton)(nil)),
 		"ColorMapButton":         reflect.ValueOf((*core.ColorMapButton)(nil)),
 		"ColorMapName":           reflect.ValueOf((*core.ColorMapName)(nil)),
@@ -239,7 +246,6 @@ func init() {
 		"DebugSettingsData":      reflect.ValueOf((*core.DebugSettingsData)(nil)),
 		"DeviceSettingsData":     reflect.ValueOf((*core.DeviceSettingsData)(nil)),
 		"DurationInput":          reflect.ValueOf((*core.DurationInput)(nil)),
-		"EditorSettings":         reflect.ValueOf((*core.EditorSettings)(nil)),
 		"Events":                 reflect.ValueOf((*core.Events)(nil)),
 		"FileButton":             reflect.ValueOf((*core.FileButton)(nil)),
 		"FilePaths":              reflect.ValueOf((*core.FilePaths)(nil)),
@@ -254,6 +260,7 @@ func init() {
 		"FuncArg":                reflect.ValueOf((*core.FuncArg)(nil)),
 		"FuncButton":             reflect.ValueOf((*core.FuncButton)(nil)),
 		"Handle":                 reflect.ValueOf((*core.Handle)(nil)),
+		"HighlightingButton":     reflect.ValueOf((*core.HighlightingButton)(nil)),
 		"HighlightingName":       reflect.ValueOf((*core.HighlightingName)(nil)),
 		"Icon":                   reflect.ValueOf((*core.Icon)(nil)),
 		"IconButton":             reflect.ValueOf((*core.IconButton)(nil)),
@@ -380,7 +387,7 @@ type _cogentcore_org_core_core_Layouter struct {
 	WPlanName          func() string
 	WPosition          func()
 	WRender            func()
-	WRenderDraw        func(drw system.Drawer, op draw.Op)
+	WRenderSource      func(op draw.Op) composer.Source
 	WRenderWidget      func()
 	WScrollChanged     func(d math32.Dims, sb *core.Slider)
 	WScrollGeom        func(d math32.Dims) (pos math32.Vector2, sz math32.Vector2)
@@ -420,8 +427,8 @@ func (W _cogentcore_org_core_core_Layouter) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Layouter) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Layouter) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Layouter) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Layouter) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Layouter) RenderSource(op draw.Op) composer.Source {
+	return W.WRenderSource(op)
 }
 func (W _cogentcore_org_core_core_Layouter) RenderWidget() { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Layouter) ScrollChanged(d math32.Dims, sb *core.Slider) {
@@ -653,7 +660,7 @@ type _cogentcore_org_core_core_Treer struct {
 	WPlanName         func() string
 	WPosition         func()
 	WRender           func()
-	WRenderDraw       func(drw system.Drawer, op draw.Op)
+	WRenderSource     func(op draw.Op) composer.Source
 	WRenderWidget     func()
 	WShowContextMenu  func(e events.Event)
 	WSizeDown         func(iter int) bool
@@ -692,8 +699,8 @@ func (W _cogentcore_org_core_core_Treer) Paste()           { W.WPaste() }
 func (W _cogentcore_org_core_core_Treer) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Treer) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Treer) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Treer) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Treer) RenderSource(op draw.Op) composer.Source {
+	return W.WRenderSource(op)
 }
 func (W _cogentcore_org_core_core_Treer) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Treer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
@@ -729,7 +736,7 @@ type _cogentcore_org_core_core_Value struct {
 	WPlanName        func() string
 	WPosition        func()
 	WRender          func()
-	WRenderDraw      func(drw system.Drawer, op draw.Op)
+	WRenderSource    func(op draw.Op) composer.Source
 	WRenderWidget    func()
 	WShowContextMenu func(e events.Event)
 	WSizeDown        func(iter int) bool
@@ -759,8 +766,8 @@ func (W _cogentcore_org_core_core_Value) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Value) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Value) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Value) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Value) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Value) RenderSource(op draw.Op) composer.Source {
+	return W.WRenderSource(op)
 }
 func (W _cogentcore_org_core_core_Value) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Value) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
@@ -807,7 +814,7 @@ type _cogentcore_org_core_core_Widget struct {
 	WPlanName        func() string
 	WPosition        func()
 	WRender          func()
-	WRenderDraw      func(drw system.Drawer, op draw.Op)
+	WRenderSource    func(op draw.Op) composer.Source
 	WRenderWidget    func()
 	WShowContextMenu func(e events.Event)
 	WSizeDown        func(iter int) bool
@@ -836,8 +843,8 @@ func (W _cogentcore_org_core_core_Widget) OnAdd()           { W.WOnAdd() }
 func (W _cogentcore_org_core_core_Widget) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Widget) Position()        { W.WPosition() }
 func (W _cogentcore_org_core_core_Widget) Render()          { W.WRender() }
-func (W _cogentcore_org_core_core_Widget) RenderDraw(drw system.Drawer, op draw.Op) {
-	W.WRenderDraw(drw, op)
+func (W _cogentcore_org_core_core_Widget) RenderSource(op draw.Op) composer.Source {
+	return W.WRenderSource(op)
 }
 func (W _cogentcore_org_core_core_Widget) RenderWidget()                  { W.WRenderWidget() }
 func (W _cogentcore_org_core_core_Widget) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }

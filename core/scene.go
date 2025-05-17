@@ -14,14 +14,18 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 )
 
 // Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,
-// which renders into its [Scene.Pixels] image. The [Scene] is set in a
+// which renders into its own [paint.Painter]. The [Scene] is set in a
 // [Stage], which the [Scene] has a pointer to.
 //
 // Each [Scene] contains state specific to its particular usage
@@ -45,7 +49,7 @@ type Scene struct { //core:no-new
 	// Bars are functions for creating control bars,
 	// attached to different sides of a [Scene]. Functions
 	// are called in forward order so first added are called first.
-	Bars styles.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
+	Bars sides.Sides[BarFuncs] `json:"-" xml:"-" set:"-"`
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
@@ -54,17 +58,17 @@ type Scene struct { //core:no-new
 	// Size and position relative to overall rendering context.
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
-	// paint context for rendering
-	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
-
-	// live pixels that we render into
-	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	// painter for rendering
+	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// event manager for this scene
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// Animations are the currently active [Animation]s in this scene.
+	Animations []*Animation `json:"-" xml:"-" set:"-"`
 
 	// renderBBoxes indicates to render colored bounding boxes for all of the widgets
 	// in the scene. This is enabled by the [Inspector] in select element mode.
@@ -81,6 +85,9 @@ type Scene struct { //core:no-new
 	// selection mode is transmitted to the inspect editor after the user is done selecting.
 	selectedWidgetChan chan Widget `json:"-" xml:"-"`
 
+	// source renderer for rendering the scene
+	renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
 	lastRender renderParams
@@ -90,7 +97,7 @@ type Scene struct { //core:no-new
 	showIter int
 
 	// directRenders are widgets that render directly to the [RenderWindow]
-	// instead of rendering into the Scene Pixels image.
+	// instead of rendering into the Scene Painter.
 	directRenders []Widget
 
 	// flags are atomic bit flags for [Scene] state.
@@ -173,6 +180,7 @@ func (sc *Scene) Init() {
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable) // this is critical to enable click-off to turn off focus.
 		s.Cursor = cursors.Arrow
 		s.Background = colors.Scheme.Background
 		s.Color = colors.Scheme.OnBackground
@@ -199,8 +207,8 @@ func (sc *Scene) Init() {
 		if sm == nil {
 			return
 		}
-		sm.mu.RLock()
-		defer sm.mu.RUnlock()
+		sm.Lock()
+		defer sm.Unlock()
 
 		if sm.stack.Len() < 2 {
 			return
@@ -240,6 +248,16 @@ func (sc *Scene) renderContext() *renderContext {
 	return sm.renderContext
 }
 
+// TextShaper returns the current [shaped.TextShaper], for text shaping.
+// may be nil if not yet initialized.
+func (sc *Scene) TextShaper() shaped.Shaper {
+	rc := sc.renderContext()
+	if rc != nil {
+		return rc.textShaper
+	}
+	return nil
+}
+
 // RenderWindow returns the current render window for this scene.
 // In general it is best to go through [renderContext] instead of the window.
 // This will be nil prior to actual rendering.
@@ -269,28 +287,36 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return false
 	}
-	if sc.PaintContext.State == nil {
-		sc.PaintContext.State = &paint.State{}
-	}
-	if sc.PaintContext.Paint == nil {
-		sc.PaintContext.Paint = &styles.Paint{}
+	sz := math32.FromPoint(geom.Size)
+	if sc.Painter.State == nil {
+		sc.Painter = *paint.NewPainter(sz)
+		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	}
 	sc.SceneGeom.Pos = geom.Pos
-	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
-		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
+	if sc.renderer != nil {
+		img := sc.renderer.Image()
+		if img != nil {
+			isz := img.Bounds().Size()
+			if isz == geom.Size {
+				return false
+			}
+		}
 	} else {
-		return false
+		sc.renderer = paint.NewSourceRenderer(sz)
 	}
-	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
+	sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+	sc.Painter.State.Init(sc.Painter.Paint, sz)
+	sc.renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
 	sc.applyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
-	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584), to get
-	// windows on Windows (OS) to update after a window snap (see https://github.com/cogentcore/core/issues/497),
-	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
-	// and Android in different contexts.
+	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584),
+	// to get windows on Windows (OS) to update after a window snap (see
+	// https://github.com/cogentcore/core/issues/497),
+	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered
+	// on both iOS and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()
@@ -399,7 +425,7 @@ func (sc *Scene) Close() bool {
 		return false // todo: needed, but not sure why
 	}
 	mm.deleteStage(sc.Stage)
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.renderWindow.closing && !mm.renderWindow.stopEventLoop && !TheApp.IsQuitting() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.renderWindow.flags.HasFlag(winClosing) && !mm.renderWindow.flags.HasFlag(winStopEventLoop) && !TheApp.IsQuitting() {
 		mm.renderWindow.closeReq()
 	}
 	return true

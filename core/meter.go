@@ -10,9 +10,11 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // Meter is a widget that renders a current value on as a filled
@@ -75,6 +77,7 @@ func (m *Meter) Init() {
 		m.ValueColor = colors.Scheme.Primary.Base
 		s.Background = colors.Scheme.SurfaceVariant
 		s.Border.Radius = styles.BorderRadiusFull
+		s.SetTextWrap(false)
 	})
 	m.FinalStyler(func(s *styles.Style) {
 		switch m.Type {
@@ -88,16 +91,16 @@ func (m *Meter) Init() {
 			s.Min.Set(units.Dp(128))
 			m.Width.Dp(8)
 			s.Font.Size.Dp(32)
-			s.Text.LineHeight.Em(40.0 / 32)
-			s.Text.Align = styles.Center
-			s.Text.AlignV = styles.Center
+			s.Text.LineHeight = 40.0 / 32
+			s.Text.Align = text.Center
+			s.Text.AlignV = text.Center
 		case MeterSemicircle:
 			s.Min.Set(units.Dp(112), units.Dp(64))
 			m.Width.Dp(16)
 			s.Font.Size.Dp(22)
-			s.Text.LineHeight.Em(28.0 / 22)
-			s.Text.Align = styles.Center
-			s.Text.AlignV = styles.Center
+			s.Text.LineHeight = 28.0 / 22
+			s.Text.Align = text.Center
+			s.Text.AlignV = text.Center
 		}
 	})
 }
@@ -117,7 +120,7 @@ func (m *Meter) WidgetTooltip(pos image.Point) (string, image.Point) {
 }
 
 func (m *Meter) Render() {
-	pc := &m.Scene.PaintContext
+	pc := &m.Scene.Painter
 	st := &m.Styles
 
 	prop := (m.Value - m.Min) / (m.Max - m.Min)
@@ -127,41 +130,42 @@ func (m *Meter) Render() {
 		if m.ValueColor != nil {
 			dim := m.Styles.Direction.Dim()
 			size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
-			pc.FillStyle.Color = m.ValueColor
+			pc.Fill.Color = m.ValueColor
 			m.RenderBoxGeom(m.Geom.Pos.Content, size, st.Border)
 		}
 		return
 	}
 
-	pc.StrokeStyle.Width = m.Width
-	sw := pc.StrokeWidth()
+	pc.Stroke.Width = m.Width
+	sw := m.Width.Dots
 	pos := m.Geom.Pos.Content.AddScalar(sw / 2)
 	size := m.Geom.Size.Actual.Content.SubScalar(sw)
+	pc.Fill.Color = colors.Scheme.Surface
 
-	var txt *paint.Text
+	var txt *shaped.Lines
 	var toff math32.Vector2
 	if m.Text != "" {
-		txt = &paint.Text{}
-		txt.SetHTML(m.Text, st.FontRender(), &st.Text, &st.UnitContext, nil)
-		tsz := txt.Layout(&st.Text, st.FontRender(), &st.UnitContext, size)
-		toff = tsz.DivScalar(2)
+		sty, tsty := m.Styles.NewRichText()
+		tx, _ := htmltext.HTMLToRich([]byte(m.Text), sty, nil)
+		txt = m.Scene.TextShaper().WrapLines(tx, sty, tsty, &AppearanceSettings.Text, size)
+		toff = txt.Bounds.Size().DivScalar(2)
 	}
 
 	if m.Type == MeterCircle {
 		r := size.DivScalar(2)
 		c := pos.Add(r)
 
-		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, 0, 2*math32.Pi)
-		pc.StrokeStyle.Color = st.Background
-		pc.Stroke()
+		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, 0, 2*math32.Pi)
+		pc.Stroke.Color = st.Background
+		pc.Draw()
 
 		if m.ValueColor != nil {
-			pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
-			pc.StrokeStyle.Color = m.ValueColor
-			pc.Stroke()
+			pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, -math32.Pi/2, prop*2*math32.Pi-math32.Pi/2)
+			pc.Stroke.Color = m.ValueColor
+			pc.Draw()
 		}
 		if txt != nil {
-			txt.Render(pc, c.Sub(toff))
+			pc.DrawText(txt, c.Sub(toff))
 		}
 		return
 	}
@@ -169,16 +173,16 @@ func (m *Meter) Render() {
 	r := size.Mul(math32.Vec2(0.5, 1))
 	c := pos.Add(r)
 
-	pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, 2*math32.Pi)
-	pc.StrokeStyle.Color = st.Background
-	pc.Stroke()
+	pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, math32.Pi, 2*math32.Pi)
+	pc.Stroke.Color = st.Background
+	pc.Draw()
 
 	if m.ValueColor != nil {
-		pc.DrawEllipticalArc(c.X, c.Y, r.X, r.Y, math32.Pi, (1+prop)*math32.Pi)
-		pc.StrokeStyle.Color = m.ValueColor
-		pc.Stroke()
+		pc.EllipticalArc(c.X, c.Y, r.X, r.Y, 0, math32.Pi, (1+prop)*math32.Pi)
+		pc.Stroke.Color = m.ValueColor
+		pc.Draw()
 	}
 	if txt != nil {
-		txt.Render(pc, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
+		pc.DrawText(txt, c.Sub(size.Mul(math32.Vec2(0, 0.3))).Sub(toff))
 	}
 }

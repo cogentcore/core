@@ -26,8 +26,9 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -248,6 +249,12 @@ type AppearanceSettingsData struct { //types:add
 	// of the default font size (higher numbers lead to larger text).
 	FontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
 
+	// Font size factor applied only to documentation and other
+	// dense text contexts, not normal interactive elements.
+	// It is a percentage of the base Font size setting (higher numbers
+	// lead to larger text).
+	DocsFontSize float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
+
 	// the amount that alternating rows are highlighted when showing
 	// tabular data (set to 0 to disable zebra striping).
 	ZebraStripes float32 `default:"0" min:"0" max:"100" step:"10" format:"%g%%"`
@@ -261,11 +268,13 @@ type AppearanceSettingsData struct { //types:add
 	// text highlighting style / theme.
 	Highlighting HighlightingName `default:"emacs"`
 
-	// Font is the default font family to use.
-	Font FontName `default:"Roboto"`
+	// Text specifies text settings including the language, and the
+	// font families for different styles of fonts.
+	Text rich.Settings
+}
 
-	// MonoFont is the default mono-spaced font family to use.
-	MonoFont FontName `default:"Roboto Mono"`
+func (as *AppearanceSettingsData) Defaults() {
+	as.Text.Defaults()
 }
 
 // ConstantSpacing returns a spacing value (padding, margin, gap)
@@ -324,8 +333,9 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 		colors.SetScheme(system.TheApp.IsDark())
 	}
 	if as.Highlighting == "" {
-		as.Highlighting = "emacs" // todo: need light / dark versions
+		as.Highlighting = "emacs"
 	}
+	rich.DefaultSettings = as.Text
 
 	// TODO(kai): move HiStyle to a separate text editor settings
 	// if TheViewInterface != nil {
@@ -489,7 +499,7 @@ type SystemSettingsData struct { //types:add
 	SettingsBase
 
 	// text editor settings
-	Editor EditorSettings
+	Editor text.EditorSettings
 
 	// whether to use a 24-hour clock (instead of AM and PM)
 	Clock24 bool `label:"24-hour clock"`
@@ -499,25 +509,27 @@ type SystemSettingsData struct { //types:add
 	// at the bottom of the screen)
 	SnackbarTimeout time.Duration `default:"5s"`
 
-	// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
+	// only support closing the currently selected active tab;
+	// if this is set to true, pressing the close button on other tabs
+	// will take you to that tab, from which you can close it.
 	OnlyCloseActiveTab bool `default:"false"`
 
-	// the limit of file size, above which user will be prompted before opening / copying, etc.
+	// the limit of file size, above which user will be prompted before
+	// opening / copying, etc.
 	BigFileSize int `default:"10000000"`
 
 	// maximum number of saved paths to save in FilePicker
 	SavedPathsMax int `default:"50"`
 
-	// extra font paths, beyond system defaults -- searched first
-	FontPaths []string
-
-	// user info, which is partially filled-out automatically if empty when settings are first created
+	// user info, which is partially filled-out automatically if empty
+	// when settings are first created.
 	User User
 
 	// favorite paths, shown in FilePickerer and also editable there
 	FavPaths favoritePaths
 
-	// column to sort by in FilePicker, and :up or :down for direction -- updated automatically via FilePicker
+	// column to sort by in FilePicker, and :up or :down for direction.
+	// Updated automatically via FilePicker
 	FilePickerSort string `display:"-"`
 
 	// the maximum height of any menu popup panel in units of font height;
@@ -539,10 +551,12 @@ type SystemSettingsData struct { //types:add
 	// number of steps to take in PageUp / Down events in terms of number of items
 	LayoutPageSteps int `default:"10" min:"1" step:"1"`
 
-	// the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay
+	// the amount of time between keypresses to combine characters into name
+	// to search for within layout -- starts over after this delay.
 	LayoutFocusNameTimeout time.Duration `default:"500ms" min:"0ms" max:"5s" step:"20ms"`
 
-	// the amount of time since last focus name event to allow tab to focus on next element with same name.
+	// the amount of time since last focus name event to allow tab to focus
+	// on next element with same name.
 	LayoutFocusNameTabTime time.Duration `default:"2s" min:"10ms" max:"10s" step:"100ms"`
 
 	// the number of map elements at or below which an inline representation
@@ -564,13 +578,6 @@ func (ss *SystemSettingsData) Defaults() {
 
 // Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //types:add
-	if ss.FontPaths != nil {
-		paths := append(ss.FontPaths, paint.FontPaths...)
-		paint.FontLibrary.InitFontPaths(paths...)
-	} else {
-		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
-	}
-
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
 		if ss.FavPaths[i].Icon == "" || ss.FavPaths[i].Icon == "folder" {
@@ -612,37 +619,6 @@ type User struct { //types:add
 
 	// default email address -- e.g., for recording changes in a version control system
 	Email string
-}
-
-// EditorSettings contains text editor settings.
-type EditorSettings struct { //types:add
-
-	// size of a tab, in chars; also determines indent level for space indent
-	TabSize int `default:"4"`
-
-	// use spaces for indentation, otherwise tabs
-	SpaceIndent bool
-
-	// wrap lines at word boundaries; otherwise long lines scroll off the end
-	WordWrap bool `default:"true"`
-
-	// whether to show line numbers
-	LineNumbers bool `default:"true"`
-
-	// use the completion system to suggest options while typing
-	Completion bool `default:"true"`
-
-	// suggest corrections for unknown words while typing
-	SpellCorrect bool `default:"true"`
-
-	// automatically indent lines when enter, tab, }, etc pressed
-	AutoIndent bool `default:"true"`
-
-	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
-	EmacsUndo bool
-
-	// colorize the background according to nesting depth
-	DepthColor bool `default:"true"`
 }
 
 ////////  FavoritePaths

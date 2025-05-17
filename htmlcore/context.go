@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"io"
 	"net/http"
 	"strings"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	selcss "github.com/ericchiang/css"
+	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/net/html"
 )
 
@@ -38,6 +40,11 @@ type Context struct {
 	// BlockParent is the current parent widget that non-inline elements
 	// should be added to.
 	BlockParent core.Widget
+
+	// TableParent is the current table being generated.
+	TableParent *core.Frame
+
+	firstRow bool
 
 	// inlineParent is the current parent widget that inline
 	// elements should be added to; it must be got through
@@ -70,15 +77,26 @@ type Context struct {
 	// The functions are tried in sequential ascending order.
 	// See [Context.AddWikilinkHandler] to add a new handler.
 	WikilinkHandlers []WikilinkHandler
+
+	// AttributeHandlers is a map of markdown render handler functions
+	// for custom attribute values that are specified in {tag: value}
+	// attributes prior to markdown elements in the markdown source.
+	// The map key is the tag in the attribute, which is then passed
+	// to the function, along with the markdown node being rendered.
+	// Alternative or additional HTML output can be written to the given writer.
+	// If the handler function returns true, then the default HTML code
+	// will not be generated.
+	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
 }
 
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		styles:          map[*html.Node][]*css.Rule{},
-		OpenURL:         system.TheApp.OpenURL,
-		GetURL:          http.Get,
-		ElementHandlers: map[string]func(ctx *Context) bool{},
+		styles:            map[*html.Node][]*css.Rule{},
+		OpenURL:           system.TheApp.OpenURL,
+		GetURL:            http.Get,
+		ElementHandlers:   map[string]func(ctx *Context) bool{},
+		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
 	}
 }
 
@@ -141,7 +159,7 @@ func (c *Context) config(w core.Widget) {
 		for _, rule := range rules {
 			for _, decl := range rule.Declarations {
 				// TODO(kai/styproperties): parent style and context
-				s.StyleFromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
+				s.FromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
 			}
 		}
 	})

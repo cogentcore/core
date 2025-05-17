@@ -36,7 +36,7 @@ type Handle struct {
 func (hl *Handle) Init() {
 	hl.WidgetBase.Init()
 	hl.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
+		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.ScrollableUnattended)
 
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.Scheme.OutlineVariant

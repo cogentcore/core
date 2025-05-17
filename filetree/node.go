@@ -28,8 +28,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/highlighting"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -49,17 +49,12 @@ type Node struct { //core:embedder
 	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// Buffer is the file buffer for editing this file.
-	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	// FileIsOpen indicates that this file has been opened, indicated by Italics.
+	FileIsOpen bool
 
 	// DirRepo is the version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
-
-	// repoFiles has the version control system repository file status,
-	// providing a much faster way to get file status, vs. the repo.Status
-	// call which is exceptionally slow.
-	repoFiles vcs.Files
 }
 
 func (fn *Node) AsFileNode() *Node {
@@ -78,30 +73,7 @@ func (fn *Node) Init() {
 	fn.ContextMenus = nil // do not include tree
 	fn.AddContextMenu(fn.contextMenu)
 	fn.Styler(func(s *styles.Style) {
-		status := fn.Info.VCS
-		hex := ""
-		switch {
-		case status == vcs.Untracked:
-			hex = "#808080"
-		case status == vcs.Modified:
-			hex = "#4b7fd1"
-		case status == vcs.Added:
-			hex = "#008800"
-		case status == vcs.Deleted:
-			hex = "#ff4252"
-		case status == vcs.Conflicted:
-			hex = "#ce8020"
-		case status == vcs.Updated:
-			hex = "#008060"
-		case status == vcs.Stored:
-			s.Color = colors.Scheme.OnSurface
-		}
-		if fn.Info.Generated {
-			hex = "#8080C0"
-		}
-		if hex != "" {
-			s.Color = colors.Uniform(colors.ToBase(errors.Must1(colors.FromHex(hex))))
-		}
+		fn.styleFromStatus()
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
 		if core.DebugSettings.KeyEventTrace {
@@ -120,10 +92,10 @@ func (fn *Node) Init() {
 		if !fn.IsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
-				fn.deleteFiles()
+				fn.This.(Filer).DeleteFiles()
 				e.SetHandled()
 			case keymap.Backspace:
-				fn.deleteFiles()
+				fn.This.(Filer).DeleteFiles()
 				e.SetHandled()
 			case keymap.Duplicate:
 				fn.duplicateFiles()
@@ -171,10 +143,10 @@ func (fn *Node) Init() {
 	tree.AddChildInit(fn.Parts, "text", func(w *core.Text) {
 		w.Styler(func(s *styles.Style) {
 			if fn.IsExec() && !fn.IsDir() {
-				s.Font.Weight = styles.WeightBold
+				s.Font.Weight = rich.Bold
 			}
-			if fn.Buffer != nil {
-				s.Font.Style = styles.Italic
+			if fn.FileIsOpen {
+				s.Font.Slant = rich.Italic
 			}
 		})
 	})
@@ -184,12 +156,17 @@ func (fn *Node) Init() {
 		if fn.IsDir() {
 			repo, rnode := fn.Repo()
 			if repo != nil && rnode.This == fn.This {
-				go rnode.updateRepoFiles()
+				rnode.updateRepoFiles()
 			}
 		} else {
 			fn.This.(Filer).GetFileInfo()
 		}
 		fn.Text = fn.Info.Name
+		cc := fn.Styles.Color
+		fn.styleFromStatus()
+		if fn.Styles.Color != cc && fn.Parts != nil {
+			fn.Parts.StyleTree()
+		}
 	})
 
 	fn.Maker(func(p *tree.Plan) {
@@ -235,12 +212,46 @@ func (fn *Node) Init() {
 				w.This.(Filer).GetFileInfo()
 				if w.FileRoot().FS == nil {
 					if w.IsDir() && repo == nil {
-						w.detectVCSRepo(true) // update files
+						w.detectVCSRepo()
 					}
 				}
 			})
 		}
 	})
+}
+
+// styleFromStatus updates font color from
+func (fn *Node) styleFromStatus() {
+	status := fn.Info.VCS
+	hex := ""
+	switch {
+	case status == vcs.Untracked:
+		hex = "#808080"
+	case status == vcs.Modified:
+		hex = "#4b7fd1"
+	case status == vcs.Added:
+		hex = "#008800"
+	case status == vcs.Deleted:
+		hex = "#ff4252"
+	case status == vcs.Conflicted:
+		hex = "#ce8020"
+	case status == vcs.Updated:
+		hex = "#008060"
+	case status == vcs.Stored:
+		fn.Styles.Color = colors.Scheme.OnSurface
+	}
+	if fn.Info.Generated {
+		hex = "#8080C0"
+	}
+	if hex != "" {
+		fn.Styles.Color = colors.Uniform(colors.ToBase(errors.Must1(colors.FromHex(hex))))
+	} else {
+		fn.Styles.Color = colors.Scheme.OnSurface
+	}
+	// if fn.Name == "test.go" {
+	// 	rep, err := fn.Repo()
+	// 	fmt.Println("style updt:", status, hex, rep != nil, err)
+	// }
 }
 
 // IsDir returns true if file is a directory (folder)
@@ -278,11 +289,6 @@ func (fn *Node) IsExec() bool {
 // isOpen returns true if file is flagged as open
 func (fn *Node) isOpen() bool {
 	return !fn.Closed
-}
-
-// IsNotSaved returns true if the file is open and has been changed (edited) since last Save
-func (fn *Node) IsNotSaved() bool {
-	return fn.Buffer != nil && fn.Buffer.IsNotSaved()
 }
 
 // isAutoSave returns true if file is an auto-save file (starts and ends with #)
@@ -413,7 +419,7 @@ func (fn *Node) InitFileInfo() error {
 		if fn.IsDir() {
 			fn.Info.VCS = vcs.Stored // always
 		} else {
-			rstat := rnode.repoFiles.Status(repo, string(fn.Filepath))
+			rstat := rnode.DirRepo.StatusFast(string(fn.Filepath))
 			if rstat != fn.Info.VCS {
 				fn.Info.VCS = rstat
 				fn.NeedsRender()
@@ -483,30 +489,6 @@ func (fn *Node) openAll() { //types:add
 	fn.FileRoot().inOpenAll = false
 }
 
-// OpenBuf opens the file in its buffer if it is not already open.
-// returns true if file is newly opened
-func (fn *Node) OpenBuf() (bool, error) {
-	if fn.IsDir() {
-		err := fmt.Errorf("filetree.Node cannot open directory in editor: %v", fn.Filepath)
-		log.Println(err)
-		return false, err
-	}
-	if fn.Buffer != nil {
-		if fn.Buffer.Filename == fn.Filepath { // close resets filename
-			return false, nil
-		}
-	} else {
-		fn.Buffer = texteditor.NewBuffer()
-		fn.Buffer.OnChange(func(e events.Event) {
-			if fn.Info.VCS == vcs.Stored {
-				fn.Info.VCS = vcs.Modified
-			}
-		})
-	}
-	fn.Buffer.SetHighlighting(NodeHighlighting)
-	return true, fn.Buffer.Open(fn.Filepath)
-}
-
 // removeFromExterns removes file from list of external files
 func (fn *Node) removeFromExterns() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
@@ -514,20 +496,8 @@ func (fn *Node) removeFromExterns() { //types:add
 			return
 		}
 		sn.FileRoot().removeExternalFile(string(sn.Filepath))
-		sn.closeBuf()
 		sn.Delete()
 	})
-}
-
-// closeBuf closes the file in its buffer if it is open.
-// returns true if closed.
-func (fn *Node) closeBuf() bool {
-	if fn.Buffer == nil {
-		return false
-	}
-	fn.Buffer.Close(nil)
-	fn.Buffer = nil
-	return true
 }
 
 // RelativePathFrom returns the relative path from node for given full path

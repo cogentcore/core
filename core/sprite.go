@@ -6,11 +6,11 @@ package core
 
 import (
 	"image"
+	"sync"
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/system"
 	"golang.org/x/image/draw"
 )
 
@@ -81,7 +81,8 @@ func (sp *Sprite) grabRenderFrom(w Widget) {
 // If it returns nil, then the image could not be fetched.
 func grabRenderFrom(w Widget) *image.RGBA {
 	wb := w.AsWidget()
-	if wb.Scene.Pixels == nil {
+	scimg := wb.Scene.renderer.Image() // todo: need to make this real on JS
+	if scimg == nil {
 		return nil
 	}
 	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
@@ -89,7 +90,7 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	}
 	sz := wb.Geom.TotalBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), wb.Scene.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
 	return img
 }
 
@@ -148,7 +149,9 @@ type Sprites struct {
 	ordmap.Map[string, *Sprite]
 
 	// set to true if sprites have been modified since last config
-	Modified bool
+	modified bool
+
+	sync.Mutex
 }
 
 // Add adds sprite to list, and returns the image index and
@@ -156,27 +159,35 @@ type Sprites struct {
 // exists on list, then it is returned, with size allocation
 // updated as needed.
 func (ss *Sprites) Add(sp *Sprite) {
+	ss.Lock()
 	ss.Init()
 	ss.Map.Add(sp.Name, sp)
-	ss.Modified = true
+	ss.modified = true
+	ss.Unlock()
 }
 
 // Delete deletes sprite by name, returning indexes where it was located.
 // All sprite images must be updated when this occurs, as indexes may have shifted.
 func (ss *Sprites) Delete(sp *Sprite) {
+	ss.Lock()
 	ss.DeleteKey(sp.Name)
-	ss.Modified = true
+	ss.modified = true
+	ss.Unlock()
 }
 
 // SpriteByName returns the sprite by name
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
+	ss.Lock()
+	defer ss.Unlock()
 	return ss.ValueByKeyTry(name)
 }
 
 // reset removes all sprites
 func (ss *Sprites) reset() {
+	ss.Lock()
 	ss.Reset()
-	ss.Modified = true
+	ss.modified = true
+	ss.Unlock()
 }
 
 // ActivateSprite flags the sprite as active, setting Modified if wasn't before.
@@ -185,10 +196,12 @@ func (ss *Sprites) ActivateSprite(name string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
+	ss.Lock()
 	if !sp.Active {
 		sp.Active = true
-		ss.Modified = true
+		ss.modified = true
 	}
+	ss.Unlock()
 }
 
 // InactivateSprite flags the sprite as inactive, setting Modified if wasn't before.
@@ -197,22 +210,17 @@ func (ss *Sprites) InactivateSprite(name string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
+	ss.Lock()
 	if sp.Active {
 		sp.Active = false
-		ss.Modified = true
+		ss.modified = true
 	}
+	ss.Unlock()
 }
 
-// drawSprites draws sprites
-func (ss *Sprites) drawSprites(drw system.Drawer, scpos image.Point) {
-	for _, kv := range ss.Order {
-		sp := kv.Value
-		if !sp.Active {
-			continue
-		}
-		// note: in general we assume sprites are static, so Unchanged.
-		// if needed, could add a "dynamic" flag or something.
-		drw.Copy(sp.Geom.Pos.Add(scpos), sp.Pixels, sp.Pixels.Bounds(), draw.Over, system.Unchanged)
-	}
-	ss.Modified = false
+// IsModified returns whether the sprites have been modified.
+func (ss *Sprites) IsModified() bool {
+	ss.Lock()
+	defer ss.Unlock()
+	return ss.modified
 }

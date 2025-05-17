@@ -9,21 +9,20 @@ package styles
 //go:generate core generate
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log/slog"
-	"strings"
 
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 )
 
 // IMPORTANT: any changes here must be updated in style_properties.go StyleStyleFuncs
@@ -47,11 +46,11 @@ type Style struct { //types:add
 
 	// Padding is the transparent space around central content of box,
 	// which is _included_ in the size of the standard box rendering.
-	Padding SideValues `display:"inline"`
+	Padding sides.Values `display:"inline"`
 
 	// Margin is the outer-most transparent space around box element,
 	// which is _excluded_ from standard box rendering.
-	Margin SideValues `display:"inline"`
+	Margin sides.Values `display:"inline"`
 
 	// Display controls how items are displayed, in terms of layout
 	Display Displays
@@ -163,14 +162,18 @@ type Style struct { //types:add
 	// and it is nil (transparent) by default.
 	Background image.Image
 
-	// alpha value between 0 and 1 to apply to the foreground and background of this element and all of its children
+	// alpha value between 0 and 1 to apply to the foreground and background
+	// of this element and all of its children.
 	Opacity float32
 
-	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the
-	// color Color (or StateColor if it defined). It is automatically set based on State, but can be overridden in stylers.
+	// StateLayer, if above zero, indicates to create a state layer over
+	// the element with this much opacity (on a scale of 0-1) and the
+	// color Color (or StateColor if it defined). It is automatically
+	// set based on State, but can be overridden in stylers.
 	StateLayer float32
 
-	// StateColor, if not nil, is the color to use for the StateLayer instead of Color. If you want to disable state layers
+	// StateColor, if not nil, is the color to use for the StateLayer
+	// instead of Color. If you want to disable state layers
 	// for an element, do not use this; instead, set StateLayer to 0.
 	StateColor image.Image
 
@@ -210,10 +213,10 @@ type Style struct { //types:add
 	// to [DefaultScrollbarWidth], and it is inherited.
 	ScrollbarWidth units.Value
 
-	// font styling parameters
+	// Font styling parameters applicable to individual spans of text.
 	Font Font
 
-	// text styling parameters
+	// Text styling parameters applicable to a paragraph of text.
 	Text Text
 
 	// unit context: parameters necessary for anchoring relative units
@@ -285,36 +288,6 @@ const (
 // visibility -- support more than just hidden
 
 // transition -- animation of hover, etc
-
-// SetStylePropertiesXML sets style properties from XML style string, which contains ';'
-// separated name: value pairs
-func SetStylePropertiesXML(style string, properties *map[string]any) {
-	st := strings.Split(style, ";")
-	for _, s := range st {
-		kv := strings.Split(s, ":")
-		if len(kv) >= 2 {
-			k := strings.TrimSpace(strings.ToLower(kv[0]))
-			v := strings.TrimSpace(kv[1])
-			if *properties == nil {
-				*properties = make(map[string]any)
-			}
-			(*properties)[k] = v
-		}
-	}
-}
-
-// StylePropertiesXML returns style properties for XML style string, which contains ';'
-// separated name: value pairs
-func StylePropertiesXML(properties map[string]any) string {
-	var sb strings.Builder
-	for k, v := range properties {
-		if k == "transform" {
-			continue
-		}
-		sb.WriteString(fmt.Sprintf("%s:%s;", k, reflectx.ToString(v)))
-	}
-	return sb.String()
-}
 
 // NewStyle returns a new [Style] object with default values.
 func NewStyle() *Style {
@@ -396,7 +369,7 @@ func (s *Style) ToDots() {
 
 // BoxSpace returns the extra space around the central content in the box model in dots.
 // It rounds all of the sides first.
-func (s *Style) BoxSpace() SideFloats {
+func (s *Style) BoxSpace() sides.Floats {
 	return s.TotalMargin().Add(s.Padding.Dots()).Round()
 }
 
@@ -406,13 +379,13 @@ func (s *Style) BoxSpace() SideFloats {
 // values for the max border width / box shadow are unset, the
 // current values are used instead, which allows for the omission
 // of the max properties when the values do not change.
-func (s *Style) TotalMargin() SideFloats {
+func (s *Style) TotalMargin() sides.Floats {
 	mbw := s.MaxBorder.Width.Dots()
-	if SidesAreZero(mbw.Sides) {
+	if sides.AreZero(mbw.Sides) {
 		mbw = s.Border.Width.Dots()
 	}
 	mbo := s.MaxBorder.Offset.Dots()
-	if SidesAreZero(mbo.Sides) {
+	if sides.AreZero(mbo.Sides) {
 		mbo = s.Border.Offset.Dots()
 	}
 	mbw = mbw.Add(mbo)
@@ -431,7 +404,7 @@ func (s *Style) TotalMargin() SideFloats {
 	}
 
 	mbsm := s.MaxBoxShadowMargin()
-	if SidesAreZero(mbsm.Sides) {
+	if sides.AreZero(mbsm.Sides) {
 		mbsm = s.BoxShadowMargin()
 	}
 	return s.Margin.Dots().Add(mbw).Add(mbsm)
@@ -519,33 +492,8 @@ func (s *Style) CenterAll() {
 	s.Justify.Items = Center
 	s.Align.Content = Center
 	s.Align.Items = Center
-	s.Text.Align = Center
-	s.Text.AlignV = Center
-}
-
-// SettingsFont and SettingsMonoFont are pointers to Font and MonoFont in
-// [core.AppearanceSettings], which are used in [Style.SetMono] if non-nil.
-// They are set automatically by core, so end users should typically not have
-// to interact with them.
-var SettingsFont, SettingsMonoFont *string
-
-// SetMono sets whether the font is monospace, using the [SettingsFont]
-// and [SettingsMonoFont] pointers if possible, and falling back on "mono"
-// and "sans-serif" otherwise.
-func (s *Style) SetMono(mono bool) {
-	if mono {
-		if SettingsMonoFont != nil {
-			s.Font.Family = *SettingsMonoFont
-			return
-		}
-		s.Font.Family = "mono"
-		return
-	}
-	if SettingsFont != nil {
-		s.Font.Family = *SettingsFont
-		return
-	}
-	s.Font.Family = "sans-serif"
+	s.Text.Align = text.Center
+	s.Text.AlignV = text.Center
 }
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
@@ -554,10 +502,10 @@ func (s *Style) SetMono(mono bool) {
 // are typically the two desired stylings.
 func (s *Style) SetTextWrap(wrap bool) {
 	if wrap {
-		s.Text.WhiteSpace = WhiteSpaceNormal
+		s.Text.WhiteSpace = text.WrapAsNeeded
 		s.GrowWrap = true
 	} else {
-		s.Text.WhiteSpace = WhiteSpaceNowrap
+		s.Text.WhiteSpace = text.WrapNever
 		s.GrowWrap = false
 	}
 }
@@ -565,6 +513,6 @@ func (s *Style) SetTextWrap(wrap bool) {
 // SetNonSelectable turns off the Selectable and DoubleClickable
 // abilities and sets the Cursor to None.
 func (s *Style) SetNonSelectable() {
-	s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+	s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.Slideable)
 	s.Cursor = cursors.None
 }

@@ -1,0 +1,414 @@
+// Copyright (c) 2020, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package golang
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/parse/parser"
+	"cogentcore.org/core/text/parse/syms"
+	"cogentcore.org/core/text/token"
+)
+
+// TypeFromASTExprStart starts walking the ast expression to find the type.
+// This computes the last ast point as the stopping point for processing
+// and then calls TypeFromASTExpr.
+// It returns the type, any AST node that remained unprocessed at the end, and bool if found.
+func (gl *GoLang) TypeFromASTExprStart(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast *parser.AST) (*syms.Type, *parser.AST, bool) {
+	last := tyast.NextSiblingAST()
+	// fmt.Printf("last: %v \n", last.PathUnique())
+	return gl.TypeFromASTExpr(fs, origPkg, pkg, tyast, last)
+}
+
+// TypeFromASTExpr walks the ast expression to find the type.
+// It returns the type, any AST node that remained unprocessed at the end, and bool if found.
+func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST) (*syms.Type, *parser.AST, bool) {
+	pos := tyast.SrcReg.Start
+	fpath, _ := filepath.Abs(fs.Src.Filename)
+	// containers of given region -- local scoping
+	var conts syms.SymMap
+	fs.Syms.FindContainsRegion(fpath, pos, 2, token.NameFunction, &conts) // 2 extra lines always!
+	// if TraceTypes && len(conts) == 0 {
+	// 	fmt.Printf("TExpr: no conts for fpath: %v  pos: %v\n", fpath, pos)
+	// }
+	// if TraceTypes {
+	// 	tyast.WriteTree(os.Stdout, 0)
+	// }
+
+	tnm := tyast.Name
+
+	switch {
+	case tnm == "FuncCall":
+		fun := tyast.NextAST()
+		if fun == nil {
+			return nil, nil, false
+		}
+		funm := fun.Src
+		sym, got := fs.FindNameScoped(funm, conts)
+		if got {
+			if !gl.InferEmptySymbolType(sym, fs, pkg) {
+				return nil, fun, false
+			}
+			if sym.Type == "" {
+				if TraceTypes {
+					fmt.Printf("TExpr: FuncCall: function type not set yet: %v\n", funm)
+				}
+				gl.InferSymbolType(sym, fs, pkg, true)
+			}
+			ftnm := sym.Type
+			ftyp, _ := gl.FindTypeName(ftnm, fs, pkg)
+			if ftyp != nil && len(ftyp.Size) == 2 {
+				return gl.TypeFromFuncCall(fs, origPkg, pkg, tyast, last, ftyp)
+			}
+			if TraceTypes {
+				fmt.Printf("TExpr: FuncCall: could not find function: %v\n", funm)
+			}
+			return nil, fun, false
+		}
+		if funm == "len" || funm == "cap" {
+			return BuiltinTypes["int"], nil, true
+		}
+		if funm == "append" {
+			farg := fun.NextAST().NextAST()
+			return gl.TypeFromASTExpr(fs, origPkg, pkg, farg, last)
+		}
+		ctyp, _ := gl.FindTypeName(funm, fs, pkg) // conversion
+		if ctyp != nil {
+			return ctyp, nil, true
+		}
+		if TraceTypes {
+			fmt.Printf("TExpr: FuncCall: could not find function: %v\n", funm)
+		}
+		return nil, fun, false
+	case tnm == "Selector":
+		if tyast.NumChildren() == 0 { // incomplete
+			return nil, nil, false
+		}
+		tnmA := tyast.ChildAST(0)
+		if tnmA.Name != "Name" {
+			if TraceTypes {
+				fmt.Printf("TExpr: selector start node kid is not a Name: %v, src: %v\n", tnmA.Name, tnmA.Src)
+				tnmA.WriteTree(os.Stdout, 0)
+			}
+			return nil, tnmA, false
+		}
+		return gl.TypeFromASTName(fs, origPkg, pkg, tnmA, last, conts)
+	case tnm == "Slice": // strings.HasPrefix(tnm, "Slice"):
+		if tyast.NumChildren() == 0 { // incomplete
+			return nil, nil, false
+		}
+		tnmA := tyast.ChildAST(0)
+		if tnmA.Name != "Name" {
+			if TraceTypes {
+				fmt.Printf("TExpr: slice start node kid is not a Name: %v, src: %v\n", tnmA.Name, tnmA.Src)
+			}
+			return nil, tnmA, false
+		}
+		snm := tnmA.Src
+		sym, got := fs.FindNameScoped(snm, conts)
+		if got {
+			return gl.TypeFromASTSym(fs, origPkg, pkg, tnmA, last, sym)
+		}
+		if TraceTypes {
+			fmt.Printf("TExpr: could not find symbol for slice var name: %v\n", snm)
+		}
+		return nil, tnmA, false
+	case tnm == "Name":
+		return gl.TypeFromASTName(fs, origPkg, pkg, tyast, last, conts)
+	case strings.HasPrefix(tnm, "Lit"):
+		sty, got := gl.TypeFromASTLit(fs, pkg, nil, tyast)
+		return sty, nil, got
+	case strings.HasSuffix(tnm, "AutoType"):
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+		return sty, nil, got
+	case tnm == "CompositeLit":
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+		return sty, nil, got
+	case tnm == "AddrExpr":
+		if !tyast.HasChildren() {
+			return nil, nil, false
+		}
+		ch := tyast.ChildAST(0)
+		snm := tyast.Src[1:] // after &
+		var sty *syms.Type
+		switch ch.Name {
+		case "CompositeLit":
+			sty, _ = gl.SubTypeFromAST(fs, pkg, ch, 0)
+		case "Selector":
+			sty, _ = gl.TypeFromAST(fs, pkg, nil, ch)
+		case "Name":
+			sym, got := fs.FindNameScoped(snm, conts)
+			if got {
+				sty, _, got = gl.TypeFromASTSym(fs, origPkg, pkg, ch, last, sym)
+			} else {
+				if snm == "true" || snm == "false" {
+					return BuiltinTypes["bool"], nil, true
+				}
+				if TraceTypes {
+					fmt.Printf("TExpr: could not find symbol named: %v\n", snm)
+				}
+			}
+		}
+		if sty != nil {
+			ty := &syms.Type{}
+			ty.Kind = syms.Ptr
+			tynm := SymTypeNameForPkg(sty, pkg)
+			ty.Name = "*" + tynm
+			ty.Els.Add("ptr", tynm)
+			return ty, nil, true
+		}
+		if TraceTypes {
+			fmt.Printf("TExpr: could not process addr expr:\n")
+			tyast.WriteTree(os.Stdout, 0)
+		}
+		return nil, tyast, false
+	case tnm == "DePtrExpr":
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0) // first child
+		return sty, nil, got
+	case strings.HasSuffix(tnm, "Expr"):
+		// note: could figure out actual numerical type, but in practice we don't care
+		// for lookup / completion, so ignoring for now.
+		return BuiltinTypes["float64"], nil, true
+	case tnm == "TypeAssert":
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 1) // type is second child
+		return sty, nil, got
+	case tnm == "MakeCall":
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+		return sty, nil, got
+	case strings.Contains(tnm, "Chan"):
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+		return sty, nil, got
+	default:
+		if TraceTypes {
+			fmt.Printf("TExpr: cannot start with: %v\n", tyast.Name)
+			tyast.WriteTree(os.Stdout, 0)
+		}
+		return nil, tyast, false
+	}
+	return nil, tyast, false
+}
+
+// TypeFromASTSym attempts to get the type from given symbol as part of expression.
+// It returns the type, any AST node that remained unprocessed at the end, and bool if found.
+func (gl *GoLang) TypeFromASTSym(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, sym *syms.Symbol) (*syms.Type, *parser.AST, bool) {
+	// if TraceTypes {
+	// 	fmt.Printf("TExpr: sym named: %v  kind: %v  type: %v\n", sym.Name, sym.Kind, sym.Type)
+	// }
+	if sym.Kind.SubCat() == token.NameScope {
+		// if TraceTypes {
+		// 	fmt.Printf("TExpr: symbol has scope type (package) -- will be looked up in a sec\n")
+		// }
+		return nil, nil, false // higher-level will catch it
+	}
+	if !gl.InferEmptySymbolType(sym, fs, pkg) {
+		return nil, tyast, false
+	}
+	tnm := sym.Type
+	return gl.TypeFromASTType(fs, origPkg, pkg, tyast, last, tnm)
+}
+
+// TypeFromASTType walks the ast expression to find the type, starting from current type name.
+// It returns the type, any AST node that remained unprocessed at the end, and bool if found.
+func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, tnm string) (*syms.Type, *parser.AST, bool) {
+	if tnm[0] == '*' {
+		tnm = tnm[1:]
+	}
+	ttp, npkg := gl.FindTypeName(tnm, fs, pkg)
+	if ttp == nil {
+		if TraceTypes {
+			fmt.Printf("TExpr: error -- couldn't find type name: %v\n", tnm)
+		}
+		return nil, tyast, false
+	}
+	pkgnm := ""
+	if pi := strings.Index(ttp.Name, "."); pi > 0 {
+		pkgnm = ttp.Name[:pi]
+	}
+	if npkg != origPkg { // need to make a package-qualified copy of type
+		if pkgnm == "" {
+			pkgnm = npkg.Name
+			qtnm := QualifyType(pkgnm, ttp.Name)
+			if qtnm != ttp.Name {
+				if etyp, ok := pkg.Types[qtnm]; ok {
+					ttp = etyp
+				} else {
+					ntyp := &syms.Type{}
+					*ntyp = *ttp
+					ntyp.Name = qtnm
+					origPkg.Types.Add(ntyp)
+					ttp = ntyp
+				}
+			}
+		}
+	}
+	pkg = npkg // update to new context
+	// if TraceTypes {
+	// 	fmt.Printf("TExpr: found type: %v  kind: %v\n", ttp.Name, ttp.Kind)
+	// }
+
+	if tyast == nil || tyast == last {
+		return ttp, tyast, true
+	}
+
+	if tyast.Name == "QualType" && tnm != tyast.Src {
+		// tyast.Src is new type name
+		return gl.TypeFromASTType(fs, origPkg, pkg, tyast, last, tyast.Src)
+	}
+
+	nxt := tyast
+	for {
+		nxt = nxt.NextAST()
+		if nxt == nil || nxt == last {
+			// if TraceTypes {
+			// 	fmt.Printf("TExpr: returning terminal type\n")
+			// }
+			return ttp, nxt, true
+		}
+		brk := false
+		switch {
+		case nxt.Name == "Name":
+			brk = true
+		case strings.HasPrefix(nxt.Name, "Lit"):
+			sty, got := gl.TypeFromASTLit(fs, pkg, nil, nxt)
+			return sty, nil, got
+		case nxt.Name == "TypeAssert":
+			sty, got := gl.SubTypeFromAST(fs, origPkg, nxt, 1) // type is second child, switch back to orig pkg
+			return sty, nil, got
+		case nxt.Name == "Slice":
+			continue
+		case strings.HasPrefix(nxt.Name, "Slice"):
+			eltyp := ttp.Els.ByName("val")
+			if eltyp != nil {
+				elnm := QualifyType(pkgnm, eltyp.Type)
+				// if TraceTypes {
+				// 	fmt.Printf("TExpr: slice/map el type: %v\n", elnm)
+				// }
+				return gl.TypeFromASTType(fs, origPkg, pkg, nxt, last, elnm)
+			}
+			if ttp.Name == "string" {
+				return BuiltinTypes["string"], nil, true
+			}
+			if TraceTypes {
+				fmt.Printf("TExpr: slice operator not on slice: %v\n", ttp.Name)
+				tyast.WriteTree(os.Stdout, 0)
+			}
+		case nxt.Name == "FuncCall":
+			// ttp is the function type name
+			fun := nxt.NextAST()
+			if fun == nil || fun == last {
+				return ttp, fun, true
+			}
+			funm := fun.Src
+			ftyp, got := ttp.Meths[funm]
+			if got && len(ftyp.Size) == 2 {
+				return gl.TypeFromFuncCall(fs, origPkg, pkg, nxt, last, ftyp)
+			}
+			if TraceTypes {
+				fmt.Printf("TExpr: FuncCall: could not find method: %v in type: %v\n", funm, ttp.Name)
+				tyast.WriteTree(os.Stdout, 0)
+			}
+			return nil, fun, false
+
+		}
+		if brk || nxt == nil || nxt == last {
+			break
+		}
+		// if TraceTypes {
+		// 	fmt.Printf("TExpr: skipping over %v\n", nxt.Nm)
+		// }
+	}
+	if nxt == nil {
+		return ttp, nxt, false
+	}
+	nm := nxt.Src
+	stp := ttp.Els.ByName(nm)
+	if stp != nil {
+		// if TraceTypes {
+		// 	fmt.Printf("TExpr: found Name: %v in type els\n", nm)
+		// }
+		return gl.TypeFromASTType(fs, origPkg, pkg, nxt, last, stp.Type)
+	}
+	// if TraceTypes {
+	// 	fmt.Printf("TExpr: error -- Name: %v not found in type els\n", nm)
+	// 	// ttp.WriteDoc(os.Stdout, 0)
+	// }
+	return ttp, nxt, true // robust, needed for completion
+}
+
+// TypeFromASTFuncCall gets return type of function call as return value, and returns the sibling node to
+// continue parsing in, skipping over everything in the function call
+func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, ftyp *syms.Type) (*syms.Type, *parser.AST, bool) {
+	nxt := tyast.NextSiblingAST() // skip over everything within method in ast
+	if len(ftyp.Size) != 2 {
+		if TraceTypes {
+			fmt.Printf("TExpr: FuncCall: %v is not properly initialized with sizes\n", ftyp.Name)
+		}
+		return nil, nxt, false
+	}
+	npars := ftyp.Size[0] // first size is number of params
+	nrval := ftyp.Size[1] // second size is number of return values
+	if nrval == 0 {
+		if TraceTypes {
+			fmt.Printf("TExpr: FuncCall: %v has no return value\n", ftyp.Name)
+		}
+		return nil, nxt, false // no return -- shouldn't happen
+	}
+	rtyp := ftyp.Els[npars]               // first return
+	if nxt != nil && nxt.Name == "Name" { // direct de-ref on function return value -- ASTType assumes nxt is type el
+		prv := nxt.PrevAST()
+		if prv != tyast {
+			nxt = prv
+		}
+	}
+	// if TraceTypes {
+	// 	fmt.Printf("got return type: %v\n", rtyp)
+	// }
+	return gl.TypeFromASTType(fs, origPkg, pkg, nxt, last, rtyp.Type)
+}
+
+// TypeFromASTName gets type from a Name in a given context (conts)
+func (gl *GoLang) TypeFromASTName(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, conts syms.SymMap) (*syms.Type, *parser.AST, bool) {
+	snm := tyast.Src
+	sym, got := fs.FindNameScoped(snm, conts)
+	if got && sym.Kind.SubCat() != token.NameScope {
+		tsym, nnxt, got := gl.TypeFromASTSym(fs, origPkg, pkg, tyast, last, sym)
+		if got {
+			return tsym, nnxt, got
+		}
+		if TraceTypes {
+			fmt.Printf("TExpr: got symbol but could not get type from sym name: %v\n", snm)
+			// tyast.WriteTree(os.Stdout, 0)
+		}
+	}
+	if snm == "true" || snm == "false" {
+		return BuiltinTypes["bool"], nil, true
+	}
+	// maybe it is a package name
+	psym, has := gl.PkgSyms(fs, pkg.Children, snm)
+	if has {
+		// if TraceTypes {
+		// 	fmt.Printf("TExpr: entering package name: %v\n", snm)
+		// }
+		nxt := tyast.NextAST()
+		if nxt != nil {
+			if nxt.Name == "Selector" {
+				nxt = nxt.NextAST()
+			}
+			return gl.TypeFromASTExpr(fs, origPkg, psym, nxt, last)
+		}
+		if TraceTypes {
+			fmt.Printf("TExpr: package alone not useful\n")
+		}
+		return nil, tyast, false // package alone not useful
+	}
+	if TraceTypes {
+		fmt.Printf("TExpr: could not find symbol for name: %v\n", snm)
+	}
+	return nil, tyast, false
+}
