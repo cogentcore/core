@@ -101,9 +101,6 @@ type renderWindow struct {
 
 	// lastResize is the time stamp of last resize event -- used for efficient updating.
 	lastResize time.Time
-
-	// renderMu is the mutex for rendering.
-	renderMu sync.Mutex
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -777,16 +774,14 @@ func (w *renderWindow) renderWindow() {
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	if !w.SystemWindow.Lock() {
 		w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
-		fmt.Println("renderAsync SystemWindow lock fail")
+		// fmt.Println("renderAsync SystemWindow lock fail")
 		return
 	}
-	w.renderMu.Lock()
 	// pr := profile.Start("Compose")
 	// fmt.Println("start compose")
 	cp.Compose()
 	// pr.End()
 	w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
-	w.renderMu.Unlock()
 	w.SystemWindow.Unlock()
 }
 
