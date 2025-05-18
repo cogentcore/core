@@ -322,7 +322,6 @@ func TestMathDisplay(t *testing.T) {
 
 func TestWhitespacePre(t *testing.T) {
 	RunTest(t, "whitespacepre", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		// todo: whitespacepre will actually wrap -- needs special handling
 		tsty.WhiteSpace = text.WhiteSpacePre
 		src := "This is not going to wrap even if it goes over\nWhiteSpacePre does that for you"
 		sty := rich.NewStyle()
@@ -334,3 +333,19 @@ func TestWhitespacePre(t *testing.T) {
 		pc.DrawText(lns, pos)
 	})
 }
+
+func TestMediumNormal(t *testing.T) {
+	RunTest(t, "mediumnormal", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		tsty.WhiteSpace = text.WhiteSpacePre
+		sty := rich.NewStyle()
+		med := *sty
+		med.Weight = rich.Medium
+		tx := rich.NewText(sty, []rune("This is Normal\n"))
+		tx.AddSpan(&med, []rune("This is Medium"))
+		// fmt.Println(tx)
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 10)
+		pc.DrawText(lns, pos)
+	})
+}
+
