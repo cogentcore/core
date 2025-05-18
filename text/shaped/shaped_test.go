@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
-	"cogentcore.org/core/text/shaped"
 	. "cogentcore.org/core/text/shaped"
 	_ "cogentcore.org/core/text/shaped/shapers"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
@@ -45,10 +44,53 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	sz := math32.Vec2(float32(width), float32(height))
 	pc := paint.NewPainter(sz)
 	pc.FillBox(math32.Vector2{}, sz, colors.Uniform(colors.White))
-	sh := shaped.NewShaper()
+	sh := NewShaper()
 	f(pc, sh, tsty, rts)
 	img := paint.RenderToImage(pc)
 	imagex.Assert(t, img, nm)
+}
+
+func TestFontMapper(t *testing.T) {
+	RunTest(t, "fontmapper", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		sty := rich.NewStyle()
+		// sty.Family = rich.Monospace // everything works fine with Monospace
+		med := *sty
+		med.Weight = rich.Medium
+		medit := med
+		medit.Slant = rich.Italic
+		bold := *sty
+		bold.Weight = rich.Bold
+		it := *sty
+		it.Slant = rich.Italic
+		boldit := bold
+		boldit.Slant = rich.Italic
+
+		tx := rich.NewText(sty, []rune("This is Normal\n"))
+		tx.AddSpan(&med, []rune("This is Medium\n"))
+		tx.AddSpan(&bold, []rune("This is Bold\n"))
+		tx.AddSpan(&it, []rune("This is Italic\n"))
+		tx.AddSpan(&medit, []rune("This is Medium Italic\n"))
+		tx.AddSpan(&boldit, []rune("This is Bold Italic"))
+		// fmt.Println(tx)
+		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		pos := math32.Vec2(10, 10)
+		pc.DrawText(lns, pos)
+
+		weights := []font.Weight{400, 500, 700, 400, 500, 700}
+
+		for li := range lns.Lines {
+			ln := &lns.Lines[li]
+			d := ln.Runs[0].(*shapedgt.Run).Output.Face.Describe()
+			fmt.Println(li, d)
+			assert.Equal(t, "Noto Sans", d.Family)
+			assert.Equal(t, weights[li], d.Aspect.Weight)
+			if li >= 3 {
+				assert.Equal(t, font.StyleItalic, d.Aspect.Style)
+			} else {
+				assert.Equal(t, font.StyleNormal, d.Aspect.Style)
+			}
+		}
+	})
 }
 
 func TestBasic(t *testing.T) {
@@ -337,30 +379,6 @@ func TestWhitespacePre(t *testing.T) {
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
 		tsty.WhiteSpace = text.WrapAsNeeded
-	})
-}
-
-func TestMediumNormal(t *testing.T) {
-	RunTest(t, "mediumnormal", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		sty := rich.NewStyle()
-		// sty.Family = rich.Monospace // everything works fine with Monospace
-		med := *sty
-		med.Weight = rich.Medium
-		tx := rich.NewText(sty, []rune("This is Normal\n"))
-		tx.AddSpan(&med, []rune("This is Medium"))
-		// fmt.Println(tx)
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
-		pos := math32.Vec2(10, 10)
-		pc.DrawText(lns, pos)
-
-		nl := lns.Lines[0]
-		ml := lns.Lines[1]
-		nface := nl.Runs[0].(*shapedgt.Run).Output.Face.Describe()
-		mface := ml.Runs[0].(*shapedgt.Run).Output.Face.Describe()
-		assert.Equal(t, font.Weight(400), nface.Aspect.Weight)
-		assert.Equal(t, font.Weight(500), mface.Aspect.Weight)
-		fmt.Println("Normal:", nface)
-		fmt.Println("Medium:", mface)
 	})
 }
 
