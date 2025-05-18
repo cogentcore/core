@@ -7,6 +7,7 @@ package textcore
 import (
 	"embed"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
@@ -98,6 +99,7 @@ func TestBaseScroll(t *testing.T) {
 	errors.Log(ed.Lines.Open("base.go"))
 	b.AssertRender(t, "scroll-40", func() {
 		ed.scrollToCenterIfHidden(textpos.Pos{Line: 40})
+		time.Sleep(300 * time.Millisecond)
 	})
 	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 42})
 	// b.AssertRender(t, "scroll-42")
@@ -137,6 +139,7 @@ func TestEditorChange(t *testing.T) {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, mods))
 		assert.Equal(t, 1, n)
 		assert.Equal(t, "Go\n\n", text)
+		time.Sleep(300 * time.Millisecond)
 	})
 }
 
@@ -159,5 +162,6 @@ func TestEditorInput(t *testing.T) {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, 4, n)
 		assert.Equal(t, "Go\n\n", text)
+		time.Sleep(300 * time.Millisecond)
 	})
 }
