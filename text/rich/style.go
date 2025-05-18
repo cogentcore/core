@@ -13,7 +13,7 @@ import (
 	"github.com/go-text/typesetting/di"
 )
 
-//go:generate core generate -add-types -setters
+//go:generate core generate
 
 // IMPORTANT: enums must remain in sync with
 // "github.com/go-text/typesetting/font"
@@ -22,7 +22,7 @@ import (
 // Style contains all of the rich text styling properties, that apply to one
 // span of text. These are encoded into a uint32 rune value in [rich.Text].
 // See [text.Style] and [Settings] for additional context needed for full specification.
-type Style struct { //types:add
+type Style struct { //types:add -setters
 
 	// Size is the font size multiplier relative to the standard font size
 	// specified in the [text.Style].

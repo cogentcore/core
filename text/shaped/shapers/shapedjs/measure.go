@@ -7,12 +7,7 @@
 package shapedjs
 
 import (
-	"fmt"
 	"syscall/js"
-
-	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/text"
 )
 
 // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
@@ -54,19 +49,6 @@ type Metrics struct {
 	// by the CanvasRenderingContext2D.textBaseline attribute to the bottom of the
 	// bounding rectangle of all the fonts used to render the text, in CSS pixels.
 	ActualBoundingBoxDescent float32
-}
-
-func MeasureTest(txt string) {
-	ctx := js.Global().Get("document").Call("getElementById", "app").Call("getContext", "2d") // todo
-	fsty := rich.NewStyle()
-	tsty := text.NewStyle()
-	uc := units.Context{}
-	uc.Defaults()
-	tsty.ToDots(&uc)
-	fn := text.NewFont(fsty, tsty)
-	SetFontStyle(ctx, fn, tsty, 0)
-	m := MeasureText(ctx, txt)
-	fmt.Printf("%#v\n", m)
 }
 
 // MeasureText calls html canvas MeasureText functon on given canvas context,
