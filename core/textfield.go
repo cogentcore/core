@@ -26,6 +26,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
@@ -1191,7 +1192,10 @@ func init() {
 			tf.blinkOn = false
 			tf.renderCursor(false)
 		} else {
-			tf.blinkOn = !tf.blinkOn
+			// Need consistent test results on offscreen.
+			if TheApp.Platform() != system.Offscreen {
+				tf.blinkOn = !tf.blinkOn
+			}
 			tf.renderCursor(tf.blinkOn)
 		}
 	}

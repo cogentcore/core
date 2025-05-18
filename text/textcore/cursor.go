@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -36,7 +37,10 @@ func init() {
 			ed.blinkOn = false
 			ed.renderCursor(false)
 		} else {
-			ed.blinkOn = !ed.blinkOn
+			// Need consistent test results on offscreen.
+			if core.TheApp.Platform() != system.Offscreen {
+				ed.blinkOn = !ed.blinkOn
+			}
 			ed.renderCursor(ed.blinkOn)
 		}
 	}
