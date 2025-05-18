@@ -28,10 +28,6 @@ jobs:
     - name: Set up Core
       run: go install ./cmd/core && sudo apt update && core setup
 
-    # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
-    - name: Test
-      run: go test -v ./core -coverprofile cover.out -timeout 30s
-
     - name: "Install video dependencies (TODO: move to a command)"
       run: sudo add-apt-repository ppa:savoury1/ffmpeg4 && sudo apt install libswscale-dev libavcodec-dev libavformat-dev libswresample-dev libavutil-dev libasound2-dev
 
@@ -52,6 +48,10 @@ jobs:
     - name: Set CORE_UPDATE_TESTDATA env var
       if: inputs.updateTestdata
       run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
+
+    # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
+    - name: Test
+      run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
 
     - name: Upload testdata
       uses: actions/upload-artifact@v4
