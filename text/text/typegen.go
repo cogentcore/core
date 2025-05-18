@@ -3,84 +3,9 @@
 package text
 
 import (
-	"image"
-	"image/color"
-
-	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/types"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.EditorSettings", IDName: "editor-settings", Doc: "EditorSettings contains text editor settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "TabSize", Doc: "size of a tab, in chars; also determines indent level for space indent"}, {Name: "SpaceIndent", Doc: "use spaces for indentation, otherwise tabs"}, {Name: "WordWrap", Doc: "wrap lines at word boundaries; otherwise long lines scroll off the end"}, {Name: "LineNumbers", Doc: "whether to show line numbers"}, {Name: "Completion", Doc: "use the completion system to suggest options while typing"}, {Name: "SpellCorrect", Doc: "suggest corrections for unknown words while typing"}, {Name: "AutoIndent", Doc: "automatically indent lines when enter, tab, }, etc pressed"}, {Name: "EmacsUndo", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"}, {Name: "DepthColor", Doc: "colorize the background according to nesting depth"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.Style", IDName: "style", Doc: "Style is used for text layout styling.\nMost of these are inherited", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate"}}, {Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Align", Doc: "Align specifies how to align text along the default direction (inherited).\nThis *only* applies to the text within its containing element,\nand is relevant only for multi-line text."}, {Name: "AlignV", Doc: "AlignV specifies \"vertical\" (orthogonal to default direction)\nalignment of text (inherited).\nThis *only* applies to the text within its containing element:\nif that element does not have a specified size\nthat is different from the text size, then this has *no effect*."}, {Name: "FontSize", Doc: "FontSize is the default font size. The rich text styling specifies\nsizes relative to this value, with the normal text size factor = 1.\nIn the [styles.Style.Text] context, this is copied from [styles.Font.Size]."}, {Name: "LineHeight", Doc: "LineHeight is a multiplier on the default font size for spacing between lines.\nIf there are larger font elements within a line, they will be accommodated, with\nthe same amount of total spacing added above that maximum size as if it was all\nthe same height. The default of 1.3 represents standard \"single spaced\" text."}, {Name: "ParaSpacing", Doc: "ParaSpacing is the line spacing between paragraphs (inherited).\nThis will be copied from [Style.Margin] if that is non-zero,\nor can be set directly. Like [LineHeight], this is a multiplier on\nthe default font size."}, {Name: "WhiteSpace", Doc: "WhiteSpace (not inherited) specifies how white space is processed,\nand how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.\nSee info about interactions with Grow.X setting for this and the NoWrap case."}, {Name: "Direction", Doc: "Direction specifies the default text direction, which can be overridden if the\nunicode text is typically written in a different direction."}, {Name: "Indent", Doc: "Indent specifies how much to indent the first line in a paragraph (inherited)."}, {Name: "TabSize", Doc: "TabSize specifies the tab size, in number of characters (inherited)."}, {Name: "Color", Doc: "Color is the default font fill color, used for inking fonts unless otherwise\nspecified in the [rich.Style]."}, {Name: "SelectColor", Doc: "SelectColor is the color to use for the background region of selected text (inherited)."}, {Name: "HighlightColor", Doc: "HighlightColor is the color to use for the background region of highlighted text (inherited)."}, {Name: "CustomFont", Doc: "CustomFont specifies the Custom font name for rich.Style.Family = Custom."}}})
-
-// SetAlign sets the [Style.Align]:
-// Align specifies how to align text along the default direction (inherited).
-// This *only* applies to the text within its containing element,
-// and is relevant only for multi-line text.
-func (t *Style) SetAlign(v Aligns) *Style { t.Align = v; return t }
-
-// SetAlignV sets the [Style.AlignV]:
-// AlignV specifies "vertical" (orthogonal to default direction)
-// alignment of text (inherited).
-// This *only* applies to the text within its containing element:
-// if that element does not have a specified size
-// that is different from the text size, then this has *no effect*.
-func (t *Style) SetAlignV(v Aligns) *Style { t.AlignV = v; return t }
-
-// SetFontSize sets the [Style.FontSize]:
-// FontSize is the default font size. The rich text styling specifies
-// sizes relative to this value, with the normal text size factor = 1.
-// In the [styles.Style.Text] context, this is copied from [styles.Font.Size].
-func (t *Style) SetFontSize(v units.Value) *Style { t.FontSize = v; return t }
-
-// SetLineHeight sets the [Style.LineHeight]:
-// LineHeight is a multiplier on the default font size for spacing between lines.
-// If there are larger font elements within a line, they will be accommodated, with
-// the same amount of total spacing added above that maximum size as if it was all
-// the same height. The default of 1.3 represents standard "single spaced" text.
-func (t *Style) SetLineHeight(v float32) *Style { t.LineHeight = v; return t }
-
-// SetParaSpacing sets the [Style.ParaSpacing]:
-// ParaSpacing is the line spacing between paragraphs (inherited).
-// This will be copied from [Style.Margin] if that is non-zero,
-// or can be set directly. Like [LineHeight], this is a multiplier on
-// the default font size.
-func (t *Style) SetParaSpacing(v float32) *Style { t.ParaSpacing = v; return t }
-
-// SetWhiteSpace sets the [Style.WhiteSpace]:
-// WhiteSpace (not inherited) specifies how white space is processed,
-// and how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.
-// See info about interactions with Grow.X setting for this and the NoWrap case.
-func (t *Style) SetWhiteSpace(v WhiteSpaces) *Style { t.WhiteSpace = v; return t }
-
-// SetDirection sets the [Style.Direction]:
-// Direction specifies the default text direction, which can be overridden if the
-// unicode text is typically written in a different direction.
-func (t *Style) SetDirection(v rich.Directions) *Style { t.Direction = v; return t }
-
-// SetIndent sets the [Style.Indent]:
-// Indent specifies how much to indent the first line in a paragraph (inherited).
-func (t *Style) SetIndent(v units.Value) *Style { t.Indent = v; return t }
-
-// SetTabSize sets the [Style.TabSize]:
-// TabSize specifies the tab size, in number of characters (inherited).
-func (t *Style) SetTabSize(v int) *Style { t.TabSize = v; return t }
-
-// SetColor sets the [Style.Color]:
-// Color is the default font fill color, used for inking fonts unless otherwise
-// specified in the [rich.Style].
-func (t *Style) SetColor(v color.Color) *Style { t.Color = v; return t }
-
-// SetSelectColor sets the [Style.SelectColor]:
-// SelectColor is the color to use for the background region of selected text (inherited).
-func (t *Style) SetSelectColor(v image.Image) *Style { t.SelectColor = v; return t }
-
-// SetHighlightColor sets the [Style.HighlightColor]:
-// HighlightColor is the color to use for the background region of highlighted text (inherited).
-func (t *Style) SetHighlightColor(v image.Image) *Style { t.HighlightColor = v; return t }
-
-// SetCustomFont sets the [Style.CustomFont]:
-// CustomFont specifies the Custom font name for rich.Style.Family = Custom.
-func (t *Style) SetCustomFont(v rich.FontName) *Style { t.CustomFont = v; return t }
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/text/text.Style", IDName: "style", Doc: "Style is used for text layout styling.\nMost of these are inherited", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate"}}, {Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Align", Doc: "Align specifies how to align text along the default direction (inherited).\nThis *only* applies to the text within its containing element,\nand is relevant only for multi-line text."}, {Name: "AlignV", Doc: "AlignV specifies \"vertical\" (orthogonal to default direction)\nalignment of text (inherited).\nThis *only* applies to the text within its containing element:\nif that element does not have a specified size\nthat is different from the text size, then this has *no effect*."}, {Name: "FontSize", Doc: "FontSize is the default font size. The rich text styling specifies\nsizes relative to this value, with the normal text size factor = 1.\nIn the [styles.Style.Text] context, this is copied from [styles.Font.Size]."}, {Name: "LineHeight", Doc: "LineHeight is a multiplier on the default font size for spacing between lines.\nIf there are larger font elements within a line, they will be accommodated, with\nthe same amount of total spacing added above that maximum size as if it was all\nthe same height. The default of 1.3 represents standard \"single spaced\" text."}, {Name: "ParaSpacing", Doc: "ParaSpacing is the line spacing between paragraphs (inherited).\nThis will be copied from [Style.Margin] if that is non-zero,\nor can be set directly. Like [LineHeight], this is a multiplier on\nthe default font size."}, {Name: "WhiteSpace", Doc: "WhiteSpace (not inherited) specifies how white space is processed,\nand how lines are wrapped.  If set to WhiteSpaceNormal (default) lines are wrapped.\nSee info about interactions with Grow.X setting for this and the NoWrap case."}, {Name: "Direction", Doc: "Direction specifies the default text direction, which can be overridden if the\nunicode text is typically written in a different direction."}, {Name: "Indent", Doc: "Indent specifies how much to indent the first line in a paragraph (inherited)."}, {Name: "TabSize", Doc: "TabSize specifies the tab size, in number of characters (inherited)."}, {Name: "Color", Doc: "Color is the default font fill color, used for inking fonts unless otherwise\nspecified in the [rich.Style]."}, {Name: "SelectColor", Doc: "SelectColor is the color to use for the background region of selected text (inherited)."}, {Name: "HighlightColor", Doc: "HighlightColor is the color to use for the background region of highlighted text (inherited)."}, {Name: "CustomFont", Doc: "CustomFont specifies the Custom font name for rich.Style.Family = Custom."}}})

@@ -26,7 +26,7 @@ import (
 
 // Style is used for text layout styling.
 // Most of these are inherited
-type Style struct { //types:add -setters
+type Style struct { //types:add
 
 	// Align specifies how to align text along the default direction (inherited).
 	// This *only* applies to the text within its containing element,
