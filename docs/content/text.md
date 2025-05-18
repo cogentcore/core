@@ -35,6 +35,7 @@ You can also use a [[style]]r to further customize the appearance of text (see [
 ```Go
 core.NewText(b).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
     s.Font.Size.Dp(21)
+    s.Font.Weight = rich.Bold
     s.Font.Slant = rich.Italic
     s.Font.SetDecoration(rich.Underline, rich.LineThrough)
     s.Text.WhiteSpace = text.WhiteSpacePre
