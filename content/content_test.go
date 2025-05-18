@@ -7,6 +7,7 @@ package content
 import (
 	"embed"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
@@ -21,5 +22,7 @@ func TestContentSetSource(t *testing.T) {
 	b := core.NewBody()
 	ct := NewContent(b).SetSource(exampleContent)
 	_ = ct
-	b.AssertRender(t, "set-source")
+	b.AssertRender(t, "set-source", func() {
+		time.Sleep(200 * time.Millisecond) // to give the image time to load for stable test results
+	})
 }
