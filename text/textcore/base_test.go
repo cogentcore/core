@@ -19,17 +19,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestBase(t *testing.T) {
-// 	b := core.NewBody()
-// 	NewBase(b)
-// 	b.AssertRender(t, "basic")
-// }
-//
-// func TestBaseSetText(t *testing.T) {
-// 	b := core.NewBody()
-// 	NewBase(b).Lines.SetString("Hello, world!")
-// 	b.AssertRender(t, "set-text")
-// }
+func TestBase(t *testing.T) {
+	b := core.NewBody()
+	NewBase(b)
+	b.AssertRender(t, "basic")
+}
+
+func TestBaseSetText(t *testing.T) {
+	b := core.NewBody()
+	NewBase(b).Lines.SetString("Hello, world!")
+	b.AssertRender(t, "set-text")
+}
 
 func TestBaseLayout(t *testing.T) {
 	b := core.NewBody()
@@ -55,29 +55,29 @@ func TestBaseTabs(t *testing.T) {
 	b.AssertRender(t, "tabs1")
 }
 
-// func TestBaseSetLanguage(t *testing.T) {
-// 	b := core.NewBody()
-// 	ed := NewBase(b)
-// 	ed.Lines.SetLanguage(fileinfo.Go).SetString(`package main
+func TestBaseSetLanguage(t *testing.T) {
+	b := core.NewBody()
+	ed := NewBase(b)
+	ed.Lines.SetLanguage(fileinfo.Go).SetString(`package main
 //
-// func main() {
-//     fmt.Println("Hello, world!")
-// }
-// `)
-// 	ed.Styler(func(s *styles.Style) {
-// 		s.Min.X.Em(29)
-// 	})
-// 	b.AssertRender(t, "set-lang")
-// }
+func main() {
+    fmt.Println("Hello, world!")
+}
+`)
+	ed.Styler(func(s *styles.Style) {
+		s.Min.X.Em(29)
+	})
+	b.AssertRender(t, "set-lang")
+}
 
 //go:embed base.go
 var myFile embed.FS
 
-// func TestBaseOpenFS(t *testing.T) {
-// 	b := core.NewBody()
-// 	errors.Log(NewBase(b).Lines.OpenFS(myFile, "base.go"))
-// 	b.AssertRender(t, "open-fs")
-// }
+func TestBaseOpenFS(t *testing.T) {
+	b := core.NewBody()
+	errors.Log(NewBase(b).Lines.OpenFS(myFile, "base.go"))
+	b.AssertRender(t, "open-fs")
+}
 
 func TestBaseOpen(t *testing.T) {
 	b := core.NewBody()

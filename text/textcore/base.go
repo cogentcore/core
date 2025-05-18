@@ -304,17 +304,12 @@ func (ed *Base) resetState() {
 
 // SendInput sends the [events.Input] event, for fine-grained updates.
 func (ed *Base) SendInput() {
-	ed.Send(events.Input, nil)
+	ed.Send(events.Input)
 }
-
-// SendChange sends the [events.Change] event, for big changes.
-// func (ed *Base) SendChange() {
-// 	ed.Send(events.Change, nil)
-// }
 
 // SendClose sends the [events.Close] event, when lines buffer is closed.
 func (ed *Base) SendClose() {
-	ed.Send(events.Close, nil)
+	ed.Send(events.Close)
 }
 
 // SetLines sets the [lines.Lines] that this is an editor of,
