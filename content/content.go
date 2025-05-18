@@ -276,7 +276,11 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	}))
 	ct.categories = maps.Keys(ct.pagesByCategory)
 	slices.SortFunc(ct.categories, func(a, b string) int {
-		return cmp.Compare(len(ct.pagesByCategory[b]), len(ct.pagesByCategory[a]))
+		v := cmp.Compare(len(ct.pagesByCategory[b]), len(ct.pagesByCategory[a]))
+		if v != 0 {
+			return v
+		}
+		return cmp.Compare(a, b)
 	})
 
 	if url := ct.getWebURL(); url != "" {
