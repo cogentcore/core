@@ -682,7 +682,7 @@ func (w *renderWindow) renderWindow() {
 		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
-		if true || DebugSettings.WindowRenderTrace {
+		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
 		return

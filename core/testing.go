@@ -40,10 +40,8 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 		b.waitNoEvents(rw)
 	}
 
-	// b.AsyncLock()
-	// rw.mains.updateAll()
-	// rw.mains.runDeferred()
-	// b.AsyncUnlock()
+	// Ensure that everything is updated and rendered. If there are no changes,
+	// the performance impact is minimal.
 	for range 10 {
 		rw.renderWindow()
 	}
