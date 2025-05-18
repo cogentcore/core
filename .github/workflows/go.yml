@@ -46,7 +46,7 @@ jobs:
         if_no_artifact_found: warn
 
     - name: Set CORE_UPDATE_TESTDATA env var
-      # if: inputs.updateTestdata
+      if: inputs.updateTestdata
       run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
 
     # TODO: we can't test gpu, xyz, system, and video on the CI since there is bad Vulkan support
