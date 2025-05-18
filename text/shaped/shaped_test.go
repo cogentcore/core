@@ -52,42 +52,51 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 
 func TestFontMapper(t *testing.T) {
 	RunTest(t, "fontmapper", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		sty := rich.NewStyle()
-		// sty.Family = rich.Monospace // everything works fine with Monospace
-		med := *sty
-		med.Weight = rich.Medium
-		medit := med
-		medit.Slant = rich.Italic
-		bold := *sty
-		bold.Weight = rich.Bold
-		it := *sty
-		it.Slant = rich.Italic
-		boldit := bold
-		boldit.Slant = rich.Italic
-
-		tx := rich.NewText(sty, []rune("This is Normal\n"))
-		tx.AddSpan(&med, []rune("This is Medium\n"))
-		tx.AddSpan(&bold, []rune("This is Bold\n"))
-		tx.AddSpan(&it, []rune("This is Italic\n"))
-		tx.AddSpan(&medit, []rune("This is Medium Italic\n"))
-		tx.AddSpan(&boldit, []rune("This is Bold Italic"))
-		// fmt.Println(tx)
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
-		pos := math32.Vec2(10, 10)
-		pc.DrawText(lns, pos)
-
-		weights := []font.Weight{400, 500, 700, 400, 500, 700}
-
-		for li := range lns.Lines {
-			ln := &lns.Lines[li]
-			d := ln.Runs[0].(*shapedgt.Run).Output.Face.Describe()
-			fmt.Println(li, d)
-			assert.Equal(t, "Noto Sans", d.Family)
-			assert.Equal(t, weights[li], d.Aspect.Weight)
-			if li >= 3 {
-				assert.Equal(t, font.StyleItalic, d.Aspect.Style)
+		fname := "Noto Sans"
+		for i := range 2 {
+			sty := rich.NewStyle()
+			var tx rich.Text
+			if i == 1 {
+				sty.Family = rich.Monospace
+				tx = rich.NewText(sty, []rune("This is Monospace\n"))
+				fname = "Roboto Mono"
 			} else {
-				assert.Equal(t, font.StyleNormal, d.Aspect.Style)
+				tx = rich.NewText(sty, []rune("This is Normal\n"))
+			}
+			med := *sty
+			med.Weight = rich.Medium
+			medit := med
+			medit.Slant = rich.Italic
+			bold := *sty
+			bold.Weight = rich.Bold
+			it := *sty
+			it.Slant = rich.Italic
+			boldit := bold
+			boldit.Slant = rich.Italic
+
+			tx.AddSpan(&med, []rune("This is Medium\n"))
+			tx.AddSpan(&bold, []rune("This is Bold\n"))
+			tx.AddSpan(&it, []rune("This is Italic\n"))
+			tx.AddSpan(&medit, []rune("This is Medium Italic\n"))
+			tx.AddSpan(&boldit, []rune("This is Bold Italic"))
+			// fmt.Println(tx)
+			lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+			pos := math32.Vec2(10, float32(10+i*150))
+			pc.DrawText(lns, pos)
+
+			weights := []font.Weight{400, 500, 700, 400, 500, 700}
+
+			for li := range lns.Lines {
+				ln := &lns.Lines[li]
+				d := ln.Runs[0].(*shapedgt.Run).Output.Face.Describe()
+				// fmt.Println(li, d)
+				assert.Equal(t, fname, d.Family)
+				assert.Equal(t, weights[li], d.Aspect.Weight)
+				if li >= 3 {
+					assert.Equal(t, font.StyleItalic, d.Aspect.Style)
+				} else {
+					assert.Equal(t, font.StyleNormal, d.Aspect.Style)
+				}
 			}
 		}
 	})
