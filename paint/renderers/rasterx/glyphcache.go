@@ -85,7 +85,7 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 
 	fsize := image.Point{X: int(g.Width.Ceil()), Y: -int(g.Height.Ceil())}
 	size := fsize.Add(image.Point{2 * glyphMaskBorder, 2 * glyphMaskBorder})
-	if size.X < 0 || size.X > glyphMaxSize || size.Y < 0 || size.Y > glyphMaxSize {
+	if size.X <= 0 || size.X > glyphMaxSize || size.Y <= 0 || size.Y > glyphMaxSize {
 		return nil, image.Point{}
 	}
 	// fmt.Println(face.Describe().Family, g.GlyphID, "wd, ht:", math32.FromFixed(g.Width), -math32.FromFixed(g.Height), "size:", size)
@@ -148,7 +148,7 @@ func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyp
 	rs.Draw()
 	rs.Clear()
 	bb := image.Rectangle{Max: size}
-	
+
 	mask := image.NewAlpha(bb)
 	draw.Draw(mask, bb, gc.image, image.Point{}, draw.Src)
 	// fmt.Println("size:", size, *mask)
