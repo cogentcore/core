@@ -19,11 +19,13 @@ import (
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/shaped"
 	. "cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	_ "cogentcore.org/core/text/shaped/shapers"
 	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
+	"github.com/go-text/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -331,13 +333,14 @@ func TestWhitespacePre(t *testing.T) {
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
+		tsty.WhiteSpace = text.WrapAsNeeded
 	})
 }
 
 func TestMediumNormal(t *testing.T) {
 	RunTest(t, "mediumnormal", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		tsty.WhiteSpace = text.WhiteSpacePre
 		sty := rich.NewStyle()
+		sty.Family = rich.Monospace
 		med := *sty
 		med.Weight = rich.Medium
 		tx := rich.NewText(sty, []rune("This is Normal\n"))
@@ -346,6 +349,15 @@ func TestMediumNormal(t *testing.T) {
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
+		
+		nl := lns.Lines[0]
+		ml := lns.Lines[1]
+		nface := nl.Runs[0].(*shapedgt.Run).Output.Face.Describe()
+		mface := ml.Runs[0].(*shapedgt.Run).Output.Face.Describe()
+		assert.Equal(t, font.Weight(400), nface.Aspect.Weight)
+		assert.Equal(t, font.Weight(500), mface.Aspect.Weight)
+		// fmt.Println("Normal:", nface)
+		// fmt.Println("Medium:", mface)
 	})
 }
 
