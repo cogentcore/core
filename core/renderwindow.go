@@ -752,7 +752,7 @@ func (w *renderWindow) renderWindow() {
 	cp.Add(SpritesSource(&top.Sprites, scpos), &top.Sprites)
 
 	w.SystemWindow.Unlock()
-	if w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
+	if TheApp.Platform() == system.Offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
 		w.flags.SetFlag(true, winIsRendering)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
