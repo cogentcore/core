@@ -16,18 +16,18 @@ import (
 )
 
 var (
-	// textcoreBlinker manages cursor blinking
-	textcoreBlinker = core.Blinker{}
+	// blinker manages cursor blinking
+	blinker = core.Blinker{}
 
-	// textcoreSpriteName is the name of the window sprite used for the cursor
-	textcoreSpriteName = "textcore.Base.Cursor"
+	// blinkerSpriteName is the name of the window sprite used for the cursor
+	blinkerSpriteName = "textcore.Base.Cursor"
 )
 
 func init() {
-	core.TheApp.AddQuitCleanFunc(textcoreBlinker.QuitClean)
-	textcoreBlinker.Func = func() {
-		w := textcoreBlinker.Widget
-		textcoreBlinker.Unlock() // comes in locked
+	core.TheApp.AddQuitCleanFunc(blinker.QuitClean)
+	blinker.Func = func() {
+		w := blinker.Widget
+		blinker.Unlock() // comes in locked
 		if w == nil {
 			return
 		}
@@ -55,8 +55,8 @@ func (ed *Base) startCursor() {
 	if core.SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	textcoreBlinker.SetWidget(ed.This.(core.Widget))
-	textcoreBlinker.Blink(core.SystemSettings.CursorBlinkTime)
+	blinker.SetWidget(ed.This.(core.Widget))
+	blinker.Blink(core.SystemSettings.CursorBlinkTime)
 }
 
 // clearCursor turns off cursor and stops it from blinking
@@ -70,7 +70,7 @@ func (ed *Base) stopCursor() {
 	if ed == nil || ed.This == nil {
 		return
 	}
-	textcoreBlinker.ResetWidget(ed.This.(core.Widget))
+	blinker.ResetWidget(ed.This.(core.Widget))
 }
 
 // cursorBBox returns a bounding-box for a cursor at given position
@@ -115,7 +115,7 @@ func (ed *Base) renderCursor(on bool) {
 
 // cursorSpriteName returns the name of the cursor sprite
 func (ed *Base) cursorSpriteName() string {
-	spnm := fmt.Sprintf("%v-%v", textcoreSpriteName, ed.charSize.Y)
+	spnm := fmt.Sprintf("%v-%v", blinkerSpriteName, ed.charSize.Y)
 	return spnm
 }
 
