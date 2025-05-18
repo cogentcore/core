@@ -50,9 +50,14 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	img := dw.(getImager).GetImage()
 	imagex.Assert(t, img, filename)
 
-	b.AsyncLock()
+	// When closing the scene, our access to the render context stops working,
+	// so using normal AsyncLock and AsyncUnlock will lead to AsyncLock failing.
+	// That leaves the lock on, which prevents the WinClose event from being
+	// received. Therefore, we get the rc ahead of time.
+	rc := b.Scene.renderContext()
+	rc.Lock()
 	b.Close()
-	b.AsyncUnlock()
+	rc.Unlock()
 }
 
 // runAndShowNewWindow runs a new window and waits for it to be shown.
