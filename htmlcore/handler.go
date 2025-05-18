@@ -144,7 +144,7 @@ func handleElement(ctx *Context) {
 			} else {
 				ed = New[textcore.Editor](ctx)
 				if id != "" {
-					ed.Name = id
+					ed.SetName(id)
 				}
 				parent = ed.Parent
 			}
@@ -239,15 +239,25 @@ func handleElement(ctx *Context) {
 		n := ctx.Node
 		src := GetAttr(n, "src")
 		alt := GetAttr(n, "alt")
+		pid := ""
+		if ctx.BlockParent != nil {
+			pid = GetAttr(n.Parent, "id")
+		}
 		// Can be either image or svg.
 		var img *core.Image
 		var svg *core.SVG
 		if strings.HasSuffix(src, ".svg") {
 			svg = New[core.SVG](ctx)
 			svg.SetTooltip(alt)
+			if pid != "" {
+				svg.SetName(pid)
+			}
 		} else {
 			img = New[core.Image](ctx)
 			img.SetTooltip(alt)
+			if pid != "" {
+				img.SetName(pid)
+			}
 		}
 
 		go func() {
