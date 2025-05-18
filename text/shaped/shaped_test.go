@@ -5,7 +5,9 @@
 package shaped_test
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -14,6 +16,7 @@ import (
 	"cogentcore.org/core/paint"
 	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
@@ -340,7 +343,7 @@ func TestWhitespacePre(t *testing.T) {
 func TestMediumNormal(t *testing.T) {
 	RunTest(t, "mediumnormal", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		sty := rich.NewStyle()
-		sty.Family = rich.Monospace
+		sty.Family = rich.Monospace // everything works fine with Monospace
 		med := *sty
 		med.Weight = rich.Medium
 		tx := rich.NewText(sty, []rune("This is Normal\n"))
@@ -359,5 +362,18 @@ func TestMediumNormal(t *testing.T) {
 		// fmt.Println("Normal:", nface)
 		// fmt.Println("Medium:", mface)
 	})
+}
+
+func TestFontList(t *testing.T) {
+	t.Skip("debugging")
+	ts := shapedgt.NewShaper().(*shapedgt.Shaper)
+	finf := ts.FontList()
+	slices.SortFunc(finf, func(a, b fonts.Info) int {
+		return cmp.Compare(a.Family, b.Family)
+	})
+	for i := range finf {
+		fi := &finf[i]
+		fmt.Println(fi.Family, "Weight:", fi.Weight, "Slant:", fi.Slant)
+	}
 }
 
