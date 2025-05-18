@@ -142,7 +142,6 @@ func TestEditorChange(t *testing.T) {
 }
 
 func TestEditorInput(t *testing.T) {
-	t.Skip("not reliable now")
 	b := core.NewBody()
 	ed := NewEditor(b)
 	n := 0

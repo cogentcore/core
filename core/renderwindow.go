@@ -648,8 +648,10 @@ func (w *renderWindow) renderWindow() {
 		return
 	}
 
+	offscreen := TheApp.Platform() == system.Offscreen
+
 	sinceResize := time.Since(w.lastResize)
-	if sinceResize < 100*time.Millisecond {
+	if !offscreen && sinceResize < 100*time.Millisecond {
 		// get many rapid updates during resizing, so just rerender last one if so.
 		// this works best in practice after a lot of experimentation.
 		w.flags.SetFlag(true, winRenderSkipped)
@@ -680,7 +682,7 @@ func (w *renderWindow) renderWindow() {
 		}
 	}
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
-		if DebugSettings.WindowRenderTrace {
+		if true || DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
 		return
@@ -752,7 +754,7 @@ func (w *renderWindow) renderWindow() {
 	cp.Add(SpritesSource(&top.Sprites, scpos), &top.Sprites)
 
 	w.SystemWindow.Unlock()
-	if TheApp.Platform() == system.Offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
+	if offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
 		w.flags.SetFlag(true, winIsRendering)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {

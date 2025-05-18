@@ -40,11 +40,13 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 		b.waitNoEvents(rw)
 	}
 
-	b.AsyncLock()
-	rw.mains.updateAll()
-	rw.mains.runDeferred()
-	b.AsyncUnlock()
-	rw.renderWindow()
+	// b.AsyncLock()
+	// rw.mains.updateAll()
+	// rw.mains.runDeferred()
+	// b.AsyncUnlock()
+	for range 10 {
+		rw.renderWindow()
+	}
 
 	dw := b.Scene.RenderWindow().SystemWindow.Composer().(*composer.ComposerDrawer).Drawer
 	img := dw.(getImager).GetImage()
