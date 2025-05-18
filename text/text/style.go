@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/text/rich"
 )
 
-//go:generate core generate -add-types -setters
+//go:generate core generate
 
 // IMPORTANT: any changes here must be updated in props.go
 
@@ -26,7 +26,7 @@ import (
 
 // Style is used for text layout styling.
 // Most of these are inherited
-type Style struct { //types:add
+type Style struct { //types:add -setters
 
 	// Align specifies how to align text along the default direction (inherited).
 	// This *only* applies to the text within its containing element,

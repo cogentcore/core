@@ -202,7 +202,7 @@ func (ed *Base) Init() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(false, abilities.ScrollableUnattended)
 		ed.CursorWidth.Dp(1)
-		ed.LineNumberColor = colors.Uniform(colors.Transparent)
+		ed.LineNumberColor = nil
 		ed.SelectColor = colors.Scheme.Select.Container
 		ed.HighlightColor = colors.Scheme.Warn.Container
 		ed.CursorColor = colors.Scheme.Primary.Base
