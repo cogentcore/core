@@ -343,7 +343,7 @@ func TestWhitespacePre(t *testing.T) {
 func TestMediumNormal(t *testing.T) {
 	RunTest(t, "mediumnormal", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
 		sty := rich.NewStyle()
-		sty.Family = rich.Monospace // everything works fine with Monospace
+		// sty.Family = rich.Monospace // everything works fine with Monospace
 		med := *sty
 		med.Weight = rich.Medium
 		tx := rich.NewText(sty, []rune("This is Normal\n"))
@@ -359,8 +359,8 @@ func TestMediumNormal(t *testing.T) {
 		mface := ml.Runs[0].(*shapedgt.Run).Output.Face.Describe()
 		assert.Equal(t, font.Weight(400), nface.Aspect.Weight)
 		assert.Equal(t, font.Weight(500), mface.Aspect.Weight)
-		// fmt.Println("Normal:", nface)
-		// fmt.Println("Medium:", mface)
+		fmt.Println("Normal:", nface)
+		fmt.Println("Medium:", mface)
 	})
 }
 
