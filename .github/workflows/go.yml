@@ -25,6 +25,10 @@ jobs:
       with:
         go-version: '1.23.4'
 
+    # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
+    - name: Test
+      run: go test -v ./core -coverprofile cover.out -timeout 30s
+
     - name: Set up Core
       run: go install ./cmd/core && sudo apt update && core setup
 
@@ -48,10 +52,6 @@ jobs:
     - name: Set CORE_UPDATE_TESTDATA env var
       if: inputs.updateTestdata
       run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
-
-    # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
-    - name: Test
-      run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
 
     - name: Upload testdata
       uses: actions/upload-artifact@v4
