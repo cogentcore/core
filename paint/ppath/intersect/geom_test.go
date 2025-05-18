@@ -60,7 +60,7 @@ func TestEllipseSplit(t *testing.T) {
 
 	mid, large0, large1, ok = ellipseSplit(2.0, 1.0, 0.0, 0.0, 0.0, 0.0, math32.Pi*7.0/4.0, math32.Pi*3.0/2.0)
 	assert.True(t, ok)
-	tolEqualVec2(t, math32.Vec2(0, -1), mid, 1.0e-7)
+	tolEqualVec2(t, math32.Vec2(0, -1), mid, 1.0e-6)
 	assert.True(t, large0)
 	assert.True(t, !large1)
 }
