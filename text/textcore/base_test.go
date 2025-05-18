@@ -96,10 +96,9 @@ func TestBaseScroll(t *testing.T) {
 		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open("base.go"))
-	ed.OnShow(func(e events.Event) {
+	b.AssertRender(t, "scroll-40", func() {
 		ed.scrollToCenterIfHidden(textpos.Pos{Line: 40})
 	})
-	b.AssertRender(t, "scroll-40")
 	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 42})
 	// b.AssertRender(t, "scroll-42")
 	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 20})

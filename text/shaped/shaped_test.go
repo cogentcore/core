@@ -22,13 +22,13 @@ import (
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/shaped"
 	. "cogentcore.org/core/text/shaped"
-	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	_ "cogentcore.org/core/text/shaped/shapers"
+	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/language"
 	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/language"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -352,7 +352,7 @@ func TestMediumNormal(t *testing.T) {
 		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
-		
+
 		nl := lns.Lines[0]
 		ml := lns.Lines[1]
 		nface := nl.Runs[0].(*shapedgt.Run).Output.Face.Describe()
@@ -366,6 +366,8 @@ func TestMediumNormal(t *testing.T) {
 
 func TestFontList(t *testing.T) {
 	t.Skip("debugging")
+	// note: there is no exported api for getting the actual fonts
+	// used in go-text, fontscan.FontMap
 	ts := shapedgt.NewShaper().(*shapedgt.Shaper)
 	finf := ts.FontList()
 	slices.SortFunc(finf, func(a, b fonts.Info) int {
@@ -376,4 +378,3 @@ func TestFontList(t *testing.T) {
 		fmt.Println(fi.Family, "Weight:", fi.Weight, "Slant:", fi.Slant)
 	}
 }
-
