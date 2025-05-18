@@ -42,8 +42,11 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 
 	// Ensure that everything is updated and rendered. If there are no changes,
 	// the performance impact is minimal.
-	for range 10 {
+	for range 10 { // note: 10 is essential for textcore tests
 		rw.renderWindow()
+		b.AsyncLock()
+		rw.mains.runDeferred()
+		b.AsyncUnlock()
 	}
 
 	dw := b.Scene.RenderWindow().SystemWindow.Composer().(*composer.ComposerDrawer).Drawer
