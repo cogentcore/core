@@ -154,7 +154,7 @@ func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
 	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.VisBBox = sv.Geom.Bounds().Intersect(g.BBox)
 }
 
 func (g *Text) Render(sv *SVG) {

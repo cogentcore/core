@@ -282,6 +282,8 @@ func (sv *SVG) SetRootTransform() {
 	if vb.Size.Y == 0 {
 		vb.Size.Y = sv.PhysicalHeight.Dots
 	}
+	pc := &sv.Root.Paint
+	tr := pc.Transform.Translate(float32(sv.Geom.Pos.X), float32(sv.Geom.Pos.Y))
 	_, trans, scale := vb.Transform(box)
 	if sv.InvertY {
 		scale.Y *= -1
@@ -289,11 +291,11 @@ func (sv *SVG) SetRootTransform() {
 	trans.SetSub(vb.Min)
 	trans.SetAdd(sv.Translate)
 	scale.SetMulScalar(sv.Scale)
-	pc := &sv.Root.Paint
-	pc.Transform = pc.Transform.Scale(scale.X, scale.Y).Translate(trans.X, trans.Y)
+	rt := math32.Scale2D(scale.X, scale.Y).Translate(trans.X, trans.Y)
 	if sv.InvertY {
-		pc.Transform.Y0 = -pc.Transform.Y0
+		rt.Y0 = -rt.Y0
 	}
+	pc.Transform = tr.Mul(rt)
 }
 
 // SetDPITransform sets a scaling transform to compensate for

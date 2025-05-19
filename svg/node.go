@@ -401,7 +401,7 @@ func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
 	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.VisBBox = sv.Geom.Bounds().Intersect(g.BBox)
 }
 
 // IsVisible checks our bounding box and visibility, returning false if
@@ -412,7 +412,7 @@ func (g *NodeBase) IsVisible(sv *SVG) bool {
 	}
 	nvis := g.VisBBox == image.Rectangle{}
 	if nvis && !g.isDef {
-		// fmt.Println("invisible:", g.Name, g.BBox, g.VisBBox)
+		// fmt.Println("invisible:", g.Name, "bb:", g.BBox, "vbb:", g.VisBBox, "svg:", sv.Geom.Bounds())
 		return false
 	}
 	return true
@@ -449,7 +449,7 @@ func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 		}
 	}
 	g.BBox = bb
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.VisBBox = sv.Geom.Bounds().Intersect(g.BBox)
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
