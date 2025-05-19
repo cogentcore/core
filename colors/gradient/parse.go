@@ -126,10 +126,14 @@ func FromAny(val any, ctx ...colors.Context) (image.Image, error) {
 	switch v := val.(type) {
 	case color.Color:
 		return colors.Uniform(v), nil
+	case *color.Color:
+		return colors.Uniform(*v), nil
 	case image.Image:
 		return v, nil
 	case string:
 		return FromString(v, ctx...)
+	case *string:
+		return FromString(*v, ctx...)
 	}
 	return nil, fmt.Errorf("gradient.FromAny: got unsupported type %T", val)
 }

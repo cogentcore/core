@@ -154,31 +154,51 @@ type Sprites struct {
 	sync.Mutex
 }
 
-// Add adds sprite to list, and returns the image index and
-// layer index within that for given sprite.  If name already
-// exists on list, then it is returned, with size allocation
-// updated as needed.
+// Add adds sprite to the map of sprites, updating if already there.
+// This version locks the sprites: see also [Sprites.AddLocked].
 func (ss *Sprites) Add(sp *Sprite) {
 	ss.Lock()
+	ss.AddLocked(sp)
+	ss.Unlock()
+}
+
+// AddLocked adds sprite to the map of sprites, updating if already there.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) AddLocked(sp *Sprite) {
 	ss.Init()
 	ss.Map.Add(sp.Name, sp)
 	ss.modified = true
-	ss.Unlock()
 }
 
-// Delete deletes sprite by name, returning indexes where it was located.
-// All sprite images must be updated when this occurs, as indexes may have shifted.
+// Delete deletes given sprite from map.
+// This version locks the sprites: see also [Sprites.DeleteLocked].
 func (ss *Sprites) Delete(sp *Sprite) {
 	ss.Lock()
-	ss.DeleteKey(sp.Name)
-	ss.modified = true
+	ss.DeleteLocked(sp)
 	ss.Unlock()
 }
 
-// SpriteByName returns the sprite by name
+// DeleteLocked deletes given sprite from map.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) DeleteLocked(sp *Sprite) {
+	ss.DeleteKey(sp.Name)
+	ss.modified = true
+}
+
+// SpriteByName returns the sprite by name.
+// This version locks the sprites: see also [Sprites.SpriteByNameLocked].
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 	ss.Lock()
 	defer ss.Unlock()
+	return ss.SpriteByNameLocked(name)
+}
+
+// SpriteByNameLocked returns the sprite by name
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) SpriteByNameLocked(name string) (*Sprite, bool) {
 	return ss.ValueByKeyTry(name)
 }
 
@@ -190,32 +210,46 @@ func (ss *Sprites) reset() {
 	ss.Unlock()
 }
 
-// ActivateSprite flags the sprite as active, setting Modified if wasn't before.
-func (ss *Sprites) ActivateSprite(name string) {
-	sp, ok := ss.SpriteByName(name)
-	if !ok {
-		return // not worth bothering about errs -- use a consistent string var!
-	}
+// ActivateSprite flags the sprite(s) as active, setting Modified if wasn't before.
+// This version locks the sprites: see also [Sprites.ActivateSpriteLocked].
+func (ss *Sprites) ActivateSprite(name ...string) {
 	ss.Lock()
-	if !sp.Active {
-		sp.Active = true
-		ss.modified = true
-	}
+	ss.ActivateSpriteLocked(name...)
 	ss.Unlock()
 }
 
-// InactivateSprite flags the sprite as inactive, setting Modified if wasn't before.
-func (ss *Sprites) InactivateSprite(name string) {
-	sp, ok := ss.SpriteByName(name)
-	if !ok {
-		return // not worth bothering about errs -- use a consistent string var!
+// ActivateSpriteLocked flags the sprite(s) as active, setting Modified if wasn't before.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) ActivateSpriteLocked(name ...string) {
+	for _, nm := range name {
+		sp, ok := ss.SpriteByNameLocked(nm)
+		if ok && !sp.Active {
+			sp.Active = true
+			ss.modified = true
+		}
 	}
+}
+
+// InactivateSprite flags the sprite(s) as inactive, setting Modified if wasn't before.
+// This version locks the sprites: see also [Sprites.InactivateSpriteLocked].
+func (ss *Sprites) InactivateSprite(name ...string) {
 	ss.Lock()
-	if sp.Active {
-		sp.Active = false
-		ss.modified = true
-	}
+	ss.InactivateSpriteLocked(name...)
 	ss.Unlock()
+}
+
+// InactivateSpriteLocked flags the sprite(s) as inactive, setting Modified if wasn't before.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) InactivateSpriteLocked(name ...string) {
+	for _, nm := range name {
+		sp, ok := ss.SpriteByNameLocked(nm)
+		if ok && sp.Active {
+			sp.Active = false
+			ss.modified = true
+		}
+	}
 }
 
 // IsModified returns whether the sprites have been modified.
