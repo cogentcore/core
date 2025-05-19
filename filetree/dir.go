@@ -4,7 +4,12 @@
 
 package filetree
 
-import "sync"
+import (
+	"os"
+	"path/filepath"
+	"slices"
+	"sync"
+)
 
 // dirFlags are flags on directories: Open, SortBy, etc.
 // These flags are stored in the DirFlagMap for persistence.
@@ -24,22 +29,20 @@ const (
 	dirSortByModTime
 )
 
-// DirFlagMap is a map for encoding directories that are open in the file
-// tree.  The strings are typically relative paths.  The bool value is used to
-// mark active paths and inactive (unmarked) ones can be removed.
-// Map access is protected by Mutex.
+// DirFlagMap is a map for encoding open directories and sorting preferences.
+// The strings are typically relative paths. Map access is protected by Mutex.
 type DirFlagMap struct {
 
 	// map of paths and associated flags
 	Map map[string]dirFlags
 
 	// mutex for accessing map
-	mu sync.Mutex
+	sync.Mutex
 }
 
-// init initializes the map, and sets the Mutex lock -- must unlock manually
+// init initializes the map, and sets the Mutex lock; must unlock manually.
 func (dm *DirFlagMap) init() {
-	dm.mu.Lock()
+	dm.Lock()
 	if dm.Map == nil {
 		dm.Map = make(map[string]dirFlags)
 	}
@@ -48,7 +51,7 @@ func (dm *DirFlagMap) init() {
 // isOpen returns true if path has isOpen bit flag set
 func (dm *DirFlagMap) isOpen(path string) bool {
 	dm.init()
-	defer dm.mu.Unlock()
+	defer dm.Unlock()
 	if df, ok := dm.Map[path]; ok {
 		return df.HasFlag(dirIsOpen)
 	}
@@ -58,7 +61,7 @@ func (dm *DirFlagMap) isOpen(path string) bool {
 // SetOpenState sets the given directory's open flag
 func (dm *DirFlagMap) setOpen(path string, open bool) {
 	dm.init()
-	defer dm.mu.Unlock()
+	defer dm.Unlock()
 	df := dm.Map[path]
 	df.SetFlag(open, dirIsOpen)
 	dm.Map[path] = df
@@ -67,7 +70,7 @@ func (dm *DirFlagMap) setOpen(path string, open bool) {
 // sortByName returns true if path is sorted by name (default if not in map)
 func (dm *DirFlagMap) sortByName(path string) bool {
 	dm.init()
-	defer dm.mu.Unlock()
+	defer dm.Unlock()
 	if df, ok := dm.Map[path]; ok {
 		return df.HasFlag(dirSortByName)
 	}
@@ -77,7 +80,7 @@ func (dm *DirFlagMap) sortByName(path string) bool {
 // sortByModTime returns true if path is sorted by mod time
 func (dm *DirFlagMap) sortByModTime(path string) bool {
 	dm.init()
-	defer dm.mu.Unlock()
+	defer dm.Unlock()
 	if df, ok := dm.Map[path]; ok {
 		return df.HasFlag(dirSortByModTime)
 	}
@@ -87,7 +90,7 @@ func (dm *DirFlagMap) sortByModTime(path string) bool {
 // setSortBy sets the given directory's sort by option
 func (dm *DirFlagMap) setSortBy(path string, modTime bool) {
 	dm.init()
-	defer dm.mu.Unlock()
+	defer dm.Unlock()
 	df := dm.Map[path]
 	if modTime {
 		df.SetFlag(true, dirSortByModTime)
@@ -97,4 +100,43 @@ func (dm *DirFlagMap) setSortBy(path string, modTime bool) {
 		df.SetFlag(true, dirSortByName)
 	}
 	dm.Map[path] = df
+}
+
+// openPaths returns a list of open paths
+func (dm *DirFlagMap) openPaths(root string) []string {
+	dm.init()
+	defer dm.Unlock()
+
+	var paths []string
+	for fn, df := range dm.Map {
+		if !df.HasFlag(dirIsOpen) {
+			continue
+		}
+		fpath := filepath.Join(root, fn)
+		_, err := os.Stat(fpath)
+		if err != nil {
+			delete(dm.Map, fn)
+			continue
+		}
+		rootClosed := false
+		par := fn
+		for {
+			par = filepath.Dir(par)
+			if par == "" || par == "." {
+				break
+			}
+			if pdf, ook := dm.Map[par]; ook {
+				if !pdf.HasFlag(dirIsOpen) {
+					rootClosed = true
+					break
+				}
+			}
+		}
+		if rootClosed {
+			continue
+		}
+		paths = append(paths, fpath)
+	}
+	slices.Sort(paths)
+	return paths
 }

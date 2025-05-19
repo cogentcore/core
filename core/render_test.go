@@ -38,7 +38,7 @@ func TestRenderParentBorderRadius(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/989
 func TestRenderParentBorderRadiusVerticalToolbar(t *testing.T) {
 	b := NewBody()
-	b.Scene.renderBBoxes = true
+	// b.Scene.renderBBoxes = true
 	b.Styler(func(s *styles.Style) {
 		s.Min.Y.Em(10)
 	})
@@ -60,7 +60,7 @@ func TestRenderParentBorderRadiusVerticalToolbar(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/989
 func TestRenderParentBorderRadiusHorizontalToolbar(t *testing.T) {
 	b := NewBody()
-	b.Scene.renderBBoxes = true
+	// b.Scene.renderBBoxes = true
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Em(10)
 	})

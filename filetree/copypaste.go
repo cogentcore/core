@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/textcore"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,
@@ -216,7 +216,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
-				texteditor.DiffFiles(fn, tpath, srcpath)
+				textcore.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
 				fsx.CopyFile(tpath, srcpath, mode)
@@ -232,11 +232,11 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Diff to target").OnClick(func(e events.Event) {
-				texteditor.DiffFiles(fn, tpath, srcpath)
+				textcore.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Diff to existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.Filepath), fname)
-				texteditor.DiffFiles(fn, npath, srcpath)
+				textcore.DiffFiles(fn, npath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
 				fsx.CopyFile(tpath, srcpath, mode)
@@ -259,7 +259,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		d.AddBottomBar(func(bar *core.Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
-				texteditor.DiffFiles(fn, tpath, srcpath)
+				textcore.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
 				fsx.CopyFile(tpath, srcpath, mode)
@@ -301,6 +301,6 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 			continue
 		}
 		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.Path(), sfn.FPath)
-		sfn.deleteFile()
+		sfn.DeleteFile()
 	}
 }

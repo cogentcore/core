@@ -6,6 +6,14 @@ This is a sample _MD_ (markdown) **document** displayed using `htmlcore`.
 
 This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), which you can _click_ on to see helpful **documentation** and examples for the *Cogent Core* framework.
 
+You can include math: $ a = f(x^2) $ inline and:
+
+$$
+y = \frac{1}{N} \left( \sum_{i=0}^{100} \frac{f(x^2)}{\sum x^2} \right)
+$$
+
+as a standalone item.
+
 # Heading 1
 ## Heading 2
 ### Heading 3
@@ -34,6 +42,13 @@ This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), 
     2. Sub list item 2
 
 
+* List item that has indented item below it.
+
+	Indented list item that should follow the indentation from above but not have a *
+
+> quote element
+	
+	
 ### This is a code block:
 
 ```go
@@ -46,10 +61,50 @@ func main() {
 }
 ```
 
+### This is a collapsed code block:
+
+{collapsed="true"}
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+```
+
 ### This is an image of the Go Gopher: 
 
+{style="height:10em"}
 ![Image of the Go Gopher](https://miro.medium.com/v2/resize:fit:1000/0*YISbBYJg5hkJGcQd.png)
 
 <h3 style="color:red">This is some HTML:</h3>
 
 <button>Click me!</button>
+
+## Divs
+
+Here is some text
+
+{style="min-height:5em;max-height:10em"}
+<div>
+
+This _text_ is in a `div`. it should be **fine**, just in a separate frame.
+
+</div>
+
+This is the text after the div.
+
+## Tables
+
+| Channel Type     | Tau (ms) |
+|------------------|----------|
+| Fast (M-type)    | 50       |
+| Medium (Slick)   | 200      |
+| Slow (Slack)     | 1000     |
+| more | 2000 |
+| and  | 100 |
+
+Here is text after the table
+

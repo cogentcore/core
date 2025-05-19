@@ -85,6 +85,12 @@ func (rt *RenderTexture) GetCurrentTexture() (*wgpu.TextureView, error) {
 	return rt.Frames[cf].view, nil
 }
 
+// GetCurrentTextureObject returns the current texture itself, not the view.
+func (rt *RenderTexture) GetCurrentTextureObject() (*Texture, error) {
+	cf := rt.curFrame
+	return rt.Frames[cf], nil
+}
+
 // ConfigFrames configures the frames, calling ReleaseFrames
 // so it is safe for re-use.
 func (rt *RenderTexture) ConfigFrames() {

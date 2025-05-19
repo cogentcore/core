@@ -17,7 +17,9 @@ import (
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
-// Toolbars are frequently added in [Body.AddTopBar].
+// Toolbars are frequently added in [Body.AddTopBar]. All toolbars use the
+// [WidgetBase.Maker] system, so you cannot directly add widgets; see
+// https://cogentcore.org/core/toolbar.
 type Toolbar struct {
 	Frame
 

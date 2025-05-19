@@ -35,7 +35,7 @@ func GoSrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("fsx.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-// Files returns all the FileInfo's for files with given extension(s) in directory
+// Files returns all the DirEntry's for files with given extension(s) in directory
 // in sorted order (if extensions are empty then all files are returned).
 // In case of error, returns nil.
 func Files(path string, extensions ...string) []fs.DirEntry {

@@ -29,6 +29,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -302,11 +303,12 @@ func (lb *ListBase) Init() {
 		}
 	})
 	lb.On(events.MouseDrag, func(e events.Event) {
-		row, idx, isValid := lb.rowFromEventPos(e)
+		row, _, isValid := lb.rowFromEventPos(e)
 		if !isValid {
 			return
 		}
-		lb.ListGrid.AutoScroll(math32.Vec2(0, float32(idx)))
+		pt := lb.PointToRelPos(e.Pos())
+		lb.ListGrid.AutoScroll(math32.FromPoint(pt))
 		prevHoverRow := lb.hoverRow
 		if !isValid {
 			lb.hoverRow = -1
@@ -530,7 +532,7 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			s.Min.Y.Em(6)
 		})
 		oc := func(e events.Event) {
-			lb.SetFocus()
+			// lb.SetFocus()
 			row, _, isValid := w.indexFromPixel(e.Pos())
 			if isValid {
 				lb.updateSelectRow(row, e.SelectMode())
@@ -637,7 +639,7 @@ func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bo
 			nd = max(nd, 3)
 			s.Min.X.Ch(nd + 2)
 			s.Padding.Right.Dp(4)
-			s.Text.Align = styles.End
+			s.Text.Align = text.End
 			s.Min.Y.Em(1)
 			s.GrowWrap = false
 		})
@@ -934,7 +936,7 @@ func (lb *ListBase) ScrollToIndexNoUpdate(idx int) bool {
 		lb.updateScroll()
 		return true
 	}
-	if idx >= lb.StartIndex+lb.VisibleRows {
+	if idx >= lb.StartIndex+(lb.VisibleRows-1) {
 		lb.StartIndex = idx - (lb.VisibleRows - 4)
 		lb.StartIndex = max(0, lb.StartIndex)
 		lb.updateScroll()
@@ -994,6 +996,9 @@ func (lb *ListBase) moveDownEvent(selMode events.SelectModes) int {
 // moveUp moves the selection up to previous idx, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (lb *ListBase) moveUp(selMode events.SelectModes) int {
+	if lb.SelectedIndex < 0 {
+		lb.SelectedIndex = lb.lastClick
+	}
 	if lb.SelectedIndex <= 0 {
 		lb.SelectedIndex = 0
 		return -1
@@ -1470,7 +1475,7 @@ func (lb *ListBase) dragStart(e events.Event) {
 	md := lb.This.(Lister).CopySelectToMime()
 	w, ok := lb.rowFirstWidget(ixs[0] - lb.StartIndex)
 	if ok {
-		lb.Scene.Events.dragStart(w, md, e)
+		lb.Scene.Events.DragStart(w, md, e)
 		e.SetHandled()
 		// } else {
 		// 	fmt.Println("List DND programmer error")
@@ -1490,7 +1495,7 @@ func (lb *ListBase) dragDrop(e events.Event) {
 		lb.saveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *Scene) {
-			lb.Scene.Events.dragMenuAddModText(m, de.DropMod)
+			lb.Scene.Events.DragMenuAddModText(m, de.DropMod)
 			lb.makePasteMenu(m, md, idx, de.DropMod, func() {
 				lb.dropFinalize(de)
 			})
@@ -1505,7 +1510,7 @@ func (lb *ListBase) dragDrop(e events.Event) {
 func (lb *ListBase) dropFinalize(de *events.DragDrop) {
 	lb.NeedsLayout()
 	lb.unselectAllIndexes()
-	lb.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
+	lb.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // dropDeleteSource handles delete source event for DropMove case
@@ -1754,6 +1759,7 @@ type ListGrid struct { //core:no-new
 
 func (lg *ListGrid) Init() {
 	lg.Frame.Init()
+	lg.handleKeyNav = false
 	lg.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
 	})
@@ -1762,22 +1768,19 @@ func (lg *ListGrid) Init() {
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	csz := lg.Frame.SizeFromChildren(iter, pass)
 	rht, err := lg.layout.rowHeight(0, 0)
+	rht += lg.layout.Gap.Y
 	if err != nil {
 		// fmt.Println("ListGrid Sizing Error:", err)
 		lg.rowHeight = 42
 	}
-	if lg.NeedsRebuild() { // rebuilding = reset
-		lg.rowHeight = rht
-	} else {
-		lg.rowHeight = rht // max(lg.rowHeight, rht) // todo: we are currently testing not having this.
-	}
+	lg.rowHeight = rht
 	if lg.rowHeight == 0 {
 		// fmt.Println("ListGrid Sizing Error: RowHeight should not be 0!", sg)
 		lg.rowHeight = 42
 	}
-	allocHt := lg.Geom.Size.Alloc.Content.Y - lg.Geom.Size.InnerSpace.Y
+	allocHt := lg.Geom.Size.Alloc.Content.Y
 	if allocHt > lg.rowHeight {
-		lg.visibleRows = int(math32.Floor(allocHt / lg.rowHeight))
+		lg.visibleRows = int(math32.Ceil(allocHt / lg.rowHeight))
 	}
 	lg.visibleRows = max(lg.visibleRows, lg.minRows)
 	minHt := lg.rowHeight * float32(lg.minRows)
@@ -1787,27 +1790,9 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	return csz
 }
 
-func (lg *ListGrid) SetScrollParams(d math32.Dims, sb *Slider) {
-	if d == math32.X {
-		lg.Frame.SetScrollParams(d, sb)
-		return
-	}
-	sb.Min = 0
-	sb.Step = 1
-	if lg.visibleRows > 0 {
-		sb.PageStep = float32(lg.visibleRows)
-	} else {
-		sb.PageStep = 10
-	}
-	sb.InputThreshold = sb.Step
-}
-
-func (lg *ListGrid) list() (Lister, *ListBase) {
+func (lg *ListGrid) list() *ListBase {
 	ls := tree.ParentByType[Lister](lg)
-	if ls == nil {
-		return nil, nil
-	}
-	return ls, ls.AsListBase()
+	return ls.AsListBase()
 }
 
 func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
@@ -1815,34 +1800,35 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		lg.Frame.ScrollChanged(d, sb)
 		return
 	}
-	_, sv := lg.list()
-	if sv == nil {
-		return
-	}
-	sv.StartIndex = int(math32.Round(sb.Value))
-	sv.Update()
+	ls := lg.list()
+	rht := lg.rowHeight
+	quo := sb.Value / rht
+	floor := math32.Floor(quo)
+	ls.StartIndex = int(floor)
+	lg.Geom.Scroll.Y = (floor - quo) * rht
+	ls.ApplyScenePos()
+	ls.UpdateTree()
+	ls.NeedsRender()
+	// ls.NeedsLayout() // needed to recompute size after resize
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
 	if d == math32.X {
 		return lg.Frame.ScrollValues(d)
 	}
-	_, sv := lg.list()
-	if sv == nil {
-		return
-	}
-	maxSize = float32(max(sv.SliceSize, 1))
-	visSize = float32(lg.visibleRows)
+	ls := lg.list()
+	maxSize = float32(max(ls.SliceSize, 1)) * lg.rowHeight
+	visSize = lg.Geom.Size.Alloc.Content.Y
 	visPct = visSize / maxSize
 	return
 }
 
 func (lg *ListGrid) updateScroll(idx int) {
-	if !lg.HasScroll[math32.Y] || lg.scrolls[math32.Y] == nil {
+	if !lg.HasScroll[math32.Y] || lg.Scrolls[math32.Y] == nil {
 		return
 	}
-	sb := lg.scrolls[math32.Y]
-	sb.SetValue(float32(idx))
+	sb := lg.Scrolls[math32.Y]
+	sb.SetValue(float32(idx) * lg.rowHeight)
 }
 
 func (lg *ListGrid) updateBackgrounds() {
@@ -1901,15 +1887,11 @@ func (lg *ListGrid) rowBackground(sel, stripe, hover bool) image.Image {
 }
 
 func (lg *ListGrid) ChildBackground(child Widget) image.Image {
-	bg := lg.Styles.ActualBackground
-	_, sv := lg.list()
-	if sv == nil {
-		return bg
-	}
+	ls := lg.list()
 	lg.updateBackgrounds()
-	row, _ := sv.widgetIndex(child)
-	si := row + sv.StartIndex
-	return lg.rowBackground(sv.indexIsSelected(si), si%2 == 1, row == sv.hoverRow)
+	row, _ := ls.widgetIndex(child)
+	si := row + ls.StartIndex
+	return lg.rowBackground(ls.indexIsSelected(si), si%2 == 1, row == ls.hoverRow)
 }
 
 func (lg *ListGrid) renderStripes() {
@@ -1920,20 +1902,20 @@ func (lg *ListGrid) renderStripes() {
 	}
 	lg.updateBackgrounds()
 
-	pc := &lg.Scene.PaintContext
+	pc := &lg.Scene.Painter
 	rows := lg.layout.Shape.Y
 	cols := lg.layout.Shape.X
 	st := pos
 	offset := 0
-	_, sv := lg.list()
+	ls := lg.list()
 	startIndex := 0
-	if sv != nil {
-		startIndex = sv.StartIndex
+	if ls != nil {
+		startIndex = ls.StartIndex
 		offset = startIndex % 2
 	}
 	for r := 0; r < rows; r++ {
 		si := r + startIndex
-		ht, _ := lg.layout.rowHeight(r, 0)
+		ht := lg.rowHeight
 		miny := st.Y
 		for c := 0; c < cols; c++ {
 			ki := r*cols + c
@@ -1949,9 +1931,9 @@ func (lg *ListGrid) renderStripes() {
 		ssz := sz
 		ssz.Y = ht
 		stripe := (r+offset)%2 == 1
-		sbg := lg.rowBackground(sv.indexIsSelected(si), stripe, r == sv.hoverRow)
+		sbg := lg.rowBackground(ls.indexIsSelected(si), stripe, r == ls.hoverRow)
 		pc.BlitBox(st, ssz, sbg)
-		st.Y += ht + lg.layout.Gap.Y
+		st.Y += ht
 	}
 }
 
@@ -1981,10 +1963,10 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	rows := lg.layout.Shape.Y
 	cols := lg.layout.Shape.X
 	st := math32.Vector2{}
+	st.Y = lg.Geom.Scroll.Y
 	got := false
 	for r := 0; r < rows; r++ {
-		ht, _ := lg.layout.rowHeight(r, 0)
-		ht += lg.layout.Gap.Y
+		ht := lg.rowHeight
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {

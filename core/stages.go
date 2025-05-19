@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/system"
 )
 
 // stages manages a stack of [Stage]s.
@@ -36,13 +37,13 @@ type stages struct {
 
 	// mutex protecting reading / updating of the Stack.
 	// Destructive stack updating gets a Write lock, else Read.
-	mu sync.RWMutex
+	sync.Mutex
 }
 
 // top returns the top-most Stage in the Stack, under Read Lock
 func (sm *stages) top() *Stage {
-	sm.mu.RLock()
-	defer sm.mu.RUnlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	sz := sm.stack.Len()
 	if sz == 0 {
@@ -67,8 +68,8 @@ func (sm *stages) uniqueName(nm string) string {
 
 // push pushes a new Stage to top, under Write lock
 func (sm *stages) push(st *Stage) {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	sm.modified = true
 	sm.stack.Add(sm.uniqueName(st.Name), st)
@@ -78,20 +79,37 @@ func (sm *stages) push(st *Stage) {
 // on Stage), returning true if found.
 // It runs under Write lock.
 func (sm *stages) deleteStage(st *Stage) bool {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	l := sm.stack.Len()
+	fullWindow := st.FullWindow
+	got := false
 	for i := l - 1; i >= 0; i-- {
 		s := sm.stack.ValueByIndex(i)
 		if st == s {
 			sm.modified = true
 			sm.stack.DeleteIndex(i, i+1)
 			st.delete()
-			return true
+			got = true
+			break
 		}
 	}
-	return false
+	if !got {
+		return false
+	}
+	// After closing a full window stage on web, the top stage behind
+	// needs to be rerendered, or else nothing will show up.
+	if fullWindow && TheApp.Platform() == system.Web {
+		sz := sm.renderWindow.mains.stack.Len()
+		if sz > 0 {
+			ts := sm.renderWindow.mains.stack.ValueByIndex(sz - 1)
+			if ts.Scene != nil {
+				ts.Scene.NeedsRender()
+			}
+		}
+	}
+	return true
 }
 
 // deleteStageAndBelow deletes given stage (removing from stack,
@@ -99,8 +117,8 @@ func (sm *stages) deleteStage(st *Stage) bool {
 // And also deletes all stages of the same type immediately below it.
 // It runs under Write lock.
 func (sm *stages) deleteStageAndBelow(st *Stage) bool {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	styp := st.Type
 
@@ -128,8 +146,8 @@ func (sm *stages) deleteStageAndBelow(st *Stage) bool {
 // moveToTop moves the given stage to the top of the stack,
 // returning true if found. It runs under Write lock.
 func (sm *stages) moveToTop(st *Stage) bool {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
@@ -148,8 +166,8 @@ func (sm *stages) moveToTop(st *Stage) bool {
 // popType pops the top-most Stage of the given type of the stack,
 // returning it or nil if none. It runs under Write lock.
 func (sm *stages) popType(typ StageTypes) *Stage {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
@@ -176,8 +194,8 @@ func (sm *stages) popDeleteType(typ StageTypes) {
 // For when Stage with Popups is Deleted, or when a RenderWindow is closed.
 // requires outer RenderContext mutex!
 func (sm *stages) deleteAll() {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	sz := sm.stack.Len()
 	if sz == 0 {
@@ -213,16 +231,20 @@ func (sm *stages) resize(rg math32.Geom2DInt) bool {
 	return resized
 }
 
-// updateAll iterates through all Stages and calls DoUpdate on them.
+// updateAll is the primary updating function to update all scenes
+// and determine if any updates were actually made.
+// This [stages] is the mains of the [renderWindow] or the popups
+// of a list of popups within a main stage.
+// It iterates through all Stages and calls doUpdate on them.
 // returns stageMods = true if any Stages have been modified (Main or Popup),
 // and sceneMods = true if any Scenes have been modified.
-// Stage calls DoUpdate on its Scene, ensuring everything is updated at the
-// Widget level.  If nothing is needed, nothing is done.
-// This is called only during RenderWindow.RenderWindow,
-// under the global RenderContext.Mu Write lock so nothing else can happen.
+// Stage calls doUpdate on its [Scene], ensuring everything is updated at the
+// Widget level. If nothing is needed, nothing is done.
+// This is called only during [renderWindow.renderWindow],
+// under the global RenderContext.Mu lock so nothing else can happen.
 func (sm *stages) updateAll() (stageMods, sceneMods bool) {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+	sm.Lock()
+	defer sm.Unlock()
 
 	stageMods = sm.modified
 	sm.modified = false

@@ -4,7 +4,10 @@
 
 package units
 
-import "cogentcore.org/core/base/reflectx"
+import (
+	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/math32"
+)
 
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels
@@ -107,13 +110,18 @@ func (uc *Context) SetSizes(vw, vh, ew, eh, pw, ph float32) bool {
 	return diff
 }
 
-// SetFont sets the context values for fonts: note these are already in raw
-// DPI dots, not points or anything else
-func (uc *Context) SetFont(em, ex, ch, rem float32) {
+// SetFont sets the context values for font based on the em size,
+// which is the nominal font height, in DPI dots.
+// This uses standard conversion factors from em. It is too unreliable
+// and complicated to get these values from the actual font itself.
+func (uc *Context) SetFont(em float32) {
+	if em == 0 {
+		em = 16
+	}
 	uc.FontEm = em
-	uc.FontEx = ex
-	uc.FontCh = ch
-	uc.FontRem = rem
+	uc.FontEx = math32.Round(0.53 * em)
+	uc.FontCh = math32.Round(0.45 * em)
+	uc.FontRem = math32.Round(uc.Dp(16))
 }
 
 // ToDotsFact returns factor needed to convert given unit into raw pixels (dots in DPI)

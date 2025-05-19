@@ -12,8 +12,10 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/fonts"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"golang.org/x/exp/maps"
@@ -184,7 +186,7 @@ func (ib *IconButton) Init() {
 
 // FontName is used to specify a font family name.
 // It results in a [FontButton] [Value].
-type FontName string
+type FontName = rich.FontName
 
 // FontButton represents a [FontName] with a [Button] that opens
 // a dialog for selecting the font family.
@@ -197,28 +199,89 @@ func (fb *FontButton) WidgetValue() any { return &fb.Text }
 func (fb *FontButton) Init() {
 	fb.Button.Init()
 	fb.SetType(ButtonTonal)
+	fb.Updater(func() {
+		if fb.Text == "" {
+			fb.SetText("(default)")
+		}
+	})
 	InitValueButton(fb, false, func(d *Body) {
 		d.SetTitle("Select a font family")
 		si := 0
-		fi := paint.FontLibrary.FontInfo
+		fi := fonts.Families(fb.Scene.TextShaper().FontList())
 		tb := NewTable(d)
-		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
+		tb.SetSlice(&fi).SetSelectedField("Family").SetSelectedValue(fb.Text).BindSelect(&si)
 		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
-			if col != 4 {
+			if col != 1 {
 				return
 			}
-			s.Font.Family = fi[row].Name
-			s.Font.Stretch = fi[row].Stretch
-			s.Font.Weight = fi[row].Weight
-			s.Font.Style = fi[row].Style
-			s.Font.Size.Pt(18)
+			s.Font.CustomFont = rich.FontName(fi[row].Family)
+			s.Font.Family = rich.Custom
+			s.Font.Size.Dp(24)
 		})
 		tb.OnChange(func(e events.Event) {
-			fb.Text = fi[si].Name
+			fb.Text = fi[si].Family
 		})
 	})
 }
 
 // HighlightingName is a highlighting style name.
-// TODO: move this to texteditor/highlighting.
-type HighlightingName string
+type HighlightingName = highlighting.HighlightingName
+
+// HighlightingButton represents a [HighlightingName] with a button.
+type HighlightingButton struct {
+	Button
+	HighlightingName string
+}
+
+func (hb *HighlightingButton) WidgetValue() any { return &hb.HighlightingName }
+
+func (hb *HighlightingButton) Init() {
+	hb.Button.Init()
+	hb.SetType(ButtonTonal).SetIcon(icons.Brush)
+	hb.Updater(func() {
+		hb.SetText(hb.HighlightingName)
+	})
+	InitValueButton(hb, false, func(d *Body) {
+		d.SetTitle("Select a syntax highlighting style")
+		si := 0
+		ls := NewList(d).SetSlice(&highlighting.StyleNames).SetSelectedValue(hb.HighlightingName).BindSelect(&si)
+		ls.OnChange(func(e events.Event) {
+			hb.HighlightingName = highlighting.StyleNames[si]
+		})
+	})
+}
+
+// Editor opens an editor of highlighting styles.
+func HighlightingEditor(st *highlighting.Styles) {
+	if RecycleMainWindow(st) {
+		return
+	}
+
+	d := NewBody("Highlighting styles").SetData(st)
+	NewText(d).SetType(TextSupporting).SetText("View standard to see the builtin styles, from which you can add and customize by saving ones from the standard and then loading them into a custom file to modify.")
+	kl := NewKeyedList(d).SetMap(st)
+	highlighting.StylesChanged = false
+	kl.OnChange(func(e events.Event) {
+		highlighting.StylesChanged = true
+	})
+	d.AddTopBar(func(bar *Frame) {
+		NewToolbar(bar).Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *FuncButton) {
+				w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *FuncButton) {
+				w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+				w.Args[0].SetTag(`extension:".highlighting"`)
+			})
+			tree.Add(p, func(w *Button) {
+				w.SetText("View standard").SetIcon(icons.Visibility).OnClick(func(e events.Event) {
+					HighlightingEditor(&highlighting.StandardStyles)
+				})
+			})
+			tree.Add(p, func(w *Separator) {})
+			kl.MakeToolbar(p)
+		})
+	})
+	d.RunWindow() // note: no context here so not dialog
+}

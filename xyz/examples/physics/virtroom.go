@@ -219,7 +219,9 @@ func (ev *Env) GrabEyeImg() { //types:add
 		ev.EyeRImg.SetImage(img)
 		ev.EyeRImg.NeedsRender()
 	} else {
-		log.Println(err)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	depth, err := ev.View3D.DepthImage()
@@ -270,8 +272,10 @@ func (ev *Env) WorldStep() {
 	}
 	ev.View3D.UpdatePose()
 	ev.View2D.UpdatePose()
-	ev.GrabEyeImg()
 	ev.UpdateViews()
+	// ev.GrabEyeImg() // todo: this is not working in the first place,
+	// and with goroutine rendering in core/renderwindow, it crashes because
+	// the main render texture for the view is stale.
 }
 
 // StepForward moves Emer forward in current facing direction one step, and takes GrabEyeImg

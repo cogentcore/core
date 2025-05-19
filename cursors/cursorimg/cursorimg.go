@@ -17,7 +17,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/pimage"
 	"cogentcore.org/core/svg"
 )
 
@@ -61,7 +62,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 		hot = image.Pt(128, 128)
 	}
 
-	sv := svg.NewSVG(size, size)
+	sv := svg.NewSVG(math32.Vec2(float32(size), float32(size)))
 	b, err := fs.ReadFile(cursors.Cursors, "svg/"+name+".svg")
 	if err != nil {
 		return nil, err
@@ -71,16 +72,16 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
 	}
-	sv.Render()
+	img := sv.RenderImage()
 
 	blurRadius := size / 16
-	bounds := sv.Pixels.Bounds()
+	bounds := img.Bounds()
 	// We need to add extra space so that the shadow doesn't get clipped.
 	bounds.Max = bounds.Max.Add(image.Pt(blurRadius, blurRadius))
 	shadow := image.NewRGBA(bounds)
-	draw.DrawMask(shadow, shadow.Bounds(), gradient.ApplyOpacity(colors.Scheme.Shadow, 0.25), image.Point{}, sv.Pixels, image.Point{}, draw.Src)
-	shadow = paint.GaussianBlur(shadow, float64(blurRadius))
-	draw.Draw(shadow, shadow.Bounds(), sv.Pixels, image.Point{}, draw.Over)
+	draw.DrawMask(shadow, shadow.Bounds(), gradient.ApplyOpacity(colors.Scheme.Shadow, 0.25), image.Point{}, img, image.Point{}, draw.Src)
+	shadow = pimage.GaussianBlur(shadow, float64(blurRadius))
+	draw.Draw(shadow, shadow.Bounds(), img, image.Point{}, draw.Over)
 
 	return &Cursor{
 		Image:   shadow,

@@ -24,7 +24,9 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore"
 	"cogentcore.org/core/yaegicore/coresymbols"
@@ -97,15 +99,15 @@ func main() {
 	ctx.ElementHandlers["home-page"] = homePage
 	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)
-		ed := texteditor.NewEditor(splits)
+		ed := textcore.NewEditor(splits)
 		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
-		err := ed.Buffer.Open(core.Filename(playgroundFile))
+		err := ed.Lines.Open(playgroundFile)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				err := os.WriteFile(playgroundFile, []byte(defaultPlaygroundCode), 0666)
 				core.ErrorSnackbar(ed, err, "Error creating code file")
 				if err == nil {
-					err := ed.Buffer.Open(core.Filename(playgroundFile))
+					err := ed.Lines.Open(playgroundFile)
 					core.ErrorSnackbar(ed, err, "Error loading code")
 				}
 			} else {
@@ -113,7 +115,7 @@ func main() {
 			}
 		}
 		ed.OnChange(func(e events.Event) {
-			core.ErrorSnackbar(ed, ed.Buffer.Save(), "Error saving code")
+			core.ErrorSnackbar(ed, ed.SaveQuiet(), "Error saving code")
 		})
 		parent := core.NewFrame(splits)
 		yaegicore.BindTextEditor(ed, parent, "Go")
@@ -158,7 +160,7 @@ func main() {
 
 var home *core.Frame
 
-func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T), url ...string) {
+func makeBlock[T tree.NodeValue](title, txt string, graphic func(w *T), url ...string) {
 	if len(url) > 0 {
 		title = `<a target="_blank" href="` + url[0] + `">` + title + `</a>`
 	}
@@ -178,18 +180,18 @@ func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T), url ...
 			tree.Add(p, func(w *core.Frame) {
 				w.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
-					s.Text.Align = styles.Start
+					s.Text.Align = text.Start
 					s.Grow.Set(1, 1)
 				})
 				tree.AddChild(w, func(w *core.Text) {
 					w.SetType(core.TextHeadlineLarge).SetText(title)
 					w.Styler(func(s *styles.Style) {
-						s.Font.Weight = styles.WeightBold
+						s.Font.Weight = rich.Bold
 						s.Color = colors.Scheme.Primary.Base
 					})
 				})
 				tree.AddChild(w, func(w *core.Text) {
-					w.SetType(core.TextTitleLarge).SetText(text)
+					w.SetType(core.TextTitleLarge).SetText(txt)
 				})
 			})
 			if !graphicFirst {
@@ -243,16 +245,16 @@ func homePage(ctx *htmlcore.Context) bool {
 		return w
 	}
 
-	makeBlock("CODE ONCE, RUN EVERYWHERE (CORE)", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single Go codebase.", func(w *core.Icon) {
+	makeBlock("CODE ONCE, RUN EVERYWHERE (CORE)", "With Cogent Core, you can write your app once and it will run on macOS, Windows, Linux, iOS, Android, and the web, automatically scaling to any screen. Instead of struggling with platform-specific code in multiple languages, you can write and maintain a single Go codebase.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Devices)
 	})
 
-	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *texteditor.Editor) {
-		w.Buffer.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
+	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with type safety and a robust design that doesn't get in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and three lines of simple code.", func(w *textcore.Editor) {
+		w.Lines.SetLanguage(fileinfo.Go).SetString(`b := core.NewBody()
 core.NewButton(b).SetText("Hello, World!")
 b.RunMainWindow()`)
 		w.SetReadOnly(true)
-		w.Buffer.Options.LineNumbers = false
+		w.Lines.Settings.LineNumbers = false
 		w.Styler(func(s *styles.Style) {
 			if w.SizeClass() != core.SizeCompact {
 				s.Min.X.Em(20)
@@ -260,7 +262,7 @@ b.RunMainWindow()`)
 		})
 	})
 
-	makeBlock("COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to fully customize apps to fit their unique needs and preferences through a robust styling system and a powerful color system that allow developers and users to instantly customize every aspect of the appearance and behavior of an app.", func(w *core.Form) {
+	makeBlock("COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to customize apps to fit their needs and preferences through a robust styling system and powerful color settings.", func(w *core.Form) {
 		w.SetStruct(core.AppearanceSettings)
 		w.OnChange(func(e events.Event) {
 			core.UpdateSettings(w, core.AppearanceSettings)
@@ -268,23 +270,23 @@ b.RunMainWindow()`)
 
 	})
 
-	makeBlock("POWERFUL FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and advanced app inspection.", func(w *core.Icon) {
+	makeBlock("POWERFUL FEATURES", "Cogent Core supports text editors, video players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for data binding and app inspection.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.ScatterPlot)
 	})
 
-	makeBlock("OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of editable interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.", func(w *core.Icon) {
+	makeBlock("OPTIMIZED EXPERIENCE", "Cogent Core has editable, interactive, example-based documentation, video tutorials, command line tools, and support from the developers.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.PlayCircle)
 	})
 
-	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.", func(w *core.Icon) {
+	makeBlock("EXTREMELY FAST", "Cogent Core is powered by WebGPU, a modern, cross-platform, high-performance graphics framework that allows apps to run at high speeds. Apps compile to machine code, allowing them to run without overhead.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Bolt)
 	})
 
-	makeBlock("FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally. We believe that software works best when everyone can use it.", func(w *core.Icon) {
+	makeBlock("FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Code)
 	})
 
-	makeBlock("USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is an advanced framework actively used to power everything from end-user apps to scientific research.", func(w *core.Icon) {
+	makeBlock("USED AROUND THE WORLD", "Over seven years of development, Cogent Core has been used and tested by developers and scientists around the world for various use cases. Cogent Core is an advanced framework used to power everything from end-user apps to scientific research.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.GlobeAsia)
 	})
 
@@ -292,23 +294,23 @@ b.RunMainWindow()`)
 		w.SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
 	})
 
-	makeBlock("COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
+	makeBlock("COGENT CODE", "Cogent Code is a Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "code-icon.svg"))
 	}, "https://cogentcore.org/cogent/code")
 
-	makeBlock("COGENT CANVAS", "Cogent Canvas is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
+	makeBlock("COGENT CANVAS", "Cogent Canvas is a vector graphics editor with support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "canvas-icon.svg"))
 	}, "https://cogentcore.org/cogent/canvas")
 
-	makeBlock("COGENT NUMBERS", "Cogent Numbers is a highly extensible math, data science, and statistics platform that combines the power of programming with the convenience of spreadsheets and graphing calculators.", func(w *core.SVG) {
+	makeBlock("COGENT LAB", "Cogent Lab is an extensible math, data science, and statistics platform and language.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "numbers-icon.svg"))
-	}, "https://github.com/cogentcore/cogent/tree/main/numbers")
+	}, "https://cogentcore.org/lab")
 
-	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support, automatic mail filtering, and an extensive set of keyboard shortcuts for advanced mail filing.", func(w *core.SVG) {
+	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support, automatic mail filtering, and keyboard shortcuts for mail filing.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "mail-icon.svg"))
 	}, "https://github.com/cogentcore/cogent/tree/main/mail")
 
-	makeBlock("COGENT CRAFT", "Cogent Craft is a powerful 3D modeling app with support for creating, loading, and editing 3D object files using an interactive WYSIWYG editor.", func(w *core.SVG) {
+	makeBlock("COGENT CRAFT", "Cogent Craft is a 3D modeling app with support for creating, loading, and editing 3D object files using an interactive WYSIWYG editor.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "craft-icon.svg"))
 	}, "https://github.com/cogentcore/cogent/tree/main/craft")
 
@@ -331,11 +333,11 @@ b.RunMainWindow()`)
 		initIcon(w).SetIcon(icons.Problem)
 	})
 
-	makeBlock("THE SOLUTION", "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
+	makeBlock("THE SOLUTION", "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Lightbulb)
 	})
 
-	makeBlock("THE RESULT", "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(w *core.Icon) {
+	makeBlock("THE RESULT", "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and simplify your development experience.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Check)
 	})
 

@@ -40,6 +40,9 @@ SOFTWARE.
 */
 
 // Matrix2 is a 3x2 matrix.
+// [XX YX]
+// [XY YY]
+// [X0 Y0]
 type Matrix2 struct {
 	XX, YX, XY, YY, X0, Y0 float32
 }
@@ -75,15 +78,24 @@ func Scale2D(x, y float32) Matrix2 {
 	}
 }
 
-// Rotate2D returns a Matrix2 2D matrix with given rotation, specified in radians
+// Rotate2D returns a Matrix2 2D matrix with given rotation, specified in radians.
+// This uses the standard graphics convention where increasing Y goes _down_ instead
+// of up, in contrast with the mathematical coordinate system where Y is up.
 func Rotate2D(angle float32) Matrix2 {
-	c := float32(Cos(angle))
-	s := float32(Sin(angle))
+	s, c := Sincos(angle)
 	return Matrix2{
 		c, s,
 		-s, c,
 		0, 0,
 	}
+}
+
+// Rotate2DAround returns a Matrix2 2D matrix with given rotation, specified in radians,
+// around given offset point that is translated to and from.
+// This uses the standard graphics convention where increasing Y goes _down_ instead
+// of up, in contrast with the mathematical coordinate system where Y is up.
+func Rotate2DAround(angle float32, pos Vector2) Matrix2 {
+	return Identity2().Translate(pos.X, pos.Y).Rotate(angle).Translate(-pos.X, -pos.Y)
 }
 
 // Shear2D returns a Matrix2 2D matrix with given shearing
@@ -176,8 +188,20 @@ func (a Matrix2) Scale(x, y float32) Matrix2 {
 	return a.Mul(Scale2D(x, y))
 }
 
+// ScaleAbout adds a scaling transformation about (x,y) in sx and sy.
+// When scale is negative it will flip those axes.
+func (m Matrix2) ScaleAbout(sx, sy, x, y float32) Matrix2 {
+	return m.Translate(x, y).Scale(sx, sy).Translate(-x, -y)
+}
+
 func (a Matrix2) Rotate(angle float32) Matrix2 {
 	return a.Mul(Rotate2D(angle))
+}
+
+// RotateAbout adds a rotation transformation about (x,y)
+// with rot in radians counter clockwise.
+func (m Matrix2) RotateAbout(rot, x, y float32) Matrix2 {
+	return m.Translate(x, y).Rotate(rot).Translate(-x, -y)
 }
 
 func (a Matrix2) Shear(x, y float32) Matrix2 {
@@ -188,7 +212,8 @@ func (a Matrix2) Skew(x, y float32) Matrix2 {
 	return a.Mul(Skew2D(x, y))
 }
 
-// ExtractRot extracts the rotation component from a given matrix
+// ExtractRot does a simple extraction of the rotation matrix for
+// a single rotation. See [Matrix2.Decompose] for two rotations.
 func (a Matrix2) ExtractRot() float32 {
 	return Atan2(-a.XY, a.XX)
 }
@@ -196,11 +221,56 @@ func (a Matrix2) ExtractRot() float32 {
 // ExtractXYScale extracts the X and Y scale factors after undoing any
 // rotation present -- i.e., in the original X, Y coordinates
 func (a Matrix2) ExtractScale() (scx, scy float32) {
-	rot := a.ExtractRot()
-	tx := a.Rotate(-rot)
-	scxv := tx.MulVector2AsVector(Vec2(1, 0))
-	scyv := tx.MulVector2AsVector(Vec2(0, 1))
-	return scxv.X, scyv.Y
+	// rot := a.ExtractRot()
+	// tx := a.Rotate(-rot)
+	// scxv := tx.MulVector2AsVector(Vec2(1, 0))
+	// scyv := tx.MulVector2AsVector(Vec2(0, 1))
+	// return scxv.X, scyv.Y
+	_, _, _, scx, scy, _ = a.Decompose()
+	return
+}
+
+// Pos returns the translation values, X0, Y0
+func (a Matrix2) Pos() (tx, ty float32) {
+	return a.X0, a.Y0
+}
+
+// Decompose extracts the translation, rotation, scaling and rotation components
+// (applied in the reverse order) as (tx, ty, theta, sx, sy, phi) with rotation
+// counter clockwise. This corresponds to:
+// Identity.Translate(tx, ty).Rotate(phi).Scale(sx, sy).Rotate(theta).
+func (m Matrix2) Decompose() (tx, ty, phi, sx, sy, theta float32) {
+	// see https://math.stackexchange.com/questions/861674/decompose-a-2d-arbitrary-transform-into-only-scaling-and-rotation
+	E := (m.XX + m.YY) / 2.0
+	F := (m.XX - m.YY) / 2.0
+	G := (m.YX + m.XY) / 2.0
+	H := (m.YX - m.XY) / 2.0
+
+	Q, R := Sqrt(E*E+H*H), Sqrt(F*F+G*G)
+	sx, sy = Q+R, Q-R
+
+	a1, a2 := Atan2(G, F), Atan2(H, E)
+	// note: our rotation matrix is inverted so we reverse the sign on these.
+	theta = -(a2 - a1) / 2.0
+	phi = -(a2 + a1) / 2.0
+	if sx == 1 && sy == 1 {
+		theta += phi
+		phi = 0
+	}
+	tx = m.X0
+	ty = m.Y0
+	return
+}
+
+// Transpose returns the transpose of the matrix
+func (a Matrix2) Transpose() Matrix2 {
+	a.XY, a.YX = a.YX, a.XY
+	return a
+}
+
+// Det returns the determinant of the matrix
+func (a Matrix2) Det() float32 {
+	return a.XX*a.YY - a.XY*a.YX // ad - bc
 }
 
 // Inverse returns inverse of matrix, for inverting transforms
@@ -213,7 +283,7 @@ func (a Matrix2) Inverse() Matrix2 {
 	// t11 := a.YY
 	// t12 := -a.YX
 	// t13 := a.Y0*a.YX - a.YY*a.X0
-	det := a.XX*a.YY - a.XY*a.YX // ad - bc
+	det := a.Det()
 	detInv := 1 / det
 
 	b := Matrix2{}
@@ -224,6 +294,93 @@ func (a Matrix2) Inverse() Matrix2 {
 	b.X0 = (a.Y0*a.XY - a.YY*a.X0) * detInv
 	b.Y0 = (a.X0*a.YX - a.XX*a.Y0) * detInv
 	return b
+}
+
+// mapping onto canvas, [col][row] matrix:
+// m[0][0] = XX
+// m[1][0] = YX
+// m[0][1] = XY
+// m[1][1] = YY
+// m[0][2] = X0
+// m[1][2] = Y0
+
+// Eigen returns the matrix eigenvalues and eigenvectors.
+// The first eigenvalue is related to the first eigenvector,
+// and so for the second pair. Eigenvectors are normalized.
+func (m Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
+	if Abs(m.YX) < 1.0e-7 && Abs(m.XY) < 1.0e-7 {
+		return m.XX, m.YY, Vector2{1.0, 0.0}, Vector2{0.0, 1.0}
+	}
+
+	lambda1, lambda2 := solveQuadraticFormula(1.0, -m.XX-m.YY, m.Det())
+	if IsNaN(lambda1) && IsNaN(lambda2) {
+		// either m.XX or m.YY is NaN or the the affine matrix has no real eigenvalues
+		return lambda1, lambda2, Vector2{}, Vector2{}
+	} else if IsNaN(lambda2) {
+		lambda2 = lambda1
+	}
+
+	// see http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
+	var v1, v2 Vector2
+	if m.YX != 0 {
+		v1 = Vector2{lambda1 - m.YY, m.YX}.Normal()
+		v2 = Vector2{lambda2 - m.YY, m.YX}.Normal()
+	} else if m.XY != 0 {
+		v1 = Vector2{m.XY, lambda1 - m.XX}.Normal()
+		v2 = Vector2{m.XY, lambda2 - m.XX}.Normal()
+	}
+	return lambda1, lambda2, v1, v2
+}
+
+// Numerically stable quadratic formula, lowest root is returned first,
+// see https://math.stackexchange.com/a/2007723
+func solveQuadraticFormula(a, b, c float32) (float32, float32) {
+	if a == 0 {
+		if b == 0 {
+			if c == 0 {
+				// all terms disappear, all x satisfy the solution
+				return 0.0, NaN()
+			}
+			// linear term disappears, no solutions
+			return NaN(), NaN()
+		}
+		// quadratic term disappears, solve linear equation
+		return -c / b, NaN()
+	}
+
+	if c == 0 {
+		// no constant term, one solution at zero and one from solving linearly
+		if b == 0 {
+			return 0.0, NaN()
+		}
+		return 0.0, -b / a
+	}
+
+	discriminant := b*b - 4.0*a*c
+	if discriminant < 0.0 {
+		return NaN(), NaN()
+	} else if discriminant == 0 {
+		return -b / (2.0 * a), NaN()
+	}
+
+	// Avoid catastrophic cancellation, which occurs when we subtract
+	// two nearly equal numbers and causes a large error.
+	// This can be the case when 4*a*c is small so that sqrt(discriminant) -> b,
+	// and the sign of b and in front of the radical are the same.
+	// Instead, we calculate x where b and the radical have different signs,
+	// and then use this result in the analytical equivalent of the formula,
+	// called the Citardauq Formula.
+	q := Sqrt(discriminant)
+	if b < 0.0 {
+		// apply sign of b
+		q = -q
+	}
+	x1 := -(b + q) / (2.0 * a)
+	x2 := c / (a * x1)
+	if x2 < x1 {
+		x1, x2 = x2, x1
+	}
+	return x1, x2
 }
 
 // ParseFloat32 logs any strconv.ParseFloat errors

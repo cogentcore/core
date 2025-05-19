@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
+	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"github.com/stretchr/testify/require"
 )
 

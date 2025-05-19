@@ -53,17 +53,17 @@ func (sc *Scene) UpdateNodesIfNeeded() {
 	}
 }
 
-// ConfigFrameFromSurface configures framebuffer for GPU rendering
-// Using GPU and Device from given gpuSurface
-func (sc *Scene) ConfigFrameFromSurface(surf *gpu.Surface) {
-	sc.ConfigFrame(surf.GPU, surf.Device())
+// ConfigOffscreenFromSurface configures offscreen [gpu.RenderTexture]
+// using GPU and Device from given [gpu.Surface].
+func (sc *Scene) ConfigOffscreenFromSurface(surf *gpu.Surface) {
+	sc.ConfigOffscreen(surf.GPU, surf.Device())
 }
 
-// ConfigFrame configures framebuffer for GPU rendering,
+// ConfigOffscreen configures offscreen [gpu.RenderTexture]
 // using given gpu and device, and size set in Geom.Size.
 // Must be called on the main thread.
 // If Frame already exists, it ensures that the Size is correct.
-func (sc *Scene) ConfigFrame(gp *gpu.GPU, dev *gpu.Device) {
+func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
 	sz := sc.Geom.Size
 	if sz == (image.Point{}) {
 		sz = image.Point{480, 320}
@@ -71,7 +71,7 @@ func (sc *Scene) ConfigFrame(gp *gpu.GPU, dev *gpu.Device) {
 	if sc.Frame == nil {
 		sc.Frame = gpu.NewRenderTexture(gp, dev, sz, sc.MultiSample, gpu.Depth32)
 		sc.Phong = phong.NewPhong(gp, sc.Frame)
-		sc.configNewPhong()
+		sc.ConfigNewPhong()
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 		sc.NeedsUpdate = true
@@ -86,10 +86,10 @@ func (sc *Scene) Rebuild() {
 		return
 	}
 	sc.Phong.ResetAll()
-	sc.configNewPhong()
+	sc.ConfigNewPhong()
 }
 
-func (sc *Scene) configNewPhong() {
+func (sc *Scene) ConfigNewPhong() {
 	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
 	sc.ConfigNodes()
 	UpdateWorldMatrix(sc.This)

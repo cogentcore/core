@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package paint
+package paint_test
 
 import (
 	"testing"
@@ -10,12 +10,13 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBackgroundColor(t *testing.T) {
-	RunTest(t, "background-color", 300, 300, func(pc *Context) {
+	RunTest(t, "background-color", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		st := styles.NewStyle()
 		st.Background = colors.Uniform(colors.Blue)
@@ -23,14 +24,14 @@ func TestBackgroundColor(t *testing.T) {
 		st.ToDots()
 
 		sz := st.BoxSpace().Size().Add(math32.Vec2(200, 100))
-		pc.DrawStandardBox(st, math32.Vec2(50, 100), sz, pabg)
+		pc.StandardBox(st, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
 func TestBackgroundImage(t *testing.T) {
-	img, _, err := imagex.Open("test.png")
+	img, _, err := imagex.Open("testdata/test.png")
 	assert.NoError(t, err)
-	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
+	RunTest(t, "background-image", 1260, 200, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		st := styles.NewStyle()
 		st.Background = img
@@ -41,7 +42,7 @@ func TestBackgroundImage(t *testing.T) {
 
 		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
-			pc.DrawStandardBox(st, pos, sz, pabg)
+			pc.StandardBox(st, pos, sz, pabg)
 		}
 
 		test(styles.FitFill, math32.Vec2(0, 0))
@@ -53,10 +54,10 @@ func TestBackgroundImage(t *testing.T) {
 }
 
 func TestObjectFit(t *testing.T) {
-	img, _, err := imagex.Open("test.png")
+	img, _, err := imagex.Open("testdata/test.png")
 	// obj := math32.FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
-	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
+	RunTest(t, "object-fit", 1260, 300, func(pc *Painter) {
 		st := styles.NewStyle()
 		st.ToDots()
 		box := math32.Vec2(200, 100)
@@ -64,7 +65,7 @@ func TestObjectFit(t *testing.T) {
 		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			fitimg := st.ResizeImage(img, box)
-			pc.DrawImage(fitimg, pos.X, pos.Y)
+			pc.DrawImageAnchored(fitimg, pos.X, pos.Y, 0, 0)
 			// trgsz := styles.ObjectSizeFromFit(of, obj, box)
 			// fmt.Println(of, trgsz)
 		}

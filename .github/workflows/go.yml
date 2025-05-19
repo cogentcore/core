@@ -49,9 +49,9 @@ jobs:
       if: inputs.updateTestdata
       run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
 
-    # we can't test gpu, xyz, and system on the CI since there is no Vulkan support
+    # TODO: we can't test gpu, xyz, system, and video on the CI since there is bad Vulkan support
     - name: Test
-      run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system) -coverprofile cover.out -timeout 30s
+      run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system | grep -v video) -coverprofile cover.out -timeout 30s
 
     - name: Upload testdata
       uses: actions/upload-artifact@v4

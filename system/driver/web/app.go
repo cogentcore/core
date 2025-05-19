@@ -8,7 +8,6 @@
 package web
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
 	"os"
@@ -23,6 +22,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 	"cogentcore.org/core/system/driver/web/jsfs"
 )
@@ -48,11 +48,11 @@ func Init() {
 }
 
 // TheApp is the single [system.App] for the web platform
-var TheApp = &App{AppSingle: base.NewAppSingle[*Drawer, *Window]()}
+var TheApp = &App{AppSingle: base.NewAppSingle[*composer.ComposerWeb, *Window]()}
 
 // App is the [system.App] implementation for the web platform
 type App struct {
-	base.AppSingle[*Drawer, *Window]
+	base.AppSingle[*composer.ComposerWeb, *Window]
 
 	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)
 	UnderlyingPlatform system.Platforms
@@ -84,9 +84,8 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
-	a.Draw = &Drawer{}
+	a.Compose = composer.NewComposerWeb()
 	a.Resize()
-	a.InitDrawer()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
@@ -114,6 +113,13 @@ func UserAgentToOS(ua string) system.Platforms {
 // Resize updates the app sizing information and sends a Resize event.
 func (a *App) Resize() {
 	a.Scrn.DevicePixelRatio = float32(js.Global().Get("devicePixelRatio").Float())
+	// On Android web, the rendering performance is not great, so we cap the DPR
+	// at 1.5 to improve performance while still keeping the quality reasonable.
+	// TODO: profile on Android web and revisit if this is necessary.
+	if a.SystemPlatform() == system.Android {
+		a.Scrn.DevicePixelRatio = min(a.Scrn.DevicePixelRatio, 1.5)
+	}
+	a.Compose.DPR = a.Scrn.DevicePixelRatio
 	dpi := 160 * a.Scrn.DevicePixelRatio
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
@@ -131,35 +137,7 @@ func (a *App) Resize() {
 	physY := 25.4 * float32(h) / dpi
 	a.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	canvas := js.Global().Get("document").Call("getElementById", "app")
-	canvas.Set("width", a.Scrn.PixelSize.X)
-	canvas.Set("height", a.Scrn.PixelSize.Y)
-
-	// We need to manually set the style width and height of the canvas
-	// instead of using 100vw and 100vh because vw and vh are incorrect on mobile browsers
-	// due to the address bar but visualViewport.width and height are correct
-	// (see https://stackoverflow.com/questions/43575363/css-100vh-is-too-tall-on-mobile-due-to-browser-ui)
-	//
-	// We also need to divide by the pixel size by the pixel ratio again instead of just
-	// using visualViewport.width and height so that there are no rounding errors (CSS
-	// supports fractional pixels but HTML doesn't). These rounding errors lead to blurriness on devices with fractional device pixel ratios
-	// (see https://github.com/cogentcore/core/issues/779 and
-	// https://stackoverflow.com/questions/15661339/how-do-i-fix-blurry-text-in-my-html5-canvas/54027313#54027313)
-	cstyle := canvas.Get("style")
-	cstyle.Set("width", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.X)/a.Scrn.DevicePixelRatio))
-	cstyle.Set("height", fmt.Sprintf("%gpx", float32(a.Scrn.PixelSize.Y)/a.Scrn.DevicePixelRatio))
-
-	if a.Draw.wgpu != nil {
-		a.Draw.wgpu.System.Renderer.SetSize(a.Scrn.PixelSize)
-	} else {
-		a.Draw.base.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixelSize})
-	}
-
 	a.Event.WindowResize()
-}
-
-func (a *App) GPUDevice() any {
-	return a.Draw.wgpu
 }
 
 func (a *App) DataDir() string {

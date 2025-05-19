@@ -19,6 +19,19 @@ type Window struct {
 	base.WindowSingle[*App]
 }
 
+// WinLoop is a web-specific implementation using requestAnimationFrame.
+func (w *Window) WinLoop() {
+	defer func() { system.HandleRecover(recover()) }()
+
+	var f js.Func
+	f = js.FuncOf(func(this js.Value, args []js.Value) any {
+		w.SendPaintEvent()
+		js.Global().Call("requestAnimationFrame", f)
+		return nil
+	})
+	js.Global().Call("requestAnimationFrame", f)
+}
+
 func (w *Window) SetTitle(title string) {
 	w.WindowSingle.SetTitle(title)
 	js.Global().Get("document").Set("title", title)

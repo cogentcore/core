@@ -25,7 +25,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
 
@@ -78,6 +78,9 @@ func text(ts *core.Tabs) {
 		s := strcase.ToSentence(typ.String())
 		core.NewText(tab).SetType(typ).SetText(s)
 	}
+	core.NewText(tab).SetText("Emojis: 🧁🍰🎁")
+	core.NewText(tab).SetText("Hebrew/RTL: אָהַבְתָּ אֵת יְיָ | אֱלֹהֶיךָ, בְּכָל-לְבָֽבְךָ, Let there be light וּבְכָל-נַפְשְׁךָ,")
+	core.NewText(tab).SetText("Chinese/Japanese/Korean: 国際化活動・計算機科学を勉強する・한국어")
 }
 
 func makeRow(parent core.Widget) *core.Frame {
@@ -258,9 +261,12 @@ func textEditors(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
 
 	sp := core.NewSplits(tab)
-
-	errors.Log(texteditor.NewEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
-	texteditor.NewEditor(sp).Buffer.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
+	ed := textcore.NewEditor(sp)
+	ed.Styler(func(s *styles.Style) {
+		s.Padding.Set(units.Em(core.ConstantSpacing(1)))
+	})
+	ed.Lines.OpenFS(demoFile, "demo.go")
+	textcore.NewEditor(sp).Lines.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
 }
 
 func valueBinding(ts *core.Tabs) {
@@ -321,7 +327,7 @@ func valueBinding(ts *core.Tabs) {
 		fmt.Println("The file is now", file)
 	})
 
-	font := core.AppearanceSettings.Font
+	font := core.AppearanceSettings.Text.SansSerif
 	core.Bind(&font, core.NewFontButton(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The font is now", font)
 	})

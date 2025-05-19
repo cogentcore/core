@@ -17,28 +17,25 @@ func (g *Polygon) SVGName() string { return "polygon" }
 
 func (g *Polygon) Render(sv *SVG) {
 	sz := len(g.Points)
-	if sz < 2 {
+	if sz < 2 || !g.IsVisible(sv) {
 		return
 	}
-	vis, pc := g.PushTransform(sv)
-	if !vis {
-		return
-	}
-	pc.DrawPolygon(g.Points)
-	pc.FillStrokeClear()
-	g.BBoxes(sv)
+	pc := g.Painter(sv)
+	pc.Polygon(g.Points...)
+	pc.Draw()
 
+	g.PushContext(sv)
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
 		ptn := g.Points[1]
 		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
-		mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]
 		ptp := g.Points[sz-2]
 		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
-		mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
 		for i := 1; i < sz-1; i++ {
@@ -46,10 +43,8 @@ func (g *Polygon) Render(sv *SVG) {
 			ptp := g.Points[i-1]
 			ptn := g.Points[i+1]
 			ang := 0.5 * (math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
-			mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
+			mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 		}
 	}
-
-	g.RenderChildren(sv)
-	pc.PopTransform()
+	pc.PopContext()
 }

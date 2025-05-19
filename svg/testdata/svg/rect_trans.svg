@@ -1,0 +1,53 @@
+<svg
+  width="100px"
+  height="200px"
+  viewBox="0 0 100 200"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs
+    id="Defs" />
+  <sodipodi:namedview
+    id="namedview658"
+    inkscape:current-layer=""
+    inkscape:cx="0"
+    inkscape:cy="0"
+    inkscape:zoom="4.675"
+    inkscape:document-units="px">
+    <inkscape:grid
+      id="grid3"
+      spacingx="12"
+      spacingy="12"
+      type="xygrid"
+      units="px" />
+  </sodipodi:namedview>
+  <rect
+    id="rect553"
+    style="stroke-opacity:1;stroke-width:1px;fill:#0000FF;fill-opacity:1;stroke:#000000;"
+    x="45.98929"
+    y="58.83476"
+    width="45.240643"
+    height="29.000843" />
+  <sodipodi:namedview
+    id="namedview669"
+    inkscape:cx="0"
+    inkscape:cy="0"
+    inkscape:zoom="4.675"
+    inkscape:document-units="px"
+    inkscape:current-layer="">
+    <inkscape:grid
+      id="grid505"
+      spacingx="12"
+      spacingy="12"
+      type="xygrid"
+      units="px" />
+  </sodipodi:namedview>
+  <rect
+    id="rect869"
+    style="stroke-opacity:1;stroke-width:1px;fill:#FF00FF;fill-opacity:0.40784314;stroke:#000000;"
+    x="12.6878605"
+    y="36.555553"
+    width="59.681133"
+    height="36.267067" />
+</svg>

@@ -50,7 +50,7 @@ type MeshData struct {
 	// typically centered around 0.
 	MeshBBox math32.Box3
 
-	//	buffers that hold mesh data for the [Mesh.Set] method.
+	// buffers that hold mesh data for the [Mesh.Set] method.
 	Vertex, Normal, TexCoord, Colors math32.ArrayF32
 	Index                            math32.ArrayU32
 }

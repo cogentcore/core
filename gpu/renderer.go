@@ -35,5 +35,9 @@ type Renderer interface {
 	// When the render surface (e.g., window) is resized, call this function.
 	// WebGPU does not have any internal mechanism for tracking this, so we
 	// need to drive it from external events.
+	// This is efficient to call if already the same size.
 	SetSize(size image.Point)
+
+	// Release frees associated GPU resources.
+	Release()
 }

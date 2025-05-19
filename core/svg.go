@@ -10,9 +10,13 @@ import (
 	"io/fs"
 	"strings"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -21,6 +25,9 @@ import (
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
+
+// todo: rewrite svg.SVG to accept an external painter to render to,
+// and use that for this, so it renders directly instead of via image.
 
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
@@ -31,13 +38,21 @@ type SVG struct {
 	// SVG is the SVG drawing to display.
 	SVG *svg.SVG `set:"-"`
 
+	// image renderer
+	renderer render.Renderer
+
+	// cached rendered image
+	image image.Image
+
 	// prevSize is the cached allocated size for the last rendered image.
 	prevSize image.Point `xml:"-" json:"-" set:"-"`
 }
 
 func (sv *SVG) Init() {
 	sv.WidgetBase.Init()
-	sv.SVG = svg.NewSVG(10, 10)
+	sz := math32.Vec2(10, 10)
+	sv.SVG = svg.NewSVG(sz)
+	sv.renderer = paint.NewImageRenderer(sz)
 	sv.SetReadOnly(true)
 	sv.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
@@ -106,14 +121,17 @@ func (sv *SVG) SaveSVG(filename Filename) error { //types:add
 	return sv.SVG.SaveXML(string(filename))
 }
 
-// SavePNG saves the current rendered SVG image to an PNG image file.
-func (sv *SVG) SavePNG(filename Filename) error { //types:add
-	return sv.SVG.SavePNG(string(filename))
+// SaveImage saves the current rendered SVG image to an image file,
+// using the filename extension to determine the file type.
+func (sv *SVG) SaveImage(filename Filename) error { //types:add
+	return sv.SVG.SaveImage(string(filename))
 }
 
 func (sv *SVG) SizeFinal() {
 	sv.WidgetBase.SizeFinal()
-	sv.SVG.Resize(sv.Geom.Size.Actual.Content.ToPoint())
+	sz := sv.Geom.Size.Actual.Content
+	sv.SVG.SetSize(sz)
+	sv.renderer.SetSize(units.UnitDot, sz)
 }
 
 // renderSVG renders the SVG
@@ -121,12 +139,10 @@ func (sv *SVG) renderSVG() {
 	if sv.SVG == nil {
 		return
 	}
-	// need to make the image again to prevent it from
-	// rendering over itself
-	sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
-	sv.SVG.RenderState.Init(sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
-	sv.SVG.Render()
-	sv.prevSize = sv.SVG.Pixels.Rect.Size()
+	sv.SVG.TextShaper = sv.Scene.TextShaper()
+	sv.renderer.Render(sv.SVG.Render(nil).RenderDone())
+	sv.image = imagex.WrapJS(sv.renderer.Image())
+	sv.prevSize = sv.image.Bounds().Size()
 }
 
 func (sv *SVG) Render() {
@@ -136,10 +152,10 @@ func (sv *SVG) Render() {
 	}
 	needsRender := !sv.IsReadOnly()
 	if !needsRender {
-		if sv.SVG.Pixels == nil {
+		if sv.image == nil {
 			needsRender = true
 		} else {
-			sz := sv.SVG.Pixels.Bounds().Size()
+			sz := sv.image.Bounds().Size()
 			if sz != sv.prevSize || sz == (image.Point{}) {
 				needsRender = true
 			}
@@ -150,7 +166,7 @@ func (sv *SVG) Render() {
 	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
-	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
+	sv.Scene.Painter.DrawImage(sv.image, r, sp, draw.Over)
 }
 
 func (sv *SVG) MakeToolbar(p *tree.Plan) {
@@ -170,6 +186,6 @@ func (sv *SVG) MakeToolbar(p *tree.Plan) {
 		w.SetFunc(sv.SaveSVG).SetIcon(icons.Save)
 	})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(sv.SavePNG).SetIcon(icons.Save)
+		w.SetFunc(sv.SaveImage).SetIcon(icons.Save)
 	})
 }

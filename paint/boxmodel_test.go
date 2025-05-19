@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package paint
+package paint_test
 
 import (
 	"path/filepath"
@@ -11,12 +11,13 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	. "cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
 
 func TestBoxModel(t *testing.T) {
-	RunTest(t, "boxmodel", 300, 300, func(pc *Context) {
+	RunTest(t, "boxmodel", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		s := styles.NewStyle()
 		s.Color = colors.Uniform(colors.Black)
@@ -29,12 +30,12 @@ func TestBoxModel(t *testing.T) {
 		s.ToDots()
 
 		sz := s.BoxSpace().Size().Add(math32.Vec2(200, 100))
-		pc.DrawStandardBox(s, math32.Vec2(50, 100), sz, pabg)
+		pc.StandardBox(s, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
 func TestBoxShadow(t *testing.T) {
-	RunTest(t, "boxshadow", 300, 300, func(pc *Context) {
+	RunTest(t, "boxshadow", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		s := styles.NewStyle()
 		s.Color = colors.Uniform(colors.Black)
@@ -49,42 +50,42 @@ func TestBoxShadow(t *testing.T) {
 
 		sz := s.BoxSpace().Size().Add(math32.Vec2(200, 100))
 
-		pc.DrawStandardBox(s, math32.Vec2(50, 100), sz, pabg)
+		pc.StandardBox(s, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
 func TestActualBackgroundColor(t *testing.T) {
-	RunTest(t, "actual-background-color", 300, 300, func(pc *Context) {
+	RunTest(t, "actual-background-color", 300, 300, func(pc *Painter) {
 		pabg := colors.Uniform(colors.White)
 		a := styles.NewStyle()
 		a.Background = colors.Uniform(colors.Lightgray)
 		a.ComputeActualBackground(pabg)
-		pc.DrawStandardBox(a, math32.Vector2{}, math32.Vec2(300, 300), pabg)
+		pc.StandardBox(a, math32.Vector2{}, math32.Vec2(300, 300), pabg)
 
 		b := styles.NewStyle()
 		b.Background = colors.Uniform(colors.Red)
 		b.Opacity = 0.5
 		b.ComputeActualBackground(a.ActualBackground)
-		pc.DrawStandardBox(b, math32.Vec2(50, 50), math32.Vec2(200, 200), a.ActualBackground)
+		pc.StandardBox(b, math32.Vec2(50, 50), math32.Vec2(200, 200), a.ActualBackground)
 
 		c := styles.NewStyle()
 		c.Background = colors.Uniform(colors.Blue)
 		c.Opacity = 0.5
 		c.StateLayer = 0.1
 		c.ComputeActualBackground(b.ActualBackground)
-		pc.DrawStandardBox(c, math32.Vec2(75, 75), math32.Vec2(150, 150), b.ActualBackground)
+		pc.StandardBox(c, math32.Vec2(75, 75), math32.Vec2(150, 150), b.ActualBackground)
 
 		// d is transparent and thus should not be any different than c
 		d := styles.NewStyle()
 		d.Opacity = 0.5
 		d.ComputeActualBackground(c.ActualBackground)
-		pc.DrawStandardBox(d, math32.Vec2(100, 100), math32.Vec2(100, 100), c.ActualBackground)
+		pc.StandardBox(d, math32.Vec2(100, 100), math32.Vec2(100, 100), c.ActualBackground)
 	})
 }
 
 func TestBorderStyle(t *testing.T) {
 	for _, typ := range styles.BorderStylesValues() {
-		RunTest(t, filepath.Join("border-styles", strcase.ToKebab(typ.String())), 300, 300, func(pc *Context) {
+		RunTest(t, filepath.Join("border-styles", strcase.ToKebab(typ.String())), 300, 300, func(pc *Painter) {
 			s := styles.NewStyle()
 			s.Background = colors.Uniform(colors.Lightgray)
 			s.Border.Style.Set(typ)
@@ -94,7 +95,7 @@ func TestBorderStyle(t *testing.T) {
 			s.ToDots()
 
 			sz := s.BoxSpace().Size().Add(math32.Vec2(200, 100))
-			pc.DrawStandardBox(s, math32.Vec2(50, 100), sz, colors.Uniform(colors.White))
+			pc.StandardBox(s, math32.Vec2(50, 100), sz, colors.Uniform(colors.White))
 		})
 	}
 }

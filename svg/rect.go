@@ -7,8 +7,7 @@ package svg
 import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/styles/sides"
 )
 
 // Rect is a SVG rectangle, optionally with rounded corners
@@ -21,7 +20,7 @@ type Rect struct {
 	// size of the rectangle
 	Size math32.Vector2 `xml:"{width,height}"`
 
-	// radii for curved corners, as a proportion of width, height
+	// radii for curved corners. only rx is used for now.
 	Radius math32.Vector2 `xml:"{rx,ry}"`
 }
 
@@ -40,7 +39,7 @@ func (g *Rect) SetNodeSize(sz math32.Vector2) {
 	g.Size = sz
 }
 
-func (g *Rect) LocalBBox() math32.Box2 {
+func (g *Rect) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(hlw)
@@ -49,27 +48,19 @@ func (g *Rect) LocalBBox() math32.Box2 {
 }
 
 func (g *Rect) Render(sv *SVG) {
-	vis, pc := g.PushTransform(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
-	// TODO: figure out a better way to do this
-	bs := styles.Border{}
-	bs.Style.Set(styles.BorderSolid)
-	bs.Width.Set(pc.StrokeStyle.Width)
-	bs.Color.Set(pc.StrokeStyle.Color)
-	bs.Radius.Set(units.Dp(g.Radius.X))
+	pc := g.Painter(sv)
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
-		pc.DrawRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+		pc.Rectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
-		// SidesTODO: also support different radii for each corner
-		pc.DrawRoundedRectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
+		// the Painter also support different radii for each corner but not rx, ry at this point,
+		// although that would be easy to add TODO:
+		pc.RoundedRectangleSides(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, sides.NewFloats(g.Radius.X))
 	}
-	pc.FillStrokeClear()
-	g.BBoxes(sv)
-	g.RenderChildren(sv)
-	pc.PopTransform()
+	pc.Draw()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

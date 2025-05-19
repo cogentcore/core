@@ -16,8 +16,8 @@ import (
 )
 
 // AppMulti contains the data and logic common to all implementations of [system.App]
-// on multi-window platforms (desktop), as opposed to single-window
-// platforms (mobile, web, and offscreen), for which you should use [AppSingle]. An AppMulti is associated
+// on multi-window platforms (desktop and offscreen), as opposed to single-window
+// platforms (mobile and web), for which you should use [AppSingle]. An AppMulti is associated
 // with a corresponding type of [system.Window]. The [system.Window]
 // type should embed [WindowMulti].
 type AppMulti[W system.Window] struct {

@@ -49,6 +49,10 @@ type Drawer struct {
 	// This is recorded after Start and executed at End.
 	opList []draw.Op
 
+	// lastOpN is the number of items in the last opList, which is
+	// reset to 0, but can be recovered for Redraw.
+	lastOpN int
+
 	// images manages the list of images and their allocation
 	// to Value indexes.
 	images images
@@ -122,13 +126,25 @@ func (dw *Drawer) Start() {
 
 // End ends image drawing rendering process on render target.
 func (dw *Drawer) End() {
-	if len(dw.opList) == 0 {
-		return
-	}
 	dw.Lock()
 	defer dw.Unlock()
+	dw.lastOpN = len(dw.opList)
+	if dw.lastOpN == 0 {
+		return
+	}
 	//	write up to GPU
 	dw.drawAll()
+	dw.opList = dw.opList[:0]
+}
 
+// Redraw re-renders the last draw
+func (dw *Drawer) Redraw() {
+	dw.Lock()
+	defer dw.Unlock()
+	if dw.lastOpN == 0 {
+		return
+	}
+	dw.opList = dw.opList[:dw.lastOpN]
+	dw.drawAll()
 	dw.opList = dw.opList[:0]
 }

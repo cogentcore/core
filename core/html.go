@@ -8,13 +8,12 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
 )
 
@@ -131,36 +130,24 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		return err
 	}
 
-	writeSVG := func(s *svg.SVG) error {
-		s.PhysicalWidth = wb.Styles.Min.X
-		s.PhysicalHeight = wb.Styles.Min.Y
-		sb := &bytes.Buffer{}
-		err := s.WriteXML(sb, false)
-		if err != nil {
-			return err
-		}
-		io.Copy(b, sb)
-		return nil
-	}
-
 	switch w := w.(type) {
 	case *Text:
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		b.WriteString(w.Text)
 	case *Icon:
-		w.Styles.Min.Zero() // do not specify any size for the inner svg object
-		err := writeSVG(&w.svg)
-		if err != nil {
-			return err
-		}
+		// TODO: just remove the width and height attributes from the source SVGs?
+		icon := strings.ReplaceAll(string(w.Icon), ` width="48" height="48"`, "")
+		b.WriteString(icon)
 	case *SVG:
-		err := writeSVG(w.SVG)
+		w.SVG.PhysicalWidth = wb.Styles.Min.X
+		w.SVG.PhysicalHeight = wb.Styles.Min.Y
+		err := w.SVG.WriteXML(b, false)
 		if err != nil {
 			return err
 		}
 	}
 	if se.Name.Local == "textarea" && idName == "editor" {
-		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Buffer").Interface().(fmt.Stringer).String())
+		b.WriteString(reflectx.Underlying(reflect.ValueOf(w)).FieldByName("Lines").Interface().(fmt.Stringer).String())
 	}
 
 	if handleChildren {

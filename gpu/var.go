@@ -104,7 +104,7 @@ type Var struct {
 	// This is 1 for Vertex buffer variables.
 	alignBytes int
 
-	//	var group we are in
+	// var group we are in
 	VarGroup *VarGroup
 }
 

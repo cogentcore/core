@@ -13,82 +13,119 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/Masterminds/vcs"
 )
 
 type GitRepo struct {
 	vcs.GitRepo
+	files        Files
+	gettingFiles bool
+	sync.Mutex
 }
 
 func (gr *GitRepo) Type() Types {
 	return Git
 }
 
-func (gr *GitRepo) Files() (Files, error) {
-	f := make(Files)
+// Files returns a map of the current files and their status,
+// using a cached version of the file list if available.
+// nil will be returned immediately if no cache is available.
+// The given onUpdated function will be called from a separate
+// goroutine when the updated list of the files is available,
+// if an update is not already under way. An update is always triggered
+// if no files have yet been cached, even if the function is nil.
+func (gr *GitRepo) Files(onUpdated func(f Files)) (Files, error) {
+	gr.Lock()
+	if gr.files != nil {
+		f := gr.files
+		gr.Unlock()
+		if onUpdated != nil {
+			go gr.updateFiles(onUpdated)
+		}
+		return f, nil
+	}
+	gr.Unlock()
+	go gr.updateFiles(onUpdated)
+	return nil, nil
+}
+
+func (gr *GitRepo) updateFiles(onUpdated func(f Files)) {
+	gr.Lock()
+	if gr.gettingFiles {
+		gr.Unlock()
+		return
+	}
+	gr.gettingFiles = true
+	gr.Unlock()
+
+	nf := max(len(gr.files), 64)
+	f := make(Files, nf)
 
 	out, err := gr.RunFromDir("git", "ls-files", "-o") // other -- untracked
-	if err != nil {
-		return nil, err
-	}
-	scan := bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		fn := filepath.FromSlash(string(scan.Bytes()))
-		f[fn] = Untracked
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			fn := filepath.FromSlash(string(scan.Bytes()))
+			f[fn] = Untracked
+		}
 	}
 
 	out, err = gr.RunFromDir("git", "ls-files", "-c") // cached = all in repo
-	if err != nil {
-		return nil, err
-	}
-	scan = bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		fn := filepath.FromSlash(string(scan.Bytes()))
-		f[fn] = Stored
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			fn := filepath.FromSlash(string(scan.Bytes()))
+			f[fn] = Stored
+		}
 	}
 
 	out, err = gr.RunFromDir("git", "ls-files", "-m") // modified
-	if err != nil {
-		return nil, err
-	}
-	scan = bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		fn := filepath.FromSlash(string(scan.Bytes()))
-		f[fn] = Modified
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			fn := filepath.FromSlash(string(scan.Bytes()))
+			f[fn] = Modified
+		}
 	}
 
 	out, err = gr.RunFromDir("git", "ls-files", "-d") // deleted
-	if err != nil {
-		return nil, err
-	}
-	scan = bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		fn := filepath.FromSlash(string(scan.Bytes()))
-		f[fn] = Deleted
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			fn := filepath.FromSlash(string(scan.Bytes()))
+			f[fn] = Deleted
+		}
 	}
 
 	out, err = gr.RunFromDir("git", "ls-files", "-u") // unmerged
-	if err != nil {
-		return nil, err
-	}
-	scan = bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		fn := filepath.FromSlash(string(scan.Bytes()))
-		f[fn] = Conflicted
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			fn := filepath.FromSlash(string(scan.Bytes()))
+			f[fn] = Conflicted
+		}
 	}
 
 	out, err = gr.RunFromDir("git", "diff", "--name-only", "--diff-filter=A", "HEAD") // deleted
-	if err != nil {
-		return nil, err
-	}
-	scan = bufio.NewScanner(bytes.NewReader(out))
-	for scan.Scan() {
-		fn := filepath.FromSlash(string(scan.Bytes()))
-		f[fn] = Added
+	if err == nil {
+		scan := bufio.NewScanner(bytes.NewReader(out))
+		for scan.Scan() {
+			fn := filepath.FromSlash(string(scan.Bytes()))
+			f[fn] = Added
+		}
 	}
 
-	return f, nil
+	gr.Lock()
+	gr.files = f
+	gr.Unlock()
+	if onUpdated != nil {
+		onUpdated(f)
+	}
+	gr.Lock()
+	gr.gettingFiles = false
+	gr.Unlock()
 }
 
 func (gr *GitRepo) charToStat(stat byte) FileStatus {
@@ -107,7 +144,21 @@ func (gr *GitRepo) charToStat(stat byte) FileStatus {
 	return Untracked
 }
 
-// Status returns status of given file; returns Untracked on any error
+// StatusFast returns file status based on the cached file info,
+// which might be slightly stale. Much faster than Status.
+// Returns Untracked if no cached files.
+func (gr *GitRepo) StatusFast(fname string) FileStatus {
+	var ff Files
+	gr.Lock()
+	ff = gr.files
+	gr.Unlock()
+	if ff != nil {
+		return ff.Status(gr, fname)
+	}
+	return Untracked
+}
+
+// Status returns status of given file; returns Untracked on any error.
 func (gr *GitRepo) Status(fname string) (FileStatus, string) {
 	out, err := gr.RunFromDir("git", "status", "--porcelain", relPath(gr, fname))
 	if err != nil {
@@ -127,11 +178,17 @@ func (gr *GitRepo) Status(fname string) (FileStatus, string) {
 
 // Add adds the file to the repo
 func (gr *GitRepo) Add(fname string) error {
-	out, err := gr.RunFromDir("git", "add", relPath(gr, fname))
+	fname = relPath(gr, fname)
+	out, err := gr.RunFromDir("git", "add", fname)
 	if err != nil {
 		log.Println(string(out))
 		return err
 	}
+	gr.Lock()
+	if gr.files != nil {
+		gr.files[fname] = Added
+	}
+	gr.Unlock()
 	return nil
 }
 

@@ -109,6 +109,7 @@ func (sp *Spinner) Init() {
 	})
 	sp.Updater(sp.setTextToValue)
 	sp.Styler(func(s *styles.Style) {
+		s.SetTextWrap(false)
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(6)

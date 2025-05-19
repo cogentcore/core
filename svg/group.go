@@ -5,8 +5,6 @@
 package svg
 
 import (
-	"image"
-
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 )
@@ -22,38 +20,17 @@ func (g *Group) SVGName() string { return "g" }
 
 func (g *Group) EnforceSVGName() bool { return false }
 
-// BBoxFromChildren sets the Group BBox from children
-func BBoxFromChildren(n Node) image.Rectangle {
-	bb := image.Rectangle{}
-	for i, kid := range n.AsTree().Children {
-		kn := kid.(Node)
-		knb := kn.AsNodeBase()
-		if i == 0 {
-			bb = knb.BBox
-		} else {
-			bb = bb.Union(knb.BBox)
-		}
-	}
-	return bb
-}
-
-func (g *Group) NodeBBox(sv *SVG) image.Rectangle {
-	bb := BBoxFromChildren(g)
-	return bb
+func (g *Group) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	g.BBoxesFromChildren(sv, parTransform)
 }
 
 func (g *Group) Render(sv *SVG) {
-	pc := &g.Paint
-	rs := &sv.RenderState
-	if pc.Off || rs == nil {
+	if !g.PushContext(sv) {
 		return
 	}
-	rs.PushTransform(pc.Transform)
-
+	pc := g.Painter(sv)
 	g.RenderChildren(sv)
-	g.BBoxes(sv) // must come after render
-
-	rs.PopTransform()
+	pc.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

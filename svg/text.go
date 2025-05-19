@@ -5,16 +5,17 @@
 package svg
 
 import (
-	"image"
-
 	"cogentcore.org/core/base/slicesx"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // Text renders SVG text, handling both text and tspan elements.
-// tspan is nested under a parent text -- text has empty Text string.
+// tspan is nested under a parent text, where text has empty Text string.
 type Text struct {
 	NodeBase
 
@@ -28,7 +29,7 @@ type Text struct {
 	Text string `xml:"text"`
 
 	// render version of text
-	TextRender paint.Text `xml:"-" json:"-" copier:"-"`
+	TextShaped *shaped.Lines `xml:"-" json:"-" copier:"-"`
 
 	// character positions along X axis, if specified
 	CharPosX []float32
@@ -50,12 +51,6 @@ type Text struct {
 
 	// in attempting to match TextLength, should we adjust glyphs in addition to spacing?
 	AdjustGlyphs bool
-
-	// last text render position -- lower-left baseline of start
-	LastPos math32.Vector2 `xml:"-" json:"-" copier:"-"`
-
-	// last actual bounding box in display units (dots)
-	LastBBox math32.Box2 `xml:"-" json:"-" copier:"-"`
 }
 
 func (g *Text) SVGName() string {
@@ -89,127 +84,108 @@ func (g *Text) SetNodeSize(sz math32.Vector2) {
 	}
 }
 
-func (g *Text) NodeBBox(sv *SVG) image.Rectangle {
-	if g.IsParText() {
-		return BBoxFromChildren(g)
-	}
-	return image.Rectangle{Min: g.LastBBox.Min.ToPointFloor(), Max: g.LastBBox.Max.ToPointCeil()}
-}
-
-// TextBBox returns the bounding box in local coordinates
-func (g *Text) TextBBox() math32.Box2 {
+// LocalBBox does full text layout, but no transforms
+func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	if g.Text == "" {
 		return math32.Box2{}
 	}
-	g.LayoutText()
 	pc := &g.Paint
-	bb := g.TextRender.BBox
-	bb.Translate(math32.Vec2(0, -0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
-	return bb
-}
-
-// LayoutText does the full text layout without any transformations,
-// including computing the text bounding box.
-// This is called in TextBBox because that is called first prior to render.
-func (g *Text) LayoutText() {
-	if g.Text == "" {
-		return
+	fs := pc.Font
+	if pc.Fill.Color != nil {
+		fs.SetFillColor(colors.ToUniform(pc.Fill.Color))
 	}
-	pc := &g.Paint
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
-	if pc.FillStyle.Color != nil {
-		pc.FontStyle.Color = pc.FillStyle.Color
-	}
-	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, 0, 1)
-	sr := &(g.TextRender.Spans[0])
+	tx, _ := htmltext.HTMLToRich([]byte(g.Text), &fs, nil)
+	// fmt.Println(tx)
+	sz := math32.Vec2(10000, 10000)
+	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
+	// baseOff := g.TextShaped.Lines[0].Offset
+	g.TextShaped.StartAtBaseline() // remove top-left offset
+	// fmt.Println("baseoff:", baseOff)
+	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)
 
 	// todo: align styling only affects multi-line text and is about how tspan is arranged within
 	// the overall text block.
 
-	if len(g.CharPosX) > 0 {
-		mx := min(len(g.CharPosX), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			sr.Render[i].RelPos.X = g.CharPosX[i]
-		}
-	}
-	if len(g.CharPosY) > 0 {
-		mx := min(len(g.CharPosY), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			sr.Render[i].RelPos.Y = g.CharPosY[i]
-		}
-	}
-	if len(g.CharPosDX) > 0 {
-		mx := min(len(g.CharPosDX), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			if i > 0 {
-				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + g.CharPosDX[i]
-			} else {
-				sr.Render[i].RelPos.X = g.CharPosDX[i] // todo: not sure this is right
+	/*
+		if len(g.CharPosX) > 0 {
+			mx := min(len(g.CharPosX), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				sr.Render[i].RelPos.X = g.CharPosX[i]
 			}
 		}
-	}
-	if len(g.CharPosDY) > 0 {
-		mx := min(len(g.CharPosDY), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			if i > 0 {
-				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + g.CharPosDY[i]
-			} else {
-				sr.Render[i].RelPos.Y = g.CharPosDY[i] // todo: not sure this is right
+		if len(g.CharPosY) > 0 {
+			mx := min(len(g.CharPosY), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				sr.Render[i].RelPos.Y = g.CharPosY[i]
 			}
 		}
-	}
+		if len(g.CharPosDX) > 0 {
+			mx := min(len(g.CharPosDX), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				if i > 0 {
+					sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + g.CharPosDX[i]
+				} else {
+					sr.Render[i].RelPos.X = g.CharPosDX[i] // todo: not sure this is right
+				}
+			}
+		}
+		if len(g.CharPosDY) > 0 {
+			mx := min(len(g.CharPosDY), len(sr.Render))
+			for i := 0; i < mx; i++ {
+				if i > 0 {
+					sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + g.CharPosDY[i]
+				} else {
+					sr.Render[i].RelPos.Y = g.CharPosDY[i] // todo: not sure this is right
+				}
+			}
+		}
+	*/
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
-
-	g.TextRender.UpdateBBox()
+	// g.TextShaped.UpdateBBox()
+	return g.TextShaped.Bounds.Translate(g.Pos)
 }
 
-func (g *Text) RenderText(sv *SVG) {
-	pc := &paint.Context{&sv.RenderState, &g.Paint}
-	mat := &pc.CurrentTransform
-	// note: layout of text has already been done in LocalBBox above
-	g.TextRender.Transform(*mat, &pc.FontStyle, &pc.UnitContext)
-	pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
-	if pc.TextStyle.Align == styles.Center || pc.TextStyle.Anchor == styles.AnchorMiddle {
-		pos.X -= g.TextRender.BBox.Size().X * .5
-	} else if pc.TextStyle.Align == styles.End || pc.TextStyle.Anchor == styles.AnchorEnd {
-		pos.X -= g.TextRender.BBox.Size().X
+func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	if g.IsParText() {
+		g.BBoxesFromChildren(sv, parTransform)
+		return
 	}
-	g.TextRender.Render(pc, pos)
-	g.LastPos = pos
-	bb := g.TextRender.BBox
-	bb.Translate(math32.Vec2(pos.X, pos.Y-0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
-	g.LastBBox = bb
-	g.BBoxes(sv)
-}
-
-func (g *Text) LocalBBox() math32.Box2 {
-	return g.TextBBox()
+	xf := parTransform.Mul(g.Paint.Transform)
+	ni := g.This.(Node)
+	lbb := ni.LocalBBox(sv)
+	g.BBox = lbb.MulMatrix2(xf).ToRect()
+	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
 func (g *Text) Render(sv *SVG) {
 	if g.IsParText() {
-		pc := &g.Paint
-		rs := &sv.RenderState
-		rs.PushTransform(pc.Transform)
-
-		g.RenderChildren(sv)
-		g.BBoxes(sv) // must come after render
-
-		rs.PopTransform()
-	} else {
-		vis, rs := g.PushTransform(sv)
-		if !vis {
+		if !g.PushContext(sv) {
 			return
 		}
-		if len(g.Text) > 0 {
-			g.RenderText(sv)
-		}
+		pc := g.Painter(sv)
 		g.RenderChildren(sv)
-		if g.IsParText() {
-			g.BBoxes(sv) // after kids have rendered
-		}
-		rs.PopTransform()
+		pc.PopContext()
+		return
 	}
+	if !g.IsVisible(sv) {
+		return
+	}
+	if len(g.Text) > 0 {
+		g.RenderText(sv)
+	}
+}
+
+func (g *Text) RenderText(sv *SVG) {
+	// note: transform is managed entirely in the render side function!
+	pc := g.Painter(sv)
+	pos := g.Pos
+	bsz := g.TextShaped.Bounds.Size()
+	if pc.Text.Align == text.Center {
+		pos.X -= bsz.X * .5
+	} else if pc.Text.Align == text.End {
+		pos.X -= bsz.X
+	}
+	pc.DrawText(g.TextShaped, pos)
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

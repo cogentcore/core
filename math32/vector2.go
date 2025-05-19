@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"image"
 
+	"github.com/chewxy/math32"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -31,6 +32,12 @@ func Vec2(x, y float32) Vector2 {
 // Vector2Scalar returns a new [Vector2] with all components set to the given scalar value.
 func Vector2Scalar(scalar float32) Vector2 {
 	return Vector2{scalar, scalar}
+}
+
+// Vector2Polar returns a new [Vector2] from polar coordinates,
+// with angle in radians CCW and radius the distance from (0,0).
+func Vector2Polar(angle, radius float32) Vector2 {
+	return Vector2{radius * math32.Cos(angle), radius * math32.Sin(angle)}
 }
 
 // FromPoint returns a new [Vector2] from the given [image.Point].
@@ -414,7 +421,11 @@ func (v Vector2) LengthSquared() float32 {
 
 // Normal returns this vector divided by its length (its unit vector).
 func (v Vector2) Normal() Vector2 {
-	return v.DivScalar(v.Length())
+	l := v.Length()
+	if l == 0 {
+		return Vector2{}
+	}
+	return v.DivScalar(l)
 }
 
 // DistanceTo returns the distance between these two vectors as points.
@@ -467,4 +478,23 @@ func (v Vector2) InTriangle(p0, p1, p2 Vector2) bool {
 	t := (p0.X*p1.Y - p0.Y*p1.X + (p0.Y-p1.Y)*v.X + (p1.X-p0.X)*v.Y) * sign
 
 	return s >= 0 && t >= 0 && (s+t) < 2*A*sign
+}
+
+// Rot90CW rotates the line OP by 90 degrees CW.
+func (v Vector2) Rot90CW() Vector2 {
+	return Vector2{v.Y, -v.X}
+}
+
+// Rot90CCW rotates the line OP by 90 degrees CCW.
+func (v Vector2) Rot90CCW() Vector2 {
+	return Vector2{-v.Y, v.X}
+}
+
+// Rot rotates the line OP by phi radians CCW.
+func (v Vector2) Rot(phi float32, p0 Vector2) Vector2 {
+	sinphi, cosphi := math32.Sincos(phi)
+	return Vector2{
+		p0.X + cosphi*(v.X-p0.X) - sinphi*(v.Y-p0.Y),
+		p0.Y + sinphi*(v.X-p0.X) + cosphi*(v.Y-p0.Y),
+	}
 }

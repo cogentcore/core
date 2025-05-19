@@ -15,7 +15,8 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/system/composer"
 )
 
 // Window is a double-buffered OS-specific hardware window.
@@ -107,7 +108,7 @@ type Window interface {
 	// This will result in move and / or size events as needed.
 	// If topOnly is true, then only the top vertical axis is constrained, so that
 	// the window title bar does not go offscreen.
-	ConstrainFrame(topOnly bool) styles.Sides[int]
+	ConstrainFrame(topOnly bool) sides.Sides[int]
 
 	// Raise requests that the window be at the top of the stack of windows,
 	// and receive focus.  If it is iconified, it will be de-iconified.  This
@@ -188,10 +189,9 @@ type Window interface {
 	// IsCursorEnabled returns true or false if cursor is enabled
 	IsCursorEnabled() bool
 
-	// Drawer returns the drawing system attached to this window surface.
-	// This is typically used for high-performance rendering to the surface.
-	// Wrap access in Lock() / Unlock() calls.
-	Drawer() Drawer
+	// Composer returns the [composer.Composer] for rendering to this
+	// window surface.
+	Composer() composer.Composer
 
 	// Lock attempts to grab the overall window Mutex lock
 	// and returns true if the window is still open and ready for business.
@@ -207,12 +207,6 @@ type Window interface {
 	// that will be called on the main thread just prior
 	// to destroying the drawer and surface.
 	SetDestroyGPUResourcesFunc(f func())
-
-	// SetFPS sets the frames per second for Paint events that drive
-	// updating of the window at regular intervals.  60 is default.
-	// 0 disables -- no regular Paint events are sent.
-	// This only takes effect prior to opening a new window.
-	SetFPS(fps int)
 
 	// SetTitleBarIsDark sets whether the color theme of the window
 	// title bar is dark (as opposed to light).

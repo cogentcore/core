@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -90,8 +91,8 @@ func (sw *Switch) Init() {
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 			s.Cursor = cursors.Pointer
 		}
-		s.Text.Align = styles.Start
-		s.Text.AlignV = styles.Center
+		s.Text.Align = text.Start
+		s.Text.AlignV = text.Center
 		s.Padding.SetVertical(units.Dp(4))
 		s.Padding.SetHorizontal(units.Dp(ConstantSpacing(4))) // needed for layout issues
 		s.Border.Radius = styles.BorderRadiusSmall
@@ -121,7 +122,7 @@ func (sw *Switch) Init() {
 		}
 	})
 
-	sw.HandleClickOnEnterSpace()
+	sw.SendClickOnEnter()
 	sw.OnFinal(events.Click, func(e events.Event) {
 		if sw.IsReadOnly() {
 			return

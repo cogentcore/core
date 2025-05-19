@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/svg"
 )
 
@@ -53,7 +54,7 @@ func Render(c *Config) error {
 	if c.Render.Height == 0 {
 		c.Render.Height = c.Render.Width
 	}
-	sv := svg.NewSVG(c.Render.Width, c.Render.Height)
+	sv := svg.NewSVG(math32.Vec2(float32(c.Render.Width), float32(c.Render.Height)))
 	err := ApplyFill(c, sv)
 	if err != nil {
 		return err
@@ -62,16 +63,15 @@ func Render(c *Config) error {
 	if err != nil {
 		return err
 	}
-	sv.Render()
 	if c.Output == "" {
 		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".png"
 	}
-	return sv.SavePNG(c.Output)
+	return sv.SaveImage(c.Output)
 }
 
 // EmbedImage embeds the input image file into the output svg file.
 func EmbedImage(c *Config) error {
-	sv := svg.NewSVG(0, 0)
+	sv := svg.NewSVG(math32.Vec2(0, 0))
 	err := ApplyFill(c, sv)
 	if err != nil {
 		return err
@@ -81,7 +81,8 @@ func EmbedImage(c *Config) error {
 	if err != nil {
 		return err
 	}
-	sv.Root.ViewBox.Size.SetPoint(img.Pixels.Bounds().Size())
+	sz := img.Pixels.Bounds().Size()
+	sv.Root.ViewBox.Size.SetPoint(sz)
 	if c.Output == "" {
 		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".svg"
 	}

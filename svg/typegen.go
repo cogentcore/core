@@ -7,7 +7,7 @@ import (
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/aymerick/douceur/css"
@@ -108,7 +108,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Group", IDName:
 // and shared style properties.
 func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "ViewBox", Doc: "how to scale and align the image"}, {Name: "Pixels", Doc: "the image pixels"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "ViewBox", Doc: "how to scale and align the image"}, {Name: "Pixels", Doc: "Pixels are the image pixels, which has imagex.WrapJS already applied."}}})
 
 // NewImage returns a new [Image] with the given optional parent:
 // Image is an SVG image (bitmap)
@@ -131,8 +131,8 @@ func (t *Image) SetFilename(v string) *Image { t.Filename = v; return t }
 func (t *Image) SetViewBox(v ViewBox) *Image { t.ViewBox = v; return t }
 
 // SetPixels sets the [Image.Pixels]:
-// the image pixels
-func (t *Image) SetPixels(v *image.RGBA) *Image { t.Pixels = v; return t }
+// Pixels are the image pixels, which has imagex.WrapJS already applied.
+func (t *Image) SetPixels(v image.Image) *Image { t.Pixels = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Line", IDName: "line", Doc: "Line is a SVG line", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Start", Doc: "position of the start of the line"}, {Name: "End", Doc: "position of the end of the line"}}})
 
@@ -208,7 +208,7 @@ func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](pare
 // use spaces to separate per css standard.
 func (t *NodeBase) SetClass(v string) *NodeBase { t.Class = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Path", IDName: "path", Doc: "Path renders SVG data sequences that can render just about anything", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Data", Doc: "the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"}, {Name: "DataStr", Doc: "string version of the path data"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Path", IDName: "path", Doc: "Path renders SVG data sequences that can render just about anything", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Data", Doc: "Path data using paint/ppath representation."}, {Name: "DataStr", Doc: "string version of the path data"}}})
 
 // NewPath returns a new [Path] with the given optional parent:
 // Path renders SVG data sequences that can render just about anything
@@ -234,7 +234,7 @@ func NewPolyline(parent ...tree.Node) *Polyline { return tree.New[Polyline](pare
 // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
 func (t *Polyline) SetPoints(v ...math32.Vector2) *Polyline { t.Points = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Rect", IDName: "rect", Doc: "Rect is a SVG rectangle, optionally with rounded corners", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the rectangle"}, {Name: "Size", Doc: "size of the rectangle"}, {Name: "Radius", Doc: "radii for curved corners, as a proportion of width, height"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Rect", IDName: "rect", Doc: "Rect is a SVG rectangle, optionally with rounded corners", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the rectangle"}, {Name: "Size", Doc: "size of the rectangle"}, {Name: "Radius", Doc: "radii for curved corners. only rx is used for now."}}})
 
 // NewRect returns a new [Rect] with the given optional parent:
 // Rect is a SVG rectangle, optionally with rounded corners
@@ -249,7 +249,7 @@ func (t *Rect) SetPos(v math32.Vector2) *Rect { t.Pos = v; return t }
 func (t *Rect) SetSize(v math32.Vector2) *Rect { t.Size = v; return t }
 
 // SetRadius sets the [Rect.Radius]:
-// radii for curved corners, as a proportion of width, height
+// radii for curved corners. only rx is used for now.
 func (t *Rect) SetRadius(v math32.Vector2) *Rect { t.Radius = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Root", IDName: "root", Doc: "Root represents the root of an SVG tree.", Embeds: []types.Field{{Name: "Group"}}, Fields: []types.Field{{Name: "ViewBox", Doc: "ViewBox defines the coordinate system for the drawing.\nThese units are mapped into the screen space allocated\nfor the SVG during rendering."}}})
@@ -264,11 +264,11 @@ func NewRoot(parent ...tree.Node) *Root { return tree.New[Root](parent...) }
 // for the SVG during rendering.
 func (t *Root) SetViewBox(v ViewBox) *Root { t.ViewBox = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextRender", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text, where text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextShaped", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}}})
 
 // NewText returns a new [Text] with the given optional parent:
 // Text renders SVG text, handling both text and tspan elements.
-// tspan is nested under a parent text -- text has empty Text string.
+// tspan is nested under a parent text, where text has empty Text string.
 func NewText(parent ...tree.Node) *Text { return tree.New[Text](parent...) }
 
 // SetPos sets the [Text.Pos]:
@@ -283,9 +283,9 @@ func (t *Text) SetWidth(v float32) *Text { t.Width = v; return t }
 // text string to render
 func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
-// SetTextRender sets the [Text.TextRender]:
+// SetTextShaped sets the [Text.TextShaped]:
 // render version of text
-func (t *Text) SetTextRender(v paint.Text) *Text { t.TextRender = v; return t }
+func (t *Text) SetTextShaped(v *shaped.Lines) *Text { t.TextShaped = v; return t }
 
 // SetCharPosX sets the [Text.CharPosX]:
 // character positions along X axis, if specified
@@ -314,11 +314,3 @@ func (t *Text) SetTextLength(v float32) *Text { t.TextLength = v; return t }
 // SetAdjustGlyphs sets the [Text.AdjustGlyphs]:
 // in attempting to match TextLength, should we adjust glyphs in addition to spacing?
 func (t *Text) SetAdjustGlyphs(v bool) *Text { t.AdjustGlyphs = v; return t }
-
-// SetLastPos sets the [Text.LastPos]:
-// last text render position -- lower-left baseline of start
-func (t *Text) SetLastPos(v math32.Vector2) *Text { t.LastPos = v; return t }
-
-// SetLastBBox sets the [Text.LastBBox]:
-// last actual bounding box in display units (dots)
-func (t *Text) SetLastBBox(v math32.Box2) *Text { t.LastBBox = v; return t }

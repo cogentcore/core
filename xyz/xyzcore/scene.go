@@ -8,17 +8,11 @@ package xyzcore
 //go:generate core generate
 
 import (
-	"errors"
-	"image/draw"
-
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gpu"
-	"cogentcore.org/core/gpu/gpudraw"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/xyz"
 )
 
@@ -68,7 +62,7 @@ func (sw *Scene) Init() {
 	sw.handleSelectEvents()
 
 	sw.Updater(func() {
-		sz := sw.Geom.Size.Actual.Content.ToPointFloor()
+		sz := sw.Geom.ContentBBox.Size()
 		if sz.X <= 0 || sz.Y <= 0 {
 			return
 		}
@@ -76,7 +70,7 @@ func (sw *Scene) Init() {
 
 		doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
 		if sw.XYZ.Frame != nil {
-			cursz := sw.XYZ.Frame.Format.Size
+			cursz := sw.XYZ.Frame.Render().Format.Size
 			if cursz == sz && !doRebuild {
 				sw.XYZ.Update()
 				sw.NeedsRender()
@@ -85,20 +79,7 @@ func (sw *Scene) Init() {
 		} else {
 			doRebuild = false // will be done automatically b/c Frame == nil
 		}
-
-		win := sw.WidgetBase.Scene.Events.RenderWindow()
-		if win == nil {
-			return
-		}
-		drw := win.SystemWindow.Drawer()
-		system.TheApp.RunOnMain(func() {
-			sf, ok := drw.Renderer().(*gpu.Surface)
-			if !ok {
-				core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))
-				return
-			}
-			sw.XYZ.ConfigFrameFromSurface(sf) // does a full build if Frame == nil, else just new size
-		})
+		sw.configFrame(sz)
 		if doRebuild {
 			sw.XYZ.Rebuild()
 		}
@@ -128,23 +109,4 @@ func (sw *Scene) Render() {
 		return
 	}
 	sw.XYZ.DoUpdate()
-}
-
-// RenderDraw draws the current image to RenderWindow drawer
-func (sw *Scene) RenderDraw(drw system.Drawer, op draw.Op) {
-	if sw.XYZ.Frame == nil || !sw.IsVisible() {
-		return
-	}
-	agd, ok := drw.(gpudraw.AsGPUDrawer)
-	if !ok || agd.AsGPUDrawer() == nil {
-		core.ErrorSnackbar(sw, errors.New("xyz.Scene.RenderDraw: no WebGPU drawer available"))
-		return
-	}
-	bb, sbb, empty := sw.DirectRenderDrawBBoxes(sw.XYZ.Frame.Frames[0].Format.Bounds())
-	if empty {
-		return
-	}
-	gdrw := agd.AsGPUDrawer()
-	gdrw.UseTexture(sw.XYZ.Frame.Frames[0])
-	gdrw.CopyUsed(bb.Min, sbb, draw.Src, false)
 }

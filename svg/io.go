@@ -23,10 +23,11 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html/charset"
 )
@@ -128,6 +129,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	inTspn := false
 	var curTspn *Text
 	var defPrevPar Node // previous parent before a def encountered
+	var groupStack stack.Stack[string]
 
 	for {
 		var t xml.Token
@@ -148,6 +150,47 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 		switch se := t.(type) {
 		case xml.StartElement:
 			nm := se.Name.Local
+			if nm == "g" {
+				name := ""
+				if sv.GroupFilter != "" {
+					for _, attr := range se.Attr {
+						if attr.Name.Local != "id" {
+							continue
+						}
+						name = attr.Value
+						if name != sv.GroupFilter {
+							sv.groupFilterSkip = true
+							sv.groupFilterSkipName = name
+							// fmt.Println("skipping:", attr.Value, sv.GroupFilter)
+							break
+							// } else {
+							// 	fmt.Println("including:", attr.Value, sv.GroupFilter)
+						}
+					}
+				}
+				if name == "" {
+					name = fmt.Sprintf("tmp%d", len(groupStack)+1)
+				}
+				groupStack.Push(name)
+				if sv.groupFilterSkip {
+					break
+				}
+				curPar = NewGroup(curPar)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					default:
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
+				break
+			}
+			if sv.groupFilterSkip {
+				break
+			}
+
 			switch {
 			case nm == "svg":
 				// if curPar != sv.This {
@@ -187,17 +230,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				inDef = true
 				defPrevPar = curPar
 				curPar = sv.Defs
-			case nm == "g":
-				curPar = NewGroup(curPar)
-				for _, attr := range se.Attr {
-					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
-						continue
-					}
-					switch attr.Name.Local {
-					default:
-						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
-					}
-				}
 			case nm == "rect":
 				rect := NewRect(curPar)
 				var x, y, w, h, rx, ry float32
@@ -370,7 +402,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "d":
-						path.SetData(attr.Value)
+						if sv.GroupFilter != "" && inDef { // font optimization
+							path.DataStr = attr.Value
+						} else {
+							path.SetData(attr.Value)
+						}
 					default:
 						path.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -625,20 +661,42 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "use":
 				link := gradient.XMLAttr("href", se.Attr)
 				itm := sv.FindNamedElement(link)
-				if itm != nil {
-					cln := itm.AsTree().Clone().(Node)
-					if cln != nil {
-						curPar.AsTree().AddChild(cln)
-						for _, attr := range se.Attr {
-							if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
-								continue
-							}
-							switch attr.Name.Local {
-							default:
-								cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
-							}
-						}
+				if itm == nil {
+					fmt.Println("can't find use:", link)
+					break
+				}
+				cln := itm.AsTree().Clone().(Node)
+				if cln == nil {
+					break
+				}
+				curPar.AsTree().AddChild(cln)
+				var xo, yo float64
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
+						continue
 					}
+					switch attr.Name.Local {
+					case "x":
+						xo, _ = reflectx.ToFloat(attr.Value)
+					case "y":
+						yo, _ = reflectx.ToFloat(attr.Value)
+					default:
+						cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
+				if xo != 0 || yo != 0 {
+					xf := math32.Translate2D(float32(xo), float32(yo))
+					if txp, has := cln.AsTree().Properties["transform"]; has {
+						exf := math32.Identity2()
+						exf.SetString(txp.(string))
+						exf = exf.Translate(float32(xo), float32(yo))
+						cln.AsTree().SetProperty("transform", exf.String())
+					} else {
+						cln.AsTree().SetProperty("transform", xf.String())
+					}
+				}
+				if p, ok := cln.(*Path); ok {
+					p.SetData(p.DataStr) // defs don't apply paths
 				}
 			case nm == "Work":
 				fallthrough
@@ -707,7 +765,36 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				// IconAutoOpen = false
 			}
 		case xml.EndElement:
-			switch se.Name.Local {
+			nm := se.Name.Local
+			if nm == "g" {
+				cg := groupStack.Pop()
+				if sv.groupFilterSkip {
+					if sv.groupFilterSkipName == cg {
+						// fmt.Println("unskip:", cg)
+						sv.groupFilterSkip = false
+					}
+					break
+				}
+				if curPar == sv.Root.This {
+					break
+				}
+				if curPar.AsTree().Parent == nil {
+					break
+				}
+				curPar = curPar.AsTree().Parent.(Node)
+				if curPar == sv.Root.This {
+					break
+				}
+				r := tree.ParentByType[*Root](curPar)
+				if r != nil {
+					curSvg = r
+				}
+				break
+			}
+			if sv.groupFilterSkip {
+				break
+			}
+			switch nm {
 			case "title":
 				inTitle = false
 			case "desc":
@@ -850,7 +937,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	_, ismark := n.(*Marker)
 	if !isgp {
 		if issvg && !ismark {
-			sp := styles.StylePropertiesXML(properties)
+			sp := styleprops.ToXMLString(properties)
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
@@ -875,7 +962,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	switch nd := n.(type) {
 	case *Path:
 		nm = "path"
-		nd.DataStr = PathDataString(nd.Data)
+		nd.DataStr = nd.Data.ToSVG()
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
@@ -1070,7 +1157,13 @@ func MarshalXMLTree(n Node, enc *XMLEncoder, setName string) (string, error) {
 		return "", nil
 	}
 	for _, k := range n.AsTree().Children {
-		knm, err := MarshalXMLTree(k.(Node), enc, "")
+		kn := k.(Node)
+		if setName == "defs" {
+			if _, ok := kn.(*Path); ok { // skip paths in defs b/c just for use and copied
+				continue
+			}
+		}
+		knm, err := MarshalXMLTree(kn, enc, "")
 		if knm != "" {
 			enc.WriteEnd(knm)
 		}
@@ -1130,7 +1223,10 @@ func SetStandardXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Properties))
+		if nb.Properties == nil {
+			nb.Properties = make(map[string]any)
+		}
+		styleprops.FromXMLString(val, nb.Properties)
 		return true
 	}
 	return false

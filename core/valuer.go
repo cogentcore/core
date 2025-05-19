@@ -161,7 +161,9 @@ func init() {
 	AddValueType[time.Duration, DurationInput]()
 	AddValueType[types.Type, TypeChooser]()
 	AddValueType[Filename, FileButton]()
-	AddValueType[FontName, FontButton]()
+	// AddValueType[FontName, FontButton]()
+	AddValueType[FontName, TextField]()
 	AddValueType[keymap.MapName, KeyMapButton]()
 	AddValueType[key.Chord, KeyChordButton]()
+	AddValueType[HighlightingName, HighlightingButton]()
 }

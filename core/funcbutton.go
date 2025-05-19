@@ -317,7 +317,7 @@ func (fb *FuncButton) callFuncShowReturns() {
 func (fb *FuncButton) confirmDialog() {
 	ctx := fb.goodContext()
 	d := NewBody(fb.Text + "?")
-	NewText(d).SetType(TextSupporting).SetText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+	NewText(d).SetType(TextSupporting).SetText("Are you sure you want to " + strings.ToLower(fb.Text) + "? " + fb.Tooltip)
 	d.AddBottomBar(func(bar *Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText(fb.Text).OnClick(func(e events.Event) {

@@ -178,6 +178,67 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
+var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4, 5}
+
+// renderWindowFlagsN is the highest valid value for type renderWindowFlags, plus one.
+const renderWindowFlagsN renderWindowFlags = 6
+
+var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`IsRendering`: 0, `RenderSkipped`: 1, `Resize`: 2, `StopEventLoop`: 3, `Closing`: 4, `GotFocus`: 5}
+
+var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the renderAsync function is running.`, 1: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`, 2: `winResize indicates that the window was just resized.`, 3: `winStopEventLoop indicates that the event loop should be stopped.`, 4: `winClosing is whether the window is closing.`, 5: `winGotFocus indicates that have we received focus.`}
+
+var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `IsRendering`, 1: `RenderSkipped`, 2: `Resize`, 3: `StopEventLoop`, 4: `Closing`, 5: `GotFocus`}
+
+// String returns the string representation of this renderWindowFlags value.
+func (i renderWindowFlags) String() string { return enums.BitFlagString(i, _renderWindowFlagsValues) }
+
+// BitIndexString returns the string representation of this renderWindowFlags value
+// if it is a bit index value (typically an enum constant), and
+// not an actual bit flag value.
+func (i renderWindowFlags) BitIndexString() string { return enums.String(i, _renderWindowFlagsMap) }
+
+// SetString sets the renderWindowFlags value from its string representation,
+// and returns an error if the string is invalid.
+func (i *renderWindowFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+
+// SetStringOr sets the renderWindowFlags value from its string representation
+// while preserving any bit flags already set, and returns an
+// error if the string is invalid.
+func (i *renderWindowFlags) SetStringOr(s string) error {
+	return enums.SetStringOr(i, s, _renderWindowFlagsValueMap, "renderWindowFlags")
+}
+
+// Int64 returns the renderWindowFlags value as an int64.
+func (i renderWindowFlags) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the renderWindowFlags value from an int64.
+func (i *renderWindowFlags) SetInt64(in int64) { *i = renderWindowFlags(in) }
+
+// Desc returns the description of the renderWindowFlags value.
+func (i renderWindowFlags) Desc() string { return enums.Desc(i, _renderWindowFlagsDescMap) }
+
+// renderWindowFlagsValues returns all possible values for the type renderWindowFlags.
+func renderWindowFlagsValues() []renderWindowFlags { return _renderWindowFlagsValues }
+
+// Values returns all possible values for the type renderWindowFlags.
+func (i renderWindowFlags) Values() []enums.Enum { return enums.Values(_renderWindowFlagsValues) }
+
+// HasFlag returns whether these bit flags have the given bit flag set.
+func (i *renderWindowFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+
+// SetFlag sets the value of the given flags in these flags to the given value.
+func (i *renderWindowFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	enums.SetFlag((*int64)(i), on, f...)
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i renderWindowFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *renderWindowFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "renderWindowFlags")
+}
+
 var _sceneFlagsValues = []sceneFlags{0, 1, 2, 3, 4, 5, 6}
 
 // sceneFlagsN is the highest valid value for type sceneFlags, plus one.
@@ -618,16 +679,16 @@ func (i *TextFieldTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "TextFieldTypes")
 }
 
-var _widgetFlagsValues = []widgetFlags{0, 1, 2}
+var _widgetFlagsValues = []widgetFlags{0, 1}
 
 // widgetFlagsN is the highest valid value for type widgetFlags, plus one.
-const widgetFlagsN widgetFlags = 3
+const widgetFlagsN widgetFlags = 2
 
-var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1, `FirstRender`: 2}
+var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1}
 
-var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`, 2: `widgetFirstRender indicates that we were the first to render, and pushed our parent&#39;s bounds, which then need to be popped.`}
+var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`}
 
-var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`, 2: `FirstRender`}
+var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`}
 
 // String returns the string representation of this widgetFlags value.
 func (i widgetFlags) String() string { return enums.BitFlagString(i, _widgetFlagsValues) }

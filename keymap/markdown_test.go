@@ -5,11 +5,18 @@
 package keymap
 
 import (
-	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMarkdown(t *testing.T) {
 	str := AvailableMaps.MarkdownDoc()
-	fmt.Println(str)
+	golden, err := os.ReadFile(filepath.Join("testdata", "keymaps-golden.md"))
+	assert.NoError(t, err)
+	err = os.WriteFile(filepath.Join("testdata", "keymaps.md"), []byte(str), 0666)
+	assert.NoError(t, err)
+	assert.Equal(t, string(golden), str)
 }

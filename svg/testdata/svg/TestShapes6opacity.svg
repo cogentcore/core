@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<svg width="500" height="500"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<radialGradient id="rg" cx="50%" cy="50%" fx="30%" fy ="30%"  r="30%" gradientUnits = "objectBoundingBox"  
+	gradientTransform="rotate(-35)" spreadMethod="reflect" >
+<stop offset="1%" stop-color="powderblue" stop-opacity="1.00"/>
+<stop offset="10%" stop-color="silver" stop-opacity="1.00"/>
+<stop offset="30%" stop-color="darkblue" stop-opacity="1.00"/>
+<stop offset="40%" stop-color="black" stop-opacity="1.00"/>
+<stop offset="100%" stop-color="lime" stop-opacity="0.50"/>
+</radialGradient>
+</defs>
+
+<ellipse cx="250" cy="350" rx="80" ry="100" opacity = "0.3" style="fill:url(#rg)" /> 
+
+</svg>

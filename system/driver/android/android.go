@@ -345,7 +345,7 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 
 			a.Scrn.Orientation = orientation
 
-			a.Scrn.DevicePixelRatio = 1
+			a.Scrn.DevicePixelRatio = dpi / 160
 			a.Scrn.PixelSize = image.Pt(widthPx, heightPx)
 			a.Scrn.Geometry.Max = a.Scrn.PixelSize
 

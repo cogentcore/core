@@ -29,17 +29,14 @@ type Node interface {
 	// without requiring interface methods.
 	AsNodeBase() *NodeBase
 
+	// BBoxes computes BBox and VisBBox, prior to render.
+	BBoxes(sv *SVG, parTransform math32.Matrix2)
+
 	// Render draws the node to the svg image.
 	Render(sv *SVG)
 
-	// BBoxes computes BBox and VisBBox during Render.
-	BBoxes(sv *SVG)
-
 	// LocalBBox returns the bounding box of node in local dimensions.
-	LocalBBox() math32.Box2
-
-	// NodeBBox returns the bounding box in image coordinates for this node.
-	NodeBBox(sv *SVG) image.Rectangle
+	LocalBBox(sv *SVG) math32.Box2
 
 	// SetNodePos sets the upper left effective position of this element, in local dimensions.
 	SetNodePos(pos math32.Vector2)
@@ -129,7 +126,7 @@ func (g *NodeBase) SetPos(pos math32.Vector2) {
 func (g *NodeBase) SetSize(sz math32.Vector2) {
 }
 
-func (g *NodeBase) LocalBBox() math32.Box2 {
+func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	return bb
 }
@@ -156,10 +153,10 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 	g.SetProperty(prop, colors.AsHex(clr))
 }
 
-// ParTransform returns the full compounded 2D transform matrix for all
-// of the parents of this node.  If self is true, then include our
+// ParentTransform returns the full compounded 2D transform matrix for all
+// of the parents of this node. If self is true, then include our
 // own transform too.
-func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
+func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
 	n := g.This.(Node)
@@ -190,11 +187,11 @@ func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
 // DeltaTransform computes the net transform matrix for given delta transform parameters
-// and the transformed version of the reference point.  If self is true, then
-// include the current node self transform, otherwise don't.  Groups do not
+// and the transformed version of the reference point. If self is true, then
+// include the current node self transform, otherwise don't. Groups do not
 // but regular rendering nodes do.
 func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
-	mxi := g.ParTransform(self)
+	mxi := g.ParentTransform(self)
 	mxi = mxi.Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
 	ldel := mxi.MulVector2AsVector(trans)
@@ -308,8 +305,7 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 	return cn
 }
 
-//////////////////////////////////////////////////////////////////
-// Standard Node infrastructure
+//////// Standard Node infrastructure
 
 // Style styles the Paint values directly from node properties
 func (g *NodeBase) Style(sv *SVG) {
@@ -324,9 +320,9 @@ func (g *NodeBase) Style(sv *SVG) {
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.AsNodeBase().PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProperties(pp, g.Properties, ctxt)
+		pc.SetProperties(pp, g.Properties, ctxt)
 	} else {
-		pc.SetStyleProperties(nil, g.Properties, ctxt)
+		pc.SetProperties(nil, g.Properties, ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -337,11 +333,9 @@ func (g *NodeBase) Style(sv *SVG) {
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
 	g.StyleCSS(sv, g.CSSAgg)
-
-	pc.StrokeStyle.Opacity *= pc.FontStyle.Opacity // applies to all
-	pc.FillStyle.Opacity *= pc.FontStyle.Opacity
-
-	pc.Off = !pc.Display || (pc.StrokeStyle.Color == nil && pc.FillStyle.Color == nil)
+	pc.Stroke.Opacity *= pc.Opacity // applies to all
+	pc.Fill.Opacity *= pc.Opacity
+	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
 }
 
 // AggCSS aggregates css properties
@@ -367,9 +361,9 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	ctxt := colors.Context(sv)
 	if g.Parent != sv.Root.This {
 		pp := g.Parent.(Node).AsNodeBase().PaintStyle()
-		pc.SetStyleProperties(pp, pmap, ctxt)
+		pc.SetProperties(pp, pmap, ctxt)
 	} else {
-		pc.SetStyleProperties(nil, pmap, ctxt)
+		pc.SetProperties(nil, pmap, ctxt)
 	}
 	return true
 }
@@ -385,17 +379,6 @@ func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
 	g.ApplyCSS(sv, idnm, css)
 }
 
-// LocalBBoxToWin converts a local bounding box to SVG coordinates
-func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
-	mxi := g.ParTransform(true) // include self
-	return bb.MulMatrix2(mxi).ToRect()
-}
-
-func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
-	rs := &sv.RenderState
-	return rs.LastRenderBBox
-}
-
 func (g *NodeBase) SetNodePos(pos math32.Vector2) {
 	// no-op by default
 }
@@ -407,52 +390,66 @@ func (g *NodeBase) SetNodeSize(sz math32.Vector2) {
 // LocalLineWidth returns the line width in local coordinates
 func (g *NodeBase) LocalLineWidth() float32 {
 	pc := &g.Paint
-	if pc.StrokeStyle.Color == nil {
+	if pc.Stroke.Color == nil {
 		return 0
 	}
-	return pc.StrokeStyle.Width.Dots
+	return pc.Stroke.Width.Dots
 }
 
-// ComputeBBox is called by default in render to compute bounding boxes for
-// gui interaction -- can only be done in rendering because that is when all
-// the proper transforms are all in place -- VpBBox is intersected with parent SVG
-func (g *NodeBase) BBoxes(sv *SVG) {
-	if g.This == nil {
-		return
-	}
+func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
+	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
-	g.BBox = ni.NodeBBox(sv)
-	g.BBox.Canon()
+	lbb := ni.LocalBBox(sv)
+	g.BBox = lbb.MulMatrix2(xf).ToRect()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
-// PushTransform checks our bounding box and visibility, returning false if
-// out of bounds.  If visible, pushes our transform.
-// Must be called as first step in Render.
-func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
-	g.BBox = image.Rectangle{}
+// IsVisible checks our bounding box and visibility, returning false if
+// out of bounds. Must be called as first step in Render.
+func (g *NodeBase) IsVisible(sv *SVG) bool {
 	if g.Paint.Off || g == nil || g.This == nil {
-		return false, nil
+		return false
 	}
-	ni := g.This.(Node)
-	// if g.IsInvisible() { // just the Invisible flag
-	// 	return false, nil
-	// }
-	lbb := ni.LocalBBox()
-	g.BBox = g.LocalBBoxToWin(lbb)
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 	nvis := g.VisBBox == image.Rectangle{}
-	// g.SetInvisibleState(nvis) // don't set
-
 	if nvis && !g.isDef {
-		return false, nil
+		// fmt.Println("invisible:", g.Name, g.BBox, g.VisBBox)
+		return false
 	}
+	return true
+}
 
-	rs := &sv.RenderState
-	rs.PushTransform(g.Paint.Transform)
+// Painter returns a new Painter using my styles.
+func (g *NodeBase) Painter(sv *SVG) *paint.Painter {
+	return &paint.Painter{sv.painter.State, &g.Paint}
+}
 
-	pc := &paint.Context{rs, &g.Paint}
-	return true, pc
+// PushContext checks our bounding box and visibility, returning false if
+// out of bounds. If visible, pushes us as Context.
+// Must be called as first step in Render.
+func (g *NodeBase) PushContext(sv *SVG) bool {
+	if !g.IsVisible(sv) {
+		return false
+	}
+	pc := g.Painter(sv)
+	pc.PushContext(&g.Paint, nil)
+	return true
+}
+
+func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
+	xf := parTransform.Mul(g.Paint.Transform)
+	var bb image.Rectangle
+	for i, kid := range g.Children {
+		ni := kid.(Node)
+		ni.BBoxes(sv, xf)
+		nb := ni.AsNodeBase()
+		if i == 0 {
+			bb = nb.BBox
+		} else {
+			bb = bb.Union(nb.BBox)
+		}
+	}
+	g.BBox = bb
+	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
@@ -463,13 +460,8 @@ func (g *NodeBase) RenderChildren(sv *SVG) {
 }
 
 func (g *NodeBase) Render(sv *SVG) {
-	vis, rs := g.PushTransform(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
-	// pc := &g.Paint
-	// render path elements, then compute bbox, then fill / stroke
-	g.BBoxes(sv)
 	g.RenderChildren(sv)
-	rs.PopTransform()
 }

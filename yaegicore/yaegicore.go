@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
-	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
 	"github.com/cogentcore/yaegi/interp"
@@ -88,7 +88,7 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 // such that the contents of the text editor are interpreted as code
 // of the given language, which is run in the context of the given parent widget.
 // It is used as the default value of [htmlcore.BindTextEditor].
-func BindTextEditor(ed *texteditor.Editor, parent *core.Frame, language string) {
+func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 	oc := func() {
 		in, new, err := getInterpreter(language)
 		if err != nil {
@@ -109,7 +109,7 @@ func BindTextEditor(ed *texteditor.Editor, parent *core.Frame, language string) 
 		}
 
 		parent.DeleteChildren()
-		str := ed.Buffer.String()
+		str := ed.Lines.String()
 		// all Go code must be in a function for declarations to be handled correctly
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"

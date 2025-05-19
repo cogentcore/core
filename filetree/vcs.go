@@ -14,8 +14,9 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/texteditor/text"
+	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
 
@@ -32,7 +33,7 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 		if sfn == nil {
 			return tree.Continue
 		}
-		sfn.detectVCSRepo(false)
+		sfn.detectVCSRepo()
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -44,9 +45,8 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 }
 
 // detectVCSRepo detects and configures DirRepo if this directory is root of
-// a VCS repository.  if updateFiles is true, gets the files in the dir.
-// returns true if a repository was newly found here.
-func (fn *Node) detectVCSRepo(updateFiles bool) bool {
+// a VCS repository. returns true if a repository was newly found here.
+func (fn *Node) detectVCSRepo() bool {
 	repo, _ := fn.Repo()
 	if repo != nil {
 		return false
@@ -63,9 +63,6 @@ func (fn *Node) detectVCSRepo(updateFiles bool) bool {
 		return false
 	}
 	fn.DirRepo = repo
-	if updateFiles {
-		fn.updateRepoFiles()
-	}
 	return true
 }
 
@@ -107,7 +104,12 @@ func (fn *Node) updateRepoFiles() {
 	if fn.DirRepo == nil {
 		return
 	}
-	fn.repoFiles, _ = fn.DirRepo.Files()
+	fn.DirRepo.Files(func(f vcs.Files) { // need the func to make it work
+		fr := fn.FileRoot()
+		fr.AsyncLock()
+		fn.Update()
+		fr.AsyncUnlock()
+	})
 }
 
 // addToVCSSelected adds selected files to version control system
@@ -123,7 +125,6 @@ func (fn *Node) AddToVCS() {
 	if repo == nil {
 		return
 	}
-	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added
@@ -206,9 +207,10 @@ func (fn *Node) revertVCS() (err error) {
 	} else if fn.Info.VCS == vcs.Added {
 		// do nothing - leave in "added" state
 	}
-	if fn.Buffer != nil {
-		fn.Buffer.Revert()
-	}
+	// todo:
+	// if fn.Lines != nil {
+	// 	fn.Lines.Revert()
+	// }
 	fn.Update()
 	return err
 }
@@ -235,7 +237,8 @@ func (fn *Node) diffVCS(rev_a, rev_b string) error {
 	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	_, err := texteditor.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath), fn.Buffer, rev_a, rev_b)
+	// todo:
+	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath) /*fn.Lines*/, nil, rev_a, rev_b)
 	return err
 }
 
@@ -284,11 +287,11 @@ func (fn *Node) blameVCSSelected() { //types:add
 
 // blameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func blameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
+func blameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textcore.TwinEditors {
 	title := "VCS Blame: " + fsx.DirAndFile(fname)
 
 	d := core.NewBody(title)
-	tv := texteditor.NewTwinEditors(d)
+	tv := textcore.NewTwinEditors(d)
 	tv.SetSplits(.3, .7)
 	tv.SetFiles(fname, fname)
 	flns := bytes.Split(fbytes, []byte("\n"))
@@ -315,12 +318,12 @@ func blameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 
 	tva, tvb := tv.Editors()
 	tva.Styler(func(s *styles.Style) {
-		s.Text.WhiteSpace = styles.WhiteSpacePre
+		s.Text.WhiteSpace = text.WhiteSpacePre
 		s.Min.X.Ch(30)
 		s.Min.Y.Em(40)
 	})
 	tvb.Styler(func(s *styles.Style) {
-		s.Text.WhiteSpace = styles.WhiteSpacePre
+		s.Text.WhiteSpace = text.WhiteSpacePre
 		s.Min.X.Ch(80)
 		s.Min.Y.Em(40)
 	})
@@ -340,7 +343,7 @@ func (fn *Node) blameVCS() ([]byte, error) {
 		return nil, errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	fnm := string(fn.Filepath)
-	fb, err := text.FileBytes(fnm)
+	fb, err := lines.FileBytes(fnm)
 	if err != nil {
 		return nil, err
 	}
@@ -363,7 +366,7 @@ func (fn *Node) UpdateAllVCS() {
 			return tree.Continue
 		}
 		if sfn.DirRepo == nil {
-			if !sfn.detectVCSRepo(false) {
+			if !sfn.detectVCSRepo() {
 				return tree.Continue
 			}
 		}

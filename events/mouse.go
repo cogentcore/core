@@ -87,7 +87,8 @@ func NewMouseDrag(but Buttons, where, prev, start image.Point, mods key.Modifier
 type MouseScroll struct {
 	Mouse
 
-	// Delta is the amount of scrolling in each axis
+	// Delta is the amount of scrolling in each axis, which is always in pixel/dot
+	// units (see [Scroll]).
 	Delta math32.Vector2
 }
 

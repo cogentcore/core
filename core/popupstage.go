@@ -37,8 +37,8 @@ func (st *Stage) runPopupAsync() *Stage {
 	}
 	ms := ctx.Scene.Stage.Main
 	rc := ms.renderContext
-	rc.lock()
-	defer rc.unlock()
+	rc.Lock()
+	defer rc.Unlock()
 	return st.runPopup()
 }
 
@@ -93,15 +93,15 @@ func (st *Stage) runPopup() *Stage {
 		bigPopup = true
 	}
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
-	fontHt := 16
-	if sc.Styles.Font.Face != nil {
-		fontHt = int(sc.Styles.Font.Face.Metrics.Height)
+	fontHt := sc.Styles.Font.FontHeight()
+	if fontHt == 0 {
+		fontHt = 16
 	}
 
 	switch st.Type {
 	case MenuStage:
 		sz.X += scrollWd * 2
-		maxht := int(SystemSettings.MenuMaxHeight * fontHt)
+		maxht := int(float32(SystemSettings.MenuMaxHeight) * fontHt)
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
 		b := msc.SceneGeom.Bounds()
@@ -172,8 +172,8 @@ func (st *Stage) runPopup() *Stage {
 // for example in a delayed callback AfterFunc etc.
 func (st *Stage) closePopupAsync() {
 	rc := st.Mains.renderContext
-	rc.lock()
-	defer rc.unlock()
+	rc.Lock()
+	defer rc.Unlock()
 	st.ClosePopup()
 }
 

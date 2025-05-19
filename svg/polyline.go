@@ -27,7 +27,7 @@ func (g *Polyline) SetSize(sz math32.Vector2) {
 	// todo: scale bbox
 }
 
-func (g *Polyline) LocalBBox() math32.Box2 {
+func (g *Polyline) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.B2Empty()
 	for _, pt := range g.Points {
 		bb.ExpandByPoint(pt)
@@ -40,28 +40,25 @@ func (g *Polyline) LocalBBox() math32.Box2 {
 
 func (g *Polyline) Render(sv *SVG) {
 	sz := len(g.Points)
-	if sz < 2 {
+	if sz < 2 || !g.IsVisible(sv) {
 		return
 	}
-	vis, pc := g.PushTransform(sv)
-	if !vis {
-		return
-	}
-	pc.DrawPolyline(g.Points)
-	pc.FillStrokeClear()
-	g.BBoxes(sv)
+	pc := g.Painter(sv)
+	pc.Polyline(g.Points...)
+	pc.Draw()
 
+	g.PushContext(sv)
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
 		ptn := g.Points[1]
 		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
-		mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]
 		ptp := g.Points[sz-2]
 		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
-		mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
 		for i := 1; i < sz-1; i++ {
@@ -69,12 +66,10 @@ func (g *Polyline) Render(sv *SVG) {
 			ptp := g.Points[i-1]
 			ptn := g.Points[i+1]
 			ang := 0.5 * (math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
-			mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
+			mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 		}
 	}
-
-	g.RenderChildren(sv)
-	pc.PopTransform()
+	pc.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

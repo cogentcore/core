@@ -35,7 +35,7 @@ func (g *Line) SetSize(sz math32.Vector2) {
 	g.End = g.Start.Add(sz)
 }
 
-func (g *Line) LocalBBox() math32.Box2 {
+func (g *Line) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.B2Empty()
 	bb.ExpandByPoint(g.Start)
 	bb.ExpandByPoint(g.End)
@@ -46,25 +46,23 @@ func (g *Line) LocalBBox() math32.Box2 {
 }
 
 func (g *Line) Render(sv *SVG) {
-	vis, pc := g.PushTransform(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
-	pc.DrawLine(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
-	pc.Stroke()
-	g.BBoxes(sv)
+	pc := g.Painter(sv)
+	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
+	pc.Draw()
 
+	g.PushContext(sv)
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
-		mrk.RenderMarker(sv, g.Start, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, g.Start, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
-		mrk.RenderMarker(sv, g.End, ang, g.Paint.StrokeStyle.Width.Dots)
+		mrk.RenderMarker(sv, g.End, ang, g.Paint.Stroke.Width.Dots)
 	}
-
-	g.RenderChildren(sv)
-	pc.PopTransform()
+	pc.PopContext()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

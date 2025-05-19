@@ -21,6 +21,7 @@ You can set the background color of a [[widget]]:
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Background = colors.Scheme.Warn.Container
+    s.Min.Set(units.Em(5))
 })
 ```
 
@@ -61,7 +62,7 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-You can specify different border properties for different sides of a widget (see the documentation for [[doc:styles.Sides.Set]]):
+You can specify different border properties for different sides of a widget (see the documentation for [[doc:styles/sides.Sides.Set]]):
 
 ```Go
 fr := core.NewFrame(b)
@@ -101,7 +102,7 @@ Min specifies the minimum size that a widget must receive:
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(5))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -111,7 +112,7 @@ Min (and Max and Grow) can be specified for each dimension:
 fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(10), units.Em(3))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -124,7 +125,7 @@ fr := core.NewFrame(b)
 fr.Styler(func(s *styles.Style) {
     s.Grow.Set(1, 1)
     s.Min.Set(units.Em(5))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -138,7 +139,7 @@ fr.Styler(func(s *styles.Style) {
     s.Grow.Set(1, 1)
     s.Min.Set(units.Em(5))
     s.Max.Set(units.Em(10))
-    s.Background = colors.Scheme.InverseSurface
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 
@@ -284,4 +285,40 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 core.NewButton(fr).SetText("Fourth")
 core.NewButton(fr).SetText("Fifth")
+```
+
+## Text
+
+You can customize the appearance of [[text]] with various properties.
+
+### Font family
+
+You can change the font family category of text:
+
+```Go
+tx := core.NewText(b).SetText("Monospaced text")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Family = rich.Monospace
+})
+```
+
+You can use a specific font family:
+
+```Go
+tx := core.NewText(b).SetText("Specific font")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Family = rich.Custom
+    s.Font.CustomFont = "Arial"
+})
+```
+
+You can also embed [[font#custom fonts]] and use them (see that page for details):
+
+```go
+fonts.AddEmbedded(MyFontName)
+tx := core.NewText(b).SetText("Custom font")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Family = rich.Custom
+    s.Font.CustomFont = "My Font Name"
+})
 ```

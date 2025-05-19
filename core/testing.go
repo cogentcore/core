@@ -1,4 +1,4 @@
-// Copyright 2023 Cogent Core. All rights reserved.
+// Copyright (c) 2023, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/system/composer"
 )
 
 // getImager is implemented by offscreen.Drawer for [Body.AssertRender].
@@ -39,19 +40,27 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 		b.waitNoEvents(rw)
 	}
 
-	b.AsyncLock()
-	rw.mains.updateAll()
-	rw.mains.runDeferred()
-	b.AsyncUnlock()
-	rw.renderWindow()
+	// Ensure that everything is updated and rendered. If there are no changes,
+	// the performance impact is minimal.
+	for range 10 { // note: 10 is essential for textcore tests
+		rw.renderWindow()
+		b.AsyncLock()
+		rw.mains.runDeferred()
+		b.AsyncUnlock()
+	}
 
-	dw := b.Scene.RenderWindow().SystemWindow.Drawer()
+	dw := b.Scene.RenderWindow().SystemWindow.Composer().(*composer.ComposerDrawer).Drawer
 	img := dw.(getImager).GetImage()
 	imagex.Assert(t, img, filename)
 
-	b.AsyncLock()
+	// When closing the scene, our access to the render context stops working,
+	// so using normal AsyncLock and AsyncUnlock will lead to AsyncLock failing.
+	// That leaves the lock on, which prevents the WinClose event from being
+	// received. Therefore, we get the rc ahead of time.
+	rc := b.Scene.renderContext()
+	rc.Lock()
 	b.Close()
-	b.AsyncUnlock()
+	rc.Unlock()
 }
 
 // runAndShowNewWindow runs a new window and waits for it to be shown.

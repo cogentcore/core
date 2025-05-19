@@ -149,7 +149,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	ft.FS = nil
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
-	ft.detectVCSRepo(true)
+	ft.detectVCSRepo()
 	ft.This.(Filer).GetFileInfo()
 	ft.Open()
 	ft.Update()
@@ -192,6 +192,11 @@ func (ft *Tree) UpdatePath(path string) {
 		return
 	}
 	// core.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
+}
+
+// OpenPaths returns a list of open paths.
+func (ft *Tree) OpenPaths() []string {
+	return ft.Dirs.openPaths(string(ft.Filepath))
 }
 
 // configWatcher configures a new watcher for tree

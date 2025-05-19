@@ -14,6 +14,8 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/events/events"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"Attend":                reflect.ValueOf(events.Attend),
+		"AttendLost":            reflect.ValueOf(events.AttendLost),
 		"ButtonsN":              reflect.ValueOf(events.ButtonsN),
 		"ButtonsValues":         reflect.ValueOf(events.ButtonsValues),
 		"Change":                reflect.ValueOf(events.Change),

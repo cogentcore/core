@@ -190,9 +190,11 @@ func (es *Source) Window(act WinActions) {
 	es.Deque.SendFirst(ev)
 }
 
+// WindowPaint sends a [NewWindowPaint] event.
 func (es *Source) WindowPaint() {
 	ev := NewWindowPaint()
 	ev.Init()
+
 	if TraceWindowPaint {
 		fmt.Printf(".")
 		es.PaintCount++

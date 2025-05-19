@@ -339,7 +339,8 @@ func (st *Stage) runDialog() *Stage {
 			minx := int(ctx.Scene.Styles.UnitContext.Dp(400))
 			sz.X = max(sz.X, minx)
 		}
-		sc.Events.startFocusFirst = true // popup dialogs always need focus
+		sc.SceneGeom.Pos = sc.SceneGeom.Pos.Sub(sz.Div(2)) // center dialogs by default
+		sc.Events.startFocusFirst = true                   // popup dialogs always need focus
 		screen := st.targetScreen()
 		if screen != nil {
 			st.SetScreen(screen.ScreenNumber)
@@ -394,7 +395,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 		opts.Size = wgp.Size
 		opts.Pos = wgp.Pos
 		opts.StdPixels = false
-		if w := AllRenderWindows.FindName(name); w != nil { // offset from existing
+		if w := AllRenderWindows.FindName(title); w != nil { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}

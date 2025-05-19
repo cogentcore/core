@@ -35,7 +35,7 @@ func (g *Ellipse) SetNodeSize(sz math32.Vector2) {
 	g.Radii = sz.MulScalar(0.5)
 }
 
-func (g *Ellipse) LocalBBox() math32.Box2 {
+func (g *Ellipse) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.Sub(g.Radii.AddScalar(hlw))
@@ -44,17 +44,12 @@ func (g *Ellipse) LocalBBox() math32.Box2 {
 }
 
 func (g *Ellipse) Render(sv *SVG) {
-	vis, pc := g.PushTransform(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
-	pc.DrawEllipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
-	pc.FillStrokeClear()
-
-	g.BBoxes(sv)
-	g.RenderChildren(sv)
-
-	pc.PopTransform()
+	pc := g.Painter(sv)
+	pc.Ellipse(g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
+	pc.Draw()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

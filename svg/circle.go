@@ -34,7 +34,7 @@ func (g *Circle) SetNodeSize(sz math32.Vector2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
 }
 
-func (g *Circle) LocalBBox() math32.Box2 {
+func (g *Circle) LocalBBox(sv *SVG) math32.Box2 {
 	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(g.Radius + hlw)
@@ -43,17 +43,13 @@ func (g *Circle) LocalBBox() math32.Box2 {
 }
 
 func (g *Circle) Render(sv *SVG) {
-	vis, pc := g.PushTransform(sv)
-	if !vis {
+	if !g.IsVisible(sv) {
 		return
 	}
-	pc.DrawCircle(g.Pos.X, g.Pos.Y, g.Radius)
-	pc.FillStrokeClear()
-
-	g.BBoxes(sv)
+	pc := g.Painter(sv)
+	pc.Circle(g.Pos.X, g.Pos.Y, g.Radius)
+	pc.Draw()
 	g.RenderChildren(sv)
-
-	pc.PopTransform()
 }
 
 // ApplyTransform applies the given 2D transform to the geometry of this node

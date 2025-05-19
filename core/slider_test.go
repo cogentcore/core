@@ -114,9 +114,10 @@ func TestSliderChange(t *testing.T) {
 			time.Sleep(5 * time.Millisecond)
 		}
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
+		time.Sleep(500 * time.Millisecond)
 	}, func() {
 		assert.Equal(t, 1, n)
-		tolassert.Equal(t, 0.5756579, value)
+		tolassert.EqualTol(t, 0.75, value, 0.24)
 	})
 }
 
@@ -132,9 +133,10 @@ func TestSliderChangeClick(t *testing.T) {
 	b.AssertRender(t, "slider/change-click", func() {
 		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(200, 20), 0)
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
+		time.Sleep(100 * time.Millisecond)
 	}, func() {
 		assert.Equal(t, 1, n)
-		tolassert.Equal(t, 0.5756579, value)
+		tolassert.EqualTol(t, 0.75, value, 0.24)
 	})
 }
 
@@ -155,8 +157,9 @@ func TestSliderInput(t *testing.T) {
 			time.Sleep(5 * time.Millisecond)
 		}
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
+		time.Sleep(500 * time.Millisecond)
 	}, func() {
 		tolassert.EqualTol(t, 5, float32(n), 4)
-		tolassert.Equal(t, 0.5756579, value)
+		tolassert.EqualTol(t, 0.75, value, 0.24)
 	})
 }

@@ -19,7 +19,10 @@ import (
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/render"
+	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
 
@@ -56,9 +59,9 @@ func (wb *WidgetBase) AsyncLock() {
 		wb.AsyncLock() // try again
 		return
 	}
-	rc.lock()
+	rc.Lock()
 	if wb.This == nil {
-		rc.unlock()
+		rc.Unlock()
 		if DebugSettings.UpdateTrace {
 			fmt.Println("AsyncLock: widget deleted; blocking forever:", wb)
 		}
@@ -78,7 +81,7 @@ func (wb *WidgetBase) AsyncUnlock() {
 	if wb.Scene != nil {
 		wb.Scene.setFlag(false, sceneUpdating)
 	}
-	rc.unlock()
+	rc.Unlock()
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
@@ -164,6 +167,14 @@ func (sc *Scene) layoutRenderScene() {
 	sc.RenderWidget()
 }
 
+func (sc *Scene) Render() {
+	if TheApp.Platform() == system.Web {
+		sc.Painter.Fill.Color = colors.Uniform(colors.Transparent)
+		sc.Painter.Clear()
+	}
+	sc.RenderStandardBox()
+}
+
 // doNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set
 func (wb *WidgetBase) doNeedsRender() {
@@ -177,8 +188,8 @@ func (wb *WidgetBase) doNeedsRender() {
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
-				if ly.HasScroll[d] && ly.scrolls[d] != nil {
-					ly.scrolls[d].doNeedsRender()
+				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
+					ly.Scrolls[d].doNeedsRender()
 				}
 			}
 		}
@@ -200,6 +211,7 @@ func (sc *Scene) doUpdate() bool {
 	sc.setFlag(true, sceneUpdating) // prevent rendering
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
+	sc.runAnimations()
 	rc := sc.renderContext()
 
 	if sc.showIter < sceneShowIters {
@@ -209,31 +221,31 @@ func (sc *Scene) doUpdate() bool {
 
 	switch {
 	case rc.rebuild:
-		pr := profile.Start("rebuild")
+		// pr := profile.Start("rebuild")
 		sc.doRebuild()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
-		pr.End()
+		// pr.End()
 	case sc.lastRender.needsRestyle(rc):
-		pr := profile.Start("restyle")
+		// pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.layoutRenderScene()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
 		sc.lastRender.saveRender(rc)
-		pr.End()
+		// pr.End()
 	case sc.hasFlag(sceneNeedsLayout):
-		pr := profile.Start("layout")
+		// pr := profile.Start("layout")
 		sc.layoutRenderScene()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
-		pr.End()
+		// pr.End()
 	case sc.hasFlag(sceneNeedsRender):
-		pr := profile.Start("render")
+		// pr := profile.Start("render")
 		sc.doNeedsRender()
 		sc.setFlag(false, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
-		pr.End()
+		// pr.End()
 	default:
 		return false
 	}
@@ -265,6 +277,9 @@ func (sc *Scene) applyStyleScene() {
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
 	sc.StyleTree()
+	if sc.Painter.Paint != nil {
+		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+	}
 	sc.setFlag(true, sceneNeedsLayout)
 }
 
@@ -298,78 +313,63 @@ func (sc *Scene) contentSize(initSz image.Point) image.Point {
 
 //////// Widget local rendering
 
-// PushBounds pushes our bounding box bounds onto the bounds stack
-// if they are non-empty. This automatically limits our drawing to
-// our own bounding box. This must be called as the first step in
-// Render implementations. It returns whether the new bounds are
-// empty or not; if they are empty, then don't render.
-func (wb *WidgetBase) PushBounds() bool {
+// StartRender starts the rendering process in the Painter, if the
+// widget is visible, otherwise it returns false.
+// It pushes our context and bounds onto the render stack.
+// This must be called as the first step in [Widget.RenderWidget] implementations.
+func (wb *WidgetBase) StartRender() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
 	wb.setFlag(false, widgetNeedsRender) // done!
-	if !wb.IsVisible() {                 // checks deleted etc
-		return false
-	}
-	if wb.Geom.TotalBBox.Empty() {
-		if DebugSettings.RenderTrace {
-			fmt.Printf("Render empty bbox: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
-		}
+	if !wb.IsVisible() {
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
-	pc := &wb.Scene.PaintContext
-	if pc.State == nil || pc.Image == nil {
+	pc := &wb.Scene.Painter
+	if pc.State == nil {
 		return false
 	}
-	if len(pc.BoundsStack) == 0 && wb.Parent != nil {
-		wb.setFlag(true, widgetFirstRender)
-		// push our parent's bounds if we are the first to render
-		pw := wb.parentWidget()
-		pc.PushBoundsGeom(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots())
-	} else {
-		wb.setFlag(false, widgetFirstRender)
-	}
-	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots())
-	pc.Defaults() // start with default values
+	pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}
 	return true
 }
 
-// PopBounds pops our bounding box bounds. This is the last step
-// in Render implementations after rendering children.
-func (wb *WidgetBase) PopBounds() {
+// EndRender is the last step in [Widget.RenderWidget] implementations after
+// rendering children. It pops our state off of the render stack.
+func (wb *WidgetBase) EndRender() {
 	if wb == nil || wb.This == nil {
 		return
 	}
-	pc := &wb.Scene.PaintContext
+	pc := &wb.Scene.Painter
 
 	isSelw := wb.Scene.selectedWidget == wb.This
 	if wb.Scene.renderBBoxes || isSelw {
 		pos := math32.FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
-		pcsw := pc.StrokeStyle.Width
-		pcsc := pc.StrokeStyle.Color
-		pcfc := pc.FillStyle.Color
-		pcop := pc.FillStyle.Opacity
-		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.Color = colors.Uniform(hct.New(wb.Scene.renderBBoxHue, 100, 50))
-		pc.FillStyle.Color = nil
+		pcsw := pc.Stroke.Width
+		pcsc := pc.Stroke.Color
+		pcfc := pc.Fill.Color
+		pcop := pc.Fill.Opacity
+		pc.Stroke.Width.Dot(1)
+		pc.Stroke.Color = colors.Uniform(hct.New(wb.Scene.renderBBoxHue, 100, 50))
+		pc.Fill.Color = nil
 		if isSelw {
-			fc := pc.StrokeStyle.Color
-			pc.FillStyle.Color = fc
-			pc.FillStyle.Opacity = 0.2
+			fc := pc.Stroke.Color
+			pc.Fill.Color = fc
+			pc.Fill.Opacity = 0.2
 		}
-		pc.DrawRectangle(pos.X, pos.Y, sz.X, sz.Y)
-		pc.FillStrokeClear()
+		pc.Rectangle(pos.X, pos.Y, sz.X, sz.Y)
+		pc.Draw()
 		// restore
-		pc.FillStyle.Opacity = pcop
-		pc.FillStyle.Color = pcfc
-		pc.StrokeStyle.Width = pcsw
-		pc.StrokeStyle.Color = pcsc
+		pc.Fill.Opacity = pcop
+		pc.Fill.Color = pcfc
+		pc.Stroke.Width = pcsw
+		pc.Stroke.Color = pcsc
 
 		wb.Scene.renderBBoxHue += 10
 		if wb.Scene.renderBBoxHue > 360 {
@@ -378,11 +378,7 @@ func (wb *WidgetBase) PopBounds() {
 		}
 	}
 
-	pc.PopBounds()
-	if wb.hasFlag(widgetFirstRender) {
-		pc.PopBounds()
-		wb.setFlag(false, widgetFirstRender)
-	}
+	pc.PopContext()
 }
 
 // Render is the method that widgets should implement to define their
@@ -398,11 +394,11 @@ func (wb *WidgetBase) Render() {
 // It does not render if the widget is invisible. It calls Widget.Render]
 // for widget-specific rendering.
 func (wb *WidgetBase) RenderWidget() {
-	if wb.PushBounds() {
+	if wb.StartRender() {
 		wb.This.(Widget).Render()
 		wb.renderChildren()
 		wb.renderParts()
-		wb.PopBounds()
+		wb.EndRender()
 	}
 }
 
@@ -468,14 +464,21 @@ func (wb *WidgetBase) Shown() {
 
 // RenderBoxGeom renders a box with the given geometry.
 func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs styles.Border) {
-	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
+	wb.Scene.Painter.Border(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
-// RenderStandardBox renders the standard box model.
+// RenderStandardBox renders the standard box model, using Actual size.
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	wb.Scene.PaintContext.DrawStandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// RenderAllocBox renders the standard box model using Alloc size, instead of Actual.
+func (wb *WidgetBase) RenderAllocBox() {
+	pos := wb.Geom.Pos.Total
+	sz := wb.Geom.Size.Alloc.Total
+	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
 ////////	Widget position functions

@@ -1,0 +1,16 @@
+{
+  "ProjectFile": "/Users/oreilly/go/src/cogentcore.org/core/text/parse/languages/tex/tex.parseproject",
+  "ParserFile": "/Users/oreilly/cogent/core/text/parse/languages/tex/tex.parse",
+  "TestFile": "/Users/oreilly/cogent/core/text/parse/languages/tex/testdata/tex_test.tex",
+  "TraceOpts": {
+    "On": false,
+    "Rules": "Slice SelectExpr AddExpr",
+    "Match": true,
+    "SubMatch": true,
+    "NoMatch": true,
+    "Run": true,
+    "RunAct": false,
+    "ScopeSrc": true,
+    "FullStackOut": false
+  }
+}

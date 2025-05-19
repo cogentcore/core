@@ -5,158 +5,34 @@
 package styles
 
 import (
-	"log/slog"
-	"reflect"
-
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
 )
-
-// styleInhInit detects the style values of "inherit" and "initial",
-// setting the corresponding bool return values
-func styleInhInit(val, parent any) (inh, init bool) {
-	if str, ok := val.(string); ok {
-		switch str {
-		case "inherit":
-			return !reflectx.IsNil(reflect.ValueOf(parent)), false
-		case "initial":
-			return false, true
-		default:
-			return false, false
-		}
-	}
-	return false, false
-}
-
-// styleFuncInt returns a style function for any numerical value
-func styleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) styleFunc {
-	return func(obj any, key string, val any, parent any, cc colors.Context) {
-		fp := getField(obj.(*T))
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				*fp = *getField(parent.(*T))
-			} else if init {
-				*fp = initVal
-			}
-			return
-		}
-		fv, _ := reflectx.ToInt(val)
-		*fp = F(fv)
-	}
-}
-
-// styleFuncFloat returns a style function for any numerical value
-func styleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) styleFunc {
-	return func(obj any, key string, val any, parent any, cc colors.Context) {
-		fp := getField(obj.(*T))
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				*fp = *getField(parent.(*T))
-			} else if init {
-				*fp = initVal
-			}
-			return
-		}
-		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
-		*fp = F(fv)
-	}
-}
-
-// styleFuncBool returns a style function for a bool value
-func styleFuncBool[T any](initVal bool, getField func(obj *T) *bool) styleFunc {
-	return func(obj any, key string, val any, parent any, cc colors.Context) {
-		fp := getField(obj.(*T))
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				*fp = *getField(parent.(*T))
-			} else if init {
-				*fp = initVal
-			}
-			return
-		}
-		fv, _ := reflectx.ToBool(val)
-		*fp = fv
-	}
-}
-
-// styleFuncUnits returns a style function for units.Value
-func styleFuncUnits[T any](initVal units.Value, getField func(obj *T) *units.Value) styleFunc {
-	return func(obj any, key string, val any, parent any, cc colors.Context) {
-		fp := getField(obj.(*T))
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				*fp = *getField(parent.(*T))
-			} else if init {
-				*fp = initVal
-			}
-			return
-		}
-		fp.SetAny(val, key)
-	}
-}
-
-// styleFuncEnum returns a style function for any enum value
-func styleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSetter) styleFunc {
-	return func(obj any, key string, val any, parent any, cc colors.Context) {
-		fp := getField(obj.(*T))
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				fp.SetInt64(getField(parent.(*T)).Int64())
-			} else if init {
-				fp.SetInt64(initVal.Int64())
-			}
-			return
-		}
-		if st, ok := val.(string); ok {
-			fp.SetString(st)
-			return
-		}
-		if en, ok := val.(enums.Enum); ok {
-			fp.SetInt64(en.Int64())
-			return
-		}
-		iv, _ := reflectx.ToInt(val)
-		fp.SetInt64(int64(iv))
-	}
-}
 
 // These functions set styles from map[string]any which are used for styling
 
-// styleSetError reports that cannot set property of given key with given value due to given error
-func styleSetError(key string, val any, err error) {
-	slog.Error("styles.Style: error setting value", "key", key, "value", val, "err", err)
-}
-
-type styleFunc func(obj any, key string, val any, parent any, cc colors.Context)
-
-// StyleFromProperty sets style field values based on the given property key and value
-func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.Context) {
+// FromProperty sets style field values based on the given property key and value
+func (s *Style) FromProperty(parent *Style, key string, val any, cc colors.Context) {
+	var pfont *Font
+	var ptext *Text
+	if parent != nil {
+		pfont = &parent.Font
+		ptext = &parent.Text
+	}
+	s.Font.FromProperty(pfont, key, val, cc)
+	s.Text.FromProperty(ptext, key, val, cc)
 	if sfunc, ok := styleLayoutFuncs[key]; ok {
 		if parent != nil {
 			sfunc(s, key, val, parent, cc)
 		} else {
 			sfunc(s, key, val, nil, cc)
-		}
-		return
-	}
-	if sfunc, ok := styleFontFuncs[key]; ok {
-		if parent != nil {
-			sfunc(&s.Font, key, val, &parent.Font, cc)
-		} else {
-			sfunc(&s.Font, key, val, nil, cc)
-		}
-		return
-	}
-	if sfunc, ok := styleTextFuncs[key]; ok {
-		if parent != nil {
-			sfunc(&s.Text, key, val, &parent.Text, cc)
-		} else {
-			sfunc(&s.Text, key, val, nil, cc)
 		}
 		return
 	}
@@ -183,14 +59,13 @@ func (s *Style) StyleFromProperty(parent *Style, key string, val any, cc colors.
 	// }
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Style
+////////  Style
 
 // styleStyleFuncs are functions for styling the Style object itself
-var styleStyleFuncs = map[string]styleFunc{
+var styleStyleFuncs = map[string]styleprops.Func{
 	"color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Color = parent.(*Style).Color
 			} else if init {
@@ -202,7 +77,7 @@ var styleStyleFuncs = map[string]styleFunc{
 	},
 	"background-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Background = parent.(*Style).Background
 			} else if init {
@@ -212,22 +87,21 @@ var styleStyleFuncs = map[string]styleFunc{
 		}
 		fs.Background = errors.Log1(gradient.FromAny(val, cc))
 	},
-	"opacity": styleFuncFloat(float32(1),
+	"opacity": styleprops.Float(float32(1),
 		func(obj *Style) *float32 { return &obj.Opacity }),
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Layout
+////////  Layout
 
 // styleLayoutFuncs are functions for styling the layout
 // style properties; they are still stored on the main style object,
 // but they are done separately to improve clarity
-var styleLayoutFuncs = map[string]styleFunc{
-	"display": styleFuncEnum(Flex,
+var styleLayoutFuncs = map[string]styleprops.Func{
+	"display": styleprops.Enum(Flex,
 		func(obj *Style) enums.EnumSetter { return &obj.Display }),
 	"flex-direction": func(obj any, key string, val, parent any, cc colors.Context) {
 		s := obj.(*Style)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				s.Direction = parent.(*Style).Direction
 			} else if init {
@@ -243,40 +117,40 @@ var styleLayoutFuncs = map[string]styleFunc{
 		}
 	},
 	// TODO(kai/styproperties): multi-dim flex-grow
-	"flex-grow": styleFuncFloat(0, func(obj *Style) *float32 { return &obj.Grow.Y }),
-	"wrap": styleFuncBool(false,
+	"flex-grow": styleprops.Float(0, func(obj *Style) *float32 { return &obj.Grow.Y }),
+	"wrap": styleprops.Bool(false,
 		func(obj *Style) *bool { return &obj.Wrap }),
-	"justify-content": styleFuncEnum(Start,
+	"justify-content": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.Justify.Content }),
-	"justify-items": styleFuncEnum(Start,
+	"justify-items": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.Justify.Items }),
-	"justify-self": styleFuncEnum(Auto,
+	"justify-self": styleprops.Enum(Auto,
 		func(obj *Style) enums.EnumSetter { return &obj.Justify.Self }),
-	"align-content": styleFuncEnum(Start,
+	"align-content": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.Align.Content }),
-	"align-items": styleFuncEnum(Start,
+	"align-items": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.Align.Items }),
-	"align-self": styleFuncEnum(Auto,
+	"align-self": styleprops.Enum(Auto,
 		func(obj *Style) enums.EnumSetter { return &obj.Align.Self }),
-	"x": styleFuncUnits(units.Value{},
+	"x": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Pos.X }),
-	"y": styleFuncUnits(units.Value{},
+	"y": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Pos.Y }),
-	"width": styleFuncUnits(units.Value{},
+	"width": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Min.X }),
-	"height": styleFuncUnits(units.Value{},
+	"height": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Min.Y }),
-	"max-width": styleFuncUnits(units.Value{},
+	"max-width": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Max.X }),
-	"max-height": styleFuncUnits(units.Value{},
+	"max-height": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.Max.Y }),
-	"min-width": styleFuncUnits(units.Dp(2),
+	"min-width": styleprops.Units(units.Dp(2),
 		func(obj *Style) *units.Value { return &obj.Min.X }),
-	"min-height": styleFuncUnits(units.Dp(2),
+	"min-height": styleprops.Units(units.Dp(2),
 		func(obj *Style) *units.Value { return &obj.Min.Y }),
 	"margin": func(obj any, key string, val any, parent any, cc colors.Context) {
 		s := obj.(*Style)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				s.Margin = parent.(*Style).Margin
 			} else if init {
@@ -288,7 +162,7 @@ var styleLayoutFuncs = map[string]styleFunc{
 	},
 	"padding": func(obj any, key string, val any, parent any, cc colors.Context) {
 		s := obj.(*Style)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				s.Padding = parent.(*Style).Padding
 			} else if init {
@@ -299,180 +173,33 @@ var styleLayoutFuncs = map[string]styleFunc{
 		s.Padding.SetAny(val)
 	},
 	// TODO(kai/styproperties): multi-dim overflow
-	"overflow": styleFuncEnum(OverflowAuto,
+	"overflow": styleprops.Enum(OverflowAuto,
 		func(obj *Style) enums.EnumSetter { return &obj.Overflow.Y }),
-	"columns": styleFuncInt(int(0),
+	"columns": styleprops.Int(int(0),
 		func(obj *Style) *int { return &obj.Columns }),
-	"row": styleFuncInt(int(0),
+	"row": styleprops.Int(int(0),
 		func(obj *Style) *int { return &obj.Row }),
-	"col": styleFuncInt(int(0),
+	"col": styleprops.Int(int(0),
 		func(obj *Style) *int { return &obj.Col }),
-	"row-span": styleFuncInt(int(0),
+	"row-span": styleprops.Int(int(0),
 		func(obj *Style) *int { return &obj.RowSpan }),
-	"col-span": styleFuncInt(int(0),
+	"col-span": styleprops.Int(int(0),
 		func(obj *Style) *int { return &obj.ColSpan }),
-	"z-index": styleFuncInt(int(0),
+	"z-index": styleprops.Int(int(0),
 		func(obj *Style) *int { return &obj.ZIndex }),
-	"scrollbar-width": styleFuncUnits(units.Value{},
+	"scrollbar-width": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.ScrollbarWidth }),
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Font
-
-// styleFontFuncs are functions for styling the Font object
-var styleFontFuncs = map[string]styleFunc{
-	"font-size": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*Font)
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				fs.Size = parent.(*Font).Size
-			} else if init {
-				fs.Size.Set(12, units.UnitPt)
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			if psz, ok := FontSizePoints[vt]; ok {
-				fs.Size = units.Pt(psz)
-			} else {
-				fs.Size.SetAny(val, key) // also processes string
-			}
-		default:
-			fs.Size.SetAny(val, key)
-		}
-	},
-	"font-family": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*Font)
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				fs.Family = parent.(*Font).Family
-			} else if init {
-				fs.Family = "" // font has defaults
-			}
-			return
-		}
-		fs.Family = reflectx.ToString(val)
-	},
-	"font-style": styleFuncEnum(FontNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Style }),
-	"font-weight": styleFuncEnum(WeightNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Weight }),
-	"font-stretch": styleFuncEnum(FontStrNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Stretch }),
-	"font-variant": styleFuncEnum(FontVarNormal,
-		func(obj *Font) enums.EnumSetter { return &obj.Variant }),
-	"baseline-shift": styleFuncEnum(ShiftBaseline,
-		func(obj *Font) enums.EnumSetter { return &obj.Shift }),
-	"text-decoration": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*Font)
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				fs.Decoration = parent.(*Font).Decoration
-			} else if init {
-				fs.Decoration = DecoNone
-			}
-			return
-		}
-		switch vt := val.(type) {
-		case string:
-			if vt == "none" {
-				fs.Decoration = DecoNone
-			} else {
-				fs.Decoration.SetString(vt)
-			}
-		case TextDecorations:
-			fs.Decoration = vt
-		default:
-			iv, err := reflectx.ToInt(val)
-			if err == nil {
-				fs.Decoration = TextDecorations(iv)
-			} else {
-				styleSetError(key, val, err)
-			}
-		}
-	},
-}
-
-// styleFontRenderFuncs are _extra_ functions for styling
-// the FontRender object in addition to base Font
-var styleFontRenderFuncs = map[string]styleFunc{
-	"color": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*FontRender)
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				fs.Color = parent.(*FontRender).Color
-			} else if init {
-				fs.Color = colors.Scheme.OnSurface
-			}
-			return
-		}
-		fs.Color = errors.Log1(gradient.FromAny(val, cc))
-	},
-	"background-color": func(obj any, key string, val any, parent any, cc colors.Context) {
-		fs := obj.(*FontRender)
-		if inh, init := styleInhInit(val, parent); inh || init {
-			if inh {
-				fs.Background = parent.(*FontRender).Background
-			} else if init {
-				fs.Background = nil
-			}
-			return
-		}
-		fs.Background = errors.Log1(gradient.FromAny(val, cc))
-	},
-	"opacity": styleFuncFloat(float32(1),
-		func(obj *FontRender) *float32 { return &obj.Opacity }),
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//  Text
-
-// styleTextFuncs are functions for styling the Text object
-var styleTextFuncs = map[string]styleFunc{
-	"text-align": styleFuncEnum(Start,
-		func(obj *Text) enums.EnumSetter { return &obj.Align }),
-	"text-vertical-align": styleFuncEnum(Start,
-		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
-	"text-anchor": styleFuncEnum(AnchorStart,
-		func(obj *Text) enums.EnumSetter { return &obj.Anchor }),
-	"letter-spacing": styleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.LetterSpacing }),
-	"word-spacing": styleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.WordSpacing }),
-	"line-height": styleFuncUnits(LineHeightNormal,
-		func(obj *Text) *units.Value { return &obj.LineHeight }),
-	"white-space": styleFuncEnum(WhiteSpaceNormal,
-		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
-	"unicode-bidi": styleFuncEnum(BidiNormal,
-		func(obj *Text) enums.EnumSetter { return &obj.UnicodeBidi }),
-	"direction": styleFuncEnum(LRTB,
-		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
-	"writing-mode": styleFuncEnum(LRTB,
-		func(obj *Text) enums.EnumSetter { return &obj.WritingMode }),
-	"glyph-orientation-vertical": styleFuncFloat(float32(1),
-		func(obj *Text) *float32 { return &obj.OrientationVert }),
-	"glyph-orientation-horizontal": styleFuncFloat(float32(1),
-		func(obj *Text) *float32 { return &obj.OrientationHoriz }),
-	"text-indent": styleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.Indent }),
-	"para-spacing": styleFuncUnits(units.Value{},
-		func(obj *Text) *units.Value { return &obj.ParaSpacing }),
-	"tab-size": styleFuncInt(int(4),
-		func(obj *Text) *int { return &obj.TabSize }),
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//  Border
+////////  Border
 
 // styleBorderFuncs are functions for styling the Border object
-var styleBorderFuncs = map[string]styleFunc{
+var styleBorderFuncs = map[string]styleprops.Func{
 	// SidesTODO: need to figure out how to get key and context information for side SetAny calls
 	// with padding, margin, border, etc
 	"border-style": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Style = parent.(*Border).Style
 			} else if init {
@@ -492,13 +219,13 @@ var styleBorderFuncs = map[string]styleFunc{
 			if err == nil {
 				bs.Style.Set(BorderStyles(iv))
 			} else {
-				styleSetError(key, val, err)
+				styleprops.SetError(key, val, err)
 			}
 		}
 	},
 	"border-width": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Width = parent.(*Border).Width
 			} else if init {
@@ -510,7 +237,7 @@ var styleBorderFuncs = map[string]styleFunc{
 	},
 	"border-radius": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Radius = parent.(*Border).Radius
 			} else if init {
@@ -522,7 +249,7 @@ var styleBorderFuncs = map[string]styleFunc{
 	},
 	"border-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Color = parent.(*Border).Color
 			} else if init {
@@ -535,14 +262,13 @@ var styleBorderFuncs = map[string]styleFunc{
 	},
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Outline
+////////  Outline
 
 // styleOutlineFuncs are functions for styling the OutlineStyle object
-var styleOutlineFuncs = map[string]styleFunc{
+var styleOutlineFuncs = map[string]styleprops.Func{
 	"outline-style": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Style = parent.(*Border).Style
 			} else if init {
@@ -562,13 +288,13 @@ var styleOutlineFuncs = map[string]styleFunc{
 			if err == nil {
 				bs.Style.Set(BorderStyles(iv))
 			} else {
-				styleSetError(key, val, err)
+				styleprops.SetError(key, val, err)
 			}
 		}
 	},
 	"outline-width": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Width = parent.(*Border).Width
 			} else if init {
@@ -580,7 +306,7 @@ var styleOutlineFuncs = map[string]styleFunc{
 	},
 	"outline-radius": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Radius = parent.(*Border).Radius
 			} else if init {
@@ -592,7 +318,7 @@ var styleOutlineFuncs = map[string]styleFunc{
 	},
 	"outline-color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		bs := obj.(*Border)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				bs.Color = parent.(*Border).Color
 			} else if init {
@@ -605,22 +331,21 @@ var styleOutlineFuncs = map[string]styleFunc{
 	},
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//  Shadow
+////////  Shadow
 
 // styleShadowFuncs are functions for styling the Shadow object
-var styleShadowFuncs = map[string]styleFunc{
-	"box-shadow.offset-x": styleFuncUnits(units.Value{},
+var styleShadowFuncs = map[string]styleprops.Func{
+	"box-shadow.offset-x": styleprops.Units(units.Value{},
 		func(obj *Shadow) *units.Value { return &obj.OffsetX }),
-	"box-shadow.offset-y": styleFuncUnits(units.Value{},
+	"box-shadow.offset-y": styleprops.Units(units.Value{},
 		func(obj *Shadow) *units.Value { return &obj.OffsetY }),
-	"box-shadow.blur": styleFuncUnits(units.Value{},
+	"box-shadow.blur": styleprops.Units(units.Value{},
 		func(obj *Shadow) *units.Value { return &obj.Blur }),
-	"box-shadow.spread": styleFuncUnits(units.Value{},
+	"box-shadow.spread": styleprops.Units(units.Value{},
 		func(obj *Shadow) *units.Value { return &obj.Spread }),
 	"box-shadow.color": func(obj any, key string, val any, parent any, cc colors.Context) {
 		ss := obj.(*Shadow)
-		if inh, init := styleInhInit(val, parent); inh || init {
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				ss.Color = parent.(*Shadow).Color
 			} else if init {
@@ -630,6 +355,190 @@ var styleShadowFuncs = map[string]styleFunc{
 		}
 		ss.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
-	"box-shadow.inset": styleFuncBool(false,
+	"box-shadow.inset": styleprops.Bool(false,
 		func(obj *Shadow) *bool { return &obj.Inset }),
+}
+
+//////// Font
+
+// FromProperties sets style field values based on the given property list.
+func (s *Font) FromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
+	for key, val := range properties {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		s.FromProperty(parent, key, val, ctxt)
+	}
+}
+
+// FromProperty sets style field values based on the given property key and value.
+func (s *Font) FromProperty(parent *Font, key string, val any, cc colors.Context) {
+	if sfunc, ok := styleFontFuncs[key]; ok {
+		if parent != nil {
+			sfunc(s, key, val, parent, cc)
+		} else {
+			sfunc(s, key, val, nil, cc)
+		}
+		return
+	}
+}
+
+// FontSizePoints maps standard font names to standard point sizes -- we use
+// dpi zoom scaling instead of rescaling "medium" font size, so generally use
+// these values as-is.  smaller and larger relative scaling can move in 2pt increments
+var FontSizePoints = map[string]float32{
+	"xx-small": 7,
+	"x-small":  7.5,
+	"small":    10, // small is also "smaller"
+	"smallf":   10, // smallf = small font size..
+	"medium":   12,
+	"large":    14,
+	"x-large":  18,
+	"xx-large": 24,
+}
+
+// styleFontFuncs are functions for styling the Font object.
+var styleFontFuncs = map[string]styleprops.Func{
+	// note: text.Style handles the standard units-based font-size settings
+	"font-size": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Font)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.Size = parent.(*Font).Size
+			} else if init {
+				fs.Size.Set(16, units.UnitDp)
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			if psz, ok := FontSizePoints[vt]; ok {
+				fs.Size = units.Pt(psz)
+			} else {
+				fs.Size.SetAny(val, key) // also processes string
+			}
+		}
+	},
+	"font-family": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Font)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.Family = parent.(*Font).Family
+			} else if init {
+				fs.Family = rich.SansSerif // font has defaults
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			fs.CustomFont = rich.FontName(vt)
+			fs.Family = rich.Custom
+		default:
+			// todo: process enum
+		}
+	},
+	"font-style": styleprops.Enum(rich.SlantNormal,
+		func(obj *Font) enums.EnumSetter { return &obj.Slant }),
+	"font-weight": styleprops.Enum(rich.Normal,
+		func(obj *Font) enums.EnumSetter { return &obj.Weight }),
+	"font-stretch": styleprops.Enum(rich.StretchNormal,
+		func(obj *Font) enums.EnumSetter { return &obj.Stretch }),
+	"text-decoration": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Font)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.Decoration = parent.(*Font).Decoration
+			} else if init {
+				fs.Decoration = 0
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			if vt == "none" {
+				fs.Decoration = 0
+			} else {
+				fs.Decoration.SetString(vt)
+			}
+		case rich.Decorations:
+			fs.Decoration.SetFlag(true, vt)
+		default:
+			iv, err := reflectx.ToInt(val)
+			if err == nil {
+				fs.Decoration.SetFlag(true, rich.Decorations(iv))
+			} else {
+				styleprops.SetError(key, val, err)
+			}
+		}
+	},
+}
+
+// FromProperties sets style field values based on the given property list.
+func (s *Text) FromProperties(parent *Text, properties map[string]any, ctxt colors.Context) {
+	for key, val := range properties {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		s.FromProperty(parent, key, val, ctxt)
+	}
+}
+
+// FromProperty sets style field values based on the given property key and value.
+func (s *Text) FromProperty(parent *Text, key string, val any, cc colors.Context) {
+	if sfunc, ok := styleFuncs[key]; ok {
+		if parent != nil {
+			sfunc(s, key, val, parent, cc)
+		} else {
+			sfunc(s, key, val, nil, cc)
+		}
+		return
+	}
+}
+
+// styleFuncs are functions for styling the Text object.
+var styleFuncs = map[string]styleprops.Func{
+	"text-align": styleprops.Enum(Start,
+		func(obj *Text) enums.EnumSetter { return &obj.Align }),
+	"text-vertical-align": styleprops.Enum(Start,
+		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
+	"line-height": styleprops.FloatProportion(float32(1.2),
+		func(obj *Text) *float32 { return &obj.LineHeight }),
+	"line-spacing": styleprops.FloatProportion(float32(1.2),
+		func(obj *Text) *float32 { return &obj.LineHeight }),
+	"white-space": styleprops.Enum(text.WrapAsNeeded,
+		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
+	"direction": styleprops.Enum(rich.LTR,
+		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
+	"tab-size": styleprops.Int(int(4),
+		func(obj *Text) *int { return &obj.TabSize }),
+	"select-color": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Text)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.SelectColor = parent.(*Text).SelectColor
+			} else if init {
+				fs.SelectColor = colors.Scheme.Select.Container
+			}
+			return
+		}
+		fs.SelectColor = errors.Log1(gradient.FromAny(val, cc))
+	},
+	"highlight-color": func(obj any, key string, val any, parent any, cc colors.Context) {
+		fs := obj.(*Text)
+		if inh, init := styleprops.InhInit(val, parent); inh || init {
+			if inh {
+				fs.HighlightColor = parent.(*Text).HighlightColor
+			} else if init {
+				fs.HighlightColor = colors.Scheme.Warn.Container
+			}
+			return
+		}
+		fs.HighlightColor = errors.Log1(gradient.FromAny(val, cc))
+	},
 }

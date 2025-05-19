@@ -10,13 +10,14 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 )
 
-// DrawStandardBox draws the CSS standard box model using the given styling information,
+// StandardBox draws the CSS standard box model using the given styling information,
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, text fields, etc in a GUI.
-func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size math32.Vector2, pabg image.Image) {
-	if !st.RenderBox {
+func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32.Vector2, pabg image.Image) {
+	if !st.RenderBox || size == (math32.Vector2{}) {
 		return
 	}
 
@@ -24,6 +25,9 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 	tm := st.TotalMargin().Round()
 	mpos := pos.Add(tm.Pos())
 	msize := size.Sub(tm.Size())
+	if msize == (math32.Vector2{}) {
+		return
+	}
 	radius := st.Border.Radius.Dots()
 	if encroach { // if we encroach, we must limit ourselves to the parent radius
 		radius = radius.Max(pr)
@@ -38,7 +42,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 
 	// note that we always set the fill opacity to 1 because we are already applying
 	// the opacity of the background color in ComputeActualBackground above
-	pc.FillStyle.Opacity = 1
+	pc.Fill.Opacity = 1
 
 	if st.FillMargin {
 		// We need to fill the whole box where the
@@ -52,26 +56,26 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
 		if encroach { // if we encroach, we must limit ourselves to the parent radius
-			pc.FillStyle.Color = pabg
-			pc.DrawRoundedRectangle(pos.X, pos.Y, size.X, size.Y, radius)
-			pc.Fill()
+			pc.Fill.Color = pabg
+			pc.RoundedRectangleSides(pos.X, pos.Y, size.X, size.Y, radius)
+			pc.Draw()
 		} else {
 			pc.BlitBox(pos, size, pabg)
 		}
 	}
 
-	pc.StrokeStyle.Opacity = st.Opacity
-	pc.FontStyle.Opacity = st.Opacity
+	pc.Stroke.Opacity = st.Opacity
+	// pc.Font.Opacity = st.Opacity // todo:
 
 	// first do any shadow
 	if st.HasBoxShadow() {
 		// CSS effectively goes in reverse order
 		for i := len(st.BoxShadow) - 1; i >= 0; i-- {
 			shadow := st.BoxShadow[i]
-			pc.StrokeStyle.Color = nil
+			pc.Stroke.Color = nil
 			// note: applying 0.5 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			pc.FillStyle.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
+			pc.Fill.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msize)
 
@@ -85,7 +89,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 			// If a higher-contrast shadow is used, it would look better
 			// with radiusFactor = 2, and you'd have to remove this /2 factor.
 
-			pc.DrawRoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, radius)
+			pc.RoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, radius)
 		}
 	}
 
@@ -93,13 +97,13 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if styles.SidesAreZero(radius.Sides) {
+	if sides.AreZero(radius.Sides) {
 		pc.FillBox(mpos, msize, st.ActualBackground)
 	} else {
-		pc.FillStyle.Color = st.ActualBackground
+		pc.Fill.Color = st.ActualBackground
 		// no border; fill on
-		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msize.X, msize.Y, radius)
-		pc.Fill()
+		pc.RoundedRectangleSides(mpos.X, mpos.Y, msize.X, msize.Y, radius)
+		pc.Draw()
 	}
 
 	// now that we have drawn background color
@@ -108,24 +112,25 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 	msize.SetAdd(st.Border.Width.Dots().Size().MulScalar(0.5))
 	mpos.SetSub(st.Border.Offset.Dots().Pos())
 	msize.SetAdd(st.Border.Offset.Dots().Size())
-	pc.FillStyle.Color = nil
-	pc.DrawBorder(mpos.X, mpos.Y, msize.X, msize.Y, st.Border)
+	pc.Fill.Color = nil
+	pc.Border(mpos.X, mpos.Y, msize.X, msize.Y, st.Border)
 }
 
 // boundsEncroachParent returns whether the current box encroaches on the
 // parent bounds, taking into account the parent radius, which is also returned.
-func (pc *Context) boundsEncroachParent(pos, size math32.Vector2) (bool, styles.SideFloats) {
-	if len(pc.BoundsStack) == 0 {
-		return false, styles.SideFloats{}
+func (pc *Painter) boundsEncroachParent(pos, size math32.Vector2) (bool, sides.Floats) {
+	if len(pc.Stack) <= 1 {
+		return false, sides.Floats{}
 	}
 
-	pr := pc.RadiusStack[len(pc.RadiusStack)-1]
-	if styles.SidesAreZero(pr.Sides) {
+	ctx := pc.Stack[len(pc.Stack)-2]
+	pr := ctx.Bounds.Radius
+	if sides.AreZero(pr.Sides) {
 		return false, pr
 	}
 
-	pbox := pc.BoundsStack[len(pc.BoundsStack)-1]
-	psz := math32.FromPoint(pbox.Size())
+	pbox := ctx.Bounds.Rect.ToRect()
+	psz := ctx.Bounds.Rect.Size()
 	pr = ClampBorderRadius(pr, psz.X, psz.Y)
 
 	rect := math32.Box2{Min: pos, Max: pos.Add(size)}

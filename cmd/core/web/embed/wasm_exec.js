@@ -28,7 +28,7 @@
 
 	if (!globalThis.fs) {
 		globalThis.fs = {
-			constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 }, // temporary placeholder that is overwritten by jsfs
+			constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1, O_DIRECTORY: 8192 }, // temporary placeholder that is overwritten by jsfs
 		};
 	}
 
@@ -44,6 +44,14 @@
 			umask() { throw enosys(); },
 			cwd() { return "/" },
 			chdir() { throw enosys(); },
+		}
+	}
+
+	if (!globalThis.path) {
+		globalThis.path = {
+			resolve(...pathSegments) {
+				return pathSegments.join("/");
+			}
 		}
 	}
 

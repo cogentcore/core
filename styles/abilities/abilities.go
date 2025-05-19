@@ -44,39 +44,47 @@ const (
 	// click events when the pointer is held down on it.
 	RepeatClickable
 
-	// LongPressable indicates that an element can be LongPressed
+	// LongPressable indicates that an element can be LongPressed.
 	LongPressable
 
 	// Draggable means it can be Dragged
 	Draggable
 
 	// Droppable means it can receive DragEnter, DragLeave, and Drop events
-	// (not specific to current Drag item, just generally)
+	// (not specific to current Drag item, just generally).
 	Droppable
 
 	// Slideable means it has a slider element that can be dragged
 	// to change value.  Cannot be both Draggable and Slideable.
 	Slideable
 
-	// Checkable means it can be Checked
+	// Checkable means it can be Checked.
 	Checkable
 
-	// Scrollable means it can be Scrolled
+	// Scrollable means it can be Scrolled.
 	Scrollable
 
-	// Focusable means it can be Focused: capable of receiving and processing key events directly
-	// and typically changing the style when focused to indicate this property to the user.
+	// Focusable means it can be Focused: capable of receiving and
+	// processing key events directly and typically changing the
+	// style when focused to indicate this property to the user.
 	Focusable
 
-	// Hoverable means it can be Hovered
+	// Hoverable means it can be Hovered.
 	Hoverable
 
-	// LongHoverable means it can be LongHovered
+	// LongHoverable means it can be LongHovered.
 	LongHoverable
 
-	// ScrollableUnfocused means it can be Scrolled and Slided without focus.
-	// This is true by default except for text editors and text fields.
-	ScrollableUnfocused
+	// ScrollableUnattended means it can be Scrolled and Slided without
+	// Focused or Attended state. This is true by default only for Frames.
+	ScrollableUnattended
+)
+
+var (
+	// Pressable is the list of abilities that makes something Pressable
+	Pressable = []Abilities{Selectable, Activatable, DoubleClickable, TripleClickable, Draggable, Slideable, Checkable, Clickable}
+
+	pressableBits = []enums.BitFlag{Selectable, Activatable, DoubleClickable, TripleClickable, Draggable, Slideable, Checkable, Clickable}
 )
 
 // Is is a shortcut for HasFlag for Abilities
@@ -87,7 +95,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 // IsPressable returns true when an element is Selectable, Activatable,
 // DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(TripleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Clickable) || ab.Is(LongPressable)
+	return enums.HasAnyFlags((*int64)(ab), pressableBits...)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable

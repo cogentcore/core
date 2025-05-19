@@ -145,13 +145,14 @@
         style="stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;fill:none;stroke:#000000;stroke-opacity:1;stroke-width:19.133;"
         d="M 1257.22,716.953 1027.55,563.836 " />
       <path
-        id="path64"
-        style="fill:none;stroke:#000000;stroke-opacity:1;stroke-width:19.133;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;"
-        d="m 1027.55,563.836 0,-535.9102 " />
-      <path
         id="path66"
         style="stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;fill:none;stroke:#000000;stroke-opacity:1;stroke-width:19.133;"
         d="m 1027.57,27.953125 535.91,0 " />
+      <path
+        id="path64"
+        style="fill:none;stroke:#000000;stroke-opacity:1;stroke-width:19.133;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;"
+        d="m 1027.55,563.836 0,-535.9102 " />
     </g>
   </g>
 </svg>
+

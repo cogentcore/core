@@ -27,14 +27,10 @@ type Radial struct { //types:add -setters
 	// the radius of the gradient (rx and ry in SVG)
 	Radius math32.Vector2
 
-	// current render version -- transformed by object matrix
-	rCenter math32.Vector2 `set:"-"`
-
-	// current render version -- transformed by object matrix
-	rFocal math32.Vector2 `set:"-"`
-
-	// current render version -- transformed by object matrix
-	rRadius math32.Vector2 `set:"-"`
+	// computed current render versions transformed by object matrix
+	rCenter math32.Vector2
+	rFocal  math32.Vector2
+	rRadius math32.Vector2
 }
 
 var _ Gradient = &Radial{}

@@ -65,7 +65,7 @@ bt.On(events.LongHoverEnd, func(e events.Event) {
 
 ### Long press
 
-Similar to a [[#long hover]] event, a long press start event is triggered when a user presses down on a [[abilities#long pressable]] widget for 500 milliseconds. A long press event results in any specified [[tooltip]] being shown, and it also creates a [[#context menu]] event. A long press end event is triggered when a user moves their mouse/finger a certain distance, moves it off of a widget, or stops pressing down. That event causes any visible tooltip to disappear, but it does *not* hide any context menu created by the start event. Long press events are mainly relevant as a replacement for long hover events on mobile.
+Similar to a [[#long hover]] event, a long press start event is triggered when a user presses down on a [[abilities#long pressable]] widget for 500 milliseconds. On mobile platforms only, a long press event results in any specified [[tooltip]] being shown, and it also creates a [[#context menu]] event (on mobile only). A long press end event is triggered when a user moves their mouse/finger a certain distance, moves it off of a widget, or stops pressing down. That event causes any visible tooltip to disappear, but it does *not* hide any context menu created by the start event. Long press events are mainly relevant as a replacement for long hover events on mobile.
 
 ```Go
 bt := core.NewButton(b).SetText("Hello")
@@ -142,6 +142,20 @@ tf.OnInput(func(e events.Event) {
 ```
 
 Unlike [[#change]] events, input events rarely cascade to higher-level elements, so they must be handled directly on the relevant widget. Also, some widgets like [[chooser]]s support change events but not input events since they aren't applicable.
+
+### Change on input
+
+You can make a widget send a [[#change]] event when it receives an [[#input]] event by calling `SendChangeOnInput`:
+
+```Go
+tf := core.NewTextField(b)
+tf.SendChangeOnInput()
+tf.OnChange(func(e events.Event) {
+    core.MessageSnackbar(b, "OnChange: "+tf.Text())
+})
+```
+
+This can be useful for things such as [[bind|value binding]], allowing you to have a bound variable update on input events.
 
 ### Focus
 

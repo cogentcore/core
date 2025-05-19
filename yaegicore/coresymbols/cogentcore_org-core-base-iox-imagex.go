@@ -4,12 +4,15 @@ package coresymbols
 
 import (
 	"cogentcore.org/core/base/iox/imagex"
+	"image"
+	"image/color"
 	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/base/iox/imagex/imagex"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"AsRGBA":           reflect.ValueOf(imagex.AsRGBA),
 		"Assert":           reflect.ValueOf(imagex.Assert),
 		"BMP":              reflect.ValueOf(imagex.BMP),
 		"Base64SplitLines": reflect.ValueOf(imagex.Base64SplitLines),
@@ -34,16 +37,21 @@ func init() {
 		"TIFF":             reflect.ValueOf(imagex.TIFF),
 		"ToBase64JPG":      reflect.ValueOf(imagex.ToBase64JPG),
 		"ToBase64PNG":      reflect.ValueOf(imagex.ToBase64PNG),
+		"Unwrap":           reflect.ValueOf(imagex.Unwrap),
+		"Update":           reflect.ValueOf(imagex.Update),
 		"UpdateTestImages": reflect.ValueOf(&imagex.UpdateTestImages).Elem(),
 		"WebP":             reflect.ValueOf(imagex.WebP),
+		"WrapJS":           reflect.ValueOf(imagex.WrapJS),
 		"Write":            reflect.ValueOf(imagex.Write),
 
 		// type definitions
 		"Formats":  reflect.ValueOf((*imagex.Formats)(nil)),
 		"TestingT": reflect.ValueOf((*imagex.TestingT)(nil)),
+		"Wrapped":  reflect.ValueOf((*imagex.Wrapped)(nil)),
 
 		// interface wrapper definitions
 		"_TestingT": reflect.ValueOf((*_cogentcore_org_core_base_iox_imagex_TestingT)(nil)),
+		"_Wrapped":  reflect.ValueOf((*_cogentcore_org_core_base_iox_imagex_Wrapped)(nil)),
 	}
 }
 
@@ -56,3 +64,25 @@ type _cogentcore_org_core_base_iox_imagex_TestingT struct {
 func (W _cogentcore_org_core_base_iox_imagex_TestingT) Errorf(format string, args ...any) {
 	W.WErrorf(format, args...)
 }
+
+// _cogentcore_org_core_base_iox_imagex_Wrapped is an interface wrapper for Wrapped type
+type _cogentcore_org_core_base_iox_imagex_Wrapped struct {
+	IValue      interface{}
+	WAt         func(x int, y int) color.Color
+	WBounds     func() image.Rectangle
+	WColorModel func() color.Model
+	WUnderlying func() image.Image
+	WUpdate     func()
+}
+
+func (W _cogentcore_org_core_base_iox_imagex_Wrapped) At(x int, y int) color.Color {
+	return W.WAt(x, y)
+}
+func (W _cogentcore_org_core_base_iox_imagex_Wrapped) Bounds() image.Rectangle { return W.WBounds() }
+func (W _cogentcore_org_core_base_iox_imagex_Wrapped) ColorModel() color.Model {
+	return W.WColorModel()
+}
+func (W _cogentcore_org_core_base_iox_imagex_Wrapped) Underlying() image.Image {
+	return W.WUnderlying()
+}
+func (W _cogentcore_org_core_base_iox_imagex_Wrapped) Update() { W.WUpdate() }
