@@ -204,6 +204,15 @@ func (wb *WidgetBase) UpdateChange(original ...events.Event) {
 	wb.Update()
 }
 
+// UpdateInput is a helper function that calls [WidgetBase.SendInput]
+// and then [WidgetBase.UpdateRender]. That is the correct order, since
+// calling [WidgetBase.UpdateRender] first would cause the value of the widget
+// to be incorrectly overridden in a [Value] context.
+func (wb *WidgetBase) UpdateInput(original ...events.Event) {
+	wb.Send(events.Input, original...)
+	wb.UpdateRender()
+}
+
 func (wb *WidgetBase) sendKey(kf keymap.Functions, original ...events.Event) {
 	if wb.This == nil {
 		return
@@ -459,10 +468,16 @@ func (wb *WidgetBase) handleWidgetMagnify() {
 	})
 }
 
-// handleValueOnChange adds a handler that calls [WidgetBase.ValueOnChange].
+// handleValueOnChange adds a handler that calls [WidgetBase.ValueOnChange],
+// for both [events.Change] and [events.Input] events.
 func (wb *WidgetBase) handleValueOnChange() {
 	// need to go before end-user OnChange handlers
 	wb.OnFirst(events.Change, func(e events.Event) {
+		if wb.ValueOnChange != nil {
+			wb.ValueOnChange()
+		}
+	})
+	wb.OnFirst(events.Input, func(e events.Event) {
 		if wb.ValueOnChange != nil {
 			wb.ValueOnChange()
 		}
