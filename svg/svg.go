@@ -63,7 +63,7 @@ type SVG struct {
 	Color image.Image
 
 	// Size is size of image, Pos is offset within any parent viewport.
-	// Node bounding boxes are based on 0 Pos offset within RenderImage
+	// The bounding boxes within the scene _include_ the Pos offset already.
 	Geom math32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed.
@@ -242,8 +242,7 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 	}
 
 	sv.Style()
-	sv.SetRootTransform()
-	sv.Root.BBoxes(sv, math32.Identity2())
+	sv.UpdateBBoxes()
 
 	if sv.Background != nil {
 		sv.FillViewport()
@@ -271,9 +270,27 @@ func (sv *SVG) FillViewport() {
 	pc.FillBox(math32.Vector2{}, math32.FromPoint(sv.Geom.Size), sv.Background)
 }
 
-// SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale
+// UpdateBBoxes updates the bounding boxes for all nodes
+// using current transform settings.
+func (sv *SVG) UpdateBBoxes() {
+	sv.setRootTransform()
+	sv.Root.BBoxes(sv, math32.Identity2())
+}
+
+// ContentBounds returns the bounding box of the contents
+// in its natural units, without any Viewbox transformations, etc.
+// Can set the Viewbox to this to have the contents fully occupy the space.
+func (sv *SVG) ContentBounds() math32.Box2 {
+	tr := sv.Root.Paint.Transform
+	sv.Root.Paint.Transform = math32.Identity2()
+	sv.Root.BBoxes(sv, math32.Identity2())
+	sv.Root.Paint.Transform = tr
+	return sv.Root.BBox
+}
+
+// setRootTransform sets the Root node transform based on ViewBox, Translate, Scale
 // parameters set on the SVG object.
-func (sv *SVG) SetRootTransform() {
+func (sv *SVG) setRootTransform() {
 	vb := &sv.Root.ViewBox
 	box := math32.FromPoint(sv.Geom.Size)
 	if vb.Size.X == 0 {
@@ -282,8 +299,7 @@ func (sv *SVG) SetRootTransform() {
 	if vb.Size.Y == 0 {
 		vb.Size.Y = sv.PhysicalHeight.Dots
 	}
-	pc := &sv.Root.Paint
-	tr := pc.Transform.Translate(float32(sv.Geom.Pos.X), float32(sv.Geom.Pos.Y))
+	tr := math32.Translate2D(float32(sv.Geom.Pos.X), float32(sv.Geom.Pos.Y))
 	_, trans, scale := vb.Transform(box)
 	if sv.InvertY {
 		scale.Y *= -1
@@ -295,7 +311,7 @@ func (sv *SVG) SetRootTransform() {
 	if sv.InvertY {
 		rt.Y0 = -rt.Y0
 	}
-	pc.Transform = tr.Mul(rt)
+	sv.Root.Paint.Transform = tr.Mul(rt)
 }
 
 // SetDPITransform sets a scaling transform to compensate for

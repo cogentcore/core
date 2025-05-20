@@ -96,10 +96,10 @@ type NodeBase struct {
 	// BBox is the bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
 	// VisBBox is intersected and only shows visible portion.
-	BBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
+	BBox math32.Box2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// VisBBox is the visible bounding box for the node intersected with the SVG image geometry.
-	VisBBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
+	VisBBox math32.Box2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Paint is the paint style information for this node.
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`
@@ -297,7 +297,7 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 		if snb.Paint.Off {
 			return tree.Break
 		}
-		if pt.In(snb.BBox) {
+		if snb.BBox.ContainsPoint(math32.FromPoint(pt)) {
 			cn = append(cn, sn)
 		}
 		return tree.Continue
@@ -400,8 +400,8 @@ func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.Bounds().Intersect(g.BBox)
+	g.BBox = lbb.MulMatrix2(xf)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 // IsVisible checks our bounding box and visibility, returning false if
@@ -410,7 +410,7 @@ func (g *NodeBase) IsVisible(sv *SVG) bool {
 	if g.Paint.Off || g == nil || g.This == nil {
 		return false
 	}
-	nvis := g.VisBBox == image.Rectangle{}
+	nvis := g.VisBBox == math32.Box2{}
 	if nvis && !g.isDef {
 		// fmt.Println("invisible:", g.Name, "bb:", g.BBox, "vbb:", g.VisBBox, "svg:", sv.Geom.Bounds())
 		return false
@@ -437,7 +437,7 @@ func (g *NodeBase) PushContext(sv *SVG) bool {
 
 func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
-	var bb image.Rectangle
+	var bb math32.Box2
 	for i, kid := range g.Children {
 		ni := kid.(Node)
 		ni.BBoxes(sv, xf)
@@ -449,7 +449,7 @@ func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 		}
 	}
 	g.BBox = bb
-	g.VisBBox = sv.Geom.Bounds().Intersect(g.BBox)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
