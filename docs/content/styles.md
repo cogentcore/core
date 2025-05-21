@@ -356,3 +356,25 @@ tx.Styler(func(s *styles.Style) {
     s.Max.X.Em(10)
 })
 ```
+
+### Whitespace
+
+You can customize the formatting of whitespace:
+
+```Go
+tx := core.NewText(b).SetText("This text\nformats      whitespace\n    as is")
+tx.Styler(func(s *styles.Style) {
+    s.Text.WhiteSpace = text.WhiteSpacePre
+})
+```
+
+### Text wrap
+
+You can disable text wrapping:
+
+```Go
+tx := core.NewTextField(b).SetText("This text never wraps even if it exceeds the maximum width")
+tx.Styler(func(s *styles.Style) {
+    s.SetTextWrap(false)
+})
+```
