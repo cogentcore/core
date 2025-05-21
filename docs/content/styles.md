@@ -94,6 +94,10 @@ fr.Styler(func(s *styles.Style) {
 
 There are many layout properties that customize the positioning and sizing of widgets, typically using [[unit]]s. See the [[layout]] page for a low-level explanation of the layout process.
 
+The standard box model explains the meaning of different size elements:
+
+![Box model](media/box-model.png)
+
 ### Size
 
 You can control the size of a widget through three properties: `Min`, `Max`, and `Grow`.
