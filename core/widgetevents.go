@@ -469,7 +469,7 @@ func (wb *WidgetBase) handleWidgetMagnify() {
 }
 
 // handleValueOnChange adds a handler that calls [WidgetBase.ValueOnChange],
-// for both [events.Change] and [events.Input] events.
+// for [events.Change]. This is installed by default by [Bind].
 func (wb *WidgetBase) handleValueOnChange() {
 	// need to go before end-user OnChange handlers
 	wb.OnFirst(events.Change, func(e events.Event) {
@@ -477,6 +477,14 @@ func (wb *WidgetBase) handleValueOnChange() {
 			wb.ValueOnChange()
 		}
 	})
+}
+
+// HandleValueOnInput adds a handler that calls [WidgetBase.ValueOnChange],
+// for [events.Input] events. This is not done by default, but can be useful
+// if handling input events from a [Slider] for example.
+// This is not generally a good idea for a [TextField] or other text-input widget,
+// because the input-level partial value is often not parseable.
+func (wb *WidgetBase) HandleValueOnInput() {
 	wb.OnFirst(events.Input, func(e events.Event) {
 		if wb.ValueOnChange != nil {
 			wb.ValueOnChange()

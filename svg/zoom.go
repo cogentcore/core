@@ -92,7 +92,7 @@ func (sv *SVG) ZoomReset() {
 func (sv *SVG) ZoomToContents(size math32.Vector2) {
 	sv.ZoomReset()
 	bb := sv.ContentBounds()
-	bsz := bb.Size()
+	bsz := bb.Size().Max(math32.Vec2(1, 1))
 	if bsz == (math32.Vector2{}) {
 		return
 	}

@@ -12,6 +12,7 @@ package svg
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -869,8 +870,14 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-//   Writing
+////////   Writing
+
+// XMLString returns the svg to a XML-encoded file, using WriteXML
+func (sv *SVG) XMLString() string {
+	var b bytes.Buffer
+	sv.WriteXML(&b, false)
+	return string(b.Bytes())
+}
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
 func (sv *SVG) SaveXML(fname string) error {
