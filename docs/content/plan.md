@@ -43,7 +43,7 @@ specifies that a `*core.Button` will be created.
 * [[doc:tree.AddAt]] adds a new item to a `Plan` with a specified name (which must be unique!), and an `Init` function.
 * [[doc:tree.Add]] does `AddAt` with an automatically-generated unique name based on the location in the code where the function is called. This only works for one-off calls, not in a for-loop where multiple elements are made at the same code line, like the above example.
 
-## Maker functions
+## Maker function
 
 A [[doc:tree.NodeBase.Maker]] function adds items to the Plan for a widget.
 
