@@ -480,6 +480,11 @@ func (tr *Tree) Init() {
 			w.SetText(tr.Label())
 		})
 	})
+	tr.Updater(func() {
+		if tr.SyncNode != nil {
+			tr.syncToSrc(&tr.viewIndex, false, 0)
+		}
+	})
 }
 
 func (tr *Tree) OnAdd() {
