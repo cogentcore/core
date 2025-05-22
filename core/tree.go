@@ -1237,12 +1237,17 @@ func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 
 func (tr *Tree) contextMenuReadOnly(m *Scene) {
 	tri := tr.This.(Treer)
-	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.editNode).SetText("View").SetIcon(icons.Visibility).SetEnabled(tr.HasSelection())
+
+	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.EditNode).SetText("View").
+		SetIcon(icons.Visibility).SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
-	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetEnabled(tr.HasSelection())
 }
 
 func (tr *Tree) contextMenu(m *Scene) {
@@ -1252,26 +1257,35 @@ func (tr *Tree) contextMenu(m *Scene) {
 	}
 	tri := tr.This.(Treer)
 	NewFuncButton(m).SetFunc(tr.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.Duplicate).SetIcon(icons.ContentCopy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.Duplicate).SetIcon(icons.ContentCopy).
+		SetEnabled(tr.HasSelection())
 	NewFuncButton(m).SetFunc(tr.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
-	NewFuncButton(m).SetFunc(tri.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).
+		SetEnabled(tr.HasSelection())
 	paste := NewFuncButton(m).SetFunc(tri.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste)
 	cb := tr.Scene.Events.Clipboard()
 	if cb != nil {
 		paste.SetState(cb.IsEmpty(), states.Disabled)
 	}
 	NewSeparator(m)
-	NewFuncButton(m).SetFunc(tr.editNode).SetText("Edit").SetIcon(icons.Edit).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.inspectNode).SetText("Inspect").SetIcon(icons.EditDocument).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.EditNode).SetText("Edit").SetIcon(icons.Edit).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.inspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
+		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
-	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetEnabled(tr.HasSelection())
 }
 
 // IsRoot returns true if given node is the root of the tree,

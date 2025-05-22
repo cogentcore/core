@@ -407,7 +407,7 @@ func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 // IsVisible checks our bounding box and visibility, returning false if
 // out of bounds. Must be called as first step in Render.
 func (g *NodeBase) IsVisible(sv *SVG) bool {
-	if g.Paint.Off || g == nil || g.This == nil {
+	if g == nil || g.This == nil || g.Paint.Off || !g.Paint.Display {
 		return false
 	}
 	nvis := g.VisBBox == math32.Box2{}

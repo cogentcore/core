@@ -348,9 +348,9 @@ func (tr *Tree) duplicateSync() {
 	}
 }
 
-// editNode pulls up a [Form] dialog for the node.
+// EditNode pulls up a [Form] dialog for the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tr *Tree) editNode() { //types:add
+func (tr *Tree) EditNode() { //types:add
 	if tr.SyncNode != nil {
 		tynm := tr.SyncNode.AsTree().NodeType().Name
 		d := NewBody(tynm)
