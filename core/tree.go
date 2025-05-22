@@ -191,7 +191,7 @@ func (tr *Tree) rootSetViewIndex() int {
 		if tvn != nil {
 			tvn.viewIndex = idx
 			if tvn.Root == nil {
-				tvn.Root = tr
+				tvn.Root = tr.This.(Treer)
 			}
 			idx++
 		}
@@ -492,7 +492,7 @@ func (tr *Tree) OnAdd() {
 		tr.IconLeaf = ptv.IconLeaf
 	} else {
 		if tr.Root == nil {
-			tr.Root = tr
+			tr.Root = tr.This.(Treer)
 		}
 	}
 	troot := tr.Root.AsCoreTree()
