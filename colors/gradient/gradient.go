@@ -82,14 +82,14 @@ type Base struct { //types:add -setters
 // Stop represents a single stop in a gradient
 type Stop struct {
 
-	// the color of the stop. these should be fully opaque,
+	// Color of the stop. These should be fully opaque,
 	// with opacity specified separately, for best results, as is done in SVG etc.
-	Color color.Color
+	Color color.RGBA
 
-	// the position of the stop between 0 and 1
+	// Pos is the position of the stop in normalized units between 0 and 1.
 	Pos float32
 
-	// Opacity is the 0-1 level of opacity for this stop
+	// Opacity is the 0-1 level of opacity for this stop.
 	Opacity float32
 }
 

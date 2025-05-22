@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -12,8 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-/////////////////////////////////////////////////////////////////////////////
-//  Gradient
+////////  Gradient
 
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
@@ -35,8 +35,7 @@ func (gr *Gradient) GradientTypeName() string {
 	return "linearGradient"
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//		SVG gradient management
+////////  SVG gradient management
 
 // GradientByName returns the gradient of given name, stored on SVG node
 func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
@@ -173,8 +172,7 @@ func (g *NodeBase) GradientReadPts(sv *SVG, dat []float32) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  Gradient management utilities for creating element-specific grads
+////////  Gradient management utilities for creating element-specific grads
 
 // GradientUpdateStops copies stops from StopsName gradient if it is set
 func (sv *SVG) GradientUpdateStops(gr *Gradient) {
@@ -251,9 +249,13 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 	url := "url(#" + trgst
 	if strings.HasPrefix(pstr, url) {
 		gr := sv.GradientByName(n, pstr)
-		gr.StopsName = stops
-		sv.GradientUpdateStops(gr)
-		return gr, NameToURL(gr.Name)
+		if gr != nil {
+			gr.StopsName = stops
+			sv.GradientUpdateStops(gr)
+			return gr, NameToURL(gr.Name)
+		} else {
+			fmt.Println("not found:", pstr, url)
+		}
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
 		sv.GradientDeleteForNode(n, pstr)

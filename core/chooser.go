@@ -290,6 +290,9 @@ func (ch *Chooser) Init() {
 		// editable handles through TextField
 		if ch.Icon.IsSet() && !ch.Editable {
 			tree.AddAt(p, "icon", func(w *Icon) {
+				w.Styler(func(s *styles.Style) {
+					s.Min = ch.Styles.IconSize
+				})
 				w.Updater(func() {
 					w.SetIcon(ch.Icon)
 				})
@@ -588,6 +591,10 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 			NewSeparator(m)
 		}
 		bt := NewButton(m).SetText(it.GetText()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
+		bt.Styler(func(s *styles.Style) {
+			s.IconSize = ch.Styles.IconSize
+		})
+
 		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
 			ch.selectItemEvent(i)

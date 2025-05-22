@@ -211,6 +211,7 @@ func (bt *Button) Init() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
+					s.Min = bt.Styles.IconSize
 				})
 				w.Updater(func() {
 					w.SetIcon(bt.Icon)
