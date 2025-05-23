@@ -1241,7 +1241,7 @@ func (tf *TextField) renderCursor(on bool) {
 		return
 	}
 	if !on {
-		if tf.Scene == nil {
+		if tf.Scene == nil || tf.Scene.Stage == nil {
 			return
 		}
 		ms := tf.Scene.Stage.Main
