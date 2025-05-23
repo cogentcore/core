@@ -57,6 +57,7 @@ type Treer interface { //types:add
 	Cut()
 	Copy()
 	Paste()
+	DeleteSelected()
 	DragDrop(e events.Event)
 	DropDeleteSource(e events.Event)
 }
@@ -313,7 +314,7 @@ func (tr *Tree) Init() {
 		if !tr.rootIsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
-				tr.DeleteNode()
+				tr.DeleteSelected()
 				e.SetHandled()
 			case keymap.Duplicate:
 				tr.Duplicate()
@@ -1265,7 +1266,7 @@ func (tr *Tree) contextMenu(m *Scene) {
 		SetEnabled(tr.HasSelection())
 	NewFuncButton(m).SetFunc(tr.Duplicate).SetIcon(icons.ContentCopy).
 		SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
+	NewFuncButton(m).SetFunc(tr.DeleteSelected).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 	NewFuncButton(m).SetFunc(tri.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).
@@ -1304,6 +1305,26 @@ func (tr *Tree) IsRoot(action ...string) bool {
 
 ////////  Copy / Cut / Paste
 
+// DeleteSelected deletes selected items.
+// Must be called from first node in selection.
+func (tr *Tree) DeleteSelected() { //types:add
+	if tr.IsRoot("Delete") {
+		return
+	}
+	if tr.SyncNode != nil {
+		tr.deleteSync()
+		return
+	}
+	sels := tr.GetSelectedNodes()
+	rn := tr.Root.AsCoreTree()
+	tr.UnselectAll()
+	for _, sn := range sels {
+		sn.AsTree().Delete()
+	}
+	rn.Update()
+	rn.sendChangeEvent()
+}
+
 // MimeData adds mimedata for this node: a text/plain of the Path.
 func (tr *Tree) MimeData(md *mimedata.Mimes) {
 	if tr.SyncNode != nil {
@@ -1341,7 +1362,8 @@ func (tr *Tree) nodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	return sl, pl
 }
 
-// Copy copies the tree to the clipboard.
+// Copy copies the selected items to the clipboard.
+// This must be called on the first item in the selected list.
 func (tr *Tree) Copy() { //types:add
 	sels := tr.GetSelectedNodes()
 	nitms := max(1, len(sels))
@@ -1358,6 +1380,7 @@ func (tr *Tree) Copy() { //types:add
 }
 
 // Cut copies to [system.Clipboard] and deletes selected items.
+// This must be called on the first item in the selected list.
 func (tr *Tree) Cut() { //types:add
 	if tr.IsRoot("Cut") {
 		return
@@ -1401,26 +1424,26 @@ func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 // to take after each optional action.
 func (tr *Tree) makePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
-		tr.pasteAssign(md)
+		tr.PasteAssign(md)
 		if fun != nil {
 			fun()
 		}
 	})
 	NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
-		tr.pasteChildren(md, events.DropCopy)
+		tr.PasteChildren(md, events.DropCopy)
 		if fun != nil {
 			fun()
 		}
 	})
 	if !tr.IsRoot() {
 		NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
-			tr.pasteBefore(md, events.DropCopy)
+			tr.PasteBefore(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
 		NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
-			tr.pasteAfter(md, events.DropCopy)
+			tr.PasteAfter(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
@@ -1429,8 +1452,8 @@ func (tr *Tree) makePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Cancel")
 }
 
-// pasteAssign assigns mime data (only the first one!) to this node
-func (tr *Tree) pasteAssign(md mimedata.Mimes) {
+// PasteAssign assigns mime data (only the first one!) to this node
+func (tr *Tree) PasteAssign(md mimedata.Mimes) {
 	if tr.SyncNode != nil {
 		tr.pasteAssignSync(md)
 		return
@@ -1446,17 +1469,17 @@ func (tr *Tree) pasteAssign(md mimedata.Mimes) {
 	tr.sendChangeEvent()
 }
 
-// pasteBefore inserts object(s) from mime data before this node.
+// PasteBefore inserts object(s) from mime data before this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tr *Tree) pasteBefore(md mimedata.Mimes, mod events.DropMods) {
+func (tr *Tree) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
 	tr.pasteAt(md, mod, 0, "Paste before")
 }
 
-// pasteAfter inserts object(s) from mime data after this node.
+// PasteAfter inserts object(s) from mime data after this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tr *Tree) pasteAfter(md mimedata.Mimes, mod events.DropMods) {
+func (tr *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 	tr.pasteAt(md, mod, 1, "Paste after")
 }
 
@@ -1492,24 +1515,20 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 	sz := len(sl)
 	var selTv *Tree
 	for i, ns := range sl {
+		nst := ns.AsTree()
 		orgpath := pl[i]
-		if mod != events.DropMove {
-			if cn := parent.ChildByName(ns.AsTree().Name, 0); cn != nil {
-				ns.AsTree().SetName(ns.AsTree().Name + "_Copy")
-			}
-		}
+		tree.SetUniqueNameIfDuplicate(parent, ns)
 		parent.InsertChild(ns, myidx+i)
 		nwb := AsWidget(ns)
-		ntv := AsTree(ns)
-		ntv.Root = tr.Root
+		AsTree(ns).Root = tr.Root
 		nwb.setScene(tr.Scene)
 		nwb.Update() // incl children
-		npath := ns.AsTree().PathFrom(tr.Root)
+		npath := nst.PathFrom(tr.Root)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name + treeTempMovedTag) // special keyword :)
+			nst.SetName(nst.Name + treeTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
-			selTv = ntv
+			selTv = AsTree(ns)
 		}
 	}
 	tr.sendChangeEvent()
@@ -1519,9 +1538,9 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 	}
 }
 
-// pasteChildren inserts object(s) from mime data
-// at end of children of this node
-func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
+// PasteChildren inserts object(s) from mime data
+// at end of children of this node.
+func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	if tr.SyncNode != nil {
 		tr.pasteChildrenSync(md, mod)
 		return
@@ -1529,11 +1548,10 @@ func (tr *Tree) pasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tr.nodesFromMimeData(md)
 
 	for _, ns := range sl {
+		tree.SetUniqueNameIfDuplicate(tr.This, ns)
 		tr.AddChild(ns)
-		nwb := AsWidget(ns)
-		ntv := AsTree(ns)
-		ntv.Root = tr.Root
-		nwb.setScene(tr.Scene)
+		AsTree(ns).Root = tr.Root
+		AsWidget(ns).setScene(tr.Scene)
 	}
 	tr.Update()
 	tr.Open()
