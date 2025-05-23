@@ -290,9 +290,6 @@ func (ch *Chooser) Init() {
 		// editable handles through TextField
 		if ch.Icon.IsSet() && !ch.Editable {
 			tree.AddAt(p, "icon", func(w *Icon) {
-				w.Styler(func(s *styles.Style) {
-					s.Min = ch.Styles.IconSize
-				})
 				w.Updater(func() {
 					w.SetIcon(ch.Icon)
 				})
@@ -357,6 +354,7 @@ func (ch *Chooser) Init() {
 				w.Maker(func(p *tree.Plan) {
 					tree.AddInit(p, "trail-icon", func(w *Button) {
 						w.Styler(func(s *styles.Style) {
+							s.IconSize.Set(units.Em(1)) // don't inherit
 							// indicator does not need to be focused
 							s.SetAbilities(false, abilities.Focusable)
 						})
@@ -383,6 +381,7 @@ func (ch *Chooser) Init() {
 		if !ch.Editable && !ch.IsReadOnly() {
 			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
+					s.IconSize.Set(units.Em(1)) // don't inherit
 					s.Justify.Self = styles.End
 				})
 				w.Updater(func() {

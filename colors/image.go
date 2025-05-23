@@ -24,6 +24,20 @@ func ToUniform(img image.Image) color.RGBA {
 	return AsRGBA(img.At(0, 0))
 }
 
+// CloneUniform returns a copy of a Uniform image color, if image is one.
+// Otherwise just returns the image back. This is useful when modifying
+// an image color, to ensure that it doesn't modify all users of this image.
+func CloneUniform(img image.Image) image.Image {
+	if img == nil {
+		return nil
+	}
+	u, ok := img.(*image.Uniform)
+	if !ok {
+		return img
+	}
+	return image.NewUniform(AsRGBA(u.C))
+}
+
 // Pattern returns a new unbounded [image.Image] represented by the given pattern function.
 func Pattern(f func(x, y int) color.Color) image.Image {
 	return &pattern{f}

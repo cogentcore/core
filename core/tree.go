@@ -221,6 +221,7 @@ func (tr *Tree) Init() {
 		s.Padding.SetVertical(units.Dp(4))
 		s.Padding.Right.Zero()
 		s.Text.Align = text.Start
+		s.IconSize.Set(units.Em(1.5))
 
 		// need to copy over to actual and then clear styles one
 		if s.Is(states.Selected) {
@@ -426,6 +427,7 @@ func (tr *Tree) Init() {
 			s.Cursor = cursors.None
 			s.Color = colors.Scheme.Primary.Base
 			s.Padding.Zero()
+			s.IconSize = tr.Styles.IconSize
 			s.Align.Self = styles.Center
 			if !w.StateIs(states.Indeterminate) {
 				// we amplify any state layer we receiver so that it is clear
@@ -459,7 +461,7 @@ func (tr *Tree) Init() {
 		if tr.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(24)
+					s.IconSize = tr.Styles.IconSize
 					s.Color = colors.Scheme.Primary.Base
 					s.Align.Self = styles.Center
 				})

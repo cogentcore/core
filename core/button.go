@@ -211,7 +211,6 @@ func (bt *Button) Init() {
 			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
-					s.Min = bt.Styles.IconSize
 				})
 				w.Updater(func() {
 					w.SetIcon(bt.Icon)
@@ -252,10 +251,10 @@ func (bt *Button) Init() {
 			})
 			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Min.X.Dp(18)
-					s.Min.Y.Dp(18)
 					s.Margin.Zero()
 					s.Padding.Zero()
+					s.Font.Size.Dp(18)
+					s.IconSize.Set(units.Em(1)) // don't inherit
 				})
 				w.Updater(func() {
 					w.SetIcon(bt.Indicator)

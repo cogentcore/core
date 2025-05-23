@@ -221,7 +221,8 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	}
 	gr := NewGradient(sv.Defs)
 	id := sv.NewUniqueID()
-	gr.SetName(NameID(gnm, id))
+	gnm = NameID(gnm, id)
+	gr.SetName(gnm)
 	url := NameToURL(gnm)
 	if radial {
 		gr.Grad = gradient.NewRadial()
@@ -233,10 +234,12 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 
 // GradientUpdateNodeProp ensures that node has a gradient property of given type
 func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := n.AsTree().Property(prop)
+	nb := n.AsNodeBase()
+	ps := nb.Property(prop)
 	if ps == nil {
 		gr, url := sv.GradientNewForNode(n, radial, stops)
-		n.AsTree().SetProperty(prop, url)
+		nb.SetProperty(prop, url)
+		nb.SetProperty(prop+"-opacity", "1")
 		return gr, url
 	}
 	pstr := ps.(string)
@@ -261,7 +264,7 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 		sv.GradientDeleteForNode(n, pstr)
 	}
 	gr, url := sv.GradientNewForNode(n, radial, stops)
-	n.AsTree().SetProperty(prop, url)
+	nb.SetProperty(prop, url)
 	return gr, url
 }
 

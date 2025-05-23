@@ -241,8 +241,9 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	for _, k := range sv.Defs.Children {
 		k.AsTree().SetProperty(refkey, 0)
 	}
-	sv.Root.WalkDown(func(k tree.Node) bool {
-		pr := k.AsTree().Properties
+	sv.Root.WalkDown(func(n tree.Node) bool {
+		nb := n.(Node).AsNodeBase()
+		pr := nb.Properties
 		for _, v := range pr {
 			ps := reflectx.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
@@ -254,15 +255,20 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 				IncRefCount(el)
 			}
 		}
-		if gr, isgr := k.(*Gradient); isgr {
+		return tree.Continue
+	})
+	sv.Defs.WalkDown(func(n tree.Node) bool {
+		if gr, isgr := n.(*Gradient); isgr {
 			if gr.StopsName != "" {
 				el := sv.FindDefByName(gr.StopsName)
 				if el != nil {
 					IncRefCount(el)
+				} else {
+					fmt.Println("stopsname not found:", gr.StopsName)
 				}
 			} else {
 				if gr.Grad != nil && len(gr.Grad.AsBase().Stops) > 0 {
-					IncRefCount(k) // keep us around
+					IncRefCount(n) // keep us around
 				}
 			}
 		}

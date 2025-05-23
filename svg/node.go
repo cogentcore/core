@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -146,7 +145,10 @@ func (g *NodeBase) Init() {
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
 func (g *NodeBase) SetColorProperties(prop, color string) {
-	clr := errors.Log1(colors.FromString(color))
+	if NameFromURL(color) != "" {
+		return
+	}
+	clr, _ := colors.FromString(color)
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255
 	clr.A = 255
