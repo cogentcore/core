@@ -24,11 +24,23 @@ func (g *Group) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	g.BBoxesFromChildren(sv, parTransform)
 }
 
+func (g *Group) IsVisible(sv *SVG) bool {
+	if g == nil || g.This == nil || !g.Paint.Display { // does not check g.Paint.Off!
+		return false
+	}
+	nvis := g.VisBBox == math32.Box2{}
+	if nvis && !g.isDef {
+		return false
+	}
+	return true
+}
+
 func (g *Group) Render(sv *SVG) {
-	if !g.PushContext(sv) {
+	if !g.IsVisible(sv) {
 		return
 	}
 	pc := g.Painter(sv)
+	pc.PushContext(&g.Paint, nil)
 	g.RenderChildren(sv)
 	pc.PopContext()
 }

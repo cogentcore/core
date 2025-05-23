@@ -148,6 +148,14 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 	if NameFromURL(color) != "" {
 		return
 	}
+	if color == "none" || color == "" {
+		g.SetProperty(prop, "none")
+		g.DeleteProperty(prop + "-opacity")
+		if prop == "stroke" {
+			g.DeleteProperty("stroke-width")
+		}
+		return
+	}
 	clr, _ := colors.FromString(color)
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255

@@ -59,7 +59,6 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		// TODO(kai): do we need to clone?
 		return img, nil
 	}
-
 	str = strings.TrimSpace(str)
 	if strings.HasPrefix(str, "url(") {
 		img := cc.ImageByURL(str)
@@ -69,6 +68,9 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		return img, nil
 	}
 	str = strings.ToLower(str)
+	if str == "none" || str == "" {
+		return nil, nil
+	}
 	grad := "-gradient"
 
 	gidx := strings.Index(str, grad)
