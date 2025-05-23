@@ -280,7 +280,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 		n := sv.Defs.Children[i]
 		rc := n.AsTree().Property(refkey).(int)
 		if rc == 0 {
-			fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name)
+			// fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name)
 			sv.Defs.Children = slices.Delete(sv.Defs.Children, i, i+1)
 			del = true
 		} else {

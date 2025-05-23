@@ -1220,7 +1220,7 @@ func SetStandardXMLAttr(ni Node, name, val string) bool {
 	nb := ni.AsNodeBase()
 	switch name {
 	case "id":
-		nb.SetName(val)
+		nb.Name = val
 		return true
 	case "class":
 		nb.Class = val
