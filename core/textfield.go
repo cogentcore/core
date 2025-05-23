@@ -595,6 +595,9 @@ func (tf *TextField) WidgetTooltip(pos image.Point) (string, image.Point) {
 ////////  Cursor Navigation
 
 func (tf *TextField) updateLinePos() {
+	if tf.renderAll == nil {
+		return
+	}
 	tf.cursorLine = tf.renderAll.RuneToLinePos(tf.cursorPos).Line
 }
 

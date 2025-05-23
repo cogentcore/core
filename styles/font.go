@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"image"
 	"log/slog"
 
 	"cogentcore.org/core/colors"
@@ -111,17 +112,43 @@ func (fs *Font) SetRich(sty *rich.Style) {
 	sty.Decoration = fs.Decoration
 }
 
-// SetRichText sets the rich.Style and text.Style properties from the style props.
-func (s *Style) SetRichText(sty *rich.Style, tsty *text.Style) {
-	s.Font.SetRich(sty)
-	s.Text.SetText(tsty)
-	tsty.FontSize = s.Font.Size
-	tsty.CustomFont = s.Font.CustomFont
-	if s.Color != nil {
-		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
-		tsty.Color = clr
+// SetFromRich sets from the rich.Style
+func (fs *Font) SetFromRich(sty *rich.Style) {
+	fs.Family = sty.Family
+	fs.Slant = sty.Slant
+	fs.Weight = sty.Weight
+	fs.Stretch = sty.Stretch
+	fs.Decoration = sty.Decoration
+}
+
+// SetRichText sets the rich.Style and text.Style properties from style
+// [Font] and [Text] styles
+func SetRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text, clr image.Image, opacity float32) {
+	font.SetRich(sty)
+	txt.SetText(tsty)
+	tsty.FontSize = font.Size
+	tsty.CustomFont = font.CustomFont
+	if clr != nil {
+		tsty.Color = colors.ApplyOpacity(colors.ToUniform(clr), opacity)
 	}
 	// note: no default background color here
+}
+
+// SetFromRichText sets the style [Font] and [Text] styles from rich.Style and text.Style.
+// returns color and opacity.
+func SetFromRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text) (image.Image, float32) {
+	font.SetFromRich(sty)
+	txt.SetFromText(tsty)
+	font.Size = tsty.FontSize
+	font.CustomFont = tsty.CustomFont
+	clr := colors.Uniform(tsty.Color)
+	// todo: opacity
+	return clr, 1
+}
+
+// SetRichText sets the rich.Style and text.Style properties from the style props.
+func (s *Style) SetRichText(sty *rich.Style, tsty *text.Style) {
+	SetRichText(sty, tsty, &s.Font, &s.Text, s.Color, s.Opacity)
 }
 
 // NewRichText sets the rich.Style and text.Style properties from the style props.
