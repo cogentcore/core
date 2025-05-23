@@ -42,7 +42,7 @@ func (w *Window) SetGeometry(fullscreen bool, pos image.Point, size image.Point,
 	// We only support fullscreen, not pos, size, or screen.
 	doc := js.Global().Get("document")
 	if fullscreen {
-		doc.Call("getElementById", "app").Call("requestFullscreen")
+		doc.Get("documentElement").Call("requestFullscreen")
 		return
 	}
 	doc.Call("exitFullscreen")
