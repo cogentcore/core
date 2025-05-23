@@ -242,7 +242,10 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 		nb.SetProperty(prop+"-opacity", "1")
 		return gr, url
 	}
-	pstr := ps.(string)
+	pstr, ok := ps.(string)
+	if !ok {
+		pstr = *ps.(*string)
+	}
 	trgst := ""
 	if radial {
 		trgst = "radialGradient"
