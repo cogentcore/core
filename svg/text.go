@@ -98,8 +98,10 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	// fmt.Println(tx)
 	sz := math32.Vec2(10000, 10000)
 	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
-	// baseOff := g.TextShaped.Lines[0].Offset
+	baseOff := g.TextShaped.Lines[0].Offset
 	g.TextShaped.StartAtBaseline() // remove top-left offset
+	return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
+
 	// fmt.Println("baseoff:", baseOff)
 	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)
 
@@ -142,7 +144,6 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	*/
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 	// g.TextShaped.UpdateBBox()
-	return g.TextShaped.Bounds.Translate(g.Pos)
 }
 
 func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {

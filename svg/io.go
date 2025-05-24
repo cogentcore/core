@@ -1027,7 +1027,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Text:
-		if nd.HasChildren() || nd.Text != "" {
+		_, parIsTxt := nd.Parent.(*Text)
+		if nd.HasChildren() || !parIsTxt {
 			nm = "text"
 		} else {
 			nm = "tspan"
