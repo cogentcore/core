@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
@@ -34,12 +35,12 @@ func (g *Path) SetSize(sz math32.Vector2) {
 // SetData sets the path data to given string, parsing it into an optimized
 // form used for rendering
 func (g *Path) SetData(data string) error {
-	g.DataStr = data
-	var err error
-	g.Data, err = ppath.ParseSVGPath(data)
-	if err != nil {
+	d, err := ppath.ParseSVGPath(data)
+	if errors.Log(err) != nil {
 		return err
 	}
+	g.DataStr = data
+	g.Data = d
 	return err
 }
 
@@ -97,31 +98,6 @@ func (g *Path) UpdatePathString() {
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Path) ApplyTransform(sv *SVG, xf math32.Matrix2) {
-	// path may have horiz, vert elements -- only gen soln is to transform
-	g.Paint.Transform.SetMul(xf)
-	g.SetProperty("transform", g.Paint.Transform.String())
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Path) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.ApplyTransformImpl(xf, lpt)
-		g.GradientApplyTransformPt(sv, xf, lpt)
-	}
-}
-
-// ApplyTransformImpl does the implementation of applying a transform to all points
-func (g *Path) ApplyTransformImpl(xf math32.Matrix2, lpt math32.Vector2) {
 	g.Data.Transform(xf)
 }
 
@@ -142,7 +118,9 @@ func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
 // the length and ordering of which is specific to each node type.
 func (g *Path) ReadGeom(sv *SVG, dat []float32) {
 	sz := len(g.Data)
-	g.Data = ppath.Path(dat)
+	for i := range g.Data {
+		g.Data[i] = dat[i]
+	}
 	g.ReadTransform(dat, sz)
 	g.GradientReadPts(sv, dat)
 }

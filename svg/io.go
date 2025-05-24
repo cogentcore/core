@@ -3,15 +3,14 @@
 // license that can be found in the LICENSE file.
 
 // svg parsing is adapted from github.com/srwiley/oksvg:
-//
 // Copyright 2017 The oksvg Authors. All rights reserved.
-//
 // created: 2/12/2017 by S.R.Wiley
 
 package svg
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -869,8 +868,14 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-//   Writing
+////////   Writing
+
+// XMLString returns the svg to a XML-encoded file, using WriteXML
+func (sv *SVG) XMLString() string {
+	var b bytes.Buffer
+	sv.WriteXML(&b, false)
+	return string(b.Bytes())
+}
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
 func (sv *SVG) SaveXML(fname string) error {
@@ -1022,7 +1027,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Text:
-		if nd.Text == "" {
+		_, parIsTxt := nd.Parent.(*Text)
+		if nd.HasChildren() || !parIsTxt {
 			nm = "text"
 		} else {
 			nm = "tspan"
@@ -1096,13 +1102,11 @@ func MarshalXMLGradient(n *Gradient, name string, enc *XMLEncoder) {
 	}
 
 	if linear {
-		// must be non-zero to add
-		if gb.Box != (math32.Box2{}) {
-			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gb.Box.Min.X))
-			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gb.Box.Min.Y))
-			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gb.Box.Max.X))
-			XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", gb.Box.Max.Y))
-		}
+		l := gr.(*gradient.Linear)
+		XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", l.Start.X))
+		XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", l.Start.Y))
+		XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", l.End.X))
+		XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", l.End.Y))
 	} else {
 		r := gr.(*gradient.Radial)
 		// must be non-zero to add
@@ -1217,7 +1221,7 @@ func SetStandardXMLAttr(ni Node, name, val string) bool {
 	nb := ni.AsNodeBase()
 	switch name {
 	case "id":
-		nb.SetName(val)
+		nb.Name = val
 		return true
 	case "class":
 		nb.Class = val

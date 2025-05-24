@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -12,8 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-/////////////////////////////////////////////////////////////////////////////
-//  Gradient
+////////  Gradient
 
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
@@ -35,8 +35,7 @@ func (gr *Gradient) GradientTypeName() string {
 	return "linearGradient"
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//		SVG gradient management
+////////  SVG gradient management
 
 // GradientByName returns the gradient of given name, stored on SVG node
 func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
@@ -173,8 +172,7 @@ func (g *NodeBase) GradientReadPts(sv *SVG, dat []float32) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//  Gradient management utilities for creating element-specific grads
+////////  Gradient management utilities for creating element-specific grads
 
 // GradientUpdateStops copies stops from StopsName gradient if it is set
 func (sv *SVG) GradientUpdateStops(gr *Gradient) {
@@ -223,7 +221,8 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	}
 	gr := NewGradient(sv.Defs)
 	id := sv.NewUniqueID()
-	gr.SetName(NameID(gnm, id))
+	gnm = NameID(gnm, id)
+	gr.SetName(gnm)
 	url := NameToURL(gnm)
 	if radial {
 		gr.Grad = gradient.NewRadial()
@@ -235,13 +234,18 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 
 // GradientUpdateNodeProp ensures that node has a gradient property of given type
 func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := n.AsTree().Property(prop)
+	nb := n.AsNodeBase()
+	ps := nb.Property(prop)
 	if ps == nil {
 		gr, url := sv.GradientNewForNode(n, radial, stops)
-		n.AsTree().SetProperty(prop, url)
+		nb.SetProperty(prop, url)
+		nb.SetProperty(prop+"-opacity", "1")
 		return gr, url
 	}
-	pstr := ps.(string)
+	pstr, ok := ps.(string)
+	if !ok {
+		pstr = *ps.(*string)
+	}
 	trgst := ""
 	if radial {
 		trgst = "radialGradient"
@@ -251,15 +255,19 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 	url := "url(#" + trgst
 	if strings.HasPrefix(pstr, url) {
 		gr := sv.GradientByName(n, pstr)
-		gr.StopsName = stops
-		sv.GradientUpdateStops(gr)
-		return gr, NameToURL(gr.Name)
+		if gr != nil {
+			gr.StopsName = stops
+			sv.GradientUpdateStops(gr)
+			return gr, NameToURL(gr.Name)
+		} else {
+			fmt.Println("not found:", pstr, url)
+		}
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
 		sv.GradientDeleteForNode(n, pstr)
 	}
 	gr, url := sv.GradientNewForNode(n, radial, stops)
-	n.AsTree().SetProperty(prop, url)
+	nb.SetProperty(prop, url)
 	return gr, url
 }
 

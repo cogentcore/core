@@ -57,15 +57,15 @@ func (s *Style) FromRunes(rs []rune) []rune {
 	RuneToStyle(s, rs[0])
 	s.Size = math.Float32frombits(uint32(rs[1]))
 	ci := 2
-	if s.Decoration.HasFlag(FillColor) {
+	if s.Decoration.HasFlag(fillColor) {
 		s.fillColor = ColorFromRune(rs[ci])
 		ci++
 	}
-	if s.Decoration.HasFlag(StrokeColor) {
+	if s.Decoration.HasFlag(strokeColor) {
 		s.strokeColor = ColorFromRune(rs[ci])
 		ci++
 	}
-	if s.Decoration.HasFlag(Background) {
+	if s.Decoration.HasFlag(background) {
 		s.background = ColorFromRune(rs[ci])
 		ci++
 	}
@@ -90,13 +90,13 @@ func (s *Style) ToRunes() []rune {
 	if s.Decoration.NumColors() == 0 {
 		return rs
 	}
-	if s.Decoration.HasFlag(FillColor) {
+	if s.Decoration.HasFlag(fillColor) {
 		rs = append(rs, ColorToRune(s.fillColor))
 	}
-	if s.Decoration.HasFlag(StrokeColor) {
+	if s.Decoration.HasFlag(strokeColor) {
 		rs = append(rs, ColorToRune(s.strokeColor))
 	}
-	if s.Decoration.HasFlag(Background) {
+	if s.Decoration.HasFlag(background) {
 		rs = append(rs, ColorToRune(s.background))
 	}
 	if s.Special == Link {

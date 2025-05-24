@@ -92,6 +92,8 @@ func init() {
 		"SetClampMaxVector":         reflect.ValueOf(styles.SetClampMaxVector),
 		"SetClampMin":               reflect.ValueOf(styles.SetClampMin),
 		"SetClampMinVector":         reflect.ValueOf(styles.SetClampMinVector),
+		"SetFromRichText":           reflect.ValueOf(styles.SetFromRichText),
+		"SetRichText":               reflect.ValueOf(styles.SetRichText),
 		"SpaceAround":               reflect.ValueOf(styles.SpaceAround),
 		"SpaceBetween":              reflect.ValueOf(styles.SpaceBetween),
 		"SpaceEvenly":               reflect.ValueOf(styles.SpaceEvenly),

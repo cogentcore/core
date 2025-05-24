@@ -63,7 +63,7 @@ type SVG struct {
 	Color image.Image
 
 	// Size is size of image, Pos is offset within any parent viewport.
-	// Node bounding boxes are based on 0 Pos offset within RenderImage
+	// The bounding boxes within the scene _include_ the Pos offset already.
 	Geom math32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed.
@@ -242,8 +242,7 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 	}
 
 	sv.Style()
-	sv.SetRootTransform()
-	sv.Root.BBoxes(sv, math32.Identity2())
+	sv.UpdateBBoxes()
 
 	if sv.Background != nil {
 		sv.FillViewport()
@@ -271,39 +270,14 @@ func (sv *SVG) FillViewport() {
 	pc.FillBox(math32.Vector2{}, math32.FromPoint(sv.Geom.Size), sv.Background)
 }
 
-// SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale
-// parameters set on the SVG object.
-func (sv *SVG) SetRootTransform() {
-	vb := &sv.Root.ViewBox
-	box := math32.FromPoint(sv.Geom.Size)
-	if vb.Size.X == 0 {
-		vb.Size.X = sv.PhysicalWidth.Dots
-	}
-	if vb.Size.Y == 0 {
-		vb.Size.Y = sv.PhysicalHeight.Dots
-	}
-	_, trans, scale := vb.Transform(box)
-	if sv.InvertY {
-		scale.Y *= -1
-	}
-	trans.SetSub(vb.Min)
-	trans.SetAdd(sv.Translate)
-	scale.SetMulScalar(sv.Scale)
-	pc := &sv.Root.Paint
-	pc.Transform = pc.Transform.Scale(scale.X, scale.Y).Translate(trans.X, trans.Y)
-	if sv.InvertY {
-		pc.Transform.Y0 = -pc.Transform.Y0
-	}
+// UpdateBBoxes updates the bounding boxes for all nodes
+// using current transform settings.
+func (sv *SVG) UpdateBBoxes() {
+	sv.setRootTransform()
+	sv.Root.BBoxes(sv, math32.Identity2())
 }
 
-// SetDPITransform sets a scaling transform to compensate for
-// a given LogicalDPI factor.
-// svg rendering is done within a 96 DPI context.
-func (sv *SVG) SetDPITransform(logicalDPI float32) {
-	pc := &sv.Root.Paint
-	dpisc := logicalDPI / 96.0
-	pc.Transform = math32.Scale2D(dpisc, dpisc)
-}
+//////// Root
 
 // Root represents the root of an SVG tree.
 type Root struct {

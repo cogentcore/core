@@ -132,6 +132,17 @@ func (ts *Style) FontHeight(sty *rich.Style) float32 {
 	return math32.Round(ts.FontSize.Dots * sty.Size)
 }
 
+// FillColor returns the effective text fill color (main color)
+// using any special setting in the given [rich.Style], falling back
+// on the Color setting on this text style.
+func (ts *Style) FillColor(sty *rich.Style) color.Color {
+	fc := sty.FillColor()
+	if fc != nil {
+		return fc
+	}
+	return ts.Color
+}
+
 // LineHeightDots returns the effective line height in dots (actual pixels)
 // as FontHeight * LineHeight
 func (ts *Style) LineHeightDots(sty *rich.Style) float32 {

@@ -98,8 +98,10 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	// fmt.Println(tx)
 	sz := math32.Vec2(10000, 10000)
 	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
-	// baseOff := g.TextShaped.Lines[0].Offset
+	baseOff := g.TextShaped.Lines[0].Offset
 	g.TextShaped.StartAtBaseline() // remove top-left offset
+	return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
+
 	// fmt.Println("baseoff:", baseOff)
 	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)
 
@@ -142,7 +144,6 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	*/
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 	// g.TextShaped.UpdateBBox()
-	return g.TextShaped.Bounds.Translate(g.Pos)
 }
 
 func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
@@ -153,8 +154,8 @@ func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.BBox = lbb.MulMatrix2(xf)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 func (g *Text) Render(sv *SVG) {
@@ -192,7 +193,7 @@ func (g *Text) RenderText(sv *SVG) {
 // each node must define this for itself
 func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
@@ -206,45 +207,6 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
 			g.GradientApplyTransform(sv, xf)
-		}
-	}
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		if g.IsParText() {
-			// translation transform
-			xft, lptt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			// transform transform
-			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false)
-			xf.X0 = 0 // negate translation effects
-			xf.Y0 = 0
-			g.Paint.Transform.SetMulCenter(xf, lpt)
-			g.SetProperty("transform", g.Paint.Transform.String())
-
-			g.Pos = xft.MulVector2AsPointCenter(g.Pos, lptt)
-			scx, _ := xft.ExtractScale()
-			g.Width *= scx
-			for _, kii := range g.Children {
-				kt := kii.(*Text)
-				kt.Pos = xft.MulVector2AsPointCenter(kt.Pos, lptt)
-				kt.Width *= scx
-			}
-		} else {
-			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
-			scx, _ := xf.ExtractScale()
-			g.Width *= scx
 		}
 	}
 }

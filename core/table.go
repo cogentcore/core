@@ -305,7 +305,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 		tags := field.Tag
 		if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
-			ni := reflect.StructTag(`display:"no-inline"`)
+			ni := reflect.StructTag(`display:"no-inline" new-window:"+"`)
 			if tags == "" {
 				tags += " " + ni
 			} else {

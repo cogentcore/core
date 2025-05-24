@@ -14,7 +14,7 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// ViewBox defines the SVG viewbox
+//////// ViewBox defines the SVG viewbox
 
 // ViewBox is used in SVG to define the coordinate system
 type ViewBox struct {

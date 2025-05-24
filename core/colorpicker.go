@@ -67,8 +67,8 @@ func (cp *ColorPicker) Init() {
 		tree.AddChild(w, func(w *TextField) {
 			w.SetTooltip("Hex color")
 			w.Styler(func(s *styles.Style) {
-				s.Min.X.Em(5)
-				s.Max.X.Em(5)
+				s.Min.X.Em(6)
+				s.Max.X.Em(6)
 			})
 			w.Updater(func() {
 				w.SetText(colors.AsHex(cp.Color))
@@ -96,6 +96,10 @@ func (cp *ColorPicker) Init() {
 		w.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetHue(w.Value)
+			cp.UpdateInput()
+		})
+		w.OnChange(func(e events.Event) {
+			cp.Color.SetHue(w.Value)
 			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
@@ -119,6 +123,10 @@ func (cp *ColorPicker) Init() {
 		})
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetChroma(w.Value)
+			cp.UpdateInput()
+		})
+		w.OnChange(func(e events.Event) {
+			cp.Color.SetChroma(w.Value)
 			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
@@ -139,6 +147,10 @@ func (cp *ColorPicker) Init() {
 		w.SetTooltip("The tone, which is the lightness of the color")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetTone(w.Value)
+			cp.UpdateInput()
+		})
+		w.OnChange(func(e events.Event) {
+			cp.Color.SetTone(w.Value)
 			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
@@ -158,6 +170,10 @@ func (cp *ColorPicker) Init() {
 		w.SetMin(0).SetMax(1)
 		w.SetTooltip("The opacity of the color")
 		w.OnInput(func(e events.Event) {
+			cp.Color.SetColor(colors.WithAF32(cp.Color, w.Value))
+			cp.UpdateInput()
+		})
+		w.OnChange(func(e events.Event) {
 			cp.Color.SetColor(colors.WithAF32(cp.Color, w.Value))
 			cp.UpdateChange()
 		})

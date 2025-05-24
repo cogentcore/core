@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -47,13 +46,6 @@ type Node interface {
 	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
 	ApplyTransform(sv *SVG, xf math32.Matrix2)
-
-	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-	// relative to given point.  Trans translation and point are in top-level coordinates,
-	// so must be transformed into local coords first.
-	// Point is upper left corner of selection box that anchors the translation and scaling,
-	// and for rotation it is the center point around which to rotate.
-	ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
@@ -96,10 +88,10 @@ type NodeBase struct {
 	// BBox is the bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
 	// VisBBox is intersected and only shows visible portion.
-	BBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
+	BBox math32.Box2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// VisBBox is the visible bounding box for the node intersected with the SVG image geometry.
-	VisBBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
+	VisBBox math32.Box2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Paint is the paint style information for this node.
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`
@@ -146,7 +138,18 @@ func (g *NodeBase) Init() {
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
 func (g *NodeBase) SetColorProperties(prop, color string) {
-	clr := errors.Log1(colors.FromString(color))
+	if NameFromURL(color) != "" {
+		return
+	}
+	if color == "none" || color == "" {
+		g.SetProperty(prop, "none")
+		g.DeleteProperty(prop + "-opacity")
+		if prop == "stroke" {
+			g.DeleteProperty("stroke-width")
+		}
+		return
+	}
+	clr, _ := colors.FromString(color)
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255
 	clr.A = 255
@@ -186,27 +189,14 @@ func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
-// DeltaTransform computes the net transform matrix for given delta transform parameters
-// and the transformed version of the reference point. If self is true, then
-// include the current node self transform, otherwise don't. Groups do not
-// but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
-	mxi := g.ParentTransform(self)
-	mxi = mxi.Inverse()
+// DeltaTransform computes the net transform matrix for given delta transform parameters,
+// operating around given reference point which serves as the effective origin for rotation.
+func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) math32.Matrix2 {
+	mxi := g.ParentTransform(true).Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
-	ldel := mxi.MulVector2AsVector(trans)
-	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
-	xf.X0 = ldel.X
-	xf.Y0 = ldel.Y
-	return xf, lpt
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
+	ltr := mxi.MulVector2AsVector(trans)
+	xf := math32.Translate2D(lpt.X, lpt.Y).Scale(scale.X, scale.Y).Rotate(rot).Translate(ltr.X, ltr.Y).Translate(-lpt.X, -lpt.Y)
+	return xf
 }
 
 // WriteTransform writes the node transform to slice at starting index.
@@ -297,7 +287,7 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 		if snb.Paint.Off {
 			return tree.Break
 		}
-		if pt.In(snb.BBox) {
+		if snb.BBox.ContainsPoint(math32.FromPoint(pt)) {
 			cn = append(cn, sn)
 		}
 		return tree.Continue
@@ -400,19 +390,19 @@ func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.BBox = lbb.MulMatrix2(xf)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 // IsVisible checks our bounding box and visibility, returning false if
 // out of bounds. Must be called as first step in Render.
 func (g *NodeBase) IsVisible(sv *SVG) bool {
-	if g.Paint.Off || g == nil || g.This == nil {
+	if g == nil || g.This == nil || g.Paint.Off || !g.Paint.Display {
 		return false
 	}
-	nvis := g.VisBBox == image.Rectangle{}
+	nvis := g.VisBBox == math32.Box2{}
 	if nvis && !g.isDef {
-		// fmt.Println("invisible:", g.Name, g.BBox, g.VisBBox)
+		// fmt.Println("invisible:", g.Name, "bb:", g.BBox, "vbb:", g.VisBBox, "svg:", sv.Geom.Bounds())
 		return false
 	}
 	return true
@@ -437,7 +427,7 @@ func (g *NodeBase) PushContext(sv *SVG) bool {
 
 func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
-	var bb image.Rectangle
+	var bb math32.Box2
 	for i, kid := range g.Children {
 		ni := kid.(Node)
 		ni.BBoxes(sv, xf)
@@ -449,7 +439,7 @@ func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 		}
 	}
 	g.BBox = bb
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {

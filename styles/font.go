@@ -5,6 +5,7 @@
 package styles
 
 import (
+	"image"
 	"log/slog"
 
 	"cogentcore.org/core/colors"
@@ -22,7 +23,7 @@ type Font struct { //types:add
 
 	// Size of font to render (inherited).
 	// Converted to points when getting font to use.
-	Size units.Value
+	Size units.Value `step:"1"`
 
 	// Family indicates the generic family of typeface to use, where the
 	// specific named values to use for each are provided in the [Settings],
@@ -111,17 +112,39 @@ func (fs *Font) SetRich(sty *rich.Style) {
 	sty.Decoration = fs.Decoration
 }
 
-// SetRichText sets the rich.Style and text.Style properties from the style props.
-func (s *Style) SetRichText(sty *rich.Style, tsty *text.Style) {
-	s.Font.SetRich(sty)
-	s.Text.SetText(tsty)
-	tsty.FontSize = s.Font.Size
-	tsty.CustomFont = s.Font.CustomFont
-	if s.Color != nil {
-		clr := colors.ApplyOpacity(colors.ToUniform(s.Color), s.Opacity)
-		tsty.Color = clr
+// SetFromRich sets from the rich.Style
+func (fs *Font) SetFromRich(sty *rich.Style) {
+	fs.Family = sty.Family
+	fs.Slant = sty.Slant
+	fs.Weight = sty.Weight
+	fs.Stretch = sty.Stretch
+	fs.Decoration = sty.Decoration
+}
+
+// SetRichText sets the rich.Style and text.Style properties from style
+// [Font] and [Text] styles
+func SetRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text, clr image.Image, opacity float32) {
+	font.SetRich(sty)
+	txt.SetText(tsty)
+	tsty.FontSize = font.Size
+	tsty.CustomFont = font.CustomFont
+	if clr != nil {
+		tsty.Color = colors.ApplyOpacity(colors.ToUniform(clr), opacity)
 	}
 	// note: no default background color here
+}
+
+// SetFromRichText sets the style [Font] and [Text] styles from rich.Style and text.Style.
+func SetFromRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text) {
+	font.SetFromRich(sty)
+	txt.SetFromText(tsty)
+	font.Size = tsty.FontSize
+	font.CustomFont = tsty.CustomFont
+}
+
+// SetRichText sets the rich.Style and text.Style properties from the style props.
+func (s *Style) SetRichText(sty *rich.Style, tsty *text.Style) {
+	SetRichText(sty, tsty, &s.Font, &s.Text, s.Color, s.Opacity)
 }
 
 // NewRichText sets the rich.Style and text.Style properties from the style props.

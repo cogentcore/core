@@ -8,6 +8,8 @@
 package ppath
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/math32"
 )
 
@@ -19,6 +21,10 @@ func (p Path) Transform(m math32.Matrix2) Path {
 		cmd := p[i]
 		switch cmd {
 		case MoveTo, LineTo, Close:
+			if i+2 >= len(p) {
+				fmt.Println("path length error:", len(p), i, p)
+				return p
+			}
 			end := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
 			p[i+1] = end.X
 			p[i+2] = end.Y

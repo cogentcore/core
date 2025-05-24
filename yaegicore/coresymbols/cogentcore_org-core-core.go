@@ -647,6 +647,7 @@ type _cogentcore_org_core_core_Treer struct {
 	WCopy             func()
 	WCopyFieldsFrom   func(from tree.Node)
 	WCut              func()
+	WDeleteSelected   func()
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
@@ -684,6 +685,7 @@ func (W _cogentcore_org_core_core_Treer) ContextMenuPos(e events.Event) image.Po
 func (W _cogentcore_org_core_core_Treer) Copy()                           { W.WCopy() }
 func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node)   { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Treer) Cut()                            { W.WCut() }
+func (W _cogentcore_org_core_core_Treer) DeleteSelected()                 { W.WDeleteSelected() }
 func (W _cogentcore_org_core_core_Treer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
