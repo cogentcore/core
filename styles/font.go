@@ -23,7 +23,7 @@ type Font struct { //types:add
 
 	// Size of font to render (inherited).
 	// Converted to points when getting font to use.
-	Size units.Value
+	Size units.Value `step:"1"`
 
 	// Family indicates the generic family of typeface to use, where the
 	// specific named values to use for each are provided in the [Settings],
@@ -135,15 +135,11 @@ func SetRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text, clr i
 }
 
 // SetFromRichText sets the style [Font] and [Text] styles from rich.Style and text.Style.
-// returns color and opacity.
-func SetFromRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text) (image.Image, float32) {
+func SetFromRichText(sty *rich.Style, tsty *text.Style, font *Font, txt *Text) {
 	font.SetFromRich(sty)
 	txt.SetFromText(tsty)
 	font.Size = tsty.FontSize
 	font.CustomFont = tsty.CustomFont
-	clr := colors.Uniform(tsty.Color)
-	// todo: opacity
-	return clr, 1
 }
 
 // SetRichText sets the rich.Style and text.Style properties from the style props.

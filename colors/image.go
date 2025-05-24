@@ -12,6 +12,9 @@ import (
 // Uniform returns a new [image.Uniform] filled completely with the given color.
 // See [ToUniform] for the converse.
 func Uniform(c color.Color) image.Image {
+	if c == nil {
+		return nil
+	}
 	return image.NewUniform(c)
 }
 

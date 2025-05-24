@@ -58,17 +58,17 @@ type Style struct { //types:add -setters
 	Direction Directions
 
 	// fillColor is the color to use for glyph fill (i.e., the standard "ink" color).
-	// Must use SetFillColor to set Decoration FillColor flag.
+	// Must use SetFillColor to set Decoration fillColor flag.
 	// This will be encoded in a uint32 following the style rune, in rich.Text spans.
 	fillColor color.Color
 
 	// strokeColor is the color to use for glyph outline stroking.
-	// Must use SetStrokeColor to set Decoration StrokeColor flag.
+	// Must use SetStrokeColor to set Decoration strokeColor flag.
 	// This will be encoded in a uint32 following the style rune, in rich.Text spans.
 	strokeColor color.Color
 
 	// background is the color to use for the background region.
-	// Must use SetBackground to set the Decoration Background flag.
+	// Must use SetBackground to set the Decoration background flag.
 	// This will be encoded in a uint32 following the style rune, in rich.Text spans.
 	background color.Color `set:"-"`
 
@@ -298,30 +298,30 @@ const (
 	// and therefore may be indented according to [text.Style] settings.
 	ParagraphStart
 
-	// FillColor means that the fill color of the glyph is set.
+	// fillColor means that the fill color of the glyph is set.
 	// The standard font rendering uses this fill color (compare to StrokeColor).
-	FillColor
+	fillColor
 
-	// StrokeColor means that the stroke color of the glyph is set.
+	// strokeColor means that the stroke color of the glyph is set.
 	// This is normally not rendered: it looks like an outline of the glyph at
 	// larger font sizes, and will make smaller font sizes look significantly thicker.
-	StrokeColor
+	strokeColor
 
-	// Background means that the background region behind the text is colored.
+	// background means that the background region behind the text is colored.
 	// The background is not normally colored so it renders over any background.
-	Background
+	background
 )
 
 // NumColors returns the number of colors used by this decoration setting.
 func (d Decorations) NumColors() int {
 	nc := 0
-	if d.HasFlag(FillColor) {
+	if d.HasFlag(fillColor) {
 		nc++
 	}
-	if d.HasFlag(StrokeColor) {
+	if d.HasFlag(strokeColor) {
 		nc++
 	}
-	if d.HasFlag(Background) {
+	if d.HasFlag(background) {
 		nc++
 	}
 	return nc
@@ -408,15 +408,32 @@ func (s *Style) SetDecoration(deco ...Decorations) *Style {
 	return s
 }
 
-func (s *Style) FillColor() color.Color   { return s.fillColor }
-func (s *Style) StrokeColor() color.Color { return s.strokeColor }
-func (s *Style) Background() color.Color  { return s.background }
+func (s *Style) FillColor() color.Color {
+	if s.Decoration.HasFlag(fillColor) {
+		return s.fillColor
+	}
+	return nil
+}
+
+func (s *Style) StrokeColor() color.Color {
+	if s.Decoration.HasFlag(strokeColor) {
+		return s.strokeColor
+	}
+	return nil
+}
+
+func (s *Style) Background() color.Color {
+	if s.Decoration.HasFlag(background) {
+		return s.background
+	}
+	return nil
+}
 
 // SetFillColor sets the fill color to given color, setting the Decoration
 // flag and the color value.
 func (s *Style) SetFillColor(clr color.Color) *Style {
 	s.fillColor = clr
-	s.Decoration.SetFlag(clr != nil, FillColor)
+	s.Decoration.SetFlag(clr != nil, fillColor)
 	return s
 }
 
@@ -426,7 +443,7 @@ func (s *Style) SetFillColor(clr color.Color) *Style {
 // larger font sizes, and will make smaller font sizes look significantly thicker.
 func (s *Style) SetStrokeColor(clr color.Color) *Style {
 	s.strokeColor = clr
-	s.Decoration.SetFlag(clr != nil, StrokeColor)
+	s.Decoration.SetFlag(clr != nil, strokeColor)
 	return s
 }
 
@@ -435,7 +452,7 @@ func (s *Style) SetStrokeColor(clr color.Color) *Style {
 // The background is not normally colored so it renders over any background.
 func (s *Style) SetBackground(clr color.Color) *Style {
 	s.background = clr
-	s.Decoration.SetFlag(clr != nil, Background)
+	s.Decoration.SetFlag(clr != nil, background)
 	return s
 }
 
@@ -486,7 +503,7 @@ func (s *Style) String() string {
 			str += "[" + s.URL + "] "
 		}
 	}
-	for d := Underline; d <= Background; d++ {
+	for d := Underline; d <= background; d++ {
 		if s.Decoration.HasFlag(d) {
 			str += d.BitIndexString() + " "
 		}

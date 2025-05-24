@@ -118,7 +118,7 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if s.AlignV != Start {
 		p["text-vertical-align"] = s.AlignV.String()
 	}
-	if s.LineHeight != 1.2 {
+	if s.LineHeight != 1.3 {
 		p["line-height"] = reflectx.ToString(s.LineHeight)
 	}
 	if s.WhiteSpace != WrapAsNeeded {
@@ -130,11 +130,7 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if s.TabSize != 4 {
 		p["tab-size"] = reflectx.ToString(s.TabSize)
 	}
-	if sty.Decoration.HasFlag(rich.FillColor) {
-		p["fill"] = colors.AsHex(sty.FillColor())
-	} else {
-		p["fill"] = colors.AsHex(s.Color)
-	}
+	p["fill"] = colors.AsHex(s.FillColor(sty))
 	if s.SelectColor != nil {
 		p["select-color"] = colors.AsHex(colors.ToUniform(s.SelectColor))
 	}
