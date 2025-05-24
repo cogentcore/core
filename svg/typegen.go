@@ -33,12 +33,12 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.ClipPath", IDNa
 // ClipPath is used for holding a path that renders as a clip path
 func NewClipPath(parent ...tree.Node) *ClipPath { return tree.New[ClipPath](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into tree.Properties and set in CSS\nfield of appropriate node", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Sheet"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into tree.Properties and set in CSS\nfield of appropriate node.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Sheet"}}})
 
 // NewStyleSheet returns a new [StyleSheet] with the given optional parent:
-// StyleSheet is a Node2D node that contains a stylesheet -- property values
+// StyleSheet is a node that contains a stylesheet -- property values
 // contained in this sheet can be transformed into tree.Properties and set in CSS
-// field of appropriate node
+// field of appropriate node.
 func NewStyleSheet(parent ...tree.Node) *StyleSheet { return tree.New[StyleSheet](parent...) }
 
 // SetSheet sets the [StyleSheet.Sheet]

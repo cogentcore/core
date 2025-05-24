@@ -126,29 +126,11 @@ func (g *Image) Render(sv *SVG) {
 // each node must define this for itself
 func (g *Image) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
-		g.Size = xf.MulVector2AsVector(g.Size)
-	}
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
 		g.Size = xf.MulVector2AsVector(g.Size)
 	}
 }

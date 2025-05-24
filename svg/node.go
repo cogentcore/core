@@ -47,13 +47,6 @@ type Node interface {
 	// this just does a direct transform multiplication on coordinates.
 	ApplyTransform(sv *SVG, xf math32.Matrix2)
 
-	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-	// relative to given point.  Trans translation and point are in top-level coordinates,
-	// so must be transformed into local coords first.
-	// Point is upper left corner of selection box that anchors the translation and scaling,
-	// and for rotation it is the center point around which to rotate.
-	ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2)
-
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
 	// Slice must be passed and will be resized if not the correct length.
@@ -196,27 +189,14 @@ func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
-// DeltaTransform computes the net transform matrix for given delta transform parameters
-// and the transformed version of the reference point. If self is true, then
-// include the current node self transform, otherwise don't. Groups do not
-// but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
-	mxi := g.ParentTransform(self)
-	mxi = mxi.Inverse()
+// DeltaTransform computes the net transform matrix for given delta transform parameters,
+// operating around given reference point which serves as the effective origin for rotation.
+func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) math32.Matrix2 {
+	mxi := g.ParentTransform(true).Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
-	ldel := mxi.MulVector2AsVector(trans)
-	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
-	xf.X0 = ldel.X
-	xf.Y0 = ldel.Y
-	return xf, lpt
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
+	ltr := mxi.MulVector2AsVector(trans)
+	xf := math32.Translate2D(lpt.X, lpt.Y).Scale(scale.X, scale.Y).Rotate(rot).Translate(ltr.X, ltr.Y).Translate(-lpt.X, -lpt.Y)
+	return xf
 }
 
 // WriteTransform writes the node transform to slice at starting index.

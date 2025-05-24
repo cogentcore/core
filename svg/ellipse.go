@@ -66,25 +66,6 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	}
 }
 
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Ellipse) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
-		g.Radii = xf.MulVector2AsVector(g.Radii)
-		g.GradientApplyTransformPt(sv, xf, lpt)
-	}
-}
-
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
 // the length and ordering of which is specific to each node type.
 // Slice must be passed and will be resized if not the correct length.

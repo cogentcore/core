@@ -193,7 +193,7 @@ func (g *Text) RenderText(sv *SVG) {
 // each node must define this for itself
 func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
@@ -207,45 +207,6 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
 			g.GradientApplyTransform(sv, xf)
-		}
-	}
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		if g.IsParText() {
-			// translation transform
-			xft, lptt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			// transform transform
-			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false)
-			xf.X0 = 0 // negate translation effects
-			xf.Y0 = 0
-			g.Paint.Transform.SetMulCenter(xf, lpt)
-			g.SetProperty("transform", g.Paint.Transform.String())
-
-			g.Pos = xft.MulVector2AsPointCenter(g.Pos, lptt)
-			scx, _ := xft.ExtractScale()
-			g.Width *= scx
-			for _, kii := range g.Children {
-				kt := kii.(*Text)
-				kt.Pos = xft.MulVector2AsPointCenter(kt.Pos, lptt)
-				kt.Width *= scx
-			}
-		} else {
-			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
-			scx, _ := xf.ExtractScale()
-			g.Width *= scx
 		}
 	}
 }
