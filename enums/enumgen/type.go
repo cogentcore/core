@@ -14,8 +14,10 @@ package enumgen
 import (
 	"fmt"
 	"go/ast"
+	"slices"
 	"sort"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"cogentcore.org/core/base/strcase"
@@ -68,7 +70,10 @@ func SortValues(values []Value) []Value {
 			j++
 		}
 	}
-	return values[:j]
+	values = slices.DeleteFunc(values[:j], func(v Value) bool { // remove any unexported names
+		return unicode.IsLower(rune(v.OriginalName[0]))
+	})
+	return values
 }
 
 // TrimValueNames removes the prefixes specified

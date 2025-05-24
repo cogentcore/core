@@ -503,10 +503,19 @@ func (s *Style) String() string {
 			str += "[" + s.URL + "] "
 		}
 	}
-	for d := Underline; d <= background; d++ {
+	for d := Underline; d <= ParagraphStart; d++ {
 		if s.Decoration.HasFlag(d) {
 			str += d.BitIndexString() + " "
 		}
+	}
+	if s.Decoration.HasFlag(fillColor) {
+		str += "fill-color "
+	}
+	if s.Decoration.HasFlag(strokeColor) {
+		str += "stroke-color "
+	}
+	if s.Decoration.HasFlag(background) {
+		str += "background "
 	}
 	return strings.TrimSpace(str)
 }

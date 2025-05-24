@@ -166,16 +166,16 @@ func (i Stretch) MarshalText() ([]byte, error) { return []byte(i.String()), nil 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Stretch) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Stretch") }
 
-var _DecorationsValues = []Decorations{0, 1, 2, 3, 4, 5, 6, 7}
+var _DecorationsValues = []Decorations{0, 1, 2, 3, 4}
 
 // DecorationsN is the highest valid value for type Decorations, plus one.
-const DecorationsN Decorations = 8
+const DecorationsN Decorations = 5
 
-var _DecorationsValueMap = map[string]Decorations{`underline`: 0, `overline`: 1, `line-through`: 2, `dotted-underline`: 3, `paragraph-start`: 4, `fill-color`: 5, `stroke-color`: 6, `background`: 7}
+var _DecorationsValueMap = map[string]Decorations{`underline`: 0, `overline`: 1, `line-through`: 2, `dotted-underline`: 3, `paragraph-start`: 4}
 
-var _DecorationsDescMap = map[Decorations]string{0: `Underline indicates to place a line below text.`, 1: `Overline indicates to place a line above text.`, 2: `LineThrough indicates to place a line through text.`, 3: `DottedUnderline is used for abbr tag.`, 4: `ParagraphStart indicates that this text is the start of a paragraph, and therefore may be indented according to [text.Style] settings.`, 5: `fillColor means that the fill color of the glyph is set. The standard font rendering uses this fill color (compare to StrokeColor).`, 6: `strokeColor means that the stroke color of the glyph is set. This is normally not rendered: it looks like an outline of the glyph at larger font sizes, and will make smaller font sizes look significantly thicker.`, 7: `background means that the background region behind the text is colored. The background is not normally colored so it renders over any background.`}
+var _DecorationsDescMap = map[Decorations]string{0: `Underline indicates to place a line below text.`, 1: `Overline indicates to place a line above text.`, 2: `LineThrough indicates to place a line through text.`, 3: `DottedUnderline is used for abbr tag.`, 4: `ParagraphStart indicates that this text is the start of a paragraph, and therefore may be indented according to [text.Style] settings.`}
 
-var _DecorationsMap = map[Decorations]string{0: `underline`, 1: `overline`, 2: `line-through`, 3: `dotted-underline`, 4: `paragraph-start`, 5: `fill-color`, 6: `stroke-color`, 7: `background`}
+var _DecorationsMap = map[Decorations]string{0: `underline`, 1: `overline`, 2: `line-through`, 3: `dotted-underline`, 4: `paragraph-start`}
 
 // String returns the string representation of this Decorations value.
 func (i Decorations) String() string { return enums.BitFlagString(i, _DecorationsValues) }
