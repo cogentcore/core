@@ -131,6 +131,7 @@ func (g *Image) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	} else {
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		g.Size = xf.MulVector2AsVector(g.Size)
+		g.GradientApplyTransform(sv, xf)
 	}
 }
 

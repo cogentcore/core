@@ -504,9 +504,6 @@ func readFraction(v string) (float32, error) {
 	}
 	f := float32(f64)
 	f /= d
-	if f < 0 {
-		f = 0
-	}
 	return f, nil
 }
 

@@ -1133,7 +1133,7 @@ func MarshalXMLGradient(n *Gradient, name string, enc *XMLEncoder) {
 	}
 
 	if n.StopsName != "" {
-		XMLAddAttr(&me.Attr, "href", "#"+n.StopsName)
+		XMLAddAttr(&me.Attr, "xlink:href", "#"+n.StopsName)
 	}
 
 	enc.EncodeToken(me)
@@ -1192,6 +1192,7 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
 	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
 	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
+	XMLAddAttr(&me.Attr, "xmlns:xlink", "http://www.w3.org/1999/xlink")
 	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 

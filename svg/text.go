@@ -205,7 +205,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 			g.Pos = xf.MulVector2AsPoint(g.Pos)
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
-			g.GradientApplyTransform(sv, xf)
 		}
+		g.GradientApplyTransform(sv, xf)
 	}
 }

@@ -92,13 +92,13 @@ type NodeBase struct {
 	// gradients of UserSpaceOnUse type applied to this node.
 	// These values are updated and copied to gradients of the appropriate type to keep
 	// the gradients sync'd with updates to the node as it is transformed.
-	GradientFill GradientGeom
+	GradientFill math32.Matrix2 `json:"-" xml:"-" set:"-"display:"-"`
 
 	// GradientStroke contains the stroke gradient geometry to use for linear and radial
 	// gradients of UserSpaceOnUse type applied to this node.
 	// These values are updated and copied to gradients of the appropriate type to keep
 	// the gradients sync'd with updates to the node as it is transformed.
-	GradientStroke GradientGeom
+	GradientStroke math32.Matrix2 `json:"-" xml:"-" set:"-" display:"-"`
 
 	// isDef is whether this is in [SVG.Defs].
 	isDef bool
@@ -110,9 +110,14 @@ func (g *NodeBase) EnforceSVGName() bool          { return true }
 func (g *NodeBase) SetPos(pos math32.Vector2)     {}
 func (g *NodeBase) SetSize(sz math32.Vector2)     {}
 func (g *NodeBase) PaintStyle() *styles.Paint     { return &g.Paint }
-func (g *NodeBase) Init()                         { g.Paint.Defaults() }
 func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 { return math32.Box2{} }
 func (n *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeOf((*NodeBase)(nil)).Elem() }
+
+func (g *NodeBase) Init() {
+	g.Paint.Defaults()
+	g.GradientFill = math32.Identity2()
+	g.GradientStroke = math32.Identity2()
+}
 
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"

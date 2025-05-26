@@ -59,6 +59,7 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
+		// todo: this is not the correct transform:
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		g.Radii = xf.MulVector2AsVector(g.Radii)
 		g.GradientApplyTransform(sv, xf)

@@ -19,58 +19,6 @@ import (
 // It is an awkward design that the gradient needs to be updated for each node
 // for most sensible use-cases, because the ObjectBoundingBox is too limited,
 // so a unique UserSpaceOnUse gradient is typically needed for each node.
-// The strategy here is to maintain the Fill and Stroke gradient control points
-// on each node, and update those dynamically as the node is transformed,
-// and then copy those back out to the gradient. If a new gradient is created,
-// the existing gradient control points will be available to retain the gradient
-// settings across such changes as well.
-
-// GradientGeom maintains the gradient control points for a node.
-// These are maintained and updated on the node, loaded from any saved
-// UserSpaceOnUse gradients, but otherwise computed based on the shape.
-type GradientGeom struct {
-	Transform math32.Matrix2
-
-	// Linear are the start and end points for linear gradient.
-	Linear [2]math32.Vector2
-
-	// Radial are the center, focal and radius points for radial gradient.
-	Radial [3]math32.Vector2
-}
-
-// LinearIsNil returns true if the current linear geom has not been set.
-func (gg *GradientGeom) LinearIsNil() bool {
-	return gg.Linear[0] == (math32.Vector2{}) && gg.Linear[1] == (math32.Vector2{})
-}
-
-// RadialIsNil returns true if the current radial geom has not been set.
-func (gg *GradientGeom) RadialIsNil() bool {
-	return gg.Radial[0] == (math32.Vector2{}) && gg.Radial[1] == (math32.Vector2{}) && gg.Radial[2] == (math32.Vector2{})
-}
-
-// ApplyTransform applies the given transform to update the current gradient
-// geom if they have been set.
-func (gg *GradientGeom) ApplyTransform(xf math32.Matrix2) {
-	xfn := gg.Transform.Inverse().Mul(xf).Mul(gg.Transform)
-	if !gg.LinearIsNil() {
-		gg.Linear[0] = xfn.MulVector2AsPoint(gg.Linear[0])
-		gg.Linear[1] = xfn.MulVector2AsPoint(gg.Linear[1])
-	}
-	if !gg.RadialIsNil() {
-		gg.Radial[0] = xfn.MulVector2AsPoint(gg.Radial[0])
-		gg.Radial[1] = xfn.MulVector2AsPoint(gg.Radial[1])
-		gg.Radial[2] = xfn.MulVector2AsVector(gg.Radial[2]) // vector for radius
-		// note: this is not correct:
-		// gg.Radial[2] = math32.Scale2D(scx, scy).MulVector2AsVector(gg.Radial[2])
-		// scx, scy := xfn.ExtractScale()
-		// nr := xfn.MulVector2AsVector(gg.Radial[2])
-		// tx, ty, phi, sx, sy, theta := xfn.Decompose()
-		// rc := math32.Scale2D(sx, sy).Rotate(-theta).Translate(tx, ty)
-		// nr := rc.MulVector2AsVector(gg.Radial[2])
-		// fmt.Println(tx, ty, phi, sx, sy, theta, gg.Radial[2], nr)
-		// gg.Radial[2] = nr
-	}
-}
 
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
@@ -101,40 +49,22 @@ func (gr *Gradient) GradientTypeName() string {
 
 // fromGeom sets gradient geom for UserSpaceOnUse gradient units
 // from given geom.
-func (gr *Gradient) fromGeom(gg *GradientGeom) {
+func (gr *Gradient) fromGeom(xf math32.Matrix2) { // gg *GradientGeom) {
 	gb := gr.Grad.AsBase()
 	if gb.Units != gradient.UserSpaceOnUse {
 		return
 	}
-	switch x := gr.Grad.(type) {
-	case *gradient.Radial:
-		x.Center = gg.Radial[0]
-		x.Focal = gg.Radial[1]
-		x.Radius = gg.Radial[2]
-	case *gradient.Linear:
-		x.Start = gg.Linear[0]
-		x.End = gg.Linear[1]
-	}
+	gb.Transform = xf
 }
 
 // toGeom copies gradient points to given geom
 // for UserSpaceOnUse gradient units.
-func (gr *Gradient) toGeom(gg *GradientGeom) {
+func (gr *Gradient) toGeom(xf *math32.Matrix2) {
 	gb := gr.Grad.AsBase()
 	if gb.Units != gradient.UserSpaceOnUse {
 		return
 	}
-	gg.Transform = gb.Transform
-	switch x := gr.Grad.(type) {
-	case *gradient.Radial:
-		gg.Radial[0] = x.Center
-		gg.Radial[1] = x.Focal
-		gg.Radial[2] = x.Radius
-		return
-	case *gradient.Linear:
-		gg.Linear[0] = x.Start
-		gg.Linear[1] = x.End
-	}
+	*xf = gb.Transform
 }
 
 ////////  SVG gradient management
@@ -154,56 +84,33 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 }
 
 // GradientApplyTransform applies given transform to node's gradient geometry.
+// This should ONLY be called when the node's transform is _not_ being updated,
+// and instead its geometry values (pos etc) are being transformed directly by
+// this transform, because the node's transform will be applied to the gradient
+// when it is being rendered.
 func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Matrix2) {
-	g.GradientFill.ApplyTransform(xf)
-	g.GradientStroke.ApplyTransform(xf)
+	g.GradientFill = xf.Mul(g.GradientFill)
+	g.GradientStroke = xf.Mul(g.GradientStroke)
 	g.GradientUpdateGeom(sv)
 }
 
-// GradientGeomDefault ensures that if current gradient geom is empty,
-// there is a default GradientGeom for given property ("fill" or "stroke")
-// and gradient type, based on the current local bounding box of the object.
-func (g *NodeBase) GradientGeomDefault(sv *SVG, prop string, radial bool) {
+// GradientGeomDefault sets the initial default gradient geometry from node.
+func (g *NodeBase) GradientGeomDefault(sv *SVG, gr gradient.Gradient) {
 	gi := g.This.(Node)
-	gg := &g.GradientFill
-	ogg := &g.GradientStroke
-	if prop == "stroke" {
-		gg = &g.GradientStroke
-		ogg = &g.GradientFill
-	}
-	if radial {
-		if !gg.RadialIsNil() {
-			return
-		}
-		if !ogg.RadialIsNil() {
-			gg.Transform = ogg.Transform
-			gg.Radial = ogg.Radial
-			return
-		}
-		gg.Transform = math32.Identity2()
+	if rg, ok := gr.(*gradient.Radial); ok {
 		lbb := gi.LocalBBox(sv)
 		ctr := lbb.Center()
 		sz := lbb.Size()
 		rad := 0.5 * max(sz.X, sz.Y)
-		gg.Radial[0] = ctr
-		gg.Radial[1] = ctr
-		gg.Radial[2].Set(rad, rad)
-		gg.ApplyTransform(g.Paint.Transform)
+		rg.Center = ctr
+		rg.Focal = ctr
+		rg.Radius.Set(rad, rad)
 		return
 	}
-	if !gg.LinearIsNil() {
-		return
-	}
-	if !ogg.LinearIsNil() {
-		gg.Transform = ogg.Transform
-		gg.Linear = ogg.Linear
-		return
-	}
-	gg.Transform = math32.Identity2()
+	lg := gr.(*gradient.Linear)
 	lbb := gi.LocalBBox(sv)
-	gg.Linear[0] = lbb.Min
-	gg.Linear[1] = math32.Vec2(lbb.Max.X, lbb.Min.Y) // L-R
-	gg.ApplyTransform(g.Paint.Transform)
+	lg.Start = lbb.Min
+	lg.End = math32.Vec2(lbb.Max.X, lbb.Min.Y) // L-R
 }
 
 // GradientUpdateGeom updates the geometry of UserSpaceOnUse gradients
@@ -215,14 +122,15 @@ func (g *NodeBase) GradientUpdateGeom(sv *SVG) {
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.fromGeom(&g.GradientFill)
+			gr.fromGeom(g.GradientFill)
+			// fmt.Println("set fill:", g.GradientFill)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.fromGeom(&g.GradientStroke)
+			gr.fromGeom(g.GradientStroke)
 		}
 	}
 }
@@ -295,11 +203,11 @@ func (sv *SVG) GradientNewForNode(n Node, prop string, radial bool, stops string
 	gr.StopsName = stops
 	gr.Grad.AsBase().Units = gradient.UserSpaceOnUse
 	nb := n.AsNodeBase()
-	nb.GradientGeomDefault(sv, prop, radial) // ensure has one
+	nb.GradientGeomDefault(sv, gr.Grad)
 	if prop == "fill" {
-		gr.fromGeom(&nb.GradientFill)
+		gr.fromGeom(nb.GradientFill)
 	} else {
-		gr.fromGeom(&nb.GradientStroke)
+		gr.fromGeom(nb.GradientStroke)
 	}
 	sv.GradientUpdateStops(gr)
 	return gr, url
