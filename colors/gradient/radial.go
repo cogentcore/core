@@ -31,6 +31,8 @@ type Radial struct { //types:add -setters
 	rCenter math32.Vector2
 	rFocal  math32.Vector2
 	rRadius math32.Vector2
+
+	rotTrans math32.Matrix2
 }
 
 var _ Gradient = &Radial{}
@@ -62,6 +64,7 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 	r.Box = box
 	r.Opacity = opacity
 	r.updateBase()
+	r.rotTrans = math32.Identity2()
 
 	c, f, rs := r.Center, r.Focal, r.Radius
 	sz := r.Box.Size()
@@ -70,12 +73,13 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		f = r.Box.Min.Add(sz.Mul(f))
 		rs.SetMul(sz)
 	} else {
-		c = r.Transform.MulVector2AsPoint(c)
-		f = r.Transform.MulVector2AsPoint(f)
-		rs = r.Transform.MulVector2AsVector(rs)
-		c = objTransform.MulVector2AsPoint(c)
-		f = objTransform.MulVector2AsPoint(f)
-		rs = objTransform.MulVector2AsVector(rs)
+		ct := objTransform.Mul(r.Transform)
+		c = ct.MulVector2AsPoint(c)
+		f = ct.MulVector2AsPoint(f)
+		rot := ct.ExtractRot()
+		r.rotTrans = math32.Rotate2D(-rot)
+		scx, scy := ct.ExtractScale()
+		rs.SetMul(math32.Vec2(scx, scy))
 	}
 	if c != f {
 		f.SetDiv(rs)
@@ -111,7 +115,7 @@ func (r *Radial) At(x, y int) color.Color {
 		if r.Units == ObjectBoundingBox {
 			pt = r.boxTransform.MulVector2AsPoint(pt)
 		}
-		d := pt.Sub(r.rCenter)
+		d := r.rotTrans.MulVector2AsVector(pt.Sub(r.rCenter))
 		pos := math32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
 		return r.getColor(pos)
 	}
@@ -123,6 +127,7 @@ func (r *Radial) At(x, y int) color.Color {
 	if r.Units == ObjectBoundingBox {
 		pt = r.boxTransform.MulVector2AsPoint(pt)
 	}
+	pt = r.rotTrans.MulVector2AsVector(pt)
 	e := pt.Div(r.rRadius)
 
 	t1, intersects := rayCircleIntersectionF(e, r.rFocal, r.rCenter, 1)
