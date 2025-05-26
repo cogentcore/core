@@ -174,18 +174,18 @@ func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
 	*CurMimeData = append(*CurMimeData, &mimedata.Data{typ, data})
 }
 
-// TODO(kai): macOpenFile
+// note: this does not happen in time for main startup
+// due to the delayed initialization of all the gui stuff.
 
 //export macOpenFile
 func macOpenFile(fname *C.char, flen C.int) {
-	/*
-		ofn := C.GoString(fname)
-		// fmt.Printf("open file: %s\n", ofn)
-		if theApp.NWindows() == 0 {
-			theApp.openFiles = append(theApp.openFiles, ofn)
-		} else {
-			// win := theApp.Window(0)
-			// win.Events.NewOS(events.OSEvent, []string{ofn})
-		}
-	*/
+	ofn := C.GoString(fname)
+	if TheApp.NWindows() == 0 {
+		TheApp.OpenFls = append(TheApp.OpenFls, ofn)
+	}
+	// todo: open event
+	// } else {
+	// win := TheApp.Window(0)
+	// win.Events.NewOS(events.OSEvent, []string{ofn})
+	// }
 }
