@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/htmltext"
@@ -207,51 +206,6 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 			scx, _ := xf.ExtractScale()
 			g.Width *= scx
 			g.GradientApplyTransform(sv, xf)
-		}
-	}
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
-	if g.IsParText() {
-		npt := 9 + g.NumChildren()*3
-		*dat = slicesx.SetLength(*dat, npt)
-		(*dat)[0] = g.Pos.X
-		(*dat)[1] = g.Pos.Y
-		(*dat)[2] = g.Width
-		g.WriteTransform(*dat, 3)
-		for i, kii := range g.Children {
-			kt := kii.(*Text)
-			off := 9 + i*3
-			(*dat)[off+0] = kt.Pos.X
-			(*dat)[off+1] = kt.Pos.Y
-			(*dat)[off+2] = kt.Width
-		}
-	} else {
-		*dat = slicesx.SetLength(*dat, 3+6)
-		(*dat)[0] = g.Pos.X
-		(*dat)[1] = g.Pos.Y
-		(*dat)[2] = g.Width
-		g.WriteTransform(*dat, 3)
-	}
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Text) ReadGeom(sv *SVG, dat []float32) {
-	g.Pos.X = dat[0]
-	g.Pos.Y = dat[1]
-	g.Width = dat[2]
-	g.ReadTransform(dat, 3)
-	if g.IsParText() {
-		for i, kii := range g.Children {
-			kt := kii.(*Text)
-			off := 9 + i*3
-			kt.Pos.X = dat[off+0]
-			kt.Pos.Y = dat[off+1]
-			kt.Width = dat[off+2]
 		}
 	}
 }

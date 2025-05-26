@@ -48,6 +48,9 @@ func (tn *Node) Init() {
 	tn.ContextMenus = nil
 	tn.AddContextMenu(tn.ContextMenu)
 
+	tn.Styler(func(s *styles.Style) {
+		s.IconSize.Set(units.Em(1))
+	})
 	tn.Parts.AsWidget().OnDoubleClick(func(e events.Event) {
 		if tn.HasChildren() {
 			return
@@ -63,20 +66,6 @@ func (tn *Node) Init() {
 	})
 	tn.Parts.Styler(func(s *styles.Style) {
 		s.Gap.X.Em(0.4)
-	})
-	tree.AddChildInit(tn.Parts, "branch", func(w *core.Switch) {
-		tree.AddChildInit(w, "stack", func(w *core.Frame) {
-			f := func(name string) {
-				tree.AddChildInit(w, name, func(w *core.Icon) {
-					w.Styler(func(s *styles.Style) {
-						s.Min.Set(units.Em(1))
-					})
-				})
-			}
-			f("icon-on")
-			f("icon-off")
-			f("icon-indeterminate")
-		})
 	})
 }
 

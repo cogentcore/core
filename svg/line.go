@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 )
 
@@ -77,28 +76,4 @@ func (g *Line) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.End = xf.MulVector2AsPoint(g.End)
 		g.GradientApplyTransform(sv, xf)
 	}
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Line) WriteGeom(sv *SVG, dat *[]float32) {
-	*dat = slicesx.SetLength(*dat, 4+6)
-	(*dat)[0] = g.Start.X
-	(*dat)[1] = g.Start.Y
-	(*dat)[2] = g.End.X
-	(*dat)[3] = g.End.Y
-	g.WriteTransform(*dat, 4)
-	g.GradientWritePts(sv, dat)
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Line) ReadGeom(sv *SVG, dat []float32) {
-	g.Start.X = dat[0]
-	g.Start.Y = dat[1]
-	g.End.X = dat[2]
-	g.End.Y = dat[3]
-	g.ReadTransform(dat, 4)
-	g.GradientReadPts(sv, dat)
 }

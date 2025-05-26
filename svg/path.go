@@ -6,7 +6,6 @@ package svg
 
 import (
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 )
@@ -29,7 +28,13 @@ func (g *Path) SetPos(pos math32.Vector2) {
 }
 
 func (g *Path) SetSize(sz math32.Vector2) {
-	// todo: scale bbox
+	bb := g.Data.FastBounds()
+	csz := bb.Size()
+	if csz.X == 0 || csz.Y == 0 {
+		return
+	}
+	sc := sz.Div(csz)
+	g.Data.Transform(math32.Scale2D(sc.X, sc.Y))
 }
 
 // SetData sets the path data to given string, parsing it into an optimized
@@ -93,34 +98,9 @@ func (g *Path) UpdatePathString() {
 	g.DataStr = g.Data.ToSVG()
 }
 
-////////  Transforms
-
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Path) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	g.Data.Transform(xf)
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
-	sz := len(g.Data)
-	*dat = slicesx.SetLength(*dat, sz+6)
-	for i := range g.Data {
-		(*dat)[i] = float32(g.Data[i])
-	}
-	g.WriteTransform(*dat, sz)
-	g.GradientWritePts(sv, dat)
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Path) ReadGeom(sv *SVG, dat []float32) {
-	sz := len(g.Data)
-	for i := range g.Data {
-		g.Data[i] = dat[i]
-	}
-	g.ReadTransform(dat, sz)
-	g.GradientReadPts(sv, dat)
+	g.GradientApplyTransform(sv, xf)
 }
