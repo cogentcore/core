@@ -76,10 +76,9 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		ct := objTransform.Mul(r.Transform)
 		c = ct.MulVector2AsPoint(c)
 		f = ct.MulVector2AsPoint(f)
-		rot := ct.ExtractRot()
-		r.rotTrans = math32.Rotate2D(-rot)
-		scx, scy := ct.ExtractScale()
-		rs.SetMul(math32.Vec2(scx, scy))
+		_, _, phi, sx, sy, _ := ct.Decompose()
+		r.rotTrans = math32.Rotate2D(phi)
+		rs.SetMul(math32.Vec2(sx, sy))
 	}
 	if c != f {
 		f.SetDiv(rs)
