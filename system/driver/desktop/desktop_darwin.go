@@ -182,10 +182,8 @@ func macOpenFile(fname *C.char, flen C.int) {
 	ofn := C.GoString(fname)
 	if TheApp.NWindows() == 0 {
 		TheApp.OpenFls = append(TheApp.OpenFls, ofn)
+	} else {
+		win := TheApp.Window(0)
+		win.Events().OSOpenFiles([]string{ofn})
 	}
-	// todo: open event
-	// } else {
-	// win := TheApp.Window(0)
-	// win.Events.NewOS(events.OSEvent, []string{ofn})
-	// }
 }

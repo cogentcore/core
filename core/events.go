@@ -174,6 +174,8 @@ func (em *Events) handleEvent(e events.Event) {
 		em.handlePosEvent(e)
 	case e.NeedsFocus():
 		em.handleFocusEvent(e)
+	default: // eg. os events
+		em.scene.HandleEvent(e)
 	}
 }
 
