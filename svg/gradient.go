@@ -205,9 +205,9 @@ func (sv *SVG) GradientNewForNode(n Node, prop string, radial bool, stops string
 	nb := n.AsNodeBase()
 	nb.GradientGeomDefault(sv, gr.Grad)
 	if prop == "fill" {
-		gr.fromGeom(nb.GradientFill)
+		nb.GradientFill = math32.Identity2()
 	} else {
-		gr.fromGeom(nb.GradientStroke)
+		nb.GradientStroke = math32.Identity2()
 	}
 	sv.GradientUpdateStops(gr)
 	return gr, url

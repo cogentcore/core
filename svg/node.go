@@ -92,7 +92,7 @@ type NodeBase struct {
 	// gradients of UserSpaceOnUse type applied to this node.
 	// These values are updated and copied to gradients of the appropriate type to keep
 	// the gradients sync'd with updates to the node as it is transformed.
-	GradientFill math32.Matrix2 `json:"-" xml:"-" set:"-"display:"-"`
+	GradientFill math32.Matrix2 `json:"-" xml:"-" set:"-" display:"-"`
 
 	// GradientStroke contains the stroke gradient geometry to use for linear and radial
 	// gradients of UserSpaceOnUse type applied to this node.
