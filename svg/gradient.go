@@ -59,10 +59,10 @@ func (gg *GradientGeom) ApplyTransform(xf math32.Matrix2) {
 	if !gg.RadialIsNil() {
 		gg.Radial[0] = xfn.MulVector2AsPoint(gg.Radial[0])
 		gg.Radial[1] = xfn.MulVector2AsPoint(gg.Radial[1])
+		gg.Radial[2] = xfn.MulVector2AsVector(gg.Radial[2]) // vector for radius
 		// note: this is not correct:
-		gg.Radial[2] = math32.Scale2D(scx, scy).MulVector2AsVector(gg.Radial[2])
+		// gg.Radial[2] = math32.Scale2D(scx, scy).MulVector2AsVector(gg.Radial[2])
 		// scx, scy := xfn.ExtractScale()
-		// gg.Radial[2] = math32.Scale2D(scx, scy).MulVector2AsVector(gg.Radial[2]) // vector for radius
 		// nr := xfn.MulVector2AsVector(gg.Radial[2])
 		// tx, ty, phi, sx, sy, theta := xfn.Decompose()
 		// rc := math32.Scale2D(sx, sy).Rotate(-theta).Translate(tx, ty)
