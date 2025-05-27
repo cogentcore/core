@@ -66,6 +66,11 @@ func (sp *Sprite) InitProperties() {
 	sp.Properties = make(map[string]any)
 }
 
+// SetPos sets the position of the sprite EventBBox, keeping the same size.
+func (sp *Sprite) SetPos(pos image.Point) {
+	sp.EventBBox = sp.EventBBox.Add(pos.Sub(sp.EventBBox.Min))
+}
+
 // On adds the given event handler to the sprite's Listeners for the given event type.
 // Listeners are called in sequential descending order, so this listener will be called
 // before all of the ones added before it.

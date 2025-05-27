@@ -813,7 +813,7 @@ func (em *Events) dragMove(e events.Event) {
 		fmt.Println("Drag sprite not found")
 		return
 	}
-	sp.EventBBox = sp.EventBBox.Add(e.WindowPos().Sub(sp.EventBBox.Min))
+	sp.SetPos(e.WindowPos())
 	for _, w := range em.dragHovers {
 		w.AsWidget().ScrollToThis()
 	}

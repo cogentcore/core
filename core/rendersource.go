@@ -75,7 +75,7 @@ func SpritesSource(stage *Stage, mainScene *Scene, scpos image.Point) composer.S
 	pc.Clear()
 	for _, kv := range stage.Sprites.Order {
 		sp := kv.Value
-		if !sp.Active {
+		if !sp.Active || sp.Draw == nil {
 			continue
 		}
 		sp.Draw(&stage.spritePainter)

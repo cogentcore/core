@@ -12,6 +12,10 @@ The eventual result of this trend is that people end up stuffing entire programm
 
 The solution to this is simple: whenever possible, everything should be written in real code, preferably in one language. Therefore, Cogent Core takes this approach: everything, from [[doc:tree]]s to [[widget]]s to [[style]]s to [[enum]]s, is written in real, pure Go code. The only non-Go functional files in a Cogent Core package or app should be TOML files, which are only used for very simple configuration options to commands, and not for any actual code.
 
+### Closures everywhere
+
+An important implication of the above is that _closure functions_ should be used anywhere that any kind of configuration is needed, instead of trying to parameterize the space of options that might likely be needed. A closure can contain arbitrary code-based logic while capturing arbitrary external context needed to conditionalize this logic. Thus, closure functions are used everywhere in Cogent Core, including `Styler` functions in [[styles]], `Maker` functions in [[plan]]s, [[event]] handlers, etc.
+
 ## Go is the best programming language (for GUIs)
 
 There are many programming languages, and each one represents a different set of tradeoffs. We think that Go is the best language (for GUIs and most other use-cases) according to the following list of fundamental characteristics:
