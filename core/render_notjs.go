@@ -16,6 +16,23 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// grabRenderFrom grabs the rendered image from the given widget.
+// If it returns nil, then the image could not be fetched.
+func grabRenderFrom(w Widget) *image.RGBA {
+	wb := w.AsWidget()
+	scimg := wb.Scene.renderer.Image() // todo: need to make this real on JS
+	if scimg == nil {
+		return nil
+	}
+	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
+		return nil
+	}
+	sz := wb.Geom.TotalBBox.Size()
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
+	return img
+}
+
 func (ps *paintSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
 	rd := ps.renderer.(*rasterx.Renderer)
@@ -34,17 +51,7 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	cd.Drawer.Copy(image.Point{}, clr, ss.bbox, draw.Over, composer.Unchanged)
 }
 
-func (ss *spritesSource) Draw(c composer.Composer) {
-	cd := c.(*composer.ComposerDrawer)
-	for _, sr := range ss.sprites {
-		if !sr.active {
-			continue
-		}
-		cd.Drawer.Copy(sr.drawPos, sr.pixels, sr.pixels.Bounds(), draw.Over, composer.Unchanged)
-	}
-}
-
-//////// 	fillInsets
+////////  fillInsets
 
 // fillInsetsSource is a [composer.Source] implementation for fillInsets.
 type fillInsetsSource struct {

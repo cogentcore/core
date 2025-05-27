@@ -10,16 +10,22 @@ import (
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 )
 
-// A Sprite is just an image (with optional background) that can be drawn onto
-// the OverTex overlay texture of a window.  Sprites are used for text cursors/carets
-// and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elements)
+// A Sprite is a top-level rendering element that paints onto a transparent
+// layer that is cleared every render pass. Sprites are used for text cursors/carets
+// and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elements).
+// To support cursor sprites and other animations, the sprites are redrawn at a
+// minimum update rate that is at least as fast as CursorBlinkTime.
+// Sprites can also receive mouse events, within their event bounding box.
+// It is basically like a [Canvas] element over the entire screen, with no constraints
+// on where you can draw.
 type Sprite struct {
 
 	// Active is whether this sprite is Active now or not.
+	// Active sprites Draw and can receive events.
 	Active bool
 
 	// Name is the unique name of the sprite.
@@ -28,11 +34,13 @@ type Sprite struct {
 	// properties for sprite, which allow for user-extensible data
 	Properties map[string]any
 
-	// position and size of the image within the RenderWindow
-	Geom math32.Geom2DInt
+	// Draw is the function that is called for Active sprites on every render pass
+	// to draw the sprite onto the top-level transparent layer.
+	Draw func(pc *paint.Painter)
 
-	// pixels to render, which should be the same size as [Sprite.Geom.Size]
-	Pixels *image.RGBA
+	// EventBBox is the bounding box for this sprite to receive mouse events.
+	// Typically this is the region in which it renders.
+	EventBBox image.Rectangle
 
 	// listeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
@@ -44,54 +52,18 @@ type Sprite struct {
 // NewSprite returns a new [Sprite] with the given name, which must remain
 // invariant and unique among all sprites in use, and is used for all access;
 // prefix with package and type name to ensure uniqueness. Starts out in
-// inactive state; must call ActivateSprite. If size is 0, no image is made.
-func NewSprite(name string, sz image.Point, pos image.Point) *Sprite {
-	sp := &Sprite{Name: name}
-	sp.SetSize(sz)
-	sp.Geom.Pos = pos
+// inactive state; must call ActivateSprite.
+func NewSprite(name string, draw func(pc *paint.Painter)) *Sprite {
+	sp := &Sprite{Name: name, Draw: draw}
 	return sp
 }
 
-// SetSize sets sprite image to given size; makes a new image (does not resize)
-// returns true if a new image was set
-func (sp *Sprite) SetSize(nwsz image.Point) bool {
-	if nwsz.X == 0 || nwsz.Y == 0 {
-		return false
+// InitProperties ensures that the Properties map exists.
+func (sp *Sprite) InitProperties() {
+	if sp.Properties != nil {
+		return
 	}
-	sp.Geom.Size = nwsz // always make sure
-	if sp.Pixels != nil && sp.Pixels.Bounds().Size() == nwsz {
-		return false
-	}
-	sp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	return true
-}
-
-// grabRenderFrom grabs the rendered image from the given widget.
-func (sp *Sprite) grabRenderFrom(w Widget) {
-	img := grabRenderFrom(w)
-	if img != nil {
-		sp.Pixels = img
-		sp.Geom.Size = sp.Pixels.Bounds().Size()
-	} else {
-		sp.SetSize(image.Pt(10, 10)) // just a blank placeholder
-	}
-}
-
-// grabRenderFrom grabs the rendered image from the given widget.
-// If it returns nil, then the image could not be fetched.
-func grabRenderFrom(w Widget) *image.RGBA {
-	wb := w.AsWidget()
-	scimg := wb.Scene.renderer.Image() // todo: need to make this real on JS
-	if scimg == nil {
-		return nil
-	}
-	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
-		return nil
-	}
-	sz := wb.Geom.TotalBBox.Size()
-	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
-	return img
+	sp.Properties = make(map[string]any)
 }
 
 // On adds the given event handler to the sprite's Listeners for the given event type.
@@ -144,6 +116,23 @@ func (sp *Sprite) send(typ events.Types, original ...events.Event) {
 	sp.handleEvent(e)
 }
 
+// NewImageSprite returns a new Sprite that draws the given image
+// in the given location, which is stored in the Min of the EventBBox.
+// Move the EventBBox to move the render location.
+// The image is stored as "image" in Properties.
+func NewImageSprite(name string, pos image.Point, img image.Image) *Sprite {
+	sp := &Sprite{Name: name}
+	sp.InitProperties()
+	sp.Properties["image"] = img
+	sp.EventBBox = img.Bounds().Add(pos)
+	sp.Draw = func(pc *paint.Painter) {
+		pc.DrawImage(img, sp.EventBBox, image.Point{}, draw.Over)
+	}
+	return sp
+}
+
+////////  Sprites
+
 // Sprites manages a collection of Sprites, with unique name ids.
 type Sprites struct {
 	ordmap.Map[string, *Sprite]
@@ -176,6 +165,16 @@ func (ss *Sprites) AddLocked(sp *Sprite) {
 func (ss *Sprites) Delete(sp *Sprite) {
 	ss.Lock()
 	ss.DeleteLocked(sp)
+	ss.Unlock()
+}
+
+// DeleteName deletes given sprite by name from map.
+func (ss *Sprites) DeleteName(name string) {
+	ss.Lock()
+	sp, ok := ss.SpriteByNameLocked(name)
+	if ok {
+		ss.DeleteLocked(sp)
+	}
 	ss.Unlock()
 }
 

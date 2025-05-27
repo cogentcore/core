@@ -101,6 +101,8 @@ type renderWindow struct {
 
 	// lastResize is the time stamp of last resize event -- used for efficient updating.
 	lastResize time.Time
+
+	lastSpriteDraw time.Time
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -674,6 +676,14 @@ func (w *renderWindow) renderWindow() {
 	}
 	spriteMods := top.Sprites.IsModified()
 
+	spriteUpdateTime := SystemSettings.CursorBlinkTime
+	if spriteUpdateTime == 0 {
+		spriteUpdateTime = 500 * time.Millisecond
+	}
+	if time.Since(w.lastSpriteDraw) > spriteUpdateTime {
+		spriteMods = true
+	}
+
 	if !spriteMods && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
@@ -751,7 +761,8 @@ func (w *renderWindow) renderWindow() {
 	if TheApp.Platform().IsMobile() {
 		scpos = image.Point{}
 	}
-	cp.Add(SpritesSource(&top.Sprites, scpos), &top.Sprites)
+	cp.Add(SpritesSource(top, winScene, scpos), &top.Sprites)
+	w.lastSpriteDraw = time.Now()
 
 	w.SystemWindow.Unlock()
 	if offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {

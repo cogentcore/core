@@ -22,18 +22,17 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
-	"golang.org/x/image/draw"
 )
 
 // TextField is a widget for editing a line of text.
@@ -159,9 +158,6 @@ type TextField struct { //core:embedder
 
 	// lineHeight is the line height cached during styling.
 	lineHeight float32
-
-	// blinkOn oscillates between on and off for blinking.
-	blinkOn bool
 
 	// cursorMu is the mutex for updating the cursor between blinker and field.
 	cursorMu sync.Mutex
@@ -532,7 +528,7 @@ func (tf *TextField) editDone() {
 		}
 	}
 	tf.clearSelected()
-	tf.clearCursor()
+	tf.stopCursor()
 }
 
 // revert aborts editing and reverts to the last saved text.
@@ -1175,34 +1171,9 @@ func (tf *TextField) charRenderPos(charidx int, wincoords bool) math32.Vector2 {
 }
 
 var (
-	// textFieldBlinker manages cursor blinking
-	textFieldBlinker = Blinker{}
-
 	// textFieldSpriteName is the name of the window sprite used for the cursor
 	textFieldSpriteName = "TextField.Cursor"
 )
-
-func init() {
-	TheApp.AddQuitCleanFunc(textFieldBlinker.QuitClean)
-	textFieldBlinker.Func = func() {
-		w := textFieldBlinker.Widget
-		textFieldBlinker.Unlock() // comes in locked
-		if w == nil {
-			return
-		}
-		tf := AsTextField(w)
-		if !tf.StateIs(states.Focused) || !tf.IsVisible() {
-			tf.blinkOn = false
-			tf.renderCursor(false)
-		} else {
-			// Need consistent test results on offscreen.
-			if TheApp.Platform() != system.Offscreen {
-				tf.blinkOn = !tf.blinkOn
-			}
-			tf.renderCursor(tf.blinkOn)
-		}
-	}
-}
 
 // startCursor starts the cursor blinking and renders it
 func (tf *TextField) startCursor() {
@@ -1212,95 +1183,80 @@ func (tf *TextField) startCursor() {
 	if !tf.IsVisible() {
 		return
 	}
-	tf.blinkOn = true
-	tf.renderCursor(true)
-	if SystemSettings.CursorBlinkTime == 0 {
-		return
-	}
-	textFieldBlinker.SetWidget(tf.This.(Widget))
-	textFieldBlinker.Blink(SystemSettings.CursorBlinkTime)
-}
-
-// clearCursor turns off cursor and stops it from blinking
-func (tf *TextField) clearCursor() {
-	if tf.IsReadOnly() {
-		return
-	}
-	tf.stopCursor()
-	tf.renderCursor(false)
+	tf.toggleCursor(true)
 }
 
 // stopCursor stops the cursor from blinking
 func (tf *TextField) stopCursor() {
-	if tf == nil || tf.This == nil {
-		return
-	}
-	textFieldBlinker.ResetWidget(tf.This.(Widget))
+	tf.toggleCursor(false)
 }
 
-// renderCursor renders the cursor on or off, as a sprite that is either on or off
-func (tf *TextField) renderCursor(on bool) {
-	if tf == nil || tf.This == nil {
-		return
-	}
-	if !on {
-		if tf.Scene == nil {
-			return
-		}
-		ms := tf.Scene.Stage.Main
-		if ms == nil {
-			return
-		}
-		spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
-		ms.Sprites.InactivateSprite(spnm)
-		return
-	}
-	if !tf.IsVisible() {
-		return
-	}
-
-	tf.cursorMu.Lock()
-	defer tf.cursorMu.Unlock()
-
-	sp := tf.cursorSprite(on)
-	if sp == nil {
-		return
-	}
-	sp.Geom.Pos = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
-}
-
-// cursorSprite returns the Sprite for the cursor (which is
-// only rendered once with a vertical bar, and just activated and inactivated
-// depending on render status).  On sets the On status of the cursor.
-func (tf *TextField) cursorSprite(on bool) *Sprite {
+// toggleSprite turns on or off the cursor sprite.
+func (tf *TextField) toggleCursor(on bool) {
 	sc := tf.Scene
 	if sc == nil {
-		return nil
+		return
 	}
 	ms := sc.Stage.Main
 	if ms == nil {
-		return nil // only MainStage has sprites
+		return // only MainStage has sprites
 	}
 	spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
-	sp, ok := ms.Sprites.SpriteByName(spnm)
-	// TODO: figure out how to update caret color on color scheme change
-	if !ok {
-		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.lineHeight))}
-		if bbsz.X < 2 { // at least 2
-			bbsz.X = 2
+	ms.Sprites.Lock()
+	defer ms.Sprites.Unlock()
+
+	sp, ok := ms.Sprites.SpriteByNameLocked(spnm)
+	if ok {
+		if on {
+			sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
+			sp.Active = true
+			sp.Properties["turnOn"] = true
+			sp.Properties["on"] = true
+			sp.Properties["lastSwitch"] = time.Now()
+		} else {
+			sp.Active = false
 		}
-		sp = NewSprite(spnm, bbsz, image.Point{})
-		sp.Active = on
-		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, tf.CursorColor, image.Point{}, draw.Src)
-		ms.Sprites.Add(sp)
+		return
 	}
-	if on {
-		ms.Sprites.ActivateSprite(sp.Name)
-	} else {
-		ms.Sprites.InactivateSprite(sp.Name)
+	if !on {
+		return
 	}
-	return sp
+	bbsz := math32.Vec2(math32.Ceil(tf.CursorWidth.Dots), math32.Ceil(tf.lineHeight))
+	if bbsz.X < 2 { // at least 2
+		bbsz.X = 2
+	}
+	sp = NewSprite(spnm, func(pc *paint.Painter) {
+		if !sp.Active {
+			return
+		}
+		turnOn := sp.Properties["turnOn"].(bool) // force on
+		if !turnOn {
+			isOn := sp.Properties["on"].(bool)
+			lastSwitch := sp.Properties["lastSwitch"].(time.Time)
+			if SystemSettings.CursorBlinkTime > 0 && time.Since(lastSwitch) > SystemSettings.CursorBlinkTime {
+				isOn = !isOn
+				sp.Properties["on"] = isOn
+				sp.Properties["lastSwitch"] = time.Now()
+			}
+			if !isOn {
+				return
+			}
+		}
+		sp.Properties["turnOn"] = false
+		pc.Fill.Color = nil
+		pc.Stroke.Color = tf.CursorColor
+		pc.Stroke.Width.Dot(bbsz.X)
+		pos := math32.FromPoint(sp.EventBBox.Min)
+		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
+		pc.Draw()
+	})
+	sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
+	sp.Active = true
+	sp.InitProperties()
+	sp.Properties["turnOn"] = false
+	sp.Properties["on"] = true
+	sp.Properties["lastSwitch"] = time.Now()
+	ms.Sprites.AddLocked(sp)
 }
 
 // renderSelect renders the selected region, if any, underneath the text

@@ -795,9 +795,9 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	}
 	em.drag = w
 	em.dragData = data
-	sp := NewSprite(dragSpriteName, image.Point{}, e.WindowPos())
-	sp.grabRenderFrom(w) // TODO: maybe show the number of items being dragged
-	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacity(sp.Pixels, 0.5))
+	// TODO: maybe show the number of items being dragged
+	img := clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
+	sp := NewImageSprite(dragSpriteName, e.WindowPos(), img)
 	sp.Active = true
 	ms.Sprites.Add(sp)
 }
@@ -813,7 +813,7 @@ func (em *Events) dragMove(e events.Event) {
 		fmt.Println("Drag sprite not found")
 		return
 	}
-	sp.Geom.Pos = e.WindowPos()
+	sp.EventBBox = sp.EventBBox.Add(e.WindowPos().Sub(sp.EventBBox.Min))
 	for _, w := range em.dragHovers {
 		w.AsWidget().ScrollToThis()
 	}
@@ -825,7 +825,7 @@ func (em *Events) dragClearSprite() {
 	if ms == nil {
 		return
 	}
-	ms.Sprites.InactivateSprite(dragSpriteName)
+	ms.Sprites.DeleteName(dragSpriteName)
 }
 
 // DragMenuAddModText adds info about key modifiers for a drag drop menu.
@@ -1312,8 +1312,7 @@ func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 		if sp.listeners == nil {
 			continue
 		}
-		r := sp.Geom.Bounds()
-		if pos.In(r) {
+		if pos.In(sp.EventBBox) {
 			em.spriteInBBox = append(em.spriteInBBox, sp)
 		}
 	}

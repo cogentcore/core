@@ -44,7 +44,7 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 func (ed *Base) SetCursorShow(pos textpos.Pos) {
 	ed.setCursor(pos)
 	ed.scrollCursorToCenterIfHidden()
-	ed.renderCursor(true)
+	ed.startCursor()
 }
 
 // SetCursorTarget sets a new cursor target position, ensures that it is visible.
@@ -97,7 +97,7 @@ func (ed *Base) CursorToHistoryPrev() bool {
 		ed.posHistoryIndex--
 	}
 	ed.scrollCursorToCenterIfHidden()
-	ed.renderCursor(true)
+	ed.startCursor()
 	ed.SendInput()
 	return true
 }
@@ -120,7 +120,7 @@ func (ed *Base) CursorToHistoryNext() bool {
 	pos, _ := ed.Lines.PosHistoryAt(ed.posHistoryIndex)
 	ed.CursorPos = ed.Lines.ValidPos(pos)
 	ed.scrollCursorToCenterIfHidden()
-	ed.renderCursor(true)
+	ed.startCursor()
 	ed.SendInput()
 	return true
 }
@@ -206,7 +206,7 @@ func (ed *Base) cursorPageDown(steps int) {
 	}
 	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToTop()
-	ed.renderCursor(true)
+	ed.startCursor()
 	ed.cursorSelect(org)
 	ed.SendInput()
 	ed.NeedsRender()
@@ -231,7 +231,7 @@ func (ed *Base) cursorPageUp(steps int) {
 	}
 	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToBottom()
-	ed.renderCursor(true)
+	ed.startCursor()
 	ed.cursorSelect(org)
 	ed.SendInput()
 	ed.NeedsRender()
@@ -310,7 +310,7 @@ func (ed *Base) cursorBackspace(steps int) {
 	// note: no update b/c signal from buf will drive update
 	ed.cursorBackward(steps)
 	ed.scrollCursorToCenterIfHidden()
-	ed.renderCursor(true)
+	ed.startCursor()
 	ed.Lines.DeleteText(ed.CursorPos, org)
 	ed.NeedsRender()
 }
@@ -339,7 +339,7 @@ func (ed *Base) cursorBackspaceWord(steps int) {
 	}
 	ed.cursorBackwardWord(steps)
 	ed.scrollCursorToCenterIfHidden()
-	ed.renderCursor(true)
+	ed.startCursor()
 	ed.Lines.DeleteText(ed.CursorPos, org)
 	ed.NeedsRender()
 }
@@ -405,7 +405,7 @@ func (ed *Base) setCursorFromMouse(pt image.Point, newPos textpos.Pos, selMode e
 		}
 		ed.setCursor(newPos)
 		ed.selectRegionUpdate(ed.CursorPos)
-		ed.renderCursor(true)
+		ed.startCursor()
 		return
 	}
 

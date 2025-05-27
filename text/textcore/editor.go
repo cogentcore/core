@@ -130,7 +130,7 @@ func (ed *Editor) Save() error { //types:add
 // in an OnChange event handler, unlike [Editor.Save].
 func (ed *Editor) SaveQuiet() error { //types:add
 	ed.clearSelected()
-	ed.clearCursor()
+	ed.stopCursor()
 	return Save(ed.Scene, ed.Lines)
 }
 
@@ -143,7 +143,7 @@ func (ed *Editor) Close(afterFunc func(canceled bool)) bool {
 func (ed *Editor) handleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {
-			ed.clearCursor()
+			ed.stopCursor()
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {
@@ -478,7 +478,7 @@ func (ed *Editor) keyInput(e events.Event) {
 			if !lasttab && ed.CursorPos.Char == 0 && ed.Lines.Settings.AutoIndent {
 				_, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
 				ed.CursorPos.Char = cpos
-				ed.renderCursor(true)
+				ed.startCursor()
 				gotTabAI = true
 			} else {
 				ed.InsertAtCursor(indent.Bytes(ed.Lines.Settings.IndentChar(), 1, ed.Styles.Text.TabSize))

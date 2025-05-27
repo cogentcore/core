@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/option"
+	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/system"
 )
 
@@ -202,6 +204,12 @@ type Stage struct { //types:add -setters
 
 	// Sprites are named images that are rendered last overlaying everything else.
 	Sprites Sprites `json:"-" xml:"-" set:"-"`
+
+	// spritePainter is the painter for sprite drawing.
+	spritePainter paint.Painter
+
+	// spriteRenderer is the renderer for sprite drawing.
+	spriteRenderer render.Renderer
 }
 
 func (st *Stage) String() string {
@@ -374,6 +382,7 @@ func (st *Stage) delete() {
 	if st.Type.isMain() && st.popups != nil {
 		st.popups.deleteAll()
 		st.Sprites.reset()
+		st.spriteRenderer = nil
 	}
 	if st.Scene != nil {
 		st.Scene.DeleteChildren()
