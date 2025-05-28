@@ -287,7 +287,7 @@ func (sc *Scene) applyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) doRebuild() {
-	sc.Stage.Sprites.Reset()
+	sc.Stage.Sprites.reset()
 	sc.updateScene()
 	sc.applyStyleScene()
 	sc.layoutRenderScene()

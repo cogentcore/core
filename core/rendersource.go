@@ -73,13 +73,14 @@ func SpritesSource(stage *Stage, mainScene *Scene, scpos image.Point) composer.S
 	pc := &stage.spritePainter
 	pc.Fill.Color = colors.Uniform(colors.Transparent)
 	pc.Clear()
-	for _, kv := range stage.Sprites.Order {
-		sp := kv.Value
-		if !sp.Active || sp.Draw == nil {
-			continue
+	stage.Sprites.Do(func(sl SpriteList) {
+		for _, sp := range sl.Values {
+			if !sp.Active || sp.Draw == nil {
+				continue
+			}
+			sp.Draw(&stage.spritePainter)
 		}
-		sp.Draw(&stage.spritePainter)
-	}
+	})
 	stage.Sprites.modified = false
 	render := stage.spritePainter.RenderDone()
 	return &paintSource{render: render, renderer: stage.spriteRenderer, drawOp: draw.Over, drawPos: mainScene.SceneGeom.Pos}

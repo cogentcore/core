@@ -825,7 +825,7 @@ func (em *Events) dragClearSprite() {
 	if ms == nil {
 		return
 	}
-	ms.Sprites.DeleteName(dragSpriteName)
+	ms.Sprites.Delete(dragSpriteName)
 }
 
 // DragMenuAddModText adds info about key modifiers for a drag drop menu.
@@ -1304,18 +1304,19 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 
 func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 	st := sc.Stage
-	for _, kv := range st.Sprites.Order {
-		sp := kv.Value
-		if !sp.Active {
-			continue
+	st.Sprites.Do(func(sl SpriteList) {
+		for _, sp := range sl.Values {
+			if !sp.Active {
+				continue
+			}
+			if sp.listeners == nil {
+				continue
+			}
+			if pos.In(sp.EventBBox) {
+				em.spriteInBBox = append(em.spriteInBBox, sp)
+			}
 		}
-		if sp.listeners == nil {
-			continue
-		}
-		if pos.In(sp.EventBBox) {
-			em.spriteInBBox = append(em.spriteInBBox, sp)
-		}
-	}
+	})
 }
 
 // handleSpriteEvent handles the given event with sprites
