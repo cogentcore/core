@@ -142,10 +142,11 @@ func NewImageSprite(name string, pos image.Point, img image.Image) *Sprite {
 type SpriteList = keylist.List[string, *Sprite]
 
 // Sprites manages a collection of Sprites, with unique name ids within each
-// of three priority lists: Normal, First and Final. The convenience API operates
-// on the Normal list, while First and Final are available for more advanced cases
-// where rendering order needs to be controlled. First items are rendered first and
-// processed first for event handling, and likewise for Final.
+// of three priority lists: Normal, First and Final. The convenience API adds to
+// the Normal list, while First and Final are available for more advanced cases
+// where rendering order needs to be controlled. First items are rendered first
+// (so they can be overwritten) and processed last for event handling,
+// and vice-versa for Final.
 type Sprites struct {
 	tiered.Tiered[SpriteList]
 
@@ -195,7 +196,7 @@ func (ss *Sprites) AddLocked(sp *Sprite) {
 	ss.modified = true
 }
 
-// Delete deletes given sprite by name from the Normal list.
+// Delete deletes given sprite by name.
 // This version locks the sprites: see also [Sprites.DeleteLocked].
 func (ss *Sprites) Delete(name string) {
 	ss.Lock()
@@ -203,15 +204,17 @@ func (ss *Sprites) Delete(name string) {
 	ss.Unlock()
 }
 
-// DeleteLocked deletes given sprite by name from the Normal list.
+// DeleteLocked deletes given sprite by name.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
 func (ss *Sprites) DeleteLocked(name string) {
-	ss.Normal.DeleteByKey(name)
+	ss.Do(func(sl SpriteList) {
+		sl.DeleteByKey(name)
+	})
 	ss.modified = true
 }
 
-// SpriteByName returns the Normal sprite by name.
+// SpriteByName returns the sprite by name.
 // This version locks the sprites: see also [Sprites.SpriteByNameLocked].
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 	ss.Lock()
@@ -219,11 +222,20 @@ func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 	return ss.SpriteByNameLocked(name)
 }
 
-// SpriteByNameLocked returns the Normal sprite by name.
+// SpriteByNameLocked returns the sprite by name.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) SpriteByNameLocked(name string) (*Sprite, bool) {
-	return ss.Normal.AtTry(name)
+func (ss *Sprites) SpriteByNameLocked(name string) (sp *Sprite, ok bool) {
+	ss.Do(func(sl SpriteList) {
+		if ok {
+			return
+		}
+		sp, ok = sl.AtTry(name)
+		if ok {
+			return
+		}
+	})
+	return
 }
 
 // reset removes all sprites.
@@ -236,7 +248,7 @@ func (ss *Sprites) reset() {
 	ss.Unlock()
 }
 
-// ActivateSprite flags the Normal sprite(s) as active, setting Modified if wasn't before.
+// ActivateSprite flags sprite(s) as active, setting Modified if wasn't before.
 // This version locks the sprites: see also [Sprites.ActivateSpriteLocked].
 func (ss *Sprites) ActivateSprite(name ...string) {
 	ss.Lock()
@@ -244,7 +256,7 @@ func (ss *Sprites) ActivateSprite(name ...string) {
 	ss.Unlock()
 }
 
-// ActivateSpriteLocked flags the Normal sprite(s) as active,
+// ActivateSpriteLocked flags the sprite(s) as active,
 // setting Modified if wasn't before.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.

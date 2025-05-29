@@ -56,16 +56,12 @@ func (ed *Base) RenderWidget() {
 		}
 		ed.PositionScrolls()
 		ed.renderLines()
-		if ed.StateIs(states.Focused) {
-			ed.startCursor()
-		} else {
-			ed.stopCursor()
-		}
 		ed.RenderChildren()
 		ed.RenderScrolls()
+		if !ed.IsReadOnly() && ed.StateIs(states.Focused) {
+			ed.startCursor() // needed to update position
+		}
 		ed.EndRender()
-	} else {
-		ed.stopCursor()
 	}
 }
 

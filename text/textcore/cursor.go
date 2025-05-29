@@ -20,7 +20,8 @@ var (
 	blinkerSpriteName = "textcore.Base.Cursor"
 )
 
-// startCursor starts the cursor blinking and renders it
+// startCursor starts the cursor blinking and renders it.
+// This must be called to update the cursor position -- is called in render.
 func (ed *Base) startCursor() {
 	if ed == nil || ed.This == nil {
 		return
@@ -51,13 +52,18 @@ func (ed *Base) toggleCursor(on bool) {
 	defer ms.Sprites.Unlock()
 
 	sp, ok := ms.Sprites.SpriteByNameLocked(spnm)
+
+	activate := func() {
+		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
+		sp.Active = true
+		sp.Properties["turnOn"] = true
+		sp.Properties["on"] = true
+		sp.Properties["lastSwitch"] = time.Now()
+	}
+
 	if ok {
 		if on {
-			sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
-			sp.Active = true
-			sp.Properties["turnOn"] = true
-			sp.Properties["on"] = true
-			sp.Properties["lastSwitch"] = time.Now()
+			activate()
 		} else {
 			sp.Active = false
 		}
@@ -90,17 +96,14 @@ func (ed *Base) toggleCursor(on bool) {
 		sp.Properties["turnOn"] = false
 		pc.Fill.Color = nil
 		pc.Stroke.Color = ed.CursorColor
+		pc.Stroke.Dashes = nil
 		pc.Stroke.Width.Dot(bbsz.X)
 		pos := math32.FromPoint(sp.EventBBox.Min)
 		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
 		pc.Draw()
 	})
-	sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
-	sp.Active = true
 	sp.InitProperties()
-	sp.Properties["turnOn"] = false
-	sp.Properties["on"] = true
-	sp.Properties["lastSwitch"] = time.Now()
+	activate()
 	ms.Sprites.AddLocked(sp)
 }
 

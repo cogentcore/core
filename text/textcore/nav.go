@@ -32,6 +32,7 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 	}
 	ed.scopelightsReset()
 	ed.CursorPos = ed.Lines.ValidPos(pos)
+	ed.startCursor()
 	bm, has := ed.Lines.BraceMatch(pos)
 	if has {
 		ed.addScopelights(pos, bm)
@@ -44,7 +45,6 @@ func (ed *Base) setCursor(pos textpos.Pos) {
 func (ed *Base) SetCursorShow(pos textpos.Pos) {
 	ed.setCursor(pos)
 	ed.scrollCursorToCenterIfHidden()
-	ed.startCursor()
 }
 
 // SetCursorTarget sets a new cursor target position, ensures that it is visible.

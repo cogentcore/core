@@ -130,7 +130,6 @@ func (ed *Editor) Save() error { //types:add
 // in an OnChange event handler, unlike [Editor.Save].
 func (ed *Editor) SaveQuiet() error { //types:add
 	ed.clearSelected()
-	ed.stopCursor()
 	return Save(ed.Scene, ed.Lines)
 }
 
@@ -149,6 +148,11 @@ func (ed *Editor) handleFocus() {
 		if ed.AbilityIs(abilities.Focusable) {
 			ed.editDone()
 			ed.SetState(false, states.Focused)
+		}
+	})
+	ed.OnFocus(func(e events.Event) {
+		if !ed.IsReadOnly() && ed.AbilityIs(abilities.Focusable) {
+			ed.startCursor()
 		}
 	})
 }
@@ -567,41 +571,44 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 	if ed.ISearch.On {
 		ed.CancelComplete()
 		ed.iSearchKeyInput(kt)
-	} else if ed.QReplace.On {
+		return
+	}
+	if ed.QReplace.On {
 		ed.CancelComplete()
 		ed.qReplaceKeyInput(kt)
-	} else {
-		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
-			ed.keyInputInsertBracket(kt)
-		} else if kt.KeyRune() == '}' && ed.Lines.Settings.AutoIndent && ed.CursorPos.Char == ed.Lines.LineLen(ed.CursorPos.Line) {
-			ed.CancelComplete()
-			ed.lastAutoInsert = 0
-			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
-			tbe, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
-			if tbe != nil {
-				ed.SetCursorShow(textpos.Pos{Line: tbe.Region.End.Line, Char: cpos})
-			}
-		} else if ed.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
-			ed.CursorPos.Char++
-			ed.SetCursorShow(ed.CursorPos)
-			ed.lastAutoInsert = 0
-		} else {
-			ed.lastAutoInsert = 0
-			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
-			if kt.KeyRune() == ' ' {
-				ed.CancelComplete()
-			} else {
-				ed.offerComplete()
-			}
+		return
+	}
+	switch {
+	case kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[':
+		ed.keyInputInsertBracket(kt)
+	case kt.KeyRune() == '}' && ed.Lines.Settings.AutoIndent && ed.CursorPos.Char == ed.Lines.LineLen(ed.CursorPos.Line):
+		ed.CancelComplete()
+		ed.lastAutoInsert = 0
+		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
+		tbe, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
+		if tbe != nil {
+			ed.SetCursorShow(textpos.Pos{Line: tbe.Region.End.Line, Char: cpos})
 		}
-		if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
-			cp := ed.CursorPos
-			np := cp
-			np.Char--
-			tp, found := ed.Lines.BraceMatchRune(kt.KeyRune(), np)
-			if found {
-				ed.addScopelights(np, tp)
-			}
+	case ed.lastAutoInsert == kt.KeyRune(): // if we type what we just inserted, just move past
+		ed.CursorPos.Char++
+		ed.SetCursorShow(ed.CursorPos)
+		ed.lastAutoInsert = 0
+	default:
+		ed.lastAutoInsert = 0
+		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
+		if kt.KeyRune() == ' ' {
+			ed.CancelComplete()
+		} else {
+			ed.offerComplete()
+		}
+	}
+	if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
+		cp := ed.CursorPos
+		np := cp
+		np.Char--
+		tp, found := ed.Lines.BraceMatchRune(kt.KeyRune(), np)
+		if found {
+			ed.addScopelights(np, tp)
 		}
 	}
 }

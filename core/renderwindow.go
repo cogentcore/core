@@ -644,6 +644,7 @@ func (w *renderWindow) renderContext() *renderContext {
 func (w *renderWindow) renderWindow() {
 	if w.flags.HasFlag(winIsRendering) { // still doing the last one
 		w.flags.SetFlag(true, winRenderSkipped)
+		// fmt.Print(".")
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
 		}

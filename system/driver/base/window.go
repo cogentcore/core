@@ -91,10 +91,12 @@ outer:
 			break outer
 		case <-winPaint.C:
 			if w.This.IsClosed() {
+				winPaint.Stop()
 				fmt.Println("win IsClosed in paint:", w.Name())
 				break outer
 			}
 			w.This.SendPaintEvent()
+			winPaint = time.NewTicker(time.Second / time.Duration(fps))
 		}
 	}
 }
