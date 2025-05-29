@@ -366,11 +366,11 @@ func (fb *FuncButton) CallFunc() {
 				async := false
 				if currentRenderWindow != curWin { // calling from another window, must lock
 					async = true
-					fb.AsyncLock()
+					ctx.AsWidget().AsyncLock()
 				}
 				accept()
 				if async {
-					fb.AsyncUnlock()
+					ctx.AsWidget().AsyncUnlock()
 				}
 			})
 			bt.Scene = fb.Scene // we must use this scene for context

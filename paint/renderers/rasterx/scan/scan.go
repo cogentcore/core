@@ -218,17 +218,19 @@ func (s *Scanner) Scan(yi int, x0, y0f, x1, y1f fixed.Int26_6) {
 			fullRem += q
 		}
 		yRem -= q
-		for xi != x1i {
-			yDelta = fullDelta
-			yRem += fullRem
-			if yRem >= 0 {
-				yDelta++
-				yRem -= q
+		if (xiDelta > 0 && xi < x1i) || (xiDelta < 0 && xi > x1i) {
+			for xi != x1i {
+				yDelta = fullDelta
+				yRem += fullRem
+				if yRem >= 0 {
+					yDelta++
+					yRem -= q
+				}
+				s.Area += int(64 * yDelta)
+				s.Cover += int(yDelta)
+				xi, y = xi+xiDelta, y+yDelta
+				s.SetCell(xi, yi)
 			}
-			s.Area += int(64 * yDelta)
-			s.Cover += int(yDelta)
-			xi, y = xi+xiDelta, y+yDelta
-			s.SetCell(xi, yi)
 		}
 	}
 	// Do the last cell.
@@ -246,15 +248,9 @@ func (s *Scanner) Start(a fixed.Point26_6) {
 
 // Line adds a linear segment to the current curve.
 func (s *Scanner) Line(b fixed.Point26_6) {
-	if b.X < 0 || b.Y < 0 {
-		return
-	}
 	s.Set(b)
 	x0, y0 := s.A.X, s.A.Y
 	x1, y1 := b.X, b.Y
-	if x0 < 0 || y0 < 0 {
-		return
-	}
 	dx, dy := x1-x0, y1-y0
 	// Break the 26.6 fixed point Y co-ordinates into integral and fractional
 	// parts.
@@ -291,11 +287,13 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 		// Do all the intermediate pixels.
 		dcover = int(edge1 - edge0)
 		darea = int(x0fTimes2 * dcover)
-		for yi != y1i {
-			s.Area += darea
-			s.Cover += dcover
-			yi += yiDelta
-			s.SetCell(x0i, yi)
+		if (yiDelta > 0 && yi < y1i) || (yiDelta < 0 && yi > y1i) {
+			for yi != y1i {
+				s.Area += darea
+				s.Cover += dcover
+				yi += yiDelta
+				s.SetCell(x0i, yi)
+			}
 		}
 		// Do the last pixel.
 		dcover = int(y1f - edge0)
@@ -337,16 +335,18 @@ func (s *Scanner) Line(b fixed.Point26_6) {
 				fullRem += q
 			}
 			xRem -= q
-			for yi != y1i {
-				xDelta = fullDelta
-				xRem += fullRem
-				if xRem >= 0 {
-					xDelta++
-					xRem -= q
+			if (yiDelta > 0 && yi < y1i) || (yiDelta < 0 && yi > y1i) {
+				for yi != y1i {
+					xDelta = fullDelta
+					xRem += fullRem
+					if xRem >= 0 {
+						xDelta++
+						xRem -= q
+					}
+					s.Scan(yi, x, edge0, x+xDelta, edge1)
+					x, yi = x+xDelta, yi+yiDelta
+					s.SetCell(int(x)/64, yi)
 				}
-				s.Scan(yi, x, edge0, x+xDelta, edge1)
-				x, yi = x+xDelta, yi+yiDelta
-				s.SetCell(int(x)/64, yi)
 			}
 		}
 		// Do the last scanline.

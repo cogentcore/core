@@ -13,16 +13,21 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
+// todo: needs some work to get up to spec:
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/tspan
+// dx, dy need to be specifiable as relative offsets from parent text, not just glyph
+// relative offsets. Also, the literal parsing of example in link of an inline <tspan>
+// element within a broader text shows that a different kind of parsing
+// structure is required.
+
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text, where text has empty Text string.
+// There is no line wrapping on SVG Text: every span is a separate line.
 type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
 	Pos math32.Vector2 `xml:"{x,y}"`
-
-	// width of text to render if using word-wrapping
-	Width float32 `xml:"width"`
 
 	// text string to render
 	Text string `xml:"text"`
@@ -74,15 +79,6 @@ func (g *Text) SetNodePos(pos math32.Vector2) {
 	}
 }
 
-func (g *Text) SetNodeSize(sz math32.Vector2) {
-	g.Width = sz.X
-	scx, _ := g.Paint.Transform.ExtractScale()
-	for _, kii := range g.Children {
-		kt := kii.(*Text)
-		kt.Width = g.Width * scx
-	}
-}
-
 // LocalBBox does full text layout, but no transforms
 func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	if g.Text == "" {
@@ -95,7 +91,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	}
 	tx, _ := htmltext.HTMLToRich([]byte(g.Text), &fs, nil)
 	// fmt.Println(tx)
-	sz := math32.Vec2(10000, 10000)
+	sz := math32.Vec2(10000, 10000) // no wrapping!!
 	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
 	baseOff := g.TextShaped.Lines[0].Offset
 	g.TextShaped.StartAtBaseline() // remove top-left offset
@@ -192,20 +188,13 @@ func (g *Text) RenderText(sv *SVG) {
 // each node must define this for itself
 func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
-	if rot != 0 {
+	scx, scy := xf.ExtractScale()
+	if rot != 0 || scx != 1 || scy != 1 || g.IsParText() {
+		// note: par text requires transform b/c not saving children pos
 		g.Paint.Transform.SetMul(xf)
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		if g.IsParText() {
-			for _, kii := range g.Children {
-				kt := kii.(*Text)
-				kt.ApplyTransform(sv, xf)
-			}
-		} else {
-			g.Pos = xf.MulVector2AsPoint(g.Pos)
-			scx, _ := xf.ExtractScale()
-			g.Width *= scx
-		}
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		g.GradientApplyTransform(sv, xf)
 	}
 }
