@@ -357,12 +357,21 @@ func (fb *FuncButton) CallFunc() {
 	// If there is a single value button, automatically
 	// open its dialog instead of this one
 	if len(fb.Args) == 1 {
+		curWin := currentRenderWindow
 		sv.UpdateWidget() // need to update first
 		bt := AsButton(sv.Child(1))
 		if bt != nil {
 			bt.OnFinal(events.Change, func(e events.Event) {
 				// the dialog for the argument has been accepted, so we call the function
+				async := false
+				if currentRenderWindow != curWin { // calling from another window, must lock
+					async = true
+					fb.AsyncLock()
+				}
 				accept()
+				if async {
+					fb.AsyncUnlock()
+				}
 			})
 			bt.Scene = fb.Scene // we must use this scene for context
 			bt.Send(events.Click)
