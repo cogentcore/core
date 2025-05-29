@@ -82,7 +82,8 @@ func (w *Window[A]) WinLoop() {
 	if fps <= 0 {
 		fps = 60
 	}
-	winPaint := time.NewTicker(time.Second / time.Duration(fps))
+	dur := time.Second / time.Duration(fps)
+	winPaint := time.NewTimer(dur)
 outer:
 	for {
 		select {
@@ -96,7 +97,7 @@ outer:
 				break outer
 			}
 			w.This.SendPaintEvent()
-			winPaint = time.NewTicker(time.Second / time.Duration(fps))
+			winPaint = time.NewTimer(dur)
 		}
 	}
 }

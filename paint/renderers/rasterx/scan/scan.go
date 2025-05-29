@@ -246,9 +246,15 @@ func (s *Scanner) Start(a fixed.Point26_6) {
 
 // Line adds a linear segment to the current curve.
 func (s *Scanner) Line(b fixed.Point26_6) {
+	if b.X < 0 || b.Y < 0 {
+		return
+	}
 	s.Set(b)
 	x0, y0 := s.A.X, s.A.Y
 	x1, y1 := b.X, b.Y
+	if x0 < 0 || y0 < 0 {
+		return
+	}
 	dx, dy := x1-x0, y1-y0
 	// Break the 26.6 fixed point Y co-ordinates into integral and fractional
 	// parts.

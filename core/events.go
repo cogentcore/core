@@ -54,6 +54,9 @@ type Events struct {
 	// stack of sprites with mouse pointer in BBox, with any listeners present.
 	spriteInBBox []*Sprite
 
+	// stack of hovered sprites: have mouse pointer in BBox.
+	spriteHovers []*Sprite
+
 	// currently pressing sprite.
 	spritePress *Sprite
 
@@ -282,13 +285,10 @@ func (em *Events) handlePosEvent(e events.Event) {
 	}
 
 	em.spriteInBBox = nil
-	if et != events.MouseMove {
-		em.getSpriteInBBox(sc, e.WindowPos())
-
-		if len(em.spriteInBBox) > 0 {
-			if em.handleSpriteEvent(e) {
-				return
-			}
+	em.getSpriteInBBox(sc, e.WindowPos())
+	if len(em.spriteInBBox) > 0 {
+		if em.handleSpriteEvent(e) {
+			return
 		}
 	}
 
@@ -580,6 +580,37 @@ func (em *Events) updateHovers(hov, prev []Widget, e events.Event, enter, leave 
 		}
 	}
 	// todo: detect change in top one, use to update cursor
+	return hov
+}
+
+// updateSpriteHovers updates the hovered sprites based on current
+// sprites in bounding box.
+func (em *Events) updateSpriteHovers(hov, prev []*Sprite, e events.Event, enter, leave events.Types) []*Sprite {
+	for _, prv := range prev {
+		stillIn := false
+		for _, cur := range hov {
+			if prv == cur {
+				stillIn = true
+				break
+			}
+		}
+		if !stillIn {
+			prv.send(leave, e)
+		}
+	}
+
+	for _, cur := range hov {
+		wasIn := false
+		for _, prv := range prev {
+			if prv == cur {
+				wasIn = true
+				break
+			}
+		}
+		if !wasIn {
+			cur.send(enter, e)
+		}
+	}
 	return hov
 }
 
@@ -1350,5 +1381,6 @@ loop:
 			}
 		}
 	}
+	em.spriteHovers = em.updateSpriteHovers(em.spriteInBBox, em.spriteHovers, e, events.MouseEnter, events.MouseLeave)
 	return e.IsHandled()
 }

@@ -69,6 +69,7 @@ func (sv *SVG) ZoomAt(pt image.Point, delta float32) {
 
 	osc := sv.Scale
 	nsc := osc * sc
+	nsc = math32.Clamp(nsc, 0.01, 100)
 
 	rxf := sv.Root.Paint.Transform
 	xf := rxf.Inverse()
