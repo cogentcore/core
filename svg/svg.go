@@ -226,6 +226,7 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 	if pc != nil {
 		sv.painter = pc
 	} else {
+		sv.UpdateSize()
 		sv.painter = paint.NewPainter(math32.FromPoint(sv.Geom.Size))
 		pc = sv.painter
 	}
@@ -261,7 +262,25 @@ func (sv *SVG) RenderImage() image.Image {
 // SaveImage renders the SVG to an image and saves it to given filename,
 // using the filename extension to determine the file type.
 func (sv *SVG) SaveImage(fname string) error {
-	return imagex.Save(sv.RenderImage(), fname)
+	pos := sv.Geom.Pos
+	sv.Geom.Pos = image.Point{}
+	err := imagex.Save(sv.RenderImage(), fname)
+	sv.Geom.Pos = pos
+	return err
+}
+
+// SaveImageSize renders the SVG to an image and saves it to given filename,
+// using the filename extension to determine the file type.
+// Specify either width or height of resulting image, or nothing for
+// current physical size as set.
+func (sv *SVG) SaveImageSize(fname string, width, height float32) error {
+	sz := sv.Geom
+	sv.Geom.Pos = image.Point{}
+	sv.Geom.Size.X = int(width)
+	sv.Geom.Size.Y = int(height)
+	err := imagex.Save(sv.RenderImage(), fname)
+	sv.Geom = sz
+	return err
 }
 
 func (sv *SVG) FillViewport() {

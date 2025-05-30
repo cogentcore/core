@@ -21,17 +21,40 @@ func (sv *SVG) ContentBounds() math32.Box2 {
 	return sv.Root.BBox
 }
 
+// UpdateSize ensures that the size is valid, using existing ViewBox values
+// to set proportions if size is not valid.
+func (sv *SVG) UpdateSize() {
+	if sv.Geom.Size.X > 0 && sv.Geom.Size.Y > 0 {
+		return
+	}
+	vb := &sv.Root.ViewBox
+	if vb.Size.X == 0 {
+		if sv.PhysicalWidth.Dots > 0 {
+			vb.Size.X = sv.PhysicalWidth.Dots
+		} else {
+			vb.Size.X = 640
+		}
+	}
+	if vb.Size.Y == 0 {
+		if sv.PhysicalHeight.Dots > 0 {
+			vb.Size.Y = sv.PhysicalHeight.Dots
+		} else {
+			vb.Size.Y = 480
+		}
+	}
+	if sv.Geom.Size.X > 0 && sv.Geom.Size.Y == 0 {
+		sv.Geom.Size.Y = int(float32(sv.Geom.Size.X) * (float32(vb.Size.Y) / float32(vb.Size.X)))
+	} else if sv.Geom.Size.Y > 0 && sv.Geom.Size.X == 0 {
+		sv.Geom.Size.X = int(float32(sv.Geom.Size.Y) * (float32(vb.Size.X) / float32(vb.Size.Y)))
+	}
+}
+
 // setRootTransform sets the Root node transform based on ViewBox, Translate, Scale
 // parameters set on the SVG object.
 func (sv *SVG) setRootTransform() {
+	sv.UpdateSize()
 	vb := &sv.Root.ViewBox
 	box := math32.FromPoint(sv.Geom.Size)
-	if vb.Size.X == 0 {
-		vb.Size.X = sv.PhysicalWidth.Dots
-	}
-	if vb.Size.Y == 0 {
-		vb.Size.Y = sv.PhysicalHeight.Dots
-	}
 	tr := math32.Translate2D(float32(sv.Geom.Pos.X), float32(sv.Geom.Pos.Y))
 	_, trans, scale := vb.Transform(box)
 	if sv.InvertY {
