@@ -5,7 +5,6 @@
 package textcore
 
 import (
-	"fmt"
 	"image"
 	"time"
 
@@ -47,7 +46,7 @@ func (ed *Base) toggleCursor(on bool) {
 	if ms == nil {
 		return // only MainStage has sprites
 	}
-	spnm := fmt.Sprintf("%v-%v", blinkerSpriteName, ed.charSize.Y)
+	spnm := blinkerSpriteName
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
@@ -72,10 +71,6 @@ func (ed *Base) toggleCursor(on bool) {
 	if !on {
 		return
 	}
-	bbsz := math32.Vec2(math32.Ceil(ed.CursorWidth.Dots), math32.Ceil(ed.charSize.Y))
-	if bbsz.X < 2 { // at least 2
-		bbsz.X = 2
-	}
 	sp = core.NewSprite(spnm, func(pc *paint.Painter) {
 		if !sp.Active {
 			return
@@ -92,6 +87,10 @@ func (ed *Base) toggleCursor(on bool) {
 			if !isOn {
 				return
 			}
+		}
+		bbsz := math32.Vec2(math32.Ceil(ed.CursorWidth.Dots), math32.Ceil(ed.charSize.Y))
+		if bbsz.X < 2 { // at least 2
+			bbsz.X = 2
 		}
 		sp.Properties["turnOn"] = false
 		pc.Fill.Color = nil

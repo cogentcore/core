@@ -1201,18 +1201,23 @@ func (tf *TextField) toggleCursor(on bool) {
 	if ms == nil {
 		return // only MainStage has sprites
 	}
-	spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
+	spnm := textFieldSpriteName
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
 	sp, ok := ms.Sprites.SpriteByNameLocked(spnm)
+
+	activate := func() {
+		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
+		sp.Active = true
+		sp.Properties["turnOn"] = true
+		sp.Properties["on"] = true
+		sp.Properties["lastSwitch"] = time.Now()
+	}
+
 	if ok {
 		if on {
-			sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
-			sp.Active = true
-			sp.Properties["turnOn"] = true
-			sp.Properties["on"] = true
-			sp.Properties["lastSwitch"] = time.Now()
+			activate()
 		} else {
 			sp.Active = false
 		}
@@ -1220,10 +1225,6 @@ func (tf *TextField) toggleCursor(on bool) {
 	}
 	if !on {
 		return
-	}
-	bbsz := math32.Vec2(math32.Ceil(tf.CursorWidth.Dots), math32.Ceil(tf.lineHeight))
-	if bbsz.X < 2 { // at least 2
-		bbsz.X = 2
 	}
 	sp = NewSprite(spnm, func(pc *paint.Painter) {
 		if !sp.Active {
@@ -1242,6 +1243,10 @@ func (tf *TextField) toggleCursor(on bool) {
 				return
 			}
 		}
+		bbsz := math32.Vec2(math32.Ceil(tf.CursorWidth.Dots), math32.Ceil(tf.lineHeight))
+		if bbsz.X < 2 { // at least 2
+			bbsz.X = 2
+		}
 		sp.Properties["turnOn"] = false
 		pc.Fill.Color = nil
 		pc.Stroke.Color = tf.CursorColor
@@ -1250,12 +1255,8 @@ func (tf *TextField) toggleCursor(on bool) {
 		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
 		pc.Draw()
 	})
-	sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
-	sp.Active = true
 	sp.InitProperties()
-	sp.Properties["turnOn"] = false
-	sp.Properties["on"] = true
-	sp.Properties["lastSwitch"] = time.Now()
+	activate()
 	ms.Sprites.AddLocked(sp)
 }
 

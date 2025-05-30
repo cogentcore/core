@@ -672,6 +672,7 @@ func (ed *Editor) handleMouse() {
 		ed.SetState(true, states.Sliding)
 		ed.isScrolling = true
 		pt := ed.PointToRelPos(e.Pos())
+		pt.X -= int(0.8 * ed.charSize.X) // favor inclusive positioning on left
 		newPos := ed.PixelToCursor(pt)
 		if ed.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
 			ed.setCursorFromMouse(pt, newPos, e.SelectMode())
