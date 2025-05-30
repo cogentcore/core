@@ -116,6 +116,7 @@ func (g *NodeBase) Init() {
 	g.Paint.Defaults()
 	g.GradientFill = math32.Identity2()
 	g.GradientStroke = math32.Identity2()
+	g.Paint.Stroke.Width.Px(1) // dp is not understood by svg..
 }
 
 // SetColorProperties sets color property from a string representation.
@@ -324,7 +325,7 @@ func (g *NodeBase) IsVisible(sv *SVG) bool {
 	if g == nil || g.This == nil || g.Paint.Off || !g.Paint.Display {
 		return false
 	}
-	nvis := g.VisBBox == math32.Box2{}
+	nvis := g.VisBBox == (math32.Box2{})
 	if nvis && !g.isDef {
 		// fmt.Println("invisible:", g.Name, "bb:", g.BBox, "vbb:", g.VisBBox, "svg:", sv.Geom.Bounds())
 		return false
