@@ -6,7 +6,6 @@ package svg
 
 import (
 	"fmt"
-	"image"
 	"maps"
 	"reflect"
 	"strings"
@@ -192,7 +191,7 @@ func SVGWalkDown(n Node, fun func(sn Node, snb *NodeBase) bool) {
 }
 
 // SVGWalkDownNoDefs does [tree.Node.WalkDown] on given node using given walk function
-// with SVG Node parameters.  Automatically filters Defs nodes (IsDef) and MetaData,
+// with SVG Node parameters. Automatically filters Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
 func SVGWalkDownNoDefs(n Node, fun func(sn Node, snb *NodeBase) bool) {
 	n.AsTree().WalkDown(func(cn tree.Node) bool {
@@ -218,29 +217,6 @@ func FirstNonGroupNode(n Node) Node {
 		return tree.Break
 	})
 	return ngn
-}
-
-// NodesContainingPoint returns all Nodes with Bounding Box that contains
-// given point, optionally only those that are terminal nodes (no leaves).
-// Excludes the starting node.
-func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
-	var cn []Node
-	SVGWalkDown(n, func(sn Node, snb *NodeBase) bool {
-		if sn == n {
-			return tree.Continue
-		}
-		if leavesOnly && snb.HasChildren() {
-			return tree.Continue
-		}
-		if snb.Paint.Off {
-			return tree.Break
-		}
-		if snb.BBox.ContainsPoint(math32.FromPoint(pt)) {
-			cn = append(cn, sn)
-		}
-		return tree.Continue
-	})
-	return cn
 }
 
 //////// Standard Node infrastructure

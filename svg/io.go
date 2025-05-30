@@ -938,28 +938,26 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	}
 	text := "" // if non-empty, contains text to render
 	_, issvg := n.(Node)
-	_, isgp := n.(*Group)
+	// _, isgp := n.(*Group)
 	_, ismark := n.(*Marker)
-	if !isgp {
-		if issvg && !ismark {
-			sp := styleprops.ToXMLString(properties)
-			if sp != "" {
-				XMLAddAttr(&se.Attr, "style", sp)
+	if issvg && !ismark {
+		sp := styleprops.ToXMLString(properties)
+		if sp != "" {
+			XMLAddAttr(&se.Attr, "style", sp)
+		}
+		if txp, has := properties["transform"]; has {
+			XMLAddAttr(&se.Attr, "transform", reflectx.ToString(txp))
+		}
+	} else {
+		for k, v := range properties {
+			sv := reflectx.ToString(v)
+			if _, has := InkscapeProperties[k]; has {
+				k = "inkscape:" + k
+			} else if k == "overflow" {
+				k = "style"
+				sv = "overflow:" + sv
 			}
-			if txp, has := properties["transform"]; has {
-				XMLAddAttr(&se.Attr, "transform", reflectx.ToString(txp))
-			}
-		} else {
-			for k, v := range properties {
-				sv := reflectx.ToString(v)
-				if _, has := InkscapeProperties[k]; has {
-					k = "inkscape:" + k
-				} else if k == "overflow" {
-					k = "style"
-					sv = "overflow:" + sv
-				}
-				XMLAddAttr(&se.Attr, k, sv)
-			}
+			XMLAddAttr(&se.Attr, k, sv)
 		}
 	}
 	var sb strings.Builder
@@ -971,8 +969,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
-		if strings.HasPrefix(strings.ToLower(n.AsTree().Name), "layer") {
-		}
+		// if strings.HasPrefix(strings.ToLower(n.AsTree().Name), "layer") {
+		// }
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
 			switch k {

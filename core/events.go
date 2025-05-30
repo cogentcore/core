@@ -1337,7 +1337,7 @@ func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 	st := sc.Stage
 	st.Sprites.Do(func(sl SpriteList) {
 		for _, sp := range sl.Values {
-			if !sp.Active {
+			if sp == nil || !sp.Active {
 				continue
 			}
 			if sp.listeners == nil {
