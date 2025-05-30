@@ -60,7 +60,7 @@ type scrimSource struct {
 //////// Sprites
 
 // SpritesSource returns a [composer.Source] for rendering [Sprites].
-func SpritesSource(stage *Stage, mainScene *Scene, scpos image.Point) composer.Source {
+func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 	stage.Sprites.Lock()
 	defer stage.Sprites.Unlock()
 
@@ -83,5 +83,9 @@ func SpritesSource(stage *Stage, mainScene *Scene, scpos image.Point) composer.S
 	})
 	stage.Sprites.modified = false
 	render := stage.spritePainter.RenderDone()
-	return &paintSource{render: render, renderer: stage.spriteRenderer, drawOp: draw.Over, drawPos: mainScene.SceneGeom.Pos}
+	scpos := mainScene.SceneGeom.Pos
+	if TheApp.Platform().IsMobile() {
+		scpos = image.Point{}
+	}
+	return &paintSource{render: render, renderer: stage.spriteRenderer, drawOp: draw.Over, drawPos: scpos}
 }

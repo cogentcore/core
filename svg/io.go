@@ -1180,38 +1180,61 @@ func MarshalXMLTree(n Node, enc *XMLEncoder, setName string) (string, error) {
 func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
-	// TODO: what makes sense for PhysicalWidth and PhysicalHeight here?
-	if sv.PhysicalWidth.Value > 0 {
-		XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%g", sv.PhysicalWidth.Value))
+
+	hasNamedView := false
+	if sv.Root.NumChildren() > 0 {
+		kd := sv.Root.Children[0]
+		if md, ismd := kd.(*MetaData); ismd {
+			if strings.HasPrefix(md.Name, "namedview") {
+				hasNamedView = true
+			}
+		}
 	}
-	if sv.PhysicalHeight.Value > 0 {
-		XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%g", sv.PhysicalHeight.Value))
+
+	// PhysicalWidth and PhysicalHeight define the viewport in SVG terminology:
+	// https://www.w3.org/TR/SVG/coords.html
+	// these are defined in "abstract" units.
+	if sv.PhysicalWidth.Dots > 0 {
+		XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%g", sv.PhysicalWidth.Dots))
+	}
+	if sv.PhysicalHeight.Dots > 0 {
+		XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%g", sv.PhysicalHeight.Dots))
 	}
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
-	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
-	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
+	if hasNamedView {
+		XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
+		XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
+	}
 	XMLAddAttr(&me.Attr, "xmlns:xlink", "http://www.w3.org/1999/xlink")
 	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 
-	dnm, err := MarshalXMLTree(sv.Defs, enc, "defs")
-	enc.WriteEnd(dnm)
+	var errs []error
+
+	if sv.Defs.HasChildren() {
+		dnm, err := MarshalXMLTree(sv.Defs, enc, "defs")
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			enc.WriteEnd(dnm)
+		}
+	}
 
 	for _, k := range sv.Root.Children {
-		var knm string
-		knm, err = MarshalXMLTree(k.(Node), enc, "")
+		knm, err := MarshalXMLTree(k.(Node), enc, "")
+		if err != nil {
+			errs = append(errs, err)
+			break
+		}
 		if knm != "" {
 			enc.WriteEnd(knm)
-		}
-		if err != nil {
-			break
 		}
 	}
 
 	ed := xml.EndElement{}
 	ed.Name = me.Name
 	enc.EncodeToken(ed)
-	return err
+	return errors.Join(errs...)
 }
 
 // SetStandardXMLAttr sets standard attributes of node given XML-style name /

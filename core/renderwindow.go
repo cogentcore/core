@@ -765,11 +765,7 @@ func (w *renderWindow) renderWindow() {
 			log.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	scpos := winScene.SceneGeom.Pos
-	if TheApp.Platform().IsMobile() {
-		scpos = image.Point{}
-	}
-	cp.Add(SpritesSource(top, winScene, scpos), &top.Sprites)
+	cp.Add(SpritesSource(top, winScene), &top.Sprites)
 	w.lastSpriteDraw = time.Now()
 
 	w.SystemWindow.Unlock()
