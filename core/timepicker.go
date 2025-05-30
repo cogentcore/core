@@ -92,7 +92,7 @@ func (tp *TimePicker) Init() {
 	tree.AddChild(tp, func(w *Spinner) {
 		spinnerInit(w)
 		w.SetStep(1).SetEnforceStep(true).
-			SetMin(0).SetMax(60).SetFormat("%02d")
+			SetMin(0).SetMax(59).SetFormat("%02d")
 		w.Updater(func() {
 			w.SetValue(float32(tp.Time.Minute()))
 		})
