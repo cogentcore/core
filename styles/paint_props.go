@@ -259,7 +259,7 @@ func (pc *Stroke) toProperties(p map[string]any) {
 		p["stroke-linecap"] = pc.Cap.String()
 	}
 	if pc.Join != ppath.JoinMiter {
-		p["stroke-linecap"] = pc.Cap.String()
+		p["stroke-linejoin"] = pc.Join.String()
 	}
 }
 
