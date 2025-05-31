@@ -299,6 +299,28 @@ core.NewButton(fr).SetText("Fifth")
 
 You can customize the appearance of [[text]] with various properties.
 
+### Font weight
+
+You can change the font weight of text:
+
+```Go
+tx := core.NewText(b).SetText("Bold text")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Weight = rich.Bold
+})
+```
+
+### Font slant
+
+You can make text italic:
+
+```Go
+tx := core.NewText(b).SetText("Italic text")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Slant = rich.Italic
+})
+```
+
 ### Font family
 
 You can change the font family category of text:
@@ -328,5 +350,39 @@ tx := core.NewText(b).SetText("Custom font")
 tx.Styler(func(s *styles.Style) {
     s.Font.Family = rich.Custom
     s.Font.CustomFont = "My Font Name"
+})
+```
+
+### Line height
+
+You can change the height of each line of text:
+
+```Go
+tx := core.NewText(b).SetText("This is some text with a large line height")
+tx.Styler(func(s *styles.Style) {
+    s.Text.LineHeight = 2
+    s.Max.X.Em(10)
+})
+```
+
+### Whitespace
+
+You can customize the formatting of whitespace:
+
+```Go
+tx := core.NewText(b).SetText("This text\nformats      whitespace\n    as is")
+tx.Styler(func(s *styles.Style) {
+    s.Text.WhiteSpace = text.WhiteSpacePre
+})
+```
+
+### Text wrap
+
+You can disable text wrapping:
+
+```Go
+tx := core.NewTextField(b).SetText("This text never wraps even if it exceeds the maximum width")
+tx.Styler(func(s *styles.Style) {
+    s.SetTextWrap(false)
 })
 ```
