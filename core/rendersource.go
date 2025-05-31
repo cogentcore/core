@@ -73,7 +73,7 @@ func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 	pc := &stage.spritePainter
 	pc.Fill.Color = colors.Uniform(colors.Transparent)
 	pc.Clear()
-	stage.Sprites.Do(func(sl SpriteList) {
+	stage.Sprites.Do(func(sl *SpriteList) {
 		for _, sp := range sl.Values {
 			if sp == nil || !sp.Active || sp.Draw == nil {
 				continue

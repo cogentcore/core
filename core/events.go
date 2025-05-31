@@ -840,7 +840,7 @@ func (em *Events) dragMove(e events.Event) {
 		return
 	}
 	sp, ok := ms.Sprites.SpriteByName(dragSpriteName)
-	if !ok {
+	if !ok || sp == nil {
 		fmt.Println("Drag sprite not found")
 		return
 	}
@@ -1335,7 +1335,7 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 
 func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 	st := sc.Stage
-	st.Sprites.Do(func(sl SpriteList) {
+	st.Sprites.Do(func(sl *SpriteList) {
 		for _, sp := range sl.Values {
 			if sp == nil || !sp.Active {
 				continue

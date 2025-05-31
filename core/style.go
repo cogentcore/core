@@ -98,8 +98,8 @@ func (wb *WidgetBase) resetStyleWidget() {
 
 // runStylers runs the [WidgetBase.Stylers].
 func (wb *WidgetBase) runStylers() {
-	wb.Stylers.Do(func(s []func(s *styles.Style)) {
-		for _, f := range s {
+	wb.Stylers.Do(func(s *[]func(s *styles.Style)) {
+		for _, f := range *s {
 			f(&wb.Styles)
 		}
 	})

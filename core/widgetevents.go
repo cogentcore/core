@@ -257,7 +257,7 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 	s := &wb.Styles
 	state := s.State
 
-	wb.Listeners.Do(func(l events.Listeners) {
+	wb.Listeners.Do(func(l *events.Listeners) {
 		l.Call(e, func() bool {
 			return wb.This != nil
 		})

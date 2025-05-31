@@ -8,6 +8,7 @@ import (
 	"image"
 	"sync"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/events"
@@ -192,26 +193,33 @@ func (ss *Sprites) Add(sp *Sprite) {
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
 func (ss *Sprites) AddLocked(sp *Sprite) {
-	ss.Normal.Add(sp.Name, sp)
+	errors.Log(ss.Normal.Add(sp.Name, sp))
 	ss.modified = true
 }
 
-// Delete deletes given sprite by name.
+// Delete deletes given sprite by name, returning true if found and deleted.
 // This version locks the sprites: see also [Sprites.DeleteLocked].
-func (ss *Sprites) Delete(name string) {
+func (ss *Sprites) Delete(name string) bool {
 	ss.Lock()
-	ss.DeleteLocked(name)
-	ss.Unlock()
+	defer ss.Unlock()
+	return ss.DeleteLocked(name)
 }
 
-// DeleteLocked deletes given sprite by name.
+// DeleteLocked deletes given sprite by name, returning true if found and deleted.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) DeleteLocked(name string) {
-	ss.Do(func(sl SpriteList) {
-		sl.DeleteByKey(name)
+func (ss *Sprites) DeleteLocked(name string) bool {
+	got := false
+	ss.Do(func(sl *SpriteList) {
+		d := sl.DeleteByKey(name)
+		if d {
+			got = true
+		}
 	})
-	ss.modified = true
+	if got {
+		ss.modified = true
+	}
+	return got
 }
 
 // SpriteByName returns the sprite by name.
@@ -226,7 +234,7 @@ func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
 func (ss *Sprites) SpriteByNameLocked(name string) (sp *Sprite, ok bool) {
-	ss.Do(func(sl SpriteList) {
+	ss.Do(func(sl *SpriteList) {
 		if ok {
 			return
 		}
@@ -241,7 +249,7 @@ func (ss *Sprites) SpriteByNameLocked(name string) (sp *Sprite, ok bool) {
 // reset removes all sprites.
 func (ss *Sprites) reset() {
 	ss.Lock()
-	ss.Do(func(sl SpriteList) {
+	ss.Do(func(sl *SpriteList) {
 		sl.Reset()
 	})
 	ss.modified = true
