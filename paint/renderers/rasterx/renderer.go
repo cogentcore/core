@@ -188,9 +188,7 @@ func (rs *Renderer) StrokeWidth(pt *render.Path) float32 {
 		return dw
 	}
 	sc := MeanScale(pt.Context.Transform)
-	// lw := math32.Max(sc*dw, 0.5)
-	lw := sc * dw
-	return lw
+	return sc * dw
 }
 
 func capfunc(st ppath.Caps) CapFunc {
