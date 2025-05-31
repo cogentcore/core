@@ -766,9 +766,6 @@ func (w *renderWindow) renderWindow() {
 			log.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	// if spriteMods {
-	// 	fmt.Println("ss pos:", winScene.SceneGeom.Pos)
-	// }
 	cp.Add(SpritesSource(top, winScene), &top.Sprites)
 	w.lastSpriteDraw = time.Now()
 
