@@ -130,6 +130,7 @@ func (bt *Button) Init() {
 			}
 		}
 		s.Font.Size.Dp(14) // Button font size is used for text font size
+		s.IconSize.Set(units.Em(18.0 / 14))
 		s.Gap.Zero()
 		s.CenterAll()
 
@@ -209,9 +210,6 @@ func (bt *Button) Init() {
 		}
 		if bt.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
-				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(18)
-				})
 				w.Updater(func() {
 					w.SetIcon(bt.Icon)
 				})
@@ -251,10 +249,7 @@ func (bt *Button) Init() {
 			})
 			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
-					s.Margin.Zero()
-					s.Padding.Zero()
-					s.Font.Size.Dp(18)
-					s.IconSize.Set(units.Em(1)) // don't inherit
+					s.IconSize.Set(units.Dp(18)) // independent from Em
 				})
 				w.Updater(func() {
 					w.SetIcon(bt.Indicator)
