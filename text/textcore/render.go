@@ -440,8 +440,12 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	if ed.Lines == nil {
 		return math32.Vector2{}
 	}
+	scpos := image.Point{}
+	if ed.Scene != nil {
+		scpos = ed.Scene.SceneGeom.Pos
+	}
 	vpos := ed.Lines.PosToView(ed.viewId, pos)
-	spos := ed.Geom.Pos.Content
+	spos := ed.Geom.Pos.Content.Add(math32.FromPoint(scpos))
 	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)

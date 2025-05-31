@@ -1096,7 +1096,7 @@ func (tf *TextField) offerComplete() {
 		return
 	}
 	s := string(tf.editText[0:tf.cursorPos])
-	cpos := tf.charRenderPos(tf.cursorPos, true).ToPoint()
+	cpos := tf.charRenderPos(tf.cursorPos).ToPoint()
 	cpos.X += 5
 	cpos.Y = tf.Geom.TotalBBox.Max.Y
 	tf.complete.SrcLn = 0
@@ -1159,13 +1159,10 @@ func (tf *TextField) relCharPos(st, ed int) math32.Vector2 {
 // charRenderPos returns the starting render coords for the given character
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too).
-// if wincoords is true, then adds window box offset -- for cursor, popups
-func (tf *TextField) charRenderPos(charidx int, wincoords bool) math32.Vector2 {
+func (tf *TextField) charRenderPos(charidx int) math32.Vector2 {
 	pos := tf.effPos
-	if wincoords {
-		sc := tf.Scene
-		pos = pos.Add(math32.FromPoint(sc.SceneGeom.Pos))
-	}
+	sc := tf.Scene
+	pos = pos.Add(math32.FromPoint(sc.SceneGeom.Pos))
 	cpos := tf.relCharPos(tf.dispRange.Start, charidx)
 	return pos.Add(cpos)
 }
@@ -1208,7 +1205,7 @@ func (tf *TextField) toggleCursor(on bool) {
 	sp, ok := ms.Sprites.SpriteByNameLocked(spnm)
 
 	activate := func() {
-		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
+		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
 		sp.Active = true
 		sp.Properties["turnOn"] = true
 		sp.Properties["on"] = true

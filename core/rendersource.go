@@ -84,7 +84,7 @@ func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 	stage.Sprites.modified = false
 	render := stage.spritePainter.RenderDone()
 	scpos := mainScene.SceneGeom.Pos
-	if TheApp.Platform().IsMobile() {
+	if TheApp.Platform().IsMobile() { // already added
 		scpos = image.Point{}
 	}
 	return &paintSource{render: render, renderer: stage.spriteRenderer, drawOp: draw.Over, drawPos: scpos}

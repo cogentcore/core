@@ -583,6 +583,20 @@ func dialogs(ts *core.Tabs) {
 		d.RunDialog(td)
 	})
 
+	tdd := core.NewButton(drow).SetText("Editor")
+	tdd.OnClick(func(e events.Event) {
+		d := core.NewBody("Editor")
+		core.NewText(d).SetType(core.TextSupporting).SetText("What is your name?")
+		ed := textcore.NewEditor(d)
+		d.AddBottomBar(func(bar *core.Frame) {
+			d.AddCancel(bar)
+			d.AddOK(bar).OnClick(func(e events.Event) {
+				core.MessageSnackbar(td, "Your name is "+ed.Lines.String())
+			})
+		})
+		d.RunDialog(tdd)
+	})
+
 	fd := core.NewButton(drow).SetText("Full window")
 	u := &core.User{}
 	fd.OnClick(func(e events.Event) {
