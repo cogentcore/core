@@ -1194,7 +1194,7 @@ func (tf *TextField) stopCursor() {
 // toggleSprite turns on or off the cursor sprite.
 func (tf *TextField) toggleCursor(on bool) {
 	sc := tf.Scene
-	if sc == nil {
+	if sc == nil || sc.Stage == nil {
 		return
 	}
 	ms := sc.Stage.Main

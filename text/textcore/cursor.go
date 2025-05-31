@@ -39,7 +39,7 @@ func (ed *Base) stopCursor() {
 // toggleSprite turns on or off the cursor sprite.
 func (ed *Base) toggleCursor(on bool) {
 	sc := ed.Scene
-	if sc == nil {
+	if sc == nil || sc.Stage == nil {
 		return
 	}
 	ms := sc.Stage.Main
