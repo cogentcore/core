@@ -139,6 +139,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 			}
 			if !kv.Value.Scene.Close() {
 				w.flags.SetFlag(false, winClosing)
+				rc.Unlock()
 				return
 			}
 		}
