@@ -110,12 +110,11 @@ bt.Styler(func(s *styles.Style) {
 })
 ```
 
-If you need more control, you can change the [[styles#icon size]] of a button:
+To change only the size of the icon, you can set the [[icon#icon size]] of a button:
 
 ```Go
 bt := core.NewButton(b).SetText("Add").SetIcon(icons.Add)
 bt.Styler(func(s *styles.Style) {
-    s.Font.Size.Dp(20)
-    s.IconSize.Set(units.Dp(40), units.Dp(25))
+    s.IconSize.Set(units.Dp(30))
 })
 ```

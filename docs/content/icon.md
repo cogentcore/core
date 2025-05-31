@@ -22,6 +22,46 @@ You can use the filled version of an icon:
 core.NewButton(b).SetIcon(icons.HomeFill)
 ```
 
+## Styles
+
+### Icon size
+
+You can change the size of an icon:
+
+```Go
+ic := core.NewIcon(b).SetIcon(icons.Home)
+ic.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40))
+})
+```
+
+You can specify different icon sizes for each dimension:
+
+```Go
+ic := core.NewIcon(b).SetIcon(icons.Home)
+ic.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40), units.Dp(20))
+})
+```
+
+Icon size is an inherited property, so you can set it on a parent widget like a [[button]] and its icon will update accordingly:
+
+```Go
+bt := core.NewButton(b).SetText("Send").SetIcon(icons.Send)
+bt.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(30))
+})
+```
+
+You can also use [[styles#font size]], which applies to all children including icons:
+
+```Go
+tf := core.NewTextField(b).SetText("Hello").SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew)
+tf.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(20)
+})
+```
+
 ## Custom icons
 
 You can add custom icons to your app using icongen, a part of the [[generate]] tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you can add all of your custom SVG icon files and an `icons.go` file with the following code:

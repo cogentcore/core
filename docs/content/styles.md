@@ -321,6 +321,19 @@ tx.Styler(func(s *styles.Style) {
 })
 ```
 
+### Font size
+
+You can change the size of text:
+
+```Go
+tx := core.NewText(b).SetText("Big text")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(50)
+})
+```
+
+See also [[icon#icon size]].
+
 ### Font family
 
 You can change the font family category of text:
