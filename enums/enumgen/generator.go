@@ -193,7 +193,7 @@ func (g *Generator) Generate() (bool, error) {
 
 		g.PrefixValueNames(values, typ.Config)
 
-		values = SortValues(values)
+		values = SortValues(values, typ)
 
 		g.BuildBasicMethods(values, typ)
 		if typ.IsBitFlag {

@@ -178,16 +178,16 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
-var _renderWindowFlagsValues = []renderWindowFlags{}
+var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4}
 
 // renderWindowFlagsN is the highest valid value for type renderWindowFlags, plus one.
-const renderWindowFlagsN renderWindowFlags = 1
+const renderWindowFlagsN renderWindowFlags = 5
 
-var _renderWindowFlagsValueMap = map[string]renderWindowFlags{}
+var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`Resize`: 0, `StopEventLoop`: 1, `Closing`: 2, `GotFocus`: 3, `RenderSkipped`: 4}
 
-var _renderWindowFlagsDescMap = map[renderWindowFlags]string{}
+var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winResize indicates that the window was just resized.`, 1: `winStopEventLoop indicates that the event loop should be stopped.`, 2: `winClosing is whether the window is closing.`, 3: `winGotFocus indicates that have we received focus.`, 4: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`}
 
-var _renderWindowFlagsMap = map[renderWindowFlags]string{}
+var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `Resize`, 1: `StopEventLoop`, 2: `Closing`, 3: `GotFocus`, 4: `RenderSkipped`}
 
 // String returns the string representation of this renderWindowFlags value.
 func (i renderWindowFlags) String() string { return enums.BitFlagString(i, _renderWindowFlagsValues) }
@@ -239,16 +239,16 @@ func (i *renderWindowFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "renderWindowFlags")
 }
 
-var _sceneFlagsValues = []sceneFlags{}
+var _sceneFlagsValues = []sceneFlags{0, 1, 2, 3, 4, 5, 6}
 
 // sceneFlagsN is the highest valid value for type sceneFlags, plus one.
-const sceneFlagsN sceneFlags = 1
+const sceneFlagsN sceneFlags = 7
 
-var _sceneFlagsValueMap = map[string]sceneFlags{}
+var _sceneFlagsValueMap = map[string]sceneFlags{`HasShown`: 0, `Updating`: 1, `NeedsRender`: 2, `NeedsLayout`: 3, `HasDeferred`: 4, `ImageUpdated`: 5, `ContentSizing`: 6}
 
-var _sceneFlagsDescMap = map[sceneFlags]string{}
+var _sceneFlagsDescMap = map[sceneFlags]string{0: `sceneHasShown is whether this scene has been shown. This is used to ensure that [events.Show] is only sent once.`, 1: `sceneUpdating means the Scene is in the process of sceneUpdating. It is set for any kind of tree-level update. Skip any further update passes until it goes off.`, 2: `sceneNeedsRender is whether anything in the Scene needs to be re-rendered (but not necessarily the whole scene itself).`, 3: `sceneNeedsLayout is whether the Scene needs a new layout pass.`, 4: `sceneHasDeferred is whether the Scene has elements with Deferred functions.`, 5: `sceneImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global [RenderWindow] rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 6: `sceneContentSizing means that this scene is currently doing a contentSize computation to compute the size of the scene (for sizing window for example). Affects layout size computation.`}
 
-var _sceneFlagsMap = map[sceneFlags]string{}
+var _sceneFlagsMap = map[sceneFlags]string{0: `HasShown`, 1: `Updating`, 2: `NeedsRender`, 3: `NeedsLayout`, 4: `HasDeferred`, 5: `ImageUpdated`, 6: `ContentSizing`}
 
 // String returns the string representation of this sceneFlags value.
 func (i sceneFlags) String() string { return enums.BitFlagString(i, _sceneFlagsValues) }
@@ -679,16 +679,16 @@ func (i *TextFieldTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "TextFieldTypes")
 }
 
-var _widgetFlagsValues = []widgetFlags{}
+var _widgetFlagsValues = []widgetFlags{0, 1}
 
 // widgetFlagsN is the highest valid value for type widgetFlags, plus one.
-const widgetFlagsN widgetFlags = 1
+const widgetFlagsN widgetFlags = 2
 
-var _widgetFlagsValueMap = map[string]widgetFlags{}
+var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1}
 
-var _widgetFlagsDescMap = map[widgetFlags]string{}
+var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`}
 
-var _widgetFlagsMap = map[widgetFlags]string{}
+var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`}
 
 // String returns the string representation of this widgetFlags value.
 func (i widgetFlags) String() string { return enums.BitFlagString(i, _widgetFlagsValues) }
