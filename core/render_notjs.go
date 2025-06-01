@@ -20,7 +20,7 @@ import (
 // If it returns nil, then the image could not be fetched.
 func grabRenderFrom(w Widget) *image.RGBA {
 	wb := w.AsWidget()
-	scimg := wb.Scene.renderer.Image() // todo: need to make this real on JS
+	scimg := wb.Scene.renderer.Image()
 	if scimg == nil {
 		return nil
 	}

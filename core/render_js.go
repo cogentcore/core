@@ -24,6 +24,7 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
 		return nil
 	}
+	// todo: grab region from canvas!
 	imgRend := paint.NewImageRenderer(math32.FromPoint(wb.Scene.SceneGeom.Size))
 	wb.RenderWidget()
 	rend := wb.Scene.Painter.RenderDone()

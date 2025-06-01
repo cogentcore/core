@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -555,27 +556,12 @@ func (em *Events) handlePosEvent(e events.Event) {
 // widgets in bounding box.
 func (em *Events) updateHovers(hov, prev []Widget, e events.Event, enter, leave events.Types) []Widget {
 	for _, prv := range prev {
-		stillIn := false
-		for _, cur := range hov {
-			if prv == cur {
-				stillIn = true
-				break
-			}
-		}
-		if !stillIn && !tree.IsNil(prv) {
+		if !slices.Contains(hov, prv) && !tree.IsNil(prv) {
 			prv.AsWidget().Send(leave, e)
 		}
 	}
-
 	for _, cur := range hov {
-		wasIn := false
-		for _, prv := range prev {
-			if prv == cur {
-				wasIn = true
-				break
-			}
-		}
-		if !wasIn {
+		if !slices.Contains(prev, cur) {
 			cur.AsWidget().Send(enter, e)
 		}
 	}
@@ -587,27 +573,12 @@ func (em *Events) updateHovers(hov, prev []Widget, e events.Event, enter, leave 
 // sprites in bounding box.
 func (em *Events) updateSpriteHovers(hov, prev []*Sprite, e events.Event, enter, leave events.Types) []*Sprite {
 	for _, prv := range prev {
-		stillIn := false
-		for _, cur := range hov {
-			if prv == cur {
-				stillIn = true
-				break
-			}
-		}
-		if !stillIn {
+		if !slices.Contains(hov, prv) {
 			prv.send(leave, e)
 		}
 	}
-
 	for _, cur := range hov {
-		wasIn := false
-		for _, prv := range prev {
-			if prv == cur {
-				wasIn = true
-				break
-			}
-		}
-		if !wasIn {
+		if !slices.Contains(prev, cur) {
 			cur.send(enter, e)
 		}
 	}
