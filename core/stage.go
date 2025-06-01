@@ -206,7 +206,7 @@ type Stage struct { //types:add -setters
 	Sprites Sprites `json:"-" xml:"-" set:"-"`
 
 	// spritePainter is the painter for sprite drawing.
-	spritePainter paint.Painter
+	spritePainter *paint.Painter
 
 	// spriteRenderer is the renderer for sprite drawing.
 	spriteRenderer render.Renderer

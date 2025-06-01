@@ -65,12 +65,12 @@ func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 	defer stage.Sprites.Unlock()
 
 	sz := math32.FromPoint(mainScene.SceneGeom.Size)
-	if stage.spritePainter.State == nil || stage.spritePainter.State.Size != sz {
-		stage.spritePainter = *paint.NewPainter(sz)
+	if stage.spritePainter == nil || stage.spritePainter.State.Size != sz {
+		stage.spritePainter = paint.NewPainter(sz)
 		stage.spritePainter.Paint.UnitContext = mainScene.Styles.UnitContext
 		stage.spriteRenderer = paint.NewSourceRenderer(sz)
 	}
-	pc := &stage.spritePainter
+	pc := stage.spritePainter
 	pc.Fill.Color = colors.Uniform(colors.Transparent)
 	pc.Clear()
 	stage.Sprites.Do(func(sl *SpriteList) {
@@ -78,7 +78,7 @@ func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 			if sp == nil || !sp.Active || sp.Draw == nil {
 				continue
 			}
-			sp.Draw(&stage.spritePainter)
+			sp.Draw(stage.spritePainter)
 		}
 	})
 	stage.Sprites.modified = false
