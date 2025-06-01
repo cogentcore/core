@@ -40,7 +40,7 @@ func TestSVG(t *testing.T) {
 	files := fsx.Filenames(filepath.Join("testdata", dir), ".svg")
 
 	for _, fn := range files {
-		// if fn != "zoom-in.svg" {
+		// if fn != "fig_neuron_as_detect.svg" {
 		// 	continue
 		// }
 		RunTest(t, 640, 480, dir, fn)

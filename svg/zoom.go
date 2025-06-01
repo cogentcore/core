@@ -24,9 +24,6 @@ func (sv *SVG) ContentBounds() math32.Box2 {
 // UpdateSize ensures that the size is valid, using existing ViewBox values
 // to set proportions if size is not valid.
 func (sv *SVG) UpdateSize() {
-	if sv.Geom.Size.X > 0 && sv.Geom.Size.Y > 0 {
-		return
-	}
 	vb := &sv.Root.ViewBox
 	if vb.Size.X == 0 {
 		if sv.PhysicalWidth.Dots > 0 {
