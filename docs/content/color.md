@@ -1,5 +1,5 @@
 +++
-Categories = ["Concepts"]
+Categories = ["Resources"]
 +++
 
 **Colors** can be specified in several different ways. Colors are used for [[styles#color|styles]], and can be represented with the [[color picker]] widget.
@@ -38,7 +38,7 @@ core.NewForm(b).SetStruct(colors.Scheme)
 
 ## Named colors
 
-You can also use named colors:
+You can also use named colors (see [[#List of named colors]] below):
 
 ```Go
 bt := core.NewButton(b).SetText("Hello")
@@ -117,3 +117,34 @@ fr.Styler(func(s *styles.Style) {
     s.Min.Set(units.Em(5))
 })
 ```
+
+## List of named colors
+
+```Go
+clrs:= core.NewFrame(b)
+clrs.Styler(func(s *styles.Style) {
+    s.Display = styles.Grid
+    s.Columns = 8
+	s.Gap.Set(units.Dp(18))
+})
+clrs.Maker(func(p *tree.Plan) {
+	for _, cn := range colors.Names {
+		nm := strcase.ToCamel(cn)
+		tree.AddAt(p, nm, func(w *core.Frame) {
+            w.Styler(func(s *styles.Style) {
+                s.Direction = styles.Column
+            })
+			cp := core.NewFrame(w)
+			cp.Styler(func(s *styles.Style) {
+				s.Min.Set(units.Em(4))
+				s.Background = colors.Uniform(colors.Map[cn])
+			})
+            core.NewText(w).SetText(nm).Styler(func(s *styles.Style) {
+                s.SetTextWrap(false)
+				s.CenterAll()
+			})
+		})
+	}
+})
+```
+
