@@ -1,7 +1,7 @@
 <svg
-  width="1280"
-  height="720"
-  viewBox="-32 -32 992 224"
+  width="960"
+  height="224"
+  viewBox="-32 -32 960 224"
   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
   xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -24,7 +24,7 @@
   </defs>
   <sodipodi:namedview
     id="namedview856"
-    style="inkscape:current-layer:;inkscape:cx:72.456055;inkscape:cy:21.016861;inkscape:document-units:px;inkscape:zoom:0.86258376;">
+    style="inkscape:document-units:px;inkscape:zoom:1;inkscape:current-layer:;inkscape:cx:0;inkscape:cy:0;">
     <inkscape:grid
       id="grid461"
       style="type:xygrid;units:px;spacingx:32;spacingy:32;" />
@@ -49,71 +49,71 @@
     x="400.51086"
     y="66.17052">render.Render</text>
   <text
-    id="tspan739_Copy-7"
-    style="font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;"
+    id="tspan640"
+    style="fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;"
     x="200.84589"
     y="66.17052">Painter</text>
   <text
-    id="tspan739_Copy-5"
+    id="tspan906"
     style="select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;"
     x="-10.763155"
     y="172.80199">Source</text>
   <text
-    id="tspan739_Copy-5_Copy"
-    style="fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;"
+    id="tspan260"
+    style="highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;"
     x="-10.763155"
     y="114.402115">Canvas</text>
   <text
-    id="tspan739_Copy"
+    id="tspan775"
     style="fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;"
     x="-10.763155"
     y="64.96315">Scene</text>
   <text
     id="tspan56"
-    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    style="select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;"
     x="721.8746"
     y="65.90364">html Canvas</text>
   <text
-    id="tspan56_Copy-15"
-    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    id="tspan730"
+    style="highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;"
     x="721.8746"
     y="16.998402">Image</text>
   <text
-    id="tspan56_Copy-13"
-    style="highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;"
+    id="tspan908"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
     x="672.00006"
     y="172.802">render.Renderer</text>
   <text
-    id="tspan56_Copy-13_Copy"
-    style="highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;"
+    id="tspan522"
+    style="font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;"
     x="721.8746"
     y="115.342575">SVG</text>
   <text
-    id="tspan56_Copy"
+    id="tspan226"
     style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
     x="-10.763155"
     y="16.057941">SVG</text>
   <path
     id="path246"
-    style="stroke-linejoin:miter;stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;"
+    style="stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;"
     d="M130.1215 56.76567H191.2529" />
   <path
-    id="path246_Copy"
-    style="stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;"
+    id="path881"
+    style="marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;"
     d="M627.638 56.76567H688.7695" />
   <path
-    id="path246_Copy_Copy"
-    style="fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-width:2px;"
+    id="path709"
+    style="stroke-linejoin:miter;stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;"
     d="M322.9209 56.76567H384.0524" />
   <text
-    id="text607"
-    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    id="tspan607"
+    style="font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;"
     transform="translate(0,-1359.5876) scale(1,4.528498)"
     x="696.29333"
     y="321.70953">{</text>
   <text
-    id="text607_Copy"
-    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    id="tspan902"
+    style="select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;"
     transform="translate(0,-1359.5876) scale(1,4.528498)"
     x="107.54985"
     y="321.70953">}</text>
