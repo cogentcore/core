@@ -326,6 +326,7 @@ func (tr *Tree) Duplicate() { //types:add
 	tr.Unselect()
 	nwkid := tr.Clone()
 	nwkid.AsTree().SetName(nm)
+	tree.SetUniqueNameIfDuplicate(parent, nwkid)
 	ntv := AsTree(nwkid)
 	parent.InsertChild(nwkid, myidx+1)
 	ntv.Update()
@@ -349,6 +350,7 @@ func (tr *Tree) duplicateSync() {
 	nm := fmt.Sprintf("%v_Copy", sn.AsTree().Name)
 	nwkid := sn.AsTree().Clone()
 	nwkid.AsTree().SetName(nm)
+	tree.SetUniqueNameIfDuplicate(parent, nwkid)
 	parent.AsTree().InsertChild(nwkid, myidx+1)
 	tvparent.sendChangeEventReSync(nil)
 	if tvk := tvparent.ChildByName("tv_"+nm, 0); tvk != nil {
