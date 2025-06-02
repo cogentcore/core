@@ -82,27 +82,29 @@ var styleFuncs = map[string]styleprops.Func{
 		func(obj *Style) enums.EnumSetter { return &obj.Stretch }),
 	"text-decoration": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Style)
+		cflags := fs.Decoration & colorFlagsMask
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Decoration = parent.(*Style).Decoration
 			} else if init {
-				fs.Decoration = 0
+				fs.Decoration = cflags
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
 			if vt == "none" {
-				fs.Decoration = 0
+				fs.Decoration = cflags
 			} else {
 				fs.Decoration.SetString(vt)
+				fs.Decoration |= cflags
 			}
 		case Decorations:
-			fs.Decoration = vt
+			fs.Decoration = cflags | vt
 		default:
 			iv, err := reflectx.ToInt(val)
 			if err == nil {
-				fs.Decoration = Decorations(iv)
+				fs.Decoration = cflags | Decorations(iv)
 			} else {
 				styleprops.SetError(key, val, err)
 			}

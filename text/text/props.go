@@ -109,8 +109,10 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if sty.Stretch != rich.StretchNormal {
 		p["font-stretch"] = sty.Stretch.String()
 	}
-	if sty.Decoration != 0 {
-		p["text-decoration"] = sty.Decoration.String()
+	if dstr := sty.Decoration.String(); dstr != "" {
+		p["text-decoration"] = dstr
+	} else {
+		p["text-decoration"] = "none"
 	}
 	if s.Align != Start {
 		p["text-align"] = s.Align.String()
@@ -131,6 +133,9 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 		p["tab-size"] = reflectx.ToString(s.TabSize)
 	}
 	p["fill"] = colors.AsHex(s.FillColor(sty))
+	if sc := sty.StrokeColor(); sc != nil {
+		p["stroke-color"] = colors.AsHex(sc)
+	}
 	if s.SelectColor != nil {
 		p["select-color"] = colors.AsHex(colors.ToUniform(s.SelectColor))
 	}

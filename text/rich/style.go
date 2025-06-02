@@ -310,6 +310,9 @@ const (
 	// background means that the background region behind the text is colored.
 	// The background is not normally colored so it renders over any background.
 	background
+
+	// colorFlagsMask is a mask for the color flags, to exclude them as needed.
+	colorFlagsMask = 1<<fillColor | 1<<strokeColor | 1<<background
 )
 
 // NumColors returns the number of colors used by this decoration setting.
