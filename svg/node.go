@@ -110,7 +110,8 @@ func (g *NodeBase) SetPos(pos math32.Vector2)     {}
 func (g *NodeBase) SetSize(sz math32.Vector2)     {}
 func (g *NodeBase) PaintStyle() *styles.Paint     { return &g.Paint }
 func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 { return math32.Box2{} }
-func (n *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeOf((*NodeBase)(nil)).Elem() }
+func (g *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeOf((*NodeBase)(nil)).Elem() }
+func (g *NodeBase) SetTransformProperty()         { g.SetProperty("transform", g.Paint.Transform.String()) }
 
 func (g *NodeBase) Init() {
 	g.Paint.Defaults()

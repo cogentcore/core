@@ -77,7 +77,7 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
 		for i, p := range g.Points {
 			p = xf.MulVector2AsPoint(p)

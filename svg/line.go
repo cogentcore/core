@@ -70,7 +70,7 @@ func (g *Line) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
 		g.Start = xf.MulVector2AsPoint(g.Start)
 		g.End = xf.MulVector2AsPoint(g.End)

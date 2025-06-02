@@ -192,7 +192,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	if rot != 0 || scx != 1 || scy != 1 || g.IsParText() {
 		// note: par text requires transform b/c not saving children pos
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		g.GradientApplyTransform(sv, xf)

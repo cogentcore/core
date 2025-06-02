@@ -57,7 +57,7 @@ func (g *Circle) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		scx, scy := xf.ExtractScale()

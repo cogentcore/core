@@ -48,5 +48,5 @@ func (g *Group) Render(sv *SVG) {
 // each node must define this for itself
 func (g *Group) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	g.Paint.Transform.SetMul(xf)
-	g.SetProperty("transform", g.Paint.Transform.String())
+	g.SetTransformProperty()
 }

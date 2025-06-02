@@ -57,7 +57,7 @@ func (g *Ellipse) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
 		// todo: this is not the correct transform:
 		g.Pos = xf.MulVector2AsPoint(g.Pos)
