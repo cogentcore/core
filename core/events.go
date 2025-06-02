@@ -263,12 +263,14 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.spriteSlide.handleEvent(e)
 			em.spriteSlide.send(events.SlideMove, e)
 			e.SetHandled()
+			em.setCursorFromStyle()
 			return
 		}
 		if !tree.IsNil(em.slide) {
 			em.slide.AsWidget().HandleEvent(e)
 			em.slide.AsWidget().Send(events.SlideMove, e)
 			e.SetHandled()
+			em.setCursorFromStyle()
 			return
 		}
 	case events.Scroll:
@@ -279,6 +281,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				if e.IsHandled() {
 					em.lastScrollTime = time.Now()
 				}
+				em.setCursorFromStyle()
 				return
 			}
 			em.scroll = nil
@@ -289,6 +292,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 	em.getSpriteInBBox(sc, e.WindowPos())
 	if len(em.spriteInBBox) > 0 {
 		if em.handleSpriteEvent(e) {
+			em.setCursorFromStyle()
 			return
 		}
 	}
@@ -301,6 +305,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		if DebugSettings.EventTrace && et != events.MouseMove {
 			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
+		em.setCursorFromStyle()
 		return
 	}
 
@@ -471,6 +476,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			case events.Left:
 				if sc.selectedWidgetChan != nil {
 					sc.selectedWidgetChan <- up
+					em.setCursorFromStyle()
 					return
 				}
 				dcInTime := time.Since(em.lastClickTime) < DeviceSettings.DoubleClickInterval
@@ -537,19 +543,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.scene.HandleEvent(e)
 		}
 	}
-
-	// we need to handle cursor after all of the events so that
-	// we get the latest cursor if it changes based on the state
-
-	cursorSet := false
-	for i := n - 1; i >= 0; i-- {
-		w := em.mouseInBBox[i]
-		wb := w.AsWidget()
-		if !cursorSet && wb.Styles.Cursor != cursors.None {
-			em.setCursor(wb.Styles.Cursor)
-			cursorSet = true
-		}
-	}
+	em.setCursorFromStyle()
 }
 
 // updateHovers updates the hovered widgets based on current
@@ -909,6 +903,21 @@ func (em *Events) setCursor(cur cursors.Cursor) {
 		return
 	}
 	errors.Log(system.TheApp.Cursor(win.SystemWindow).Set(cur))
+}
+
+// setCursorFromStyle sets the window cursor to the cursor of the bottom-most
+// widget in the mouseInBBox stack that has a Styles.Cursor set.
+// This should be called after every event pass.
+func (em *Events) setCursorFromStyle() {
+	n := len(em.mouseInBBox)
+	for i := n - 1; i >= 0; i-- {
+		w := em.mouseInBBox[i]
+		wb := w.AsWidget()
+		if wb.Styles.Cursor != cursors.None {
+			em.setCursor(wb.Styles.Cursor)
+			break
+		}
+	}
 }
 
 // focusClear saves current focus to FocusPrev
