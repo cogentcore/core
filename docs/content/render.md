@@ -6,9 +6,9 @@ Categories = ["Architecture"]
 
 On all platforms except web, the core rendering logic is pure Go, with cgo used for pushing images to the system window. On web, we use HTML canvas, as discussed later.
 
-The overall flow of rendering is:
+The overall flow of rendering is shown in this figure:
 
-* Source (SVG, `core.Scene`, etc) -> `Painter` (`render.Render`) -> `render.Renderer` (`image.Image`, SVG, PDF)
+![Render overview](media/render-overview.png)
 
 All rendering goes through the `Painter` object in the [[doc:paint]] package, which provides a standard set of drawing functions, operating on a `State` that has a stack of `Context` to provide context for these drawing functions (style, transform, bounds, clipping, and mask). Each of these drawing functions is recorded in a `Render` list of render `Item`s (see [[doc:paint/render]]), which provides the intermediate representation of everything that needs to be rendered in a given render update pass. There are three basic types of render `Item`s:
 

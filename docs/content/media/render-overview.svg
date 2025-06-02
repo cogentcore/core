@@ -1,0 +1,120 @@
+<svg
+  width="1280"
+  height="720"
+  viewBox="-32 -32 992 224"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs
+    id="defs">
+    <marker
+      id="Arrow2Lend"
+      inkscape:stockid="Arrow2Lend"
+      style="overflow:visible"
+      refX="0"
+      refY="0"
+      orient="auto">
+      <path
+        id="path-0"
+        style="fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+        transform="scale(1.1) rotate(180) translate(1,0)"
+        d="M8.718588 4.033735L-2.207289 .01601326L8.718589 -4.001708C6.97309 -1.629647 6.983148 1.615744 8.718588 4.033735z" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+    id="namedview856"
+    style="inkscape:current-layer:;inkscape:cx:72.456055;inkscape:cy:21.016861;inkscape:document-units:px;inkscape:zoom:0.86258376;">
+    <inkscape:grid
+      id="grid461"
+      style="type:xygrid;units:px;spacingx:32;spacingy:32;" />
+  </sodipodi:namedview>
+  <rect
+    id="rect88"
+    style="stroke-linecap:butt;stroke-linejoin:miter;fill:#FFFFFF;fill-opacity:1;stroke:none;"
+    x="-32.00001"
+    y="-31.12246"
+    width="958.4066"
+    height="223.12245" />
+  <sodipodi:namedview
+    id="namedview14"
+    style="inkscape:current-layer:;inkscape:cx:0;inkscape:cy:0;inkscape:document-units:px;inkscape:zoom:1;">
+    <inkscape:grid
+      id="grid577"
+      style="spacingx:32;spacingy:32;type:xygrid;units:px;" />
+  </sodipodi:namedview>
+  <text
+    id="tspan739"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    x="400.51086"
+    y="66.17052">render.Render</text>
+  <text
+    id="tspan739_Copy-7"
+    style="font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;"
+    x="200.84589"
+    y="66.17052">Painter</text>
+  <text
+    id="tspan739_Copy-5"
+    style="select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;"
+    x="-10.763155"
+    y="172.80199">Source</text>
+  <text
+    id="tspan739_Copy-5_Copy"
+    style="fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;"
+    x="-10.763155"
+    y="114.402115">Canvas</text>
+  <text
+    id="tspan739_Copy"
+    style="fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;"
+    x="-10.763155"
+    y="64.96315">Scene</text>
+  <text
+    id="tspan56"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    x="721.8746"
+    y="65.90364">html Canvas</text>
+  <text
+    id="tspan56_Copy-15"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    x="721.8746"
+    y="16.998402">Image</text>
+  <text
+    id="tspan56_Copy-13"
+    style="highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;"
+    x="672.00006"
+    y="172.802">render.Renderer</text>
+  <text
+    id="tspan56_Copy-13_Copy"
+    style="highlight-color:#FFE17B;select-color:#D8E2FF;direction:ltr;fill:#000000;font-size:32px;"
+    x="721.8746"
+    y="115.342575">SVG</text>
+  <text
+    id="tspan56_Copy"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    x="-10.763155"
+    y="16.057941">SVG</text>
+  <path
+    id="path246"
+    style="stroke-linejoin:miter;stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;"
+    d="M130.1215 56.76567H191.2529" />
+  <path
+    id="path246_Copy"
+    style="stroke-opacity:1;stroke-width:2px;fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;"
+    d="M627.638 56.76567H688.7695" />
+  <path
+    id="path246_Copy_Copy"
+    style="fill:#000000;fill-opacity:1;marker-end:url(#Arrow2Lend);stroke:#000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-width:2px;"
+    d="M322.9209 56.76567H384.0524" />
+  <text
+    id="text607"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    transform="translate(0,-1359.5876) scale(1,4.528498)"
+    x="696.29333"
+    y="321.70953">{</text>
+  <text
+    id="text607_Copy"
+    style="direction:ltr;fill:#000000;font-size:32px;highlight-color:#FFE17B;select-color:#D8E2FF;"
+    transform="translate(0,-1359.5876) scale(1,4.528498)"
+    x="107.54985"
+    y="321.70953">}</text>
+</svg>
