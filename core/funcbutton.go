@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -364,7 +365,7 @@ func (fb *FuncButton) CallFunc() {
 			bt.OnFinal(events.Change, func(e events.Event) {
 				// the dialog for the argument has been accepted, so we call the function
 				async := false
-				if currentRenderWindow != curWin { // calling from another window, must lock
+				if !tree.IsNil(ctx) && currentRenderWindow != curWin { // calling from another window, must lock
 					async = true
 					ctx.AsWidget().AsyncLock()
 				}
