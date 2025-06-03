@@ -26,7 +26,7 @@ type Path struct { //types:add
 	Display bool
 
 	// Stroke (line drawing) parameters.
-	Stroke Stroke
+	Stroke Stroke `display:"add-fields"`
 
 	// Fill (region filling) parameters.
 	Fill Fill
@@ -35,7 +35,7 @@ type Path struct { //types:add
 	Opacity float32
 
 	// Transform has our additions to the transform stack.
-	Transform math32.Matrix2
+	Transform math32.Matrix2 `display:"inline"`
 
 	// VectorEffect has various rendering special effects settings.
 	VectorEffect ppath.VectorEffects
