@@ -37,6 +37,10 @@ func (vb *ViewBox) Defaults() {
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
 
+func (vb *ViewBox) Max() math32.Vector2 {
+	return vb.Min.Add(vb.Size)
+}
+
 // BoxString returns the string representation of just the viewbox:
 // "min.X min.Y size.X size.Y"
 func (vb *ViewBox) BoxString() string {

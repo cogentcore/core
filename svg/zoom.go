@@ -52,13 +52,12 @@ func (sv *SVG) setRootTransform() {
 	sv.UpdateSize()
 	vb := &sv.Root.ViewBox
 	box := math32.FromPoint(sv.Geom.Size)
-	tr := math32.Translate2D(float32(sv.Geom.Pos.X), float32(sv.Geom.Pos.Y))
+	tr := math32.Translate2D(float32(sv.Geom.Pos.X)+sv.Translate.X, float32(sv.Geom.Pos.Y)+sv.Translate.Y)
 	_, trans, scale := vb.Transform(box)
 	if sv.InvertY {
 		scale.Y *= -1
 	}
 	trans.SetSub(vb.Min)
-	trans.SetAdd(sv.Translate)
 	scale.SetMulScalar(sv.Scale)
 	rt := math32.Scale2D(scale.X, scale.Y).Translate(trans.X, trans.Y)
 	if sv.InvertY {
@@ -76,9 +75,24 @@ func (sv *SVG) SetDPITransform(logicalDPI float32) {
 	pc.Transform = math32.Scale2D(dpisc, dpisc)
 }
 
-// ZoomAt updates the scale and translate parameters at given point
-// by given delta: + means zoom in, - means zoom out,
-// delta should always be < 1 in magnitude.
+// ZoomAtScroll calls ZoomAt using the Delta.Y and Pos() parameters
+// from an [events.MouseScroll] event, to produce well-behaved zooming behavior,
+// for elements of any size.
+func (sv *SVG) ZoomAtScroll(deltaY float32, pos image.Point) {
+	del := 0.01 * deltaY * max(sv.Root.ViewBox.Size.X/1280, 0.1)
+	del /= max(1, sv.Scale)
+	del = math32.Clamp(del, -0.1, 0.1)
+	sv.ZoomAt(pos, del)
+}
+
+// ZoomAt updates the global Scale by given delta value,
+// by multiplying the current Scale by 1+delta
+// (+ means zoom in; - means zoom out).
+// Delta should be < 1 in magnitude, and resulting scale is clamped
+// in range 0.01..100.
+// The global Translate is updated so that the given render
+// coordinate point (dots) corresponds to the same
+// underlying svg viewbox coordinate point.
 func (sv *SVG) ZoomAt(pt image.Point, delta float32) {
 	sc := float32(1)
 	if delta > 1 {
@@ -86,21 +100,26 @@ func (sv *SVG) ZoomAt(pt image.Point, delta float32) {
 	} else {
 		sc *= (1 - math32.Min(-delta, .5))
 	}
+	nsc := math32.Clamp(sv.Scale*sc, 0.01, 100)
+	sv.ScaleAt(pt, nsc)
+}
 
-	osc := sv.Scale
-	nsc := osc * sc
-	nsc = math32.Clamp(nsc, 0.01, 100)
-
-	rxf := sv.Root.Paint.Transform
-	xf := rxf.Inverse()
-
+// ScaleAt sets the global Scale parameter and updates the
+// global Translate parameter so that the given render coordinate
+// point (dots) corresponds to the same underlying svg viewbox
+// coordinate point.
+func (sv *SVG) ScaleAt(pt image.Point, sc float32) {
+	sv.setRootTransform()
+	rxf := sv.Root.Paint.Transform.Inverse()
 	mpt := math32.FromPoint(pt)
-	xpt := xf.MulVector2AsPoint(mpt)
-	xpt.SetSub(sv.Root.ViewBox.Min)
-	dt := xpt.DivScalar(nsc).Sub(xpt.DivScalar(osc))
+	xpt := rxf.MulVector2AsPoint(mpt)
+	sv.Scale = sc
 
-	sv.Translate.SetAdd(dt)
-	sv.Scale = nsc
+	sv.setRootTransform()
+	rxf = sv.Root.Paint.Transform
+	npt := rxf.MulVector2AsPoint(xpt) // original point back to screen
+	dpt := mpt.Sub(npt)
+	sv.Translate.SetAdd(dpt)
 }
 
 func (sv *SVG) ZoomReset() {

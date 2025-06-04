@@ -80,11 +80,11 @@ type SVG struct {
 	InvertY bool
 
 	// Translate specifies a translation to apply beyond what is specified in the SVG,
-	// and its ViewBox transform.
+	// and its ViewBox transform, in top-level rendering units (dots, pixels).
 	Translate math32.Vector2
 
 	// Scale specifies a zoom scale factor to apply beyond what is specified in the SVG,
-	// and its ViewBox transform.
+	// and its ViewBox transform. See [SVG.ZoomAt] for convenient zooming method.
 	Scale float32
 
 	// painter is the current painter being used, which is only valid during rendering.
