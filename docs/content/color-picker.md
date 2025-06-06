@@ -23,6 +23,15 @@ cp.OnChange(func(e events.Event) {
 })
 ```
 
+You can detect when a user changes the color as they slide ([[events#input]]):
+
+```Go
+cp := core.NewColorPicker(b).SetColor(colors.Green)
+cp.OnInput(func(e events.Event) {
+    core.MessageSnackbar(cp, colors.AsHex(cp.Color))
+})
+```
+
 ## Color button
 
 You can make a [[button]] that opens a color picker [[dialog]]:

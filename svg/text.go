@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/htmltext"
@@ -14,16 +13,21 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
+// todo: needs some work to get up to spec:
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/tspan
+// dx, dy need to be specifiable as relative offsets from parent text, not just glyph
+// relative offsets. Also, the literal parsing of example in link of an inline <tspan>
+// element within a broader text shows that a different kind of parsing
+// structure is required.
+
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text, where text has empty Text string.
+// There is no line wrapping on SVG Text: every span is a separate line.
 type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
 	Pos math32.Vector2 `xml:"{x,y}"`
-
-	// width of text to render if using word-wrapping
-	Width float32 `xml:"width"`
 
 	// text string to render
 	Text string `xml:"text"`
@@ -75,15 +79,6 @@ func (g *Text) SetNodePos(pos math32.Vector2) {
 	}
 }
 
-func (g *Text) SetNodeSize(sz math32.Vector2) {
-	g.Width = sz.X
-	scx, _ := g.Paint.Transform.ExtractScale()
-	for _, kii := range g.Children {
-		kt := kii.(*Text)
-		kt.Width = g.Width * scx
-	}
-}
-
 // LocalBBox does full text layout, but no transforms
 func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	if g.Text == "" {
@@ -96,10 +91,12 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	}
 	tx, _ := htmltext.HTMLToRich([]byte(g.Text), &fs, nil)
 	// fmt.Println(tx)
-	sz := math32.Vec2(10000, 10000)
+	sz := math32.Vec2(10000, 10000) // no wrapping!!
 	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
-	// baseOff := g.TextShaped.Lines[0].Offset
+	baseOff := g.TextShaped.Lines[0].Offset
 	g.TextShaped.StartAtBaseline() // remove top-left offset
+	return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
+
 	// fmt.Println("baseoff:", baseOff)
 	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)
 
@@ -142,7 +139,6 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	*/
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 	// g.TextShaped.UpdateBBox()
-	return g.TextShaped.Bounds.Translate(g.Pos)
 }
 
 func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
@@ -153,8 +149,8 @@ func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.BBox = lbb.MulMatrix2(xf)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 func (g *Text) Render(sv *SVG) {
@@ -192,104 +188,13 @@ func (g *Text) RenderText(sv *SVG) {
 // each node must define this for itself
 func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+	scx, scy := xf.ExtractScale()
+	if rot != 0 || scx != 1 || scy != 1 || g.IsParText() {
+		// note: par text requires transform b/c not saving children pos
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
-		if g.IsParText() {
-			for _, kii := range g.Children {
-				kt := kii.(*Text)
-				kt.ApplyTransform(sv, xf)
-			}
-		} else {
-			g.Pos = xf.MulVector2AsPoint(g.Pos)
-			scx, _ := xf.ExtractScale()
-			g.Width *= scx
-			g.GradientApplyTransform(sv, xf)
-		}
-	}
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		if g.IsParText() {
-			// translation transform
-			xft, lptt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			// transform transform
-			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false)
-			xf.X0 = 0 // negate translation effects
-			xf.Y0 = 0
-			g.Paint.Transform.SetMulCenter(xf, lpt)
-			g.SetProperty("transform", g.Paint.Transform.String())
-
-			g.Pos = xft.MulVector2AsPointCenter(g.Pos, lptt)
-			scx, _ := xft.ExtractScale()
-			g.Width *= scx
-			for _, kii := range g.Children {
-				kt := kii.(*Text)
-				kt.Pos = xft.MulVector2AsPointCenter(kt.Pos, lptt)
-				kt.Width *= scx
-			}
-		} else {
-			xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self when not a parent
-			g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
-			scx, _ := xf.ExtractScale()
-			g.Width *= scx
-		}
-	}
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
-	if g.IsParText() {
-		npt := 9 + g.NumChildren()*3
-		*dat = slicesx.SetLength(*dat, npt)
-		(*dat)[0] = g.Pos.X
-		(*dat)[1] = g.Pos.Y
-		(*dat)[2] = g.Width
-		g.WriteTransform(*dat, 3)
-		for i, kii := range g.Children {
-			kt := kii.(*Text)
-			off := 9 + i*3
-			(*dat)[off+0] = kt.Pos.X
-			(*dat)[off+1] = kt.Pos.Y
-			(*dat)[off+2] = kt.Width
-		}
-	} else {
-		*dat = slicesx.SetLength(*dat, 3+6)
-		(*dat)[0] = g.Pos.X
-		(*dat)[1] = g.Pos.Y
-		(*dat)[2] = g.Width
-		g.WriteTransform(*dat, 3)
-	}
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Text) ReadGeom(sv *SVG, dat []float32) {
-	g.Pos.X = dat[0]
-	g.Pos.Y = dat[1]
-	g.Width = dat[2]
-	g.ReadTransform(dat, 3)
-	if g.IsParText() {
-		for i, kii := range g.Children {
-			kt := kii.(*Text)
-			off := 9 + i*3
-			kt.Pos.X = dat[off+0]
-			kt.Pos.Y = dat[off+1]
-			kt.Width = dat[off+2]
-		}
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.GradientApplyTransform(sv, xf)
 	}
 }

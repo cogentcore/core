@@ -42,6 +42,7 @@ func init() {
 		"Chartreuse":           reflect.ValueOf(&colors.Chartreuse).Elem(),
 		"Chocolate":            reflect.ValueOf(&colors.Chocolate).Elem(),
 		"Clearer":              reflect.ValueOf(colors.Clearer),
+		"CloneUniform":         reflect.ValueOf(colors.CloneUniform),
 		"Coral":                reflect.ValueOf(&colors.Coral).Elem(),
 		"Cornflowerblue":       reflect.ValueOf(&colors.Cornflowerblue).Elem(),
 		"Cornsilk":             reflect.ValueOf(&colors.Cornsilk).Elem(),

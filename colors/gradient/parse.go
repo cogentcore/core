@@ -59,7 +59,6 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		// TODO(kai): do we need to clone?
 		return img, nil
 	}
-
 	str = strings.TrimSpace(str)
 	if strings.HasPrefix(str, "url(") {
 		img := cc.ImageByURL(str)
@@ -69,6 +68,9 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		return img, nil
 	}
 	str = strings.ToLower(str)
+	if str == "none" || str == "" {
+		return nil, nil
+	}
 	grad := "-gradient"
 
 	gidx := strings.Index(str, grad)
@@ -126,10 +128,14 @@ func FromAny(val any, ctx ...colors.Context) (image.Image, error) {
 	switch v := val.(type) {
 	case color.Color:
 		return colors.Uniform(v), nil
+	case *color.Color:
+		return colors.Uniform(*v), nil
 	case image.Image:
 		return v, nil
 	case string:
 		return FromString(v, ctx...)
+	case *string:
+		return FromString(*v, ctx...)
 	}
 	return nil, fmt.Errorf("gradient.FromAny: got unsupported type %T", val)
 }
@@ -498,9 +504,6 @@ func readFraction(v string) (float32, error) {
 	}
 	f := float32(f64)
 	f /= d
-	if f < 0 {
-		f = 0
-	}
 	return f, nil
 }
 

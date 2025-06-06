@@ -7,10 +7,37 @@
 package core
 
 import (
+	"image"
+
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
+	"golang.org/x/image/draw"
 )
+
+// grabRenderFrom grabs the rendered image from the given widget.
+// If it returns nil, then the image could not be fetched.
+func grabRenderFrom(w Widget) *image.RGBA {
+	wb := w.AsWidget()
+	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
+		return nil
+	}
+	// todo: grab region from canvas!
+	imgRend := paint.NewImageRenderer(math32.FromPoint(wb.Scene.SceneGeom.Size))
+	wb.RenderWidget()
+	rend := wb.Scene.Painter.RenderDone()
+	imgRend.Render(rend)
+	scimg := imgRend.Image()
+	if scimg == nil {
+		return nil
+	}
+	sz := wb.Geom.TotalBBox.Size()
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
+	return img
+}
 
 func (ps *paintSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
@@ -29,20 +56,6 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 	elem := cw.Element(ss, "div")
 	cw.SetElementGeom(elem, ss.bbox.Min, ss.bbox.Size())
 	elem.Get("style").Set("backgroundColor", colors.AsHex(clr))
-}
-
-func (ss *spritesSource) Draw(c composer.Composer) {
-	cw := c.(*composer.ComposerWeb)
-	for _, sr := range ss.sprites {
-		elem := cw.Element(ss, "div") // TODO: support full images
-		if !sr.active {
-			elem.Get("style").Set("display", "none")
-			continue
-		}
-		elem.Get("style").Set("display", "initial")
-		cw.SetElementGeom(elem, sr.drawPos, sr.pixels.Bounds().Size())
-		elem.Get("style").Set("backgroundColor", colors.AsHex(colors.ToUniform(sr.pixels)))
-	}
 }
 
 func (w *renderWindow) fillInsets(c composer.Composer) {

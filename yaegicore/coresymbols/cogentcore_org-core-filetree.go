@@ -57,6 +57,7 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WCopyFieldsFrom   func(from tree.Node)
 	WCut              func()
 	WDeleteFiles      func()
+	WDeleteSelected   func()
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
@@ -99,6 +100,7 @@ func (W _cogentcore_org_core_filetree_Filer) Copy()                           { 
 func (W _cogentcore_org_core_filetree_Filer) CopyFieldsFrom(from tree.Node)   { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_filetree_Filer) Cut()                            { W.WCut() }
 func (W _cogentcore_org_core_filetree_Filer) DeleteFiles()                    { W.WDeleteFiles() }
+func (W _cogentcore_org_core_filetree_Filer) DeleteSelected()                 { W.WDeleteSelected() }
 func (W _cogentcore_org_core_filetree_Filer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_filetree_Filer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_filetree_Filer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }

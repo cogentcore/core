@@ -103,11 +103,12 @@ func (txt *Text2D) RenderText() {
 	}
 	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
 	st := &txt.Styles
-	if !st.Font.Decoration.HasFlag(rich.FillColor) {
-		txt.usesDefaultColor = true
-	}
+
 	st.ToDots()
 	sty, tsty := st.NewRichText()
+	if sty.FillColor() == nil {
+		txt.usesDefaultColor = true
+	}
 	sz := math32.Vec2(10000, 1000) // just a big size
 	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), sty, nil)
 	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, sty, tsty, &rich.DefaultSettings, sz)

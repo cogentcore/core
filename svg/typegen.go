@@ -33,12 +33,12 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.ClipPath", IDNa
 // ClipPath is used for holding a path that renders as a clip path
 func NewClipPath(parent ...tree.Node) *ClipPath { return tree.New[ClipPath](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into tree.Properties and set in CSS\nfield of appropriate node", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Sheet"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into tree.Properties and set in CSS\nfield of appropriate node.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Sheet"}}})
 
 // NewStyleSheet returns a new [StyleSheet] with the given optional parent:
-// StyleSheet is a Node2D node that contains a stylesheet -- property values
+// StyleSheet is a node that contains a stylesheet -- property values
 // contained in this sheet can be transformed into tree.Properties and set in CSS
-// field of appropriate node
+// field of appropriate node.
 func NewStyleSheet(parent ...tree.Node) *StyleSheet { return tree.New[StyleSheet](parent...) }
 
 // SetSheet sets the [StyleSheet.Sheet]
@@ -194,7 +194,7 @@ func (t *Marker) SetTransform(v math32.Matrix2) *Marker { t.Transform = v; retur
 // effective size for actual rendering
 func (t *Marker) SetEffSize(v math32.Vector2) *Marker { t.EffSize = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "NodeBase is the base type for all elements within an SVG tree.\nIt implements the [Node] interface and contains the core functionality.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Class", Doc: "Class contains user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties;\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "CSS is the cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Properties elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "CSSAgg is the aggregated css properties from all higher nodes down to this node."}, {Name: "BBox", Doc: "BBox is the bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "VisBBox is the visible bounding box for the node intersected with the SVG image geometry."}, {Name: "Paint", Doc: "Paint is the paint style information for this node."}, {Name: "isDef", Doc: "isDef is whether this is in [SVG.Defs]."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "NodeBase is the base type for all elements within an SVG tree.\nIt implements the [Node] interface and contains the core functionality.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Class", Doc: "Class contains user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties;\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "CSS is the cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Properties elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "CSSAgg is the aggregated css properties from all higher nodes down to this node."}, {Name: "BBox", Doc: "BBox is the bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "VisBBox is the visible bounding box for the node intersected with the SVG image geometry."}, {Name: "Paint", Doc: "Paint is the paint style information for this node."}, {Name: "GradientFill", Doc: "GradientFill contains the fill gradient geometry to use for linear and radial\ngradients of UserSpaceOnUse type applied to this node.\nThese values are updated and copied to gradients of the appropriate type to keep\nthe gradients sync'd with updates to the node as it is transformed."}, {Name: "GradientStroke", Doc: "GradientStroke contains the stroke gradient geometry to use for linear and radial\ngradients of UserSpaceOnUse type applied to this node.\nThese values are updated and copied to gradients of the appropriate type to keep\nthe gradients sync'd with updates to the node as it is transformed."}, {Name: "isDef", Doc: "isDef is whether this is in [SVG.Defs]."}}})
 
 // NewNodeBase returns a new [NodeBase] with the given optional parent:
 // NodeBase is the base type for all elements within an SVG tree.
@@ -264,20 +264,17 @@ func NewRoot(parent ...tree.Node) *Root { return tree.New[Root](parent...) }
 // for the SVG during rendering.
 func (t *Root) SetViewBox(v ViewBox) *Root { t.ViewBox = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text, where text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextShaped", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text, where text has empty Text string.\nThere is no line wrapping on SVG Text: every span is a separate line.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextShaped", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}}})
 
 // NewText returns a new [Text] with the given optional parent:
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text, where text has empty Text string.
+// There is no line wrapping on SVG Text: every span is a separate line.
 func NewText(parent ...tree.Node) *Text { return tree.New[Text](parent...) }
 
 // SetPos sets the [Text.Pos]:
 // position of the left, baseline of the text
 func (t *Text) SetPos(v math32.Vector2) *Text { t.Pos = v; return t }
-
-// SetWidth sets the [Text.Width]:
-// width of text to render if using word-wrapping
-func (t *Text) SetWidth(v float32) *Text { t.Width = v; return t }
 
 // SetText sets the [Text.Text]:
 // text string to render

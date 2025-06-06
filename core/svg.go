@@ -77,9 +77,7 @@ func (sv *SVG) Init() {
 			return
 		}
 		e.SetHandled()
-		del := e.PrevDelta()
-		sv.SVG.Translate.X += float32(del.X)
-		sv.SVG.Translate.Y += float32(del.Y)
+		sv.SVG.Translate.SetAdd(math32.FromPoint(e.PrevDelta()))
 		sv.NeedsRender()
 	})
 	sv.On(events.Scroll, func(e events.Event) {
@@ -88,10 +86,7 @@ func (sv *SVG) Init() {
 		}
 		e.SetHandled()
 		se := e.(*events.MouseScroll)
-		sv.SVG.Scale += float32(se.Delta.Y) / 100
-		if sv.SVG.Scale <= 0.0000001 {
-			sv.SVG.Scale = 0.01
-		}
+		sv.SVG.ZoomAtScroll(se.Delta.Y, se.Pos())
 		sv.NeedsRender()
 	})
 }

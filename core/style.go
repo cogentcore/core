@@ -98,8 +98,8 @@ func (wb *WidgetBase) resetStyleWidget() {
 
 // runStylers runs the [WidgetBase.Stylers].
 func (wb *WidgetBase) runStylers() {
-	wb.Stylers.Do(func(s []func(s *styles.Style)) {
-		for _, f := range s {
+	wb.Stylers.Do(func(s *[]func(s *styles.Style)) {
+		for _, f := range *s {
 			f(&wb.Styles)
 		}
 	})
@@ -217,6 +217,8 @@ func styleFromTags(w Widget, tags reflect.StructTag) {
 		setFromTag(tags, "max-height", s.Max.Y.Em)
 		setFromTag(tags, "grow", func(v float32) { s.Grow.X = v })
 		setFromTag(tags, "grow-y", func(v float32) { s.Grow.Y = v })
+		setFromTag(tags, "icon-width", s.IconSize.X.Em)
+		setFromTag(tags, "icon-height", s.IconSize.Y.Em)
 	})
 	if tags.Get("new-window") == "+" {
 		w.AsWidget().setFlag(true, widgetValueNewWindow)

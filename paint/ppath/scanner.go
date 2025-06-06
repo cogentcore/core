@@ -24,7 +24,7 @@ func (p Path) ReverseScanner() ReverseScanner {
 // Scanner scans the path.
 type Scanner struct {
 	p Path
-	i int
+	i int // i is at the end of the current command
 }
 
 // Scan scans a new path segment and should be called before the other methods.
@@ -39,6 +39,11 @@ func (s *Scanner) Scan() bool {
 // Cmd returns the current path segment command.
 func (s *Scanner) Cmd() float32 {
 	return s.p[s.i]
+}
+
+// Index returns the index in path of the current command.
+func (s *Scanner) Index() int {
+	return (s.i - CmdLen(s.p[s.i])) + 1
 }
 
 // Values returns the current path segment values.

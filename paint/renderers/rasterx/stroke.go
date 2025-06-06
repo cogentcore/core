@@ -265,6 +265,9 @@ func StrokeArc(p Adder, a, s1, s2 fixed.Point26_6, clockwise bool, trimStart,
 // Joiner is called when two segments of a stroke are joined. it is exposed
 // so that if can be wrapped to generate callbacks for the join points.
 func (r *Stroker) Joiner(p C2Point) {
+	if p.P.X < 0 || p.P.Y < 0 {
+		return
+	}
 	crossProd := p.LNorm.X*p.TNorm.Y - p.TNorm.X*p.LNorm.Y
 	// stroke bottom edge, with the reverse of p
 	r.StrokeEdge(C2Point{P: p.P, TNorm: Invert(p.LNorm), LNorm: Invert(p.TNorm),

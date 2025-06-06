@@ -133,6 +133,11 @@ func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 		return
 	}
 	ri -= sn
+	if ri+rng.Len() > len(stx) {
+		rng.End -= (ri + rng.Len()) - len(stx)
+		// fmt.Println("shape range err:", tx, string(stx), len(stx), si, sn, ri, rng)
+		// return
+	}
 	rtx := stx[ri : ri+rng.Len()]
 	SetFontStyle(ctx, fnt, tsty, 0)
 

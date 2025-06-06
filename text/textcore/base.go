@@ -266,7 +266,6 @@ func (ed *Base) editDone() {
 		ed.Lines.EditDone() // sends the change event
 	}
 	ed.clearSelected()
-	ed.clearCursor()
 }
 
 // reMarkup triggers a complete re-markup of the entire text --

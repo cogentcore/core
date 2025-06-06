@@ -143,8 +143,8 @@ func (sp *SpellData) SaveUserIfLearn() error {
 // CheckWord checks a single word and returns suggestions if word is unknown.
 // bool is true if word is in the dictionary, false otherwise.
 func (sp *SpellData) CheckWord(word string) ([]string, bool) {
-	if sp.model == nil {
-		log.Println("spell.CheckWord: programmer error -- Spelling not initialized!")
+	if sp == nil || sp.model == nil {
+		// log.Println("spell.CheckWord: programmer error -- Spelling not initialized!")
 		return nil, false
 	}
 	w := lexer.FirstWordApostrophe(word) // only lookup words

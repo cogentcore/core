@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"cogentcore.org/core/base/slicesx"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 )
@@ -28,18 +28,24 @@ func (g *Path) SetPos(pos math32.Vector2) {
 }
 
 func (g *Path) SetSize(sz math32.Vector2) {
-	// todo: scale bbox
+	bb := g.Data.FastBounds()
+	csz := bb.Size()
+	if csz.X == 0 || csz.Y == 0 {
+		return
+	}
+	sc := sz.Div(csz)
+	g.Data.Transform(math32.Scale2D(sc.X, sc.Y))
 }
 
 // SetData sets the path data to given string, parsing it into an optimized
 // form used for rendering
 func (g *Path) SetData(data string) error {
-	g.DataStr = data
-	var err error
-	g.Data, err = ppath.ParseSVGPath(data)
-	if err != nil {
+	d, err := ppath.ParseSVGPath(data)
+	if errors.Log(err) != nil {
 		return err
 	}
+	g.DataStr = data
+	g.Data = d
 	return err
 }
 
@@ -69,12 +75,14 @@ func (g *Path) Render(sv *SVG) {
 		pos := g.Data.Coords()
 		dir := g.Data.CoordDirections()
 		np := len(pos)
-		if mrk_start != nil && np > 0 {
-			ang := ppath.Angle(dir[0])
+		if mrk_start != nil && np > 1 {
+			dir0 := pos[1].Sub(pos[0])
+			ang := ppath.Angle(dir0) // dir[0]: has average but last 2 works better
 			mrk_start.RenderMarker(sv, pos[0], ang, g.Paint.Stroke.Width.Dots)
 		}
 		if mrk_end != nil && np > 1 {
-			ang := ppath.Angle(dir[np-1])
+			dirn := pos[np-1].Sub(pos[np-2])
+			ang := ppath.Angle(dirn) // dir[np-1]: see above
 			mrk_end.RenderMarker(sv, pos[np-1], ang, g.Paint.Stroke.Width.Dots)
 		}
 		if mrk_mid != nil && np > 2 {
@@ -92,57 +100,9 @@ func (g *Path) UpdatePathString() {
 	g.DataStr = g.Data.ToSVG()
 }
 
-////////  Transforms
-
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Path) ApplyTransform(sv *SVG, xf math32.Matrix2) {
-	// path may have horiz, vert elements -- only gen soln is to transform
-	g.Paint.Transform.SetMul(xf)
-	g.SetProperty("transform", g.Paint.Transform.String())
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Path) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.ApplyTransformImpl(xf, lpt)
-		g.GradientApplyTransformPt(sv, xf, lpt)
-	}
-}
-
-// ApplyTransformImpl does the implementation of applying a transform to all points
-func (g *Path) ApplyTransformImpl(xf math32.Matrix2, lpt math32.Vector2) {
 	g.Data.Transform(xf)
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Path) WriteGeom(sv *SVG, dat *[]float32) {
-	sz := len(g.Data)
-	*dat = slicesx.SetLength(*dat, sz+6)
-	for i := range g.Data {
-		(*dat)[i] = float32(g.Data[i])
-	}
-	g.WriteTransform(*dat, sz)
-	g.GradientWritePts(sv, dat)
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Path) ReadGeom(sv *SVG, dat []float32) {
-	sz := len(g.Data)
-	g.Data = ppath.Path(dat)
-	g.ReadTransform(dat, sz)
-	g.GradientReadPts(sv, dat)
+	g.GradientApplyTransform(sv, xf)
 }

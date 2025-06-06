@@ -158,6 +158,7 @@ func (sr *Slider) Init() {
 	sr.Precision = 9
 	sr.ThumbSize.Set(1, 1)
 	sr.TrackSize = 0.5
+	sr.lastValue = -math32.MaxFloat32
 	sr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
@@ -211,6 +212,7 @@ func (sr *Slider) Init() {
 	sr.On(events.SlideStart, func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
 		sr.setSliderPosEvent(pos)
+		sr.lastValue = -math32.MaxFloat32
 		sr.slideStartPos = sr.pos
 	})
 	sr.On(events.SlideMove, func(e events.Event) {
