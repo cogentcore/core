@@ -47,7 +47,7 @@ type Page struct {
 	Title string
 
 	// Date is the optional date that the page was published.
-	Date time.Time
+	Date time.Time `toml:"-"`
 
 	// Authors are the optional authors of the page.
 	Authors []string
