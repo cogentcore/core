@@ -207,6 +207,22 @@ func (ct *Content) Init() {
 						})
 					})
 				}
+				if len(ct.currentPage.Authors) > 0 {
+					tree.Add(p, func(w *core.Text) {
+						w.SetType(core.TextTitleLarge)
+						w.Updater(func() {
+							w.SetText("By " + strcase.FormatList(ct.currentPage.Authors...))
+						})
+					})
+				}
+				if !ct.currentPage.Date.IsZero() {
+					tree.Add(p, func(w *core.Text) {
+						w.SetType(core.TextTitleMedium)
+						w.Updater(func() {
+							w.SetText(ct.currentPage.Date.Format("January 2, 2006"))
+						})
+					})
+				}
 				tree.Add(p, func(w *core.Frame) {
 					w.Styler(func(s *styles.Style) {
 						s.Direction = styles.Column

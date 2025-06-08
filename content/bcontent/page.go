@@ -49,6 +49,9 @@ type Page struct {
 	// Date is the optional date that the page was published.
 	Date time.Time `toml:"-"`
 
+	// DateString is only used for parsing the date from the TOML front matter.
+	DateString string `toml:"Date" json:"-"`
+
 	// Authors are the optional authors of the page.
 	Authors []string
 
@@ -119,7 +122,17 @@ func (pg *Page) ReadMetadata() error {
 		}
 		data = append(data, append(b, '\n')...)
 	}
-	return tomlx.ReadBytes(pg, data)
+	err = tomlx.ReadBytes(pg, data)
+	if err != nil {
+		return err
+	}
+	if pg.DateString != "" {
+		pg.Date, err = time.Parse(time.DateOnly, pg.DateString)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ReadContent returns the page content with any front matter removed.
