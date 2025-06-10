@@ -74,3 +74,21 @@ core.NewSwitches(b).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Styl
     s.Direction = styles.Column
 })
 ```
+
+You can change the [[styles#font size]] of switches:
+
+```Go
+sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
+sw.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(25)
+})
+```
+
+You can change the [[icon#icon size]] of switches:
+
+```Go
+sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
+sw.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40))
+})
+```
