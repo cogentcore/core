@@ -150,7 +150,7 @@ func (tx *Text) Init() {
 			s.Font.Weight = rich.Medium
 		case TextBodyLarge:
 			s.Text.LineHeight = 24.0 / 16
-			// s.Font.Size.Dp(16) // already the default so don't specify (to allow for inheritance)
+			// s.Font.Size.Dp(16) // already the default so don't specify (to allow for inheritance) (important)
 			s.Font.Weight = rich.Normal
 		case TextSupporting:
 			s.Color = colors.Scheme.OnSurfaceVariant
