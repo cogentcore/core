@@ -54,16 +54,6 @@ You can make switches render as segmented buttons:
 core.NewSwitches(b).SetType(core.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
 ```
 
-## Styles
-
-You can make switches render vertically:
-
-```Go
-core.NewSwitches(b).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Style) {
-    s.Direction = styles.Column
-})
-```
-
 ## Events
 
 You can detect when the user [[events#change]]s which switches are selected:
@@ -72,5 +62,15 @@ You can detect when the user [[events#change]]s which switches are selected:
 sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
 sw.OnChange(func(e events.Event) {
     core.MessageSnackbar(sw, fmt.Sprintf("Currently selected: %v", sw.SelectedItems()))
+})
+```
+
+## Styles
+
+You can make switches render vertically:
+
+```Go
+core.NewSwitches(b).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Style) {
+    s.Direction = styles.Column
 })
 ```
