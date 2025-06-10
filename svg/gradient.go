@@ -26,7 +26,7 @@ type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad gradient.Gradient
+	Grad gradient.Gradient `json:"-"` // note: cannot do drag-n-drop
 
 	// name of another gradient to get stops from
 	StopsName string
@@ -285,4 +285,35 @@ func (sv *SVG) GradientUpdateAllStops() {
 			sv.GradientUpdateStops(gr)
 		}
 	}
+}
+
+// GradientDuplicateNode duplicates any existing gradients
+// for the given node, in fill or stroke.
+// Must be called when duplicating a node.
+func (sv *SVG) GradientDuplicateNode(n Node) {
+	nb := n.AsNodeBase()
+
+	setGr := func(prop string) {
+		v, ok := nb.Properties[prop]
+		if !ok {
+			return
+		}
+		s, ok := v.(string)
+		if !ok {
+			return
+		}
+		nm := NameFromURL(s)
+		if nm == "" {
+			return
+		}
+		gri := sv.FindDefByName(nm)
+		if gri == nil {
+			return
+		}
+		gr := gri.(*Gradient)
+		_, ngu := sv.GradientNewForNode(n, prop, gr.IsRadial(), gr.StopsName)
+		nb.Properties["fill"] = ngu
+	}
+	setGr("fill")
+	setGr("stroke")
 }

@@ -302,9 +302,8 @@ func (tr *Tree) deleteSync() {
 	tr.sendChangeEventReSync(nil)
 }
 
-// Duplicate duplicates the sync node corresponding to this view node in
-// the tree, and inserts the duplicate after this node (as a new sibling).
-// If SyncNode is set, operates on Sync Tree.
+// Duplicate duplicates this node, and inserts the duplicate after this node
+// (as a new sibling). If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) Duplicate() { //types:add
 	ttl := "Duplicate"
 	if tr.IsRoot(ttl) {
