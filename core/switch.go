@@ -117,7 +117,7 @@ func (sw *Switch) Init() {
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
 		case SwitchSwitch:
-			s.IconSize.Set(units.Em(2), units.Em(1.5))
+			s.IconSize.Set(units.Em(2), units.Em(1.5)) // switches need to be bigger
 		}
 
 		if s.Is(states.Selected) {
@@ -164,7 +164,6 @@ func (sw *Switch) Init() {
 						} else {
 							s.Color = colors.Scheme.Primary.Base
 						}
-						// switches need to be bigger
 					})
 					w.Updater(func() {
 						w.SetIcon(sw.IconOn)
@@ -172,9 +171,7 @@ func (sw *Switch) Init() {
 				})
 				// same styles for off and indeterminate
 				iconStyle := func(s *styles.Style) {
-					switch {
-					case sw.Type == SwitchSwitch:
-					case sw.IconOff == icons.None && sw.IconIndeterminate == icons.None:
+					if sw.IconOff == icons.None && sw.IconIndeterminate == icons.None {
 						s.IconSize.Zero() // nothing to render
 					}
 				}
