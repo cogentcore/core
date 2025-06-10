@@ -229,6 +229,7 @@ func (tf *TextField) Init() {
 		s.Text.Align = text.Start
 		s.Align.Items = styles.Center
 		s.Color = colors.Scheme.OnSurface
+		s.IconSize.Set(units.Em(18.0 / 16))
 		switch tf.Type {
 		case TextFieldFilled:
 			s.Border.Style.Set(styles.BorderNone)
@@ -350,6 +351,8 @@ func (tf *TextField) Init() {
 					s.Padding.Zero()
 					s.Color = colors.Scheme.OnSurfaceVariant
 					s.Margin.SetRight(units.Dp(8))
+					s.Font.Size = tf.Styles.Font.Size
+					s.IconSize = tf.Styles.IconSize
 					if tf.LeadingIconOnClick == nil {
 						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 						s.Cursor = cursors.None
@@ -395,6 +398,8 @@ func (tf *TextField) Init() {
 						s.Color = colors.Scheme.Error.Base
 					}
 					s.Margin.SetLeft(units.Dp(8))
+					s.Font.Size = tf.Styles.Font.Size
+					s.IconSize = tf.Styles.IconSize
 					if tf.TrailingIconOnClick == nil || tf.error != nil {
 						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 						s.Cursor = cursors.None
