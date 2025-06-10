@@ -355,7 +355,7 @@ func (ch *Chooser) Init() {
 				w.Maker(func(p *tree.Plan) {
 					tree.AddInit(p, "trail-icon", func(w *Button) {
 						w.Styler(func(s *styles.Style) {
-							s.IconSize.Set(units.Dp(16)) // independent from Em
+							s.IconSize.Set(units.Dp(18)) // independent from Em
 							// indicator does not need to be focused
 							s.SetAbilities(false, abilities.Focusable)
 						})
