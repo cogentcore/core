@@ -359,6 +359,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	contents.SetReadOnly(true)
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
 			ct.rightFrame.ScrollDimToContentStart(math32.Y)
@@ -410,6 +411,7 @@ func (ct *Content) makeCategories() {
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
+	cats.SetReadOnly(true)
 	cats.OnSelect(func(e events.Event) {
 		if cats.IsRootSelected() {
 			ct.Open("")
