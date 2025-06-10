@@ -131,6 +131,11 @@ func (sw *Switches) Init() {
 		} else {
 			s.Wrap = true
 		}
+		if sw.Type == SwitchSwitch {
+			s.IconSize.Set(units.Em(2), units.Em(1.5))
+		} else {
+			s.IconSize.Set(units.Em(1.5))
+		}
 	})
 	sw.FinalStyler(func(s *styles.Style) {
 		if s.Direction != styles.Row {
@@ -156,12 +161,15 @@ func (sw *Switches) Init() {
 					sw.UpdateRender()
 				})
 				w.Styler(func(s *styles.Style) {
+					ps := &sw.Styles
+					s.IconSize = ps.IconSize // Directly inherit
+
+					// Remaining styles are only for segmented buttons
 					if sw.Type != SwitchSegmentedButton {
 						return
 					}
 					ip := w.IndexInParent()
 					brf := styles.BorderRadiusFull.Top
-					ps := &sw.Styles
 					if ip == 0 {
 						if ps.Direction == styles.Row {
 							s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)

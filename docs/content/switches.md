@@ -87,7 +87,7 @@ sw.Styler(func(s *styles.Style) {
 You can change the [[icon#icon size]] of switches:
 
 ```Go
-sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
+sw := core.NewSwitches(b).SetType(core.SwitchCheckbox).SetStrings("Go", "Python", "C++")
 sw.Styler(func(s *styles.Style) {
     s.IconSize.Set(units.Dp(40))
 })
