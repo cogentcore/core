@@ -142,7 +142,6 @@ func (ed *Editor) Close(afterFunc func(canceled bool)) bool {
 func (ed *Editor) handleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {
-			ed.stopCursor()
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {
@@ -151,9 +150,7 @@ func (ed *Editor) handleFocus() {
 		}
 	})
 	ed.OnFocus(func(e events.Event) {
-		if !ed.IsReadOnly() && ed.AbilityIs(abilities.Focusable) {
-			ed.startCursor()
-		}
+		ed.startCursor()
 	})
 }
 
@@ -482,7 +479,6 @@ func (ed *Editor) keyInput(e events.Event) {
 			if !lasttab && ed.CursorPos.Char == 0 && ed.Lines.Settings.AutoIndent {
 				_, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
 				ed.CursorPos.Char = cpos
-				ed.startCursor()
 				gotTabAI = true
 			} else {
 				ed.InsertAtCursor(indent.Bytes(ed.Lines.Settings.IndentChar(), 1, ed.Styles.Text.TabSize))
@@ -514,6 +510,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.iSpellKeyInput(e)
 	}
 	ed.lastWasTabAI = gotTabAI
+	ed.startCursor()
 }
 
 // keyInputInsertBracket handle input of opening bracket-like entity
@@ -637,6 +634,7 @@ func (ed *Editor) handleMouse() {
 				ed.Paste()
 			}
 		}
+		ed.startCursor()
 	})
 	ed.OnDoubleClick(func(e events.Event) {
 		if !ed.StateIs(states.Focused) {
@@ -647,6 +645,7 @@ func (ed *Editor) handleMouse() {
 		if ed.selectWord() {
 			ed.CursorPos = ed.SelectRegion.Start
 		}
+		ed.startCursor()
 		ed.NeedsRender()
 	})
 	ed.On(events.TripleClick, func(e events.Event) {
@@ -662,6 +661,7 @@ func (ed *Editor) handleMouse() {
 			ed.SelectRegion.End.Line = ed.CursorPos.Line
 			ed.SelectRegion.End.Char = sz
 		}
+		ed.startCursor()
 		ed.NeedsRender()
 	})
 	ed.On(events.Scroll, func(e events.Event) {
@@ -682,6 +682,7 @@ func (ed *Editor) handleMouse() {
 				ed.selectModeToggle()
 			}
 		}
+		ed.startCursor()
 		ed.savePosHistory(ed.CursorPos)
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
@@ -690,10 +691,12 @@ func (ed *Editor) handleMouse() {
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		ed.setCursorFromMouse(pt, newPos, events.SelectOne)
+		ed.startCursor()
 	})
 	ed.On(events.SlideStop, func(e events.Event) {
 		e.SetHandled()
 		ed.isScrolling = false
+		ed.startCursor()
 	})
 }
 

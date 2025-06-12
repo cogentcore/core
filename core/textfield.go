@@ -1187,6 +1187,9 @@ func (tf *TextField) startCursor() {
 	if tf == nil || tf.This == nil || !tf.IsVisible() {
 		return
 	}
+	if tf.IsReadOnly() || !tf.AbilityIs(abilities.Focusable) {
+		return
+	}
 	tf.toggleCursor(true)
 }
 
@@ -1206,27 +1209,13 @@ func (tf *TextField) toggleCursor(on bool) {
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
-	sp, ok := ms.Sprites.SpriteByNameNoLock(spnm)
-
-	activate := func() {
-		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
-		sp.Active = true
-		sp.Properties["turnOn"] = true
-		sp.Properties["on"] = true
-		sp.Properties["lastSwitch"] = time.Now()
-	}
-
-	if ok {
-		if on {
-			activate()
-		} else {
+	if !on {
+		if sp, ok := ms.Sprites.SpriteByNameNoLock(spnm); ok {
 			sp.Active = false
 		}
 		return
 	}
-	if !on {
-		return
-	}
+	var sp *Sprite
 	sp = NewSprite(spnm, func(pc *paint.Painter) {
 		if !sp.Active || tf == nil || tf.This == nil || !tf.IsVisible() {
 			return
@@ -1250,7 +1239,7 @@ func (tf *TextField) toggleCursor(on bool) {
 		}
 		sp.Properties["turnOn"] = false
 		pos := math32.FromPoint(sp.EventBBox.Min)
-		if !pos.AddScalar(3).ToPointCeil().In(tf.Geom.ContentBBox) {
+		if !pos.AddScalar(3).ToPointCeil().Sub(tf.Scene.SceneGeom.Pos).In(tf.Geom.ContentBBox) {
 			return
 		}
 		pc.Fill.Color = nil
@@ -1260,12 +1249,19 @@ func (tf *TextField) toggleCursor(on bool) {
 		pc.Draw()
 	})
 	sp.InitProperties()
-	activate()
+	sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
+	sp.Active = true
+	sp.Properties["turnOn"] = true
+	sp.Properties["on"] = true
+	sp.Properties["lastSwitch"] = time.Now()
 	ms.Sprites.AddNoLock(sp)
 }
 
 // updateCursorPosition updates the position of the cursor.
 func (tf *TextField) updateCursorPosition() {
+	if tf.IsReadOnly() || !tf.StateIs(states.Focused) {
+		return
+	}
 	sc := tf.Scene
 	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
 		return
@@ -1647,7 +1643,6 @@ func (tf *TextField) handleKeyEvents() {
 		}
 	})
 	tf.OnFocusLost(func(e events.Event) {
-		tf.stopCursor()
 		if tf.IsReadOnly() {
 			e.SetHandled()
 			return
@@ -1809,9 +1804,7 @@ func (tf *TextField) Render() {
 	if tf.renderVisible == nil || tf.dispRange != tf.renderedRange {
 		tf.layoutCurrent()
 	}
-	if tf.StateIs(states.Focused) {
-		tf.updateCursorPosition()
-	}
+	tf.updateCursorPosition()
 	tf.renderSelect()
 	tf.Scene.Painter.DrawText(tf.renderVisible, tf.effPos)
 }

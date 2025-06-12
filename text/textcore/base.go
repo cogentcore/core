@@ -199,7 +199,8 @@ func (ed *Base) Init() {
 	ed.Styles.Font.Family = rich.Monospace // critical
 	ed.SetLines(lines.NewLines())
 	ed.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		s.SetAbilities(!ed.IsReadOnly(), abilities.Focusable)
 		s.SetAbilities(false, abilities.ScrollableUnattended)
 		ed.CursorWidth.Dp(1)
 		ed.LineNumberColor = nil

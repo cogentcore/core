@@ -8,7 +8,6 @@ import (
 	"image"
 	"sync"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/events"
@@ -193,7 +192,7 @@ func (ss *Sprites) Add(sp *Sprite) {
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
 func (ss *Sprites) AddNoLock(sp *Sprite) {
-	errors.Log(ss.Normal.Add(sp.Name, sp))
+	ss.Normal.Set(sp.Name, sp)
 	ss.modified = true
 }
 

@@ -11,6 +11,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -23,6 +25,9 @@ var (
 // This must be called to update the cursor position -- is called in render.
 func (ed *Base) startCursor() {
 	if ed == nil || ed.This == nil || !ed.IsVisible() {
+		return
+	}
+	if ed.IsReadOnly() || !ed.AbilityIs(abilities.Focusable) {
 		return
 	}
 	ed.toggleCursor(true)
@@ -44,28 +49,14 @@ func (ed *Base) toggleCursor(on bool) {
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
-	sp, ok := ms.Sprites.SpriteByNameNoLock(spnm)
-
-	activate := func() {
-		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
-		sp.Active = true
-		sp.Properties["turnOn"] = true
-		sp.Properties["on"] = true
-		sp.Properties["lastSwitch"] = time.Now()
-	}
-
-	if ok {
-		if on {
-			activate()
-		} else {
+	if !on {
+		if sp, ok := ms.Sprites.SpriteByNameNoLock(spnm); ok {
 			sp.Active = false
 		}
 		return
 	}
-	if !on {
-		return
-	}
-	sp = core.NewSprite(spnm, func(pc *paint.Painter) {
+	var sp *core.Sprite
+	sp = core.NewSprite(spnm, func(pc *paint.Painter) { // overwrites existing
 		if !sp.Active || ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
@@ -88,7 +79,7 @@ func (ed *Base) toggleCursor(on bool) {
 		}
 		sp.Properties["turnOn"] = false
 		pos := math32.FromPoint(sp.EventBBox.Min)
-		if !pos.ToPoint().In(ed.Geom.ContentBBox) {
+		if !pos.ToPoint().Sub(sc.Scene.SceneGeom.Pos).In(ed.Geom.ContentBBox) {
 			return
 		}
 		pc.Fill.Color = nil
@@ -99,12 +90,19 @@ func (ed *Base) toggleCursor(on bool) {
 		pc.Draw()
 	})
 	sp.InitProperties()
-	activate()
+	sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
+	sp.Active = true
+	sp.Properties["turnOn"] = true
+	sp.Properties["on"] = true
+	sp.Properties["lastSwitch"] = time.Now()
 	ms.Sprites.AddNoLock(sp)
 }
 
 // updateCursorPosition updates the position of the cursor.
 func (ed *Base) updateCursorPosition() {
+	if ed.IsReadOnly() || !ed.StateIs(states.Focused) {
+		return
+	}
 	sc := ed.Scene
 	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
 		return

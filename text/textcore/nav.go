@@ -97,7 +97,6 @@ func (ed *Base) CursorToHistoryPrev() bool {
 		ed.posHistoryIndex--
 	}
 	ed.scrollCursorToCenterIfHidden()
-	ed.startCursor()
 	ed.SendInput()
 	return true
 }
@@ -310,7 +309,6 @@ func (ed *Base) cursorBackspace(steps int) {
 	// note: no update b/c signal from buf will drive update
 	ed.cursorBackward(steps)
 	ed.scrollCursorToCenterIfHidden()
-	ed.startCursor()
 	ed.Lines.DeleteText(ed.CursorPos, org)
 	ed.NeedsRender()
 }
@@ -339,7 +337,6 @@ func (ed *Base) cursorBackspaceWord(steps int) {
 	}
 	ed.cursorBackwardWord(steps)
 	ed.scrollCursorToCenterIfHidden()
-	ed.startCursor()
 	ed.Lines.DeleteText(ed.CursorPos, org)
 	ed.NeedsRender()
 }
