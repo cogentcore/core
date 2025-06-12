@@ -383,6 +383,7 @@ func (st *Stage) delete() {
 		st.popups.deleteAll()
 		st.Sprites.reset()
 		st.spriteRenderer = nil
+		st.spritePainter = nil
 	}
 	if st.Scene != nil {
 		st.Scene.DeleteChildren()

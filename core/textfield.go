@@ -294,6 +294,7 @@ func (tf *TextField) Init() {
 				tf.paste()
 			}
 		}
+		tf.startCursor()
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
@@ -304,6 +305,7 @@ func (tf *TextField) Init() {
 		}
 		e.SetHandled()
 		tf.selectWord()
+		tf.startCursor()
 	})
 	tf.On(events.TripleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
@@ -314,6 +316,7 @@ func (tf *TextField) Init() {
 		}
 		e.SetHandled()
 		tf.selectAll()
+		tf.startCursor()
 	})
 	tf.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
@@ -326,20 +329,22 @@ func (tf *TextField) Init() {
 				tf.selectModeToggle()
 			}
 		}
+		tf.startCursor()
 	})
 	tf.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		tf.selectMode = true // always
 		tf.setCursorFromPixel(e.Pos(), events.SelectOne)
+		tf.startCursor()
 	})
 	tf.OnClose(func(e events.Event) {
 		tf.editDone() // todo: this must be protected against something else, for race detector
 	})
 
 	tf.Maker(func(p *tree.Plan) {
-		tf.editText = []rune(tf.text)
-		tf.edited = false
-
+		if !tf.edited { // if in edit, don't overwrite
+			tf.editText = []rune(tf.text)
+		}
 		if tf.IsReadOnly() {
 			return
 		}
@@ -1179,10 +1184,7 @@ var (
 
 // startCursor starts the cursor blinking and renders it
 func (tf *TextField) startCursor() {
-	if tf == nil || tf.This == nil {
-		return
-	}
-	if !tf.IsVisible() {
+	if tf == nil || tf.This == nil || !tf.IsVisible() {
 		return
 	}
 	tf.toggleCursor(true)
@@ -1196,13 +1198,10 @@ func (tf *TextField) stopCursor() {
 // toggleSprite turns on or off the cursor sprite.
 func (tf *TextField) toggleCursor(on bool) {
 	sc := tf.Scene
-	if sc == nil || sc.Stage == nil {
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
 		return
 	}
 	ms := sc.Stage.Main
-	if ms == nil {
-		return // only MainStage has sprites
-	}
 	spnm := textFieldSpriteName
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
@@ -1229,7 +1228,7 @@ func (tf *TextField) toggleCursor(on bool) {
 		return
 	}
 	sp = NewSprite(spnm, func(pc *paint.Painter) {
-		if !sp.Active {
+		if !sp.Active || tf == nil || tf.This == nil || !tf.IsVisible() {
 			return
 		}
 		turnOn := sp.Properties["turnOn"].(bool) // force on
@@ -1250,16 +1249,33 @@ func (tf *TextField) toggleCursor(on bool) {
 			bbsz.X = 2
 		}
 		sp.Properties["turnOn"] = false
+		pos := math32.FromPoint(sp.EventBBox.Min)
+		if !pos.AddScalar(3).ToPointCeil().In(tf.Geom.ContentBBox) {
+			return
+		}
 		pc.Fill.Color = nil
 		pc.Stroke.Color = tf.CursorColor
 		pc.Stroke.Width.Dot(bbsz.X)
-		pos := math32.FromPoint(sp.EventBBox.Min)
 		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
 		pc.Draw()
 	})
 	sp.InitProperties()
 	activate()
 	ms.Sprites.AddNoLock(sp)
+}
+
+// updateCursorPosition updates the position of the cursor.
+func (tf *TextField) updateCursorPosition() {
+	sc := tf.Scene
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
+		return
+	}
+	ms := sc.Stage.Main
+	ms.Sprites.Lock()
+	defer ms.Sprites.Unlock()
+	if sp, ok := ms.Sprites.SpriteByNameNoLock(textFieldSpriteName); ok {
+		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
+	}
 }
 
 // renderSelect renders the selected region, if any, underneath the text
@@ -1469,6 +1485,7 @@ func (tf *TextField) handleKeyEvents() {
 		if !tf.StateIs(states.Focused) && kf == keymap.Abort {
 			return
 		}
+		tf.startCursor()
 
 		// first all the keys that work for both inactive and active
 		switch kf {
@@ -1625,9 +1642,12 @@ func (tf *TextField) handleKeyEvents() {
 	tf.OnFocus(func(e events.Event) {
 		if tf.IsReadOnly() {
 			e.SetHandled()
+		} else {
+			tf.startCursor()
 		}
 	})
 	tf.OnFocusLost(func(e events.Event) {
+		tf.stopCursor()
 		if tf.IsReadOnly() {
 			e.SetHandled()
 			return
@@ -1781,17 +1801,6 @@ func (tf *TextField) layoutCurrent() {
 }
 
 func (tf *TextField) Render() {
-	defer func() {
-		if tf.IsReadOnly() {
-			return
-		}
-		if tf.StateIs(states.Focused) {
-			tf.startCursor()
-		} else {
-			tf.stopCursor()
-		}
-	}()
-
 	tf.autoScroll() // does all update checking, inits paint with our style
 	tf.RenderAllocBox()
 	if tf.dispRange.Start < 0 || tf.dispRange.End > len(tf.editText) {
@@ -1799,6 +1808,9 @@ func (tf *TextField) Render() {
 	}
 	if tf.renderVisible == nil || tf.dispRange != tf.renderedRange {
 		tf.layoutCurrent()
+	}
+	if tf.StateIs(states.Focused) {
+		tf.updateCursorPosition()
 	}
 	tf.renderSelect()
 	tf.Scene.Painter.DrawText(tf.renderVisible, tf.effPos)

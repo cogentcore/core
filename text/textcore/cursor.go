@@ -22,10 +22,7 @@ var (
 // startCursor starts the cursor blinking and renders it.
 // This must be called to update the cursor position -- is called in render.
 func (ed *Base) startCursor() {
-	if ed == nil || ed.This == nil {
-		return
-	}
-	if !ed.IsVisible() {
+	if ed == nil || ed.This == nil || !ed.IsVisible() {
 		return
 	}
 	ed.toggleCursor(true)
@@ -39,13 +36,10 @@ func (ed *Base) stopCursor() {
 // toggleSprite turns on or off the cursor sprite.
 func (ed *Base) toggleCursor(on bool) {
 	sc := ed.Scene
-	if sc == nil || sc.Stage == nil {
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
 		return
 	}
 	ms := sc.Stage.Main
-	if ms == nil {
-		return // only MainStage has sprites
-	}
 	spnm := blinkerSpriteName
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
@@ -72,7 +66,7 @@ func (ed *Base) toggleCursor(on bool) {
 		return
 	}
 	sp = core.NewSprite(spnm, func(pc *paint.Painter) {
-		if !sp.Active {
+		if !sp.Active || ed == nil || ed.This == nil || !ed.IsVisible() {
 			return
 		}
 		turnOn := sp.Properties["turnOn"].(bool) // force on
@@ -93,17 +87,34 @@ func (ed *Base) toggleCursor(on bool) {
 			bbsz.X = 2
 		}
 		sp.Properties["turnOn"] = false
+		pos := math32.FromPoint(sp.EventBBox.Min)
+		if !pos.ToPoint().In(ed.Geom.ContentBBox) {
+			return
+		}
 		pc.Fill.Color = nil
 		pc.Stroke.Color = ed.CursorColor
 		pc.Stroke.Dashes = nil
 		pc.Stroke.Width.Dot(bbsz.X)
-		pos := math32.FromPoint(sp.EventBBox.Min)
 		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
 		pc.Draw()
 	})
 	sp.InitProperties()
 	activate()
 	ms.Sprites.AddNoLock(sp)
+}
+
+// updateCursorPosition updates the position of the cursor.
+func (ed *Base) updateCursorPosition() {
+	sc := ed.Scene
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
+		return
+	}
+	ms := sc.Stage.Main
+	ms.Sprites.Lock()
+	defer ms.Sprites.Unlock()
+	if sp, ok := ms.Sprites.SpriteByNameNoLock(blinkerSpriteName); ok {
+		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
+	}
 }
 
 // cursorBBox returns a bounding-box for a cursor at given position
