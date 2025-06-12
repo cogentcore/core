@@ -50,7 +50,7 @@ func (ed *Base) toggleCursor(on bool) {
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
-	sp, ok := ms.Sprites.SpriteByNameLocked(spnm)
+	sp, ok := ms.Sprites.SpriteByNameNoLock(spnm)
 
 	activate := func() {
 		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
@@ -103,7 +103,7 @@ func (ed *Base) toggleCursor(on bool) {
 	})
 	sp.InitProperties()
 	activate()
-	ms.Sprites.AddLocked(sp)
+	ms.Sprites.AddNoLock(sp)
 }
 
 // cursorBBox returns a bounding-box for a cursor at given position

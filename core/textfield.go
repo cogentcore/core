@@ -1207,7 +1207,7 @@ func (tf *TextField) toggleCursor(on bool) {
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
-	sp, ok := ms.Sprites.SpriteByNameLocked(spnm)
+	sp, ok := ms.Sprites.SpriteByNameNoLock(spnm)
 
 	activate := func() {
 		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
@@ -1259,7 +1259,7 @@ func (tf *TextField) toggleCursor(on bool) {
 	})
 	sp.InitProperties()
 	activate()
-	ms.Sprites.AddLocked(sp)
+	ms.Sprites.AddNoLock(sp)
 }
 
 // renderSelect renders the selected region, if any, underneath the text

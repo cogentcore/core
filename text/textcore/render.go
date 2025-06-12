@@ -171,7 +171,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	pc := &ed.Scene.Painter
 	sz := ed.charSize
 	sz.X *= float32(ed.linesSize.X)
-	vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
+	vlr := buf.ViewLineRegionNoLock(ed.viewId, ln)
 	vseli := vlr.Intersect(vsel, ed.linesSize.X)
 	tx := buf.ViewMarkupLine(ed.viewId, ln)
 	ctx := &rich.DefaultSettings

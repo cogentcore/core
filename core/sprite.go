@@ -159,18 +159,18 @@ type Sprites struct {
 
 // SetModified sets the sprite modified flag, which will
 // drive a render to reflect the updated sprite.
-// This version locks the sprites: see also [Sprites.SetModifiedLocked].
+// This version locks the sprites: see also [Sprites.SetModifiedNoLock].
 func (ss *Sprites) SetModified() {
 	ss.Lock()
 	ss.modified = true
 	ss.Unlock()
 }
 
-// SetModifiedLocked sets the sprite modified flag, which will
+// SetModifiedNoLock sets the sprite modified flag, which will
 // drive a render to reflect the updated sprite.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) SetModifiedLocked() {
+func (ss *Sprites) SetModifiedNoLock() {
 	ss.modified = true
 }
 
@@ -182,33 +182,33 @@ func (ss *Sprites) IsModified() bool {
 }
 
 // Add adds sprite to the Normal list of sprites, updating if already there.
-// This version locks the sprites: see also [Sprites.AddLocked].
+// This version locks the sprites: see also [Sprites.AddNoLock].
 func (ss *Sprites) Add(sp *Sprite) {
 	ss.Lock()
-	ss.AddLocked(sp)
+	ss.AddNoLock(sp)
 	ss.Unlock()
 }
 
-// AddLocked adds sprite to the Normal list of sprites, updating if already there.
+// AddNoLock adds sprite to the Normal list of sprites, updating if already there.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) AddLocked(sp *Sprite) {
+func (ss *Sprites) AddNoLock(sp *Sprite) {
 	errors.Log(ss.Normal.Add(sp.Name, sp))
 	ss.modified = true
 }
 
 // Delete deletes given sprite by name, returning true if found and deleted.
-// This version locks the sprites: see also [Sprites.DeleteLocked].
+// This version locks the sprites: see also [Sprites.DeleteNoLock].
 func (ss *Sprites) Delete(name string) bool {
 	ss.Lock()
 	defer ss.Unlock()
-	return ss.DeleteLocked(name)
+	return ss.DeleteNoLock(name)
 }
 
-// DeleteLocked deletes given sprite by name, returning true if found and deleted.
+// DeleteNoLock deletes given sprite by name, returning true if found and deleted.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) DeleteLocked(name string) bool {
+func (ss *Sprites) DeleteNoLock(name string) bool {
 	got := false
 	ss.Do(func(sl *SpriteList) {
 		d := sl.DeleteByKey(name)
@@ -223,17 +223,17 @@ func (ss *Sprites) DeleteLocked(name string) bool {
 }
 
 // SpriteByName returns the sprite by name.
-// This version locks the sprites: see also [Sprites.SpriteByNameLocked].
+// This version locks the sprites: see also [Sprites.SpriteByNameNoLock].
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 	ss.Lock()
 	defer ss.Unlock()
-	return ss.SpriteByNameLocked(name)
+	return ss.SpriteByNameNoLock(name)
 }
 
-// SpriteByNameLocked returns the sprite by name.
+// SpriteByNameNoLock returns the sprite by name.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) SpriteByNameLocked(name string) (sp *Sprite, ok bool) {
+func (ss *Sprites) SpriteByNameNoLock(name string) (sp *Sprite, ok bool) {
 	ss.Do(func(sl *SpriteList) {
 		if ok {
 			return
@@ -257,20 +257,20 @@ func (ss *Sprites) reset() {
 }
 
 // ActivateSprite flags sprite(s) as active, setting Modified if wasn't before.
-// This version locks the sprites: see also [Sprites.ActivateSpriteLocked].
+// This version locks the sprites: see also [Sprites.ActivateSpriteNoLock].
 func (ss *Sprites) ActivateSprite(name ...string) {
 	ss.Lock()
-	ss.ActivateSpriteLocked(name...)
+	ss.ActivateSpriteNoLock(name...)
 	ss.Unlock()
 }
 
-// ActivateSpriteLocked flags the sprite(s) as active,
+// ActivateSpriteNoLock flags the sprite(s) as active,
 // setting Modified if wasn't before.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) ActivateSpriteLocked(name ...string) {
+func (ss *Sprites) ActivateSpriteNoLock(name ...string) {
 	for _, nm := range name {
-		sp, ok := ss.SpriteByNameLocked(nm)
+		sp, ok := ss.SpriteByNameNoLock(nm)
 		if ok && !sp.Active {
 			sp.Active = true
 			ss.modified = true
@@ -280,20 +280,20 @@ func (ss *Sprites) ActivateSpriteLocked(name ...string) {
 
 // InactivateSprite flags the Normal sprite(s) as inactive,
 // setting Modified if wasn't before.
-// This version locks the sprites: see also [Sprites.InactivateSpriteLocked].
+// This version locks the sprites: see also [Sprites.InactivateSpriteNoLock].
 func (ss *Sprites) InactivateSprite(name ...string) {
 	ss.Lock()
-	ss.InactivateSpriteLocked(name...)
+	ss.InactivateSpriteNoLock(name...)
 	ss.Unlock()
 }
 
-// InactivateSpriteLocked flags the Normal sprite(s) as inactive,
+// InactivateSpriteNoLock flags the Normal sprite(s) as inactive,
 // setting Modified if wasn't before.
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
-func (ss *Sprites) InactivateSpriteLocked(name ...string) {
+func (ss *Sprites) InactivateSpriteNoLock(name ...string) {
 	for _, nm := range name {
-		sp, ok := ss.SpriteByNameLocked(nm)
+		sp, ok := ss.SpriteByNameNoLock(nm)
 		if ok && sp.Active {
 			sp.Active = false
 			ss.modified = true
