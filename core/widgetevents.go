@@ -199,15 +199,15 @@ func (wb *WidgetBase) SendChange(original ...events.Event) {
 // and then [WidgetBase.Update]. That is the correct order, since
 // calling [WidgetBase.Update] first would cause the value of the widget
 // to be incorrectly overridden in a [Value] context.
+//
+// See also [WidgetBase.UpdateInput].
 func (wb *WidgetBase) UpdateChange(original ...events.Event) {
 	wb.SendChange(original...)
 	wb.Update()
 }
 
-// UpdateInput is a helper function that calls [WidgetBase.SendInput]
-// and then [WidgetBase.UpdateRender]. That is the correct order, since
-// calling [WidgetBase.UpdateRender] first would cause the value of the widget
-// to be incorrectly overridden in a [Value] context.
+// UpdateInput is a helper function that calls [WidgetBase.Send]([events.Input])
+// and then [WidgetBase.UpdateRender]. See also [WidgetBase.UpdateChange].
 func (wb *WidgetBase) UpdateInput(original ...events.Event) {
 	wb.Send(events.Input, original...)
 	wb.UpdateRender()
