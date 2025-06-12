@@ -67,6 +67,32 @@ tr.SetTreeInit(func(tr *core.Tree) {
 tr.SyncTree(n)
 ```
 
+## Styles
+
+You can change the [[styles#font size]] of a tree:
+
+```Go
+tr := core.NewTree(b).SetText("Root")
+tr.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(25)
+})
+core.NewTree(tr)
+c2 := core.NewTree(tr)
+core.NewTree(c2)
+```
+
+You can change the [[icon#icon size]] of a tree:
+
+```Go
+tr := core.NewTree(b).SetText("Root")
+tr.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(15))
+})
+core.NewTree(tr)
+c2 := core.NewTree(tr)
+core.NewTree(c2)
+```
+
 ## Tree button
 
 You can make a [[button]] that opens an interactive [[inspector]] of a tree:

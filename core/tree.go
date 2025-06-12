@@ -347,6 +347,7 @@ func (tr *Tree) Init() {
 		s.SetAbilities(!tr.IsReadOnly() && !tr.rootIsReadOnly(), abilities.Draggable, abilities.Droppable)
 		s.Gap.X.Em(0.1)
 		s.Padding.Zero()
+		s.Align.Items = styles.Center
 
 		// we manually inherit our state layer from the tree state
 		// layer so that the parts get it but not the other trees
