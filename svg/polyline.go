@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/math32"
 )
 
@@ -76,9 +75,9 @@ func (g *Polyline) Render(sv *SVG) {
 // each node must define this for itself
 func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
-	if rot != 0 || !g.Paint.Transform.IsIdentity() {
+	if rot != 0 {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProperty("transform", g.Paint.Transform.String())
+		g.SetTransformProperty()
 	} else {
 		for i, p := range g.Points {
 			p = xf.MulVector2AsPoint(p)
@@ -86,52 +85,4 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		}
 		g.GradientApplyTransform(sv, xf)
 	}
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-	crot := g.Paint.Transform.ExtractRot()
-	if rot != 0 || crot != 0 {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
-		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProperty("transform", g.Paint.Transform.String())
-	} else {
-		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		for i, p := range g.Points {
-			p = xf.MulVector2AsPointCenter(p, lpt)
-			g.Points[i] = p
-		}
-		g.GradientApplyTransformPt(sv, xf, lpt)
-	}
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *Polyline) WriteGeom(sv *SVG, dat *[]float32) {
-	sz := len(g.Points) * 2
-	*dat = slicesx.SetLength(*dat, sz+6)
-	for i, p := range g.Points {
-		(*dat)[i*2] = p.X
-		(*dat)[i*2+1] = p.Y
-	}
-	g.WriteTransform(*dat, sz)
-	g.GradientWritePts(sv, dat)
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *Polyline) ReadGeom(sv *SVG, dat []float32) {
-	sz := len(g.Points) * 2
-	for i, p := range g.Points {
-		p.X = dat[i*2]
-		p.Y = dat[i*2+1]
-		g.Points[i] = p
-	}
-	g.ReadTransform(dat, sz)
-	g.GradientReadPts(sv, dat)
 }

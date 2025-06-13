@@ -49,11 +49,11 @@ var styleFuncs = map[string]styleprops.Func{
 	// note: text-style reads the font-size setting for regular units cases.
 	"font-size": styleprops.Units(units.Value{},
 		func(obj *Style) *units.Value { return &obj.FontSize }),
-	"line-height": styleprops.FloatProportion(float32(1.2),
+	"line-height": styleprops.FloatProportion(float32(1.3),
 		func(obj *Style) *float32 { return &obj.LineHeight }),
-	"line-spacing": styleprops.FloatProportion(float32(1.2),
+	"line-spacing": styleprops.FloatProportion(float32(1.3),
 		func(obj *Style) *float32 { return &obj.LineHeight }),
-	"para-spacing": styleprops.FloatProportion(float32(1.2),
+	"para-spacing": styleprops.FloatProportion(float32(1.3),
 		func(obj *Style) *float32 { return &obj.ParaSpacing }),
 	"white-space": styleprops.Enum(WrapAsNeeded,
 		func(obj *Style) enums.EnumSetter { return &obj.WhiteSpace }),
@@ -109,8 +109,10 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if sty.Stretch != rich.StretchNormal {
 		p["font-stretch"] = sty.Stretch.String()
 	}
-	if sty.Decoration != 0 {
-		p["text-decoration"] = sty.Decoration.String()
+	if dstr := sty.Decoration.String(); dstr != "" {
+		p["text-decoration"] = dstr
+	} else {
+		p["text-decoration"] = "none"
 	}
 	if s.Align != Start {
 		p["text-align"] = s.Align.String()
@@ -118,7 +120,7 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if s.AlignV != Start {
 		p["text-vertical-align"] = s.AlignV.String()
 	}
-	if s.LineHeight != 1.2 {
+	if s.LineHeight != 1.3 {
 		p["line-height"] = reflectx.ToString(s.LineHeight)
 	}
 	if s.WhiteSpace != WrapAsNeeded {
@@ -130,10 +132,9 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if s.TabSize != 4 {
 		p["tab-size"] = reflectx.ToString(s.TabSize)
 	}
-	if sty.Decoration.HasFlag(rich.FillColor) {
-		p["fill"] = colors.AsHex(sty.FillColor())
-	} else {
-		p["fill"] = colors.AsHex(s.Color)
+	p["fill"] = colors.AsHex(s.FillColor(sty))
+	if sc := sty.StrokeColor(); sc != nil {
+		p["stroke-color"] = colors.AsHex(sc)
 	}
 	if s.SelectColor != nil {
 		p["select-color"] = colors.AsHex(colors.ToUniform(s.SelectColor))

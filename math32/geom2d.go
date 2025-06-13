@@ -21,12 +21,17 @@ func (gm *Geom2DInt) Bounds() image.Rectangle {
 	return image.Rect(gm.Pos.X, gm.Pos.Y, gm.Pos.X+gm.Size.X, gm.Pos.Y+gm.Size.Y)
 }
 
-// SizeRect converts geom to rect version of size at 0 pos
+// Box2 returns bounds as a [Box2].
+func (gm *Geom2DInt) Box2() Box2 {
+	return B2FromRect(gm.Bounds())
+}
+
+// SizeRect converts geom to rect version of size at 0 pos.
 func (gm *Geom2DInt) SizeRect() image.Rectangle {
 	return image.Rect(0, 0, gm.Size.X, gm.Size.Y)
 }
 
-// SetRect sets values from image.Rectangle
+// SetRect sets values from image.Rectangle.
 func (gm *Geom2DInt) SetRect(r image.Rectangle) {
 	gm.Pos = r.Min
 	gm.Size = r.Size()

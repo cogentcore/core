@@ -16,68 +16,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Layout uses 3 Size passes, 2 Position passes:
-//
-// SizeUp: (bottom-up) gathers Actual sizes from our Children & Parts,
-// based on Styles.Min / Max sizes and actual content sizing
-// (e.g., text size).  Flexible elements (e.g., [Text], Flex Wrap,
-// [Toolbar]) should reserve the _minimum_ size possible at this stage,
-// and then Grow based on SizeDown allocation.
-
-// SizeDown: (top-down, multiple iterations possible) provides top-down
-// size allocations based initially on Scene available size and
-// the SizeUp Actual sizes.  If there is extra space available, it is
-// allocated according to the Grow factors.
-// Flexible elements (e.g., Flex Wrap layouts and Text with word wrap)
-// update their Actual size based on available Alloc size (re-wrap),
-// to fit the allocated shape vs. the initial bottom-up guess.
-// However, do NOT grow the Actual size to match Alloc at this stage,
-// as Actual sizes must always represent the minimums (see Position).
-// Returns true if any change in Actual size occurred.
-
-// SizeFinal: (bottom-up) similar to SizeUp but done at the end of the
-// Sizing phase: first grows widget Actual sizes based on their Grow
-// factors, up to their Alloc sizes.  Then gathers this updated final
-// actual Size information for layouts to register their actual sizes
-// prior to positioning, which requires accurate Actual vs. Alloc
-// sizes to perform correct alignment calculations.
-
-// Position: uses the final sizes to set relative positions within layouts
-// according to alignment settings, and Grow elements to their actual
-// Alloc size per Styles settings and widget-specific behavior.
-
-// ScenePos: computes scene-based absolute positions and final BBox
-// bounding boxes for rendering, based on relative positions from
-// Position step and parents accumulated position and scroll offset.
-// This is the only step needed when scrolling (very fast).
-
-// (Text) Wrapping key principles:
-// * Using a heuristic initial box based on expected text area from length
-//   of Text and aspect ratio based on styled size to get initial layout size.
-//   This avoids extremes of all horizontal or all vertical initial layouts.
-// * Use full Alloc for SizeDown to allocate for what has been reserved.
-// * Set Actual to what you actually use (key: start with only styled
-//   so you don't get hysterisis)
-// * Layout always re-gets the actuals for accurate Actual sizing
-
-// Scroll areas are similar: don't request anything more than Min reservation
-// and then expand to Alloc in Final.
-
-// Note that it is critical to not actually change any bottom-up Actual
-// sizing based on the Alloc, during the SizeDown process, as this will
-// introduce false constraints on the process: only work with minimum
-// Actual "hard" constraints to make sure those are satisfied.  Text
-// and Wrap elements resize only enough to fit within the Alloc space
-// to the extent possible, but do not Grow.
-//
-// The separate SizeFinal step then finally allows elements to grow
-// into their final Alloc space, once all the constraints are satisfied.
-//
-// This overall top-down / bottom-up logic is used in Flutter:
-// https://docs.flutter.dev/resources/architectural-overview#rendering-and-layout
-// Here's more links to other layout algorithms:
-// https://stackoverflow.com/questions/53911631/gui-layout-algorithms-overview
-
 // LayoutPasses is used for the SizeFromChildren method,
 // which can potentially compute different sizes for different passes.
 type LayoutPasses int32 //enums:enum

@@ -274,8 +274,7 @@ func (tr *Tree) AddChildNode() { //types:add
 // to this view node in the sync tree.
 // If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) DeleteNode() { //types:add
-	ttl := "Delete"
-	if tr.IsRoot(ttl) {
+	if tr.IsRoot("Delete") {
 		return
 	}
 	tr.Close()
@@ -293,9 +292,18 @@ func (tr *Tree) DeleteNode() { //types:add
 	}
 }
 
-// Duplicate duplicates the sync node corresponding to this view node in
-// the tree, and inserts the duplicate after this node (as a new sibling).
-// If SyncNode is set, operates on Sync Tree.
+// deleteSync deletes selected items.
+func (tr *Tree) deleteSync() {
+	sels := tr.selectedSyncNodes()
+	tr.UnselectAll()
+	for _, sn := range sels {
+		sn.AsTree().Delete()
+	}
+	tr.sendChangeEventReSync(nil)
+}
+
+// Duplicate duplicates this node, and inserts the duplicate after this node
+// (as a new sibling). If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) Duplicate() { //types:add
 	ttl := "Duplicate"
 	if tr.IsRoot(ttl) {
@@ -317,6 +325,7 @@ func (tr *Tree) Duplicate() { //types:add
 	tr.Unselect()
 	nwkid := tr.Clone()
 	nwkid.AsTree().SetName(nm)
+	tree.SetUniqueNameIfDuplicate(parent, nwkid)
 	ntv := AsTree(nwkid)
 	parent.InsertChild(nwkid, myidx+1)
 	ntv.Update()
@@ -340,6 +349,7 @@ func (tr *Tree) duplicateSync() {
 	nm := fmt.Sprintf("%v_Copy", sn.AsTree().Name)
 	nwkid := sn.AsTree().Clone()
 	nwkid.AsTree().SetName(nm)
+	tree.SetUniqueNameIfDuplicate(parent, nwkid)
 	parent.AsTree().InsertChild(nwkid, myidx+1)
 	tvparent.sendChangeEventReSync(nil)
 	if tvk := tvparent.ChildByName("tv_"+nm, 0); tvk != nil {
@@ -348,9 +358,9 @@ func (tr *Tree) duplicateSync() {
 	}
 }
 
-// editNode pulls up a [Form] dialog for the node.
+// EditNode pulls up a [Form] dialog for the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tr *Tree) editNode() { //types:add
+func (tr *Tree) EditNode() { //types:add
 	if tr.SyncNode != nil {
 		tynm := tr.SyncNode.AsTree().NodeType().Name
 		d := NewBody(tynm)
@@ -436,19 +446,17 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	myidx += rel
 	sroot := tr.Root.AsCoreTree().SyncNode
+	pt := parent.AsTree()
 	sz := len(sl)
 	var seln tree.Node
 	for i, ns := range sl {
+		nst := ns.AsTree()
 		orgpath := pl[i]
-		if mod != events.DropMove {
-			if cn := parent.AsTree().ChildByName(ns.AsTree().Name, 0); cn != nil {
-				ns.AsTree().SetName(ns.AsTree().Name + "_Copy")
-			}
-		}
-		parent.AsTree().InsertChild(ns, myidx+i)
-		npath := ns.AsTree().PathFrom(sroot)
+		tree.SetUniqueNameIfDuplicate(parent, ns)
+		pt.InsertChild(ns, myidx+i)
+		npath := nst.PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name + treeTempMovedTag) // special keyword :)
+			nst.SetName(nst.Name + treeTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			seln = ns
@@ -467,9 +475,10 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 // end of children of this node
 func (tr *Tree) pasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tr.nodesFromMimeData(md)
-	sk := tr.SyncNode
+	spar := tr.SyncNode
 	for _, ns := range sl {
-		sk.AsTree().AddChild(ns)
+		tree.SetUniqueNameIfDuplicate(spar, ns)
+		spar.AsTree().AddChild(ns)
 	}
 	tr.sendChangeEventReSync(nil)
 }

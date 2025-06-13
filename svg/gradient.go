@@ -5,15 +5,20 @@
 package svg
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tree"
 )
 
-/////////////////////////////////////////////////////////////////////////////
-//  Gradient
+// note: this code provides convenience methods for updating gradient data
+// when dynamically updating svg nodes, as in an animation, svg drawing app, etc.
+// It is an awkward design that the gradient needs to be updated for each node
+// for most sensible use-cases, because the ObjectBoundingBox is too limited,
+// so a unique UserSpaceOnUse gradient is typically needed for each node.
 
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
@@ -21,22 +26,48 @@ type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad gradient.Gradient
+	Grad gradient.Gradient `json:"-"` // note: cannot do drag-n-drop
 
 	// name of another gradient to get stops from
 	StopsName string
 }
 
-// GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient
+// IsRadial returns true if given gradient is a raidal type.
+func (gr *Gradient) IsRadial() bool {
+	_, ok := gr.Grad.(*gradient.Radial)
+	return ok
+}
+
+// GradientTypeName returns the SVG-style type name of gradient:
+// linearGradient or radialGradient
 func (gr *Gradient) GradientTypeName() string {
-	if _, ok := gr.Grad.(*gradient.Radial); ok {
+	if gr.IsRadial() {
 		return "radialGradient"
 	}
 	return "linearGradient"
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//		SVG gradient management
+// fromGeom sets gradient geom for UserSpaceOnUse gradient units
+// from given geom.
+func (gr *Gradient) fromGeom(xf math32.Matrix2) { // gg *GradientGeom) {
+	gb := gr.Grad.AsBase()
+	if gb.Units != gradient.UserSpaceOnUse {
+		return
+	}
+	gb.Transform = xf
+}
+
+// toGeom copies gradient points to given geom
+// for UserSpaceOnUse gradient units.
+func (gr *Gradient) toGeom(xf *math32.Matrix2) {
+	gb := gr.Grad.AsBase()
+	if gb.Units != gradient.UserSpaceOnUse {
+		return
+	}
+	*xf = gb.Transform
+}
+
+////////  SVG gradient management
 
 // GradientByName returns the gradient of given name, stored on SVG node
 func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
@@ -52,129 +83,92 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 	return gr
 }
 
-// GradientApplyTransform applies the given transform to any gradients for this node,
-// that are using specific coordinates (not bounding box which is automatic)
+// GradientApplyTransform applies given transform to node's gradient geometry.
+// This should ONLY be called when the node's transform is _not_ being updated,
+// and instead its geometry values (pos etc) are being transformed directly by
+// this transform, because the node's transform will be applied to the gradient
+// when it is being rendered.
 func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Matrix2) {
+	g.GradientFill = xf.Mul(g.GradientFill)
+	g.GradientStroke = xf.Mul(g.GradientStroke)
+	g.GradientUpdateGeom(sv)
+}
+
+// GradientGeomDefault sets the initial default gradient geometry from node.
+func (g *NodeBase) GradientGeomDefault(sv *SVG, gr gradient.Gradient) {
+	gi := g.This.(Node)
+	if rg, ok := gr.(*gradient.Radial); ok {
+		lbb := gi.LocalBBox(sv)
+		ctr := lbb.Center()
+		sz := lbb.Size()
+		rad := 0.5 * max(sz.X, sz.Y)
+		rg.Center = ctr
+		rg.Focal = ctr
+		rg.Radius.Set(rad, rad)
+		return
+	}
+	lg := gr.(*gradient.Linear)
+	lbb := gi.LocalBBox(sv)
+	lg.Start = lbb.Min
+	lg.End = math32.Vec2(lbb.Max.X, lbb.Min.Y) // L-R
+}
+
+// GradientUpdateGeom updates the geometry of UserSpaceOnUse gradients
+// in use by this node for "fill" and "stroke" by copying its current
+// GradientGeom points to those gradients.
+func (g *NodeBase) GradientUpdateGeom(sv *SVG) {
 	gi := g.This.(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMul(xf) // todo: do the Ctr, unscale version?
+			gr.fromGeom(g.GradientFill)
+			// fmt.Println("set fill:", g.GradientFill)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMul(xf)
+			gr.fromGeom(g.GradientStroke)
 		}
 	}
 }
 
-// GradientApplyTransformPt applies the given transform with ctr point
-// to any gradients for this node, that are using specific coordinates
-// (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf math32.Matrix2, pt math32.Vector2) {
+// GradientFromGradients updates the geometry of UserSpaceOnUse gradients
+// in use by this node for "fill" and "stroke" by copying its current
+// GradientGeom points to those gradients.
+func (g *NodeBase) GradientFromGradients(sv *SVG) {
 	gi := g.This.(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMulCenter(xf, pt) // todo: ctr off?
+			gr.toGeom(&g.GradientFill)
 		}
 	}
 	gnm = NodePropURL(gi, "stroke")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
 		if gr != nil {
-			gr.Grad.AsBase().Transform.SetMulCenter(xf, pt)
+			gr.toGeom(&g.GradientStroke)
 		}
 	}
 }
 
-// GradientWritePoints writes the gradient points to
-// a slice of floating point numbers, appending to end of slice.
-func GradientWritePts(gr gradient.Gradient, dat *[]float32) {
-	// TODO: do we want this, and is this the right way to structure it?
-	if gr == nil {
-		return
-	}
-	gb := gr.AsBase()
-	*dat = append(*dat, gb.Transform.XX)
-	*dat = append(*dat, gb.Transform.YX)
-	*dat = append(*dat, gb.Transform.XY)
-	*dat = append(*dat, gb.Transform.YY)
-	*dat = append(*dat, gb.Transform.X0)
-	*dat = append(*dat, gb.Transform.Y0)
-
-	*dat = append(*dat, gb.Box.Min.X)
-	*dat = append(*dat, gb.Box.Min.Y)
-	*dat = append(*dat, gb.Box.Max.X)
-	*dat = append(*dat, gb.Box.Max.Y)
+// GradientFromGradients updates the geometry of UserSpaceOnUse gradients
+// for all nodes, for "fill" and "stroke" properties, by copying the current
+// GradientGeom points to those gradients. This can be done after loading
+// for cases where node transforms will be updated dynamically.
+func (sv *SVG) GradientFromGradients() {
+	sv.Root.WalkDown(func(n tree.Node) bool {
+		nb := n.(Node).AsNodeBase()
+		nb.GradientFromGradients(sv)
+		return tree.Continue
+	})
 }
 
-// GradientWritePts writes the geometry of the gradients for this node
-// to a slice of floating point numbers, appending to end of slice.
-func (g *NodeBase) GradientWritePts(sv *SVG, dat *[]float32) {
-	gnm := NodePropURL(g, "fill")
-	if gnm != "" {
-		gr := sv.GradientByName(g, gnm)
-		if gr != nil {
-			GradientWritePts(gr.Grad, dat)
-		}
-	}
-	gnm = NodePropURL(g, "stroke")
-	if gnm != "" {
-		gr := sv.GradientByName(g, gnm)
-		if gr != nil {
-			GradientWritePts(gr.Grad, dat)
-		}
-	}
-}
-
-// GradientReadPoints reads the gradient points from
-// a slice of floating point numbers, reading from the end.
-func GradientReadPts(gr gradient.Gradient, dat []float32) {
-	if gr == nil {
-		return
-	}
-	gb := gr.AsBase()
-	sz := len(dat)
-	gb.Box.Min.X = dat[sz-4]
-	gb.Box.Min.Y = dat[sz-3]
-	gb.Box.Max.X = dat[sz-2]
-	gb.Box.Max.Y = dat[sz-1]
-
-	gb.Transform.XX = dat[sz-10]
-	gb.Transform.YX = dat[sz-9]
-	gb.Transform.XY = dat[sz-8]
-	gb.Transform.YY = dat[sz-7]
-	gb.Transform.X0 = dat[sz-6]
-	gb.Transform.Y0 = dat[sz-5]
-}
-
-// GradientReadPts reads the geometry of the gradients for this node
-// from a slice of floating point numbers, reading from the end.
-func (g *NodeBase) GradientReadPts(sv *SVG, dat []float32) {
-	gnm := NodePropURL(g, "fill")
-	if gnm != "" {
-		gr := sv.GradientByName(g, gnm)
-		if gr != nil {
-			GradientReadPts(gr.Grad, dat)
-		}
-	}
-	gnm = NodePropURL(g, "stroke")
-	if gnm != "" {
-		gr := sv.GradientByName(g, gnm)
-		if gr != nil {
-			GradientReadPts(gr.Grad, dat)
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  Gradient management utilities for creating element-specific grads
+////////  Gradient management utilities for creating element-specific grads
 
 // GradientUpdateStops copies stops from StopsName gradient if it is set
 func (sv *SVG) GradientUpdateStops(gr *Gradient) {
@@ -201,13 +195,20 @@ func (sv *SVG) GradientDeleteForNode(n Node, grnm string) bool {
 }
 
 // GradientNewForNode adds a new gradient specific to given node
-// that points to given stops name.  returns the new gradient
+// that points to given stops name. Returns the new gradient
 // and the url that points to it (nil if parent svg cannot be found).
-// Initializes gradient to use bounding box of object, but using userSpaceOnUse setting
-func (sv *SVG) GradientNewForNode(n Node, radial bool, stops string) (*Gradient, string) {
+// Initializes gradient to use current GradientFill or Stroke with UserSpaceOnUse.
+func (sv *SVG) GradientNewForNode(n Node, prop string, radial bool, stops string) (*Gradient, string) {
 	gr, url := sv.GradientNew(radial)
 	gr.StopsName = stops
-	gr.Grad.AsBase().SetBox(n.LocalBBox(sv))
+	gr.Grad.AsBase().Units = gradient.UserSpaceOnUse
+	nb := n.AsNodeBase()
+	nb.GradientGeomDefault(sv, gr.Grad)
+	if prop == "fill" {
+		nb.GradientFill = math32.Identity2()
+	} else {
+		nb.GradientStroke = math32.Identity2()
+	}
 	sv.GradientUpdateStops(gr)
 	return gr, url
 }
@@ -223,7 +224,8 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	}
 	gr := NewGradient(sv.Defs)
 	id := sv.NewUniqueID()
-	gr.SetName(NameID(gnm, id))
+	gnm = NameID(gnm, id)
+	gr.SetName(gnm)
 	url := NameToURL(gnm)
 	if radial {
 		gr.Grad = gradient.NewRadial()
@@ -233,15 +235,20 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	return gr, url
 }
 
-// GradientUpdateNodeProp ensures that node has a gradient property of given type
+// GradientUpdateNodeProp ensures that node has a gradient property of given type.
 func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := n.AsTree().Property(prop)
+	nb := n.AsNodeBase()
+	ps := nb.Property(prop)
 	if ps == nil {
-		gr, url := sv.GradientNewForNode(n, radial, stops)
-		n.AsTree().SetProperty(prop, url)
+		gr, url := sv.GradientNewForNode(n, prop, radial, stops)
+		nb.SetProperty(prop, url)
+		nb.SetProperty(prop+"-opacity", "1")
 		return gr, url
 	}
-	pstr := ps.(string)
+	pstr, ok := ps.(string)
+	if !ok {
+		pstr = *ps.(*string)
+	}
 	trgst := ""
 	if radial {
 		trgst = "radialGradient"
@@ -251,77 +258,20 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 	url := "url(#" + trgst
 	if strings.HasPrefix(pstr, url) {
 		gr := sv.GradientByName(n, pstr)
-		gr.StopsName = stops
-		sv.GradientUpdateStops(gr)
-		return gr, NameToURL(gr.Name)
+		if gr != nil {
+			gr.StopsName = stops
+			sv.GradientUpdateStops(gr)
+			return gr, NameToURL(gr.Name)
+		} else {
+			fmt.Println("not found:", pstr, url)
+		}
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
 		sv.GradientDeleteForNode(n, pstr)
 	}
-	gr, url := sv.GradientNewForNode(n, radial, stops)
-	n.AsTree().SetProperty(prop, url)
+	gr, url := sv.GradientNewForNode(n, prop, radial, stops)
+	nb.SetProperty(prop, url)
 	return gr, url
-}
-
-// GradientUpdateNodePoints updates the points for node based on current bbox
-func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
-	ps := n.AsTree().Property(prop)
-	if ps == nil {
-		return
-	}
-	pstr := ps.(string)
-	url := "url(#"
-	if !strings.HasPrefix(pstr, url) {
-		return
-	}
-	gr := sv.GradientByName(n, pstr)
-	if gr == nil {
-		return
-	}
-	gb := gr.Grad.AsBase()
-	gb.SetBox(n.LocalBBox(sv))
-	gb.SetTransform(math32.Identity2())
-}
-
-// GradientCloneNodeProp creates a new clone of the existing gradient for node
-// if set for given property key ("fill" or "stroke").
-// returns new gradient.
-func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
-	ps := n.AsTree().Property(prop)
-	if ps == nil {
-		return nil
-	}
-	pstr := ps.(string)
-	radial := false
-	if strings.HasPrefix(pstr, "url(#radialGradient") {
-		radial = true
-	} else if !strings.HasPrefix(pstr, "url(#linearGradient") {
-		return nil
-	}
-	gr := sv.GradientByName(n, pstr)
-	if gr == nil {
-		return nil
-	}
-	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
-	n.AsTree().SetProperty(prop, url)
-	gradient.CopyFrom(ngr.Grad, gr.Grad)
-	// TODO(kai): should this return ngr or gr? (used to return gr but ngr seems correct)
-	return ngr
-}
-
-// GradientDeleteNodeProp deletes any existing gradient for node
-// if set for given property key ("fill" or "stroke").
-// Returns true if deleted.
-func (sv *SVG) GradientDeleteNodeProp(n Node, prop string) bool {
-	ps := n.AsTree().Property(prop)
-	if ps == nil {
-		return false
-	}
-	pstr := ps.(string)
-	if !strings.HasPrefix(pstr, "url(#radialGradient") && !strings.HasPrefix(pstr, "url(#linearGradient") {
-		return false
-	}
-	return sv.GradientDeleteForNode(n, pstr)
 }
 
 // GradientUpdateAllStops removes any items from Defs that are not actually referred to
@@ -335,4 +285,35 @@ func (sv *SVG) GradientUpdateAllStops() {
 			sv.GradientUpdateStops(gr)
 		}
 	}
+}
+
+// GradientDuplicateNode duplicates any existing gradients
+// for the given node, in fill or stroke.
+// Must be called when duplicating a node.
+func (sv *SVG) GradientDuplicateNode(n Node) {
+	nb := n.AsNodeBase()
+
+	setGr := func(prop string) {
+		v, ok := nb.Properties[prop]
+		if !ok {
+			return
+		}
+		s, ok := v.(string)
+		if !ok {
+			return
+		}
+		nm := NameFromURL(s)
+		if nm == "" {
+			return
+		}
+		gri := sv.FindDefByName(nm)
+		if gri == nil {
+			return
+		}
+		gr := gri.(*Gradient)
+		_, ngu := sv.GradientNewForNode(n, prop, gr.IsRadial(), gr.StopsName)
+		nb.Properties["fill"] = ngu
+	}
+	setGr("fill")
+	setGr("stroke")
 }

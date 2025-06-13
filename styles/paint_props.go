@@ -121,8 +121,6 @@ var styleStrokeFuncs = map[string]styleprops.Func{
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
 	"stroke-width": styleprops.Units(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
-	"stroke-min-width": styleprops.Units(units.Dp(1),
-		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
 	"stroke-dasharray": func(obj any, key string, val any, parent any, cc colors.Context) {
 		fs := obj.(*Stroke)
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
@@ -256,15 +254,12 @@ func (pc *Stroke) toProperties(p map[string]any) {
 	if pc.Width.Unit != units.UnitDp || pc.Width.Value != 1 {
 		p["stroke-width"] = pc.Width.StringCSS()
 	}
-	if pc.MinWidth.Unit != units.UnitDp || pc.MinWidth.Value != 1 {
-		p["stroke-min-width"] = pc.MinWidth.StringCSS()
-	}
 	// todo: dashes
 	if pc.Cap != ppath.CapButt {
 		p["stroke-linecap"] = pc.Cap.String()
 	}
 	if pc.Join != ppath.JoinMiter {
-		p["stroke-linecap"] = pc.Cap.String()
+		p["stroke-linejoin"] = pc.Join.String()
 	}
 }
 

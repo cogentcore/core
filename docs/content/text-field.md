@@ -90,3 +90,34 @@ tf.OnInput(func(e events.Event) {
     core.MessageSnackbar(b, "OnInput: "+tf.Text())
 })
 ```
+
+## Styles
+
+You can change the [[styles#font size]] of a text field:
+
+```Go
+tf := core.NewTextField(b).AddClearButton().SetText("Big text")
+tf.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(30)
+})
+```
+
+You can change the [[icon#icon size]] of a text field:
+
+```Go
+tf := core.NewTextField(b).AddClearButton().SetText("Big icon")
+tf.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(30))
+    s.Min.Y.Dp(30)
+})
+```
+
+Other [[styles#text|text styles]] like [[styles#font weight]] also work on a text field:
+
+```Go
+tf := core.NewTextField(b).SetText("Bold and italic text")
+tf.Styler(func(s *styles.Style) {
+    s.Font.Weight = rich.Bold
+    s.Font.Slant = rich.Italic
+})
+```

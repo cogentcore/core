@@ -387,9 +387,9 @@ func (ls *Lines) ViewLineRegion(vid int, vln int) textpos.Region {
 	return ls.viewLineRegion(vw, vln)
 }
 
-// ViewLineRegionLocked returns the region in view coordinates of the given view line,
+// ViewLineRegionNoLock returns the region in view coordinates of the given view line,
 // for case where Lines is already locked.
-func (ls *Lines) ViewLineRegionLocked(vid int, vln int) textpos.Region {
+func (ls *Lines) ViewLineRegionNoLock(vid int, vln int) textpos.Region {
 	vw := ls.view(vid)
 	return ls.viewLineRegion(vw, vln)
 }

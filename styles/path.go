@@ -26,7 +26,7 @@ type Path struct { //types:add
 	Display bool
 
 	// Stroke (line drawing) parameters.
-	Stroke Stroke
+	Stroke Stroke `display:"add-fields"`
 
 	// Fill (region filling) parameters.
 	Fill Fill
@@ -35,7 +35,7 @@ type Path struct { //types:add
 	Opacity float32
 
 	// Transform has our additions to the transform stack.
-	Transform math32.Matrix2
+	Transform math32.Matrix2 `display:"inline"`
 
 	// VectorEffect has various rendering special effects settings.
 	VectorEffect ppath.VectorEffects
@@ -149,13 +149,6 @@ type Stroke struct {
 	// line width
 	Width units.Value
 
-	// MinWidth is the minimum line width used for rendering.
-	// If width is > 0, then this is the smallest line width.
-	// This value is NOT subject to transforms so is in absolute
-	// dot values, and is ignored if vector-effects, non-scaling-stroke
-	// is used. This is an extension of the SVG / CSS standard
-	MinWidth units.Value
-
 	// Dashes are the dashes of the stroke. Each pair of values specifies
 	// the amount to paint and then the amount to skip.
 	Dashes []float32
@@ -178,7 +171,6 @@ func (ss *Stroke) Defaults() {
 	// stroking is off by default in svg
 	ss.Color = nil
 	ss.Width.Dp(1)
-	ss.MinWidth.Dot(.5)
 	ss.Cap = ppath.CapButt
 	ss.Join = ppath.JoinMiter
 	ss.MiterLimit = 10.0
@@ -188,7 +180,6 @@ func (ss *Stroke) Defaults() {
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ss *Stroke) ToDots(uc *units.Context) {
 	ss.Width.ToDots(uc)
-	ss.MinWidth.ToDots(uc)
 }
 
 // ApplyBorderStyle applies the given border style to the stroke style.

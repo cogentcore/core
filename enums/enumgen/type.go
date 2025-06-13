@@ -14,8 +14,10 @@ package enumgen
 import (
 	"fmt"
 	"go/ast"
+	"slices"
 	"sort"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"cogentcore.org/core/base/strcase"
@@ -53,7 +55,7 @@ func (v *Value) String() string {
 // SortValues sorts the values and ensures there
 // are no duplicates. The input slice is known
 // to be non-empty.
-func SortValues(values []Value) []Value {
+func SortValues(values []Value, typ *Type) []Value {
 	// We use stable sort so the lexically first name is chosen for equal elements.
 	sort.Stable(ByValue(values))
 	// Remove duplicates. Stable sort has put the one we want to print first,
@@ -68,7 +70,14 @@ func SortValues(values []Value) []Value {
 			j++
 		}
 	}
-	return values[:j]
+	// for exported types, delete any unexported values
+	// unexported types are expected to have unexported values.
+	if len(typ.Name) > 0 && !unicode.IsLower(rune(typ.Name[0])) {
+		values = slices.DeleteFunc(values[:j], func(v Value) bool { // remove any unexported names
+			return unicode.IsLower(rune(v.OriginalName[0]))
+		})
+	}
+	return values
 }
 
 // TrimValueNames removes the prefixes specified

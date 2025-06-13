@@ -294,6 +294,7 @@ func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
 	} else if csp.X > epos {
 		// ed.scrollCursorToLeft()
 	}
+	ed.updateCursorPosition()
 	return true
 }
 

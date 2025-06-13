@@ -144,15 +144,26 @@ func TestRenderRadial(t *testing.T) {
 	imagex.Assert(t, img, "radial-user-space")
 }
 
-// func matToRasterx(mat *math32.Matrix2) rasterx.Matrix2D {
-// 	// A = XX
-// 	// B = YX
-// 	// C = XY
-// 	// D = YY
-// 	// E = X0
-// 	// F = Y0
-// 	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
-// }
+func TestRenderRadialRotate(t *testing.T) {
+	r := image.Rectangle{Max: image.Point{128, 128}}
+	b := math32.B2FromRect(r)
+	img := image.NewRGBA(r)
+	g := CopyOf(radialTransformTest)
+	// g.AsBase().Blend = colors.HCT
+	g.Update(1, b, math32.Identity2())
+	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
+	imagex.Assert(t, img, "radial-rot")
+
+	xf := math32.Rotate2D(math32.DegToRad(-45))
+	ug := CopyOf(g).(*Radial)
+	ug.SetUnits(UserSpaceOnUse)
+	ug.Center.SetMul(ug.Box.Size())
+	ug.Focal.SetMul(ug.Box.Size())
+	ug.Radius.SetMul(ug.Box.Size())
+	ug.Update(1, b, xf)
+	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
+	imagex.Assert(t, img, "radial-rot-user-space")
+}
 
 func compareTol(t *testing.T, a, c float32) {
 	if math32.Abs(a-c) > 1.0e-5 {

@@ -58,13 +58,13 @@ type Scene struct { //core:no-new
 	// Size and position relative to overall rendering context.
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
-	// painter for rendering
+	// painter for rendering all widgets in the scene.
 	Painter paint.Painter `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
-	// event manager for this scene
+	// event manager for this scene.
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// current stage in which this Scene is set
+	// current stage in which this Scene is set.
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Animations are the currently active [Animation]s in this scene.

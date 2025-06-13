@@ -183,6 +183,7 @@ func (ch *Chooser) Init() {
 		s.Text.Align = text.Center
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Padding.Set(units.Dp(8), units.Dp(16))
+		s.IconSize.Set(units.Em(18.0 / 16))
 		s.CenterAll()
 		// textfield handles everything
 		if ch.Editable {
@@ -354,6 +355,7 @@ func (ch *Chooser) Init() {
 				w.Maker(func(p *tree.Plan) {
 					tree.AddInit(p, "trail-icon", func(w *Button) {
 						w.Styler(func(s *styles.Style) {
+							s.IconSize.Set(units.Dp(18)) // independent from Em
 							// indicator does not need to be focused
 							s.SetAbilities(false, abilities.Focusable)
 						})
@@ -380,6 +382,7 @@ func (ch *Chooser) Init() {
 		if !ch.Editable && !ch.IsReadOnly() {
 			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
+					s.IconSize.Set(units.Dp(16)) // independent from Em
 					s.Justify.Self = styles.End
 				})
 				w.Updater(func() {
@@ -588,6 +591,18 @@ func (ch *Chooser) makeItemsMenu(m *Scene) {
 			NewSeparator(m)
 		}
 		bt := NewButton(m).SetText(it.GetText()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
+		bt.Styler(func(s *styles.Style) {
+			s.IconSize = ch.Styles.IconSize
+			// Chooser has a bigger font size by default, so we have to normalize
+			// to account for the smaller default button font size.
+			if s.IconSize.X.Unit == units.UnitEm {
+				s.IconSize.X.Value *= 16.0 / 14
+			}
+			if s.IconSize.Y.Unit == units.UnitEm {
+				s.IconSize.Y.Value *= 16.0 / 14
+			}
+		})
+
 		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
 			ch.selectItemEvent(i)

@@ -181,6 +181,7 @@ NS_ASSUME_NONNULL_END
 + (void)load{
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
+	
 		Class class = objc_getClass("GLFWApplicationDelegate");
 	
 		[GLFWCustomDelegate swizzle:class src:@selector(application:openFile:) tgt:@selector(swz_application:openFile:)];
@@ -210,6 +211,7 @@ NS_ASSUME_NONNULL_END
 }
 
 - (BOOL)swz_application:(NSApplication *)sender openFile:(NSString *)filename{
+	// NSLog(@"in open file %@\n", filename);
 	const char* utf_fn = filename.UTF8String;
    int flen = (int)strlen(utf_fn);
 	macOpenFile((char*)utf_fn, flen);
@@ -218,12 +220,15 @@ NS_ASSUME_NONNULL_END
 
 - (void)swz_application:(NSApplication *)sender openFiles:(NSArray<NSString *> *)filenames{
 	int n = [filenames count];
+	// NSLog(@"in open files: %d nfiles\n", n);
 	int i;
 	for (i=0; i<n; i++) {
-  		NSString* fnm = [filenames objectAtIndex: i];
+		NSString* fnm = [filenames objectAtIndex: i];
 		const char* utf_fn = fnm.UTF8String;
 		int flen = (int)strlen(utf_fn);
+		// NSLog(@"open file: %@\n", fnm);
 		macOpenFile((char*)utf_fn, flen);
+		// NSLog(@"done file\n");
 	}
 }
 

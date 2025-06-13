@@ -3,15 +3,14 @@
 // license that can be found in the LICENSE file.
 
 // svg parsing is adapted from github.com/srwiley/oksvg:
-//
 // Copyright 2017 The oksvg Authors. All rights reserved.
-//
 // created: 2/12/2017 by S.R.Wiley
 
 package svg
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -869,8 +868,14 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-//   Writing
+////////   Writing
+
+// XMLString returns the svg to a XML-encoded file, using WriteXML
+func (sv *SVG) XMLString() string {
+	var b bytes.Buffer
+	sv.WriteXML(&b, false)
+	return string(b.Bytes())
+}
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
 func (sv *SVG) SaveXML(fname string) error {
@@ -933,28 +938,26 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	}
 	text := "" // if non-empty, contains text to render
 	_, issvg := n.(Node)
-	_, isgp := n.(*Group)
+	// _, isgp := n.(*Group)
 	_, ismark := n.(*Marker)
-	if !isgp {
-		if issvg && !ismark {
-			sp := styleprops.ToXMLString(properties)
-			if sp != "" {
-				XMLAddAttr(&se.Attr, "style", sp)
+	if issvg && !ismark {
+		sp := styleprops.ToXMLString(properties)
+		if sp != "" {
+			XMLAddAttr(&se.Attr, "style", sp)
+		}
+		if txp, has := properties["transform"]; has {
+			XMLAddAttr(&se.Attr, "transform", reflectx.ToString(txp))
+		}
+	} else {
+		for k, v := range properties {
+			sv := reflectx.ToString(v)
+			if _, has := InkscapeProperties[k]; has {
+				k = "inkscape:" + k
+			} else if k == "overflow" {
+				k = "style"
+				sv = "overflow:" + sv
 			}
-			if txp, has := properties["transform"]; has {
-				XMLAddAttr(&se.Attr, "transform", reflectx.ToString(txp))
-			}
-		} else {
-			for k, v := range properties {
-				sv := reflectx.ToString(v)
-				if _, has := InkscapeProperties[k]; has {
-					k = "inkscape:" + k
-				} else if k == "overflow" {
-					k = "style"
-					sv = "overflow:" + sv
-				}
-				XMLAddAttr(&se.Attr, k, sv)
-			}
+			XMLAddAttr(&se.Attr, k, sv)
 		}
 	}
 	var sb strings.Builder
@@ -966,8 +969,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
-		if strings.HasPrefix(strings.ToLower(n.AsTree().Name), "layer") {
-		}
+		// if strings.HasPrefix(strings.ToLower(n.AsTree().Name), "layer") {
+		// }
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
 			switch k {
@@ -1022,7 +1025,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Text:
-		if nd.Text == "" {
+		_, parIsTxt := nd.Parent.(*Text)
+		if nd.HasChildren() || !parIsTxt {
 			nm = "text"
 		} else {
 			nm = "tspan"
@@ -1096,13 +1100,11 @@ func MarshalXMLGradient(n *Gradient, name string, enc *XMLEncoder) {
 	}
 
 	if linear {
-		// must be non-zero to add
-		if gb.Box != (math32.Box2{}) {
-			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gb.Box.Min.X))
-			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gb.Box.Min.Y))
-			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gb.Box.Max.X))
-			XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", gb.Box.Max.Y))
-		}
+		l := gr.(*gradient.Linear)
+		XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", l.Start.X))
+		XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", l.Start.Y))
+		XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", l.End.X))
+		XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", l.End.Y))
 	} else {
 		r := gr.(*gradient.Radial)
 		// must be non-zero to add
@@ -1129,7 +1131,7 @@ func MarshalXMLGradient(n *Gradient, name string, enc *XMLEncoder) {
 	}
 
 	if n.StopsName != "" {
-		XMLAddAttr(&me.Attr, "href", "#"+n.StopsName)
+		XMLAddAttr(&me.Attr, "xlink:href", "#"+n.StopsName)
 	}
 
 	enc.EncodeToken(me)
@@ -1178,37 +1180,61 @@ func MarshalXMLTree(n Node, enc *XMLEncoder, setName string) (string, error) {
 func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
-	// TODO: what makes sense for PhysicalWidth and PhysicalHeight here?
-	if sv.PhysicalWidth.Value > 0 {
-		XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%g", sv.PhysicalWidth.Value))
+
+	hasNamedView := false
+	if sv.Root.NumChildren() > 0 {
+		kd := sv.Root.Children[0]
+		if md, ismd := kd.(*MetaData); ismd {
+			if strings.HasPrefix(md.Name, "namedview") {
+				hasNamedView = true
+			}
+		}
 	}
-	if sv.PhysicalHeight.Value > 0 {
-		XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%g", sv.PhysicalHeight.Value))
+
+	// PhysicalWidth and PhysicalHeight define the viewport in SVG terminology:
+	// https://www.w3.org/TR/SVG/coords.html
+	// these are defined in "abstract" units.
+	if sv.PhysicalWidth.Dots > 0 {
+		XMLAddAttr(&me.Attr, "width", fmt.Sprintf("%g", sv.PhysicalWidth.Dots))
+	}
+	if sv.PhysicalHeight.Dots > 0 {
+		XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%g", sv.PhysicalHeight.Dots))
 	}
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
-	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
-	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
+	if hasNamedView {
+		XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
+		XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
+	}
+	XMLAddAttr(&me.Attr, "xmlns:xlink", "http://www.w3.org/1999/xlink")
 	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 
-	dnm, err := MarshalXMLTree(sv.Defs, enc, "defs")
-	enc.WriteEnd(dnm)
+	var errs []error
+
+	if sv.Defs.HasChildren() {
+		dnm, err := MarshalXMLTree(sv.Defs, enc, "defs")
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			enc.WriteEnd(dnm)
+		}
+	}
 
 	for _, k := range sv.Root.Children {
-		var knm string
-		knm, err = MarshalXMLTree(k.(Node), enc, "")
+		knm, err := MarshalXMLTree(k.(Node), enc, "")
+		if err != nil {
+			errs = append(errs, err)
+			break
+		}
 		if knm != "" {
 			enc.WriteEnd(knm)
-		}
-		if err != nil {
-			break
 		}
 	}
 
 	ed := xml.EndElement{}
 	ed.Name = me.Name
 	enc.EncodeToken(ed)
-	return err
+	return errors.Join(errs...)
 }
 
 // SetStandardXMLAttr sets standard attributes of node given XML-style name /
@@ -1217,7 +1243,7 @@ func SetStandardXMLAttr(ni Node, name, val string) bool {
 	nb := ni.AsNodeBase()
 	switch name {
 	case "id":
-		nb.SetName(val)
+		nb.Name = val
 		return true
 	case "class":
 		nb.Class = val

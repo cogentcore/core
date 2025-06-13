@@ -203,7 +203,7 @@ func (run *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 func (run *Run) RuneBounds(ri int) math32.Box2 {
 	gis := run.GlyphsAt(ri)
 	if len(gis) == 0 {
-		fmt.Println("no glyphs")
+		// fmt.Println("no glyphs")
 		return (math32.Box2{})
 	}
 	return run.GlyphRegionBounds(gis[0], gis[len(gis)-1])

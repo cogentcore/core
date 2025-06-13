@@ -14,7 +14,7 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// ViewBox defines the SVG viewbox
+//////// ViewBox defines the SVG viewbox
 
 // ViewBox is used in SVG to define the coordinate system
 type ViewBox struct {
@@ -35,6 +35,10 @@ func (vb *ViewBox) Defaults() {
 	vb.Size = math32.Vec2(100, 100)
 	vb.PreserveAspectRatio.Align.Set(AlignMid)
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
+}
+
+func (vb *ViewBox) Max() math32.Vector2 {
+	return vb.Min.Add(vb.Size)
 }
 
 // BoxString returns the string representation of just the viewbox:
