@@ -2,45 +2,48 @@
 Categories = ["Resources"]
 +++
 
-The [[doc:cursors]] package contains standard cursors that can be set to indicate the kinds of actions available on a widget. The cursor changes when the mouse enters the space of the widget.
+The **[[doc:cursors]]** package contains standard cursors that can be set to indicate the kinds of actions available on a [[widget]]. The cursor changes when the mouse enters the space of a widget.
 
-Set the cursor in a styler:
+You can set a cursor in [[style]]r:
+
 ```Go
-core.NewText(b).SetText("Mouse over to see the cursor").Styler(func(s *styles.Style) {
+tx := core.NewText(b).SetText("Hover to see the cursor")
+tx.Styler(func(s *styles.Style) {
     s.Cursor = cursors.Help
 })
 ```
 
-This code shows all the standard cursors available:
+## All cursors
 
+These are all of the standard cursors available:
+
+{collapsed="true"}
 ```Go
-curs:= core.NewFrame(b)
-curs.Styler(func(s *styles.Style) {
-    s.Display = styles.Grid
-    s.Columns = 4
-	s.Gap.Set(units.Dp(18))
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+	s.Wrap = true
+	s.Grow.Set(1, 0)
 })
-curs.Maker(func(p *tree.Plan) {
-	for _, c := range cursors.CursorN.Values() {
-		nm := strcase.ToCamel(c.String())
-		fnm := filepath.Join("svg", c.String() + ".svg")
-		tree.AddAt(p, nm, func(w *core.Frame) {
-            w.Styler(func(s *styles.Style) {
-                s.Direction = styles.Column
-				s.Cursor = c.(cursors.Cursor)
-            })
+fr.Maker(func(p *tree.Plan) {
+	for _, c := range cursors.CursorValues() {
+		name := c.String()
+		fname := "svg/" + name + ".svg"
+		tree.AddAt(p, name, func(w *core.Frame) {
+			w.Styler(func(s *styles.Style) {
+				s.Cursor = c
+				s.Direction = styles.Column
+				s.Align.Items = styles.Center
+			})
 			sv := core.NewSVG(w)
-			sv.OpenFS(cursors.Cursors, fnm)
+			sv.OpenFS(cursors.Cursors, fname)
 			sv.Styler(func(s *styles.Style) {
 				s.Min.Set(units.Em(4))
-				s.Cursor = c.(cursors.Cursor)
 			})
-            core.NewText(w).SetText(nm).Styler(func(s *styles.Style) {
-                s.SetTextWrap(false)
-				s.CenterAll()
+			tx := core.NewText(w).SetText(strcase.ToCamel(name))
+			tx.Styler(func(s *styles.Style) {
+				s.SetTextWrap(false)
 			})
 		})
 	}
 })
 ```
-
