@@ -109,7 +109,8 @@ type renderWindow struct {
 	// the launching of renderAsync functions and when those functions
 	// actually complete. Each time one is launched, the counter is incremented
 	// and each time one completes, it is decremented. This ensures
-	// everything is synchronized.
+	// everything is synchronized. Basically a [sync.WaitGroup] but we
+	// need to just bail if not done, not wait.
 	winRenderCounter int32
 }
 
