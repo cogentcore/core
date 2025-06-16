@@ -19,6 +19,9 @@ import (
 var (
 	// blinkerSpriteName is the name of the window sprite used for the cursor
 	blinkerSpriteName = "textcore.Base.Cursor"
+
+	// lastCursor is the *Base that last created a cursor sprite.
+	lastCursor *Base
 )
 
 // startCursor starts the cursor blinking and renders it.
@@ -49,11 +52,27 @@ func (ed *Base) toggleCursor(on bool) {
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
-	if !on {
+	activate := func(sp *core.Sprite) {
+		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
+		sp.Active = true
+		sp.Properties["turnOn"] = true
+		sp.Properties["on"] = true
+		sp.Properties["lastSwitch"] = time.Now()
+	}
+
+	if !on || lastCursor == ed {
 		if sp, ok := ms.Sprites.SpriteByNameNoLock(spnm); ok {
-			sp.Active = false
+			if on {
+				activate(sp)
+			} else {
+				sp.Active = false
+			}
+			return
 		}
-		return
+		if !on {
+			lastCursor = nil
+			return
+		}
 	}
 	var sp *core.Sprite
 	sp = core.NewSprite(spnm, func(pc *paint.Painter) { // overwrites existing
@@ -90,12 +109,9 @@ func (ed *Base) toggleCursor(on bool) {
 		pc.Draw()
 	})
 	sp.InitProperties()
-	sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
-	sp.Active = true
-	sp.Properties["turnOn"] = true
-	sp.Properties["on"] = true
-	sp.Properties["lastSwitch"] = time.Now()
+	activate(sp)
 	ms.Sprites.AddNoLock(sp)
+	lastCursor = ed
 }
 
 // updateCursorPosition updates the position of the cursor.
