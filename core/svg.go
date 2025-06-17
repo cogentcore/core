@@ -5,6 +5,7 @@
 package core
 
 import (
+	"bytes"
 	"image"
 	"io"
 	"io/fs"
@@ -104,6 +105,11 @@ func (sv *SVG) OpenFS(fsys fs.FS, filename string) error {
 // Read reads an XML-formatted SVG file from the given reader.
 func (sv *SVG) Read(r io.Reader) error {
 	return sv.SVG.ReadXML(r)
+}
+
+// ReadBytes reads an XML-formatted SVG file from the given bytes.
+func (sv *SVG) ReadBytes(b []byte) error {
+	return sv.SVG.ReadXML(bytes.NewReader(b))
 }
 
 // ReadString reads an XML-formatted SVG file from the given string.
