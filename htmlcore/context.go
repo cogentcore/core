@@ -88,9 +88,6 @@ type Context struct {
 
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
-
-	// listDepth tracks the depth of ol, ul elements (cumulative across all list types).
-	listDepth int
 }
 
 // NewContext returns a new [Context] with basic defaults.
@@ -105,7 +102,6 @@ func NewContext() *Context {
 }
 
 func (c *Context) reset() {
-	c.listDepth = 0
 	c.firstRow = false
 }
 

@@ -65,9 +65,6 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 	if n.NextSibling != nil {
 		readHTMLNode(ctx, parent, n.NextSibling)
 	}
-	if n.Data == "ul" || n.Data == "ol" {
-		ctx.listDepth--
-	}
 	return nil
 }
 

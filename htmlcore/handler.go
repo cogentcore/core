@@ -88,11 +88,15 @@ func handleElement(ctx *Context) {
 				s.Grow.Set(1, 1)
 			})
 		case "ol", "ul":
+			ld := listDepth(ctx, w.This.(core.Widget)) + 1
+			w.SetProperty("listDepth", ld)
+			if tag == "ol" {
+				w.SetProperty("listCount", 0)
+			}
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
-				s.Margin.Left.Ch(core.ConstantSpacing(float32(4 * ctx.listDepth)))
+				s.Padding.Left.Ch(core.ConstantSpacing(float32(4 * ld)))
 			})
-			ctx.listDepth++
 		case "div":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
@@ -203,23 +207,18 @@ func handleElement(ctx *Context) {
 		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
-
 		text, sublist := handleTextExclude(ctx, "ol", "ul") // exclude other lists
 		start := ""
 		if pw, ok := text.Parent.(core.Widget); ok {
-			switch pw.AsTree().Property("tag") {
+			pwt := pw.AsTree()
+			switch pwt.Property("tag") {
 			case "ol":
-				number := 0
-				for _, k := range pw.AsTree().Children {
-					// we only consider text for the number (frames may be
-					// added for nested lists, interfering with the number)
-					if _, ok := k.(*core.Text); ok {
-						number++
-					}
-				}
+				number := pwt.Property("listCount").(int) + 1
+				pwt.SetProperty("listCount", number)
 				start = strconv.Itoa(number) + ". "
 			case "ul":
-				if ctx.listDepth%2 == 1 {
+				ld := pwt.Property("listDepth").(int)
+				if ld%2 == 1 {
 					start = "• "
 				} else {
 					start = "◦ "
@@ -230,15 +229,21 @@ func handleElement(ctx *Context) {
 
 		if hasPChild { // handle potential additional <p> blocks that should be indented
 			cnode := ctx.Node
-			ctx.BlockParent = text.Parent.(core.Widget)
+			// ctx.BlockParent = text.Parent.(core.Widget)
 			for cnode.NextSibling != nil {
 				cnode = cnode.NextSibling
 				ctx.Node = cnode
 				if cnode.Data != "p" {
 					continue
 				}
-				txt := handleText(ctx)
-				txt.SetText("&nbsp;&nbsp; " + txt.Text)
+				txt, psub := handleTextExclude(ctx, "ol", "ul")
+				txt.SetText(txt.Text)
+				if psub != nil {
+					if psub != sublist {
+						readHTMLNode(ctx, ctx.Parent(), psub)
+					}
+					break
+				}
 			}
 		}
 		if sublist != nil {
@@ -427,6 +432,23 @@ func handleTextTag(ctx *Context) *core.Text {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
+}
+
+// listDepth returns the depth of list elements ("ol", "ul") above
+// the given widget. 0 = none, 1 = 1 etc.
+func listDepth(ctx *Context, w core.Widget) int {
+	ld := 0
+	pw, ok := w.AsTree().Parent.(core.Widget)
+	for ok {
+		ptag := pw.AsTree().Property("tag")
+		if ptag == "ol" || ptag == "ul" {
+			ld++
+			pw, ok = pw.AsTree().Parent.(core.Widget)
+		} else {
+			break
+		}
+	}
+	return ld
 }
 
 // GetAttr gets the given attribute from the given node, returning ""
