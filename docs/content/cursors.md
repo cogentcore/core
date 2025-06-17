@@ -27,7 +27,6 @@ fr.Styler(func(s *styles.Style) {
 fr.Maker(func(p *tree.Plan) {
 	for _, c := range cursors.CursorValues() {
 		name := c.String()
-		fname := "svg/" + name + ".svg"
 		tree.AddAt(p, name, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Cursor = c
@@ -35,7 +34,7 @@ fr.Maker(func(p *tree.Plan) {
 				s.Align.Items = styles.Center
 			})
 			sv := core.NewSVG(w)
-			sv.OpenFS(cursors.Cursors, fname)
+			sv.ReadBytes(errors.Log1(cursors.SVG(name)))
 			sv.Styler(func(s *styles.Style) {
 				s.Min.Set(units.Em(4))
 			})
