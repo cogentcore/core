@@ -90,7 +90,9 @@ func handleElement(ctx *Context) {
 		case "ol", "ul":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
+				s.Margin.Left.Ch(core.ConstantSpacing(float32(4 * ctx.listDepth)))
 			})
+			ctx.listDepth++
 		case "div":
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
@@ -202,7 +204,7 @@ func handleElement(ctx *Context) {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
 
-		text := handleText(ctx)
+		text, sublist := handleTextExclude(ctx, "ol", "ul") // exclude other lists
 		start := ""
 		if pw, ok := text.Parent.(core.Widget); ok {
 			switch pw.AsTree().Property("tag") {
@@ -217,11 +219,15 @@ func handleElement(ctx *Context) {
 				}
 				start = strconv.Itoa(number) + ". "
 			case "ul":
-				// TODO(kai/htmlcore): have different bullets for different depths
-				start = "• "
+				if ctx.listDepth%2 == 1 {
+					start = "• "
+				} else {
+					start = "◦ "
+				}
 			}
 		}
 		text.SetText(start + text.Text)
+
 		if hasPChild { // handle potential additional <p> blocks that should be indented
 			cnode := ctx.Node
 			ctx.BlockParent = text.Parent.(core.Widget)
@@ -234,6 +240,9 @@ func handleElement(ctx *Context) {
 				txt := handleText(ctx)
 				txt.SetText("&nbsp;&nbsp; " + txt.Text)
 			}
+		}
+		if sublist != nil {
+			readHTMLNode(ctx, ctx.Parent(), sublist)
 		}
 	case "img":
 		n := ctx.Node
@@ -384,6 +393,24 @@ func handleText(ctx *Context) *core.Text {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
+}
+
+// handleTextExclude creates a new [core.Text] from the given information, setting the text and
+// the text click function so that URLs are opened according to [Context.OpenURL].
+// excludeSubs is a list of sub-node types to exclude in processing this element.
+// If one of those types is encountered, it is returned.
+func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.Node) {
+	et, excl := ExtractTextExclude(ctx, excludeSubs...)
+	if et == "" {
+		// Empty text elements do not render, so we just return a fake one (to avoid panics).
+		return core.NewText(), excl
+	}
+	tx := New[core.Text](ctx).SetText(et)
+	tx.Styler(ctx.textStyler)
+	tx.HandleTextClick(func(tl *rich.Hyperlink) {
+		ctx.OpenURL(tl.URL)
+	})
+	return tx, excl
 }
 
 // handleTextTag creates a new [core.Text] from the given information, setting the text and

@@ -18,6 +18,7 @@ import (
 // ReadHTML reads HTML from the given [io.Reader] and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
+	ctx.reset()
 	n, err := html.Parse(r)
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
@@ -63,6 +64,9 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 
 	if n.NextSibling != nil {
 		readHTMLNode(ctx, parent, n.NextSibling)
+	}
+	if n.Data == "ul" || n.Data == "ol" {
+		ctx.listDepth--
 	}
 	return nil
 }

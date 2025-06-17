@@ -48,6 +48,61 @@ func extractText(ctx *Context, n *html.Node) string {
 	return str
 }
 
+// ExtractTextExclude recursively extracts all of the text from the children
+// of the given [*html.Node], adding any appropriate inline markup for
+// formatted text. It adds any non-text elements to the given [core.Widget]
+// using [readHTMLNode], except those types listed in the excludeSubs list.
+// If one of those types is encountered, it is returned.
+func ExtractTextExclude(ctx *Context, excludeSubs ...string) (string, *html.Node) {
+	if ctx.Node.FirstChild == nil {
+		return "", nil
+	}
+	return extractTextExclude(ctx, ctx.Node.FirstChild, excludeSubs...)
+}
+
+func extractTextExclude(ctx *Context, n *html.Node, excludeSubs ...string) (string, *html.Node) {
+	str := ""
+	if n.Type == html.TextNode {
+		str += n.Data
+	}
+	it := isText(n)
+	if !it {
+		sub := n.Data
+		excl := false
+		for _, ex := range excludeSubs {
+			if ex == sub {
+				excl = true
+				break
+			}
+		}
+		if excl {
+			return str, n
+		}
+		readHTMLNode(ctx, ctx.Parent(), n)
+		// readHTMLNode already handles children and siblings, so we return.
+		// TODO: for something like [TestButtonInHeadingBug] this will not
+		// have the right behavior, but that is a rare use case and this
+		// heuristic is much simpler.
+		return str, nil
+	}
+	if n.FirstChild != nil {
+		start, end := nodeString(n)
+		tx, excl := extractTextExclude(ctx, n.FirstChild, excludeSubs...)
+		str = start + tx + end
+		if excl != nil {
+			return str, excl
+		}
+	}
+	if n.NextSibling != nil {
+		tx, excl := extractTextExclude(ctx, n.NextSibling, excludeSubs...)
+		str += tx
+		if excl != nil {
+			return str, excl
+		}
+	}
+	return str, nil
+}
+
 // nodeString returns the given node as starting and ending strings in the format:
 //
 //	<tag attr0="value0" attr1="value1">
