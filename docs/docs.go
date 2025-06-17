@@ -239,7 +239,7 @@ func homePage(ctx *htmlcore.Context) bool {
 
 	initIcon := func(w *core.Icon) *core.Icon {
 		w.Styler(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
+			s.IconSize.Set(units.Dp(256))
 			s.Color = colors.Scheme.Primary.Base
 		})
 		return w

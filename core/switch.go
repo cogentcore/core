@@ -98,16 +98,17 @@ func (sw *Switch) Init() {
 		s.Border.Radius = styles.BorderRadiusSmall
 		s.Gap.Zero()
 		s.CenterAll()
+		s.IconSize.Set(units.Em(1.5))
 
-		if sw.Type == SwitchChip {
+		switch sw.Type {
+		case SwitchChip:
 			if s.Is(states.Checked) {
 				s.Background = colors.Scheme.SurfaceVariant
 				s.Color = colors.Scheme.OnSurfaceVariant
 			} else if !s.Is(states.Focused) {
 				s.Border.Width.Set(units.Dp(1))
 			}
-		}
-		if sw.Type == SwitchSegmentedButton {
+		case SwitchSegmentedButton:
 			if !s.Is(states.Focused) {
 				s.Border.Width.Set(units.Dp(1))
 			}
@@ -115,6 +116,8 @@ func (sw *Switch) Init() {
 				s.Background = colors.Scheme.SurfaceVariant
 				s.Color = colors.Scheme.OnSurfaceVariant
 			}
+		case SwitchSwitch:
+			s.IconSize.Set(units.Em(2), units.Em(1.5)) // switches need to be bigger
 		}
 
 		if s.Is(states.Selected) {
@@ -161,12 +164,6 @@ func (sw *Switch) Init() {
 						} else {
 							s.Color = colors.Scheme.Primary.Base
 						}
-						// switches need to be bigger
-						if sw.Type == SwitchSwitch {
-							s.Min.Set(units.Em(2), units.Em(1.5))
-						} else {
-							s.Min.Set(units.Em(1.5))
-						}
 					})
 					w.Updater(func() {
 						w.SetIcon(sw.IconOn)
@@ -174,14 +171,8 @@ func (sw *Switch) Init() {
 				})
 				// same styles for off and indeterminate
 				iconStyle := func(s *styles.Style) {
-					switch {
-					case sw.Type == SwitchSwitch:
-						// switches need to be bigger
-						s.Min.Set(units.Em(2), units.Em(1.5))
-					case sw.IconOff == icons.None && sw.IconIndeterminate == icons.None:
-						s.Min.Zero() // nothing to render
-					default:
-						s.Min.Set(units.Em(1.5))
+					if sw.IconOff == icons.None && sw.IconIndeterminate == icons.None {
+						s.IconSize.Zero() // nothing to render
 					}
 				}
 				tree.AddAt(p, "icon-off", func(w *Icon) {

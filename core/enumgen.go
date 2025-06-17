@@ -178,16 +178,16 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
-var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4, 5}
+var _renderWindowFlagsValues = []renderWindowFlags{0, 1, 2, 3, 4}
 
 // renderWindowFlagsN is the highest valid value for type renderWindowFlags, plus one.
-const renderWindowFlagsN renderWindowFlags = 6
+const renderWindowFlagsN renderWindowFlags = 5
 
-var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`IsRendering`: 0, `RenderSkipped`: 1, `Resize`: 2, `StopEventLoop`: 3, `Closing`: 4, `GotFocus`: 5}
+var _renderWindowFlagsValueMap = map[string]renderWindowFlags{`Resize`: 0, `StopEventLoop`: 1, `Closing`: 2, `GotFocus`: 3, `RenderSkipped`: 4}
 
-var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winIsRendering indicates that the renderAsync function is running.`, 1: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`, 2: `winResize indicates that the window was just resized.`, 3: `winStopEventLoop indicates that the event loop should be stopped.`, 4: `winClosing is whether the window is closing.`, 5: `winGotFocus indicates that have we received focus.`}
+var _renderWindowFlagsDescMap = map[renderWindowFlags]string{0: `winResize indicates that the window was just resized.`, 1: `winStopEventLoop indicates that the event loop should be stopped.`, 2: `winClosing is whether the window is closing.`, 3: `winGotFocus indicates that have we received focus.`, 4: `winRenderSkipped indicates that a render update was skipped, so another update will be run to ensure full updating.`}
 
-var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `IsRendering`, 1: `RenderSkipped`, 2: `Resize`, 3: `StopEventLoop`, 4: `Closing`, 5: `GotFocus`}
+var _renderWindowFlagsMap = map[renderWindowFlags]string{0: `Resize`, 1: `StopEventLoop`, 2: `Closing`, 3: `GotFocus`, 4: `RenderSkipped`}
 
 // String returns the string representation of this renderWindowFlags value.
 func (i renderWindowFlags) String() string { return enums.BitFlagString(i, _renderWindowFlagsValues) }

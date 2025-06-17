@@ -215,6 +215,12 @@ func (es *Source) WindowResize() {
 	es.Deque.SendFirst(ev)
 }
 
+func (es *Source) OSOpenFiles(files []string) {
+	ev := NewOSFiles(OSOpenFiles, files)
+	ev.Init()
+	es.Deque.Send(ev)
+}
+
 func (es *Source) Custom(data any) {
 	ce := &CustomEvent{}
 	ce.Typ = Custom

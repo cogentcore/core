@@ -213,6 +213,10 @@ type Style struct { //types:add
 	// to [DefaultScrollbarWidth], and it is inherited.
 	ScrollbarWidth units.Value
 
+	// IconSize specifies the size of icons in this widget, if it has icons.
+	// The default icon size is 1em for X and Y. This is inherited.
+	IconSize units.XY `display:"inline"`
+
 	// Font styling parameters applicable to individual spans of text.
 	Font Font
 
@@ -232,6 +236,7 @@ func (s *Style) Defaults() {
 	s.Opacity = 1
 	s.RenderBox = true
 	s.FillMargin = true
+	s.IconSize.Set(units.Em(1))
 	s.Font.Defaults()
 	s.Text.Defaults()
 }
@@ -341,6 +346,7 @@ func (s *Style) InheritFields(parent *Style) {
 	s.Color = parent.Color
 	s.Opacity = parent.Opacity
 	s.ScrollbarWidth = parent.ScrollbarWidth
+	s.IconSize = parent.IconSize
 	s.Font.InheritFields(&parent.Font)
 	s.Text.InheritFields(&parent.Text)
 }

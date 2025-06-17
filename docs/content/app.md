@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-The first call in every **app** is [[doc:core.NewBody]]. This creates and returns a new [[doc:core.Body]], which is a container in which app content is placed. This takes an optional name, which is used for the title of the app/window/tab.
+The first call in every **app** is [[doc:core.NewBody]]. This creates and returns a new [[body]], which is a container in which app content is placed. This takes an optional name, which is used for the title of the app/window/tab.
 
 After calling NewBody, you add [[widget]]s to the body that was returned, which is typically given the local variable name `b` for body.
 

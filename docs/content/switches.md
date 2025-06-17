@@ -54,6 +54,17 @@ You can make switches render as segmented buttons:
 core.NewSwitches(b).SetType(core.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
 ```
 
+## Events
+
+You can detect when the user [[events#change]]s which switches are selected:
+
+```Go
+sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
+sw.OnChange(func(e events.Event) {
+    core.MessageSnackbar(sw, fmt.Sprintf("Currently selected: %v", sw.SelectedItems()))
+})
+```
+
 ## Styles
 
 You can make switches render vertically:
@@ -64,13 +75,20 @@ core.NewSwitches(b).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Styl
 })
 ```
 
-## Events
-
-You can detect when the user [[events#change]]s which switches are selected:
+You can change the [[styles#font size]] of switches:
 
 ```Go
 sw := core.NewSwitches(b).SetStrings("Go", "Python", "C++")
-sw.OnChange(func(e events.Event) {
-    core.MessageSnackbar(sw, fmt.Sprintf("Currently selected: %v", sw.SelectedItems()))
+sw.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(25)
+})
+```
+
+You can change the [[icon#icon size]] of switches:
+
+```Go
+sw := core.NewSwitches(b).SetType(core.SwitchCheckbox).SetStrings("Go", "Python", "C++")
+sw.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40))
 })
 ```

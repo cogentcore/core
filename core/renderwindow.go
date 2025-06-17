@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -101,6 +102,16 @@ type renderWindow struct {
 
 	// lastResize is the time stamp of last resize event -- used for efficient updating.
 	lastResize time.Time
+
+	lastSpriteDraw time.Time
+
+	// winRenderCounter is maintained under atomic locking to coordinate
+	// the launching of renderAsync functions and when those functions
+	// actually complete. Each time one is launched, the counter is incremented
+	// and each time one completes, it is decremented. This ensures
+	// everything is synchronized. Basically a [sync.WaitGroup] but we
+	// need to just bail if not done, not wait.
+	winRenderCounter int32
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -129,6 +140,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 			}
 			if !kv.Value.Scene.Close() {
 				w.flags.SetFlag(false, winClosing)
+				rc.Unlock()
 				return
 			}
 		}
@@ -640,7 +652,7 @@ func (w *renderWindow) renderContext() *renderContext {
 // there is a moment for other goroutines to acquire the lock and get necessary
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
-	if w.flags.HasFlag(winIsRendering) { // still doing the last one
+	if atomic.LoadInt32(&w.winRenderCounter) > 0 { // still working
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
@@ -673,6 +685,14 @@ func (w *renderWindow) renderWindow() {
 		return
 	}
 	spriteMods := top.Sprites.IsModified()
+
+	spriteUpdateTime := SystemSettings.CursorBlinkTime
+	if spriteUpdateTime == 0 {
+		spriteUpdateTime = 500 * time.Millisecond
+	}
+	if time.Since(w.lastSpriteDraw) > spriteUpdateTime {
+		spriteMods = true
+	}
 
 	if !spriteMods && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		if w.flags.HasFlag(winRenderSkipped) {
@@ -747,15 +767,12 @@ func (w *renderWindow) renderWindow() {
 			log.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	scpos := winScene.SceneGeom.Pos
-	if TheApp.Platform().IsMobile() {
-		scpos = image.Point{}
-	}
-	cp.Add(SpritesSource(&top.Sprites, scpos), &top.Sprites)
+	cp.Add(SpritesSource(top, winScene), &top.Sprites)
+	w.lastSpriteDraw = time.Now()
 
 	w.SystemWindow.Unlock()
 	if offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
-		w.flags.SetFlag(true, winIsRendering)
+		atomic.AddInt32(&w.winRenderCounter, 1)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
 			w.lastResize = time.Now()
@@ -765,17 +782,17 @@ func (w *renderWindow) renderWindow() {
 		// note: it is critical to set *before* going into loop
 		// because otherwise we can lose an entire pass before the goroutine starts!
 		// function will turn flag off when it finishes.
-		w.flags.SetFlag(true, winIsRendering)
+		atomic.AddInt32(&w.winRenderCounter, 1)
 		go w.renderAsync(cp)
 	}
 }
 
 // renderAsync is the implementation of the main render pass,
-// which must be called in a goroutine. It relies on the platform-specific
-// [renderWindow.doRender].
+// which is usually called in a goroutine.
+// It calls the Compose function on the given composer.
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	if !w.SystemWindow.Lock() {
-		w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
+		atomic.AddInt32(&w.winRenderCounter, -1)
 		// fmt.Println("renderAsync SystemWindow lock fail")
 		return
 	}
@@ -783,8 +800,8 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 	// fmt.Println("start compose")
 	cp.Compose()
 	// pr.End()
-	w.flags.SetFlag(false, winIsRendering) // note: comes in with flag set
 	w.SystemWindow.Unlock()
+	atomic.AddInt32(&w.winRenderCounter, -1)
 }
 
 // RenderSource returns the [render.Render] state from the [Scene.Painter].
@@ -798,15 +815,8 @@ func (sc *Scene) RenderSource(op draw.Op) composer.Source {
 type renderWindowFlags int64 //enums:bitflag -trim-prefix win
 
 const (
-	// winIsRendering indicates that the renderAsync function is running.
-	winIsRendering renderWindowFlags = iota
-
-	// winRenderSkipped indicates that a render update was skipped, so
-	// another update will be run to ensure full updating.
-	winRenderSkipped
-
 	// winResize indicates that the window was just resized.
-	winResize
+	winResize renderWindowFlags = iota
 
 	// winStopEventLoop indicates that the event loop should be stopped.
 	winStopEventLoop
@@ -816,4 +826,8 @@ const (
 
 	// winGotFocus indicates that have we received focus.
 	winGotFocus
+
+	// winRenderSkipped indicates that a render update was skipped, so
+	// another update will be run to ensure full updating.
+	winRenderSkipped
 )

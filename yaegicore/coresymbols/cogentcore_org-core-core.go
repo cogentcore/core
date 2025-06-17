@@ -102,6 +102,7 @@ func init() {
 		"NewIcon":                       reflect.ValueOf(core.NewIcon),
 		"NewIconButton":                 reflect.ValueOf(core.NewIconButton),
 		"NewImage":                      reflect.ValueOf(core.NewImage),
+		"NewImageSprite":                reflect.ValueOf(core.NewImageSprite),
 		"NewInlineList":                 reflect.ValueOf(core.NewInlineList),
 		"NewInspector":                  reflect.ValueOf(core.NewInspector),
 		"NewKeyChordButton":             reflect.ValueOf(core.NewKeyChordButton),
@@ -227,7 +228,6 @@ func init() {
 		"App":                    reflect.ValueOf((*core.App)(nil)),
 		"AppearanceSettingsData": reflect.ValueOf((*core.AppearanceSettingsData)(nil)),
 		"BarFuncs":               reflect.ValueOf((*core.BarFuncs)(nil)),
-		"Blinker":                reflect.ValueOf((*core.Blinker)(nil)),
 		"Body":                   reflect.ValueOf((*core.Body)(nil)),
 		"Button":                 reflect.ValueOf((*core.Button)(nil)),
 		"ButtonEmbedder":         reflect.ValueOf((*core.ButtonEmbedder)(nil)),
@@ -647,6 +647,7 @@ type _cogentcore_org_core_core_Treer struct {
 	WCopy             func()
 	WCopyFieldsFrom   func(from tree.Node)
 	WCut              func()
+	WDeleteSelected   func()
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
@@ -684,6 +685,7 @@ func (W _cogentcore_org_core_core_Treer) ContextMenuPos(e events.Event) image.Po
 func (W _cogentcore_org_core_core_Treer) Copy()                           { W.WCopy() }
 func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node)   { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Treer) Cut()                            { W.WCut() }
+func (W _cogentcore_org_core_core_Treer) DeleteSelected()                 { W.WDeleteSelected() }
 func (W _cogentcore_org_core_core_Treer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }

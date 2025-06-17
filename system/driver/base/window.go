@@ -82,7 +82,8 @@ func (w *Window[A]) WinLoop() {
 	if fps <= 0 {
 		fps = 60
 	}
-	winPaint := time.NewTicker(time.Second / time.Duration(fps))
+	dur := time.Second / time.Duration(fps)
+	winPaint := time.NewTicker(dur)
 outer:
 	for {
 		select {
@@ -91,6 +92,7 @@ outer:
 			break outer
 		case <-winPaint.C:
 			if w.This.IsClosed() {
+				winPaint.Stop()
 				fmt.Println("win IsClosed in paint:", w.Name())
 				break outer
 			}

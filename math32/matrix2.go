@@ -148,31 +148,6 @@ func (a Matrix2) MulVector2AsPoint(v Vector2) Vector2 {
 	return Vec2(tx, ty)
 }
 
-// MulVector2AsPointCenter multiplies the Vector2 as a point relative to given center-point
-// including adding translations.
-func (a Matrix2) MulVector2AsPointCenter(v, ctr Vector2) Vector2 {
-	rel := v.Sub(ctr)
-	tx := ctr.X + a.XX*rel.X + a.XY*rel.Y + a.X0
-	ty := ctr.Y + a.YX*rel.X + a.YY*rel.Y + a.Y0
-	return Vec2(tx, ty)
-}
-
-// MulCenter multiplies the Matrix2, first subtracting given translation center point
-// from the translation components, and then adding it back in.
-func (a Matrix2) MulCenter(b Matrix2, ctr Vector2) Matrix2 {
-	a.X0 -= ctr.X
-	a.Y0 -= ctr.Y
-	rv := a.Mul(b)
-	rv.X0 += ctr.X
-	rv.Y0 += ctr.Y
-	return rv
-}
-
-// SetMulCenter sets the matrix to the result of [Matrix2.MulCenter].
-func (a *Matrix2) SetMulCenter(b Matrix2, ctr Vector2) {
-	*a = a.MulCenter(b, ctr)
-}
-
 // MulFixedAsPoint multiplies the fixed point as a point, including adding translations.
 func (a Matrix2) MulFixedAsPoint(fp fixed.Point26_6) fixed.Point26_6 {
 	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
@@ -221,11 +196,6 @@ func (a Matrix2) ExtractRot() float32 {
 // ExtractXYScale extracts the X and Y scale factors after undoing any
 // rotation present -- i.e., in the original X, Y coordinates
 func (a Matrix2) ExtractScale() (scx, scy float32) {
-	// rot := a.ExtractRot()
-	// tx := a.Rotate(-rot)
-	// scxv := tx.MulVector2AsVector(Vec2(1, 0))
-	// scyv := tx.MulVector2AsVector(Vec2(0, 1))
-	// return scxv.X, scyv.Y
 	_, _, _, scx, scy, _ = a.Decompose()
 	return
 }

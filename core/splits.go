@@ -187,6 +187,7 @@ func (sl *Splits) Init() {
 			tree.AddAt(p, "handle-"+strconv.Itoa(hidx), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
 					sl.setHandlePos(w.IndexInParent(), w.Value())
+					sl.SendChange()
 				})
 				w.Styler(func(s *styles.Style) {
 					ix := w.IndexInParent()

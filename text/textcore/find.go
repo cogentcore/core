@@ -339,6 +339,7 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	ed.QReplace.pos, _ = ed.matchFromPos(ed.QReplace.Matches, ed.CursorPos)
 	ed.qReplaceSelectMatch(ed.QReplace.pos)
 	ed.qReplaceEvent()
+	ed.NeedsRender()
 }
 
 // qReplaceMatches finds QReplace matches -- returns true if there are any
