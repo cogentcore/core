@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-Cogent Core provides more than 2,000 unique **icons** from the [Material Symbols collection](https://fonts.google.com/icons), allowing you to easily represent many things in a concise, visually pleasing, and language-independent way. See [[icons]] for more info about this resource, and how to use additional icons in your app.
+See [[icons]] for more info about this resource, and how to use additional icons in your app.
 
 Icons are specified using their named variable in the [[doc:icons]] package, and they are typically used in the context of another [[widget]], like a [[button]]:
 
