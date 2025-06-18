@@ -6,7 +6,7 @@ Categories = ["Concepts"]
 
 ## Color
 
-Many style properties involve [[color]]s, which can be specified in several ways as documented on that linked page.
+Many style properties involve [[colors]], which can be specified in several ways as documented on that linked page.
 
 You can set the content color of [[text]] or an [[icon]]:
 
@@ -29,7 +29,7 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-You can use a [[color#gradient]] background:
+You can use a [[colors#gradient]] background:
 
 ```Go
 fr := core.NewFrame(b)
@@ -39,7 +39,7 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-See the [[color]] page for more possible background color options such as an [[color#image]].
+See the [[colors]] page for more possible background color options such as an [[colors#image]].
 
 ## Border
 
