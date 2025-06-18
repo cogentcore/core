@@ -690,7 +690,7 @@ func (w *renderWindow) renderWindow() {
 	if spriteUpdateTime == 0 {
 		spriteUpdateTime = 500 * time.Millisecond
 	}
-	if time.Since(w.lastSpriteDraw) > spriteUpdateTime {
+	if w.flags.HasFlag(winGotFocus) && time.Since(w.lastSpriteDraw) > spriteUpdateTime {
 		spriteMods = true
 	}
 
