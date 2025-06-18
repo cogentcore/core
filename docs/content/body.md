@@ -2,13 +2,28 @@
 Categories = ["Widgets"]
 +++
 
-A **body** is a [[frame]] widget that contains most of the elements constructed within a [[scene]].
+A **body** is a [[frame]] that contains the main [[app]] content. It is contained within a [[scene]], which is the root node of a window or dialog.
 
-The `b` widget that shows up in all of the examples in these docs represents the body that you typically add widgets to, as in the [[hello world tutorial]]:
+The `b` widget in these docs examples represents the body that you typically add widgets to:
 
-<embed-page src="hello world tutorial" title="Hello world">
+```Go
+core.NewButton(b).SetText("Click me")
+```
 
-The [[doc:core.Body]] has methods to create different types of [[scene]] stages, such as the `RunMainWindow()` method in the above example, which manage the process of actually showing the body content to the user.
+This is docs shorthand for:
 
-If you want to customize the behavior, do `b.NewWindow()` to get a new [[doc:core.Stage]], which has various optional parameters that can be configured.
+```Go
+package main
 
+import "cogentcore.org/core/core"
+
+func main() {
+	b := core.NewBody("App Name")
+	core.NewButton(b).SetText("Click me")
+	b.RunMainWindow()
+}
+```
+
+## Methods
+
+Because the body is typically the easiest content container to access, there are various helper methods on it. For example, to create a [[stage]], you can use methods like [[doc:core.Body.RunMainWindow]] as above. See the [[stage]] docs for more info on these methods and how to customize the way a window or dialog is displayed.
