@@ -22,7 +22,7 @@ spinner.OnChange(func(e events.Event) {
 })
 ```
 
-Plans are a powerful tool that are critical for some widgets such as those that need to dynamically manage hundreds of children in a convenient and performant way. They aren't always necessary, but you will find them being used a lot in complicated apps, and you will see more examples of them in the rest of this documentation.
+Plans are a powerful tool that are critical for some widgets such as those that need to dynamically manage hundreds of children in a convenient and performant way. They aren't always necessary, but you will find them being used a lot in complicated apps, and you will see more examples of them in the rest of this documentation. Read more of this page for details.
 
 ## Naming
 
@@ -51,6 +51,33 @@ sw.OnChange(func(e events.Event) {
 })
 ```
 
+## Maker
+
+The examples above have used [[doc:tree.NodeBase.Maker]], which adds a maker function that can use logic like if statements and for loops to determine what elements should be added. However, sometimes you know that certain elements will always be added, in which case you can use a helper function to avoid unnecessary complexity and code nesting.
+
+[[doc:tree.AddChild]] and [[doc:tree.AddChildAt]] are the same as Add and AddAt respectively, except that they add the maker function for you. For example, here is the same example as above, but with the first button taken out of the maker using AddChild:
+
+```Go
+on := true
+sw := core.Bind(&on, core.NewSwitch(b))
+buttons := core.NewFrame(b)
+tree.AddChild(buttons, func(w *core.Button) {
+    w.SetText("First")
+})
+buttons.Maker(func(p *tree.Plan) {
+    if on {
+        tree.Add(p, func(w *core.Button) {
+            w.SetText("Extra")
+        })
+    }
+})
+sw.OnChange(func(e events.Event) {
+    buttons.Update()
+})
+```
+
+When there are multiple maker functions, they are called in the order they are added (FIFO). There are also functions like [[doc:tree.NodeBase.FirstMaker]] and [[doc:tree.NodeBase.FinalMaker]] to allow more control over the ordering when necessary.
+
 
 The `Init` function(s) in the `PlanItem` are only run _once_ when a new widget element is made, so they should contain all of the initialization steps such as adding [[styles]] `Styler` functions and [[events]] handling functions.
 
@@ -61,20 +88,6 @@ tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
 ```
 
 specifies that a `*core.Button` will be created.
-
-* [[doc:tree.AddAt]] adds a new item to a `Plan` with a specified name (which must be unique!), and an `Init` function.
-* [[doc:tree.Add]] does `AddAt` with an automatically-generated unique name based on the location in the code where the function is called. This only works for one-off calls, not in a for-loop where multiple elements are made at the same code line, like the above example.
-
-## Maker function
-
-A [[doc:tree.NodeBase.Maker]] function adds items to the Plan for a widget.
-
-By having multiple such functions, each function can handle a different situation, when there is more complex logic that determines what child elements are needed, and how they should be configured.
-
-Functions are called in the order they are added, and there are three [[doc:base/tiered.Tiered]] levels of these function lists, to allow more control over the ordering.
-
-* [[doc:tree.AddChild]] adds a Maker function that calls [[doc:tree.Add]] to add a new child element. This is helpful when adding a few children in the main `Init` function of a given widget, saving the need to nest everything within an explicit `Maker` function.
-* [[doc:tree.AddChildAt]] is the `AddAt` version that takes a unique name instead of auto-generating it.
 
 ## Styling sub-elements of widgets
 
