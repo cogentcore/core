@@ -14,7 +14,7 @@ The solution to this is simple: whenever possible, everything should be written 
 
 ### Closures everywhere
 
-An important implication of the above is that _closure functions_ should be used anywhere that any kind of configuration is needed, instead of trying to parameterize the space of options that might likely be needed. A closure can contain arbitrary code-based logic while capturing arbitrary external context needed to conditionalize this logic. Thus, closure functions are used everywhere in Cogent Core, including `Styler` functions in [[styles]], `Maker` functions in [[plan]]s, [[event]] handlers, etc.
+An important implication of the above is that _closure functions_ should be used anywhere that any kind of configuration is needed, instead of trying to parameterize the space of options that might likely be needed. A closure can contain arbitrary code-based logic while capturing arbitrary external context needed to conditionalize this logic. Thus, closure functions are used everywhere in Cogent Core, including [[style]]r functions, Maker functions in [[plan]]s, [[event]] handlers, etc.
 
 ## Go is the best programming language (for GUIs)
 
