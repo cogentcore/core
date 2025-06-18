@@ -78,16 +78,29 @@ sw.OnChange(func(e events.Event) {
 
 When there are multiple maker functions, they are called in the order they are added (FIFO). There are also functions like [[doc:tree.NodeBase.FirstMaker]] and [[doc:tree.NodeBase.FinalMaker]] to allow more control over the ordering when necessary.
 
+## Init functions
 
-The `Init` function(s) in the `PlanItem` are only run _once_ when a new widget element is made, so they should contain all of the initialization steps such as adding [[styles]] `Styler` functions and [[events]] handling functions.
+The anonymous function that you pass to [[doc:tree.Add]] etc is the init function, responsible for customizing the child widget. This function is only run one time, when that widget is made, and it contains all of the initialization steps such as adding [[styler]]s and [[event]] handlers. Because it is only run once, the init function needs to add [[update]]rs for any properties that may change over time:
 
-There are functions in the `tree` package that use generics to make it easy to add plan items. The type of child widget to create is determined by the type in the Init function, for example this code:
-
-```go
-tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
+```Go
+number := 3
+spinner := core.Bind(&number, core.NewSpinner(b))
+fr := core.NewFrame(b)
+tree.AddChild(fr, func(w *core.Text) {
+    w.Updater(func() {
+        w.SetText(strconv.Itoa(number))
+    })
+})
+spinner.OnChange(func(e events.Event) {
+    fr.Update()
+})
 ```
 
-specifies that a `*core.Button` will be created.
+This is an important point worth repeating: the init function is only run *once*. It is a closure and looks like other closures that are run more than once ([[update]]rs, [[style]]rs, [[event]] handlers etc), but it is only run once, and all dynamic logic must be placed in an updater, styler, or event handler. Many common pitfalls derive from this.
+
+### Generics
+
+Functions like [[doc:tree.Add]] use generics to make it easy to add plan items. The type you specify for the `w` argument in the function is used to determine the type of child widget to create (using generics type parameter inference). In rare cases where the precise type of the widget is not known at compile time, see [[doc:tree.AddNew]] and [[doc:tree.Plan.Add]].
 
 ## Styling sub-elements of widgets
 
