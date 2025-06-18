@@ -67,7 +67,7 @@ tb.AddOverflowMenu(func(m *core.Scene) {
 
 ## Top bar
 
-Toolbars are frequently added in [[doc:core.Body.AddTopBar]] of a [[scene]]:
+Toolbars are frequently added in the [[scene#bars|top bar]] of a [[scene]]:
 
 ```go
 b.AddTopBar(func(bar *core.Frame) {

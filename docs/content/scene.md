@@ -1,34 +1,41 @@
 +++
-Categories = ["Architecture"]
+Categories = ["Widgets"]
 +++
 
-The **scene** contains all of the [[widget]] elements for a window or a dialog.
+A **scene** is a [[frame]] widget that contains all of the [[widget]]s of a window or dialog. It is the root of a widget tree.
 
-It is a type of [[frame]] with optional `Bars` elements that can be configured on each side around a central [[body]] element that has the main scene contents.
+The central child of a scene is a [[body]], which contains the main app content. However, the scene also manages optional [[#bars]] on the sides.
 
-The Scene has the [[doc:paint.Painter]] that all widgets use to [[render]], and it manages the [[events]] for all of its widgets.
+A scene has the [[doc:paint.Painter]] that all widgets use to [[render]], and it manages the [[event]]s for all of its widgets.
+
+A scene "takes place" on a [[stage]], which is where you can customize the options for windows and dialogs, such as sizing and positioning.
 
 ## Bars
 
-The `Bars` on the scene contain functions for configuring optional [[toolbar]]-like elements on any side surrounding the central body content.
+The [[doc:core.Scene.Bars]] are functions for configuring optional [[widget]]s on any side surrounding the central [[body]] content.
 
-The `Top` bar is most frequently used, typically in this way:
+The top bar is often used for a [[toolbar]]:
 
 ```go
-	b.AddTopBar(func(bar *Frame) {
-		NewToolbar(bar).Maker(w.MakeToolbar)
+b.AddTopBar(func(bar *Frame) {
+	NewToolbar(bar).Maker(func(p *tree.Plan) {
+        tree.Add(p, func(w *core.Button) {
+            w.SetText("Build")
+        })
 	})
+})
 ```
 
-Where `w.MakeToolbar` is a [[plan#Maker function]] taking a `*tree.Plan` argument, that configures the [[toolbar]] with the [[button]] and [[func button]] actions for this scene.
+The bottom bar is often used in [[dialog]]s:
 
-## Stages
-
-The [[doc:core.Stage]] provides the outer "setting" for a scene, and manages its behavior in relation to other scenes within the overall [[app]].
-
-The different [[doc:core.StageTypes]] include things like `Window`, `Dialog`, `Menu`, `Tooltip` etc.
-
-The `Window` and `Dialog` are _main_ stages, whereas the others are _popup_ stages, with different overall behavior.
-
-
-
+```Go
+bt := core.NewButton(b).SetText("Dialog")
+bt.OnClick(func(e events.Event) {
+	d := core.NewBody("Dialog")
+	d.AddBottomBar(func(bar *core.Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar)
+	})
+	d.RunDialog(bt)
+})
+```
