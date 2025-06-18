@@ -102,17 +102,19 @@ This is an important point worth repeating: the init function is only run *once*
 
 Functions like [[doc:tree.Add]] use generics to make it easy to add plan items. The type you specify for the `w` argument in the function is used to determine the type of child widget to create (using generics type parameter inference). In rare cases where the precise type of the widget is not known at compile time, see [[doc:tree.AddNew]] and [[doc:tree.Plan.Add]].
 
-## Styling sub-elements of widgets
+## AddInit
 
-The [[doc:tree.AddChildInit]] function can be used to modify the styling of elements within another widget. For example, many standard widgets have an optional [[icon]] element (e.g., [[button]], [[chooser]]). If you want to change the size of that icon, you can do something like this:
+The [[doc:tree.AddInit]] and [[doc:tree.AddChildInit]] functions can be used to modify the configuration of children within a widget with pre-existing plans. For example, you can directly customize the [[icon]] widget of a [[button]]:
 
 ```Go
-tree.AddChildInit(core.NewButton(b).SetIcon(icons.Download), "icon", func(w *core.Icon) {
+bt := core.NewButton(b).SetText("Download").SetIcon(icons.Download).SetType(core.ButtonOutlined)
+tree.AddChildInit(bt, "icon", func(w *core.Icon) {
     w.Styler(func(s *styles.Style) {
-        s.Min.Set(units.Em(2))
+        s.Color = colors.Scheme.Error.Base
     })
 })
 ```
 
-`AddChildInit` adds a new `Init` function to an existing `PlanItem`'s list of such functions. You just need to know the name of the children, which can be found using the [[inspector]] (in general they are lower kebab-case names based on the corresponding `Set` function, e.g., `SetIcon` -> `icon`, etc)
+To call AddInit or AddChildInit, you need to know the name of the relevant child, which can be found using the [[inspector]] (for standard widgets, they are typically kebab-case names based on the corresponding `Set` function; ex: `SetIcon` -> `icon`)
 
+Note that AddInit and AddChildInit are rarely necessary for normal use cases due to [[style]] inheritance of properties such as [[styles#font size]], [[icon#icon size]], and [[styles#color]].
