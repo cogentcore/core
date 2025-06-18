@@ -2,9 +2,9 @@
 Categories = ["Widgets"]
 +++
 
-See [[icons]] for more info about this resource, and how to use additional icons in your app.
+An **icon** is a [[widget]] that renders an icon through SVG. See [[icons]] for information on the standard icons and how to add custom icons. See also [[SVG]].
 
-Icons are specified using their named variable in the [[doc:icons]] package, and they are typically used in the context of another [[widget]], like a [[button]]:
+Icons are typically specified using their named variable in the [[doc:icons]] package, and they are typically used in the context of another [[widget]], like a [[button]]:
 
 ```Go
 core.NewButton(b).SetIcon(icons.Send)
@@ -61,5 +61,3 @@ tf.Styler(func(s *styles.Style) {
     s.Font.Size.Dp(20)
 })
 ```
-
-
