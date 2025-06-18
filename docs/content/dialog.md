@@ -26,7 +26,7 @@ bt.OnClick(func(e events.Event) {
 
 ## Custom
 
-You can also construct a dialog with any content you want. For example, you can make a confirmation dialog:
+You can also construct a dialog with any content you want. For example, you can make a confirmation dialog using a [[scene#bars|bottom bar]]:
 
 ```Go
 bt := core.NewButton(b).SetText("Confirm")
