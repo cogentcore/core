@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-The previous two sections cover how to update the properties of a [[widget]], but what if you want to update the structure of a widget? To answer that question, Cogent Core provides **plans**, a mechanism for specifying what the children of a widget should be, which is then used to automatically update the actual children to reflect that.
+[[Update]] and [[bind]] cover how to update the properties of a [[widget]], but what if you want to update the structure of a widget? To answer that question, Cogent Core provides **plans**, a mechanism for specifying what the children of a widget should be, which is then used to automatically update the actual children to reflect that.
 
 For example, this code uses [[doc:tree.Plan]] through [[doc:tree.NodeBase.Maker]] to dynamically update the number of [[button]]s in a [[frame]]:
 
@@ -24,11 +24,33 @@ spinner.OnChange(func(e events.Event) {
 
 Plans are a powerful tool that are critical for some widgets such as those that need to dynamically manage hundreds of children in a convenient and performant way. They aren't always necessary, but you will find them being used a lot in complicated apps, and you will see more examples of them in the rest of this documentation.
 
-## Plan logic
+## Naming
 
-A `Plan` is a list (slice) of [[doc:tree.PlanItem]]s that specify all of the children for a given widget.
+Each item in a plan must have a unique name, which is used for updating the children in an efficient way. If the current children have all of the same names as the plan, then nothing is done. Otherwise, any missing items are inserted, and any extra ones are removed, and everything is put in the correct order according to the plan.
 
-Each item must have a unique name, specified in the `PlanItem`, which is used for updating the children in an efficient way to ensure that the widget actually has the correct children. If the current children have all of the same names as the `Plan` list, then nothing is done. Otherwise, any missing items are inserted, and any extra ones are removed, and everything is put in the correct order according to the `Plan`.
+There are two ways to accomplish unique naming. The first is [[doc:tree.AddAt]], where you pass a unique name to the function. That is useful for cases like the example above where you have some unique index to use as the name.
+
+However, if you aren't doing a for loop, the easier approach is [[doc:tree.Add]]. Add calls AddAt using an automatically generated unique name based on the location in the code where the function is called. This doesn't work in loops since multiple items are added at the same line of code. Here is an example using Add:
+
+```Go
+on := true
+sw := core.Bind(&on, core.NewSwitch(b))
+buttons := core.NewFrame(b)
+buttons.Maker(func(p *tree.Plan) {
+    tree.Add(p, func(w *core.Button) {
+        w.SetText("First")
+    })
+    if on {
+        tree.Add(p, func(w *core.Button) {
+            w.SetText("Extra")
+        })
+    }
+})
+sw.OnChange(func(e events.Event) {
+    buttons.Update()
+})
+```
+
 
 The `Init` function(s) in the `PlanItem` are only run _once_ when a new widget element is made, so they should contain all of the initialization steps such as adding [[styles]] `Styler` functions and [[events]] handling functions.
 
