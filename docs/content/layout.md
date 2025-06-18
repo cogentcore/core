@@ -2,9 +2,9 @@
 Categories = ["Architecture"]
 +++
 
-**Layout** is the process of sizing and positioning widgets in a [[scene]], according to the [[styles#Layout]] styles on each widget. Each [[frame]] widget performs the layout of its child widgets, recursively, under control of the overall [[scene]].
+**Layout** is the process of sizing and positioning [[widget]]s in a [[scene]], according to the [[styles#layout|layout styles]] on each widget. Each [[frame]] widget performs the layout of its child widgets, recursively, under the control of the overall [[scene]].
 
-Each [[doc:core.WidgetBase]] has a `Geom` field that contains the results of the layout process for each widget.
+Each [[doc:core.WidgetBase]] has a [[doc:core.WidgetBase.Geom]] field that contains the results of the layout process for each widget.
 
 The layout process involves multiple passes up and down the [[doc:tree]] of widgets within the [[scene]], as described below.
 
@@ -12,7 +12,7 @@ The layout process involves multiple passes up and down the [[doc:tree]] of widg
 
 Determining the proper size of a given widget involves both _bottom-up_ and _top-down_ constraints:
 
-* Bottom-up constraints come from the `Min` and `Max` [[styles#Layout]] styles, and the size needed by [[text]] elements to fully display the relevant text, styled according to the [[styles]] settings.
+* Bottom-up constraints come from the `Min` and `Max` [[styles#layout|layout styles]], and the size needed by [[text]] elements to fully display the relevant text, styled according to the [[style]] settings.
 
 * Top-down constraints come ultimately from the size of the window containing the [[scene]] in which the content is being displayed, and are propagated down from there to all of the [[frame]] elements in the scene. Each frame gets an _allocation_ of space from above, and then allocates that space to its children, on down the line.
 
@@ -74,4 +74,3 @@ This pass also incorporates offsets from scrolling, and is the only layout pass 
 * [Flutter](https://docs.flutter.dev/resources/architectural-overview#rendering-and-layout) uses a similar strategy for reference.
 
 * [stackoverflow](https://stackoverflow.com/questions/53911631/gui-layout-algorithms-overview) has a discussion of layout issues.
-
