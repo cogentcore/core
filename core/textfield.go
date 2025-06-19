@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -1178,11 +1177,11 @@ func (tf *TextField) charRenderPos(charidx int) math32.Vector2 {
 }
 
 var (
-	// textFieldSpriteName is the name of the window sprite used for the cursor
+	// textFieldSpriteName is the name of the window sprite used for the cursor.
 	textFieldSpriteName = "TextField.Cursor"
 
 	// textFieldCursor is the TextField that last created a new cursor sprite.
-	textFieldCursor *TextField
+	textFieldCursor tree.Node
 )
 
 // startCursor starts the cursor blinking and renders it
@@ -1203,74 +1202,9 @@ func (tf *TextField) stopCursor() {
 
 // toggleSprite turns on or off the cursor sprite.
 func (tf *TextField) toggleCursor(on bool) {
-	sc := tf.Scene
-	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
-		return
-	}
-	ms := sc.Stage.Main
-	spnm := textFieldSpriteName
-	ms.Sprites.Lock()
-	defer ms.Sprites.Unlock()
-
-	activate := func(sp *Sprite) {
-		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
-		sp.Active = true
-		sp.Properties["turnOn"] = true
-		sp.Properties["on"] = true
-		sp.Properties["lastSwitch"] = time.Now()
-	}
-
-	if !on || textFieldCursor == tf {
-		if sp, ok := ms.Sprites.SpriteByNameNoLock(spnm); ok {
-			if on {
-				activate(sp)
-			} else {
-				sp.Active = false
-			}
-			return
-		}
-		if !on {
-			textFieldCursor = nil
-			return
-		}
-	}
-	var sp *Sprite
-	sp = NewSprite(spnm, func(pc *paint.Painter) {
-		if !sp.Active || tf == nil || tf.This == nil || !tf.IsVisible() {
-			return
-		}
-		turnOn := sp.Properties["turnOn"].(bool) // force on
-		if !turnOn {
-			isOn := sp.Properties["on"].(bool)
-			lastSwitch := sp.Properties["lastSwitch"].(time.Time)
-			if SystemSettings.CursorBlinkTime > 0 && time.Since(lastSwitch) > SystemSettings.CursorBlinkTime {
-				isOn = !isOn
-				sp.Properties["on"] = isOn
-				sp.Properties["lastSwitch"] = time.Now()
-			}
-			if !isOn {
-				return
-			}
-		}
-		bbsz := math32.Vec2(math32.Ceil(tf.CursorWidth.Dots), math32.Ceil(tf.lineHeight))
-		if bbsz.X < 2 { // at least 2
-			bbsz.X = 2
-		}
-		sp.Properties["turnOn"] = false
-		pos := math32.FromPoint(sp.EventBBox.Min)
-		if !pos.AddScalar(3).ToPointCeil().Sub(tf.Scene.SceneGeom.Pos).In(tf.Geom.ContentBBox) {
-			return
-		}
-		pc.Fill.Color = nil
-		pc.Stroke.Color = tf.CursorColor
-		pc.Stroke.Width.Dot(bbsz.X)
-		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
-		pc.Draw()
+	TextCursor(on, tf.AsWidget(), &textFieldCursor, textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
+		return tf.charRenderPos(tf.cursorPos).ToPointFloor()
 	})
-	sp.InitProperties()
-	activate(sp)
-	ms.Sprites.AddNoLock(sp)
-	textFieldCursor = tf
 }
 
 // updateCursorPosition updates the position of the cursor.
