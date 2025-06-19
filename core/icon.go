@@ -88,7 +88,7 @@ func (ic *Icon) renderSVG() *svg.SVG {
 	sv.Root.ViewBox.PreserveAspectRatio.SetFromStyle(&ic.Styles)
 	sv.TextShaper = ic.Scene.TextShaper()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	sv.Color = clr
+	sv.DefaultFill = clr
 	sv.Scale = 1
 	ic.pixels = sv.RenderImage()
 	ic.prevColor = cc
