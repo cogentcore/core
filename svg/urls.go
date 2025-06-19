@@ -14,11 +14,11 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/tree"
 )
 
-/////////////////////////////////////////////////////////////////////////////
-//   Naming elements with unique id's
+////////  Naming elements with unique id's
 
 // SplitNameIDDig splits name into numerical end part and preceding name,
 // based on string of digits from end of name.
@@ -131,7 +131,7 @@ func (sv *SVG) NewUniqueID() int {
 	return nid
 }
 
-// FindDefByName finds Defs item by name, using cached indexes for speed
+// FindDefByName finds Defs item by name, using cached indexes for speed.
 func (sv *SVG) FindDefByName(defnm string) Node {
 	if sv.DefIndexes == nil {
 		sv.DefIndexes = make(map[string]int)
@@ -233,48 +233,66 @@ func IncRefCount(k tree.Node) {
 }
 
 // RemoveOrphanedDefs removes any items from Defs that are not actually referred to
-// by anything in the current SVG tree.  Returns true if items were removed.
+// by anything in the current SVG tree. Returns true if items were removed.
 // Does not remove gradients with StopsName = "" with extant stops -- these
 // should be removed manually, as they are not automatically generated.
+// Also ensures that referenced gradients are before their referencers,
+// so that they work correctly on loading.
 func (sv *SVG) RemoveOrphanedDefs() bool {
 	refkey := SVGRefCountKey
 	for _, k := range sv.Defs.Children {
 		k.AsTree().SetProperty(refkey, 0)
 	}
-	sv.Root.WalkDown(func(k tree.Node) bool {
-		pr := k.AsTree().Properties
+	sv.Root.WalkDown(func(n tree.Node) bool {
+		nb := n.(Node).AsNodeBase()
+		pr := nb.Properties
 		for _, v := range pr {
-			ps := reflectx.ToString(v)
-			if !strings.HasPrefix(ps, "url(#") {
+			nm := NameFromURL(reflectx.ToString(v))
+			if nm == "" {
 				continue
 			}
-			nm := NameFromURL(ps)
 			el := sv.FindDefByName(nm)
 			if el != nil {
 				IncRefCount(el)
 			}
 		}
-		if gr, isgr := k.(*Gradient); isgr {
-			if gr.StopsName != "" {
-				el := sv.FindDefByName(gr.StopsName)
-				if el != nil {
-					IncRefCount(el)
-				}
+		return tree.Continue
+	})
+	refGr := map[Node]bool{} // ref'd gradients -- move to top!
+	sv.Defs.WalkDown(func(n tree.Node) bool {
+		gr, isgr := n.(*Gradient)
+		if !isgr {
+			return tree.Continue
+		}
+		if gr.StopsName != "" {
+			el := sv.FindDefByName(gr.StopsName)
+			if el != nil {
+				IncRefCount(el)
+				refGr[el] = true
 			} else {
-				if gr.Grad != nil && len(gr.Grad.AsBase().Stops) > 0 {
-					IncRefCount(k) // keep us around
-				}
+				fmt.Println("stopsname not found:", gr.StopsName)
+			}
+		} else {
+			if gr.Grad != nil && len(gr.Grad.AsBase().Stops) > 0 {
+				IncRefCount(n) // keep us around
 			}
 		}
 		return tree.Continue
 	})
+	ng := len(refGr)
+	for gn := range refGr {
+		idx := gn.AsNodeBase().IndexInParent()
+		if idx >= ng { // not in first elements
+			sv.Defs.Children = slicesx.Move(sv.Defs.Children, idx, 0) // move to top
+		}
+	}
 	sz := len(sv.Defs.Children)
 	del := false
 	for i := sz - 1; i >= 0; i-- {
 		n := sv.Defs.Children[i]
 		rc := n.AsTree().Property(refkey).(int)
 		if rc == 0 {
-			fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name)
+			// fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name)
 			sv.Defs.Children = slices.Delete(sv.Defs.Children, i, i+1)
 			del = true
 		} else {

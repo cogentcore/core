@@ -73,6 +73,7 @@ func (fn *Node) Init() {
 	fn.ContextMenus = nil // do not include tree
 	fn.AddContextMenu(fn.contextMenu)
 	fn.Styler(func(s *styles.Style) {
+		s.IconSize.Set(units.Em(1))
 		fn.styleFromStatus()
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
@@ -125,20 +126,6 @@ func (fn *Node) Init() {
 		} else {
 			fn.This.(Filer).OpenFile()
 		}
-	})
-	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
-		tree.AddChildInit(w, "stack", func(w *core.Frame) {
-			f := func(name string) {
-				tree.AddChildInit(w, name, func(w *core.Icon) {
-					w.Styler(func(s *styles.Style) {
-						s.Min.Set(units.Em(1))
-					})
-				})
-			}
-			f("icon-on")
-			f("icon-off")
-			f("icon-indeterminate")
-		})
 	})
 	tree.AddChildInit(fn.Parts, "text", func(w *core.Text) {
 		w.Styler(func(s *styles.Style) {

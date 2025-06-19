@@ -130,7 +130,6 @@ func (ed *Editor) Save() error { //types:add
 // in an OnChange event handler, unlike [Editor.Save].
 func (ed *Editor) SaveQuiet() error { //types:add
 	ed.clearSelected()
-	ed.clearCursor()
 	return Save(ed.Scene, ed.Lines)
 }
 
@@ -143,13 +142,15 @@ func (ed *Editor) Close(afterFunc func(canceled bool)) bool {
 func (ed *Editor) handleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {
-			ed.clearCursor()
 			return
 		}
 		if ed.AbilityIs(abilities.Focusable) {
 			ed.editDone()
 			ed.SetState(false, states.Focused)
 		}
+	})
+	ed.OnFocus(func(e events.Event) {
+		ed.startCursor()
 	})
 }
 
@@ -478,7 +479,6 @@ func (ed *Editor) keyInput(e events.Event) {
 			if !lasttab && ed.CursorPos.Char == 0 && ed.Lines.Settings.AutoIndent {
 				_, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
 				ed.CursorPos.Char = cpos
-				ed.renderCursor(true)
 				gotTabAI = true
 			} else {
 				ed.InsertAtCursor(indent.Bytes(ed.Lines.Settings.IndentChar(), 1, ed.Styles.Text.TabSize))
@@ -510,6 +510,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.iSpellKeyInput(e)
 	}
 	ed.lastWasTabAI = gotTabAI
+	ed.startCursor()
 }
 
 // keyInputInsertBracket handle input of opening bracket-like entity
@@ -567,41 +568,44 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 	if ed.ISearch.On {
 		ed.CancelComplete()
 		ed.iSearchKeyInput(kt)
-	} else if ed.QReplace.On {
+		return
+	}
+	if ed.QReplace.On {
 		ed.CancelComplete()
 		ed.qReplaceKeyInput(kt)
-	} else {
-		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
-			ed.keyInputInsertBracket(kt)
-		} else if kt.KeyRune() == '}' && ed.Lines.Settings.AutoIndent && ed.CursorPos.Char == ed.Lines.LineLen(ed.CursorPos.Line) {
-			ed.CancelComplete()
-			ed.lastAutoInsert = 0
-			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
-			tbe, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
-			if tbe != nil {
-				ed.SetCursorShow(textpos.Pos{Line: tbe.Region.End.Line, Char: cpos})
-			}
-		} else if ed.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
-			ed.CursorPos.Char++
-			ed.SetCursorShow(ed.CursorPos)
-			ed.lastAutoInsert = 0
-		} else {
-			ed.lastAutoInsert = 0
-			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
-			if kt.KeyRune() == ' ' {
-				ed.CancelComplete()
-			} else {
-				ed.offerComplete()
-			}
+		return
+	}
+	switch {
+	case kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[':
+		ed.keyInputInsertBracket(kt)
+	case kt.KeyRune() == '}' && ed.Lines.Settings.AutoIndent && ed.CursorPos.Char == ed.Lines.LineLen(ed.CursorPos.Line):
+		ed.CancelComplete()
+		ed.lastAutoInsert = 0
+		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
+		tbe, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
+		if tbe != nil {
+			ed.SetCursorShow(textpos.Pos{Line: tbe.Region.End.Line, Char: cpos})
 		}
-		if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
-			cp := ed.CursorPos
-			np := cp
-			np.Char--
-			tp, found := ed.Lines.BraceMatchRune(kt.KeyRune(), np)
-			if found {
-				ed.addScopelights(np, tp)
-			}
+	case ed.lastAutoInsert == kt.KeyRune(): // if we type what we just inserted, just move past
+		ed.CursorPos.Char++
+		ed.SetCursorShow(ed.CursorPos)
+		ed.lastAutoInsert = 0
+	default:
+		ed.lastAutoInsert = 0
+		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
+		if kt.KeyRune() == ' ' {
+			ed.CancelComplete()
+		} else {
+			ed.offerComplete()
+		}
+	}
+	if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
+		cp := ed.CursorPos
+		np := cp
+		np.Char--
+		tp, found := ed.Lines.BraceMatchRune(kt.KeyRune(), np)
+		if found {
+			ed.addScopelights(np, tp)
 		}
 	}
 }
@@ -630,6 +634,7 @@ func (ed *Editor) handleMouse() {
 				ed.Paste()
 			}
 		}
+		ed.startCursor()
 	})
 	ed.OnDoubleClick(func(e events.Event) {
 		if !ed.StateIs(states.Focused) {
@@ -640,6 +645,7 @@ func (ed *Editor) handleMouse() {
 		if ed.selectWord() {
 			ed.CursorPos = ed.SelectRegion.Start
 		}
+		ed.startCursor()
 		ed.NeedsRender()
 	})
 	ed.On(events.TripleClick, func(e events.Event) {
@@ -655,6 +661,7 @@ func (ed *Editor) handleMouse() {
 			ed.SelectRegion.End.Line = ed.CursorPos.Line
 			ed.SelectRegion.End.Char = sz
 		}
+		ed.startCursor()
 		ed.NeedsRender()
 	})
 	ed.On(events.Scroll, func(e events.Event) {
@@ -665,6 +672,7 @@ func (ed *Editor) handleMouse() {
 		ed.SetState(true, states.Sliding)
 		ed.isScrolling = true
 		pt := ed.PointToRelPos(e.Pos())
+		pt.X -= int(0.8 * ed.charSize.X) // favor inclusive positioning on left
 		newPos := ed.PixelToCursor(pt)
 		if ed.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
 			ed.setCursorFromMouse(pt, newPos, e.SelectMode())
@@ -674,6 +682,7 @@ func (ed *Editor) handleMouse() {
 				ed.selectModeToggle()
 			}
 		}
+		ed.startCursor()
 		ed.savePosHistory(ed.CursorPos)
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
@@ -682,10 +691,12 @@ func (ed *Editor) handleMouse() {
 		pt := ed.PointToRelPos(e.Pos())
 		newPos := ed.PixelToCursor(pt)
 		ed.setCursorFromMouse(pt, newPos, events.SelectOne)
+		ed.startCursor()
 	})
 	ed.On(events.SlideStop, func(e events.Event) {
 		e.SetHandled()
 		ed.isScrolling = false
+		ed.startCursor()
 	})
 }
 

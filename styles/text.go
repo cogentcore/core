@@ -93,6 +93,18 @@ func (ts *Text) SetText(tsty *text.Style) {
 	tsty.HighlightColor = ts.HighlightColor
 }
 
+// SetFromText sets from the given [text.Style].
+func (ts *Text) SetFromText(tsty *text.Style) {
+	ts.Align = tsty.Align
+	ts.AlignV = tsty.AlignV
+	ts.LineHeight = tsty.LineHeight
+	ts.WhiteSpace = tsty.WhiteSpace
+	ts.Direction = tsty.Direction
+	ts.TabSize = tsty.TabSize
+	ts.SelectColor = tsty.SelectColor
+	ts.HighlightColor = tsty.HighlightColor
+}
+
 // LineHeightDots returns the effective line height in dots (actual pixels)
 // as FontHeight * LineHeight
 func (s *Style) LineHeightDots() float32 {

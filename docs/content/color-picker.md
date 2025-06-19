@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **color picker** is a [[widget]] that allows users to input [[color]]s using three [[slider]]s for the components of the HCT color system: hue, chroma, and tone. The [[tooltip]] for each slider contains more information about each component.
+A **color picker** is a [[widget]] that allows users to input [[colors]] using three [[slider]]s for the components of the HCT color system: hue, chroma, and tone. The [[tooltip]] for each slider contains more information about each component.
 
 ## Properties
 
@@ -19,6 +19,15 @@ You can detect when a user [[events#change]]s the color:
 ```Go
 cp := core.NewColorPicker(b).SetColor(colors.Green)
 cp.OnChange(func(e events.Event) {
+    core.MessageSnackbar(cp, colors.AsHex(cp.Color))
+})
+```
+
+You can detect when a user changes the color as they slide ([[events#input]]):
+
+```Go
+cp := core.NewColorPicker(b).SetColor(colors.Green)
+cp.OnInput(func(e events.Event) {
     core.MessageSnackbar(cp, colors.AsHex(cp.Color))
 })
 ```

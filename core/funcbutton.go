@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -357,12 +358,21 @@ func (fb *FuncButton) CallFunc() {
 	// If there is a single value button, automatically
 	// open its dialog instead of this one
 	if len(fb.Args) == 1 {
+		curWin := currentRenderWindow
 		sv.UpdateWidget() // need to update first
 		bt := AsButton(sv.Child(1))
 		if bt != nil {
 			bt.OnFinal(events.Change, func(e events.Event) {
 				// the dialog for the argument has been accepted, so we call the function
+				async := false
+				if !tree.IsNil(ctx) && currentRenderWindow != curWin { // calling from another window, must lock
+					async = true
+					ctx.AsWidget().AsyncLock()
+				}
 				accept()
+				if async {
+					ctx.AsWidget().AsyncUnlock()
+				}
 			})
 			bt.Scene = fb.Scene // we must use this scene for context
 			bt.Send(events.Click)

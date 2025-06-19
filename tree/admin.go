@@ -174,3 +174,19 @@ func setUniqueName(n Node, addIfSet bool) {
 		nb.SetName(nb.Name + id)
 	}
 }
+
+// SetUniqueNameIfDuplicate adds a unique name id to the given new child
+// of given parent node if there is already a child by that name.
+// Returns true if renamed. This is slow, and should not be used in
+// performance-critical code (ensure names are unique in advance).
+func SetUniqueNameIfDuplicate(par, child Node) bool {
+	ct := child.AsTree()
+	if IndexByName(par.AsTree().Children, ct.Name) < 0 {
+		return false
+	}
+	opar := ct.Parent
+	ct.Parent = par // unique name relies on parent
+	setUniqueName(child, true)
+	ct.Parent = opar
+	return true
+}

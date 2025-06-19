@@ -50,8 +50,10 @@ func Int[T any, F num.Integer](initVal F, getField func(obj *T) *F) Func {
 			}
 			return
 		}
-		fv, _ := reflectx.ToInt(val)
-		*fp = F(fv)
+		fv, err := reflectx.ToInt(val)
+		if err == nil {
+			*fp = F(fv)
+		}
 	}
 }
 
@@ -71,8 +73,10 @@ func Float[T any, F num.Float](initVal F, getField func(obj *T) *F) Func {
 		if vstr, ok := val.(string); ok {
 			val = strings.TrimSuffix(vstr, "%")
 		}
-		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
-		*fp = F(fv)
+		fv, err := reflectx.ToFloat(val)
+		if err == nil {
+			*fp = F(fv)
+		}
 	}
 }
 
@@ -94,11 +98,13 @@ func FloatProportion[T any, F num.Float](initVal F, getField func(obj *T) *F) Fu
 			val = strings.TrimSuffix(vstr, "%")
 			isPct = true
 		}
-		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
+		fv, err := reflectx.ToFloat(val)
 		if isPct {
 			fv /= 100
 		}
-		*fp = F(fv)
+		if err == nil {
+			*fp = F(fv)
+		}
 	}
 }
 
@@ -114,8 +120,10 @@ func Bool[T any](initVal bool, getField func(obj *T) *bool) Func {
 			}
 			return
 		}
-		fv, _ := reflectx.ToBool(val)
-		*fp = fv
+		fv, err := reflectx.ToBool(val)
+		if err == nil {
+			*fp = fv
+		}
 	}
 }
 
@@ -155,8 +163,10 @@ func Enum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSetter) Fun
 			fp.SetInt64(en.Int64())
 			return
 		}
-		iv, _ := reflectx.ToInt(val)
-		fp.SetInt64(int64(iv))
+		iv, err := reflectx.ToInt(val)
+		if err == nil {
+			fp.SetInt64(int64(iv))
+		}
 	}
 }
 

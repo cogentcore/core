@@ -12,7 +12,7 @@ core.NewText(b).SetText("Bold text").Styler(func(s *styles.Style) {
 })
 ```
 
-You can change the [[color]]s of a widget using Cogent Core's dynamic [[color#color scheme]] system:
+You can change the [[styles#color]]s of a widget using Cogent Core's dynamic [[colors#color scheme]] system:
 
 ```Go
 core.NewButton(b).SetText("Success button").Styler(func(s *styles.Style) {

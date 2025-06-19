@@ -25,10 +25,10 @@ type Tiered[T any] struct {
 
 // Do calls the given function for each tier,
 // going through first, then normal, then final.
-func (t *Tiered[T]) Do(f func(T)) {
-	f(t.First)
-	f(t.Normal)
-	f(t.Final)
+func (t *Tiered[T]) Do(f func(*T)) {
+	f(&t.First)
+	f(&t.Normal)
+	f(&t.Final)
 }
 
 // DoWith calls the given function with each tier of this tiered

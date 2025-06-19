@@ -48,3 +48,23 @@ You can make a switch read-only to prevent users from changing it:
 ```Go
 core.NewSwitch(b).SetReadOnly(true)
 ```
+
+## Styles
+
+You can change the [[styles#font size]] of a switch:
+
+```Go
+sw := core.NewSwitch(b).SetText("Remember me")
+sw.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(25)
+})
+```
+
+You can change the [[icon#icon size]] of a switch:
+
+```Go
+sw := core.NewSwitch(b).SetType(core.SwitchCheckbox).SetText("Remember me")
+sw.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40))
+})
+```

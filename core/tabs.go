@@ -474,6 +474,9 @@ func (tb *Tab) Init() {
 		s.Align.Content = styles.Center
 		s.Align.Items = styles.Center
 
+		s.Font.Size.Dp(14)
+		s.IconSize.Set(units.Em(18.0 / 14))
+
 		if tb.StateIs(states.Selected) {
 			s.Color = colors.Scheme.Select.OnContainer
 		} else {
@@ -493,9 +496,6 @@ func (tb *Tab) Init() {
 
 		if tb.Icon.IsSet() {
 			tree.AddAt(p, "icon", func(w *Icon) {
-				w.Styler(func(s *styles.Style) {
-					s.Font.Size.Dp(18)
-				})
 				w.Updater(func() {
 					w.SetIcon(tb.Icon)
 				})
@@ -509,6 +509,8 @@ func (tb *Tab) Init() {
 				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
+					s.FillMargin = false
+					s.Font.Size = tb.Styles.Font.Size // Directly inherit to override the [Text.Type]-based default
 				})
 				w.Updater(func() {
 					if tb.Type.effective(tb) == FunctionalTabs {

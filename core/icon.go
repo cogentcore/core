@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
 	"golang.org/x/image/draw"
 )
@@ -46,8 +45,8 @@ func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
 func (ic *Icon) Init() {
 	ic.WidgetBase.Init()
-	ic.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Em(1))
+	ic.FinalStyler(func(s *styles.Style) {
+		s.Min = s.IconSize
 	})
 }
 
@@ -89,7 +88,7 @@ func (ic *Icon) renderSVG() *svg.SVG {
 	sv.Root.ViewBox.PreserveAspectRatio.SetFromStyle(&ic.Styles)
 	sv.TextShaper = ic.Scene.TextShaper()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	sv.Color = clr
+	sv.DefaultFill = clr
 	sv.Scale = 1
 	ic.pixels = sv.RenderImage()
 	ic.prevColor = cc

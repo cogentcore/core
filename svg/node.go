@@ -6,12 +6,11 @@ package svg
 
 import (
 	"fmt"
-	"image"
 	"maps"
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -48,22 +47,6 @@ type Node interface {
 	// this just does a direct transform multiplication on coordinates.
 	ApplyTransform(sv *SVG, xf math32.Matrix2)
 
-	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-	// relative to given point.  Trans translation and point are in top-level coordinates,
-	// so must be transformed into local coords first.
-	// Point is upper left corner of selection box that anchors the translation and scaling,
-	// and for rotation it is the center point around which to rotate.
-	ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2)
-
-	// WriteGeom writes the geometry of the node to a slice of floating point numbers
-	// the length and ordering of which is specific to each node type.
-	// Slice must be passed and will be resized if not the correct length.
-	WriteGeom(sv *SVG, dat *[]float32)
-
-	// ReadGeom reads the geometry of the node from a slice of floating point numbers
-	// the length and ordering of which is specific to each node type.
-	ReadGeom(sv *SVG, dat []float32)
-
 	// SVGName returns the SVG element name (e.g., "rect", "path" etc).
 	SVGName() string
 
@@ -96,57 +79,62 @@ type NodeBase struct {
 	// BBox is the bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
 	// VisBBox is intersected and only shows visible portion.
-	BBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
+	BBox math32.Box2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// VisBBox is the visible bounding box for the node intersected with the SVG image geometry.
-	VisBBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
+	VisBBox math32.Box2 `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Paint is the paint style information for this node.
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`
+
+	// GradientFill contains the fill gradient geometry to use for linear and radial
+	// gradients of UserSpaceOnUse type applied to this node.
+	// These values are updated and copied to gradients of the appropriate type to keep
+	// the gradients sync'd with updates to the node as it is transformed.
+	GradientFill math32.Matrix2 `json:"-" xml:"-" set:"-" display:"-"`
+
+	// GradientStroke contains the stroke gradient geometry to use for linear and radial
+	// gradients of UserSpaceOnUse type applied to this node.
+	// These values are updated and copied to gradients of the appropriate type to keep
+	// the gradients sync'd with updates to the node as it is transformed.
+	GradientStroke math32.Matrix2 `json:"-" xml:"-" set:"-" display:"-"`
 
 	// isDef is whether this is in [SVG.Defs].
 	isDef bool
 }
 
-func (g *NodeBase) AsNodeBase() *NodeBase {
-	return g
-}
-
-func (g *NodeBase) SVGName() string {
-	return "base"
-}
-
-func (g *NodeBase) EnforceSVGName() bool {
-	return true
-}
-
-func (g *NodeBase) SetPos(pos math32.Vector2) {
-}
-
-func (g *NodeBase) SetSize(sz math32.Vector2) {
-}
-
-func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 {
-	bb := math32.Box2{}
-	return bb
-}
-
-func (n *NodeBase) BaseInterface() reflect.Type {
-	return reflect.TypeOf((*NodeBase)(nil)).Elem()
-}
-
-func (g *NodeBase) PaintStyle() *styles.Paint {
-	return &g.Paint
-}
+func (g *NodeBase) AsNodeBase() *NodeBase         { return g }
+func (g *NodeBase) SVGName() string               { return "base" }
+func (g *NodeBase) EnforceSVGName() bool          { return true }
+func (g *NodeBase) SetPos(pos math32.Vector2)     {}
+func (g *NodeBase) SetSize(sz math32.Vector2)     {}
+func (g *NodeBase) PaintStyle() *styles.Paint     { return &g.Paint }
+func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 { return math32.Box2{} }
+func (g *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeOf((*NodeBase)(nil)).Elem() }
+func (g *NodeBase) SetTransformProperty()         { g.SetProperty("transform", g.Paint.Transform.String()) }
 
 func (g *NodeBase) Init() {
 	g.Paint.Defaults()
+	g.GradientFill = math32.Identity2()
+	g.GradientStroke = math32.Identity2()
+	g.Paint.Stroke.Width.Px(1) // dp is not understood by svg..
 }
 
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
 func (g *NodeBase) SetColorProperties(prop, color string) {
-	clr := errors.Log1(colors.FromString(color))
+	if NameFromURL(color) != "" {
+		return
+	}
+	if color == "none" || color == "" {
+		g.SetProperty(prop, "none")
+		g.DeleteProperty(prop + "-opacity")
+		if prop == "stroke" {
+			g.DeleteProperty("stroke-width")
+		}
+		return
+	}
+	clr, _ := colors.FromString(color)
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255
 	clr.A = 255
@@ -181,67 +169,18 @@ func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 	return xf
 }
 
-// ApplyTransform applies the given 2D transform to the geometry of this node
-// this just does a direct transform multiplication on coordinates.
+// ApplyTransform applies the given 2D transform to the geometry of this node.
 func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
-// DeltaTransform computes the net transform matrix for given delta transform parameters
-// and the transformed version of the reference point. If self is true, then
-// include the current node self transform, otherwise don't. Groups do not
-// but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
-	mxi := g.ParentTransform(self)
-	mxi = mxi.Inverse()
+// DeltaTransform computes the net transform matrix for given delta transform parameters,
+// operating around given reference point which serves as the effective origin for rotation.
+func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) math32.Matrix2 {
+	mxi := g.ParentTransform(true).Inverse()
 	lpt := mxi.MulVector2AsPoint(pt)
-	ldel := mxi.MulVector2AsVector(trans)
-	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
-	xf.X0 = ldel.X
-	xf.Y0 = ldel.Y
-	return xf, lpt
-}
-
-// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
-// relative to given point.  Trans translation and point are in top-level coordinates,
-// so must be transformed into local coords first.
-// Point is upper left corner of selection box that anchors the translation and scaling,
-// and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
-}
-
-// WriteTransform writes the node transform to slice at starting index.
-// slice must already be allocated sufficiently.
-func (g *NodeBase) WriteTransform(dat []float32, idx int) {
-	dat[idx+0] = g.Paint.Transform.XX
-	dat[idx+1] = g.Paint.Transform.YX
-	dat[idx+2] = g.Paint.Transform.XY
-	dat[idx+3] = g.Paint.Transform.YY
-	dat[idx+4] = g.Paint.Transform.X0
-	dat[idx+5] = g.Paint.Transform.Y0
-}
-
-// ReadTransform reads the node transform from slice at starting index.
-func (g *NodeBase) ReadTransform(dat []float32, idx int) {
-	g.Paint.Transform.XX = dat[idx+0]
-	g.Paint.Transform.YX = dat[idx+1]
-	g.Paint.Transform.XY = dat[idx+2]
-	g.Paint.Transform.YY = dat[idx+3]
-	g.Paint.Transform.X0 = dat[idx+4]
-	g.Paint.Transform.Y0 = dat[idx+5]
-}
-
-// WriteGeom writes the geometry of the node to a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-// Slice must be passed and will be resized if not the correct length.
-func (g *NodeBase) WriteGeom(sv *SVG, dat *[]float32) {
-	*dat = slicesx.SetLength(*dat, 6)
-	g.WriteTransform(*dat, 0)
-}
-
-// ReadGeom reads the geometry of the node from a slice of floating point numbers
-// the length and ordering of which is specific to each node type.
-func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
-	g.ReadTransform(dat, 0)
+	ltr := mxi.MulVector2AsVector(trans)
+	xf := math32.Translate2D(lpt.X, lpt.Y).Scale(scale.X, scale.Y).Rotate(rot).Translate(ltr.X, ltr.Y).Translate(-lpt.X, -lpt.Y)
+	return xf
 }
 
 // SVGWalkDown does [tree.NodeBase.WalkDown] on given node using given walk function
@@ -254,7 +193,7 @@ func SVGWalkDown(n Node, fun func(sn Node, snb *NodeBase) bool) {
 }
 
 // SVGWalkDownNoDefs does [tree.Node.WalkDown] on given node using given walk function
-// with SVG Node parameters.  Automatically filters Defs nodes (IsDef) and MetaData,
+// with SVG Node parameters. Automatically filters Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
 func SVGWalkDownNoDefs(n Node, fun func(sn Node, snb *NodeBase) bool) {
 	n.AsTree().WalkDown(func(cn tree.Node) bool {
@@ -280,29 +219,6 @@ func FirstNonGroupNode(n Node) Node {
 		return tree.Break
 	})
 	return ngn
-}
-
-// NodesContainingPoint returns all Nodes with Bounding Box that contains
-// given point, optionally only those that are terminal nodes (no leaves).
-// Excludes the starting node.
-func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
-	var cn []Node
-	SVGWalkDown(n, func(sn Node, snb *NodeBase) bool {
-		if sn == n {
-			return tree.Continue
-		}
-		if leavesOnly && snb.HasChildren() {
-			return tree.Continue
-		}
-		if snb.Paint.Off {
-			return tree.Break
-		}
-		if pt.In(snb.BBox) {
-			cn = append(cn, sn)
-		}
-		return tree.Continue
-	})
-	return cn
 }
 
 //////// Standard Node infrastructure
@@ -400,19 +316,19 @@ func (g *NodeBase) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
-	g.BBox = lbb.MulMatrix2(xf).ToRect()
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.BBox = lbb.MulMatrix2(xf)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 // IsVisible checks our bounding box and visibility, returning false if
 // out of bounds. Must be called as first step in Render.
 func (g *NodeBase) IsVisible(sv *SVG) bool {
-	if g.Paint.Off || g == nil || g.This == nil {
+	if g == nil || g.This == nil || g.Paint.Off || !g.Paint.Display {
 		return false
 	}
-	nvis := g.VisBBox == image.Rectangle{}
+	nvis := g.VisBBox == (math32.Box2{})
 	if nvis && !g.isDef {
-		// fmt.Println("invisible:", g.Name, g.BBox, g.VisBBox)
+		// fmt.Println("invisible:", g.Name, "bb:", g.BBox, "vbb:", g.VisBBox, "svg:", sv.Geom.Bounds())
 		return false
 	}
 	return true
@@ -437,7 +353,7 @@ func (g *NodeBase) PushContext(sv *SVG) bool {
 
 func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 	xf := parTransform.Mul(g.Paint.Transform)
-	var bb image.Rectangle
+	var bb math32.Box2
 	for i, kid := range g.Children {
 		ni := kid.(Node)
 		ni.BBoxes(sv, xf)
@@ -449,7 +365,7 @@ func (g *NodeBase) BBoxesFromChildren(sv *SVG, parTransform math32.Matrix2) {
 		}
 	}
 	g.BBox = bb
-	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
@@ -464,4 +380,29 @@ func (g *NodeBase) Render(sv *SVG) {
 		return
 	}
 	g.RenderChildren(sv)
+}
+
+// BitCloneNode returns a bit-wise copy of just the single svg Node itself
+// without any of the children, props or other state being copied, etc.
+// Useful for saving and restoring state during animations or other
+// manipulations. See also [CopyFrom].
+func BitCloneNode(n Node) Node {
+	cp := n.AsTree().NewInstance().(Node)
+	BitCopyFrom(cp, n)
+	return cp
+}
+
+// BitCopyFrom copies only the direct field bits and other key shape data
+// (e.g., [Path.Data]) between nodes. Useful for saving and restoring
+// state during animations or other manipulations.
+func BitCopyFrom(to, fm any) {
+	reflectx.Underlying(reflect.ValueOf(to)).Set(reflectx.Underlying(reflect.ValueOf(fm)))
+	switch x := to.(type) {
+	case *Path:
+		x.Data = fm.(*Path).Data.Clone()
+	case *Polyline:
+		slicesx.CopyFrom(x.Points, fm.(*Polyline).Points)
+	case *Polygon:
+		slicesx.CopyFrom(x.Points, fm.(*Polygon).Points)
+	}
 }
