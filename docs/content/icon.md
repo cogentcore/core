@@ -2,9 +2,9 @@
 Categories = ["Widgets"]
 +++
 
-Cogent Core provides more than 2,000 unique **icons** from the [Material Symbols collection](https://fonts.google.com/icons), allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.
+An **icon** is a [[widget]] that renders an icon through SVG. See [[icons]] for information on the standard icons and how to add custom icons. See also [[SVG]].
 
-Icons are specified using their named variable in the [[doc:icons]] package, and they are typically used in the context of another [[widget]], like a [[button]]:
+Icons are typically specified using their named variable in the [[doc:icons]] package, and they are typically used in the context of another [[widget]], like a [[button]]:
 
 ```Go
 core.NewButton(b).SetIcon(icons.Send)
@@ -22,34 +22,42 @@ You can use the filled version of an icon:
 core.NewButton(b).SetIcon(icons.HomeFill)
 ```
 
-## Custom icons
+## Styles
 
-You can add custom icons to your app using icongen, a part of the [[generate]] tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you can add all of your custom SVG icon files and an `icons.go` file with the following code:
+### Icon size
 
-```go
-package cicons
+You can change the size of an icon:
 
-//go:generate core generate -icons .
+```Go
+ic := core.NewIcon(b).SetIcon(icons.Home)
+ic.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40))
+})
 ```
 
-Then, once you run `go generate`, you can access your icons through your cicons package, where icon names are automatically transformed into CamelCase:
+You can specify different icon sizes for each dimension:
 
-```go
-core.NewButton(b).SetIcon(cicons.MyIconName)
+```Go
+ic := core.NewIcon(b).SetIcon(icons.Home)
+ic.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(40), units.Dp(20))
+})
 ```
 
-### Image icons
+Icon size is an inherited property, so you can set it on a parent widget like a [[button]] and its icon will update accordingly:
 
-Although only SVG files are supported for icons, you can easily embed a bitmap image file in an SVG file. Cogent Core provides an `svg` command line tool that can do this for you. To install it, run:
-
-```sh
-go install cogentcore.org/core/svg/cmd/svg@main
+```Go
+bt := core.NewButton(b).SetText("Send").SetIcon(icons.Send)
+bt.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(30))
+})
 ```
 
-Then, to embed an image into an svg file, run:
+You can also use [[styles#font size]], which applies to all children including icons:
 
-```sh
-svg embed-image my-image.png
+```Go
+tf := core.NewTextField(b).SetText("Hello").SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew)
+tf.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(20)
+})
 ```
-
-This will create a file called `my-image.svg` that has the image embedded into it. Then, you can use that SVG file as an icon as described above.

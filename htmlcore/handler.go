@@ -282,7 +282,7 @@ func handleElement(ctx *Context) {
 			defer resp.Body.Close()
 			if svg != nil {
 				svg.AsyncLock()
-				svg.Read(resp.Body)
+				errors.Log(svg.Read(resp.Body))
 				svg.Update()
 				svg.AsyncUnlock()
 			} else {

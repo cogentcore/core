@@ -7,6 +7,9 @@ package core
 import (
 	"image"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
@@ -57,29 +60,28 @@ type scrimSource struct {
 //////// Sprites
 
 // SpritesSource returns a [composer.Source] for rendering [Sprites].
-func SpritesSource(sprites *Sprites, scpos image.Point) composer.Source {
-	sprites.Lock()
-	defer sprites.Unlock()
-	ss := &spritesSource{}
-	ss.sprites = make([]spriteRender, len(sprites.Order))
-	for i, kv := range sprites.Order {
-		sp := kv.Value
-		// note: may need to copy pixels but hoping not..
-		sr := spriteRender{drawPos: sp.Geom.Pos.Add(scpos), pixels: sp.Pixels, active: sp.Active}
-		ss.sprites[i] = sr
+func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
+	stage.Sprites.Lock()
+	defer stage.Sprites.Unlock()
+
+	sz := math32.FromPoint(mainScene.SceneGeom.Size)
+	if stage.spritePainter == nil || stage.spritePainter.State.Size != sz {
+		stage.spritePainter = paint.NewPainter(sz)
+		stage.spritePainter.Paint.UnitContext = mainScene.Styles.UnitContext
+		stage.spriteRenderer = paint.NewSourceRenderer(sz)
 	}
-	sprites.modified = false
-	return ss
-}
-
-// spritesSource is a [composer.Source] implementation for [Sprites].
-type spritesSource struct {
-	sprites []spriteRender
-}
-
-// spriteRender holds info sufficient for rendering a sprite.
-type spriteRender struct {
-	drawPos image.Point
-	pixels  *image.RGBA
-	active  bool
+	pc := stage.spritePainter
+	pc.Fill.Color = colors.Uniform(colors.Transparent)
+	pc.Clear()
+	stage.Sprites.Do(func(sl *SpriteList) {
+		for _, sp := range sl.Values {
+			if sp == nil || !sp.Active || sp.Draw == nil {
+				continue
+			}
+			sp.Draw(stage.spritePainter)
+		}
+	})
+	stage.Sprites.modified = false
+	render := stage.spritePainter.RenderDone()
+	return &paintSource{render: render, renderer: stage.spriteRenderer, drawOp: draw.Over, drawPos: image.Point{}}
 }

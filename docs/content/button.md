@@ -98,3 +98,23 @@ Action and menu buttons are the most minimal buttons, and they are typically onl
 ```Go
 core.NewButton(b).SetType(core.ButtonAction).SetText("Action")
 ```
+
+## Styles
+
+You can change the [[styles#font size]] of a button, which changes the size of its [[text]] and/or [[icon]]:
+
+```Go
+bt := core.NewButton(b).SetText("Download").SetIcon(icons.Download)
+bt.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(20)
+})
+```
+
+To change only the size of the icon, you can set the [[icon#icon size]] of a button:
+
+```Go
+bt := core.NewButton(b).SetText("Add").SetIcon(icons.Add)
+bt.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(30))
+})
+```

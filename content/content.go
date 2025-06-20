@@ -207,6 +207,22 @@ func (ct *Content) Init() {
 						})
 					})
 				}
+				if len(ct.currentPage.Authors) > 0 {
+					tree.Add(p, func(w *core.Text) {
+						w.SetType(core.TextTitleLarge)
+						w.Updater(func() {
+							w.SetText("By " + strcase.FormatList(ct.currentPage.Authors...))
+						})
+					})
+				}
+				if !ct.currentPage.Date.IsZero() {
+					tree.Add(p, func(w *core.Text) {
+						w.SetType(core.TextTitleMedium)
+						w.Updater(func() {
+							w.SetText(ct.currentPage.Date.Format("January 2, 2006"))
+						})
+					})
+				}
 				tree.Add(p, func(w *core.Frame) {
 					w.Styler(func(s *styles.Style) {
 						s.Direction = styles.Column
@@ -343,6 +359,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	ct.tocNodes = map[string]*core.Tree{}
 	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	contents.SetReadOnly(true)
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
 			ct.rightFrame.ScrollDimToContentStart(math32.Y)
@@ -394,6 +411,7 @@ func (ct *Content) makeCategories() {
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
+	cats.SetReadOnly(true)
 	cats.OnSelect(func(e events.Event) {
 		if cats.IsRootSelected() {
 			ct.Open("")

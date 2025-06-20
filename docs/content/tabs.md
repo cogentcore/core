@@ -74,3 +74,34 @@ tb.SetIcon(icons.Explore)
 _, tb = ts.NewTab("Third")
 tb.SetIcon(icons.History)
 ```
+
+## Styles
+
+You can change the [[styles#font size]] of tab buttons:
+
+```Go
+ts := core.NewTabs(b)
+st := func(s *styles.Style) {
+    s.Font.Size.Dp(30)
+}
+_, firstTb := ts.NewTab("First")
+firstTb.Styler(st)
+_, secondTb := ts.NewTab("Second")
+secondTb.Styler(st)
+```
+
+You can change the [[icon#icon size]] of tab buttons:
+
+```Go
+ts := core.NewTabs(b)
+_, firstTb := ts.NewTab("First")
+firstTb.SetIcon(icons.Home)
+firstTb.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(30))
+})
+_, secondTb := ts.NewTab("Second")
+secondTb.SetIcon(icons.Explore)
+secondTb.Styler(func(s *styles.Style) {
+    s.IconSize.Set(units.Dp(15))
+})
+```

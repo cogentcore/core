@@ -11,12 +11,16 @@ import (
 	"github.com/aymerick/douceur/parser"
 )
 
-// StyleSheet is a Node2D node that contains a stylesheet -- property values
+// StyleSheet is a node that contains a stylesheet -- property values
 // contained in this sheet can be transformed into tree.Properties and set in CSS
-// field of appropriate node
+// field of appropriate node.
 type StyleSheet struct {
 	NodeBase
 	Sheet *css.Stylesheet `copier:"-"`
+}
+
+func (ss *StyleSheet) SVGName() string {
+	return "css"
 }
 
 // ParseString parses the string into a StyleSheet of rules, which can then be
@@ -61,11 +65,18 @@ func (ss *StyleSheet) CSSProperties() map[string]any {
 	return pr
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// MetaData
+//////// MetaData
 
 // MetaData is used for holding meta data info
 type MetaData struct {
 	NodeBase
 	MetaData string
+}
+
+func (g *MetaData) SVGName() string {
+	return "metadata"
+}
+
+func (g *MetaData) EnforceSVGName() bool {
+	return false
 }

@@ -56,16 +56,10 @@ func (ed *Base) RenderWidget() {
 		}
 		ed.PositionScrolls()
 		ed.renderLines()
-		if ed.StateIs(states.Focused) {
-			ed.startCursor()
-		} else {
-			ed.stopCursor()
-		}
 		ed.RenderChildren()
 		ed.RenderScrolls()
+		ed.updateCursorPosition()
 		ed.EndRender()
-	} else {
-		ed.stopCursor()
 	}
 }
 
@@ -175,7 +169,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	pc := &ed.Scene.Painter
 	sz := ed.charSize
 	sz.X *= float32(ed.linesSize.X)
-	vlr := buf.ViewLineRegionLocked(ed.viewId, ln)
+	vlr := buf.ViewLineRegionNoLock(ed.viewId, ln)
 	vseli := vlr.Intersect(vsel, ed.linesSize.X)
 	tx := buf.ViewMarkupLine(ed.viewId, ln)
 	ctx := &rich.DefaultSettings
@@ -444,8 +438,12 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	if ed.Lines == nil {
 		return math32.Vector2{}
 	}
+	scpos := image.Point{}
+	if ed.Scene != nil {
+		scpos = ed.Scene.SceneGeom.Pos
+	}
 	vpos := ed.Lines.PosToView(ed.viewId, pos)
-	spos := ed.Geom.Pos.Content
+	spos := ed.Geom.Pos.Content.Add(math32.FromPoint(scpos))
 	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)

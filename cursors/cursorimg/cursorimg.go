@@ -11,7 +11,6 @@ import (
 	"image"
 	"image/draw"
 	_ "image/png"
-	"io/fs"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -63,11 +62,10 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	}
 
 	sv := svg.NewSVG(math32.Vec2(float32(size), float32(size)))
-	b, err := fs.ReadFile(cursors.Cursors, "svg/"+name+".svg")
+	b, err := cursors.SVG(name)
 	if err != nil {
 		return nil, err
 	}
-	b = replaceColors(b)
 	err = sv.ReadXML(bytes.NewReader(b))
 	if err != nil {
 		return nil, fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
@@ -88,19 +86,4 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 		Size:    size,
 		Hotspot: hot.Mul(size).Div(256),
 	}, nil
-}
-
-// replaceColors replaces literal cursor colors in the given SVG with scheme colors.
-func replaceColors(b []byte) []byte {
-	m := map[string]image.Image{
-		"#fff": colors.Palette.Neutral.ToneUniform(100),
-		"#000": colors.Palette.Neutral.ToneUniform(0),
-		"#f00": colors.Scheme.Error.Base,
-		"#0f0": colors.Scheme.Success.Base,
-		"#ff0": colors.Scheme.Warn.Base,
-	}
-	for old, clr := range m {
-		b = bytes.ReplaceAll(b, []byte(fmt.Sprintf("%q", old)), []byte(fmt.Sprintf("%q", colors.AsHex(colors.ToUniform(clr)))))
-	}
-	return b
 }

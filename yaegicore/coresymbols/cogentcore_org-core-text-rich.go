@@ -14,7 +14,6 @@ func init() {
 		// function, constant and variable definitions
 		"AddFamily":          reflect.ValueOf(rich.AddFamily),
 		"BTT":                reflect.ValueOf(rich.BTT),
-		"Background":         reflect.ValueOf(rich.Background),
 		"Black":              reflect.ValueOf(rich.Black),
 		"Bold":               reflect.ValueOf(rich.Bold),
 		"ColorFromRune":      reflect.ValueOf(rich.ColorFromRune),
@@ -47,7 +46,6 @@ func init() {
 		"FamilyValues":       reflect.ValueOf(rich.FamilyValues),
 		"Fangsong":           reflect.ValueOf(rich.Fangsong),
 		"Fantasy":            reflect.ValueOf(rich.Fantasy),
-		"FillColor":          reflect.ValueOf(rich.FillColor),
 		"FontSizes":          reflect.ValueOf(&rich.FontSizes).Elem(),
 		"Italic":             reflect.ValueOf(rich.Italic),
 		"Join":               reflect.ValueOf(rich.Join),
@@ -106,7 +104,6 @@ func init() {
 		"StretchNormal":      reflect.ValueOf(rich.StretchNormal),
 		"StretchStart":       reflect.ValueOf(constant.MakeFromLiteral("16", token.INT, 0)),
 		"StretchValues":      reflect.ValueOf(rich.StretchValues),
-		"StrokeColor":        reflect.ValueOf(rich.StrokeColor),
 		"Sub":                reflect.ValueOf(rich.Sub),
 		"Super":              reflect.ValueOf(rich.Super),
 		"TTB":                reflect.ValueOf(rich.TTB),

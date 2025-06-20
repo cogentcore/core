@@ -8,18 +8,25 @@ import (
 	"image"
 	"sync"
 
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
+	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 )
 
-// A Sprite is just an image (with optional background) that can be drawn onto
-// the OverTex overlay texture of a window.  Sprites are used for text cursors/carets
-// and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elements)
+// A Sprite is a top-level rendering element that paints onto a transparent
+// layer that is cleared every render pass. Sprites are used for text cursors/carets
+// and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elements).
+// To support cursor sprites and other animations, the sprites are redrawn at a
+// minimum update rate that is at least as fast as CursorBlinkTime.
+// Sprites can also receive mouse events, within their event bounding box.
+// It is basically like a [Canvas] element over the entire screen, with no constraints
+// on where you can draw.
 type Sprite struct {
 
 	// Active is whether this sprite is Active now or not.
+	// Active sprites Draw and can receive events.
 	Active bool
 
 	// Name is the unique name of the sprite.
@@ -28,11 +35,13 @@ type Sprite struct {
 	// properties for sprite, which allow for user-extensible data
 	Properties map[string]any
 
-	// position and size of the image within the RenderWindow
-	Geom math32.Geom2DInt
+	// Draw is the function that is called for Active sprites on every render pass
+	// to draw the sprite onto the top-level transparent layer.
+	Draw func(pc *paint.Painter)
 
-	// pixels to render, which should be the same size as [Sprite.Geom.Size]
-	Pixels *image.RGBA
+	// EventBBox is the bounding box for this sprite to receive mouse events.
+	// Typically this is the region in which it renders.
+	EventBBox image.Rectangle
 
 	// listeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
@@ -44,54 +53,23 @@ type Sprite struct {
 // NewSprite returns a new [Sprite] with the given name, which must remain
 // invariant and unique among all sprites in use, and is used for all access;
 // prefix with package and type name to ensure uniqueness. Starts out in
-// inactive state; must call ActivateSprite. If size is 0, no image is made.
-func NewSprite(name string, sz image.Point, pos image.Point) *Sprite {
-	sp := &Sprite{Name: name}
-	sp.SetSize(sz)
-	sp.Geom.Pos = pos
+// inactive state; must call ActivateSprite.
+func NewSprite(name string, draw func(pc *paint.Painter)) *Sprite {
+	sp := &Sprite{Name: name, Draw: draw}
 	return sp
 }
 
-// SetSize sets sprite image to given size; makes a new image (does not resize)
-// returns true if a new image was set
-func (sp *Sprite) SetSize(nwsz image.Point) bool {
-	if nwsz.X == 0 || nwsz.Y == 0 {
-		return false
+// InitProperties ensures that the Properties map exists.
+func (sp *Sprite) InitProperties() {
+	if sp.Properties != nil {
+		return
 	}
-	sp.Geom.Size = nwsz // always make sure
-	if sp.Pixels != nil && sp.Pixels.Bounds().Size() == nwsz {
-		return false
-	}
-	sp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	return true
+	sp.Properties = make(map[string]any)
 }
 
-// grabRenderFrom grabs the rendered image from the given widget.
-func (sp *Sprite) grabRenderFrom(w Widget) {
-	img := grabRenderFrom(w)
-	if img != nil {
-		sp.Pixels = img
-		sp.Geom.Size = sp.Pixels.Bounds().Size()
-	} else {
-		sp.SetSize(image.Pt(10, 10)) // just a blank placeholder
-	}
-}
-
-// grabRenderFrom grabs the rendered image from the given widget.
-// If it returns nil, then the image could not be fetched.
-func grabRenderFrom(w Widget) *image.RGBA {
-	wb := w.AsWidget()
-	scimg := wb.Scene.renderer.Image() // todo: need to make this real on JS
-	if scimg == nil {
-		return nil
-	}
-	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
-		return nil
-	}
-	sz := wb.Geom.TotalBBox.Size()
-	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
-	return img
+// SetPos sets the position of the sprite EventBBox, keeping the same size.
+func (sp *Sprite) SetPos(pos image.Point) {
+	sp.EventBBox = sp.EventBBox.Add(pos.Sub(sp.EventBBox.Min))
 }
 
 // On adds the given event handler to the sprite's Listeners for the given event type.
@@ -144,9 +122,33 @@ func (sp *Sprite) send(typ events.Types, original ...events.Event) {
 	sp.handleEvent(e)
 }
 
-// Sprites manages a collection of Sprites, with unique name ids.
+// NewImageSprite returns a new Sprite that draws the given image
+// in the given location, which is stored in the Min of the EventBBox.
+// Move the EventBBox to move the render location.
+// The image is stored as "image" in Properties.
+func NewImageSprite(name string, pos image.Point, img image.Image) *Sprite {
+	sp := &Sprite{Name: name}
+	sp.InitProperties()
+	sp.Properties["image"] = img
+	sp.EventBBox = img.Bounds().Add(pos)
+	sp.Draw = func(pc *paint.Painter) {
+		pc.DrawImage(img, sp.EventBBox, image.Point{}, draw.Over)
+	}
+	return sp
+}
+
+////////  Sprites
+
+type SpriteList = keylist.List[string, *Sprite]
+
+// Sprites manages a collection of Sprites, with unique name ids within each
+// of three priority lists: Normal, First and Final. The convenience API adds to
+// the Normal list, while First and Final are available for more advanced cases
+// where rendering order needs to be controlled. First items are rendered first
+// (so they can be overwritten) and processed last for event handling,
+// and vice-versa for Final.
 type Sprites struct {
-	ordmap.Map[string, *Sprite]
+	tiered.Tiered[SpriteList]
 
 	// set to true if sprites have been modified since last config
 	modified bool
@@ -154,73 +156,146 @@ type Sprites struct {
 	sync.Mutex
 }
 
-// Add adds sprite to list, and returns the image index and
-// layer index within that for given sprite.  If name already
-// exists on list, then it is returned, with size allocation
-// updated as needed.
-func (ss *Sprites) Add(sp *Sprite) {
+// SetModified sets the sprite modified flag, which will
+// drive a render to reflect the updated sprite.
+// This version locks the sprites: see also [Sprites.SetModifiedNoLock].
+func (ss *Sprites) SetModified() {
 	ss.Lock()
-	ss.Init()
-	ss.Map.Add(sp.Name, sp)
 	ss.modified = true
 	ss.Unlock()
 }
 
-// Delete deletes sprite by name, returning indexes where it was located.
-// All sprite images must be updated when this occurs, as indexes may have shifted.
-func (ss *Sprites) Delete(sp *Sprite) {
-	ss.Lock()
-	ss.DeleteKey(sp.Name)
+// SetModifiedNoLock sets the sprite modified flag, which will
+// drive a render to reflect the updated sprite.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) SetModifiedNoLock() {
 	ss.modified = true
-	ss.Unlock()
 }
 
-// SpriteByName returns the sprite by name
-func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
-	ss.Lock()
-	defer ss.Unlock()
-	return ss.ValueByKeyTry(name)
-}
-
-// reset removes all sprites
-func (ss *Sprites) reset() {
-	ss.Lock()
-	ss.Reset()
-	ss.modified = true
-	ss.Unlock()
-}
-
-// ActivateSprite flags the sprite as active, setting Modified if wasn't before.
-func (ss *Sprites) ActivateSprite(name string) {
-	sp, ok := ss.SpriteByName(name)
-	if !ok {
-		return // not worth bothering about errs -- use a consistent string var!
-	}
-	ss.Lock()
-	if !sp.Active {
-		sp.Active = true
-		ss.modified = true
-	}
-	ss.Unlock()
-}
-
-// InactivateSprite flags the sprite as inactive, setting Modified if wasn't before.
-func (ss *Sprites) InactivateSprite(name string) {
-	sp, ok := ss.SpriteByName(name)
-	if !ok {
-		return // not worth bothering about errs -- use a consistent string var!
-	}
-	ss.Lock()
-	if sp.Active {
-		sp.Active = false
-		ss.modified = true
-	}
-	ss.Unlock()
-}
-
-// IsModified returns whether the sprites have been modified.
+// IsModified returns whether the sprites have been modified, under lock.
 func (ss *Sprites) IsModified() bool {
 	ss.Lock()
 	defer ss.Unlock()
 	return ss.modified
+}
+
+// Add adds sprite to the Normal list of sprites, updating if already there.
+// This version locks the sprites: see also [Sprites.AddNoLock].
+func (ss *Sprites) Add(sp *Sprite) {
+	ss.Lock()
+	ss.AddNoLock(sp)
+	ss.Unlock()
+}
+
+// AddNoLock adds sprite to the Normal list of sprites, updating if already there.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) AddNoLock(sp *Sprite) {
+	ss.Normal.Set(sp.Name, sp)
+	ss.modified = true
+}
+
+// Delete deletes given sprite by name, returning true if found and deleted.
+// This version locks the sprites: see also [Sprites.DeleteNoLock].
+func (ss *Sprites) Delete(name string) bool {
+	ss.Lock()
+	defer ss.Unlock()
+	return ss.DeleteNoLock(name)
+}
+
+// DeleteNoLock deletes given sprite by name, returning true if found and deleted.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) DeleteNoLock(name string) bool {
+	got := false
+	ss.Do(func(sl *SpriteList) {
+		d := sl.DeleteByKey(name)
+		if d {
+			got = true
+		}
+	})
+	if got {
+		ss.modified = true
+	}
+	return got
+}
+
+// SpriteByName returns the sprite by name.
+// This version locks the sprites: see also [Sprites.SpriteByNameNoLock].
+func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
+	ss.Lock()
+	defer ss.Unlock()
+	return ss.SpriteByNameNoLock(name)
+}
+
+// SpriteByNameNoLock returns the sprite by name.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) SpriteByNameNoLock(name string) (sp *Sprite, ok bool) {
+	ss.Do(func(sl *SpriteList) {
+		if ok {
+			return
+		}
+		sp, ok = sl.AtTry(name)
+		if ok {
+			return
+		}
+	})
+	return
+}
+
+// reset removes all sprites.
+func (ss *Sprites) reset() {
+	ss.Lock()
+	ss.Do(func(sl *SpriteList) {
+		sl.Reset()
+	})
+	ss.modified = true
+	ss.Unlock()
+}
+
+// ActivateSprite flags sprite(s) as active, setting Modified if wasn't before.
+// This version locks the sprites: see also [Sprites.ActivateSpriteNoLock].
+func (ss *Sprites) ActivateSprite(name ...string) {
+	ss.Lock()
+	ss.ActivateSpriteNoLock(name...)
+	ss.Unlock()
+}
+
+// ActivateSpriteNoLock flags the sprite(s) as active,
+// setting Modified if wasn't before.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) ActivateSpriteNoLock(name ...string) {
+	for _, nm := range name {
+		sp, ok := ss.SpriteByNameNoLock(nm)
+		if ok && !sp.Active {
+			sp.Active = true
+			ss.modified = true
+		}
+	}
+}
+
+// InactivateSprite flags the Normal sprite(s) as inactive,
+// setting Modified if wasn't before.
+// This version locks the sprites: see also [Sprites.InactivateSpriteNoLock].
+func (ss *Sprites) InactivateSprite(name ...string) {
+	ss.Lock()
+	ss.InactivateSpriteNoLock(name...)
+	ss.Unlock()
+}
+
+// InactivateSpriteNoLock flags the Normal sprite(s) as inactive,
+// setting Modified if wasn't before.
+// This version assumes Sprites are already locked, which is better for
+// doing multiple coordinated updates at the same time.
+func (ss *Sprites) InactivateSpriteNoLock(name ...string) {
+	for _, nm := range name {
+		sp, ok := ss.SpriteByNameNoLock(nm)
+		if ok && sp.Active {
+			sp.Active = false
+			ss.modified = true
+		}
+	}
 }

@@ -92,8 +92,8 @@ func (nb *NodeBase) Make(p *Plan) {
 	if len(nb.Makers.First) > 0 || len(nb.Makers.Normal) > 0 || len(nb.Makers.Final) > 0 {
 		p.EnforceEmpty = true
 	}
-	nb.Makers.Do(func(makers []func(p *Plan)) {
-		for _, maker := range makers {
+	nb.Makers.Do(func(makers *[]func(p *Plan)) {
+		for _, maker := range *makers {
 			maker(p)
 		}
 	})
@@ -110,9 +110,9 @@ func (nb *NodeBase) UpdateFromMake() {
 // It is called in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and other places
 // such as in xyz to update the node.
 func (nb *NodeBase) RunUpdaters() {
-	nb.Updaters.Do(func(updaters []func()) {
-		for i := len(updaters) - 1; i >= 0; i-- {
-			updaters[i]()
+	nb.Updaters.Do(func(updaters *[]func()) {
+		for i := len(*updaters) - 1; i >= 0; i-- {
+			(*updaters)[i]()
 		}
 	})
 }

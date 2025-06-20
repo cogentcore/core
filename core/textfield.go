@@ -26,14 +26,12 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
-	"golang.org/x/image/draw"
 )
 
 // TextField is a widget for editing a line of text.
@@ -160,9 +158,6 @@ type TextField struct { //core:embedder
 	// lineHeight is the line height cached during styling.
 	lineHeight float32
 
-	// blinkOn oscillates between on and off for blinking.
-	blinkOn bool
-
 	// cursorMu is the mutex for updating the cursor between blinker and field.
 	cursorMu sync.Mutex
 
@@ -233,6 +228,7 @@ func (tf *TextField) Init() {
 		s.Text.Align = text.Start
 		s.Align.Items = styles.Center
 		s.Color = colors.Scheme.OnSurface
+		s.IconSize.Set(units.Em(18.0 / 16))
 		switch tf.Type {
 		case TextFieldFilled:
 			s.Border.Style.Set(styles.BorderNone)
@@ -297,6 +293,7 @@ func (tf *TextField) Init() {
 				tf.paste()
 			}
 		}
+		tf.startCursor()
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
@@ -307,6 +304,7 @@ func (tf *TextField) Init() {
 		}
 		e.SetHandled()
 		tf.selectWord()
+		tf.startCursor()
 	})
 	tf.On(events.TripleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
@@ -317,6 +315,7 @@ func (tf *TextField) Init() {
 		}
 		e.SetHandled()
 		tf.selectAll()
+		tf.startCursor()
 	})
 	tf.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
@@ -329,20 +328,22 @@ func (tf *TextField) Init() {
 				tf.selectModeToggle()
 			}
 		}
+		tf.startCursor()
 	})
 	tf.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		tf.selectMode = true // always
 		tf.setCursorFromPixel(e.Pos(), events.SelectOne)
+		tf.startCursor()
 	})
 	tf.OnClose(func(e events.Event) {
 		tf.editDone() // todo: this must be protected against something else, for race detector
 	})
 
 	tf.Maker(func(p *tree.Plan) {
-		tf.editText = []rune(tf.text)
-		tf.edited = false
-
+		if !tf.edited { // if in edit, don't overwrite
+			tf.editText = []rune(tf.text)
+		}
 		if tf.IsReadOnly() {
 			return
 		}
@@ -354,6 +355,8 @@ func (tf *TextField) Init() {
 					s.Padding.Zero()
 					s.Color = colors.Scheme.OnSurfaceVariant
 					s.Margin.SetRight(units.Dp(8))
+					s.Font.Size = tf.Styles.Font.Size
+					s.IconSize = tf.Styles.IconSize
 					if tf.LeadingIconOnClick == nil {
 						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 						s.Cursor = cursors.None
@@ -399,6 +402,8 @@ func (tf *TextField) Init() {
 						s.Color = colors.Scheme.Error.Base
 					}
 					s.Margin.SetLeft(units.Dp(8))
+					s.Font.Size = tf.Styles.Font.Size
+					s.IconSize = tf.Styles.IconSize
 					if tf.TrailingIconOnClick == nil || tf.error != nil {
 						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 						s.Cursor = cursors.None
@@ -532,7 +537,7 @@ func (tf *TextField) editDone() {
 		}
 	}
 	tf.clearSelected()
-	tf.clearCursor()
+	tf.stopCursor()
 }
 
 // revert aborts editing and reverts to the last saved text.
@@ -595,6 +600,9 @@ func (tf *TextField) WidgetTooltip(pos image.Point) (string, image.Point) {
 ////////  Cursor Navigation
 
 func (tf *TextField) updateLinePos() {
+	if tf.renderAll == nil {
+		return
+	}
 	tf.cursorLine = tf.renderAll.RuneToLinePos(tf.cursorPos).Line
 }
 
@@ -1097,7 +1105,7 @@ func (tf *TextField) offerComplete() {
 		return
 	}
 	s := string(tf.editText[0:tf.cursorPos])
-	cpos := tf.charRenderPos(tf.cursorPos, true).ToPoint()
+	cpos := tf.charRenderPos(tf.cursorPos).ToPoint()
 	cpos.X += 5
 	cpos.Y = tf.Geom.TotalBBox.Max.Y
 	tf.complete.SrcLn = 0
@@ -1160,144 +1168,60 @@ func (tf *TextField) relCharPos(st, ed int) math32.Vector2 {
 // charRenderPos returns the starting render coords for the given character
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too).
-// if wincoords is true, then adds window box offset -- for cursor, popups
-func (tf *TextField) charRenderPos(charidx int, wincoords bool) math32.Vector2 {
+func (tf *TextField) charRenderPos(charidx int) math32.Vector2 {
 	pos := tf.effPos
-	if wincoords {
-		sc := tf.Scene
-		pos = pos.Add(math32.FromPoint(sc.SceneGeom.Pos))
-	}
+	sc := tf.Scene
+	pos = pos.Add(math32.FromPoint(sc.SceneGeom.Pos))
 	cpos := tf.relCharPos(tf.dispRange.Start, charidx)
 	return pos.Add(cpos)
 }
 
 var (
-	// textFieldBlinker manages cursor blinking
-	textFieldBlinker = Blinker{}
-
-	// textFieldSpriteName is the name of the window sprite used for the cursor
+	// textFieldSpriteName is the name of the window sprite used for the cursor.
 	textFieldSpriteName = "TextField.Cursor"
-)
 
-func init() {
-	TheApp.AddQuitCleanFunc(textFieldBlinker.QuitClean)
-	textFieldBlinker.Func = func() {
-		w := textFieldBlinker.Widget
-		textFieldBlinker.Unlock() // comes in locked
-		if w == nil {
-			return
-		}
-		tf := AsTextField(w)
-		if !tf.StateIs(states.Focused) || !tf.IsVisible() {
-			tf.blinkOn = false
-			tf.renderCursor(false)
-		} else {
-			// Need consistent test results on offscreen.
-			if TheApp.Platform() != system.Offscreen {
-				tf.blinkOn = !tf.blinkOn
-			}
-			tf.renderCursor(tf.blinkOn)
-		}
-	}
-}
+	// textFieldCursor is the TextField that last created a new cursor sprite.
+	textFieldCursor tree.Node
+)
 
 // startCursor starts the cursor blinking and renders it
 func (tf *TextField) startCursor() {
-	if tf == nil || tf.This == nil {
+	if tf == nil || tf.This == nil || !tf.IsVisible() {
 		return
 	}
-	if !tf.IsVisible() {
+	if tf.IsReadOnly() || !tf.AbilityIs(abilities.Focusable) {
 		return
 	}
-	tf.blinkOn = true
-	tf.renderCursor(true)
-	if SystemSettings.CursorBlinkTime == 0 {
-		return
-	}
-	textFieldBlinker.SetWidget(tf.This.(Widget))
-	textFieldBlinker.Blink(SystemSettings.CursorBlinkTime)
-}
-
-// clearCursor turns off cursor and stops it from blinking
-func (tf *TextField) clearCursor() {
-	if tf.IsReadOnly() {
-		return
-	}
-	tf.stopCursor()
-	tf.renderCursor(false)
+	tf.toggleCursor(true)
 }
 
 // stopCursor stops the cursor from blinking
 func (tf *TextField) stopCursor() {
-	if tf == nil || tf.This == nil {
-		return
-	}
-	textFieldBlinker.ResetWidget(tf.This.(Widget))
+	tf.toggleCursor(false)
 }
 
-// renderCursor renders the cursor on or off, as a sprite that is either on or off
-func (tf *TextField) renderCursor(on bool) {
-	if tf == nil || tf.This == nil {
-		return
-	}
-	if !on {
-		if tf.Scene == nil || tf.Scene.Stage == nil {
-			return
-		}
-		ms := tf.Scene.Stage.Main
-		if ms == nil {
-			return
-		}
-		spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
-		ms.Sprites.InactivateSprite(spnm)
-		return
-	}
-	if !tf.IsVisible() {
-		return
-	}
-
-	tf.cursorMu.Lock()
-	defer tf.cursorMu.Unlock()
-
-	sp := tf.cursorSprite(on)
-	if sp == nil {
-		return
-	}
-	sp.Geom.Pos = tf.charRenderPos(tf.cursorPos, true).ToPointFloor()
+// toggleSprite turns on or off the cursor sprite.
+func (tf *TextField) toggleCursor(on bool) {
+	TextCursor(on, tf.AsWidget(), &textFieldCursor, textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
+		return tf.charRenderPos(tf.cursorPos).ToPointFloor()
+	})
 }
 
-// cursorSprite returns the Sprite for the cursor (which is
-// only rendered once with a vertical bar, and just activated and inactivated
-// depending on render status).  On sets the On status of the cursor.
-func (tf *TextField) cursorSprite(on bool) *Sprite {
+// updateCursorPosition updates the position of the cursor.
+func (tf *TextField) updateCursorPosition() {
+	if tf.IsReadOnly() || !tf.StateIs(states.Focused) {
+		return
+	}
 	sc := tf.Scene
-	if sc == nil {
-		return nil
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
+		return
 	}
 	ms := sc.Stage.Main
-	if ms == nil {
-		return nil // only MainStage has sprites
+	ms.Sprites.Lock()
+	defer ms.Sprites.Unlock()
+	if sp, ok := ms.Sprites.SpriteByNameNoLock(textFieldSpriteName); ok {
+		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
 	}
-	spnm := fmt.Sprintf("%v-%v", textFieldSpriteName, tf.lineHeight)
-	sp, ok := ms.Sprites.SpriteByName(spnm)
-	// TODO: figure out how to update caret color on color scheme change
-	if !ok {
-		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.lineHeight))}
-		if bbsz.X < 2 { // at least 2
-			bbsz.X = 2
-		}
-		sp = NewSprite(spnm, bbsz, image.Point{})
-		sp.Active = on
-		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, tf.CursorColor, image.Point{}, draw.Src)
-		ms.Sprites.Add(sp)
-	}
-	if on {
-		ms.Sprites.ActivateSprite(sp.Name)
-	} else {
-		ms.Sprites.InactivateSprite(sp.Name)
-	}
-	return sp
 }
 
 // renderSelect renders the selected region, if any, underneath the text
@@ -1507,6 +1431,7 @@ func (tf *TextField) handleKeyEvents() {
 		if !tf.StateIs(states.Focused) && kf == keymap.Abort {
 			return
 		}
+		tf.startCursor()
 
 		// first all the keys that work for both inactive and active
 		switch kf {
@@ -1663,6 +1588,8 @@ func (tf *TextField) handleKeyEvents() {
 	tf.OnFocus(func(e events.Event) {
 		if tf.IsReadOnly() {
 			e.SetHandled()
+		} else {
+			tf.startCursor()
 		}
 	})
 	tf.OnFocusLost(func(e events.Event) {
@@ -1819,17 +1746,6 @@ func (tf *TextField) layoutCurrent() {
 }
 
 func (tf *TextField) Render() {
-	defer func() {
-		if tf.IsReadOnly() {
-			return
-		}
-		if tf.StateIs(states.Focused) {
-			tf.startCursor()
-		} else {
-			tf.stopCursor()
-		}
-	}()
-
 	tf.autoScroll() // does all update checking, inits paint with our style
 	tf.RenderAllocBox()
 	if tf.dispRange.Start < 0 || tf.dispRange.End > len(tf.editText) {
@@ -1838,6 +1754,7 @@ func (tf *TextField) Render() {
 	if tf.renderVisible == nil || tf.dispRange != tf.renderedRange {
 		tf.layoutCurrent()
 	}
+	tf.updateCursorPosition()
 	tf.renderSelect()
 	tf.Scene.Painter.DrawText(tf.renderVisible, tf.effPos)
 }

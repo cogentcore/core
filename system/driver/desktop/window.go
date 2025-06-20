@@ -152,6 +152,9 @@ func (w *Window) Screen() *system.Screen {
 		goto setScreen
 	}
 	sc = w.GetScreenOverlap()
+	if sc == nil {
+		return nil
+	}
 	// if monitorDebug {
 	// 	log.Printf("ScreenDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
 	// }
@@ -321,6 +324,9 @@ func (w *Window) ConstrainFrame(topOnly bool) sides.Sides[int] {
 	l, t, r, b := w.Glw.GetFrameSize()
 	w.FrameSize.Set(t, r, b, l)
 	sc := w.Screen()
+	if sc == nil {
+		return w.FrameSize
+	}
 	scSize := sc.Geometry.Size()
 	// fmt.Println("\tconstrainframe screen:", sc.Name, scSize, w.FrameSize, "geom:", w.Pos, w.WnSize)
 	frSize := image.Pt(w.FrameSize.Left+w.FrameSize.Right, w.FrameSize.Top+w.FrameSize.Bottom)

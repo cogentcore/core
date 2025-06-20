@@ -17,9 +17,13 @@ func FromXMLString(style string, properties map[string]any) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
-		if len(kv) >= 2 {
-			k := strings.TrimSpace(strings.ToLower(kv[0]))
-			v := strings.TrimSpace(kv[1])
+		n := len(kv)
+		if n >= 2 {
+			k := strings.TrimSpace(strings.ToLower(kv[n-2]))
+			if n == 3 { // prefixed name
+				k = strings.TrimSpace(strings.ToLower(kv[0])) + ":" + k
+			}
+			v := strings.TrimSpace(kv[n-1])
 			properties[k] = v
 		}
 	}

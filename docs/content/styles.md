@@ -1,8 +1,12 @@
++++
+Categories = ["Concepts"]
++++
+
 **Styles** contains explanations of common [[style]] properties. You can also see the API documentation for an [exhaustive list](https://pkg.go.dev/cogentcore.org/core/styles#Style) of style properties. You can experiment with style properties in the [[style playground]].
 
 ## Color
 
-Many style properties involve [[color]]s, which can be specified in several ways as documented on that linked page.
+Many style properties involve [[colors]], which can be specified in several ways as documented on that linked page.
 
 You can set the content color of [[text]] or an [[icon]]:
 
@@ -25,7 +29,7 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-You can use a [[color#gradient]] background:
+You can use a [[colors#gradient]] background:
 
 ```Go
 fr := core.NewFrame(b)
@@ -35,7 +39,7 @@ fr.Styler(func(s *styles.Style) {
 })
 ```
 
-See the [[color]] page for more possible background color options such as an [[color#image]].
+See the [[colors]] page for more possible background color options such as an [[colors#image]].
 
 ## Border
 
@@ -89,6 +93,10 @@ fr.Styler(func(s *styles.Style) {
 ## Layout
 
 There are many layout properties that customize the positioning and sizing of widgets, typically using [[unit]]s. See the [[layout]] page for a low-level explanation of the layout process.
+
+The standard box model explains the meaning of different size elements:
+
+![Box model](media/box-model.png)
 
 ### Size
 
@@ -312,6 +320,19 @@ tx.Styler(func(s *styles.Style) {
     s.Font.Slant = rich.Italic
 })
 ```
+
+### Font size
+
+You can change the size of text:
+
+```Go
+tx := core.NewText(b).SetText("Big text")
+tx.Styler(func(s *styles.Style) {
+    s.Font.Size.Dp(50)
+})
+```
+
+See also [[icon#icon size]].
 
 ### Font family
 

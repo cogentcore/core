@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -53,6 +54,9 @@ type Events struct {
 
 	// stack of sprites with mouse pointer in BBox, with any listeners present.
 	spriteInBBox []*Sprite
+
+	// stack of hovered sprites: have mouse pointer in BBox.
+	spriteHovers []*Sprite
 
 	// currently pressing sprite.
 	spritePress *Sprite
@@ -174,6 +178,8 @@ func (em *Events) handleEvent(e events.Event) {
 		em.handlePosEvent(e)
 	case e.NeedsFocus():
 		em.handleFocusEvent(e)
+	default: // eg. os events
+		em.scene.HandleEvent(e)
 	}
 }
 
@@ -257,12 +263,14 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.spriteSlide.handleEvent(e)
 			em.spriteSlide.send(events.SlideMove, e)
 			e.SetHandled()
+			em.setCursorFromStyle()
 			return
 		}
 		if !tree.IsNil(em.slide) {
 			em.slide.AsWidget().HandleEvent(e)
 			em.slide.AsWidget().Send(events.SlideMove, e)
 			e.SetHandled()
+			em.setCursorFromStyle()
 			return
 		}
 	case events.Scroll:
@@ -273,6 +281,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				if e.IsHandled() {
 					em.lastScrollTime = time.Now()
 				}
+				em.setCursorFromStyle()
 				return
 			}
 			em.scroll = nil
@@ -280,13 +289,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 	}
 
 	em.spriteInBBox = nil
-	if et != events.MouseMove {
-		em.getSpriteInBBox(sc, e.WindowPos())
-
-		if len(em.spriteInBBox) > 0 {
-			if em.handleSpriteEvent(e) {
-				return
-			}
+	em.getSpriteInBBox(sc, e.WindowPos())
+	if len(em.spriteInBBox) > 0 {
+		if em.handleSpriteEvent(e) {
+			em.setCursorFromStyle()
+			return
 		}
 	}
 
@@ -298,6 +305,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		if DebugSettings.EventTrace && et != events.MouseMove {
 			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
+		em.setCursorFromStyle()
 		return
 	}
 
@@ -468,6 +476,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			case events.Left:
 				if sc.selectedWidgetChan != nil {
 					sc.selectedWidgetChan <- up
+					em.setCursorFromStyle()
 					return
 				}
 				dcInTime := time.Since(em.lastClickTime) < DeviceSettings.DoubleClickInterval
@@ -534,50 +543,39 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.scene.HandleEvent(e)
 		}
 	}
-
-	// we need to handle cursor after all of the events so that
-	// we get the latest cursor if it changes based on the state
-
-	cursorSet := false
-	for i := n - 1; i >= 0; i-- {
-		w := em.mouseInBBox[i]
-		wb := w.AsWidget()
-		if !cursorSet && wb.Styles.Cursor != cursors.None {
-			em.setCursor(wb.Styles.Cursor)
-			cursorSet = true
-		}
-	}
+	em.setCursorFromStyle()
 }
 
 // updateHovers updates the hovered widgets based on current
 // widgets in bounding box.
 func (em *Events) updateHovers(hov, prev []Widget, e events.Event, enter, leave events.Types) []Widget {
 	for _, prv := range prev {
-		stillIn := false
-		for _, cur := range hov {
-			if prv == cur {
-				stillIn = true
-				break
-			}
-		}
-		if !stillIn && !tree.IsNil(prv) {
+		if !slices.Contains(hov, prv) && !tree.IsNil(prv) {
 			prv.AsWidget().Send(leave, e)
 		}
 	}
-
 	for _, cur := range hov {
-		wasIn := false
-		for _, prv := range prev {
-			if prv == cur {
-				wasIn = true
-				break
-			}
-		}
-		if !wasIn {
+		if !slices.Contains(prev, cur) {
 			cur.AsWidget().Send(enter, e)
 		}
 	}
 	// todo: detect change in top one, use to update cursor
+	return hov
+}
+
+// updateSpriteHovers updates the hovered sprites based on current
+// sprites in bounding box.
+func (em *Events) updateSpriteHovers(hov, prev []*Sprite, e events.Event, enter, leave events.Types) []*Sprite {
+	for _, prv := range prev {
+		if !slices.Contains(hov, prv) {
+			prv.send(leave, e)
+		}
+	}
+	for _, cur := range hov {
+		if !slices.Contains(prev, cur) {
+			cur.send(enter, e)
+		}
+	}
 	return hov
 }
 
@@ -793,9 +791,9 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	}
 	em.drag = w
 	em.dragData = data
-	sp := NewSprite(dragSpriteName, image.Point{}, e.WindowPos())
-	sp.grabRenderFrom(w) // TODO: maybe show the number of items being dragged
-	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacity(sp.Pixels, 0.5))
+	// TODO: maybe show the number of items being dragged
+	img := clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
+	sp := NewImageSprite(dragSpriteName, e.WindowPos(), img)
 	sp.Active = true
 	ms.Sprites.Add(sp)
 }
@@ -807,11 +805,11 @@ func (em *Events) dragMove(e events.Event) {
 		return
 	}
 	sp, ok := ms.Sprites.SpriteByName(dragSpriteName)
-	if !ok {
+	if !ok || sp == nil {
 		fmt.Println("Drag sprite not found")
 		return
 	}
-	sp.Geom.Pos = e.WindowPos()
+	sp.SetPos(e.WindowPos())
 	for _, w := range em.dragHovers {
 		w.AsWidget().ScrollToThis()
 	}
@@ -823,7 +821,7 @@ func (em *Events) dragClearSprite() {
 	if ms == nil {
 		return
 	}
-	ms.Sprites.InactivateSprite(dragSpriteName)
+	ms.Sprites.Delete(dragSpriteName)
 }
 
 // DragMenuAddModText adds info about key modifiers for a drag drop menu.
@@ -905,6 +903,21 @@ func (em *Events) setCursor(cur cursors.Cursor) {
 		return
 	}
 	errors.Log(system.TheApp.Cursor(win.SystemWindow).Set(cur))
+}
+
+// setCursorFromStyle sets the window cursor to the cursor of the bottom-most
+// widget in the mouseInBBox stack that has a Styles.Cursor set.
+// This should be called after every event pass.
+func (em *Events) setCursorFromStyle() {
+	n := len(em.mouseInBBox)
+	for i := n - 1; i >= 0; i-- {
+		w := em.mouseInBBox[i]
+		wb := w.AsWidget()
+		if wb.Styles.Cursor != cursors.None {
+			em.setCursor(wb.Styles.Cursor)
+			break
+		}
+	}
 }
 
 // focusClear saves current focus to FocusPrev
@@ -1302,19 +1315,19 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 
 func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 	st := sc.Stage
-	for _, kv := range st.Sprites.Order {
-		sp := kv.Value
-		if !sp.Active {
-			continue
+	st.Sprites.Do(func(sl *SpriteList) {
+		for _, sp := range sl.Values {
+			if sp == nil || !sp.Active {
+				continue
+			}
+			if sp.listeners == nil {
+				continue
+			}
+			if pos.In(sp.EventBBox) {
+				em.spriteInBBox = append(em.spriteInBBox, sp)
+			}
 		}
-		if sp.listeners == nil {
-			continue
-		}
-		r := sp.Geom.Bounds()
-		if pos.In(r) {
-			em.spriteInBBox = append(em.spriteInBBox, sp)
-		}
-	}
+	})
 }
 
 // handleSpriteEvent handles the given event with sprites
@@ -1348,5 +1361,6 @@ loop:
 			}
 		}
 	}
+	em.spriteHovers = em.updateSpriteHovers(em.spriteInBBox, em.spriteHovers, e, events.MouseEnter, events.MouseLeave)
 	return e.IsHandled()
 }
