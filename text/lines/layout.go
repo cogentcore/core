@@ -5,6 +5,7 @@
 package lines
 
 import (
+	"fmt"
 	"unicode"
 
 	"cogentcore.org/core/base/slicesx"
@@ -98,7 +99,11 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 					lt.SplitSpan(i)
 					si++
 				}
-				breaks = append(breaks, si)
+				if si < 0 {
+					fmt.Println("lines.layout si < 0")
+				} else {
+					breaks = append(breaks, si)
+				}
 				if wlen > width {
 					nb := wlen / width
 					if nb*width == wlen {
@@ -111,7 +116,11 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 							lt.SplitSpan(bp)
 							si++
 						}
-						breaks = append(breaks, si)
+						if si < 0 {
+							fmt.Println("lines.layout si < 0")
+						} else {
+							breaks = append(breaks, si)
+						}
 						sp.Char = bp
 						vst = append(vst, sp)
 						bp += width
@@ -130,9 +139,6 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 	muls := make([]rich.Text, 0, nb+1)
 	last := 0
 	for _, si := range breaks {
-		if si < last {
-			continue
-		}
 		muls = append(muls, lt[last:si])
 		last = si
 	}
