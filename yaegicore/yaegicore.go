@@ -7,6 +7,7 @@
 package yaegicore
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"strings"
@@ -16,10 +17,15 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
 	"github.com/cogentcore/yaegi/interp"
+)
+
+var (
+	InterpOutput bytes.Buffer
 )
 
 // Interpreters is a map from language names (such as "Go") to functions that create a
@@ -76,17 +82,13 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 	if f == nil {
 		return nil, false, fmt.Errorf("no entry in yaegicore.Interpreters for language %q", language)
 	}
-	in = f(interp.Options{})
+	in = f(interp.Options{Stdout: &InterpOutput})
 
 	if language == "Goal" {
 		currentGoalInterpreter = in
 	}
 	return in, true, nil
 }
-
-// CurrentParent is set to the current parent frame prior to calling the Eval
-// function on the interpreter.
-var CurrentParent *core.Frame
 
 // BindTextEditor binds the given text editor to a yaegi interpreter
 // such that the contents of the text editor are interpreted as code
@@ -118,9 +120,17 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
-		CurrentParent = parent
+		InterpOutput.Reset()
 		_, err = in.Eval(str)
-		CurrentParent = nil
+		ostr := InterpOutput.String()
+		if len(ostr) > 0 {
+			out := textcore.NewEditor(parent)
+			out.Styler(func(s *styles.Style) {
+				s.SetReadOnly(true)
+			})
+			out.Lines.Settings.LineNumbers = false
+			out.Lines.SetText([]byte(ostr))
+		}
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return
