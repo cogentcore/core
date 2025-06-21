@@ -84,6 +84,10 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 	return in, true, nil
 }
 
+// CurrentParent is set to the current parent frame prior to calling the Eval
+// function on the interpreter.
+var CurrentParent *core.Frame
+
 // BindTextEditor binds the given text editor to a yaegi interpreter
 // such that the contents of the text editor are interpreted as code
 // of the given language, which is run in the context of the given parent widget.
@@ -114,7 +118,9 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
+		CurrentParent = parent
 		_, err = in.Eval(str)
+		CurrentParent = nil
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return

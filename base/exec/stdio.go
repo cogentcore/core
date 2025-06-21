@@ -61,8 +61,16 @@ func (st *StdIO) SetToOS() *StdIO {
 	} else {
 		fmt.Printf("In is not an *os.File: %#v\n", st.In)
 	}
-	os.Stdout = st.Out.(*os.File)
-	os.Stderr = st.Err.(*os.File)
+	if st.Out != nil {
+		if so, ok := st.Out.(*os.File); ok {
+			os.Stdout = so
+		}
+	}
+	if st.Err != nil {
+		if so, ok := st.Err.(*os.File); ok {
+			os.Stderr = so
+		}
+	}
 	return cur
 }
 
