@@ -40,6 +40,12 @@ func Setup(c *config.Config) error { //types:add
 			if err != nil {
 				continue // package manager not found
 			}
+			if ld.tool == "apt" { // special case for apt
+				err := vc.Run("sudo", "apt", "update")
+				if err != nil {
+					return err
+				}
+			}
 			cmd, args := ld.cmd()
 			err = vc.Run(cmd, args...)
 			if err != nil {

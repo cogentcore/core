@@ -44,7 +44,10 @@ func (mo Modifiers) ModifiersString() string {
 }
 
 // ModifiersFromString returns the modifiers corresponding to given string
-// and the remainder of the string after modifiers have been stripped
+// and the remainder of the string after modifiers have been stripped. This only
+// works for modifiers followed with a plus sign (ex: "Control+C" will work, but
+// "Control" will not). See [Modifiers.SetString] for simple setting of modifiers
+// without the plus sign.
 func ModifiersFromString(cs string) (Modifiers, string) {
 	var mods Modifiers
 	for _, m := range ModifiersValues() {
