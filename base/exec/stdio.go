@@ -49,7 +49,7 @@ func (st *StdIO) Set(o *StdIO) *StdIO {
 // SetToOS sets the current IO to os.Std*, returning
 // a StdIO with the current IO settings prior to this call,
 // which can be used to restore.
-// Note: os.Std* are *os.File types, and this function will panic
+// Note: os.Std* are *os.File types, and this function will do nothing
 // if the current IO are not actually *os.Files.
 // The results of a prior SetToOS call will do the right thing for
 // saving and restoring the os state.
