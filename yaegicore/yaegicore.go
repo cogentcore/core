@@ -25,7 +25,8 @@ import (
 )
 
 var (
-	InterpOutput bytes.Buffer
+	// interpOutput is the output buffer for catching yaegi stdout.
+	interpOutput bytes.Buffer
 )
 
 // Interpreters is a map from language names (such as "Go") to functions that create a
@@ -82,7 +83,7 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 	if f == nil {
 		return nil, false, fmt.Errorf("no entry in yaegicore.Interpreters for language %q", language)
 	}
-	in = f(interp.Options{Stdout: &InterpOutput})
+	in = f(interp.Options{Stdout: &interpOutput})
 
 	if language == "Goal" {
 		currentGoalInterpreter = in
@@ -120,9 +121,9 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
-		InterpOutput.Reset()
+		interpOutput.Reset()
 		_, err = in.Eval(str)
-		ostr := InterpOutput.String()
+		ostr := interpOutput.String()
 		if len(ostr) > 0 {
 			out := textcore.NewEditor(parent)
 			out.Styler(func(s *styles.Style) {
