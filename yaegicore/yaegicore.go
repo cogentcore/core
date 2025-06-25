@@ -7,6 +7,7 @@
 package yaegicore
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"strings"
@@ -16,10 +17,16 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
 	"github.com/cogentcore/yaegi/interp"
+)
+
+var (
+	// interpOutput is the output buffer for catching yaegi stdout.
+	interpOutput bytes.Buffer
 )
 
 // Interpreters is a map from language names (such as "Go") to functions that create a
@@ -76,7 +83,7 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 	if f == nil {
 		return nil, false, fmt.Errorf("no entry in yaegicore.Interpreters for language %q", language)
 	}
-	in = f(interp.Options{})
+	in = f(interp.Options{Stdout: &interpOutput})
 
 	if language == "Goal" {
 		currentGoalInterpreter = in
@@ -114,7 +121,17 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
+		interpOutput.Reset()
 		_, err = in.Eval(str)
+		ostr := interpOutput.String()
+		if len(ostr) > 0 {
+			out := textcore.NewEditor(parent)
+			out.Styler(func(s *styles.Style) {
+				s.SetReadOnly(true)
+			})
+			out.Lines.Settings.LineNumbers = false
+			out.Lines.SetText([]byte(ostr))
+		}
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return

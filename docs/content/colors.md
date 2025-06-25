@@ -38,7 +38,7 @@ core.NewForm(b).SetStruct(colors.Scheme)
 
 ## Named colors
 
-You can also use named colors (see [[#List of named colors]] below):
+You can also use named colors (see the [[#list of named colors]] below):
 
 ```Go
 bt := core.NewButton(b).SetText("Hello")
@@ -121,28 +121,25 @@ fr.Styler(func(s *styles.Style) {
 ## List of named colors
 
 ```Go
-clrs:= core.NewFrame(b)
-clrs.Styler(func(s *styles.Style) {
-    s.Display = styles.Grid
-    s.Columns = 8
-	s.Gap.Set(units.Dp(18))
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+	s.Wrap = true
+	s.Grow.Set(1, 0)
 })
-clrs.Maker(func(p *tree.Plan) {
-	for _, cn := range colors.Names {
-		nm := strcase.ToCamel(cn)
-		tree.AddAt(p, nm, func(w *core.Frame) {
-            w.Styler(func(s *styles.Style) {
-                s.Direction = styles.Column
-            })
-			cp := core.NewFrame(w)
-			cp.Styler(func(s *styles.Style) {
-				s.Min.Set(units.Em(4))
-				s.Background = colors.Uniform(colors.Map[cn])
-			})
-            core.NewText(w).SetText(nm).Styler(func(s *styles.Style) {
-                s.SetTextWrap(false)
+fr.Maker(func(p *tree.Plan) {
+	for _, name := range colors.Names {
+		tree.AddAt(p, name, func(w *core.Frame) {
+			w.Styler(func(s *styles.Style) {
+				s.Direction = styles.Column
 				s.CenterAll()
+				s.Min.X.Em(5)
 			})
+			cf := core.NewFrame(w)
+			cf.Styler(func(s *styles.Style) {
+				s.Min.Set(units.Em(4))
+				s.Background = colors.Uniform(colors.Map[name])
+			})
+			core.NewText(w).SetText(strcase.ToCamel(name))
 		})
 	}
 })

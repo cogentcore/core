@@ -2,15 +2,32 @@
 Categories = ["Resources"]
 +++
 
-The [[doc:icons]] package contains the [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols).
+Cogent Core provides more than 2,000 **icons** from [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols). See [[icon]] for information about the icon widget and how to use icons.
 
-See [[icon]] for information about the icon widget and how to set icons in stylers.
-
-Icons are represented directly as an SVG string that draws the icon, and only those icons that your app actually uses are included, to minimize executable size. This also makes it easy to add new icon sets.
+Icons are represented directly as an SVG string. To reduce binary size, only the icons your app actually uses are included.
 
 ## Custom icons
 
-You can add custom icons to your app using icongen, a part of the [[generate]] tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you can add all of your custom SVG icon files and an `icons.go` file with the following code:
+Because an icon is just an SVG string, it is easy to add custom icons. If you just have one or two, you can manually embed the SVG data:
+
+```go
+import (
+	_ "embed"
+)
+
+//go:embed myIcon.svg
+var myIcon string
+```
+
+And then use it like this:
+
+```go
+core.NewButton(b).SetIcon(icons.Icon(myIcon))
+```
+
+### Icongen
+
+If you have more icons, you can use icongen, a part of the [[generate]] tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you can add all of your custom SVG icon files and an `icons.go` file with the following code:
 
 ```go
 package cicons

@@ -6,22 +6,20 @@ package textcore
 
 import (
 	"image"
-	"time"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/textpos"
+	"cogentcore.org/core/tree"
 )
 
 var (
-	// blinkerSpriteName is the name of the window sprite used for the cursor
-	blinkerSpriteName = "textcore.Base.Cursor"
+	// cursorSpriteName is the name of the window sprite used for the cursor
+	cursorSpriteName = "textcore.Base.Cursor"
 
 	// lastCursor is the *Base that last created a cursor sprite.
-	lastCursor *Base
+	lastCursor tree.Node
 )
 
 // startCursor starts the cursor blinking and renders it.
@@ -43,75 +41,9 @@ func (ed *Base) stopCursor() {
 
 // toggleSprite turns on or off the cursor sprite.
 func (ed *Base) toggleCursor(on bool) {
-	sc := ed.Scene
-	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
-		return
-	}
-	ms := sc.Stage.Main
-	spnm := blinkerSpriteName
-	ms.Sprites.Lock()
-	defer ms.Sprites.Unlock()
-
-	activate := func(sp *core.Sprite) {
-		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
-		sp.Active = true
-		sp.Properties["turnOn"] = true
-		sp.Properties["on"] = true
-		sp.Properties["lastSwitch"] = time.Now()
-	}
-
-	if !on || lastCursor == ed {
-		if sp, ok := ms.Sprites.SpriteByNameNoLock(spnm); ok {
-			if on {
-				activate(sp)
-			} else {
-				sp.Active = false
-			}
-			return
-		}
-		if !on {
-			lastCursor = nil
-			return
-		}
-	}
-	var sp *core.Sprite
-	sp = core.NewSprite(spnm, func(pc *paint.Painter) { // overwrites existing
-		if !sp.Active || ed == nil || ed.This == nil || !ed.IsVisible() {
-			return
-		}
-		turnOn := sp.Properties["turnOn"].(bool) // force on
-		if !turnOn {
-			isOn := sp.Properties["on"].(bool)
-			lastSwitch := sp.Properties["lastSwitch"].(time.Time)
-			if time.Since(lastSwitch) > core.SystemSettings.CursorBlinkTime {
-				isOn = !isOn
-				sp.Properties["on"] = isOn
-				sp.Properties["lastSwitch"] = time.Now()
-			}
-			if !isOn {
-				return
-			}
-		}
-		bbsz := math32.Vec2(math32.Ceil(ed.CursorWidth.Dots), math32.Ceil(ed.charSize.Y))
-		if bbsz.X < 2 { // at least 2
-			bbsz.X = 2
-		}
-		sp.Properties["turnOn"] = false
-		pos := math32.FromPoint(sp.EventBBox.Min)
-		if !pos.ToPoint().Sub(sc.Scene.SceneGeom.Pos).In(ed.Geom.ContentBBox) {
-			return
-		}
-		pc.Fill.Color = nil
-		pc.Stroke.Color = ed.CursorColor
-		pc.Stroke.Dashes = nil
-		pc.Stroke.Width.Dot(bbsz.X)
-		pc.Line(pos.X, pos.Y, pos.X, pos.Y+bbsz.Y)
-		pc.Draw()
+	core.TextCursor(on, ed.AsWidget(), &lastCursor, cursorSpriteName, ed.CursorWidth.Dots, ed.charSize.Y, ed.CursorColor, func() image.Point {
+		return ed.charStartPos(ed.CursorPos).ToPointFloor()
 	})
-	sp.InitProperties()
-	activate(sp)
-	ms.Sprites.AddNoLock(sp)
-	lastCursor = ed
 }
 
 // updateCursorPosition updates the position of the cursor.
@@ -126,7 +58,7 @@ func (ed *Base) updateCursorPosition() {
 	ms := sc.Stage.Main
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
-	if sp, ok := ms.Sprites.SpriteByNameNoLock(blinkerSpriteName); ok {
+	if sp, ok := ms.Sprites.SpriteByNameNoLock(cursorSpriteName); ok {
 		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
 	}
 }

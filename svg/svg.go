@@ -59,8 +59,8 @@ type SVG struct {
 	// if any.
 	Background image.Image
 
-	// Color can be set to provide a default Fill and Stroke Color value
-	Color image.Image
+	// DefaultFill can be set to provide a default Fill color for the root node.
+	DefaultFill image.Image
 
 	// Size is size of image, Pos is offset within any parent viewport.
 	// The bounding boxes within the scene _include_ the Pos offset already.
@@ -200,11 +200,9 @@ func (sv *SVG) Style() {
 	})
 
 	sv.Root.Paint.Defaults()
-	if sv.Color != nil {
+	if sv.DefaultFill != nil {
 		// TODO(kai): consider handling non-uniform colors here
-		c := colors.ToUniform(sv.Color)
-		sv.Root.SetColorProperties("stroke", colors.AsHex(c))
-		sv.Root.SetColorProperties("fill", colors.AsHex(c))
+		sv.Root.SetColorProperties("fill", colors.AsHex(colors.ToUniform(sv.DefaultFill)))
 	}
 	sv.SetUnitContext(&sv.Root.Paint)
 
