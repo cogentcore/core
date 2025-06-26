@@ -17,4 +17,4 @@ Cogent Core is a free and open source framework for building powerful, fast, ele
 
 ## Sponsors
 
-We thank October Swimmer and our other [sponsors](https://github.com/sponsors/cogentcore) for their support, which allows us to spend more time improving Cogent Core.
+We thank our [sponsors](https://github.com/sponsors/cogentcore) for their support, which allows us to spend more time improving Cogent Core.
