@@ -7,6 +7,7 @@
 package yaegicore
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"strings"
@@ -65,6 +66,11 @@ var currentGoalInterpreter Interpreter
 // keep the parent widget up-to-date.
 var interpreterParent = new(*core.Frame)
 
+// interpOutput is the output buffer for catching yaegi stdout.
+// It must be a global variable because Goal re-uses the same interpreter,
+// so it cannot be a local variable in [BindTextEditor].
+var interpOutput bytes.Buffer
+
 // getInterpreter returns a new interpreter for the given language,
 // or [currentGoalInterpreter] if the language is "Goal" and it is non-nil.
 func getInterpreter(language string) (in Interpreter, new bool, err error) {
@@ -76,7 +82,7 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 	if f == nil {
 		return nil, false, fmt.Errorf("no entry in yaegicore.Interpreters for language %q", language)
 	}
-	in = f(interp.Options{})
+	in = f(interp.Options{Stdout: &interpOutput})
 
 	if language == "Goal" {
 		currentGoalInterpreter = in
@@ -114,7 +120,15 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
+		interpOutput.Reset()
 		_, err = in.Eval(str)
+		ostr := interpOutput.String()
+		if len(ostr) > 0 {
+			out := textcore.NewEditor(parent)
+			out.SetReadOnly(true)
+			out.Lines.Settings.LineNumbers = false
+			out.Lines.SetString(ostr)
+		}
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
 			return

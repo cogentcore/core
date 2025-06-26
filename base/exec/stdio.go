@@ -49,7 +49,7 @@ func (st *StdIO) Set(o *StdIO) *StdIO {
 // SetToOS sets the current IO to os.Std*, returning
 // a StdIO with the current IO settings prior to this call,
 // which can be used to restore.
-// Note: os.Std* are *os.File types, and this function will panic
+// Note: os.Std* are *os.File types, and this function will do nothing
 // if the current IO are not actually *os.Files.
 // The results of a prior SetToOS call will do the right thing for
 // saving and restoring the os state.
@@ -61,8 +61,16 @@ func (st *StdIO) SetToOS() *StdIO {
 	} else {
 		fmt.Printf("In is not an *os.File: %#v\n", st.In)
 	}
-	os.Stdout = st.Out.(*os.File)
-	os.Stderr = st.Err.(*os.File)
+	if st.Out != nil {
+		if so, ok := st.Out.(*os.File); ok {
+			os.Stdout = so
+		}
+	}
+	if st.Err != nil {
+		if so, ok := st.Err.(*os.File); ok {
+			os.Stderr = so
+		}
+	}
 	return cur
 }
 
