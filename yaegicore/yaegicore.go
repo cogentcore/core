@@ -24,11 +24,6 @@ import (
 	"github.com/cogentcore/yaegi/interp"
 )
 
-var (
-	// interpOutput is the output buffer for catching yaegi stdout.
-	interpOutput bytes.Buffer
-)
-
 // Interpreters is a map from language names (such as "Go") to functions that create a
 // new [Interpreter] for that language. The base implementation is just [interp.Interpreter]
 // for Go, but other packages can extend this. See the [Interpreter] interface for more information.
@@ -71,6 +66,11 @@ var currentGoalInterpreter Interpreter
 // wherein the parent widget must be remotely controllable with a double pointer to
 // keep the parent widget up-to-date.
 var interpreterParent = new(*core.Frame)
+
+// interpOutput is the output buffer for catching yaegi stdout.
+// It must be a global variable because Goal re-uses the same interpreter,
+// so it cannot be a local variable in [BindTextEditor].
+var interpOutput bytes.Buffer
 
 // getInterpreter returns a new interpreter for the given language,
 // or [currentGoalInterpreter] if the language is "Goal" and it is non-nil.
