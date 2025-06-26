@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
@@ -126,11 +125,9 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		ostr := interpOutput.String()
 		if len(ostr) > 0 {
 			out := textcore.NewEditor(parent)
-			out.Styler(func(s *styles.Style) {
-				s.SetReadOnly(true)
-			})
+			out.SetReadOnly(true)
 			out.Lines.Settings.LineNumbers = false
-			out.Lines.SetText([]byte(ostr))
+			out.Lines.SetString(ostr)
 		}
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
