@@ -387,16 +387,7 @@ func (ctx *Context) textStyler(s *styles.Style) {
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context) *core.Text {
-	et := ExtractText(ctx)
-	if et == "" {
-		// Empty text elements do not render, so we just return a fake one (to avoid panics).
-		return core.NewText()
-	}
-	tx := New[core.Text](ctx).SetText(et)
-	tx.Styler(ctx.textStyler)
-	tx.HandleTextClick(func(tl *rich.Hyperlink) {
-		ctx.OpenURL(tl.URL)
-	})
+	tx, _ := handleTextExclude(ctx)
 	return tx
 }
 
