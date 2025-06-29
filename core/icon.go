@@ -83,7 +83,7 @@ func (ic *Icon) renderSVG() *svg.SVG {
 	if errors.Log(err) != nil || sv.Root == nil || !sv.Root.HasChildren() {
 		return nil
 	}
-	icons.Used[ic.Icon] = struct{}{}
+	icons.AddUsed(ic.Icon)
 	ic.prevIcon = ic.Icon
 	sv.Root.ViewBox.PreserveAspectRatio.SetFromStyle(&ic.Styles)
 	sv.TextShaper = ic.Scene.TextShaper()
