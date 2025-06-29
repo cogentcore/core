@@ -5,7 +5,12 @@
 // Package icons provides Material Design Symbols as SVG icon variables.
 package icons
 
-import _ "embed"
+import (
+	_ "embed"
+	"sync"
+
+	"golang.org/x/exp/maps"
+)
 
 //go:generate core generate -icons svg
 
@@ -26,6 +31,12 @@ var (
 	//
 	//go:embed svg/blank.svg
 	Blank Icon
+
+	// used is a map containing all icons that have been used.
+	// It is added to by [cogentcore.org/core/core.Icon].
+	used = map[Icon]struct{}{}
+
+	usedMu sync.Mutex
 )
 
 // IsSet returns whether the icon is set to a value other than "" or [None].
@@ -33,6 +44,18 @@ func (i Icon) IsSet() bool {
 	return i != "" && i != None
 }
 
-// Used is a map containing all icons that have been used.
-// It is added to by [cogentcore.org/core/core.Icon].
-var Used = map[Icon]struct{}{}
+// AddUsed adds given icon to the list of icons that have been used
+// (under mutex lock).
+func AddUsed(i Icon) {
+	usedMu.Lock()
+	used[i] = struct{}{}
+	usedMu.Unlock()
+}
+
+// Used returns a list of icons that have been used so far in the app.
+// This list is in indeterminate order.
+func Used() []Icon {
+	usedMu.Lock()
+	defer usedMu.Unlock()
+	return maps.Keys(used)
+}
