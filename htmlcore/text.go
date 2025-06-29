@@ -44,15 +44,7 @@ func extractTextExclude(ctx *Context, n *html.Node, excludeSubs ...string) (stri
 	}
 	it := isText(n)
 	if !it {
-		sub := n.Data
-		excl := false
-		for _, ex := range excludeSubs {
-			if ex == sub {
-				excl = true
-				break
-			}
-		}
-		if excl {
+		if slices.Contains(excludeSubs, n.Data) {
 			return str, n
 		}
 		readHTMLNode(ctx, ctx.Parent(), n)
