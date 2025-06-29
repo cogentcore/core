@@ -88,8 +88,14 @@ func handleElement(ctx *Context) {
 				s.Grow.Set(1, 1)
 			})
 		case "ol", "ul":
+			ld := listDepth(ctx, w.This.(core.Widget)) + 1
+			w.SetProperty("listDepth", ld)
+			if tag == "ol" {
+				w.SetProperty("listCount", 0)
+			}
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
+				s.Padding.Left.Ch(core.ConstantSpacing(float32(4 * ld)))
 			})
 		case "div":
 			w.Styler(func(s *styles.Style) {
@@ -201,39 +207,47 @@ func handleElement(ctx *Context) {
 		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
-
-		text := handleText(ctx)
+		text, sublist := handleTextExclude(ctx, "ol", "ul") // exclude other lists
 		start := ""
 		if pw, ok := text.Parent.(core.Widget); ok {
-			switch pw.AsTree().Property("tag") {
+			pwt := pw.AsTree()
+			switch pwt.Property("tag") {
 			case "ol":
-				number := 0
-				for _, k := range pw.AsTree().Children {
-					// we only consider text for the number (frames may be
-					// added for nested lists, interfering with the number)
-					if _, ok := k.(*core.Text); ok {
-						number++
-					}
-				}
+				number := pwt.Property("listCount").(int) + 1
+				pwt.SetProperty("listCount", number)
 				start = strconv.Itoa(number) + ". "
 			case "ul":
-				// TODO(kai/htmlcore): have different bullets for different depths
-				start = "• "
+				ld := pwt.Property("listDepth").(int)
+				if ld%2 == 1 {
+					start = "• "
+				} else {
+					start = "◦ "
+				}
 			}
 		}
 		text.SetText(start + text.Text)
+
 		if hasPChild { // handle potential additional <p> blocks that should be indented
 			cnode := ctx.Node
-			ctx.BlockParent = text.Parent.(core.Widget)
+			// ctx.BlockParent = text.Parent.(core.Widget)
 			for cnode.NextSibling != nil {
 				cnode = cnode.NextSibling
 				ctx.Node = cnode
 				if cnode.Data != "p" {
 					continue
 				}
-				txt := handleText(ctx)
-				txt.SetText("&nbsp;&nbsp; " + txt.Text)
+				txt, psub := handleTextExclude(ctx, "ol", "ul")
+				txt.SetText(txt.Text)
+				if psub != nil {
+					if psub != sublist {
+						readHTMLNode(ctx, ctx.Parent(), psub)
+					}
+					break
+				}
 			}
+		}
+		if sublist != nil {
+			readHTMLNode(ctx, ctx.Parent(), sublist)
 		}
 	case "img":
 		n := ctx.Node
@@ -373,17 +387,26 @@ func (ctx *Context) textStyler(s *styles.Style) {
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context) *core.Text {
-	et := ExtractText(ctx)
+	tx, _ := handleTextExclude(ctx)
+	return tx
+}
+
+// handleTextExclude creates a new [core.Text] from the given information, setting the text and
+// the text click function so that URLs are opened according to [Context.OpenURL].
+// excludeSubs is a list of sub-node types to exclude in processing this element.
+// If one of those types is encountered, it is returned.
+func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.Node) {
+	et, excl := ExtractTextExclude(ctx, excludeSubs...)
 	if et == "" {
 		// Empty text elements do not render, so we just return a fake one (to avoid panics).
-		return core.NewText()
+		return core.NewText(), excl
 	}
 	tx := New[core.Text](ctx).SetText(et)
 	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
-	return tx
+	return tx, excl
 }
 
 // handleTextTag creates a new [core.Text] from the given information, setting the text and
@@ -400,6 +423,23 @@ func handleTextTag(ctx *Context) *core.Text {
 		ctx.OpenURL(tl.URL)
 	})
 	return tx
+}
+
+// listDepth returns the depth of list elements ("ol", "ul") above
+// the given widget. 0 = none, 1 = 1 etc.
+func listDepth(ctx *Context, w core.Widget) int {
+	ld := 0
+	pw, ok := w.AsTree().Parent.(core.Widget)
+	for ok {
+		ptag := pw.AsTree().Property("tag")
+		if ptag == "ol" || ptag == "ul" {
+			ld++
+			pw, ok = pw.AsTree().Parent.(core.Widget)
+		} else {
+			break
+		}
+	}
+	return ld
 }
 
 // GetAttr gets the given attribute from the given node, returning ""

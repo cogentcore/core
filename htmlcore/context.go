@@ -44,8 +44,6 @@ type Context struct {
 	// TableParent is the current table being generated.
 	TableParent *core.Frame
 
-	firstRow bool
-
 	// inlineParent is the current parent widget that inline
 	// elements should be added to; it must be got through
 	// [Context.InlineParent], as it may need to be constructed
@@ -87,6 +85,9 @@ type Context struct {
 	// If the handler function returns true, then the default HTML code
 	// will not be generated.
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
+
+	// firstRow indicates the start of a table, where number of columns is counted.
+	firstRow bool
 }
 
 // NewContext returns a new [Context] with basic defaults.
@@ -98,6 +99,10 @@ func NewContext() *Context {
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
 		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
 	}
+}
+
+func (c *Context) reset() {
+	c.firstRow = false
 }
 
 // Parent returns the current parent widget that a widget
