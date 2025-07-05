@@ -21,6 +21,42 @@ func (km *Maps) MarkdownDoc() string { //types:add
 		fmap[i] = make([][]string, FunctionsN)
 	}
 
+	// By function
+	b.WriteString("### By function\n\n")
+
+	b.WriteString("| Function                         ")
+	for _, m := range *km {
+		b.WriteString("| `" + m.Name + "` ")
+	}
+	b.WriteString("|\n")
+	b.WriteString("| ---------------------------- ")
+	for _, m := range *km {
+		b.WriteString("| " + strings.Repeat("-", len(m.Name)+2) + " ")
+	}
+	b.WriteString("|\n")
+
+	for kf := MoveUp; kf < FunctionsN; kf++ {
+		b.WriteString("| " + kf.String() + " ")
+		for mi, m := range *km {
+			f := fmap[mi][kf]
+			b.WriteString("| ")
+			if len(f) > 0 {
+				for fi, fs := range f {
+					b.WriteString(fs)
+					if fi < len(f)-1 {
+						b.WriteString(", ")
+					} else {
+						b.WriteString(" ")
+					}
+				}
+			} else {
+				b.WriteString(strings.Repeat(" ", len(m.Name)+2) + " ")
+			}
+		}
+		b.WriteString("|\n")
+	}
+	b.WriteString("\n\n")
+
 	for _, md := range mods {
 		if md == "" {
 			b.WriteString("### No Modifiers\n\n")
@@ -68,42 +104,6 @@ func (km *Maps) MarkdownDoc() string { //types:add
 		}
 		b.WriteString("\n\n")
 	}
-
-	// By function
-	b.WriteString("### By function\n\n")
-
-	b.WriteString("| Function                         ")
-	for _, m := range *km {
-		b.WriteString("| `" + m.Name + "` ")
-	}
-	b.WriteString("|\n")
-	b.WriteString("| ---------------------------- ")
-	for _, m := range *km {
-		b.WriteString("| " + strings.Repeat("-", len(m.Name)+2) + " ")
-	}
-	b.WriteString("|\n")
-
-	for kf := MoveUp; kf < FunctionsN; kf++ {
-		b.WriteString("| " + kf.String() + " ")
-		for mi, m := range *km {
-			f := fmap[mi][kf]
-			b.WriteString("| ")
-			if len(f) > 0 {
-				for fi, fs := range f {
-					b.WriteString(fs)
-					if fi < len(f)-1 {
-						b.WriteString(", ")
-					} else {
-						b.WriteString(" ")
-					}
-				}
-			} else {
-				b.WriteString(strings.Repeat(" ", len(m.Name)+2) + " ")
-			}
-		}
-		b.WriteString("|\n")
-	}
-	b.WriteString("\n\n")
 
 	return b.String()
 }

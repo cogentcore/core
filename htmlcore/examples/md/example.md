@@ -136,6 +136,7 @@ This is the text after the div.
 | Fast (M-type)    | 50       |
 | Medium (Slick)   | 200      |
 | Slow (Slack)     | 1000     |
+|      | 500 |
 | more | 2000 |
 | and  | 100 |
 

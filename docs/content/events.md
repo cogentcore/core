@@ -95,7 +95,7 @@ tf.OnKeyChord(func(e events.Event) {
 
 ### Key function
 
-You can convert a key chord into a semantic key function. The key mappings are defined in the user's keyboard shortcut [[settings]]. Try pressing keyboard shortcuts in the text field below to see their semantic names (ex: `Ctrl+C`, `Ctrl+V`, `Ctrl+F`, `Ctrl+Enter`, `Ctrl+Left`, and `Right`, using `Cmd` instead of `Ctrl` on macOS).
+You can convert a key chord into a semantic key function. The [[keymaps|key mappings]] are defined in the user's keyboard shortcut [[settings]]. Try pressing keyboard shortcuts in the text field below to see their semantic names (ex: `Ctrl+C`, `Ctrl+V`, `Ctrl+F`, `Ctrl+Enter`, `Ctrl+Left`, and `Right`, using `Cmd` instead of `Ctrl` on macOS).
 
 ```Go
 tf := core.NewTextField(b)

@@ -348,6 +348,10 @@ func handleElement(ctx *Context) {
 			ctx.TableParent.SetProperty("cols", cols)
 		}
 		tx := handleText(ctx)
+		if tx.Parent == nil { // if empty we need a real empty text to keep structure
+			tx = New[core.Text](ctx)
+		}
+		// fmt.Println(tag, "val:", tx.Text)
 		if tag == "th" {
 			tx.Styler(func(s *styles.Style) {
 				s.Font.Weight = rich.Bold
