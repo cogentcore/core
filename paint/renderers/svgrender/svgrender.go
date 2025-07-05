@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -184,7 +185,10 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	// Fast path for [image.Uniform]
 	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
-		_ = u
+		r := svg.NewRect(cg)
+		r.Pos = math32.FromPoint(pr.Rect.Min)
+		r.Size = math32.FromPoint(pr.Rect.Size())
+		r.SetProperty("fill", colors.AsHex(u.C))
 		return
 	}
 
