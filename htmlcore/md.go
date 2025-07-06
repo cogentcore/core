@@ -7,7 +7,6 @@ package htmlcore
 import (
 	"bytes"
 	"io"
-	"os"
 	"regexp"
 
 	"cogentcore.org/core/core"
@@ -45,7 +44,7 @@ func mdToHTML(ctx *Context, md []byte) []byte {
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
 	htm := mdToHTML(ctx, b)
-	os.WriteFile("htmlcore_tmp.html", htm, 0666) // note: keep here, needed for debugging
+	// os.WriteFile("htmlcore_tmp.html", htm, 0666) // note: keep here, needed for debugging
 	buf := bytes.NewBuffer(htm)
 	return ReadHTML(ctx, parent, buf)
 }
