@@ -52,9 +52,9 @@ type Interpreter interface {
 
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
+	content.NewPageInitFunc = ResetGoalInterpreter
 	coresymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 	basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
-	content.NewPageInitFunc = ResetGoalInterpreter
 }
 
 var (
