@@ -167,6 +167,9 @@ func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
 	}
 	res := []byte{'\n'}
 	for _, cpage := range cpages {
+		if cpage == pg {
+			continue
+		}
 		res = append(res, fmt.Sprintf("* [[%s]]\n", cpage.Name)...)
 	}
 	return res
