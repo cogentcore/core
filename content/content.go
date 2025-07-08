@@ -436,6 +436,9 @@ func (ct *Content) makeCategories() {
 			}
 		})
 		for _, pg := range ct.pagesByCategory[cat] {
+			if strings.EqualFold(cat, pg.Name) {
+				continue
+			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
 			if pg == ct.currentPage {
 				pgTree.SetSelected(true)
