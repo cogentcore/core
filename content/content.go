@@ -114,6 +114,11 @@ func init() {
 	system.ReservedWebShortcuts = append(system.ReservedWebShortcuts, "Command+[", "Command+]")
 }
 
+// NewPageInitFunc is called when a new page is just being rendered.
+// This can do any necessary new-page initialization, e.g.,
+// [yaegicore.ResetGoalInterpreter]
+var NewPageInitFunc func()
+
 func (ct *Content) Init() {
 	ct.Splits.Init()
 	ct.SetSplits(0.2, 0.8)
@@ -335,6 +340,9 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if ct.renderedPage == ct.currentPage {
 		return nil
 	}
+	if NewPageInitFunc != nil {
+		NewPageInitFunc()
+	}
 	w.DeleteChildren()
 	b, err := ct.currentPage.ReadContent(ct.pagesByCategory)
 	if err != nil {
@@ -428,6 +436,9 @@ func (ct *Content) makeCategories() {
 			}
 		})
 		for _, pg := range ct.pagesByCategory[cat] {
+			if strings.EqualFold(cat, pg.Name) {
+				continue
+			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
 			if pg == ct.currentPage {
 				pgTree.SetSelected(true)

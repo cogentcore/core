@@ -51,7 +51,7 @@ core.NewButton(b).SetText("Save").SetShortcut("Command+S").OnClick(func(e events
 })
 ```
 
-You can make a button trigger on a certain semantic [[events#key function]], which have default bindings that the user can customize in their [[settings]]:
+You can make a button trigger on a certain semantic [[events#key function]], which have default bindings ([[keymaps]]) that the user can customize in their [[settings]]:
 
 ```Go
 core.NewButton(b).SetText("Open").SetKey(keymap.Open).OnClick(func(e events.Event) {

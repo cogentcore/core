@@ -1,73 +1,94 @@
++++
+Categories = ["Resources"]
++++
+
+The **[[doc:keymap]]** package maps keyboard input [[events]] into a [[doc:keymap.Functions]] enum, which has a standard list of app functions that are typically activated by keyboard events. [[Settings]] allow the user to select from a set of different standard keyboard mappings, which are documented in the tables on this page.
+
+As a programmer, it is best to use these standard functions in your app wherever possible, so that the standard keyboard mappings will automatically apply, including any custom mappings the user may have set up. See [[events#key function]] and [[button#events|button events]] for usage examples.
+
+## Global shortcuts
+
+| Function  | Key         |
+| --------- | ----------- |
+| Settings  | `Control+,` |
+| Inspector | `Control+Shift+I` |
+| Snapshot (grab) | `Control+Shift+G` |
+
+On Mac, use the Command key ⌘ instead of Control, except for Snapshot.
+
+Snapshot saves a PNG image and an SVG vector representation of the current window.
+
+## Standard mappings
+
 ### By function
 
 | Function                         | `MacStandard` | `MacEmacs` | `LinuxEmacs` | `LinuxStandard` | `WindowsStandard` | `ChromeStd` |
 | ---------------------------- | ------------- | ---------- | ------------ | --------------- | ----------------- | ----------- |
-| MoveUp |               |            |              |                 |                   |             |
-| MoveDown |               |            |              |                 |                   |             |
-| MoveRight |               |            |              |                 |                   |             |
-| MoveLeft |               |            |              |                 |                   |             |
-| PageUp |               |            |              |                 |                   |             |
-| PageDown |               |            |              |                 |                   |             |
-| Home |               |            |              |                 |                   |             |
-| End |               |            |              |                 |                   |             |
-| DocHome |               |            |              |                 |                   |             |
-| DocEnd |               |            |              |                 |                   |             |
-| WordRight |               |            |              |                 |                   |             |
-| WordLeft |               |            |              |                 |                   |             |
-| FocusNext |               |            |              |                 |                   |             |
-| FocusPrev |               |            |              |                 |                   |             |
-| Enter |               |            |              |                 |                   |             |
-| Accept |               |            |              |                 |                   |             |
-| CancelSelect |               |            |              |                 |                   |             |
-| SelectMode |               |            |              |                 |                   |             |
-| SelectAll |               |            |              |                 |                   |             |
-| Abort |               |            |              |                 |                   |             |
-| Copy |               |            |              |                 |                   |             |
-| Cut |               |            |              |                 |                   |             |
-| Paste |               |            |              |                 |                   |             |
-| PasteHist |               |            |              |                 |                   |             |
-| Backspace |               |            |              |                 |                   |             |
-| BackspaceWord |               |            |              |                 |                   |             |
-| Delete |               |            |              |                 |                   |             |
-| DeleteWord |               |            |              |                 |                   |             |
-| Kill |               |            |              |                 |                   |             |
-| Duplicate |               |            |              |                 |                   |             |
-| Transpose |               |            |              |                 |                   |             |
-| TransposeWord |               |            |              |                 |                   |             |
-| Undo |               |            |              |                 |                   |             |
-| Redo |               |            |              |                 |                   |             |
-| Insert |               |            |              |                 |                   |             |
-| InsertAfter |               |            |              |                 |                   |             |
+| MoveUp | UpArrow, Control+P, Meta+UpArrow | UpArrow, Control+P, Meta+UpArrow | UpArrow, Control+P, Alt+UpArrow, Control+Alt+P | UpArrow | UpArrow | UpArrow |
+| MoveDown | DownArrow, Control+N, Meta+DownArrow | DownArrow, Control+N, Meta+DownArrow | DownArrow, Control+N, Alt+DownArrow, Control+Alt+N | DownArrow | DownArrow | DownArrow |
+| MoveRight | RightArrow, Control+F | RightArrow, Control+F | RightArrow, Control+F, Control+Alt+F | RightArrow | RightArrow | RightArrow |
+| MoveLeft | LeftArrow, Control+B | LeftArrow, Control+B | LeftArrow, Control+B, Control+Alt+B | LeftArrow | LeftArrow | LeftArrow |
+| PageUp | PageUp, Control+U, Control+UpArrow | PageUp, Control+U, Control+UpArrow | PageUp, Control+U, Control+UpArrow, Control+Alt+U | PageUp, Control+UpArrow | PageUp, Control+UpArrow | PageUp, Control+UpArrow |
+| PageDown | PageDown, Control+DownArrow, Alt+V | PageDown, Control+V, Control+DownArrow, Alt+V | PageDown, Control+V, Control+DownArrow, Control+Alt+V | PageDown, Control+DownArrow | PageDown, Control+DownArrow | PageDown, Control+DownArrow |
+| Home | Home, Control+A, Meta+LeftArrow | Home, Control+A, Meta+LeftArrow | Home, Control+A, Alt+LeftArrow | Home, Alt+LeftArrow | Home, Alt+LeftArrow | Home, Alt+LeftArrow |
+| End | End, Control+E, Meta+RightArrow | End, Control+E, Meta+RightArrow | End, Control+E, Alt+RightArrow | End, Alt+RightArrow | End, Alt+RightArrow | End, Alt+RightArrow |
+| DocHome | Control+Home, Meta+H, Meta+Home, Alt+Home | Control+H, Control+Home, Meta+H, Meta+Home, Alt+Home, Control+Alt+A | Control+Home, Alt+H, Alt+Home, Control+Alt+A | Control+Home, Alt+Home | Control+Home, Alt+Home | Control+Home, Alt+Home |
+| DocEnd | Control+End, Meta+L, Meta+End, Alt+End | Control+End, Meta+L, Meta+End, Alt+End, Control+Alt+E | Control+End, Alt+L, Alt+End, Control+Alt+E | Control+End, Alt+End | Control+End, Alt+End | Control+End, Alt+End |
+| WordRight | Control+RightArrow, Alt+RightArrow | Control+RightArrow, Alt+F, Alt+RightArrow | Control+RightArrow | Control+RightArrow | Control+RightArrow | Control+RightArrow |
+| WordLeft | Control+LeftArrow, Alt+LeftArrow | Control+LeftArrow, Alt+B, Alt+LeftArrow | Control+LeftArrow | Control+LeftArrow | Control+LeftArrow | Control+LeftArrow |
+| FocusNext | Tab | Tab | Tab | Tab | Tab | Tab |
+| FocusPrev | Shift+Tab | Shift+Tab | Shift+Tab | Shift+Tab | Shift+Tab | Shift+Tab |
+| Enter | ReturnEnter, KeypadEnter | ReturnEnter, KeypadEnter | ReturnEnter, KeypadEnter | ReturnEnter, KeypadEnter | ReturnEnter, KeypadEnter | ReturnEnter, KeypadEnter |
+| Accept | Control+ReturnEnter, Meta+ReturnEnter | Control+ReturnEnter, Meta+ReturnEnter | Control+ReturnEnter | Control+ReturnEnter | Control+ReturnEnter | Control+ReturnEnter |
+| CancelSelect | Control+G | Control+G | Control+G | Control+G, Control+Shift+A | Control+G, Control+Shift+A | Control+G, Control+Shift+A |
+| SelectMode | Control+Spacebar | Control+Spacebar | Control+Spacebar | Control+Spacebar | Control+Spacebar | Control+Spacebar |
+| SelectAll | Meta+A | Meta+A | Alt+A | Control+A | Control+A | Control+A |
+| Abort | Escape | Escape | Escape | Escape | Escape | Escape |
+| Copy | Meta+C, Alt+C | Meta+C, Alt+C | Alt+C, Alt+W | Control+C | Control+C | Control+C |
+| Cut | Control+W, Meta+X | Control+W, Meta+X | Control+W, Alt+X | Control+X | Control+X | Control+X |
+| Paste | Control+V, Control+Y, Meta+V | Control+Y, Meta+V | Control+Y, Alt+V | Control+V | Control+V | Control+V |
+| PasteHist | Meta+Shift+V | Control+Shift+Y, Meta+Shift+V | Control+Shift+Y, Alt+Shift+V | Control+Shift+V | Control+Shift+V | Control+Shift+V |
+| Backspace | Backspace | Backspace | Backspace | Backspace | Backspace | Backspace |
+| BackspaceWord | Control+Backspace, Meta+Backspace, Alt+Backspace | Control+Backspace, Meta+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace |
+| Delete | Delete, Control+D | Delete, Control+D | Delete, Control+D | Delete | Delete | Delete |
+| DeleteWord | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete |
+| Kill | Control+K | Control+K | Control+K | Control+K | Control+K | Control+K |
+| Duplicate | Alt+D | Alt+D | Alt+D | Alt+D | Alt+D | Alt+D |
+| Transpose | Control+T | Control+T | Control+T | Control+T | Control+T | Control+T |
+| TransposeWord | Alt+T | Alt+T | Alt+T | Alt+T | Alt+T | Alt+T |
+| Undo | Control+Z, Meta+Z | Control+Z, Meta+Z | Control+Z | Control+Z | Control+Z | Control+Z |
+| Redo | Control+Shift+Z, Meta+Shift+Z | Control+Shift+Z, Meta+Shift+Z | Control+Shift+Z | Control+Y, Control+Shift+Z | Control+Y, Control+Shift+Z | Control+Y, Control+Shift+Z |
+| Insert | Control+I | Control+I | Control+I | Control+Alt+I | Control+Alt+I | Control+Alt+I |
+| InsertAfter | Control+O | Control+O | Control+O | Control+Alt+O | Control+Alt+O | Control+Alt+O |
 | ZoomOut |               |            |              |                 |                   |             |
 | ZoomIn |               |            |              |                 |                   |             |
-| Refresh |               |            |              |                 |                   |             |
-| Recenter |               |            |              |                 |                   |             |
+| Refresh | F5 | F5 | F5 | F5 | F5 | F5 |
+| Recenter | Control+L | Control+L | Control+L | Control+L | Control+L | Control+L |
 | Complete |               |            |              |                 |                   |             |
 | Lookup |               |            |              |                 |                   |             |
-| Search |               |            |              |                 |                   |             |
-| Find |               |            |              |                 |                   |             |
-| Replace |               |            |              |                 |                   |             |
-| Jump |               |            |              |                 |                   |             |
+| Search | Control+S | Control+S | Control+S | Alt+S | Alt+S | Alt+S |
+| Find | Meta+F | Meta+F | Alt+F | Control+F | Control+F | Control+F |
+| Replace | Meta+R | Control+R, Meta+R | Control+R | Control+H, Control+R | Control+H, Control+R | Control+H, Control+R |
+| Jump | Control+J | Control+J | Control+J | Control+J | Control+J | Control+J |
 | HistPrev |               |            |              |                 |                   |             |
 | HistNext |               |            |              |                 |                   |             |
-| Menu |               |            |              |                 |                   |             |
-| WinFocusNext |               |            |              |                 |                   |             |
-| WinClose |               |            |              |                 |                   |             |
-| WinSnapshot |               |            |              |                 |                   |             |
-| New |               |            |              |                 |                   |             |
-| NewAlt1 |               |            |              |                 |                   |             |
-| NewAlt2 |               |            |              |                 |                   |             |
-| Open |               |            |              |                 |                   |             |
-| OpenAlt1 |               |            |              |                 |                   |             |
-| OpenAlt2 |               |            |              |                 |                   |             |
-| Save |               |            |              |                 |                   |             |
-| SaveAs |               |            |              |                 |                   |             |
-| SaveAlt |               |            |              |                 |                   |             |
-| CloseAlt1 |               |            |              |                 |                   |             |
-| CloseAlt2 |               |            |              |                 |                   |             |
-| MultiA |               |            |              |                 |                   |             |
-| MultiB |               |            |              |                 |                   |             |
-
+| Menu | F10, Control+M | F10, Control+M | F10, Control+M | F10, Control+M | F10, Control+M | F10, Control+M |
+| WinFocusNext |               |            | Alt+F6 | Alt+F6 | Alt+F6 | Alt+F6 |
+| WinClose | Meta+W | Meta+W | Control+Shift+W | Control+W | Control+W | Control+W |
+| WinSnapshot | Control+Shift+G, Control+Alt+G | Control+Shift+G, Control+Alt+G | Control+Shift+G, Control+Alt+G | Control+Shift+G, Control+Alt+G | Control+Shift+G, Control+Alt+G | Control+Shift+G, Control+Alt+G |
+| New | Meta+N | Meta+N | Alt+N | Control+N | Control+N | Control+N |
+| NewAlt1 | Meta+Shift+N | Meta+Shift+N | Alt+Shift+N | Control+Shift+N | Control+Shift+N | Control+Shift+N |
+| NewAlt2 | Meta+Alt+N | Meta+Alt+N |              | Control+Alt+N | Control+Alt+N | Control+Alt+N |
+| Open | Meta+O | Meta+O | Alt+O | Control+O | Control+O | Control+O |
+| OpenAlt1 | Meta+Shift+O | Meta+Shift+O | Alt+Shift+O | Control+Shift+O | Control+Shift+O | Control+Shift+O |
+| OpenAlt2 | Meta+Alt+O | Meta+Alt+O | Control+Alt+O | Alt+Shift+O | Alt+Shift+O | Alt+Shift+O |
+| Save | Meta+S | Meta+S | Alt+S | Control+S | Control+S | Control+S |
+| SaveAs | Meta+Shift+S | Meta+Shift+S | Alt+Shift+S | Control+Shift+S | Control+Shift+S | Control+Shift+S |
+| SaveAlt | Meta+Alt+S | Meta+Alt+S | Control+Alt+S | Control+Alt+S | Control+Alt+S | Control+Alt+S |
+| CloseAlt1 | Meta+Shift+W | Meta+Shift+W | Alt+Shift+W | Control+Shift+W | Control+Shift+W | Control+Shift+W |
+| CloseAlt2 | Meta+Alt+W | Meta+Alt+W | Control+Alt+W | Control+Alt+W | Control+Alt+W | Control+Alt+W |
+| MultiA | Control+C | Control+C | Control+C | Control+B | Control+B | Control+B |
+| MultiB | Control+X | Control+X | Control+X | Control+E | Control+E | Control+E |
 
 ### No Modifiers
 
