@@ -2,7 +2,7 @@
 Categories = ["Resources"]
 +++
 
-The [[doc:keymap]] package maps keyboard input [[events]] into a [[doc:keymap.Functions]] enum, which has a standard list of app functions that are typically activated by keyboard events. [[Settings]] allow the user to select from a set of different standard keyboard mappings, which are documented in the tables on this page.
+The **[[doc:keymap]]** package maps keyboard input [[events]] into a [[doc:keymap.Functions]] enum, which has a standard list of app functions that are typically activated by keyboard events. [[Settings]] allow the user to select from a set of different standard keyboard mappings, which are documented in the tables on this page.
 
 As a programmer, it is best to use these standard functions in your app wherever possible, so that the standard keyboard mappings will automatically apply, including any custom mappings the user may have set up. See [[events#key function]] and [[button#events|button events]] for usage examples.
 
