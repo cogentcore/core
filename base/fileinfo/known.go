@@ -177,6 +177,7 @@ const (
 	Haskell
 	Java
 	JavaScript
+	TypeScript
 	Lisp
 	Lua
 	Makefile
