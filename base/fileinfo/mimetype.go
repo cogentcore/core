@@ -336,8 +336,9 @@ var StandardMimes = []MimeType{
 
 	{"text/x-java", []string{".java", ".jar"}, Code, Java},
 	{"application/java-archive", nil, Code, Java},
-	{"application/javascript", []string{".js"}, Code, JavaScript},
-	{"application/ecmascript", []string{".es"}, Code, Unknown},
+	{"application/javascript", []string{".js", ".es"}, Code, JavaScript},
+	{"application/ecmascript", nil, Code, JavaScript},
+	{"application/typescript", []string{".ts"}, Code, TypeScript},
 
 	{"text/x-common-lisp", []string{".lisp", ".cl", ".el"}, Code, Lisp},
 	{"text/elisp", nil, Code, Lisp},
@@ -587,7 +588,7 @@ var StandardMimes = []MimeType{
 	{"video/gl", []string{".gl"}, Video, Unknown},
 	{"video/h264", nil, Video, Unknown},
 	{"video/mpeg", []string{".mpeg", ".mpg", ".mpe"}, Video, Mpeg},
-	{"video/MP2T", []string{".ts"}, Video, Unknown},
+	{"video/MP2T", nil, Video, Unknown},
 	{"video/mp4", []string{".mp4"}, Video, Mp4},
 	{"video/quicktime", []string{".qt", ".mov"}, Video, Mov},
 	{"video/ogg", []string{".ogv"}, Video, Ogv},
