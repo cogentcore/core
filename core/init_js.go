@@ -42,7 +42,9 @@ func init() {
 	webInstall = func() {
 		js.Global().Call("appShowInstallPrompt")
 	}
-	webCanInstall = js.Global().Call("appIsAppInstallable").Bool()
+	if !js.Global().Get("appIsAppInstallable").IsUndefined() {
+		webCanInstall = js.Global().Call("appIsAppInstallable").Bool()
+	}
 	js.Global().Set("appOnAppInstallChange", js.FuncOf(func(this js.Value, args []js.Value) any {
 		webCanInstall = js.Global().Call("appIsAppInstallable").Bool()
 		return nil
