@@ -6,6 +6,7 @@ package gpu
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
@@ -255,13 +256,16 @@ func (vg *VarGroup) Release() {
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
+func (vg *VarGroup) bindLayout(vs *Vars, used ...*Var) (*wgpu.BindGroupLayout, error) {
 	var binds []wgpu.BindGroupLayoutEntry
 
 	vg.nDynamicOffsets = 0
 	// https://eliemichel.github.io/LearnWebGPU/basic-3d-rendering/shader-uniforms/dynamic-uniforms.html
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
 	for _, vr := range vg.Vars {
+		if len(used) > 0 && !slices.Contains(used, vr) {
+			continue
+		}
 		if vr.Role == Vertex || vr.Role == Index { // shouldn't happen
 			continue
 		}
@@ -313,13 +317,16 @@ func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
 }
 
 // dynamicOffsets returns any current dynamic offsets for this group
-func (vg *VarGroup) dynamicOffsets() []uint32 {
+func (vg *VarGroup) dynamicOffsets(used ...*Var) []uint32 {
 	var do []uint32
 	if vg.Role == Vertex || vg.Role == SampledTexture {
 		return do
 	}
 	curDynIdx := 0
 	for _, vr := range vg.Vars {
+		if len(used) > 0 && !slices.Contains(used, vr) {
+			continue
+		}
 		if vr.DynamicOffset {
 			do = append(do, vr.Values.dynamicOffset())
 			curDynIdx++
@@ -333,8 +340,8 @@ func (vg *VarGroup) dynamicOffsets() []uint32 {
 // current Render actions will use.  Only for non-VertexGroup groups.
 // The second return value is the dynamicOffsets for any dynamic
 // offset variables.
-func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
-	dynamicOffsets := vg.dynamicOffsets()
+func (vg *VarGroup) bindGroup(vs *Vars, used ...*Var) (*wgpu.BindGroup, []uint32, error) {
+	dynamicOffsets := vg.dynamicOffsets(used...)
 	if vg.currentBindGroup != nil && !vg.bindGroupDirty {
 		return vg.currentBindGroup, dynamicOffsets, nil
 	}
@@ -343,7 +350,7 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 		vg.oldBindGroups = append(vg.oldBindGroups, vg.currentBindGroup) // to be released
 	}
 	vg.currentBindGroup = nil
-	bgl, err := vg.bindLayout(vs)
+	bgl, err := vg.bindLayout(vs, used...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -351,6 +358,9 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 
 	var bgs []wgpu.BindGroupEntry
 	for _, vr := range vg.Vars {
+		if len(used) > 0 && !slices.Contains(used, vr) {
+			continue
+		}
 		bgs = append(bgs, vr.bindGroupEntry()...)
 	}
 	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{

@@ -18,6 +18,16 @@ import (
 type ComputePipeline struct {
 	Pipeline
 
+	// VarsUsed is a list of variables actually used by this pipeline.
+	// If non-empty, only these variables are registered for this pipeline.
+	// This is necessary for larger compute systems with more than the
+	// 8 maxStorageBuffersPerShaderStage default limit of variables, which is
+	// actually 10 on chrome, and will be raised to 16 at some point:
+	// https://github.com/gpuweb/gpuweb/issues/4235
+	// The lab/gosl system automatically sets these for you based on what
+	// the shader actually uses.
+	VarsUsed []*Var
+
 	// computePipeline is the configured, instantiated wgpu pipeline
 	computePipeline *wgpu.ComputePipeline
 }
@@ -134,7 +144,7 @@ func (pl *ComputePipeline) BindAllGroups(ce *wgpu.ComputePassEncoder) {
 func (pl *ComputePipeline) BindGroup(ce *wgpu.ComputePassEncoder, group int) {
 	vs := pl.Vars()
 	vg := vs.Groups[group]
-	bg, dynOffs, err := vg.bindGroup(vs)
+	bg, dynOffs, err := vg.bindGroup(vs, pl.VarsUsed...)
 	if err == nil {
 		ce.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
