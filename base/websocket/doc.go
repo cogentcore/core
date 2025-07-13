@@ -7,4 +7,5 @@
 // browser's built-in WebSocket support via syscall/js.
 //
 // The API is consistent across platforms, so low level details are not exposed.
+// Use [Connect] to make a [Client].
 package websocket
