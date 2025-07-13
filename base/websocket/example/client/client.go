@@ -29,7 +29,7 @@ func main() {
 	})
 
 	list = core.NewList(b)
-	list.SetSlice(&msgs)
+	list.SetSlice(&msgs).SetReadOnly(true)
 
 	ws.OnMessage(func(typ websocket.MessageTypes, msg []byte) {
 		msgs = append(msgs, string(msg))
