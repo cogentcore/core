@@ -9,3 +9,19 @@
 // The API is consistent across platforms, so low level details are not exposed.
 // Use [Connect] to make a [Client].
 package websocket
+
+//go:generate core generate
+
+// MessageTypes are the types of messages that can be sent or received.
+type MessageTypes int32 //enums:enum
+
+const (
+
+	// TextMessage is a text message (string).
+	// Equivalent to [websocket.TextMessage].
+	TextMessage MessageTypes = iota + 1
+
+	// BinaryMessage is a binary data message ([]byte).
+	// Equivalent to [websocket.BinaryMessage].
+	BinaryMessage
+)

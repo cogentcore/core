@@ -45,3 +45,8 @@ func (c *Client) OnMessage(f func(typ int, msg []byte)) {
 		}
 	}()
 }
+
+// Send sends a message to the WebSocket server with the given type and message.
+func (c *Client) Send(typ int, msg []byte) error {
+
+}
