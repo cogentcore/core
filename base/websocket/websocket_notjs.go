@@ -51,6 +51,13 @@ func (c *Client) Send(typ MessageTypes, msg []byte) error {
 	return c.conn.WriteMessage(int(typ), msg)
 }
 
+// Close cleanly closes the WebSocket connection.
+// It does not directly trigger [Client.OnClose], but once the connection
+// is closed, [Client.OnMessage] will trigger it.
+func (c *Client) Close() error {
+	return c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+}
+
 // OnClose sets a callback function to be called when the connection is closed.
 // This function can only be called once.
 func (c *Client) OnClose(f func()) {
