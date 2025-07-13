@@ -225,7 +225,7 @@ func (vl *Value) DynamicN() int {
 // varGroupDirty tells our VarGroup that our buffers have changed,
 // so a new bindGroup needs to be created when it is next requested.
 func (vl *Value) varGroupDirty() {
-	vl.vvar.VarGroup.bindGroupDirty = true
+	vl.vvar.VarGroup.ValuesUpdated()
 }
 
 // SetDynamicN sets the number of dynamic values for this Value.

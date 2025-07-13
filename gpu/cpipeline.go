@@ -151,9 +151,8 @@ func (pl *ComputePipeline) BindAllGroups(ce *wgpu.ComputePassEncoder) {
 // variable group, as the Value to use by shader.
 // Be sure to set Current index to correct value before calling!
 func (pl *ComputePipeline) BindGroup(ce *wgpu.ComputePassEncoder, group int) {
-	vs := pl.Vars()
-	vg := vs.Groups[group]
-	bg, dynOffs, err := vg.bindGroup(vs, pl.VarsUsed...)
+	vg := pl.Vars().Groups[group]
+	bg, dynOffs, err := pl.bindGroup(vg, pl.VarsUsed...)
 	if err == nil {
 		ce.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
@@ -186,7 +185,7 @@ func (pl *ComputePipeline) Config(rebuild bool) error {
 		}
 		pl.releasePipeline() // starting over: note: requires keeping shaders around
 	}
-	play, err := pl.bindLayout()
+	play, err := pl.bindLayout(pl.VarsUsed...)
 	if errors.Log(err) != nil {
 		return err
 	}

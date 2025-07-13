@@ -71,7 +71,7 @@ func (vs *Values) SetCurrentValue(idx int) (*Value, error) {
 	}
 	if vs.current != idx {
 		vs.current = idx
-		vs.Values[0].vvar.VarGroup.bindGroupDirty = true
+		vs.Values[0].vvar.VarGroup.ValuesUpdated()
 	}
 	return vs.CurrentValue(), nil
 }
