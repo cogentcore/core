@@ -13,7 +13,7 @@ import (
 func main() {
 	b := core.NewBody("Websocket Example")
 
-	ws, err := websocket.Connect("ws://localhost:8081")
+	ws, err := websocket.Connect("ws://localhost:8081/ws")
 	core.ErrorDialog(b, err)
 
 	msgs := []string{}
