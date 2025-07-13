@@ -33,7 +33,7 @@ func Connect(url string) (*Client, error) {
 
 // OnMessage sets a callback function to be called when a message is received.
 // This function can only be called once.
-func (c *Client) OnMessage(f func(typ int, msg []byte)) {
+func (c *Client) OnMessage(f func(typ MessageTypes, msg []byte)) {
 	go func() {
 		for {
 			typ, msg, err := c.conn.ReadMessage()
@@ -41,12 +41,12 @@ func (c *Client) OnMessage(f func(typ int, msg []byte)) {
 				close(c.done)
 				return
 			}
-			f(typ, msg)
+			f(MessageTypes(typ), msg)
 		}
 	}()
 }
 
 // Send sends a message to the WebSocket server with the given type and message.
-func (c *Client) Send(typ int, msg []byte) error {
-
+func (c *Client) Send(typ MessageTypes, msg []byte) error {
+	return c.conn.WriteMessage(int(typ), msg)
 }
