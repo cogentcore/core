@@ -30,4 +30,6 @@ func main() {
 			fmt.Println(string(msg))
 		}
 	})
+
+	http.ListenAndServe(":8081", nil)
 }
