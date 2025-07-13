@@ -20,12 +20,19 @@ func main() {
 		},
 	}
 
+	conns := map[*websocket.Conn]struct{}{}
+
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if errors.Log(err) != nil {
 			return
 		}
-		defer conn.Close()
+		conns[conn] = struct{}{}
+
+		defer func() {
+			conn.Close()
+			delete(conns, conn)
+		}()
 
 		for {
 			_, msg, err := conn.ReadMessage()
@@ -33,6 +40,13 @@ func main() {
 				return
 			}
 			fmt.Println(string(msg))
+
+			for other := range conns {
+				if other == conn {
+					continue
+				}
+				other.WriteMessage(websocket.TextMessage, msg)
+			}
 		}
 	})
 
