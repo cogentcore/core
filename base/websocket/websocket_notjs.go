@@ -50,3 +50,12 @@ func (c *Client) OnMessage(f func(typ MessageTypes, msg []byte)) {
 func (c *Client) Send(typ MessageTypes, msg []byte) error {
 	return c.conn.WriteMessage(int(typ), msg)
 }
+
+// OnClose sets a callback function to be called when the connection is closed.
+// This function can only be called once.
+func (c *Client) OnClose(f func()) {
+	go func() {
+		<-c.done
+		f()
+	}()
+}
