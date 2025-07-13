@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/draw"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -52,8 +53,13 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	}
 
 	ji := pr.Source.(*imagex.JSRGBA)
+	if ji.JS.Bitmap.IsNull() || ji.JS.Bitmap.IsUndefined() {
+		errors.Log(errors.New("htmlcanvas.pimage: nil JS bitmap in image"))
+		return
+	}
 
 	sbb := pr.Source.Bounds()
+	// fmt.Println("bounds:", sbb)
 	sw := min(pr.Rect.Dx(), sbb.Dx())
 	sh := min(pr.Rect.Dy(), sbb.Dy())
 	// fmt.Println(pr.Cmd, pr.Rect, pr.Op, pr.SourcePos, sw, sh, sbb)

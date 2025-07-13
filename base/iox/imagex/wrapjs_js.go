@@ -29,8 +29,10 @@ func WrapJS(src image.Image) image.Image {
 		return NewJSRGBA(x, nil)
 	case *image.NRGBA:
 		return NewJSRGBA(x, nil)
-	default:
+	case *image.Uniform:
 		return src
+	default:
+		return NewJSRGBA(AsRGBA(src), nil)
 	}
 }
 
@@ -48,8 +50,12 @@ func ResizeJS(src image.Image, size image.Point) image.Image {
 		im = NewJSRGBA(x, options)
 	case *image.NRGBA:
 		im = NewJSRGBA(x, options)
+	default:
+		im = NewJSRGBA(AsRGBA(src), options)
 	}
-	// todo: get image back to image.RGBA?
+	if im.RGBA == nil {
+		im.RGBA = image.NewRGBA(image.Rectangle{Max: size})
+	}
 	return im
 }
 
@@ -68,8 +74,13 @@ func CropJS(src image.Image, rect image.Rectangle) image.Image {
 		im = NewJSRGBA(x, nil)
 	case *image.NRGBA:
 		im = NewJSRGBA(x, nil)
+	default:
+		im = NewJSRGBA(AsRGBA(src), nil)
 	}
 	im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, nil, args...)
+	if im.RGBA == nil {
+		im.RGBA = image.NewRGBA(rect)
+	}
 	return im
 }
 
@@ -103,7 +114,10 @@ func NewJSRGBA(src image.Image, options map[string]any) *JSRGBA {
 			options["premultiplyAlpha"] = "premultiply"
 		}
 		im.JS.SetImageData(x.Pix, src.Bounds(), options)
-		// todo: could get RGBA back from web
+		// todo: get RGBA back from web
+	default:
+		im.RGBA = AsRGBA(src)
+		im.JS.SetImageData(im.RGBA.Pix, im.RGBA.Bounds(), options)
 	}
 	return im
 }
@@ -176,5 +190,9 @@ func (im *JSImageData) Set(src image.Image) {
 		im.SetRGBA(x)
 	case *image.NRGBA:
 		im.SetNRGBA(x)
+	case *image.Uniform:
+		errors.Log(errors.New("imagex.JSImageData: setting image to Uniform not supported"))
+	default:
+		im.SetRGBA(AsRGBA(ui))
 	}
 }
