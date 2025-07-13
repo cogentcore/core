@@ -35,7 +35,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	// Fast path for [image.Uniform]
 	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
-		if u.C == colors.Transparent {
+		if u == nil || u.C == colors.Transparent {
 			rs.ctx.Call("clearRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		} else {
 			rs.ctx.Set("fillStyle", rs.imageToStyle(u))

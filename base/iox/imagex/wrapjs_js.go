@@ -26,12 +26,51 @@ func WrapJS(src image.Image) image.Image {
 		*im = *x
 		return im
 	case *image.RGBA:
-		return NewJSRGBA(x)
+		return NewJSRGBA(x, nil)
 	case *image.NRGBA:
-		return NewJSRGBA(x)
+		return NewJSRGBA(x, nil)
 	default:
 		return src
 	}
+}
+
+// ResizeJS returns a resized version of the source image (which can be
+// [Wrapped]), returning a [WrapJS] image handle on web and using web-native
+// optimized code. Otherwise, uses medium quality Linear resize.
+func ResizeJS(src image.Image, size image.Point) image.Image {
+	im := &JSRGBA{}
+	options := map[string]any{"resizeWidth": size.X, "resizeHeight": size.Y, "resizeQuality": "medium"}
+	switch x := src.(type) {
+	case *JSRGBA:
+		*im = *x
+		im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, options)
+	case *image.RGBA:
+		im = NewJSRGBA(x, options)
+	case *image.NRGBA:
+		im = NewJSRGBA(x, options)
+	}
+	// todo: get image back to image.RGBA?
+	return im
+}
+
+// CropJS returns a cropped region of the source image (which can be
+// [Wrapped]), returning a [WrapJS] image handle on web and using web-native
+// optimized code.
+func CropJS(src image.Image, rect image.Rectangle) image.Image {
+	im := &JSRGBA{}
+	args := []any{rect.Min.X, rect.Min.Y, rect.Dx(), rect.Dy()}
+	switch x := src.(type) {
+	case *JSRGBA:
+		*im = *x
+		im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, nil, args...)
+		return im
+	case *image.RGBA:
+		im = NewJSRGBA(x, nil)
+	case *image.NRGBA:
+		im = NewJSRGBA(x, nil)
+	}
+	im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, nil, args...)
+	return im
 }
 
 // JSRGBA is a wrapper around [image.RGBA] that adds [JSImageData] pointers.
@@ -45,17 +84,27 @@ type JSRGBA struct {
 // If the source is already a wrapped [JSRGBA] image, it returns a shallow
 // copy of that original data, re-using the pixels and js pointers.
 // Returns nil if the source image is nil.
-func NewJSRGBA(src image.Image) *JSRGBA {
+func NewJSRGBA(src image.Image, options map[string]any) *JSRGBA {
 	if src == nil {
 		return nil
 	}
 	im := &JSRGBA{}
-	if x, ok := src.(*JSRGBA); ok {
+	switch x := src.(type) {
+	case *JSRGBA:
 		*im = *x
 		return im
+	case *image.RGBA:
+		im.RGBA = x
+		im.JS.SetImageData(x.Pix, src.Bounds(), options)
+	case *image.NRGBA:
+		if options == nil {
+			options = map[string]any{"premultiplyAlpha": "premultiply"}
+		} else {
+			options["premultiplyAlpha"] = "premultiply"
+		}
+		im.JS.SetImageData(x.Pix, src.Bounds(), options)
+		// todo: could get RGBA back from web
 	}
-	im.RGBA = AsRGBA(src)
-	im.Update()
 	return im
 }
 
@@ -83,12 +132,24 @@ func (im *JSImageData) SetImageData(src []byte, sbb image.Rectangle, options map
 	jsBuf := jsx.BytesToJS(src)
 	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
 	im.Data = imageData
-	imageBitmapPromise := js.Global().Call("createImageBitmap", imageData, options)
+	im.Bitmap, _ = createImageBitmap(imageData, options)
+}
+
+// createImageBitmap calls the JS createImageBitmap function with given args.
+func createImageBitmap(imageData js.Value, options map[string]any, args ...any) (js.Value, error) {
+	var imageBitmapPromise js.Value
+	if len(args) > 0 {
+		args = append([]any{imageData}, args...)
+		args = append(args, options)
+		imageBitmapPromise = js.Global().Call("createImageBitmap", args...)
+	} else {
+		imageBitmapPromise = js.Global().Call("createImageBitmap", imageData, options)
+	}
 	imageBitmap, ok := jsx.Await(imageBitmapPromise)
 	if ok {
-		im.Bitmap = imageBitmap
+		return imageBitmap, nil
 	} else {
-		errors.Log(errors.New("imagex.JSImageData: createImageBitmap failed"))
+		return imageBitmap, errors.Log(errors.New("imagex.createImageBitmap failed"))
 	}
 }
 

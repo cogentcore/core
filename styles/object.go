@@ -6,10 +6,9 @@ package styles
 
 import (
 	"image"
-	"image/draw"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
-	"github.com/anthonynsimon/bild/transform"
 )
 
 // ObjectFits are the different ways in which a replaced element
@@ -79,21 +78,22 @@ func ObjectSizeFromFit(fit ObjectFits, obj, box math32.Vector2) math32.Vector2 {
 }
 
 // ResizeImage resizes the given image according to [Style.ObjectFit]
-// in an object of the given box size.
+// in an object of the given box size. It returns an [imagex.WrapJS] image
+// that is a pointer to an html image object on web, and resizing is done
+// efficiently for that platform.
 func (s *Style) ResizeImage(img image.Image, box math32.Vector2) image.Image {
 	obj := math32.FromPoint(img.Bounds().Size())
 	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
+	szi := sz.ToPointFloor()
 
 	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {
 		return img
 	}
-	rimg := transform.Resize(img, int(sz.X), int(sz.Y), transform.Linear)
-	if s.ObjectFit != FitCover {
+	rimg := imagex.ResizeJS(img, szi)
+	if s.ObjectFit != FitCover || box.X >= sz.X && box.Y >= sz.Y {
 		return rimg
 	}
-	// but we cap the destination size to the size of the containing object
+	// need to crop the destination size to the size of the containing object
 	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
-	dst := image.NewRGBA(drect)
-	draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
-	return dst
+	return imagex.CropJS(rimg, drect)
 }
