@@ -6,7 +6,9 @@ package gpu
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"github.com/cogentcore/webgpu/wgpu"
@@ -61,15 +63,13 @@ type VarGroup struct {
 	// This is 1 for Vertex buffer variables.
 	alignBytes int
 
-	// need a new bindGroup, when a Values.current has been changed.
-	bindGroupDirty bool
+	// this counter updates when when a Values.current has been changed.
+	// pipelines record the count that they last used to determine if time
+	// to change. Use BindGroupUpdateCount() to access under lock.
+	bindGroupUpdateCount int
 
-	// current bind group
-	currentBindGroup *wgpu.BindGroup
-
-	// oldBindGroups are prior bind groups that need to be released
-	// after current render or compute pass.
-	oldBindGroups []*wgpu.BindGroup
+	// mutex used for bindGroupsUpdateCount
+	sync.Mutex
 }
 
 // addVar adds given variable
@@ -170,6 +170,22 @@ func (vg *VarGroup) SetAllCurrentValue(i int) {
 	}
 }
 
+// ValuesUpdated is called whenever values have been updated in a way
+// that requires new a new bind group to be computed.
+func (vg *VarGroup) ValuesUpdated() {
+	vg.Lock()
+	vg.bindGroupUpdateCount++
+	vg.Unlock()
+}
+
+// ValuesUpdated is called whenever values have been updated in a way
+// that requires new a new bind group to be computed.
+func (vg *VarGroup) BindGroupUpdateCount() int {
+	vg.Lock()
+	defer vg.Unlock()
+	return vg.bindGroupUpdateCount
+}
+
 // Config must be called after all variables have been added.
 // Configures binding / location for all vars based on sequential order.
 // also does validation and returns error message.
@@ -227,25 +243,8 @@ func (vg *VarGroup) Config(dev *Device) error {
 	return errors.Join(errs...)
 }
 
-// releaseOldBindGroups releases old bind groups.
-func (vg *VarGroup) releaseOldBindGroups() {
-	if vg.oldBindGroups == nil {
-		return
-	}
-	og := vg.oldBindGroups
-	vg.oldBindGroups = nil
-	for _, bg := range og {
-		bg.Release()
-	}
-}
-
 // Release destroys infrastructure for Group, Vars and Values.
 func (vg *VarGroup) Release() {
-	vg.releaseOldBindGroups()
-	if vg.currentBindGroup != nil {
-		vg.currentBindGroup.Release()
-		vg.currentBindGroup = nil
-	}
 	for _, vr := range vg.Vars {
 		vr.Release()
 	}
@@ -255,13 +254,16 @@ func (vg *VarGroup) Release() {
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
+func (vg *VarGroup) bindLayout(vs *Vars, used ...*Var) (*wgpu.BindGroupLayout, error) {
 	var binds []wgpu.BindGroupLayoutEntry
 
 	vg.nDynamicOffsets = 0
 	// https://eliemichel.github.io/LearnWebGPU/basic-3d-rendering/shader-uniforms/dynamic-uniforms.html
 	// https://toji.dev/webgpu-best-practices/bind-groups.html
 	for _, vr := range vg.Vars {
+		if len(used) > 0 && !slices.Contains(used, vr) {
+			continue
+		}
 		if vr.Role == Vertex || vr.Role == Index { // shouldn't happen
 			continue
 		}
@@ -313,13 +315,16 @@ func (vg *VarGroup) bindLayout(vs *Vars) (*wgpu.BindGroupLayout, error) {
 }
 
 // dynamicOffsets returns any current dynamic offsets for this group
-func (vg *VarGroup) dynamicOffsets() []uint32 {
+func (vg *VarGroup) dynamicOffsets(used ...*Var) []uint32 {
 	var do []uint32
 	if vg.Role == Vertex || vg.Role == SampledTexture {
 		return do
 	}
 	curDynIdx := 0
 	for _, vr := range vg.Vars {
+		if len(used) > 0 && !slices.Contains(used, vr) {
+			continue
+		}
 		if vr.DynamicOffset {
 			do = append(do, vr.Values.dynamicOffset())
 			curDynIdx++
@@ -329,28 +334,21 @@ func (vg *VarGroup) dynamicOffsets() []uint32 {
 }
 
 // bindGroup returns the Current Value bindings for all variables
-// within this Group.  This determines what Values of the Vars the
-// current Render actions will use.  Only for non-VertexGroup groups.
-// The second return value is the dynamicOffsets for any dynamic
-// offset variables.
-func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
-	dynamicOffsets := vg.dynamicOffsets()
-	if vg.currentBindGroup != nil && !vg.bindGroupDirty {
-		return vg.currentBindGroup, dynamicOffsets, nil
-	}
-	vg.bindGroupDirty = false
-	if vg.currentBindGroup != nil {
-		vg.oldBindGroups = append(vg.oldBindGroups, vg.currentBindGroup) // to be released
-	}
-	vg.currentBindGroup = nil
-	bgl, err := vg.bindLayout(vs)
+// within this Group, subject to the used filter if present.
+// This determines what Values of the Vars the current Render
+// actions will use. Only for non-VertexGroup groups.
+func (vg *VarGroup) bindGroup(vs *Vars, used ...*Var) (*wgpu.BindGroup, error) {
+	bgl, err := vg.bindLayout(vs, used...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer bgl.Release()
 
 	var bgs []wgpu.BindGroupEntry
 	for _, vr := range vg.Vars {
+		if len(used) > 0 && !slices.Contains(used, vr) {
+			continue
+		}
 		bgs = append(bgs, vr.bindGroupEntry()...)
 	}
 	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
@@ -359,10 +357,9 @@ func (vg *VarGroup) bindGroup(vs *Vars) (*wgpu.BindGroup, []uint32, error) {
 		Label:   vg.Name,
 	})
 	if errors.Log(err) != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	vg.currentBindGroup = bg
-	return bg, dynamicOffsets, nil
+	return bg, nil
 }
 
 // IndexVar returns the Index variable within this VertexGroup.

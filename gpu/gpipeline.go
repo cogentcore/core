@@ -54,9 +54,8 @@ func (pl *GraphicsPipeline) BindAllGroups(rp *wgpu.RenderPassEncoder) {
 // variable group, as the Value to use by shader.
 // Be sure to set Current index to correct value before calling!
 func (pl *GraphicsPipeline) BindGroup(rp *wgpu.RenderPassEncoder, group int) {
-	vs := pl.Vars()
-	vg := vs.Groups[group]
-	bg, dynOffs, err := vg.bindGroup(vs)
+	vg := pl.Vars().Groups[group]
+	bg, dynOffs, err := pl.bindGroup(vg)
 	if err == nil {
 		rp.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}

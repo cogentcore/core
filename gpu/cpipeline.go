@@ -18,6 +18,16 @@ import (
 type ComputePipeline struct {
 	Pipeline
 
+	// VarsUsed is a list of variables actually used by this pipeline.
+	// If non-empty, only these variables are registered for this pipeline.
+	// This is necessary for larger compute systems with more than the
+	// 8 maxStorageBuffersPerShaderStage default limit of variables, which is
+	// actually 10 on chrome, and will be raised to 16 at some point:
+	// https://github.com/gpuweb/gpuweb/issues/4235
+	// The lab/gosl system automatically sets these for you based on what
+	// the shader actually uses.
+	VarsUsed []*Var
+
 	// computePipeline is the configured, instantiated wgpu pipeline
 	computePipeline *wgpu.ComputePipeline
 }
@@ -46,6 +56,15 @@ func NewComputePipelineShaderFS(fsys fs.FS, fname string, sy *ComputeSystem) *Co
 	pl.AddEntry(sh, ComputeShader, "main")
 	sy.ComputePipelines[pl.Name] = pl
 	return pl
+}
+
+// AddVarUsed adds given variable name in given group as a variable used
+// by this compute pipeline.
+func (pl *ComputePipeline) AddVarUsed(group int, varName string) {
+	vr := errors.Log1(pl.System.Vars().VarByName(group, varName))
+	if vr != nil {
+		pl.VarsUsed = append(pl.VarsUsed, vr)
+	}
 }
 
 // Dispatch adds commands to given compute encoder to run this
@@ -132,9 +151,8 @@ func (pl *ComputePipeline) BindAllGroups(ce *wgpu.ComputePassEncoder) {
 // variable group, as the Value to use by shader.
 // Be sure to set Current index to correct value before calling!
 func (pl *ComputePipeline) BindGroup(ce *wgpu.ComputePassEncoder, group int) {
-	vs := pl.Vars()
-	vg := vs.Groups[group]
-	bg, dynOffs, err := vg.bindGroup(vs)
+	vg := pl.Vars().Groups[group]
+	bg, dynOffs, err := pl.bindGroup(vg, pl.VarsUsed...)
 	if err == nil {
 		ce.SetBindGroup(uint32(vg.Group), bg, dynOffs)
 	}
@@ -167,7 +185,7 @@ func (pl *ComputePipeline) Config(rebuild bool) error {
 		}
 		pl.releasePipeline() // starting over: note: requires keeping shaders around
 	}
-	play, err := pl.bindLayout()
+	play, err := pl.bindLayout(pl.VarsUsed...)
 	if errors.Log(err) != nil {
 		return err
 	}
