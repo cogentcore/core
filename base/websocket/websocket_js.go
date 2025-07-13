@@ -55,3 +55,20 @@ func (c *Client) Send(typ MessageTypes, msg []byte) error {
 	c.ws.Call("send", array)
 	return nil
 }
+
+// Close cleanly closes the WebSocket connection.
+// It does not directly trigger [Client.OnClose], but once the connection
+// is closed, that will trigger it.
+func (c *Client) Close() error {
+	c.ws.Call("close")
+	return nil
+}
+
+// OnClose sets a callback function to be called when the connection is closed.
+// This function can only be called once on native.
+func (c *Client) OnClose(f func()) {
+	c.ws.Call("addEventListener", "close", js.FuncOf(func(this js.Value, args []js.Value) any {
+		f()
+		return nil
+	}))
+}
