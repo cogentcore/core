@@ -6,7 +6,11 @@
 
 package websocket
 
-import "syscall/js"
+import (
+	"syscall/js"
+
+	"github.com/cogentcore/webgpu/jsx"
+)
 
 // Client represents a WebSocket client connection.
 // You can use [Connect] to create a new Client.
@@ -39,4 +43,15 @@ func (c *Client) OnMessage(f func(typ MessageTypes, msg []byte)) {
 		f(BinaryMessage, b)
 		return nil
 	}))
+}
+
+// Send sends a message to the WebSocket server with the given type and message.
+func (c *Client) Send(typ MessageTypes, msg []byte) error {
+	if typ == TextMessage {
+		c.ws.Call("send", string(msg))
+		return nil
+	}
+	array := jsx.BytesToJS(msg)
+	c.ws.Call("send", array)
+	return nil
 }
