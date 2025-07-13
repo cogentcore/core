@@ -58,6 +58,15 @@ func NewComputePipelineShaderFS(fsys fs.FS, fname string, sy *ComputeSystem) *Co
 	return pl
 }
 
+// AddVarUsed adds given variable name in given group as a variable used
+// by this compute pipeline.
+func (pl *ComputePipeline) AddVarUsed(group int, varName string) {
+	vr := errors.Log1(pl.System.Vars().VarByName(group, varName))
+	if vr != nil {
+		pl.VarsUsed = append(pl.VarsUsed, vr)
+	}
+}
+
 // Dispatch adds commands to given compute encoder to run this
 // pipeline for given number of *warps* (work groups of compute threads)
 // along 3 dimensions, which then generate indexes passed into the shader.
