@@ -53,9 +53,7 @@ func ResizeJS(src image.Image, size image.Point) image.Image {
 	default:
 		im = NewJSRGBA(AsRGBA(src), options)
 	}
-	if im.RGBA == nil {
-		im.RGBA = image.NewRGBA(image.Rectangle{Max: size})
-	}
+	im.JS.Bounds = image.Rectangle{Max: size}
 	return im
 }
 
@@ -78,9 +76,7 @@ func CropJS(src image.Image, rect image.Rectangle) image.Image {
 		im = NewJSRGBA(AsRGBA(src), nil)
 	}
 	im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, nil, args...)
-	if im.RGBA == nil {
-		im.RGBA = image.NewRGBA(rect)
-	}
+	im.JS.Bounds = image.Rectangle{Max: rect.Size()}
 	return im
 }
 
@@ -122,6 +118,11 @@ func NewJSRGBA(src image.Image, options map[string]any) *JSRGBA {
 	return im
 }
 
+// Bounds returns the underlying JS data Bounds
+func (im *JSRGBA) Bounds() image.Rectangle {
+	return im.JS.Bounds
+}
+
 // Update must be called any time the image has been updated!
 func (im *JSRGBA) Update() {
 	im.JS.SetRGBA(im.RGBA)
@@ -139,12 +140,16 @@ type JSImageData struct {
 
 	// Bitmap is the result of createImageBitmap on ImageData; a gpu texture basically.
 	Bitmap js.Value
+
+	// Bounds is the size of the image: keep updated.
+	Bounds image.Rectangle
 }
 
 // setImageData sets the JavaScript pointers from given bytes.
 func (im *JSImageData) SetImageData(src []byte, sbb image.Rectangle, options map[string]any) {
 	jsBuf := jsx.BytesToJS(src)
 	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
+	im.Bounds = image.Rectangle{Max: sbb.Size()}
 	im.Data = imageData
 	im.Bitmap, _ = createImageBitmap(imageData, options)
 }

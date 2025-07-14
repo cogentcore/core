@@ -236,6 +236,20 @@ func (w *renderWindow) logicalDPI() float32 {
 	return w.SystemWindow.LogicalDPI()
 }
 
+// devicePixelRatio returns the current devicePixelRatio of the
+// window, which is already managed in most cases, but may be needed
+// in certain rare cases.
+func (w *renderWindow) devicePixelRatio() float32 {
+	if w.SystemWindow == nil || w.SystemWindow.Screen() == nil {
+		sc := system.TheApp.Screen(0)
+		if sc == nil {
+			return 1 // default
+		}
+		return sc.DevicePixelRatio
+	}
+	return w.SystemWindow.Screen().DevicePixelRatio
+}
+
 // stepZoom calls [SetZoom] with the current zoom plus 10 times the given number of steps.
 func (w *renderWindow) stepZoom(steps float32) {
 	sc := w.SystemWindow.Screen()

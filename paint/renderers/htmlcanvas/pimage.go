@@ -67,7 +67,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
 	// m = m.Scale(rs.dpm, rs.dpm)
 	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
-	if pr.Op == draw.Over {
+	if pr.Op == draw.Over || (ji.JS.Data.IsUndefined() || ji.JS.Data.IsNull()) {
 		rs.ctx.Call("drawImage", ji.JS.Bitmap, pr.SourcePos.X, pr.SourcePos.Y, sw, sh, pr.Rect.Min.X, pr.Rect.Min.Y, sw, sh)
 	} else {
 		rs.ctx.Call("putImageData", ji.JS.Data, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)

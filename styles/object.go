@@ -5,7 +5,6 @@
 package styles
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -85,16 +84,14 @@ func ObjectSizeFromFit(fit ObjectFits, obj, box math32.Vector2) math32.Vector2 {
 func (s *Style) ResizeImage(img image.Image, box math32.Vector2) image.Image {
 	obj := math32.FromPoint(img.Bounds().Size())
 	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
-	szi := sz.ToPointFloor()
-
 	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {
 		return img
 	}
+	szi := sz.ToPointFloor()
 	rimg := imagex.ResizeJS(img, szi)
 	if s.ObjectFit != FitCover || (box.X >= sz.X && box.Y >= sz.Y) {
 		return rimg
 	}
-	fmt.Println("cropping")
 	// need to crop the destination size to the size of the containing object
 	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
 	return imagex.CropJS(rimg, drect)
