@@ -19,17 +19,17 @@ func WrapJS(src image.Image) image.Image {
 	return src
 }
 
-// ResizeJS returns a resized version of the source image (which can be
+// Resize returns a resized version of the source image (which can be
 // [Wrapped]), returning a [WrapJS] image handle on web and using web-native
 // optimized code. Otherwise, uses medium quality Linear resize.
-func ResizeJS(src image.Image, size image.Point) image.Image {
+func Resize(src image.Image, size image.Point) image.Image {
 	return transform.Resize(src, size.X, size.Y, transform.Linear)
 }
 
-// CropJS returns a cropped region of the source image (which can be
+// Crop returns a cropped region of the source image (which can be
 // [Wrapped]), returning a [WrapJS] image handle on web and using web-native
 // optimized code.
-func CropJS(src image.Image, rect image.Rectangle) image.Image {
+func Crop(src image.Image, rect image.Rectangle) image.Image {
 	dst := image.NewRGBA(rect)
 	draw.Draw(dst, rect, src, image.Point{}, draw.Src)
 	return dst

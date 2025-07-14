@@ -36,10 +36,10 @@ func WrapJS(src image.Image) image.Image {
 	}
 }
 
-// ResizeJS returns a resized version of the source image (which can be
+// Resize returns a resized version of the source image (which can be
 // [Wrapped]), returning a [WrapJS] image handle on web and using web-native
 // optimized code. Otherwise, uses medium quality Linear resize.
-func ResizeJS(src image.Image, size image.Point) image.Image {
+func Resize(src image.Image, size image.Point) image.Image {
 	im := &JSRGBA{}
 	options := map[string]any{"resizeWidth": size.X, "resizeHeight": size.Y, "resizeQuality": "medium"}
 	switch x := src.(type) {
@@ -57,10 +57,10 @@ func ResizeJS(src image.Image, size image.Point) image.Image {
 	return im
 }
 
-// CropJS returns a cropped region of the source image (which can be
+// Crop returns a cropped region of the source image (which can be
 // [Wrapped]), returning a [WrapJS] image handle on web and using web-native
 // optimized code.
-func CropJS(src image.Image, rect image.Rectangle) image.Image {
+func Crop(src image.Image, rect image.Rectangle) image.Image {
 	im := &JSRGBA{}
 	args := []any{rect.Min.X, rect.Min.Y, rect.Dx(), rect.Dy()}
 	switch x := src.(type) {

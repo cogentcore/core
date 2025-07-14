@@ -88,11 +88,11 @@ func (s *Style) ResizeImage(img image.Image, box math32.Vector2) image.Image {
 		return img
 	}
 	szi := sz.ToPointFloor()
-	rimg := imagex.ResizeJS(img, szi)
+	rimg := imagex.Resize(img, szi)
 	if s.ObjectFit != FitCover || (box.X >= sz.X && box.Y >= sz.Y) {
 		return rimg
 	}
 	// need to crop the destination size to the size of the containing object
 	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
-	return imagex.CropJS(rimg, drect)
+	return imagex.Crop(rimg, drect)
 }
