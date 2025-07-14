@@ -194,6 +194,10 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 				}
 			} else {
 				// if no conflict, we get the name
+				nfns := nf.Field.Tag.Get("nest")
+				if nfns == "+" || nfns == "true" {
+					applyShortestUniqueName(nf, i, usedNames)
+				}
 				usedNames[name] = nf
 			}
 		}
