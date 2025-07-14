@@ -236,6 +236,71 @@ func TestParentRelativeSize(t *testing.T) {
 	b.AssertRender(t, "layout/parent-relative")
 }
 
+func TestParentRelativeSizeSplits(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(400))
+	})
+
+	splitFrame := NewSplits(b)
+	splitFrame.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+		s.Direction = styles.Row
+	})
+	splitFrame.SetSplits(20, 60, 20)
+
+	firstFrame := NewFrame(splitFrame)
+	firstFrame.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+		s.Border.Width.Set(units.Dp(4))
+		s.CenterAll()
+	})
+	NewText(firstFrame).SetText("20% Split Frame")
+
+	// The center of the split, created so that we can put child widgets in it
+	centerFrame := NewFrame(splitFrame)
+	centerFrame.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		//s.Overflow.Set(styles.OverflowHidden)
+	})
+
+	// represents a top "menu" bar that has buttons in it
+	centerMenu := NewFrame(centerFrame)
+	centerMenu.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Pw(100), units.Ph(10))
+		s.Max.Set(units.Pw(100), units.Ph(10))
+		s.Border.Width.Set(units.Dp(4))
+		s.CenterAll()
+	})
+	NewText(centerMenu).SetText("Menu Bar")
+
+	// the frame that the child widget will use to wrap its content so that from the outside we only have a single frame
+	centerContentArea := NewFrame(centerFrame)
+	centerContentArea.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+		s.Border.Width.Set(units.Dp(4))
+		s.Overflow.Set(styles.OverflowScroll)
+	})
+
+	// represents content that will be too large for this frame, user will need to scroll this on both
+	// axes to interact with it correctly
+	internalCenter := NewFrame(centerContentArea)
+	internalCenter.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Pw(125), units.Ph(125))
+		s.CenterAll()
+	})
+	NewText(internalCenter).SetText("Content in center frame")
+
+	lastFrame := NewFrame(splitFrame)
+	lastFrame.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+		s.CenterAll()
+		s.Border.Width.Set(units.Dp(4))
+	})
+	NewText(lastFrame).SetText("20% Split Frame")
+	b.AssertRender(t, "layout/parent-relative-splits")
+}
+
 func TestCustomLayout(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
