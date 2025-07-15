@@ -212,8 +212,9 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 // used names, at the given index.
 func applyShortestUniqueName(field *field, idx int, usedNames map[string]*field) {
 	nm := shortestUniqueName(field.Name, usedNames)
-	// if we already have this name, we don't need to add it, so we just delete this entry
-	if slices.Contains(field.Names, nm) {
+	// if we already have this name, we don't need to add it, so we just delete
+	// this entry (unless this entry is the shortest unique name)
+	if slices.Contains(field.Names, nm) && field.Names[idx] != nm {
 		field.Names = slices.Delete(field.Names, idx, idx+1)
 	} else {
 		field.Names[idx] = nm
