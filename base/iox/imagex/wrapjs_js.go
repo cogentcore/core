@@ -108,10 +108,9 @@ func NewJSRGBA(src image.Image, options map[string]any) *JSRGBA {
 		im.JS.SetImageData(x.Pix, src.Bounds(), options)
 	case *image.NRGBA:
 		if options == nil {
-			options = map[string]any{"premultiplyAlpha": "premultiply"}
-		} else {
-			options["premultiplyAlpha"] = "premultiply"
+			options = map[string]any{}
 		}
+		options["premultiplyAlpha"] = "premultiply"
 		im.JS.SetImageData(x.Pix, src.Bounds(), options)
 		// todo: get RGBA back from web
 	default:
