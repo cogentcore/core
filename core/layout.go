@@ -1228,58 +1228,78 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 		slog.Error("unexpected error: layout has not been initialized", "layout", fr.String())
 		return false
 	}
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		cidx := cwb.Geom.Cell
-		ksz := &cwb.Geom.Size
-		grw := cwb.Styles.Grow
-		if iter == 0 && cwb.Styles.GrowWrap {
-			grw.Set(1, 0)
-		}
-		// if DebugSettings.LayoutTrace {
-		// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
-		// }
-		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
-			gr := grw.Dim(ma)
-			ca := ma.Other()     // cross axis = Y then X
-			exd := extra.Dim(ma) // row.X = extra width for cols; col.Y = extra height for rows in this col
-			if exd < 0 {
-				exd = 0
+	var maxExtra, exn math32.Vector2
+	for exitr := range 2 {
+		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cidx := cwb.Geom.Cell
+			ksz := &cwb.Geom.Size
+			grw := cwb.Styles.Grow
+			if iter == 0 && cwb.Styles.GrowWrap {
+				grw.Set(1, 0)
 			}
-			mi := math32.PointDim(cidx, ma) // X, Y
-			ci := math32.PointDim(cidx, ca) // Y, X
-			md := li.cell(ma, mi, ci)       // X, Y
-			cd := li.cell(ca, ci, mi)       // Y, X
-			if md == nil || cd == nil {
-				break
-			}
-			mx := md.Size.Dim(ma)
-			asz := mx
-			gsum := cd.Grow.Dim(ma)
-			if gsum > 0 && exd > 0 {
-				if gr > gsum {
-					fmt.Println(fr, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
-					gr = gsum
+			// if DebugSettings.LayoutTrace {
+			// 	fmt.Println("szdn i:", i, kwb, "cidx:", cidx, "sz:", sz, "grw:", grw)
+			// }
+			for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
+				gr := grw.Dim(ma)
+				ca := ma.Other()     // cross axis = Y then X
+				exd := extra.Dim(ma) // row.X = extra width for cols; col.Y = extra height for rows in this col
+				if exd < 0 {
+					exd = 0
 				}
-				redo = true
-				asz = math32.Round(mx + exd*(gr/gsum))
-				styles.SetClampMax(&asz, ksz.Max.Dim(ma))
-				if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
-					if DebugSettings.LayoutTrace {
+				mi := math32.PointDim(cidx, ma) // X, Y
+				ci := math32.PointDim(cidx, ca) // Y, X
+				md := li.cell(ma, mi, ci)       // X, Y
+				cd := li.cell(ca, ci, mi)       // Y, X
+				if md == nil || cd == nil {
+					break
+				}
+				mx := md.Size.Dim(ma)
+				asz := mx
+				gsum := cd.Grow.Dim(ma)
+				if gsum > 0 && exd > 0 {
+					if gr > gsum {
+						fmt.Println(fr, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
+						gr = gsum
+					}
+					redo = true
+					asz = math32.Round(mx + exd*(gr/gsum))
+					oasz := asz
+					styles.SetClampMax(&asz, ksz.Max.Dim(ma))
+					if asz < oasz { // didn't consume its full amount
+						if exitr == 0 {
+							maxExtra.SetDim(ma, maxExtra.Dim(ma)+(oasz-asz))
+							exn.SetDim(ma, exn.Dim(ma)+gr)
+						}
+					} else {
+						if exitr == 1 { // get more!
+							nsum := gsum - exn.Dim(ma)
+							if nsum > 0 {
+								asz += math32.Round(maxExtra.Dim(ma) * (gr / nsum))
+							}
+						}
+					}
+					if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
+						// if DebugSettings.LayoutTrace {
 						fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
 						fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
 						fmt.Println(fr.layout.String())
 						fmt.Println(fr.layout.cellsSize())
+						// }
 					}
 				}
+				if DebugSettings.LayoutTraceDetail {
+					fmt.Println(cwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
+				}
+				ksz.Alloc.Total.SetDim(ma, asz)
 			}
-			if DebugSettings.LayoutTraceDetail {
-				fmt.Println(cwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
-			}
-			ksz.Alloc.Total.SetDim(ma, asz)
+			ksz.setContentFromTotal(&ksz.Alloc)
+			return tree.Continue
+		})
+		if exn.X == 0 && exn.Y == 0 {
+			break
 		}
-		ksz.setContentFromTotal(&ksz.Alloc)
-		return tree.Continue
-	})
+	}
 	return redo
 }
 
