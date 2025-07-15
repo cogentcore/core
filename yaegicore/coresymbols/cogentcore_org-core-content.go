@@ -10,7 +10,8 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/content/content"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"NewContent": reflect.ValueOf(content.NewContent),
+		"NewContent":      reflect.ValueOf(content.NewContent),
+		"NewPageInitFunc": reflect.ValueOf(&content.NewPageInitFunc).Elem(),
 
 		// type definitions
 		"Content": reflect.ValueOf((*content.Content)(nil)),
