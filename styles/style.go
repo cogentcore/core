@@ -103,6 +103,11 @@ type Style struct { //types:add
 	// its default value of true in most circumstances, but it can be set to false
 	// when the element is fully managed by something that is guaranteed to render the
 	// appropriate background color and/or border for the element.
+	//
+	// If you want to overlay widgets on top of each other, you might want
+	// to use RenderBox so that the widget(s) on top do not fully obscure
+	// the widgets below. (To place widgets on top of each other,
+	// set [Style.Display] = [Custom] on the parent widget).
 	RenderBox bool
 
 	// FillMargin determines is whether to fill the margin with
