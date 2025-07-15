@@ -234,7 +234,9 @@ func (sr *Slider) Init() {
 	})
 	sr.On(events.Click, func(e events.Event) {
 		pos := sr.pointToRelPos(e.Pos())
-		sr.setSliderPosEvent(pos)
+		if !sr.setSliderPosEvent(pos) {
+			sr.Send(events.Input) // always send on click even if same.
+		}
 		sr.sendChange()
 	})
 	sr.On(events.Scroll, func(e events.Event) {
@@ -401,13 +403,15 @@ func (sr *Slider) setSliderPos(pos float32) {
 
 // setSliderPosEvent sets the position of the slider at the given position in pixels,
 // and updates the corresponding Value based on that position.
-// This version sends input events.
-func (sr *Slider) setSliderPosEvent(pos float32) {
+// This version sends input events. Returns true if event sent.
+func (sr *Slider) setSliderPosEvent(pos float32) bool {
 	sr.setSliderPos(pos)
 	if math32.Abs(sr.prevSlide-sr.Value) > sr.InputThreshold {
 		sr.prevSlide = sr.Value
 		sr.Send(events.Input)
+		return true
 	}
+	return false
 }
 
 // setPosFromValue sets the slider position based on the given value
