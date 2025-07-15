@@ -5,6 +5,7 @@
 package cli
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"reflect"
@@ -12,6 +13,7 @@ import (
 
 	"slices"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
@@ -236,5 +238,6 @@ func shortestUniqueName(name string, usedNames map[string]*field) string {
 			return cur
 		}
 	}
-	return cur // TODO: this should never happen, but if it does, we might want to print an error
+	errors.Log(fmt.Errorf("cli: internal error: name %q conflicts with itself", name))
+	return cur
 }
