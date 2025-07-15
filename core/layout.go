@@ -650,17 +650,18 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 		return false
 	}
 	sz := &wb.Geom.Size
+	effmin := sz.Min
 	s := &wb.Styles
 	psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
 	got := false
 	for d := math32.X; d <= math32.Y; d++ {
 		if s.Min.Dim(d).Unit == units.UnitPw {
 			got = true
-			sz.Min.SetDim(d, psz.X*0.01*s.Min.Dim(d).Value)
+			effmin.SetDim(d, psz.X*0.01*s.Min.Dim(d).Value)
 		}
 		if s.Min.Dim(d).Unit == units.UnitPh {
 			got = true
-			sz.Min.SetDim(d, psz.Y*0.01*s.Min.Dim(d).Value)
+			effmin.SetDim(d, psz.Y*0.01*s.Min.Dim(d).Value)
 		}
 		if s.Max.Dim(d).Unit == units.UnitPw {
 			got = true
@@ -672,8 +673,8 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 		}
 	}
 	if got {
-		sz.FitSizeMax(&sz.Actual.Total, sz.Min)
-		sz.FitSizeMax(&sz.Alloc.Total, sz.Min)
+		sz.FitSizeMax(&sz.Actual.Total, effmin)
+		sz.FitSizeMax(&sz.Alloc.Total, effmin)
 		sz.setContentFromTotal(&sz.Actual)
 		sz.setContentFromTotal(&sz.Alloc)
 	}
@@ -1004,9 +1005,9 @@ func (fr *Frame) sizeFromChildrenStacked() math32.Vector2 {
 // as Actual sizes must always represent the minimums (see Position).
 // Returns true if any change in Actual size occurred.
 func (wb *WidgetBase) SizeDown(iter int) bool {
-	prel := wb.updateParentRelSizes()
+	wb.updateParentRelSizes()
 	redo := wb.sizeDownParts(iter)
-	return prel || redo
+	return redo
 }
 
 func (wb *WidgetBase) sizeDownParts(iter int) bool {
@@ -1103,7 +1104,7 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	if !fr.HasChildren() || !fr.layout.shapeCheck(fr, "SizeDown") {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
-	prel := fr.updateParentRelSizes()
+	fr.updateParentRelSizes()
 	sz := &fr.Geom.Size
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.setTotalFromContent(&sz.Alloc)
@@ -1120,11 +1121,11 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	}
 	fr.This.(Layouter).SizeDownSetAllocs(iter)
 	redo := fr.sizeDownChildren(iter)
-	if prel || redo || wrapped {
+	if redo || wrapped {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
 	}
 	fr.sizeDownParts(iter) // no std role, just get sizes
-	return chg || wrapped || redo || prel
+	return chg || wrapped || redo
 }
 
 // SizeDownSetAllocs is the key SizeDown step that sets the allocations
@@ -1451,7 +1452,7 @@ func (fr *Frame) sizeDownAllocActualStacked(iter int) {
 }
 
 func (fr *Frame) sizeDownCustom(iter int) bool {
-	prel := fr.updateParentRelSizes()
+	fr.updateParentRelSizes()
 	fr.growToAlloc()
 	sz := &fr.Geom.Size
 	if DebugSettings.LayoutTrace {
@@ -1468,7 +1469,7 @@ func (fr *Frame) sizeDownCustom(iter int) bool {
 	})
 	redo := fr.sizeDownChildren(iter)
 	fr.sizeDownParts(iter) // no std role, just get sizes
-	return prel || redo
+	return redo
 }
 
 // sizeFinalUpdateChildrenSizes can optionally be called for layouts
@@ -1568,15 +1569,13 @@ func (fr *Frame) sizeFinalChildren() {
 }
 
 // styleSizeUpdate updates styling size values for widget and its parent,
-// which should be called after these are updated.  Returns true if any changed.
+// which should be called after these are updated. Returns true if any changed.
 func (wb *WidgetBase) styleSizeUpdate() bool {
 	pwb := wb.parentWidget()
 	if pwb == nil {
 		return false
 	}
-	if !wb.updateParentRelSizes() {
-		return false
-	}
+	wb.updateParentRelSizes()
 	scsz := wb.Scene.SceneGeom.Size
 	sz := wb.Geom.Size.Alloc.Content
 	psz := pwb.Geom.Size.Alloc.Content

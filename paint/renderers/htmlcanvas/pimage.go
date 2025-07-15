@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/draw"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -24,9 +25,6 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	umask := imagex.Unwrap(pr.Mask)
 
 	nilSrc := usrc == nil
-	if r, ok := usrc.(*image.RGBA); ok && r == nil {
-		nilSrc = true
-	}
 	if pr.Rect == (image.Rectangle{}) {
 		pr.Rect = image.Rectangle{Max: rs.size.ToPoint()}
 	}
@@ -35,7 +33,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	// Fast path for [image.Uniform]
 	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
-		if u.C == colors.Transparent {
+		if u == nil || u.C == colors.Transparent {
 			rs.ctx.Call("clearRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		} else {
 			rs.ctx.Set("fillStyle", rs.imageToStyle(u))
@@ -52,16 +50,17 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	}
 
 	ji := pr.Source.(*imagex.JSRGBA)
+	if ji.JS.Bitmap.IsNull() || ji.JS.Bitmap.IsUndefined() {
+		errors.Log(errors.New("htmlcanvas.pimage: nil JS bitmap in image"))
+		return
+	}
 
 	sbb := pr.Source.Bounds()
 	sw := min(pr.Rect.Dx(), sbb.Dx())
 	sh := min(pr.Rect.Dy(), sbb.Dy())
 	// fmt.Println(pr.Cmd, pr.Rect, pr.Op, pr.SourcePos, sw, sh, sbb)
 
-	// origin := m.Dot(canvas.Point{0, float64(img.Bounds().Size().Y)}).Mul(rs.dpm)
-	// m = m.Scale(rs.dpm, rs.dpm)
-	// rs.ctx.Call("setTransform", m[0][0], m[0][1], m[1][0], m[1][1], origin.X, rs.height-origin.Y)
-	if pr.Op == draw.Over {
+	if pr.Op == draw.Over || (ji.JS.Data.IsUndefined() || ji.JS.Data.IsNull()) {
 		rs.ctx.Call("drawImage", ji.JS.Bitmap, pr.SourcePos.X, pr.SourcePos.Y, sw, sh, pr.Rect.Min.X, pr.Rect.Min.Y, sw, sh)
 	} else {
 		rs.ctx.Call("putImageData", ji.JS.Data, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)

@@ -176,6 +176,7 @@ func init() {
 		"Troff":               reflect.ValueOf(fileinfo.Troff),
 		"TrueType":            reflect.ValueOf(fileinfo.TrueType),
 		"Tsv":                 reflect.ValueOf(fileinfo.Tsv),
+		"TypeScript":          reflect.ValueOf(fileinfo.TypeScript),
 		"Unknown":             reflect.ValueOf(fileinfo.Unknown),
 		"UnknownCategory":     reflect.ValueOf(fileinfo.UnknownCategory),
 		"Uri":                 reflect.ValueOf(fileinfo.Uri),
