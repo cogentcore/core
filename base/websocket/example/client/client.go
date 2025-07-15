@@ -32,6 +32,8 @@ func main() {
 	list.SetSlice(&msgs).SetReadOnly(true)
 
 	ws.OnMessage(func(typ websocket.MessageTypes, msg []byte) {
+		list.AsyncLock()
+		defer list.AsyncUnlock()
 		msgs = append(msgs, string(msg))
 		list.Update()
 	})
