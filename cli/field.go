@@ -238,6 +238,6 @@ func shortestUniqueName(name string, usedNames map[string]*field) string {
 			return cur
 		}
 	}
-	errors.Log(fmt.Errorf("cli: internal error: name %q conflicts with itself", name))
+	errors.Log(fmt.Errorf("cli: unexpected error: name %q conflicts with itself", name))
 	return cur
 }
