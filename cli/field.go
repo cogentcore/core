@@ -167,8 +167,8 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 				ofns := of.Field.Tag.Get("nest")
 
 				// whether new and other get to have non-nested version
-				nfn := nfns == "-" || nfns == "false"
-				ofn := ofns == "-" || ofns == "false"
+				nfn := nfns == "-"
+				ofn := ofns == "-"
 
 				if nfn && ofn {
 					slog.Error(`programmer error: cli: nest:"-" specified on two config fields with the same name; keep nest:"-" on the field you want to be able to access without nesting and remove it from the other one`, "name", name, "field0", of.Name, "field1", nf.Name, "exampleFlagWithoutNesting", "-"+name, "exampleFlagWithNesting", "-"+strcase.ToKebab(nf.Name))
@@ -197,7 +197,7 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 			} else {
 				// if no conflict, we get the name
 				nfns := nf.Field.Tag.Get("nest")
-				if nfns == "+" || nfns == "true" {
+				if nfns == "+" {
 					applyShortestUniqueName(nf, i, usedNames)
 				}
 				usedNames[name] = nf
