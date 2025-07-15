@@ -477,6 +477,13 @@ func (tx *Text) SizeDown(iter int) bool {
 	return chg
 }
 
+// todo: could enable this if we see any stragglers
+// func (tx *Text) SizeFinal() {
+// 	tx.WidgetBase.SizeFinal()
+// 	asz := tx.Geom.Size.Actual.Content
+// 	tx.configTextAlloc(asz)
+// }
+
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
 	tx.Scene.Painter.DrawText(tx.paintText, tx.Geom.Pos.Content)

@@ -248,7 +248,7 @@ func TestParentRelativeSizeSplits(t *testing.T) {
 		s.Direction = styles.Row
 	})
 	splitFrame.SetSplits(20, 60, 20)
-
+	//
 	firstFrame := NewFrame(splitFrame)
 	firstFrame.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
@@ -261,6 +261,7 @@ func TestParentRelativeSizeSplits(t *testing.T) {
 	centerFrame := NewFrame(splitFrame)
 	centerFrame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
 		//s.Overflow.Set(styles.OverflowHidden)
 	})
 
@@ -281,7 +282,7 @@ func TestParentRelativeSizeSplits(t *testing.T) {
 		s.Border.Width.Set(units.Dp(4))
 		s.Overflow.Set(styles.OverflowScroll)
 	})
-
+	//
 	// represents content that will be too large for this frame, user will need to scroll this on both
 	// axes to interact with it correctly
 	internalCenter := NewFrame(centerContentArea)
@@ -290,7 +291,7 @@ func TestParentRelativeSizeSplits(t *testing.T) {
 		s.CenterAll()
 	})
 	NewText(internalCenter).SetText("Content in center frame")
-
+	//
 	lastFrame := NewFrame(splitFrame)
 	lastFrame.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
