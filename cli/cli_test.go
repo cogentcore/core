@@ -378,3 +378,31 @@ func TestConfigOpen(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+type testRootConfig struct {
+	Run testRunConfig
+}
+
+type testRunConfig struct {
+	Run   int
+	Debug bool `nest:"+"`
+	Log   bool
+}
+
+func TestNestedConfig(t *testing.T) {
+	cfg := &testRootConfig{}
+	fs := &fields{}
+	addFields(cfg, fs, "")
+
+	expected := [][]string{
+		{"Run.Run"},
+		{"Run.Debug"},
+		{"Log", "Run.Log"},
+		{"Run"},
+	}
+
+	for i, kv := range fs.Order {
+		field := kv.Value
+		assert.Equal(t, expected[i], field.Names, "index=%d", i)
+	}
+}

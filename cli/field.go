@@ -165,8 +165,8 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 				ofns := of.Field.Tag.Get("nest")
 
 				// whether new and other get to have non-nested version
-				nfn := nfns == "-" || nfns == "false"
-				ofn := ofns == "-" || ofns == "false"
+				nfn := nfns == "-"
+				ofn := ofns == "-"
 
 				if nfn && ofn {
 					slog.Error(`programmer error: cli: nest:"-" specified on two config fields with the same name; keep nest:"-" on the field you want to be able to access without nesting and remove it from the other one`, "name", name, "field0", of.Name, "field1", nf.Name, "exampleFlagWithoutNesting", "-"+name, "exampleFlagWithNesting", "-"+strcase.ToKebab(nf.Name))
@@ -193,8 +193,14 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 					applyShortestUniqueName(nf, i, usedNames)
 				}
 			} else {
-				// if no conflict, we get the name
-				usedNames[name] = nf
+				// if no conflict, we get the name, unless we are forcing
+				// nesting, in which case we only get it if it is our full name
+				nfns := nf.Field.Tag.Get("nest")
+				if nfns == "+" && name != nf.Name {
+					nf.Names = slices.Delete(nf.Names, i, i+1) // TODO: is it safe to delete while iterating like this?
+				} else {
+					usedNames[name] = nf
+				}
 			}
 		}
 		allFields.Add(name, nf)
@@ -206,8 +212,9 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 // used names, at the given index.
 func applyShortestUniqueName(field *field, idx int, usedNames map[string]*field) {
 	nm := shortestUniqueName(field.Name, usedNames)
-	// if we already have this name, we don't need to add it, so we just delete this entry
-	if slices.Contains(field.Names, nm) {
+	// if we already have this name, we don't need to add it, so we just delete
+	// this entry (unless this entry is the shortest unique name)
+	if slices.Contains(field.Names, nm) && field.Names[idx] != nm {
 		field.Names = slices.Delete(field.Names, idx, idx+1)
 	} else {
 		field.Names[idx] = nm
@@ -232,5 +239,8 @@ func shortestUniqueName(name string, usedNames map[string]*field) string {
 			return cur
 		}
 	}
-	return cur // TODO: this should never happen, but if it does, we might want to print an error
+	// It is actually expected for this to happen, for example, when there is
+	// a Run struct with a Run field inside it (see TestNestedConfig).
+	// errors.Log(fmt.Errorf("cli: unexpected error: name %q conflicts with itself", name))
+	return cur
 }
