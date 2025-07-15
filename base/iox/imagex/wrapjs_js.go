@@ -11,6 +11,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors/gradient"
 	"github.com/cogentcore/webgpu/jsx"
 )
 
@@ -30,6 +31,8 @@ func WrapJS(src image.Image) image.Image {
 	case *image.NRGBA:
 		return NewJSRGBA(x, nil)
 	case *image.Uniform:
+		return src
+	case gradient.Gradient:
 		return src
 	default:
 		return NewJSRGBA(AsRGBA(src), nil)
@@ -197,6 +200,8 @@ func (im *JSImageData) Set(src image.Image) {
 		im.SetNRGBA(x)
 	case *image.Uniform:
 		errors.Log(errors.New("imagex.JSImageData: setting image to Uniform not supported"))
+	case gradient.Gradient:
+		errors.Log(errors.New("imagex.JSImageData: setting image to Gradient not supported"))
 	default:
 		im.SetRGBA(AsRGBA(ui))
 	}
