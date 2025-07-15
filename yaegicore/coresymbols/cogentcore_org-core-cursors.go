@@ -3,9 +3,8 @@
 package coresymbols
 
 import (
-	"reflect"
-
 	"cogentcore.org/core/cursors"
+	"reflect"
 )
 
 func init() {
@@ -48,9 +47,9 @@ func init() {
 		"ResizeSW":            reflect.ValueOf(cursors.ResizeSW),
 		"ResizeUp":            reflect.ValueOf(cursors.ResizeUp),
 		"ResizeW":             reflect.ValueOf(cursors.ResizeW),
+		"SVG":                 reflect.ValueOf(cursors.SVG),
 		"ScreenshotSelection": reflect.ValueOf(cursors.ScreenshotSelection),
 		"ScreenshotWindow":    reflect.ValueOf(cursors.ScreenshotWindow),
-		"SVG":                 reflect.ValueOf(cursors.SVG),
 		"Text":                reflect.ValueOf(cursors.Text),
 		"VerticalText":        reflect.ValueOf(cursors.VerticalText),
 		"Wait":                reflect.ValueOf(cursors.Wait),
