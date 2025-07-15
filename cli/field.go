@@ -195,12 +195,14 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 					applyShortestUniqueName(nf, i, usedNames)
 				}
 			} else {
-				// if no conflict, we get the name
+				// if no conflict, we get the name, unless we are forcing
+				// nesting, in which case we only get it if it is our full name
 				nfns := nf.Field.Tag.Get("nest")
-				if nfns == "+" {
-					applyShortestUniqueName(nf, i, usedNames)
+				if nfns == "+" && name != nf.Name {
+					nf.Names = slices.Delete(nf.Names, i, i+1) // TODO: is it safe to delete while iterating like this?
+				} else {
+					usedNames[name] = nf
 				}
-				usedNames[name] = nf
 			}
 		}
 		allFields.Add(name, nf)
