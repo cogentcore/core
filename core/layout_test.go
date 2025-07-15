@@ -340,137 +340,44 @@ func TestCustomLayoutButton(t *testing.T) {
 }
 
 func TestLayoutMaxGrow(t *testing.T) { // issue #1557
-	b := NewBody()
-	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(400), units.Dp(50))
-	})
-	container := NewFrame(b)
-	container.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(4))
-	})
+	names := []string{"none", "first", "two", "all"}
+	for i, name := range names {
+		b := NewBody()
+		b.Styler(func(s *styles.Style) {
+			s.Min.Set(units.Dp(400), units.Dp(50))
+		})
+		container := NewFrame(b)
+		container.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			s.Border.Width.Set(units.Dp(4))
+		})
 
-	firstPane := NewFrame(container)
-	firstPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		// s.Max.X.Dp(50)
-	})
+		firstPane := NewFrame(container)
+		firstPane.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			s.Border.Width.Set(units.Dp(2))
+			if i >= 1 {
+				s.Max.X.Dp(50)
+			}
+		})
 
-	secondPane := NewFrame(container)
-	secondPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		// s.Max.X.Dp(50)
-	})
+		secondPane := NewFrame(container)
+		secondPane.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			s.Border.Width.Set(units.Dp(2))
+			if i == 3 {
+				s.Max.X.Dp(50)
+			}
+		})
 
-	thirdPane := NewFrame(container)
-	thirdPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		// s.Max.X.Dp(50)
-	})
-	b.AssertRender(t, "layout/maxgrow/none")
-}
-
-func TestLayoutMaxGrowFirst(t *testing.T) { // issue #1557
-	b := NewBody()
-	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(400), units.Dp(50))
-	})
-	container := NewFrame(b)
-	container.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(4))
-	})
-
-	firstPane := NewFrame(container)
-	firstPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		s.Max.X.Dp(50)
-	})
-
-	secondPane := NewFrame(container)
-	secondPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		// s.Max.X.Dp(50)
-	})
-
-	thirdPane := NewFrame(container)
-	thirdPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		// s.Max.X.Dp(50)
-	})
-	b.AssertRender(t, "layout/maxgrow/first")
-}
-
-func TestLayoutMaxGrowTwo(t *testing.T) { // issue #1557
-	b := NewBody()
-	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(400), units.Dp(50))
-	})
-	container := NewFrame(b)
-	container.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(4))
-	})
-
-	firstPane := NewFrame(container)
-	firstPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		s.Max.X.Dp(50)
-	})
-
-	secondPane := NewFrame(container)
-	secondPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		// s.Max.X.Dp(50)
-	})
-
-	thirdPane := NewFrame(container)
-	thirdPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		s.Max.X.Dp(50)
-	})
-	b.AssertRender(t, "layout/maxgrow/two")
-}
-
-func TestLayoutMaxGrowAll(t *testing.T) { // issue #1557
-	b := NewBody()
-	b.Styler(func(s *styles.Style) {
-		s.Min.Set(units.Dp(400), units.Dp(50))
-	})
-	container := NewFrame(b)
-	container.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(4))
-	})
-
-	firstPane := NewFrame(container)
-	firstPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		s.Max.X.Dp(50)
-	})
-
-	secondPane := NewFrame(container)
-	secondPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		s.Max.X.Dp(50)
-	})
-
-	thirdPane := NewFrame(container)
-	thirdPane.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.Border.Width.Set(units.Dp(2))
-		s.Max.X.Dp(50)
-	})
-	b.AssertRender(t, "layout/maxgrow/all")
+		thirdPane := NewFrame(container)
+		thirdPane.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			s.Border.Width.Set(units.Dp(2))
+			if i >= 2 {
+				s.Max.X.Dp(50)
+			}
+		})
+		b.AssertRender(t, "layout/maxgrow/"+name)
+	}
 }
