@@ -5,7 +5,6 @@
 package cli
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"reflect"
@@ -13,7 +12,6 @@ import (
 
 	"slices"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
@@ -241,6 +239,8 @@ func shortestUniqueName(name string, usedNames map[string]*field) string {
 			return cur
 		}
 	}
-	errors.Log(fmt.Errorf("cli: unexpected error: name %q conflicts with itself", name))
+	// It is actually expected for this to happen, for example, when there is
+	// a Run struct with a Run field inside it (see TestNestedConfig).
+	// errors.Log(fmt.Errorf("cli: unexpected error: name %q conflicts with itself", name))
 	return cur
 }
