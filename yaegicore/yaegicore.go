@@ -126,11 +126,11 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 
 		parent.DeleteChildren()
 		str := ed.Lines.String()
-		// code must be in a function for declarations to be handled correctly
-		// (the author can place a main function around a block of code and have
-		// declarations outside of it, but if there is no main function, we put
-		// everything in one so the code runs).
-		if !strings.Contains(str, "func main()") {
+		// Go code must be in a function for type declarations to be handled
+		// correctly (the author can place a main function around a block of code
+		// and have declarations outside of it, but if there is no main function,
+		// we put everything in one so the code runs). This causes problems in Goal.
+		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
 		interpOutput.Reset()
