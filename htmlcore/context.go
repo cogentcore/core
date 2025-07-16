@@ -217,12 +217,13 @@ func (c *Context) addStyle(style string) {
 // open the given link when clicked on, using [Context.OpenURL].
 // The advantage of using this is that it does [tree.NodeBase.SetProperty]
 // of "href" to the given url, allowing generatehtml to create an <a> element
-// for HTML preview and SEO purposes.
+// for HTML preview and SEO purposes. It also sets the tooltip to the URL.
 //
 // See also [Context.LinkButtonUpdating] for a dynamic version.
 func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
 	bt.SetProperty("tag", "a")
 	bt.SetProperty("href", url)
+	bt.SetTooltip(url)
 	bt.OnClick(func(e events.Event) {
 		c.OpenURL(url)
 	})
@@ -234,7 +235,9 @@ func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
 func (c *Context) LinkButtonUpdating(bt *core.Button, url func() string) *core.Button {
 	bt.SetProperty("tag", "a")
 	bt.Updater(func() {
-		bt.SetProperty("href", url())
+		u := url()
+		bt.SetProperty("href", u)
+		bt.SetTooltip(u)
 	})
 	bt.OnClick(func(e events.Event) {
 		c.OpenURL(url())
