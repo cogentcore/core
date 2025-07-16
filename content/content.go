@@ -433,6 +433,8 @@ func (ct *Content) makeCategories() {
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.Open(catPage.URL)
+			} else {
+				catTree.Open() // no page to open so open the tree
 			}
 		})
 		for _, pg := range ct.pagesByCategory[cat] {
