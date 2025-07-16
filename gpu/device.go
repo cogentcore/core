@@ -49,6 +49,7 @@ func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// note: these limits are being processed and allow the MaxBufferSize to be the
 	// controlling factor -- if we don't set these, then the slrand example doesn't
 	// work above a smaller limit.
+	// TODO: converting these limits to int may cause issues on 32-bit systems
 	limits.MaxUniformBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxUniformBufferBindingSize), int(gpu.Limits.Limits.MinUniformBufferOffsetAlignment)))
 
 	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
