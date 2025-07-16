@@ -14,4 +14,4 @@ The `Platform` type enumerates these supported platforms and should be used to c
 
 ## IMPORTANT
 
-After making any changes to `GoNativeActivity.java` in the Android driver, you **need** to run go generate in [../cmd/core/mobile](../cmd/core/mobile) and reinstall the core tool.
+After making any changes to `GoNativeActivity.java` in the Android driver, you **need** to run go generate in [../cmd/mobile](../cmd/mobile) and reinstall the core tool.
