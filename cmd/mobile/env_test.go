@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/cmd/config"
 )
 
 func TestNdkRoot(t *testing.T) {

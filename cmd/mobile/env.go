@@ -15,8 +15,8 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
-	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/cmd/core/mobile/sdkpath"
+	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/mobile/sdkpath"
 )
 
 // General mobile build environment. Initialized by envInit.

@@ -30,7 +30,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/cmd/core/mobile/sdkpath"
+	"cogentcore.org/core/cmd/mobile/sdkpath"
 )
 
 var outfile = flag.String("o", "", "result will be written file")

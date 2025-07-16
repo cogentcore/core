@@ -11,9 +11,9 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
-	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/cmd/core/mobile"
-	"cogentcore.org/core/cmd/core/web"
+	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/mobile"
+	"cogentcore.org/core/cmd/web"
 )
 
 // Run builds and runs the config package. It also displays the logs generated

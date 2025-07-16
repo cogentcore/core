@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/base/ordmap"
-	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/cmd/config"
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/types/typegen"

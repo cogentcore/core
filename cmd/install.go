@@ -11,8 +11,8 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/base/exec"
-	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/cmd/core/mobile"
+	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/mobile"
 )
 
 // Install installs the package on the local system.

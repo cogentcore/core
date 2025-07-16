@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/logx"
-	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/cmd/config"
 )
 
 // Serve serves the build output directory on the default network address at the config port.

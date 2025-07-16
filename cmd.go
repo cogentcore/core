@@ -8,9 +8,9 @@ package main
 
 import (
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/cmd/core/cmd"
-	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/cmd/core/generate"
+	"cogentcore.org/core/cmd"
+	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/generate"
 )
 
 func main() {

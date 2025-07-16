@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/cmd/config"
 )
 
 // iconData contains the data for an icon

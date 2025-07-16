@@ -17,7 +17,7 @@ import (
 	"os"
 	"strconv"
 
-	"cogentcore.org/core/cmd/core/mobile/binres"
+	"cogentcore.org/core/cmd/mobile/binres"
 )
 
 const tmpl = `// Copyright 2016 The Go Authors.  All rights reserved.

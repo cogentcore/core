@@ -12,7 +12,7 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/base/elide"
-	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/cmd/config"
 	"cogentcore.org/core/content/bcontent"
 	strip "github.com/grokify/html-strip-tags-go"
 )

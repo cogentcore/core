@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/exec"
-	"cogentcore.org/core/cmd/core/config"
+	"cogentcore.org/core/cmd/config"
 )
 
 // Install installs the app named by the import path on the attached mobile device.

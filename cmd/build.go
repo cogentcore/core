@@ -15,9 +15,9 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/exec"
-	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/cmd/core/mobile"
-	"cogentcore.org/core/cmd/core/web"
+	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/mobile"
+	"cogentcore.org/core/cmd/web"
 )
 
 // Build builds an executable for the package

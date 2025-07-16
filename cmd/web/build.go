@@ -17,8 +17,8 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/iox/jsonx"
-	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/cmd/core/rendericon"
+	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/rendericon"
 	"cogentcore.org/core/content/bcontent"
 	strip "github.com/grokify/html-strip-tags-go"
 )
