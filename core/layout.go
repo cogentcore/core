@@ -313,6 +313,9 @@ func (lc *layoutCells) cellsSize() math32.Vector2 {
 		sum := float32(0)
 		for mi := 0; mi < n; mi++ {
 			md := lc.cell(ma, mi) // X, Y
+			if md == nil {
+				continue
+			}
 			mx := md.Size.Dim(ma)
 			sum += mx // sum of maxes
 		}
@@ -949,7 +952,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			md := li.cell(ma, mi, ci) // X, Y
 			cd := li.cell(ca, ci, mi) // Y, X
 			if md == nil || cd == nil {
-				break
+				continue
 			}
 			msz := sz.Dim(ma) // main axis size dim: X, Y
 			mx := md.Size.Dim(ma)
@@ -987,6 +990,9 @@ func (fr *Frame) sizeFromChildrenStacked() math32.Vector2 {
 		kgrw := kwb.Styles.Grow
 		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
 			md := li.cell(ma, 0, 0)
+			if md == nil {
+				continue
+			}
 			md.Size = ksz
 			md.Grow = kgrw
 		}
@@ -1252,7 +1258,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				md := li.cell(ma, mi, ci)       // X, Y
 				cd := li.cell(ca, ci, mi)       // Y, X
 				if md == nil || cd == nil {
-					break
+					continue
 				}
 				mx := md.Size.Dim(ma)
 				asz := mx
@@ -1280,12 +1286,12 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 						}
 					}
 					if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
-						// if DebugSettings.LayoutTrace {
-						fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
-						fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
-						fmt.Println(fr.layout.String())
-						fmt.Println(fr.layout.cellsSize())
-						// }
+						if DebugSettings.LayoutTrace {
+							fmt.Println(fr, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
+							fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
+							fmt.Println(fr.layout.String())
+							fmt.Println(fr.layout.cellsSize())
+						}
 					}
 				}
 				if DebugSettings.LayoutTraceDetail {
@@ -1420,6 +1426,9 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 			mi := math32.PointDim(cidx, ma)  // X, Y
 			ci := math32.PointDim(cidx, ca)  // Y, X
 			md := fr.layout.cell(ma, mi, ci) // X, Y
+			if md == nil {
+				continue
+			}
 			asz := md.Size.Dim(ma)
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
