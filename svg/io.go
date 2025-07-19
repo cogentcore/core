@@ -1035,7 +1035,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
 	case *Image:
-		if nd.Pixels == nil {
+		if nd.Pixels.Image == nil {
 			return ""
 		}
 		nm = "image"
@@ -1044,7 +1044,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
-		ib, fmt := imagex.ToBase64PNG(nd.Pixels)
+		ib, fmt := imagex.ToBase64PNG(nd.Pixels.Image)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
 		if strings.HasPrefix(nd.Name, "namedview") {

@@ -13,6 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testObj struct {
+	Name    string
+	Image   *JSON
+	Another string
+}
+
 func testImage() *image.RGBA {
 	im := image.NewRGBA(image.Rect(0, 0, 16, 16))
 	for y := range 16 {
@@ -67,5 +73,23 @@ func TestJSON(t *testing.T) {
 	ri := nsi.Image.(*image.RGBA)
 
 	assert.Equal(t, im, ri)
-	assert.Equal(t, im.Pix, ri.Pix)
+
+	bounds, content, _, _, _, _ := ImagesEqual(im, ri, 1)
+	assert.Equal(t, true, bounds)
+	assert.Equal(t, true, content)
+
+	jo := &testObj{Name: "testy", Another: "guy"}
+	jo.Image = NewJSON(im)
+
+	b, err = json.Marshal(jo)
+	assert.NoError(t, err)
+
+	no := &testObj{}
+	err = json.Unmarshal(b, no)
+	assert.NoError(t, err)
+
+	assert.Equal(t, jo, no)
+	bounds, content, _, _, _, _ = ImagesEqual(jo.Image.Image, no.Image.Image, 1)
+	assert.Equal(t, true, bounds)
+	assert.Equal(t, true, content)
 }

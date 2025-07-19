@@ -12,8 +12,11 @@ import (
 // JSON is a wrapper around an [image.Image] that defines JSON
 // Marshal and Unmarshal methods, so that the image will automatically
 // be properly saved / loaded when used as a struct field, for example.
+// Must be a pointer type to support custom unmarshal function.
+// The original image is not anonymously embedded so that you have to
+// extract it, otherwise it will be processed inefficiently.
 type JSON struct {
-	image.Image
+	Image image.Image
 }
 
 // JSONEncoded is a representation of an image encoded into a byte stream,
@@ -22,6 +25,12 @@ type JSONEncoded struct {
 	Width  int
 	Height int
 	Image  []byte
+}
+
+// NewJSON returns a new JSON wrapper around given image,
+// to support automatic wrapping and unwrapping.
+func NewJSON(im image.Image) *JSON {
+	return &JSON{Image: im}
 }
 
 func (js *JSON) MarshalJSON() ([]byte, error) {

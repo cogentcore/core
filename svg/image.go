@@ -31,8 +31,9 @@ type Image struct {
 	// how to scale and align the image
 	ViewBox ViewBox `xml:"viewbox"`
 
-	// Pixels are the image pixels, which has imagex.WrapJS already applied.
-	Pixels image.Image `xml:"-" json:"-" display:"-"`
+	// Pixels are the image pixels, which has imagex.WrapJS already applied,
+	// and has JSON marshal / unmarshal abilities for copy / paste of element.
+	Pixels *imagex.JSON `xml:"-" display:"-" set:"-"`
 }
 
 func (g *Image) SVGName() string { return "image" }
@@ -51,11 +52,11 @@ func (g *Image) pixelsOfSize(nwsz image.Point) image.Image {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return nil
 	}
-	if g.Pixels != nil && g.Pixels.Bounds().Size() == nwsz {
-		return g.Pixels
+	if g.Pixels != nil && g.Pixels.Image != nil && g.Pixels.Image.Bounds().Size() == nwsz {
+		return g.Pixels.Image
 	}
-	g.Pixels = imagex.WrapJS(image.NewRGBA(image.Rectangle{Max: nwsz}))
-	return g.Pixels
+	g.Pixels = imagex.NewJSON(imagex.WrapJS(image.NewRGBA(image.Rectangle{Max: nwsz})))
+	return g.Pixels.Image
 }
 
 // SetImage sets an image for the bitmap, and resizes to the size of the image
@@ -69,7 +70,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		cp := imagex.CloneAsRGBA(img)
-		g.Pixels = imagex.WrapJS(cp)
+		g.Pixels = imagex.NewJSON(imagex.WrapJS(cp))
 		if g.Size.X == 0 && g.Size.Y == 0 {
 			g.Size = math32.FromPoint(sz)
 		}
@@ -98,11 +99,11 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 }
 
 func (g *Image) DrawImage(sv *SVG) {
-	if g.Pixels == nil {
+	if g.Pixels == nil || g.Pixels.Image == nil {
 		return
 	}
 	pc := g.Painter(sv)
-	pc.DrawImageScaled(g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+	pc.DrawImageScaled(g.Pixels.Image, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
 func (g *Image) LocalBBox(sv *SVG) math32.Box2 {
@@ -151,8 +152,8 @@ func (g *Image) OpenImage(filename string, width, height float32) error {
 
 // SaveImage saves current image to a file
 func (g *Image) SaveImage(filename string) error {
-	if g.Pixels == nil {
+	if g.Pixels == nil || g.Pixels.Image == nil {
 		return errors.New("svg.SaveImage Pixels is nil")
 	}
-	return imagex.Save(g.Pixels, filename)
+	return imagex.Save(g.Pixels.Image, filename)
 }
