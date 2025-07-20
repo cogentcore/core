@@ -1035,7 +1035,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
 	case *Image:
-		if nd.Pixels.Image == nil {
+		if nd.Pixels == nil || nd.Pixels.Image == nil {
 			return ""
 		}
 		nm = "image"
