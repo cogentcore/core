@@ -198,7 +198,7 @@ func (tb *Toolbar) setOverflowMenuVisibility() {
 		tb.overflowButton.SetState(true, states.Invisible)
 	} else {
 		tb.overflowButton.SetState(false, states.Invisible)
-		tb.overflowButton.Update()
+		tb.overflowButton.UpdateRender()
 	}
 }
 
