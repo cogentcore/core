@@ -5,6 +5,7 @@
 package imagex
 
 import (
+	"bytes"
 	"encoding/json"
 	"image"
 )
@@ -24,7 +25,10 @@ type JSON struct {
 type JSONEncoded struct {
 	Width  int
 	Height int
-	Image  []byte
+
+	// Image is the encoded byte stream, which will be encoded in JSON
+	// using Base64
+	Image []byte
 }
 
 // NewJSON returns a new JSON wrapper around given image,
@@ -39,7 +43,9 @@ func (js *JSON) MarshalJSON() ([]byte, error) {
 		sz := js.Image.Bounds().Size()
 		id.Width = sz.X
 		id.Height = sz.Y
-		id.Image, _ = ToBase64PNG(js.Image)
+		ibuf := &bytes.Buffer{}
+		Write(js.Image, ibuf, PNG)
+		id.Image = ibuf.Bytes()
 	}
 	return json.Marshal(id)
 }
@@ -51,7 +57,7 @@ func (js *JSON) UnmarshalJSON(b []byte) error {
 		js.Image = nil
 		return err
 	}
-	im, err := FromBase64PNG(id.Image)
+	im, _, err := image.Decode(bytes.NewReader(id.Image))
 	if err != nil {
 		js.Image = nil
 		return err

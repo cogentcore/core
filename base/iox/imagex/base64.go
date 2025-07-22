@@ -7,34 +7,23 @@ package imagex
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"image"
-	"image/jpeg"
-	"image/png"
-	"log"
 	"strings"
+
+	"cogentcore.org/core/base/errors"
 )
 
-// ToBase64PNG returns bytes of image encoded as a PNG in Base64 format
-// with "image/png" mimetype returned
-func ToBase64PNG(img image.Image) ([]byte, string) {
-	ibuf := &bytes.Buffer{}
-	png.Encode(ibuf, img)
-	ib := ibuf.Bytes()
-	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
-	base64.StdEncoding.Encode(eb, ib)
-	return eb, "image/png"
-}
+// todo: pass format
 
-// ToBase64JPG returns bytes image encoded as a JPG in Base64 format
-// with "image/jpeg" mimetype returned
-func ToBase64JPG(img image.Image) ([]byte, string) {
+// ToBase64 returns bytes of image encoded in given format,
+// in Base64 encoding with "image/format" mimetype returned
+func ToBase64(img image.Image, f Formats) ([]byte, string) {
 	ibuf := &bytes.Buffer{}
-	jpeg.Encode(ibuf, img, &jpeg.Options{Quality: 90})
+	Write(img, ibuf, f)
 	ib := ibuf.Bytes()
 	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
 	base64.StdEncoding.Encode(eb, ib)
-	return eb, "image/jpeg"
+	return eb, "image/" + strings.ToLower(f.String())
 }
 
 // Base64SplitLines splits the encoded Base64 bytes into standard lines of 76
@@ -58,44 +47,15 @@ func Base64SplitLines(b []byte) []byte {
 	return rb
 }
 
-// FromBase64PNG returns image from Base64-encoded bytes in PNG format
-func FromBase64PNG(eb []byte) (image.Image, error) {
+// FromBase64 returns image from Base64-encoded bytes
+func FromBase64(eb []byte) (image.Image, Formats, error) {
 	if eb[76] == ' ' {
 		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
 	}
 	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
 	_, err := base64.StdEncoding.Decode(db, eb)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		return nil, None, errors.Log(err)
 	}
-	rb := bytes.NewReader(db)
-	return png.Decode(rb)
-}
-
-// FromBase64JPG returns image from Base64-encoded bytes in PNG format
-func FromBase64JPG(eb []byte) (image.Image, error) {
-	if eb[76] == ' ' {
-		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
-	}
-	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
-	_, err := base64.StdEncoding.Decode(db, eb)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	rb := bytes.NewReader(db)
-	return jpeg.Decode(rb)
-}
-
-// FromBase64 returns image from Base64-encoded bytes in either PNG or JPEG format
-// based on fmt which must end in either png, jpg, or jpeg
-func FromBase64(fmt string, eb []byte) (image.Image, error) {
-	if strings.HasSuffix(fmt, "png") {
-		return FromBase64PNG(eb)
-	}
-	if strings.HasSuffix(fmt, "jpg") || strings.HasSuffix(fmt, "jpeg") {
-		return FromBase64JPG(eb)
-	}
-	return nil, errors.New("image format must be either png or jpeg")
+	return Read(bytes.NewReader(db))
 }

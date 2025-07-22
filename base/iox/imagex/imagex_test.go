@@ -42,21 +42,23 @@ func TestSave(t *testing.T) {
 
 func TestBase64(t *testing.T) {
 	im := testImage()
-	b, mime := ToBase64PNG(im)
+	b, mime := ToBase64(im, PNG)
 	assert.Equal(t, "image/png", mime)
-	bim, err := FromBase64PNG(b)
+	bim, f, err := FromBase64(b)
 	assert.NoError(t, err)
+	assert.Equal(t, PNG, f)
 	bounds, content, _, _, _, _ := ImagesEqual(im, bim, 1)
-	assert.Equal(t, true, bounds)
-	assert.Equal(t, true, content)
+	assert.True(t, bounds)
+	assert.True(t, content)
 
-	b, mime = ToBase64JPG(im)
+	b, mime = ToBase64(im, JPEG)
 	assert.Equal(t, "image/jpeg", mime)
-	bim, err = FromBase64JPG(b)
+	bim, f, err = FromBase64(b)
 	assert.NoError(t, err)
+	assert.Equal(t, JPEG, f)
 	bounds, content, _, _, _, _ = ImagesEqual(im, bim, 20)
-	assert.Equal(t, true, bounds)
-	assert.Equal(t, true, content)
+	assert.True(t, bounds)
+	assert.True(t, content)
 }
 
 func TestJSON(t *testing.T) {
@@ -75,8 +77,8 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, im, ri)
 
 	bounds, content, _, _, _, _ := ImagesEqual(im, ri, 1)
-	assert.Equal(t, true, bounds)
-	assert.Equal(t, true, content)
+	assert.True(t, bounds)
+	assert.True(t, content)
 
 	jo := &testObj{Name: "testy", Another: "guy"}
 	jo.Image = NewJSON(im)
@@ -90,6 +92,6 @@ func TestJSON(t *testing.T) {
 
 	assert.Equal(t, jo, no)
 	bounds, content, _, _, _, _ = ImagesEqual(jo.Image.Image, no.Image.Image, 1)
-	assert.Equal(t, true, bounds)
-	assert.Equal(t, true, content)
+	assert.True(t, bounds)
+	assert.True(t, content)
 }
