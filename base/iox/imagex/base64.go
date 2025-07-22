@@ -13,8 +13,6 @@ import (
 	"cogentcore.org/core/base/errors"
 )
 
-// todo: pass format
-
 // ToBase64 returns bytes of image encoded in given format,
 // in Base64 encoding with "image/format" mimetype returned
 func ToBase64(img image.Image, f Formats) ([]byte, string) {
