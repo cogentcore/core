@@ -81,7 +81,7 @@ func EmbedImage(c *Config) error {
 	if err != nil {
 		return err
 	}
-	sz := img.Pixels.Bounds().Size()
+	sz := img.Pixels.Image.Bounds().Size()
 	sv.Root.ViewBox.Size.SetPoint(sz)
 	if c.Output == "" {
 		c.Output = strings.TrimSuffix(c.Input, filepath.Ext(c.Input)) + ".svg"
