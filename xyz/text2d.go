@@ -109,6 +109,9 @@ func (txt *Text2D) RenderText() {
 	if sty.FillColor() == nil {
 		txt.usesDefaultColor = true
 	}
+	if txt.usesDefaultColor {
+		tsty.Color = colors.ToUniform(colors.Scheme.OnSurface)
+	}
 	sz := math32.Vec2(10000, 1000) // just a big size
 	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), sty, nil)
 	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, sty, tsty, &rich.DefaultSettings, sz)
