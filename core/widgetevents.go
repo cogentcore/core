@@ -574,6 +574,9 @@ func (wb *WidgetBase) SetFocus() {
 func (wb *WidgetBase) focusableInThis() Widget {
 	var foc Widget
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if foc != nil {
+			return tree.Break
+		}
 		if !cwb.AbilityIs(abilities.Focusable) {
 			return tree.Continue
 		}
