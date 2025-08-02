@@ -28,7 +28,7 @@ type morePerson struct {
 	LikesPython bool
 }
 
-func (mp *morePerson) CoreFieldValue(field string) Value {
+func (mp *morePerson) FieldWidget(field string) Value {
 	if field == "Job" {
 		return NewChooser().SetStrings("plumber", "dentist", "other")
 	}

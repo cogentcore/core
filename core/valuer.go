@@ -157,13 +157,13 @@ func toValue(value any, tags reflect.StructTag) Value {
 
 // FieldValuer is an interface that struct types can implement to specify the
 // [Value] that should be used to represent specific fields in the GUI,
-// via the CoreFieldValue method. For Form and Table widgets.
+// via the FieldWidget method. For Form and Table widgets.
 type FieldValuer interface {
 
-	// CoreFieldValue returns the [Value] that should be used to represent
+	// FieldWidget returns the [Value] that should be used to represent
 	// the field of given name in the GUI. If it returns nil, then the default is used
 	// based on display tags, type, etc. This function must NOT call [Bind].
-	CoreFieldValue(field string) Value
+	FieldWidget(field string) Value
 }
 
 // NewFieldValue converts the given value into an appropriate [Value]
@@ -175,7 +175,7 @@ type FieldValuer interface {
 // documented on [toValue].
 func NewFieldValue(field string, stru any, value any, tags reflect.StructTag, parent ...tree.Node) Value {
 	if fv, ok := stru.(FieldValuer); ok {
-		v := fv.CoreFieldValue(field)
+		v := fv.FieldWidget(field)
 		if v != nil {
 			return v
 		}
