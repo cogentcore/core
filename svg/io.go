@@ -874,7 +874,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 func (sv *SVG) XMLString() string {
 	var b bytes.Buffer
 	sv.WriteXML(&b, false)
-	return string(b.Bytes())
+	return b.String()
 }
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
