@@ -13,6 +13,13 @@ type language struct {
 	Rating int
 }
 
+func (l *language) FieldWidget(field string) Value {
+	if field == "Rating" {
+		return NewSlider().SetMin(1).SetMax(10).SetStep(1)
+	}
+	return nil
+}
+
 func TestTable(t *testing.T) {
 	b := NewBody()
 	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
