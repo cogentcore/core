@@ -91,17 +91,26 @@ func NewPage(source fs.FS, filename string) (*Page, error) {
 	return pg, err
 }
 
+const unsetTitle = "$UNSET_TITLE"
+
 // Defaults sets default values for the page based on its filename.
 func (pg *Page) Defaults() {
 	pg.Name = strcase.ToSentence(strings.TrimSuffix(pg.Filename, filepath.Ext(pg.Filename)))
 	pg.URL = strcase.ToKebab(pg.Name)
-	pg.Title = pg.Name
+	pg.Title = unsetTitle
 	pg.Categories = []string{"Other"}
 }
 
 // ReadMetadata reads the page metadata from the front matter of the page file,
 // if there is any.
 func (pg *Page) ReadMetadata() error {
+	// Ensure the default title is set if it was not manually set (need defer).
+	defer func() {
+		if pg.Title == unsetTitle {
+			pg.Title = pg.Name
+		}
+	}()
+
 	f, err := pg.Source.Open(pg.Filename)
 	if err != nil {
 		return err
