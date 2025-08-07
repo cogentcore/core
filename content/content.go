@@ -69,7 +69,8 @@ type Content struct {
 	pagesByCategory map[string][]*bcontent.Page
 
 	// categories has all unique [bcontent.Page.Categories], sorted such that the categories
-	// with the most pages are listed first.
+	// with the most pages are listed first. "Other" is always last, and is used for pages that
+	// do not have a category.
 	categories []string
 
 	// history is the history of pages that have been visited.
@@ -297,6 +298,12 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	}))
 	ct.categories = maps.Keys(ct.pagesByCategory)
 	slices.SortFunc(ct.categories, func(a, b string) int {
+		if a == "Other" {
+			return 1
+		}
+		if b == "Other" {
+			return -1
+		}
 		v := cmp.Compare(len(ct.pagesByCategory[b]), len(ct.pagesByCategory[a]))
 		if v != 0 {
 			return v

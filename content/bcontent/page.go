@@ -96,6 +96,7 @@ func (pg *Page) Defaults() {
 	pg.Name = strcase.ToSentence(strings.TrimSuffix(pg.Filename, filepath.Ext(pg.Filename)))
 	pg.URL = strcase.ToKebab(pg.Name)
 	pg.Title = pg.Name
+	pg.Categories = []string{"Other"}
 }
 
 // ReadMetadata reads the page metadata from the front matter of the page file,
