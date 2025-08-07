@@ -70,7 +70,7 @@ type Content struct {
 
 	// categories has all unique [bcontent.Page.Categories], sorted such that the categories
 	// with the most pages are listed first. "Other" is always last, and is used for pages that
-	// do not have a category.
+	// do not have a category, unless they are a category themselves.
 	categories []string
 
 	// history is the history of pages that have been visited.
@@ -309,6 +309,17 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 			return v
 		}
 		return cmp.Compare(a, b)
+	})
+	// Pages that are a category are already represented in the categories tree,
+	// so they do not belong in the "Other" category.
+	ct.pagesByCategory["Other"] = slices.DeleteFunc(ct.pagesByCategory["Other"], func(pg *bcontent.Page) bool {
+		_, isCategory := ct.pagesByCategory[pg.Name]
+		if isCategory {
+			pg.Categories = slices.DeleteFunc(pg.Categories, func(c string) bool {
+				return c == "Other"
+			})
+		}
+		return isCategory
 	})
 
 	if url := ct.getWebURL(); url != "" {
