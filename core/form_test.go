@@ -28,6 +28,13 @@ type morePerson struct {
 	LikesPython bool
 }
 
+func (mp *morePerson) FieldWidget(field string) Value {
+	if field == "Job" {
+		return NewChooser().SetStrings("plumber", "dentist", "other")
+	}
+	return nil
+}
+
 func TestForm(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
@@ -44,6 +51,12 @@ func TestFormReadOnly(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	b.AssertRender(t, "form/read-only")
+}
+
+func TestFormFieldValue(t *testing.T) {
+	b := NewBody()
+	NewForm(b).SetStruct(&morePerson{Name: "Go", Age: 35})
+	b.AssertRender(t, "form/field-value")
 }
 
 func TestFormChange(t *testing.T) {

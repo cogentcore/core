@@ -292,7 +292,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	val := tb.sliceElementValue(si)
-	// stru := val.Interface()
+	valPtr := reflectx.UnderlyingPointer(val).Interface()
 
 	if tb.ShowIndexes {
 		tb.MakeGridIndex(p, i, si, itxt, invis)
@@ -315,7 +315,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 		readOnlyTag := tags.Get("edit") == "-"
 
 		tree.AddNew(p, valnm, func() Value {
-			return NewValue(uvp.Interface(), tags)
+			return NewFieldValue(field.Name, valPtr, uvp.Interface(), tags)
 		}, func(w Value) {
 			wb := w.AsWidget()
 			tb.MakeValue(w, i)

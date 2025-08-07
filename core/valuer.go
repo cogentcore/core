@@ -20,13 +20,13 @@ import (
 )
 
 // Valuer is an interface that types can implement to specify the
-// [Value] that should be used to represent them in the GUI.
+// [Value] Widget that should be used to represent them in the GUI.
 type Valuer interface {
 
-	// Value returns the [Value] that should be used to represent
+	// Widget returns the [Value] Widget that should be used to represent
 	// the value in the GUI. If it returns nil, then [ToValue] will
 	// fall back onto the next step. This function must NOT call [Bind].
-	Value() Value
+	Widget() Value
 }
 
 // ValueTypes is a map of functions that return a [Value]
@@ -76,7 +76,7 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 // it falls back on the next step.
 func toValue(value any, tags reflect.StructTag) Value {
 	if vwr, ok := value.(Valuer); ok {
-		if vw := vwr.Value(); vw != nil {
+		if vw := vwr.Widget(); vw != nil {
 			return vw
 		}
 	}
@@ -153,6 +153,38 @@ func toValue(value any, tags reflect.StructTag) Value {
 	}
 
 	return NewTextField() // final fallback
+}
+
+// FieldWidgeter is an interface that struct types can implement to specify the
+// [Value] Widget that should be used to represent specific fields in the GUI,
+// via the FieldWidget method. For [Form] and [Table] widgets.
+type FieldWidgeter interface {
+
+	// FieldWidget returns the [Value] that should be used to represent
+	// the field with the given name in the GUI. If it returns nil, then
+	// the default is used based on display tags, type, etc. This function
+	// must NOT call [Bind].
+	FieldWidget(field string) Value
+}
+
+// NewFieldValue converts the given value into an appropriate [Value] widget
+// whose associated value is bound to the given value. The given value must
+// be a pointer. It uses the given field name and parent struct pointer for
+// context, such as if the parent struct implements [FieldWidgeter]. This
+// function is used in [Form] and [Table] and generally should not be called
+// by end users directly.
+//
+// It uses the given optional struct tags for additional context
+// and to determine styling properties via [styleFromTags]. It also adds the
+// resulting [Value] to the given optional parent if it specified.
+func NewFieldValue(field string, str any, value any, tags reflect.StructTag, parent ...tree.Node) Value {
+	if fw, ok := str.(FieldWidgeter); ok {
+		v := fw.FieldWidget(field)
+		if v != nil {
+			return v
+		}
+	}
+	return NewValue(value, tags, parent...)
 }
 
 func init() {
