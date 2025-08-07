@@ -20,13 +20,13 @@ import (
 )
 
 // Valuer is an interface that types can implement to specify the
-// [Value] that should be used to represent them in the GUI.
+// [Value] Widget that should be used to represent them in the GUI.
 type Valuer interface {
 
-	// Value returns the [Value] that should be used to represent
+	// Widget returns the [Value] Widget that should be used to represent
 	// the value in the GUI. If it returns nil, then [ToValue] will
 	// fall back onto the next step. This function must NOT call [Bind].
-	Value() Value
+	Widget() Value
 }
 
 // ValueTypes is a map of functions that return a [Value]
@@ -76,7 +76,7 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 // it falls back on the next step.
 func toValue(value any, tags reflect.StructTag) Value {
 	if vwr, ok := value.(Valuer); ok {
-		if vw := vwr.Value(); vw != nil {
+		if vw := vwr.Widget(); vw != nil {
 			return vw
 		}
 	}
@@ -155,10 +155,10 @@ func toValue(value any, tags reflect.StructTag) Value {
 	return NewTextField() // final fallback
 }
 
-// FieldValuer is an interface that struct types can implement to specify the
+// FieldWidgeter is an interface that struct types can implement to specify the
 // [Value] that should be used to represent specific fields in the GUI,
 // via the FieldWidget method. For Form and Table widgets.
-type FieldValuer interface {
+type FieldWidgeter interface {
 
 	// FieldWidget returns the [Value] that should be used to represent
 	// the field of given name in the GUI. If it returns nil, then the default is used
@@ -174,7 +174,7 @@ type FieldValuer interface {
 // on how it determines what type of [Value] to make are further
 // documented on [toValue].
 func NewFieldValue(field string, stru any, value any, tags reflect.StructTag, parent ...tree.Node) Value {
-	if fv, ok := stru.(FieldValuer); ok {
+	if fv, ok := stru.(FieldWidgeter); ok {
 		v := fv.FieldWidget(field)
 		if v != nil {
 			return v

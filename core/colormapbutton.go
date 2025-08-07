@@ -19,7 +19,7 @@ import (
 // which can be edited using a [ColorMapButton].
 type ColorMapName string
 
-func (cm ColorMapName) Value() Value { return NewColorMapButton() }
+func (cm ColorMapName) Widget() Value { return NewColorMapButton() }
 
 // ColorMapButton displays a [colormap.Map] and can be clicked on
 // to display a dialog for selecting different color map options.
