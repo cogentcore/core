@@ -14,8 +14,8 @@ import (
 // note: WriteBuffer is the preferred method for writing, so we only need to manage Read
 
 // BufferMapAsyncError returns an error message if the status is not success.
-func BufferMapAsyncError(status wgpu.BufferMapAsyncStatus) error {
-	if status != wgpu.BufferMapAsyncStatusSuccess {
+func BufferMapAsyncError(status wgpu.MapAsyncStatus) error {
+	if status != wgpu.MapAsyncStatusSuccess {
 		return errors.New("gpu BufferMapAsync was not successful")
 	}
 	return nil
@@ -24,8 +24,8 @@ func BufferMapAsyncError(status wgpu.BufferMapAsyncStatus) error {
 // BufferReadSync does a MapAsync on given buffer, waiting on the device
 // until the sync is complete, and returning error if any issues.
 func BufferReadSync(device *Device, size int, buffer *wgpu.Buffer) error {
-	var status wgpu.BufferMapAsyncStatus
-	err := buffer.MapAsync(wgpu.MapModeRead, 0, uint64(size), func(s wgpu.BufferMapAsyncStatus) {
+	var status wgpu.MapAsyncStatus
+	err := buffer.MapAsync(wgpu.MapModeRead, 0, uint64(size), func(s wgpu.MapAsyncStatus) {
 		status = s
 	})
 	if errors.Log(err) != nil {
@@ -44,9 +44,9 @@ func ValueReadSync(device *Device, values ...*Value) error {
 		return nil
 	}
 	var errs []error
-	status := make([]wgpu.BufferMapAsyncStatus, nv)
+	status := make([]wgpu.MapAsyncStatus, nv)
 	for i, vl := range values {
-		err := vl.readBuffer.MapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(s wgpu.BufferMapAsyncStatus) {
+		err := vl.readBuffer.MapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(s wgpu.MapAsyncStatus) {
 			status[i] = s
 		})
 		if err != nil {

@@ -39,35 +39,34 @@ func NewDevice(gpu *GPU) (*Device, error) {
 // It gets the Queue for this device.
 func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
-	limits := wgpu.DefaultLimits()
+	limits := wgpu.Limits{}
+	limits = wgpu.DefaultLimits()
 	// Per https://github.com/cogentcore/core/issues/1362 -- this may cause issues on "downlevel"
 	// hardware, so we may need to detect that. OTOH it probably won't be useful for compute anyway,
 	// but we can just sort that out later
 	// note: on web / chromium / dawn, limited to 10: https://issues.chromium.org/issues/366151398?pli=1
-	limits.MaxStorageBuffersPerShaderStage = gpu.Limits.Limits.MaxStorageBuffersPerShaderStage
-	// fmt.Println("MaxStorageBuffersPerShaderStage:", gpu.Limits.Limits.MaxStorageBuffersPerShaderStage)
+	limits.MaxStorageBuffersPerShaderStage = gpu.Limits.MaxStorageBuffersPerShaderStage
+	// fmt.Println("MaxStorageBuffersPerShaderStage:", gpu.Limits.MaxStorageBuffersPerShaderStage)
 	// note: these limits are being processed and allow the MaxBufferSize to be the
 	// controlling factor -- if we don't set these, then the slrand example doesn't
 	// work above a smaller limit.
 	// TODO: converting these limits to int may cause issues on 32-bit systems
-	limits.MaxUniformBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxUniformBufferBindingSize), int(gpu.Limits.Limits.MinUniformBufferOffsetAlignment)))
+	limits.MaxUniformBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.MaxUniformBufferBindingSize), int(gpu.Limits.MinUniformBufferOffsetAlignment)))
 
-	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
+	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.MinStorageBufferOffsetAlignment)))
 	// note: this limit is not working properly:
 	g4 := uint64(0xFFFFFF00)
-	limits.MaxBufferSize = uint64(MemSizeAlignDown(int(min(gpu.Limits.Limits.MaxBufferSize, g4)), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
+	limits.MaxBufferSize = uint64(MemSizeAlignDown(int(min(gpu.Limits.MaxBufferSize, g4)), int(gpu.Limits.MinStorageBufferOffsetAlignment)))
 	if limits.MaxBufferSize == 0 {
 		limits.MaxBufferSize = g4
 	}
-	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
+	// limits.MaxBindGroups = gpu.Limits.MaxBindGroups // note: no point in changing -- web constraint
 
 	if Debug {
 		fmt.Printf("Requesting sizes: MaxStorageBufferBindingSize: %X  MaxBufferSize: %X\n", limits.MaxStorageBufferBindingSize, limits.MaxBufferSize)
 	}
 	desc := wgpu.DeviceDescriptor{
-		RequiredLimits: &wgpu.RequiredLimits{
-			Limits: limits,
-		},
+		RequiredLimits: &limits,
 	}
 	wdev, err := gpu.GPU.RequestDevice(&desc)
 	if errors.Log(err) != nil {
@@ -107,5 +106,5 @@ func (dv *Device) WaitDone() {
 	if dv.Device == nil {
 		return
 	}
-	dv.Device.Poll(true, nil)
+	dv.Device.Poll(true, 0)
 }

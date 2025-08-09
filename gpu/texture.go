@@ -93,14 +93,14 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 
 	// https://www.w3.org/TR/webgpu/#gpuimagecopytexture
 	tx.device.Queue.WriteTexture(
-		&wgpu.ImageCopyTexture{
+		&wgpu.TexelCopyTextureInfo{
 			Aspect:   wgpu.TextureAspectAll,
 			Texture:  tx.texture,
 			MipLevel: 0,
 			Origin:   wgpu.Origin3D{X: 0, Y: 0, Z: 0},
 		},
 		rimg.Pix,
-		&wgpu.TextureDataLayout{
+		&wgpu.TexelCopyBufferLayout{
 			Offset:       0,
 			BytesPerRow:  4 * uint32(sz.X),
 			RowsPerImage: uint32(sz.Y),
@@ -259,9 +259,9 @@ func (tx *Texture) CopyToReadBuffer(cmd *wgpu.CommandEncoder) error {
 	size := tx.Format.Extent3D()
 	cmd.CopyTextureToBuffer(
 		tx.texture.AsImageCopy(),
-		&wgpu.ImageCopyBuffer{
+		&wgpu.TexelCopyBufferInfo{
 			Buffer: tx.readBuffer,
-			Layout: wgpu.TextureDataLayout{
+			Layout: wgpu.TexelCopyBufferLayout{
 				Offset:       0,
 				BytesPerRow:  uint32(tx.ReadBufferDims.PaddedRowSize),
 				RowsPerImage: wgpu.CopyStrideUndefined,
