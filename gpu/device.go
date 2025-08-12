@@ -39,8 +39,7 @@ func NewDevice(gpu *GPU) (*Device, error) {
 // It gets the Queue for this device.
 func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// we only request max buffer sizes so compute can go as big as it needs to
-	limits := wgpu.Limits{}
-	limits = wgpu.DefaultLimits()
+	limits := wgpu.DefaultLimits()
 	// Per https://github.com/cogentcore/core/issues/1362 -- this may cause issues on "downlevel"
 	// hardware, so we may need to detect that. OTOH it probably won't be useful for compute anyway,
 	// but we can just sort that out later
@@ -106,5 +105,5 @@ func (dv *Device) WaitDone() {
 	if dv.Device == nil {
 		return
 	}
-	dv.Device.Poll(true, 0)
+	dv.Device.Poll(true, nil)
 }
