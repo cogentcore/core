@@ -185,7 +185,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if pl.System.Render().Depth.texture != nil {
 		pd.DepthStencil = &wgpu.DepthStencilState{
 			Format:            pl.System.Render().Depth.Format.Format,
-			DepthWriteEnabled: true,
+			DepthWriteEnabled: wgpu.OptionalBoolTrue,
 			DepthCompare:      wgpu.CompareFunctionLess,
 			StencilFront: wgpu.StencilFaceState{
 				Compare: wgpu.CompareFunctionAlways,
