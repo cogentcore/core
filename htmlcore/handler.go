@@ -17,7 +17,9 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/lines"
@@ -272,6 +274,15 @@ func handleElement(ctx *Context) {
 			if pid != "" {
 				img.SetName(pid)
 			}
+			img.Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
+				s.Overflow.Set(styles.OverflowAuto)
+			})
+			img.OnDoubleClick(func(e events.Event) {
+				d := core.NewBody("Image")
+				core.NewImage(d).SetImage(img.Image)
+				d.RunWindowDialog(img)
+			})
 		}
 
 		go func() {
