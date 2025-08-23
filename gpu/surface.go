@@ -140,8 +140,13 @@ func (sf *Surface) Present() {
 // This assumes that all existing items have been destroyed.
 func (sf *Surface) InitConfig() error {
 	caps := sf.surface.GetCapabilities(sf.GPU.GPU)
-	trgFmt := caps.Formats[0]
-	// fmt.Println(reflectx.StringJSON(caps), trgFmt)
+
+	trgFmt := wgpu.TextureFormatBGRA8UnormSrgb
+	if len(caps.Formats) > 0 {
+		trgFmt = caps.Formats[0]
+	} else if Debug {
+		errors.Log(errors.New("gpu: surface capabilities have no Formats"))
+	}
 	viewFmt := trgFmt
 	switch trgFmt {
 	case wgpu.TextureFormatBGRA8Unorm:
@@ -154,13 +159,19 @@ func (sf *Surface) InitConfig() error {
 		viewFmts = append(viewFmts, viewFmt)
 	}
 
+	alphaMode := wgpu.CompositeAlphaModeOpaque
+	if len(caps.AlphaModes) > 0 {
+		alphaMode = caps.AlphaModes[0]
+	} else if Debug {
+		errors.Log(errors.New("gpu: surface capabilities have no AlphaModes"))
+	}
 	sf.config = &wgpu.SurfaceConfiguration{
 		Usage:       wgpu.TextureUsageRenderAttachment,
 		Format:      trgFmt,
 		Width:       uint32(sf.Format.Size.X),
 		Height:      uint32(sf.Format.Size.Y),
 		PresentMode: wgpu.PresentModeFifo,
-		AlphaMode:   caps.AlphaModes[0],
+		AlphaMode:   alphaMode,
 		ViewFormats: viewFmts,
 	}
 
