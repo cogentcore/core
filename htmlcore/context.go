@@ -87,7 +87,7 @@ type Context struct {
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
 
 	// WidgetHandlers is a list of handler functions for each Widget,
-	// called in reverse order for each widget that is created,
+	// called in sequential order for each widget that is created,
 	// after it has been configured by the existing handlers etc.
 	// This allows for additional styling to be applied based on the
 	// type of widget, for example.
