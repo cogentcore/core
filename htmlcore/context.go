@@ -258,10 +258,10 @@ func (c *Context) AddWidgetHandler(f func(w core.Widget)) {
 	c.WidgetHandlers = append(c.WidgetHandlers, f)
 }
 
-// handleWidget calls WidgetHandlers functions on given widget.
+// handleWidget calls WidgetHandlers functions on given widget,
+// in order added so last one has override priority.
 func (c *Context) handleWidget(w core.Widget) {
-	n := len(c.WidgetHandlers)
-	for i := n - 1; i >= 0; i-- {
-		c.WidgetHandlers[i](w)
+	for _, f := range c.WidgetHandlers {
+		f(w)
 	}
 }
