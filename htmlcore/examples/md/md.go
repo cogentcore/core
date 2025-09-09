@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/styles"
 	_ "cogentcore.org/core/text/tex" // include this to get math
 )
 
@@ -18,6 +19,15 @@ var content string
 
 func main() {
 	b := core.NewBody("MD Example")
-	errors.Log(htmlcore.ReadMDString(htmlcore.NewContext(), b, content))
+	ctx := htmlcore.NewContext()
+	ctx.AddWidgetHandler(func(w core.Widget) {
+		switch x := w.(type) {
+		case *core.Text:
+			x.Styler(func(s *styles.Style) {
+				s.Max.X.Ch(80)
+			})
+		}
+	})
+	errors.Log(htmlcore.ReadMDString(ctx, b, content))
 	b.RunMainWindow()
 }
