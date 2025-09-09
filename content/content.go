@@ -186,6 +186,14 @@ func (ct *Content) Init() {
 		}
 		return false
 	}
+	ct.Context.AddWidgetHandler(func(w core.Widget) {
+		switch x := w.(type) {
+		case *core.Text:
+			x.Styler(func(s *styles.Style) {
+				s.Max.X.Ch(120)
+			})
+		}
+	})
 
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {
