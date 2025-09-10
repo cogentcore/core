@@ -131,6 +131,14 @@ func (nb *NodeBase) AsNodeBase() *NodeBase {
 	return nb
 }
 
+func (nb *NodeBase) Init() {
+	nb.Updater(nb.UpdateFromMake)
+}
+
+func (nb *NodeBase) Update() {
+	nb.RunUpdaters()
+}
+
 // OnAdd is called when nodes are added to a parent.
 // It sets the scene of the node to that of its parent.
 // It should be called by all other OnAdd functions defined by node types.

@@ -72,8 +72,7 @@ func (sw *Scene) Init() {
 		if sw.XYZ.Frame != nil {
 			cursz := sw.XYZ.Frame.Render().Format.Size
 			if cursz == sz && !doRebuild {
-				sw.XYZ.Update()
-				sw.NeedsRender()
+				sw.XYZ.SetNeedsRender()
 				return
 			}
 		} else {

@@ -118,6 +118,7 @@ func (sc *Scene) Init() {
 	sc.Camera.Defaults()
 	sc.Background = colors.Scheme.Surface
 	initTextShaper(sc)
+	sc.Updater(sc.UpdateFromMake)
 }
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen
@@ -135,6 +136,15 @@ func NewOffscreenScene() *Scene {
 
 // Update is a global update of everything: config, update, and re-render
 func (sc *Scene) Update() {
+	sc.RunUpdaters()
+	sc.WalkDown(func(n tree.Node) bool {
+		if n.AsTree().This == sc.This {
+			return tree.Continue
+		}
+		nb := n.(Node).AsNodeBase()
+		nb.Update()
+		return tree.Continue
+	})
 	sc.SetNeedsUpdate()
 }
 
