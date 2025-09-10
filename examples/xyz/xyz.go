@@ -105,10 +105,13 @@ func main() {
 		n.SetMesh(lines).SetColor(color.RGBA{255, 255, 0, 128}).SetPos(0, 0, 1)
 	})
 
-	// xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
-
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, color.RGBA{255, 255, 0, 255}, xyz.Active)
+	tree.AddChild(sc, func(g *xyz.Group) {
+		xyz.MakeArrow(sc, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)(g)
+	})
+
+	// g := xyz.NewGroup(sc)
+	// xyz.MakeLineBox(sc, "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, color.RGBA{255, 255, 0, 255}, xyz.Active)
 
 	cylinder := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	tree.AddChild(sc, func(n *xyz.Solid) {
