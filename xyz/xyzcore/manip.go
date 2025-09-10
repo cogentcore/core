@@ -115,7 +115,7 @@ func (sw *Scene) SelectBox() {
 	clr := sw.SelectionParams.Color
 	g := xyz.NewGroup(sc)
 	g.SetName(SelectedBoxName)
-	xyz.MakeLineBox(sc, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)(g)
+	xyz.InitLineBox(sc, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)(g)
 	sc.SetNeedsUpdate()
 	sw.NeedsRender()
 }
@@ -140,7 +140,7 @@ func (sw *Scene) ManipBox() {
 	bbox := nb.WorldBBox.BBox
 	mb := xyz.NewGroup(sc)
 	mb.SetName(nm)
-	xyz.MakeLineBox(sc, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)(mb)
+	xyz.InitLineBox(sc, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)(mb)
 
 	mbspm := xyz.NewSphere(sc, nm+"-pt", sw.SelectionParams.Radius*cdist, 16)
 

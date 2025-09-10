@@ -122,11 +122,11 @@ const (
 	NoEndArrow = false
 )
 
-// MakeLine returns a Maker function for making a line
-// between two specified points, using a shared
+// InitLine returns an Init function (e.g., for [tree] Maker functions)
+// for making a line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned
 // to go between the designated points.
-func MakeLine(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA) func(ln *Solid) {
+func InitLine(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA) func(ln *Solid) {
 	lm := UnitLineMesh(sc)
 	return func(ln *Solid) {
 		ln.SetMesh(lm)
@@ -137,15 +137,16 @@ func MakeLine(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA) f
 	}
 }
 
-// MakeArrow returns a Maker function for making a group with a new line + cone
-// between two specified points, using shared mesh unit line and arrow heads,
-// which are rotated and positioned to go between the designated points.
+// InitArrow returns an Init function (e.g., for [tree] Maker functions)
+// for making a group with a new line + cone between two specified points,
+// using shared mesh unit line and arrow heads, which are rotated and
+// positioned to go between the designated points.
 // The arrowSize is a multiplier on the width for the radius and length
 // of the arrow head, with width providing an additional multiplicative
 // factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead
 // 4 = a 4-sided pyramid, etc.
-func MakeArrow(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) func(g *Group) {
+func InitArrow(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) func(g *Group) {
 	cm := UnitConeMesh(sc, arrowSegs)
 	return func(g *Group) {
 		g.isLinear = true
@@ -157,7 +158,7 @@ func MakeArrow(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA, 
 
 		g.Maker(func(p *tree.Plan) {
 			tree.Add(p, func(ln *Solid) {
-				MakeLine(sc, st, ed, width, clr)(ln)
+				InitLine(sc, st, ed, width, clr)(ln)
 				ln.Pose.SetIdentity()
 				switch {
 				case startArrow && endArrow:
@@ -228,8 +229,8 @@ const (
 	Active = false
 )
 
-// MakeLineBox returns a Maker function that adds a new Group with Solids
-// and two Meshes defining the edges of a Box.
+// InitLineBox returns an Init function (e.g., for [tree] Maker functions)
+// that adds a new [Group] with [Solid]s and two Meshes defining the edges of a Box.
 // This can be used for drawing a selection box around a Node in the scene,
 // for example.
 // offset is an arbitrary offset (for composing shapes).
@@ -237,7 +238,7 @@ const (
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func MakeLineBox(sc *Scene, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) func(g *Group) {
+func InitLineBox(sc *Scene, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) func(g *Group) {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 	front, side := NewLineBoxMeshes(sc, meshNm, bbox, width)
