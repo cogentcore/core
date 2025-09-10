@@ -106,9 +106,7 @@ func main() {
 	})
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	tree.AddChild(sc, func(g *xyz.Group) {
-		xyz.MakeArrow(sc, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)(g)
-	})
+	tree.AddChild(sc, xyz.MakeArrow(sc, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8))
 
 	// g := xyz.NewGroup(sc)
 	// xyz.MakeLineBox(sc, "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, color.RGBA{255, 255, 0, 255}, xyz.Active)
@@ -137,7 +135,7 @@ func main() {
 	var smallGo *xyz.Object
 	var goPos math32.Vector3
 
-	tree.AddChildAt(sc, "go-group", func(g *xyz.Group) {
+	tree.AddChild(sc, func(g *xyz.Group) {
 		tree.AddChild(g, func(n *xyz.Object) {
 			n.SetObjectName("gopher").SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0)
 			n.SetAxisRotation(0, 1, 0, -60)
@@ -152,7 +150,7 @@ func main() {
 	torus := xyz.NewTorus(sc, "torus", .75, .1, 32)
 	var hoop *xyz.Solid
 	var hoopPos math32.Vector3
-	tree.AddChildAt(sc, "torus", func(n *xyz.Solid) {
+	tree.AddChild(sc, func(n *xyz.Solid) {
 		n.SetMesh(torus).SetColor(colors.White).SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
 		n.Material.Color.A = 200
 		hoop = n
