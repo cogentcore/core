@@ -141,8 +141,7 @@ func (sc *Scene) Update() {
 		if n.AsTree().This == sc.This {
 			return tree.Continue
 		}
-		nb := n.(Node).AsNodeBase()
-		nb.Update()
+		n.(Node).Update()
 		return tree.Continue
 	})
 	sc.SetNeedsUpdate()
@@ -264,4 +263,16 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 		})
 	}
 	return objs
+}
+
+// SetScene sets the Scene pointer in given object and all of its children.
+func (sc *Scene) SetScene(o tree.Node) {
+	o.AsTree().WalkDown(func(n tree.Node) bool {
+		ni, nb := AsNode(n)
+		if ni == nil {
+			return tree.Break
+		}
+		nb.Scene = sc
+		return tree.Continue
+	})
 }

@@ -60,6 +60,9 @@ type Node interface {
 	// IsTransparent returns true if solid has transparent color.
 	IsTransparent() bool
 
+	// Update does tree updating.
+	Update()
+
 	// Config configures the node.
 	Config()
 

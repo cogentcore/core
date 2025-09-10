@@ -7,6 +7,7 @@ package xyz
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/tree"
 )
 
@@ -40,14 +41,37 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 	nwgp := gp.Clone().(*Group)
 	parent.AsTree().AddChild(nwgp)
 	tree.SetUniqueName(nwgp)
-
-	parent.AsTree().WalkDown(func(k tree.Node) bool {
-		ni, nb := AsNode(k)
-		if ni == nil {
-			return tree.Break
-		}
-		nb.Scene = sc
-		return tree.Continue
-	})
+	sc.SetScene(parent)
 	return nwgp, nil
+}
+
+// Object is an object cloned from a Library.
+type Object struct {
+	Group
+
+	// ObjectName is the name of the object to load from the Library.
+	ObjectName string
+
+	// currentName is the name of the object currently loaded.
+	// if ObjectName is different than this, it is loaded on Update.
+	currentName string
+}
+
+func (ob *Object) Update() {
+	if ob.currentName == ob.ObjectName {
+		return
+	}
+	if ob.Scene == nil {
+		return
+	}
+	gp, ok := ob.Scene.Library[ob.ObjectName]
+	if !ok {
+		err := fmt.Errorf("Object Update: Library item: %s not found", ob.ObjectName)
+		errors.Log(err)
+	}
+	ob.currentName = ob.ObjectName
+	nwgp := gp.Clone().(*Group)
+	ob.DeleteChildren()
+	ob.AddChild(nwgp)
+	ob.Scene.SetScene(ob)
 }

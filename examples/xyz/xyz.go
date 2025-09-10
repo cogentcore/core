@@ -131,17 +131,19 @@ func main() {
 	lgo := errors.Log1(sc.OpenToLibraryFS(assets.Content, "gopher.obj", ""))
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	var smallGo *xyz.Group
+	var smallGo *xyz.Object
 	var goPos math32.Vector3
 
 	tree.AddChildAt(sc, "go-group", func(g *xyz.Group) {
-		// todo: need a new type for this
-		bgo, _ := sc.AddFromLibrary("gopher", g)
-		bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
-
-		smallGo, _ = sc.AddFromLibrary("gopher", g)
-		smallGo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
-		goPos = smallGo.Pose.Pos
+		tree.AddChild(g, func(n *xyz.Object) {
+			n.SetObjectName("gopher").SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0)
+			n.SetAxisRotation(0, 1, 0, -60)
+		})
+		tree.AddChild(g, func(n *xyz.Object) {
+			smallGo = n
+			n.SetObjectName("gopher").SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
+			goPos = n.Pose.Pos
+		})
 	})
 
 	torus := xyz.NewTorus(sc, "torus", .75, .1, 32)
