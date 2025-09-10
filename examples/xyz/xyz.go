@@ -5,10 +5,8 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math"
-	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -25,124 +23,13 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Anim has control for animating
-type Anim struct {
-
-	// run the animation
-	On bool
-
-	// angular speed (in radians)
-	Speed float32 `min:"0.01" step:"0.01"`
-
-	// animate the torus
-	DoTorus bool
-
-	// animate the gopher
-	DoGopher bool
-
-	// current angle
-	Ang float32 `edit:"-"`
-
-	// the time.Ticker for animating the scene
-	Ticker *time.Ticker `display:"-"`
-
-	// the scene editor
-	SceneEditor *xyzcore.SceneEditor
-
-	// the torus
-	Torus *xyz.Solid
-
-	// the gopher
-	Gopher *xyz.Group
-
-	// original position
-	TorusPosOrig math32.Vector3
-
-	// original position
-	GopherPosOrig math32.Vector3
-}
-
-// Start starts the animation ticker timer -- if on is true, then
-// animation will actually start too.
-func (an *Anim) Start(sv *xyzcore.SceneEditor, on bool) {
-	an.SceneEditor = sv
-	an.On = on
-	an.DoTorus = true
-	an.DoGopher = true
-	an.Speed = .1
-	an.Ticker = time.NewTicker(time.Second / 30) // 30 fps probably smoother
-	go an.Animate()
-}
-
-// GetObjs gets the objects to animate
-func (an *Anim) GetObjs() {
-	sc := an.SceneEditor.SceneXYZ()
-	torusi := sc.ChildByName("torus", 0)
-	if torusi == nil {
-		fmt.Println("torus not found")
-		return
-	}
-	an.Torus = torusi.(*xyz.Solid)
-	an.TorusPosOrig = an.Torus.Pose.Pos
-
-	ggp := sc.ChildByName("go-group", 0)
-	if ggp == nil {
-		fmt.Println("go-group not found")
-		return
-	}
-	gophi := ggp.AsTree().Child(1)
-	if gophi == nil {
-		fmt.Println("small gopher not found")
-		return
-	}
-	an.Gopher = gophi.(*xyz.Group)
-	an.GopherPosOrig = an.Gopher.Pose.Pos
-}
-
-// Animate
-func (an *Anim) Animate() {
-	for {
-		if an.Ticker == nil || an.SceneEditor.This == nil {
-			return
-		}
-		<-an.Ticker.C // wait for tick
-		if an.Torus == nil {
-			an.GetObjs()
-			if an.Torus == nil {
-				break
-			}
-		}
-		if !an.On || an.SceneEditor.This == nil {
-			continue
-		}
-		radius := float32(0.3)
-
-		if an.DoTorus {
-			tdx := radius * math32.Cos(an.Ang)
-			tdz := radius * math32.Sin(an.Ang)
-			tp := an.TorusPosOrig
-			tp.X += tdx
-			tp.Z += tdz
-			an.Torus.SetPosePos(tp)
-		}
-
-		if an.DoGopher {
-			gdx := 0.1 * radius * math32.Cos(an.Ang+math.Pi)
-			gdz := 0.1 * radius * math32.Sin(an.Ang+math.Pi)
-			gp := an.GopherPosOrig
-			gp.X += gdx
-			gp.Z += gdz
-			an.Gopher.SetPosePos(gp)
-		}
-
-		an.SceneEditor.SceneWidget().NeedsRender()
-		// note that any changes to underlying mesh would require Scene.SetMesh calls.
-		an.Ang += an.Speed
-	}
-}
-
 func main() {
-	anim := &Anim{}
+	animOn := false
+	animSpeed := float32(0.01)
+	animGopher := true
+	animHoop := true
+	animAngle := float32(0)
+
 	b := core.NewBody("XYZ Demo")
 
 	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> framework`).
@@ -153,7 +40,7 @@ func main() {
 		})
 
 	core.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
-		anim.On = !anim.On
+		animOn = !animOn
 	})
 
 	se := xyzcore.NewSceneEditor(b)
@@ -244,19 +131,27 @@ func main() {
 	lgo := errors.Log1(sc.OpenToLibraryFS(assets.Content, "gopher.obj", ""))
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
+	var smallGo *xyz.Group
+	var goPos math32.Vector3
+
 	tree.AddChildAt(sc, "go-group", func(g *xyz.Group) {
 		// todo: need a new type for this
 		bgo, _ := sc.AddFromLibrary("gopher", g)
 		bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
 
-		sgo, _ := sc.AddFromLibrary("gopher", g)
-		sgo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
+		smallGo, _ = sc.AddFromLibrary("gopher", g)
+		smallGo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
+		goPos = smallGo.Pose.Pos
 	})
 
 	torus := xyz.NewTorus(sc, "torus", .75, .1, 32)
+	var hoop *xyz.Solid
+	var hoopPos math32.Vector3
 	tree.AddChildAt(sc, "torus", func(n *xyz.Solid) {
 		n.SetMesh(torus).SetColor(colors.White).SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
 		n.Material.Color.A = 200
+		hoop = n
+		hoopPos = hoop.Pose.Pos
 	})
 
 	tree.AddChild(sc, func(n *xyz.Text2D) {
@@ -276,7 +171,31 @@ func main() {
 
 	///////  Animation & Embedded controls
 
-	anim.Start(se, false) // start without animation running
+	radius := float32(0.3)
+	sw.Animate(func(a *core.Animation) {
+		if !animOn {
+			return
+		}
+		if animHoop {
+			tdx := radius * math32.Cos(animAngle)
+			tdz := radius * math32.Sin(animAngle)
+			tp := hoopPos
+			tp.X += tdx
+			tp.Z += tdz
+			hoop.SetPosePos(tp)
+		}
+
+		if animGopher {
+			gdx := 0.1 * radius * math32.Cos(animAngle+math.Pi)
+			gdz := 0.1 * radius * math32.Sin(animAngle+math.Pi)
+			gp := goPos
+			gp.X += gdx
+			gp.Z += gdz
+			smallGo.SetPosePos(gp)
+		}
+		sw.NeedsRender()
+		animAngle += animSpeed * a.Dt
+	})
 
 	/*
 		emb := xyz.NewEmbed2D(sc, sc, "embed-but", 150, 100, xyz.FitContent)
