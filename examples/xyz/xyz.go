@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
@@ -39,12 +38,10 @@ func main() {
 			s.Text.AlignV = text.Center
 		})
 
-	core.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
-		animOn = !animOn
-	})
+	core.Bind(&animOn, core.NewSwitch(b).SetText("Toggle animation"))
 
 	se := xyzcore.NewSceneEditor(b)
-	se.UpdateWidget()
+	se.UpdateWidget() // needed to create sub nodes:
 	sw := se.SceneWidget()
 	sc := se.SceneXYZ()
 	sw.SelectionMode = xyzcore.Manipulable
