@@ -261,6 +261,5 @@ func main() {
 		})
 	*/
 
-	sc.Update()
 	b.RunMainWindow()
 }

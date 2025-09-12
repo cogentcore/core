@@ -54,7 +54,7 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
 			OnClick(func(e events.Event) {
 				sc.SetCamera("default")
-				sc.Update()
+				sw.Update()
 				sv.NeedsRender()
 			})
 	})
