@@ -65,7 +65,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Zoom(-.05)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -76,7 +75,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -92,7 +90,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(5, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -103,7 +100,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(0, 5)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -114,7 +110,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(0, -5)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -125,7 +120,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(-5, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -141,7 +135,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(-.2, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -152,7 +145,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(0, .2)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -163,7 +155,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(0, -.2)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -174,7 +165,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(.2, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -200,7 +190,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 						}
 					}
 					fmt.Printf("Camera %s: %v\n", cam, sc.Camera.GenGoSet(""))
-					sc.SetNeedsUpdate()
 					sv.NeedsRender()
 				})
 		})

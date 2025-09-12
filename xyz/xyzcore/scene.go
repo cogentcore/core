@@ -61,7 +61,10 @@ func (sw *Scene) Init() {
 	sw.handleSlideEvents()
 	sw.handleSelectEvents()
 
-	sw.Updater(sw.ConfigXYZ)
+	sw.Updater(func() {
+		sw.XYZ.Update()
+		sw.ConfigXYZ()
+	})
 }
 
 func (sw *Scene) OnAdd() {
@@ -92,8 +95,7 @@ func (sw *Scene) Render() {
 	if sw.XYZ.Frame == nil {
 		return
 	}
-	sw.XYZ.SetNeedsRender() // always rerender XYZ when we rerender.
-	sw.XYZ.DoUpdate()       // this does it.
+	sw.XYZ.Render()
 }
 
 func (sw *Scene) ConfigXYZ() {
@@ -107,7 +109,6 @@ func (sw *Scene) ConfigXYZ() {
 	if sw.XYZ.Frame != nil {
 		cursz := sw.XYZ.Frame.Render().Format.Size
 		if cursz == sz && !doRebuild {
-			sw.XYZ.SetNeedsRender()
 			return
 		}
 	} else {

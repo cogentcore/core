@@ -16,43 +16,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// DoUpdate handles needed updates based on Scene Flags.
-// If no updates are required, then false is returned, else true.
-func (sc *Scene) DoUpdate() bool {
-	switch {
-	case sc.NeedsUpdate:
-		sc.UpdateNodes()
-		sc.Render()
-		sc.NeedsUpdate = false
-		sc.NeedsRender = false
-	case sc.NeedsRender:
-		sc.Render()
-		sc.NeedsRender = false
-	default:
-		return false
-	}
-	return true
-}
-
-// SetNeedsRender sets [Scene.NeedsRender] to true.
-func (sc *Scene) SetNeedsRender() {
-	sc.NeedsRender = true
-}
-
-// SetNeedsUpdate sets [Scene.SetNeedsUpdate] to true.
-func (sc *Scene) SetNeedsUpdate() {
-	sc.NeedsUpdate = true
-}
-
-// UpdateNodesIfNeeded can be called to update prior to an ad-hoc render
-// if the NeedsUpdate flag has been set (resets flag)
-func (sc *Scene) UpdateNodesIfNeeded() {
-	if sc.NeedsUpdate {
-		sc.UpdateNodes()
-		sc.NeedsUpdate = false
-	}
-}
-
 // ConfigOffscreenFromSurface configures offscreen [gpu.RenderTexture]
 // using GPU and Device from given [gpu.Surface].
 func (sc *Scene) ConfigOffscreenFromSurface(surf *gpu.Surface) {
@@ -74,7 +37,6 @@ func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
 		sc.ConfigNewPhong()
 	} else {
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
-		sc.NeedsUpdate = true
 	}
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 }
@@ -96,7 +58,6 @@ func (sc *Scene) ConfigNewPhong() {
 	sc.setAllLights()
 	sc.setAllMeshes()
 	sc.setAllTextures()
-	sc.NeedsUpdate = true
 }
 
 // Image returns the current rendered image from the Frame RenderTexture.
@@ -110,6 +71,7 @@ func (sc *Scene) Image() (*image.RGBA, error) {
 	if fr == nil {
 		return nil, errors.New("xyz.Scene Image: Scene does not have a Frame")
 	}
+	// todo!
 	// sy := &sc.Phong.System
 	// tcmd := sy.MemCmdStart()
 	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
@@ -151,10 +113,10 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	return nil, nil // err
 }
 
+// todo: get rid of these:
+
 // ImageUpdate configures, updates, and renders the scene, then returns [Scene.Image].
 func (sc *Scene) ImageUpdate() (*image.RGBA, error) {
-	// sc.Config()
-	sc.UpdateNodes()
 	sc.Render()
 	return sc.Image()
 }
@@ -267,11 +229,6 @@ func (sc *Scene) ConfigNodes() {
 	})
 }
 
-func (sc *Scene) UpdateNodes() {
-	UpdateWorldMatrix(sc.This)
-	sc.UpdateMeshBBox()
-}
-
 // TrackCamera -- a Group at the top-level named "TrackCamera"
 // will automatically track the camera (i.e., its Pose is copied).
 // Solids in that group can set their relative Pos etc to display
@@ -286,14 +243,10 @@ func (sc *Scene) TrackCamera() bool {
 		return false
 	}
 	tc.TrackCamera()
-	sc.SetNeedsUpdate() // need to update world model for nodes
 	return true
 }
 
 // Render renders the scene to the Frame framebuffer.
-// Only the Camera pose view matrix is updated here.
-// If nodes require their own pose etc updates, UpdateNodes
-// must be called prior to render.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
 	if sc.Frame == nil {
@@ -302,16 +255,17 @@ func (sc *Scene) Render() bool {
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}
+	sc.TrackCamera()
+	UpdateWorldMatrix(sc.This)
+	sc.UpdateMeshBBox()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.UpdateMatrix()
-	sc.TrackCamera()
 	sc.UpdateMVPMatrix()
 	sc.RenderImpl()
 	return true
 }
 
-////////////////////////////////////////////////////////////////////
-// 	RenderImpl
+//////// 	RenderImpl
 
 // RenderClasses define the different classes of rendering
 type RenderClasses int32 //enums:enum -trim-prefix RClass

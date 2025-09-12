@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
@@ -28,6 +29,7 @@ func main() {
 	animGopher := true
 	animHoop := true
 	animAngle := float32(0)
+	bigGopher := true
 
 	b := core.NewBody("XYZ Demo")
 
@@ -38,7 +40,10 @@ func main() {
 			s.Text.AlignV = text.Center
 		})
 
-	core.Bind(&animOn, core.NewSwitch(b).SetText("Toggle animation"))
+	tf := core.NewFrame(b)
+	tf.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+	})
 
 	se := xyzcore.NewSceneEditor(b)
 	se.UpdateWidget() // needed to create sub nodes:
@@ -50,6 +55,13 @@ func main() {
 	// sc.MultiSample = 1
 	// se.Wireframe = true
 	// sc.NoNav = true
+
+	core.Bind(&animOn, core.NewSwitch(tf).SetText("Toggle animation"))
+	bgs := core.NewSwitch(tf).SetText("Toggle big Gopher")
+	bgs.OnChange(func(e events.Event) {
+		sw.Update()
+	})
+	core.Bind(&bigGopher, bgs)
 
 	se.Styler(func(s *styles.Style) {
 		sc.Background = colors.Scheme.Select.Container
@@ -105,9 +117,6 @@ func main() {
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	tree.AddChild(sc, xyz.InitArrow(sc, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8))
 
-	// g := xyz.NewGroup(sc)
-	// xyz.InitLineBox(sc, "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, color.RGBA{255, 255, 0, 255}, xyz.Active)
-
 	cylinder := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	tree.AddChild(sc, func(n *xyz.Solid) {
 		n.SetMesh(cylinder).SetPos(-2.25, 0, 0)
@@ -133,14 +142,18 @@ func main() {
 	var goPos math32.Vector3
 
 	tree.AddChild(sc, func(g *xyz.Group) {
-		tree.AddChild(g, func(n *xyz.Object) {
-			n.SetObjectName("gopher").SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0)
-			n.SetAxisRotation(0, 1, 0, -60)
-		})
-		tree.AddChild(g, func(n *xyz.Object) {
-			smallGo = n
-			n.SetObjectName("gopher").SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
-			goPos = n.Pose.Pos
+		g.Maker(func(p *tree.Plan) {
+			if bigGopher {
+				tree.Add(p, func(n *xyz.Object) {
+					n.SetObjectName("gopher").SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0)
+					n.SetAxisRotation(0, 1, 0, -60)
+				})
+			}
+			tree.Add(p, func(n *xyz.Object) {
+				smallGo = n
+				n.SetObjectName("gopher").SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
+				goPos = n.Pose.Pos
+			})
 		})
 	})
 

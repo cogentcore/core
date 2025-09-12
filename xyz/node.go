@@ -151,19 +151,12 @@ func (nb *NodeBase) OnAdd() {
 	}
 	if sc, ok := nb.Parent.(*Scene); ok {
 		nb.Scene = sc
-		if nb.Scene != nil {
-			nb.Scene.SetNeedsUpdate()
-		}
 		return
 	}
 	if _, pnb := AsNode(nb.Parent); pnb != nil {
 		nb.Scene = pnb.Scene
-		if nb.Scene != nil {
-			nb.Scene.SetNeedsUpdate()
-		}
 		return
 	}
-	fmt.Println(nb, "not set from parent")
 }
 
 func (nb *NodeBase) BaseInterface() reflect.Type {

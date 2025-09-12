@@ -53,14 +53,6 @@ type Scene struct {
 	// which is used directly as a solid color in Vulkan.
 	Background image.Image
 
-	// NeedsUpdate means that Node Pose has changed and an update pass
-	// is required to update matrix and bounding boxes.
-	NeedsUpdate bool `set:"-"`
-
-	// NeedsRender means that something has been updated (minimally the
-	// Camera pose) and a new Render is required.
-	NeedsRender bool `set:"-"`
-
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom math32.Geom2DInt `set:"-"`
 
@@ -134,7 +126,7 @@ func NewOffscreenScene() *Scene {
 	return sc
 }
 
-// Update is a global update of everything: config, update, and re-render
+// Update does the [tree] Maker / Plan updating of nodes.
 func (sc *Scene) Update() {
 	sc.RunUpdaters()
 	sc.WalkDown(func(n tree.Node) bool {
@@ -144,7 +136,6 @@ func (sc *Scene) Update() {
 		n.(Node).Update()
 		return tree.Continue
 	})
-	sc.SetNeedsUpdate()
 }
 
 // IsLive indicates whether the Phong system is active and we can
