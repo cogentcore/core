@@ -62,11 +62,11 @@ func (sw *Scene) configFrame(sz image.Point) {
 	if win == nil {
 		return
 	}
-	gdrw := getGPUDrawer(win.SystemWindow.Composer())
-	if gdrw == nil {
-		return
-	}
 	system.TheApp.RunOnMain(func() {
+		gdrw := getGPUDrawer(win.SystemWindow.Composer())
+		if gdrw == nil {
+			return
+		}
 		sf, ok := gdrw.Renderer().(*gpu.Surface)
 		if !ok {
 			core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))

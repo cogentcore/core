@@ -62,28 +62,8 @@ func (sw *Scene) Init() {
 	sw.handleSelectEvents()
 
 	sw.Updater(func() {
-		sz := sw.Geom.ContentBBox.Size()
-		if sz.X <= 0 || sz.Y <= 0 {
-			return
-		}
-		sw.XYZ.Geom.Size = sz
-
-		doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
-		if sw.XYZ.Frame != nil {
-			cursz := sw.XYZ.Frame.Render().Format.Size
-			if cursz == sz && !doRebuild {
-				sw.XYZ.Update()
-				sw.NeedsRender()
-				return
-			}
-		} else {
-			doRebuild = false // will be done automatically b/c Frame == nil
-		}
-		sw.configFrame(sz)
-		if doRebuild {
-			sw.XYZ.Rebuild()
-		}
-		sw.NeedsRender()
+		sw.XYZ.Update()
+		sw.ConfigXYZ()
 	})
 }
 
@@ -103,10 +83,40 @@ func (sw *Scene) SceneXYZ() *xyz.Scene {
 	return sw.XYZ
 }
 
+func (sw *Scene) SizeFinal() {
+	sw.WidgetBase.SizeFinal()
+	if sw.XYZ.NumChildren() == 0 {
+		sw.XYZ.Update()
+	}
+}
+
 func (sw *Scene) Render() {
-	sw.UpdateWidget() // Note: this is indeed essential here -- doesn't work without it.
+	sw.ConfigXYZ() // ensure configured: no cost if not
 	if sw.XYZ.Frame == nil {
 		return
 	}
-	sw.XYZ.DoUpdate()
+	sw.XYZ.Render()
+}
+
+func (sw *Scene) ConfigXYZ() {
+	sz := sw.Geom.ContentBBox.Size()
+	if sz.X <= 0 || sz.Y <= 0 || !sw.IsVisible() {
+		return
+	}
+	sw.XYZ.Geom.Size = sz
+
+	doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
+	if sw.XYZ.Frame != nil {
+		cursz := sw.XYZ.Frame.Render().Format.Size
+		if cursz == sz && !doRebuild {
+			return
+		}
+	} else {
+		doRebuild = false // will be done automatically b/c Frame == nil
+	}
+	sw.configFrame(sz)
+	if doRebuild {
+		sw.XYZ.Rebuild()
+	}
+	sw.NeedsRender()
 }

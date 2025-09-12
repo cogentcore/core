@@ -10,9 +10,11 @@
 
 * You must call `SetMesh` or `SetTexture` to update or add a new Mesh or Texture element. Just changing an existing mesh by itself does not trigger the proper updates.
 
-* The `xyz.Scene.Update()` method updates the scenegraph object matricies and triggers re-render.  `.Render()` or `NeedsRender()` just drives a new render if only the camera parameters have changed, but this will not reflect changes in object poses.
+* The `xyz.Scene.Update()` method calls the `tree.RunUpdaters` and calls `Update` on every node, supporting the [tree](../tree) updating and Plan / Maker paradigm for updating nodes. This is called by the `xyzcore.Scene` Update, so it will update as the core updates.
 
-* `xyzcore.Scene.UpdateWidget()` is the cleanest way to trigger the `Update` on the underlying xyx.Scene and also a re-render of the `core` widget viewing that scene.  If using an `xyzcore.SceneEditor` then use `Editor.SceneWidget().UpdateWidget()`.
+* `Render` is an imperative render that updates the world and view matricies of all nodes (reflecting node geometry and camera changes), and renders to the offscreen framebuffer.
+
+* `xyzcore.Scene.Render` always calls Render on the XYZ Scene, so calling `NeedsRender()` on that or the `xyzcore.SceneEditor` will trigger updates.
 
 # Basic elements
 

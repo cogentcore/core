@@ -60,6 +60,9 @@ type Node interface {
 	// IsTransparent returns true if solid has transparent color.
 	IsTransparent() bool
 
+	// Update does tree updating.
+	Update()
+
 	// Config configures the node.
 	Config()
 
@@ -131,6 +134,14 @@ func (nb *NodeBase) AsNodeBase() *NodeBase {
 	return nb
 }
 
+func (nb *NodeBase) Init() {
+	nb.Updater(nb.UpdateFromMake)
+}
+
+func (nb *NodeBase) Update() {
+	nb.RunUpdaters()
+}
+
 // OnAdd is called when nodes are added to a parent.
 // It sets the scene of the node to that of its parent.
 // It should be called by all other OnAdd functions defined by node types.
@@ -140,19 +151,12 @@ func (nb *NodeBase) OnAdd() {
 	}
 	if sc, ok := nb.Parent.(*Scene); ok {
 		nb.Scene = sc
-		if nb.Scene != nil {
-			nb.Scene.SetNeedsUpdate()
-		}
 		return
 	}
 	if _, pnb := AsNode(nb.Parent); pnb != nil {
 		nb.Scene = pnb.Scene
-		if nb.Scene != nil {
-			nb.Scene.SetNeedsUpdate()
-		}
 		return
 	}
-	fmt.Println(nb, "not set from parent")
 }
 
 func (nb *NodeBase) BaseInterface() reflect.Type {
