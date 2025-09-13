@@ -282,7 +282,7 @@ func (tx *Texture) ReadGoImage() (*image.NRGBA, error) {
 	}
 	img := &image.NRGBA{
 		Pix:    data,
-		Stride: int(tx.ReadBufferDims.PaddedRowSize),
+		Stride: int(tx.ReadBufferDims.UnpaddedRowSize), // note: this is actually unpadded here
 		Rect:   image.Rect(0, 0, int(tx.ReadBufferDims.Width), int(tx.ReadBufferDims.Height)),
 	}
 	return img, nil
