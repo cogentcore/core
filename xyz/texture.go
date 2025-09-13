@@ -29,8 +29,7 @@ type Texture interface {
 	Image() *image.RGBA
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TextureBase
+//////// TextureBase
 
 // TextureBase is the base texture implementation.
 // It uses an [image.RGBA] as the underlying image storage
@@ -55,8 +54,7 @@ func (tx *TextureBase) Image() *image.RGBA {
 	return tx.RGBA
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TextureFile
+//////// TextureFile
 
 // TextureFile is a texture loaded from a file
 type TextureFile struct {
@@ -120,8 +118,7 @@ type TextureCore struct {
 	// Scene2D *core.Scene
 }
 
-///////////////////////////////////////////////////////////////////////////
-// Scene code
+//////// Scene code
 
 // SetTexture adds given texture to texture collection
 // see NewTextureFile to add a texture that loads from file

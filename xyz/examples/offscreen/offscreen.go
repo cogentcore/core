@@ -7,7 +7,6 @@ package main
 import (
 	"image/color"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -71,7 +70,6 @@ func main() {
 	floor.Material.Tiling.Repeat.Set(40, 40)
 	// floor.SetDisabled() // not selectable
 
-	img := errors.Must1(sc.ImageUpdate())
+	img := sc.RenderGrabImage()
 	imagex.Save(img, "render.png")
-	sc.ImageDone()
 }

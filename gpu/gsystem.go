@@ -196,8 +196,7 @@ func (sy *GraphicsSystem) SetClearDepthStencil(depth float32, stencil uint32) *G
 	return sy
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Rendering
+//////// Rendering
 
 // NewCommandEncoder returns a new CommandEncoder for encoding
 // rendering commands.  This is automatically called by

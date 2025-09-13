@@ -60,77 +60,51 @@ func (sc *Scene) ConfigNewPhong() {
 	sc.setAllTextures()
 }
 
-// Image returns the current rendered image from the Frame RenderTexture.
-// This version returns a direct pointer to the underlying host version of
-// the GPU image, and should only be used immediately (for saving or writing
-// to another image).  You must call ImageDone() when done with the image.
-// See [ImageCopy] for a version that returns a copy of the image, which
-// will be usable until the next call to ImageCopy.
-func (sc *Scene) Image() (*image.RGBA, error) {
-	fr := sc.Frame
-	if fr == nil {
-		return nil, errors.New("xyz.Scene Image: Scene does not have a Frame")
-	}
-	// todo!
-	// sy := &sc.Phong.System
-	// tcmd := sy.MemCmdStart()
-	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
-	// sy.MemCmdEndSubmitWaitFree()
-	// img, err := fr.Render.Grab.DevGoImage()
-	// if err == nil {
-	// 	return img, err
-	// }
-	return nil, nil //err
-}
-
-// ImageDone must be called when done using the image returned by [Scene.Image].
-func (sc *Scene) ImageDone() {
+// Render renders the scene to the Frame framebuffer.
+// Returns false if currently already rendering.
+func (sc *Scene) Render() bool {
 	if sc.Frame == nil {
-		return
+		return false
 	}
-	// sc.Frame.Render.Grab.UnmapDev()
+	sc.render(false)
+	return true
 }
 
-// ImageCopy returns a copy of the current rendered image
-// from the Frame RenderTexture. A re-used image.RGBA is returned.
-// This same image is used across calls to avoid large memory allocations,
-// so it will automatically update after the next ImageCopy call.
-// The underlying image is in the [ImgCopy] field.
-// If a persistent image is required, call [imagex.CloneAsRGBA].
-func (sc *Scene) ImageCopy() (*image.RGBA, error) {
-	fr := sc.Frame
-	if fr == nil {
-		return nil, errors.New("xyz.Scene ImageCopy: Scene does not have a Frame")
+// RenderGrabImage renders the scene to the Frame framebuffer.
+// and returns the resulting image as an [image.NRGBA]
+// which could be nil if there are any issues.
+// The image data is a copy and can be modified etc.
+func (sc *Scene) RenderGrabImage() *image.NRGBA {
+	if sc.Frame == nil {
+		return nil
 	}
-	// sy := &sc.Phong.System
-	// tcmd := sy.MemCmdStart()
-	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
-	// sy.MemCmdEndSubmitWaitFree()
-	// err := fr.Render.Grab.DevGoImageCopy(&sc.imgCopy)
-	// if err == nil {
-	// 	return &sc.imgCopy, err
-	// }
-	return nil, nil // err
+	return sc.render(true)
 }
 
-// todo: get rid of these:
-
-// ImageUpdate configures, updates, and renders the scene, then returns [Scene.Image].
-func (sc *Scene) ImageUpdate() (*image.RGBA, error) {
-	sc.Render()
-	return sc.Image()
+// render renders the scene to the Frame framebuffer.
+// Returns false if currently already rendering.
+func (sc *Scene) render(grabImage bool) *image.NRGBA {
+	if len(sc.SavedCams) == 0 {
+		sc.SaveCamera("default")
+	}
+	sc.TrackCamera()
+	UpdateWorldMatrix(sc.This)
+	sc.UpdateMeshBBox()
+	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+	sc.Camera.UpdateMatrix()
+	sc.UpdateMVPMatrix()
+	return sc.renderImpl(grabImage)
 }
 
 // AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
 // It first configures, updates, and renders the scene.
 func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
-	img, err := sc.ImageUpdate()
-	if err != nil {
-		t.Errorf("xyz.Scene.AssertImage: error getting image: %w", err)
+	img := sc.RenderGrabImage()
+	if img == nil {
+		t.Errorf("xyz.Scene.AssertImage: failure getting image")
 		return
 	}
 	imagex.Assert(t, img, filename)
-	sc.ImageDone()
 }
 
 // DepthImage returns the current rendered depth image
@@ -246,26 +220,7 @@ func (sc *Scene) TrackCamera() bool {
 	return true
 }
 
-// Render renders the scene to the Frame framebuffer.
-// Returns false if currently already rendering.
-func (sc *Scene) Render() bool {
-	if sc.Frame == nil {
-		return false
-	}
-	if len(sc.SavedCams) == 0 {
-		sc.SaveCamera("default")
-	}
-	sc.TrackCamera()
-	UpdateWorldMatrix(sc.This)
-	sc.UpdateMeshBBox()
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
-	sc.Camera.UpdateMatrix()
-	sc.UpdateMVPMatrix()
-	sc.RenderImpl()
-	return true
-}
-
-//////// 	RenderImpl
+////////  renderImpl
 
 // RenderClasses define the different classes of rendering
 type RenderClasses int32 //enums:enum -trim-prefix RClass
@@ -280,9 +235,10 @@ const (
 	RClassTransVertex
 )
 
-// RenderImpl renders the scene to the framebuffer.
-// all scene-level resources must be initialized and activated at this point
-func (sc *Scene) RenderImpl() {
+// renderImpl renders the scene to the framebuffer.
+// all scene-level resources must be initialized and activated at this point.
+// if grabImage is true, the resulting rendered image is returned.
+func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 	ph := sc.Phong
 	ph.SetCamera(&sc.Camera.ViewMatrix, &sc.Camera.ProjectionMatrix)
 
@@ -340,7 +296,7 @@ func (sc *Scene) RenderImpl() {
 
 	rp, err := ph.RenderStart()
 	if err != nil {
-		return
+		return nil
 	}
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
@@ -356,5 +312,9 @@ func (sc *Scene) RenderImpl() {
 			obj.Render(rp)
 		}
 	}
+	if grabImage {
+		return ph.RenderEndGrabImage(rp)
+	}
 	ph.RenderEnd(rp)
+	return nil
 }
