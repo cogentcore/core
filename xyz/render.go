@@ -44,6 +44,7 @@ func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
 // Rebuild updates all the data resources.
 // Is only effective when the GPU render is active.
 func (sc *Scene) Rebuild() {
+	sc.Update()
 	if !sc.IsLive() {
 		return
 	}
@@ -99,6 +100,7 @@ func (sc *Scene) render(grabImage bool) *image.NRGBA {
 // AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
 // It first configures, updates, and renders the scene.
 func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
+	sc.Rebuild()
 	img := sc.RenderGrabImage()
 	if img == nil {
 		t.Errorf("xyz.Scene.AssertImage: failure getting image")

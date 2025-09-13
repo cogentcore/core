@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 )
@@ -70,6 +71,7 @@ func main() {
 	floor.Material.Tiling.Repeat.Set(40, 40)
 	// floor.SetDisabled() // not selectable
 
+	sc.Rebuild()
 	img := sc.RenderGrabImage()
 	imagex.Save(img, "render.png")
 }
