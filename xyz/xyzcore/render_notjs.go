@@ -48,7 +48,7 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 		return nil
 	}
 	rt := sw.XYZ.Frame.(*gpu.RenderTexture)
-	tex, _ := rt.GetCurrentTextureObject()
+	tex := rt.CurrentFrame()
 	bb, sbb, empty := sw.DirectRenderDrawBBoxes(tex.Format.Bounds())
 	if empty {
 		return nil
