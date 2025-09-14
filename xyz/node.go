@@ -60,10 +60,10 @@ type Node interface {
 	// IsTransparent returns true if solid has transparent color.
 	IsTransparent() bool
 
-	// Update does tree updating.
+	// Update does [tree] updating to dynamically update nodes / tree config.
 	Update()
 
-	// Config configures the node.
+	// Config configures the node data for gpu rendering.
 	Config()
 
 	// RenderClass returns the class of rendering for this solid.

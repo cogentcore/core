@@ -64,7 +64,7 @@ func (sc *Scene) ConfigNewPhong() {
 // Render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
-	if sc.Frame == nil {
+	if sc.Frame == nil || sc.isRendering {
 		return false
 	}
 	sc.render(false)
@@ -76,7 +76,7 @@ func (sc *Scene) Render() bool {
 // which could be nil if there are any issues.
 // The image data is a copy and can be modified etc.
 func (sc *Scene) RenderGrabImage() *image.NRGBA {
-	if sc.Frame == nil {
+	if sc.Frame == nil || sc.isRendering {
 		return nil
 	}
 	return sc.render(true)
@@ -85,6 +85,10 @@ func (sc *Scene) RenderGrabImage() *image.NRGBA {
 // render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) render(grabImage bool) *image.NRGBA {
+	sc.isRendering = true
+	defer func() {
+		sc.isRendering = false
+	}()
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}

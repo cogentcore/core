@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 	"image"
-	"log"
 	"math/rand"
 	"os"
 
@@ -203,32 +202,22 @@ func (ev *Env) ConfigView2D(sc *svg.SVG) {
 }
 
 // RenderEyeImg returns a snapshot from the perspective of Emer's right eye
-func (ev *Env) RenderEyeImg() (*image.RGBA, error) {
-	err := ev.View3D.RenderOffNode(ev.EyeR, &ev.Camera)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	return ev.View3D.Image()
+func (ev *Env) RenderEyeImg() *image.NRGBA {
+	return ev.View3D.RenderFromNode(ev.EyeR, &ev.Camera)
 }
 
 // GrabEyeImg takes a snapshot from the perspective of Emer's right eye
 func (ev *Env) GrabEyeImg() { //types:add
-	img, err := ev.RenderEyeImg()
-	if err == nil && img != nil {
+	img := ev.RenderEyeImg()
+	if img != nil {
 		ev.EyeRImg.SetImage(img)
 		ev.EyeRImg.NeedsRender()
-	} else {
-		if err != nil {
-			log.Println(err)
-		}
 	}
-
-	depth, err := ev.View3D.DepthImage()
-	if err == nil && depth != nil {
-		ev.DepthVals = depth
-		ev.ViewDepth(depth)
-	}
+	// depth, err := ev.View3D.DepthImage()
+	// if err == nil && depth != nil {
+	// 	ev.DepthVals = depth
+	// 	ev.ViewDepth(depth)
+	// }
 }
 
 // ViewDepth updates depth bitmap with depth data
@@ -273,7 +262,7 @@ func (ev *Env) WorldStep() {
 	ev.View3D.UpdatePose()
 	ev.View2D.UpdatePose()
 	ev.UpdateViews()
-	// ev.GrabEyeImg() // todo: this is not working in the first place,
+	ev.GrabEyeImg()
 	// and with goroutine rendering in core/renderwindow, it crashes because
 	// the main render texture for the view is stale.
 }
@@ -527,10 +516,8 @@ func (ev *Env) NoGUIRun() {
 	ev.MakeWorld()
 	ev.ConfigView3D(se)
 
-	img, err := ev.RenderEyeImg()
-	if err == nil {
+	img := ev.RenderEyeImg()
+	if img != nil {
 		imagex.Save(img, "eyer_0.png")
-	} else {
-		panic(err)
 	}
 }

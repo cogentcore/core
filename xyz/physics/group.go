@@ -19,6 +19,17 @@ type Group struct {
 	NodeBase
 }
 
+func (gp *Group) Update() {
+	gp.RunUpdaters()
+	gp.WalkDown(func(n tree.Node) bool {
+		if n.AsTree().This == gp.This {
+			return tree.Continue
+		}
+		n.(Node).Update()
+		return tree.Continue
+	})
+}
+
 func (gp *Group) InitAbs(par *NodeBase) {
 	gp.InitAbsBase(par)
 }

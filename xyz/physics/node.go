@@ -46,6 +46,9 @@ type Node interface {
 	// Use this for physics-based state updates.
 	// Body nodes should also update their bounding boxes.
 	Step(step float32)
+
+	// Update does [tree] updating to dynamically update nodes / tree config.
+	Update()
 }
 
 // NodeBase is the basic node, which has position, rotation, velocity
@@ -149,6 +152,10 @@ func (nb *NodeBase) RelToAbsBase(par *NodeBase) {
 func (nb *NodeBase) StepBase(step float32) {
 	nb.Abs.StepByAngVel(step)
 	nb.Abs.StepByLinVel(step)
+}
+
+func (nb *NodeBase) Update() {
+	nb.RunUpdaters()
 }
 
 // AsNode converts a [tree.Node] to a [Node] interface and a [Node3DBase] object,

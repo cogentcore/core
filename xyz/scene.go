@@ -103,6 +103,8 @@ type Scene struct {
 	// so it will automatically update after every ImageCopy call.
 	// If a persistent image is required, call [iox/imagex.CloneAsRGBA].
 	imgCopy image.RGBA `set:"-"`
+
+	isRendering bool
 }
 
 func (sc *Scene) Init() {

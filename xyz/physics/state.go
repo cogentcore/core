@@ -7,7 +7,10 @@ package physics
 import (
 	"math"
 
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tree"
 )
 
 // State contains the basic physical state including position, orientation, velocity.
@@ -35,8 +38,7 @@ func (ps *State) Defaults() {
 	}
 }
 
-///////////////////////////////////////////////////////
-// 	State updates
+//////// 	State updates
 
 // FromRel sets state from relative values compared to a parent state
 func (ps *State) FromRel(rel, par *State) {
@@ -76,8 +78,7 @@ func (ps *State) StepByLinVel(step float32) {
 	ps.Pos = ps.Pos.Add(ps.LinVel.MulScalar(step))
 }
 
-///////////////////////////////////////////////////////
-// 		Moving
+//////// 		Moving
 
 // Move moves (translates) Pos by given amount, and sets the LinVel to the given
 // delta -- this can be useful for Scripted motion to track movement.
@@ -104,11 +105,10 @@ func (ps *State) MoveOnAxisAbs(x, y, z, dist float32) {
 	ps.Pos.SetAdd(ps.LinVel)
 }
 
-///////////////////////////////////////////////////////
-// 		Rotating
+//////// 		Rotating
 
 // SetEulerRotation sets the rotation in Euler angles (degrees).
-func (ps *State) SetEulerRotation(x, y, z float32) {
+func (ps *State) SetEulerRotation(x, y, z float32) { //types:add
 	ps.Quat.SetFromEuler(math32.Vec3(x, y, z).MulScalar(math32.DegToRadFactor))
 }
 
@@ -157,26 +157,17 @@ func (ps *State) RotateEulerRad(x, y, z, angle float32) {
 	ps.Quat.SetMul(math32.NewQuatEuler(math32.Vec3(x, y, z)))
 }
 
+func (ps *State) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ps.SetEulerRotation).SetIcon(icons.Rotate90DegreesCcw)
+	})
+}
+
 /*
 
 // StateProps define the ToolBar and MenuBar for Form
 var StateProps = tree.Props{
 	"ToolBar": tree.PropSlice{
-		{"SetEulerRotation", tree.Props{
-			"desc": "Set the local rotation (relative to parent) using Euler angles, in degrees.",
-			"icon": "rotate-3d",
-			"Args": tree.PropSlice{
-				{"Pitch", tree.Props{
-					"desc": "rotation up / down along the X axis (in the Y-Z plane), e.g., the altitude (climbing, descending) for motion along the Z depth axis",
-				}},
-				{"Yaw", tree.Props{
-					"desc": "rotation along the Y axis (in the horizontal X-Z plane), e.g., the bearing or direction for motion along the Z depth axis",
-				}},
-				{"Roll", tree.Props{
-					"desc": "rotation along the Z axis (in the X-Y plane), e.g., the bank angle for motion along the Z depth axis",
-				}},
-			},
-		}},
 		{"SetAxisRotation", tree.Props{
 			"desc": "Set the local rotation (relative to parent) using Axis about which to rotate, and the angle.",
 			"icon": "rotate-3d",

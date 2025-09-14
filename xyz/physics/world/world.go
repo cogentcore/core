@@ -54,25 +54,23 @@ func (vw *View) Sync() bool {
 // Essential that both trees are already synchronized.
 func (vw *View) UpdatePose() {
 	vw.UpdatePoseNode(vw.World, vw.Root)
-	vw.Scene.SetNeedsUpdate()
 }
 
 // UpdateBodyView updates the display properties of given body name
 // recurses the tree until this body name is found.
 func (vw *View) UpdateBodyView(bodyNames ...string) {
 	vw.UpdateBodyViewNode(bodyNames, vw.World, vw.Root)
-	vw.Scene.SetNeedsUpdate()
 }
 
-// RenderOffNode does an offscreen render using given node
-// for the camera position and orientation.
-// Current scene camera is saved and restored
-func (vw *View) RenderOffNode(node physics.Node, cam *Camera) error {
+// RenderFromNode does an offscreen render using given node
+// for the camera position and orientation, returning the render image.
+// Current scene camera is saved and restored.
+func (vw *View) RenderFromNode(node physics.Node, cam *Camera) *image.NRGBA {
 	sc := vw.Scene
-	sc.UpdateNodesIfNeeded()
 	camnm := "eve-view-renderoff-save"
 	sc.SaveCamera(camnm)
 	defer sc.SetCamera(camnm)
+
 	sc.Camera.FOV = cam.FOV
 	sc.Camera.Near = cam.Near
 	sc.Camera.Far = cam.Far
@@ -83,26 +81,24 @@ func (vw *View) RenderOffNode(node physics.Node, cam *Camera) error {
 	sz := sc.Geom.Size
 	sc.Geom.Size = cam.Size
 	sc.Frame.SetSize(sc.Geom.Size) // nop if same
-	ok := sc.Render()
+
+	img := sc.RenderGrabImage()
 	sc.Geom.Size = sz
-	if !ok {
-		return errors.New("could not render scene")
-	}
-	return nil
+	return img
 }
 
-// Image returns the current rendered image
-func (vw *View) Image() (*image.RGBA, error) {
-	return vw.Scene.ImageCopy()
-}
+// // Image returns the current rendered image
+//
+//	func (vw *View) Image() (*image.RGBA, error) {
+//		return vw.Scene.ImageCopy()
+//	}
 
 // DepthImage returns the current rendered depth image
-func (vw *View) DepthImage() ([]float32, error) {
-	return vw.Scene.DepthImage()
-}
+// func (vw *View) DepthImage() ([]float32, error) {
+// 	return vw.Scene.DepthImage()
+// }
 
-///////////////////////////////////////////////////////////////
-// Sync, Config
+//////// Sync, Config
 
 // InitLibraryBody initializes Scene library with basic Solid shapes
 // based on bodies in the virtual world.  More complex visualizations
@@ -241,14 +237,10 @@ func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
 			}
 		}
 	}
-	if modall {
-		sc.SetNeedsUpdate()
-	}
 	return modall
 }
 
-///////////////////////////////////////////////////////////////
-// UpdatePose
+//////// UpdatePose
 
 // UpdatePoseNode updates the view pose values only from world tree.
 // Essential that both trees are already synchronized.
