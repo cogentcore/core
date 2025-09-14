@@ -12,22 +12,18 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BBox", 
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Body", IDName: "body", Doc: "Body is the common interface for all body types", Methods: []types.Method{{Name: "AsBodyBase", Doc: "AsBodyBase returns the body as a BodyBase", Returns: []string{"BodyBase"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyBase", IDName: "body-base", Doc: "BodyBase is the base type for all specific Body types", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Rigid", Doc: "rigid body properties, including mass, bounce, friction etc"}, {Name: "Vis", Doc: "visualization name -- looks up an entry in the scene library that provides the visual representation of this body"}, {Name: "Color", Doc: "default color of body for basic InitLibrary configuration"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyBase", IDName: "body-base", Doc: "BodyBase is the base type for all specific Body types", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Rigid", Doc: "rigid body properties, including mass, bounce, friction etc."}, {Name: "Color", Doc: "default color of body."}}})
 
 // NewBodyBase returns a new [BodyBase] with the given optional parent:
 // BodyBase is the base type for all specific Body types
 func NewBodyBase(parent ...tree.Node) *BodyBase { return tree.New[BodyBase](parent...) }
 
 // SetRigid sets the [BodyBase.Rigid]:
-// rigid body properties, including mass, bounce, friction etc
+// rigid body properties, including mass, bounce, friction etc.
 func (t *BodyBase) SetRigid(v Rigid) *BodyBase { t.Rigid = v; return t }
 
-// SetVis sets the [BodyBase.Vis]:
-// visualization name -- looks up an entry in the scene library that provides the visual representation of this body
-func (t *BodyBase) SetVis(v string) *BodyBase { t.Vis = v; return t }
-
 // SetColor sets the [BodyBase.Color]:
-// default color of body for basic InitLibrary configuration
+// default color of body.
 func (t *BodyBase) SetColor(v string) *BodyBase { t.Color = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Box", IDName: "box", Doc: "Box is a box body shape", Embeds: []types.Field{{Name: "BodyBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size of box in each dimension (units arbitrary, as long as they are all consistent -- meters is typical)"}}})
@@ -93,9 +89,9 @@ func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyPoint", IDName: "body-point", Doc: "BodyPoint contains a Body and a Point on that body", Fields: []types.Field{{Name: "Body"}, {Name: "Point"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", IDName: "node", Doc: "Node is the common interface for all nodes.", Methods: []types.Method{{Name: "AsNodeBase", Doc: "AsNodeBase returns a generic NodeBase for our node -- gives generic\naccess to all the base-level data structures without needing interface methods.", Returns: []string{"NodeBase"}}, {Name: "AsBody", Doc: "AsBody returns a generic Body interface for our node -- nil if not a Body", Returns: []string{"Body"}}, {Name: "GroupBBox", Doc: "GroupBBox sets bounding boxes for groups based on groups or bodies.\ncalled in a FuncDownMeLast traversal."}, {Name: "InitAbs", Doc: "InitAbs sets current Abs physical state parameters from Initial values\nwhich are local, relative to parent -- is passed the parent (nil = top).\nBody nodes should also set their bounding boxes.\nCalled in a FuncDownMeFirst traversal.", Args: []string{"par"}}, {Name: "RelToAbs", Doc: "RelToAbs updates current world Abs physical state parameters\nbased on Rel values added to updated Abs values at higher levels.\nAbs.LinVel is updated from the resulting change from prior position.\nThis is useful for manual updating of relative positions (scripted movement).\nIt is passed the parent (nil = top).\nBody nodes should also update their bounding boxes.\nCalled in a FuncDownMeFirst traversal.", Args: []string{"par"}}, {Name: "Step", Doc: "Step computes one update of the world Abs physical state parameters,\nusing *current* velocities -- add forces prior to calling.\nUse this for physics-based state updates.\nBody nodes should also update their bounding boxes.", Args: []string{"step"}}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", IDName: "node", Doc: "Node is the common interface for all nodes.", Methods: []types.Method{{Name: "AsNodeBase", Doc: "AsNodeBase returns a generic NodeBase for our node -- gives generic\naccess to all the base-level data structures without needing interface methods.", Returns: []string{"NodeBase"}}, {Name: "AsBody", Doc: "AsBody returns a generic Body interface for our node -- nil if not a Body", Returns: []string{"Body"}}, {Name: "GroupBBox", Doc: "GroupBBox sets bounding boxes for groups based on groups or bodies.\ncalled in a FuncDownMeLast traversal."}, {Name: "InitAbs", Doc: "InitAbs sets current Abs physical state parameters from Initial values\nwhich are local, relative to parent -- is passed the parent (nil = top).\nBody nodes should also set their bounding boxes.\nCalled in a FuncDownMeFirst traversal.", Args: []string{"par"}}, {Name: "RelToAbs", Doc: "RelToAbs updates current world Abs physical state parameters\nbased on Rel values added to updated Abs values at higher levels.\nAbs.LinVel is updated from the resulting change from prior position.\nThis is useful for manual updating of relative positions (scripted movement).\nIt is passed the parent (nil = top).\nBody nodes should also update their bounding boxes.\nCalled in a FuncDownMeFirst traversal.", Args: []string{"par"}}, {Name: "Step", Doc: "Step computes one update of the world Abs physical state parameters,\nusing *current* velocities -- add forces prior to calling.\nUse this for physics-based state updates.\nBody nodes should also update their bounding boxes.", Args: []string{"step"}}, {Name: "Update", Doc: "Update does [tree] updating to dynamically update nodes / tree config."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic node, which has position, rotation, velocity\nand computed bounding boxes, etc.\nThere are only three different kinds of Nodes: Group, Body, and Joint", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Dynamic", Doc: "Dynamic is whether this node can move. If it is false, then this is a Static node.\nAny top-level group that is not Dynamic is immediately pruned from further consideration,\nso top-level groups should be separated into Dynamic and Static nodes at the start."}, {Name: "Initial", Doc: "initial position, orientation, velocity in *local* coordinates (relative to parent)"}, {Name: "Rel", Doc: "current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom"}, {Name: "Abs", Doc: "current absolute (world) position, orientation, velocity"}, {Name: "BBox", Doc: "bounding box in world coordinates (aggregated for groups)"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic node, which has position, rotation, velocity\nand computed bounding boxes, etc.\nThere are only three different kinds of Nodes: Group, Body, and Joint", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Dynamic", Doc: "Dynamic is whether this node can move. If it is false, then this is a Static node.\nAny top-level group that is not Dynamic is immediately pruned from further consideration,\nso top-level groups should be separated into Dynamic and Static nodes at the start."}, {Name: "Initial", Doc: "initial position, orientation, velocity in *local* coordinates (relative to parent)"}, {Name: "Rel", Doc: "current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom"}, {Name: "Abs", Doc: "current absolute (world) position, orientation, velocity"}, {Name: "BBox", Doc: "bounding box in world coordinates (aggregated for groups)"}, {Name: "NewViewNode", Doc: "NewViewNode is a function that returns a new [xyz.Node]\nto represent this node. Groups make groups by default,\nand Body makes a default block solid shape."}, {Name: "InitViewNode", Doc: "InitViewNode is a function that initializes a new [xyz.Node]\nthat represents this physics node. Groups make group elements by default,\nand Body makes a default block solid shape."}}})
 
 // NewNodeBase returns a new [NodeBase] with the given optional parent:
 // NodeBase is the basic node, which has position, rotation, velocity
@@ -117,6 +113,18 @@ func (t *NodeBase) SetInitial(v State) *NodeBase { t.Initial = v; return t }
 // current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom
 func (t *NodeBase) SetRel(v State) *NodeBase { t.Rel = v; return t }
 
+// SetNewViewNode sets the [NodeBase.NewViewNode]:
+// NewViewNode is a function that returns a new [xyz.Node]
+// to represent this node. Groups make groups by default,
+// and Body makes a default block solid shape.
+func (t *NodeBase) SetNewViewNode(v func() tree.Node) *NodeBase { t.NewViewNode = v; return t }
+
+// SetInitViewNode sets the [NodeBase.InitViewNode]:
+// InitViewNode is a function that initializes a new [xyz.Node]
+// that represents this physics node. Groups make group elements by default,
+// and Body makes a default block solid shape.
+func (t *NodeBase) SetInitViewNode(v func(n tree.Node)) *NodeBase { t.InitViewNode = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Rigid", IDName: "rigid", Doc: "Rigid contains the full specification of a given object's basic physics\nproperties including position, orientation, velocity.  These", Fields: []types.Field{{Name: "InvMass", Doc: "1/mass -- 0 for no mass"}, {Name: "Bounce", Doc: "COR or coefficient of restitution -- how elastic is the collision i.e., final velocity / initial velocity"}, {Name: "Friction", Doc: "friction coefficient -- how much friction is generated by transverse motion"}, {Name: "Force", Doc: "record of computed force vector from last iteration"}, {Name: "RotInertia", Doc: "Last calculated rotational inertia matrix in local coords"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Sphere", IDName: "sphere", Doc: "Sphere is a spherical body shape.", Embeds: []types.Field{{Name: "BodyBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "radius"}}})
@@ -129,4 +137,4 @@ func NewSphere(parent ...tree.Node) *Sphere { return tree.New[Sphere](parent...)
 // radius
 func (t *Sphere) SetRadius(v float32) *Sphere { t.Radius = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.State", IDName: "state", Doc: "State contains the basic physical state including position, orientation, velocity.\nThese are only the values that can be either relative or absolute -- other physical\nstate values such as Mass should go in Rigid.", Fields: []types.Field{{Name: "Pos", Doc: "position of center of mass of object"}, {Name: "Quat", Doc: "rotation specified as a Quat"}, {Name: "LinVel", Doc: "linear velocity"}, {Name: "AngVel", Doc: "angular velocity"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.State", IDName: "state", Doc: "State contains the basic physical state including position, orientation, velocity.\nThese are only the values that can be either relative or absolute -- other physical\nstate values such as Mass should go in Rigid.", Methods: []types.Method{{Name: "SetEulerRotation", Doc: "SetEulerRotation sets the rotation in Euler angles (degrees).", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"x", "y", "z"}}}, Fields: []types.Field{{Name: "Pos", Doc: "position of center of mass of object"}, {Name: "Quat", Doc: "rotation specified as a Quat"}, {Name: "LinVel", Doc: "linear velocity"}, {Name: "AngVel", Doc: "angular velocity"}}})

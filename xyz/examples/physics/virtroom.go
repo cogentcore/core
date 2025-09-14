@@ -22,12 +22,10 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 	"cogentcore.org/core/xyz/physics/world"
-	"cogentcore.org/core/xyz/physics/world2d"
 	"cogentcore.org/core/xyz/xyzcore"
 )
 
@@ -87,14 +85,8 @@ type Env struct { //types:add
 	// 3D view of world
 	View3D *world.View
 
-	// view of world
-	View2D *world2d.View
-
 	// 3D visualization of the Scene
 	SceneEditor *xyzcore.SceneEditor
-
-	// 2D visualization of the Scene
-	Scene2D *core.SVG
 
 	// emer group
 	Emer *physics.Group `display:"-"`
@@ -157,24 +149,7 @@ func (ev *Env) MakeWorld() {
 func (ev *Env) WorldInit() { //types:add
 	ev.World.WorldInit()
 	if ev.View3D != nil {
-		ev.View3D.Sync()
-		ev.GrabEyeImg()
-	}
-	if ev.View2D != nil {
-		ev.View2D.Sync()
-	}
-}
-
-// ReMakeWorld rebuilds the world and re-syncs with gui
-func (ev *Env) ReMakeWorld() { //types:add
-	ev.MakeWorld()
-	ev.View3D.World = ev.World
-	if ev.View3D != nil {
-		ev.View3D.Sync()
-		ev.GrabEyeImg()
-	}
-	if ev.View2D != nil {
-		ev.View2D.Sync()
+		ev.View3D.Update()
 	}
 }
 
@@ -184,25 +159,11 @@ func (ev *Env) ConfigView3D(sc *xyz.Scene) {
 	wgp := xyz.NewGroup(sc)
 	wgp.SetName("world")
 	ev.View3D = world.NewView(ev.World, sc, wgp)
-	ev.View3D.InitLibrary() // this makes a basic library based on body shapes, sizes
-	// at this point the library can be updated to configure custom visualizations
-	// for any of the named bodies.
-	ev.View3D.Sync()
-}
-
-// ConfigView2D makes the 2D view
-func (ev *Env) ConfigView2D(sc *svg.SVG) {
-	wgp := svg.NewGroup(sc.Root)
-	wgp.SetName("world")
-	ev.View2D = world2d.NewView(ev.World, sc, wgp)
-	ev.View2D.InitLibrary() // this makes a basic library based on body shapes, sizes
-	// at this point the library can be updated to configure custom visualizations
-	// for any of the named bodies.
-	ev.View2D.Sync()
+	ev.View3D.Update()
 }
 
 // RenderEyeImg returns a snapshot from the perspective of Emer's right eye
-func (ev *Env) RenderEyeImg() *image.NRGBA {
+func (ev *Env) RenderEyeImg() image.Image {
 	return ev.View3D.RenderFromNode(ev.EyeR, &ev.Camera)
 }
 
@@ -229,13 +190,10 @@ func (ev *Env) ViewDepth(depth []float32) {
 	ev.DepthImage.NeedsRender()
 }
 
-// UpdateViews updates the 2D and 3D views of the scene
-func (ev *Env) UpdateViews() {
+// UpdateView tells 3D view it needs to update.
+func (ev *Env) UpdateView() {
 	if ev.SceneEditor.IsVisible() {
 		ev.SceneEditor.NeedsRender()
-	}
-	if ev.Scene2D.IsVisible() {
-		ev.Scene2D.NeedsRender()
 	}
 }
 
@@ -259,10 +217,9 @@ func (ev *Env) WorldStep() {
 		rot := 100.0 + 90.0*rand.Float32()
 		ev.Emer.Rel.RotateOnAxis(0, 1, 0, rot)
 	}
-	ev.View3D.UpdatePose()
-	ev.View2D.UpdatePose()
-	ev.UpdateViews()
+	ev.View3D.Update()
 	ev.GrabEyeImg()
+	ev.UpdateView()
 }
 
 // StepForward moves Emer forward in current facing direction one step, and takes GrabEyeImg
@@ -369,7 +326,6 @@ func (ev *Env) ConfigGUI() *core.Body {
 	tbvw := core.NewTabs(split)
 
 	scfr, _ := tbvw.NewTab("3D View")
-	twofr, _ := tbvw.NewTab("2D View")
 
 	split.SetSplits(.1, .2, .2, .5)
 
@@ -379,8 +335,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 		}
 	})
 
-	//////////////////////////////////////////
-	//    3D Scene
+	////////    3D Scene
 
 	ev.SceneEditor = xyzcore.NewSceneEditor(scfr)
 	ev.SceneEditor.UpdateWidget()
@@ -401,8 +356,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	se.SaveCamera("1")
 	se.SaveCamera("default")
 
-	//////////////////////////////////////////
-	//    Image
+	////////    Image
 
 	imfr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -417,91 +371,68 @@ func (ev *Env) ConfigGUI() *core.Body {
 	ev.DepthImage.SetName("depth-img")
 	ev.DepthImage.Image = image.NewRGBA(image.Rectangle{Max: ev.Camera.Size})
 
-	//////////////////////////////////////////
-	//    2D Scene
-
-	twov := core.NewSVG(twofr)
-	ev.Scene2D = twov
-	twov.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		twov.SVG.Root.ViewBox.Size.Set(ev.Width+4, ev.Depth+4)
-		twov.SVG.Root.ViewBox.Min.Set(-0.5*(ev.Width+4), -0.5*(ev.Depth+4))
-		twov.SetReadOnly(false)
-	})
-
-	ev.ConfigView2D(twov.SVG)
-
-	//////////////////////////////////////////
-	//    Toolbar
+	////////    Toolbar
 
 	b.AddTopBar(func(bar *core.Frame) {
-		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
-			tree.Add(p, func(w *core.Button) {
-				w.SetText("Edit Env").SetIcon(icons.Edit).
-					SetTooltip("Edit the settings for the environment").
-					OnClick(func(e events.Event) {
-						sv.SetStruct(ev)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
-			})
-			tree.Add(p, func(w *core.Separator) {})
-
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.Separator) {})
-
-			tree.Add(p, func(w *core.Button) {
-				w.SetText("README").SetIcon(icons.FileMarkdown).
-					SetTooltip("Open browser on README.").
-					OnClick(func(e events.Event) {
-						core.TheApp.OpenURL("https://github.com/emer/eve/blob/master/examples/virtroom/README.md")
-					})
-			})
-		})
+		core.NewToolbar(bar).Maker(ev.MakeToolbar)
 	})
 	return b
+}
+
+func (ev *Env) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
+	})
+	tree.Add(p, func(w *core.Separator) {})
+
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.Separator) {})
+
+	tree.Add(p, func(w *core.Button) {
+		w.SetText("README").SetIcon(icons.FileMarkdown).
+			SetTooltip("Open browser on README.").
+			OnClick(func(e events.Event) {
+				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/master/xyz/examples/physics/README.md")
+			})
+	})
 }
 
 func (ev *Env) NoGUIRun() {

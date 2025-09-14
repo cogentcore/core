@@ -86,6 +86,7 @@ func (gp *Group) WorldDynGroupBBox() {
 
 // WorldInit does the full tree InitAbs and GroupBBox updates
 func (gp *Group) WorldInit() {
+	gp.Update()
 	gp.WalkDown(func(tn tree.Node) bool {
 		n, _ := AsNode(tn)
 		if n == nil {

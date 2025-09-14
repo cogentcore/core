@@ -16,13 +16,10 @@ type Body interface {
 type BodyBase struct {
 	NodeBase
 
-	// rigid body properties, including mass, bounce, friction etc
+	// rigid body properties, including mass, bounce, friction etc.
 	Rigid Rigid
 
-	// visualization name -- looks up an entry in the scene library that provides the visual representation of this body
-	Vis string
-
-	// default color of body for basic InitLibrary configuration
+	// default color of body.
 	Color string
 }
 
