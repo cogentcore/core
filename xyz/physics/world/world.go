@@ -10,6 +10,9 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 )
@@ -73,3 +76,33 @@ func (vw *View) RenderFromNode(node physics.Node, cam *Camera) image.Image {
 // func (vw *View) DepthImage() ([]float32, error) {
 // 	return vw.Scene.DepthImage()
 // }
+
+// MakeStateToolbar returns a toolbar function for physics state updates,
+// calling the given updt function after making the change.
+func MakeStateToolbar(ps *physics.State, updt func()) func(p *tree.Plan) {
+	return func(p *tree.Plan) {
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.SetEulerRotation).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.SetAxisRotation).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.RotateEuler).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.RotateOnAxis).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.EulerRotation).SetAfterFunc(updt).SetShowReturn(true).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.Separator) {})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.MoveOnAxis).SetAfterFunc(updt).SetIcon(icons.MoveItem)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.MoveOnAxisAbs).SetAfterFunc(updt).SetIcon(icons.MoveItem)
+		})
+
+	}
+}

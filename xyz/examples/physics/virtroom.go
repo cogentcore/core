@@ -355,11 +355,17 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	////////    3D Scene
 
+	etb := core.NewToolbar(scfr)
 	ev.SceneEditor = xyzcore.NewSceneEditor(scfr)
 	ev.SceneEditor.UpdateWidget()
 	se := ev.SceneEditor.SceneXYZ()
 	ev.ConfigScene(se)
 	ev.ConfigView3D(se)
+
+	etb.Maker(world.MakeStateToolbar(&ev.Emer.Rel, func() {
+		ev.View3D.Update()
+		ev.SceneEditor.NeedsRender()
+	}))
 
 	se.Camera.Pose.Pos = math32.Vec3(0, 40, 3.5)
 	se.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))

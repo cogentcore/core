@@ -7,10 +7,7 @@ package physics
 import (
 	"math"
 
-	"cogentcore.org/core/core"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/tree"
 )
 
 // State contains the basic physical state including position, orientation, velocity.
@@ -91,7 +88,7 @@ func (ps *State) Move(delta math32.Vector3) {
 // relative to the current rotation orientation.
 // The axis is normalized prior to aplying the distance factor.
 // Sets the LinVel to motion vector.
-func (ps *State) MoveOnAxis(x, y, z, dist float32) {
+func (ps *State) MoveOnAxis(x, y, z, dist float32) { //types:add
 	ps.LinVel = math32.Vec3(x, y, z).Normal().MulQuat(ps.Quat).MulScalar(dist)
 	ps.Pos.SetAdd(ps.LinVel)
 }
@@ -100,7 +97,7 @@ func (ps *State) MoveOnAxis(x, y, z, dist float32) {
 // in absolute X,Y,Z coordinates (does not apply the Quat rotation factor.
 // The axis is normalized prior to aplying the distance factor.
 // Sets the LinVel to motion vector.
-func (ps *State) MoveOnAxisAbs(x, y, z, dist float32) {
+func (ps *State) MoveOnAxisAbs(x, y, z, dist float32) { //types:add
 	ps.LinVel = math32.Vec3(x, y, z).Normal().MulScalar(dist)
 	ps.Pos.SetAdd(ps.LinVel)
 }
@@ -118,7 +115,7 @@ func (ps *State) SetEulerRotationRad(x, y, z float32) {
 }
 
 // EulerRotation returns the current rotation in Euler angles (degrees).
-func (ps *State) EulerRotation() math32.Vector3 {
+func (ps *State) EulerRotation() math32.Vector3 { //types:add
 	return ps.Quat.ToEuler().MulScalar(math32.RadToDegFactor)
 }
 
@@ -128,7 +125,7 @@ func (ps *State) EulerRotationRad() math32.Vector3 {
 }
 
 // SetAxisRotation sets rotation from local axis and angle in degrees.
-func (ps *State) SetAxisRotation(x, y, z, angle float32) {
+func (ps *State) SetAxisRotation(x, y, z, angle float32) { //types:add
 	ps.Quat.SetFromAxisAngle(math32.Vec3(x, y, z), math32.DegToRad(angle))
 }
 
@@ -138,7 +135,7 @@ func (ps *State) SetAxisRotationRad(x, y, z, angle float32) {
 }
 
 // RotateOnAxis rotates around the specified local axis the specified angle in degrees.
-func (ps *State) RotateOnAxis(x, y, z, angle float32) {
+func (ps *State) RotateOnAxis(x, y, z, angle float32) { //types:add
 	ps.Quat.SetMul(math32.NewQuatAxisAngle(math32.Vec3(x, y, z), math32.DegToRad(angle)))
 }
 
@@ -148,7 +145,7 @@ func (ps *State) RotateOnAxisRad(x, y, z, angle float32) {
 }
 
 // RotateEuler rotates by given Euler angles (in degrees) relative to existing rotation.
-func (ps *State) RotateEuler(x, y, z float32) {
+func (ps *State) RotateEuler(x, y, z float32) { //types:add
 	ps.Quat.SetMul(math32.NewQuatEuler(math32.Vec3(x, y, z).MulScalar(math32.DegToRadFactor)))
 }
 
@@ -156,80 +153,3 @@ func (ps *State) RotateEuler(x, y, z float32) {
 func (ps *State) RotateEulerRad(x, y, z, angle float32) {
 	ps.Quat.SetMul(math32.NewQuatEuler(math32.Vec3(x, y, z)))
 }
-
-func (ps *State) MakeToolbar(p *tree.Plan) {
-	tree.Add(p, func(w *core.FuncButton) {
-		w.SetFunc(ps.SetEulerRotation).SetIcon(icons.Rotate90DegreesCcw)
-	})
-}
-
-/*
-
-// StateProps define the ToolBar and MenuBar for Form
-var StateProps = tree.Props{
-	"ToolBar": tree.PropSlice{
-		{"SetAxisRotation", tree.Props{
-			"desc": "Set the local rotation (relative to parent) using Axis about which to rotate, and the angle.",
-			"icon": "rotate-3d",
-			"Args": tree.PropSlice{
-				{"X", tree.BlankProp{}},
-				{"Y", tree.BlankProp{}},
-				{"Z", tree.BlankProp{}},
-				{"Angle", tree.BlankProp{}},
-			},
-		}},
-		{"RotateEuler", tree.Props{
-			"desc": "rotate (relative to current rotation) using Euler angles, in degrees.",
-			"icon": "rotate-3d",
-			"Args": tree.PropSlice{
-				{"Pitch", tree.Props{
-					"desc": "rotation up / down along the X axis (in the Y-Z plane), e.g., the altitude (climbing, descending) for motion along the Z depth axis",
-				}},
-				{"Yaw", tree.Props{
-					"desc": "rotation along the Y axis (in the horizontal X-Z plane), e.g., the bearing or direction for motion along the Z depth axis",
-				}},
-				{"Roll", tree.Props{
-					"desc": "rotation along the Z axis (in the X-Y plane), e.g., the bank angle for motion along the Z depth axis",
-				}},
-			},
-		}},
-		{"RotateOnAxis", tree.Props{
-			"desc": "Rotate (relative to current rotation) using Axis about which to rotate, and the angle.",
-			"icon": "rotate-3d",
-			"Args": tree.PropSlice{
-				{"X", tree.BlankProp{}},
-				{"Y", tree.BlankProp{}},
-				{"Z", tree.BlankProp{}},
-				{"Angle", tree.BlankProp{}},
-			},
-		}},
-		{"EulerRotation", tree.Props{
-			"desc":        "The local rotation (relative to parent) in Euler angles in degrees (X = Pitch, Y = Yaw, Z = Roll)",
-			"icon":        "rotate-3d",
-			"show-return": "true",
-		}},
-		{"sep-rot", tree.BlankProp{}},
-		{"MoveOnAxis", tree.Props{
-			"desc": "Move given distance on given X,Y,Z axis relative to current rotation orientation.",
-			"icon": "pan",
-			"Args": tree.PropSlice{
-				{"X", tree.BlankProp{}},
-				{"Y", tree.BlankProp{}},
-				{"Z", tree.BlankProp{}},
-				{"Dist", tree.BlankProp{}},
-			},
-		}},
-		{"MoveOnAxisAbs", tree.Props{
-			"desc": "Move given distance on given X,Y,Z axis in absolute coords, not relative to current rotation orientation.",
-			"icon": "pan",
-			"Args": tree.PropSlice{
-				{"X", tree.BlankProp{}},
-				{"Y", tree.BlankProp{}},
-				{"Z", tree.BlankProp{}},
-				{"Dist", tree.BlankProp{}},
-			},
-		}},
-	},
-}
-
-*/
