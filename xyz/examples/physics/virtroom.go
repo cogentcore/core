@@ -263,8 +263,6 @@ func (ev *Env) WorldStep() {
 	ev.View2D.UpdatePose()
 	ev.UpdateViews()
 	ev.GrabEyeImg()
-	// and with goroutine rendering in core/renderwindow, it crashes because
-	// the main render texture for the view is stale.
 }
 
 // StepForward moves Emer forward in current facing direction one step, and takes GrabEyeImg

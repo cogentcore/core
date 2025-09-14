@@ -17,17 +17,17 @@ import (
 	"cogentcore.org/core/xyz/physics"
 )
 
-// View connects a Virtual World with a Xyz Scene to visualize the world,
-// including ability to render offscreen
+// View connects a Virtual World with an [xyz.Scene] to visualize the world,
+// including ability to render offscreen.
 type View struct {
 
-	// the root Group node of the virtual world
+	// World is the root Group node of the virtual world
 	World *physics.Group
 
-	// the scene object for visualizing
+	// Scene is the [xyz.Scene] object for visualizing.
 	Scene *xyz.Scene
 
-	// the root Group node in the Scene under which the world is rendered
+	// Root is the root Group node in the Scene under which the world is rendered.
 	Root *xyz.Group
 }
 
