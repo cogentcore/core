@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// package world implements visualization of [physics] using [xyz]
+// 3D graphics.
 package world
 
 //go:generate core generate -add-types
@@ -17,9 +19,9 @@ import (
 	"cogentcore.org/core/xyz/physics"
 )
 
-// View connects a Virtual World with an [xyz.Scene] to visualize the world,
+// World connects a Virtual World with an [xyz.Scene] to visualize the world,
 // including ability to render offscreen.
-type View struct {
+type World struct {
 
 	// World is the root Group node of the virtual world
 	World *physics.Group
@@ -31,28 +33,36 @@ type View struct {
 	Root *xyz.Group
 }
 
-// NewView returns a new View that links given world with given scene and root group
-func NewView(world *physics.Group, sc *xyz.Scene, root *xyz.Group) *View {
-	vw := &View{World: world, Scene: sc, Root: root}
-	vw.Init()
-	return vw
+// NewWorld returns a new World that links given [physics] world
+// (top level Group) with given [xyz.Scene], making a
+// top-level Root group in the scene.
+func NewWorld(world *physics.Group, sc *xyz.Scene) *World {
+	rgp := xyz.NewGroup(sc)
+	rgp.SetName("world")
+	wr := &World{World: world, Scene: sc, Root: rgp}
+	GroupInit(wr.World, rgp)
+	wr.Update()
+	return wr
 }
 
-// Init performs initialization at New.
-func (vw *View) Init() {
-	GroupInit(vw.World, vw.Root)
+// Init initializes the physics world, e.g., at start of a new sim run.
+func (wr *World) Init() {
+	wr.World.WorldInit()
+	wr.Update()
 }
 
 // Update updates the view from current physics node state.
-func (vw *View) Update() {
-	vw.Scene.Update()
+func (wr *World) Update() {
+	if wr.Scene != nil {
+		wr.Scene.Update()
+	}
 }
 
 // RenderFromNode does an offscreen render using given node
 // for the camera position and orientation, returning the render image.
 // Current scene camera is saved and restored.
-func (vw *View) RenderFromNode(node physics.Node, cam *Camera) image.Image {
-	sc := vw.Scene
+func (wr *World) RenderFromNode(node physics.Node, cam *Camera) image.Image {
+	sc := wr.Scene
 	camnm := "physics-view-rendernode-save"
 	sc.SaveCamera(camnm)
 	defer sc.SetCamera(camnm)
@@ -73,7 +83,7 @@ func (vw *View) RenderFromNode(node physics.Node, cam *Camera) image.Image {
 }
 
 // DepthImage returns the current rendered depth image
-// func (vw *View) DepthImage() ([]float32, error) {
+// func (vw *World) DepthImage() ([]float32, error) {
 // 	return vw.Scene.DepthImage()
 // }
 

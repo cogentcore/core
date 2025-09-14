@@ -12,6 +12,10 @@ import (
 	"cogentcore.org/core/xyz/physics"
 )
 
+// todo: add type that manages a world, view etc -- no need to replicate that
+// and change name of world package to something better -- confusing, although
+// the new type will be world so actually that is ok.
+
 // Add adds given physics node to the [tree.Plan], using NewView
 // function on the node, or default.
 func Add(p *tree.Plan, nb *physics.NodeBase) {

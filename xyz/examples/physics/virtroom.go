@@ -82,16 +82,13 @@ type Env struct { //types:add
 	// color map to use for rendering depth map
 	DepthMap core.ColorMapName
 
-	// world
-	World *physics.Group `display:"-"`
-
-	// 3D view of world
-	View3D *world.View
+	// The whole physics World, including visualization.
+	World *world.World
 
 	// 3D visualization of the Scene
 	SceneEditor *xyzcore.SceneEditor
 
-	// emer group
+	// emer object
 	Emer *physics.Group `display:"-"`
 
 	// Right eye of emer
@@ -120,53 +117,41 @@ func (ev *Env) Defaults() {
 	ev.Camera.FOV = 90
 }
 
-func (ev *Env) ConfigScene(se *xyz.Scene) {
-	ev.SceneEditor.Styler(func(s *styles.Style) {
-		se.Background = colors.Scheme.Select.Container
-	})
-	xyz.NewAmbient(se, "ambient", 0.3, xyz.DirectSun)
+// MakePhysicsWorld constructs a new virtual physics world.
+func (ev *Env) MakePhysicsWorld() *physics.Group {
+	pw := physics.NewGroup()
+	pw.SetName("RoomWorld")
 
-	dir := xyz.NewDirectional(se, "dir", 1, xyz.DirectSun)
+	ev.MakeRoom(pw, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
+	ev.MakeEmer(pw, "emer", ev.EmerHt)
+	pw.WorldInit()
+	return pw
+}
+
+func (ev *Env) MakeWorld(sc *xyz.Scene) {
+	pw := ev.MakePhysicsWorld()
+	sc.Background = colors.Scheme.Select.Container
+	xyz.NewAmbient(sc, "ambient", 0.3, xyz.DirectSun)
+
+	dir := xyz.NewDirectional(sc, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
-	// grtx := xyz.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
-	// floorp := xyz.NewPlane(se, "floor-plane", 100, 100)
-	// floor := xyz.NewSolid(se, "floor").SetMesh(floorp).
-	// 	SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
-	// floor.Mat.Tiling.Repeat.Set(40, 40)
+	ev.World = world.NewWorld(pw, sc)
 }
 
-// MakeWorld constructs a new virtual physics world
-func (ev *Env) MakeWorld() {
-	ev.World = physics.NewGroup()
-	ev.World.SetName("RoomWorld")
-
-	ev.MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
-	ev.MakeEmer(ev.World, "emer", ev.EmerHt)
-
-	ev.World.WorldInit()
-}
-
-// InitWorld does init on world and re-syncs
+// InitWorld does init on world.
 func (ev *Env) WorldInit() { //types:add
-	ev.World.WorldInit()
-	if ev.View3D != nil {
-		ev.View3D.Update()
-	}
+	ev.World.Init()
 }
 
 // ConfigView3D makes the 3D view
 func (ev *Env) ConfigView3D(sc *xyz.Scene) {
 	// sc.MultiSample = 1 // we are using depth grab so we need this = 1
-	wgp := xyz.NewGroup(sc)
-	wgp.SetName("world")
-	ev.View3D = world.NewView(ev.World, sc, wgp)
-	ev.View3D.Update()
 }
 
 // RenderEyeImg returns a snapshot from the perspective of Emer's right eye
 func (ev *Env) RenderEyeImg() image.Image {
-	return ev.View3D.RenderFromNode(ev.EyeR, &ev.Camera)
+	return ev.World.RenderFromNode(ev.EyeR, &ev.Camera)
 }
 
 // GrabEyeImg takes a snapshot from the perspective of Emer's right eye
@@ -201,9 +186,10 @@ func (ev *Env) UpdateView() {
 
 // WorldStep does one step of the world
 func (ev *Env) WorldStep() {
-	ev.World.Update() // only need to call if there are updaters added to world
-	ev.World.WorldRelToAbs()
-	cts := ev.World.WorldCollide(physics.DynsTopGps)
+	pw := ev.World.World
+	pw.Update() // only need to call if there are updaters added to world
+	pw.WorldRelToAbs()
+	cts := pw.WorldCollide(physics.DynsTopGps)
 	ev.Contacts = nil
 	for _, cl := range cts {
 		if len(cl) > 1 {
@@ -222,7 +208,7 @@ func (ev *Env) WorldStep() {
 		rot := 100.0 + 90.0*rand.Float32()
 		ev.Emer.Rel.RotateOnAxis(0, 1, 0, rot)
 	}
-	ev.View3D.Update()
+	ev.World.Update()
 	ev.GrabEyeImg()
 	ev.UpdateView()
 }
@@ -350,16 +336,12 @@ func (ev *Env) ConfigGUI() *core.Body {
 	// vgpu.Debug = true
 
 	b := core.NewBody("virtroom").SetTitle("Emergent Virtual Engine")
-
-	ev.MakeWorld()
-
 	split := core.NewSplits(b)
 
-	tv := core.NewTree(core.NewFrame(split)).SyncTree(ev.World)
+	tv := core.NewTree(core.NewFrame(split))
 	sv := core.NewForm(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
-
 	scfr, _ := tbvw.NewTab("3D View")
 
 	split.SetSplits(.1, .2, .2, .5)
@@ -375,27 +357,28 @@ func (ev *Env) ConfigGUI() *core.Body {
 	etb := core.NewToolbar(scfr)
 	ev.SceneEditor = xyzcore.NewSceneEditor(scfr)
 	ev.SceneEditor.UpdateWidget()
-	se := ev.SceneEditor.SceneXYZ()
-	ev.ConfigScene(se)
-	ev.ConfigView3D(se)
+	sc := ev.SceneEditor.SceneXYZ()
+	ev.MakeWorld(sc)
+	tv.SyncTree(ev.World.World)
 
+	// local toolbar for manipulating emer
 	etb.Maker(world.MakeStateToolbar(&ev.Emer.Rel, func() {
-		ev.View3D.Update()
+		ev.World.Update()
 		ev.SceneEditor.NeedsRender()
 	}))
 
-	se.Camera.Pose.Pos = math32.Vec3(0, 40, 3.5)
-	se.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
-	se.SaveCamera("3")
+	sc.Camera.Pose.Pos = math32.Vec3(0, 40, 3.5)
+	sc.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
+	sc.SaveCamera("3")
 
-	se.Camera.Pose.Pos = math32.Vec3(0, 20, 30)
-	se.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
-	se.SaveCamera("2")
+	sc.Camera.Pose.Pos = math32.Vec3(0, 20, 30)
+	sc.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
+	sc.SaveCamera("2")
 
-	se.Camera.Pose.Pos = math32.Vec3(-.86, .97, 2.7)
-	se.Camera.LookAt(math32.Vec3(0, .8, 0), math32.Vec3(0, 1, 0))
-	se.SaveCamera("1")
-	se.SaveCamera("default")
+	sc.Camera.Pose.Pos = math32.Vec3(-.86, .97, 2.7)
+	sc.Camera.LookAt(math32.Vec3(0, .8, 0), math32.Vec3(0, 1, 0))
+	sc.SaveCamera("1")
+	sc.SaveCamera("default")
 
 	////////    Image
 
@@ -481,10 +464,8 @@ func (ev *Env) NoGUIRun() {
 	if err != nil {
 		panic(err)
 	}
-	se := world.NoDisplayScene(gp, dev)
-	ev.ConfigScene(se)
-	ev.MakeWorld()
-	ev.ConfigView3D(se)
+	sc := world.NoDisplayScene(gp, dev)
+	ev.MakeWorld(sc)
 
 	img := ev.RenderEyeImg()
 	if img != nil {
