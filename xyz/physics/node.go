@@ -83,6 +83,9 @@ type NodeBase struct {
 	// that represents this physics node. If nil, Groups make Group children,
 	// and bodies configure corresponding Solid shape.
 	InitView func(n tree.Node)
+
+	// View is the current view node for this node, set when made.
+	View tree.Node `set:"-"`
 }
 
 func (nb *NodeBase) Init() {

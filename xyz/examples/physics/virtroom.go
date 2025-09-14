@@ -49,6 +49,9 @@ func main() {
 // Env encapsulates the virtual environment
 type Env struct { //types:add
 
+	// if true, emer is angry: changes face color
+	EmerAngry bool
+
 	// height of emer
 	EmerHt float32
 
@@ -198,6 +201,7 @@ func (ev *Env) UpdateView() {
 
 // WorldStep does one step of the world
 func (ev *Env) WorldStep() {
+	ev.World.Update() // only need to call if there are updaters added to world
 	ev.World.WorldRelToAbs()
 	cts := ev.World.WorldCollide(physics.DynsTopGps)
 	ev.Contacts = nil
@@ -211,7 +215,9 @@ func (ev *Env) WorldStep() {
 			}
 		}
 	}
+	ev.EmerAngry = false
 	if len(ev.Contacts) > 1 { // turn around
+		ev.EmerAngry = true
 		fmt.Printf("hit wall: turn around!\n")
 		rot := 100.0 + 90.0*rand.Float32()
 		ev.Emer.Rel.RotateOnAxis(0, 1, 0, rot)
@@ -311,6 +317,17 @@ func (ev *Env) MakeEmer(par *physics.Group, name string, height float32) {
 					tree.AddAt(p, "head", func(n *physics.Box) {
 						n.SetSize(math32.Vec3(headsz, headsz, headsz)).
 							SetColor("tan").SetDynamic(true).SetInitPos(math32.Vec3(0, 0, 0))
+						n.InitView = func(vn tree.Node) {
+							sld := vn.(*xyz.Solid)
+							world.BoxInit(n, sld)
+							sld.Updater(func() {
+								clr := n.Color
+								if ev.EmerAngry {
+									clr = "pink"
+								}
+								world.UpdateColor(clr, n.View.(*xyz.Solid))
+							})
+						}
 					})
 					tree.AddAt(p, "eye-l", func(n *physics.Box) {
 						n.SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
