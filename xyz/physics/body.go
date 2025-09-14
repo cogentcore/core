@@ -32,3 +32,7 @@ func (bb *BodyBase) AsBodyBase() *BodyBase {
 }
 
 func (bb *BodyBase) GroupBBox() {}
+
+func (bb *BodyBase) Init() {
+	// not calling Updater(UpdateFromMake) here -- no children
+}
