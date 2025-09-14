@@ -12,9 +12,11 @@ import (
 	"cogentcore.org/core/xyz/physics"
 )
 
-func (vw *View) nodePlanAdd(p *tree.Plan, nb *physics.NodeBase) {
-	newFunc := nb.NewViewNode
-	initFunc := nb.InitViewNode
+// Add adds given node to the [tree.Plan], using NewView
+// and InitView functions on the node, or default ones.
+func Add(p *tree.Plan, nb *physics.NodeBase) {
+	newFunc := nb.NewView
+	initFunc := nb.InitView
 	if newFunc == nil {
 		if _, ok := nb.This.(*physics.Group); ok {
 			newFunc = func() tree.Node {
@@ -30,108 +32,114 @@ func (vw *View) nodePlanAdd(p *tree.Plan, nb *physics.NodeBase) {
 		switch x := nb.This.(type) {
 		case *physics.Group:
 			initFunc = func(n tree.Node) {
-				vw.groupViewInit(x, n.(*xyz.Group))
+				GroupInit(x, n.(*xyz.Group))
 			}
 		case *physics.Box:
 			initFunc = func(n tree.Node) {
-				vw.boxViewInit(x, n.(*xyz.Solid))
+				BoxInit(x, n.(*xyz.Solid))
 			}
 		case *physics.Cylinder:
 			initFunc = func(n tree.Node) {
-				vw.cylinderViewInit(x, n.(*xyz.Solid))
+				CylinderInit(x, n.(*xyz.Solid))
 			}
 		case *physics.Capsule:
 			initFunc = func(n tree.Node) {
-				vw.capsuleViewInit(x, n.(*xyz.Solid))
+				CapsuleInit(x, n.(*xyz.Solid))
 			}
 		case *physics.Sphere:
 			initFunc = func(n tree.Node) {
-				vw.sphereViewInit(x, n.(*xyz.Solid))
+				SphereInit(x, n.(*xyz.Solid))
 			}
 		}
 	}
 	p.Add(nb.Name, newFunc, initFunc)
 }
 
-// groupViewInit is the default InitViewNode function for groups.
-func (vw *View) groupViewInit(gp *physics.Group, vgp *xyz.Group) {
+// GroupInit is the default InitView function for groups.
+func GroupInit(gp *physics.Group, vgp *xyz.Group) {
 	vgp.Maker(func(p *tree.Plan) {
 		for _, c := range gp.Children {
-			nb := c.(physics.Node).AsNodeBase()
-			vw.nodePlanAdd(p, nb)
+			Add(p, c.(physics.Node).AsNodeBase())
 		}
 	})
 	vgp.Updater(func() {
-		vw.nodeUpdateViewPose(gp.AsNodeBase(), vgp.AsNodeBase())
+		UpdatePose(gp.AsNodeBase(), vgp.AsNodeBase())
 	})
 }
 
-// nodeUpdateViewPose updates the view node pose parameters
-func (vw *View) nodeUpdateViewPose(nd *physics.NodeBase, vn *xyz.NodeBase) {
+// UpdatePose updates the view node pose from physics node state.
+func UpdatePose(nd *physics.NodeBase, vn *xyz.NodeBase) {
 	vn.Pose.Pos = nd.Rel.Pos
 	vn.Pose.Quat = nd.Rel.Quat
 }
 
-// bodyViewUpdate is the default Updater function for [physics.BodyBase].
-func (vw *View) bodyViewUpdate(bd *physics.BodyBase, sld *xyz.Solid) {
-	vw.nodeUpdateViewPose(bd.AsNodeBase(), sld.AsNodeBase())
+// UpdateColor updates the view color for [physics.BodyBase] nodes.
+func UpdateColor(bd *physics.BodyBase, sld *xyz.Solid) {
 	if bd.Color != "" {
 		sld.Material.Color = errors.Log1(colors.FromString(bd.Color))
 	}
 }
 
-// boxViewInit is the default InitViewNode function for [physics.Box].
-func (vw *View) boxViewInit(bx *physics.Box, sld *xyz.Solid) {
+// BoxInit is the default InitView function for [physics.Box].
+// Only updates Pose in Updater: if node will change size or color,
+// add updaters for that.
+func BoxInit(bx *physics.Box, sld *xyz.Solid) {
 	mnm := "physics.Box"
-	ms, _ := sld.Scene.MeshByName(mnm)
-	if ms == nil {
-		ms = xyz.NewBox(sld.Scene, mnm, 1, 1, 1)
+	if ms, _ := sld.Scene.MeshByName(mnm); ms == nil {
+		xyz.NewBox(sld.Scene, mnm, 1, 1, 1)
 	}
 	sld.SetMeshName(mnm)
+	sld.Pose.Scale = bx.Size
+	UpdateColor(bx.AsBodyBase(), sld)
 	sld.Updater(func() {
-		sld.Pose.Scale = bx.Size
-		vw.bodyViewUpdate(bx.AsBodyBase(), sld)
+		UpdatePose(bx.AsNodeBase(), sld.AsNodeBase())
 	})
 }
 
-// cylinderViewInit is the default InitViewNode function for [physics.Cylinder].
-func (vw *View) cylinderViewInit(cy *physics.Cylinder, sld *xyz.Solid) {
+// CylinderInit is the default InitView function for [physics.Cylinder].
+// Only updates Pose in Updater: if node will change size or color,
+// add updaters for that.
+func CylinderInit(cy *physics.Cylinder, sld *xyz.Solid) {
 	mnm := "physics.Cylinder"
-	ms, _ := sld.Scene.MeshByName(mnm)
-	if ms == nil {
-		ms = xyz.NewCylinder(sld.Scene, mnm, 1, 1, 32, 1, true, true)
+	if ms, _ := sld.Scene.MeshByName(mnm); ms == nil {
+		xyz.NewCylinder(sld.Scene, mnm, 1, 1, 32, 1, true, true)
 	}
 	sld.SetMeshName(mnm)
+	sld.Pose.Scale.Set(cy.BotRad, cy.Height, cy.BotRad)
+	UpdateColor(cy.AsBodyBase(), sld)
 	sld.Updater(func() {
-		sld.Pose.Scale.Set(cy.BotRad, cy.Height, cy.BotRad)
-		vw.bodyViewUpdate(cy.AsBodyBase(), sld)
+		UpdatePose(cy.AsNodeBase(), sld.AsNodeBase())
 	})
 }
 
-// capsuleViewInit is the default InitViewNode function for [physics.Capsule].
-func (vw *View) capsuleViewInit(cp *physics.Capsule, sld *xyz.Solid) {
+// CapsuleInit is the default InitView function for [physics.Capsule].
+// Only updates Pose in Updater: if node will change size or color,
+// add updaters for that.
+func CapsuleInit(cp *physics.Capsule, sld *xyz.Solid) {
 	mnm := "physics.Capsule"
-	ms, _ := sld.Scene.MeshByName(mnm)
-	if ms == nil {
+	if ms, _ := sld.Scene.MeshByName(mnm); ms == nil {
 		ms = xyz.NewCapsule(sld.Scene, mnm, 1, .2, 32, 1)
 	}
 	sld.SetMeshName(mnm)
+	sld.Pose.Scale.Set(cp.BotRad/.2, cp.Height/1.4, cp.BotRad/.2)
+	UpdateColor(cp.AsBodyBase(), sld)
 	sld.Updater(func() {
-		sld.Pose.Scale.Set(cp.BotRad/.2, cp.Height/1.4, cp.BotRad/.2)
-		vw.bodyViewUpdate(cp.AsBodyBase(), sld)
+		UpdatePose(cp.AsNodeBase(), sld.AsNodeBase())
 	})
 }
 
-// sphereViewInit is the default InitViewNode function for [physics.Sphere].
-func (vw *View) sphereViewInit(sp *physics.Sphere, sld *xyz.Solid) {
+// SphereInit is the default InitView function for [physics.Sphere].
+// Only updates Pose in Updater: if node will change size or color,
+// add updaters for that.
+func SphereInit(sp *physics.Sphere, sld *xyz.Solid) {
 	mnm := "physics.Sphere"
-	ms, _ := sld.Scene.MeshByName(mnm)
-	if ms == nil {
+	if ms, _ := sld.Scene.MeshByName(mnm); ms == nil {
 		ms = xyz.NewSphere(sld.Scene, mnm, 1, 32)
 	}
 	sld.SetMeshName(mnm)
+	sld.Pose.Scale.SetScalar(sp.Radius)
+	UpdateColor(sp.AsBodyBase(), sld)
 	sld.Updater(func() {
-		sld.Pose.Scale.SetScalar(sp.Radius)
-		vw.bodyViewUpdate(sp.AsBodyBase(), sld)
+		UpdatePose(sp.AsNodeBase(), sld.AsNodeBase())
 	})
 }

@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Camera defines the properties of a camera needed for offscreen rendering
+// Camera defines the properties of a camera needed for rendering from a node.
 type Camera struct {
 
 	// size of image to record

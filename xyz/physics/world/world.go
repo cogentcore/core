@@ -37,7 +37,7 @@ func NewView(world *physics.Group, sc *xyz.Scene, root *xyz.Group) *View {
 
 // Init performs initialization at New.
 func (vw *View) Init() {
-	vw.groupViewInit(vw.World, vw.Root)
+	GroupInit(vw.World, vw.Root)
 }
 
 // Update updates the view from current physics node state.

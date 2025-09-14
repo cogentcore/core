@@ -74,15 +74,15 @@ type NodeBase struct {
 	// bounding box in world coordinates (aggregated for groups)
 	BBox BBox `set:"-"`
 
-	// NewViewNode is a function that returns a new [xyz.Node]
-	// to represent this node. Groups make groups by default,
-	// and bodies make corresponding solid shape.
-	NewViewNode func() tree.Node
+	// NewView is a function that returns a new [xyz.Node]
+	// to represent this node. If nil, Groups make Groups,
+	// and bodies make corresponding Solid shape.
+	NewView func() tree.Node
 
-	// InitViewNode is a function that initializes a new [xyz.Node]
-	// that represents this physics node. Groups make group elements by default,
-	// and bodies make corresponding solid shape.
-	InitViewNode func(n tree.Node)
+	// InitView is a function that initializes a new [xyz.Node]
+	// that represents this physics node. If nil, Groups make Group children,
+	// and bodies configure corresponding Solid shape.
+	InitView func(n tree.Node)
 }
 
 func (nb *NodeBase) Init() {
