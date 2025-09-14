@@ -138,9 +138,8 @@ func (ev *Env) MakeWorld() {
 	ev.World = physics.NewGroup()
 	ev.World.SetName("RoomWorld")
 
-	MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
-	ev.Emer = MakeEmer(ev.World, ev.EmerHt)
-	ev.EyeR = ev.Emer.ChildByName("head", 1).AsTree().ChildByName("eye-r", 2).(physics.Body)
+	ev.MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
+	ev.MakeEmer(ev.World, "emer", ev.EmerHt)
 
 	ev.World.WorldInit()
 }
@@ -261,54 +260,73 @@ func (ev *Env) RotHeadRight() { //types:add
 }
 
 // MakeRoom constructs a new room in given parent group with given params
-func MakeRoom(par *physics.Group, name string, width, depth, height, thick float32) *physics.Group {
-	rm := physics.NewGroup(par)
-	rm.SetName(name)
-	physics.NewBox(rm).SetSize(math32.Vec3(width, thick, depth)).
-		SetColor("grey").SetInitPos(math32.Vec3(0, -thick/2, 0)).SetName("floor")
-
-	physics.NewBox(rm).SetSize(math32.Vec3(width, height, thick)).
-		SetColor("blue").SetInitPos(math32.Vec3(0, height/2, -depth/2)).SetName("back-wall")
-	physics.NewBox(rm).SetSize(math32.Vec3(thick, height, depth)).
-		SetColor("red").SetInitPos(math32.Vec3(-width/2, height/2, 0)).SetName("left-wall")
-	physics.NewBox(rm).SetSize(math32.Vec3(thick, height, depth)).
-		SetColor("green").SetInitPos(math32.Vec3(width/2, height/2, 0)).SetName("right-wall")
-	physics.NewBox(rm).SetSize(math32.Vec3(width, height, thick)).
-		SetColor("yellow").SetInitPos(math32.Vec3(0, height/2, depth/2)).SetName("front-wall")
-	return rm
+func (ev *Env) MakeRoom(par *physics.Group, name string, width, depth, height, thick float32) {
+	tree.AddChildAt(par, name, func(rm *physics.Group) {
+		rm.Maker(func(p *tree.Plan) {
+			tree.AddAt(p, "floor", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, thick, depth)).
+					SetColor("grey").SetInitPos(math32.Vec3(0, -thick/2, 0))
+			})
+			tree.AddAt(p, "back-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, height, thick)).
+					SetColor("blue").SetInitPos(math32.Vec3(0, height/2, -depth/2))
+			})
+			tree.AddAt(p, "left-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(thick, height, depth)).
+					SetColor("red").SetInitPos(math32.Vec3(-width/2, height/2, 0))
+			})
+			tree.AddAt(p, "right-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(thick, height, depth)).
+					SetColor("green").SetInitPos(math32.Vec3(width/2, height/2, 0))
+			})
+			tree.AddAt(p, "front-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, height, thick)).
+					SetColor("yellow").SetInitPos(math32.Vec3(0, height/2, depth/2))
+			})
+		})
+	})
 }
 
-// MakeEmer constructs a new Emer virtual robot of given height (e.g., 1)
-func MakeEmer(par *physics.Group, height float32) *physics.Group {
-	emr := physics.NewGroup(par)
-	emr.SetName("emer")
-	width := height * .4
-	depth := height * .15
+// MakeEmer constructs a new Emer virtual robot of given height (e.g., 1).
+func (ev *Env) MakeEmer(par *physics.Group, name string, height float32) {
+	tree.AddChildAt(par, name, func(emr *physics.Group) {
+		ev.Emer = emr
+		emr.Maker(func(p *tree.Plan) {
+			width := height * .4
+			depth := height * .15
+			tree.AddAt(p, "body", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, height, depth)).
+					SetColor("purple").SetDynamic(true).
+					SetInitPos(math32.Vec3(0, height/2, 0))
+			})
+			// body := physics.NewCapsule(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
+			// body := physics.NewCylinder(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
 
-	physics.NewBox(emr).SetSize(math32.Vec3(width, height, depth)).
-		SetColor("purple").SetDynamic(true).
-		SetInitPos(math32.Vec3(0, height/2, 0)).SetName("body")
-	// body := physics.NewCapsule(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
-	// body := physics.NewCylinder(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
-
-	headsz := depth * 1.5
-	hhsz := .5 * headsz
-	hgp := physics.NewGroup(emr).SetInitPos(math32.Vec3(0, height+hhsz, 0))
-	hgp.SetName("head")
-
-	physics.NewBox(hgp).SetSize(math32.Vec3(headsz, headsz, headsz)).
-		SetColor("tan").SetDynamic(true).SetInitPos(math32.Vec3(0, 0, 0)).SetName("head")
-
-	eyesz := headsz * .2
-	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
-		SetColor("green").SetDynamic(true).
-		SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-l")
-
-	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
-		SetColor("green").SetDynamic(true).
-		SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-r")
-
-	return emr
+			headsz := depth * 1.5
+			eyesz := headsz * .2
+			hhsz := .5 * headsz
+			tree.AddAt(p, "head", func(n *physics.Group) {
+				n.SetInitPos(math32.Vec3(0, height+hhsz, 0))
+				n.Maker(func(p *tree.Plan) {
+					tree.AddAt(p, "head", func(n *physics.Box) {
+						n.SetSize(math32.Vec3(headsz, headsz, headsz)).
+							SetColor("tan").SetDynamic(true).SetInitPos(math32.Vec3(0, 0, 0))
+					})
+					tree.AddAt(p, "eye-l", func(n *physics.Box) {
+						n.SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
+							SetColor("green").SetDynamic(true).
+							SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3)))
+					})
+					tree.AddAt(p, "eye-r", func(n *physics.Box) {
+						ev.EyeR = n
+						n.SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
+							SetColor("green").SetDynamic(true).
+							SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3)))
+					})
+				})
+			})
+		})
+	})
 }
 
 func (ev *Env) ConfigGUI() *core.Body {

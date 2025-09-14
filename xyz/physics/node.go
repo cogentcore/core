@@ -85,6 +85,10 @@ type NodeBase struct {
 	InitViewNode func(n tree.Node)
 }
 
+func (nb *NodeBase) Init() {
+	nb.Updater(nb.UpdateFromMake)
+}
+
 func (nb *NodeBase) AsNodeBase() *NodeBase {
 	return nb
 }
