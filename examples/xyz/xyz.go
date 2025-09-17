@@ -70,17 +70,12 @@ func main() {
 	xyz.NewAmbient(sc, "ambient", 0.3, xyz.DirectSun)
 	xyz.NewDirectional(sc, "directional", 1, xyz.DirectSun).Pos.Set(0, 2, 1)
 	// xyz.NewPoint(sc, "point", 1, xyz.DirectSun).Pos.Set(-5, 0, 2)
-	// spot := xyz.NewSpot(sc, "spot", 1, xyz.DirectSun)
-	// spot.Pose.Pos.Set(0, 5, 5)
-	// spot.LookAtOrigin()
+	// xyz.NewSpot(sc, "spot", 1, xyz.DirectSun).Pose.Pos.Set(0, 5, 5)
 
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
-
-	grtx := xyz.NewTextureFileFS(assets.Content, sc, "ground", "ground.png")
-	_ = grtx
 
 	cube := xyz.NewBox(sc, "cube1", 1, 1, 1)
 	cube.Segs.Set(10, 10, 10) // not clear if any diff really..
@@ -100,6 +95,7 @@ func main() {
 		})
 	})
 
+	grtx := xyz.NewTextureFileFS(assets.Content, sc, "ground", "ground.png")
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
 	tree.AddChild(sc, func(n *xyz.Solid) {
 		n.SetMesh(floorp).SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
@@ -115,7 +111,9 @@ func main() {
 	})
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	tree.AddChild(sc, xyz.InitArrow(sc, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8))
+	tree.AddChild(sc, func(g *xyz.Group) {
+		xyz.InitArrow(g, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
+	})
 
 	cylinder := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	tree.AddChild(sc, func(n *xyz.Solid) {
@@ -168,7 +166,7 @@ func main() {
 	})
 
 	tree.AddChild(sc, func(n *xyz.Text2D) {
-		n.SetText("Text2D can put <b>HTML</b> formatted Text anywhere you might <i>want</i>").SetPos(0, 2.2, 0)
+		n.SetText("Text2D can put <b>HTML</b> formatted Text<br> anywhere you might <i>want</i>").SetPos(0, 2.2, 0)
 		n.Styles.Text.Align = text.Center
 		n.Pose.Scale.SetScalar(0.2)
 	})

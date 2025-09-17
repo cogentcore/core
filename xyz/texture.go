@@ -132,15 +132,14 @@ func (sc *Scene) SetTexture(tx Texture) {
 
 func (sc *Scene) setAllTextures() {
 	ph := sc.Phong
-	for _, kv := range sc.Textures.Order {
-		tx := kv.Value
-		ph.SetTexture(kv.Key, phong.NewTexture(tx.Image()))
+	for i, nm := range sc.Textures.Keys {
+		ph.SetTexture(nm, phong.NewTexture(sc.Textures.Values[i].Image()))
 	}
 }
 
 // TextureByName looks for texture by name, returning error if not found.
 func (sc *Scene) TextureByName(nm string) (Texture, error) {
-	tx, ok := sc.Textures.ValueByKeyTry(nm)
+	tx, ok := sc.Textures.AtTry(nm)
 	if ok {
 		return tx, nil
 	}
@@ -149,5 +148,5 @@ func (sc *Scene) TextureByName(nm string) (Texture, error) {
 
 // TextureList returns a list of available textures (e.g., for chooser)
 func (sc *Scene) TextureList() []string {
-	return sc.Textures.Keys()
+	return sc.Textures.Keys
 }

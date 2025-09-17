@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"image"
 
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
@@ -70,13 +70,13 @@ type Scene struct {
 	Camera Camera `set:"-"`
 
 	// all lights used in the scene
-	Lights ordmap.Map[string, Light] `set:"-"`
+	Lights keylist.List[string, Light] `set:"-"`
 
 	// meshes
-	Meshes ordmap.Map[string, Mesh] `set:"-"`
+	Meshes keylist.List[string, Mesh] `set:"-"`
 
 	// textures
-	Textures ordmap.Map[string, Texture] `set:"-"`
+	Textures keylist.List[string, Texture] `set:"-"`
 
 	// library of objects that can be used in the scene
 	Library map[string]*Group `set:"-"`

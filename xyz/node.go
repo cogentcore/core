@@ -310,7 +310,7 @@ func (nb *NodeBase) TrackCamera() {
 // For Spot, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *NodeBase) TrackLight(lightName string) error {
-	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
+	lt, ok := nb.Scene.Lights.AtTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

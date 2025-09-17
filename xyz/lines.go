@@ -122,19 +122,17 @@ const (
 	NoEndArrow = false
 )
 
-// InitLine returns an Init function (e.g., for [tree] Maker functions)
+// InitLine is an Init function (e.g., for [tree] Maker functions)
 // for making a line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned
 // to go between the designated points.
-func InitLine(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA) func(ln *Solid) {
-	lm := UnitLineMesh(sc)
-	return func(ln *Solid) {
-		ln.SetMesh(lm)
-		ln.isLinear = true
-		ln.Pose.Scale.Set(1, width, width)
-		SetLineStartEnd(&ln.Pose, st, ed)
-		ln.Material.Color = clr
-	}
+func InitLine(ln *Solid, st, ed math32.Vector3, width float32, clr color.RGBA) {
+	lm := UnitLineMesh(ln.Scene)
+	ln.SetMesh(lm)
+	ln.isLinear = true
+	ln.Pose.Scale.Set(1, width, width)
+	SetLineStartEnd(&ln.Pose, st, ed)
+	ln.Material.Color = clr
 }
 
 // InitArrow returns an Init function (e.g., for [tree] Maker functions)
@@ -146,55 +144,53 @@ func InitLine(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA) f
 // factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead
 // 4 = a 4-sided pyramid, etc.
-func InitArrow(sc *Scene, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) func(g *Group) {
-	cm := UnitConeMesh(sc, arrowSegs)
-	return func(g *Group) {
-		g.isLinear = true
-		d := ed.Sub(st)
-		dst := d.Length()
-		awd := arrowSize * arrowWidth
-		asz := (arrowSize * width) / dst
-		hasz := 0.5 * asz
+func InitArrow(g *Group, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) {
+	cm := UnitConeMesh(g.Scene, arrowSegs)
+	g.isLinear = true
+	d := ed.Sub(st)
+	dst := d.Length()
+	awd := arrowSize * arrowWidth
+	asz := (arrowSize * width) / dst
+	hasz := 0.5 * asz
 
-		g.Maker(func(p *tree.Plan) {
-			tree.Add(p, func(ln *Solid) {
-				InitLine(sc, st, ed, width, clr)(ln)
-				ln.Pose.SetIdentity()
-				switch {
-				case startArrow && endArrow:
-					ln.Pose.Scale.X -= 2 * asz
-				case startArrow:
-					ln.Pose.Scale.X -= asz
-					ln.Pose.Pos.X += hasz
-				case endArrow:
-					ln.Pose.Scale.X -= asz
-					ln.Pose.Pos.X -= hasz
-				}
-			})
-
-			g.Pose.Scale.Set(1, width, width) // group does everything
-			SetLineStartEnd(&g.Pose, st, ed)
-
-			if startArrow {
-				tree.Add(p, func(ar *Solid) {
-					ar.SetMesh(cm)
-					ar.Pose.Scale.Set(awd, asz, awd)                               // Y is up
-					ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
-					ar.Pose.Pos = math32.Vec3(-0.5+hasz, 0, 0)
-					ar.Material.Color = clr
-				})
-			}
-			if endArrow {
-				tree.Add(p, func(ar *Solid) {
-					ar.SetMesh(cm)
-					ar.Pose.Scale.Set(awd, asz, awd)
-					ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
-					ar.Pose.Pos = math32.Vec3(0.5-hasz, 0, 0)
-					ar.Material.Color = clr
-				})
+	g.Maker(func(p *tree.Plan) {
+		tree.Add(p, func(ln *Solid) {
+			InitLine(ln, st, ed, width, clr)
+			ln.Pose.SetIdentity()
+			switch {
+			case startArrow && endArrow:
+				ln.Pose.Scale.X -= 2 * asz
+			case startArrow:
+				ln.Pose.Scale.X -= asz
+				ln.Pose.Pos.X += hasz
+			case endArrow:
+				ln.Pose.Scale.X -= asz
+				ln.Pose.Pos.X -= hasz
 			}
 		})
-	}
+
+		g.Pose.Scale.Set(1, width, width) // group does everything
+		SetLineStartEnd(&g.Pose, st, ed)
+
+		if startArrow {
+			tree.Add(p, func(ar *Solid) {
+				ar.SetMesh(cm)
+				ar.Pose.Scale.Set(awd, asz, awd)                               // Y is up
+				ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
+				ar.Pose.Pos = math32.Vec3(-0.5+hasz, 0, 0)
+				ar.Material.Color = clr
+			})
+		}
+		if endArrow {
+			tree.Add(p, func(ar *Solid) {
+				ar.SetMesh(cm)
+				ar.Pose.Scale.Set(awd, asz, awd)
+				ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
+				ar.Pose.Pos = math32.Vec3(0.5-hasz, 0, 0)
+				ar.Material.Color = clr
+			})
+		}
+	})
 }
 
 // NewLineBoxMeshes adds two Meshes defining the edges of a Box.
@@ -238,41 +234,39 @@ const (
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func InitLineBox(sc *Scene, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) func(g *Group) {
+func InitLineBox(g *Group, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
-	front, side := NewLineBoxMeshes(sc, meshNm, bbox, width)
+	front, side := NewLineBoxMeshes(g.Scene, meshNm, bbox, width)
 	ctr := bbox.Min.Add(hSz)
 
-	return func(g *Group) {
-		g.Pose.Pos = ctr
+	g.Pose.Pos = ctr
 
-		bs := NewSolid(g).SetMesh(front).SetColor(clr)
-		bs.SetName("back")
-		bs.Pose.Pos.Set(0, 0, -hSz.Z)
+	bs := NewSolid(g).SetMesh(front).SetColor(clr)
+	bs.SetName("back")
+	bs.Pose.Pos.Set(0, 0, -hSz.Z)
 
-		ls := NewSolid(g).SetMesh(side).SetColor(clr)
-		ls.SetName("left")
-		ls.Pose.Pos.Set(-hSz.X, 0, 0)
-		ls.Pose.SetAxisRotation(0, 1, 0, 90)
+	ls := NewSolid(g).SetMesh(side).SetColor(clr)
+	ls.SetName("left")
+	ls.Pose.Pos.Set(-hSz.X, 0, 0)
+	ls.Pose.SetAxisRotation(0, 1, 0, 90)
 
-		rs := NewSolid(g).SetMesh(side).SetColor(clr)
-		rs.SetName("right")
-		rs.Pose.Pos.Set(hSz.X, 0, 0)
-		rs.Pose.SetAxisRotation(0, 1, 0, -90)
+	rs := NewSolid(g).SetMesh(side).SetColor(clr)
+	rs.SetName("right")
+	rs.Pose.Pos.Set(hSz.X, 0, 0)
+	rs.Pose.SetAxisRotation(0, 1, 0, -90)
 
-		fs := NewSolid(g).SetMesh(front).SetColor(clr)
-		fs.SetName("front")
+	fs := NewSolid(g).SetMesh(front).SetColor(clr)
+	fs.SetName("front")
 
-		fs.Pose.Pos.Set(0, 0, hSz.Z)
+	fs.Pose.Pos.Set(0, 0, hSz.Z)
 
-		// todo:
-		// if inactive {
-		// 	g.SetDisabled()
-		// 	bs.SetDisabled()
-		// 	ls.SetDisabled()
-		// 	rs.SetDisabled()
-		// 	fs.SetDisabled()
-		// }
-	}
+	// todo:
+	// if inactive {
+	// 	g.SetDisabled()
+	// 	bs.SetDisabled()
+	// 	ls.SetDisabled()
+	// 	rs.SetDisabled()
+	// 	fs.SetDisabled()
+	// }
 }
