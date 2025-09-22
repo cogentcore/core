@@ -8,11 +8,14 @@ package xyzcore
 //go:generate core generate
 
 import (
+	"image"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 )
 
@@ -38,9 +41,27 @@ type Scene struct {
 	SelectionParams SelectionParams `display:"inline"`
 }
 
+// NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
+// in given parent (if non-nil).
+func NewSceneForScene(parent tree.Node, sc *xyz.Scene) *Scene {
+	n := &Scene{XYZ: sc}
+	ni := any(n).(tree.Node)
+	n.Scene = parent.(core.Widget).AsWidget().Scene
+	tree.InitNode(ni)
+	if parent == nil {
+		n.SetName(n.NodeType().IDName)
+		return n
+	}
+	parent.AsTree().Children = append(parent.AsTree().Children, ni)
+	tree.SetParent(ni, parent)
+	return n
+}
+
 func (sw *Scene) Init() {
 	sw.WidgetBase.Init()
-	sw.XYZ = xyz.NewScene()
+	if sw.XYZ == nil {
+		sw.XYZ = xyz.NewScene()
+	}
 	sw.SelectionParams.Defaults()
 	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
@@ -99,9 +120,12 @@ func (sw *Scene) Render() {
 }
 
 func (sw *Scene) ConfigXYZ() {
-	sz := sw.Geom.ContentBBox.Size()
-	if sz.X <= 0 || sz.Y <= 0 || !sw.IsVisible() {
+	if !sw.IsVisible() {
 		return
+	}
+	sz := sw.Geom.ContentBBox.Size()
+	if sz.X <= 0 || sz.Y <= 0 {
+		sz = image.Point{10, 10}
 	}
 	sw.XYZ.Geom.Size = sz
 
