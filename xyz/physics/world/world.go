@@ -11,7 +11,6 @@ package world
 import (
 	"image"
 
-	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
@@ -65,7 +64,10 @@ func (wr *World) RenderFromNode(node physics.Node, cam *Camera) image.Image {
 	sc := wr.Scene
 	camnm := "physics-view-rendernode-save"
 	sc.SaveCamera(camnm)
-	defer sc.SetCamera(camnm)
+	defer func() {
+		sc.SetCamera(camnm)
+		sc.UseMainFrame()
+	}()
 
 	sc.Camera.FOV = cam.FOV
 	sc.Camera.Near = cam.Near
@@ -75,11 +77,8 @@ func (wr *World) RenderFromNode(node physics.Node, cam *Camera) image.Image {
 	sc.Camera.Pose.Quat = nb.Abs.Quat
 	sc.Camera.Pose.Scale.Set(1, 1, 1)
 
-	img := sc.RenderGrabImage()
-	if img != nil {
-		return imagex.Resize(img, cam.Size)
-	}
-	return nil
+	sc.UseAltFrame(cam.Size)
+	return sc.RenderGrabImage()
 }
 
 // DepthImage returns the current rendered depth image

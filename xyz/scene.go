@@ -93,17 +93,17 @@ type Scene struct {
 	// the phong rendering system
 	Phong *phong.Phong `set:"-"`
 
-	// the gpu render frame holding the rendered scene
-	Frame gpu.Renderer `set:"-"` // *gpu.RenderTexture `set:"-"`
+	// Frame is the gpu render frame holding the rendered scene.
+	Frame gpu.Renderer `set:"-"`
+
+	// AltFrame is an alternative render frame that can be used,
+	// e.g., for grabbing images from different viewpoints.
+	// AltFrame is not used for xyzcore display purposes.
+	// call UseAltFrame and UseMainFrame to switch between.
+	AltFrame gpu.Renderer `set:"-"`
 
 	// TextShaper is the text shaping system for this scene, for doing text layout.
 	TextShaper shaped.Shaper
-
-	// image used to hold a copy of the Frame image, for ImageCopy() call.
-	// This is re-used across calls to avoid large memory allocations,
-	// so it will automatically update after every ImageCopy call.
-	// If a persistent image is required, call [iox/imagex.CloneAsRGBA].
-	imgCopy image.RGBA `set:"-"`
 
 	// mutex checked for rendering
 	sync.Mutex
@@ -235,6 +235,10 @@ func (sc *Scene) Destroy() {
 	if sc.Frame != nil {
 		sc.Frame.Release()
 		sc.Frame = nil
+	}
+	if sc.AltFrame != nil {
+		sc.AltFrame.Release()
+		sc.AltFrame = nil
 	}
 }
 

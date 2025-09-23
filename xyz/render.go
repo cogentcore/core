@@ -24,9 +24,11 @@ func (sc *Scene) ConfigOffscreenFromSurface(surf *gpu.Surface) {
 
 // ConfigOffscreen configures offscreen [gpu.RenderTexture]
 // using given gpu and device, and size set in Geom.Size.
-// Must be called on the main thread.
 // If Frame already exists, it ensures that the Size is correct.
 func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
+	sc.Lock()
+	defer sc.Unlock()
+
 	sz := sc.Geom.Size
 	if sz == (image.Point{}) {
 		sz = image.Point{480, 320}
@@ -61,6 +63,32 @@ func (sc *Scene) ConfigNewPhong() {
 	sc.setAllTextures()
 }
 
+// UseAltFrame sets Phong to use the AltFrame [gpu.RenderTexture]
+// using given size.
+// If AltFrame already exists, it ensures that the Size is correct.
+// Call UseMainFrame to return to Frame.
+func (sc *Scene) UseAltFrame(sz image.Point) {
+	sc.Lock()
+	defer sc.Unlock()
+
+	if sc.AltFrame == nil {
+		sc.AltFrame = gpu.NewRenderTexture(sc.Phong.System.GPU(), sc.Phong.System.Device(), sz, sc.MultiSample, gpu.Depth32)
+	} else {
+		sc.AltFrame.SetSize(sz) // nop if same
+	}
+	sc.AltFrame.Render().ClearColor = sc.Background.At(0, 0)
+	sc.Camera.Aspect = float32(sz.X) / float32(sz.Y)
+	sc.Phong.System.Renderer = sc.AltFrame
+}
+
+// UseMainFrame sets Phong to return to using the Frame [gpu.RenderTexture].
+func (sc *Scene) UseMainFrame() {
+	sc.Lock()
+	defer sc.Unlock()
+	sc.Phong.System.Renderer = sc.Frame
+	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+}
+
 // Render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
@@ -87,6 +115,7 @@ func (sc *Scene) RenderGrabImage() *image.NRGBA {
 func (sc *Scene) render(grabImage bool) *image.NRGBA {
 	sc.Lock()
 	defer sc.Unlock()
+	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
 
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
