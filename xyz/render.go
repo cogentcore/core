@@ -36,7 +36,7 @@ func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
 		sc.Phong = phong.NewPhong(gp, sc.Frame)
 		sc.ConfigNewPhong()
 	} else {
-		sc.Frame.SetSize(sc.Geom.Size) // nop if same
+		sc.Frame.SetSize(sz) // nop if same
 	}
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 }
@@ -64,7 +64,7 @@ func (sc *Scene) ConfigNewPhong() {
 // Render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
-	if sc.Frame == nil || sc.isRendering {
+	if sc.Frame == nil {
 		return false
 	}
 	sc.render(false)
@@ -76,7 +76,7 @@ func (sc *Scene) Render() bool {
 // which could be nil if there are any issues.
 // The image data is a copy and can be modified etc.
 func (sc *Scene) RenderGrabImage() *image.NRGBA {
-	if sc.Frame == nil || sc.isRendering {
+	if sc.Frame == nil {
 		return nil
 	}
 	return sc.render(true)
@@ -85,10 +85,9 @@ func (sc *Scene) RenderGrabImage() *image.NRGBA {
 // render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) render(grabImage bool) *image.NRGBA {
-	sc.isRendering = true
-	defer func() {
-		sc.isRendering = false
-	}()
+	sc.Lock()
+	defer sc.Unlock()
+
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}

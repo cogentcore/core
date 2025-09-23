@@ -10,6 +10,7 @@ package xyz
 import (
 	"fmt"
 	"image"
+	"sync"
 
 	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/colors"
@@ -104,7 +105,8 @@ type Scene struct {
 	// If a persistent image is required, call [iox/imagex.CloneAsRGBA].
 	imgCopy image.RGBA `set:"-"`
 
-	isRendering bool
+	// mutex checked for rendering
+	sync.Mutex
 }
 
 func (sc *Scene) Init() {

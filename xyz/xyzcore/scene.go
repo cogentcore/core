@@ -44,6 +44,7 @@ type Scene struct {
 // NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
 // in given parent (if non-nil).
 func NewSceneForScene(parent tree.Node, sc *xyz.Scene) *Scene {
+	sc.Destroy() // reset any existing GPU stuff, so it gets properly rebuilt
 	n := &Scene{XYZ: sc}
 	ni := any(n).(tree.Node)
 	n.Scene = parent.(core.Widget).AsWidget().Scene
