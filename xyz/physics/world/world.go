@@ -77,8 +77,10 @@ func (wr *World) RenderFromNode(node physics.Node, cam *Camera) image.Image {
 	sc.Camera.Pose.Quat = nb.Abs.Quat
 	sc.Camera.Pose.Scale.Set(1, 1, 1)
 
-	sc.UseAltFrame(cam.Size)
-	return sc.RenderGrabImage()
+	if sc.UseAltFrame(cam.Size) {
+		return sc.RenderGrabImage()
+	}
+	return nil
 }
 
 // DepthImage returns the current rendered depth image

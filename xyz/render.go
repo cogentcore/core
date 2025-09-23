@@ -66,8 +66,12 @@ func (sc *Scene) ConfigNewPhong() {
 // UseAltFrame sets Phong to use the AltFrame [gpu.RenderTexture]
 // using given size.
 // If AltFrame already exists, it ensures that the Size is correct.
+// returns false if Frame or Phong are not yet set -- must config those first.
 // Call UseMainFrame to return to Frame.
-func (sc *Scene) UseAltFrame(sz image.Point) {
+func (sc *Scene) UseAltFrame(sz image.Point) bool {
+	if sc.Frame == nil || sc.Phong == nil {
+		return false
+	}
 	sc.Lock()
 	defer sc.Unlock()
 
@@ -79,10 +83,14 @@ func (sc *Scene) UseAltFrame(sz image.Point) {
 	sc.AltFrame.Render().ClearColor = sc.Background.At(0, 0)
 	sc.Camera.Aspect = float32(sz.X) / float32(sz.Y)
 	sc.Phong.System.Renderer = sc.AltFrame
+	return true
 }
 
 // UseMainFrame sets Phong to return to using the Frame [gpu.RenderTexture].
 func (sc *Scene) UseMainFrame() {
+	if sc.Frame == nil || sc.Phong == nil {
+		return
+	}
 	sc.Lock()
 	defer sc.Unlock()
 	sc.Phong.System.Renderer = sc.Frame
@@ -92,7 +100,7 @@ func (sc *Scene) UseMainFrame() {
 // Render renders the scene to the Frame framebuffer.
 // Returns false if currently already rendering.
 func (sc *Scene) Render() bool {
-	if sc.Frame == nil {
+	if sc.Frame == nil || sc.Phong == nil {
 		return false
 	}
 	sc.render(false)
@@ -104,7 +112,7 @@ func (sc *Scene) Render() bool {
 // which could be nil if there are any issues.
 // The image data is a copy and can be modified etc.
 func (sc *Scene) RenderGrabImage() *image.NRGBA {
-	if sc.Frame == nil {
+	if sc.Frame == nil || sc.Phong == nil {
 		return nil
 	}
 	return sc.render(true)
