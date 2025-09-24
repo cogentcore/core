@@ -5,10 +5,10 @@
 package xyz
 
 import (
-	"errors"
 	"image"
 	"sort"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
@@ -40,7 +40,7 @@ func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
 	} else {
 		sc.Frame.SetSize(sz) // nop if same
 	}
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+	sc.Camera.SetAspect(sz)
 }
 
 // Rebuild updates all the data resources.
@@ -55,7 +55,6 @@ func (sc *Scene) Rebuild() {
 }
 
 func (sc *Scene) ConfigNewPhong() {
-	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
 	sc.ConfigNodes()
 	UpdateWorldMatrix(sc.This)
 	sc.setAllLights()
@@ -66,24 +65,34 @@ func (sc *Scene) ConfigNewPhong() {
 // UseAltFrame sets Phong to use the AltFrame [gpu.RenderTexture]
 // using given size.
 // If AltFrame already exists, it ensures that the Size is correct.
-// returns false if Frame or Phong are not yet set -- must config those first.
 // Call UseMainFrame to return to Frame.
-func (sc *Scene) UseAltFrame(sz image.Point) bool {
-	if sc.Frame == nil || sc.Phong == nil {
-		return false
-	}
+func (sc *Scene) UseAltFrame(sz image.Point) {
 	sc.Lock()
 	defer sc.Unlock()
 
 	if sc.AltFrame == nil {
-		sc.AltFrame = gpu.NewRenderTexture(sc.Phong.System.GPU(), sc.Phong.System.Device(), sz, sc.MultiSample, gpu.Depth32)
+		var gp *gpu.GPU
+		var dev *gpu.Device
+		if sc.Phong != nil {
+			gp, dev = sc.Phong.System.GPU(), sc.Phong.System.Device()
+		} else {
+			var err error
+			gp, dev, err = gpu.NoDisplayGPU()
+			if errors.Log(err) != nil {
+				return
+			}
+		}
+		sc.AltFrame = gpu.NewRenderTexture(gp, dev, sz, sc.MultiSample, gpu.Depth32)
+		if sc.Phong == nil {
+			sc.Phong = phong.NewPhong(gp, sc.AltFrame)
+			sc.ConfigNewPhong()
+		}
 	} else {
 		sc.AltFrame.SetSize(sz) // nop if same
 	}
 	sc.AltFrame.Render().ClearColor = sc.Background.At(0, 0)
-	sc.Camera.Aspect = float32(sz.X) / float32(sz.Y)
+	sc.Camera.SetAspect(sz)
 	sc.Phong.System.Renderer = sc.AltFrame
-	return true
 }
 
 // UseMainFrame sets Phong to return to using the Frame [gpu.RenderTexture].
@@ -94,7 +103,7 @@ func (sc *Scene) UseMainFrame() {
 	sc.Lock()
 	defer sc.Unlock()
 	sc.Phong.System.Renderer = sc.Frame
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+	sc.Camera.SetAspect(sc.Geom.Size)
 }
 
 // Render renders the scene to the Frame framebuffer.
@@ -112,7 +121,7 @@ func (sc *Scene) Render() bool {
 // which could be nil if there are any issues.
 // The image data is a copy and can be modified etc.
 func (sc *Scene) RenderGrabImage() *image.NRGBA {
-	if sc.Frame == nil || sc.Phong == nil {
+	if sc.Phong == nil {
 		return nil
 	}
 	return sc.render(true)
@@ -123,7 +132,9 @@ func (sc *Scene) RenderGrabImage() *image.NRGBA {
 func (sc *Scene) render(grabImage bool) *image.NRGBA {
 	sc.Lock()
 	defer sc.Unlock()
-	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
+	tex := sc.Phong.System.Renderer.(*gpu.RenderTexture)
+	sc.Phong.System.SetClearColor(sc.Background.At(0, 0))
+	sc.Camera.SetAspect(tex.Format.Bounds().Size())
 
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
@@ -131,7 +142,6 @@ func (sc *Scene) render(grabImage bool) *image.NRGBA {
 	sc.TrackCamera()
 	UpdateWorldMatrix(sc.This)
 	sc.UpdateMeshBBox()
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.UpdateMatrix()
 	sc.UpdateMVPMatrix()
 	return sc.renderImpl(grabImage)
