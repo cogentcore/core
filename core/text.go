@@ -262,6 +262,8 @@ func (tx *Text) Init() {
 		tx.NeedsRender()
 	})
 	tx.On(events.SlideStop, func(e events.Event) {
+		tx.SetState(false, states.Sliding)
+		tx.parentWidget().SetFocusQuiet()
 		if TheApp.SystemPlatform().IsMobile() {
 			tx.Send(events.ContextMenu, e)
 		}
