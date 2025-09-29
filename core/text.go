@@ -54,6 +54,8 @@ type Text struct {
 
 	// selectRange is the selected range, in _runes_, which must be applied
 	selectRange textpos.Range
+
+	wasFocused bool
 }
 
 // TextTypes is an enum containing the different
@@ -234,6 +236,23 @@ func (tx *Text) Init() {
 			tx.Styles.Cursor = tx.normalCursor
 		}
 	})
+	tx.OnFirst(events.Click, func(e events.Event) {
+		if tx.ContainsFocus() {
+			fmt.Println("contains focus")
+			tx.wasFocused = true
+			return
+		}
+		fmt.Println("wasn't focused")
+		tx.wasFocused = false
+	})
+	tx.OnFinal(events.Click, func(e events.Event) {
+		if tx.wasFocused {
+			fmt.Println("was focused")
+			tx.wasFocused = false
+			e.SetHandled()
+			tx.parentWidget().SetFocusQuiet()
+		}
+	})
 	tx.On(events.DoubleClick, func(e events.Event) {
 		e.SetHandled()
 		tx.selectWord(tx.pixelToRune(e.Pos()))
@@ -263,7 +282,6 @@ func (tx *Text) Init() {
 	})
 	tx.On(events.SlideStop, func(e events.Event) {
 		tx.SetState(false, states.Sliding)
-		tx.parentWidget().SetFocusQuiet()
 		if TheApp.SystemPlatform().IsMobile() {
 			tx.Send(events.ContextMenu, e)
 		}
