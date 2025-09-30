@@ -54,8 +54,6 @@ type Text struct {
 
 	// selectRange is the selected range, in _runes_, which must be applied
 	selectRange textpos.Range
-
-	wasFocused bool
 }
 
 // TextTypes is an enum containing the different
@@ -236,21 +234,17 @@ func (tx *Text) Init() {
 			tx.Styles.Cursor = tx.normalCursor
 		}
 	})
-	tx.OnFirst(events.Click, func(e events.Event) {
-		if tx.ContainsFocus() {
-			fmt.Println("contains focus")
-			tx.wasFocused = true
+	tx.OnFinal(events.Click, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
-		fmt.Println("wasn't focused")
-		tx.wasFocused = false
-	})
-	tx.OnFinal(events.Click, func(e events.Event) {
-		if tx.wasFocused {
-			fmt.Println("was focused")
-			tx.wasFocused = false
+		if tx.StateIs(states.Attended) { // toggle attention with clicking
+			// this allows drag scrolling to proceed.
 			e.SetHandled()
-			tx.parentWidget().SetFocusQuiet()
+			em := tx.Events()
+			if em != nil {
+				em.setAttend(nil)
+			}
 		}
 	})
 	tx.On(events.DoubleClick, func(e events.Event) {
@@ -281,7 +275,6 @@ func (tx *Text) Init() {
 		tx.NeedsRender()
 	})
 	tx.On(events.SlideStop, func(e events.Event) {
-		tx.SetState(false, states.Sliding)
 		if TheApp.SystemPlatform().IsMobile() {
 			tx.Send(events.ContextMenu, e)
 		}
