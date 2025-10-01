@@ -46,6 +46,9 @@ type Node interface {
 	// Use this for physics-based state updates.
 	// Body nodes should also update their bounding boxes.
 	Step(step float32)
+
+	// Update does [tree] updating to dynamically update nodes / tree config.
+	Update()
 }
 
 // NodeBase is the basic node, which has position, rotation, velocity
@@ -70,6 +73,23 @@ type NodeBase struct {
 
 	// bounding box in world coordinates (aggregated for groups)
 	BBox BBox `set:"-"`
+
+	// NewView is a function that returns a new [xyz.Node]
+	// to represent this node. If nil, Groups make Groups,
+	// and bodies make corresponding Solid shape.
+	NewView func() tree.Node
+
+	// InitView is a function that initializes a new [xyz.Node]
+	// that represents this physics node. If nil, Groups make Group children,
+	// and bodies configure corresponding Solid shape.
+	InitView func(n tree.Node)
+
+	// View is the current view node for this node, set when made.
+	View tree.Node `set:"-"`
+}
+
+func (nb *NodeBase) Init() {
+	nb.Updater(nb.UpdateFromMake)
 }
 
 func (nb *NodeBase) AsNodeBase() *NodeBase {
@@ -149,6 +169,10 @@ func (nb *NodeBase) RelToAbsBase(par *NodeBase) {
 func (nb *NodeBase) StepBase(step float32) {
 	nb.Abs.StepByAngVel(step)
 	nb.Abs.StepByLinVel(step)
+}
+
+func (nb *NodeBase) Update() {
+	nb.RunUpdaters()
 }
 
 // AsNode converts a [tree.Node] to a [Node] interface and a [Node3DBase] object,

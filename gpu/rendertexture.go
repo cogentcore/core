@@ -31,8 +31,11 @@ type RenderTexture struct {
 	// pointer to gpu device, for convenience
 	GPU *GPU
 
-	// current frame number
+	// current frame number is the one that has just been rendered to.
 	curFrame int
+
+	// next frame number is the one that will be rendered to next.
+	nextFrame int
 
 	// device, which we do NOT own.
 	device Device
@@ -74,21 +77,21 @@ func (rt *RenderTexture) init(gp *GPU, dev *Device, size image.Point, samples in
 	rt.ConfigFrames()
 }
 
-func (rt *RenderTexture) Device() *Device { return &rt.device }
-func (rt *RenderTexture) Render() *Render { return &rt.render }
+func (rt *RenderTexture) Device() *Device         { return &rt.device }
+func (rt *RenderTexture) Render() *Render         { return &rt.render }
+func (rt *RenderTexture) CurrentFrameNumber() int { return rt.curFrame }
 
 // GetCurrentTexture returns a TextureView that is the current
 // target for rendering.
 func (rt *RenderTexture) GetCurrentTexture() (*wgpu.TextureView, error) {
-	cf := rt.curFrame
-	rt.curFrame = (rt.curFrame + 1) % rt.NFrames
-	return rt.Frames[cf].view, nil
+	rt.curFrame = rt.nextFrame
+	rt.nextFrame = (rt.curFrame + 1) % rt.NFrames
+	return rt.Frames[rt.curFrame].view, nil
 }
 
-// GetCurrentTextureObject returns the current texture itself, not the view.
-func (rt *RenderTexture) GetCurrentTextureObject() (*Texture, error) {
-	cf := rt.curFrame
-	return rt.Frames[cf], nil
+// CurrentFrame returns the current frame texture object.
+func (rt *RenderTexture) CurrentFrame() *Texture {
+	return rt.Frames[rt.curFrame]
 }
 
 // ConfigFrames configures the frames, calling ReleaseFrames
@@ -130,14 +133,16 @@ func (rt *RenderTexture) Present() {
 	// no-op
 }
 
-// GrabTexture grabs rendered image of given index to RenderTexture.TextureGrab.
-// must have waited for render already.
-func (rt *RenderTexture) GrabTexture(cmd *wgpu.CommandEncoder, idx int) {
-	// rt.Frames[idx].GrabTexture(&rt.device, cmd)
+// ReadFrame adds a command to given command encoder to read the current
+// Frame into the texture read buffer, so it can be available for
+// ReadGoImage after the current render pass is done.
+func (rt *RenderTexture) ReadFrame(cmd *wgpu.CommandEncoder) {
+	rt.CurrentFrame().CopyToReadBuffer(cmd)
 }
 
-// GrabDepthTexture grabs rendered depth image from the Render,
-// must have waited for render already.
-func (rt *RenderTexture) GrabDepthTexture(cmd *wgpu.CommandEncoder) {
+// ReadDepthTexture adds a command to given command encoder to read the current
+// depth texture into the texture read buffer, so it can be available for
+// ReadGoImage after the current render pass is done.
+func (rt *RenderTexture) ReadDepthTexture(cmd *wgpu.CommandEncoder) {
 	// rt.render.GrabDepthTexture(&rt.device, cmd)
 }

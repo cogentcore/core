@@ -14,7 +14,7 @@ import (
 // NoDisplayScene returns a xyz Scene initialized and ready to use
 // in NoGUI offscreen rendering mode, using given GPU and device.
 // Must manually call Init3D and Style3D on the Scene prior to
-// a RenderOffNode call to grab the image from a specific camera.
+// a RenderFromNode call to grab the image from a specific camera.
 func NoDisplayScene(gp *gpu.GPU, dev *gpu.Device) *xyz.Scene {
 	sc := xyz.NewScene()
 	sc.MultiSample = 4

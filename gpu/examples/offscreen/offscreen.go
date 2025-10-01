@@ -144,7 +144,7 @@ func main() {
 		camo.Model.SetRotationY(.1 * float32(frameCount))
 		gpu.SetValueFrom(cam, []CamView{camo})
 
-		rt.Frames[0].ConfigReadBuffer() // ensure configed with proper size
+		rt.CurrentFrame().ConfigReadBuffer() // ensure configed with proper size
 
 		rp, err := sy.BeginRenderPass()
 		if err != nil {
@@ -155,14 +155,14 @@ func main() {
 		rp.End()
 		if !didSave {
 			didSave = true
-			rt.Frames[0].CopyToReadBuffer(sy.CommandEncoder)
+			rt.ReadFrame(sy.CommandEncoder)
 			sy.EndRenderPass(rp)
-			img, err := rt.Frames[0].ReadGoImage()
+			img, err := rt.CurrentFrame().ReadGoImage()
 			if errors.Log(err) != nil {
 				return
 			}
 			imagex.Save(img, "render.png")
-			fmt.Println("saved image", rt.Frames[0].ReadBufferDims)
+			fmt.Println("saved image", rt.CurrentFrame().ReadBufferDims)
 		} else {
 			sy.EndRenderPass(rp)
 		}

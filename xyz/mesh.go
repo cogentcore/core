@@ -100,9 +100,8 @@ func (sc *Scene) SetMesh(ms Mesh) {
 // setAllMeshes is called when the Phong system first is activated.
 func (sc *Scene) setAllMeshes() {
 	ph := sc.Phong
-	for _, kv := range sc.Meshes.Order {
-		ms := kv.Value
-		ph.SetMesh(kv.Key, ms)
+	for i, nm := range sc.Meshes.Keys {
+		ph.SetMesh(nm, sc.Meshes.Values[i])
 	}
 }
 
@@ -122,7 +121,7 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 
 // MeshByName looks for mesh by name, returning error if not found.
 func (sc *Scene) MeshByName(nm string) (Mesh, error) {
-	ms, ok := sc.Meshes.ValueByKeyTry(nm)
+	ms, ok := sc.Meshes.AtTry(nm)
 	if ok {
 		return ms, nil
 	}
@@ -131,7 +130,7 @@ func (sc *Scene) MeshByName(nm string) (Mesh, error) {
 
 // MeshList returns a list of available meshes (e.g., for chooser)
 func (sc *Scene) MeshList() []string {
-	return sc.Meshes.Keys()
+	return sc.Meshes.Keys
 }
 
 // ResetMeshes removes all meshes.

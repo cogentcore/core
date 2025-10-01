@@ -22,6 +22,7 @@ import (
 type xyzSource struct {
 	destBBox, srcBBox image.Rectangle
 	texture           *gpu.Texture
+	sw                *Scene
 }
 
 func getGPUDrawer(c composer.Composer) *gpudraw.Drawer {
@@ -38,22 +39,29 @@ func (xr *xyzSource) Draw(c composer.Composer) {
 	if gdrw == nil {
 		return
 	}
+	if xr.sw.XYZ == nil {
+		return
+	}
+	xr.sw.XYZ.Lock()
 	gdrw.UseTexture(xr.texture)
 	gdrw.CopyUsed(xr.destBBox.Min, xr.srcBBox, draw.Src, false)
+	xr.sw.XYZ.Unlock()
 }
 
 // RenderSource returns the [composer.Source] for direct rendering.
 func (sw *Scene) RenderSource(op draw.Op) composer.Source {
-	if sw.XYZ.Frame == nil || !sw.IsVisible() {
+	if sw.XYZ == nil || sw.XYZ.Frame == nil || !sw.IsVisible() {
 		return nil
 	}
+	sw.XYZ.Lock()
+	defer sw.XYZ.Unlock()
 	rt := sw.XYZ.Frame.(*gpu.RenderTexture)
-	tex, _ := rt.GetCurrentTextureObject()
+	tex := rt.CurrentFrame()
 	bb, sbb, empty := sw.DirectRenderDrawBBoxes(tex.Format.Bounds())
 	if empty {
 		return nil
 	}
-	return &xyzSource{destBBox: bb, srcBBox: sbb, texture: tex}
+	return &xyzSource{destBBox: bb, srcBBox: sbb, texture: tex, sw: sw}
 }
 
 // configFrame configures the render frame in a platform-specific manner.
@@ -62,11 +70,11 @@ func (sw *Scene) configFrame(sz image.Point) {
 	if win == nil {
 		return
 	}
-	gdrw := getGPUDrawer(win.SystemWindow.Composer())
-	if gdrw == nil {
-		return
-	}
 	system.TheApp.RunOnMain(func() {
+		gdrw := getGPUDrawer(win.SystemWindow.Composer())
+		if gdrw == nil {
+			return
+		}
 		sf, ok := gdrw.Renderer().(*gpu.Surface)
 		if !ok {
 			core.ErrorSnackbar(sw, errors.New("WebGPU not available for 3D rendering"))

@@ -83,7 +83,6 @@ func (sw *Scene) SetSelected(nd xyz.Node) {
 		sw.CurrentSelected = nil
 		xy.DeleteChildByName(SelectedBoxName)
 		xy.DeleteChildByName(ManipBoxName)
-		xy.SetNeedsRender()
 		return
 	}
 	manip, ok := nd.(*ManipPoint)
@@ -108,14 +107,14 @@ func (sw *Scene) SelectBox() {
 	if sw.CurrentSelected == nil {
 		return
 	}
-	xy := sw.XYZ
+	sc := sw.XYZ
 
 	nb := sw.CurrentSelected.AsNodeBase()
-	xy.DeleteChildByName(SelectedBoxName) // get rid of existing
+	sc.DeleteChildByName(SelectedBoxName) // get rid of existing
 	clr := sw.SelectionParams.Color
-	xyz.NewLineBox(xy, xy, SelectedBoxName, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)
-
-	xy.SetNeedsUpdate()
+	g := xyz.NewGroup(sc)
+	g.SetName(SelectedBoxName)
+	xyz.InitLineBox(g, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)
 	sw.NeedsRender()
 }
 
@@ -125,21 +124,23 @@ func (sw *Scene) ManipBox() {
 	if sw.CurrentSelected == nil {
 		return
 	}
-	xy := sw.XYZ
+	sc := sw.XYZ
 
 	nm := ManipBoxName
 
 	nb := sw.CurrentSelected.AsNodeBase()
 	// todo: definitely need to use plan based updating here!
-	xy.DeleteChildByName(nm) // get rid of existing
+	sc.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 
-	cdist := math32.Max(xy.Camera.DistanceTo(xy.Camera.Target), 1.0)
+	cdist := math32.Max(sc.Camera.DistanceTo(sc.Camera.Target), 1.0)
 
 	bbox := nb.WorldBBox.BBox
-	mb := xyz.NewLineBox(xy, xy, nm, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)
+	mb := xyz.NewGroup(sc)
+	mb.SetName(nm)
+	xyz.InitLineBox(mb, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)
 
-	mbspm := xyz.NewSphere(xy, nm+"-pt", sw.SelectionParams.Radius*cdist, 16)
+	mbspm := xyz.NewSphere(sc, nm+"-pt", sw.SelectionParams.Radius*cdist, 16)
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
@@ -294,7 +295,6 @@ func (sw *Scene) handleSlideEvents() {
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}
-		xy.SetNeedsUpdate()
 		sw.NeedsRender()
 	})
 }

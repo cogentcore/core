@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Camera defines the properties of a camera needed for offscreen rendering
+// Camera defines the properties of a camera needed for rendering from a node.
 type Camera struct {
 
 	// size of image to record
@@ -25,16 +25,19 @@ type Camera struct {
 	// far plane z coordinate
 	Far float32 `default:"1000"`
 
-	// maximum distance for depth maps -- anything above is 1 -- this is independent of Near / Far rendering (though must be < Far) and is for normalized depth maps
+	// maximum distance for depth maps. Anything above is 1.
+	// This is independent of Near / Far rendering (though must be < Far)
+	// and is for normalized depth maps.
 	MaxD float32 `default:"20"`
 
-	// use the natural log of 1 + depth for normalized depth values in display etc
+	// use the natural log of 1 + depth for normalized depth values in display etc.
 	LogD bool `default:"true"`
 
-	// number of multi-samples to use for antialising -- 4 is best and default
+	// number of multi-samples to use for antialising -- 4 is best and default.
 	MSample int `default:"4"`
 
-	// up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method
+	// up direction for camera. Defaults to positive Y axis,
+	// and is reset by call to LookAt method.
 	UpDir math32.Vector3
 }
 

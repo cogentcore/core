@@ -96,19 +96,6 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 	return cmm
 }
 
-// NewLine adds a new line between two specified points, using a shared
-// mesh unit line, which is rotated and positioned to go between the designated points.
-func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA) *Solid {
-	lm := UnitLineMesh(sc)
-	ln := NewSolid(parent).SetMesh(lm)
-	ln.isLinear = true
-	ln.SetName(name)
-	ln.Pose.Scale.Set(1, width, width)
-	SetLineStartEnd(&ln.Pose, st, ed)
-	ln.Material.Color = clr
-	return ln
-}
-
 // SetLineStartEnd sets line Pose such that it starts / ends at given poitns.
 func SetLineStartEnd(pose *Pose, st, ed math32.Vector3) {
 	wd := pose.Scale.Y
@@ -135,56 +122,75 @@ const (
 	NoEndArrow = false
 )
 
-// NewArrow adds a group with a new line + cone between two specified points, using shared
-// mesh unit line and arrow heads, which are rotated and positioned to go between the designated points.
-// The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
-// providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
-// arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
-func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
-	cm := UnitConeMesh(sc, arrowSegs)
-	gp := NewGroup(parent)
-	gp.isLinear = true
-	gp.SetName(name)
+// InitLine is an Init function (e.g., for [tree] Maker functions)
+// for making a line between two specified points, using a shared
+// mesh unit line, which is rotated and positioned
+// to go between the designated points.
+func InitLine(ln *Solid, st, ed math32.Vector3, width float32, clr color.RGBA) {
+	lm := UnitLineMesh(ln.Scene)
+	ln.SetMesh(lm)
+	ln.isLinear = true
+	ln.Pose.Scale.Set(1, width, width)
+	SetLineStartEnd(&ln.Pose, st, ed)
+	ln.Material.Color = clr
+}
+
+// InitArrow returns an Init function (e.g., for [tree] Maker functions)
+// for making a group with a new line + cone between two specified points,
+// using shared mesh unit line and arrow heads, which are rotated and
+// positioned to go between the designated points.
+// The arrowSize is a multiplier on the width for the radius and length
+// of the arrow head, with width providing an additional multiplicative
+// factor for width to achieve "fat" vs. "thin" arrows.
+// arrowSegs determines how many faces there are on the arrowhead
+// 4 = a 4-sided pyramid, etc.
+func InitArrow(g *Group, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) {
+	cm := UnitConeMesh(g.Scene, arrowSegs)
+	g.isLinear = true
 	d := ed.Sub(st)
 	dst := d.Length()
-
 	awd := arrowSize * arrowWidth
 	asz := (arrowSize * width) / dst
 	hasz := 0.5 * asz
 
-	ln := NewLine(sc, gp, name+"-line", st, ed, width, clr)
-	ln.Pose.SetIdentity()
-	switch {
-	case startArrow && endArrow:
-		ln.Pose.Scale.X -= 2 * asz
-	case startArrow:
-		ln.Pose.Scale.X -= asz
-		ln.Pose.Pos.X += hasz
-	case endArrow:
-		ln.Pose.Scale.X -= asz
-		ln.Pose.Pos.X -= hasz
-	}
+	g.Maker(func(p *tree.Plan) {
+		tree.Add(p, func(ln *Solid) {
+			InitLine(ln, st, ed, width, clr)
+			ln.Pose.SetIdentity()
+			switch {
+			case startArrow && endArrow:
+				ln.Pose.Scale.X -= 2 * asz
+			case startArrow:
+				ln.Pose.Scale.X -= asz
+				ln.Pose.Pos.X += hasz
+			case endArrow:
+				ln.Pose.Scale.X -= asz
+				ln.Pose.Pos.X -= hasz
+			}
+		})
 
-	gp.Pose.Scale.Set(1, width, width) // group does everything
-	SetLineStartEnd(&gp.Pose, st, ed)
+		g.Pose.Scale.Set(1, width, width) // group does everything
+		SetLineStartEnd(&g.Pose, st, ed)
 
-	if startArrow {
-		ar := NewSolid(gp).SetMesh(cm)
-		ar.SetName(name + "-start-arrow")
-		ar.Pose.Scale.Set(awd, asz, awd)                               // Y is up
-		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
-		ar.Pose.Pos = math32.Vec3(-0.5+hasz, 0, 0)
-		ar.Material.Color = clr
-	}
-	if endArrow {
-		ar := NewSolid(gp).SetMesh(cm)
-		ar.SetName(name + "-end-arrow")
-		ar.Pose.Scale.Set(awd, asz, awd)
-		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
-		ar.Pose.Pos = math32.Vec3(0.5-hasz, 0, 0)
-		ar.Material.Color = clr
-	}
-	return gp
+		if startArrow {
+			tree.Add(p, func(ar *Solid) {
+				ar.SetMesh(cm)
+				ar.Pose.Scale.Set(awd, asz, awd)                               // Y is up
+				ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
+				ar.Pose.Pos = math32.Vec3(-0.5+hasz, 0, 0)
+				ar.Material.Color = clr
+			})
+		}
+		if endArrow {
+			tree.Add(p, func(ar *Solid) {
+				ar.SetMesh(cm)
+				ar.Pose.Scale.Set(awd, asz, awd)
+				ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
+				ar.Pose.Pos = math32.Vec3(0.5-hasz, 0, 0)
+				ar.Material.Color = clr
+			})
+		}
+	})
 }
 
 // NewLineBoxMeshes adds two Meshes defining the edges of a Box.
@@ -219,51 +225,48 @@ const (
 	Active = false
 )
 
-// NewLineBox adds a new Group with Solid's and two Meshes defining the edges of a Box.
-// This can be used for drawing a selection box around a Node in the scene, for example.
+// InitLineBox returns an Init function (e.g., for [tree] Maker functions)
+// that adds a new [Group] with [Solid]s and two Meshes defining the edges of a Box.
+// This can be used for drawing a selection box around a Node in the scene,
+// for example.
 // offset is an arbitrary offset (for composing shapes).
 // Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func NewLineBox(sc *Scene, parent tree.Node, meshNm, boxNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
+func InitLineBox(g *Group, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
-
-	front, side := NewLineBoxMeshes(sc, meshNm, bbox, width)
-
+	front, side := NewLineBoxMeshes(g.Scene, meshNm, bbox, width)
 	ctr := bbox.Min.Add(hSz)
-	bgp := NewGroup(parent)
-	bgp.SetName(boxNm)
-	bgp.Pose.Pos = ctr
 
-	bs := NewSolid(bgp).SetMesh(front).SetColor(clr)
-	bs.SetName(boxNm + "-back")
+	g.Pose.Pos = ctr
+
+	bs := NewSolid(g).SetMesh(front).SetColor(clr)
+	bs.SetName("back")
 	bs.Pose.Pos.Set(0, 0, -hSz.Z)
 
-	ls := NewSolid(bgp).SetMesh(side).SetColor(clr)
-	ls.SetName(boxNm + "-left")
+	ls := NewSolid(g).SetMesh(side).SetColor(clr)
+	ls.SetName("left")
 	ls.Pose.Pos.Set(-hSz.X, 0, 0)
 	ls.Pose.SetAxisRotation(0, 1, 0, 90)
 
-	rs := NewSolid(bgp).SetMesh(side).SetColor(clr)
-	rs.SetName(boxNm + "-right")
+	rs := NewSolid(g).SetMesh(side).SetColor(clr)
+	rs.SetName("right")
 	rs.Pose.Pos.Set(hSz.X, 0, 0)
 	rs.Pose.SetAxisRotation(0, 1, 0, -90)
 
-	fs := NewSolid(bgp).SetMesh(front).SetColor(clr)
-	fs.SetName(boxNm + "-front")
+	fs := NewSolid(g).SetMesh(front).SetColor(clr)
+	fs.SetName("front")
 
 	fs.Pose.Pos.Set(0, 0, hSz.Z)
 
 	// todo:
 	// if inactive {
-	// 	bgp.SetDisabled()
+	// 	g.SetDisabled()
 	// 	bs.SetDisabled()
 	// 	ls.SetDisabled()
 	// 	rs.SetDisabled()
 	// 	fs.SetDisabled()
 	// }
-
-	return bgp
 }

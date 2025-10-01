@@ -10,6 +10,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"github.com/cogentcore/webgpu/wgpu"
 )
@@ -196,8 +197,7 @@ func (sy *GraphicsSystem) SetClearDepthStencil(depth float32, stencil uint32) *G
 	return sy
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Rendering
+//////// Rendering
 
 // NewCommandEncoder returns a new CommandEncoder for encoding
 // rendering commands.  This is automatically called by
@@ -228,7 +228,7 @@ func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) 
 // to start the render pass using the Renderer configured for
 // this system, and returns the encoder object to which further
 // rendering commands should be added.
-// Call [EndRenderPass] when done.
+// Call [GraphicsSystem.EndRenderPass] when done.
 // This version Clears the target texture first, using ClearValues.
 func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 	rd, view, err := sy.beginRenderPass()
@@ -242,7 +242,7 @@ func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 // to start the render pass using the Renderer configured for
 // this system, and returns the encoder object to which further
 // rendering commands should be added.
-// Call [EndRenderPass] when done.
+// Call [GraphicsSystem.EndRenderPass] when done.
 // This version does NOT clear the target texture first,
 // so the prior render output is carried over.
 func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, error) {
@@ -254,7 +254,7 @@ func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, err
 }
 
 // SubmitRender submits the current render commands to the device
-// Queue and releases the [CurrentCommandEncoder] and the given
+// Queue and releases the [GraphicsSystem.CurrentCommandEncoder] and the given
 // RenderPassEncoder.  You must call rp.End prior to calling this.
 // Can insert other commands after rp.End, e.g., to copy the rendered image,
 // prior to calling SubmitRender.
@@ -275,10 +275,36 @@ func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 	return nil
 }
 
-// EndRenderPass ends the render pass started by [BeginRenderPass],
-// by calling [SubmitRender] to submit the rendering commands to the
+// EndRenderPass ends the render pass started by [GraphicsSystem.BeginRenderPass],
+// by calling [GraphicsSystem.SubmitRender] to submit the rendering commands to the
 // device, and calling Present() on the Renderer to show results.
 func (sy *GraphicsSystem) EndRenderPass(rp *wgpu.RenderPassEncoder) {
 	sy.SubmitRender(rp)
 	sy.Renderer.Present()
+}
+
+// EndRenderPassGrabImage ends the render pass started by [GraphicsSystem.BeginRenderPass],
+// as in [GraphicsSystem.EndRenderPass]
+func (sy *GraphicsSystem) EndRenderPassGrabImage(rp *wgpu.RenderPassEncoder) *image.NRGBA {
+	rt, ok := sy.Renderer.(*RenderTexture)
+	if !ok {
+		sy.EndRenderPass(rp)
+		return nil
+	}
+	rt.ReadFrame(sy.CommandEncoder)
+	sy.EndRenderPass(rp)
+	img := errors.Log1(rt.CurrentFrame().ReadGoImage())
+	return img
+}
+
+// AssertImage asserts the currend render image at the given
+// filename using [imagex.Assert].
+// It runs [GraphicsSystem.EndRenderPassGrabImage].
+func (sy *GraphicsSystem) AssertImage(t imagex.TestingT, rp *wgpu.RenderPassEncoder, filename string) {
+	img := sy.EndRenderPassGrabImage(rp)
+	if img == nil {
+		t.Errorf("GraphicsSystem.AssertImage: failure getting image")
+		return
+	}
+	imagex.Assert(t, img, filename)
 }

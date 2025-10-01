@@ -767,7 +767,11 @@ func (em *Events) startRepeatClickTimer() {
 		if tree.IsNil(em.repeatClick) || !em.repeatClick.AsWidget().IsVisible() {
 			return
 		}
-		em.repeatClick.AsWidget().Send(events.Click)
+		// note: we are not in event loop here anymore!
+		rw := em.repeatClick.AsWidget()
+		rw.AsyncLock()
+		rw.Send(events.Click)
+		rw.AsyncUnlock()
 		em.startRepeatClickTimer()
 	})
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// package world implements visualization of [physics] using [xyz]
+// 3D graphics.
 package world
 
 //go:generate core generate -add-types
@@ -9,70 +11,64 @@ package world
 import (
 	"image"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 )
 
-// View connects a Virtual World with a Xyz Scene to visualize the world,
-// including ability to render offscreen
-type View struct {
+// World connects a Virtual World with an [xyz.Scene] to visualize the world,
+// including ability to render offscreen.
+type World struct {
 
-	// the root Group node of the virtual world
+	// World is the root Group node of the virtual world
 	World *physics.Group
 
-	// the scene object for visualizing
+	// Scene is the [xyz.Scene] object for visualizing.
 	Scene *xyz.Scene
 
-	// the root Group node in the Scene under which the world is rendered
+	// Root is the root Group node in the Scene under which the world is rendered.
 	Root *xyz.Group
 }
 
-// NewView returns a new View that links given world with given scene and root group
-func NewView(world *physics.Group, sc *xyz.Scene, root *xyz.Group) *View {
-	vw := &View{World: world, Scene: sc, Root: root}
-	return vw
+// NewWorld returns a new World that links given [physics] world
+// (top level Group) with given [xyz.Scene], making a
+// top-level Root group in the scene.
+func NewWorld(world *physics.Group, sc *xyz.Scene) *World {
+	rgp := xyz.NewGroup(sc)
+	rgp.SetName("world")
+	wr := &World{World: world, Scene: sc, Root: rgp}
+	GroupInit(wr.World, rgp)
+	wr.Update()
+	return wr
 }
 
-// InitLibrary initializes Scene library with basic Solid shapes
-// based on bodies in the virtual world.  More complex visualizations
-// can be configured after this.
-func (vw *View) InitLibrary() {
-	vw.InitLibraryBody(vw.World, vw.Scene)
+// Init initializes the physics world, e.g., at start of a new sim run.
+func (wr *World) Init() {
+	wr.World.WorldInit()
+	wr.Update()
 }
 
-// Sync synchronizes the view to the world
-func (vw *View) Sync() bool {
-	rval := vw.SyncNode(vw.World, vw.Root, vw.Scene)
-	return rval
+// Update updates the view from current physics node state.
+func (wr *World) Update() {
+	if wr.Scene != nil {
+		wr.Scene.Update()
+	}
 }
 
-// UpdatePose updates the view pose values only from world tree.
-// Essential that both trees are already synchronized.
-func (vw *View) UpdatePose() {
-	vw.UpdatePoseNode(vw.World, vw.Root)
-	vw.Scene.SetNeedsUpdate()
-}
-
-// UpdateBodyView updates the display properties of given body name
-// recurses the tree until this body name is found.
-func (vw *View) UpdateBodyView(bodyNames ...string) {
-	vw.UpdateBodyViewNode(bodyNames, vw.World, vw.Root)
-	vw.Scene.SetNeedsUpdate()
-}
-
-// RenderOffNode does an offscreen render using given node
-// for the camera position and orientation.
-// Current scene camera is saved and restored
-func (vw *View) RenderOffNode(node physics.Node, cam *Camera) error {
-	sc := vw.Scene
-	sc.UpdateNodesIfNeeded()
-	camnm := "eve-view-renderoff-save"
+// RenderFromNode does an offscreen render using given node
+// for the camera position and orientation, returning the render image.
+// Current scene camera is saved and restored.
+func (wr *World) RenderFromNode(node physics.Node, cam *Camera) image.Image {
+	sc := wr.Scene
+	camnm := "physics-view-rendernode-save"
 	sc.SaveCamera(camnm)
-	defer sc.SetCamera(camnm)
+	defer func() {
+		sc.SetCamera(camnm)
+		sc.UseMainFrame()
+	}()
+
 	sc.Camera.FOV = cam.FOV
 	sc.Camera.Near = cam.Near
 	sc.Camera.Far = cam.Far
@@ -80,217 +76,42 @@ func (vw *View) RenderOffNode(node physics.Node, cam *Camera) error {
 	sc.Camera.Pose.Pos = nb.Abs.Pos
 	sc.Camera.Pose.Quat = nb.Abs.Quat
 	sc.Camera.Pose.Scale.Set(1, 1, 1)
-	sz := sc.Geom.Size
-	sc.Geom.Size = cam.Size
-	sc.Frame.SetSize(sc.Geom.Size) // nop if same
-	ok := sc.Render()
-	sc.Geom.Size = sz
-	if !ok {
-		return errors.New("could not render scene")
-	}
-	return nil
-}
 
-// Image returns the current rendered image
-func (vw *View) Image() (*image.RGBA, error) {
-	return vw.Scene.ImageCopy()
+	sc.UseAltFrame(cam.Size)
+	return sc.RenderGrabImage()
 }
 
 // DepthImage returns the current rendered depth image
-func (vw *View) DepthImage() ([]float32, error) {
-	return vw.Scene.DepthImage()
-}
+// func (vw *World) DepthImage() ([]float32, error) {
+// 	return vw.Scene.DepthImage()
+// }
 
-///////////////////////////////////////////////////////////////
-// Sync, Config
+// MakeStateToolbar returns a toolbar function for physics state updates,
+// calling the given updt function after making the change.
+func MakeStateToolbar(ps *physics.State, updt func()) func(p *tree.Plan) {
+	return func(p *tree.Plan) {
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.SetEulerRotation).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.SetAxisRotation).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.RotateEuler).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.RotateOnAxis).SetAfterFunc(updt).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.EulerRotation).SetAfterFunc(updt).SetShowReturn(true).SetIcon(icons.Rotate90DegreesCcw)
+		})
+		tree.Add(p, func(w *core.Separator) {})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.MoveOnAxis).SetAfterFunc(updt).SetIcon(icons.MoveItem)
+		})
+		tree.Add(p, func(w *core.FuncButton) {
+			w.SetFunc(ps.MoveOnAxisAbs).SetAfterFunc(updt).SetIcon(icons.MoveItem)
+		})
 
-// InitLibraryBody initializes Scene library with basic Solid shapes
-// based on bodies in the virtual world.  More complex visualizations
-// can be configured after this.
-func (vw *View) InitLibraryBody(wn physics.Node, sc *xyz.Scene) {
-	bod := wn.AsBody()
-	if bod != nil {
-		vw.InitLibSolid(bod, sc)
-	}
-	for idx := range wn.AsTree().Children {
-		wk := wn.AsTree().Child(idx).(physics.Node)
-		vw.InitLibraryBody(wk, sc)
-	}
-}
-
-// InitLibSolid initializes Scene library with Solid for given body
-func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
-	nm := bod.AsTree().Name
-	bb := bod.AsBodyBase()
-	if bb.Vis == "" {
-		bb.Vis = nm
-	}
-	if _, has := sc.Library[nm]; has {
-		return
-	}
-	lgp := sc.NewInLibrary(nm)
-	sld := xyz.NewSolid(lgp)
-	sld.SetName(nm)
-	wt := bb.NodeType().ShortName()
-	switch wt {
-	case "physics.Box":
-		mnm := "eveBox"
-		bm, _ := sc.MeshByName(mnm)
-		if bm == nil {
-			bm = xyz.NewBox(sc, mnm, 1, 1, 1)
-		}
-		sld.SetMeshName(mnm)
-	case "physics.Cylinder":
-		mnm := "eveCylinder"
-		cm, _ := sc.MeshByName(mnm)
-		if cm == nil {
-			cm = xyz.NewCylinder(sc, mnm, 1, 1, 32, 1, true, true)
-		}
-		sld.SetMeshName(mnm)
-	case "physics.Capsule":
-		mnm := "eveCapsule"
-		cm, _ := sc.MeshByName(mnm)
-		if cm == nil {
-			cm = xyz.NewCapsule(sc, mnm, 1, .2, 32, 1)
-		}
-		sld.SetMeshName(mnm)
-	case "physics.Sphere":
-		mnm := "eveSphere"
-		sm, _ := sc.MeshByName(mnm)
-		if sm == nil {
-			sm = xyz.NewSphere(sc, mnm, 1, 32)
-		}
-		sld.SetMeshName(mnm)
-	}
-}
-
-// ConfigBodySolid configures a solid for a body with current values
-func (vw *View) ConfigBodySolid(bod physics.Body, sld *xyz.Solid) {
-	wt := bod.AsTree().NodeType().ShortName()
-	switch wt {
-	case "physics.Box":
-		bx := bod.(*physics.Box)
-		sld.Pose.Scale = bx.Size
-		if bx.Color != "" {
-			sld.Material.Color = errors.Log1(colors.FromString(bx.Color))
-		}
-	case "physics.Cylinder":
-		cy := bod.(*physics.Cylinder)
-		sld.Pose.Scale.Set(cy.BotRad, cy.Height, cy.BotRad)
-		if cy.Color != "" {
-			sld.Material.Color = errors.Log1(colors.FromString(cy.Color))
-		}
-	case "physics.Capsule":
-		cp := bod.(*physics.Capsule)
-		sld.Pose.Scale.Set(cp.BotRad/.2, cp.Height/1.4, cp.BotRad/.2)
-		if cp.Color != "" {
-			sld.Material.Color = errors.Log1(colors.FromString(cp.Color))
-		}
-	case "physics.Sphere":
-		sp := bod.(*physics.Sphere)
-		sld.Pose.Scale.SetScalar(sp.Radius)
-		if sp.Color != "" {
-			sld.Material.Color = errors.Log1(colors.FromString(sp.Color))
-		}
-	}
-}
-
-// ConfigView configures the view node to properly display world node
-func (vw *View) ConfigView(wn physics.Node, vn xyz.Node, sc *xyz.Scene) {
-	wb := wn.AsNodeBase()
-	vb := vn.(*xyz.Group)
-	vb.Pose.Pos = wb.Rel.Pos
-	vb.Pose.Quat = wb.Rel.Quat
-	bod := wn.AsBody()
-	if bod == nil {
-		return
-	}
-	if !vb.HasChildren() {
-		sc.AddFromLibrary(bod.AsBodyBase().Vis, vb)
-	}
-	bgp := vb.Child(0)
-	if bgp.AsTree().HasChildren() {
-		sld, has := bgp.AsTree().Child(0).(*xyz.Solid)
-		if has {
-			vw.ConfigBodySolid(bod, sld)
-		}
-	}
-}
-
-// SyncNode updates the view tree to match the world tree, using
-// efficient plan-based Build to maximally preserve existing tree elements
-// returns true if view tree was modified (elements added / removed etc)
-func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
-	nm := wn.AsTree().Name
-	vn.AsTree().SetName(nm) // guaranteed to be unique
-	skids := wn.AsTree().Children
-	p := make(tree.TypePlan, 0, len(skids))
-	for _, skid := range skids {
-		p.Add(types.For[xyz.Group](), skid.AsTree().Name)
-	}
-	mod := tree.Update(vn, p)
-	modall := mod
-	for idx := range skids {
-		wk := wn.AsTree().Child(idx).(physics.Node)
-		vk := vn.AsTree().Child(idx).(xyz.Node)
-		vw.ConfigView(wk, vk, sc)
-		if wk.AsTree().HasChildren() {
-			kmod := vw.SyncNode(wk, vk, sc)
-			if kmod {
-				modall = true
-			}
-		}
-	}
-	if modall {
-		sc.SetNeedsUpdate()
-	}
-	return modall
-}
-
-///////////////////////////////////////////////////////////////
-// UpdatePose
-
-// UpdatePoseNode updates the view pose values only from world tree.
-// Essential that both trees are already synchronized.
-func (vw *View) UpdatePoseNode(wn physics.Node, vn xyz.Node) {
-	skids := wn.AsTree().Children
-	for idx := range skids {
-		wk := wn.AsTree().Child(idx).(physics.Node)
-		vk := vn.AsTree().Child(idx).(xyz.Node)
-		wb := wk.AsNodeBase()
-		vb := vk.AsNodeBase()
-		vb.Pose.Pos = wb.Rel.Pos
-		vb.Pose.Quat = wb.Rel.Quat
-		vw.UpdatePoseNode(wk, vk)
-	}
-}
-
-// UpdateBodyViewNode updates the body view info for given name(s)
-// Essential that both trees are already synchronized.
-func (vw *View) UpdateBodyViewNode(bodyNames []string, wn physics.Node, vn xyz.Node) {
-	skids := wn.AsTree().Children
-	for idx := range skids {
-		wk := wn.AsTree().Child(idx).(physics.Node)
-		vk := vn.AsTree().Child(idx).(xyz.Node)
-		match := false
-		if _, isBod := wk.(physics.Body); isBod {
-			for _, nm := range bodyNames {
-				if wk.AsTree().Name == nm {
-					match = true
-					break
-				}
-			}
-		}
-		if match {
-			wb := wk.(physics.Body)
-			bgp := vk.AsTree().Child(0)
-			if bgp.AsTree().HasChildren() {
-				sld, has := bgp.AsTree().Child(0).(*xyz.Solid)
-				if has {
-					vw.ConfigBodySolid(wb, sld)
-				}
-			}
-		}
-		vw.UpdateBodyViewNode(bodyNames, wk, vk)
 	}
 }

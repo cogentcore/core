@@ -19,6 +19,17 @@ type Group struct {
 	NodeBase
 }
 
+func (gp *Group) Update() {
+	gp.RunUpdaters()
+	gp.WalkDown(func(n tree.Node) bool {
+		if n.AsTree().This == gp.This {
+			return tree.Continue
+		}
+		n.(Node).Update()
+		return tree.Continue
+	})
+}
+
 func (gp *Group) InitAbs(par *NodeBase) {
 	gp.InitAbsBase(par)
 }
@@ -75,6 +86,7 @@ func (gp *Group) WorldDynGroupBBox() {
 
 // WorldInit does the full tree InitAbs and GroupBBox updates
 func (gp *Group) WorldInit() {
+	gp.Update()
 	gp.WalkDown(func(tn tree.Node) bool {
 		n, _ := AsNode(tn)
 		if n == nil {

@@ -13,40 +13,45 @@ import (
 // Camera defines the properties of the camera
 type Camera struct {
 
-	// overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction
+	// Pose is the overall orientation and direction of the camera,
+	// relative to pointing at negative Z axis with up (positive Y) direction.
 	Pose Pose
 
-	// target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method
+	// Target location for the camera to point at, which defaults to the origin.
+	// This moves with panning movements, and is reset by a call to LookAt method
 	Target math32.Vector3
 
-	// up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method
+	// UpDir is the upward direction for camera, which defaults to positive Y axis,
+	// and is reset by LookAt method.
 	UpDir math32.Vector3
 
-	// default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far).
+	// Ortho switches to using Orthographic instead of default Perspective
+	// camera. For Ortho, the view includes the volume specified by the
+	// Near - Far distance (i.e., you probably want to decrease Far).
 	Ortho bool
 
-	// field of view in degrees
+	// FOV is field of view in degrees.
 	FOV float32
 
-	// aspect ratio (width/height)
-	Aspect float32
+	// Aspect is the aspect ratio (width/height).
+	Aspect float32 `set:"-"`
 
-	// near plane z coordinate
+	// Near plane z coordinate.
 	Near float32
 
-	// far plane z coordinate
+	// Far plane z coordinate.
 	Far float32
 
-	// view matrix (inverse of the Pose.Matrix)
+	// ViewMatrix is the inverse of the Pose.Matrix.
 	ViewMatrix math32.Matrix4 `display:"-"`
 
-	// projection matrix, defining the camera perspective / ortho transform
+	// ProjectionMatrix defines the camera perspective / ortho transform.
 	ProjectionMatrix math32.Matrix4 `display:"-"`
 
-	// inverse of the projection matrix
+	// InvProjectionMatrix is the inverse of the projection matrix.
 	InvProjectionMatrix math32.Matrix4 `display:"-"`
 
-	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
+	// Frustum of projection: viewable space defined by 6 planes of a pyrammidal shape.
 	Frustum *math32.Frustum `display:"-"`
 }
 
@@ -69,6 +74,11 @@ func (cm *Camera) DefaultPose() {
 // GenGoSet returns code to set values at given path (var.member etc)
 func (cm *Camera) GenGoSet(path string) string {
 	return cm.Pose.GenGoSet(path+".Pose") + "; " + cm.Target.GenGoSet(path+".Target") + "; " + cm.UpDir.GenGoSet(path+".UpDir")
+}
+
+// SetAspect sets the aspect ratio from the given frame size.
+func (cm *Camera) SetAspect(size image.Point) {
+	cm.Aspect = float32(size.X) / float32(size.Y)
 }
 
 // UpdateMatrix updates the view and projection matricies
