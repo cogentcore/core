@@ -177,9 +177,19 @@ func (uc *Context) Dots(un Units) float32 {
 	return uc.DPI
 }
 
-// ToDots converts value in given units into raw display pixels (dots in DPI)
+// ToDots converts value in given units into raw display pixels (dots in DPI).
 func (uc *Context) ToDots(val float32, un Units) float32 {
 	return val * uc.Dots(un)
+}
+
+// FromDots converts value in dots to value in given units.
+func (uc *Context) FromDots(val float32, un Units) float32 {
+	return val / uc.Dots(un)
+}
+
+// Convert converts value in given from units to value in given to units.
+func (uc *Context) Convert(val float32, from, to Units) float32 {
+	return val * (uc.Dots(from) / uc.Dots(to))
 }
 
 // PxToDots just converts a value from pixels to dots

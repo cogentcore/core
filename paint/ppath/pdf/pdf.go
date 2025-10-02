@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/shaped"
 )
 
@@ -37,13 +38,14 @@ type PDF struct {
 }
 
 // New returns a portable document format (PDF) renderer.
-func New(w io.Writer, width, height float32) *PDF {
+// The size is in points.
+func New(w io.Writer, width, height float32, un *units.Context) *PDF {
 	// if opts == nil {
 	// 	defaultOptions := DefaultOptions
 	// 	opts = &defaultOptions
 	// }
 
-	page := newPDFWriter(w).NewPage(width, height)
+	page := newPDFWriter(w, un).NewPage(width, height)
 	// page.pdf.SetCompression(opts.Compress)
 	// page.pdf.SetFontSubsetting(opts.SubsetFonts)
 	return &PDF{
@@ -134,7 +136,7 @@ func (r *PDF) RenderPath(path ppath.Path, style *styles.Paint, m math32.Matrix2)
 	scale := math32.Sqrt(math32.Abs(m.Det()))
 	stk := style.Stroke
 	stk.Width.Dots *= scale
-	stk.DashOffset, stk.Dashes = ppath.ScaleDash(stk.Width.Dots, stk.DashOffset, stk.Dashes)
+	stk.DashOffset, stk.Dashes = ppath.ScaleDash(scale, stk.DashOffset, stk.Dashes)
 
 	// PDFs don't support connecting first and last dashes if path is closed,
 	// so we move the start of the path if this is the case

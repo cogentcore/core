@@ -55,7 +55,7 @@ func (w *pdfPageWriter) writePage(parent pdfRef) pdfRef {
 	page := pdfDict{
 		"Type":      pdfName("Page"),
 		"Parent":    parent,
-		"MediaBox":  pdfArray{0.0, 0.0, w.width * ptPerMm, w.height * ptPerMm},
+		"MediaBox":  pdfArray{0.0, 0.0, w.width, w.height},
 		"Resources": w.resources,
 		"Group": pdfDict{
 			"Type": pdfName("Group"),
@@ -77,7 +77,7 @@ func (w *pdfPageWriter) AddURIAction(uri string, rect math32.Box2) {
 		"Type":     pdfName("Annot"),
 		"Subtype":  pdfName("Link"),
 		"Border":   pdfArray{0, 0, 0},
-		"Rect":     pdfArray{rect.Min.X * ptPerMm, rect.Min.Y * ptPerMm, rect.Max.X * ptPerMm, rect.Max.Y * ptPerMm},
+		"Rect":     pdfArray{rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y},
 		"Contents": uri,
 		"A": pdfDict{
 			"S":   pdfName("URI"),
@@ -539,12 +539,12 @@ func (w *pdfPageWriter) getPattern(gradient ppath.Gradient) pdfName {
 	}
 	if g, ok := gradient.(*ppath.LinearGradient); ok {
 		shading["ShadingType"] = 2
-		shading["Coords"] = pdfArray{g.Start.X * ptPerMm, g.Start.Y * ptPerMm, g.End.X * ptPerMm, g.End.Y * ptPerMm}
+		shading["Coords"] = pdfArray{g.Start.X, g.Start.Y, g.End.X, g.End.Y}
 		shading["Function"] = patternStopsFunction(g.Stops)
 		shading["Extend"] = pdfArray{true, true}
 	} else if g, ok := gradient.(*ppath.RadialGradient); ok {
 		shading["ShadingType"] = 3
-		shading["Coords"] = pdfArray{g.C0.X * ptPerMm, g.C0.Y * ptPerMm, g.R0 * ptPerMm, g.C1.X * ptPerMm, g.C1.Y * ptPerMm, g.R1 * ptPerMm}
+		shading["Coords"] = pdfArray{g.C0.X, g.C0.Y, g.R0, g.C1.X, g.C1.Y, g.R1}
 		shading["Function"] = patternStopsFunction(g.Stops)
 		shading["Extend"] = pdfArray{true, true}
 	}

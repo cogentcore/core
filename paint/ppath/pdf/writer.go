@@ -21,6 +21,7 @@ import (
 	"unicode/utf16"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
@@ -32,9 +33,10 @@ type pdfWriter struct {
 	w   io.Writer
 	err error
 
-	pos        int
-	objOffsets []int
-	pages      []pdfRef
+	unitContext units.Context
+	pos         int
+	objOffsets  []int
+	pages       []pdfRef
 
 	page     *pdfPageWriter
 	fontsStd map[string]pdfRef
@@ -54,11 +56,12 @@ type pdfWriter struct {
 	lang     string
 }
 
-func newPDFWriter(writer io.Writer) *pdfWriter {
+func newPDFWriter(writer io.Writer, un *units.Context) *pdfWriter {
 	w := &pdfWriter{
-		w:          writer,
-		objOffsets: []int{0, 0, 0}, // catalog, metadata, page tree
-		fontsStd:   map[string]pdfRef{},
+		w:           writer,
+		unitContext: *un,
+		objOffsets:  []int{0, 0, 0}, // catalog, metadata, page tree
+		fontsStd:    map[string]pdfRef{},
 		// fontSubset: map[*text.Font]*ppath.FontSubsetter{},
 		// fontsH:   map[*text.Font]pdfRef{},
 		// fontsV:   map[*text.Font]pdfRef{},
@@ -68,7 +71,7 @@ func newPDFWriter(writer io.Writer) *pdfWriter {
 	}
 	w.layerInit()
 
-	w.write("%%PDF-1.7\n%%Ŧǟċơ\n")
+	w.write("%%PDF-1.7\n")
 	return w
 }
 
@@ -471,13 +474,11 @@ func (w *pdfWriter) NewPage(width, height float32) *pdfPageWriter {
 	}
 	w.page.style.Defaults()
 
-	m := math32.Scale2D(ptPerMm, ptPerMm)
+	sc := w.unitContext.Convert(1, units.UnitDot, units.UnitPt)
+	m := math32.Translate2D(0, height).Scale(sc, -sc)
 	fmt.Fprintf(w.page, " %s cm", mat2(m))
 	return w.page
 }
-
-const mmPerPt = 25.4 / 72.0
-const ptPerMm = 72 / 25.4
 
 type dec float32
 

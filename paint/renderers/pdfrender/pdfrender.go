@@ -21,8 +21,9 @@ import (
 
 // Renderer is the PDF renderer.
 type Renderer struct {
-	size  math32.Vector2
-	units units.Units
+	size        math32.Vector2
+	sizeUnits   units.Units
+	unitContext units.Context
 
 	PDF *pdf.PDF
 
@@ -32,8 +33,8 @@ type Renderer struct {
 	lyStack stack.Stack[int]
 }
 
-func New(size math32.Vector2) render.Renderer {
-	rs := &Renderer{}
+func New(size math32.Vector2, un *units.Context) render.Renderer {
+	rs := &Renderer{unitContext: *un}
 	rs.SetSize(units.UnitDot, size)
 	return rs
 }
@@ -50,22 +51,24 @@ func (rs *Renderer) Source() []byte {
 }
 
 func (rs *Renderer) Size() (units.Units, math32.Vector2) {
-	return rs.units, rs.size
+	return rs.sizeUnits, rs.size
 }
 
 func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
-	if rs.units == un && rs.size == size {
+	if rs.sizeUnits == un && rs.size == size {
 		return
 	}
-	rs.units = un
+	rs.sizeUnits = un
 	rs.size = size
 }
 
 // Render is the main rendering function.
 func (rs *Renderer) Render(r render.Render) render.Renderer {
 	rs.buff = &bytes.Buffer{}
-	// todo: convert size to mm
-	rs.PDF = pdf.New(rs.buff, rs.size.X, rs.size.Y)
+	// pdf is in points
+	sx := rs.unitContext.Convert(float32(rs.size.X), rs.sizeUnits, units.UnitPt)
+	sy := rs.unitContext.Convert(float32(rs.size.Y), rs.sizeUnits, units.UnitPt)
+	rs.PDF = pdf.New(rs.buff, sx, sy, &rs.unitContext)
 	rs.lyStack = nil
 	bg := rs.PDF.AddLayer("bg", true)
 	rs.PDF.BeginLayer(bg)

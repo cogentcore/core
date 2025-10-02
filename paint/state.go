@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/styles/units"
 )
 
 var (
@@ -31,7 +32,7 @@ var (
 
 	// NewPDFRenderer returns a PDF renderer that can
 	// generate a PDF document from painter content.
-	NewPDFRenderer func(size math32.Vector2) render.Renderer
+	NewPDFRenderer func(size math32.Vector2, un *units.Context) render.Renderer
 )
 
 // RenderToImage is a convenience function that renders the current
