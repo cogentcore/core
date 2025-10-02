@@ -140,7 +140,7 @@ const (
 	Serif
 
 	// Monospace fonts have all glyphs with he same fixed width.
-	// Example monospace fonts include Fira Mono, DejaVu Sans Mono,
+	// Example monospace fonts include Courier, Fira Mono, DejaVu Sans Mono,
 	// Menlo, Consolas, Liberation Mono, Monaco, and Lucida Console.
 	Monospace
 

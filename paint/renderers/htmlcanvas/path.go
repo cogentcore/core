@@ -58,9 +58,14 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 	if style.HasStroke() {
 		scale := math32.Sqrt(math32.Abs(pt.Context.Transform.Det()))
-		// note: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
-		style.Stroke.Width.Dots /= scale
-		rs.setStroke(&style.Stroke)
+		if scale != 1 {
+			// note: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
+			stk := style.Stroke
+			stk.Width.Dots /= scale
+			rs.setStroke(&stk)
+		} else {
+			rs.setStroke(&style.Stroke)
+		}
 		rs.ctx.Call("stroke")
 	}
 }

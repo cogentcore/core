@@ -275,7 +275,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 	case events.Scroll:
 		if !tree.IsNil(em.scroll) {
-			scInTime := time.Since(em.lastScrollTime) < DeviceSettings.ScrollFocusTime
+			scInTime := time.Since(em.lastScrollTime) < TimingSettings.ScrollFocusTime
 			if scInTime {
 				em.scroll.AsWidget().HandleEvent(e)
 				if e.IsHandled() {
@@ -439,12 +439,12 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.drag.AsWidget().Send(events.DragMove, e) // usually ignored
 			e.SetHandled()
 		} else {
-			if !tree.IsNil(em.dragPress) && em.dragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
+			if !tree.IsNil(em.dragPress) && em.dragStartCheck(e, TimingSettings.DragStartTime, TimingSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
 				em.dragPress.AsWidget().Send(events.DragStart, e)
 				e.SetHandled()
-			} else if !tree.IsNil(em.slidePress) && em.dragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
+			} else if !tree.IsNil(em.slidePress) && em.dragStartCheck(e, TimingSettings.SlideStartTime, TimingSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
 				em.slide = em.slidePress
@@ -479,7 +479,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 					em.setCursorFromStyle()
 					return
 				}
-				dcInTime := time.Since(em.lastClickTime) < DeviceSettings.DoubleClickInterval
+				dcInTime := time.Since(em.lastClickTime) < TimingSettings.DoubleClickInterval
 				em.lastClickTime = time.Now()
 				sentMulti := false
 				switch {
@@ -594,12 +594,12 @@ func (em *Events) topLongHover() Widget {
 
 // handleLongHover handles long hover events
 func (em *Events) handleLongHover(e events.Event) {
-	em.handleLong(e, em.topLongHover(), &em.longHoverWidget, &em.longHoverPos, &em.longHoverTimer, events.LongHoverStart, events.LongHoverEnd, DeviceSettings.LongHoverTime, DeviceSettings.LongHoverStopDistance)
+	em.handleLong(e, em.topLongHover(), &em.longHoverWidget, &em.longHoverPos, &em.longHoverTimer, events.LongHoverStart, events.LongHoverEnd, TimingSettings.LongHoverTime, TimingSettings.LongHoverStopDistance)
 }
 
 // handleLongPress handles long press events
 func (em *Events) handleLongPress(e events.Event) {
-	em.handleLong(e, em.press, &em.longPressWidget, &em.longPressPos, &em.longPressTimer, events.LongPressStart, events.LongPressEnd, DeviceSettings.LongPressTime, DeviceSettings.LongPressStopDistance)
+	em.handleLong(e, em.press, &em.longPressWidget, &em.longPressPos, &em.longPressTimer, events.LongPressStart, events.LongPressEnd, TimingSettings.LongPressTime, TimingSettings.LongPressStopDistance)
 }
 
 // handleLong is the implementation of [Events.handleLongHover] and
@@ -759,7 +759,7 @@ func (em *Events) startRepeatClickTimer() {
 	if tree.IsNil(em.repeatClick) || !em.repeatClick.AsWidget().IsVisible() {
 		return
 	}
-	delay := DeviceSettings.RepeatClickTime
+	delay := TimingSettings.RepeatClickTime
 	if em.repeatClickTimer == nil {
 		delay *= 8
 	}

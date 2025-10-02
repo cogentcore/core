@@ -63,7 +63,7 @@ func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, he
 		if !turnOn {
 			isOn := sp.Properties["on"].(bool)
 			lastSwitch := sp.Properties["lastSwitch"].(time.Time)
-			if TheApp.Platform() != system.Offscreen && SystemSettings.CursorBlinkTime > 0 && time.Since(lastSwitch) > SystemSettings.CursorBlinkTime {
+			if TheApp.Platform() != system.Offscreen && TimingSettings.CursorBlinkTime > 0 && time.Since(lastSwitch) > TimingSettings.CursorBlinkTime {
 				isOn = !isOn
 				sp.Properties["on"] = isOn
 				sp.Properties["lastSwitch"] = time.Now()

@@ -3,6 +3,7 @@ module cogentcore.org/core
 go 1.23.4
 
 require (
+	codeberg.org/go-pdf/fpdf v0.11.1
 	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3

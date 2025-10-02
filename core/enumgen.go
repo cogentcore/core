@@ -337,6 +337,49 @@ func (i Themes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Themes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Themes") }
 
+var _PageSizesValues = []PageSizes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+// PageSizesN is the highest valid value for type PageSizes, plus one.
+const PageSizesN PageSizes = 10
+
+var _PageSizesValueMap = map[string]PageSizes{`A1`: 0, `A2`: 1, `A3`: 2, `A4`: 3, `A5`: 4, `A6`: 5, `A7`: 6, `Letter`: 7, `Legal`: 8, `Tabloid`: 9}
+
+var _PageSizesDescMap = map[PageSizes]string{0: ``, 1: ``, 2: ``, 3: ``, 4: ``, 5: ``, 6: ``, 7: ``, 8: ``, 9: ``}
+
+var _PageSizesMap = map[PageSizes]string{0: `A1`, 1: `A2`, 2: `A3`, 3: `A4`, 4: `A5`, 5: `A6`, 6: `A7`, 7: `Letter`, 8: `Legal`, 9: `Tabloid`}
+
+// String returns the string representation of this PageSizes value.
+func (i PageSizes) String() string { return enums.String(i, _PageSizesMap) }
+
+// SetString sets the PageSizes value from its string representation,
+// and returns an error if the string is invalid.
+func (i *PageSizes) SetString(s string) error {
+	return enums.SetString(i, s, _PageSizesValueMap, "PageSizes")
+}
+
+// Int64 returns the PageSizes value as an int64.
+func (i PageSizes) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the PageSizes value from an int64.
+func (i *PageSizes) SetInt64(in int64) { *i = PageSizes(in) }
+
+// Desc returns the description of the PageSizes value.
+func (i PageSizes) Desc() string { return enums.Desc(i, _PageSizesDescMap) }
+
+// PageSizesValues returns all possible values for the type PageSizes.
+func PageSizesValues() []PageSizes { return _PageSizesValues }
+
+// Values returns all possible values for the type PageSizes.
+func (i PageSizes) Values() []enums.Enum { return enums.Values(_PageSizesValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i PageSizes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *PageSizes) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "PageSizes")
+}
+
 var _SizeClassesValues = []SizeClasses{0, 1, 2}
 
 // SizeClassesN is the highest valid value for type SizeClasses, plus one.
