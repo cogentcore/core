@@ -27,7 +27,7 @@ type pdfLayers struct {
 func (w *pdfWriter) layerInit() {
 	w.layers.list = make([]pdfLayer, 0)
 	w.layers.currentLayer = -1
-	w.layers.openLayerPane = false
+	w.layers.openLayerPane = true
 }
 
 // AddLayer defines a layer that can be shown or hidden when the document is

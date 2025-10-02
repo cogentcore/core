@@ -1203,10 +1203,16 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 			MessageSnackbar(sc, "Save screenshot: no render image")
 		}
 		sc.RenderWidget()
-		sv := paint.RenderToSVG(&sc.Painter)
+		rend := sc.Painter.RenderDone()
+		svr := paint.NewSVGRenderer(sc.Painter.Size)
+		sv := svr.Render(rend).Source()
 		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".svg")
 		errors.Log(os.WriteFile(fnm, sv, 0666))
-		MessageSnackbar(sc, "Saved SVG screenshot to: "+strings.ReplaceAll(fnm, " ", `\ `)+sz)
+		pdr := paint.NewPDFRenderer(sc.Painter.Size, &sc.Painter.Context().Style.UnitContext)
+		pd := pdr.Render(rend).Source()
+		fnm = filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".pdf")
+		errors.Log(os.WriteFile(fnm, pd, 0666))
+		MessageSnackbar(sc, "Saved SVG, PDF screenshots to: "+strings.ReplaceAll(fnm, " ", `\ `)+sz)
 		e.SetHandled()
 	case keymap.ZoomIn:
 		win.stepZoom(1)

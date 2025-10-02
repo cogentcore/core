@@ -46,8 +46,7 @@ func RenderToImage(pc *Painter) image.Image {
 }
 
 // RenderToSVG is a convenience function that renders the current
-// accumulated painter actions to an SVG document using a
-// [NewSVGRenderer].n
+// accumulated painter actions to an SVG document using a [NewSVGRenderer]
 func RenderToSVG(pc *Painter) []byte {
 	rd := NewSVGRenderer(pc.Size)
 	return rd.Render(pc.RenderDone()).Source()
