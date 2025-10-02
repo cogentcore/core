@@ -463,15 +463,16 @@ func (w *pdfPageWriter) embedImage(img image.Image) pdfRef {
 	sp := img.Bounds().Min // starting point
 	stream := make([]byte, size.X*size.Y*3)
 	streamMask := make([]byte, size.X*size.Y)
-	for y := 0; y < size.Y; y++ {
-		for x := 0; x < size.X; x++ {
-			i := (y*size.X + x) * 3
+	for y := size.Y - 1; y >= 0; y-- { // invert
+		for x := range size.X {
+			pi := (size.Y-1-y)*size.X + x
+			i := pi * 3
 			R, G, B, A := img.At(sp.X+x, sp.Y+y).RGBA()
 			if A != 0 {
 				stream[i+0] = byte((R * 65535 / A) >> 8)
 				stream[i+1] = byte((G * 65535 / A) >> 8)
 				stream[i+2] = byte((B * 65535 / A) >> 8)
-				streamMask[y*size.X+x] = byte(A >> 8)
+				streamMask[pi] = byte(A >> 8)
 			}
 			if A>>8 != 255 {
 				hasMask = true
