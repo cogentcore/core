@@ -43,6 +43,7 @@ type pdfWriter struct {
 	// fontsH   map[*text.Font]pdfRef
 	// fontsV   map[*text.Font]pdfRef
 	images   map[image.Image]pdfRef
+	layers   pdfLayers
 	compress bool
 	subset   bool
 	title    string
@@ -65,6 +66,7 @@ func newPDFWriter(writer io.Writer) *pdfWriter {
 		compress: false,
 		subset:   true,
 	}
+	w.layerInit()
 
 	w.write("%%PDF-1.7\n%%Ŧǟċơ\n")
 	return w
@@ -256,6 +258,9 @@ func (w *pdfWriter) writeVal(i interface{}) {
 		w.write("stream\n")
 		w.writeBytes(b)
 		w.write("\nendstream\n")
+	case *pdfLayer:
+		v.objNum = len(w.objOffsets)
+		w.write("<</Type /OCG /Name %s>>", pdfName(v.name))
 	default:
 		panic(fmt.Sprintf("unknown PDF type %T", i))
 	}
@@ -359,7 +364,7 @@ func (w *pdfWriter) Close() error {
 
 	// document info
 	info := pdfDict{
-		"Producer":     "tdewolff/canvas",
+		"Producer":     "cogentcore/pdf",
 		"CreationDate": time.Now().Format("D:20060102150405Z0700"),
 	}
 
@@ -409,12 +414,14 @@ func (w *pdfWriter) Close() error {
 	w.objOffsets[0] = w.pos
 	w.write("%v 0 obj\n", 1)
 	w.writeVal(catalog)
+	w.writeLayerCatalog()
 	w.write("\nendobj\n")
 
 	// document info
 	w.objOffsets[1] = w.pos
 	w.write("%v 0 obj\n", 2)
 	w.writeVal(info)
+	w.writeLayerResourceDict()
 	w.write("\nendobj\n")
 
 	// page tree

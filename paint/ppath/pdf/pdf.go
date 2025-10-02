@@ -93,6 +93,29 @@ func (r *PDF) Size() (float32, float32) {
 	return r.width, r.height
 }
 
+// AddLayer defines a layer that can be shown or hidden when the document is
+// displayed. name specifies the layer name that the document reader will
+// display in the layer list. visible specifies whether the layer will be
+// initially visible. The return value is an integer ID that is used in a call
+// to BeginLayer().
+func (r *PDF) AddLayer(name string, visible bool) (layerID int) {
+	return r.w.pdf.AddLayer(name, visible)
+}
+
+// BeginLayer is called to begin adding content to the specified layer. All
+// content added to the page between a call to BeginLayer and a call to
+// EndLayer is added to the layer specified by id. See AddLayer for more
+// details.
+func (r *PDF) BeginLayer(id int) {
+	r.w.pdf.BeginLayer(id)
+}
+
+// EndLayer is called to stop adding content to the currently active layer. See
+// BeginLayer for more details.
+func (r *PDF) EndLayer() {
+	r.w.pdf.EndLayer()
+}
+
 // RenderPath renders a path to the canvas using a style and a transformation matrix.
 func (r *PDF) RenderPath(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 	// PDFs don't support the arcs joiner, miter joiner (not clipped),

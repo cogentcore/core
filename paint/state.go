@@ -28,6 +28,10 @@ var (
 	// NewSVGRenderer returns a structured SVG renderer that can
 	// generate an SVG vector graphics document from painter content.
 	NewSVGRenderer func(size math32.Vector2) render.Renderer
+
+	// NewPDFRenderer returns a PDF renderer that can
+	// generate a PDF document from painter content.
+	NewPDFRenderer func(size math32.Vector2) render.Renderer
 )
 
 // RenderToImage is a convenience function that renders the current
