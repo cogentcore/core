@@ -21,6 +21,7 @@ import (
 	"unicode/utf16"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -34,11 +35,12 @@ type pdfWriter struct {
 	err error
 
 	unitContext units.Context
+	globalScale float32 // global unit conversion
 	pos         int
 	objOffsets  []int
 	pages       []pdfRef
 
-	page     *pdfPageWriter
+	page     *pdfPage
 	fontsStd map[string]pdfRef
 	// todo: for custom fonts:
 	// fontSubset map[*text.Font]*ppath.FontSubsetter
@@ -70,6 +72,8 @@ func newPDFWriter(writer io.Writer, un *units.Context) *pdfWriter {
 		subset:   true,
 	}
 	w.layerInit()
+
+	w.globalScale = w.unitContext.Convert(1, units.UnitDot, units.UnitPt)
 
 	w.write("%%PDF-1.7\n")
 	return w
@@ -454,13 +458,13 @@ func (w *pdfWriter) Close() error {
 }
 
 // NewPage starts a new page.
-func (w *pdfWriter) NewPage(width, height float32) *pdfPageWriter {
+func (w *pdfWriter) NewPage(width, height float32) *pdfPage {
 	if w.page != nil {
 		w.pages = append(w.pages, w.page.writePage(pdfRef(3)))
 	}
 
 	// for defaults see https://help.adobe.com/pdfl_sdk/15/PDFL_SDK_HTMLHelp/PDFL_SDK_HTMLHelp/API_References/PDFL_API_Reference/PDFEdit_Layer/General.html#_t_PDEGraphicState
-	w.page = &pdfPageWriter{
+	w.page = &pdfPage{
 		Buffer:         &bytes.Buffer{},
 		pdf:            w,
 		width:          width,
@@ -468,23 +472,29 @@ func (w *pdfWriter) NewPage(width, height float32) *pdfPageWriter {
 		resources:      pdfDict{},
 		graphicsStates: map[float32]pdfName{},
 		inTextObject:   false,
-		textPosition:   math32.Identity2(),
+		textPosition:   math32.Vector2{},
 		textCharSpace:  0.0,
 		textRenderMode: 0,
 	}
 	w.page.style.Defaults()
-
-	sc := w.unitContext.Convert(1, units.UnitDot, units.UnitPt)
-	m := math32.Translate2D(0, height).Scale(sc, -sc)
-	fmt.Fprintf(w.page, " %s cm", mat2(m))
+	w.page.SetTopTransform()
 	return w.page
+}
+
+// SetTopTransform sets the current transformation matrix so that
+// the top left corner is effectively at 0,0. This is set at the
+// start of each page, to align with standard rendering in cogent core.
+func (w *pdfPage) SetTopTransform() {
+	sc := w.pdf.globalScale
+	m := math32.Translate2D(0, w.height).Scale(sc, -sc)
+	fmt.Fprintf(w, " %s cm", mat2(m))
 }
 
 type dec float32
 
 func (f dec) String() string {
 	s := fmt.Sprintf("%.*f", 5, f) // precision
-	// s = string(minify.Decimal([]byte(s), canvas.Precision))
+	s = string(ppath.MinifyDecimal([]byte(s), ppath.Precision))
 	if dec(math.MaxInt32) < f || f < dec(math.MinInt32) {
 		if i := strings.IndexByte(s, '.'); i == -1 {
 			s += ".0"

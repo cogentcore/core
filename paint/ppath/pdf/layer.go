@@ -44,20 +44,21 @@ func (w *pdfWriter) AddLayer(name string, visible bool) (layerID int) {
 // BeginLayer is called to begin adding content to the specified layer. All
 // content added to the page between a call to BeginLayer and a call to
 // EndLayer is added to the layer specified by id. See AddLayer for more
-// details.
+// details. The graphics state is also pushed onto the stack
 func (w *pdfWriter) BeginLayer(id int) {
 	w.EndLayer()
 	if id >= 0 && id < len(w.layers.list) {
-		w.write("/OC /OC%d BDC", id)
+		w.write("/OC /OC%d BDC q", id)
 		w.layers.currentLayer = id
 	}
 }
 
-// EndLayer is called to stop adding content to the currently active layer. See
-// BeginLayer for more details.
+// EndLayer is called to stop adding content to the currently active layer.
+// See BeginLayer for more details. The graphics state is also popped from
+// the stack.
 func (w *pdfWriter) EndLayer() {
 	if w.layers.currentLayer >= 0 {
-		w.write("EMC")
+		w.write("EMC Q")
 		w.layers.currentLayer = -1
 	}
 }

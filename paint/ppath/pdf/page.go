@@ -24,7 +24,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-type pdfPageWriter struct {
+type pdfPage struct {
 	*bytes.Buffer
 	pdf           *pdfWriter
 	width, height float32
@@ -34,12 +34,12 @@ type pdfPageWriter struct {
 	graphicsStates map[float32]pdfName
 	style          styles.Paint
 	inTextObject   bool
-	textPosition   math32.Matrix2
+	textPosition   math32.Vector2
 	textCharSpace  float32
 	textRenderMode int
 }
 
-func (w *pdfPageWriter) writePage(parent pdfRef) pdfRef {
+func (w *pdfPage) writePage(parent pdfRef) pdfRef {
 	b := w.Bytes()
 	if 0 < len(b) && b[0] == ' ' {
 		b = b[1:]
@@ -72,7 +72,7 @@ func (w *pdfPageWriter) writePage(parent pdfRef) pdfRef {
 }
 
 // AddAnnotation adds an annotation.
-func (w *pdfPageWriter) AddURIAction(uri string, rect math32.Box2) {
+func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
 	annot := pdfDict{
 		"Type":     pdfName("Annot"),
 		"Subtype":  pdfName("Link"),
@@ -88,7 +88,7 @@ func (w *pdfPageWriter) AddURIAction(uri string, rect math32.Box2) {
 }
 
 // SetFill sets the fill style values where different from current.
-func (w *pdfPageWriter) SetFill(fill *styles.Fill) {
+func (w *pdfPage) SetFill(fill *styles.Fill) {
 	if w.style.Fill.Color != fill.Color || w.style.Fill.Opacity != fill.Opacity {
 		w.SetFillColor(fill)
 	}
@@ -96,13 +96,13 @@ func (w *pdfPageWriter) SetFill(fill *styles.Fill) {
 }
 
 // SetAlpha sets the transparency value.
-func (w *pdfPageWriter) SetAlpha(alpha float32) {
+func (w *pdfPage) SetAlpha(alpha float32) {
 	gs := w.getOpacityGS(alpha)
 	fmt.Fprintf(w, " /%v gs", gs)
 }
 
 // SetFillColor sets the filling color (image).
-func (w *pdfPageWriter) SetFillColor(fill *styles.Fill) {
+func (w *pdfPage) SetFillColor(fill *styles.Fill) {
 	switch x := fill.Color.(type) {
 	// todo: pattern, image
 	case *gradient.Linear:
@@ -122,7 +122,7 @@ func (w *pdfPageWriter) SetFillColor(fill *styles.Fill) {
 }
 
 // SetStroke sets the stroke style values where different from current.
-func (w *pdfPageWriter) SetStroke(stroke *styles.Stroke) {
+func (w *pdfPage) SetStroke(stroke *styles.Stroke) {
 	if w.style.Stroke.Color != stroke.Color || w.style.Stroke.Opacity != stroke.Opacity {
 		w.SetStrokeColor(stroke)
 	}
@@ -146,7 +146,7 @@ func (w *pdfPageWriter) SetStroke(stroke *styles.Stroke) {
 }
 
 // SetStrokeColor sets the stroking color (image).
-func (w *pdfPageWriter) SetStrokeColor(stroke *styles.Stroke) {
+func (w *pdfPage) SetStrokeColor(stroke *styles.Stroke) {
 	switch x := stroke.Color.(type) {
 	case *gradient.Linear:
 	case *gradient.Radial:
@@ -165,12 +165,12 @@ func (w *pdfPageWriter) SetStrokeColor(stroke *styles.Stroke) {
 }
 
 // SetStrokeWidth sets the stroke width.
-func (w *pdfPageWriter) SetStrokeWidth(lineWidth float32) {
+func (w *pdfPage) SetStrokeWidth(lineWidth float32) {
 	fmt.Fprintf(w, " %v w", dec(lineWidth))
 }
 
 // SetStrokeCap sets the stroke cap type.
-func (w *pdfPageWriter) SetStrokeCap(capper ppath.Caps) {
+func (w *pdfPage) SetStrokeCap(capper ppath.Caps) {
 	var lineCap int
 	switch capper {
 	case ppath.CapButt:
@@ -186,7 +186,7 @@ func (w *pdfPageWriter) SetStrokeCap(capper ppath.Caps) {
 }
 
 // SetStrokeJoin sets the stroke join type.
-func (w *pdfPageWriter) SetStrokeJoin(joiner ppath.Joins, miterLimit float32) {
+func (w *pdfPage) SetStrokeJoin(joiner ppath.Joins, miterLimit float32) {
 	var lineJoin int
 	switch joiner {
 	case ppath.JoinBevel:
@@ -205,7 +205,7 @@ func (w *pdfPageWriter) SetStrokeJoin(joiner ppath.Joins, miterLimit float32) {
 }
 
 // SetDashes sets the dash phase and array.
-func (w *pdfPageWriter) SetDashes(dashPhase float32, dashArray []float32) {
+func (w *pdfPage) SetDashes(dashPhase float32, dashArray []float32) {
 	if len(dashArray)%2 == 1 {
 		dashArray = append(dashArray, dashArray...)
 	}
@@ -235,11 +235,11 @@ func (w *pdfPageWriter) SetDashes(dashPhase float32, dashArray []float32) {
 }
 
 // SetFont sets the font.
-func (w *pdfPageWriter) SetFont(sty *rich.Style, tsty *text.Style) error {
+func (w *pdfPage) SetFont(sty *rich.Style, tsty *text.Style) error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
-	size := tsty.FontHeight(sty)
+	size := tsty.FontHeight(sty) // * w.pdf.globalScale
 	ref := w.pdf.getFont(sty, tsty)
 	if _, ok := w.resources["Font"]; !ok {
 		w.resources["Font"] = pdfDict{}
@@ -258,23 +258,22 @@ func (w *pdfPageWriter) SetFont(sty *rich.Style, tsty *text.Style) error {
 	return nil
 }
 
-// SetTextPosition sets the text position.
-func (w *pdfPageWriter) SetTextPosition(m math32.Matrix2) error {
+// SetTextPosition sets the text offset position.
+func (w *pdfPage) SetTextPosition(off math32.Vector2) error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
-	if ppath.Equal(m.XX, w.textPosition.XX) && ppath.Equal(m.XY, w.textPosition.XY) && ppath.Equal(m.YX, w.textPosition.YX) && ppath.Equal(m.YY, w.textPosition.YY) {
-		d := w.textPosition.Inverse().MulVector2AsPoint(math32.Vec2(m.X0, m.Y0))
-		fmt.Fprintf(w, " %v %v Td", dec(d.X), dec(d.Y))
-	} else {
-		fmt.Fprintf(w, " %s Tm", mat2(m))
-	}
-	w.textPosition = m
+	do := off.Sub(w.textPosition)
+	// and finally apply an offset from there, in reverse for Y
+	fmt.Fprintf(w, " %v %v Td", dec(do.X), dec(-do.Y))
+	w.textPosition = off
 	return nil
 }
 
 // SetTextRenderMode sets the text rendering mode.
-func (w *pdfPageWriter) SetTextRenderMode(mode int) error {
+// 0 = fill text, 1 = stroke text, 2 = fill, then stroke.
+// higher numbers support clip path.
+func (w *pdfPage) SetTextRenderMode(mode int) error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
@@ -284,7 +283,7 @@ func (w *pdfPageWriter) SetTextRenderMode(mode int) error {
 }
 
 // SetTextCharSpace sets the text character spacing.
-func (w *pdfPageWriter) SetTextCharSpace(space float32) error {
+func (w *pdfPage) SetTextCharSpace(space float32) error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
@@ -293,29 +292,36 @@ func (w *pdfPageWriter) SetTextCharSpace(space float32) error {
 	return nil
 }
 
-// StartTextObject starts a text object.
-func (w *pdfPageWriter) StartTextObject() error {
+// StartTextObject starts a text object, initializing the global
+// CTM transform matrix as given by the arg, and setting an inverting
+// text transform, so text is rendered upright.
+func (w *pdfPage) StartTextObject(m math32.Matrix2) error {
 	if w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: already in text object"))
 	}
 	fmt.Fprintf(w, " BT")
-	w.textPosition = math32.Identity2()
+	// set the global graphics transform to m first
+	fmt.Fprintf(w, " q %s cm", mat2(m))
+	// then apply an inversion text matrix
+	tm := math32.Scale2D(1, -1)
+	fmt.Fprintf(w, " %s Tm", mat2(tm))
 	w.inTextObject = true
+	w.textPosition = math32.Vector2{}
 	return nil
 }
 
 // EndTextObject ends a text object.
-func (w *pdfPageWriter) EndTextObject() error {
+func (w *pdfPage) EndTextObject() error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
-	fmt.Fprintf(w, " ET")
+	fmt.Fprintf(w, " Q ET")
 	w.inTextObject = false
 	return nil
 }
 
 // WriteText writes text using current text style.
-func (w *pdfPageWriter) WriteText(tx string) error {
+func (w *pdfPage) WriteText(tx string) error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
@@ -427,7 +433,7 @@ func (w *pdfPageWriter) WriteText(tx string) error {
 }
 
 // DrawImage embeds and draws an image, as a lossless (PNG)
-func (w *pdfPageWriter) DrawImage(img image.Image, m math32.Matrix2) {
+func (w *pdfPage) DrawImage(img image.Image, m math32.Matrix2) {
 	size := img.Bounds().Size()
 
 	// add clipping path around image for smooth edges when rotating
@@ -452,7 +458,7 @@ func (w *pdfPageWriter) DrawImage(img image.Image, m math32.Matrix2) {
 }
 
 // embedImage does a lossless image embedding.
-func (w *pdfPageWriter) embedImage(img image.Image) pdfRef {
+func (w *pdfPage) embedImage(img image.Image) pdfRef {
 	if ref, ok := w.pdf.images[img]; ok {
 		return ref
 	}
@@ -515,7 +521,7 @@ func (w *pdfPageWriter) embedImage(img image.Image) pdfRef {
 	return ref
 }
 
-func (w *pdfPageWriter) getOpacityGS(a float32) pdfName {
+func (w *pdfPage) getOpacityGS(a float32) pdfName {
 	if name, ok := w.graphicsStates[a]; ok {
 		return name
 	}
@@ -533,7 +539,7 @@ func (w *pdfPageWriter) getOpacityGS(a float32) pdfName {
 }
 
 /*
-func (w *pdfPageWriter) getPattern(gradient ppath.Gradient) pdfName {
+func (w *pdfPage) getPattern(gradient ppath.Gradient) pdfName {
 	// TODO: support patterns/gradients with alpha channel
 	shading := pdfDict{
 		"ColorSpace": pdfName("DeviceRGB"),

@@ -110,7 +110,7 @@ func (rs *Renderer) PopLayer() int {
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	p := pt.Path
 	pc := &pt.Context
-	rs.PDF.RenderPath(p, &pc.Style, pc.Transform)
+	rs.PDF.Path(p, &pc.Style, pc.Transform)
 }
 
 func (rs *Renderer) PushContext(pt *render.ContextPush) {
@@ -122,44 +122,8 @@ func (rs *Renderer) PopContext(pt *render.ContextPop) {
 }
 
 func (rs *Renderer) RenderText(pt *render.Text) {
-	// pc := &pt.Context
-	// cg := rs.lyStack.Peek()
-	// tg := fpdf.NewLayer(cg)
-	// props := map[string]any{}
-	// pt.Context.Style.GetProperties(props)
-	// if !pc.Transform.IsIdentity() {
-	// 	props["transform"] = pc.Transform.String()
-	// }
-	// pos := pt.Position
-	// tx := pt.Text.Source
-	// txt := tx.Join()
-	// for li := range pt.Text.Lines {
-	// 	ln := &pt.Text.Lines[li]
-	// 	lpos := pos.Add(ln.Offset)
-	// 	rpos := lpos
-	// 	for ri := range ln.Runs {
-	// 		run := ln.Runs[ri].(*shapedgt.Run)
-	// 		rs := run.Runes().Start
-	// 		re := run.Runes().End
-	// 		si, _, _ := tx.Index(rs)
-	// 		sty, _ := tx.Span(si)
-	// 		rtxt := txt[rs:re]
-	//
-	// 		st := fpdf.NewText(tg)
-	// 		st.Text = string(rtxt)
-	// 		rprops := maps.Clone(props)
-	// 		if pc.Style.UnitContext.DPI != 160 {
-	// 			sty.Size *= pc.Style.UnitContext.DPI / 160
-	// 		}
-	// 		pt.Context.Style.Text.ToProperties(sty, rprops)
-	// 		rprops["x"] = reflectx.ToString(rpos.X)
-	// 		rprops["y"] = reflectx.ToString(rpos.Y)
-	// 		st.Pos = rpos
-	// 		st.Properties = rprops
-	//
-	// 		rpos.X += run.Advance()
-	// 	}
-	// }
+	pc := &pt.Context
+	rs.PDF.Text(&pc.Style, pc.Transform, pt.Position, pt.Text)
 }
 
 func (rs *Renderer) RenderImage(pr *pimage.Params) {
@@ -195,6 +159,6 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	// sz := pr.Rect.Size()
 	m := math32.Translate2D(float32(pr.Rect.Min.X), float32(pr.Rect.Min.Y))
-	rs.PDF.RenderImage(usrc, m)
+	rs.PDF.Image(usrc, m)
 	// simg.Pos = math32.FromPoint(pr.Rect.Min)
 }

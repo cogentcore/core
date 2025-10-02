@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/shaped"
 )
 
 // type Options struct {
@@ -32,7 +31,7 @@ import (
 
 // PDF is a portable document format renderer.
 type PDF struct {
-	w             *pdfPageWriter
+	w             *pdfPage
 	width, height float32
 	// opts          *Options
 }
@@ -118,8 +117,8 @@ func (r *PDF) EndLayer() {
 	r.w.pdf.EndLayer()
 }
 
-// RenderPath renders a path to the canvas using a style and a transformation matrix.
-func (r *PDF) RenderPath(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
+// Path renders a path to the canvas using a style and a transformation matrix.
+func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 	// PDFs don't support the arcs joiner, miter joiner (not clipped),
 	// or miter joiner (clipped) with non-bevel fallback
 	strokeUnsupported := false
@@ -245,44 +244,7 @@ func (r *PDF) RenderPath(path ppath.Path, style *styles.Paint, m math32.Matrix2)
 	}
 }
 
-// RenderText renders a text object to the canvas using a transformation matrix,
-// (the translation component specifies the starting offset)
-func (r *PDF) RenderText(text *shaped.Lines, m math32.Matrix2) {
-	// text.WalkDecorations(func(fill canvas.Paint, p *canvas.Path) {
-	// 	style := canvas.DefaultStyle
-	// 	style.Fill = fill
-	// 	r.RenderPath(p, style, m)
-	// })
-
-	// todo: copy from other render cases
-	// text.WalkSpans(func(x, y float32, span canvas.TextSpan) {
-	// 	if span.IsText() {
-	// 		style := canvas.DefaultStyle
-	// 		style.Fill = span.Face.Fill
-	//
-	// 		r.w.StartTextObject()
-	// 		r.w.SetFill(span.Face.Fill)
-	// 		r.w.SetFont(span.Face.Font, span.Face.Size, span.Direction)
-	// 		r.w.SetTextPosition(m.Translate(x, y).Shear(span.Face.FauxItalic, 0.0))
-	//
-	// 		if 0.0 < span.Face.FauxBold {
-	// 			r.w.SetTextRenderMode(2)
-	// 			r.w.SetStroke(span.Face.Fill)
-	// 			fmt.Fprintf(r.w, " %v w", dec(span.Face.FauxBold*2.0))
-	// 		} else {
-	// 			r.w.SetTextRenderMode(0)
-	// 		}
-	// 		r.w.WriteText(text.WritingMode, span.Glyphs)
-	// 		r.w.EndTextObject()
-	// 	} else {
-	// 		for _, obj := range span.Objects {
-	// 			obj.Canvas.RenderViewTo(r, m.Mul(obj.View(x, y, span.Face)))
-	// 		}
-	// 	}
-	// })
-}
-
-// RenderImage renders an image to the canvas using a transformation matrix.
-func (r *PDF) RenderImage(img image.Image, m math32.Matrix2) {
+// Image renders an image to the canvas using a transformation matrix.
+func (r *PDF) Image(img image.Image, m math32.Matrix2) {
 	r.w.DrawImage(img, m)
 }

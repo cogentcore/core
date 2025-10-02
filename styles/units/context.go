@@ -9,8 +9,8 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Context specifies everything about the current context necessary for converting the number
-// into specific display-dependent pixels
+// Context specifies everything about the current context necessary
+// for converting the number into specific display-dependent pixels.
 type Context struct {
 
 	// DPI is dots-per-inch of the display
@@ -45,6 +45,12 @@ type Context struct {
 
 	// Pah is height of parent in dots
 	Pah float32
+}
+
+func NewContext() *Context {
+	uc := &Context{}
+	uc.Defaults()
+	return uc
 }
 
 // Defaults are generic defaults
