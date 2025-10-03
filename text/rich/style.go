@@ -118,7 +118,7 @@ func (s *Style) InheritFields(parent *Style) {
 
 // FontFamily returns the font family name(s) based on [Style.Family] and the
 // values specified in the given [Settings].
-func (s *Style) FontFamily(ctx *Settings) string {
+func (s *Style) FontFamily(ctx *SettingsData) string {
 	return ctx.Family(s.Family)
 }
 

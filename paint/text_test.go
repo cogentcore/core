@@ -44,7 +44,7 @@ func TestTextAscii(t *testing.T) {
 			y := float32(5)
 			for _, ts := range lines {
 				tx := rich.NewText(fsty, []rune(ts))
-				lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+				lns := txtSh.WrapLines(tx, fsty, tsty, &rich.Settings, sizef)
 				pos := math32.Vector2{5, y}
 				pc.DrawText(lns, pos)
 				y += 20
@@ -66,7 +66,7 @@ func TestTextMarkup(t *testing.T) {
 
 		tx, err := htmltext.HTMLToRich([]byte("This is <a>HTML</a> <b>formatted</b> <i>text</i> with <u>underline</u> and <s>strikethrough</s>"), fsty, nil)
 		assert.NoError(t, err)
-		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.Settings, sizef)
 		lns.SelectRegion(textpos.Range{Start: 5, End: 20})
 		// if tsz.X != 100 || tsz.Y != 40 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
@@ -104,7 +104,7 @@ func TestTextLines(t *testing.T) {
 		tx.AddSpan(&du, []rune("Dotted Underline")).AddSpan(fsty, []rune(" and ")).AddSpan(&uu, []rune("Underline"))
 		tx.AddSpan(fsty, []rune(" and ")).AddSpan(&ol, []rune("Overline"))
 
-		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.Settings, sizef)
 		pos := math32.Vector2{10, 10}
 		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
 		pc.DrawText(lns, pos)
@@ -135,7 +135,7 @@ func TestTextColors(t *testing.T) {
 		tx.AddSpan(&rd, []rune("Red")).AddSpan(fsty, []rune(" and ")).AddSpan(&bl, []rune("Blue"))
 		tx.AddSpan(fsty, []rune(" and ")).AddSpan(&gr, []rune("Green"))
 
-		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, sizef)
+		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.Settings, sizef)
 		pos := math32.Vector2{10, 10}
 		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
 		pc.DrawText(lns, pos)

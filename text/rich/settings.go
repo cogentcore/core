@@ -11,12 +11,14 @@ import (
 )
 
 func init() {
-	DefaultSettings.Defaults()
+	Settings.Defaults()
 }
 
-// DefaultSettings contains the default global text settings.
-// This will be updated from rich.DefaultSettings.
-var DefaultSettings Settings
+// Settings contains the global text settings,
+// for language, script and font names to use.
+// To use different settings temporarily, save current
+// and swap.
+var Settings SettingsData
 
 // FontName is a special string that provides a font chooser.
 // It is aliased to [core.FontName] as well.
@@ -25,7 +27,7 @@ type FontName string
 // Settings holds the global settings for rich text styling,
 // including language, script, and preferred font faces for
 // each category of font.
-type Settings struct {
+type SettingsData struct {
 
 	// Language is the preferred language used for rendering text.
 	Language language.Language
@@ -96,7 +98,7 @@ type Settings struct {
 	Fangsong FontName
 }
 
-func (rts *Settings) Defaults() {
+func (rts *SettingsData) Defaults() {
 	rts.Language = language.DefaultLanguage()
 	rts.SansSerif = "Noto Sans"
 	rts.Monospace = "Roboto Mono"
@@ -130,7 +132,7 @@ func FamiliesToList(fam string) []string {
 }
 
 // Family returns the font family specified by the given [Family] enum.
-func (rts *Settings) Family(fam Family) string {
+func (rts *SettingsData) Family(fam Family) string {
 	switch fam {
 	case SansSerif:
 		return AddFamily(rts.SansSerif, `-apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif, emoji`)

@@ -1618,7 +1618,7 @@ func (tf *TextField) configTextSize(sz math32.Vector2) math32.Vector2 {
 	etxs := *tsty
 	etxs.Align, etxs.AlignV = text.Start, text.Start // only works with this
 	tx := rich.NewText(sty, txt)
-	tf.renderAll = tf.Scene.TextShaper().WrapLines(tx, sty, &etxs, &AppearanceSettings.Text, sz)
+	tf.renderAll = tf.Scene.TextShaper().WrapLines(tx, sty, &etxs, sz)
 	rsz := tf.renderAll.Bounds.Size().Ceil()
 	return rsz
 }
@@ -1741,7 +1741,7 @@ func (tf *TextField) layoutCurrent() {
 	sty, tsty := tf.Styles.NewRichText()
 	tsty.Color = colors.ToUniform(clr)
 	tx := rich.NewText(sty, cur)
-	tf.renderVisible = tf.Scene.TextShaper().WrapLines(tx, sty, tsty, &AppearanceSettings.Text, availSz)
+	tf.renderVisible = tf.Scene.TextShaper().WrapLines(tx, sty, tsty, availSz)
 	tf.renderedRange = tf.dispRange
 }
 

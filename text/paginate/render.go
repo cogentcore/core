@@ -5,12 +5,14 @@
 package paginate
 
 import (
+	"fmt"
 	"io"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/pdfrender"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -20,6 +22,11 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	if len(ins) == 0 {
 		return
 	}
+	fmt.Println("\n\n#######################\nREDOING\n#######################")
+	rich.Settings.SansSerif = "Arial"
+	in0 := ins[0].AsWidget()
+	in0.Scene.StyleTree()
+	in0.Scene.LayoutRenderScene()
 	p := pager{opts: &opts, ins: ins}
 	p.paginate()
 	sc := core.NewScene()
@@ -27,6 +34,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	sz.Size = opts.sizeDots.ToPointCeil()
 	sc.Resize(sz)
 	sc.MakeTextShaper()
+
 	pdr := paint.NewPDFRenderer(opts.sizeDots, &p.ctx).(*pdfrender.Renderer)
 	pdr.StartRender(w)
 	np := len(p.outs)

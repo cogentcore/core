@@ -6,7 +6,6 @@ package paginate
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
@@ -42,6 +41,7 @@ func (p *pager) paginate() {
 	cIn := widg(p.ins[ii])
 	cw := widg(cIn.Child(ci))
 	atEnd := false
+	gap := cIn.Styles.Gap.Dots().Floor()
 	for {
 		// find height
 		ht := float32(0)
@@ -51,11 +51,11 @@ func (p *pager) paginate() {
 				atEnd = true
 				break
 			}
-			gp := cIn.Styles.Gap.Dots().Floor()
-			ht += cw.Geom.Size.Actual.Total.Y + gp.Y
+			ht += cw.Geom.Size.Actual.Total.Y
 			if ht >= p.opts.bodyDots.Y {
 				break
 			}
+			ht += gap.Y
 			ws = append(ws, cw.This.(core.Widget))
 			ci++
 			if ci >= cIn.NumChildren() {
@@ -66,24 +66,18 @@ func (p *pager) paginate() {
 					break
 				}
 				cIn = widg(p.ins[ii])
+				gap = cIn.Styles.Gap.Dots().Floor() // todo: need to track this per parent input
 			}
 			cw = widg(cIn.Child(ci))
 		}
 		// todo: rearrange elements to put text at bottom and non-text at top
+
 		// now transfer over to frame
-		cOut := core.NewFrame()
-		cOut.Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Min.X.Dot(p.opts.sizeDots.X)
-			s.Min.Y.Dot(p.opts.sizeDots.Y)
-			s.Max.X.Dot(p.opts.sizeDots.X)
-			s.Max.Y.Dot(p.opts.sizeDots.Y)
-		})
+		page, body := p.newPage(gap)
 		for _, w := range ws {
-			tree.MoveToParent(w, cOut)
+			tree.MoveToParent(w, body)
 		}
-		// fmt.Println("ht:", ht, "n:", len(ws))
-		p.outs = append(p.outs, cOut)
+		p.outs = append(p.outs, page)
 		if atEnd {
 			break
 		}

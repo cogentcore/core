@@ -34,7 +34,7 @@ func RunTest(t *testing.T, nm string, f func() *core.Body) {
 }
 
 func TestTextOnly(t *testing.T) {
-	ttx := "This is testing text, it is only a test. Do not be alarmed"
+	ttx := "This is testing text, it is <i>only</i> a test. Do not be <b>alarmed</b>. The text must be at least a certain amount wide so that we can see how it <u>flows</u> up to the margin and judge the typesetting qualities etc."
 	RunTest(t, "text-only", func() *core.Body {
 		b := core.NewBody()
 		b.Styler(func(s *styles.Style) {

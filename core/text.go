@@ -420,7 +420,7 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	}
 	sty, tsty := tx.Styles.NewRichText()
 	tsty.Align, tsty.AlignV = text.Start, text.Start
-	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, sz)
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -441,10 +441,10 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	if tsty.Align != text.Start && tsty.AlignV != text.Start {
 		etxs := *tsty
 		etxs.Align, etxs.AlignV = text.Start, text.Start
-		tx.paintText = tsh.WrapLines(tx.richText, sty, &etxs, &AppearanceSettings.Text, rsz)
+		tx.paintText = tsh.WrapLines(tx.richText, sty, &etxs, rsz)
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
-	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, rsz)
+	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, rsz)
 	return tx.paintText.Bounds.Size().Ceil()
 }
 

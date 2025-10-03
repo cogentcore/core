@@ -487,9 +487,6 @@ func (sp *Space) Init() {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
-		s.Padding.Zero()
-		s.Margin.Zero()
-		s.MaxBorder.Width.Zero()
-		s.Border.Width.Zero()
+		s.ZeroSpace()
 	})
 }

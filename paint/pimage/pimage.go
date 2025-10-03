@@ -69,6 +69,10 @@ type Params struct {
 
 func (pr *Params) IsRenderItem() {}
 
+func (p *Params) String() string {
+	return "image: " + p.Cmd.String()
+}
+
 // NewClear returns a new Clear that renders entire image with given source image.
 func NewClear(src image.Image, sp image.Point, op draw.Op) *Params {
 	pr := &Params{Cmd: Draw, Rect: image.Rectangle{}, Source: imagex.WrapJS(src), SourcePos: sp, Op: op}

@@ -7,6 +7,7 @@ package render
 import (
 	"reflect"
 	"slices"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 )
@@ -46,4 +47,12 @@ func (pr *Render) Add(item ...Item) *Render {
 // It preserves the existing slice memory for re-use.
 func (pr *Render) Reset() {
 	*pr = (*pr)[:0]
+}
+
+func (pr *Render) String() string {
+	var b strings.Builder
+	for _, it := range *pr {
+		b.WriteString(it.String() + "\n")
+	}
+	return b.String()
 }

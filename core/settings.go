@@ -270,7 +270,7 @@ type AppearanceSettingsData struct { //types:add
 
 	// Text specifies text settings including the language, and the
 	// font families for different styles of fonts.
-	Text rich.Settings
+	Text rich.SettingsData
 
 	// only support closing the currently selected active tab;
 	// if this is set to true, pressing the close button on other tabs
@@ -366,7 +366,7 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 	if as.Highlighting == "" {
 		as.Highlighting = "emacs"
 	}
-	rich.DefaultSettings = as.Text
+	rich.Settings = as.Text
 
 	// TODO(kai): move HiStyle to a separate text editor settings
 	// if TheViewInterface != nil {

@@ -251,9 +251,13 @@ func (sc *Scene) renderContext() *renderContext {
 	return sm.renderContext
 }
 
-// MakeTextShaper makes our own text shaper for offline use
-func (sc *Scene) MakeTextShaper() {
-	sc.textShaper = shaped.NewShaper()
+// MakeTextShaper makes our own text shaper for offline use,
+// if not already in place.
+func (sc *Scene) MakeTextShaper() shaped.Shaper {
+	if sc.textShaper == nil {
+		sc.textShaper = shaped.NewShaper()
+	}
+	return sc.textShaper
 }
 
 // TextShaper returns the current [shaped.TextShaper], for text shaping.

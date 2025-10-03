@@ -4,9 +4,13 @@
 
 package render
 
+import "fmt"
+
 // Item is a union interface for render items:
 // [Path], [Text], [Image], and [ContextPush].
 type Item interface {
+	fmt.Stringer
+
 	IsRenderItem()
 }
 
@@ -20,9 +24,17 @@ type ContextPush struct {
 func (p *ContextPush) IsRenderItem() {
 }
 
+func (p *ContextPush) String() string {
+	return "ctx-push: " + p.Context.Transform.String()
+}
+
 // ContextPop is a [Context] pop render item, which can be used by renderers
 // that track group structure (e.g., SVG).
 type ContextPop struct {
+}
+
+func (p *ContextPop) String() string {
+	return "ctx-pop"
 }
 
 // interface assertion.
