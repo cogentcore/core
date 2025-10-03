@@ -299,9 +299,9 @@ func (w *pdfPage) StartTextObject(m math32.Matrix2) error {
 	if w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: already in text object"))
 	}
-	fmt.Fprintf(w, " BT")
 	// set the global graphics transform to m first
 	fmt.Fprintf(w, " q %s cm", mat2(m))
+	fmt.Fprintf(w, " BT")
 	// then apply an inversion text matrix
 	tm := math32.Scale2D(1, -1)
 	fmt.Fprintf(w, " %s Tm", mat2(tm))
@@ -315,7 +315,7 @@ func (w *pdfPage) EndTextObject() error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
-	fmt.Fprintf(w, " Q ET")
+	fmt.Fprintf(w, " ET Q")
 	w.inTextObject = false
 	return nil
 }

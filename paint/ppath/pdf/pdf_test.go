@@ -67,6 +67,9 @@ func TestText(t *testing.T) {
 		assert.NoError(t, err)
 		lns := sh.WrapLines(tx, rsty, tsty, rts, math32.Vec2(250, 250))
 
-		pd.Text(sty, math32.Identity2(), math32.Vec2(10, 20), lns)
+		// m := math32.Identity2()
+		m := math32.Rotate2D(math32.DegToRad(-15))
+
+		pd.Text(sty, m, math32.Vec2(20, 20), lns)
 	})
 }

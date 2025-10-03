@@ -24,8 +24,9 @@ import (
 // Text renders text to the canvas using a transformation matrix,
 // (the translation component specifies the starting offset)
 func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, lns *shaped.Lines) {
-	r.w.StartTextObject(m)
-	off := pos.Add(lns.Offset)
+	mt := m.Mul(math32.Translate2D(pos.X, pos.Y))
+	r.w.StartTextObject(mt)
+	off := lns.Offset
 	clr := colors.Uniform(lns.Color)
 	runes := lns.Source.Join()
 	for li := range lns.Lines {
