@@ -5,6 +5,7 @@
 package paginate
 
 import (
+	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -74,38 +75,70 @@ func (p *pager) paginate() {
 	widg := core.AsWidget
 
 	ii := 0
-	ci := 0
-	cIn := widg(p.ins[ii])
-	cw := widg(cIn.Child(ci))
+	type posn struct {
+		w core.Widget
+		i int
+	}
+
+	pars := stack.Stack[*posn]{}
+	pars.Push(&posn{p.ins[ii], 0})
 	atEnd := false
-	gap := cIn.Styles.Gap.Dots().Floor()
+	gap := p.ins[0].AsWidget().Styles.Gap.Dots().Floor()
+
+	next := func() {
+	start:
+		cp := pars.Peek()
+		cp.i++
+		if cp.i >= cp.w.AsWidget().NumChildren() {
+			pars.Pop()
+			if len(pars) == 0 {
+				ii++
+				if ii >= len(p.ins) {
+					atEnd = true
+					return
+				}
+				pars.Push(&posn{p.ins[ii], 0})
+				return
+			} else {
+				goto start
+			}
+		}
+	}
+
+	maxY := p.opts.bodyDots.Y
 	for {
 		// find height
 		ht := float32(0)
 		var ws []core.Widget
 		for {
-			if cw == nil {
-				atEnd = true
-				break
-			}
-			ht += cw.Geom.Size.Actual.Total.Y
-			if ht >= p.opts.bodyDots.Y {
-				break
-			}
-			ht += gap.Y
-			ws = append(ws, cw.This.(core.Widget))
-			ci++
-			if ci >= cIn.NumChildren() {
-				ci = 0
-				ii++
-				if ii >= len(p.ins) {
-					atEnd = true
+			cp := pars.Peek()
+			cpw := cp.w.AsWidget()
+			if cp.i >= cpw.NumChildren() {
+				next()
+				if atEnd {
 					break
 				}
-				cIn = widg(p.ins[ii])
-				gap = cIn.Styles.Gap.Dots().Floor() // todo: need to track this per parent input
+				continue
 			}
-			cw = widg(cIn.Child(ci))
+			cw := widg(cpw.Child(cp.i))
+			sz := cw.Geom.Size.Actual.Total.Y
+			if ht+sz > maxY {
+				if fr, ok := cw.This.(*core.Frame); ok {
+					pars.Push(&posn{fr.This.(core.Widget), 0})
+					continue
+				}
+				if len(ws) == 0 {
+					ws = append(ws, cw.This.(core.Widget))
+				}
+				next()
+				break
+			}
+			ht += sz + gap.Y
+			ws = append(ws, cw.This.(core.Widget))
+			next()
+			if atEnd {
+				break
+			}
 		}
 		// todo: rearrange elements to put text at bottom and non-text at top
 

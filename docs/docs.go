@@ -88,6 +88,12 @@ func main() {
 				ctx.LinkButton(w, "https://github.com/sponsors/cogentcore")
 				w.SetText("Sponsor").SetIcon(icons.Favorite)
 			})
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("PDF").SetIcon(icons.PictureAsPdf)
+				w.OnClick(func(e events.Event) {
+					ct.PagePDF("")
+				})
+			})
 		})
 	})
 
