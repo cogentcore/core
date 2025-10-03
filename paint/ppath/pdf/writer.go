@@ -308,6 +308,9 @@ func standardFontName(sty *rich.Style) string {
 			name += "-Oblique"
 		}
 	}
+	if name == "Times" {
+		name = "Times-Roman" // ugh
+	}
 	return name
 }
 

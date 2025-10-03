@@ -71,7 +71,7 @@ func (rs *Renderer) Render(r render.Render) render.Renderer {
 	rs.PDF = pdf.New(rs.buff, sx, sy, &rs.unitContext)
 	rs.lyStack = nil
 	bg := rs.PDF.AddLayer("bg", true)
-	rs.PDF.BeginLayer(bg)
+	rs.PDF.BeginLayer(bg, math32.Identity2())
 	rs.lyStack.Push(bg)
 	for _, ri := range r {
 		switch x := ri.(type) {
@@ -92,11 +92,11 @@ func (rs *Renderer) Render(r render.Render) render.Renderer {
 	return rs
 }
 
-func (rs *Renderer) PushLayer() int {
+func (rs *Renderer) PushLayer(m math32.Matrix2) int {
 	cg := rs.lyStack.Peek()
 	nm := strconv.Itoa(cg + 1)
 	g := rs.PDF.AddLayer(nm, true)
-	rs.PDF.BeginLayer(g)
+	rs.PDF.BeginLayer(g, m)
 	rs.lyStack.Push(g)
 	return g
 }
@@ -114,7 +114,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 }
 
 func (rs *Renderer) PushContext(pt *render.ContextPush) {
-	rs.PushLayer() // note: does not set transform..
+	rs.PushLayer(pt.Context.Transform)
 }
 
 func (rs *Renderer) PopContext(pt *render.ContextPop) {

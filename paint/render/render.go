@@ -27,6 +27,16 @@ func (pr *Render) Add(item ...Item) *Render {
 		if reflectx.IsNil(reflect.ValueOf(it)) {
 			continue
 		}
+		n := len(*pr)
+		if n > 0 {
+			// eliminate empty push-pop sequences, which occur due to invisible elements
+			if _, ok := it.(*ContextPop); ok {
+				if _, ok := (*pr)[n-1].(*ContextPush); ok {
+					*pr = (*pr)[:n-1]
+					continue
+				}
+			}
+		}
 		*pr = append(*pr, it)
 	}
 	return pr

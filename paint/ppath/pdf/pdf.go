@@ -106,9 +106,13 @@ func (r *PDF) AddLayer(name string, visible bool) (layerID int) {
 // BeginLayer is called to begin adding content to the specified layer. All
 // content added to the page between a call to BeginLayer and a call to
 // EndLayer is added to the layer specified by id. See AddLayer for more
-// details.
-func (r *PDF) BeginLayer(id int) {
+// details. Also adds a graphics stack push, and sets the given transform
+// matrix, if not identity.
+func (r *PDF) BeginLayer(id int, m math32.Matrix2) {
 	r.w.pdf.BeginLayer(id)
+	if !m.IsIdentity() {
+		r.w.SetTransform(m)
+	}
 }
 
 // EndLayer is called to stop adding content to the currently active layer. See

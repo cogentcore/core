@@ -71,6 +71,11 @@ func (w *pdfPage) writePage(parent pdfRef) pdfRef {
 	return w.pdf.writeObject(page)
 }
 
+// SetTransform adds a cm to set the current matrix transform (CMT).
+func (w *pdfPage) SetTransform(m math32.Matrix2) {
+	fmt.Fprintf(w, " %s cm", mat2(m))
+}
+
 // AddAnnotation adds an annotation.
 func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
 	annot := pdfDict{
