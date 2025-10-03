@@ -28,6 +28,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	sc.Resize(sz)
 	sc.MakeTextShaper()
 	pdr := paint.NewPDFRenderer(opts.sizeDots, &p.ctx).(*pdfrender.Renderer)
+	pdr.StartRender(w)
 	np := len(p.outs)
 	for i, p := range p.outs {
 		tree.MoveToParent(p, sc)
@@ -36,12 +37,11 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 		sc.LayoutRenderScene()
 
 		rend := sc.Painter.RenderDone()
-		pdr.RenderPage(w, rend)
-		break
+		pdr.RenderPage(rend)
 		if i < np-1 {
-			pdr.PDF.NewPage(opts.sizeDots.X, opts.sizeDots.Y)
+			pdr.AddPage()
 		}
 		sc.DeleteChildren()
 	}
-	pdr.PDF.Close()
+	pdr.EndRender()
 }

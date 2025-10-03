@@ -66,21 +66,34 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 // Render is the main rendering function.
 func (rs *Renderer) Render(r render.Render) render.Renderer {
 	rs.buff = &bytes.Buffer{}
-	rs.RenderPage(rs.buff, r)
-	rs.PDF.Close()
+	rs.StartRender(rs.buff)
+	rs.RenderPage(r)
+	rs.EndRender()
 	return rs
 }
 
-// RenderPage is the main rendering function, rendering to a writer
-func (rs *Renderer) RenderPage(w io.Writer, r render.Render) render.Renderer {
-	// pdf is in points
+// StartRender creates the renderer.
+func (rs *Renderer) StartRender(w io.Writer) {
 	sx := rs.unitContext.Convert(float32(rs.size.X), rs.sizeUnits, units.UnitPt)
 	sy := rs.unitContext.Convert(float32(rs.size.Y), rs.sizeUnits, units.UnitPt)
 	rs.PDF = pdf.New(w, sx, sy, &rs.unitContext)
 	rs.lyStack = nil
-	bg := rs.PDF.AddLayer("bg", true)
-	rs.PDF.BeginLayer(bg, math32.Identity2())
-	rs.lyStack.Push(bg)
+}
+
+// EndRender finishes the render
+func (rs *Renderer) EndRender() {
+	rs.PDF.Close()
+}
+
+// AddPage adds a new page of the same size.
+func (rs *Renderer) AddPage() {
+	sx := rs.unitContext.Convert(float32(rs.size.X), rs.sizeUnits, units.UnitPt)
+	sy := rs.unitContext.Convert(float32(rs.size.Y), rs.sizeUnits, units.UnitPt)
+	rs.PDF.NewPage(sx, sy)
+}
+
+// RenderPage renders the content to current PDF page
+func (rs *Renderer) RenderPage(r render.Render) {
 	for _, ri := range r {
 		switch x := ri.(type) {
 		case *render.Path:
@@ -95,8 +108,6 @@ func (rs *Renderer) RenderPage(w io.Writer, r render.Render) render.Renderer {
 			rs.PopContext(x)
 		}
 	}
-	rs.PDF.EndLayer()
-	return rs
 }
 
 func (rs *Renderer) PushLayer(m math32.Matrix2) int {

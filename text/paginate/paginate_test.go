@@ -6,6 +6,7 @@ package paginate
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -39,8 +40,8 @@ func TestTextOnly(t *testing.T) {
 		b.Styler(func(s *styles.Style) {
 			s.Min.X.Ch(80)
 		})
-		for range 200 {
-			core.NewText(b).SetText(ttx)
+		for i := range 200 {
+			core.NewText(b).SetText(fmt.Sprintf("Line %d: %s", i, ttx))
 		}
 		return b
 	})
