@@ -106,10 +106,11 @@ func (p *pager) paginate() {
 	}
 
 	maxY := p.opts.bodyDots.Y
+	// per page, list of widgets -- must accumulate all, to not change structure
+	var ws [][]core.Widget
 	for {
-		// find height
+		var cws []core.Widget
 		ht := float32(0)
-		var ws []core.Widget
 		for {
 			cp := pars.Peek()
 			cpw := cp.w.AsWidget()
@@ -127,29 +128,32 @@ func (p *pager) paginate() {
 					pars.Push(&posn{fr.This.(core.Widget), 0})
 					continue
 				}
-				if len(ws) == 0 {
-					ws = append(ws, cw.This.(core.Widget))
+				if len(cws) == 0 {
+					cws = append(cws, cw.This.(core.Widget))
+					next()
 				}
-				next()
 				break
 			}
 			ht += sz + gap.Y
-			ws = append(ws, cw.This.(core.Widget))
+			cws = append(cws, cw.This.(core.Widget))
 			next()
 			if atEnd {
 				break
 			}
 		}
-		// todo: rearrange elements to put text at bottom and non-text at top
-
-		// now transfer over to frame
-		page, body := p.newPage(gap)
-		for _, w := range ws {
-			tree.MoveToParent(w, body)
-		}
-		p.outs = append(p.outs, page)
+		ws = append(ws, cws)
 		if atEnd {
 			break
 		}
+	}
+
+	for _, cws := range ws {
+		// todo: rearrange elements to put text at bottom and non-text at top
+		// now transfer over to frame
+		page, body := p.newPage(gap)
+		for _, w := range cws {
+			tree.MoveToParent(w, body)
+		}
+		p.outs = append(p.outs, page)
 	}
 }
