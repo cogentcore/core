@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/paginate/pagesizes"
+	"cogentcore.org/core/text/rich"
 )
 
 // Options has the parameters for pagination.
@@ -28,6 +29,14 @@ type Options struct {
 
 	// Margins specify the page margins in the size units.
 	Margins sides.Floats `display:"inline"`
+
+	// FontFamily specifies the default font family to apply
+	// to all core.Text elements.
+	FontFamily rich.Family
+
+	// FontSize specifies the default font size to apply
+	// to all core.Text elements, if non-zero.
+	FontSize units.Value
 
 	// Header is the header template string, with #
 	// replaced with the page number

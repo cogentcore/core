@@ -301,11 +301,19 @@ func standardFontName(sty *rich.Style) string {
 	if sty.Weight > rich.Medium {
 		name += "-Bold"
 		if sty.Slant == rich.Italic {
-			name += "Oblique"
+			if name == "Times" {
+				name += "Italic"
+			} else {
+				name += "Oblique"
+			}
 		}
 	} else {
 		if sty.Slant == rich.Italic {
-			name += "-Oblique"
+			if name == "Times" {
+				name += "-Italic"
+			} else {
+				name += "-Oblique"
+			}
 		}
 	}
 	if name == "Times" {

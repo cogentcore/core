@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/rich"
 )
 
 // RunTest runs a test for given test case.
@@ -27,8 +28,10 @@ func RunTest(t *testing.T, nm string, f func() *core.Body) {
 	b.RunWindow()
 	<-showed
 
+	opts := NewOptions()
+	opts.FontFamily = rich.Serif
 	buff := bytes.Buffer{}
-	PDF(&buff, NewOptions(), b)
+	PDF(&buff, opts, b)
 	os.Mkdir("testdata", 0777)
 	os.WriteFile(filepath.Join("testdata", nm)+".pdf", buff.Bytes(), 0666)
 }
