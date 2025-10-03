@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/pdf"
 	"cogentcore.org/core/paint/pimage"
-	"cogentcore.org/core/paint/ppath/pdf"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles/units"
 )
