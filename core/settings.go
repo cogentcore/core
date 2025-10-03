@@ -551,9 +551,6 @@ type SystemSettingsData struct { //types:add
 	// whether to use a 24-hour clock (instead of AM and PM)
 	Clock24 bool `label:"24-hour clock"`
 
-	// default page size for PDF generation, typically either Letter or A4.
-	PageSize PageSizes
-
 	// user info, which is partially filled-out automatically if empty
 	// when settings are first created.
 	User User
@@ -573,7 +570,6 @@ func (ss *SystemSettingsData) Defaults() {
 	ss.KeyMap = keymap.DefaultMap
 	ss.KeyMaps.Value = keymap.AvailableMaps
 	ss.FavPaths.setToDefaults()
-	ss.PageSize = Letter
 	ss.updateUser()
 }
 
@@ -627,22 +623,6 @@ type User struct { //types:add
 	// default email address -- e.g., for recording changes in a version control system
 	Email string
 }
-
-// PageSizes are the different possible page sizes that a user can select in their settings.
-type PageSizes int32 //enums:enum
-
-const (
-	A1 PageSizes = iota
-	A2
-	A3
-	A4
-	A5
-	A6
-	A7
-	Letter
-	Legal
-	Tabloid
-)
 
 ////////  FavoritePaths
 

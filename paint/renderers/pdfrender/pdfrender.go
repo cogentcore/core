@@ -7,6 +7,7 @@ package pdfrender
 import (
 	"bytes"
 	"image"
+	"io"
 	"strconv"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -65,10 +66,17 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 // Render is the main rendering function.
 func (rs *Renderer) Render(r render.Render) render.Renderer {
 	rs.buff = &bytes.Buffer{}
+	rs.RenderPage(rs.buff, r)
+	rs.PDF.Close()
+	return rs
+}
+
+// RenderPage is the main rendering function, rendering to a writer
+func (rs *Renderer) RenderPage(w io.Writer, r render.Render) render.Renderer {
 	// pdf is in points
 	sx := rs.unitContext.Convert(float32(rs.size.X), rs.sizeUnits, units.UnitPt)
 	sy := rs.unitContext.Convert(float32(rs.size.Y), rs.sizeUnits, units.UnitPt)
-	rs.PDF = pdf.New(rs.buff, sx, sy, &rs.unitContext)
+	rs.PDF = pdf.New(w, sx, sy, &rs.unitContext)
 	rs.lyStack = nil
 	bg := rs.PDF.AddLayer("bg", true)
 	rs.PDF.BeginLayer(bg, math32.Identity2())
@@ -88,7 +96,6 @@ func (rs *Renderer) Render(r render.Render) render.Renderer {
 		}
 	}
 	rs.PDF.EndLayer()
-	rs.PDF.Close()
 	return rs
 }
 

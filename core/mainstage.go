@@ -168,7 +168,7 @@ func (st *Stage) addSceneParts() {
 			np.Y = max(np.Y, minsz)
 			ng := sc.SceneGeom
 			ng.Size = np
-			sc.resize(ng)
+			sc.Resize(ng)
 		})
 	}
 }
@@ -266,7 +266,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 
 	if st.NewWindow || currentRenderWindow == nil {
-		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		win := st.newRenderWindow()
 		mainRenderWindows.add(win)
 		setCurrentRenderWindow(win)
@@ -352,7 +352,7 @@ func (st *Stage) runDialog() *Stage {
 
 	if st.NewWindow {
 		st.Mains = nil
-		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()

@@ -83,7 +83,7 @@ func (im *Image) SizeUp() {
 		obj := math32.FromPoint(im.Image.Bounds().Size())
 		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, sz.Actual.Content)
 		sz.Actual.Content = osz
-		sz.setTotalFromContent(&sz.Actual)
+		sz.SetTotalFromContent(&sz.Actual)
 	}
 }
 

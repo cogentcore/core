@@ -463,7 +463,7 @@ func (tx *Text) SizeUp() {
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
@@ -480,7 +480,7 @@ func (tx *Text) SizeDown(iter int) bool {
 	// start over so we don't reflect hysteresis of prior guess
 	sz.setInitContentMin(tx.Styles.Min.Dots().Ceil())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
 		if DebugSettings.LayoutTrace {

@@ -1651,7 +1651,7 @@ func (tf *TextField) SizeUp() {
 	rsz := tf.configTextSize(availSz)
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	tf.lineHeight = tf.Styles.LineHeightDots()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
@@ -1681,7 +1681,7 @@ func (tf *TextField) SizeDown(iter int) bool {
 		rsz.Y = max(pgrow.Y, rsz.Y)
 	}
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // this is important for constraining our children layout:
 	redo := tf.Frame.SizeDown(iter)
 	return chg || redo
