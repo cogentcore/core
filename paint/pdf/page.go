@@ -76,6 +76,30 @@ func (w *pdfPage) SetTransform(m math32.Matrix2) {
 	fmt.Fprintf(w, " %s cm", mat2(m))
 }
 
+// PushStack adds a graphics stack push (q)
+func (w *pdfPage) PushStack() {
+	fmt.Fprintf(w, " q")
+}
+
+// PushTransform adds a graphics stack push (q) and then
+// cm to set the current matrix transform (CMT).
+func (w *pdfPage) PushTransform(m math32.Matrix2) {
+	rot := m.ExtractRot()
+	m2 := m
+	if rot != 0 {
+		m2 = m.Mul(math32.Rotate2D(-2 * rot))
+	}
+	fmt.Fprintf(w, " q %s cm", mat2(m2))
+}
+
+// PopStack adds a graphics stack pop (Q) which must
+// be paired with a corresponding Push (q). Resets the
+func (w *pdfPage) PopStack() {
+	w.style.Fill.Color = nil   // reset
+	w.style.Stroke.Color = nil // reset
+	fmt.Fprintf(w, " Q")
+}
+
 // AddAnnotation adds an annotation.
 func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
 	annot := pdfDict{
@@ -297,15 +321,15 @@ func (w *pdfPage) SetTextCharSpace(space float32) error {
 	return nil
 }
 
-// StartTextObject starts a text object, initializing the global
+// StartTextObject starts a text object, adding to the graphics
 // CTM transform matrix as given by the arg, and setting an inverting
 // text transform, so text is rendered upright.
 func (w *pdfPage) StartTextObject(m math32.Matrix2) error {
 	if w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: already in text object"))
 	}
-	// set the global graphics transform to m first
-	fmt.Fprintf(w, " q %s cm", mat2(m))
+	// set the graphics transform to m first
+	w.PushTransform(m)
 	fmt.Fprintf(w, " BT")
 	// then apply an inversion text matrix
 	tm := math32.Scale2D(1, -1)
@@ -320,7 +344,8 @@ func (w *pdfPage) EndTextObject() error {
 	if !w.inTextObject {
 		return errors.Log(errors.New("pdfWriter: must be in text object"))
 	}
-	fmt.Fprintf(w, " ET Q")
+	fmt.Fprintf(w, " ET")
+	w.PopStack()
 	w.inTextObject = false
 	return nil
 }

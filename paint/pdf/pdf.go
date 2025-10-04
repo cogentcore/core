@@ -15,7 +15,26 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 )
+
+// UseStandardFonts sets the [rich.Settings] default fonts to the
+// corresponding PDF defaults, so that text layout works correctly
+// for the PDF rendering. The current settings are returned,
+// and should be passed to [RestorePreviousFonts] when done.
+func UseStandardFonts() rich.SettingsData {
+	prev := rich.Settings
+	rich.Settings.SansSerif = "Helvetica"
+	rich.Settings.Serif = "Times"
+	rich.Settings.Monospace = "Courier"
+	return prev
+}
+
+// RestorePreviousFonts sets the [rich.Settings] default fonts
+// to those returned from [UseStandardFonts]
+func RestorePreviousFonts(s rich.SettingsData) {
+	rich.Settings = s
+}
 
 // type Options struct {
 // 	Compress    bool

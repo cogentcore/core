@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/pdf"
 	"cogentcore.org/core/paint/renderers/pdfrender"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -24,10 +24,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	if len(ins) == 0 {
 		return
 	}
-	cset := rich.Settings
-	rich.Settings.SansSerif = "Helvetica"
-	rich.Settings.Serif = "Times"
-	rich.Settings.Monospace = "Courier"
+	cset := pdf.UseStandardFonts()
 
 	p := pager{opts: &opts, ins: ins}
 	p.optsUpdate()
@@ -57,5 +54,5 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 		sc.DeleteChildren()
 	}
 	pdr.EndRender()
-	rich.Settings = cset
+	pdf.RestorePreviousFonts(cset)
 }

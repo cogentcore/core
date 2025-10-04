@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	_ "cogentcore.org/core/text/shaped/shapers"
 	"github.com/alecthomas/assert/v2"
@@ -54,9 +53,8 @@ func TestPath(t *testing.T) {
 
 func TestText(t *testing.T) {
 	RunTest(t, "text", 300, 300, func(pd *PDF, sty *styles.Paint) {
+		prv := UseStandardFonts()
 		sh := shaped.NewShaper()
-		rts := &rich.Settings{}
-		rts.Defaults()
 
 		src := "PDF can put <b>HTML</b> <br>formatted Text where you <i>want</i>"
 		rsty := &sty.Font
@@ -65,11 +63,12 @@ func TestText(t *testing.T) {
 		tx, err := htmltext.HTMLToRich([]byte(src), rsty, nil)
 		// fmt.Println(tx)
 		assert.NoError(t, err)
-		lns := sh.WrapLines(tx, rsty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, rsty, tsty, math32.Vec2(250, 250))
 
 		// m := math32.Identity2()
-		m := math32.Rotate2D(math32.DegToRad(-15))
+		m := math32.Rotate2D(math32.DegToRad(15))
 
 		pd.Text(sty, m, math32.Vec2(20, 20), lns)
+		RestorePreviousFonts(prv)
 	})
 }

@@ -110,7 +110,7 @@ func TestRender(t *testing.T) {
 
 		tx, err := htmltext.HTMLToRich([]byte("This is <a>HTML</a> <b>formatted</b> <i>text</i>"), fsty, nil)
 		assert.NoError(t, err)
-		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.Settings, math32.Vec2(100, 60))
+		lns := txtSh.WrapLines(tx, fsty, tsty, math32.Vec2(100, 60))
 		// if tsz.X != 100 || tsz.Y != 60 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }

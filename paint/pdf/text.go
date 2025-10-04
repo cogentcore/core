@@ -25,7 +25,7 @@ import (
 // (the translation component specifies the starting offset)
 func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, lns *shaped.Lines) {
 	mt := m.Mul(math32.Translate2D(pos.X, pos.Y))
-	r.w.StartTextObject(mt)
+	r.w.PushTransform(mt)
 	off := lns.Offset
 	clr := colors.Uniform(lns.Color)
 	runes := lns.Source.Join()
@@ -33,7 +33,7 @@ func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, ln
 		ln := &lns.Lines[li]
 		r.textLine(style, m, ln, lns, runes, clr, off)
 	}
-	r.w.EndTextObject()
+	r.w.PopStack()
 }
 
 // TextLine rasterizes the given shaped.Line.
@@ -66,6 +66,7 @@ func (r *PDF) textRegionFill(m math32.Matrix2, run *shapedgt.Run, off math32.Vec
 	if fill == nil {
 		return
 	}
+	idm := math32.Identity2()
 	for _, sel := range ranges {
 		rsel := sel.Intersect(run.Runes())
 		if rsel.Len() == 0 {
@@ -75,17 +76,19 @@ func (r *PDF) textRegionFill(m math32.Matrix2, run *shapedgt.Run, off math32.Vec
 		li := run.LastGlyphAt(rsel.End - 1)
 		if fi >= 0 && li >= fi {
 			sbb := run.GlyphRegionBounds(fi, li).Canon()
-			r.FillBox(m, sbb.Translate(off), fill)
+			r.FillBox(idm, sbb.Translate(off), fill)
 		}
 	}
 }
 
 // textRunRegions draws region fills for given run.
 func (r *PDF) textRunRegions(m math32.Matrix2, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, off math32.Vector2) {
+	idm := math32.Identity2()
+
 	// dir := run.Direction
 	rbb := run.MaxBounds.Translate(off)
 	if run.Background != nil {
-		r.FillBox(m, rbb, run.Background)
+		r.FillBox(idm, rbb, run.Background)
 	}
 	r.textRegionFill(m, run, off, lns.SelectionColor, ln.Selections)
 	r.textRegionFill(m, run, off, lns.HighlightColor, ln.Highlights)
@@ -105,13 +108,11 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	fsz := math32.FromFixed(run.Size)
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
 	if run.Math.Path != nil {
-		mm := m
-		mm.X0 += off.X
-		mm.Y0 += off.Y
-		r.Path(*run.Math.Path, style, mm)
+		r.Path(*run.Math.Path, style, math32.Translate2D(off.X, off.Y))
 		return
 	}
 
+	idm := math32.Identity2()
 	if run.Decoration.HasFlag(rich.Underline) || run.Decoration.HasFlag(rich.DottedUnderline) {
 		dash := []float32{2, 2}
 		if run.Decoration.HasFlag(rich.Underline) {
@@ -120,29 +121,28 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 		if run.Direction.IsVertical() {
 		} else {
 			dec := off.Y + 3
-			r.strokeTextLine(m, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
+			r.strokeTextLine(idm, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, dash)
 		}
 	}
 	if run.Decoration.HasFlag(rich.Overline) {
 		if run.Direction.IsVertical() {
 		} else {
 			dec := off.Y - 0.7*rbb.Size().Y
-			r.strokeTextLine(m, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+			r.strokeTextLine(idm, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
 		}
 	}
 
+	r.w.StartTextObject(math32.Translate2D(off.X, off.Y))
 	r.setTextStyle(&run.Font, style, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
-
-	raw := runes[region.Start:region.End]
-	sraw := string(raw)
-	r.w.SetTextPosition(off)
-	r.w.WriteText(sraw)
+	raw := string(runes[region.Start:region.End])
+	r.w.WriteText(raw)
+	r.w.EndTextObject()
 
 	if run.Decoration.HasFlag(rich.LineThrough) {
 		if run.Direction.IsVertical() {
 		} else {
 			dec := off.Y - 0.2*rbb.Size().Y
-			r.strokeTextLine(m, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
+			r.strokeTextLine(idm, math32.Vec2(rbb.Min.X, dec), math32.Vec2(rbb.Max.X, dec), lineW, fill, nil)
 		}
 	}
 }
