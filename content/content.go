@@ -15,6 +15,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -36,6 +37,8 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
+	"cogentcore.org/core/text/paginate"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -528,4 +531,24 @@ func (ct *Content) setStageTitle() {
 		}
 		rw.SetStageTitle(name)
 	}
+}
+
+// PagePDF generates a PDF of the current page, to given file path
+// (directory). the page name is the file name.
+func (ct *Content) PagePDF(path string) error {
+	if ct.currentPage == nil {
+		return errors.Log(errors.New("Page empty"))
+	}
+	fname := ct.currentPage.Name + ".pdf"
+	if path != "" {
+		fname = filepath.Join(path, fname)
+	}
+	f, err := os.Create(fname)
+	if errors.Log(err) != nil {
+		return err
+	}
+	opts := paginate.NewOptions()
+	opts.FontFamily = rich.Serif
+	paginate.PDF(f, opts, ct.rightFrame)
+	return f.Close()
 }

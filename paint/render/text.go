@@ -36,3 +36,7 @@ func NewText(txt *shaped.Lines, sty *styles.Paint, ctx *Context, pos math32.Vect
 
 // interface assertion.
 func (tx *Text) IsRenderItem() {}
+
+func (tx *Text) String() string {
+	return "text: " + tx.Text.String()
+}

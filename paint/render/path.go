@@ -34,3 +34,7 @@ func NewPath(pt ppath.Path, sty *styles.Paint, ctx *Context) *Path {
 
 // interface assertion.
 func (p *Path) IsRenderItem() {}
+
+func (p *Path) String() string {
+	return "path: " + p.Path.String()
+}

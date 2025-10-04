@@ -80,7 +80,7 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string) {
 	if c.MatchFunc == nil {
 		return
 	}
-	wait := SystemSettings.CompleteWaitDuration
+	wait := TimingSettings.CompleteWaitDuration
 	if c.stage != nil {
 		c.Cancel()
 	}
@@ -137,8 +137,8 @@ func (c *Complete) showNowImpl(ctx Widget, pos image.Point, text string) bool {
 	if len(c.completions) == 0 {
 		return false
 	}
-	if len(c.completions) > SystemSettings.CompleteMaxItems {
-		c.completions = c.completions[0:SystemSettings.CompleteMaxItems]
+	if len(c.completions) > AppearanceSettings.MenuMax {
+		c.completions = c.completions[0:AppearanceSettings.MenuMax]
 	}
 
 	sc := NewScene(ctx.AsTree().Name + "-complete")

@@ -248,6 +248,15 @@ func (s *Style) Defaults() {
 	s.Text.Defaults()
 }
 
+// ZeroSpace sets all the spacing elements to zero: Padding, Border, Margin, Gap
+func (s *Style) ZeroSpace() {
+	s.Padding.Zero()
+	s.Margin.Zero()
+	s.MaxBorder.Width.Zero()
+	s.Border.Width.Zero()
+	s.Gap.Zero()
+}
+
 // VirtualKeyboards are all of the supported virtual keyboard types
 // to display on mobile platforms.
 type VirtualKeyboards int32 //enums:enum -trim-prefix Keyboard -transform kebab

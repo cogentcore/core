@@ -36,7 +36,7 @@ import (
 // that the user will see in the settings window. It contains the base Cogent Core
 // settings by default and should be modified by other apps to add their
 // app settings.
-var AllSettings = []Settings{AppearanceSettings, SystemSettings, DeviceSettings, DebugSettings}
+var AllSettings = []Settings{AppearanceSettings, SystemSettings, TimingSettings, DebugSettings}
 
 // Settings is the interface that describes the functionality common
 // to all settings data types.
@@ -270,11 +270,42 @@ type AppearanceSettingsData struct { //types:add
 
 	// Text specifies text settings including the language, and the
 	// font families for different styles of fonts.
-	Text rich.Settings
+	Text rich.SettingsData
+
+	// only support closing the currently selected active tab;
+	// if this is set to true, pressing the close button on other tabs
+	// will take you to that tab, from which you can close it.
+	OnlyCloseActiveTab bool `default:"false"`
+
+	// the maximum number of items in a menu popup panel;
+	// scroll bars are enforced beyond that size, or for
+	// completion, this is the max number of items shown.
+	MenuMax int `default:"30" min:"5" step:"1"`
+
+	// column to sort by in FilePicker, and :up or :down for direction.
+	// Updated automatically via FilePicker
+	FilePickerSort string `display:"-"`
+
+	// length of inline elements to display for containers in Form widgets.
+	InlineLengths InlineLengths `display:"inline"`
 }
 
 func (as *AppearanceSettingsData) Defaults() {
 	as.Text.Defaults()
+}
+
+// InlineLengths has the length of inline elements to display for containers in Form widgets.
+type InlineLengths struct {
+	// the number of map elements at or below which an inline representation
+	// of the map will be presented, which is more convenient for small #'s of properties
+	Map int `default:"2" min:"1" step:"1"`
+
+	// the number of elemental struct fields at or below which an inline representation
+	// of the struct will be presented, which is more convenient for small structs
+	Struct int `default:"4" min:"2" step:"1"`
+
+	// the number of slice elements below which inline will be used
+	Slice int `default:"4" min:"2" step:"1"`
 }
 
 // ConstantSpacing returns a spacing value (padding, margin, gap)
@@ -335,7 +366,7 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 	if as.Highlighting == "" {
 		as.Highlighting = "emacs"
 	}
-	rich.DefaultSettings = as.Text
+	rich.Settings = as.Text
 
 	// TODO(kai): move HiStyle to a separate text editor settings
 	// if TheViewInterface != nil {
@@ -384,11 +415,11 @@ func (as *AppearanceSettingsData) ZebraStripesWeight() float32 {
 	return as.ZebraStripes * 0.002
 }
 
-// DeviceSettings are the global device settings.
-var DeviceSettings = &DeviceSettingsData{
+// TimingSettings are the global timing settings.
+var TimingSettings = &TimingSettingsData{
 	SettingsBase: SettingsBase{
-		Name: "Device",
-		File: filepath.Join(TheApp.CogentCoreDataDir(), "device-settings.toml"),
+		Name: "Timing",
+		File: filepath.Join(TheApp.CogentCoreDataDir(), "timing-settings.toml"),
 	},
 }
 
@@ -409,17 +440,14 @@ func (as *AppearanceSettingsData) SaveScreenZoom() { //types:add
 	errors.Log(SaveSettings(as))
 }
 
-// DeviceSettingsData is the data type for the device settings.
-type DeviceSettingsData struct { //types:add
+// TimingSettingsData is the data type for the timing settings.
+type TimingSettingsData struct { //types:add
 	SettingsBase
 
-	// The keyboard shortcut map to use
-	KeyMap keymap.MapName
-
-	// The keyboard shortcut maps available as options for Key map.
-	// If you do not want to have custom key maps, you should leave
-	// this unset so that you always have the latest standard key maps.
-	KeyMaps option.Option[keymap.Maps]
+	// SnackbarTimeout is the default amount of time until snackbars
+	// disappear (snackbars show short updates about app processes
+	// at the bottom of the screen)
+	SnackbarTimeout time.Duration `default:"5s"`
 
 	// The maximum time interval between button press events to count as a double-click
 	DoubleClickInterval time.Duration `default:"500ms" min:"100ms" step:"50ms"`
@@ -461,22 +489,33 @@ type DeviceSettingsData struct { //types:add
 
 	// The maximum number of pixels that mouse/finger can move and still register a long press event
 	LongPressStopDistance int `default:"50" min:"0" max:"1000" step:"1"`
+
+	// the amount of time to wait before offering completions
+	CompleteWaitDuration time.Duration `default:"0ms" min:"0ms" max:"10s" step:"10ms"`
+
+	// time interval for cursor blinking on and off -- set to 0 to disable blinking
+	CursorBlinkTime time.Duration `default:"500ms" min:"0ms" max:"1s" step:"5ms"`
+
+	// The amount of time to wait before trying to autoscroll again
+	LayoutAutoScrollDelay time.Duration `default:"25ms" min:"1ms" step:"5ms"`
+
+	// number of steps to take in PageUp / Down events in terms of number of items
+	LayoutPageSteps int `default:"10" min:"1" step:"1"`
+
+	// the amount of time between keypresses to combine characters into name
+	// to search for within layout -- starts over after this delay.
+	LayoutFocusNameTimeout time.Duration `default:"500ms" min:"0ms" max:"5s" step:"20ms"`
+
+	// the amount of time since last focus name event to allow tab to focus
+	// on next element with same name.
+	LayoutFocusNameTabTime time.Duration `default:"2s" min:"10ms" max:"10s" step:"100ms"`
 }
 
-func (ds *DeviceSettingsData) Defaults() {
-	ds.KeyMap = keymap.DefaultMap
-	ds.KeyMaps.Value = keymap.AvailableMaps
+func (ts *TimingSettingsData) Defaults() {
 }
 
-func (ds *DeviceSettingsData) Apply() {
-	if ds.KeyMaps.Valid {
-		keymap.AvailableMaps = ds.KeyMaps.Value
-	}
-	if ds.KeyMap != "" {
-		keymap.SetActiveMapName(ds.KeyMap)
-	}
-
-	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
+func (ts *TimingSettingsData) Apply() {
+	events.ScrollWheelSpeed = ts.ScrollWheelSpeed
 }
 
 // ScreenSettings are per-screen settings that override the global settings.
@@ -498,21 +537,23 @@ var SystemSettings = &SystemSettingsData{
 type SystemSettingsData struct { //types:add
 	SettingsBase
 
+	// The keyboard shortcut map to use
+	KeyMap keymap.MapName
+
+	// The keyboard shortcut maps available as options for Key map.
+	// If you do not want to have custom key maps, you should leave
+	// this unset so that you always have the latest standard key maps.
+	KeyMaps option.Option[keymap.Maps]
+
 	// text editor settings
 	Editor text.EditorSettings
 
 	// whether to use a 24-hour clock (instead of AM and PM)
 	Clock24 bool `label:"24-hour clock"`
 
-	// SnackbarTimeout is the default amount of time until snackbars
-	// disappear (snackbars show short updates about app processes
-	// at the bottom of the screen)
-	SnackbarTimeout time.Duration `default:"5s"`
-
-	// only support closing the currently selected active tab;
-	// if this is set to true, pressing the close button on other tabs
-	// will take you to that tab, from which you can close it.
-	OnlyCloseActiveTab bool `default:"false"`
+	// user info, which is partially filled-out automatically if empty
+	// when settings are first created.
+	User User
 
 	// the limit of file size, above which user will be prompted before
 	// opening / copying, etc.
@@ -521,63 +562,25 @@ type SystemSettingsData struct { //types:add
 	// maximum number of saved paths to save in FilePicker
 	SavedPathsMax int `default:"50"`
 
-	// user info, which is partially filled-out automatically if empty
-	// when settings are first created.
-	User User
-
 	// favorite paths, shown in FilePickerer and also editable there
 	FavPaths favoritePaths
-
-	// column to sort by in FilePicker, and :up or :down for direction.
-	// Updated automatically via FilePicker
-	FilePickerSort string `display:"-"`
-
-	// the maximum height of any menu popup panel in units of font height;
-	// scroll bars are enforced beyond that size.
-	MenuMaxHeight int `default:"30" min:"5" step:"1"`
-
-	// the amount of time to wait before offering completions
-	CompleteWaitDuration time.Duration `default:"0ms" min:"0ms" max:"10s" step:"10ms"`
-
-	// the maximum number of completions offered in popup
-	CompleteMaxItems int `default:"25" min:"5" step:"1"`
-
-	// time interval for cursor blinking on and off -- set to 0 to disable blinking
-	CursorBlinkTime time.Duration `default:"500ms" min:"0ms" max:"1s" step:"5ms"`
-
-	// The amount of time to wait before trying to autoscroll again
-	LayoutAutoScrollDelay time.Duration `default:"25ms" min:"1ms" step:"5ms"`
-
-	// number of steps to take in PageUp / Down events in terms of number of items
-	LayoutPageSteps int `default:"10" min:"1" step:"1"`
-
-	// the amount of time between keypresses to combine characters into name
-	// to search for within layout -- starts over after this delay.
-	LayoutFocusNameTimeout time.Duration `default:"500ms" min:"0ms" max:"5s" step:"20ms"`
-
-	// the amount of time since last focus name event to allow tab to focus
-	// on next element with same name.
-	LayoutFocusNameTabTime time.Duration `default:"2s" min:"10ms" max:"10s" step:"100ms"`
-
-	// the number of map elements at or below which an inline representation
-	// of the map will be presented, which is more convenient for small #'s of properties
-	MapInlineLength int `default:"2" min:"1" step:"1"`
-
-	// the number of elemental struct fields at or below which an inline representation
-	// of the struct will be presented, which is more convenient for small structs
-	StructInlineLength int `default:"4" min:"2" step:"1"`
-
-	// the number of slice elements below which inline will be used
-	SliceInlineLength int `default:"4" min:"2" step:"1"`
 }
 
 func (ss *SystemSettingsData) Defaults() {
+	ss.KeyMap = keymap.DefaultMap
+	ss.KeyMaps.Value = keymap.AvailableMaps
 	ss.FavPaths.setToDefaults()
 	ss.updateUser()
 }
 
 // Apply detailed settings to all the relevant settings.
 func (ss *SystemSettingsData) Apply() { //types:add
+	if ss.KeyMaps.Valid {
+		keymap.AvailableMaps = ss.KeyMaps.Value
+	}
+	if ss.KeyMap != "" {
+		keymap.SetActiveMapName(ss.KeyMap)
+	}
 	np := len(ss.FavPaths)
 	for i := 0; i < np; i++ {
 		if ss.FavPaths[i].Icon == "" || ss.FavPaths[i].Icon == "folder" {

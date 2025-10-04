@@ -6,10 +6,12 @@ package renderers
 
 import (
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/paint/renderers/pdfrender"
 	"cogentcore.org/core/paint/renderers/svgrender"
 	_ "cogentcore.org/core/text/shaped/shapers"
 )
 
 func init() {
 	paint.NewSVGRenderer = svgrender.New
+	paint.NewPDFRenderer = pdfrender.New
 }

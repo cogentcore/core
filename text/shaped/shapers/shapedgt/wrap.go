@@ -24,7 +24,7 @@ import (
 // source text, and wrapped separately. For horizontal text, the Lines will render with
 // a position offset at the upper left corner of the overall bounding box of the text.
 // This is called under a mutex lock, so it is safe for parallel use.
-func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *shaped.Lines {
+func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) *shaped.Lines {
 	sh.Lock()
 	defer sh.Unlock()
 	if tsty.FontSize.Dots == 0 {
@@ -32,14 +32,14 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	}
 
 	txt := tx.Join()
-	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
-	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, rts, size)
+	outs := sh.ShapeTextOutput(tx, tsty, txt)
+	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, size)
 	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call. Returns new lines and number of truncations.
-func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) ([]shaping.Line, int) {
+func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) ([]shaping.Line, int) {
 
 	lht := tsty.LineHeightDots(defSty)
 	dir := shaped.GoTextDirection(rich.Default, tsty)

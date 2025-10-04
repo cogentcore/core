@@ -188,7 +188,11 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		r := svg.NewRect(cg)
 		r.Pos = math32.FromPoint(pr.Rect.Min)
 		r.Size = math32.FromPoint(pr.Rect.Size())
-		r.SetProperty("fill", colors.AsHex(u.C))
+		if ok {
+			r.SetProperty("fill", colors.AsHex(u.C))
+		} else {
+			r.SetProperty("fill", colors.Transparent)
+		}
 		return
 	}
 

@@ -122,16 +122,15 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	return rc.rebuild
 }
 
-// layoutScene does a layout of the scene: Size, Position
-func (sc *Scene) layoutScene() {
+// LayoutScene does a layout of the scene: Size, Position
+func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
 	sc.SizeUp()
 	sz := &sc.Geom.Size
 	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
-	sz.setContentFromTotal(&sz.Alloc)
-	// sz.Actual = sz.Alloc // todo: is this needed??
+	sz.SetContentFromTotal(&sz.Alloc)
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nSizeDown start:", sc)
 	}
@@ -160,10 +159,10 @@ func (sc *Scene) layoutScene() {
 	sc.ApplyScenePos()
 }
 
-// layoutRenderScene does a layout and render of the tree:
+// LayoutRenderScene does a layout and render of the tree:
 // GetSize, DoLayout, Render.  Needed after Config.
-func (sc *Scene) layoutRenderScene() {
-	sc.layoutScene()
+func (sc *Scene) LayoutRenderScene() {
+	sc.LayoutScene()
 	sc.RenderWidget()
 }
 
@@ -229,14 +228,14 @@ func (sc *Scene) doUpdate() bool {
 	case sc.lastRender.needsRestyle(rc):
 		// pr := profile.Start("restyle")
 		sc.applyStyleScene()
-		sc.layoutRenderScene()
+		sc.LayoutRenderScene()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
 		sc.lastRender.saveRender(rc)
 		// pr.End()
 	case sc.hasFlag(sceneNeedsLayout):
 		// pr := profile.Start("layout")
-		sc.layoutRenderScene()
+		sc.LayoutRenderScene()
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
 		// pr.End()
@@ -290,7 +289,7 @@ func (sc *Scene) doRebuild() {
 	sc.Stage.Sprites.reset()
 	sc.updateScene()
 	sc.applyStyleScene()
-	sc.layoutRenderScene()
+	sc.LayoutRenderScene()
 }
 
 // contentSize computes the size of the scene based on current content.
@@ -303,7 +302,7 @@ func (sc *Scene) contentSize(initSz image.Point) image.Point {
 	sc.setFlag(true, sceneContentSizing)
 	sc.updateScene()
 	sc.applyStyleScene()
-	sc.layoutScene()
+	sc.LayoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
 	sc.setFlag(false, sceneContentSizing)

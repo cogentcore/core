@@ -27,6 +27,7 @@ func init() {
 		"Mm":            reflect.ValueOf(units.Mm),
 		"MmPerInch":     reflect.ValueOf(constant.MakeFromLiteral("25.39999999999999999965305530480463858111761510372161865234375", token.FLOAT, 0)),
 		"New":           reflect.ValueOf(units.New),
+		"NewContext":    reflect.ValueOf(units.NewContext),
 		"Pc":            reflect.ValueOf(units.Pc),
 		"PcPerInch":     reflect.ValueOf(constant.MakeFromLiteral("6", token.INT, 0)),
 		"Ph":            reflect.ValueOf(units.Ph),

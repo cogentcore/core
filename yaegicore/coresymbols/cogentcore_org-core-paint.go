@@ -13,6 +13,7 @@ func init() {
 		"ClampBorderRadius": reflect.ValueOf(paint.ClampBorderRadius),
 		"EdgeBlurFactors":   reflect.ValueOf(paint.EdgeBlurFactors),
 		"NewImageRenderer":  reflect.ValueOf(&paint.NewImageRenderer).Elem(),
+		"NewPDFRenderer":    reflect.ValueOf(&paint.NewPDFRenderer).Elem(),
 		"NewPainter":        reflect.ValueOf(paint.NewPainter),
 		"NewSVGRenderer":    reflect.ValueOf(&paint.NewSVGRenderer).Elem(),
 		"NewSourceRenderer": reflect.ValueOf(&paint.NewSourceRenderer).Elem(),

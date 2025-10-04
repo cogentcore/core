@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/htmltext"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 )
@@ -92,7 +91,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	tx, _ := htmltext.HTMLToRich([]byte(g.Text), &fs, nil)
 	// fmt.Println(tx)
 	sz := math32.Vec2(10000, 10000) // no wrapping!!
-	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
+	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, sz)
 	baseOff := g.TextShaped.Lines[0].Offset
 	g.TextShaped.StartAtBaseline() // remove top-left offset
 	return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))

@@ -158,7 +158,7 @@ type WidgetBase struct {
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this widget.
-	Geom geomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// OverrideStyle, if true, indicates override the computed styles of the widget
 	// and allow directly editing [WidgetBase.Styles]. It is typically only set in
@@ -311,10 +311,10 @@ func (wb *WidgetBase) OnAdd() {
 	}
 }
 
-// setScene sets the Scene pointer for this widget and all of its children.
+// SetScene sets the Scene pointer for this widget and all of its children.
 // This can be necessary when creating widgets outside the usual New* paradigm,
 // e.g., when reading from a JSON file.
-func (wb *WidgetBase) setScene(sc *Scene) {
+func (wb *WidgetBase) SetScene(sc *Scene) {
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		cwb.Scene = sc
 		return tree.Continue

@@ -7,6 +7,7 @@ package render
 import (
 	"reflect"
 	"slices"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 )
@@ -27,6 +28,16 @@ func (pr *Render) Add(item ...Item) *Render {
 		if reflectx.IsNil(reflect.ValueOf(it)) {
 			continue
 		}
+		n := len(*pr)
+		if n > 0 {
+			// eliminate empty push-pop sequences, which occur due to invisible elements
+			if _, ok := it.(*ContextPop); ok {
+				if _, ok := (*pr)[n-1].(*ContextPush); ok {
+					*pr = (*pr)[:n-1]
+					continue
+				}
+			}
+		}
 		*pr = append(*pr, it)
 	}
 	return pr
@@ -36,4 +47,12 @@ func (pr *Render) Add(item ...Item) *Render {
 // It preserves the existing slice memory for re-use.
 func (pr *Render) Reset() {
 	*pr = (*pr)[:0]
+}
+
+func (pr *Render) String() string {
+	var b strings.Builder
+	for _, it := range *pr {
+		b.WriteString(it.String() + "\n")
+	}
+	return b.String()
 }

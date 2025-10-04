@@ -172,7 +172,6 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	vlr := buf.ViewLineRegionNoLock(ed.viewId, ln)
 	vseli := vlr.Intersect(vsel, ed.linesSize.X)
 	tx := buf.ViewMarkupLine(ed.viewId, ln)
-	ctx := &rich.DefaultSettings
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
 	sty, tsty := ed.Styles.NewRichText()
@@ -181,7 +180,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		if ed.tabRender != nil {
 			return ed.tabRender.Clone()
 		}
-		lns := sh.WrapLines(stx, sty, tsty, ctx, ssz)
+		lns := sh.WrapLines(stx, sty, tsty, ssz)
 		ed.tabRender = lns
 		return lns
 	}
@@ -191,7 +190,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
 			return rc.lns
 		}
-		lns := sh.WrapLines(stx, sty, tsty, ctx, ssz)
+		lns := sh.WrapLines(stx, sty, tsty, ssz)
 		ed.lineRenders[li] = renderCache{tx: txt, lns: lns}
 		return lns
 	}
@@ -318,7 +317,7 @@ func (ed *Base) renderLineNumber(pos math32.Vector2, li, ln int) {
 	if rc.lns != nil && slices.Compare(rc.tx, tx[0]) == 0 { // captures styling
 		lns = rc.lns
 	} else {
-		lns = sh.WrapLines(tx, sty, tsty, &rich.DefaultSettings, sz)
+		lns = sh.WrapLines(tx, sty, tsty, sz)
 		ed.lineNoRenders[li] = renderCache{tx: tx[0], lns: lns}
 	}
 	pc.DrawText(lns, pos)

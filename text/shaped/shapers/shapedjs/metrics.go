@@ -18,10 +18,10 @@ import (
 // has the font ascent and descent information, and the BoundsBox() method returns a full
 // bounding box for the given font, centered at the baseline.
 // This is called under a mutex lock, so it is safe for parallel use.
-func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) shaped.Run {
+func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style) shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
-	return sh.fontSize(r, sty, tsty, rts)
+	return sh.fontSize(r, sty, tsty)
 }
 
 // LineHeight returns the line height for given font and text style.
@@ -29,27 +29,27 @@ func (sh *Shaper) FontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.
 // It includes the [text.Style] LineHeight multiplier on the natural
 // font-derived line height, which is not generally the same as the font size.
 // This is called under a mutex lock, so it is safe for parallel use.
-func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
+func (sh *Shaper) LineHeight(sty *rich.Style, tsty *text.Style) float32 {
 	sh.Lock()
 	defer sh.Unlock()
-	return sh.lineHeight(sty, tsty, rts)
+	return sh.lineHeight(sty, tsty)
 }
 
 // fontSize returns the font shape sizing information for given font and text style,
 // using given rune (often the letter 'm'). The GlyphBounds field of the [Run] result
 // has the font ascent and descent information, and the BoundsBox() method returns a full
 // bounding box for the given font, centered at the baseline.
-func (sh *Shaper) fontSize(r rune, sty *rich.Style, tsty *text.Style, rts *rich.Settings) shaped.Run {
+func (sh *Shaper) fontSize(r rune, sty *rich.Style, tsty *text.Style) shaped.Run {
 	tx := rich.NewText(sty, []rune{r})
-	return sh.shapeAdjust(tx, tsty, rts, []rune{r})[0]
+	return sh.shapeAdjust(tx, tsty, []rune{r})[0]
 }
 
 // lineHeight returns the line height for given font and text style.
 // For vertical text directions, this is actually the line width.
 // It includes the [text.Style] LineHeight multiplier on the natural
 // font-derived line height, which is not generally the same as the font size.
-func (sh *Shaper) lineHeight(sty *rich.Style, tsty *text.Style, rts *rich.Settings) float32 {
-	run := sh.fontSize('M', sty, tsty, rts)
+func (sh *Shaper) lineHeight(sty *rich.Style, tsty *text.Style) float32 {
+	run := sh.fontSize('M', sty, tsty)
 	bb := run.LineBounds()
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 	if dir.IsVertical() {

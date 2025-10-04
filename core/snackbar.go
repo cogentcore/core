@@ -30,7 +30,7 @@ func (bd *Body) NewSnackbar(ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
 	bd.snackbarStyles()
 	bd.Scene.Stage = NewPopupStage(SnackbarStage, bd.Scene, ctx).
-		SetTimeout(SystemSettings.SnackbarTimeout)
+		SetTimeout(TimingSettings.SnackbarTimeout)
 	return bd.Scene.Stage
 }
 

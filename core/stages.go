@@ -216,7 +216,7 @@ func (sm *stages) resize(rg math32.Geom2DInt) bool {
 	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		if st.FullWindow {
-			did := st.Scene.resize(rg)
+			did := st.Scene.Resize(rg)
 			if did {
 				st.Sprites.reset()
 				resized = true

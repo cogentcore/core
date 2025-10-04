@@ -592,7 +592,7 @@ func (tr *Tree) SizeUp() {
 	}
 	sz := &tr.Geom.Size
 	sz.Actual.Content = math32.Vec2(w, h)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // need allocation to match!
 	tr.widgetSize.X = w  // stretch
 }
@@ -618,7 +618,7 @@ func (tr *Tree) Position() {
 	sz.Alloc = sz.Actual
 	psz := &tr.Parts.Geom.Size
 	psz.Alloc.Total = tr.widgetSize
-	psz.setContentFromTotal(&psz.Alloc)
+	psz.SetContentFromTotal(&psz.Alloc)
 
 	tr.WidgetBase.Position() // just does our parts
 
@@ -637,7 +637,7 @@ func (tr *Tree) Position() {
 func (tr *Tree) ApplyScenePos() {
 	sz := &tr.Geom.Size
 	if sz.Actual.Total == tr.widgetSize {
-		sz.setTotalFromContent(&sz.Actual) // restore after scrolling
+		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
 	}
 	tr.WidgetBase.ApplyScenePos()
 	tr.applyScenePosChildren()
@@ -1467,7 +1467,7 @@ func (tr *Tree) PasteAssign(md mimedata.Mimes) {
 		return
 	}
 	tr.CopyFrom(sl[0])    // nodes with data copy here
-	tr.setScene(tr.Scene) // ensure children have scene
+	tr.SetScene(tr.Scene) // ensure children have scene
 	tr.Update()           // could have children
 	tr.Open()
 	tr.sendChangeEvent()
@@ -1525,7 +1525,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		parent.InsertChild(ns, myidx+i)
 		nwb := AsWidget(ns)
 		AsTree(ns).Root = tr.Root
-		nwb.setScene(tr.Scene)
+		nwb.SetScene(tr.Scene)
 		nwb.Update() // incl children
 		npath := nst.PathFrom(tr.Root)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
@@ -1555,7 +1555,7 @@ func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 		tree.SetUniqueNameIfDuplicate(tr.This, ns)
 		tr.AddChild(ns)
 		AsTree(ns).Root = tr.Root
-		AsWidget(ns).setScene(tr.Scene)
+		AsWidget(ns).SetScene(tr.Scene)
 	}
 	tr.Update()
 	tr.Open()

@@ -36,7 +36,7 @@ type Shaper interface {
 	// The results are only valid until the next call to Shape or WrapParagraph:
 	// use slices.Clone if needed longer than that.
 	// This is called under a mutex lock, so it is safe for parallel use.
-	Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []Run
+	Shape(tx rich.Text, tsty *text.Style) []Run
 
 	// WrapLines performs line wrapping and shaping on the given rich text source,
 	// using the given style information, where the [rich.Style] provides the default
@@ -46,7 +46,7 @@ type Shaper interface {
 	// source text, and wrapped separately. For horizontal text, the Lines will render with
 	// a position offset at the upper left corner of the overall bounding box of the text.
 	// This is called under a mutex lock, so it is safe for parallel use.
-	WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, rts *rich.Settings, size math32.Vector2) *Lines
+	WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) *Lines
 
 	// FontFamilies returns a list of available font family names on this system.
 	FontList() []fonts.Info
