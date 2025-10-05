@@ -194,7 +194,7 @@ func (ct *Content) Init() {
 		switch x := w.(type) {
 		case *core.Text:
 			x.Styler(func(s *styles.Style) {
-				s.Max.X.Ch(120)
+				s.Max.X.In(8) // doesn't constrain PDF render
 			})
 		case *core.Image:
 			x.Styler(func(s *styles.Style) {
@@ -375,6 +375,12 @@ func (ct *Content) addHistory(pg *bcontent.Page) {
 	ct.saveWebURL()
 }
 
+// reloadPage reloads the current page
+func (ct *Content) reloadPage() {
+	ct.renderedPage = nil
+	ct.Update()
+}
+
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
 	if ct.renderedPage == ct.currentPage {
@@ -549,6 +555,10 @@ func (ct *Content) PagePDF(path string) error {
 	}
 	opts := paginate.NewOptions()
 	opts.FontFamily = rich.Serif
+	opts.Header = paginate.HeaderLeftPageNumber(ct.currentPage.Name)
+	opts.Footer = nil
 	paginate.PDF(f, opts, ct.rightFrame)
-	return f.Close()
+	err = f.Close()
+	ct.reloadPage()
+	return err
 }

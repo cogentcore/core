@@ -32,6 +32,7 @@ type pdfPage struct {
 	annots        pdfArray
 
 	graphicsStates map[float32]pdfName
+	// todo: make this a stack of render.Context elements, push and pop
 	style          styles.Paint
 	inTextObject   bool
 	textPosition   math32.Vector2

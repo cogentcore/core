@@ -30,6 +30,7 @@ func RunTest(t *testing.T, nm string, f func() *core.Body) {
 
 	opts := NewOptions()
 	opts.FontFamily = rich.Serif
+	opts.Header = HeaderLeftPageNumber("This is a test header")
 	buff := bytes.Buffer{}
 	PDF(&buff, opts, b)
 	os.Mkdir("testdata", 0777)

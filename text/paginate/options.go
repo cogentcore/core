@@ -7,6 +7,7 @@
 package paginate
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -38,17 +39,19 @@ type Options struct {
 	// to all core.Text elements, if non-zero.
 	FontSize units.Value
 
-	// Header is the header template string, with #
-	// replaced with the page number
-	// <stretch> adds a stretch element that can be used to accomplish
-	// justification: at start = right justify, at start and end = center
-	Header string
+	// Title generates the title contents for the first page,
+	// into the given page body frame.
+	Title func(frame *core.Frame, opts *Options)
 
-	// Footer is the footer template string, with #
-	// replaced with the page number.
-	// <stretch> adds a stretch element that can be used to accomplish
-	// justification: at start = right justify, at start and end = center
-	Footer string
+	// Header generates the header contents for the page, into the given
+	// frame that represents the entire top margin.
+	// See examples in runners.go
+	Header func(frame *core.Frame, opts *Options, pageNo int)
+
+	// Footer generates the footer contents for the page, into the given
+	// frame that represents the entire top margin.
+	// See examples in runners.go
+	Footer func(frame *core.Frame, opts *Options, pageNo int)
 
 	sizeDots math32.Vector2 // total size in dots
 	bodyDots math32.Vector2 // body (content) size in dots
@@ -65,7 +68,7 @@ func (o *Options) Defaults() {
 	// todo: make this contingent on localization somehow!
 	o.PageSize = pagesizes.A4
 	o.Margins.Set(25) // basically one inch
-	o.Footer = "<stretch>#<stretch>"
+	o.Footer = CenteredPageNumber
 	o.Update()
 }
 

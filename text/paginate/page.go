@@ -20,38 +20,40 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 		s.Max.X.Dot(x)
 		s.Max.Y.Dot(y)
 	}
-	pn := fmt.Sprintf("page-%d", len(p.outs)+1)
+
+	curPage := len(p.outs) + 1
+	pn := fmt.Sprintf("page-%d", curPage)
+
 	page = core.NewFrame()
 	page.SetName(pn)
 	page.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
+		s.Direction = styles.Row
 		styMinMax(s, p.opts.sizeDots.X, p.opts.sizeDots.Y)
 	})
-	hdr := core.NewFrame(page)
-	hdr.SetName("header")
-	hdr.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		styMinMax(s, p.opts.sizeDots.X, p.opts.margDots.Top)
-	})
-	bodRow := core.NewFrame(page)
-	bodRow.SetName("body-row")
-	bodRow.Styler(func(s *styles.Style) {
-		s.Direction = styles.Row
-		styMinMax(s, p.opts.sizeDots.X, p.opts.bodyDots.Y)
-	})
-	ftr := core.NewFrame(page)
-	ftr.SetName("footer")
-	ftr.Styler(func(s *styles.Style) {
-		s.Direction = styles.Column
-		styMinMax(s, p.opts.sizeDots.X, p.opts.margDots.Bottom)
-	})
-	lmar := core.NewFrame(bodRow)
+	lmar := core.NewFrame(page)
 	lmar.SetName("left-margin")
 	lmar.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		styMinMax(s, p.opts.margDots.Left, p.opts.bodyDots.Y)
+		styMinMax(s, p.opts.margDots.Left, p.opts.sizeDots.Y)
 	})
-	body = core.NewFrame(bodRow)
+	bfr := core.NewFrame(page)
+	bfr.SetName("body-frame")
+	bfr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		styMinMax(s, p.opts.bodyDots.X, p.opts.sizeDots.Y)
+	})
+
+	hdr := core.NewFrame(bfr)
+	hdr.SetName("header")
+	hdr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		styMinMax(s, p.opts.bodyDots.X, p.opts.margDots.Top)
+	})
+	if p.opts.Header != nil {
+		p.opts.Header(hdr, p.opts, curPage)
+	}
+
+	body = core.NewFrame(bfr)
 	body.SetName("body")
 	body.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -59,5 +61,16 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 		s.Gap.X.Dot(gap.X)
 		s.Gap.Y.Dot(gap.Y)
 	})
+
+	ftr := core.NewFrame(bfr)
+	ftr.SetName("footer")
+	ftr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		styMinMax(s, p.opts.bodyDots.X, p.opts.margDots.Bottom)
+	})
+	if p.opts.Footer != nil {
+		p.opts.Footer(ftr, p.opts, curPage)
+	}
+
 	return
 }

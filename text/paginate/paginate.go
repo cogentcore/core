@@ -56,9 +56,11 @@ func (p *pager) preRender() {
 		})
 		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			if _, ok := cwb.This.(*core.Text); ok {
-				cwb.Styler(func(s *styles.Style) {
-					s.Font.Family = p.opts.FontFamily
-				})
+				if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
+					cwb.Styler(func(s *styles.Style) {
+						s.Font.Family = p.opts.FontFamily
+					})
+				}
 			}
 			return true
 		})
