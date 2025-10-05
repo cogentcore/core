@@ -22,6 +22,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -487,18 +488,18 @@ func (w *pdfWriter) NewPage(width, height float32) *pdfPage {
 		textCharSpace:  0.0,
 		textRenderMode: 0,
 	}
-	w.page.style.Defaults()
-	w.page.SetTopTransform()
+	w.page.stack.Push(newContext(styles.NewPaint(), math32.Identity2()))
+	w.page.setTopTransform()
 	return w.page
 }
 
-// SetTopTransform sets the current transformation matrix so that
+// setTopTransform sets the current transformation matrix so that
 // the top left corner is effectively at 0,0. This is set at the
 // start of each page, to align with standard rendering in cogent core.
-func (w *pdfPage) SetTopTransform() {
+func (w *pdfPage) setTopTransform() {
 	sc := w.pdf.globalScale
 	m := math32.Translate2D(0, w.height).Scale(sc, -sc)
-	fmt.Fprintf(w, " %s cm", mat2(m))
+	w.SetTransform(m)
 }
 
 type dec float32

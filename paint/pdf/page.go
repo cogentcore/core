@@ -14,6 +14,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -32,8 +33,7 @@ type pdfPage struct {
 	annots        pdfArray
 
 	graphicsStates map[float32]pdfName
-	// todo: make this a stack of render.Context elements, push and pop
-	style          styles.Paint
+	stack          stack.Stack[*context]
 	inTextObject   bool
 	textPosition   math32.Vector2
 	textCharSpace  float32
@@ -72,35 +72,6 @@ func (w *pdfPage) writePage(parent pdfRef) pdfRef {
 	return w.pdf.writeObject(page)
 }
 
-// SetTransform adds a cm to set the current matrix transform (CMT).
-func (w *pdfPage) SetTransform(m math32.Matrix2) {
-	fmt.Fprintf(w, " %s cm", mat2(m))
-}
-
-// PushStack adds a graphics stack push (q)
-func (w *pdfPage) PushStack() {
-	fmt.Fprintf(w, " q")
-}
-
-// PushTransform adds a graphics stack push (q) and then
-// cm to set the current matrix transform (CMT).
-func (w *pdfPage) PushTransform(m math32.Matrix2) {
-	rot := m.ExtractRot()
-	m2 := m
-	if rot != 0 {
-		m2 = m.Mul(math32.Rotate2D(-2 * rot))
-	}
-	fmt.Fprintf(w, " q %s cm", mat2(m2))
-}
-
-// PopStack adds a graphics stack pop (Q) which must
-// be paired with a corresponding Push (q). Resets the
-func (w *pdfPage) PopStack() {
-	w.style.Fill.Color = nil   // reset
-	w.style.Stroke.Color = nil // reset
-	fmt.Fprintf(w, " Q")
-}
-
 // AddAnnotation adds an annotation.
 func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
 	annot := pdfDict{
@@ -119,10 +90,11 @@ func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
 
 // SetFill sets the fill style values where different from current.
 func (w *pdfPage) SetFill(fill *styles.Fill) {
-	if w.style.Fill.Color != fill.Color || w.style.Fill.Opacity != fill.Opacity {
+	csty := w.style()
+	if csty.Fill.Color != fill.Color || csty.Fill.Opacity != fill.Opacity {
 		w.SetFillColor(fill)
 	}
-	w.style.Fill = *fill
+	csty.Fill = *fill
 }
 
 // SetAlpha sets the transparency value.
@@ -153,26 +125,27 @@ func (w *pdfPage) SetFillColor(fill *styles.Fill) {
 
 // SetStroke sets the stroke style values where different from current.
 func (w *pdfPage) SetStroke(stroke *styles.Stroke) {
-	if w.style.Stroke.Color != stroke.Color || w.style.Stroke.Opacity != stroke.Opacity {
+	csty := w.style()
+	if csty.Stroke.Color != stroke.Color || csty.Stroke.Opacity != stroke.Opacity {
 		w.SetStrokeColor(stroke)
 	}
-	if w.style.Stroke.Width.Dots != stroke.Width.Dots {
+	if csty.Stroke.Width.Dots != stroke.Width.Dots {
 		w.SetStrokeWidth(stroke.Width.Dots)
 	}
-	if w.style.Stroke.Cap != stroke.Cap {
+	if csty.Stroke.Cap != stroke.Cap {
 		w.SetStrokeCap(stroke.Cap)
 	}
-	if w.style.Stroke.Join != stroke.Join || (w.style.Stroke.Join == ppath.JoinMiter && w.style.Stroke.MiterLimit != stroke.MiterLimit) {
+	if csty.Stroke.Join != stroke.Join || (csty.Stroke.Join == ppath.JoinMiter && csty.Stroke.MiterLimit != stroke.MiterLimit) {
 		w.SetStrokeJoin(stroke.Join, stroke.MiterLimit)
 	}
 	if len(stroke.Dashes) > 0 { // always do
 		w.SetDashes(stroke.DashOffset, stroke.Dashes)
 	} else {
-		if len(w.style.Stroke.Dashes) > 0 {
+		if len(csty.Stroke.Dashes) > 0 {
 			w.SetDashes(0, nil)
 		}
 	}
-	w.style.Stroke = *stroke
+	csty.Stroke = *stroke
 }
 
 // SetStrokeColor sets the stroking color (image).

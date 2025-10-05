@@ -129,6 +129,7 @@ func (r *PDF) AddLayer(name string, visible bool) (layerID int) {
 // matrix, if not identity.
 func (r *PDF) BeginLayer(id int, m math32.Matrix2) {
 	r.w.pdf.BeginLayer(id)
+	r.w.PushStack()
 	if !m.IsIdentity() {
 		r.w.SetTransform(m)
 	}
@@ -137,6 +138,7 @@ func (r *PDF) BeginLayer(id int, m math32.Matrix2) {
 // EndLayer is called to stop adding content to the currently active layer. See
 // BeginLayer for more details.
 func (r *PDF) EndLayer() {
+	r.w.PopStack()
 	r.w.pdf.EndLayer()
 }
 
