@@ -27,6 +27,8 @@ import (
 )
 
 func RunTest(t *testing.T, width, height int, dir, fname string) {
+	// cset := pdf.UseStandardFonts()
+
 	size := math32.Vec2(float32(width), float32(height))
 	sv := NewSVG(size)
 	svfn := filepath.Join("testdata", dir, fname)
@@ -41,17 +43,16 @@ func RunTest(t *testing.T, width, height int, dir, fname string) {
 	// fmt.Println(svfn, imfn)
 	imagex.Assert(t, img, imfn)
 
-	// todo: sizing and offset is not right -- need to install that somehow.
 	pddir := filepath.Join("testdata", dir, "pdf")
 	pdfn := filepath.Join(pddir, bnm+".pdf")
 	ctx := units.NewContext()
 	pd := paint.NewPDFRenderer(size, ctx)
-	// pd.SetSize(units.UnitPx, size) // should be correct
-	// pd.SetSize(units.UnitMm, size) // to see everything
 	pd.Render(rend)
 	os.MkdirAll(pddir, 0777)
 	err = os.WriteFile(pdfn, pd.Source(), 0666)
 	assert.NoError(t, err)
+
+	// pdf.RestorePreviousFonts(cset)
 }
 
 func TestSVG(t *testing.T) {
