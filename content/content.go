@@ -105,6 +105,11 @@ type Content struct {
 	// if any (in kebab-case).
 	currentHeading string
 
+	// noTitleAuthors is used to turn off the addition of title and authors
+	// in prep for PDF rendering, which includes those elements in a more
+	// print-conventional manner typically.
+	noTitleAuthors bool
+
 	// The previous and next page, if applicable. They must be stored on this struct
 	// to avoid stale local closure variables.
 	prevPage, nextPage *bcontent.Page
@@ -226,7 +231,7 @@ func (ct *Content) Init() {
 				}
 			})
 			w.Maker(func(p *tree.Plan) {
-				if ct.currentPage.Title != "" {
+				if !ct.noTitleAuthors && ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextDisplaySmall)
 						w.Updater(func() {
@@ -234,7 +239,7 @@ func (ct *Content) Init() {
 						})
 					})
 				}
-				if len(ct.currentPage.Authors) > 0 {
+				if !ct.noTitleAuthors && len(ct.currentPage.Authors) > 0 {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextTitleLarge)
 						w.Updater(func() {
@@ -544,6 +549,10 @@ func (ct *Content) PagePDF(path string) error {
 	if ct.currentPage == nil {
 		return errors.Log(errors.New("Page empty"))
 	}
+	ct.noTitleAuthors = true
+	ct.Update()
+	ct.noTitleAuthors = false
+
 	fname := ct.currentPage.Name + ".pdf"
 	if path != "" {
 		fname = filepath.Join(path, fname)
@@ -552,7 +561,7 @@ func (ct *Content) PagePDF(path string) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	opts := Settings.PageSettings(ct.currentPage)
+	opts := Settings.PageSettings(ct, ct.currentPage)
 	paginate.PDF(f, opts.PDF, ct.rightFrame)
 	err = f.Close()
 	ct.reloadPage()

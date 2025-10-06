@@ -20,6 +20,8 @@ var firstContent *Content
 
 var documentData = js.Global().Get("document").Get("documentElement").Get("dataset")
 
+func (ct *Content) getPrintURL() string { return ct.getWebURL() }
+
 // getWebURL returns the current relative web URL that should be passed to [Content.Open]
 // on startup and in [Content.handleWebPopState].
 func (ct *Content) getWebURL() string {

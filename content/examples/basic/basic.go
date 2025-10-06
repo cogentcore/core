@@ -18,6 +18,7 @@ var econtent embed.FS
 
 func main() {
 	content.Settings.SiteTitle = "Cogent Content Example"
+	content.OfflineURL = "https://example.com"
 	b := core.NewBody("Cogent Content Example")
 	ct := content.NewContent(b).SetContent(econtent)
 	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
