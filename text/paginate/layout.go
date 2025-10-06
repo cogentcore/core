@@ -17,7 +17,7 @@ func (p *pager) pagify(its []*item) [][]*item {
 		return widg(it.w).Geom.Size.Actual.Total.Y + it.gap.Y
 	}
 
-	maxY := p.opts.bodyDots.Y
+	maxY := p.opts.BodyDots.Y
 
 	var pgs [][]*item
 	var cpg []*item

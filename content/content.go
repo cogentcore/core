@@ -38,7 +38,6 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/paginate"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -553,12 +552,10 @@ func (ct *Content) PagePDF(path string) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	opts := paginate.NewOptions()
-	opts.FontFamily = rich.Serif
-	opts.Header = paginate.HeaderLeftPageNumber(ct.currentPage.Name)
-	opts.Footer = nil
-	paginate.PDF(f, opts, ct.rightFrame)
+	opts := Settings.PageSettings(ct.currentPage)
+	paginate.PDF(f, opts.PDF, ct.rightFrame)
 	err = f.Close()
 	ct.reloadPage()
+	core.MessageSnackbar(ct, "PDF saved to: "+fname)
 	return err
 }

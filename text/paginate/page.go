@@ -28,26 +28,26 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 	page.SetName(pn)
 	page.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
-		styMinMax(s, p.opts.sizeDots.X, p.opts.sizeDots.Y)
+		styMinMax(s, p.opts.SizeDots.X, p.opts.SizeDots.Y)
 	})
 	lmar := core.NewFrame(page)
 	lmar.SetName("left-margin")
 	lmar.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		styMinMax(s, p.opts.margDots.Left, p.opts.sizeDots.Y)
+		styMinMax(s, p.opts.MargDots.Left, p.opts.SizeDots.Y)
 	})
 	bfr := core.NewFrame(page)
 	bfr.SetName("body-frame")
 	bfr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		styMinMax(s, p.opts.bodyDots.X, p.opts.sizeDots.Y)
+		styMinMax(s, p.opts.BodyDots.X, p.opts.SizeDots.Y)
 	})
 
 	hdr := core.NewFrame(bfr)
 	hdr.SetName("header")
 	hdr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		styMinMax(s, p.opts.bodyDots.X, p.opts.margDots.Top)
+		styMinMax(s, p.opts.BodyDots.X, p.opts.MargDots.Top)
 	})
 	if p.opts.Header != nil {
 		p.opts.Header(hdr, p.opts, curPage)
@@ -57,7 +57,7 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 	body.SetName("body")
 	body.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		styMinMax(s, p.opts.bodyDots.X, p.opts.bodyDots.Y)
+		styMinMax(s, p.opts.BodyDots.X, p.opts.BodyDots.Y)
 		s.Gap.X.Dot(gap.X)
 		s.Gap.Y.Dot(gap.Y)
 	})
@@ -66,7 +66,7 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 	ftr.SetName("footer")
 	ftr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		styMinMax(s, p.opts.bodyDots.X, p.opts.margDots.Bottom)
+		styMinMax(s, p.opts.BodyDots.X, p.opts.MargDots.Bottom)
 	})
 	if p.opts.Footer != nil {
 		p.opts.Footer(ftr, p.opts, curPage)

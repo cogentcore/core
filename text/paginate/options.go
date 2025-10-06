@@ -53,9 +53,15 @@ type Options struct {
 	// See examples in runners.go
 	Footer func(frame *core.Frame, opts *Options, pageNo int)
 
-	sizeDots math32.Vector2 // total size in dots
-	bodyDots math32.Vector2 // body (content) size in dots
-	margDots sides.Floats   // margin sizes in dots
+	// SizeDots is the total size in dots. Set automatically, but needs to be readable
+	// so is exported.
+	SizeDots math32.Vector2 `edit:"-"`
+
+	// BodyDots (content) size in dots.
+	BodyDots math32.Vector2 `edit:"-"`
+
+	// MargDots is the margin sizes in dots.
+	MargDots sides.Floats `edit:"-"`
 }
 
 func NewOptions() Options {
@@ -80,8 +86,8 @@ func (o *Options) Update() {
 
 func (o *Options) ToDots(un *units.Context) {
 	sc := un.ToDots(1, o.Units)
-	o.sizeDots = o.Size.MulScalar(sc)
-	o.margDots = o.Margins.MulScalar(sc)
-	o.bodyDots.X = o.sizeDots.X - (o.margDots.Left + o.margDots.Right)
-	o.bodyDots.Y = o.sizeDots.Y - (o.margDots.Top + o.margDots.Bottom)
+	o.SizeDots = o.Size.MulScalar(sc)
+	o.MargDots = o.Margins.MulScalar(sc)
+	o.BodyDots.X = o.SizeDots.X - (o.MargDots.Left + o.MargDots.Right)
+	o.BodyDots.Y = o.SizeDots.Y - (o.MargDots.Top + o.MargDots.Bottom)
 }

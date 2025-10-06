@@ -33,11 +33,11 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 
 	sc := core.NewScene()
 	sz := math32.Geom2DInt{}
-	sz.Size = opts.sizeDots.ToPointCeil()
+	sz.Size = opts.SizeDots.ToPointCeil()
 	sc.Resize(sz)
 	sc.MakeTextShaper()
 
-	pdr := paint.NewPDFRenderer(opts.sizeDots, &p.ctx).(*pdfrender.Renderer)
+	pdr := paint.NewPDFRenderer(opts.SizeDots, &p.ctx).(*pdfrender.Renderer)
 	pdr.StartRender(w)
 	np := len(p.outs)
 	for i, p := range p.outs {

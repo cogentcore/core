@@ -45,12 +45,22 @@ func (p *pager) optsUpdate() {
 // preRender re-renders inputs with styles enforced to fit page size,
 // and setting the font family and size for text elements.
 func (p *pager) preRender() {
+	if p.opts.Title != nil {
+		tf := core.NewFrame()
+		tf.Scene = core.AsWidget(p.ins[0]).Scene
+		tf.FinalStyler(func(s *styles.Style) {
+			s.Min.X.Dot(p.opts.BodyDots.X)
+			s.Min.Y.Dot(p.opts.BodyDots.Y)
+		})
+		p.opts.Title(tf, p.opts)
+		p.ins = append([]core.Widget{tf.This.(core.Widget)}, p.ins...)
+	}
 	for _, in := range p.ins {
 		iw := core.AsWidget(in)
 
 		iw.FinalStyler(func(s *styles.Style) {
-			s.Min.X.Dot(p.opts.bodyDots.X)
-			s.Min.Y.Dot(p.opts.bodyDots.Y)
+			s.Min.X.Dot(p.opts.BodyDots.X)
+			s.Min.Y.Dot(p.opts.BodyDots.Y)
 		})
 		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			if _, ok := cwb.This.(*core.Text); ok {

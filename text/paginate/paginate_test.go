@@ -31,8 +31,9 @@ func RunTest(t *testing.T, nm string, f func() *core.Body) {
 	opts := NewOptions()
 	opts.FontFamily = rich.Serif
 	opts.Header = HeaderLeftPageNumber("This is a test header")
+	opts.Title = CenteredTitle("This is a Profound Statement of Something Important", "Bea A. Author", "University of Twente<br>Department of Physiology", "The thing about this paper is that it is dealing with an issue that should be given more attention, but perhaps it really is hard to understand and that makes it difficult to get the attention it deserves. In any case, we are very proud.")
 	buff := bytes.Buffer{}
-	PDF(&buff, opts, b)
+	PDF(&buff, opts, &b.Frame)
 	os.Mkdir("testdata", 0777)
 	os.WriteFile(filepath.Join("testdata", nm)+".pdf", buff.Bytes(), 0666)
 }
