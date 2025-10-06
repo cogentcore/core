@@ -46,7 +46,7 @@ func RunTest(t *testing.T, width, height int, dir, fname string) {
 	pdfn := filepath.Join(pddir, bnm+".pdf")
 	ctx := units.NewContext()
 	pd := paint.NewPDFRenderer(size, ctx)
-	pd.SetSize(units.UnitPx, size) // should be correct
+	// pd.SetSize(units.UnitPx, size) // should be correct
 	// pd.SetSize(units.UnitMm, size) // to see everything
 	pd.Render(rend)
 	os.MkdirAll(pddir, 0777)

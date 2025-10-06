@@ -35,7 +35,7 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 // The text will be drawn starting at the start pixel position, which specifies the
 // left baseline location of the first text item..
 func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32.Vector2) {
-	m := ctx.Transform
+	m := ctx.Cumulative
 	identity := m == math32.Identity2()
 	off := pos.Add(lns.Offset)
 	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
@@ -120,7 +120,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
 	if run.Math.Path != nil {
 		rs.Path.Clear()
-		PathToRasterx(&rs.Path, *run.Math.Path, ctx.Transform, off)
+		PathToRasterx(&rs.Path, *run.Math.Path, ctx.Cumulative, off)
 		rf := &rs.Raster.Filler
 		rf.SetWinding(true)
 		rf.SetColor(fill)
@@ -204,7 +204,7 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	}
 
 	rs.Path.Clear()
-	m := ctx.Transform
+	m := ctx.Cumulative
 	for _, s := range outline.Segments {
 		p0 := m.MulVector2AsPoint(math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y))
 		switch s.Op {
@@ -265,7 +265,7 @@ func (rs *Renderer) StrokeBounds(ctx *render.Context, bb math32.Box2, clr color.
 		ButtCap, nil, nil, Miter,
 		nil, 0)
 	rs.Raster.SetColor(colors.Uniform(clr))
-	m := ctx.Transform
+	m := ctx.Cumulative
 	rs.Raster.Start(m.MulVector2AsPoint(math32.Vec2(bb.Min.X, bb.Min.Y)).ToFixed())
 	rs.Raster.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Min.Y)).ToFixed())
 	rs.Raster.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Max.Y)).ToFixed())
@@ -277,7 +277,7 @@ func (rs *Renderer) StrokeBounds(ctx *render.Context, bb math32.Box2, clr color.
 
 // StrokeTextLine strokes a line for text decoration.
 func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
-	m := ctx.Transform
+	m := ctx.Cumulative
 	sp = m.MulVector2AsPoint(sp)
 	ep = m.MulVector2AsPoint(ep)
 	width *= MeanScale(m)
@@ -298,7 +298,7 @@ func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, w
 func (rs *Renderer) FillBounds(ctx *render.Context, bb math32.Box2, clr image.Image) {
 	rf := &rs.Raster.Filler
 	rf.SetColor(clr)
-	m := ctx.Transform
+	m := ctx.Cumulative
 	rf.Start(m.MulVector2AsPoint(math32.Vec2(bb.Min.X, bb.Min.Y)).ToFixed())
 	rf.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Min.Y)).ToFixed())
 	rf.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Max.Y)).ToFixed())

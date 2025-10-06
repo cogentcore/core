@@ -58,7 +58,7 @@ func NewPainter(size math32.Vector2) *Painter {
 }
 
 func (pc *Painter) Transform() math32.Matrix2 {
-	return pc.Context().Transform.Mul(pc.Paint.Transform)
+	return pc.Context().Cumulative.Mul(pc.Paint.Transform)
 }
 
 //////// Path basics

@@ -25,7 +25,7 @@ func (p *ContextPush) IsRenderItem() {
 }
 
 func (p *ContextPush) String() string {
-	return "ctx-push: " + p.Context.Transform.String()
+	return "ctx-push: " + p.Context.Cumulative.String()
 }
 
 // ContextPop is a [Context] pop render item, which can be used by renderers
