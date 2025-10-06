@@ -100,6 +100,7 @@ func (r *PDF) textRunRegions(m math32.Matrix2, run *shapedgt.Run, ln *shaped.Lin
 func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
 	// dir := run.Direction
 	region := run.Runes()
+	offTrans := math32.Translate2D(off.X, off.Y)
 	rbb := run.MaxBounds.Translate(off)
 	fill := clr
 	if run.FillColor != nil {
@@ -108,7 +109,9 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	fsz := math32.FromFixed(run.Size)
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
 	if run.Math.Path != nil {
-		r.Path(*run.Math.Path, style, math32.Translate2D(off.X, off.Y))
+		r.w.PushTransform(offTrans)
+		r.Path(*run.Math.Path, style, math32.Identity2())
+		r.w.PopStack()
 		return
 	}
 
@@ -132,7 +135,7 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 		}
 	}
 
-	r.w.StartTextObject(math32.Translate2D(off.X, off.Y))
+	r.w.StartTextObject(offTrans)
 	r.setTextStyle(&run.Font, style, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
 	raw := string(runes[region.Start:region.End])
 	r.w.WriteText(raw)
