@@ -68,7 +68,7 @@ func (p *pager) extract() []*item {
 			continue
 		}
 		gap := cpw.Styles.Gap.Dots().Floor()
-		// todo: left margin
+		left := cpw.Styles.Padding.Left.Dots
 		if cp.i == 0 {
 			gap.Y = 0
 		}
@@ -81,7 +81,7 @@ func (p *pager) extract() []*item {
 				}
 			}
 		}
-		its = append(its, &item{w: cw.This.(core.Widget), gap: gap})
+		its = append(its, &item{w: cw.This.(core.Widget), gap: gap, left: left})
 		next()
 		if atEnd {
 			break

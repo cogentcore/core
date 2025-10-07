@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
@@ -64,21 +65,47 @@ func (p *pager) pagify(its []*item) [][]*item {
 	return pgs
 }
 
-// layout reorders items within the pages and generates final output.
-func (p *pager) layout(its []*item) {
-	pgs := p.pagify(its)
+func (p *pager) outputPages(pgs [][]*item) {
 	for _, pg := range pgs {
-		// todo: rearrange elements to put text at bottom and non-text at top
-
-		gap := math32.Vector2{}
+		lastGap := math32.Vector2{}
+		lastLeft := float32(0)
 		if len(pg) > 0 {
-			gap = pg[0].gap // todo: better
+			lastGap = pg[0].gap
 		}
-		// now transfer over to frame
-		page, body := p.newPage(gap)
+		page, body := p.newPage(lastGap)
+		cpar := body
 		for _, it := range pg {
-			tree.MoveToParent(it.w, body)
+			gap := it.gap
+			left := it.left
+			if gap != lastGap || left != lastLeft {
+				cpar = p.newOutFrame(body, gap, left)
+				lastGap = gap
+				lastLeft = left
+			}
+			tree.MoveToParent(it.w, cpar)
 		}
 		p.outs = append(p.outs, page)
 	}
+}
+
+func (p *pager) newOutFrame(par *core.Frame, gap math32.Vector2, left float32) *core.Frame {
+	fr := core.NewFrame(par)
+	fr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.ZeroSpace()
+		s.Min.X.Dot(p.opts.BodyDots.X)
+		s.Max.X.Dot(p.opts.BodyDots.X)
+		s.Gap.X.Dot(gap.X)
+		s.Gap.Y.Dot(gap.Y)
+		s.Padding.Left.Dot(core.ConstantSpacing(left))
+	})
+	return fr
+}
+
+// layout reorders items within the pages and generates final output.
+func (p *pager) layout(its []*item) {
+	pgs := p.pagify(its)
+	// note: could rearrange elements to put text at bottom and non-text at top?
+	// but this is probably not necessary?
+	p.outputPages(pgs)
 }

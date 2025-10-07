@@ -77,7 +77,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *core.Button) {
 		w.SetText("PDF").SetIcon(icons.PictureAsPdf)
 		w.OnClick(func(e events.Event) {
-			ct.PagePDF("")
+			ct.PagePDF("pdfs")
 		})
 	})
 }

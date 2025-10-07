@@ -489,6 +489,7 @@ func (ct *Content) PagePDF(path string) error {
 
 	fname := ct.currentPage.Name + ".pdf"
 	if path != "" {
+		os.MkdirAll(path, 0777)
 		fname = filepath.Join(path, fname)
 	}
 	f, err := os.Create(fname)

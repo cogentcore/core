@@ -12,14 +12,15 @@ import (
 	"cogentcore.org/core/styles"
 )
 
+func styMinMax(s *styles.Style, x, y float32) {
+	s.ZeroSpace()
+	s.Min.X.Dot(x)
+	s.Min.Y.Dot(y)
+	s.Max.X.Dot(x)
+	s.Max.Y.Dot(y)
+}
+
 func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
-	styMinMax := func(s *styles.Style, x, y float32) {
-		s.ZeroSpace()
-		s.Min.X.Dot(x)
-		s.Min.Y.Dot(y)
-		s.Max.X.Dot(x)
-		s.Max.Y.Dot(y)
-	}
 
 	curPage := len(p.outs) + 1
 	pn := fmt.Sprintf("page-%d", curPage)

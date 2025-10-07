@@ -99,3 +99,24 @@ Action and menu buttons are the most minimal buttons, and they are typically onl
 ```Go
 core.NewButton(b).SetType(core.ButtonAction).SetText("Action")
 ```
+
+* List item 1
+    * Sub list item 1
+    * Sub list item 2
+* List item 2
+    * Sub list item 1
+    * Sub list item 2
+* List item 3
+    * Sub list item 1
+    * Sub list item 2
+
+1. List item 1
+    1. Sub list item 1
+    2. Sub list item 2
+2. List item 2
+    1. Sub list item 1
+    2. Sub list item 2
+3. List item 3
+    1. Sub list item 1
+    2. Sub list item 2
+

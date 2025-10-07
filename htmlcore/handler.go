@@ -101,7 +101,7 @@ func handleElement(ctx *Context) {
 			if tag == "ol" {
 				w.SetProperty("listCount", 0)
 			}
-			w.Styler(func(s *styles.Style) {
+			w.FinalStyler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Padding.Left.Ch(core.ConstantSpacing(float32(4 * ld)))
 			})
