@@ -31,14 +31,14 @@ func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, ln
 	runes := lns.Source.Join()
 	for li := range lns.Lines {
 		ln := &lns.Lines[li]
-		r.textLine(style, m, ln, lns, runes, clr, off)
+		r.textLine(style, m, li, ln, lns, runes, clr, off)
 	}
 	r.links(lns, m, pos)
 	r.w.PopStack()
 }
 
 // TextLine rasterizes the given shaped.Line.
-func (r *PDF) textLine(style *styles.Paint, m math32.Matrix2, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
+func (r *PDF) textLine(style *styles.Paint, m math32.Matrix2, li int, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
 	start := off.Add(ln.Offset)
 	off = start
 	for ri := range ln.Runs {

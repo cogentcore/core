@@ -44,7 +44,20 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 		tree.MoveToParent(p, sc)
 		p.SetScene(sc)
 		sc.StyleTree()
-		sc.LayoutRenderScene()
+		sc.LayoutScene()
+
+		sc.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+			if tx, ok := cwb.This.(*core.Text); ok {
+				lns := tx.PaintText()
+				if len(lns.Lines) > 0 {
+					ln := &lns.Lines[0]
+					ln.Offset.Y += 3 // todo: seriously, this fixes an otherwise inexplicable offset
+				}
+			}
+			return true
+		})
+
+		sc.RenderWidget()
 
 		rend := sc.Painter.RenderDone()
 		pdr.RenderPage(rend)

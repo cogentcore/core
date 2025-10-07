@@ -119,6 +119,13 @@ const (
 
 func (tx *Text) WidgetValue() any { return &tx.Text }
 
+// PaintText returns the shaped representation of the text,
+// which is needed for some specific special-case rendering
+// situations.
+func (tx *Text) PaintText() *shaped.Lines {
+	return tx.paintText
+}
+
 func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.AddContextMenu(tx.contextMenu)

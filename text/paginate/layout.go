@@ -39,9 +39,11 @@ func (p *pager) pagify(its []*item) [][]*item {
 		over := ht+sz > maxY
 		if !over && nobrk {
 			if i < n-1 {
-				nsz := size(its[i+1])
+				nsz := size(its[i+1]) + 100 // extra space to be sure
 				if ht+sz+nsz > maxY {
 					over = true // break now
+					// } else {
+					// 	fmt.Println("not !over, nobrk:", ht, sz, nsz, maxY, ht+sz+nsz, cw, its[i+1])
 				}
 			}
 		}
