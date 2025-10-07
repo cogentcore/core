@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 )
 
 // Paginate organizes the given input widget content into frames
@@ -45,9 +46,11 @@ func (p *pager) optsUpdate() {
 // preRender re-renders inputs with styles enforced to fit page size,
 // and setting the font family and size for text elements.
 func (p *pager) preRender() {
+	sc := core.AsWidget(p.ins[0]).Scene
+	// sc.AsyncLock()
 	if p.opts.Title != nil {
 		tf := core.NewFrame()
-		tf.Scene = core.AsWidget(p.ins[0]).Scene
+		tf.Scene = sc
 		tf.FinalStyler(func(s *styles.Style) {
 			s.Min.X.Dot(p.opts.BodyDots.X)
 			s.Min.Y.Dot(p.opts.BodyDots.Y)
@@ -63,11 +66,13 @@ func (p *pager) preRender() {
 			s.Min.Y.Dot(p.opts.BodyDots.Y)
 		})
 		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-			if _, ok := cwb.This.(*core.Text); ok {
-				if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
-					cwb.Styler(func(s *styles.Style) {
-						s.Font.Family = p.opts.FontFamily
-					})
+			if tx, ok := cwb.This.(*core.Text); ok {
+				if tx.Styles.Font.Family == rich.SansSerif {
+					if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
+						cwb.Styler(func(s *styles.Style) {
+							s.Font.Family = p.opts.FontFamily
+						})
+					}
 				}
 			}
 			return true
@@ -76,6 +81,7 @@ func (p *pager) preRender() {
 		iw.Scene.StyleTree()
 		iw.Scene.LayoutRenderScene()
 	}
+	// sc.AsyncUnlock()
 }
 
 func (p *pager) paginate() {

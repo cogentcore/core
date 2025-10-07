@@ -29,23 +29,14 @@ func CenteredPageNumber(frame *core.Frame, opts *Options, pageNo int) {
 	core.NewText(fr).SetText(strconv.Itoa(pageNo))
 }
 
-// CenteredPageNumberNoFirst generates a page number cenetered in the frame
-// with a 1.5em space above it. Skips the first one.
-func CenteredPageNumberNoFirst(frame *core.Frame, opts *Options, pageNo int) {
-	if pageNo == 1 {
-		return
+// NoFirst excludes the first page for any runner
+func NoFirst(fun func(frame *core.Frame, opts *Options, pageNo int)) func(frame *core.Frame, opts *Options, pageNo int) {
+	return func(frame *core.Frame, opts *Options, pageNo int) {
+		if pageNo == 1 {
+			return
+		}
+		fun(frame, opts, pageNo)
 	}
-	core.NewSpace(frame).Styler(func(s *styles.Style) { // space before
-		s.Min.Y.Em(1.5)
-		s.Grow.Set(1, 0)
-	})
-	fr := core.NewFrame(frame)
-	fr.Styler(func(s *styles.Style) {
-		s.Direction = styles.Row
-		s.Grow.Set(1, 0)
-		s.Justify.Content = styles.Center
-	})
-	core.NewText(fr).SetText(strconv.Itoa(pageNo))
 }
 
 // HeaderLeftPageNumber adds a running header with page number on the right.
@@ -77,7 +68,7 @@ func HeaderLeftPageNumber(header string) func(frame *core.Frame, opts *Options, 
 }
 
 // CenteredTitle inserts centered text elements for each element if non-empty.
-func CenteredTitle(title, authors, affiliations, abstract string) func(frame *core.Frame, opts *Options) {
+func CenteredTitle(title, authors, affiliations, url, date, abstract string) func(frame *core.Frame, opts *Options) {
 	return func(frame *core.Frame, opts *Options) {
 		fr := core.NewFrame(frame)
 		fr.Styler(func(s *styles.Style) {
@@ -97,7 +88,6 @@ func CenteredTitle(title, authors, affiliations, abstract string) func(frame *co
 			s.Font.Size.Pt(16)
 			s.Text.Align = text.Center
 		})
-		core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
 
 		if authors != "" {
 			core.NewText(fr).SetText(authors).Styler(func(s *styles.Style) {
@@ -105,31 +95,47 @@ func CenteredTitle(title, authors, affiliations, abstract string) func(frame *co
 				s.Font.Size.Pt(11)
 				s.Text.Align = text.Center
 			})
-			core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
 		}
 
 		if affiliations != "" {
 			core.NewText(fr).SetText(affiliations).Styler(func(s *styles.Style) {
 				s.Font.Family = opts.FontFamily
-				s.Font.Slant = rich.Italic
+				s.Font.Size.Pt(10)
+				s.Text.Align = text.Center
+				s.Text.LineHeight = 1.1
+			})
+		}
+		core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
+
+		if date != "" {
+			core.NewText(fr).SetText(date).Styler(func(s *styles.Style) {
+				s.Font.Family = opts.FontFamily
 				s.Font.Size.Pt(10)
 				s.Text.Align = text.Center
 			})
-			core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
+		}
+
+		if url != "" {
+			core.NewText(fr).SetText(url).Styler(func(s *styles.Style) {
+				s.Font.Family = opts.FontFamily
+				s.Font.Size.Pt(10)
+				s.Text.Align = text.Center
+			})
 		}
 
 		if abstract != "" {
 			core.NewText(fr).SetText("Abstract:").Styler(func(s *styles.Style) {
 				s.Font.Family = opts.FontFamily
 				s.Font.Size.Pt(11)
+				s.Font.Weight = rich.Bold
+				s.Align.Self = styles.Start
 			})
-			core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(.5) })
 			core.NewText(fr).SetText(abstract).Styler(func(s *styles.Style) {
 				s.Font.Family = opts.FontFamily
 				s.Font.Size.Pt(10)
 				s.Align.Self = styles.Start
 			})
-			core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
 		}
+		core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
 	}
 }

@@ -243,7 +243,7 @@ func (ct *Content) Init() {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextTitleLarge)
 						w.Updater(func() {
-							w.SetText("By " + strcase.FormatList(ct.currentPage.Authors...))
+							w.SetText("By " + ct.currentPage.Authors)
 						})
 					})
 				}

@@ -5,7 +5,7 @@
 package content
 
 import (
-	"strings"
+	"time"
 
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/text/paginate"
@@ -46,14 +46,17 @@ func (s *SettingsData) Defaults() {
 		if ps.SiteTitle != "" {
 			pt = ps.SiteTitle + ": " + pt
 		}
-		ps.PDF.Header = paginate.HeaderLeftPageNumber(pt)
-		au := ""
-		if len(curPage.Authors) > 0 {
-			au = strings.Join(curPage.Authors, ", ")
-		}
+		ps.PDF.Header = paginate.NoFirst(paginate.HeaderLeftPageNumber(pt))
 		// todo: add affiliations and abstract
-		af := ct.getPrintURL() + "/" + curPage.URL
-		ps.PDF.Title = paginate.CenteredTitle(pt, au, af, "")
+		ur := ct.getPrintURL() + "/" + curPage.URL
+		ura := `<a href="` + ur + `">` + ur + `</a>`
+		dt := ""
+		if !curPage.Date.IsZero() {
+			dt = curPage.Date.Format("January 2, 2006")
+		} else {
+			dt = time.Now().Format("January 2, 2006")
+		}
+		ps.PDF.Title = paginate.CenteredTitle(pt, curPage.Authors, curPage.Affiliations, ura, dt, curPage.Abstract)
 		return ps
 	}
 }

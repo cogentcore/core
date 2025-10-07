@@ -52,8 +52,16 @@ type Page struct {
 	// DateString is only used for parsing the date from the TOML front matter.
 	DateString string `toml:"Date" json:"-"`
 
-	// Authors are the optional authors of the page.
-	Authors []string
+	// Authors are the optional author(s) of the page.
+	Authors string
+
+	// Affiliations are optional institutional affiliations of the authors.
+	// This is only used for the PDF output.
+	Affiliations string
+
+	// Abstract is an optional abstract.
+	// This is only used for the PDF output.
+	Abstract string
 
 	// Draft indicates that the page is a draft and should not be visible on the web.
 	Draft bool

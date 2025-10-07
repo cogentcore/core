@@ -325,6 +325,9 @@ func (wb *WidgetBase) StartRender() bool {
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
+	if wb.Scene == nil {
+		return false
+	}
 	pc := &wb.Scene.Painter
 	if pc.State == nil {
 		return false

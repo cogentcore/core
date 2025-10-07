@@ -1,6 +1,8 @@
 +++
 Categories = ["Widgets"]
-Authors = ["Bea A. Author", "Test Ing Name"]
+Authors = "Bea A. Author<sup>1</sup> and Test Ing Name<sup>2</sup>"
+Affiliations = "<sup>1</sup>University of Somwhere <sup>2</sup>University of Elsewhere"
+Abstract = "The button is an essential element of any GUI framework, with the capability of triggering actions of any sort. Actions are very important because they allow people to actually do something."
 +++
 
 A **button** is a [[widget]] that a user can click on to trigger a described action. See [[func button]] for a button [[value binding|bound]] to a function. There are various [[#types]] of buttons.

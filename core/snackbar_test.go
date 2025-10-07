@@ -71,10 +71,10 @@ func TestSnackbarError(t *testing.T) {
 
 func TestSnackbarTime(t *testing.T) {
 	t.Skip("TODO(#1456): fix this test")
-	ptimeout := SystemSettings.SnackbarTimeout
-	SystemSettings.SnackbarTimeout = 50 * time.Millisecond
+	ptimeout := TimingSettings.SnackbarTimeout
+	TimingSettings.SnackbarTimeout = 50 * time.Millisecond
 	defer func() {
-		SystemSettings.SnackbarTimeout = ptimeout
+		TimingSettings.SnackbarTimeout = ptimeout
 	}()
 	times := []time.Duration{0, 25 * time.Millisecond, 75 * time.Millisecond}
 	for _, tm := range times {
