@@ -48,6 +48,9 @@ func (p *pager) pagify(its []*item) [][]*item {
 		ht += sz
 		cpg = append(cpg, ci)
 	}
+	if len(cpg) > 0 {
+		pgs = append(pgs, cpg)
+	}
 	return pgs
 }
 

@@ -111,7 +111,10 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
 	if run.Math.Path != nil {
 		r.w.PushTransform(offTrans)
-		r.Path(*run.Math.Path, style, math32.Identity2())
+		psty := *style
+		psty.Stroke.Color = run.StrokeColor
+		psty.Fill.Color = fill
+		r.Path(*run.Math.Path, &psty, math32.Identity2())
 		r.w.PopStack()
 		return
 	}
@@ -151,6 +154,18 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	}
 }
 
+func (r *PDF) setTextStrokeColor(clr image.Image) {
+	sc := r.w.style().Stroke
+	sc.Color = clr
+	r.w.SetStroke(&sc)
+}
+
+func (r *PDF) setTextFillColor(clr image.Image) {
+	fc := r.w.style().Fill
+	fc.Color = clr
+	r.w.SetFill(&fc)
+}
+
 // setTextStyle applies the given styles.
 func (r *PDF) setTextStyle(fnt *text.Font, style *styles.Paint, fill, stroke image.Image, size, lineHeight float32) {
 	tsty := &style.Text
@@ -158,17 +173,10 @@ func (r *PDF) setTextStyle(fnt *text.Font, style *styles.Paint, fill, stroke ima
 	r.w.SetFont(sty, tsty)
 	mode := 0
 	if stroke != nil {
-		sc := styles.Stroke{}
-		sc.Defaults()
-		sc.Color = stroke
-		r.w.SetStroke(&sc)
+		r.setTextStrokeColor(stroke)
 	}
 	if fill != nil {
-		fc := styles.Fill{}
-		fc.Defaults()
-		fc.Color = fill
-		fc.Opacity = 1
-		r.w.SetFill(&fc)
+		r.setTextFillColor(fill)
 		if stroke != nil {
 			mode = 2
 		}

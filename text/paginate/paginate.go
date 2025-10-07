@@ -9,6 +9,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
+	_ "cogentcore.org/core/text/tex"
 )
 
 // Paginate organizes the given input widget content into frames

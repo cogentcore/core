@@ -69,7 +69,7 @@ func newPDFWriter(writer io.Writer, un *units.Context) *pdfWriter {
 		// fontsH:   map[*text.Font]pdfRef{},
 		// fontsV:   map[*text.Font]pdfRef{},
 		images:   map[image.Image]pdfRef{},
-		compress: true,
+		compress: false,
 		subset:   true,
 	}
 	w.layerInit()

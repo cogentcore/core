@@ -19,8 +19,10 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	_ "cogentcore.org/core/text/shaped/shapers"
+	_ "cogentcore.org/core/text/tex"
 	"github.com/alecthomas/assert/v2"
 )
 
@@ -68,6 +70,45 @@ func TestText(t *testing.T) {
 		// m := math32.Identity2()
 		m := math32.Rotate2D(math32.DegToRad(15))
 
+		pd.Text(sty, m, math32.Vec2(20, 20), lns)
+		RestorePreviousFonts(prv)
+	})
+}
+
+func TestMathInline(t *testing.T) {
+	RunTest(t, "math-inline", 300, 300, func(pd *PDF, sty *styles.Paint) {
+		prv := UseStandardFonts()
+		sh := shaped.NewShaper()
+
+		src := `y = \frac{1}{N} \left( \sum_{i=0}^{100} \frac{f(x^2)}{\sum x^2} \right)`
+		rsty := &sty.Font
+		tsty := &sty.Text
+
+		tx := rich.NewText(rsty, []rune("math: "))
+		tx.AddMathInline(rsty, src)
+		tx.AddSpan(rsty, []rune(" and we should check line wrapping too"))
+		lns := sh.WrapLines(tx, rsty, tsty, math32.Vec2(250, 250))
+
+		m := math32.Identity2()
+		pd.Text(sty, m, math32.Vec2(20, 20), lns)
+		RestorePreviousFonts(prv)
+	})
+}
+
+func TestMathDisplay(t *testing.T) {
+	RunTest(t, "math-display", 300, 300, func(pd *PDF, sty *styles.Paint) {
+		prv := UseStandardFonts()
+		sh := shaped.NewShaper()
+
+		src := `y = \frac{1}{N} \left( \sum_{i=0}^{100} \frac{f(x^2)}{\sum x^2} \right)`
+		rsty := &sty.Font
+		tsty := &sty.Text
+
+		var tx rich.Text
+		tx.AddMathDisplay(rsty, src)
+		lns := sh.WrapLines(tx, rsty, tsty, math32.Vec2(250, 250))
+
+		m := math32.Identity2()
 		pd.Text(sty, m, math32.Vec2(20, 20), lns)
 		RestorePreviousFonts(prv)
 	})

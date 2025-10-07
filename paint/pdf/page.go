@@ -74,7 +74,8 @@ func (w *pdfPage) writePage(parent pdfRef) pdfRef {
 
 // AddAnnotation adds an annotation. The rect is in "default user space"
 // coordinates = standard page coordinates, without the current CTM transform.
-// This function will handle the flipping of coordinates to top-left system.
+// This function will handle the base page transform for scaling and
+// flipping of coordinates to top-left system.
 func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
 	ms := math32.Scale2D(w.pdf.globalScale, w.pdf.globalScale)
 	rect = rect.MulMatrix2(ms)

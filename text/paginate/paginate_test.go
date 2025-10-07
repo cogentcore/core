@@ -33,7 +33,9 @@ func RunTest(t *testing.T, nm string, f func() *core.Body) {
 	opts.Header = NoFirst(HeaderLeftPageNumber("This is a test header"))
 	opts.Title = CenteredTitle("This is a Profound Statement of Something Important", "Bea A. Author", "University of Twente<br>Department of Physiology", "March 1, 2024", `<a href="https://example.com/testing">https://example.com/testing</a>`, "The thing about this paper is that it is dealing with an issue that should be given more attention, but perhaps it really is hard to understand and that makes it difficult to get the attention it deserves. In any case, we are very proud.")
 	buff := bytes.Buffer{}
+	b.AsyncLock()
 	PDF(&buff, opts, b)
+	b.AsyncUnlock()
 	os.Mkdir("testdata", 0777)
 	os.WriteFile(filepath.Join("testdata", nm)+".pdf", buff.Bytes(), 0666)
 }
