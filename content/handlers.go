@@ -6,6 +6,7 @@ package content
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -14,12 +15,126 @@ import (
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/tree"
+	"github.com/gomarkdown/markdown/ast"
 )
+
+// handles the id attribute in htmlcore -- deals with all non-image id cases
+func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
+	if ct.currentPage == nil {
+		return false
+	}
+	lbl := ct.currentPage.SpecialLabel(value)
+	ch := node.GetChildren()
+	if len(ch) == 2 { // image or table
+		if entering {
+			return false
+		}
+		if _, ok := ch[1].(*ast.Image); ok {
+			return false
+		}
+		cp := "\n<p><b>" + lbl + ":</b>"
+		title := htmlcore.MDGetAttr(node, "title")
+		if title != "" {
+			cp += " " + title
+		}
+		cp += "</p>\n"
+		w.Write([]byte(cp))
+		return false
+	}
+	if entering {
+		cp := "\n<span id=\"" + value + "\"><b>" + lbl + ":</b>"
+		title := htmlcore.MDGetAttr(node, "title")
+		if title != "" {
+			cp += " " + title
+		}
+		cp += "</span>\n"
+		w.Write([]byte(cp))
+		// fmt.Println("id:", value, lbl)
+		// fmt.Printf("%#v\n", node)
+	}
+	return false
+}
+
+// widgetHandler is htmlcore widget handler for adding our own actions etc.
+func (ct *Content) widgetHandler(w core.Widget) {
+	switch x := w.(type) {
+	case *core.Text:
+		hdr := false
+		if t, ok := x.Properties["tag"]; ok {
+			if len(t.(string)) > 0 && (t.(string))[0] == 'h' {
+				hdr = true
+			}
+		}
+		x.Styler(func(s *styles.Style) {
+			s.Max.X.In(8) // big enough to not constrain PDF render
+			if hdr {
+				x.SetProperty("paginate-no-break-after", true)
+			}
+		})
+	case *core.Image:
+		ct.widgetHandlerFigure(w)
+		x.OnDoubleClick(func(e events.Event) {
+			d := core.NewBody("Image")
+			core.NewImage(d).SetImage(x.Image)
+			d.RunWindowDialog(x)
+		})
+	case *core.SVG:
+		ct.widgetHandlerFigure(w)
+		x.OnDoubleClick(func(e events.Event) {
+			d := core.NewBody("SVG")
+			sv := core.NewSVG(d)
+			sv.SVG = x.SVG
+			d.RunWindowDialog(x)
+		})
+	case *core.Frame:
+		table := false
+		if t, ok := x.Properties["tag"]; ok {
+			table = (t.(string) == "table")
+		}
+		if table {
+			x.Styler(func(s *styles.Style) {
+				s.Align.Self = styles.Center
+			})
+		}
+	}
+}
+
+func (ct *Content) widgetHandlerFigure(w core.Widget) {
+	wb := w.AsWidget()
+	fig := false
+	alt := ""
+	id := ""
+	if p, ok := wb.Properties["alt"]; ok {
+		alt = p.(string)
+	}
+	if p, ok := wb.Properties["id"]; ok {
+		id = p.(string)
+	}
+	if alt != "" && id != "" {
+		fig = true
+	}
+	wb.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
+		s.Overflow.Set(styles.OverflowAuto)
+		if fig {
+			s.Align.Self = styles.Center
+		}
+	})
+	if !fig {
+		return
+	}
+	lbl := ct.currentPage.SpecialLabel(id)
+	lbf := "<b>" + lbl + ":</b> "
+	cp := core.NewText(wb.Parent).SetText(lbf + alt + "<br> <br> ")
+	cp.SetProperty("paginate-no-break-before", true)
+}
 
 // citeWikilink processes citation links, which start with @
 func (ct *Content) citeWikilink(text string) (url string, label string) {

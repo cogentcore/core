@@ -12,7 +12,6 @@ import (
 	"bytes"
 	"cmp"
 	"fmt"
-	"io"
 	"io/fs"
 	"net/http"
 	"os"
@@ -21,7 +20,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/exp/maps"
 
 	"cogentcore.org/core/base/errors"
@@ -33,7 +31,6 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
@@ -144,99 +141,8 @@ func (ct *Content) Init() {
 		errors.Log(ct.embedPage(ctx))
 		return true
 	}
-	ct.Context.AttributeHandlers["id"] = func(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
-		if ct.currentPage == nil {
-			return false
-		}
-		lbl := ct.currentPage.SpecialLabel(value)
-		ch := node.GetChildren()
-		if len(ch) == 2 { // image or table
-			if entering {
-				sty := htmlcore.MDGetAttr(node, "style")
-				if sty != "" {
-					if img, ok := ch[1].(*ast.Image); ok {
-						htmlcore.MDSetAttr(img, "style", sty)
-						delete(node.AsContainer().Attribute.Attrs, "style")
-					}
-				}
-				return false
-			}
-			cp := "\n<p><b>" + lbl + ":</b>"
-			if img, ok := ch[1].(*ast.Image); ok {
-				// fmt.Printf("Image: %s\n", string(img.Destination))
-				// fmt.Printf("Image: %#v\n", img)
-				nc := len(img.Children)
-				if nc > 0 {
-					if txt, ok := img.Children[0].(*ast.Text); ok {
-						// fmt.Printf("text: %s\n", string(txt.Literal)) // not formatted!
-						cp += " " + string(txt.Literal) // todo: not formatted!
-					}
-				}
-			} else {
-				title := htmlcore.MDGetAttr(node, "title")
-				if title != "" {
-					cp += " " + title
-				}
-			}
-			cp += "</p>\n"
-			w.Write([]byte(cp))
-		} else if entering {
-			cp := "\n<span id=\"" + value + "\"><b>" + lbl + ":</b>"
-			title := htmlcore.MDGetAttr(node, "title")
-			if title != "" {
-				cp += " " + title
-			}
-			cp += "</span>\n"
-			w.Write([]byte(cp))
-			// fmt.Println("id:", value, lbl)
-			// fmt.Printf("%#v\n", node)
-		}
-		return false
-	}
-	ct.Context.AddWidgetHandler(func(w core.Widget) {
-		switch x := w.(type) {
-		case *core.Text:
-			hdr := false
-			if t, ok := x.Properties["tag"]; ok {
-				if len(t.(string)) > 0 && (t.(string))[0] == 'h' {
-					hdr = true
-				}
-			}
-			x.Styler(func(s *styles.Style) {
-				s.Max.X.In(8) // big enough to not constrain PDF render
-				if hdr {
-					x.SetProperty("paginate-no-break-after", true)
-				}
-			})
-		case *core.Image:
-			fig := false
-			if t, ok := x.Properties["tag"]; ok {
-				fig = (t.(string) == "figure") // images with id set are considered images, center
-			}
-			x.Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
-				s.Overflow.Set(styles.OverflowAuto)
-				if fig {
-					s.Align.Self = styles.Center
-				}
-			})
-			x.OnDoubleClick(func(e events.Event) {
-				d := core.NewBody("Image")
-				core.NewImage(d).SetImage(x.Image)
-				d.RunWindowDialog(x)
-			})
-		case *core.Frame:
-			table := false
-			if t, ok := x.Properties["tag"]; ok {
-				table = (t.(string) == "table")
-			}
-			if table {
-				x.Styler(func(s *styles.Style) {
-					s.Align.Self = styles.Center
-				})
-			}
-		}
-	})
+	ct.Context.AttributeHandlers["id"] = ct.htmlIDAttributeHandler
+	ct.Context.AddWidgetHandler(ct.widgetHandler)
 
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {

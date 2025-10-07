@@ -11,6 +11,7 @@ A **button** is a [[widget]] that a user can click on to trigger a described act
 
 Buttons can do math? $x = y^2$ and even display math:
 
+{id="eq_math" title="Math demo"}
 $$
 y = \frac{1}{N} \left( \sum_{i=0}^{100} \frac{f(x^2)}{\sum x^2} \right)
 $$

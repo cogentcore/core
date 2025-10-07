@@ -34,9 +34,6 @@ func (p *pager) pagify(its []*item) [][]*item {
 		// fmt.Println(cw)
 		brk := cw.Property("paginate-break") != nil
 		nobrk := cw.Property("paginate-no-break-after") != nil
-		if nobrk {
-			fmt.Println("no break:", cw)
-		}
 		sz := size(ci)
 		over := ht+sz > maxY
 		if !over && nobrk {

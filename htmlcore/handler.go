@@ -258,9 +258,14 @@ func handleElement(ctx *Context) {
 		n := ctx.Node
 		src := GetAttr(n, "src")
 		alt := GetAttr(n, "alt")
+		style := ""
 		pid := ""
-		if ctx.BlockParent != nil {
+		if ctx.BlockParent != nil { // these attributes get put on a block parent element
+			style = GetAttr(n.Parent, "style")
 			pid = GetAttr(n.Parent, "id")
+		}
+		if style != "" {
+			ctx.setStyleAttr(n, style)
 		}
 		// Can be either image or svg.
 		var img *core.Image
@@ -270,7 +275,7 @@ func handleElement(ctx *Context) {
 			svg.SetTooltip(alt)
 			if pid != "" {
 				svg.SetName(pid)
-				svg.SetProperty("tag", "figure")
+				svg.SetProperty("id", pid)
 			}
 			newWidget = svg
 		} else {
@@ -278,7 +283,7 @@ func handleElement(ctx *Context) {
 			img.SetTooltip(alt)
 			if pid != "" {
 				img.SetName(pid)
-				img.SetProperty("tag", "figure")
+				img.SetProperty("id", pid)
 			}
 			newWidget = img
 		}
@@ -347,7 +352,7 @@ func handleElement(ctx *Context) {
 		w.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Overflow.X = styles.OverflowAuto
-			s.Grow.Set(1, 1)
+			s.Grow.Set(1, 0)
 			s.Columns = w.Property("cols").(int)
 			s.Gap.X.Dp(core.ConstantSpacing(6))
 			s.Justify.Content = styles.Center
@@ -388,7 +393,7 @@ func handleElement(ctx *Context) {
 		ctx.NewParent = ctx.Parent()
 	}
 	if newWidget != nil {
-		ctx.handleWidget(newWidget)
+		ctx.handleWidget(ctx.Node, newWidget)
 	}
 }
 
