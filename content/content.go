@@ -141,6 +141,7 @@ func (ct *Content) Init() {
 		errors.Log(ct.embedPage(ctx))
 		return true
 	}
+	ct.Context.ElementHandlers["pre"] = ct.htmlPreHandler
 	ct.Context.AttributeHandlers["id"] = ct.htmlIDAttributeHandler
 	ct.Context.AddWidgetHandler(ct.widgetHandler)
 

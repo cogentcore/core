@@ -53,6 +53,12 @@ func handleElement(ctx *Context) {
 		return
 	}
 
+	pid := ""
+	pstyle := ""
+	if ctx.BlockParent != nil { // these attributes get put on a block parent element
+		pstyle = GetAttr(ctx.Node.Parent, "style")
+		pid = GetAttr(ctx.Node.Parent, "id")
+	}
 	var newWidget core.Widget
 
 	switch tag {
@@ -130,31 +136,12 @@ func handleElement(ctx *Context) {
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
 			codeEl := ctx.Node.FirstChild
-			collapsed := GetAttr(codeEl, "collapsed")
-			lang := getLanguage(GetAttr(codeEl, "class"))
+			lang := GetLanguage(GetAttr(codeEl, "class"))
 			id := GetAttr(codeEl, "id")
 			var ed *textcore.Editor
-			var parent tree.Node
-			if collapsed != "" {
-				cl := New[core.Collapser](ctx)
-				summary := core.NewText(cl.Summary).SetText("Code")
-				if title := GetAttr(codeEl, "title"); title != "" {
-					summary.SetText(title)
-				}
-				ed = textcore.NewEditor(cl.Details)
-				if id != "" {
-					cl.Summary.Name = id
-				}
-				parent = cl.Parent
-				if collapsed == "false" || collapsed == "-" {
-					cl.Open = true
-				}
-			} else {
-				ed = New[textcore.Editor](ctx)
-				if id != "" {
-					ed.SetName(id)
-				}
-				parent = ed.Parent
+			ed = New[textcore.Editor](ctx)
+			if id != "" {
+				ed.SetName(id)
 			}
 			newWidget = ed
 			ctx.Node = codeEl
@@ -162,38 +149,14 @@ func handleElement(ctx *Context) {
 				ed.Lines.SetFileExt(lang)
 			}
 			ed.Lines.SetString(ExtractText(ctx))
-			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
-				ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
-				parFrame := core.NewFrame(parent)
-				parFrame.Styler(func(s *styles.Style) {
-					s.Direction = styles.Column
-					s.Grow.Set(1, 0)
-				})
-				// we inherit our Grow.Y from our first child so that
-				// elements that want to grow can do so
-				parFrame.SetOnChildAdded(func(n tree.Node) {
-					if _, ok := n.(*core.Body); ok { // Body should not grow
-						return
-					}
-					wb := core.AsWidget(n)
-					if wb.IndexInParent() != 0 {
-						return
-					}
-					wb.FinalStyler(func(s *styles.Style) {
-						parFrame.Styles.Grow.Y = s.Grow.Y
-					})
-				})
-				BindTextEditor(ed, parFrame, lang)
-			} else {
-				ed.SetReadOnly(true)
-				ed.Lines.Settings.LineNumbers = false
-				ed.Styler(func(s *styles.Style) {
-					s.Border.Width.Zero()
-					s.MaxBorder.Width.Zero()
-					s.StateLayer = 0
-					s.Background = colors.Scheme.SurfaceContainer
-				})
-			}
+			ed.SetReadOnly(true)
+			ed.Lines.Settings.LineNumbers = false
+			ed.Styler(func(s *styles.Style) {
+				s.Border.Width.Zero()
+				s.MaxBorder.Width.Zero()
+				s.StateLayer = 0
+				s.Background = colors.Scheme.SurfaceContainer
+			})
 		} else {
 			newWidget = handleText(ctx, tag)
 			newWidget.AsWidget().Styler(func(s *styles.Style) {
@@ -259,14 +222,8 @@ func handleElement(ctx *Context) {
 		n := ctx.Node
 		src := GetAttr(n, "src")
 		alt := GetAttr(n, "alt")
-		style := ""
-		pid := ""
-		if ctx.BlockParent != nil { // these attributes get put on a block parent element
-			style = GetAttr(n.Parent, "style")
-			pid = GetAttr(n.Parent, "id")
-		}
-		if style != "" {
-			ctx.setStyleAttr(n, style)
+		if pstyle != "" {
+			ctx.setStyleAttr(n, pstyle)
 		}
 		// Can be either image or svg.
 		var img *core.Image
@@ -473,9 +430,9 @@ func HasAttr(n *html.Node, attr string) bool {
 	})
 }
 
-// getLanguage returns the 'x' in a `language-x` class from the given
+// GetLanguage returns the 'x' in a `language-x` class from the given
 // string of class(es).
-func getLanguage(class string) string {
+func GetLanguage(class string) string {
 	fields := strings.Fields(class)
 	for _, field := range fields {
 		if strings.HasPrefix(field, "language-") {
@@ -505,8 +462,3 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 	}
 	return resp, nil
 }
-
-// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
-// when importing yaegicore, which provides interactive editing functionality for Go
-// code blocks in text editors.
-var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)

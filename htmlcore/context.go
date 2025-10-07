@@ -146,6 +146,7 @@ func (c *Context) config(w core.Widget) {
 		switch attr.Key {
 		case "id":
 			wb.SetName(attr.Val)
+			wb.SetProperty("id", attr.Val)
 		case "style":
 			c.setStyleAttr(c.Node, attr.Val)
 		default:
