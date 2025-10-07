@@ -33,10 +33,6 @@ import (
 // code blocks in text editors.
 var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)
 
-// * add after-first-line indent (what is official name?) to text style and implement it -- need for li etc
-// * paginate uses left margins
-// * not able to click off shading of figures etc when clicking link
-
 // handles the id attribute in htmlcore: needed for equation case
 func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
 	if ct.currentPage == nil {
