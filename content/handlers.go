@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/tree"
 	"github.com/gomarkdown/markdown/ast"
@@ -73,6 +74,8 @@ func (ct *Content) widgetHandler(w core.Widget) {
 			}
 		}
 		x.Styler(func(s *styles.Style) {
+			s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
 			s.Max.X.In(8) // big enough to not constrain PDF render
 			if hdr {
 				x.SetProperty("paginate-no-break-after", true)
@@ -130,10 +133,22 @@ func (ct *Content) widgetHandlerFigure(w core.Widget) {
 	if !fig {
 		return
 	}
+	fr := core.NewFrame(wb.Parent)
+	fr.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
+	})
+	fr.SetProperty("paginate-block", true) // no split
+	fr.SetProperty("id", id)
+	tree.MoveToParent(w, fr)
+	fr.SetName(id)
 	lbl := ct.currentPage.SpecialLabel(id)
 	lbf := "<b>" + lbl + ":</b> "
-	cp := core.NewText(wb.Parent).SetText(lbf + alt + "<br> <br> ")
-	cp.SetProperty("paginate-no-break-before", true)
+	tx := core.NewText(fr).SetText(lbf + alt + "<br> <br> ")
+	tx.Styler(func(s *styles.Style) {
+		s.Max.X.In(8) // big enough to not constrain PDF render
+		s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+	})
 }
 
 // citeWikilink processes citation links, which start with @

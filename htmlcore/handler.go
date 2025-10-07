@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -213,6 +212,7 @@ func handleElement(ctx *Context) {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
 		text, sublist := handleTextExclude(ctx, "ol", "ul") // exclude other lists
+		newWidget = text
 		start := ""
 		if pw, ok := text.Parent.(core.Widget); ok {
 			pwt := pw.AsTree()
@@ -243,6 +243,7 @@ func handleElement(ctx *Context) {
 				}
 				txt, psub := handleTextExclude(ctx, "ol", "ul")
 				txt.SetText(txt.Text)
+				ctx.handleWidget(cnode, txt)
 				if psub != nil {
 					if psub != sublist {
 						readHTMLNode(ctx, ctx.Parent(), psub)
@@ -397,17 +398,6 @@ func handleElement(ctx *Context) {
 	}
 }
 
-func (ctx *Context) textStyler(s *styles.Style) {
-	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
-	s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
-	// TODO: it would be ideal for htmlcore to automatically save a scale factor
-	// in general and for each domain, that is applied only to page content
-	// scale := float32(1.2)
-	// s.Font.Size.Value *= scale
-	// s.Text.LineHeight.Value *= scale
-	// s.Text.LetterSpacing.Value *= scale
-}
-
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func handleText(ctx *Context, tag string) *core.Text {
@@ -426,7 +416,6 @@ func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.N
 		return core.NewText(), excl
 	}
 	tx := New[core.Text](ctx).SetText(et)
-	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -442,7 +431,6 @@ func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
-	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
