@@ -72,13 +72,17 @@ func (w *pdfPage) writePage(parent pdfRef) pdfRef {
 	return w.pdf.writeObject(page)
 }
 
-// AddAnnotation adds an annotation.
+// AddAnnotation adds an annotation. The rect is in "default user space"
+// coordinates = standard page coordinates, without the current CTM transform.
+// This function will handle the flipping of coordinates to top-left system.
 func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
+	ms := math32.Scale2D(w.pdf.globalScale, w.pdf.globalScale)
+	rect = rect.MulMatrix2(ms)
 	annot := pdfDict{
 		"Type":     pdfName("Annot"),
 		"Subtype":  pdfName("Link"),
 		"Border":   pdfArray{0, 0, 0},
-		"Rect":     pdfArray{rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y},
+		"Rect":     pdfArray{rect.Min.X, w.height - rect.Max.Y, rect.Max.X, w.height - rect.Min.Y},
 		"Contents": uri,
 		"A": pdfDict{
 			"S":   pdfName("URI"),

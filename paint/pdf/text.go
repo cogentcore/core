@@ -33,6 +33,7 @@ func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, ln
 		ln := &lns.Lines[li]
 		r.textLine(style, m, ln, lns, runes, clr, off)
 	}
+	r.links(lns, m, pos)
 	r.w.PopStack()
 }
 
@@ -200,35 +201,17 @@ func (r *PDF) FillBox(m math32.Matrix2, bb math32.Box2, clr image.Image) {
 	r.Path(*p, sty, m)
 }
 
-// text.WalkDecorations(func(fill canvas.Paint, p *canvas.Path) {
-// 	style := canvas.DefaultStyle
-// 	style.Fill = fill
-// 	r.RenderPath(p, style, m)
-// })
-
-// todo: copy from other render cases
-// text.WalkSpans(func(x, y float32, span canvas.TextSpan) {
-// 	if span.IsText() {
-// 		style := canvas.DefaultStyle
-// 		style.Fill = span.Face.Fill
-//
-// 		r.w.StartTextObject()
-// 		r.w.SetFill(span.Face.Fill)
-// 		r.w.SetFont(span.Face.Font, span.Face.Size, span.Direction)
-// 		r.w.SetTextPosition(m.Translate(x, y).Shear(span.Face.FauxItalic, 0.0))
-//
-// 		if 0.0 < span.Face.FauxBold {
-// 			r.w.SetTextRenderMode(2)
-// 			r.w.SetStroke(span.Face.Fill)
-// 			fmt.Fprintf(r.w, " %v w", dec(span.Face.FauxBold*2.0))
-// 		} else {
-// 			r.w.SetTextRenderMode(0)
-// 		}
-// 		r.w.WriteText(text.WritingMode, span.Glyphs)
-// 		r.w.EndTextObject()
-// 	} else {
-// 		for _, obj := range span.Objects {
-// 			obj.Canvas.RenderViewTo(r, m.Mul(obj.View(x, y, span.Face)))
-// 		}
-// 	}
-// })
+func (r *PDF) links(lns *shaped.Lines, m math32.Matrix2, pos math32.Vector2) {
+	lks := lns.GetLinks()
+	for _, lk := range lks {
+		// note: link coordinates are in default user space, not current transform.
+		srb := lns.RuneBounds(lk.Range.Start)
+		erb := lns.RuneBounds(lk.Range.End)
+		if erb.Max.X > srb.Max.X {
+			srb.Max.X = erb.Max.X
+		}
+		rb := srb.Translate(pos)
+		rb = rb.MulMatrix2(m)
+		r.w.AddURIAction(lk.URL, rb)
+	}
+}
