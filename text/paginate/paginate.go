@@ -6,6 +6,7 @@ package paginate
 
 import (
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
@@ -58,6 +59,8 @@ func (p *pager) preRender() {
 		})
 		p.opts.Title(tf, p.opts)
 		p.ins = append([]core.Widget{tf.This.(core.Widget)}, p.ins...)
+		tf.StyleTree()
+		tf.LayoutFrame(math32.FromPoint(tf.Scene.SceneGeom.Size))
 	}
 	for _, in := range p.ins {
 		iw := core.AsWidget(in)

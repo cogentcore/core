@@ -165,7 +165,7 @@ func (c *Context) config(w core.Widget) {
 			wb.SetProperty(attr.Key, attr.Val)
 		}
 	}
-	wb.SetProperty("tag", c.Node.Data)
+	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
 	rules := c.styles[c.Node]
 	wb.Styler(func(s *styles.Style) {
 		for _, rule := range rules {
@@ -175,7 +175,6 @@ func (c *Context) config(w core.Widget) {
 			}
 		}
 	})
-	c.handleWidget(w)
 }
 
 // InlineParent returns the current parent widget that inline

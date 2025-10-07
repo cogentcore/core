@@ -105,10 +105,9 @@ type Content struct {
 	// if any (in kebab-case).
 	currentHeading string
 
-	// noTitleAuthors is used to turn off the addition of title and authors
-	// in prep for PDF rendering, which includes those elements in a more
-	// print-conventional manner typically.
-	noTitleAuthors bool
+	// inPDFRender indicates that it is rendering a PDF now, turning off
+	// elements that are not appropriate for that.
+	inPDFRender bool
 
 	// The previous and next page, if applicable. They must be stored on this struct
 	// to avoid stale local closure variables.
@@ -197,19 +196,45 @@ func (ct *Content) Init() {
 	ct.Context.AddWidgetHandler(func(w core.Widget) {
 		switch x := w.(type) {
 		case *core.Text:
+			hdr := false
+			if t, ok := x.Properties["tag"]; ok {
+				if len(t.(string)) > 0 && (t.(string))[0] == 'h' {
+					hdr = true
+				}
+			}
 			x.Styler(func(s *styles.Style) {
-				s.Max.X.In(8) // doesn't constrain PDF render
+				s.Max.X.In(8) // big enough to not constrain PDF render
+				if hdr {
+					x.SetProperty("paginate-no-break-after", true)
+				}
 			})
 		case *core.Image:
+			fig := false
+			if t, ok := x.Properties["tag"]; ok {
+				fig = (t.(string) == "figure") // images with id set are considered images, center
+			}
 			x.Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
 				s.Overflow.Set(styles.OverflowAuto)
+				if fig {
+					s.Align.Self = styles.Center
+				}
 			})
 			x.OnDoubleClick(func(e events.Event) {
 				d := core.NewBody("Image")
 				core.NewImage(d).SetImage(x.Image)
 				d.RunWindowDialog(x)
 			})
+		case *core.Frame:
+			table := false
+			if t, ok := x.Properties["tag"]; ok {
+				table = (t.(string) == "table")
+			}
+			if table {
+				x.Styler(func(s *styles.Style) {
+					s.Align.Self = styles.Center
+				})
+			}
 		}
 	})
 
@@ -231,7 +256,7 @@ func (ct *Content) Init() {
 				}
 			})
 			w.Maker(func(p *tree.Plan) {
-				if !ct.noTitleAuthors && ct.currentPage.Title != "" {
+				if !ct.inPDFRender && ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextDisplaySmall)
 						w.Updater(func() {
@@ -239,7 +264,7 @@ func (ct *Content) Init() {
 						})
 					})
 				}
-				if !ct.noTitleAuthors && len(ct.currentPage.Authors) > 0 {
+				if !ct.inPDFRender && len(ct.currentPage.Authors) > 0 {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextTitleLarge)
 						w.Updater(func() {
@@ -264,7 +289,9 @@ func (ct *Content) Init() {
 						errors.Log(ct.loadPage(w))
 					})
 				})
-				ct.makeBottomButtons(p)
+				if !ct.inPDFRender {
+					ct.makeBottomButtons(p)
+				}
 			})
 		})
 	})
@@ -549,9 +576,9 @@ func (ct *Content) PagePDF(path string) error {
 	if ct.currentPage == nil {
 		return errors.Log(errors.New("Page empty"))
 	}
-	ct.noTitleAuthors = true
+	ct.inPDFRender = true
 	ct.Update()
-	ct.noTitleAuthors = false
+	ct.inPDFRender = false
 
 	fname := ct.currentPage.Name + ".pdf"
 	if path != "" {

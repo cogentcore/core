@@ -5,6 +5,8 @@
 package paginate
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
@@ -14,7 +16,11 @@ import (
 func (p *pager) pagify(its []*item) [][]*item {
 	widg := core.AsWidget
 	size := func(it *item) float32 {
-		return widg(it.w).Geom.Size.Actual.Total.Y + it.gap.Y
+		ih := widg(it.w).Geom.Size.Actual.Total.Y
+		if ih == 0 {
+			fmt.Println("zero height", ih, it.w)
+		}
+		return ih + it.gap.Y
 	}
 
 	maxY := p.opts.BodyDots.Y
@@ -25,8 +31,12 @@ func (p *pager) pagify(its []*item) [][]*item {
 	n := len(its)
 	for i, ci := range its {
 		cw := widg(ci.w)
+		// fmt.Println(cw)
 		brk := cw.Property("paginate-break") != nil
 		nobrk := cw.Property("paginate-no-break-after") != nil
+		if nobrk {
+			fmt.Println("no break:", cw)
+		}
 		sz := size(ci)
 		over := ht+sz > maxY
 		if !over && nobrk {
@@ -38,12 +48,15 @@ func (p *pager) pagify(its []*item) [][]*item {
 			}
 		}
 		if brk || over {
+			ht = 0
 			if !brk && len(cpg) == 0 { // no blank pages!
 				cpg = append(cpg, ci)
+				pgs = append(pgs, cpg)
+				cpg = nil
+				continue
 			}
 			pgs = append(pgs, cpg)
 			cpg = nil
-			ht = 0
 		}
 		ht += sz
 		cpg = append(cpg, ci)

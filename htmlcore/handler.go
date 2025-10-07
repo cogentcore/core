@@ -33,7 +33,7 @@ import (
 func New[T tree.NodeValue](ctx *Context) *T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.config(any(w).(core.Widget)) // TODO: better htmlcore structure with new config paradigm?
+	ctx.config(any(w).(core.Widget))
 	return w
 }
 
@@ -53,6 +53,8 @@ func handleElement(ctx *Context) {
 		handleTextTag(ctx)
 		return
 	}
+
+	var newWidget core.Widget
 
 	switch tag {
 	case "script", "title", "meta":
@@ -81,6 +83,7 @@ func handleElement(ctx *Context) {
 		ctx.addStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
 		w := New[core.Frame](ctx)
+		newWidget = w
 		ctx.NewParent = w
 		switch tag {
 		case "body":
@@ -109,21 +112,21 @@ func handleElement(ctx *Context) {
 			})
 		}
 	case "button":
-		New[core.Button](ctx).SetText(ExtractText(ctx))
+		newWidget = New[core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		handleText(ctx).SetType(core.TextDisplaySmall)
+		newWidget = handleText(ctx, tag).SetType(core.TextDisplaySmall)
 	case "h2":
-		handleText(ctx).SetType(core.TextHeadlineMedium)
+		newWidget = handleText(ctx, tag).SetType(core.TextHeadlineMedium)
 	case "h3":
-		handleText(ctx).SetType(core.TextTitleLarge)
+		newWidget = handleText(ctx, tag).SetType(core.TextTitleLarge)
 	case "h4":
-		handleText(ctx).SetType(core.TextTitleMedium)
+		newWidget = handleText(ctx, tag).SetType(core.TextTitleMedium)
 	case "h5":
-		handleText(ctx).SetType(core.TextTitleSmall)
+		newWidget = handleText(ctx, tag).SetType(core.TextTitleSmall)
 	case "h6":
-		handleText(ctx).SetType(core.TextLabelSmall)
+		newWidget = handleText(ctx, tag).SetType(core.TextLabelSmall)
 	case "p":
-		handleText(ctx)
+		newWidget = handleText(ctx, tag)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
@@ -154,6 +157,7 @@ func handleElement(ctx *Context) {
 				}
 				parent = ed.Parent
 			}
+			newWidget = ed
 			ctx.Node = codeEl
 			if lang != "" {
 				ed.Lines.SetFileExt(lang)
@@ -192,7 +196,8 @@ func handleElement(ctx *Context) {
 				})
 			}
 		} else {
-			handleText(ctx).Styler(func(s *styles.Style) {
+			newWidget = handleText(ctx, tag)
+			newWidget.AsWidget().Styler(func(s *styles.Style) {
 				s.Text.WhiteSpace = text.WhiteSpacePreWrap
 			})
 		}
@@ -265,13 +270,17 @@ func handleElement(ctx *Context) {
 			svg.SetTooltip(alt)
 			if pid != "" {
 				svg.SetName(pid)
+				svg.SetProperty("tag", "figure")
 			}
+			newWidget = svg
 		} else {
 			img = New[core.Image](ctx)
 			img.SetTooltip(alt)
 			if pid != "" {
 				img.SetName(pid)
+				img.SetProperty("tag", "figure")
 			}
+			newWidget = img
 		}
 
 		go func() {
@@ -303,33 +312,34 @@ func handleElement(ctx *Context) {
 		switch ityp {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			New[core.Spinner](ctx).SetValue(fval)
+			newWidget = New[core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
-			New[core.Switch](ctx).SetType(core.SwitchCheckbox).
+			newWidget = New[core.Switch](ctx).SetType(core.SwitchCheckbox).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
-			New[core.Switch](ctx).SetType(core.SwitchRadioButton).
+			newWidget = New[core.Switch](ctx).SetType(core.SwitchRadioButton).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			New[core.Slider](ctx).SetValue(fval)
+			newWidget = New[core.Slider](ctx).SetValue(fval)
 		case "button", "submit":
-			New[core.Button](ctx).SetText(val)
+			newWidget = New[core.Button](ctx).SetText(val)
 		case "color":
-			core.Bind(val, New[core.ColorButton](ctx))
+			newWidget = core.Bind(val, New[core.ColorButton](ctx))
 		case "datetime":
-			core.Bind(val, New[core.TimeInput](ctx))
+			newWidget = core.Bind(val, New[core.TimeInput](ctx))
 		case "file":
-			core.Bind(val, New[core.FileButton](ctx))
+			newWidget = core.Bind(val, New[core.FileButton](ctx))
 		default:
-			New[core.TextField](ctx).SetText(val)
+			newWidget = New[core.TextField](ctx).SetText(val)
 		}
 	case "textarea":
 		buf := lines.NewLines()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[textcore.Editor](ctx).SetLines(buf)
+		newWidget = New[textcore.Editor](ctx).SetLines(buf)
 	case "table":
 		w := New[core.Frame](ctx)
+		newWidget = w
 		ctx.NewParent = w
 		ctx.TableParent = w
 		ctx.firstRow = true
@@ -348,10 +358,11 @@ func handleElement(ctx *Context) {
 			cols++
 			ctx.TableParent.SetProperty("cols", cols)
 		}
-		tx := handleText(ctx)
+		tx := handleText(ctx, tag)
 		if tx.Parent == nil { // if empty we need a real empty text to keep structure
 			tx = New[core.Text](ctx)
 		}
+		newWidget = tx
 		// fmt.Println(tag, "val:", tx.Text)
 		if tag == "th" {
 			tx.Styler(func(s *styles.Style) {
@@ -376,6 +387,9 @@ func handleElement(ctx *Context) {
 	default:
 		ctx.NewParent = ctx.Parent()
 	}
+	if newWidget != nil {
+		ctx.handleWidget(newWidget)
+	}
 }
 
 func (ctx *Context) textStyler(s *styles.Style) {
@@ -391,7 +405,7 @@ func (ctx *Context) textStyler(s *styles.Style) {
 
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
-func handleText(ctx *Context) *core.Text {
+func handleText(ctx *Context, tag string) *core.Text {
 	tx, _ := handleTextExclude(ctx)
 	return tx
 }

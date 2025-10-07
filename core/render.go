@@ -127,36 +127,41 @@ func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
-	sc.SizeUp()
-	sz := &sc.Geom.Size
-	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
+	sc.LayoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+}
+
+// LayoutFrame does a layout on the given Frame using given size.
+func (fr *Frame) LayoutFrame(size math32.Vector2) {
+	fr.SizeUp()
+	sz := &fr.Geom.Size
+	sz.Alloc.Total = size
 	sz.SetContentFromTotal(&sz.Alloc)
 	if DebugSettings.LayoutTrace {
-		fmt.Println("\n############################\nSizeDown start:", sc)
+		fmt.Println("\n############################\nSizeDown start:", fr)
 	}
 	maxIter := 3
 	for iter := 0; iter < maxIter; iter++ { // 3  > 2; 4 same as 3
-		redo := sc.SizeDown(iter)
+		redo := fr.SizeDown(iter)
 		if redo && iter < maxIter-1 {
 			if DebugSettings.LayoutTrace {
-				fmt.Println("\n############################\nSizeDown redo:", sc, "iter:", iter+1)
+				fmt.Println("\n############################\nSizeDown redo:", fr, "iter:", iter+1)
 			}
 		} else {
 			break
 		}
 	}
 	if DebugSettings.LayoutTrace {
-		fmt.Println("\n############################\nSizeFinal start:", sc)
+		fmt.Println("\n############################\nSizeFinal start:", fr)
 	}
-	sc.SizeFinal()
+	fr.SizeFinal()
 	if DebugSettings.LayoutTrace {
-		fmt.Println("\n############################\nPosition start:", sc)
+		fmt.Println("\n############################\nPosition start:", fr)
 	}
-	sc.Position()
+	fr.Position()
 	if DebugSettings.LayoutTrace {
-		fmt.Println("\n############################\nScenePos start:", sc)
+		fmt.Println("\n############################\nScenePos start:", fr)
 	}
-	sc.ApplyScenePos()
+	fr.ApplyScenePos()
 }
 
 // LayoutRenderScene does a layout and render of the tree:
