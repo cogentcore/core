@@ -6,9 +6,7 @@ package paginate
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/rich"
 	_ "cogentcore.org/core/text/tex"
 )
 
@@ -42,48 +40,6 @@ func (p *pager) optsUpdate() {
 	in0 := p.ins[0].AsWidget()
 	p.ctx = in0.Styles.UnitContext
 	p.opts.ToDots(&p.ctx)
-}
-
-// assemble collects everything to be rendered into one big list,
-// and sets the font family and size for text elements.
-func (p *pager) assemble() {
-	sc := core.AsWidget(p.ins[0]).Scene
-	// sc.AsyncLock()
-	if p.opts.Title != nil {
-		tf := core.NewFrame()
-		tf.Scene = sc
-		tf.FinalStyler(func(s *styles.Style) {
-			s.Min.X.Dot(p.opts.BodyDots.X)
-			s.Min.Y.Dot(p.opts.BodyDots.Y)
-		})
-		p.opts.Title(tf, p.opts)
-		p.ins = append([]core.Widget{tf.This.(core.Widget)}, p.ins...)
-		tf.StyleTree()
-	}
-	for _, in := range p.ins {
-		iw := core.AsWidget(in)
-
-		iw.FinalStyler(func(s *styles.Style) {
-			s.Min.X.Dot(p.opts.BodyDots.X)
-			s.Min.Y.Dot(p.opts.BodyDots.Y)
-		})
-		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-			if tx, ok := cwb.This.(*core.Text); ok {
-				if tx.Styles.Font.Family == rich.SansSerif {
-					if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
-						cwb.Styler(func(s *styles.Style) {
-							s.Font.Family = p.opts.FontFamily
-						})
-					}
-				}
-			}
-			return true
-		})
-
-		iw.Scene.StyleTree()
-		iw.Scene.LayoutRenderScene()
-	}
-	// sc.AsyncUnlock()
 }
 
 func (p *pager) paginate() {

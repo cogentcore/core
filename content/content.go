@@ -487,6 +487,8 @@ func (ct *Content) PagePDF(path string) error {
 	ct.Update()
 	ct.inPDFRender = false
 
+	refs := ct.PageRefs(ct.currentPage)
+
 	fname := ct.currentPage.Name + ".pdf"
 	if path != "" {
 		os.MkdirAll(path, 0777)
@@ -497,12 +499,39 @@ func (ct *Content) PagePDF(path string) error {
 		return err
 	}
 	opts := Settings.PageSettings(ct, ct.currentPage)
-	paginate.PDF(f, opts.PDF, ct.rightFrame)
+	if refs != nil {
+		paginate.PDF(f, opts.PDF, ct.rightFrame, refs)
+	} else {
+		paginate.PDF(f, opts.PDF, ct.rightFrame)
+	}
 	err = f.Close()
+
 	ct.reloadPage()
 
 	core.MessageSnackbar(ct, "PDF saved to: "+fname)
 	af := errors.Log1(filepath.Abs(fname))
 	core.TheApp.OpenURL("file://" + af)
 	return err
+}
+
+// PageRefs returns a core.Frame with the contents of the references cited
+// on the given page. if References is nil, or error, result will be nil.
+func (ct *Content) PageRefs(page *bcontent.Page) *core.Frame {
+	if ct.References == nil {
+		return nil
+	}
+	sty := csl.APA // todo: settings
+	var b bytes.Buffer
+	_, err := csl.GenerateMarkdown(&b, ct.Source, "## References", ct.References, sty, page.Filename)
+	if errors.Log(err) != nil {
+		return nil
+	}
+
+	fr := core.NewFrame()
+	err = htmlcore.ReadMD(ct.Context, fr, b.Bytes())
+	if errors.Log(err) != nil {
+		return nil
+	}
+	fr.SetScene(ct.Scene)
+	return fr
 }
