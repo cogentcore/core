@@ -5,8 +5,6 @@
 package paginate
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -17,11 +15,10 @@ import (
 func (p *pager) pagify(its []*item) [][]*item {
 	widg := core.AsWidget
 	size := func(it *item) float32 {
-		ih := widg(it.w).Geom.Size.Actual.Total.Y
-		if ih == 0 {
-			fmt.Println("zero height", ih, it.w)
-		}
-		return ih + it.gap.Y
+		wb := widg(it.w)
+		ih := wb.Geom.Size.Actual.Total.Y // todo: something wrong with size!
+		sz := ih + it.gap.Y
+		return sz
 	}
 
 	maxY := p.opts.BodyDots.Y

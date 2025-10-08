@@ -176,7 +176,8 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 		closed = true
 	}
 
-	if style.HasStroke() && strokeUnsupported { // todo
+	if style.HasStroke() && strokeUnsupported {
+		// todo: handle with optional inclusion of stroke function as _ import
 		/*	// style.HasStroke() && strokeUnsupported
 			if style.HasFill() {
 				r.w.SetFill(style.Fill)
@@ -199,7 +200,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 			r.w.Write([]byte(path.Transform(m).ToPDF()))
 			r.w.Write([]byte(" f"))
 		*/
-		return
+		// return
 	}
 	if style.HasFill() && !style.HasStroke() {
 		r.w.SetFill(&style.Fill)
@@ -238,34 +239,27 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 			if style.Fill.Rule == ppath.EvenOdd {
 				r.w.Write([]byte("*"))
 			}
-		}
-		/*
-			 else {
-				r.w.SetFill(style.Fill)
-				r.w.Write([]byte(" "))
-				r.w.Write([]byte(data))
-				r.w.Write([]byte(" f"))
-				if style.Fill.Rule == ppath.EvenOdd {
-					r.w.Write([]byte("*"))
-				}
-
-				r.w.SetStroke(style.Stroke)
-				r.w.SetLineWidth(style.StrokeWidth)
-				r.w.SetLineCap(style.StrokeCapper)
-				r.w.SetLineJoin(style.StrokeJoiner)
-				r.w.SetDashes(style.DashOffset, style.Dashes)
-				r.w.Write([]byte(" "))
-				r.w.Write([]byte(data))
-				if closed {
-					r.w.Write([]byte(" s"))
-				} else {
-					r.w.Write([]byte(" S"))
-				}
-				if style.Fill.Rule == ppath.EvenOdd {
-					r.w.Write([]byte("*"))
-				}
+		} else {
+			r.w.SetFill(&style.Fill)
+			r.w.Write([]byte(" "))
+			r.w.Write([]byte(data))
+			r.w.Write([]byte(" f"))
+			if style.Fill.Rule == ppath.EvenOdd {
+				r.w.Write([]byte("*"))
 			}
-		*/
+
+			r.w.SetStroke(&style.Stroke)
+			r.w.Write([]byte(" "))
+			r.w.Write([]byte(data))
+			if closed {
+				r.w.Write([]byte(" s"))
+			} else {
+				r.w.Write([]byte(" S"))
+			}
+			if style.Fill.Rule == ppath.EvenOdd {
+				r.w.Write([]byte("*"))
+			}
+		}
 	}
 }
 

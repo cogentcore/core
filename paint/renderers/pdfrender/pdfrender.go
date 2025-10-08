@@ -160,12 +160,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	// Fast path for [image.Uniform]
 	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
-		_ = u
-		// todo: draw a box
-		// r := fpdf.NewRect(cg)
-		// r.Pos = math32.FromPoint(pr.Rect.Min)
-		// r.Size = math32.FromPoint(pr.Rect.Size())
-		// r.SetProperty("fill", colors.AsHex(u.C))
+		rs.PDF.FillBox(math32.Identity2(), math32.B2FromRect(pr.Rect), u)
 		return
 	}
 

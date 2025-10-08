@@ -31,6 +31,8 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	p.preRender()
 	p.paginate()
 
+	// osc := ins[0].AsWidget().Scene
+
 	sc := core.NewScene()
 	sz := math32.Geom2DInt{}
 	sz.Size = opts.SizeDots.ToPointCeil()
@@ -57,7 +59,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 			return true
 		})
 
-		sc.RenderWidget()
+		p.RenderWidget()
 
 		rend := sc.Painter.RenderDone()
 		pdr.RenderPage(rend)
