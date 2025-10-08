@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 	"log/slog"
 
 	"cogentcore.org/core/base/errors"
@@ -117,7 +118,10 @@ func (w *pdfPage) SetFillColor(fill *styles.Fill) {
 		// TODO: should we unset cs?
 		// fmt.Fprintf(w, " /Pattern cs /%v scn", w.getPattern(fill.Gradient))
 	case *image.Uniform:
-		clr := colors.ApplyOpacity(colors.AsRGBA(x), fill.Opacity)
+		var clr color.RGBA
+		if x != nil {
+			clr = colors.ApplyOpacity(colors.AsRGBA(x), fill.Opacity)
+		}
 		a := float32(clr.A) / 255.0
 		if clr.R == clr.G && clr.R == clr.B {
 			fmt.Fprintf(w, " %v g", dec(float32(clr.R)/255.0/a))

@@ -14,11 +14,17 @@ import (
 	"cogentcore.org/core/base/errors"
 )
 
-// firstContent is the first [Content] used for [Content.getWebURL] or [Content.saveWebURL],
-// which is used to prevent nested [Content] widgets from incorrectly affecting the URL.
-var firstContent *Content
+var (
+	// firstContent is the first [Content] used for [Content.getWebURL] or [Content.saveWebURL],
+	// which is used to prevent nested [Content] widgets from incorrectly affecting the URL.
+	firstContent *Content
 
-var documentData = js.Global().Get("document").Get("documentElement").Get("dataset")
+	documentData = js.Global().Get("document").Get("documentElement").Get("dataset")
+
+	// OfflineURL is the non-web base url, which can be set to allow
+	// docs to refer to this in frontmatter.
+	OfflineURL = ""
+)
 
 func (ct *Content) getPrintURL() string { return ct.getWebURL() }
 
@@ -35,7 +41,10 @@ func (ct *Content) getWebURL() string {
 	if errors.Log(err) != nil {
 		return ""
 	}
-	return strings.Trim(strings.TrimPrefix(full.String(), base.String()), "/")
+	ur := strings.Trim(strings.TrimPrefix(full.String(), base.String()), "/")
+	// fmt.Println("url is:", ur)
+	OfflineURL = ur
+	return ur
 }
 
 // saveWebURL saves the current page URL to the user's address bar and history.
