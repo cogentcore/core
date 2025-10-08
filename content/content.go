@@ -500,6 +500,9 @@ func (ct *Content) PagePDF(path string) error {
 	paginate.PDF(f, opts.PDF, ct.rightFrame)
 	err = f.Close()
 	ct.reloadPage()
+
 	core.MessageSnackbar(ct, "PDF saved to: "+fname)
+	af := errors.Log1(filepath.Abs(fname))
+	core.TheApp.OpenURL("file://" + af)
 	return err
 }

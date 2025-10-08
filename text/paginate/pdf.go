@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pdf"
 	"cogentcore.org/core/paint/renderers/pdfrender"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -27,11 +28,11 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	cset := pdf.UseStandardFonts()
 
 	p := pager{opts: &opts, ins: ins}
-	p.optsUpdate()
-	p.preRender()
+	p.opts.Update()
+	p.ctx = *units.NewContext() // generic, invariant of actual context
+	p.opts.ToDots(&p.ctx)
+	p.assemble()
 	p.paginate()
-
-	// osc := ins[0].AsWidget().Scene
 
 	sc := core.NewScene()
 	sz := math32.Geom2DInt{}

@@ -1212,6 +1212,10 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		pd := pdr.Render(rend).Source()
 		fnm = filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".pdf")
 		errors.Log(os.WriteFile(fnm, pd, 0666))
+
+		sc.SetScene(sc)
+		sc.Update()
+
 		MessageSnackbar(sc, "Saved SVG, PDF screenshots to: "+strings.ReplaceAll(fnm, " ", `\ `)+sz)
 		e.SetHandled()
 	case keymap.ZoomIn:

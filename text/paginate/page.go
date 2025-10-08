@@ -20,10 +20,8 @@ func styMinMax(s *styles.Style, x, y float32) {
 	s.Max.Y.Dot(y)
 }
 
-func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
-
-	curPage := len(p.outs) + 1
-	pn := fmt.Sprintf("page-%d", curPage)
+func (p *pager) newPage(gap math32.Vector2, pageNo int) (page, body *core.Frame) {
+	pn := fmt.Sprintf("page-%d", pageNo)
 
 	page = core.NewFrame()
 	page.SetName(pn)
@@ -51,7 +49,7 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 		styMinMax(s, p.opts.BodyDots.X, p.opts.MargDots.Top)
 	})
 	if p.opts.Header != nil {
-		p.opts.Header(hdr, p.opts, curPage)
+		p.opts.Header(hdr, p.opts, pageNo)
 	}
 
 	body = core.NewFrame(bfr)
@@ -70,7 +68,7 @@ func (p *pager) newPage(gap math32.Vector2) (page, body *core.Frame) {
 		styMinMax(s, p.opts.BodyDots.X, p.opts.MargDots.Bottom)
 	})
 	if p.opts.Footer != nil {
-		p.opts.Footer(ftr, p.opts, curPage)
+		p.opts.Footer(ftr, p.opts, pageNo)
 	}
 
 	return

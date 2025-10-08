@@ -6,7 +6,6 @@ package paginate
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
@@ -45,9 +44,9 @@ func (p *pager) optsUpdate() {
 	p.opts.ToDots(&p.ctx)
 }
 
-// preRender re-renders inputs with styles enforced to fit page size,
-// and setting the font family and size for text elements.
-func (p *pager) preRender() {
+// assemble collects everything to be rendered into one big list,
+// and sets the font family and size for text elements.
+func (p *pager) assemble() {
 	sc := core.AsWidget(p.ins[0]).Scene
 	// sc.AsyncLock()
 	if p.opts.Title != nil {
@@ -60,7 +59,6 @@ func (p *pager) preRender() {
 		p.opts.Title(tf, p.opts)
 		p.ins = append([]core.Widget{tf.This.(core.Widget)}, p.ins...)
 		tf.StyleTree()
-		tf.LayoutFrame(math32.FromPoint(tf.Scene.SceneGeom.Size))
 	}
 	for _, in := range p.ins {
 		iw := core.AsWidget(in)

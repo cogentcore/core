@@ -17,8 +17,7 @@ func (p *pager) pagify(its []*item) [][]*item {
 	size := func(it *item) float32 {
 		wb := widg(it.w)
 		ih := wb.Geom.Size.Actual.Total.Y // todo: something wrong with size!
-		sz := ih + it.gap.Y
-		return sz
+		return ih + it.gap.Y
 	}
 
 	maxY := p.opts.BodyDots.Y
@@ -36,7 +35,7 @@ func (p *pager) pagify(its []*item) [][]*item {
 		over := ht+sz > maxY
 		if !over && nobrk {
 			if i < n-1 {
-				nsz := size(its[i+1]) + 100 // extra space to be sure
+				nsz := size(its[i+1]) // extra space to be sure
 				if ht+sz+nsz > maxY {
 					over = true // break now
 					// } else {
@@ -64,14 +63,15 @@ func (p *pager) pagify(its []*item) [][]*item {
 	return pgs
 }
 
-func (p *pager) outputPages(pgs [][]*item) {
-	for _, pg := range pgs {
+func (p *pager) outputPages(pgs [][]*item, newPage func(gap math32.Vector2, pageNo int) (page, body *core.Frame)) []*core.Frame {
+	var outs []*core.Frame
+	for pn, pg := range pgs {
 		lastGap := math32.Vector2{}
 		lastLeft := float32(0)
 		if len(pg) > 0 {
 			lastGap = pg[0].gap
 		}
-		page, body := p.newPage(lastGap)
+		page, body := newPage(lastGap, pn+1)
 		cpar := body
 		for _, it := range pg {
 			gap := it.gap
@@ -83,12 +83,18 @@ func (p *pager) outputPages(pgs [][]*item) {
 			}
 			tree.MoveToParent(it.w, cpar)
 		}
-		p.outs = append(p.outs, page)
+		outs = append(outs, page)
 	}
+	return outs
 }
 
 func (p *pager) newOutFrame(par *core.Frame, gap math32.Vector2, left float32) *core.Frame {
-	fr := core.NewFrame(par)
+	var fr *core.Frame
+	if par != nil {
+		fr = core.NewFrame(par)
+	} else {
+		fr = core.NewFrame()
+	}
 	fr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.ZeroSpace()
@@ -101,10 +107,32 @@ func (p *pager) newOutFrame(par *core.Frame, gap math32.Vector2, left float32) *
 	return fr
 }
 
+// pre-render everything in the offscreen scene that will be used for final
+// to get accurate element sizes.
+func (p *pager) preRender(its []*item) {
+	pg := [][]*item{its}
+	op := p.outputPages(pg, func(gap math32.Vector2, pageNo int) (page, body *core.Frame) {
+		fr := p.newOutFrame(nil, gap, 0)
+		page, body = fr, fr
+		return
+	})
+	sc := core.NewScene()
+	sz := math32.Geom2DInt{}
+	sz.Size = p.opts.SizeDots.ToPointCeil()
+	sc.Resize(sz)
+	sc.MakeTextShaper()
+
+	tree.MoveToParent(op[0], sc)
+	op[0].SetScene(sc)
+	sc.StyleTree()
+	sc.LayoutScene()
+}
+
 // layout reorders items within the pages and generates final output.
 func (p *pager) layout(its []*item) {
+	p.preRender(its)
 	pgs := p.pagify(its)
 	// note: could rearrange elements to put text at bottom and non-text at top?
 	// but this is probably not necessary?
-	p.outputPages(pgs)
+	p.outs = p.outputPages(pgs, p.newPage)
 }
