@@ -163,9 +163,9 @@ func (c *Context) config(w core.Widget) {
 func (c *Context) setStyleAttr(node *html.Node, style string) error {
 	// our CSS parser is strict about semicolons, but
 	// they aren't needed in normal inline styles in HTML
-	if !strings.HasSuffix(style, ";") {
-		style += ";"
-	}
+	// if !strings.HasSuffix(style, ";") {
+	// 	style += ";"
+	// }
 	decls, err := parser.ParseDeclarations(style)
 	if errors.Log(err) != nil {
 		return err

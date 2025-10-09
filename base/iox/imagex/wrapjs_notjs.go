@@ -13,6 +13,12 @@ import (
 	"github.com/anthonynsimon/bild/transform"
 )
 
+// JSRGBA is a dummy version of this type so code does not have to be
+// conditionalized.
+type JSRGBA struct {
+	*image.RGBA
+}
+
 // WrapJS returns a JavaScript optimized wrapper around the given
 // [image.Image] on web, and just returns the image on other platforms.
 func WrapJS(src image.Image) image.Image {

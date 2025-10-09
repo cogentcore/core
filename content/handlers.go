@@ -245,7 +245,7 @@ func (ct *Content) widgetHandlerFigure(w core.Widget, id string) {
 	}
 	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
 	lbl := ct.currentPage.SpecialLabel(id)
-	lbf := "<b>" + lbl + ":</b> " + string(altf) + "<br> <br> "
+	lbf := "<b>" + lbl + ":</b> " + string(altf) + " <br><br> "
 	ct.moveToBlockFrame(w, id, lbf, false)
 }
 

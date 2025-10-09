@@ -11,8 +11,10 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -99,6 +101,19 @@ func (im *Image) Render() {
 	}
 	sp := im.Geom.ScrollOffset()
 
+	useLocalResize := false
+	if TheApp.Platform() == system.Web && im.Scene != nil {
+		// we are using an image renderer, e.g. PDF, offline rendering.
+		// note that there is no way to get transformed image back from javascript :(
+		// which would be the cleaner solution here.
+		if _, ok := im.Scene.Renderer.(*rasterx.Renderer); ok {
+			if _, ok := im.prevRenderImage.(*imagex.JSRGBA); ok {
+				im.prevImage = nil // clear
+			}
+			useLocalResize = true
+		}
+	}
+
 	var rimg image.Image
 	if im.prevImage == im.Image && im.Styles.ObjectFit == im.prevObjectFit && im.Geom.Size.Actual.Content == im.prevSize {
 		rimg = im.prevRenderImage
@@ -106,7 +121,11 @@ func (im *Image) Render() {
 		im.prevImage = im.Image
 		im.prevObjectFit = im.Styles.ObjectFit
 		im.prevSize = im.Geom.Size.Actual.Content
-		rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
+		if useLocalResize {
+			rimg = im.Styles.ResizeImageLocal(im.Image, im.Geom.Size.Actual.Content)
+		} else {
+			rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
+		}
 		im.prevRenderImage = rimg
 	}
 	pim := im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)
