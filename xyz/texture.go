@@ -29,8 +29,7 @@ type Texture interface {
 	Image() *image.RGBA
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TextureBase
+//////// TextureBase
 
 // TextureBase is the base texture implementation.
 // It uses an [image.RGBA] as the underlying image storage
@@ -55,8 +54,7 @@ func (tx *TextureBase) Image() *image.RGBA {
 	return tx.RGBA
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
-// TextureFile
+//////// TextureFile
 
 // TextureFile is a texture loaded from a file
 type TextureFile struct {
@@ -120,8 +118,7 @@ type TextureCore struct {
 	// Scene2D *core.Scene
 }
 
-///////////////////////////////////////////////////////////////////////////
-// Scene code
+//////// Scene code
 
 // SetTexture adds given texture to texture collection
 // see NewTextureFile to add a texture that loads from file
@@ -135,15 +132,14 @@ func (sc *Scene) SetTexture(tx Texture) {
 
 func (sc *Scene) setAllTextures() {
 	ph := sc.Phong
-	for _, kv := range sc.Textures.Order {
-		tx := kv.Value
-		ph.SetTexture(kv.Key, phong.NewTexture(tx.Image()))
+	for i, nm := range sc.Textures.Keys {
+		ph.SetTexture(nm, phong.NewTexture(sc.Textures.Values[i].Image()))
 	}
 }
 
 // TextureByName looks for texture by name, returning error if not found.
 func (sc *Scene) TextureByName(nm string) (Texture, error) {
-	tx, ok := sc.Textures.ValueByKeyTry(nm)
+	tx, ok := sc.Textures.AtTry(nm)
 	if ok {
 		return tx, nil
 	}
@@ -152,5 +148,5 @@ func (sc *Scene) TextureByName(nm string) (Texture, error) {
 
 // TextureList returns a list of available textures (e.g., for chooser)
 func (sc *Scene) TextureList() []string {
-	return sc.Textures.Keys()
+	return sc.Textures.Keys
 }

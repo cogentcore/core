@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 	"image"
-	"log"
 	"math/rand"
 	"os"
 
@@ -23,12 +22,10 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 	"cogentcore.org/core/xyz/physics/world"
-	"cogentcore.org/core/xyz/physics/world2d"
 	"cogentcore.org/core/xyz/xyzcore"
 )
 
@@ -51,6 +48,9 @@ func main() {
 
 // Env encapsulates the virtual environment
 type Env struct { //types:add
+
+	// if true, emer is angry: changes face color
+	EmerAngry bool
 
 	// height of emer
 	EmerHt float32
@@ -82,22 +82,13 @@ type Env struct { //types:add
 	// color map to use for rendering depth map
 	DepthMap core.ColorMapName
 
-	// world
-	World *physics.Group `display:"-"`
-
-	// 3D view of world
-	View3D *world.View
-
-	// view of world
-	View2D *world2d.View
+	// The whole physics World, including visualization.
+	World *world.World
 
 	// 3D visualization of the Scene
 	SceneEditor *xyzcore.SceneEditor
 
-	// 2D visualization of the Scene
-	Scene2D *core.SVG
-
-	// emer group
+	// emer object
 	Emer *physics.Group `display:"-"`
 
 	// Right eye of emer
@@ -126,109 +117,55 @@ func (ev *Env) Defaults() {
 	ev.Camera.FOV = 90
 }
 
-func (ev *Env) ConfigScene(se *xyz.Scene) {
-	ev.SceneEditor.Styler(func(s *styles.Style) {
-		se.Background = colors.Scheme.Select.Container
-	})
-	xyz.NewAmbient(se, "ambient", 0.3, xyz.DirectSun)
+// MakePhysicsWorld constructs a new virtual physics world.
+func (ev *Env) MakePhysicsWorld() *physics.Group {
+	pw := physics.NewGroup()
+	pw.SetName("RoomWorld")
 
-	dir := xyz.NewDirectional(se, "dir", 1, xyz.DirectSun)
+	ev.MakeRoom(pw, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
+	ev.MakeEmer(pw, "emer", ev.EmerHt)
+	pw.WorldInit()
+	return pw
+}
+
+func (ev *Env) MakeWorld(sc *xyz.Scene) {
+	pw := ev.MakePhysicsWorld()
+	sc.Background = colors.Scheme.Select.Container
+	xyz.NewAmbient(sc, "ambient", 0.3, xyz.DirectSun)
+
+	dir := xyz.NewDirectional(sc, "dir", 1, xyz.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
-	// grtx := xyz.NewTextureFileFS(assets.Content, se, "ground", "ground.png")
-	// floorp := xyz.NewPlane(se, "floor-plane", 100, 100)
-	// floor := xyz.NewSolid(se, "floor").SetMesh(floorp).
-	// 	SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
-	// floor.Mat.Tiling.Repeat.Set(40, 40)
+	ev.World = world.NewWorld(pw, sc)
 }
 
-// MakeWorld constructs a new virtual physics world
-func (ev *Env) MakeWorld() {
-	ev.World = physics.NewGroup()
-	ev.World.SetName("RoomWorld")
-
-	MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
-	ev.Emer = MakeEmer(ev.World, ev.EmerHt)
-	ev.EyeR = ev.Emer.ChildByName("head", 1).AsTree().ChildByName("eye-r", 2).(physics.Body)
-
-	ev.World.WorldInit()
-}
-
-// InitWorld does init on world and re-syncs
+// InitWorld does init on world.
 func (ev *Env) WorldInit() { //types:add
-	ev.World.WorldInit()
-	if ev.View3D != nil {
-		ev.View3D.Sync()
-		ev.GrabEyeImg()
-	}
-	if ev.View2D != nil {
-		ev.View2D.Sync()
-	}
-}
-
-// ReMakeWorld rebuilds the world and re-syncs with gui
-func (ev *Env) ReMakeWorld() { //types:add
-	ev.MakeWorld()
-	ev.View3D.World = ev.World
-	if ev.View3D != nil {
-		ev.View3D.Sync()
-		ev.GrabEyeImg()
-	}
-	if ev.View2D != nil {
-		ev.View2D.Sync()
-	}
+	ev.World.Init()
 }
 
 // ConfigView3D makes the 3D view
 func (ev *Env) ConfigView3D(sc *xyz.Scene) {
 	// sc.MultiSample = 1 // we are using depth grab so we need this = 1
-	wgp := xyz.NewGroup(sc)
-	wgp.SetName("world")
-	ev.View3D = world.NewView(ev.World, sc, wgp)
-	ev.View3D.InitLibrary() // this makes a basic library based on body shapes, sizes
-	// at this point the library can be updated to configure custom visualizations
-	// for any of the named bodies.
-	ev.View3D.Sync()
-}
-
-// ConfigView2D makes the 2D view
-func (ev *Env) ConfigView2D(sc *svg.SVG) {
-	wgp := svg.NewGroup(sc.Root)
-	wgp.SetName("world")
-	ev.View2D = world2d.NewView(ev.World, sc, wgp)
-	ev.View2D.InitLibrary() // this makes a basic library based on body shapes, sizes
-	// at this point the library can be updated to configure custom visualizations
-	// for any of the named bodies.
-	ev.View2D.Sync()
 }
 
 // RenderEyeImg returns a snapshot from the perspective of Emer's right eye
-func (ev *Env) RenderEyeImg() (*image.RGBA, error) {
-	err := ev.View3D.RenderOffNode(ev.EyeR, &ev.Camera)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	return ev.View3D.Image()
+func (ev *Env) RenderEyeImg() image.Image {
+	return ev.World.RenderFromNode(ev.EyeR, &ev.Camera)
 }
 
 // GrabEyeImg takes a snapshot from the perspective of Emer's right eye
 func (ev *Env) GrabEyeImg() { //types:add
-	img, err := ev.RenderEyeImg()
-	if err == nil && img != nil {
+	img := ev.RenderEyeImg()
+	if img != nil {
 		ev.EyeRImg.SetImage(img)
 		ev.EyeRImg.NeedsRender()
-	} else {
-		if err != nil {
-			log.Println(err)
-		}
 	}
-
-	depth, err := ev.View3D.DepthImage()
-	if err == nil && depth != nil {
-		ev.DepthVals = depth
-		ev.ViewDepth(depth)
-	}
+	// depth, err := ev.View3D.DepthImage()
+	// if err == nil && depth != nil {
+	// 	ev.DepthVals = depth
+	// 	ev.ViewDepth(depth)
+	// }
 }
 
 // ViewDepth updates depth bitmap with depth data
@@ -240,20 +177,19 @@ func (ev *Env) ViewDepth(depth []float32) {
 	ev.DepthImage.NeedsRender()
 }
 
-// UpdateViews updates the 2D and 3D views of the scene
-func (ev *Env) UpdateViews() {
+// UpdateView tells 3D view it needs to update.
+func (ev *Env) UpdateView() {
 	if ev.SceneEditor.IsVisible() {
 		ev.SceneEditor.NeedsRender()
-	}
-	if ev.Scene2D.IsVisible() {
-		ev.Scene2D.NeedsRender()
 	}
 }
 
 // WorldStep does one step of the world
 func (ev *Env) WorldStep() {
-	ev.World.WorldRelToAbs()
-	cts := ev.World.WorldCollide(physics.DynsTopGps)
+	pw := ev.World.World
+	pw.Update() // only need to call if there are updaters added to world
+	pw.WorldRelToAbs()
+	cts := pw.WorldCollide(physics.DynsTopGps)
 	ev.Contacts = nil
 	for _, cl := range cts {
 		if len(cl) > 1 {
@@ -265,17 +201,16 @@ func (ev *Env) WorldStep() {
 			}
 		}
 	}
+	ev.EmerAngry = false
 	if len(ev.Contacts) > 1 { // turn around
+		ev.EmerAngry = true
 		fmt.Printf("hit wall: turn around!\n")
 		rot := 100.0 + 90.0*rand.Float32()
 		ev.Emer.Rel.RotateOnAxis(0, 1, 0, rot)
 	}
-	ev.View3D.UpdatePose()
-	ev.View2D.UpdatePose()
-	ev.UpdateViews()
-	// ev.GrabEyeImg() // todo: this is not working in the first place,
-	// and with goroutine rendering in core/renderwindow, it crashes because
-	// the main render texture for the view is stale.
+	ev.World.Update()
+	ev.GrabEyeImg()
+	ev.UpdateView()
 }
 
 // StepForward moves Emer forward in current facing direction one step, and takes GrabEyeImg
@@ -317,72 +252,97 @@ func (ev *Env) RotHeadRight() { //types:add
 }
 
 // MakeRoom constructs a new room in given parent group with given params
-func MakeRoom(par *physics.Group, name string, width, depth, height, thick float32) *physics.Group {
-	rm := physics.NewGroup(par)
-	rm.SetName(name)
-	physics.NewBox(rm).SetSize(math32.Vec3(width, thick, depth)).
-		SetColor("grey").SetInitPos(math32.Vec3(0, -thick/2, 0)).SetName("floor")
-
-	physics.NewBox(rm).SetSize(math32.Vec3(width, height, thick)).
-		SetColor("blue").SetInitPos(math32.Vec3(0, height/2, -depth/2)).SetName("back-wall")
-	physics.NewBox(rm).SetSize(math32.Vec3(thick, height, depth)).
-		SetColor("red").SetInitPos(math32.Vec3(-width/2, height/2, 0)).SetName("left-wall")
-	physics.NewBox(rm).SetSize(math32.Vec3(thick, height, depth)).
-		SetColor("green").SetInitPos(math32.Vec3(width/2, height/2, 0)).SetName("right-wall")
-	physics.NewBox(rm).SetSize(math32.Vec3(width, height, thick)).
-		SetColor("yellow").SetInitPos(math32.Vec3(0, height/2, depth/2)).SetName("front-wall")
-	return rm
+func (ev *Env) MakeRoom(par *physics.Group, name string, width, depth, height, thick float32) {
+	tree.AddChildAt(par, name, func(rm *physics.Group) {
+		rm.Maker(func(p *tree.Plan) {
+			tree.AddAt(p, "floor", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, thick, depth)).
+					SetColor("grey").SetInitPos(math32.Vec3(0, -thick/2, 0))
+			})
+			tree.AddAt(p, "back-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, height, thick)).
+					SetColor("blue").SetInitPos(math32.Vec3(0, height/2, -depth/2))
+			})
+			tree.AddAt(p, "left-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(thick, height, depth)).
+					SetColor("red").SetInitPos(math32.Vec3(-width/2, height/2, 0))
+			})
+			tree.AddAt(p, "right-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(thick, height, depth)).
+					SetColor("green").SetInitPos(math32.Vec3(width/2, height/2, 0))
+			})
+			tree.AddAt(p, "front-wall", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, height, thick)).
+					SetColor("yellow").SetInitPos(math32.Vec3(0, height/2, depth/2))
+			})
+		})
+	})
 }
 
-// MakeEmer constructs a new Emer virtual robot of given height (e.g., 1)
-func MakeEmer(par *physics.Group, height float32) *physics.Group {
-	emr := physics.NewGroup(par)
-	emr.SetName("emer")
-	width := height * .4
-	depth := height * .15
+// MakeEmer constructs a new Emer virtual robot of given height (e.g., 1).
+func (ev *Env) MakeEmer(par *physics.Group, name string, height float32) {
+	tree.AddChildAt(par, name, func(emr *physics.Group) {
+		ev.Emer = emr
+		emr.Maker(func(p *tree.Plan) {
+			width := height * .4
+			depth := height * .15
+			tree.AddAt(p, "body", func(n *physics.Box) {
+				n.SetSize(math32.Vec3(width, height, depth)).
+					SetColor("purple").SetDynamic(true).
+					SetInitPos(math32.Vec3(0, height/2, 0))
+			})
+			// body := physics.NewCapsule(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
+			// body := physics.NewCylinder(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
 
-	physics.NewBox(emr).SetSize(math32.Vec3(width, height, depth)).
-		SetColor("purple").SetDynamic(true).
-		SetInitPos(math32.Vec3(0, height/2, 0)).SetName("body")
-	// body := physics.NewCapsule(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
-	// body := physics.NewCylinder(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
-
-	headsz := depth * 1.5
-	hhsz := .5 * headsz
-	hgp := physics.NewGroup(emr).SetInitPos(math32.Vec3(0, height+hhsz, 0))
-	hgp.SetName("head")
-
-	physics.NewBox(hgp).SetSize(math32.Vec3(headsz, headsz, headsz)).
-		SetColor("tan").SetDynamic(true).SetInitPos(math32.Vec3(0, 0, 0)).SetName("head")
-
-	eyesz := headsz * .2
-	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
-		SetColor("green").SetDynamic(true).
-		SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-l")
-
-	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
-		SetColor("green").SetDynamic(true).
-		SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-r")
-
-	return emr
+			headsz := depth * 1.5
+			eyesz := headsz * .2
+			hhsz := .5 * headsz
+			tree.AddAt(p, "head", func(n *physics.Group) {
+				n.SetInitPos(math32.Vec3(0, height+hhsz, 0))
+				n.Maker(func(p *tree.Plan) {
+					tree.AddAt(p, "head", func(n *physics.Box) {
+						n.SetSize(math32.Vec3(headsz, headsz, headsz)).
+							SetColor("tan").SetDynamic(true).SetInitPos(math32.Vec3(0, 0, 0))
+						n.InitView = func(vn tree.Node) {
+							sld := vn.(*xyz.Solid)
+							world.BoxInit(n, sld)
+							sld.Updater(func() {
+								clr := n.Color
+								if ev.EmerAngry {
+									clr = "pink"
+								}
+								world.UpdateColor(clr, n.View.(*xyz.Solid))
+							})
+						}
+					})
+					tree.AddAt(p, "eye-l", func(n *physics.Box) {
+						n.SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
+							SetColor("green").SetDynamic(true).
+							SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3)))
+					})
+					tree.AddAt(p, "eye-r", func(n *physics.Box) {
+						ev.EyeR = n
+						n.SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
+							SetColor("green").SetDynamic(true).
+							SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3)))
+					})
+				})
+			})
+		})
+	})
 }
 
 func (ev *Env) ConfigGUI() *core.Body {
 	// vgpu.Debug = true
 
 	b := core.NewBody("virtroom").SetTitle("Emergent Virtual Engine")
-
-	ev.MakeWorld()
-
 	split := core.NewSplits(b)
 
-	tv := core.NewTree(core.NewFrame(split)).SyncTree(ev.World)
+	tv := core.NewTree(core.NewFrame(split))
 	sv := core.NewForm(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
-
 	scfr, _ := tbvw.NewTab("3D View")
-	twofr, _ := tbvw.NewTab("2D View")
 
 	split.SetSplits(.1, .2, .2, .5)
 
@@ -392,30 +352,35 @@ func (ev *Env) ConfigGUI() *core.Body {
 		}
 	})
 
-	//////////////////////////////////////////
-	//    3D Scene
+	////////    3D Scene
 
+	etb := core.NewToolbar(scfr)
 	ev.SceneEditor = xyzcore.NewSceneEditor(scfr)
 	ev.SceneEditor.UpdateWidget()
-	se := ev.SceneEditor.SceneXYZ()
-	ev.ConfigScene(se)
-	ev.ConfigView3D(se)
+	sc := ev.SceneEditor.SceneXYZ()
+	ev.MakeWorld(sc)
+	tv.SyncTree(ev.World.World)
 
-	se.Camera.Pose.Pos = math32.Vec3(0, 40, 3.5)
-	se.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
-	se.SaveCamera("3")
+	// local toolbar for manipulating emer
+	etb.Maker(world.MakeStateToolbar(&ev.Emer.Rel, func() {
+		ev.World.Update()
+		ev.SceneEditor.NeedsRender()
+	}))
 
-	se.Camera.Pose.Pos = math32.Vec3(0, 20, 30)
-	se.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
-	se.SaveCamera("2")
+	sc.Camera.Pose.Pos = math32.Vec3(0, 40, 3.5)
+	sc.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
+	sc.SaveCamera("3")
 
-	se.Camera.Pose.Pos = math32.Vec3(-.86, .97, 2.7)
-	se.Camera.LookAt(math32.Vec3(0, .8, 0), math32.Vec3(0, 1, 0))
-	se.SaveCamera("1")
-	se.SaveCamera("default")
+	sc.Camera.Pose.Pos = math32.Vec3(0, 20, 30)
+	sc.Camera.LookAt(math32.Vec3(0, 5, 0), math32.Vec3(0, 1, 0))
+	sc.SaveCamera("2")
 
-	//////////////////////////////////////////
-	//    Image
+	sc.Camera.Pose.Pos = math32.Vec3(-.86, .97, 2.7)
+	sc.Camera.LookAt(math32.Vec3(0, .8, 0), math32.Vec3(0, 1, 0))
+	sc.SaveCamera("1")
+	sc.SaveCamera("default")
+
+	////////    Image
 
 	imfr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -430,91 +395,68 @@ func (ev *Env) ConfigGUI() *core.Body {
 	ev.DepthImage.SetName("depth-img")
 	ev.DepthImage.Image = image.NewRGBA(image.Rectangle{Max: ev.Camera.Size})
 
-	//////////////////////////////////////////
-	//    2D Scene
-
-	twov := core.NewSVG(twofr)
-	ev.Scene2D = twov
-	twov.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		twov.SVG.Root.ViewBox.Size.Set(ev.Width+4, ev.Depth+4)
-		twov.SVG.Root.ViewBox.Min.Set(-0.5*(ev.Width+4), -0.5*(ev.Depth+4))
-		twov.SetReadOnly(false)
-	})
-
-	ev.ConfigView2D(twov.SVG)
-
-	//////////////////////////////////////////
-	//    Toolbar
+	////////    Toolbar
 
 	b.AddTopBar(func(bar *core.Frame) {
-		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
-			tree.Add(p, func(w *core.Button) {
-				w.SetText("Edit Env").SetIcon(icons.Edit).
-					SetTooltip("Edit the settings for the environment").
-					OnClick(func(e events.Event) {
-						sv.SetStruct(ev)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
-			})
-			tree.Add(p, func(w *core.Separator) {})
-
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.FuncButton) {
-				w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
-					Styler(func(s *styles.Style) {
-						s.SetAbilities(true, abilities.RepeatClickable)
-					})
-			})
-			tree.Add(p, func(w *core.Separator) {})
-
-			tree.Add(p, func(w *core.Button) {
-				w.SetText("README").SetIcon(icons.FileMarkdown).
-					SetTooltip("Open browser on README.").
-					OnClick(func(e events.Event) {
-						core.TheApp.OpenURL("https://github.com/emer/eve/blob/master/examples/virtroom/README.md")
-					})
-			})
-		})
+		core.NewToolbar(bar).Maker(ev.MakeToolbar)
 	})
 	return b
+}
+
+func (ev *Env) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
+	})
+	tree.Add(p, func(w *core.Separator) {})
+
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.FuncButton) {
+		w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
+			Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+	})
+	tree.Add(p, func(w *core.Separator) {})
+
+	tree.Add(p, func(w *core.Button) {
+		w.SetText("README").SetIcon(icons.FileMarkdown).
+			SetTooltip("Open browser on README.").
+			OnClick(func(e events.Event) {
+				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/master/xyz/examples/physics/README.md")
+			})
+	})
 }
 
 func (ev *Env) NoGUIRun() {
@@ -522,15 +464,11 @@ func (ev *Env) NoGUIRun() {
 	if err != nil {
 		panic(err)
 	}
-	se := world.NoDisplayScene(gp, dev)
-	ev.ConfigScene(se)
-	ev.MakeWorld()
-	ev.ConfigView3D(se)
+	sc := world.NoDisplayScene(gp, dev)
+	ev.MakeWorld(sc)
 
-	img, err := ev.RenderEyeImg()
-	if err == nil {
+	img := ev.RenderEyeImg()
+	if img != nil {
 		imagex.Save(img, "eyer_0.png")
-	} else {
-		panic(err)
 	}
 }

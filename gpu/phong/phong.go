@@ -7,8 +7,10 @@ package phong
 //go:generate core generate
 
 import (
+	"image"
 	"sync"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/shape"
@@ -149,12 +151,36 @@ func (ph *Phong) RenderStart() (*wgpu.RenderPassEncoder, error) {
 	ph.configDummyTexture() // if needed
 	ph.updateObjects()
 
+	if rt, ok := ph.System.Renderer.(*gpu.RenderTexture); ok {
+		rt.CurrentFrame().ConfigReadBuffer()
+	}
+
 	return ph.System.BeginRenderPass()
 }
 
+// RenderEnd ends the render pass. Must be paired after RenderStart.
 func (ph *Phong) RenderEnd(rp *wgpu.RenderPassEncoder) {
 	rp.End()
 	ph.System.EndRenderPass(rp)
+}
+
+// RenderEndGrabImage grabs the rendered image from rendering.
+// The command to read the image must be inserted at the end of the
+// render commands, so this is an alternative to standard RenderEnd.
+// This only works if the system Renderer is a [RenderTexture],
+// otherwise it will return nil.
+func (ph *Phong) RenderEndGrabImage(rp *wgpu.RenderPassEncoder) *image.NRGBA {
+	rp.End()
+	sy := ph.System
+	rt, ok := sy.Renderer.(*gpu.RenderTexture)
+	if !ok {
+		sy.EndRenderPass(rp)
+		return nil
+	}
+	rt.ReadFrame(sy.CommandEncoder)
+	sy.EndRenderPass(rp)
+	img := errors.Log1(rt.CurrentFrame().ReadGoImage())
+	return img
 }
 
 // Render does one step of rendering given current Use* settings,
