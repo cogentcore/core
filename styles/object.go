@@ -6,9 +6,11 @@ package styles
 
 import (
 	"image"
+	"image/draw"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
+	"github.com/anthonynsimon/bild/transform"
 )
 
 // ObjectFits are the different ways in which a replaced element
@@ -95,4 +97,25 @@ func (s *Style) ResizeImage(img image.Image, box math32.Vector2) image.Image {
 	// need to crop the destination size to the size of the containing object
 	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
 	return imagex.Crop(rimg, drect)
+}
+
+// ResizeImageLocal resizes the given image according to [Style.ObjectFit]
+// in an object of the given box size. This version uses local Go image
+// resizing regardless of what platform, for use with local Image rendering.
+func (s *Style) ResizeImageLocal(img image.Image, box math32.Vector2) image.Image {
+	obj := math32.FromPoint(img.Bounds().Size())
+	sz := ObjectSizeFromFit(s.ObjectFit, obj, box)
+	if s.ObjectFit == FitScaleDown && sz.X >= obj.X {
+		return img
+	}
+	szi := sz.ToPointFloor()
+	rimg := transform.Resize(img, szi.X, szi.Y, transform.Linear)
+	if s.ObjectFit != FitCover || (box.X >= sz.X && box.Y >= sz.Y) {
+		return rimg
+	}
+	// need to crop the destination size to the size of the containing object
+	drect := image.Rect(0, 0, int(min(sz.X, box.X)), int(min(sz.Y, box.Y)))
+	dst := image.NewRGBA(drect)
+	draw.Draw(dst, drect, rimg, image.Point{}, draw.Src)
+	return dst
 }
