@@ -527,12 +527,17 @@ func (ct *Content) PageRefs(page *bcontent.Page) *core.Frame {
 	if errors.Log(err) != nil {
 		return nil
 	}
+	// os.WriteFile("tmp-refs.md", b.Bytes(), 0666)
 
 	fr := core.NewFrame()
+	fr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
 	err = htmlcore.ReadMD(ct.Context, fr, b.Bytes())
 	if errors.Log(err) != nil {
 		return nil
 	}
+	fr.StyleTree()
 	fr.SetScene(ct.Scene)
 	return fr
 }

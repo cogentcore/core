@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/text/htmltext"
 )
 
 // GenerateMarkdown extracts markdown citations in the format [@Ref; @Ref]
@@ -88,7 +89,8 @@ func WriteRefsMarkdown(w io.Writer, kl *KeyList, sty Styles) error {
 		if err != nil {
 			return err
 		}
-		_, err = w.Write([]byte(string(ref.Join()) + "</p>\n\n")) // todo: ref to markdown!!
+		str := htmltext.RichToHTML(ref)
+		_, err = w.Write([]byte(str + "</p>\n\n")) // todo: ref to markdown!!
 		if err != nil {
 			return err
 		}

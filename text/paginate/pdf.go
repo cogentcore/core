@@ -80,7 +80,6 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 // only for full format rendering (e.g., PDF)
 func (p *pager) assemble() {
 	sc := core.AsWidget(p.ins[0]).Scene
-	// sc.AsyncLock()
 	if p.opts.Title != nil {
 		tf := core.NewFrame()
 		tf.Scene = sc
@@ -111,9 +110,5 @@ func (p *pager) assemble() {
 			}
 			return true
 		})
-
-		iw.Scene.StyleTree()
-		iw.Scene.LayoutRenderScene()
 	}
-	// sc.AsyncUnlock()
 }
