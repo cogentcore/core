@@ -18,21 +18,41 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
+	"cogentcore.org/core/styles/units"
 	. "cogentcore.org/core/svg"
 	"github.com/go-text/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 
 func RunTest(t *testing.T, width, height int, dir, fname string) {
-	sv := NewSVG(math32.Vec2(float32(width), float32(height)))
+	// cset := pdf.UseStandardFonts()
+
+	size := math32.Vec2(float32(width), float32(height))
+	sv := NewSVG(size)
 	svfn := filepath.Join("testdata", dir, fname)
 	err := sv.OpenXML(svfn)
 	assert.NoError(t, err)
-	img := sv.RenderImage()
-	imfn := filepath.Join(dir, "png", strings.TrimSuffix(fname, ".svg"))
+	rend := sv.Render(nil).RenderDone()
+
+	rd := paint.NewImageRenderer(size)
+	img := rd.Render(rend).Image()
+	bnm := strings.TrimSuffix(fname, ".svg")
+	imfn := filepath.Join(dir, "png", bnm)
 	// fmt.Println(svfn, imfn)
 	imagex.Assert(t, img, imfn)
+
+	pddir := filepath.Join("testdata", dir, "pdf")
+	pdfn := filepath.Join(pddir, bnm+".pdf")
+	ctx := units.NewContext()
+	pd := paint.NewPDFRenderer(size, ctx)
+	pd.Render(rend)
+	os.MkdirAll(pddir, 0777)
+	err = os.WriteFile(pdfn, pd.Source(), 0666)
+	assert.NoError(t, err)
+
+	// pdf.RestorePreviousFonts(cset)
 }
 
 func TestSVG(t *testing.T) {

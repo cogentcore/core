@@ -74,6 +74,12 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
 		})
 	})
+	tree.Add(p, func(w *core.Button) {
+		w.SetText("PDF").SetIcon(icons.PictureAsPdf).SetTooltip("PDF generates and opens / downloads the current page as a printable PDF file")
+		w.OnClick(func(e events.Event) {
+			ct.PagePDF("pdfs")
+		})
+	})
 }
 
 func (ct *Content) MenuSearch(items *[]core.ChooserItem) {

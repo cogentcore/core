@@ -10,11 +10,11 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/htmlcore/htmlcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"BindTextEditor":     reflect.ValueOf(&htmlcore.BindTextEditor).Elem(),
 		"ExtractText":        reflect.ValueOf(htmlcore.ExtractText),
 		"ExtractTextExclude": reflect.ValueOf(htmlcore.ExtractTextExclude),
 		"Get":                reflect.ValueOf(htmlcore.Get),
 		"GetAttr":            reflect.ValueOf(htmlcore.GetAttr),
+		"GetLanguage":        reflect.ValueOf(htmlcore.GetLanguage),
 		"GetURLFromFS":       reflect.ValueOf(htmlcore.GetURLFromFS),
 		"GoDocWikilink":      reflect.ValueOf(htmlcore.GoDocWikilink),
 		"HasAttr":            reflect.ValueOf(htmlcore.HasAttr),

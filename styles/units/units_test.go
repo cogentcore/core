@@ -71,4 +71,7 @@ func TestValueConvert(t *testing.T) {
 	if s1 != s2 {
 		t.Errorf("strings don't match: %v != %v\n", s1, s2)
 	}
+
+	tolassert.Equal(t, 72, ctxt.Convert(1, UnitIn, UnitPt))
+	tolassert.Equal(t, 25.4/72.0, ctxt.Convert(1, UnitPt, UnitMm))
 }

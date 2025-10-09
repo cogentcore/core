@@ -93,6 +93,10 @@ type Context struct {
 	// type of widget, for example.
 	WidgetHandlers []func(w core.Widget)
 
+	// DelayedImageLoad causes images to be loaded at a delay.
+	// if not set, then they are loaded immediately.
+	DelayedImageLoad bool
+
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
 }
@@ -146,36 +150,32 @@ func (c *Context) config(w core.Widget) {
 		switch attr.Key {
 		case "id":
 			wb.SetName(attr.Val)
+			wb.SetProperty("id", attr.Val)
 		case "style":
-			// our CSS parser is strict about semicolons, but
-			// they aren't needed in normal inline styles in HTML
-			if !strings.HasSuffix(attr.Val, ";") {
-				attr.Val += ";"
-			}
-			decls, err := parser.ParseDeclarations(attr.Val)
-			if errors.Log(err) != nil {
-				continue
-			}
-			rule := &css.Rule{Declarations: decls}
-			if c.styles == nil {
-				c.styles = map[*html.Node][]*css.Rule{}
-			}
-			c.styles[c.Node] = append(c.styles[c.Node], rule)
+			c.setStyleAttr(c.Node, attr.Val)
 		default:
 			wb.SetProperty(attr.Key, attr.Val)
 		}
 	}
-	wb.SetProperty("tag", c.Node.Data)
-	rules := c.styles[c.Node]
-	wb.Styler(func(s *styles.Style) {
-		for _, rule := range rules {
-			for _, decl := range rule.Declarations {
-				// TODO(kai/styproperties): parent style and context
-				s.FromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
-			}
-		}
-	})
-	c.handleWidget(w)
+	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
+}
+
+func (c *Context) setStyleAttr(node *html.Node, style string) error {
+	// our CSS parser is strict about semicolons, but
+	// they aren't needed in normal inline styles in HTML
+	if !strings.HasSuffix(style, ";") {
+		style += ";"
+	}
+	decls, err := parser.ParseDeclarations(style)
+	if errors.Log(err) != nil {
+		return err
+	}
+	rule := &css.Rule{Declarations: decls}
+	if c.styles == nil {
+		c.styles = map[*html.Node][]*css.Rule{}
+	}
+	c.styles[c.Node] = append(c.styles[c.Node], rule)
+	return nil
 }
 
 // InlineParent returns the current parent widget that inline
@@ -258,9 +258,24 @@ func (c *Context) AddWidgetHandler(f func(w core.Widget)) {
 	c.WidgetHandlers = append(c.WidgetHandlers, f)
 }
 
-// handleWidget calls WidgetHandlers functions on given widget,
+func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
+	wb := w.AsWidget()
+	rules := c.styles[c.Node]
+	wb.Styler(func(s *styles.Style) {
+		for _, rule := range rules {
+			for _, decl := range rule.Declarations {
+				// TODO(kai/styproperties): parent style and context
+				s.FromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
+			}
+		}
+	})
+}
+
+// handleWidget applies accumulated style rules,
+// and calls WidgetHandlers functions on given widget,
 // in order added so last one has override priority.
-func (c *Context) handleWidget(w core.Widget) {
+func (c *Context) handleWidget(node *html.Node, w core.Widget) {
+	c.applyStyleRules(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}

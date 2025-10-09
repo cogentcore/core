@@ -309,8 +309,8 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		w.SetSlice(&fp.files)
 		w.SelectedField = "Name"
 		w.SelectedValue = fp.selectedFilename
-		if SystemSettings.FilePickerSort != "" {
-			w.setSortFieldName(SystemSettings.FilePickerSort)
+		if AppearanceSettings.FilePickerSort != "" {
+			w.setSortFieldName(AppearanceSettings.FilePickerSort)
 		}
 		w.TableStyler = func(w Widget, s *styles.Style, row, col int) {
 			fn := fp.files[row].Name
@@ -657,7 +657,7 @@ func (fp *FilePicker) saveSortSettings() {
 	if sv == nil {
 		return
 	}
-	SystemSettings.FilePickerSort = sv.sortFieldName()
+	AppearanceSettings.FilePickerSort = sv.sortFieldName()
 	// fmt.Printf("sort: %v\n", Settings.FilePickerSort)
 	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
 }

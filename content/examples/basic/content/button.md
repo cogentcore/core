@@ -1,10 +1,20 @@
 +++
 Categories = ["Widgets"]
+Authors = "Bea A. Author<sup>1</sup> and Test Ing Name<sup>2</sup>"
+Affiliations = "<sup>1</sup>University of Somwhere <sup>2</sup>University of Elsewhere"
+Abstract = "The button is an essential element of any GUI framework, with the capability of triggering actions of any sort. Actions are very important because they allow people to actually do something."
 +++
 
 A **button** is a [[widget]] that a user can click on to trigger a described action. See [[func button]] for a button [[value binding|bound]] to a function. There are various [[#types]] of buttons.
 
 ## Properties
+
+Buttons can do math? $x = y^2$ and even display math:
+
+{id="eq_math" title="Math demo"}
+$$
+y = \frac{1}{N} \left( \sum_{i=0}^{100} \frac{f(x^2)}{\sum x^2} \right)
+$$
 
 You can make a button with text:
 
@@ -89,3 +99,24 @@ Action and menu buttons are the most minimal buttons, and they are typically onl
 ```Go
 core.NewButton(b).SetType(core.ButtonAction).SetText("Action")
 ```
+
+* List item 1
+    * Sub list item 1
+    * Sub list item 2
+* List item 2
+    * Sub list item 1
+    * Sub list item 2
+* List item 3
+    * Sub list item 1
+    * Sub list item 2
+
+1. List item 1
+    1. Sub list item 1
+    2. Sub list item 2
+2. List item 2
+    1. Sub list item 1
+    2. Sub list item 2
+3. List item 3
+    1. Sub list item 1
+    2. Sub list item 2
+

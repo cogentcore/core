@@ -72,8 +72,8 @@ func RefLinks(it *Item, tx *rich.Text) {
 		tx.AddLink(link, it.URL, it.URL)
 	}
 	if it.DOI != "" {
-		url := " http://doi.org/" + it.DOI
-		tx.AddLink(link, url, url)
+		url := "http://doi.org/" + it.DOI
+		tx.AddLink(link, url, " "+url)
 	}
 }
 
@@ -118,7 +118,7 @@ func RefAPABook(it *Item) rich.Text {
 		}
 	}
 	if it.Publisher != "" {
-		tx.AddSpanString(sty, EnsurePeriod(it.Publisher)+" ")
+		tx.AddSpanString(sty, " "+EnsurePeriod(it.Publisher)+" ")
 	}
 	RefLinks(it, &tx)
 	return tx

@@ -82,7 +82,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 	pc := &pt.Context
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
-	PathToRasterx(&rs.Path, p, pt.Context.Transform, math32.Vector2{})
+	PathToRasterx(&rs.Path, p, pt.Context.Cumulative, math32.Vector2{})
 	rs.Fill(pt)
 	rs.Stroke(pt)
 	rs.Path.Clear()
@@ -120,7 +120,7 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 
 	dash := slices.Clone(sty.Stroke.Dashes)
 	if dash != nil {
-		scx, scy := pc.Transform.ExtractScale()
+		scx, scy := pc.Cumulative.ExtractScale()
 		sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
 		for i := range dash {
 			dash[i] *= sc
@@ -143,7 +143,7 @@ func (rs *Renderer) SetColor(sc Scanner, pc *render.Context, clr image.Image, op
 		fbox := sc.GetPathExtent()
 		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-		g.Update(opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
+		g.Update(opacity, math32.B2FromRect(lastRenderBBox), pc.Cumulative)
 		sc.SetColor(clr)
 	} else {
 		if opacity < 1 {
@@ -187,7 +187,7 @@ func (rs *Renderer) StrokeWidth(pt *render.Path) float32 {
 	if sty.VectorEffect == ppath.VectorEffectNonScalingStroke {
 		return dw
 	}
-	sc := MeanScale(pt.Context.Transform)
+	sc := MeanScale(pt.Context.Cumulative)
 	return sc * dw
 }
 

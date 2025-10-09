@@ -65,6 +65,11 @@ type Lines struct {
 
 	// HighlightColor is the color to use for rendering highlighted regions.
 	HighlightColor image.Image
+
+	// Anchor provides a named link destination associated with this text item.
+	// Used for document navigation, e.g., in PDF rendering. Must be a unique name.
+	// Is set in [core.Text] based on the id property, which is set by [content].
+	Anchor string
 }
 
 // Line is one line of shaped text, containing multiple Runs.

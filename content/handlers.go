@@ -6,20 +6,248 @@ package content
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/csl"
+	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
+	"github.com/gomarkdown/markdown/ast"
 )
+
+// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
+// when importing yaegicore, which provides interactive editing functionality for Go
+// code blocks in text editors.
+var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)
+
+// handles the id attribute in htmlcore: needed for equation case
+func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
+	if ct.currentPage == nil {
+		return false
+	}
+	lbl := ct.currentPage.SpecialLabel(value)
+	if lbl == "" {
+		return false
+	}
+	ch := node.GetChildren()
+	if len(ch) == 2 { // image or table
+		return false
+	}
+	if entering {
+		cp := "\n<span id=\"" + value + "\"><b>" + lbl + ":</b>"
+		title := htmlcore.MDGetAttr(node, "title")
+		if title != "" {
+			cp += " " + title
+		}
+		cp += "</span>\n"
+		w.Write([]byte(cp))
+		// fmt.Println("id:", value, lbl)
+		// fmt.Printf("%#v\n", node)
+	}
+	return false
+}
+
+func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
+	hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
+	if !hasCode {
+		return false
+	}
+	codeEl := ctx.Node.FirstChild
+	collapsed := htmlcore.GetAttr(codeEl, "collapsed")
+	lang := htmlcore.GetLanguage(htmlcore.GetAttr(codeEl, "class"))
+	id := htmlcore.GetAttr(codeEl, "id")
+	title := htmlcore.GetAttr(codeEl, "title")
+	var ed *textcore.Editor
+	parent := ctx.Parent().AsWidget()
+	fr := core.NewFrame(parent.This)
+	fr.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
+	})
+	fr.SetProperty("paginate-block", true) // no split
+	if id != "" {
+		fr.SetProperty("id", id)
+		fr.SetName(id)
+		ttx := parent.Children[parent.NumChildren()-2].(core.Widget)
+		ttx.AsWidget().SetProperty("id", id) // link target
+		tree.MoveToParent(ttx, fr)           // get title text
+	}
+	if collapsed != "" {
+		cl := core.NewCollapser(fr)
+		core.NewText(cl.Summary).SetText("Code").SetText(title)
+		ed = textcore.NewEditor(cl.Details)
+		if collapsed == "false" || collapsed == "-" {
+			cl.Open = true
+		}
+	} else {
+		ed = textcore.NewEditor(fr)
+	}
+	ctx.Node = codeEl
+	if lang != "" {
+		ed.Lines.SetFileExt(lang)
+	}
+	ed.Lines.SetString(htmlcore.ExtractText(ctx))
+	if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
+		ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
+		parFrame := core.NewFrame(fr)
+		parFrame.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.Set(1, 0)
+		})
+		// we inherit our Grow.Y from our first child so that
+		// elements that want to grow can do so
+		parFrame.SetOnChildAdded(func(n tree.Node) {
+			if _, ok := n.(*core.Body); ok { // Body should not grow
+				return
+			}
+			wb := core.AsWidget(n)
+			if wb.IndexInParent() != 0 {
+				return
+			}
+			wb.FinalStyler(func(s *styles.Style) {
+				parFrame.Styles.Grow.Y = s.Grow.Y
+			})
+		})
+		BindTextEditor(ed, parFrame, lang)
+	} else {
+		ed.SetReadOnly(true)
+		ed.Lines.Settings.LineNumbers = false
+		ed.Styler(func(s *styles.Style) {
+			s.Border.Width.Zero()
+			s.MaxBorder.Width.Zero()
+			s.StateLayer = 0
+			s.Background = colors.Scheme.SurfaceContainer
+		})
+	}
+	return true
+}
+
+// widgetHandler is htmlcore widget handler for adding our own actions etc.
+func (ct *Content) widgetHandler(w core.Widget) {
+	tag := ""
+	id := ""
+	title := ""
+	wb := w.AsWidget()
+	if t, ok := wb.Properties["tag"]; ok {
+		tag = t.(string)
+	}
+	if t, ok := wb.Properties["id"]; ok {
+		id = t.(string)
+	}
+	if t, ok := wb.Properties["title"]; ok {
+		title = t.(string)
+	}
+	switch x := w.(type) {
+	case *core.Text:
+		hdr := len(tag) > 0 && tag[0] == 'h'
+		x.Styler(func(s *styles.Style) {
+			s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+			s.Max.X.In(8) // big enough to not constrain PDF render
+			if hdr {
+				x.SetProperty("paginate-no-break-after", true)
+			}
+		})
+	case *core.Image:
+		ct.widgetHandlerFigure(w, id)
+		x.OnDoubleClick(func(e events.Event) {
+			d := core.NewBody("Image")
+			core.NewImage(d).SetImage(x.Image)
+			d.RunWindowDialog(x)
+		})
+	case *core.SVG:
+		ct.widgetHandlerFigure(w, id)
+		x.OnDoubleClick(func(e events.Event) {
+			d := core.NewBody("SVG")
+			sv := core.NewSVG(d)
+			sv.SVG = x.SVG
+			d.RunWindowDialog(x)
+		})
+	case *core.Frame:
+		switch tag {
+		case "table":
+			x.Styler(func(s *styles.Style) {
+				s.Align.Self = styles.Center
+			})
+			if id == "" {
+				break
+			}
+			lbl := ct.currentPage.SpecialLabel(id)
+			cp := "<b>" + lbl + ":</b>"
+			if title != "" {
+				cp += " " + title
+			}
+			ct.moveToBlockFrame(w, id, cp, true)
+		}
+	}
+}
+
+// moveToBlockFrame moves given widget into a block frame with given text
+// widget either at the top or bottom of the new frame.
+func (ct *Content) moveToBlockFrame(w core.Widget, id, txt string, top bool) {
+	wb := w.AsWidget()
+	fr := core.NewFrame(wb.Parent)
+	fr.Styler(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
+	})
+	fr.SetProperty("paginate-block", true) // no split
+	fr.SetProperty("id", id)
+	fr.SetName(id)
+	var tx *core.Text
+	if top {
+		tx = core.NewText(fr).SetText(txt)
+		tx.SetProperty("id", id) // good link destination
+	}
+	tree.MoveToParent(w, fr)
+	if !top {
+		tx = core.NewText(fr).SetText(txt)
+		wb.SetProperty("id", id) // link here
+	}
+	tx.Styler(func(s *styles.Style) {
+		s.Max.X.In(8)
+		s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+	})
+}
+
+func (ct *Content) widgetHandlerFigure(w core.Widget, id string) {
+	wb := w.AsWidget()
+	fig := false
+	alt := ""
+	if p, ok := wb.Properties["alt"]; ok {
+		alt = p.(string)
+	}
+	if alt != "" && id != "" {
+		fig = true
+	}
+	wb.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
+		s.Overflow.Set(styles.OverflowAuto)
+		if fig {
+			s.Align.Self = styles.Center
+		}
+	})
+	if !fig {
+		return
+	}
+	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
+	lbl := ct.currentPage.SpecialLabel(id)
+	lbf := "<b>" + lbl + ":</b> " + string(altf) + "<br> <br> "
+	ct.moveToBlockFrame(w, id, lbf, false)
+}
 
 // citeWikilink processes citation links, which start with @
 func (ct *Content) citeWikilink(text string) (url string, label string) {
@@ -32,7 +260,11 @@ func (ct *Content) citeWikilink(text string) (url string, label string) {
 		cs = csl.Narrative
 		ref = ref[1:]
 	}
-	url = "ref://" + ref
+	if ct.inPDFRender {
+		url = "#" + ref
+	} else {
+		url = "ref://" + ref
+	}
 	if ct.References == nil {
 		return url, ref
 	}
@@ -74,6 +306,16 @@ func (ct *Content) mainWikilink(text string) (url string, label string) {
 			label = name
 		}
 	}
+	if ct.inPDFRender {
+		if heading != "" {
+			if pg == ct.currentPage {
+				return "#" + heading, label
+			}
+			return ct.getPrintURL() + "/" + pg.URL + "#" + heading, label
+		}
+		return ct.getPrintURL() + "/" + pg.URL, label
+	}
+
 	if heading != "" {
 		return pg.URL + "#" + heading, label
 	}

@@ -37,9 +37,12 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 	rend := pc.RenderDone()
 	ir := NewImageRenderer(size)
 	sv := NewSVGRenderer(size)
+	pd := NewPDFRenderer(size, &pc.Context().Style.UnitContext)
 	ir.Render(rend)
 	sv.Render(rend)
+	pd.Render(rend)
 	imagex.Assert(t, ir.Image(), nm)
+
 	svdir := filepath.Join("testdata", "svg")
 	dp, fno := filepath.Split(nm)
 	if dp != "" {
@@ -49,6 +52,15 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 	os.MkdirAll(svdir, 0777)
 	svfnm := filepath.Join(svdir, nm) + ".svg"
 	err := os.WriteFile(svfnm, sv.Source(), 0666)
+	assert.NoError(t, err)
+
+	pddir := filepath.Join("testdata", "pdf")
+	if dp != "" {
+		pddir = filepath.Join(pddir, dp)
+	}
+	os.MkdirAll(pddir, 0777)
+	pdfnm := filepath.Join(pddir, nm) + ".pdf"
+	err = os.WriteFile(pdfnm, pd.Source(), 0666)
 	assert.NoError(t, err)
 }
 
@@ -98,7 +110,7 @@ func TestRender(t *testing.T) {
 
 		tx, err := htmltext.HTMLToRich([]byte("This is <a>HTML</a> <b>formatted</b> <i>text</i>"), fsty, nil)
 		assert.NoError(t, err)
-		lns := txtSh.WrapLines(tx, fsty, tsty, &rich.DefaultSettings, math32.Vec2(100, 60))
+		lns := txtSh.WrapLines(tx, fsty, tsty, math32.Vec2(100, 60))
 		// if tsz.X != 100 || tsz.Y != 60 {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }

@@ -131,7 +131,7 @@ func (fr *Frame) Init() {
 				return
 			case keymap.PageDown:
 				proc := false
-				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
+				for st := 0; st < TimingSettings.LayoutPageSteps; st++ {
 					if !fr.focusNextChild(true) {
 						break
 					}
@@ -143,7 +143,7 @@ func (fr *Frame) Init() {
 				return
 			case keymap.PageUp:
 				proc := false
-				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
+				for st := 0; st < TimingSettings.LayoutPageSteps; st++ {
 					if !fr.focusPreviousChild(true) {
 						break
 					}
@@ -381,13 +381,13 @@ func (fr *Frame) focusOnName(e events.Event) bool {
 	delay := e.Time().Sub(fr.focusNameTime)
 	fr.focusNameTime = e.Time()
 	if kf == keymap.FocusNext { // tab means go to next match -- don't worry about time
-		if fr.focusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
+		if fr.focusName == "" || delay > TimingSettings.LayoutFocusNameTabTime {
 			fr.focusName = ""
 			fr.focusNameLast = nil
 			return false
 		}
 	} else {
-		if delay > SystemSettings.LayoutFocusNameTimeout {
+		if delay > TimingSettings.LayoutFocusNameTimeout {
 			fr.focusName = ""
 		}
 		if !unicode.IsPrint(e.KeyRune()) || e.Modifiers() != 0 {
@@ -487,9 +487,6 @@ func (sp *Space) Init() {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
-		s.Padding.Zero()
-		s.Margin.Zero()
-		s.MaxBorder.Width.Zero()
-		s.Border.Width.Zero()
+		s.ZeroSpace()
 	})
 }

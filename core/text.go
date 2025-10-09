@@ -119,6 +119,13 @@ const (
 
 func (tx *Text) WidgetValue() any { return &tx.Text }
 
+// PaintText returns the shaped representation of the text,
+// which is needed for some specific special-case rendering
+// situations.
+func (tx *Text) PaintText() *shaped.Lines {
+	return tx.paintText
+}
+
 func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.AddContextMenu(tx.contextMenu)
@@ -420,7 +427,10 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	}
 	sty, tsty := tx.Styles.NewRichText()
 	tsty.Align, tsty.AlignV = text.Start, text.Start
-	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, sz)
+	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, sz)
+	if id, ok := tx.Properties["id"]; ok {
+		tx.paintText.Anchor = id.(string)
+	}
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -441,10 +451,13 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	if tsty.Align != text.Start && tsty.AlignV != text.Start {
 		etxs := *tsty
 		etxs.Align, etxs.AlignV = text.Start, text.Start
-		tx.paintText = tsh.WrapLines(tx.richText, sty, &etxs, &AppearanceSettings.Text, rsz)
+		tx.paintText = tsh.WrapLines(tx.richText, sty, &etxs, rsz)
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
-	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, &AppearanceSettings.Text, rsz)
+	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, rsz)
+	if id, ok := tx.Properties["id"]; ok {
+		tx.paintText.Anchor = id.(string)
+	}
 	return tx.paintText.Bounds.Size().Ceil()
 }
 
@@ -463,7 +476,7 @@ func (tx *Text) SizeUp() {
 	}
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
@@ -480,7 +493,7 @@ func (tx *Text) SizeDown(iter int) bool {
 	// start over so we don't reflect hysteresis of prior guess
 	sz.setInitContentMin(tx.Styles.Min.Dots().Ceil())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.setTotalFromContent(&sz.Actual)
+	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
 		if DebugSettings.LayoutTrace {

@@ -124,13 +124,13 @@ func toValue(value any, tags reflect.StructTag) Value {
 		return NewSwitch()
 	case kind == reflect.Struct:
 		num := reflectx.NumAllFields(uv)
-		if !noInline && (inline || num <= SystemSettings.StructInlineLength) {
+		if !noInline && (inline || num <= AppearanceSettings.InlineLengths.Struct) {
 			return NewForm().SetInline(true)
 		}
 		return NewFormButton()
 	case kind == reflect.Map:
 		len := uv.Len()
-		if !noInline && (inline || len <= SystemSettings.MapInlineLength) {
+		if !noInline && (inline || len <= AppearanceSettings.InlineLengths.Map) {
 			return NewKeyedList().SetInline(true)
 		}
 		return NewKeyedListButton()
@@ -144,7 +144,7 @@ func toValue(value any, tags reflect.StructTag) Value {
 			return NewTextField()
 		}
 		isStruct := (reflectx.NonPointerType(elemType).Kind() == reflect.Struct)
-		if !noInline && (inline || (!isStruct && sz <= SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
+		if !noInline && (inline || (!isStruct && sz <= AppearanceSettings.InlineLengths.Slice && !tree.IsNode(elemType))) {
 			return NewInlineList()
 		}
 		return NewListButton()

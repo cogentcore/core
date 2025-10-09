@@ -100,6 +100,9 @@ type Scene struct { //core:no-new
 	// instead of rendering into the Scene Painter.
 	directRenders []Widget
 
+	// this is our own text shaper in case we don't have a render context
+	textShaper shaped.Shaper
+
 	// flags are atomic bit flags for [Scene] state.
 	flags sceneFlags
 }
@@ -248,6 +251,15 @@ func (sc *Scene) renderContext() *renderContext {
 	return sm.renderContext
 }
 
+// MakeTextShaper makes our own text shaper for offline use,
+// if not already in place.
+func (sc *Scene) MakeTextShaper() shaped.Shaper {
+	if sc.textShaper == nil {
+		sc.textShaper = shaped.NewShaper()
+	}
+	return sc.textShaper
+}
+
 // TextShaper returns the current [shaped.TextShaper], for text shaping.
 // may be nil if not yet initialized.
 func (sc *Scene) TextShaper() shaped.Shaper {
@@ -255,7 +267,7 @@ func (sc *Scene) TextShaper() shaped.Shaper {
 	if rc != nil {
 		return rc.textShaper
 	}
-	return nil
+	return sc.textShaper
 }
 
 // RenderWindow returns the current render window for this scene.
@@ -278,12 +290,12 @@ func (sc *Scene) RenderWindow() *renderWindow {
 func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) bool {
 	geom := sc.SceneGeom
 	geom = geom.FitInWindow(winGeom)
-	return sc.resize(geom)
+	return sc.Resize(geom)
 }
 
-// resize resizes the scene if needed, creating a new image; updates Geom.
+// Resize resizes the scene if needed, creating a new image; updates Geom.
 // returns false if the scene is already the correct size.
-func (sc *Scene) resize(geom math32.Geom2DInt) bool {
+func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return false
 	}

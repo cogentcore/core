@@ -25,9 +25,10 @@ import (
 
 // Renderer is an HTML canvas renderer.
 type Renderer struct {
-	Canvas js.Value
-	ctx    js.Value
-	size   math32.Vector2
+	Canvas      js.Value
+	ctx         js.Value
+	size        math32.Vector2
+	unitContext units.Context
 
 	// curRect is the rectangle of the current object.
 	curRect image.Rectangle

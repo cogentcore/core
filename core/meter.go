@@ -147,7 +147,7 @@ func (m *Meter) Render() {
 	if m.Text != "" {
 		sty, tsty := m.Styles.NewRichText()
 		tx, _ := htmltext.HTMLToRich([]byte(m.Text), sty, nil)
-		txt = m.Scene.TextShaper().WrapLines(tx, sty, tsty, &AppearanceSettings.Text, size)
+		txt = m.Scene.TextShaper().WrapLines(tx, sty, tsty, size)
 		toff = txt.Bounds.Size().DivScalar(2)
 	}
 
