@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pdf"
 	"cogentcore.org/core/paint/renderers/pdfrender"
@@ -36,11 +35,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	p.assemble()
 	p.paginate()
 
-	sc := core.NewScene()
-	sz := math32.Geom2DInt{}
-	sz.Size = opts.SizeDots.ToPointCeil()
-	sc.Resize(sz)
-	sc.MakeTextShaper()
+	sc := p.offScene()
 
 	pdr := paint.NewPDFRenderer(opts.SizeDots, &p.ctx).(*pdfrender.Renderer)
 	pdr.StartRender(w)

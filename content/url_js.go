@@ -26,7 +26,10 @@ var (
 	OfflineURL = ""
 )
 
-func (ct *Content) getPrintURL() string { return ct.getWebURL() }
+func (ct *Content) getPrintURL() string {
+	p := originalBase.String()
+	return p[:len(p)-1]
+}
 
 // getWebURL returns the current relative web URL that should be passed to [Content.Open]
 // on startup and in [Content.handleWebPopState].

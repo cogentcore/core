@@ -1194,7 +1194,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keymap.WinSnapshot:
-		img := sc.renderer.Image()
+		img := sc.Renderer.Image()
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
 		var sz string
 		if img != nil {
