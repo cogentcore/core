@@ -116,12 +116,7 @@ func (p *pager) preRender(its []*item) {
 		page, body = fr, fr
 		return
 	})
-	sc := core.NewScene()
-	sz := math32.Geom2DInt{}
-	sz.Size = p.opts.SizeDots.ToPointCeil()
-	sc.Resize(sz)
-	sc.MakeTextShaper()
-
+	sc := p.offScene()
 	tree.MoveToParent(op[0], sc)
 	op[0].SetScene(sc)
 	sc.StyleTree()

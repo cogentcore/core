@@ -86,7 +86,7 @@ type Scene struct { //core:no-new
 	selectedWidgetChan chan Widget `json:"-" xml:"-"`
 
 	// source renderer for rendering the scene
-	renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	Renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
@@ -305,8 +305,8 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	}
 	sc.SceneGeom.Pos = geom.Pos
-	if sc.renderer != nil {
-		img := sc.renderer.Image()
+	if sc.Renderer != nil {
+		img := sc.Renderer.Image()
 		if img != nil {
 			isz := img.Bounds().Size()
 			if isz == geom.Size {
@@ -314,11 +314,11 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 			}
 		}
 	} else {
-		sc.renderer = paint.NewSourceRenderer(sz)
+		sc.Renderer = paint.NewSourceRenderer(sz)
 	}
 	sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	sc.Painter.State.Init(sc.Painter.Paint, sz)
-	sc.renderer.SetSize(units.UnitDot, sz)
+	sc.Renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	sc.updateScene()
