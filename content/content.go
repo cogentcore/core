@@ -129,6 +129,7 @@ func (ct *Content) Init() {
 	ct.SetSplits(0.2, 0.8)
 
 	ct.Context = htmlcore.NewContext()
+	ct.Context.DelayedImageLoad = false // not useful for content
 	ct.Context.OpenURL = func(url string) {
 		ct.Open(url)
 	}
