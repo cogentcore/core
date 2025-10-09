@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"image"
 	"io"
-	"strconv"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/stack"
@@ -30,8 +29,8 @@ type Renderer struct {
 
 	buff *bytes.Buffer
 
-	// lyStack is a stack of layers used while building the pdf (int layer id)
-	lyStack stack.Stack[int]
+	// gStack is a stack of graphic state context in the PDF
+	gStack stack.Stack[int]
 }
 
 func New(size math32.Vector2, un *units.Context) render.Renderer {
@@ -77,7 +76,7 @@ func (rs *Renderer) StartRender(w io.Writer) {
 	sx := rs.unitContext.Convert(float32(rs.size.X), rs.sizeUnits, units.UnitPt)
 	sy := rs.unitContext.Convert(float32(rs.size.Y), rs.sizeUnits, units.UnitPt)
 	rs.PDF = pdf.New(w, sx, sy, &rs.unitContext)
-	rs.lyStack = nil
+	rs.gStack = nil
 }
 
 // EndRender finishes the render
@@ -110,18 +109,21 @@ func (rs *Renderer) RenderPage(r render.Render) {
 	}
 }
 
-func (rs *Renderer) PushLayer(m math32.Matrix2) int {
-	cg := rs.lyStack.Peek()
-	nm := strconv.Itoa(cg + 1)
-	g := rs.PDF.AddLayer(nm, true)
-	rs.PDF.BeginLayer(g, m)
-	rs.lyStack.Push(g)
+func (rs *Renderer) PushTransform(m math32.Matrix2) int {
+	cg := rs.gStack.Peek()
+	g := cg + 1
+	if m.IsIdentity() {
+		rs.PDF.PushStack()
+	} else {
+		rs.PDF.PushTransform(m)
+	}
+	rs.gStack.Push(g)
 	return g
 }
 
-func (rs *Renderer) PopLayer() int {
-	cg := rs.lyStack.Pop()
-	rs.PDF.EndLayer()
+func (rs *Renderer) PopStack() int {
+	cg := rs.gStack.Pop()
+	rs.PDF.PopStack()
 	return cg
 }
 
@@ -132,11 +134,11 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 }
 
 func (rs *Renderer) PushContext(pt *render.ContextPush) {
-	rs.PushLayer(pt.Context.Transform)
+	rs.PushTransform(pt.Context.Transform)
 }
 
 func (rs *Renderer) PopContext(pt *render.ContextPop) {
-	rs.PopLayer()
+	rs.PopStack()
 }
 
 func (rs *Renderer) RenderText(pt *render.Text) {

@@ -136,3 +136,28 @@ func TestLinks(t *testing.T) {
 		RestorePreviousFonts(prv)
 	})
 }
+
+func TestLayers(t *testing.T) {
+	RunTest(t, "layers", 300, 300, func(pd *PDF, sty *styles.Paint) {
+		prv := UseStandardFonts()
+		sh := shaped.NewShaper()
+
+		src := "PDF can put <b>HTML</b> <br>formatted Text where you <i>want</i>"
+		rsty := &sty.Font
+		tsty := &sty.Text
+
+		tx, err := htmltext.HTMLToRich([]byte(src), rsty, nil)
+		// fmt.Println(tx)
+		assert.NoError(t, err)
+		lns := sh.WrapLines(tx, rsty, tsty, math32.Vec2(250, 250))
+
+		// mi := math32.Identity2()
+		mr := math32.Rotate2D(math32.DegToRad(15))
+
+		g := pd.AddLayer("first layer", true)
+		pd.BeginLayer(g)
+		pd.Text(sty, mr, math32.Vec2(20, 20), lns)
+		pd.EndLayer()
+		RestorePreviousFonts(prv)
+	})
+}

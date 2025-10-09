@@ -103,7 +103,9 @@ func (w *pdfPage) SetFillColor(fill *styles.Fill) {
 			clr = colors.ApplyOpacity(colors.AsRGBA(x), fill.Opacity)
 		}
 		a := float32(clr.A) / 255.0
-		if clr.R == clr.G && clr.R == clr.B {
+		if a == 0 {
+			fmt.Fprintf(w, " 0 g")
+		} else if clr.R == clr.G && clr.R == clr.B {
 			fmt.Fprintf(w, " %v g", dec(float32(clr.R)/255.0/a))
 		} else {
 			fmt.Fprintf(w, " %v %v %v rg", dec(float32(clr.R)/255.0/a), dec(float32(clr.G)/255.0/a), dec(float32(clr.B)/255.0/a))

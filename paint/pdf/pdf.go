@@ -122,24 +122,42 @@ func (r *PDF) AddLayer(name string, visible bool) (layerID int) {
 	return r.w.pdf.AddLayer(name, visible)
 }
 
-// BeginLayer is called to begin adding content to the specified layer. All
-// content added to the page between a call to BeginLayer and a call to
+// BeginLayer is called to begin adding content to the specified layer.
+// All content added to the page between a call to BeginLayer and a call to
 // EndLayer is added to the layer specified by id. See AddLayer for more
-// details. Also adds a graphics stack push, and sets the given transform
-// matrix, if not identity.
-func (r *PDF) BeginLayer(id int, m math32.Matrix2) {
-	r.w.pdf.BeginLayer(id)
-	r.w.PushStack()
-	if !m.IsIdentity() {
-		r.w.SetTransform(m)
-	}
+// details.
+func (r *PDF) BeginLayer(id int) {
+	r.w.BeginLayer(id)
 }
 
-// EndLayer is called to stop adding content to the currently active layer. See
-// BeginLayer for more details.
+// EndLayer is called to stop adding content to the currently active layer.
+// See BeginLayer for more details.
 func (r *PDF) EndLayer() {
+	r.w.EndLayer()
+}
+
+// PushStack adds a graphics stack push, which must
+// be paired with a corresponding Pop.
+func (r *PDF) PushStack() {
+	r.w.PushStack()
+}
+
+// PopStack adds a graphics stack pop which must
+// be paired with a corresponding Push.
+func (r *PDF) PopStack() {
 	r.w.PopStack()
-	r.w.pdf.EndLayer()
+}
+
+// SetTransform adds a cm to set the current matrix transform (CMT).
+func (r *PDF) SetTransform(m math32.Matrix2) {
+	r.w.SetTransform(m)
+}
+
+// PushTransform adds a graphics stack push (q) and then
+// cm to set the current matrix transform (CMT).
+func (r *PDF) PushTransform(m math32.Matrix2) {
+	r.PushStack()
+	r.SetTransform(m)
 }
 
 // Path renders a path to the canvas using a style and a transformation matrix.

@@ -47,7 +47,6 @@ func (s *SettingsData) Defaults() {
 			pt = ps.SiteTitle + ": " + pt
 		}
 		ps.PDF.Header = paginate.NoFirst(paginate.HeaderLeftPageNumber(pt))
-		// todo: add affiliations and abstract
 		ur := ct.getPrintURL() + "/" + curPage.URL
 		ura := `<a href="` + ur + `">` + ur + `</a>`
 		dt := ""

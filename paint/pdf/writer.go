@@ -288,9 +288,6 @@ func (w *pdfWriter) writeVal(i interface{}) {
 		w.write("stream\n")
 		w.writeBytes(b)
 		w.write("\nendstream\n")
-	case *pdfLayer:
-		v.objNum = len(w.objOffsets)
-		w.write("<</Type /OCG /Name %s>>", pdfName(v.name))
 	default:
 		// panic(fmt.Sprintf("unknown PDF type %T", i))
 	}
@@ -420,6 +417,23 @@ func (w *pdfWriter) Close() error {
 		catalog[pdfName("Names")] = pdfDict{"Dests": nmref}
 	}
 
+	if len(w.layers.list) > 0 {
+		var refs, off pdfArray
+		for _, l := range w.layers.list {
+			refs = append(refs, l.ref)
+			if !l.visible {
+				off = append(off, l.ref)
+			}
+		}
+		catalog[pdfName("OCProperties")] = pdfDict{
+			"OCGs": refs,
+			"D":    pdfDict{"OFF": off, "Order": refs},
+		}
+		if w.layers.openLayerPane {
+			catalog[pdfName("PageMode")] = pdfName("UseOC")
+		}
+	}
+
 	// document info
 	info := pdfDict{
 		"Producer":     "cogentcore/pdf",
@@ -472,14 +486,12 @@ func (w *pdfWriter) Close() error {
 	w.objOffsets[0] = w.pos
 	w.write("%v 0 obj\n", 1)
 	w.writeVal(catalog)
-	w.writeLayerCatalog()
 	w.write("\nendobj\n")
 
 	// document info
 	w.objOffsets[1] = w.pos
 	w.write("%v 0 obj\n", 2)
 	w.writeVal(info)
-	w.writeLayerResourceDict()
 	w.write("\nendobj\n")
 
 	// page tree
