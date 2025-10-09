@@ -70,7 +70,7 @@ func (mb *MeshButton) Init() {
 TODO: This doesn't work because texture is on Material which doesn't have a pointer to the Scene! (https://github.com/cogentcore/core/issues/1023)
 
 // Value restylesers TexValue as the viewer of TexName
-func (mn TexName) Value() core.Value {
+func (mn TexName) Widget() core.Value {
 	vv := TexValue{}
 	vv.Init(&vv)
 	return &vv

@@ -14,7 +14,7 @@ require (
 	github.com/chewxy/math32 v1.10.1
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/webgpu v0.23.0
-	github.com/cogentcore/yaegi v0.0.0-20240724064145-e32a03faad56
+	github.com/cogentcore/yaegi v0.0.0-20250622201820-b7838bdd95eb
 	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/ericchiang/css v1.3.0
 	github.com/faiface/beep v1.1.0
@@ -23,6 +23,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-text/typesetting v0.3.1-0.20250402122313-7a0f05577ff5
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
+	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
@@ -38,9 +39,9 @@ require (
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.25.0
 	golang.org/x/net v0.38.0
-	golang.org/x/oauth2 v0.20.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/sys v0.31.0
-	golang.org/x/tools v0.23.0
+	golang.org/x/tools v0.29.0
 	gopkg.in/yaml.v3 v3.0.1
 	star-tex.org/x/tex v0.6.0
 )
@@ -65,7 +66,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
-	golang.org/x/mod v0.19.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect

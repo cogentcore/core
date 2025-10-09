@@ -213,6 +213,30 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
+#### Custom
+
+You can manually set the position of widgets:
+
+```Go
+fr := core.NewFrame(b)
+fr.Styler(func(s *styles.Style) {
+    s.Display = styles.Custom
+    s.Min.Set(units.Dp(250))
+})
+first := core.NewButton(fr).SetText("First")
+first.Styler(func(s *styles.Style) {
+    s.Pos.Set(units.Dp(10), units.Dp(50))
+})
+second := core.NewButton(fr).SetText("Second")
+second.Styler(func(s *styles.Style) {
+    s.Pos.Set(units.Dp(100), units.Dp(30))
+})
+third := core.NewButton(fr).SetText("Third")
+third.Styler(func(s *styles.Style) {
+    s.Pos.Set(units.Dp(150), units.Dp(150))
+})
+```
+
 ### Alignment
 
 *Note: we recommend experimenting with alignment properties in the [[style playground]] to get a better sense of how they work.*

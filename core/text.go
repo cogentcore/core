@@ -234,6 +234,19 @@ func (tx *Text) Init() {
 			tx.Styles.Cursor = tx.normalCursor
 		}
 	})
+	tx.OnFinal(events.Click, func(e events.Event) {
+		if !TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+		if tx.StateIs(states.Attended) { // toggle attention with clicking
+			// this allows drag scrolling to proceed.
+			e.SetHandled()
+			em := tx.Events()
+			if em != nil {
+				em.setAttend(nil)
+			}
+		}
+	})
 	tx.On(events.DoubleClick, func(e events.Event) {
 		e.SetHandled()
 		tx.selectWord(tx.pixelToRune(e.Pos()))
@@ -476,6 +489,13 @@ func (tx *Text) SizeDown(iter int) bool {
 	}
 	return chg
 }
+
+// todo: could enable this if we see any stragglers
+// func (tx *Text) SizeFinal() {
+// 	tx.WidgetBase.SizeFinal()
+// 	asz := tx.Geom.Size.Actual.Content
+// 	tx.configTextAlloc(asz)
+// }
 
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()

@@ -14,19 +14,14 @@ import (
 	"sync/atomic"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
 	"github.com/cogentcore/yaegi/interp"
-)
-
-var (
-	// interpOutput is the output buffer for catching yaegi stdout.
-	interpOutput bytes.Buffer
 )
 
 // Interpreters is a map from language names (such as "Go") to functions that create a
@@ -55,22 +50,36 @@ type Interpreter interface {
 	Eval(src string) (res reflect.Value, err error)
 }
 
-var autoPlanNameCounter uint64
-
 func init() {
 	htmlcore.BindTextEditor = BindTextEditor
+	content.NewPageInitFunc = ResetGoalInterpreter
 	coresymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 	basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 }
 
-var currentGoalInterpreter Interpreter
+var (
+	autoPlanNameCounter uint64
 
-// interpreterParent is used to store the parent widget ("b") for the interpreter.
-// It exists (as a double pointer) such that it can be updated after-the-fact, such
-// as in Cogent Lab/Goal where interpreters are re-used across multiple text editors,
-// wherein the parent widget must be remotely controllable with a double pointer to
-// keep the parent widget up-to-date.
-var interpreterParent = new(*core.Frame)
+	currentGoalInterpreter Interpreter
+
+	// interpreterParent is used to store the parent widget ("b") for the interpreter.
+	// It exists (as a double pointer) such that it can be updated after-the-fact, such
+	// as in Cogent Lab/Goal where interpreters are re-used across multiple text editors,
+	// wherein the parent widget must be remotely controllable with a double pointer to
+	// keep the parent widget up-to-date.
+	interpreterParent = new(*core.Frame)
+
+	// interpOutput is the output buffer for catching yaegi stdout.
+	// It must be a global variable because Goal re-uses the same interpreter,
+	// so it cannot be a local variable in [BindTextEditor].
+	interpOutput bytes.Buffer
+)
+
+// ResetGoalInterpreter resets the current goal interpreter to nil
+// so that a new one will be made. Content does this for new pages.
+func ResetGoalInterpreter() {
+	currentGoalInterpreter = nil
+}
 
 // getInterpreter returns a new interpreter for the given language,
 // or [currentGoalInterpreter] if the language is "Goal" and it is non-nil.
@@ -117,7 +126,10 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 
 		parent.DeleteChildren()
 		str := ed.Lines.String()
-		// all Go code must be in a function for declarations to be handled correctly
+		// Go code must be in a function for type declarations to be handled
+		// correctly (the author can place a main function around a block of code
+		// and have declarations outside of it, but if there is no main function,
+		// we put everything in one so the code runs). This causes problems in Goal.
 		if language == "Go" && !strings.Contains(str, "func main()") {
 			str = "func main() {\n" + str + "\n}"
 		}
@@ -126,11 +138,9 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		ostr := interpOutput.String()
 		if len(ostr) > 0 {
 			out := textcore.NewEditor(parent)
-			out.Styler(func(s *styles.Style) {
-				s.SetReadOnly(true)
-			})
+			out.SetReadOnly(true)
 			out.Lines.Settings.LineNumbers = false
-			out.Lines.SetText([]byte(ostr))
+			out.Lines.SetString(ostr)
 		}
 		if err != nil {
 			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))

@@ -103,6 +103,11 @@ type Style struct { //types:add
 	// its default value of true in most circumstances, but it can be set to false
 	// when the element is fully managed by something that is guaranteed to render the
 	// appropriate background color and/or border for the element.
+	//
+	// If you want to overlay widgets on top of each other, you might want
+	// to use RenderBox so that the widget(s) on top do not fully obscure
+	// the widgets below. (To place widgets on top of each other,
+	// set [Style.Display] = [Custom] on the parent widget).
 	RenderBox bool
 
 	// FillMargin determines is whether to fill the margin with
@@ -191,19 +196,21 @@ type Style struct { //types:add
 	// has [Style.Display] = [Custom].
 	Pos units.XY `display:"inline"`
 
-	// ordering factor for rendering depth -- lower numbers rendered first.
-	// Sort children according to this factor
-	ZIndex int
+	// TODO: support these properties
 
-	// specifies the row that this element should appear within a grid layout
-	Row int
+	// // ordering factor for rendering depth -- lower numbers rendered first.
+	// // Sort children according to this factor
+	// ZIndex int
 
-	// specifies the column that this element should appear within a grid layout
-	Col int
+	// // specifies the row that this element should appear within a grid layout
+	// Row int
 
-	// specifies the number of sequential rows that this element should occupy
-	// within a grid layout (todo: not currently supported)
-	RowSpan int
+	// // specifies the column that this element should appear within a grid layout
+	// Col int
+
+	// // specifies the number of sequential rows that this element should occupy
+	// // within a grid layout (todo: not currently supported)
+	// RowSpan int
 
 	// specifies the number of sequential columns that this element should occupy
 	// within a grid layout

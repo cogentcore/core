@@ -30,8 +30,8 @@ type TestingT interface {
 // and it should only be set once and then turned back off.
 var UpdateTestImages = updateTestImages
 
-// CompareUint8 returns true if two numbers are more different than tol
-func CompareUint8(cc, ic uint8, tol int) bool {
+// Uint8Equal returns true if two numbers are within tol
+func Uint8Equal(cc, ic uint8, tol int) bool {
 	d := int(cc) - int(ic)
 	if d < -tol {
 		return false
@@ -42,18 +42,18 @@ func CompareUint8(cc, ic uint8, tol int) bool {
 	return true
 }
 
-// CompareColors returns true if two colors are more different than tol
-func CompareColors(cc, ic color.RGBA, tol int) bool {
-	if !CompareUint8(cc.R, ic.R, tol) {
+// ColorsEqual returns true if two colors equal within tol
+func ColorsEqual(cc, ic color.RGBA, tol int) bool {
+	if !Uint8Equal(cc.R, ic.R, tol) {
 		return false
 	}
-	if !CompareUint8(cc.G, ic.G, tol) {
+	if !Uint8Equal(cc.G, ic.G, tol) {
 		return false
 	}
-	if !CompareUint8(cc.B, ic.B, tol) {
+	if !Uint8Equal(cc.B, ic.B, tol) {
 		return false
 	}
-	if !CompareUint8(cc.A, ic.A, tol) {
+	if !Uint8Equal(cc.A, ic.A, tol) {
 		return false
 	}
 	return true
@@ -61,6 +61,7 @@ func CompareColors(cc, ic color.RGBA, tol int) bool {
 
 // DiffImage returns the difference between two images,
 // with pixels having the abs of the difference between pixels.
+// Images must have the same bounds.
 func DiffImage(a, b image.Image) image.Image {
 	ab := a.Bounds()
 	di := image.NewRGBA(ab)
@@ -78,6 +79,31 @@ func DiffImage(a, b image.Image) image.Image {
 	return di
 }
 
+// ImagesEqual compares two images, returns false if not equal,
+// based on bounds or content. If a content difference, then
+// the colors and pixel where they first differ are returned.
+// The first image is considered the reference, correct one.
+// Tol is the color tolerance.
+func ImagesEqual(a, b image.Image, tol int) (bounds, content bool, ac, bc color.RGBA, x, y int) {
+	abounds := a.Bounds()
+	bbounds := b.Bounds()
+	if bbounds != abounds {
+		return
+	}
+	bounds = true
+	for y = abounds.Min.Y; y < abounds.Max.Y; y++ {
+		for x = abounds.Min.X; x < abounds.Max.X; x++ {
+			ac = color.RGBAModel.Convert(a.At(x, y)).(color.RGBA)
+			bc = color.RGBAModel.Convert(b.At(x, y)).(color.RGBA)
+			if !ColorsEqual(ac, bc, tol) {
+				return
+			}
+		}
+	}
+	content = true
+	return
+}
+
 // Assert asserts that the given image is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
@@ -86,15 +112,21 @@ func DiffImage(a, b image.Image) image.Image {
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func Assert(t TestingT, img image.Image, filename string) {
+// optional tolerance argument specifies the maximum color difference,
+// which defaults to 10.
+func Assert(t TestingT, img image.Image, filename string, tols ...int) {
 	filename = filepath.Join("testdata", filename)
 	if filepath.Ext(filename) == "" {
 		filename += ".png"
 	}
-
 	err := os.MkdirAll(filepath.Dir(filename), 0750)
 	if err != nil {
 		t.Errorf("error making testdata directory: %v", err)
+	}
+
+	tol := 10
+	if len(tols) == 1 {
+		tol = tols[0]
 	}
 
 	ext := filepath.Ext(filename)
@@ -128,32 +160,16 @@ func Assert(t TestingT, img image.Image, filename string) {
 		return
 	}
 
-	failed := false
+	// TODO(#1456): reduce tolerance to 1 after we fix rendering inconsistencies
+	bounds, content, ac, bc, x, y := ImagesEqual(fimg, img, tol)
 
-	ibounds := img.Bounds()
-	fbounds := fimg.Bounds()
-	if ibounds != fbounds {
-		t.Errorf("AssertImage: expected bounds %v for image for %s, but got bounds %v; see %s", fbounds, filename, ibounds, failFilename)
-		failed = true
-	} else {
-		for y := ibounds.Min.Y; y < ibounds.Max.Y; y++ {
-			for x := ibounds.Min.X; x < ibounds.Max.X; x++ {
-				cc := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
-				ic := color.RGBAModel.Convert(fimg.At(x, y)).(color.RGBA)
-				// TODO(#1456): reduce tolerance to 1 after we fix rendering inconsistencies
-				if !CompareColors(cc, ic, 10) {
-					t.Errorf("AssertImage: image for %s is not the same as expected; see %s; expected color %v at (%d, %d), but got %v", filename, failFilename, ic, x, y, cc)
-					failed = true
-					break
-				}
-			}
-			if failed {
-				break
-			}
+	if !bounds || !content {
+		if !bounds {
+			t.Errorf("AssertImage: expected bounds %v for image for %s, but got bounds %v; see %s", fimg.Bounds(), filename, img.Bounds(), failFilename)
+		} else {
+			t.Errorf("AssertImage: image for %s is not the same as expected; see %s; expected color %v at (%d, %d), but got %v", filename, failFilename, ac, x, y, bc)
+
 		}
-	}
-
-	if failed {
 		err := Save(img, failFilename)
 		if err != nil {
 			t.Errorf("AssertImage: error saving fail image: %v", err)

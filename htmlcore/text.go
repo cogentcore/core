@@ -21,31 +21,8 @@ func ExtractText(ctx *Context) string {
 	if ctx.Node.FirstChild == nil {
 		return ""
 	}
-	return extractText(ctx, ctx.Node.FirstChild)
-}
-
-func extractText(ctx *Context, n *html.Node) string {
-	str := ""
-	if n.Type == html.TextNode {
-		str += n.Data
-	}
-	it := isText(n)
-	if !it {
-		readHTMLNode(ctx, ctx.Parent(), n)
-		// readHTMLNode already handles children and siblings, so we return.
-		// TODO: for something like [TestButtonInHeadingBug] this will not
-		// have the right behavior, but that is a rare use case and this
-		// heuristic is much simpler.
-		return str
-	}
-	if n.FirstChild != nil {
-		start, end := nodeString(n)
-		str = start + extractText(ctx, n.FirstChild) + end
-	}
-	if n.NextSibling != nil {
-		str += extractText(ctx, n.NextSibling)
-	}
-	return str
+	tx, _ := extractTextExclude(ctx, ctx.Node.FirstChild)
+	return tx
 }
 
 // ExtractTextExclude recursively extracts all of the text from the children
@@ -67,15 +44,7 @@ func extractTextExclude(ctx *Context, n *html.Node, excludeSubs ...string) (stri
 	}
 	it := isText(n)
 	if !it {
-		sub := n.Data
-		excl := false
-		for _, ex := range excludeSubs {
-			if ex == sub {
-				excl = true
-				break
-			}
-		}
-		if excl {
+		if slices.Contains(excludeSubs, n.Data) {
 			return str, n
 		}
 		readHTMLNode(ctx, ctx.Parent(), n)

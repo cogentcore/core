@@ -351,8 +351,8 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 	return w
 }
 
-// deleteTabIndex deletes the tab at the given index, returning whether it was successful.
-func (ts *Tabs) deleteTabIndex(idx int) bool {
+// DeleteTabIndex deletes the tab at the given index, returning whether it was successful.
+func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	frame, _ := ts.tabAtIndex(idx)
 	if frame == nil {
 		return false
@@ -537,7 +537,7 @@ func (tb *Tab) Init() {
 					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 						ts.SelectTabIndex(idx)
 					} else {
-						ts.deleteTabIndex(idx)
+						ts.DeleteTabIndex(idx)
 					}
 				})
 				w.Updater(func() {

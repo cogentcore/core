@@ -49,15 +49,16 @@ func NewComputeDevice(gpu *GPU) (*Device, error) {
 	// note: these limits are being processed and allow the MaxBufferSize to be the
 	// controlling factor -- if we don't set these, then the slrand example doesn't
 	// work above a smaller limit.
+	// TODO: converting these limits to int may cause issues on 32-bit systems
 	limits.MaxUniformBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxUniformBufferBindingSize), int(gpu.Limits.Limits.MinUniformBufferOffsetAlignment)))
 
 	limits.MaxStorageBufferBindingSize = uint64(MemSizeAlignDown(int(gpu.Limits.Limits.MaxStorageBufferBindingSize), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
 	// note: this limit is not working properly:
-	g4 := 0xFFFFFF00
-	limits.MaxBufferSize = uint64(MemSizeAlignDown(min(int(gpu.Limits.Limits.MaxBufferSize), g4), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
+	g4 := uint64(0xFFFFFF00)
+	limits.MaxBufferSize = uint64(MemSizeAlignDown(int(min(gpu.Limits.Limits.MaxBufferSize, g4)), int(gpu.Limits.Limits.MinStorageBufferOffsetAlignment)))
 	if limits.MaxBufferSize == 0 {
-	   limits.MaxBufferSize = uint64(g4)
-   	}
+		limits.MaxBufferSize = g4
+	}
 	// limits.MaxBindGroups = gpu.Limits.Limits.MaxBindGroups // note: no point in changing -- web constraint
 
 	if Debug {

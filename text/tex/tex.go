@@ -30,6 +30,14 @@ func init() {
 	shaped.ShapeMath = TeXMath
 }
 
+type cacheKey struct {
+	fontSizeDots float32
+	formula      string
+}
+
+// cache results of TeX processing because it is rather slow.
+var cache = map[cacheKey]*ppath.Path{}
+
 // TeXMath parses a plain TeX math expression and returns a path
 // rendering that expression. This is NOT LaTeX and only \frac is defined
 // as an additional math utility function, for fractions.
@@ -41,6 +49,11 @@ func init() {
 func TeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	texMu.Lock()
 	defer texMu.Unlock()
+
+	ckey := cacheKey{fontSizeDots: fontSizeDots, formula: formula}
+	if p, ok := cache[ckey]; ok {
+		return p, nil
+	}
 
 	r := strings.NewReader(fmt.Sprintf(`%s $%s$
 \bye
@@ -62,7 +75,9 @@ func TeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	p, err := DVIToPath(w.Bytes(), texFonts, fontSizeDots)
 	if err != nil {
 		fmt.Println(stdout.String())
+		cache[ckey] = nil
 		return nil, err
 	}
+	cache[ckey] = p
 	return p, nil
 }

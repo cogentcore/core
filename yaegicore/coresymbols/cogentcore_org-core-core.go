@@ -184,6 +184,7 @@ func init() {
 		"TextBodyLarge":                 reflect.ValueOf(core.TextBodyLarge),
 		"TextBodyMedium":                reflect.ValueOf(core.TextBodyMedium),
 		"TextBodySmall":                 reflect.ValueOf(core.TextBodySmall),
+		"TextCursor":                    reflect.ValueOf(core.TextCursor),
 		"TextDisplayLarge":              reflect.ValueOf(core.TextDisplayLarge),
 		"TextDisplayMedium":             reflect.ValueOf(core.TextDisplayMedium),
 		"TextDisplaySmall":              reflect.ValueOf(core.TextDisplaySmall),

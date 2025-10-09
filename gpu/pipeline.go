@@ -33,6 +33,16 @@ type Pipeline struct {
 	// Entries contains the entry points into shader code,
 	// which are what is actually called.
 	Entries map[string]*ShaderEntry
+
+	// current bind groups for each var group used.
+	currentBindGroups map[int]*wgpu.BindGroup
+
+	// current counter for bind groups, to detect if needs updating.
+	currentBindGroupsCount map[int]int
+
+	// oldBindGroups are prior bind groups that need to be released
+	// after current render or compute pass.
+	oldBindGroups []*wgpu.BindGroup
 }
 
 // Vars returns a pointer to the vars for this pipeline,
@@ -105,6 +115,8 @@ func (pl *Pipeline) AddEntry(sh *Shader, typ ShaderTypes, entry string) *ShaderE
 
 // releaseShaders releases the shaders
 func (pl *Pipeline) releaseShaders() {
+	pl.releaseOldBindGroups()
+	pl.releaseCurrentBindGroups()
 	for _, sh := range pl.Shaders {
 		sh.Release()
 	}
@@ -113,8 +125,8 @@ func (pl *Pipeline) releaseShaders() {
 }
 
 // bindLayout returns a PipeLineLayout based on Vars
-func (pl *Pipeline) bindLayout() (*wgpu.PipelineLayout, error) {
-	lays := pl.Vars().bindLayout(pl.System.Device())
+func (pl *Pipeline) bindLayout(used ...*Var) (*wgpu.PipelineLayout, error) {
+	lays := pl.Vars().bindLayout(pl.System.Device(), used...)
 	if lays != nil {
 		defer func() {
 			for _, bgl := range lays {
@@ -132,11 +144,52 @@ func (pl *Pipeline) bindLayout() (*wgpu.PipelineLayout, error) {
 	return rpl, nil
 }
 
+// bindGroup returns a BindGroup for given var group,
+// along with dynamic offsets. manages whether updates are needed
+// or can re-use existing.
+func (pl *Pipeline) bindGroup(vg *VarGroup, used ...*Var) (*wgpu.BindGroup, []uint32, error) {
+	if pl.currentBindGroups == nil {
+		pl.currentBindGroups = make(map[int]*wgpu.BindGroup)
+		pl.currentBindGroupsCount = make(map[int]int)
+	}
+	dynamicOffsets := vg.dynamicOffsets(used...)
+	cbg, ok := pl.currentBindGroups[vg.Group]
+	ccount := pl.currentBindGroupsCount[vg.Group]
+	vgcount := vg.BindGroupUpdateCount()
+	if ok && ccount == vgcount {
+		return cbg, dynamicOffsets, nil
+	}
+	if cbg != nil {
+		pl.oldBindGroups = append(pl.oldBindGroups, cbg) // to be released
+	}
+	bg, err := vg.bindGroup(pl.Vars(), used...)
+	if err == nil {
+		pl.currentBindGroups[vg.Group] = bg
+		pl.currentBindGroupsCount[vg.Group] = vgcount
+	}
+	return bg, dynamicOffsets, err
+}
+
+// releaseCurrentBindGroups releases current bind groups.
+func (pl *Pipeline) releaseCurrentBindGroups() {
+	if pl.currentBindGroups == nil {
+		return
+	}
+	og := pl.currentBindGroups
+	pl.currentBindGroups = nil
+	for _, bg := range og {
+		bg.Release()
+	}
+}
+
+// releaseOldBindGroups releases old bind groups.
 func (pl *Pipeline) releaseOldBindGroups() {
-	vs := pl.Vars()
-	ngp := vs.NGroups()
-	for gi := range ngp {
-		vg := vs.Groups[gi]
-		vg.releaseOldBindGroups()
+	if pl.oldBindGroups == nil {
+		return
+	}
+	og := pl.oldBindGroups
+	pl.oldBindGroups = nil
+	for _, bg := range og {
+		bg.Release()
 	}
 }

@@ -5,7 +5,7 @@ You can complete the three steps below to **install** Cogent Core on your system
 2. Run the following command to install the Cogent Core command line tool. You should run this command again each time you update to a new version of Cogent Core.
 
 ```sh
-go install cogentcore.org/core/cmd/core@main
+go install cogentcore.org/core@main
 ```
 
 3. **After** reading the info for your platform below, run the following command to install platform-specific dependencies. You **must** restart your shell/prompt/terminal after running the command.
@@ -28,7 +28,7 @@ This installs Go, gcc, and various graphics libraries. You may need to enter you
 
 If you want to install manually instead, the commands for each distro are listed below.
 
-<!-- To update this, copy the output of [cogentcore.org/core/cmd/core/cmd.TestLinuxDistroString]; DO NOT EDIT manually -->
+<!-- To update this, copy the output of [cogentcore.org/core/cmd.TestLinuxDistroString]; DO NOT EDIT manually -->
 
 {collapsed="true" title="Linux install commands"}
 ```sh

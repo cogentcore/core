@@ -175,7 +175,7 @@ func (ib *IconButton) Init() {
 	InitValueButton(ib, false, func(d *Body) {
 		d.SetTitle("Select an icon")
 		si := 0
-		used := maps.Keys(icons.Used)
+		used := icons.Used()
 		ls := NewList(d)
 		ls.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
 		ls.OnChange(func(e events.Event) {

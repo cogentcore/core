@@ -435,13 +435,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						if len(attr.Value) > 11 && attr.Value[:11] == "data:image/" {
 							es := attr.Value[11:]
 							fmti := strings.Index(es, ";")
-							fm := es[:fmti]
+							// fm := es[:fmti]
 							bs64 := es[fmti+1 : fmti+8]
 							if bs64 != "base64," {
 								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
 							}
 							eb := []byte(es[fmti+8:])
-							im, err := imagex.FromBase64(fm, eb)
+							im, _, err := imagex.FromBase64(eb)
 							if err != nil {
 								log.Println(err)
 							} else {
@@ -874,7 +874,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 func (sv *SVG) XMLString() string {
 	var b bytes.Buffer
 	sv.WriteXML(&b, false)
-	return string(b.Bytes())
+	return b.String()
 }
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
@@ -1035,7 +1035,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
 	case *Image:
-		if nd.Pixels == nil {
+		if nd.Pixels == nil || nd.Pixels.Image == nil {
 			return ""
 		}
 		nm = "image"
@@ -1044,7 +1044,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
-		ib, fmt := imagex.ToBase64PNG(nd.Pixels)
+		ib, fmt := imagex.ToBase64(nd.Pixels.Image, imagex.PNG)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
 		if strings.HasPrefix(nd.Name, "namedview") {

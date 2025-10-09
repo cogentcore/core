@@ -240,7 +240,7 @@ func (fm *Form) Init() {
 			})
 
 			tree.AddNew(p, valnm, func() Value {
-				return NewValue(reflectx.UnderlyingPointer(f.value).Interface(), f.field.Tag)
+				return NewFieldValue(f.field.Name, reflectx.UnderlyingPointer(f.parent).Interface(), reflectx.UnderlyingPointer(f.value).Interface(), f.field.Tag)
 			}, func(w Value) {
 				valueWidget = w
 				wb := w.AsWidget()

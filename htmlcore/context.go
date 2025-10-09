@@ -86,6 +86,13 @@ type Context struct {
 	// will not be generated.
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
 
+	// WidgetHandlers is a list of handler functions for each Widget,
+	// called in sequential order for each widget that is created,
+	// after it has been configured by the existing handlers etc.
+	// This allows for additional styling to be applied based on the
+	// type of widget, for example.
+	WidgetHandlers []func(w core.Widget)
+
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
 }
@@ -168,6 +175,7 @@ func (c *Context) config(w core.Widget) {
 			}
 		}
 	})
+	c.handleWidget(w)
 }
 
 // InlineParent returns the current parent widget that inline
@@ -217,12 +225,13 @@ func (c *Context) addStyle(style string) {
 // open the given link when clicked on, using [Context.OpenURL].
 // The advantage of using this is that it does [tree.NodeBase.SetProperty]
 // of "href" to the given url, allowing generatehtml to create an <a> element
-// for HTML preview and SEO purposes.
+// for HTML preview and SEO purposes. It also sets the tooltip to the URL.
 //
 // See also [Context.LinkButtonUpdating] for a dynamic version.
 func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
 	bt.SetProperty("tag", "a")
 	bt.SetProperty("href", url)
+	bt.SetTooltip(url)
 	bt.OnClick(func(e events.Event) {
 		c.OpenURL(url)
 	})
@@ -234,10 +243,25 @@ func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
 func (c *Context) LinkButtonUpdating(bt *core.Button, url func() string) *core.Button {
 	bt.SetProperty("tag", "a")
 	bt.Updater(func() {
-		bt.SetProperty("href", url())
+		u := url()
+		bt.SetProperty("href", u)
+		bt.SetTooltip(u)
 	})
 	bt.OnClick(func(e events.Event) {
 		c.OpenURL(url())
 	})
 	return bt
+}
+
+// AddWidgetHandler adds given widget handler function
+func (c *Context) AddWidgetHandler(f func(w core.Widget)) {
+	c.WidgetHandlers = append(c.WidgetHandlers, f)
+}
+
+// handleWidget calls WidgetHandlers functions on given widget,
+// in order added so last one has override priority.
+func (c *Context) handleWidget(w core.Widget) {
+	for _, f := range c.WidgetHandlers {
+		f(w)
+	}
 }

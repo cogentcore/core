@@ -48,12 +48,6 @@ func (vs *Vars) Release() {
 	}
 }
 
-func (vs *Vars) releaseOldBindGroups() {
-	for _, vg := range vs.Groups {
-		vg.releaseOldBindGroups()
-	}
-}
-
 // AddVertexGroup adds a new Vertex Group.
 // This is a special Group holding Vertex, Index vars
 func (vs *Vars) AddVertexGroup() *VarGroup {
@@ -282,7 +276,7 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 
 // bindLayout configures the Layouts slice of BindGroupLayouts
 // for all of the non-Vertex vars
-func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
+func (vs *Vars) bindLayout(dev *Device, used ...*Var) []*wgpu.BindGroupLayout {
 	ngp := vs.NGroups()
 	if ngp == 0 {
 		vs.layouts = nil
@@ -295,7 +289,7 @@ func (vs *Vars) bindLayout(dev *Device) []*wgpu.BindGroupLayout {
 		if vg == nil {
 			continue
 		}
-		vgl, err := vg.bindLayout(vs)
+		vgl, err := vg.bindLayout(vs, used...)
 		if err != nil {
 			continue
 		}

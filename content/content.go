@@ -32,6 +32,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
@@ -69,7 +70,8 @@ type Content struct {
 	pagesByCategory map[string][]*bcontent.Page
 
 	// categories has all unique [bcontent.Page.Categories], sorted such that the categories
-	// with the most pages are listed first.
+	// with the most pages are listed first. "Other" is always last, and is used for pages that
+	// do not have a category, unless they are a category themselves.
 	categories []string
 
 	// history is the history of pages that have been visited.
@@ -113,6 +115,11 @@ func init() {
 	// so we only add these in content.
 	system.ReservedWebShortcuts = append(system.ReservedWebShortcuts, "Command+[", "Command+]")
 }
+
+// NewPageInitFunc is called when a new page is just being rendered.
+// This can do any necessary new-page initialization, e.g.,
+// [yaegicore.ResetGoalInterpreter]
+var NewPageInitFunc func()
 
 func (ct *Content) Init() {
 	ct.Splits.Init()
@@ -180,6 +187,24 @@ func (ct *Content) Init() {
 		}
 		return false
 	}
+	ct.Context.AddWidgetHandler(func(w core.Widget) {
+		switch x := w.(type) {
+		case *core.Text:
+			x.Styler(func(s *styles.Style) {
+				s.Max.X.Ch(120)
+			})
+		case *core.Image:
+			x.Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
+				s.Overflow.Set(styles.OverflowAuto)
+			})
+			x.OnDoubleClick(func(e events.Event) {
+				d := core.NewBody("Image")
+				core.NewImage(d).SetImage(x.Image)
+				d.RunWindowDialog(x)
+			})
+		}
+	})
 
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {
@@ -292,11 +317,28 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	}))
 	ct.categories = maps.Keys(ct.pagesByCategory)
 	slices.SortFunc(ct.categories, func(a, b string) int {
+		if a == "Other" {
+			return 1
+		}
+		if b == "Other" {
+			return -1
+		}
 		v := cmp.Compare(len(ct.pagesByCategory[b]), len(ct.pagesByCategory[a]))
 		if v != 0 {
 			return v
 		}
 		return cmp.Compare(a, b)
+	})
+	// Pages that are a category are already represented in the categories tree,
+	// so they do not belong in the "Other" category.
+	ct.pagesByCategory["Other"] = slices.DeleteFunc(ct.pagesByCategory["Other"], func(pg *bcontent.Page) bool {
+		_, isCategory := ct.pagesByCategory[pg.Name]
+		if isCategory {
+			pg.Categories = slices.DeleteFunc(pg.Categories, func(c string) bool {
+				return c == "Other"
+			})
+		}
+		return isCategory
 	})
 
 	if url := ct.getWebURL(); url != "" {
@@ -334,6 +376,9 @@ func (ct *Content) addHistory(pg *bcontent.Page) {
 func (ct *Content) loadPage(w *core.Frame) error {
 	if ct.renderedPage == ct.currentPage {
 		return nil
+	}
+	if NewPageInitFunc != nil {
+		NewPageInitFunc()
 	}
 	w.DeleteChildren()
 	b, err := ct.currentPage.ReadContent(ct.pagesByCategory)
@@ -425,9 +470,14 @@ func (ct *Content) makeCategories() {
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.Open(catPage.URL)
+			} else {
+				catTree.Open() // no page to open so open the tree
 			}
 		})
 		for _, pg := range ct.pagesByCategory[cat] {
+			if strings.EqualFold(cat, pg.Name) {
+				continue
+			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
 			if pg == ct.currentPage {
 				pgTree.SetSelected(true)
