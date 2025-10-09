@@ -93,6 +93,10 @@ type Context struct {
 	// type of widget, for example.
 	WidgetHandlers []func(w core.Widget)
 
+	// DelayedImageLoad causes images to be loaded at a delay.
+	// if not set, then they are loaded immediately.
+	DelayedImageLoad bool
+
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
 }

@@ -156,6 +156,10 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		pr.Rect = image.Rectangle{Max: rs.size.ToPoint()}
 	}
 
+	if pr.Anchor != "" {
+		rs.PDF.AddAnchor(pr.Anchor, math32.FromPoint(pr.Rect.Min))
+	}
+
 	// todo: handle masks!
 
 	// Fast path for [image.Uniform]

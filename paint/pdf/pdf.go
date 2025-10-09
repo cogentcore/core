@@ -100,7 +100,7 @@ func (r *PDF) NewPage(width, height float32) {
 
 // AddLink adds a link to the PDF document.
 func (r *PDF) AddLink(uri string, rect math32.Box2) {
-	r.w.AddURIAction(uri, rect)
+	r.w.AddLink(uri, rect)
 }
 
 // Close finished and closes the PDF.
@@ -266,4 +266,10 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 // Image renders an image to the canvas using a transformation matrix.
 func (r *PDF) Image(img image.Image, m math32.Matrix2) {
 	r.w.DrawImage(img, m)
+}
+
+// AddAnchor adds a uniquely-named link anchor location,
+// which can then be a target for links.
+func (r *PDF) AddAnchor(name string, pos math32.Vector2) {
+	r.w.AddAnchor(name, pos)
 }

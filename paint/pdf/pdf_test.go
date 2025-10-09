@@ -113,3 +113,26 @@ func TestMathDisplay(t *testing.T) {
 		RestorePreviousFonts(prv)
 	})
 }
+
+func TestLinks(t *testing.T) {
+	RunTest(t, "links", 300, 300, func(pd *PDF, sty *styles.Paint) {
+		prv := UseStandardFonts()
+		sh := shaped.NewShaper()
+		m := math32.Identity2()
+		rsty := &sty.Font
+		tsty := &sty.Text
+		sz := math32.Vec2(250, 250)
+
+		txt := func(src string, pos math32.Vector2) {
+			tx, err := htmltext.HTMLToRich([]byte(src), rsty, nil)
+			assert.NoError(t, err)
+			lns := sh.WrapLines(tx, rsty, tsty, sz)
+			pd.Text(sty, m, pos, lns)
+		}
+		txt("Some random text here", math32.Vec2(10, 10))
+		pd.w.AddAnchor("test", math32.Vec2(10, 10))
+		txt(`A <a href="#test">link</a> to that text`, math32.Vec2(10, 30))
+
+		RestorePreviousFonts(prv)
+	})
+}

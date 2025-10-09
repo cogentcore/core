@@ -15,6 +15,7 @@ import (
 	"image"
 	"io"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
+	"golang.org/x/exp/maps"
 )
 
 // TODO: Invalid graphics transparency, Group has a transparency S entry or the S entry is null
@@ -49,6 +51,7 @@ type pdfWriter struct {
 	// fontsV   map[*text.Font]pdfRef
 	images   map[image.Image]pdfRef
 	layers   pdfLayers
+	anchors  pdfMap // things that can be linked to within doc
 	compress bool
 	subset   bool
 	title    string
@@ -76,7 +79,7 @@ func newPDFWriter(writer io.Writer, un *units.Context) *pdfWriter {
 
 	w.globalScale = w.unitContext.Convert(1, units.UnitDot, units.UnitPt)
 
-	w.write("%%PDF-1.7\n")
+	w.write("%%PDF-1.7\n%%Ŧǟċơ\n")
 	return w
 }
 
@@ -142,6 +145,7 @@ type pdfRef int
 type pdfName string
 type pdfArray []interface{}
 type pdfDict map[pdfName]interface{}
+type pdfMap map[string]interface{}
 type pdfFilter string
 type pdfStream struct {
 	dict   pdfDict
@@ -177,10 +181,7 @@ func (w *pdfWriter) writeVal(i interface{}) {
 	case float64:
 		w.write("%v", dec(v))
 	case string:
-		v = strings.Replace(v, `\`, `\\`, -1)
-		v = strings.Replace(v, `(`, `\(`, -1)
-		v = strings.Replace(v, `)`, `\)`, -1)
-		w.write("(%v)", v)
+		w.write("(%v)", escape(v))
 	case pdfRef:
 		w.write("%v 0 R", v)
 	case pdfName, pdfFilter:
@@ -210,9 +211,16 @@ func (w *pdfWriter) writeVal(i interface{}) {
 			}
 			w.writeVal(val)
 		}
+		if val, ok := v["S"]; ok {
+			w.write("/S")
+			if pdfValContinuesName(val) {
+				w.write(" ")
+			}
+			w.writeVal(val)
+		}
 		keys := []string{}
 		for key := range v {
-			if key != "Type" && key != "Subtype" {
+			if key != "Type" && key != "Subtype" && key != "S" {
 				keys = append(keys, string(key))
 			}
 		}
@@ -223,6 +231,20 @@ func (w *pdfWriter) writeVal(i interface{}) {
 				w.write(" ")
 			}
 			w.writeVal(v[pdfName(key)])
+		}
+		w.write(">>")
+	case pdfMap:
+		w.write("<<")
+		keys := maps.Keys(v)
+		sort.Strings(keys)
+		nk := len(keys)
+		for i, key := range keys {
+			w.writeVal(pdfName(key))
+			w.write(" ")
+			w.writeVal(v[key])
+			if i < nk-1 {
+				w.write(" ")
+			}
 		}
 		w.write(">>")
 	case pdfStream:
@@ -270,7 +292,7 @@ func (w *pdfWriter) writeVal(i interface{}) {
 		v.objNum = len(w.objOffsets)
 		w.write("<</Type /OCG /Name %s>>", pdfName(v.name))
 	default:
-		panic(fmt.Sprintf("unknown PDF type %T", i))
+		// panic(fmt.Sprintf("unknown PDF type %T", i))
 	}
 }
 
@@ -360,7 +382,6 @@ func (w *pdfWriter) getFont(sty *rich.Style, tsty *text.Style) pdfRef {
 
 // Close finished the document.
 func (w *pdfWriter) Close() error {
-	// TODO: support cross reference table streams and compressed objects for all dicts
 	if w.page != nil {
 		w.pages = append(w.pages, w.page.writePage(pdfRef(3)))
 	}
@@ -378,7 +399,25 @@ func (w *pdfWriter) Close() error {
 	catalog := pdfDict{
 		"Type":  pdfName("Catalog"),
 		"Pages": pdfRef(3),
-		// TODO: add metadata?
+	}
+
+	if len(w.anchors) > 0 {
+		ancrefs := pdfMap{}
+		var nms []string
+		for nm, v := range w.anchors {
+			vary := v.(pdfArray)
+			vary[0] = w.pages[vary[0].(int)] // replace page no with ref
+			anc := w.writeObject(pdfDict{"D": vary})
+			ancrefs[nm] = anc
+			nms = append(nms, nm)
+		}
+		slices.Sort(nms)
+		var nmary pdfArray
+		for _, nm := range nms {
+			nmary = append(nmary, nm, ancrefs[nm])
+		}
+		nmref := w.writeObject(pdfDict{"Names": nmary})
+		catalog[pdfName("Names")] = pdfDict{"Dests": nmref}
 	}
 
 	// document info
@@ -481,6 +520,7 @@ func (w *pdfWriter) NewPage(width, height float32) *pdfPage {
 		pdf:            w,
 		width:          width,
 		height:         height,
+		pageNo:         len(w.pages),
 		resources:      pdfDict{},
 		graphicsStates: map[float32]pdfName{},
 		inTextObject:   false,
@@ -490,6 +530,7 @@ func (w *pdfWriter) NewPage(width, height float32) *pdfPage {
 	}
 	w.page.stack.Push(newContext(styles.NewPaint(), math32.Identity2()))
 	w.page.setTopTransform()
+	// fmt.Println("added page:", w.page.pageNo)
 	return w.page
 }
 
@@ -518,4 +559,51 @@ func (f dec) String() string {
 // mat2 returns matrix components as a string
 func mat2(m math32.Matrix2) string {
 	return fmt.Sprintf("%v %v %v %v %v %v", dec(m.XX), dec(m.XY), dec(m.YX), dec(m.YY), dec(m.X0), dec(m.Y0))
+}
+
+// Escape special characters in strings
+func escape(s string) string {
+	s = strings.Replace(s, "\\", "\\\\", -1)
+	s = strings.Replace(s, "(", "\\(", -1)
+	s = strings.Replace(s, ")", "\\)", -1)
+	s = strings.Replace(s, "\r", "\\r", -1)
+	return s
+}
+
+// utf8toutf16 converts UTF-8 to UTF-16BE; from http://www.fpdf.org/
+func utf8toutf16(s string, withBOM ...bool) string {
+	bom := true
+	if len(withBOM) > 0 {
+		bom = withBOM[0]
+	}
+	res := make([]byte, 0, 8)
+	if bom {
+		res = append(res, 0xFE, 0xFF)
+	}
+	nb := len(s)
+	i := 0
+	for i < nb {
+		c1 := byte(s[i])
+		i++
+		switch {
+		case c1 >= 224:
+			// 3-byte character
+			c2 := byte(s[i])
+			i++
+			c3 := byte(s[i])
+			i++
+			res = append(res, ((c1&0x0F)<<4)+((c2&0x3C)>>2),
+				((c2&0x03)<<6)+(c3&0x3F))
+		case c1 >= 192:
+			// 2-byte character
+			c2 := byte(s[i])
+			i++
+			res = append(res, ((c1 & 0x1C) >> 2),
+				((c1&0x03)<<6)+(c2&0x3F))
+		default:
+			// Single-byte character
+			res = append(res, 0, c1)
+		}
+	}
+	return string(res)
 }

@@ -24,6 +24,9 @@ import (
 // Text renders text to the canvas using a transformation matrix,
 // (the translation component specifies the starting offset)
 func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, lns *shaped.Lines) {
+	if lns.Anchor != "" {
+		r.w.AddAnchor(lns.Anchor, pos)
+	}
 	mt := m.Mul(math32.Translate2D(pos.X, pos.Y))
 	r.w.PushTransform(mt)
 	off := lns.Offset
@@ -220,6 +223,6 @@ func (r *PDF) links(lns *shaped.Lines, m math32.Matrix2, pos math32.Vector2) {
 		}
 		rb := srb.Translate(pos)
 		rb = rb.MulMatrix2(m)
-		r.w.AddURIAction(lk.URL, rb)
+		r.w.AddLink(lk.URL, rb)
 	}
 }

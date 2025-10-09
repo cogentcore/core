@@ -508,39 +508,47 @@ func (pc *Painter) SetPixel(x, y int) {
 // using the bounds of the source image in rectangle rect, using
 // the given draw operration: Over = overlay (alpha blend with destination)
 // Src = copy source directly, overwriting destination pixels.
-func (pc *Painter) DrawImage(src image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) {
-	pc.Render.Add(pimage.NewDraw(rect, src, srcStart, op))
+func (pc *Painter) DrawImage(src image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) *pimage.Params {
+	pim := pimage.NewDraw(rect, src, srcStart, op)
+	pc.Render.Add(pim)
+	return pim
 }
 
 // DrawImageAnchored draws the specified image at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // image. Use ax=0.5, ay=0.5 to center the image at the specified point.
-func (pc *Painter) DrawImageAnchored(src image.Image, x, y, ax, ay float32) {
+func (pc *Painter) DrawImageAnchored(src image.Image, x, y, ax, ay float32) *pimage.Params {
 	s := src.Bounds().Size()
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
 	m := pc.Transform().Translate(x, y)
+	var pim *pimage.Params
 	if pc.Mask == nil {
-		pc.Render.Add(pimage.NewTransform(m, src.Bounds(), src, draw.Over))
+		pim = pimage.NewTransform(m, src.Bounds(), src, draw.Over)
 	} else {
-		pc.Render.Add(pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{}))
+		pim = pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{})
 	}
+	pc.Render.Add(pim)
+	return pim
 }
 
 // DrawImageScaled draws the specified image starting at given upper-left point,
 // such that the size of the image is rendered as specified by w, h parameters
 // (an additional scaling is applied to the transform matrix used in rendering)
-func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) {
+func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) *pimage.Params {
 	s := src.Bounds().Size()
 	isz := math32.FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
 
 	m := pc.Transform().Translate(x, y).Scale(isc.X, isc.Y)
+	var pim *pimage.Params
 	if pc.Mask == nil {
-		pc.Render.Add(pimage.NewTransform(m, src.Bounds(), src, draw.Over))
+		pim = pimage.NewTransform(m, src.Bounds(), src, draw.Over)
 	} else {
-		pc.Render.Add(pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{}))
+		pim = pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{})
 	}
+	pc.Render.Add(pim)
+	return pim
 }
 
 // BoundingBox computes the bounding box for an element in pixel int

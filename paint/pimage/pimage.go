@@ -65,6 +65,11 @@ type Params struct {
 
 	// BlurRadius is the Gaussian standard deviation for Blur function
 	BlurRadius float32
+
+	// Anchor provides a named link destination associated with this text item.
+	// Used for document navigation, e.g., in PDF rendering. Must be a unique name.
+	// Is set in [core.Text] based on the id property, which is set by [content].
+	Anchor string
 }
 
 func (pr *Params) IsRenderItem() {}

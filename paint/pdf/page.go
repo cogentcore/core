@@ -29,6 +29,7 @@ import (
 type pdfPage struct {
 	*bytes.Buffer
 	pdf           *pdfWriter
+	pageNo        int
 	width, height float32
 	resources     pdfDict
 	annots        pdfArray
@@ -71,27 +72,6 @@ func (w *pdfPage) writePage(parent pdfRef) pdfRef {
 		page["Annots"] = w.annots
 	}
 	return w.pdf.writeObject(page)
-}
-
-// AddAnnotation adds an annotation. The rect is in "default user space"
-// coordinates = standard page coordinates, without the current CTM transform.
-// This function will handle the base page transform for scaling and
-// flipping of coordinates to top-left system.
-func (w *pdfPage) AddURIAction(uri string, rect math32.Box2) {
-	ms := math32.Scale2D(w.pdf.globalScale, w.pdf.globalScale)
-	rect = rect.MulMatrix2(ms)
-	annot := pdfDict{
-		"Type":     pdfName("Annot"),
-		"Subtype":  pdfName("Link"),
-		"Border":   pdfArray{0, 0, 0},
-		"Rect":     pdfArray{rect.Min.X, w.height - rect.Max.Y, rect.Max.X, w.height - rect.Min.Y},
-		"Contents": uri,
-		"A": pdfDict{
-			"S":   pdfName("URI"),
-			"URI": uri,
-		},
-	}
-	w.annots = append(w.annots, annot)
 }
 
 // SetFill sets the fill style values where different from current.
@@ -384,63 +364,8 @@ func (w *pdfPage) WriteText(tx string) error {
 		fmt.Fprintf(w, ")")
 	}
 
-	// position := w.textPosition
-	// if glyphs, ok := TJ[0].([]canvasText.Glyph); ok && 0 < len(glyphs) && mode != ppath.HorizontalTB && !glyphs[0].Vertical {
-	// 	glyphRotation, glyphOffset := glyphs[0].Rotation(), glyphs[0].YOffset-int32(glyphs[0].SFNT.Head.UnitsPerEm/2)
-	// 	if glyphRotation != canvasText.NoRotation || glyphOffset != 0 {
-	// 		w.SetTextPosition(position.Rotate(float32(glyphRotation)).Translate(0.0, glyphs[0].Size/float32(glyphs[0].SFNT.Head.UnitsPerEm)*mmPerPt*float32(glyphOffset)))
-	// 	}
-	// }
-
-	// f := 1000.0 / float32(w.font.SFNT.Head.UnitsPerEm)
 	fmt.Fprintf(w, "[")
 	write(tx)
-
-	// for _, tj := range TJ {
-	// 	switch val := tj.(type) {
-	// 	case []canvasText.Glyph:
-	// 		i := 0
-	// 		for j, glyph := range val {
-	// 			if mode == ppath.HorizontalTB || !glyph.Vertical {
-	// 				origXAdvance := int32(w.font.SFNT.GlyphAdvance(glyph.ID))
-	// 				if glyph.XAdvance != origXAdvance {
-	// 					write(val[i : j+1])
-	// 					fmt.Fprintf(w, " %d", -int(f*float32(glyph.XAdvance-origXAdvance)+0.5))
-	// 					i = j + 1
-	// 				}
-	// 			} else {
-	// 				origYAdvance := -int32(w.font.SFNT.GlyphVerticalAdvance(glyph.ID))
-	// 				if glyph.YAdvance != origYAdvance {
-	// 					write(val[i : j+1])
-	// 					fmt.Fprintf(w, " %d", -int(f*float32(glyph.YAdvance-origYAdvance)+0.5))
-	// 					i = j + 1
-	// 				}
-	// 			}
-	// 		}
-	// 		write(val[i:])
-	// 	case string:
-	// 		i := 0
-	// 		if mode == ppath.HorizontalTB {
-	// 			var rPrev rune
-	// 			for j, r := range val {
-	// 				if i < j {
-	// 					kern := w.font.SFNT.Kerning(w.font.SFNT.GlyphIndex(rPrev), w.font.SFNT.GlyphIndex(r))
-	// 					if kern != 0 {
-	// 						writeString(val[i:j])
-	// 						fmt.Fprintf(w, " %d", -int(f*float32(kern)+0.5))
-	// 						i = j
-	// 					}
-	// 				}
-	// 				rPrev = r
-	// 			}
-	// 		}
-	// 		writeString(val[i:])
-	// 	case float32:
-	// 		fmt.Fprintf(w, " %d", -int(val*1000.0/w.fontSize+0.5))
-	// 	case int:
-	// 		fmt.Fprintf(w, " %d", -int(float32(val)*1000.0/w.fontSize+0.5))
-	// 	}
-	// }
 	fmt.Fprintf(w, "]TJ")
 	return nil
 }

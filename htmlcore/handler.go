@@ -53,12 +53,6 @@ func handleElement(ctx *Context) {
 		return
 	}
 
-	pid := ""
-	pstyle := ""
-	if ctx.BlockParent != nil { // these attributes get put on a block parent element
-		pstyle = GetAttr(ctx.Node.Parent, "style")
-		pid = GetAttr(ctx.Node.Parent, "id")
-	}
 	var newWidget core.Widget
 
 	switch tag {
@@ -219,56 +213,7 @@ func handleElement(ctx *Context) {
 			readHTMLNode(ctx, ctx.Parent(), sublist)
 		}
 	case "img":
-		n := ctx.Node
-		src := GetAttr(n, "src")
-		alt := GetAttr(n, "alt")
-		if pstyle != "" {
-			ctx.setStyleAttr(n, pstyle)
-		}
-		// Can be either image or svg.
-		var img *core.Image
-		var svg *core.SVG
-		if strings.HasSuffix(src, ".svg") {
-			svg = New[core.SVG](ctx)
-			svg.SetTooltip(alt)
-			if pid != "" {
-				svg.SetName(pid)
-				svg.SetProperty("id", pid)
-			}
-			newWidget = svg
-		} else {
-			img = New[core.Image](ctx)
-			img.SetTooltip(alt)
-			if pid != "" {
-				img.SetName(pid)
-				img.SetProperty("id", pid)
-			}
-			newWidget = img
-		}
-
-		go func() {
-			resp, err := Get(ctx, src)
-			if errors.Log(err) != nil {
-				return
-			}
-			defer resp.Body.Close()
-			if svg != nil {
-				svg.AsyncLock()
-				errors.Log(svg.Read(resp.Body))
-				svg.Update()
-				svg.AsyncUnlock()
-			} else {
-				im, _, err := imagex.Read(resp.Body)
-				if err != nil {
-					slog.Error("error loading image", "url", src, "err", err)
-					return
-				}
-				img.AsyncLock()
-				img.SetImage(im)
-				img.Update()
-				img.AsyncUnlock()
-			}
-		}()
+		newWidget = handleImage(ctx, tag)
 	case "input":
 		ityp := GetAttr(ctx.Node, "type")
 		val := GetAttr(ctx.Node, "value")
@@ -353,6 +298,91 @@ func handleElement(ctx *Context) {
 	if newWidget != nil {
 		ctx.handleWidget(ctx.Node, newWidget)
 	}
+}
+
+func handleImage(ctx *Context, tag string) core.Widget {
+	pid := ""
+	pstyle := ""
+	if ctx.BlockParent != nil { // these attributes get put on a block parent element
+		pstyle = GetAttr(ctx.Node.Parent, "style")
+		pid = GetAttr(ctx.Node.Parent, "id")
+	}
+	n := ctx.Node
+	src := GetAttr(n, "src")
+	alt := GetAttr(n, "alt")
+	if pstyle != "" {
+		ctx.setStyleAttr(n, pstyle)
+	}
+	var newWidget core.Widget
+	var resp *http.Response
+	var err error
+	if !ctx.DelayedImageLoad {
+		resp, err = Get(ctx, src)
+		if errors.Log(err) != nil {
+			return nil
+		}
+		defer resp.Body.Close()
+	}
+
+	// Can be either image or svg.
+	var img *core.Image
+	var svg *core.SVG
+	if strings.HasSuffix(src, ".svg") {
+		svg = New[core.SVG](ctx)
+		svg.SetTooltip(alt)
+		if pid != "" {
+			svg.SetName(pid)
+			svg.SetProperty("id", pid)
+		}
+		if !ctx.DelayedImageLoad {
+			errors.Log(svg.Read(resp.Body))
+		}
+		newWidget = svg
+	} else {
+		img = New[core.Image](ctx)
+		img.SetTooltip(alt)
+		if pid != "" {
+			img.SetName(pid)
+			img.SetProperty("id", pid)
+		}
+		if !ctx.DelayedImageLoad {
+			im, _, err := imagex.Read(resp.Body)
+			if err != nil {
+				slog.Error("error loading image", "url", src, "err", err)
+			} else {
+				img.SetImage(im)
+			}
+		}
+		newWidget = img
+	}
+
+	if !ctx.DelayedImageLoad {
+		return newWidget
+	}
+	go func() {
+		resp, err := Get(ctx, src)
+		if errors.Log(err) != nil {
+			return
+		}
+		defer resp.Body.Close()
+		if svg != nil {
+			svg.AsyncLock()
+			errors.Log(svg.Read(resp.Body))
+			svg.Update()
+			svg.AsyncUnlock()
+		} else {
+			im, _, err := imagex.Read(resp.Body)
+			if err != nil {
+				slog.Error("error loading image", "url", src, "err", err)
+				return
+			}
+			img.AsyncLock()
+			img.SetImage(im)
+			img.Update()
+			img.AsyncUnlock()
+		}
+	}()
+	return newWidget
 }
 
 // handleText creates a new [core.Text] from the given information, setting the text and

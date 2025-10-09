@@ -81,7 +81,9 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 	if id != "" {
 		fr.SetProperty("id", id)
 		fr.SetName(id)
-		tree.MoveToParent(parent.Children[parent.NumChildren()-2], fr) // get title text
+		ttx := parent.Children[parent.NumChildren()-2].(core.Widget)
+		ttx.AsWidget().SetProperty("id", id) // link target
+		tree.MoveToParent(ttx, fr)           // get title text
 	}
 	if collapsed != "" {
 		cl := core.NewCollapser(fr)
@@ -208,10 +210,12 @@ func (ct *Content) moveToBlockFrame(w core.Widget, id, txt string, top bool) {
 	var tx *core.Text
 	if top {
 		tx = core.NewText(fr).SetText(txt)
+		tx.SetProperty("id", id) // good link destination
 	}
 	tree.MoveToParent(w, fr)
 	if !top {
 		tx = core.NewText(fr).SetText(txt)
+		wb.SetProperty("id", id) // link here
 	}
 	tx.Styler(func(s *styles.Style) {
 		s.Max.X.In(8)
@@ -255,7 +259,11 @@ func (ct *Content) citeWikilink(text string) (url string, label string) {
 		cs = csl.Narrative
 		ref = ref[1:]
 	}
-	url = "ref://" + ref
+	if ct.inPDFRender {
+		url = "#" + ref
+	} else {
+		url = "ref://" + ref
+	}
 	if ct.References == nil {
 		return url, ref
 	}
@@ -297,6 +305,16 @@ func (ct *Content) mainWikilink(text string) (url string, label string) {
 			label = name
 		}
 	}
+	if ct.inPDFRender {
+		if heading != "" {
+			if pg == ct.currentPage {
+				return "#" + heading, label
+			}
+			return ct.getPrintURL() + "/" + pg.URL + "#" + heading, label
+		}
+		return ct.getPrintURL() + "/" + pg.URL, label
+	}
+
 	if heading != "" {
 		return pg.URL + "#" + heading, label
 	}

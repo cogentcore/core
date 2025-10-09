@@ -428,6 +428,9 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	sty, tsty := tx.Styles.NewRichText()
 	tsty.Align, tsty.AlignV = text.Start, text.Start
 	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, sz)
+	if id, ok := tx.Properties["id"]; ok {
+		tx.paintText.Anchor = id.(string)
+	}
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -452,6 +455,9 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
 	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, rsz)
+	if id, ok := tx.Properties["id"]; ok {
+		tx.paintText.Anchor = id.(string)
+	}
 	return tx.paintText.Bounds.Size().Ceil()
 }
 

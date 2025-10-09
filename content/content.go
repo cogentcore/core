@@ -484,7 +484,7 @@ func (ct *Content) PagePDF(path string) error {
 		return errors.Log(errors.New("Page empty"))
 	}
 	ct.inPDFRender = true
-	ct.Update()
+	ct.reloadPage()
 	ct.inPDFRender = false
 
 	refs := ct.PageRefs(ct.currentPage)

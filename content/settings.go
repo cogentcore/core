@@ -43,7 +43,7 @@ func (s *SettingsData) Defaults() {
 		ps := &SettingsData{}
 		*ps = Settings
 		pt := curPage.Title
-		if ps.SiteTitle != "" {
+		if ps.SiteTitle != "" && pt == curPage.Name {
 			pt = ps.SiteTitle + ": " + pt
 		}
 		ps.PDF.Header = paginate.NoFirst(paginate.HeaderLeftPageNumber(pt))

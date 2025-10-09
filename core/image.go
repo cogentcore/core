@@ -109,7 +109,10 @@ func (im *Image) Render() {
 		rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
 		im.prevRenderImage = rimg
 	}
-	im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)
+	pim := im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)
+	if id, ok := im.Properties["id"]; ok {
+		pim.Anchor = id.(string)
+	}
 }
 
 func (im *Image) MakeToolbar(p *tree.Plan) {
