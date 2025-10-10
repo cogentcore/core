@@ -15,7 +15,11 @@ func (l Locale) Language() string {
 	if l == "" {
 		return ""
 	}
-	return strings.Split(string(l), "-")[0]
+	pos := strings.LastIndex(string(l), "-")
+	if pos < 0 {
+		return string(l)
+	}
+	return string(l)[:pos]
 }
 
 // Region returns the region portion of the locale tag (e.g., US, FR, JA)
@@ -27,5 +31,5 @@ func (l Locale) Region() string {
 	if pos < 0 {
 		return ""
 	}
-	return string(l)[:pos]
+	return string(l)[pos+1:]
 }

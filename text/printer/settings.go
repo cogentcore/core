@@ -17,11 +17,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-func init() {
-	Settings.Defaults()
-}
-
 // Settings provides the default printer settings.
+// This is initialized by the system.App because it depends on
+// the locale for initialization.
 var Settings SettingsData
 
 // Settings has standard printer settings.
@@ -29,11 +27,11 @@ type SettingsData struct {
 	// PageSize specifies a standard page size, or Custom.
 	PageSize PageSizes
 
-	// Units are the units in which size is specified.
+	// Units are the units in which the page size is specified.
 	// Will automatically be set if PageSize != Custom.
 	Units units.Units
 
-	// Size is the size in given units.
+	// Size is the page size in given units.
 	// Will automatically be set if PageSize != Custom.
 	Size math32.Vector2
 
@@ -43,13 +41,26 @@ type SettingsData struct {
 
 func (ps *SettingsData) Defaults() {
 	ps.PageSize = DefaultPageSizeForRegion(system.TheApp.SystemLocale().Region())
-	ps.Margins.Set(25) // basically one inch
+	switch ps.Units {
+	case units.UnitMm:
+		ps.Margins.Set(25) // basically one inch
+	case units.UnitPt:
+		ps.Margins.Set(72)
+	case units.UnitPx:
+		ps.Margins.Set(24)
+	}
 	ps.Update()
 }
 
 func (ps *SettingsData) Update() {
 	if ps.PageSize != Custom {
+		pU := ps.Units
 		ps.Units, ps.Size = ps.PageSize.Size()
+		if pU != ps.Units {
+			uc := units.NewContext()
+			sc := uc.Convert(1, pU, ps.Units)
+			ps.Margins = ps.Margins.MulScalar(sc)
+		}
 	}
 }
 
@@ -73,7 +84,7 @@ func (ps *SettingsData) MakeToolbar(p *tree.Plan) {
 // size = page size; body = content area inside margins
 func (ps *SettingsData) ToDots(un *units.Context) (size, body math32.Vector2, margins sides.Floats) {
 	sc := un.ToDots(1, ps.Units)
-	size = ps.Size.MulScalar(sc)
+	size = ps.Size.MulScalar(sc).Floor()
 	margins = ps.Margins.MulScalar(sc)
 	body.X = size.X - (margins.Left + margins.Right)
 	body.Y = size.Y - (margins.Top + margins.Bottom)
