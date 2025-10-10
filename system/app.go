@@ -61,6 +61,10 @@ type App interface {
 	// returns the platform of the underlying operating system.
 	SystemPlatform() Platforms
 
+	// SystemLocale returns the https://www.rfc-editor.org/rfc/bcp/bcp47.txt standard
+	// language tag, consisting of language and region, e.g., "en-US", "fr-FR", "ja-JP".
+	SystemLocale() Locale
+
 	// SystemInfo returns any additional information about the underlying system
 	// that is not otherwise given. It is used in crash logs.
 	SystemInfo() string

@@ -11,6 +11,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -27,6 +28,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/printer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
@@ -37,6 +39,16 @@ import (
 // settings by default and should be modified by other apps to add their
 // app settings.
 var AllSettings = []Settings{AppearanceSettings, SystemSettings, TimingSettings, DebugSettings}
+
+// AddAppSettings inserts app-specific settings after the AppearanceSettings
+func AddAppSettings(sets ...Settings) {
+	AllSettings = slices.Insert(AllSettings, 1, sets...)
+}
+
+// AddPrinterSettings adds printer settings, for apps that use these.
+func AddPrinterSettings() {
+	AddAppSettings(&printer.Settings)
+}
 
 // Settings is the interface that describes the functionality common
 // to all settings data types.

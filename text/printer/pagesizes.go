@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate core generate
-
-// package pagesizes provides an enum of standard page sizes
-// including image (e.g., 1080p, 4K, etc) and printed page sizes
-// (e.g., A4, USLetter).
-package pagesizes
+package printer
 
 import (
 	"cogentcore.org/core/math32"
@@ -15,11 +10,11 @@ import (
 )
 
 // Sizes are standard physical drawing sizes
-type Sizes int32 //enums:enum
+type PageSizes int32 //enums:enum
 
 const (
 	// Custom =  nonstandard
-	Custom Sizes = iota
+	Custom PageSizes = iota
 
 	// Image 1280x720 Px = 720p
 	Img1280x720
@@ -86,13 +81,13 @@ const (
 )
 
 // Size returns the corresponding size values and units.
-func (s Sizes) Size() (un units.Units, size math32.Vector2) {
+func (s PageSizes) Size() (un units.Units, size math32.Vector2) {
 	v := sizesMap[s]
 	return v.un, math32.Vec2(v.x, v.y)
 }
 
 // Match returns a matching standard size for given units and dimension.
-func Match(un units.Units, wd, ht float32) Sizes {
+func Match(un units.Units, wd, ht float32) PageSizes {
 	trgl := values{un: un, x: wd, y: ht}
 	trgp := values{un: un, x: ht, y: wd}
 	for k, v := range sizesMap {
@@ -111,7 +106,7 @@ type values struct {
 }
 
 // sizesMap is the map of size values for each standard size
-var sizesMap = map[Sizes]*values{
+var sizesMap = map[PageSizes]*values{
 	Img1280x720:  {units.UnitPx, 1280, 720},
 	Img1920x1080: {units.UnitPx, 1920, 1080},
 	Img3840x2160: {units.UnitPx, 3840, 2160},
@@ -133,4 +128,16 @@ var sizesMap = map[Sizes]*values{
 	A8:           {units.UnitMm, 52, 74},
 	A9:           {units.UnitMm, 37, 52},
 	A10:          {units.UnitMm, 26, 37},
+}
+
+// DefaultPageSizeForRegion returns the default page size based on locale
+// region value, per the https://www.rfc-editor.org/rfc/bcp/bcp47.txt standard.
+// See [system.Locale] and [system.App] for how to get this.
+func DefaultPageSizeForRegion(region string) PageSizes {
+	switch region {
+	case "US", "CA", "BZ", "CL", "CR", "GT", "NI", "PA", "PR", "SV", "VE", "MX", "CO", "PH":
+		return USLetter
+	default:
+		return A4
+	}
 }
