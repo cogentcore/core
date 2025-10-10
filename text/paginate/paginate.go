@@ -39,7 +39,6 @@ type pager struct {
 
 // optsUpdate updates the option sizes based on unit context in first input.
 func (p *pager) optsUpdate() {
-	p.opts.Update()
 	in0 := p.ins[0].AsWidget()
 	p.ctx = in0.Styles.UnitContext
 	p.opts.ToDots(&p.ctx)

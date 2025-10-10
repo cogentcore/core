@@ -29,7 +29,6 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	cset := pdf.UseStandardFonts()
 
 	p := pager{opts: &opts, ins: ins}
-	p.opts.Update()
 	p.ctx = *units.NewContext() // generic, invariant of actual context
 	p.opts.ToDots(&p.ctx)
 	p.assemble()
