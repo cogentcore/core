@@ -484,6 +484,8 @@ func (ct *Content) PagePDF(path string) error {
 	if ct.currentPage == nil {
 		return errors.Log(errors.New("Page empty"))
 	}
+	core.MessageSnackbar(ct, "Generating PDF...")
+
 	ct.inPDFRender = true
 	ct.reloadPage()
 	ct.inPDFRender = false
