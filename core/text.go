@@ -7,7 +7,9 @@ package core
 import (
 	"fmt"
 	"image"
+	"strconv"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -428,9 +430,26 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 	sty, tsty := tx.Styles.NewRichText()
 	tsty.Align, tsty.AlignV = text.Start, text.Start
 	tx.paintText = tx.Scene.TextShaper().WrapLines(tx.richText, sty, tsty, sz)
+	tx.setAnchorFromProperties()
+}
+
+// setAnchorFromProperties sets the Anchor string on paintText based on
+// id and tag properties, which is needed for PDF print formatting.
+// This is the only point at which we know we have the final
+// shaped.Lines for a text item.
+func (tx *Text) setAnchorFromProperties() {
+	anc := ""
 	if id, ok := tx.Properties["id"]; ok {
-		tx.paintText.Anchor = id.(string)
+		anc = id.(string)
 	}
+	if t, ok := tx.Properties["tag"]; ok {
+		tag := t.(string)
+		if len(tag) > 1 && tag[0] == 'h' { // header
+			level := errors.Log1(strconv.Atoi(tag[1:]))
+			anc += fmt.Sprintf(";Header %d:%s", level, tx.Text)
+		}
+	}
+	tx.paintText.Anchor = anc
 }
 
 // configTextAlloc is used for determining how much space the text
@@ -455,9 +474,7 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 		rsz = tx.paintText.Bounds.Size().Ceil()
 	}
 	tx.paintText = tsh.WrapLines(tx.richText, sty, tsty, rsz)
-	if id, ok := tx.Properties["id"]; ok {
-		tx.paintText.Anchor = id.(string)
-	}
+	tx.setAnchorFromProperties()
 	return tx.paintText.Bounds.Size().Ceil()
 }
 

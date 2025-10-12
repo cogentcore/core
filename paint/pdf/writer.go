@@ -50,6 +50,7 @@ type pdfWriter struct {
 	images   map[image.Image]pdfRef
 	layers   pdfLayers
 	anchors  pdfMap // things that can be linked to within doc
+	outlines []*pdfOutline
 	compress bool
 	subset   bool
 	title    string
@@ -340,6 +341,18 @@ func (w *pdfWriter) Close() error {
 		}
 		nmref := w.writeObject(pdfDict{"Names": nmary})
 		catalog[pdfName("Names")] = pdfDict{"Dests": nmref}
+	}
+
+	if len(w.outlines) > 0 {
+		firstRef := w.writeOutlines()
+		first := w.outlines[0]
+		cdict := w.writeObject(pdfDict{
+			"Type:": pdfName("Outlines"),
+			"First": firstRef,
+			"Last":  firstRef + pdfRef(first.last),
+			"Count": len(w.outlines),
+		})
+		catalog[pdfName("Outlines")] = cdict
 	}
 
 	if len(w.layers.list) > 0 {
