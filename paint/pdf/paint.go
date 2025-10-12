@@ -16,15 +16,18 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 )
 
 // SetFill sets the fill style values where different from current.
-func (w *pdfPage) SetFill(fill *styles.Fill) {
+// The bounds and matrix are required for gradient fills: pass identity
+// if not available.
+func (w *pdfPage) SetFill(fill *styles.Fill, bounds math32.Box2, m math32.Matrix2) {
 	csty := w.style()
 	if csty.Fill.Color != fill.Color || csty.Fill.Opacity != fill.Opacity {
-		w.SetFillColor(fill)
+		w.SetFillColor(fill, bounds, m)
 	}
 	csty.Fill = *fill
 }
@@ -51,13 +54,13 @@ func alphaNormColor(c color.RGBA, a float32) [3]dec {
 }
 
 // SetFillColor sets the filling color (image).
-func (w *pdfPage) SetFillColor(fill *styles.Fill) {
+func (w *pdfPage) SetFillColor(fill *styles.Fill, bounds math32.Box2, m math32.Matrix2) {
 	switch x := fill.Color.(type) {
 	// todo: image
 	case *gradient.Linear:
-		fmt.Fprintf(w, " /Pattern cs /%v scn", w.getPattern(x))
+		fmt.Fprintf(w, " /Pattern cs /%v scn", w.gradientPattern(x, bounds, m))
 	case *gradient.Radial:
-		fmt.Fprintf(w, " /Pattern cs /%v scn", w.getPattern(x))
+		fmt.Fprintf(w, " /Pattern cs /%v scn", w.gradientPattern(x, bounds, m))
 	case *image.Uniform:
 		var clr color.RGBA
 		if x != nil {
@@ -107,7 +110,7 @@ func (w *pdfPage) SetStrokeColor(stroke *styles.Stroke) {
 	case *gradient.Linear:
 	case *gradient.Radial:
 		// TODO: should we unset cs?
-		// fmt.Fprintf(w, " /Pattern cs /%v scn", w.getPattern(stroke.Gradient))
+		// fmt.Fprintf(w, " /Pattern cs /%v scn", w.gradientPattern(stroke.Gradient))
 	case *image.Uniform:
 		clr := colors.ApplyOpacity(colors.AsRGBA(x), stroke.Opacity)
 		a := float32(clr.A) / 255.0
@@ -208,15 +211,20 @@ func (w *pdfPage) getOpacityGS(a float32) pdfName {
 	return name
 }
 
-func (w *pdfPage) getPattern(gr gradient.Gradient) pdfName {
+func (w *pdfPage) gradientPattern(gr gradient.Gradient, bounds math32.Box2, m math32.Matrix2) pdfName {
+	// fbox := sc.GetPathExtent()
+	// lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
+	// 	Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
+	gr.Update(1, bounds, m)
 	// TODO: support patterns/gradients with alpha channel
 	shading := pdfDict{
 		"ColorSpace": pdfName("DeviceRGB"),
 	}
 	switch g := gr.(type) {
 	case *gradient.Linear:
+		s, e := g.TransformedAxis()
 		shading["ShadingType"] = 2
-		shading["Coords"] = pdfArray{g.Start.X, g.Start.Y, g.End.X, g.End.Y}
+		shading["Coords"] = pdfArray{s.X, s.Y, e.X, e.Y}
 		shading["Function"] = patternStopsFunction(g.Stops)
 		shading["Extend"] = pdfArray{true, true}
 	case *gradient.Radial:

@@ -50,24 +50,28 @@ func TestPath(t *testing.T) {
 		sty.Stroke.Width.Px(2)
 		sty.ToDots()
 
-		pd.Path(*p, sty, math32.Translate2D(10, 20))
+		tr := math32.Translate2D(10, 20)
+		pd.Path(*p, sty, math32.Box2{}, tr, tr)
 	})
 }
 
 func TestGradientLinear(t *testing.T) {
 	RunTest(t, "gradient-linear", 50, 50, func(pd *PDF, sty *styles.Paint) {
-		// pd.PushTransform(math32.Translate2D(10, 5))
+		pd.PushTransform(math32.Translate2D(10, 5).Scale(.5, .5))
 		p := ppath.New().Rectangle(0, 0, 30, 20)
 		gg := gradient.NewLinear().AddStop(colors.White, 0).AddStop(colors.Red, 1)
-		gg.Start.Set(10, 20)
-		gg.End.Set(40, 20)
+		gg.Start.Set(0, 10)
+		gg.End.Set(30, 10)
+		gg.Units = gradient.UserSpaceOnUse
 		sty.Stroke.Color = colors.Uniform(colors.Blue)
 		sty.Fill.Color = gg
 		sty.Stroke.Width.Px(2)
 		sty.ToDots()
 
-		pd.Path(*p, sty, math32.Translate2D(10, 20))
-		// pd.PopStack()
+		tr := math32.Translate2D(10, 20)
+		cum := pd.Cumulative()
+		pd.Path(*p, sty, math32.B2(0, 0, 30, 20), tr, cum.Mul(tr))
+		pd.PopStack()
 	})
 }
 
@@ -76,6 +80,7 @@ func TestGradientRadial(t *testing.T) {
 		p := ppath.New().Rectangle(0, 0, 30, 20)
 		// todo: this is a different definition than ours..
 		gg := gradient.NewRadial().AddStop(colors.White, 0).AddStop(colors.Red, 1)
+		gg.Units = gradient.UserSpaceOnUse
 		gg.Center.Set(25, 20)
 		gg.Focal = gg.Center
 		gg.Radius.Set(15, 5)
@@ -84,7 +89,8 @@ func TestGradientRadial(t *testing.T) {
 		sty.Stroke.Width.Px(2)
 		sty.ToDots()
 
-		pd.Path(*p, sty, math32.Translate2D(10, 20))
+		tr := math32.Translate2D(10, 20)
+		pd.Path(*p, sty, math32.B2(0, 0, 30, 20), tr, tr)
 	})
 }
 

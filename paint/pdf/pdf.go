@@ -160,8 +160,14 @@ func (r *PDF) PushTransform(m math32.Matrix2) {
 	r.SetTransform(m)
 }
 
-// Path renders a path to the canvas using a style and a transformation matrix.
-func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
+// Cumulative returns the current cumulative transform.
+func (r *PDF) Cumulative() math32.Matrix2 {
+	return r.w.Cumulative()
+}
+
+// Path renders a path to the canvas using a style and an
+// individual and cumulative transformation matrix (needed for fill)
+func (r *PDF) Path(path ppath.Path, style *styles.Paint, bounds math32.Box2, tr, cum math32.Matrix2) {
 	// PDFs don't support the arcs joiner, miter joiner (not clipped),
 	// or miter joiner (clipped) with non-bevel fallback
 	strokeUnsupported := false
@@ -175,7 +181,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 		// 	strokeUnsupported = true
 		// }
 	}
-	scale := math32.Sqrt(math32.Abs(m.Det()))
+	scale := math32.Sqrt(math32.Abs(tr.Det()))
 	stk := style.Stroke
 	stk.Width.Dots *= scale
 	stk.DashOffset, stk.Dashes = ppath.ScaleDash(scale, stk.DashOffset, stk.Dashes)
@@ -188,7 +194,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 	//}
 
 	closed := false
-	data := path.Clone().Transform(m).ToPDF()
+	data := path.Clone().Transform(tr).ToPDF()
 	if 1 < len(data) && data[len(data)-1] == 'h' {
 		data = data[:len(data)-2]
 		closed = true
@@ -221,7 +227,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 		// return
 	}
 	if style.HasFill() && !style.HasStroke() {
-		r.w.SetFill(&style.Fill)
+		r.w.SetFill(&style.Fill, bounds, cum)
 		r.w.Write([]byte(" "))
 		r.w.Write([]byte(data))
 		r.w.Write([]byte(" f"))
@@ -245,7 +251,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 		// todo:
 		sameAlpha := true
 		if sameAlpha {
-			r.w.SetFill(&style.Fill)
+			r.w.SetFill(&style.Fill, bounds, cum)
 			r.w.SetStroke(&style.Stroke)
 			r.w.Write([]byte(" "))
 			r.w.Write([]byte(data))
@@ -258,7 +264,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
 				r.w.Write([]byte("*"))
 			}
 		} else {
-			r.w.SetFill(&style.Fill)
+			r.w.SetFill(&style.Fill, bounds, cum)
 			r.w.Write([]byte(" "))
 			r.w.Write([]byte(data))
 			r.w.Write([]byte(" f"))

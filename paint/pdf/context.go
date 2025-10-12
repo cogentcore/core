@@ -64,6 +64,15 @@ func (w *pdfPage) PushTransform(m math32.Matrix2) {
 	w.SetTransform(m)
 }
 
+// Cumulative returns the current cumulative transform.
+func (w *pdfPage) Cumulative() math32.Matrix2 {
+	m := math32.Identity2()
+	for _, s := range w.stack {
+		m = m.Mul(s.Transform)
+	}
+	return m
+}
+
 // style() returns the currently active style
 func (w *pdfPage) style() *styles.Paint {
 	ctx := w.stack.Peek()
