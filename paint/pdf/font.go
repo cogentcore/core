@@ -7,6 +7,87 @@
 
 package pdf
 
+import (
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
+)
+
+func standardFontName(sty *rich.Style) string {
+	name := "Helvetica"
+	switch sty.Family {
+	case rich.SansSerif:
+		name = "Helvetica"
+	case rich.Serif:
+		name = "Times"
+	case rich.Monospace:
+		name = "Courier"
+	case rich.Cursive:
+		name = "ZapfChancery"
+	case rich.Math:
+		name = "Symbol"
+	case rich.Emoji:
+		name = "ZapfDingbats"
+	}
+	bname := name
+	if sty.Weight > rich.Medium {
+		name += "-Bold"
+		if sty.Slant == rich.Italic {
+			if bname == "Times" {
+				name += "Italic"
+			} else {
+				name += "Oblique"
+			}
+		}
+	} else {
+		if sty.Slant == rich.Italic {
+			if bname == "Times" {
+				name += "-Italic"
+			} else {
+				name += "-Oblique"
+			}
+		}
+	}
+	if name == "Times" {
+		name = "Times-Roman" // ugh
+	}
+	return name
+}
+
+func (w *pdfWriter) getFont(sty *rich.Style, tsty *text.Style) pdfRef {
+	if sty.Family != rich.Custom {
+		stdFont := standardFontName(sty)
+		if ref, ok := w.fontsStd[stdFont]; ok {
+			return ref
+		}
+
+		dict := pdfDict{
+			"Type":     pdfName("Font"),
+			"Subtype":  pdfName("Type1"),
+			"BaseFont": pdfName(stdFont),
+			"Encoding": pdfName("WinAnsiEncoding"),
+		}
+		ref := w.writeObject(dict)
+		w.fontsStd[stdFont] = ref
+		return ref
+	}
+	// todo: deal with custom
+	/*
+		fonts := w.fontsH
+		if vertical {
+			fonts = w.fontsV
+		}
+		if ref, ok := fonts[font]; ok {
+			return ref
+		}
+		w.objOffsets = append(w.objOffsets, 0)
+		ref := pdfRef(len(w.objOffsets))
+		fonts[font] = ref
+		w.fontSubset[font] = ppath.NewFontSubsetter()
+		return ref
+	*/
+	return 0
+}
+
 /*
 func (w *pdfWriter) writeFont(ref pdfRef, font *text.Font, vertical bool) {
 	// subset the font, we only write the used characters to the PDF CMap object to reduce its

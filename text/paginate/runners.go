@@ -144,3 +144,31 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 		core.NewSpace(fr).Styler(func(s *styles.Style) { s.Min.Y.Em(1) })
 	}
 }
+
+// APAHeaders is a TextStyler function that sets APA-style headers based
+// on the text.Type. The default material design header sizes used onscreen are
+// generally too large for print. This is designed for content, where the
+// second level header ## is used for most top-level headers within a page.
+func APAHeaders(tx *core.Text) {
+	s := &tx.Styles
+	base := printer.Settings.FontSize
+	switch tx.Type {
+	case core.TextDisplaySmall: // h1, e.g., chapter level
+		s.Font.Size = base
+		s.Font.Size.Value *= 16.0 / 11.0
+		s.Font.Weight = rich.Bold
+	case core.TextHeadlineMedium: // h2
+		s.Font.Size = base
+		s.Font.Size.Value *= 14.0 / 11.0
+		s.Font.Weight = rich.Bold
+		s.Align.Self = styles.Center
+	case core.TextTitleLarge: // h3
+		s.Font.Size = base
+		s.Font.Size.Value *= 12.0 / 11.0
+		s.Font.Weight = rich.Bold
+	case core.TextTitleMedium: // h4
+		s.Font.Size = base
+		s.Font.Weight = rich.Bold
+		s.Font.Slant = rich.Italic
+	}
+}

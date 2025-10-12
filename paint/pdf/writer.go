@@ -25,8 +25,6 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/text"
 	"golang.org/x/exp/maps"
 )
 
@@ -302,81 +300,6 @@ func (w *pdfWriter) writeObject(val interface{}) pdfRef {
 	w.writeVal(val)
 	w.write("\nendobj\n")
 	return pdfRef(len(w.objOffsets))
-}
-
-func standardFontName(sty *rich.Style) string {
-	name := "Helvetica"
-	switch sty.Family {
-	case rich.SansSerif:
-		name = "Helvetica"
-	case rich.Serif:
-		name = "Times"
-	case rich.Monospace:
-		name = "Courier"
-	case rich.Cursive:
-		name = "ZapfChancery"
-	case rich.Math:
-		name = "Symbol"
-	case rich.Emoji:
-		name = "ZapfDingbats"
-	}
-	if sty.Weight > rich.Medium {
-		name += "-Bold"
-		if sty.Slant == rich.Italic {
-			if name == "Times" {
-				name += "Italic"
-			} else {
-				name += "Oblique"
-			}
-		}
-	} else {
-		if sty.Slant == rich.Italic {
-			if name == "Times" {
-				name += "-Italic"
-			} else {
-				name += "-Oblique"
-			}
-		}
-	}
-	if name == "Times" {
-		name = "Times-Roman" // ugh
-	}
-	return name
-}
-
-func (w *pdfWriter) getFont(sty *rich.Style, tsty *text.Style) pdfRef {
-	if sty.Family != rich.Custom {
-		stdFont := standardFontName(sty)
-		if ref, ok := w.fontsStd[stdFont]; ok {
-			return ref
-		}
-
-		dict := pdfDict{
-			"Type":     pdfName("Font"),
-			"Subtype":  pdfName("Type1"),
-			"BaseFont": pdfName(stdFont),
-			"Encoding": pdfName("WinAnsiEncoding"),
-		}
-		ref := w.writeObject(dict)
-		w.fontsStd[stdFont] = ref
-		return ref
-	}
-	// todo: deal with custom
-	/*
-		fonts := w.fontsH
-		if vertical {
-			fonts = w.fontsV
-		}
-		if ref, ok := fonts[font]; ok {
-			return ref
-		}
-		w.objOffsets = append(w.objOffsets, 0)
-		ref := pdfRef(len(w.objOffsets))
-		fonts[font] = ref
-		w.fontSubset[font] = ppath.NewFontSubsetter()
-		return ref
-	*/
-	return 0
 }
 
 // Close finished the document.
