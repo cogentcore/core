@@ -8,8 +8,10 @@
 package pdf
 
 import (
+	"fmt"
 	"image"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
@@ -19,6 +21,7 @@ import (
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
+	"golang.org/x/text/encoding/charmap"
 )
 
 // Text renders text to the canvas using a transformation matrix,
@@ -225,4 +228,148 @@ func (r *PDF) links(lns *shaped.Lines, m math32.Matrix2, pos math32.Vector2) {
 		rb = rb.MulMatrix2(m)
 		r.w.AddLink(lk.URL, rb)
 	}
+}
+
+// SetFont sets the font.
+func (w *pdfPage) SetFont(sty *rich.Style, tsty *text.Style) error {
+	if !w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: must be in text object"))
+	}
+	size := tsty.FontHeight(sty) // * w.pdf.globalScale
+	ref := w.pdf.getFont(sty, tsty)
+	if _, ok := w.resources["Font"]; !ok {
+		w.resources["Font"] = pdfDict{}
+	} else {
+		for name, fontRef := range w.resources["Font"].(pdfDict) {
+			if ref == fontRef {
+				fmt.Fprintf(w, " /%v %v Tf", name, dec(size))
+				return nil
+			}
+		}
+	}
+
+	name := pdfName(fmt.Sprintf("F%d", len(w.resources["Font"].(pdfDict))))
+	w.resources["Font"].(pdfDict)[name] = ref
+	fmt.Fprintf(w, " /%v %v Tf", name, dec(size))
+	return nil
+}
+
+// SetTextPosition sets the text offset position.
+func (w *pdfPage) SetTextPosition(off math32.Vector2) error {
+	if !w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: must be in text object"))
+	}
+	do := off.Sub(w.textPosition)
+	// and finally apply an offset from there, in reverse for Y
+	fmt.Fprintf(w, " %v %v Td", dec(do.X), dec(-do.Y))
+	w.textPosition = off
+	return nil
+}
+
+// SetTextRenderMode sets the text rendering mode.
+// 0 = fill text, 1 = stroke text, 2 = fill, then stroke.
+// higher numbers support clip path.
+func (w *pdfPage) SetTextRenderMode(mode int) error {
+	if !w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: must be in text object"))
+	}
+	fmt.Fprintf(w, " %d Tr", mode)
+	w.textRenderMode = mode
+	return nil
+}
+
+// SetTextCharSpace sets the text character spacing.
+func (w *pdfPage) SetTextCharSpace(space float32) error {
+	if !w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: must be in text object"))
+	}
+	fmt.Fprintf(w, " %v Tc", dec(space))
+	w.textCharSpace = space
+	return nil
+}
+
+// StartTextObject starts a text object, adding to the graphics
+// CTM transform matrix as given by the arg, and setting an inverting
+// text transform, so text is rendered upright.
+func (w *pdfPage) StartTextObject(m math32.Matrix2) error {
+	if w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: already in text object"))
+	}
+	// set the graphics transform to m first
+	w.PushTransform(m)
+	fmt.Fprintf(w, " BT")
+	// then apply an inversion text matrix
+	tm := math32.Scale2D(1, -1)
+	fmt.Fprintf(w, " %s Tm", mat2(tm))
+	w.inTextObject = true
+	w.textPosition = math32.Vector2{}
+	return nil
+}
+
+// EndTextObject ends a text object.
+func (w *pdfPage) EndTextObject() error {
+	if !w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: must be in text object"))
+	}
+	fmt.Fprintf(w, " ET")
+	w.PopStack()
+	w.inTextObject = false
+	return nil
+}
+
+// WriteText writes text using current text style.
+func (w *pdfPage) WriteText(tx string) error {
+	if !w.inTextObject {
+		return errors.Log(errors.New("pdfWriter: must be in text object"))
+	}
+	if len(tx) == 0 {
+		return nil
+	}
+
+	first := true
+	write := func(s string) {
+		if first {
+			fmt.Fprintf(w, "(")
+			first = false
+		} else {
+			fmt.Fprintf(w, " (")
+		}
+		rs := []rune(s)
+		for _, r := range rs {
+			c, ok := charmap.Windows1252.EncodeRune(r)
+			if !ok {
+				if '\u2000' <= r && r <= '\u200A' {
+					c = ' '
+				}
+			}
+			switch c {
+			case '\n':
+				w.WriteByte('\\')
+				w.WriteByte('n')
+			case '\r':
+				w.WriteByte('\\')
+				w.WriteByte('r')
+			case '\t':
+				w.WriteByte('\\')
+				w.WriteByte('t')
+			case '\b':
+				w.WriteByte('\\')
+				w.WriteByte('b')
+			case '\f':
+				w.WriteByte('\\')
+				w.WriteByte('f')
+			case '\\', '(', ')':
+				w.WriteByte('\\')
+				w.WriteByte(c)
+			default:
+				w.WriteByte(c)
+			}
+		}
+		fmt.Fprintf(w, ")")
+	}
+
+	fmt.Fprintf(w, "[")
+	write(tx)
+	fmt.Fprintf(w, "]TJ")
+	return nil
 }

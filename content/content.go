@@ -486,6 +486,8 @@ func (ct *Content) PagePDF(path string) error {
 	}
 	core.MessageSnackbar(ct, "Generating PDF...")
 
+	Settings.PDF.FontScale = (100.0 / core.AppearanceSettings.DocsFontSize)
+
 	ct.inPDFRender = true
 	ct.reloadPage()
 	ct.inPDFRender = false

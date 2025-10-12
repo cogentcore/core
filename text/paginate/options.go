@@ -12,18 +12,13 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/printer"
-	"cogentcore.org/core/text/rich"
 )
 
 // Options has the parameters for pagination.
 type Options struct {
-	// FontFamily specifies the default font family to apply
-	// to all core.Text elements.
-	FontFamily rich.Family
-
-	// FontSize specifies the default font size to apply
-	// to all core.Text elements, if non-zero.
-	FontSize units.Value
+	// FontScale is an additional font scaling factor to apply.
+	// This is used in content to reverse the DocsFontSize factor, for example.
+	FontScale float32
 
 	// Title generates the title contents for the first page,
 	// into the given page body frame.
@@ -57,6 +52,7 @@ func NewOptions() Options {
 }
 
 func (o *Options) Defaults() {
+	o.FontScale = 1
 	o.Footer = CenteredPageNumber
 }
 
