@@ -172,6 +172,34 @@ func TestLinks(t *testing.T) {
 	})
 }
 
+func TestOutline(t *testing.T) {
+	RunTest(t, "outline", 300, 300, func(pd *PDF, sty *styles.Paint) {
+		prv := UseStandardFonts()
+		sh := shaped.NewShaper()
+		m := math32.Identity2()
+		rsty := &sty.Font
+		tsty := &sty.Text
+		sz := math32.Vec2(250, 250)
+
+		txt := func(src string, pos math32.Vector2) {
+			tx, err := htmltext.HTMLToRich([]byte(src), rsty, nil)
+			assert.NoError(t, err)
+			lns := sh.WrapLines(tx, rsty, tsty, sz)
+			pd.Text(sty, m, pos, lns)
+		}
+		txt("Heading 1", math32.Vec2(10, 10))
+		pd.w.AddOutline("Heading 1", 1, 10)
+		txt("Sub Heading", math32.Vec2(10, 30))
+		pd.w.AddOutline("Sub Heading 1", 2, 30)
+		txt("Another Sub Heading", math32.Vec2(10, 50))
+		pd.w.AddOutline("Sub Heading 2", 2, 50)
+		txt("Heading 2", math32.Vec2(10, 70))
+		pd.w.AddOutline("Heading 2", 1, 70)
+
+		RestorePreviousFonts(prv)
+	})
+}
+
 func TestLayers(t *testing.T) {
 	RunTest(t, "layers", 300, 300, func(pd *PDF, sty *styles.Paint) {
 		prv := UseStandardFonts()

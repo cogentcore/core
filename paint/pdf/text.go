@@ -10,6 +10,8 @@ package pdf
 import (
 	"fmt"
 	"image"
+	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -28,7 +30,20 @@ import (
 // (the translation component specifies the starting offset)
 func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, lns *shaped.Lines) {
 	if lns.Anchor != "" {
-		r.w.AddAnchor(lns.Anchor, pos)
+		anc := lns.Anchor
+		hidx := strings.Index(anc, ";Header ")
+		if hidx >= 0 {
+			if hidx > 0 {
+				r.w.AddAnchor(anc[:hidx], pos)
+				anc = anc[hidx:]
+			}
+			anc = anc[8:]
+			level := errors.Log1(strconv.Atoi(anc[0:1]))
+			anc = anc[2:]
+			r.w.AddOutline(anc, level, pos.Y)
+		} else {
+			r.w.AddAnchor(lns.Anchor, pos)
+		}
 	}
 	mt := m.Mul(math32.Translate2D(pos.X, pos.Y))
 	r.w.PushTransform(mt)

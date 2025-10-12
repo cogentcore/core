@@ -108,6 +108,9 @@ func (p *pager) assemble() {
 							s.Text.LineHeight = printer.Settings.LineHeight
 						}
 						s.Font.Size.Value *= fsc
+						if p.opts.TextStyler != nil {
+							p.opts.TextStyler(tx)
+						}
 					})
 				}
 			}

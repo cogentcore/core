@@ -20,6 +20,10 @@ type Options struct {
 	// This is used in content to reverse the DocsFontSize factor, for example.
 	FontScale float32
 
+	// TextStyler is an optional text styling function to apply to text elements.
+	// Can be used to adjust the sizes and formatting of headers, for example.
+	TextStyler func(tx *core.Text)
+
 	// Title generates the title contents for the first page,
 	// into the given page body frame.
 	Title func(frame *core.Frame, opts *Options)

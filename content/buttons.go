@@ -75,7 +75,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("PDF").SetIcon(icons.PictureAsPdf).SetTooltip("PDF generates and opens / downloads the current page as a printable PDF file")
+		w.SetText("PDF").SetIcon(icons.PictureAsPdf).SetTooltip("PDF generates and opens / downloads the current page as a printable PDF file. See the Settings/Printer panel (Command+,) for settings.")
 		w.OnClick(func(e events.Event) {
 			ct.PagePDF("pdfs")
 		})
