@@ -73,7 +73,7 @@ type pdfOutline struct {
 func (w *pdfPage) AddOutline(name string, level int, ypos float32) {
 	ol := &pdfOutline{name: name, level: level, page: w.pageNo, ypos: w.height - w.pdf.globalScale*ypos, prev: -1, next: -1, first: -1, last: -1}
 	if len(w.pdf.outlines) == 0 {
-		or := &pdfOutline{name: "Contents", level: 0, page: 0, ypos: 0, prev: -1, next: -1, first: -1, last: -1}
+		or := &pdfOutline{name: "Contents", level: 0, page: 0, ypos: w.height, prev: -1, next: -1, first: -1, last: -1}
 		w.pdf.outlines = append(w.pdf.outlines, or)
 	}
 	w.pdf.outlines = append(w.pdf.outlines, ol)
@@ -128,7 +128,6 @@ func (w *pdfWriter) writeOutlines() pdfRef {
 		}
 		if i == 0 {
 			delete(od, "Parent")
-			delete(od, "Dest")
 		}
 		ref := w.writeObject(od)
 		refs = append(refs, ref)
