@@ -176,6 +176,8 @@ func (w *pdfWriter) writeVal(i interface{}) {
 		}
 	case int:
 		w.write("%d", v)
+	case dec:
+		w.write("%v", v)
 	case float32:
 		w.write("%v", dec(v))
 	case float64:

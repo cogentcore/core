@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
 
@@ -37,6 +38,21 @@ type SettingsData struct {
 
 	// Margins specify the page margins in the size units.
 	Margins sides.Floats `display:"inline"`
+
+	// FontFamily specifies the font family to use for printing.
+	// The default SansSerif font used on screen may not be desired
+	// for printouts, where Serif is more typically used.
+	FontFamily rich.Family
+
+	// FontSize specifies the base font size to use for scaling printed
+	// text output (i.e., the default Text font will be this size, with
+	// larger elements scaled appropriately).
+	FontSize units.Value
+
+	// LineHeight is the default line height for standard text elements,
+	// in proportion to the font size (e.g., 1.25), which determines the
+	// spacing between lines.
+	LineHeight float32
 }
 
 func (ps *SettingsData) Defaults() {
@@ -49,6 +65,9 @@ func (ps *SettingsData) Defaults() {
 	case units.UnitPx:
 		ps.Margins.Set(24)
 	}
+	ps.FontFamily = rich.Serif
+	ps.FontSize.Pt(11)
+	ps.LineHeight = 1.25
 	ps.Update()
 }
 
@@ -89,4 +108,12 @@ func (ps *SettingsData) ToDots(un *units.Context) (size, body math32.Vector2, ma
 	body.X = size.X - (margins.Left + margins.Right)
 	body.Y = size.Y - (margins.Top + margins.Bottom)
 	return
+}
+
+// FontScale returns the scaling factor based on FontSize,
+// relative to the core default font size of 16 Dp.
+func (ps *SettingsData) FontScale() float32 {
+	uc := units.NewContext()
+	sc := uc.Convert(16, units.UnitDp, ps.FontSize.Unit)
+	return ps.FontSize.Value / sc
 }

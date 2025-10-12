@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/printer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
@@ -50,15 +51,15 @@ func HeaderLeftPageNumber(header string) func(frame *core.Frame, opts *Options, 
 		})
 		core.NewText(fr).SetText(header).Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
-			s.Font.Family = opts.FontFamily
+			s.Font.Family = printer.Settings.FontFamily
 			s.Font.Slant = rich.Italic
-			s.Font.Size.Pt(11)
+			s.Font.Size = printer.Settings.FontSize
 		})
 		core.NewStretch(fr)
 		core.NewText(fr).SetText(strconv.Itoa(pageNo)).Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
-			s.Font.Family = opts.FontFamily
-			s.Font.Size.Pt(11)
+			s.Font.Family = printer.Settings.FontFamily
+			s.Font.Size = printer.Settings.FontSize
 		})
 		core.NewSpace(frame).Styler(func(s *styles.Style) { // space after
 			s.Min.Y.Em(3)
@@ -84,23 +85,25 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 			s.Min.Y.Em(.1)
 		})
 		core.NewText(fr).SetText(title).Styler(func(s *styles.Style) {
-			s.Font.Family = opts.FontFamily
-			s.Font.Size.Pt(16)
+			s.Font.Family = printer.Settings.FontFamily
+			s.Font.Size = printer.Settings.FontSize
+			s.Font.Size.Value *= 16.0 / 11
 			s.Text.Align = text.Center
 		})
 
 		if authors != "" {
 			core.NewText(fr).SetText(authors).Styler(func(s *styles.Style) {
-				s.Font.Family = opts.FontFamily
-				s.Font.Size.Pt(11)
+				s.Font.Family = printer.Settings.FontFamily
+				s.Font.Size = printer.Settings.FontSize
+				s.Font.Size.Value *= 12.0 / 11
 				s.Text.Align = text.Center
 			})
 		}
 
 		if affiliations != "" {
 			core.NewText(fr).SetText(affiliations).Styler(func(s *styles.Style) {
-				s.Font.Family = opts.FontFamily
-				s.Font.Size.Pt(10)
+				s.Font.Family = printer.Settings.FontFamily
+				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center
 				s.Text.LineHeight = 1.1
 			})
@@ -109,30 +112,32 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if date != "" {
 			core.NewText(fr).SetText(date).Styler(func(s *styles.Style) {
-				s.Font.Family = opts.FontFamily
-				s.Font.Size.Pt(10)
+				s.Font.Family = printer.Settings.FontFamily
+				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center
 			})
 		}
 
 		if url != "" {
 			core.NewText(fr).SetText(url).Styler(func(s *styles.Style) {
-				s.Font.Family = opts.FontFamily
-				s.Font.Size.Pt(10)
+				s.Font.Family = printer.Settings.FontFamily
+				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center
 			})
 		}
 
 		if abstract != "" {
 			core.NewText(fr).SetText("Abstract:").Styler(func(s *styles.Style) {
-				s.Font.Family = opts.FontFamily
-				s.Font.Size.Pt(11)
+				s.Font.Family = printer.Settings.FontFamily
+				s.Font.Size = printer.Settings.FontSize
+				s.Font.Size.Value *= 12.0 / 11
 				s.Font.Weight = rich.Bold
 				s.Align.Self = styles.Start
 			})
 			core.NewText(fr).SetText(abstract).Styler(func(s *styles.Style) {
-				s.Font.Family = opts.FontFamily
-				s.Font.Size.Pt(10)
+				s.Font.Family = printer.Settings.FontFamily
+				s.Font.Size = printer.Settings.FontSize
+				s.Text.LineHeight = printer.Settings.LineHeight
 				s.Align.Self = styles.Start
 			})
 		}

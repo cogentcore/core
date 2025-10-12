@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/paginate"
-	"cogentcore.org/core/text/rich"
 )
 
 func init() {
@@ -38,7 +37,6 @@ type SettingsData struct {
 
 func (s *SettingsData) Defaults() {
 	s.PDF.Defaults()
-	s.PDF.FontFamily = rich.Serif
 	s.PDF.Footer = nil
 
 	s.PageSettings = func(ct *Content, curPage *bcontent.Page) *SettingsData {

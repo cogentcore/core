@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/paint/renderers/pdfrender"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/printer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 )
@@ -85,21 +86,29 @@ func (p *pager) assemble() {
 		p.ins = append([]core.Widget{tf.This.(core.Widget)}, p.ins...)
 		tf.StyleTree()
 	}
-	for _, in := range p.ins {
+	fsc := printer.Settings.FontScale() * p.opts.FontScale
+	for ii, in := range p.ins {
 		iw := core.AsWidget(in)
 
 		iw.FinalStyler(func(s *styles.Style) {
 			s.Min.X.Dot(p.opts.BodyDots.X)
 			s.Min.Y.Dot(p.opts.BodyDots.Y)
 		})
+		if p.opts.Title != nil && ii == 0 { // don't restyle the title
+			continue
+		}
 		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			if tx, ok := cwb.This.(*core.Text); ok {
-				if tx.Styles.Font.Family == rich.SansSerif {
-					if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
-						cwb.Styler(func(s *styles.Style) {
-							s.Font.Family = p.opts.FontFamily
-						})
-					}
+				if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
+					cwb.Styler(func(s *styles.Style) {
+						if tx.Styles.Font.Family == rich.SansSerif {
+							s.Font.Family = printer.Settings.FontFamily
+						}
+						if tx.Type == core.TextBodyLarge {
+							s.Text.LineHeight = printer.Settings.LineHeight
+						}
+						s.Font.Size.Value *= fsc
+					})
 				}
 			}
 			return true

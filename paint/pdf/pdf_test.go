@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
@@ -46,6 +47,40 @@ func TestPath(t *testing.T) {
 
 		sty.Stroke.Color = colors.Uniform(colors.Blue)
 		sty.Fill.Color = colors.Uniform(colors.Red)
+		sty.Stroke.Width.Px(2)
+		sty.ToDots()
+
+		pd.Path(*p, sty, math32.Translate2D(10, 20))
+	})
+}
+
+func TestGradientLinear(t *testing.T) {
+	RunTest(t, "gradient-linear", 50, 50, func(pd *PDF, sty *styles.Paint) {
+		// pd.PushTransform(math32.Translate2D(10, 5))
+		p := ppath.New().Rectangle(0, 0, 30, 20)
+		gg := gradient.NewLinear().AddStop(colors.White, 0).AddStop(colors.Red, 1)
+		gg.Start.Set(10, 20)
+		gg.End.Set(40, 20)
+		sty.Stroke.Color = colors.Uniform(colors.Blue)
+		sty.Fill.Color = gg
+		sty.Stroke.Width.Px(2)
+		sty.ToDots()
+
+		pd.Path(*p, sty, math32.Translate2D(10, 20))
+		// pd.PopStack()
+	})
+}
+
+func TestGradientRadial(t *testing.T) {
+	RunTest(t, "gradient-radial", 50, 50, func(pd *PDF, sty *styles.Paint) {
+		p := ppath.New().Rectangle(0, 0, 30, 20)
+		// todo: this is a different definition than ours..
+		gg := gradient.NewRadial().AddStop(colors.White, 0).AddStop(colors.Red, 1)
+		gg.Center.Set(25, 20)
+		gg.Focal = gg.Center
+		gg.Radius.Set(15, 5)
+		sty.Stroke.Color = colors.Uniform(colors.Blue)
+		sty.Fill.Color = gg
 		sty.Stroke.Width.Px(2)
 		sty.ToDots()
 
