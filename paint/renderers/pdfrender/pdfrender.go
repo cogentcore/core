@@ -130,7 +130,7 @@ func (rs *Renderer) PopStack() int {
 func (rs *Renderer) RenderPath(pt *render.Path) {
 	p := pt.Path
 	pc := &pt.Context
-	rs.PDF.Path(p, &pc.Style, pc.Bounds.Rect, pc.Transform)
+	rs.PDF.Path(p, &pc.Style, pc.Transform)
 }
 
 func (rs *Renderer) PushContext(pt *render.ContextPush) {

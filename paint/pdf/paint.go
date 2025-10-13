@@ -23,7 +23,7 @@ import (
 
 // Path renders a path to the canvas using a style and an
 // individual matrix (needed for fill)
-func (r *PDF) Path(path ppath.Path, style *styles.Paint, bounds math32.Box2, tr math32.Matrix2) {
+func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 	// PDFs don't support the arcs joiner, miter joiner (not clipped),
 	// or miter joiner (clipped) with non-bevel fallback
 	strokeUnsupported := false
@@ -50,10 +50,20 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, bounds math32.Box2, tr 
 	//}
 
 	closed := false
-	data := path.Clone().Transform(tr).ToPDF()
+	trpath := path.Clone().Transform(tr)
+	data := trpath.ToPDF()
 	if 1 < len(data) && data[len(data)-1] == 'h' {
 		data = data[:len(data)-2]
 		closed = true
+	}
+
+	var bounds math32.Box2
+	if style.HasFill() {
+		if _, ok := style.Fill.Color.(gradient.Gradient); ok {
+			fbox := trpath.FastBounds()
+			cum := r.Cumulative()
+			bounds = fbox.MulMatrix2(cum)
+		}
 	}
 
 	if style.HasStroke() && strokeUnsupported {
@@ -334,9 +344,6 @@ func (w *pdfPage) getOpacityGS(a float32) pdfName {
 }
 
 func (w *pdfPage) gradientPattern(gr gradient.Gradient, bounds math32.Box2, m math32.Matrix2) pdfName {
-	// fbox := sc.GetPathExtent()
-	// lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
-	// 	Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
 	cum := w.Cumulative().Mul(m)
 	gr.Update(1, bounds, cum)
 	// TODO: support patterns/gradients with alpha channel
