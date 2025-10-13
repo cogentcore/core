@@ -109,46 +109,22 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		} else {
 			r.w.Write([]byte(" S"))
 		}
+	} else if style.HasFill() && style.HasStroke() {
+		r.w.SetFill(&style.Fill, bounds, tr)
+		r.w.Write([]byte(" "))
+		r.w.Write([]byte(data))
+		r.w.Write([]byte(" f"))
 		if style.Fill.Rule == ppath.EvenOdd {
 			r.w.Write([]byte("*"))
 		}
-	} else if style.HasFill() && style.HasStroke() {
-		// sameAlpha := style.Fill.IsColor() && style.Stroke.IsColor() && style.Fill.Color.A == style.Stroke.Color.A
-		// todo:
-		sameAlpha := true
-		if sameAlpha {
-			r.w.SetFill(&style.Fill, bounds, tr)
-			r.w.SetStroke(&style.Stroke)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(data))
-			if closed {
-				r.w.Write([]byte(" b"))
-			} else {
-				r.w.Write([]byte(" B"))
-			}
-			if style.Fill.Rule == ppath.EvenOdd {
-				r.w.Write([]byte("*"))
-			}
-		} else {
-			r.w.SetFill(&style.Fill, bounds, tr)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(data))
-			r.w.Write([]byte(" f"))
-			if style.Fill.Rule == ppath.EvenOdd {
-				r.w.Write([]byte("*"))
-			}
 
-			r.w.SetStroke(&style.Stroke)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(data))
-			if closed {
-				r.w.Write([]byte(" s"))
-			} else {
-				r.w.Write([]byte(" S"))
-			}
-			if style.Fill.Rule == ppath.EvenOdd {
-				r.w.Write([]byte("*"))
-			}
+		r.w.SetStroke(&stk)
+		r.w.Write([]byte(" "))
+		r.w.Write([]byte(data))
+		if closed {
+			r.w.Write([]byte(" s"))
+		} else {
+			r.w.Write([]byte(" S"))
 		}
 	}
 }
