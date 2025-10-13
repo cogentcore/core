@@ -380,11 +380,12 @@ func (w *pdfPage) gradientPattern(gr gradient.Gradient, bounds math32.Box2, m ma
 }
 
 func patternStopsFunction(stops []gradient.Stop) pdfDict {
+	n := len(stops)
 	if len(stops) < 2 {
 		return pdfDict{}
 	}
 
-	fs := []pdfDict{}
+	fs := pdfArray{}
 	encode := pdfArray{}
 	bounds := pdfArray{}
 	if !ppath.Equal(stops[0].Pos, 0.0) {
@@ -392,19 +393,20 @@ func patternStopsFunction(stops []gradient.Stop) pdfDict {
 		encode = append(encode, 0, 1)
 		bounds = append(bounds, stops[0].Pos)
 	}
-	for i := 0; i < len(stops)-1; i++ {
+	for i := range n - 1 {
 		fs = append(fs, patternStopFunction(stops[i], stops[i+1]))
 		encode = append(encode, 0, 1)
 		if i != 0 {
 			bounds = append(bounds, stops[1].Pos)
 		}
 	}
-	if !ppath.Equal(stops[len(stops)-1].Pos, 1.0) {
-		fs = append(fs, patternStopFunction(stops[len(stops)-1], stops[len(stops)-1]))
+	if !ppath.Equal(stops[n-1].Pos, 1.0) {
+		fs = append(fs, patternStopFunction(stops[n-1], stops[n-1]))
 		encode = append(encode, 0, 1)
+		bounds = append(bounds, stops[n-1].Pos)
 	}
 	if len(fs) == 1 {
-		return fs[0]
+		return fs[0].(pdfDict)
 	}
 	return pdfDict{
 		"FunctionType": 3,
