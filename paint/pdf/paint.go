@@ -21,6 +21,128 @@ import (
 	"cogentcore.org/core/styles"
 )
 
+// Path renders a path to the canvas using a style and an
+// individual matrix (needed for fill)
+func (r *PDF) Path(path ppath.Path, style *styles.Paint, bounds math32.Box2, tr math32.Matrix2) {
+	// PDFs don't support the arcs joiner, miter joiner (not clipped),
+	// or miter joiner (clipped) with non-bevel fallback
+	strokeUnsupported := false
+	if style.Stroke.Join == ppath.JoinArcs {
+		strokeUnsupported = true
+	} else if style.Stroke.Join == ppath.JoinMiter {
+		if style.Stroke.MiterLimit == 0 {
+			strokeUnsupported = true
+		}
+		// } else if _, ok := miter.GapJoiner.(canvas.BevelJoiner); !ok {
+		// 	strokeUnsupported = true
+		// }
+	}
+	scale := math32.Sqrt(math32.Abs(tr.Det()))
+	stk := style.Stroke
+	stk.Width.Dots *= scale
+	stk.DashOffset, stk.Dashes = ppath.ScaleDash(scale, stk.DashOffset, stk.Dashes)
+
+	// PDFs don't support connecting first and last dashes if path is closed,
+	// so we move the start of the path if this is the case
+	// TODO: closing dashes
+	//if style.DashesClose {
+	//	strokeUnsupported = true
+	//}
+
+	closed := false
+	data := path.Clone().Transform(tr).ToPDF()
+	if 1 < len(data) && data[len(data)-1] == 'h' {
+		data = data[:len(data)-2]
+		closed = true
+	}
+
+	if style.HasStroke() && strokeUnsupported {
+		// todo: handle with optional inclusion of stroke function as _ import
+		/*	// style.HasStroke() && strokeUnsupported
+			if style.HasFill() {
+				r.w.SetFill(style.Fill)
+				r.w.Write([]byte(" "))
+				r.w.Write([]byte(data))
+				r.w.Write([]byte(" f"))
+				if style.Fill.Rule == canvas.EvenOdd {
+					r.w.Write([]byte("*"))
+				}
+			}
+
+			// stroke settings unsupported by PDF, draw stroke explicitly
+			if style.IsDashed() {
+				path = path.Dash(style.DashOffset, style.Dashes...)
+			}
+			path = path.Stroke(style.StrokeWidth, style.StrokeCapper, style.StrokeJoiner, canvas.Tolerance)
+
+			r.w.SetFill(style.Stroke)
+			r.w.Write([]byte(" "))
+			r.w.Write([]byte(path.Transform(m).ToPDF()))
+			r.w.Write([]byte(" f"))
+		*/
+		// return
+	}
+	if style.HasFill() && !style.HasStroke() {
+		r.w.SetFill(&style.Fill, bounds, tr)
+		r.w.Write([]byte(" "))
+		r.w.Write([]byte(data))
+		r.w.Write([]byte(" f"))
+		if style.Fill.Rule == ppath.EvenOdd {
+			r.w.Write([]byte("*"))
+		}
+	} else if !style.HasFill() && style.HasStroke() {
+		r.w.SetStroke(&stk)
+		r.w.Write([]byte(" "))
+		r.w.Write([]byte(data))
+		if closed {
+			r.w.Write([]byte(" s"))
+		} else {
+			r.w.Write([]byte(" S"))
+		}
+		if style.Fill.Rule == ppath.EvenOdd {
+			r.w.Write([]byte("*"))
+		}
+	} else if style.HasFill() && style.HasStroke() {
+		// sameAlpha := style.Fill.IsColor() && style.Stroke.IsColor() && style.Fill.Color.A == style.Stroke.Color.A
+		// todo:
+		sameAlpha := true
+		if sameAlpha {
+			r.w.SetFill(&style.Fill, bounds, tr)
+			r.w.SetStroke(&style.Stroke)
+			r.w.Write([]byte(" "))
+			r.w.Write([]byte(data))
+			if closed {
+				r.w.Write([]byte(" b"))
+			} else {
+				r.w.Write([]byte(" B"))
+			}
+			if style.Fill.Rule == ppath.EvenOdd {
+				r.w.Write([]byte("*"))
+			}
+		} else {
+			r.w.SetFill(&style.Fill, bounds, tr)
+			r.w.Write([]byte(" "))
+			r.w.Write([]byte(data))
+			r.w.Write([]byte(" f"))
+			if style.Fill.Rule == ppath.EvenOdd {
+				r.w.Write([]byte("*"))
+			}
+
+			r.w.SetStroke(&style.Stroke)
+			r.w.Write([]byte(" "))
+			r.w.Write([]byte(data))
+			if closed {
+				r.w.Write([]byte(" s"))
+			} else {
+				r.w.Write([]byte(" S"))
+			}
+			if style.Fill.Rule == ppath.EvenOdd {
+				r.w.Write([]byte("*"))
+			}
+		}
+	}
+}
+
 // SetFill sets the fill style values where different from current.
 // The bounds and matrix are required for gradient fills: pass identity
 // if not available.
@@ -215,7 +337,8 @@ func (w *pdfPage) gradientPattern(gr gradient.Gradient, bounds math32.Box2, m ma
 	// fbox := sc.GetPathExtent()
 	// lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 	// 	Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	gr.Update(1, bounds, m)
+	cum := w.Cumulative().Mul(m)
+	gr.Update(1, bounds, cum)
 	// TODO: support patterns/gradients with alpha channel
 	shading := pdfDict{
 		"ColorSpace": pdfName("DeviceRGB"),
@@ -228,8 +351,12 @@ func (w *pdfPage) gradientPattern(gr gradient.Gradient, bounds math32.Box2, m ma
 		shading["Function"] = patternStopsFunction(g.Stops)
 		shading["Extend"] = pdfArray{true, true}
 	case *gradient.Radial:
+		c, f, rad := g.TransformedCoords()
+		// r := 0.5 * (math32.Abs(rad.X) + math32.Abs(rad.Y))
+		r := max(math32.Abs(rad.X), math32.Abs(rad.Y))
+		// fmt.Println("c:", c, "ctr:", g.Center)
 		shading["ShadingType"] = 3
-		shading["Coords"] = pdfArray{g.Center.X, g.Center.Y, g.Radius.X, g.Focal.X, g.Focal.Y, g.Radius.Y}
+		shading["Coords"] = pdfArray{f.X, f.Y, 0, c.X, c.Y, r}
 		shading["Function"] = patternStopsFunction(g.Stops)
 		shading["Extend"] = pdfArray{true, true}
 	}

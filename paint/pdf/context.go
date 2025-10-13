@@ -54,7 +54,7 @@ func (w *pdfPage) SetTransform(m math32.Matrix2) {
 	}
 	fmt.Fprintf(w, " %s cm", mat2(m2))
 	ctx := w.stack.Peek()
-	ctx.Transform = ctx.Transform.Mul(m2)
+	ctx.Transform = m2 // not cumulative!
 }
 
 // PushTransform adds a graphics stack push (q) and then

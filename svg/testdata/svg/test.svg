@@ -1,37 +1,49 @@
 <svg
-   width="100"
-   height="200"
-   viewBox="0 0 100 200"
-   id="svg2"
-   version="1.1"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg">
+  width="1280"
+  height="720"
+  viewBox="0 0 1280 720"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
   <defs
-     id="defs4">
+    id="defs">
     <linearGradient
-       id="linearGradient5467">
+      id="linearGradient99"
+      x1="0"
+      y1="0"
+      x2="1"
+      y2="0"
+      gradientUnits="objectBoundingBox">
       <stop
-         style="stop-color:#3dd738;stop-opacity:1;"
-         offset="0"
-         id="stop5469" />
+        style="stop-color:#FFFFFF;stop-opacity:1;"
+        offset="0" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
-         offset="1"
-         id="stop5471" />
+        style="stop-color:#0000FF;stop-opacity:1;"
+        offset="1" />
     </linearGradient>
     <linearGradient
-       xlink:href="#linearGradient5467"
-       id="linearGradient5497"
-       x1="9.0706501"
-       y1="114.9175"
-       x2="68.382446"
-       y2="114.9175"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,596.27)" />
+      id="linearGradient643"
+      x1="127.5"
+      y1="67.22998"
+      x2="1024.5"
+      y2="67.22998"
+      gradientUnits="userSpaceOnUse"
+      gradientTransform="matrix(1,0,0,1,205.15338,156.77002)"
+      xlink:href="#linearGradient99" />
   </defs>
-  <path
-     id="path14"
-     d="m 10.0273,123.623 57.3985,0 0,-24.871 -57.3985,0 0,24.871 z"
-     style="fill:url(#linearGradient5497);fill-opacity:1;stroke:#000000;stroke-width:1.91330004" />
+  <sodipodi:namedview
+    id="namedview810"
+    style="inkscape:document-units:px;inkscape:current-layer:;inkscape:cx:0;inkscape:cy:0;inkscape:zoom:1;">
+    <inkscape:grid
+      id="grid191"
+      style="units:px;spacingx:32;spacingy:32;type:xygrid;" />
+  </sodipodi:namedview>
+  <rect
+    id="rect454"
+    style="fill:url(#linearGradient643);fill-rule:nonzero;stroke-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;fill-opacity:1;"
+    x="333.15338"
+    y="224.5"
+    width="896.00006"
+    height="444.26993" />
 </svg>
-

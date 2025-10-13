@@ -51,7 +51,7 @@ func TestPath(t *testing.T) {
 		sty.ToDots()
 
 		tr := math32.Translate2D(10, 20)
-		pd.Path(*p, sty, math32.Box2{}, tr, tr)
+		pd.Path(*p, sty, math32.Box2{}, tr)
 	})
 }
 
@@ -69,8 +69,7 @@ func TestGradientLinear(t *testing.T) {
 		sty.ToDots()
 
 		tr := math32.Translate2D(10, 20)
-		cum := pd.Cumulative()
-		pd.Path(*p, sty, math32.B2(0, 0, 30, 20), tr, cum.Mul(tr))
+		pd.Path(*p, sty, math32.B2(0, 0, 30, 20), tr)
 		pd.PopStack()
 	})
 }
@@ -90,7 +89,7 @@ func TestGradientRadial(t *testing.T) {
 		sty.ToDots()
 
 		tr := math32.Translate2D(10, 20)
-		pd.Path(*p, sty, math32.B2(0, 0, 30, 20), tr, tr)
+		pd.Path(*p, sty, math32.B2(0, 0, 30, 20), tr)
 	})
 }
 

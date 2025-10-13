@@ -493,6 +493,7 @@ func (w *pdfPage) setTopTransform() {
 	w.SetTransform(m)
 }
 
+// dec efficiently prints float values.
 type dec float32
 
 func (f dec) String() string {

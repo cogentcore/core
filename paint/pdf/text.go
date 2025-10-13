@@ -135,7 +135,7 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 		psty := *style
 		psty.Stroke.Color = run.StrokeColor
 		psty.Fill.Color = fill
-		r.Path(*run.Math.Path, &psty, math32.B2FromFixed(run.Bounds()), math32.Identity2(), math32.Identity2())
+		r.Path(*run.Math.Path, &psty, math32.B2FromFixed(run.Bounds()), math32.Identity2())
 		r.w.PopStack()
 		return
 	}
@@ -217,7 +217,7 @@ func (r *PDF) strokeTextLine(m math32.Matrix2, sp, ep math32.Vector2, width floa
 	sty.Stroke.Color = clr
 	sty.Stroke.Dashes = dash
 	p := ppath.New().Line(sp.X, sp.Y, ep.X, ep.Y)
-	r.Path(*p, sty, math32.Box2{}, m, m)
+	r.Path(*p, sty, math32.Box2{}, m)
 }
 
 // FillBox fills a box in the given color.
@@ -227,7 +227,7 @@ func (r *PDF) FillBox(m math32.Matrix2, bb math32.Box2, clr image.Image) {
 	sty.Fill.Color = clr
 	sz := bb.Size()
 	p := ppath.New().Rectangle(bb.Min.X, bb.Min.Y, sz.X, sz.Y)
-	r.Path(*p, sty, bb, m, m)
+	r.Path(*p, sty, bb, m)
 }
 
 func (r *PDF) links(lns *shaped.Lines, m math32.Matrix2, pos math32.Vector2) {
