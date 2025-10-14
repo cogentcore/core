@@ -27,7 +27,8 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 	}
 	size := run.Size.Floor()
 	fsize := image.Point{X: size, Y: size}
-	scale := 82.0 / float32(run.Face.Upem())
+	upem := float32(run.Face.Upem())
+	scale := 82.0 / upem
 	fam := run.Font.Style(&ctx.Style.Text).Family
 	if fam == rich.Monospace {
 		scale *= 0.8
@@ -35,13 +36,19 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 	gk := glyphKey{gid: g.GlyphID, sx: uint8(size / 256), sy: uint8(size % 256), ox: uint8(fam)}
 	img, ok := svgGlyphCache[gk]
 	if !ok {
+		fmt.Println(fsize)
 		sv := svg.NewSVG(math32.FromPoint(fsize))
 		sv.GroupFilter = fmt.Sprintf("glyph%d", g.GlyphID) // critical: for filtering items with many glyphs
 		b := bytes.NewBuffer(svgCmds)
 		err := sv.ReadXML(b)
 		errors.Log(err)
-		sv.Translate.Y = float32(run.Face.Upem())
+		sv.Translate.Y = upem
 		sv.Scale = scale
+		// sv.Root.ViewBox.Min.Y = upem
+		// sv.Root.ViewBox.Size.SetScalar(upem)
+		// sv.Root.ViewBox.PreserveAspectRatio.Align.Set(svg.AlignNone)
+		// sv.Scale = scale / 0.02832
+		fmt.Println("textsvg rend")
 		img = sv.RenderImage()
 		svgGlyphCache[gk] = img
 	}
