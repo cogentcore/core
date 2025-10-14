@@ -10,9 +10,11 @@ import (
 	"bytes"
 	"image"
 	"image/color"
+	"os"
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -279,6 +281,32 @@ func (sv *SVG) SaveImageSize(fname string, width, height float32) error {
 	err := imagex.Save(sv.RenderImage(), fname)
 	sv.Geom = sz
 	return err
+}
+
+// SavePDF renders the SVG to a PDF and saves it to given filename.
+func (sv *SVG) SavePDF(fname string) error {
+	pos := sv.Geom.Pos
+	sv.Geom.Pos = image.Point{}
+	rend := sv.Render(nil).RenderDone()
+
+	ctx := units.NewContext()
+	vsz := math32.FromPoint(sv.Geom.Size)
+	pd := paint.NewPDFRenderer(vsz, ctx)
+	pd.Render(rend)
+	err := os.WriteFile(fname, pd.Source(), 0666)
+
+	sv.Geom.Pos = pos
+	return err
+}
+
+// CloneSVG returns a copy of this SVG, with given size,
+// by writing and reading the XML source.
+func (sv *SVG) CloneSVG(size math32.Vector2) *SVG {
+	var b bytes.Buffer
+	errors.Log(sv.WriteXML(&b, false))
+	nsv := NewSVG(size)
+	errors.Log(nsv.ReadXML(&b))
+	return nsv
 }
 
 func (sv *SVG) FillViewport() {

@@ -80,7 +80,7 @@ func TestGradientRadial(t *testing.T) {
 		// todo: this is a different definition than ours..
 		gg := gradient.NewRadial().AddStop(colors.White, 0).AddStop(colors.Red, 1)
 		gg.Units = gradient.UserSpaceOnUse
-		gg.Center.Set(25, 20)
+		gg.Center.Set(15, 10)
 		gg.Focal = gg.Center
 		gg.Radius.Set(15, 5)
 		sty.Stroke.Color = colors.Uniform(colors.Blue)
