@@ -52,6 +52,14 @@ func RenderToSVG(pc *Painter) []byte {
 	return rd.Render(pc.RenderDone()).Source()
 }
 
+// RenderToPDF is a convenience function that renders the current
+// accumulated painter actions to a PDF document using a [NewPDFRenderer]
+func RenderToPDF(pc *Painter) []byte {
+	p := pc.RenderDone()
+	rd := NewPDFRenderer(pc.Size, &pc.Context().Style.UnitContext)
+	return rd.Render(p).Source()
+}
+
 // The State holds all the current rendering state information used
 // while painting. The [Paint] embeds a pointer to this.
 type State struct {
