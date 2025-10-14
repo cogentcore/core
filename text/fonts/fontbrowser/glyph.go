@@ -135,9 +135,7 @@ func (gi *Glyph) drawShaped(pc *paint.Painter) {
 	off := math32.Vec2(0, 0)
 	if msz > 200 {
 		o := 0.2 * float32(msz)
-		if gi.Browser.IsEmoji {
-			off = math32.Vec2(0.5*o, -o)
-		} else { // for bitmap fonts, kinda random
+		if !gi.Browser.IsEmoji { // for bitmap fonts, kinda random
 			off = math32.Vec2(o, o)
 		}
 	}
