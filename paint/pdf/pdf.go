@@ -12,11 +12,15 @@ import (
 	"io"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint/ppath"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 )
+
+// todo:
+// * needs to include the basic page xform which we neeed to install on pdf rendering stack.
+// if passed bounds are empty, use path bounds.
+// - compute cumulative from stack, don't pass -- only pass local
+// - add a convenience method with empty bounds and ID transform, for text cases?
 
 // UseStandardFonts sets the [rich.Settings] default fonts to the
 // corresponding PDF defaults, so that text layout works correctly
@@ -160,125 +164,9 @@ func (r *PDF) PushTransform(m math32.Matrix2) {
 	r.SetTransform(m)
 }
 
-// Path renders a path to the canvas using a style and a transformation matrix.
-func (r *PDF) Path(path ppath.Path, style *styles.Paint, m math32.Matrix2) {
-	// PDFs don't support the arcs joiner, miter joiner (not clipped),
-	// or miter joiner (clipped) with non-bevel fallback
-	strokeUnsupported := false
-	if style.Stroke.Join == ppath.JoinArcs {
-		strokeUnsupported = true
-	} else if style.Stroke.Join == ppath.JoinMiter {
-		if style.Stroke.MiterLimit == 0 {
-			strokeUnsupported = true
-		}
-		// } else if _, ok := miter.GapJoiner.(canvas.BevelJoiner); !ok {
-		// 	strokeUnsupported = true
-		// }
-	}
-	scale := math32.Sqrt(math32.Abs(m.Det()))
-	stk := style.Stroke
-	stk.Width.Dots *= scale
-	stk.DashOffset, stk.Dashes = ppath.ScaleDash(scale, stk.DashOffset, stk.Dashes)
-
-	// PDFs don't support connecting first and last dashes if path is closed,
-	// so we move the start of the path if this is the case
-	// TODO: closing dashes
-	//if style.DashesClose {
-	//	strokeUnsupported = true
-	//}
-
-	closed := false
-	data := path.Clone().Transform(m).ToPDF()
-	if 1 < len(data) && data[len(data)-1] == 'h' {
-		data = data[:len(data)-2]
-		closed = true
-	}
-
-	if style.HasStroke() && strokeUnsupported {
-		// todo: handle with optional inclusion of stroke function as _ import
-		/*	// style.HasStroke() && strokeUnsupported
-			if style.HasFill() {
-				r.w.SetFill(style.Fill)
-				r.w.Write([]byte(" "))
-				r.w.Write([]byte(data))
-				r.w.Write([]byte(" f"))
-				if style.Fill.Rule == canvas.EvenOdd {
-					r.w.Write([]byte("*"))
-				}
-			}
-
-			// stroke settings unsupported by PDF, draw stroke explicitly
-			if style.IsDashed() {
-				path = path.Dash(style.DashOffset, style.Dashes...)
-			}
-			path = path.Stroke(style.StrokeWidth, style.StrokeCapper, style.StrokeJoiner, canvas.Tolerance)
-
-			r.w.SetFill(style.Stroke)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(path.Transform(m).ToPDF()))
-			r.w.Write([]byte(" f"))
-		*/
-		// return
-	}
-	if style.HasFill() && !style.HasStroke() {
-		r.w.SetFill(&style.Fill)
-		r.w.Write([]byte(" "))
-		r.w.Write([]byte(data))
-		r.w.Write([]byte(" f"))
-		if style.Fill.Rule == ppath.EvenOdd {
-			r.w.Write([]byte("*"))
-		}
-	} else if !style.HasFill() && style.HasStroke() {
-		r.w.SetStroke(&stk)
-		r.w.Write([]byte(" "))
-		r.w.Write([]byte(data))
-		if closed {
-			r.w.Write([]byte(" s"))
-		} else {
-			r.w.Write([]byte(" S"))
-		}
-		if style.Fill.Rule == ppath.EvenOdd {
-			r.w.Write([]byte("*"))
-		}
-	} else if style.HasFill() && style.HasStroke() {
-		// sameAlpha := style.Fill.IsColor() && style.Stroke.IsColor() && style.Fill.Color.A == style.Stroke.Color.A
-		// todo:
-		sameAlpha := true
-		if sameAlpha {
-			r.w.SetFill(&style.Fill)
-			r.w.SetStroke(&style.Stroke)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(data))
-			if closed {
-				r.w.Write([]byte(" b"))
-			} else {
-				r.w.Write([]byte(" B"))
-			}
-			if style.Fill.Rule == ppath.EvenOdd {
-				r.w.Write([]byte("*"))
-			}
-		} else {
-			r.w.SetFill(&style.Fill)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(data))
-			r.w.Write([]byte(" f"))
-			if style.Fill.Rule == ppath.EvenOdd {
-				r.w.Write([]byte("*"))
-			}
-
-			r.w.SetStroke(&style.Stroke)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(data))
-			if closed {
-				r.w.Write([]byte(" s"))
-			} else {
-				r.w.Write([]byte(" S"))
-			}
-			if style.Fill.Rule == ppath.EvenOdd {
-				r.w.Write([]byte("*"))
-			}
-		}
-	}
+// Cumulative returns the current cumulative transform.
+func (r *PDF) Cumulative() math32.Matrix2 {
+	return r.w.Cumulative()
 }
 
 // Image renders an image to the canvas using a transformation matrix.

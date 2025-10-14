@@ -59,8 +59,9 @@ func TestSVG(t *testing.T) {
 	dir := "svg"
 	files := fsx.Filenames(filepath.Join("testdata", dir), ".svg")
 
+	// PDF currently failing: TestShapes4, 6,
 	for _, fn := range files {
-		// if fn != "fig_neuron_as_detect.svg" {
+		// if fn != "fig_neuron_as_detect_test.svg" {
 		// 	continue
 		// }
 		RunTest(t, 640, 480, dir, fn)

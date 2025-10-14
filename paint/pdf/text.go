@@ -184,7 +184,7 @@ func (r *PDF) setTextStrokeColor(clr image.Image) {
 func (r *PDF) setTextFillColor(clr image.Image) {
 	fc := r.w.style().Fill
 	fc.Color = clr
-	r.w.SetFill(&fc)
+	r.w.SetFill(&fc, math32.Box2{}, math32.Identity2())
 }
 
 // setTextStyle applies the given styles.

@@ -54,7 +54,7 @@ func (w *pdfPage) SetTransform(m math32.Matrix2) {
 	}
 	fmt.Fprintf(w, " %s cm", mat2(m2))
 	ctx := w.stack.Peek()
-	ctx.Transform = ctx.Transform.Mul(m2)
+	ctx.Transform = m2 // not cumulative!
 }
 
 // PushTransform adds a graphics stack push (q) and then
@@ -62,6 +62,15 @@ func (w *pdfPage) SetTransform(m math32.Matrix2) {
 func (w *pdfPage) PushTransform(m math32.Matrix2) {
 	w.PushStack()
 	w.SetTransform(m)
+}
+
+// Cumulative returns the current cumulative transform.
+func (w *pdfPage) Cumulative() math32.Matrix2 {
+	m := math32.Identity2()
+	for _, s := range w.stack {
+		m = m.Mul(s.Transform)
+	}
+	return m
 }
 
 // style() returns the currently active style

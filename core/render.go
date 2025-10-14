@@ -127,11 +127,12 @@ func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
-	sc.LayoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+	sc.layoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+	sc.ApplyScenePos()
 }
 
-// LayoutFrame does a layout on the given Frame using given size.
-func (fr *Frame) LayoutFrame(size math32.Vector2) {
+// layoutFrame does the frame layout core functionality
+func (fr *Frame) layoutFrame(size math32.Vector2) {
 	fr.SizeUp()
 	sz := &fr.Geom.Size
 	sz.Alloc.Total = size
@@ -161,6 +162,11 @@ func (fr *Frame) LayoutFrame(size math32.Vector2) {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nScenePos start:", fr)
 	}
+}
+
+// layoutFrame does a layout on the given Frame using given size.
+func (fr *Frame) LayoutFrame(size math32.Vector2) {
+	fr.layoutFrame(size)
 	fr.ApplyScenePos()
 }
 

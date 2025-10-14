@@ -112,11 +112,7 @@ func (rs *Renderer) RenderPage(r render.Render) {
 func (rs *Renderer) PushTransform(m math32.Matrix2) int {
 	cg := rs.gStack.Peek()
 	g := cg + 1
-	if m.IsIdentity() {
-		rs.PDF.PushStack()
-	} else {
-		rs.PDF.PushTransform(m)
-	}
+	rs.PDF.PushTransform(m)
 	rs.gStack.Push(g)
 	return g
 }

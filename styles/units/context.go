@@ -130,7 +130,7 @@ func (uc *Context) SetFont(em float32) {
 	uc.FontRem = math32.Round(uc.Dp(16))
 }
 
-// ToDotsFact returns factor needed to convert given unit into raw pixels (dots in DPI)
+// Dots returns factor needed to convert given unit into raw pixels (dots in DPI)
 func (uc *Context) Dots(un Units) float32 {
 	if uc.DPI == 0 {
 		// log.Printf("gi/units Context was not initialized -- falling back on defaults\n")

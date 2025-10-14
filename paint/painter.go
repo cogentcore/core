@@ -57,7 +57,9 @@ func NewPainter(size math32.Vector2) *Painter {
 	return pc
 }
 
-func (pc *Painter) Transform() math32.Matrix2 {
+// Cumulative returns the current cumulative transform function,
+// including the current transform.
+func (pc *Painter) Cumulative() math32.Matrix2 {
 	return pc.Context().Cumulative.Mul(pc.Paint.Transform)
 }
 
@@ -446,8 +448,8 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	if img == nil {
 		img = colors.Uniform(color.RGBA{})
 	}
-	pos = pc.Transform().MulVector2AsPoint(pos)
-	size = pc.Transform().MulVector2AsVector(size)
+	pos = pc.Cumulative().MulVector2AsPoint(pos)
+	size = pc.Cumulative().MulVector2AsVector(size)
 	br := math32.RectFromPosSizeMax(pos, size)
 	cb := pc.Context().Bounds.Rect.ToRect()
 	b := cb.Intersect(br)
@@ -455,7 +457,7 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 		return
 	}
 	if g, ok := img.(gradient.Gradient); ok {
-		g.Update(pc.Fill.Opacity, math32.B2FromRect(b), pc.Transform())
+		g.Update(pc.Fill.Opacity, math32.B2FromRect(b), pc.Cumulative())
 	} else {
 		img = gradient.ApplyOpacity(img, pc.Fill.Opacity)
 	}
@@ -521,7 +523,7 @@ func (pc *Painter) DrawImageAnchored(src image.Image, x, y, ax, ay float32) *pim
 	s := src.Bounds().Size()
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
-	m := pc.Transform().Translate(x, y)
+	m := pc.Cumulative().Translate(x, y)
 	var pim *pimage.Params
 	if pc.Mask == nil {
 		pim = pimage.NewTransform(m, src.Bounds(), src, draw.Over)
@@ -540,7 +542,7 @@ func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) *pimage.
 	isz := math32.FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
 
-	m := pc.Transform().Translate(x, y).Scale(isc.X, isc.Y)
+	m := pc.Cumulative().Translate(x, y).Scale(isc.X, isc.Y)
 	var pim *pimage.Params
 	if pc.Mask == nil {
 		pim = pimage.NewTransform(m, src.Bounds(), src, draw.Over)
@@ -558,8 +560,8 @@ func (pc *Painter) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	// if pc.Stroke.Color != nil {// todo
 	// 	sw = 0.5 * pc.StrokeWidth()
 	// }
-	tmin := pc.Transform().MulVector2AsPoint(math32.Vec2(minX, minY))
-	tmax := pc.Transform().MulVector2AsPoint(math32.Vec2(maxX, maxY))
+	tmin := pc.Cumulative().MulVector2AsPoint(math32.Vec2(minX, minY))
+	tmax := pc.Cumulative().MulVector2AsPoint(math32.Vec2(maxX, maxY))
 	tp1 := math32.Vec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := math32.Vec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
