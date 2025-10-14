@@ -25,36 +25,31 @@ func (rs *Renderer) GlyphSVG(ctx *render.Context, run *shapedgt.Run, g *shaping.
 	if svgGlyphCache == nil {
 		svgGlyphCache = make(map[glyphKey]image.Image)
 	}
-	size := run.Size.Floor()
-	fsize := image.Point{X: size, Y: size}
-	upem := float32(run.Face.Upem())
-	scale := 82.0 / upem
+	size := float32(run.Size.Floor())
 	fam := run.Font.Style(&ctx.Style.Text).Family
-	if fam == rich.Monospace {
-		scale *= 0.8
-	}
-	gk := glyphKey{gid: g.GlyphID, sx: uint8(size / 256), sy: uint8(size % 256), ox: uint8(fam)}
+	desc := run.Output.LineBounds.Descent
+	fsize := math32.Vec2(size, size)
+	gk := glyphKey{gid: g.GlyphID, sx: uint8(int(size) / 256), sy: uint8(int(size) % 256), ox: uint8(fam)}
 	img, ok := svgGlyphCache[gk]
 	if !ok {
-		fmt.Println(fsize)
-		sv := svg.NewSVG(math32.FromPoint(fsize))
+		hadv := run.Face.HorizontalAdvance(g.GlyphID)
+		scale := size / hadv
+		if fam == rich.Monospace {
+			scale *= 0.8
+		}
+		sv := svg.NewSVG(fsize)
 		sv.GroupFilter = fmt.Sprintf("glyph%d", g.GlyphID) // critical: for filtering items with many glyphs
 		b := bytes.NewBuffer(svgCmds)
 		err := sv.ReadXML(b)
 		errors.Log(err)
-		sv.Translate.Y = upem
+		sv.Translate.Y = size + math32.FromFixed(desc)
 		sv.Scale = scale
-		// sv.Root.ViewBox.Min.Y = upem
-		// sv.Root.ViewBox.Size.SetScalar(upem)
-		// sv.Root.ViewBox.PreserveAspectRatio.Align.Set(svg.AlignNone)
-		// sv.Scale = scale / 0.02832
-		fmt.Println("textsvg rend")
+		sv.Root.ViewBox.Size.SetScalar(size)
 		img = sv.RenderImage()
 		svgGlyphCache[gk] = img
 	}
 	left := int(math32.Round(pos.X + math32.FromFixed(g.XBearing)))
-	desc := run.Output.LineBounds.Descent
-	top := int(math32.Round(pos.Y - math32.FromFixed(g.YBearing+desc) - float32(fsize.Y)))
+	top := int(math32.Round(pos.Y - math32.FromFixed(g.YBearing+desc) - fsize.Y))
 	dbb := img.Bounds().Add(image.Point{left, top})
 	ibb := dbb.Intersect(ctx.Bounds.Rect.ToRect())
 	if ibb == (image.Rectangle{}) {

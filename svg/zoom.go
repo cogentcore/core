@@ -5,7 +5,6 @@
 package svg
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/math32"
@@ -59,14 +58,12 @@ func (sv *SVG) setRootTransform() {
 		scale.Y *= -1
 	}
 	trans.SetSub(vb.Min)
-	fmt.Println("scale:", scale, "svsc", sv.Scale, "vb:", vb)
 	scale.SetMulScalar(sv.Scale)
 	rt := math32.Scale2D(scale.X, scale.Y).Translate(trans.X, trans.Y)
 	if sv.InvertY {
 		rt.Y0 = -rt.Y0
 	}
 	sv.Root.Paint.Transform = tr.Mul(rt)
-	fmt.Println("final tr:", sv.Root.Paint.Transform)
 }
 
 // SetDPITransform sets a scaling transform to compensate for

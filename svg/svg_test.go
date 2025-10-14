@@ -135,7 +135,7 @@ func TestEmoji(t *testing.T) {
 }
 
 func TestFontEmoji(t *testing.T) {
-	// t.Skip("special-case testing -- requires noto-emoji file")
+	t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
@@ -144,6 +144,8 @@ func TestFontEmoji(t *testing.T) {
 	faces, err := font.ParseTTC(bytes.NewReader(b))
 	assert.NoError(t, err)
 	face := faces[0]
+	size := float32(512)
+	hext, _ := face.FontHExtents()
 	ctr := 0
 	for r := rune(0); r < math.MaxInt32; r++ {
 		gid, has := face.NominalGlyph(r)
@@ -159,15 +161,12 @@ func TestFontEmoji(t *testing.T) {
 		// if !strings.Contains(fn, "203c") {
 		// 	continue
 		// }
-		sv := NewSVG(math32.Vec2(512, 512))
-		upem := float32(1024)
-		scale := 82.0 / upem
-		_ = scale
-		sv.Translate.Y = upem
-		// sv.Root.ViewBox.Min.Y = upem
-		sv.Root.ViewBox.Size.SetScalar(512)
-		// sv.Root.ViewBox.PreserveAspectRatio.Align.Set(svg.AlignNone)
-		// sv.Scale = scale
+		sv := NewSVG(math32.Vec2(size, size))
+		hadv := face.HorizontalAdvance(gid)
+		scale := size / hadv
+		sv.Scale = scale
+		sv.Translate.Y = size + scale*hext.Descender
+		sv.Root.ViewBox.Size.SetScalar(size)
 		sv.GroupFilter = fmt.Sprintf("glyph%d", gid)
 		sfn := filepath.Join("testdata/font-emoji-src", fn+".svg")
 		fmt.Println(sfn, "gid:", sv.GroupFilter, "len:", len(gd.Source))
@@ -180,7 +179,7 @@ func TestFontEmoji(t *testing.T) {
 		// sv.SaveXML(sfn)
 		// os.WriteFile(sfn, gd.Source, 0666)
 		ctr++
-		if ctr > 10 {
+		if ctr > 100 {
 			break
 		}
 	}
