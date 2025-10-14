@@ -39,16 +39,16 @@ func RunTest(t *testing.T, width, height int, dir, fname string) {
 	rd := paint.NewImageRenderer(size)
 	img := rd.Render(rend).Image()
 	bnm := strings.TrimSuffix(fname, ".svg")
-	imfn := filepath.Join(dir, "png", bnm)
+	imfn := filepath.Join("png", dir, bnm)
 	// fmt.Println(svfn, imfn)
 	imagex.Assert(t, img, imfn)
 
-	pddir := filepath.Join("testdata", dir, "pdf")
-	pdfn := filepath.Join(pddir, bnm+".pdf")
+	pddir := filepath.Join("testdata", "pdf")
+	pdfn := filepath.Join(pddir, dir, bnm+".pdf")
 	ctx := units.NewContext()
 	pd := paint.NewPDFRenderer(size, ctx)
 	pd.Render(rend)
-	os.MkdirAll(pddir, 0777)
+	os.MkdirAll(filepath.Join(pddir, dir), 0777)
 	err = os.WriteFile(pdfn, pd.Source(), 0666)
 	assert.NoError(t, err)
 
@@ -86,7 +86,7 @@ func TestViewBox(t *testing.T) {
 		img := sv.RenderImage()
 
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
-		imfn := filepath.Join("svg", "png", "viewbox", fnm)
+		imfn := filepath.Join("png", "viewbox", fnm)
 		// fmt.Println(imfn)
 		imagex.Assert(t, img, imfn)
 	}
@@ -156,7 +156,7 @@ func TestEmoji(t *testing.T) {
 }
 
 func TestFontEmoji(t *testing.T) {
-	t.Skip("special-case testing -- requires noto-emoji file")
+	// t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
@@ -195,7 +195,7 @@ func TestFontEmoji(t *testing.T) {
 		err := sv.ReadXML(b)
 		assert.NoError(t, err)
 		img := sv.RenderImage()
-		imfn := filepath.Join("svg", "png", "font-emoji", strings.TrimSuffix(fn, ".svg"))
+		imfn := filepath.Join("png", "font-emoji", strings.TrimSuffix(fn, ".svg"))
 		imagex.Assert(t, img, imfn)
 		// sv.SaveXML(sfn)
 		// os.WriteFile(sfn, gd.Source, 0666)
