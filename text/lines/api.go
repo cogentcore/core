@@ -357,6 +357,9 @@ func (ls *Lines) PosToView(vid int, pos textpos.Pos) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Pos{}
+	}
 	return ls.posToView(vw, pos)
 }
 
@@ -368,6 +371,9 @@ func (ls *Lines) PosFromView(vid int, pos textpos.Pos) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Pos{}
+	}
 	return ls.posFromView(vw, pos)
 }
 
@@ -376,6 +382,9 @@ func (ls *Lines) ViewLineLen(vid int, vln int) int {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return 0
+	}
 	return ls.viewLineLen(vw, vln)
 }
 
@@ -384,6 +393,9 @@ func (ls *Lines) ViewLineRegion(vid int, vln int) textpos.Region {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Region{}
+	}
 	return ls.viewLineRegion(vw, vln)
 }
 
@@ -391,6 +403,9 @@ func (ls *Lines) ViewLineRegion(vid int, vln int) textpos.Region {
 // for case where Lines is already locked.
 func (ls *Lines) ViewLineRegionNoLock(vid int, vln int) textpos.Region {
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Region{}
+	}
 	return ls.viewLineRegion(vw, vln)
 }
 
@@ -399,6 +414,9 @@ func (ls *Lines) RegionToView(vid int, reg textpos.Region) textpos.Region {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Region{}
+	}
 	return ls.regionToView(vw, reg)
 }
 
@@ -407,6 +425,9 @@ func (ls *Lines) RegionFromView(vid int, reg textpos.Region) textpos.Region {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Region{}
+	}
 	return ls.regionFromView(vw, reg)
 }
 
@@ -681,6 +702,9 @@ func (ls *Lines) MoveDown(vid int, pos textpos.Pos, steps, col int) textpos.Pos 
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Pos{}
+	}
 	return ls.moveDown(vw, pos, steps, col)
 }
 
@@ -690,6 +714,9 @@ func (ls *Lines) MoveUp(vid int, pos textpos.Pos, steps, col int) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Pos{}
+	}
 	return ls.moveUp(vw, pos, steps, col)
 }
 
@@ -698,6 +725,9 @@ func (ls *Lines) MoveLineStart(vid int, pos textpos.Pos) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Pos{}
+	}
 	return ls.moveLineStart(vw, pos)
 }
 
@@ -706,6 +736,9 @@ func (ls *Lines) MoveLineEnd(vid int, pos textpos.Pos) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return textpos.Pos{}
+	}
 	return ls.moveLineEnd(vw, pos)
 }
 
@@ -714,6 +747,9 @@ func (ls *Lines) TransposeChar(vid int, pos textpos.Pos) bool {
 	ls.Lock()
 	defer ls.Unlock()
 	vw := ls.view(vid)
+	if vw == nil {
+		return false
+	}
 	return ls.transposeChar(vw, pos)
 }
 
