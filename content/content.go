@@ -32,6 +32,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
@@ -186,6 +187,24 @@ func (ct *Content) Init() {
 		}
 		return false
 	}
+	ct.Context.AddWidgetHandler(func(w core.Widget) {
+		switch x := w.(type) {
+		case *core.Text:
+			x.Styler(func(s *styles.Style) {
+				s.Max.X.Ch(120)
+			})
+		case *core.Image:
+			x.Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
+				s.Overflow.Set(styles.OverflowAuto)
+			})
+			x.OnDoubleClick(func(e events.Event) {
+				d := core.NewBody("Image")
+				core.NewImage(d).SetImage(x.Image)
+				d.RunWindowDialog(x)
+			})
+		}
+	})
 
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {

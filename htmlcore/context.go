@@ -86,6 +86,13 @@ type Context struct {
 	// will not be generated.
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
 
+	// WidgetHandlers is a list of handler functions for each Widget,
+	// called in sequential order for each widget that is created,
+	// after it has been configured by the existing handlers etc.
+	// This allows for additional styling to be applied based on the
+	// type of widget, for example.
+	WidgetHandlers []func(w core.Widget)
+
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
 }
@@ -168,6 +175,7 @@ func (c *Context) config(w core.Widget) {
 			}
 		}
 	})
+	c.handleWidget(w)
 }
 
 // InlineParent returns the current parent widget that inline
@@ -243,4 +251,17 @@ func (c *Context) LinkButtonUpdating(bt *core.Button, url func() string) *core.B
 		c.OpenURL(url())
 	})
 	return bt
+}
+
+// AddWidgetHandler adds given widget handler function
+func (c *Context) AddWidgetHandler(f func(w core.Widget)) {
+	c.WidgetHandlers = append(c.WidgetHandlers, f)
+}
+
+// handleWidget calls WidgetHandlers functions on given widget,
+// in order added so last one has override priority.
+func (c *Context) handleWidget(w core.Widget) {
+	for _, f := range c.WidgetHandlers {
+		f(w)
+	}
 }
