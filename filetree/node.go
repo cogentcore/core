@@ -423,7 +423,7 @@ func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	sels := fn.GetSelectedNodes()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i])
-		if sn == nil {
+		if tree.IsNil(sn) {
 			continue
 		}
 		fun(sn)
