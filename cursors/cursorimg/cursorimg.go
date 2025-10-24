@@ -81,9 +81,11 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	shadow = pimage.GaussianBlur(shadow, float64(blurRadius))
 	draw.Draw(shadow, shadow.Bounds(), img, image.Point{}, draw.Over)
 
-	return &Cursor{
+	c := &Cursor{
 		Image:   shadow,
 		Size:    size,
 		Hotspot: hot.Mul(size).Div(256),
-	}, nil
+	}
+	sm[size] = c
+	return c, nil
 }

@@ -144,6 +144,9 @@ func TestFontEmoji(t *testing.T) {
 	faces, err := font.ParseTTC(bytes.NewReader(b))
 	assert.NoError(t, err)
 	face := faces[0]
+	size := float32(512)
+	hext, _ := face.FontHExtents()
+	ctr := 0
 	for r := rune(0); r < math.MaxInt32; r++ {
 		gid, has := face.NominalGlyph(r)
 		if !has {
@@ -155,12 +158,15 @@ func TestFontEmoji(t *testing.T) {
 			continue
 		}
 		fn := fmt.Sprintf("femoji-%x", r)
-		if !strings.Contains(fn, "203c") {
-			continue
-		}
-		sv := NewSVG(math32.Vec2(512, 512))
-		sv.Translate.Y = 1024
-		sv.Scale = 0.080078125
+		// if !strings.Contains(fn, "203c") {
+		// 	continue
+		// }
+		sv := NewSVG(math32.Vec2(size, size))
+		hadv := face.HorizontalAdvance(gid)
+		scale := size / hadv
+		sv.Scale = scale
+		sv.Translate.Y = size + scale*hext.Descender
+		sv.Root.ViewBox.Size.SetScalar(size)
 		sv.GroupFilter = fmt.Sprintf("glyph%d", gid)
 		sfn := filepath.Join("testdata/font-emoji-src", fn+".svg")
 		fmt.Println(sfn, "gid:", sv.GroupFilter, "len:", len(gd.Source))
@@ -172,5 +178,9 @@ func TestFontEmoji(t *testing.T) {
 		imagex.Assert(t, img, imfn)
 		// sv.SaveXML(sfn)
 		// os.WriteFile(sfn, gd.Source, 0666)
+		ctr++
+		if ctr > 100 {
+			break
+		}
 	}
 }
