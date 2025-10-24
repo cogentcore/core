@@ -139,7 +139,7 @@ var TypeSizes = map[Types]int{
 
 // TypeToVertexFormat maps gpu.Types to WebGPU VertexFormat
 var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
-	UndefinedType: wgpu.VertexFormatUndefined,
+	UndefinedType: 0,
 	// Bool32:         wgpu.VertexFormatUint32,
 	// Int16:          wgpu.VertexFormatR16Sint,
 	// Uint16:         wgpu.VertexFormatR16Uint,
