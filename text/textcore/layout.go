@@ -44,7 +44,7 @@ func (ed *Base) styleSizes() {
 	if sh != nil {
 		lht := ed.Styles.LineHeightDots()
 		tx := rich.NewText(sty, []rune{'M'})
-		r := sh.Shape(tx, tsty, &rich.DefaultSettings)
+		r := sh.Shape(tx, tsty)
 		ed.charSize.X = math32.Round(r[0].Advance())
 		ed.charSize.Y = lht
 	}

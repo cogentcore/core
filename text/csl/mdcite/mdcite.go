@@ -5,6 +5,11 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/text/csl"
 )
@@ -45,7 +50,24 @@ func Generate(c *Config) error {
 		return err
 	}
 	kl := csl.NewKeyList(refs)
-	cited, err := csl.GenerateMarkdown(c.Dir, c.Output, c.Heading, kl, c.Style)
+
+	if c.Dir == "" {
+		c.Dir = "./"
+	}
+	mds := fsx.Filenames(c.Dir, ".md")
+	if len(mds) == 0 {
+		return errors.New("No .md files found in: " + c.Dir)
+	}
+	if c.Output == "" {
+		c.Output = filepath.Join(c.Dir, "references.md")
+	}
+	of, err := os.Create(c.Output)
+	if errors.Log(err) != nil {
+		return err
+	}
+	defer of.Close()
+
+	cited, err := csl.GenerateMarkdown(of, os.DirFS(c.Dir), c.Heading, kl, c.Style, mds...)
 	cf := c.CitedData
 	if cf == "" {
 		cf = "citedrefs.json"

@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore"
+	_ "cogentcore.org/core/text/tex"
 	_ "cogentcore.org/core/yaegicore"
 )
 
@@ -17,6 +18,8 @@ import (
 var econtent embed.FS
 
 func main() {
+	content.Settings.SiteTitle = "Cogent Content Example"
+	content.OfflineURL = "https://example.com"
 	b := core.NewBody("Cogent Content Example")
 	ct := content.NewContent(b).SetContent(econtent)
 	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))

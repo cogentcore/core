@@ -20,6 +20,8 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/text/printer"
+	"github.com/jeandeaual/go-locale"
 )
 
 // App contains the data and logic common to all implementations of [system.App].
@@ -67,6 +69,9 @@ func Init(a system.App, ab *App) {
 	ab.This = a
 	system.TheApp = a
 	key.SystemPlatform = a.SystemPlatform().String()
+	// sl := a.SystemLocale()
+	// fmt.Println("locale:", sl, sl.Language(), sl.Region())
+	printer.Settings.Defaults() // depends on system.TheApp
 }
 
 func (a *App) MainLoop() {
@@ -117,6 +122,10 @@ func (a *App) SystemPlatform() system.Platforms {
 
 func (a *App) SystemInfo() string {
 	return "" // no-op by default
+}
+
+func (a *App) SystemLocale() system.Locale {
+	return system.Locale(errors.Log1(locale.GetLocale()))
 }
 
 func (a *App) Name() string {

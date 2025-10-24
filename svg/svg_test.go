@@ -18,29 +18,50 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
+	"cogentcore.org/core/styles/units"
 	. "cogentcore.org/core/svg"
 	"github.com/go-text/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 
 func RunTest(t *testing.T, width, height int, dir, fname string) {
-	sv := NewSVG(math32.Vec2(float32(width), float32(height)))
+	// cset := pdf.UseStandardFonts()
+
+	size := math32.Vec2(float32(width), float32(height))
+	sv := NewSVG(size)
 	svfn := filepath.Join("testdata", dir, fname)
 	err := sv.OpenXML(svfn)
 	assert.NoError(t, err)
-	img := sv.RenderImage()
-	imfn := filepath.Join(dir, "png", strings.TrimSuffix(fname, ".svg"))
+	rend := sv.Render(nil).RenderDone()
+
+	rd := paint.NewImageRenderer(size)
+	img := rd.Render(rend).Image()
+	bnm := strings.TrimSuffix(fname, ".svg")
+	imfn := filepath.Join("png", dir, bnm)
 	// fmt.Println(svfn, imfn)
 	imagex.Assert(t, img, imfn)
+
+	pddir := filepath.Join("testdata", "pdf")
+	pdfn := filepath.Join(pddir, dir, bnm+".pdf")
+	ctx := units.NewContext()
+	pd := paint.NewPDFRenderer(size, ctx)
+	pd.Render(rend)
+	os.MkdirAll(filepath.Join(pddir, dir), 0777)
+	err = os.WriteFile(pdfn, pd.Source(), 0666)
+	assert.NoError(t, err)
+
+	// pdf.RestorePreviousFonts(cset)
 }
 
 func TestSVG(t *testing.T) {
 	dir := "svg"
 	files := fsx.Filenames(filepath.Join("testdata", dir), ".svg")
 
+	// PDF currently failing: TestShapes4, 6,
 	for _, fn := range files {
-		// if fn != "fig_neuron_as_detect.svg" {
+		// if fn != "fig_neuron_as_detect_test.svg" {
 		// 	continue
 		// }
 		RunTest(t, 640, 480, dir, fn)
@@ -65,7 +86,7 @@ func TestViewBox(t *testing.T) {
 		img := sv.RenderImage()
 
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
-		imfn := filepath.Join("svg", "png", "viewbox", fnm)
+		imfn := filepath.Join("png", "viewbox", fnm)
 		// fmt.Println(imfn)
 		imagex.Assert(t, img, imfn)
 	}
@@ -135,7 +156,7 @@ func TestEmoji(t *testing.T) {
 }
 
 func TestFontEmoji(t *testing.T) {
-	t.Skip("special-case testing -- requires noto-emoji file")
+	// t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
@@ -174,7 +195,7 @@ func TestFontEmoji(t *testing.T) {
 		err := sv.ReadXML(b)
 		assert.NoError(t, err)
 		img := sv.RenderImage()
-		imfn := filepath.Join("svg", "png", "font-emoji", strings.TrimSuffix(fn, ".svg"))
+		imfn := filepath.Join("png", "font-emoji", strings.TrimSuffix(fn, ".svg"))
 		imagex.Assert(t, img, imfn)
 		// sv.SaveXML(sfn)
 		// os.WriteFile(sfn, gd.Source, 0666)

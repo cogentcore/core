@@ -17,11 +17,8 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -35,7 +32,7 @@ import (
 func New[T tree.NodeValue](ctx *Context) *T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.config(any(w).(core.Widget)) // TODO: better htmlcore structure with new config paradigm?
+	ctx.config(any(w).(core.Widget))
 	return w
 }
 
@@ -55,6 +52,8 @@ func handleElement(ctx *Context) {
 		handleTextTag(ctx)
 		return
 	}
+
+	var newWidget core.Widget
 
 	switch tag {
 	case "script", "title", "meta":
@@ -83,6 +82,7 @@ func handleElement(ctx *Context) {
 		ctx.addStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
 		w := New[core.Frame](ctx)
+		newWidget = w
 		ctx.NewParent = w
 		switch tag {
 		case "body":
@@ -95,7 +95,7 @@ func handleElement(ctx *Context) {
 			if tag == "ol" {
 				w.SetProperty("listCount", 0)
 			}
-			w.Styler(func(s *styles.Style) {
+			w.FinalStyler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Padding.Left.Ch(core.ConstantSpacing(float32(4 * ld)))
 			})
@@ -111,90 +111,49 @@ func handleElement(ctx *Context) {
 			})
 		}
 	case "button":
-		New[core.Button](ctx).SetText(ExtractText(ctx))
+		newWidget = New[core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		handleText(ctx).SetType(core.TextDisplaySmall)
+		newWidget = handleText(ctx, tag).SetType(core.TextDisplaySmall)
 	case "h2":
-		handleText(ctx).SetType(core.TextHeadlineMedium)
+		newWidget = handleText(ctx, tag).SetType(core.TextHeadlineMedium)
 	case "h3":
-		handleText(ctx).SetType(core.TextTitleLarge)
+		newWidget = handleText(ctx, tag).SetType(core.TextTitleLarge)
 	case "h4":
-		handleText(ctx).SetType(core.TextTitleMedium)
+		newWidget = handleText(ctx, tag).SetType(core.TextTitleMedium)
 	case "h5":
-		handleText(ctx).SetType(core.TextTitleSmall)
+		newWidget = handleText(ctx, tag).SetType(core.TextTitleSmall)
 	case "h6":
-		handleText(ctx).SetType(core.TextLabelSmall)
+		newWidget = handleText(ctx, tag).SetType(core.TextLabelSmall)
 	case "p":
-		handleText(ctx)
+		newWidget = handleText(ctx, tag)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
 			codeEl := ctx.Node.FirstChild
-			collapsed := GetAttr(codeEl, "collapsed")
-			lang := getLanguage(GetAttr(codeEl, "class"))
+			lang := GetLanguage(GetAttr(codeEl, "class"))
 			id := GetAttr(codeEl, "id")
 			var ed *textcore.Editor
-			var parent tree.Node
-			if collapsed != "" {
-				cl := New[core.Collapser](ctx)
-				summary := core.NewText(cl.Summary).SetText("Code")
-				if title := GetAttr(codeEl, "title"); title != "" {
-					summary.SetText(title)
-				}
-				ed = textcore.NewEditor(cl.Details)
-				if id != "" {
-					cl.Summary.Name = id
-				}
-				parent = cl.Parent
-				if collapsed == "false" || collapsed == "-" {
-					cl.Open = true
-				}
-			} else {
-				ed = New[textcore.Editor](ctx)
-				if id != "" {
-					ed.SetName(id)
-				}
-				parent = ed.Parent
+			ed = New[textcore.Editor](ctx)
+			if id != "" {
+				ed.SetName(id)
 			}
+			newWidget = ed
 			ctx.Node = codeEl
 			if lang != "" {
 				ed.Lines.SetFileExt(lang)
 			}
 			ed.Lines.SetString(ExtractText(ctx))
-			if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
-				ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
-				parFrame := core.NewFrame(parent)
-				parFrame.Styler(func(s *styles.Style) {
-					s.Direction = styles.Column
-					s.Grow.Set(1, 0)
-				})
-				// we inherit our Grow.Y from our first child so that
-				// elements that want to grow can do so
-				parFrame.SetOnChildAdded(func(n tree.Node) {
-					if _, ok := n.(*core.Body); ok { // Body should not grow
-						return
-					}
-					wb := core.AsWidget(n)
-					if wb.IndexInParent() != 0 {
-						return
-					}
-					wb.FinalStyler(func(s *styles.Style) {
-						parFrame.Styles.Grow.Y = s.Grow.Y
-					})
-				})
-				BindTextEditor(ed, parFrame, lang)
-			} else {
-				ed.SetReadOnly(true)
-				ed.Lines.Settings.LineNumbers = false
-				ed.Styler(func(s *styles.Style) {
-					s.Border.Width.Zero()
-					s.MaxBorder.Width.Zero()
-					s.StateLayer = 0
-					s.Background = colors.Scheme.SurfaceContainer
-				})
-			}
+			ed.SetReadOnly(true)
+			ed.Lines.Settings.LineNumbers = false
+			ed.Styler(func(s *styles.Style) {
+				s.Border.Width.Zero()
+				s.MaxBorder.Width.Zero()
+				s.StateLayer = 0
+				s.Background = colors.Scheme.SurfaceContainer
+			})
 		} else {
-			handleText(ctx).Styler(func(s *styles.Style) {
+			newWidget = handleText(ctx, tag)
+			newWidget.AsWidget().Styler(func(s *styles.Style) {
 				s.Text.WhiteSpace = text.WhiteSpacePreWrap
 			})
 		}
@@ -210,6 +169,7 @@ func handleElement(ctx *Context) {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
 		text, sublist := handleTextExclude(ctx, "ol", "ul") // exclude other lists
+		newWidget = text
 		start := ""
 		if pw, ok := text.Parent.(core.Widget); ok {
 			pwt := pw.AsTree()
@@ -240,6 +200,7 @@ func handleElement(ctx *Context) {
 				}
 				txt, psub := handleTextExclude(ctx, "ol", "ul")
 				txt.SetText(txt.Text)
+				ctx.handleWidget(cnode, txt)
 				if psub != nil {
 					if psub != sublist {
 						readHTMLNode(ctx, ctx.Parent(), psub)
@@ -252,95 +213,41 @@ func handleElement(ctx *Context) {
 			readHTMLNode(ctx, ctx.Parent(), sublist)
 		}
 	case "img":
-		n := ctx.Node
-		src := GetAttr(n, "src")
-		alt := GetAttr(n, "alt")
-		pid := ""
-		if ctx.BlockParent != nil {
-			pid = GetAttr(n.Parent, "id")
-		}
-		// Can be either image or svg.
-		var img *core.Image
-		var svg *core.SVG
-		if strings.HasSuffix(src, ".svg") {
-			svg = New[core.SVG](ctx)
-			svg.SetTooltip(alt)
-			if pid != "" {
-				svg.SetName(pid)
-			}
-		} else {
-			img = New[core.Image](ctx)
-			img.SetTooltip(alt)
-			if pid != "" {
-				img.SetName(pid)
-			}
-			img.Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
-				s.Overflow.Set(styles.OverflowAuto)
-			})
-			img.OnDoubleClick(func(e events.Event) {
-				d := core.NewBody("Image")
-				core.NewImage(d).SetImage(img.Image)
-				d.RunWindowDialog(img)
-			})
-		}
-
-		go func() {
-			resp, err := Get(ctx, src)
-			if errors.Log(err) != nil {
-				return
-			}
-			defer resp.Body.Close()
-			if svg != nil {
-				svg.AsyncLock()
-				errors.Log(svg.Read(resp.Body))
-				svg.Update()
-				svg.AsyncUnlock()
-			} else {
-				im, _, err := imagex.Read(resp.Body)
-				if err != nil {
-					slog.Error("error loading image", "url", src, "err", err)
-					return
-				}
-				img.AsyncLock()
-				img.SetImage(im)
-				img.Update()
-				img.AsyncUnlock()
-			}
-		}()
+		newWidget = handleImage(ctx, tag)
 	case "input":
 		ityp := GetAttr(ctx.Node, "type")
 		val := GetAttr(ctx.Node, "value")
 		switch ityp {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			New[core.Spinner](ctx).SetValue(fval)
+			newWidget = New[core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
-			New[core.Switch](ctx).SetType(core.SwitchCheckbox).
+			newWidget = New[core.Switch](ctx).SetType(core.SwitchCheckbox).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
-			New[core.Switch](ctx).SetType(core.SwitchRadioButton).
+			newWidget = New[core.Switch](ctx).SetType(core.SwitchRadioButton).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			New[core.Slider](ctx).SetValue(fval)
+			newWidget = New[core.Slider](ctx).SetValue(fval)
 		case "button", "submit":
-			New[core.Button](ctx).SetText(val)
+			newWidget = New[core.Button](ctx).SetText(val)
 		case "color":
-			core.Bind(val, New[core.ColorButton](ctx))
+			newWidget = core.Bind(val, New[core.ColorButton](ctx))
 		case "datetime":
-			core.Bind(val, New[core.TimeInput](ctx))
+			newWidget = core.Bind(val, New[core.TimeInput](ctx))
 		case "file":
-			core.Bind(val, New[core.FileButton](ctx))
+			newWidget = core.Bind(val, New[core.FileButton](ctx))
 		default:
-			New[core.TextField](ctx).SetText(val)
+			newWidget = New[core.TextField](ctx).SetText(val)
 		}
 	case "textarea":
 		buf := lines.NewLines()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[textcore.Editor](ctx).SetLines(buf)
+		newWidget = New[textcore.Editor](ctx).SetLines(buf)
 	case "table":
 		w := New[core.Frame](ctx)
+		newWidget = w
 		ctx.NewParent = w
 		ctx.TableParent = w
 		ctx.firstRow = true
@@ -348,7 +255,7 @@ func handleElement(ctx *Context) {
 		w.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Overflow.X = styles.OverflowAuto
-			s.Grow.Set(1, 1)
+			s.Grow.Set(1, 0)
 			s.Columns = w.Property("cols").(int)
 			s.Gap.X.Dp(core.ConstantSpacing(6))
 			s.Justify.Content = styles.Center
@@ -359,10 +266,11 @@ func handleElement(ctx *Context) {
 			cols++
 			ctx.TableParent.SetProperty("cols", cols)
 		}
-		tx := handleText(ctx)
+		tx := handleText(ctx, tag)
 		if tx.Parent == nil { // if empty we need a real empty text to keep structure
 			tx = New[core.Text](ctx)
 		}
+		newWidget = tx
 		// fmt.Println(tag, "val:", tx.Text)
 		if tag == "th" {
 			tx.Styler(func(s *styles.Style) {
@@ -387,22 +295,99 @@ func handleElement(ctx *Context) {
 	default:
 		ctx.NewParent = ctx.Parent()
 	}
+	if newWidget != nil {
+		ctx.handleWidget(ctx.Node, newWidget)
+	}
 }
 
-func (ctx *Context) textStyler(s *styles.Style) {
-	s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
-	s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
-	// TODO: it would be ideal for htmlcore to automatically save a scale factor
-	// in general and for each domain, that is applied only to page content
-	// scale := float32(1.2)
-	// s.Font.Size.Value *= scale
-	// s.Text.LineHeight.Value *= scale
-	// s.Text.LetterSpacing.Value *= scale
+func handleImage(ctx *Context, tag string) core.Widget {
+	pid := ""
+	pstyle := ""
+	if ctx.BlockParent != nil { // these attributes get put on a block parent element
+		pstyle = GetAttr(ctx.Node.Parent, "style")
+		pid = GetAttr(ctx.Node.Parent, "id")
+	}
+	n := ctx.Node
+	src := GetAttr(n, "src")
+	alt := GetAttr(n, "alt")
+	if pstyle != "" {
+		ctx.setStyleAttr(n, pstyle)
+	}
+	var newWidget core.Widget
+	var resp *http.Response
+	var err error
+	if !ctx.DelayedImageLoad {
+		resp, err = Get(ctx, src)
+		if errors.Log(err) != nil {
+			return nil
+		}
+		defer resp.Body.Close()
+	}
+
+	// Can be either image or svg.
+	var img *core.Image
+	var svg *core.SVG
+	if strings.HasSuffix(src, ".svg") {
+		svg = New[core.SVG](ctx)
+		svg.SetTooltip(alt)
+		if pid != "" {
+			svg.SetName(pid)
+			svg.SetProperty("id", pid)
+		}
+		if !ctx.DelayedImageLoad {
+			errors.Log(svg.Read(resp.Body))
+		}
+		newWidget = svg
+	} else {
+		img = New[core.Image](ctx)
+		img.SetTooltip(alt)
+		if pid != "" {
+			img.SetName(pid)
+			img.SetProperty("id", pid)
+		}
+		if !ctx.DelayedImageLoad {
+			im, _, err := imagex.Read(resp.Body)
+			if err != nil {
+				slog.Error("error loading image", "url", src, "err", err)
+			} else {
+				img.SetImage(im)
+			}
+		}
+		newWidget = img
+	}
+
+	if !ctx.DelayedImageLoad {
+		return newWidget
+	}
+	go func() {
+		resp, err := Get(ctx, src)
+		if errors.Log(err) != nil {
+			return
+		}
+		defer resp.Body.Close()
+		if svg != nil {
+			svg.AsyncLock()
+			errors.Log(svg.Read(resp.Body))
+			svg.Update()
+			svg.AsyncUnlock()
+		} else {
+			im, _, err := imagex.Read(resp.Body)
+			if err != nil {
+				slog.Error("error loading image", "url", src, "err", err)
+				return
+			}
+			img.AsyncLock()
+			img.SetImage(im)
+			img.Update()
+			img.AsyncUnlock()
+		}
+	}()
+	return newWidget
 }
 
 // handleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
-func handleText(ctx *Context) *core.Text {
+func handleText(ctx *Context, tag string) *core.Text {
 	tx, _ := handleTextExclude(ctx)
 	return tx
 }
@@ -418,7 +403,6 @@ func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.N
 		return core.NewText(), excl
 	}
 	tx := New[core.Text](ctx).SetText(et)
-	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -434,7 +418,6 @@ func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
-	tx.Styler(ctx.textStyler)
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -477,9 +460,9 @@ func HasAttr(n *html.Node, attr string) bool {
 	})
 }
 
-// getLanguage returns the 'x' in a `language-x` class from the given
+// GetLanguage returns the 'x' in a `language-x` class from the given
 // string of class(es).
-func getLanguage(class string) string {
+func GetLanguage(class string) string {
 	fields := strings.Fields(class)
 	for _, field := range fields {
 		if strings.HasPrefix(field, "language-") {
@@ -509,8 +492,3 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 	}
 	return resp, nil
 }
-
-// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
-// when importing yaegicore, which provides interactive editing functionality for Go
-// code blocks in text editors.
-var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)

@@ -19,7 +19,7 @@ type Font struct {
 	Size float32
 
 	// Family is a nonstandard family name: if standard, then empty,
-	// and value is determined by [rich.DefaultSettings] and Style.Family.
+	// and value is determined by [rich.Settings] and Style.Family.
 	Family string
 }
 
@@ -40,12 +40,12 @@ func (fn *Font) Style(tsty *Style) *rich.Style {
 }
 
 // FontFamily returns the string value of the font Family for given [rich.Style],
-// using [text.Style] CustomFont or [rich.DefaultSettings] values.
+// using [text.Style] CustomFont or [rich.Settings] values.
 func (ts *Style) FontFamily(sty *rich.Style) string {
 	if sty.Family == rich.Custom {
 		return string(ts.CustomFont)
 	}
-	return sty.FontFamily(&rich.DefaultSettings)
+	return sty.FontFamily(&rich.Settings)
 }
 
 func (fn *Font) FamilyString(tsty *Style) string {

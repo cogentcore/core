@@ -38,6 +38,17 @@ func (gp *Group) Defaults() {
 	gp.Pose.Defaults()
 }
 
+func (gp *Group) Update() {
+	gp.RunUpdaters()
+	gp.WalkDown(func(n tree.Node) bool {
+		if n.AsTree().This == gp.This {
+			return tree.Continue
+		}
+		n.(Node).Update()
+		return tree.Continue
+	})
+}
+
 func (gp *Group) RenderClass() RenderClasses {
 	return RClassNone
 }

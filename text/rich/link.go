@@ -16,10 +16,6 @@ type Hyperlink struct {
 	// URL is the full URL for the link.
 	URL string
 
-	// Properties are additional properties defined for the link,
-	// e.g., from the parsed HTML attributes. TODO: resolve
-	// Properties map[string]any
-
 	// Range defines the starting and ending positions of the link,
 	// in terms of source rune indexes.
 	Range textpos.Range

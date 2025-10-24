@@ -18,6 +18,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -974,8 +975,12 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
 			switch k {
-			case "opacity", "transform":
+			case "opacity":
 				XMLAddAttr(&se.Attr, k, sv)
+			case "transform":
+				if slices.IndexFunc(se.Attr, func(a xml.Attr) bool { return a.Name.Local == k }) < 0 {
+					XMLAddAttr(&se.Attr, k, sv)
+				}
 			case "groupmode":
 				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
 				if st, has := properties["style"]; has {

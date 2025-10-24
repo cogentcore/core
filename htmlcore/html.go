@@ -46,7 +46,7 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 	case html.TextNode:
 		str := strings.TrimSpace(n.Data)
 		if str != "" {
-			New[core.Text](ctx).SetText(str)
+			ctx.handleWidget(n, New[core.Text](ctx).SetText(str))
 		}
 	case html.ElementNode:
 		ctx.Node = n

@@ -28,10 +28,12 @@ func NewKeyList(items []Item) *KeyList {
 	return kl
 }
 
-// AlphaKeys returns an alphabetically sorted list of keys.
+// AlphaKeys returns an alphabetically sorted list of keys (case insensitive).
 func (kl *KeyList) AlphaKeys() []string {
 	ks := slices.Clone(kl.Keys)
-	slices.Sort(ks)
+	slices.SortFunc(ks, func(a, b string) int {
+		return strings.Compare(strings.ToLower(a), strings.ToLower(b))
+	})
 	return ks
 }
 

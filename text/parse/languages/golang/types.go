@@ -291,8 +291,19 @@ func (gl *GoLang) TypeFromASTPrim(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 	return nil, false
 }
 
+var typeDepth int
+
 // TypeFromASTComp handles composite type processing
 func (gl *GoLang) TypeFromASTComp(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.AST) (*syms.Type, bool) {
+	typeDepth++
+	if typeDepth > 100 {
+		typeDepth = 0
+		return nil, false
+	}
+	defer func() {
+		typeDepth--
+	}()
+
 	tnm := gl.ASTTypeName(tyast)
 	newTy := false
 	if ty == nil {

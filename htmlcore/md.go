@@ -18,7 +18,7 @@ import (
 
 var divRegex = regexp.MustCompile("<p(.*?)><div></p>")
 
-func mdToHTML(ctx *Context, md []byte) []byte {
+func MDToHTML(ctx *Context, md []byte) []byte {
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.Attributes | parser.Mmark
 	p := parser.NewWithExtensions(extensions)
@@ -43,7 +43,7 @@ func mdToHTML(ctx *Context, md []byte) []byte {
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
-	htm := mdToHTML(ctx, b)
+	htm := MDToHTML(ctx, b)
 	// os.WriteFile("htmlcore_tmp.html", htm, 0666) // note: keep here, needed for debugging
 	buf := bytes.NewBuffer(htm)
 	return ReadHTML(ctx, parent, buf)

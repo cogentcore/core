@@ -45,6 +45,13 @@ type Text struct { //types:add
 	// unicode text is typically written in a different direction.
 	Direction rich.Directions
 
+	// Indent specifies how much to indent the first line in a paragraph (inherited).
+	Indent units.Value
+
+	// Hanging specifies how much to indent all but the first line
+	// in a paragraph (inherited).
+	Hanging units.Value
+
 	// TabSize specifies the tab size, in number of characters (inherited).
 	TabSize int
 
@@ -67,6 +74,8 @@ func (ts *Text) Defaults() {
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (ts *Text) ToDots(uc *units.Context) {
+	ts.Indent.ToDots(uc)
+	ts.Hanging.ToDots(uc)
 }
 
 // InheritFields from parent
@@ -76,6 +85,8 @@ func (ts *Text) InheritFields(parent *Text) {
 	ts.LineHeight = parent.LineHeight
 	// ts.WhiteSpace = par.WhiteSpace // note: we can't inherit this b/c label base default then gets overwritten
 	ts.Direction = parent.Direction
+	ts.Indent = parent.Indent
+	ts.Hanging = parent.Hanging
 	ts.TabSize = parent.TabSize
 	ts.SelectColor = parent.SelectColor
 	ts.HighlightColor = parent.HighlightColor
@@ -88,6 +99,8 @@ func (ts *Text) SetText(tsty *text.Style) {
 	tsty.LineHeight = ts.LineHeight
 	tsty.WhiteSpace = ts.WhiteSpace
 	tsty.Direction = ts.Direction
+	tsty.Indent = ts.Indent
+	tsty.Hanging = ts.Hanging
 	tsty.TabSize = ts.TabSize
 	tsty.SelectColor = ts.SelectColor
 	tsty.HighlightColor = ts.HighlightColor
@@ -100,6 +113,8 @@ func (ts *Text) SetFromText(tsty *text.Style) {
 	ts.LineHeight = tsty.LineHeight
 	ts.WhiteSpace = tsty.WhiteSpace
 	ts.Direction = tsty.Direction
+	ts.Indent = tsty.Indent
+	ts.Hanging = tsty.Hanging
 	ts.TabSize = tsty.TabSize
 	ts.SelectColor = tsty.SelectColor
 	ts.HighlightColor = tsty.HighlightColor

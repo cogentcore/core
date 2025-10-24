@@ -20,11 +20,11 @@ import (
 // SceneSource returns a [composer.Source] for the given scene
 // using the given suggested draw operation.
 func SceneSource(sc *Scene, op draw.Op) composer.Source {
-	if sc.Painter.State == nil || sc.renderer == nil {
+	if sc.Painter.State == nil || sc.Renderer == nil {
 		return nil
 	}
 	render := sc.Painter.RenderDone()
-	return &paintSource{render: render, renderer: sc.renderer, drawOp: op, drawPos: sc.SceneGeom.Pos}
+	return &paintSource{render: render, renderer: sc.Renderer, drawOp: op, drawPos: sc.SceneGeom.Pos}
 }
 
 // paintSource is the [composer.Source] for [paint.Painter] content, such as for a [Scene].

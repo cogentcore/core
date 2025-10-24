@@ -14,11 +14,12 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Linear represents a linear gradient. It implements the [image.Image] interface.
+// Linear represents a linear gradient along linear axis from Start to End.
+// It implements the [image.Image] interface.
 type Linear struct { //types:add -setters
 	Base
 
-	// the starting point of the gradient (x1 and y1 in SVG)
+	// the starting point of the gradient axis (x1 and y1 in SVG).
 	Start math32.Vector2
 
 	// the ending point of the gradient (x2 and y2 in SVG)
@@ -72,6 +73,12 @@ func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 
 	l.distance = l.rEnd.Sub(l.rStart)
 	l.distanceLengthSquared = l.distance.LengthSquared()
+}
+
+// TransformedAxis returns the Start and End axis points as transformed
+// by the last Update call.
+func (l *Linear) TransformedAxis() (start, end math32.Vector2) {
+	return l.rStart, l.rEnd
 }
 
 // At returns the color of the linear gradient at the given point

@@ -26,8 +26,7 @@ const (
 	ConeMeshName = "__UnitCone"
 )
 
-///////////////////////////////////////////////////////////////////////////
-//   Plane
+////////   Plane
 
 // Plane is a flat 2D plane, which can be oriented along any
 // axis facing either positive or negative
@@ -80,8 +79,7 @@ func (pl *Plane) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math3
 	pl.BBox.SetBounds(mn, mx)
 }
 
-///////////////////////////////////////////////////////////////////////////
-//   Box
+////////   Box
 
 // Box is a rectangular-shaped solid (cuboid)
 type Box struct { //types:add -setters
@@ -118,8 +116,7 @@ func (bx *Box) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.
 	bx.BBox.SetBounds(mn, mx)
 }
 
-///////////////////////////////////////////////////////////////////////////
-//   Sphere
+////////   Sphere
 
 // Sphere is a sphere mesh
 type Sphere struct { //types:add -setters
@@ -185,8 +182,7 @@ func (sp *Sphere) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math
 	sp.BBox.SetBounds(bb.Min, bb.Max)
 }
 
-///////////////////////////////////////////////////////////////////////////
-//   Cylinder / Cone
+////////   Cylinder / Cone
 
 // Cylinder is a generalized cylinder shape, including a cone
 // or truncated cone by having different size circles at either end.
@@ -282,8 +278,7 @@ func (cy *Cylinder) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index ma
 	cy.BBox.SetBounds(bb.Min, bb.Max)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Capsule
+////////  Capsule
 
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.
@@ -388,8 +383,7 @@ func (cp *Capsule) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index mat
 	cp.BBox.SetBounds(bb.Min, bb.Max)
 }
 
-//////////////////////////////////////////////////////////////////////////
-//  Torus
+////////  Torus
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
 // larger radius of the ring.

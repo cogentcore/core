@@ -348,7 +348,7 @@ var lastAutoScroll time.Time
 func (fr *Frame) AutoScroll(pos math32.Vector2) bool {
 	now := time.Now()
 	lag := now.Sub(lastAutoScroll)
-	if lag < SystemSettings.LayoutAutoScrollDelay {
+	if lag < TimingSettings.LayoutAutoScrollDelay {
 		return false
 	}
 	did := false

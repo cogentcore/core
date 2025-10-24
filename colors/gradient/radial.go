@@ -96,6 +96,12 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 	r.rCenter, r.rFocal, r.rRadius = c, f, rs
 }
 
+// TransformedCoords returns the coordinate points as transformed
+// by the last Update call.
+func (r *Radial) TransformedCoords() (center, focal, radius math32.Vector2) {
+	return r.rCenter, r.rFocal, r.rRadius
+}
+
 const epsilonF = 1e-5
 
 // At returns the color of the radial gradient at the given point

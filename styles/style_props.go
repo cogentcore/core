@@ -516,6 +516,10 @@ var styleFuncs = map[string]styleprops.Func{
 		func(obj *Text) enums.EnumSetter { return &obj.WhiteSpace }),
 	"direction": styleprops.Enum(rich.LTR,
 		func(obj *Text) enums.EnumSetter { return &obj.Direction }),
+	"text-indent": styleprops.Units(units.Value{},
+		func(obj *Text) *units.Value { return &obj.Indent }),
+	"text-hanging": styleprops.Units(units.Value{},
+		func(obj *Text) *units.Value { return &obj.Hanging }),
 	"tab-size": styleprops.Int(int(4),
 		func(obj *Text) *int { return &obj.TabSize }),
 	"select-color": func(obj any, key string, val any, parent any, cc colors.Context) {

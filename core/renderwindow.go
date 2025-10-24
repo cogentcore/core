@@ -686,7 +686,7 @@ func (w *renderWindow) renderWindow() {
 	}
 	spriteMods := top.Sprites.IsModified()
 
-	spriteUpdateTime := SystemSettings.CursorBlinkTime
+	spriteUpdateTime := TimingSettings.CursorBlinkTime
 	if spriteUpdateTime == 0 {
 		spriteUpdateTime = 500 * time.Millisecond
 	}
