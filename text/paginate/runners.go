@@ -8,12 +8,20 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/printer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 )
+
+// TextStyler does standard text styling for printout:
+// FontFamily and Black Color (e.g., in case user is in Dark mode).
+func TextStyler(s *styles.Style) {
+	s.Font.Family = printer.Settings.FontFamily
+	s.Color = colors.Uniform(colors.Black)
+}
 
 // CenteredPageNumber generates a page number cenetered in the frame
 // with a 1.5em space above it.
@@ -28,7 +36,9 @@ func CenteredPageNumber(frame *core.Frame, opts *Options, pageNo int) {
 		s.Grow.Set(1, 0)
 		s.Justify.Content = styles.Center
 	})
-	core.NewText(fr).SetText(strconv.Itoa(pageNo))
+	core.NewText(fr).SetText(strconv.Itoa(pageNo)).Styler(func(s *styles.Style) {
+		TextStyler(s)
+	})
 }
 
 // NoFirst excludes the first page for any runner
@@ -51,15 +61,15 @@ func HeaderLeftPageNumber(header string) func(frame *core.Frame, opts *Options, 
 			s.Grow.Set(1, 0)
 		})
 		core.NewText(fr).SetText(header).Styler(func(s *styles.Style) {
+			TextStyler(s)
 			s.SetTextWrap(false)
-			s.Font.Family = printer.Settings.FontFamily
 			s.Font.Slant = rich.Italic
 			s.Font.Size = printer.Settings.FontSize
 		})
 		core.NewStretch(fr)
 		core.NewText(fr).SetText(strconv.Itoa(pageNo)).Styler(func(s *styles.Style) {
+			TextStyler(s)
 			s.SetTextWrap(false)
-			s.Font.Family = printer.Settings.FontFamily
 			s.Font.Size = printer.Settings.FontSize
 		})
 		core.NewSpace(frame).Styler(func(s *styles.Style) { // space after
@@ -86,7 +96,7 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 			s.Min.Y.Em(.1)
 		})
 		core.NewText(fr).SetText(title).Styler(func(s *styles.Style) {
-			s.Font.Family = printer.Settings.FontFamily
+			TextStyler(s)
 			s.Font.Size = printer.Settings.FontSize
 			s.Font.Size.Value *= 16.0 / 11
 			s.Text.Align = text.Center
@@ -94,7 +104,7 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if authors != "" {
 			core.NewText(fr).SetText(authors).Styler(func(s *styles.Style) {
-				s.Font.Family = printer.Settings.FontFamily
+				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Font.Size.Value *= 12.0 / 11
 				s.Text.Align = text.Center
@@ -103,7 +113,7 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if affiliations != "" {
 			core.NewText(fr).SetText(affiliations).Styler(func(s *styles.Style) {
-				s.Font.Family = printer.Settings.FontFamily
+				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center
 				s.Text.LineHeight = 1.1
@@ -113,7 +123,7 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if date != "" {
 			core.NewText(fr).SetText(date).Styler(func(s *styles.Style) {
-				s.Font.Family = printer.Settings.FontFamily
+				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center
 			})
@@ -121,7 +131,7 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if url != "" {
 			core.NewText(fr).SetText(url).Styler(func(s *styles.Style) {
-				s.Font.Family = printer.Settings.FontFamily
+				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center
 			})
@@ -129,14 +139,14 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if abstract != "" {
 			core.NewText(fr).SetText("Abstract:").Styler(func(s *styles.Style) {
-				s.Font.Family = printer.Settings.FontFamily
+				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Font.Size.Value *= 12.0 / 11
 				s.Font.Weight = rich.Bold
 				s.Align.Self = styles.Start
 			})
 			core.NewText(fr).SetText(abstract).Styler(func(s *styles.Style) {
-				s.Font.Family = printer.Settings.FontFamily
+				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Text.LineHeight = printer.Settings.LineHeight
 				s.Align.Self = styles.Start

@@ -7,6 +7,8 @@ package paginate
 import (
 	"io"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/pdf"
@@ -27,6 +29,8 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	if len(ins) == 0 {
 		return
 	}
+	cmode := matcolor.SchemeIsDark
+	colors.SetScheme(false)
 	cset := pdf.UseStandardFonts()
 
 	p := pager{opts: &opts, ins: ins}
@@ -67,6 +71,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 		sc.DeleteChildren()
 	}
 	pdr.EndRender()
+	colors.SetScheme(cmode)
 	pdf.RestorePreviousFonts(cset)
 }
 
@@ -108,6 +113,7 @@ func (p *pager) assemble() {
 							s.Text.LineHeight = printer.Settings.LineHeight
 						}
 						s.Font.Size.Value *= fsc
+						s.Color = colors.Uniform(colors.Black) // in case dark mode
 						if p.opts.TextStyler != nil {
 							p.opts.TextStyler(tx)
 						}
