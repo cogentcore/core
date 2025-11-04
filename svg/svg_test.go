@@ -156,7 +156,7 @@ func TestEmoji(t *testing.T) {
 }
 
 func TestFontEmoji(t *testing.T) {
-	// t.Skip("special-case testing -- requires noto-emoji file")
+	t.Skip("special-case testing -- requires noto-emoji file")
 	// dir := filepath.Join("testdata", "noto-emoji")
 	os.MkdirAll("testdata/font-emoji-src", 0777)
 	fname := "/Library/Fonts/NotoColorEmoji-Regular.ttf"
