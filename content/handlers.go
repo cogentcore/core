@@ -154,7 +154,11 @@ func (ct *Content) widgetHandler(w core.Widget) {
 	case *core.Text:
 		hdr := len(tag) > 0 && tag[0] == 'h'
 		x.Styler(func(s *styles.Style) {
-			s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+			if tag == "td" {
+				s.Margin.SetVertical(units.Em(0)) // use gap
+			} else {
+				s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+			}
 			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
 			s.Max.X.In(8) // big enough to not constrain PDF render
 			if hdr {
@@ -179,18 +183,17 @@ func (ct *Content) widgetHandler(w core.Widget) {
 	case *core.Frame:
 		switch tag {
 		case "table":
+			if id != "" {
+				lbl := ct.currentPage.SpecialLabel(id)
+				cp := "<b>" + lbl + ":</b>"
+				if title != "" {
+					cp += " " + title
+				}
+				ct.moveToBlockFrame(w, id, cp, true)
+			}
 			x.Styler(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
-			if id == "" {
-				break
-			}
-			lbl := ct.currentPage.SpecialLabel(id)
-			cp := "<b>" + lbl + ":</b>"
-			if title != "" {
-				cp += " " + title
-			}
-			ct.moveToBlockFrame(w, id, cp, true)
 		}
 	}
 }
