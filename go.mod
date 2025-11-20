@@ -1,6 +1,6 @@
 module cogentcore.org/core
 
-go 1.23.4
+go 1.24.0
 
 require (
 	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
@@ -35,13 +35,13 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.10.0
 	github.com/tdewolff/parse/v2 v2.7.19
-	golang.org/x/crypto v0.36.0
+	golang.org/x/crypto v0.45.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.25.0
-	golang.org/x/net v0.38.0
+	golang.org/x/net v0.47.0
 	golang.org/x/oauth2 v0.27.0
-	golang.org/x/sys v0.31.0
-	golang.org/x/tools v0.29.0
+	golang.org/x/sys v0.38.0
+	golang.org/x/tools v0.38.0
 	gopkg.in/yaml.v3 v3.0.1
 	star-tex.org/x/tex v0.6.0
 )
@@ -66,9 +66,9 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	modernc.org/knuth v0.5.4 // indirect
 	modernc.org/token v1.1.0 // indirect
