@@ -118,7 +118,7 @@ func NewLightScheme(p *Palette) Scheme {
 
 		SurfaceDim:    p.Neutral.AbsToneUniform(87),
 		Surface:       p.Neutral.AbsToneUniform(98),
-		SurfaceBright: p.Neutral.AbsToneUniform(98),
+		SurfaceBright: p.Neutral.AbsToneUniform(99),
 
 		SurfaceContainerLowest:  p.Neutral.AbsToneUniform(100),
 		SurfaceContainerLow:     p.Neutral.AbsToneUniform(96),
@@ -134,7 +134,7 @@ func NewLightScheme(p *Palette) Scheme {
 		InverseOnSurface: p.Neutral.AbsToneUniform(95),
 		InversePrimary:   p.Primary.AbsToneUniform(80),
 
-		Background:   p.Neutral.AbsToneUniform(98),
+		Background:   p.Neutral.AbsToneUniform(100),
 		OnBackground: p.Neutral.AbsToneUniform(10),
 
 		Outline:        p.NeutralVariant.AbsToneUniform(50),
@@ -182,7 +182,7 @@ func NewDarkScheme(p *Palette) Scheme {
 		InverseOnSurface: p.Neutral.AbsToneUniform(20),
 		InversePrimary:   p.Primary.AbsToneUniform(40),
 
-		Background:   p.Neutral.AbsToneUniform(6),
+		Background:   p.Neutral.AbsToneUniform(0),
 		OnBackground: p.Neutral.AbsToneUniform(90),
 
 		Outline:        p.NeutralVariant.AbsToneUniform(60),
