@@ -72,126 +72,9 @@ func (v *Vector2) SetFromVector2i(vi Vector2i) {
 	v.Y = float32(vi.Y)
 }
 
-// SetDim sets the given vector component value by its dimension index.
-func (v *Vector2) SetDim(dim Dims, value float32) {
-	switch dim {
-	case X:
-		v.X = value
-	case Y:
-		v.Y = value
-	default:
-		panic("dim is out of range")
-	}
-}
-
-// Dim returns the given vector component.
-func (v Vector2) Dim(dim Dims) float32 {
-	switch dim {
-	case X:
-		return v.X
-	case Y:
-		return v.Y
-	default:
-		panic("dim is out of range")
-	}
-}
-
-// SetPointDim sets the given dimension of the given [image.Point] to the given value.
-func SetPointDim(pt *image.Point, dim Dims, value int) {
-	switch dim {
-	case X:
-		pt.X = value
-	case Y:
-		pt.Y = value
-	default:
-		panic("dim is out of range")
-	}
-}
-
-// PointDim returns the given dimension of the given [image.Point].
-func PointDim(pt image.Point, dim Dims) int {
-	switch dim {
-	case X:
-		return pt.X
-	case Y:
-		return pt.Y
-	default:
-		panic("dim is out of range")
-	}
-}
-
-func (a Vector2) String() string {
-	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
-}
-
-// SetPoint sets the vector from the given [image.Point].
-func (a *Vector2) SetPoint(pt image.Point) {
-	a.X = float32(pt.X)
-	a.Y = float32(pt.Y)
-}
-
-// SetFixed sets the vector from the given [fixed.Point26_6].
-func (a *Vector2) SetFixed(pt fixed.Point26_6) {
-	a.X = FromFixed(pt.X)
-	a.Y = FromFixed(pt.Y)
-}
-
-// ToPoint returns the vector as an [image.Point].
-func (a Vector2) ToPoint() image.Point {
-	return image.Point{int(a.X), int(a.Y)}
-}
-
-// ToPointFloor returns the vector as an [image.Point] with all values [Floor]ed.
-func (a Vector2) ToPointFloor() image.Point {
-	return image.Point{int(Floor(a.X)), int(Floor(a.Y))}
-}
-
-// ToPointCeil returns the vector as an [image.Point] with all values [Ceil]ed.
-func (a Vector2) ToPointCeil() image.Point {
-	return image.Point{int(Ceil(a.X)), int(Ceil(a.Y))}
-}
-
-// ToPointRound returns the vector as an [image.Point] with all values [Round]ed.
-func (a Vector2) ToPointRound() image.Point {
-	return image.Point{int(Round(a.X)), int(Round(a.Y))}
-}
-
-// ToFixed returns the vector as a [fixed.Point26_6].
-func (a Vector2) ToFixed() fixed.Point26_6 {
-	return ToFixedPoint(a.X, a.Y)
-}
-
-// RectFromPosSizeMax returns an [image.Rectangle] from the floor of pos
-// and ceil of size.
-func RectFromPosSizeMax(pos, size Vector2) image.Rectangle {
-	tp := pos.ToPointFloor()
-	ts := size.ToPointCeil()
-	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
-}
-
-// RectFromPosSizeMin returns an [image.Rectangle] from the ceil of pos
-// and floor of size.
-func RectFromPosSizeMin(pos, size Vector2) image.Rectangle {
-	tp := pos.ToPointCeil()
-	ts := size.ToPointFloor()
-	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
-}
-
 // SetZero sets all of the vector's components to zero.
 func (v *Vector2) SetZero() {
 	v.SetScalar(0)
-}
-
-// FromSlice sets this vector's components from the given slice, starting at offset.
-func (v *Vector2) FromSlice(slice []float32, offset int) {
-	v.X = slice[offset]
-	v.Y = slice[offset+1]
-}
-
-// ToSlice copies this vector's components to the given slice, starting at offset.
-func (v Vector2) ToSlice(slice []float32, offset int) {
-	slice[offset] = v.X
-	slice[offset+1] = v.Y
 }
 
 // Basic math operations:
@@ -336,68 +219,9 @@ func (v *Vector2) Clamp(min, max Vector2) {
 	}
 }
 
-// Floor returns this vector with [Floor] applied to each of its components.
-func (v Vector2) Floor() Vector2 {
-	return Vec2(Floor(v.X), Floor(v.Y))
-}
-
-// Ceil returns this vector with [Ceil] applied to each of its components.
-func (v Vector2) Ceil() Vector2 {
-	return Vec2(Ceil(v.X), Ceil(v.Y))
-}
-
-// Round returns this vector with [Round] applied to each of its components.
-func (v Vector2) Round() Vector2 {
-	return Vec2(Round(v.X), Round(v.Y))
-}
-
 // Negate returns the vector with each component negated.
 func (v Vector2) Negate() Vector2 {
 	return Vec2(-v.X, -v.Y)
-}
-
-// AddDim returns the vector with the given value added on the given dimension.
-func (a Vector2) AddDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X += value
-	case Y:
-		a.Y += value
-	}
-	return a
-}
-
-// SubDim returns the vector with the given value subtracted on the given dimension.
-func (a Vector2) SubDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X -= value
-	case Y:
-		a.Y -= value
-	}
-	return a
-}
-
-// MulDim returns the vector with the given value multiplied by on the given dimension.
-func (a Vector2) MulDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X *= value
-	case Y:
-		a.Y *= value
-	}
-	return a
-}
-
-// DivDim returns the vector with the given value divided by on the given dimension.
-func (a Vector2) DivDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X /= value
-	case Y:
-		a.Y /= value
-	}
-	return a
 }
 
 // Distance, Normal:
@@ -497,4 +321,188 @@ func (v Vector2) Rot(phi float32, p0 Vector2) Vector2 {
 		p0.X + cosphi*(v.X-p0.X) - sinphi*(v.Y-p0.Y),
 		p0.Y + sinphi*(v.X-p0.X) + cosphi*(v.Y-p0.Y),
 	}
+}
+
+func (a Vector2) String() string {
+	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
+}
+
+// SetDim sets the given vector component value by its dimension index.
+func (v *Vector2) SetDim(dim Dims, value float32) {
+	switch dim {
+	case X:
+		v.X = value
+	case Y:
+		v.Y = value
+	default:
+		panic("dim is out of range")
+	}
+}
+
+// Dim returns the given vector component.
+func (v Vector2) Dim(dim Dims) float32 {
+	switch dim {
+	case X:
+		return v.X
+	case Y:
+		return v.Y
+	default:
+		panic("dim is out of range")
+	}
+}
+
+// SetPointDim sets the given dimension of the given [image.Point] to the given value.
+func SetPointDim(pt *image.Point, dim Dims, value int) {
+	switch dim {
+	case X:
+		pt.X = value
+	case Y:
+		pt.Y = value
+	default:
+		panic("dim is out of range")
+	}
+}
+
+// PointDim returns the given dimension of the given [image.Point].
+func PointDim(pt image.Point, dim Dims) int {
+	switch dim {
+	case X:
+		return pt.X
+	case Y:
+		return pt.Y
+	default:
+		panic("dim is out of range")
+	}
+}
+
+// AddDim returns the vector with the given value added on the given dimension.
+func (a Vector2) AddDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X += value
+	case Y:
+		a.Y += value
+	default:
+		panic("dim is out of range")
+	}
+	return a
+}
+
+// SubDim returns the vector with the given value subtracted on the given dimension.
+func (a Vector2) SubDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X -= value
+	case Y:
+		a.Y -= value
+	default:
+		panic("dim is out of range")
+	}
+	return a
+}
+
+// MulDim returns the vector with the given value multiplied by on the given dimension.
+func (a Vector2) MulDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X *= value
+	case Y:
+		a.Y *= value
+	default:
+		panic("dim is out of range")
+	}
+	return a
+}
+
+// DivDim returns the vector with the given value divided by on the given dimension.
+func (a Vector2) DivDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X /= value
+	case Y:
+		a.Y /= value
+	default:
+		panic("dim is out of range")
+	}
+	return a
+}
+
+// SetPoint sets the vector from the given [image.Point].
+func (a *Vector2) SetPoint(pt image.Point) {
+	a.X = float32(pt.X)
+	a.Y = float32(pt.Y)
+}
+
+// SetFixed sets the vector from the given [fixed.Point26_6].
+func (a *Vector2) SetFixed(pt fixed.Point26_6) {
+	a.X = FromFixed(pt.X)
+	a.Y = FromFixed(pt.Y)
+}
+
+// ToPoint returns the vector as an [image.Point].
+func (a Vector2) ToPoint() image.Point {
+	return image.Point{int(a.X), int(a.Y)}
+}
+
+// ToPointFloor returns the vector as an [image.Point] with all values [Floor]ed.
+func (a Vector2) ToPointFloor() image.Point {
+	return image.Point{int(Floor(a.X)), int(Floor(a.Y))}
+}
+
+// ToPointCeil returns the vector as an [image.Point] with all values [Ceil]ed.
+func (a Vector2) ToPointCeil() image.Point {
+	return image.Point{int(Ceil(a.X)), int(Ceil(a.Y))}
+}
+
+// ToPointRound returns the vector as an [image.Point] with all values [Round]ed.
+func (a Vector2) ToPointRound() image.Point {
+	return image.Point{int(Round(a.X)), int(Round(a.Y))}
+}
+
+// ToFixed returns the vector as a [fixed.Point26_6].
+func (a Vector2) ToFixed() fixed.Point26_6 {
+	return ToFixedPoint(a.X, a.Y)
+}
+
+// RectFromPosSizeMax returns an [image.Rectangle] from the floor of pos
+// and ceil of size.
+func RectFromPosSizeMax(pos, size Vector2) image.Rectangle {
+	tp := pos.ToPointFloor()
+	ts := size.ToPointCeil()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+}
+
+// RectFromPosSizeMin returns an [image.Rectangle] from the ceil of pos
+// and floor of size.
+func RectFromPosSizeMin(pos, size Vector2) image.Rectangle {
+	tp := pos.ToPointCeil()
+	ts := size.ToPointFloor()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+}
+
+// FromSlice sets this vector's components from the given slice, starting at offset.
+func (v *Vector2) FromSlice(slice []float32, offset int) {
+	v.X = slice[offset]
+	v.Y = slice[offset+1]
+}
+
+// ToSlice copies this vector's components to the given slice, starting at offset.
+func (v Vector2) ToSlice(slice []float32, offset int) {
+	slice[offset] = v.X
+	slice[offset+1] = v.Y
+}
+
+// Floor returns this vector with [Floor] applied to each of its components.
+func (v Vector2) Floor() Vector2 {
+	return Vec2(Floor(v.X), Floor(v.Y))
+}
+
+// Ceil returns this vector with [Ceil] applied to each of its components.
+func (v Vector2) Ceil() Vector2 {
+	return Vec2(Ceil(v.X), Ceil(v.Y))
+}
+
+// Round returns this vector with [Round] applied to each of its components.
+func (v Vector2) Round() Vector2 {
+	return Vec2(Round(v.X), Round(v.Y))
 }

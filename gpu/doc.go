@@ -5,7 +5,7 @@
 /*
 Package gpu implements a convenient interface to the WebGPU
 graphics and compute framework, in Go, using the
-... bindings
+[github.com/cogentcore/webgpu] bindings.
 
 The Cogent Core GUI framework runs on top of this.
 */
