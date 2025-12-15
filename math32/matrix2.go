@@ -133,16 +133,18 @@ func (a *Matrix2) SetMul(b Matrix2) {
 	*a = a.Mul(b)
 }
 
-// MulVector2AsVector multiplies the Vector2 as a vector without adding translations.
+// todo: rename to MulVector, MulPoint
+
+// MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Matrix2) MulVector2AsVector(v Vector2) Vector2 {
+func (a Matrix2) MulVector(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y
 	ty := a.YX*v.X + a.YY*v.Y
 	return Vec2(tx, ty)
 }
 
-// MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
-func (a Matrix2) MulVector2AsPoint(v Vector2) Vector2 {
+// MulPoint multiplies the Vector2 as a point, including adding translations.
+func (a Matrix2) MulPoint(v Vector2) Vector2 {
 	tx := a.XX*v.X + a.XY*v.Y + a.X0
 	ty := a.YX*v.X + a.YY*v.Y + a.Y0
 	return Vec2(tx, ty)

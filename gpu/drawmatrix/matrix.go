@@ -159,8 +159,8 @@ func Transform(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Ma
 	dsz := math32.FromPoint(dr.Size())
 	rmat := math32.Rotate2D(rad)
 
-	dmnr := rmat.MulVector2AsPoint(math32.FromPoint(dr.Min))
-	dmxr := rmat.MulVector2AsPoint(math32.FromPoint(dr.Max))
+	dmnr := rmat.MulPoint(math32.FromPoint(dr.Min))
+	dmxr := rmat.MulPoint(math32.FromPoint(dr.Max))
 	sx = math32.Abs(dmxr.X-dmnr.X) / float32(sr.Dx())
 	sy = math32.Abs(dmxr.Y-dmnr.Y) / float32(sr.Dy())
 	tx = dmnr.X - sx*float32(sr.Min.X)

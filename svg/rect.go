@@ -70,8 +70,8 @@ func (g *Rect) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetTransformProperty()
 	} else {
-		g.Pos = xf.MulVector2AsPoint(g.Pos)
-		g.Size = xf.MulVector2AsVector(g.Size)
+		g.Pos = xf.MulPoint(g.Pos)
+		g.Size = xf.MulVector(g.Size)
 		g.GradientApplyTransform(sv, xf)
 	}
 }

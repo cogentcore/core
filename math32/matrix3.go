@@ -186,16 +186,16 @@ func (m *Matrix3) SetMulScalar(s float32) {
 	m[8] *= s
 }
 
-// MulVector2AsVector multiplies the Vector2 as a vector without adding translations.
+// MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Matrix3) MulVector2AsVector(v Vector2) Vector2 {
+func (a Matrix3) MulVector(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y
 	ty := a[3]*v.X + a[4]*v.Y
 	return Vec2(tx, ty)
 }
 
-// MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
-func (a Matrix3) MulVector2AsPoint(v Vector2) Vector2 {
+// MulPoint multiplies the Vector2 as a point, including adding translations.
+func (a Matrix3) MulPoint(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y + a[2]
 	ty := a[3]*v.X + a[4]*v.Y + a[5]
 	return Vec2(tx, ty)
@@ -323,8 +323,7 @@ func (m *Matrix3) SetScaleCols(v Vector3) {
 	m[8] *= v.Z
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Special functions
+//////// Special functions
 
 // SetNormalMatrix set this matrix to the matrix that can transform the normal vectors
 // from the src matrix which is used transform the vertices (e.g., a ModelView matrix).

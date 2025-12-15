@@ -74,7 +74,7 @@ func (g *Text) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
 	for _, kii := range g.Children {
 		kt := kii.(*Text)
-		kt.Pos = g.Paint.Transform.MulVector2AsPoint(pos)
+		kt.Pos = g.Paint.Transform.MulPoint(pos)
 	}
 }
 
@@ -193,7 +193,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetTransformProperty()
 	} else {
-		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Pos = xf.MulPoint(g.Pos)
 		g.GradientApplyTransform(sv, xf)
 	}
 }

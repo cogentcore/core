@@ -55,6 +55,13 @@ func (b *Box3) Set(min, max *Vector3) {
 	}
 }
 
+// SetMinMax sets this bounding box minimum and maximum coordinates
+// using specific values (see also Set)
+func (b *Box3) SetMinMax(min, max Vector3) {
+	b.Min = min
+	b.Max = max
+}
+
 // SetFromPoints sets this bounding box from the specified array of points.
 func (b *Box3) SetFromPoints(points []Vector3) {
 	b.SetEmpty()

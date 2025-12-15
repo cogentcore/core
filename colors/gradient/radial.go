@@ -74,8 +74,8 @@ func (r *Radial) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		rs.SetMul(sz)
 	} else {
 		ct := objTransform.Mul(r.Transform)
-		c = ct.MulVector2AsPoint(c)
-		f = ct.MulVector2AsPoint(f)
+		c = ct.MulPoint(c)
+		f = ct.MulPoint(f)
 		_, _, phi, sx, sy, _ := ct.Decompose()
 		r.rotTrans = math32.Rotate2D(phi)
 		rs.SetMul(math32.Vec2(sx, sy))
@@ -118,9 +118,9 @@ func (r *Radial) At(x, y int) color.Color {
 		// pos is just distance from center scaled by radius
 		pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 		if r.Units == ObjectBoundingBox {
-			pt = r.boxTransform.MulVector2AsPoint(pt)
+			pt = r.boxTransform.MulPoint(pt)
 		}
-		d := r.rotTrans.MulVector2AsVector(pt.Sub(r.rCenter))
+		d := r.rotTrans.MulVector(pt.Sub(r.rCenter))
 		pos := math32.Sqrt(d.X*d.X/(r.rRadius.X*r.rRadius.X) + (d.Y*d.Y)/(r.rRadius.Y*r.rRadius.Y))
 		return r.getColor(pos)
 	}
@@ -130,9 +130,9 @@ func (r *Radial) At(x, y int) color.Color {
 
 	pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 	if r.Units == ObjectBoundingBox {
-		pt = r.boxTransform.MulVector2AsPoint(pt)
+		pt = r.boxTransform.MulPoint(pt)
 	}
-	pt = r.rotTrans.MulVector2AsVector(pt)
+	pt = r.rotTrans.MulVector(pt)
 	e := pt.Div(r.rRadius)
 
 	t1, intersects := rayCircleIntersectionF(e, r.rFocal, r.rCenter, 1)

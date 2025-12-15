@@ -112,12 +112,12 @@ func (sv *SVG) ScaleAt(pt image.Point, sc float32) {
 	sv.setRootTransform()
 	rxf := sv.Root.Paint.Transform.Inverse()
 	mpt := math32.FromPoint(pt)
-	xpt := rxf.MulVector2AsPoint(mpt)
+	xpt := rxf.MulPoint(mpt)
 	sv.Scale = sc
 
 	sv.setRootTransform()
 	rxf = sv.Root.Paint.Transform
-	npt := rxf.MulVector2AsPoint(xpt) // original point back to screen
+	npt := rxf.MulPoint(xpt) // original point back to screen
 	dpt := mpt.Sub(npt)
 	sv.Translate.SetAdd(dpt)
 }

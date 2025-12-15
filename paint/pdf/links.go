@@ -14,7 +14,7 @@ import (
 // transform for scaling and flipping of coordinates to top-left system.
 func (w *pdfPage) AddAnchor(name string, pos math32.Vector2) {
 	ms := math32.Scale2D(w.pdf.globalScale, w.pdf.globalScale)
-	pos = ms.MulVector2AsPoint(pos)
+	pos = ms.MulPoint(pos)
 	if w.pdf.anchors == nil {
 		w.pdf.anchors = make(pdfMap)
 	}

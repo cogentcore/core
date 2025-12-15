@@ -65,10 +65,10 @@ func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		l.rStart = l.Box.Min.Add(sz.Mul(l.Start))
 		l.rEnd = l.Box.Min.Add(sz.Mul(l.End))
 	} else {
-		l.rStart = l.Transform.MulVector2AsPoint(l.Start)
-		l.rEnd = l.Transform.MulVector2AsPoint(l.End)
-		l.rStart = objTransform.MulVector2AsPoint(l.rStart)
-		l.rEnd = objTransform.MulVector2AsPoint(l.rEnd)
+		l.rStart = l.Transform.MulPoint(l.Start)
+		l.rEnd = l.Transform.MulPoint(l.End)
+		l.rStart = objTransform.MulPoint(l.rStart)
+		l.rEnd = objTransform.MulPoint(l.rEnd)
 	}
 
 	l.distance = l.rEnd.Sub(l.rStart)
@@ -92,7 +92,7 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.boxTransform.MulVector2AsPoint(pt)
+		pt = l.boxTransform.MulPoint(pt)
 	}
 	df := pt.Sub(l.rStart)
 	pos := (l.distance.X*df.X + l.distance.Y*df.Y) / l.distanceLengthSquared

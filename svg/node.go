@@ -177,8 +177,8 @@ func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 // operating around given reference point which serves as the effective origin for rotation.
 func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) math32.Matrix2 {
 	mxi := g.ParentTransform(true).Inverse()
-	lpt := mxi.MulVector2AsPoint(pt)
-	ltr := mxi.MulVector2AsVector(trans)
+	lpt := mxi.MulPoint(pt)
+	ltr := mxi.MulVector(trans)
 	xf := math32.Translate2D(lpt.X, lpt.Y).Scale(scale.X, scale.Y).Rotate(rot).Translate(ltr.X, ltr.Y).Translate(-lpt.X, -lpt.Y)
 	return xf
 }
