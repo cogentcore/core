@@ -111,6 +111,20 @@ func TestQuatMulQuats(t *testing.T) {
 	assert.Equal(t, expected, q)
 }
 
+func TestQuatMulVector(t *testing.T) {
+	q1 := Quat{X: 1, Y: 2, Z: 3, W: 4}
+	q1.Normalize() // note: critical
+	v := Vector3{X: 5, Y: 6, Z: 7}
+
+	vr := q1.MulVector(v)
+
+	expected := Vector3{X: 1.7999997, Y: 7.6, Z: 7}
+	assert.Equal(t, expected, vr)
+
+	viv := q1.MulVectorInverse(q1.MulVector(v))
+	assert.Equal(t, v, viv)
+}
+
 func TestQuatSlerp(t *testing.T) {
 	q1 := Quat{X: 1, Y: 2, Z: 3, W: 4}
 	q2 := Quat{X: 5, Y: 6, Z: 7, W: 8}

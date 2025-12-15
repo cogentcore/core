@@ -155,13 +155,13 @@ func (cm *Camera) Orbit(delX, delY float32) {
 
 	// delX rotates around the up vector
 	dxq := math32.NewQuatAxisAngle(up, math32.DegToRad(delX))
-	dx := ctdir.MulQuat(dxq).Sub(ctdir)
+	dx := dxq.MulVector(ctdir).Sub(ctdir)
 	// delY rotates around the right vector
 	dyq := math32.NewQuatAxisAngle(right, math32.DegToRad(delY))
-	dy := ctdir.MulQuat(dyq).Sub(ctdir)
+	dy := dyq.MulVector(ctdir).Sub(ctdir)
 
 	cm.Pose.Pos = cm.Pose.Pos.Add(dx).Add(dy)
-	cm.UpDir = cm.UpDir.MulQuat(dyq) // this is only one that affects up
+	cm.UpDir = dyq.MulVector(cm.UpDir) // this is only one that affects up
 
 	cm.LookAtTarget()
 }
@@ -171,8 +171,8 @@ func (cm *Camera) Orbit(delX, delY float32) {
 // current window view)
 // and it moves the target by the same increment, changing the target position.
 func (cm *Camera) Pan(delX, delY float32) {
-	dx := math32.Vec3(-delX, 0, 0).MulQuat(cm.Pose.Quat)
-	dy := math32.Vec3(0, -delY, 0).MulQuat(cm.Pose.Quat)
+	dx := cm.Pose.Quat.MulVector(math32.Vec3(-delX, 0, 0))
+	dy := cm.Pose.Quat.MulVector(math32.Vec3(0, -delY, 0))
 	td := dx.Add(dy)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)

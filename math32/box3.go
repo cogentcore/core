@@ -215,15 +215,15 @@ func (b Box3) MulMatrix4(m *Matrix4) Box3 {
 // and computes the resulting spanning Box3 of the transformed points
 func (b Box3) MulQuat(q Quat) Box3 {
 	var cs [8]Vector3
-	cs[0] = Vec3(b.Min.X, b.Min.Y, b.Min.Z).MulQuat(q)
-	cs[1] = Vec3(b.Min.X, b.Min.Y, b.Max.Z).MulQuat(q)
-	cs[2] = Vec3(b.Min.X, b.Max.Y, b.Min.Z).MulQuat(q)
-	cs[3] = Vec3(b.Max.X, b.Min.Y, b.Min.Z).MulQuat(q)
+	cs[0] = q.MulVector(Vec3(b.Min.X, b.Min.Y, b.Min.Z))
+	cs[1] = q.MulVector(Vec3(b.Min.X, b.Min.Y, b.Max.Z))
+	cs[2] = q.MulVector(Vec3(b.Min.X, b.Max.Y, b.Min.Z))
+	cs[3] = q.MulVector(Vec3(b.Max.X, b.Min.Y, b.Min.Z))
 
-	cs[4] = Vec3(b.Max.X, b.Max.Y, b.Max.Z).MulQuat(q)
-	cs[5] = Vec3(b.Max.X, b.Max.Y, b.Min.Z).MulQuat(q)
-	cs[6] = Vec3(b.Max.X, b.Min.Y, b.Max.Z).MulQuat(q)
-	cs[7] = Vec3(b.Min.X, b.Max.Y, b.Max.Z).MulQuat(q)
+	cs[4] = q.MulVector(Vec3(b.Max.X, b.Max.Y, b.Max.Z))
+	cs[5] = q.MulVector(Vec3(b.Max.X, b.Max.Y, b.Min.Z))
+	cs[6] = q.MulVector(Vec3(b.Max.X, b.Min.Y, b.Max.Z))
+	cs[7] = q.MulVector(Vec3(b.Min.X, b.Max.Y, b.Max.Z))
 
 	nb := B3Empty()
 	for i := 0; i < 8; i++ {

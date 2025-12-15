@@ -56,7 +56,7 @@ func (q *Quat) FromArray(array []float32, offset int) {
 }
 
 // ToArray copies this quaternions's components to array starting at offset.
-func (q *Quat) ToArray(array []float32, offset int) {
+func (q Quat) ToArray(array []float32, offset int) {
 	array[offset] = q.X
 	array[offset+1] = q.Y
 	array[offset+2] = q.Z
@@ -72,12 +72,12 @@ func (q *Quat) SetIdentity() {
 }
 
 // IsIdentity returns if this is an identity quaternion.
-func (q *Quat) IsIdentity() bool {
+func (q Quat) IsIdentity() bool {
 	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 1
 }
 
 // IsNil returns true if all values are 0 (uninitialized).
-func (q *Quat) IsNil() bool {
+func (q Quat) IsNil() bool {
 	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0
 }
 
@@ -104,9 +104,9 @@ func (q *Quat) SetFromEuler(euler Vector3) {
 
 // ToEuler returns a Vector3 with components as the Euler angles
 // from the given quaternion.
-func (q *Quat) ToEuler() Vector3 {
+func (q Quat) ToEuler() Vector3 {
 	rot := Vector3{}
-	rot.SetEulerAnglesFromQuat(*q)
+	rot.SetEulerAnglesFromQuat(q)
 	return rot
 }
 
@@ -122,20 +122,20 @@ func (q *Quat) SetFromAxisAngle(axis Vector3, angle float32) {
 }
 
 // ToAxisAngle returns the Vector4 holding axis and angle of this Quaternion
-func (q *Quat) ToAxisAngle() Vector4 {
+func (q Quat) ToAxisAngle() Vector4 {
 	aa := Vector4{}
-	aa.SetAxisAngleFromQuat(*q)
+	aa.SetAxisAngleFromQuat(q)
 	return aa
 }
 
 // GenGoSet returns code to set values in object at given path (var.member etc)
-func (q *Quat) GenGoSet(path string) string {
+func (q Quat) GenGoSet(path string) string {
 	aa := q.ToAxisAngle()
 	return fmt.Sprintf("%s.SetFromAxisAngle(math32.Vec3(%g, %g, %g), %g)", path, aa.X, aa.Y, aa.Z, aa.W)
 }
 
 // GenGoNew returns code to create new
-func (q *Quat) GenGoNew() string {
+func (q Quat) GenGoNew() string {
 	return fmt.Sprintf("math32.Quat{%g, %g, %g, %g}", q.X, q.Y, q.Z, q.W)
 }
 
@@ -213,10 +213,9 @@ func (q *Quat) SetInverse() {
 }
 
 // Inverse returns the inverse of this quaternion.
-func (q *Quat) Inverse() Quat {
-	nq := *q
-	nq.SetInverse()
-	return nq
+func (q Quat) Inverse() Quat {
+	q.SetInverse()
+	return q
 }
 
 // SetConjugate sets this quaternion to its conjugate.
@@ -227,14 +226,13 @@ func (q *Quat) SetConjugate() {
 }
 
 // Conjugate returns the conjugate of this quaternion.
-func (q *Quat) Conjugate() Quat {
-	nq := *q
-	nq.SetConjugate()
-	return nq
+func (q Quat) Conjugate() Quat {
+	q.SetConjugate()
+	return q
 }
 
 // Dot returns the dot products of this quaternion with other.
-func (q *Quat) Dot(other Quat) float32 {
+func (q Quat) Dot(other Quat) float32 {
 	return q.X*other.X + q.Y*other.Y + q.Z*other.Z + q.W*other.W
 }
 
@@ -299,14 +297,56 @@ func (q *Quat) SetMul(other Quat) {
 }
 
 // Mul returns returns multiplication of this quaternion with other
-func (q *Quat) Mul(other Quat) Quat {
-	nq := *q
-	nq.SetMul(other)
-	return nq
+func (q Quat) Mul(other Quat) Quat {
+	q.SetMul(other)
+	return q
 }
 
-// Slerp sets this quaternion to another quaternion which is the spherically linear interpolation
-// from this quaternion to other using t.
+// MulVector applies the rotation encoded in the quaternion to the [Vector3].
+func (q Quat) MulVector(v Vector3) Vector3 {
+	// note: these each produce the same results when q is normalized
+	// but produce very different results for non-normalized,
+	// which is presumably not well defined anyway.
+	// According to IsaacLab, the cross-product version is faster,
+	// but the old version that it replaced is pretty weird.
+	// In any case, it is much simpler!
+	// https://github.com/isaac-sim/IsaacLab/issues/1711
+	// https://github.com/isaac-sim/IsaacLab/pull/2129/files
+
+	// original version:
+	// // calculate quat * vector
+	// ix := q.W*v.X + q.Y*v.Z - q.Z*v.Y
+	// iy := q.W*v.Y + q.Z*v.X - q.X*v.Z
+	// iz := q.W*v.Z + q.X*v.Y - q.Y*v.X
+	// iw := -q.X*v.X - q.Y*v.Y - q.Z*v.Z
+	// // calculate result * inverse quat
+	// return Vec3(ix*q.W+iw*-q.X+iy*-q.Z-iz*-q.Y,
+	// 	iy*q.W+iw*-q.Y+iz*-q.X-ix*-q.Z,
+	// 	iz*q.W+iw*-q.Z+ix*-q.Y-iy*-q.X)
+
+	// warp version:
+	// c := 2*q.W*q.W - 1
+	// d := 2 * (q.X*v.X + q.Y*v.Y + q.Z*v.Z)
+	// return Vec3(v.X*c+q.X*d+(q.Y*v.Z-q.Z*v.Y)*q.W*2,
+	// 	v.Y*c+q.Y*d+(q.Z*v.X-q.X*v.Z)*q.W*2,
+	// 	v.Z*c+q.Z*d+(q.X*v.Y-q.Y*v.X)*q.W*2)
+
+	// isaacLab
+	xyz := Vec3(q.X, q.Y, q.Z)
+	t := xyz.Cross(v).MulScalar(2)
+	return v.Add(t.MulScalar(q.W)).Add(xyz.Cross(t))
+}
+
+// MulVectorInverse applies the inverse of the rotation encoded in the quaternion
+// to the [Vector3].
+func (q Quat) MulVectorInverse(v Vector3) Vector3 {
+	xyz := Vec3(q.X, q.Y, q.Z)
+	t := xyz.Cross(v).MulScalar(2)
+	return v.Sub(t.MulScalar(q.W)).Add(xyz.Cross(t))
+}
+
+// Slerp sets this quaternion to another quaternion which is the
+// spherically linear interpolation from this quaternion to other using t.
 func (q *Quat) Slerp(other Quat, t float32) {
 	if t == 0 {
 		return

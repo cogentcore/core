@@ -412,21 +412,6 @@ func (v Vector3) MulProjection(m *Matrix4) Vector3 {
 		(m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]) * d}
 }
 
-// MulQuat returns vector multiplied by specified quaternion and
-// then by the quaternion inverse.
-// It basically applies the rotation encoded in the quaternion to this vector.
-func (v Vector3) MulQuat(q Quat) Vector3 {
-	// calculate quat * vector
-	ix := q.W*v.X + q.Y*v.Z - q.Z*v.Y
-	iy := q.W*v.Y + q.Z*v.X - q.X*v.Z
-	iz := q.W*v.Z + q.X*v.Y - q.Y*v.X
-	iw := -q.X*v.X - q.Y*v.Y - q.Z*v.Z
-	// calculate result * inverse quat
-	return Vec3(ix*q.W+iw*-q.X+iy*-q.Z-iz*-q.Y,
-		iy*q.W+iw*-q.Y+iz*-q.X-ix*-q.Z,
-		iz*q.W+iw*-q.Z+ix*-q.Y-iy*-q.X)
-}
-
 // Cross returns the cross product of this vector with other.
 func (v Vector3) Cross(other Vector3) Vector3 {
 	return Vec3(v.Y*other.Z-v.Z*other.Y, v.Z*other.X-v.X*other.Z, v.X*other.Y-v.Y*other.X)
