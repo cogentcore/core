@@ -133,8 +133,6 @@ func (a *Matrix2) SetMul(b Matrix2) {
 	*a = a.Mul(b)
 }
 
-// todo: rename to MulVector, MulPoint
-
 // MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
 func (a Matrix2) MulVector(v Vector2) Vector2 {
@@ -150,8 +148,8 @@ func (a Matrix2) MulPoint(v Vector2) Vector2 {
 	return Vec2(tx, ty)
 }
 
-// MulFixedAsPoint multiplies the fixed point as a point, including adding translations.
-func (a Matrix2) MulFixedAsPoint(fp fixed.Point26_6) fixed.Point26_6 {
+// MulFixedPoint multiplies the fixed point as a point, including adding translations.
+func (a Matrix2) MulFixedPoint(fp fixed.Point26_6) fixed.Point26_6 {
 	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
 	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*32)
 	return fixed.Point26_6{x, y}
