@@ -72,8 +72,8 @@ func (g *Line) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetTransformProperty()
 	} else {
-		g.Start = xf.MulVector2AsPoint(g.Start)
-		g.End = xf.MulVector2AsPoint(g.End)
+		g.Start = xf.MulPoint(g.Start)
+		g.End = xf.MulPoint(g.End)
 		g.GradientApplyTransform(sv, xf)
 	}
 }

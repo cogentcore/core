@@ -59,7 +59,7 @@ func (g *Circle) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetTransformProperty()
 	} else {
-		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Pos = xf.MulPoint(g.Pos)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
 		g.GradientApplyTransform(sv, xf)

@@ -104,8 +104,7 @@ func TestQuatMulQuats(t *testing.T) {
 	q1 := Quat{X: 1, Y: 2, Z: 3, W: 4}
 	q2 := Quat{X: 5, Y: 6, Z: 7, W: 8}
 
-	q := Quat{}
-	q.MulQuats(q1, q2)
+	q := MulQuats(q1, q2)
 
 	expected := Quat{X: 24, Y: 48, Z: 48, W: -6}
 

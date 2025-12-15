@@ -448,8 +448,8 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	if img == nil {
 		img = colors.Uniform(color.RGBA{})
 	}
-	pos = pc.Cumulative().MulVector2AsPoint(pos)
-	size = pc.Cumulative().MulVector2AsVector(size)
+	pos = pc.Cumulative().MulPoint(pos)
+	size = pc.Cumulative().MulVector(size)
 	br := math32.RectFromPosSizeMax(pos, size)
 	cb := pc.Context().Bounds.Rect.ToRect()
 	b := cb.Intersect(br)
@@ -560,8 +560,8 @@ func (pc *Painter) BoundingBox(minX, minY, maxX, maxY float32) image.Rectangle {
 	// if pc.Stroke.Color != nil {// todo
 	// 	sw = 0.5 * pc.StrokeWidth()
 	// }
-	tmin := pc.Cumulative().MulVector2AsPoint(math32.Vec2(minX, minY))
-	tmax := pc.Cumulative().MulVector2AsPoint(math32.Vec2(maxX, maxY))
+	tmin := pc.Cumulative().MulPoint(math32.Vec2(minX, minY))
+	tmax := pc.Cumulative().MulPoint(math32.Vec2(maxX, maxY))
 	tp1 := math32.Vec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
 	tp2 := math32.Vec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)

@@ -282,27 +282,20 @@ func (q *Quat) NormalizeFast() {
 	}
 }
 
-// MulQuats set this quaternion to the multiplication of a by b.
-func (q *Quat) MulQuats(a, b Quat) {
+// MulQuats returns a * b quaternion multiplication.
+func MulQuats(a, b Quat) Quat {
 	// from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
-	qax := a.X
-	qay := a.Y
-	qaz := a.Z
-	qaw := a.W
-	qbx := b.X
-	qby := b.Y
-	qbz := b.Z
-	qbw := b.W
-
-	q.X = qax*qbw + qaw*qbx + qay*qbz - qaz*qby
-	q.Y = qay*qbw + qaw*qby + qaz*qbx - qax*qbz
-	q.Z = qaz*qbw + qaw*qbz + qax*qby - qay*qbx
-	q.W = qaw*qbw - qax*qbx - qay*qby - qaz*qbz
+	var q Quat
+	q.X = a.X*b.W + a.W*b.X + a.Y*b.Z - a.Z*b.Y
+	q.Y = a.Y*b.W + a.W*b.Y + a.Z*b.X - a.X*b.Z
+	q.Z = a.Z*b.W + a.W*b.Z + a.X*b.Y - a.Y*b.X
+	q.W = a.W*b.W - a.X*b.X - a.Y*b.Y - a.Z*b.Z
+	return q
 }
 
 // SetMul sets this quaternion to the multiplication of itself by other.
 func (q *Quat) SetMul(other Quat) {
-	q.MulQuats(*q, other)
+	*q = MulQuats(*q, other)
 }
 
 // Mul returns returns multiplication of this quaternion with other

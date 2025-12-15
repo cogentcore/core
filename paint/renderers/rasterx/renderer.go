@@ -92,18 +92,18 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 func PathToRasterx(rs Adder, p ppath.Path, m math32.Matrix2, off math32.Vector2) {
 	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
-		end := m.MulVector2AsPoint(s.End()).Add(off)
+		end := m.MulPoint(s.End()).Add(off)
 		switch cmd {
 		case ppath.MoveTo:
 			rs.Start(end.ToFixed())
 		case ppath.LineTo:
 			rs.Line(end.ToFixed())
 		case ppath.QuadTo:
-			cp1 := m.MulVector2AsPoint(s.CP1()).Add(off)
+			cp1 := m.MulPoint(s.CP1()).Add(off)
 			rs.QuadBezier(cp1.ToFixed(), end.ToFixed())
 		case ppath.CubeTo:
-			cp1 := m.MulVector2AsPoint(s.CP1()).Add(off)
-			cp2 := m.MulVector2AsPoint(s.CP2()).Add(off)
+			cp1 := m.MulPoint(s.CP1()).Add(off)
+			cp2 := m.MulPoint(s.CP2()).Add(off)
 			rs.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
 		case ppath.Close:
 			rs.Stop(true)

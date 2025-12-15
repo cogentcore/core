@@ -80,7 +80,7 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.SetTransformProperty()
 	} else {
 		for i, p := range g.Points {
-			p = xf.MulVector2AsPoint(p)
+			p = xf.MulPoint(p)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransform(sv, xf)
