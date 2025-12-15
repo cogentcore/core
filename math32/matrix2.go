@@ -39,7 +39,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Matrix2 is a 3x2 matrix.
+// Matrix2 is a 2x3 matrix.
 // [XX YX]
 // [XY YY]
 // [X0 Y0]

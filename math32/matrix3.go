@@ -15,6 +15,13 @@ import "errors"
 // Matrix3 is 3x3 matrix organized internally as column matrix.
 type Matrix3 [9]float32
 
+// Mat3 constructs a new Matrix3 from given values, in column-wise order.
+func Mat3(n11, n21, n31, n12, n22, n32, n13, n23, n33 float32) Matrix3 {
+	m := Matrix3{}
+	m.SetCols(n11, n21, n31, n12, n22, n32, n13, n23, n33)
+	return m
+}
+
 // Identity3 returns a new identity [Matrix3] matrix.
 func Identity3() Matrix3 {
 	m := Matrix3{}
@@ -49,23 +56,37 @@ func Matrix3Rotate2D(angle float32) Matrix3 {
 	return Matrix3FromMatrix2(Rotate2D(angle))
 }
 
-// Set sets all the elements of the matrix row by row starting at row1, column1,
-// row1, column2, row1, column3 and so forth.
-func (m *Matrix3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) {
+// SetCols sets all the elements of the matrix col by col starting at row1, column1,
+// row2, column1, row3, column1 and so forth.
+func (m *Matrix3) SetCols(n11, n21, n31, n12, n22, n32, n13, n23, n33 float32) {
 	m[0] = n11
-	m[3] = n12
-	m[6] = n13
 	m[1] = n21
-	m[4] = n22
-	m[7] = n23
 	m[2] = n31
+	m[3] = n12
+	m[4] = n22
 	m[5] = n32
+	m[6] = n13
+	m[7] = n23
+	m[8] = n33
+}
+
+// SetRows sets all the elements of the matrix row by row starting at row1, column1,
+// row1, column2, row1, column3 and so forth.
+func (m *Matrix3) SetRows(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) {
+	m[0] = n11
+	m[1] = n21
+	m[2] = n31
+	m[3] = n12
+	m[4] = n22
+	m[5] = n32
+	m[6] = n13
+	m[7] = n23
 	m[8] = n33
 }
 
 // SetFromMatrix4 sets the matrix elements based on a Matrix4.
 func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
-	m.Set(
+	m.SetRows(
 		src[0], src[4], src[8],
 		src[1], src[5], src[9],
 		src[2], src[6], src[10],
@@ -78,7 +99,7 @@ func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
 
 // SetFromMatrix2 sets the matrix elements based on a Matrix2.
 func (m *Matrix3) SetFromMatrix2(src Matrix2) {
-	m.Set(
+	m.SetRows(
 		src.XX, src.YX, src.X0,
 		src.XY, src.YY, src.Y0,
 		src.X0, src.Y0, 1,
@@ -97,7 +118,7 @@ func (m Matrix3) ToArray(array []float32, offset int) {
 
 // SetIdentity sets this matrix as the identity matrix.
 func (m *Matrix3) SetIdentity() {
-	m.Set(
+	m.SetRows(
 		1, 0, 0,
 		0, 1, 0,
 		0, 0, 1,
@@ -106,7 +127,7 @@ func (m *Matrix3) SetIdentity() {
 
 // SetZero sets this matrix as the zero matrix.
 func (m *Matrix3) SetZero() {
-	m.Set(
+	m.SetRows(
 		0, 0, 0,
 		0, 0, 0,
 		0, 0, 0,
