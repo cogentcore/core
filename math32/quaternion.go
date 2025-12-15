@@ -304,34 +304,6 @@ func (q Quat) Mul(other Quat) Quat {
 
 // MulVector applies the rotation encoded in the quaternion to the [Vector3].
 func (q Quat) MulVector(v Vector3) Vector3 {
-	// note: these each produce the same results when q is normalized
-	// but produce very different results for non-normalized,
-	// which is presumably not well defined anyway.
-	// According to IsaacLab, the cross-product version is faster,
-	// but the old version that it replaced is pretty weird.
-	// In any case, it is much simpler!
-	// https://github.com/isaac-sim/IsaacLab/issues/1711
-	// https://github.com/isaac-sim/IsaacLab/pull/2129/files
-
-	// original version:
-	// // calculate quat * vector
-	// ix := q.W*v.X + q.Y*v.Z - q.Z*v.Y
-	// iy := q.W*v.Y + q.Z*v.X - q.X*v.Z
-	// iz := q.W*v.Z + q.X*v.Y - q.Y*v.X
-	// iw := -q.X*v.X - q.Y*v.Y - q.Z*v.Z
-	// // calculate result * inverse quat
-	// return Vec3(ix*q.W+iw*-q.X+iy*-q.Z-iz*-q.Y,
-	// 	iy*q.W+iw*-q.Y+iz*-q.X-ix*-q.Z,
-	// 	iz*q.W+iw*-q.Z+ix*-q.Y-iy*-q.X)
-
-	// warp version:
-	// c := 2*q.W*q.W - 1
-	// d := 2 * (q.X*v.X + q.Y*v.Y + q.Z*v.Z)
-	// return Vec3(v.X*c+q.X*d+(q.Y*v.Z-q.Z*v.Y)*q.W*2,
-	// 	v.Y*c+q.Y*d+(q.Z*v.X-q.X*v.Z)*q.W*2,
-	// 	v.Z*c+q.Z*d+(q.X*v.Y-q.Y*v.X)*q.W*2)
-
-	// isaacLab
 	xyz := Vec3(q.X, q.Y, q.Z)
 	t := xyz.Cross(v).MulScalar(2)
 	return v.Add(t.MulScalar(q.W)).Add(xyz.Cross(t))
