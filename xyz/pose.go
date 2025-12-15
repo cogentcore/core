@@ -117,7 +117,7 @@ func (ps *Pose) UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4) {
 // MoveOnAxis moves (translates) the specified distance on the specified local axis,
 // relative to the current rotation orientation.
 func (ps *Pose) MoveOnAxis(x, y, z, dist float32) {
-	ps.Pos.SetAdd(math32.Vec3(x, y, z).Normal().MulQuat(ps.Quat).MulScalar(dist))
+	ps.Pos.SetAdd(ps.Quat.MulVector(math32.Vec3(x, y, z).Normal()).MulScalar(dist))
 }
 
 // MoveOnAxisAbs moves (translates) the specified distance on the specified local axis,
