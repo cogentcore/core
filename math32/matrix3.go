@@ -12,7 +12,8 @@ package math32
 
 import "errors"
 
-// Matrix3 is 3x3 matrix organized internally as column matrix.
+// Matrix3 is 3x3 matrix organized internally as column matrix,
+// with columns as the inner dimension.
 type Matrix3 [9]float32
 
 // note: matrix indexes are row,column. matrix dimensions are CxR.
@@ -132,35 +133,35 @@ func (m *Matrix3) CopyFrom(src Matrix3) {
 // MulMatrices sets ths matrix as matrix multiplication a by b (i.e., a*b).
 func (m *Matrix3) MulMatrices(a, b Matrix3) {
 	a11 := a[0]
-	a12 := a[3]
-	a13 := a[6]
 	a21 := a[1]
-	a22 := a[4]
-	a23 := a[7]
 	a31 := a[2]
+	a12 := a[3]
+	a22 := a[4]
 	a32 := a[5]
+	a13 := a[6]
+	a23 := a[7]
 	a33 := a[8]
 
 	b11 := b[0]
-	b12 := b[3]
-	b13 := b[6]
 	b21 := b[1]
-	b22 := b[4]
-	b23 := b[7]
 	b31 := b[2]
+	b12 := b[3]
+	b22 := b[4]
 	b32 := b[5]
+	b13 := b[6]
+	b23 := b[7]
 	b33 := b[8]
 
 	m[0] = b11*a11 + b12*a21 + b13*a31
-	m[3] = b11*a12 + b12*a22 + b13*a32
-	m[6] = b11*a13 + b12*a23 + b13*a33
-
 	m[1] = b21*a11 + b22*a21 + b23*a31
-	m[4] = b21*a12 + b22*a22 + b23*a32
-	m[7] = b21*a13 + b22*a23 + b23*a33
-
 	m[2] = b31*a11 + b32*a21 + b33*a31
+
+	m[3] = b11*a12 + b12*a22 + b13*a32
+	m[4] = b21*a12 + b22*a22 + b23*a32
 	m[5] = b31*a12 + b32*a22 + b33*a32
+
+	m[6] = b11*a13 + b12*a23 + b13*a33
+	m[7] = b21*a13 + b22*a23 + b23*a33
 	m[8] = b31*a13 + b32*a23 + b33*a33
 }
 
@@ -186,13 +187,13 @@ func (m Matrix3) MulScalar(s float32) Matrix3 {
 // SetMulScalar multiplies each of this matrix's components by the specified scalar.
 func (m *Matrix3) SetMulScalar(s float32) {
 	m[0] *= s
-	m[3] *= s
-	m[6] *= s
 	m[1] *= s
-	m[4] *= s
-	m[7] *= s
 	m[2] *= s
+	m[3] *= s
+	m[4] *= s
 	m[5] *= s
+	m[6] *= s
+	m[7] *= s
 	m[8] *= s
 }
 
@@ -209,6 +210,13 @@ func (a Matrix3) MulPoint(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y + a[2]
 	ty := a[3]*v.X + a[4]*v.Y + a[5]
 	return Vec2(tx, ty)
+}
+
+// MulVector3 multiplies the Vector3 on the right, as a standard matrix multiply.
+func (a Matrix3) MulVector3(v Vector3) Vector3 {
+	return Vec3(a[0]*v.X+a[3]*v.Y+a[6]*v.Z,
+		a[1]*v.X+a[4]*v.Y+a[7]*v.Z,
+		a[2]*v.X+a[5]*v.Y+a[8]*v.Z)
 }
 
 // MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)

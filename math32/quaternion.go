@@ -232,8 +232,8 @@ func (q Quat) Conjugate() Quat {
 }
 
 // Dot returns the dot products of this quaternion with other.
-func (q Quat) Dot(other Quat) float32 {
-	return q.X*other.X + q.Y*other.Y + q.Z*other.Z + q.W*other.W
+func (q Quat) Dot(o Quat) float32 {
+	return q.X*o.X + q.Y*o.Y + q.Z*o.Z + q.W*o.W
 }
 
 // LengthSq returns this quanternion's length squared
@@ -292,14 +292,24 @@ func MulQuats(a, b Quat) Quat {
 }
 
 // SetMul sets this quaternion to the multiplication of itself by other.
-func (q *Quat) SetMul(other Quat) {
-	*q = MulQuats(*q, other)
+func (q *Quat) SetMul(o Quat) {
+	*q = MulQuats(*q, o)
 }
 
 // Mul returns returns multiplication of this quaternion with other
-func (q Quat) Mul(other Quat) Quat {
-	q.SetMul(other)
+func (q Quat) Mul(o Quat) Quat {
+	q.SetMul(o)
 	return q
+}
+
+// MulScalar returns values multiplied by scalar
+func (q Quat) MulScalar(s float32) Quat {
+	return NewQuat(q.X*s, q.Y*s, q.Z*s, q.W*s)
+}
+
+// Add returns values added
+func (q Quat) Add(o Quat) Quat {
+	return NewQuat(q.X+o.X, q.Y+o.Y, q.Z+o.Z, q.W+o.W)
 }
 
 // MulVector applies the rotation encoded in the quaternion to the [Vector3].
@@ -319,12 +329,12 @@ func (q Quat) MulVectorInverse(v Vector3) Vector3 {
 
 // Slerp sets this quaternion to another quaternion which is the
 // spherically linear interpolation from this quaternion to other using t.
-func (q *Quat) Slerp(other Quat, t float32) {
+func (q *Quat) Slerp(o Quat, t float32) {
 	if t == 0 {
 		return
 	}
 	if t == 1 {
-		*q = other
+		*q = o
 		return
 	}
 
@@ -333,16 +343,16 @@ func (q *Quat) Slerp(other Quat, t float32) {
 	z := q.Z
 	w := q.W
 
-	cosHalfTheta := w*other.W + x*other.X + y*other.Y + z*other.Z
+	cosHalfTheta := w*o.W + x*o.X + y*o.Y + z*o.Z
 
 	if cosHalfTheta < 0 {
-		q.W = -other.W
-		q.X = -other.X
-		q.Y = -other.Y
-		q.Z = -other.Z
+		q.W = -o.W
+		q.X = -o.X
+		q.Y = -o.Y
+		q.Z = -o.Z
 		cosHalfTheta = -cosHalfTheta
 	} else {
-		*q = other
+		*q = o
 	}
 
 	if cosHalfTheta >= 1.0 {
