@@ -49,6 +49,7 @@ func init() {
 		"Formats":     reflect.ValueOf((*imagex.Formats)(nil)),
 		"JSON":        reflect.ValueOf((*imagex.JSON)(nil)),
 		"JSONEncoded": reflect.ValueOf((*imagex.JSONEncoded)(nil)),
+		"JSRGBA":      reflect.ValueOf((*imagex.JSRGBA)(nil)),
 		"TestingT":    reflect.ValueOf((*imagex.TestingT)(nil)),
 		"Wrapped":     reflect.ValueOf((*imagex.Wrapped)(nil)),
 

@@ -20,6 +20,7 @@ func init() {
 		"HasAttr":            reflect.ValueOf(htmlcore.HasAttr),
 		"MDGetAttr":          reflect.ValueOf(htmlcore.MDGetAttr),
 		"MDSetAttr":          reflect.ValueOf(htmlcore.MDSetAttr),
+		"MDToHTML":           reflect.ValueOf(htmlcore.MDToHTML),
 		"NewContext":         reflect.ValueOf(htmlcore.NewContext),
 		"ReadHTML":           reflect.ValueOf(htmlcore.ReadHTML),
 		"ReadHTMLString":     reflect.ValueOf(htmlcore.ReadHTMLString),
