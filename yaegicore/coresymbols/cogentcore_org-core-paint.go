@@ -18,6 +18,7 @@ func init() {
 		"NewSVGRenderer":    reflect.ValueOf(&paint.NewSVGRenderer).Elem(),
 		"NewSourceRenderer": reflect.ValueOf(&paint.NewSourceRenderer).Elem(),
 		"RenderToImage":     reflect.ValueOf(paint.RenderToImage),
+		"RenderToPDF":       reflect.ValueOf(paint.RenderToPDF),
 		"RenderToSVG":       reflect.ValueOf(paint.RenderToSVG),
 
 		// type definitions

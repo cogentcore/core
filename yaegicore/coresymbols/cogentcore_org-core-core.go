@@ -21,6 +21,8 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/core/core"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"AddAppSettings":                reflect.ValueOf(core.AddAppSettings),
+		"AddPrinterSettings":            reflect.ValueOf(core.AddPrinterSettings),
 		"AllRenderWindows":              reflect.ValueOf(&core.AllRenderWindows).Elem(),
 		"AllSettings":                   reflect.ValueOf(&core.AllSettings).Elem(),
 		"AppAbout":                      reflect.ValueOf(&core.AppAbout).Elem(),
