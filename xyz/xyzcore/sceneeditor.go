@@ -25,21 +25,23 @@ type SceneEditor struct {
 
 // NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
 // in given parent (if non-nil).
-func NewSceneEditorForScene(parent tree.Node, sc *xyz.Scene) *SceneEditor {
+func NewSceneEditorForScene(sc *xyz.Scene, parent ...tree.Node) *SceneEditor {
 	n := &SceneEditor{}
 	ni := any(n).(tree.Node)
 	tree.InitNode(ni)
-	n.Scene = parent.(core.Widget).AsWidget().Scene
-
-	sw := NewSceneForScene(ni, sc)
-	sw.SetName("scene")
-
-	if parent == nil {
-		n.SetName(n.NodeType().IDName)
-	} else {
-		parent.AsTree().Children = append(parent.AsTree().Children, ni)
-		tree.SetParent(ni, parent)
+	var p tree.Node
+	if len(parent) > 0 {
+		p = parent[0]
+		n.Scene = p.(core.Widget).AsWidget().Scene
 	}
+	sw := NewSceneForScene(sc, ni)
+	sw.SetName("scene")
+	if p == nil {
+		n.SetName(n.NodeType().IDName)
+		return n
+	}
+	p.AsTree().Children = append(p.AsTree().Children, ni)
+	tree.SetParent(ni, p)
 	return n
 }
 
