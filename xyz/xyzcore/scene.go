@@ -42,19 +42,23 @@ type Scene struct {
 }
 
 // NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
-// in given parent (if non-nil).
-func NewSceneForScene(parent tree.Node, sc *xyz.Scene) *Scene {
+// in given parent (optional).
+func NewSceneForScene(sc *xyz.Scene, parent ...tree.Node) *Scene {
 	sc.Destroy() // reset any existing GPU stuff, so it gets properly rebuilt
 	n := &Scene{XYZ: sc}
 	ni := any(n).(tree.Node)
-	n.Scene = parent.(core.Widget).AsWidget().Scene
+	var p tree.Node
+	if len(parent) > 0 {
+		p = parent[0]
+		n.Scene = p.(core.Widget).AsWidget().Scene
+	}
 	tree.InitNode(ni)
-	if parent == nil {
+	if p == nil {
 		n.SetName(n.NodeType().IDName)
 		return n
 	}
-	parent.AsTree().Children = append(parent.AsTree().Children, ni)
-	tree.SetParent(ni, parent)
+	p.AsTree().Children = append(p.AsTree().Children, ni)
+	tree.SetParent(ni, p)
 	return n
 }
 
