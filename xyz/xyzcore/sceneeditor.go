@@ -23,6 +23,28 @@ type SceneEditor struct {
 	core.Frame
 }
 
+// NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
+// in given parent (if non-nil).
+func NewSceneEditorForScene(sc *xyz.Scene, parent ...tree.Node) *SceneEditor {
+	n := &SceneEditor{}
+	ni := any(n).(tree.Node)
+	tree.InitNode(ni)
+	var p tree.Node
+	if len(parent) > 0 {
+		p = parent[0]
+		n.Scene = p.(core.Widget).AsWidget().Scene
+	}
+	sw := NewSceneForScene(sc, ni)
+	sw.SetName("scene")
+	if p == nil {
+		n.SetName(n.NodeType().IDName)
+		return n
+	}
+	p.AsTree().Children = append(p.AsTree().Children, ni)
+	tree.SetParent(ni, p)
+	return n
+}
+
 func (sv *SceneEditor) Init() {
 	sv.Frame.Init()
 	sv.Styler(func(s *styles.Style) {
@@ -54,7 +76,7 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
 			OnClick(func(e events.Event) {
 				sc.SetCamera("default")
-				sc.SetNeedsUpdate()
+				sw.Update()
 				sv.NeedsRender()
 			})
 	})
@@ -65,7 +87,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Zoom(-.05)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -76,7 +97,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -92,7 +112,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(5, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -103,7 +122,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(0, 5)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -114,7 +132,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(0, -5)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -125,7 +142,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Orbit(-5, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -141,7 +157,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(-.2, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -152,7 +167,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(0, .2)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -163,7 +177,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(0, -.2)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -174,7 +187,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		})
 		w.OnClick(func(e events.Event) {
 			sc.Camera.Pan(.2, 0)
-			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -200,7 +212,6 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 						}
 					}
 					fmt.Printf("Camera %s: %v\n", cam, sc.Camera.GenGoSet(""))
-					sc.SetNeedsUpdate()
 					sv.NeedsRender()
 				})
 		})

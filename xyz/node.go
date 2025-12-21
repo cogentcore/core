@@ -60,7 +60,10 @@ type Node interface {
 	// IsTransparent returns true if solid has transparent color.
 	IsTransparent() bool
 
-	// Config configures the node.
+	// Update does [tree] updating to dynamically update nodes / tree config.
+	Update()
+
+	// Config configures the node data for gpu rendering.
 	Config()
 
 	// RenderClass returns the class of rendering for this solid.
@@ -131,6 +134,14 @@ func (nb *NodeBase) AsNodeBase() *NodeBase {
 	return nb
 }
 
+func (nb *NodeBase) Init() {
+	nb.Updater(nb.UpdateFromMake)
+}
+
+func (nb *NodeBase) Update() {
+	nb.RunUpdaters()
+}
+
 // OnAdd is called when nodes are added to a parent.
 // It sets the scene of the node to that of its parent.
 // It should be called by all other OnAdd functions defined by node types.
@@ -140,19 +151,12 @@ func (nb *NodeBase) OnAdd() {
 	}
 	if sc, ok := nb.Parent.(*Scene); ok {
 		nb.Scene = sc
-		if nb.Scene != nil {
-			nb.Scene.SetNeedsUpdate()
-		}
 		return
 	}
 	if _, pnb := AsNode(nb.Parent); pnb != nil {
 		nb.Scene = pnb.Scene
-		if nb.Scene != nil {
-			nb.Scene.SetNeedsUpdate()
-		}
 		return
 	}
-	fmt.Println(nb, "not set from parent")
 }
 
 func (nb *NodeBase) BaseInterface() reflect.Type {
@@ -306,7 +310,7 @@ func (nb *NodeBase) TrackCamera() {
 // For Spot, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *NodeBase) TrackLight(lightName string) error {
-	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
+	lt, ok := nb.Scene.Lights.AtTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

@@ -42,8 +42,7 @@ func (lb *LightBase) AsLightBase() *LightBase {
 	return lb
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//  Light types
+////////  Light types
 
 // Ambient provides diffuse uniform lighting; typically only one of these in a [Scene].
 type Ambient struct {
@@ -200,8 +199,7 @@ func (sl *Spot) LookAtOrigin() {
 	sl.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0))
 }
 
-/////////////////////////////////////////////////////////////////////////
-//  Scene code
+////////  Scene code
 
 // AddLight adds given light to lights
 // see NewX for convenience methods to add specific lights
@@ -230,14 +228,12 @@ func (sc *Scene) addPhongLight(lt Light) {
 // setAllLights configures Phong 3D rendering for current lights.
 func (sc *Scene) setAllLights() {
 	sc.Phong.ResetLights()
-	for _, ltkv := range sc.Lights.Order {
-		lt := ltkv.Value
+	for _, lt := range sc.Lights.Values {
 		sc.addPhongLight(lt)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////\
-//  Standard Light Colors
+////////  Standard Light Colors
 
 // http://planetpixelemporium.com/tutorialpages/light.html
 
