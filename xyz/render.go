@@ -5,53 +5,16 @@
 package xyz
 
 import (
-	"errors"
 	"image"
 	"sort"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 )
-
-// DoUpdate handles needed updates based on Scene Flags.
-// If no updates are required, then false is returned, else true.
-func (sc *Scene) DoUpdate() bool {
-	switch {
-	case sc.NeedsUpdate:
-		sc.UpdateNodes()
-		sc.Render()
-		sc.NeedsUpdate = false
-		sc.NeedsRender = false
-	case sc.NeedsRender:
-		sc.Render()
-		sc.NeedsRender = false
-	default:
-		return false
-	}
-	return true
-}
-
-// SetNeedsRender sets [Scene.NeedsRender] to true.
-func (sc *Scene) SetNeedsRender() {
-	sc.NeedsRender = true
-}
-
-// SetNeedsUpdate sets [Scene.SetNeedsUpdate] to true.
-func (sc *Scene) SetNeedsUpdate() {
-	sc.NeedsUpdate = true
-}
-
-// UpdateNodesIfNeeded can be called to update prior to an ad-hoc render
-// if the NeedsUpdate flag has been set (resets flag)
-func (sc *Scene) UpdateNodesIfNeeded() {
-	if sc.NeedsUpdate {
-		sc.UpdateNodes()
-		sc.NeedsUpdate = false
-	}
-}
 
 // ConfigOffscreenFromSurface configures offscreen [gpu.RenderTexture]
 // using GPU and Device from given [gpu.Surface].
@@ -61,9 +24,11 @@ func (sc *Scene) ConfigOffscreenFromSurface(surf *gpu.Surface) {
 
 // ConfigOffscreen configures offscreen [gpu.RenderTexture]
 // using given gpu and device, and size set in Geom.Size.
-// Must be called on the main thread.
 // If Frame already exists, it ensures that the Size is correct.
 func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
+	sc.Lock()
+	defer sc.Unlock()
+
 	sz := sc.Geom.Size
 	if sz == (image.Point{}) {
 		sz = image.Point{480, 320}
@@ -73,15 +38,15 @@ func (sc *Scene) ConfigOffscreen(gp *gpu.GPU, dev *gpu.Device) {
 		sc.Phong = phong.NewPhong(gp, sc.Frame)
 		sc.ConfigNewPhong()
 	} else {
-		sc.Frame.SetSize(sc.Geom.Size) // nop if same
-		sc.NeedsUpdate = true
+		sc.Frame.SetSize(sz) // nop if same
 	}
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+	sc.Camera.SetAspect(sz)
 }
 
 // Rebuild updates all the data resources.
 // Is only effective when the GPU render is active.
 func (sc *Scene) Rebuild() {
+	sc.Update()
 	if !sc.IsLive() {
 		return
 	}
@@ -90,85 +55,108 @@ func (sc *Scene) Rebuild() {
 }
 
 func (sc *Scene) ConfigNewPhong() {
-	sc.Frame.Render().ClearColor = sc.Background.At(0, 0)
 	sc.ConfigNodes()
 	UpdateWorldMatrix(sc.This)
 	sc.setAllLights()
 	sc.setAllMeshes()
 	sc.setAllTextures()
-	sc.NeedsUpdate = true
 }
 
-// Image returns the current rendered image from the Frame RenderTexture.
-// This version returns a direct pointer to the underlying host version of
-// the GPU image, and should only be used immediately (for saving or writing
-// to another image).  You must call ImageDone() when done with the image.
-// See [ImageCopy] for a version that returns a copy of the image, which
-// will be usable until the next call to ImageCopy.
-func (sc *Scene) Image() (*image.RGBA, error) {
-	fr := sc.Frame
-	if fr == nil {
-		return nil, errors.New("xyz.Scene Image: Scene does not have a Frame")
+// UseAltFrame sets Phong to use the AltFrame [gpu.RenderTexture]
+// using given size.
+// If AltFrame already exists, it ensures that the Size is correct.
+// Call UseMainFrame to return to Frame.
+func (sc *Scene) UseAltFrame(sz image.Point) {
+	sc.Lock()
+	defer sc.Unlock()
+
+	if sc.AltFrame == nil {
+		var gp *gpu.GPU
+		var dev *gpu.Device
+		if sc.Phong != nil {
+			gp, dev = sc.Phong.System.GPU(), sc.Phong.System.Device()
+		} else {
+			var err error
+			gp, dev, err = gpu.NoDisplayGPU()
+			if errors.Log(err) != nil {
+				return
+			}
+		}
+		sc.AltFrame = gpu.NewRenderTexture(gp, dev, sz, sc.MultiSample, gpu.Depth32)
+		if sc.Phong == nil {
+			sc.Phong = phong.NewPhong(gp, sc.AltFrame)
+			sc.ConfigNewPhong()
+		}
+	} else {
+		sc.AltFrame.SetSize(sz) // nop if same
 	}
-	// sy := &sc.Phong.System
-	// tcmd := sy.MemCmdStart()
-	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
-	// sy.MemCmdEndSubmitWaitFree()
-	// img, err := fr.Render.Grab.DevGoImage()
-	// if err == nil {
-	// 	return img, err
-	// }
-	return nil, nil //err
+	sc.AltFrame.Render().ClearColor = sc.Background.At(0, 0)
+	sc.Camera.SetAspect(sz)
+	sc.Phong.System.Renderer = sc.AltFrame
 }
 
-// ImageDone must be called when done using the image returned by [Scene.Image].
-func (sc *Scene) ImageDone() {
-	if sc.Frame == nil {
+// UseMainFrame sets Phong to return to using the Frame [gpu.RenderTexture].
+func (sc *Scene) UseMainFrame() {
+	if sc.Frame == nil || sc.Phong == nil {
 		return
 	}
-	// sc.Frame.Render.Grab.UnmapDev()
+	sc.Lock()
+	defer sc.Unlock()
+	sc.Phong.System.Renderer = sc.Frame
+	sc.Camera.SetAspect(sc.Geom.Size)
 }
 
-// ImageCopy returns a copy of the current rendered image
-// from the Frame RenderTexture. A re-used image.RGBA is returned.
-// This same image is used across calls to avoid large memory allocations,
-// so it will automatically update after the next ImageCopy call.
-// The underlying image is in the [ImgCopy] field.
-// If a persistent image is required, call [imagex.CloneAsRGBA].
-func (sc *Scene) ImageCopy() (*image.RGBA, error) {
-	fr := sc.Frame
-	if fr == nil {
-		return nil, errors.New("xyz.Scene ImageCopy: Scene does not have a Frame")
+// Render renders the scene to the Frame framebuffer.
+// Returns false if currently already rendering.
+func (sc *Scene) Render() bool {
+	if sc.Frame == nil || sc.Phong == nil {
+		return false
 	}
-	// sy := &sc.Phong.System
-	// tcmd := sy.MemCmdStart()
-	// fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
-	// sy.MemCmdEndSubmitWaitFree()
-	// err := fr.Render.Grab.DevGoImageCopy(&sc.imgCopy)
-	// if err == nil {
-	// 	return &sc.imgCopy, err
-	// }
-	return nil, nil // err
+	sc.render(false)
+	return true
 }
 
-// ImageUpdate configures, updates, and renders the scene, then returns [Scene.Image].
-func (sc *Scene) ImageUpdate() (*image.RGBA, error) {
-	// sc.Config()
-	sc.UpdateNodes()
-	sc.Render()
-	return sc.Image()
+// RenderGrabImage renders the scene to the Frame framebuffer.
+// and returns the resulting image as an [image.NRGBA]
+// which could be nil if there are any issues.
+// The image data is a copy and can be modified etc.
+func (sc *Scene) RenderGrabImage() *image.NRGBA {
+	if sc.Phong == nil {
+		return nil
+	}
+	return sc.render(true)
+}
+
+// render renders the scene to the Frame framebuffer.
+// Returns false if currently already rendering.
+func (sc *Scene) render(grabImage bool) *image.NRGBA {
+	sc.Lock()
+	defer sc.Unlock()
+	tex := sc.Phong.System.Renderer.(*gpu.RenderTexture)
+	sc.Phong.System.SetClearColor(sc.Background.At(0, 0))
+	sc.Camera.SetAspect(tex.Format.Bounds().Size())
+
+	if len(sc.SavedCams) == 0 {
+		sc.SaveCamera("default")
+	}
+	sc.TrackCamera()
+	UpdateWorldMatrix(sc.This)
+	sc.UpdateMeshBBox()
+	sc.Camera.UpdateMatrix()
+	sc.UpdateMVPMatrix()
+	return sc.renderImpl(grabImage)
 }
 
 // AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
 // It first configures, updates, and renders the scene.
 func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
-	img, err := sc.ImageUpdate()
-	if err != nil {
-		t.Errorf("xyz.Scene.AssertImage: error getting image: %w", err)
+	sc.Rebuild()
+	img := sc.RenderGrabImage()
+	if img == nil {
+		t.Errorf("xyz.Scene.AssertImage: failure getting image")
 		return
 	}
 	imagex.Assert(t, img, filename)
-	sc.ImageDone()
 }
 
 // DepthImage returns the current rendered depth image
@@ -267,11 +255,6 @@ func (sc *Scene) ConfigNodes() {
 	})
 }
 
-func (sc *Scene) UpdateNodes() {
-	UpdateWorldMatrix(sc.This)
-	sc.UpdateMeshBBox()
-}
-
 // TrackCamera -- a Group at the top-level named "TrackCamera"
 // will automatically track the camera (i.e., its Pose is copied).
 // Solids in that group can set their relative Pos etc to display
@@ -286,32 +269,10 @@ func (sc *Scene) TrackCamera() bool {
 		return false
 	}
 	tc.TrackCamera()
-	sc.SetNeedsUpdate() // need to update world model for nodes
 	return true
 }
 
-// Render renders the scene to the Frame framebuffer.
-// Only the Camera pose view matrix is updated here.
-// If nodes require their own pose etc updates, UpdateNodes
-// must be called prior to render.
-// Returns false if currently already rendering.
-func (sc *Scene) Render() bool {
-	if sc.Frame == nil {
-		return false
-	}
-	if len(sc.SavedCams) == 0 {
-		sc.SaveCamera("default")
-	}
-	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
-	sc.Camera.UpdateMatrix()
-	sc.TrackCamera()
-	sc.UpdateMVPMatrix()
-	sc.RenderImpl()
-	return true
-}
-
-////////////////////////////////////////////////////////////////////
-// 	RenderImpl
+////////  renderImpl
 
 // RenderClasses define the different classes of rendering
 type RenderClasses int32 //enums:enum -trim-prefix RClass
@@ -326,9 +287,10 @@ const (
 	RClassTransVertex
 )
 
-// RenderImpl renders the scene to the framebuffer.
-// all scene-level resources must be initialized and activated at this point
-func (sc *Scene) RenderImpl() {
+// renderImpl renders the scene to the framebuffer.
+// all scene-level resources must be initialized and activated at this point.
+// if grabImage is true, the resulting rendered image is returned.
+func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 	ph := sc.Phong
 	ph.SetCamera(&sc.Camera.ViewMatrix, &sc.Camera.ProjectionMatrix)
 
@@ -386,7 +348,7 @@ func (sc *Scene) RenderImpl() {
 
 	rp, err := ph.RenderStart()
 	if err != nil {
-		return
+		return nil
 	}
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
@@ -402,5 +364,9 @@ func (sc *Scene) RenderImpl() {
 			obj.Render(rp)
 		}
 	}
+	if grabImage {
+		return ph.RenderEndGrabImage(rp)
+	}
 	ph.RenderEnd(rp)
+	return nil
 }

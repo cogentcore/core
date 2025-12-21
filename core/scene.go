@@ -321,7 +321,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	sc.Renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 
-	sc.updateScene()
+	// sc.updateScene() // note: doing this every resize can be very expensive, and is unnec in general. really you just need a layout.
 	sc.applyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
 	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584),

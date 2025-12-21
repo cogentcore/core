@@ -3,7 +3,9 @@ Name = "GPU"
 Categories = ["Architecture"]
 +++
 
-The [[doc:gpu]] package provides a higher-level interface to [WebGPU](https://www.w3.org/TR/webgpu/), which provides GPU (_graphical processing unit_) hardware-accelerated graphics and compute processing on both desktop and web platforms, using the same unified api.
+The [[doc:gpu]] package provides a higher-level interface to [WebGPU](https://www.w3.org/TR/webgpu/), which is available on all non-web platforms and is gaining wider browser support: [WebGPU](https://caniuse.com/webgpu).
+
+The GPU (_graphical processing unit_) is a hardware-accelerated graphics and compute processor.
 
 The `gpu` package manages all the details of WebGPU to provide a higher-level interface where you can specify the data variables and values, shader pipelines, and other parameters that tell the GPU what to do, without having to worry about all the lower-level implementational details. It maps directly onto the underlying WebGPU structure, and does not decrease performance in any way. It supports both graphics and compute functionality.
 

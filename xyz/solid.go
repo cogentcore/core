@@ -208,8 +208,7 @@ func (sld *Solid) UpdateMeshBBox() {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Rendering
+////////   Rendering
 
 // RenderClass returns the class of rendering for this solid
 // used for organizing the ordering of rendering

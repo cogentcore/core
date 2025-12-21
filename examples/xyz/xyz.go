@@ -6,15 +6,15 @@ package main
 
 import (
 	"image/color"
-	"log"
 	"math"
-	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
@@ -23,116 +23,14 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Anim has control for animating
-type Anim struct {
-
-	// run the animation
-	On bool
-
-	// angular speed (in radians)
-	Speed float32 `min:"0.01" step:"0.01"`
-
-	// animate the torus
-	DoTorus bool
-
-	// animate the gopher
-	DoGopher bool
-
-	// current angle
-	Ang float32 `edit:"-"`
-
-	// the time.Ticker for animating the scene
-	Ticker *time.Ticker `display:"-"`
-
-	// the scene editor
-	SceneEditor *xyzcore.SceneEditor
-
-	// the torus
-	Torus *xyz.Solid
-
-	// the gopher
-	Gopher *xyz.Group
-
-	// original position
-	TorusPosOrig math32.Vector3
-
-	// original position
-	GopherPosOrig math32.Vector3
-}
-
-// Start starts the animation ticker timer -- if on is true, then
-// animation will actually start too.
-func (an *Anim) Start(sv *xyzcore.SceneEditor, on bool) {
-	an.SceneEditor = sv
-	an.On = on
-	an.DoTorus = true
-	an.DoGopher = true
-	an.Speed = .1
-	an.GetObjs()
-	an.Ticker = time.NewTicker(time.Second / 30) // 30 fps probably smoother
-	go an.Animate()
-}
-
-// GetObjs gets the objects to animate
-func (an *Anim) GetObjs() {
-	sc := an.SceneEditor.SceneXYZ()
-	torusi := sc.ChildByName("torus", 0)
-	if torusi == nil {
-		return
-	}
-	an.Torus = torusi.(*xyz.Solid)
-	an.TorusPosOrig = an.Torus.Pose.Pos
-
-	ggp := sc.ChildByName("go-group", 0)
-	if ggp == nil {
-		return
-	}
-	gophi := ggp.AsTree().Child(1)
-	if gophi == nil {
-		return
-	}
-	an.Gopher = gophi.(*xyz.Group)
-	an.GopherPosOrig = an.Gopher.Pose.Pos
-}
-
-// Animate
-func (an *Anim) Animate() {
-	for {
-		if an.Ticker == nil || an.SceneEditor.This == nil {
-			return
-		}
-		<-an.Ticker.C // wait for tick
-		if !an.On || an.SceneEditor.This == nil || an.Torus == nil || an.Gopher == nil {
-			continue
-		}
-		radius := float32(0.3)
-
-		if an.DoTorus {
-			tdx := radius * math32.Cos(an.Ang)
-			tdz := radius * math32.Sin(an.Ang)
-			tp := an.TorusPosOrig
-			tp.X += tdx
-			tp.Z += tdz
-			an.Torus.SetPosePos(tp)
-		}
-
-		if an.DoGopher {
-			gdx := 0.1 * radius * math32.Cos(an.Ang+math.Pi)
-			gdz := 0.1 * radius * math32.Sin(an.Ang+math.Pi)
-			gp := an.GopherPosOrig
-			gp.X += gdx
-			gp.Z += gdz
-			an.Gopher.SetPosePos(gp)
-		}
-
-		an.SceneEditor.SceneWidget().UpdateWidget() // note: this is cleanest way to drive updating of xyz
-		// note that any changes to underlying mesh would require Scene.SetMesh calls.
-		an.Ang += an.Speed
-	}
-}
-
 func main() {
-	anim := &Anim{}
+	animOn := false
+	animSpeed := float32(0.01)
+	animGopher := true
+	animHoop := true
+	animAngle := float32(0)
+	bigGopher := true
+
 	b := core.NewBody("XYZ Demo")
 
 	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> framework`).
@@ -142,12 +40,13 @@ func main() {
 			s.Text.AlignV = text.Center
 		})
 
-	core.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
-		anim.On = !anim.On
+	tf := core.NewFrame(b)
+	tf.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
 	})
 
 	se := xyzcore.NewSceneEditor(b)
-	se.UpdateWidget()
+	se.UpdateWidget() // needed to create sub nodes:
 	sw := se.SceneWidget()
 	sc := se.SceneXYZ()
 	sw.SelectionMode = xyzcore.Manipulable
@@ -157,6 +56,13 @@ func main() {
 	// se.Wireframe = true
 	// sc.NoNav = true
 
+	core.Bind(&animOn, core.NewSwitch(tf).SetText("Toggle animation"))
+	bgs := core.NewSwitch(tf).SetText("Toggle big Gopher")
+	bgs.OnChange(func(e events.Event) {
+		sw.Update()
+	})
+	core.Bind(&bigGopher, bgs)
+
 	se.Styler(func(s *styles.Style) {
 		sc.Background = colors.Scheme.Select.Container
 	})
@@ -164,108 +70,145 @@ func main() {
 	xyz.NewAmbient(sc, "ambient", 0.3, xyz.DirectSun)
 	xyz.NewDirectional(sc, "directional", 1, xyz.DirectSun).Pos.Set(0, 2, 1)
 	// xyz.NewPoint(sc, "point", 1, xyz.DirectSun).Pos.Set(-5, 0, 2)
-	// spot := xyz.NewSpot(sc, "spot", 1, xyz.DirectSun)
-	// spot.Pose.Pos.Set(0, 5, 5)
-	// spot.LookAtOrigin()
+	// xyz.NewSpot(sc, "spot", 1, xyz.DirectSun).Pose.Pos.Set(0, 5, 5)
 
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
 
+	cube := xyz.NewBox(sc, "cube1", 1, 1, 1)
+	cube.Segs.Set(10, 10, 10) // not clear if any diff really..
+
+	tree.AddChild(sc, func(g *xyz.Group) {
+		tree.AddChild(g, func(n *xyz.Solid) {
+			n.SetMesh(cube).SetColor(colors.Red).SetShiny(500).SetPos(-1, 0, 0)
+		})
+		tree.AddChild(g, func(n *xyz.Solid) {
+			n.SetMesh(cube).SetColor(colors.Blue).SetShiny(10).SetReflective(0.2).
+				SetPos(1, 1, 0)
+			n.Pose.Scale.X = 2
+		})
+		tree.AddChild(g, func(n *xyz.Solid) {
+			// alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
+			n.SetMesh(cube).SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
+		})
+	})
+
 	grtx := xyz.NewTextureFileFS(assets.Content, sc, "ground", "ground.png")
-	// _ = grtx
-
-	cbm := xyz.NewBox(sc, "cube1", 1, 1, 1)
-	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
-
-	rbgp := xyz.NewGroup(sc)
-
-	xyz.NewSolid(rbgp).SetMesh(cbm).
-		SetColor(colors.Red).SetShiny(500).SetPos(-1, 0, 0)
-
-	bcb := xyz.NewSolid(rbgp).SetMesh(cbm).
-		SetColor(colors.Blue).SetShiny(10).SetReflective(0.2).
-		SetPos(1, 1, 0)
-	bcb.Pose.Scale.X = 2
-
-	// alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
-	xyz.NewSolid(rbgp).SetMesh(cbm).
-		SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
-
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
-	floor := xyz.NewSolid(sc).SetMesh(floorp).
-		SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
-	floor.Material.Tiling.Repeat.Set(40, 40)
+	tree.AddChild(sc, func(n *xyz.Solid) {
+		n.SetMesh(floorp).SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
+		n.Material.Tiling.Repeat.Set(40, 40)
+		// n.Mat.Emissive.SetName("brown")
+		// n.Mat.Bright = 2 // .5 for wood / brown
+		// n.SetDisabled() // not selectable
+	})
 
-	// floor.Mat.Emissive.SetName("brown")
-	// floor.Mat.Bright = 2 // .5 for wood / brown
-	// floor.SetDisabled() // not selectable
-
-	lnsm := xyz.NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), xyz.CloseLines)
-	lns := xyz.NewSolid(sc).SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
-	lns.Pose.Pos.Set(0, 0, 1)
+	lines := xyz.NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), xyz.CloseLines)
+	tree.AddChild(sc, func(n *xyz.Solid) {
+		n.SetMesh(lines).SetColor(color.RGBA{255, 255, 0, 128}).SetPos(0, 0, 1)
+	})
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	cyan := colors.FromRGB(0, 255, 255)
-	xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
+	tree.AddChild(sc, func(g *xyz.Group) {
+		xyz.InitArrow(g, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
+	})
 
-	// bbclr := styles.Color{}
-	// bbclr.SetUInt8(255, 255, 0, 255)
-	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, bbclr, xyz.Active)
+	cylinder := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+	tree.AddChild(sc, func(n *xyz.Solid) {
+		n.SetMesh(cylinder).SetPos(-2.25, 0, 0)
+	})
 
-	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
-	xyz.NewSolid(sc).SetMesh(cylm).SetPos(-2.25, 0, 0)
+	capsule := xyz.NewCapsule(sc, "capsule", 1.5, .5, 32, 1)
+	tree.AddChild(sc, func(n *xyz.Solid) {
+		n.SetMesh(capsule).SetColor(colors.Tan).SetPos(3.25, 0, 0)
+	})
 
-	capm := xyz.NewCapsule(sc, "capsule", 1.5, .5, 32, 1)
-	xyz.NewSolid(sc).SetMesh(capm).SetColor(colors.Tan).
-		SetPos(3.25, 0, 0)
-
-	sphm := xyz.NewSphere(sc, "sphere", .75, 32)
-	sph := xyz.NewSolid(sc).SetMesh(sphm).SetColor(colors.Orange)
-	sph.Material.Color.A = 200
-	sph.Pose.Pos.Set(0, -2, 0)
+	sphere := xyz.NewSphere(sc, "sphere", .75, 32)
+	tree.AddChild(sc, func(n *xyz.Solid) {
+		n.SetMesh(sphere).SetColor(colors.Orange).SetPos(0, -2, 0)
+		n.Material.Color.A = 200
+	})
 
 	// Good strategy for objects if used in multiple places is to load
 	// into library, then add from there.
-	lgo, err := sc.OpenToLibraryFS(assets.Content, "gopher.obj", "")
-	if err != nil {
-		log.Println(err)
-	}
+	lgo := errors.Log1(sc.OpenToLibraryFS(assets.Content, "gopher.obj", ""))
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	gogp := xyz.NewGroup(sc)
-	gogp.SetName("go-group")
+	var smallGo *xyz.Object
+	var goPos math32.Vector3
 
-	bgo, _ := sc.AddFromLibrary("gopher", gogp)
-	bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
+	tree.AddChild(sc, func(g *xyz.Group) {
+		g.Maker(func(p *tree.Plan) {
+			if bigGopher {
+				tree.Add(p, func(n *xyz.Object) {
+					n.SetObjectName("gopher").SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0)
+					n.SetAxisRotation(0, 1, 0, -60)
+				})
+			}
+			tree.Add(p, func(n *xyz.Object) {
+				smallGo = n
+				n.SetObjectName("gopher").SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
+				goPos = n.Pose.Pos
+			})
+		})
+	})
 
-	sgo, _ := sc.AddFromLibrary("gopher", gogp)
-	sgo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
+	torus := xyz.NewTorus(sc, "torus", .75, .1, 32)
+	var hoop *xyz.Solid
+	var hoopPos math32.Vector3
+	tree.AddChild(sc, func(n *xyz.Solid) {
+		n.SetMesh(torus).SetColor(colors.White).SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
+		n.Material.Color.A = 200
+		hoop = n
+		hoopPos = hoop.Pose.Pos
+	})
 
-	trsm := xyz.NewTorus(sc, "torus", .75, .1, 32)
-	trs := xyz.NewSolid(sc).SetMesh(trsm).SetColor(colors.White).
-		SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
-	trs.SetName("torus")
-	trs.Material.Color.A = 200
+	tree.AddChild(sc, func(n *xyz.Text2D) {
+		n.SetText("Text2D can put <b>HTML</b> formatted Text<br> anywhere you might <i>want</i>").SetPos(0, 2.2, 0)
+		n.Styles.Text.Align = text.Center
+		n.Pose.Scale.SetScalar(0.2)
+	})
 
-	txt := xyz.NewText2D(sc).SetText("Text2D can put <b>HTML</b> formatted Text anywhere you might <i>want</i>")
-	txt.Styles.Text.Align = text.Center
-	txt.Pose.Scale.SetScalar(0.2)
-	txt.SetPos(0, 2.2, 0)
+	// automatically tracks camera -- FPS effect
+	tree.AddChildAt(sc, xyz.TrackCameraName, func(g *xyz.Group) {
+		tree.AddChild(g, func(n *xyz.Solid) {
+			// in front of camera
+			n.SetMesh(cube).SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5).
+				SetColor(color.RGBA{255, 0, 255, 128})
+		})
+	})
 
-	tcg := xyz.NewGroup(sc) // automatically tracks camera -- FPS effect
-	tcg.SetName(xyz.TrackCameraName)
-	xyz.NewSolid(tcg).SetMesh(cbm).
-		SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5). // in front of camera
-		SetColor(color.RGBA{255, 0, 255, 128})
+	///////  Animation & Embedded controls
 
-	///////////////////////////////////////////////////
-	//  Animation & Embedded controls
+	radius := float32(0.3)
+	sw.Animate(func(a *core.Animation) {
+		if !animOn {
+			return
+		}
+		if animHoop {
+			tdx := radius * math32.Cos(animAngle)
+			tdz := radius * math32.Sin(animAngle)
+			tp := hoopPos
+			tp.X += tdx
+			tp.Z += tdz
+			hoop.SetPosePos(tp)
+		}
 
-	anim.Start(se, false) // start without animation running
+		if animGopher {
+			gdx := 0.1 * radius * math32.Cos(animAngle+math.Pi)
+			gdz := 0.1 * radius * math32.Sin(animAngle+math.Pi)
+			gp := goPos
+			gp.X += gdx
+			gp.Z += gdz
+			smallGo.SetPosePos(gp)
+		}
+		sw.NeedsRender()
+		animAngle += animSpeed * a.Dt
+	})
+
 	/*
-
 		emb := xyz.NewEmbed2D(sc, sc, "embed-but", 150, 100, xyz.FitContent)
 		emb.Pose.Pos.Set(-2, 2, 0)
 		// emb.Zoom = 1.5   // this is how to rescale overall size
@@ -328,5 +271,6 @@ func main() {
 			}
 		})
 	*/
+
 	b.RunMainWindow()
 }

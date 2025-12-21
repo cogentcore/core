@@ -282,7 +282,7 @@ func (tx *Texture) ReadGoImage() (*image.NRGBA, error) {
 	}
 	img := &image.NRGBA{
 		Pix:    data,
-		Stride: int(tx.ReadBufferDims.PaddedRowSize),
+		Stride: int(tx.ReadBufferDims.UnpaddedRowSize), // note: this is actually unpadded here
 		Rect:   image.Rect(0, 0, int(tx.ReadBufferDims.Width), int(tx.ReadBufferDims.Height)),
 	}
 	return img, nil
@@ -290,7 +290,7 @@ func (tx *Texture) ReadGoImage() (*image.NRGBA, error) {
 
 // ReadData reads the data from a GPU-resident Texture,
 // setting the given data bytes, which will be resized to fit
-// the data.  If removePadding is true, then extra padding will be
+// the data. If removePadding is true, then extra padding will be
 // removed, if present.
 func (tx *Texture) ReadData(data *[]byte, removePadding bool) error {
 	ud, err := tx.ReadDataMapped()
@@ -321,7 +321,7 @@ func (tx *Texture) ReadData(data *[]byte, removePadding bool) error {
 // ReadDataMapped reads the data from a GPU-resident Texture,
 // returning the bytes as mapped from the readBuffer,
 // so they must be used immediately, followed by an [UnmapReadData]
-// call to unmap the data.  See [ReadData] for a version that copies
+// call to unmap the data. See [ReadData] for a version that copies
 // the data into a bytes slice, which is safe for indefinite use.
 // There is alignment padding as reflected in the
 // [ReadBufferDims] data.

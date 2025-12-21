@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package xyzcore provides a GUI view for a 3D xyz scene.
+// Package xyzcore provides a core-based GUI view for a 3D xyz scene.
 package xyzcore
 
 //go:generate core generate
 
 import (
+	"image"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 )
 
@@ -38,9 +41,32 @@ type Scene struct {
 	SelectionParams SelectionParams `display:"inline"`
 }
 
+// NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
+// in given parent (optional).
+func NewSceneForScene(sc *xyz.Scene, parent ...tree.Node) *Scene {
+	sc.Destroy() // reset any existing GPU stuff, so it gets properly rebuilt
+	n := &Scene{XYZ: sc}
+	ni := any(n).(tree.Node)
+	var p tree.Node
+	if len(parent) > 0 {
+		p = parent[0]
+		n.Scene = p.(core.Widget).AsWidget().Scene
+	}
+	tree.InitNode(ni)
+	if p == nil {
+		n.SetName(n.NodeType().IDName)
+		return n
+	}
+	p.AsTree().Children = append(p.AsTree().Children, ni)
+	tree.SetParent(ni, p)
+	return n
+}
+
 func (sw *Scene) Init() {
 	sw.WidgetBase.Init()
-	sw.XYZ = xyz.NewScene()
+	if sw.XYZ == nil {
+		sw.XYZ = xyz.NewScene()
+	}
 	sw.SelectionParams.Defaults()
 	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
@@ -62,28 +88,8 @@ func (sw *Scene) Init() {
 	sw.handleSelectEvents()
 
 	sw.Updater(func() {
-		sz := sw.Geom.ContentBBox.Size()
-		if sz.X <= 0 || sz.Y <= 0 {
-			return
-		}
-		sw.XYZ.Geom.Size = sz
-
-		doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
-		if sw.XYZ.Frame != nil {
-			cursz := sw.XYZ.Frame.Render().Format.Size
-			if cursz == sz && !doRebuild {
-				sw.XYZ.Update()
-				sw.NeedsRender()
-				return
-			}
-		} else {
-			doRebuild = false // will be done automatically b/c Frame == nil
-		}
-		sw.configFrame(sz)
-		if doRebuild {
-			sw.XYZ.Rebuild()
-		}
-		sw.NeedsRender()
+		sw.XYZ.Update()
+		sw.ConfigXYZ()
 	})
 }
 
@@ -103,10 +109,43 @@ func (sw *Scene) SceneXYZ() *xyz.Scene {
 	return sw.XYZ
 }
 
+func (sw *Scene) SizeFinal() {
+	sw.WidgetBase.SizeFinal()
+	if sw.XYZ.NumChildren() == 0 {
+		sw.XYZ.Update()
+	}
+}
+
 func (sw *Scene) Render() {
-	sw.UpdateWidget() // Note: this is indeed essential here -- doesn't work without it.
+	sw.ConfigXYZ() // ensure configured: no cost if not
 	if sw.XYZ.Frame == nil {
 		return
 	}
-	sw.XYZ.DoUpdate()
+	sw.XYZ.Render()
+}
+
+func (sw *Scene) ConfigXYZ() {
+	if !sw.IsVisible() {
+		return
+	}
+	sz := sw.Geom.ContentBBox.Size()
+	if sz.X <= 0 || sz.Y <= 0 {
+		sz = image.Point{10, 10}
+	}
+	sw.XYZ.Geom.Size = sz
+
+	doRebuild := sw.NeedsRebuild() // settings-driven full rebuild
+	if sw.XYZ.Frame != nil {
+		cursz := sw.XYZ.Frame.Render().Format.Size
+		if cursz == sz && !doRebuild {
+			return
+		}
+	} else {
+		doRebuild = false // will be done automatically b/c Frame == nil
+	}
+	sw.configFrame(sz)
+	if doRebuild {
+		sw.XYZ.Rebuild()
+	}
+	sw.NeedsRender()
 }
