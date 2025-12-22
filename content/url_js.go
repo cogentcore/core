@@ -28,7 +28,7 @@ var (
 
 func (ct *Content) getPrintURL() string {
 	p := originalBase.String()
-	return p[:len(p)-1]
+	return strings.TrimSuffix(p, "/")
 }
 
 // getWebURL returns the current relative web URL that should be passed to [Content.Open]
