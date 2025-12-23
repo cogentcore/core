@@ -102,6 +102,10 @@ func (sf *Surface) SetSize(sz image.Point) {
 	sf.Reconfig()
 }
 
+func (sf *Surface) Size() image.Point {
+	return sf.Format.Bounds().Size()
+}
+
 // GetCurrentTexture returns a TextureView that is the current
 // target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
