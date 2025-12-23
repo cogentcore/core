@@ -81,12 +81,6 @@ type Scheme struct {
 	// InversePrimary is the color applied to interactive elements on top of InverseSurface
 	InversePrimary image.Image
 
-	// Background is the color applied to the background of the app and other low-emphasis areas
-	Background image.Image
-
-	// OnBackground is the color applied to content on top of Background
-	OnBackground image.Image
-
 	// Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast
 	Outline image.Image
 
@@ -134,9 +128,6 @@ func NewLightScheme(p *Palette) Scheme {
 		InverseOnSurface: p.Neutral.AbsToneUniform(95),
 		InversePrimary:   p.Primary.AbsToneUniform(80),
 
-		Background:   p.Neutral.AbsToneUniform(100),
-		OnBackground: p.Neutral.AbsToneUniform(10),
-
 		Outline:        p.NeutralVariant.AbsToneUniform(50),
 		OutlineVariant: p.NeutralVariant.AbsToneUniform(80),
 
@@ -181,9 +172,6 @@ func NewDarkScheme(p *Palette) Scheme {
 		InverseSurface:   p.Neutral.AbsToneUniform(90),
 		InverseOnSurface: p.Neutral.AbsToneUniform(20),
 		InversePrimary:   p.Primary.AbsToneUniform(40),
-
-		Background:   p.Neutral.AbsToneUniform(0),
-		OnBackground: p.Neutral.AbsToneUniform(90),
 
 		Outline:        p.NeutralVariant.AbsToneUniform(60),
 		OutlineVariant: p.NeutralVariant.AbsToneUniform(30),

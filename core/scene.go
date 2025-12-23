@@ -185,8 +185,8 @@ func (sc *Scene) Init() {
 	sc.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable) // this is critical to enable click-off to turn off focus.
 		s.Cursor = cursors.Arrow
-		s.Background = colors.Scheme.Background
-		s.Color = colors.Scheme.OnBackground
+		s.Background = colors.Scheme.Surface
+		s.Color = colors.Scheme.OnSurface
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
 		s.Direction = styles.Column

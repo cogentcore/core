@@ -60,7 +60,7 @@ type fillInsetsSource struct {
 
 func (ss *fillInsetsSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
-	clr := colors.Scheme.Background
+	clr := colors.Scheme.Surface
 
 	fill := func(x0, y0, x1, y1 int) {
 		r := image.Rect(x0, y0, x1, y1)
@@ -77,7 +77,7 @@ func (ss *fillInsetsSource) Draw(c composer.Composer) {
 	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 }
 
-// fillInsets fills the window insets, if any, with [colors.Scheme.Background].
+// fillInsets fills the window insets, if any, with [colors.Scheme.Surface].
 func (w *renderWindow) fillInsets(cp composer.Composer) {
 	// render geom and window geom
 	rg := w.SystemWindow.RenderGeom()
