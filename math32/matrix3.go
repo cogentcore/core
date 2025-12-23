@@ -16,8 +16,7 @@ import "errors"
 // with columns as the inner dimension.
 type Matrix3 [9]float32
 
-// note: matrix indexes are row,column. matrix dimensions are CxR.
-// nothing like consistency...
+// note: matrix indexes and dimensions are row,column.
 
 // Mat3 constructs a new Matrix3 from given values, in column-wise order.
 func Mat3(n11, n21, n31, n12, n22, n32, n13, n23, n33 float32) Matrix3 {
