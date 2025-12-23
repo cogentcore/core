@@ -117,6 +117,10 @@ func (rt *RenderTexture) SetSize(size image.Point) {
 	rt.ConfigFrames()
 }
 
+func (rt *RenderTexture) Size() image.Point {
+	return rt.Format.Bounds().Size()
+}
+
 func (rt *RenderTexture) ReleaseFrames() {
 	for _, fr := range rt.Frames {
 		fr.Release()

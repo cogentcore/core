@@ -38,6 +38,9 @@ type Renderer interface {
 	// This is efficient to call if already the same size.
 	SetSize(size image.Point)
 
+	// Size returns the current render image size.
+	Size() image.Point
+
 	// Release frees associated GPU resources.
 	Release()
 }

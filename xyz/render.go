@@ -132,9 +132,9 @@ func (sc *Scene) RenderGrabImage() *image.NRGBA {
 func (sc *Scene) render(grabImage bool) *image.NRGBA {
 	sc.Lock()
 	defer sc.Unlock()
-	tex := sc.Phong.System.Renderer.(*gpu.RenderTexture)
+	tex := sc.Phong.System.Renderer
 	sc.Phong.System.SetClearColor(sc.Background.At(0, 0))
-	sc.Camera.SetAspect(tex.Format.Bounds().Size())
+	sc.Camera.SetAspect(tex.Size())
 
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
