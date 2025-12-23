@@ -114,7 +114,7 @@ func (ts *Tabs) Init() {
 	ts.maxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Styler(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnBackground
+		s.Color = colors.Scheme.OnSurface
 		s.Grow.Set(1, 1)
 		if ts.Type.effective(ts).isColumn() {
 			s.Direction = styles.Row
