@@ -57,6 +57,7 @@ type SettingsData struct {
 
 func (ps *SettingsData) Defaults() {
 	ps.PageSize = DefaultPageSizeForRegion(system.TheApp.SystemLocale().Region())
+	ps.Update()
 	switch ps.Units {
 	case units.UnitMm:
 		ps.Margins.Set(25) // basically one inch
