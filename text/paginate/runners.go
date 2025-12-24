@@ -23,7 +23,7 @@ func TextStyler(s *styles.Style) {
 	s.Color = colors.Uniform(colors.Black)
 }
 
-// CenteredPageNumber generates a page number cenetered in the frame
+// CenteredPageNumber generates a page number centered in the frame
 // with a 1.5em space above it.
 func CenteredPageNumber(frame *core.Frame, opts *Options, pageNo int) {
 	core.NewSpace(frame).Styler(func(s *styles.Style) { // space before

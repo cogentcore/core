@@ -169,6 +169,7 @@ func TestHebrew(t *testing.T) {
 
 func TestVertical(t *testing.T) {
 	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
+		// these are correctly inferred:
 		// rts.Language = "ja"
 		// rts.Script = language.Han
 		tsty.Direction = rich.TTB // rich.BTT // note: apparently BTT is actually never used
