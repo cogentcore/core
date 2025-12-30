@@ -109,6 +109,7 @@ func init() {
 		"NewQuat":                  reflect.ValueOf(math32.NewQuat),
 		"NewQuatAxisAngle":         reflect.ValueOf(math32.NewQuatAxisAngle),
 		"NewQuatEuler":             reflect.ValueOf(math32.NewQuatEuler),
+		"NewQuatIdentity":          reflect.ValueOf(math32.NewQuatIdentity),
 		"NewRay":                   reflect.ValueOf(math32.NewRay),
 		"NewSphere":                reflect.ValueOf(math32.NewSphere),
 		"NewTriangle":              reflect.ValueOf(math32.NewTriangle),
