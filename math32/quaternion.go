@@ -25,6 +25,11 @@ func NewQuat(x, y, z, w float32) Quat {
 	return Quat{X: x, Y: y, Z: z, W: w}
 }
 
+// NewQuatIdentity returns a new quaternion with the identity rotation.
+func NewQuatIdentity() Quat {
+	return Quat{X: 0, Y: 0, Z: 0, W: 1}
+}
+
 // NewQuatAxisAngle returns a new quaternion from given axis and angle rotation (radians).
 func NewQuatAxisAngle(axis Vector3, angle float32) Quat {
 	nq := Quat{}
