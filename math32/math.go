@@ -780,8 +780,7 @@ func Yn(n int, x float32) float32 {
 	return math32.Yn(n, x)
 }
 
-//////////////////////////////////////////////////////////////
-// Special additions to math. functions
+//////// Special additions to math. functions
 
 // Clamp clamps x to the provided closed interval [a, b]
 func Clamp[T cmp.Ordered](x, a, b T) T {
@@ -852,4 +851,21 @@ func Truncate64(val float64, prec int) float64 {
 	// note: this unfortunately does not work.  also Pow(prec) is not likely to be that much faster ;)
 	// pow := math.Pow(10, float64(prec))
 	// return math.Round(val*pow) / pow
+}
+
+// WrapsMax returns x wrapped in the interval [0..max).
+func WrapMax(x, mx float32) float32 {
+	// integer math: (max + x % max) % max
+	return Mod(mx+Mod(x, mx), mx)
+}
+
+// WrapMinMax returns x wrapped in the interval [min..max).
+func WrapMinMax(x, mn, mx float32) float32 {
+	return mn + WrapMax(x-mn, mx-mn)
+}
+
+// WrapPi wraps the value into the [-Pi, Pi) interval.
+func WrapPi(x float32) float32 {
+	w := WrapMinMax(x, -Pi, Pi)
+	return w
 }
