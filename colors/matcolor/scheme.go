@@ -156,7 +156,7 @@ func NewDarkScheme(p *Palette) Scheme {
 		Custom:    map[string]Accent{},
 
 		SurfaceDim:    p.Neutral.AbsToneUniform(6),
-		Surface:       p.Neutral.AbsToneUniform(6),
+		Surface:       p.Neutral.AbsToneUniform(0),
 		SurfaceBright: p.Neutral.AbsToneUniform(24),
 
 		SurfaceContainerLowest:  p.Neutral.AbsToneUniform(4),
