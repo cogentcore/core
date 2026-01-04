@@ -86,6 +86,10 @@ func (q Quat) IsNil() bool {
 	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0
 }
 
+func (q Quat) IsNaN() bool {
+	return IsNaN(q.X) || IsNaN(q.Y) || IsNaN(q.Z) || IsNaN(q.W)
+}
+
 func (q Quat) String() string {
 	return fmt.Sprintf("(%v, %v, %v, %v)", q.X, q.Y, q.Z, q.W)
 }

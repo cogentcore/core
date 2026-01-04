@@ -145,3 +145,19 @@ func TestWrapPi(t *testing.T) {
 		assert.InDelta(t, tt.cor, got, 1e-5)
 	}
 }
+
+func TestMinAngleDiff(t *testing.T) {
+	tests := []struct {
+		a, b, cor float32
+	}{
+		{a: 0, b: Pi, cor: Pi},
+		{a: Pi, b: -Pi - 0.5, cor: 0.5},
+		{a: -Pi, b: Pi + 0.5, cor: -0.5},
+		{a: Pi, b: -Pi, cor: 0},
+		{a: Pi, b: -Pi + 0.1, cor: -0.1},
+	}
+	for _, tt := range tests {
+		got := MinAngleDiff(tt.a, tt.b)
+		assert.InDelta(t, tt.cor, got, 1e-5)
+	}
+}

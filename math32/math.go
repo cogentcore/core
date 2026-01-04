@@ -869,3 +869,16 @@ func WrapPi(x float32) float32 {
 	w := WrapMinMax(x, -Pi, Pi)
 	return w
 }
+
+// MinAngleDiff returns the minimum difference between two angles
+// (in radians): a-b, dealing with the wrap-around issues with angles.
+func MinAngleDiff(a, b float32) float32 {
+	d := WrapPi(a) - WrapPi(b)
+	if d > Pi {
+		d -= 2 * Pi
+	}
+	if d < -Pi {
+		d += 2 * Pi
+	}
+	return d
+}
