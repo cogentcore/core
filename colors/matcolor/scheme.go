@@ -111,8 +111,8 @@ func NewLightScheme(p *Palette) Scheme {
 		Custom:    map[string]Accent{},
 
 		SurfaceDim:    p.Neutral.AbsToneUniform(87),
-		Surface:       p.Neutral.AbsToneUniform(99),
-		SurfaceBright: p.Neutral.AbsToneUniform(99),
+		Surface:       p.Neutral.AbsToneUniform(100),
+		SurfaceBright: p.Neutral.AbsToneUniform(100),
 
 		SurfaceContainerLowest:  p.Neutral.AbsToneUniform(100),
 		SurfaceContainerLow:     p.Neutral.AbsToneUniform(98),

@@ -12,24 +12,12 @@ type Locale string
 
 // Language returns the language portion of the locale tag (e.g., en, fr, ja)
 func (l Locale) Language() string {
-	if l == "" {
-		return ""
-	}
-	pos := strings.LastIndex(string(l), "-")
-	if pos < 0 {
-		return string(l)
-	}
-	return string(l)[:pos]
+	lang, _, _ := strings.Cut(string(l), "-")
+	return lang
 }
 
 // Region returns the region portion of the locale tag (e.g., US, FR, JA)
 func (l Locale) Region() string {
-	if l == "" {
-		return ""
-	}
-	pos := strings.LastIndex(string(l), "-")
-	if pos < 0 {
-		return ""
-	}
-	return string(l)[pos+1:]
+	_, region, _ := strings.Cut(string(l), "-")
+	return region
 }

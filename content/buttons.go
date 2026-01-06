@@ -17,6 +17,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// MakeToolbar adds the standard toolbar buttons for the content.
+// See [Content.MakeToolbarPDF] for the optional PDF button.
 func (ct *Content) MakeToolbar(p *tree.Plan) {
 	if false && ct.SizeClass() == core.SizeCompact { // TODO: implement hamburger menu for compact
 		tree.Add(p, func(w *core.Button) {
@@ -74,6 +76,10 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
 		})
 	})
+}
+
+// MakeToolbarPDF adds the PDF button to the toolbar. This is optional.
+func (ct *Content) MakeToolbarPDF(p *tree.Plan) {
 	tree.Add(p, func(w *core.Button) {
 		w.SetText("PDF").SetIcon(icons.PictureAsPdf).SetTooltip("PDF generates and opens / downloads the current page as a printable PDF file. See the Settings/Printer panel (Command+,) for settings.")
 		w.OnClick(func(e events.Event) {

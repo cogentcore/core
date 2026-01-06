@@ -38,16 +38,11 @@ import (
 // that the user will see in the settings window. It contains the base Cogent Core
 // settings by default and should be modified by other apps to add their
 // app settings.
-var AllSettings = []Settings{AppearanceSettings, SystemSettings, TimingSettings, DebugSettings}
+var AllSettings = []Settings{AppearanceSettings, SystemSettings, &printer.Settings, TimingSettings, DebugSettings}
 
 // AddAppSettings inserts app-specific settings after the AppearanceSettings
 func AddAppSettings(sets ...Settings) {
 	AllSettings = slices.Insert(AllSettings, 1, sets...)
-}
-
-// AddPrinterSettings adds printer settings, for apps that use these.
-func AddPrinterSettings() {
-	AddAppSettings(&printer.Settings)
 }
 
 // Settings is the interface that describes the functionality common

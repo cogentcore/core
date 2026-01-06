@@ -175,10 +175,19 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	}
 }
 
-func (r *PDF) setTextStrokeColor(clr image.Image) {
+// setTextStrokeColor sets the text stroke color. Returns false
+// if stroke color is fully transparent and thus should not be rendered.
+func (r *PDF) setTextStrokeColor(clr image.Image) bool {
 	sc := r.w.style().Stroke
+	if x, ok := clr.(*image.Uniform); ok {
+		c := colors.ApplyOpacity(colors.AsRGBA(x), sc.Opacity)
+		if c.A == 0 { // fully transparent
+			return false
+		}
+	}
 	sc.Color = clr
 	r.w.SetStroke(&sc)
+	return true
 }
 
 func (r *PDF) setTextFillColor(clr image.Image) {
@@ -193,16 +202,17 @@ func (r *PDF) setTextStyle(fnt *text.Font, style *styles.Paint, fill, stroke ima
 	sty := fnt.Style(tsty)
 	r.w.SetFont(sty, tsty)
 	mode := 0
+	hasStroke := false
 	if stroke != nil {
-		r.setTextStrokeColor(stroke)
+		hasStroke = r.setTextStrokeColor(stroke)
 	}
 	if fill != nil {
 		r.setTextFillColor(fill)
-		if stroke != nil {
+		if hasStroke {
 			mode = 2
 		}
 	} else {
-		if stroke != nil {
+		if hasStroke {
 			mode = 1
 		}
 	}

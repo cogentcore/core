@@ -52,7 +52,7 @@ func Generate(c *Config) error {
 	kl := csl.NewKeyList(refs)
 
 	if c.Dir == "" {
-		c.Dir = "./"
+		c.Dir = "." + string(filepath.Separator)
 	}
 	mds := fsx.Filenames(c.Dir, ".md")
 	if len(mds) == 0 {

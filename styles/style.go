@@ -255,6 +255,8 @@ func (s *Style) ZeroSpace() {
 	s.MaxBorder.Width.Zero()
 	s.Border.Width.Zero()
 	s.Gap.Zero()
+	s.BoxShadow = nil
+	s.MaxBoxShadow = nil
 }
 
 // VirtualKeyboards are all of the supported virtual keyboard types

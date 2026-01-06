@@ -8,12 +8,10 @@ import (
 	"time"
 
 	"cogentcore.org/core/content/bcontent"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/text/paginate"
 )
 
 func init() {
-	core.AddPrinterSettings()
 	Settings.Defaults()
 }
 

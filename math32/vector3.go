@@ -120,6 +120,10 @@ func (v Vector3) ToSlice(array []float32, offset int) {
 	array[offset+2] = v.Z
 }
 
+func (v Vector3) IsNaN() bool {
+	return IsNaN(v.X) || IsNaN(v.Y) || IsNaN(v.Z)
+}
+
 // Basic math operations:
 
 // Add adds the other given vector to this one and returns the result as a new vector.
