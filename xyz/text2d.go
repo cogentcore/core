@@ -114,7 +114,7 @@ func (txt *Text2D) RenderText() {
 	}
 	sz := math32.Vec2(10000, 1000) // just a big size
 	txt.richText, _ = htmltext.HTMLToRich([]byte(txt.Text), sty, nil)
-	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, sty, tsty, &rich.DefaultSettings, sz)
+	txt.textRender = txt.Scene.TextShaper.WrapLines(txt.richText, sty, tsty, sz)
 	sz = txt.textRender.Bounds.Size().Ceil()
 	if sz.X == 0 {
 		sz.X = 10

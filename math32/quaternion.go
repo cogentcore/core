@@ -25,6 +25,11 @@ func NewQuat(x, y, z, w float32) Quat {
 	return Quat{X: x, Y: y, Z: z, W: w}
 }
 
+// NewQuatIdentity returns a new quaternion with the identity rotation.
+func NewQuatIdentity() Quat {
+	return Quat{X: 0, Y: 0, Z: 0, W: 1}
+}
+
 // NewQuatAxisAngle returns a new quaternion from given axis and angle rotation (radians).
 func NewQuatAxisAngle(axis Vector3, angle float32) Quat {
 	nq := Quat{}
@@ -56,7 +61,7 @@ func (q *Quat) FromArray(array []float32, offset int) {
 }
 
 // ToArray copies this quaternions's components to array starting at offset.
-func (q *Quat) ToArray(array []float32, offset int) {
+func (q Quat) ToArray(array []float32, offset int) {
 	array[offset] = q.X
 	array[offset+1] = q.Y
 	array[offset+2] = q.Z
@@ -72,13 +77,17 @@ func (q *Quat) SetIdentity() {
 }
 
 // IsIdentity returns if this is an identity quaternion.
-func (q *Quat) IsIdentity() bool {
+func (q Quat) IsIdentity() bool {
 	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 1
 }
 
 // IsNil returns true if all values are 0 (uninitialized).
-func (q *Quat) IsNil() bool {
+func (q Quat) IsNil() bool {
 	return q.X == 0 && q.Y == 0 && q.Z == 0 && q.W == 0
+}
+
+func (q Quat) IsNaN() bool {
+	return IsNaN(q.X) || IsNaN(q.Y) || IsNaN(q.Z) || IsNaN(q.W)
 }
 
 func (q Quat) String() string {
@@ -104,9 +113,9 @@ func (q *Quat) SetFromEuler(euler Vector3) {
 
 // ToEuler returns a Vector3 with components as the Euler angles
 // from the given quaternion.
-func (q *Quat) ToEuler() Vector3 {
+func (q Quat) ToEuler() Vector3 {
 	rot := Vector3{}
-	rot.SetEulerAnglesFromQuat(*q)
+	rot.SetEulerAnglesFromQuat(q)
 	return rot
 }
 
@@ -122,20 +131,20 @@ func (q *Quat) SetFromAxisAngle(axis Vector3, angle float32) {
 }
 
 // ToAxisAngle returns the Vector4 holding axis and angle of this Quaternion
-func (q *Quat) ToAxisAngle() Vector4 {
+func (q Quat) ToAxisAngle() Vector4 {
 	aa := Vector4{}
-	aa.SetAxisAngleFromQuat(*q)
+	aa.SetAxisAngleFromQuat(q)
 	return aa
 }
 
 // GenGoSet returns code to set values in object at given path (var.member etc)
-func (q *Quat) GenGoSet(path string) string {
+func (q Quat) GenGoSet(path string) string {
 	aa := q.ToAxisAngle()
 	return fmt.Sprintf("%s.SetFromAxisAngle(math32.Vec3(%g, %g, %g), %g)", path, aa.X, aa.Y, aa.Z, aa.W)
 }
 
 // GenGoNew returns code to create new
-func (q *Quat) GenGoNew() string {
+func (q Quat) GenGoNew() string {
 	return fmt.Sprintf("math32.Quat{%g, %g, %g, %g}", q.X, q.Y, q.Z, q.W)
 }
 
@@ -213,10 +222,9 @@ func (q *Quat) SetInverse() {
 }
 
 // Inverse returns the inverse of this quaternion.
-func (q *Quat) Inverse() Quat {
-	nq := *q
-	nq.SetInverse()
-	return nq
+func (q Quat) Inverse() Quat {
+	q.SetInverse()
+	return q
 }
 
 // SetConjugate sets this quaternion to its conjugate.
@@ -227,15 +235,14 @@ func (q *Quat) SetConjugate() {
 }
 
 // Conjugate returns the conjugate of this quaternion.
-func (q *Quat) Conjugate() Quat {
-	nq := *q
-	nq.SetConjugate()
-	return nq
+func (q Quat) Conjugate() Quat {
+	q.SetConjugate()
+	return q
 }
 
 // Dot returns the dot products of this quaternion with other.
-func (q *Quat) Dot(other Quat) float32 {
-	return q.X*other.X + q.Y*other.Y + q.Z*other.Z + q.W*other.W
+func (q Quat) Dot(o Quat) float32 {
+	return q.X*o.X + q.Y*o.Y + q.Z*o.Z + q.W*o.W
 }
 
 // LengthSq returns this quanternion's length squared
@@ -282,44 +289,61 @@ func (q *Quat) NormalizeFast() {
 	}
 }
 
-// MulQuats set this quaternion to the multiplication of a by b.
-func (q *Quat) MulQuats(a, b Quat) {
+// MulQuats returns a * b quaternion multiplication.
+func MulQuats(a, b Quat) Quat {
 	// from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
-	qax := a.X
-	qay := a.Y
-	qaz := a.Z
-	qaw := a.W
-	qbx := b.X
-	qby := b.Y
-	qbz := b.Z
-	qbw := b.W
-
-	q.X = qax*qbw + qaw*qbx + qay*qbz - qaz*qby
-	q.Y = qay*qbw + qaw*qby + qaz*qbx - qax*qbz
-	q.Z = qaz*qbw + qaw*qbz + qax*qby - qay*qbx
-	q.W = qaw*qbw - qax*qbx - qay*qby - qaz*qbz
+	var q Quat
+	q.X = a.X*b.W + a.W*b.X + a.Y*b.Z - a.Z*b.Y
+	q.Y = a.Y*b.W + a.W*b.Y + a.Z*b.X - a.X*b.Z
+	q.Z = a.Z*b.W + a.W*b.Z + a.X*b.Y - a.Y*b.X
+	q.W = a.W*b.W - a.X*b.X - a.Y*b.Y - a.Z*b.Z
+	return q
 }
 
 // SetMul sets this quaternion to the multiplication of itself by other.
-func (q *Quat) SetMul(other Quat) {
-	q.MulQuats(*q, other)
+func (q *Quat) SetMul(o Quat) {
+	*q = MulQuats(*q, o)
 }
 
 // Mul returns returns multiplication of this quaternion with other
-func (q *Quat) Mul(other Quat) Quat {
-	nq := *q
-	nq.SetMul(other)
-	return nq
+func (q Quat) Mul(o Quat) Quat {
+	q.SetMul(o)
+	return q
 }
 
-// Slerp sets this quaternion to another quaternion which is the spherically linear interpolation
-// from this quaternion to other using t.
-func (q *Quat) Slerp(other Quat, t float32) {
+// MulScalar returns values multiplied by scalar
+func (q Quat) MulScalar(s float32) Quat {
+	return NewQuat(q.X*s, q.Y*s, q.Z*s, q.W*s)
+}
+
+// Add returns values added
+func (q Quat) Add(o Quat) Quat {
+	return NewQuat(q.X+o.X, q.Y+o.Y, q.Z+o.Z, q.W+o.W)
+}
+
+// MulVector applies the rotation encoded in the quaternion to the [Vector3].
+func (q Quat) MulVector(v Vector3) Vector3 {
+	xyz := Vec3(q.X, q.Y, q.Z)
+	t := xyz.Cross(v).MulScalar(2)
+	return v.Add(t.MulScalar(q.W)).Add(xyz.Cross(t))
+}
+
+// MulVectorInverse applies the inverse of the rotation encoded in the quaternion
+// to the [Vector3].
+func (q Quat) MulVectorInverse(v Vector3) Vector3 {
+	xyz := Vec3(q.X, q.Y, q.Z)
+	t := xyz.Cross(v).MulScalar(2)
+	return v.Sub(t.MulScalar(q.W)).Add(xyz.Cross(t))
+}
+
+// Slerp sets this quaternion to another quaternion which is the
+// spherically linear interpolation from this quaternion to other using t.
+func (q *Quat) Slerp(o Quat, t float32) {
 	if t == 0 {
 		return
 	}
 	if t == 1 {
-		*q = other
+		*q = o
 		return
 	}
 
@@ -328,16 +352,16 @@ func (q *Quat) Slerp(other Quat, t float32) {
 	z := q.Z
 	w := q.W
 
-	cosHalfTheta := w*other.W + x*other.X + y*other.Y + z*other.Z
+	cosHalfTheta := w*o.W + x*o.X + y*o.Y + z*o.Z
 
 	if cosHalfTheta < 0 {
-		q.W = -other.W
-		q.X = -other.X
-		q.Y = -other.Y
-		q.Z = -other.Z
+		q.W = -o.W
+		q.X = -o.X
+		q.Y = -o.Y
+		q.Z = -o.Z
 		cosHalfTheta = -cosHalfTheta
 	} else {
-		*q = other
+		*q = o
 	}
 
 	if cosHalfTheta >= 1.0 {

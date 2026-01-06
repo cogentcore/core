@@ -81,12 +81,6 @@ type Scheme struct {
 	// InversePrimary is the color applied to interactive elements on top of InverseSurface
 	InversePrimary image.Image
 
-	// Background is the color applied to the background of the app and other low-emphasis areas
-	Background image.Image
-
-	// OnBackground is the color applied to content on top of Background
-	OnBackground image.Image
-
 	// Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast
 	Outline image.Image
 
@@ -117,14 +111,14 @@ func NewLightScheme(p *Palette) Scheme {
 		Custom:    map[string]Accent{},
 
 		SurfaceDim:    p.Neutral.AbsToneUniform(87),
-		Surface:       p.Neutral.AbsToneUniform(98),
-		SurfaceBright: p.Neutral.AbsToneUniform(98),
+		Surface:       p.Neutral.AbsToneUniform(100),
+		SurfaceBright: p.Neutral.AbsToneUniform(100),
 
 		SurfaceContainerLowest:  p.Neutral.AbsToneUniform(100),
-		SurfaceContainerLow:     p.Neutral.AbsToneUniform(96),
-		SurfaceContainer:        p.Neutral.AbsToneUniform(94),
-		SurfaceContainerHigh:    p.Neutral.AbsToneUniform(92),
-		SurfaceContainerHighest: p.Neutral.AbsToneUniform(90),
+		SurfaceContainerLow:     p.Neutral.AbsToneUniform(98),
+		SurfaceContainer:        p.Neutral.AbsToneUniform(96),
+		SurfaceContainerHigh:    p.Neutral.AbsToneUniform(94),
+		SurfaceContainerHighest: p.Neutral.AbsToneUniform(92),
 
 		SurfaceVariant:   p.NeutralVariant.AbsToneUniform(90),
 		OnSurface:        p.NeutralVariant.AbsToneUniform(10),
@@ -133,9 +127,6 @@ func NewLightScheme(p *Palette) Scheme {
 		InverseSurface:   p.Neutral.AbsToneUniform(20),
 		InverseOnSurface: p.Neutral.AbsToneUniform(95),
 		InversePrimary:   p.Primary.AbsToneUniform(80),
-
-		Background:   p.Neutral.AbsToneUniform(98),
-		OnBackground: p.Neutral.AbsToneUniform(10),
 
 		Outline:        p.NeutralVariant.AbsToneUniform(50),
 		OutlineVariant: p.NeutralVariant.AbsToneUniform(80),
@@ -181,9 +172,6 @@ func NewDarkScheme(p *Palette) Scheme {
 		InverseSurface:   p.Neutral.AbsToneUniform(90),
 		InverseOnSurface: p.Neutral.AbsToneUniform(20),
 		InversePrimary:   p.Primary.AbsToneUniform(40),
-
-		Background:   p.Neutral.AbsToneUniform(6),
-		OnBackground: p.Neutral.AbsToneUniform(90),
 
 		Outline:        p.NeutralVariant.AbsToneUniform(60),
 		OutlineVariant: p.NeutralVariant.AbsToneUniform(30),

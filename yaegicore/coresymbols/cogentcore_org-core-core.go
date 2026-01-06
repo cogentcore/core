@@ -21,6 +21,7 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/core/core"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"AddAppSettings":                reflect.ValueOf(core.AddAppSettings),
 		"AllRenderWindows":              reflect.ValueOf(&core.AllRenderWindows).Elem(),
 		"AllSettings":                   reflect.ValueOf(&core.AllSettings).Elem(),
 		"AppAbout":                      reflect.ValueOf(&core.AppAbout).Elem(),
@@ -51,7 +52,6 @@ func init() {
 		"CompleterStage":                reflect.ValueOf(core.CompleterStage),
 		"ConstantSpacing":               reflect.ValueOf(core.ConstantSpacing),
 		"DebugSettings":                 reflect.ValueOf(&core.DebugSettings).Elem(),
-		"DeviceSettings":                reflect.ValueOf(&core.DeviceSettings).Elem(),
 		"DialogStage":                   reflect.ValueOf(core.DialogStage),
 		"ErrorDialog":                   reflect.ValueOf(core.ErrorDialog),
 		"ErrorSnackbar":                 reflect.ValueOf(core.ErrorSnackbar),
@@ -90,6 +90,7 @@ func init() {
 		"NewComplete":                   reflect.ValueOf(core.NewComplete),
 		"NewDatePicker":                 reflect.ValueOf(core.NewDatePicker),
 		"NewDurationInput":              reflect.ValueOf(core.NewDurationInput),
+		"NewFieldValue":                 reflect.ValueOf(core.NewFieldValue),
 		"NewFileButton":                 reflect.ValueOf(core.NewFileButton),
 		"NewFilePicker":                 reflect.ValueOf(core.NewFilePicker),
 		"NewFontButton":                 reflect.ValueOf(core.NewFontButton),
@@ -215,6 +216,7 @@ func init() {
 		"TileSecondLong":                reflect.ValueOf(core.TileSecondLong),
 		"TileSpan":                      reflect.ValueOf(core.TileSpan),
 		"TileSplit":                     reflect.ValueOf(core.TileSplit),
+		"TimingSettings":                reflect.ValueOf(&core.TimingSettings).Elem(),
 		"ToHTML":                        reflect.ValueOf(core.ToHTML),
 		"ToolbarStyles":                 reflect.ValueOf(core.ToolbarStyles),
 		"TooltipStage":                  reflect.ValueOf(core.TooltipStage),
@@ -245,9 +247,9 @@ func init() {
 		"Complete":               reflect.ValueOf((*core.Complete)(nil)),
 		"DatePicker":             reflect.ValueOf((*core.DatePicker)(nil)),
 		"DebugSettingsData":      reflect.ValueOf((*core.DebugSettingsData)(nil)),
-		"DeviceSettingsData":     reflect.ValueOf((*core.DeviceSettingsData)(nil)),
 		"DurationInput":          reflect.ValueOf((*core.DurationInput)(nil)),
 		"Events":                 reflect.ValueOf((*core.Events)(nil)),
+		"FieldWidgeter":          reflect.ValueOf((*core.FieldWidgeter)(nil)),
 		"FileButton":             reflect.ValueOf((*core.FileButton)(nil)),
 		"FilePaths":              reflect.ValueOf((*core.FilePaths)(nil)),
 		"FilePicker":             reflect.ValueOf((*core.FilePicker)(nil)),
@@ -260,12 +262,15 @@ func init() {
 		"Frame":                  reflect.ValueOf((*core.Frame)(nil)),
 		"FuncArg":                reflect.ValueOf((*core.FuncArg)(nil)),
 		"FuncButton":             reflect.ValueOf((*core.FuncButton)(nil)),
+		"GeomSize":               reflect.ValueOf((*core.GeomSize)(nil)),
+		"GeomState":              reflect.ValueOf((*core.GeomState)(nil)),
 		"Handle":                 reflect.ValueOf((*core.Handle)(nil)),
 		"HighlightingButton":     reflect.ValueOf((*core.HighlightingButton)(nil)),
 		"HighlightingName":       reflect.ValueOf((*core.HighlightingName)(nil)),
 		"Icon":                   reflect.ValueOf((*core.Icon)(nil)),
 		"IconButton":             reflect.ValueOf((*core.IconButton)(nil)),
 		"Image":                  reflect.ValueOf((*core.Image)(nil)),
+		"InlineLengths":          reflect.ValueOf((*core.InlineLengths)(nil)),
 		"InlineList":             reflect.ValueOf((*core.InlineList)(nil)),
 		"Inspector":              reflect.ValueOf((*core.Inspector)(nil)),
 		"KeyChordButton":         reflect.ValueOf((*core.KeyChordButton)(nil)),
@@ -325,6 +330,7 @@ func init() {
 		"Themes":                 reflect.ValueOf((*core.Themes)(nil)),
 		"TimeInput":              reflect.ValueOf((*core.TimeInput)(nil)),
 		"TimePicker":             reflect.ValueOf((*core.TimePicker)(nil)),
+		"TimingSettingsData":     reflect.ValueOf((*core.TimingSettingsData)(nil)),
 		"Toolbar":                reflect.ValueOf((*core.Toolbar)(nil)),
 		"ToolbarMaker":           reflect.ValueOf((*core.ToolbarMaker)(nil)),
 		"Tree":                   reflect.ValueOf((*core.Tree)(nil)),
@@ -341,6 +347,7 @@ func init() {
 
 		// interface wrapper definitions
 		"_ButtonEmbedder":    reflect.ValueOf((*_cogentcore_org_core_core_ButtonEmbedder)(nil)),
+		"_FieldWidgeter":     reflect.ValueOf((*_cogentcore_org_core_core_FieldWidgeter)(nil)),
 		"_Layouter":          reflect.ValueOf((*_cogentcore_org_core_core_Layouter)(nil)),
 		"_Lister":            reflect.ValueOf((*_cogentcore_org_core_core_Lister)(nil)),
 		"_MenuSearcher":      reflect.ValueOf((*_cogentcore_org_core_core_MenuSearcher)(nil)),
@@ -368,6 +375,16 @@ type _cogentcore_org_core_core_ButtonEmbedder struct {
 }
 
 func (W _cogentcore_org_core_core_ButtonEmbedder) AsButton() *core.Button { return W.WAsButton() }
+
+// _cogentcore_org_core_core_FieldWidgeter is an interface wrapper for FieldWidgeter type
+type _cogentcore_org_core_core_FieldWidgeter struct {
+	IValue       interface{}
+	WFieldWidget func(field string) core.Value
+}
+
+func (W _cogentcore_org_core_core_FieldWidgeter) FieldWidget(field string) core.Value {
+	return W.WFieldWidget(field)
+}
 
 // _cogentcore_org_core_core_Layouter is an interface wrapper for Layouter type
 type _cogentcore_org_core_core_Layouter struct {
@@ -795,11 +812,11 @@ func (W _cogentcore_org_core_core_ValueSetter) SetWidgetValue(value any) error {
 
 // _cogentcore_org_core_core_Valuer is an interface wrapper for Valuer type
 type _cogentcore_org_core_core_Valuer struct {
-	IValue interface{}
-	WValue func() core.Value
+	IValue  interface{}
+	WWidget func() core.Value
 }
 
-func (W _cogentcore_org_core_core_Valuer) Value() core.Value { return W.WValue() }
+func (W _cogentcore_org_core_core_Valuer) Widget() core.Value { return W.WWidget() }
 
 // _cogentcore_org_core_core_Widget is an interface wrapper for Widget type
 type _cogentcore_org_core_core_Widget struct {

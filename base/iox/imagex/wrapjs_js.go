@@ -130,6 +130,12 @@ func (im *JSRGBA) Update() {
 	im.JS.SetRGBA(im.RGBA)
 }
 
+// note: per https://github.com/whatwg/html/issues/4785 there is no way
+// to actually get the data back from the ImageBitmap :(
+
+// Underlying returns the underlying image data as a local image.RGBA.
+// Note that this may not be possible and a nil will be returned, because
+// there is no way to get the image data back from an ImageBitmap at this point.
 func (im *JSRGBA) Underlying() image.Image {
 	return im.RGBA
 }

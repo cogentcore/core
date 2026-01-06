@@ -27,15 +27,12 @@ import (
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/language"
 	"github.com/stretchr/testify/assert"
 )
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
 // function, and then asserts the image using [imagex.Assert] with the given name.
-func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings)) {
-	rts := &rich.Settings{}
-	rts.Defaults()
+func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Painter, sh Shaper, tsty *text.Style)) {
 	uc := units.Context{}
 	uc.Defaults()
 	tsty := text.NewStyle()
@@ -45,13 +42,13 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	pc := paint.NewPainter(sz)
 	pc.FillBox(math32.Vector2{}, sz, colors.Uniform(colors.White))
 	sh := NewShaper()
-	f(pc, sh, tsty, rts)
+	f(pc, sh, tsty)
 	img := paint.RenderToImage(pc)
 	imagex.Assert(t, img, nm)
 }
 
 func TestFontMapper(t *testing.T) {
-	RunTest(t, "fontmapper", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "fontmapper", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		fname := "Noto Sans"
 		for i := range 2 {
 			sty := rich.NewStyle()
@@ -80,7 +77,7 @@ func TestFontMapper(t *testing.T) {
 			tx.AddSpan(&medit, []rune("This is Medium Italic\n"))
 			tx.AddSpan(&boldit, []rune("This is Bold Italic"))
 			// fmt.Println(tx)
-			lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+			lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 			pos := math32.Vec2(10, float32(10+i*150))
 			pc.DrawText(lns, pos)
 
@@ -103,7 +100,7 @@ func TestFontMapper(t *testing.T) {
 }
 
 func TestBasic(t *testing.T) {
-	RunTest(t, "basic", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "basic", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 
 		src := "The lazy fox typed in some familiar text"
 		sr := []rune(src)
@@ -122,7 +119,7 @@ func TestBasic(t *testing.T) {
 		tx.AddSpan(boldBig, sr[ix:ix+8])
 		tx.AddSpan(ul, sr[ix+8:])
 
-		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, plain, tsty, math32.Vec2(250, 250))
 		lns.SelectRegion(textpos.Range{7, 30})
 		lns.SelectRegion(textpos.Range{34, 40})
 		pos := math32.Vec2(20, 60)
@@ -155,7 +152,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestHebrew(t *testing.T) {
-	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "hebrew", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 
 		tsty.Direction = rich.RTL
 		tsty.FontSize.Dots *= 1.5
@@ -165,15 +162,16 @@ func TestHebrew(t *testing.T) {
 		plain := rich.NewStyle()
 		tx := rich.NewText(plain, sr)
 
-		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, plain, tsty, math32.Vec2(250, 250))
 		pc.DrawText(lns, math32.Vec2(20, 60))
 	})
 }
 
 func TestVertical(t *testing.T) {
-	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		rts.Language = "ja"
-		rts.Script = language.Han
+	RunTest(t, "nihongo_ttb", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
+		// these are correctly inferred:
+		// rts.Language = "ja"
+		// rts.Script = language.Han
 		tsty.Direction = rich.TTB // rich.BTT // note: apparently BTT is actually never used
 		tsty.FontSize.Dots *= 1.5
 
@@ -186,14 +184,14 @@ func TestVertical(t *testing.T) {
 		sr := []rune(src)
 		tx := rich.NewText(plain, sr)
 
-		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(150, 50))
+		lns := sh.WrapLines(tx, plain, tsty, math32.Vec2(150, 50))
 		// pc.DrawText(lns, math32.Vec2(100, 200))
 		pc.DrawText(lns, math32.Vec2(60, 100))
 	})
 
-	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
-		rts.Language = "ja"
-		rts.Script = language.Han
+	RunTest(t, "nihongo_ltr", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
+		// rts.Language = "ja"
+		// rts.Script = language.Han
 		tsty.FontSize.Dots *= 1.5
 
 		// todo: word wrapping and sideways rotation in vertical not currently working
@@ -202,13 +200,13 @@ func TestVertical(t *testing.T) {
 		plain := rich.NewStyle()
 		tx := rich.NewText(plain, sr)
 
-		lns := sh.WrapLines(tx, plain, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, plain, tsty, math32.Vec2(250, 250))
 		pc.DrawText(lns, math32.Vec2(20, 60))
 	})
 }
 
 func TestColors(t *testing.T) {
-	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "colors", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		tsty.FontSize.Dots *= 4
 
 		stroke := rich.NewStyle().SetStrokeColor(colors.Red).SetBackground(colors.ToUniform(colors.Scheme.Select.Container))
@@ -220,28 +218,28 @@ func TestColors(t *testing.T) {
 		tx := rich.NewText(stroke, sr[:4])
 		tx.AddSpan(&big, sr[4:8]).AddSpan(stroke, sr[8:])
 
-		lns := sh.WrapLines(tx, stroke, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, stroke, tsty, math32.Vec2(250, 250))
 		pc.DrawText(lns, math32.Vec2(20, 10))
 	})
 }
 
 func TestLink(t *testing.T) {
-	RunTest(t, "link", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "link", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		src := `The <a href="https://example.com">link <b>and <i>it</i> is cool</b></a> and`
 		sty := rich.NewStyle()
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
 		assert.NoError(t, err)
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 		pc.DrawText(lns, math32.Vec2(10, 10))
 	})
 }
 
 func TestSpacePos(t *testing.T) {
-	RunTest(t, "space-pos", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "space-pos", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		src := `The and`
 		sty := rich.NewStyle()
 		tx := rich.NewText(sty, []rune(src))
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
 
@@ -256,13 +254,13 @@ func TestSpacePos(t *testing.T) {
 }
 
 func TestLinefeed(t *testing.T) {
-	RunTest(t, "linefeed", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "linefeed", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		src := "Text2D can put <b>HTML</b> <br>formatted Text anywhere you might <i>want</i>"
 		sty := rich.NewStyle()
 		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
 		// fmt.Println(tx)
 		assert.NoError(t, err)
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
 
@@ -276,27 +274,27 @@ func TestLinefeed(t *testing.T) {
 }
 
 func TestLineCentering(t *testing.T) {
-	RunTest(t, "linecentering", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "linecentering", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		src := "This is Line Centering"
 		// src := "aceg"
 		sty := rich.NewStyle()
 		tsty.LineHeight = 3
 		tx := rich.NewText(sty, []rune(src))
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
 	})
 }
 
 func TestEmoji(t *testing.T) {
-	RunTest(t, "emoji", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "emoji", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		// src := "the \U0001F615\U0001F618\U0001F616 !!" // smileys
 		src := "the 🎁🎉, !!"
 		sty := rich.NewStyle()
 		sty.Size = 3
 		// sty.Family = rich.Monospace
 		tx := rich.NewText(sty, []rune(src))
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 		// fmt.Println(lns)
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
@@ -338,13 +336,13 @@ func TestMathInline(t *testing.T) {
 		// 	continue
 		// }
 		fnm := "math-inline-" + test.name
-		RunTest(t, fnm, 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		RunTest(t, fnm, 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 			src := test.math
 			sty := rich.NewStyle()
 			tx := rich.NewText(sty, []rune("math: "))
 			tx.AddMathInline(sty, src)
 			tx.AddSpan(sty, []rune(" and we should check line wrapping too"))
-			lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+			lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 			pos := math32.Vec2(10, 10)
 			pc.DrawText(lns, pos)
 		})
@@ -364,12 +362,12 @@ func TestMathDisplay(t *testing.T) {
 		// 	continue
 		// }
 		fnm := "math-display-" + test.name
-		RunTest(t, fnm, 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+		RunTest(t, fnm, 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 			src := test.math
 			sty := rich.NewStyle()
 			var tx rich.Text
 			tx.AddMathDisplay(sty, src)
-			lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+			lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 			pos := math32.Vec2(10, 10)
 			pc.DrawText(lns, pos)
 		})
@@ -377,14 +375,14 @@ func TestMathDisplay(t *testing.T) {
 }
 
 func TestWhitespacePre(t *testing.T) {
-	RunTest(t, "whitespacepre", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style, rts *rich.Settings) {
+	RunTest(t, "whitespacepre", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
 		tsty.WhiteSpace = text.WhiteSpacePre
 		src := "This is not going to wrap even if it goes over\nWhiteSpacePre does that for you"
 		sty := rich.NewStyle()
 		tx, err := htmltext.HTMLPreToRich([]byte(src), sty, nil)
 		assert.NoError(t, err)
 		// fmt.Println(tx)
-		lns := sh.WrapLines(tx, sty, tsty, rts, math32.Vec2(250, 250))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
 		pos := math32.Vec2(10, 10)
 		pc.DrawText(lns, pos)
 		tsty.WhiteSpace = text.WrapAsNeeded

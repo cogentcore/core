@@ -35,7 +35,7 @@ func (rs *Renderer) RenderText(txt *render.Text) {
 // The text will be drawn starting at the start pixel position, which specifies the
 // left baseline location of the first text item..
 func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32.Vector2) {
-	m := ctx.Transform
+	m := ctx.Cumulative
 	identity := m == math32.Identity2()
 	off := pos.Add(lns.Offset)
 	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
@@ -120,7 +120,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
 	if run.Math.Path != nil {
 		rs.Path.Clear()
-		PathToRasterx(&rs.Path, *run.Math.Path, ctx.Transform, off)
+		PathToRasterx(&rs.Path, *run.Math.Path, ctx.Cumulative, off)
 		rf := &rs.Raster.Filler
 		rf.SetWinding(true)
 		rf.SetColor(fill)
@@ -204,20 +204,20 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	}
 
 	rs.Path.Clear()
-	m := ctx.Transform
+	m := ctx.Cumulative
 	for _, s := range outline.Segments {
-		p0 := m.MulVector2AsPoint(math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y))
+		p0 := m.MulPoint(math32.Vec2(s.Args[0].X*scale+x, -s.Args[0].Y*scale+y))
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			rs.Path.Start(p0.ToFixed())
 		case opentype.SegmentOpLineTo:
 			rs.Path.Line(p0.ToFixed())
 		case opentype.SegmentOpQuadTo:
-			p1 := m.MulVector2AsPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y))
+			p1 := m.MulPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y))
 			rs.Path.QuadBezier(p0.ToFixed(), p1.ToFixed())
 		case opentype.SegmentOpCubeTo:
-			p1 := m.MulVector2AsPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y))
-			p2 := m.MulVector2AsPoint(math32.Vec2(s.Args[2].X*scale+x, -s.Args[2].Y*scale+y))
+			p1 := m.MulPoint(math32.Vec2(s.Args[1].X*scale+x, -s.Args[1].Y*scale+y))
+			p2 := m.MulPoint(math32.Vec2(s.Args[2].X*scale+x, -s.Args[2].Y*scale+y))
 			rs.Path.CubeBezier(p0.ToFixed(), p1.ToFixed(), p2.ToFixed())
 		}
 	}
@@ -265,11 +265,11 @@ func (rs *Renderer) StrokeBounds(ctx *render.Context, bb math32.Box2, clr color.
 		ButtCap, nil, nil, Miter,
 		nil, 0)
 	rs.Raster.SetColor(colors.Uniform(clr))
-	m := ctx.Transform
-	rs.Raster.Start(m.MulVector2AsPoint(math32.Vec2(bb.Min.X, bb.Min.Y)).ToFixed())
-	rs.Raster.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Min.Y)).ToFixed())
-	rs.Raster.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Max.Y)).ToFixed())
-	rs.Raster.Line(m.MulVector2AsPoint(math32.Vec2(bb.Min.X, bb.Max.Y)).ToFixed())
+	m := ctx.Cumulative
+	rs.Raster.Start(m.MulPoint(math32.Vec2(bb.Min.X, bb.Min.Y)).ToFixed())
+	rs.Raster.Line(m.MulPoint(math32.Vec2(bb.Max.X, bb.Min.Y)).ToFixed())
+	rs.Raster.Line(m.MulPoint(math32.Vec2(bb.Max.X, bb.Max.Y)).ToFixed())
+	rs.Raster.Line(m.MulPoint(math32.Vec2(bb.Min.X, bb.Max.Y)).ToFixed())
 	rs.Raster.Stop(true)
 	rs.Raster.Draw()
 	rs.Raster.Clear()
@@ -277,9 +277,9 @@ func (rs *Renderer) StrokeBounds(ctx *render.Context, bb math32.Box2, clr color.
 
 // StrokeTextLine strokes a line for text decoration.
 func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, width float32, clr image.Image, dash []float32) {
-	m := ctx.Transform
-	sp = m.MulVector2AsPoint(sp)
-	ep = m.MulVector2AsPoint(ep)
+	m := ctx.Cumulative
+	sp = m.MulPoint(sp)
+	ep = m.MulPoint(ep)
 	width *= MeanScale(m)
 	rs.Raster.SetStroke(
 		math32.ToFixed(width),
@@ -298,11 +298,11 @@ func (rs *Renderer) StrokeTextLine(ctx *render.Context, sp, ep math32.Vector2, w
 func (rs *Renderer) FillBounds(ctx *render.Context, bb math32.Box2, clr image.Image) {
 	rf := &rs.Raster.Filler
 	rf.SetColor(clr)
-	m := ctx.Transform
-	rf.Start(m.MulVector2AsPoint(math32.Vec2(bb.Min.X, bb.Min.Y)).ToFixed())
-	rf.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Min.Y)).ToFixed())
-	rf.Line(m.MulVector2AsPoint(math32.Vec2(bb.Max.X, bb.Max.Y)).ToFixed())
-	rf.Line(m.MulVector2AsPoint(math32.Vec2(bb.Min.X, bb.Max.Y)).ToFixed())
+	m := ctx.Cumulative
+	rf.Start(m.MulPoint(math32.Vec2(bb.Min.X, bb.Min.Y)).ToFixed())
+	rf.Line(m.MulPoint(math32.Vec2(bb.Max.X, bb.Min.Y)).ToFixed())
+	rf.Line(m.MulPoint(math32.Vec2(bb.Max.X, bb.Max.Y)).ToFixed())
+	rf.Line(m.MulPoint(math32.Vec2(bb.Min.X, bb.Max.Y)).ToFixed())
 	rf.Stop(true)
 	rf.Draw()
 	rf.Clear()

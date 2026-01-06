@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
+	"cogentcore.org/core/styles/units"
 )
 
 var (
@@ -28,6 +29,10 @@ var (
 	// NewSVGRenderer returns a structured SVG renderer that can
 	// generate an SVG vector graphics document from painter content.
 	NewSVGRenderer func(size math32.Vector2) render.Renderer
+
+	// NewPDFRenderer returns a PDF renderer that can
+	// generate a PDF document from painter content.
+	NewPDFRenderer func(size math32.Vector2, un *units.Context) render.Renderer
 )
 
 // RenderToImage is a convenience function that renders the current
@@ -41,11 +46,18 @@ func RenderToImage(pc *Painter) image.Image {
 }
 
 // RenderToSVG is a convenience function that renders the current
-// accumulated painter actions to an SVG document using a
-// [NewSVGRenderer].n
+// accumulated painter actions to an SVG document using a [NewSVGRenderer]
 func RenderToSVG(pc *Painter) []byte {
 	rd := NewSVGRenderer(pc.Size)
 	return rd.Render(pc.RenderDone()).Source()
+}
+
+// RenderToPDF is a convenience function that renders the current
+// accumulated painter actions to a PDF document using a [NewPDFRenderer]
+func RenderToPDF(pc *Painter) []byte {
+	p := pc.RenderDone()
+	rd := NewPDFRenderer(pc.Size, &pc.Context().Style.UnitContext)
+	return rd.Render(p).Source()
 }
 
 // The State holds all the current rendering state information used

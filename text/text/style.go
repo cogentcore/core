@@ -69,6 +69,10 @@ type Style struct { //types:add
 	// Indent specifies how much to indent the first line in a paragraph (inherited).
 	Indent units.Value
 
+	// Hanging specifies how much to indent all but the first line
+	// in a paragraph (inherited).
+	Hanging units.Value
+
 	// TabSize specifies the tab size, in number of characters (inherited).
 	TabSize int
 
@@ -110,6 +114,7 @@ func (ts *Style) ToDots(uc *units.Context) {
 	ts.FontSize.ToDots(uc)
 	ts.FontSize.Dots = math32.Round(ts.FontSize.Dots)
 	ts.Indent.ToDots(uc)
+	ts.Hanging.ToDots(uc)
 }
 
 // InheritFields from parent
@@ -121,6 +126,7 @@ func (ts *Style) InheritFields(parent *Style) {
 	// ts.WhiteSpace = par.WhiteSpace // todo: we can't inherit this b/c label base default then gets overwritten
 	ts.Direction = parent.Direction
 	ts.Indent = parent.Indent
+	ts.Hanging = parent.Hanging
 	ts.TabSize = parent.TabSize
 	ts.SelectColor = parent.SelectColor
 	ts.HighlightColor = parent.HighlightColor

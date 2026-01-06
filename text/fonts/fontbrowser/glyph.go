@@ -131,7 +131,7 @@ func (gi *Glyph) drawShaped(pc *paint.Painter) {
 	sty.Size = float32(msz) / tsty.FontSize.Dots
 	sty.Size *= 0.85
 	tx := rich.NewText(sty, []rune{gi.Rune})
-	lns := gi.Scene.TextShaper().WrapLines(tx, sty, tsty, &core.AppearanceSettings.Text, sz)
+	lns := gi.Scene.TextShaper().WrapLines(tx, sty, tsty, sz)
 	off := math32.Vec2(0, 0)
 	if msz > 200 {
 		o := 0.2 * float32(msz)

@@ -33,7 +33,7 @@ func (il *InlineList) Init() {
 	il.Maker(func(p *tree.Plan) {
 		sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
 
-		sz := min(sl.Len(), SystemSettings.SliceInlineLength)
+		sz := min(sl.Len(), AppearanceSettings.InlineLengths.Slice)
 		for i := 0; i < sz; i++ {
 			itxt := strconv.Itoa(i)
 			tree.AddNew(p, "value-"+itxt, func() Value {

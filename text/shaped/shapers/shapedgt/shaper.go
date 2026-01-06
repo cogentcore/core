@@ -83,18 +83,18 @@ func (sh *Shaper) FontMap() *fontscan.FontMap {
 // The results are only valid until the next call to Shape or WrapParagraph:
 // use slices.Clone if needed longer than that.
 // This is called under a mutex lock, so it is safe for parallel use.
-func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style, rts *rich.Settings) []shaped.Run {
+func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
-	return sh.ShapeText(tx, tsty, rts, tx.Join())
+	return sh.ShapeText(tx, tsty, tx.Join())
 }
 
 // ShapeText shapes the spans in the given text using given style and settings,
 // returning [shaped.Run] results.
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call.
-func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaped.Run {
-	outs := sh.ShapeTextOutput(tx, tsty, rts, txt)
+func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, txt []rune) []shaped.Run {
+	outs := sh.ShapeTextOutput(tx, tsty, txt)
 	runs := make([]shaped.Run, len(outs))
 	for i := range outs {
 		run := &Run{Output: outs[i]}
@@ -118,7 +118,7 @@ func (sh *Shaper) ShapeText(tx rich.Text, tsty *text.Style, rts *rich.Settings, 
 // returning raw go-text [shaping.Output].
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call.
-func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Settings, txt []rune) []shaping.Output {
+func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, txt []rune) []shaping.Output {
 	if tx.Len() == 0 {
 		return nil
 	}
@@ -144,7 +144,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 			si++ // skip the end special
 			continue
 		}
-		q := StyleToQuery(sty, tsty, rts)
+		q := StyleToQuery(sty, tsty)
 		sh.fontMap.SetQuery(q)
 
 		in.Text = txt
@@ -153,8 +153,8 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, rts *rich.Sett
 		in.Direction = shaped.GoTextDirection(sty.Direction, tsty)
 		fsz := tsty.FontHeight(sty)
 		in.Size = math32.ToFixed(fsz)
-		in.Script = rts.Script
-		in.Language = rts.Language
+		in.Script = rich.Settings.Script
+		in.Language = rich.Settings.Language
 
 		ins := sh.splitter.Split(in, sh.fontMap) // this is essential
 		for _, in := range ins {
@@ -219,7 +219,7 @@ func DirectionAdvance(dir di.Direction, pos fixed.Point26_6, adv fixed.Int26_6) 
 }
 
 // StyleToQuery translates the rich.Style to go-text fontscan.Query parameters.
-func StyleToQuery(sty *rich.Style, tsty *text.Style, rts *rich.Settings) fontscan.Query {
+func StyleToQuery(sty *rich.Style, tsty *text.Style) fontscan.Query {
 	q := fontscan.Query{}
 	fam := tsty.FontFamily(sty)
 	q.Families = rich.FamiliesToList(fam)

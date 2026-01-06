@@ -86,7 +86,7 @@ type Scene struct { //core:no-new
 	selectedWidgetChan chan Widget `json:"-" xml:"-"`
 
 	// source renderer for rendering the scene
-	renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	Renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
@@ -99,6 +99,9 @@ type Scene struct { //core:no-new
 	// directRenders are widgets that render directly to the [RenderWindow]
 	// instead of rendering into the Scene Painter.
 	directRenders []Widget
+
+	// this is our own text shaper in case we don't have a render context
+	textShaper shaped.Shaper
 
 	// flags are atomic bit flags for [Scene] state.
 	flags sceneFlags
@@ -182,8 +185,8 @@ func (sc *Scene) Init() {
 	sc.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable) // this is critical to enable click-off to turn off focus.
 		s.Cursor = cursors.Arrow
-		s.Background = colors.Scheme.Background
-		s.Color = colors.Scheme.OnBackground
+		s.Background = colors.Scheme.Surface
+		s.Color = colors.Scheme.OnSurface
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
 		s.Direction = styles.Column
@@ -248,6 +251,15 @@ func (sc *Scene) renderContext() *renderContext {
 	return sm.renderContext
 }
 
+// MakeTextShaper makes our own text shaper for offline use,
+// if not already in place.
+func (sc *Scene) MakeTextShaper() shaped.Shaper {
+	if sc.textShaper == nil {
+		sc.textShaper = shaped.NewShaper()
+	}
+	return sc.textShaper
+}
+
 // TextShaper returns the current [shaped.TextShaper], for text shaping.
 // may be nil if not yet initialized.
 func (sc *Scene) TextShaper() shaped.Shaper {
@@ -255,7 +267,7 @@ func (sc *Scene) TextShaper() shaped.Shaper {
 	if rc != nil {
 		return rc.textShaper
 	}
-	return nil
+	return sc.textShaper
 }
 
 // RenderWindow returns the current render window for this scene.
@@ -278,12 +290,12 @@ func (sc *Scene) RenderWindow() *renderWindow {
 func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) bool {
 	geom := sc.SceneGeom
 	geom = geom.FitInWindow(winGeom)
-	return sc.resize(geom)
+	return sc.Resize(geom)
 }
 
-// resize resizes the scene if needed, creating a new image; updates Geom.
+// Resize resizes the scene if needed, creating a new image; updates Geom.
 // returns false if the scene is already the correct size.
-func (sc *Scene) resize(geom math32.Geom2DInt) bool {
+func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return false
 	}
@@ -293,8 +305,8 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	}
 	sc.SceneGeom.Pos = geom.Pos
-	if sc.renderer != nil {
-		img := sc.renderer.Image()
+	if sc.Renderer != nil {
+		img := sc.Renderer.Image()
 		if img != nil {
 			isz := img.Bounds().Size()
 			if isz == geom.Size {
@@ -302,11 +314,11 @@ func (sc *Scene) resize(geom math32.Geom2DInt) bool {
 			}
 		}
 	} else {
-		sc.renderer = paint.NewSourceRenderer(sz)
+		sc.Renderer = paint.NewSourceRenderer(sz)
 	}
 	sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
 	sc.Painter.State.Init(sc.Painter.Paint, sz)
-	sc.renderer.SetSize(units.UnitDot, sz)
+	sc.Renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	// sc.updateScene() // note: doing this every resize can be very expensive, and is unnec in general. really you just need a layout.

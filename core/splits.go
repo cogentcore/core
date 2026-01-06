@@ -730,7 +730,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 		ksz := &cwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, szm)
 		ksz.Alloc.Total.SetDim(odim, szc)
-		ksz.setContentFromTotal(&ksz.Alloc)
+		ksz.SetContentFromTotal(&ksz.Alloc)
 	}
 
 	ci := 0

@@ -114,7 +114,7 @@ func (ts *Tabs) Init() {
 	ts.maxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Styler(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnBackground
+		s.Color = colors.Scheme.OnSurface
 		s.Grow.Set(1, 1)
 		if ts.Type.effective(ts).isColumn() {
 			s.Direction = styles.Row
@@ -534,7 +534,7 @@ func (tb *Tab) Init() {
 					ts := tb.tabs()
 					idx := ts.tabIndexByName(tb.Name)
 					// if OnlyCloseActiveTab is on, only process delete when already selected
-					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+					if AppearanceSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 						ts.SelectTabIndex(idx)
 					} else {
 						ts.DeleteTabIndex(idx)

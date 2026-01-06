@@ -45,24 +45,24 @@ func TestMatrix2(t *testing.T) {
 	rot90 := DegToRad(90)
 	rot45 := DegToRad(45)
 
-	assert.Equal(t, vx, Identity3().MulVector2AsPoint(vx))
-	assert.Equal(t, vy, Identity3().MulVector2AsPoint(vy))
-	assert.Equal(t, vxy, Identity3().MulVector2AsPoint(vxy))
+	assert.Equal(t, vx, Identity3().MulPoint(vx))
+	assert.Equal(t, vy, Identity3().MulPoint(vy))
+	assert.Equal(t, vxy, Identity3().MulPoint(vxy))
 
-	assert.Equal(t, vxy, Translate2D(1, 1).MulVector2AsPoint(v0))
+	assert.Equal(t, vxy, Translate2D(1, 1).MulPoint(v0))
 
-	assert.Equal(t, vxy.MulScalar(2), Scale2D(2, 2).MulVector2AsPoint(vxy))
+	assert.Equal(t, vxy.MulScalar(2), Scale2D(2, 2).MulPoint(vxy))
 
-	tolAssertEqualVector(t, vy, Rotate2D(rot90).MulVector2AsPoint(vx))  // left, CCW
-	tolAssertEqualVector(t, vx, Rotate2D(-rot90).MulVector2AsPoint(vy)) // right, CW
-	tolAssertEqualVector(t, vxy.Normal(), Rotate2D(rot45).MulVector2AsPoint(vx))
-	tolAssertEqualVector(t, vxy.Normal(), Rotate2D(-rot45).MulVector2AsPoint(vy))
+	tolAssertEqualVector(t, vy, Rotate2D(rot90).MulPoint(vx))  // left, CCW
+	tolAssertEqualVector(t, vx, Rotate2D(-rot90).MulPoint(vy)) // right, CW
+	tolAssertEqualVector(t, vxy.Normal(), Rotate2D(rot45).MulPoint(vx))
+	tolAssertEqualVector(t, vxy.Normal(), Rotate2D(-rot45).MulPoint(vy))
 
-	tolAssertEqualVector(t, vy, Rotate2D(-rot90).Inverse().MulVector2AsPoint(vx))
-	tolAssertEqualVector(t, vx, Rotate2D(rot90).Inverse().MulVector2AsPoint(vy))
+	tolAssertEqualVector(t, vy, Rotate2D(-rot90).Inverse().MulPoint(vx))
+	tolAssertEqualVector(t, vx, Rotate2D(rot90).Inverse().MulPoint(vy))
 
-	tolAssertEqualVector(t, vxy, Rotate2D(-rot45).Mul(Rotate2D(rot45)).MulVector2AsPoint(vxy))
-	tolAssertEqualVector(t, vxy, Rotate2D(-rot45).Mul(Rotate2D(-rot45).Inverse()).MulVector2AsPoint(vxy))
+	tolAssertEqualVector(t, vxy, Rotate2D(-rot45).Mul(Rotate2D(rot45)).MulPoint(vxy))
+	tolAssertEqualVector(t, vxy, Rotate2D(-rot45).Mul(Rotate2D(-rot45).Inverse()).MulPoint(vxy))
 
 	tolassert.EqualTol(t, -rot90, Rotate2D(-rot90).ExtractRot(), standardTol)
 	tolassert.EqualTol(t, -rot45, Rotate2D(-rot45).ExtractRot(), standardTol)
@@ -71,7 +71,7 @@ func TestMatrix2(t *testing.T) {
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
 	// multiplication order is *reverse* of "logical" order:
-	tolAssertEqualVector(t, Vec2(1, 3), Translate2D(1, 1).Mul(Rotate2D(rot90)).Mul(Scale2D(2, 2)).MulVector2AsPoint(vx))
+	tolAssertEqualVector(t, Vec2(1, 3), Translate2D(1, 1).Mul(Rotate2D(rot90)).Mul(Scale2D(2, 2)).MulPoint(vx))
 
 }
 
@@ -153,14 +153,14 @@ func TestMatrix2Canvas(t *testing.T) {
 	p := Vector2{3, 4}
 	rot90 := DegToRad(90)
 	rot45 := DegToRad(45)
-	tolAssertEqualVector(t, Identity2().Translate(2.0, 2.0).MulVector2AsPoint(p), Vector2{5.0, 6.0})
-	tolAssertEqualVector(t, Identity2().Scale(2.0, 2.0).MulVector2AsPoint(p), Vector2{6.0, 8.0})
-	tolAssertEqualVector(t, Identity2().Scale(1.0, -1.0).MulVector2AsPoint(p), Vector2{3.0, -4.0})
-	tolAssertEqualVector(t, Identity2().ScaleAbout(2.0, -1.0, 2.0, 2.0).MulVector2AsPoint(p), Vector2{4.0, 0.0})
-	tolAssertEqualVector(t, Identity2().Shear(1.0, 0.0).MulVector2AsPoint(p), Vector2{7.0, 4.0})
-	tolAssertEqualVector(t, Identity2().Rotate(rot90).MulVector2AsPoint(p), p.Rot90CCW())
-	tolAssertEqualVector(t, Identity2().RotateAbout(rot90, 5.0, 5.0).MulVector2AsPoint(p), p.Rot(90.0*Pi/180.0, Vector2{5.0, 5.0}))
-	tolAssertEqualVector(t, Identity2().Rotate(rot90).Transpose().MulVector2AsPoint(p), p.Rot90CW())
+	tolAssertEqualVector(t, Identity2().Translate(2.0, 2.0).MulPoint(p), Vector2{5.0, 6.0})
+	tolAssertEqualVector(t, Identity2().Scale(2.0, 2.0).MulPoint(p), Vector2{6.0, 8.0})
+	tolAssertEqualVector(t, Identity2().Scale(1.0, -1.0).MulPoint(p), Vector2{3.0, -4.0})
+	tolAssertEqualVector(t, Identity2().ScaleAbout(2.0, -1.0, 2.0, 2.0).MulPoint(p), Vector2{4.0, 0.0})
+	tolAssertEqualVector(t, Identity2().Shear(1.0, 0.0).MulPoint(p), Vector2{7.0, 4.0})
+	tolAssertEqualVector(t, Identity2().Rotate(rot90).MulPoint(p), p.Rot90CCW())
+	tolAssertEqualVector(t, Identity2().RotateAbout(rot90, 5.0, 5.0).MulPoint(p), p.Rot(90.0*Pi/180.0, Vector2{5.0, 5.0}))
+	tolAssertEqualVector(t, Identity2().Rotate(rot90).Transpose().MulPoint(p), p.Rot90CW())
 	tolAssertEqualMatrix2(t, Identity2().Scale(2.0, 4.0).Inverse(), Identity2().Scale(0.5, 0.25))
 	tolAssertEqualMatrix2(t, Identity2().Rotate(rot90).Inverse(), Identity2().Rotate(-rot90))
 	tolAssertEqualMatrix2(t, Identity2().Rotate(rot90).Scale(2.0, 1.0), Identity2().Scale(1.0, 2.0).Rotate(rot90))

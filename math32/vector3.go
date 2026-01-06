@@ -120,6 +120,10 @@ func (v Vector3) ToSlice(array []float32, offset int) {
 	array[offset+2] = v.Z
 }
 
+func (v Vector3) IsNaN() bool {
+	return IsNaN(v.X) || IsNaN(v.Y) || IsNaN(v.Z)
+}
+
 // Basic math operations:
 
 // Add adds the other given vector to this one and returns the result as a new vector.
@@ -410,25 +414,6 @@ func (v Vector3) MulProjection(m *Matrix4) Vector3 {
 	return Vector3{(m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]) * d,
 		(m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13]) * d,
 		(m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]) * d}
-}
-
-// MulQuat returns vector multiplied by specified quaternion and
-// then by the quaternion inverse.
-// It basically applies the rotation encoded in the quaternion to this vector.
-func (v Vector3) MulQuat(q Quat) Vector3 {
-	qx := q.X
-	qy := q.Y
-	qz := q.Z
-	qw := q.W
-	// calculate quat * vector
-	ix := qw*v.X + qy*v.Z - qz*v.Y
-	iy := qw*v.Y + qz*v.X - qx*v.Z
-	iz := qw*v.Z + qx*v.Y - qy*v.X
-	iw := -qx*v.X - qy*v.Y - qz*v.Z
-	// calculate result * inverse quat
-	return Vector3{ix*qw + iw*-qx + iy*-qz - iz*-qy,
-		iy*qw + iw*-qy + iz*-qx - ix*-qz,
-		iz*qw + iw*-qz + ix*-qy - iy*-qx}
 }
 
 // Cross returns the cross product of this vector with other.

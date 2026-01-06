@@ -82,7 +82,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	}
 	pc := &pt.Context
 	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
-	PathToRasterx(&rs.Path, p, pt.Context.Transform, math32.Vector2{})
+	PathToRasterx(&rs.Path, p, pt.Context.Cumulative, math32.Vector2{})
 	rs.Fill(pt)
 	rs.Stroke(pt)
 	rs.Path.Clear()
@@ -92,18 +92,18 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 func PathToRasterx(rs Adder, p ppath.Path, m math32.Matrix2, off math32.Vector2) {
 	for s := p.Scanner(); s.Scan(); {
 		cmd := s.Cmd()
-		end := m.MulVector2AsPoint(s.End()).Add(off)
+		end := m.MulPoint(s.End()).Add(off)
 		switch cmd {
 		case ppath.MoveTo:
 			rs.Start(end.ToFixed())
 		case ppath.LineTo:
 			rs.Line(end.ToFixed())
 		case ppath.QuadTo:
-			cp1 := m.MulVector2AsPoint(s.CP1()).Add(off)
+			cp1 := m.MulPoint(s.CP1()).Add(off)
 			rs.QuadBezier(cp1.ToFixed(), end.ToFixed())
 		case ppath.CubeTo:
-			cp1 := m.MulVector2AsPoint(s.CP1()).Add(off)
-			cp2 := m.MulVector2AsPoint(s.CP2()).Add(off)
+			cp1 := m.MulPoint(s.CP1()).Add(off)
+			cp2 := m.MulPoint(s.CP2()).Add(off)
 			rs.CubeBezier(cp1.ToFixed(), cp2.ToFixed(), end.ToFixed())
 		case ppath.Close:
 			rs.Stop(true)
@@ -120,7 +120,7 @@ func (rs *Renderer) Stroke(pt *render.Path) {
 
 	dash := slices.Clone(sty.Stroke.Dashes)
 	if dash != nil {
-		scx, scy := pc.Transform.ExtractScale()
+		scx, scy := pc.Cumulative.ExtractScale()
 		sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
 		for i := range dash {
 			dash[i] *= sc
@@ -143,7 +143,7 @@ func (rs *Renderer) SetColor(sc Scanner, pc *render.Context, clr image.Image, op
 		fbox := sc.GetPathExtent()
 		lastRenderBBox := image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 			Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-		g.Update(opacity, math32.B2FromRect(lastRenderBBox), pc.Transform)
+		g.Update(opacity, math32.B2FromRect(lastRenderBBox), pc.Cumulative)
 		sc.SetColor(clr)
 	} else {
 		if opacity < 1 {
@@ -187,7 +187,7 @@ func (rs *Renderer) StrokeWidth(pt *render.Path) float32 {
 	if sty.VectorEffect == ppath.VectorEffectNonScalingStroke {
 		return dw
 	}
-	sc := MeanScale(pt.Context.Transform)
+	sc := MeanScale(pt.Context.Cumulative)
 	return sc * dw
 }
 

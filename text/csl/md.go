@@ -7,50 +7,30 @@ package csl
 import (
 	"bufio"
 	"io"
-	"os"
-	"path/filepath"
+	"io/fs"
 	"regexp"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
+	"cogentcore.org/core/text/htmltext"
 )
 
 // GenerateMarkdown extracts markdown citations in the format [@Ref; @Ref]
-// from .md markdown files in given directory, looking up in given source [KeyList],
-// and writing the results in given style to given .md file (references.md default).
+// from given mds markdown files in given filesystem (use os.DirFS for filesys),
+// looking up in given source [KeyList], and writing the results in given style to writer.
 // Heading is written first: must include the appropriate markdown heading level
 // (## typically). Returns the [KeyList] of references that were cited.
-func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) (*KeyList, error) {
+func GenerateMarkdown(w io.Writer, fsys fs.FS, heading string, kl *KeyList, sty Styles, mds ...string) (*KeyList, error) {
 	cited := &KeyList{}
-	if dir == "" {
-		dir = "./"
-	}
-	mds := fsx.Filenames(dir, ".md")
-	if len(mds) == 0 {
-		return cited, errors.New("No .md files found in: " + dir)
-	}
 	var errs []error
-	for i := range mds {
-		mds[i] = filepath.Join(dir, mds[i])
-	}
-	err := ExtractMarkdownCites(mds, kl, cited)
+	err := ExtractMarkdownCites(fsys, mds, kl, cited)
 	if err != nil {
 		errs = append(errs, err)
 	}
-	if refFile == "" {
-		refFile = filepath.Join(dir, "references.md")
-	}
-	of, err := os.Create(refFile)
-	if err != nil {
-		errs = append(errs, err)
-		return cited, errors.Join(errs...)
-	}
-	defer of.Close()
 	if heading != "" {
-		of.WriteString(heading + "\n\n")
+		w.Write([]byte(heading + "\n\n"))
 	}
-	err = WriteRefsMarkdown(of, cited, sty)
+	err = WriteRefsMarkdown(w, cited, sty)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -58,12 +38,13 @@ func GenerateMarkdown(dir, refFile, heading string, kl *KeyList, sty Styles) (*K
 }
 
 // ExtractMarkdownCites extracts markdown citations in the format [@Ref; @Ref]
-// from given list of .md files, looking up in given source [KeyList], adding to cited.
-func ExtractMarkdownCites(files []string, src, cited *KeyList) error {
+// from given list of .md files in given FS,
+// looking up in given source [KeyList], adding to cited.
+func ExtractMarkdownCites(fsys fs.FS, files []string, src, cited *KeyList) error {
 	exp := regexp.MustCompile(`\[(@\^?([[:alnum:]]+-?)+(;[[:blank:]]+)?)+\]`)
 	var errs []error
 	for _, fn := range files {
-		f, err := os.Open(fn)
+		f, err := fsys.Open(fn)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -108,7 +89,8 @@ func WriteRefsMarkdown(w io.Writer, kl *KeyList, sty Styles) error {
 		if err != nil {
 			return err
 		}
-		_, err = w.Write([]byte(string(ref.Join()) + "</p>\n\n")) // todo: ref to markdown!!
+		str := htmltext.RichToHTML(ref)
+		_, err = w.Write([]byte(str + "</p>\n\n")) // todo: ref to markdown!!
 		if err != nil {
 			return err
 		}

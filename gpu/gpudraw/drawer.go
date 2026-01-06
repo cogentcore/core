@@ -118,7 +118,7 @@ func (dw *Drawer) Start() {
 	defer dw.Unlock()
 
 	// always use the default background color for clearing in general
-	dw.System.SetClearColor(colors.ToUniform(colors.Scheme.Background))
+	dw.System.SetClearColor(colors.ToUniform(colors.Scheme.Surface))
 
 	dw.opList = dw.opList[:0]
 	dw.images.start()

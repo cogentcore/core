@@ -65,9 +65,18 @@ type Params struct {
 
 	// BlurRadius is the Gaussian standard deviation for Blur function
 	BlurRadius float32
+
+	// Anchor provides a named link destination associated with this text item.
+	// Used for document navigation, e.g., in PDF rendering. Must be a unique name.
+	// Is set in [core.Text] based on the id property, which is set by [content].
+	Anchor string
 }
 
 func (pr *Params) IsRenderItem() {}
+
+func (p *Params) String() string {
+	return "image: " + p.Cmd.String()
+}
 
 // NewClear returns a new Clear that renders entire image with given source image.
 func NewClear(src image.Image, sp image.Point, op draw.Op) *Params {

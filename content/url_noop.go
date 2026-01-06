@@ -6,6 +6,12 @@
 
 package content
 
-func (ct *Content) getWebURL() string  { return "" }
-func (ct *Content) saveWebURL()        {}
-func (ct *Content) handleWebPopState() {}
+// OfflineURL is the non-web base url, which can be set to allow
+// docs to refer to this in frontmatter.
+var OfflineURL = ""
+
+// just for printing
+func (ct *Content) getPrintURL() string { return OfflineURL }
+func (ct *Content) getWebURL() string   { return "" }
+func (ct *Content) saveWebURL()         {}
+func (ct *Content) handleWebPopState()  {}

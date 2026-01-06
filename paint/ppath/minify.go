@@ -15,8 +15,11 @@ const MaxInt = int(^uint(0) >> 1)
 // MinInt is the minimum value of int.
 const MinInt = -MaxInt - 1
 
-// MinifyDecimal minifies a given byte slice containing a decimal and removes superfluous characters. It differs from Number in that it does not parse exponents.
-// It does not parse or output exponents. prec is the number of significant digits. When prec is zero it will keep all digits. Only digits after the dot can be removed to reach the number of significant digits. Very large number may thus have more significant digits.
+// MinifyDecimal minifies a given byte slice containing a decimal and removes superfluous characters.
+// It differs from Number in that it does not parse exponents.
+// It does not parse or output exponents. prec is the number of significant digits.
+// When prec is zero it will keep all digits. Only digits after the dot can be removed
+// to reach the number of significant digits. Very large number may thus have more significant digits.
 func MinifyDecimal(num []byte, prec int) []byte {
 	if len(num) <= 1 {
 		return num

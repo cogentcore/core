@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/yaegicore/basesymbols"
 	"cogentcore.org/core/yaegicore/coresymbols"
@@ -51,7 +50,7 @@ type Interpreter interface {
 }
 
 func init() {
-	htmlcore.BindTextEditor = BindTextEditor
+	content.BindTextEditor = BindTextEditor
 	content.NewPageInitFunc = ResetGoalInterpreter
 	coresymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
 	basesymbols.Symbols["."] = map[string]reflect.Value{} // make "." available for use
@@ -103,7 +102,7 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 // BindTextEditor binds the given text editor to a yaegi interpreter
 // such that the contents of the text editor are interpreted as code
 // of the given language, which is run in the context of the given parent widget.
-// It is used as the default value of [htmlcore.BindTextEditor].
+// It is used as the default value of [content.BindTextEditor].
 func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 	oc := func() {
 		in, new, err := getInterpreter(language)

@@ -25,20 +25,20 @@ func (p Path) Transform(m math32.Matrix2) Path {
 				fmt.Println("path length error:", len(p), i, p)
 				return p
 			}
-			end := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
+			end := m.MulPoint(math32.Vec2(p[i+1], p[i+2]))
 			p[i+1] = end.X
 			p[i+2] = end.Y
 		case QuadTo:
-			cp := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
-			end := m.MulVector2AsPoint(math32.Vec2(p[i+3], p[i+4]))
+			cp := m.MulPoint(math32.Vec2(p[i+1], p[i+2]))
+			end := m.MulPoint(math32.Vec2(p[i+3], p[i+4]))
 			p[i+1] = cp.X
 			p[i+2] = cp.Y
 			p[i+3] = end.X
 			p[i+4] = end.Y
 		case CubeTo:
-			cp1 := m.MulVector2AsPoint(math32.Vec2(p[i+1], p[i+2]))
-			cp2 := m.MulVector2AsPoint(math32.Vec2(p[i+3], p[i+4]))
-			end := m.MulVector2AsPoint(math32.Vec2(p[i+5], p[i+6]))
+			cp1 := m.MulPoint(math32.Vec2(p[i+1], p[i+2]))
+			cp2 := m.MulPoint(math32.Vec2(p[i+3], p[i+4]))
+			end := m.MulPoint(math32.Vec2(p[i+5], p[i+6]))
 			p[i+1] = cp1.X
 			p[i+2] = cp1.Y
 			p[i+3] = cp2.X
@@ -77,7 +77,7 @@ func (p Path) Transform(m math32.Matrix2) Path {
 			if xscale*yscale < 0.0 { // flip x or y axis needs flipping of the sweep
 				sweep = !sweep
 			}
-			end = m.MulVector2AsPoint(end)
+			end = m.MulPoint(end)
 
 			p[i+1] = rx
 			p[i+2] = ry

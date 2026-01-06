@@ -14,11 +14,12 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Linear represents a linear gradient. It implements the [image.Image] interface.
+// Linear represents a linear gradient along linear axis from Start to End.
+// It implements the [image.Image] interface.
 type Linear struct { //types:add -setters
 	Base
 
-	// the starting point of the gradient (x1 and y1 in SVG)
+	// the starting point of the gradient axis (x1 and y1 in SVG).
 	Start math32.Vector2
 
 	// the ending point of the gradient (x2 and y2 in SVG)
@@ -64,14 +65,20 @@ func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		l.rStart = l.Box.Min.Add(sz.Mul(l.Start))
 		l.rEnd = l.Box.Min.Add(sz.Mul(l.End))
 	} else {
-		l.rStart = l.Transform.MulVector2AsPoint(l.Start)
-		l.rEnd = l.Transform.MulVector2AsPoint(l.End)
-		l.rStart = objTransform.MulVector2AsPoint(l.rStart)
-		l.rEnd = objTransform.MulVector2AsPoint(l.rEnd)
+		l.rStart = l.Transform.MulPoint(l.Start)
+		l.rEnd = l.Transform.MulPoint(l.End)
+		l.rStart = objTransform.MulPoint(l.rStart)
+		l.rEnd = objTransform.MulPoint(l.rEnd)
 	}
 
 	l.distance = l.rEnd.Sub(l.rStart)
 	l.distanceLengthSquared = l.distance.LengthSquared()
+}
+
+// TransformedAxis returns the Start and End axis points as transformed
+// by the last Update call.
+func (l *Linear) TransformedAxis() (start, end math32.Vector2) {
+	return l.rStart, l.rEnd
 }
 
 // At returns the color of the linear gradient at the given point
@@ -85,7 +92,7 @@ func (l *Linear) At(x, y int) color.Color {
 
 	pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
-		pt = l.boxTransform.MulVector2AsPoint(pt)
+		pt = l.boxTransform.MulPoint(pt)
 	}
 	df := pt.Sub(l.rStart)
 	pos := (l.distance.X*df.X + l.distance.Y*df.Y) / l.distanceLengthSquared

@@ -12,8 +12,18 @@ package math32
 
 import "errors"
 
-// Matrix3 is 3x3 matrix organized internally as column matrix.
+// Matrix3 is 3x3 matrix organized internally as column matrix,
+// with columns as the inner dimension.
 type Matrix3 [9]float32
+
+// note: matrix indexes and dimensions are row,column.
+
+// Mat3 constructs a new Matrix3 from given values, in column-wise order.
+func Mat3(n11, n21, n31, n12, n22, n32, n13, n23, n33 float32) Matrix3 {
+	m := Matrix3{}
+	m.Set(n11, n21, n31, n12, n22, n32, n13, n23, n33)
+	return m
+}
 
 // Identity3 returns a new identity [Matrix3] matrix.
 func Identity3() Matrix3 {
@@ -49,26 +59,26 @@ func Matrix3Rotate2D(angle float32) Matrix3 {
 	return Matrix3FromMatrix2(Rotate2D(angle))
 }
 
-// Set sets all the elements of the matrix row by row starting at row1, column1,
-// row1, column2, row1, column3 and so forth.
-func (m *Matrix3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) {
+// Set sets all the elements of the matrix col by col starting at row1, column1,
+// row2, column1, row3, column1 and so forth.
+func (m *Matrix3) Set(n11, n21, n31, n12, n22, n32, n13, n23, n33 float32) {
 	m[0] = n11
-	m[3] = n12
-	m[6] = n13
 	m[1] = n21
-	m[4] = n22
-	m[7] = n23
 	m[2] = n31
+	m[3] = n12
+	m[4] = n22
 	m[5] = n32
+	m[6] = n13
+	m[7] = n23
 	m[8] = n33
 }
 
 // SetFromMatrix4 sets the matrix elements based on a Matrix4.
 func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
 	m.Set(
-		src[0], src[4], src[8],
-		src[1], src[5], src[9],
-		src[2], src[6], src[10],
+		src[0], src[1], src[2],
+		src[4], src[5], src[6],
+		src[8], src[9], src[10],
 	)
 }
 
@@ -79,8 +89,8 @@ func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
 // SetFromMatrix2 sets the matrix elements based on a Matrix2.
 func (m *Matrix3) SetFromMatrix2(src Matrix2) {
 	m.Set(
-		src.XX, src.YX, src.X0,
-		src.XY, src.YY, src.Y0,
+		src.XX, src.XY, src.X0,
+		src.YX, src.YY, src.Y0,
 		src.X0, src.Y0, 1,
 	)
 }
@@ -122,35 +132,35 @@ func (m *Matrix3) CopyFrom(src Matrix3) {
 // MulMatrices sets ths matrix as matrix multiplication a by b (i.e., a*b).
 func (m *Matrix3) MulMatrices(a, b Matrix3) {
 	a11 := a[0]
-	a12 := a[3]
-	a13 := a[6]
 	a21 := a[1]
-	a22 := a[4]
-	a23 := a[7]
 	a31 := a[2]
+	a12 := a[3]
+	a22 := a[4]
 	a32 := a[5]
+	a13 := a[6]
+	a23 := a[7]
 	a33 := a[8]
 
 	b11 := b[0]
-	b12 := b[3]
-	b13 := b[6]
 	b21 := b[1]
-	b22 := b[4]
-	b23 := b[7]
 	b31 := b[2]
+	b12 := b[3]
+	b22 := b[4]
 	b32 := b[5]
+	b13 := b[6]
+	b23 := b[7]
 	b33 := b[8]
 
 	m[0] = b11*a11 + b12*a21 + b13*a31
-	m[3] = b11*a12 + b12*a22 + b13*a32
-	m[6] = b11*a13 + b12*a23 + b13*a33
-
 	m[1] = b21*a11 + b22*a21 + b23*a31
-	m[4] = b21*a12 + b22*a22 + b23*a32
-	m[7] = b21*a13 + b22*a23 + b23*a33
-
 	m[2] = b31*a11 + b32*a21 + b33*a31
+
+	m[3] = b11*a12 + b12*a22 + b13*a32
+	m[4] = b21*a12 + b22*a22 + b23*a32
 	m[5] = b31*a12 + b32*a22 + b33*a32
+
+	m[6] = b11*a13 + b12*a23 + b13*a33
+	m[7] = b21*a13 + b22*a23 + b23*a33
 	m[8] = b31*a13 + b32*a23 + b33*a33
 }
 
@@ -176,29 +186,36 @@ func (m Matrix3) MulScalar(s float32) Matrix3 {
 // SetMulScalar multiplies each of this matrix's components by the specified scalar.
 func (m *Matrix3) SetMulScalar(s float32) {
 	m[0] *= s
-	m[3] *= s
-	m[6] *= s
 	m[1] *= s
-	m[4] *= s
-	m[7] *= s
 	m[2] *= s
+	m[3] *= s
+	m[4] *= s
 	m[5] *= s
+	m[6] *= s
+	m[7] *= s
 	m[8] *= s
 }
 
-// MulVector2AsVector multiplies the Vector2 as a vector without adding translations.
+// MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Matrix3) MulVector2AsVector(v Vector2) Vector2 {
+func (a Matrix3) MulVector(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y
 	ty := a[3]*v.X + a[4]*v.Y
 	return Vec2(tx, ty)
 }
 
-// MulVector2AsPoint multiplies the Vector2 as a point, including adding translations.
-func (a Matrix3) MulVector2AsPoint(v Vector2) Vector2 {
+// MulPoint multiplies the Vector2 as a point, including adding translations.
+func (a Matrix3) MulPoint(v Vector2) Vector2 {
 	tx := a[0]*v.X + a[1]*v.Y + a[2]
 	ty := a[3]*v.X + a[4]*v.Y + a[5]
 	return Vec2(tx, ty)
+}
+
+// MulVector3 multiplies the Vector3 on the right, as a standard matrix multiply.
+func (a Matrix3) MulVector3(v Vector3) Vector3 {
+	return Vec3(a[0]*v.X+a[3]*v.Y+a[6]*v.Z,
+		a[1]*v.X+a[4]*v.Y+a[7]*v.Z,
+		a[2]*v.X+a[5]*v.Y+a[8]*v.Z)
 }
 
 // MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
@@ -323,8 +340,7 @@ func (m *Matrix3) SetScaleCols(v Vector3) {
 	m[8] *= v.Z
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Special functions
+//////// Special functions
 
 // SetNormalMatrix set this matrix to the matrix that can transform the normal vectors
 // from the src matrix which is used transform the vertices (e.g., a ModelView matrix).

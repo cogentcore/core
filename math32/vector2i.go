@@ -17,8 +17,8 @@ type Vector2i struct {
 }
 
 // Vec2i returns a new [Vector2i] with the given x and y components.
-func Vec2i(x, y int32) Vector2i {
-	return Vector2i{X: x, Y: y}
+func Vec2i(x, y int) Vector2i {
+	return Vector2i{X: int32(x), Y: int32(y)}
 }
 
 // Vector2iScalar returns a new [Vector2i] with all components set to the given scalar value.

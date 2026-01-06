@@ -59,6 +59,7 @@ func main() {
 	b := core.NewBody("Cogent Core Docs")
 	ct := content.NewContent(b).SetContent(econtent)
 	ctx := ct.Context
+	content.OfflineURL = "https://cogentcore.org/core"
 	ctx.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
 		tb := core.NewToolbar(bar)

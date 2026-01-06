@@ -12,15 +12,14 @@ import (
 	"bytes"
 	"cmp"
 	"fmt"
-	"io"
 	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/exp/maps"
 
 	"cogentcore.org/core/base/errors"
@@ -32,10 +31,10 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
+	"cogentcore.org/core/text/paginate"
 	"cogentcore.org/core/tree"
 )
 
@@ -103,6 +102,10 @@ type Content struct {
 	// if any (in kebab-case).
 	currentHeading string
 
+	// inPDFRender indicates that it is rendering a PDF now, turning off
+	// elements that are not appropriate for that.
+	inPDFRender bool
+
 	// The previous and next page, if applicable. They must be stored on this struct
 	// to avoid stale local closure variables.
 	prevPage, nextPage *bcontent.Page
@@ -126,6 +129,7 @@ func (ct *Content) Init() {
 	ct.SetSplits(0.2, 0.8)
 
 	ct.Context = htmlcore.NewContext()
+	ct.Context.DelayedImageLoad = false // not useful for content
 	ct.Context.OpenURL = func(url string) {
 		ct.Open(url)
 	}
@@ -138,73 +142,9 @@ func (ct *Content) Init() {
 		errors.Log(ct.embedPage(ctx))
 		return true
 	}
-	ct.Context.AttributeHandlers["id"] = func(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
-		if ct.currentPage == nil {
-			return false
-		}
-		lbl := ct.currentPage.SpecialLabel(value)
-		ch := node.GetChildren()
-		if len(ch) == 2 { // image or table
-			if entering {
-				sty := htmlcore.MDGetAttr(node, "style")
-				if sty != "" {
-					if img, ok := ch[1].(*ast.Image); ok {
-						htmlcore.MDSetAttr(img, "style", sty)
-						delete(node.AsContainer().Attribute.Attrs, "style")
-					}
-				}
-				return false
-			}
-			cp := "\n<p><b>" + lbl + ":</b>"
-			if img, ok := ch[1].(*ast.Image); ok {
-				// fmt.Printf("Image: %s\n", string(img.Destination))
-				// fmt.Printf("Image: %#v\n", img)
-				nc := len(img.Children)
-				if nc > 0 {
-					if txt, ok := img.Children[0].(*ast.Text); ok {
-						// fmt.Printf("text: %s\n", string(txt.Literal)) // not formatted!
-						cp += " " + string(txt.Literal) // todo: not formatted!
-					}
-				}
-			} else {
-				title := htmlcore.MDGetAttr(node, "title")
-				if title != "" {
-					cp += " " + title
-				}
-			}
-			cp += "</p>\n"
-			w.Write([]byte(cp))
-		} else if entering {
-			cp := "\n<span id=\"" + value + "\"><b>" + lbl + ":</b>"
-			title := htmlcore.MDGetAttr(node, "title")
-			if title != "" {
-				cp += " " + title
-			}
-			cp += "</span>\n"
-			w.Write([]byte(cp))
-			// fmt.Println("id:", value, lbl)
-			// fmt.Printf("%#v\n", node)
-		}
-		return false
-	}
-	ct.Context.AddWidgetHandler(func(w core.Widget) {
-		switch x := w.(type) {
-		case *core.Text:
-			x.Styler(func(s *styles.Style) {
-				s.Max.X.Ch(120)
-			})
-		case *core.Image:
-			x.Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable)
-				s.Overflow.Set(styles.OverflowAuto)
-			})
-			x.OnDoubleClick(func(e events.Event) {
-				d := core.NewBody("Image")
-				core.NewImage(d).SetImage(x.Image)
-				d.RunWindowDialog(x)
-			})
-		}
-	})
+	ct.Context.ElementHandlers["pre"] = ct.htmlPreHandler
+	ct.Context.AttributeHandlers["id"] = ct.htmlIDAttributeHandler
+	ct.Context.AddWidgetHandler(ct.widgetHandler)
 
 	ct.Maker(func(p *tree.Plan) {
 		if ct.currentPage == nil {
@@ -224,7 +164,7 @@ func (ct *Content) Init() {
 				}
 			})
 			w.Maker(func(p *tree.Plan) {
-				if ct.currentPage.Title != "" {
+				if !ct.inPDFRender && ct.currentPage.Title != "" {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextDisplaySmall)
 						w.Updater(func() {
@@ -232,11 +172,11 @@ func (ct *Content) Init() {
 						})
 					})
 				}
-				if len(ct.currentPage.Authors) > 0 {
+				if !ct.inPDFRender && len(ct.currentPage.Authors) > 0 {
 					tree.Add(p, func(w *core.Text) {
 						w.SetType(core.TextTitleLarge)
 						w.Updater(func() {
-							w.SetText("By " + strcase.FormatList(ct.currentPage.Authors...))
+							w.SetText("By " + ct.currentPage.Authors)
 						})
 					})
 				}
@@ -257,7 +197,9 @@ func (ct *Content) Init() {
 						errors.Log(ct.loadPage(w))
 					})
 				})
-				ct.makeBottomButtons(p)
+				if !ct.inPDFRender {
+					ct.makeBottomButtons(p)
+				}
 			})
 		})
 	})
@@ -370,6 +312,12 @@ func (ct *Content) addHistory(pg *bcontent.Page) {
 	ct.historyIndex = len(ct.history)
 	ct.history = append(ct.history, pg)
 	ct.saveWebURL()
+}
+
+// reloadPage reloads the current page
+func (ct *Content) reloadPage() {
+	ct.renderedPage = nil
+	ct.Update()
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
@@ -528,4 +476,72 @@ func (ct *Content) setStageTitle() {
 		}
 		rw.SetStageTitle(name)
 	}
+}
+
+// PagePDF generates a PDF of the current page, to given file path
+// (directory). the page name is the file name.
+func (ct *Content) PagePDF(path string) error {
+	if ct.currentPage == nil {
+		return errors.Log(errors.New("Page empty"))
+	}
+	core.MessageSnackbar(ct, "Generating PDF...")
+
+	Settings.PDF.FontScale = (100.0 / core.AppearanceSettings.DocsFontSize)
+
+	ct.inPDFRender = true
+	ct.reloadPage()
+	ct.inPDFRender = false
+
+	refs := ct.PageRefs(ct.currentPage)
+
+	fname := ct.currentPage.Name + ".pdf"
+	if path != "" {
+		errors.Log(os.MkdirAll(path, 0777))
+		fname = filepath.Join(path, fname)
+	}
+	f, err := os.Create(fname)
+	if errors.Log(err) != nil {
+		return err
+	}
+	opts := Settings.PageSettings(ct, ct.currentPage)
+	if refs != nil {
+		paginate.PDF(f, opts.PDF, ct.rightFrame, refs)
+	} else {
+		paginate.PDF(f, opts.PDF, ct.rightFrame)
+	}
+	err = f.Close()
+
+	ct.reloadPage()
+
+	core.MessageSnackbar(ct, "PDF saved to: "+fname)
+	af := errors.Log1(filepath.Abs(fname))
+	core.TheApp.OpenURL("file://" + af)
+	return err
+}
+
+// PageRefs returns a core.Frame with the contents of the references cited
+// on the given page. if References is nil, or error, result will be nil.
+func (ct *Content) PageRefs(page *bcontent.Page) *core.Frame {
+	if ct.References == nil {
+		return nil
+	}
+	sty := csl.APA // todo: settings
+	var b bytes.Buffer
+	_, err := csl.GenerateMarkdown(&b, ct.Source, "## References", ct.References, sty, page.Filename)
+	if errors.Log(err) != nil {
+		return nil
+	}
+	// os.WriteFile("tmp-refs.md", b.Bytes(), 0666)
+
+	fr := core.NewFrame()
+	fr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	err = htmlcore.ReadMD(ct.Context, fr, b.Bytes())
+	if errors.Log(err) != nil {
+		return nil
+	}
+	fr.StyleTree()
+	fr.SetScene(ct.Scene)
+	return fr
 }

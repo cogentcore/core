@@ -129,7 +129,7 @@ func (sy *GraphicsSystem) SetGraphicsDefaults() *GraphicsSystem {
 	for _, pl := range sy.GraphicsPipelines {
 		pl.SetGraphicsDefaults()
 	}
-	sy.SetClearColor(colors.ToUniform(colors.Scheme.Background))
+	sy.SetClearColor(colors.ToUniform(colors.Scheme.Surface))
 	sy.SetClearDepthStencil(1, 0)
 	return sy
 }

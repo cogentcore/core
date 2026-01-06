@@ -49,8 +49,11 @@ type Context struct {
 	// Individual elements inherit from this style.
 	Style styles.Paint
 
-	// Transform is the accumulated transformation matrix.
+	// Transform is the transformation matrix for this stack level.
 	Transform math32.Matrix2
+
+	// Cumulative is the accumulated transformation matrix.
+	Cumulative math32.Matrix2
 
 	// Bounds is the rounded rectangle clip boundary.
 	// This is applied to the effective Path prior to adding to Render.
@@ -92,12 +95,14 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 	}
 	if parent == nil {
 		ctx.Transform = sty.Transform
+		ctx.Cumulative = sty.Transform
 		ctx.SetBounds(bounds)
 		ctx.ClipPath = sty.ClipPath
 		ctx.Mask = sty.Mask
 		return
 	}
-	ctx.Transform = parent.Transform.Mul(ctx.Style.Transform)
+	ctx.Transform = ctx.Style.Transform
+	ctx.Cumulative = parent.Cumulative.Mul(ctx.Style.Transform)
 	ctx.Style.InheritFields(&parent.Style)
 	if bounds == nil {
 		bounds = &parent.Bounds

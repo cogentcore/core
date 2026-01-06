@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/htmltext"
-	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 )
@@ -75,7 +74,7 @@ func (g *Text) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
 	for _, kii := range g.Children {
 		kt := kii.(*Text)
-		kt.Pos = g.Paint.Transform.MulVector2AsPoint(pos)
+		kt.Pos = g.Paint.Transform.MulPoint(pos)
 	}
 }
 
@@ -92,7 +91,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	tx, _ := htmltext.HTMLToRich([]byte(g.Text), &fs, nil)
 	// fmt.Println(tx)
 	sz := math32.Vec2(10000, 10000) // no wrapping!!
-	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, &rich.DefaultSettings, sz)
+	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, sz)
 	baseOff := g.TextShaped.Lines[0].Offset
 	g.TextShaped.StartAtBaseline() // remove top-left offset
 	return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
@@ -194,7 +193,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.Paint.Transform.SetMul(xf)
 		g.SetTransformProperty()
 	} else {
-		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Pos = xf.MulPoint(g.Pos)
 		g.GradientApplyTransform(sv, xf)
 	}
 }
