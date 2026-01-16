@@ -16,6 +16,7 @@ import (
 )
 
 func TestSignPKCS7(t *testing.T) {
+	t.Skip("requires keytool app")
 	// Setup RSA key.
 	block, _ := pem.Decode([]byte(testKey))
 	if block == nil {
