@@ -37,7 +37,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
 	golang.org/x/crypto v0.47.0
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
+	golang.org/x/exp v0.0.0-20260112195511-716be5621a96
 	golang.org/x/image v0.35.0
 	golang.org/x/net v0.49.0
 	golang.org/x/oauth2 v0.28.0
