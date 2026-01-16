@@ -197,5 +197,5 @@ func TestMatrix4SetVkPerspective(t *testing.T) {
 		0, 0, -0.1001001, 0,
 	}
 
-	assert.Equal(t, expected, m)
+	assert.InDeltaSlicef(t, expected[:], m[:], 1.0e-6, "")
 }

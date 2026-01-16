@@ -5,7 +5,6 @@
 package math32
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/tolassert"
@@ -168,7 +167,7 @@ func TestMatrix2Canvas(t *testing.T) {
 	lambda1, lambda2, v1, v2 := Identity2().Rotate(rot90).Scale(2.0, 1.0).Rotate(-rot90).Eigen()
 	assert.Equal(t, lambda1, float32(1.0))
 	assert.Equal(t, lambda2, float32(2.0))
-	fmt.Println(v1, v2)
+	// fmt.Println(v1, v2)
 	tolAssertEqualVector(t, v1, Vector2{1.0, 0.0})
 	tolAssertEqualVector(t, v2, Vector2{0.0, 1.0})
 
