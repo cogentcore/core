@@ -13,8 +13,8 @@ import (
 	"github.com/cogentcore/yaegi/interp"
 	"go/constant"
 	"go/token"
+	"golang.org/x/image/draw"
 	"image"
-	"image/draw"
 	"reflect"
 )
 
@@ -103,6 +103,7 @@ func init() {
 		"NewIcon":                       reflect.ValueOf(core.NewIcon),
 		"NewIconButton":                 reflect.ValueOf(core.NewIconButton),
 		"NewImage":                      reflect.ValueOf(core.NewImage),
+		"NewImageButton":                reflect.ValueOf(core.NewImageButton),
 		"NewImageSprite":                reflect.ValueOf(core.NewImageSprite),
 		"NewInlineList":                 reflect.ValueOf(core.NewInlineList),
 		"NewInspector":                  reflect.ValueOf(core.NewInspector),
@@ -270,6 +271,7 @@ func init() {
 		"Icon":                   reflect.ValueOf((*core.Icon)(nil)),
 		"IconButton":             reflect.ValueOf((*core.IconButton)(nil)),
 		"Image":                  reflect.ValueOf((*core.Image)(nil)),
+		"ImageButton":            reflect.ValueOf((*core.ImageButton)(nil)),
 		"InlineLengths":          reflect.ValueOf((*core.InlineLengths)(nil)),
 		"InlineList":             reflect.ValueOf((*core.InlineList)(nil)),
 		"Inspector":              reflect.ValueOf((*core.Inspector)(nil)),
@@ -307,6 +309,7 @@ func init() {
 		"Splits":                 reflect.ValueOf((*core.Splits)(nil)),
 		"SplitsTiles":            reflect.ValueOf((*core.SplitsTiles)(nil)),
 		"Sprite":                 reflect.ValueOf((*core.Sprite)(nil)),
+		"SpriteList":             reflect.ValueOf((*core.SpriteList)(nil)),
 		"Sprites":                reflect.ValueOf((*core.Sprites)(nil)),
 		"Stage":                  reflect.ValueOf((*core.Stage)(nil)),
 		"StageTypes":             reflect.ValueOf((*core.StageTypes)(nil)),

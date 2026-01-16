@@ -92,6 +92,7 @@ func init() {
 		"MaxFloat32":               reflect.ValueOf(constant.MakeFromLiteral("340282346638528859811704183484516925440", token.FLOAT, 0)),
 		"MaxPos":                   reflect.ValueOf(math32.MaxPos),
 		"Min":                      reflect.ValueOf(math32.Min),
+		"MinAngleDiff":             reflect.ValueOf(math32.MinAngleDiff),
 		"MinPos":                   reflect.ValueOf(math32.MinPos),
 		"Mod":                      reflect.ValueOf(math32.Mod),
 		"Modf":                     reflect.ValueOf(math32.Modf),

@@ -24,7 +24,7 @@ import (
 	"cogentcore.org/core/text/shaped"
 	_ "cogentcore.org/core/text/shaped/shapers"
 	_ "cogentcore.org/core/text/tex"
-	"github.com/alecthomas/assert/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 // RunTest runs a test for given test case.
