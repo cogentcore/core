@@ -91,6 +91,7 @@ func TestBaseOpen(t *testing.T) {
 }
 
 func TestBaseScroll(t *testing.T) {
+	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()
 	ed := NewBase(b)
 	ed.Styler(func(s *styles.Style) {

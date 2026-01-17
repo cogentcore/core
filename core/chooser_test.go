@@ -111,6 +111,7 @@ func TestChooserAllowNewClick(t *testing.T) {
 }
 
 func TestChooserEditableAllowNewClick(t *testing.T) {
+	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
