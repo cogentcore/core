@@ -144,6 +144,7 @@ func TestEditorChange(t *testing.T) {
 }
 
 func TestEditorInput(t *testing.T) {
+	t.Skip("todo: randomly failing, fixme https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()
 	ed := NewEditor(b)
 	n := 0

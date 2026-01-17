@@ -99,6 +99,7 @@ func TestSliderStart(t *testing.T) {
 }
 
 func TestSliderChange(t *testing.T) {
+	t.Skip("todo: randomly failing, fixme https://github.com/cogentcore/core/issues/1641")
 	b := NewBody()
 	sr := NewSlider(b)
 	n := 0

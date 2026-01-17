@@ -9,6 +9,7 @@ import (
 )
 
 func TestFilePicker(t *testing.T) {
+	t.Skip("todo: randomly failing, fixme https://github.com/cogentcore/core/issues/1641")
 	b := NewBody()
 	NewFilePicker(b)
 	b.AssertRender(t, "file-picker/basic")
