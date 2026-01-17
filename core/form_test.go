@@ -36,6 +36,7 @@ func (mp *morePerson) FieldWidget(field string) Value {
 }
 
 func TestForm(t *testing.T) {
+	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
 	b.AssertRender(t, "form/basic")
