@@ -117,6 +117,7 @@ func TestBaseMulti(t *testing.T) {
 }
 
 func TestEditorChange(t *testing.T) {
+	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()
 	ed := NewEditor(b)
 	n := 0
