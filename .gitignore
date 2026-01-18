@@ -16,3 +16,9 @@ go.work.sum
 .vscode
 .idea
 .DS_STORE
+
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock

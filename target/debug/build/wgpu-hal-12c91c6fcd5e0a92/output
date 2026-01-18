@@ -1,0 +1,3 @@
+cargo:rustc-cfg=native
+cargo:rustc-cfg=send_sync
+cargo:rustc-cfg=metal

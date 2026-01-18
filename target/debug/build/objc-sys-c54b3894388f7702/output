@@ -1,0 +1,6 @@
+cargo:rerun-if-changed=build.rs
+cargo:rustc-check-cfg=cfg(target_abi_macabi)
+cargo:rustc-check-cfg=cfg(target_simulator)
+cargo:rustc-check-cfg=cfg(libobjc2_strict_apple_compat)
+cargo:rustc-link-lib=dylib=objc
+cargo:cc_args=-fobjc-exceptions -fobjc-arc -fobjc-arc-exceptions

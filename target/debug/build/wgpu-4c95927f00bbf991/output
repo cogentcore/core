@@ -1,0 +1,4 @@
+cargo:rustc-cfg=native
+cargo:rustc-cfg=wgpu_core
+cargo:rustc-cfg=send_sync
+cargo:rustc-cfg=metal

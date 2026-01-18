@@ -1,0 +1,55 @@
+[package]
+name = "cogent-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Cogent Core Contributors"]
+license = "BSD-3-Clause"
+description = "A free and open source framework for building powerful, fast, elegant 2D and 3D apps"
+repository = "https://github.com/cogentcore/core"
+
+[workspace]
+members = []
+
+[dependencies]
+# Core async runtime
+tokio = { version = "1.40", features = ["full"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Image processing
+image = "0.25"
+imageproc = "0.25"
+
+# Math
+nalgebra = "0.33"
+nalgebra-glm = "0.18"
+
+# Graphics (we'll use wgpu for cross-platform rendering)
+wgpu = "0.20"
+winit = "0.30"
+raw-window-handle = "0.6"
+softbuffer = "0.4"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilities
+parking_lot = "0.12"
+smallvec = "1.13"
+ahash = "0.8"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
