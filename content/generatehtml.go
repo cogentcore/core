@@ -22,6 +22,7 @@ import (
 // as HTML that can be used as a preview and for SEO purposes.
 
 func init() {
+	fmt.Println("gen init")
 	// We override the OnChildAdded set in core/generatehtml.go
 	core.ExternalParent.AsWidget().SetOnChildAdded(func(n tree.Node) {
 		var ct *Content
@@ -35,6 +36,7 @@ func init() {
 			}
 			return tree.Continue
 		})
+		fmt.Println("content:", ct)
 		if ct == nil {
 			fmt.Println(core.GenerateHTML(n.(core.Widget))) // basic fallback
 			os.Exit(0)
@@ -47,6 +49,7 @@ func init() {
 				Page: *pg,
 				HTML: core.GenerateHTML(ct),
 			}
+			fmt.Println(pg.URL)
 			// The first non-emphasized paragraph is used as the description
 			// (<em> typically indicates a note or caption, not an introduction).
 			ct.WalkDown(func(n tree.Node) bool {
