@@ -302,7 +302,7 @@ func TestOpen(t *testing.T) {
 	cfg := &TestConfig{}
 	err := openWithIncludes(opts, cfg, "testcfg.toml")
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 
 	// fmt.Println("includes:", cfg.Includes)

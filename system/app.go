@@ -14,6 +14,7 @@ package system
 
 import (
 	"fmt"
+	"os"
 	"runtime/debug"
 
 	"cogentcore.org/core/styles"
@@ -282,4 +283,14 @@ func init() {
 			}
 		}
 	}
+}
+
+// GenerateHTMLArg returns true if the first [os.Args] is -generatehtml.
+// Apps that process args should test this first and skip arg processing
+// if true.
+func GenerateHTMLArg() bool {
+	if len(os.Args) < 2 {
+		return false
+	}
+	return os.Args[1] == "-generatehtml"
 }

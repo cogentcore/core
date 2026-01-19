@@ -80,7 +80,7 @@ When there are multiple maker functions, they are called in the order they are a
 
 ## Init functions
 
-The anonymous function that you pass to [[doc:tree.Add]] etc is the init function, responsible for customizing the child widget. This function is only run one time, when that widget is made, and it contains all of the initialization steps such as adding [[styler]]s and [[event]] handlers. Because it is only run once, the init function needs to add [[update]]rs for any properties that may change over time:
+The anonymous function that you pass to [[doc:tree.Add]] etc is the init function, responsible for customizing the child widget. This function is only run one time, when that widget is made, and it contains all of the initialization steps such as adding [[style|stylers]] and [[event]] handlers. Because it is only run once, the init function needs to add [[update]]rs for any properties that may change over time:
 
 ```Go
 number := 3

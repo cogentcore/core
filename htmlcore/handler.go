@@ -403,6 +403,11 @@ func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.N
 		return core.NewText(), excl
 	}
 	tx := New[core.Text](ctx).SetText(et)
+	if strings.Contains(et, "\n") && !strings.Contains(et, "math display") {
+		tx.Styler(func(s *styles.Style) {
+			s.Text.WhiteSpace = text.WhiteSpacePreWrap
+		})
+	}
 	tx.HandleTextClick(func(tl *rich.Hyperlink) {
 		ctx.OpenURL(tl.URL)
 	})

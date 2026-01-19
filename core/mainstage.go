@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"os"
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -32,6 +33,19 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	return st
 }
 
+func generateHTMLBody(bd *Body) {
+	if !system.GenerateHTMLArg() || ExternalParent != nil {
+		return
+	}
+	wb := NewWidgetBase()
+	ExternalParent = wb
+	wb.SetOnChildAdded(func(n tree.Node) {
+		fmt.Println(GenerateHTML(n.(Widget)))
+		os.Exit(0)
+	})
+	bd.handleExternalParent()
+}
+
 // RunMainWindow creates a new main window from the body,
 // runs it, starts the app's main loop, and waits for all windows
 // to close. It should typically be called once by every app at
@@ -40,6 +54,7 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 // If you need to configure the [Stage] further, use [Body.NewWindow]
 // and then [Stage.RunMain] on the resulting [Stage].
 func (bd *Body) RunMainWindow() {
+	generateHTMLBody(bd)
 	if ExternalParent != nil {
 		bd.handleExternalParent()
 		return
@@ -54,6 +69,7 @@ func (bd *Body) RunMainWindow() {
 // on the [Stage]. It can not be called more than once for one app.
 // For secondary stages, see [Stage.Run].
 func (st *Stage) RunMain() {
+	generateHTMLBody(st.Scene.Body)
 	if ExternalParent != nil {
 		st.Scene.Body.handleExternalParent()
 		return
@@ -80,6 +96,7 @@ var waitCalled bool
 // For the first window of your app, you should typically call
 // [Body.RunMainWindow] instead.
 func (bd *Body) RunWindow() *Stage {
+	generateHTMLBody(bd)
 	if ExternalParent != nil && !waitCalled {
 		bd.handleExternalParent()
 		return nil

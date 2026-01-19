@@ -9,8 +9,8 @@ import (
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/tree"
+	"golang.org/x/image/draw"
 	"image"
-	"image/draw"
 	"reflect"
 )
 

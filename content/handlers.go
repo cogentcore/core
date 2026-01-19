@@ -493,11 +493,15 @@ func (ct *Content) elementInSpecial(sp *core.WidgetBase, element string) *core.W
 		if !cwb.IsDisplayable() {
 			return tree.Continue
 		}
-		if hasPath && !strings.Contains(cw.AsTree().Path(), pathPrefix) {
-			return tree.Continue
+		if hasPath {
+			pth := cw.AsTree().Path()
+			if strings.Contains(pth, pathPrefix) {
+				return tree.Continue
+			}
 		}
 		label := labels.ToLabel(cw)
-		if !strings.EqualFold(label, element) {
+		kb := bcontent.SpecialToKebab(label)
+		if !strings.EqualFold(label, element) && kb != element {
 			return tree.Continue
 		}
 		if cwb.AbilityIs(abilities.Focusable) {

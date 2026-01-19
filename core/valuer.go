@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"reflect"
 	"time"
@@ -108,6 +109,9 @@ func toValue(value any, tags reflect.StructTag) Value {
 	}
 	if _, ok := value.(tree.Node); ok {
 		return NewTreeButton()
+	}
+	if _, ok := value.(image.Image); ok {
+		return NewImageButton()
 	}
 
 	inline := tags.Get("display") == "inline"

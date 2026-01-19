@@ -112,14 +112,3 @@ var ShaderStageFlags = map[ShaderTypes]wgpu.ShaderStage{
 	FragmentShader: wgpu.ShaderStageFragment,
 	ComputeShader:  wgpu.ShaderStageCompute,
 }
-
-/*
-var ShaderPipelineFlags = map[ShaderTypes]vk.PipelineStageFlagBits{
-	VertexShader:   vk.PipelineStageVertexShaderBit,
-	TessCtrlShader: vk.PipelineStageTessellationControlShaderBit,
-	TessEvalShader: vk.PipelineStageTessellationEvaluationShaderBit,
-	GeometryShader: vk.PipelineStageGeometryShaderBit,
-	FragmentShader: vk.PipelineStageFragmentShaderBit,
-	ComputeShader:  vk.PipelineStageComputeShaderBit,
-}
-*/

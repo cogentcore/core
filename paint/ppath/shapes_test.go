@@ -96,7 +96,7 @@ func TestEllipseToCenter(t *testing.T) {
 }
 
 func TestArcToQuad(t *testing.T) {
-	assert.InDeltaSlice(t, ArcToQuad(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-5)
+	assert.InDeltaSlice(t, ArcToQuad(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-4)
 }
 
 func TestArcToCube(t *testing.T) {

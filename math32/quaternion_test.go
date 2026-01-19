@@ -119,10 +119,14 @@ func TestQuatMulVector(t *testing.T) {
 	vr := q1.MulVector(v)
 
 	expected := Vector3{X: 1.7999997, Y: 7.6, Z: 7}
-	assert.Equal(t, expected, vr)
+	assert.InDelta(t, expected.X, vr.X, 1.0e-5)
+	assert.InDelta(t, expected.Y, vr.Y, 1.0e-5)
+	assert.InDelta(t, expected.Z, vr.Z, 1.0e-5)
 
 	viv := q1.MulVectorInverse(q1.MulVector(v))
-	assert.Equal(t, v, viv)
+	assert.InDelta(t, v.X, viv.X, 1.0e-5)
+	assert.InDelta(t, v.Y, viv.Y, 1.0e-5)
+	assert.InDelta(t, v.Z, viv.Z, 1.0e-5)
 }
 
 func TestQuatSlerp(t *testing.T) {

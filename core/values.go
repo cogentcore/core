@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"reflect"
 
@@ -284,4 +285,29 @@ func HighlightingEditor(st *highlighting.Styles) {
 		})
 	})
 	d.RunWindow() // note: no context here so not dialog
+}
+
+// ImageButton represents an image.Image value with a button that opens a [Image].
+type ImageButton struct {
+	Button
+	Image image.Image
+}
+
+func (fb *ImageButton) WidgetValue() any { return &fb.Image }
+
+func (fb *ImageButton) Init() {
+	fb.Button.Init()
+	fb.SetType(ButtonTonal).SetIcon(icons.Edit)
+	fb.Updater(func() {
+		if fb.Image == nil {
+			fb.SetText("nil image")
+		} else {
+			sz := fb.Image.Bounds().Size()
+			fb.SetText(fmt.Sprintf("image (%d x %d)", sz.X, sz.Y))
+		}
+	})
+	InitValueButton(fb, true, func(d *Body) {
+		fm := NewImage(d).SetImage(fb.Image)
+		fm.SetValueTitle(fb.ValueTitle).SetReadOnly(fb.IsReadOnly())
+	})
 }

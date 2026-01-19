@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore"
 	_ "cogentcore.org/core/text/tex"
+	"cogentcore.org/core/tree"
 	_ "cogentcore.org/core/yaegicore"
 )
 
@@ -24,7 +25,10 @@ func main() {
 	ct := content.NewContent(b).SetContent(econtent)
 	ct.Context.AddWikilinkHandler(htmlcore.GoDocWikilink("doc", "cogentcore.org/core"))
 	b.AddTopBar(func(bar *core.Frame) {
-		core.NewToolbar(bar).Maker(ct.MakeToolbar)
+		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+			ct.MakeToolbar(p)
+			ct.MakeToolbarPDF(p)
+		})
 	})
 	b.RunMainWindow()
 }
