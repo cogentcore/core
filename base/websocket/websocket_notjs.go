@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !js && !generatehtml
+//go:build !js
 
 package websocket
 
 import (
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/system"
 	"github.com/gorilla/websocket"
 )
 
@@ -24,6 +25,9 @@ type Client struct {
 
 // Connect connects to a WebSocket server and returns a [Client].
 func Connect(url string) (*Client, error) {
+	if system.GenerateHTMLArg() {
+		return &Client{}, nil
+	}
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		return nil, err
@@ -34,6 +38,9 @@ func Connect(url string) (*Client, error) {
 // OnMessage sets a callback function to be called when a message is received.
 // This function can only be called once.
 func (c *Client) OnMessage(f func(typ MessageTypes, msg []byte)) {
+	if system.GenerateHTMLArg() {
+		return
+	}
 	go func() {
 		for {
 			typ, msg, err := c.conn.ReadMessage()
@@ -48,6 +55,9 @@ func (c *Client) OnMessage(f func(typ MessageTypes, msg []byte)) {
 
 // Send sends a message to the WebSocket server with the given type and message.
 func (c *Client) Send(typ MessageTypes, msg []byte) error {
+	if system.GenerateHTMLArg() {
+		return nil
+	}
 	return c.conn.WriteMessage(int(typ), msg)
 }
 
@@ -55,12 +65,18 @@ func (c *Client) Send(typ MessageTypes, msg []byte) error {
 // It does not directly trigger [Client.OnClose], but once the connection
 // is closed, [Client.OnMessage] will trigger it.
 func (c *Client) Close() error {
+	if system.GenerateHTMLArg() {
+		return nil
+	}
 	return c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 }
 
 // OnClose sets a callback function to be called when the connection is closed.
 // This function can only be called once.
 func (c *Client) OnClose(f func()) {
+	if system.GenerateHTMLArg() {
+		return
+	}
 	go func() {
 		<-c.done
 		f()

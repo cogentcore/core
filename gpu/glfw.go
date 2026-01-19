@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !offscreen && ((darwin && !ios) || windows || (linux && !android) || dragonfly || openbsd)
+//go:build (darwin && !ios) || windows || (linux && !android) || dragonfly || openbsd
 
 package gpu
 
@@ -10,6 +10,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/system"
 	"github.com/cogentcore/webgpu/wgpu"
 	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -42,6 +43,9 @@ func Terminate() {
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
 func GLFWCreateWindow(size image.Point, title string, resize *func(size image.Point)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualSize image.Point, err error) {
+	if system.GenerateHTMLArg() {
+		return
+	}
 	if err = Init(); err != nil {
 		return
 	}

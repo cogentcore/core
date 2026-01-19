@@ -2,34 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build generatehtml
-
 package core
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
-
-	"cogentcore.org/core/tree"
 )
 
-// This file is activated by the core tool to pre-render Cogent Core apps
-// as HTML that can be used as a preview and for SEO purposes.
-
-func init() {
-	wb := NewWidgetBase()
-	ExternalParent = wb
-	wb.SetOnChildAdded(func(n tree.Node) {
-		fmt.Println(GenerateHTML(n.(Widget)))
-		os.Exit(0)
-	})
-}
-
-// GenerateHTML returns generated HTML for the given widget.
+// GenerateHTML is the Function to call for the -generatehtml argument.
+// it returns generated HTML for the given widget.
 // It exits the program if there is an error, but does not exit
 // the program if there is no error.
-func GenerateHTML(w Widget) string {
+var GenerateHTML func(w Widget) string
+
+func init() {
+	GenerateHTML = GenerateHTMLCore
+}
+
+func GenerateHTMLCore(w Widget) string {
 	wb := w.AsWidget()
 	wb.UpdateTree()
 	wb.StyleTree()
