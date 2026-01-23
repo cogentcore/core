@@ -40,7 +40,7 @@ jobs:
           go-version: '1.25.6'
 
       - name: Install Core
-        run: go install
+        run: go install && core setup
 
       - name: Build Docs
         run: core build web -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
