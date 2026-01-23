@@ -191,13 +191,16 @@ func handleElement(ctx *Context) {
 
 		if hasPChild { // handle potential additional <p> blocks that should be indented
 			cnode := ctx.Node
+			orignode := cnode
 			// ctx.BlockParent = text.Parent.(core.Widget)
+			got := false
 			for cnode.NextSibling != nil {
 				cnode = cnode.NextSibling
-				ctx.Node = cnode
 				if cnode.Data != "p" {
-					continue
+					break
 				}
+				ctx.Node = cnode
+				got = true
 				txt, psub := handleTextExclude(ctx, "ol", "ul")
 				txt.SetText(txt.Text)
 				ctx.handleWidget(cnode, txt)
@@ -207,6 +210,9 @@ func handleElement(ctx *Context) {
 					}
 					break
 				}
+			}
+			if !got && cnode != nil && cnode != orignode {
+				readHTMLNode(ctx, ctx.Parent(), cnode)
 			}
 		}
 		if sublist != nil {
@@ -403,7 +409,8 @@ func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.N
 		return core.NewText(), excl
 	}
 	tx := New[core.Text](ctx).SetText(et)
-	if strings.Contains(et, "\n") && !strings.Contains(et, "math display") {
+	tag := ctx.Node.Data
+	if tag != "li" && strings.Contains(et, "\n") && !strings.Contains(et, `<span class="math display">`) {
 		tx.Styler(func(s *styles.Style) {
 			s.Text.WhiteSpace = text.WhiteSpacePreWrap
 		})
