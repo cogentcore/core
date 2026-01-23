@@ -60,6 +60,8 @@ func init() {
 		"FilePickerExtensionOnlyFilter": reflect.ValueOf(core.FilePickerExtensionOnlyFilter),
 		"ForceAppColor":                 reflect.ValueOf(&core.ForceAppColor).Elem(),
 		"FunctionalTabs":                reflect.ValueOf(core.FunctionalTabs),
+		"GenerateHTML":                  reflect.ValueOf(&core.GenerateHTML).Elem(),
+		"GenerateHTMLCore":              reflect.ValueOf(core.GenerateHTMLCore),
 		"HighlightingEditor":            reflect.ValueOf(core.HighlightingEditor),
 		"InitValueButton":               reflect.ValueOf(core.InitValueButton),
 		"InspectorWindow":               reflect.ValueOf(core.InspectorWindow),
