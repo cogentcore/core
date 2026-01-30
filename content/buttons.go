@@ -38,7 +38,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		w.SetIcon(icons.Icon(core.AppIcon))
 		w.SetTooltip("Home")
 		w.OnClick(func(e events.Event) {
-			ct.Open("")
+			ct.OpenEvent("", e)
 		})
 	})
 	// Superseded by browser navigation on web.

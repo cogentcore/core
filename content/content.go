@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -130,8 +131,8 @@ func (ct *Content) Init() {
 
 	ct.Context = htmlcore.NewContext()
 	ct.Context.DelayedImageLoad = false // not useful for content
-	ct.Context.OpenURL = func(url string) {
-		ct.Open(url)
+	ct.Context.OpenURL = func(url string, e events.Event) {
+		ct.OpenEvent(url, e)
 	}
 	ct.Context.GetURL = func(url string) (*http.Response, error) {
 		return htmlcore.GetURLFromFS(ct.Source, url)
@@ -284,15 +285,12 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	})
 
 	if url := ct.getWebURL(); url != "" {
-		ct.Open(url)
-		return ct
+		return ct.Open(url)
 	}
 	if root, ok := ct.pagesByURL[""]; ok {
-		ct.Open(root.URL)
-		return ct
+		return ct.Open(root.URL)
 	}
-	ct.Open(ct.pages[0].URL)
-	return ct
+	return ct.Open(ct.pages[0].URL)
 }
 
 // SetContent is a helper function that calls [Content.SetSource]
@@ -301,8 +299,38 @@ func (ct *Content) SetContent(content fs.FS) *Content {
 	return ct.SetSource(fsx.Sub(content, "content"))
 }
 
+// OpenEvent opens the page with the given URL and updates the display.
+// If no pages correspond to the URL, it is opened in the default browser.
+// This version is for widget event cases, where the keyboard modifiers
+// are used to control the way the page is opened: Ctrl/Meta = new tab.
+func (ct *Content) OpenEvent(url string, e events.Event) *Content {
+	if e == nil || !e.HasAnyModifier(key.Control, key.Meta) {
+		return ct.Open(url)
+	}
+	if core.TheApp.Platform() == system.Web {
+		if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
+			core.TheApp.OpenURL(url)
+			return ct
+		}
+		if strings.HasPrefix(url, "ref://") {
+			ct.openRef(url)
+			return ct
+		}
+		_, pg, heading := ct.parseURL(url)
+		_, nw, err := ct.pageURL(pg, heading)
+		if err != nil {
+			return ct
+		}
+		core.TheApp.OpenURL(nw.String())
+		return ct
+	}
+	// todo: open in a new tab
+	return ct.Open(url)
+}
+
 // Open opens the page with the given URL and updates the display.
 // If no pages correspond to the URL, it is opened in the default browser.
+// This version is for programmatic use -- see also OpenEvent.
 func (ct *Content) Open(url string) *Content {
 	ct.open(url, true)
 	return ct

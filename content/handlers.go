@@ -343,20 +343,11 @@ func (ct *Content) wikilinkLabel(pg *bcontent.Page, heading string) string {
 	return label
 }
 
-// open opens the page with the given URL and updates the display.
-// It optionally adds the page to the history.
-func (ct *Content) open(url string, history bool) {
-	if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
-		core.TheApp.OpenURL(url)
-		return
-	}
-	if strings.HasPrefix(url, "ref://") {
-		ct.openRef(url)
-		return
-	}
+// parseURL parses the given local url into a page and heading.
+func (ct *Content) parseURL(url string) (pgUrl string, pg *bcontent.Page, heading string) {
 	url = strings.ReplaceAll(url, "/#", "#")
-	url, heading, _ := strings.Cut(url, "#")
-	pg := ct.pagesByURL[url]
+	pgUrl, heading, _ = strings.Cut(url, "#")
+	pg = ct.pagesByURL[url]
 	if pg == nil {
 		// We want only the URL after the last slash for automatic redirects
 		// (old URLs could have nesting).
@@ -372,6 +363,21 @@ func (ct *Content) open(url string, history bool) {
 		}
 	}
 	heading = bcontent.SpecialToKebab(heading)
+	return
+}
+
+// open opens the page with the given URL and updates the display.
+// It optionally adds the page to the history.
+func (ct *Content) open(url string, history bool) {
+	if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
+		core.TheApp.OpenURL(url)
+		return
+	}
+	if strings.HasPrefix(url, "ref://") {
+		ct.openRef(url)
+		return
+	}
+	url, pg, heading := ct.parseURL(url)
 	ct.currentHeading = heading
 	if ct.currentPage == pg {
 		ct.openHeading(heading)

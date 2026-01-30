@@ -219,7 +219,7 @@ func (tx *Text) Init() {
 		}
 	})
 
-	tx.HandleTextClick(func(tl *rich.Hyperlink) {
+	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
@@ -327,13 +327,13 @@ func (tx *Text) findLink(pos image.Point) (*rich.Hyperlink, image.Rectangle) {
 
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (tx *Text) HandleTextClick(openLink func(tl *rich.Hyperlink)) {
+func (tx *Text) HandleTextClick(openLink func(tl *rich.Hyperlink, e events.Event)) {
 	tx.OnClick(func(e events.Event) {
 		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {
 			return
 		}
-		openLink(tl)
+		openLink(tl, e)
 		e.SetHandled()
 	})
 }

@@ -12,6 +12,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/content/bcontent"
 )
 
 var (
@@ -52,6 +53,19 @@ func (ct *Content) getWebURL() string {
 
 // saveWebURL saves the current page URL to the user's address bar and history.
 func (ct *Content) saveWebURL() {
+	current, nw, err := ct.pageURL(ct.currentPage, ct.currentHeading)
+	if err != nil {
+		return
+	}
+	if nw.String() == current.String() {
+		return // We are already at this URL, so don't push it again
+	}
+	js.Global().Get("history").Call("pushState", "", "", nw.String())
+}
+
+// pageURL returns the full URL for the given page, with the heading
+// if non-empty.
+func (ct *Content) pageURL(pg *bcontent.Page, heading string) (current, nw *url.URL, err error) {
 	if firstContent == nil {
 		firstContent = ct
 	}
@@ -62,16 +76,13 @@ func (ct *Content) saveWebURL() {
 	if errors.Log(err) != nil {
 		return
 	}
-	new, err := url.Parse(ct.currentPage.URL)
+	cur, err := url.Parse(pg.URL)
 	if errors.Log(err) != nil {
 		return
 	}
-	new.Fragment = ct.currentHeading
-	fullNew := base.ResolveReference(new)
-	if fullNew.String() == current.String() {
-		return // We are already at this URL, so don't push it again
-	}
-	js.Global().Get("history").Call("pushState", "", "", fullNew.String())
+	cur.Fragment = heading
+	nw = base.ResolveReference(cur)
+	return
 }
 
 // handleWebPopState adds a JS event listener to handle user navigation in the browser.
