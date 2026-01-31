@@ -385,7 +385,7 @@ func (ct *Content) open(url string, history bool) {
 	}
 	ct.currentPage = pg
 	if history {
-		ct.addHistory(pg)
+		ct.historyAdd(pg, heading, url)
 	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
@@ -404,7 +404,7 @@ func (ct *Content) openRef(url string) {
 	}
 	ref := strings.TrimPrefix(url, "ref://")
 	ct.currentPage = pg
-	ct.addHistory(pg)
+	ct.historyAdd(pg, "", url)
 	ct.Scene.Update()
 	ct.Defer(func() {
 		ct.setStageTitle()
@@ -414,7 +414,7 @@ func (ct *Content) openRef(url string) {
 
 func (ct *Content) openHeading(heading string) {
 	if heading == "" {
-		ct.rightFrame.ScrollDimToContentStart(math32.Y)
+		ct.pageFrame().ScrollDimToContentStart(math32.Y)
 		return
 	}
 	idname := "" // in case of #id:element
@@ -445,11 +445,11 @@ func (ct *Content) openHeading(heading string) {
 
 func (ct *Content) openID(id, element string) bool {
 	if id == "" {
-		ct.rightFrame.ScrollDimToContentStart(math32.Y)
+		ct.pageFrame().ScrollDimToContentStart(math32.Y)
 		return true
 	}
 	var found *core.WidgetBase
-	ct.rightFrame.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	ct.pageFrame().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		// if found != nil {
 		// 	return tree.Break
 		// }

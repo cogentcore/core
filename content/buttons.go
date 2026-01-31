@@ -47,22 +47,20 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 			w.SetTooltip("Back")
 			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex > 0)
+				w.SetEnabled(ct.historyHasBack())
 			})
 			w.OnClick(func(e events.Event) {
-				ct.historyIndex--
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+				ct.historyBack()
 			})
 		})
 		tree.Add(p, func(w *core.Button) {
 			w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
 			w.SetTooltip("Forward")
 			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex < len(ct.history)-1)
+				w.SetEnabled(ct.historyHasForward())
 			})
 			w.OnClick(func(e events.Event) {
-				ct.historyIndex++
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+				ct.historyForward()
 			})
 		})
 	}

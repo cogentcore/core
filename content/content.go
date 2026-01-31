@@ -74,14 +74,10 @@ type Content struct {
 	// do not have a category, unless they are a category themselves.
 	categories []string
 
-	// history is the history of pages that have been visited.
-	// The oldest page is first.
-	history []*bcontent.Page
+	// history is the history of pages that have been visited, per tab.
+	history []*History
 
-	// historyIndex is the current position in [Content.history].
-	historyIndex int
-
-	// currentPage is the currently open page.
+	// currentPage is the currently open page (in the current tab).
 	currentPage *bcontent.Page
 
 	// renderedPage is the most recently rendered page.
@@ -94,6 +90,9 @@ type Content struct {
 	// rightFrame is the frame on the right side of the widget,
 	// used for displaying the page content.
 	rightFrame *core.Frame
+
+	// tabs are the tabs, only for non-web
+	tabs *core.Tabs
 
 	// tocNodes are all of the tree nodes in the table of contents
 	// by kebab-case heading name.
@@ -156,50 +155,18 @@ func (ct *Content) Init() {
 		})
 		tree.Add(p, func(w *core.Frame) {
 			ct.rightFrame = w
-			w.Styler(func(s *styles.Style) {
-				switch w.SizeClass() {
-				case core.SizeCompact, core.SizeMedium:
-					s.Padding.SetHorizontal(units.Em(0.5))
-				case core.SizeExpanded:
-					s.Padding.SetHorizontal(units.Em(3))
-				}
-			})
 			w.Maker(func(p *tree.Plan) {
-				if !ct.inPDFRender && ct.currentPage.Title != "" {
-					tree.Add(p, func(w *core.Text) {
-						w.SetType(core.TextDisplaySmall)
-						w.Updater(func() {
-							w.SetText(ct.currentPage.Title)
-						})
+				if core.TheApp.Platform() == system.Web {
+					ct.pageMaker(p, 0)
+				} else {
+					tree.Add(p, func(w *core.Tabs) {
+						ct.tabs = w
+						tb, _ := w.NewTab("Content")
+						h := &History{}
+						h.Save(ct.currentPage, ct.currentHeading, ct.currentPage.URL) // todo: URL not quite right
+						ct.history = []*History{h}
+						tb.Maker(func(p *tree.Plan) { ct.pageMaker(p, 0) })
 					})
-				}
-				if !ct.inPDFRender && len(ct.currentPage.Authors) > 0 {
-					tree.Add(p, func(w *core.Text) {
-						w.SetType(core.TextTitleLarge)
-						w.Updater(func() {
-							w.SetText("By " + ct.currentPage.Authors)
-						})
-					})
-				}
-				if !ct.currentPage.Date.IsZero() {
-					tree.Add(p, func(w *core.Text) {
-						w.SetType(core.TextTitleMedium)
-						w.Updater(func() {
-							w.SetText(ct.currentPage.Date.Format("January 2, 2006"))
-						})
-					})
-				}
-				tree.Add(p, func(w *core.Frame) {
-					w.Styler(func(s *styles.Style) {
-						s.Direction = styles.Column
-						s.Grow.Set(1, 1)
-					})
-					w.Updater(func() {
-						errors.Log(ct.loadPage(w))
-					})
-				})
-				if !ct.inPDFRender {
-					ct.makeBottomButtons(p)
 				}
 			})
 		})
@@ -210,6 +177,75 @@ func (ct *Content) Init() {
 		ct.setStageTitle()
 	})
 	ct.handleWebPopState()
+}
+
+// pageFrame returns the current frame for rendering the page.
+func (ct *Content) pageFrame() *core.Frame {
+	if ct.tabs == nil {
+		return ct.rightFrame
+	}
+	w, _ := ct.tabs.CurrentTab()
+	return w.(*core.Frame)
+}
+
+// pageMaker is the maker function for a page
+func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
+	tree.Add(p, func(w *core.Frame) {
+		w.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.Set(1, 1)
+			switch w.SizeClass() {
+			case core.SizeCompact, core.SizeMedium:
+				s.Padding.SetHorizontal(units.Em(0.5))
+			case core.SizeExpanded:
+				s.Padding.SetHorizontal(units.Em(3))
+			}
+		})
+		w.Maker(func(p *tree.Plan) {
+			if !ct.inPDFRender && ct.currentPage.Title != "" {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextDisplaySmall)
+					w.Updater(func() {
+						w.SetText(ct.currentPage.Title)
+					})
+				})
+			}
+			if !ct.inPDFRender && len(ct.currentPage.Authors) > 0 {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextTitleLarge)
+					w.Updater(func() {
+						w.SetText("By " + ct.currentPage.Authors)
+					})
+				})
+			}
+			if !ct.currentPage.Date.IsZero() {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextTitleMedium)
+					w.Updater(func() {
+						w.SetText(ct.currentPage.Date.Format("January 2, 2006"))
+					})
+				})
+			}
+			tree.Add(p, func(w *core.Frame) {
+				w.Styler(func(s *styles.Style) {
+					s.Direction = styles.Column
+					s.Grow.Set(1, 1)
+				})
+				w.Updater(func() {
+					if ct.tabs != nil {
+						h := ct.history[tabIdx]
+						lc := h.Records[h.Index]
+						ct.currentPage = lc.Page
+						ct.currentHeading = lc.Heading
+					}
+					errors.Log(ct.loadPage(w))
+				})
+			})
+			if !ct.inPDFRender {
+				ct.makeBottomButtons(p)
+			}
+		})
+	})
 }
 
 // pageByName returns [Content.pagesByName] of the lowercase version of the given name.
@@ -307,7 +343,7 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 	if e == nil || !e.HasAnyModifier(key.Control, key.Meta) {
 		return ct.Open(url)
 	}
-	if core.TheApp.Platform() == system.Web {
+	if ct.tabs == nil {
 		if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
 			core.TheApp.OpenURL(url)
 			return ct
@@ -324,7 +360,16 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 		core.TheApp.OpenURL(nw.String())
 		return ct
 	}
-	// todo: open in a new tab
+	nt := ct.tabs.NumTabs()
+	nm := fmt.Sprintf("Tab %d", nt)
+	tb, _ := ct.tabs.NewTab(nm)
+	h := &History{}
+	h.Save(ct.currentPage, ct.currentHeading, ct.currentPage.URL) // todo: not right
+	ct.history = append(ct.history, h)
+	tb.Maker(func(p *tree.Plan) {
+		ct.pageMaker(p, nt)
+	})
+	ct.tabs.SelectTabIndex(nt)
 	return ct.Open(url)
 }
 
@@ -336,12 +381,6 @@ func (ct *Content) Open(url string) *Content {
 	return ct
 }
 
-func (ct *Content) addHistory(pg *bcontent.Page) {
-	ct.historyIndex = len(ct.history)
-	ct.history = append(ct.history, pg)
-	ct.saveWebURL()
-}
-
 // reloadPage reloads the current page
 func (ct *Content) reloadPage() {
 	ct.renderedPage = nil
@@ -350,8 +389,8 @@ func (ct *Content) reloadPage() {
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
-	if ct.renderedPage == ct.currentPage {
-		return nil
+	if ct.renderedPage == ct.currentPage { // this prevents tabs from rendering
+		fmt.Println("rerender")
 	}
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
@@ -383,7 +422,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	contents.SetReadOnly(true)
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
-			ct.rightFrame.ScrollDimToContentStart(math32.Y)
+			ct.pageFrame().ScrollDimToContentStart(math32.Y)
 			ct.currentHeading = ""
 			ct.saveWebURL()
 		}
@@ -533,9 +572,9 @@ func (ct *Content) PagePDF(path string) error {
 	}
 	opts := Settings.PageSettings(ct, ct.currentPage)
 	if refs != nil {
-		paginate.PDF(f, opts.PDF, ct.rightFrame, refs)
+		paginate.PDF(f, opts.PDF, ct.pageFrame(), refs)
 	} else {
-		paginate.PDF(f, opts.PDF, ct.rightFrame)
+		paginate.PDF(f, opts.PDF, ct.pageFrame())
 	}
 	err = f.Close()
 
