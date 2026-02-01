@@ -77,11 +77,11 @@ type Content struct {
 	// history is the history of pages that have been visited, per tab.
 	history []*History
 
-	// currentPage is the currently open page (in the current tab).
-	currentPage *bcontent.Page
+	// current is the current location, in current tab.
+	current Location
 
-	// renderedPage is the most recently rendered page.
-	renderedPage *bcontent.Page
+	// rendered is the most recently rendered location, in current tab.
+	rendered Location
 
 	// leftFrame is the frame on the left side of the widget,
 	// used for displaying the table of contents and the categories.
@@ -97,10 +97,6 @@ type Content struct {
 	// tocNodes are all of the tree nodes in the table of contents
 	// by kebab-case heading name.
 	tocNodes map[string]*core.Tree
-
-	// currentHeading is the currently selected heading in the table of contents,
-	// if any (in kebab-case).
-	currentHeading string
 
 	// inPDFRender indicates that it is rendering a PDF now, turning off
 	// elements that are not appropriate for that.
@@ -147,7 +143,7 @@ func (ct *Content) Init() {
 	ct.Context.AddWidgetHandler(ct.widgetHandler)
 
 	ct.Maker(func(p *tree.Plan) {
-		if ct.currentPage == nil {
+		if ct.current.Page == nil {
 			return
 		}
 		tree.Add(p, func(w *core.Frame) {
@@ -163,7 +159,7 @@ func (ct *Content) Init() {
 						ct.tabs = w
 						tb, _ := w.NewTab("Content")
 						h := &History{}
-						h.Save(ct.currentPage, ct.currentHeading, ct.currentPage.URL) // todo: URL not quite right
+						h.Save(ct.current.Page, ct.current.Heading, ct.current.Page.URL) // todo: URL not quite right
 						ct.history = []*History{h}
 						tb.Maker(func(p *tree.Plan) { ct.pageMaker(p, 0) })
 					})
@@ -202,27 +198,27 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 			}
 		})
 		w.Maker(func(p *tree.Plan) {
-			if !ct.inPDFRender && ct.currentPage.Title != "" {
+			if !ct.inPDFRender && ct.current.Page.Title != "" {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextDisplaySmall)
 					w.Updater(func() {
-						w.SetText(ct.currentPage.Title)
+						w.SetText(ct.current.Page.Title)
 					})
 				})
 			}
-			if !ct.inPDFRender && len(ct.currentPage.Authors) > 0 {
+			if !ct.inPDFRender && len(ct.current.Page.Authors) > 0 {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextTitleLarge)
 					w.Updater(func() {
-						w.SetText("By " + ct.currentPage.Authors)
+						w.SetText("By " + ct.current.Page.Authors)
 					})
 				})
 			}
-			if !ct.currentPage.Date.IsZero() {
+			if !ct.current.Page.Date.IsZero() {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextTitleMedium)
 					w.Updater(func() {
-						w.SetText(ct.currentPage.Date.Format("January 2, 2006"))
+						w.SetText(ct.current.Page.Date.Format("January 2, 2006"))
 					})
 				})
 			}
@@ -233,10 +229,13 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 				})
 				w.Updater(func() {
 					if ct.tabs != nil {
+						_, ci := ct.tabs.CurrentTab()
+						if ci != tabIdx {
+							return
+						}
 						h := ct.history[tabIdx]
 						lc := h.Records[h.Index]
-						ct.currentPage = lc.Page
-						ct.currentHeading = lc.Heading
+						ct.current = *lc
 					}
 					errors.Log(ct.loadPage(w))
 				})
@@ -364,7 +363,7 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 	nm := fmt.Sprintf("Tab %d", nt)
 	tb, _ := ct.tabs.NewTab(nm)
 	h := &History{}
-	h.Save(ct.currentPage, ct.currentHeading, ct.currentPage.URL) // todo: not right
+	h.Save(ct.current.Page, ct.current.Heading, ct.current.Page.URL) // todo: not right
 	ct.history = append(ct.history, h)
 	tb.Maker(func(p *tree.Plan) {
 		ct.pageMaker(p, nt)
@@ -383,34 +382,35 @@ func (ct *Content) Open(url string) *Content {
 
 // reloadPage reloads the current page
 func (ct *Content) reloadPage() {
-	ct.renderedPage = nil
+	ct.rendered.Reset()
 	ct.Update()
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
-	if ct.renderedPage == ct.currentPage { // this prevents tabs from rendering
+	if ct.rendered == ct.current { // this prevents tabs from rendering
 		fmt.Println("rerender")
+		// todo: bail
 	}
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
 	}
 	w.DeleteChildren()
-	b, err := ct.currentPage.ReadContent(ct.pagesByCategory)
+	b, err := ct.current.Page.ReadContent(ct.pagesByCategory)
 	if err != nil {
 		return err
 	}
-	ct.currentPage.ParseSpecials(b)
+	ct.current.Page.ParseSpecials(b)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
 	}
 
 	ct.leftFrame.DeleteChildren()
-	ct.makeTableOfContents(w, ct.currentPage)
+	ct.makeTableOfContents(w, ct.current.Page)
 	ct.makeCategories()
 	ct.leftFrame.Update()
-	ct.renderedPage = ct.currentPage
+	ct.rendered = ct.current
 	return nil
 }
 
@@ -423,7 +423,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
 			ct.pageFrame().ScrollDimToContentStart(math32.Y)
-			ct.currentHeading = ""
+			ct.current.Heading = ""
 			ct.saveWebURL()
 		}
 	})
@@ -447,13 +447,13 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 				}
 			}
 			tr := core.NewTree(parent).SetText(tx.Text)
+			tr.SetProperty("page-text", tx)
 			last[num] = tr
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
 				tx.ScrollThisToTop()
-				ct.currentHeading = kebab
-				ct.saveWebURL()
+				ct.open(ct.current.Page.URL+"#"+kebab, true)
 			})
 		}
 		return tree.Continue
@@ -479,7 +479,7 @@ func (ct *Content) makeCategories() {
 	})
 	for _, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
-		if ct.currentPage.Name == cat {
+		if ct.current.Page.Name == cat {
 			catTree.SetSelected(true)
 		}
 		catTree.OnSelect(func(e events.Event) {
@@ -494,7 +494,7 @@ func (ct *Content) makeCategories() {
 				continue
 			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
-			if pg == ct.currentPage {
+			if pg == ct.current.Page {
 				pgTree.SetSelected(true)
 				catTree.SetClosed(false)
 			}
@@ -536,9 +536,9 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 
 // setStageTitle sets the title of the stage based on the current page URL.
 func (ct *Content) setStageTitle() {
-	if rw := ct.Scene.RenderWindow(); rw != nil && ct.currentPage != nil {
-		name := ct.currentPage.Name
-		if ct.currentPage.URL == "" { // Root page just gets app name
+	if rw := ct.Scene.RenderWindow(); rw != nil && ct.current.Page != nil {
+		name := ct.current.Page.Name
+		if ct.current.Page.URL == "" { // Root page just gets app name
 			name = core.TheApp.Name()
 		}
 		rw.SetStageTitle(name)
@@ -548,7 +548,7 @@ func (ct *Content) setStageTitle() {
 // PagePDF generates a PDF of the current page, to given file path
 // (directory). the page name is the file name.
 func (ct *Content) PagePDF(path string) error {
-	if ct.currentPage == nil {
+	if ct.current.Page == nil {
 		return errors.Log(errors.New("Page empty"))
 	}
 	core.MessageSnackbar(ct, "Generating PDF...")
@@ -559,9 +559,9 @@ func (ct *Content) PagePDF(path string) error {
 	ct.reloadPage()
 	ct.inPDFRender = false
 
-	refs := ct.PageRefs(ct.currentPage)
+	refs := ct.PageRefs(ct.current.Page)
 
-	fname := ct.currentPage.Name + ".pdf"
+	fname := ct.current.Page.Name + ".pdf"
 	if path != "" {
 		errors.Log(os.MkdirAll(path, 0777))
 		fname = filepath.Join(path, fname)
@@ -570,7 +570,7 @@ func (ct *Content) PagePDF(path string) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	opts := Settings.PageSettings(ct, ct.currentPage)
+	opts := Settings.PageSettings(ct, ct.current.Page)
 	if refs != nil {
 		paginate.PDF(f, opts.PDF, ct.pageFrame(), refs)
 	} else {

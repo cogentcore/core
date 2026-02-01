@@ -103,12 +103,12 @@ func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
 
 // makeBottomButtons makes the previous and next buttons if relevant.
 func (ct *Content) makeBottomButtons(p *tree.Plan) {
-	if len(ct.currentPage.Categories) == 0 {
+	if len(ct.current.Page.Categories) == 0 {
 		return
 	}
-	cat := ct.currentPage.Categories[0]
+	cat := ct.current.Page.Categories[0]
 	pages := ct.pagesByCategory[cat]
-	idx := slices.Index(pages, ct.currentPage)
+	idx := slices.Index(pages, ct.current.Page)
 
 	ct.prevPage, ct.nextPage = nil, nil
 

@@ -53,7 +53,7 @@ func (ct *Content) getWebURL() string {
 
 // saveWebURL saves the current page URL to the user's address bar and history.
 func (ct *Content) saveWebURL() {
-	current, nw, err := ct.pageURL(ct.currentPage, ct.currentHeading)
+	current, nw, err := ct.pageURL(ct.current.Page, ct.current.Heading)
 	if err != nil {
 		return
 	}

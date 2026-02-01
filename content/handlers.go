@@ -35,10 +35,10 @@ var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string
 
 // handles the id attribute in htmlcore: needed for equation case
 func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool {
-	if ct.currentPage == nil {
+	if ct.current.Page == nil {
 		return false
 	}
-	lbl := ct.currentPage.SpecialLabel(value)
+	lbl := ct.current.Page.SpecialLabel(value)
 	if lbl == "" {
 		return false
 	}
@@ -184,7 +184,7 @@ func (ct *Content) widgetHandler(w core.Widget) {
 		switch tag {
 		case "table":
 			if id != "" {
-				lbl := ct.currentPage.SpecialLabel(id)
+				lbl := ct.current.Page.SpecialLabel(id)
 				cp := "<b>" + lbl + ":</b>"
 				if title != "" {
 					cp += " " + title
@@ -247,7 +247,7 @@ func (ct *Content) widgetHandlerFigure(w core.Widget, id string) {
 		return
 	}
 	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
-	lbl := ct.currentPage.SpecialLabel(id)
+	lbl := ct.current.Page.SpecialLabel(id)
 	lbf := "<b>" + lbl + ":</b> " + string(altf) + " <br><br> "
 	ct.moveToBlockFrame(w, id, lbf, false)
 }
@@ -290,9 +290,9 @@ func (ct *Content) mainWikilink(text string) (url string, label string) {
 	name, label, _ := strings.Cut(text, "|")
 	name, heading, _ := strings.Cut(name, "#")
 	if name == "" { // A link with a blank page links to the current page
-		name = ct.currentPage.Name
+		name = ct.current.Page.Name
 	} else if heading == "" {
-		if pg := ct.pageByName(name); pg == ct.currentPage {
+		if pg := ct.pageByName(name); pg == ct.current.Page {
 			// if just a link to current page, don't render link
 			// this can happen for embedded pages that refer to embedder
 			return "", ""
@@ -311,7 +311,7 @@ func (ct *Content) mainWikilink(text string) (url string, label string) {
 	}
 	if ct.inPDFRender {
 		if heading != "" {
-			if pg == ct.currentPage {
+			if pg == ct.current.Page {
 				return "#" + heading, label
 			}
 			return ct.getPrintURL() + "/" + pg.URL + "#" + heading, label
@@ -347,19 +347,19 @@ func (ct *Content) wikilinkLabel(pg *bcontent.Page, heading string) string {
 func (ct *Content) parseURL(url string) (pgUrl string, pg *bcontent.Page, heading string) {
 	url = strings.ReplaceAll(url, "/#", "#")
 	pgUrl, heading, _ = strings.Cut(url, "#")
-	pg = ct.pagesByURL[url]
+	pg = ct.pagesByURL[pgUrl]
 	if pg == nil {
 		// We want only the URL after the last slash for automatic redirects
 		// (old URLs could have nesting).
-		last := url
-		if li := strings.LastIndex(url, "/"); li >= 0 {
-			last = url[li+1:]
+		last := pgUrl
+		if li := strings.LastIndex(last, "/"); li >= 0 {
+			last = pgUrl[li+1:]
 		}
 		pg = ct.similarPage(last)
 		if pg == nil {
 			core.ErrorSnackbar(ct, errors.New("no pages available"))
 		} else {
-			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", url))
+			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", pgUrl))
 		}
 	}
 	heading = bcontent.SpecialToKebab(heading)
@@ -377,16 +377,18 @@ func (ct *Content) open(url string, history bool) {
 		ct.openRef(url)
 		return
 	}
-	url, pg, heading := ct.parseURL(url)
-	ct.currentHeading = heading
-	if ct.currentPage == pg {
-		ct.openHeading(heading)
-		return
-	}
-	ct.currentPage = pg
+	_, pg, heading := ct.parseURL(url)
+	// fmt.Println("open:", url, heading, "pg:", pg.URL)
 	if history {
 		ct.historyAdd(pg, heading, url)
 	}
+	ct.current.Heading = heading
+	ct.current.URL = url
+	if ct.current.Page == pg {
+		ct.openHeading(heading)
+		return
+	}
+	ct.current.Page = pg
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
@@ -403,7 +405,7 @@ func (ct *Content) openRef(url string) {
 		return
 	}
 	ref := strings.TrimPrefix(url, "ref://")
-	ct.currentPage = pg
+	ct.current.Page = pg
 	ct.historyAdd(pg, "", url)
 	ct.Scene.Update()
 	ct.Defer(func() {
@@ -440,7 +442,8 @@ func (ct *Content) openHeading(heading string) {
 		}
 		return
 	}
-	tr.SelectEvent(events.SelectOne)
+	tx := tr.Property("page-text").(*core.Text)
+	tx.ScrollThisToTop()
 }
 
 func (ct *Content) openID(id, element string) bool {

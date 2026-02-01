@@ -4,7 +4,9 @@
 
 package content
 
-import "cogentcore.org/core/content/bcontent"
+import (
+	"cogentcore.org/core/content/bcontent"
+)
 
 func (ct *Content) historyAdd(pg *bcontent.Page, header, url string) {
 	if ct.tabs == nil {
@@ -60,6 +62,12 @@ type Location struct {
 	URL     string
 }
 
+func (lc *Location) Reset() {
+	lc.Page = nil
+	lc.Heading = ""
+	lc.URL = ""
+}
+
 // History records the history of browsing locations, for back arrow
 // navigation.
 type History struct {
@@ -95,11 +103,8 @@ func (hs *History) Back() (*Location, bool) {
 	if hs.Index <= 0 {
 		return hs.Records[0], false
 	}
-	if hs.Index == len(hs.Records)-1 { // top one is always current.
-		hs.Index--
-	}
-	lc := hs.Records[hs.Index]
 	hs.Index--
+	lc := hs.Records[hs.Index]
 	return lc, true
 }
 
