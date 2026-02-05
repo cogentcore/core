@@ -157,6 +157,7 @@ func (ct *Content) Init() {
 				} else {
 					tree.Add(p, func(w *core.Tabs) {
 						ct.tabs = w
+						w.SetType(core.FunctionalTabs).SetNewTabButton(true)
 						tb, _ := w.NewTab("Content")
 						h := &History{}
 						h.Save(ct.current.Page, ct.current.Heading, ct.current.Page.URL) // todo: URL not quite right

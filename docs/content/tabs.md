@@ -48,6 +48,9 @@ You can allow users to add new tabs:
 
 ```Go
 ts := core.NewTabs(b).SetNewTabButton(true)
+ts.NewTabFunc = func(index int) {
+	core.MessageSnackbar(ts, "New tab created: " + strconv.Itoa(index))
+}
 ts.NewTab("First")
 ts.NewTab("Second")
 ```

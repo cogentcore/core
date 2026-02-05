@@ -39,6 +39,11 @@ type Tabs struct {
 	// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 	NewTabButton bool
 
+	// NewTabFunc is a function that will be called when the NewTabButton
+	// is clicked to create a new tab, with the index of this new tab.
+	// This can be used to update the new tab contents.
+	NewTabFunc func(index int)
+
 	// maxChars is the maximum number of characters to include in the tab text.
 	// It elides text that are longer than that.
 	maxChars int
@@ -151,7 +156,11 @@ func (ts *Tabs) Init() {
 				ntb.SetTooltip("Add a new tab").SetName("new-tab-button")
 				ntb.OnClick(func(e events.Event) {
 					ts.NewTab("New tab")
-					ts.SelectTabIndex(ts.NumTabs() - 1)
+					idx := ts.NumTabs() - 1
+					if ts.NewTabFunc != nil {
+						ts.NewTabFunc(idx)
+					}
+					ts.SelectTabIndex(idx)
 				})
 			})
 		})
