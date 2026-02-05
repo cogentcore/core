@@ -389,8 +389,7 @@ func (ct *Content) reloadPage() {
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
 	if ct.rendered == ct.current { // this prevents tabs from rendering
-		fmt.Println("rerender")
-		// todo: bail
+		return nil
 	}
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
