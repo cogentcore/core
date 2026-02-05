@@ -259,9 +259,9 @@ func (ts *Tabs) insertTabButtonAt(label string, idx int) *Tab {
 	return tab
 }
 
-// tabAtIndex returns content frame and tab button at given index, nil if
+// TabAtIndex returns content frame and tab button at given index, nil if
 // index out of range (emits log message).
-func (ts *Tabs) tabAtIndex(idx int) (*Frame, *Tab) {
+func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab) {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
 
@@ -280,7 +280,7 @@ func (ts *Tabs) tabAtIndex(idx int) (*Frame, *Tab) {
 // SelectTabIndex selects the tab at the given index, returning it or nil.
 // This is the final tab selection path.
 func (ts *Tabs) SelectTabIndex(idx int) *Frame {
-	frame, tab := ts.tabAtIndex(idx)
+	frame, tab := ts.TabAtIndex(idx)
 	if frame == nil {
 		return nil
 	}
@@ -362,7 +362,7 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 
 // DeleteTabIndex deletes the tab at the given index, returning whether it was successful.
 func (ts *Tabs) DeleteTabIndex(idx int) bool {
-	frame, _ := ts.tabAtIndex(idx)
+	frame, _ := ts.TabAtIndex(idx)
 	if frame == nil {
 		return false
 	}
