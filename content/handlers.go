@@ -442,6 +442,8 @@ func (ct *Content) openHeading(heading string) {
 		}
 		return
 	}
+	tr.UnselectAll()
+	tr.Select()
 	tx := tr.Property("page-text").(*core.Text)
 	tx.ScrollThisToTop()
 }
