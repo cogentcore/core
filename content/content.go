@@ -94,6 +94,9 @@ type Content struct {
 	// tabs are the tabs, only for non-web
 	tabs *core.Tabs
 
+	// top toolbar, if present
+	toolbar *core.Toolbar
+
 	// tocNodes are all of the tree nodes in the table of contents
 	// by kebab-case heading name.
 	tocNodes map[string]*core.Tree
@@ -158,11 +161,15 @@ func (ct *Content) Init() {
 					tree.Add(p, func(w *core.Tabs) {
 						ct.tabs = w
 						w.SetType(core.FunctionalTabs).SetNewTabButton(true)
-						tb, _ := w.NewTab("Content")
+						w.NewTabFunc = func(index int) {
+							ct.newTab(ct.tabs.TabAtIndex(index))
+							ct.open("", true)
+						}
+						fr, _ := w.NewTab("Content")
 						h := &History{}
-						h.Save(ct.current.Page, ct.current.Heading, ct.current.Page.URL) // todo: URL not quite right
+						h.Save(&ct.current)
 						ct.history = []*History{h}
-						tb.Maker(func(p *tree.Plan) { ct.pageMaker(p, 0) })
+						fr.Maker(func(p *tree.Plan) { ct.pageMaker(p, 0) })
 					})
 				}
 			})
@@ -237,8 +244,12 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 						h := ct.history[tabIdx]
 						lc := h.Records[h.Index]
 						ct.current = *lc
+						// fmt.Println("page refresh", ci, h.Index)
 					}
 					errors.Log(ct.loadPage(w))
+					if ct.toolbar != nil {
+						ct.toolbar.Update()
+					}
 				})
 			})
 			if !ct.inPDFRender {
@@ -360,17 +371,24 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 		core.TheApp.OpenURL(nw.String())
 		return ct
 	}
+	ct.newTab(ct.tabs.NewTab("nt"))
+	return ct.Open(url)
+}
+
+// todo: also need tab delete!
+
+func (ct *Content) newTab(fr *core.Frame, tb *core.Tab) {
+	ct.rendered.Reset()
 	nt := ct.tabs.NumTabs()
 	nm := fmt.Sprintf("Tab %d", nt)
-	tb, _ := ct.tabs.NewTab(nm)
+	tb.SetText(nm)
 	h := &History{}
-	h.Save(ct.current.Page, ct.current.Heading, ct.current.Page.URL) // todo: not right
+	h.Save(&ct.current)
 	ct.history = append(ct.history, h)
-	tb.Maker(func(p *tree.Plan) {
-		ct.pageMaker(p, nt)
+	fr.Maker(func(p *tree.Plan) {
+		ct.pageMaker(p, nt-1)
 	})
-	ct.tabs.SelectTabIndex(nt)
-	return ct.Open(url)
+	ct.tabs.SelectTabIndex(nt - 1)
 }
 
 // Open opens the page with the given URL and updates the display.
@@ -390,7 +408,8 @@ func (ct *Content) reloadPage() {
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
 	if ct.rendered == ct.current { // this prevents tabs from rendering
-		return nil
+		// fmt.Println("repeat")
+		// return nil
 	}
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()

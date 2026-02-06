@@ -44,6 +44,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 	// Superseded by browser navigation on web.
 	if core.TheApp.Platform() != system.Web {
 		tree.Add(p, func(w *core.Button) {
+			ct.toolbar = w.Parent.(*core.Toolbar)
 			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 			w.SetTooltip("Back")
 			w.Updater(func() {
@@ -51,6 +52,9 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 			})
 			w.OnClick(func(e events.Event) {
 				ct.historyBack()
+				if ct.toolbar != nil {
+					ct.toolbar.Update()
+				}
 			})
 		})
 		tree.Add(p, func(w *core.Button) {
@@ -61,6 +65,9 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 			})
 			w.OnClick(func(e events.Event) {
 				ct.historyForward()
+				if ct.toolbar != nil {
+					ct.toolbar.Update()
+				}
 			})
 		})
 	}

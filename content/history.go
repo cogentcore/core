@@ -8,13 +8,13 @@ import (
 	"cogentcore.org/core/content/bcontent"
 )
 
-func (ct *Content) historyAdd(pg *bcontent.Page, header, url string) {
+func (ct *Content) historyAdd(pg *bcontent.Page, heading, url string) {
 	if ct.tabs == nil {
 		ct.saveWebURL()
 		return
 	}
 	_, ci := ct.tabs.CurrentTab()
-	ct.history[ci].Save(pg, header, url)
+	ct.history[ci].Save(&Location{Page: pg, Heading: heading, URL: url})
 }
 
 func (ct *Content) historyHasBack() bool {
@@ -32,6 +32,7 @@ func (ct *Content) historyBack() {
 	}
 	_, ci := ct.tabs.CurrentTab()
 	lc, _ := ct.history[ci].Back()
+	// fmt.Println("back:", lc.URL)
 	ct.open(lc.URL, false) // no add more history
 }
 
@@ -79,8 +80,7 @@ type History struct {
 	Records []*Location
 }
 
-func (hs *History) Save(pg *bcontent.Page, heading, url string) {
-	lc := &Location{Page: pg, Heading: heading, URL: url}
+func (hs *History) Save(lc *Location) {
 	if hs.Records == nil {
 		hs.Records = make([]*Location, 1)
 		hs.Index = 0
