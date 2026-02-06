@@ -81,3 +81,23 @@ b.AddTopBar(func(bar *core.Frame) {
     })
 })
 ```
+
+You can grab the toolbar as the parent of a widget, and e.g., call [[Update]] on it as needed to enable or disable items based on other state (using the [[doc:core.WidgetBase.SetEnabled]] method):
+
+```go
+var toolbar *core.Toolbar
+
+b.AddTopBar(func(bar *core.Frame) {
+    core.NewToolbar(bar).Maker(func(p *tree.Plan) {
+        tree.Add(p, func(w *core.Button) {
+            toolbar = w.Parent.(*core.Toolbar)
+            w.SetText("Build")
+        })
+        tree.Add(p, func(w *core.Button) {
+            w.SetText("Run")
+        })
+    })
+})
+```
+
+
