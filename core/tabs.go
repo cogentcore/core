@@ -44,10 +44,10 @@ type Tabs struct {
 	// This can be used to update the new tab contents.
 	NewTabFunc func(index int)
 
-	// CloseFunc is a function that will be called when a tab is closed.
+	// CloseTabFunc is a function that will be called when a tab is closed.
 	// with the index of the tab that was closed.
 	// This can be used to manage any additional resources associated with the tab.
-	CloseFunc func(index int)
+	CloseTabFunc func(index int)
 
 	// maxChars is the maximum number of characters to include in the tab text.
 	// It elides text that are longer than that.
@@ -397,8 +397,8 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 		ts.SelectTabIndex(nidx)
 	}
 	ts.NeedsLayout()
-	if ts.CloseFunc != nil {
-		ts.CloseFunc(idx)
+	if ts.CloseTabFunc != nil {
+		ts.CloseTabFunc(idx)
 	}
 	return true
 }

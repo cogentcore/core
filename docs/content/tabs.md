@@ -63,7 +63,7 @@ You can make functional tabs, which can be closed:
 
 ```Go
 ts := core.NewTabs(b).SetType(core.FunctionalTabs)
-ts.CloseFunc = func(index int) {
+ts.CloseTabFunc = func(index int) {
 	core.MessageSnackbar(ts, "Tab was closed: " + strconv.Itoa(index))
 }
 ts.NewTab("First")

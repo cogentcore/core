@@ -5,6 +5,8 @@
 package content
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/content/bcontent"
 )
 
@@ -32,7 +34,6 @@ func (ct *Content) historyBack() {
 	}
 	_, ci := ct.tabs.CurrentTab()
 	lc, _ := ct.history[ci].Back()
-	// fmt.Println("back:", lc.URL)
 	ct.open(lc.URL, false) // no add more history
 }
 
@@ -69,11 +70,24 @@ func (lc *Location) Reset() {
 	lc.URL = ""
 }
 
+func (lc *Location) String() string {
+	if lc.Page != nil {
+		return fmt.Sprintf("%q (page: %q head: %q)", lc.URL, lc.Page.URL, lc.Heading)
+	}
+	return fmt.Sprintf("%q", lc.URL)
+}
+
+func (lc *Location) Clone() *Location {
+	nc := &Location{}
+	*nc = *lc
+	return nc
+}
+
 // History records the history of browsing locations, for back arrow
 // navigation.
 type History struct {
-	// Index is the current index in the Records.
-	// This is the location to use when the back arrow happens.
+	// Index is the current index in the Records, which is typically the
+	// current page as saved. Back decrements then returns that.
 	Index int
 
 	// Records is the list of saved locations.
@@ -97,7 +111,7 @@ func (hs *History) Save(lc *Location) {
 	}
 }
 
-// Back returns current back location and decrements Index.
+// Back decrements Index and returns that location.
 // If already at the start, returns false.
 func (hs *History) Back() (*Location, bool) {
 	if hs.Index <= 0 {

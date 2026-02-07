@@ -165,9 +165,19 @@ func (ct *Content) Init() {
 							ct.newTab(ct.tabs.TabAtIndex(index))
 							ct.open("", true)
 						}
+						w.CloseTabFunc = func(index int) {
+							ct.history = slices.Delete(ct.history, index, index+1)
+							_, ci := ct.tabs.CurrentTab()
+							h := ct.history[ci]
+							lc := h.Records[h.Index]
+							ct.open(lc.URL, false)
+							if ct.toolbar != nil {
+								ct.toolbar.Update()
+							}
+						}
 						fr, _ := w.NewTab("Content")
 						h := &History{}
-						h.Save(&ct.current)
+						h.Save(ct.current.Clone())
 						ct.history = []*History{h}
 						fr.Maker(func(p *tree.Plan) { ct.pageMaker(p, 0) })
 					})
@@ -206,12 +216,21 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 			}
 		})
 		w.Maker(func(p *tree.Plan) {
+			if ct.tabs != nil {
+				_, ci := ct.tabs.CurrentTab()
+				if ci != tabIdx {
+					return
+				}
+				h := ct.history[tabIdx]
+				lc := h.Records[h.Index]
+				ct.current = *lc
+			}
 			if !ct.inPDFRender && ct.current.Page.Title != "" {
 				tree.Add(p, func(w *core.Text) {
-					w.SetType(core.TextDisplaySmall)
 					w.Updater(func() {
 						w.SetText(ct.current.Page.Title)
 					})
+					w.SetType(core.TextDisplaySmall)
 				})
 			}
 			if !ct.inPDFRender && len(ct.current.Page.Authors) > 0 {
@@ -236,16 +255,6 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 					s.Grow.Set(1, 1)
 				})
 				w.Updater(func() {
-					if ct.tabs != nil {
-						_, ci := ct.tabs.CurrentTab()
-						if ci != tabIdx {
-							return
-						}
-						h := ct.history[tabIdx]
-						lc := h.Records[h.Index]
-						ct.current = *lc
-						// fmt.Println("page refresh", ci, h.Index)
-					}
 					errors.Log(ct.loadPage(w))
 					if ct.toolbar != nil {
 						ct.toolbar.Update()
@@ -383,7 +392,7 @@ func (ct *Content) newTab(fr *core.Frame, tb *core.Tab) {
 	nm := fmt.Sprintf("Tab %d", nt)
 	tb.SetText(nm)
 	h := &History{}
-	h.Save(&ct.current)
+	h.Save(ct.current.Clone())
 	ct.history = append(ct.history, h)
 	fr.Maker(func(p *tree.Plan) {
 		ct.pageMaker(p, nt-1)
