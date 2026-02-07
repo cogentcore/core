@@ -1193,6 +1193,8 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		if em.focusPrev() {
 			e.SetHandled()
 		}
+	case keymap.Find:
+		TextSearch(sc, "", true)
 	case keymap.WinSnapshot:
 		img := sc.Renderer.Image()
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")

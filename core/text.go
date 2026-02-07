@@ -45,7 +45,16 @@ type Text struct {
 	Links []rich.Hyperlink `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// richText is the conversion of the HTML text source.
+	// This is what is actually rendered.
 	richText rich.Text
+
+	// SelectRange is the selected range, in terms of rune indexes
+	// into the richText.Join() runes.
+	selectRange textpos.Range
+
+	// highlights are regions that will be highlighted in the text
+	// when rendered. Indexes are into richText.Join() runes.
+	highlights []textpos.Range
 
 	// paintText is the [shaped.Lines] for the text.
 	paintText *shaped.Lines
@@ -53,9 +62,6 @@ type Text struct {
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
 	normalCursor cursors.Cursor
-
-	// selectRange is the selected range, in _runes_, which must be applied
-	selectRange textpos.Range
 }
 
 // TextTypes is an enum containing the different
@@ -358,7 +364,8 @@ func (tx *Text) copy() { //types:add
 		return
 	}
 	// note: selectRange is in runes, not string indexes.
-	md := mimedata.NewText(string([]rune(tx.Text)[tx.selectRange.Start:tx.selectRange.End]))
+	rn := tx.richText.Join()
+	md := mimedata.NewText(string(rn[tx.selectRange.Start:tx.selectRange.End]))
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
@@ -529,5 +536,7 @@ func (tx *Text) SizeDown(iter int) bool {
 
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
+	tx.paintText.HighlightReset()
+	tx.paintText.HighlightRegion(tx.highlights...)
 	tx.Scene.Painter.DrawText(tx.paintText, tx.Geom.Pos.Content)
 }
