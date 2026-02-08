@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// SearchResults are the search results for text within [Text] widgets.
-type SearchResults struct {
+// SearchResult is one set of search results for a [Text] widget.
+type SearchResult struct {
 	// Text is the widget
 	Text *Text
 
@@ -24,12 +24,36 @@ type SearchResults struct {
 	Matches []textpos.Range
 }
 
+type SearchResults []SearchResult
+
+// Len returns the total number of search results.
+func (sr SearchResults) Len() int {
+	n := 0
+	for _, r := range sr {
+		n += len(r.Matches)
+	}
+	return n
+}
+
+// AtIndex returns the results at given index.
+func (sr SearchResults) AtIndex(idx int) (*Text, textpos.Range) {
+	n := 0
+	for _, r := range sr {
+		nr := len(r.Matches)
+		if idx >= n && idx < n+nr {
+			return r.Text, r.Matches[idx-n]
+		}
+		n += nr
+	}
+	return nil, textpos.Range{}
+}
+
 // TextSearchResults returns all of the [Text] widgets within given widget,
 // with matching text for the given find string, with given case sensitivity.
-func TextSearchResults(w Widget, find string, ignoreCase bool) []SearchResults {
+func TextSearchResults(w Widget, find string, ignoreCase bool) SearchResults {
 	fr := []rune(find)
 	fsz := len(fr)
-	var res []SearchResults
+	var res SearchResults
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		tx, ok := cw.(*Text)
@@ -56,7 +80,7 @@ func TextSearchResults(w Widget, find string, ignoreCase bool) []SearchResults {
 			matches = append(matches, textpos.Range{Start: i, End: ci})
 		}
 		if len(matches) > 0 {
-			res = append(res, SearchResults{Text: tx, Matches: matches})
+			res = append(res, SearchResult{Text: tx, Matches: matches})
 		}
 		return tree.Continue
 	})
@@ -80,7 +104,7 @@ func TextSearchHighlightReset(w Widget) {
 
 // TextSearchHighlight adds region highlights for given text search results,
 // first calling [TextSearchHighlightReset] to reset any existing highlights.
-func TextSearchHighlight(w Widget, res []SearchResults) {
+func TextSearchHighlight(w Widget, res SearchResults) {
 	TextSearchHighlightReset(w)
 	for _, r := range res {
 		r.Text.highlights = r.Matches
@@ -91,15 +115,33 @@ func TextSearchHighlight(w Widget, res []SearchResults) {
 // TextSearch performs an interactive search for given text,
 // on elements within given widget.
 func TextSearch(w Widget, find string, ignoreCase bool) {
-	var res []SearchResults
+	var res SearchResults
 	var n int
 	idx := 0
 	search := func() {
 		res = TextSearchResults(w, find, ignoreCase)
 		TextSearchHighlight(w, res)
-		n = len(res)
+		n = res.Len()
+	}
+
+	unSel := func() {
+		tx, _ := res.AtIndex(idx)
+		if tx == nil {
+			return
+		}
+		tx.SetSelectRange(textpos.Range{})
+	}
+
+	sel := func() {
+		tx, r := res.AtIndex(idx)
+		if tx == nil {
+			return
+		}
+		tx.SetSelectRange(r)
+		tx.ScrollThisToTop()
 	}
 	search()
+	sel()
 
 	d := NewBody("Search")
 	d.Styler(func(s *styles.Style) {
@@ -113,7 +155,9 @@ func TextSearch(w Widget, find string, ignoreCase bool) {
 	})
 	st.OnChange(func(e events.Event) {
 		find = st.Text()
+		unSel()
 		search()
+		sel()
 		ix.Update()
 	})
 	up := NewButton(d).SetIcon(icons.ArrowUpward)
@@ -121,10 +165,12 @@ func TextSearch(w Widget, find string, ignoreCase bool) {
 		if n == 0 {
 			return
 		}
+		unSel()
 		idx--
 		if idx < 0 {
 			idx += n
 		}
+		sel()
 		ix.Update()
 		// todo: select
 	})
@@ -133,15 +179,18 @@ func TextSearch(w Widget, find string, ignoreCase bool) {
 		if n == 0 {
 			return
 		}
+		unSel()
 		idx++
 		if idx >= n {
 			idx -= n
 		}
+		sel()
 		ix.Update()
 		// todo: select
 	})
 	x := NewButton(d).SetIcon(icons.Close)
 	x.OnClick(func(e events.Event) {
+		unSel()
 		TextSearchHighlightReset(w)
 		d.Close()
 	})

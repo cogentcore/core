@@ -91,8 +91,8 @@ func (rs *Renderer) TextRunRegions(ctx *render.Context, run *shapedgt.Run, ln *s
 	if run.Background != nil {
 		rs.FillBounds(ctx, rbb, run.Background)
 	}
-	rs.TextRegionFill(ctx, run, off, lns.SelectionColor, ln.Selections)
 	rs.TextRegionFill(ctx, run, off, lns.HighlightColor, ln.Highlights)
+	rs.TextRegionFill(ctx, run, off, lns.SelectionColor, ln.Selections)
 }
 
 // TextRun rasterizes the given text run into the output image using the

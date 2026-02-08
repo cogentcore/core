@@ -391,8 +391,12 @@ func (tx *Text) selectUpdate(ri int) {
 	} else {
 		tx.selectRange.Start, tx.selectRange.End = ri, tx.selectRange.Start
 	}
-	tx.paintText.SelectReset()
-	tx.paintText.SelectRegion(tx.selectRange)
+}
+
+// SetSelectRange sets the selection range
+func (tx *Text) SetSelectRange(r textpos.Range) {
+	tx.selectRange = r
+	tx.NeedsRender()
 }
 
 // hasSelection returns true if there is an active selection.
@@ -536,6 +540,8 @@ func (tx *Text) SizeDown(iter int) bool {
 
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
+	tx.paintText.SelectReset()
+	tx.paintText.SelectRegion(tx.selectRange)
 	tx.paintText.HighlightReset()
 	tx.paintText.HighlightRegion(tx.highlights...)
 	tx.Scene.Painter.DrawText(tx.paintText, tx.Geom.Pos.Content)
