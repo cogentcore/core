@@ -9,6 +9,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system/composer"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"github.com/cogentcore/yaegi/interp"
 	"go/constant"
@@ -63,8 +64,11 @@ func init() {
 		"GenerateHTML":                  reflect.ValueOf(&core.GenerateHTML).Elem(),
 		"GenerateHTMLCore":              reflect.ValueOf(core.GenerateHTMLCore),
 		"HighlightingEditor":            reflect.ValueOf(core.HighlightingEditor),
+		"IgnoreCase":                    reflect.ValueOf(core.IgnoreCase),
 		"InitValueButton":               reflect.ValueOf(core.InitValueButton),
 		"InspectorWindow":               reflect.ValueOf(core.InspectorWindow),
+		"LastSearch":                    reflect.ValueOf(&core.LastSearch).Elem(),
+		"LastUseCase":                   reflect.ValueOf(&core.LastUseCase).Elem(),
 		"LayoutPassesN":                 reflect.ValueOf(core.LayoutPassesN),
 		"LayoutPassesValues":            reflect.ValueOf(core.LayoutPassesValues),
 		"ListColProperty":               reflect.ValueOf(constant.MakeFromLiteral("\"ls-col\"", token.STRING, 0)),
@@ -153,6 +157,15 @@ func init() {
 		"SaveSettings":                  reflect.ValueOf(core.SaveSettings),
 		"SceneSource":                   reflect.ValueOf(core.SceneSource),
 		"ScrimSource":                   reflect.ValueOf(core.ScrimSource),
+		"Search":                        reflect.ValueOf(core.Search),
+		"SearchHighlight":               reflect.ValueOf(core.SearchHighlight),
+		"SearchRunes":                   reflect.ValueOf(core.SearchRunes),
+		"SearchSelect":                  reflect.ValueOf(core.SearchSelect),
+		"SearchWidgets":                 reflect.ValueOf(core.SearchWidgets),
+		"SelectNoScroll":                reflect.ValueOf(core.SelectNoScroll),
+		"SelectReset":                   reflect.ValueOf(core.SelectReset),
+		"SelectScroll":                  reflect.ValueOf(core.SelectScroll),
+		"SelectSet":                     reflect.ValueOf(core.SelectSet),
 		"SettingsEditor":                reflect.ValueOf(core.SettingsEditor),
 		"SettingsWindow":                reflect.ValueOf(core.SettingsWindow),
 		"SizeClassesN":                  reflect.ValueOf(core.SizeClassesN),
@@ -225,6 +238,7 @@ func init() {
 		"TooltipStage":                  reflect.ValueOf(core.TooltipStage),
 		"UpdateAll":                     reflect.ValueOf(core.UpdateAll),
 		"UpdateSettings":                reflect.ValueOf(core.UpdateSettings),
+		"UseCase":                       reflect.ValueOf(core.UseCase),
 		"ValueTypes":                    reflect.ValueOf(&core.ValueTypes).Elem(),
 		"Wait":                          reflect.ValueOf(core.Wait),
 		"WindowStage":                   reflect.ValueOf(core.WindowStage),
@@ -297,6 +311,8 @@ func init() {
 		"SVG":                    reflect.ValueOf((*core.SVG)(nil)),
 		"Scene":                  reflect.ValueOf((*core.Scene)(nil)),
 		"ScreenSettings":         reflect.ValueOf((*core.ScreenSettings)(nil)),
+		"SearchResult":           reflect.ValueOf((*core.SearchResult)(nil)),
+		"SearchResults":          reflect.ValueOf((*core.SearchResults)(nil)),
 		"Separator":              reflect.ValueOf((*core.Separator)(nil)),
 		"Settings":               reflect.ValueOf((*core.Settings)(nil)),
 		"SettingsBase":           reflect.ValueOf((*core.SettingsBase)(nil)),
@@ -402,6 +418,7 @@ type _cogentcore_org_core_core_Layouter struct {
 	WContextMenuPos    func(e events.Event) image.Point
 	WCopyFieldsFrom    func(from tree.Node)
 	WDestroy           func()
+	WHighlightMatches  func(matches []textpos.Match) bool
 	WInit              func()
 	WLayoutSpace       func()
 	WManageOverflow    func(iter int, updateSize bool) bool
@@ -415,6 +432,8 @@ type _cogentcore_org_core_core_Layouter struct {
 	WScrollChanged     func(d math32.Dims, sb *core.Slider)
 	WScrollGeom        func(d math32.Dims) (pos math32.Vector2, sz math32.Vector2)
 	WScrollValues      func(d math32.Dims) (maxSize float32, visSize float32, visPct float32)
+	WSearch            func(find string, useCase bool) ([]textpos.Match, bool)
+	WSelectMatch       func(matches []textpos.Match, index int, scroll bool, reset bool)
 	WSetScrollParams   func(d math32.Dims, sb *core.Slider)
 	WShowContextMenu   func(e events.Event)
 	WSizeDown          func(iter int) bool
@@ -423,6 +442,7 @@ type _cogentcore_org_core_core_Layouter struct {
 	WSizeFromChildren  func(iter int, pass core.LayoutPasses) math32.Vector2
 	WSizeUp            func()
 	WStyle             func()
+	WTextRunes         func() []rune
 	WWidgetTooltip     func(pos image.Point) (string, image.Point)
 }
 
@@ -438,8 +458,11 @@ func (W _cogentcore_org_core_core_Layouter) ContextMenuPos(e events.Event) image
 }
 func (W _cogentcore_org_core_core_Layouter) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Layouter) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Layouter) Init()                         { W.WInit() }
-func (W _cogentcore_org_core_core_Layouter) LayoutSpace()                  { W.WLayoutSpace() }
+func (W _cogentcore_org_core_core_Layouter) HighlightMatches(matches []textpos.Match) bool {
+	return W.WHighlightMatches(matches)
+}
+func (W _cogentcore_org_core_core_Layouter) Init()        { W.WInit() }
+func (W _cogentcore_org_core_core_Layouter) LayoutSpace() { W.WLayoutSpace() }
 func (W _cogentcore_org_core_core_Layouter) ManageOverflow(iter int, updateSize bool) bool {
 	return W.WManageOverflow(iter, updateSize)
 }
@@ -463,6 +486,12 @@ func (W _cogentcore_org_core_core_Layouter) ScrollGeom(d math32.Dims) (pos math3
 func (W _cogentcore_org_core_core_Layouter) ScrollValues(d math32.Dims) (maxSize float32, visSize float32, visPct float32) {
 	return W.WScrollValues(d)
 }
+func (W _cogentcore_org_core_core_Layouter) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return W.WSearch(find, useCase)
+}
+func (W _cogentcore_org_core_core_Layouter) SelectMatch(matches []textpos.Match, index int, scroll bool, reset bool) {
+	W.WSelectMatch(matches, index, scroll, reset)
+}
 func (W _cogentcore_org_core_core_Layouter) SetScrollParams(d math32.Dims, sb *core.Slider) {
 	W.WSetScrollParams(d, sb)
 }
@@ -473,8 +502,9 @@ func (W _cogentcore_org_core_core_Layouter) SizeFinal()                     { W.
 func (W _cogentcore_org_core_core_Layouter) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Vector2 {
 	return W.WSizeFromChildren(iter, pass)
 }
-func (W _cogentcore_org_core_core_Layouter) SizeUp() { W.WSizeUp() }
-func (W _cogentcore_org_core_core_Layouter) Style()  { W.WStyle() }
+func (W _cogentcore_org_core_core_Layouter) SizeUp()           { W.WSizeUp() }
+func (W _cogentcore_org_core_core_Layouter) Style()            { W.WStyle() }
+func (W _cogentcore_org_core_core_Layouter) TextRunes() []rune { return W.WTextRunes() }
 func (W _cogentcore_org_core_core_Layouter) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
@@ -674,6 +704,7 @@ type _cogentcore_org_core_core_Treer struct {
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
+	WHighlightMatches func(matches []textpos.Match) bool
 	WInit             func()
 	WMimeData         func(md *mimedata.Mimes)
 	WNodeWalkDown     func(fun func(n tree.Node) bool)
@@ -686,11 +717,14 @@ type _cogentcore_org_core_core_Treer struct {
 	WRender           func()
 	WRenderSource     func(op draw.Op) composer.Source
 	WRenderWidget     func()
+	WSearch           func(find string, useCase bool) ([]textpos.Match, bool)
+	WSelectMatch      func(matches []textpos.Match, index int, scroll bool, reset bool)
 	WShowContextMenu  func(e events.Event)
 	WSizeDown         func(iter int) bool
 	WSizeFinal        func()
 	WSizeUp           func()
 	WStyle            func()
+	WTextRunes        func() []rune
 	WWidgetTooltip    func(pos image.Point) (string, image.Point)
 }
 
@@ -712,8 +746,11 @@ func (W _cogentcore_org_core_core_Treer) DeleteSelected()                 { W.WD
 func (W _cogentcore_org_core_core_Treer) Destroy()                        { W.WDestroy() }
 func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
-func (W _cogentcore_org_core_core_Treer) Init()                           { W.WInit() }
-func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes)     { W.WMimeData(md) }
+func (W _cogentcore_org_core_core_Treer) HighlightMatches(matches []textpos.Match) bool {
+	return W.WHighlightMatches(matches)
+}
+func (W _cogentcore_org_core_core_Treer) Init()                       { W.WInit() }
+func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes) { W.WMimeData(md) }
 func (W _cogentcore_org_core_core_Treer) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
@@ -727,12 +764,19 @@ func (W _cogentcore_org_core_core_Treer) Render()          { W.WRender() }
 func (W _cogentcore_org_core_core_Treer) RenderSource(op draw.Op) composer.Source {
 	return W.WRenderSource(op)
 }
-func (W _cogentcore_org_core_core_Treer) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Treer) RenderWidget() { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Treer) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return W.WSearch(find, useCase)
+}
+func (W _cogentcore_org_core_core_Treer) SelectMatch(matches []textpos.Match, index int, scroll bool, reset bool) {
+	W.WSelectMatch(matches, index, scroll, reset)
+}
 func (W _cogentcore_org_core_core_Treer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_core_Treer) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
 func (W _cogentcore_org_core_core_Treer) SizeFinal()                     { W.WSizeFinal() }
 func (W _cogentcore_org_core_core_Treer) SizeUp()                        { W.WSizeUp() }
 func (W _cogentcore_org_core_core_Treer) Style()                         { W.WStyle() }
+func (W _cogentcore_org_core_core_Treer) TextRunes() []rune              { return W.WTextRunes() }
 func (W _cogentcore_org_core_core_Treer) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
@@ -747,29 +791,33 @@ func (W _cogentcore_org_core_core_Validator) Validate() error { return W.WValida
 
 // _cogentcore_org_core_core_Value is an interface wrapper for Value type
 type _cogentcore_org_core_core_Value struct {
-	IValue           interface{}
-	WApplyScenePos   func()
-	WAsTree          func() *tree.NodeBase
-	WAsWidget        func() *core.WidgetBase
-	WChildBackground func(child core.Widget) image.Image
-	WContextMenuPos  func(e events.Event) image.Point
-	WCopyFieldsFrom  func(from tree.Node)
-	WDestroy         func()
-	WInit            func()
-	WNodeWalkDown    func(fun func(n tree.Node) bool)
-	WOnAdd           func()
-	WPlanName        func() string
-	WPosition        func()
-	WRender          func()
-	WRenderSource    func(op draw.Op) composer.Source
-	WRenderWidget    func()
-	WShowContextMenu func(e events.Event)
-	WSizeDown        func(iter int) bool
-	WSizeFinal       func()
-	WSizeUp          func()
-	WStyle           func()
-	WWidgetTooltip   func(pos image.Point) (string, image.Point)
-	WWidgetValue     func() any
+	IValue            interface{}
+	WApplyScenePos    func()
+	WAsTree           func() *tree.NodeBase
+	WAsWidget         func() *core.WidgetBase
+	WChildBackground  func(child core.Widget) image.Image
+	WContextMenuPos   func(e events.Event) image.Point
+	WCopyFieldsFrom   func(from tree.Node)
+	WDestroy          func()
+	WHighlightMatches func(matches []textpos.Match) bool
+	WInit             func()
+	WNodeWalkDown     func(fun func(n tree.Node) bool)
+	WOnAdd            func()
+	WPlanName         func() string
+	WPosition         func()
+	WRender           func()
+	WRenderSource     func(op draw.Op) composer.Source
+	WRenderWidget     func()
+	WSearch           func(find string, useCase bool) ([]textpos.Match, bool)
+	WSelectMatch      func(matches []textpos.Match, index int, scroll bool, reset bool)
+	WShowContextMenu  func(e events.Event)
+	WSizeDown         func(iter int) bool
+	WSizeFinal        func()
+	WSizeUp           func()
+	WStyle            func()
+	WTextRunes        func() []rune
+	WWidgetTooltip    func(pos image.Point) (string, image.Point)
+	WWidgetValue      func() any
 }
 
 func (W _cogentcore_org_core_core_Value) ApplyScenePos()             { W.WApplyScenePos() }
@@ -783,7 +831,10 @@ func (W _cogentcore_org_core_core_Value) ContextMenuPos(e events.Event) image.Po
 }
 func (W _cogentcore_org_core_core_Value) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Value) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Value) Init()                         { W.WInit() }
+func (W _cogentcore_org_core_core_Value) HighlightMatches(matches []textpos.Match) bool {
+	return W.WHighlightMatches(matches)
+}
+func (W _cogentcore_org_core_core_Value) Init() { W.WInit() }
 func (W _cogentcore_org_core_core_Value) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
@@ -794,12 +845,19 @@ func (W _cogentcore_org_core_core_Value) Render()          { W.WRender() }
 func (W _cogentcore_org_core_core_Value) RenderSource(op draw.Op) composer.Source {
 	return W.WRenderSource(op)
 }
-func (W _cogentcore_org_core_core_Value) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Value) RenderWidget() { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Value) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return W.WSearch(find, useCase)
+}
+func (W _cogentcore_org_core_core_Value) SelectMatch(matches []textpos.Match, index int, scroll bool, reset bool) {
+	W.WSelectMatch(matches, index, scroll, reset)
+}
 func (W _cogentcore_org_core_core_Value) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_core_Value) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
 func (W _cogentcore_org_core_core_Value) SizeFinal()                     { W.WSizeFinal() }
 func (W _cogentcore_org_core_core_Value) SizeUp()                        { W.WSizeUp() }
 func (W _cogentcore_org_core_core_Value) Style()                         { W.WStyle() }
+func (W _cogentcore_org_core_core_Value) TextRunes() []rune              { return W.WTextRunes() }
 func (W _cogentcore_org_core_core_Value) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
@@ -825,28 +883,32 @@ func (W _cogentcore_org_core_core_Valuer) Widget() core.Value { return W.WWidget
 
 // _cogentcore_org_core_core_Widget is an interface wrapper for Widget type
 type _cogentcore_org_core_core_Widget struct {
-	IValue           interface{}
-	WApplyScenePos   func()
-	WAsTree          func() *tree.NodeBase
-	WAsWidget        func() *core.WidgetBase
-	WChildBackground func(child core.Widget) image.Image
-	WContextMenuPos  func(e events.Event) image.Point
-	WCopyFieldsFrom  func(from tree.Node)
-	WDestroy         func()
-	WInit            func()
-	WNodeWalkDown    func(fun func(n tree.Node) bool)
-	WOnAdd           func()
-	WPlanName        func() string
-	WPosition        func()
-	WRender          func()
-	WRenderSource    func(op draw.Op) composer.Source
-	WRenderWidget    func()
-	WShowContextMenu func(e events.Event)
-	WSizeDown        func(iter int) bool
-	WSizeFinal       func()
-	WSizeUp          func()
-	WStyle           func()
-	WWidgetTooltip   func(pos image.Point) (string, image.Point)
+	IValue            interface{}
+	WApplyScenePos    func()
+	WAsTree           func() *tree.NodeBase
+	WAsWidget         func() *core.WidgetBase
+	WChildBackground  func(child core.Widget) image.Image
+	WContextMenuPos   func(e events.Event) image.Point
+	WCopyFieldsFrom   func(from tree.Node)
+	WDestroy          func()
+	WHighlightMatches func(matches []textpos.Match) bool
+	WInit             func()
+	WNodeWalkDown     func(fun func(n tree.Node) bool)
+	WOnAdd            func()
+	WPlanName         func() string
+	WPosition         func()
+	WRender           func()
+	WRenderSource     func(op draw.Op) composer.Source
+	WRenderWidget     func()
+	WSearch           func(find string, useCase bool) ([]textpos.Match, bool)
+	WSelectMatch      func(matches []textpos.Match, index int, scroll bool, reset bool)
+	WShowContextMenu  func(e events.Event)
+	WSizeDown         func(iter int) bool
+	WSizeFinal        func()
+	WSizeUp           func()
+	WStyle            func()
+	WTextRunes        func() []rune
+	WWidgetTooltip    func(pos image.Point) (string, image.Point)
 }
 
 func (W _cogentcore_org_core_core_Widget) ApplyScenePos()             { W.WApplyScenePos() }
@@ -860,7 +922,10 @@ func (W _cogentcore_org_core_core_Widget) ContextMenuPos(e events.Event) image.P
 }
 func (W _cogentcore_org_core_core_Widget) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Widget) Destroy()                      { W.WDestroy() }
-func (W _cogentcore_org_core_core_Widget) Init()                         { W.WInit() }
+func (W _cogentcore_org_core_core_Widget) HighlightMatches(matches []textpos.Match) bool {
+	return W.WHighlightMatches(matches)
+}
+func (W _cogentcore_org_core_core_Widget) Init() { W.WInit() }
 func (W _cogentcore_org_core_core_Widget) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
@@ -871,12 +936,19 @@ func (W _cogentcore_org_core_core_Widget) Render()          { W.WRender() }
 func (W _cogentcore_org_core_core_Widget) RenderSource(op draw.Op) composer.Source {
 	return W.WRenderSource(op)
 }
-func (W _cogentcore_org_core_core_Widget) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Widget) RenderWidget() { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Widget) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return W.WSearch(find, useCase)
+}
+func (W _cogentcore_org_core_core_Widget) SelectMatch(matches []textpos.Match, index int, scroll bool, reset bool) {
+	W.WSelectMatch(matches, index, scroll, reset)
+}
 func (W _cogentcore_org_core_core_Widget) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_core_Widget) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
 func (W _cogentcore_org_core_core_Widget) SizeFinal()                     { W.WSizeFinal() }
 func (W _cogentcore_org_core_core_Widget) SizeUp()                        { W.WSizeUp() }
 func (W _cogentcore_org_core_core_Widget) Style()                         { W.WStyle() }
+func (W _cogentcore_org_core_core_Widget) TextRunes() []rune              { return W.WTextRunes() }
 func (W _cogentcore_org_core_core_Widget) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
