@@ -380,11 +380,11 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 		core.TheApp.OpenURL(nw.String())
 		return ct
 	}
-	ct.newTab(ct.tabs.NewTab("nt"))
+	nt := ct.tabs.NumTabs()
+	nm := fmt.Sprintf("Tab %d", nt+1)
+	ct.newTab(ct.tabs.NewTab(nm))
 	return ct.Open(url)
 }
-
-// todo: also need tab delete!
 
 func (ct *Content) newTab(fr *core.Frame, tb *core.Tab) {
 	ct.rendered.Reset()
@@ -452,7 +452,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 		if contents.IsRootSelected() {
 			ct.pageFrame().ScrollDimToContentStart(math32.Y)
 			ct.current.Heading = ""
-			ct.saveWebURL()
+			ct.saveWebURL(&ct.current)
 		}
 	})
 	// last is the most recent tree node for each heading level, used for nesting.
@@ -481,7 +481,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
 				tx.ScrollThisToTop()
-				ct.open(ct.current.Page.URL+"#"+kebab, true)
+				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})
 		}
 		return tree.Continue
@@ -502,7 +502,7 @@ func (ct *Content) makeCategories() {
 	cats.SetReadOnly(true)
 	cats.OnSelect(func(e events.Event) {
 		if cats.IsRootSelected() {
-			ct.Open("")
+			ct.OpenEvent("", e)
 		}
 	})
 	for _, cat := range ct.categories {
@@ -512,7 +512,7 @@ func (ct *Content) makeCategories() {
 		}
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
-				ct.Open(catPage.URL)
+				ct.OpenEvent(catPage.URL, e)
 			} else {
 				catTree.Open() // no page to open so open the tree
 			}
@@ -527,7 +527,7 @@ func (ct *Content) makeCategories() {
 				catTree.SetClosed(false)
 			}
 			pgTree.OnSelect(func(e events.Event) {
-				ct.Open(pg.URL)
+				ct.OpenEvent(pg.URL, e)
 			})
 		}
 	}

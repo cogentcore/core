@@ -386,7 +386,7 @@ func (tr *Tree) Init() {
 		e.SetHandled()
 	})
 	parts.OnClick(func(e events.Event) {
-		tr.SelectEvent(e.SelectMode())
+		tr.SelectEvent(e.SelectMode(), e)
 		e.SetHandled()
 	})
 	parts.AsWidget().OnDoubleClick(func(e events.Event) {
@@ -420,7 +420,7 @@ func (tr *Tree) Init() {
 	parts.On(events.ContextMenu, func(e events.Event) {
 		sels := tr.GetSelectedNodes()
 		if len(sels) == 0 {
-			tr.SelectEvent(e.SelectMode())
+			tr.SelectEvent(e.SelectMode(), e)
 		}
 		tr.ShowContextMenu(e)
 	})
@@ -894,10 +894,10 @@ func (tr *Tree) sendChangeEventReSync(original ...events.Event) {
 // SelectEvent updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne),
 // and root sends selection event. Returns true if event sent.
-func (tr *Tree) SelectEvent(mode events.SelectModes) bool {
+func (tr *Tree) SelectEvent(mode events.SelectModes, original ...events.Event) bool {
 	sel := tr.selectUpdate(mode)
 	if sel {
-		tr.sendSelectEvent()
+		tr.sendSelectEvent(original...)
 	}
 	return sel
 }

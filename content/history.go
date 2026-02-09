@@ -12,7 +12,7 @@ import (
 
 func (ct *Content) historyAdd(pg *bcontent.Page, heading, url string) {
 	if ct.tabs == nil {
-		ct.saveWebURL()
+		ct.saveWebURL(&Location{Page: pg, Heading: heading, URL: url})
 		return
 	}
 	_, ci := ct.tabs.CurrentTab()

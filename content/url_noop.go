@@ -22,5 +22,5 @@ func (ct *Content) getWebURL() string   { return "" }
 func (ct *Content) pageURL(pg *bcontent.Page, heading string) (current, nw *url.URL, err error) {
 	return
 }
-func (ct *Content) saveWebURL()        {}
-func (ct *Content) handleWebPopState() {}
+func (ct *Content) saveWebURL(lc *Location) {}
+func (ct *Content) handleWebPopState()      {}
