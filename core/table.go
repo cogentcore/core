@@ -599,7 +599,7 @@ func (tb *Table) SizeFinal() {
 	ksz.Alloc.Content.X = gsz.Alloc.Content.X
 }
 
-//////// TextSearch interface
+//////// Search interface
 
 // TextRunes returns any text content associated with the widget, to be used
 // for Search for example. If this is nil, then it is excluded from search.
@@ -607,10 +607,12 @@ func (tb *Table) TextRunes() []rune {
 	return nil
 }
 
-// TextSearch returns text search results for this widget, searching for
+// Search returns text search results for this widget, searching for
 // the find string with given case sensitivity. It is up to each widget
 // to define the meaning of the Region line, char values for the matches.
-func (tb *Table) TextSearch(find string, useCase bool) []textpos.Match {
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tb *Table) Search(find string, useCase bool) ([]textpos.Match, bool) {
 	var results []textpos.Match
 	for rw := range tb.SliceSize {
 		val := tb.sliceElementValue(rw)
@@ -621,7 +623,7 @@ func (tb *Table) TextSearch(find string, useCase bool) []textpos.Match {
 				continue
 			}
 			str := reflectx.ToString(fval.Interface())
-			m := TextSearchRunes([]rune(str), find, useCase)
+			m := SearchRunes([]rune(str), find, useCase)
 			if len(m) == 0 {
 				continue
 			}
@@ -633,26 +635,28 @@ func (tb *Table) TextSearch(find string, useCase bool) []textpos.Match {
 			results = append(results, m...)
 		}
 	}
-	return results
+	return results, true
 }
 
 // HighlightMatches does highlighting of the given matches within this widget,
-// where the matches are as returned from the TextSearch method.
+// where the matches are as returned from the Search method.
 // Passing a nil causes matches to be reset.
 // Any existing highlighting should always be reset first regardless.
-func (tb *Table) HighlightMatches(matches []textpos.Match) {
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tb *Table) HighlightMatches(matches []textpos.Match) bool {
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
 	lg := tb.ListGrid
 	for i := range tb.VisibleRows {
 		ridx := nWidgPerRow * i
 		for fli := range tb.numVisibleFields {
 			w := lg.Child(ridx + idxOff + fli).(Widget)
-			w.SelectMatch(matches, 0, false, true)
+			w.SelectMatch(matches, 0, SelectNoScroll, SelectReset)
 			w.HighlightMatches(nil) // reset
 		}
 	}
 	if matches == nil {
-		return
+		return true
 	}
 	for _, m := range matches {
 		ln := m.Region.Start.Line
@@ -665,10 +669,11 @@ func (tb *Table) HighlightMatches(matches []textpos.Match) {
 		w := lg.Child(ridx + idxOff + fli).(Widget)
 		w.HighlightMatches([]textpos.Match{m})
 	}
+	return true
 }
 
 // SelectMatch selects match at given index from among those returned
-// from the TextSearch method. scroll = scroll widget into view.
+// from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting.
 func (tb *Table) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
@@ -689,5 +694,5 @@ func (tb *Table) SelectMatch(matches []textpos.Match, index int, scroll, reset b
 	ridx := nWidgPerRow * (rw - tb.StartIndex)
 	fli := ln % tb.numVisibleFields
 	w := lg.Child(ridx + idxOff + fli).(Widget)
-	w.SelectMatch(matches, index, false, reset)
+	w.SelectMatch(matches, index, SelectNoScroll, reset)
 }

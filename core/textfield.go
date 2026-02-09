@@ -1792,7 +1792,7 @@ func concealDots(n int) []rune {
 	return dots
 }
 
-//////// TextSearch interface
+//////// Search interface
 
 // TextRunes returns any text content associated with the widget, to be used
 // for Search for example. If this is nil, then it is excluded from search.
@@ -1800,30 +1800,35 @@ func (tx *TextField) TextRunes() []rune {
 	return tx.editText
 }
 
-// TextSearch returns text search results for this widget, searching for
+// Search returns text search results for this widget, searching for
 // the find string with given case sensitivity. It is up to each widget
 // to define the meaning of the Region line, char values for the matches.
-func (tx *TextField) TextSearch(find string, useCase bool) []textpos.Match {
-	return TextSearchRunes(tx.editText, find, useCase)
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tx *TextField) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return SearchRunes(tx.editText, find, useCase), true
 }
 
 // HighlightMatches does highlighting of the given matches within this widget,
-// where the matches are as returned from the TextSearch method.
+// where the matches are as returned from the Search method.
 // Passing a nil causes matches to be reset.
 // Any existing highlighting should always be reset first regardless.
-func (tx *TextField) HighlightMatches(matches []textpos.Match) {
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tx *TextField) HighlightMatches(matches []textpos.Match) bool {
 	tx.highlights = nil
 	tx.NeedsRender()
 	if matches == nil {
-		return
+		return true
 	}
 	for _, m := range matches {
 		tx.highlights = append(tx.highlights, textpos.Range{Start: m.Region.Start.Char, End: m.Region.End.Char})
 	}
+	return true
 }
 
 // SelectMatch selects match at given index from among those returned
-// from the TextSearch method. scroll = scroll widget into view.
+// from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting (does not scroll).
 func (tx *TextField) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
 	if reset {

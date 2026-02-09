@@ -142,19 +142,23 @@ type Widget interface {
 	// for Search for example. If this is nil, then it is excluded from search.
 	TextRunes() []rune
 
-	// TextSearch returns text search results for this widget, searching for
+	// Search returns text search results for this widget, searching for
 	// the find string with given case sensitivity. It is up to each widget
 	// to define the meaning of the Region line, char values for the matches.
-	TextSearch(find string, useCase bool) []textpos.Match
+	// The bool return value indicates whether this widget handled the search,
+	// thereby excluding further searching within the elements under it.
+	Search(find string, useCase bool) ([]textpos.Match, bool)
 
 	// HighlightMatches does highlighting of the given matches within this widget,
-	// where the matches are as returned from the TextSearch method.
+	// where the matches are as returned from the Search method.
 	// Passing a nil causes matches to be reset.
 	// Any existing highlighting should always be reset first regardless.
-	HighlightMatches(matches []textpos.Match)
+	// The bool return value indicates whether this widget handled the search,
+	// thereby excluding further searching within the elements under it.
+	HighlightMatches(matches []textpos.Match) bool
 
 	// SelectMatch selects match at given index from among those returned
-	// from the TextSearch method. scroll = scroll widget into view.
+	// from the Search method. scroll = scroll widget into view.
 	// reset = clear selection instead of selecting (does not scroll).
 	SelectMatch(matches []textpos.Match, index int, scroll, reset bool)
 }
@@ -631,22 +635,27 @@ func (wb *WidgetBase) TextRunes() []rune {
 	return nil
 }
 
-// TextSearch returns text search results for this widget, searching for
+// Search returns text search results for this widget, searching for
 // the find string with given case sensitivity. It is up to each widget
 // to define the meaning of the Region line, char values for the matches.
-func (wb *WidgetBase) TextSearch(find string, useCase bool) []textpos.Match {
-	return nil
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (wb *WidgetBase) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return nil, false
 }
 
 // HighlightMatches does highlighting of the given matches within this widget,
-// where the matches are as returned from the TextSearch method.
+// where the matches are as returned from the Search method.
 // Passing a nil causes matches to be reset.
 // Any existing highlighting should always be reset first regardless.
-func (wb *WidgetBase) HighlightMatches(matches []textpos.Match) {
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (wb *WidgetBase) HighlightMatches(matches []textpos.Match) bool {
+	return false
 }
 
 // SelectMatch selects match at given index from among those returned
-// from the TextSearch method. scroll = scroll widget into view.
+// from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting (does not scroll).
 func (wb *WidgetBase) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
 

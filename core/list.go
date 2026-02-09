@@ -1737,7 +1737,7 @@ func (lb *ListBase) SizeFinal() {
 	lb.Frame.SizeFinal()
 }
 
-//////// TextSearch interface
+//////// Search interface
 
 // TextRunes returns any text content associated with the widget, to be used
 // for Search for example. If this is nil, then it is excluded from search.
@@ -1745,15 +1745,17 @@ func (lb *ListBase) TextRunes() []rune {
 	return nil
 }
 
-// TextSearch returns text search results for this widget, searching for
+// Search returns text search results for this widget, searching for
 // the find string with given case sensitivity. It is up to each widget
 // to define the meaning of the Region line, char values for the matches.
-func (lb *ListBase) TextSearch(find string, useCase bool) []textpos.Match {
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (lb *ListBase) Search(find string, useCase bool) ([]textpos.Match, bool) {
 	var results []textpos.Match
 	for rw := range lb.SliceSize {
 		val := lb.sliceElementValue(rw)
 		str := reflectx.ToString(val.Interface())
-		m := TextSearchRunes([]rune(str), find, useCase)
+		m := SearchRunes([]rune(str), find, useCase)
 		if len(m) == 0 {
 			continue
 		}
@@ -1763,24 +1765,26 @@ func (lb *ListBase) TextSearch(find string, useCase bool) []textpos.Match {
 		}
 		results = append(results, m...)
 	}
-	return results
+	return results, true
 }
 
 // HighlightMatches does highlighting of the given matches within this widget,
-// where the matches are as returned from the TextSearch method.
+// where the matches are as returned from the Search method.
 // Passing a nil causes matches to be reset.
 // Any existing highlighting should always be reset first regardless.
-func (lb *ListBase) HighlightMatches(matches []textpos.Match) {
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (lb *ListBase) HighlightMatches(matches []textpos.Match) bool {
 	nWidgPerRow, idxOff := lb.RowWidgetNs()
 	lg := lb.ListGrid
 	for i := range lb.VisibleRows {
 		ridx := nWidgPerRow * i
 		w := lg.Child(ridx + idxOff).(Widget)
-		w.SelectMatch(matches, 0, false, true)
+		w.SelectMatch(matches, 0, SelectNoScroll, SelectReset)
 		w.HighlightMatches(nil) // reset
 	}
 	if matches == nil {
-		return
+		return true
 	}
 	for _, m := range matches {
 		rw := m.Region.Start.Line
@@ -1791,10 +1795,11 @@ func (lb *ListBase) HighlightMatches(matches []textpos.Match) {
 		w := lg.Child(ridx + idxOff).(Widget)
 		w.HighlightMatches([]textpos.Match{m})
 	}
+	return true
 }
 
 // SelectMatch selects match at given index from among those returned
-// from the TextSearch method. scroll = scroll widget into view.
+// from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting.
 func (lb *ListBase) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
 	nWidgPerRow, idxOff := lb.RowWidgetNs()
@@ -1813,7 +1818,7 @@ func (lb *ListBase) SelectMatch(matches []textpos.Match, index int, scroll, rese
 	}
 	ridx := nWidgPerRow * (rw - lb.StartIndex)
 	w := lg.Child(ridx + idxOff).(Widget)
-	w.SelectMatch(matches, index, false, reset) // no scroll is key!
+	w.SelectMatch(matches, index, SelectNoScroll, reset) // no scroll is key!
 }
 
 //////// ListGrid

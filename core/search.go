@@ -16,11 +16,37 @@ import (
 )
 
 var (
-	// LastTextSearch remembers the last search string.
-	LastTextSearch string
+	// LastSearch remembers the last search string.
+	LastSearch string
 
 	// LastUseCase remembers the last search useCase value.
 	LastUseCase bool
+)
+
+const (
+	// UseCase can be used as arg for [Search] functions,
+	// to use case-sensitive search.
+	UseCase = true
+
+	// IgnoreCase can be used as arg for [Search] functions
+	// to use case-insensitive search.
+	IgnoreCase = false
+
+	// SelectReset can be used as reset arg for Select functions,
+	// to reset the selection.
+	SelectReset = true
+
+	// SelectSet can be used as reset arg for Select functions,
+	// to actually set the selection.
+	SelectSet = false
+
+	// SelectScroll can be used as scroll arg for Select functions,
+	// to scroll to given location.
+	SelectScroll = true
+
+	// SelectNoScroll can be used as scroll arg for Select functions,
+	// to NOT scroll to given location.
+	SelectNoScroll = false
 )
 
 // SearchResult is one set of search results for text in a widget.
@@ -60,9 +86,9 @@ func (sr SearchResults) AtIndex(idx int) (*SearchResult, int) {
 	return nil, -1
 }
 
-// TextSearchRunes is a helper function that returns [textpos.Matches]
+// SearchRunes is a helper function that returns [textpos.Matches]
 // as Region Char indexes into the runes.
-func TextSearchRunes(rn []rune, find string, useCase bool) []textpos.Match {
+func SearchRunes(rn []rune, find string, useCase bool) []textpos.Match {
 	var matches []textpos.Match
 	fr := []rune(find)
 	fsz := len(fr)
@@ -85,19 +111,21 @@ func TextSearchRunes(rn []rune, find string, useCase bool) []textpos.Match {
 	return matches
 }
 
-// TextSearchResults performs text search within given widget,
+// SearchWidgets performs text in widgets under given widget,
 // for the given find string, with given case sensitivity,
-// using the TextSearch interface method.
-func TextSearchResults(w Widget, find string, useCase bool) SearchResults {
+// using the Search interface method.
+func SearchWidgets(w Widget, find string, useCase bool) SearchResults {
 	var res SearchResults
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		if !cwb.IsVisible() {
+		if !cwb.IsDisplayable() {
 			return tree.Break
 		}
-		matches := cw.TextSearch(find, useCase)
+		matches, handled := cw.Search(find, useCase)
 		if len(matches) > 0 {
 			res = append(res, SearchResult{Widget: cw, Matches: matches})
+		}
+		if handled {
 			return tree.Break
 		}
 		return tree.Continue
@@ -105,12 +133,15 @@ func TextSearchResults(w Widget, find string, useCase bool) SearchResults {
 	return res
 }
 
-// TextSearchHighlight highlights all the [SearchResults] under given
+// SearchHighlight highlights all the [SearchResults] under given
 // widget, resetting any existing first. Pass a nil to just reset.
-func TextSearchHighlight(w Widget, results SearchResults) {
+func SearchHighlight(w Widget, results SearchResults) {
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		cw.HighlightMatches(nil)
+		handled := cw.HighlightMatches(nil)
+		if handled {
+			return tree.Break
+		}
 		return tree.Continue
 	})
 	if results == nil {
@@ -121,9 +152,9 @@ func TextSearchHighlight(w Widget, results SearchResults) {
 	}
 }
 
-// TextSearchSelect selects the [SearchResult] at given results index
+// SearchSelect selects the [SearchResult] at given results index
 // from given [SearchResults], or resets the selection if reset = true.
-func TextSearchSelect(results SearchResults, index int, reset bool) {
+func SearchSelect(results SearchResults, index int, reset bool) {
 	res, i := results.AtIndex(index)
 	if res == nil {
 		return
@@ -131,24 +162,24 @@ func TextSearchSelect(results SearchResults, index int, reset bool) {
 	res.Widget.SelectMatch(res.Matches, i, !reset, reset)
 }
 
-// TextSearch performs an interactive search for given text,
+// Search performs an interactive search for given text,
 // on elements within given widget.
-func TextSearch(w Widget, find string, useCase bool) {
-	LastTextSearch = find
+func Search(w Widget, find string, useCase bool) {
+	LastSearch = find
 	var res SearchResults
 	var n int
 	idx := 0
 	search := func() {
-		res = TextSearchResults(w, find, useCase)
-		TextSearchHighlight(w, res)
+		res = SearchWidgets(w, find, useCase)
+		SearchHighlight(w, res)
 		n = res.Len()
 	}
 
 	sel := func() {
-		TextSearchSelect(res, idx, false) // not reset
+		SearchSelect(res, idx, false) // not reset
 	}
 	unSel := func() {
-		TextSearchSelect(res, idx, true) // reset
+		SearchSelect(res, idx, true) // reset
 	}
 	search()
 	sel()
@@ -161,11 +192,11 @@ func TextSearch(w Widget, find string, useCase bool) {
 
 	ix := NewText(d).SetText("00/00")
 	ix.Updater(func() {
-		ix.SetText(fmt.Sprintf("%d/%d", idx, n))
+		ix.SetText(fmt.Sprintf("%d/%d", idx+1, n))
 	})
 	st.OnChange(func(e events.Event) {
 		find = st.Text()
-		LastTextSearch = find
+		LastSearch = find
 		unSel()
 		search()
 		sel()
@@ -211,7 +242,7 @@ func TextSearch(w Widget, find string, useCase bool) {
 	x.SetTooltip("Close search dialog")
 	x.OnClick(func(e events.Event) {
 		unSel()
-		TextSearchHighlight(w, nil)
+		SearchHighlight(w, nil)
 		d.Close()
 	})
 	d.NewDialog(w).SetModal(false).Run()

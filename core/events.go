@@ -1194,7 +1194,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keymap.Find:
-		TextSearch(sc, LastTextSearch, LastUseCase)
+		Search(sc, LastSearch, LastUseCase)
 	case keymap.WinSnapshot:
 		img := sc.Renderer.Image()
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
