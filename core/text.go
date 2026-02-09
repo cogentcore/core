@@ -561,15 +561,18 @@ func (tx *Text) HighlightMatches(matches []textpos.Match) {
 	}
 }
 
-// SelectMatch selects given match from among those returned from the
-// TextSearch method. Should also scroll widget into view.
-// Passing a nil causes select to be reset.
-func (tx *Text) SelectMatch(match *textpos.Match) {
-	if match == nil {
+// SelectMatch selects match at given index from among those returned
+// from the TextSearch method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting (does not scroll).
+func (tx *Text) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+	if reset {
 		tx.selectReset()
 		return
 	}
+	match := matches[index]
 	tx.selectRange = textpos.Range{Start: match.Region.Start.Char, End: match.Region.End.Char}
 	tx.NeedsRender()
-	tx.ScrollThisToTop()
+	if scroll {
+		tx.ScrollThisToTop()
+	}
 }

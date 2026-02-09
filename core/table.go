@@ -19,12 +19,10 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
-
-// todo:
-// * search option, both as a search field and as simple type-to-search
 
 // Table represents a slice of structs as a table, where the fields are
 // the columns and the elements are the rows. It is a full-featured editor with
@@ -98,7 +96,7 @@ func (tb *Table) Init() {
 
 		tb.makeHeader(p)
 		tb.MakeGrid(p, func(p *tree.Plan) {
-			for i := 0; i < tb.VisibleRows; i++ {
+			for i := range tb.VisibleRows {
 				svi.MakeRow(p, i)
 			}
 		})
@@ -192,7 +190,7 @@ func (tb *Table) UpdateMaxWidths() {
 		return
 	}
 	updated := false
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
+	for fli := range tb.numVisibleFields {
 		field := tb.visibleFields[fli]
 		val := tb.sliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
@@ -202,7 +200,7 @@ func (tb *Table) UpdateMaxWidths() {
 			continue
 		}
 		mxw := 0
-		for rw := 0; rw < tb.SliceSize; rw++ {
+		for rw := range tb.SliceSize {
 			val := tb.sliceElementValue(rw)
 			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
 			mxw = max(mxw, len(str))
@@ -236,7 +234,7 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 					w.SetText("Index")
 				})
 			}
-			for fli := 0; fli < tb.numVisibleFields; fli++ {
+			for fli := range tb.numVisibleFields {
 				field := tb.visibleFields[fli]
 				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
 					w.SetType(ButtonAction)
@@ -298,7 +296,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 		tb.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
+	for fli := range tb.numVisibleFields {
 		field := tb.visibleFields[fli]
 		uvp := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
 		uv := uvp.Elem()
@@ -410,7 +408,7 @@ func (tb *Table) SortColumn(fieldIndex int) {
 	sgh := tb.header
 	_, idxOff := tb.RowWidgetNs()
 
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
+	for fli := range tb.numVisibleFields {
 		hdr := sgh.Child(idxOff + fli).(*Button)
 		hdr.SetType(ButtonAction)
 		if fli == fieldIndex {
@@ -450,7 +448,7 @@ func (tb *Table) setSortFieldName(nm string) {
 	}
 	spnm := strings.Split(nm, ":")
 	got := false
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
+	for fli := range tb.numVisibleFields {
 		fld := tb.visibleFields[fli]
 		if fld.Name == spnm[0] {
 			got = true
@@ -481,7 +479,7 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	ridx := nWidgPerRow * row
 	lg := tb.ListGrid
 	// first check if we already have focus
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
+	for fli := range tb.numVisibleFields {
 		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
@@ -489,7 +487,7 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	}
 	tb.InFocusGrab = true
 	defer func() { tb.InFocusGrab = false }()
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
+	for fli := range tb.numVisibleFields {
 		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocus()
@@ -599,4 +597,97 @@ func (tb *Table) SizeFinal() {
 	ksz.Actual.Content.X = gsz.Actual.Content.X
 	ksz.Alloc.Total.X = gsz.Alloc.Total.X
 	ksz.Alloc.Content.X = gsz.Alloc.Content.X
+}
+
+//////// TextSearch interface
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (tb *Table) TextRunes() []rune {
+	return nil
+}
+
+// TextSearch returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+func (tb *Table) TextSearch(find string, useCase bool) []textpos.Match {
+	var results []textpos.Match
+	for rw := range tb.SliceSize {
+		val := tb.sliceElementValue(rw)
+		for fli := range tb.numVisibleFields {
+			field := tb.visibleFields[fli]
+			fval := val.FieldByIndex(field.Index)
+			if fval.Type() == reflect.TypeFor[icons.Icon]() {
+				continue
+			}
+			str := reflectx.ToString(fval.Interface())
+			m := TextSearchRunes([]rune(str), find, useCase)
+			if len(m) == 0 {
+				continue
+			}
+			ln := rw*tb.numVisibleFields + fli
+			for i := range m {
+				m[i].Region.Start.Line = ln
+				m[i].Region.End.Line = ln
+			}
+			results = append(results, m...)
+		}
+	}
+	return results
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the TextSearch method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+func (tb *Table) HighlightMatches(matches []textpos.Match) {
+	nWidgPerRow, idxOff := tb.RowWidgetNs()
+	lg := tb.ListGrid
+	for i := range tb.VisibleRows {
+		ridx := nWidgPerRow * i
+		for fli := range tb.numVisibleFields {
+			w := lg.Child(ridx + idxOff + fli).(Widget)
+			w.SelectMatch(matches, 0, false, true)
+			w.HighlightMatches(nil) // reset
+		}
+	}
+	if matches == nil {
+		return
+	}
+	for _, m := range matches {
+		ln := m.Region.Start.Line
+		rw := ln / tb.numVisibleFields
+		if rw < tb.StartIndex || rw >= tb.StartIndex+tb.VisibleRows {
+			continue
+		}
+		ridx := nWidgPerRow * (rw - tb.StartIndex)
+		fli := ln % tb.numVisibleFields
+		w := lg.Child(ridx + idxOff + fli).(Widget)
+		w.HighlightMatches([]textpos.Match{m})
+	}
+}
+
+// SelectMatch selects match at given index from among those returned
+// from the TextSearch method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting.
+func (tb *Table) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+	nWidgPerRow, idxOff := tb.RowWidgetNs()
+	match := matches[index]
+	lg := tb.ListGrid
+	ln := match.Region.Start.Line
+	rw := ln / tb.numVisibleFields
+	if rw < tb.StartIndex || rw >= tb.StartIndex+tb.VisibleRows {
+		if reset || !scroll {
+			return
+		}
+		tb.ScrollToIndex(rw)
+		tb.HighlightMatches(matches)
+	}
+	if rw < tb.StartIndex || rw >= tb.StartIndex+tb.VisibleRows { // shouldn't happen
+		return
+	}
+	ridx := nWidgPerRow * (rw - tb.StartIndex)
+	fli := ln % tb.numVisibleFields
+	w := lg.Child(ridx + idxOff + fli).(Widget)
+	w.SelectMatch(matches, index, false, reset)
 }

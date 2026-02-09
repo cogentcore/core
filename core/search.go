@@ -92,9 +92,13 @@ func TextSearchResults(w Widget, find string, useCase bool) SearchResults {
 	var res SearchResults
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if !cwb.IsVisible() {
+			return tree.Break
+		}
 		matches := cw.TextSearch(find, useCase)
 		if len(matches) > 0 {
 			res = append(res, SearchResult{Widget: cw, Matches: matches})
+			return tree.Break
 		}
 		return tree.Continue
 	})
@@ -124,11 +128,7 @@ func TextSearchSelect(results SearchResults, index int, reset bool) {
 	if res == nil {
 		return
 	}
-	if reset {
-		res.Widget.SelectMatch(nil)
-		return
-	}
-	res.Widget.SelectMatch(&res.Matches[i])
+	res.Widget.SelectMatch(res.Matches, i, !reset, reset)
 }
 
 // TextSearch performs an interactive search for given text,

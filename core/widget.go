@@ -153,10 +153,10 @@ type Widget interface {
 	// Any existing highlighting should always be reset first regardless.
 	HighlightMatches(matches []textpos.Match)
 
-	// SelectMatch selects given match from among those returned from the
-	// TextSearch method. Should also scroll widget into view.
-	// Passing a nil causes select to be reset.
-	SelectMatch(match *textpos.Match)
+	// SelectMatch selects match at given index from among those returned
+	// from the TextSearch method. scroll = scroll widget into view.
+	// reset = clear selection instead of selecting (does not scroll).
+	SelectMatch(matches []textpos.Match, index int, scroll, reset bool)
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -645,9 +645,9 @@ func (wb *WidgetBase) TextSearch(find string, useCase bool) []textpos.Match {
 func (wb *WidgetBase) HighlightMatches(matches []textpos.Match) {
 }
 
-// SelectMatch selects given match from among those returned from the
-// TextSearch method. Should also scroll widget into view.
-// Passing a nil causes select to be reset.
-func (wb *WidgetBase) SelectMatch(match *textpos.Match) {
+// SelectMatch selects match at given index from among those returned
+// from the TextSearch method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting (does not scroll).
+func (wb *WidgetBase) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
 
 }

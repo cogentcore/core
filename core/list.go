@@ -30,6 +30,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -437,8 +438,8 @@ func (lb *ListBase) SetSlice(sl any) *ListBase {
 // rowFromEventPos returns the widget row, slice index, and
 // whether the index is in slice range, for given event position.
 func (lb *ListBase) rowFromEventPos(e events.Event) (row, idx int, isValid bool) {
-	sg := lb.ListGrid
-	row, _, isValid = sg.indexFromPixel(e.Pos())
+	lg := lb.ListGrid
+	row, _, isValid = lg.indexFromPixel(e.Pos())
 	if !isValid {
 		return
 	}
@@ -493,7 +494,7 @@ func (lb *ListBase) UpdateMaxWidths() {
 		return
 	}
 	mxw := 0
-	for rw := 0; rw < lb.SliceSize; rw++ {
+	for rw := range lb.SliceSize {
 		str := reflectx.ToString(lb.sliceElementValue(rw).Interface())
 		mxw = max(mxw, len(str))
 	}
@@ -725,11 +726,11 @@ func (lb *ListBase) UpdateStartIndex() {
 
 // updateScroll updates the scroll value
 func (lb *ListBase) updateScroll() {
-	sg := lb.ListGrid
-	if sg == nil {
+	lg := lb.ListGrid
+	if lg == nil {
 		return
 	}
-	sg.updateScroll(lb.StartIndex)
+	lg.updateScroll(lb.StartIndex)
 }
 
 // newAtRow inserts a new blank element at the given display row.
@@ -850,8 +851,8 @@ func (lb *ListBase) rowFirstWidget(row int) (*WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, _ := lb.This.(Lister).RowWidgetNs()
-	sg := lb.ListGrid
-	w := sg.Children[row*nWidgPerRow].(Widget).AsWidget()
+	lg := lb.ListGrid
+	w := lg.Children[row*nWidgPerRow].(Widget).AsWidget()
 	return w, true
 }
 
@@ -864,8 +865,8 @@ func (lb *ListBase) RowGrabFocus(row int) *WidgetBase {
 	}
 	nWidgPerRow, idxOff := lb.This.(Lister).RowWidgetNs()
 	ridx := nWidgPerRow * row
-	sg := lb.ListGrid
-	w := sg.Child(ridx + idxOff).(Widget).AsWidget()
+	lg := lb.ListGrid
+	w := lg.Child(ridx + idxOff).(Widget).AsWidget()
 	if w.StateIs(states.Focused) {
 		return w
 	}
@@ -1716,25 +1717,106 @@ func (lb *ListBase) keyInputReadOnly(kt events.Event) {
 }
 
 func (lb *ListBase) SizeFinal() {
-	sg := lb.ListGrid
-	if sg == nil {
+	lg := lb.ListGrid
+	if lg == nil {
 		lb.Frame.SizeFinal()
 		return
 	}
 	localIter := 0
-	for (lb.MakeIter < 2 || lb.VisibleRows != sg.visibleRows) && localIter < 2 {
-		if lb.VisibleRows != sg.visibleRows {
-			lb.VisibleRows = sg.visibleRows
+	for (lb.MakeIter < 2 || lb.VisibleRows != lg.visibleRows) && localIter < 2 {
+		if lb.VisibleRows != lg.visibleRows {
+			lb.VisibleRows = lg.visibleRows
 			lb.Update()
 		} else {
-			sg.StyleTree()
+			lg.StyleTree()
 		}
-		sg.sizeFinalUpdateChildrenSizes()
+		lg.sizeFinalUpdateChildrenSizes()
 		lb.MakeIter++
 		localIter++
 	}
 	lb.Frame.SizeFinal()
 }
+
+//////// TextSearch interface
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (lb *ListBase) TextRunes() []rune {
+	return nil
+}
+
+// TextSearch returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+func (lb *ListBase) TextSearch(find string, useCase bool) []textpos.Match {
+	var results []textpos.Match
+	for rw := range lb.SliceSize {
+		val := lb.sliceElementValue(rw)
+		str := reflectx.ToString(val.Interface())
+		m := TextSearchRunes([]rune(str), find, useCase)
+		if len(m) == 0 {
+			continue
+		}
+		for i := range m {
+			m[i].Region.Start.Line = rw
+			m[i].Region.End.Line = rw
+		}
+		results = append(results, m...)
+	}
+	return results
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the TextSearch method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+func (lb *ListBase) HighlightMatches(matches []textpos.Match) {
+	nWidgPerRow, idxOff := lb.RowWidgetNs()
+	lg := lb.ListGrid
+	for i := range lb.VisibleRows {
+		ridx := nWidgPerRow * i
+		w := lg.Child(ridx + idxOff).(Widget)
+		w.SelectMatch(matches, 0, false, true)
+		w.HighlightMatches(nil) // reset
+	}
+	if matches == nil {
+		return
+	}
+	for _, m := range matches {
+		rw := m.Region.Start.Line
+		if rw < lb.StartIndex || rw >= lb.StartIndex+lb.VisibleRows {
+			continue
+		}
+		ridx := nWidgPerRow * (rw - lb.StartIndex)
+		w := lg.Child(ridx + idxOff).(Widget)
+		w.HighlightMatches([]textpos.Match{m})
+	}
+}
+
+// SelectMatch selects match at given index from among those returned
+// from the TextSearch method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting.
+func (lb *ListBase) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+	nWidgPerRow, idxOff := lb.RowWidgetNs()
+	match := matches[index]
+	lg := lb.ListGrid
+	rw := match.Region.Start.Line
+	if rw < lb.StartIndex || rw >= lb.StartIndex+lb.VisibleRows {
+		if reset || !scroll {
+			return
+		}
+		lb.ScrollToIndex(rw)
+		lb.HighlightMatches(matches)
+	}
+	if rw < lb.StartIndex || rw >= lb.StartIndex+lb.VisibleRows { // shouldn't happen
+		return
+	}
+	ridx := nWidgPerRow * (rw - lb.StartIndex)
+	w := lg.Child(ridx + idxOff).(Widget)
+	w.SelectMatch(matches, index, false, reset) // no scroll is key!
+}
+
+//////// ListGrid
 
 // ListGrid handles the resizing logic for all [Lister]s.
 type ListGrid struct { //core:no-new
