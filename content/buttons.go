@@ -78,7 +78,7 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 			s.Padding.Right.Em(5)
 		})
 		w.OnClick(func(e events.Event) {
-			core.TextSearch(ct, "", true)
+			core.TextSearch(ct, core.LastTextSearch, core.LastUseCase)
 		})
 	})
 }

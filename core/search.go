@@ -15,15 +15,24 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// SearchResult is one set of search results for a [Text] widget.
+var (
+	// LastTextSearch remembers the last search string.
+	LastTextSearch string
+
+	// LastUseCase remembers the last search useCase value.
+	LastUseCase bool
+)
+
+// SearchResult is one set of search results for text in a widget.
 type SearchResult struct {
-	// Text is the widget
-	Text *Text
+	// Widget with the text. Can be a collection too, to manage scrolling.
+	Widget Widget
 
 	// Matches are the matching ranges within the RichText of widget.
-	Matches []textpos.Range
+	Matches []textpos.Match
 }
 
+// SearchResults are the collection of search results.
 type SearchResults []SearchResult
 
 // Len returns the total number of search results.
@@ -35,110 +44,111 @@ func (sr SearchResults) Len() int {
 	return n
 }
 
-// AtIndex returns the results at given index.
-func (sr SearchResults) AtIndex(idx int) (*Text, textpos.Range) {
+// AtIndex returns the result at given index into the full set
+// of results [0..Len()), returning the local index into Matches
+// within the given result.
+func (sr SearchResults) AtIndex(idx int) (*SearchResult, int) {
 	n := 0
-	for _, r := range sr {
+	for i := range sr {
+		r := &sr[i]
 		nr := len(r.Matches)
 		if idx >= n && idx < n+nr {
-			return r.Text, r.Matches[idx-n]
+			return r, idx - n
 		}
 		n += nr
 	}
-	return nil, textpos.Range{}
+	return nil, -1
 }
 
-// TextSearchResults returns all of the [Text] widgets within given widget,
-// with matching text for the given find string, with given case sensitivity.
-func TextSearchResults(w Widget, find string, ignoreCase bool) SearchResults {
+// TextSearchRunes is a helper function that returns [textpos.Matches]
+// as Region Char indexes into the runes.
+func TextSearchRunes(rn []rune, find string, useCase bool) []textpos.Match {
+	var matches []textpos.Match
 	fr := []rune(find)
 	fsz := len(fr)
+	sz := len(rn)
+	ci := 0
+	for ci < sz {
+		var i int
+		if useCase {
+			i = runes.Index(rn[ci:], fr)
+		} else {
+			i = runes.IndexFold(rn[ci:], fr)
+		}
+		if i < 0 {
+			break
+		}
+		i += ci
+		ci = i + fsz
+		matches = append(matches, textpos.NewMatch(rn, i, ci, 0))
+	}
+	return matches
+}
+
+// TextSearchResults performs text search within given widget,
+// for the given find string, with given case sensitivity,
+// using the TextSearch interface method.
+func TextSearchResults(w Widget, find string, useCase bool) SearchResults {
 	var res SearchResults
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		tx, ok := cw.(*Text)
-		if !ok {
-			return tree.Continue
-		}
-		rn := tx.richText.Join()
-
-		var matches []textpos.Range
-		sz := len(rn)
-		ci := 0
-		for ci < sz {
-			var i int
-			if ignoreCase {
-				i = runes.IndexFold(rn[ci:], fr)
-			} else {
-				i = runes.Index(rn[ci:], fr)
-			}
-			if i < 0 {
-				break
-			}
-			i += ci
-			ci = i + fsz
-			matches = append(matches, textpos.Range{Start: i, End: ci})
-		}
+		matches := cw.TextSearch(find, useCase)
 		if len(matches) > 0 {
-			res = append(res, SearchResult{Text: tx, Matches: matches})
+			res = append(res, SearchResult{Widget: cw, Matches: matches})
 		}
 		return tree.Continue
 	})
 	return res
 }
 
-// TextSearchHighlightReset resets the highlights within all [Text] elements
-// under given widget.
-func TextSearchHighlightReset(w Widget) {
+// TextSearchHighlight highlights all the [SearchResults] under given
+// widget, resetting any existing first. Pass a nil to just reset.
+func TextSearchHighlight(w Widget, results SearchResults) {
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		tx, ok := cw.(*Text)
-		if !ok {
-			return tree.Continue
-		}
-		tx.highlights = nil
-		tx.NeedsRender()
+		cw.HighlightMatches(nil)
 		return tree.Continue
 	})
+	if results == nil {
+		return
+	}
+	for _, r := range results {
+		r.Widget.HighlightMatches(r.Matches)
+	}
 }
 
-// TextSearchHighlight adds region highlights for given text search results,
-// first calling [TextSearchHighlightReset] to reset any existing highlights.
-func TextSearchHighlight(w Widget, res SearchResults) {
-	TextSearchHighlightReset(w)
-	for _, r := range res {
-		r.Text.highlights = r.Matches
-		r.Text.NeedsRender()
+// TextSearchSelect selects the [SearchResult] at given results index
+// from given [SearchResults], or resets the selection if reset = true.
+func TextSearchSelect(results SearchResults, index int, reset bool) {
+	res, i := results.AtIndex(index)
+	if res == nil {
+		return
 	}
+	if reset {
+		res.Widget.SelectMatch(nil)
+		return
+	}
+	res.Widget.SelectMatch(&res.Matches[i])
 }
 
 // TextSearch performs an interactive search for given text,
 // on elements within given widget.
-func TextSearch(w Widget, find string, ignoreCase bool) {
+func TextSearch(w Widget, find string, useCase bool) {
+	LastTextSearch = find
 	var res SearchResults
 	var n int
 	idx := 0
 	search := func() {
-		res = TextSearchResults(w, find, ignoreCase)
+		res = TextSearchResults(w, find, useCase)
 		TextSearchHighlight(w, res)
 		n = res.Len()
 	}
 
-	unSel := func() {
-		tx, _ := res.AtIndex(idx)
-		if tx == nil {
-			return
-		}
-		tx.SetSelectRange(textpos.Range{})
-	}
-
 	sel := func() {
-		tx, r := res.AtIndex(idx)
-		if tx == nil {
-			return
-		}
-		tx.SetSelectRange(r)
-		tx.ScrollThisToTop()
+		TextSearchSelect(res, idx, false) // not reset
+	}
+	unSel := func() {
+		TextSearchSelect(res, idx, true) // reset
 	}
 	search()
 	sel()
@@ -155,6 +165,7 @@ func TextSearch(w Widget, find string, ignoreCase bool) {
 	})
 	st.OnChange(func(e events.Event) {
 		find = st.Text()
+		LastTextSearch = find
 		unSel()
 		search()
 		sel()
@@ -188,12 +199,20 @@ func TextSearch(w Widget, find string, ignoreCase bool) {
 		ix.Update()
 		// todo: select
 	})
+	cs := NewSwitch(d).SetText("Use case")
+	cs.SetTooltip("Use case sensitive search.")
+	Bind(&useCase, cs)
+	cs.OnChange(func(e events.Event) {
+		unSel()
+		search()
+		sel()
+	})
 	x := NewButton(d).SetIcon(icons.Close)
+	x.SetTooltip("Close search dialog")
 	x.OnClick(func(e events.Event) {
 		unSel()
-		TextSearchHighlightReset(w)
+		TextSearchHighlight(w, nil)
 		d.Close()
 	})
-	d.RunDialog(w)
-
+	d.NewDialog(w).SetModal(false).Run()
 }

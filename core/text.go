@@ -281,7 +281,6 @@ func (tx *Text) Init() {
 		tx.SetFocusQuiet()
 		tx.selectRange.Start = tx.pixelToRune(e.Pos())
 		tx.selectRange.End = tx.selectRange.Start
-		tx.paintText.SelectReset()
 		tx.NeedsRender()
 	})
 	tx.On(events.SlideMove, func(e events.Event) {
@@ -393,12 +392,6 @@ func (tx *Text) selectUpdate(ri int) {
 	}
 }
 
-// SetSelectRange sets the selection range
-func (tx *Text) SetSelectRange(r textpos.Range) {
-	tx.selectRange = r
-	tx.NeedsRender()
-}
-
 // hasSelection returns true if there is an active selection.
 func (tx *Text) hasSelection() bool {
 	return tx.selectRange.Len() > 0
@@ -408,7 +401,6 @@ func (tx *Text) hasSelection() bool {
 func (tx *Text) selectReset() {
 	tx.selectRange.Start = 0
 	tx.selectRange.End = 0
-	tx.paintText.SelectReset()
 	tx.NeedsRender()
 }
 
@@ -422,7 +414,6 @@ func (tx *Text) selectAll() {
 
 // selectWord selects word at given rune location
 func (tx *Text) selectWord(ri int) {
-	tx.paintText.SelectReset()
 	txt := tx.richText.Join()
 	wr := textpos.WordAt(txt, ri)
 	if wr.Start >= 0 {
@@ -531,13 +522,6 @@ func (tx *Text) SizeDown(iter int) bool {
 	return chg
 }
 
-// todo: could enable this if we see any stragglers
-// func (tx *Text) SizeFinal() {
-// 	tx.WidgetBase.SizeFinal()
-// 	asz := tx.Geom.Size.Actual.Content
-// 	tx.configTextAlloc(asz)
-// }
-
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
 	tx.paintText.SelectReset()
@@ -545,4 +529,47 @@ func (tx *Text) Render() {
 	tx.paintText.HighlightReset()
 	tx.paintText.HighlightRegion(tx.highlights...)
 	tx.Scene.Painter.DrawText(tx.paintText, tx.Geom.Pos.Content)
+}
+
+//////// TextSearch interface
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (tx *Text) TextRunes() []rune {
+	return tx.richText.Join()
+}
+
+// TextSearch returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+func (tx *Text) TextSearch(find string, useCase bool) []textpos.Match {
+	return TextSearchRunes(tx.richText.Join(), find, useCase)
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the TextSearch method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+func (tx *Text) HighlightMatches(matches []textpos.Match) {
+	tx.highlights = nil
+	tx.NeedsRender()
+	if matches == nil {
+		return
+	}
+	for _, m := range matches {
+		tx.highlights = append(tx.highlights, textpos.Range{Start: m.Region.Start.Char, End: m.Region.End.Char})
+	}
+}
+
+// SelectMatch selects given match from among those returned from the
+// TextSearch method. Should also scroll widget into view.
+// Passing a nil causes select to be reset.
+func (tx *Text) SelectMatch(match *textpos.Match) {
+	if match == nil {
+		tx.selectReset()
+		return
+	}
+	tx.selectRange = textpos.Range{Start: match.Region.Start.Char, End: match.Region.End.Char}
+	tx.NeedsRender()
+	tx.ScrollThisToTop()
 }

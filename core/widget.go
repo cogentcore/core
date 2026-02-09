@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system/composer"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -136,6 +137,26 @@ type Widget interface {
 	// Use [Scene.AddDirectRender] to register such widgets with the Scene.
 	// The given draw operation is the suggested way to Draw onto existing images.
 	RenderSource(op draw.Op) composer.Source
+
+	// TextRunes returns any text content associated with the widget, to be used
+	// for Search for example. If this is nil, then it is excluded from search.
+	TextRunes() []rune
+
+	// TextSearch returns text search results for this widget, searching for
+	// the find string with given case sensitivity. It is up to each widget
+	// to define the meaning of the Region line, char values for the matches.
+	TextSearch(find string, useCase bool) []textpos.Match
+
+	// HighlightMatches does highlighting of the given matches within this widget,
+	// where the matches are as returned from the TextSearch method.
+	// Passing a nil causes matches to be reset.
+	// Any existing highlighting should always be reset first regardless.
+	HighlightMatches(matches []textpos.Match)
+
+	// SelectMatch selects given match from among those returned from the
+	// TextSearch method. Should also scroll widget into view.
+	// Passing a nil causes select to be reset.
+	SelectMatch(match *textpos.Match)
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -602,4 +623,31 @@ func widgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
 // which just returns [WidgetBase.Tooltip] and [WidgetBase.DefaultTooltipPos].
 func (wb *WidgetBase) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return wb.Tooltip, wb.DefaultTooltipPos()
+}
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (wb *WidgetBase) TextRunes() []rune {
+	return nil
+}
+
+// TextSearch returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+func (wb *WidgetBase) TextSearch(find string, useCase bool) []textpos.Match {
+	return nil
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the TextSearch method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+func (wb *WidgetBase) HighlightMatches(matches []textpos.Match) {
+}
+
+// SelectMatch selects given match from among those returned from the
+// TextSearch method. Should also scroll widget into view.
+// Passing a nil causes select to be reset.
+func (wb *WidgetBase) SelectMatch(match *textpos.Match) {
+
 }
