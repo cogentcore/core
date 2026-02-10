@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"slices"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
@@ -250,6 +251,7 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.OnFinal(events.Click, func(e events.Event) {
+		tx.Scene.selectedText = nil // reset
 		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
@@ -278,9 +280,14 @@ func (tx *Text) Init() {
 	tx.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
 		tx.SetState(true, states.Sliding)
-		tx.SetFocusQuiet()
+		if len(tx.Scene.selectedText) == 0 {
+			tx.SetFocusQuiet()
+		}
 		tx.selectRange.Start = tx.pixelToRune(e.Pos())
 		tx.selectRange.End = tx.selectRange.Start
+		if !slices.Contains(tx.Scene.selectedText, tx) {
+			tx.Scene.selectedText = append(tx.Scene.selectedText, tx)
+		}
 		tx.NeedsRender()
 	})
 	tx.On(events.SlideMove, func(e events.Event) {
@@ -362,9 +369,20 @@ func (tx *Text) copy() { //types:add
 	if !tx.hasSelection() {
 		return
 	}
-	// note: selectRange is in runes, not string indexes.
-	rn := tx.richText.Join()
-	md := mimedata.NewText(string(rn[tx.selectRange.Start:tx.selectRange.End]))
+	var sel string
+	if len(tx.Scene.selectedText) > 0 {
+		for _, st := range tx.Scene.selectedText {
+			if len(sel) > 0 {
+				sel += "\n"
+			}
+			sel += string(st.richText.Join()[st.selectRange.Start:st.selectRange.End])
+			st.selectReset()
+		}
+	} else {
+		// note: selectRange is in runes, not string indexes.
+		sel = string(tx.richText.Join()[tx.selectRange.Start:tx.selectRange.End])
+	}
+	md := mimedata.NewText(sel)
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
