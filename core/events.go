@@ -1222,6 +1222,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		}
 	case keymap.Find:
 		Search(sc, LastSearch, LastUseCase)
+		e.SetHandled()
 	case keymap.WinSnapshot:
 		img := sc.Renderer.Image()
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
@@ -1267,7 +1268,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		AllRenderWindows.focusNext()
 	}
 	if !e.IsHandled() {
-		em.triggerShortcut(cs)
+		em.triggerShortcut(cs, e)
 	}
 }
 
@@ -1327,7 +1328,7 @@ func (em *Events) addShortcut(chord key.Chord, bt *Button) {
 // triggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // buttons, and does not trigger for Disabled buttons.
-func (em *Events) triggerShortcut(chord key.Chord) bool {
+func (em *Events) triggerShortcut(chord key.Chord, e events.Event) bool {
 	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for button\n", chord)
 	}
@@ -1352,6 +1353,7 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v, button: %v triggered\n", chord, sa.Text)
 	}
+	e.SetHandled()
 	sa.Send(events.Click)
 	return true
 }

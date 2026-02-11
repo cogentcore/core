@@ -72,7 +72,8 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 	}
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Page Search").SetIcon(icons.Search).SetKey(keymap.Menu)
+		w.SetText("Page Search").SetIcon(icons.Search).SetKey(keymap.Menu).
+			SetTooltip("Search for pages by name")
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.SurfaceVariant
 			s.Padding.Right.Em(5)
@@ -82,13 +83,15 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu)
+		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Find).
+			SetTooltip("Search within content of current page")
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.SurfaceVariant
 			s.Padding.Right.Em(5)
 		})
 		w.OnClick(func(e events.Event) {
-			core.Search(ct, core.LastSearch, core.LastUseCase)
+			e.SetHandled()
+			core.Search(ct.rightFrame, core.LastSearch, core.LastUseCase)
 		})
 	})
 }
