@@ -72,6 +72,16 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 	}
 	tree.Add(p, func(w *core.Button) {
+		w.SetText("Page Search").SetIcon(icons.Search).SetKey(keymap.Menu)
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.SurfaceVariant
+			s.Padding.Right.Em(5)
+		})
+		w.OnClick(func(e events.Event) {
+			ct.Scene.MenuSearchDialog("Page Search", "Page Search "+core.TheApp.Name())
+		})
+	})
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu)
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.SurfaceVariant
