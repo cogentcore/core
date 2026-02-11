@@ -108,6 +108,7 @@ func handleElement(ctx *Context) {
 		case "blockquote":
 			w.Styler(func(s *styles.Style) { // todo: need a better marker
 				s.Grow.Set(1, 0)
+				s.Direction = styles.Column
 				s.Background = colors.Scheme.SurfaceContainer
 			})
 		}
