@@ -1,6 +1,6 @@
 You can complete the three steps below to **install** Cogent Core on your system. You can also explore the [[#demo]], [[basics]], [[tutorials]], and [[widgets]]. You can also see how to [[build]] apps.
 
-1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.23.4+ installed.
+1. Download and install Go from [the Go website](https://go.dev/doc/install) if you do not already have Go 1.25.6+ installed.
 
 2. Run the following command to install the Cogent Core command line tool. You should run this command again each time you update to a new version of Cogent Core.
 
