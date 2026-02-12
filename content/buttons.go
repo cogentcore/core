@@ -38,42 +38,49 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		w.SetIcon(icons.Icon(core.AppIcon))
 		w.SetTooltip("Home")
 		w.OnClick(func(e events.Event) {
-			ct.Open("")
+			ct.OpenEvent("", e)
 		})
 	})
 	// Superseded by browser navigation on web.
 	if core.TheApp.Platform() != system.Web {
 		tree.Add(p, func(w *core.Button) {
+			ct.toolbar = w.Parent.(*core.Toolbar)
 			w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev)
 			w.SetTooltip("Back")
 			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex > 0)
+				w.SetEnabled(ct.historyHasBack())
 			})
 			w.OnClick(func(e events.Event) {
-				ct.historyIndex--
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+				ct.historyBack()
+				if ct.toolbar != nil {
+					ct.toolbar.Update()
+				}
 			})
 		})
 		tree.Add(p, func(w *core.Button) {
 			w.SetIcon(icons.ArrowForward).SetKey(keymap.HistNext)
 			w.SetTooltip("Forward")
 			w.Updater(func() {
-				w.SetEnabled(ct.historyIndex < len(ct.history)-1)
+				w.SetEnabled(ct.historyHasForward())
 			})
 			w.OnClick(func(e events.Event) {
-				ct.historyIndex++
-				ct.open(ct.history[ct.historyIndex].URL, false) // do not add to history while navigating history
+				ct.historyForward()
+				if ct.toolbar != nil {
+					ct.toolbar.Update()
+				}
 			})
 		})
 	}
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu)
+		find := keymap.Find.Chord().Label()
+		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).
+			SetTooltip("Search for pages by name (use " + find + " or context menu to search within current page)")
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.SurfaceVariant
 			s.Padding.Right.Em(5)
 		})
 		w.OnClick(func(e events.Event) {
-			ct.Scene.MenuSearchDialog("Search", "Search "+core.TheApp.Name())
+			ct.Scene.MenuSearchDialog("Page search", "Search "+core.TheApp.Name())
 		})
 	})
 }
@@ -84,6 +91,23 @@ func (ct *Content) MakeToolbarPDF(p *tree.Plan) {
 		w.SetText("PDF").SetIcon(icons.PictureAsPdf).SetTooltip("PDF generates and opens / downloads the current page as a printable PDF file. See the Settings/Printer panel (Command+,) for settings.")
 		w.OnClick(func(e events.Event) {
 			ct.PagePDF("pdfs")
+		})
+	})
+}
+
+// MakeToolbarSearch adds a within-page search button to the toolbar.
+// This is optional.
+func (ct *Content) MakeToolbarSearch(p *tree.Plan) {
+	tree.Add(p, func(w *core.Button) {
+		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Find).
+			SetTooltip("Search within content of current page")
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.SurfaceVariant
+			s.Padding.Right.Em(5)
+		})
+		w.OnClick(func(e events.Event) {
+			e.SetHandled()
+			core.Search(ct.rightFrame, core.LastSearch, core.LastUseCase)
 		})
 	})
 }
@@ -105,12 +129,12 @@ func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
 
 // makeBottomButtons makes the previous and next buttons if relevant.
 func (ct *Content) makeBottomButtons(p *tree.Plan) {
-	if len(ct.currentPage.Categories) == 0 {
+	if len(ct.current.Page.Categories) == 0 {
 		return
 	}
-	cat := ct.currentPage.Categories[0]
+	cat := ct.current.Page.Categories[0]
 	pages := ct.pagesByCategory[cat]
-	idx := slices.Index(pages, ct.currentPage)
+	idx := slices.Index(pages, ct.current.Page)
 
 	ct.prevPage, ct.nextPage = nil, nil
 

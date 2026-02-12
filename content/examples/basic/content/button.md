@@ -100,6 +100,12 @@ Action and menu buttons are the most minimal buttons, and they are typically onl
 core.NewButton(b).SetType(core.ButtonAction).SetText("Action")
 ```
 
+> This is the first quote
+
+> And this is the second quote
+
+> and this is the last quote
+
 ### Third level header
 
 This is content at the third level.

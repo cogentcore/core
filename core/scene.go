@@ -85,6 +85,10 @@ type Scene struct { //core:no-new
 	// selection mode is transmitted to the inspect editor after the user is done selecting.
 	selectedWidgetChan chan Widget `json:"-" xml:"-"`
 
+	// selectedText is a list of [Text] elements that have been selected,
+	// to support multi-text selection.
+	selectedText []*Text
+
 	// source renderer for rendering the scene
 	Renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 

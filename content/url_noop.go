@@ -6,6 +6,12 @@
 
 package content
 
+import (
+	"net/url"
+
+	"cogentcore.org/core/content/bcontent"
+)
+
 // OfflineURL is the non-web base url, which can be set to allow
 // docs to refer to this in frontmatter.
 var OfflineURL = ""
@@ -13,5 +19,8 @@ var OfflineURL = ""
 // just for printing
 func (ct *Content) getPrintURL() string { return OfflineURL }
 func (ct *Content) getWebURL() string   { return "" }
-func (ct *Content) saveWebURL()         {}
-func (ct *Content) handleWebPopState()  {}
+func (ct *Content) pageURL(pg *bcontent.Page, heading string) (current, nw *url.URL, err error) {
+	return
+}
+func (ct *Content) saveWebURL(lc *Location) {}
+func (ct *Content) handleWebPopState()      {}

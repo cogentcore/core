@@ -143,6 +143,10 @@ type TextField struct { //core:embedder
 	// selectModeShift is whether selectmode was turned on because of the shift key.
 	selectModeShift bool
 
+	// highlights are regions that will be highlighted in the text
+	// when rendered. Indexes are into editText runes.
+	highlights []textpos.Range
+
 	// renderAll is the render version of entire text, for sizing.
 	renderAll *shaped.Lines
 
@@ -803,6 +807,12 @@ func (tf *TextField) hasSelection() bool {
 	return tf.selectRange.Start < tf.selectRange.End
 }
 
+// SetSelectRange sets the selection range
+func (tf *TextField) SetSelectRange(r textpos.Range) {
+	tf.selectRange = r
+	tf.NeedsRender()
+}
+
 // selection returns the currently selected text
 func (tf *TextField) selection() string {
 	if tf.hasSelection() {
@@ -1236,8 +1246,21 @@ func (tf *TextField) renderSelect() {
 	if effst == effed {
 		return
 	}
-	// fmt.Println("sel range:", effst, effed)
 	tf.renderVisible.SelectRegion(textpos.Range{effst, effed})
+}
+
+// renderHighlights renders the highlights regions, if any, underneath the text
+func (tf *TextField) renderHighlights() {
+	tf.renderVisible.HighlightReset()
+	dn := tf.dispRange.Len()
+	for _, r := range tf.highlights {
+		effst := max(0, r.Start-tf.dispRange.Start)
+		effed := min(dn, r.End-tf.dispRange.Start)
+		if effst == effed {
+			return
+		}
+		tf.renderVisible.HighlightRegion(textpos.Range{effst, effed})
+	}
 }
 
 // autoScroll scrolls the starting position to keep the cursor visible,
@@ -1755,6 +1778,7 @@ func (tf *TextField) Render() {
 		tf.layoutCurrent()
 	}
 	tf.updateCursorPosition()
+	tf.renderHighlights()
 	tf.renderSelect()
 	tf.Scene.Painter.DrawText(tf.renderVisible, tf.effPos)
 }
@@ -1766,4 +1790,55 @@ func concealDots(n int) []rune {
 		dots[i] = '•'
 	}
 	return dots
+}
+
+//////// Search interface
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (tx *TextField) TextRunes() []rune {
+	return tx.editText
+}
+
+// Search returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tx *TextField) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return SearchRunes(tx.editText, find, useCase), true
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the Search method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tx *TextField) HighlightMatches(matches []textpos.Match) bool {
+	tx.highlights = nil
+	tx.NeedsRender()
+	if matches == nil {
+		return true
+	}
+	for _, m := range matches {
+		tx.highlights = append(tx.highlights, textpos.Range{Start: m.Region.Start.Char, End: m.Region.End.Char})
+	}
+	return true
+}
+
+// SelectMatch selects match at given index from among those returned
+// from the Search method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting (does not scroll).
+func (tx *TextField) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+	if reset {
+		tx.selectReset()
+		return
+	}
+	match := matches[index]
+	tx.selectRange = textpos.Range{Start: match.Region.Start.Char, End: match.Region.End.Char}
+	tx.NeedsRender()
+	if scroll {
+		tx.ScrollThisToTop()
+	}
 }

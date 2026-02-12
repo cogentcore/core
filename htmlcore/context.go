@@ -56,7 +56,7 @@ type Context struct {
 
 	// OpenURL is the function used to open URLs,
 	// which defaults to [system.App.OpenURL].
-	OpenURL func(url string)
+	OpenURL func(url string, e events.Event)
 
 	// GetURL is the function used to get resources from URLs,
 	// which defaults to [http.Get].
@@ -105,7 +105,7 @@ type Context struct {
 func NewContext() *Context {
 	return &Context{
 		styles:            map[*html.Node][]*css.Rule{},
-		OpenURL:           system.TheApp.OpenURL,
+		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            http.Get,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
 		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
@@ -233,7 +233,7 @@ func (c *Context) LinkButton(bt *core.Button, url string) *core.Button {
 	bt.SetProperty("href", url)
 	bt.SetTooltip(url)
 	bt.OnClick(func(e events.Event) {
-		c.OpenURL(url)
+		c.OpenURL(url, e)
 	})
 	return bt
 }
@@ -248,7 +248,7 @@ func (c *Context) LinkButtonUpdating(bt *core.Button, url func() string) *core.B
 		bt.SetTooltip(u)
 	})
 	bt.OnClick(func(e events.Event) {
-		c.OpenURL(url())
+		c.OpenURL(url(), e)
 	})
 	return bt
 }

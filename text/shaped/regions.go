@@ -31,16 +31,18 @@ func (ls *Lines) SelectReset() {
 	}
 }
 
-// HighlightRegion adds the selection to given region of runes from
+// HighlightRegion adds the selection(s) to given region of runes from
 // the original source runes. Use HighlightReset to clear first if desired.
-func (ls *Lines) HighlightRegion(r textpos.Range) {
+func (ls *Lines) HighlightRegion(rs ...textpos.Range) {
 	nr := ls.Source.Len()
-	r = r.Intersect(textpos.Range{0, nr})
-	for li := range ls.Lines {
-		ln := &ls.Lines[li]
-		lr := r.Intersect(ln.SourceRange)
-		if lr.Len() > 0 {
-			ln.Highlights = append(ln.Highlights, lr)
+	for _, r := range rs {
+		r = r.Intersect(textpos.Range{0, nr})
+		for li := range ls.Lines {
+			ln := &ls.Lines[li]
+			lr := r.Intersect(ln.SourceRange)
+			if lr.Len() > 0 {
+				ln.Highlights = append(ln.Highlights, lr)
+			}
 		}
 	}
 }

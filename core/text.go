@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"slices"
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
@@ -45,7 +46,16 @@ type Text struct {
 	Links []rich.Hyperlink `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// richText is the conversion of the HTML text source.
+	// This is what is actually rendered.
 	richText rich.Text
+
+	// SelectRange is the selected range, in terms of rune indexes
+	// into the richText.Join() runes.
+	selectRange textpos.Range
+
+	// highlights are regions that will be highlighted in the text
+	// when rendered. Indexes are into richText.Join() runes.
+	highlights []textpos.Range
 
 	// paintText is the [shaped.Lines] for the text.
 	paintText *shaped.Lines
@@ -53,9 +63,6 @@ type Text struct {
 	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
 	normalCursor cursors.Cursor
-
-	// selectRange is the selected range, in _runes_, which must be applied
-	selectRange textpos.Range
 }
 
 // TextTypes is an enum containing the different
@@ -219,7 +226,7 @@ func (tx *Text) Init() {
 		}
 	})
 
-	tx.HandleTextClick(func(tl *rich.Hyperlink) {
+	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
@@ -244,6 +251,7 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.OnFinal(events.Click, func(e events.Event) {
+		tx.Scene.selectedText = nil // reset
 		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
@@ -272,10 +280,14 @@ func (tx *Text) Init() {
 	tx.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
 		tx.SetState(true, states.Sliding)
-		tx.SetFocusQuiet()
+		if len(tx.Scene.selectedText) == 0 {
+			tx.SetFocusQuiet()
+		}
 		tx.selectRange.Start = tx.pixelToRune(e.Pos())
 		tx.selectRange.End = tx.selectRange.Start
-		tx.paintText.SelectReset()
+		if !slices.Contains(tx.Scene.selectedText, tx) {
+			tx.Scene.selectedText = append(tx.Scene.selectedText, tx)
+		}
 		tx.NeedsRender()
 	})
 	tx.On(events.SlideMove, func(e events.Event) {
@@ -327,13 +339,13 @@ func (tx *Text) findLink(pos image.Point) (*rich.Hyperlink, image.Rectangle) {
 
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (tx *Text) HandleTextClick(openLink func(tl *rich.Hyperlink)) {
+func (tx *Text) HandleTextClick(openLink func(tl *rich.Hyperlink, e events.Event)) {
 	tx.OnClick(func(e events.Event) {
 		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {
 			return
 		}
-		openLink(tl)
+		openLink(tl, e)
 		e.SetHandled()
 	})
 }
@@ -357,8 +369,20 @@ func (tx *Text) copy() { //types:add
 	if !tx.hasSelection() {
 		return
 	}
-	// note: selectRange is in runes, not string indexes.
-	md := mimedata.NewText(string([]rune(tx.Text)[tx.selectRange.Start:tx.selectRange.End]))
+	var sel string
+	if len(tx.Scene.selectedText) > 0 {
+		for _, st := range tx.Scene.selectedText {
+			if len(sel) > 0 {
+				sel += "\n"
+			}
+			sel += string(st.richText.Join()[st.selectRange.Start:st.selectRange.End])
+			st.selectReset()
+		}
+	} else {
+		// note: selectRange is in runes, not string indexes.
+		sel = string(tx.richText.Join()[tx.selectRange.Start:tx.selectRange.End])
+	}
+	md := mimedata.NewText(sel)
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
@@ -384,8 +408,6 @@ func (tx *Text) selectUpdate(ri int) {
 	} else {
 		tx.selectRange.Start, tx.selectRange.End = ri, tx.selectRange.Start
 	}
-	tx.paintText.SelectReset()
-	tx.paintText.SelectRegion(tx.selectRange)
 }
 
 // hasSelection returns true if there is an active selection.
@@ -397,7 +419,6 @@ func (tx *Text) hasSelection() bool {
 func (tx *Text) selectReset() {
 	tx.selectRange.Start = 0
 	tx.selectRange.End = 0
-	tx.paintText.SelectReset()
 	tx.NeedsRender()
 }
 
@@ -411,7 +432,6 @@ func (tx *Text) selectAll() {
 
 // selectWord selects word at given rune location
 func (tx *Text) selectWord(ri int) {
-	tx.paintText.SelectReset()
 	txt := tx.richText.Join()
 	wr := textpos.WordAt(txt, ri)
 	if wr.Start >= 0 {
@@ -520,14 +540,62 @@ func (tx *Text) SizeDown(iter int) bool {
 	return chg
 }
 
-// todo: could enable this if we see any stragglers
-// func (tx *Text) SizeFinal() {
-// 	tx.WidgetBase.SizeFinal()
-// 	asz := tx.Geom.Size.Actual.Content
-// 	tx.configTextAlloc(asz)
-// }
-
 func (tx *Text) Render() {
 	tx.WidgetBase.Render()
+	tx.paintText.SelectReset()
+	tx.paintText.SelectRegion(tx.selectRange)
+	tx.paintText.HighlightReset()
+	tx.paintText.HighlightRegion(tx.highlights...)
 	tx.Scene.Painter.DrawText(tx.paintText, tx.Geom.Pos.Content)
+}
+
+//////// Search interface
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (tx *Text) TextRunes() []rune {
+	return tx.richText.Join()
+}
+
+// Search returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tx *Text) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return SearchRunes(tx.richText.Join(), find, useCase), true
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the Search method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tx *Text) HighlightMatches(matches []textpos.Match) bool {
+	tx.highlights = nil
+	tx.NeedsRender()
+	if matches == nil {
+		return true
+	}
+	for _, m := range matches {
+		tx.highlights = append(tx.highlights, textpos.Range{Start: m.Region.Start.Char, End: m.Region.End.Char})
+	}
+	return true
+}
+
+// SelectMatch selects match at given index from among those returned
+// from the Search method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting (does not scroll).
+func (tx *Text) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+	if reset {
+		tx.selectReset()
+		return
+	}
+	match := matches[index]
+	tx.selectRange = textpos.Range{Start: match.Region.Start.Char, End: match.Region.End.Char}
+	tx.NeedsRender()
+	if scroll {
+		tx.ScrollThisToTop()
+	}
 }

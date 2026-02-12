@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -73,18 +74,14 @@ type Content struct {
 	// do not have a category, unless they are a category themselves.
 	categories []string
 
-	// history is the history of pages that have been visited.
-	// The oldest page is first.
-	history []*bcontent.Page
+	// history is the history of pages that have been visited, per tab.
+	history []*History
 
-	// historyIndex is the current position in [Content.history].
-	historyIndex int
+	// current is the current location, in current tab.
+	current Location
 
-	// currentPage is the currently open page.
-	currentPage *bcontent.Page
-
-	// renderedPage is the most recently rendered page.
-	renderedPage *bcontent.Page
+	// rendered is the most recently rendered location, in current tab.
+	rendered Location
 
 	// leftFrame is the frame on the left side of the widget,
 	// used for displaying the table of contents and the categories.
@@ -94,13 +91,15 @@ type Content struct {
 	// used for displaying the page content.
 	rightFrame *core.Frame
 
+	// tabs are the tabs, only for non-web
+	tabs *core.Tabs
+
+	// top toolbar, if present
+	toolbar *core.Toolbar
+
 	// tocNodes are all of the tree nodes in the table of contents
 	// by kebab-case heading name.
 	tocNodes map[string]*core.Tree
-
-	// currentHeading is the currently selected heading in the table of contents,
-	// if any (in kebab-case).
-	currentHeading string
 
 	// inPDFRender indicates that it is rendering a PDF now, turning off
 	// elements that are not appropriate for that.
@@ -130,8 +129,8 @@ func (ct *Content) Init() {
 
 	ct.Context = htmlcore.NewContext()
 	ct.Context.DelayedImageLoad = false // not useful for content
-	ct.Context.OpenURL = func(url string) {
-		ct.Open(url)
+	ct.Context.OpenURL = func(url string, e events.Event) {
+		ct.OpenEvent(url, e)
 	}
 	ct.Context.GetURL = func(url string) (*http.Response, error) {
 		return htmlcore.GetURLFromFS(ct.Source, url)
@@ -147,7 +146,7 @@ func (ct *Content) Init() {
 	ct.Context.AddWidgetHandler(ct.widgetHandler)
 
 	ct.Maker(func(p *tree.Plan) {
-		if ct.currentPage == nil {
+		if ct.current.Page == nil {
 			return
 		}
 		tree.Add(p, func(w *core.Frame) {
@@ -155,50 +154,33 @@ func (ct *Content) Init() {
 		})
 		tree.Add(p, func(w *core.Frame) {
 			ct.rightFrame = w
-			w.Styler(func(s *styles.Style) {
-				switch w.SizeClass() {
-				case core.SizeCompact, core.SizeMedium:
-					s.Padding.SetHorizontal(units.Em(0.5))
-				case core.SizeExpanded:
-					s.Padding.SetHorizontal(units.Em(3))
-				}
-			})
 			w.Maker(func(p *tree.Plan) {
-				if !ct.inPDFRender && ct.currentPage.Title != "" {
-					tree.Add(p, func(w *core.Text) {
-						w.SetType(core.TextDisplaySmall)
-						w.Updater(func() {
-							w.SetText(ct.currentPage.Title)
-						})
+				if core.TheApp.Platform() == system.Web || core.GenerateHTML != nil {
+					ct.pageMaker(p, 0)
+				} else {
+					tree.Add(p, func(w *core.Tabs) {
+						ct.tabs = w
+						w.SetType(core.FunctionalTabs).SetNewTabButton(true)
+						w.NewTabFunc = func(index int) {
+							ct.newTab(ct.tabs.TabAtIndex(index))
+							ct.open("", true)
+						}
+						w.CloseTabFunc = func(index int) {
+							ct.history = slices.Delete(ct.history, index, index+1)
+							_, ci := ct.tabs.CurrentTab()
+							h := ct.history[ci]
+							lc := h.Records[h.Index]
+							ct.open(lc.URL, false)
+							if ct.toolbar != nil {
+								ct.toolbar.Update()
+							}
+						}
+						fr, _ := w.NewTab("Content")
+						h := &History{}
+						h.Save(ct.current.Clone())
+						ct.history = []*History{h}
+						fr.Maker(func(p *tree.Plan) { ct.pageMaker(p, 0) })
 					})
-				}
-				if !ct.inPDFRender && len(ct.currentPage.Authors) > 0 {
-					tree.Add(p, func(w *core.Text) {
-						w.SetType(core.TextTitleLarge)
-						w.Updater(func() {
-							w.SetText("By " + ct.currentPage.Authors)
-						})
-					})
-				}
-				if !ct.currentPage.Date.IsZero() {
-					tree.Add(p, func(w *core.Text) {
-						w.SetType(core.TextTitleMedium)
-						w.Updater(func() {
-							w.SetText(ct.currentPage.Date.Format("January 2, 2006"))
-						})
-					})
-				}
-				tree.Add(p, func(w *core.Frame) {
-					w.Styler(func(s *styles.Style) {
-						s.Direction = styles.Column
-						s.Grow.Set(1, 1)
-					})
-					w.Updater(func() {
-						errors.Log(ct.loadPage(w))
-					})
-				})
-				if !ct.inPDFRender {
-					ct.makeBottomButtons(p)
 				}
 			})
 		})
@@ -209,6 +191,81 @@ func (ct *Content) Init() {
 		ct.setStageTitle()
 	})
 	ct.handleWebPopState()
+}
+
+// pageFrame returns the current frame for rendering the page.
+func (ct *Content) pageFrame() *core.Frame {
+	if ct.tabs == nil {
+		return ct.rightFrame
+	}
+	w, _ := ct.tabs.CurrentTab()
+	return w.(*core.Frame)
+}
+
+// pageMaker is the maker function for a page
+func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
+	tree.Add(p, func(w *core.Frame) {
+		w.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.Set(1, 1)
+			switch w.SizeClass() {
+			case core.SizeCompact, core.SizeMedium:
+				s.Padding.SetHorizontal(units.Em(0.5))
+			case core.SizeExpanded:
+				s.Padding.SetHorizontal(units.Em(3))
+			}
+		})
+		w.Maker(func(p *tree.Plan) {
+			if ct.tabs != nil {
+				_, ci := ct.tabs.CurrentTab()
+				if ci != tabIdx {
+					return
+				}
+				h := ct.history[tabIdx]
+				lc := h.Records[h.Index]
+				ct.current = *lc
+			}
+			if !ct.inPDFRender && ct.current.Page.Title != "" {
+				tree.Add(p, func(w *core.Text) {
+					w.Updater(func() {
+						w.SetText(ct.current.Page.Title)
+					})
+					w.SetType(core.TextDisplaySmall)
+				})
+			}
+			if !ct.inPDFRender && len(ct.current.Page.Authors) > 0 {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextTitleLarge)
+					w.Updater(func() {
+						w.SetText("By " + ct.current.Page.Authors)
+					})
+				})
+			}
+			if !ct.current.Page.Date.IsZero() {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextTitleMedium)
+					w.Updater(func() {
+						w.SetText(ct.current.Page.Date.Format("January 2, 2006"))
+					})
+				})
+			}
+			tree.Add(p, func(w *core.Frame) {
+				w.Styler(func(s *styles.Style) {
+					s.Direction = styles.Column
+					s.Grow.Set(1, 1)
+				})
+				w.Updater(func() {
+					errors.Log(ct.loadPage(w))
+					if ct.toolbar != nil {
+						ct.toolbar.Update()
+					}
+				})
+			})
+			if !ct.inPDFRender {
+				ct.makeBottomButtons(p)
+			}
+		})
+	})
 }
 
 // pageByName returns [Content.pagesByName] of the lowercase version of the given name.
@@ -284,15 +341,12 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	})
 
 	if url := ct.getWebURL(); url != "" {
-		ct.Open(url)
-		return ct
+		return ct.Open(url)
 	}
 	if root, ok := ct.pagesByURL[""]; ok {
-		ct.Open(root.URL)
-		return ct
+		return ct.Open(root.URL)
 	}
-	ct.Open(ct.pages[0].URL)
-	return ct
+	return ct.Open(ct.pages[0].URL)
 }
 
 // SetContent is a helper function that calls [Content.SetSource]
@@ -301,49 +355,90 @@ func (ct *Content) SetContent(content fs.FS) *Content {
 	return ct.SetSource(fsx.Sub(content, "content"))
 }
 
+// OpenEvent opens the page with the given URL and updates the display.
+// If no pages correspond to the URL, it is opened in the default browser.
+// This version is for widget event cases, where the keyboard modifiers
+// are used to control the way the page is opened: Ctrl/Meta = new tab.
+func (ct *Content) OpenEvent(url string, e events.Event) *Content {
+	if e == nil || !e.HasAnyModifier(key.Control, key.Meta) {
+		return ct.Open(url)
+	}
+	if ct.tabs == nil {
+		if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
+			core.TheApp.OpenURL(url)
+			return ct
+		}
+		if strings.HasPrefix(url, "ref://") {
+			ct.openRef(url)
+			return ct
+		}
+		_, pg, heading := ct.parseURL(url)
+		_, nw, err := ct.pageURL(pg, heading)
+		if err != nil {
+			return ct
+		}
+		core.TheApp.OpenURL(nw.String())
+		return ct
+	}
+	nt := ct.tabs.NumTabs()
+	nm := fmt.Sprintf("Tab %d", nt+1)
+	ct.newTab(ct.tabs.NewTab(nm))
+	return ct.Open(url)
+}
+
+func (ct *Content) newTab(fr *core.Frame, tb *core.Tab) {
+	ct.rendered.Reset()
+	nt := ct.tabs.NumTabs()
+	nm := fmt.Sprintf("Tab %d", nt)
+	tb.SetText(nm)
+	h := &History{}
+	h.Save(ct.current.Clone())
+	ct.history = append(ct.history, h)
+	fr.Maker(func(p *tree.Plan) {
+		ct.pageMaker(p, nt-1)
+	})
+	ct.tabs.SelectTabIndex(nt - 1)
+}
+
 // Open opens the page with the given URL and updates the display.
 // If no pages correspond to the URL, it is opened in the default browser.
+// This version is for programmatic use -- see also OpenEvent.
 func (ct *Content) Open(url string) *Content {
 	ct.open(url, true)
 	return ct
 }
 
-func (ct *Content) addHistory(pg *bcontent.Page) {
-	ct.historyIndex = len(ct.history)
-	ct.history = append(ct.history, pg)
-	ct.saveWebURL()
-}
-
 // reloadPage reloads the current page
 func (ct *Content) reloadPage() {
-	ct.renderedPage = nil
+	ct.rendered.Reset()
 	ct.Update()
 }
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
-	if ct.renderedPage == ct.currentPage {
-		return nil
+	if ct.rendered == ct.current { // this prevents tabs from rendering
+		// fmt.Println("repeat")
+		// return nil
 	}
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
 	}
 	w.DeleteChildren()
-	b, err := ct.currentPage.ReadContent(ct.pagesByCategory)
+	b, err := ct.current.Page.ReadContent(ct.pagesByCategory)
 	if err != nil {
 		return err
 	}
-	ct.currentPage.ParseSpecials(b)
+	ct.current.Page.ParseSpecials(b)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	if err != nil {
 		return err
 	}
 
 	ct.leftFrame.DeleteChildren()
-	ct.makeTableOfContents(w, ct.currentPage)
+	ct.makeTableOfContents(w, ct.current.Page)
 	ct.makeCategories()
 	ct.leftFrame.Update()
-	ct.renderedPage = ct.currentPage
+	ct.rendered = ct.current
 	return nil
 }
 
@@ -355,9 +450,9 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	contents.SetReadOnly(true)
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
-			ct.rightFrame.ScrollDimToContentStart(math32.Y)
-			ct.currentHeading = ""
-			ct.saveWebURL()
+			ct.pageFrame().ScrollDimToContentStart(math32.Y)
+			ct.current.Heading = ""
+			ct.saveWebURL(&ct.current)
 		}
 	})
 	// last is the most recent tree node for each heading level, used for nesting.
@@ -380,13 +475,13 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 				}
 			}
 			tr := core.NewTree(parent).SetText(tx.Text)
+			tr.SetProperty("page-text", tx)
 			last[num] = tr
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
 				tx.ScrollThisToTop()
-				ct.currentHeading = kebab
-				ct.saveWebURL()
+				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})
 		}
 		return tree.Continue
@@ -407,17 +502,17 @@ func (ct *Content) makeCategories() {
 	cats.SetReadOnly(true)
 	cats.OnSelect(func(e events.Event) {
 		if cats.IsRootSelected() {
-			ct.Open("")
+			ct.OpenEvent("", e)
 		}
 	})
 	for _, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
-		if ct.currentPage.Name == cat {
+		if ct.current.Page.Name == cat {
 			catTree.SetSelected(true)
 		}
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
-				ct.Open(catPage.URL)
+				ct.OpenEvent(catPage.URL, e)
 			} else {
 				catTree.Open() // no page to open so open the tree
 			}
@@ -427,12 +522,12 @@ func (ct *Content) makeCategories() {
 				continue
 			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
-			if pg == ct.currentPage {
+			if pg == ct.current.Page {
 				pgTree.SetSelected(true)
 				catTree.SetClosed(false)
 			}
 			pgTree.OnSelect(func(e events.Event) {
-				ct.Open(pg.URL)
+				ct.OpenEvent(pg.URL, e)
 			})
 		}
 	}
@@ -469,9 +564,9 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 
 // setStageTitle sets the title of the stage based on the current page URL.
 func (ct *Content) setStageTitle() {
-	if rw := ct.Scene.RenderWindow(); rw != nil && ct.currentPage != nil {
-		name := ct.currentPage.Name
-		if ct.currentPage.URL == "" { // Root page just gets app name
+	if rw := ct.Scene.RenderWindow(); rw != nil && ct.current.Page != nil {
+		name := ct.current.Page.Name
+		if ct.current.Page.URL == "" { // Root page just gets app name
 			name = core.TheApp.Name()
 		}
 		rw.SetStageTitle(name)
@@ -481,7 +576,7 @@ func (ct *Content) setStageTitle() {
 // PagePDF generates a PDF of the current page, to given file path
 // (directory). the page name is the file name.
 func (ct *Content) PagePDF(path string) error {
-	if ct.currentPage == nil {
+	if ct.current.Page == nil {
 		return errors.Log(errors.New("Page empty"))
 	}
 	core.MessageSnackbar(ct, "Generating PDF...")
@@ -492,9 +587,9 @@ func (ct *Content) PagePDF(path string) error {
 	ct.reloadPage()
 	ct.inPDFRender = false
 
-	refs := ct.PageRefs(ct.currentPage)
+	refs := ct.PageRefs(ct.current.Page)
 
-	fname := ct.currentPage.Name + ".pdf"
+	fname := ct.current.Page.Name + ".pdf"
 	if path != "" {
 		errors.Log(os.MkdirAll(path, 0777))
 		fname = filepath.Join(path, fname)
@@ -503,11 +598,11 @@ func (ct *Content) PagePDF(path string) error {
 	if errors.Log(err) != nil {
 		return err
 	}
-	opts := Settings.PageSettings(ct, ct.currentPage)
+	opts := Settings.PageSettings(ct, ct.current.Page)
 	if refs != nil {
-		paginate.PDF(f, opts.PDF, ct.rightFrame, refs)
+		paginate.PDF(f, opts.PDF, ct.pageFrame(), refs)
 	} else {
-		paginate.PDF(f, opts.PDF, ct.rightFrame)
+		paginate.PDF(f, opts.PDF, ct.pageFrame())
 	}
 	err = f.Close()
 

@@ -48,6 +48,11 @@ You can allow users to add new tabs:
 
 ```Go
 ts := core.NewTabs(b).SetNewTabButton(true)
+ts.NewTabFunc = func(index int) {
+    fr, tb := ts.TabAtIndex(index)
+	core.NewText(fr).SetText("This is the contents of tab: " + strconv.Itoa(index+1))
+	tb.SetText("Tab number " + strconv.Itoa(index+1)).Update()
+}
 ts.NewTab("First")
 ts.NewTab("Second")
 ```
@@ -58,6 +63,9 @@ You can make functional tabs, which can be closed:
 
 ```Go
 ts := core.NewTabs(b).SetType(core.FunctionalTabs)
+ts.CloseTabFunc = func(index int) {
+	core.MessageSnackbar(ts, "Tab was closed: " + strconv.Itoa(index))
+}
 ts.NewTab("First")
 ts.NewTab("Second")
 ts.NewTab("Third")

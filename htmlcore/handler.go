@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/lines"
@@ -107,6 +108,7 @@ func handleElement(ctx *Context) {
 		case "blockquote":
 			w.Styler(func(s *styles.Style) { // todo: need a better marker
 				s.Grow.Set(1, 0)
+				s.Direction = styles.Column
 				s.Background = colors.Scheme.SurfaceContainer
 			})
 		}
@@ -415,8 +417,8 @@ func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.N
 			s.Text.WhiteSpace = text.WhiteSpacePreWrap
 		})
 	}
-	tx.HandleTextClick(func(tl *rich.Hyperlink) {
-		ctx.OpenURL(tl.URL)
+	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
+		ctx.OpenURL(tl.URL, e)
 	})
 	return tx, excl
 }
@@ -430,8 +432,8 @@ func handleTextTag(ctx *Context) *core.Text {
 	start, end := nodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	tx := New[core.Text](ctx).SetText(str)
-	tx.HandleTextClick(func(tl *rich.Hyperlink) {
-		ctx.OpenURL(tl.URL)
+	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
+		ctx.OpenURL(tl.URL, e)
 	})
 	return tx
 }

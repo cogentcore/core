@@ -25,6 +25,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
@@ -385,7 +386,7 @@ func (tr *Tree) Init() {
 		e.SetHandled()
 	})
 	parts.OnClick(func(e events.Event) {
-		tr.SelectEvent(e.SelectMode())
+		tr.SelectEvent(e.SelectMode(), e)
 		e.SetHandled()
 	})
 	parts.AsWidget().OnDoubleClick(func(e events.Event) {
@@ -419,7 +420,7 @@ func (tr *Tree) Init() {
 	parts.On(events.ContextMenu, func(e events.Event) {
 		sels := tr.GetSelectedNodes()
 		if len(sels) == 0 {
-			tr.SelectEvent(e.SelectMode())
+			tr.SelectEvent(e.SelectMode(), e)
 		}
 		tr.ShowContextMenu(e)
 	})
@@ -893,10 +894,10 @@ func (tr *Tree) sendChangeEventReSync(original ...events.Event) {
 // SelectEvent updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne),
 // and root sends selection event. Returns true if event sent.
-func (tr *Tree) SelectEvent(mode events.SelectModes) bool {
+func (tr *Tree) SelectEvent(mode events.SelectModes, original ...events.Event) bool {
 	sel := tr.selectUpdate(mode)
 	if sel {
-		tr.sendSelectEvent()
+		tr.sendSelectEvent(original...)
 	}
 	return sel
 }
@@ -1648,5 +1649,129 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 			sn.AsTree().SetName(orgnm)
 			AsWidget(sn).NeedsRender()
 		}
+	}
+}
+
+//////// Search interface
+
+// TextRunes returns any text content associated with the widget, to be used
+// for Search for example. If this is nil, then it is excluded from search.
+func (tr *Tree) TextRunes() []rune {
+	return nil
+}
+
+// Search returns text search results for this widget, searching for
+// the find string with given case sensitivity. It is up to each widget
+// to define the meaning of the Region line, char values for the matches.
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tr *Tree) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	var results []textpos.Match
+	nn := tr.Root
+	idx := 0
+
+	next := func(c Treer) Treer {
+		idx++
+		nni := tree.Next(c)
+		if n, ok := nni.(Treer); ok {
+			return n
+		}
+		return nil
+	}
+
+	for nn != nil {
+		tr := nn.AsCoreTree()
+		str := tr.Label()
+		m := SearchRunes([]rune(str), find, useCase)
+		if len(m) == 0 {
+			nn = next(nn)
+			continue
+		}
+		for i := range m {
+			m[i].Region.Start.Line = idx
+			m[i].Region.End.Line = idx
+		}
+		results = append(results, m...)
+		nn = next(nn)
+	}
+	return results, true
+}
+
+// HighlightMatches does highlighting of the given matches within this widget,
+// where the matches are as returned from the Search method.
+// Passing a nil causes matches to be reset.
+// Any existing highlighting should always be reset first regardless.
+// The bool return value indicates whether this widget handled the search,
+// thereby excluding further searching within the elements under it.
+func (tr *Tree) HighlightMatches(matches []textpos.Match) bool {
+	nn := tr.Root
+	next := func(c Treer) Treer {
+		nni := tree.Next(c)
+		if n, ok := nni.(Treer); ok {
+			return n
+		}
+		return nil
+	}
+	for nn != nil {
+		tr := nn.AsCoreTree()
+		tx := tr.Parts.ChildByName("text", 1).(*Text)
+		tx.HighlightMatches(nil) // reset
+		tx.SelectMatch(matches, 0, SelectNoScroll, SelectReset)
+		nn = next(nn)
+	}
+	if matches == nil {
+		return true
+	}
+	idx := 0
+	nextTrg := func(trg int) *Text {
+		for nn != nil {
+			tr := nn.AsCoreTree()
+			tx := tr.Parts.ChildByName("text", 1).(*Text)
+			if idx == trg {
+				return tx
+			}
+			idx++
+			nn = next(nn)
+		}
+		return nil
+	}
+	nn = tr.Root
+	for _, m := range matches {
+		trg := m.Region.Start.Line
+		tx := nextTrg(trg)
+		tx.HighlightMatches([]textpos.Match{m})
+	}
+	return true
+}
+
+// SelectMatch selects match at given index from among those returned
+// from the Search method. scroll = scroll widget into view.
+// reset = clear selection instead of selecting.
+func (tr *Tree) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+	match := matches[index]
+	mIdx := match.Region.Start.Line
+	idx := 0
+	nn := tr.Root
+	next := func(c Treer) Treer {
+		idx++
+		nni := tree.Next(c)
+		if n, ok := nni.(Treer); ok {
+			return n
+		}
+		return nil
+	}
+	for nn != nil {
+		if idx < mIdx {
+			nn = next(nn)
+			continue
+		}
+		tr := nn.AsCoreTree()
+		if tr.Closed {
+			tr.OpenParents()
+		}
+		tr.ScrollToThis()
+		tx := tr.Parts.ChildByName("text", 1).(*Text)
+		tx.SelectMatch(matches, 0, SelectNoScroll, reset)
+		break
 	}
 }

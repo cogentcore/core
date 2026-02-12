@@ -18,6 +18,8 @@ func init() {
 
 		// type definitions
 		"Content":      reflect.ValueOf((*content.Content)(nil)),
+		"History":      reflect.ValueOf((*content.History)(nil)),
+		"Location":     reflect.ValueOf((*content.Location)(nil)),
 		"SettingsData": reflect.ValueOf((*content.SettingsData)(nil)),
 	}
 }

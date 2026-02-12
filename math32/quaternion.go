@@ -114,9 +114,25 @@ func (q *Quat) SetFromEuler(euler Vector3) {
 // ToEuler returns a Vector3 with components as the Euler angles
 // from the given quaternion.
 func (q Quat) ToEuler() Vector3 {
-	rot := Vector3{}
-	rot.SetEulerAnglesFromQuat(q)
-	return rot
+	// columns
+	x := q.MulVector(Vec3(1, 0, 0))
+	y := q.MulVector(Vec3(0, 1, 0))
+	z := q.MulVector(Vec3(0, 0, 1))
+
+	phi := Atan2(z.Y, z.Z)
+	sinp := -z.X
+	var theta float32
+	if Abs(sinp) >= 1 {
+		theta = 0.5 * Pi * Sign(sinp)
+	} else {
+		theta = Asin(sinp)
+	}
+	psi := Atan2(y.X, x.X)
+
+	return Vec3(-phi, -theta, -psi)
+	// rot := Vector3{}
+	// rot.SetEulerAnglesFromQuat(q)
+	// return rot
 }
 
 // SetFromAxisAngle sets this quaternion with the rotation

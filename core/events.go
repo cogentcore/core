@@ -267,11 +267,15 @@ func (em *Events) handlePosEvent(e events.Event) {
 			return
 		}
 		if !tree.IsNil(em.slide) {
-			em.slide.AsWidget().HandleEvent(e)
-			em.slide.AsWidget().Send(events.SlideMove, e)
-			e.SetHandled()
-			em.setCursorFromStyle()
-			return
+			if len(sc.selectedText) > 0 && !em.slide.AsWidget().posInScBBox(pos) {
+				// allow multi-select
+			} else {
+				em.slide.AsWidget().HandleEvent(e)
+				em.slide.AsWidget().Send(events.SlideMove, e)
+				e.SetHandled()
+				em.setCursorFromStyle()
+				return
+			}
 		}
 	case events.Scroll:
 		if !tree.IsNil(em.scroll) {
@@ -447,8 +451,31 @@ func (em *Events) handlePosEvent(e events.Event) {
 			} else if !tree.IsNil(em.slidePress) && em.dragStartCheck(e, TimingSettings.SlideStartTime, TimingSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
-				em.slide = em.slidePress
-				em.slide.AsWidget().Send(events.SlideStart, e)
+				if em.slide != nil { // out of original bbox
+					got := false
+					for i := n - 1; i >= 0; i-- {
+						w := em.mouseInBBox[i]
+						if _, ok := w.(*Text); ok {
+							em.slide = w
+							got = true
+							break
+						}
+					}
+					slb := em.slide.AsWidget()
+					if pos.Y > slb.Geom.TotalBBox.Max.Y || pos.X > slb.Geom.TotalBBox.Max.X {
+						ec := e.Clone()
+						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Max
+						slb.Send(events.SlideMove, ec)
+					}
+					if got {
+						ec := e.Clone()
+						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Min
+						em.slide.AsWidget().Send(events.SlideStart, ec)
+					}
+				} else {
+					em.slide = em.slidePress
+					em.slide.AsWidget().Send(events.SlideStart, e)
+				}
 				e.SetHandled()
 			}
 		}
@@ -1193,6 +1220,9 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		if em.focusPrev() {
 			e.SetHandled()
 		}
+	case keymap.Find:
+		Search(sc, LastSearch, LastUseCase)
+		e.SetHandled()
 	case keymap.WinSnapshot:
 		img := sc.Renderer.Image()
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
@@ -1238,7 +1268,7 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		AllRenderWindows.focusNext()
 	}
 	if !e.IsHandled() {
-		em.triggerShortcut(cs)
+		em.triggerShortcut(cs, e)
 	}
 }
 
@@ -1298,7 +1328,7 @@ func (em *Events) addShortcut(chord key.Chord, bt *Button) {
 // triggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // buttons, and does not trigger for Disabled buttons.
-func (em *Events) triggerShortcut(chord key.Chord) bool {
+func (em *Events) triggerShortcut(chord key.Chord, e events.Event) bool {
 	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for button\n", chord)
 	}
@@ -1323,6 +1353,7 @@ func (em *Events) triggerShortcut(chord key.Chord) bool {
 	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v, button: %v triggered\n", chord, sa.Text)
 	}
+	e.SetHandled()
 	sa.Send(events.Click)
 	return true
 }

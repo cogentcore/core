@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/system/composer"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 	"image"
@@ -62,6 +63,7 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WDragDrop         func(e events.Event)
 	WDropDeleteSource func(e events.Event)
 	WGetFileInfo      func() error
+	WHighlightMatches func(matches []textpos.Match) bool
 	WInit             func()
 	WMimeData         func(md *mimedata.Mimes)
 	WNodeWalkDown     func(fun func(n tree.Node) bool)
@@ -76,11 +78,14 @@ type _cogentcore_org_core_filetree_Filer struct {
 	WRender           func()
 	WRenderSource     func(op draw.Op) composer.Source
 	WRenderWidget     func()
+	WSearch           func(find string, useCase bool) ([]textpos.Match, bool)
+	WSelectMatch      func(matches []textpos.Match, index int, scroll bool, reset bool)
 	WShowContextMenu  func(e events.Event)
 	WSizeDown         func(iter int) bool
 	WSizeFinal        func()
 	WSizeUp           func()
 	WStyle            func()
+	WTextRunes        func() []rune
 	WWidgetTooltip    func(pos image.Point) (string, image.Point)
 }
 
@@ -105,8 +110,11 @@ func (W _cogentcore_org_core_filetree_Filer) Destroy()                        { 
 func (W _cogentcore_org_core_filetree_Filer) DragDrop(e events.Event)         { W.WDragDrop(e) }
 func (W _cogentcore_org_core_filetree_Filer) DropDeleteSource(e events.Event) { W.WDropDeleteSource(e) }
 func (W _cogentcore_org_core_filetree_Filer) GetFileInfo() error              { return W.WGetFileInfo() }
-func (W _cogentcore_org_core_filetree_Filer) Init()                           { W.WInit() }
-func (W _cogentcore_org_core_filetree_Filer) MimeData(md *mimedata.Mimes)     { W.WMimeData(md) }
+func (W _cogentcore_org_core_filetree_Filer) HighlightMatches(matches []textpos.Match) bool {
+	return W.WHighlightMatches(matches)
+}
+func (W _cogentcore_org_core_filetree_Filer) Init()                       { W.WInit() }
+func (W _cogentcore_org_core_filetree_Filer) MimeData(md *mimedata.Mimes) { W.WMimeData(md) }
 func (W _cogentcore_org_core_filetree_Filer) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
@@ -122,12 +130,19 @@ func (W _cogentcore_org_core_filetree_Filer) Render()          { W.WRender() }
 func (W _cogentcore_org_core_filetree_Filer) RenderSource(op draw.Op) composer.Source {
 	return W.WRenderSource(op)
 }
-func (W _cogentcore_org_core_filetree_Filer) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_filetree_Filer) RenderWidget() { W.WRenderWidget() }
+func (W _cogentcore_org_core_filetree_Filer) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return W.WSearch(find, useCase)
+}
+func (W _cogentcore_org_core_filetree_Filer) SelectMatch(matches []textpos.Match, index int, scroll bool, reset bool) {
+	W.WSelectMatch(matches, index, scroll, reset)
+}
 func (W _cogentcore_org_core_filetree_Filer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
 func (W _cogentcore_org_core_filetree_Filer) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
 func (W _cogentcore_org_core_filetree_Filer) SizeFinal()                     { W.WSizeFinal() }
 func (W _cogentcore_org_core_filetree_Filer) SizeUp()                        { W.WSizeUp() }
 func (W _cogentcore_org_core_filetree_Filer) Style()                         { W.WStyle() }
+func (W _cogentcore_org_core_filetree_Filer) TextRunes() []rune              { return W.WTextRunes() }
 func (W _cogentcore_org_core_filetree_Filer) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }

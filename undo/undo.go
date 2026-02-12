@@ -8,7 +8,7 @@ representations of any kind of state representation (typically JSON dump of the 
 state). It stores the compact diffs from one state change to the next, with raw copies saved
 at infrequent intervals to tradeoff cost of computing diffs.
 
-In addition state (which is optional on any given step), a description of the action
+In addition to state (which is optional on any given step), a description of the action
 and arbitrary string-encoded data can be saved with each record.  Thus, for cases
 where the state doesn't change, you can just save some data about the action sufficient
 to undo / redo it.
@@ -74,16 +74,20 @@ func (rc *Record) Init(action, data string) {
 // Stack is the undo stack manager that manages the undo and redo process.
 type Stack struct {
 
-	// current index in the undo records -- this is the record that will be undone if user hits undo
+	// Index is the current index in the undo records.
+	// This is the record that will be undone if user hits undo.
 	Index int
 
-	// the list of saved state / action records
+	// Records is the list of saved state / action records.
 	Records []*Record
 
-	// interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs.
+	// RawInterval is the interval for saving raw data.
+	// Need to do this at some interval to prevent having it take too long
+	// to compute patches from all the diffs.
 	RawInterval int
 
-	// mutex that protects updates -- we do diff computation as a separate goroutine so it is instant from perspective of UI
+	// Mu mutex that protects updates. Diff computation runs as a separate
+	// goroutine so it is instant from perspective of UI.
 	Mu sync.Mutex
 }
 

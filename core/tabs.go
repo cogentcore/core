@@ -39,6 +39,16 @@ type Tabs struct {
 	// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 	NewTabButton bool
 
+	// NewTabFunc is a function that will be called when the NewTabButton
+	// is clicked to create a new tab, with the index of this new tab.
+	// This can be used to update the new tab contents.
+	NewTabFunc func(index int)
+
+	// CloseTabFunc is a function that will be called when a tab is closed.
+	// with the index of the tab that was closed.
+	// This can be used to manage any additional resources associated with the tab.
+	CloseTabFunc func(index int)
+
 	// maxChars is the maximum number of characters to include in the tab text.
 	// It elides text that are longer than that.
 	maxChars int
@@ -151,7 +161,11 @@ func (ts *Tabs) Init() {
 				ntb.SetTooltip("Add a new tab").SetName("new-tab-button")
 				ntb.OnClick(func(e events.Event) {
 					ts.NewTab("New tab")
-					ts.SelectTabIndex(ts.NumTabs() - 1)
+					idx := ts.NumTabs() - 1
+					if ts.NewTabFunc != nil {
+						ts.NewTabFunc(idx)
+					}
+					ts.SelectTabIndex(idx)
 				})
 			})
 		})
@@ -250,9 +264,9 @@ func (ts *Tabs) insertTabButtonAt(label string, idx int) *Tab {
 	return tab
 }
 
-// tabAtIndex returns content frame and tab button at given index, nil if
+// TabAtIndex returns content frame and tab button at given index, nil if
 // index out of range (emits log message).
-func (ts *Tabs) tabAtIndex(idx int) (*Frame, *Tab) {
+func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab) {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
 
@@ -271,7 +285,7 @@ func (ts *Tabs) tabAtIndex(idx int) (*Frame, *Tab) {
 // SelectTabIndex selects the tab at the given index, returning it or nil.
 // This is the final tab selection path.
 func (ts *Tabs) SelectTabIndex(idx int) *Frame {
-	frame, tab := ts.tabAtIndex(idx)
+	frame, tab := ts.TabAtIndex(idx)
 	if frame == nil {
 		return nil
 	}
@@ -283,9 +297,9 @@ func (ts *Tabs) SelectTabIndex(idx int) *Frame {
 	ts.unselectOtherTabs(idx)
 	tab.SetSelected(true)
 	fr.StackTop = idx
+	ts.mu.Unlock()
 	fr.Update()
 	frame.DeferShown()
-	ts.mu.Unlock()
 	return frame
 }
 
@@ -353,7 +367,7 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 
 // DeleteTabIndex deletes the tab at the given index, returning whether it was successful.
 func (ts *Tabs) DeleteTabIndex(idx int) bool {
-	frame, _ := ts.tabAtIndex(idx)
+	frame, _ := ts.TabAtIndex(idx)
 	if frame == nil {
 		return false
 	}
@@ -383,6 +397,9 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 		ts.SelectTabIndex(nidx)
 	}
 	ts.NeedsLayout()
+	if ts.CloseTabFunc != nil {
+		ts.CloseTabFunc(idx)
+	}
 	return true
 }
 

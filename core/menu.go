@@ -218,6 +218,10 @@ type MenuSearcher interface {
 
 // standardContextMenu adds standard context menu items for the [Scene].
 func (sc *Scene) standardContextMenu(m *Scene) { //types:add
+	sdesc := "Search for text within all widgets in current scene."
+	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Find).SetTooltip(sdesc).OnClick(func(e events.Event) {
+		Search(sc, LastSearch, LastUseCase)
+	})
 	msdesc := "Search for menu buttons and other app actions"
 	NewButton(m).SetText("Menu search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip(msdesc).OnClick(func(e events.Event) {
 		sc.MenuSearchDialog("Menu search", msdesc)

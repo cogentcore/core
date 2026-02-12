@@ -34,6 +34,23 @@ func TestQuatSetFromAxisAngle(t *testing.T) {
 	expected := Quat{X: 0.7071068, Y: 0, Z: 0, W: 0.70710677}
 
 	assert.Equal(t, expected, q)
+
+	ta := q.ToAxisAngle()
+	tolassert.Equal(t, axis.X, ta.X)
+	tolassert.Equal(t, axis.Y, ta.Y)
+	tolassert.Equal(t, axis.Z, ta.Z)
+}
+
+func TestQuatToEuler(t *testing.T) {
+	axis := Vector3{X: 1, Y: 0, Z: 0}
+
+	q := Quat{}
+	q.SetFromAxisAngle(axis, Pi/2)
+
+	te := q.ToEuler()
+	tolassert.Equal(t, Pi/2, te.X)
+	tolassert.Equal(t, 0, te.Y)
+	tolassert.Equal(t, 0, te.Z)
 }
 
 func TestQuatSetFromRotationMatrix(t *testing.T) {
