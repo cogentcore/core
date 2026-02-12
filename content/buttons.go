@@ -73,14 +73,14 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 	}
 	tree.Add(p, func(w *core.Button) {
 		find := keymap.Find.Chord().Label()
-		w.SetText("Page Search").SetIcon(icons.Search).SetKey(keymap.Menu).
+		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Menu).
 			SetTooltip("Search for pages by name (use " + find + " or context menu to search within current page)")
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.SurfaceVariant
 			s.Padding.Right.Em(5)
 		})
 		w.OnClick(func(e events.Event) {
-			ct.Scene.MenuSearchDialog("Page Search", "Page Search "+core.TheApp.Name())
+			ct.Scene.MenuSearchDialog("Page search", "Search "+core.TheApp.Name())
 		})
 	})
 }
