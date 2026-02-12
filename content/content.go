@@ -155,7 +155,7 @@ func (ct *Content) Init() {
 		tree.Add(p, func(w *core.Frame) {
 			ct.rightFrame = w
 			w.Maker(func(p *tree.Plan) {
-				if core.TheApp.Platform() == system.Web || core.GenerateHTML != nil {
+				if core.TheApp.Platform() == system.Web || system.GenerateHTMLArg() {
 					ct.pageMaker(p, 0)
 				} else {
 					tree.Add(p, func(w *core.Tabs) {
