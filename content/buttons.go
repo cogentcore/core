@@ -72,26 +72,15 @@ func (ct *Content) MakeToolbar(p *tree.Plan) {
 		})
 	}
 	tree.Add(p, func(w *core.Button) {
+		find := keymap.Find.Chord().Label()
 		w.SetText("Page Search").SetIcon(icons.Search).SetKey(keymap.Menu).
-			SetTooltip("Search for pages by name")
+			SetTooltip("Search for pages by name (use " + find + " or context menu to search within current page)")
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Scheme.SurfaceVariant
 			s.Padding.Right.Em(5)
 		})
 		w.OnClick(func(e events.Event) {
 			ct.Scene.MenuSearchDialog("Page Search", "Page Search "+core.TheApp.Name())
-		})
-	})
-	tree.Add(p, func(w *core.Button) {
-		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Find).
-			SetTooltip("Search within content of current page")
-		w.Styler(func(s *styles.Style) {
-			s.Background = colors.Scheme.SurfaceVariant
-			s.Padding.Right.Em(5)
-		})
-		w.OnClick(func(e events.Event) {
-			e.SetHandled()
-			core.Search(ct.rightFrame, core.LastSearch, core.LastUseCase)
 		})
 	})
 }
@@ -102,6 +91,23 @@ func (ct *Content) MakeToolbarPDF(p *tree.Plan) {
 		w.SetText("PDF").SetIcon(icons.PictureAsPdf).SetTooltip("PDF generates and opens / downloads the current page as a printable PDF file. See the Settings/Printer panel (Command+,) for settings.")
 		w.OnClick(func(e events.Event) {
 			ct.PagePDF("pdfs")
+		})
+	})
+}
+
+// MakeToolbarSearch adds a within-page search button to the toolbar.
+// This is optional.
+func (ct *Content) MakeToolbarSearch(p *tree.Plan) {
+	tree.Add(p, func(w *core.Button) {
+		w.SetText("Search").SetIcon(icons.Search).SetKey(keymap.Find).
+			SetTooltip("Search within content of current page")
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Scheme.SurfaceVariant
+			s.Padding.Right.Em(5)
+		})
+		w.OnClick(func(e events.Event) {
+			e.SetHandled()
+			core.Search(ct.rightFrame, core.LastSearch, core.LastUseCase)
 		})
 	})
 }
