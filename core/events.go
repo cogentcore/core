@@ -468,9 +468,10 @@ func (em *Events) handlePosEvent(e events.Event) {
 					}
 					if nextSlide != nil {
 						em.slide = nextSlide
+						slb = em.slide.AsWidget()
 						ec := e.Clone()
 						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Min
-						em.slide.AsWidget().Send(events.SlideStart, ec)
+						slb.Send(events.SlideStart, ec)
 					}
 				} else {
 					em.slide = em.slidePress
