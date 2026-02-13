@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
@@ -230,7 +231,9 @@ func (tx *Text) Init() {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
-		tx.selectReset()
+		if !(tx.Scene.selectedText != nil && !e.HasAnyModifier(key.Shift, key.Meta)) {
+			tx.selectReset()
+		}
 	})
 	tx.OnKeyChord(func(e events.Event) {
 		if tx.selectRange.Len() == 0 {
@@ -251,7 +254,9 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.OnFinal(events.Click, func(e events.Event) {
-		tx.Scene.selectedText = nil // reset
+		if !e.HasAnyModifier(key.Shift, key.Meta) {
+			tx.selectReset()
+		}
 		if !TheApp.SystemPlatform().IsMobile() {
 			return
 		}
@@ -266,11 +271,17 @@ func (tx *Text) Init() {
 	})
 	tx.On(events.DoubleClick, func(e events.Event) {
 		e.SetHandled()
+		if !slices.Contains(tx.Scene.selectedText, tx) {
+			tx.Scene.selectedText = append(tx.Scene.selectedText, tx)
+		}
 		tx.selectWord(tx.pixelToRune(e.Pos()))
 		tx.SetFocusQuiet()
 	})
 	tx.On(events.TripleClick, func(e events.Event) {
 		e.SetHandled()
+		if !slices.Contains(tx.Scene.selectedText, tx) {
+			tx.Scene.selectedText = append(tx.Scene.selectedText, tx)
+		}
 		tx.selectAll()
 		tx.SetFocusQuiet()
 		if TheApp.SystemPlatform().IsMobile() {
@@ -376,7 +387,6 @@ func (tx *Text) copy() { //types:add
 				sel += "\n"
 			}
 			sel += string(st.richText.Join()[st.selectRange.Start:st.selectRange.End])
-			st.selectReset()
 		}
 	} else {
 		// note: selectRange is in runes, not string indexes.
@@ -415,11 +425,19 @@ func (tx *Text) hasSelection() bool {
 	return tx.selectRange.Len() > 0
 }
 
-// selectReset resets any current selection
+// selectReset resets any current selection, including for the multi-text
+// Scene selectedText.
 func (tx *Text) selectReset() {
-	tx.selectRange.Start = 0
-	tx.selectRange.End = 0
-	tx.NeedsRender()
+	reset := func(t *Text) {
+		t.selectRange.Start = 0
+		t.selectRange.End = 0
+		t.NeedsRender()
+	}
+	for _, st := range tx.Scene.selectedText {
+		reset(st)
+	}
+	reset(tx)
+	tx.Scene.selectedText = nil
 }
 
 // selectAll selects entire set of text

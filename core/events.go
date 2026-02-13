@@ -452,12 +452,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
 				if em.slide != nil { // out of original bbox
-					got := false
+					var nextSlide Widget
 					for i := n - 1; i >= 0; i-- {
 						w := em.mouseInBBox[i]
 						if _, ok := w.(*Text); ok {
-							em.slide = w
-							got = true
+							nextSlide = w
 							break
 						}
 					}
@@ -467,10 +466,12 @@ func (em *Events) handlePosEvent(e events.Event) {
 						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Max
 						slb.Send(events.SlideMove, ec)
 					}
-					if got {
+					if nextSlide != nil {
+						em.slide = nextSlide
+						slb = em.slide.AsWidget()
 						ec := e.Clone()
 						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Min
-						em.slide.AsWidget().Send(events.SlideStart, ec)
+						slb.Send(events.SlideStart, ec)
 					}
 				} else {
 					em.slide = em.slidePress
