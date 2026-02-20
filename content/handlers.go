@@ -7,6 +7,9 @@ package content
 import (
 	"fmt"
 	"io"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -375,6 +378,20 @@ func (ct *Content) open(url string, history bool) {
 	}
 	if strings.HasPrefix(url, "ref://") {
 		ct.openRef(url)
+		return
+	}
+	sli := strings.Index(url, "/")
+	if sli > 0 {
+		fb, err := fs.ReadFile(ct.Source, url)
+		if err != nil {
+			core.MessageSnackbar(ct, "Resource at: "+url+" not found")
+			return
+		}
+		errors.Log(os.MkdirAll("resources", 0777))
+		fn := filepath.Join("resources", strings.ReplaceAll(url, "/", "_"))
+		os.WriteFile(fn, fb, 0666)
+		af := "file://" + errors.Log1(filepath.Abs(fn))
+		core.TheApp.OpenURL(af)
 		return
 	}
 	_, pg, heading := ct.parseURL(url)

@@ -241,7 +241,7 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 					})
 				})
 			}
-			if !ct.current.Page.Date.IsZero() {
+			if !ct.inPDFRender && !ct.current.Page.Date.IsZero() {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextTitleMedium)
 					w.Updater(func() {
