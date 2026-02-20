@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -388,8 +389,13 @@ func (ct *Content) open(url string, history bool) {
 			return
 		}
 		errors.Log(os.MkdirAll("resources", 0777))
-		fn := filepath.Join("resources", strings.ReplaceAll(url, "/", "_"))
-		os.WriteFile(fn, fb, 0666)
+		_, fn := path.Split(url)
+		fn = filepath.Join("resources", fn)
+		err = os.WriteFile(fn, fb, 0666)
+		if err != nil {
+			core.MessageSnackbar(ct, "Could not save resource at: "+fn)
+			return
+		}
 		af := "file://" + errors.Log1(filepath.Abs(fn))
 		core.TheApp.OpenURL(af)
 		return
