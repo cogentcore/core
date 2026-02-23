@@ -87,7 +87,6 @@ func (a *App) SetSystemWindow() {
 	a.Compose = composer.NewComposerWeb()
 	a.Resize()
 	a.Event.Window(events.WinShow)
-	a.Event.Window(events.ScreenUpdate)
 	a.Event.Window(events.WinFocus)
 }
 
@@ -196,6 +195,7 @@ func (a *App) Cursor(win system.Window) system.Cursor {
 }
 
 func (a *App) IsDark() bool {
+	// See https://stackoverflow.com/a/57795495
 	return js.Global().Get("matchMedia").Truthy() &&
 		js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Get("matches").Truthy()
 }

@@ -548,14 +548,10 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WindowEventTrace {
 				log.Println("Win: ScreenUpdate", w.name, screenConfig())
 			}
-			if !TheApp.Platform().IsMobile() { // native desktop
-				if TheApp.NScreens() > 0 {
-					AppearanceSettings.Apply()
-					UpdateAll()
-					theWindowGeometrySaver.restoreAll()
-				}
-			} else {
-				w.resized()
+			if TheApp.NScreens() > 0 {
+				AppearanceSettings.Apply()
+				UpdateAll()
+				theWindowGeometrySaver.restoreAll()
 			}
 		}
 	}
