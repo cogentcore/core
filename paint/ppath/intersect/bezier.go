@@ -121,8 +121,7 @@ func findInflectionPointRangeCubicBezier(p0, p1, p2, p3 math32.Vector2, t, toler
 	// find the range around an inflection point that we consider flat within the flatness criterion
 	if math32.IsNaN(t) {
 		return math32.Inf(1), math32.Inf(1)
-	}
-	if t < 0.0 || t > 1.0 {
+	} else if t < 0.0 || t > 1.0 {
 		panic("t outside 0.0--1.0 range")
 	}
 
@@ -145,12 +144,12 @@ func findInflectionPointRangeCubicBezier(p0, p1, p2, p3 math32.Vector2, t, toler
 
 	if ppath.Equal(nr.X, 0.0) && ppath.Equal(nr.Y, 0.0) {
 		// if rn is still zero, this curve has p0=p1=p2, so it is straight
-		return 0.0, 1.0
+		return math32.Max(0.0, 2.0*t-1.0), 1.0
 	}
 
 	s3 := math32.Abs(ns.X*nr.Y-ns.Y*nr.X) / math32.Hypot(nr.X, nr.Y)
 	if ppath.Equal(s3, 0.0) {
-		return 0.0, 1.0 // can approximate whole curve linearly
+		return math32.Max(0.0, 2.0*t-1.0), 1.0 // can approximate whole curve linearly
 	}
 
 	tf := math32.Cbrt(tolerance / s3)

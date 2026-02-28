@@ -373,10 +373,10 @@ func (w *renderWindow) closed() {
 	}
 	if len(AllRenderWindows) > 0 {
 		pfw := AllRenderWindows[len(AllRenderWindows)-1]
-		if DebugSettings.WindowEventTrace {
+		if true || DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.name, w.name)
 		}
-		pfw.Raise()
+		// pfw.Raise()
 	}
 }
 
