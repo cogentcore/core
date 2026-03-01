@@ -83,6 +83,9 @@ func (a *App) PollScreenChanges() {
 	}
 	a.GetScreens()
 	for i, sc := range a.Screens {
+		if i >= len(csc) { // number could have changed
+			goto doUpdate
+		}
 		ssc := csc[i]
 		if *ssc != *sc {
 			goto doUpdate
