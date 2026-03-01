@@ -29,6 +29,12 @@ func GlfwMods(mod glfw.ModifierKey) key.Modifiers {
 	if mod&glfw.ModSuper != 0 {
 		m.SetFlag(true, key.Meta)
 	}
+	if mod&glfw.ModCapsLock != 0 {
+		m.SetFlag(true, key.CapsLock)
+	}
+	if mod&glfw.ModNumLock != 0 {
+		m.SetFlag(true, key.NumLock)
+	}
 	return m
 }
 

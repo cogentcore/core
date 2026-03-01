@@ -45,16 +45,16 @@ func (i Codes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Codes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Codes") }
 
-var _ModifiersValues = []Modifiers{0, 1, 2, 3}
+var _ModifiersValues = []Modifiers{0, 1, 2, 3, 4, 5}
 
 // ModifiersN is the highest valid value for type Modifiers, plus one.
-const ModifiersN Modifiers = 4
+const ModifiersN Modifiers = 6
 
-var _ModifiersValueMap = map[string]Modifiers{`Control`: 0, `Meta`: 1, `Alt`: 2, `Shift`: 3}
+var _ModifiersValueMap = map[string]Modifiers{`Control`: 0, `Meta`: 1, `Alt`: 2, `Shift`: 3, `CapsLock`: 4, `NumLock`: 5}
 
-var _ModifiersDescMap = map[Modifiers]string{0: `Control is the &#34;Control&#34; (Ctrl) key.`, 1: `Meta is the system meta key (the &#34;Command&#34; key on macOS and the Windows key on Windows).`, 2: `Alt is the &#34;Alt&#34; (&#34;Option&#34; on macOS) key.`, 3: `Shift is the &#34;Shift&#34; key.`}
+var _ModifiersDescMap = map[Modifiers]string{0: `Control is the &#34;Control&#34; (Ctrl) key.`, 1: `Meta is the system meta key (the &#34;Command&#34; key on macOS and the Windows key on Windows).`, 2: `Alt is the &#34;Alt&#34; (&#34;Option&#34; on macOS) key.`, 3: `Shift is the &#34;Shift&#34; key.`, 4: `CapsLock indicates that CapsLock is toggled on at time of keypress`, 5: `NumLock indicates that NumLock is toggled on at time of keypress`}
 
-var _ModifiersMap = map[Modifiers]string{0: `Control`, 1: `Meta`, 2: `Alt`, 3: `Shift`}
+var _ModifiersMap = map[Modifiers]string{0: `Control`, 1: `Meta`, 2: `Alt`, 3: `Shift`, 4: `CapsLock`, 5: `NumLock`}
 
 // String returns the string representation of this Modifiers value.
 func (i Modifiers) String() string { return enums.BitFlagString(i, _ModifiersValues) }
