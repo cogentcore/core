@@ -21,11 +21,45 @@ type Chord string
 // shortcut formatting based on the underlying system platform without import cycles.
 var SystemPlatform string
 
+// KeypadMap maps the keypad versions to standard codes,
+// for non-printing characters.
+var KeypadMap = map[Codes]Codes{
+	CodeKeypadEnter: CodeReturnEnter,
+	CodeKeypadFullStop: CodeFullStop,
+	CodeKeypadEqualSign: CodeEqualSign,
+}
+
+// KeypadAlts are alternate codes for keypad keys to use when 
+// the NumLock key is on.
+var KeypadAlts = map[Codes]Codes{
+	CodeKeypad1: CodeEnd,
+	CodeKeypad2: CodeDownArrow,
+	CodeKeypad3: CodePageDown,
+	CodeKeypad4: CodeLeftArrow,
+	CodeKeypad6: CodeRightArrow,
+	CodeKeypad7: CodeHome,
+	CodeKeypad8: CodeUpArrow,
+	CodeKeypad9: CodePageUp,
+	CodeKeypad0: CodeInsert,
+	CodeKeypadFullStop: CodeDelete,
+}
+
 // NewChord returns a string representation of the keyboard event suitable for
 // keyboard function maps, etc. Printable runes are sent directly, and
 // non-printable ones are converted to their corresponding code names without
 // the "Code" prefix.
 func NewChord(rn rune, code Codes, mods Modifiers) Chord {
+	mods.SetFlag(false, CapsLock)
+	if !mods.HasFlag(NumLock) && code >= CodeKeypadNumLock && code < CodeKeypadEqualSign {
+		if ac, ok := KeypadAlts[code]; ok {
+			rn = 0
+			code = ac
+		}
+	}
+	if ac, ok := KeypadMap[code]; ok {
+		code = ac
+	}
+	mods.SetFlag(false, NumLock)
 	modstr := mods.ModifiersString()
 	if modstr != "" && code == CodeSpacebar { // modified space is not regular space
 		return Chord(modstr + "Spacebar")

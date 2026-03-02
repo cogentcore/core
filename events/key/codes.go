@@ -165,10 +165,6 @@ const (
 	CodeCompose Codes = 0x10000
 )
 
-// TODO: currently have to use official go stringer for this,
-// not custom one, which doesn't currently handle discontinuities
-// // go: generate stringer -type=Codes
-
 // TODO: Given we use runes outside the unicode space, should we provide a
 // printing function? Related: it's a little unfortunate that printing a
 // events.Key with %v gives not very readable output like:

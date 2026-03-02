@@ -73,13 +73,27 @@ func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 	ev.Init()
 	es.Deque.Send(ev)
 
-	_, mapped := key.CodeRuneMap[code]
+	mrn, mapped := key.CodeRuneMap[code]
 
-	if typ == KeyDown && ev.Code < key.CodeLeftControl &&
-		(ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
+	if typ != KeyDown {
+		return
+	}
+	
+	if !ev.HasAnyModifier(key.NumLock) && code >= key.CodeKeypadNumLock && code < key.CodeKeypadEqualSign {
+		if mapped {
+			rn = mrn
+		}
 		che := NewKey(KeyChord, rn, code, mods)
 		che.Init()
 		es.Deque.Send(che)
+		return
+	}
+
+	if ev.Code < key.CodeLeftControl &&	(ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
+		che := NewKey(KeyChord, rn, code, mods)
+		che.Init()
+		es.Deque.Send(che)
+		return
 	}
 }
 
