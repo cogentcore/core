@@ -78,7 +78,7 @@ func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 	if typ != KeyDown {
 		return
 	}
-	
+
 	if !ev.HasAnyModifier(key.NumLock) && code >= key.CodeKeypadNumLock && code < key.CodeKeypadEqualSign {
 		if mapped {
 			rn = mrn
@@ -89,7 +89,7 @@ func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 		return
 	}
 
-	if ev.Code < key.CodeLeftControl &&	(ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
+	if ev.Code < key.CodeLeftControl && (ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
 		che := NewKey(KeyChord, rn, code, mods)
 		che.Init()
 		es.Deque.Send(che)

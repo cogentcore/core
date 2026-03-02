@@ -24,23 +24,23 @@ var SystemPlatform string
 // KeypadMap maps the keypad versions to standard codes,
 // for non-printing characters.
 var KeypadMap = map[Codes]Codes{
-	CodeKeypadEnter: CodeReturnEnter,
-	CodeKeypadFullStop: CodeFullStop,
+	CodeKeypadEnter:     CodeReturnEnter,
+	CodeKeypadFullStop:  CodeFullStop,
 	CodeKeypadEqualSign: CodeEqualSign,
 }
 
-// KeypadAlts are alternate codes for keypad keys to use when 
+// KeypadAlts are alternate codes for keypad keys to use when
 // the NumLock key is on.
 var KeypadAlts = map[Codes]Codes{
-	CodeKeypad1: CodeEnd,
-	CodeKeypad2: CodeDownArrow,
-	CodeKeypad3: CodePageDown,
-	CodeKeypad4: CodeLeftArrow,
-	CodeKeypad6: CodeRightArrow,
-	CodeKeypad7: CodeHome,
-	CodeKeypad8: CodeUpArrow,
-	CodeKeypad9: CodePageUp,
-	CodeKeypad0: CodeInsert,
+	CodeKeypad1:        CodeEnd,
+	CodeKeypad2:        CodeDownArrow,
+	CodeKeypad3:        CodePageDown,
+	CodeKeypad4:        CodeLeftArrow,
+	CodeKeypad6:        CodeRightArrow,
+	CodeKeypad7:        CodeHome,
+	CodeKeypad8:        CodeUpArrow,
+	CodeKeypad9:        CodePageUp,
+	CodeKeypad0:        CodeInsert,
 	CodeKeypadFullStop: CodeDelete,
 }
 
