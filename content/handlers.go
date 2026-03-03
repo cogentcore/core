@@ -382,7 +382,7 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	sli := strings.Index(url, "/")
-	if sli > 0 {
+	if sli > 0 && len(url) > sli+1 && url[sli+1] != '#' {
 		fb, err := fs.ReadFile(ct.Source, url)
 		if err != nil {
 			core.MessageSnackbar(ct, "Resource at: "+url+" not found")
