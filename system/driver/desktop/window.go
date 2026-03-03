@@ -461,8 +461,7 @@ func (w *Window) SetCursorEnabled(enabled, raw bool) {
 	}
 }
 
-/////////////////////////////////////////////////////////
-//  Window Callbacks
+////////  Window Callbacks
 
 func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	w.Mu.Lock()

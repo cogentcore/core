@@ -28,6 +28,12 @@ const (
 
 	// Shift is the "Shift" key.
 	Shift
+
+	// CapsLock indicates that CapsLock is toggled on at time of keypress
+	CapsLock
+
+	// NumLock indicates that NumLock is toggled on at time of keypress
+	NumLock
 )
 
 // ModifiersString returns the string representation of the modifiers using

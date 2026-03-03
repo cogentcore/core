@@ -29,6 +29,12 @@ func GlfwMods(mod glfw.ModifierKey) key.Modifiers {
 	if mod&glfw.ModSuper != 0 {
 		m.SetFlag(true, key.Meta)
 	}
+	if mod&glfw.ModCapsLock != 0 {
+		m.SetFlag(true, key.CapsLock)
+	}
+	if mod&glfw.ModNumLock != 0 {
+		m.SetFlag(true, key.NumLock)
+	}
 	return m
 }
 
@@ -45,6 +51,9 @@ func (w *Window) FocusWindow() *Window {
 // physical key
 func (w *Window) KeyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
 	mods := GlfwMods(mod)
+	if TheApp.Platform() == system.MacOS {
+		mods.SetFlag(true, key.NumLock) // mac always acts like numlock is on
+	}
 	ec := GlfwKeyCode(ky)
 	rn := key.CodeRuneMap[ec]
 	typ := events.KeyDown

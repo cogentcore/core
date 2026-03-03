@@ -152,6 +152,7 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Glw.SetCursorPosCallback(w.CursorPosEvent)
 	w.Glw.SetCursorEnterCallback(w.CursorEnterEvent)
 	w.Glw.SetDropCallback(w.DropEvent)
+	w.Glw.SetInputMode(glfw.LockKeyMods, glfw.True)
 
 	w.Show()
 	a.RunOnMain(func() {
