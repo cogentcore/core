@@ -358,8 +358,10 @@ func (w *Window) ConstrainFrame(topOnly bool) sides.Sides[int] {
 		sz.Y = csz.Y
 	}
 	if change {
-		// fmt.Println("\tconstrainframe changed:", pos, sz)
-		w.SetGeometry(false, pos, sz, sc)
+		// if the scaling factor or device pixel ratio is great than 1
+		// on Windows platform (effectively >= 1.5)
+		// then here we have deadlock.
+		go w.SetGeometry(false, pos, sz, sc)
 	}
 	return w.FrameSize
 }
