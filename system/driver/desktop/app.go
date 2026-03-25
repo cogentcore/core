@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
 	"github.com/cogentcore/webgpu/wgpuglfw"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 func Init() {
