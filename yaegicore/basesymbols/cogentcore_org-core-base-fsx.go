@@ -12,6 +12,7 @@ func init() {
 		// function, constant and variable definitions
 		"CopyFile":         reflect.ValueOf(fsx.CopyFile),
 		"DirAndFile":       reflect.ValueOf(fsx.DirAndFile),
+		"DirExists":        reflect.ValueOf(fsx.DirExists),
 		"DirFS":            reflect.ValueOf(fsx.DirFS),
 		"Dirs":             reflect.ValueOf(fsx.Dirs),
 		"ExtSplit":         reflect.ValueOf(fsx.ExtSplit),
