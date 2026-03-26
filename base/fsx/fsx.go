@@ -184,6 +184,16 @@ func FileExists(filePath string) (bool, error) {
 	return false, err
 }
 
+// DirExists checks whether given directory exists, returning true if so,
+// false if not, and error if there is an error in accessing the file.
+func DirExists(filePath string) (bool, error) {
+	fileInfo, err := os.Stat(filePath)
+	if err == nil {
+		return fileInfo.IsDir(), nil
+	}
+	return false, err
+}
+
 // DirAndFile returns the final dir and file name.
 func DirAndFile(file string) string {
 	dir, fnm := filepath.Split(file)
