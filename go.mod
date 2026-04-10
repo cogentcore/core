@@ -13,14 +13,14 @@ require (
 	github.com/bramvdbogaerde/go-scp v1.6.0
 	github.com/chewxy/math32 v1.11.1
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
-	github.com/cogentcore/webgpu v0.23.0
+	github.com/cogentcore/webgpu v0.23.1-0.20260410073005-a2ae7d757168
 	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-fonts/latin-modern v0.3.3
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20250301202403-da16c1255728
+	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1
 	github.com/go-text/typesetting v0.3.1-0.20250707124828-58cd3ef91251
 	github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a
 	github.com/gorilla/websocket v1.5.3
