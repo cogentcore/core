@@ -132,7 +132,7 @@ func (a *App) GetScreens() {
 		}
 		sc := a.Screens[scNo]
 		vm := mon.GetVideoMode()
-		if vm.Width == 0 || vm.Height == 0 {
+		if vm == nil || vm.Width == 0 || vm.Height == 0 {
 			if ScreenDebug {
 				log.Printf("ScreenDebug: getScreens: screen %v has no size!\n", sc.Name)
 			}
