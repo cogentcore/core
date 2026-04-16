@@ -1,0 +1,47 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="300"
+      height="100" />
+    <g
+      id="group-1">
+      <text
+        id="text-0"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;y:22.109375;stroke:none;fill:#191B22;"
+        x="5"
+        y="22.109375">`0123456789-=~!@#$%^&amp;*()_+</text>
+    </g>
+    <g
+      id="group-2">
+      <text
+        id="text-0"
+        style="highlight-color:#FFE17B;x:5;y:42.109375;stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;"
+        x="5"
+        y="42.109375">[]\;&#39;,./{}|:&#34;&lt;&gt;?</text>
+    </g>
+    <g
+      id="group-3">
+      <text
+        id="text-0"
+        style="y:62.109375;stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;"
+        x="5"
+        y="62.109375">ABCDEFGHIJKLMNOPQRSTUV</text>
+    </g>
+    <g
+      id="group-4">
+      <text
+        id="text-0"
+        style="y:82.109375;stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;"
+        x="5"
+        y="82.109375">abcdefghijklmnopqrstuvwxyz</text>
+    </g>
+  </g>
+</svg>

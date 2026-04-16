@@ -1,0 +1,89 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <path
+      id="path-0"
+      style="stroke:none;fill:#FFFFFF;"
+      d="M0 0H300V300H0z" />
+    <path
+      id="path-1"
+      style="stroke:#0000FF;stroke-width:20dot;fill:#FFFFFF;"
+      d="M0 0H300" />
+    <path
+      id="path-2"
+      style="stroke-width:30dot;fill:#FFFFFF;stroke:#FFA500;"
+      d="M300 0V300" />
+    <path
+      id="path-3"
+      style="fill:#FFFFFF;stroke:#7F007FCC;stroke-width:40dot;"
+      d="M300 300H0" />
+    <path
+      id="path-4"
+      style="stroke:#FFA500;stroke-width:50dot;fill:#FFFFFF;"
+      d="M0 300V0" />
+    <path
+      id="path-5"
+      style="stroke:none;fill:#FFFFFF;"
+      d="" />
+    <path
+      id="path-6"
+      style="stroke:none;fill:#ADD8E6;"
+      d="M60 60H180C187.9534 60 195.5893 63.16287 201.2132 68.7868C206.8371 74.41074 210 82.04656 210 90.00001V150C210 155.4858 205.4858 160 200 160H90C73.54249 160 60 146.4575 60 130z" />
+    <path
+      id="path-7"
+      style="stroke:#FFA500;stroke-width:20dot;fill:#ADD8E6;"
+      d="M60 60H180M180 60C187.9534 60 195.5893 63.16286 201.2132 68.7868C206.8371 74.41074 210 82.04657 210 90.00002" />
+    <path
+      id="path-8"
+      style="stroke:#7F007FCC;stroke-width:30dot;fill:#ADD8E6;"
+      d="M210 90V150M210 150C210 155.4858 205.4858 160 200 160" />
+    <path
+      id="path-9"
+      style="stroke:#FFA500;stroke-width:40dot;fill:#ADD8E6;"
+      d="M200 160H90M90 160C73.54249 160 60 146.4575 60 130" />
+    <path
+      id="path-10"
+      style="stroke:#0000FF;stroke-width:50dot;fill:#ADD8E6;"
+      d="M60 130V60" />
+    <path
+      id="path-11"
+      style="stroke:none;fill:#ADD8E6;"
+      d="" />
+    <g
+      id="group-12">
+      <text
+        id="text-0"
+        style="highlight-color:#FFE17B;x:85;y:97.109375;stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;"
+        x="85"
+        y="97.109375">This is </text>
+      <text
+        id="text-1"
+        style="highlight-color:#FFE17B;x:135.65625;y:97.109375;stroke:none;fill:#005BC0;text-decoration:underline;direction:ltr;select-color:#D8E2FF;"
+        x="135.65625"
+        y="97.109375">HTML</text>
+      <text
+        id="text-2"
+        style="stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:179.3125;y:97.109375;"
+        x="179.3125"
+        y="97.109375"> </text>
+      <text
+        id="text-3"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:91.13281;y:117.71094;stroke:none;fill:#191B22;font-weight:bold;"
+        x="91.13281"
+        y="117.71094">formatted</text>
+      <text
+        id="text-4"
+        style="stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:173.17969;y:117.71094;"
+        x="173.17969"
+        y="117.71094"> </text>
+      <text
+        id="text-5"
+        style="fill:#191B22;font-style:italic;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:121.0625;y:138.71094;stroke:none;"
+        x="121.0625"
+        y="138.71094">text</text>
+    </g>
+  </g>
+</svg>

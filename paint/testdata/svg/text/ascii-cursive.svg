@@ -1,0 +1,57 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="300"
+      height="100" />
+    <g
+      id="group-1">
+      <text
+        id="text-0"
+        style="highlight-color:#FFE17B;x:5;y:35;stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;"
+        x="5"
+        y="35">`0123456789-=~!@#$</text>
+      <text
+        id="text-1"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;y:39.476562;stroke:none;fill:#191B22;"
+        x="5"
+        y="39.476562">%^&amp;*()_+</text>
+    </g>
+    <g
+      id="group-2">
+      <text
+        id="text-0"
+        style="direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;y:55;stroke:none;fill:#191B22;text-decoration:none;"
+        x="5"
+        y="55">[]\;&#39;,./{}|:&#34;&lt;&gt;?</text>
+    </g>
+    <g
+      id="group-3">
+      <text
+        id="text-0"
+        style="fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;y:75;stroke:none;"
+        x="5"
+        y="75">ABCDEFGHIJKLMNO</text>
+      <text
+        id="text-1"
+        style="stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;y:79.47656;"
+        x="5"
+        y="79.47656">PQRSTUV</text>
+    </g>
+    <g
+      id="group-4">
+      <text
+        id="text-0"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:5;y:95;stroke:none;fill:#191B22;"
+        x="5"
+        y="95">abcdefghijklmnopqrstuvwxyz</text>
+    </g>
+  </g>
+</svg>

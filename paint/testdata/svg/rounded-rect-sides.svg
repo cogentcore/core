@@ -1,0 +1,19 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="300"
+      height="300" />
+    <path
+      id="path-1"
+      style="stroke:#0000FF;stroke-width:3dot;fill:#FFFF00;"
+      d="M50 60C50 54.51416 54.51416 50 60 50H130C135.3023 50 140.3929 52.10858 144.1421 55.85787C147.8914 59.60716 150 64.69771 150 70V115C150 123.2288 143.2288 130 135 130H55C52.25708 130 50 127.7429 50 125z" />
+  </g>
+</svg>

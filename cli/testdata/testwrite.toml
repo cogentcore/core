@@ -1,0 +1,36 @@
+Includes = [
+  'testinc.toml',
+  'testinc3.toml',
+  'testinc2.toml'
+]
+GUI = true
+GPU = true
+Debug = false
+ParamSet = ''
+ParamFile = ''
+ParamDocFile = ''
+Tag = 'testing'
+Note = 'something else'
+Run = 0
+Runs = 8
+Epochs = 500
+NTrials = 32
+NData = 12
+SaveWts = false
+EpochLog = false
+RunLog = false
+TrialLog = false
+TestEpochLog = false
+TestTrialLog = false
+NetData = false
+Enum = 'TestValue2'
+Slice = []
+StrSlice = []
+
+[PatParams]
+  NPats = 14
+  Sparseness = 0.22
+
+[Network]
+  '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'
+  '.PFCLayer:Layer.Inhib.Layer.Gi' = '2.4'

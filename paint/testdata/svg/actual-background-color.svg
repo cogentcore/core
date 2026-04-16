@@ -1,0 +1,80 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="300"
+      height="300" />
+    <rect
+      id="rect-1"
+      style="fill:#D3D3D3;"
+      x="0"
+      y="0"
+      width="300"
+      height="300" />
+    <path
+      id="path-2"
+      style="stroke-width:0px;fill:none;stroke:#75777F;"
+      d="M0 0H300V300H0z" />
+    <rect
+      id="rect-3"
+      style="fill:#D3D3D3;"
+      x="50"
+      y="50"
+      width="200"
+      height="200" />
+    <rect
+      id="rect-4"
+      style="fill:#E96A6A;"
+      x="50"
+      y="50"
+      width="200"
+      height="200" />
+    <path
+      id="path-5"
+      style="stroke-opacity:0.5;stroke-width:0px;fill:none;stroke:#75777F;"
+      d="M50 50H250V250H50z" />
+    <rect
+      id="rect-6"
+      style="fill:#E96A6A;"
+      x="75"
+      y="75"
+      width="150"
+      height="150" />
+    <rect
+      id="rect-7"
+      style="fill:#6B31A5;"
+      x="75"
+      y="75"
+      width="150"
+      height="150" />
+    <path
+      id="path-8"
+      style="stroke:#75777F;stroke-opacity:0.5;stroke-width:0px;fill:none;"
+      d="M75 75H225V225H75z" />
+    <rect
+      id="rect-9"
+      style="fill:#6B31A5;"
+      x="100"
+      y="100"
+      width="100"
+      height="100" />
+    <rect
+      id="rect-10"
+      style="fill:#6B30A5;"
+      x="100"
+      y="100"
+      width="100"
+      height="100" />
+    <path
+      id="path-11"
+      style="stroke:#75777F;stroke-opacity:0.5;stroke-width:0px;fill:none;"
+      d="M100 100H200V200H100z" />
+  </g>
+</svg>

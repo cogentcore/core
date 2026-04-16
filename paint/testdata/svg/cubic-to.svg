@@ -1,0 +1,19 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="300"
+      height="300" />
+    <path
+      id="path-1"
+      style="stroke:#0000FF;stroke-width:3dot;fill:#FFFF00;"
+      d="M100 200C130 110 160 180 200 100V150z" />
+  </g>
+</svg>

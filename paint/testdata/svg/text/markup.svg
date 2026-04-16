@@ -1,0 +1,90 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="480"
+      height="400" />
+    <g
+      id="group-1">
+      <text
+        id="text-0"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;fill:#191B22;highlight-color:#FFE17B;x:10;y:264.14062;stroke:none;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="10"
+        y="264.14062">This is </text>
+      <text
+        id="text-1"
+        style="stroke:none;text-decoration:underline;direction:ltr;select-color:#D8E2FF;fill:#005BC0;highlight-color:#FFE17B;x:200.0625;y:264.14062;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="200.0625"
+        y="264.14062">HTML</text>
+      <text
+        id="text-2"
+        style="highlight-color:#FFE17B;x:363.73438;y:264.14062;stroke:none;text-decoration:none;direction:ltr;select-color:#D8E2FF;fill:#191B22;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="363.73438"
+        y="264.14062"> </text>
+      <text
+        id="text-3"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;fill:#191B22;font-weight:bold;highlight-color:#FFE17B;x:10;y:340.28125;stroke:none;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="10"
+        y="340.28125">formatted</text>
+      <text
+        id="text-4"
+        style="direction:ltr;select-color:#D8E2FF;fill:#191B22;highlight-color:#FFE17B;x:317.79688;y:340.28125;stroke:none;text-decoration:none;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="317.79688"
+        y="340.28125"> </text>
+      <text
+        id="text-5"
+        style="fill:#191B22;highlight-color:#FFE17B;x:333.39062;y:340.28125;stroke:none;font-style:italic;text-decoration:none;direction:ltr;select-color:#D8E2FF;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="333.39062"
+        y="340.28125">text</text>
+      <text
+        id="text-6"
+        style="direction:ltr;select-color:#D8E2FF;fill:#191B22;highlight-color:#FFE17B;x:432.15625;y:340.28125;stroke:none;text-decoration:none;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="432.15625"
+        y="340.28125"> </text>
+      <text
+        id="text-7"
+        style="fill:#191B22;highlight-color:#FFE17B;x:10;y:418.28125;stroke:none;text-decoration:none;direction:ltr;select-color:#D8E2FF;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="10"
+        y="418.28125">with </text>
+      <text
+        id="text-8"
+        style="fill:#191B22;highlight-color:#FFE17B;x:146.96875;y:418.28125;stroke:none;text-decoration:underline;direction:ltr;select-color:#D8E2FF;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="146.96875"
+        y="418.28125">underline</text>
+      <text
+        id="text-9"
+        style="stroke:none;text-decoration:none;direction:ltr;select-color:#D8E2FF;fill:#191B22;highlight-color:#FFE17B;x:418.54688;y:418.28125;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="418.54688"
+        y="418.28125"> </text>
+      <text
+        id="text-10"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;fill:#191B22;highlight-color:#FFE17B;x:10;y:496.28125;stroke:none;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="10"
+        y="496.28125">and </text>
+      <text
+        id="text-11"
+        style="stroke:none;text-decoration:line-through;direction:ltr;select-color:#D8E2FF;fill:#191B22;highlight-color:#FFE17B;x:10;y:574.28125;"
+        transform="matrix(0.70710677,-0.7071068,0.7071068,0.70710677,-138.49243,65.64972)"
+        x="10"
+        y="574.28125">strikethrough</text>
+    </g>
+  </g>
+</svg>

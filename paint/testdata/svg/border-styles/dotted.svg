@@ -1,0 +1,23 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="50"
+      y="100"
+      width="220"
+      height="120" />
+    <path
+      id="path-1"
+      style="stroke:none;fill:#FFFFFF;"
+      d="M60 160C60 132.5708 82.57082 110 110 110H210C223.2557 110 235.9821 115.2714 245.3553 124.6447C254.7286 134.0179 260 146.7443 260 160V160C260 187.4292 237.4292 210 210 210H110C82.57081 210 60 187.4292 60 160z" />
+    <path
+      id="path-2"
+      style="stroke:#0000FF;stroke-width:10px;stroke-linecap:round;fill:none;"
+      d="M55 155C55 127.5708 77.57082 105 105 105H215C228.2557 105 240.9821 110.2714 250.3553 119.6447C259.7286 129.0179 265 141.7443 265 155V165C265 192.4292 242.4292 215 215 215H105C77.57081 215 55 192.4292 55 165z" />
+  </g>
+</svg>

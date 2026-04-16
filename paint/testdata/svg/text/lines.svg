@@ -1,0 +1,48 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#FFFFFF;"
+      x="0"
+      y="0"
+      width="480"
+      height="80" />
+    <g
+      id="group-1">
+      <text
+        id="text-0"
+        style="stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:10;y:27.109375;"
+        x="10"
+        y="27.109375">Plain </text>
+      <text
+        id="text-1"
+        style="y:27.109375;stroke:none;fill:#191B22;text-decoration:dotted-underline;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:50.953125;"
+        x="50.953125"
+        y="27.109375">Dotted Underline</text>
+      <text
+        id="text-2"
+        style="text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:181.17188;y:27.109375;stroke:none;fill:#191B22;"
+        x="181.17188"
+        y="27.109375"> and </text>
+      <text
+        id="text-3"
+        style="text-decoration:underline;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:218.1875;y:27.109375;stroke:none;fill:#191B22;"
+        x="218.1875"
+        y="27.109375">Underline</text>
+      <text
+        id="text-4"
+        style="stroke:none;fill:#191B22;text-decoration:none;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:292.4375;y:27.109375;"
+        x="292.4375"
+        y="27.109375"> and </text>
+      <text
+        id="text-5"
+        style="fill:#191B22;text-decoration:overline;direction:ltr;select-color:#D8E2FF;highlight-color:#FFE17B;x:329.45312;y:27.109375;stroke:none;"
+        x="329.45312"
+        y="27.109375">Overline</text>
+    </g>
+  </g>
+</svg>

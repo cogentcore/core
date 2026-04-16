@@ -1,0 +1,15 @@
+<svg
+  viewBox="0 0 1 1"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <path
+    id="path-0"
+    style="stroke-width:0.4;fill:none;stroke:#005BC0;"
+    d="M.8331088 .675C.7541501 .8117605 .5919498 .878946 .4394133 .838074C.2868768 .7972019 .18 .6579174 .18 .4999999C.18 .3420825 .2868768 .202798 .4394133 .1619259C.5919499 .1210539 .7541501 .1882394 .8331088 .3249999" />
+  <circle
+    id="circle-1"
+    style="fill:#FBBD0E;stroke:none;"
+    cx="0.53"
+    cy="0.5"
+    r="0.23" />
+</svg>

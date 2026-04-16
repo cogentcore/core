@@ -1,0 +1,22 @@
+<svg
+  viewBox="0 0 0 0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg">
+  <g
+    id="group-0">
+    <rect
+      id="rect-0"
+      style="fill:#008000;"
+      x="10"
+      y="100"
+      width="200"
+      height="100" />
+    <rect
+      id="rect-1"
+      style="fill:{0 0 0 0};"
+      x="0"
+      y="50"
+      width="300"
+      height="200" />
+  </g>
+</svg>
