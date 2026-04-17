@@ -168,6 +168,16 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		default:
 			fmt.Printf("unrecognized glyph data: %T\n", data)
 		}
+		// todo: once https://github.com/go-text/typesetting/pull/254 is merged
+		// if data, ok := run.Face.GlyphDataSVG(g.GlyphID); ok {
+		// 	rs.GlyphSVG(ctx, run, g, data.Source, bb, pos, identity)
+		// } else if data, ok := run.Face.GlyphDataBitmap(g.GlyphID); ok {
+		// 	rs.GlyphBitmap(ctx, run, g, data, fill, stroke, bb, pos, identity)
+		// } else if data, ok := run.Face.GlyphDataOutline(g.GlyphID); ok {
+		// 	rs.GlyphOutline(ctx, run, g, data, fill, stroke, bb, pos, identity)
+		// } else {
+		// 	fmt.Printf("unrecognized glyph data for glyphID: %v, face: %v\n", g.GlyphID, run.Face.Describe().Family)
+		// }
 		off.X += math32.FromFixed(g.XAdvance)
 		off.Y -= math32.FromFixed(g.YAdvance)
 	}
