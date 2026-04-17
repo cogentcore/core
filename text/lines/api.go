@@ -79,7 +79,7 @@ func (ls *Lines) SetWidth(vid int, wd int) bool {
 	defer ls.Unlock()
 	vw := ls.view(vid)
 	if vw != nil {
-		if vw.width == wd {
+		if vw.width == wd || wd == 0 {
 			return false
 		}
 		vw.width = wd
