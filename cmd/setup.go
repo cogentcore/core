@@ -159,7 +159,7 @@ var linuxDistros = []*linuxDistro{
 		"system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "vulkan", "wayland-devel", "libxkbcommon-devel",
 	}},
 	{name: "openSUSE", sudo: true, tool: "zypper", command: []string{"install"}, packages: []string{
-		"gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel", "libvulkan1", "wayland-devel", "libxkbcommon",
+		"gcc", "libXcursor-devel", "libXrandr-devel", "libxkbcommon", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel", "libvulkan1", "wayland-devel",
 	}},
 	{name: "Void", sudo: true, tool: "xbps-install", command: []string{"-S"}, packages: []string{
 		"base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel", "vulkan-loader", "wayland-devel", "libxkbcommon-devel",
