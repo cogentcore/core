@@ -147,7 +147,7 @@ func (ld *linuxDistro) String() string {
 // based on https://docs.fyne.io/started.
 var linuxDistros = []*linuxDistro{
 	{name: "Debian/Ubuntu", sudo: true, tool: "apt", command: []string{"install"}, packages: []string{
-		"gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev", "libwayland-dev",
+		"gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev", "libwayland-dev", "libxkbcommon-dev",
 	}},
 	{name: "Fedora", sudo: true, tool: "dnf", command: []string{"install"}, packages: []string{
 		"gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel", "mesa-vulkan-drivers", "wayland-devel",

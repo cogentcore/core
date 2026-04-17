@@ -32,7 +32,7 @@ If you want to install manually instead, the commands for each distro are listed
 
 {collapsed="true" title="Linux install commands"}
 ```sh
-Debian/Ubuntu:  sudo apt install gcc libgl1-mesa-dev libegl1-mesa-dev mesa-vulkan-drivers xorg-dev libwayland-dev
+Debian/Ubuntu:  sudo apt install gcc libgl1-mesa-dev libegl1-mesa-dev mesa-vulkan-drivers xorg-dev libwayland-dev libxkbcommon-dev
 Fedora:         sudo dnf install gcc libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel libXi-devel libXxf86vm-devel mesa-vulkan-drivers wayland-devel
 Arch:           sudo pacman -S xorg-server-devel libxcursor libxrandr libxinerama libxi vulkan-swrast wayland
 Solus:          sudo eopkg it -c system.devel mesalib-devel libxrandr-devel libxcursor-devel libxi-devel libxinerama-devel vulkan wayland-devel
