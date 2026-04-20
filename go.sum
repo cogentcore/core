@@ -60,10 +60,10 @@ github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1 h1:nIVzcwqIaO1mK8LFr0fGkKpgQD4wJDDH
 github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1/go.mod h1:T5Dn0JwIJOX1euPZ/iT4tq6nFYtmukjcYa7937HuYK8=
 github.com/go-jose/go-jose/v4 v4.1.4 h1:moDMcTHmvE6Groj34emNPLs/qtYXRVcd6S7NHbHz3kA=
 github.com/go-jose/go-jose/v4 v4.1.4/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
-github.com/go-text/typesetting v0.3.1-0.20250707124828-58cd3ef91251 h1:QRcFLinlR2DKeVdwo/hwyz9S5HSzUiXnV0pzX/dhKOg=
-github.com/go-text/typesetting v0.3.1-0.20250707124828-58cd3ef91251/go.mod h1:Fle5OPkxGUxdWDeCpKpvSCE31gEoTGBh63ASvTmSXBA=
-github.com/go-text/typesetting-utils v0.0.0-20250527170436-63e4acdcf075 h1:zRaPuzKe/+Euzz3WwE0YwjXAX4IwvGPRH6abtmRI/4M=
-github.com/go-text/typesetting-utils v0.0.0-20250527170436-63e4acdcf075/go.mod h1:DDxDdQEnB70R8owOx3LVpEFvpMK9eeH1o2r0yZhFI9o=
+github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec h1:qkk9+cZlaY8920dQrhY8GoI91N72f58XmJgGDkkDiaA=
+github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec/go.mod h1:yW47fmJYxJsPcyNWEOGM2lNx766ZKw0cilos3XaD5YY=
+github.com/go-text/typesetting-utils v0.0.0-20260327125527-fbf04b32d9ad h1:J6fi06yzug4KkyQo0hK7UZVFBIlCh7iaG38sGq7THaY=
+github.com/go-text/typesetting-utils v0.0.0-20260327125527-fbf04b32d9ad/go.mod h1:3/62I4La/HBRX9TcTpBj4eipLiwzf+vhI+7whTc9V7o=
 github.com/gobwas/glob v0.2.3 h1:A4xDbljILXROh+kObIiy5kIaPYD8e96x1tgBhUI5J+Y=
 github.com/gobwas/glob v0.2.3/go.mod h1:d3Ez4x06l9bZtSvzIay5+Yzi0fmZzPgnTbPcKjJAkT8=
 github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a h1:l7A0loSszR5zHd/qK53ZIHMO8b3bBSmENnQ6eKnUT0A=
