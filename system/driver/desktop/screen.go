@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 var (
@@ -132,7 +132,7 @@ func (a *App) GetScreens() {
 		}
 		sc := a.Screens[scNo]
 		vm := mon.GetVideoMode()
-		if vm.Width == 0 || vm.Height == 0 {
+		if vm == nil || vm.Width == 0 || vm.Height == 0 {
 			if ScreenDebug {
 				log.Printf("ScreenDebug: getScreens: screen %v has no size!\n", sc.Name)
 			}

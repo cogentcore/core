@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 // Window is the implementation of [system.Window] for the desktop platform.

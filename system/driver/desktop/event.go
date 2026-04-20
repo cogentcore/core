@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 func GlfwMods(mod glfw.ModifierKey) key.Modifiers {

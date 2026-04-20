@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/system"
 	"github.com/cogentcore/webgpu/wgpu"
 	"github.com/cogentcore/webgpu/wgpuglfw"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 // note: this file contains the glfw dependencies, for desktop platform builds

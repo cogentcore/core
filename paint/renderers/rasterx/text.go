@@ -156,17 +156,14 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		pos := off.Add(math32.Vec2(math32.FromFixed(g.XOffset), -math32.FromFixed(g.YOffset)))
 		bb := run.GlyphBoundsBox(g).Translate(off)
 		// rs.StrokeBounds(ctx, bb, colors.Yellow)
-
-		data := run.Face.GlyphData(g.GlyphID)
-		switch format := data.(type) {
-		case font.GlyphOutline:
-			rs.GlyphOutline(ctx, run, g, format, fill, stroke, bb, pos, identity)
-		case font.GlyphBitmap:
-			rs.GlyphBitmap(ctx, run, g, format, fill, stroke, bb, pos, identity)
-		case font.GlyphSVG:
-			rs.GlyphSVG(ctx, run, g, format.Source, bb, pos, identity)
-		default:
-			fmt.Printf("unrecognized glyph data: %T\n", data)
+		if data, ok := run.Face.GlyphDataSVG(g.GlyphID); ok {
+			rs.GlyphSVG(ctx, run, g, data.Source, bb, pos, identity)
+		} else if data, ok := run.Face.GlyphDataBitmap(g.GlyphID); ok {
+			rs.GlyphBitmap(ctx, run, g, data, fill, stroke, bb, pos, identity)
+		} else if data, ok := run.Face.GlyphDataOutline(g.GlyphID); ok {
+			rs.GlyphOutline(ctx, run, g, data, fill, stroke, bb, pos, identity)
+		} else {
+			fmt.Printf("unrecognized glyph data for glyphID: %v, face: %v\n", g.GlyphID, run.Face.Describe().Family)
 		}
 		off.X += math32.FromFixed(g.XAdvance)
 		off.Y -= math32.FromFixed(g.YAdvance)

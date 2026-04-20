@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/system"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 // Notes on intermixing glfw and xgb: bottom line, can't do:

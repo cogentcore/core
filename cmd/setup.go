@@ -147,27 +147,27 @@ func (ld *linuxDistro) String() string {
 // based on https://docs.fyne.io/started.
 var linuxDistros = []*linuxDistro{
 	{name: "Debian/Ubuntu", sudo: true, tool: "apt", command: []string{"install"}, packages: []string{
-		"gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev",
+		"gcc", "libgl1-mesa-dev", "libegl1-mesa-dev", "mesa-vulkan-drivers", "xorg-dev", "libwayland-dev", "libxkbcommon-dev",
 	}},
 	{name: "Fedora", sudo: true, tool: "dnf", command: []string{"install"}, packages: []string{
-		"gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel", "mesa-vulkan-drivers",
+		"gcc", "libX11-devel", "libXcursor-devel", "libXrandr-devel", "libXinerama-devel", "mesa-libGL-devel", "libXi-devel", "libXxf86vm-devel", "mesa-vulkan-drivers", "wayland-devel", "libxkbcommon-devel",
 	}},
 	{name: "Arch", sudo: true, tool: "pacman", command: []string{"-S"}, packages: []string{
-		"xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi", "vulkan-swrast",
+		"xorg-server-devel", "libxcursor", "libxrandr", "libxinerama", "libxi", "vulkan-swrast", "wayland", "libxkbcommon",
 	}},
 	{name: "Solus", sudo: true, tool: "eopkg", command: []string{"it", "-c"}, packages: []string{
-		"system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "vulkan",
+		"system.devel", "mesalib-devel", "libxrandr-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "vulkan", "wayland-devel", "libxkbcommon-devel",
 	}},
 	{name: "openSUSE", sudo: true, tool: "zypper", command: []string{"install"}, packages: []string{
-		"gcc", "libXcursor-devel", "libXrandr-devel", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel", "libvulkan1",
+		"gcc", "libXcursor-devel", "libXrandr-devel", "libxkbcommon", "Mesa-libGL-devel", "libXi-devel", "libXinerama-devel", "libXxf86vm-devel", "libvulkan1", "wayland-devel",
 	}},
 	{name: "Void", sudo: true, tool: "xbps-install", command: []string{"-S"}, packages: []string{
-		"base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel", "vulkan-loader",
+		"base-devel", "xorg-server-devel", "libXrandr-devel", "libXcursor-devel", "libXinerama-devel", "vulkan-loader", "wayland-devel", "libxkbcommon-devel",
 	}},
 	{name: "Alpine", sudo: true, tool: "apk", command: []string{"add"}, packages: []string{
-		"gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev", "vulkan-loader",
+		"gcc", "libxcursor-dev", "libxrandr-dev", "libxinerama-dev", "libxi-dev", "linux-headers", "mesa-dev", "vulkan-loader", "wayland-dev", "libxkbcommon-dev",
 	}},
 	{name: "NixOS", sudo: false, tool: "nix-shell", command: []string{"-p"}, packages: []string{
-		"libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm", "mesa.drivers", "vulkan-loader",
+		"libGL", "pkg-config", "xorg.libX11.dev", "xorg.libXcursor", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXxf86vm", "mesa.drivers", "vulkan-loader", "wayland", "libxkbcommon",
 	}},
 }
