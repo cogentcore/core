@@ -152,18 +152,18 @@ func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 	ng := len(out.Glyphs)
 	for gi := 0; gi < ng; gi++ {
 		g := &out.Glyphs[gi]
-		gri := g.ClusterIndex - rng.Start
+		gri := g.TextIndex() - rng.Start
 		// nrtx := len(rtx)
-		ed := gri + g.GlyphCount
+		ed := gri + g.GlyphsCount()
 		gtx := rtx[gri:ed]
 		gm := theGlyphCache.Glyph(ctx, fnt, tsty, gtx, g.GlyphID)
-		if g.GlyphCount > 1 {
-			gi += g.GlyphCount - 1
+		if g.GlyphsCount() > 1 {
+			gi += g.GlyphsCount() - 1
 		}
 		msz := gm.ActualBoundingBoxAscent + gm.ActualBoundingBoxDescent
 		mwd := -gm.ActualBoundingBoxLeft + gm.ActualBoundingBoxRight
 		// todo: conditional on vertical / horiz
-		g.XAdvance = math32.ToFixed(gm.Width)
+		g.Advance = math32.ToFixed(gm.Width)
 		g.Width = math32.ToFixed(mwd)
 		g.Height = -math32.ToFixed(msz)
 		g.XBearing = -math32.ToFixed(gm.ActualBoundingBoxLeft)

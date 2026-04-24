@@ -131,10 +131,10 @@ func (run *Run) GlyphsAt(i int) []int {
 	var gis []int
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		if g.ClusterIndex > i {
+		if g.TextIndex() > i {
 			break
 		}
-		if g.ClusterIndex == i {
+		if g.TextIndex() == i {
 			gis = append(gis, gi)
 		}
 	}
@@ -146,7 +146,7 @@ func (run *Run) GlyphsAt(i int) []int {
 func (run *Run) FirstGlyphAt(i int) int {
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		if g.ClusterIndex >= i {
+		if g.TextIndex() >= i {
 			return gi
 		}
 	}
@@ -159,7 +159,7 @@ func (run *Run) LastGlyphAt(i int) int {
 	ng := len(run.Glyphs)
 	for gi := ng - 1; gi >= 0; gi-- {
 		g := &run.Glyphs[gi]
-		if g.ClusterIndex <= i {
+		if g.TextIndex() <= i {
 			return gi
 		}
 	}
@@ -171,7 +171,7 @@ func (run *Run) LastGlyphAt(i int) int {
 func (run *Run) SetGlyphXAdvance(adv fixed.Int26_6) {
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		g.XAdvance = adv
+		g.Advance = adv
 	}
 	run.Output.Advance = adv * fixed.Int26_6(len(run.Glyphs))
 }
@@ -186,8 +186,8 @@ func (run *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 	rr := run.Runes()
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		cri := g.ClusterIndex
-		gadv := math32.FromFixed(g.XAdvance)
+		cri := g.TextIndex()
+		gadv := math32.FromFixed(g.Advance)
 		mx := adv + gadv
 		// fmt.Println(gi, cri, adv, mx, pt.X)
 		if pt.X >= adv && pt.X < mx {
@@ -222,14 +222,14 @@ func (run *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
 	off := float32(0)
 	for gi := 0; gi < st; gi++ {
 		g := &run.Glyphs[gi]
-		off += math32.FromFixed(g.XAdvance)
+		off += math32.FromFixed(g.Advance)
 	}
 	mb.Min.X = off + stb.Min.X - 2
 	for gi := st; gi <= ed; gi++ {
 		g := &run.Glyphs[gi]
 		gb := run.GlyphBoundsBox(g)
 		mb.Max.X = off + gb.Max.X + 2
-		off += math32.FromFixed(g.XAdvance)
+		off += math32.FromFixed(g.Advance)
 	}
 	return mb
 }
