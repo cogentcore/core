@@ -5,6 +5,8 @@
 package lines
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/text/textpos"
 )
 
@@ -154,6 +156,10 @@ func (ls *Lines) transposeChar(vw *view, pos textpos.Pos) bool {
 		return false
 	}
 	ppos := ls.posFromView(vw, pvp)
+	if pos.Line >= len(ls.lines) || pos.Char >= len(ls.lines[pos.Line]) {
+		fmt.Println("transpose err:", pos, "lines:", len(ls.lines))
+		return false
+	}
 	chr := ls.lines[pos.Line][pos.Char]
 	pchr := ls.lines[ppos.Line][ppos.Char]
 	repl := string([]rune{chr, pchr})

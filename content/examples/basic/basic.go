@@ -19,6 +19,7 @@ import (
 var econtent embed.FS
 
 func main() {
+	// rasterx.UseGlyphCache = false
 	content.Settings.SiteTitle = "Cogent Content Example"
 	content.OfflineURL = "https://example.com"
 	b := core.NewBody("Cogent Content Example")

@@ -36,7 +36,8 @@ const (
 	// glyphMaskOffsets is the number of different subpixel offsets to render, in each axis.
 	// The memory usage goes as the square of this number, and 4 produces very good results,
 	// while 2 is acceptable, and is significantly better than 1. 8 is overkill.
-	glyphMaskOffsets = 4
+	glyphMaskOffsetsX = 4
+	glyphMaskOffsetsY = 4
 )
 
 func init() {
@@ -83,7 +84,7 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 	gc.Lock()
 	defer gc.Unlock()
 
-	fsize := image.Point{X: int(g.Width.Ceil()), Y: -int(g.Height.Ceil())}
+	fsize := image.Point{X: int(g.Width.Round()), Y: -int(g.Height.Round())}
 	size := fsize.Add(image.Point{2 * glyphMaskBorder, 2 * glyphMaskBorder})
 	if size.X <= 0 || size.X > glyphMaxSize || size.Y <= 0 || size.Y > glyphMaxSize {
 		return nil, image.Point{}
@@ -95,8 +96,9 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 	pi := pf.ToPoint().Sub(image.Point{glyphMaskBorder, glyphMaskBorder})
 	pi.X += g.XBearing.Round()
 	pi.Y -= g.YBearing.Round()
+
 	off := pos.Sub(pf)
-	oi := off.MulScalar(glyphMaskOffsets).Floor().ToPoint()
+	oi := off.Mul(math32.Vec2(glyphMaskOffsetsX, glyphMaskOffsetsY)).Round().ToPoint()
 	// fmt.Println("pos:", pos, "oi:", oi, "pi:", pi)
 
 	key := glyphKey{gid: g.GlyphID, sx: uint8(fsize.X), sy: uint8(fsize.Y), ox: uint8(oi.X), oy: uint8(oi.Y)}
@@ -123,9 +125,9 @@ func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyp
 	// clear target:
 	draw.Draw(gc.image, gc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
 
-	od := float32(1) / glyphMaskOffsets
-	x := -float32(g.XBearing.Round()) + float32(xo)*od + glyphMaskBorder
-	y := float32(g.YBearing.Round()) + float32(yo)*od + glyphMaskBorder
+	od := math32.Vec2(1, 1).Div(math32.Vec2(glyphMaskOffsetsX, glyphMaskOffsetsY))
+	x := -float32(g.XBearing.Round()) + float32(xo)*od.X + glyphMaskBorder
+	y := float32(g.YBearing.Round()) + float32(yo)*od.Y + glyphMaskBorder
 	rs := gc.filler
 	rs.Clear()
 	for _, s := range outline.Segments {

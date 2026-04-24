@@ -165,8 +165,11 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		} else {
 			fmt.Printf("unrecognized glyph data for glyphID: %v, face: %v\n", g.GlyphID, run.Face.Describe().Family)
 		}
-		off.X += math32.FromFixed(g.XAdvance)
-		off.Y -= math32.FromFixed(g.YAdvance)
+		if run.Direction.IsVertical() {
+			off.Y -= math32.FromFixed(g.Advance)
+		} else {
+			off.X += math32.FromFixed(g.Advance)
+		}
 	}
 
 	if run.Decoration.HasFlag(rich.LineThrough) {
@@ -188,7 +191,8 @@ func (rs *Renderer) GlyphOutline(ctx *render.Context, run *shapedgt.Run, g *shap
 	}
 
 	wd := math32.FromFixed(g.Width)
-	xadv := math32.Abs(math32.FromFixed(g.XAdvance))
+	// todo: should be conditional on run.Direction
+	xadv := math32.Abs(math32.FromFixed(g.Advance))
 	if wd > xadv {
 		if run.Font.Style(&ctx.Style.Text).Family == rich.Monospace {
 			scale *= 0.95 * xadv / wd

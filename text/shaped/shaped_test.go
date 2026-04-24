@@ -403,3 +403,15 @@ func TestFontList(t *testing.T) {
 		fmt.Println(fi.Family, "Weight:", fi.Weight, "Slant:", fi.Slant)
 	}
 }
+
+func TestGlyphAlign(t *testing.T) {
+	RunTest(t, "align", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
+		src := "to gopher so"
+		sty := rich.NewStyle()
+		sty.Size = 0.845
+		tx := rich.NewText(sty, []rune(src))
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
+		pos := math32.Vec2(10.3, 10.96875)
+		pc.DrawText(lns, pos)
+	})
+}
