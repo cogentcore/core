@@ -47,7 +47,7 @@ func Base64SplitLines(b []byte) []byte {
 
 // FromBase64 returns image from Base64-encoded bytes
 func FromBase64(eb []byte) (image.Image, Formats, error) {
-	if eb[76] == ' ' {
+	if len(eb) > 76 && eb[76] == ' ' {
 		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
 	}
 	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
