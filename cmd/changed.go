@@ -23,6 +23,7 @@ import (
 func Changed(c *config.Config) error { //types:add
 	wg := sync.WaitGroup{}
 	errs := []error{}
+	errMu := sync.Mutex{}
 	fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
 		wg.Add(1)
 		go func() {
@@ -33,7 +34,9 @@ func Changed(c *config.Config) error { //types:add
 			dir := filepath.Dir(path)
 			out, err := exec.Major().SetDir(dir).Output("git", "diff")
 			if err != nil {
+				errMu.Lock()
 				errs = append(errs, fmt.Errorf("error getting diff of %q: %w", dir, err))
+				errMu.Unlock()
 				return
 			}
 			if out != "" { // if we have a diff, we have been changed
@@ -43,7 +46,9 @@ func Changed(c *config.Config) error { //types:add
 			// if we don't have a diff, we also check to make sure we aren't ahead of the remote
 			out, err = exec.Minor().SetDir(dir).Output("git", "status")
 			if err != nil {
+				errMu.Lock()
 				errs = append(errs, fmt.Errorf("error getting status of %q: %w", dir, err))
+				errMu.Unlock()
 				return
 			}
 			if strings.Contains(out, "Your branch is ahead") { // if we are ahead, we have been changed
