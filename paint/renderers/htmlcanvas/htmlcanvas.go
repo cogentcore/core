@@ -104,7 +104,7 @@ func (rs *Renderer) PopContext(pt *render.ContextPop) {
 }
 
 func (rs *Renderer) setTransform(ctx *render.Context) {
-	m := ctx.Transform
+	m := ctx.Cumulative
 	rs.ctx.Call("setTransform", m.XX, m.YX, m.XY, m.YY, m.X0, m.Y0)
 }
 

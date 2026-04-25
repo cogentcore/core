@@ -57,7 +57,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		rs.ctx.Call("fill", style.Fill.Rule.String())
 	}
 	if style.HasStroke() {
-		scale := math32.Sqrt(math32.Abs(pt.Context.Transform.Det()))
+		scale := math32.Sqrt(math32.Abs(pt.Context.Cumulative.Det()))
 		if scale != 1 {
 			// note: this is a hack to get the effect of [ppath.VectorEffectNonScalingStroke]
 			stk := style.Stroke
