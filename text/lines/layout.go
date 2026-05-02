@@ -138,7 +138,11 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 	}
 	muls := make([]rich.Text, 0, nb+1)
 	last := 0
+	ltn := len(lt)
 	for _, si := range breaks {
+		if si < last || si > ltn {
+			continue
+		}
 		muls = append(muls, lt[last:si])
 		last = si
 	}
