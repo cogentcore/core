@@ -22,7 +22,7 @@ require (
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1
 	github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec
-	github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a
+	github.com/gomarkdown/markdown v0.0.0-20260417124207-7d523f7318df
 	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
