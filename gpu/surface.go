@@ -107,12 +107,19 @@ func (sf *Surface) Size() image.Point {
 }
 
 // GetCurrentTexture returns a TextureView that is the current
-// target for rendering.
+// target for rendering. The TextureView can be nil AND the err
+// also nil, in which case the surface needs to be reconfigured.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	sf.Lock() // we remain locked until submit!
-	texture, err := sf.surface.TryGetCurrentTexture()
+	stexture, err := sf.surface.TryGetCurrentTexture()
 	if errors.Log(err) != nil {
+		sf.Unlock()
 		return nil, err
+	}
+	texture, ok := stexture.Get()
+	if !ok {
+		sf.Unlock()
+		return nil, nil
 	}
 	// Note: we need to specify a descriptor here so that we use the correct
 	// format, which may be different from the default format, such as when

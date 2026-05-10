@@ -66,7 +66,11 @@ func main() {
 		// rt := time.Now()
 
 		rp, err := sy.BeginRenderPass()
-		if err != nil {
+		if err != nil { // error here is fatal
+			panic(err)
+		}
+		if rp == nil { // nil indicates need to reconfig
+			sf.Reconfig()
 			return
 		}
 		pl.BindPipeline(rp)
