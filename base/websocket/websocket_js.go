@@ -9,7 +9,7 @@ package websocket
 import (
 	"syscall/js"
 
-	"github.com/cogentcore/webgpu/jsx"
+	"github.com/oliverbestmann/webgpu/jsx"
 )
 
 // Client represents a WebSocket client connection.

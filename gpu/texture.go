@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/slicesx"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // Texture represents a WebGPU Texture with an associated TextureView.
@@ -93,14 +93,14 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 
 	// https://www.w3.org/TR/webgpu/#gpuimagecopytexture
 	tx.device.Queue.WriteTexture(
-		&wgpu.ImageCopyTexture{
+		&wgpu.TexelCopyTextureInfo{
 			Aspect:   wgpu.TextureAspectAll,
 			Texture:  tx.texture,
 			MipLevel: 0,
 			Origin:   wgpu.Origin3D{X: 0, Y: 0, Z: 0},
 		},
 		rimg.Pix,
-		&wgpu.TextureDataLayout{
+		&wgpu.TexelCopyBufferLayout{
 			Offset:       0,
 			BytesPerRow:  4 * uint32(sz.X),
 			RowsPerImage: uint32(sz.Y),
@@ -116,7 +116,7 @@ func (tx *Texture) CreateTexture(usage wgpu.TextureUsage) error {
 	tx.ReleaseTexture()
 
 	size := tx.Format.Extent3D()
-	t, err := tx.device.Device.CreateTexture(&wgpu.TextureDescriptor{
+	t, err := tx.device.Device.TryCreateTexture(&wgpu.TextureDescriptor{
 		Label:         tx.Name,
 		Size:          size,
 		MipLevelCount: 1,
@@ -129,7 +129,7 @@ func (tx *Texture) CreateTexture(usage wgpu.TextureUsage) error {
 		return err
 	}
 	tx.texture = t
-	vw, err := t.CreateView(nil)
+	vw, err := t.TryCreateView(nil)
 	if errors.Log(err) != nil {
 		return err
 	}
@@ -236,7 +236,7 @@ func (tx *Texture) ConfigReadBuffer() error {
 	if tx.readBuffer != nil && tx.ReadBufferDims == *dims {
 		return nil
 	}
-	b, err := tx.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
+	b, err := tx.device.Device.TryCreateBuffer(&wgpu.BufferDescriptor{
 		Size:  buffSize,
 		Usage: wgpu.BufferUsageMapRead | wgpu.BufferUsageCopyDst,
 	})
@@ -259,9 +259,9 @@ func (tx *Texture) CopyToReadBuffer(cmd *wgpu.CommandEncoder) error {
 	size := tx.Format.Extent3D()
 	cmd.CopyTextureToBuffer(
 		tx.texture.AsImageCopy(),
-		&wgpu.ImageCopyBuffer{
+		&wgpu.TexelCopyBufferInfo{
 			Buffer: tx.readBuffer,
-			Layout: wgpu.TextureDataLayout{
+			Layout: wgpu.TexelCopyBufferLayout{
 				Offset:       0,
 				BytesPerRow:  uint32(tx.ReadBufferDims.PaddedRowSize),
 				RowsPerImage: wgpu.CopyStrideUndefined,
@@ -330,7 +330,7 @@ func (tx *Texture) ReadDataMapped() ([]byte, error) {
 	buffSize := dims.PaddedSize()
 
 	if tx.readBuffer == nil || tx.ReadBufferDims != *dims {
-		b, err := tx.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
+		b, err := tx.device.Device.TryCreateBuffer(&wgpu.BufferDescriptor{
 			Size:  buffSize,
 			Usage: wgpu.BufferUsageMapRead | wgpu.BufferUsageCopyDst,
 		})

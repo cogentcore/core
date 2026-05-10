@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // GraphicsSystem manages a system of Pipelines that all share
@@ -203,7 +203,7 @@ func (sy *GraphicsSystem) SetClearDepthStencil(depth float32, stencil uint32) *G
 // rendering commands.  This is automatically called by
 // BeginRenderPass and the result maintained in CurrentCommandEncoder.
 func (sy *GraphicsSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
-	cmd, err := sy.device.Device.CreateCommandEncoder(nil)
+	cmd, err := sy.device.Device.TryCreateCommandEncoder(nil)
 	if errors.Log(err) != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 	cmd := sy.CommandEncoder
 	sy.CommandEncoder = nil
 	rp.Release() // must happen before Finish
-	cmdBuffer, err := cmd.Finish(nil)
+	cmdBuffer, err := cmd.TryFinish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}

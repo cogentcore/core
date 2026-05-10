@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"fmt"
 	"image"
+	"os"
 	"runtime"
 	"time"
 
@@ -20,6 +21,8 @@ var trianglelit string
 func init() {
 	// must lock main thread for gpu!
 	runtime.LockOSThread()
+	gpu.Debug = true
+	os.Setenv("RUST_BACKTRACE", "full")
 }
 
 func main() {

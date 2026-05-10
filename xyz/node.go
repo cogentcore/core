@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // Node is the common interface for all xyz 3D tree nodes.

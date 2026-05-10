@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors/gradient"
-	"github.com/cogentcore/webgpu/jsx"
+	"github.com/oliverbestmann/webgpu/jsx"
 )
 
 // WrapJS returns a JavaScript optimized wrapper around the given

@@ -7,7 +7,7 @@ package gpu
 import (
 	"image"
 
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // RenderTexture is an offscreen, non-window-backed rendering target,

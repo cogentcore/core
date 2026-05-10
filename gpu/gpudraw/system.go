@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/drawmatrix"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 //go:embed shaders/*.wgsl

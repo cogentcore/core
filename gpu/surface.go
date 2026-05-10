@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // Surface manages the physical device for the visible image
@@ -110,21 +110,18 @@ func (sf *Surface) Size() image.Point {
 // target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	sf.Lock() // we remain locked until submit!
-	texture, err := sf.surface.GetCurrentTexture()
+	texture, err := sf.surface.TryGetCurrentTexture()
 	if errors.Log(err) != nil {
 		return nil, err
 	}
 	// Note: we need to specify a descriptor here so that we use the correct
 	// format, which may be different from the default format, such as when
 	// it is srgb.
-	view, err := texture.CreateView(&wgpu.TextureViewDescriptor{
+	view, err := texture.TryCreateView(&wgpu.TextureViewDescriptor{
 		MipLevelCount:   texture.GetMipLevelCount(),
 		ArrayLayerCount: texture.GetDepthOrArrayLayers(),
 		Format:          sf.Format.Format,
 	})
-	if errors.Log(err) != nil {
-		return nil, err
-	}
 	sf.curTexture = view
 	return view, nil
 }
@@ -175,7 +172,7 @@ func (sf *Surface) InitConfig() error {
 
 // Config configures the surface based on the surface configuration.
 func (sf *Surface) Config() {
-	sf.surface.Configure(sf.GPU.GPU, sf.device.Device, sf.config)
+	sf.surface.Configure(sf.device.Device, sf.config)
 }
 
 // Reconfig reconfigures the surface.
