@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **collapser** is a [[widget]] that can be collapsed or expanded by a user. It contains a summary part which is always visible, and a details part which is only visible when the collapser is expanded. Collapsers are similar to HTML's `&lt;details&gt;` and `&lt;summary&gt;` tags.
+A **collapser** is a [[widget]] that can be collapsed or expanded by a user ([[doc:core.Collapser]]). It contains a summary part which is always visible, and a details part which is only visible when the collapser is expanded. Collapsers are similar to HTML's `&lt;details&gt;` and `&lt;summary&gt;` tags.
 
 You can make a collapser:
 

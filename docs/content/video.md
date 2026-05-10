@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **video** is a [[widget]] for playing video and audio media. Video support is currently experimental and only fully present on macOS and Linux. To use video players, you must first install these [dependencies](https://github.com/zergon321/reisen#dependencies).
+A **video** is a [[widget]] for playing video and audio media ([[doc:core.Video]]). Video support is currently experimental and only fully present on macOS and Linux. To use video players, you must first install these [dependencies](https://github.com/zergon321/reisen#dependencies).
 
 For static images, use an [[image]] widget instead. For more programmatic control of rendering, use a [[canvas]]. For SVG, use an [[SVG]] widget.
 

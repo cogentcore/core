@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **file tree** is a [[widget]] that allow users to view directories as nested [[tree]]s.
+A **file tree** is a [[widget]] that allow users to view directories as nested [[tree]]s ([[doc:filetree.Tree]]).
 
 For displaying a list of files with metadata, consider a [[file picker]] instead.
 

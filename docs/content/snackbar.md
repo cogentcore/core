@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **snackbar** is a type of [[stage]] that displays temporary information to users.
+A **snackbar** is a type of [[stage]] that displays temporary information to users ([[doc:core.Snackbar]]).
 
 ## Simple
 

@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **keyed list** is a [[widget]] that allows you to display a map value to users and have them edit it. Users can use [[context menu]]s to add, remove, and move rows.
+A **keyed list** is a [[widget]] that allows you to display a map value to users and have them edit it ([[doc:core.KeyedList]]). Users can use [[context menu]]s to add, remove, and move rows.
 
 For a slice, use a [[list]] instead. For a slice of structs, use a [[table]]. For a single struct, use a [[form]]. For a nested tree, use a [[tree]].
 

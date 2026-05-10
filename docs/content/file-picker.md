@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **file picker** is a [[widget]] for selecting files. It supports sorting, navigation, searching, favorites, and history.
+A **file picker** is a [[widget]] for selecting files ([[doc:core.FilePicker]]). It supports sorting, navigation, searching, favorites, and history.
 
 For a nested filesystem tree, use a [[file tree]] instead.
 

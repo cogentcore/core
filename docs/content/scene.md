@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **scene** is a [[frame]] widget that contains all of the [[widget]]s of a window or dialog. It is the root of a widget tree.
+A **scene** is a [[frame]] widget that contains all of the [[widget]]s of a window or dialog. It is the root of a widget tree ([[doc:core.Frame]]).
 
 The central child of a scene is a [[body]], which contains the main app content. However, the scene also manages optional [[#bars]] on the sides.
 

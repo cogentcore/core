@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-**Switches** allow users to select one or more options out of a list of items represented with [[switch]] widgets.
+**Switches** allow users to select one or more options out of a list of items represented with [[switch]] widgets ([[doc:core.Switches]]).
 
 ## Properties
 

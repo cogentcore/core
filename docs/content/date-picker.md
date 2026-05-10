@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **date picker** is a [[widget]] that allows users to select a year, month, and day.
+A **date picker** is a [[widget]] that allows users to select a year, month, and day ([[doc:core.DatePicker]]).
 
 Also see a [[time picker]] that allows users to select an hour and minute, a unified [[time picker#time input]] that allows users to select both a date and time using [[text field]]s and [[dialog]]s, and a [[time picker#duration input]].
 

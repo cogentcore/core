@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **func button** is a [[button]] that can be [[bind|bound]] to a function. The [[text]] and [[tooltip]] of a func button are automatically set based on the bound function, and when you [[events#click]] on a func button, it calls the function bound to it.
+A **func button** is a [[button]] that can be [[bind|bound]] to a function ([[doc:core.FuncButton]]). The [[text]] and [[tooltip]] of a func button are automatically set based on the bound function, and when you [[events#click]] on a func button, it calls the function bound to it.
 
 ## Properties
 

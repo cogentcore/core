@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-An **icon** is a [[widget]] that renders an icon through SVG. See [[icons]] for information on the standard icons and how to add custom icons. See also [[SVG]].
+An **icon** is a [[widget]] that renders an icon through SVG ([[doc:core.Icon]]). See [[icons]] for information on the standard icons and how to add custom icons. See also [[SVG]].
 
 Icons are typically specified using their named variable in the [[doc:icons]] package, and they are typically used in the context of another [[widget]], like a [[button]]:
 

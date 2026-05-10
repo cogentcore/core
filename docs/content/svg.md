@@ -3,7 +3,7 @@ Name = "SVG"
 Categories = ["Widgets"]
 +++
 
-An **SVG** [[widget]] renders SVG data.
+An **SVG** [[widget]] renders SVG data ([[doc:core.SVG]]).
 
 If you have image files instead of SVG files, use an [[image]] widget. For more programmatic control of rendering, you can use a [[canvas]]. For rendering HTML, see [[HTML]].
 

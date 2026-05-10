@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **switch** is a [[widget]] that allows users to control a single bool value. See [[switches]] to handle multiple items at once.
+A **switch** is a [[widget]] that allows users to control a single bool value. See [[switches]] to handle multiple items at once ([[doc:core.Switch]]).
 
 ## Properties
 
