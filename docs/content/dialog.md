@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **dialog** is a type of [[stage]] that displays content on top of the surrounding window.
+A **dialog** is a type of [[stage]] that displays content on top of the surrounding window ([[doc:core.Dialog]]).
 
 ## Simple
 

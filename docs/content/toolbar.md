@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **toolbar** is a [[frame]] that contains [[widget]]s for related actions and controls.
+A **toolbar** is a [[frame]] that contains [[widget]]s for related actions and controls ([[doc:core.Toolbar]]).
 
 All toolbars use the [[plan]] system through [[doc:core.WidgetBase.Maker]]. This ensures that toolbars can always be dynamic and responsive.
 

@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-**Splits** allow you to divide space among [[widget]]s and have the user customize how much space each widget gets using draggable handles.
+**Splits** allow you to divide space among [[widget]]s and have the user customize how much space each widget gets using draggable handles ([[doc:core.Splits]]).
 
 ## Properties
 

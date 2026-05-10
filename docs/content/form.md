@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **form** is a [[widget]] that allows you to display a struct value to users and have them edit it.
+A **form** is a [[widget]] that allows you to display a struct value to users and have them edit it ([[doc:core.Form]]).
 
 For a slice of structs, use a [[table]] instead. For a slice of non-structs, use a [[list]]. For a map, use a [[keyed list]]. For a nested tree, use a [[tree]].
 

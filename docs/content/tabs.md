@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-**Tabs** allow you to divide [[widget]]s into logical groups and give users the ability to freely navigate between them.
+**Tabs** allow you to divide [[widget]]s into logical groups and give users the ability to freely navigate between them ([[doc:core.Tabs]]).
 
 ## Properties
 

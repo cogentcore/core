@@ -2,7 +2,7 @@
 Categories = ["Concepts"]
 +++
 
-A **stage** is a window, dialog, or popup in which a [[scene]] takes place. It manages the options for that, such as sizing and positioning.
+A **stage** is a window, dialog, or popup in which a [[scene]] takes place. It manages the options for that, such as sizing and positioning ([[doc:core.Stage]]).
 
 A stage is *not* a widget. The scene is the root widget, and the stage is a non-widget object that manages the scene. Metaphorically, a scene "takes place" on a stage.
 

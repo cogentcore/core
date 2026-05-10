@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **chooser** is [[widget]] that allow users to choose one option among a list of items.
+A **chooser** is [[widget]] that allow users to choose one option among a list of items ([[doc:core.Chooser]]).
 
 ## Properties
 

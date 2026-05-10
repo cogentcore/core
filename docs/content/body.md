@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **body** is a [[frame]] that contains the main [[app]] content. It is contained within a [[scene]], which is the root node of a window or dialog.
+A **body** is a [[frame]] that contains the main [[app]] content ([[doc:core.Body]]). It is contained within a [[scene]], which is the root node of a window or dialog.
 
 The `b` widget in these docs examples represents the body that you typically add widgets to:
 

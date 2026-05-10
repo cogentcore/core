@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **frame** is a [[widget]] that can position content in many different ways and [[render]] a container. Frames are the base container type, and almost all [[widgets]] are contained within some kind of frame.
+A **frame** is a [[widget]] that can position content in many different ways and [[render]] a container ([[doc:core.Frame]]). Frames are the base container type, and almost all [[widgets]] are contained within some kind of frame.
 
 You can make a frame and place elements inside of it:
 

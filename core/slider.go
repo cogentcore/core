@@ -26,7 +26,8 @@ import (
 
 // Slider is a slideable widget that provides slider functionality with a draggable
 // thumb and a clickable track. The [styles.Style.Direction] determines the direction
-// in which the slider slides.
+// in which the slider slides: Row = left-to-right, Column = top-to-bottom (use Flip
+// to invert these directions).
 type Slider struct {
 	Frame
 
@@ -59,6 +60,10 @@ type Slider struct {
 	// increment/decrement the value by.
 	// It defaults to 0.2, and will be at least as big as [Slider.Step].
 	PageStep float32
+
+	// Flip inverts the direction that the slider slides: if true, then
+	// Row = right-to-left and Column = bottom-to-top.
+	Flip bool
 
 	// Icon is an optional icon to use for the dragging thumb.
 	Icon icons.Icon
@@ -106,7 +111,7 @@ type Slider struct {
 
 	// Computed values below:
 
-	// logical position of the slider relative to Size
+	// logical position of the slider in dots (pixels), relative to Size
 	pos float32
 
 	// previous Change event emitted value; don't re-emit Change if it is the same
@@ -216,20 +221,18 @@ func (sr *Slider) Init() {
 		sr.slideStartPos = sr.pos
 	})
 	sr.On(events.SlideMove, func(e events.Event) {
-		del := e.StartDelta()
-		if sr.Styles.Direction == styles.Row {
-			sr.setSliderPosEvent(sr.slideStartPos + float32(del.X))
-		} else {
-			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
+		del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
+		if sr.Flip {
+			del = -del
 		}
+		sr.setSliderPosEvent(sr.slideStartPos + del)
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		del := e.StartDelta()
-		if sr.Styles.Direction == styles.Row {
-			sr.setSliderPosEvent(sr.slideStartPos + float32(del.X))
-		} else {
-			sr.setSliderPosEvent(sr.slideStartPos + float32(del.Y))
+		del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
+		if sr.Flip {
+			del = -del
 		}
+		sr.setSliderPosEvent(sr.slideStartPos + del)
 		sr.sendChange()
 	})
 	sr.On(events.Click, func(e events.Event) {
@@ -262,36 +265,47 @@ func (sr *Slider) Init() {
 		if DebugSettings.KeyEventTrace {
 			slog.Info("SliderBase KeyInput", "widget", sr, "keyFunction", kf)
 		}
+		step := sr.Step
+		if sr.PageStep < sr.Step {
+			sr.PageStep = 2 * sr.Step
+		}
+		pageStep := sr.PageStep
+		if sr.Flip {
+			step = -step
+			pageStep = -pageStep
+		}
 		switch kf {
 		case keymap.MoveUp:
-			sr.setValueEvent(sr.Value - sr.Step)
+			sr.setValueEvent(sr.Value - step)
 			e.SetHandled()
 		case keymap.MoveLeft:
-			sr.setValueEvent(sr.Value - sr.Step)
+			sr.setValueEvent(sr.Value - step)
 			e.SetHandled()
 		case keymap.MoveDown:
-			sr.setValueEvent(sr.Value + sr.Step)
+			sr.setValueEvent(sr.Value + step)
 			e.SetHandled()
 		case keymap.MoveRight:
-			sr.setValueEvent(sr.Value + sr.Step)
+			sr.setValueEvent(sr.Value + step)
 			e.SetHandled()
 		case keymap.PageUp:
-			if sr.PageStep < sr.Step {
-				sr.PageStep = 2 * sr.Step
-			}
-			sr.setValueEvent(sr.Value - sr.PageStep)
+			sr.setValueEvent(sr.Value - pageStep)
 			e.SetHandled()
 		case keymap.PageDown:
-			if sr.PageStep < sr.Step {
-				sr.PageStep = 2 * sr.Step
-			}
-			sr.setValueEvent(sr.Value + sr.PageStep)
+			sr.setValueEvent(sr.Value + pageStep)
 			e.SetHandled()
 		case keymap.Home:
-			sr.setValueEvent(sr.Min)
+			if sr.Flip {
+				sr.setValueEvent(sr.Max)
+			} else {
+				sr.setValueEvent(sr.Min)
+			}
 			e.SetHandled()
 		case keymap.End:
-			sr.setValueEvent(sr.Max)
+			if sr.Flip {
+				sr.setValueEvent(sr.Min)
+			} else {
+				sr.setValueEvent(sr.Max)
+			}
 			e.SetHandled()
 		}
 	})
@@ -386,7 +400,6 @@ func (sr *Slider) setSliderPos(pos float32) {
 	if sz <= 0 {
 		return
 	}
-
 	thsz := sr.slideThumbSize()
 	thszh := .5 * thsz
 	sr.pos = math32.Clamp(pos, thszh, sz-thszh)
@@ -394,7 +407,6 @@ func (sr *Slider) setSliderPos(pos float32) {
 	effmax := sr.effectiveMax()
 	val := math32.Truncate(sr.Min+prel*(effmax-sr.Min), sr.Precision)
 	val = math32.Clamp(val, sr.Min, effmax)
-	// fmt.Println(pos, thsz, prel, val)
 	sr.Value = val
 	sr.snapValue()
 	sr.setPosFromValue(sr.Value) // go back the other way to be fully consistent
@@ -433,7 +445,7 @@ func (sr *Slider) setPosFromValue(val float32) {
 }
 
 // setVisiblePercent sets the [Slider.visiblePercent] value for a [SliderScrollbar].
-func (sr *Slider) setVisiblePercent(val float32) *Slider {
+func (sr *Slider) SetVisiblePercent(val float32) *Slider {
 	sr.visiblePercent = math32.Clamp(val, 0, 1)
 	return sr
 }
@@ -480,8 +492,14 @@ func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 // pointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) pointToRelPos(pt image.Point) float32 {
-	ptf := math32.FromPoint(pt).Dim(sr.Styles.Direction.Dim())
-	return ptf - sr.Geom.Pos.Content.Dim(sr.Styles.Direction.Dim())
+	dim := sr.Styles.Direction.Dim()
+	ptf := math32.FromPoint(pt).Dim(dim)
+	pos := sr.Geom.Pos.Content.Dim(dim)
+	sz := sr.Geom.Size.Actual.Content.Dim(dim)
+	if sr.Flip {
+		return (pos + sz) - ptf
+	}
+	return ptf - pos
 }
 
 // scrollScale returns scaled value of scroll delta
@@ -508,14 +526,17 @@ func (sr *Slider) Render() {
 		if sr.ValueColor != nil {
 			thsz := sr.slideThumbSize()
 			osz := sr.thumbSizeDots().Dim(od)
+			origsz := sz.Dim(od)
 			tpos := pos
-			tpos = tpos.AddDim(dim, sr.pos)
-			tpos = tpos.SubDim(dim, thsz*.5)
+			tpos = tpos.AddDim(od, 0.5*(osz-origsz))
 			tsz := sz
 			tsz.SetDim(dim, thsz)
-			origsz := sz.Dim(od)
 			tsz.SetDim(od, osz)
-			tpos = tpos.AddDim(od, 0.5*(osz-origsz))
+			if sr.Flip {
+				tpos.SetDim(dim, (pos.Dim(dim)+sz.Dim(dim)-sr.pos)-thsz*.5)
+			} else {
+				tpos = tpos.AddDim(dim, sr.pos-thsz*.5)
+			}
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.Fill.Color = vabg
 			sr.RenderBoxGeom(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
@@ -537,22 +558,30 @@ func (sr *Slider) Render() {
 		bsz := sz
 		bsz.SetDim(od, trsz)
 		bpos := pos
-		bpos = bpos.AddDim(od, .5*(sz.Dim(od)-trsz))
+		thsz := sr.thumbSizeDots()
+		tpos := pos
+
+		if sr.Flip {
+			tpos.SetDim(dim, pos.Dim(dim)+sz.Dim(dim)-sr.pos)
+		} else {
+			tpos.SetDim(dim, pos.Dim(dim)+sr.pos)
+		}
+		tpos = tpos.AddDim(od, 0.5*sz.Dim(od)) // ctr
+		bpos = bpos.AddDim(od, 0.5*(sz.Dim(od)-trsz))
 		pc.Fill.Color = st.ActualBackground
 		sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius}) // track
 
 		if sr.ValueColor != nil {
-			bsz.SetDim(dim, sr.pos)
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.Fill.Color = vabg
-			sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius})
+			bsz.SetDim(dim, sr.pos)
+			if sr.Flip {
+				tp := tpos.SubDim(od, 0.5*trsz)
+				sr.RenderBoxGeom(tp, bsz, styles.Border{Radius: st.Border.Radius})
+			} else {
+				sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius})
+			}
 		}
-
-		thsz := sr.thumbSizeDots()
-		tpos := pos
-		tpos.SetDim(dim, pos.Dim(dim)+sr.pos)
-		tpos = tpos.AddDim(od, 0.5*sz.Dim(od)) // ctr
-
 		// render thumb as icon or box
 		if sr.Icon.IsSet() && sr.HasChildren() {
 			ic := sr.Child(0).(*Icon)

@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **meter** displays bounded numeric values. It is read-only, whereas a [[slider]] supports changing the value.
+A **meter** displays bounded numeric values ([[doc:core.Meter]]). It is read-only, whereas a [[slider]] supports changing the value.
 
 ## Properties
 

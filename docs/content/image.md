@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-An **image** is a [[widget]] that displays an image.
+An **image** is a [[widget]] that displays an image ([[doc:core.Image]]).
 
 If you have video files instead of image files, use a [[video]] widget. For SVG, use an [[SVG]] widget. For more programmatic control of rendering, you can use a [[canvas]].
 

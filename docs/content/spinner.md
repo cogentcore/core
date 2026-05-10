@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **spinner** is a [[text field]] designed for numeric input. It automatically supports the parsing and validation of input, in addition to convenient incrementing and decrementing. It provides more precise and less visual input than a [[slider]].
+A **spinner** is a [[text field]] designed for numeric input ([[doc:core.Spinner]]). It automatically supports the parsing and validation of input, in addition to convenient incrementing and decrementing. It provides more precise and less visual input than a [[slider]].
 
 ## Properties
 

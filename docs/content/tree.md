@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **tree** is a [[widget]] that allows you to display a nested tree structure. Users can use [[context menu]]s and [[events#drag-and-drop]] to add, remove, and move tree nodes.
+A **tree** is a [[widget]] that allows you to display a nested tree structure. Users can use [[context menu]]s and [[events#drag-and-drop]] to add, remove, and move tree nodes ([[doc:core.Tree]]).
 
 For filesystem trees, use a [[file tree]] instead. For a struct, use a [[form]]. For a non-nested slice, use a [[list]]. For a map, use a [[keyed list]].
 

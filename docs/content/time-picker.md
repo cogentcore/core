@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **time picker** is a [[widget]] that allows users to select an hour and minute.
+A **time picker** is a [[widget]] that allows users to select an hour and minute ([[doc:core.TimePicker]]).
 
 Also see a [[date picker]] for selecting a year, month, and day.
 

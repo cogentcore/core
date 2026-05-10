@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-**Text** is a [[widget]] that can display many kinds of text.
+**Text** is a [[widget]] that can display many kinds of text ([[doc:core.Text]]).
 
 You can render plain text:
 

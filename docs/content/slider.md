@@ -2,7 +2,7 @@
 Categories = ["Widgets"]
 +++
 
-A **slider** is a [[widget]] for bounded numeric input. It provides more visual and less precise input than a [[spinner]]. For read-only numeric display, consider a [[meter]].
+A **slider** is a [[widget]] for bounded numeric input ([[doc:core.Slider]]). It provides more visual and less precise input than a [[spinner]]. For read-only numeric display, consider a [[meter]].
 
 ## Properties
 
@@ -40,6 +40,25 @@ You can use an [[icon]] for the thumb of the slider:
 
 ```Go
 core.NewSlider(b).SetIcon(icons.DeployedCodeFill)
+```
+
+You can make a scrollbar, where the visiblePercent determines the thumb size:
+```Go
+core.NewSlider(b).SetType(core.SliderScrollbar).SetVisiblePercent(0.1)
+```
+
+You can change the direction that the slider goes, e.g., now top-to-bottom:
+```Go
+core.NewSlider(b).Styler(func(s *styles.Style) {
+    s.Direction = styles.Column
+})
+```
+
+You can change the direction that the slider goes, e.g., now bottom-to-top:
+```Go
+core.NewSlider(b).SetFlip(true).Styler(func(s *styles.Style) {
+    s.Direction = styles.Column
+})
 ```
 
 ## Events

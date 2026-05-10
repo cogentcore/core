@@ -168,7 +168,7 @@ func (fr *Frame) positionScroll(d math32.Dims) {
 	}
 	sb.SetState(false, states.Invisible)
 	sb.Max = maxSize
-	sb.setVisiblePercent(visPct)
+	sb.SetVisiblePercent(visPct)
 	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
 	fr.This.(Layouter).SetScrollParams(d, sb)
