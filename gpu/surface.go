@@ -7,8 +7,11 @@ package gpu
 import (
 	"image"
 	"sync"
+	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/system"
+	"github.com/go-gl/glfw/v3.4/glfw"
 	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
@@ -108,13 +111,29 @@ func (sf *Surface) Size() image.Point {
 
 // GetCurrentTexture returns a TextureView that is the current
 // target for rendering. The TextureView can be nil AND the err
-// also nil, in which case the surface needs to be reconfigured.
+// also nil, in which case the surface needs to be reconfigured,
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	sf.Lock() // we remain locked until submit!
-	stexture, err := sf.surface.TryGetCurrentTexture()
-	if errors.Log(err) != nil {
-		sf.Unlock()
-		return nil, err
+	var stexture wgpu.SurfaceTexture
+	for {
+		var err error
+		stexture, err = sf.surface.TryGetCurrentTexture()
+		if errors.Log(err) != nil {
+			sf.Unlock()
+			return nil, err
+		}
+		if stexture.Status == wgpu.SurfaceGetCurrentTextureStatusOccluded {
+			time.Sleep(16 * time.Millisecond)
+			if system.TheApp != nil {
+				system.TheApp.RunOnMain(func() {
+					glfw.PollEvents()
+				})
+			} else {
+				glfw.PollEvents()
+			}
+			continue
+		}
+		break
 	}
 	texture, ok := stexture.Get()
 	if !ok {
@@ -129,6 +148,10 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 		ArrayLayerCount: texture.GetDepthOrArrayLayers(),
 		Format:          sf.Format.Format,
 	})
+	if errors.Log(err) != nil {
+		sf.Unlock()
+		return nil, err
+	}
 	sf.curTexture = view
 	return view, nil
 }
