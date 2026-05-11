@@ -19,7 +19,7 @@ The main gpu code is in the top-level `gpu` package, with the following sub-pack
 
 * [[doc:gpu/gpudraw]] implements GPU-accelerated texture-based versions of the Go [image/draw](https://pkg.go.dev/image/draw) api. This is used by the `Composer` framework for compositing images in the `core` GUI to construct the final rendered scene, and for drawing that scene on the actual hardware window (see [[render]] for details).
 
-We maintain a separate [webgpu](https://github.com/oliverbestmann/webgpu) package that provides a Go and JS wrapper around the rust-based [wgpu](https://github.com/gfx-rs/wgpu) and [wgpu-native](https://github.com/gfx-rs/wgpu-native) packages that actually implement WebGPU itself on the desktop and mobile. This "native" version is just as performant as the much more difficult-to-use [Vulkan](https://www.vulkan.org/) framework, which we used to use.
+There is a separate [webgpu](https://github.com/oliverbestmann/webgpu) package that provides a Go and JS wrapper around the rust-based [wgpu](https://github.com/gfx-rs/wgpu) and [wgpu-native](https://github.com/gfx-rs/wgpu-native) packages that actually implement WebGPU itself on the desktop and mobile. This "native" version is just as performant as the much more difficult-to-use [Vulkan](https://www.vulkan.org/) framework, which we used to use.
 
 ## Selecting a GPU Device
 
