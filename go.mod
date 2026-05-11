@@ -80,3 +80,5 @@ require (
 	modernc.org/knuth v0.5.4 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
+
+replace github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260406072232-3ac4aa2bb164 => github.com/oliverbestmann/go-gl-glfw/v3.4/glfw v0.0.0-20260510101646-c1f83c493fe1
