@@ -11,9 +11,9 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/system"
-	"github.com/cogentcore/webgpu/wgpu"
-	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.4/glfw"
+	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpuglfw"
 )
 
 // note: this file contains the glfw dependencies, for desktop platform builds

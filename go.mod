@@ -13,14 +13,13 @@ require (
 	github.com/bramvdbogaerde/go-scp v1.6.0
 	github.com/chewxy/math32 v1.11.1
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
-	github.com/cogentcore/webgpu v0.23.1-0.20260410073005-a2ae7d757168
 	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-fonts/latin-modern v0.3.3
-	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1
+	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260406072232-3ac4aa2bb164
 	github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec
 	github.com/gomarkdown/markdown v0.0.0-20260417124207-7d523f7318df
 	github.com/gorilla/websocket v1.5.3
@@ -33,6 +32,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
+	github.com/oliverbestmann/webgpu v1.33.2
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
@@ -63,6 +63,11 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
+	github.com/oliverbestmann/webgpu/libs-android v0.0.0-20260509160813-48db59792a15 // indirect
+	github.com/oliverbestmann/webgpu/libs-darwin v0.0.0-20260509160802-b09403b07cd3 // indirect
+	github.com/oliverbestmann/webgpu/libs-ios v0.0.0-20260509160803-765e39d2a48b // indirect
+	github.com/oliverbestmann/webgpu/libs-linux v0.0.0-20260509160809-2fefaf7c9ead // indirect
+	github.com/oliverbestmann/webgpu/libs-windows v0.0.0-20260509160807-0bc32b12c7bc // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
@@ -75,3 +80,5 @@ require (
 	modernc.org/knuth v0.5.4 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
+
+replace github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260406072232-3ac4aa2bb164 => github.com/oliverbestmann/go-gl-glfw/v3.4/glfw v0.0.0-20260510101646-c1f83c493fe1

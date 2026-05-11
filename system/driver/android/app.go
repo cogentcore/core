@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 func Init() {
