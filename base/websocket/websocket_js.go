@@ -9,7 +9,7 @@ package websocket
 import (
 	"syscall/js"
 
-	"github.com/oliverbestmann/webgpu/jsx"
+	"cogentcore.org/core/base/jscp"
 )
 
 // Client represents a WebSocket client connection.
@@ -51,7 +51,7 @@ func (c *Client) Send(typ MessageTypes, msg []byte) error {
 		c.ws.Call("send", string(msg))
 		return nil
 	}
-	array := jsx.BytesToJS(msg)
+	array := jscp.BytesToJS(msg)
 	c.ws.Call("send", array)
 	return nil
 }
