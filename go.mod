@@ -80,4 +80,3 @@ require (
 	modernc.org/knuth v0.5.4 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
-
