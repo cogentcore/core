@@ -19,7 +19,7 @@ import (
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/gpu/shape"
 	"cogentcore.org/core/math32"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func init() {

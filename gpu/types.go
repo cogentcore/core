@@ -5,7 +5,7 @@
 package gpu
 
 import (
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // See: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)
@@ -139,7 +139,7 @@ var TypeSizes = map[Types]int{
 
 // TypeToVertexFormat maps gpu.Types to WebGPU VertexFormat
 var TypeToVertexFormat = map[Types]wgpu.VertexFormat{
-	UndefinedType: wgpu.VertexFormat(0),
+	UndefinedType: wgpu.VertexFormatUndefined,
 	// Bool32:         wgpu.VertexFormatUint32,
 	// Int16:          wgpu.VertexFormatR16Sint,
 	// Uint16:         wgpu.VertexFormatR16Uint,

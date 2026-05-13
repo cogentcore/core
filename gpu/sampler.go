@@ -6,7 +6,7 @@ package gpu
 
 import (
 	"cogentcore.org/core/base/errors"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Sampler represents a WebGPU image sampler
@@ -43,7 +43,7 @@ func (sm *Sampler) Config(dev *Device) error {
 	if sm.sampler != nil {
 		return nil
 	}
-	samp, err := dev.Device.TryCreateSampler(&wgpu.SamplerDescriptor{
+	samp, err := dev.Device.CreateSampler(&wgpu.SamplerDescriptor{
 		AddressModeU:  sm.UMode.Mode(),
 		AddressModeV:  sm.VMode.Mode(),
 		AddressModeW:  sm.WMode.Mode(),

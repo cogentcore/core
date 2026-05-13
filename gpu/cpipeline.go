@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // ComputePipeline is a compute pipeline, which runs shader code on vars data.
@@ -192,7 +192,7 @@ func (pl *ComputePipeline) Config(rebuild bool) error {
 	defer play.Release()
 
 	sh := pl.EntryByType(ComputeShader)
-	cp, err := pl.System.Device().Device.TryCreateComputePipeline(&wgpu.ComputePipelineDescriptor{
+	cp, err := pl.System.Device().Device.CreateComputePipeline(&wgpu.ComputePipelineDescriptor{
 		Layout: play,
 		Compute: wgpu.ProgrammableStageDescriptor{
 			Module:     sh.Shader.module,

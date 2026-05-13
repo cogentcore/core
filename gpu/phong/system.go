@@ -9,7 +9,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/gpu"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 //go:embed shaders/*.wgsl

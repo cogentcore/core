@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/gpu"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func main() {

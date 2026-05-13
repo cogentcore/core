@@ -6,7 +6,7 @@ package gpu
 
 import (
 	"cogentcore.org/core/base/errors"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // GraphicsPipeline is a Pipeline specifically for the Graphics stack.
@@ -185,7 +185,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 	if pl.System.Render().Depth.texture != nil {
 		pd.DepthStencil = &wgpu.DepthStencilState{
 			Format:            pl.System.Render().Depth.Format.Format,
-			DepthWriteEnabled: wgpu.OptionalBoolTrue,
+			DepthWriteEnabled: true,
 			DepthCompare:      wgpu.CompareFunctionLess,
 			StencilFront: wgpu.StencilFaceState{
 				Compare: wgpu.CompareFunctionAlways,
@@ -195,7 +195,7 @@ func (pl *GraphicsPipeline) Config(rebuild bool) error {
 			},
 		}
 	}
-	rp, err := pl.System.Device().Device.TryCreateRenderPipeline(pd)
+	rp, err := pl.System.Device().Device.CreateRenderPipeline(pd)
 	if errors.Log(err) != nil {
 		return err
 	}

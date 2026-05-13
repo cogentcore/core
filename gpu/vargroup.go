@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 const (
@@ -307,7 +307,7 @@ func (vg *VarGroup) bindLayout(vs *Vars, used ...*Var) (*wgpu.BindGroupLayout, e
 		Entries: binds,
 	}
 
-	bgl, err := vg.device.Device.TryCreateBindGroupLayout(&bgld)
+	bgl, err := vg.device.Device.CreateBindGroupLayout(&bgld)
 	if errors.Log(err) != nil {
 		return nil, err
 	}
@@ -351,7 +351,7 @@ func (vg *VarGroup) bindGroup(vs *Vars, used ...*Var) (*wgpu.BindGroup, error) {
 		}
 		bgs = append(bgs, vr.bindGroupEntry()...)
 	}
-	bg, err := vg.device.Device.TryCreateBindGroup(&wgpu.BindGroupDescriptor{
+	bg, err := vg.device.Device.CreateBindGroup(&wgpu.BindGroupDescriptor{
 		Layout:  bgl,
 		Entries: bgs,
 		Label:   vg.Name,
