@@ -7,12 +7,9 @@ package gpu
 import (
 	"image"
 	"sync"
-	"time"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/system"
-	"github.com/go-gl/glfw/v3.4/glfw"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Surface manages the physical device for the visible image
@@ -110,46 +107,22 @@ func (sf *Surface) Size() image.Point {
 }
 
 // GetCurrentTexture returns a TextureView that is the current
-// target for rendering. The TextureView can be nil AND the err
-// also nil, in which case the surface needs to be reconfigured,
+// target for rendering.
 func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	sf.Lock() // we remain locked until submit!
-	var stexture wgpu.SurfaceTexture
-	for {
-		var err error
-		stexture, err = sf.surface.TryGetCurrentTexture()
-		if errors.Log(err) != nil {
-			sf.Unlock()
-			return nil, err
-		}
-		if stexture.Status == wgpu.SurfaceGetCurrentTextureStatusOccluded {
-			time.Sleep(16 * time.Millisecond)
-			if system.TheApp != nil {
-				system.TheApp.RunOnMain(func() {
-					glfw.PollEvents()
-				})
-			} else {
-				glfw.PollEvents()
-			}
-			continue
-		}
-		break
-	}
-	texture, ok := stexture.Get()
-	if !ok {
-		sf.Unlock()
-		return nil, nil
+	texture, err := sf.surface.GetCurrentTexture()
+	if errors.Log(err) != nil {
+		return nil, err
 	}
 	// Note: we need to specify a descriptor here so that we use the correct
 	// format, which may be different from the default format, such as when
 	// it is srgb.
-	view, err := texture.TryCreateView(&wgpu.TextureViewDescriptor{
+	view, err := texture.CreateView(&wgpu.TextureViewDescriptor{
 		MipLevelCount:   texture.GetMipLevelCount(),
 		ArrayLayerCount: texture.GetDepthOrArrayLayers(),
 		Format:          sf.Format.Format,
 	})
 	if errors.Log(err) != nil {
-		sf.Unlock()
 		return nil, err
 	}
 	sf.curTexture = view
@@ -202,7 +175,7 @@ func (sf *Surface) InitConfig() error {
 
 // Config configures the surface based on the surface configuration.
 func (sf *Surface) Config() {
-	sf.surface.Configure(sf.device.Device, sf.config)
+	sf.surface.Configure(sf.GPU.GPU, sf.device.Device, sf.config)
 }
 
 // Reconfig reconfigures the surface.

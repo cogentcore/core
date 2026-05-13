@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Shader manages a single Shader program, which can have multiple
@@ -56,9 +56,9 @@ func (sh *Shader) OpenFileFS(fsys fs.FS, fname string) error {
 
 // OpenCode loads given WGSL ".wgl" code for the Shader.
 func (sh *Shader) OpenCode(code string) error {
-	module, err := sh.device.Device.TryCreateShaderModule(&wgpu.ShaderModuleDescriptor{
-		Label:      sh.Name,
-		WGSLSource: &wgpu.ShaderSourceWGSL{Code: code},
+	module, err := sh.device.Device.CreateShaderModule(&wgpu.ShaderModuleDescriptor{
+		Label:          sh.Name,
+		WGSLDescriptor: &wgpu.ShaderModuleWGSLDescriptor{Code: code},
 	})
 	if errors.Log(err) != nil {
 		return err

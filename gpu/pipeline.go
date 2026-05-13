@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Pipeline is the shared Base for Graphics and Compute Pipelines.
@@ -134,7 +134,7 @@ func (pl *Pipeline) bindLayout(used ...*Var) (*wgpu.PipelineLayout, error) {
 			}
 		}()
 	}
-	rpl, err := pl.System.Device().Device.TryCreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
+	rpl, err := pl.System.Device().Device.CreatePipelineLayout(&wgpu.PipelineLayoutDescriptor{
 		Label:            pl.Name,
 		BindGroupLayouts: lays,
 	})

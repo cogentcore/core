@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/indent"
 
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Vars are all the variables that are used by a pipeline,
@@ -101,12 +101,12 @@ func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 	}
 	vg.alignBytes = 1
 	if role == Uniform {
-		vg.alignBytes = int(vs.sys.GPU().Limits.MinUniformBufferOffsetAlignment)
+		vg.alignBytes = int(vs.sys.GPU().Limits.Limits.MinUniformBufferOffsetAlignment)
 		// note: wgpu-native reports alignment sizes of 64
 		// but then barfs when that is used.  256 seems to keep it happy
 		vg.alignBytes = max(vg.alignBytes, 256)
 	} else if role == Storage {
-		vg.alignBytes = int(vs.sys.GPU().Limits.MinStorageBufferOffsetAlignment)
+		vg.alignBytes = int(vs.sys.GPU().Limits.Limits.MinStorageBufferOffsetAlignment)
 		vg.alignBytes = max(vg.alignBytes, 256)
 	}
 	vs.Groups[idx] = vg

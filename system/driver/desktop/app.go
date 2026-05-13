@@ -19,8 +19,8 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
+	"github.com/cogentcore/webgpu/wgpuglfw"
 	"github.com/go-gl/glfw/v3.4/glfw"
-	"github.com/oliverbestmann/webgpu/wgpuglfw"
 )
 
 func Init() {

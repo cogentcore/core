@@ -7,7 +7,7 @@ package gpu
 import (
 	"image"
 
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // Renderer is an interface for something that can actually be rendered to.

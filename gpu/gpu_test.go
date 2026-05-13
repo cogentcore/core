@@ -12,7 +12,7 @@ import (
 
 	_ "cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 	"github.com/stretchr/testify/assert"
 )
 

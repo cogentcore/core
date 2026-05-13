@@ -8,14 +8,14 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 // note: WriteBuffer is the preferred method for writing, so we only need to manage Read
 
 // BufferMapAsyncError returns an error message if the status is not success.
-func BufferMapAsyncError(status wgpu.MapAsyncStatus) error {
-	if status != wgpu.MapAsyncStatusSuccess {
+func BufferMapAsyncError(status wgpu.BufferMapAsyncStatus) error {
+	if status != wgpu.BufferMapAsyncStatusSuccess {
 		return errors.New("gpu BufferMapAsync was not successful")
 	}
 	return nil
@@ -24,8 +24,8 @@ func BufferMapAsyncError(status wgpu.MapAsyncStatus) error {
 // BufferReadSync does a MapAsync on given buffer, waiting on the device
 // until the sync is complete, and returning error if any issues.
 func BufferReadSync(device *Device, size int, buffer *wgpu.Buffer) error {
-	var status wgpu.MapAsyncStatus
-	err := buffer.TryMapAsync(wgpu.MapModeRead, 0, uint64(size), func(s wgpu.MapAsyncStatus) {
+	var status wgpu.BufferMapAsyncStatus
+	err := buffer.MapAsync(wgpu.MapModeRead, 0, uint64(size), func(s wgpu.BufferMapAsyncStatus) {
 		status = s
 	})
 	if errors.Log(err) != nil {
@@ -44,9 +44,9 @@ func ValueReadSync(device *Device, values ...*Value) error {
 		return nil
 	}
 	var errs []error
-	status := make([]wgpu.MapAsyncStatus, nv)
+	status := make([]wgpu.BufferMapAsyncStatus, nv)
 	for i, vl := range values {
-		err := vl.readBuffer.TryMapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(s wgpu.MapAsyncStatus) {
+		err := vl.readBuffer.MapAsync(wgpu.MapModeRead, 0, uint64(vl.AllocSize), func(s wgpu.BufferMapAsyncStatus) {
 			status[i] = s
 		})
 		if err != nil {

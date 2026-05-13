@@ -16,7 +16,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
-	"github.com/oliverbestmann/webgpu/wgpu"
+	"github.com/cogentcore/webgpu/wgpu"
 )
 
 func init() {
@@ -88,7 +88,7 @@ type GPU struct {
 	Properties wgpu.AdapterInfo
 
 	// Limits are the limits of the current GPU adapter.
-	Limits wgpu.Limits
+	Limits wgpu.SupportedLimits
 
 	// ComputeOnly indicates if this GPU is only used for compute,
 	// which determines if it listens to GPU_COMPUTE_DEVICE
@@ -181,7 +181,7 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 		fmt.Println(gp.PropertiesString())
 	}
 
-	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.MaxComputeWorkgroupsPerDimension)
+	gp.MaxComputeWorkGroupCount1D = int(gp.Limits.Limits.MaxComputeWorkgroupsPerDimension)
 	dv := actualVendorName(&gp.Properties)
 	if Debug || DebugAdapter {
 		fmt.Println("GPU device vendor:", dv)
@@ -201,7 +201,7 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 // string that the adapter VendorName contains,
 // or, failing that, from the description.
 func actualVendorName(ai *wgpu.AdapterInfo) string {
-	nm := strings.ToLower(ai.Vendor)
+	nm := strings.ToLower(ai.VendorName)
 	// source: https://www.reddit.com/r/vulkan/comments/4ta9nj/is_there_a_comprehensive_list_of_the_names_and/
 	switch nm {
 	case "0x10de":
@@ -217,7 +217,7 @@ func actualVendorName(ai *wgpu.AdapterInfo) string {
 	case "0x8086":
 		return "intel"
 	}
-	vd := strings.ToLower(ai.Description)
+	vd := strings.ToLower(ai.DriverDescription)
 	if strings.Contains(vd, "apple") {
 		return "apple"
 	}
@@ -225,10 +225,13 @@ func actualVendorName(ai *wgpu.AdapterInfo) string {
 }
 
 func adapterName(ai *wgpu.AdapterInfo) string {
-	if ai.Description != "" && !strings.HasPrefix(ai.Description, "0x") {
-		return ai.Description
+	if ai.Name != "" && !strings.HasPrefix(ai.Name, "0x") {
+		return ai.Name
 	}
-	return ai.Vendor
+	if ai.DriverDescription != "" && !strings.HasPrefix(ai.DriverDescription, "0x") {
+		return ai.DriverDescription
+	}
+	return ai.VendorName
 }
 
 func (gp *GPU) SelectGraphicsGPU(gpus []*wgpu.Adapter) int {
@@ -256,7 +259,7 @@ func (gp *GPU) SelectGraphicsGPU(gpus []*wgpu.Adapter) int {
 			}
 			pnm := adapterName(&props)
 			if strings.Contains(pnm, trgDevNm) {
-				devNm := pnm
+				devNm := props.Name
 				if Debug {
 					log.Printf("gpu: selected device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable, index: %d\n", devNm, gi)
 				}
@@ -346,8 +349,9 @@ func (gp *GPU) SelectComputeGPU(gpus []*wgpu.Adapter) int {
 			}
 			pnm := adapterName(&props)
 			if strings.Contains(pnm, trgDevNm) {
+				devNm := props.Name
 				if Debug {
-					log.Printf("gpu: selected device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable, index: %d\n", pnm, gi)
+					log.Printf("gpu: selected device named: %s, specified in GPU_DEVICE or GPU_COMPUTE_DEVICE environment variable, index: %d\n", devNm, gi)
 				}
 				return gi
 			}
@@ -404,7 +408,7 @@ func (gp *GPU) NewDevice() (*Device, error) {
 
 // PropertiesString returns a human-readable summary of the GPU properties.
 func (gp *GPU) PropertiesString() string {
-	return "\n######## GPU Properties\n" + reflectx.StringJSON(&gp.Properties) + reflectx.StringJSON(gp.Limits)
+	return "\n######## GPU Properties\n" + reflectx.StringJSON(&gp.Properties) + reflectx.StringJSON(gp.Limits.Limits)
 }
 
 // NoDisplayGPU Initializes WebGPU and returns that and a new
