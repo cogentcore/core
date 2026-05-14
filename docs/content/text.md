@@ -43,3 +43,13 @@ core.NewText(b).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
     s.Font.Family = rich.Monospace
 })
 ```
+
+The `Type` of text provides predefined size values according to the Material 3 standards, with the default being `TextBodyLarge`:
+
+```Go
+	for _, typ := range core.TextTypesValues() {
+		s := strcase.ToSentence(typ.String())
+		core.NewText(b).SetType(typ).SetText(s)
+	}
+```
+

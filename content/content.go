@@ -241,11 +241,27 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 					})
 				})
 			}
+			if !ct.inPDFRender && len(ct.current.Page.Affiliations) > 0 {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextBodyLarge)
+					w.Updater(func() {
+						w.SetText(ct.current.Page.Affiliations)
+					})
+				})
+			}
 			if !ct.inPDFRender && !ct.current.Page.Date.IsZero() {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextTitleMedium)
 					w.Updater(func() {
 						w.SetText(ct.current.Page.Date.Format("January 2, 2006"))
+					})
+				})
+			}
+			if !ct.inPDFRender && len(ct.current.Page.Abstract) > 0 {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextBodyLarge)
+					w.Updater(func() {
+						w.SetText("<b>Abstract:</b> " + ct.current.Page.Abstract)
 					})
 				})
 			}
