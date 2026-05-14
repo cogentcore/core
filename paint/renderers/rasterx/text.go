@@ -131,6 +131,15 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 		return
 	}
 
+	sty := run.Font.Style(&ctx.Style.Text)
+	// https://en.wikipedia.org/wiki/Subscript_and_superscript: latex does -.14 sub, .25 super
+	// others often use -.33 and .33
+	if sty.Special == rich.Super {
+		off.Y -= 0.25 * fsz
+	} else if sty.Special == rich.Sub {
+		off.Y += 0.14 * fsz
+	}
+
 	if run.Decoration.HasFlag(rich.Underline) || run.Decoration.HasFlag(rich.DottedUnderline) {
 		dash := []float32{2, 2}
 		if run.Decoration.HasFlag(rich.Underline) {

@@ -122,7 +122,6 @@ func (r *PDF) textRunRegions(m math32.Matrix2, run *shapedgt.Run, ln *shaped.Lin
 func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
 	// dir := run.Direction
 	region := run.Runes()
-	offTrans := math32.Translate2D(off.X, off.Y)
 	rbb := run.MaxBounds.Translate(off)
 	fill := clr
 	if run.FillColor != nil {
@@ -131,13 +130,23 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	fsz := math32.FromFixed(run.Size)
 	lineW := max(fsz/16, 1) // 1 at 16, bigger if biggerr
 	if run.Math.Path != nil {
-		r.w.PushTransform(offTrans)
+		r.w.PushTransform(math32.Translate2D(off.X, off.Y))
 		psty := *style
 		psty.Stroke.Color = run.StrokeColor
 		psty.Fill.Color = fill
 		r.Path(*run.Math.Path, &psty, math32.Identity2())
 		r.w.PopStack()
 		return
+	}
+	sty := run.Font.Style(&style.Text)
+	// https://en.wikipedia.org/wiki/Subscript_and_superscript: latex does -.14 sub, .25 super
+	// others often use -.33 and .33
+	if sty.Special == rich.Super {
+		off.X += 0.05 * fsz // tends to be cramped otherwise
+		off.Y -= 0.25 * fsz
+	} else if sty.Special == rich.Sub {
+		off.X += 0.05 * fsz // tends to be cramped otherwise
+		off.Y += 0.14 * fsz
 	}
 
 	idm := math32.Identity2()
@@ -160,7 +169,7 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 		}
 	}
 
-	r.w.StartTextObject(offTrans)
+	r.w.StartTextObject(math32.Translate2D(off.X, off.Y))
 	r.setTextStyle(&run.Font, style, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
 	raw := string(runes[region.Start:region.End])
 	r.w.WriteText(raw)

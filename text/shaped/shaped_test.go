@@ -415,3 +415,16 @@ func TestGlyphAlign(t *testing.T) {
 		pc.DrawText(lns, pos)
 	})
 }
+
+func TestGlyphSuperSub(t *testing.T) {
+	RunTest(t, "supersub", 300, 300, func(pc *paint.Painter, sh Shaper, tsty *text.Style) {
+		src := "Super<sup>script</sup> and Sub<sub>script</sub>"
+		sty := rich.NewStyle()
+		sty.Size = 0.845
+		tx, err := htmltext.HTMLToRich([]byte(src), sty, nil)
+		assert.NoError(t, err)
+		lns := sh.WrapLines(tx, sty, tsty, math32.Vec2(250, 250))
+		pos := math32.Vec2(10.3, 10.96875)
+		pc.DrawText(lns, pos)
+	})
+}

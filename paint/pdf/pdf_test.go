@@ -98,7 +98,7 @@ func TestText(t *testing.T) {
 		prv := UseStandardFonts()
 		sh := shaped.NewShaper()
 
-		src := "PDF can put <b>HTML</b> <br>formatted Text where you <i>want</i>"
+		src := "PDF can put <b>HTML</b> <br>formatted Text where you <i>want</i> <br>including<sup>1</sup> and sub<sub>script</sub>"
 		rsty := &sty.Font
 		tsty := &sty.Text
 
