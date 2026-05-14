@@ -153,7 +153,7 @@ func CountWordsLinesRegion(src [][]rune, reg textpos.Region) (words, lines int) 
 		if ln == reg.Start.Line {
 			sln = sln[reg.Start.Char:]
 		} else if ln == reg.End.Line {
-			sln = sln[:reg.End.Char]
+			sln = sln[:min(reg.End.Char, len(sln))]
 		}
 		flds := strings.Fields(string(sln))
 		words += len(flds)
