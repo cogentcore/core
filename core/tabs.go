@@ -38,6 +38,7 @@ type Tabs struct {
 
 	// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 	NewTabButton bool
+	NewTabButtonOnClick func(e events.Event)
 
 	// NewTabFunc is a function that will be called when the NewTabButton
 	// is clicked to create a new tab, with the index of this new tab.
@@ -159,14 +160,18 @@ func (ts *Tabs) Init() {
 				}
 				ntb := NewButton(w).SetType(ButtonAction).SetIcon(icons.Add)
 				ntb.SetTooltip("Add a new tab").SetName("new-tab-button")
-				ntb.OnClick(func(e events.Event) {
-					ts.NewTab("New tab")
-					idx := ts.NumTabs() - 1
-					if ts.NewTabFunc != nil {
-						ts.NewTabFunc(idx)
-					}
-					ts.SelectTabIndex(idx)
-				})
+				if ts.NewTabButtonOnClick == nil {
+					ntb.OnClick(func(e events.Event) {
+						ts.NewTab("New tab")
+						idx := ts.NumTabs() - 1
+						if ts.NewTabFunc != nil {
+							ts.NewTabFunc(idx)
+						}
+						ts.SelectTabIndex(idx)
+					})
+				} else {
+					ntb.OnClick(ts.NewTabButtonOnClick)
+				}
 			})
 		})
 		tree.AddAt(p, "frame", func(w *Frame) {
