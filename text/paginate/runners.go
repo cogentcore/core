@@ -80,7 +80,7 @@ func HeaderLeftPageNumber(header string) func(frame *core.Frame, opts *Options, 
 }
 
 // CenteredTitle inserts centered text elements for each element if non-empty.
-func CenteredTitle(title, authors, affiliations, url, date, abstract string) func(frame *core.Frame, opts *Options) {
+func CenteredTitle(title, authors, affiliations, url, date, reference, abstract string) func(frame *core.Frame, opts *Options) {
 	return func(frame *core.Frame, opts *Options) {
 		fr := core.NewFrame(frame)
 		fr.Styler(func(s *styles.Style) {
@@ -131,6 +131,14 @@ func CenteredTitle(title, authors, affiliations, url, date, abstract string) fun
 
 		if url != "" {
 			core.NewText(fr).SetText(url).Styler(func(s *styles.Style) {
+				TextStyler(s)
+				s.Font.Size = printer.Settings.FontSize
+				s.Text.Align = text.Center
+			})
+		}
+
+		if reference != "" {
+			core.NewText(fr).SetText(reference).Styler(func(s *styles.Style) {
 				TextStyler(s)
 				s.Font.Size = printer.Settings.FontSize
 				s.Text.Align = text.Center

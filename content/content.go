@@ -257,6 +257,14 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 					})
 				})
 			}
+			if !ct.inPDFRender && len(ct.current.Page.Reference) > 0 {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextBodyLarge)
+					w.Updater(func() {
+						w.SetText(ct.current.Page.Reference)
+					})
+				})
+			}
 			if !ct.inPDFRender && len(ct.current.Page.Abstract) > 0 {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextBodyLarge)
