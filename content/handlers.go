@@ -403,6 +403,7 @@ func (ct *Content) open(url string, history bool) {
 	_, pg, heading := ct.parseURL(url)
 	// fmt.Println("open:", url, heading, "pg:", pg.URL)
 	if history {
+		ct.saveUpdatedPos(pg, heading, url)
 		ct.historyAdd(pg, heading, url)
 	}
 	ct.current.Heading = heading

@@ -486,10 +486,9 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 		if !ok {
 			return tree.Continue
 		}
-		tag := tx.Property("tag")
-		switch tag {
-		case "h1", "h2", "h3", "h4", "h5", "h6":
-			num := errors.Log1(strconv.Atoi(tag.(string)[1:]))
+		tag, ok := tx.Property("tag").(string)
+		if ok && len(tag) == 2 && tag[0] == 'h' {
+			num := errors.Log1(strconv.Atoi(tag[1:]))
 			parent := contents
 			// Our parent is the last heading with a lower level (closer to h1).
 			for i := num - 1; i >= 1; i-- {

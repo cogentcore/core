@@ -8,7 +8,53 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/content/bcontent"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tree"
 )
+
+func (ct *Content) nearestHeading(pg *bcontent.Page) string {
+	fr := ct.pageFrame()
+	if fr == nil {
+		return ""
+	}
+	d := math32.Y
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
+		return ""
+	}
+	// go through the lines and find one at pos
+	var lastHead string
+	fr.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		wpos := cwb.Geom.Pos.Total.Y - fr.Geom.Pos.Content.Y
+		if wpos > 100 {
+			return tree.Break
+		}
+		tx, ok := cw.(*core.Text)
+		if !ok {
+			return tree.Continue
+		}
+		tag, ok := tx.Property("tag").(string)
+		if ok && len(tag) == 2 && tag[0] == 'h' {
+			lastHead = tx.Text
+		}
+		return tree.Continue
+	})
+	return lastHead
+}
+
+// save an updated history record based on current position on current page
+func (ct *Content) saveUpdatedPos(pg *bcontent.Page, heading, url string) {
+	nhead := ct.nearestHeading(ct.current.Page)
+	fmt.Println("nhead:", nhead, "heading:", heading)
+	if pg == ct.current.Page && nhead == heading {
+		return
+	}
+	_, nw, _ := ct.pageURL(ct.current.Page, nhead)
+	if nw != nil {
+		url = nw.String()
+	}
+	ct.historyAdd(ct.current.Page, nhead, url)
+}
 
 func (ct *Content) historyAdd(pg *bcontent.Page, heading, url string) {
 	if ct.tabs == nil {
