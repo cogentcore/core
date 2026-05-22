@@ -400,10 +400,11 @@ func (ct *Content) open(url string, history bool) {
 		core.TheApp.OpenURL(af)
 		return
 	}
+	curPg := ct.current
 	_, pg, heading := ct.parseURL(url)
 	// fmt.Println("open:", url, heading, "pg:", pg.URL)
 	if history {
-		ct.saveUpdatedPos(pg, heading, url)
+		ct.saveUpdatedPos(curPg, pg, heading)
 		ct.historyAdd(pg, heading, url)
 	}
 	ct.current.Heading = heading
@@ -443,6 +444,7 @@ func (ct *Content) openHeading(heading string) {
 		ct.pageFrame().ScrollDimToContentStart(math32.Y)
 		return
 	}
+	// fmt.Println("opening heading:", heading)
 	idname := "" // in case of #id:element
 	element := ""
 	colon := strings.Index(heading, ":")
@@ -469,6 +471,7 @@ func (ct *Content) openHeading(heading string) {
 	tr.UnselectAll()
 	tr.Select()
 	tx := tr.Property("page-text").(*core.Text)
+	// fmt.Println("scroll to top:", tx.Text, tx.Geom.Pos.Total.Y)
 	tx.ScrollThisToTop()
 }
 

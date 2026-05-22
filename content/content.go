@@ -503,6 +503,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
+				ct.saveUpdatedPos(ct.current, ct.current.Page, ct.current.Heading)
 				tx.ScrollThisToTop()
 				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})

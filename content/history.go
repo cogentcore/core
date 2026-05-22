@@ -7,13 +7,14 @@ package content
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 )
 
-func (ct *Content) nearestHeading(pg *bcontent.Page) string {
+func (ct *Content) nearestHeading() string {
 	fr := ct.pageFrame()
 	if fr == nil {
 		return ""
@@ -42,18 +43,22 @@ func (ct *Content) nearestHeading(pg *bcontent.Page) string {
 	return lastHead
 }
 
-// save an updated history record based on current position on current page
-func (ct *Content) saveUpdatedPos(pg *bcontent.Page, heading, url string) {
-	nhead := ct.nearestHeading(ct.current.Page)
-	fmt.Println("nhead:", nhead, "heading:", heading)
-	if pg == ct.current.Page && nhead == heading {
+// save an updated history record based on current position on current page.
+// args are for the _next_ page that will be opened: don't add updated history
+// if the same as these args.
+func (ct *Content) saveUpdatedPos(curPg Location, pg *bcontent.Page, heading string) {
+	nhead := ct.nearestHeading()
+	if nhead == "" {
 		return
 	}
-	_, nw, _ := ct.pageURL(ct.current.Page, nhead)
+	url := curPg.URL
+	_, nw, _ := ct.pageURL(curPg.Page, nhead)
 	if nw != nil {
 		url = nw.String()
+	} else {
+		url = curPg.Page.URL + "#" + strcase.ToKebab(nhead)
 	}
-	ct.historyAdd(ct.current.Page, nhead, url)
+	ct.historyAdd(curPg.Page, nhead, url)
 }
 
 func (ct *Content) historyAdd(pg *bcontent.Page, heading, url string) {
@@ -149,10 +154,16 @@ func (hs *History) Save(lc *Location) {
 	}
 	hs.Index++
 	if len(hs.Records) > hs.Index {
+		if hs.Index > 0 && *(hs.Records[hs.Index-1]) == *lc { // no repeats
+			return
+		}
 		hs.Records = hs.Records[:hs.Index+1]
 		hs.Records[hs.Index] = lc
 	} else {
-		hs.Index = len(hs.Records) // note: going to end first
+		hs.Index = len(hs.Records)                            // note: going to end first
+		if hs.Index > 0 && *(hs.Records[hs.Index-1]) == *lc { // no repeats
+			return
+		}
 		hs.Records = append(hs.Records, lc)
 	}
 }
