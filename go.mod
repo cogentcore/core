@@ -11,7 +11,7 @@ require (
 	github.com/anthonynsimon/bild v0.14.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.6.0
-	github.com/chewxy/math32 v1.11.1
+	github.com/chewxy/math32 v1.11.2
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
 	github.com/coreos/go-oidc/v3 v3.17.0
@@ -32,7 +32,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
-	github.com/oliverbestmann/webgpu v1.33.2
+	github.com/oliverbestmann/webgpu v1.33.4
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
@@ -80,5 +80,3 @@ require (
 	modernc.org/knuth v0.5.4 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
-
-replace github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260406072232-3ac4aa2bb164 => github.com/oliverbestmann/go-gl-glfw/v3.4/glfw v0.0.0-20260510101646-c1f83c493fe1
