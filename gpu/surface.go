@@ -11,7 +11,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/system"
-	"github.com/go-gl/glfw/v3.4/glfw"
 	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
@@ -126,10 +125,10 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 			time.Sleep(16 * time.Millisecond)
 			if system.TheApp != nil {
 				system.TheApp.RunOnMain(func() {
-					glfw.PollEvents()
+					GLFWPollEvents()
 				})
 			} else {
-				glfw.PollEvents()
+				GLFWPollEvents()
 			}
 			continue
 		}
