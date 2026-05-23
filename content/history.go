@@ -52,7 +52,7 @@ func (ct *Content) saveUpdatedPos(curPg Location, pg *bcontent.Page, heading str
 		return
 	}
 	url := curPg.URL
-	_, nw, _ := ct.pageURL(curPg.Page, nhead)
+	_, nw, _ := ct.pageURL(curPg.Page, strcase.ToKebab(nhead))
 	if nw != nil {
 		url = nw.String()
 	} else {

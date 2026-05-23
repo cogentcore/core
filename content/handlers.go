@@ -420,6 +420,7 @@ func (ct *Content) open(url string, history bool) {
 	ct.Defer(func() {
 		ct.setStageTitle()
 		ct.openHeading(heading)
+		ct.openHeading(heading) // note: needs this on web!
 	})
 }
 
