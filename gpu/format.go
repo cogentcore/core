@@ -9,7 +9,7 @@ import (
 	"image"
 	"log"
 
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // TextureFormat describes the size and WebGPU format of a Texture.

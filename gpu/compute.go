@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // ComputeSystem manages a system of ComputePipelines that all share
@@ -111,7 +111,7 @@ func (sy *ComputeSystem) Config() {
 // compute commands.  This is automatically called by
 // BeginRenderPass and the result maintained in [CommandEncoder].
 func (sy *ComputeSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
-	cmd, err := sy.device.Device.CreateCommandEncoder(nil)
+	cmd, err := sy.device.Device.TryCreateCommandEncoder(nil)
 	if errors.Log(err) != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (sy *ComputeSystem) EndComputePass() error {
 	sy.ComputeEncoder = nil
 	sy.CommandEncoder = nil
 	ce.Release() // must happen before Finish
-	cmdBuffer, err := cmd.Finish(nil)
+	cmdBuffer, err := cmd.TryFinish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}

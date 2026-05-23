@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
 	"cogentcore.org/core/system/composer"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // xyzSource implements [composer.Source] for core direct rendering.
