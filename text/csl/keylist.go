@@ -28,6 +28,14 @@ func NewKeyList(items []Item) *KeyList {
 	return kl
 }
 
+// AddItems adds items to this KeyList, replacing any duplicates with new items.
+func (kl *KeyList) AddItems(items []Item) {
+	for i := range items {
+		it := &items[i]
+		kl.Set(it.CitationKey, it)
+	}
+}
+
 // AlphaKeys returns an alphabetically sorted list of keys (case insensitive).
 func (kl *KeyList) AlphaKeys() []string {
 	ks := slices.Clone(kl.Keys)
