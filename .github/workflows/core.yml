@@ -39,6 +39,9 @@ jobs:
         with:
           go-version: '1.25.6'
 
+      - name: Change Mirror Priorities
+        uses: ./.github/actions/apt-mirrors
+
       - name: Install Core
         run: go install && core setup
 
