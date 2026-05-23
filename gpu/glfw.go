@@ -40,6 +40,11 @@ func Terminate() {
 	glfw.Terminate()
 }
 
+// GLFWPollEvents is a wrapper around glfw.PollEvents that is a no-op on web
+func GLFWPollEvents() {
+	glfw.PollEvents()
+}
+
 // GLFWCreateWindow is a helper function intended only for use in simple examples that makes a
 // new window with glfw on platforms that support it and is largely a no-op on other platforms.
 func GLFWCreateWindow(size image.Point, title string, resize *func(size image.Point)) (surface *wgpu.Surface, terminate func(), pollEvents func() bool, actualSize image.Point, err error) {

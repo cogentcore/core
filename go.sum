@@ -122,8 +122,8 @@ github.com/muesli/termenv v0.16.0 h1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc
 github.com/muesli/termenv v0.16.0/go.mod h1:ZRfOIKPFDYQoDFF4Olj7/QJbW60Ol/kL1pU3VfY/Cnk=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
-github.com/oliverbestmann/webgpu v1.33.4 h1:+r4wFXfVFRo2U1NFlQlHgHKZqZrEUQZw4IHOhDRIGoI=
-github.com/oliverbestmann/webgpu v1.33.4/go.mod h1:vtdJTC9gIdqmU42NDGfsq70dco6K+dCYC2vkvE4RD2I=
+github.com/oliverbestmann/webgpu v1.33.5-0.20260523154840-fa113c1fb662 h1:5p8ACK7mXsdgyRjASbRd6kgVf9mctHDgF8Fn4MfFvBg=
+github.com/oliverbestmann/webgpu v1.33.5-0.20260523154840-fa113c1fb662/go.mod h1:vtdJTC9gIdqmU42NDGfsq70dco6K+dCYC2vkvE4RD2I=
 github.com/oliverbestmann/webgpu/libs-android v0.0.0-20260509160813-48db59792a15 h1:HPxVSV8C8JaxGfa9hjDhzNmryoqPF3EwESBTFWpxNBo=
 github.com/oliverbestmann/webgpu/libs-android v0.0.0-20260509160813-48db59792a15/go.mod h1:tczQXCdsoFy+FTJVsZSve/vF8cmWEkxhvjcyY2Rujp8=
 github.com/oliverbestmann/webgpu/libs-darwin v0.0.0-20260509160802-b09403b07cd3 h1:NbBG2+pwqKcNfKUKtjWOj+02RkXSUWVkxY3hqzgyjSA=
