@@ -18,8 +18,9 @@ import (
 
 type Config struct {
 
-	// CSL JSON formatted file with the library of references to lookup citations in.
-	Refs string `flag:"r,refs" posarg:"0"`
+	// CSL JSON formatted file(s) (comma-separated list) with the library
+	// of references to lookup citations in.
+	Refs []string `flag:"r,refs" posarg:"0"`
 
 	// Directory with markdown files to extract citations from.
 	// Defaults to current directory if empty.
@@ -45,11 +46,18 @@ type Config struct {
 
 // Generate extracts citations and generates resulting references file.
 func Generate(c *Config) error {
-	refs, err := csl.Open(c.Refs)
-	if err != nil {
-		return err
+	var kl *csl.KeyList
+	for _, rf := range c.Refs {
+		refs, err := csl.Open(rf)
+		if err != nil {
+			return err
+		}
+		if kl == nil {
+			kl = csl.NewKeyList(refs)
+		} else {
+			kl.AddItems(refs)
+		}
 	}
-	kl := csl.NewKeyList(refs)
 
 	if c.Dir == "" {
 		c.Dir = "." + string(filepath.Separator)
