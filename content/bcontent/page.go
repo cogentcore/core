@@ -56,12 +56,14 @@ type Page struct {
 	Authors string
 
 	// Affiliations are optional institutional affiliations of the authors.
-	// This is only used for the PDF output.
 	Affiliations string
 
 	// Abstract is an optional abstract.
-	// This is only used for the PDF output.
 	Abstract string
+
+	// Reference can be used for a publication or other external source
+	// for the content on this page.
+	Reference string
 
 	// Draft indicates that the page is a draft and should not be visible on the web.
 	Draft bool

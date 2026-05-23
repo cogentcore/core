@@ -12,6 +12,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/content/bcontent"
 )
 
@@ -53,7 +54,8 @@ func (ct *Content) getWebURL() string {
 
 // saveWebURL saves the current page URL to the user's address bar and history.
 func (ct *Content) saveWebURL(lc *Location) {
-	current, nw, err := ct.pageURL(lc.Page, lc.Heading)
+	nhead := strcase.ToKebab(lc.Heading)
+	current, nw, err := ct.pageURL(lc.Page, nhead)
 	if err != nil || nw == nil {
 		return
 	}

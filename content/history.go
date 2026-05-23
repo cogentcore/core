@@ -7,8 +7,59 @@ package content
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/content/bcontent"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tree"
 )
+
+func (ct *Content) nearestHeading() string {
+	fr := ct.pageFrame()
+	if fr == nil {
+		return ""
+	}
+	d := math32.Y
+	if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
+		return ""
+	}
+	// go through the lines and find one at pos
+	var lastHead string
+	fr.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		wpos := cwb.Geom.Pos.Total.Y - fr.Geom.Pos.Content.Y
+		if wpos > 100 {
+			return tree.Break
+		}
+		tx, ok := cw.(*core.Text)
+		if !ok {
+			return tree.Continue
+		}
+		tag, ok := tx.Property("tag").(string)
+		if ok && len(tag) == 2 && tag[0] == 'h' {
+			lastHead = tx.Text
+		}
+		return tree.Continue
+	})
+	return lastHead
+}
+
+// save an updated history record based on current position on current page.
+// args are for the _next_ page that will be opened: don't add updated history
+// if the same as these args.
+func (ct *Content) saveUpdatedPos(curPg Location, pg *bcontent.Page, heading string) {
+	nhead := ct.nearestHeading()
+	if nhead == "" {
+		return
+	}
+	url := curPg.URL
+	_, nw, _ := ct.pageURL(curPg.Page, strcase.ToKebab(nhead))
+	if nw != nil {
+		url = nw.String()
+	} else {
+		url = curPg.Page.URL + "#" + strcase.ToKebab(nhead)
+	}
+	ct.historyAdd(curPg.Page, nhead, url)
+}
 
 func (ct *Content) historyAdd(pg *bcontent.Page, heading, url string) {
 	if ct.tabs == nil {
@@ -103,10 +154,16 @@ func (hs *History) Save(lc *Location) {
 	}
 	hs.Index++
 	if len(hs.Records) > hs.Index {
+		if hs.Index > 0 && *(hs.Records[hs.Index-1]) == *lc { // no repeats
+			return
+		}
 		hs.Records = hs.Records[:hs.Index+1]
 		hs.Records[hs.Index] = lc
 	} else {
-		hs.Index = len(hs.Records) // note: going to end first
+		hs.Index = len(hs.Records)                            // note: going to end first
+		if hs.Index > 0 && *(hs.Records[hs.Index-1]) == *lc { // no repeats
+			return
+		}
 		hs.Records = append(hs.Records, lc)
 	}
 }

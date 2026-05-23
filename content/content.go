@@ -257,6 +257,14 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 					})
 				})
 			}
+			if !ct.inPDFRender && len(ct.current.Page.Reference) > 0 {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextBodyLarge)
+					w.Updater(func() {
+						w.SetText(ct.current.Page.Reference)
+					})
+				})
+			}
 			if !ct.inPDFRender && len(ct.current.Page.Abstract) > 0 {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextBodyLarge)
@@ -478,10 +486,9 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 		if !ok {
 			return tree.Continue
 		}
-		tag := tx.Property("tag")
-		switch tag {
-		case "h1", "h2", "h3", "h4", "h5", "h6":
-			num := errors.Log1(strconv.Atoi(tag.(string)[1:]))
+		tag, ok := tx.Property("tag").(string)
+		if ok && len(tag) == 2 && tag[0] == 'h' {
+			num := errors.Log1(strconv.Atoi(tag[1:]))
 			parent := contents
 			// Our parent is the last heading with a lower level (closer to h1).
 			for i := num - 1; i >= 1; i-- {
@@ -496,6 +503,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
+				ct.saveUpdatedPos(ct.current, ct.current.Page, ct.current.Heading)
 				tx.ScrollThisToTop()
 				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})
