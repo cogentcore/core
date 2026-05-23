@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/gpu/phong"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices

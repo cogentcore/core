@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/shape"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // MaxLights is upper limit on number of any given type of light

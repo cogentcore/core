@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // GraphicsSystem manages a system of Pipelines that all share
@@ -203,7 +203,7 @@ func (sy *GraphicsSystem) SetClearDepthStencil(depth float32, stencil uint32) *G
 // rendering commands.  This is automatically called by
 // BeginRenderPass and the result maintained in CurrentCommandEncoder.
 func (sy *GraphicsSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
-	cmd, err := sy.device.Device.CreateCommandEncoder(nil)
+	cmd, err := sy.device.Device.TryCreateCommandEncoder(nil)
 	if errors.Log(err) != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (sy *GraphicsSystem) NewCommandEncoder() (*wgpu.CommandEncoder, error) {
 func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) {
 	rd := sy.Renderer
 	view, err := rd.GetCurrentTexture()
-	if errors.Log(err) != nil {
+	if view == nil || errors.Log(err) != nil {
 		return nil, nil, err
 	}
 	cmd, err := sy.NewCommandEncoder()
@@ -230,9 +230,11 @@ func (sy *GraphicsSystem) beginRenderPass() (*Render, *wgpu.TextureView, error) 
 // rendering commands should be added.
 // Call [GraphicsSystem.EndRenderPass] when done.
 // This version Clears the target texture first, using ClearValues.
+// The RenderPassEncoder can be nil AND the err also nil, which
+// indicates the need to reconfigure the surface and try again.
 func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 	rd, view, err := sy.beginRenderPass()
-	if errors.Log(err) != nil {
+	if view == nil || errors.Log(err) != nil {
 		return nil, err
 	}
 	return rd.BeginRenderPass(sy.CommandEncoder, view), nil
@@ -245,9 +247,11 @@ func (sy *GraphicsSystem) BeginRenderPass() (*wgpu.RenderPassEncoder, error) {
 // Call [GraphicsSystem.EndRenderPass] when done.
 // This version does NOT clear the target texture first,
 // so the prior render output is carried over.
+// The RenderPassEncoder can be nil AND the err also nil, which
+// indicates the need to reconfigure the surface and try again.
 func (sy *GraphicsSystem) BeginRenderPassNoClear() (*wgpu.RenderPassEncoder, error) {
 	rd, view, err := sy.beginRenderPass()
-	if errors.Log(err) != nil {
+	if view == nil || errors.Log(err) != nil {
 		return nil, err
 	}
 	return rd.BeginRenderPassNoClear(sy.CommandEncoder, view), nil
@@ -262,7 +266,7 @@ func (sy *GraphicsSystem) SubmitRender(rp *wgpu.RenderPassEncoder) error {
 	cmd := sy.CommandEncoder
 	sy.CommandEncoder = nil
 	rp.Release() // must happen before Finish
-	cmdBuffer, err := cmd.Finish(nil)
+	cmdBuffer, err := cmd.TryFinish(nil)
 	if errors.Log(err) != nil {
 		return err
 	}

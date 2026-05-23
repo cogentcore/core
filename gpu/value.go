@@ -11,7 +11,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // Value represents a specific value of a Var variable, with
@@ -171,7 +171,7 @@ func (vl *Value) CreateBuffer() error {
 	}
 	vl.Release()
 
-	buf, err := vl.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
+	buf, err := vl.device.Device.TryCreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
 		Usage:            vl.vvar.bufferUsages(),
@@ -281,7 +281,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 	if vl.buffer == nil || vl.AllocSize != tb {
 		vl.varGroupDirty() // only if tb is different; buffer created in bindGroupEntry so not nil here
 		vl.Release()
-		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
+		buf, err := vl.device.Device.TryCreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: from,
 			Usage:    vl.vvar.bufferUsages(),
@@ -295,7 +295,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 			vl.CreateReadBuffer()
 		}
 	} else {
-		err := vl.device.Queue.WriteBuffer(vl.buffer, 0, from)
+		err := vl.device.Queue.TryWriteBuffer(vl.buffer, 0, from)
 		if errors.Log(err) != nil {
 			return err
 		}
@@ -357,7 +357,7 @@ func (vl *Value) WriteDynamicBuffer() error {
 	if vl.buffer == nil || nb != vl.AllocSize {
 		vl.varGroupDirty() // only if nb is different; buffer created in bindGroupEntry so not nil here
 		vl.Release()
-		buf, err := vl.device.Device.CreateBufferInit(&wgpu.BufferInitDescriptor{
+		buf, err := vl.device.Device.TryCreateBufferInit(&wgpu.BufferInitDescriptor{
 			Label:    vl.Name,
 			Contents: vl.dynamicBuffer,
 			Usage:    vl.vvar.bufferUsages(),
@@ -368,7 +368,7 @@ func (vl *Value) WriteDynamicBuffer() error {
 		vl.buffer = buf
 		vl.AllocSize = nb
 	} else {
-		err := vl.device.Queue.WriteBuffer(vl.buffer, 0, vl.dynamicBuffer)
+		err := vl.device.Queue.TryWriteBuffer(vl.buffer, 0, vl.dynamicBuffer)
 		if errors.Log(err) != nil {
 			return err
 		}
@@ -462,7 +462,7 @@ func (vl *Value) CreateReadBuffer() error {
 	}
 	vl.ReleaseRead()
 
-	buf, err := vl.device.Device.CreateBuffer(&wgpu.BufferDescriptor{
+	buf, err := vl.device.Device.TryCreateBuffer(&wgpu.BufferDescriptor{
 		Size:             uint64(sz),
 		Label:            vl.Name,
 		Usage:            wgpu.BufferUsageMapRead | wgpu.BufferUsageCopyDst,
@@ -495,7 +495,7 @@ func (vl *Value) GPUToRead(cmd *wgpu.CommandEncoder) error {
 	if err := vl.readNilCheck(); err != nil {
 		return errors.Log(err)
 	}
-	return cmd.CopyBufferToBuffer(vl.buffer, 0, vl.readBuffer, 0, uint64(vl.AllocSize))
+	return cmd.TryCopyBufferToBuffer(vl.buffer, 0, vl.readBuffer, 0, uint64(vl.AllocSize))
 }
 
 // ReadSync reads data from GPU to CPU side of the read buffer.

@@ -11,7 +11,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/colors"
-	"github.com/cogentcore/webgpu/wgpu"
+	"github.com/oliverbestmann/webgpu/wgpu"
 )
 
 // Render manages various elements needed for rendering,
