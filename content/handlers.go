@@ -378,6 +378,7 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	if strings.HasPrefix(url, "ref://") {
+		ct.saveUpdatedPos(ct.current, ct.current.Page, ct.current.Heading)
 		ct.openRef(url)
 		return
 	}
@@ -473,6 +474,9 @@ func (ct *Content) openHeading(heading string) {
 	tx := tr.Property("page-text").(*core.Text)
 	// fmt.Println("scroll to top:", tx.Text, tx.Geom.Pos.Total.Y)
 	tx.ScrollThisToTop()
+	ct.Defer(func() {
+		tx.ScrollThisToTop() // try try again -- without this, is somewhat unreliable..
+	})
 }
 
 func (ct *Content) openID(id, element string) bool {
