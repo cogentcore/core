@@ -18,10 +18,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: '1.25.6'
 
@@ -38,7 +38,7 @@ jobs:
       run: core build web -dir docs -o static
 
     - name: Download testdata
-      uses: dawidd6/action-download-artifact@v6
+      uses: dawidd6/action-download-artifact@v21
       with:
         name: testdata
         workflow_search: true
@@ -54,13 +54,13 @@ jobs:
       run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system | grep -v video) -coverprofile cover.out -timeout 30s
 
     - name: Upload testdata
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: testdata
         path: "**/testdata/**/*.png"
 
     - name: Upload failure testdata
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: failure()
       with:
         name: testdata-fail
