@@ -253,7 +253,19 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 				tree.Add(p, func(w *core.Text) {
 					w.SetType(core.TextTitleMedium)
 					w.Updater(func() {
-						w.SetText(ct.current.Page.Date.Format("January 2, 2006"))
+						if ct.current.Page.Version != "" {
+							w.SetText(ct.current.Page.Date.Format("January 2, 2006") + ", Version: " + ct.current.Page.Version)
+						} else {
+							w.SetText(ct.current.Page.Date.Format("January 2, 2006"))
+						}
+					})
+				})
+			}
+			if !ct.inPDFRender && ct.current.Page.Date.IsZero() && ct.current.Page.Version != "" {
+				tree.Add(p, func(w *core.Text) {
+					w.SetType(core.TextTitleMedium)
+					w.Updater(func() {
+						w.SetText(" Version: " + ct.current.Page.Version)
 					})
 				})
 			}

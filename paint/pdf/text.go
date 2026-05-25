@@ -172,6 +172,10 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	r.w.StartTextObject(math32.Translate2D(off.X, off.Y))
 	r.setTextStyle(&run.Font, style, fill, run.StrokeColor, math32.FromFixed(run.Size), lns.LineHeight)
 	raw := string(runes[region.Start:region.End])
+	raw = strings.ReplaceAll(raw, "https://", "https.//") // links need to be obfuscated, to prevent PDF auto-link detection!
+	raw = strings.ReplaceAll(raw, "http://", "http.//")   // links need to be obfuscated, to prevent PDF auto-link detection!
+	raw = strings.ReplaceAll(raw, "www.", "www:")
+	raw = strings.ReplaceAll(raw, "doi.", "doi:")
 	r.w.WriteText(raw)
 	r.w.EndTextObject()
 
@@ -255,10 +259,13 @@ func (r *PDF) links(lns *shaped.Lines, m math32.Matrix2, pos math32.Vector2) {
 		// note: link coordinates are in default user space, not current transform.
 		srb := lns.RuneBounds(lk.Range.Start)
 		erb := lns.RuneBounds(lk.Range.End)
+		rb := srb
 		if erb.Max.X > srb.Max.X {
-			srb.Max.X = erb.Max.X
+			rb.Max.X = erb.Max.X
+		} else {
+			rb.Max.X = lns.Bounds.Max.X
 		}
-		rb := srb.Translate(pos)
+		rb = rb.Translate(pos)
 		rb = rb.MulMatrix2(m)
 		r.w.AddLink(lk.URL, rb)
 	}

@@ -4,6 +4,7 @@ Authors = "Bea A. Author<sup>1</sup> and Test Ing Name<sup>2</sup>"
 Affiliations = "<sup>1</sup>University of Somewhere <sup>2</sup>University of Elsewhere"
 Abstract = "The button is an essential element of any GUI framework, with the capability of triggering actions of any sort. Actions are very important because they allow people to actually do something."
 Date = "2026-05-01"
+Version = "1"
 +++
 
 A **button** is a [[widget]] that a user can click on to trigger a described action. See [[func button]] for a button [[value binding|bound]] to a function. There are various [[#types]] of buttons.
@@ -109,6 +110,12 @@ core.NewButton(b).SetType(core.ButtonAction).SetText("Action")
 
 ### Third level header
 
+{id="eq_dwt" title="example"}
+$$
+dW = x^+ y^+ - x^- y^-
+$$
+
+{style="paginate-break:true"}
 This is content at the third level.
 
 #### Fourth level header

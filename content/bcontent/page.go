@@ -52,6 +52,12 @@ type Page struct {
 	// DateString is only used for parsing the date from the TOML front matter.
 	DateString string `toml:"Date" json:"-"`
 
+	// Version is a version string, e.g., for pages that have some kind of publication
+	// status. Typically reserve for major changes, with the Date being used to track
+	// minor changes (typo fixes etc). Will be rendered with "Version: " prepended,
+	// in the same line as the date if date is set.
+	Version string
+
 	// Authors are the optional author(s) of the page.
 	Authors string
 

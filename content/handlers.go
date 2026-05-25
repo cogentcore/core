@@ -51,7 +51,12 @@ func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, no
 		return false
 	}
 	if entering {
-		cp := "\n<span id=\"" + value + "\"><b>" + lbl + ":</b>"
+		cp := "\n<span id=\"" + value + "\""
+		style := htmlcore.MDGetAttr(node, "style")
+		if style != "" {
+			cp += fmt.Sprintf(" style=%q", style)
+		}
+		cp += "><b>" + lbl + ":</b>"
 		title := htmlcore.MDGetAttr(node, "title")
 		if title != "" {
 			cp += " " + title
