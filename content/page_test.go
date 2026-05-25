@@ -30,5 +30,6 @@ func TestNewPage(t *testing.T) {
 		Abstract:     "The button is an essential element of any GUI framework, with the capability of triggering actions of any sort. Actions are very important because they allow people to actually do something.",
 		DateString:   dstr,
 		Date:         date,
+		Version:      "1",
 	}, *pg)
 }
