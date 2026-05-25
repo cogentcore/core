@@ -50,7 +50,7 @@ func handleElement(ctx *Context) {
 	}
 
 	if slices.Contains(textTags, tag) {
-		handleTextTag(ctx)
+		ctx.handleWidget(ctx.Node, handleTextTag(ctx))
 		return
 	}
 
@@ -319,7 +319,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	src := GetAttr(n, "src")
 	alt := GetAttr(n, "alt")
 	if pstyle != "" {
-		ctx.setStyleAttr(n, pstyle)
+		ctx.SetStyleAttr(n, pstyle)
 	}
 	var newWidget core.Widget
 	var resp *http.Response

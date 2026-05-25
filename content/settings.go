@@ -53,7 +53,7 @@ func (s *SettingsData) Defaults() {
 		} else {
 			dt = time.Now().Format("January 2, 2006")
 		}
-		ps.PDF.Title = paginate.CenteredTitle(pt, curPage.Authors, curPage.Affiliations, ura, dt, curPage.Reference, curPage.Abstract)
+		ps.PDF.Title = paginate.CenteredTitle(pt, curPage.Authors, curPage.Affiliations, ura, dt, curPage.Version, curPage.Reference, curPage.Abstract)
 		ps.PDF.TextStyler = paginate.APAHeaders
 		return ps
 	}

@@ -152,7 +152,7 @@ func (c *Context) config(w core.Widget) {
 			wb.SetName(attr.Val)
 			wb.SetProperty("id", attr.Val)
 		case "style":
-			c.setStyleAttr(c.Node, attr.Val)
+			c.SetStyleAttr(c.Node, attr.Val)
 		default:
 			wb.SetProperty(attr.Key, attr.Val)
 		}
@@ -160,7 +160,7 @@ func (c *Context) config(w core.Widget) {
 	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
 }
 
-func (c *Context) setStyleAttr(node *html.Node, style string) error {
+func (c *Context) SetStyleAttr(node *html.Node, style string) error {
 	// our CSS parser is strict about semicolons, but
 	// they aren't needed in normal inline styles in HTML
 	if !strings.HasSuffix(style, ";") {
@@ -264,6 +264,10 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 	wb.Styler(func(s *styles.Style) {
 		for _, rule := range rules {
 			for _, decl := range rule.Declarations {
+				if strings.HasPrefix(decl.Property, "paginate-") {
+					wb.SetProperty(decl.Property, decl.Value)
+					continue
+				}
 				// TODO(kai/styproperties): parent style and context
 				s.FromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
 			}
