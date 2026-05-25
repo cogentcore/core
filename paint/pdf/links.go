@@ -30,10 +30,14 @@ func (w *pdfPage) AddAnchor(name string, pos math32.Vector2) {
 func (w *pdfPage) AddLink(uri string, rect math32.Box2) {
 	ms := math32.Scale2D(w.pdf.globalScale, w.pdf.globalScale)
 	rect = rect.MulMatrix2(ms)
+	bs := pdfDict{
+		"W": 0,
+	}
 	annot := pdfDict{
 		"Type":    pdfName("Annot"),
 		"Subtype": pdfName("Link"),
-		"Border":  pdfArray{0, 0, 0},
+		"BS":      bs,
+		"C":       pdfArray{0.8, 0.8, 1.0},
 		"Rect":    pdfArray{rect.Min.X, w.height - rect.Max.Y, rect.Max.X, w.height - rect.Min.Y},
 	}
 	if len(uri) > 0 && uri[0] == '#' { // local anchor actions
@@ -41,6 +45,7 @@ func (w *pdfPage) AddLink(uri string, rect math32.Box2) {
 	} else {
 		annot["Contents"] = uri
 		annot["A"] = pdfDict{
+			"Type":         pdfName("Action"),
 			"S":            pdfName("URI"),
 			pdfName("URI"): uri,
 		}
