@@ -37,6 +37,12 @@ func (a *App) AddEventListeners() {
 	AddEventListener(g, "beforeinput", a.OnBeforeInput)
 	AddEventListener(g.Get("visualViewport"), "resize", a.OnResize)
 	AddEventListener(g, "blur", a.OnBlur)
+
+	// See https://stackoverflow.com/a/57795495
+	if g.Get("matchMedia").Truthy() {
+		pcs := g.Call("matchMedia", "(prefers-color-scheme: dark)")
+		AddEventListener(pcs, "change", a.OnThemeChange)
+	}
 }
 
 func AddEventListener(v js.Value, nm string, fn func(this js.Value, args []js.Value) any, opts ...map[string]any) {
@@ -268,5 +274,10 @@ func (a *App) OnResize(this js.Value, args []js.Value) any {
 
 func (a *App) OnBlur(this js.Value, args []js.Value) any {
 	a.KeyMods = 0
+	return nil
+}
+
+func (a *App) OnThemeChange(this js.Value, args []js.Value) any {
+	a.Event.Window(events.ScreenUpdate)
 	return nil
 }
