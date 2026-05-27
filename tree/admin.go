@@ -33,6 +33,30 @@ func New[T NodeValue](parent ...Node) *T { //yaegi:add
 	return n
 }
 
+// New returns a new node of the given type with the given optional parent.
+// If the name is unspecified, it defaults to the ID (kebab-case) name of
+// the type, plus the [Node.NumLifetimeChildren] of the parent.
+func NewAtAfter[T NodeValue](parent ...Node) *T { //parent at_after
+	n := new(T)
+	ni := any(n).(Node)
+	InitNode(ni)
+	p := parent[0]
+	for childi, child := range p.AsTree().Children {
+		if child == parent[1] {
+			if childi+2 <= len(p.AsTree().Children) {
+				p.AsTree().Children = append(p.AsTree().Children[:childi+2], p.AsTree().Children[childi+1:]...)
+				p.AsTree().Children[childi+1] = ni
+			} else {
+				p.AsTree().Children = append(p.AsTree().Children, ni)
+			}
+			SetParent(ni, p)
+			return n
+		}
+	}
+	panic("not found after child at parent error.")
+	return n
+}
+
 // NewOfType returns a new node of the given [types.Type] with the given optional parent.
 // If the name is unspecified, it defaults to the ID (kebab-case) name of
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
