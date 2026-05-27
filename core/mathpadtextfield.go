@@ -205,7 +205,7 @@ func (tf *MathpadTextField) Init() {
 	tf.AddContextMenu(tf.contextMenu)
 
 	tf.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
+		//s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(false, abilities.ScrollableUnattended)
 		tf.CursorWidth.Dp(1)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
@@ -275,27 +275,27 @@ func (tf *MathpadTextField) Init() {
 		s.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	})
 
-	tf.handleKeyEvents()
+	//tf.handleKeyEvents()
 	tf.OnFirst(events.Change, func(e events.Event) {
 		tf.validate()
 		if tf.error != nil {
 			e.SetHandled()
 		}
 	})
-	tf.OnClick(func(e events.Event) {
-		if !tf.IsReadOnly() {
-			tf.SetFocus()
-		}
-		switch e.MouseButton() {
-		case events.Left:
-			tf.setCursorFromPixel(e.Pos(), e.SelectMode())
-		case events.Middle:
-			if !tf.IsReadOnly() {
-				tf.paste()
-			}
-		}
-		tf.startCursor()
-	})
+	// tf.OnClick(func(e events.Event) {
+	// 	if !tf.IsReadOnly() {
+	// 		tf.SetFocus()
+	// 	}
+	// 	switch e.MouseButton() {
+	// 	case events.Left:
+	// 		tf.setCursorFromPixel(e.Pos(), e.SelectMode())
+	// 	case events.Middle:
+	// 		if !tf.IsReadOnly() {
+	// 			tf.paste()
+	// 		}
+	// 	}
+	// 	tf.startCursor()
+	// })
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if tf.IsReadOnly() {
 			return
@@ -305,6 +305,7 @@ func (tf *MathpadTextField) Init() {
 		}
 		e.SetHandled()
 		tf.selectWord()
+		fmt.Println("5 tf.startCursor()")
 		tf.startCursor()
 	})
 	tf.On(events.TripleClick, func(e events.Event) {
@@ -316,27 +317,28 @@ func (tf *MathpadTextField) Init() {
 		}
 		e.SetHandled()
 		tf.selectAll()
+		fmt.Println("6 tf.startCursor()")
 		tf.startCursor()
 	})
-	tf.On(events.SlideStart, func(e events.Event) {
-		e.SetHandled()
-		tf.SetState(true, states.Sliding)
-		if tf.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
-			tf.setCursorFromPixel(e.Pos(), e.SelectMode())
-		} else {
-			tf.cursorPos = tf.pixelToCursor(e.Pos())
-			if !tf.selectMode {
-				tf.selectModeToggle()
-			}
-		}
-		tf.startCursor()
-	})
-	tf.On(events.SlideMove, func(e events.Event) {
-		e.SetHandled()
-		tf.selectMode = true // always
-		tf.setCursorFromPixel(e.Pos(), events.SelectOne)
-		tf.startCursor()
-	})
+	// tf.On(events.SlideStart, func(e events.Event) {
+	// 	e.SetHandled()
+	// 	tf.SetState(true, states.Sliding)
+	// 	if tf.selectMode || e.SelectMode() != events.SelectOne { // extend existing select
+	// 		tf.setCursorFromPixel(e.Pos(), e.SelectMode())
+	// 	} else {
+	// 		tf.cursorPos = tf.pixelToCursor(e.Pos())
+	// 		if !tf.selectMode {
+	// 			tf.selectModeToggle()
+	// 		}
+	// 	}
+	// 	tf.startCursor()
+	// })
+	// tf.On(events.SlideMove, func(e events.Event) {
+	// 	e.SetHandled()
+	// 	tf.selectMode = true // always
+	// 	tf.setCursorFromPixel(e.Pos(), events.SelectOne)
+	// 	tf.startCursor()
+	// })
 	tf.OnClose(func(e events.Event) {
 		tf.editDone() // todo: this must be protected against something else, for race detector
 	})
@@ -350,13 +352,20 @@ func (tf *MathpadTextField) Init() {
 	// 	fmt.Println("mousedown", tf.selectInit)
 	// })
 	// tf.On(events.MouseUp, func(e events.Event) {
+	// 	fmt.Println("mathpadtextfield mouseup at", e.Pos(), e.Pos().Sub(tf.Geom.contentRect().Min), tf.Geom.contentRect().Max.Sub(e.Pos()))
 	// 	endpos := tf.pixelToCursor(e.Pos())
 	// 	if tf.selectInit == endpos {
-	// 		tf.cursorPos = endpos
-	// 		tf.updateLinePos()
-	// 		tf.clearSelected()
-	// 		tf.NeedsRender()
-	// 		tf.startCursor()
+	// 		if e.Pos().Sub(tf.Geom.contentRect().Min).X > 2 && tf.Geom.contentRect().Max.Sub(e.Pos()).X > 2 {
+	// 			//e.SetHandled()
+	// 			tf.cursorPos = endpos
+	// 			tf.updateLinePos()
+	// 			tf.clearSelected()
+	// 			tf.NeedsRender()
+	// 			fmt.Println("1 tf.startCursor()")
+	// 			tf.startCursor()
+	// 		} else {
+	// 			panic("error")
+	// 		}
 	// 	} else {
 	// 		tf.cursorPos = endpos
 	// 		tf.selectRegionUpdate(endpos)
@@ -367,7 +376,8 @@ func (tf *MathpadTextField) Init() {
 	// 		fmt.Println("tf.dispRange.End", tf.dispRange.End)
 	// 		fmt.Println("tf.cursorPos", tf.cursorPos)
 	// 		tf.updateCursorPosition()
-	// 		tf.startCursor()
+	// 		fmt.Println("2 tf.startCursor()")
+	// 		//tf.startCursor()
 	// 		tf.NeedsRender()
 	// 		fmt.Println("tf.cursorPos", tf.cursorPos)
 	// 	}
@@ -480,24 +490,24 @@ func (tf *MathpadTextField) Destroy() {
 func (tf *MathpadTextField) selectToStartByPos(pos image.Point, curposAtLeft bool) {
 	tf.selectInit = 0
 	endpos := tf.pixelToCursor(pos)
-	if endpos != 0 {
-		if curposAtLeft {
-			tf.cursorPos = 0
-		} else {
-			tf.cursorPos = endpos
-		}
-		tf.selectRegionUpdate(endpos)
-		fmt.Println("selectToStartByPos", "tf", tf, "endpos", endpos)
-		tf.dispRange.Start = tf.selectRange.Start
-		fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.Start", tf.dispRange.Start)
-		tf.dispRange.End = tf.selectRange.End
-		fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.End", tf.dispRange.End)
-		fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
-		tf.updateCursorPosition()
-		//tf.startCursor()
-		tf.NeedsRender()
-		fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
+	//if endpos != 0 {
+	if curposAtLeft {
+		tf.cursorPos = 0
+	} else {
+		tf.cursorPos = endpos
 	}
+	tf.selectRegionUpdate(endpos)
+	fmt.Println("selectToStartByPos", "tf", tf, "endpos", endpos)
+	tf.dispRange.Start = tf.selectRange.Start
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.Start", tf.dispRange.Start)
+	tf.dispRange.End = tf.selectRange.End
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.End", tf.dispRange.End)
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
+	tf.updateCursorPosition()
+	//tf.startCursor()
+	tf.NeedsRender()
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
+	//}
 }
 
 func (tf *MathpadTextField) selectToEndByPos(pos image.Point, curposAtLeft bool) {
@@ -1063,13 +1073,15 @@ func (tf *MathpadTextField) insertAtCursor(str string) {
 	}
 	rs := []rune(str)
 	rsl := len(rs)
-	nt := append(tf.editText, rs...)               // first append to end
+	nt := append(tf.editText, rs...) // first append to end
+	fmt.Println("insertAtCursor", tf.cursorPos, rsl, str, len(nt), nt)
 	copy(nt[tf.cursorPos+rsl:], nt[tf.cursorPos:]) // move stuff to end
 	copy(nt[tf.cursorPos:], rs)                    // copy into position
 	tf.editText = nt
 	tf.dispRange.End += rsl
 	tf.textEdited()
-	tf.cursorForward(rsl)
+	tf.cursorPos += rsl
+	fmt.Println("insertAtCursor tf.cursorPos", tf.cursorPos)
 }
 
 func (tf *MathpadTextField) contextMenu(m *Scene) {
@@ -1238,17 +1250,24 @@ func (tf *MathpadTextField) hasWordWrap() bool {
 // in the overall RenderAll of all the text.
 // These positions can be out of visible range: see CharRenderPos
 func (tf *MathpadTextField) charPos(idx int) math32.Vector2 {
-	if idx <= 0 || len(tf.renderAll.Lines) == 0 {
+	fmt.Println("charPos tf.editText", tf.editText)
+	if idx <= 0 {
 		return math32.Vector2{}
 	}
+	tf.SizeUp()
+	fmt.Println("1charPos tf.editText", tf.editText)
 	bb := tf.renderAll.RuneBounds(idx)
+	fmt.Println("2charPos tf.editText", tf.editText)
 	if idx >= len(tf.editText) {
 		if tf.numLines > 1 && tf.editText[len(tf.editText)-1] == ' ' {
+			fmt.Println("3charPos tf.editText", tf.editText)
 			bb.Max.X += tf.lineHeight * 0.2
 			return bb.Max
 		}
+		fmt.Println("4charPos tf.editText", tf.editText)
 		return bb.Max
 	}
+	fmt.Println("5charPos tf.editText", tf.editText)
 	return bb.Min
 }
 
@@ -1265,7 +1284,8 @@ func (tf *MathpadTextField) charRenderPos(charidx int) math32.Vector2 {
 	pos := tf.effPos
 	sc := tf.Scene
 	pos = pos.Add(math32.FromPoint(sc.SceneGeom.Pos))
-	cpos := tf.relCharPos(0, charidx)
+	fmt.Println("charRenderPos", "pos", pos, "tf.dispRange.Start", tf.dispRange.Start, "charidx", charidx)
+	cpos := tf.relCharPos(tf.dispRange.Start, charidx)
 	return pos.Add(cpos)
 }
 
@@ -1316,7 +1336,9 @@ func (tf *MathpadTextField) updateCursorPosition() {
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 	if sp, ok := ms.Sprites.SpriteByNameNoLock(MathpadTextFieldSpriteName); ok {
-		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
+		pt := tf.charRenderPos(tf.cursorPos).ToPointFloor()
+		fmt.Println("updateCursorPosition", pt)
+		sp.EventBBox.Min = pt
 	}
 }
 
@@ -1527,6 +1549,7 @@ func (tf *MathpadTextField) handleKeyEvents() {
 		if !tf.StateIs(states.Focused) && kf == keymap.Abort {
 			return
 		}
+		fmt.Println("MathpadTextField handleKeyEvents", kf)
 		tf.startCursor()
 
 		// first all the keys that work for both inactive and active
@@ -1586,21 +1609,23 @@ func (tf *MathpadTextField) handleKeyEvents() {
 			tf.cancelComplete()
 			tf.selectAll()
 		case keymap.Copy:
-			e.SetHandled()
-			tf.cancelComplete()
-			tf.copy()
+			// e.SetHandled()
+			// tf.cancelComplete()
+			// tf.copy()
+			fmt.Println("keymap.Copy return")
+			e.ClearHandled()
+			return
 		}
 		if tf.IsReadOnly() || e.IsHandled() {
 			return
 		}
 		switch kf {
 		case keymap.Enter:
-			fallthrough
 		case keymap.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
-			e.SetHandled()
-			tf.editText = append(tf.editText, '\t')
-			tf.dispRange.End += 1
-			tf.textEdited()
+			// e.SetHandled()
+			// tf.editText = append(tf.editText, '\t')
+			// tf.dispRange.End += 1
+			// tf.textEdited()
 			//tf.cancelComplete()
 			//tf.editDone()
 			//tf.focusNext()
@@ -1609,10 +1634,10 @@ func (tf *MathpadTextField) handleKeyEvents() {
 			tf.cancelComplete()
 			tf.editDone()
 		case keymap.FocusPrev:
-			e.SetHandled()
-			tf.cancelComplete()
-			tf.editDone()
-			tf.focusPrev()
+			// e.SetHandled()
+			// tf.cancelComplete()
+			// tf.editDone()
+			// tf.focusPrev()
 		case keymap.Abort: // esc
 			e.SetHandled()
 			tf.cancelComplete()
@@ -1625,6 +1650,7 @@ func (tf *MathpadTextField) handleKeyEvents() {
 				backcnt = tf.selectRange.End - tf.selectRange.Start
 				tf.cursorPos = tf.selectRange.Start
 			}
+			fmt.Println("4 tf.startCursor()")
 			tf.startCursor()
 			tf.saveUndo()
 			tf.cursorBackspace(backcnt)
@@ -1693,24 +1719,21 @@ func (tf *MathpadTextField) handleKeyEvents() {
 	tf.OnFocus(func(e events.Event) {
 		if tf.IsReadOnly() {
 			e.SetHandled()
-		} else {
-			tf.startCursor()
 		}
-		tf.selectInit = tf.pixelToCursor(e.Pos())
-		tf.selectRange.Start = 0
-		tf.selectRange.End = 0
-		tf.selectMode = true
-		tf.selectModeShift = true
-
-		selFocusMathpadTextfields = append(selFocusMathpadTextfields, tf)
+		// tf.selectInit = tf.pixelToCursor(e.Pos())
+		// tf.selectRange.Start = 0
+		// tf.selectRange.End = 0
+		// tf.selectMode = true
+		// tf.selectModeShift = true
+		// selFocusMathpadTextfields = append(selFocusMathpadTextfields, tf)
 	})
 	tf.OnFocusLost(func(e events.Event) {
-
 		if tf.IsReadOnly() {
 			e.SetHandled()
 			return
 		}
-		tf.editDone()
+		//tf.editDone()
+		tf.stopCursor()
 	})
 }
 
@@ -1750,6 +1773,7 @@ func (tf *MathpadTextField) iconsSize() math32.Vector2 {
 }
 
 func (tf *MathpadTextField) SizeUp() {
+	fmt.Println("SizeUp")
 	tf.renderVisible = nil
 	tf.Frame.SizeUp()
 	txt := tf.editText
@@ -1774,6 +1798,7 @@ func (tf *MathpadTextField) SizeUp() {
 }
 
 func (tf *MathpadTextField) SizeDown(iter int) bool {
+	fmt.Println("SizeDown")
 	sz := &tf.Geom.Size
 	prevContent := sz.Actual.Content
 	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())

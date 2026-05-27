@@ -4,18 +4,22 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"reflect"
 
+	//"reflect"
+	"unicode"
+
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/styles/states"
+
+	//"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -45,11 +49,11 @@ func (mp *Mathpad) Init() {
 	mp.Maker(func(p *tree.Plan) {
 		tree.AddAt(p, "frame", func(w *Frame) {
 			mp.toolbar = w
-			runallbtn := NewButton(w).SetIcon(icons.Add).SetText("Run all")
+			runallbtn := NewButton(w).SetText("Run all")
 			runallbtn.OnClick(func(e events.Event) {
 
 			})
-			runlinebtn := NewButton(w).SetIcon(icons.Add).SetText("Run line")
+			runlinebtn := NewButton(w).SetText("Run line")
 			runlinebtn.OnClick(func(e events.Event) {
 
 			})
@@ -57,12 +61,7 @@ func (mp *Mathpad) Init() {
 
 		tree.AddAt(p, "Mathpadframe", func(w *MathpadFrame) {
 			mp.sentsfrm = w
-			w.Styler(func(s *styles.Style) {
-				s.Overflow.Set(styles.OverflowScroll) // have scrollbar
-				s.Grow.Set(1, 1)
-				s.Direction = styles.Column
-			})
-			NewMathpadRow(w, nil, "")
+			NewMathpadRow(w, nil, "", true)
 		})
 	})
 }
@@ -75,9 +74,11 @@ type MathpadFrame struct {
 	CursorColor image.Image
 	CursorPos   image.Point
 
-	selectInitRowMain                 *MathpadRow
-	selectInitPos                     image.Point
-	selectInitRow, selectInitRowChild tree.Node
+	selectInitPos      image.Point
+	selectInitRow      *MathpadRow
+	selectInitRowChild Widget
+
+	focusChild tree.Node
 }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.MathpadFrame", IDName: "Mathpadframe", Doc: "Mathpad divide widgets into logical groups and give users the ability\nto math execute.", Embeds: []types.Field{{Name: "MathpadFrame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}}})
@@ -89,7 +90,7 @@ const (
 func (mpfr *MathpadFrame) Init() {
 	mpfr.Frame.Init()
 	mpfr.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Selectable, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Draggable, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable, abilities.ScrollableUnattended, abilities.Scrollable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Draggable, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable, abilities.ScrollableUnattended, abilities.Scrollable)
 		//s.GrowWrap = false
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
@@ -100,90 +101,268 @@ func (mpfr *MathpadFrame) Init() {
 		s.Align.Items = styles.Start
 		s.Overflow.Set(styles.OverflowAuto)
 		mpfr.CursorColor = colors.Scheme.Primary.Base
+		s.Overflow.Set(styles.OverflowScroll) // have scrollbar
+		s.Grow.Set(1, 1)
+		s.Direction = styles.Column
 	})
-	mpfr.OnClick(func(e events.Event) {
-		fmt.Println("Mathpadframe clicked")
-		if !mpfr.IsReadOnly() {
-			mpfr.SetFocus()
-		}
-		switch e.MouseButton() {
-		case events.Left:
-			mpfr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-				fmt.Println("cwb pos", cwb.Geom.Pos, cwb.Geom.RelPos, e.Pos())
-				// if cwb.Geom.Pos.Content.Y-mpfr.Geom.Scroll.Y>=0 && cwb.Geom.Pos.Content.Y-mpfr.Geom.Scroll.Y<mpfr.SceneSize().Y {
-				// 	if cwb.Geom.Pos.Content.ToPoint().Y-mpfr.Geom.Scroll.ToPoint().Y>=e.Pos().Y && e.Pos().Y<cwb.Geom.Pos.Content.ToPoint().Y-mpfr.Geom.Scroll.ToPoint().Y+cwb.Geom.Size.Internal.Y {
-				// 		cwb.ForWidgetChildren(func(i int, cw1 Widget, cwb1 *WidgetBase) bool {
-				// 			if cwb1.Geom.Pos.Content.X>e.Pos().X && e.Pos().X<cwb1.Geom.Pos.Content.X+cwb1.Geom.Size.Internal.Y {
-				// 				mpfr.CursorPos=cwb1.Geom.RelPos.ToPoint().Add(cwb.Geom.RelPos.ToPoint())
-				// 				return false
-				// 			}
-				// 			fmt.Println("cwb pos", cwb.Geom.Pos, cwb.Geom.RelPos, e.Pos())
-				// 			return true
-				// 		})
-				// 		return false
-				// 	}
-				// }
-				// fmt.Println("cwb pos", cwb.Geom.Pos, cwb.Geom.RelPos, e.Pos())
-				return true
-			})
-		}
-		mpfr.CursorPos = e.Pos()
-		mpfr.startCursor()
-	})
+
+	// mpfr.OnClick(func(e events.Event) {
+	// 	fmt.Println("Mathpadframe clicked")
+	// 	if !mpfr.IsReadOnly() {
+	// 		mpfr.SetFocus()
+	// 	}
+	// 	switch e.MouseButton() {
+	// 	case events.Left:
+	// 		mpfr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	// 			fmt.Println("cwb pos", cwb.Geom.Pos, cwb.Geom.RelPos, e.Pos())
+	// 			// if cwb.Geom.Pos.Content.Y-mpfr.Geom.Scroll.Y>=0 && cwb.Geom.Pos.Content.Y-mpfr.Geom.Scroll.Y<mpfr.SceneSize().Y {
+	// 			// 	if cwb.Geom.Pos.Content.ToPoint().Y-mpfr.Geom.Scroll.ToPoint().Y>=e.Pos().Y && e.Pos().Y<cwb.Geom.Pos.Content.ToPoint().Y-mpfr.Geom.Scroll.ToPoint().Y+cwb.Geom.Size.Internal.Y {
+	// 			// 		cwb.ForWidgetChildren(func(i int, cw1 Widget, cwb1 *WidgetBase) bool {
+	// 			// 			if cwb1.Geom.Pos.Content.X>e.Pos().X && e.Pos().X<cwb1.Geom.Pos.Content.X+cwb1.Geom.Size.Internal.Y {
+	// 			// 				mpfr.CursorPos=cwb1.Geom.RelPos.ToPoint().Add(cwb.Geom.RelPos.ToPoint())
+	// 			// 				return false
+	// 			// 			}
+	// 			// 			fmt.Println("cwb pos", cwb.Geom.Pos, cwb.Geom.RelPos, e.Pos())
+	// 			// 			return true
+	// 			// 		})
+	// 			// 		return false
+	// 			// 	}
+	// 			// }
+	// 			// fmt.Println("cwb pos", cwb.Geom.Pos, cwb.Geom.RelPos, e.Pos())
+	// 			return true
+	// 		})
+	// 	}
+	// 	mpfr.CursorPos = e.Pos()
+	// 	mpfr.startCursor()
+	// })
 	mpfr.On(events.MouseDown, func(e events.Event) {
 		mpfr.selectInitPos = e.Pos()
-		mpfr.selectInitRowMain, mpfr.selectInitRow, mpfr.selectInitRowChild = mpfr.pixelToRow(e.Pos())
-		fmt.Println("Mathpad mousedown", e.Pos(), "mpfr.selectInitRowMain", mpfr.selectInitRowMain, "mpfr.selectInitRow", mpfr.selectInitRow, "mpfr.selectInitRowChild", mpfr.selectInitRowChild)
+		mpfr.selectInitRow, mpfr.selectInitRowChild = mpfr.pixelToRow(e.Pos())
+		fmt.Println("Mathpad mousedown", e.Pos(), "mpfr.selectInitRow", mpfr.selectInitRow, "mpfr.selectInitRowChild", mpfr.selectInitRowChild)
 	})
 	mpfr.On(events.MouseUp, func(e events.Event) {
-		selectUpRowMain, selectUpRow, selectUpRowChild := mpfr.pixelToRow(e.Pos())
-		rowcmprl := mpfr.compareRow(mpfr.selectInitRowMain, selectUpRowMain)
-		fmt.Println("Mathpad mouseup", e.Pos(), "rowcmprl", rowcmprl, "selectUpRowMain", selectUpRow, "selectUpRow", selectUpRow, "selectUpRowChild", selectUpRowChild)
-		if rowcmprl == 0 {
+		if e.Pos().Eq(mpfr.selectInitPos) {
+			mpfr.focusChild = mpfr.selectInitRowChild
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				wid.cursorPos = wid.pixelToCursor(e.Pos())
+				wid.startCursor()
+			default:
+				mpfr.CursorPos = e.Pos()
+			}
+			fmt.Println("mpfr.SetFocus()")
+			mpfr.SetFocus()
+		} else {
+			Row, RowChild := mpfr.pixelToRow(e.Pos())
+			fmt.Println("Row, RowChild", Row, RowChild, "mpfr.selectInitRow, mpfr.selectInitRowChild", mpfr.selectInitRow, mpfr.selectInitRowChild)
+			if RowChild == mpfr.selectInitRowChild { //select in row
+				fmt.Println("RowChild == mpfr.selectInitRowChild")
+			} else {
+				rowcmprl := mpfr.compareRow(mpfr.selectInitRow, Row)
+				fmt.Println("rowcmprl", rowcmprl)
+				if rowcmprl == 0 {
 
-		} else if rowcmprl < 0 {
-			for childi, child := range mpfr.Children {
-				if child == mpfr.selectInitRowMain {
-					child.(*MathpadRow).selectToEndByPos(mpfr.selectInitPos, false)
-					for i := childi + 1; i < len(mpfr.Children); i += 1 {
-						if mpfr.Children[i] != selectUpRowMain {
-							mpfr.Children[i].(*MathpadRow).selectAll()
+				} else if rowcmprl < 0 {
+					for childi := 0; childi < len(mpfr.Children); childi += 1 {
+						child := mpfr.Children[childi]
+						if child == mpfr.selectInitRow {
+							mpfr.selectInitRowChild.(*MathpadTextField).selectToEndByPos(mpfr.selectInitPos, false)
+							fmt.Println("cwb.Children[2]")
+							for childi = childi + 1; childi < len(mpfr.Children); childi += 1 {
+								if mpfr.Children[childi] != Row {
+									fmt.Println("cwb.Children[3]", mpfr.Children[childi])
+									mpfr.Children[childi].(*MathpadRow).Children[1].(*MathpadTextField).selectAll()
+								} else {
+									break
+								}
+							}
+							RowChild.(*MathpadTextField).clearSelected()
+							RowChild.(*MathpadTextField).selectToStartByPos(e.Pos(), false)
+							RowChild.(*MathpadTextField).toggleCursor(true)
 						} else {
-							break
+							child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
 						}
 					}
-					selectUpRowMain.selectToStartByPos(e.Pos(), false)
-					break
+				} else if rowcmprl > 0 {
+					for childi := 0; childi < len(mpfr.Children); childi += 1 {
+						child := mpfr.Children[childi]
+						if child == Row {
+							RowChild.(*MathpadTextField).clearSelected()
+							RowChild.(*MathpadTextField).selectToEndByPos(e.Pos(), false)
+							RowChild.(*MathpadTextField).cursorPos = RowChild.(*MathpadTextField).pixelToCursor(e.Pos())
+							RowChild.(*MathpadTextField).toggleCursor(true)
+							RowChild.(*MathpadTextField).startCursor()
+							fmt.Println("cwb.Children[2]")
+							for childi = childi + 1; childi < len(mpfr.Children); childi += 1 {
+								if mpfr.Children[childi] != mpfr.selectInitRow {
+									fmt.Println("cwb.Children[3]", mpfr.Children[childi])
+									mpfr.Children[childi].(*MathpadRow).Children[1].(*MathpadTextField).selectAll()
+								} else {
+									break
+								}
+							}
+							mpfr.selectInitRowChild.(*MathpadTextField).selectToStartByPos(mpfr.selectInitPos, false)
+						} else {
+							child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
+						}
+					}
 				}
 			}
-		} else if rowcmprl > 0 {
-			for childi, child := range mpfr.Children {
-				if child == selectUpRowMain {
-					selectUpRowMain.selectToEndByPos(e.Pos(), false)
-					for i := childi + 1; i < len(mpfr.Children); i += 1 {
-						if mpfr.Children[i] != mpfr.selectInitRowMain {
-							mpfr.Children[i].(*MathpadRow).selectAll()
+		}
+		// if mpfr.selectInitRowMain != nil {
+		// 	if e.Pos().Eq(mpfr.selectInitPos) {
+		// 		focusChild=
+		// 	}
+		// 	selectUpRowMain, selectUpRow, selectUpRowChild := mpfr.pixelToRow(e.Pos())
+		// 	rowcmprl := mpfr.compareRow(mpfr.selectInitRowMain, selectUpRowMain)
+		// 	fmt.Println("Mathpad mouseup", e.Pos(), "rowcmprl", rowcmprl, "selectUpRowMain", selectUpRow, "selectUpRow", selectUpRow, "selectUpRowChild", selectUpRowChild)
+		// 	if rowcmprl == 0 {
+
+		// 	} else if rowcmprl < 0 {
+		// 		for childi, child := range mpfr.Children {
+		// 			if child == mpfr.selectInitRowMain {
+		// 				child.(*MathpadRow).selectToEndByPos(mpfr.selectInitPos, false)
+		// 				for i := childi + 1; i < len(mpfr.Children); i += 1 {
+		// 					if mpfr.Children[i] != selectUpRowMain {
+		// 						mpfr.Children[i].(*MathpadRow).selectAll()
+		// 					} else {
+		// 						break
+		// 					}
+		// 				}
+		// 				selectUpRowMain.selectToStartByPos(e.Pos(), false)
+		// 				selectUpRowChild.(*MathpadTextField).toggleCursor(true)
+		// 				break
+		// 			}
+		// 		}
+		// 	} else if rowcmprl > 0 {
+		// 		for childi, child := range mpfr.Children {
+		// 			if child == selectUpRowMain {
+		// 				selectUpRowMain.selectToEndByPos(e.Pos(), false)
+		// 				for i := childi + 1; i < len(mpfr.Children); i += 1 {
+		// 					if mpfr.Children[i] != mpfr.selectInitRowMain {
+		// 						mpfr.Children[i].(*MathpadRow).selectAll()
+		// 					} else {
+		// 						break
+		// 					}
+		// 				}
+		// 				mpfr.selectInitRowMain.selectToStartByPos(mpfr.selectInitPos, false)
+		// 				selectUpRowChild.(*MathpadTextField).cursorPos = selectUpRowChild.(*MathpadTextField).pixelToCursor(e.Pos())
+		// 				selectUpRowChild.(*MathpadTextField).toggleCursor(true)
+		// 				break
+		// 			}
+		// 		}
+		// 	}
+		// } else {
+		// 	mpfr.CursorPos = e.Pos()
+		// 	mpfr.startCursor()
+		// }
+	})
+
+	mpfr.OnKeyChord(func(e events.Event) {
+		kf := keymap.Of(e.KeyChord())
+		fmt.Println("mpfr OnKeyChord", kf)
+		// first all the keys that work for both inactive and active
+		switch kf {
+		case keymap.MoveRight:
+			//e.SetHandled()
+		case keymap.MoveLeft:
+			//e.SetHandled()
+		case keymap.MoveDown:
+		case keymap.MoveUp:
+		case keymap.Home:
+		case keymap.End:
+			//e.SetHandled()
+		case keymap.SelectMode:
+			//e.SetHandled()
+		case keymap.CancelSelect:
+			//e.SetHandled()
+		case keymap.SelectAll:
+			//e.SetHandled()
+		case keymap.Copy:
+			e.SetHandled()
+			mpfr.Clipboard().Write(mimedata.NewText(mpfr.selection()))
+		}
+		if e.IsHandled() {
+			return
+		}
+		switch kf {
+		case keymap.Enter:
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				text := wid.Text()
+				wid.SetText(string([]rune(text)[:wid.cursorPos]))
+				newlinetext := string([]rune(text)[wid.cursorPos:])
+				mpfr.selectInitRow, mpfr.selectInitRowChild = NewMathpadRow(mpfr, mpfr.selectInitRow, newlinetext, true)
+				mpfr.focusChild = mpfr.selectInitRowChild
+				mpfr.selectInitRowChild.(*MathpadTextField).cursorPos = 0
+				mpfr.selectInitRowChild.(*MathpadTextField).startCursor()
+				mpfr.Update()
+				mpfr.SetFocus()
+				e.SetHandled()
+			default:
+			}
+		case keymap.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
+			//e.SetHandled()
+		case keymap.Accept: // ctrl+enter
+			//e.SetHandled()
+		case keymap.FocusPrev:
+			//e.SetHandled()
+		case keymap.Abort: // esc
+			//e.SetHandled()
+		case keymap.Backspace:
+		case keymap.Delete:
+		case keymap.Cut:
+		case keymap.Paste:
+		case keymap.Undo:
+		case keymap.Redo:
+		case keymap.None:
+			if unicode.IsPrint(e.KeyRune()) {
+				if !e.HasAnyModifier(key.Control, key.Meta) {
+					e.SetHandled()
+					switch wid := mpfr.focusChild.(type) {
+					case *MathpadTextField:
+						wid.saveUndo()
+						wid.insertAtCursor(string(e.KeyRune()))
+						if e.KeyRune() == ' ' {
+							wid.cancelComplete()
 						} else {
-							break
+							wid.offerComplete()
 						}
+						//wid.Send(events.Input, e)
+						wid.updateCursorPosition()
+						wid.startCursor()
+					default:
 					}
-					mpfr.selectInitRowMain.selectToStartByPos(mpfr.selectInitPos, false)
-					break
 				}
 			}
 		}
 	})
 }
 
-func (mpfr *MathpadFrame) pixelToRow(pos image.Point) (out *MathpadRow, row, rowchild tree.Node) {
+func (mpfr *MathpadFrame) selection() (out string) {
+	outbytes := []byte{}
 	for _, child := range mpfr.Children {
-		if pos.In(child.(*MathpadRow).Geom.totalRect()) {
-			fmt.Println("MathpadFrame pos to row pos", pos, "to", child.(*MathpadRow).PointToRelPos(pos))
-			row, rowhild := child.(*MathpadRow).pixelToWidget(pos)
-			return child.(*MathpadRow), row, rowhild
-		}
+		outbytes = append(outbytes, []byte(child.(*MathpadRow).Children[0].(*Frame).Children[1].(*MathpadTextField).selection())...)
 	}
-	return nil, nil, nil
+	return string(outbytes)
+}
+
+func (mpfr *MathpadFrame) clearSelect() {
+	for _, child := range mpfr.Children {
+		child.(*MathpadRow).Children[0].(*Frame).Children[1].(*MathpadTextField).clearSelected()
+	}
+}
+
+func (mpfr *MathpadFrame) pixelToRow(pos image.Point) (row *MathpadRow, rowchild Widget) {
+	mpfr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if pos.In(cwb.Geom.totalRect()) {
+			rowchild = cw.(*MathpadRow).pixelToWidgetBase(pos)
+			row = cw.(*MathpadRow)
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	return row, rowchild
 }
 
 func (mp *MathpadFrame) compareRow(row1, row2 *MathpadRow) (out int) {
@@ -235,74 +414,76 @@ type MathpadRow struct {
 	painter *paint.Painter
 }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.MathpadRow", IDName: "Mathpadrow", Doc: "Mathpad divide widgets into logical groups and give users the ability\nto math execute.", Embeds: []types.Field{{Name: "MathpadFrame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.MathpadRow", IDName: "mathpadrow", Doc: "Mathpad divide widgets into logical groups and give users the ability\nto math execute.", Embeds: []types.Field{{Name: "MathpadFrame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}}})
 
-func NewMathpadRow(parent, after tree.Node, text string) *MathpadRow {
-	var row *MathpadRow
+func NewMathpadRow(parent, after tree.Node, text string, inrow bool) (row *MathpadRow, rowchild Widget) {
 	if after == nil {
 		row = tree.New[MathpadRow](parent)
 	} else {
 		row = tree.NewAtAfter[MathpadRow](parent, after)
 	}
-	row1 := NewFrameRow(row)
-	NewText(row1).SetText(" in:")
-	inedit := NewMathpadTextField(row1).SetText(text)
+	if inrow {
+		NewText(row).SetText(" in:")
+	} else {
+		NewText(row).SetText("out:")
+	}
+	inedit := NewMathpadTextField(row).SetText(text)
 	inedit.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Max.X.Ch(-1)
 	})
-	inedit.OnKeyChord(func(e events.Event) {
-		if keymap.Of(e.KeyChord()) == keymap.Enter {
-			text := inedit.Text()
-			inedit.SetText(string([]rune(text)[:inedit.cursorPos]))
-			newlinetext := string([]rune(text)[inedit.cursorPos:])
-			NewMathpadRow(parent, row, newlinetext)
-			parent.(*MathpadFrame).Update()
-			inedit.SetFocus()
-		} else if keymap.Of(e.KeyChord()) == keymap.Backspace {
-			if inedit.cursorPos == 0 {
-				text := inedit.Text()
-				if text == "" {
-					for childi, child := range parent.AsTree().Children {
-						if child == row {
-							parent.AsTree().Children = append(parent.AsTree().Children[:childi], parent.AsTree().Children[childi+1:]...)
-							if childi > 0 {
-								ed := parent.AsTree().Children[childi-1].AsTree().Children[0].AsTree().Children[1].(*TextField)
-								ed.cursorPos = len([]rune(ed.Text()))
-								ed.SetText(ed.Text() + text)
-								ed.SetFocus()
-							}
-						}
-					}
-					parent.(*MathpadFrame).Update()
-				} else {
-					for childi, child := range parent.AsTree().Children {
-						if child == row {
-							if childi > 0 {
-								ed := parent.AsTree().Children[childi-1].AsTree().Children[0].AsTree().Children[1].(*TextField)
-								ed.cursorPos = len([]rune(ed.Text()))
-								ed.SetText(ed.Text() + text)
-								ed.SetFocus()
-								parent.AsTree().Children = append(parent.AsTree().Children[:childi], parent.AsTree().Children[childi+1:]...)
-							}
-						}
-					}
-					parent.(*MathpadFrame).Update()
-				}
-				e.SetHandled()
-			}
-		}
-	})
+	// inedit.OnKeyChord(func(e events.Event) {
+	// 	kf := keymap.Of(e.KeyChord())
+	// 	fmt.Println("inedit.OnKeyChord", kf)
+	// 	switch kf {
+	// 	case keymap.Copy:
+	// 		parent.(*MathpadFrame).Send(events.KeyChord, e)
+	// 	case keymap.Enter:
+	// 		text := inedit.Text()
+	// 		inedit.SetText(string([]rune(text)[:inedit.cursorPos]))
+	// 		newlinetext := string([]rune(text)[inedit.cursorPos:])
+	// 		NewMathpadRow(parent, row, newlinetext, true)
+	// 		parent.(*MathpadFrame).Update()
+	// 		e.SetHandled()
+	// 	case keymap.Backspace:
+	// 		if inedit.cursorPos == 0 {
+	// 			text := inedit.Text()
+	// 			if text == "" {
+	// 				for childi, child := range parent.AsTree().Children {
+	// 					if child == row {
+	// 						parent.AsTree().Children = append(parent.AsTree().Children[:childi], parent.AsTree().Children[childi+1:]...)
+	// 						if childi > 0 {
+	// 							ed := parent.AsTree().Children[childi-1].AsTree().Children[0].AsTree().Children[1].(*TextField)
+	// 							ed.cursorPos = len([]rune(ed.Text()))
+	// 							ed.SetText(ed.Text() + text)
+	// 							ed.SetFocus()
+	// 						}
+	// 					}
+	// 				}
+	// 				parent.(*MathpadFrame).Update()
+	// 			} else {
+	// 				for childi, child := range parent.AsTree().Children {
+	// 					if child == row {
+	// 						if childi > 0 {
+	// 							ed := parent.AsTree().Children[childi-1].AsTree().Children[0].AsTree().Children[1].(*TextField)
+	// 							ed.cursorPos = len([]rune(ed.Text()))
+	// 							ed.SetText(ed.Text() + text)
+	// 							ed.SetFocus()
+	// 							parent.AsTree().Children = append(parent.AsTree().Children[:childi], parent.AsTree().Children[childi+1:]...)
+	// 						}
+	// 					}
+	// 				}
+	// 				parent.(*MathpadFrame).Update()
+	// 			}
+	// 			e.SetHandled()
+	// 		}
+	// 	default:
+	// 		e.ClearHandled()
+	// 	}
+	// })
 	inedit.cursorPos = 0
 	inedit.SetFocus()
-	row2 := NewFrameRow(row)
-	NewText(row2).SetText("out:")
-	outtext := NewText(row2).SetText("")
-	outtext.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 0)
-	})
-	row2.SetState(true, states.Invisible)
-	return row
+	return row, inedit
 }
 
 func (mpr *MathpadRow) Init() {
@@ -317,27 +498,16 @@ func (mpr *MathpadRow) Init() {
 	})
 }
 
-func (mpr *MathpadRow) pixelToWidget(pos image.Point) (row, rowchild tree.Node) {
-	for _, child := range mpr.Children {
-		fmt.Println("MathpadRow pos", pos, "childrect", child.(*Frame).Geom.totalRect())
-		if pos.In(child.(*Frame).Geom.totalRect()) {
-			for _, child2 := range child.(*Frame).Children {
-				switch child2.(type) {
-				case *Text:
-					if pos.In(child2.(*Text).Geom.totalRect()) {
-						return child, child2
-					}
-				case *MathpadTextField:
-					if pos.In(child2.(*MathpadTextField).Geom.totalRect()) {
-						return child, child2
-					}
-				default:
-					panic("error type:" + reflect.TypeOf(child2).String())
-				}
-			}
+func (mpr *MathpadRow) pixelToWidgetBase(pos image.Point) (child Widget) {
+	mpr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		fmt.Println("cwb.Geom.totalRect()", cwb.Geom.TotalBBox)
+		if pos.In(cwb.Geom.TotalBBox) {
+			child = cw
+			return tree.Break
 		}
-	}
-	return nil, nil
+		return tree.Continue
+	})
+	return child
 }
 
 func (mpr *MathpadRow) selectAll() {
