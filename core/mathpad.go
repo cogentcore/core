@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
@@ -78,6 +79,12 @@ type MathpadFrame struct {
 	selectInitRow      *MathpadRow
 	selectInitRowChild Widget
 
+	selectStartRow      *MathpadRow
+	selectStartRowChild Widget
+
+	selectEndRow      *MathpadRow
+	selectEndRowChild Widget
+
 	focusChild tree.Node
 }
 
@@ -154,9 +161,28 @@ func (mpfr *MathpadFrame) Init() {
 			mpfr.SetFocus()
 		} else {
 			Row, RowChild := mpfr.pixelToRow(e.Pos())
+			if e.Pos().Sub(mpfr.selectInitPos).Y > 0 {
+				mpfr.selectStartRow = mpfr.selectInitRow
+				mpfr.selectStartRowChild = mpfr.selectInitRowChild
+				mpfr.selectEndRow = Row
+				mpfr.selectEndRowChild = RowChild
+			} else {
+				mpfr.selectStartRow = Row
+				mpfr.selectStartRowChild = RowChild
+				mpfr.selectEndRow = mpfr.selectInitRow
+				mpfr.selectEndRowChild = mpfr.selectInitRowChild
+			}
 			fmt.Println("Row, RowChild", Row, RowChild, "mpfr.selectInitRow, mpfr.selectInitRowChild", mpfr.selectInitRow, mpfr.selectInitRowChild)
 			if RowChild == mpfr.selectInitRowChild { //select in row
 				fmt.Println("RowChild == mpfr.selectInitRowChild")
+				RowChild.(*MathpadTextField).clearSelected()
+				if mpfr.selectInitPos.Sub(e.Pos()).X >= 0 {
+					RowChild.(*MathpadTextField).selectMiddle(e.Pos(), mpfr.selectInitPos, true)
+				} else {
+					RowChild.(*MathpadTextField).selectMiddle(mpfr.selectInitPos, e.Pos(), false)
+				}
+				RowChild.(*MathpadTextField).toggleCursor(true)
+				RowChild.(*MathpadTextField).startCursor()
 			} else {
 				rowcmprl := mpfr.compareRow(mpfr.selectInitRow, Row)
 				fmt.Println("rowcmprl", rowcmprl)
@@ -278,6 +304,41 @@ func (mpfr *MathpadFrame) Init() {
 			//e.SetHandled()
 		case keymap.SelectAll:
 			//e.SetHandled()
+		case keymap.Cut:
+			e.SetHandled()
+			mpfr.Clipboard().Write(mimedata.NewText(mpfr.selection()))
+			firstnosel := []rune{}
+			endnosel := []rune{}
+			var firstrow *MathpadRow
+			var firstrowi, lastrowi int = -1, -1
+			for i := 0; i < len(mpfr.Children); i += 1 {
+				child := mpfr.Children[i]
+				if child == mpfr.selectStartRow {
+					ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+					fmt.P("ed.selectRange.Start", ed.selectRange.Start)
+					firstnosel = ed.editText[:ed.selectRange.Start]
+					firstrow = child.(*MathpadRow)
+					firstrowi = i
+				}
+				if child == mpfr.selectEndRow {
+					ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+					fmt.P("ed.selectRange.End", ed.selectRange.End)
+					endnosel = ed.editText[ed.selectRange.End:]
+					lastrowi = i
+					break
+				}
+			}
+			fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
+			ed := firstrow.Children[1].(*MathpadTextField)
+			mpfr.focusChild = ed
+			ed.SetText(string(append(firstnosel, endnosel...)))
+			fmt.P("ed.editText", ed.editText)
+			ed.setCursorPos(len(firstnosel))
+			ed.startCursor()
+			if lastrowi-(firstrowi+1) >= 0 {
+				mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
+				mpfr.Update()
+			}
 		case keymap.Copy:
 			e.SetHandled()
 			mpfr.Clipboard().Write(mimedata.NewText(mpfr.selection()))
@@ -342,8 +403,12 @@ func (mpfr *MathpadFrame) Init() {
 func (mpfr *MathpadFrame) selection() (out string) {
 	outbytes := []byte{}
 	for _, child := range mpfr.Children {
-		outbytes = append(outbytes, []byte(child.(*MathpadRow).Children[0].(*Frame).Children[1].(*MathpadTextField).selection())...)
+		if child.(*MathpadRow).Children[1].(*MathpadTextField).hasSelection() {
+			outbytes = append(outbytes, []byte(child.(*MathpadRow).Children[1].(*MathpadTextField).selection())...)
+			outbytes = append(outbytes, '\n')
+		}
 	}
+	outbytes = bytes.TrimRight(outbytes, "\n")
 	return string(outbytes)
 }
 

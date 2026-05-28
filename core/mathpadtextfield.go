@@ -528,6 +528,42 @@ func (tf *MathpadTextField) selectToEndByPos(pos image.Point, curposAtLeft bool)
 	}
 }
 
+func (tf *MathpadTextField) selectMiddle(pos1, pos2 image.Point, curposAtLeft bool) {
+	tf.selectInit = tf.pixelToCursor(pos1)
+	rightpos := tf.pixelToCursor(pos2)
+	//if endpos != 0 {
+	if curposAtLeft {
+		tf.cursorPos = tf.selectInit
+	} else {
+		tf.cursorPos = rightpos
+	}
+	tf.selectRegionUpdate(rightpos)
+	fmt.Println("selectToStartByPos", "tf", tf, "endpos", rightpos)
+	tf.dispRange.Start = tf.selectRange.Start
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.Start", tf.dispRange.Start)
+	tf.dispRange.End = tf.selectRange.End
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.End", tf.dispRange.End)
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
+	tf.updateCursorPosition()
+	//tf.startCursor()
+	tf.NeedsRender()
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
+}
+
+func (tf *MathpadTextField) setCursorPos(pos int) {
+	tf.selectInit = 0
+	tf.cursorPos = pos
+	tf.clearSelected()
+	tf.dispRange.Start = 0
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.Start", tf.dispRange.Start)
+	tf.dispRange.End = len(tf.editText)
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.dispRange.End", tf.dispRange.End)
+	tf.updateCursorPosition()
+	//tf.startCursor()
+	tf.NeedsRender()
+	fmt.Println("selectToStartByPos", "tf", tf, "tf.cursorPos", tf.cursorPos)
+}
+
 func (tf *MathpadTextField) selectStartToEnd() {
 	tf.selectInit = 0
 	endpos := len(tf.editText)
@@ -1254,20 +1290,20 @@ func (tf *MathpadTextField) charPos(idx int) math32.Vector2 {
 	if idx <= 0 {
 		return math32.Vector2{}
 	}
-	tf.SizeUp()
-	fmt.Println("1charPos tf.editText", tf.editText)
+	tf.configTextSize(tf.Geom.Size.Actual.Content)
+	fmt.Println("1charPos", "idx", idx, "tf.editText", tf.editText)
 	bb := tf.renderAll.RuneBounds(idx)
-	fmt.Println("2charPos tf.editText", tf.editText)
+	fmt.Println("2charPos", "idx", idx, "tf.editText", tf.editText)
 	if idx >= len(tf.editText) {
 		if tf.numLines > 1 && tf.editText[len(tf.editText)-1] == ' ' {
-			fmt.Println("3charPos tf.editText", tf.editText)
+			fmt.Println("3charPos", "idx", idx, "tf.editText", tf.editText)
 			bb.Max.X += tf.lineHeight * 0.2
 			return bb.Max
 		}
-		fmt.Println("4charPos tf.editText", tf.editText)
+		fmt.Println("4charPos", "idx", idx, "tf.editText", tf.editText)
 		return bb.Max
 	}
-	fmt.Println("5charPos tf.editText", tf.editText)
+	fmt.Println("5charPos", "idx", idx, "tf.editText", tf.editText, "bb.Min", bb.Min)
 	return bb.Min
 }
 
@@ -1284,9 +1320,9 @@ func (tf *MathpadTextField) charRenderPos(charidx int) math32.Vector2 {
 	pos := tf.effPos
 	sc := tf.Scene
 	pos = pos.Add(math32.FromPoint(sc.SceneGeom.Pos))
-	fmt.Println("charRenderPos", "pos", pos, "tf.dispRange.Start", tf.dispRange.Start, "charidx", charidx)
-	cpos := tf.relCharPos(tf.dispRange.Start, charidx)
-	return pos.Add(cpos)
+	cpos := tf.relCharPos(0, charidx)
+	fmt.Println("charRenderPos", "pos", pos, "tf.dispRange.Start", tf.dispRange.Start, "charidx", charidx, "cpos", cpos)
+	return math32.Vector2{pos.X + cpos.X, pos.Y}
 }
 
 var (
