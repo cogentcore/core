@@ -85,6 +85,7 @@ type MathpadFrame struct {
 	selectEndRow      *MathpadRow
 	selectEndRowChild Widget
 
+	focusRow   *MathpadRow
 	focusChild tree.Node
 }
 
@@ -149,6 +150,7 @@ func (mpfr *MathpadFrame) Init() {
 	})
 	mpfr.On(events.MouseUp, func(e events.Event) {
 		if e.Pos().Eq(mpfr.selectInitPos) {
+			mpfr.focusRow = mpfr.selectInitRow
 			mpfr.focusChild = mpfr.selectInitRowChild
 			switch wid := mpfr.focusChild.(type) {
 			case *MathpadTextField:
@@ -184,6 +186,7 @@ func (mpfr *MathpadFrame) Init() {
 					}
 					RowChild.(*MathpadTextField).toggleCursor(true)
 					RowChild.(*MathpadTextField).startCursor()
+					mpfr.focusRow = Row
 					mpfr.focusChild = RowChild
 				} else {
 					rowcmprl := mpfr.compareRow(mpfr.selectInitRow, Row)
@@ -191,6 +194,7 @@ func (mpfr *MathpadFrame) Init() {
 					if rowcmprl == 0 {
 						panic("not impossible to run")
 					} else if rowcmprl < 0 {
+						mpfr.focusRow = Row
 						mpfr.focusChild = RowChild
 						for childi := 0; childi < len(mpfr.Children); childi += 1 {
 							child := mpfr.Children[childi]
@@ -213,6 +217,7 @@ func (mpfr *MathpadFrame) Init() {
 							}
 						}
 					} else if rowcmprl > 0 {
+						mpfr.focusRow = Row
 						mpfr.focusChild = RowChild
 						for childi := 0; childi < len(mpfr.Children); childi += 1 {
 							child := mpfr.Children[childi]
@@ -335,6 +340,7 @@ func (mpfr *MathpadFrame) Init() {
 			}
 			fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
 			ed := firstrow.Children[1].(*MathpadTextField)
+			mpfr.focusRow = firstrow
 			mpfr.focusChild = ed
 			ed.SetText(string(append(firstnosel, endnosel...)))
 			fmt.P("ed.editText", ed.editText)
@@ -359,6 +365,7 @@ func (mpfr *MathpadFrame) Init() {
 				wid.SetText(string([]rune(text)[:wid.cursorPos]))
 				newlinetext := string([]rune(text)[wid.cursorPos:])
 				mpfr.selectInitRow, mpfr.selectInitRowChild = NewMathpadRow(mpfr, mpfr.selectInitRow, newlinetext, true)
+				mpfr.focusRow = mpfr.selectInitRow
 				mpfr.focusChild = mpfr.selectInitRowChild
 				mpfr.selectInitRowChild.(*MathpadTextField).cursorPos = 0
 				mpfr.selectInitRowChild.(*MathpadTextField).startCursor()
@@ -376,7 +383,141 @@ func (mpfr *MathpadFrame) Init() {
 		case keymap.Abort: // esc
 			//e.SetHandled()
 		case keymap.Backspace:
+			if mpfr.selection() != "" {
+				firstnosel := []rune{}
+				endnosel := []rune{}
+				var firstrow *MathpadRow
+				var firstrowi, lastrowi int = -1, -1
+				for i := 0; i < len(mpfr.Children); i += 1 {
+					child := mpfr.Children[i]
+					if child == mpfr.selectStartRow {
+						ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+						fmt.P("ed.selectRange.Start", ed.selectRange.Start)
+						firstnosel = ed.editText[:ed.selectRange.Start]
+						firstrow = child.(*MathpadRow)
+						firstrowi = i
+					}
+					if child == mpfr.selectEndRow {
+						ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+						fmt.P("ed.selectRange.End", ed.selectRange.End)
+						endnosel = ed.editText[ed.selectRange.End:]
+						lastrowi = i
+						break
+					}
+				}
+				fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
+				ed := firstrow.Children[1].(*MathpadTextField)
+				mpfr.focusRow = firstrow
+				mpfr.focusChild = ed
+				ed.SetText(string(append(firstnosel, endnosel...)))
+				fmt.P("ed.editText", ed.editText)
+				ed.setCursorPos(len(firstnosel))
+				ed.startCursor()
+				if lastrowi-(firstrowi+1) >= 0 {
+					mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
+					mpfr.Update()
+				}
+			} else {
+				e.SetHandled()
+				switch mpfr.focusChild.(type) {
+				case *MathpadTextField:
+					if mpfr.focusChild.(*MathpadTextField).cursorPos > 0 {
+						backcnt := 1
+						if mpfr.focusChild.(*MathpadTextField).selectRange.End-mpfr.focusChild.(*MathpadTextField).selectRange.Start > 0 {
+							backcnt = mpfr.focusChild.(*MathpadTextField).selectRange.End - mpfr.focusChild.(*MathpadTextField).selectRange.Start
+							mpfr.focusChild.(*MathpadTextField).cursorPos = mpfr.focusChild.(*MathpadTextField).selectRange.Start
+						}
+						fmt.Println("4 tf.startCursor()")
+						mpfr.focusChild.(*MathpadTextField).startCursor()
+						mpfr.focusChild.(*MathpadTextField).saveUndo()
+						mpfr.focusChild.(*MathpadTextField).cursorBackspace(backcnt)
+						mpfr.focusChild.(*MathpadTextField).offerComplete()
+						mpfr.focusChild.(*MathpadTextField).Send(events.Input, e)
+					} else {
+						for i := 0; i < len(mpfr.Children); i += 1 {
+							child := mpfr.Children[i]
+							if child == mpfr.focusRow {
+								if i > 0 {
+									ed := mpfr.Children[i-1].(*MathpadRow).Children[1].(*MathpadTextField)
+									cur := len(ed.editText)
+									ed.insertAtCursor(string(child.(*MathpadRow).Children[1].(*MathpadTextField).editText))
+									ed.cursorPos = cur
+									ed.startCursor()
+									mpfr.Children = append(mpfr.Children[:i], mpfr.Children[i+1:]...)
+									mpfr.Update()
+									mpfr.focusRow = mpfr.Children[i-1].(*MathpadRow)
+									mpfr.focusChild = ed
+									break
+								}
+							}
+						}
+					}
+				}
+			}
 		case keymap.Delete:
+			if mpfr.selection() != "" {
+				firstnosel := []rune{}
+				endnosel := []rune{}
+				var firstrow *MathpadRow
+				var firstrowi, lastrowi int = -1, -1
+				for i := 0; i < len(mpfr.Children); i += 1 {
+					child := mpfr.Children[i]
+					if child == mpfr.selectStartRow {
+						ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+						fmt.P("ed.selectRange.Start", ed.selectRange.Start)
+						firstnosel = ed.editText[:ed.selectRange.Start]
+						firstrow = child.(*MathpadRow)
+						firstrowi = i
+					}
+					if child == mpfr.selectEndRow {
+						ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+						fmt.P("ed.selectRange.End", ed.selectRange.End)
+						endnosel = ed.editText[ed.selectRange.End:]
+						lastrowi = i
+						break
+					}
+				}
+				fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
+				ed := firstrow.Children[1].(*MathpadTextField)
+				mpfr.focusRow = firstrow
+				mpfr.focusChild = ed
+				ed.SetText(string(append(firstnosel, endnosel...)))
+				fmt.P("ed.editText", ed.editText)
+				ed.setCursorPos(len(firstnosel))
+				ed.startCursor()
+				if lastrowi-(firstrowi+1) >= 0 {
+					mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
+					mpfr.Update()
+				}
+			} else {
+				e.SetHandled()
+				switch mpfr.focusChild.(type) {
+				case *MathpadTextField:
+					if mpfr.focusChild.(*MathpadTextField).cursorPos < len(mpfr.focusChild.(*MathpadTextField).editText) {
+						mpfr.focusChild.(*MathpadTextField).saveUndo()
+						mpfr.focusChild.(*MathpadTextField).cursorDelete(1)
+						mpfr.focusChild.(*MathpadTextField).offerComplete()
+						mpfr.focusChild.(*MathpadTextField).Send(events.Input, e)
+					} else {
+						for i := 0; i < len(mpfr.Children); i += 1 {
+							child := mpfr.Children[i]
+							if child == mpfr.focusRow {
+								if i+1 < len(mpfr.Children) {
+									ed := mpfr.Children[i+1].(*MathpadRow).Children[1].(*MathpadTextField)
+									ed0 := mpfr.Children[i].(*MathpadRow).Children[1].(*MathpadTextField)
+									cur := len(ed0.editText)
+									ed0.editText = append(ed0.editText, ed.editText...)
+									ed0.cursorPos = cur
+									ed0.startCursor()
+									mpfr.Children = append(mpfr.Children[:i+1], mpfr.Children[i+2:]...)
+									mpfr.Update()
+									break
+								}
+							}
+						}
+					}
+				}
+			}
 		case keymap.Cut:
 		case keymap.Paste:
 		case keymap.Undo:
@@ -411,6 +552,7 @@ func (mpfr *MathpadFrame) Init() {
 							}
 							fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
 							ed := firstrow.Children[1].(*MathpadTextField)
+							mpfr.focusRow = firstrow
 							mpfr.focusChild = ed
 							wid = ed
 							ed.SetText(string(append(firstnosel, endnosel...)))
