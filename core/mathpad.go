@@ -172,64 +172,69 @@ func (mpfr *MathpadFrame) Init() {
 				mpfr.selectEndRow = mpfr.selectInitRow
 				mpfr.selectEndRowChild = mpfr.selectInitRowChild
 			}
-			fmt.Println("Row, RowChild", Row, RowChild, "mpfr.selectInitRow, mpfr.selectInitRowChild", mpfr.selectInitRow, mpfr.selectInitRowChild)
-			if RowChild == mpfr.selectInitRowChild { //select in row
-				fmt.Println("RowChild == mpfr.selectInitRowChild")
-				RowChild.(*MathpadTextField).clearSelected()
-				if mpfr.selectInitPos.Sub(e.Pos()).X >= 0 {
-					RowChild.(*MathpadTextField).selectMiddle(e.Pos(), mpfr.selectInitPos, true)
-				} else {
-					RowChild.(*MathpadTextField).selectMiddle(mpfr.selectInitPos, e.Pos(), false)
-				}
-				RowChild.(*MathpadTextField).toggleCursor(true)
-				RowChild.(*MathpadTextField).startCursor()
-			} else {
-				rowcmprl := mpfr.compareRow(mpfr.selectInitRow, Row)
-				fmt.Println("rowcmprl", rowcmprl)
-				if rowcmprl == 0 {
-
-				} else if rowcmprl < 0 {
-					for childi := 0; childi < len(mpfr.Children); childi += 1 {
-						child := mpfr.Children[childi]
-						if child == mpfr.selectInitRow {
-							mpfr.selectInitRowChild.(*MathpadTextField).selectToEndByPos(mpfr.selectInitPos, false)
-							fmt.Println("cwb.Children[2]")
-							for childi = childi + 1; childi < len(mpfr.Children); childi += 1 {
-								if mpfr.Children[childi] != Row {
-									fmt.Println("cwb.Children[3]", mpfr.Children[childi])
-									mpfr.Children[childi].(*MathpadRow).Children[1].(*MathpadTextField).selectAll()
-								} else {
-									break
-								}
-							}
-							RowChild.(*MathpadTextField).clearSelected()
-							RowChild.(*MathpadTextField).selectToStartByPos(e.Pos(), false)
-							RowChild.(*MathpadTextField).toggleCursor(true)
-						} else {
-							child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
-						}
+			if RowChild != nil {
+				fmt.Println("Row, RowChild", Row, RowChild, "mpfr.selectInitRow, mpfr.selectInitRowChild", mpfr.selectInitRow, mpfr.selectInitRowChild)
+				if RowChild == mpfr.selectInitRowChild { //select in row
+					fmt.Println("RowChild == mpfr.selectInitRowChild")
+					RowChild.(*MathpadTextField).clearSelected()
+					if mpfr.selectInitPos.Sub(e.Pos()).X >= 0 {
+						RowChild.(*MathpadTextField).selectMiddle(e.Pos(), mpfr.selectInitPos, true)
+					} else {
+						RowChild.(*MathpadTextField).selectMiddle(mpfr.selectInitPos, e.Pos(), false)
 					}
-				} else if rowcmprl > 0 {
-					for childi := 0; childi < len(mpfr.Children); childi += 1 {
-						child := mpfr.Children[childi]
-						if child == Row {
-							RowChild.(*MathpadTextField).clearSelected()
-							RowChild.(*MathpadTextField).selectToEndByPos(e.Pos(), false)
-							RowChild.(*MathpadTextField).cursorPos = RowChild.(*MathpadTextField).pixelToCursor(e.Pos())
-							RowChild.(*MathpadTextField).toggleCursor(true)
-							RowChild.(*MathpadTextField).startCursor()
-							fmt.Println("cwb.Children[2]")
-							for childi = childi + 1; childi < len(mpfr.Children); childi += 1 {
-								if mpfr.Children[childi] != mpfr.selectInitRow {
-									fmt.Println("cwb.Children[3]", mpfr.Children[childi])
-									mpfr.Children[childi].(*MathpadRow).Children[1].(*MathpadTextField).selectAll()
-								} else {
-									break
+					RowChild.(*MathpadTextField).toggleCursor(true)
+					RowChild.(*MathpadTextField).startCursor()
+					mpfr.focusChild = RowChild
+				} else {
+					rowcmprl := mpfr.compareRow(mpfr.selectInitRow, Row)
+					fmt.Println("rowcmprl", rowcmprl)
+					if rowcmprl == 0 {
+						panic("not impossible to run")
+					} else if rowcmprl < 0 {
+						mpfr.focusChild = RowChild
+						for childi := 0; childi < len(mpfr.Children); childi += 1 {
+							child := mpfr.Children[childi]
+							if child == mpfr.selectInitRow {
+								mpfr.selectInitRowChild.(*MathpadTextField).selectToEndByPos(mpfr.selectInitPos, false)
+								fmt.Println("cwb.Children[2]")
+								for childi = childi + 1; childi < len(mpfr.Children); childi += 1 {
+									if mpfr.Children[childi] != Row {
+										fmt.Println("cwb.Children[3]", mpfr.Children[childi])
+										mpfr.Children[childi].(*MathpadRow).Children[1].(*MathpadTextField).selectAll()
+									} else {
+										break
+									}
 								}
+								RowChild.(*MathpadTextField).clearSelected()
+								RowChild.(*MathpadTextField).selectToStartByPos(e.Pos(), false)
+								RowChild.(*MathpadTextField).toggleCursor(true)
+							} else {
+								child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
 							}
-							mpfr.selectInitRowChild.(*MathpadTextField).selectToStartByPos(mpfr.selectInitPos, false)
-						} else {
-							child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
+						}
+					} else if rowcmprl > 0 {
+						mpfr.focusChild = RowChild
+						for childi := 0; childi < len(mpfr.Children); childi += 1 {
+							child := mpfr.Children[childi]
+							if child == Row {
+								RowChild.(*MathpadTextField).clearSelected()
+								RowChild.(*MathpadTextField).selectToEndByPos(e.Pos(), false)
+								RowChild.(*MathpadTextField).cursorPos = RowChild.(*MathpadTextField).pixelToCursor(e.Pos())
+								RowChild.(*MathpadTextField).toggleCursor(true)
+								RowChild.(*MathpadTextField).startCursor()
+								fmt.Println("cwb.Children[2]")
+								for childi = childi + 1; childi < len(mpfr.Children); childi += 1 {
+									if mpfr.Children[childi] != mpfr.selectInitRow {
+										fmt.Println("cwb.Children[3]", mpfr.Children[childi])
+										mpfr.Children[childi].(*MathpadRow).Children[1].(*MathpadTextField).selectAll()
+									} else {
+										break
+									}
+								}
+								mpfr.selectInitRowChild.(*MathpadTextField).selectToStartByPos(mpfr.selectInitPos, false)
+							} else {
+								child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
+							}
 						}
 					}
 				}
@@ -382,6 +387,41 @@ func (mpfr *MathpadFrame) Init() {
 					e.SetHandled()
 					switch wid := mpfr.focusChild.(type) {
 					case *MathpadTextField:
+						if mpfr.selection() != "" {
+							firstnosel := []rune{}
+							endnosel := []rune{}
+							var firstrow *MathpadRow
+							var firstrowi, lastrowi int = -1, -1
+							for i := 0; i < len(mpfr.Children); i += 1 {
+								child := mpfr.Children[i]
+								if child == mpfr.selectStartRow {
+									ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+									fmt.P("ed.selectRange.Start", ed.selectRange.Start)
+									firstnosel = ed.editText[:ed.selectRange.Start]
+									firstrow = child.(*MathpadRow)
+									firstrowi = i
+								}
+								if child == mpfr.selectEndRow {
+									ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+									fmt.P("ed.selectRange.End", ed.selectRange.End)
+									endnosel = ed.editText[ed.selectRange.End:]
+									lastrowi = i
+									break
+								}
+							}
+							fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
+							ed := firstrow.Children[1].(*MathpadTextField)
+							mpfr.focusChild = ed
+							wid = ed
+							ed.SetText(string(append(firstnosel, endnosel...)))
+							fmt.P("ed.editText", ed.editText)
+							ed.setCursorPos(len(firstnosel))
+							ed.startCursor()
+							if lastrowi-(firstrowi+1) >= 0 {
+								mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
+								mpfr.Update()
+							}
+						}
 						wid.saveUndo()
 						wid.insertAtCursor(string(e.KeyRune()))
 						if e.KeyRune() == ' ' {
