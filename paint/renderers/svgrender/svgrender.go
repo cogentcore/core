@@ -6,9 +6,9 @@ package svgrender
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"maps"
+	"reflect"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
@@ -207,10 +207,11 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	rimg := usrc
 	if pr.Original != nil {
 		uorig := imagex.Unwrap(pr.Original)
-		sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
-		if sc > 1.2 {
-			fmt.Println("orig highres", sc)
-			rimg = uorig
+		if !reflectx.IsNil(reflect.ValueOf(uorig)) {
+			sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
+			if sc > 1.2 {
+				rimg = uorig
+			}
 		}
 	}
 

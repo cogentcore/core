@@ -83,7 +83,14 @@ func (im *Image) SizeUp() {
 	if im.Image != nil {
 		sz := &im.Geom.Size
 		obj := math32.FromPoint(im.Image.Bounds().Size())
-		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, sz.Actual.Content)
+		csz := sz.Actual.Content
+		// if only one min size is specified, then allow the other to expand
+		if im.Styles.Min.Y.Value != 0 && im.Styles.Min.X.Value == 0 {
+			csz.X = obj.X
+		} else if im.Styles.Min.X.Value != 0 && im.Styles.Min.Y.Value == 0 {
+			csz.Y = obj.Y
+		}
+		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, csz)
 		sz.Actual.Content = osz
 		sz.SetTotalFromContent(&sz.Actual)
 	}

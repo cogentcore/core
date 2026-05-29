@@ -8,8 +8,10 @@ import (
 	"bytes"
 	"image"
 	"io"
+	"reflect"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -176,10 +178,12 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	rimg := usrc
 	if pr.Original != nil {
 		uorig := imagex.Unwrap(pr.Original)
-		sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
-		if sc > 1.2 {
-			rimg = uorig
-			m = m.Scale(1.0/sc, float32(usrc.Bounds().Size().Y)/float32(uorig.Bounds().Size().Y))
+		if !reflectx.IsNil(reflect.ValueOf(uorig)) {
+			sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
+			if sc > 1.2 {
+				rimg = uorig
+				m = m.Scale(1.0/sc, float32(usrc.Bounds().Size().Y)/float32(uorig.Bounds().Size().Y))
+			}
 		}
 	}
 	rs.PDF.Image(rimg, m)

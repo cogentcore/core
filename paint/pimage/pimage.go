@@ -94,7 +94,7 @@ func NewDraw(rect image.Rectangle, src, orig image.Image, sp image.Point, op dra
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), SourcePos: sp, Op: op}
+	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), Original: orig, SourcePos: sp, Op: op}
 	return pr
 }
 
@@ -104,7 +104,7 @@ func NewDrawMask(rect image.Rectangle, src, orig image.Image, sp image.Point, op
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), SourcePos: sp, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
+	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), Original: orig, SourcePos: sp, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
@@ -114,7 +114,7 @@ func NewTransform(m math32.Matrix2, rect image.Rectangle, src, orig image.Image,
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), Op: op}
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: orig, Op: op}
 	return pr
 }
 
@@ -124,7 +124,7 @@ func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src, orig image.Im
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: orig, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
