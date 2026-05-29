@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"time"
 
 	//"reflect"
 	"unicode"
@@ -293,7 +294,6 @@ func (mpfr *MathpadFrame) Init() {
 		// 	mpfr.startCursor()
 		// }
 	})
-
 	mpfr.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		fmt.Println("mpfr OnKeyChord", kf)
@@ -306,8 +306,35 @@ func (mpfr *MathpadFrame) Init() {
 		case keymap.MoveDown:
 		case keymap.MoveUp:
 		case keymap.Home:
+			e.SetHandled()
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				wid.cursorPos = 0
+				wid.toggleCursor(true)
+				wid.startCursor()
+			}
 		case keymap.End:
-			//e.SetHandled()
+			e.SetHandled()
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				wid.cursorPos = len(wid.editText)
+				wid.toggleCursor(true)
+				wid.startCursor()
+			}
+		case keymap.DocHome:
+			e.SetHandled()
+			mpfr.scrollToWidget(mpfr.Children[0].(*MathpadRow))
+			ed := mpfr.Children[0].(*MathpadRow).Children[1].(*MathpadTextField)
+			ed.cursorPos = 0
+			ed.toggleCursor(true)
+			ed.startCursor()
+		case keymap.DocEnd:
+			e.SetHandled()
+			mpfr.scrollToWidget(mpfr.Children[len(mpfr.Children)-1].(*MathpadRow))
+			ed := mpfr.Children[len(mpfr.Children)-1].(*MathpadRow).Children[1].(*MathpadTextField)
+			ed.cursorPos = len(ed.editText)
+			ed.toggleCursor(true)
+			ed.startCursor()
 		case keymap.SelectMode:
 			//e.SetHandled()
 		case keymap.CancelSelect:
@@ -364,13 +391,27 @@ func (mpfr *MathpadFrame) Init() {
 				text := wid.Text()
 				wid.SetText(string([]rune(text)[:wid.cursorPos]))
 				newlinetext := string([]rune(text)[wid.cursorPos:])
-				mpfr.selectInitRow, mpfr.selectInitRowChild = NewMathpadRow(mpfr, mpfr.selectInitRow, newlinetext, true)
-				mpfr.focusRow = mpfr.selectInitRow
-				mpfr.focusChild = mpfr.selectInitRowChild
-				mpfr.selectInitRowChild.(*MathpadTextField).cursorPos = 0
-				mpfr.selectInitRowChild.(*MathpadTextField).startCursor()
+				newRow, newRowChild := NewMathpadRow(mpfr, mpfr.focusRow, newlinetext, true)
+				mpfr.focusRow = newRow
+				mpfr.focusChild = newRowChild
+				newRowChild.(*MathpadTextField).cursorPos = 0
+				newRowChild.(*MathpadTextField).startCursor()
+				mpfr.scrollToWidget(newRow)
 				mpfr.Update()
 				mpfr.SetFocus()
+				//mpfr.autoScrollDim(math32.Y, 100)
+				//mpfr.AutoScroll(math32.Vector2{X: 0, Y: float32(newRow.Geom.TotalBBox.Dy())})
+				//mpfr.Send(events.Scroll, events.NewScroll(e.WindowPos(), math32.Vector2{X: 0, Y: 23}, e.Modifiers()))
+				//mpfr.scrollDelta(events.NewScroll(e.WindowPos(), math32.Vector2{X: 0, Y: 400}, e.Modifiers()))
+				//fmt.Println("newRow.Geom.TotalBBox", newRow.Geom.TotalBBox)
+				go func() {
+					time.Sleep(100 * time.Millisecond)
+					mpfr.AsyncLock()
+					mpfr.scrollToWidget(newRow)
+					mpfr.AsyncUnlock()
+				}()
+				//newRow.scrollActionDelta(math32.Y, 200)
+				//mpfr.ScrollToBox(image.Rectangle{Min: image.Point{X: 100, Y: 100}, Max: image.Point{X: 100, Y: 100}})
 				e.SetHandled()
 			default:
 			}
