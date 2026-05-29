@@ -25,6 +25,8 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
+	"github.com/cogentcore/yaegi/interp"
+	"github.com/cogentcore/yaegi/stdlib"
 )
 
 // a Mathematia notepad similar widget.
@@ -32,6 +34,7 @@ type Mathpad struct {
 	Frame
 	toolbar  *Frame
 	sentsfrm *MathpadFrame
+	inter    *interp.Interpreter
 }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Mathpad", IDName: "Mathpad", Doc: "Mathpad divide widgets into logical groups and give users the ability\nto math execute.", Embeds: []types.Field{{Name: "MathpadFrame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "toolbar"}, {Name: "sentsfrm"}}})
@@ -48,15 +51,53 @@ func (mp *Mathpad) Init() {
 		s.Direction = styles.Column
 	})
 
+	mp.inter = interp.New(interp.Options{GoPath: "./_gopath/"})
+	if err := mp.inter.Use(stdlib.Symbols); err != nil {
+		panic(err)
+	}
+	if _, err := mp.inter.Eval(`import "math"`); err != nil {
+		panic(err)
+	}
+
 	mp.Maker(func(p *tree.Plan) {
 		tree.AddAt(p, "frame", func(w *Frame) {
 			mp.toolbar = w
 			runallbtn := NewButton(w).SetText("Run all")
 			runallbtn.OnClick(func(e events.Event) {
-
+				code := mp.sentsfrm.Text()
+				val, err := mp.inter.Eval(code)
+				if err != nil {
+					panic(err)
+				}
+				lastrow := mp.sentsfrm.Children[len(mp.sentsfrm.Children)-1].(*MathpadRow)
+				if lastrow.inrow {
+					NewMathpadRow(mp.sentsfrm, mp.sentsfrm.focusRow, fmt.Sprintf("%v", val), false)
+					mp.sentsfrm.Update()
+				} else {
+					lastrow.Children[1].(*MathpadTextField).SetText(fmt.Sprintf("%v", val))
+				}
 			})
 			runlinebtn := NewButton(w).SetText("Run line")
 			runlinebtn.OnClick(func(e events.Event) {
+				val, err := mp.inter.Eval(mp.sentsfrm.focusChild.(*MathpadTextField).Text())
+				if err != nil {
+					panic(err)
+				}
+				for childi, child := range mp.sentsfrm.Children {
+					if child == mp.sentsfrm.focusRow {
+						if childi+1 < len(mp.sentsfrm.Children) {
+							if mp.sentsfrm.Children[childi+1].(*MathpadRow).inrow {
+								NewMathpadRow(mp.sentsfrm, mp.sentsfrm.focusRow, fmt.Sprintf("%v", val), false)
+								mp.sentsfrm.Update()
+							} else {
+								mp.sentsfrm.Children[childi+1].(*MathpadRow).Children[1].(*MathpadTextField).SetText(fmt.Sprintf("%v", val))
+							}
+						} else {
+							NewMathpadRow(mp.sentsfrm, mp.sentsfrm.focusRow, fmt.Sprintf("%v", val), false)
+							mp.sentsfrm.Update()
+						}
+					}
+				}
 
 			})
 		})
@@ -151,6 +192,9 @@ func (mpfr *MathpadFrame) Init() {
 	})
 	mpfr.On(events.MouseUp, func(e events.Event) {
 		if e.Pos().Eq(mpfr.selectInitPos) {
+			for _, child := range mpfr.Children {
+				child.(*MathpadRow).Children[1].(*MathpadTextField).clearSelected()
+			}
 			mpfr.focusRow = mpfr.selectInitRow
 			mpfr.focusChild = mpfr.selectInitRowChild
 			switch wid := mpfr.focusChild.(type) {
@@ -475,7 +519,17 @@ func (mpfr *MathpadFrame) Init() {
 				text := wid.Text()
 				wid.SetText(string([]rune(text)[:wid.cursorPos]))
 				newlinetext := string([]rune(text)[wid.cursorPos:])
-				newRow, newRowChild := NewMathpadRow(mpfr, mpfr.focusRow, newlinetext, true)
+				after := mpfr.focusRow
+				for childi, child := range mpfr.Children {
+					if child == mpfr.focusRow {
+						if childi+1 < len(mpfr.Children) {
+							if mpfr.Children[childi+1].(*MathpadRow).inrow == false {
+								after = mpfr.Children[childi+1].(*MathpadRow)
+							}
+						}
+					}
+				}
+				newRow, newRowChild := NewMathpadRow(mpfr, after, newlinetext, true)
 				mpfr.focusRow = newRow
 				mpfr.focusChild = newRowChild
 				newRowChild.(*MathpadTextField).cursorPos = 0
@@ -561,17 +615,26 @@ func (mpfr *MathpadFrame) Init() {
 					} else {
 						for i := 0; i < len(mpfr.Children); i += 1 {
 							child := mpfr.Children[i]
+							if child.(*MathpadRow).inrow == false {
+								continue
+							}
 							if child == mpfr.focusRow {
 								if i > 0 {
-									ed := mpfr.Children[i-1].(*MathpadRow).Children[1].(*MathpadTextField)
-									cur := len(ed.editText)
-									ed.insertAtCursor(string(child.(*MathpadRow).Children[1].(*MathpadTextField).editText))
-									ed.cursorPos = cur
-									ed.startCursor()
-									mpfr.Children = append(mpfr.Children[:i], mpfr.Children[i+1:]...)
-									mpfr.Update()
-									mpfr.focusRow = mpfr.Children[i-1].(*MathpadRow)
-									mpfr.focusChild = ed
+									delta := 0
+									if mpfr.Children[i-1].(*MathpadRow).inrow == false {
+										delta = 1
+									}
+									if i-(1+delta) >= 0 {
+										ed := mpfr.Children[i-(1+delta)].(*MathpadRow).Children[1].(*MathpadTextField)
+										cur := len(ed.editText)
+										ed.insertAtCursor(string(child.(*MathpadRow).Children[1].(*MathpadTextField).editText))
+										ed.cursorPos = cur
+										ed.startCursor()
+										mpfr.Children = append(mpfr.Children[:i], mpfr.Children[i+1+delta:]...)
+										mpfr.Update()
+										mpfr.focusRow = mpfr.Children[i-(1+delta)].(*MathpadRow)
+										mpfr.focusChild = ed
+									}
 									break
 								}
 							}
@@ -626,16 +689,29 @@ func (mpfr *MathpadFrame) Init() {
 					} else {
 						for i := 0; i < len(mpfr.Children); i += 1 {
 							child := mpfr.Children[i]
+							if child.(*MathpadRow).inrow == false {
+								continue
+							}
 							if child == mpfr.focusRow {
 								if i+1 < len(mpfr.Children) {
-									ed := mpfr.Children[i+1].(*MathpadRow).Children[1].(*MathpadTextField)
-									ed0 := mpfr.Children[i].(*MathpadRow).Children[1].(*MathpadTextField)
-									cur := len(ed0.editText)
-									ed0.editText = append(ed0.editText, ed.editText...)
-									ed0.cursorPos = cur
-									ed0.startCursor()
-									mpfr.Children = append(mpfr.Children[:i+1], mpfr.Children[i+2:]...)
-									mpfr.Update()
+									delta := 0
+									if mpfr.Children[i+1].(*MathpadRow).inrow == false {
+										delta = 1
+									}
+									if i+1+delta < len(mpfr.Children) {
+										ed := mpfr.Children[i+1+delta].(*MathpadRow).Children[1].(*MathpadTextField)
+										ed0 := mpfr.Children[i].(*MathpadRow).Children[1].(*MathpadTextField)
+										cur := len(ed0.editText)
+										ed0.editText = append(ed0.editText, ed.editText...)
+										ed0.cursorPos = cur
+										ed0.startCursor()
+										if delta == 0 {
+											mpfr.Children = append(mpfr.Children[:i+1], mpfr.Children[i+2:]...)
+										} else {
+											mpfr.Children = append(mpfr.Children[:i+1], mpfr.Children[i+2+delta:]...)
+										}
+										mpfr.Update()
+									}
 									break
 								}
 							}
@@ -653,52 +729,54 @@ func (mpfr *MathpadFrame) Init() {
 					e.SetHandled()
 					switch wid := mpfr.focusChild.(type) {
 					case *MathpadTextField:
-						if mpfr.selection() != "" {
-							firstnosel := []rune{}
-							endnosel := []rune{}
-							var firstrow *MathpadRow
-							var firstrowi, lastrowi int = -1, -1
-							for i := 0; i < len(mpfr.Children); i += 1 {
-								child := mpfr.Children[i]
-								if child == mpfr.selectStartRow {
-									ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
-									fmt.P("ed.selectRange.Start", ed.selectRange.Start)
-									firstnosel = ed.editText[:ed.selectRange.Start]
-									firstrow = child.(*MathpadRow)
-									firstrowi = i
+						if mpfr.focusRow.inrow {
+							if mpfr.selection() != "" {
+								firstnosel := []rune{}
+								endnosel := []rune{}
+								var firstrow *MathpadRow
+								var firstrowi, lastrowi int = -1, -1
+								for i := 0; i < len(mpfr.Children); i += 1 {
+									child := mpfr.Children[i]
+									if child == mpfr.selectStartRow {
+										ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+										fmt.P("ed.selectRange.Start", ed.selectRange.Start)
+										firstnosel = ed.editText[:ed.selectRange.Start]
+										firstrow = child.(*MathpadRow)
+										firstrowi = i
+									}
+									if child == mpfr.selectEndRow {
+										ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+										fmt.P("ed.selectRange.End", ed.selectRange.End)
+										endnosel = ed.editText[ed.selectRange.End:]
+										lastrowi = i
+										break
+									}
 								}
-								if child == mpfr.selectEndRow {
-									ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
-									fmt.P("ed.selectRange.End", ed.selectRange.End)
-									endnosel = ed.editText[ed.selectRange.End:]
-									lastrowi = i
-									break
+								fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
+								ed := firstrow.Children[1].(*MathpadTextField)
+								mpfr.focusRow = firstrow
+								mpfr.focusChild = ed
+								wid = ed
+								ed.SetText(string(append(firstnosel, endnosel...)))
+								fmt.P("ed.editText", ed.editText)
+								ed.setCursorPos(len(firstnosel))
+								ed.startCursor()
+								if lastrowi-(firstrowi+1) >= 0 {
+									mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
+									mpfr.Update()
 								}
 							}
-							fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
-							ed := firstrow.Children[1].(*MathpadTextField)
-							mpfr.focusRow = firstrow
-							mpfr.focusChild = ed
-							wid = ed
-							ed.SetText(string(append(firstnosel, endnosel...)))
-							fmt.P("ed.editText", ed.editText)
-							ed.setCursorPos(len(firstnosel))
-							ed.startCursor()
-							if lastrowi-(firstrowi+1) >= 0 {
-								mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
-								mpfr.Update()
+							wid.saveUndo()
+							wid.insertAtCursor(string(e.KeyRune()))
+							if e.KeyRune() == ' ' {
+								wid.cancelComplete()
+							} else {
+								wid.offerComplete()
 							}
+							//wid.Send(events.Input, e)
+							wid.updateCursorPosition()
+							wid.startCursor()
 						}
-						wid.saveUndo()
-						wid.insertAtCursor(string(e.KeyRune()))
-						if e.KeyRune() == ' ' {
-							wid.cancelComplete()
-						} else {
-							wid.offerComplete()
-						}
-						//wid.Send(events.Input, e)
-						wid.updateCursorPosition()
-						wid.startCursor()
 					default:
 					}
 				}
@@ -710,10 +788,23 @@ func (mpfr *MathpadFrame) Init() {
 func (mpfr *MathpadFrame) selection() (out string) {
 	outbytes := []byte{}
 	for _, child := range mpfr.Children {
+		if child.(*MathpadRow).inrow == false {
+			continue
+		}
 		if child.(*MathpadRow).Children[1].(*MathpadTextField).hasSelection() {
 			outbytes = append(outbytes, []byte(child.(*MathpadRow).Children[1].(*MathpadTextField).selection())...)
 			outbytes = append(outbytes, '\n')
 		}
+	}
+	outbytes = bytes.TrimRight(outbytes, "\n")
+	return string(outbytes)
+}
+
+func (mpfr *MathpadFrame) Text() (out string) {
+	outbytes := []byte{}
+	for _, child := range mpfr.Children {
+		outbytes = append(outbytes, []byte(string(child.(*MathpadRow).Children[1].(*MathpadTextField).editText))...)
+		outbytes = append(outbytes, '\n')
 	}
 	outbytes = bytes.TrimRight(outbytes, "\n")
 	return string(outbytes)
@@ -784,6 +875,7 @@ type MathpadRow struct {
 	Frame
 
 	painter *paint.Painter
+	inrow   bool
 }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.MathpadRow", IDName: "mathpadrow", Doc: "Mathpad divide widgets into logical groups and give users the ability\nto math execute.", Embeds: []types.Field{{Name: "MathpadFrame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}}})
@@ -794,6 +886,7 @@ func NewMathpadRow(parent, after tree.Node, text string, inrow bool) (row *Mathp
 	} else {
 		row = tree.NewAtAfter[MathpadRow](parent, after)
 	}
+	row.inrow = inrow
 	if inrow {
 		NewText(row).SetText(" in:")
 	} else {
@@ -908,4 +1001,8 @@ func (mpr *MathpadRow) Render() {
 	mpr.painter.Line(1, 0, 1, 1)
 	mpr.painter.Draw()
 	mpr.painter.PopContext()
+}
+
+func (mpr *MathpadRow) IsInRow() (out bool) {
+	return mpr.inrow
 }
