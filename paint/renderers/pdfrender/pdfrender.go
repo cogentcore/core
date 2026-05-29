@@ -171,6 +171,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		// todo: handle:
 		return
 	}
+	// uorig := imagex.Unwrap(pr.Original)
 
 	// sz := pr.Rect.Size()
 	m := math32.Translate2D(float32(pr.Rect.Min.X), float32(pr.Rect.Min.Y))

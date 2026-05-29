@@ -103,5 +103,5 @@ func (ic *Icon) Render() {
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	ic.Scene.Painter.DrawImage(ic.pixels, r, sp, draw.Over)
+	ic.Scene.Painter.DrawImage(ic.pixels, nil, r, sp, draw.Over)
 }

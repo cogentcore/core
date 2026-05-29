@@ -128,7 +128,7 @@ func (im *Image) Render() {
 		}
 		im.prevRenderImage = rimg
 	}
-	pim := im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)
+	pim := im.Scene.Painter.DrawImage(rimg, im.Image, r, sp, draw.Over)
 	if id, ok := im.Properties["id"]; ok {
 		pim.Anchor = id.(string)
 	}

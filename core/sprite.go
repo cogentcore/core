@@ -132,7 +132,7 @@ func NewImageSprite(name string, pos image.Point, img image.Image) *Sprite {
 	sp.Properties["image"] = img
 	sp.EventBBox = img.Bounds().Add(pos)
 	sp.Draw = func(pc *paint.Painter) {
-		pc.DrawImage(img, sp.EventBBox, image.Point{}, draw.Over)
+		pc.DrawImage(img, nil, sp.EventBBox, image.Point{}, draw.Over)
 	}
 	return sp
 }

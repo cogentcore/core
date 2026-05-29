@@ -461,7 +461,7 @@ func (pc *Painter) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	} else {
 		img = gradient.ApplyOpacity(img, pc.Fill.Opacity)
 	}
-	pc.Render.Add(pimage.NewDraw(b, img, b.Min, op))
+	pc.Render.Add(pimage.NewDraw(b, img, nil, b.Min, op))
 }
 
 // BlurBox blurs the given already drawn region with the given blur radius.
@@ -507,37 +507,40 @@ func (pc *Painter) SetPixel(x, y int) {
 }
 
 // DrawImage draws the given image at the specified starting point,
-// using the bounds of the source image in rectangle rect, using
-// the given draw operration: Over = overlay (alpha blend with destination)
+// using the bounds of the source image in rectangle rect. orig = original
+// source image, which is used for high-resolution rendering if higher res.
+// Uses the given draw operration: Over = overlay (alpha blend with destination)
 // Src = copy source directly, overwriting destination pixels.
-func (pc *Painter) DrawImage(src image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) *pimage.Params {
-	pim := pimage.NewDraw(rect, src, srcStart, op)
+func (pc *Painter) DrawImage(src, orig image.Image, rect image.Rectangle, srcStart image.Point, op draw.Op) *pimage.Params {
+	pim := pimage.NewDraw(rect, src, orig, srcStart, op)
 	pc.Render.Add(pim)
 	return pim
 }
 
 // DrawImageAnchored draws the specified image at the specified anchor point.
+// orig = original source image, which is used for high-resolution rendering.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // image. Use ax=0.5, ay=0.5 to center the image at the specified point.
-func (pc *Painter) DrawImageAnchored(src image.Image, x, y, ax, ay float32) *pimage.Params {
+func (pc *Painter) DrawImageAnchored(src, orig image.Image, x, y, ax, ay float32) *pimage.Params {
 	s := src.Bounds().Size()
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
 	m := pc.Cumulative().Translate(x, y)
 	var pim *pimage.Params
 	if pc.Mask == nil {
-		pim = pimage.NewTransform(m, src.Bounds(), src, draw.Over)
+		pim = pimage.NewTransform(m, src.Bounds(), src, orig, draw.Over)
 	} else {
-		pim = pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{})
+		pim = pimage.NewTransformMask(m, src.Bounds(), src, orig, draw.Over, pc.Mask, image.Point{})
 	}
 	pc.Render.Add(pim)
 	return pim
 }
 
 // DrawImageScaled draws the specified image starting at given upper-left point,
+// orig = original source image, which is used for high-resolution rendering,
 // such that the size of the image is rendered as specified by w, h parameters
 // (an additional scaling is applied to the transform matrix used in rendering)
-func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) *pimage.Params {
+func (pc *Painter) DrawImageScaled(src, orig image.Image, x, y, w, h float32) *pimage.Params {
 	s := src.Bounds().Size()
 	isz := math32.FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
@@ -545,9 +548,9 @@ func (pc *Painter) DrawImageScaled(src image.Image, x, y, w, h float32) *pimage.
 	m := pc.Cumulative().Translate(x, y).Scale(isc.X, isc.Y)
 	var pim *pimage.Params
 	if pc.Mask == nil {
-		pim = pimage.NewTransform(m, src.Bounds(), src, draw.Over)
+		pim = pimage.NewTransform(m, src.Bounds(), src, orig, draw.Over)
 	} else {
-		pim = pimage.NewTransformMask(m, src.Bounds(), src, draw.Over, pc.Mask, image.Point{})
+		pim = pimage.NewTransformMask(m, src.Bounds(), src, orig, draw.Over, pc.Mask, image.Point{})
 	}
 	pc.Render.Add(pim)
 	return pim

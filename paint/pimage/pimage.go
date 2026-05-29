@@ -54,6 +54,10 @@ type Params struct {
 	// Source to draw.
 	Source image.Image
 
+	// Original is the original source image, which is used for
+	// high-resolution renderers (e.g., PDF).
+	Original image.Image
+
 	// Mask, used if non-nil.
 	Mask image.Image
 
@@ -86,41 +90,41 @@ func NewClear(src image.Image, sp image.Point, op draw.Op) *Params {
 
 // NewDraw returns a new Draw operation with given parameters.
 // Does nothing if rect is empty.
-func NewDraw(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op) *Params {
+func NewDraw(rect image.Rectangle, src, orig image.Image, sp image.Point, op draw.Op) *Params {
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), SourcePos: sp, Op: op}
+	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), SourcePos: sp, Op: op}
 	return pr
 }
 
 // NewDrawMask returns a new DrawMask operation with given parameters.
 // Does nothing if rect is empty.
-func NewDrawMask(rect image.Rectangle, src image.Image, sp image.Point, op draw.Op, mask image.Image, mp image.Point) *Params {
+func NewDrawMask(rect image.Rectangle, src, orig image.Image, sp image.Point, op draw.Op, mask image.Image, mp image.Point) *Params {
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), SourcePos: sp, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
+	pr := &Params{Cmd: Draw, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), SourcePos: sp, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
 // NewTransform returns a new Transform operation with given parameters.
 // Does nothing if rect is empty.
-func NewTransform(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op) *Params {
+func NewTransform(m math32.Matrix2, rect image.Rectangle, src, orig image.Image, op draw.Op) *Params {
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Op: op}
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), Op: op}
 	return pr
 }
 
 // NewTransformMask returns a new Transform Mask operation with given parameters.
 // Does nothing if rect is empty.
-func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
+func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src, orig image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
+	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: imagex.WrapJS(orig), Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
@@ -141,6 +145,7 @@ func NewSetPixel(at image.Point, clr image.Image) *Params {
 }
 
 // Render performs the image operation on given destination image.
+// This uses the native Go image package draw function.
 func (pr *Params) Render(dest *image.RGBA) {
 	switch pr.Cmd {
 	case Draw:
