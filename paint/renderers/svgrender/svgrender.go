@@ -6,6 +6,7 @@ package svgrender
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"maps"
 
@@ -203,9 +204,19 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	}
 
 	sz := pr.Rect.Size()
+	rimg := usrc
+	if pr.Original != nil {
+		uorig := imagex.Unwrap(pr.Original)
+		sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
+		if sc > 1.2 {
+			fmt.Println("orig highres", sc)
+			rimg = uorig
+		}
+	}
 
 	simg := svg.NewImage(cg)
-	simg.SetImage(usrc, float32(sz.X), float32(sz.Y))
+	simg.SetImage(rimg, 0, 0)
+	simg.Size.Set(float32(sz.X), float32(sz.Y))
 	simg.Pos = math32.FromPoint(pr.Rect.Min)
 	// todo: ViewBox?
 }
