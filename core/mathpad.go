@@ -300,11 +300,95 @@ func (mpfr *MathpadFrame) Init() {
 		// first all the keys that work for both inactive and active
 		switch kf {
 		case keymap.MoveRight:
-			//e.SetHandled()
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				e.SetHandled()
+				if wid.cursorPos < len(wid.editText) {
+					wid.cursorPos += 1
+					wid.startCursor()
+				} else {
+					for childi, child := range mpfr.Children {
+						if child == mpfr.focusRow {
+							if childi+1 < len(mpfr.Children) {
+								ed := mpfr.Children[childi+1].(*MathpadRow).Children[1].(*MathpadTextField)
+								mpfr.focusRow = mpfr.Children[childi+1].(*MathpadRow)
+								mpfr.focusChild = ed
+								ed.cursorPos = 0
+								ed.toggleCursor(true)
+								ed.startCursor()
+							}
+							break
+						}
+					}
+				}
+			}
 		case keymap.MoveLeft:
-			//e.SetHandled()
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				e.SetHandled()
+				if wid.cursorPos-1 >= 0 {
+					wid.cursorPos -= 1
+					wid.startCursor()
+				} else {
+					for childi, child := range mpfr.Children {
+						if child == mpfr.focusRow {
+							if childi-1 >= 0 {
+								ed := mpfr.Children[childi-1].(*MathpadRow).Children[1].(*MathpadTextField)
+								mpfr.focusRow = mpfr.Children[childi-1].(*MathpadRow)
+								mpfr.focusChild = ed
+								ed.cursorPos = len(ed.editText)
+								ed.toggleCursor(true)
+								ed.startCursor()
+							}
+							break
+						}
+					}
+				}
+			}
 		case keymap.MoveDown:
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				e.SetHandled()
+				for childi, child := range mpfr.Children {
+					if child == mpfr.focusRow {
+						if childi+1 < len(mpfr.Children) {
+							ed := mpfr.Children[childi+1].(*MathpadRow).Children[1].(*MathpadTextField)
+							mpfr.focusRow = mpfr.Children[childi+1].(*MathpadRow)
+							mpfr.focusChild = ed
+							if len(ed.editText) >= wid.cursorPos {
+								ed.cursorPos = wid.cursorPos
+							} else {
+								ed.cursorPos = len(ed.editText)
+							}
+							ed.toggleCursor(true)
+							ed.startCursor()
+						}
+						break
+					}
+				}
+			}
 		case keymap.MoveUp:
+			switch wid := mpfr.focusChild.(type) {
+			case *MathpadTextField:
+				e.SetHandled()
+				for childi, child := range mpfr.Children {
+					if child == mpfr.focusRow {
+						if childi-1 >= 0 {
+							ed := mpfr.Children[childi-1].(*MathpadRow).Children[1].(*MathpadTextField)
+							mpfr.focusRow = mpfr.Children[childi-1].(*MathpadRow)
+							mpfr.focusChild = ed
+							if len(ed.editText) >= wid.cursorPos {
+								ed.cursorPos = wid.cursorPos
+							} else {
+								ed.cursorPos = len(ed.editText)
+							}
+							ed.toggleCursor(true)
+							ed.startCursor()
+						}
+						break
+					}
+				}
+			}
 		case keymap.Home:
 			e.SetHandled()
 			switch wid := mpfr.focusChild.(type) {
