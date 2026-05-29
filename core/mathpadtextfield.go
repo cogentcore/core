@@ -35,7 +35,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// MathpadTextField is a widget for editing a line of text.
+// MathpadTextField is a widget of Mathpad for edit line text
 //
 // With the default [styles.WhiteSpaceNormal] setting,
 // text will wrap onto multiple lines as needed. You can

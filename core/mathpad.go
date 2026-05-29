@@ -51,7 +51,6 @@ func (mp *Mathpad) Init() {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
-
 	mp.inter = interp.New(interp.Options{GoPath: "./_gopath/"})
 	if err := mp.inter.Use(stdlib.Symbols); err != nil {
 		panic(err)
@@ -59,7 +58,6 @@ func (mp *Mathpad) Init() {
 	if _, err := mp.inter.Eval(`import "math"`); err != nil {
 		panic(err)
 	}
-
 	mp.Maker(func(p *tree.Plan) {
 		tree.AddAt(p, "frame", func(w *Frame) {
 			mp.toolbar = w
