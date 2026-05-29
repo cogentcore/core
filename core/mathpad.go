@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"strings"
 	"time"
 
 	//"reflect"
@@ -721,6 +722,107 @@ func (mpfr *MathpadFrame) Init() {
 			}
 		case keymap.Cut:
 		case keymap.Paste:
+			e.SetHandled()
+			mimetext := mpfr.Clipboard().Read([]string{"text/plain"})
+			text := mimetext.Text("text/plain")
+			pastelines := strings.Split(text, "\n")
+			if mpfr.selection() != "" {
+				firstnosel := []rune{}
+				endnosel := []rune{}
+				var firstrow *MathpadRow
+				var firstrowi, lastrowi int = -1, -1
+				for i := 0; i < len(mpfr.Children); i += 1 {
+					child := mpfr.Children[i]
+					if child == mpfr.selectStartRow {
+						ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+						fmt.P("ed.selectRange.Start", ed.selectRange.Start)
+						firstnosel = ed.editText[:ed.selectRange.Start]
+						firstrow = child.(*MathpadRow)
+						firstrowi = i
+					}
+					if child == mpfr.selectEndRow {
+						ed := child.(*MathpadRow).Children[1].(*MathpadTextField)
+						fmt.P("ed.selectRange.End", ed.selectRange.End)
+						endnosel = ed.editText[ed.selectRange.End:]
+						lastrowi = i
+						break
+					}
+				}
+				if lastrowi-(firstrowi+1) >= 0 {
+					mpfr.Children = append(mpfr.Children[:firstrowi+1], mpfr.Children[lastrowi+1:]...)
+				}
+				fmt.P("firstrow", firstrow, "mpfr.selectStartRow", mpfr.selectStartRow, "mpfr.selectEndRow", mpfr.selectEndRow, "firstrowi, lastrowi", firstrowi, lastrowi, "firstnosel", firstnosel, "endnosel", endnosel)
+				ed := firstrow.Children[1].(*MathpadTextField)
+				mpfr.focusRow = firstrow
+				mpfr.focusChild = ed
+				if len(pastelines) == 1 {
+					text := string(firstnosel) + pastelines[0] + string(endnosel)
+					ed.SetText(text)
+					fmt.P("ed.editText", ed.editText)
+					ed.setCursorPos(len(firstnosel))
+					ed.startCursor()
+				} else {
+					text := string(firstnosel) + pastelines[0]
+					ed.SetText(text)
+					var after *MathpadRow = firstrow
+					for childi, child := range mpfr.Children {
+						if child == firstrow {
+							if childi+1 < len(mpfr.Children) {
+								if mpfr.Children[childi+1].(*MathpadRow).inrow == false {
+									after = mpfr.Children[childi+1].(*MathpadRow)
+								}
+							}
+						}
+					}
+					lastmod := pastelines[len(pastelines)-1]
+					pastelines[len(pastelines)-1] = pastelines[len(pastelines)-1] + string(endnosel)
+					for i := 1; i < len(pastelines); i += 1 {
+						_, wid := NewMathpadRow(mpfr, after, pastelines[i], true)
+						if i+1 == len(pastelines) {
+							wid.(*MathpadTextField).cursorPos = len([]rune(lastmod))
+							wid.(*MathpadTextField).startCursor()
+						}
+					}
+				}
+				mpfr.Update()
+			} else {
+				switch wid := mpfr.focusChild.(type) {
+				case *MathpadTextField:
+					pretext := string(wid.editText[:wid.cursorPos])
+					suftext := string(wid.editText[wid.cursorPos:])
+					if len(pastelines) == 1 {
+						newtext := pretext + pastelines[0] + suftext
+						wid.SetText(newtext)
+						wid.cursorPos = len([]rune(pretext + pastelines[0]))
+						wid.startCursor()
+					} else {
+						var after *MathpadRow = mpfr.focusRow
+						for childi, child := range mpfr.Children {
+							if child == mpfr.focusRow {
+								if childi+1 < len(mpfr.Children) {
+									if mpfr.Children[childi+1].(*MathpadRow).inrow == false {
+										after = mpfr.Children[childi+1].(*MathpadRow)
+									}
+								}
+							}
+						}
+						fmt.P("after", after)
+						pastelines[0] = pretext + pastelines[0]
+						lastmod := pastelines[len(pastelines)-1]
+						pastelines[len(pastelines)-1] = pastelines[len(pastelines)-1] + suftext
+						for i := 1; i < len(pastelines); i += 1 {
+							row, wid := NewMathpadRow(mpfr, after, pastelines[i], true)
+							if i+1 == len(pastelines) {
+								wid.(*MathpadTextField).cursorPos = len([]rune(lastmod))
+								wid.(*MathpadTextField).startCursor()
+							}
+							after = row
+						}
+						wid.SetText(pastelines[0])
+						mpfr.Update()
+					}
+				}
+			}
 		case keymap.Undo:
 		case keymap.Redo:
 		case keymap.None:
