@@ -410,3 +410,19 @@ func (gr *GitRepo) Blame(fname string) ([]byte, error) {
 	}
 	return out, nil
 }
+
+// Branches returns a list of available branches on the RemoteLocation
+func (s *GitRepo) Branches() ([]string, error) {
+	out, err := s.RunFromDir("git", "branch")
+	if err != nil {
+		return []string{}, vcs.NewLocalError("Unable to retrieve branches", err, string(out))
+	}
+	ff := strings.Fields(string(out))
+	var br []string
+	for _, f := range ff {
+		if f != "*" {
+			br = append(br, f)
+		}
+	}
+	return br, nil
+}
