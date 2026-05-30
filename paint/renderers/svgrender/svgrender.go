@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"image"
 	"maps"
+	"reflect"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
@@ -203,9 +204,20 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	}
 
 	sz := pr.Rect.Size()
+	rimg := usrc
+	if pr.Original != nil {
+		uorig := imagex.Unwrap(pr.Original)
+		if !reflectx.IsNil(reflect.ValueOf(uorig)) {
+			sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
+			if sc > 1.2 {
+				rimg = uorig
+			}
+		}
+	}
 
 	simg := svg.NewImage(cg)
-	simg.SetImage(usrc, float32(sz.X), float32(sz.Y))
+	simg.SetImage(rimg, 0, 0)
+	simg.Size.Set(float32(sz.X), float32(sz.Y))
 	simg.Pos = math32.FromPoint(pr.Rect.Min)
 	// todo: ViewBox?
 }

@@ -167,7 +167,7 @@ func (sv *SVG) Render() {
 	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
-	sv.Scene.Painter.DrawImage(sv.image, r, sp, draw.Over)
+	sv.Scene.Painter.DrawImage(sv.image, nil, r, sp, draw.Over)
 }
 
 func (sv *SVG) MakeToolbar(p *tree.Plan) {

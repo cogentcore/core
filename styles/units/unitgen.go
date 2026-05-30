@@ -17,6 +17,7 @@ func Dp(value float32) Value {
 func (v *Value) Dp(value float32) {
 	v.Value = value
 	v.Unit = UnitDp
+	v.Custom = nil
 }
 
 // Dp converts the given dp value to dots.
@@ -36,6 +37,7 @@ func Px(value float32) Value {
 func (v *Value) Px(value float32) {
 	v.Value = value
 	v.Unit = UnitPx
+	v.Custom = nil
 }
 
 // Px converts the given px value to dots.
@@ -55,6 +57,7 @@ func Ew(value float32) Value {
 func (v *Value) Ew(value float32) {
 	v.Value = value
 	v.Unit = UnitEw
+	v.Custom = nil
 }
 
 // Ew converts the given ew value to dots.
@@ -74,6 +77,7 @@ func Eh(value float32) Value {
 func (v *Value) Eh(value float32) {
 	v.Value = value
 	v.Unit = UnitEh
+	v.Custom = nil
 }
 
 // Eh converts the given eh value to dots.
@@ -93,6 +97,7 @@ func Pw(value float32) Value {
 func (v *Value) Pw(value float32) {
 	v.Value = value
 	v.Unit = UnitPw
+	v.Custom = nil
 }
 
 // Pw converts the given pw value to dots.
@@ -112,6 +117,7 @@ func Ph(value float32) Value {
 func (v *Value) Ph(value float32) {
 	v.Value = value
 	v.Unit = UnitPh
+	v.Custom = nil
 }
 
 // Ph converts the given ph value to dots.
@@ -131,6 +137,7 @@ func Rem(value float32) Value {
 func (v *Value) Rem(value float32) {
 	v.Value = value
 	v.Unit = UnitRem
+	v.Custom = nil
 }
 
 // Rem converts the given rem value to dots.
@@ -150,6 +157,7 @@ func Em(value float32) Value {
 func (v *Value) Em(value float32) {
 	v.Value = value
 	v.Unit = UnitEm
+	v.Custom = nil
 }
 
 // Em converts the given em value to dots.
@@ -169,6 +177,7 @@ func Ex(value float32) Value {
 func (v *Value) Ex(value float32) {
 	v.Value = value
 	v.Unit = UnitEx
+	v.Custom = nil
 }
 
 // Ex converts the given ex value to dots.
@@ -188,6 +197,7 @@ func Ch(value float32) Value {
 func (v *Value) Ch(value float32) {
 	v.Value = value
 	v.Unit = UnitCh
+	v.Custom = nil
 }
 
 // Ch converts the given ch value to dots.
@@ -207,6 +217,7 @@ func Vw(value float32) Value {
 func (v *Value) Vw(value float32) {
 	v.Value = value
 	v.Unit = UnitVw
+	v.Custom = nil
 }
 
 // Vw converts the given vw value to dots.
@@ -226,6 +237,7 @@ func Vh(value float32) Value {
 func (v *Value) Vh(value float32) {
 	v.Value = value
 	v.Unit = UnitVh
+	v.Custom = nil
 }
 
 // Vh converts the given vh value to dots.
@@ -245,6 +257,7 @@ func Vmin(value float32) Value {
 func (v *Value) Vmin(value float32) {
 	v.Value = value
 	v.Unit = UnitVmin
+	v.Custom = nil
 }
 
 // Vmin converts the given vmin value to dots.
@@ -264,6 +277,7 @@ func Vmax(value float32) Value {
 func (v *Value) Vmax(value float32) {
 	v.Value = value
 	v.Unit = UnitVmax
+	v.Custom = nil
 }
 
 // Vmax converts the given vmax value to dots.
@@ -283,6 +297,7 @@ func Cm(value float32) Value {
 func (v *Value) Cm(value float32) {
 	v.Value = value
 	v.Unit = UnitCm
+	v.Custom = nil
 }
 
 // Cm converts the given cm value to dots.
@@ -302,6 +317,7 @@ func Mm(value float32) Value {
 func (v *Value) Mm(value float32) {
 	v.Value = value
 	v.Unit = UnitMm
+	v.Custom = nil
 }
 
 // Mm converts the given mm value to dots.
@@ -321,6 +337,7 @@ func Q(value float32) Value {
 func (v *Value) Q(value float32) {
 	v.Value = value
 	v.Unit = UnitQ
+	v.Custom = nil
 }
 
 // Q converts the given q value to dots.
@@ -340,6 +357,7 @@ func In(value float32) Value {
 func (v *Value) In(value float32) {
 	v.Value = value
 	v.Unit = UnitIn
+	v.Custom = nil
 }
 
 // In converts the given in value to dots.
@@ -359,6 +377,7 @@ func Pc(value float32) Value {
 func (v *Value) Pc(value float32) {
 	v.Value = value
 	v.Unit = UnitPc
+	v.Custom = nil
 }
 
 // Pc converts the given pc value to dots.
@@ -378,6 +397,7 @@ func Pt(value float32) Value {
 func (v *Value) Pt(value float32) {
 	v.Value = value
 	v.Unit = UnitPt
+	v.Custom = nil
 }
 
 // Pt converts the given pt value to dots.

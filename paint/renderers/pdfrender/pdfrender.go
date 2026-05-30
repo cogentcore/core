@@ -8,8 +8,10 @@ import (
 	"bytes"
 	"image"
 	"io"
+	"reflect"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -172,8 +174,17 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		return
 	}
 
-	// sz := pr.Rect.Size()
 	m := math32.Translate2D(float32(pr.Rect.Min.X), float32(pr.Rect.Min.Y))
-	rs.PDF.Image(usrc, m)
-	// simg.Pos = math32.FromPoint(pr.Rect.Min)
+	rimg := usrc
+	if pr.Original != nil {
+		uorig := imagex.Unwrap(pr.Original)
+		if !reflectx.IsNil(reflect.ValueOf(uorig)) {
+			sc := float32(uorig.Bounds().Size().X) / float32(usrc.Bounds().Size().X)
+			if sc > 1.2 {
+				rimg = uorig
+				m = m.Scale(1.0/sc, float32(usrc.Bounds().Size().Y)/float32(uorig.Bounds().Size().Y))
+			}
+		}
+	}
+	rs.PDF.Image(rimg, m)
 }

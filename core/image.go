@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
@@ -48,13 +47,6 @@ func (im *Image) Init() {
 	im.WidgetBase.Init()
 	im.Styler(func(s *styles.Style) {
 		s.ObjectFit = styles.FitContain
-		if im.Image != nil {
-			sz := im.Image.Bounds().Size()
-			s.Min.X.SetCustom(func(uc *units.Context) float32 {
-				return min(uc.Dp(float32(sz.X)), uc.Pw(95))
-			})
-			s.Min.Y.Dp(float32(sz.Y))
-		}
 	})
 }
 
@@ -83,7 +75,27 @@ func (im *Image) SizeUp() {
 	if im.Image != nil {
 		sz := &im.Geom.Size
 		obj := math32.FromPoint(im.Image.Bounds().Size())
-		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, sz.Actual.Content)
+		csz := sz.Actual.Content
+		// if only one min size is specified, then allow the other to expand
+		if im.Styles.Min.Y.Value != 0 && im.Styles.Min.X.Value == 0 {
+			csz.X = obj.X
+		} else if im.Styles.Min.X.Value != 0 && im.Styles.Min.Y.Value == 0 {
+			csz.Y = obj.Y
+		} else if im.Styles.Min.X.Value == 0 && im.Styles.Min.Y.Value == 0 {
+			pwd := float32(0)
+			pwb := im.parentWidget()
+			if pwb != nil {
+				psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
+				pwd = 0.95 * psz.X
+			}
+			if pwd > 0 {
+				csz.X = min(obj.X, pwd)
+			} else {
+				csz.X = obj.X
+			}
+			csz.Y = obj.Y
+		}
+		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, csz)
 		sz.Actual.Content = osz
 		sz.SetTotalFromContent(&sz.Actual)
 	}
@@ -128,7 +140,7 @@ func (im *Image) Render() {
 		}
 		im.prevRenderImage = rimg
 	}
-	pim := im.Scene.Painter.DrawImage(rimg, r, sp, draw.Over)
+	pim := im.Scene.Painter.DrawImage(rimg, im.Image, r, sp, draw.Over)
 	if id, ok := im.Properties["id"]; ok {
 		pim.Anchor = id.(string)
 	}

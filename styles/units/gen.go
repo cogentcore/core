@@ -67,6 +67,7 @@ func {{.Camel}}(value float32) Value {
 func (v *Value) {{.Camel}}(value float32) {
 	v.Value = value
 	v.Unit = Unit{{.Camel}}
+	v.Custom = nil
 }
 
 // {{.Camel}} converts the given {{.Lower}} value to dots.

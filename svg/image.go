@@ -103,7 +103,7 @@ func (g *Image) DrawImage(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
-	pc.DrawImageScaled(g.Pixels.Image, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
+	pc.DrawImageScaled(g.Pixels.Image, nil, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
 func (g *Image) LocalBBox(sv *SVG) math32.Box2 {

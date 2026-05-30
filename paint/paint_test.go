@@ -25,7 +25,9 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
+	"github.com/anthonynsimon/bild/transform"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/image/draw"
 )
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
@@ -241,6 +243,16 @@ func TestPaintFill(t *testing.T) {
 		pc.Fill.Color = nil
 		pc.Stroke.Color = colors.Uniform(colors.Orange)
 		pc.Rectangle(50, 25, 150, 200)
+		pc.Draw()
+	})
+}
+
+func TestHighResImage(t *testing.T) {
+	img, _, err := imagex.Open("testdata/test.png")
+	smimg := transform.Resize(img, 60, 60, transform.Linear)
+	assert.NoError(t, err)
+	RunTest(t, "highres-image", 60, 60, func(pc *Painter) {
+		pc.DrawImage(smimg, img, smimg.Bounds(), image.Point{0, 0}, draw.Src)
 		pc.Draw()
 	})
 }
