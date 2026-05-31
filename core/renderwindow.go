@@ -550,9 +550,11 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			}
 			if !TheApp.Platform().IsMobile() { // native desktop
 				if TheApp.NScreens() > 0 {
-					// AppearanceSettings.Apply()
+					if TheApp.Platform() == system.Offscreen {
+						AppearanceSettings.Apply()
+					}
 					UpdateAll()
-					theWindowGeometrySaver.restoreAll()
+					// theWindowGeometrySaver.restoreAll()
 				}
 			} else {
 				w.resized()
