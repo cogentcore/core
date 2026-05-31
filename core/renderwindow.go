@@ -550,7 +550,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			}
 			if !TheApp.Platform().IsMobile() { // native desktop
 				if TheApp.NScreens() > 0 {
-					AppearanceSettings.Apply()
+					// AppearanceSettings.Apply()
 					UpdateAll()
 					theWindowGeometrySaver.restoreAll()
 				}

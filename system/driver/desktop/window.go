@@ -134,9 +134,6 @@ func (w *Window) Screen() *system.Screen {
 	if w == nil || w.Glw == nil {
 		return TheApp.Screens[0]
 	}
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-
 	var sc *system.Screen
 	mon := w.Glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems. only works for fullscreen
@@ -159,6 +156,8 @@ func (w *Window) Screen() *system.Screen {
 	// 	log.Printf("ScreenDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
 	w.ScreenWindow = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
 	if w.DevicePixelRatio != sc.DevicePixelRatio {

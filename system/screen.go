@@ -25,6 +25,10 @@ var (
 	// these can be set from preferences (as in gi/prefs) on a per-screen
 	// basis.
 	LogicalDPIScales map[string]float32
+
+	// UpdateLogicalDPIScaleFunc is a function that updates the system
+	// LogicalDPIScale and the per-screen LogicalDPIScales map
+	UpdateLogicalDPIScaleFunc func()
 )
 
 // note: fields obtained from QScreen in Qt

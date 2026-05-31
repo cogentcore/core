@@ -46,10 +46,13 @@ func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 	}
 	a.GetScreens()
 	if len(a.Windows) > 0 {
-		fw := a.Windows[0]
 		if ScreenDebug {
 			log.Println("ScreenDebug: monitorChange: sending screen update")
 		}
+		for _, w := range a.Windows {
+			w.SetLogicalDPI(w.Screen().LogicalDPI)
+		}
+		fw := a.Windows[0]
 		fw.Event.Window(events.ScreenUpdate)
 	} else {
 		if ScreenDebug {
@@ -155,9 +158,9 @@ func (a *App) GetScreens() {
 				sc.DevicePixelRatio = 2
 				sc.PixelSize = sc.Geometry.Max.Mul(2)
 				sc.PhysicalSize = image.Point{344, 222}
-				sc.UpdatePhysicalDPI()
 				sc.Depth = 24
 				sc.RefreshRate = 60
+				sc.UpdatePhysicalDPI()
 				sc.UpdateLogicalDPI()
 				if ScreenDebug {
 					log.Printf("ScreenDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, reflectx.StringJSON(sc))
@@ -231,6 +234,9 @@ func (a *App) GetScreens() {
 			a.Screens[0].ScreenNumber = 0
 			a.Screens[1].ScreenNumber = 1
 		}
+	}
+	if system.UpdateLogicalDPIScaleFunc != nil {
+		system.UpdateLogicalDPIScaleFunc()
 	}
 }
 
