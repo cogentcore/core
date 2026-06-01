@@ -233,10 +233,6 @@ var AppearanceSettings = &AppearanceSettingsData{
 	},
 }
 
-func init() {
-	system.UpdateLogicalDPIScaleFunc = AppearanceSettings.updateLogicalDPI
-}
-
 // AppearanceSettingsData is the data type for the global Cogent Core appearance settings.
 type AppearanceSettingsData struct { //types:add
 	SettingsBase

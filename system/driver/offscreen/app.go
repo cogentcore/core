@@ -84,8 +84,8 @@ func (a *App) GetScreens() {
 	sc.PhysicalDPI = dpi
 	sc.LogicalDPI = dpi
 
-	if system.InitScreenLogicalDPIFunc != nil {
-		system.InitScreenLogicalDPIFunc()
+	if system.UpdateLogicalDPIScaleFunc != nil {
+		system.UpdateLogicalDPIScaleFunc()
 	}
 
 	physX := 25.4 * float32(sc.PixelSize.X) / dpi

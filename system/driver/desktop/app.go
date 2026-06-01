@@ -83,11 +83,11 @@ func (a *App) InitGPU() {
 }
 
 func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
-	if len(a.Windows) == 0 && system.InitScreenLogicalDPIFunc != nil {
+	if len(a.Windows) == 0 && system.UpdateLogicalDPIScaleFunc != nil {
 		if ScreenDebug {
-			log.Println("app first new window calling InitScreenLogicalDPIFunc")
+			log.Println("app first new window calling UpdateLogicalDPIScaleFunc")
 		}
-		system.InitScreenLogicalDPIFunc()
+		system.UpdateLogicalDPIScaleFunc()
 	}
 
 	sc := a.Screens[0]

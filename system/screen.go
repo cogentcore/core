@@ -221,8 +221,3 @@ func ConstrainWindowGeometry(pos, sz, scSize image.Point) (cpos, csz image.Point
 	}
 	return
 }
-
-// InitScreenLogicalDPIFunc is a function that can be set to initialize the
-// screen LogicalDPI values based on user preferences etc.  Called just before
-// first window is opened.
-var InitScreenLogicalDPIFunc func()
