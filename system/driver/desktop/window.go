@@ -463,21 +463,25 @@ func (w *Window) SetCursorEnabled(enabled, raw bool) {
 ////////  Window Callbacks
 
 func (w *Window) Moved(gw *glfw.Window, x, y int) {
-	w.Mu.Lock()
-	w.Pos = image.Pt(x, y)
-	w.Mu.Unlock()
-	// w.app.GetScreens() // this can crash here on win disconnect..
-	w.updateGeometry() // critical to update size etc here.
-	w.Event.Window(events.WinMove)
+	go func() {
+		w.Mu.Lock()
+		w.Pos = image.Pt(x, y)
+		w.Mu.Unlock()
+		// w.app.GetScreens() // this can crash here on win disconnect..
+		w.updateGeometry() // critical to update size etc here.
+		w.Event.Window(events.WinMove)
+	}()
 }
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
-	// w.app.GetScreens()  // this can crash here on win disconnect..
-	if ScreenDebug {
-		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixelSize)
-	}
-	w.updateMaximized()
-	w.updateGeometry()
+	go func() {
+		// w.app.GetScreens()  // this can crash here on win disconnect..
+		if ScreenDebug {
+			log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixelSize)
+		}
+		w.updateMaximized()
+		w.updateGeometry()
+	}()
 }
 
 func (w *Window) updateMaximized() {
