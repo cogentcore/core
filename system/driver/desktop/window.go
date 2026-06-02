@@ -514,18 +514,20 @@ func (w *Window) updateGeometry() {
 }
 
 func (w *Window) FbResized(gw *glfw.Window, width, height int) {
-	if w.Is(system.Fullscreen) {
-		sc := w.Screen()
-		width = sc.PixelSize.X
-		height = sc.PixelSize.Y
-	}
-	fbsz := image.Point{width, height}
-	if w.PixelSize != fbsz {
-		if ScreenDebug {
-			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixelSize)
+	go func() {
+		if w.Is(system.Fullscreen) {
+			sc := w.Screen()
+			width = sc.PixelSize.X
+			height = sc.PixelSize.Y
 		}
-		w.updateGeometry()
-	}
+		fbsz := image.Point{width, height}
+		if w.PixelSize != fbsz {
+			if ScreenDebug {
+				log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixelSize)
+			}
+			w.updateGeometry()
+		}
+	}()
 }
 
 func (w *Window) OnCloseReq(gw *glfw.Window) {
