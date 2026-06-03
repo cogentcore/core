@@ -151,13 +151,14 @@ func (sv *SVG) Render() {
 	if sv.SVG == nil {
 		return
 	}
-	needsRender := !sv.IsReadOnly()
+	needsRender := !sv.IsReadOnly() || sv.NeedsRebuild()
 	if !needsRender {
 		if sv.image == nil {
 			needsRender = true
 		} else {
-			sz := sv.image.Bounds().Size()
-			if sz != sv.prevSize || sz == (image.Point{}) {
+			sv.SVG.UpdateSize()
+			sz := sv.SVG.Geom.Size
+			if sz != sv.prevSize || sv.image.Bounds().Size() == (image.Point{}) {
 				needsRender = true
 			}
 		}

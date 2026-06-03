@@ -134,9 +134,6 @@ func (w *Window) Screen() *system.Screen {
 	if w == nil || w.Glw == nil {
 		return TheApp.Screens[0]
 	}
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
-
 	var sc *system.Screen
 	mon := w.Glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems. only works for fullscreen
@@ -159,6 +156,8 @@ func (w *Window) Screen() *system.Screen {
 	// 	log.Printf("ScreenDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
+	w.Mu.Lock()
+	defer w.Mu.Unlock()
 	w.ScreenWindow = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
 	if w.DevicePixelRatio != sc.DevicePixelRatio {
@@ -464,21 +463,25 @@ func (w *Window) SetCursorEnabled(enabled, raw bool) {
 ////////  Window Callbacks
 
 func (w *Window) Moved(gw *glfw.Window, x, y int) {
-	w.Mu.Lock()
-	w.Pos = image.Pt(x, y)
-	w.Mu.Unlock()
-	// w.app.GetScreens() // this can crash here on win disconnect..
-	w.updateGeometry() // critical to update size etc here.
-	w.Event.Window(events.WinMove)
+	go func() {
+		w.Mu.Lock()
+		w.Pos = image.Pt(x, y)
+		w.Mu.Unlock()
+		// w.app.GetScreens() // this can crash here on win disconnect..
+		w.updateGeometry() // critical to update size etc here.
+		w.Event.Window(events.WinMove)
+	}()
 }
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
-	// w.app.GetScreens()  // this can crash here on win disconnect..
-	if ScreenDebug {
-		log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixelSize)
-	}
-	w.updateMaximized()
-	w.updateGeometry()
+	go func() {
+		// w.app.GetScreens()  // this can crash here on win disconnect..
+		if ScreenDebug {
+			log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixelSize)
+		}
+		w.updateMaximized()
+		w.updateGeometry()
+	}()
 }
 
 func (w *Window) updateMaximized() {
@@ -511,18 +514,20 @@ func (w *Window) updateGeometry() {
 }
 
 func (w *Window) FbResized(gw *glfw.Window, width, height int) {
-	if w.Is(system.Fullscreen) {
-		sc := w.Screen()
-		width = sc.PixelSize.X
-		height = sc.PixelSize.Y
-	}
-	fbsz := image.Point{width, height}
-	if w.PixelSize != fbsz {
-		if ScreenDebug {
-			log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixelSize)
+	go func() {
+		if w.Is(system.Fullscreen) {
+			sc := w.Screen()
+			width = sc.PixelSize.X
+			height = sc.PixelSize.Y
 		}
-		w.updateGeometry()
-	}
+		fbsz := image.Point{width, height}
+		if w.PixelSize != fbsz {
+			if ScreenDebug {
+				log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixelSize)
+			}
+			w.updateGeometry()
+		}
+	}()
 }
 
 func (w *Window) OnCloseReq(gw *glfw.Window) {

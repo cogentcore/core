@@ -10,8 +10,8 @@ import (
 
 func init() {
 	system.HandleRecover = handleRecover
-	system.InitScreenLogicalDPIFunc = AppearanceSettings.applyDPI // called when screens are initialized
-	TheApp.CogentCoreDataDir()                                    // ensure it exists
-	theWindowGeometrySaver.needToReload()                         // gets time stamp associated with open, so it doesn't re-open
+	system.UpdateLogicalDPIScaleFunc = AppearanceSettings.updateLogicalDPI
+	TheApp.CogentCoreDataDir()            // ensure it exists
+	theWindowGeometrySaver.needToReload() // gets time stamp associated with open, so it doesn't re-open
 	theWindowGeometrySaver.open()
 }

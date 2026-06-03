@@ -144,8 +144,8 @@ func updateConfig(width, height, orientation int32) {
 	TheApp.Scrn.PhysicalDPI = DisplayMetrics.DPI
 	TheApp.Scrn.LogicalDPI = DisplayMetrics.DPI
 
-	if system.InitScreenLogicalDPIFunc != nil {
-		system.InitScreenLogicalDPIFunc()
+	if system.UpdateLogicalDPIScaleFunc != nil {
+		system.UpdateLogicalDPIScaleFunc()
 	}
 
 	physX := 25.4 * float32(width) / DisplayMetrics.DPI

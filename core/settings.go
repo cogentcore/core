@@ -383,9 +383,9 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 	as.applyDPI()
 }
 
-// applyDPI updates the screen LogicalDPI values according to current
-// settings and zoom factor, and then updates all open windows as well.
-func (as *AppearanceSettingsData) applyDPI() {
+// updateLogicalDPI updates the screen LogicalDPI values according to current
+// settings and zoom factor. set this as [system.UpdateLogicalDPIFunc] function.
+func (as *AppearanceSettingsData) updateLogicalDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
 	system.LogicalDPIScale = as.Zoom / 100
 	// fmt.Println("system ldpi:", system.LogicalDPIScale)
@@ -401,6 +401,12 @@ func (as *AppearanceSettingsData) applyDPI() {
 		}
 		sc.UpdateLogicalDPI()
 	}
+}
+
+// applyDPI updates the screen LogicalDPI values according to current
+// settings and zoom factor, and then updates all open windows as well.
+func (as *AppearanceSettingsData) applyDPI() {
+	as.updateLogicalDPI()
 	for _, w := range AllRenderWindows {
 		w.SystemWindow.SetLogicalDPI(w.SystemWindow.Screen().LogicalDPI)
 		// this isn't DPI-related, but this is the most efficient place to do it

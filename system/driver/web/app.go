@@ -124,8 +124,8 @@ func (a *App) Resize() {
 	a.Scrn.PhysicalDPI = dpi
 	a.Scrn.LogicalDPI = dpi
 
-	if system.InitScreenLogicalDPIFunc != nil {
-		system.InitScreenLogicalDPIFunc()
+	if system.UpdateLogicalDPIScaleFunc != nil {
+		system.UpdateLogicalDPIScaleFunc()
 	}
 
 	vv := js.Global().Get("visualViewport")

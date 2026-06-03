@@ -352,8 +352,8 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			a.Scrn.PhysicalDPI = dpi
 			a.Scrn.LogicalDPI = dpi
 
-			if system.InitScreenLogicalDPIFunc != nil {
-				system.InitScreenLogicalDPIFunc()
+			if system.UpdateLogicalDPIScaleFunc != nil {
+				system.UpdateLogicalDPIScaleFunc()
 			}
 
 			physX := 25.4 * float32(widthPx) / dpi
