@@ -35,30 +35,32 @@ var (
 // MonitorChange is called when a monitor is connected to or
 // disconnected from the system.
 func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
-	if ScreenDebug {
-		enm := "Unknown"
-		if event == glfw.Connected {
-			enm = "Connected"
+	go func() {
+		if ScreenDebug {
+			enm := "Unknown"
+			if event == glfw.Connected {
+				enm = "Connected"
+			} else {
+				enm = "Disconnected"
+			}
+			log.Printf("ScreenDebug: monitorChange: %v event: %v\n", monitor.GetName(), enm)
+		}
+		a.GetScreens()
+		if len(a.Windows) > 0 {
+			if ScreenDebug {
+				log.Println("ScreenDebug: monitorChange: sending screen update")
+			}
+			for _, w := range a.Windows {
+				w.SetLogicalDPI(w.Screen().LogicalDPI)
+			}
+			fw := a.Windows[0]
+			fw.Event.Window(events.ScreenUpdate)
 		} else {
-			enm = "Disconnected"
+			if ScreenDebug {
+				log.Println("ScreenDebug: monitorChange: no windows, NOT sending screen update")
+			}
 		}
-		log.Printf("ScreenDebug: monitorChange: %v event: %v\n", monitor.GetName(), enm)
-	}
-	a.GetScreens()
-	if len(a.Windows) > 0 {
-		if ScreenDebug {
-			log.Println("ScreenDebug: monitorChange: sending screen update")
-		}
-		for _, w := range a.Windows {
-			w.SetLogicalDPI(w.Screen().LogicalDPI)
-		}
-		fw := a.Windows[0]
-		fw.Event.Window(events.ScreenUpdate)
-	} else {
-		if ScreenDebug {
-			log.Println("ScreenDebug: monitorChange: no windows, NOT sending screen update")
-		}
-	}
+	}()
 }
 
 var lastScreenPoll time.Time
