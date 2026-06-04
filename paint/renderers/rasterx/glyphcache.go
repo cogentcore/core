@@ -27,6 +27,11 @@ var (
 )
 
 const (
+	// glyphMinSize is the min size in height to use the cached values.
+	// small glyphs end up with bad aliasing artifacts when rendered
+	// from the cache.
+	glyphMinSize = 12
+
 	// glyphMaxSize is the max size in either dim for the render mask.
 	glyphMaxSize = 128
 
@@ -86,7 +91,7 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 
 	fsize := image.Point{X: int(g.Width.Round()), Y: -int(g.Height.Round())}
 	size := fsize.Add(image.Point{2 * glyphMaskBorder, 2 * glyphMaskBorder})
-	if size.X <= 0 || size.X > glyphMaxSize || size.Y <= 0 || size.Y > glyphMaxSize {
+	if size.X <= 0 || size.X > glyphMaxSize || size.Y <= 0 || size.Y > glyphMaxSize || size.Y < glyphMinSize {
 		return nil, image.Point{}
 	}
 	// fmt.Println(face.Describe().Family, g.GlyphID, "wd, ht:", math32.FromFixed(g.Width), -math32.FromFixed(g.Height), "size:", size)
