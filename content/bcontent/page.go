@@ -74,6 +74,10 @@ type Page struct {
 	// Draft indicates that the page is a draft and should not be visible on the web.
 	Draft bool
 
+	// NoURLinPDF turns off the generation of the page URL when generating the PDF
+	// version of a page.
+	NoURLinPDF bool
+
 	// Categories are the categories that the page belongs to.
 	Categories []string
 
