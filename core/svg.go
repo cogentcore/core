@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
@@ -156,8 +157,13 @@ func (sv *SVG) Render() {
 		if sv.image == nil {
 			needsRender = true
 		} else {
-			sv.SVG.UpdateSize()
-			sz := sv.SVG.Geom.Size
+			sz := sv.prevSize
+			if TheApp.Platform() == system.Offscreen {
+				sz = sv.image.Bounds().Size() // note: needed for tests to be reliable
+			} else {
+				sv.SVG.UpdateSize()
+				sz = sv.SVG.Geom.Size
+			}
 			if sz != sv.prevSize || sv.image.Bounds().Size() == (image.Point{}) {
 				needsRender = true
 			}
