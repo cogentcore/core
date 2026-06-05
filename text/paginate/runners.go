@@ -197,7 +197,6 @@ func APAHeaders(tx *core.Text) {
 		s.Font.Size = base
 		s.Font.Size.Value *= 14.0 / 11.0
 		s.Font.Weight = rich.Bold
-		s.Align.Self = styles.Center
 	case 3:
 		s.Font.Size = base
 		s.Font.Size.Value *= 12.0 / 11.0
