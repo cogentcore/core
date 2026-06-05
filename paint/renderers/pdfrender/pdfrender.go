@@ -173,8 +173,10 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		// todo: handle:
 		return
 	}
-
-	m := math32.Translate2D(float32(pr.Rect.Min.X), float32(pr.Rect.Min.Y))
+	m := math32.Translate2D(float32(pr.Rect.Min.X+pr.SourcePos.X), float32(pr.Rect.Min.Y+pr.SourcePos.Y))
+	if pr.Cmd == pimage.Transform {
+		m = pr.Transform.Mul(m)
+	}
 	rimg := usrc
 	if pr.Original != nil {
 		uorig := imagex.Unwrap(pr.Original)
