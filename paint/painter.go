@@ -525,12 +525,13 @@ func (pc *Painter) DrawImageAnchored(src, orig image.Image, x, y, ax, ay float32
 	s := src.Bounds().Size()
 	x -= ax * float32(s.X)
 	y -= ay * float32(s.Y)
-	m := pc.Cumulative().Translate(x, y)
+	m := math32.Translate2D(x, y)
+	cm := pc.Cumulative().Mul(m)
 	var pim *pimage.Params
 	if pc.Mask == nil {
-		pim = pimage.NewTransform(m, src.Bounds(), src, orig, draw.Over)
+		pim = pimage.NewTransform(m, cm, src.Bounds(), src, orig, draw.Over)
 	} else {
-		pim = pimage.NewTransformMask(m, src.Bounds(), src, orig, draw.Over, pc.Mask, image.Point{})
+		pim = pimage.NewTransformMask(m, cm, src.Bounds(), src, orig, draw.Over, pc.Mask, image.Point{})
 	}
 	pc.Render.Add(pim)
 	return pim
@@ -545,12 +546,13 @@ func (pc *Painter) DrawImageScaled(src, orig image.Image, x, y, w, h float32) *p
 	isz := math32.FromPoint(s)
 	isc := math32.Vec2(w, h).Div(isz)
 
-	m := pc.Cumulative().Translate(x, y).Scale(isc.X, isc.Y)
+	m := math32.Translate2D(x, y).Scale(isc.X, isc.Y)
+	cm := pc.Cumulative().Mul(m)
 	var pim *pimage.Params
 	if pc.Mask == nil {
-		pim = pimage.NewTransform(m, src.Bounds(), src, orig, draw.Over)
+		pim = pimage.NewTransform(m, cm, src.Bounds(), src, orig, draw.Over)
 	} else {
-		pim = pimage.NewTransformMask(m, src.Bounds(), src, orig, draw.Over, pc.Mask, image.Point{})
+		pim = pimage.NewTransformMask(m, cm, src.Bounds(), src, orig, draw.Over, pc.Mask, image.Point{})
 	}
 	pc.Render.Add(pim)
 	return pim

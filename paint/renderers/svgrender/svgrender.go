@@ -218,6 +218,10 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	simg := svg.NewImage(cg)
 	simg.SetImage(rimg, 0, 0)
 	simg.Size.Set(float32(sz.X), float32(sz.Y))
-	simg.Pos = math32.FromPoint(pr.Rect.Min)
+	simg.Pos = math32.FromPoint(pr.Rect.Min.Add(pr.SourcePos))
+	if pr.Cmd == pimage.Transform {
+		simg.Paint.Transform = pr.Transform
+		simg.SetTransformProperty()
+	}
 	// todo: ViewBox?
 }

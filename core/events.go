@@ -18,6 +18,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -1226,11 +1227,13 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 	case keymap.WinSnapshot:
 		img := sc.Renderer.Image()
+		scnm := strings.ReplaceAll(strings.ReplaceAll(strcase.ToKebab(sc.Name), "/", "-"), "•", "-")
 		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
+		bnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+scnm+"-"+dstr)
 		var sz string
 		if img != nil {
 			sz = fmt.Sprint(img.Bounds().Size())
-			fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
+			fnm := bnm + ".png"
 			if errors.Log(imagex.Save(img, fnm)) == nil {
 				MessageSnackbar(sc, "Saved screenshot to: "+strings.ReplaceAll(fnm, " ", `\ `)+sz)
 			}
@@ -1241,11 +1244,11 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 		rend := sc.Painter.RenderDone()
 		svr := paint.NewSVGRenderer(sc.Painter.Size)
 		sv := svr.Render(rend).Source()
-		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".svg")
+		fnm := bnm + ".svg"
 		errors.Log(os.WriteFile(fnm, sv, 0666))
 		pdr := paint.NewPDFRenderer(sc.Painter.Size, &sc.Painter.Context().Style.UnitContext)
 		pd := pdr.Render(rend).Source()
-		fnm = filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".pdf")
+		fnm = bnm + ".pdf"
 		errors.Log(os.WriteFile(fnm, pd, 0666))
 
 		sc.SetScene(sc)

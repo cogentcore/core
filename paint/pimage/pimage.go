@@ -64,8 +64,11 @@ type Params struct {
 	// MaskPos is the position for the mask
 	MaskPos image.Point
 
-	// Transform for image transform.
+	// Transform for image transform, just for the image.
 	Transform math32.Matrix2
+
+	// Cumulative is the cumulative image transform including all prior transforms.
+	Cumulative math32.Matrix2
 
 	// BlurRadius is the Gaussian standard deviation for Blur function
 	BlurRadius float32
@@ -108,23 +111,25 @@ func NewDrawMask(rect image.Rectangle, src, orig image.Image, sp image.Point, op
 	return pr
 }
 
-// NewTransform returns a new Transform operation with given parameters.
+// NewTransform returns a new Transform operation with given parameters,
+// where m is the specific Transform for the image, and cm is the Cumulative including it.
 // Does nothing if rect is empty.
-func NewTransform(m math32.Matrix2, rect image.Rectangle, src, orig image.Image, op draw.Op) *Params {
+func NewTransform(m, cm math32.Matrix2, rect image.Rectangle, src, orig image.Image, op draw.Op) *Params {
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: orig, Op: op}
+	pr := &Params{Cmd: Transform, Transform: m, Cumulative: cm, Rect: rect, Source: imagex.WrapJS(src), Original: orig, Op: op}
 	return pr
 }
 
 // NewTransformMask returns a new Transform Mask operation with given parameters.
+// where m is the specific Transform for the image, and cm is the Cumulative including it.
 // Does nothing if rect is empty.
-func NewTransformMask(m math32.Matrix2, rect image.Rectangle, src, orig image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
+func NewTransformMask(m, cm math32.Matrix2, rect image.Rectangle, src, orig image.Image, op draw.Op, mask image.Image, mp image.Point) *Params {
 	if rect == (image.Rectangle{}) {
 		return nil
 	}
-	pr := &Params{Cmd: Transform, Transform: m, Rect: rect, Source: imagex.WrapJS(src), Original: orig, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
+	pr := &Params{Cmd: Transform, Transform: m, Cumulative: cm, Rect: rect, Source: imagex.WrapJS(src), Original: orig, Op: op, Mask: imagex.WrapJS(mask), MaskPos: mp}
 	return pr
 }
 
@@ -161,7 +166,7 @@ func (pr *Params) Render(dest *image.RGBA) {
 			draw.Draw(dest, pr.Rect, imagex.Unwrap(pr.Source), pr.SourcePos, pr.Op)
 		}
 	case Transform:
-		m := pr.Transform
+		m := pr.Cumulative
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		tdraw := draw.BiLinear
 		if pr.Mask != nil {

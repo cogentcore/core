@@ -256,3 +256,13 @@ func TestHighResImage(t *testing.T) {
 		pc.Draw()
 	})
 }
+
+func TestImageScaled(t *testing.T) {
+	img, _, err := imagex.Open("testdata/test.png")
+	smimg := transform.Resize(img, 60, 60, transform.Linear)
+	assert.NoError(t, err)
+	RunTest(t, "image-scaled", 60, 60, func(pc *Painter) {
+		pc.DrawImageScaled(smimg, img, 15, 15, 30, 20)
+		pc.Draw()
+	})
+}
