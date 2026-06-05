@@ -47,6 +47,9 @@ func (s *SettingsData) Defaults() {
 		ps.PDF.Header = paginate.NoFirst(paginate.HeaderLeftPageNumber(pt))
 		ur := ct.getPrintURL() + "/" + curPage.URL
 		ura := `<a href="` + ur + `">` + ur + `</a>`
+		if curPage.NoURLinPDF {
+			ura = ""
+		}
 		dt := ""
 		if !curPage.Date.IsZero() {
 			dt = curPage.Date.Format("January 2, 2006")
