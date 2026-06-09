@@ -48,7 +48,7 @@ func TestButtonClick(t *testing.T) {
 
 func TestButtonMenu(t *testing.T) {
 	b := NewBody()
-	NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene) {
+	NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Copy link")
 		NewButton(m).SetText("Send message")
 	})
@@ -60,7 +60,7 @@ func TestButtonMenuClick(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
-	bt := NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene) {
+	bt := NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Copy link")
 		NewButton(m).SetText("Send message")
 	})
