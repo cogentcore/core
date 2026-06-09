@@ -8,7 +8,7 @@ You can add [[button]]s to the context menu of a widget:
 
 ```Go
 tf := core.NewTextField(b)
-tf.AddContextMenu(func(m *core.Scene) {
+tf.AddContextMenu(func(m *core.Scene, pos image.Point) {
     core.NewButton(m).SetText("Build")
     core.NewButton(m).SetText("Run")
 })

@@ -60,7 +60,7 @@ tb.Maker(func(p *tree.Plan) {
         w.SetText("Build")
     })
 })
-tb.AddOverflowMenu(func(m *core.Scene) {
+tb.AddOverflowMenu(func(m *core.Scene, pos image.Point) {
     core.NewButton(m).SetText("Run")
 })
 ```

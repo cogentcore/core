@@ -373,6 +373,17 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 }
 
 func (tx *Text) contextMenu(m *Scene, pos image.Point) {
+	tl, _ := tx.findLink(pos)
+	if tl != nil {
+		bt := NewButton(m).SetIcon(icons.Copy).SetText("Copy link")
+		bt.OnClick(func(e events.Event) {
+			em := tx.Events()
+			if em != nil {
+				md := mimedata.NewText(tl.URL)
+				em.Clipboard().Write(md)
+			}
+		})
+	}
 	NewFuncButton(m).SetFunc(tx.copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tx.hasSelection())
 }
 
