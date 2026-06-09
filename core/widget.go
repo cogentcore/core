@@ -214,7 +214,7 @@ type WidgetBase struct {
 	// Context menus should be added through [WidgetBase.AddContextMenu].
 	// Separators will be added between each context menu function.
 	// [Scene.ContextMenus] apply to all widgets in the scene.
-	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+	ContextMenus []func(m *Scene, pos image.Point) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Deferred is a slice of functions to call after the next [Scene] update/render.
 	// In each function event sending etc will work as expected. Use

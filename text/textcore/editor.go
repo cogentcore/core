@@ -6,6 +6,7 @@ package textcore
 
 import (
 	"fmt"
+	"image"
 	"unicode"
 
 	"cogentcore.org/core/base/fileinfo"
@@ -729,7 +730,7 @@ func (ed *Editor) ShowContextMenu(e events.Event) {
 }
 
 // contextMenu builds the text editor context menu
-func (ed *Editor) contextMenu(m *core.Scene) {
+func (ed *Editor) contextMenu(m *core.Scene, pos image.Point) {
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
 		SetKey(keymap.Copy).SetState(!ed.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {

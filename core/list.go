@@ -1351,7 +1351,7 @@ func (lb *ListBase) pasteIndex(idx int) { //types:add
 }
 
 // makePasteMenu makes the menu of options for paste events
-func (lb *ListBase) makePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+func (lb *ListBase) makePasteMenu(m *Scene, pos image.Point, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
 	ls := lb.This.(Lister)
 	if mod == events.DropCopy {
 		NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
@@ -1380,8 +1380,8 @@ func (lb *ListBase) makePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod even
 // a menu to determine what specifically to do
 func (lb *ListBase) pasteMenu(md mimedata.Mimes, idx int) {
 	lb.unselectAllIndexes()
-	mf := func(m *Scene) {
-		lb.makePasteMenu(m, md, idx, events.DropCopy, nil)
+	mf := func(m *Scene, pos image.Point) {
+		lb.makePasteMenu(m, pos, md, idx, events.DropCopy, nil)
 	}
 	pos := lb.indexPos(idx)
 	NewMenu(mf, lb.This.(Widget), pos).Run()
@@ -1495,9 +1495,9 @@ func (lb *ListBase) dragDrop(e events.Event) {
 		lb.tmpIndex = idx
 		lb.saveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
-		mf := func(m *Scene) {
+		mf := func(m *Scene, pos image.Point) {
 			lb.Scene.Events.DragMenuAddModText(m, de.DropMod)
-			lb.makePasteMenu(m, md, idx, de.DropMod, func() {
+			lb.makePasteMenu(m, pos, md, idx, de.DropMod, func() {
 				lb.dropFinalize(de)
 			})
 		}
@@ -1546,7 +1546,7 @@ func (lb *ListBase) saveDraggedIndexes(idx int) {
 	}
 }
 
-func (lb *ListBase) contextMenu(m *Scene) {
+func (lb *ListBase) contextMenu(m *Scene, pos image.Point) {
 	if lb.IsReadOnly() || lb.isArray {
 		NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 			lb.copyIndexes(true)

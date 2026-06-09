@@ -5,6 +5,8 @@
 package core
 
 import (
+	"image"
+
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
@@ -40,7 +42,7 @@ func SettingsEditor(b *Body) {
 		for _, se := range AllSettings {
 			tb.Maker(se.MakeToolbar)
 		}
-		tb.AddOverflowMenu(func(m *Scene) {
+		tb.AddOverflowMenu(func(m *Scene, pos image.Point) {
 			NewFuncButton(m).SetFunc(resetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
 			NewFuncButton(m).SetFunc(AppearanceSettings.deleteSavedWindowGeometries).SetConfirm(true).SetIcon(icons.Delete)
 			NewFuncButton(m).SetFunc(ProfileToggle).SetShortcut("Control+Alt+R").SetText("Profile performance").SetIcon(icons.Analytics)

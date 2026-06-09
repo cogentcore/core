@@ -337,7 +337,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			}
 		})
 		w.ContextMenus = nil
-		w.AddContextMenu(func(m *Scene) {
+		w.AddContextMenu(func(m *Scene, pos image.Point) {
 			open := NewButton(m).SetText("Open").SetIcon(icons.Open)
 			open.SetTooltip("Open the selected file using the default app")
 			open.OnClick(func(e events.Event) {

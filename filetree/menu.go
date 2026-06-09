@@ -5,6 +5,7 @@
 package filetree
 
 import (
+	"image"
 	"strings"
 
 	"cogentcore.org/core/base/vcs"
@@ -25,7 +26,7 @@ func vcsLabelFunc(fn *Node, label string) string {
 	return label
 }
 
-func (fn *Node) VCSContextMenu(m *core.Scene) {
+func (fn *Node) VCSContextMenu(m *core.Scene, pos image.Point) {
 	if fn.FileRoot().FS != nil {
 		return
 	}
@@ -61,7 +62,7 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 		})
 }
 
-func (fn *Node) contextMenu(m *core.Scene) {
+func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	core.NewFuncButton(m).SetFunc(fn.showFileInfo).SetText("Info").
 		SetIcon(icons.Info).SetEnabled(fn.HasSelection())
 
@@ -106,7 +107,7 @@ func (fn *Node) contextMenu(m *core.Scene) {
 
 	core.NewSeparator(m)
 
-	fn.VCSContextMenu(m)
+	fn.VCSContextMenu(m, pos)
 	core.NewSeparator(m)
 
 	core.NewFuncButton(m).SetFunc(fn.removeFromExterns).

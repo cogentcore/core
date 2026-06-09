@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
@@ -87,7 +88,7 @@ func (kl *KeyedList) Init() {
 				wb.SetReadOnly(kl.IsReadOnly())
 				wb.OnInput(kl.HandleEvent)
 				if !kl.IsReadOnly() {
-					wb.AddContextMenu(func(m *Scene) {
+					wb.AddContextMenu(func(m *Scene, pos image.Point) {
 						kl.contextMenu(m, key)
 					})
 				}
@@ -110,7 +111,7 @@ func (kl *KeyedList) Init() {
 					s.SetTextWrap(false)
 				})
 				if !kl.IsReadOnly() {
-					wb.AddContextMenu(func(m *Scene) {
+					wb.AddContextMenu(func(m *Scene, pos image.Point) {
 						kl.contextMenu(m, key)
 					})
 				}

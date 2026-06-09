@@ -372,7 +372,7 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return tl.URL, bounds.Min
 }
 
-func (tx *Text) contextMenu(m *Scene) {
+func (tx *Text) contextMenu(m *Scene, pos image.Point) {
 	NewFuncButton(m).SetFunc(tx.copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tx.hasSelection())
 }
 

@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -560,7 +561,7 @@ func (tb *Table) editIndex(idx int) {
 	d.RunWindowDialog(tb)
 }
 
-func (tb *Table) contextMenu(m *Scene) {
+func (tb *Table) contextMenu(m *Scene, pos image.Point) {
 	e := NewButton(m)
 	if tb.IsReadOnly() {
 		e.SetText("View").SetIcon(icons.Visibility)

@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"reflect"
 	"strconv"
 
@@ -48,7 +49,7 @@ func (il *InlineList) Init() {
 				if il.IsReadOnly() {
 					wb.SetReadOnly(true)
 				} else {
-					wb.AddContextMenu(func(m *Scene) {
+					wb.AddContextMenu(func(m *Scene, pos image.Point) {
 						il.contextMenu(m, i)
 					})
 				}
