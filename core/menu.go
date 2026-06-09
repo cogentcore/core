@@ -62,14 +62,14 @@ func StyleMenuScene(msc *Scene) {
 // newMenuScene constructs a [Scene] for displaying a menu, using the
 // given menu constructor function. If no name is provided, it defaults
 // to "menu".  If no menu items added, returns nil.
-func newMenuScene(menu func(m *Scene), name ...string) *Scene {
+func newMenuScene(menu func(m *Scene, pos image.Point), pos image.Point, name ...string) *Scene {
 	nm := "menu"
 	if len(name) > 0 {
 		nm = name[0] + "-menu"
 	}
 	msc := NewScene(nm)
 	StyleMenuScene(msc)
-	menu(msc)
+	menu(msc, pos)
 	if !msc.HasChildren() {
 		return nil
 	}
@@ -123,8 +123,8 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
-	return NewMenuStage(newMenuScene(menu, ctx.AsTree().Name), ctx, pos)
+func NewMenu(menu func(m *Scene, pos image.Point), ctx Widget, pos image.Point) *Stage {
+	return NewMenuStage(newMenuScene(menu, pos, ctx.AsTree().Name), ctx, pos)
 }
 
 // AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
@@ -132,20 +132,20 @@ func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
 // Context menu functions are run in reverse order, and separators are
 // automatically added between each context menu function. [Scene.ContextMenus]
 // apply to all widgets in the scene.
-func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) {
+func (wb *WidgetBase) AddContextMenu(menu func(m *Scene, pos image.Point)) {
 	wb.ContextMenus = append(wb.ContextMenus, menu)
 }
 
 // applyContextMenus adds the [WidgetBase.ContextMenus] and [Scene.ContextMenus]
 // to the given menu scene in reverse order. It also adds separators between each
 // context menu function.
-func (wb *WidgetBase) applyContextMenus(m *Scene) {
-	do := func(cms []func(m *Scene)) {
+func (wb *WidgetBase) applyContextMenus(m *Scene, pos image.Point) {
+	do := func(cms []func(m *Scene, pos image.Point)) {
 		for i := len(cms) - 1; i >= 0; i-- {
 			if m.NumChildren() > 0 {
 				NewSeparator(m)
 			}
-			cms[i](m)
+			cms[i](m, pos)
 		}
 	}
 	do(wb.ContextMenus)
@@ -188,7 +188,7 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 // calling the given function with the index of the selected string.
 // if string == sel, that menu item is selected initially.
 func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
-	return newMenuScene(func(m *Scene) {
+	return newMenuScene(func(m *Scene, pos image.Point) {
 		for i, s := range strs {
 			b := NewButton(m).SetText(s)
 			b.OnClick(func(e events.Event) {
@@ -198,7 +198,7 @@ func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
 				b.SetSelected(true)
 			}
 		}
-	})
+	}, image.Point{})
 }
 
 var (
@@ -217,7 +217,7 @@ type MenuSearcher interface {
 }
 
 // standardContextMenu adds standard context menu items for the [Scene].
-func (sc *Scene) standardContextMenu(m *Scene) { //types:add
+func (sc *Scene) standardContextMenu(m *Scene, pos image.Point) { //types:add
 	sdesc := "Search for text within all widgets in current scene."
 	NewButton(m).SetText("Search").SetIcon(icons.Search).SetKey(keymap.Find).SetTooltip(sdesc).OnClick(func(e events.Event) {
 		Search(sc, LastSearch, LastUseCase)
@@ -260,7 +260,7 @@ func (sc *Scene) standardContextMenu(m *Scene) { //types:add
 	if TheApp.Platform().IsMobile() && TheApp.Platform() != system.Web {
 		return
 	}
-	NewButton(m).SetText("Window").SetMenu(func(m *Scene) {
+	NewButton(m).SetText("Window").SetMenu(func(m *Scene, pos image.Point) {
 		if sc.IsFullscreen() {
 			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
 				sc.SetFullscreen(false)
@@ -330,7 +330,7 @@ func (sc *Scene) MenuSearchDialog(title, text string) {
 	w.AddItemsFunc(func() {
 		addButtonItems(&w.Items, sc, "")
 		tmps := NewScene()
-		sc.applyContextMenus(tmps)
+		sc.applyContextMenus(tmps, image.Point{})
 		addButtonItems(&w.Items, tmps, "")
 	})
 	w.OnFinal(events.Change, func(e events.Event) {
@@ -370,7 +370,7 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 		}
 		if bt.HasMenu() {
 			tmps := NewScene()
-			bt.Menu(tmps)
+			bt.Menu(tmps, image.Point{})
 			npath := path
 			if npath != "" {
 				npath += " > "

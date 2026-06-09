@@ -5,6 +5,7 @@
 package filetree
 
 import (
+	"image"
 	"log/slog"
 
 	"cogentcore.org/core/base/errors"
@@ -65,7 +66,7 @@ func (lv *VCSLog) Init() {
 	tree.AddChildAt(lv, "log", func(w *core.Table) {
 		w.SetReadOnly(true)
 		w.SetSlice(&lv.Log)
-		w.AddContextMenu(func(m *core.Scene) {
+		w.AddContextMenu(func(m *core.Scene, pos image.Point) {
 			core.NewButton(m).SetText("Set Revision A").
 				SetTooltip("Set Buffer A's revision to this").
 				OnClick(func(e events.Event) {

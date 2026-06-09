@@ -584,7 +584,7 @@ func (ch *Chooser) ClearError() {
 
 // makeItemsMenu constructs a menu of all the items.
 // It is used when the chooser is clicked.
-func (ch *Chooser) makeItemsMenu(m *Scene) {
+func (ch *Chooser) makeItemsMenu(m *Scene, pos image.Point) {
 	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
 		if it.SeparatorBefore {

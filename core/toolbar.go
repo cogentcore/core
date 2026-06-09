@@ -5,6 +5,8 @@
 package core
 
 import (
+	"image"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
@@ -27,7 +29,7 @@ type Toolbar struct {
 	// toolbar. You can use [Toolbar.AddOverflowMenu] to add them.
 	// These are processed in reverse order (last in, first called)
 	// so that the default items are added last.
-	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
+	OverflowMenus []func(m *Scene, pos image.Point) `set:"-" json:"-" xml:"-"`
 
 	// allItemsPlan has all the items, during layout sizing
 	allItemsPlan *tree.Plan
@@ -203,7 +205,7 @@ func (tb *Toolbar) setOverflowMenuVisibility() {
 }
 
 // overflowMenu adds the overflow menu to the given Scene.
-func (tb *Toolbar) overflowMenu(m *Scene) {
+func (tb *Toolbar) overflowMenu(m *Scene, pos image.Point) {
 	nm := len(tb.OverflowMenus)
 	ni := len(tb.overflowItems)
 	if ni > 0 {
@@ -217,14 +219,14 @@ func (tb *Toolbar) overflowMenu(m *Scene) {
 	// reverse order so defaults are last
 	for i := nm - 1; i >= 0; i-- {
 		fn := tb.OverflowMenus[i]
-		fn(m)
+		fn(m, pos)
 	}
 }
 
 // AddOverflowMenu adds the given menu function to the overflow menu list.
 // These functions are called in reverse order such that the last added function
 // is called first when constructing the menu.
-func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
+func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene, pos image.Point)) {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
 }
 

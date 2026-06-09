@@ -60,7 +60,7 @@ c2 := tree.NewNodeBase(n)
 tree.NewNodeBase(c2)
 tr := core.NewTree(b)
 tr.SetTreeInit(func(tr *core.Tree) {
-    tr.AddContextMenu(func(m *core.Scene) {
+    tr.AddContextMenu(func(m *core.Scene, pos image.Point) {
         core.NewButton(m).SetText("My button")
     })
 })

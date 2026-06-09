@@ -1258,7 +1258,7 @@ func (tr *Tree) contextMenuReadOnly(m *Scene) {
 		SetEnabled(tr.HasSelection())
 }
 
-func (tr *Tree) contextMenu(m *Scene) {
+func (tr *Tree) contextMenu(m *Scene, pos image.Point) {
 	if tr.IsReadOnly() || tr.rootIsReadOnly() {
 		tr.contextMenuReadOnly(m)
 		return
@@ -1417,8 +1417,8 @@ func (tr *Tree) Paste() { //types:add
 // by popping up a menu to determine what specifically to do.
 func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 	tr.UnselectAll()
-	mf := func(m *Scene) {
-		tr.makePasteMenu(m, md, nil)
+	mf := func(m *Scene, pos image.Point) {
+		tr.makePasteMenu(m, pos, md, nil)
 	}
 	pos := tr.ContextMenuPos(nil)
 	NewMenu(mf, tr.This.(Widget), pos).Run()
@@ -1427,7 +1427,7 @@ func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 // makePasteMenu makes the menu of options for paste events
 // Optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tr *Tree) makePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
+func (tr *Tree) makePasteMenu(m *Scene, pos image.Point, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tr.PasteAssign(md)
 		if fun != nil {
@@ -1605,9 +1605,9 @@ func (tr *Tree) DragDrop(e events.Event) {
 		stv.dragClearStates()
 	}
 	md := de.Data.(mimedata.Mimes)
-	mf := func(m *Scene) {
+	mf := func(m *Scene, pos image.Point) {
 		tr.Scene.Events.DragMenuAddModText(m, de.DropMod)
-		tr.makePasteMenu(m, md, func() {
+		tr.makePasteMenu(m, pos, md, func() {
 			tr.DropFinalize(de)
 		})
 	}

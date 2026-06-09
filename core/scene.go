@@ -234,7 +234,7 @@ func (sc *Scene) Init() {
 		// since buttons may be added or removed dynamically.
 		sc.Events.shortcuts = nil
 		tmps := NewScene()
-		sc.applyContextMenus(tmps)
+		sc.applyContextMenus(tmps, image.Point{})
 		sc.Events.getShortcutsIn(tmps)
 	})
 	if TheApp.SceneInit != nil {

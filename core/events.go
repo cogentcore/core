@@ -1289,7 +1289,7 @@ func (em *Events) getShortcutsIn(parent Widget) {
 		}
 		if bt.HasMenu() {
 			tmps := NewScene()
-			bt.Menu(tmps)
+			bt.Menu(tmps, image.Point{})
 			em.getShortcutsIn(tmps)
 		}
 		return tree.Break // there are no buttons in buttons

@@ -55,8 +55,8 @@ type Button struct { //core:embedder
 	// Menu is a menu constructor function used to build and display
 	// a menu whenever the button is clicked. There will be no menu
 	// if it is nil. The constructor function should add buttons
-	// to the Scene that it is passed.
-	Menu func(m *Scene) `json:"-" xml:"-"`
+	// to the Scene that it is passed. Position is mouse click position.
+	Menu func(m *Scene, pos image.Point) `json:"-" xml:"-"`
 }
 
 // ButtonTypes is an enum containing the

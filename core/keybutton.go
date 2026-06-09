@@ -5,6 +5,8 @@
 package core
 
 import (
+	"image"
+
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
@@ -60,7 +62,7 @@ func (kc *KeyChordButton) Init() {
 	kc.Updater(func() {
 		kc.SetText(kc.Chord.Label())
 	})
-	kc.AddContextMenu(func(m *Scene) {
+	kc.AddContextMenu(func(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
 			kc.Chord = ""
 			kc.UpdateChange()

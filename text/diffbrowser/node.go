@@ -5,6 +5,7 @@
 package diffbrowser
 
 import (
+	"image"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -74,7 +75,7 @@ func (tn *Node) Browser() *Browser {
 	return tree.ParentByType[*Browser](tn)
 }
 
-func (tn *Node) ContextMenu(m *core.Scene) {
+func (tn *Node) ContextMenu(m *core.Scene, pos image.Point) {
 	vd := core.NewButton(m).SetText("View Diffs").SetIcon(icons.Add)
 	vd.Styler(func(s *styles.Style) {
 		s.SetState(!tn.HasSelection(), states.Disabled)

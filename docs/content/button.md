@@ -27,7 +27,7 @@ core.NewButton(b).SetText("Download").SetIcon(icons.Download)
 You can add a popup [[menu]] to a button:
 
 ```Go
-core.NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *core.Scene) {
+core.NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *core.Scene, pos image.Point) {
     core.NewButton(m).SetText("Copy link")
     core.NewButton(m).SetText("Send message")
 })

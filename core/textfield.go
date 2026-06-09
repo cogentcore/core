@@ -989,7 +989,7 @@ func (tf *TextField) insertAtCursor(str string) {
 	tf.cursorForward(rsl)
 }
 
-func (tf *TextField) contextMenu(m *Scene) {
+func (tf *TextField) contextMenu(m *Scene, pos image.Point) {
 	NewFuncButton(m).SetFunc(tf.copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.hasSelection(), states.Disabled)
 	if !tf.IsReadOnly() {
 		NewFuncButton(m).SetFunc(tf.cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.hasSelection(), states.Disabled)
