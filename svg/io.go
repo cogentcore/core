@@ -1000,6 +1000,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
+		XMLAddAttr(&se.Attr, "rx", fmt.Sprintf("%g", nd.Radius.X))
+		XMLAddAttr(&se.Attr, "ry", fmt.Sprintf("%g", nd.Radius.Y))
 	case *Circle:
 		nm = "circle"
 		XMLAddAttr(&se.Attr, "cx", fmt.Sprintf("%g", nd.Pos.X))
