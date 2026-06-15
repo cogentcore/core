@@ -299,6 +299,7 @@ func SetFieldsFromMap(obj any, vals map[string]any) error {
 		fld, err := FieldByPath(objv, k)
 		if err != nil {
 			errs = append(errs, err)
+			continue
 		}
 		err = SetRobust(PointerValue(fld).Interface(), v)
 		if err != nil {
