@@ -7,18 +7,29 @@ package main
 import (
 	"embed"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	_ "cogentcore.org/core/text/tex"
+	"cogentcore.org/core/text/tex/texcache"
 	"cogentcore.org/core/tree"
 	_ "cogentcore.org/core/yaegicore"
 )
 
+//go:generate go run ./genmath.go
+
 //go:embed content
 var econtent embed.FS
 
+//go:embed mathcache.json.gz
+var mathcache embed.FS
+
 func main() {
+	texcache.OpenFS(mathcache, "mathcache.json.gz")
 	// rasterx.UseGlyphCache = false
 	content.Settings.SiteTitle = "Cogent Content Example"
 	content.OfflineURL = "https://example.com"
@@ -29,6 +40,14 @@ func main() {
 		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
 			ct.MakeToolbar(p)
 			ct.MakeToolbarPDF(p)
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("SaveMath").SetIcon(icons.Search).SetKey(keymap.Find).
+					SetTooltip("Save cached math rendering")
+				w.OnClick(func(e events.Event) {
+					e.SetHandled()
+					errors.Log(texcache.SaveAs("mathcache.json"))
+				})
+			})
 		})
 	})
 	b.RunMainWindow()

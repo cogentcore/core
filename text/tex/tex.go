@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/tex/texcache"
 	"star-tex.org/x/tex"
 )
 
@@ -34,14 +35,6 @@ func init() {
 	shaped.ShapeMath = LaTeXMath
 }
 
-type cacheKey struct {
-	fontSizeDots float32
-	formula      string
-}
-
-// cache results of TeX processing because it is rather slow.
-var cache = map[cacheKey]*ppath.Path{}
-
 // LaTeXMath parses a LaTeX math expression and returns a path
 // rendering that expression. To activate display math mode, add an additional $
 // surrounding the expression: one set of $ $ is automatically included to produce
@@ -49,23 +42,25 @@ var cache = map[cacheKey]*ppath.Path{}
 // The additional $ activates displaystyle math.
 // fontSizeDots specifies the actual font size in dots (actual pixels)
 // for a 10pt font in the DVI system.
-func LaTeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
+func LaTeXMath(expr string, fontSizeDots float32) (ppath.Path, error) {
 	texMu.Lock()
 	defer texMu.Unlock()
 
-	formula = strings.TrimSpace(formula)
-	if len(formula) == 0 {
-		return nil, fmt.Errorf("LaTeXMath: empty formula")
+	expr = strings.TrimSpace(expr)
+	if len(expr) == 0 {
+		return nil, fmt.Errorf("LaTeXMath: empty expr")
 	}
-	ckey := cacheKey{fontSizeDots: fontSizeDots, formula: formula}
-	if p, ok := cache[ckey]; ok {
+
+	p := texcache.Get(expr, fontSizeDots)
+	if p != nil {
 		return p, nil
 	}
+
 	txt := preamble
-	if formula[0] == '$' {
-		txt += "$\\displaystyle " + formula[1:len(formula)-1] + " $"
+	if expr[0] == '$' {
+		txt += "$\\displaystyle " + expr[1:len(expr)-1] + " $"
 	} else {
-		txt += "$" + formula + "$"
+		txt += "$" + expr + "$"
 	}
 	txt += postamble
 	if Debug {
@@ -91,9 +86,8 @@ func LaTeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	if err != nil {
 		fmt.Println("got DVIToPath error:", err)
 		fmt.Println(stdout.String())
-		cache[ckey] = nil
 		return nil, err
 	}
-	cache[ckey] = p
+	texcache.Add(expr, fontSizeDots, p)
 	return p, nil
 }

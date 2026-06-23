@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/maps"
 
@@ -108,6 +109,9 @@ type Content struct {
 	// The previous and next page, if applicable. They must be stored on this struct
 	// to avoid stale local closure variables.
 	prevPage, nextPage *bcontent.Page
+
+	// if non-nil, a message is sent when content page is rendered
+	renderChan chan struct{}
 }
 
 func init() {
@@ -478,6 +482,14 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	return nil
 }
 
+func (ct *Content) RenderWidget() {
+	ct.Splits.RenderWidget()
+	if ct.renderChan != nil {
+		ct.renderChan <- struct{}{}
+	}
+	fmt.Println(time.Now(), "rendered:", ct.current.URL)
+}
+
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
 func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
@@ -675,4 +687,22 @@ func (ct *Content) PageRefs(page *bcontent.Page) *core.Frame {
 	fr.StyleTree()
 	fr.SetScene(ct.Scene)
 	return fr
+}
+
+// LoadEachPage is a helper function to iterate through loading each page,
+// which is used for updating the math cache.
+func (ct *Content) LoadEachPage(after func()) error {
+	ct.renderChan = make(chan struct{})
+	go func() {
+		for _, pg := range ct.pages {
+			fmt.Println(pg.URL)
+			ct.OpenEvent(pg.URL, nil)
+			<-ct.renderChan
+			fmt.Println("rendered:", pg.URL)
+		}
+		if after != nil {
+			after()
+		}
+	}()
+	return nil
 }

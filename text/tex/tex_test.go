@@ -75,8 +75,8 @@ func TestTex(t *testing.T) {
 			pp, err := LaTeXMath(test.tex, pc.Text.FontSize.Dots)
 			assert.NoError(t, err)
 			assert.NotNil(t, pp)
-			*pp = pp.Translate(0, 40)
-			pc.State.Path = *pp
+			pp = pp.Translate(0, 40)
+			pc.State.Path = pp
 			pc.Draw()
 			// reference text
 			// sh := shaped.NewShaper()

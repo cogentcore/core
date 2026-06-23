@@ -24,7 +24,7 @@ var (
 	// Import _ cogentcore.org/core/text/tex to set this function
 	// (incurs a significant additional memory footprint due to fonts
 	// and other packages).
-	ShapeMath func(expr string, fontHeight float32) (*ppath.Path, error)
+	ShapeMath func(expr string, fontHeight float32) (ppath.Path, error)
 )
 
 // Shaper is a text shaping system that can shape the layout of [rich.Text],

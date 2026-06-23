@@ -23,10 +23,10 @@ type state struct {
 // note: use dvitype --show-opcodes to show the dvi in human-readable format,
 // with command opcodes
 
-// DVIToPath parses a DVI file (output from TeX) and returns *ppath.Path.
+// DVIToPath parses a DVI file (output from TeX) and returns ppath.Path.
 // fontSizeDots specifies the actual font size in dots (actual pixels)
 // for a 10pt font in the DVI system.
-func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, error) {
+func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, error) {
 	// state
 	var fnt uint32 // font index
 	s := state{}
@@ -47,7 +47,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 	h0 := int32(0)
 	v0 := int32(0)
 
-	p := &ppath.Path{}
+	p := ppath.Path{}
 	r := &dviReader{b, 0}
 	for 0 < r.len() {
 		if Debug {
@@ -67,7 +67,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			if Debug {
 				fmt.Printf("\nchar font #%d, cid: %d, rune: %s, pos: (%v,%v)\n", fnt, c, string(rune(c)), f*float32(s.h), f*float32(s.v))
 			}
-			w := int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
+			w := int32(fnts[fnt].Draw(&p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 			s.h += w
 		} else if 128 <= cmd && cmd <= 131 {
 			// set
@@ -84,7 +84,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
 			// fmt.Println("print:", string(rune(c)), s.v)
-			s.h += int32(fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
+			s.h += int32(fnts[fnt].Draw(&p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 		} else if cmd == 132 {
 			// set_rule
 			height := r.readInt32()
@@ -112,7 +112,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
 			// fmt.Println("print:", string(rune(c)), s.v)
-			fnts[fnt].Draw(p, f*float32(s.h), f*float32(s.v), c, fontScale)
+			fnts[fnt].Draw(&p, f*float32(s.h), f*float32(s.v), c, fontScale)
 		} else if cmd == 137 {
 			// put_rule
 			height := r.readInt32()
@@ -308,7 +308,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 		}
 	}
 	// fmt.Println("start offsets:", h0, v0)
-	*p = p.Translate(-f*float32(h0), -f*float32(v0))
+	p = p.Translate(-f*float32(h0), -f*float32(v0))
 	return p, nil
 }
 
