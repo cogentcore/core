@@ -20,7 +20,9 @@ var (
 	texFonts  *dviFonts
 	texMu     sync.Mutex
 
-	preamble = `\documentclass{article}
+	// note: must be standalone to work properly for inline paths.
+	// standalone cannot use standard \begin{equation} so using $\displaymath
+	preamble = `\documentclass{standalone}
 \begin{document}
 `
 	postamble = `
@@ -44,7 +46,7 @@ var cache = map[cacheKey]*ppath.Path{}
 // rendering that expression. To activate display math mode, add an additional $
 // surrounding the expression: one set of $ $ is automatically included to produce
 // inline math mode rendering by default.
-// The additional $ is automatically translated into \[ \].
+// The additional $ activates displaystyle math.
 // fontSizeDots specifies the actual font size in dots (actual pixels)
 // for a 10pt font in the DVI system.
 func LaTeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
@@ -61,7 +63,7 @@ func LaTeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	}
 	txt := preamble
 	if formula[0] == '$' {
-		txt += "\\[ " + formula[1:len(formula)-1] + " \\]"
+		txt += "$\\displaystyle " + formula[1:len(formula)-1] + " $"
 	} else {
 		txt += "$" + formula + "$"
 	}
