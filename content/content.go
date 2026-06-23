@@ -19,7 +19,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"golang.org/x/exp/maps"
 
@@ -487,7 +486,6 @@ func (ct *Content) RenderWidget() {
 	if ct.renderChan != nil {
 		ct.renderChan <- struct{}{}
 	}
-	fmt.Println(time.Now(), "rendered:", ct.current.URL)
 }
 
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
@@ -695,7 +693,7 @@ func (ct *Content) LoadEachPage(after func()) error {
 	ct.renderChan = make(chan struct{})
 	go func() {
 		for _, pg := range ct.pages {
-			fmt.Println(pg.URL)
+			fmt.Println("\n#### page:", pg.URL)
 			ct.OpenEvent(pg.URL, nil)
 			<-ct.renderChan
 			fmt.Println("rendered:", pg.URL)

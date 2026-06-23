@@ -58,16 +58,17 @@ func TestTex(t *testing.T) {
 		{`frac-text`, `a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)`},
 		{`frac-disp`, `$a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)$`},
 		{`partial-text`, `y = \partial x`},
-		{`begin-disp`, `$\Phi = \left(\begin{array}{c}
+		{`array-disp`, `$\Phi = \left(\begin{array}{c}
 \Phi^+ \\
 \Phi^0 \\
 \end{array}\right)$`},
+		{`hat-text`, `$\hat{p} = -i \hbar \vec{\nabla}$`},
 	}
 
 	for _, test := range tests {
-		// if test.name != "partial-text" {
-		// 	continue
-		// }
+		if test.name != "hat-text" {
+			continue
+		}
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)

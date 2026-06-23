@@ -35,7 +35,10 @@ type cached struct {
 	FontSizeDots float32
 
 	// actual loaded, scaled PPath.
-	pp ppath.Path `json:"-"`
+	pp ppath.Path
+
+	// call DeleteUnused to remove any that haven't been accessed or added.
+	used bool
 }
 
 // Get tries to get a cached path for given equation at given fontsize in dots.
@@ -48,6 +51,7 @@ func Get(expr string, fontSizeDots float32) ppath.Path {
 	if !ok {
 		return nil
 	}
+	cd.used = true
 	if cd.pp == nil { // lazy loading
 		p, err := ppath.ParseSVGPath(cd.Path)
 		if err != nil {
@@ -62,7 +66,7 @@ func Get(expr string, fontSizeDots float32) ppath.Path {
 	}
 	sc := fontSizeDots / cd.FontSizeDots
 	np := cd.pp.Scale(sc, sc)
-	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: np}
+	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: np, used: true}
 	return np
 }
 
@@ -74,7 +78,7 @@ func Add(expr string, fontSizeDots float32, pp ppath.Path) {
 	if cache == nil {
 		cache = make(map[string]*cached)
 	}
-	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp}
+	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp, used: true}
 }
 
 // OpenFS opens saved cache entries from given file system (e.g., for embed).
@@ -156,8 +160,21 @@ func Open(filename string) error {
 	return nil
 }
 
+// DeleteUnused deletes any cache entries that have not been
+// accessed since the cache was loaded.
+// Use this in generate functions that save all generated cache.
+func DeleteUnused() {
+	for k, v := range cache {
+		if !v.used {
+			delete(cache, k)
+		}
+	}
+}
+
 // SaveAs saves cache entries to given file
 // If the filename ends in .gz, it is zipped.
+// When generating, can call DeleteUnused to filter
+// all unused items.
 func SaveAs(filename string) error {
 	mu.Lock()
 	defer mu.Unlock()

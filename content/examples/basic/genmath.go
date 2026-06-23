@@ -31,6 +31,7 @@ func main() {
 	ct := content.NewContent(b).SetContent(econtent)
 	b.OnShow(func(e events.Event) {
 		ct.LoadEachPage(func() {
+			texcache.DeleteUnused()
 			errors.Log(texcache.SaveAs("mathcache.json.gz"))
 			fmt.Println("ALL DONE!")
 			core.TheApp.QuitReq()
