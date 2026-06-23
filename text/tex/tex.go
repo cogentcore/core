@@ -20,18 +20,16 @@ var (
 	texFonts  *dviFonts
 	texMu     sync.Mutex
 
-	preamble = `
-\documentclass{standalone}
-%\documentclass{article}
-\usepackage[utf8]{inputenc}
+	preamble = `\documentclass{article}
 \begin{document}
 `
-	postamble = `\end{document}
+	postamble = `
+\end{document}
 `
 )
 
 func init() {
-	shaped.ShapeMath = TeXMath
+	shaped.ShapeMath = LaTeXMath
 }
 
 type cacheKey struct {
@@ -42,26 +40,37 @@ type cacheKey struct {
 // cache results of TeX processing because it is rather slow.
 var cache = map[cacheKey]*ppath.Path{}
 
-// TeXMath parses a plain TeX math expression and returns a path
-// rendering that expression. This is NOT LaTeX and only \frac is defined
-// as an additional math utility function, for fractions.
-// To activate display math mode, add an additional $ $ surrounding the
-// expression: one set of $ $ is automatically included to produce inline
-// math mode rendering.
+// LaTeXMath parses a LaTeX math expression and returns a path
+// rendering that expression. To activate display math mode, add an additional $
+// surrounding the expression: one set of $ $ is automatically included to produce
+// inline math mode rendering by default.
+// The additional $ is automatically translated into \[ \].
 // fontSizeDots specifies the actual font size in dots (actual pixels)
 // for a 10pt font in the DVI system.
-func TeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
+func LaTeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	texMu.Lock()
 	defer texMu.Unlock()
 
+	formula = strings.TrimSpace(formula)
+	if len(formula) == 0 {
+		return nil, fmt.Errorf("LaTeXMath: empty formula")
+	}
 	ckey := cacheKey{fontSizeDots: fontSizeDots, formula: formula}
 	if p, ok := cache[ckey]; ok {
 		return p, nil
 	}
-
-	r := strings.NewReader(fmt.Sprintf(`%s $%s$
-%s
-`, preamble, formula, postamble))
+	txt := preamble
+	if formula[0] == '$' {
+		txt += "\\[ " + formula[1:len(formula)-1] + " \\]"
+	} else {
+		txt += "$" + formula + "$"
+	}
+	txt += postamble
+	if Debug {
+		fmt.Println("Input:")
+		fmt.Println(txt)
+	}
+	r := strings.NewReader(txt)
 	w := &bytes.Buffer{}
 	stdout := &bytes.Buffer{}
 	if texEngine == nil {

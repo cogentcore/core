@@ -5,6 +5,7 @@
 package tex_test
 
 import (
+	"fmt"
 	"image/color"
 	"testing"
 
@@ -29,7 +30,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 }
 
 func TestTex(t *testing.T) {
-	Debug = true
+	// Debug = true
 	tests := []struct {
 		name string
 		tex  string
@@ -68,9 +69,10 @@ func TestTex(t *testing.T) {
 		// 	continue
 		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
+			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)
 			// fmt.Println("font size dots:", pc.Text.FontSize.Dots)
-			pp, err := TeXMath(test.tex, pc.Text.FontSize.Dots)
+			pp, err := LaTeXMath(test.tex, pc.Text.FontSize.Dots)
 			assert.NoError(t, err)
 			assert.NotNil(t, pp)
 			*pp = pp.Translate(0, 40)
@@ -82,6 +84,6 @@ func TestTex(t *testing.T) {
 			// lns := sh.WrapLines(tx, &pc.Font, &pc.Text, &rich.Settings, math32.Vec2(1000, 50))
 			// pc.DrawText(lns, math32.Vec2(0, 70))
 		})
-		break
+		// break
 	}
 }

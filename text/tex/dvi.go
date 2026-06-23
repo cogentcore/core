@@ -50,12 +50,13 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 	p := &ppath.Path{}
 	r := &dviReader{b, 0}
 	for 0 < r.len() {
+		if Debug {
+			fmt.Printf("## At: %d\n", r.i)
+		}
 		cmd := r.readByte()
 		if cmd <= 127 {
 			// set_char
 			if firstChar {
-				s.h += int32(float32(150) / f)
-				s.v += int32(float32(130) / f)
 				h0, v0 = s.h, s.v
 				firstChar = false
 			}
@@ -138,7 +139,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			// push
 			stack = append(stack, s)
 			if Debug {
-				fmt.Printf("push to: %d\n", len(stack))
+				fmt.Printf("push to: %d at %v\n", len(stack), r.i-1)
 			}
 		} else if cmd == 142 {
 			// pop
@@ -151,7 +152,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 				s = stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
 				if Debug {
-					fmt.Printf("pop to: %d\n", len(stack))
+					fmt.Printf("pop to: %d at: %v\n", len(stack), r.i-1)
 				}
 			}
 		} else if 143 <= cmd && cmd <= 146 {
@@ -202,7 +203,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			if cmd == 161 {
 				s.v += s.y
 			} else {
-				n := int(cmd - 152)
+				n := int(cmd - 161)
 				if r.len() < n {
 					return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 				}
@@ -214,7 +215,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			// z
 			if cmd == 166 {
 				s.v += s.z
-				fmt.Println("z down", s.z, s.v)
+				// fmt.Println("z down", s.z, s.v)
 			} else {
 				n := int(cmd - 166)
 				if r.len() < n {
@@ -279,9 +280,12 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (*ppath.Path, er
 			den := r.readUint32()
 			mag = r.readUint32()
 			f = fontScaleFactor * float32(num) / float32(den) * float32(mag) / 1000.0 / 10000.0 // in units/mm
-			// fmt.Println("num:", num, "mag:", mag, "den:", den, "f:", f)
 			n := int(r.readByte())
-			_ = r.readString(n) // comment
+			cmt := r.readString(n) // comment
+			_ = cmt
+			if Debug {
+				fmt.Println("num:", num, "mag:", mag, "den:", den, "f:", f, "cmt len:", n, "cmt:", cmt)
+			}
 		} else if cmd == 248 {
 			_ = r.readUint32() // pointer to final bop
 			_ = r.readUint32() // num
