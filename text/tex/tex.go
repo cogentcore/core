@@ -16,13 +16,17 @@ import (
 )
 
 var (
-	texEngine *tex.Engine
+	texEngine *tex.LaTeXEngine
 	texFonts  *dviFonts
 	texMu     sync.Mutex
 
-	preamble = `\nopagenumbers
-
-\def\frac#1#2{{{#1}\over{#2}}}
+	preamble = `
+\documentclass{standalone}
+%\documentclass{article}
+\usepackage[utf8]{inputenc}
+\begin{document}
+`
+	postamble = `\end{document}
 `
 )
 
@@ -56,12 +60,12 @@ func TeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	}
 
 	r := strings.NewReader(fmt.Sprintf(`%s $%s$
-\bye
-`, preamble, formula))
+%s
+`, preamble, formula, postamble))
 	w := &bytes.Buffer{}
 	stdout := &bytes.Buffer{}
 	if texEngine == nil {
-		texEngine = tex.New()
+		texEngine = tex.NewLaTeX()
 	}
 	texEngine.Stdout = stdout
 	if err := texEngine.Process(w, r); err != nil {
@@ -74,6 +78,7 @@ func TeXMath(formula string, fontSizeDots float32) (*ppath.Path, error) {
 	}
 	p, err := DVIToPath(w.Bytes(), texFonts, fontSizeDots)
 	if err != nil {
+		fmt.Println("got DVIToPath error:", err)
 		fmt.Println(stdout.String())
 		cache[ckey] = nil
 		return nil, err

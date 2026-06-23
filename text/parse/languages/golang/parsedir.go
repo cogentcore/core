@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"unicode"
@@ -165,6 +166,9 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 		// fmt.Printf("No go files, bailing\n")
 		return nil
 	}
+	files = slices.DeleteFunc(files, func(s string) bool {
+		return strings.Contains(s, "_test.go") || strings.HasPrefix(s, "_")
+	})
 	for i, pt := range files {
 		files[i] = filepath.Join(pkgPathAbs, pt)
 	}

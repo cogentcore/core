@@ -522,6 +522,9 @@ var cmexScales = map[uint32]float32{
 
 func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) float32 {
 	r := f.cmap[cid]
+	if r == 0x337 {
+		r = ' '
+	}
 	face := f.face
 	gid, ok := face.Cmap.Lookup(r)
 	if !ok {
@@ -529,7 +532,7 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 			face = f.mathSyms.face
 			gid, ok = face.Cmap.Lookup(r)
 			if !ok {
-				fmt.Println("rune not found in mathSyms:", string(r))
+				fmt.Printf("rune not found in mathSyms, cid: %x, hex: %x, string: %q\n", cid, r, string(r))
 			}
 		} else {
 			fmt.Println("rune not found:", string(r))

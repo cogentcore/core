@@ -1,5 +1,5 @@
-codeberg.org/go-pdf/fpdf v0.11.0 h1:n3I8WISQ1cr0S2rvx9DOlE/GypbcimMWqLpel3slHmY=
-codeberg.org/go-pdf/fpdf v0.11.0/go.mod h1:Y0DGRAdZ0OmnZPvjbMp/1bYxmIPxm0ws4tfoPOc4LjU=
+codeberg.org/go-pdf/fpdf v0.11.1 h1:U8+coOTDVLxHIXZgGvkfQEi/q0hYHYvEHFuGNX2GzGs=
+codeberg.org/go-pdf/fpdf v0.11.1/go.mod h1:Y0DGRAdZ0OmnZPvjbMp/1bYxmIPxm0ws4tfoPOc4LjU=
 git.sr.ht/~sbinet/cmpimg v0.1.0 h1:E0zPRk2muWuCqSKSVZIWsgtU9pjsw3eKHi8VmQeScxo=
 git.sr.ht/~sbinet/cmpimg v0.1.0/go.mod h1:FU12psLbF4TfNXkKH2ZZQ29crIqoiqTZmeQ7dkp/pxE=
 github.com/Bios-Marcel/wastebasket/v2 v2.0.3 h1:TkoDPcSqluhLGE+EssHu7UGmLgUEkWg7kNyHyyJ3Q9g=
@@ -209,11 +209,11 @@ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EV
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-modernc.org/knuth v0.5.4 h1:F8mDs7ME3oN9eyx01n6/xVmJ4F5U/qEhSYPnPXaZrps=
-modernc.org/knuth v0.5.4/go.mod h1:e5SBb35HQBj2aFwbBO3ClPcViLY3Wi0LzaOd7c/3qMk=
+modernc.org/knuth v0.5.5 h1:6lap2U/ISm8aC/4NU58ALFCRllNPaK0EZcIGY/oDgUg=
+modernc.org/knuth v0.5.5/go.mod h1:e5SBb35HQBj2aFwbBO3ClPcViLY3Wi0LzaOd7c/3qMk=
 modernc.org/token v1.1.0 h1:Xl7Ap9dKaEs5kLoOQeQmPWevfnk/DM5qcLcYlA8ys6Y=
 modernc.org/token v1.1.0/go.mod h1:UGzOrNV1mAFSEB63lOFHIpNRUVMvYTc6yu1SMY/XTDM=
 rsc.io/pdf v0.1.1 h1:k1MczvYDUvJBe93bYd7wrZLLUEcLZAuF824/I4e5Xr4=
 rsc.io/pdf v0.1.1/go.mod h1:n8OzWcQ6Sp37PL01nO98y4iUCRdTGarVfzxY20ICaU4=
-star-tex.org/x/tex v0.7.1 h1:4qGAByRyY0WQsOjtcHlxz+FgrYxz8fzxIds2Gjepp5U=
-star-tex.org/x/tex v0.7.1/go.mod h1:Y3y0U7sZTltTh/CDZIx0oAtMjG7eMaTuTtvDZGdyhJo=
+star-tex.org/x/tex v0.7.2-0.20260429141124-28abc24bb573 h1:WKZSZCpNM/1Iugwn3bjw+stS+TmasVWnovrAqwqHUo4=
+star-tex.org/x/tex v0.7.2-0.20260429141124-28abc24bb573/go.mod h1:r1wjM0JCvA4JsXhPiP/BjgzmP1LQVecVySOSGMjpZ8g=

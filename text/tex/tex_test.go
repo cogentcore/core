@@ -29,6 +29,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 }
 
 func TestTex(t *testing.T) {
+	Debug = true
 	tests := []struct {
 		name string
 		tex  string
@@ -56,6 +57,10 @@ func TestTex(t *testing.T) {
 		{`frac-text`, `a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)`},
 		{`frac-disp`, `$a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)$`},
 		{`partial-text`, `y = \partial x`},
+		{`begin-disp`, `$\Phi = \left(\begin{array}{c}
+\Phi^+ \\
+\Phi^0 \\
+\end{array}\right)$`},
 	}
 
 	for _, test := range tests {
@@ -77,5 +82,6 @@ func TestTex(t *testing.T) {
 			// lns := sh.WrapLines(tx, &pc.Font, &pc.Text, &rich.Settings, math32.Vec2(1000, 50))
 			// pc.DrawText(lns, math32.Vec2(0, 70))
 		})
+		break
 	}
 }
