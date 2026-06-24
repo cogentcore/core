@@ -64,10 +64,10 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 			if _, ok := fnts[fnt]; !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
-			if Debug {
-				fmt.Printf("\nchar font #%d, cid: %d, rune: %s, pos: (%v,%v)\n", fnt, c, string(rune(c)), f*float32(s.h), f*float32(s.v))
-			}
 			w := int32(fnts[fnt].Draw(&p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
+			if Debug {
+				fmt.Printf("\nchar font #%d, cid: %d, 0x%x, rune: %s, pos: (%v,%v) = (%v,%v) w: %v to h: %v\n", fnt, c, c, string(rune(c)), s.h, s.v, f*float32(s.h), f*float32(s.v), w, s.h+w)
+			}
 			s.h += w
 		} else if 128 <= cmd && cmd <= 131 {
 			// set
@@ -139,7 +139,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 			// push
 			stack = append(stack, s)
 			if Debug {
-				fmt.Printf("push to: %d at %v\n", len(stack), r.i-1)
+				fmt.Printf("push to: %d\n", len(stack))
 			}
 		} else if cmd == 142 {
 			// pop
@@ -152,7 +152,7 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 				s = stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
 				if Debug {
-					fmt.Printf("pop to: %d at: %v\n", len(stack), r.i-1)
+					fmt.Printf("pop to: %d\n", len(stack))
 				}
 			}
 		} else if 143 <= cmd && cmd <= 146 {
@@ -163,10 +163,16 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 			}
 			d := r.readInt32N(n)
 			s.h += d
+			if Debug {
+				fmt.Printf("right %d to %d\n", d, s.h)
+			}
 		} else if 147 <= cmd && cmd <= 151 {
 			// w
 			if cmd == 147 {
 				s.h += s.w
+				if Debug {
+					fmt.Printf("right w %d to %d\n", s.w, s.h)
+				}
 			} else {
 				n := int(cmd - 147)
 				if r.len() < n {
@@ -175,11 +181,17 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 				d := r.readInt32N(n)
 				s.w = d
 				s.h += d
+				if Debug {
+					fmt.Printf("right arg w %d to %d\n", d, s.h)
+				}
 			}
 		} else if 152 <= cmd && cmd <= 156 {
 			// x
 			if cmd == 152 {
 				s.h += s.x
+				if Debug {
+					fmt.Printf("right x %d to %d\n", s.x, s.h)
+				}
 			} else {
 				n := int(cmd - 152)
 				if r.len() < n {
@@ -188,6 +200,9 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 				d := r.readInt32N(n)
 				s.x = d
 				s.h += d
+				if Debug {
+					fmt.Printf("right spec x %d to %d\n", s.x, s.h)
+				}
 			}
 		} else if 157 <= cmd && cmd <= 160 {
 			// down
@@ -196,12 +211,17 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 				return nil, fmt.Errorf("bad command: %v at position %v", cmd, r.i)
 			}
 			d := r.readInt32N(n)
-			// fmt.Println("down:", d, s.v)
 			s.v += d
+			if Debug {
+				fmt.Printf("down %d to %d\n", d, s.v)
+			}
 		} else if 161 <= cmd && cmd <= 165 {
 			// y
 			if cmd == 161 {
 				s.v += s.y
+				if Debug {
+					fmt.Printf("down y %d to %d\n", s.y, s.v)
+				}
 			} else {
 				n := int(cmd - 161)
 				if r.len() < n {
@@ -210,12 +230,17 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 				d := r.readInt32N(n)
 				s.y = d
 				s.v += d
+				if Debug {
+					fmt.Printf("down spec y %d to %d\n", s.y, s.v)
+				}
 			}
 		} else if 166 <= cmd && cmd <= 170 {
 			// z
 			if cmd == 166 {
 				s.v += s.z
-				// fmt.Println("z down", s.z, s.v)
+				if Debug {
+					fmt.Printf("down z %d to %d\n", s.z, s.v)
+				}
 			} else {
 				n := int(cmd - 166)
 				if r.len() < n {
@@ -224,6 +249,9 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 				d := r.readInt32N(n)
 				s.z = d
 				s.v += d
+				if Debug {
+					fmt.Printf("down spec z %d to %d\n", s.z, s.v)
+				}
 			}
 		} else if 171 <= cmd && cmd <= 234 {
 			// fnt_num

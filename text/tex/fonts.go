@@ -400,6 +400,15 @@ func (fs *dviFonts) loadFont(fontname string, cmap map[uint32]rune, fontsize, sc
 	return &dviFont{face: face, cmap: cmap, size: fsize, italic: isItalic, ex: isEx, mathSyms: fs.mathSyms}
 }
 
+// glyphs for which bearings should be used: most are better without.
+// outline versions of font data are kinda weird it seems here.
+// value is extra adjustment to apply.
+var useXBearings = map[uint32]uint32{
+	0x16: 0,
+	0x5E: 0,
+	0x7E: 0,
+}
+
 const (
 	mag1 = 1.2
 	mag2 = 1.2 * 1.2
@@ -520,6 +529,7 @@ var cmexScales = map[uint32]float32{
 
 }
 
+// Draw renders the font, and returns the width advance
 func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) float32 {
 	r := f.cmap[cid]
 	if r == 0x337 {
@@ -538,7 +548,6 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 			fmt.Println("rune not found:", string(r))
 		}
 	}
-	hadv := face.HorizontalAdvance(gid)
 	// fmt.Printf("rune: 0x%0x gid: %d, r: 0x%0X\n", cid, gid, int(r))
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
@@ -546,45 +555,56 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 	xsc := float32(1)
 	// fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
 
+	ext, has := face.GlyphExtents(gid)
+	var xb, yb float32
+	if has {
+		xb = ext.XBearing
+		yb = ext.YBearing
+		exX, useX := useXBearings[cid]
+		if useX {
+			x -= sc * (xb + float32(exX))
+		}
+	}
+
 	if f.ex {
-		ext, _ := face.GlyphExtents(gid)
 		exsc, has := cmexScales[cid]
-		yb := ext.YBearing
 		if has {
 			sc *= exsc
-			switch cid {
-			case 0x5A, 0x49: // \int and \oint are off in large size
-				yb += 200
-			case 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F:
-				// larger delims are too thick
-				xsc = .7
-			case 0x20, 0x21, 0x22, 0x23, 0x28, 0x29, 0x2A, 0x2B:
-				// same for even larger ones
-				xsc = .6
-			case 0x3C, 0x3D: // braces middles need shifting
-				yb += 150
-			case 0x3A, 0x3B: // braces bottom shifting
-				yb += 400
-			// below are fixes for all the square root elements
-			case 0x71:
-				x += sc * 80
-				xsc = .6
-			case 0x72:
-				x -= sc * 80
-				xsc = .6
-			case 0x73:
-				x -= sc * 80
-				xsc = .5
-			case 0x74:
-				yb += 600
-			case 0x75:
-				x += sc * 560
-			case 0x76:
-				x += sc * 400
-				yb -= 36
-			}
+			// fmt.Printf("%x: ex scale %g\n", cid, exsc)
 		}
-		y += sc * yb
+		ybb := yb
+		switch cid {
+		case 0x5A, 0x49: // \int and \oint are off in large size
+			ybb += 200
+		case 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F:
+			// larger delims are too thick
+			xsc = .7
+		case 0x20, 0x21, 0x22, 0x23, 0x28, 0x29, 0x2A, 0x2B:
+			// same for even larger ones
+			xsc = .6
+		case 0x3C, 0x3D: // braces middles need shifting
+			ybb += 150
+		case 0x3A, 0x3B: // braces bottom shifting
+			ybb += 400
+			// below are fixes for all the square root elements
+		case 0x71:
+			x += sc * 80
+			xsc = .6
+		case 0x72:
+			x -= sc * 80
+			xsc = .6
+		case 0x73:
+			x -= sc * 80
+			xsc = .5
+		case 0x74:
+			ybb += 600
+		case 0x75:
+			x += sc * 560
+		case 0x76:
+			x += sc * 400
+			ybb -= 36
+		}
+		y += sc * ybb
 	}
 
 	if f.italic {
@@ -595,6 +615,7 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 
 	for _, s := range outline.Segments {
 		p0 := math32.Vec2(s.Args[0].X*xsc*sc+x, -s.Args[0].Y*sc+y)
+		// fmt.Println(s.Args[0].X, s.Args[0].Y, s.Args[0])
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			p.MoveTo(p0.X, p0.Y)
@@ -610,7 +631,10 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 		}
 	}
 	p.Close()
+	hadv := face.HorizontalAdvance(gid)
+	if hadv == 0 {
+		hadv = 500
+	}
 	adv := sc * hadv
-	// fmt.Println("hadv:", face.HorizontalAdvance(gid), "adv:", adv)
 	return adv
 }

@@ -62,13 +62,14 @@ func TestTex(t *testing.T) {
 \Phi^+ \\
 \Phi^0 \\
 \end{array}\right)$`},
-		{`hat-text`, `$\hat{p} = -i \hbar \vec{\nabla}$`},
+		{`hat-text`, `\hat{p}`},
+		{`hbar-text`, `\hat{p} = -i \hbar \vec{\nabla}`},
 	}
 
 	for _, test := range tests {
-		if test.name != "hat-text" {
-			continue
-		}
+		// if test.name != "hbar-text" {
+		// 	continue
+		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)
