@@ -7,6 +7,32 @@
 
 package tex
 
+type charMaps int32 //enums:enum
+
+const (
+	CMR charMaps = iota
+	CMMI
+	CMSY
+	CMEX
+	CMTT
+)
+
+func (cm charMaps) Table() map[uint32]rune {
+	switch cm {
+	case CMR:
+		return cmapCMR
+	case CMMI:
+		return cmapCMMI
+	case CMSY:
+		return cmapCMSY
+	case CMEX:
+		return cmapCMEX
+	case CMTT:
+		return cmapCMTT
+	}
+	return nil
+}
+
 var cmapCMR = map[uint32]rune{
 	0x00: '\u0393',
 	0x01: '\u0394',
@@ -185,7 +211,7 @@ var cmapCMMI = map[uint32]rune{
 	0x2B: '\u21C1',
 	0x2C: '\u21AA',
 	0x2D: '\u21A9',
-	0x2E: '\u25B9',
+	0x2E: '\u22C8',
 	0x2F: '\u25C3',
 	0x30: '\u0030',
 	0x31: '\u0031',
@@ -286,8 +312,8 @@ var cmapCMSY = map[uint32]rune{
 	0x0D: '\u25CB',
 	0x0E: '\u2218',
 	0x0F: '\u2219',
-	0x10: '\u2243',
-	0x11: '\u224D',
+	0x10: '\u224D',
+	0x11: '\u2261',
 	0x12: '\u2286',
 	0x13: '\u2287',
 	0x14: '\u2264',
@@ -295,7 +321,7 @@ var cmapCMSY = map[uint32]rune{
 	0x16: '\u227C',
 	0x17: '\u227D',
 	0x18: '\u223C',
-	0x19: '\u2245',
+	0x19: '\u2248',
 	0x1A: '\u2282',
 	0x1B: '\u2283',
 	0x1C: '\u226A',
@@ -309,7 +335,7 @@ var cmapCMSY = map[uint32]rune{
 	0x24: '\u2194',
 	0x25: '\u2197',
 	0x26: '\u2198',
-	0x27: '\u2242',
+	0x27: '\u2243',
 	0x28: '\u21D0',
 	0x29: '\u21D2',
 	0x2A: '\u21D1',
@@ -534,7 +560,7 @@ var cmapCMEX = map[uint32]rune{
 	0x79: '\u2193', // ↓
 	0x7A: '\u23DC', // ⏜ only left half
 	0x7B: '\u23DC', // ⏜ only right half
-	0x7C: '\u23DD', // ⏝ only left
+	0x7C: '\u23DD', //
 	0x7D: '\u23DD', // ⏝ only right
 	0x7E: '\u21D1', // ⇑
 	0x7F: '\u21D3', // ⇓

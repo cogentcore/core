@@ -30,11 +30,11 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 }
 
 func TestTex(t *testing.T) {
-	// Debug = true
 	tests := []struct {
 		name string
 		tex  string
 	}{
+		{`abs-text`, `|x|`},
 		{`sum-text`, `y = \sum_{i=0}^{100} f(x_i)`},
 		{`sum-disp`, `$y = \sum_{i=0}^{100} f(x_i)$`},
 		{`int-text`, `y = \int_{i=0}^{100} f(x_i)`},
@@ -58,16 +58,79 @@ func TestTex(t *testing.T) {
 		{`frac-text`, `a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)`},
 		{`frac-disp`, `$a = \left( \frac{\overline{f}(x^2)}{\prod_i^j \sum_i^j f_i(x_j^2)} \right)$`},
 		{`partial-text`, `y = \partial x`},
+		{`partial-disp`, `$\frac{\partial^2f}{\partial x^2}$`},
 		{`array-disp`, `$\Phi = \left(\begin{array}{c}
 \Phi^+ \\
 \Phi^0 \\
 \end{array}\right)$`},
+		{`neq-text`, `a \neq b`},
 		{`hat-text`, `\hat{p}`},
 		{`hbar-text`, `\hat{p} = -i \hbar \vec{\nabla}`},
+		{`binom-disp`, `$\binom{n}{k} = \frac{n!}{k!(n-k)!}$`},
+		{`bigfrac-disp`, `$\frac{1+\frac{a}{b}} {\displaystyle 1+\frac{1}{1+\frac{1}{a}}}$`},
+		{`cfrac-disp`, `$a_0+\cfrac{1}{a_1+\cfrac{1}{a_2+\cfrac{1}{a_3+\cdots}}}$`},
+		{`lim-text`, `\lim_{h \to 0} (x-h)`},
+		{`lim-disp`, `$\lim_{h \to 0 } \frac{f(x+h)-f(x)}{h}$`},
+		{`forall-disp`, `$\forall x \in \mathbf{R}: \qquad x^{2} \geq 0$`},
+		{`forall2-disp`, `$x^{2} \geq 0\qquad \text{for all }x\in\mathbf{R}$`},
+		{`expers-disp`, `$p^3_{ij} \; m_\text{Knuth} \; \sum_{k=1}^3 k \\[5pt] a^x+y \neq a^{x+y} \; e^{x^2} \neq {e^x}^2$`},
+		{`roots-disp`, `$\sqrt{x} \Leftrightarrow x^{1/2} \; \sqrt[3]{2} \; \sqrt{x^{2} + \sqrt{y}} \; \surd[x^2 + y^2]$`},
+		{`lines-disp`, `$0.\overline{3} = \underline{\underline{1/3}}$`},
+		{`underbrace-disp`, `$\underbrace{\overbrace{a+b+c}^6 \cdot \overbrace{d+e+f}^7}_\text{meaning of life} = 42$`},
+		{`widehat-disp`, `$f''(x) = 2 \hat{XY} \quad \widehat{XY} \quad \bar{x_0} \quad \bar{x}_0$`},
+		{`prime-text`, `$f''(x)$`},
+		{`vecs-disp`, `$\vec{a} \qquad \vec{AB} \qquad \overrightarrow{AB}$`},
+		{`stackrel-text`, `f_n(x) \stackrel{*}{\approx} 1`},
+		{`sum-big-disp`, `$\sum^n_{\substack{0<i<n \\ j \subseteq i}}P(i,j) = Q(i,j)$`},
+		{`left-right-disp`, `$1 + \left(\frac{1}{1-x^{2}} \right)^3 \qquad \left. \ddagger \frac{.}{.} \right)$`},
+		{`bigg-disp`, `$\Big( \bigg( \Bigg( \quad \big\} \Big\} \bigg\} \Bigg\} \quad
+\bigg\Downarrow \Bigg\Downarrow$`},
+		{`matrix-disp`, `$\mathbf{X} = \left(
+\begin{array}{ccc}
+x_1 & x_2 & \ldots \\
+x_3 & x_4 & \ldots \\
+\vdots & \vdots & \ddots
+\end{array} \right)$`},
+		{`conds-disp`, `$|x| = \left\{
+\begin{array}{rl}
+-x & \text{if } x < 0,\\
+0 & \text{if } x = 0,\\
+x & \text{if } x > 0.
+\end{array} \right.$`},
+		{`cases-disp`, `$|x| =
+\begin{cases}
+-x & \text{if } x < 0,\\
+0 & \text{if } x = 0,\\
+x & \text{if } x > 0.
+\end{cases}$`},
+		{`matrix-ams-disp`, `$\begin{matrix}
+1 & 2 \\
+3 & 4
+\end{matrix} \qquad
+\begin{bmatrix}
+p_{11} & p_{12} & \ldots
+& p_{1n} \\
+p_{21} & p_{22} & \ldots
+& p_{2n} \\
+\vdots & \vdots & \ddots
+& \vdots \\
+p_{m1} & p_{m2} & \ldots
+& p_{mn}
+\end{bmatrix}$`},
+		{`phantom-disp`, `${}^{14}_{6}\text{C}
+\qquad \text{versus} \qquad
+{}^{14}_{\phantom{1}6}\text{C}$`},
+		{`real-disp`, `$\Re \qquad \mathcal{R}$`},
+		// {``, `$$`},
+		// {``, `$$`},
+		// {``, `$$`},
+		// {``, `$$`},
+		// {``, `$$`},
 	}
 
 	for _, test := range tests {
-		// if test.name != "hbar-text" {
+		// Debug = true
+		// if test.name != "abs-text" {
 		// 	continue
 		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
@@ -88,4 +151,52 @@ func TestTex(t *testing.T) {
 		})
 		// break
 	}
+}
+
+func TestRelations(t *testing.T) {
+	// Debug = true
+	tests := []string{
+		`<`, `>`, `=`, `\leq`, `\le`, `\geq`, `\ge`, `\equiv`,
+		`\ll`, `\gg`, `\doteq`, `\prec`, `\succ`, `\sim`,
+		`\preceq`, `\succeq`, `\simeq`, `\subset`, `\supset`, `\approx`,
+		`\subseteq`, `\supseteq`, `\cong`, `\sqsubseteq`, `\sqsupseteq`,
+		`\bowtie`, `\in`, `\ni`, `\owns`, `\propto`, `\vdash`, `\dashv`,
+		`\models`, `\mid`, `\parallel`, `\perp`, `\smile`, `\frown`,
+		`\asymp`, `:`, `\notin`, `\neq`, `\ne`,
+	}
+	// `\sqsubset`, `\sqsupset`, `\Join`, // latexsym
+	width := 600
+	RunTest(t, "all-relations", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 1.5
+				x = 0.5 * fsize
+			}
+		}
+	})
 }

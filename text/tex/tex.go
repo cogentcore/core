@@ -24,6 +24,7 @@ var (
 	// note: must be standalone to work properly for inline paths.
 	// standalone cannot use standard \begin{equation} so using $\displaymath
 	preamble = `\documentclass{standalone}
+\usepackage{amsmath}
 \begin{document}
 `
 	postamble = `

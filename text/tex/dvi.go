@@ -44,8 +44,9 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 
 	// first position of baseline which will be the path's origin
 	firstChar := true
-	h0 := int32(0)
+	// min pos
 	v0 := int32(0)
+	h0 := int32(0)
 
 	p := ppath.Path{}
 	r := &dviReader{b, 0}
@@ -57,16 +58,20 @@ func DVIToPath(b []byte, fonts *dviFonts, fontSizeDots float32) (ppath.Path, err
 		if cmd <= 127 {
 			// set_char
 			if firstChar {
-				h0, v0 = s.h, s.v
+				v0 = s.v
+				h0 = s.h
 				firstChar = false
 			}
+			// v0 = min(v0, s.v) // note: this doesn't work in general
+			h0 = min(h0, s.h)
 			c := uint32(cmd)
-			if _, ok := fnts[fnt]; !ok {
+			fntd, ok := fnts[fnt]
+			if !ok {
 				return nil, fmt.Errorf("bad command: font %v undefined at position %v", fnt, r.i)
 			}
 			w := int32(fnts[fnt].Draw(&p, f*float32(s.h), f*float32(s.v), c, fontScale) / f)
 			if Debug {
-				fmt.Printf("\nchar font #%d, cid: %d, 0x%x, rune: %s, pos: (%v,%v) = (%v,%v) w: %v to h: %v\n", fnt, c, c, string(rune(c)), s.h, s.v, f*float32(s.h), f*float32(s.v), w, s.h+w)
+				fmt.Printf("\nchar font %d, cid: %d, 0x%x, rune: %s, pos: (%v,%v) = (%v,%v) w: %v to h: %v\n", fntd.cmapType, c, c, string(rune(c)), s.h, s.v, f*float32(s.h), f*float32(s.v), w, s.h+w)
 			}
 			s.h += w
 		} else if 128 <= cmd && cmd <= 131 {
