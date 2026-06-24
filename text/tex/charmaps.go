@@ -527,7 +527,7 @@ var cmapCMEX = map[uint32]rune{
 	0x5A: '\u222B', // ∫ mag2
 	0x5B: '\u22C3', // ⋃ mag2
 	0x5C: '\u22C2', // ⋂ mag2
-	0x5D: '\u2A03', // ⨄ mag2
+	0x5D: '\u2A04', // ⨄ mag2
 	0x5E: '\u22C0', // ⋀ mag2
 	0x5F: '\u22C1', // ⋁ mag2
 

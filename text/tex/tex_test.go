@@ -154,7 +154,6 @@ p_{m1} & p_{m2} & \ldots
 }
 
 func TestRelations(t *testing.T) {
-	// Debug = true
 	tests := []string{
 		`<`, `>`, `=`, `\leq`, `\le`, `\geq`, `\ge`, `\equiv`,
 		`\ll`, `\gg`, `\doteq`, `\prec`, `\succ`, `\sim`,
@@ -202,7 +201,6 @@ func TestRelations(t *testing.T) {
 }
 
 func TestOperators(t *testing.T) {
-	// Debug = true
 	tests := []string{
 		`+`, `-`, `\pm`, `\mp`, `\triangleleft`, `\cdot`, `\div`,
 		`\triangleright`, `\times`, `\setminus`, `\star`, `\cup`,
@@ -242,6 +240,140 @@ func TestOperators(t *testing.T) {
 			x += 8 * fsize
 			if x > float32(width) {
 				y += fsize * 1.5
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestBigOperators(t *testing.T) {
+	tests := []string{
+		`\sum`, `\bigcup`, `\bigvee`, `\prod`, `\bigcap`, `\bigwedge`, `\coprod`,
+		`\bigsqcup`, `\biguplus`, `\int`, `\oint`, `\bigodot`,
+		`\bigoplus`, `\bigotimes`,
+	}
+	width := 600
+	RunTest(t, "big-operators", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\biguplus` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(`$`+test+`$`, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 2
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y+fsize)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2.5
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestArrows(t *testing.T) {
+	tests := []string{
+		`\leftarrow`, `\gets`, `\longleftarrow`, `\rightarrow`, `\to`, `\longrightarrow`,
+		`\leftrightarrow`, `\longleftrightarrow`, `\Leftarrow`, `\Longleftarrow`,
+		`\Rightarrow`, `\Longrightarrow`, `\Leftrightarrow`, `\Longleftrightarrow`,
+		`\mapsto`, `\longmapsto`, `\hookleftarrow`, `\hookrightarrow`, `\leftharpoonup`,
+		`\rightharpoonup`, `\leftharpoondown`, `\rightharpoondown`, `\rightleftharpoons`,
+		`\iff`, `\uparrow`, `\downarrow`, `\updownarrow`, `\Uparrow`, `\Downarrow`,
+		`\Updownarrow`, `\nearrow`, `\searrow`, `\swarrow`, `\nwarrow`,
+	}
+	// todo: mapsto and hook are sent as double chars, rendering both
+	width := 600
+	RunTest(t, "all-arrows", width, 500, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mapsto` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 3
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 18 * fsize
+			if x > float32(width) {
+				y += fsize * 1.5
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestSymbols(t *testing.T) {
+	tests := []string{
+		`\dots`, `\cdots`, `\vdots`, `\ddots`, `\hbar`, `\imath`, `\jmath`, `\ell`,
+		`\Re`, `\Im`, `\aleph`, `\wp`, `\forall`, `\exists`,
+		`\partial`, `'`, `\prime`, `\emptyset`, `\infty`,
+		`\nabla`, `\triangle`, `\bot`, `\top`, `\angle`,
+		`\surd`, `\diamondsuit`, `\heartsuit`, `\clubsuit`, `\spadesuit`, `\neg`, `\lnot`,
+		`\flat`, `\natural`, `\sharp`,
+	}
+	width := 600
+	RunTest(t, "all-symbols", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
 				x = 0.5 * fsize
 			}
 		}
