@@ -200,3 +200,50 @@ func TestRelations(t *testing.T) {
 		}
 	})
 }
+
+func TestOperators(t *testing.T) {
+	// Debug = true
+	tests := []string{
+		`+`, `-`, `\pm`, `\mp`, `\triangleleft`, `\cdot`, `\div`,
+		`\triangleright`, `\times`, `\setminus`, `\star`, `\cup`,
+		`\cap`, `\ast`, `\sqcup`, `\sqcap`, `\circ`, `\vee`, `\lor`,
+		`\wedge`, `\land`, `\bullet`, `\oplus`, `\ominus`, `\diamond`,
+		`\odot`, `\oslash`, `\uplus`, `\otimes`, `\bigcirc`,
+		`\amalg`, `\bigtriangleup`, `\dagger`, `\ddagger`, `\wr`,
+		`\bigtriangledown`,
+	}
+	width := 600
+	RunTest(t, "all-operators", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\ast` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 1.5
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
