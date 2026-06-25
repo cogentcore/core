@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/text/shaped"
 )
 
 var (
@@ -39,6 +40,21 @@ type cached struct {
 
 	// call DeleteUnused to remove any that haven't been accessed or added.
 	used bool
+}
+
+// SetShapeMath sets the standard text shaping math function to use only
+// cached math paths, not live generation of paths from TeX. This saves
+// a lot of memory in the resulting executable, and is recommended for
+// any math-heavy uses where all the equations can be cached in advance
+// (e.g., the content system).
+func SetShapeMath() {
+	shaped.ShapeMath = func(expr string, fontSizeDots float32) (ppath.Path, error) {
+		p := Get(expr, fontSizeDots)
+		if p != nil {
+			return p, nil
+		}
+		return nil, fmt.Errorf("texcache: no cached path for expression: %q", expr)
+	}
 }
 
 // Get tries to get a cached path for given equation at given fontsize in dots.

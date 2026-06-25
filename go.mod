@@ -13,6 +13,7 @@ require (
 	github.com/bramvdbogaerde/go-scp v1.6.0
 	github.com/chewxy/math32 v1.11.2
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
+	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
 	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
@@ -45,11 +46,11 @@ require (
 	golang.org/x/text v0.37.0
 	golang.org/x/tools v0.44.0
 	gopkg.in/yaml.v3 v3.0.1
-	star-tex.org/x/tex v0.7.2-0.20260429141124-28abc24bb573
 )
 
 require (
 	codeberg.org/go-pdf/fpdf v0.11.1 // indirect
+	git.sr.ht/~sbinet/overlayfs v0.1.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect

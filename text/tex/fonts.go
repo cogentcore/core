@@ -416,6 +416,7 @@ var useXBearings = map[uint32]xxbearing{
 	0x36: {CMSY, -720}, // / in neq
 	0x5E: {CMR, 0},     // ^
 	0x7E: {CMMI, -150}, // -> vec
+	0x7F: {CMR, -150},  // .. ddot
 }
 
 const (

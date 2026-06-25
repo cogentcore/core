@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/tex/texcache"
-	"star-tex.org/x/tex"
+	tex "github.com/cogentcore/star-tex"
 )
 
 var (

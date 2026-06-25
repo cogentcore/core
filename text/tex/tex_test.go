@@ -35,6 +35,8 @@ func TestTex(t *testing.T) {
 		tex  string
 	}{
 		{`abs-text`, `|x|`},
+		{`dot-text`, `\dot x`},
+		{`ddot-text`, `\ddot x`},
 		{`sum-text`, `y = \sum_{i=0}^{100} f(x_i)`},
 		{`sum-disp`, `$y = \sum_{i=0}^{100} f(x_i)$`},
 		{`int-text`, `y = \int_{i=0}^{100} f(x_i)`},
@@ -129,10 +131,10 @@ p_{m1} & p_{m2} & \ldots
 	}
 
 	for _, test := range tests {
-		// Debug = true
-		// if test.name != "abs-text" {
-		// 	continue
-		// }
+		Debug = true
+		if test.name != "stackrel-text" {
+			continue
+		}
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)

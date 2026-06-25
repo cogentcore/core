@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/tex/texcache"
 	"cogentcore.org/core/tree"
 	_ "cogentcore.org/core/yaegicore"
@@ -30,6 +29,7 @@ var mathcache embed.FS
 
 func main() {
 	texcache.OpenFS(mathcache, "mathcache.json.gz")
+	texcache.SetShapeMath() // only use cached!
 	// rasterx.UseGlyphCache = false
 	content.Settings.SiteTitle = "Cogent Content Example"
 	content.OfflineURL = "https://example.com"
