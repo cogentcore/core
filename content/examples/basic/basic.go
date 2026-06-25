@@ -22,11 +22,11 @@ import (
 
 //go:generate go run ./genmath.go
 
-//go:embed mathcache.json.gz
-var mathcache []byte
-
 //go:embed content
 var econtent embed.FS
+
+//go:embed mathcache.json.gz
+var mathcache []byte
 
 func main() {
 	texcache.ReadGzip(bytes.NewBuffer(mathcache))

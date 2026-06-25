@@ -25,7 +25,7 @@ var econtent embed.FS
 var mathcache embed.FS
 
 func main() {
-	texcache.OpenFS(mathcache, "mathcache.json.gz")
+	texcache.OpenFS(mathcache, "mathcache.json.gz") // note: doesn't work on web / js
 	content.Settings.SiteTitle = "Generate Cache Math"
 	content.OfflineURL = "https://example.com"
 	b := core.NewBody("Generate Cache Math")
