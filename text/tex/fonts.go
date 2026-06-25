@@ -633,7 +633,7 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 
 	doItal := false
 	if f.italic && f.cmapType == CMMI && cid == 0x40 {
-		fmt.Printf("italic sym: 0x%X  font: %d\n", cid, f.cmapType)
+		// fmt.Printf("italic sym: 0x%X  font: %d\n", cid, f.cmapType)
 		doItal = true
 	}
 	for _, s := range outline.Segments {

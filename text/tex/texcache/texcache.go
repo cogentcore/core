@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"cogentcore.org/core/base/errors"
@@ -49,6 +50,7 @@ type cached struct {
 // (e.g., the content system).
 func SetShapeMath() {
 	shaped.ShapeMath = func(expr string, fontSizeDots float32) (ppath.Path, error) {
+		expr = strings.TrimSpace(expr)
 		p := Get(expr, fontSizeDots)
 		if p != nil {
 			return p, nil
