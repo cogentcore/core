@@ -133,7 +133,7 @@ p_{m1} & p_{m2} & \ldots
 
 	for _, test := range tests {
 		// Debug = true
-		// if test.name != "sqrt-disp" {
+		// if test.name != "forall2-disp" {
 		// 	continue
 		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {

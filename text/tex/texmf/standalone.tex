@@ -1,0 +1,8 @@
+%%\ProvidesFile{standalone.tex}[2010/02/28 v0.4 Provides if-switch to show if file is compiled standalone]%
+\expandafter\ifx\csname ifstandalone\endcsname\relax
+\expandafter\newif\csname ifstandalone\endcsname
+\expandafter\ifx\csname @twoclasseserror\endcsname\documentclass
+\else
+  \standalonetrue
+\fi
+\fi

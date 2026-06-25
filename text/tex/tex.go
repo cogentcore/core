@@ -6,20 +6,31 @@ package tex
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/paint/ppath"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/tex/texcache"
 	tex "github.com/cogentcore/star-tex"
 )
 
+//go:embed texmf
+var texmf embed.FS
+
 var (
 	texEngine *tex.LaTeXEngine
 	texFonts  *dviFonts
 	texMu     sync.Mutex
+	// this is set to path where texmf files were installed
+	texmfAt string
 
 	// note: must be standalone to work properly for inline paths.
 	// standalone cannot use standard \begin{equation} so using $\displaymath
@@ -57,6 +68,8 @@ func LaTeXMath(expr string, fontSizeDots float32) (ppath.Path, error) {
 		return p, nil
 	}
 
+	InstallTexMF()
+
 	txt := preamble
 	if expr[0] == '$' {
 		txt += "$\\displaystyle " + expr[1:len(expr)-1] + " $"
@@ -91,4 +104,47 @@ func LaTeXMath(expr string, fontSizeDots float32) (ppath.Path, error) {
 	}
 	texcache.Add(expr, fontSizeDots, p)
 	return p, nil
+}
+
+// InstallTexMF installs the specific TeX class and style files that
+// we depend on, if not yet installed. Returns true if we just did
+// the install. Must be called under texMu lock.
+func InstallTexMF() bool {
+	if texmfAt != "" {
+		return false
+	}
+	trgDir := ""
+	if system.TheApp != nil {
+		trgDir = system.TheApp.CogentCoreDataDir()
+	} else {
+		// presumably testing, just use local files and be done!
+		dir := "./texmf"
+		texmfAt = dir
+		os.Setenv("TEXMF", dir)
+		return true
+	}
+
+	dir := filepath.Join(trgDir, "texmf")
+	err := os.MkdirAll(dir, 0x777)
+	if errors.Log(err) != nil {
+		return false
+	}
+	files, err := texmf.ReadDir("texmf")
+	if errors.Log(err) != nil {
+		return false
+	}
+	for _, de := range files {
+		fn := de.Name()
+		fmt.Println(fn)
+		fsp := filepath.Join("texmf", fn)
+		b, err := fs.ReadFile(texmf, fsp)
+		if errors.Log(err) != nil {
+			return false
+		}
+		op := filepath.Join(dir, fn)
+		os.WriteFile(op, b, 0666)
+	}
+	texmfAt = dir
+	os.Setenv("TEXMF", dir)
+	return true
 }

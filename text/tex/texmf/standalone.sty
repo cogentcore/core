@@ -1,0 +1,1145 @@
+%% Copyright (C) 2010-2025 by Martin Scharrer <martin.scharrer@web.de>
+%% ---------------------------------------------------------------------------
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% The Current Maintainer of this work is Martin Scharrer.
+%%
+%% This work consists of the files standalone.dtx and standalone.ins
+%% and the derived filebase standalone.sty, standalone.cls and
+%% standalone.cfg.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{standalone}[%
+    2025/02/22
+    v1.5a
+    Package to include TeX sub-files with preambles]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\@ifundefined{ifstandalone}{%
+    \expandafter\newif\csname ifstandalone\endcsname
+    \standalonefalse
+}{}
+\@ifundefined{ifstandalonebeamer}{%
+    \expandafter\newif\csname ifstandalonebeamer\endcsname
+    \standalonebeamerfalse
+}{}
+\@ifundefined{onlyifstandalone}{%
+    \let\onlyifstandalone\@gobble
+}{}
+\@ifundefined{IfStandalone}{%
+    \let\IfStandalone\@secondoftwo
+}{}
+\expandafter\ifx\csname ShellEscape\endcsname\relax
+    \IfFileExists{shellesc.sty}{
+        \RequirePackage{shellesc}
+        \@ifpackagelater{shellesc}{2016/04/29}{
+        }{
+            \protected\def\ShellEscape{\immediate\write18 }
+        }
+    }{
+        \protected\def\ShellEscape{\immediate\write18 }
+    }
+\fi
+\expandafter\ifx\csname ifluatex\endcsname\relax
+    \IfFileExists{ifluatex.sty}{
+        \RequirePackage{ifluatex}
+    }{
+        \begingroup
+        \expandafter\ifx\csname directlua\endcsname\relax
+            \endgroup
+            \global\expandafter\let\csname ifluatex\expandafter\endcsname\csname iffalse\endcsname
+        \else
+            \endgroup
+            \global\expandafter\let\csname ifluatex\expandafter\endcsname\csname iftrue\endcsname
+        \fi
+    }
+\fi
+\expandafter\ifx\csname ifpdf\endcsname\relax
+    \IfFileExists{ifpdf.sty}{
+        \RequirePackage{ifpdf}
+    }{
+        \begingroup
+        \expandafter\ifx\csname pdfoutput\endcsname\relax
+            \endgroup
+            \global\expandafter\let\csname ifpdf\expandafter\endcsname\csname iffalse\endcsname
+        \else
+            \endgroup
+            \ifnum\pdfoutput<1
+                \global\expandafter\let\csname ifpdf\expandafter\endcsname\csname iffalse\endcsname
+            \else
+                \global\expandafter\let\csname ifpdf\expandafter\endcsname\csname iftrue\endcsname
+            \fi
+        \fi
+    }
+\fi
+\expandafter\ifx\csname ifxetex\endcsname\relax
+    \IfFileExists{ifxetex.sty}{
+        \RequirePackage{ifxetex}
+    }{
+        \begingroup
+        \expandafter\ifx\csname XeTeXrevision\endcsname\relax
+            \endgroup
+            \global\expandafter\let\csname ifxetex\expandafter\endcsname\csname iffalse\endcsname
+        \else
+            \endgroup
+            \global\expandafter\let\csname ifxetex\expandafter\endcsname\csname iftrue\endcsname
+        \fi
+    }
+\fi
+\newif\ifsa@subpreambles
+\newif\ifsa@sortsubpreambles
+\newif\ifsa@printsubpreambles
+\newif\ifsa@group
+\newif\ifsa@obeyclassoptions
+\newif\ifsa@multi
+\newif\ifsa@tikz
+\newif\ifsa@varwidth
+\newif\ifsa@comments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{xkeyval}
+\def\sa@pkgoption{%
+    \define@key{standalone.sty}%
+}
+\def\sa@boolean#1#2{%
+    \sa@boolorvalue{#1}{#2}%
+        {\ClassError{standalone}{Invalid value '#2' for boolean key '#1'}{}}%
+}
+\def\sa@boolorvalue#1#2{%
+    \begingroup
+    \edef\@tempa{#2}%
+    \def\@tempb{true}%
+    \ifx\@tempa\@tempb
+        \endgroup
+        \csname sa@#1true\endcsname
+        \expandafter\@gobble
+    \else
+    \def\@tempb{false}%
+    \ifx\@tempa\@tempb
+        \endgroup
+        \csname sa@#1false\endcsname
+        \expandafter\expandafter
+        \expandafter\@gobble
+    \else
+        \endgroup
+        \expandafter\expandafter
+        \expandafter\@firstofone
+    \fi\fi
+}
+\sa@pkgoption{sort}[true]{%
+    \sa@boolean{sortsubpreambles}{#1}%
+    \ifsa@sortsubpreambles
+        \sa@subpreamblestrue
+    \fi
+}
+\sa@pkgoption{print}[true]{%
+    \sa@boolean{printsubpreambles}{#1}%
+    \ifsa@printsubpreambles
+        \sa@subpreamblestrue
+    \fi
+}
+\sa@pkgoption{subpreambles}[true]{%
+    \sa@boolean{subpreambles}{#1}%
+}
+\sa@pkgoption{group}[true]{%
+    \sa@boolean{group}{#1}%
+}
+\sa@grouptrue
+\sa@pkgoption{comments}[true]{%
+    \sa@boolean{comments}{#1}%
+    \ifsa@comments
+        \def\sa@percent{\@makeother\%}%
+    \else
+        \def\sa@percent{\catcode`\%=14\relax}%
+    \fi
+}
+\sa@pkgoption{nocomments}[]{%
+    \begingroup
+        \def\@tempa{#1}%
+        \ifx\@tempa\@empty\else
+            \PackageWarning{standalone}{Unwanted value of 'nocomments' was ignored}{}A
+        \fi
+    \endgroup
+    \setkeys{standalone.sty}{comments=false}%
+}
+\sa@pkgoption{mode}{%
+    \begingroup
+    \expandafter\let\expandafter\@tempa\csname sa@mode@#1\endcsname
+    \ifx\@tempa\relax
+        \endgroup
+        \PackageError{standalone}{Wrong value for option 'mode'}{}%
+    \else
+        \expandafter
+        \endgroup
+        \@tempa
+    \fi
+}
+\def\sa@mode@none{%
+    \let\sa@mode\relax%
+}
+\def\sa@mode@tex{%
+    \def\sa@mode{1}%
+}
+\def\sa@mode@image{%
+    \def\sa@mode{2}%
+}
+\@namedef{sa@mode@image|tex}{%
+    \def\sa@mode{0}%
+}
+\def\sa@mode@build{%
+    \def\sa@mode{3}%
+}
+\def\sa@mode@buildmissing{%
+    \def\sa@mode{4}%
+}
+\def\sa@mode@buildnew{%
+    \ifxetex
+        \PackageWarning{standalone}{The 'mode=buildnew' option is not available for XeTeX.\MessageBreak
+                                    Therefore 'mode=build' will be used instead}%
+        \def\sa@mode{3}%
+    \else
+        \def\sa@mode{5}%
+    \fi
+}
+\sa@mode@tex
+\sa@pkgoption{obeyclassoptions}[true]{%
+    \sa@boolean{obeyclassoptions}{#1}%
+}
+\sa@pkgoption{extension}{%
+    \def\sa@graphicext{#1}%
+}
+\sa@pkgoption{build}[]{%
+    \setkeys{standalone.sty/build}{#1}%
+}
+\def\sa@buildvar#1#2{%
+    \define@key{standalone.sty/build}{#1}{%
+        \@namedef{sa@build@#1}{##1}%
+    }%
+    \@namedef{sa@build@#1}{#2}%
+}
+\sa@buildvar{jobname}{\file}
+\sa@buildvar{latex}{}
+\sa@buildvar{quote}{}
+\let\sa@build@quote\relax
+\sa@buildvar{latexoptions}{%
+    -interaction=batchmode -shell-escape -jobname \quote\buildjobname\quote
+}
+\sa@buildvar{command}{%
+    \latex\space\latexoptions\space\file
+}
+%%    '\string\PassOptionsToClass{border=0pt}{standalone}\string\input{\image}'
+\def\sa@build@postcommand{}
+\ifpdf
+    \def\sa@graphicext{.pdf}
+    \ifluatex
+        \def\sa@build@latex{lualatex}
+    \else
+        \def\sa@build@latex{pdflatex}
+    \fi
+\else
+\ifxetex
+    \def\sa@graphicext{.pdf}
+    \def\sa@build@latex{xelatex}
+\else
+    \def\sa@graphicext{.eps}
+    \def\sa@build@latex{latex}
+    \def\sa@build@postcommand{dvips -o \quote\file.eps\quote\space \quote\file.dvi\quote}
+\fi\fi
+\ProcessOptionsX*<standalone.sty>\relax
+\disable@keys{standalone.sty}{subpreambles,print,sort}
+\def\sa@setquote{%
+    \ifx\sa@build@quote\relax
+    \expandafter\ifx\csname sa@convert@quote\endcsname\relax
+    \begingroup
+    \@tempswafalse
+    \expandafter\ifx\csname pdftexbanner\endcsname\relax
+        \@tempswatrue
+    \else
+    \def\MiKTeX{MiKTeX}
+    \@onelevel@sanitize\MiKTeX
+    \expandafter\def\expandafter\testmiktex\expandafter##\expandafter1\MiKTeX##2\relax{%
+            \ifx\empty##2\empty
+                \@tempswafalse
+            \else
+                \@tempswatrue
+            \fi
+    }
+    \expandafter\expandafter
+    \expandafter\testmiktex\expandafter\pdftexbanner\MiKTeX\relax\relax
+    \fi
+    \expandafter
+    \endgroup
+    \if@tempswa
+    \def\sa@build@quote{"}
+    \else
+    \def\sa@build@quote{'}
+    \fi
+    \else
+    \let\sa@build@quote\sa@convert@quote
+    \fi
+    \fi
+}
+\ifsa@printsubpreambles
+  \ifsa@sortsubpreambles\else
+    \@ifundefined{sa@percent}{%
+        \setkeys{standalone.sty}{comments=true}%
+    }{}%
+  \fi
+\fi
+\@ifclassloaded{standalone}{%
+    \def\standaloneconfig{%
+        \setkeys{standalone.sty,standalone.cls}%
+    }%
+}{%
+    \newcommand*{\standaloneconfig}{%
+        \setkeys{standalone.sty}%
+    }%
+}
+\RequirePackage{currfile}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifsa@subpreambles
+\newwrite\sa@out
+\def\sa@write{\immediate\write\sa@out}%
+\ifsa@printsubpreambles
+\long\def\sa@removeonlyifstandalone#1\onlyifstandalone{%
+  \g@addto@macro\sa@preamble{#1}%
+  \@ifnextchar\sa@endmarker
+    {\@gobble}%
+    {\expandafter\sa@gobbleeol\expandafter\sa@removeonlyifstandalone\expandafter^^J\@gobble}%
+}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifsa@sortsubpreambles
+\newcommand{\sa@usepackagewithoutoptions}[2][]{%
+  \sa@orig@usepackage{#2}%
+}
+\def\sa@endmarker{%
+  \@gobble{sa@endmarker}%
+}
+\ifsa@printsubpreambles
+\AtEndDocument{%
+  \sa@write{\@percentchar\space Packages required by sub-files:}%
+  \expandafter\@for\expandafter\pkg\expandafter:\expandafter=\sa@collpkgs\do{%
+    \ifx\pkg\empty\else
+      \sa@write{%
+        \string\usepackage%
+        \expandafter\ifx\csname sa@pkgopts@\pkg\endcsname\empty\else%
+          [\csname sa@pkgopts@\pkg\endcsname]%
+        \fi
+        {\pkg}%
+        \expandafter\ifx\csname sa@pkgdate@\pkg\endcsname\relax\else%
+          [\csname sa@pkgdate@\pkg\endcsname]%
+        \fi
+        }%
+    \fi
+  }%
+  \ifx\sa@collpgflibs\empty\else
+  \sa@write{^^J\@percentchar\space PGF libraries required by sub-files:}%
+  \expandafter\@for\expandafter\lib\expandafter:\expandafter=\sa@collpgflibs\do{%
+    \ifx\lib\empty\else
+      \sa@write{\string\usepgflibrary{\lib}}%
+    \fi
+  }%
+  \fi
+  \ifx\sa@colltikzlibs\empty\else
+  \sa@write{^^J\@percentchar\space TikZ libraries required by sub-files:}%
+  \expandafter\@for\expandafter\lib\expandafter:\expandafter=\sa@colltikzlibs\do{%
+    \ifx\lib\empty\else
+      \sa@write{\string\usetikzlibrary{\lib}}%
+    \fi
+  }%
+  \fi
+  \ifx\sa@colltikztiminglibs\empty\else
+  \sa@write{^^J\@percentchar\space TikZ-Timing libraries required by sub-files:}%
+  \expandafter\@for\expandafter\lib\expandafter:\expandafter=\sa@colltikztiminglibs\do{%
+    \ifx\lib\empty\else
+      \sa@write{%
+        \string\usetikztiminglibrary%
+        \expandafter\ifx\csname sa@tikztimingopts@\lib\endcsname\empty\else%
+          [\csname sa@tikztimingopts@\lib\endcsname]%
+        \fi
+        {\lib}%
+        \expandafter\ifx\csname sa@tikztimingdate@\lib\endcsname\relax\else%
+          [\csname sa@tikztimingdate@\lib\endcsname]%
+        \fi
+        }%
+    \fi
+  }%
+  \fi
+  \sa@write{\expandafter\unexpanded\expandafter{\sa@preamble}}%
+  \message{^^JPackage 'standalone' INFO: See file '\jobname.stp' for list of sub-preambles.^^J}%
+  \immediate\closeout\sa@out
+}
+\long\def\sa@removepackages#1\usepackage{%
+  \sa@removepgflibs#1\usepgflibrary\sa@endmarker
+  \@ifnextchar\sa@endmarker
+    {\@gobble}%
+    {\sa@sortpackages}%
+}
+\long\def\sa@removepgflibs#1\usepgflibrary{%
+  \sa@removetikzlibs#1\usetikzlibrary\sa@endmarker
+  \@ifnextchar\sa@endmarker
+    {\@gobble}%
+    {\sa@sortpgflibs}%
+}
+\long\def\sa@removetikzlibs#1\usetikzlibrary{%
+  \sa@removetikztiminglibs#1\usetikztiminglibrary\sa@endmarker
+  \@ifnextchar\sa@endmarker
+    {\@gobble}%
+    {\sa@sorttikzlibs}%
+}
+\long\def\sa@removetikztiminglibs#1\usetikztiminglibrary{%
+  \sa@removeonlyifstandalone#1\onlyifstandalone\sa@endmarker
+  \@ifnextchar\sa@endmarker
+    {\@gobble}%
+    {\sa@sorttikztiminglibs}%
+}
+\def\sa@collpkgs{}%
+\newcommand\sa@sortpackages[2][]{%
+  \@ifnextchar[%]
+    {\sa@@sortpackages{#1}{#2}}%
+    {\sa@@sortpackages{#1}{#2}[]}%
+}
+\def\sa@@sortpackages#1#2[#3]{%
+  \@for\pkg:=#2\do {%
+    \@ifundefined{sa@pkgopts@\pkg}%
+      {%
+        \expandafter\g@addto@macro\expandafter\sa@collpkgs\expandafter{\expandafter,\pkg}%
+        \global\@namedef{sa@pkgopts@\pkg}{#1}%
+        \global\@namedef{sa@pkgopt@\pkg @}{}%
+        \ifx\relax#1\relax\else
+          \@for\opt:=#1\do{\global\@namedef{sa@pkgopt@\pkg @\opt}{}}%
+        \fi
+      }%
+      {%
+        \ifx\relax#1\relax\else
+          \@for\opt:=#1\do{%
+            \@ifundefined{sa@pkgopt@\pkg @\opt}%
+              {%
+                \expandafter\g@addto@macro\csname sa@pkgopts@\pkg\expandafter\endcsname\expandafter{\expandafter,\opt}%
+                \global\@namedef{sa@pkgopt@\pkg @\opt}{}%
+              }{}%
+          }%
+        \fi
+      }%
+    \ifx\relax#3\relax\else
+    \@ifundefined{sa@pkgdate@\pkg}%
+      {\global\@namedef{sa@pkgdate@\pkg}{#3}}%
+      {%
+        \ifnum\expandafter\expandafter
+         \expandafter\sa@@getdate\csname sa@pkgdate@\pkg\endcsname//00\relax<\sa@@getdate#3//00\relax
+          \global\@namedef{sa@pkgdate@\pkg}{#3}%
+        \fi
+      }%
+    \fi
+  }%
+  \sa@gobbleeol\sa@removepackages^^J%
+}
+\def\sa@@getdate#1/#2/#3#4#5\relax{#1#2#3#4}
+\def\sa@collpgflibs{}%
+\def\sa@sortpgflibs#1{%
+  \@for\lib:=#1\do {%
+    \@ifundefined{sa@pgflib@\lib}%
+      {%
+        \expandafter\g@addto@macro\expandafter\sa@collpgflibs\expandafter{\expandafter,\lib}%
+        \global\@namedef{sa@pgflib@\lib}{}%
+      }%
+      {}%
+  }%
+  \sa@gobbleeol\sa@removepgflibs^^J%
+}
+\def\sa@colltikzlibs{}%
+\def\sa@sorttikzlibs#1{%
+  \@for\lib:=#1\do {%
+    \@ifundefined{sa@tikzlib@\lib}%
+      {%
+        \expandafter\g@addto@macro\expandafter\sa@colltikzlibs\expandafter{\expandafter,\lib}%
+        \global\@namedef{sa@tikzlib@\lib}{}%
+      }%
+      {}%
+  }%
+  \sa@gobbleeol\sa@removetikzlibs^^J%
+}
+\def\sa@colltikztiminglibs{}%
+\newcommand\sa@sorttikztiminglibs[2][]{%
+  \@ifnextchar[%]
+    {\sa@@sorttikztiminglibs{#1}{#2}}%
+    {\sa@@sorttikztiminglibs{#1}{#2}[]}%
+}
+\def\sa@@sorttikztiminglibs#1#2[#3]{%
+  \@for\lib:=#2\do {%
+    \@ifundefined{sa@tikztimingopts@\lib}%
+      {%
+        \expandafter\g@addto@macro\expandafter\sa@colltikztiminglibs\expandafter{\expandafter,\lib}%
+        \global\@namedef{sa@tikztimingopts@\lib}{#1}%
+        \global\@namedef{sa@tikztimingopt@\lib @}{}%
+        \ifx\relax#1\relax\else
+          \@for\opt:=#1\do{\global\@namedef{sa@tikztimingopt@\lib @\opt}{}}%
+        \fi
+      }%
+      {%
+        \ifx\relax#1\relax\else
+          \@for\opt:=#1\do{%
+            \@ifundefined{sa@tikztimingopt@\lib @\opt}%
+              {%
+                \expandafter\g@addto@macro\csname sa@tikztimingopts@\lib\expandafter\endcsname\expandafter{\expandafter,\opt}%
+                \global\@namedef{sa@tikztimingopt@\lib @\opt}{}%
+              }{}%
+          }%
+        \fi
+      }%
+    \ifx\relax#3\relax\else
+    \@ifundefined{sa@tikztimingdate@\lib}%
+      {\global\@namedef{sa@tikztimingdate@\lib}{#3}}%
+      {%
+        \begingroup
+        \edef\@tempa{{\csname sa@tikztimingdate@\lib\endcsname}{#3}}%
+        \expandafter\sa@getlargerdate\@tempa
+        \expandafter\xdef\csname sa@tikztimingdate@\lib\endcsname{\sa@thedate}%
+        \endgroup
+      }%
+    \fi
+  }%
+  \sa@gobbleeol\sa@removetikztiminglibs^^J%
+}
+\def\sa@gobbleopt#1[#2]{%
+  \@ifnextchar^^J%
+    {\sa@gobbleeol{#1}}{#1}%
+}
+\else
+\def\sa@scanpackages#1\usepackage{%
+  \@ifnextchar\sa@endmarker
+    {\@gobble}%
+    {\sa@collectpackage}
+}
+\newcommand\sa@collectpackage[2][]{%
+  \ifx\relax#1\relax\else
+    \g@addto@macro\sa@collopts{\PassOptionsToPackage{#1}{#2}}%
+  \fi
+  \sa@scanpackages
+}
+\fi
+\def\sa@collopts{}
+\AtEndOfPackage{\sa@collopts\let\sa@collopts\relax}
+\fi
+\def\standalonepreambles{%
+  \begingroup
+  \endlinechar=\m@ne
+  \@makeother\#%
+}
+\def\endstandalonepreambles{%
+  \endgroup
+  \endinput
+}
+\long\gdef\subpreamble#1#2\endsubpreamble{%
+  \expandafter\gdef\csname prevsubpreamble@#1\endcsname{#2}%
+  \ifsa@sortsubpreambles
+    \sa@scanpackages#2\usepackage\sa@endmarker
+  \fi
+}
+\def\endsubpreamble{}%
+\ifsa@printsubpreambles
+  \immediate\openout\sa@out=\jobname.stp\relax
+\else
+\begingroup
+  \setbox\@tempboxa\hbox{%
+    \makeatother
+    \InputIfFileExists{\jobname.sta}{}{\PackageInfo{standalone}{STA file not found!}{}{}}%
+  }%
+\endgroup
+
+\AtBeginDocument{%
+  \let\subpreamble\@gobble
+  \let\endsubpreamble\relax
+  \let\standalonepreambles\relax
+  \let\endstandalonepreambles\relax
+  \ifsa@sortsubpreambles
+    \let\sa@orig@usepackage\usepackage
+    \let\usepackage\sa@usepackagewithoutoptions
+  \fi
+  \InputIfFileExists{\jobname.sta}{}{}%
+  \ifsa@sortsubpreambles
+    \let\usepackage\sa@orig@usepackage
+  \fi
+  \immediate\openout\sa@out=\jobname.sta\relax
+  \immediate\write\sa@out{\string\standalonepreambles}%
+}
+\AtEndDocument{%
+  \sa@write{\string\endstandalonepreambles}%
+  \immediate\closeout\sa@out
+}
+\fi
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\sa@gobbleeol#1^^J{%
+  \@ifnextchar^^J%
+    {\sa@gobbleeol{#1}}{#1}%
+}
+\def\sa@endinput{%
+    \endlinechar`^^J\relax
+    \let\do\@makeother
+    \dospecials
+    \sa@@endinput
+}%
+\def\sa@@endinput#1^^J{%
+    \endgroup
+    \endinput
+}
+\def\sa@substbox{%
+    \leavevmode\hbox to 1pt{\vbox to 1pt{}}%
+}%
+\long\def\standaloneignore#1\documentclass{%
+  \sa@documentclass
+}
+\@namedef{standaloneignore\space}{\standaloneignore}
+\newcommand{\sa@documentclass}[2][]{%
+  \let\document\sa@document
+  \let\sa@subfile@options\@empty
+  \ifsa@obeyclassoptions
+    \begingroup
+    \edef\@tempa{#2}%
+    \edef\@tempb{standalone}%
+    \ifx\@tempa\@tempb
+        \endgroup
+        \def\sa@subfile@options{#1}%
+    \else
+        \endgroup
+    \fi
+  \fi
+  \begingroup
+  \ifsa@subpreambles
+    \@ifundefined{sa@written@\currfilepath}%
+      {%
+        \ifsa@printsubpreambles
+          \ifsa@sortsubpreambles
+            \begingroup
+              \edef\@tempa{^^J\@percentchar\space Preamble from file '\currfilepath'^^J}%
+              \expandafter\g@addto@macro\expandafter\sa@preamble\expandafter{\@tempa}%
+            \endgroup
+          \else
+            \sa@write{^^J\@percentchar\space Preamble from file '\currfilepath'}%
+          \fi
+        \else
+          \sa@write{\string\subpreamble{\currfilepath}}%
+        \fi
+      }{}%
+    \global\@namedef{subpreamble@\currfilepath}{}%
+    \ifsa@printsubpreambles
+      \endlinechar=`\^^J\relax
+    \else
+      \endlinechar=\m@ne
+    \fi
+    \@makeother\#%
+    \@nameuse{sa@percent}%
+  \fi
+  \def\sa@gobbleto{document}%
+  \sa@gobbleeol\sa@gobble^^J%
+}
+\def\sa@preamble{}%
+\long\def\sa@gobble#1\begin#2{%
+  \def\@tempa{#2}%
+  \ifx\@tempa\sa@gobbleto
+    \ifsa@subpreambles
+      \expandafter\g@addto@macro\csname subpreamble@\currfilepath\endcsname{#1}%
+      \@ifundefined{sa@written@\currfilepath}%
+        {%
+          \ifsa@printsubpreambles
+            \ifsa@sortsubpreambles
+              \sa@removepackages#1\usepackage\sa@endmarker
+            \else
+              \begingroup
+              \let\sa@preamble\empty
+              \sa@removeonlyifstandalone#1\onlyifstandalone\sa@endmarker
+              \expandafter\sa@write\expandafter{\expandafter\unexpanded\expandafter{\sa@preamble}}%
+              \endgroup
+            \fi
+          \else
+            \sa@write{\unexpanded{#1}}%
+            \sa@write{\string\endsubpreamble}%
+          \fi
+        }{}%
+      \global\@namedef{sa@written@\currfilepath}{}%
+      \ifsa@printsubpreambles
+        \def\next{%
+          \PackageWarning{standalone}{Running 'standalone' package in sub-preamble print mode. All body content of file `\currfilepath' is ignored!}{}{}%
+          \sa@substbox
+          \sa@endinput
+        }%
+      \else
+      \expandafter
+      \ifx
+      \csname prevsubpreamble@\currfilepath\expandafter\endcsname
+      \csname     subpreamble@\currfilepath\endcsname
+        \def\next{\expandafter\endgroup\expandafter\begin\expandafter{\sa@gobbleto}}%
+      \else
+        %\expandafter\show\csname prevsubpreamble@\currfilepath\endcsname
+        %\expandafter\show\csname     subpreamble@\currfilepath\endcsname
+        \def\next{%
+          \PackageWarning{standalone}{Sub-preamble of file '\currfilepath' has changed. Content will be ignored. Please rerun LaTeX!}{}{}%
+          \immediate\write\@mainaux{%
+            \@percentchar\space standalone package info: Rerun LaTeX!
+          }%
+          \sa@substbox
+          \sa@endinput
+        }%
+      \fi
+      \fi
+    \else
+      \def\next{\expandafter\endgroup\expandafter\begin\expandafter{\sa@gobbleto}}%
+    \fi
+  \else
+    \ifsa@subpreambles
+      \expandafter\g@addto@macro\csname subpreamble@\currfilepath\endcsname{#1\begin{#2}}%
+      \@ifundefined{sa@written@\currfilepath}%
+        {\sa@write{\unexpanded{#1\begin{#2}}}}{}%
+    \fi
+    \def\next{\sa@gobble}%
+  \fi
+  \next
+}
+\@ifundefined{standalone}
+  {\newenvironment{standalone}[1][]{}{}}
+  {}
+\@ifundefined{standaloneframe}
+  {\@ifundefined{beamer@newenv}
+    {\newenvironment{standaloneframe}[1][]{%
+      \@ifnextchar[%]
+        {\sa@framegobbleopt}{\sa@framegobbleargs}}{}%
+    }
+    {\newenvironment<>{standaloneframe}[1][]{%
+      \@ifnextchar[%]
+        {\sa@framegobbleopt}{\sa@framegobbleargs}}{}%
+    }
+   \def\sa@framegobbleopt[#1]{\sa@framegobbleargs}
+   \def\sa@framegobbleargs{%
+     \@ifnextchar\bgroup
+       {\sa@framegobbleargs@}%
+       {}%
+   }
+   \def\sa@framegobbleargs@#1{%
+    \@ifnextchar\bgroup
+      {\@gobble}%
+      {}%
+   }
+  }
+  {}
+\let\sa@orig@document\document
+\let\sa@orig@enddocument\enddocument
+\begingroup
+\toks@\expandafter{%
+    \document
+    \let\documentclass\sa@documentclass
+    \ignorespaces
+}
+\xdef\document{\the\toks@}%
+\endgroup
+\ifsa@obeyclassoptions
+\IfFileExists{varwidth.sty}{%
+    \RequirePackage{varwidth}%
+}{}
+\define@key{standalone.sty/class}{12pt}[]{%
+    \def\sa@subfile@size{12}%
+}
+\define@key{standalone.sty/class}{11pt}[]{%
+    \def\sa@subfile@size{11}%
+}
+\define@key{standalone.sty/class}{10pt}[]{%
+    \def\sa@subfile@size{10}%
+}
+\define@key{standalone.sty/class}{class}{%
+    \def\sa@subfile@class{#1}%
+}
+\define@key{standalone.sty/class}{multi}[true]{%
+    \sa@boolorvalue{multi}{#1}{%
+        \sa@multitrue\AtEndOfClass{\standaloneenv{#1}}%
+    }%
+    \ifsa@multi
+        \def\sa@requestedpage{1}%
+        \def\standaloneenv##1{%
+            \begingroup
+            \edef\@tempa{\endgroup\noexpand\@for\noexpand\@tempa:=\zap@space##1 \@empty}%
+            \@tempa\do{\expandafter\@standaloneenv\expandafter{\@tempa}}%
+        }%
+        \def\@standaloneenv##1{%
+            \expandafter\ifx\csname sa@orig@##1\endcsname\relax
+                \expandafter\let\csname sa@orig@##1\expandafter\endcsname\csname ##1\endcsname
+                \expandafter\let\csname sa@orig@end##1\expandafter\endcsname\csname end##1\endcsname
+            \fi
+            \expandafter\def\csname ##1\endcsname{%
+                \ifnum\sa@internal=0
+                    \global\advance\sa@pagenum\@ne
+                    \sa@boxit
+                \fi
+                \advance\sa@internal\@ne
+                \csname sa@orig@##1\endcsname
+            }%
+            \expandafter\def\csname end##1\endcsname{%
+                \csname sa@orig@end##1\endcsname
+                \advance\sa@internal\m@ne
+                \ifnum\sa@internal=0
+                    \endsa@boxit
+                    \ifx\sa@requestedpage\@empty
+\let\sa@requestedpage\sa@allpages
+    \fi
+                    \ifx\sa@requestedpage\sa@allpages
+                        \usebox\sa@box
+                    \else
+                    \ifnum\sa@requestedpage=\sa@pagenum
+                        \usebox\sa@box
+                    \fi\fi
+                \fi
+                \@ignoretrue
+            }%
+        }%
+    \else
+        \let\standaloneenv\@gobble
+    \fi
+}
+\newcount\sa@internal
+\newcount\sa@pagenum
+\def\sa@allpages{-1}%
+\let\sa@box\@tempboxa
+\def\sa@boxit{%
+    \setbox\sa@box\hbox\bgroup\color@setgroup\sa@varwidth
+}%
+\def\endsa@boxit{%
+    \sa@endvarwidth\color@endgroup\egroup
+}%
+\define@key{standalone.sty/class}{tikz}[true]{%
+    \sa@boolean{tikz}{#1}%
+    \ifsa@tikz
+        \setkeys*{standalone.sty/class}{multi=tikzpicture,varwidth=false}%
+    \fi
+}
+\define@key{standalone.sty/class}{varwidth}[true]{%
+    \sa@boolorvalue{varwidth}{#1}{\sa@varwidthtrue\def\sa@width{#1}}%
+    \ifsa@varwidth
+        \expandafter\ifx\csname ver@varwidth.sty\endcsname\relax
+            \PackageWarning{standalone}{A standalone file which uses the varwidth package\MessageBreak
+                                        has been encountered while obeyclassoptions=true.\MessageBreak
+                                        Please load this package in the preamble.\MessageBreak
+                                        The file in question is loaded}%
+            \sa@varwidthfalse
+        \fi
+    \fi
+    \ifsa@varwidth
+        \def\sa@varwidth{\varwidth{\sa@width}}%
+        \def\sa@endvarwidth{\endvarwidth}%
+    \else
+        \let\sa@varwidth\@empty
+        \let\sa@endvarwidth\@empty
+    \fi
+}
+\let\sa@varwidth\@empty
+\let\sa@endvarwidth\@empty
+\def\sa@width{\linewidth}
+\define@key{standalone.sty/class}{beamer}[true]{%
+    \sa@boolean{beamer}{#1}%
+    \ifstandalonebeamer
+        \setkeys*{standalone.sty/class}{class=beamer,preview=false,crop=false,varwidth=false}%
+    \fi
+    \standalonebeamerfalse
+}
+\let\sa@beamertrue\standalonebeamertrue
+\let\sa@beamerfalse\standalonebeamerfalse
+\define@key{standalone.sty/class}{border}{%
+    \sa@readborder#1 {} {} {} {} \@nnil
+}
+\def\sa@border@left{0.50001bp}
+\let\sa@border@right\sa@border@left
+\let\sa@border@top\sa@border@left
+\let\sa@border@bottom\sa@border@left
+\def\rem@bp#1bp\relax#2\@nnil{#1}%
+\def\default@bp#1#2{%
+    \begingroup
+    \afterassignment\remove@to@nnil
+    \dimen@ #2bp\relax\@nnil
+    \expandafter
+    \endgroup
+    \expandafter
+    \def\expandafter#1\expandafter{\the\dimen@}%
+}
+\def\sa@readborder#1 #2 #3 #4 #5\@nnil{%
+    \ifx\\#2#3#4\\%
+        \default@bp\sa@border@left{#1}%
+        \let\sa@border@right\sa@border@left
+        \let\sa@border@top\sa@border@left
+        \let\sa@border@bottom\sa@border@left
+    \else
+    \ifx\\#4\\%
+        \default@bp\sa@border@left{#1}%
+        \let\sa@border@right\sa@border@left
+        \default@bp\sa@border@top{#2}%
+        \let\sa@border@bottom\sa@border@top
+    \else
+        \default@bp\sa@border@left{#1}%
+        \default@bp\sa@border@bottom{#2}%
+        \default@bp\sa@border@right{#3}%
+        \default@bp\sa@border@top{#4}%
+    \fi\fi
+}%
+\IfFileExists{adjustbox.sty}{%
+    \IfFileExists{trimclip.sty}{%
+        \RequirePackage{trimclip}%
+    }{%
+        \RequirePackage{adjustbox}%
+    }%
+    \def\sa@beginbox{%
+        \ifcase0%
+            \ifdim\sa@border@left<\z@ 1\fi
+            \ifdim\sa@border@right<\z@ 1\fi
+            \ifdim\sa@border@top<\z@ 1\fi
+            \ifdim\sa@border@bottom<\z@ 1\fi
+        \relax
+            \marginbox{{\sa@border@left} {\sa@border@bottom} {\sa@border@right} {\sa@border@top}}\bgroup
+        \else
+            \clipbox{{-\sa@border@left} {-\sa@border@bottom} {-\sa@border@right} {-\sa@border@top}}\bgroup
+        \fi
+    }%
+    \let\sa@endbox\egroup
+}{%
+    \PackageInfo{standalone}{The 'adjustbox' bundle was not found. Negative borders will not be clipped.}%
+    \def\sa@beginbox{%
+        \setbox\@tempboxa\color@hbox
+    }%
+    \def\sa@endbox{%
+        \color@endbox
+        \sbox\@tempboxa{%
+            \setlength\@tempdima{\sa@border@left}%
+            \hskip\@tempdima
+            \setlength\@tempdima{\sa@border@right}%
+            \setlength\@tempdimb{\sa@border@bottom}%
+            \setlength\@tempdimc{\sa@border@top}%
+            \advance\@tempdima\wd\@tempboxa
+            \wd\@tempboxa\@tempdima
+            \advance\@tempdimb\dp\@tempboxa
+            \dp\@tempboxa\@tempdimb
+            \advance\@tempdimc\ht\@tempboxa
+            \ht\@tempboxa\@tempdimc
+            \raise\dp\@tempboxa\box\@tempboxa
+        }%
+        \usebox\@tempboxa
+    }%
+}
+\fi
+\def\sa@document{%
+    \ifsa@group
+        \let\enddocument\sa@enddocument
+        \ifx\sa@subfile@options\@empty\else
+            \def\sa@subfile@size{10}%
+            \def\sa@subfile@class{article}%
+            \let\NeedsTeXFormat\@gobble
+            \let\sa@atendofclass\@empty
+            \def\AtEndOfClass{\g@addto@macro\sa@atendofclass}%
+            \def\standaloneconfig{\setkeys*{standalone.sty/class}}%
+            \let\sa@@latex@error\@latex@error
+            \let\@latex@error\@gobbletwo
+            \let\sa@selectfont\selectfont
+            \let\selectfont\relax
+            \makeatletter
+            \nullfont
+            \InputIfFileExists{standalone.cfg}{}{}%
+            \begingroup
+            \def\@tempa{\setkeys*{standalone.sty/class}}%
+            \expandafter\expandafter
+            \expandafter\endgroup
+            \expandafter\@tempa\expandafter{\sa@subfile@options}%
+            \sa@atendofclass
+    \let\sa@requestedpage\Gin@page
+            \sa@pagenum\z@
+            \sa@beginbox
+            \@ifundefined{KOMAClassName}{%
+                \def\@tempa{size}%
+            }{%
+                \def\@tempa##1##2##3##4\relax{\def\@tempa{##1##2##3}}%
+                \expandafter\@tempa\sa@subfile@class{}{}{}\relax
+                \def\@tempb{scr}%
+                \ifx\@tempa\@tempb
+                    \def\@tempa##1{scrsize##1pt}%
+                \else
+                    \def\@tempa{size}%
+                \fi
+            }%
+            \let\sa@newcommand\newcommand
+            \let\sa@@ifundefined\@ifundefined
+            \let\newcommand\renewcommand
+            \let\@ifundefined\@thirdofthree
+            \edef\@tempa{%
+                \noexpand\input{\@tempa\sa@subfile@size.clo}%
+                \catcode`\noexpand\@=\the\catcode`\@
+            }\@tempa
+            \let\newcommand\sa@newcommand
+            \let\@latex@error\sa@@latex@error
+            \let\@ifundefined\sa@@ifundefined
+            \let\selectfont\sa@selectfont
+            \normalsize
+        \fi
+    \else
+        \endgroup
+        \global\let\enddocument\sa@enddocument
+    \fi
+    \sa@atbegindocument
+}
+\def\sa@enddocument{%
+    \sa@atenddocument
+    \ifsa@group
+        \ifx\sa@subfile@options\@empty\else
+            \sa@endbox
+        \fi
+    \else
+        \global\let\document\sa@orig@document
+        \global\let\enddocument\sa@orig@enddocument
+        \begingroup
+        \def\@currenvir{document}%
+    \fi
+    \@ignoretrue
+    \aftergroup\endinput
+}
+\def\sa@atbegindocument{%
+  \ignorespaces
+}%
+\def\sa@atenddocument{%
+  \ifhmode\unskip\fi
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\IfFileExists{gincltex.sty}{%
+    \RequirePackage{gincltex}
+    \newcommand*\includestandalone[2][]{%
+        \begingroup
+        \setkeys*{standalone.sty}{##1}%
+        \edef\@tempa{{##2\sa@graphicext}}%
+        \expandafter\expandafter\expandafter\includestandalone@
+        \expandafter\expandafter\expandafter{\expandafter\XKV@rm\expandafter}\@tempa{##2}%
+        \endgroup
+    }
+}{%
+    \begingroup
+    \let\on@line\@gobble
+    \PackageWarning{standalone}{Required package 'gincltex' not found.\MessageBreak
+                                The \string\includestandalone\space feature is disabled.}
+    \endgroup
+    \newcommand*\includestandalone[2][]{%
+        \begingroup
+        \input{##2}%
+        \endgroup
+    }
+}
+\ifxetex\else
+    \RequirePackage{filemod-expmin}
+\fi
+\newif\ifsa@buildsuccess
+%% 0 = PDF if exists, TEX otherwise
+%% 1 = force TEX
+%% 2 = force PDF
+%% 3 = build PDF if not exists
+%% 4 = build PDF if older than TEX
+\def\includestandalone@#1#2#3{%
+    \ifcase\sa@mode
+    \relax% 0
+        \IfFileExists{#2}%
+            {\includegraphics[#1]{#2}}%
+            {\includegraphics[#1]{#3.tex}}%
+    \or% 1
+        \includegraphics[#1]{#3.tex}%
+    \or% 2
+        \includegraphics[#1]{#2}%
+    \or% 3
+        \sa@buildgraphic{#3}%
+        \ifsa@buildsuccess
+            \includegraphics[#1]{#2}%
+        \else
+            \PackageWarning{standalone}%
+                {Graphic '#2' could not be build.^^J%
+                Shell escape activated?}%
+                \includegraphics[#1]{#3.tex}%
+        \fi
+    \or% 4
+        \IfFileExists{#2}%
+            {\includegraphics[#1]{#2}}%
+            {\sa@buildgraphic{#3}%
+             \ifsa@buildsuccess
+                \includegraphics[#1]{#2}%
+             \else
+                \PackageWarning{standalone}%
+                 {Graphic '#2' could not be build.^^J%
+                  Shell escape activated?}%
+                 \includegraphics[#1]{#3.tex}%
+             \fi
+            }%
+    \or% 5
+        \filemodCmp{#3.tex}{#2}%
+            {\sa@buildgraphic{#3}%
+             \ifsa@buildsuccess
+                \includegraphics[#1]{#2}%
+             \else
+                \PackageWarning{standalone}%
+                 {Graphic '#2' could not be build.^^J%
+                  Shell escape activated?}%
+                 \includegraphics[#1]{#3.tex}%
+             \fi
+            }%
+            {%
+                \PackageInfo{standalone}%
+                    {generated file #2 newer then source file #3.tex}%
+                \includegraphics[#1]{#2}%
+            }%
+    \fi
+}
+\def\sa@buildgraphic#1{%
+    \ifcase
+      \ifx\pdfshellescape\@undefined
+        \ifx\shellescape\@undefined
+          \ifx\directlua\@undefined
+            \z@
+          \else
+            \directlua{%
+              tex.sprint((status.shell_escape or os.execute()) .. " ")}
+          \fi
+        \else
+          \shellescape
+        \fi
+      \else
+        \pdfshellescape
+      \fi
+        \PackageError{standalone}{Shell escape needed to create graphic! Use the '-shell-escape' option.}{}%
+    \else
+        \begingroup
+        \edef\file{#1}%
+        \edef\outfile{\file\sa@graphicext}%
+        \edef\filemodbefore{\csname pdffilemoddate\endcsname{\outfile}}%
+        \let\latex\sa@build@latex
+        \let\latexoptions\sa@build@latexoptions
+        \let\buildjobname\sa@build@jobname
+        \sa@setquote
+        \let\quote\sa@build@quote
+        \ShellEscape{\sa@build@command}%
+        \ifx\sa@build@postcommand\@empty\else
+            \ShellEscape{\sa@build@postcommand}%
+        \fi
+        \IfFileExists{\outfile}{%
+            \edef\filemodafter{\csname pdffilemoddate\endcsname{\outfile}}%
+            \ifx\filemodbefore\filemodafter
+                \expandafter\ifx\csname pdffilemoddate\endcsname\relax
+                    \global\sa@buildsuccesstrue
+                \else
+                    \global\sa@buildsuccessfalse
+                \fi
+            \else
+                \global\sa@buildsuccesstrue
+            \fi
+        }{%
+            \global\sa@buildsuccessfalse
+        }%
+        \endgroup
+    \fi
+}
+\endinput
+%%
+%% End of file `standalone.sty'.
