@@ -7,6 +7,7 @@ package texcache
 import (
 	"compress/gzip"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -99,6 +100,43 @@ func Add(expr string, fontSizeDots float32, pp ppath.Path) {
 	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp, used: true}
 }
 
+// ReadGzip reads cache entries from gzipped reader input.
+func ReadGzip(r io.Reader) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var c map[string]*cached
+	err := readGzip(&c, r)
+	if err != nil {
+		return err
+	}
+	setCache(c)
+	return nil
+}
+
+func readGzip(c *map[string]*cached, r io.Reader) error {
+	gzr, err := gzip.NewReader(r)
+	defer gzr.Close()
+	if err != nil {
+		return errors.Log(err)
+	}
+	err = jsonx.Read(c, gzr)
+	if err != nil {
+		return errors.Log(err)
+	}
+	return nil
+}
+
+func setCache(c map[string]*cached) {
+	if cache == nil {
+		cache = c
+		return
+	}
+	for k, v := range c {
+		cache[k] = v
+	}
+}
+
 // OpenFS opens saved cache entries from given file system (e.g., for embed).
 // If the filename ends in .gz, it is unzipped for reading.
 func OpenFS(fsys fs.FS, filename string) error {
@@ -114,14 +152,9 @@ func OpenFS(fsys fs.FS, filename string) error {
 		if err != nil {
 			return errors.Log(err)
 		}
-		gzr, err := gzip.NewReader(fp)
-		defer gzr.Close()
+		err = readGzip(&c, fp)
 		if err != nil {
-			return errors.Log(err)
-		}
-		err = jsonx.Read(&c, gzr)
-		if err != nil {
-			return errors.Log(err)
+			return err
 		}
 	} else {
 		err := jsonx.OpenFS(&c, fsys, filename)
@@ -129,13 +162,7 @@ func OpenFS(fsys fs.FS, filename string) error {
 			return errors.Log(err)
 		}
 	}
-	if cache == nil {
-		cache = c
-		return nil
-	}
-	for k, v := range c {
-		cache[k] = v
-	}
+	setCache(c)
 	return nil
 }
 
@@ -153,14 +180,9 @@ func Open(filename string) error {
 		if err != nil {
 			return errors.Log(err)
 		}
-		gzr, err := gzip.NewReader(fp)
-		defer gzr.Close()
+		err = readGzip(&c, fp)
 		if err != nil {
-			return errors.Log(err)
-		}
-		err = jsonx.Read(&c, gzr)
-		if err != nil {
-			return errors.Log(err)
+			return err
 		}
 	} else {
 		err := jsonx.Open(&c, filename)
@@ -168,13 +190,7 @@ func Open(filename string) error {
 			return errors.Log(err)
 		}
 	}
-	if cache == nil {
-		cache = c
-		return nil
-	}
-	for k, v := range c {
-		cache[k] = v
-	}
+	setCache(c)
 	return nil
 }
 
