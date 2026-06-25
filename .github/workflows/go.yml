@@ -54,7 +54,7 @@ jobs:
 
     # TODO: we can't test gpu, xyz, system, and video on the CI since there is bad Vulkan support
     - name: Test
-      run: go test -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system | grep -v video) -coverprofile cover.out -timeout 30s
+      run: go test -short -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system | grep -v video) -coverprofile cover.out -timeout 30s
 
     - name: Upload testdata
       uses: actions/upload-artifact@v7

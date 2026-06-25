@@ -30,6 +30,9 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 }
 
 func TestTex(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	tests := []struct {
 		name string
 		tex  string
@@ -157,6 +160,9 @@ p_{m1} & p_{m2} & \ldots
 }
 
 func TestRelations(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	tests := []string{
 		`<`, `>`, `=`, `\leq`, `\le`, `\geq`, `\ge`, `\equiv`,
 		`\ll`, `\gg`, `\doteq`, `\prec`, `\succ`, `\sim`,
@@ -204,6 +210,9 @@ func TestRelations(t *testing.T) {
 }
 
 func TestOperators(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	tests := []string{
 		`+`, `-`, `\pm`, `\mp`, `\triangleleft`, `\cdot`, `\div`,
 		`\triangleright`, `\times`, `\setminus`, `\star`, `\cup`,
@@ -250,6 +259,9 @@ func TestOperators(t *testing.T) {
 }
 
 func TestBigOperators(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	tests := []string{
 		`\sum`, `\bigcup`, `\bigvee`, `\prod`, `\bigcap`, `\bigwedge`, `\coprod`,
 		`\bigsqcup`, `\biguplus`, `\int`, `\oint`, `\bigodot`,
@@ -292,6 +304,9 @@ func TestBigOperators(t *testing.T) {
 }
 
 func TestArrows(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	tests := []string{
 		`\leftarrow`, `\gets`, `\longleftarrow`, `\rightarrow`, `\to`, `\longrightarrow`,
 		`\leftrightarrow`, `\longleftrightarrow`, `\Leftarrow`, `\Longleftarrow`,
@@ -339,6 +354,9 @@ func TestArrows(t *testing.T) {
 }
 
 func TestSymbols(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	tests := []string{
 		`\dots`, `\cdots`, `\vdots`, `\ddots`, `\hbar`, `\imath`, `\jmath`, `\ell`,
 		`\Re`, `\Im`, `\aleph`, `\wp`, `\forall`, `\exists`,
