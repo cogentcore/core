@@ -609,6 +609,8 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 			ybb -= 400
 			x += sc * 600
 		// below are fixes for all the square root elements
+		case 0x70:
+			x += sc * 120
 		case 0x71:
 			x += sc * 80
 			xsc = .6

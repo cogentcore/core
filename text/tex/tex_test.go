@@ -76,6 +76,7 @@ func TestTex(t *testing.T) {
 		{`forall-disp`, `$\forall x \in \mathbf{R}: \qquad x^{2} \geq 0$`},
 		{`forall2-disp`, `$x^{2} \geq 0\qquad \text{for all }x\in\mathbf{R}$`},
 		{`expers-disp`, `$p^3_{ij} \; m_\text{Knuth} \; \sum_{k=1}^3 k \\[5pt] a^x+y \neq a^{x+y} \; e^{x^2} \neq {e^x}^2$`},
+		{`sqrt-disp`, `$\sqrt{p^2}$`},
 		{`roots-disp`, `$\sqrt{x} \Leftrightarrow x^{1/2} \; \sqrt[3]{2} \; \sqrt{x^{2} + \sqrt{y}} \; \surd[x^2 + y^2]$`},
 		{`lines-disp`, `$0.\overline{3} = \underline{\underline{1/3}}$`},
 		{`underbrace-disp`, `$\underbrace{\overbrace{a+b+c}^6 \cdot \overbrace{d+e+f}^7}_\text{meaning of life} = 42$`},
@@ -131,10 +132,10 @@ p_{m1} & p_{m2} & \ldots
 	}
 
 	for _, test := range tests {
-		Debug = true
-		if test.name != "stackrel-text" {
-			continue
-		}
+		// Debug = true
+		// if test.name != "sqrt-disp" {
+		// 	continue
+		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)
