@@ -134,7 +134,7 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 		psty := *style
 		psty.Stroke.Color = run.StrokeColor
 		psty.Fill.Color = fill
-		r.Path(*run.Math.Path, &psty, math32.Identity2())
+		r.Path(run.Math.Path, &psty, math32.Identity2())
 		r.w.PopStack()
 		return
 	}

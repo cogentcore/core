@@ -189,6 +189,7 @@ type dviFonts struct {
 
 type dviFont struct {
 	face     *font.Face
+	cmapType charMaps
 	cmap     map[uint32]rune
 	size     float32
 	italic   bool
@@ -215,10 +216,10 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 	// fmt.Println("font name:", fontname, fontsize, scale)
 
 	if fs.mathSyms == nil {
-		fs.mathSyms = fs.loadFont("cmsy", cmapCMSY, 10.0, scale, lmmath.TTF)
+		fs.mathSyms = fs.loadFont("cmsy", CMSY, 10.0, scale, lmmath.TTF)
 	}
 
-	cmap := cmapCMR
+	cmap := CMR
 	f, ok := fs.font[name]
 	if !ok {
 		var fontSizes map[float32][]byte
@@ -234,7 +235,7 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				5.0:  lmroman5bold.TTF,
 			}
 		case "cmbsy":
-			cmap = cmapCMSY
+			cmap = CMSY
 			fontSizes = map[float32][]byte{
 				fontsize: lmmath.TTF,
 			}
@@ -247,7 +248,7 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				10.0: lmroman10bolditalic.TTF,
 			}
 		case "cmcsc":
-			cmap = cmapCMTT
+			cmap = CMTT
 			fontSizes = map[float32][]byte{
 				10.0: lmromancaps10regular.TTF,
 			}
@@ -256,17 +257,17 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				10.0: lmromandunh10regular.TTF,
 			}
 		case "cmex":
-			cmap = cmapCMEX
+			cmap = CMEX
 			fontSizes = map[float32][]byte{
 				fontsize: lmmath.TTF,
 			}
 		case "cmitt":
-			cmap = cmapCMTT
+			cmap = CMTT
 			fontSizes = map[float32][]byte{
 				10.0: lmmono10italic.TTF,
 			}
 		case "cmmi":
-			cmap = cmapCMMI
+			cmap = CMMI
 			fontSizes = map[float32][]byte{
 				12.0: lmroman12italic.TTF,
 				10.0: lmroman10italic.TTF,
@@ -275,7 +276,7 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				7.0:  lmroman7italic.TTF,
 			}
 		case "cmmib":
-			cmap = cmapCMMI
+			cmap = CMMI
 			fontSizes = map[float32][]byte{
 				10.0: lmroman10bolditalic.TTF,
 			}
@@ -335,12 +336,12 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				8.0: lmsansquot8oblique.TTF,
 			}
 		case "cmsy":
-			cmap = cmapCMSY
+			cmap = CMSY
 			fontSizes = map[float32][]byte{
 				fontsize: lmmath.TTF,
 			}
 		case "cmtcsc":
-			cmap = cmapCMTT
+			cmap = CMTT
 			fontSizes = map[float32][]byte{
 				10.0: lmmonocaps10regular.TTF,
 			}
@@ -355,7 +356,7 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 				7.0:  lmroman7italic.TTF,
 			}
 		case "cmtt":
-			cmap = cmapCMTT
+			cmap = CMTT
 			fontSizes = map[float32][]byte{
 				12.0: lmmono12regular.TTF,
 				10.0: lmmono10regular.TTF,
@@ -387,17 +388,35 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 	return f
 }
 
-func (fs *dviFonts) loadFont(fontname string, cmap map[uint32]rune, fontsize, scale float32, data []byte) *dviFont {
+func (fs *dviFonts) loadFont(fontname string, cmap charMaps, fontsize, scale float32, data []byte) *dviFont {
 	faces, err := font.ParseTTC(bytes.NewReader(data))
 	if err != nil { // todo: should still work presumably?
-		errors.Log(err)
+		panic(fmt.Errorf("dviFonts error: no font found %s: %w", fontname, err))
+		return nil
 	}
 	face := faces[0]
 	fsize := scale * fontsize
 	isItalic := 0 < len(fontname) && fontname[len(fontname)-1] == 'i'
 	isEx := fontname == "cmex"
 
-	return &dviFont{face: face, cmap: cmap, size: fsize, italic: isItalic, ex: isEx, mathSyms: fs.mathSyms}
+	return &dviFont{face: face, cmapType: cmap, cmap: cmap.Table(), size: fsize, italic: isItalic, ex: isEx, mathSyms: fs.mathSyms}
+}
+
+type xxbearing struct {
+	cmap charMaps
+	x    int32
+}
+
+// glyphs for which bearings should be used: most are better without.
+// outline versions of font data are kinda weird it seems here.
+// value is extra adjustment to apply.
+var useXBearings = map[uint32]xxbearing{
+	0x16: {CMR, 0},     // h-bar
+	0x30: {CMSY, -200}, // ' (prime)
+	0x36: {CMSY, -720}, // / in neq
+	0x5E: {CMR, 0},     // ^
+	0x7E: {CMMI, -150}, // -> vec
+	0x7F: {CMR, -150},  // .. ddot
 }
 
 const (
@@ -520,8 +539,16 @@ var cmexScales = map[uint32]float32{
 
 }
 
+const (
+	italicYX = 0.2
+)
+
+// Draw renders the font, and returns the width advance
 func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) float32 {
 	r := f.cmap[cid]
+	if r == 0x337 {
+		r = ' '
+	}
 	face := f.face
 	gid, ok := face.Cmap.Lookup(r)
 	if !ok {
@@ -529,69 +556,92 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 			face = f.mathSyms.face
 			gid, ok = face.Cmap.Lookup(r)
 			if !ok {
-				fmt.Println("rune not found in mathSyms:", string(r))
+				fmt.Printf("rune not found in mathSyms, cid: %x, hex: %x, string: %q\n", cid, r, string(r))
 			}
 		} else {
 			fmt.Println("rune not found:", string(r))
 		}
 	}
-	hadv := face.HorizontalAdvance(gid)
 	// fmt.Printf("rune: 0x%0x gid: %d, r: 0x%0X\n", cid, gid, int(r))
+
+	// adcb
+	// cbad
 
 	outline := face.GlyphData(gid).(font.GlyphOutline)
 	sc := scale * f.size / float32(face.Upem())
 	xsc := float32(1)
 	// fmt.Println("draw scale:", sc, "f.size:", f.size, "face.Upem()", face.Upem())
 
-	if f.ex {
-		ext, _ := face.GlyphExtents(gid)
-		exsc, has := cmexScales[cid]
-		yb := ext.YBearing
-		if has {
-			sc *= exsc
-			switch cid {
-			case 0x5A, 0x49: // \int and \oint are off in large size
-				yb += 200
-			case 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F:
-				// larger delims are too thick
-				xsc = .7
-			case 0x20, 0x21, 0x22, 0x23, 0x28, 0x29, 0x2A, 0x2B:
-				// same for even larger ones
-				xsc = .6
-			case 0x3C, 0x3D: // braces middles need shifting
-				yb += 150
-			case 0x3A, 0x3B: // braces bottom shifting
-				yb += 400
-			// below are fixes for all the square root elements
-			case 0x71:
-				x += sc * 80
-				xsc = .6
-			case 0x72:
-				x -= sc * 80
-				xsc = .6
-			case 0x73:
-				x -= sc * 80
-				xsc = .5
-			case 0x74:
-				yb += 600
-			case 0x75:
-				x += sc * 560
-			case 0x76:
-				x += sc * 400
-				yb -= 36
+	ext, has := face.GlyphExtents(gid)
+	var xb, yb float32
+	if has {
+		xb = ext.XBearing
+		yb = ext.YBearing
+		ex, useX := useXBearings[cid]
+		if useX {
+			if f.cmapType == ex.cmap {
+				x -= sc * (xb + float32(ex.x))
 			}
 		}
-		y += sc * yb
 	}
 
-	if f.italic {
-		// angle := f.face.Post.ItalicAngle
-		// angle := float32(-15) // degrees
-		// x -= scale * f.size * face.LineMetric(font.XHeight) / 2.0 * math32.Tan(-angle*math.Pi/180.0)
+	if f.ex {
+		exsc, has := cmexScales[cid]
+		if has {
+			sc *= exsc
+			// fmt.Printf("%x: ex scale %g\n", cid, exsc)
+		}
+		ybb := yb
+		switch cid {
+		case 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F:
+			// larger delims are too thick
+			xsc = .7
+		case 0x20, 0x21, 0x22, 0x23, 0x28, 0x29, 0x2A, 0x2B:
+			// same for even larger ones
+			xsc = .6
+		case 0x3C, 0x3D: // braces middles need shifting
+			ybb += 150
+		case 0x3A, 0x3B: // braces bottom shifting
+			ybb += 400
+		case 0x5A, 0x49: // \int and \oint are off in large size
+			ybb += 200
+		case 0x64: // ^ big
+			ybb -= 400
+			x += sc * 600
+		// below are fixes for all the square root elements
+		case 0x70:
+			x += sc * 120
+		case 0x71:
+			x += sc * 80
+			xsc = .6
+		case 0x72:
+			x -= sc * 80
+			xsc = .6
+		case 0x73:
+			x -= sc * 80
+			xsc = .5
+		case 0x74:
+			ybb += 150
+		case 0x75:
+			x += sc * 560
+		case 0x76:
+			x += sc * 400
+			ybb -= 36
+		}
+		y += sc * ybb
 	}
 
+	doItal := false
+	if f.italic && f.cmapType == CMMI && cid == 0x40 {
+		// fmt.Printf("italic sym: 0x%X  font: %d\n", cid, f.cmapType)
+		doItal = true
+	}
 	for _, s := range outline.Segments {
 		p0 := math32.Vec2(s.Args[0].X*xsc*sc+x, -s.Args[0].Y*sc+y)
+		if doItal {
+			p0.X += italicYX * s.Args[0].Y * xsc * sc
+		}
+		// fmt.Println(s.Args[0].X, s.Args[0].Y, s.Args[0])
 		switch s.Op {
 		case opentype.SegmentOpMoveTo:
 			p.MoveTo(p0.X, p0.Y)
@@ -599,15 +649,25 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 			p.LineTo(p0.X, p0.Y)
 		case opentype.SegmentOpQuadTo:
 			p1 := math32.Vec2(s.Args[1].X*xsc*sc+x, -s.Args[1].Y*sc+y)
+			if doItal {
+				p1.X += italicYX * s.Args[1].Y * xsc * sc
+			}
 			p.QuadTo(p0.X, p0.Y, p1.X, p1.Y)
 		case opentype.SegmentOpCubeTo:
 			p1 := math32.Vec2(s.Args[1].X*xsc*sc+x, -s.Args[1].Y*sc+y)
 			p2 := math32.Vec2(s.Args[2].X*xsc*sc+x, -s.Args[2].Y*sc+y)
+			if doItal {
+				p1.X += italicYX * s.Args[1].Y * xsc * sc
+				p2.X += italicYX * s.Args[2].Y * xsc * sc
+			}
 			p.CubeTo(p0.X, p0.Y, p1.X, p1.Y, p2.X, p2.Y)
 		}
 	}
 	p.Close()
+	hadv := face.HorizontalAdvance(gid)
+	if hadv == 0 {
+		hadv = 500
+	}
 	adv := sc * hadv
-	// fmt.Println("hadv:", face.HorizontalAdvance(gid), "adv:", adv)
 	return adv
 }

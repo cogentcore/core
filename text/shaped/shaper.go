@@ -23,8 +23,11 @@ var (
 	// given math expression, in TeX syntax.
 	// Import _ cogentcore.org/core/text/tex to set this function
 	// (incurs a significant additional memory footprint due to fonts
-	// and other packages).
-	ShapeMath func(expr string, fontHeight float32) (*ppath.Path, error)
+	// and other packages), or call texcache.SetShapeMath() from
+	// cogentcore.org/core/text/texcache for fully cached version that
+	// saves on all the memory, but requires all equations to be generated
+	// in advance and saved.
+	ShapeMath func(expr string, fontHeight float32) (ppath.Path, error)
 )
 
 // Shaper is a text shaping system that can shape the layout of [rich.Text],

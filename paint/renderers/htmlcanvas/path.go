@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/paint/render"
 )
 
-func (rs *Renderer) writePath(pt *ppath.Path) {
+func (rs *Renderer) writePath(pt ppath.Path) {
 	rs.ctx.Call("beginPath")
 	for scanner := pt.Scanner(); scanner.Scan(); {
 		end := scanner.End()
@@ -48,7 +48,7 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 	rs.setTransform(&pt.Context)
 
 	if style.HasFill() || style.HasStroke() {
-		rs.writePath(&pt.Path)
+		rs.writePath(pt.Path)
 	}
 
 	rs.curRect = pt.Path.FastBounds().ToRect() // TODO: more performance optimized approach (such as only computing for gradients)?

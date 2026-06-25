@@ -47,7 +47,7 @@ type Run interface {
 
 // Math holds the output of a TeX math expression.
 type Math struct {
-	Path *ppath.Path
+	Path ppath.Path
 	BBox math32.Box2
 }
 
