@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/tex/texcache"
 )
 

@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/shaped"
@@ -113,10 +114,8 @@ func InstallTexMF() bool {
 	if texmfAt != "" {
 		return false
 	}
-	trgDir := ""
-	if system.TheApp != nil {
-		trgDir = system.TheApp.CogentCoreDataDir()
-	} else {
+
+	if system.TheApp == nil {
 		// presumably testing, just use local files and be done!
 		dir := "./texmf"
 		texmfAt = dir
@@ -124,27 +123,44 @@ func InstallTexMF() bool {
 		return true
 	}
 
-	dir := filepath.Join(trgDir, "texmf")
-	err := os.MkdirAll(dir, 0x777)
+	dir := system.TheApp.CogentCoreDataDir()
+	tdir := filepath.Join(dir, "texmf")
+	ex, err := fsx.DirExists(tdir)
+	if ex {
+		texmfAt = tdir
+		os.Setenv("TEXMF", tdir)
+		return true
+	}
+	err = os.MkdirAll(tdir, 0777)
 	if errors.Log(err) != nil {
 		return false
 	}
-	files, err := texmf.ReadDir("texmf")
-	if errors.Log(err) != nil {
-		return false
-	}
-	for _, de := range files {
-		fn := de.Name()
-		fmt.Println(fn)
-		fsp := filepath.Join("texmf", fn)
-		b, err := fs.ReadFile(texmf, fsp)
-		if errors.Log(err) != nil {
-			return false
+	fs.WalkDir(texmf, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return errors.Log(err)
 		}
-		op := filepath.Join(dir, fn)
-		os.WriteFile(op, b, 0666)
-	}
-	texmfAt = dir
-	os.Setenv("TEXMF", dir)
+		if d.IsDir() {
+			op := filepath.Join(dir, path)
+			err = os.MkdirAll(op, 0777)
+			if errors.Log(err) != nil {
+				return err
+			}
+			return nil
+		}
+		// fmt.Println(path)
+		b, err := fs.ReadFile(texmf, path)
+		if err != nil {
+			return errors.Log(err)
+		}
+		op := filepath.Join(dir, path)
+		// fmt.Println(op)
+		err = os.WriteFile(op, b, 0666)
+		if err != nil {
+			return errors.Log(err)
+		}
+		return nil
+	})
+	texmfAt = tdir
+	os.Setenv("TEXMF", tdir)
 	return true
 }
