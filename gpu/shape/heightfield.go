@@ -254,11 +254,11 @@ func SetHeightfieldBars(vertex, normal, texcoord math32.ArrayF32, index math32.A
 				// back
 				SetPlane(vertex, normal, texcoord, index, poff, ioff, waxis, zaxis, 1, -1, barPct, ht, x0, base, y0, segs, segs, pos)
 				// bottom
-				SetPlane(vertex, normal, texcoord, index, poff+3*vtxSz, ioff+3*idxSz, waxis, haxis, 1, 1, barPct, barPct, x0, y0, base, segs, segs, pos)
+				SetPlane(vertex, normal, texcoord, index, poff+1*vtxSz, ioff+1*idxSz, waxis, haxis, 1, 1, barPct, barPct, x0, y0, base, segs, segs, pos)
 				// left
-				SetPlane(vertex, normal, texcoord, index, poff+1*vtxSz, ioff+1*idxSz, haxis, zaxis, 1, -1, barPct, ht, y0, base, x0+barPct, segs, segs, pos)
+				SetPlane(vertex, normal, texcoord, index, poff+2*vtxSz, ioff+2*idxSz, haxis, zaxis, 1, -1, barPct, ht, y0, base, x0+barPct, segs, segs, pos)
 				// right
-				SetPlane(vertex, normal, texcoord, index, poff+2*vtxSz, ioff+2*idxSz, haxis, zaxis, 1, -1, barPct, ht, y0, base, x0, segs, segs, pos)
+				SetPlane(vertex, normal, texcoord, index, poff+3*vtxSz, ioff+3*idxSz, haxis, zaxis, 1, -1, barPct, ht, y0, base, x0, segs, segs, pos)
 				// front
 				SetPlane(vertex, normal, texcoord, index, poff+4*vtxSz, ioff+4*idxSz, waxis, zaxis, 1, -1, barPct, ht, x0, base, y0+barPct, segs, segs, pos)
 			}
