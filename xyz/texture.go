@@ -124,7 +124,7 @@ type TextureCore struct {
 // see NewTextureFile to add a texture that loads from file
 func (sc *Scene) SetTexture(tx Texture) {
 	name := tx.AsTextureBase().Name
-	sc.Textures.Add(name, tx) // does replease
+	sc.Textures.Add(name, tx) // does replace
 	if sc.IsLive() {
 		sc.Phong.SetTexture(name, phong.NewTexture(tx.Image()))
 	}

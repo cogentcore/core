@@ -99,6 +99,45 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.ShapeGrou
 // list of shapes in group
 func (t *ShapeGroup) SetShapes(v ...Mesh) *ShapeGroup { t.Shapes = v; return t }
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Heightfield", IDName: "heightfield", Doc: "Heightfield is represents planar 2D data with the third dimension\nprovided by the data values, which can be visualized as either\na triangulated plane or discrete bars.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Bars", Doc: "Bars represents the data using discrete bars, else triangles on the plane."}, {Name: "NormalAxis", Doc: "axis along which the normal perpendicular to the plane points.\nE.g., if the Y axis is specified, then it is a standard X-Z ground plane.\nSee also NormalNeg for whether it is facing in the positive or\nnegative of the given axis."}, {Name: "NormalNeg", Doc: "if false, the plane normal is facing in the positive direction\nalong specified NormalAxis, otherwise it faces in the negative."}, {Name: "Size", Doc: "Size is the 2D size of the heightfield data values."}, {Name: "VisSize", Doc: "3D visual size, with the Z value providing scaling for data heights."}, {Name: "Data", Doc: "Data for the heights of points in the field."}, {Name: "BarPct", Doc: "BarPct is proportion (0-1) that the bar occupies within its unit square\n(i.e., 1-BarPct is the spacing between bars)."}, {Name: "Offset", Doc: "Offset from origin along direction of normal to the plane."}}})
+
+// SetBars sets the [Heightfield.Bars]:
+// Bars represents the data using discrete bars, else triangles on the plane.
+func (t *Heightfield) SetBars(v bool) *Heightfield { t.Bars = v; return t }
+
+// SetNormalAxis sets the [Heightfield.NormalAxis]:
+// axis along which the normal perpendicular to the plane points.
+// E.g., if the Y axis is specified, then it is a standard X-Z ground plane.
+// See also NormalNeg for whether it is facing in the positive or
+// negative of the given axis.
+func (t *Heightfield) SetNormalAxis(v math32.Dims) *Heightfield { t.NormalAxis = v; return t }
+
+// SetNormalNeg sets the [Heightfield.NormalNeg]:
+// if false, the plane normal is facing in the positive direction
+// along specified NormalAxis, otherwise it faces in the negative.
+func (t *Heightfield) SetNormalNeg(v bool) *Heightfield { t.NormalNeg = v; return t }
+
+// SetSize sets the [Heightfield.Size]:
+// Size is the 2D size of the heightfield data values.
+func (t *Heightfield) SetSize(v math32.Vector2i) *Heightfield { t.Size = v; return t }
+
+// SetVisSize sets the [Heightfield.VisSize]:
+// 3D visual size, with the Z value providing scaling for data heights.
+func (t *Heightfield) SetVisSize(v math32.Vector3) *Heightfield { t.VisSize = v; return t }
+
+// SetData sets the [Heightfield.Data]:
+// Data for the heights of points in the field.
+func (t *Heightfield) SetData(v HeightfieldData2D) *Heightfield { t.Data = v; return t }
+
+// SetBarPct sets the [Heightfield.BarPct]:
+// BarPct is proportion (0-1) that the bar occupies within its unit square
+// (i.e., 1-BarPct is the spacing between bars).
+func (t *Heightfield) SetBarPct(v float32) *Heightfield { t.BarPct = v; return t }
+
+// SetOffset sets the [Heightfield.Offset]:
+// Offset from origin along direction of normal to the plane.
+func (t *Heightfield) SetOffset(v float32) *Heightfield { t.Offset = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/gpu/shape.Lines", IDName: "lines", Doc: "Lines are lines rendered as long thin boxes defined by points\nand width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0\nor a constant unless specifically relevant to have full 3D variation).\nRotate the solid to put into other planes.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "ShapeBase"}}, Fields: []types.Field{{Name: "Points", Doc: "line points (must be 2 or more)"}, {Name: "Width", Doc: "line width, Y = height perpendicular to line direction, and X = depth"}, {Name: "Colors", Doc: "optional colors for each point -- actual color interpolates between"}, {Name: "Closed", Doc: "if true, connect the first and last points to form a closed shape"}}})
 
 // SetPoints sets the [Lines.Points]:

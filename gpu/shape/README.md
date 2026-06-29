@@ -17,5 +17,6 @@ Here are the shapes:
 * Capsule: a cylinder with half-sphere caps -- good for simple body segments
 * Torus
 * Lines: uses a box to draw 3D lines
+* Heightfield: represents planar 2D data with the third dimension provided by data values, which can be visualized as either a triangulated plane or discrete bars.
 * Group: combines multiple shapes.
 
