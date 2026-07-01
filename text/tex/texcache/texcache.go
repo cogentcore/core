@@ -5,16 +5,14 @@
 package texcache
 
 import (
-	"compress/gzip"
 	"fmt"
 	"io"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/gzipx"
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/shaped"
@@ -100,33 +98,6 @@ func Add(expr string, fontSizeDots float32, pp ppath.Path) {
 	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp, used: true}
 }
 
-// ReadGzip reads cache entries from gzipped reader input.
-func ReadGzip(r io.Reader) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	var c map[string]*cached
-	err := readGzip(&c, r)
-	if err != nil {
-		return err
-	}
-	setCache(c)
-	return nil
-}
-
-func readGzip(c *map[string]*cached, r io.Reader) error {
-	gzr, err := gzip.NewReader(r)
-	defer gzr.Close()
-	if err != nil {
-		return errors.Log(err)
-	}
-	err = jsonx.Read(c, gzr)
-	if err != nil {
-		return errors.Log(err)
-	}
-	return nil
-}
-
 func setCache(c map[string]*cached) {
 	if cache == nil {
 		cache = c
@@ -144,23 +115,11 @@ func OpenFS(fsys fs.FS, filename string) error {
 	defer mu.Unlock()
 
 	var c map[string]*cached
-
-	ext := filepath.Ext(string(filename))
-	if ext == ".gz" {
-		fp, err := os.Open(filename)
-		defer fp.Close()
-		if err != nil {
-			return errors.Log(err)
-		}
-		err = readGzip(&c, fp)
-		if err != nil {
-			return err
-		}
-	} else {
-		err := jsonx.OpenFS(&c, fsys, filename)
-		if err != nil {
-			return errors.Log(err)
-		}
+	err := gzipx.OpenFS(fsys, filename, func(r io.Reader) error {
+		return jsonx.Read(&c, r)
+	})
+	if err != nil {
+		return errors.Log(err)
 	}
 	setCache(c)
 	return nil
@@ -173,22 +132,11 @@ func Open(filename string) error {
 	defer mu.Unlock()
 
 	var c map[string]*cached
-	ext := filepath.Ext(string(filename))
-	if ext == ".gz" {
-		fp, err := os.Open(filename)
-		defer fp.Close()
-		if err != nil {
-			return errors.Log(err)
-		}
-		err = readGzip(&c, fp)
-		if err != nil {
-			return err
-		}
-	} else {
-		err := jsonx.Open(&c, filename)
-		if err != nil {
-			return errors.Log(err)
-		}
+	err := gzipx.Open(filename, func(r io.Reader) error {
+		return jsonx.Read(&c, r)
+	})
+	if err != nil {
+		return errors.Log(err)
 	}
 	setCache(c)
 	return nil
@@ -220,24 +168,8 @@ func SaveAs(filename string) error {
 		v.Path = v.pp.ToSVG()
 	}
 
-	ext := filepath.Ext(string(filename))
-	if ext == ".gz" {
-		fp, err := os.Create(filename)
-		defer fp.Close()
-		if err != nil {
-			return errors.Log(err)
-		}
-		gzr := gzip.NewWriter(fp)
-		err = jsonx.Write(cache, gzr)
-		gzr.Close()
-		if err != nil {
-			return errors.Log(err)
-		}
-	} else {
-		err := jsonx.Save(cache, filename)
-		if err != nil {
-			return errors.Log(err)
-		}
-	}
-	return nil
+	err := gzipx.Save(filename, func(w io.Writer) error {
+		return jsonx.Write(cache, w)
+	})
+	return errors.Log(err)
 }

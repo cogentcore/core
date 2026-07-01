@@ -100,8 +100,12 @@ func (fm *Form) getStructFields() {
 			return shouldShow(parent, field)
 		},
 		func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value) {
-			if field.Tag.Get("display") == "add-fields" && field.Type.Kind() == reflect.Struct {
-				reflectx.WalkFields(value,
+			if field.Tag.Get("display") == "add-fields" && (field.Type.Kind() == reflect.Struct || (field.Type.Kind() == reflect.Pointer && !reflectx.IsNil(value))) {
+				fldval := value
+				if field.Type.Kind() == reflect.Pointer && !reflectx.IsNil(value) {
+					fldval = value.Elem()
+				}
+				reflectx.WalkFields(fldval,
 					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
 						return shouldShow(parent, sfield)
 					},
