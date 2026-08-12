@@ -92,9 +92,12 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	// fmt.Println(tx)
 	sz := math32.Vec2(10000, 10000) // no wrapping!!
 	g.TextShaped = sv.TextShaper.WrapLines(tx, &fs, &pc.Text, sz)
-	baseOff := g.TextShaped.Lines[0].Offset
-	g.TextShaped.StartAtBaseline() // remove top-left offset
-	return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
+	if len(g.TextShaped.Lines) > 0 {
+		baseOff := g.TextShaped.Lines[0].Offset
+		g.TextShaped.StartAtBaseline() // remove top-left offset
+		return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
+	}
+	return g.TextShaped.Bounds
 
 	// fmt.Println("baseoff:", baseOff)
 	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)

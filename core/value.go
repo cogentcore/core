@@ -108,7 +108,7 @@ const shiftNewWindow = "[Shift: new window]"
 // It also sets the tooltip of the widget appropriately. If allowReadOnly is false,
 // the dialog will not be opened if the widget is read only. It also takes an optional
 // function to call after the dialog is accepted.
-func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...func()) {
+func InitValueButton(v Value, allowReadOnly bool, mkfun func(d *Body), after ...func()) {
 	wb := v.AsWidget()
 	// windows are never new on mobile
 	if !TheApp.Platform().IsMobile() {
@@ -119,7 +119,7 @@ func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...f
 			if e.HasAnyModifier(key.Shift) {
 				wb.setFlag(!wb.hasFlag(widgetValueNewWindow), widgetValueNewWindow)
 			}
-			openValueDialog(v, make, after...)
+			openValueDialog(v, mkfun, after...)
 		}
 	})
 }
@@ -127,7 +127,7 @@ func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...f
 // openValueDialog opens a new value dialog for the given [Value] using the
 // given function for constructing the dialog and the optional given function
 // to call after the dialog is accepted.
-func openValueDialog(v Value, make func(d *Body), after ...func()) {
+func openValueDialog(v Value, mkfun func(d *Body), after ...func()) {
 	opv := reflectx.UnderlyingPointer(reflect.ValueOf(v.WidgetValue()))
 	if !opv.IsValid() {
 		return
@@ -141,7 +141,7 @@ func openValueDialog(v Value, make func(d *Body), after ...func()) {
 	if text := strings.ReplaceAll(wb.Tooltip, shiftNewWindow, ""); text != "" {
 		NewText(d).SetType(TextSupporting).SetText(text)
 	}
-	make(d)
+	mkfun(d)
 
 	// if we don't have anything specific for ok events,
 	// we just register an OnClose event and skip the

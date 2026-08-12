@@ -78,9 +78,9 @@ func (im *Image) SizeUp() {
 		csz := sz.Actual.Content
 		// if only one min size is specified, then allow the other to expand
 		if im.Styles.Min.Y.Value != 0 && im.Styles.Min.X.Value == 0 {
-			csz.X = obj.X
+			csz.X = math32.Floor((im.Styles.Min.Y.Dots / obj.Y) * obj.X)
 		} else if im.Styles.Min.X.Value != 0 && im.Styles.Min.Y.Value == 0 {
-			csz.Y = obj.Y
+			csz.Y = math32.Floor((im.Styles.Min.X.Dots / obj.X) * obj.Y)
 		} else if im.Styles.Min.X.Value == 0 && im.Styles.Min.Y.Value == 0 {
 			pwd := float32(0)
 			pwb := im.parentWidget()
@@ -90,10 +90,10 @@ func (im *Image) SizeUp() {
 			}
 			if pwd > 0 {
 				csz.X = min(obj.X, pwd)
+				csz.Y = math32.Floor((csz.X / obj.X) * obj.Y)
 			} else {
-				csz.X = obj.X
+				csz = obj
 			}
-			csz.Y = obj.Y
 		}
 		osz := styles.ObjectSizeFromFit(im.Styles.ObjectFit, obj, csz)
 		sz.Actual.Content = osz

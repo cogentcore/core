@@ -70,6 +70,12 @@ func (fb *FormButton) Init() {
 	})
 	InitValueButton(fb, true, func(d *Body) {
 		fm := NewForm(d).SetStruct(fb.Struct)
+		fm.OnChange(func(e events.Event) {
+			if up, ok := fb.Struct.(Updater); ok {
+				up.Update()
+				fm.Update()
+			}
+		})
 		fm.SetValueTitle(fb.ValueTitle).SetReadOnly(fb.IsReadOnly())
 		if tb, ok := fb.Struct.(ToolbarMaker); ok {
 			d.AddTopBar(func(bar *Frame) {
@@ -77,6 +83,12 @@ func (fb *FormButton) Init() {
 			})
 		}
 	})
+}
+
+// Updater is an interface for the Update method,
+// called by FormButton on changes.
+type Updater interface {
+	Update()
 }
 
 // KeyedListButton represents a map value with a button that opens a [KeyedList].

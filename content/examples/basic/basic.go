@@ -5,7 +5,6 @@
 package main
 
 import (
-	"bytes"
 	"embed"
 
 	"cogentcore.org/core/base/errors"
@@ -26,10 +25,10 @@ import (
 var econtent embed.FS
 
 //go:embed mathcache.json.gz
-var mathcache []byte
+var mathcache embed.FS
 
 func main() {
-	texcache.ReadGzip(bytes.NewBuffer(mathcache))
+	texcache.OpenFS(mathcache, "mathcache.json.gz")
 	texcache.SetShapeMath() // only use cached!
 	// rasterx.UseGlyphCache = false
 	content.Settings.SiteTitle = "Cogent Content Example"
