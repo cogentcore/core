@@ -38,6 +38,7 @@ func TestTex(t *testing.T) {
 		tex  string
 	}{
 		{`abs-text`, `|x|`},
+		{`greek`, `\phi \varphi \epsilon \varepsilon`},
 		{`dot-text`, `\dot x`},
 		{`ddot-text`, `\ddot x`},
 		{`sum-text`, `y = \sum_{i=0}^{100} f(x_i)`},
@@ -136,7 +137,7 @@ p_{m1} & p_{m2} & \ldots
 
 	for _, test := range tests {
 		// Debug = true
-		// if test.name != "forall2-disp" {
+		// if test.name != "greek" {
 		// 	continue
 		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
@@ -367,6 +368,54 @@ func TestSymbols(t *testing.T) {
 	}
 	width := 600
 	RunTest(t, "all-symbols", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestGreek(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\alpha`, `\beta`, `\gamma`, `\Gamma`, `\delta`, `\Delta`, `\epsilon`, `\varepsilon`,
+		`\zeta`, `\eta`, `\theta`, `\vartheta`, `\Theta`, `\iota`,
+		`\kappa`, `\lambda`, `\Lambda`, `\mu`, `\nu`,
+		`\xi`, `\Xi`, `\pi`, `\Pi`, `\rho`,
+		`\varrho`, `\sigma`, `\Sigma`, `\tau`, `\upsilon`, `\Upsilon`, `\phi`,
+		`\varphi`, `\Phi`, `\chi`, `\psi`, `\Psi`, `\omega`, `\Omega`,
+	}
+	width := 600
+	RunTest(t, "all-greek", width, 350, func(pc *paint.Painter) {
 		pc.Fill.Color = colors.Uniform(color.Black)
 		fsize := pc.Text.FontSize.Dots
 		y := fsize
