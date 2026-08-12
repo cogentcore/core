@@ -6,6 +6,7 @@
 package basesymbols
 
 import (
+	"iter"
 	"reflect"
 )
 
@@ -111,20 +112,24 @@ type _reflect_Type struct {
 	WFieldByIndex    func(index []int) reflect.StructField
 	WFieldByName     func(name string) (reflect.StructField, bool)
 	WFieldByNameFunc func(match func(string) bool) (reflect.StructField, bool)
+	WFields          func() iter.Seq[reflect.StructField]
 	WImplements      func(u reflect.Type) bool
 	WIn              func(i int) reflect.Type
+	WIns             func() iter.Seq[reflect.Type]
 	WIsVariadic      func() bool
 	WKey             func() reflect.Type
 	WKind            func() reflect.Kind
 	WLen             func() int
 	WMethod          func(a0 int) reflect.Method
 	WMethodByName    func(a0 string) (reflect.Method, bool)
+	WMethods         func() iter.Seq[reflect.Method]
 	WName            func() string
 	WNumField        func() int
 	WNumIn           func() int
 	WNumMethod       func() int
 	WNumOut          func() int
 	WOut             func(i int) reflect.Type
+	WOuts            func() iter.Seq[reflect.Type]
 	WOverflowComplex func(x complex128) bool
 	WOverflowFloat   func(x float64) bool
 	WOverflowInt     func(x int64) bool
@@ -152,20 +157,24 @@ func (W _reflect_Type) FieldByName(name string) (reflect.StructField, bool) {
 func (W _reflect_Type) FieldByNameFunc(match func(string) bool) (reflect.StructField, bool) {
 	return W.WFieldByNameFunc(match)
 }
+func (W _reflect_Type) Fields() iter.Seq[reflect.StructField]         { return W.WFields() }
 func (W _reflect_Type) Implements(u reflect.Type) bool                { return W.WImplements(u) }
 func (W _reflect_Type) In(i int) reflect.Type                         { return W.WIn(i) }
+func (W _reflect_Type) Ins() iter.Seq[reflect.Type]                   { return W.WIns() }
 func (W _reflect_Type) IsVariadic() bool                              { return W.WIsVariadic() }
 func (W _reflect_Type) Key() reflect.Type                             { return W.WKey() }
 func (W _reflect_Type) Kind() reflect.Kind                            { return W.WKind() }
 func (W _reflect_Type) Len() int                                      { return W.WLen() }
 func (W _reflect_Type) Method(a0 int) reflect.Method                  { return W.WMethod(a0) }
 func (W _reflect_Type) MethodByName(a0 string) (reflect.Method, bool) { return W.WMethodByName(a0) }
+func (W _reflect_Type) Methods() iter.Seq[reflect.Method]             { return W.WMethods() }
 func (W _reflect_Type) Name() string                                  { return W.WName() }
 func (W _reflect_Type) NumField() int                                 { return W.WNumField() }
 func (W _reflect_Type) NumIn() int                                    { return W.WNumIn() }
 func (W _reflect_Type) NumMethod() int                                { return W.WNumMethod() }
 func (W _reflect_Type) NumOut() int                                   { return W.WNumOut() }
 func (W _reflect_Type) Out(i int) reflect.Type                        { return W.WOut(i) }
+func (W _reflect_Type) Outs() iter.Seq[reflect.Type]                  { return W.WOuts() }
 func (W _reflect_Type) OverflowComplex(x complex128) bool             { return W.WOverflowComplex(x) }
 func (W _reflect_Type) OverflowFloat(x float64) bool                  { return W.WOverflowFloat(x) }
 func (W _reflect_Type) OverflowInt(x int64) bool                      { return W.WOverflowInt(x) }
