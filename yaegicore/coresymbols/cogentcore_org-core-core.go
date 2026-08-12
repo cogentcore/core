@@ -358,6 +358,7 @@ func init() {
 		"TreeButton":             reflect.ValueOf((*core.TreeButton)(nil)),
 		"Treer":                  reflect.ValueOf((*core.Treer)(nil)),
 		"TypeChooser":            reflect.ValueOf((*core.TypeChooser)(nil)),
+		"Updater":                reflect.ValueOf((*core.Updater)(nil)),
 		"User":                   reflect.ValueOf((*core.User)(nil)),
 		"Validator":              reflect.ValueOf((*core.Validator)(nil)),
 		"Value":                  reflect.ValueOf((*core.Value)(nil)),
@@ -381,6 +382,7 @@ func init() {
 		"_TextFieldEmbedder": reflect.ValueOf((*_cogentcore_org_core_core_TextFieldEmbedder)(nil)),
 		"_ToolbarMaker":      reflect.ValueOf((*_cogentcore_org_core_core_ToolbarMaker)(nil)),
 		"_Treer":             reflect.ValueOf((*_cogentcore_org_core_core_Treer)(nil)),
+		"_Updater":           reflect.ValueOf((*_cogentcore_org_core_core_Updater)(nil)),
 		"_Validator":         reflect.ValueOf((*_cogentcore_org_core_core_Validator)(nil)),
 		"_Value":             reflect.ValueOf((*_cogentcore_org_core_core_Value)(nil)),
 		"_ValueSetter":       reflect.ValueOf((*_cogentcore_org_core_core_ValueSetter)(nil)),
@@ -780,6 +782,14 @@ func (W _cogentcore_org_core_core_Treer) TextRunes() []rune              { retur
 func (W _cogentcore_org_core_core_Treer) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
+
+// _cogentcore_org_core_core_Updater is an interface wrapper for Updater type
+type _cogentcore_org_core_core_Updater struct {
+	IValue  interface{}
+	WUpdate func()
+}
+
+func (W _cogentcore_org_core_core_Updater) Update() { W.WUpdate() }
 
 // _cogentcore_org_core_core_Validator is an interface wrapper for Validator type
 type _cogentcore_org_core_core_Validator struct {
