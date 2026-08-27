@@ -129,7 +129,7 @@ func (ct *Content) MenuSearch(items *[]core.ChooserItem) {
 
 // makeBottomButtons makes the previous and next buttons if relevant.
 func (ct *Content) makeBottomButtons(p *tree.Plan) {
-	if len(ct.current.Page.Categories) == 0 {
+	if len(ct.current.Page.Categories) == 0 || ct.current.Page.URL == "" {
 		return
 	}
 	cat := ct.current.Page.Categories[0]
