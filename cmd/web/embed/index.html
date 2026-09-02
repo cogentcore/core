@@ -39,17 +39,21 @@
 
 <body role="application">
     <input id="app-text-field" type="text">
-    <div id="app-wasm-loader">
+    <div id="app-wasm-loader"{{if ne .IndexPage ""}} class="has-index"{{end}}>
         <header id="app-wasm-loader-header">
             <img id="app-wasm-loader-icon" src="{{.BasePath}}icons/svg.svg">
             <p id="app-wasm-loader-title">{{.SiteName}}</p>
             <p id="app-wasm-loader-label">0%</p>
             <progress id="app-wasm-loader-progress" value="0"></progress>
         </header>
+        {{- if ne .IndexPage ""}}
+        <div id="app-index">{{.IndexPage}}</div>
+        {{- else}}
         <h1>Loading...</h1>
         {{- if ne .PreRenderHTML ""}}
         <h3>Static preview:</h3>
         {{.PreRenderHTML}}
+        {{- end}}
         {{- end}}
     </div>
 </body>

@@ -142,14 +142,16 @@ type indexHTMLData struct {
 	VanityURL              string
 	GithubVanityRepository string
 	PreRenderHTML          string
+	IndexPage              string
 }
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
 // base path for app resources (used in [makePages]), optional title (used in [makePages],
 // defaults to [config.Config.Name] otherwise), optional page-specific description (used
 // in [makePages], defaults to [config.Config.About]), and pre-render HTML representation
-// of app content.
-func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPage) ([]byte, error) {
+// of app content. If indexPage is non-empty, it is the HTML for the custom index page
+// of the app (see [readIndexPage]), which is used instead of the pre-render HTML.
+func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPage, indexPage string) ([]byte, error) {
 	if prp.Description == "" {
 		prp.Description = c.About
 	} else {
@@ -169,6 +171,7 @@ func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPag
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
 		PreRenderHTML:          prp.HTML,
+		IndexPage:              indexPage,
 	}
 
 	b := &bytes.Buffer{}
