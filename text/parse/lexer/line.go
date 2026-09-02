@@ -176,7 +176,9 @@ func (ll *Line) NonCodeWords(src []rune) Line {
 	for _, t := range *ll { // blank out code parts first
 		if t.Token.Token.IsCode() {
 			for i := t.Start; i < t.End; i++ {
-				wsrc[i] = ' '
+				if i < len(wsrc) {
+					wsrc[i] = ' '
+				}
 			}
 		}
 	}

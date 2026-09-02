@@ -917,7 +917,7 @@ func (tr *Tree) UnselectEvent() {
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node.
 func (tr *Tree) moveDown(selMode events.SelectModes) *Tree {
-	if tr.Parent == nil {
+	if tree.IsNil(tr) || tree.IsNil(tr.Parent) {
 		return nil
 	}
 	if tr.Closed || !tr.HasChildren() { // next sibling
@@ -949,7 +949,7 @@ func (tr *Tree) moveDownEvent(selMode events.SelectModes) *Tree {
 // moveDownSibling moves down only to siblings, not down into children,
 // using given select mode (from keyboard modifiers)
 func (tr *Tree) moveDownSibling(selMode events.SelectModes) *Tree {
-	if tr.Parent == nil {
+	if tree.IsNil(tr) || tree.IsNil(tr.Parent) {
 		return nil
 	}
 	if tr == tr.Root {
@@ -972,7 +972,7 @@ func (tr *Tree) moveDownSibling(selMode events.SelectModes) *Tree {
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
 func (tr *Tree) moveUp(selMode events.SelectModes) *Tree {
-	if tr.Parent == nil || tr == tr.Root {
+	if tree.IsNil(tr) || tree.IsNil(tr.Parent) || tr == tr.Root {
 		return nil
 	}
 	myidx := tr.IndexInParent()
@@ -1074,7 +1074,7 @@ func (tr *Tree) movePageDownEvent(selMode events.SelectModes) *Tree {
 // moveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
 func (tr *Tree) moveToLastChild(selMode events.SelectModes) *Tree {
-	if tr.Parent == nil || tr == tr.Root {
+	if tree.IsNil(tr) || tr.Parent == nil || tr == tr.Root {
 		return nil
 	}
 	if !tr.Closed && tr.HasChildren() {
