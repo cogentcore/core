@@ -24,6 +24,14 @@ If there is an `icon.svg` file in the current directory, it will be used as the 
 
 For development on Android, you need to install [Android Studio](https://developer.android.com/studio), and for development on iOS, you need to install [XCode](https://apps.apple.com/us/app/xcode/id497799835?mt=12). For Android development, if you run into any errors with the Android NDK, you should ensure that it is [installed](https://developer.android.com/studio/projects/install-ndk#default-version). You may also need to add the Android tools [to your PATH](https://stackoverflow.com/a/29083170).
 
+## Web index page
+
+When building for web, the `core` tool generates an `index.html` file that loads the app. While the app is loading, it shows a preview of the app, which is automatically pre-rendered as HTML at build time. This preview is also what search engines and social media sites see.
+
+You can replace that automatic preview with your own content by making an `index.html` or `index.md` file (converted from markdown) in your app directory. If both exist, `index.html` is used. These files specify the body content, and are imported within a page that loads the app and sets default styles. Do not include `&lt;html&gt;`, `&lt;head&gt;`, or `&lt;body&gt;` elements.
+
+You can include a `&lt;script&gt;` element in your index page, and it will run, but note that the entire loader element is removed as soon as the app finishes its first render. Anything that the script registered, such as a timer or an event listener, keeps running after that, so it must clean up after itself.
+
 ## Details
 
 You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.
