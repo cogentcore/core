@@ -135,7 +135,10 @@ body > #app-crash-dialog {
   overflow: auto;
 }
 
-#app-wasm-loader * {
+/* This reset is for the loader chrome and the automatically pre-rendered
+   preview, which carries its own inline styles. A custom index page is
+   excluded, as it needs normal browser defaults. */
+#app-wasm-loader *:not(#app-index, #app-index *) {
   border: unset;
   margin-block: unset;
   font-family: unset;
@@ -144,4 +147,93 @@ body > #app-crash-dialog {
 #app-wasm-loader textarea {
   font-family: Roboto Mono, monospace;
   font-size: 16px;
+}
+
+/* Custom index page (index.html / index.md): */
+
+#app-index {
+  flex: 1;
+  min-height: 0; /* required, or a flex child will not shrink and will not scroll */
+  overflow: auto;
+  max-width: 55em;
+  margin-inline: auto;
+  line-height: 1.6;
+}
+
+/* These defaults are wrapped in :where() so that they contribute zero
+   specificity, which means that any styles in the custom index page itself
+   override them. */
+
+:where(#app-index) :where(h1, h2, h3, h4, h5, h6) {
+  line-height: 1.25;
+}
+
+:where(#app-index) :where(a) {
+  color: var(--primary-color);
+}
+
+:where(#app-index) :where(code, pre) {
+  font-family: Roboto Mono, monospace;
+  background-color: var(--surface-container-color);
+  border-radius: 4px;
+}
+
+:where(#app-index) :where(code) {
+  padding: 0.1em 0.3em;
+}
+
+:where(#app-index) :where(pre) {
+  padding: 0.75em;
+  overflow-x: auto;
+}
+
+:where(#app-index) :where(pre code) {
+  padding: 0;
+  background: none;
+}
+
+:where(#app-index) :where(blockquote) {
+  margin-inline: 0;
+  padding-inline-start: 1em;
+  border-inline-start: 4px solid var(--container-color);
+}
+
+:where(#app-index) :where(table) {
+  border-collapse: collapse;
+}
+
+:where(#app-index) :where(th, td) {
+  border: 1px solid var(--container-color);
+  padding: 0.4em 0.6em;
+}
+
+:where(#app-index) :where(img, svg, video) {
+  max-width: 100%;
+  height: auto;
+}
+
+:where(#app-index) :where(hr) {
+  border: none;
+  border-block-start: 1px solid var(--container-color);
+}
+
+/* The loader chrome becomes a compact strip when a custom index page is the
+   content, instead of a full loading screen. */
+
+#app-wasm-loader.has-index #app-wasm-loader-icon {
+  width: 2em;
+  height: 2em;
+}
+
+#app-wasm-loader.has-index #app-wasm-loader-title {
+  font-size: 16px;
+}
+
+#app-wasm-loader.has-index #app-wasm-loader-label {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+#app-wasm-loader.has-index #app-wasm-loader-progress {
+  height: 0.35em;
 }

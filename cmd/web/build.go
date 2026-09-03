@@ -137,7 +137,13 @@ func makeFiles(c *config.Config) error {
 	if c.About != "" {
 		prindex.Description = c.About
 	}
-	iht, err := makeIndexHTML(c, "", prindex)
+	// A custom index page replaces the pre-rendered preview of the root page
+	// only; the pre-rendered previews of any content pages are still used.
+	indexPage, err := readIndexPage()
+	if err != nil {
+		return err
+	}
+	iht, err := makeIndexHTML(c, "", prindex, indexPage)
 	if err != nil {
 		return err
 	}
@@ -157,7 +163,7 @@ func makeFiles(c *config.Config) error {
 			bpath404 = "http://localhost:8080/" // dev
 		}
 	}
-	notFound, err := makeIndexHTML(c, bpath404, prindex)
+	notFound, err := makeIndexHTML(c, bpath404, prindex, "")
 	if err != nil {
 		return err
 	}
@@ -208,7 +214,7 @@ func makePages(c *config.Config, prps []*bcontent.PreRenderPage) error {
 		if err != nil {
 			return err
 		}
-		b, err := makeIndexHTML(c, "../", prp)
+		b, err := makeIndexHTML(c, "../", prp, "")
 		if err != nil {
 			return err
 		}
