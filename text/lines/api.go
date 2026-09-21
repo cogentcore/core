@@ -468,6 +468,9 @@ func (ls *Lines) AdjustRegion(reg textpos.Region) textpos.Region {
 func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
+	// positions can be off based on lock acquisition dynamics
+	st, _ = ls.validCharPos(st)
+	ed, _ = ls.validCharPos(ed)
 	tbe := ls.deleteText(st, ed)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
@@ -485,6 +488,9 @@ func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
+	// positions can be off based on lock acquisition dynamics
+	st, _ = ls.validCharPos(st)
+	ed, _ = ls.validCharPos(ed)
 	tbe := ls.deleteTextRect(st, ed)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
@@ -501,6 +507,8 @@ func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
+	// positions can be off based on lock acquisition dynamics
+	st, _ = ls.validCharPos(st)
 	tbe := ls.insertText(st, []rune(string(text)))
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
@@ -517,6 +525,8 @@ func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
+	// positions can be off based on lock acquisition dynamics
+	st, _ = ls.validCharPos(st)
 	tbe := ls.insertText(st, text)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()
@@ -533,6 +543,8 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 func (ls *Lines) InsertTextLines(st textpos.Pos, text [][]rune) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
+	// positions can be off based on lock acquisition dynamics
+	st, _ = ls.validCharPos(st)
 	tbe := ls.insertTextLines(st, text)
 	if tbe != nil && ls.Autosave {
 		go ls.autoSave()

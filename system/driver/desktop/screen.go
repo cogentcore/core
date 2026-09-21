@@ -51,7 +51,10 @@ func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 				log.Println("ScreenDebug: monitorChange: sending screen update")
 			}
 			for _, w := range a.Windows {
-				w.SetLogicalDPI(w.Screen().LogicalDPI)
+				sc := w.Screen()
+				if sc != nil {
+					w.SetLogicalDPI(sc.LogicalDPI)
+				}
 			}
 			fw := a.Windows[0]
 			fw.Event.Window(events.ScreenUpdate)

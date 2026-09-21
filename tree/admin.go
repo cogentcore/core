@@ -117,7 +117,7 @@ func ChildByType[T Node](n Node, startIndex ...int) T {
 // IsNil returns true if the Node interface is nil, or the underlying
 // This pointer is nil, which happens when the node is deleted.
 func IsNil(n Node) bool {
-	return n == nil || n.AsTree().This == nil
+	return n == nil || n.AsTree() == nil || n.AsTree().This == nil
 }
 
 // IsRoot returns whether the given node is the root node in its tree.
