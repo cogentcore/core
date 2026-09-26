@@ -15,6 +15,8 @@ const (
 	CMSY
 	CMEX
 	CMTT
+	AMSAM
+	AMSBM
 )
 
 func (cm charMaps) Table() map[uint32]rune {
@@ -29,6 +31,10 @@ func (cm charMaps) Table() map[uint32]rune {
 		return cmapCMEX
 	case CMTT:
 		return cmapCMTT
+	case AMSAM:
+		return cmapAMSAM
+	case AMSBM:
+		return cmapAMSBM
 	}
 	return nil
 }
@@ -695,4 +701,167 @@ var cmapCMTT = map[uint32]rune{
 	0x7D: '\u007D',
 	0x7E: '\u0303',
 	0x7F: '\u0308',
+}
+
+// AMS A math symbols (font 5)
+var cmapAMSAM = map[uint32]rune{
+	0x00: '\u22A1', // \boxdot
+	0x01: '\u229E', // \boxplus
+	0x02: '\u22A0', // \boxtimes
+	0x03: '\u25A1', // \Box
+	0x04: '\u2588', // \blacksquare
+	0x05: '\u25AA', // \centerdot
+	0x06: '\u25CA', // \Diamond
+	0x07: '\u2666', // \blacklozenge
+
+	0x0C: '\u229F', // \boxminus
+	0x0D: '\u22A9', // \Vdash
+	0x0E: '\u22AA', // \Vvdash
+	0x0F: '\u22A8', // \vDash
+
+	0x24: '\u2257', // \circeq
+	0x25: '\u227F', // \succsim
+
+	0x28: '\u22B8', // \multimap
+	0x29: '\u2234', // \therefore
+	0x2A: '\u2235', // \because
+	0x2B: '\u2251', // \doteqdot
+
+	0x2D: '\u227E', // \precsim
+
+	0x32: '\u22DE', // \curlyeqprec
+	0x33: '\u22DF', // \curlyeqsucc
+	0x34: '\u227C', // \preccurlyeq
+
+	0x38: '\u2035', // \backprime
+
+	0x3A: '\u2253', // \risingdotseq
+	0x3B: '\u2252', // \fallingdotseq
+	0x3C: '\u227D', // \succcurlyeq
+
+	0x40: '\u228F', // \sqsubset
+	0x41: '\u2290', // \sqsupset
+	0x42: '\u22B3', // \rhd
+	0x43: '\u22B2', // \lhd
+	0x44: '\u22B5', // \unrhd
+	0x45: '\u22B4', // \unlhd
+	0x46: '\u22C6', // \bigstar
+	0x47: '\u226C', // \between
+	0x48: '\u25BC', // \blacktriangledown
+
+	0x4D: '\u25B3', // \vartriangle  note: not var
+	0x4E: '\u25B2', // \blacktriangle
+	0x4F: '\u25BD', // \triangledown
+	0x50: '\u2256', // \eqcirc
+
+	0x59: '\u22BB', // \veebar
+	0x5A: '\u22BC', // \barwedge
+	0x5B: '\u22BC', // \doublebarwedge  todo: not found! render as \bar \barwedge!
+	0x5C: '\u2220', // \angle
+	0x5D: '\u2221', // \measuredangle
+	0x5E: '\u2222', // \sphericalangle
+	0x5F: '\u221D', // \varpropto  note: not var -- just regular
+	0x60: '\u2323', // \smallsmile
+	0x61: '\u2322', // \smallfrown
+	0x62: '\u22D0', // \Subset
+	0x63: '\u22D1', // \Supset
+	0x64: '\u22D3', // \Cup
+	0x65: '\u22D2', // \Cap
+	0x66: '\u22CF', // \curlywedge
+	0x67: '\u22CE', // \curlyvee
+	0x68: '\u22CB', // \leftthreetimes
+	0x69: '\u22CC', // \rightthreetimes
+	0x6A: '\u2286', // \subseteqq  note: subseteq
+	0x6B: '\u2287', // \supseteqq  note: supseteq
+	0x6C: '\u224F', // \bumpeq
+	0x6D: '\u224E', // \Bumpeq
+
+	0x70: '\u231C', //  \ulcorner
+	0x71: '\u231D', //  \urcorner
+	0x72: '\u00AE', //  \circledR
+	0x73: '\u2120', //  \circledS   todo: draw as an S inside circle -- this is SM
+	0x74: '\u22D2', //  \pitchfork  todo: not right -- using \Cap
+	0x75: '\u2214', //  \dotplus
+	0x76: '\u223D', //  \backsim
+	0x77: '\u224C', //  \backsimeq  note: not correct but semantically ok
+	0x78: '\u231E', //  \llcorner
+	0x79: '\u231F', //  \lrcorner
+
+	0x7B: '\u2201', // \complement
+	0x7C: '\u22A4', // \intercal    note: not as bold as should be
+	0x7D: '\u229A', // \circledcirc
+	0x7E: '\u229B', // \circledast
+	0x7F: '\u229D', // \circleddash
+}
+
+// AMS B math symbols (font 6)
+var cmapAMSBM = map[uint32]rune{
+
+	0x06: '\u2280', // \nprec
+	0x07: '\u2281', // \nsucc
+
+	0x0E: '\u22E0', // \npreceq note: actually npreccurlyeq
+	0x0F: '\u22E1', // \nsucceq note: actually nsucccurlyeq
+	0x10: '\u22E8', // \precnsim
+	0x11: '\u22E9', // \succnsim
+
+	0x18: '\u22E8', // \precnapprox note: actually precnsim
+	0x19: '\u22E9', // \succnapprox note: actually succnsim
+
+	0x1C: '\u2241', // \nsim
+	0x1D: '\u2247', // \ncong
+	0x1E: '\u2215', // \diagup
+	0x1F: '\u2216', // \diagdown
+	0x20: '\u228A', // \varsubsetneq \subsetneq -- no var
+	0x21: '\u228B', // \varsupsetneq \supsetneq -- no var
+
+	0x23: '\u2289', // \nsupseteqq note: actually nsupseteq
+	0x24: '\u228A', // \subsetneqq note: actually subsetneq
+	0x25: '\u228B', // \supsetneqq note: actually supsetneq
+	0x26: '\u228A', // \varsubsetneqq note: actually subsetneq -- no var
+	0x27: '\u228B', // \varsupsetneqq note: actually supsetneq -- no var
+	0x28: '\u228A', // \subsetneq
+	0x29: '\u228B', // \supsetneq
+	0x2A: '\u2288', // \nsubseteq
+	0x2B: '\u2289', // \nsupseteq
+	0x2C: '\u2226', // \nparallel
+	0x2D: '\u2224', // \nmid
+	0x2E: '\u2224', // \nshortmid // note: no short!
+	0x2F: '\u2226', // \nshortparallel // note: no short!
+
+	0x30: '\u22AC', // \nvdash
+	0x32: '\u22AD', // \nvDash
+	0x33: '\u22AF', // \nVDash
+
+	0x3E: '\u203B', // \divideontimes
+	0x3F: '\u2300', // \varnothing
+	0x40: '\u2204', // \nexists
+
+	0x60: '\u22A7', // \Finv  note: not correct -- looks kinda close
+	0x61: '\u0122', // \Game  note: not correct -- using cyrillic G
+
+	0x66: '\u2127', // \mho
+	0x67: '\u2202', // \eth note: using partial -- needs a bar
+
+	0x69: '\u2136', // \beth
+	0x6A: '\u2137', // \gimel
+	0x6B: '\u2138', // \daleth
+
+	0x6E: '\u22C9', // \ltimes
+	0x6F: '\u22CA', // \rtimes
+	0x70: '\u23D0', // \shortmid
+	0x71: '\u2225', // \shortparallel todo: not short!
+	0x72: '\u2216', // \smallsetminus todo: probably not quite right -- more backslash
+	0x73: '\u223C', // \thicksim    note: no thick avail
+	0x74: '\u2248', // \thickapprox note: no thick avail
+	0x75: '\u224A', // \approxeq
+	0x76: '\u227F', // \succapprox  note: using succsim -- no approx
+	0x77: '\u227E', // \precapprox  note: using precsim -- no approx
+
+	0x7A: '\u0046', // \digamma note: using F
+	0x7B: '\u03F0', // \varkappa  note: using kappa
+	0x7C: '\u212A', // \Bbbk  note: not the right double-outlined font
+	0x7D: '\u210F', // \hslash
+	0x7E: '\u210F', // \hbar  note: not correct: using /hslash
+	0x7F: '\u220D', // \backepsilon  todo: not quite right but same shape
 }

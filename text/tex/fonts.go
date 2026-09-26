@@ -369,6 +369,16 @@ func (fs *dviFonts) Get(name string, scale float32) *dviFont {
 			}
 		//case "cmvtt":
 		//cmap = cmapCTT
+		case "msam":
+			cmap = AMSAM
+			fontSizes = map[float32][]byte{
+				fontsize: lmmath.TTF,
+			}
+		case "msbm":
+			cmap = AMSBM
+			fontSizes = map[float32][]byte{
+				fontsize: lmmath.TTF,
+			}
 		default:
 			fmt.Println("WARNING: unknown font", fontname)
 		}
