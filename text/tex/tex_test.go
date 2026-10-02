@@ -94,6 +94,8 @@ func TestTex(t *testing.T) {
 		{`sqrt-disp`, `$\sqrt{p^2}$`},
 		{`roots-disp`, `$\sqrt{x} \Leftrightarrow x^{1/2} \; \sqrt[3]{2} \; \sqrt{x^{2} + \sqrt{y}} \; \surd[x^2 + y^2]$`},
 		{`lines-disp`, `$0.\overline{3} = \underline{\underline{1/3}}$`},
+		{`overbrace-small`, `$\overbrace{a * b}$`},
+		{`underbrace-small`, `$\underbrace{a * b * c * d}$`},
 		{`underbrace-disp`, `$\underbrace{\overbrace{a+b+c}^6 \cdot \overbrace{d+e+f}^7}_\text{meaning of life} = 42$`},
 		{`widehat-disp`, `$f''(x) = 2 \hat{XY} \quad \widehat{XY} \quad \bar{x_0} \quad \bar{x}_0$`},
 		{`prime-text`, `$f''(x)$`},
@@ -139,6 +141,7 @@ p_{m1} & p_{m2} & \ldots
 \qquad \text{versus} \qquad
 {}^{14}_{\phantom{1}6}\text{C}$`},
 		{`real-disp`, `$\Re \qquad \mathcal{R}$`},
+		{`underbrace`, `$j_\mu = \underbrace{-i\tfrac{e}{\hbar}\left[\chi^*\partial_\mu\chi - (\partial_\mu\chi^*)\chi\right]}_{\text{convection}} \;-\; \underbrace{\tfrac{2e^2}{\hbar^2 c}\,|\chi|^2 A_\mu}_{\text{proportional to } A}$`},
 		// {``, `$$`},
 		// {``, `$$`},
 		// {``, `$$`},
@@ -147,10 +150,10 @@ p_{m1} & p_{m2} & \ldots
 	}
 
 	for _, test := range tests {
-		Debug = true
-		if test.name != "ams" {
-			continue
-		}
+		// Debug = true
+		// if test.name != "underbrace" {
+		// 	continue
+		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)

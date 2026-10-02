@@ -564,10 +564,10 @@ var cmapCMEX = map[uint32]rune{
 	0x77: '\u2225', // ∥
 	0x78: '\u2191', // ↑
 	0x79: '\u2193', // ↓
-	0x7A: '\u23DC', // ⏜ only left half
-	0x7B: '\u23DC', // ⏜ only right half
-	0x7C: '\u23DD', //
-	0x7D: '\u23DD', // ⏝ only right
+	0x7A: '\u252C', // '\u0331', // '\u23DC', // right bottom middle
+	0x7B: '\u2524', // '\u2581', // '\u23DC', // left bottom middle
+	0x7C: '\u250C', // '\u23DD', // left bottom brack
+	0x7D: '\u2524', // \u23DD', // right bottom brack
 	0x7E: '\u21D1', // ⇑
 	0x7F: '\u21D3', // ⇓
 }
