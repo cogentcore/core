@@ -16,13 +16,9 @@ import "errors"
 // with columns as the inner dimension: element (row i, column j) is at
 // index j*3+i.
 //
-// Note that the 3D and 2D sides of this type use opposite conventions.
-// [Matrix3.MulVector3] multiplies the vector on the right (m * v), as do
-// [Matrix3.SetRotationFromQuat], [Matrix3.SetFromMatrix4] and
-// [Matrix3.SetNormalMatrix]. The 2D affine side instead multiplies the
-// point on the left (v * m): [Matrix3.MulVector], [Matrix3.MulPoint] and
-// [Matrix3.SetFromMatrix2], and so [Matrix3Translate2D], [Matrix3Scale2D]
-// and [Matrix3Rotate2D], all store and read the transform transposed.
+// All of the Mul methods multiply the vector or point on the right
+// (m * v), as in [Matrix2], [Matrix4] and the WGSL mat3x3f type, so a
+// chain of [Matrix3.Mul] calls applies its transforms right to left.
 type Matrix3 [9]float32
 
 // note: matrix indexes and dimensions are row,column.
@@ -91,15 +87,14 @@ func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
 	)
 }
 
-// note: following use of [2], [5] for translation works
-// exactly as the 2x3 Matrix2 case works.  But vulkan and wikipedia
-// use [6][7] for translation.  Not sure exactly what is going on.
-
-// SetFromMatrix2 sets the matrix elements based on a Matrix2.
+// SetFromMatrix2 sets the matrix elements based on a Matrix2,
+// as a standard homogeneous 2D affine matrix with the translation
+// in the third column, so that [Matrix3.MulPoint] on the result
+// matches [Matrix2.MulPoint] on the source.
 func (m *Matrix3) SetFromMatrix2(src Matrix2) {
 	m.Set(
-		src.XX, src.XY, src.X0,
-		src.YX, src.YY, src.Y0,
+		src.XX, src.YX, 0,
+		src.XY, src.YY, 0,
 		src.X0, src.Y0, 1,
 	)
 }
@@ -177,11 +172,9 @@ func (m *Matrix3) MulMatrices(a, b Matrix3) {
 }
 
 // Mul returns this matrix times other matrix, as the standard product
-// m * other (this matrix is unchanged). Because [Matrix3.MulVector3]
-// multiplies the vector on the right, the transform of other is applied
-// to a vector before the transform of this matrix. Note that
-// [Matrix3.MulVector] and [Matrix3.MulPoint] instead multiply the 2D
-// point on the left, so for those the order is reversed.
+// m * other (this matrix is unchanged). Because the Mul methods multiply
+// the vector or point on the right, the transform of other is applied
+// before the transform of this matrix.
 func (m Matrix3) Mul(other Matrix3) Matrix3 {
 	nm := Matrix3{}
 	nm.MulMatrices(m, other)
@@ -215,21 +208,16 @@ func (m *Matrix3) SetMulScalar(s float32) {
 
 // MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-// Note: this multiplies the point on the left (v * a), which is the
-// opposite convention from [Matrix3.MulVector3].
 func (a Matrix3) MulVector(v Vector2) Vector2 {
-	tx := a[0]*v.X + a[1]*v.Y
-	ty := a[3]*v.X + a[4]*v.Y
+	tx := a[0]*v.X + a[3]*v.Y
+	ty := a[1]*v.X + a[4]*v.Y
 	return Vec2(tx, ty)
 }
 
 // MulPoint multiplies the Vector2 as a point, including adding translations.
-// Note: this multiplies the point on the left (v * a), which is the
-// opposite convention from [Matrix3.MulVector3], so a chain of Mul calls
-// applies its transforms left to right.
 func (a Matrix3) MulPoint(v Vector2) Vector2 {
-	tx := a[0]*v.X + a[1]*v.Y + a[2]
-	ty := a[3]*v.X + a[4]*v.Y + a[5]
+	tx := a[0]*v.X + a[3]*v.Y + a[6]
+	ty := a[1]*v.X + a[4]*v.Y + a[7]
 	return Vec2(tx, ty)
 }
 

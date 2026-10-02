@@ -8,6 +8,7 @@ import (
 	"image"
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
@@ -116,4 +117,69 @@ func TestScaleMatrix(t *testing.T) {
 	tmat := Config(destSz, mat, sr.Max, sr, false)
 	pts := DrawFromMatrixMVP4(&tmat.MVP)
 	CompareRect(t, pts, dr)
+}
+
+// mulXform applies the transform the way Config does, which is the
+// standard affine multiply with the point on the right.
+func mulXform(x math32.Matrix3, p math32.Vector2) math32.Vector2 {
+	return math32.Vec2(
+		x[0]*p.X+x[3]*p.Y+x[6],
+		x[1]*p.X+x[4]*p.Y+x[7])
+}
+
+func rectCorners(r image.Rectangle) []math32.Vector2 {
+	return []math32.Vector2{
+		math32.Vec2(float32(r.Min.X), float32(r.Min.Y)),
+		math32.Vec2(float32(r.Max.X), float32(r.Min.Y)),
+		math32.Vec2(float32(r.Min.X), float32(r.Max.Y)),
+		math32.Vec2(float32(r.Max.X), float32(r.Max.Y)),
+	}
+}
+
+// TestTransformMapsSourceOntoDest checks the defining property of
+// Transform: it maps the corners of the source rectangle onto the
+// corners of the destination rectangle, for each supported rotation.
+func TestTransformMapsSourceOntoDest(t *testing.T) {
+	tests := []struct {
+		rotDeg float32
+		dr, sr image.Rectangle
+	}{
+		{0, image.Rect(0, 0, 100, 50), image.Rect(0, 0, 100, 50)},
+		{0, image.Rect(10, 20, 110, 70), image.Rect(0, 0, 50, 25)},
+		{90, image.Rect(0, 0, 100, 50), image.Rect(0, 0, 50, 100)},
+		{-90, image.Rect(0, 0, 100, 50), image.Rect(0, 0, 50, 100)},
+		{180, image.Rect(0, 0, 100, 50), image.Rect(0, 0, 100, 50)},
+	}
+	for _, tst := range tests {
+		x := Transform(tst.dr, tst.sr, tst.rotDeg)
+		// every source corner lands on a distinct destination corner
+		want := rectCorners(tst.dr)
+		used := make([]bool, len(want))
+		for _, c := range rectCorners(tst.sr) {
+			g := mulXform(x, c)
+			found := false
+			for i, w := range want {
+				if !used[i] && math32.Abs(g.X-w.X) < 0.01 && math32.Abs(g.Y-w.Y) < 0.01 {
+					used[i] = true
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("rot %g: source corner %v mapped to %v, which is not an unused destination corner of %v",
+					tst.rotDeg, c, g, tst.dr)
+			}
+		}
+	}
+}
+
+// TestTransformNoRotation checks the unrotated transform exactly.
+func TestTransformNoRotation(t *testing.T) {
+	x := Transform(image.Rect(10, 20, 110, 70), image.Rect(0, 0, 50, 25), 0)
+	p := mulXform(x, math32.Vec2(0, 0))
+	tolassert.Equal(t, float32(10), p.X)
+	tolassert.Equal(t, float32(20), p.Y)
+	p = mulXform(x, math32.Vec2(50, 25))
+	tolassert.Equal(t, float32(110), p.X)
+	tolassert.Equal(t, float32(70), p.Y)
 }
