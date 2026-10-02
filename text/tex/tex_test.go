@@ -37,6 +37,17 @@ func TestTex(t *testing.T) {
 		name string
 		tex  string
 	}{
+		// `\Box`, `\Diamond`, `\mho`, `\angle`, `\backprime`, `\bigstar`, `\blacklozenge`,
+		// `\blacksquare`, `\blacktriangle`, `\blacktriangledown`, `\diagdown`, `\diagup`,
+		// `\eth`, `\lozenge`, `\measuredangle`, `\sphericalangle`, `\square`, `\triangledown`,
+		// `\varnothing`, `\vartriangle`,
+		// `\digamma`, `\varkappa`, `\beth`, `\gimel`, `\daleth`,
+		// `\Bbbk`, `\circledR`, `\circledS`, `\complement`, `\Finv`,
+		// `\Game`, `\hbar`, `\hslash`, `\nexists`,
+		// `\ulcorner`, `\llcorner`, `\urcorner`, `\lrcorner`,
+		// `\dddot{a}`, `\ddddot{a}`
+
+		{`ams`, `\ddddot{a}`},
 		{`abs-text`, `|x|`},
 		{`greek`, `\phi \varphi \epsilon \varepsilon`},
 		{`dot-text`, `\dot x`},
@@ -83,6 +94,8 @@ func TestTex(t *testing.T) {
 		{`sqrt-disp`, `$\sqrt{p^2}$`},
 		{`roots-disp`, `$\sqrt{x} \Leftrightarrow x^{1/2} \; \sqrt[3]{2} \; \sqrt{x^{2} + \sqrt{y}} \; \surd[x^2 + y^2]$`},
 		{`lines-disp`, `$0.\overline{3} = \underline{\underline{1/3}}$`},
+		{`overbrace-small`, `$\overbrace{a * b}$`},
+		{`underbrace-small`, `$\underbrace{a * b * c * d}$`},
 		{`underbrace-disp`, `$\underbrace{\overbrace{a+b+c}^6 \cdot \overbrace{d+e+f}^7}_\text{meaning of life} = 42$`},
 		{`widehat-disp`, `$f''(x) = 2 \hat{XY} \quad \widehat{XY} \quad \bar{x_0} \quad \bar{x}_0$`},
 		{`prime-text`, `$f''(x)$`},
@@ -128,6 +141,7 @@ p_{m1} & p_{m2} & \ldots
 \qquad \text{versus} \qquad
 {}^{14}_{\phantom{1}6}\text{C}$`},
 		{`real-disp`, `$\Re \qquad \mathcal{R}$`},
+		{`underbrace`, `$j_\mu = \underbrace{-i\tfrac{e}{\hbar}\left[\chi^*\partial_\mu\chi - (\partial_\mu\chi^*)\chi\right]}_{\text{convection}} \;-\; \underbrace{\tfrac{2e^2}{\hbar^2 c}\,|\chi|^2 A_\mu}_{\text{proportional to } A}$`},
 		// {``, `$$`},
 		// {``, `$$`},
 		// {``, `$$`},
@@ -137,7 +151,7 @@ p_{m1} & p_{m2} & \ldots
 
 	for _, test := range tests {
 		// Debug = true
-		// if test.name != "greek" {
+		// if test.name != "underbrace" {
 		// 	continue
 		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
@@ -368,6 +382,287 @@ func TestSymbols(t *testing.T) {
 	}
 	width := 600
 	RunTest(t, "all-symbols", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSSymbols(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\lhd`, `\rhd`, `\unlhd`, `\unrhd`, `\barwedge`, `\boxdot`, `\boxminus`, `\boxplus`,
+		`\boxtimes`, `\Cap`, `\centerdot`, `\circledast`, `\circledcirc`, `\circleddash`,
+		`\Cup`, `\curlyvee`, `\curlywedge`, `\divideontimes`, `\dotplus`,
+		`\doublebarwedge`, `\intercal`, `\leftthreetimes`, `\ltimes`, `\rightthreetimes`,
+		`\rtimes`, `\smallsetminus`, `\veebar`, `\Join`,
+		`\ulcorner`, `\llcorner`, `\urcorner`, `\lrcorner`,
+	}
+	width := 600
+	RunTest(t, "ams-symbols", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSSymbols2(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\Box`, `\Diamond`, `\mho`, `\angle`, `\backprime`, `\bigstar`, `\blacklozenge`,
+		`\blacksquare`, `\blacktriangle`, `\blacktriangledown`, `\diagdown`, `\diagup`,
+		`\eth`, `\lozenge`, `\measuredangle`, `\sphericalangle`, `\square`, `\triangledown`,
+		`\varnothing`, `\vartriangle`,
+		`\digamma`, `\varkappa`, `\beth`, `\gimel`, `\daleth`,
+		`\Bbbk`, `\circledR`, `\circledS`, `\complement`, `\Finv`,
+		`\Game`, `\hbar`, `\hslash`, `\nexists`,
+	}
+	width := 600
+	RunTest(t, "ams-symbols2", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSRelations(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\approxeq`, `\backepsilon`, `\backsim`, `\backsimeq`, `\because`, `\between`, `\Bumpeq`,
+		`\bumpeq`, `\circeq`, `\curlyeqprec`, `\curlyeqsucc`, `\doteqdot`, `\eqcirc`, `\fallingdotseq`,
+		`\multimap`, `\pitchfork`, `\precapprox`, `\preccurlyeq`, `\precsim`,
+		`\risingdotseq`, `\shortmid`, `\shortparallel`, `\smallfrown`, `\smallsmile`,
+		`\succapprox`, `\succcurlyeq`, `\succsim`, `\therefore`, `\thickapprox`, `\thicksim`,
+		`\varpropto`, `\Vdash`, `\vDash`, `\Vvdash`,
+	}
+	width := 600
+	RunTest(t, "ams-relations", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSSets(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\nsubseteq`, `\nsupseteq`, `\nsupseteqq`, `\sqsubset`, `\sqsupset`, `\Subset`,
+		`\subseteqq`, `\subsetneq`, `\subsetneqq`, `\Supset`, `\supseteqq`, `\supsetneq`,
+		`\supsetneqq`, `\varsubsetneq`, `\varsubsetneqq`, `\varsupsetneq`, `\varsupsetneqq`,
+		`\dotsb`, `\dotsc`, `\dotsi`, `\dotsm`, `\dotso`, `\dddot{a}`, `\ddddot{a}`,
+	}
+	width := 600
+	RunTest(t, "ams-sets", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSInequalities(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		// todo!
+		// also: ams triangle relations, AMS arrows + negated + harpoons
+		// log-like symbols
+		// variable-sized delimiters
+		// extensible accents, arrows
+	}
+	width := 600
+	RunTest(t, "ams-inequalities", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSOperators(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\iint`, `\iiint`, `\iiiint`, `\idotsinit`,
+	}
+	width := 600
+	RunTest(t, "ams-operators", width, 300, func(pc *paint.Painter) {
 		pc.Fill.Color = colors.Uniform(color.Black)
 		fsize := pc.Text.FontSize.Dots
 		y := fsize

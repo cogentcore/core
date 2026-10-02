@@ -181,7 +181,12 @@ func Transform(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Ma
 		tx, ty, 1,
 	}
 
-	return mat.Mul(math32.Matrix3FromMatrix2(rmat))
+	// mat maps the source into the *rotated* destination frame, because
+	// the scale and translation above are derived from the destination
+	// corners after rotating them forward by rmat. So the inverse
+	// rotation is what brings it back into destination coordinates.
+	// rmat is a pure rotation, so its transpose is its inverse.
+	return math32.Matrix3FromMatrix2(rmat.Transpose()).Mul(mat)
 
 	/*  stuff that didn't work, but theoretically should?
 	rad := math32.DegToRad(rotDeg)

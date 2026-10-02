@@ -13,7 +13,12 @@ package math32
 import "errors"
 
 // Matrix3 is 3x3 matrix organized internally as column matrix,
-// with columns as the inner dimension.
+// with columns as the inner dimension: element (row i, column j) is at
+// index j*3+i.
+//
+// All of the Mul methods multiply the vector or point on the right
+// (m * v), as in [Matrix2], [Matrix4] and the WGSL mat3x3f type, so a
+// chain of [Matrix3.Mul] calls applies its transforms right to left.
 type Matrix3 [9]float32
 
 // note: matrix indexes and dimensions are row,column.
@@ -82,15 +87,14 @@ func (m *Matrix3) SetFromMatrix4(src *Matrix4) {
 	)
 }
 
-// note: following use of [2], [5] for translation works
-// exactly as the 2x3 Matrix2 case works.  But vulkan and wikipedia
-// use [6][7] for translation.  Not sure exactly what is going on.
-
-// SetFromMatrix2 sets the matrix elements based on a Matrix2.
+// SetFromMatrix2 sets the matrix elements based on a Matrix2,
+// as a standard homogeneous 2D affine matrix with the translation
+// in the third column, so that [Matrix3.MulPoint] on the result
+// matches [Matrix2.MulPoint] on the source.
 func (m *Matrix3) SetFromMatrix2(src Matrix2) {
 	m.Set(
-		src.XX, src.XY, src.X0,
-		src.YX, src.YY, src.Y0,
+		src.XX, src.YX, 0,
+		src.XY, src.YY, 0,
 		src.X0, src.Y0, 1,
 	)
 }
@@ -129,7 +133,10 @@ func (m *Matrix3) CopyFrom(src Matrix3) {
 	copy(m[:], src[:])
 }
 
-// MulMatrices sets ths matrix as matrix multiplication a by b (i.e., a*b).
+// MulMatrices sets this matrix as the matrix multiplication a * b,
+// in the standard sense: element (row i, column j) of the result is
+// row i of a dotted with column j of b. This matches
+// [Matrix4.MulMatrices] and the WGSL mat3x3f * operator.
 func (m *Matrix3) MulMatrices(a, b Matrix3) {
 	a11 := a[0]
 	a21 := a[1]
@@ -151,27 +158,30 @@ func (m *Matrix3) MulMatrices(a, b Matrix3) {
 	b23 := b[7]
 	b33 := b[8]
 
-	m[0] = b11*a11 + b12*a21 + b13*a31
-	m[1] = b21*a11 + b22*a21 + b23*a31
-	m[2] = b31*a11 + b32*a21 + b33*a31
+	m[0] = a11*b11 + a12*b21 + a13*b31
+	m[1] = a21*b11 + a22*b21 + a23*b31
+	m[2] = a31*b11 + a32*b21 + a33*b31
 
-	m[3] = b11*a12 + b12*a22 + b13*a32
-	m[4] = b21*a12 + b22*a22 + b23*a32
-	m[5] = b31*a12 + b32*a22 + b33*a32
+	m[3] = a11*b12 + a12*b22 + a13*b32
+	m[4] = a21*b12 + a22*b22 + a23*b32
+	m[5] = a31*b12 + a32*b22 + a33*b32
 
-	m[6] = b11*a13 + b12*a23 + b13*a33
-	m[7] = b21*a13 + b22*a23 + b23*a33
-	m[8] = b31*a13 + b32*a23 + b33*a33
+	m[6] = a11*b13 + a12*b23 + a13*b33
+	m[7] = a21*b13 + a22*b23 + a23*b33
+	m[8] = a31*b13 + a32*b23 + a33*b33
 }
 
-// Mul returns this matrix times other matrix (this matrix is unchanged)
+// Mul returns this matrix times other matrix, as the standard product
+// m * other (this matrix is unchanged). Because the Mul methods multiply
+// the vector or point on the right, the transform of other is applied
+// before the transform of this matrix.
 func (m Matrix3) Mul(other Matrix3) Matrix3 {
 	nm := Matrix3{}
 	nm.MulMatrices(m, other)
 	return nm
 }
 
-// SetMul sets this matrix to this matrix * other
+// SetMul sets this matrix to the standard product of this matrix * other.
 func (m *Matrix3) SetMul(other Matrix3) {
 	m.MulMatrices(*m, other)
 }
@@ -199,19 +209,20 @@ func (m *Matrix3) SetMulScalar(s float32) {
 // MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
 func (a Matrix3) MulVector(v Vector2) Vector2 {
-	tx := a[0]*v.X + a[1]*v.Y
-	ty := a[3]*v.X + a[4]*v.Y
+	tx := a[0]*v.X + a[3]*v.Y
+	ty := a[1]*v.X + a[4]*v.Y
 	return Vec2(tx, ty)
 }
 
 // MulPoint multiplies the Vector2 as a point, including adding translations.
 func (a Matrix3) MulPoint(v Vector2) Vector2 {
-	tx := a[0]*v.X + a[1]*v.Y + a[2]
-	ty := a[3]*v.X + a[4]*v.Y + a[5]
+	tx := a[0]*v.X + a[3]*v.Y + a[6]
+	ty := a[1]*v.X + a[4]*v.Y + a[7]
 	return Vec2(tx, ty)
 }
 
-// MulVector3 multiplies the Vector3 on the right, as a standard matrix multiply.
+// MulVector3 multiplies the Vector3 on the right (a * v),
+// as a standard matrix multiply.
 func (a Matrix3) MulVector3(v Vector3) Vector3 {
 	return Vec3(a[0]*v.X+a[3]*v.Y+a[6]*v.Z,
 		a[1]*v.X+a[4]*v.Y+a[7]*v.Z,

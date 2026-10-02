@@ -37,6 +37,7 @@ var (
 	// standalone cannot use standard \begin{equation} so using $\displaymath
 	preamble = `\documentclass{standalone}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \begin{document}
 `
 	postamble = `

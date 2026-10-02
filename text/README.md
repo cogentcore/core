@@ -46,9 +46,10 @@ This directory contains all of the text processing and rendering functionality, 
 
 * [runes](runes): is a partial translation of the standard Go library `bytes` / `strings` functions for the `[]rune` type, so you don't have to keep converting back and forth. Most of the `text` library functionality deals directly with `[]rune` representations.
 
+* [tex](tex): provides full LaTeX math rendering. Renders to a PPath. Best to cache the render as it is somewhat slow to generate, via texcache sub-package.
+
 ## Future plans
 
 * Leverage the tdewolff/canvas LaTeX layout system, with arbitrary textobject elements that can include Widgets etc, for doing `content` layout in an optimized way, e.g., doing direct translation of markdown into this augmented rich text format that is then just rendered directly. This would provide a better typesetting-level output, e.g., for direct to PDF rendering.
 
-* Speaking of which, need to add the PDF & SVG backends.
 

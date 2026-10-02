@@ -7,6 +7,7 @@ package math32
 import (
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,10 +34,8 @@ func TestMatrix3(t *testing.T) {
 	tolAssertEqualVector(t, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulPoint(vy))  // right
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
-	// multiplication order is *reverse* of "logical" order:
+	// multiplication order is *reverse* of "logical" order, as in Matrix2:
 	tolAssertEqualVector(t, Vec2(1, 3), Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulPoint(vx))
-
-	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulPoint(vx))
 }
 
 func TestMatrix3SetFromMatrix4(t *testing.T) {
@@ -68,9 +67,11 @@ func TestMatrix3SetFromMatrix2(t *testing.T) {
 
 	m.SetFromMatrix2(src)
 
+	// stored column-wise, so this is the standard affine matrix
+	// [XX XY X0 / YX YY Y0 / 0 0 1] = [1 2 0 / 3 4 0 / 0 0 1]
 	expected := &Matrix3{
-		1, 2, 0,
-		3, 4, 0,
+		1, 3, 0,
+		2, 4, 0,
 		0, 0, 1,
 	}
 
@@ -183,4 +184,105 @@ func TestMatrix3SetRotationFromQuat(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, m)
+}
+
+// TestMatrix3MulStandard checks that Mul is the standard matrix product
+// a * b: element (row i, column j) is row i of a dotted with column j of b.
+func TestMatrix3MulStandard(t *testing.T) {
+	a := Mat3(1, 2, 3, 4, 5, 6, 7, 8, 10)
+	b := Mat3(2, 0, 1, 3, 1, 0, 0, 4, 2)
+	got := a.Mul(b)
+	for c := range 3 {
+		for r := range 3 {
+			var want float32
+			for k := range 3 {
+				want += a[k*3+r] * b[c*3+k]
+			}
+			assert.Equal(t, want, got[c*3+r], "element row %d col %d", r, c)
+		}
+	}
+	assert.Equal(t, a, a.Mul(Identity3()))
+	assert.Equal(t, a, Identity3().Mul(a))
+
+	// SetMul matches Mul
+	sm := a
+	sm.SetMul(b)
+	assert.Equal(t, got, sm)
+}
+
+// TestMatrix3MulMatchesMatrix4 checks that Matrix3 and Matrix4 compose
+// 3D rotations in the same order, which they did not before Matrix3.Mul
+// was changed to the standard a * b product.
+func TestMatrix3MulMatchesMatrix4(t *testing.T) {
+	qa := NewQuatAxisAngle(Vec3(0, 0, 1), DegToRad(90))
+	qb := NewQuatAxisAngle(Vec3(1, 0, 0), DegToRad(90))
+
+	var a3, b3 Matrix3
+	a3.SetRotationFromQuat(qa)
+	b3.SetRotationFromQuat(qb)
+
+	a4, b4 := Identity4(), Identity4()
+	a4.SetRotationFromQuat(qa)
+	b4.SetRotationFromQuat(qb)
+
+	m3 := a3.Mul(b3)
+	m4 := a4.Mul(b4)
+	for _, v := range []Vector3{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 2, 3}} {
+		tolAssertEqualVector3(t, v.MulMatrix4(m4), m3.MulVector3(v))
+		// and both apply b before a
+		tolAssertEqualVector3(t, a3.MulVector3(b3.MulVector3(v)), m3.MulVector3(v))
+	}
+}
+
+func tolAssertEqualVector3(t *testing.T, vt, va Vector3) {
+	t.Helper()
+	tolassert.EqualTol(t, vt.X, va.X, 1.0e-6)
+	tolassert.EqualTol(t, vt.Y, va.Y, 1.0e-6)
+	tolassert.EqualTol(t, vt.Z, va.Z, 1.0e-6)
+}
+
+// TestMatrix3Matches2D checks that the 2D affine side of Matrix3 agrees
+// with Matrix2, which is the convention the rest of the codebase uses:
+// the point multiplies on the right, so a chain of Mul calls applies its
+// transforms right to left.
+func TestMatrix3Matches2D(t *testing.T) {
+	m2s := []Matrix2{
+		Identity2(),
+		Translate2D(3, -4),
+		Scale2D(2, 0.5),
+		Rotate2D(DegToRad(30)),
+		Shear2D(0.3, -0.7),
+		Identity2().Translate(1, 2).Rotate(DegToRad(45)).Scale(2, 3),
+	}
+	pts := []Vector2{{0, 0}, {1, 0}, {0, 1}, {1, 1}, {-2.5, 7.25}}
+
+	for _, a2 := range m2s {
+		a3 := Matrix3FromMatrix2(a2)
+		for _, v := range pts {
+			tolAssertEqualVector(t, a2.MulPoint(v), a3.MulPoint(v))
+			tolAssertEqualVector(t, a2.MulVector(v), a3.MulVector(v))
+		}
+		for _, b2 := range m2s {
+			b3 := Matrix3FromMatrix2(b2)
+			// composition agrees in the same operand order as Matrix2
+			m2 := a2.Mul(b2)
+			m3 := a3.Mul(b3)
+			tolAssertEqualMatrix3(t, Matrix3FromMatrix2(m2), m3)
+			for _, v := range pts {
+				tolAssertEqualVector(t, m2.MulPoint(v), m3.MulPoint(v))
+			}
+		}
+	}
+
+	// the 2D constructors agree with their Matrix2 counterparts
+	tolAssertEqualMatrix3(t, Matrix3FromMatrix2(Translate2D(3, -4)), Matrix3Translate2D(3, -4))
+	tolAssertEqualMatrix3(t, Matrix3FromMatrix2(Scale2D(3, -4)), Matrix3Scale2D(3, -4))
+	tolAssertEqualMatrix3(t, Matrix3FromMatrix2(Rotate2D(0.7)), Matrix3Rotate2D(0.7))
+}
+
+func tolAssertEqualMatrix3(t *testing.T, mt, ma Matrix3) {
+	t.Helper()
+	for i := range mt {
+		tolassert.EqualTol(t, mt[i], ma[i], 1.0e-6)
+	}
 }
