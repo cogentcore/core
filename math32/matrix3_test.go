@@ -7,6 +7,7 @@ package math32
 import (
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,10 +34,9 @@ func TestMatrix3(t *testing.T) {
 	tolAssertEqualVector(t, vx, Matrix3FromMatrix2(Rotate2D(DegToRad(90))).Inverse().MulPoint(vy))  // right
 
 	// 1,0 -> scale(2) = 2,0 -> rotate 90 = 0,2 -> trans 1,1 -> 1,3
-	// multiplication order is *reverse* of "logical" order:
-	tolAssertEqualVector(t, Vec2(1, 3), Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulPoint(vx))
-
-	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulPoint(vx))
+	// Mul is the standard a*b, and MulPoint multiplies the point on the
+	// left, so the multiplication order is the order of application:
+	tolAssertEqualVector(t, Vec2(1, 3), Matrix3Scale2D(2, 2).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Translate2D(1, 1)).MulPoint(vx))
 }
 
 func TestMatrix3SetFromMatrix4(t *testing.T) {
@@ -183,4 +183,59 @@ func TestMatrix3SetRotationFromQuat(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, m)
+}
+
+// TestMatrix3MulStandard checks that Mul is the standard matrix product
+// a * b: element (row i, column j) is row i of a dotted with column j of b.
+func TestMatrix3MulStandard(t *testing.T) {
+	a := Mat3(1, 2, 3, 4, 5, 6, 7, 8, 10)
+	b := Mat3(2, 0, 1, 3, 1, 0, 0, 4, 2)
+	got := a.Mul(b)
+	for c := range 3 {
+		for r := range 3 {
+			var want float32
+			for k := range 3 {
+				want += a[k*3+r] * b[c*3+k]
+			}
+			assert.Equal(t, want, got[c*3+r], "element row %d col %d", r, c)
+		}
+	}
+	assert.Equal(t, a, a.Mul(Identity3()))
+	assert.Equal(t, a, Identity3().Mul(a))
+
+	// SetMul matches Mul
+	sm := a
+	sm.SetMul(b)
+	assert.Equal(t, got, sm)
+}
+
+// TestMatrix3MulMatchesMatrix4 checks that Matrix3 and Matrix4 compose
+// 3D rotations in the same order, which they did not before Matrix3.Mul
+// was changed to the standard a * b product.
+func TestMatrix3MulMatchesMatrix4(t *testing.T) {
+	qa := NewQuatAxisAngle(Vec3(0, 0, 1), DegToRad(90))
+	qb := NewQuatAxisAngle(Vec3(1, 0, 0), DegToRad(90))
+
+	var a3, b3 Matrix3
+	a3.SetRotationFromQuat(qa)
+	b3.SetRotationFromQuat(qb)
+
+	a4, b4 := Identity4(), Identity4()
+	a4.SetRotationFromQuat(qa)
+	b4.SetRotationFromQuat(qb)
+
+	m3 := a3.Mul(b3)
+	m4 := a4.Mul(b4)
+	for _, v := range []Vector3{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 2, 3}} {
+		tolAssertEqualVector3(t, v.MulMatrix4(m4), m3.MulVector3(v))
+		// and both apply b before a
+		tolAssertEqualVector3(t, a3.MulVector3(b3.MulVector3(v)), m3.MulVector3(v))
+	}
+}
+
+func tolAssertEqualVector3(t *testing.T, vt, va Vector3) {
+	t.Helper()
+	tolassert.EqualTol(t, vt.X, va.X, 1.0e-6)
+	tolassert.EqualTol(t, vt.Y, va.Y, 1.0e-6)
+	tolassert.EqualTol(t, vt.Z, va.Z, 1.0e-6)
 }

@@ -181,7 +181,9 @@ func Transform(dr image.Rectangle, sr image.Rectangle, rotDeg float32) math32.Ma
 		tx, ty, 1,
 	}
 
-	return mat.Mul(math32.Matrix3FromMatrix2(rmat))
+	// note: Matrix3.Mul is the standard a*b, so rmat goes on the left here
+	// in order to be applied after mat.
+	return math32.Matrix3FromMatrix2(rmat).Mul(mat)
 
 	/*  stuff that didn't work, but theoretically should?
 	rad := math32.DegToRad(rotDeg)
