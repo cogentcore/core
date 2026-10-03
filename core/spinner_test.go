@@ -67,11 +67,11 @@ func TestSpinnerArrowKeys(t *testing.T) {
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeUpArrow, 0))
 		assert.Equal(t, float32(0), sp.Value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageDown, 0))
-		assert.Equal(t, float32(-0.2), sp.Value)
+		assert.Equal(t, float32(-1.0), sp.Value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
-		assert.Equal(t, float32(0), sp.Value)
+		assert.InDelta(t, float32(0), sp.Value, 1.0e-6)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
-		assert.Equal(t, float32(0.2), sp.Value)
+		assert.Equal(t, float32(1.0), sp.Value)
 	})
 }
 
@@ -82,7 +82,7 @@ func TestSpinnerStep(t *testing.T) {
 		sp.leadingIconButton.Send(events.Click)
 		assert.Equal(t, float32(-0.3), sp.Value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
-		assert.Equal(t, float32(0.3), sp.Value)
+		assert.Equal(t, float32(2.7), sp.Value)
 	})
 }
 

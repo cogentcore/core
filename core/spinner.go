@@ -13,6 +13,7 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
@@ -54,10 +55,16 @@ type Spinner struct {
 	// is always a multiple of [Spinner.Step].
 	EnforceStep bool
 
-	// PageStep is the amount that the PageUp and PageDown keys
-	// increment/decrement the value by.
-	// It defaults to 0.2, and will be at least as big as [Spinner.Step].
+	// PageStep is the multiplier on Step for the PageUp and PageDown keys
+	// to increment/decrement the value by. It defaults to 10.
 	PageStep float32
+
+	// StepFunc is an optional function to return the new value
+	// after incrementing the value by given number of steps (+ or -).
+	// This allows for custom stepping functions (e.g., that use logarithmic
+	// step increments). The returned value is subject to the Min/Max and
+	// EnforceStep settings (generally set EnforceStep = false here).
+	StepFunc func(sp *Spinner, steps float32) float32
 
 	// Precision specifies the precision of decimal places
 	// (total, not after the decimal point) to use in
@@ -101,11 +108,19 @@ func (sp *Spinner) OnBind(value any, tags reflect.StructTag) {
 
 func (sp *Spinner) Init() {
 	sp.TextField.Init()
-	sp.SetStep(0.1).SetPageStep(0.2).SetPrecision(6).SetFormat("%g")
+	sp.SetStep(0.1).SetPageStep(10).SetPrecision(6).SetFormat("%g")
 	sp.SetLeadingIcon(icons.Remove, func(e events.Event) {
-		sp.incrementValue(-1)
+		if e.HasAnyModifier(key.Shift, key.Alt) {
+			sp.pageIncrementValue(-1)
+		} else {
+			sp.incrementValue(-1)
+		}
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
-		sp.incrementValue(1)
+		if e.HasAnyModifier(key.Shift, key.Alt) {
+			sp.pageIncrementValue(1)
+		} else {
+			sp.incrementValue(1)
+		}
 	})
 	sp.Updater(sp.setTextToValue)
 	sp.Styler(func(s *styles.Style) {
@@ -230,7 +245,11 @@ func (sp *Spinner) incrementValue(steps float32) *Spinner {
 		return sp
 	}
 	val := sp.Value + steps*sp.Step
-	val = sp.wrapAround(val)
+	if sp.StepFunc != nil {
+		val = sp.StepFunc(sp, steps)
+	} else {
+		val = sp.wrapAround(val)
+	}
 	return sp.setValueEvent(val)
 }
 
@@ -238,15 +257,7 @@ func (sp *Spinner) incrementValue(steps float32) *Spinner {
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and sends a change event.
 func (sp *Spinner) pageIncrementValue(steps float32) *Spinner {
-	if sp.IsReadOnly() {
-		return sp
-	}
-	if sp.PageStep < sp.Step {
-		sp.PageStep = 2 * sp.Step
-	}
-	val := sp.Value + steps*sp.PageStep
-	val = sp.wrapAround(val)
-	return sp.setValueEvent(val)
+	return sp.incrementValue(steps * sp.PageStep)
 }
 
 // wrapAround, if the spinner has a min and a max, converts values less
