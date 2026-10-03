@@ -727,7 +727,7 @@ func (t *Slider) SetThumbColor(v image.Image) *Slider { t.ThumbColor = v; return
 // in other scrollbars.
 func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce.\nIt should be set using [Spinner.SetMin]."}, {Name: "Min", Doc: "Min, if [Spinner.HasMin] is true, is the the minimum value in range.\nIt should be set using [Spinner.SetMin]."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce.\nIt should be set using [Spinner.SetMax]."}, {Name: "Max", Doc: "Max, if [Spinner.HasMax] is true, is the maximum value in range.\nIt should be set using [Spinner.SetMax]."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Precision", Doc: "Precision specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce.\nIt should be set using [Spinner.SetMin]."}, {Name: "Min", Doc: "Min, if [Spinner.HasMin] is true, is the the minimum value in range.\nIt should be set using [Spinner.SetMin]."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce.\nIt should be set using [Spinner.SetMax]."}, {Name: "Max", Doc: "Max, if [Spinner.HasMax] is true, is the maximum value in range.\nIt should be set using [Spinner.SetMax]."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "StepFunc", Doc: "StepFunc is an optional function to return the new value\nafter incrementing the value by given number of steps (+ or -).\nThis allows for custom stepping functions (e.g., that use logarithmic\nstep increments). The returned value is subject to the Min/Max and\nEnforceStep settings (generally set EnforceStep = false here)."}, {Name: "Precision", Doc: "Precision specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}})
 
 // NewSpinner returns a new [Spinner] with the given optional parent:
 // Spinner is a [TextField] for editing numerical values. It comes with
@@ -749,6 +749,17 @@ func (t *Spinner) SetEnforceStep(v bool) *Spinner { t.EnforceStep = v; return t 
 // increment/decrement the value by.
 // It defaults to 0.2, and will be at least as big as [Spinner.Step].
 func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
+
+// SetStepFunc sets the [Spinner.StepFunc]:
+// StepFunc is an optional function to return the new value
+// after incrementing the value by given number of steps (+ or -).
+// This allows for custom stepping functions (e.g., that use logarithmic
+// step increments). The returned value is subject to the Min/Max and
+// EnforceStep settings (generally set EnforceStep = false here).
+func (t *Spinner) SetStepFunc(v func(sp *Spinner, steps float32) float32) *Spinner {
+	t.StepFunc = v
+	return t
+}
 
 // SetPrecision sets the [Spinner.Precision]:
 // Precision specifies the precision of decimal places
