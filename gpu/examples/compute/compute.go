@@ -13,6 +13,7 @@ import (
 
 	"cogentcore.org/core/base/timer"
 	"cogentcore.org/core/gpu"
+	"cogentcore.org/core/math32"
 	// "cogentcore.org/core/system/driver/web/jsfs"
 )
 
@@ -37,13 +38,18 @@ func main() {
 	// b := core.NewBody()
 	// bt := core.NewButton(b).SetText("Run Compute")
 	// bt.OnClick(func(e events.Event) {
-	compute()
+	n := 16_000_000 // near max capacity on Mac M*
+	// n := 200_000 // should fit in any webgpu
+	nerr := compute(n)
+	fmt.Printf("compute: n: %d errors: %d\n", n, nerr)
 	// })
 	// b.RunMainWindow()
 	// select {}
 }
 
-func compute() {
+// compute runs the squares.wgsl compute shader on n items,
+// returning the number of items that do not match the CPU result.
+func compute(n int) int {
 	// gpu.SetDebug(true)
 	gp := gpu.NewComputeGPU()
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
@@ -56,8 +62,6 @@ func compute() {
 	vars := sy.Vars()
 	sgp := vars.AddGroup(gpu.Storage)
 
-	// n := 16_000_000 // near max capacity on Mac M*
-	n := 200_000 // should fit in any webgpu
 	threads := 64
 	nx, ny := gpu.NumWorkgroups1D(n, threads)
 	fmt.Printf("workgroup sizes: %d, %d  storage mem bytes: %X\n", nx, ny, n*int(unsafe.Sizeof(Data{})))
@@ -75,6 +79,8 @@ func compute() {
 		sd[i].B = rand.Float32()
 	}
 	gpu.SetValueFrom(dvl, sd)
+	in := make([]Data, n) // save inputs to check results
+	copy(in, sd)
 
 	gpuTmr := timer.Time{}
 	cpyTmr := timer.Time{}
@@ -107,6 +113,16 @@ func compute() {
 	fmt.Printf("\n")
 	fmt.Println("total:", gpuTmr.Total, "copy:", cpyTmr.Total)
 
+	nerr := 0
+	for i := range sd {
+		tc := in[i].A + in[i].B
+		td := tc * tc
+		if sd[i].A != in[i].A || sd[i].B != in[i].B || math32.Abs(sd[i].C-tc) > 1.0e-6 || math32.Abs(sd[i].D-td) > 1.0e-5 {
+			nerr++
+		}
+	}
+
 	sy.Release()
 	gp.Release()
+	return nerr
 }

@@ -29,6 +29,20 @@
 	if (!globalThis.fs) {
 		globalThis.fs = {
 			constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1, O_DIRECTORY: 8192 }, // temporary placeholder that is overwritten by jsfs
+			// writeSync and write allow stdout / stderr printing to work before (or without) jsfs
+			writeSync(fd, buf) {
+				if (fd !== 1 && fd !== 2) {
+					throw enosys();
+				}
+				return writeConsole(fd, buf);
+			},
+			write(fd, buf, offset, length, position, callback) {
+				if ((fd !== 1 && fd !== 2) || offset !== 0 || length !== buf.length || position !== null) {
+					callback(enosys());
+					return;
+				}
+				callback(null, writeConsole(fd, buf));
+			},
 			chmod(path, mode, callback) { callback(enosys()); },
 			chown(path, uid, gid, callback) { callback(enosys()); },
 			close(fd, callback) { callback(enosys()); },
