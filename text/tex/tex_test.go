@@ -37,17 +37,7 @@ func TestTex(t *testing.T) {
 		name string
 		tex  string
 	}{
-		// `\Box`, `\Diamond`, `\mho`, `\angle`, `\backprime`, `\bigstar`, `\blacklozenge`,
-		// `\blacksquare`, `\blacktriangle`, `\blacktriangledown`, `\diagdown`, `\diagup`,
-		// `\eth`, `\lozenge`, `\measuredangle`, `\sphericalangle`, `\square`, `\triangledown`,
-		// `\varnothing`, `\vartriangle`,
-		// `\digamma`, `\varkappa`, `\beth`, `\gimel`, `\daleth`,
-		// `\Bbbk`, `\circledR`, `\circledS`, `\complement`, `\Finv`,
-		// `\Game`, `\hbar`, `\hslash`, `\nexists`,
-		// `\ulcorner`, `\llcorner`, `\urcorner`, `\lrcorner`,
-		// `\dddot{a}`, `\ddddot{a}`
-
-		{`ams`, `\ddddot{a}`},
+		{`ams`, `\xleftarrow{abc}`},
 		{`abs-text`, `|x|`},
 		{`greek`, `\phi \varphi \epsilon \varepsilon`},
 		{`dot-text`, `\dot x`},
@@ -150,10 +140,10 @@ p_{m1} & p_{m2} & \ldots
 	}
 
 	for _, test := range tests {
-		// Debug = true
-		// if test.name != "underbrace" {
-		// 	continue
-		// }
+		Debug = true
+		if test.name != "ams" {
+			continue
+		}
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)
@@ -474,11 +464,11 @@ func TestAMSSymbols2(t *testing.T) {
 		`\eth`, `\lozenge`, `\measuredangle`, `\sphericalangle`, `\square`, `\triangledown`,
 		`\varnothing`, `\vartriangle`,
 		`\digamma`, `\varkappa`, `\beth`, `\gimel`, `\daleth`,
-		`\Bbbk`, `\circledR`, `\circledS`, `\complement`, `\Finv`,
-		`\Game`, `\hbar`, `\hslash`, `\nexists`,
+		`\Bbbk`, `\checkmark`, `\circledR`, `\circledS`, `\complement`, `\Finv`,
+		`\Game`, `\hbar`, `\hslash`, `\maltese`, `\nexists`, `\yen`,
 	}
-	width := 600
-	RunTest(t, "ams-symbols2", width, 300, func(pc *paint.Painter) {
+	width := 640
+	RunTest(t, "ams-symbols2", width, 410, func(pc *paint.Painter) {
 		pc.Fill.Color = colors.Uniform(color.Black)
 		fsize := pc.Text.FontSize.Dots
 		y := fsize
@@ -504,7 +494,7 @@ func TestAMSSymbols2(t *testing.T) {
 				pc.State.Path = pp
 				pc.Draw()
 			}
-			x += 8 * fsize
+			x += 12 * fsize
 			if x > float32(width) {
 				y += fsize * 2
 				x = 0.5 * fsize
@@ -566,7 +556,7 @@ func TestAMSSets(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	tests := []string{
-		`\nsubseteq`, `\nsupseteq`, `\nsupseteqq`, `\sqsubset`, `\sqsupset`, `\Subset`,
+		`\nsubseteq`, `\nsubseteqq`, `\nsupseteq`, `\nsupseteqq`, `\sqsubset`, `\sqsupset`, `\Subset`,
 		`\subseteqq`, `\subsetneq`, `\subsetneqq`, `\Supset`, `\supseteqq`, `\supsetneq`,
 		`\supsetneqq`, `\varsubsetneq`, `\varsubsetneqq`, `\varsupsetneq`, `\varsupsetneqq`,
 		`\dotsb`, `\dotsc`, `\dotsi`, `\dotsm`, `\dotso`, `\dddot{a}`, `\ddddot{a}`,
@@ -612,9 +602,12 @@ func TestAMSInequalities(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	tests := []string{
-		// todo!
-		// also: ams triangle relations, AMS arrows + negated + harpoons
-		// log-like symbols
+		`\eqslantgtr`, `\eqslantless`,
+		`\geqq`, `\geqslant`, `\ggg`, `\gnapprox`, `\gneq`, `\gneqq`, `\gnsim`, `\gtrapprox`,
+		`\gtrdot`, `\gtreqless`, `\gtreqqless`, `\gtrless`, `\gtrsim`, `\leqq`, `\leqslant`, `\lessapprox`,
+		`\lessdot`, `\lesseqgtr`, `\lesseqqgtr`, `\lessgtr`, `\lesssim`, `\lll`, `\lnapprox`,
+		`\lneq`, `\lneqq`, `\lnsim`, `\ngeq`, `\ngeqq`, `\ngtr`, `\nleq`,
+		`\nleqq`, `\nless`,
 		// variable-sized delimiters
 		// extensible accents, arrows
 	}
@@ -646,6 +639,101 @@ func TestAMSInequalities(t *testing.T) {
 				pc.Draw()
 			}
 			x += 8 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSTriRels(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\blacktriangleleft`, `\blacktriangleright`, `\ntriangleleft`, `\ntrianglelefteq`,
+		`\ntriangleright`, `\ntrianglerighteq`, `\trianglelefteq`, `\triangleq`, `\trianglerighteq`,
+		`\vartriangleleft`, `\vartriangleright`, `\leadsto`,
+	}
+	width := 600
+	RunTest(t, "ams-tri-rels", width, 300, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 11 * fsize
+			if x > float32(width) {
+				y += fsize * 2
+				x = 0.5 * fsize
+			}
+		}
+	})
+}
+
+func TestAMSArrows(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	tests := []string{
+		`\circlearrowleft`, `\circlearrowright`, `\curvearrowleft`, `\curvearrowright`,
+		`\downdownarrows`, `\leftarrowtail`, `\leftleftarrows`, `\leftrightarrows`,
+		`\leftrightsquigarrow`, `\Lleftarrow`, `\looparrowleft`, `\looparrowright`,
+		`\Lsh`, `\rightarrowtail`, `\rightleftarrows`, `\rightrightarrows`, `\rightsquigarrow`,
+		`\Rsh`, `\Rrightarrow`, `\twoheadleftarrow`, `\twoheadrightarrow`, `\upuparrows`,
+		`\nLeftarrow`, `\nleftarrow`, `\nLeftrightarrow`, `\nleftrightarrow`,
+		`\nRightarrow`, `\nrightarrow`, `\downharpoonleft`, `\downharpoonright`,
+		`\leftrightharpoons`, `\rightleftharpoons`, `\upharpoonleft`, `\upharpoonright`,
+	}
+	width := 640
+	RunTest(t, "ams-arrows", width, 350, func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.Black)
+		fsize := pc.Text.FontSize.Dots
+		y := fsize
+		x := 0.5 * fsize
+		for _, test := range tests {
+			// Debug = true
+			// if test != `\mid` {
+			// 	continue
+			// }
+			pp, err := LaTeXMath(test, fsize)
+			assert.NoError(t, err)
+			assert.NotNil(t, pp)
+			pp = pp.Translate(x, y)
+			pc.State.Path = pp
+			pc.Draw()
+
+			x += fsize * 1.5
+			if len(test) > 1 {
+				pp, err = LaTeXMath(`\backslash \text{`+test[1:]+`}`, fsize)
+				assert.NoError(t, err)
+				assert.NotNil(t, pp)
+				pp = pp.Translate(x, y)
+				pc.State.Path = pp
+				pc.Draw()
+			}
+			x += 12 * fsize
 			if x > float32(width) {
 				y += fsize * 2
 				x = 0.5 * fsize

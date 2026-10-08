@@ -713,32 +713,62 @@ var cmapAMSAM = map[uint32]rune{
 	0x05: '\u25AA', // \centerdot
 	0x06: '\u25CA', // \Diamond
 	0x07: '\u2666', // \blacklozenge
-
+	0x08: '\u21BB', // \circlearrowright
+	0x09: '\u21BA', // \circlearrowleft
+	0x0A: '\u21CC', // \rightleftharpoons
+	0x0B: '\u21CB', // \leftrightharpoons
 	0x0C: '\u229F', // \boxminus
 	0x0D: '\u22A9', // \Vdash
 	0x0E: '\u22AA', // \Vvdash
 	0x0F: '\u22A8', // \vDash
-
+	0x10: '\u21A0', // \twoheadrightarrow
+	0x11: '\u219E', // \twoheadleftarrow
+	0x12: '\u21C7', // \leftleftarrows
+	0x13: '\u21C9', // \rightrightarrows
+	0x14: '\u21C8', // \upuparrows
+	0x15: '\u21CA', // \downdownarrows
+	0x16: '\u21BE', // \upharpoonright
+	0x17: '\u21C2', // \downharpoonright
+	0x18: '\u21BF', // \upharpoonleft
+	0x19: '\u21C3', // \downharpoonleft
+	0x1A: '\u21A3', // \rightarrowtail
+	0x1B: '\u21A2', // \leftarrowtail
+	0x1C: '\u21C6', // \leftrightarrows
+	0x1D: '\u21C4', // \rightleftarrows
+	0x1E: '\u21B0', // \Lsh
+	0x1F: '\u21B1', // \Rsh
+	0x20: '\u21DD', // \leadsto
+	0x21: '\u21AD', // \leftrightsquigarrow
+	0x22: '\u21AB', // \looparrowleft
+	0x23: '\u21AC', // \looparrowright
 	0x24: '\u2257', // \circeq
 	0x25: '\u227F', // \succsim
-
+	0x26: '\u2273', // \gtrsim
+	0x27: '\u2A86', // \gtrapprox
 	0x28: '\u22B8', // \multimap
 	0x29: '\u2234', // \therefore
 	0x2A: '\u2235', // \because
 	0x2B: '\u2251', // \doteqdot
-
+	0x2C: '\u225C', // \triangleq
 	0x2D: '\u227E', // \precsim
-
+	0x2E: '\u2272', // \lesssim
+	0x2F: '\u2A85', // \lessapprox
+	0x30: '\u2A95', // \eqslantless
+	0x31: '\u2A96', // \eqslantgtr
 	0x32: '\u22DE', // \curlyeqprec
 	0x33: '\u22DF', // \curlyeqsucc
 	0x34: '\u227C', // \preccurlyeq
-
+	0x35: '\u2266', // \leqq
+	0x36: '\u2A7D', // \leqslant
+	0x37: '\u2276', // \lessgtr
 	0x38: '\u2035', // \backprime
-
+	// 0x39 is a - sign apparently?
 	0x3A: '\u2253', // \risingdotseq
 	0x3B: '\u2252', // \fallingdotseq
 	0x3C: '\u227D', // \succcurlyeq
-
+	0x3D: '\u2267', // \geqq
+	0x3E: '\u2A7E', // \geqslant
+	0x3F: '\u2277', // \gtrless
 	0x40: '\u228F', // \sqsubset
 	0x41: '\u2290', // \sqsupset
 	0x42: '\u22B3', // \rhd
@@ -748,12 +778,22 @@ var cmapAMSAM = map[uint32]rune{
 	0x46: '\u22C6', // \bigstar
 	0x47: '\u226C', // \between
 	0x48: '\u25BC', // \blacktriangledown
-
+	0x49: '\u25B6', // \blacktriangleright
+	0x4A: '\u25C0', // \blacktriangleleft
+	0x4B: '\u27A1', // thicker arrow right
+	0x4C: '\u2B05', // thicker arrow left
 	0x4D: '\u25B3', // \vartriangle  note: not var
 	0x4E: '\u25B2', // \blacktriangle
 	0x4F: '\u25BD', // \triangledown
 	0x50: '\u2256', // \eqcirc
-
+	0x51: '\u22DA', // \lesseqgtr
+	0x52: '\u22DB', // \gtreqless
+	0x53: '\u2A8B', // \lesseqqgtr
+	0x54: '\u2A8C', // \gtreqqless
+	0x55: '\u00A5', // \yen
+	0x56: '\u21DB', // \Rrightarrow
+	0x57: '\u21DA', // \Lleftarrow
+	0x58: '\u2713', // \checkmark
 	0x59: '\u22BB', // \veebar
 	0x5A: '\u22BC', // \barwedge
 	0x5B: '\u22BC', // \doublebarwedge  todo: not found! render as \bar \barwedge!
@@ -775,18 +815,19 @@ var cmapAMSAM = map[uint32]rune{
 	0x6B: '\u2287', // \supseteqq  note: supseteq
 	0x6C: '\u224F', // \bumpeq
 	0x6D: '\u224E', // \Bumpeq
-
-	0x70: '\u231C', //  \ulcorner
-	0x71: '\u231D', //  \urcorner
-	0x72: '\u00AE', //  \circledR
-	0x73: '\u2120', //  \circledS   todo: draw as an S inside circle -- this is SM
-	0x74: '\u22D2', //  \pitchfork  todo: not right -- using \Cap
-	0x75: '\u2214', //  \dotplus
-	0x76: '\u223D', //  \backsim
-	0x77: '\u224C', //  \backsimeq  note: not correct but semantically ok
-	0x78: '\u231E', //  \llcorner
-	0x79: '\u231F', //  \lrcorner
-
+	0x6E: '\u22D8', // \lll
+	0x6F: '\u22D9', // \ggg
+	0x70: '\u231C', // \ulcorner
+	0x71: '\u231D', // \urcorner
+	0x72: '\u00AE', // \circledR
+	0x73: '\u2120', // \circledS   todo: draw as an S inside circle -- this is SM
+	0x74: '\u22D2', // \pitchfork  todo: not right -- using \Cap
+	0x75: '\u2214', // \dotplus
+	0x76: '\u223D', // \backsim
+	0x77: '\u224C', // \backsimeq  note: not correct but semantically ok
+	0x78: '\u231E', // \llcorner
+	0x79: '\u231F', // \lrcorner
+	0x7A: '\u2720', // \maltese
 	0x7B: '\u2201', // \complement
 	0x7C: '\u22A4', // \intercal    note: not as bold as should be
 	0x7D: '\u229A', // \circledcirc
@@ -796,25 +837,41 @@ var cmapAMSAM = map[uint32]rune{
 
 // AMS B math symbols (font 6)
 var cmapAMSBM = map[uint32]rune{
-
+	// 0x00: \lvertneqq
+	// 0x01: \gvertneqq
+	0x02: '\u2270', // \nleq
+	0x03: '\u2271', // \ngeq
+	0x04: '\u226E', // \nless
+	0x05: '\u226F', // \ngtr
 	0x06: '\u2280', // \nprec
 	0x07: '\u2281', // \nsucc
-
+	0x08: '\u2268', // \lneqq
+	0x09: '\u2269', // \gneqq
+	// 0x0A: \nleqslant
+	// 0x0B: \ngeqslant
+	0x0C: '\u2A87', // \lneq
+	0x0D: '\u2A88', // \gneq
 	0x0E: '\u22E0', // \npreceq note: actually npreccurlyeq
 	0x0F: '\u22E1', // \nsucceq note: actually nsucccurlyeq
 	0x10: '\u22E8', // \precnsim
 	0x11: '\u22E9', // \succnsim
-
+	0x12: '\u22E6', // \lnsim
+	0x13: '\u22E7', // \gnsim
+	0x14: '\u2268', // \nleqq
+	0x15: '\u2269', // \ngeqq
+	// 0x16: \precneq
+	// 0x17: \succneq
 	0x18: '\u22E8', // \precnapprox note: actually precnsim
 	0x19: '\u22E9', // \succnapprox note: actually succnsim
-
+	0x1A: '\u2A89', // \lnapprox
+	0x1B: '\u2A8A', // \gnapprox
 	0x1C: '\u2241', // \nsim
 	0x1D: '\u2247', // \ncong
 	0x1E: '\u2215', // \diagup
 	0x1F: '\u2216', // \diagdown
 	0x20: '\u228A', // \varsubsetneq \subsetneq -- no var
 	0x21: '\u228B', // \varsupsetneq \supsetneq -- no var
-
+	0x22: '\u2288', // \nsubseteqq
 	0x23: '\u2289', // \nsupseteqq note: actually nsupseteq
 	0x24: '\u228A', // \subsetneqq note: actually subsetneq
 	0x25: '\u228B', // \supsetneqq note: actually supsetneq
@@ -828,25 +885,36 @@ var cmapAMSBM = map[uint32]rune{
 	0x2D: '\u2224', // \nmid
 	0x2E: '\u2224', // \nshortmid // note: no short!
 	0x2F: '\u2226', // \nshortparallel // note: no short!
-
 	0x30: '\u22AC', // \nvdash
+	0x31: '\u22AE', // ?
 	0x32: '\u22AD', // \nvDash
 	0x33: '\u22AF', // \nVDash
-
+	0x34: '\u22ED', // \ntrianglerighteq
+	0x35: '\u22EC', // \ntrianglelefteq
+	0x36: '\u22EA', // \ntriangleleft
+	0x37: '\u22EB', // \ntriangleright
+	0x38: '\u219A', // \nleftarrow
+	0x39: '\u219B', // \nrightarrow
+	0x3A: '\u21CD', // \nLeftarrow
+	0x3B: '\u21CF', // \nRightarrow
+	0x3C: '\u21CE', // \nLeftrightarrow
+	0x3D: '\u21AE', // \nleftrightarrow
 	0x3E: '\u203B', // \divideontimes
 	0x3F: '\u2300', // \varnothing
 	0x40: '\u2204', // \nexists
-
+	// 0x41-5A is double-lined letters A-Z
+	// 0x5B-0x5F are big hat chars
 	0x60: '\u22A7', // \Finv  note: not correct -- looks kinda close
 	0x61: '\u0122', // \Game  note: not correct -- using cyrillic G
-
+	// 0x62-65 are blank!
 	0x66: '\u2127', // \mho
 	0x67: '\u2202', // \eth note: using partial -- needs a bar
-
+	0x68: '\u2242', // ?
 	0x69: '\u2136', // \beth
 	0x6A: '\u2137', // \gimel
 	0x6B: '\u2138', // \daleth
-
+	0x6C: '\u22D6', // \lessdot
+	0x6D: '\u22D7', // \gtrdot
 	0x6E: '\u22C9', // \ltimes
 	0x6F: '\u22CA', // \rtimes
 	0x70: '\u23D0', // \shortmid
@@ -857,7 +925,8 @@ var cmapAMSBM = map[uint32]rune{
 	0x75: '\u224A', // \approxeq
 	0x76: '\u227F', // \succapprox  note: using succsim -- no approx
 	0x77: '\u227E', // \precapprox  note: using precsim -- no approx
-
+	0x78: '\u21B6', // \curvearrowleft
+	0x79: '\u21B7', // \curvearrowright
 	0x7A: '\u0046', // \digamma note: using F
 	0x7B: '\u03F0', // \varkappa  note: using kappa
 	0x7C: '\u212A', // \Bbbk  note: not the right double-outlined font
