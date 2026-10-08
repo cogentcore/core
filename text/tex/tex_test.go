@@ -140,10 +140,10 @@ p_{m1} & p_{m2} & \ldots
 	}
 
 	for _, test := range tests {
-		Debug = true
-		if test.name != "ams" {
-			continue
-		}
+		// Debug = true
+		// if test.name != "ams" {
+		// 	continue
+		// }
 		RunTest(t, test.name, 400, 150, func(pc *paint.Painter) {
 			fmt.Println("\n\n#### ", test.name)
 			pc.Fill.Color = colors.Uniform(color.Black)
