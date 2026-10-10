@@ -44,7 +44,11 @@ func (s *SettingsData) Defaults() {
 		if ps.SiteTitle != "" && pt == curPage.Name {
 			pt = ps.SiteTitle + ": " + pt
 		}
-		ps.PDF.Header = paginate.NoFirst(paginate.HeaderLeftPageNumber(pt))
+		hdr := pt
+		if curPage.Heading != "" {
+			hdr = curPage.Heading
+		}
+		ps.PDF.Header = paginate.NoFirst(paginate.HeaderLeftPageNumber(hdr))
 		ur := ct.getPrintURL() + "/" + curPage.URL
 		ura := `<a href="` + ur + `">` + ur + `</a>`
 		if curPage.NoURLinPDF {
