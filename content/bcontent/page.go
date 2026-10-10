@@ -78,6 +78,9 @@ type Page struct {
 	// version of a page.
 	NoURLinPDF bool
 
+	// Heading is an optional string to use on page headings in the PDF version.
+	Heading string
+
 	// Categories are the categories that the page belongs to.
 	Categories []string
 
