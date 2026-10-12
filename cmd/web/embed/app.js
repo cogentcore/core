@@ -166,7 +166,12 @@ async function appInitWebAssembly() {
   const loader = document.getElementById("app-wasm-loader");
 
   if (!appCanLoadWebAssembly()) {
-    loader.remove();
+    if (loader.classList.contains("cc-site")) {
+      // A content website works without the app, so we keep it.
+      loader.querySelector(".cc-loading").remove();
+    } else {
+      loader.remove();
+    }
     return;
   }
 

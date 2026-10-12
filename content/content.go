@@ -208,6 +208,9 @@ func (ct *Content) pageFrame() *core.Frame {
 // pageMaker is the maker function for a page
 func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 	tree.Add(p, func(w *core.Frame) {
+		if system.GenerateHTMLArg() {
+			w.SetProperty("class", "cc-page-frame") // responsive padding in the web content.css
+		}
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(1, 1)
@@ -234,6 +237,10 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 						w.SetText(ct.current.Page.Title)
 					})
 					w.SetType(core.TextDisplaySmall)
+					if system.GenerateHTMLArg() {
+						w.SetProperty("tag", "h1")
+						w.SetProperty("page-title", true) // not in table of contents
+					}
 				})
 			}
 			if !ct.inPDFRender && len(ct.current.Page.Authors) > 0 {

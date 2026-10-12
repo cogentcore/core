@@ -32,6 +32,12 @@ You can replace that automatic preview with your own content by making an `index
 
 You can include a `&lt;script&gt;` element in your index page, and it will run, but note that the entire loader element is removed as soon as the app finishes its first render. Anything that the script registered, such as a timer or an event listener, keeps running after that, so it must clean up after itself.
 
+## Content websites
+
+For apps that use [[content]], each content page is pre-rendered as its own HTML page, along with navigation trees for the table of contents and categories and a page search, which use [Vue.js](https://vuejs.org) and closely replicate the content app. Math is rendered with [KaTeX](https://katex.org). Code blocks are shown with syntax highlighting, but interactive Go examples are not run, so their resulting widgets are not shown. Any non-page files in the content directory, such as images, are copied into the website. These pages are shown while the app is loading, and they are what search engines see.
+
+You can also build a freestanding website that consists only of these static HTML pages, without the Go wasm app, using `core build web -htmlonly`. The pages are the same, except that they do not load the app.
+
 ## Details
 
 You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.

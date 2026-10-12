@@ -40,4 +40,19 @@ var (
 	//
 	//go:embed embed/index.html
 	indexHTML string
+
+	// contentHTML is the string used for [contentTmpl].
+	//
+	//go:embed embed/content.html
+	contentHTML string
+
+	// contentCSS is the string used for content.css.
+	//
+	//go:embed embed/content.css
+	contentCSS string
+
+	// contentJS is the content.js file.
+	//
+	//go:embed embed/content.js
+	contentJS string
 )
