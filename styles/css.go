@@ -46,23 +46,26 @@ func ToCSS(s *Style, idName, htmlName string) string {
 		add("justify-content", s.Justify.Content.String())
 		add("align-items", s.Align.Items.String())
 		add("columns", strconv.Itoa(s.Columns))
-		add("gap", s.Gap.X.StringCSS())
+		add("gap", s.Gap.X.StringCSSDp())
 	}
-	add("min-width", s.Min.X.StringCSS())
-	add("min-height", s.Min.Y.StringCSS())
-	add("max-width", s.Max.X.StringCSS())
-	add("max-height", s.Max.Y.StringCSS())
+	add("min-width", s.Min.X.StringCSSDp())
+	add("min-height", s.Min.Y.StringCSSDp())
+	add("max-width", s.Max.X.StringCSSDp())
+	add("max-height", s.Max.Y.StringCSSDp())
 	if s.Grow == (math32.Vector2{}) {
-		add("width", s.Min.X.StringCSS())
-		add("height", s.Min.Y.StringCSS())
+		add("width", s.Min.X.StringCSSDp())
+		add("height", s.Min.Y.StringCSSDp())
 	}
-	add("padding-top", s.Padding.Top.StringCSS())
-	add("padding-right", s.Padding.Right.StringCSS())
-	add("padding-bottom", s.Padding.Bottom.StringCSS())
-	add("padding-left", s.Padding.Left.StringCSS())
-	add("margin", s.Margin.Top.StringCSS())
+	add("padding-top", s.Padding.Top.StringCSSDp())
+	add("padding-right", s.Padding.Right.StringCSSDp())
+	add("padding-bottom", s.Padding.Bottom.StringCSSDp())
+	add("padding-left", s.Padding.Left.StringCSSDp())
+	add("margin-top", s.Margin.Top.StringCSSDp())
+	add("margin-right", s.Margin.Right.StringCSSDp())
+	add("margin-bottom", s.Margin.Bottom.StringCSSDp())
+	add("margin-left", s.Margin.Left.StringCSSDp())
 	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
-		add("font-size", s.Font.Size.StringCSS())
+		add("font-size", s.Font.Size.StringCSSDp())
 	}
 	// todo:
 	// if s.Font.Family != "" && s.Font.Family != "Roboto" {
@@ -83,10 +86,10 @@ func ToCSS(s *Style, idName, htmlName string) string {
 	add("text-align", s.Text.Align.String())
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())
-		add("border-width", s.Border.Width.Top.StringCSS())
+		add("border-width", s.Border.Width.Top.StringCSSDp())
 		add("border-color", colorToCSS(s.Border.Color.Top))
 	}
-	add("border-radius", s.Border.Radius.Top.StringCSS())
+	add("border-radius", s.Border.Radius.Top.StringCSSDp())
 
 	return strings.Join(parts, ";")
 }

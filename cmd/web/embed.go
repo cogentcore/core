@@ -40,4 +40,19 @@ var (
 	//
 	//go:embed embed/index.html
 	indexHTML string
+
+	// htmlOnlyHTML is the string used for [htmlOnlyTmpl].
+	//
+	//go:embed embed/htmlonly.html
+	htmlOnlyHTML string
+
+	// htmlOnlyCSS is the string used for htmlonly.css.
+	//
+	//go:embed embed/htmlonly.css
+	htmlOnlyCSS string
+
+	// htmlOnlyJS is the htmlonly.js file.
+	//
+	//go:embed embed/htmlonly.js
+	htmlOnlyJS string
 )

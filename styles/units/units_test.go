@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/tolassert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestToDots(t *testing.T) {
@@ -74,4 +75,13 @@ func TestValueConvert(t *testing.T) {
 
 	tolassert.Equal(t, 72, ctxt.Convert(1, UnitIn, UnitPt))
 	tolassert.Equal(t, 25.4/72.0, ctxt.Convert(1, UnitPt, UnitMm))
+}
+
+func TestStringCSSDp(t *testing.T) {
+	assert.Equal(t, "1280px", In(8).StringCSSDp())
+	assert.Equal(t, "16px", Dp(16).StringCSSDp())
+	assert.Equal(t, "160px", Px(96).StringCSSDp())
+	assert.Equal(t, "160px", Pt(72).StringCSSDp())
+	assert.Equal(t, "1.5em", Em(1.5).StringCSSDp())
+	assert.Equal(t, "50%", Pw(50).StringCSSDp())
 }

@@ -27,6 +27,12 @@ type Web struct { //types:add
 	// preview and SEO purposes.
 	GenerateHTML bool `default:"true"`
 
+	// HTMLOnly is whether to build a freestanding website consisting only of
+	// static HTML pages generated from the app content, without the Go wasm app.
+	// It is only supported for apps that use the content package. The navigation
+	// elements of the website use the Vue.js framework, loaded from a CDN.
+	HTMLOnly bool
+
 	// The page language.
 	//
 	// DEFAULT: en.

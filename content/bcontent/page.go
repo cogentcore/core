@@ -103,6 +103,10 @@ type PreRenderPage struct {
 
 	// HTML is the pre-rendered HTML for the page.
 	HTML string
+
+	// TOC is the table of contents for the page, which is only
+	// generated for a freestanding website (htmlonly mode).
+	TOC []*TOCHeading `json:",omitempty"`
 }
 
 // NewPage makes a new page in the given filesystem with the given filename,

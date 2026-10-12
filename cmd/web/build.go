@@ -25,6 +25,9 @@ import (
 
 // Build builds an app for web using the given configuration information.
 func Build(c *config.Config) error {
+	if c.Web.HTMLOnly {
+		return buildHTMLOnly(c)
+	}
 	output := filepath.Join(c.Build.Output, "app.wasm")
 	opath := output
 	if c.Web.Gzip {
@@ -179,7 +182,13 @@ func makeFiles(c *config.Config) error {
 		}
 	}
 
-	err = os.MkdirAll(filepath.Join(odir, "icons"), 0777)
+	return makeIcons(c)
+}
+
+// makeIcons makes the app icon files in the icons directory of the output.
+func makeIcons(c *config.Config) error {
+	odir := c.Build.Output
+	err := os.MkdirAll(filepath.Join(odir, "icons"), 0777)
 	if err != nil {
 		return err
 	}

@@ -26,6 +26,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
@@ -109,6 +110,10 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 		ed.Lines.SetFileExt(lang)
 	}
 	ed.Lines.SetString(htmlcore.ExtractText(ctx))
+	if system.HTMLOnlyArg() { // just the code, without running it
+		ed.SetProperty("html", codeHTML(ed.Lines.String(), lang))
+		return true
+	}
 	if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
 		ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
 		parFrame := core.NewFrame(fr)
