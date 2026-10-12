@@ -30,6 +30,9 @@ var htmlOnlyPages = []string{"", "button", "widget", "value-binding"}
 // a desktop size, along with a text dump of the left navigation trees, which
 // serve as the reference for the pre-rendered website.
 func TestContentPages(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for _, url := range htmlOnlyPages {
 		name := url
 		if name == "" {
