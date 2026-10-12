@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
-	"slices"
 
 	"cogentcore.org/core/styles"
 )
@@ -294,11 +293,4 @@ func GenerateHTMLArg() bool {
 		return false
 	}
 	return os.Args[1] == "-generatehtml"
-}
-
-// HTMLOnlyArg returns true if [GenerateHTMLArg] is true and -htmlonly is
-// also one of the [os.Args], which indicates that HTML is being generated
-// for a freestanding website that does not use the Go wasm app at all.
-func HTMLOnlyArg() bool {
-	return GenerateHTMLArg() && slices.Contains(os.Args[2:], "-htmlonly")
 }

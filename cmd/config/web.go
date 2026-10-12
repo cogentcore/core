@@ -29,8 +29,8 @@ type Web struct { //types:add
 
 	// HTMLOnly is whether to build a freestanding website consisting only of
 	// static HTML pages generated from the app content, without the Go wasm app.
-	// It is only supported for apps that use the content package. The navigation
-	// elements of the website use the Vue.js framework, loaded from a CDN.
+	// It is only supported for apps that use the content package. The pages are
+	// the same as the preview pages that are otherwise shown while the app loads.
 	HTMLOnly bool
 
 	// The page language.

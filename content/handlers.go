@@ -110,7 +110,7 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 		ed.Lines.SetFileExt(lang)
 	}
 	ed.Lines.SetString(htmlcore.ExtractText(ctx))
-	if system.HTMLOnlyArg() { // just the code, without running it
+	if system.GenerateHTMLArg() { // just the code, without running it
 		ed.SetProperty("html", codeHTML(ed.Lines.String(), lang))
 		return true
 	}
