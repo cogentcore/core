@@ -30,10 +30,14 @@ func TestRebaseURLs(t *testing.T) {
 		{`<a href="mailto:a@b.c">m</a>`, `<a href="mailto:a@b.c">m</a>`},
 		{`<img id="fig" src="media/fig.png" alt="x">`, `<img id="fig" src="../media/fig.png" alt="x">`},
 		{`<p>href="widget"</p>`, `<p>href="widget"</p>`},
+		{`<a href="media/fig.png" target="_blank">f</a>`, `<a href="../media/fig.png" target="_blank">f</a>`},
+		{`<a href="docs/paper.v2.pdf#page=3" target="_blank">p</a>`, `<a href="../docs/paper.v2.pdf#page=3" target="_blank">p</a>`},
+		{`<a href="v1.2" target="_blank">v</a>`, `<a href="../v1.2/">v</a>`}, // page URL with a dot
 	}
+	pages := map[string]bool{"": true, "button": true, "widget": true, "v1.2": true}
 	for _, tt := range tests {
-		assert.Equal(t, tt.out, rebaseURLs(tt.in, "../", "button"), tt.in)
+		assert.Equal(t, tt.out, rebaseURLs(tt.in, "../", "button", pages), tt.in)
 	}
-	assert.Equal(t, `<a href="./">h</a>`, rebaseURLs(`<a href="">h</a>`, "", "widget"))
-	assert.Equal(t, `<a href="widget/">w</a>`, rebaseURLs(`<a href="widget">w</a>`, "", ""))
+	assert.Equal(t, `<a href="./">h</a>`, rebaseURLs(`<a href="">h</a>`, "", "widget", pages))
+	assert.Equal(t, `<a href="widget/">w</a>`, rebaseURLs(`<a href="widget">w</a>`, "", "", pages))
 }

@@ -244,7 +244,7 @@ func makeContentPage(c *config.Config, site *bcontent.Site, prp *bcontent.PreRen
 		Lang:     c.Web.Lang,
 		HomeURL:  pageHref(base, ""),
 		NavHTML:  staticNavHTML(site, prp, base),
-		PageHTML: rebaseURLs(prp.HTML, base, prp.URL),
+		PageHTML: rebaseURLs(prp.HTML, base, prp.URL, pageURLs(site)),
 		PageJSON: string(pj),
 	}
 	b := &bytes.Buffer{}
@@ -301,14 +301,25 @@ var (
 	urlSchemeRe = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*:`)
 )
 
+// pageURLs returns the set of the URLs of all of the pages in the site.
+func pageURLs(site *bcontent.Site) map[string]bool {
+	urls := map[string]bool{}
+	for _, prp := range site.Pages {
+		urls[prp.URL] = true
+	}
+	return urls
+}
+
 // rebaseURLs updates the relative URLs in the given page HTML, which are
 // relative to the root of the content, to be relative to the page with the
 // given URL at the given base path. Links to other pages are made to open
 // in the same tab, and links to headings in the same page are reduced to
-// just the heading fragment.
-func rebaseURLs(h, base, pageURL string) string {
+// just the heading fragment. Links to files (such as images or PDFs in the
+// content directory) are left as links to the files themselves. A link is to
+// a file if it is not one of the given page URLs and it has a file extension.
+func rebaseURLs(h, base, pageURL string, pages map[string]bool) string {
 	return htmlTagRe.ReplaceAllStringFunc(h, func(tag string) string {
-		internal := false
+		internal := false // a link to a page, which opens in the same tab
 		tag = urlAttrRe.ReplaceAllStringFunc(tag, func(attr string) string {
 			sm := urlAttrRe.FindStringSubmatch(attr)
 			name, u := sm[1], html.UnescapeString(sm[2])
@@ -319,12 +330,12 @@ func rebaseURLs(h, base, pageURL string) string {
 			if u == "" || u[0] == '#' || u[0] == '/' || urlSchemeRe.MatchString(u) {
 				return attr
 			}
-			internal = true
-			if name == "src" {
-				return fmt.Sprintf(` %s="%s"`, name, html.EscapeString(base+u))
-			}
 			pg, frag, hasFrag := strings.Cut(u, "#")
 			pg = strings.TrimSuffix(pg, "/")
+			if name == "src" || (!pages[pg] && path.Ext(pg) != "") {
+				return fmt.Sprintf(` %s="%s"`, name, html.EscapeString(base+u))
+			}
+			internal = true
 			if hasFrag {
 				frag = "#" + frag
 				if pg == pageURL {
