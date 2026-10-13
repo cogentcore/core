@@ -247,7 +247,7 @@ func (vl *Value) SetDynamicN(n int) {
 // Storage variables, as the alignment will not be correct;
 // See [SetDynamicFromBytes].
 func SetValueFrom[E any](vl *Value, from []E) error {
-	return vl.SetFromBytes(wgpu.ToBytes(from))
+	return vl.SetFromBytes(sliceToBytes(from))
 }
 
 // SetFromBytes copies given bytes into value buffer memory,
@@ -314,7 +314,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 // calling this.  Existing values will be preserved with
 // changes in DynamicN to the extent possible.
 func SetDynamicValueFrom[E any](vl *Value, idx int, from []E) error {
-	return vl.SetDynamicFromBytes(idx, wgpu.ToBytes(from))
+	return vl.SetDynamicFromBytes(idx, sliceToBytes(from))
 }
 
 // SetDynamicFromBytes copies given values into a staging buffer
@@ -516,7 +516,7 @@ func (vl *Value) ReadSync() error {
 // This automatically calls Unmap() after copying,
 // which is essential for being able to re-use the read buffer again.
 func ReadToBytes[E any](vl *Value, dest []E) error {
-	return vl.ReadToBytes(wgpu.ToBytes(dest))
+	return readToSlice(vl, dest)
 }
 
 // ReadToBytes copies data from read buffer into given byte slice

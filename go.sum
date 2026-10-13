@@ -6,6 +6,8 @@ git.sr.ht/~sbinet/overlayfs v0.1.1 h1:HvCHXT1cs8RMSjNLQXxPPosB2hgR3tRC8RniH0f3ES
 git.sr.ht/~sbinet/overlayfs v0.1.1/go.mod h1:TmrIWKlxyPJJ7vchTqk85DUcW6IDsIa7ONLvSGIw438=
 github.com/Bios-Marcel/wastebasket/v2 v2.0.3 h1:TkoDPcSqluhLGE+EssHu7UGmLgUEkWg7kNyHyyJ3Q9g=
 github.com/Bios-Marcel/wastebasket/v2 v2.0.3/go.mod h1:769oPCv6eH7ugl90DYIsWwjZh4hgNmMS3Zuhe1bH6KU=
+github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
+github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
@@ -138,8 +140,6 @@ github.com/oliverbestmann/webgpu/libs-linux v0.0.0-20260628152803-421b8a341d08 h
 github.com/oliverbestmann/webgpu/libs-linux v0.0.0-20260628152803-421b8a341d08/go.mod h1:SOeo2YWe2UxWxOeAHyZtwaSXkBbP78cGnm7I+6lIWV0=
 github.com/oliverbestmann/webgpu/libs-windows v0.0.0-20260628152801-f47d1b682eb8 h1:i+nU0u/5Fwwnqc6QXXk6Ivizue6YpdMGQbMwW2/frpY=
 github.com/oliverbestmann/webgpu/libs-windows v0.0.0-20260628152801-f47d1b682eb8/go.mod h1:58qRJHG2+mjEu/AKJFh026bz3xE1zEHYt41i4TBM8NE=
-github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
-github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

@@ -34,7 +34,7 @@ func init() {
 	addBuiltin[float32]("float32")
 	addBuiltin[float64]("float64")
 	addBuiltin[int]("int")
-	addBuiltin[int64]("int8")
+	addBuiltin[int8]("int8")
 	addBuiltin[int16]("int16")
 	addBuiltin[int32]("int32")
 	addBuiltin[int64]("int64")
@@ -44,7 +44,7 @@ func init() {
 	addBuiltin[uint16]("uint16")
 	addBuiltin[uint32]("uint32")
 	addBuiltin[uint64]("uint64")
-	addBuiltin[uint64]("uintptr")
+	addBuiltin[uintptr]("uintptr")
 }
 
 // addBuiltin adds the given builtin type with the given name to the type registry.

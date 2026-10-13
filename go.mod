@@ -4,6 +4,7 @@ go 1.25.6
 
 require (
 	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
+	github.com/BurntSushi/toml v1.6.0
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3
 	github.com/adrg/strutil v0.3.1
@@ -34,7 +35,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
 	github.com/oliverbestmann/webgpu v1.36.1-0.20261006093257-de8bdd5d5976
-	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
 	golang.org/x/crypto v0.54.0

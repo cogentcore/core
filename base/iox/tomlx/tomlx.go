@@ -11,11 +11,21 @@ import (
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox"
-	"github.com/pelletier/go-toml/v2"
+	"github.com/BurntSushi/toml"
 )
 
+// decoder wraps [toml.Decoder] to implement [iox.Decoder].
+type decoder struct {
+	*toml.Decoder
+}
+
+func (d decoder) Decode(v any) error {
+	_, err := d.Decoder.Decode(v)
+	return err
+}
+
 // NewDecoder returns a new [iox.Decoder]
-func NewDecoder(r io.Reader) iox.Decoder { return toml.NewDecoder(r) }
+func NewDecoder(r io.Reader) iox.Decoder { return decoder{toml.NewDecoder(r)} }
 
 // Open reads the given object from the given filename using TOML encoding
 func Open(v any, filename string) error {
@@ -53,7 +63,7 @@ func ReadBytes(v any, data []byte) error {
 
 // NewEncoder returns a new [iox.Encoder]
 func NewEncoder(w io.Writer) iox.Encoder {
-	return toml.NewEncoder(w).SetIndentTables(true).SetArraysMultiline(true)
+	return toml.NewEncoder(w)
 }
 
 // Save writes the given object to the given filename using TOML encoding

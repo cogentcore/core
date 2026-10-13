@@ -33,7 +33,7 @@ func Init() {
 		slog.Error("error setting home directory", "err", err)
 	}
 
-	fs, err := jsfs.Config(js.Global().Get("fs"))
+	fs, err := jsfs.Config(jsfs.Global())
 	if err != nil {
 		slog.Error("error configuring basic web filesystem", "err", err)
 	} else {
