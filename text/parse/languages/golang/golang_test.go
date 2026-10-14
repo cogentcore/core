@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
@@ -49,6 +50,7 @@ func TestParse(t *testing.T) {
 
 func TestGoParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
+	goscript.Skip(t, "the goscript go/scanner does not see the source of go/parser")
 	stt := time.Now()
 	fset := token.NewFileSet()
 	_, err := parser.ParseFile(fset, filepath.Join("..", "..", "..", "..", "core", "tree.go"), nil, parser.ParseComments)
