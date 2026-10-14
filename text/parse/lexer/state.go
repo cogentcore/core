@@ -6,6 +6,7 @@ package lexer
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -69,6 +70,50 @@ type State struct {
 
 	// any error messages accumulated during lexing specifically
 	Errs ErrorList
+
+	// traceLines are the lines of the [Trace] output that [Rule.Lex] adds,
+	// which [Rule.LexStart] prints. Lex does no output itself, so that it
+	// is not an async function when compiled to JavaScript, which would make
+	// each of its many calls much slower there.
+	traceLines []string
+
+	// guestName is the name of the guest lexer that a [SetGuestLex] action
+	// has requested in the current step, which [Rule.LexStart] installs
+	// with setGuestLex, along with guestStack, the state stack at the time
+	// of the action. The lookup of the guest lexer is a call of the
+	// [LanguageLexer] interface, which is done once per step in LexStart
+	// rather than in [Rule.DoAct], so that DoAct and [Rule.Lex] do not call
+	// an interface method, which makes them async functions when compiled to
+	// JavaScript, and much slower there.
+	guestName  string
+	guestStack Stack
+}
+
+// setGuestLex installs the guest lexer that a [SetGuestLex] action has
+// requested in this step, if any.
+func (ls *State) setGuestLex() {
+	if ls.guestName == "" {
+		return
+	}
+	if lx := TheLanguageLexer.LexerByName(ls.guestName); lx != nil {
+		ls.GuestLex = lx
+		ls.SaveStack = ls.guestStack
+	}
+	ls.guestName = ""
+	ls.guestStack = nil
+}
+
+// addTrace adds a line of [Trace] output, which is printed by printTrace.
+func (ls *State) addTrace(line string) {
+	ls.traceLines = append(ls.traceLines, line)
+}
+
+// printTrace prints the lines of [Trace] output added by addTrace.
+func (ls *State) printTrace() {
+	for _, line := range ls.traceLines {
+		fmt.Println(line)
+	}
+	ls.traceLines = ls.traceLines[:0]
 }
 
 // Init initializes the state at start of parsing
@@ -78,6 +123,8 @@ func (ls *State) Init() {
 	ls.Line = 0
 	ls.SetLine(nil)
 	ls.SaveStack = nil
+	ls.guestName = ""
+	ls.guestStack = nil
 	ls.Errs.Reset()
 }
 
@@ -457,7 +504,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 	for n > 0 {
 		d := uint32(DigitValue(ls.Rune))
 		if d >= base {
-			msg := fmt.Sprintf("illegal character %#U in escape sequence", ls.Rune)
+			msg := "illegal character " + unicodeString(ls.Rune) + " in escape sequence"
 			if ls.Rune < 0 {
 				msg = "escape sequence not terminated"
 			}
@@ -475,4 +522,19 @@ func (ls *State) ReadEscape(quote rune) bool {
 	}
 
 	return true
+}
+
+// unicodeString formats r as the %#U verb of fmt does, such as U+0041 'A'.
+// It is used rather than fmt in the lexer, so that the lexing functions are
+// not async functions when compiled to JavaScript, where fmt is async.
+func unicodeString(r rune) string {
+	hex := strings.ToUpper(strconv.FormatInt(int64(r), 16))
+	if len(hex) < 4 {
+		hex = strings.Repeat("0", 4-len(hex)) + hex
+	}
+	s := "U+" + hex
+	if strconv.IsPrint(r) {
+		s += " '" + string(r) + "'"
+	}
+	return s
 }

@@ -7,6 +7,7 @@ package lexer
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"unicode"
@@ -226,6 +227,7 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 			break
 		}
 	}
+	ls.setGuestLex()
 	if hasGuest && ls.GuestLex != nil && lr != ls.GuestLex {
 		ls.Pos = cpos // backup and undo what the standard rule did, and redo with guest..
 		// this is necessary to allow main lex to detect when to turn OFF the guest!
@@ -235,6 +237,9 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 			ls.Lex = nil
 		}
 		mrule = ls.GuestLex.LexStart(ls)
+	}
+	if Trace {
+		ls.printTrace()
 	}
 	if !ls.AtEol() && cpos == ls.Pos {
 		ls.Error(cpos, "did not advance position -- need more rules to match current input", lr)
@@ -260,7 +265,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 		}
 		ls.Add(tok, st, ed)
 		if Trace {
-			fmt.Println("Lex:", lr.Desc, "Added token:", tok, "at:", st, ed)
+			ls.addTrace("Lex: " + lr.Desc + " Added token: " + tok.String() + " at: " + strconv.Itoa(st) + " " + strconv.Itoa(ed))
 		}
 	}
 	if !lr.HasChildren() {
@@ -289,7 +294,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 	// and thus we depend entirely on kids matching
 	if len(lr.Acts) == 0 {
 		if Trace {
-			fmt.Println("Lex:", lr.Desc, "fallthrough")
+			ls.addTrace("Lex: " + lr.Desc + " fallthrough")
 		}
 		return nil
 	}
@@ -436,14 +441,15 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 		if ls.LastName == "" {
 			ls.Error(ls.Pos, "SetGuestLex action requires prior Name action -- name is empty", lr)
 		} else {
-			lx := TheLanguageLexer.LexerByName(ls.LastName)
-			if lx != nil {
-				ls.GuestLex = lx
-				ls.SaveStack = ls.Stack.Clone()
-			}
+			ls.guestName = ls.LastName
+			ls.guestStack = ls.Stack.Clone()
 		}
 	case PopGuestLex:
-		if ls.SaveStack != nil {
+		if ls.guestName != "" { // set in this same step: cancel it
+			ls.Stack = ls.guestStack
+			ls.guestName = ""
+			ls.guestStack = nil
+		} else if ls.SaveStack != nil {
 			ls.Stack = ls.SaveStack
 			ls.SaveStack = nil
 		}

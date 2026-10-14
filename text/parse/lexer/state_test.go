@@ -5,6 +5,7 @@
 package lexer
 
 import (
+	"fmt"
 	"testing"
 
 	"cogentcore.org/core/text/token"
@@ -107,4 +108,10 @@ func TestReadEscape(t *testing.T) {
 
 	assert.False(t, ls.ReadEscape('"'))
 	assert.Equal(t, 2, ls.Pos)
+}
+
+func TestUnicodeString(t *testing.T) {
+	for _, r := range []rune{'A', 0, '\n', 'é', '世', 0x1F600, 0x10FFFF, 0xD800} {
+		assert.Equal(t, fmt.Sprintf("%#U", r), unicodeString(r))
+	}
 }
