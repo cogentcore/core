@@ -1,6 +1,6 @@
 module cogentcore.org/core
 
-go 1.25.6
+go 1.27.0
 
 require (
 	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
