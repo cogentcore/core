@@ -26,6 +26,9 @@ func Build(c *config.Config) error {
 	if c.Web.HTMLOnly {
 		return buildHTMLOnly(c)
 	}
+	if IsJS(c) {
+		return buildJS(c)
+	}
 	output := filepath.Join(c.Build.Output, "app.wasm")
 	opath := output
 	if c.Web.Gzip {
@@ -69,10 +72,11 @@ func makeFiles(c *config.Config) error {
 	// It is trusted, so we do not need a more advanced sanitizer.
 	c.About = strip.StripTags(c.About)
 
-	wej := []byte(wasmExecJS)
-	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
-	if err != nil {
-		return err
+	if !IsJS(c) {
+		err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), []byte(wasmExecJS), 0666)
+		if err != nil {
+			return err
+		}
 	}
 
 	ajs, err := makeAppJS(c)

@@ -37,7 +37,7 @@ func Run(c *config.Config) error { //types:add
 		logx.PrintlnWarn("warning: only installing, not running, because there is no effective way to just launch an app on iOS from the terminal without debugging; pass the -d flag to run and debug")
 	}
 
-	if t.OS == "web" {
+	if t.OS == "web" || t.OS == "js" {
 		// needed for changes to show during local development
 		c.Web.RandomVersion = true
 	}
@@ -78,7 +78,7 @@ func Run(c *config.Config) error { //types:add
 			return mobile.Install(c)
 		}
 		return exec.Verbose().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join(c.Build.Output, c.Name+".app"), "-d")
-	case "web":
+	case "web", "js":
 		return web.Serve(c)
 	}
 	return nil

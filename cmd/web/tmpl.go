@@ -25,6 +25,10 @@ type appJSData struct {
 	Env                     string
 	WasmContentLengthHeader string
 	AutoUpdateInterval      int64
+
+	// JS is whether the app is compiled to JavaScript with GoScript
+	// (the js platform) instead of to WebAssembly.
+	JS bool
 }
 
 // makeAppJS exectues [appJSTmpl] based on the given configuration information.
@@ -50,6 +54,7 @@ func makeAppJS(c *config.Config) ([]byte, error) {
 		Env:                     string(wenv),
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
+		JS:                      IsJS(c),
 	}
 	b := &bytes.Buffer{}
 	err = appJSTmpl.Execute(b, d)
@@ -75,6 +80,15 @@ func makeAppWorkerJS(c *config.Config) ([]byte, error) {
 		"manifest.webmanifest",
 		"wasm_exec.js",
 		"index.html",
+	}
+	if IsJS(c) {
+		resources = []string{
+			"app.css",
+			"app.js",
+			"app.gs.js",
+			"manifest.webmanifest",
+			"index.html",
+		}
 	}
 
 	tmpl, err := template.New("app-worker.js").Parse(appWorkerJS)
@@ -143,6 +157,10 @@ type indexHTMLData struct {
 	GithubVanityRepository string
 	PreRenderHTML          string
 	IndexPage              string
+
+	// JS is whether the app is compiled to JavaScript with GoScript
+	// (the js platform), in which case wasm_exec.js is not needed.
+	JS bool
 }
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
@@ -172,6 +190,7 @@ func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPag
 		GithubVanityRepository: c.Web.GithubVanityRepository,
 		PreRenderHTML:          prp.HTML,
 		IndexPage:              indexPage,
+		JS:                     IsJS(c),
 	}
 
 	b := &bytes.Buffer{}

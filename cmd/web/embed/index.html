@@ -33,7 +33,9 @@
     {{ range $url := .Styles }}
     <link rel="stylesheet" href="{{$url}}">
     {{ end }}
+    {{- if not .JS}}
     <script defer src="{{.BasePath}}wasm_exec.js"></script>
+    {{- end}}
     <script defer src="{{.BasePath}}app.js"></script>
 </head>
 

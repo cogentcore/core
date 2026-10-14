@@ -45,7 +45,9 @@
     <script defer src="{{.BasePath}}nav.js"></script>
     <script defer src="{{.BasePath}}content.js"></script>
     {{- if .Wasm}}
+    {{- if not .JS}}
     <script defer src="{{.BasePath}}wasm_exec.js"></script>
+    {{- end}}
     <script defer src="{{.BasePath}}app.js"></script>
     {{- end}}
 </head>

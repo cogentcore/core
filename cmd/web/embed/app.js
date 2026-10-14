@@ -175,6 +175,11 @@ async function appInitWebAssembly() {
     return;
   }
 
+  {{- if .JS}}
+  await appInitGoScript(loader);
+  return;
+  {{- end}}
+
   let instantiateStreaming = WebAssembly.instantiateStreaming;
   if (!instantiateStreaming) {
     instantiateStreaming = async (resp, importObject) => {
@@ -201,6 +206,30 @@ async function appInitWebAssembly() {
     go.run(wasm.instance);
   } catch (err) {
     console.error("loading wasm failed: ", err);
+  }
+}
+
+// appInitGoScript loads the app compiled to JavaScript with GoScript
+// (the js platform), showing download progress in the loader.
+async function appInitGoScript(loader) {
+  const loaderLabel = document.getElementById("app-wasm-loader-label");
+  const loaderProgress = document.getElementById("app-wasm-loader-progress");
+  const showProgress = (progress) => {
+    if (loaderLabel) {
+      loaderLabel.innerText = progress + "%";
+    }
+    if (loaderProgress) {
+      loaderProgress.value = progress / 100;
+    }
+  };
+  try {
+    showProgress(1);
+    const response = await fetchWithProgress(document.documentElement.dataset.basePath + "app.gs.js", showProgress);
+    const source = await response.text();
+    const url = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
+    await import(url);
+  } catch (err) {
+    console.error("loading app failed: ", err);
   }
 }
 
