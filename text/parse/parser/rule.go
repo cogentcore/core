@@ -240,6 +240,9 @@ func (pr *Rule) CompileAll(ps *State) bool {
 // Compile compiles string rules into their runnable elements.
 // Returns true if everything is ok, false if there were compile errors.
 func (pr *Rule) Compile(ps *State) bool {
+	for i := range pr.Acts {
+		pr.Acts[i].compilePaths()
+	}
 	if pr.Off {
 		pr.SetProperty("inactive", true)
 	} else {
@@ -1467,14 +1470,19 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 	if useAST == nil {
 		useAST = parAST
 	}
-	apath := useAST.Path()
+	apath := "" // only used for tracing
+	if ps.Trace.On {
+		apath = useAST.Path()
+	}
 	var node tree.Node
-	var adnl []tree.Node // additional nodes
+	var adnl []tree.Node                    // additional nodes
+	if act.paths == nil && act.Path != "" { // not compiled
+		act.compilePaths()
+	}
 	if act.Path == "" {
 		node = useAST
 	} else if andidx := strings.Index(act.Path, "&"); andidx >= 0 {
-		pths := strings.Split(act.Path, "&")
-		for _, p := range pths {
+		for _, p := range act.paths {
 			findAll := false
 			if strings.HasSuffix(p, "...") {
 				findAll = true
@@ -1503,8 +1511,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 			}
 		}
 	} else {
-		pths := strings.Split(act.Path, "|")
-		for _, p := range pths {
+		for _, p := range act.paths {
 			findAll := false
 			if strings.HasSuffix(p, "...") {
 				findAll = true

@@ -6,6 +6,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/token"
@@ -76,6 +77,19 @@ type Act struct {
 
 	// for ChangeToken, only change if token is this to start with (only if != None))
 	FromToken token.Tokens
+
+	// paths are the alternative paths in Path, split by & or |,
+	// which are set by [Act.compilePaths].
+	paths []string
+}
+
+// compilePaths splits the Path into its alternative paths.
+func (ac *Act) compilePaths() {
+	if strings.Contains(ac.Path, "&") {
+		ac.paths = strings.Split(ac.Path, "&")
+	} else {
+		ac.paths = strings.Split(ac.Path, "|")
+	}
 }
 
 // String satisfies fmt.Stringer interface
