@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/math32"
@@ -33,13 +34,19 @@ func Init() {
 		slog.Error("error setting home directory", "err", err)
 	}
 
-	fs, err := jsfs.Config(jsfs.Global())
-	if err != nil {
-		slog.Error("error configuring basic web filesystem", "err", err)
-	} else {
-		err := fs.ConfigUnix()
+	// Under goscript, a filesystem that the host already provides on the
+	// fs global, such as the host filesystem of goscript browser tests,
+	// is used instead of the filesystem over IndexedDB.
+	jfs := jsfs.Global()
+	if !goscript.Enabled || jfs.Get("open").Type() != js.TypeFunction {
+		fs, err := jsfs.Config(jfs)
 		if err != nil {
-			slog.Error("error setting up standard unix filesystem structure", "err", err)
+			slog.Error("error configuring basic web filesystem", "err", err)
+		} else {
+			err := fs.ConfigUnix()
+			if err != nil {
+				slog.Error("error setting up standard unix filesystem structure", "err", err)
+			}
 		}
 	}
 

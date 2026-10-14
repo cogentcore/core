@@ -125,6 +125,13 @@ func Test(t *testing.T, opts ...Options) {
 
 	cmd := exec.Command(gs, args...)
 	cmd.Env = append(os.Environ(), "NO_COLOR=1", "FORCE_COLOR=0")
+	// go test does not pass GOROOT to tests as of Go 1.27, but the tests
+	// compiled to JavaScript get runtime.GOROOT from the environment.
+	if os.Getenv("GOROOT") == "" {
+		if goroot, err := exec.Command("go", "env", "GOROOT").Output(); err == nil {
+			cmd.Env = append(cmd.Env, "GOROOT="+strings.TrimSpace(string(goroot)))
+		}
+	}
 	out, err := cmd.CombinedOutput()
 	if err == nil {
 		if testing.Verbose() {
