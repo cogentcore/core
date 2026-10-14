@@ -115,6 +115,22 @@ func (ls *State) String(off, sz int) (string, bool) {
 	return string(ls.Src[idx:ei]), true
 }
 
+// MatchString returns whether the source at the given offset from the
+// current position matches the given string, without allocating a string.
+func (ls *State) MatchString(off int, s string) bool {
+	idx := ls.Pos + off
+	if idx < 0 {
+		return false
+	}
+	for _, r := range s {
+		if idx >= len(ls.Src) || ls.Src[idx] != r {
+			return false
+		}
+		idx++
+	}
+	return true
+}
+
 // Rune gets the rune at given offset from current position, returns false if out of range
 func (ls *State) RuneAt(off int) (rune, bool) {
 	idx := ls.Pos + off
@@ -215,18 +231,12 @@ func (ls *State) ReadNameTmp(off int) string {
 
 // ReadName reads a standard alpha-numeric_ name -- saves in LastName
 func (ls *State) ReadName() {
-	str := ""
+	st := ls.Pos
 	sz := len(ls.Src)
-	for ls.Pos < sz {
-		rn := ls.Src[ls.Pos]
-		if IsLetterOrDigit(rn) {
-			str += string(rn)
-			ls.Pos++
-		} else {
-			break
-		}
+	for ls.Pos < sz && IsLetterOrDigit(ls.Src[ls.Pos]) {
+		ls.Pos++
 	}
-	ls.LastName = str
+	ls.LastName = string(ls.Src[st:ls.Pos])
 }
 
 // NextSrcLine returns the next line of text

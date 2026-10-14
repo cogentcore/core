@@ -305,15 +305,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 
 	switch lr.Match {
 	case String:
-		sz := len(lr.String)
-		str, ok := ls.String(lr.Offset, sz)
-		if !ok {
-			return false
-		}
-		if str != lr.String {
-			return false
-		}
-		return true
+		return ls.MatchString(lr.Offset, lr.String)
 	case StrName:
 		nm := ls.ReadNameTmp(lr.Offset)
 		if nm != lr.String {
