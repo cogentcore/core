@@ -19,7 +19,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/chewxy/math32"
+	math32 "cogentcore.org/core/math32/internal/fmath"
 )
 
 // These are mostly just wrappers around chewxy/math32, which has

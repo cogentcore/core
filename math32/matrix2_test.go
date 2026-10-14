@@ -193,10 +193,10 @@ func TestMatrix2Canvas(t *testing.T) {
 	tx, ty, phi, sx, sy, theta := Identity2().Rotate(rot90).Scale(2.0, 1.0).Rotate(-rot90).Translate(0.0, 10.0).Decompose()
 	assert.InDelta(t, tx, float32(0.0), 1.0e-6)
 	assert.Equal(t, ty, float32(20.0))
-	assert.Equal(t, phi, rot90)
+	assert.InDelta(t, phi, rot90, 1.0e-6)
 	assert.Equal(t, sx, float32(2.0))
 	assert.Equal(t, sy, float32(1.0))
-	assert.Equal(t, theta, -rot90)
+	assert.InDelta(t, theta, -rot90, 1.0e-6)
 
 	x, y := Identity2().Translate(p.X, p.Y).Pos()
 	assert.Equal(t, x, p.X)
