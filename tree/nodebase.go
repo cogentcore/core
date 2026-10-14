@@ -97,6 +97,10 @@ type NodeBase struct {
 
 	// depth is the depth of the node while using [NodeBase.WalkDownBreadth].
 	depth int
+
+	// nodeType is the cached result of [NodeBase.NodeType], which would
+	// otherwise use reflection to look up the type each time.
+	nodeType *types.Type
 }
 
 // String implements the [fmt.Stringer] interface by returning the path of the node.
@@ -121,19 +125,24 @@ func (n *NodeBase) PlanName() string {
 // If there is no [types.Type] registered for this node already,
 // it registers one and then returns it.
 func (n *NodeBase) NodeType() *types.Type {
+	if n.nodeType != nil {
+		return n.nodeType
+	}
 	if t := types.TypeByValue(n.This); t != nil {
 		if t.Instance == nil {
 			t.Instance = n.NewInstance()
 		}
+		n.nodeType = t
 		return t
 	}
 	name := types.TypeNameValue(n.This)
 	li := strings.LastIndex(name, ".")
-	return types.AddType(&types.Type{
+	n.nodeType = types.AddType(&types.Type{
 		Name:     name,
 		IDName:   strcase.ToKebab(name[li+1:]),
 		Instance: n.NewInstance(),
 	})
+	return n.nodeType
 }
 
 // NewInstance returns a new instance of this node type.
