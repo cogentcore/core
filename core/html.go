@@ -51,7 +51,7 @@ var htmlElementNames = map[string]string{
 	"spinner":    "input",
 	"slider":     "input",
 	"meter":      "progress",
-	"chooser":    "select",
+	"chooser":    "div", // a select element can only contain option elements
 	"pre":        "textarea",
 	"switches":   "div",
 	"switch":     "input",
