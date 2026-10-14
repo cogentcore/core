@@ -96,7 +96,10 @@ func buildJS(c *config.Config) error {
 
 	args := []string{"build", "entry.ts", "--target", "browser", "--format", "esm", "--outfile", filepath.Join(c.Build.Output, "app.gs.js")}
 	if !c.Build.Debug {
-		args = append(args, "--minify")
+		// We only minify identifiers, since minifying whitespace or syntax puts
+		// different statements on the same line,
+		// which breaks tree.AutoPlanName, as it uses the caller line numbers.
+		args = append(args, "--minify-identifiers")
 	}
 	err = exec.Major().SetDir(work).Run("bun", args...)
 	if err != nil {
