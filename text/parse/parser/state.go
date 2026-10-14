@@ -49,6 +49,12 @@ type State struct {
 	// which are cleared by [State.ResetNonMatches].
 	nonMatched []textpos.Pos
 
+	// matchBuf and nonMatchBuf are the buffers for Matches and nonMatches,
+	// which are reused for the next parse, typically of the same file after
+	// an edit, along with the slices for each position (see [State.AllocRules]).
+	matchBuf    []MatchStack
+	nonMatchBuf []nonMatchSet
+
 	// stack for context-sensitive rules
 	Stack lexer.Stack `display:"no-inline"`
 }
@@ -118,20 +124,37 @@ func (ps *State) AllocRules() {
 	for ln := 0; ln < nlines; ln++ {
 		ntot += len(ps.Src.Lexs[ln])
 	}
-	// We make one allocation for all of the lines.
-	matches := make([]MatchStack, ntot)
-	nonMatches := make([]nonMatchSet, ntot)
-	ps.Matches = make([][]MatchStack, nlines)
-	ps.nonMatches = make([][]nonMatchSet, nlines)
+	// We make one allocation for all of the lines, and reuse the buffers
+	// of the previous parse when they are big enough, truncating the slices
+	// of each position so that their capacity is also reused.
+	if cap(ps.matchBuf) < ntot {
+		ps.matchBuf = make([]MatchStack, ntot, ntot+ntot/4)
+		ps.nonMatchBuf = make([]nonMatchSet, ntot, ntot+ntot/4)
+	} else {
+		ps.matchBuf = ps.matchBuf[:ntot]
+		ps.nonMatchBuf = ps.nonMatchBuf[:ntot]
+		for i := range ntot {
+			ps.matchBuf[i] = ps.matchBuf[i][:0]
+			nm := &ps.nonMatchBuf[i]
+			nm.rules = nm.rules[:0]
+			nm.endLines = nm.endLines[:0]
+			nm.endChars = nm.endChars[:0]
+		}
+	}
+	if cap(ps.Matches) < nlines {
+		ps.Matches = make([][]MatchStack, nlines, nlines+nlines/4)
+		ps.nonMatches = make([][]nonMatchSet, nlines, nlines+nlines/4)
+	} else {
+		ps.Matches = ps.Matches[:nlines]
+		ps.nonMatches = ps.nonMatches[:nlines]
+	}
 	ps.nonMatched = ps.nonMatched[:0]
 	off := 0
 	for ln := 0; ln < nlines; ln++ {
 		sz := len(ps.Src.Lexs[ln])
-		if sz > 0 {
-			ps.Matches[ln] = matches[off : off+sz : off+sz]
-			ps.nonMatches[ln] = nonMatches[off : off+sz : off+sz]
-			off += sz
-		}
+		ps.Matches[ln] = ps.matchBuf[off : off+sz : off+sz]
+		ps.nonMatches[ln] = ps.nonMatchBuf[off : off+sz : off+sz]
+		off += sz
 	}
 }
 

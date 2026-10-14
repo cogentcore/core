@@ -54,3 +54,16 @@ func BenchmarkParseFile(b *testing.B) {
 		pr.ParseAll(fs)
 	}
 }
+
+// BenchmarkReparseFile measures lexing and parsing a Go file again with the
+// same file states, which is what the text editor does after each edit.
+func BenchmarkReparseFile(b *testing.B) {
+	pr, txt := benchParser(b)
+	fss := parse.NewFileStates(benchFile, "", fileinfo.Go)
+	for b.Loop() {
+		fs := fss.StartProc(txt)
+		pr.LexAll(fs)
+		pr.ParseAll(fs)
+		fss.EndProc()
+	}
+}
