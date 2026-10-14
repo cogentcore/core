@@ -7,6 +7,7 @@ package paint_test
 import (
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -54,6 +55,7 @@ func TestBackgroundImage(t *testing.T) {
 }
 
 func TestObjectFit(t *testing.T) {
+	goscript.Skip(t, "on js, resized images exist only as an ImageBitmap that the image renderer cannot draw")
 	img, _, err := imagex.Open("testdata/test.png")
 	// obj := math32.FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
