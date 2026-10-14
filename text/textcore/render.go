@@ -46,6 +46,9 @@ func (ed *Base) reLayout() {
 }
 
 func (ed *Base) RenderWidget() {
+	if ed.Lines != nil {
+		ed.Lines.StartDeferredMarkup()
+	}
 	if ed.StartRender() {
 		ed.reLayout()
 		if ed.targetSet {
