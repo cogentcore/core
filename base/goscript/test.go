@@ -23,6 +23,19 @@ import (
 // and requires goscript and bun (https://bun.sh) to be installed.
 const EnvVar = "CORE_GOSCRIPT_TEST"
 
+// BenchEnvVar is the environment variable that, when set to a regular
+// expression, makes [Test] also run the benchmarks matching it in JavaScript,
+// as with go test -bench, logging their results (use go test -v to see them).
+// The tests are not run in this case, unless [Options.Run] is set.
+const BenchEnvVar = "CORE_GOSCRIPT_BENCH"
+
+// BenchTimeEnvVar is the environment variable that sets the minimum time to
+// run each benchmark when [BenchEnvVar] is set, as a duration such as 2s.
+const BenchTimeEnvVar = "CORE_GOSCRIPT_BENCHTIME"
+
+// benchRegexp matches benchmark result lines in the output of goscript test.
+var benchRegexp = regexp.MustCompile(`(?m)^Benchmark\S*\t.*$`)
+
 // Options are the options for [Test].
 type Options struct {
 
@@ -77,9 +90,21 @@ func Test(t *testing.T, opts ...Options) {
 		t.Fatal("bun must be installed: see https://bun.sh")
 	}
 
+	bench := os.Getenv(BenchEnvVar)
+	if bench != "" && o.Timeout < 30*time.Minute {
+		o.Timeout = 30 * time.Minute
+	}
 	args := []string{"test", "--workdir", t.TempDir(), "--timeout", o.Timeout.String()}
 	if o.Run != "" {
 		args = append(args, "--run", o.Run)
+	} else if bench != "" {
+		args = append(args, "--run", "^$")
+	}
+	if bench != "" {
+		args = append(args, "--bench", bench)
+		if bt := os.Getenv(BenchTimeEnvVar); bt != "" {
+			args = append(args, "--benchtime", bt)
+		}
 	}
 	if o.Browser {
 		args = append(args, "--browser")
@@ -104,6 +129,8 @@ func Test(t *testing.T, opts ...Options) {
 	if err == nil {
 		if testing.Verbose() {
 			t.Log(string(out))
+		} else if bench != "" {
+			t.Log("\n" + strings.Join(benchRegexp.FindAllString(string(out), -1), "\n"))
 		}
 		return
 	}

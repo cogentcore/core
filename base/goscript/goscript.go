@@ -24,6 +24,12 @@
 //
 //	func TestGoScript(t *testing.T) { goscript.Test(t) }
 //
+// Benchmarks can also be run in JavaScript by setting the CORE_GOSCRIPT_BENCH
+// environment variable to a benchmark regular expression (see [BenchEnvVar]),
+// for example:
+//
+//	CORE_GOSCRIPT_TEST=1 CORE_GOSCRIPT_BENCH=. go test -v -run TestGoScript
+//
 // This package must only import the standard library, so that it can be used
 // in the tests of any package without an import cycle.
 package goscript
