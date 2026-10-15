@@ -502,7 +502,7 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	tm := make(walkStack, 0, 16) // traversal state of the current path
 	start := n.This
 	cur := start
-	tm.set(cur, -1)
+	tm.push(cur, -1)
 outer:
 	for {
 		cb := cur.AsTree()
@@ -515,7 +515,7 @@ outer:
 				nxt := cb.Child(0)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm.set(cur, -1)
+					tm.push(cur, -1)
 					continue
 				}
 			}
@@ -532,7 +532,7 @@ outer:
 				nxt := cb.Child(curChild)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm.set(cur, -1)
+					tm.push(cur, -1)
 					continue outer
 				}
 				continue
@@ -572,7 +572,7 @@ func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Nod
 	tm := make(walkStack, 0, 16) // traversal state of the current path
 	start := n.This
 	cur := start
-	tm.set(cur, -1)
+	tm.push(cur, -1)
 outer:
 	for {
 		cb := cur.AsTree()
@@ -582,7 +582,7 @@ outer:
 				nxt := cb.Child(0)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm.set(cur, -1)
+					tm.push(cur, -1)
 					continue
 				}
 			}
@@ -599,7 +599,7 @@ outer:
 				nxt := cb.Child(curChild)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm.set(cur, -1)
+					tm.push(cur, -1)
 					continue outer
 				}
 				continue

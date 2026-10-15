@@ -39,6 +39,13 @@ func (ws *walkStack) set(n Node, child int) {
 	*ws = append(s, walkEntry{n, child})
 }
 
+// push adds n with the given child index to the end of the stack, for a
+// node that is known not to be in it, such as a child of the deepest node,
+// which cannot also be on the path above it.
+func (ws *walkStack) push(n Node, child int) {
+	*ws = append(*ws, walkEntry{n, child})
+}
+
 // delete removes n from the stack, if it is in it.
 func (ws *walkStack) delete(n Node) {
 	s := *ws
