@@ -485,8 +485,9 @@ func (ps *State) IsNonMatch(scope textpos.Region, pr *Rule) bool {
 		return false
 	}
 	eln, ech := scope.End.Line, scope.End.Char
+	endLines, endChars := nm.endLines, nm.endChars
 	for i, r := range nm.rules {
-		if r == pr && nm.endLines[i] == eln && nm.endChars[i] == ech {
+		if r == pr && endLines[i] == eln && endChars[i] == ech {
 			return true
 		}
 	}
