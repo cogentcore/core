@@ -503,3 +503,34 @@ func BenchmarkLadderLexLikeSync(b *testing.B) {
 		ladSinkI = n
 	}
 }
+
+// LadderBitFlagHas tests the bit flags of a struct field with the generated
+// HasFlag method, as text/rich styles test their decorations.
+func BenchmarkLadderBitFlagHas(b *testing.B) {
+	s := &ladFlagged{}
+	s.Flags.SetFlag(true, ladFlagB)
+	for range b.N {
+		n := 0
+		for i := range 10000 {
+			if s.Flags.HasFlag(ladFlagB) {
+				n += i & 3
+			}
+			if s.Flags.HasFlag(ladFlagC) {
+				n++
+			}
+		}
+		ladSinkI = n
+	}
+}
+
+// LadderBitFlagSet sets the bit flags of a struct field with the generated
+// SetFlag method.
+func BenchmarkLadderBitFlagSet(b *testing.B) {
+	s := &ladFlagged{}
+	for range b.N {
+		for i := range 10000 {
+			s.Flags.SetFlag(i&1 == 0, ladFlagB)
+		}
+		ladSinkB = s.Flags.HasFlag(ladFlagB)
+	}
+}
