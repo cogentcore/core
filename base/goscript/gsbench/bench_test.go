@@ -264,3 +264,27 @@ func BenchmarkBoxInterface(b *testing.B) {
 		sinkAny = vec{float32(i), 1}
 	}
 }
+
+// BenchmarkMapPointerKeys fills and reads a map with interface keys that hold
+// pointers to structs with slice and map fields, as tree.WalkDown does.
+func BenchmarkMapPointerKeys(b *testing.B) {
+	type node struct {
+		Kids  []*node
+		Attrs map[string]string
+	}
+	nodes := make([]*node, 200)
+	for i := range nodes {
+		nodes[i] = &node{}
+	}
+	for range b.N {
+		m := map[any]int{}
+		for i, n := range nodes {
+			m[n] = i
+		}
+		s := 0
+		for _, n := range nodes {
+			s += m[n]
+		}
+		sinkI = s
+	}
+}
