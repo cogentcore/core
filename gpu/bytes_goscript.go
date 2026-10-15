@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build goscript
+//go:build js && goscript
 
 package gpu
 
@@ -11,14 +11,20 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"syscall/js"
+	"unsafe"
 )
 
-// sliceToBytes returns a little-endian encoding of the given slice.
-// GoScript cannot view the memory of a slice as bytes, so this is a copy.
+// sliceToBytes returns the bytes of the given slice. GoScript holds slices
+// of fixed-size numbers such as float32 and uint32 in JavaScript typed arrays,
+// whose memory is viewed as bytes without copying, as wgpu.ToBytes does in
+// native and wasm builds. Any other slice, such as a slice of structs, is
+// encoded into a little-endian copy.
 func sliceToBytes[E any](src []E) []byte {
+	if b, ok := sliceBytes(src); ok {
+		return b
+	}
 	switch s := any(src).(type) {
-	case []byte:
-		return s
 	case []float32:
 		b := make([]byte, 4*len(s))
 		for i, v := range s {
@@ -53,6 +59,35 @@ func sliceToBytes[E any](src []E) []byte {
 		}
 	}
 	return b
+}
+
+// sliceBytes returns the bytes of the memory of the given slice and true
+// when GoScript holds it in a JavaScript typed array, which it does for the
+// slices it makes of fixed-size numbers up to 32 bits and of float64.
+func sliceBytes[E any](src []E) ([]byte, bool) {
+	if b, ok := any(src).([]byte); ok {
+		return b, true
+	}
+	if len(src) == 0 || !typedArrayKind(reflect.TypeFor[E]().Kind()) {
+		return nil, false
+	}
+	array := js.ValueOf(src)
+	if !array.Get("BYTES_PER_ELEMENT").Truthy() {
+		return nil, false
+	}
+	n := array.Get("byteLength").Int()
+	return unsafe.Slice((*byte)(unsafe.Pointer(&src[0])), n), true
+}
+
+// typedArrayKind reports whether GoScript holds slices of elements of the
+// given kind in JavaScript typed arrays.
+func typedArrayKind(kind reflect.Kind) bool {
+	switch kind {
+	case reflect.Int8, reflect.Uint8, reflect.Int16, reflect.Uint16,
+		reflect.Int32, reflect.Uint32, reflect.Float32, reflect.Float64:
+		return true
+	}
+	return false
 }
 
 // encodeValue writes the given value into b in little-endian order,
@@ -186,9 +221,13 @@ func bytesToSlice[E any](src []byte, dest []E) error {
 	return nil
 }
 
-// readToSlice copies the read buffer data of the given value
-// into the given slice.
+// readToSlice copies the read buffer data of the given value into the
+// given slice: directly into its memory when GoScript holds it in a
+// JavaScript typed array, and otherwise by decoding the bytes.
 func readToSlice[E any](vl *Value, dest []E) error {
+	if b, ok := sliceBytes(dest); ok {
+		return vl.ReadToBytes(b)
+	}
 	var zero E
 	b := make([]byte, len(dest)*int(reflect.TypeOf(zero).Size()))
 	if err := vl.ReadToBytes(b); err != nil {
