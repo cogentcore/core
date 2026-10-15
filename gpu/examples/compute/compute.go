@@ -73,11 +73,14 @@ func compute(n int) int {
 
 	dvl := dv.Values.Values[0]
 
+	fillTmr := timer.Time{}
+	fillTmr.Start()
 	sd := make([]Data, n)
 	for i := range sd {
 		sd[i].A = rand.Float32()
 		sd[i].B = rand.Float32()
 	}
+	fillTmr.Stop()
 	upTmr := timer.Time{}
 	upTmr.Start()
 	gpu.SetValueFrom(dvl, sd)
@@ -117,7 +120,7 @@ func compute(n int) int {
 		fmt.Printf("%d\t A: %g\t B: %g\t C: %g\t trg: %g\t D: %g \t trg: %g \t difC: %g \t difD: %g\n", i, sd[i].A, sd[i].B, sd[i].C, tc, sd[i].D, td, dc, dd)
 	}
 	fmt.Printf("\n")
-	fmt.Println("total:", gpuTmr.Total, "copy:", cpyTmr.Total, "upload:", upTmr.Total, "read into slice:", readTmr.Total)
+	fmt.Println("fill:", fillTmr.Total, "total:", gpuTmr.Total, "copy:", cpyTmr.Total, "upload:", upTmr.Total, "read into slice:", readTmr.Total)
 
 	nerr := 0
 	for i := range sd {
