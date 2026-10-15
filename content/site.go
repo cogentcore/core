@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/token"
 	"cogentcore.org/core/tree"
-	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v3/lexers"
 )
 
 // generateSite generates the JSON [bcontent.Site] data for the website

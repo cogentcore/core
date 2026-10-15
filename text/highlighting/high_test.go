@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/token"
-	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v3/lexers"
 	"github.com/stretchr/testify/assert"
 )
 

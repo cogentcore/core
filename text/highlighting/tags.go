@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/text/token"
-	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v3"
 )
 
 // FromChroma converts a chroma.TokenType to a parse token.Tokens
@@ -39,7 +39,7 @@ var (
 
 // TokensToChromaMap maps from Tokens to chroma.TokenType
 var TokensToChromaMap = map[token.Tokens]chroma.TokenType{
-	token.EOF:                 chroma.EOFType,
+	token.EOF:                 chroma.TokenType(0), // chroma v3 has no EOFType, which was 0 in v2
 	token.Background:          chroma.Background,
 	token.Error:               chroma.Error,
 	token.None:                chroma.None,

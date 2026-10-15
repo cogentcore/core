@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3
 	github.com/adrg/strutil v0.3.1
-	github.com/alecthomas/chroma/v2 v2.23.0
+	github.com/alecthomas/chroma/v3 v3.0.0-alpha.5
 	github.com/anthonynsimon/bild v0.14.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.6.0
@@ -53,7 +53,7 @@ require (
 	git.sr.ht/~sbinet/overlayfs v0.1.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/dlclark/regexp2/v2 v2.2.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gorilla/css v1.0.1 // indirect

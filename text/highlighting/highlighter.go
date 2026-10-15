@@ -6,6 +6,7 @@ package highlighting
 
 import (
 	"log/slog"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
@@ -13,9 +14,9 @@ import (
 	"cogentcore.org/core/text/parse/lexer"
 	_ "cogentcore.org/core/text/parse/supportedlanguages"
 	"cogentcore.org/core/text/token"
-	"github.com/alecthomas/chroma/v2"
-	"github.com/alecthomas/chroma/v2/formatters/html"
-	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v3"
+	"github.com/alecthomas/chroma/v3/formatters/html"
+	"github.com/alecthomas/chroma/v3/lexers"
 )
 
 // Highlighter performs syntax highlighting,
@@ -187,7 +188,7 @@ func (hi *Highlighter) chromaTagsAll(txt []byte) ([]lexer.Line, error) {
 		slog.Error(err.Error())
 		return nil, err
 	}
-	lines := chroma.SplitTokensIntoLines(iterator.Tokens())
+	lines := chroma.SplitTokensIntoLines(slices.Collect(iterator))
 	sz := len(lines)
 	tags := make([]lexer.Line, sz)
 	for li, lt := range lines {
@@ -217,7 +218,7 @@ func ChromaTagsLine(clex chroma.Lexer, txt string) (lexer.Line, error) {
 		return nil, err
 	}
 	var tags lexer.Line
-	toks := iterator.Tokens()
+	toks := slices.Collect(iterator)
 	chromaTagsForLine(&tags, toks)
 	return tags, nil
 }
