@@ -43,7 +43,7 @@ func (gl *GoLang) Parser() *parse.Parser {
 	}
 	lp, _ := parse.LanguageSupport.Properties(fileinfo.Go)
 	if lp.Parser == nil {
-		parse.LanguageSupport.OpenStandard()
+		parse.LanguageSupport.OpenLanguage(fileinfo.Go)
 	}
 	gl.Pr = lp.Parser
 	if gl.Pr == nil {

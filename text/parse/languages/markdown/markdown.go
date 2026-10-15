@@ -52,7 +52,7 @@ func (ml *MarkdownLang) Parser() *parse.Parser {
 	}
 	lp, _ := parse.LanguageSupport.Properties(fileinfo.Markdown)
 	if lp.Parser == nil {
-		parse.LanguageSupport.OpenStandard()
+		parse.LanguageSupport.OpenLanguage(fileinfo.Markdown)
 	}
 	ml.Pr = lp.Parser
 	if ml.Pr == nil {
