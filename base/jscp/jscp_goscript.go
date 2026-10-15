@@ -9,10 +9,9 @@ package jscp
 import "syscall/js"
 
 // BytesToJS converts the given bytes to a js Uint8ClampedArray.
-// Under goscript there is no wasm memory to view, so the bytes
-// are copied with [js.CopyBytesToJS].
+// Under goscript a []byte is already a js Uint8Array, so the result
+// is a view of the same memory, without copying.
 func BytesToJS(b []byte) js.Value {
-	array := js.Global().Get("Uint8Array").New(len(b))
-	js.CopyBytesToJS(array, b)
+	array := js.ValueOf(b)
 	return js.Global().Get("Uint8ClampedArray").New(array.Get("buffer"), array.Get("byteOffset"), len(b))
 }
