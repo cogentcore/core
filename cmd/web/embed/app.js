@@ -224,10 +224,20 @@ async function appInitGoScript(loader) {
   };
   try {
     showProgress(1);
-    const response = await fetchWithProgress(document.documentElement.dataset.basePath + "app.gs.js", showProgress);
-    const source = await response.text();
-    const url = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
-    await import(url);
+    const url = new URL(document.documentElement.dataset.basePath + "app.gs.js", document.baseURI).href;
+    // When the service worker controls the page, it serves the bundle from
+    // its cache, so we import the URL itself, which also lets the browser
+    // reuse the code it compiled on an earlier load.
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      await import(url);
+      return;
+    }
+    // Otherwise we download the bundle once, showing progress, and import
+    // its bytes from a blob, without decoding them to text.
+    const response = await fetchWithProgress(url, showProgress);
+    const blob = new Blob([await response.blob()], { type: "text/javascript" });
+    const blobURL = URL.createObjectURL(blob);
+    await import(blobURL);
   } catch (err) {
     console.error("loading app failed: ", err);
   }
