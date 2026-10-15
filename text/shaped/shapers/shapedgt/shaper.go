@@ -27,7 +27,7 @@ import (
 type Shaper struct {
 	shaper   shaping.HarfbuzzShaper
 	wrapper  shaping.LineWrapper
-	fontMap  *fontscan.FontMap
+	fontMap  fontMap
 	splitter shaping.Segmenter
 	maths    map[int]*shaped.Math
 
@@ -44,7 +44,7 @@ func (nl *nilLogger) Printf(format string, args ...any) {}
 // NewShaper returns a new text shaper.
 func NewShaper() shaped.Shaper {
 	sh := &Shaper{}
-	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
+	sh.fontMap.FontMap = fontscan.NewFontMap(&nilLogger{})
 	// TODO(text): figure out cache dir situation (especially on mobile and web)
 	str, err := os.UserCacheDir()
 	if errors.Log(err) != nil {
@@ -58,7 +58,7 @@ func NewShaper() shaped.Shaper {
 		// errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	errors.Log(fonts.UseEmbeddedInMap(sh.fontMap))
+	errors.Log(fonts.UseEmbeddedInMap(sh.fontMap.FontMap))
 	sh.shaper.SetFontCacheSize(32)
 	return sh
 }
@@ -67,15 +67,17 @@ func NewShaper() shaped.Shaper {
 // given filesystem with fonts.
 func NewShaperWithFonts(fss []fs.FS) shaped.Shaper {
 	sh := &Shaper{}
-	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
-	errors.Log(fonts.UseInMap(sh.fontMap, fss))
+	sh.fontMap.FontMap = fontscan.NewFontMap(&nilLogger{})
+	errors.Log(fonts.UseInMap(sh.fontMap.FontMap, fss))
 	sh.shaper.SetFontCacheSize(32)
 	return sh
 }
 
-// FontMap returns the font map used for this shaper
+// FontMap returns the font map used for this shaper.
 func (sh *Shaper) FontMap() *fontscan.FontMap {
-	return sh.fontMap
+	// The caller may set the query or script of the map.
+	sh.fontMap.forget()
+	return sh.fontMap.FontMap
 }
 
 // Shape turns given input spans into [Runs] of rendered text,
@@ -156,7 +158,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, txt []rune) []
 		in.Script = rich.Settings.Script
 		in.Language = rich.Settings.Language
 
-		ins := sh.splitter.Split(in, sh.fontMap) // this is essential
+		ins := sh.splitter.Split(in, &sh.fontMap) // this is essential
 		for _, in := range ins {
 			if in.Face == nil {
 				fmt.Println("nil face in input", len(stx), string(stx))
