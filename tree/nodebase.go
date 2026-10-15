@@ -499,10 +499,10 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	if n.This == nil {
 		return
 	}
-	tm := map[Node]int{} // traversal map
+	tm := make(walkStack, 0, 16) // traversal state of the current path
 	start := n.This
 	cur := start
-	tm[cur] = -1
+	tm.set(cur, -1)
 outer:
 	for {
 		cb := cur.AsTree()
@@ -511,33 +511,33 @@ outer:
 		if cb.This != nil && fun(cur) && cb.This != nil {
 			cb.This.NodeWalkDown(fun)
 			if cb.HasChildren() {
-				tm[cur] = 0 // 0 for no fields
+				tm.set(cur, 0) // 0 for no fields
 				nxt := cb.Child(0)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.set(cur, -1)
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cb.NumChildren()
+			tm.set(cur, cb.NumChildren())
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			cb := cur.AsTree() // may have changed, so must get again
-			curChild := tm[cur]
+			curChild := tm.get(cur)
 			if (curChild + 1) < cb.NumChildren() {
 				curChild++
-				tm[cur] = curChild
+				tm.set(cur, curChild)
 				nxt := cb.Child(curChild)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.set(cur, -1)
 					continue outer
 				}
 				continue
 			}
-			delete(tm, cur)
+			tm.delete(cur)
 			// couldn't go right, move up..
 			if cur == start {
 				break outer // done!
@@ -569,44 +569,44 @@ func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Nod
 	if n.This == nil {
 		return
 	}
-	tm := map[Node]int{} // traversal map
+	tm := make(walkStack, 0, 16) // traversal state of the current path
 	start := n.This
 	cur := start
-	tm[cur] = -1
+	tm.set(cur, -1)
 outer:
 	for {
 		cb := cur.AsTree()
 		if cb.This != nil && shouldContinue(cur) { // false return means stop
 			if cb.HasChildren() {
-				tm[cur] = 0 // 0 for no fields
+				tm.set(cur, 0) // 0 for no fields
 				nxt := cb.Child(0)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.set(cur, -1)
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cb.NumChildren()
+			tm.set(cur, cb.NumChildren())
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			cb := cur.AsTree() // may have changed, so must get again
-			curChild := tm[cur]
+			curChild := tm.get(cur)
 			if (curChild + 1) < cb.NumChildren() {
 				curChild++
-				tm[cur] = curChild
+				tm.set(cur, curChild)
 				nxt := cb.Child(curChild)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.set(cur, -1)
 					continue outer
 				}
 				continue
 			}
 			fun(cur) // now we call the function, last..
 			// couldn't go right, move up..
-			delete(tm, cur)
+			tm.delete(cur)
 			if cur == start {
 				break outer // done!
 			}
