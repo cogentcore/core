@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -51,13 +52,34 @@ var (
 	StylesChanged = false
 )
 
+// themeMu guards usedStyles.
+var themeMu sync.Mutex
+
+// usedStyles holds the names of the styles that [AvailableStyle] has
+// returned. [UpdateFromTheme] updates only these styles, and AvailableStyle
+// updates a style when it first returns it, as updating the colors of all
+// of the styles takes time.
+var usedStyles = map[string]bool{}
+
 // UpdateFromTheme normalizes the colors of all style entry such that they have consistent
 // chromas and tones that guarantee sufficient text contrast in accordance with the color theme.
+// Styles that have not been used yet are updated when they are first used.
 func UpdateFromTheme() {
-	for _, s := range AvailableStyles {
-		for _, se := range *s {
-			se.UpdateFromTheme()
-		}
+	themeMu.Lock()
+	defer themeMu.Unlock()
+	for nm := range usedStyles {
+		updateStyleFromTheme(AvailableStyles[nm])
+	}
+}
+
+// updateStyleFromTheme updates the colors of all entries of the style
+// from the color theme.
+func updateStyleFromTheme(s *Style) {
+	if s == nil {
+		return
+	}
+	for _, se := range *s {
+		se.UpdateFromTheme()
 	}
 }
 
@@ -67,10 +89,21 @@ func AvailableStyle(nm HighlightingName) *Style {
 	if AvailableStyles == nil {
 		Init()
 	}
-	if st, ok := AvailableStyles[string(nm)]; ok {
-		return st
+	name := string(nm)
+	st, ok := AvailableStyles[name]
+	if !ok {
+		name = string(StyleDefault)
+		st = AvailableStyles[name]
 	}
-	return AvailableStyles[string(StyleDefault)]
+
+	// A style used for the first time gets the colors of the theme.
+	themeMu.Lock()
+	defer themeMu.Unlock()
+	if !usedStyles[name] {
+		usedStyles[name] = true
+		updateStyleFromTheme(st)
+	}
+	return st
 }
 
 // Add adds a new style to the list
