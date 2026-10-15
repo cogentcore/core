@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/text/parse"
 )
 
 // DefaultStyle is the initial default style.
@@ -176,9 +175,9 @@ func (hs *Styles) Names() []string {
 }
 
 // Init must be called to initialize the hi styles -- post startup
-// so chroma stuff is all in place, and loads custom styles
+// so chroma stuff is all in place, and loads custom styles.
+// The parsers of the languages open when they are first used.
 func Init() {
-	parse.LanguageSupport.OpenStandard()
 	StandardStyles.OpenDefaults()
 	CustomStyles.OpenSettings()
 	if len(CustomStyles) == 0 {
