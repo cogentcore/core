@@ -7,9 +7,13 @@
 package gpu
 
 import (
+	"bytes"
 	"encoding/binary"
 	"math"
+	"reflect"
 	"testing"
+
+	"cogentcore.org/core/math32"
 )
 
 type bytesTestVertex struct {
@@ -91,4 +95,54 @@ func readBytesInto[E any](dest []E, src []byte) {
 		return
 	}
 	bytesToSlice(src, dest)
+}
+
+// bytesTestPadded has padding before B, which encoding/binary leaves out.
+type bytesTestPadded struct {
+	A uint8
+	B float32
+}
+
+// reflectBytes encodes the given slice with the reflect encoder.
+func reflectBytes[E any](src []E) []byte {
+	sv := reflect.ValueOf(src)
+	size := int(sv.Type().Elem().Size())
+	b := make([]byte, size*len(src))
+	for i := range len(src) {
+		encodeValue(b[i*size:], sv.Index(i))
+	}
+	return b
+}
+
+func TestSliceBytesStructs(t *testing.T) {
+	// Structs of nested structs and arrays encode as the reflect encoder
+	// does, whether or not encoding/binary handles their slices.
+	obs := make([]benchObject, 3)
+	for i := range obs {
+		obs[i].Color = math32.Vec4(float32(i), 0.5, -1, 1)
+		obs[i].Offset.Y = float32(i) / 3
+		obs[i].Matrix.SetIdentity()
+		obs[i].WorldMatrix[14] = float32(-i)
+	}
+	b := sliceToBytes(obs)
+	if !bytes.Equal(b, reflectBytes(obs)) {
+		t.Errorf("object bytes differ from the reflect encoding")
+	}
+	t.Logf("encoding/binary layout: %v", elementInfoOf[benchObject]().binarySize == 192)
+
+	// Decoding gives the structs back.
+	out := make([]benchObject, 3)
+	if err := bytesToSlice(b, out); err != nil || !reflect.DeepEqual(out, obs) {
+		t.Errorf("decoded %v, %v", out, err)
+	}
+
+	// A struct with padding keeps its layout through the reflect encoder.
+	if elementInfoOf[bytesTestPadded]().binarySize != 0 {
+		t.Errorf("padded struct has the encoding/binary layout")
+	}
+	p := []bytesTestPadded{{A: 3, B: 1.5}}
+	pb := sliceToBytes(p)
+	if len(pb) != 8 || pb[0] != 3 || math.Float32frombits(binary.LittleEndian.Uint32(pb[4:])) != 1.5 {
+		t.Errorf("padded bytes = %v", pb)
+	}
 }

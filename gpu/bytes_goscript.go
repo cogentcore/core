@@ -24,6 +24,9 @@ func sliceToBytes[E any](src []E) []byte {
 	if b, ok := sliceBytes(src); ok {
 		return b
 	}
+	if b, ok := binaryBytes(src); ok {
+		return b
+	}
 	switch s := any(src).(type) {
 	case []float32:
 		b := make([]byte, 4*len(s))
@@ -68,7 +71,7 @@ func sliceBytes[E any](src []E) ([]byte, bool) {
 	if b, ok := any(src).([]byte); ok {
 		return b, true
 	}
-	if len(src) == 0 || !typedArrayKind(reflect.TypeFor[E]().Kind()) {
+	if len(src) == 0 || !elementInfoOf[E]().typed {
 		return nil, false
 	}
 	array := js.ValueOf(src)
@@ -77,6 +80,57 @@ func sliceBytes[E any](src []E) ([]byte, bool) {
 	}
 	n := array.Get("byteLength").Int()
 	return unsafe.Slice((*byte)(unsafe.Pointer(&src[0])), n), true
+}
+
+// elementInfo describes how slices of an element type become bytes.
+type elementInfo struct {
+	// typed is whether GoScript holds slices of the type in typed arrays.
+	typed bool
+
+	// binarySize is the size of a value of the type when encoding/binary
+	// encodes values of the type as their memory, and 0 otherwise. It does
+	// for fixed-size types without padding, such as the structs of float32,
+	// int32 and uint32 fields that GPU buffers hold. GoScript then encodes
+	// and decodes slices of them with a plan built once per struct type,
+	// much faster than the reflect encoder below. A GoScript without that
+	// support gives a size of -1 for such slices.
+	binarySize int
+}
+
+// elementInfos holds the elementInfo of each element type, keyed by a nil
+// pointer to it, which is much cheaper to make under GoScript than its
+// reflect.Type. GPU calls are made from one goroutine.
+var elementInfos = map[any]elementInfo{}
+
+// elementInfoOf returns the elementInfo of type E.
+func elementInfoOf[E any]() elementInfo {
+	if info, ok := elementInfos[(*E)(nil)]; ok {
+		return info
+	}
+	t := reflect.TypeFor[E]()
+	info := elementInfo{typed: typedArrayKind(t.Kind())}
+	if size := int(t.Size()); binary.Size(make([]E, 1)) == size {
+		info.binarySize = size
+	}
+	elementInfos[(*E)(nil)] = info
+	return info
+}
+
+// binaryBytes returns the little-endian encoding of the given slice by
+// encoding/binary, and whether its layout allows that (see elementInfo).
+// Slices of numbers that are not in typed arrays are left to the loops of
+// sliceToBytes.
+func binaryBytes[E any](src []E) ([]byte, bool) {
+	info := elementInfoOf[E]()
+	size := info.binarySize
+	if len(src) == 0 || size == 0 || info.typed {
+		return nil, false
+	}
+	b := make([]byte, len(src)*size)
+	if _, err := binary.Encode(b, binary.LittleEndian, src); err != nil {
+		return nil, false
+	}
+	return b, true
 }
 
 // typedArrayKind reports whether GoScript holds slices of elements of the
@@ -186,6 +240,12 @@ func decodeValue(b []byte, v reflect.Value) error {
 
 // bytesToSlice decodes the given little-endian bytes into the given slice.
 func bytesToSlice[E any](src []byte, dest []E) error {
+	if info := elementInfoOf[E](); len(dest) > 0 && info.binarySize > 0 && !info.typed {
+		n := min(len(dest), len(src)/info.binarySize)
+		if _, err := binary.Decode(src, binary.LittleEndian, dest[:n]); err == nil {
+			return nil
+		}
+	}
 	switch d := any(dest).(type) {
 	case []byte:
 		copy(d, src)
