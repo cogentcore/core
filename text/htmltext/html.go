@@ -15,11 +15,11 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/xmlx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
-	"golang.org/x/net/html/charset"
 )
 
 // HTMLToRich translates HTML-formatted rich text into a [rich.Text],
@@ -73,7 +73,7 @@ func htmlToRich(spcstr []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 	decoder.Strict = false
 	decoder.AutoClose = xml.HTMLAutoClose
 	decoder.Entity = xml.HTMLEntity
-	decoder.CharsetReader = charset.NewReaderLabel
+	decoder.CharsetReader = xmlx.CharsetReader
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
