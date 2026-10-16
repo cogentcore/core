@@ -72,6 +72,12 @@ type wrapEntry struct {
 	truncated     int
 }
 
+// ResetCache empties the cache of shaped and wrapped texts, as when the
+// fonts that they are measured with change.
+func (sh *Shaper) ResetCache() {
+	sh.shapes.reset()
+}
+
 // reset empties the cache.
 func (sc *shapeCache) reset() {
 	sc.entries = nil

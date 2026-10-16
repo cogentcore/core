@@ -7,6 +7,7 @@
 package shapedjs
 
 import (
+	"sync/atomic"
 	"syscall/js"
 
 	"cogentcore.org/core/math32"
@@ -22,6 +23,10 @@ var (
 	canvasInited bool
 	canvas       js.Value
 	ctx          js.Value
+
+	// fontsLoaded counts the times that the browser has finished loading
+	// fonts, which changes the measurements of the texts that use them.
+	fontsLoaded atomic.Int32
 )
 
 // initCanvas ensures that the shared text measuring canvas is available.
@@ -32,6 +37,17 @@ func initCanvas() {
 	canvas = js.Global().Get("OffscreenCanvas").New(1000, 100)
 	ctx = canvas.Call("getContext", "2d")
 	canvasInited = true
+
+	// Texts measured before their fonts load are measured with fallback
+	// fonts, so shapers discard their cached texts when fonts have loaded.
+	if doc := js.Global().Get("document"); doc.Truthy() {
+		if fonts := doc.Get("fonts"); fonts.Truthy() {
+			fonts.Call("addEventListener", "loadingdone", js.FuncOf(func(this js.Value, args []js.Value) any {
+				fontsLoaded.Add(1)
+				return nil
+			}))
+		}
+	}
 }
 
 // Shaper is the html canvas version of text shaping,
@@ -39,6 +55,9 @@ func initCanvas() {
 // the results using the results of measuring the text.
 type Shaper struct {
 	shapedgt.Shaper
+
+	// fontsLoaded is the value of fontsLoaded when the cache was last reset.
+	fontsLoaded int32
 }
 
 // NewShaper returns a new text shaper.
@@ -96,6 +115,12 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	defer sh.Unlock()
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 16
+	}
+
+	// Texts cached before fonts finished loading are shaped again.
+	if n := fontsLoaded.Load(); n != sh.fontsLoaded {
+		sh.fontsLoaded = n
+		sh.ResetCache()
 	}
 
 	// The outputs of shaping and wrapping are adjusted to the measurements of the browser.
