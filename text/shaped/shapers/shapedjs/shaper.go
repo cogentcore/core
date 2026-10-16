@@ -98,27 +98,16 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
-	txt := tx.Join()
-	// sptx := tx.Clone()
-	// sptx.SplitSpaces() // no advantage to doing this
-	outs := sh.ShapeTextOutput(tx, tsty, txt)
-	for oi := range outs {
-		out := &outs[oi]
-		si, _, _ := tx.Index(out.Runes.Offset)
-		sty, _ := tx.Span(si)
-		fnt := text.NewFont(sty, tsty)
-		sh.adjustOutput(out, fnt, tx, tsty)
-	}
-	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, size)
-	for _, lno := range lines {
-		for oi := range lno {
-			out := &lno[oi]
+	// The outputs of shaping and wrapping are adjusted to the measurements of the browser.
+	lines, truncated := sh.WrapLinesCached(tx, defSty, tsty, size, func(outs []shaping.Output) {
+		for oi := range outs {
+			out := &outs[oi]
 			si, _, _ := tx.Index(out.Runes.Offset)
 			sty, _ := tx.Span(si)
 			fnt := text.NewFont(sty, tsty)
 			sh.adjustOutput(out, fnt, tx, tsty)
 		}
-	}
+	})
 	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 

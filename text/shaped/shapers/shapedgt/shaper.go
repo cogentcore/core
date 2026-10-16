@@ -34,6 +34,9 @@ type Shaper struct {
 	// outBuff is the output buffer to avoid excessive memory consumption.
 	outBuff []shaping.Output
 
+	// shapes caches the shaped outputs of recent texts for wrapping.
+	shapes shapeCache
+
 	sync.Mutex
 }
 
@@ -75,8 +78,10 @@ func NewShaperWithFonts(fss []fs.FS) shaped.Shaper {
 
 // FontMap returns the font map used for this shaper.
 func (sh *Shaper) FontMap() *fontscan.FontMap {
-	// The caller may set the query or script of the map.
+	// The caller may set the query or script of the map, or add fonts,
+	// which can change how texts are shaped.
 	sh.fontMap.forget()
+	sh.shapes.reset()
 	return sh.fontMap.FontMap
 }
 
