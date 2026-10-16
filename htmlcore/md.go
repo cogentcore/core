@@ -36,7 +36,10 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 
 	htm := markdown.Render(doc, renderer)
 	htm = bytes.ReplaceAll(htm, []byte("<p></div><!-- dummy --></p>"), []byte("</div>"))
-	htm = divRegex.ReplaceAll(htm, []byte("<div${1}>"))
+	// Every match of divRegex ends with this, and scanning for the regexp is slow.
+	if bytes.Contains(htm, []byte("><div></p>")) {
+		htm = divRegex.ReplaceAll(htm, []byte("<div${1}>"))
+	}
 	return htm
 }
 
