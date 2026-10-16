@@ -707,7 +707,7 @@ func TestAMSArrows(t *testing.T) {
 		`\leftrightharpoons`, `\rightleftharpoons`, `\upharpoonleft`, `\upharpoonright`,
 	}
 	width := 640
-	RunTest(t, "ams-arrows", width, 350, func(pc *paint.Painter) {
+	RunTest(t, "ams-arrows", width, 385, func(pc *paint.Painter) {
 		pc.Fill.Color = colors.Uniform(color.Black)
 		fsize := pc.Text.FontSize.Dots
 		y := fsize

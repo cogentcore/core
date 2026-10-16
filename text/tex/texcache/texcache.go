@@ -59,7 +59,9 @@ func SetShapeMath() {
 }
 
 // Get tries to get a cached path for given equation at given fontsize in dots.
-// returns nil if not available.
+// returns nil if not available. The returned path is a copy, so the caller
+// can transform it in place (as [ppath.Path.Translate] does) without
+// changing the cached path.
 func Get(expr string, fontSizeDots float32) ppath.Path {
 	mu.Lock()
 	defer mu.Unlock()
@@ -79,12 +81,12 @@ func Get(expr string, fontSizeDots float32) ppath.Path {
 		cd.pp = p
 	}
 	if cd.FontSizeDots == fontSizeDots {
-		return cd.pp
+		return cd.pp.Clone()
 	}
 	sc := fontSizeDots / cd.FontSizeDots
-	np := cd.pp.Scale(sc, sc)
+	np := cd.pp.Clone().Scale(sc, sc)
 	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: np, used: true}
-	return np
+	return np.Clone()
 }
 
 // Add adds a new entry
@@ -95,7 +97,7 @@ func Add(expr string, fontSizeDots float32, pp ppath.Path) {
 	if cache == nil {
 		cache = make(map[string]*cached)
 	}
-	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp, used: true}
+	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp.Clone(), used: true}
 }
 
 func setCache(c map[string]*cached) {
