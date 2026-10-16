@@ -19,6 +19,17 @@
     <meta name="go-source"
         content="{{.VanityURL}} https://github.com/{{.GithubVanityRepository}} https://github.com/{{.GithubVanityRepository}}/tree/master{/dir} https://github.com/{{.GithubVanityRepository}}/blob/master{/dir}/{file}#L{line}">
     {{- end}}
+    {{- if .JS}}
+    <script>
+        // We start loading the app now, unless app.js will not load it (see appCanLoadWebAssembly).
+        if (!/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) && new URLSearchParams(location.search).get("wasm") !== "false") {
+            const preload = document.createElement("link");
+            preload.rel = "modulepreload";
+            preload.href = "{{.BasePath}}app.gs.js";
+            document.head.appendChild(preload);
+        }
+    </script>
+    {{- end}}
     <link type="text/css" rel="preload" href="{{.BasePath}}app.css" as="style">
     <link rel="icon" href="{{.BasePath}}icons/32.png" type="image/png">
     <link rel="icon" href="{{.BasePath}}icons/svg.svg" type="image/svg+xml">

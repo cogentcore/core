@@ -225,22 +225,67 @@ async function appInitGoScript(loader) {
   try {
     showProgress(1);
     const url = new URL(document.documentElement.dataset.basePath + "app.gs.js", document.baseURI).href;
-    // When the service worker controls the page, it serves the bundle from
-    // its cache, so we import the URL itself, which also lets the browser
-    // reuse the code it compiled on an earlier load.
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      await import(url);
-      return;
+    // Without the service worker, the bundle comes from the network, so we
+    // also read it with fetch to show progress.
+    if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+      appShowDownloadProgress(url, showProgress);
     }
-    // Otherwise we download the bundle once, showing progress, and import
-    // its bytes from a blob, without decoding them to text.
-    const response = await fetchWithProgress(url, showProgress);
-    const blob = new Blob([await response.blob()], { type: "text/javascript" });
-    const blobURL = URL.createObjectURL(blob);
-    await import(blobURL);
+    // We import the bundle URL itself, which the page already started to
+    // load with modulepreload, so that the browser compiles it while it
+    // downloads and reuses the code it compiled on later loads.
+    await import(url);
   } catch (err) {
     console.error("loading app failed: ", err);
   }
+}
+
+// appShowDownloadProgress reads the response of the given URL, calling
+// progress with the percentage downloaded, without keeping the data.
+async function appShowDownloadProgress(url, progress) {
+  try {
+    // The browser shares one download between this request and the module
+    // load through its HTTP cache only if the response can be cached, so we
+    // check that first, to never download the bundle twice. (The query makes
+    // the browser send the HEAD request without waiting for the download.)
+    const head = await fetch(url + "?head", { method: "HEAD", cache: "no-store" });
+    if (!/max-age=[1-9]|immutable/.test(head.headers.get("Cache-Control") || "")) {
+      return;
+    }
+    const response = await fetch(url);
+    const total = appResponseSize(response);
+    const reader = response.body.getReader();
+    let loaded = 0;
+    for (; ;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      loaded += value.byteLength;
+      progress(Math.min(99, Math.max(1, Math.round((loaded * 100) / total)))); // must be 1-99
+    }
+  } catch (err) {
+    console.warn("showing download progress failed: ", err);
+  }
+}
+
+// appResponseSize returns the estimated size in bytes of the decoded body of
+// the given response.
+function appResponseSize(response) {
+  let contentLength;
+  try {
+    contentLength = response.headers.get(appWasmContentLengthHeader);
+  } catch { }
+  if (!appWasmContentLengthHeader || !contentLength) {
+    contentLength = response.headers.get("Content-Length");
+  }
+  if (!contentLength) {
+    contentLength = "60000000"; // 60 mb default
+  }
+  let total = parseInt(contentLength, 10);
+  if (response.headers.get("Content-Encoding")) {
+    total = total * 5; // we assume that compression reduces the size 5x
+  }
+  return total;
 }
 
 function appCanLoadWebAssembly() {
@@ -257,22 +302,7 @@ function appCanLoadWebAssembly() {
 async function fetchWithProgress(url, progress) {
   const response = await fetch(url);
 
-  let contentLength;
-  try {
-    contentLength = response.headers.get(appWasmContentLengthHeader);
-  } catch { }
-  if (!appWasmContentLengthHeader || !contentLength) {
-    contentLength = response.headers.get("Content-Length");
-  }
-  if (!contentLength) {
-    contentLength = "60000000"; // 60 mb default
-  }
-  let contentEncoding = response.headers.get("Content-Encoding");
-
-  let total = parseInt(contentLength, 10);
-  if (contentEncoding) {
-    total = total * 5; // we assume that compression reduces the size 5x
-  }
+  let total = appResponseSize(response);
   let loaded = 0;
 
   const progressHandler = function (loaded, total) {

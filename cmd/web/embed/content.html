@@ -28,6 +28,17 @@
     <link rel="apple-touch-icon" href="{{.BasePath}}icons/192.png">
     {{- if .Wasm}}
     <link rel="manifest" href="{{.BasePath}}manifest.webmanifest">
+    {{- if .JS}}
+    <script>
+        // We start loading the app now, unless app.js will not load it (see appCanLoadWebAssembly).
+        if (!/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) && new URLSearchParams(location.search).get("wasm") !== "false") {
+            const preload = document.createElement("link");
+            preload.rel = "modulepreload";
+            preload.href = "{{.BasePath}}app.gs.js";
+            document.head.appendChild(preload);
+        }
+    </script>
+    {{- end}}
     {{- end}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
