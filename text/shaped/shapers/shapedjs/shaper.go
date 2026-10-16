@@ -124,7 +124,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	}
 
 	// The outputs of shaping and wrapping are adjusted to the measurements of the browser.
-	lines, truncated := sh.WrapLinesCached(tx, defSty, tsty, size, func(outs []shaping.Output) {
+	return sh.WrapLinesBoundsCached(tx, defSty, tsty, size, func(outs []shaping.Output) {
 		for oi := range outs {
 			out := &outs[oi]
 			si, _, _ := tx.Index(out.Runes.Offset)
@@ -133,7 +133,6 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			sh.adjustOutput(out, fnt, tx, tsty)
 		}
 	})
-	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
 }
 
 // adjustOutput adjusts the given run metrics based on the html measureText results.

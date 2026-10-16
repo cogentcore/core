@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/shaping"
@@ -70,6 +71,29 @@ type wrapEntry struct {
 	noTrim        bool
 	lines         []shaping.Line
 	truncated     int
+
+	// bounds are the most recent lines with bounds of the wrapped lines.
+	bounds []boundsEntry
+}
+
+// maxBounds is the number of lines with bounds that a [wrapEntry] holds.
+const maxBounds = 2
+
+// boundsKey has the values other than those of the [shapeEntry] and the
+// [wrapEntry] that [Shaper.LinesBounds] depends on, except for the colors,
+// which are set on each copy.
+type boundsKey struct {
+	width      float32 // the exact width, of which the wrap size is the integer part
+	defSize    float32 // the size of the default style
+	lineHeight float32
+	whiteSpace text.WhiteSpaces
+	align      text.Aligns
+}
+
+// boundsEntry is the lines with bounds of wrapped lines for a [boundsKey].
+type boundsEntry struct {
+	key   boundsKey
+	lines *shaped.Lines
 }
 
 // ResetCache empties the cache of shaped and wrapped texts, as when the
@@ -187,21 +211,35 @@ func cacheable(tx rich.Text) bool {
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call.
 func (sh *Shaper) WrapLinesCached(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2, adjust func(outs []shaping.Output)) ([]shaping.Line, int) {
-	txt := tx.Join()
+	lines, truncated, _, cached := sh.wrapCached(tx, defSty, tsty, size, adjust)
+	if cached {
+		lines = copyLines(lines)
+	}
+	return lines, truncated
+}
+
+// wrapCached is [Shaper.WrapLinesCached], also returning the cache entry of
+// the wrapping, which is nil when it is not cached, and whether the lines are
+// those of the entry, which were wrapped before and are not the caller's to change.
+func (sh *Shaper) wrapCached(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2, adjust func(outs []shaping.Output)) ([]shaping.Line, int, *wrapEntry, bool) {
 	cfg, maxSize := wrapConfig(defSty, tsty, size)
 
 	// Texts that cannot be cached are shaped and wrapped every time.
 	if !cacheable(tx) {
+		txt := tx.Join()
 		outs := sh.ShapeTextOutput(tx, tsty, txt)
 		if adjust != nil {
 			adjust(outs)
 		}
-		return sh.wrapOutputs(outs, txt, cfg, maxSize, adjust)
+		lines, truncated := sh.wrapOutputs(outs, txt, cfg, maxSize, adjust)
+		return lines, truncated, nil, false
 	}
 
-	// The text is shaped unless it is cached.
+	// The text is shaped unless it is cached, and its runes are only needed to wrap it.
+	var txt []rune
 	se, h := sh.shapes.get(tx, tsty)
 	if se == nil {
+		txt = tx.Join()
 		outs := sh.ShapeTextOutput(tx, tsty, txt)
 		if adjust != nil {
 			adjust(outs)
@@ -210,12 +248,75 @@ func (sh *Shaper) WrapLinesCached(tx rich.Text, defSty *rich.Style, tsty *text.S
 	}
 
 	// The text is wrapped unless it is cached wrapped to this size.
-	if lines, truncated, ok := se.wrapped(cfg, maxSize); ok {
-		return lines, truncated
+	if we := se.wrapEntry(cfg, maxSize); we != nil {
+		return we.lines, we.truncated, we, true
+	}
+	if txt == nil {
+		txt = tx.Join()
 	}
 	lines, truncated := sh.wrapOutputs(copyOutputs(se.outs), txt, cfg, maxSize, adjust)
-	se.addWrap(cfg, maxSize, lines, truncated)
-	return lines, truncated
+	return lines, truncated, se.addWrap(cfg, maxSize, lines, truncated), false
+}
+
+// WrapLinesBoundsCached returns the lines with bounds of the text wrapped to
+// the given size, as [Shaper.LinesBounds] makes them from the lines of
+// [Shaper.WrapLinesCached], using the cache of recent texts, which also
+// keeps the lines with bounds of their recent wrappings. The adjust function
+// is as for [Shaper.WrapLinesCached]. The lines are the caller's to change.
+// This should already have the mutex lock, and is used by shapedjs but is
+// not an end-user call.
+func (sh *Shaper) WrapLinesBoundsCached(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2, adjust func(outs []shaping.Output)) *shaped.Lines {
+	// Lines of wrappings that are not cached are made every time.
+	lines, truncated, we, cached := sh.wrapCached(tx, defSty, tsty, size, adjust)
+	if we == nil {
+		return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+	}
+
+	// Cached lines with bounds are copied.
+	key := boundsKey{width: size.X, defSize: defSty.Size, lineHeight: tsty.LineHeight, whiteSpace: tsty.WhiteSpace, align: tsty.Align}
+	for i := range we.bounds {
+		if be := &we.bounds[i]; be.key == key {
+			return copyBounds(be.lines, tx, tsty)
+		}
+	}
+
+	// New bounds are kept as a copy, replacing the oldest ones when there are maxBounds.
+	if cached {
+		lines = copyLines(lines)
+	}
+	lns := sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+	be := boundsEntry{key: key, lines: copyBounds(lns, nil, tsty)}
+	if len(we.bounds) < maxBounds {
+		we.bounds = append(we.bounds, be)
+	} else {
+		copy(we.bounds, we.bounds[1:])
+		we.bounds[maxBounds-1] = be
+	}
+	return lns
+}
+
+// copyBounds returns a copy of the lines with bounds, with their own runs
+// and spans, for the given source text and the colors of the given style.
+// The runs share the glyphs, which [Run.SetGlyphXAdvance] copies before
+// changing them, the only change made to the glyphs of shaped lines.
+func copyBounds(lns *shaped.Lines, tx rich.Text, tsty *text.Style) *shaped.Lines {
+	cp := *lns
+	cp.Source = tx
+	cp.Color, cp.SelectionColor, cp.HighlightColor = tsty.Color, tsty.SelectColor, tsty.HighlightColor
+	cp.Lines = slices.Clone(lns.Lines)
+	for li := range cp.Lines {
+		ln := &cp.Lines[li]
+		ln.Source = slices.Clone(ln.Source)
+		for si := range ln.Source {
+			ln.Source[si] = slices.Clone(ln.Source[si])
+		}
+		ln.Runs = slices.Clone(ln.Runs)
+		for ri, r := range ln.Runs {
+			run := *r.(*Run)
+			ln.Runs[ri] = &run
+		}
+	}
+	return &cp
 }
 
 // wrapOutputs wraps the outputs into lines, adjusting the outputs of the
@@ -237,27 +338,32 @@ func (sh *Shaper) wrapOutputs(outs []shaping.Output, txt []rune, cfg shaping.Wra
 	return lines, truncated
 }
 
-// wrapped returns a copy of the cached lines of the entry wrapped with the
-// given configuration and size, and whether they are cached.
-func (se *shapeEntry) wrapped(cfg shaping.WrapConfig, maxSize int) ([]shaping.Line, int, bool) {
+// wrapEntry returns the cached wrapping of the entry with the given
+// configuration and size, or nil if it is not cached.
+func (se *shapeEntry) wrapEntry(cfg shaping.WrapConfig, maxSize int) *wrapEntry {
 	for i := range se.wraps {
 		if we := &se.wraps[i]; we.matches(cfg, maxSize) {
-			return copyLines(we.lines), we.truncated, true
+			return we
 		}
 	}
-	return nil, 0, false
+	return nil
 }
 
 // addWrap adds a copy of the lines of the entry wrapped with the given
-// configuration and size, replacing the oldest one when it has maxWraps.
-func (se *shapeEntry) addWrap(cfg shaping.WrapConfig, maxSize int, lines []shaping.Line, truncated int) {
+// configuration and size, replacing the oldest one when it has maxWraps,
+// and returns it, or nil when wrappings with the configuration are not cached.
+func (se *shapeEntry) addWrap(cfg shaping.WrapConfig, maxSize int, lines []shaping.Line, truncated int) *wrapEntry {
 	we := wrapEntry{maxSize: maxSize, direction: cfg.Direction, truncateAfter: cfg.TruncateAfterLines, policy: cfg.BreakPolicy, noTrim: cfg.DisableTrailingWhitespaceTrim, lines: copyLines(lines), truncated: truncated}
+	if !we.matches(cfg, maxSize) {
+		return nil
+	}
 	if len(se.wraps) < maxWraps {
 		se.wraps = append(se.wraps, we)
-		return
+		return &se.wraps[len(se.wraps)-1]
 	}
 	copy(se.wraps, se.wraps[1:])
 	se.wraps[maxWraps-1] = we
+	return &se.wraps[maxWraps-1]
 }
 
 // matches returns whether the wrapped lines are for the given configuration and size.

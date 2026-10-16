@@ -32,8 +32,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
-	lines, truncated := sh.WrapLinesCached(tx, defSty, tsty, size, nil)
-	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+	return sh.WrapLinesBoundsCached(tx, defSty, tsty, size, nil)
 }
 
 // This should already have the mutex lock, and is used by shapedjs but is

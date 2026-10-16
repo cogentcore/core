@@ -6,14 +6,18 @@ package shapedgt
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/text/textpos"
 	"github.com/go-text/typesetting/language"
 	"github.com/go-text/typesetting/shaping"
+	"golang.org/x/image/math/fixed"
 )
 
 // testTexts returns texts with one or more spans, spaces at the ends,
@@ -100,6 +104,73 @@ func TestShapeCache(t *testing.T) {
 	}
 	if sh.shapes.n != len(testTexts()) {
 		t.Errorf("cached %d texts, want %d", sh.shapes.n, len(testTexts()))
+	}
+}
+
+// TestBoundsCache tests that the lines with bounds of cached wrappings are
+// those of the uncached path as the values that the bounds depend on vary
+// between calls with the same wrapping, and that changing the returned lines
+// does not change those of later calls.
+func TestBoundsCache(t *testing.T) {
+	sh := NewShaper().(*Shaper)
+	defSty := rich.NewStyle()
+	bigSty := *defSty
+	bigSty.Size = 1.5
+	// variant is one set of values that the bounds depend on.
+	type variant struct {
+		width  float32
+		height float32 // 0 for no truncation, so that the wrapping does not depend on the line height
+		defSty *rich.Style
+		style  func(ts *text.Style)
+	}
+	variants := []variant{
+		{90, 200, defSty, func(ts *text.Style) {}},
+		{5, 0, defSty, func(ts *text.Style) {}},
+		{5.6, 0, defSty, func(ts *text.Style) {}},
+		{90, 0, defSty, func(ts *text.Style) {}},
+		{90, 0, &bigSty, func(ts *text.Style) {}},
+		{90.6, 200, defSty, func(ts *text.Style) {}},
+		{90, 200, &bigSty, func(ts *text.Style) {}},
+		{90, 200, defSty, func(ts *text.Style) { ts.Align = text.Center }},
+		{90, 200, defSty, func(ts *text.Style) { ts.Align = text.End }},
+		{90, 0, defSty, func(ts *text.Style) { ts.LineHeight = 2 }},
+		{90, 200, defSty, func(ts *text.Style) { ts.WhiteSpace = text.WrapAlways }},
+		{90, 200, defSty, func(ts *text.Style) { ts.Color = colors.Red; ts.SelectColor = colors.Uniform(colors.Blue) }},
+		{300, 200, defSty, func(ts *text.Style) { ts.Align = text.Center }},
+	}
+	for round := range 3 {
+		for ti, tx := range testTexts() {
+			for vi, v := range variants {
+				tsty := testStyle()
+				v.style(tsty)
+				size := math32.Vec2(v.width, v.height)
+				txt := tx.Join()
+				outs := copyOutputs(sh.ShapeTextOutput(tx, tsty, txt))
+				lines, truncated := sh.WrapLinesOutput(outs, txt, tx, v.defSty, tsty, size)
+				want := sh.LinesBounds(lines, truncated, tx, v.defSty, tsty, size)
+				// A copy of the text is the source of the lines.
+				src := slices.Clone(tx)
+				got := sh.WrapLines(src, v.defSty, tsty, size)
+				if !reflect.DeepEqual(got, want) {
+					t.Errorf("round %d text %d variant %d: cached lines differ:\n%v\n%v", round, ti, vi, got, want)
+				}
+				if len(got.Source) > 0 && &got.Source[0] != &src[0] {
+					t.Errorf("round %d text %d variant %d: the source is not the given text", round, ti, vi)
+				}
+				// Changes to the lines that callers make are their own.
+				got.SetGlyphXAdvance(fixed.I(3))
+				for li := range got.Lines {
+					ln := &got.Lines[li]
+					ln.Offset.X += 7
+					ln.Selections = append(ln.Selections, textpos.Range{Start: 0, End: 1})
+					for _, sp := range ln.Source {
+						for i := range sp {
+							sp[i] = 'x'
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
