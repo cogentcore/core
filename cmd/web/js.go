@@ -96,10 +96,10 @@ func buildJS(c *config.Config) error {
 
 	args := []string{"build", "entry.ts", "--target", "browser", "--format", "esm", "--outfile", filepath.Join(c.Build.Output, "app.gs.js")}
 	if !c.Build.Debug {
-		// We only minify identifiers, since minifying whitespace or syntax puts
-		// different statements on the same line,
-		// which breaks tree.AutoPlanName, as it uses the caller line numbers.
-		args = append(args, "--minify-identifiers")
+		// Full minification puts many statements on one line, which is fine
+		// for tree.AutoPlanName, since its //goscript:maxify directive makes
+		// GoScript pass it the Go file and line of each call.
+		args = append(args, "--minify")
 	}
 	err = exec.Major().SetDir(work).Run("bun", args...)
 	if err != nil {
