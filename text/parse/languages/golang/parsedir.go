@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/syms"
 	"cogentcore.org/core/text/token"
-	"golang.org/x/tools/go/packages"
 )
 
 // ParseDirLock provides a lock protecting parsing of a package directory
@@ -134,25 +133,10 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 				// fmt.Printf("using cached path: %s to: %s\n", path, pkgPathAbs)
 			} else {
 				// fmt.Printf("mod: loading package: %s\n", path)
-				// packages automatically deals with GOPATH vs. modules, etc.
-				pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
-				if err != nil {
-					// this is too many errors!
-					// log.Println(err)
+				fgo, ok := packageGoFile(path)
+				if !ok {
 					return nil
 				}
-				if len(pkgs) != 1 {
-					fmt.Printf("More than one package for path: %v\n", path)
-					return nil
-				}
-				pkg := pkgs[0]
-
-				if len(pkg.GoFiles) == 0 {
-					// fmt.Printf("No Go files found in package: %v\n", path)
-					return nil
-				}
-				// files = pkg.GoFiles
-				fgo := pkg.GoFiles[0]
 				pkgPathAbs, _ = filepath.Abs(filepath.Dir(fgo))
 				// fmt.Printf("mod: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
 			}
