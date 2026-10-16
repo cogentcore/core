@@ -425,6 +425,11 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	ct.current.Page = pg
+	// The table of contents and categories of the old page are remade by
+	// loadPage, so they are deleted now instead of being updated first.
+	if ct.leftFrame != nil {
+		ct.leftFrame.DeleteChildren()
+	}
 	ct.Scene.Update() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
