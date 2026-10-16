@@ -170,10 +170,9 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 
 // applyTextStyle applies the given styles to the HTML canvas context.
 func (rs *Renderer) applyTextStyle(fnt *text.Font, tsty *text.Style, fill, stroke image.Image, size, lineHeight float32) {
-	shapedjs.SetFontStyle(rs.ctx, fnt, tsty, lineHeight)
-
-	rs.ctx.Set("fillStyle", rs.imageToStyle(fill))
-	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke))
+	rs.setFont(shapedjs.FontSpec(fnt, tsty, lineHeight))
+	rs.setFillStyle(rs.imageToStyle(fill))
+	rs.setStrokeStyle(rs.imageToStyle(stroke))
 	// note: text decorations not available in canvas
 }
 
