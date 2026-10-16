@@ -32,6 +32,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
@@ -101,6 +102,19 @@ type Content struct {
 	// by kebab-case heading name.
 	tocNodes map[string]*core.Tree
 
+	// tocTree is the table of contents tree of the current page in [Content.leftFrame].
+	tocTree *core.Tree
+
+	// categoriesTree is the categories tree in [Content.leftFrame]. It is made once
+	// and kept between pages; [Content.updateCategories] updates it for each page.
+	categoriesTree *core.Tree
+
+	// categoryTrees are the tree nodes of [Content.categories] in [Content.categoriesTree].
+	categoryTrees []*core.Tree
+
+	// categoryPages are the pages of the page nodes in [Content.categoriesTree].
+	categoryPages map[*core.Tree]*bcontent.Page
+
 	// inPDFRender indicates that it is rendering a PDF now, turning off
 	// elements that are not appropriate for that.
 	inPDFRender bool
@@ -120,6 +134,10 @@ func init() {
 	// so we only add these in content.
 	system.ReservedWebShortcuts = append(system.ReservedWebShortcuts, "Command+[", "Command+]")
 }
+
+// keepCategories is whether the categories tree is kept between pages,
+// instead of being made again for each page (tests compare the two).
+var keepCategories = true
 
 // NewPageInitFunc is called when a new page is just being rendered.
 // This can do any necessary new-page initialization, e.g.,
@@ -385,6 +403,11 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		}
 		return isCategory
 	})
+	// The categories tree of the old source is made again.
+	if ct.categoriesTree != nil {
+		ct.categoriesTree.Delete()
+		ct.categoriesTree = nil
+	}
 
 	if url := ct.getWebURL(); url != "" {
 		return ct.Open(url)
@@ -480,10 +503,18 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return err
 	}
 
-	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w, ct.current.Page)
-	ct.makeCategories()
-	ct.leftFrame.Update()
+	// A new categories tree is styled with the table of contents; a kept one only
+	// restyles the nodes whose selection changes, in updateCategories.
+	if ct.makeCategories() {
+		ct.leftFrame.Update()
+	} else {
+		ct.updateCategories(true)
+		if ct.tocTree != nil {
+			ct.tocTree.Update()
+		}
+		ct.leftFrame.NeedsLayout()
+	}
 	ct.rendered = ct.current
 	return nil
 }
@@ -498,8 +529,13 @@ func (ct *Content) RenderWidget() {
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
 func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
+	ct.deleteTableOfContents()
 	ct.tocNodes = map[string]*core.Tree{}
-	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	// The table of contents goes before the categories tree, which is kept between pages.
+	contents := core.NewTree()
+	ct.leftFrame.InsertChild(contents, 0)
+	contents.SetText("<b>Contents</b>")
+	ct.tocTree = contents
 	contents.SetReadOnly(true)
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
@@ -541,14 +577,30 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	})
 
 	if contents.NumChildren() == 0 {
-		contents.Delete()
+		ct.deleteTableOfContents()
 	}
 }
 
-// makeCategories makes the categories tree for the current page and adds it to [Content.leftFrame].
-func (ct *Content) makeCategories() {
-	if len(ct.categories) == 0 {
-		return
+// deleteTableOfContents deletes the table of contents tree, if there is one.
+func (ct *Content) deleteTableOfContents() {
+	if ct.tocTree != nil {
+		ct.tocTree.Delete()
+		ct.tocTree = nil
+	}
+}
+
+// hasCategoriesTree returns whether [Content.categoriesTree] is the
+// current categories tree in [Content.leftFrame].
+func (ct *Content) hasCategoriesTree() bool {
+	cats := ct.categoriesTree
+	return cats != nil && cats.This != nil && ct.leftFrame != nil && cats.Parent == ct.leftFrame.This
+}
+
+// makeCategories makes the categories tree for the current page and adds it to
+// [Content.leftFrame] if it does not have it yet, returning whether it made it.
+func (ct *Content) makeCategories() bool {
+	if len(ct.categories) == 0 || ct.hasCategoriesTree() {
+		return false
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
@@ -558,11 +610,12 @@ func (ct *Content) makeCategories() {
 			ct.OpenEvent("", e)
 		}
 	})
-	for _, cat := range ct.categories {
+	ct.categoriesTree = cats
+	ct.categoryTrees = make([]*core.Tree, len(ct.categories))
+	ct.categoryPages = map[*core.Tree]*bcontent.Page{}
+	for i, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
-		if ct.current.Page.Name == cat {
-			catTree.SetSelected(true)
-		}
+		ct.categoryTrees[i] = catTree
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.OpenEvent(catPage.URL, e)
@@ -575,15 +628,84 @@ func (ct *Content) makeCategories() {
 				continue
 			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
-			if pg == ct.current.Page {
-				pgTree.SetSelected(true)
-				catTree.SetClosed(false)
-			}
+			ct.categoryPages[pgTree] = pg
 			pgTree.OnSelect(func(e events.Event) {
 				ct.OpenEvent(pg.URL, e)
 			})
 		}
 	}
+	ct.updateCategories(false)
+	return true
+}
+
+// updateCategories selects the nodes of the categories tree for the current page
+// and opens the categories that contain it, closing the others, as a new tree has them.
+// If restyle is true, the nodes whose selection changes are styled again.
+func (ct *Content) updateCategories(restyle bool) {
+	var selected []core.Treer
+	// setSelected sets whether the given node is selected.
+	setSelected := func(tr *core.Tree, sel bool) {
+		if sel {
+			selected = append(selected, tr)
+		}
+		if tr.StateIs(states.Selected) == sel {
+			return
+		}
+		tr.SetState(sel, states.Selected)
+		if restyle {
+			styleTreeNode(tr)
+		}
+	}
+
+	// The root is selected by a click on it until the home page opens.
+	setSelected(ct.categoriesTree, false)
+	for i, catTree := range ct.categoryTrees {
+		setSelected(catTree, ct.current.Page.Name == ct.categories[i])
+		hasPage := false
+		for _, k := range catTree.Children {
+			pgTree := k.(*core.Tree)
+			isPage := ct.categoryPages[pgTree] == ct.current.Page
+			hasPage = hasPage || isPage
+			setSelected(pgTree, isPage)
+		}
+		if hasPage {
+			catTree.Open()
+		} else {
+			catTree.Close()
+		}
+	}
+	ct.categoriesTree.SelectedNodes = selected
+}
+
+// styleTreeNode styles the given tree node and its parts, which inherit
+// its selection colors, but not its child nodes.
+func styleTreeNode(tr *core.Tree) {
+	tr.Style()
+	if tr.Parts != nil {
+		tr.Parts.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+			cw.Style()
+			return tree.Continue
+		})
+	}
+	tr.NeedsRender()
+}
+
+// updateScene updates the scene for a new page, as [core.WidgetBase.Update]
+// does, except for the categories tree, which [Content.loadPage] updates.
+func (ct *Content) updateScene() {
+	cats := ct.categoriesTree
+	if !ct.hasCategoriesTree() {
+		cats = nil
+	}
+	ct.Scene.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		if cats != nil && cwb == cats.AsWidget() {
+			return tree.Break
+		}
+		cwb.UpdateWidget()
+		cw.Style()
+		return tree.Continue
+	})
+	ct.Scene.NeedsLayout()
 }
 
 // embedPage handles an <embed-page> element by embedding the lead section

@@ -425,12 +425,14 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	ct.current.Page = pg
-	// The table of contents and categories of the old page are remade by
-	// loadPage, so they are deleted now instead of being updated first.
-	if ct.leftFrame != nil {
-		ct.leftFrame.DeleteChildren()
+	// The table of contents of the old page is remade by loadPage,
+	// so it is deleted now instead of being updated first.
+	ct.deleteTableOfContents()
+	if !keepCategories && ct.categoriesTree != nil {
+		ct.categoriesTree.Delete()
+		ct.categoriesTree = nil
 	}
-	ct.Scene.Update() // need to update the whole scene to also update the toolbar
+	ct.updateScene() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
 		ct.setStageTitle()
@@ -449,7 +451,8 @@ func (ct *Content) openRef(url string) {
 	ref := strings.TrimPrefix(url, "ref://")
 	ct.current.Page = pg
 	ct.historyAdd(pg, "", url)
-	ct.Scene.Update()
+	ct.deleteTableOfContents()
+	ct.updateScene()
 	ct.Defer(func() {
 		ct.setStageTitle()
 		ct.openID(ref, "")
