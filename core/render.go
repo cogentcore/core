@@ -90,8 +90,17 @@ func (wb *WidgetBase) NeedsRender() {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
 	wb.setFlag(true, widgetNeedsRender)
+	wb.setParentsChildNeedsRender()
 	if wb.Scene != nil {
 		wb.Scene.setFlag(true, sceneNeedsRender)
+	}
+}
+
+// setParentsChildNeedsRender marks all of the parents of the widget as
+// having a widget inside of them that needs to be rendered.
+func (wb *WidgetBase) setParentsChildNeedsRender() {
+	for pwb := wb.parentWidget(); pwb != nil; pwb = pwb.parentWidget() {
+		pwb.setFlag(true, widgetChildNeedsRender)
 	}
 }
 
@@ -186,16 +195,22 @@ func (sc *Scene) Render() {
 }
 
 // doNeedsRender calls Render on tree from me for nodes
-// with NeedsRender flags set
+// with NeedsRender flags set. It only goes into the widgets
+// that have such nodes inside of them.
 func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
+			cwb.setFlag(false, widgetChildNeedsRender)
 			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
+		if !cwb.hasFlag(widgetChildNeedsRender) {
+			return tree.Break // nothing inside needs to be rendered
+		}
+		cwb.setFlag(false, widgetChildNeedsRender)
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
