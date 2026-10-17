@@ -16,7 +16,7 @@ import (
 
 // line returns the line of its caller, also in a JavaScript build.
 //
-//goscript:maxify
+//goscript:callsite
 func line() int {
 	_, _, l, _ := runtime.Caller(1)
 	return l

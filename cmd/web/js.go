@@ -104,7 +104,7 @@ func buildJS(c *config.Config) error {
 	args := []string{"build", "entry.ts", "--target", "browser", "--format", "esm", "--outfile", filepath.Join(c.Build.Output, "app.gs.js")}
 	if !c.Build.Debug {
 		// Full minification puts many statements on one line, which is fine
-		// for tree.AutoPlanName, since its //goscript:maxify directive makes
+		// for tree.AutoPlanName, since its //goscript:callsite directive makes
 		// GoScript pass it the Go file and line of each call.
 		args = append(args, "--minify")
 	}
