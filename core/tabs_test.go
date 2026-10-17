@@ -42,6 +42,26 @@ func TestTabsClick(t *testing.T) {
 	})
 }
 
+func TestTabsUpdateSelected(t *testing.T) {
+	b := NewBody()
+	ts := NewTabs(b)
+	first, _ := ts.NewTab("First")
+	NewText(first).SetText("I am first!")
+	second, _ := ts.NewTab("Second")
+	updates := 0
+	text := NewText(second)
+	text.Updater(func() {
+		updates++
+		text.SetText("I am second!")
+	})
+	b.AssertRender(t, "tabs/click", func() {
+		// The content of a tab is updated when it is selected, not before.
+		assert.Zero(t, updates)
+		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
+	})
+	assert.NotZero(t, updates)
+}
+
 func TestTabsMany(t *testing.T) {
 	b := NewBody()
 	ts := NewTabs(b)
