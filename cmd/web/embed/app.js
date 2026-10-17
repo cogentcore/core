@@ -8,12 +8,17 @@ var appOnAppInstallChange = function () { };
 const appEnv = {{.Env }};
 const appWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
 
+// appSharedDownloadMaxSize is the largest transfer size of the bundle for
+// which appShowDownloadProgress reads it, since the browser then shares one
+// download with the module load (see there).
+const appSharedDownloadMaxSize = 8000000;
+
 window.wasm = null;
 
 let appServiceWorkerRegistration;
 let deferredPrompt = null;
 
-appInitServiceWorker();
+appWhenLoaded(appInitServiceWorker);
 appWatchForUpdate();
 appWatchForInstallable();
 appInitWebAssembly();
@@ -21,6 +26,26 @@ appInitWebAssembly();
 // -----------------------------------------------------------------------------
 // Service Worker
 // -----------------------------------------------------------------------------
+
+// appWhenLoaded calls f once the app has rendered, which removes the loader,
+// or now if there is no loader. The service worker is registered then, since
+// it downloads the files of the app to cache them, which would otherwise slow
+// down the first load of the app.
+function appWhenLoaded(f) {
+  const loader = document.getElementById("app-wasm-loader");
+  if (!loader || !loader.parentNode) {
+    f();
+    return;
+  }
+  const observer = new MutationObserver(() => {
+    if (!loader.isConnected) {
+      observer.disconnect();
+      f();
+    }
+  });
+  observer.observe(loader.parentNode, { childList: true });
+}
+
 async function appInitServiceWorker() {
   if ("serviceWorker" in navigator) {
     try {
@@ -247,8 +272,14 @@ async function appShowDownloadProgress(url, progress) {
     // load through its HTTP cache only if the response can be cached, so we
     // check that first, to never download the bundle twice. (The query makes
     // the browser send the HEAD request without waiting for the download.)
+    // The browser also does not cache a response larger than a fraction of
+    // its cache, such as 10 MB of 80 MB, so a larger bundle is not shared.
     const head = await fetch(url + "?head", { method: "HEAD", cache: "no-store" });
     if (!/max-age=[1-9]|immutable/.test(head.headers.get("Cache-Control") || "")) {
+      return;
+    }
+    const size = parseInt(head.headers.get("Content-Length") || "0", 10);
+    if (!(size > 0 && size <= appSharedDownloadMaxSize)) {
       return;
     }
     const response = await fetch(url);
