@@ -251,7 +251,7 @@ func (sc *Scene) doUpdate() bool {
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
 		// pr.End()
-	case sc.lastRender.needsRestyle(rc):
+	case rc.restyle || sc.lastRender.needsRestyle(rc):
 		// pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.LayoutRenderScene()
