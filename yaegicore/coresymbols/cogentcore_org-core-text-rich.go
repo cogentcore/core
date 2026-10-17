@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/text/rich/rich"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AddFamily":          reflect.ValueOf(rich.AddFamily),
@@ -130,4 +130,4 @@ func init() {
 		"Text":         reflect.ValueOf((*rich.Text)(nil)),
 		"Weights":      reflect.ValueOf((*rich.Weights)(nil)),
 	}
-}
+})

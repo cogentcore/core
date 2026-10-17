@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/styles/states/states"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Active":        reflect.ValueOf(states.Active),
@@ -31,4 +31,4 @@ func init() {
 		// type definitions
 		"States": reflect.ValueOf((*states.States)(nil)),
 	}
-}
+})

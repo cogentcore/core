@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/text/text/text"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AlignsN":           reflect.ValueOf(text.AlignsN),
@@ -34,4 +34,4 @@ func init() {
 		"Style":          reflect.ValueOf((*text.Style)(nil)),
 		"WhiteSpaces":    reflect.ValueOf((*text.WhiteSpaces)(nil)),
 	}
-}
+})

@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/htmlcore/htmlcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"ExtractText":        reflect.ValueOf(htmlcore.ExtractText),
@@ -31,4 +31,4 @@ func init() {
 		"Context":         reflect.ValueOf((*htmlcore.Context)(nil)),
 		"WikilinkHandler": reflect.ValueOf((*htmlcore.WikilinkHandler)(nil)),
 	}
-}
+})

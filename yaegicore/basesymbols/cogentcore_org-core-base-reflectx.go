@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/reflectx/reflectx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"CloneToType":        reflect.ValueOf(reflectx.CloneToType),
@@ -75,7 +75,7 @@ func init() {
 		"_SetStringer": reflect.ValueOf((*_cogentcore_org_core_base_reflectx_SetStringer)(nil)),
 		"_ShouldSaver": reflect.ValueOf((*_cogentcore_org_core_base_reflectx_ShouldSaver)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_base_reflectx_SetAnyer is an interface wrapper for SetAnyer type
 type _cogentcore_org_core_base_reflectx_SetAnyer struct {

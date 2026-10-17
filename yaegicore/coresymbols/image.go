@@ -11,7 +11,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["image/image"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Black":                  reflect.ValueOf(&image.Black).Elem(),
@@ -73,7 +73,7 @@ func init() {
 		"_PalettedImage": reflect.ValueOf((*_image_PalettedImage)(nil)),
 		"_RGBA64Image":   reflect.ValueOf((*_image_RGBA64Image)(nil)),
 	}
-}
+})
 
 // _image_Image is an interface wrapper for Image type
 type _image_Image struct {

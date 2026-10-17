@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/events/events"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Attend":                reflect.ValueOf(events.Attend),
@@ -148,7 +148,7 @@ func init() {
 		// interface wrapper definitions
 		"_Event": reflect.ValueOf((*_cogentcore_org_core_events_Event)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_events_Event is an interface wrapper for Event type
 type _cogentcore_org_core_events_Event struct {

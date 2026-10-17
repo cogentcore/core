@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/cursors/cursors"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Alias":               reflect.ValueOf(cursors.Alias),
@@ -59,4 +59,4 @@ func init() {
 		// type definitions
 		"Cursor": reflect.ValueOf((*cursors.Cursor)(nil)),
 	}
-}
+})

@@ -105,6 +105,9 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 // It is used as the default value of [content.BindTextEditor].
 func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 	oc := func() {
+		// The symbols are made when they are first needed on the web.
+		basesymbols.Load()
+		coresymbols.Load()
 		in, new, err := getInterpreter(language)
 		if err != nil {
 			core.ErrorSnackbar(ed, err)

@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/labels/labels"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"FriendlyMapLabel":    reflect.ValueOf(labels.FriendlyMapLabel),
@@ -25,7 +25,7 @@ func init() {
 		"_Labeler":      reflect.ValueOf((*_cogentcore_org_core_base_labels_Labeler)(nil)),
 		"_SliceLabeler": reflect.ValueOf((*_cogentcore_org_core_base_labels_SliceLabeler)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_base_labels_Labeler is an interface wrapper for Labeler type
 type _cogentcore_org_core_base_labels_Labeler struct {

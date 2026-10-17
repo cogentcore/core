@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/styles/units/units"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Ch":            reflect.ValueOf(units.Ch),
@@ -74,4 +74,4 @@ func init() {
 		"Value":   reflect.ValueOf((*units.Value)(nil)),
 		"XY":      reflect.ValueOf((*units.XY)(nil)),
 	}
-}
+})

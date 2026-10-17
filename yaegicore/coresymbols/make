@@ -10,3 +10,5 @@ yaegi extract image image/color image/draw
 
 extract core events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree text/textcore text/rich text/lines text/text htmlcore content paint base/iox/imagex cursors
 
+
+sh ../lazyinit.sh

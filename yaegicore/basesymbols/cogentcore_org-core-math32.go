@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/math32/math32"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Abs":                      reflect.ValueOf(math32.Abs),
@@ -212,4 +212,4 @@ func init() {
 		"Vector3i":  reflect.ValueOf((*math32.Vector3i)(nil)),
 		"Vector4":   reflect.ValueOf((*math32.Vector4)(nil)),
 	}
-}
+})

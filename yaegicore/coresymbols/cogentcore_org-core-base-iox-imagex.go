@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/iox/imagex/imagex"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsRGBA":           reflect.ValueOf(imagex.AsRGBA),
@@ -57,7 +57,7 @@ func init() {
 		"_TestingT": reflect.ValueOf((*_cogentcore_org_core_base_iox_imagex_TestingT)(nil)),
 		"_Wrapped":  reflect.ValueOf((*_cogentcore_org_core_base_iox_imagex_Wrapped)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_base_iox_imagex_TestingT is an interface wrapper for TestingT type
 type _cogentcore_org_core_base_iox_imagex_TestingT struct {

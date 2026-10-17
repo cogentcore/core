@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/text/lines/lines"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"ApplyOneDiff":           reflect.ValueOf(lines.ApplyOneDiff),
@@ -42,4 +42,4 @@ func init() {
 		"Settings":       reflect.ValueOf((*lines.Settings)(nil)),
 		"Undo":           reflect.ValueOf((*lines.Undo)(nil)),
 	}
-}
+})

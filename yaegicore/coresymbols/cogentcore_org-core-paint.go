@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/paint/paint"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"ClampBorderRadius": reflect.ValueOf(paint.ClampBorderRadius),
@@ -25,4 +25,4 @@ func init() {
 		"Painter": reflect.ValueOf((*paint.Painter)(nil)),
 		"State":   reflect.ValueOf((*paint.State)(nil)),
 	}
-}
+})
