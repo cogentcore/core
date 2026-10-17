@@ -10,6 +10,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -71,7 +72,19 @@ func buildJS(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	err = exec.Major().Run("goscript", "compile", "-p", ".", "--output", output, "-b", "-tags="+tags)
+	// Dead code elimination leaves the functions and methods that the
+	// program can never call out of the bundle (unless the environment
+	// already sets GOSCRIPT_ELIMINATE_DEAD_CODE, such as to 0 to turn it off).
+	// Versions of goscript without it ignore the variable.
+	gs := exec.Major()
+	gs.Env = maps.Clone(gs.Env)
+	if gs.Env == nil {
+		gs.Env = map[string]string{}
+	}
+	if _, ok := os.LookupEnv("GOSCRIPT_ELIMINATE_DEAD_CODE"); !ok {
+		gs.Env["GOSCRIPT_ELIMINATE_DEAD_CODE"] = "1"
+	}
+	err = gs.Run("goscript", "compile", "-p", ".", "--output", output, "-b", "-tags="+tags)
 	if err != nil {
 		return fmt.Errorf("error compiling with goscript: %w", err)
 	}
