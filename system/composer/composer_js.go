@@ -16,6 +16,27 @@ import (
 // loaderRemoved is whether the HTML loader div has been removed.
 var loaderRemoved = false
 
+// loaderRemovedFuncs are the functions to call once the loader is removed
+// (see [OnLoaderRemoved]).
+var loaderRemovedFuncs []func()
+
+// LoaderRemoved returns whether the HTML loader div, which shows the loading
+// progress and the static preview of the page, has been removed, which
+// happens once the app has rendered.
+func LoaderRemoved() bool {
+	return loaderRemoved
+}
+
+// OnLoaderRemoved calls the given function once the HTML loader div has been
+// removed (see [LoaderRemoved]), or now if it already has been.
+func OnLoaderRemoved(f func()) {
+	if loaderRemoved {
+		f()
+		return
+	}
+	loaderRemovedFuncs = append(loaderRemovedFuncs, f)
+}
+
 // ComposerWeb is the web implementation of [Composer].
 type ComposerWeb struct {
 
@@ -99,7 +120,13 @@ func (cw *ComposerWeb) Compose() {
 	// Only remove the loader after we have successfully rendered.
 	if !loaderRemoved {
 		loaderRemoved = true
-		js.Global().Get("document").Call("getElementById", "app-wasm-loader").Call("remove")
+		if loader := js.Global().Get("document").Call("getElementById", "app-wasm-loader"); !loader.IsNull() {
+			loader.Call("remove")
+		}
+		for _, f := range loaderRemovedFuncs {
+			f()
+		}
+		loaderRemovedFuncs = nil
 	}
 }
 
