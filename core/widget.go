@@ -333,9 +333,11 @@ func (wb *WidgetBase) Init() {
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
 	if pwb := wb.parentWidget(); pwb != nil {
-		if pwb.Scene != wb.Scene {
+		if pwb.Scene != nil && pwb.Scene != wb.Scene {
 			// A subtree added as a whole (for example, a clone or a moved
 			// widget) has descendants that must now be in the new scene.
+			// A parent without a scene, as when a body is added to an
+			// external parent, leaves the scenes of the descendants alone.
 			wb.setDescendantScenes(pwb.Scene)
 		}
 		wb.Scene = pwb.Scene
