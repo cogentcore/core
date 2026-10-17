@@ -5,6 +5,8 @@
 package highlighting
 
 import (
+	"fmt"
+	"iter"
 	"log/slog"
 	"slices"
 	"strings"
@@ -188,7 +190,12 @@ func (hi *Highlighter) chromaTagsAll(txt []byte) ([]lexer.Line, error) {
 		slog.Error(err.Error())
 		return nil, err
 	}
-	lines := chroma.SplitTokensIntoLines(slices.Collect(iterator))
+	toks, err := collectTokens(iterator)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, err
+	}
+	lines := chroma.SplitTokensIntoLines(toks)
 	sz := len(lines)
 	tags := make([]lexer.Line, sz)
 	for li, lt := range lines {
@@ -218,7 +225,29 @@ func ChromaTagsLine(clex chroma.Lexer, txt string) (lexer.Line, error) {
 		return nil, err
 	}
 	var tags lexer.Line
-	toks := slices.Collect(iterator)
+	toks, err := collectTokens(iterator)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, err
+	}
 	chromaTagsForLine(&tags, toks)
 	return tags, nil
+}
+
+// collectTokens collects the tokens of a chroma lexer's iterator. The
+// iterator cannot return an error, so chroma panics when lexing fails,
+// for example when a rule's regular expression exceeds its match timeout,
+// and leaves it to the caller to recover; this returns that as an error.
+func collectTokens(iterator iter.Seq[chroma.Token]) (toks []chroma.Token, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			toks = nil
+			if e, ok := r.(error); ok {
+				err = fmt.Errorf("highlighting: lexing failed: %w", e)
+			} else {
+				err = fmt.Errorf("highlighting: lexing failed: %v", r)
+			}
+		}
+	}()
+	return slices.Collect(iterator), nil
 }
