@@ -12,9 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/copier"
-
 	"cogentcore.org/core/base/elide"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/types"
@@ -668,7 +667,7 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 // copy from a source to a target that only differ minimally will be
 // minimally destructive. Only copying to the same type is supported.
 // The struct field tag copier:"-" can be added for any fields that
-// should not be copied. Also, unexported fields are not copied.
+// should not be copied. Unexported fields are copied shallowly.
 // See [Node.CopyFieldsFrom] for more information on field copying.
 func (n *NodeBase) CopyFrom(from Node) {
 	if from == nil {
@@ -722,7 +721,7 @@ func (n *NodeBase) Clone() Node {
 // CopyFieldsFrom copies the fields of the node from the given node.
 // By default, it is [NodeBase.CopyFieldsFrom], which automatically does
 // a deep copy of all of the fields of the node that do not a have a
-// `copier:"-"` struct tag. Node types should only implement a custom
+// `copier:"-"` struct tag, using [reflectx.CopyStructDeep]. Node types should only implement a custom
 // CopyFieldsFrom method when they have fields that need special copying
 // logic that can not be automatically handled. All custom CopyFieldsFrom
 // methods should call [NodeBase.CopyFieldsFrom] first and then only do manual
@@ -730,10 +729,12 @@ func (n *NodeBase) Clone() Node {
 // [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 // custom CopyFieldsFrom method.
 func (n *NodeBase) CopyFieldsFrom(from Node) {
-	err := copier.CopyWithOption(n.This, from.AsTree().This, copier.Option{CaseSensitive: true, DeepCopy: true})
-	if err != nil {
-		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
+	ft := from.AsTree().This
+	if reflect.TypeOf(n.This) != reflect.TypeOf(ft) {
+		slog.Error("tree.NodeBase.CopyFieldsFrom: can only copy between nodes of the same type", "to", n.This, "from", ft)
+		return
 	}
+	reflectx.CopyStructDeep(n.This, ft)
 }
 
 // Event methods:

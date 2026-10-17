@@ -30,7 +30,6 @@ require (
 	github.com/hack-pad/hackpadfs v0.2.4
 	github.com/jackmordaunt/icns/v2 v2.2.7
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
-	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
