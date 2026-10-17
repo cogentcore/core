@@ -42,6 +42,50 @@ func TestTabsClick(t *testing.T) {
 	})
 }
 
+func TestTabsUpdateSelected(t *testing.T) {
+	b := NewBody()
+	ts := NewTabs(b)
+	first, _ := ts.NewTab("First")
+	NewText(first).SetText("I am first!")
+	second, _ := ts.NewTab("Second")
+	updates := 0
+	text := NewText(second)
+	text.Updater(func() {
+		updates++
+		text.SetText("I am second!")
+	})
+	b.AssertRender(t, "tabs/click", func() {
+		// The content of a tab is updated when it is selected, not before.
+		assert.Zero(t, updates)
+		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
+	})
+	assert.NotZero(t, updates)
+}
+
+func TestTabsLazy(t *testing.T) {
+	b := NewBody()
+	ts := NewTabs(b)
+	builds := 0
+	ts.NewLazyTab("First", func(tab *Frame) {
+		builds++
+		NewText(tab).SetText("I am first!")
+	})
+	ts.NewLazyTab("Second", func(tab *Frame) {
+		builds++
+		NewText(tab).SetText("I am second!")
+	})
+	// Only the content of the selected tab is made, and only once.
+	assert.Equal(t, 1, builds)
+	b.AssertRender(t, "tabs/click", func() {
+		assert.Equal(t, 1, builds)
+		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
+	})
+	assert.Equal(t, 2, builds)
+	ts.SelectTabIndex(0)
+	ts.SelectTabIndex(1)
+	assert.Equal(t, 2, builds)
+}
+
 func TestTabsMany(t *testing.T) {
 	b := NewBody()
 	ts := NewTabs(b)

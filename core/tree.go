@@ -500,6 +500,11 @@ func (tr *Tree) OnAdd() {
 	tr.WidgetBase.OnAdd()
 	tr.Text = tr.Name
 	if ptv := AsTree(tr.Parent); ptv != nil {
+		if ptv.Root == nil {
+			// The parent is the root of a tree that has not been added
+			// anywhere yet, such as the result of [tree.NodeBase.Clone].
+			ptv.Root = ptv.This.(Treer)
+		}
 		tr.Root = ptv.Root
 		tr.IconOpen = ptv.IconOpen
 		tr.IconClosed = ptv.IconClosed
@@ -509,9 +514,23 @@ func (tr *Tree) OnAdd() {
 			tr.Root = tr.This.(Treer)
 		}
 	}
+	// A subtree added as a whole (for example, a duplicate or a moved node)
+	// already has children, whose roots must now be the new root.
+	tr.setDescendantRoots(tr.Root)
 	troot := tr.Root.AsCoreTree()
 	if troot.TreeInit != nil {
 		troot.TreeInit(tr)
+	}
+}
+
+// setDescendantRoots sets the [Tree.Root] of all descendant tree
+// nodes of this node to the given root.
+func (tr *Tree) setDescendantRoots(root Treer) {
+	for _, c := range tr.Children {
+		if ct := AsTree(c); ct != nil {
+			ct.Root = root
+			ct.setDescendantRoots(root)
+		}
 	}
 }
 

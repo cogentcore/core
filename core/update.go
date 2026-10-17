@@ -30,6 +30,9 @@ func (wb *WidgetBase) UpdateWidget() *WidgetBase {
 // starting with this one and going down.
 func (wb *WidgetBase) UpdateTree() {
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if cwb != wb && isHiddenStackChild(cwb) {
+			return tree.Break
+		}
 		cwb.UpdateWidget()
 		return tree.Continue
 	})
@@ -58,6 +61,9 @@ func (wb *WidgetBase) Update() { //types:add
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if cwb != wb && isHiddenStackChild(cwb) {
+			return tree.Break
+		}
 		cwb.UpdateWidget()
 		cw.Style()
 		return tree.Continue
@@ -73,9 +79,24 @@ func (wb *WidgetBase) Update() { //types:add
 // and should call [WidgetBase.Update] instead).
 func (wb *WidgetBase) UpdateRender() {
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if cwb != wb && isHiddenStackChild(cwb) {
+			return tree.Break
+		}
 		cwb.UpdateWidget()
 		cw.Style()
 		return tree.Continue
 	})
 	wb.NeedsRender()
+}
+
+// isHiddenStackChild returns whether the given widget is a child of a frame
+// that only lays out its stack top ([Frame.LayoutStackTopOnly]) other than its
+// stack top, such as the content of a tab that is not selected. Updates and
+// styling skip it until it becomes the stack top, whose frame is then updated.
+func isHiddenStackChild(cwb *WidgetBase) bool {
+	fr := AsFrame(cwb.Parent)
+	if fr == nil || !fr.LayoutStackTopOnly {
+		return false
+	}
+	return fr.Child(fr.StackTop) != cwb.This
 }

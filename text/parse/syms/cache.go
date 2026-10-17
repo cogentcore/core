@@ -5,7 +5,6 @@
 package syms
 
 import (
-	"go/build"
 	"log"
 	"os"
 	"os/user"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 )
 
 // ParseCacheDir returns the parse cache directory for given language, and ensures that it exists.
@@ -38,7 +38,7 @@ func GoRelPath(filename string) (string, error) {
 	}
 	relfn := absfn
 	got := false
-	for _, srcDir := range build.Default.SrcDirs() {
+	for _, srcDir := range fsx.GoSrcDirs() {
 		if strings.HasPrefix(absfn, srcDir) {
 			relfn = strings.TrimPrefix(absfn, srcDir)
 			got = true

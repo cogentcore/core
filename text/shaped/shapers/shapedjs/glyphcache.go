@@ -23,6 +23,13 @@ func init() {
 // glyphCache caches glyph sizing data by font and rune
 type glyphCache struct {
 	glyphs map[text.Font]map[font.GID]*Metrics
+
+	// last is the font of the last lookup and lastGlyphs its glyphs, as
+	// consecutive lookups are nearly always in the same font, which saves
+	// looking up the font in glyphs.
+	last       text.Font
+	lastGlyphs map[font.GID]*Metrics
+
 	sync.Mutex
 }
 
@@ -35,18 +42,23 @@ func (gc *glyphCache) Glyph(ctx js.Value, fn *text.Font, tsty *text.Style, tx []
 	gc.Lock()
 	defer gc.Unlock()
 
-	fc, hasfc := gc.glyphs[*fn]
-	if hasfc {
-		g, ok := fc[gid]
-		if ok {
-			return g
+	// The glyphs of the font are those of the last lookup, or looked up.
+	fc := gc.lastGlyphs
+	if fc == nil || gc.last != *fn {
+		fc = gc.glyphs[*fn]
+		if fc == nil {
+			fc = make(map[font.GID]*Metrics)
+			gc.glyphs[*fn] = fc
 		}
-	} else {
-		fc = make(map[font.GID]*Metrics)
+		gc.last, gc.lastGlyphs = *fn, fc
+	}
+
+	// A glyph not measured yet is measured.
+	if g, ok := fc[gid]; ok {
+		return g
 	}
 	g := gc.measureGlyph(ctx, fn, tsty, tx)
 	fc[gid] = g
-	gc.glyphs[*fn] = fc
 	return g
 }
 

@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["strconv/strconv"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AppendBool":               reflect.ValueOf(strconv.AppendBool),
@@ -56,4 +56,4 @@ func init() {
 		// type definitions
 		"NumError": reflect.ValueOf((*strconv.NumError)(nil)),
 	}
-}
+})

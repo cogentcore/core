@@ -16,9 +16,11 @@ The `core` command line tool provides four main build commands, as documented be
 
 4. `core install` installs the app on the target system
 
-You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run web` to serve an app on the web.
+You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run wasm` to serve an app on the web.
 
-Note: `core run web` is mainly used for serving an app locally; to deploy an app on the web, you can use `core build web` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
+There are two web platforms: `wasm` compiles the app to WebAssembly, and `js` compiles it to JavaScript with [GoScript](https://github.com/s4wave/goscript). The `js` platform installs GoScript and [bun](https://bun.sh) automatically if they are not already installed. The `web` platform name from earlier versions still works, and means `wasm`.
+
+Note: `core run wasm` and `core run js` are mainly used for serving an app locally; to deploy an app on the web, you can use `core build wasm` or `core build js` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
 
 If there is an `icon.svg` file in the current directory, it will be used as the app icon on all platforms.
 
@@ -32,11 +34,17 @@ You can replace that automatic preview with your own content by making an `index
 
 You can include a `&lt;script&gt;` element in your index page, and it will run, but note that the entire loader element is removed as soon as the app finishes its first render. Anything that the script registered, such as a timer or an event listener, keeps running after that, so it must clean up after itself.
 
+## Content websites
+
+For apps that use [[content]], each content page is pre-rendered as its own HTML page, along with navigation trees for the table of contents and categories and a page search, which use [Vue.js](https://vuejs.org) and closely replicate the content app. Math is rendered with [KaTeX](https://katex.org). Code blocks are shown with syntax highlighting, but interactive Go examples are not run, so their resulting widgets are not shown. Any non-page files in the content directory, such as images, are copied into the website. These pages are shown while the app is loading, and they are what search engines see.
+
+You can also build a freestanding website that consists only of these static HTML pages, without the Go wasm app, using `core build wasm -htmlonly`. The pages are the same, except that they do not load the app.
+
 ## Details
 
 You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.
 
-The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` and associated `.html` and `.js` files on Web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
+The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` (or `.js` for `js`) and associated `.html` and `.js` files on the web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
 
 For desktop platforms, `core run` just runs the executable directly. For mobile platforms, it installs the executable package on the target device (which can be a simulator or a real connected device) using `core install` and then starts it. For web, it serves the files in `bin/web` at http://localhost:8080.
 

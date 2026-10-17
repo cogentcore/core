@@ -15,7 +15,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/filetree/filetree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsNode":            reflect.ValueOf(filetree.AsNode),
@@ -41,7 +41,7 @@ func init() {
 		"_NodeEmbedder": reflect.ValueOf((*_cogentcore_org_core_filetree_NodeEmbedder)(nil)),
 		"_Treer":        reflect.ValueOf((*_cogentcore_org_core_filetree_Treer)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_filetree_Filer is an interface wrapper for Filer type
 type _cogentcore_org_core_filetree_Filer struct {

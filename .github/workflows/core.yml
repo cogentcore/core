@@ -37,7 +37,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.6'
+          go-version: '1.27.0'
 
       - name: Change Mirror Priorities
         uses: ./.github/actions/apt-mirrors
@@ -46,10 +46,10 @@ jobs:
         run: go install && core setup
 
       - name: Build Docs
-        run: core build web -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
+        run: core build wasm -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
 
       - name: Build Demo
-        run: core build web -dir examples/demo -o static/demo
+        run: core build wasm -dir examples/demo -o static/demo
 
       - name: Setup Pages
         id: pages

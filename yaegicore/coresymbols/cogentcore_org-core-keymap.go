@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/keymap/keymap"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Abort":            reflect.ValueOf(keymap.Abort),
@@ -95,4 +95,4 @@ func init() {
 		"Maps":      reflect.ValueOf((*keymap.Maps)(nil)),
 		"MapsItem":  reflect.ValueOf((*keymap.MapsItem)(nil)),
 	}
-}
+})

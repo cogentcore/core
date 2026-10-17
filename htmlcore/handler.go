@@ -349,6 +349,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	} else {
 		img = New[core.Image](ctx)
 		img.SetTooltip(alt)
+		img.SetProperty("src", src) // for generatehtml
 		if pid != "" {
 			img.SetName(pid)
 			img.SetProperty("id", pid)

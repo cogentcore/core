@@ -12,9 +12,17 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/jscp"
-	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/math32"
 	"github.com/oliverbestmann/webgpu/jsx"
 )
+
+// gradient matches [cogentcore.org/core/colors/gradient.Gradient] without
+// importing it, which would create an import cycle in the tests of the
+// packages that it depends on.
+type gradient interface {
+	image.Image
+	Update(opacity float32, box math32.Box2, objTransform math32.Matrix2)
+}
 
 // WrapJS returns a JavaScript optimized wrapper around the given
 // [image.Image] on web, and just returns the image otherwise.
@@ -33,7 +41,7 @@ func WrapJS(src image.Image) image.Image {
 		return NewJSRGBA(x, nil)
 	case *image.Uniform:
 		return src
-	case gradient.Gradient:
+	case gradient:
 		return src
 	default:
 		return NewJSRGBA(AsRGBA(src), nil)
@@ -206,7 +214,7 @@ func (im *JSImageData) Set(src image.Image) {
 		im.SetNRGBA(x)
 	case *image.Uniform:
 		errors.Log(errors.New("imagex.JSImageData: setting image to Uniform not supported"))
-	case gradient.Gradient:
+	case gradient:
 		errors.Log(errors.New("imagex.JSImageData: setting image to Gradient not supported"))
 	default:
 		im.SetRGBA(AsRGBA(ui))

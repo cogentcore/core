@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/errors/errors"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"As":             reflect.ValueOf(errors.As),
@@ -22,4 +22,4 @@ func init() {
 		"New":            reflect.ValueOf(errors.New),
 		"Unwrap":         reflect.ValueOf(errors.Unwrap),
 	}
-}
+})

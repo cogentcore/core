@@ -90,7 +90,14 @@ func (ct *Content) pageURL(pg *bcontent.Page, heading string) (current, nw *url.
 // handleWebPopState adds a JS event listener to handle user navigation in the browser.
 func (ct *Content) handleWebPopState() {
 	js.Global().Get("window").Call("addEventListener", "popstate", js.FuncOf(func(this js.Value, args []js.Value) any {
-		ct.open(ct.getWebURL(), false) // do not add to history while navigating history
+		// The page is opened outside of the event callback, which must not
+		// block (opening a page can wait on files), with the render lock, as
+		// in the handling of other events.
+		go func() {
+			ct.AsyncLock()
+			defer ct.AsyncUnlock()
+			ct.open(ct.getWebURL(), false) // do not add to history while navigating history
+		}()
 		return nil
 	}))
 }

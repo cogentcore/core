@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/chewxy/math32"
+	math32 "cogentcore.org/core/math32/internal/fmath"
 	"golang.org/x/image/math/fixed"
 )
 

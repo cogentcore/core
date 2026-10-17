@@ -10,7 +10,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/colors/gradient/gradient"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Apply":             reflect.ValueOf(gradient.Apply),
@@ -52,7 +52,7 @@ func init() {
 		// interface wrapper definitions
 		"_Gradient": reflect.ValueOf((*_cogentcore_org_core_colors_gradient_Gradient)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_colors_gradient_Gradient is an interface wrapper for Gradient type
 type _cogentcore_org_core_colors_gradient_Gradient struct {

@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/tree/tree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Add":                      reflect.ValueOf(interp.GenericFunc("func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add\n\tAddAt(p, AutoPlanName(2), init)\n}")),
@@ -58,7 +58,7 @@ func init() {
 		"_Node":      reflect.ValueOf((*_cogentcore_org_core_tree_Node)(nil)),
 		"_NodeValue": reflect.ValueOf((*_cogentcore_org_core_tree_NodeValue)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_tree_Node is an interface wrapper for Node type
 type _cogentcore_org_core_tree_Node struct {

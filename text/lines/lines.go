@@ -149,6 +149,12 @@ type Lines struct {
 	// markupDelayMu is the mutex for updating the markup delay timer.
 	markupDelayMu sync.Mutex
 
+	// markupDeferred is whether the syntax highlighting markup is deferred
+	// until the text is first shown in a view (see [Lines.StartDeferredMarkup]),
+	// which is done when running in JavaScript (see goscript), where it can
+	// take a significant amount of time.
+	markupDeferred bool
+
 	// posHistory is the history of cursor positions.
 	// It can be used to move back through them.
 	posHistory []textpos.Pos

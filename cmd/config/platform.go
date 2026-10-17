@@ -7,6 +7,8 @@ package config
 import (
 	"fmt"
 	"strings"
+
+	"cogentcore.org/core/base/logx"
 )
 
 // Note: the maps in this file are derived from https://github.com/golang/go/blob/master/src/go/build/syslist.go
@@ -56,6 +58,11 @@ func (p *Platform) SetString(platform string) error {
 	if err != nil {
 		return fmt.Errorf("error parsing platform: %w", err)
 	}
+	// The wasm platform was called web, which is still accepted.
+	if p.OS == "web" {
+		logx.PrintlnWarn("the web platform is now called wasm; use wasm instead of web")
+		p.OS = "wasm"
+	}
 	if !found {
 		p.Arch = "*"
 		return nil
@@ -88,7 +95,9 @@ var supportedOS = map[string]bool{
 	"hurd":      false,
 	"illumos":   false,
 	"ios":       true,
-	"web":       true,
+	"js":        true,
+	"wasm":      true,
+	"web":       true, // the old name of wasm
 	"linux":     true,
 	"nacl":      false,
 	"netbsd":    false,

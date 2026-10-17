@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/text/textcore/textcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AsBase":                   reflect.ValueOf(textcore.AsBase),
@@ -44,7 +44,7 @@ func init() {
 		"_BaseEmbedder":   reflect.ValueOf((*_cogentcore_org_core_text_textcore_BaseEmbedder)(nil)),
 		"_EditorEmbedder": reflect.ValueOf((*_cogentcore_org_core_text_textcore_EditorEmbedder)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_text_textcore_BaseEmbedder is an interface wrapper for BaseEmbedder type
 type _cogentcore_org_core_text_textcore_BaseEmbedder struct {

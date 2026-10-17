@@ -169,7 +169,8 @@ func ContrastToneDarker(tone, ratio float32) float32 {
 // given tone. The tone must be between 0 and 100 and the ratio must be
 // between 1 and 21.
 func ContrastToneLighterTry(tone, ratio float32) (float32, bool) {
-	if tone < 0 || tone > 100 {
+	tone, ok := validTone(tone)
+	if !ok {
 		return -1, false
 	}
 
@@ -184,8 +185,8 @@ func ContrastToneLighterTry(tone, ratio float32) (float32, bool) {
 	// TODO(kai/cam): this +0.4 explained by the comment below only seems to cause problems
 	// Ensure gamut mapping, which requires a 'range' on tone, will still result
 	// the correct ratio by darkening slightly.
-	ret := cie.YToL(lightY) // + 0.4
-	if ret < 0 || ret > 100 {
+	ret, ok := validTone(cie.YToL(lightY)) // + 0.4
+	if !ok {
 		return -1, false
 	}
 	return ret, true
@@ -197,7 +198,8 @@ func ContrastToneLighterTry(tone, ratio float32) (float32, bool) {
 // given tone. The tone must be between 0 and 100 and the ratio must be
 // between 1 and 21.
 func ContrastToneDarkerTry(tone, ratio float32) (float32, bool) {
-	if tone < 0 || tone > 100 {
+	tone, ok := validTone(tone)
+	if !ok {
 		return -1, false
 	}
 
@@ -212,11 +214,22 @@ func ContrastToneDarkerTry(tone, ratio float32) (float32, bool) {
 	// TODO(kai/cam): this -0.4 explained by the comment below only seems to cause problems
 	// Ensure gamut mapping, which requires a 'range' on tone, will still result
 	// the correct ratio by darkening slightly.
-	ret := cie.YToL(darkY) // - 0.4
-	if ret < 0 || ret > 100 {
+	ret, ok := validTone(cie.YToL(darkY)) // - 0.4
+	if !ok {
 		return -1, false
 	}
 	return ret, true
+}
+
+// validTone returns the given tone and whether it is between 0 and 100,
+// allowing for floating point error at the ends of the range, such as a
+// tone of -6e-08 for black, which is clamped to the range.
+func validTone(tone float32) (float32, bool) {
+	const tol = 0.001
+	if tone < -tol || tone > 100+tol {
+		return -1, false
+	}
+	return math32.Clamp(tone, 0, 100), true
 }
 
 // ContrastRatioOfYs returns the contrast ratio of two XYZ Y values.

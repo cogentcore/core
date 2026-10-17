@@ -40,8 +40,20 @@ type State struct {
 	// rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
 	Matches [][]MatchStack `display:"no-inline"`
 
-	// rules that did NOT match -- represented as a map by scope of a RuleSet
-	NonMatches ScopeRuleSet `display:"no-inline"`
+	// nonMatches are the rules that did not match at each point, in 1-to-1
+	// correspondence with the Src.Lex tokens like Matches, for the scopes
+	// that start there.
+	nonMatches [][]nonMatchSet
+
+	// nonMatched has the positions in nonMatches that have rules,
+	// which are cleared by [State.ResetNonMatches].
+	nonMatched []textpos.Pos
+
+	// matchBuf and nonMatchBuf are the buffers for Matches and nonMatches,
+	// which are reused for the next parse, typically of the same file after
+	// an edit, along with the slices for each position (see [State.AllocRules]).
+	matchBuf    []MatchStack
+	nonMatchBuf []nonMatchSet
 
 	// stack for context-sensitive rules
 	Stack lexer.Stack `display:"no-inline"`
@@ -108,16 +120,42 @@ func (ps *State) AllocRules() {
 	if len(ps.Src.Lexs) != nlines {
 		return
 	}
-	ps.Matches = make([][]MatchStack, nlines)
 	ntot := 0
 	for ln := 0; ln < nlines; ln++ {
-		sz := len(ps.Src.Lexs[ln])
-		if sz > 0 {
-			ps.Matches[ln] = make([]MatchStack, sz)
-			ntot += sz
+		ntot += len(ps.Src.Lexs[ln])
+	}
+	// We make one allocation for all of the lines, and reuse the buffers
+	// of the previous parse when they are big enough, truncating the slices
+	// of each position so that their capacity is also reused.
+	if cap(ps.matchBuf) < ntot {
+		ps.matchBuf = make([]MatchStack, ntot, ntot+ntot/4)
+		ps.nonMatchBuf = make([]nonMatchSet, ntot, ntot+ntot/4)
+	} else {
+		ps.matchBuf = ps.matchBuf[:ntot]
+		ps.nonMatchBuf = ps.nonMatchBuf[:ntot]
+		for i := range ntot {
+			ps.matchBuf[i] = ps.matchBuf[i][:0]
+			nm := &ps.nonMatchBuf[i]
+			nm.rules = nm.rules[:0]
+			nm.endLines = nm.endLines[:0]
+			nm.endChars = nm.endChars[:0]
 		}
 	}
-	ps.NonMatches = make(ScopeRuleSet, ntot*10)
+	if cap(ps.Matches) < nlines {
+		ps.Matches = make([][]MatchStack, nlines, nlines+nlines/4)
+		ps.nonMatches = make([][]nonMatchSet, nlines, nlines+nlines/4)
+	} else {
+		ps.Matches = ps.Matches[:nlines]
+		ps.nonMatches = ps.nonMatches[:nlines]
+	}
+	ps.nonMatched = ps.nonMatched[:0]
+	off := 0
+	for ln := 0; ln < nlines; ln++ {
+		sz := len(ps.Src.Lexs[ln])
+		ps.Matches[ln] = ps.matchBuf[off : off+sz : off+sz]
+		ps.nonMatches[ln] = ps.nonMatchBuf[off : off+sz : off+sz]
+		off += sz
+	}
 }
 
 // Error adds a parsing error at given lex token position
@@ -319,10 +357,11 @@ func (rs *MatchStack) Add(pr *Rule, scope textpos.Region, regs Matches) {
 
 // Find looks for given rule and scope on the stack
 func (rs *MatchStack) Find(pr *Rule, scope textpos.Region) (*MatchState, bool) {
-	for i := range *rs {
-		r := &(*rs)[i]
-		if r.Rule == pr && r.Scope == scope {
-			return r, true
+	s := *rs
+	for i := range s {
+		// We only take the address of a match, which is costly in JavaScript.
+		if s[i].Rule == pr && s[i].Scope == scope {
+			return &s[i], true
 		}
 	}
 	return nil, false
@@ -389,7 +428,7 @@ type ScopeRule struct {
 	Rule  *Rule
 }
 
-// ScopeRuleSet is a map by scope of RuleSets, for non-matching rules
+// ScopeRuleSet is a map by scope of RuleSets, for non-matching rules.
 type ScopeRuleSet map[ScopeRule]struct{}
 
 // Add a rule to scope set, with auto-alloc
@@ -405,19 +444,65 @@ func (rs ScopeRuleSet) Has(scope textpos.Region, pr *Rule) bool {
 	return has
 }
 
+// nonMatchSet has the rules that did not match for the scopes that start at
+// its position in [State.nonMatches], with the line and character of the end
+// of each scope. These are in separate slices of basic types, which are
+// faster to search than a slice of structs, especially in JavaScript.
+type nonMatchSet struct {
+	rules    []*Rule
+	endLines []int
+	endChars []int
+}
+
+// nonMatchesAt returns the non-matching rules at the start of the given
+// scope, or nil if it is outside of the source.
+func (ps *State) nonMatchesAt(scope textpos.Region) *nonMatchSet {
+	ln, ch := scope.Start.Line, scope.Start.Char
+	if ln < 0 || ln >= len(ps.nonMatches) || ch < 0 || ch >= len(ps.nonMatches[ln]) {
+		return nil
+	}
+	return &ps.nonMatches[ln][ch]
+}
+
 // AddNonMatch adds given rule to non-matching rule set for this scope
 func (ps *State) AddNonMatch(scope textpos.Region, pr *Rule) {
-	ps.NonMatches.Add(scope, pr)
+	nm := ps.nonMatchesAt(scope)
+	if nm == nil {
+		return
+	}
+	if len(nm.rules) == 0 {
+		ps.nonMatched = append(ps.nonMatched, scope.Start)
+	}
+	nm.rules = append(nm.rules, pr)
+	nm.endLines = append(nm.endLines, scope.End.Line)
+	nm.endChars = append(nm.endChars, scope.End.Char)
 }
 
 // IsNonMatch looks for rule in nonmatch list at given scope
 func (ps *State) IsNonMatch(scope textpos.Region, pr *Rule) bool {
-	return ps.NonMatches.Has(scope, pr)
+	nm := ps.nonMatchesAt(scope)
+	if nm == nil {
+		return false
+	}
+	eln, ech := scope.End.Line, scope.End.Char
+	endLines, endChars := nm.endLines, nm.endChars
+	for i, r := range nm.rules {
+		if r == pr && endLines[i] == eln && endChars[i] == ech {
+			return true
+		}
+	}
+	return false
 }
 
-// ResetNonMatches resets the non-match map -- do after every EOS
+// ResetNonMatches resets the non-matching rules -- do after every EOS
 func (ps *State) ResetNonMatches() {
-	ps.NonMatches = make(ScopeRuleSet)
+	for _, p := range ps.nonMatched {
+		nm := &ps.nonMatches[p.Line][p.Char]
+		nm.rules = nm.rules[:0]
+		nm.endLines = nm.endLines[:0]
+		nm.endChars = nm.endChars[:0]
+	}
+	ps.nonMatched = ps.nonMatched[:0]
 }
 
 ///////////////////////////////////////////////////////////////////////////

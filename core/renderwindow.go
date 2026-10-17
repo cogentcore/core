@@ -607,6 +607,10 @@ type renderContext struct {
 	// rebuild is whether to force a rebuild of all Scene elements.
 	rebuild bool
 
+	// restyle is whether to restyle and lay out all Scenes, as when the
+	// fonts that texts are measured with have changed.
+	restyle bool
+
 	// TextShaper is the text shaping system for the render context,
 	// for doing text layout.
 	textShaper shaped.Shaper
@@ -677,6 +681,7 @@ func (w *renderWindow) renderWindow() {
 	rc.Lock()
 	defer func() {
 		rc.rebuild = false
+		rc.restyle = false
 		rc.Unlock()
 	}()
 	rebuild := rc.rebuild

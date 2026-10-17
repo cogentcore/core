@@ -27,6 +27,12 @@ type Web struct { //types:add
 	// preview and SEO purposes.
 	GenerateHTML bool `default:"true"`
 
+	// HTMLOnly is whether to build a freestanding website consisting only of
+	// static HTML pages generated from the app content, without the Go wasm app.
+	// It is only supported for apps that use the content package. The pages are
+	// the same as the preview pages that are otherwise shown while the app loads.
+	HTMLOnly bool
+
 	// The page language.
 	//
 	// DEFAULT: en.

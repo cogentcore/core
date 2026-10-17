@@ -10,7 +10,7 @@ package token
 //go:generate core generate
 
 import (
-	"fmt"
+	"strconv"
 
 	"cogentcore.org/core/icons"
 )
@@ -179,7 +179,7 @@ var KeyTokenZero = KeyToken{}
 func (kt KeyToken) String() string {
 	ds := ""
 	if kt.Depth != 0 {
-		ds = fmt.Sprintf("+%d:", kt.Depth)
+		ds = "+" + strconv.Itoa(kt.Depth) + ":"
 	}
 	if kt.Key != "" {
 		return ds + kt.Token.String() + ": " + kt.Key

@@ -1,4 +1,4 @@
-//go:build js
+//go:build js && !goscript
 
 // Package jscp provides functions for copying data to JavaScript
 package jscp

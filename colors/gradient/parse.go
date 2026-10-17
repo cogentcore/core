@@ -19,9 +19,9 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/iox/xmlx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"golang.org/x/net/html/charset"
 )
 
 // XMLAttr searches for given attribute in slice of xml attributes;
@@ -316,7 +316,7 @@ func parseColorStop(stop *Stop, prev color.Color, par string) error {
 // sets the properties of the given gradient accordingly.
 func ReadXML(g *Gradient, reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
-	decoder.CharsetReader = charset.NewReaderLabel
+	decoder.CharsetReader = xmlx.CharsetReader
 
 	for {
 		t, err := decoder.Token()

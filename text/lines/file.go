@@ -15,6 +15,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse"
 )
 
@@ -43,8 +44,7 @@ func (ls *Lines) FileInfo() *fileinfo.FileInfo {
 func (ls *Lines) ParseState() (*parse.LanguageProperties, *parse.FileStates) {
 	ls.Lock()
 	defer ls.Unlock()
-	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
-	if lp != nil && lp.Lang != nil {
+	if lp := highlighting.ParseLanguage(ls.parseState.Known); lp != nil {
 		return lp, &ls.parseState
 	}
 	return nil, nil
@@ -57,8 +57,7 @@ func (ls *Lines) ParseState() (*parse.LanguageProperties, *parse.FileStates) {
 func (ls *Lines) ParseFileState() *parse.FileState {
 	ls.Lock()
 	defer ls.Unlock()
-	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
-	if lp != nil && lp.Lang != nil {
+	if highlighting.ParseLanguage(ls.parseState.Known) != nil {
 		return ls.parseState.Done()
 	}
 	return nil

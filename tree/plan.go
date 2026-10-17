@@ -122,6 +122,8 @@ func (nb *NodeBase) RunUpdaters() {
 // guaranteed to be added to its parent before the init function
 // is called. The name of the node is automatically generated based
 // on the file and line number of the calling function.
+//
+//goscript:callsite
 func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add
 	AddAt(p, AutoPlanName(2), init)
 }
@@ -129,6 +131,12 @@ func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add
 // AutoPlanName returns the dir-filename of [runtime.Caller](level),
 // with all / . replaced to -, which is suitable as a unique name
 // for a [PlanItem.Name].
+//
+// Under GoScript, the //goscript:callsite directive on it and on the functions
+// that call it makes their callers pass the Go file and line of each call,
+// so that the names are the same as in Go even in a minified JavaScript bundle.
+//
+//goscript:callsite
 func AutoPlanName(level int) string {
 	_, file, line, _ := runtime.Caller(level)
 	name := filepath.Base(file)
@@ -184,6 +192,8 @@ func AddInit[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add
 // AddChild adds a new [NodeBase.Maker] to the the given parent [Node] that
 // adds a [PlanItem] with the given init function using [Add]. In other words,
 // this adds a maker that will add a child to the given parent.
+//
+//goscript:callsite
 func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add
 	name := AutoPlanName(2) // must get here to get correct name
 	parent.AsTree().Maker(func(p *Plan) {

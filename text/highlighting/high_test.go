@@ -15,7 +15,8 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/token"
-	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v3"
+	"github.com/alecthomas/chroma/v3/lexers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -242,5 +243,20 @@ func TestMarkupSpellErr(t *testing.T) {
 			fmt.Println(i, string(r), string(tx[si][ri]), si, ri, sn)
 		}
 		assert.Equal(t, string(r), string(tx[si][ri]))
+	}
+}
+
+// TestMarkupNestedCode highlights a fenced Go code block in markdown, which
+// chroma lexes with a nested Go lexer pulled through iter.Pull.
+func TestMarkupNestedCode(t *testing.T) {
+	src := "# Title\n\n```go\nfunc main() { return }\n```\n\ntext\n"
+	hi := Highlighter{lexer: chroma.Coalesce(lexers.Get("markdown"))}
+	tags, err := hi.chromaTagsAll([]byte(src))
+	assert.NoError(t, err)
+	if assert.Len(t, tags, 7) {
+		assert.Equal(t, "[{LitStr 0 5 {0 0}}]", fmt.Sprint(tags[2]))
+		assert.Equal(t, "[{KeywordDeclaration 0 4 {0 0}} {NameFunction 5 9 {0 0}} {Punctuation 9 11 {0 0}} {Punctuation 12 13 {0 0}} {Keyword 14 20 {0 0}} {Punctuation 21 22 {0 0}}]", fmt.Sprint(tags[3]))
+		assert.Equal(t, "[{LitStr 0 3 {0 0}}]", fmt.Sprint(tags[4]))
+		assert.Empty(t, tags[6])
 	}
 }

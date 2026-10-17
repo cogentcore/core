@@ -58,3 +58,42 @@ func TestUp(t *testing.T) {
 	}
 	assert.Equal(t, []string{"/root/child3", "/root/child2", "/root/child1/subchild1/subsubchild1", "/root/child1/subchild1", "/root/child1", "/root/child0", "/root"}, res)
 }
+
+// benchTree returns a tree of depth levels below the root, each node with
+// width children.
+func benchTree(depth, width int) *NodeBase {
+	root := NewNodeBase()
+	level := []*NodeBase{root}
+	for range depth {
+		var next []*NodeBase
+		for _, n := range level {
+			for range width {
+				next = append(next, NewNodeBase(n))
+			}
+		}
+		level = next
+	}
+	return root
+}
+
+func BenchmarkWalkDown(b *testing.B) {
+	root := benchTree(3, 10)
+	for range b.N {
+		count := 0
+		root.WalkDown(func(n Node) bool {
+			count++
+			return Continue
+		})
+	}
+}
+
+func BenchmarkWalkDownPost(b *testing.B) {
+	root := benchTree(3, 10)
+	for range b.N {
+		count := 0
+		root.WalkDownPost(func(n Node) bool { return Continue }, func(n Node) bool {
+			count++
+			return Continue
+		})
+	}
+}

@@ -283,11 +283,24 @@ func AsHex(c color.Color) string {
 		return "nil"
 	}
 	r := color.NRGBAModel.Convert(c).(color.NRGBA)
+
+	// The hex digits are looked up, as this is called for every color
+	// rendered on the web.
+	hex := "#" + hexBytes[r.R] + hexBytes[r.G] + hexBytes[r.B]
 	if r.A == 255 {
-		return fmt.Sprintf("#%02X%02X%02X", r.R, r.G, r.B)
+		return hex
 	}
-	return fmt.Sprintf("#%02X%02X%02X%02X", r.R, r.G, r.B, r.A)
+	return hex + hexBytes[r.A]
 }
+
+// hexBytes holds the two upper case hex digits of each byte value.
+var hexBytes = func() (hb [256]string) {
+	const digits = "0123456789ABCDEF"
+	for i := range hb {
+		hb[i] = string([]byte{digits[i>>4], digits[i&0xF]})
+	}
+	return
+}()
 
 // WithR returns the given color with the red
 // component (R) set to the given alpha-premultiplied value

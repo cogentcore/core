@@ -5,6 +5,7 @@
 package texcache
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
@@ -59,7 +60,9 @@ func SetShapeMath() {
 }
 
 // Get tries to get a cached path for given equation at given fontsize in dots.
-// returns nil if not available.
+// returns nil if not available. The returned path is a copy, so the caller
+// can transform it in place (as [ppath.Path.Translate] does) without
+// changing the cached path.
 func Get(expr string, fontSizeDots float32) ppath.Path {
 	mu.Lock()
 	defer mu.Unlock()
@@ -79,12 +82,12 @@ func Get(expr string, fontSizeDots float32) ppath.Path {
 		cd.pp = p
 	}
 	if cd.FontSizeDots == fontSizeDots {
-		return cd.pp
+		return cd.pp.Clone()
 	}
 	sc := fontSizeDots / cd.FontSizeDots
-	np := cd.pp.Scale(sc, sc)
+	np := cd.pp.Clone().Scale(sc, sc)
 	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: np, used: true}
-	return np
+	return np.Clone()
 }
 
 // Add adds a new entry
@@ -95,7 +98,7 @@ func Add(expr string, fontSizeDots float32, pp ppath.Path) {
 	if cache == nil {
 		cache = make(map[string]*cached)
 	}
-	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp, used: true}
+	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: pp.Clone(), used: true}
 }
 
 func setCache(c map[string]*cached) {
@@ -116,7 +119,7 @@ func OpenFS(fsys fs.FS, filename string) error {
 
 	var c map[string]*cached
 	err := gzipx.OpenFS(fsys, filename, func(r io.Reader) error {
-		return jsonx.Read(&c, r)
+		return readCache(&c, r)
 	})
 	if err != nil {
 		return errors.Log(err)
@@ -133,13 +136,24 @@ func Open(filename string) error {
 
 	var c map[string]*cached
 	err := gzipx.Open(filename, func(r io.Reader) error {
-		return jsonx.Read(&c, r)
+		return readCache(&c, r)
 	})
 	if err != nil {
 		return errors.Log(err)
 	}
 	setCache(c)
 	return nil
+}
+
+// readCache reads the cache entries from the given reader. The cache is one
+// large JSON object, which is read whole and then unmarshaled, which is much
+// faster on the web (js platform) than decoding it from the stream.
+func readCache(c *map[string]*cached, r io.Reader) error {
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, c)
 }
 
 // DeleteUnused deletes any cache entries that have not been

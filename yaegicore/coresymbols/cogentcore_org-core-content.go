@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/content/content"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"BindTextEditor":  reflect.ValueOf(&content.BindTextEditor).Elem(),
@@ -22,4 +22,4 @@ func init() {
 		"Location":     reflect.ValueOf((*content.Location)(nil)),
 		"SettingsData": reflect.ValueOf((*content.SettingsData)(nil)),
 	}
-}
+})

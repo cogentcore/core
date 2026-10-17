@@ -214,6 +214,11 @@ type GeomState struct {
 	// starting at Pos.Content and ending at Pos.Content + Size.Content.
 	// It is intersected with parent bounding boxes.
 	ContentBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+
+	// contentOffset is the offset of Pos.Content from Pos.Total, the
+	// position of the style's BoxSpace. It is set with Size.Space, so that
+	// positioning, as when scrolling, need not compute it again.
+	contentOffset math32.Vector2
 }
 
 func (ls *GeomState) String() string {
@@ -611,9 +616,12 @@ func (wb *WidgetBase) SizeUpWidget() {
 	sz.SetTotalFromContent(&sz.Actual)
 }
 
-// spaceFromStyle sets the Space based on Style BoxSpace().Size()
+// spaceFromStyle sets the Space based on Style BoxSpace().Size(),
+// and the content offset from its position.
 func (wb *WidgetBase) spaceFromStyle() {
-	wb.Geom.Size.Space = wb.Styles.BoxSpace().Size().Ceil()
+	space := wb.Styles.BoxSpace()
+	wb.Geom.Size.Space = space.Size().Ceil()
+	wb.Geom.contentOffset = space.Pos().Floor()
 }
 
 // sizeFromStyle sets the initial Actual Sizes from Style.Min, Max.
@@ -1755,8 +1763,7 @@ func (wb *WidgetBase) ApplyScenePos() {
 // setContentPosFromPos sets the Pos.Content position based on current Pos
 // plus the BoxSpace position offset.
 func (wb *WidgetBase) setContentPosFromPos() {
-	off := wb.Styles.BoxSpace().Pos().Floor()
-	wb.Geom.Pos.Content = wb.Geom.Pos.Total.Add(off)
+	wb.Geom.Pos.Content = wb.Geom.Pos.Total.Add(wb.Geom.contentOffset)
 }
 
 func (wb *WidgetBase) setPosFromParent() {
@@ -1786,8 +1793,7 @@ func (wb *WidgetBase) setBBoxes() {
 	if pwb == nil { // scene
 		sz := &wb.Geom.Size
 		wb.Geom.TotalBBox = math32.RectFromPosSizeMax(math32.Vector2{}, sz.Alloc.Total)
-		off := wb.Styles.BoxSpace().Pos().Floor()
-		wb.Geom.ContentBBox = math32.RectFromPosSizeMax(off, sz.Alloc.Content)
+		wb.Geom.ContentBBox = math32.RectFromPosSizeMax(wb.Geom.contentOffset, sz.Alloc.Content)
 		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Total BBox:", wb.Geom.TotalBBox)
 			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)

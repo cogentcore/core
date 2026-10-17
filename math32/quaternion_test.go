@@ -33,7 +33,10 @@ func TestQuatSetFromAxisAngle(t *testing.T) {
 
 	expected := Quat{X: 0.7071068, Y: 0, Z: 0, W: 0.70710677}
 
-	assert.Equal(t, expected, q)
+	tolassert.Equal(t, expected.X, q.X)
+	tolassert.Equal(t, expected.Y, q.Y)
+	tolassert.Equal(t, expected.Z, q.Z)
+	tolassert.Equal(t, expected.W, q.W)
 
 	ta := q.ToAxisAngle()
 	tolassert.Equal(t, axis.X, ta.X)

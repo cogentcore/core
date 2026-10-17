@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/complete"
@@ -184,12 +185,8 @@ func completeParse(data any, text string, posLine, posChar int) (md complete.Mat
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
 		return md
 	}
-	lp, err := parse.LanguageSupport.Properties(sfs.Known)
-	if err != nil {
-		// log.Printf("CompletePi: %v\n", err)
-		return md
-	}
-	if lp.Lang == nil {
+	lp := highlighting.ParseLanguage(sfs.Known)
+	if lp == nil {
 		return md
 	}
 
@@ -208,12 +205,8 @@ func completeEditParse(data any, text string, cursorPos int, comp complete.Compl
 		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
 		return ed
 	}
-	lp, err := parse.LanguageSupport.Properties(sfs.Known)
-	if err != nil {
-		// log.Printf("CompleteEditPi: %v\n", err)
-		return ed
-	}
-	if lp.Lang == nil {
+	lp := highlighting.ParseLanguage(sfs.Known)
+	if lp == nil {
 		return ed
 	}
 	return lp.Lang.CompleteEdit(sfs, text, cursorPos, comp, seed)
@@ -228,12 +221,8 @@ func lookupParse(data any, txt string, posLine, posChar int) (ld complete.Lookup
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
 		return ld
 	}
-	lp, err := parse.LanguageSupport.Properties(sfs.Known)
-	if err != nil {
-		// log.Printf("LookupPi: %v\n", err)
-		return ld
-	}
-	if lp.Lang == nil {
+	lp := highlighting.ParseLanguage(sfs.Known)
+	if lp == nil {
 		return ld
 	}
 

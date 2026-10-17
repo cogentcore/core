@@ -32,6 +32,25 @@ type Renderer struct {
 
 	// curRect is the rectangle of the current object.
 	curRect image.Rectangle
+
+	// state is the part of the canvas context state that the renderer has
+	// set, so that unchanged values are not set again, which is costly
+	// for the font in particular.
+	state canvasState
+
+	// stateStack holds the states saved by [Renderer.PushContext].
+	stateStack []canvasState
+
+	// hexes holds the CSS color strings of colors, keyed by their RGBA values.
+	hexes map[uint32]string
+}
+
+// canvasState is the part of the canvas context state that the renderer
+// sets. Empty strings and a false hasTransform are unknown values.
+type canvasState struct {
+	fillStyle, strokeStyle, font string
+	transform                    math32.Matrix2
+	hasTransform                 bool
 }
 
 // New returns an HTMLCanvas renderer.
@@ -63,6 +82,13 @@ func (rs *Renderer) Image() image.Image { return nil }
 func (rs *Renderer) Source() []byte     { return nil }
 
 func (rs *Renderer) SetCanvas(c js.Value) {
+	// A change of the canvas size resets its state, so the cached state is
+	// reset for each render.
+	rs.state = canvasState{}
+	rs.stateStack = rs.stateStack[:0]
+	if !rs.ctx.IsUndefined() && rs.Canvas.Equal(c) {
+		return
+	}
 	rs.Canvas = c
 	rs.ctx = rs.Canvas.Call("getContext", "2d", "alpha", "true")
 	// todo: make this a font options.
@@ -93,6 +119,7 @@ func (rs *Renderer) Render(r render.Render) render.Renderer {
 
 func (rs *Renderer) PushContext(pt *render.ContextPush) {
 	pc := &pt.Context
+	rs.stateStack = append(rs.stateStack, rs.state)
 	rs.ctx.Call("save") // save clip region prior to using
 	br := pc.Bounds.Rect.ToRect()
 	rs.ctx.Call("rect", br.Min.X, br.Min.Y, br.Dx(), br.Dy())
@@ -101,15 +128,63 @@ func (rs *Renderer) PushContext(pt *render.ContextPush) {
 
 func (rs *Renderer) PopContext(pt *render.ContextPop) {
 	rs.ctx.Call("restore") // restore clip region
+	if n := len(rs.stateStack); n > 0 {
+		rs.state = rs.stateStack[n-1]
+		rs.stateStack = rs.stateStack[:n-1]
+	} else {
+		rs.state = canvasState{}
+	}
 }
 
 func (rs *Renderer) setTransform(ctx *render.Context) {
 	m := ctx.Cumulative
+	if rs.state.hasTransform && rs.state.transform == m {
+		return
+	}
+	rs.state.transform, rs.state.hasTransform = m, true
 	rs.ctx.Call("setTransform", m.XX, m.YX, m.XY, m.YY, m.X0, m.Y0)
 }
 
 func (rs *Renderer) setFill(clr image.Image) {
-	rs.ctx.Set("fillStyle", rs.imageToStyle(clr))
+	rs.setFillStyle(rs.imageToStyle(clr))
+}
+
+// setFillStyle sets the fillStyle of the canvas to the given color string
+// or gradient, unless it is already that color.
+func (rs *Renderer) setFillStyle(style any) {
+	if str, ok := style.(string); ok {
+		if str == rs.state.fillStyle {
+			return
+		}
+		rs.state.fillStyle = str
+	} else {
+		rs.state.fillStyle = ""
+	}
+	rs.ctx.Set("fillStyle", style)
+}
+
+// setStrokeStyle sets the strokeStyle of the canvas to the given color
+// string or gradient, unless it is already that color.
+func (rs *Renderer) setStrokeStyle(style any) {
+	if str, ok := style.(string); ok {
+		if str == rs.state.strokeStyle {
+			return
+		}
+		rs.state.strokeStyle = str
+	} else {
+		rs.state.strokeStyle = ""
+	}
+	rs.ctx.Set("strokeStyle", style)
+}
+
+// setFont sets the font of the canvas to the given CSS font
+// specification, unless it is already that font.
+func (rs *Renderer) setFont(spec string) {
+	if spec == rs.state.font {
+		return
+	}
+	rs.state.font = spec
+	rs.ctx.Set("font", spec)
 }
 
 func (rs *Renderer) setStroke(stroke *styles.Stroke) {
@@ -126,7 +201,7 @@ func (rs *Renderer) setStroke(stroke *styles.Stroke) {
 	rs.ctx.Call("setLineDash", jsDashes)
 	rs.ctx.Set("lineDashOffset", stroke.DashOffset)
 	rs.ctx.Set("lineWidth", stroke.Width.Dots)
-	rs.ctx.Set("strokeStyle", rs.imageToStyle(stroke.Color))
+	rs.setStrokeStyle(rs.imageToStyle(stroke.Color))
 }
 
 // toJSer is satisfied by [gradient.Gradient] on JS.
@@ -140,5 +215,16 @@ func (rs *Renderer) imageToStyle(clr image.Image) any {
 		return g.(toJSer).ToJS(rs.ctx)
 	}
 	// TODO: handle more cases for things like pattern functions and [image.RGBA] images?
-	return colors.AsHex(colors.ToUniform(clr))
+	// The strings of the colors are kept, as there are only a few of them.
+	u := colors.ToUniform(clr)
+	key := uint32(u.R)<<24 | uint32(u.G)<<16 | uint32(u.B)<<8 | uint32(u.A)
+	if hex, ok := rs.hexes[key]; ok {
+		return hex
+	}
+	if rs.hexes == nil || len(rs.hexes) >= 4096 {
+		rs.hexes = map[uint32]string{}
+	}
+	hex := colors.AsHex(u)
+	rs.hexes[key] = hex
+	return hex
 }

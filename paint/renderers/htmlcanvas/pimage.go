@@ -36,7 +36,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		if u == nil || u.C == colors.Transparent {
 			rs.ctx.Call("clearRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		} else {
-			rs.ctx.Set("fillStyle", rs.imageToStyle(u))
+			rs.setFillStyle(rs.imageToStyle(u))
 			rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		}
 		return
@@ -44,7 +44,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	if gr, ok := usrc.(gradient.Gradient); ok {
 		rs.curRect = pr.Rect
-		rs.ctx.Set("fillStyle", rs.imageToStyle(gr))
+		rs.setFillStyle(rs.imageToStyle(gr))
 		rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		return
 	}

@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/fsx/fsx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"CopyFile":         reflect.ValueOf(fsx.CopyFile),
@@ -31,4 +31,4 @@ func init() {
 		// type definitions
 		"Filename": reflect.ValueOf((*fsx.Filename)(nil)),
 	}
-}
+})

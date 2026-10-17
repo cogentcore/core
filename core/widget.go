@@ -10,6 +10,7 @@ package core
 import (
 	"image"
 	"log/slog"
+	"sync/atomic"
 
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/colors"
@@ -257,11 +258,18 @@ const (
 
 	// widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.
 	widgetNeedsRender
+
+	// widgetChildNeedsRender is whether any widget inside of the widget, such as
+	// a child or a scrollbar, needs to be rendered on the next render iteration,
+	// so that the render iteration only goes into the parts of the tree that do.
+	widgetChildNeedsRender
 )
 
 // hasFlag returns whether the given flag is set.
 func (wb *WidgetBase) hasFlag(f widgetFlags) bool {
-	return wb.flags.HasFlag(f)
+	// This is equivalent to [widgetFlags.HasFlag] without converting the
+	// flag to an [enums.BitFlag], since it is called very frequently.
+	return atomic.LoadInt64((*int64)(&wb.flags))&(1<<uint32(f)) != 0
 }
 
 // setFlag sets the given flags to the given value.
@@ -325,7 +333,17 @@ func (wb *WidgetBase) Init() {
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
 	if pwb := wb.parentWidget(); pwb != nil {
+		if pwb.Scene != nil && pwb.Scene != wb.Scene {
+			// A subtree added as a whole (for example, a clone or a moved
+			// widget) has descendants that must now be in the new scene.
+			// A parent without a scene, as when a body is added to an
+			// external parent, leaves the scenes of the descendants alone.
+			wb.setDescendantScenes(pwb.Scene)
+		}
 		wb.Scene = pwb.Scene
+		if wb.hasFlag(widgetNeedsRender) || wb.hasFlag(widgetChildNeedsRender) {
+			wb.setParentsChildNeedsRender()
+		}
 	}
 	if wb.Parts != nil {
 		// the Scene of the Parts may not have been set yet if they were made in Init
@@ -333,6 +351,30 @@ func (wb *WidgetBase) OnAdd() {
 	}
 	if wb.Scene != nil && wb.Scene.WidgetInit != nil {
 		wb.Scene.WidgetInit(wb.This.(Widget))
+	}
+}
+
+// setDescendantScenes sets the [WidgetBase.Scene] of all of the descendants
+// of this widget, including those in parts, to the given scene. Descendants
+// that had no scene before, such as those of a clone, have not been
+// initialized for any scene yet, so it calls its [Scene.WidgetInit] on them,
+// as [WidgetBase.OnAdd] does for each widget.
+func (wb *WidgetBase) setDescendantScenes(sc *Scene) {
+	set := func(kwb *WidgetBase) {
+		hadScene := kwb.Scene != nil
+		kwb.Scene = sc
+		kwb.setDescendantScenes(sc)
+		if !hadScene && sc != nil && sc.WidgetInit != nil {
+			sc.WidgetInit(kwb.This.(Widget))
+		}
+	}
+	for _, k := range wb.Children {
+		if kwb := AsWidget(k); kwb != nil {
+			set(kwb)
+		}
+	}
+	if wb.Parts != nil {
+		set(wb.Parts.AsWidget())
 	}
 }
 
@@ -452,7 +494,9 @@ func (wb *WidgetBase) IsDisplayable() bool {
 // for this function, even though they are still displayable and return true for
 // [WidgetBase.IsDisplayable].
 func (wb *WidgetBase) IsVisible() bool {
-	return wb.IsDisplayable() && !wb.Geom.TotalBBox.Empty()
+	// The bounding box is checked first, as it is much faster than checking
+	// all of the parents, and most widgets are offscreen in a long scene.
+	return wb != nil && !wb.Geom.TotalBBox.Empty() && wb.IsDisplayable()
 }
 
 // RenderSource returns the self-contained [composer.Source] for
@@ -481,8 +525,8 @@ func (wb *WidgetBase) ForWidgetChildren(fun func(i int, cw Widget, cwb *WidgetBa
 		if tree.IsNil(c) {
 			continue
 		}
-		w, cwb := c.(Widget), AsWidget(c)
-		if !fun(i, w, cwb) {
+		w := c.(Widget)
+		if !fun(i, w, w.AsWidget()) {
 			break
 		}
 	}
@@ -497,7 +541,8 @@ func (wb *WidgetBase) forVisibleChildren(fun func(i int, cw Widget, cwb *WidgetB
 		if tree.IsNil(c) {
 			continue
 		}
-		w, cwb := c.(Widget), AsWidget(c)
+		w := c.(Widget)
+		cwb := w.AsWidget()
 		if cwb.StateIs(states.Invisible) {
 			continue
 		}

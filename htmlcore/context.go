@@ -21,6 +21,7 @@ import (
 	selcss "github.com/ericchiang/css"
 	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // Context contains context information about the current state of a htmlcore
@@ -203,22 +204,62 @@ func (c *Context) addStyle(style string) {
 	root := rootNode(c.Node)
 
 	for _, rule := range ss.Rules {
-		var sel *selcss.Selector
-		if len(rule.Selectors) > 0 {
-			s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
-			if errors.Log(err) != nil {
-				s = &selcss.Selector{}
-			}
-			sel = s
-		} else {
-			sel = &selcss.Selector{}
-		}
-
-		matches := sel.Select(root)
-		for _, match := range matches {
+		for _, match := range selectRule(root, rule) {
 			c.styles[match] = append(c.styles[match], rule)
 		}
 	}
+}
+
+// selectRule returns the nodes under root that the selectors of the rule
+// select, once for each selector that selects them.
+func selectRule(root *html.Node, rule *css.Rule) []*html.Node {
+	// Selectors of element names, such as the user agent styles have, select
+	// the elements with those names, which one walk of the tree finds; the
+	// selector library walks the tree for each selector.
+	if names := selectorAtoms(rule.Selectors); names != nil {
+		var matches []*html.Node
+		var walk func(n *html.Node)
+		walk = func(n *html.Node) {
+			for range names[n.DataAtom] {
+				matches = append(matches, n)
+			}
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				if c.Type == html.ElementNode {
+					walk(c)
+				}
+			}
+		}
+		walk(root)
+		return matches
+	}
+
+	// Other selectors are matched by the selector library.
+	sel := &selcss.Selector{}
+	if len(rule.Selectors) > 0 {
+		s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
+		if errors.Log(err) == nil {
+			sel = s
+		}
+	}
+	return sel.Select(root)
+}
+
+// selectorAtoms returns the number of selectors of each element name, when
+// all of the selectors are lowercase element names, and otherwise nil.
+func selectorAtoms(selectors []string) map[atom.Atom]int {
+	if len(selectors) == 0 {
+		return nil
+	}
+	names := make(map[atom.Atom]int, len(selectors))
+	for _, s := range selectors {
+		s = strings.TrimSpace(s)
+		a := atom.Lookup([]byte(s))
+		if a == 0 || a.String() != s {
+			return nil
+		}
+		names[a]++
+	}
+	return names
 }
 
 // LinkButton is a helper function that makes the given button

@@ -116,22 +116,41 @@ var LanguageSupport = LanguageSupporter{}
 
 // OpenStandard opens all the standard parsers for languages, from the langs/ directory
 func (ll *LanguageSupporter) OpenStandard() error {
-	lexer.TheLanguageLexer = &LanguageSupport
-
 	for sl, lp := range StandardLanguageProperties {
-		pib, err := languages.OpenParser(sl)
-		if err != nil {
-			continue
+		if err := ll.open(sl, lp); err != nil {
+			return err
 		}
-		pr := NewParser()
-		err = pr.ReadJSON(pib)
-		if err != nil {
-			return errors.Log(err)
-		}
-		pr.ModTime = time.Date(2023, 02, 10, 00, 00, 00, 0, time.UTC)
-		pr.InitAll()
-		lp.Parser = pr
 	}
+	return nil
+}
+
+// OpenLanguage opens the standard parser for the given language, from the
+// langs/ directory, unless it is already open. It does nothing for a
+// language without a standard parser. The parsers are opened as needed,
+// as reading them takes time.
+func (ll *LanguageSupporter) OpenLanguage(sl fileinfo.Known) error {
+	lp, has := StandardLanguageProperties[sl]
+	if !has || lp.Parser != nil {
+		return nil
+	}
+	return ll.open(sl, lp)
+}
+
+// open opens the standard parser for the given language into lp, if it has one.
+func (ll *LanguageSupporter) open(sl fileinfo.Known, lp *LanguageProperties) error {
+	lexer.TheLanguageLexer = &LanguageSupport
+	pib, err := languages.OpenParser(sl)
+	if err != nil {
+		return nil
+	}
+	pr := NewParser()
+	err = pr.ReadJSON(pib)
+	if err != nil {
+		return errors.Log(err)
+	}
+	pr.ModTime = time.Date(2023, 02, 10, 00, 00, 00, 0, time.UTC)
+	pr.InitAll()
+	lp.Parser = pr
 	return nil
 }
 
@@ -162,6 +181,9 @@ func (ll *LanguageSupporter) LexerByName(lang string) *lexer.Rule {
 	lp, err := ll.PropertiesByName(lang)
 	if err != nil {
 		return nil
+	}
+	if lp.Parser == nil {
+		ll.OpenLanguage(lp.Known)
 	}
 	if lp.Parser == nil {
 		// log.Printf("core.LangSupport: no lexer / parser support for language: %v\n", lang)

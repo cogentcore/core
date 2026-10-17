@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
@@ -36,6 +37,12 @@ func (ls *Lines) initialMarkup() {
 		ls.layoutViews()
 		return
 	}
+	if goscript.Enabled {
+		ls.markupDeferred = true
+		ls.collectLinks()
+		ls.layoutViews()
+		return
+	}
 	txt := ls.bytes(100)
 	if ls.Highlighter.UsingParse() {
 		fs := ls.parseState.Done() // initialize
@@ -57,6 +64,9 @@ func (ls *Lines) startDelayedReMarkup() {
 		ls.layoutViews()
 		return
 	}
+	if ls.markupDeferred {
+		return
+	}
 	if ls.markupDelayTimer != nil {
 		ls.markupDelayTimer.Stop()
 		ls.markupDelayTimer = nil
@@ -65,6 +75,21 @@ func (ls *Lines) startDelayedReMarkup() {
 		ls.markupDelayTimer = nil
 		ls.asyncMarkup() // already in a goroutine
 	})
+}
+
+// StartDeferredMarkup starts the syntax highlighting markup in the background
+// if it was deferred until the text is first shown, which is done when running
+// in JavaScript (see goscript), where it can take a significant amount of time.
+// Views call it when they render the text.
+func (ls *Lines) StartDeferredMarkup() {
+	ls.Lock()
+	if !ls.markupDeferred {
+		ls.Unlock()
+		return
+	}
+	ls.markupDeferred = false
+	ls.Unlock()
+	ls.reMarkup()
 }
 
 // stopDelayedReMarkup stops timer for doing markup after an interval

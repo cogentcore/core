@@ -34,30 +34,65 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
-// unmarshalTypeCache is a cache of [reflect.Type] values used
-// for unmarshalling in [NodeBase.UnmarshalJSON]. This cache has
-// a noticeable performance benefit of around 1.2x in
-// [BenchmarkNodeUnmarshalJSON], a benefit that should only increase
-// for larger trees.
-var unmarshalTypeCache = map[string]reflect.Type{}
+// jsonFieldsCache is a cache of the results of [jsonFields] for each type.
+var jsonFieldsCache = map[reflect.Type]map[string][]int{}
 
-// UnmarshalJSON unmarshals the node by extracting the nodeType and numChildren fields
-// added by [NodeBase.MarshalJSON] and then updating the node to the correct type and
-// creating the correct number of children. Note that this method can not update the type
+// jsonFields returns a map from the JSON names of the fields of the given
+// struct type to their field indexes, following the encoding/json rules for
+// field names and embedded structs. Each name is also included in lowercase,
+// to support the case-insensitive matching of encoding/json.
+func jsonFields(typ reflect.Type) map[string][]int {
+	if fields, ok := jsonFieldsCache[typ]; ok {
+		return fields
+	}
+	fields := map[string][]int{}
+	var add func(t reflect.Type, index []int)
+	add = func(t reflect.Type, index []int) {
+		for i := range t.NumField() {
+			f := t.Field(i)
+			tag := f.Tag.Get("json")
+			if tag == "-" {
+				continue
+			}
+			name, _, _ := strings.Cut(tag, ",")
+			fi := append(slices.Clip(index), i)
+			if f.Anonymous && name == "" && f.Type.Kind() == reflect.Struct {
+				add(f.Type, fi)
+				continue
+			}
+			if !f.IsExported() {
+				continue
+			}
+			if name == "" {
+				name = f.Name
+			}
+			// outer fields take precedence over embedded ones
+			if _, has := fields[name]; !has {
+				fields[name] = fi
+			}
+			lower := strings.ToLower(name)
+			if _, has := fields[lower]; !has {
+				fields[lower] = fi
+			}
+		}
+	}
+	add(typ, nil)
+	jsonFieldsCache[typ] = fields
+	return fields
+}
+
+// UnmarshalJSON unmarshals the node by extracting the nodeType field added by
+// [NodeBase.MarshalJSON] and then updating the node to the correct type and
+// creating children of the correct types. Note that this method can not update the type
 // of the node if it has no parent; to load a root node from JSON and have it be of the
 // correct type, see the [UnmarshalRootJSON] function. If the type of the node is changed
 // by this function, the node pointer will no longer be valid, and the node must be fetched
 // again through the children of its parent. You do not need to call [UnmarshalRootJSON]
 // or worry about pointers changing if this node is already of the correct type.
 func (n *NodeBase) UnmarshalJSON(b []byte) error {
-	typeStart := bytes.Index(b, []byte(`":`)) + 3
-	typeEnd := bytes.Index(b, []byte(`",`))
-	typeName := string(b[typeStart:typeEnd])
-	// we may end up with an extraneous quote / space at the start
-	typeName = strings.TrimPrefix(strings.TrimSpace(typeName), `"`)
-	typ := types.TypeByName(typeName)
-	if typ == nil {
-		return fmt.Errorf("tree.NodeBase.UnmarshalJSON: type %q not found", typeName)
+	typ, err := unmarshalNodeType(b)
+	if err != nil {
+		return err
 	}
 
 	// if our type does not match, we must replace our This to make it match
@@ -75,49 +110,83 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	// We must delete any existing children first.
 	n.DeleteChildren()
 
-	remainder := b[typeEnd+2:]
-	numStart := bytes.Index(remainder, []byte(`"numChildren":`))
-	if numStart >= 0 { // numChildren may not be specified if it is 0
-		numStart += 14 // start of actual number bytes
-		numEnd := bytes.Index(remainder, []byte(`,`))
-		numString := string(remainder[numStart:numEnd])
-		// we may end up with extraneous space at the start
-		numString = strings.TrimSpace(numString)
-		numChildren, err := strconv.Atoi(numString)
-		if err != nil {
-			return err
-		}
-		// We make placeholder NodeBase children that will be replaced
-		// with children of the correct type during their UnmarshalJSON.
-		for range numChildren {
-			New[NodeBase](n)
-		}
-	}
-
-	uv := reflectx.UnderlyingPointer(reflect.ValueOf(n.This))
-	rtyp := unmarshalTypeCache[typeName]
-	if rtyp == nil {
-		// We must create a new type that has the exact same fields as the original type
-		// so that we can unmarshal into it without having infinite recursion on the
-		// UnmarshalJSON method. This works because [reflect.StructOf] does not promote
-		// methods on embedded fields, meaning that the UnmarshalJSON method on the NodeBase
-		// is not carried over and thus is not called, avoiding infinite recursion.
-		uvt := uv.Type().Elem()
-		fields := make([]reflect.StructField, uvt.NumField())
-		for i := range fields {
-			fields[i] = uvt.Field(i)
-		}
-		nt := reflect.StructOf(fields)
-		rtyp = reflect.PointerTo(nt)
-		unmarshalTypeCache[typeName] = rtyp
-	}
-	// We can directly convert because our new struct type has the exact same fields.
-	uvi := uv.Convert(rtyp).Interface()
-	err := json.Unmarshal(b, uvi)
+	// The children are unmarshaled separately below, so that each one can be
+	// made with the correct type before it is unmarshaled, and the fields
+	// of this node are unmarshaled without them.
+	var fields map[string]json.RawMessage
+	err = json.Unmarshal(b, &fields)
 	if err != nil {
 		return err
 	}
+	children := fields["Children"]
+	delete(fields, "Children")
+	delete(fields, "nodeType")
+	delete(fields, "numChildren")
+
+	// We unmarshal each field directly, since unmarshaling the node as a
+	// whole would call this UnmarshalJSON method again.
+	uv := reflectx.Underlying(reflect.ValueOf(n.This))
+	jfields := jsonFields(uv.Type())
+	for name, data := range fields {
+		index, ok := jfields[name]
+		if !ok {
+			index, ok = jfields[strings.ToLower(name)]
+		}
+		if !ok {
+			continue // unknown fields are ignored, as in encoding/json
+		}
+		fv, err := uv.FieldByIndexErr(index)
+		if err != nil {
+			continue // nil embedded pointer
+		}
+		err = json.Unmarshal(data, fv.Addr().Interface())
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(children) == 0 {
+		return nil
+	}
+	var kids []json.RawMessage
+	err = json.Unmarshal(children, &kids)
+	if err != nil {
+		return err
+	}
+	for _, kb := range kids {
+		ktyp, err := unmarshalNodeType(kb)
+		if err != nil {
+			return err
+		}
+		kid := NewOfType(ktyp)
+		n.AddChild(kid)
+		err = kid.AsTree().UnmarshalJSON(kb)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+// unmarshalNodeType returns the type of the node in the given JSON,
+// based on the nodeType field added by [NodeBase.MarshalJSON].
+func unmarshalNodeType(b []byte) (*types.Type, error) {
+	typeName := ""
+	key := []byte(`"nodeType"`)
+	if i := bytes.Index(b, key); i >= 0 {
+		rest := b[i+len(key):]
+		if start := bytes.IndexByte(rest, '"'); start >= 0 {
+			rest = rest[start+1:]
+			if end := bytes.IndexByte(rest, '"'); end >= 0 {
+				typeName = string(rest[:end])
+			}
+		}
+	}
+	typ := types.TypeByName(typeName)
+	if typ == nil {
+		return nil, fmt.Errorf("tree.NodeBase.UnmarshalJSON: type %q not found", typeName)
+	}
+	return typ, nil
 }
 
 // UnmarshalRootJSON loads the given JSON to produce a new root node of

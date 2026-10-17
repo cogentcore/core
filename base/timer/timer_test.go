@@ -25,7 +25,9 @@ func TestTime(t *testing.T) {
 	timer.Stop()
 	elapsed := time.Since(startTime)
 	assert.Equal(t, 1, timer.N)
-	tolassert.Equal(t, elapsed.Seconds(), timer.Total.Seconds())
+	// The elapsed time also includes the time from startTime to timer.Start,
+	// which can take a few milliseconds (such as in JavaScript).
+	tolassert.EqualTol(t, elapsed.Seconds(), timer.Total.Seconds(), 0.01)
 
 	timer.Reset()
 	assert.Zero(t, timer.St)

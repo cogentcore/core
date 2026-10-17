@@ -225,6 +225,17 @@ func UpdateAll() { //types:add
 	}
 }
 
+// restyleAll restyles and lays out all windows, as is needed when the fonts
+// that texts are measured with have changed.
+func restyleAll() {
+	for _, w := range AllRenderWindows {
+		rc := w.renderContext()
+		rc.Lock()
+		rc.restyle = true
+		rc.Unlock()
+	}
+}
+
 // AppearanceSettings are the currently active global Cogent Core appearance settings.
 var AppearanceSettings = &AppearanceSettingsData{
 	SettingsBase: SettingsBase{

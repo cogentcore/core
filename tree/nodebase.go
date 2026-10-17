@@ -12,9 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/copier"
-
 	"cogentcore.org/core/base/elide"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/types"
@@ -97,6 +96,10 @@ type NodeBase struct {
 
 	// depth is the depth of the node while using [NodeBase.WalkDownBreadth].
 	depth int
+
+	// nodeType is the cached result of [NodeBase.NodeType], which would
+	// otherwise use reflection to look up the type each time.
+	nodeType *types.Type
 }
 
 // String implements the [fmt.Stringer] interface by returning the path of the node.
@@ -121,19 +124,24 @@ func (n *NodeBase) PlanName() string {
 // If there is no [types.Type] registered for this node already,
 // it registers one and then returns it.
 func (n *NodeBase) NodeType() *types.Type {
+	if n.nodeType != nil {
+		return n.nodeType
+	}
 	if t := types.TypeByValue(n.This); t != nil {
 		if t.Instance == nil {
 			t.Instance = n.NewInstance()
 		}
+		n.nodeType = t
 		return t
 	}
 	name := types.TypeNameValue(n.This)
 	li := strings.LastIndex(name, ".")
-	return types.AddType(&types.Type{
+	n.nodeType = types.AddType(&types.Type{
 		Name:     name,
 		IDName:   strcase.ToKebab(name[li+1:]),
 		Instance: n.NewInstance(),
 	})
+	return n.nodeType
 }
 
 // NewInstance returns a new instance of this node type.
@@ -490,10 +498,10 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	if n.This == nil {
 		return
 	}
-	tm := map[Node]int{} // traversal map
+	tm := make(walkStack, 0, 16) // traversal state of the current path
 	start := n.This
 	cur := start
-	tm[cur] = -1
+	tm.push(cur, -1)
 outer:
 	for {
 		cb := cur.AsTree()
@@ -502,33 +510,33 @@ outer:
 		if cb.This != nil && fun(cur) && cb.This != nil {
 			cb.This.NodeWalkDown(fun)
 			if cb.HasChildren() {
-				tm[cur] = 0 // 0 for no fields
+				tm.set(cur, 0) // 0 for no fields
 				nxt := cb.Child(0)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.push(cur, -1)
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cb.NumChildren()
+			tm.set(cur, cb.NumChildren())
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			cb := cur.AsTree() // may have changed, so must get again
-			curChild := tm[cur]
+			curChild := tm.get(cur)
 			if (curChild + 1) < cb.NumChildren() {
 				curChild++
-				tm[cur] = curChild
+				tm.set(cur, curChild)
 				nxt := cb.Child(curChild)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.push(cur, -1)
 					continue outer
 				}
 				continue
 			}
-			delete(tm, cur)
+			tm.delete(cur)
 			// couldn't go right, move up..
 			if cur == start {
 				break outer // done!
@@ -560,44 +568,44 @@ func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Nod
 	if n.This == nil {
 		return
 	}
-	tm := map[Node]int{} // traversal map
+	tm := make(walkStack, 0, 16) // traversal state of the current path
 	start := n.This
 	cur := start
-	tm[cur] = -1
+	tm.push(cur, -1)
 outer:
 	for {
 		cb := cur.AsTree()
 		if cb.This != nil && shouldContinue(cur) { // false return means stop
 			if cb.HasChildren() {
-				tm[cur] = 0 // 0 for no fields
+				tm.set(cur, 0) // 0 for no fields
 				nxt := cb.Child(0)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.push(cur, -1)
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cb.NumChildren()
+			tm.set(cur, cb.NumChildren())
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			cb := cur.AsTree() // may have changed, so must get again
-			curChild := tm[cur]
+			curChild := tm.get(cur)
 			if (curChild + 1) < cb.NumChildren() {
 				curChild++
-				tm[cur] = curChild
+				tm.set(cur, curChild)
 				nxt := cb.Child(curChild)
 				if nxt != nil && nxt.AsTree().This != nil {
 					cur = nxt.AsTree().This
-					tm[cur] = -1
+					tm.push(cur, -1)
 					continue outer
 				}
 				continue
 			}
 			fun(cur) // now we call the function, last..
 			// couldn't go right, move up..
-			delete(tm, cur)
+			tm.delete(cur)
 			if cur == start {
 				break outer // done!
 			}
@@ -659,7 +667,7 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 // copy from a source to a target that only differ minimally will be
 // minimally destructive. Only copying to the same type is supported.
 // The struct field tag copier:"-" can be added for any fields that
-// should not be copied. Also, unexported fields are not copied.
+// should not be copied. Unexported fields are copied shallowly.
 // See [Node.CopyFieldsFrom] for more information on field copying.
 func (n *NodeBase) CopyFrom(from Node) {
 	if from == nil {
@@ -713,7 +721,7 @@ func (n *NodeBase) Clone() Node {
 // CopyFieldsFrom copies the fields of the node from the given node.
 // By default, it is [NodeBase.CopyFieldsFrom], which automatically does
 // a deep copy of all of the fields of the node that do not a have a
-// `copier:"-"` struct tag. Node types should only implement a custom
+// `copier:"-"` struct tag, using [reflectx.CopyStructDeep]. Node types should only implement a custom
 // CopyFieldsFrom method when they have fields that need special copying
 // logic that can not be automatically handled. All custom CopyFieldsFrom
 // methods should call [NodeBase.CopyFieldsFrom] first and then only do manual
@@ -721,10 +729,12 @@ func (n *NodeBase) Clone() Node {
 // [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 // custom CopyFieldsFrom method.
 func (n *NodeBase) CopyFieldsFrom(from Node) {
-	err := copier.CopyWithOption(n.This, from.AsTree().This, copier.Option{CaseSensitive: true, DeepCopy: true})
-	if err != nil {
-		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
+	ft := from.AsTree().This
+	if reflect.TypeOf(n.This) != reflect.TypeOf(ft) {
+		slog.Error("tree.NodeBase.CopyFieldsFrom: can only copy between nodes of the same type", "to", n.This, "from", ft)
+		return
 	}
+	reflectx.CopyStructDeep(n.This, ft)
 }
 
 // Event methods:

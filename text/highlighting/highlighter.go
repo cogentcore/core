@@ -5,21 +5,46 @@
 package highlighting
 
 import (
+	"fmt"
+	"iter"
 	"log/slog"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
-	_ "cogentcore.org/core/text/parse/supportedlanguages"
 	"cogentcore.org/core/text/token"
-	"github.com/alecthomas/chroma/v2"
-	"github.com/alecthomas/chroma/v2/formatters/html"
-	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v3"
+	"github.com/alecthomas/chroma/v3/formatters/html"
+	"github.com/alecthomas/chroma/v3/lexers"
 )
 
-// Highlighter performs syntax highlighting,
-// using [parse] if available, otherwise falls back on chroma.
+// UseParse is whether syntax highlighting, completion, lookup and
+// indentation use the [parse] lexer and parser for the languages that it
+// supports, instead of chroma. It is off by default, which keeps the parse
+// languages out of programs that only need highlighting, making them smaller
+// and faster to start. Programs that want the parse languages, such as code
+// editors, set it to true and import
+// cogentcore.org/core/text/parse/supportedlanguages to register them.
+var UseParse = false
+
+// ParseLanguage returns the [parse] language properties for the given
+// known file type if [UseParse] is on and the language is registered,
+// and nil otherwise.
+func ParseLanguage(known fileinfo.Known) *parse.LanguageProperties {
+	if !UseParse || known == fileinfo.Unknown {
+		return nil
+	}
+	lp, err := parse.LanguageSupport.Properties(known)
+	if err != nil || lp.Lang == nil {
+		return nil
+	}
+	return lp
+}
+
+// Highlighter performs syntax highlighting, using [parse] if [UseParse]
+// is on and the language is supported, and otherwise chroma.
 type Highlighter struct {
 
 	// syntax highlighting style to use
@@ -68,15 +93,11 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	}
 	hi.parseState = pist
 
-	if info.Known != fileinfo.Unknown {
-		if lp, err := parse.LanguageSupport.Properties(info.Known); err == nil {
-			if lp.Lang != nil {
-				hi.lexer = nil
-				hi.parseLanguage = lp.Lang
-			} else {
-				hi.parseLanguage = nil
-			}
-		}
+	if lp := ParseLanguage(info.Known); lp != nil {
+		hi.lexer = nil
+		hi.parseLanguage = lp.Lang
+	} else {
+		hi.parseLanguage = nil
 	}
 
 	if hi.parseLanguage == nil {
@@ -187,7 +208,12 @@ func (hi *Highlighter) chromaTagsAll(txt []byte) ([]lexer.Line, error) {
 		slog.Error(err.Error())
 		return nil, err
 	}
-	lines := chroma.SplitTokensIntoLines(iterator.Tokens())
+	toks, err := collectTokens(iterator)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, err
+	}
+	lines := chroma.SplitTokensIntoLines(toks)
 	sz := len(lines)
 	tags := make([]lexer.Line, sz)
 	for li, lt := range lines {
@@ -217,7 +243,29 @@ func ChromaTagsLine(clex chroma.Lexer, txt string) (lexer.Line, error) {
 		return nil, err
 	}
 	var tags lexer.Line
-	toks := iterator.Tokens()
+	toks, err := collectTokens(iterator)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, err
+	}
 	chromaTagsForLine(&tags, toks)
 	return tags, nil
+}
+
+// collectTokens collects the tokens of a chroma lexer's iterator. The
+// iterator cannot return an error, so chroma panics when lexing fails,
+// for example when a rule's regular expression exceeds its match timeout,
+// and leaves it to the caller to recover; this returns that as an error.
+func collectTokens(iterator iter.Seq[chroma.Token]) (toks []chroma.Token, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			toks = nil
+			if e, ok := r.(error); ok {
+				err = fmt.Errorf("highlighting: lexing failed: %w", e)
+			} else {
+				err = fmt.Errorf("highlighting: lexing failed: %v", r)
+			}
+		}
+	}()
+	return slices.Collect(iterator), nil
 }

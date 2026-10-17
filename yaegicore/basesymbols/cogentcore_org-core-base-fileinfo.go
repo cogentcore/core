@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/fileinfo/fileinfo"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Aac":                 reflect.ValueOf(fileinfo.Aac),
@@ -201,4 +201,4 @@ func init() {
 		"Known":      reflect.ValueOf((*fileinfo.Known)(nil)),
 		"MimeType":   reflect.ValueOf((*fileinfo.MimeType)(nil)),
 	}
-}
+})

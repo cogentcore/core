@@ -138,7 +138,7 @@ func TestMatrix4SetRotationFromEuler(t *testing.T) {
 		0, 0, 0, 1,
 	}
 
-	assert.Equal(t, expected, m)
+	assert.InDeltaSlice(t, expected[:], m[:], 1.0e-6)
 }
 
 func TestMatrix4SetOrthographic(t *testing.T) {

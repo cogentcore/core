@@ -125,6 +125,36 @@ func (v Value) StringCSS() string {
 	return s
 }
 
+// StringCSSDp returns the value as a CSS string for HTML that is rendered in a
+// web browser, where 1dp corresponds to 1 CSS px (as in the web driver).
+// Unlike [Value.StringCSS], absolute units (px, in, cm, etc) are converted to
+// CSS px based on [DpPerInch], so that they have the same size as they do
+// in a Cogent Core app.
+func (v Value) StringCSSDp() string {
+	perInch := float32(0)
+	switch v.Unit {
+	case UnitPx:
+		perInch = PxPerInch
+	case UnitIn:
+		perInch = 1
+	case UnitCm:
+		perInch = CmPerInch
+	case UnitMm:
+		perInch = MmPerInch
+	case UnitQ:
+		perInch = 4 * MmPerInch
+	case UnitPc:
+		perInch = PcPerInch
+	case UnitPt:
+		perInch = PtPerInch
+	}
+	if perInch != 0 {
+		v.Value *= DpPerInch / perInch
+		v.Unit = UnitDp
+	}
+	return v.StringCSS()
+}
+
 // SetString sets value from a string
 func (v *Value) SetString(str string) error {
 	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))

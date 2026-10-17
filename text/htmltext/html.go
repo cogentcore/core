@@ -12,13 +12,14 @@ import (
 	"io"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/xmlx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
-	"golang.org/x/net/html/charset"
 )
 
 // HTMLToRich translates HTML-formatted rich text into a [rich.Text],
@@ -34,16 +35,45 @@ func HTMLToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.Text
 	if sz == 0 {
 		return nil, nil
 	}
-	var errs []error
-
 	spcstr := bytes.Join(bytes.Fields(str), []byte(" "))
+
+	// Plain text without markup is one span of the text, as the decoder gives.
+	if isPlainText(spcstr) {
+		return rich.Join(rich.NewText(sty, []rune(string(spcstr)))), nil
+	}
+	return htmlToRich(spcstr, sty, cssProps)
+}
+
+// isPlainText returns whether the text has no markup, entities or anything
+// else that the XML decoder would change or report as an error, in which case
+// it is one character data token of the text itself.
+func isPlainText(b []byte) bool {
+	if bytes.Contains(b, []byte("]]>")) {
+		return false
+	}
+	for len(b) > 0 {
+		r, n := utf8.DecodeRune(b)
+		switch {
+		case r == '<' || r == '&':
+			return false
+		case r < 0x20 || r == utf8.RuneError || r == 0xFEFF || r == 0xFFFE || r == 0xFFFF:
+			return false
+		}
+		b = b[n:]
+	}
+	return true
+}
+
+// htmlToRich is [HTMLToRich] for the given text with its whitespace collapsed.
+func htmlToRich(spcstr []byte, sty *rich.Style, cssProps map[string]any) (rich.Text, error) {
+	var errs []error
 
 	reader := bytes.NewReader(spcstr)
 	decoder := xml.NewDecoder(reader)
 	decoder.Strict = false
 	decoder.AutoClose = xml.HTMLAutoClose
 	decoder.Entity = xml.HTMLEntity
-	decoder.CharsetReader = charset.NewReaderLabel
+	decoder.CharsetReader = xmlx.CharsetReader
 
 	// set when a </p> is encountered
 	nextIsParaStart := false

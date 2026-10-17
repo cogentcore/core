@@ -7,10 +7,12 @@ package exec
 import (
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRun(t *testing.T) {
+	goscript.Skip(t, "running external commands is not supported")
 	assert.NoError(t, Run("go", "version"))
 	assert.NoError(t, Run("git", "version"))
 	assert.NoError(t, Run("echo", " hello"))

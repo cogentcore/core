@@ -12,7 +12,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["path/filepath/filepath"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Abs":           reflect.ValueOf(filepath.Abs),
@@ -45,4 +45,4 @@ func init() {
 		// type definitions
 		"WalkFunc": reflect.ValueOf((*filepath.WalkFunc)(nil)),
 	}
-}
+})

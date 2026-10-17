@@ -143,6 +143,9 @@ func (wb *WidgetBase) styleSettings() {
 // underneath and including this widget.
 func (wb *WidgetBase) StyleTree() {
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if cwb != wb && isHiddenStackChild(cwb) {
+			return tree.Break
+		}
 		cw.Style()
 		return tree.Continue
 	})

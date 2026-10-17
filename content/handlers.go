@@ -26,6 +26,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
@@ -109,6 +110,10 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 		ed.Lines.SetFileExt(lang)
 	}
 	ed.Lines.SetString(htmlcore.ExtractText(ctx))
+	if system.GenerateHTMLArg() { // just the code, without running it
+		ed.SetProperty("html", codeHTML(ed.Lines.String(), lang))
+		return true
+	}
 	if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
 		ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
 		parFrame := core.NewFrame(fr)
@@ -420,7 +425,14 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	ct.current.Page = pg
-	ct.Scene.Update() // need to update the whole scene to also update the toolbar
+	// The table of contents of the old page is remade by loadPage,
+	// so it is deleted now instead of being updated first.
+	ct.deleteTableOfContents()
+	if !keepCategories && ct.categoriesTree != nil {
+		ct.categoriesTree.Delete()
+		ct.categoriesTree = nil
+	}
+	ct.updateScene() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
 		ct.setStageTitle()
@@ -439,7 +451,8 @@ func (ct *Content) openRef(url string) {
 	ref := strings.TrimPrefix(url, "ref://")
 	ct.current.Page = pg
 	ct.historyAdd(pg, "", url)
-	ct.Scene.Update()
+	ct.deleteTableOfContents()
+	ct.updateScene()
 	ct.Defer(func() {
 		ct.setStageTitle()
 		ct.openID(ref, "")
