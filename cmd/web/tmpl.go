@@ -89,6 +89,7 @@ func makeAppWorkerJS(c *config.Config) ([]byte, error) {
 			"manifest.webmanifest",
 			"index.html",
 		}
+		resources = append(resources, externalEmbedFiles(c.Build.Output)...)
 	}
 
 	tmpl, err := template.New("app-worker.js").Parse(appWorkerJS)

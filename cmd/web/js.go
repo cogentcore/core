@@ -10,6 +10,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
@@ -84,6 +85,11 @@ func buildJS(c *config.Config) error {
 	if _, ok := os.LookupEnv("GOSCRIPT_ELIMINATE_DEAD_CODE"); !ok {
 		gs.Env["GOSCRIPT_ELIMINATE_DEAD_CODE"] = "1"
 	}
+	for k, v := range jsExternalEmbedEnv() {
+		if _, ok := os.LookupEnv(k); !ok {
+			gs.Env[k] = v
+		}
+	}
 	err = gs.Run("goscript", "compile", "-p", ".", "--output", output, "-b", "-tags="+tags)
 	if err != nil {
 		return fmt.Errorf("error compiling with goscript: %w", err)
@@ -125,7 +131,79 @@ func buildJS(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("error bundling with bun: %w", err)
 	}
+	err = copyExternalEmbeds(output, c.Build.Output)
+	if err != nil {
+		return err
+	}
 	return makeFiles(c)
+}
+
+// jsExternalEmbedPatterns are the base name patterns of the embedded files of
+// embed.FS variables that GoScript writes as separate files, which the app
+// fetches when it first opens them, instead of into the bundle: media files,
+// such as the images of a content site, which are only needed when a page
+// shows them, and which do not compress well, so that they would make the
+// download of the bundle much larger.
+var jsExternalEmbedPatterns = []string{
+	"*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif", "*.bmp", "*.ico", "*.svg",
+	"*.mp3", "*.wav", "*.ogg", "*.mp4", "*.webm", "*.pdf",
+}
+
+// jsExternalEmbedMinSize is the size from which a file that matches
+// [jsExternalEmbedPatterns] is external; smaller files are not worth a request.
+const jsExternalEmbedMinSize = 8 << 10
+
+// jsExternalEmbedDir is the directory of the external embedded files, which
+// GoScript writes beside the output of each package and the app loads from
+// beside app.gs.js, so they are all copied into it in the output directory.
+const jsExternalEmbedDir = "@embed"
+
+// jsExternalEmbedEnv returns the GoScript environment variables that select
+// the external embedded files (see [jsExternalEmbedPatterns]), unless the
+// environment already sets them. Versions of goscript without them ignore
+// them, and then inline all files as before.
+func jsExternalEmbedEnv() map[string]string {
+	return map[string]string{
+		"GOSCRIPT_EXTERNAL_EMBED":          strings.Join(jsExternalEmbedPatterns, ","),
+		"GOSCRIPT_EXTERNAL_EMBED_MIN_SIZE": fmt.Sprint(jsExternalEmbedMinSize),
+	}
+}
+
+// copyExternalEmbeds copies the external embedded files in the GoScript output
+// directory (see [jsExternalEmbedDir]) into the given build output directory.
+func copyExternalEmbeds(output, odir string) error {
+	dst := filepath.Join(odir, jsExternalEmbedDir)
+	err := os.RemoveAll(dst)
+	if err != nil {
+		return err
+	}
+	return filepath.WalkDir(output, func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || filepath.Base(filepath.Dir(p)) != jsExternalEmbedDir {
+			return err
+		}
+		b, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		err = os.MkdirAll(dst, 0777)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(filepath.Join(dst, d.Name()), b, 0666)
+	})
+}
+
+// externalEmbedFiles returns the paths of the external embedded files in the
+// given build output directory (see [jsExternalEmbedDir]), relative to it.
+func externalEmbedFiles(odir string) []string {
+	entries, _ := os.ReadDir(filepath.Join(odir, jsExternalEmbedDir))
+	var files []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			files = append(files, jsExternalEmbedDir+"/"+e.Name())
+		}
+	}
+	return files
 }
 
 // jsMainPackage returns the import path of the main package in the current
