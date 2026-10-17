@@ -215,12 +215,27 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 func (ts *Tabs) NewTab(label string) (*Frame, *Tab) {
 	fr := ts.getFrame()
 	idx := len(fr.Children)
-	return ts.insertNewTab(label, idx)
+	return ts.insertTab(label, idx, nil)
 }
 
-// insertNewTab inserts a new tab with the given label at the given index position
+// NewLazyTab adds a new tab with the given label whose content is made
+// by the given function when the tab is first shown, and returns the
+// tab frame and button as [Tabs.NewTab] does. The content of the selected
+// tab is made right away. This saves the time of making and styling the
+// content of tabs that are not shown, such as at the startup of an app;
+// once a tab has been shown, it is the same as a tab made with [Tabs.NewTab]
+// and filled with the same function.
+func (ts *Tabs) NewLazyTab(label string, build func(tab *Frame)) (*Frame, *Tab) {
+	fr := ts.getFrame()
+	return ts.insertTab(label, len(fr.Children), build)
+}
+
+// insertTab inserts a new tab with the given label at the given index position
 // within the list of tabs and returns the resulting tab frame and button.
-func (ts *Tabs) insertNewTab(label string, idx int) (*Frame, *Tab) {
+// If build is non-nil, it makes the content of the tab when the tab is first
+// updated: updates skip the content of tabs that are not selected, so that is
+// when the tab is first shown.
+func (ts *Tabs) insertTab(label string, idx int, build func(tab *Frame)) (*Frame, *Tab) {
 	tfr := ts.getFrame()
 	alreadyExists := tfr.ChildByName(label) != nil
 	frame := NewFrame()
@@ -232,6 +247,15 @@ func (ts *Tabs) insertNewTab(label string, idx int) (*Frame, *Tab) {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
+	if build != nil {
+		built := false
+		frame.FirstUpdater(func() {
+			if !built {
+				built = true
+				build(frame)
+			}
+		})
+	}
 	button := ts.insertTabButtonAt(label, idx)
 	if alreadyExists {
 		tree.SetUniqueName(frame)  // prevent duplicate names
