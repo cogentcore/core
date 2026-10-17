@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/text/parse"
+	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
@@ -206,9 +206,9 @@ func (ls *Lines) indentLine(ln, ind int) *textpos.Edit {
 // level and character position for the indent of the current line.
 func (ls *Lines) autoIndent(ln int) (tbe *textpos.Edit, indLev, chPos int) {
 	tabSz := ls.Settings.TabSize
-	lp, _ := parse.LanguageSupport.Properties(ls.parseState.Known)
+	lp := highlighting.ParseLanguage(ls.parseState.Known)
 	var pInd, delInd int
-	if lp != nil && lp.Lang != nil {
+	if lp != nil {
 		pInd, delInd, _, _ = lp.Lang.IndentLine(&ls.parseState, ls.lines, ls.hiTags, ln, tabSz)
 	} else {
 		pInd, delInd, _, _ = lexer.BracketIndentLine(ls.lines, ls.hiTags, ln, tabSz)
