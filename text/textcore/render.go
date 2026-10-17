@@ -161,6 +161,7 @@ func (ed *Base) renderLines() {
 }
 
 type renderCache struct {
+	// tx is the rich text of the line, including the styles of its spans.
 	tx  []rune
 	lns *shaped.Lines
 }
@@ -188,7 +189,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		return lns
 	}
 	shapeSpan := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
-		txt := stx.Join()
+		txt := slices.Concat(stx...) // with the styles, which change with highlighting
 		rc := ed.lineRenders[li]
 		if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
 			return rc.lns
