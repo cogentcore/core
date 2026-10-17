@@ -49,10 +49,10 @@ const jsTSConfig = `{
 // buildJS builds the app in the current directory to JavaScript using
 // GoScript, bundling it into app.gs.js in the output directory with bun.
 func buildJS(c *config.Config) error {
-	for _, tool := range []string{"goscript", "bun"} {
-		if _, err := exec.LookPath(tool); err != nil {
-			return fmt.Errorf("the js platform requires %s; install goscript with `go install github.com/s4wave/goscript/cmd/goscript@latest` and bun from https://bun.sh", tool)
-		}
+	// GoScript and bun are installed automatically if they are not found.
+	err := ensureJSTools()
+	if err != nil {
+		return err
 	}
 	tags := "goscript,purego,noasm"
 	if c.Build.Debug {
