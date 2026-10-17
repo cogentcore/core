@@ -28,7 +28,7 @@ func Pack(c *config.Config) error { //types:add
 	}
 	for _, platform := range c.Build.Target {
 		switch platform.OS {
-		case "android", "ios", "web", "js": // build already packages
+		case "android", "ios", "wasm", "js": // build already packages
 			continue
 		case "linux":
 			err := packLinux(c)

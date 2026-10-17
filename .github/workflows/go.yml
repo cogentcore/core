@@ -38,7 +38,7 @@ jobs:
       run: go build -v ./...
 
     - name: Build Docs (to verify it works on PRs)
-      run: core build web -dir docs -o static
+      run: core build wasm -dir docs -o static
 
     - name: Download testdata
       uses: dawidd6/action-download-artifact@v21

@@ -54,16 +54,16 @@ func TestComputeWeb(t *testing.T) {
 	}
 
 	// use the core tool from this module so that it matches the current code.
-	build := exec.Command("go", "run", "cogentcore.org/core", "build", "web", "-no-generate-html")
+	build := exec.Command("go", "run", "cogentcore.org/core", "build", "wasm", "-no-generate-html")
 	if out, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("core build web failed: %v\n%s", err, out)
+		t.Fatalf("core build wasm failed: %v\n%s", err, out)
 	}
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv := &http.Server{Handler: http.FileServer(http.Dir(filepath.Join("bin", "web")))}
+	srv := &http.Server{Handler: http.FileServer(http.Dir(filepath.Join("bin", "wasm")))}
 	go srv.Serve(ln)
 	defer srv.Close()
 

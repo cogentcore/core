@@ -158,7 +158,7 @@ func (c *Config) OnConfig(cmd string) error {
 	}
 	if c.Build.Output == "" && len(c.Build.Target) > 0 {
 		t := c.Build.Target[0]
-		if cmd == "pack" || t.OS == "web" || t.OS == "js" || t.OS == "android" || t.OS == "ios" {
+		if cmd == "pack" || t.OS == "wasm" || t.OS == "js" || t.OS == "android" || t.OS == "ios" {
 			c.Build.Output = filepath.Join("bin", t.OS)
 		}
 	}

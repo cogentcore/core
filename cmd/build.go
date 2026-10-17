@@ -40,7 +40,7 @@ func Build(c *config.Config) error { //types:add
 		if platform.OS == "android" || platform.OS == "ios" {
 			return mobile.Build(c)
 		}
-		if platform.OS == "web" || platform.OS == "js" {
+		if platform.OS == "wasm" || platform.OS == "js" {
 			err := os.MkdirAll(c.Build.Output, 0777)
 			if err != nil {
 				return err

@@ -45,7 +45,7 @@ func Install(c *config.Config) error { //types:add
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
-		case "web", "js":
+		case "wasm", "js":
 			return fmt.Errorf("can not install on platform %s; use build or run instead", p.OS)
 		case "darwin":
 			c.Pack.DMG = false
