@@ -15,6 +15,9 @@ import (
 )
 
 func TestGoSrcDir(t *testing.T) {
+	if len(GoSrcDirs()) == 0 {
+		t.Skip("there are no Go source directories on the web")
+	}
 	dir1 := "fmt"
 	expected1 := filepath.Join(build.Default.GOROOT, "src", dir1)
 	absDir1, err := GoSrcDir(dir1)
