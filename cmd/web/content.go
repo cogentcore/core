@@ -6,11 +6,14 @@ package web
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
 	"io/fs"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -99,6 +102,13 @@ func makeContentSite(c *config.Config, site *bcontent.Site, wasm bool, indexPage
 		return err
 	}
 
+	// The content files that a js app loads as external embedded files are
+	// shown from there by the pages too, so they are only downloaded once.
+	var files map[string]string
+	if wasm && IsJS(c) {
+		files = externalContentFiles(c.Content, odir)
+	}
+
 	var root *bcontent.PreRenderPage
 	for _, prp := range site.Pages {
 		if prp.URL == "" {
@@ -113,7 +123,7 @@ func makeContentSite(c *config.Config, site *bcontent.Site, wasm bool, indexPage
 		if prp.URL == "" && wasm && indexPage != "" {
 			b, err = makeIndexHTML(c, "", &bcontent.PreRenderPage{Page: bcontent.Page{Name: c.Name}}, indexPage)
 		} else {
-			b, err = makeContentPage(c, site, prp, basePath(prp.URL), wasm)
+			b, err = makeContentPage(c, site, prp, basePath(prp.URL), wasm, files)
 		}
 		if err != nil {
 			return err
@@ -135,7 +145,7 @@ func makeContentSite(c *config.Config, site *bcontent.Site, wasm bool, indexPage
 	if wasm && root != nil {
 		notFound = root
 	}
-	b, err := makeContentPage(c, site, notFound, notFoundBasePath(c), wasm)
+	b, err := makeContentPage(c, site, notFound, notFoundBasePath(c), wasm, files)
 	if err != nil {
 		return err
 	}
@@ -144,7 +154,7 @@ func makeContentSite(c *config.Config, site *bcontent.Site, wasm bool, indexPage
 		return err
 	}
 
-	return copyContentFiles(c.Content, odir)
+	return copyContentFiles(c.Content, odir, files)
 }
 
 // basePath returns the relative path to the root of the website
@@ -213,8 +223,9 @@ type pageJSData struct {
 
 // makeContentPage returns the HTML file for the given page of the site,
 // with the given base path to the root of the site. If wasm is true,
-// the page loads the Go wasm app (see [makeContentSite]).
-func makeContentPage(c *config.Config, site *bcontent.Site, prp *bcontent.PreRenderPage, base string, wasm bool) ([]byte, error) {
+// the page loads the Go wasm app (see [makeContentSite]). The given files
+// map content files to other paths in the website (see [rebaseURLs]).
+func makeContentPage(c *config.Config, site *bcontent.Site, prp *bcontent.PreRenderPage, base string, wasm bool, files map[string]string) ([]byte, error) {
 	desc := c.About
 	if prp.Description != "" && (prp.URL != "" || c.About == "") {
 		desc = strings.TrimSpace(html.UnescapeString(strip.StripTags(prp.Description)))
@@ -245,7 +256,7 @@ func makeContentPage(c *config.Config, site *bcontent.Site, prp *bcontent.PreRen
 		Lang:     c.Web.Lang,
 		HomeURL:  pageHref(base, ""),
 		NavHTML:  staticNavHTML(site, prp, base),
-		PageHTML: rebaseURLs(prp.HTML, base, prp.URL, pageURLs(site)),
+		PageHTML: rebaseURLs(prp.HTML, base, prp.URL, pageURLs(site), files),
 		PageJSON: string(pj),
 	}
 	b := &bytes.Buffer{}
@@ -318,7 +329,9 @@ func pageURLs(site *bcontent.Site) map[string]bool {
 // just the heading fragment. Links to files (such as images or PDFs in the
 // content directory) are left as links to the files themselves. A link is to
 // a file if it is not one of the given page URLs and it has a file extension.
-func rebaseURLs(h, base, pageURL string, pages map[string]bool) string {
+// The given files map the paths of content files to their paths in the
+// website, if they are elsewhere (see [externalContentFiles]).
+func rebaseURLs(h, base, pageURL string, pages map[string]bool, files map[string]string) string {
 	return htmlTagRe.ReplaceAllStringFunc(h, func(tag string) string {
 		internal := false // a link to a page, which opens in the same tab
 		tag = urlAttrRe.ReplaceAllStringFunc(tag, func(attr string) string {
@@ -334,6 +347,9 @@ func rebaseURLs(h, base, pageURL string, pages map[string]bool) string {
 			pg, frag, hasFrag := strings.Cut(u, "#")
 			pg = strings.TrimSuffix(pg, "/")
 			if name == "src" || (!pages[pg] && path.Ext(pg) != "") {
+				if f, ok := files[u]; ok {
+					u = f
+				}
 				return fmt.Sprintf(` %s="%s"`, name, html.EscapeString(base+u))
 			}
 			internal = true
@@ -354,8 +370,9 @@ func rebaseURLs(h, base, pageURL string, pages map[string]bool) string {
 
 // copyContentFiles copies all of the files in the given content directory
 // other than the content pages themselves (such as images) to the
-// given output directory, preserving their relative paths.
-func copyContentFiles(content, odir string) error {
+// given output directory, preserving their relative paths, except for
+// the given files, which are elsewhere in the output directory.
+func copyContentFiles(content, odir string, files map[string]string) error {
 	if _, err := os.Stat(content); errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}
@@ -368,7 +385,7 @@ func copyContentFiles(content, odir string) error {
 			return nil
 		}
 		ext := path.Ext(p)
-		if ext == ".md" || ext == ".html" || strings.HasPrefix(path.Base(p), ".") {
+		if _, ok := files[p]; ok || ext == ".md" || ext == ".html" || strings.HasPrefix(path.Base(p), ".") {
 			return nil
 		}
 		b, err := fs.ReadFile(cfs, p)
@@ -382,4 +399,30 @@ func copyContentFiles(content, odir string) error {
 		}
 		return os.WriteFile(op, b, 0666)
 	})
+}
+
+// externalContentFiles returns the content files in the given content
+// directory that the js app loads as external embedded files from the given
+// output directory (see [copyExternalEmbeds]), mapped to their paths there.
+// An external file is named by GoScript with the first 16 hexadecimal digits
+// of the SHA-256 of its contents and its base name.
+func externalContentFiles(content, odir string) map[string]string {
+	files := map[string]string{}
+	cfs := os.DirFS(content)
+	fs.WalkDir(cfs, ".", func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		b, err := fs.ReadFile(cfs, p)
+		if err != nil {
+			return nil
+		}
+		sum := sha256.Sum256(b)
+		name := hex.EncodeToString(sum[:])[:16] + "-" + path.Base(p)
+		if _, err := os.Stat(filepath.Join(odir, jsExternalEmbedDir, name)); err == nil {
+			files[p] = jsExternalEmbedDir + "/" + url.PathEscape(name)
+		}
+		return nil
+	})
+	return files
 }

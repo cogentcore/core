@@ -36,8 +36,8 @@ func TestRebaseURLs(t *testing.T) {
 	}
 	pages := map[string]bool{"": true, "button": true, "widget": true, "v1.2": true}
 	for _, tt := range tests {
-		assert.Equal(t, tt.out, rebaseURLs(tt.in, "../", "button", pages), tt.in)
+		assert.Equal(t, tt.out, rebaseURLs(tt.in, "../", "button", pages, nil), tt.in)
 	}
-	assert.Equal(t, `<a href="./">h</a>`, rebaseURLs(`<a href="">h</a>`, "", "widget", pages))
-	assert.Equal(t, `<a href="widget/">w</a>`, rebaseURLs(`<a href="widget">w</a>`, "", "", pages))
+	assert.Equal(t, `<a href="./">h</a>`, rebaseURLs(`<a href="">h</a>`, "", "widget", pages, nil))
+	assert.Equal(t, `<a href="widget/">w</a>`, rebaseURLs(`<a href="widget">w</a>`, "", "", pages, nil))
 }
