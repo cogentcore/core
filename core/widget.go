@@ -333,6 +333,11 @@ func (wb *WidgetBase) Init() {
 // by widget types.
 func (wb *WidgetBase) OnAdd() {
 	if pwb := wb.parentWidget(); pwb != nil {
+		if pwb.Scene != wb.Scene {
+			// A subtree added as a whole (for example, a clone or a moved
+			// widget) has descendants that must now be in the new scene.
+			wb.setDescendantScenes(pwb.Scene)
+		}
 		wb.Scene = pwb.Scene
 		if wb.hasFlag(widgetNeedsRender) || wb.hasFlag(widgetChildNeedsRender) {
 			wb.setParentsChildNeedsRender()
@@ -344,6 +349,30 @@ func (wb *WidgetBase) OnAdd() {
 	}
 	if wb.Scene != nil && wb.Scene.WidgetInit != nil {
 		wb.Scene.WidgetInit(wb.This.(Widget))
+	}
+}
+
+// setDescendantScenes sets the [WidgetBase.Scene] of all of the descendants
+// of this widget, including those in parts, to the given scene. Descendants
+// that had no scene before, such as those of a clone, have not been
+// initialized for any scene yet, so it calls its [Scene.WidgetInit] on them,
+// as [WidgetBase.OnAdd] does for each widget.
+func (wb *WidgetBase) setDescendantScenes(sc *Scene) {
+	set := func(kwb *WidgetBase) {
+		hadScene := kwb.Scene != nil
+		kwb.Scene = sc
+		kwb.setDescendantScenes(sc)
+		if !hadScene && sc != nil && sc.WidgetInit != nil {
+			sc.WidgetInit(kwb.This.(Widget))
+		}
+	}
+	for _, k := range wb.Children {
+		if kwb := AsWidget(k); kwb != nil {
+			set(kwb)
+		}
+	}
+	if wb.Parts != nil {
+		set(wb.Parts.AsWidget())
 	}
 }
 
