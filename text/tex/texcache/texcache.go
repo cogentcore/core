@@ -5,6 +5,7 @@
 package texcache
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
@@ -118,7 +119,7 @@ func OpenFS(fsys fs.FS, filename string) error {
 
 	var c map[string]*cached
 	err := gzipx.OpenFS(fsys, filename, func(r io.Reader) error {
-		return jsonx.Read(&c, r)
+		return readCache(&c, r)
 	})
 	if err != nil {
 		return errors.Log(err)
@@ -135,13 +136,24 @@ func Open(filename string) error {
 
 	var c map[string]*cached
 	err := gzipx.Open(filename, func(r io.Reader) error {
-		return jsonx.Read(&c, r)
+		return readCache(&c, r)
 	})
 	if err != nil {
 		return errors.Log(err)
 	}
 	setCache(c)
 	return nil
+}
+
+// readCache reads the cache entries from the given reader. The cache is one
+// large JSON object, which is read whole and then unmarshaled, which is much
+// faster on the web (js platform) than decoding it from the stream.
+func readCache(c *map[string]*cached, r io.Reader) error {
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, c)
 }
 
 // DeleteUnused deletes any cache entries that have not been
