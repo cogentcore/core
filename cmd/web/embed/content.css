@@ -148,6 +148,30 @@ body>#app-crash-dialog {
   background-color: var(--primary);
 }
 
+/* Without a known progress, a band moves along the bar. */
+.cc-loading progress:indeterminate {
+  background: linear-gradient(90deg, var(--surface-variant) 25%, var(--primary) 50%, var(--surface-variant) 75%) 0 0 / 300% 100%;
+  animation: cc-loading 1.5s linear infinite;
+}
+
+.cc-loading progress:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+.cc-loading progress:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes cc-loading {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
 a {
   color: var(--primary);
 }

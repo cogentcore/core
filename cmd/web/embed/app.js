@@ -247,13 +247,24 @@ async function appInitGoScript(loader) {
       loaderProgress.value = progress / 100;
     }
   };
+  // Without a known progress, the progress bar shows that the app is loading.
+  const showLoading = () => {
+    if (loaderLabel) {
+      loaderLabel.innerText = "";
+    }
+    if (loaderProgress) {
+      loaderProgress.removeAttribute("value");
+    }
+  };
   try {
     showProgress(1);
     const url = new URL(document.documentElement.dataset.basePath + "app.gs.js", document.baseURI).href;
     // Without the service worker, the bundle comes from the network, so we
     // also read it with fetch to show progress.
     if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
-      appShowDownloadProgress(url, showProgress);
+      appShowDownloadProgress(url, showProgress).then((shown) => shown || showLoading());
+    } else {
+      showLoading();
     }
     // We import the bundle URL itself, which the page already started to
     // load with modulepreload, so that the browser compiles it while it
@@ -266,6 +277,7 @@ async function appInitGoScript(loader) {
 
 // appShowDownloadProgress reads the response of the given URL, calling
 // progress with the percentage downloaded, without keeping the data.
+// It returns whether it read the response.
 async function appShowDownloadProgress(url, progress) {
   try {
     // The browser shares one download between this request and the module
@@ -276,11 +288,11 @@ async function appShowDownloadProgress(url, progress) {
     // its cache, such as 10 MB of 80 MB, so a larger bundle is not shared.
     const head = await fetch(url + "?head", { method: "HEAD", cache: "no-store" });
     if (!/max-age=[1-9]|immutable/.test(head.headers.get("Cache-Control") || "")) {
-      return;
+      return false;
     }
     const size = parseInt(head.headers.get("Content-Length") || "0", 10);
     if (!(size > 0 && size <= appSharedDownloadMaxSize)) {
-      return;
+      return false;
     }
     const response = await fetch(url);
     const total = appResponseSize(response);
@@ -294,8 +306,10 @@ async function appShowDownloadProgress(url, progress) {
       loaded += value.byteLength;
       progress(Math.min(99, Math.max(1, Math.round((loaded * 100) / total)))); // must be 1-99
     }
+    return true;
   } catch (err) {
     console.warn("showing download progress failed: ", err);
+    return false;
   }
 }
 

@@ -130,6 +130,30 @@ body > #app-crash-dialog {
   background-color: var(--primary-color);
 }
 
+/* Without a known progress, a band moves along the bar. */
+#app-wasm-loader-progress:indeterminate {
+  background: linear-gradient(90deg, var(--container-color) 25%, var(--primary-color) 50%, var(--container-color) 75%) 0 0 / 300% 100%;
+  animation: app-wasm-loader-loading 1.5s linear infinite;
+}
+
+#app-wasm-loader-progress:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+#app-wasm-loader-progress:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes app-wasm-loader-loading {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
 #app-wasm-loader > main,
 #app-wasm-loader > content {
   overflow: auto;
