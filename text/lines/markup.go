@@ -72,7 +72,9 @@ func (ls *Lines) startDelayedReMarkup() {
 		ls.markupDelayTimer = nil
 	}
 	ls.markupDelayTimer = time.AfterFunc(markupDelay, func() {
+		ls.markupDelayMu.Lock()
 		ls.markupDelayTimer = nil
+		ls.markupDelayMu.Unlock()
 		ls.asyncMarkup() // already in a goroutine
 	})
 }

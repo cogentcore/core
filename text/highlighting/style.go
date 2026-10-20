@@ -399,9 +399,15 @@ func (hs Style) SaveJSON(filename fsx.Filename) error {
 }
 
 // Properties are default properties for custom tags (tokens); if set in style then used
-// there but otherwise we use these as a fallback; typically not overridden
+// there but otherwise we use these as a fallback; typically not overridden.
+// text-decoration flags here are applied to tagged spans even when the style
+// also defines other properties for the tag, so that diagnostic tags like
+// Error are always visibly decorated.
 var Properties = map[token.Tokens]map[string]any{
 	token.TextSpellErr: {
-		"text-decoration": 1 << uint32(rich.DottedUnderline), // bitflag!
+		"text-decoration": uint32(1) << uint32(rich.DottedUnderline), // bitflag!
+	},
+	token.Error: {
+		"text-decoration": uint32(1) << uint32(rich.DottedUnderline), // bitflag!
 	},
 }

@@ -853,7 +853,7 @@ func Truncate64(val float64, prec int) float64 {
 	// return math.Round(val*pow) / pow
 }
 
-// WrapsMax returns x wrapped in the interval [0..max).
+// WrapMax returns x wrapped in the interval [0..max).
 func WrapMax(x, mx float32) float32 {
 	// integer math: (max + x % max) % max
 	return Mod(mx+Mod(x, mx), mx)
