@@ -59,24 +59,56 @@ func (sw *Scene) canvas(cw *composer.ComposerWeb) js.Value {
 }
 
 // configFrame configures the render frame in a platform-specific manner.
+// The GPU device, surface and Phong renderer are made once, the first time.
+// After that, a new size only reconfigures the surface and remakes its
+// depth and multisample textures, as [xyz.Scene.ConfigOffscreen] does for
+// the render texture in native builds.
 func (sw *Scene) configFrame(sz image.Point) {
 	// Even though we are not in [xyzSource.Draw], we can get the Composer
 	// and use it to get the canvas element, which we may need before we
-	// get to [xyzSource.Draw].
+	// get to [xyzSource.Draw]. The size of the canvas is that of the
+	// textures that the surface gives, so it is set first.
 	cw := core.TheApp.Window(0).Composer().(*composer.ComposerWeb)
 	elem := sw.canvas(cw)
 	cw.SetElementGeom(elem, sw.Geom.ContentBBox.Min, sz)
 
+	sc := sw.XYZ
+	if sc.Frame != nil {
+		sc.Lock()
+		sc.SetSize(sz)
+		sc.Unlock()
+		return
+	}
 	wsurf := gpu.Instance().CreateSurface(&wgpu.SurfaceDescriptor{Canvas: elem})
 	gp := gpu.NewGPU(nil)
-	sc := sw.XYZ
 	sc.Frame = gpu.NewSurface(gp, wsurf, sz, 4, gpu.Depth32)
 	sc.Phong = phong.NewPhong(gp, sc.Frame)
 	sc.ConfigNewPhong()
 }
 
-// destroyFrame forgets the canvas of the scene, which the composer removes
-// as its widget is no longer drawn.
+// destroyFrame releases the GPU resources of the canvas of the scene, after
+// [xyz.Scene.Destroy]: the Release methods of WebGPU objects do nothing on
+// the web, so it unconfigures the canvas context and destroys the device of
+// the surface, which frees all of its buffers and textures at once. The
+// composer removes the canvas as the widget is no longer drawn.
 func (sw *Scene) destroyFrame() {
+	elem, ok := canvases[sw]
+	if !ok {
+		return
+	}
 	delete(canvases, sw)
+	ctx := elem.Call("getContext", "webgpu")
+	if !ctx.Truthy() {
+		return
+	}
+	var device js.Value
+	if ctx.Get("getConfiguration").Truthy() {
+		if conf := ctx.Call("getConfiguration"); conf.Truthy() {
+			device = conf.Get("device")
+		}
+	}
+	ctx.Call("unconfigure")
+	if device.Truthy() {
+		device.Call("destroy")
+	}
 }
