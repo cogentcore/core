@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
 	"github.com/go-text/typesetting/di"
+	"github.com/go-text/typesetting/segmenter"
 	"github.com/go-text/typesetting/shaping"
 )
 
@@ -58,6 +59,11 @@ type shapeEntry struct {
 
 	// wraps are the most recent wrappings of the outputs.
 	wraps []wrapEntry
+
+	// seg has the line and grapheme break opportunities of the text,
+	// which the line wrapper uses for every wrapping of the text that
+	// is not cached; it is made by the first one (see [shapeEntry.segmenter]).
+	seg *segmenter.Segmenter
 
 	// next is the next entry with the same hash.
 	next *shapeEntry
@@ -266,7 +272,7 @@ func (sh *Shaper) wrapCached(tx rich.Text, defSty *rich.Style, tsty *text.Style,
 		if adjust != nil {
 			adjust(outs)
 		}
-		lines, truncated := sh.wrapOutputs(outs, txt, cfg, maxSize, adjust)
+		lines, truncated := sh.wrapOutputs(outs, txt, cfg, maxSize, adjust, nil)
 		return lines, truncated, nil, false
 	}
 
@@ -292,7 +298,7 @@ func (sh *Shaper) wrapCached(tx rich.Text, defSty *rich.Style, tsty *text.Style,
 	if txt == nil {
 		txt = tx.Join()
 	}
-	lines, truncated := sh.wrapOutputs(copyOutputs(se.outs), txt, cfg, maxSize, adjust)
+	lines, truncated := sh.wrapOutputs(copyOutputs(se.outs), txt, cfg, maxSize, adjust, se)
 	return lines, truncated, se.addWrap(cfg, maxSize, lines, truncated), false
 }
 
@@ -358,22 +364,37 @@ func copyBounds(lns *shaped.Lines, tx rich.Text, tsty *text.Style) *shaped.Lines
 }
 
 // wrapOutputs wraps the outputs into lines, adjusting the outputs of the
-// lines with adjust if non-nil (see [Shaper.WrapLinesCached]). The lines
+// lines with adjust if non-nil (see [Shaper.WrapLinesCached]). The cache
+// entry of the text, if non-nil, keeps its break opportunities. The lines
 // are only valid until the next call.
-func (sh *Shaper) wrapOutputs(outs []shaping.Output, txt []rune, cfg shaping.WrapConfig, maxSize int, adjust func(outs []shaping.Output)) ([]shaping.Line, int) {
+func (sh *Shaper) wrapOutputs(outs []shaping.Output, txt []rune, cfg shaping.WrapConfig, maxSize int, adjust func(outs []shaping.Output), se *shapeEntry) ([]shaping.Line, int) {
 	// Text that fits on one line does not need the line wrapper.
 	if lines, ok := singleLine(outs, txt, cfg, maxSize, adjust == nil && !cfg.DisableTrailingWhitespaceTrim); ok {
 		return lines, 0
 	}
 
 	// Wrapping can cut outputs, which are adjusted again.
-	lines, truncated := sh.wrapParagraph(cfg, maxSize, txt, outs)
+	var seg *segmenter.Segmenter
+	if se != nil {
+		seg = se.segmenter(txt)
+	}
+	lines, truncated := sh.wrapParagraph(cfg, maxSize, txt, outs, seg)
 	if adjust != nil {
 		for _, ln := range lines {
 			adjust(ln)
 		}
 	}
 	return lines, truncated
+}
+
+// segmenter returns the segmenter of the entry, initialized with its text
+// (the given runes) the first time.
+func (se *shapeEntry) segmenter(txt []rune) *segmenter.Segmenter {
+	if se.seg == nil {
+		se.seg = &segmenter.Segmenter{}
+		se.seg.Init(txt)
+	}
+	return se.seg
 }
 
 // wrapEntry returns the cached wrapping of the entry with the given
