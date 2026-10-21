@@ -8,7 +8,10 @@ import (
 	"reflect"
 	"testing"
 
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
 	"github.com/go-text/typesetting/shaping"
 )
 
@@ -70,5 +73,49 @@ func TestSimpleSpans(t *testing.T) {
 				t.Errorf("%q: not shaped by the go-text shaper", s)
 			}
 		}
+	}
+}
+
+// TestMathCache tests that the lines of cached texts with math spans are
+// those of the uncached path, with their math.
+func TestMathCache(t *testing.T) {
+	old := shaped.ShapeMath
+	defer func() { shaped.ShapeMath = old }()
+	shaped.ShapeMath = func(expr string, fontHeight float32) (ppath.Path, error) {
+		p := ppath.Path{}
+		w := float32(len(expr)) * fontHeight / 2
+		p.MoveTo(0, -fontHeight)
+		p.LineTo(w, -fontHeight)
+		p.LineTo(w, fontHeight/3)
+		p.Close()
+		return p, nil
+	}
+	sh := NewShaper().(*Shaper)
+	tsty := testStyle()
+	defSty := rich.NewStyle()
+	var txs []rich.Text
+	for _, m := range []string{"x", `y = f(x^2)`, `\frac{1}{N}`} {
+		tx := rich.NewText(defSty, []rune("The value "))
+		tx.AddMathInline(defSty, m)
+		tx.AddSpan(defSty, []rune(" is what we compute here, and it wraps"))
+		txs = append(txs, tx)
+	}
+	for round := range 2 {
+		for ti, tx := range txs {
+			for _, w := range []float32{60, 150, 400, 150} {
+				size := math32.Vec2(w, 200)
+				txt := tx.Join()
+				outs := copyOutputs(sh.ShapeTextOutput(tx, tsty, txt))
+				lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, size)
+				want := sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+				got := sh.WrapLines(tx, defSty, tsty, size)
+				if !reflect.DeepEqual(got, want) {
+					t.Errorf("round %d text %d width %v: cached lines differ:\n%v\n%v", round, ti, w, got, want)
+				}
+			}
+		}
+	}
+	if sh.shapes.n != len(txs) {
+		t.Errorf("cached %d texts, want %d", sh.shapes.n, len(txs))
 	}
 }

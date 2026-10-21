@@ -52,6 +52,10 @@ type shapeEntry struct {
 	// outs are the shaped outputs, which callers get copies of.
 	outs []shaping.Output
 
+	// maths are the shaped math spans of the text by span index (see
+	// [Shaper.shapeMaths]), which are not changed once made.
+	maths map[int]*shaped.Math
+
 	// wraps are the most recent wrappings of the outputs.
 	wraps []wrapEntry
 
@@ -226,18 +230,9 @@ func copyOutputs(outs []shaping.Output) []shaping.Output {
 }
 
 // cacheable returns whether the shaped outputs of the text can be cached,
-// which they cannot when the text is empty or has math, as shaping math
-// also makes the math paths.
+// which they cannot when the text is empty.
 func cacheable(tx rich.Text) bool {
-	if tx.Len() == 0 {
-		return false
-	}
-	for si := range tx {
-		if sty, _ := tx.Span(si); sty.IsMath() {
-			return false
-		}
-	}
-	return true
+	return tx.Len() > 0
 }
 
 // WrapLinesCached returns the lines of the text wrapped to the given size,
@@ -275,7 +270,8 @@ func (sh *Shaper) wrapCached(tx rich.Text, defSty *rich.Style, tsty *text.Style,
 		return lines, truncated, nil, false
 	}
 
-	// The text is shaped unless it is cached, and its runes are only needed to wrap it.
+	// The text is shaped unless it is cached, with its math spans, which its
+	// lines use, and its runes are only needed to wrap it.
 	var txt []rune
 	se, h := sh.shapes.get(tx, tsty)
 	if se == nil {
@@ -285,7 +281,9 @@ func (sh *Shaper) wrapCached(tx rich.Text, defSty *rich.Style, tsty *text.Style,
 			adjust(outs)
 		}
 		se = sh.shapes.add(tx, tsty, h, outs)
+		se.maths = sh.maths
 	}
+	sh.maths = se.maths
 
 	// The text is wrapped unless it is cached wrapped to this size.
 	if we := se.wrapEntry(cfg, maxSize); we != nil {
