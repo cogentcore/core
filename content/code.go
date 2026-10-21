@@ -28,6 +28,13 @@ type CodeFunc func(b *core.Frame, out io.Writer)
 // an entry here runs without an interpreter.
 var CompiledCode = map[string]CodeFunc{}
 
+// CodeSymbols are values of the app, by name, that its code blocks use,
+// such as embedded files. Compiled code (see [CompiledCode]) uses them from
+// the app's package directly; interpreters (see [BindTextEditor]) add them
+// to the names that code can use without a package, when they are first
+// needed.
+var CodeSymbols = map[string]any{}
+
 // AddCompiledCode adds the given compiled code blocks to [CompiledCode].
 // Generated code calls it.
 func AddCompiledCode(code map[string]CodeFunc) {
@@ -109,7 +116,9 @@ func bindCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, 
 // runCompiledCode runs f in parent, like the interpreter would.
 func runCompiledCode(ed *textcore.Editor, parent *core.Frame, f CodeFunc) {
 	parent.DeleteChildren()
+	// a program that makes a body and runs a window adds it to parent instead
 	core.ExternalParent = parent
+	defer func() { core.ExternalParent = nil }()
 	var out bytes.Buffer
 	err := func() (err error) {
 		defer func() {

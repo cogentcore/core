@@ -88,6 +88,12 @@ func main() {
 		})
 	})
 
+	// for the interpreter (yaegi.go), when code is edited
+	content.CodeSymbols["econtent"] = econtent
+	content.CodeSymbols["myImage"] = myImage
+	content.CodeSymbols["mySVG"] = mySVG
+	content.CodeSymbols["myFile"] = myFile
+
 	ctx.ElementHandlers["home-page"] = homePage
 	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)

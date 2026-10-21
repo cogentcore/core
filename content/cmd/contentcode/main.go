@@ -204,6 +204,9 @@ func run(contentDir, output, tags string, extra []string) error {
 			return fmt.Errorf("could not fix the type errors: %v", errs)
 		}
 	}
+	if f, err := format.Source(src); err == nil {
+		src = f
+	}
 	if err := os.WriteFile(output, src, 0666); err != nil {
 		return err
 	}

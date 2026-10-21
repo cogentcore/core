@@ -41,340 +41,340 @@ import (
 // code block programs that are running.
 var (
 	contentCodeParent *core.Frame
-	contentCodeOut io.Writer
+	contentCodeOut    io.Writer
 )
 
 func init() {
 	content.AddCompiledCode(map[string]content.CodeFunc{
-		"a85766b8-184": contentCode0, // content/abilities.md:10
-		"193d945b-251": contentCode1, // content/abilities.md:21
-		"d1bece9d-61": contentCode2, // content/abilities.md:33
-		"9f3d104a-213": contentCode3, // content/animate.md:10
-		"2c31d74b-289": contentCode4, // content/animate.md:27
-		"fedc1661-306": contentCode5, // content/animate.md:52
-		"4bc77432-183": contentCode6, // content/animate.md:77
-		"fd4c299d-117": contentCode7, // content/app.md:14
-		"83ce31d3-212": contentCode8, // content/async.md:10
-		"1c691f72-136": contentCode9, // content/bind.md:10
-		"35a91bb2-135": contentCode10, // content/bind.md:23
-		"150f83b7-36": contentCode11, // content/body.md:10
-		"72d6fe58-134": contentCode12, // content/body.md:16
-		"0eb2a81d-37": contentCode13, // content/button.md:12
-		"dab5c2db-41": contentCode14, // content/button.md:18
-		"33a5d7bd-61": contentCode15, // content/button.md:24
-		"519ea3e3-177": contentCode16, // content/button.md:30
-		"1e87bac3-121": contentCode17, // content/button.md:41
-		"61a82cb2-124": contentCode18, // content/button.md:49
-		"d75787a8-120": contentCode19, // content/button.md:57
-		"a768b88f-62": contentCode20, // content/button.md:69
-		"f40c28cf-60": contentCode21, // content/button.md:75
-		"98632bb7-66": contentCode22, // content/button.md:81
-		"70aa2feb-66": contentCode23, // content/button.md:87
-		"2c48b38d-58": contentCode24, // content/button.md:93
-		"320232c7-62": contentCode25, // content/button.md:99
-		"d3ccb957-116": contentCode26, // content/button.md:107
-		"17abc3d2-116": contentCode27, // content/button.md:116
-		"df6a3063-123": contentCode28, // content/canvas.md:14
-		"9e8be769-128": contentCode29, // content/canvas.md:22
-		"54f3929e-160": contentCode30, // content/canvas.md:33
-		"ae5f0a8b-122": contentCode31, // content/canvas.md:46
-		"2449a9ff-240": contentCode32, // content/canvas.md:56
-		"c1cb9e10-128": contentCode33, // content/canvas.md:88
-		"61b1804c-169": contentCode34, // content/canvas.md:98
-		"a39814b9-137": contentCode35, // content/canvas.md:108
-		"aef26ed4-137": contentCode36, // content/canvas.md:118
-		"86a911d8-146": contentCode37, // content/canvas.md:129
-		"9c1f576e-179": contentCode38, // content/canvas.md:142
-		"511a90d0-173": contentCode39, // content/canvas.md:153
-		"be95cd41-56": contentCode40, // content/chooser.md:12
-		"cb94e2d3-181": contentCode41, // content/chooser.md:18
-		"7d1be444-90": contentCode42, // content/chooser.md:27
-		"2d6d1199-86": contentCode43, // content/chooser.md:33
-		"e01aa973-90": contentCode44, // content/chooser.md:39
-		"2cd86613-78": contentCode45, // content/chooser.md:45
-		"933314de-76": contentCode46, // content/chooser.md:51
-		"22e7a2af-76": contentCode47, // content/chooser.md:57
-		"16a31d2e-94": contentCode48, // content/chooser.md:63
-		"285cb309-167": contentCode49, // content/chooser.md:71
-		"143c0aaa-132": contentCode50, // content/collapser.md:10
-		"80cded6b-200": contentCode51, // content/collapser.md:18
-		"cbf5f6b8-46": contentCode52, // content/color-picker.md:12
-		"fa12a532-130": contentCode53, // content/color-picker.md:20
-		"b31e3c98-129": contentCode54, // content/color-picker.md:29
-		"bcf8a27e-46": contentCode55, // content/color-picker.md:40
-		"8e51f2b3-129": contentCode56, // content/color-picker.md:46
-		"9b6fea0e-40": contentCode57, // content/colors.md:36
-		"4478044e-113": contentCode58, // content/colors.md:44
-		"386f83ba-178": contentCode59, // content/colors.md:61
-		"a06c0734-182": contentCode60, // content/colors.md:73
-		"1fd961d8-184": contentCode61, // content/colors.md:83
-		"741d1679-233": contentCode62, // content/colors.md:93
-		"7b12edcb-151": contentCode63, // content/colors.md:112
-		"d10e36ae-426": contentCode64, // content/colors.md:124
-		"19deec68-42": contentCode65, // content/content.md:14
-		"00bc6a58-144": contentCode66, // content/context-menu.md:10
-		"6f6a6eae-43": contentCode67, // content/context-menu.md:20
-		"9c17426f-104": contentCode68, // content/cursors.md:10
-		"d738eded-514": contentCode69, // content/cursors.md:22
-		"633b121d-41": contentCode70, // content/date-picker.md:14
-		"b5968a09-130": contentCode71, // content/date-picker.md:22
-		"a497e537-125": contentCode72, // content/dialog.md:12
-		"84b37db4-146": contentCode73, // content/dialog.md:21
-		"917db1e9-392": contentCode74, // content/dialog.md:32
-		"080fe1d2-349": contentCode75, // content/dialog.md:51
-		"ac8e0b51-130": contentCode76, // content/dialog.md:71
-		"559da630-130": contentCode77, // content/dialog.md:81
-		"cb7a2a72-107": contentCode78, // content/event.md:10
-		"20fd5671-129": contentCode79, // content/event.md:18
-		"d1c0ec92-112": contentCode80, // content/event.md:36
-		"e617a6ef-110": contentCode81, // content/events.md:26
-		"7dd80688-102": contentCode82, // content/events.md:36
-		"620df995-187": contentCode83, // content/events.md:46
-		"ec8f9963-258": contentCode84, // content/events.md:60
-		"dbb17c4b-258": contentCode85, // content/events.md:75
-		"15473b54-104": contentCode86, // content/events.md:90
-		"5471f119-116": contentCode87, // content/events.md:101
-		"2774e2be-103": contentCode88, // content/events.md:120
-		"935f83b0-127": contentCode89, // content/events.md:129
-		"5e817b5a-101": contentCode90, // content/events.md:142
-		"e6ad6f1c-125": contentCode91, // content/events.md:155
-		"07ab6c61-166": contentCode92, // content/events.md:169
-		"d1706909-121": contentCode93, // content/events.md:183
-		"c56924c7-220": contentCode94, // content/events.md:195
-		"210bde93-199": contentCode96, // content/events.md:227
-		"de923813-146": contentCode97, // content/events.md:244
-		"3a3153ef-21": contentCode98, // content/file-picker.md:14
-		"82af2952-56": contentCode99, // content/file-picker.md:20
-		"74cd1731-101": contentCode100, // content/file-picker.md:28
-		"a98abd49-21": contentCode101, // content/file-picker.md:39
-		"d6c84ecc-95": contentCode102, // content/file-picker.md:45
-		"17ea78ae-33": contentCode103, // content/file-tree.md:14
-		"8f84554b-225": contentCode104, // content/file-tree.md:22
-		"24e2f972-86": contentCode105, // content/form.md:14
-		"f5baa4c6-102": contentCode106, // content/form.md:24
-		"dcdf1e01-104": contentCode107, // content/form.md:34
-		"0db50844-171": contentCode108, // content/form.md:46
-		"ad354294-186": contentCode109, // content/form.md:59
-		"e7563bc3-99": contentCode110, // content/form.md:76
-		"43c63921-96": contentCode111, // content/form.md:86
-		"0ed93f66-104": contentCode112, // content/form.md:96
-		"c7fe894b-145": contentCode113, // content/form.md:106
-		"9fffd67e-152": contentCode114, // content/form.md:120
-		"d325a21d-174": contentCode115, // content/form.md:134
-		"bc896070-163": contentCode116, // content/form.md:148
-		"87403e0a-92": contentCode117, // content/form.md:161
-		"6dfd9858-126": contentCode118, // content/frame.md:10
-		"e27ade49-205": contentCode119, // content/frame.md:25
-		"76225bf2-209": contentCode120, // content/frame.md:38
-		"7b1e0302-193": contentCode121, // content/frame.md:53
-		"da92b314-79": contentCode122, // content/func-button.md:12
-		"3d16ab07-123": contentCode123, // content/func-button.md:22
-		"235bf2f8-118": contentCode124, // content/func-button.md:31
-		"bad131b1-88": contentCode125, // content/func-button.md:39
-		"529ecb5f-96": contentCode126, // content/func-button.md:47
-		"1b789f9f-67": contentCode127, // content/func-button.md:57
-		"dc52e62d-130": contentCode128, // content/hello-world-tutorial.md:8
-		"4669dc9e-104": contentCode129, // content/hello-world-tutorial.md:26
-		"cf4d7ac1-165": contentCode130, // content/hello-world-tutorial.md:34
-		"10bb0f4f-90": contentCode131, // content/html.md:13
-		"f3fd221e-112": contentCode132, // content/html.md:21
-		"c4927e85-37": contentCode133, // content/icon.md:10
-		"97bcdc65-35": contentCode134, // content/icon.md:16
-		"a875d165-41": contentCode135, // content/icon.md:22
-		"dd63d801-100": contentCode136, // content/icon.md:32
-		"efff71cb-113": contentCode137, // content/icon.md:41
-		"d9a2f676-118": contentCode138, // content/icon.md:50
-		"7345a058-152": contentCode139, // content/icon.md:59
-		"ef36f545-56": contentCode140, // content/image.md:21
-		"e1b528f5-122": contentCode141, // content/image.md:27
-		"2b0fd27e-338": contentCode142, // content/image.md:37
-		"5e647216-71": contentCode143, // content/keyed-list.md:14
-		"bffe6eff-76": contentCode144, // content/keyed-list.md:20
-		"8c6114fd-89": contentCode145, // content/keyed-list.md:26
-		"d91dadb8-81": contentCode146, // content/keyed-list.md:32
-		"bff9c2cc-154": contentCode147, // content/keyed-list.md:40
-		"a170dada-77": contentCode148, // content/keyed-list.md:51
-		"0a3dc7c4-39": contentCode149, // content/list.md:14
-		"78d394fb-45": contentCode150, // content/list.md:20
-		"8a18e863-57": contentCode151, // content/list.md:26
-		"4f69170c-45": contentCode152, // content/list.md:45
-		"7abb08bc-16": contentCode153, // content/meter.md:12
-		"c65dce7f-30": contentCode154, // content/meter.md:18
-		"3c76d212-54": contentCode155, // content/meter.md:24
-		"27e6e278-72": contentCode156, // content/meter.md:32
-		"6fcebf85-42": contentCode157, // content/meter.md:40
-		"98ff9957-46": contentCode158, // content/meter.md:46
-		"0dd8174b-57": contentCode159, // content/meter.md:52
-		"1a492cc9-61": contentCode160, // content/meter.md:58
-		"9ff15f9a-275": contentCode161, // content/plan.md:10
-		"e6bb346f-261": contentCode162, // content/plan.md:36
-		"fb7731d8-272": contentCode163, // content/plan.md:61
-		"8c308e74-212": contentCode164, // content/plan.md:86
-		"eded1666-206": contentCode165, // content/plan.md:110
-		"a0018c3e-178": contentCode166, // content/scene.md:32
-		"ff3b51ab-54": contentCode167, // content/sign-in-tutorial.md:10
-		"6bc5d574-182": contentCode168, // content/sign-in-tutorial.md:20
-		"89185833-446": contentCode169, // content/sign-in-tutorial.md:35
-		"832e96b0-17": contentCode170, // content/slider.md:12
-		"76c4181b-31": contentCode171, // content/slider.md:18
-		"dede4f66-55": contentCode172, // content/slider.md:24
-		"3d0c2633-30": contentCode173, // content/slider.md:30
-		"2553cb10-51": contentCode174, // content/slider.md:36
-		"59ada9a6-49": contentCode175, // content/slider.md:42
-		"e4a659ec-70": contentCode176, // content/slider.md:47
-		"05cc6f64-73": contentCode177, // content/slider.md:52
-		"90e322aa-87": contentCode178, // content/slider.md:59
-		"5390574e-114": contentCode179, // content/slider.md:69
-		"d58d8028-112": contentCode180, // content/slider.md:78
-		"cef83395-117": contentCode181, // content/snackbar.md:12
-		"082efb70-139": contentCode182, // content/snackbar.md:21
-		"76c0f973-255": contentCode183, // content/snackbar.md:32
-		"4988717c-18": contentCode184, // content/spinner.md:12
-		"04c78eb8-33": contentCode185, // content/spinner.md:18
-		"afe22e79-43": contentCode186, // content/spinner.md:24
-		"da0ffa35-29": contentCode187, // content/spinner.md:30
-		"2e995a80-50": contentCode188, // content/spinner.md:36
-		"4368c8f7-50": contentCode189, // content/spinner.md:42
-		"cc6dbf59-58": contentCode190, // content/spinner.md:48
-		"67518d78-120": contentCode191, // content/spinner.md:56
-		"7b19c22e-88": contentCode192, // content/splits.md:12
-		"d889a5c0-232": contentCode193, // content/splits.md:20
-		"2de2f779-155": contentCode194, // content/splits.md:32
-		"1a3a84b2-107": contentCode195, // content/splits.md:42
-		"2d634812-201": contentCode196, // content/splits.md:50
-		"c7d60e77-146": contentCode197, // content/splits.md:63
-		"b872474b-143": contentCode198, // content/splits.md:74
-		"c992baa0-77": contentCode199, // content/stage.md:12
-		"0074e953-83": contentCode200, // content/stage.md:20
-		"854cab58-134": contentCode201, // content/states.md:10
-		"e2ace5b9-89": contentCode202, // content/style.md:10
-		"8a587724-144": contentCode203, // content/style.md:18
-		"ebf4f88a-109": contentCode204, // content/style.md:27
-		"8df35223-248": contentCode205, // content/style.md:48
-		"d9e25c4c-272": contentCode206, // content/style.md:62
-		"6fc5f69f-105": contentCode207, // content/styles.md:14
-		"828e45df-116": contentCode208, // content/styles.md:25
-		"43d25a2f-147": contentCode209, // content/styles.md:49
-		"e9ad4d57-188": contentCode210, // content/styles.md:60
-		"53bc079e-181": contentCode211, // content/styles.md:72
-		"b67cad52-152": contentCode212, // content/styles.md:85
-		"c0181941-114": contentCode213, // content/styles.md:110
-		"d77f89b0-127": contentCode214, // content/styles.md:120
-		"af11d26c-129": contentCode215, // content/styles.md:132
-		"9e14e495-152": contentCode216, // content/styles.md:145
-		"1c60e8b8-173": contentCode217, // content/styles.md:159
-		"5826ae08-184": contentCode218, // content/styles.md:177
-		"1a434324-227": contentCode219, // content/styles.md:191
-		"99334a2c-181": contentCode220, // content/styles.md:207
-		"747e256d-448": contentCode221, // content/styles.md:221
-		"7da97d26-257": contentCode222, // content/styles.md:247
-		"f58a04d3-205": contentCode223, // content/styles.md:264
-		"00b58633-246": contentCode224, // content/styles.md:279
-		"e644cf71-205": contentCode225, // content/styles.md:295
-		"6416152e-255": contentCode226, // content/styles.md:310
-		"9a2bb98e-95": contentCode227, // content/styles.md:331
-		"6c86a578-98": contentCode228, // content/styles.md:342
-		"91ed278e-89": contentCode229, // content/styles.md:353
-		"c0f0bff6-106": contentCode230, // content/styles.md:366
-		"804f7f29-126": contentCode231, // content/styles.md:375
-		"2a842569-131": contentCode232, // content/styles.md:398
-		"90885d81-133": contentCode233, // content/styles.md:410
-		"448b8f30-137": contentCode234, // content/styles.md:421
-		"f60f56c8-51": contentCode235, // content/svg.md:22
-		"a345e915-117": contentCode236, // content/svg.md:28
-		"2eab5abb-81": contentCode237, // content/svg.md:38
-		"dea31796-81": contentCode238, // content/svg.md:46
-		"720677b3-17": contentCode239, // content/switch.md:12
-		"9ff2d468-39": contentCode240, // content/switch.md:18
-		"46a16465-68": contentCode241, // content/switch.md:26
-		"d7ee4f5b-71": contentCode242, // content/switch.md:32
-		"d09920b3-142": contentCode243, // content/switch.md:40
-		"dd0801a4-35": contentCode244, // content/switch.md:49
-		"08038751-94": contentCode245, // content/switch.md:57
-		"83fd4057-133": contentCode246, // content/switch.md:66
-		"a72b0ae3-51": contentCode247, // content/switches.md:12
-		"beedf7f5-221": contentCode248, // content/switches.md:18
-		"1de116e7-66": contentCode249, // content/switches.md:28
-		"eb20baaf-76": contentCode250, // content/switches.md:36
-		"27a18926-80": contentCode251, // content/switches.md:42
-		"6825de00-83": contentCode252, // content/switches.md:48
-		"588a92b5-87": contentCode253, // content/switches.md:54
-		"fb037717-168": contentCode254, // content/switches.md:62
-		"94ee091b-107": contentCode255, // content/switches.md:73
-		"dd11e884-106": contentCode256, // content/switches.md:81
-		"dc3c846a-145": contentCode257, // content/switches.md:90
-		"00fe07b3-101": contentCode258, // content/table.md:14
-		"31d611a4-119": contentCode259, // content/table.md:24
-		"75e93aac-193": contentCode260, // content/table.md:36
-		"5c790cf4-114": contentCode261, // content/table.md:53
-		"ebf26229-123": contentCode262, // content/table.md:63
-		"9a381dc6-111": contentCode263, // content/table.md:73
-		"f3321817-116": contentCode264, // content/table.md:83
-		"c5d97c21-106": contentCode265, // content/table.md:95
-		"1c6679e1-56": contentCode266, // content/tabs.md:12
-		"f733fcc5-157": contentCode267, // content/tabs.md:20
-		"863a0dfa-93": contentCode268, // content/tabs.md:30
-		"6f90d11f-114": contentCode269, // content/tabs.md:40
-		"4927ed1d-262": contentCode270, // content/tabs.md:50
-		"a3130f04-195": contentCode271, // content/tabs.md:65
-		"b67de27e-191": contentCode272, // content/tabs.md:77
-		"4fa9c4b7-160": contentCode273, // content/tabs.md:91
-		"8c1fa79c-270": contentCode274, // content/tabs.md:104
-		"272f5289-21": contentCode275, // content/text-editor.md:14
-		"a1e066ff-53": contentCode276, // content/text-editor.md:20
-		"0e68481c-116": contentCode277, // content/text-editor.md:26
-		"0f933baa-64": contentCode278, // content/text-editor.md:42
-		"1d44cca7-114": contentCode279, // content/text-editor.md:54
-		"338fddf9-112": contentCode280, // content/text-editor.md:64
-		"9b05065d-110": contentCode281, // content/text-editor.md:73
-		"b8d002d4-20": contentCode282, // content/text-field.md:14
-		"429e6bde-78": contentCode283, // content/text-field.md:20
-		"39edb74d-44": contentCode284, // content/text-field.md:27
-		"3da87c27-114": contentCode285, // content/text-field.md:33
-		"1ee195df-52": contentCode286, // content/text-field.md:39
-		"916d7680-38": contentCode287, // content/text-field.md:45
-		"9c7c8565-37": contentCode288, // content/text-field.md:51
-		"952e58e9-147": contentCode289, // content/text-field.md:57
-		"122f503f-133": contentCode290, // content/text-field.md:67
-		"6e41343b-111": contentCode291, // content/text-field.md:99
-		"f38b109d-135": contentCode292, // content/text-field.md:108
-		"d042a436-133": contentCode293, // content/text-field.md:118
-		"40382e2b-39": contentCode294, // content/text.md:10
-		"b9adf737-259": contentCode295, // content/text.md:16
-		"8a024ed0-232": contentCode296, // content/text.md:22
-		"593b15ab-72": contentCode297, // content/text.md:30
-		"ac000ca9-290": contentCode298, // content/text.md:36
-		"e6ae127f-113": contentCode299, // content/text.md:50
-		"35e92d7c-259": contentCode300, // content/tic-tac-toe-tutorial.md:11
-		"338e33eb-612": contentCode301, // content/tic-tac-toe-tutorial.md:29
+		"a85766b8-184":  contentCode0,   // content/abilities.md:10
+		"193d945b-251":  contentCode1,   // content/abilities.md:21
+		"d1bece9d-61":   contentCode2,   // content/abilities.md:33
+		"9f3d104a-213":  contentCode3,   // content/animate.md:10
+		"2c31d74b-289":  contentCode4,   // content/animate.md:27
+		"fedc1661-306":  contentCode5,   // content/animate.md:52
+		"4bc77432-183":  contentCode6,   // content/animate.md:77
+		"fd4c299d-117":  contentCode7,   // content/app.md:14
+		"83ce31d3-212":  contentCode8,   // content/async.md:10
+		"1c691f72-136":  contentCode9,   // content/bind.md:10
+		"35a91bb2-135":  contentCode10,  // content/bind.md:23
+		"150f83b7-36":   contentCode11,  // content/body.md:10
+		"72d6fe58-134":  contentCode12,  // content/body.md:16
+		"0eb2a81d-37":   contentCode13,  // content/button.md:12
+		"dab5c2db-41":   contentCode14,  // content/button.md:18
+		"33a5d7bd-61":   contentCode15,  // content/button.md:24
+		"519ea3e3-177":  contentCode16,  // content/button.md:30
+		"1e87bac3-121":  contentCode17,  // content/button.md:41
+		"61a82cb2-124":  contentCode18,  // content/button.md:49
+		"d75787a8-120":  contentCode19,  // content/button.md:57
+		"a768b88f-62":   contentCode20,  // content/button.md:69
+		"f40c28cf-60":   contentCode21,  // content/button.md:75
+		"98632bb7-66":   contentCode22,  // content/button.md:81
+		"70aa2feb-66":   contentCode23,  // content/button.md:87
+		"2c48b38d-58":   contentCode24,  // content/button.md:93
+		"320232c7-62":   contentCode25,  // content/button.md:99
+		"d3ccb957-116":  contentCode26,  // content/button.md:107
+		"17abc3d2-116":  contentCode27,  // content/button.md:116
+		"df6a3063-123":  contentCode28,  // content/canvas.md:14
+		"9e8be769-128":  contentCode29,  // content/canvas.md:22
+		"54f3929e-160":  contentCode30,  // content/canvas.md:33
+		"ae5f0a8b-122":  contentCode31,  // content/canvas.md:46
+		"2449a9ff-240":  contentCode32,  // content/canvas.md:56
+		"c1cb9e10-128":  contentCode33,  // content/canvas.md:88
+		"61b1804c-169":  contentCode34,  // content/canvas.md:98
+		"a39814b9-137":  contentCode35,  // content/canvas.md:108
+		"aef26ed4-137":  contentCode36,  // content/canvas.md:118
+		"86a911d8-146":  contentCode37,  // content/canvas.md:129
+		"9c1f576e-179":  contentCode38,  // content/canvas.md:142
+		"511a90d0-173":  contentCode39,  // content/canvas.md:153
+		"be95cd41-56":   contentCode40,  // content/chooser.md:12
+		"cb94e2d3-181":  contentCode41,  // content/chooser.md:18
+		"7d1be444-90":   contentCode42,  // content/chooser.md:27
+		"2d6d1199-86":   contentCode43,  // content/chooser.md:33
+		"e01aa973-90":   contentCode44,  // content/chooser.md:39
+		"2cd86613-78":   contentCode45,  // content/chooser.md:45
+		"933314de-76":   contentCode46,  // content/chooser.md:51
+		"22e7a2af-76":   contentCode47,  // content/chooser.md:57
+		"16a31d2e-94":   contentCode48,  // content/chooser.md:63
+		"285cb309-167":  contentCode49,  // content/chooser.md:71
+		"143c0aaa-132":  contentCode50,  // content/collapser.md:10
+		"80cded6b-200":  contentCode51,  // content/collapser.md:18
+		"cbf5f6b8-46":   contentCode52,  // content/color-picker.md:12
+		"fa12a532-130":  contentCode53,  // content/color-picker.md:20
+		"b31e3c98-129":  contentCode54,  // content/color-picker.md:29
+		"bcf8a27e-46":   contentCode55,  // content/color-picker.md:40
+		"8e51f2b3-129":  contentCode56,  // content/color-picker.md:46
+		"9b6fea0e-40":   contentCode57,  // content/colors.md:36
+		"4478044e-113":  contentCode58,  // content/colors.md:44
+		"386f83ba-178":  contentCode59,  // content/colors.md:61
+		"a06c0734-182":  contentCode60,  // content/colors.md:73
+		"1fd961d8-184":  contentCode61,  // content/colors.md:83
+		"741d1679-233":  contentCode62,  // content/colors.md:93
+		"7b12edcb-151":  contentCode63,  // content/colors.md:112
+		"d10e36ae-426":  contentCode64,  // content/colors.md:124
+		"19deec68-42":   contentCode65,  // content/content.md:14
+		"00bc6a58-144":  contentCode66,  // content/context-menu.md:10
+		"6f6a6eae-43":   contentCode67,  // content/context-menu.md:20
+		"9c17426f-104":  contentCode68,  // content/cursors.md:10
+		"d738eded-514":  contentCode69,  // content/cursors.md:22
+		"633b121d-41":   contentCode70,  // content/date-picker.md:14
+		"b5968a09-130":  contentCode71,  // content/date-picker.md:22
+		"a497e537-125":  contentCode72,  // content/dialog.md:12
+		"84b37db4-146":  contentCode73,  // content/dialog.md:21
+		"917db1e9-392":  contentCode74,  // content/dialog.md:32
+		"080fe1d2-349":  contentCode75,  // content/dialog.md:51
+		"ac8e0b51-130":  contentCode76,  // content/dialog.md:71
+		"559da630-130":  contentCode77,  // content/dialog.md:81
+		"cb7a2a72-107":  contentCode78,  // content/event.md:10
+		"20fd5671-129":  contentCode79,  // content/event.md:18
+		"d1c0ec92-112":  contentCode80,  // content/event.md:36
+		"e617a6ef-110":  contentCode81,  // content/events.md:26
+		"7dd80688-102":  contentCode82,  // content/events.md:36
+		"620df995-187":  contentCode83,  // content/events.md:46
+		"ec8f9963-258":  contentCode84,  // content/events.md:60
+		"dbb17c4b-258":  contentCode85,  // content/events.md:75
+		"15473b54-104":  contentCode86,  // content/events.md:90
+		"5471f119-116":  contentCode87,  // content/events.md:101
+		"2774e2be-103":  contentCode88,  // content/events.md:120
+		"935f83b0-127":  contentCode89,  // content/events.md:129
+		"5e817b5a-101":  contentCode90,  // content/events.md:142
+		"e6ad6f1c-125":  contentCode91,  // content/events.md:155
+		"07ab6c61-166":  contentCode92,  // content/events.md:169
+		"d1706909-121":  contentCode93,  // content/events.md:183
+		"c56924c7-220":  contentCode94,  // content/events.md:195
+		"210bde93-199":  contentCode96,  // content/events.md:227
+		"de923813-146":  contentCode97,  // content/events.md:244
+		"3a3153ef-21":   contentCode98,  // content/file-picker.md:14
+		"82af2952-56":   contentCode99,  // content/file-picker.md:20
+		"74cd1731-101":  contentCode100, // content/file-picker.md:28
+		"a98abd49-21":   contentCode101, // content/file-picker.md:39
+		"d6c84ecc-95":   contentCode102, // content/file-picker.md:45
+		"17ea78ae-33":   contentCode103, // content/file-tree.md:14
+		"8f84554b-225":  contentCode104, // content/file-tree.md:22
+		"24e2f972-86":   contentCode105, // content/form.md:14
+		"f5baa4c6-102":  contentCode106, // content/form.md:24
+		"dcdf1e01-104":  contentCode107, // content/form.md:34
+		"0db50844-171":  contentCode108, // content/form.md:46
+		"ad354294-186":  contentCode109, // content/form.md:59
+		"e7563bc3-99":   contentCode110, // content/form.md:76
+		"43c63921-96":   contentCode111, // content/form.md:86
+		"0ed93f66-104":  contentCode112, // content/form.md:96
+		"c7fe894b-145":  contentCode113, // content/form.md:106
+		"9fffd67e-152":  contentCode114, // content/form.md:120
+		"d325a21d-174":  contentCode115, // content/form.md:134
+		"bc896070-163":  contentCode116, // content/form.md:148
+		"87403e0a-92":   contentCode117, // content/form.md:161
+		"6dfd9858-126":  contentCode118, // content/frame.md:10
+		"e27ade49-205":  contentCode119, // content/frame.md:25
+		"76225bf2-209":  contentCode120, // content/frame.md:38
+		"7b1e0302-193":  contentCode121, // content/frame.md:53
+		"da92b314-79":   contentCode122, // content/func-button.md:12
+		"3d16ab07-123":  contentCode123, // content/func-button.md:22
+		"235bf2f8-118":  contentCode124, // content/func-button.md:31
+		"bad131b1-88":   contentCode125, // content/func-button.md:39
+		"529ecb5f-96":   contentCode126, // content/func-button.md:47
+		"1b789f9f-67":   contentCode127, // content/func-button.md:57
+		"dc52e62d-130":  contentCode128, // content/hello-world-tutorial.md:8
+		"4669dc9e-104":  contentCode129, // content/hello-world-tutorial.md:26
+		"cf4d7ac1-165":  contentCode130, // content/hello-world-tutorial.md:34
+		"10bb0f4f-90":   contentCode131, // content/html.md:13
+		"f3fd221e-112":  contentCode132, // content/html.md:21
+		"c4927e85-37":   contentCode133, // content/icon.md:10
+		"97bcdc65-35":   contentCode134, // content/icon.md:16
+		"a875d165-41":   contentCode135, // content/icon.md:22
+		"dd63d801-100":  contentCode136, // content/icon.md:32
+		"efff71cb-113":  contentCode137, // content/icon.md:41
+		"d9a2f676-118":  contentCode138, // content/icon.md:50
+		"7345a058-152":  contentCode139, // content/icon.md:59
+		"ef36f545-56":   contentCode140, // content/image.md:21
+		"e1b528f5-122":  contentCode141, // content/image.md:27
+		"2b0fd27e-338":  contentCode142, // content/image.md:37
+		"5e647216-71":   contentCode143, // content/keyed-list.md:14
+		"bffe6eff-76":   contentCode144, // content/keyed-list.md:20
+		"8c6114fd-89":   contentCode145, // content/keyed-list.md:26
+		"d91dadb8-81":   contentCode146, // content/keyed-list.md:32
+		"bff9c2cc-154":  contentCode147, // content/keyed-list.md:40
+		"a170dada-77":   contentCode148, // content/keyed-list.md:51
+		"0a3dc7c4-39":   contentCode149, // content/list.md:14
+		"78d394fb-45":   contentCode150, // content/list.md:20
+		"8a18e863-57":   contentCode151, // content/list.md:26
+		"4f69170c-45":   contentCode152, // content/list.md:45
+		"7abb08bc-16":   contentCode153, // content/meter.md:12
+		"c65dce7f-30":   contentCode154, // content/meter.md:18
+		"3c76d212-54":   contentCode155, // content/meter.md:24
+		"27e6e278-72":   contentCode156, // content/meter.md:32
+		"6fcebf85-42":   contentCode157, // content/meter.md:40
+		"98ff9957-46":   contentCode158, // content/meter.md:46
+		"0dd8174b-57":   contentCode159, // content/meter.md:52
+		"1a492cc9-61":   contentCode160, // content/meter.md:58
+		"9ff15f9a-275":  contentCode161, // content/plan.md:10
+		"e6bb346f-261":  contentCode162, // content/plan.md:36
+		"fb7731d8-272":  contentCode163, // content/plan.md:61
+		"8c308e74-212":  contentCode164, // content/plan.md:86
+		"eded1666-206":  contentCode165, // content/plan.md:110
+		"a0018c3e-178":  contentCode166, // content/scene.md:32
+		"ff3b51ab-54":   contentCode167, // content/sign-in-tutorial.md:10
+		"6bc5d574-182":  contentCode168, // content/sign-in-tutorial.md:20
+		"89185833-446":  contentCode169, // content/sign-in-tutorial.md:35
+		"832e96b0-17":   contentCode170, // content/slider.md:12
+		"76c4181b-31":   contentCode171, // content/slider.md:18
+		"dede4f66-55":   contentCode172, // content/slider.md:24
+		"3d0c2633-30":   contentCode173, // content/slider.md:30
+		"2553cb10-51":   contentCode174, // content/slider.md:36
+		"59ada9a6-49":   contentCode175, // content/slider.md:42
+		"e4a659ec-70":   contentCode176, // content/slider.md:47
+		"05cc6f64-73":   contentCode177, // content/slider.md:52
+		"90e322aa-87":   contentCode178, // content/slider.md:59
+		"5390574e-114":  contentCode179, // content/slider.md:69
+		"d58d8028-112":  contentCode180, // content/slider.md:78
+		"cef83395-117":  contentCode181, // content/snackbar.md:12
+		"082efb70-139":  contentCode182, // content/snackbar.md:21
+		"76c0f973-255":  contentCode183, // content/snackbar.md:32
+		"4988717c-18":   contentCode184, // content/spinner.md:12
+		"04c78eb8-33":   contentCode185, // content/spinner.md:18
+		"afe22e79-43":   contentCode186, // content/spinner.md:24
+		"da0ffa35-29":   contentCode187, // content/spinner.md:30
+		"2e995a80-50":   contentCode188, // content/spinner.md:36
+		"4368c8f7-50":   contentCode189, // content/spinner.md:42
+		"cc6dbf59-58":   contentCode190, // content/spinner.md:48
+		"67518d78-120":  contentCode191, // content/spinner.md:56
+		"7b19c22e-88":   contentCode192, // content/splits.md:12
+		"d889a5c0-232":  contentCode193, // content/splits.md:20
+		"2de2f779-155":  contentCode194, // content/splits.md:32
+		"1a3a84b2-107":  contentCode195, // content/splits.md:42
+		"2d634812-201":  contentCode196, // content/splits.md:50
+		"c7d60e77-146":  contentCode197, // content/splits.md:63
+		"b872474b-143":  contentCode198, // content/splits.md:74
+		"c992baa0-77":   contentCode199, // content/stage.md:12
+		"0074e953-83":   contentCode200, // content/stage.md:20
+		"854cab58-134":  contentCode201, // content/states.md:10
+		"e2ace5b9-89":   contentCode202, // content/style.md:10
+		"8a587724-144":  contentCode203, // content/style.md:18
+		"ebf4f88a-109":  contentCode204, // content/style.md:27
+		"8df35223-248":  contentCode205, // content/style.md:48
+		"d9e25c4c-272":  contentCode206, // content/style.md:62
+		"6fc5f69f-105":  contentCode207, // content/styles.md:14
+		"828e45df-116":  contentCode208, // content/styles.md:25
+		"43d25a2f-147":  contentCode209, // content/styles.md:49
+		"e9ad4d57-188":  contentCode210, // content/styles.md:60
+		"53bc079e-181":  contentCode211, // content/styles.md:72
+		"b67cad52-152":  contentCode212, // content/styles.md:85
+		"c0181941-114":  contentCode213, // content/styles.md:110
+		"d77f89b0-127":  contentCode214, // content/styles.md:120
+		"af11d26c-129":  contentCode215, // content/styles.md:132
+		"9e14e495-152":  contentCode216, // content/styles.md:145
+		"1c60e8b8-173":  contentCode217, // content/styles.md:159
+		"5826ae08-184":  contentCode218, // content/styles.md:177
+		"1a434324-227":  contentCode219, // content/styles.md:191
+		"99334a2c-181":  contentCode220, // content/styles.md:207
+		"747e256d-448":  contentCode221, // content/styles.md:221
+		"7da97d26-257":  contentCode222, // content/styles.md:247
+		"f58a04d3-205":  contentCode223, // content/styles.md:264
+		"00b58633-246":  contentCode224, // content/styles.md:279
+		"e644cf71-205":  contentCode225, // content/styles.md:295
+		"6416152e-255":  contentCode226, // content/styles.md:310
+		"9a2bb98e-95":   contentCode227, // content/styles.md:331
+		"6c86a578-98":   contentCode228, // content/styles.md:342
+		"91ed278e-89":   contentCode229, // content/styles.md:353
+		"c0f0bff6-106":  contentCode230, // content/styles.md:366
+		"804f7f29-126":  contentCode231, // content/styles.md:375
+		"2a842569-131":  contentCode232, // content/styles.md:398
+		"90885d81-133":  contentCode233, // content/styles.md:410
+		"448b8f30-137":  contentCode234, // content/styles.md:421
+		"f60f56c8-51":   contentCode235, // content/svg.md:22
+		"a345e915-117":  contentCode236, // content/svg.md:28
+		"2eab5abb-81":   contentCode237, // content/svg.md:38
+		"dea31796-81":   contentCode238, // content/svg.md:46
+		"720677b3-17":   contentCode239, // content/switch.md:12
+		"9ff2d468-39":   contentCode240, // content/switch.md:18
+		"46a16465-68":   contentCode241, // content/switch.md:26
+		"d7ee4f5b-71":   contentCode242, // content/switch.md:32
+		"d09920b3-142":  contentCode243, // content/switch.md:40
+		"dd0801a4-35":   contentCode244, // content/switch.md:49
+		"08038751-94":   contentCode245, // content/switch.md:57
+		"83fd4057-133":  contentCode246, // content/switch.md:66
+		"a72b0ae3-51":   contentCode247, // content/switches.md:12
+		"beedf7f5-221":  contentCode248, // content/switches.md:18
+		"1de116e7-66":   contentCode249, // content/switches.md:28
+		"eb20baaf-76":   contentCode250, // content/switches.md:36
+		"27a18926-80":   contentCode251, // content/switches.md:42
+		"6825de00-83":   contentCode252, // content/switches.md:48
+		"588a92b5-87":   contentCode253, // content/switches.md:54
+		"fb037717-168":  contentCode254, // content/switches.md:62
+		"94ee091b-107":  contentCode255, // content/switches.md:73
+		"dd11e884-106":  contentCode256, // content/switches.md:81
+		"dc3c846a-145":  contentCode257, // content/switches.md:90
+		"00fe07b3-101":  contentCode258, // content/table.md:14
+		"31d611a4-119":  contentCode259, // content/table.md:24
+		"75e93aac-193":  contentCode260, // content/table.md:36
+		"5c790cf4-114":  contentCode261, // content/table.md:53
+		"ebf26229-123":  contentCode262, // content/table.md:63
+		"9a381dc6-111":  contentCode263, // content/table.md:73
+		"f3321817-116":  contentCode264, // content/table.md:83
+		"c5d97c21-106":  contentCode265, // content/table.md:95
+		"1c6679e1-56":   contentCode266, // content/tabs.md:12
+		"f733fcc5-157":  contentCode267, // content/tabs.md:20
+		"863a0dfa-93":   contentCode268, // content/tabs.md:30
+		"6f90d11f-114":  contentCode269, // content/tabs.md:40
+		"4927ed1d-262":  contentCode270, // content/tabs.md:50
+		"a3130f04-195":  contentCode271, // content/tabs.md:65
+		"b67de27e-191":  contentCode272, // content/tabs.md:77
+		"4fa9c4b7-160":  contentCode273, // content/tabs.md:91
+		"8c1fa79c-270":  contentCode274, // content/tabs.md:104
+		"272f5289-21":   contentCode275, // content/text-editor.md:14
+		"a1e066ff-53":   contentCode276, // content/text-editor.md:20
+		"0e68481c-116":  contentCode277, // content/text-editor.md:26
+		"0f933baa-64":   contentCode278, // content/text-editor.md:42
+		"1d44cca7-114":  contentCode279, // content/text-editor.md:54
+		"338fddf9-112":  contentCode280, // content/text-editor.md:64
+		"9b05065d-110":  contentCode281, // content/text-editor.md:73
+		"b8d002d4-20":   contentCode282, // content/text-field.md:14
+		"429e6bde-78":   contentCode283, // content/text-field.md:20
+		"39edb74d-44":   contentCode284, // content/text-field.md:27
+		"3da87c27-114":  contentCode285, // content/text-field.md:33
+		"1ee195df-52":   contentCode286, // content/text-field.md:39
+		"916d7680-38":   contentCode287, // content/text-field.md:45
+		"9c7c8565-37":   contentCode288, // content/text-field.md:51
+		"952e58e9-147":  contentCode289, // content/text-field.md:57
+		"122f503f-133":  contentCode290, // content/text-field.md:67
+		"6e41343b-111":  contentCode291, // content/text-field.md:99
+		"f38b109d-135":  contentCode292, // content/text-field.md:108
+		"d042a436-133":  contentCode293, // content/text-field.md:118
+		"40382e2b-39":   contentCode294, // content/text.md:10
+		"b9adf737-259":  contentCode295, // content/text.md:16
+		"8a024ed0-232":  contentCode296, // content/text.md:22
+		"593b15ab-72":   contentCode297, // content/text.md:30
+		"ac000ca9-290":  contentCode298, // content/text.md:36
+		"e6ae127f-113":  contentCode299, // content/text.md:50
+		"35e92d7c-259":  contentCode300, // content/tic-tac-toe-tutorial.md:11
+		"338e33eb-612":  contentCode301, // content/tic-tac-toe-tutorial.md:29
 		"8702ac73-1062": contentCode302, // content/tic-tac-toe-tutorial.md:70
-		"3e0d841e-41": contentCode303, // content/time-picker.md:14
-		"302e0113-152": contentCode304, // content/time-picker.md:22
-		"87f4aa86-40": contentCode305, // content/time-picker.md:33
-		"e4dee514-62": contentCode306, // content/time-picker.md:39
-		"ca45f3c3-162": contentCode307, // content/time-picker.md:45
-		"f21d1352-51": contentCode308, // content/time-picker.md:56
-		"50286caa-134": contentCode309, // content/time-picker.md:62
-		"c2a45fdf-34": contentCode310, // content/todo-list-tutorial.md:10
-		"c92a249e-128": contentCode311, // content/todo-list-tutorial.md:19
-		"1e05c7a0-249": contentCode312, // content/todo-list-tutorial.md:30
-		"be10c735-151": contentCode313, // content/toolbar.md:14
-		"4e659b0f-170": contentCode314, // content/toolbar.md:28
-		"bcb11031-152": contentCode315, // content/toolbar.md:44
-		"e4090b7f-189": contentCode316, // content/toolbar.md:57
-		"4094e081-71": contentCode317, // content/tooltip.md:10
-		"c92d54d7-87": contentCode318, // content/tree.md:14
-		"15ed5c4b-110": contentCode319, // content/tree.md:23
-		"b3d3c4ac-128": contentCode320, // content/tree.md:33
-		"66274e7c-179": contentCode321, // content/tree.md:45
-		"6a2235fe-243": contentCode322, // content/tree.md:57
-		"33569ae5-138": contentCode323, // content/tree.md:75
-		"386762d4-148": contentCode324, // content/tree.md:87
-		"6ecf7e50-115": contentCode325, // content/tree.md:101
-		"60653be6-160": contentCode326, // content/update.md:10
-		"c7422c8d-173": contentCode327, // content/update.md:21
-		"e58cf063-56": contentCode328, // content/widget.md:14
-		"388dae72-72": contentCode329, // content/widget.md:20
+		"3e0d841e-41":   contentCode303, // content/time-picker.md:14
+		"302e0113-152":  contentCode304, // content/time-picker.md:22
+		"87f4aa86-40":   contentCode305, // content/time-picker.md:33
+		"e4dee514-62":   contentCode306, // content/time-picker.md:39
+		"ca45f3c3-162":  contentCode307, // content/time-picker.md:45
+		"f21d1352-51":   contentCode308, // content/time-picker.md:56
+		"50286caa-134":  contentCode309, // content/time-picker.md:62
+		"c2a45fdf-34":   contentCode310, // content/todo-list-tutorial.md:10
+		"c92a249e-128":  contentCode311, // content/todo-list-tutorial.md:19
+		"1e05c7a0-249":  contentCode312, // content/todo-list-tutorial.md:30
+		"be10c735-151":  contentCode313, // content/toolbar.md:14
+		"4e659b0f-170":  contentCode314, // content/toolbar.md:28
+		"bcb11031-152":  contentCode315, // content/toolbar.md:44
+		"e4090b7f-189":  contentCode316, // content/toolbar.md:57
+		"4094e081-71":   contentCode317, // content/tooltip.md:10
+		"c92d54d7-87":   contentCode318, // content/tree.md:14
+		"15ed5c4b-110":  contentCode319, // content/tree.md:23
+		"b3d3c4ac-128":  contentCode320, // content/tree.md:33
+		"66274e7c-179":  contentCode321, // content/tree.md:45
+		"6a2235fe-243":  contentCode322, // content/tree.md:57
+		"33569ae5-138":  contentCode323, // content/tree.md:75
+		"386762d4-148":  contentCode324, // content/tree.md:87
+		"6ecf7e50-115":  contentCode325, // content/tree.md:101
+		"60653be6-160":  contentCode326, // content/update.md:10
+		"c7422c8d-173":  contentCode327, // content/update.md:21
+		"e58cf063-56":   contentCode328, // content/widget.md:14
+		"388dae72-72":   contentCode329, // content/widget.md:20
 	})
 }
 
@@ -393,7 +393,6 @@ func contentCode0(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/abilities.md:21
 func contentCode1(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -410,7 +409,6 @@ func contentCode1(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/abilities.md:33
 func contentCode2(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -421,7 +419,6 @@ func contentCode2(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/animate.md:10
 func contentCode3(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -441,7 +438,6 @@ func contentCode3(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/animate.md:27
 func contentCode4(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -468,7 +464,6 @@ func contentCode4(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/animate.md:52
 func contentCode5(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -494,7 +489,6 @@ func contentCode5(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/animate.md:77
 func contentCode6(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -514,7 +508,6 @@ func contentCode6(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/app.md:14
 func contentCode7_main() {
 	b := core.NewBody("App Name")
@@ -526,7 +519,6 @@ func contentCode7(b *core.Frame, out io.Writer) {
 	contentCodeParent, contentCodeOut = b, out
 	contentCode7_main()
 }
-
 
 // content/async.md:10
 func contentCode8(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -551,7 +543,6 @@ func contentCode8(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/bind.md:10
 func contentCode9(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -567,7 +558,6 @@ func contentCode9(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/bind.md:23
 func contentCode10(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -581,7 +571,6 @@ func contentCode10(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/body.md:10
 func contentCode11(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -591,7 +580,6 @@ func contentCode11(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/body.md:16
 func contentCode12_main() {
@@ -605,7 +593,6 @@ func contentCode12(b *core.Frame, out io.Writer) {
 	contentCode12_main()
 }
 
-
 // content/button.md:12
 func contentCode13(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -615,7 +602,6 @@ func contentCode13(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/button.md:18
 func contentCode14(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -627,7 +613,6 @@ func contentCode14(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:24
 func contentCode15(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -637,7 +622,6 @@ func contentCode15(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/button.md:30
 func contentCode16(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -652,7 +636,6 @@ func contentCode16(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:41
 func contentCode17(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -664,7 +647,6 @@ func contentCode17(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/button.md:49
 func contentCode18(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -678,7 +660,6 @@ func contentCode18(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:57
 func contentCode19(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -691,7 +672,6 @@ func contentCode19(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:69
 func contentCode20(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -701,7 +681,6 @@ func contentCode20(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/button.md:75
 func contentCode21(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -713,7 +692,6 @@ func contentCode21(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:81
 func contentCode22(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -723,7 +701,6 @@ func contentCode22(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/button.md:87
 func contentCode23(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -735,7 +712,6 @@ func contentCode23(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:93
 func contentCode24(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -746,7 +722,6 @@ func contentCode24(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:99
 func contentCode25(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -756,7 +731,6 @@ func contentCode25(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/button.md:107
 func contentCode26(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -771,7 +745,6 @@ func contentCode26(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/button.md:116
 func contentCode27(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -785,7 +758,6 @@ func contentCode27(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/canvas.md:14
 func contentCode28(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -797,7 +769,6 @@ func contentCode28(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/canvas.md:22
 func contentCode29(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -813,7 +784,6 @@ func contentCode29(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/canvas.md:33
 func contentCode30(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -832,7 +802,6 @@ func contentCode30(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/canvas.md:46
 func contentCode31(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -846,7 +815,6 @@ func contentCode31(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/canvas.md:56
 func contentCode32(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -869,7 +837,6 @@ func contentCode32(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/canvas.md:88
 func contentCode33(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -883,7 +850,6 @@ func contentCode33(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/canvas.md:98
 func contentCode34(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -899,7 +865,6 @@ func contentCode34(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/canvas.md:108
 func contentCode35(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -913,7 +878,6 @@ func contentCode35(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/canvas.md:118
 func contentCode36(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -930,7 +894,6 @@ func contentCode36(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/canvas.md:129
 func contentCode37(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -945,7 +908,6 @@ func contentCode37(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/canvas.md:142
 func contentCode38(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -962,7 +924,6 @@ func contentCode38(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/canvas.md:153
 func contentCode39(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -978,7 +939,6 @@ func contentCode39(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/chooser.md:12
 func contentCode40(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -988,7 +948,6 @@ func contentCode40(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/chooser.md:18
 func contentCode41(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1003,7 +962,6 @@ func contentCode41(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/chooser.md:27
 func contentCode42(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1013,7 +971,6 @@ func contentCode42(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/chooser.md:33
 func contentCode43(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1025,7 +982,6 @@ func contentCode43(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/chooser.md:39
 func contentCode44(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1035,7 +991,6 @@ func contentCode44(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/chooser.md:45
 func contentCode45(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1047,7 +1002,6 @@ func contentCode45(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/chooser.md:51
 func contentCode46(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1057,7 +1011,6 @@ func contentCode46(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/chooser.md:57
 func contentCode47(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1069,7 +1022,6 @@ func contentCode47(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/chooser.md:63
 func contentCode48(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1079,7 +1031,6 @@ func contentCode48(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/chooser.md:71
 func contentCode49(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1094,7 +1045,6 @@ func contentCode49(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/collapser.md:10
 func contentCode50(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1106,7 +1056,6 @@ func contentCode50(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/collapser.md:18
 func contentCode51(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1122,7 +1071,6 @@ func contentCode51(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/color-picker.md:12
 func contentCode52(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1132,7 +1080,6 @@ func contentCode52(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/color-picker.md:20
 func contentCode53(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1147,7 +1094,6 @@ func contentCode53(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/color-picker.md:29
 func contentCode54(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1161,7 +1107,6 @@ func contentCode54(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/color-picker.md:40
 func contentCode55(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1171,7 +1116,6 @@ func contentCode55(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/color-picker.md:46
 func contentCode56(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1186,7 +1130,6 @@ func contentCode56(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/colors.md:36
 func contentCode57(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1196,7 +1139,6 @@ func contentCode57(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/colors.md:44
 func contentCode58(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1210,7 +1152,6 @@ func contentCode58(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/colors.md:61
 func contentCode59(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1226,7 +1167,6 @@ func contentCode59(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/colors.md:73
 func contentCode60(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1241,7 +1181,6 @@ func contentCode60(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/colors.md:83
 func contentCode61(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1255,7 +1194,6 @@ func contentCode61(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/colors.md:93
 func contentCode62(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1273,7 +1211,6 @@ func contentCode62(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/colors.md:112
 func contentCode63(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1289,7 +1226,6 @@ func contentCode63(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/colors.md:124
 func contentCode64(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1322,7 +1258,6 @@ func contentCode64(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/content.md:14
 func contentCode65(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1332,7 +1267,6 @@ func contentCode65(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/context-menu.md:10
 func contentCode66(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1348,7 +1282,6 @@ func contentCode66(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/context-menu.md:20
 func contentCode67(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1359,7 +1292,6 @@ func contentCode67(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/cursors.md:10
 func contentCode68(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1373,7 +1305,6 @@ func contentCode68(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/cursors.md:22
 func contentCode69(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1410,7 +1341,6 @@ func contentCode69(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/date-picker.md:14
 func contentCode70(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1420,7 +1350,6 @@ func contentCode70(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/date-picker.md:22
 func contentCode71(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1435,7 +1364,6 @@ func contentCode71(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/dialog.md:12
 func contentCode72(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1449,7 +1377,6 @@ func contentCode72(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/dialog.md:21
 func contentCode73(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1462,7 +1389,6 @@ func contentCode73(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/dialog.md:32
 func contentCode74(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1487,7 +1413,6 @@ func contentCode74(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/dialog.md:51
 func contentCode75(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1510,7 +1435,6 @@ func contentCode75(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/dialog.md:71
 func contentCode76(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1524,7 +1448,6 @@ func contentCode76(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/dialog.md:81
 func contentCode77(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1540,7 +1463,6 @@ func contentCode77(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/event.md:10
 func contentCode78(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1552,7 +1474,6 @@ func contentCode78(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/event.md:18
 func contentCode79(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1566,7 +1487,6 @@ func contentCode79(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/event.md:36
 func contentCode80(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1578,7 +1498,6 @@ func contentCode80(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:26
 func contentCode81(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1592,7 +1511,6 @@ func contentCode81(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:36
 func contentCode82(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1604,7 +1522,6 @@ func contentCode82(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:46
 func contentCode83(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1621,7 +1538,6 @@ func contentCode83(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:60
 func contentCode84(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1640,7 +1556,6 @@ func contentCode84(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:75
 func contentCode85(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1658,7 +1573,6 @@ func contentCode85(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:90
 func contentCode86(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1671,7 +1585,6 @@ func contentCode86(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:101
 func contentCode87(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1686,7 +1599,6 @@ func contentCode87(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:120
 func contentCode88(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1699,7 +1611,6 @@ func contentCode88(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:129
 func contentCode89(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1714,7 +1625,6 @@ func contentCode89(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:142
 func contentCode90(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1727,7 +1637,6 @@ func contentCode90(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:155
 func contentCode91(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1742,7 +1651,6 @@ func contentCode91(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:169
 func contentCode92(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1760,7 +1668,6 @@ func contentCode92(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:183
 func contentCode93(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1774,7 +1681,6 @@ func contentCode93(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:195
 func contentCode94(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1795,7 +1701,6 @@ func contentCode94(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/events.md:227
 func contentCode96(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1812,7 +1717,6 @@ func contentCode96(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/events.md:244
 func contentCode97(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1831,7 +1735,6 @@ func contentCode97(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/file-picker.md:14
 func contentCode98(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1842,7 +1745,6 @@ func contentCode98(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/file-picker.md:20
 func contentCode99(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1852,7 +1754,6 @@ func contentCode99(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/file-picker.md:28
 func contentCode100(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1867,7 +1768,6 @@ func contentCode100(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/file-picker.md:39
 func contentCode101(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1877,7 +1777,6 @@ func contentCode101(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/file-picker.md:45
 func contentCode102(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1892,7 +1791,6 @@ func contentCode102(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/file-tree.md:14
 func contentCode103(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1902,7 +1800,6 @@ func contentCode103(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/file-tree.md:22
 func contentCode104(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1921,7 +1818,6 @@ func contentCode104(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:14
 func contentCode105(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1935,7 +1831,6 @@ func contentCode105(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/form.md:24
 func contentCode106(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1951,7 +1846,6 @@ func contentCode106(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:34
 func contentCode107(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -1965,7 +1859,6 @@ func contentCode107(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/form.md:46
 func contentCode108(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -1984,7 +1877,6 @@ func contentCode108(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:59
 func contentCode109(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2002,7 +1894,6 @@ func contentCode109(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:76
 func contentCode110(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2016,7 +1907,6 @@ func contentCode110(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/form.md:86
 func contentCode111(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2032,7 +1922,6 @@ func contentCode111(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:96
 func contentCode112(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2046,7 +1935,6 @@ func contentCode112(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/form.md:106
 func contentCode113(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2066,7 +1954,6 @@ func contentCode113(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:120
 func contentCode114(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2084,7 +1971,6 @@ func contentCode114(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/form.md:134
 func contentCode115(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2104,7 +1990,6 @@ func contentCode115(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:148
 func contentCode116(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2120,7 +2005,6 @@ func contentCode116(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/form.md:161
 func contentCode117(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2135,7 +2019,6 @@ func contentCode117(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/frame.md:10
 func contentCode118(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2148,7 +2031,6 @@ func contentCode118(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/frame.md:25
 func contentCode119(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2167,7 +2049,6 @@ func contentCode119(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/frame.md:38
 func contentCode120(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2184,7 +2065,6 @@ func contentCode120(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/frame.md:53
 func contentCode121(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2203,7 +2083,6 @@ func contentCode121(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/func-button.md:12
 func contentCode122(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2215,7 +2094,6 @@ func contentCode122(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/func-button.md:22
 func contentCode123(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2230,7 +2108,6 @@ func contentCode123(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/func-button.md:31
 func contentCode124(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2242,7 +2119,6 @@ func contentCode124(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/func-button.md:39
 func contentCode125(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2256,7 +2132,6 @@ func contentCode125(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/func-button.md:47
 func contentCode126(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2269,7 +2144,6 @@ func contentCode126(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/func-button.md:57
 func contentCode127(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2279,7 +2153,6 @@ func contentCode127(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/hello-world-tutorial.md:8
 func contentCode128_main() {
@@ -2293,7 +2166,6 @@ func contentCode128(b *core.Frame, out io.Writer) {
 	contentCode128_main()
 }
 
-
 // content/hello-world-tutorial.md:26
 func contentCode129(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2305,7 +2177,6 @@ func contentCode129(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/hello-world-tutorial.md:34
 func contentCode130(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2320,7 +2191,6 @@ func contentCode130(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/html.md:13
 func contentCode131(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2330,7 +2200,6 @@ func contentCode131(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/html.md:21
 func contentCode132(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2343,7 +2212,6 @@ func contentCode132(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/icon.md:10
 func contentCode133(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2353,7 +2221,6 @@ func contentCode133(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/icon.md:16
 func contentCode134(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2365,7 +2232,6 @@ func contentCode134(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/icon.md:22
 func contentCode135(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2375,7 +2241,6 @@ func contentCode135(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/icon.md:32
 func contentCode136(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2390,7 +2255,6 @@ func contentCode136(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/icon.md:41
 func contentCode137(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2403,7 +2267,6 @@ func contentCode137(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/icon.md:50
 func contentCode138(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2418,7 +2281,6 @@ func contentCode138(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/icon.md:59
 func contentCode139(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2432,7 +2294,6 @@ func contentCode139(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/image.md:21
 func contentCode140(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2442,7 +2303,6 @@ func contentCode140(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/image.md:27
 func contentCode141(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2458,7 +2318,6 @@ func contentCode141(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/image.md:37
 func contentCode142(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2473,7 +2332,6 @@ func contentCode142(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/keyed-list.md:14
 func contentCode143(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2483,7 +2341,6 @@ func contentCode143(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/keyed-list.md:20
 func contentCode144(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2495,7 +2352,6 @@ func contentCode144(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/keyed-list.md:26
 func contentCode145(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2506,7 +2362,6 @@ func contentCode145(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/keyed-list.md:32
 func contentCode146(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2516,7 +2371,6 @@ func contentCode146(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/keyed-list.md:40
 func contentCode147(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2531,7 +2385,6 @@ func contentCode147(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/keyed-list.md:51
 func contentCode148(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2541,7 +2394,6 @@ func contentCode148(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/list.md:14
 func contentCode149(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2553,7 +2405,6 @@ func contentCode149(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/list.md:20
 func contentCode150(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2563,7 +2414,6 @@ func contentCode150(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/list.md:26
 func contentCode151(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2575,7 +2425,6 @@ func contentCode151(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/list.md:45
 func contentCode152(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2585,7 +2434,6 @@ func contentCode152(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/meter.md:12
 func contentCode153(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2597,7 +2445,6 @@ func contentCode153(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/meter.md:18
 func contentCode154(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2608,7 +2455,6 @@ func contentCode154(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/meter.md:24
 func contentCode155(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2618,7 +2464,6 @@ func contentCode155(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/meter.md:32
 func contentCode156(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2632,7 +2477,6 @@ func contentCode156(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/meter.md:40
 func contentCode157(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2642,7 +2486,6 @@ func contentCode157(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/meter.md:46
 func contentCode158(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2654,7 +2497,6 @@ func contentCode158(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/meter.md:52
 func contentCode159(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2665,7 +2507,6 @@ func contentCode159(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/meter.md:58
 func contentCode160(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2675,7 +2516,6 @@ func contentCode160(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/plan.md:10
 func contentCode161(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2698,7 +2538,6 @@ func contentCode161(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/plan.md:36
 func contentCode162(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2725,7 +2564,6 @@ func contentCode162(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/plan.md:61
 func contentCode163(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2751,7 +2589,6 @@ func contentCode163(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/plan.md:86
 func contentCode164(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2772,7 +2609,6 @@ func contentCode164(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/plan.md:110
 func contentCode165(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2787,7 +2623,6 @@ func contentCode165(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/scene.md:32
 func contentCode166(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2807,7 +2642,6 @@ func contentCode166(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/sign-in-tutorial.md:10
 func contentCode167(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2822,7 +2656,6 @@ func contentCode167(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/sign-in-tutorial.md:20
 func contentCode168(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2842,7 +2675,6 @@ func contentCode168(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/sign-in-tutorial.md:35
 func contentCode169(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2872,7 +2704,6 @@ func contentCode169(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/slider.md:12
 func contentCode170(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2882,7 +2713,6 @@ func contentCode170(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/slider.md:18
 func contentCode171(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2894,7 +2724,6 @@ func contentCode171(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/slider.md:24
 func contentCode172(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2904,7 +2733,6 @@ func contentCode172(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/slider.md:30
 func contentCode173(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2916,7 +2744,6 @@ func contentCode173(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/slider.md:36
 func contentCode174(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2926,7 +2753,6 @@ func contentCode174(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/slider.md:42
 func contentCode175(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2938,7 +2764,6 @@ func contentCode175(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/slider.md:47
 func contentCode176(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2948,7 +2773,6 @@ func contentCode176(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/slider.md:52
 func contentCode177(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2962,7 +2786,6 @@ func contentCode177(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/slider.md:59
 func contentCode178(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -2974,7 +2797,6 @@ func contentCode178(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/slider.md:69
 func contentCode179(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -2989,7 +2811,6 @@ func contentCode179(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/slider.md:78
 func contentCode180(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3002,7 +2823,6 @@ func contentCode180(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/snackbar.md:12
 func contentCode181(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3017,7 +2837,6 @@ func contentCode181(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/snackbar.md:21
 func contentCode182(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3030,7 +2849,6 @@ func contentCode182(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/snackbar.md:32
 func contentCode183(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3048,7 +2866,6 @@ func contentCode183(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/spinner.md:12
 func contentCode184(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3058,7 +2875,6 @@ func contentCode184(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/spinner.md:18
 func contentCode185(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3070,7 +2886,6 @@ func contentCode185(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/spinner.md:24
 func contentCode186(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3080,7 +2895,6 @@ func contentCode186(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/spinner.md:30
 func contentCode187(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3092,7 +2906,6 @@ func contentCode187(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/spinner.md:36
 func contentCode188(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3102,7 +2915,6 @@ func contentCode188(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/spinner.md:42
 func contentCode189(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3114,7 +2926,6 @@ func contentCode189(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/spinner.md:48
 func contentCode190(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3124,7 +2935,6 @@ func contentCode190(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/spinner.md:56
 func contentCode191(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3139,7 +2949,6 @@ func contentCode191(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/splits.md:12
 func contentCode192(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3151,7 +2960,6 @@ func contentCode192(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/splits.md:20
 func contentCode193(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3169,7 +2977,6 @@ func contentCode193(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/splits.md:32
 func contentCode194(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3184,7 +2991,6 @@ func contentCode194(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/splits.md:42
 func contentCode195(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3196,7 +3002,6 @@ func contentCode195(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/splits.md:50
 func contentCode196(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3213,7 +3018,6 @@ func contentCode196(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/splits.md:63
 func contentCode197(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3228,7 +3032,6 @@ func contentCode197(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/splits.md:74
 func contentCode198(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3245,7 +3048,6 @@ func contentCode198(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/stage.md:12
 func contentCode199(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3258,7 +3060,6 @@ func contentCode199(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/stage.md:20
 func contentCode200(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3270,7 +3071,6 @@ func contentCode200(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/states.md:10
 func contentCode201(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3287,7 +3087,6 @@ func contentCode201(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/style.md:10
 func contentCode202(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3299,7 +3098,6 @@ func contentCode202(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/style.md:18
 func contentCode203(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3314,7 +3112,6 @@ func contentCode203(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/style.md:27
 func contentCode204(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3327,7 +3124,6 @@ func contentCode204(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/style.md:48
 func contentCode205(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3346,7 +3142,6 @@ func contentCode205(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/style.md:62
 func contentCode206(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3369,7 +3164,6 @@ func contentCode206(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:14
 func contentCode207(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3382,7 +3176,6 @@ func contentCode207(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:25
 func contentCode208(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3398,7 +3191,6 @@ func contentCode208(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:49
 func contentCode209(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3413,7 +3205,6 @@ func contentCode209(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:60
 func contentCode210(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3431,7 +3222,6 @@ func contentCode210(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:72
 func contentCode211(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3446,7 +3236,6 @@ func contentCode211(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:85
 func contentCode212(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3463,7 +3252,6 @@ func contentCode212(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:110
 func contentCode213(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3477,7 +3265,6 @@ func contentCode213(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:120
 func contentCode214(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3493,7 +3280,6 @@ func contentCode214(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:132
 func contentCode215(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3508,7 +3294,6 @@ func contentCode215(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:145
 func contentCode216(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3526,7 +3311,6 @@ func contentCode216(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:159
 func contentCode217(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3543,7 +3327,6 @@ func contentCode217(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:177
 func contentCode218(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3559,7 +3342,6 @@ func contentCode218(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:191
 func contentCode219(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3579,7 +3361,6 @@ func contentCode219(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:207
 func contentCode220(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3595,7 +3376,6 @@ func contentCode220(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:221
 func contentCode221(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3623,7 +3403,6 @@ func contentCode221(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:247
 func contentCode222(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3643,7 +3422,6 @@ func contentCode222(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:264
 func contentCode223(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3660,7 +3438,6 @@ func contentCode223(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:279
 func contentCode224(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3680,7 +3457,6 @@ func contentCode224(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:295
 func contentCode225(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3697,7 +3473,6 @@ func contentCode225(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:310
 func contentCode226(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3718,7 +3493,6 @@ func contentCode226(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:331
 func contentCode227(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3731,7 +3505,6 @@ func contentCode227(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:342
 func contentCode228(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3746,7 +3519,6 @@ func contentCode228(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:353
 func contentCode229(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3760,7 +3532,6 @@ func contentCode229(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:366
 func contentCode230(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3773,7 +3544,6 @@ func contentCode230(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:375
 func contentCode231(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3789,7 +3559,6 @@ func contentCode231(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:398
 func contentCode232(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3804,7 +3573,6 @@ func contentCode232(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/styles.md:410
 func contentCode233(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3817,7 +3585,6 @@ func contentCode233(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/styles.md:421
 func contentCode234(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3832,7 +3599,6 @@ func contentCode234(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/svg.md:22
 func contentCode235(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3842,7 +3608,6 @@ func contentCode235(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/svg.md:28
 func contentCode236(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3858,7 +3623,6 @@ func contentCode236(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/svg.md:38
 func contentCode237(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3871,7 +3635,6 @@ func contentCode237(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/svg.md:46
 func contentCode238(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3881,7 +3644,6 @@ func contentCode238(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switch.md:12
 func contentCode239(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3893,7 +3655,6 @@ func contentCode239(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switch.md:18
 func contentCode240(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3903,7 +3664,6 @@ func contentCode240(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switch.md:26
 func contentCode241(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3915,7 +3675,6 @@ func contentCode241(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switch.md:32
 func contentCode242(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3925,7 +3684,6 @@ func contentCode242(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switch.md:40
 func contentCode243(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3940,7 +3698,6 @@ func contentCode243(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switch.md:49
 func contentCode244(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3950,7 +3707,6 @@ func contentCode244(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switch.md:57
 func contentCode245(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -3965,7 +3721,6 @@ func contentCode245(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switch.md:66
 func contentCode246(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3979,7 +3734,6 @@ func contentCode246(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switches.md:12
 func contentCode247(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -3989,7 +3743,6 @@ func contentCode247(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switches.md:18
 func contentCode248(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4005,7 +3758,6 @@ func contentCode248(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switches.md:28
 func contentCode249(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4015,7 +3767,6 @@ func contentCode249(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switches.md:36
 func contentCode250(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4027,7 +3778,6 @@ func contentCode250(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switches.md:42
 func contentCode251(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4037,7 +3787,6 @@ func contentCode251(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switches.md:48
 func contentCode252(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4049,7 +3798,6 @@ func contentCode252(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switches.md:54
 func contentCode253(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4059,7 +3807,6 @@ func contentCode253(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switches.md:62
 func contentCode254(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4074,7 +3821,6 @@ func contentCode254(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switches.md:73
 func contentCode255(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4086,7 +3832,6 @@ func contentCode255(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/switches.md:81
 func contentCode256(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4101,7 +3846,6 @@ func contentCode256(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/switches.md:90
 func contentCode257(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4114,7 +3858,6 @@ func contentCode257(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/table.md:14
 func contentCode258(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4130,7 +3873,6 @@ func contentCode258(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/table.md:24
 func contentCode259(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4144,7 +3886,6 @@ func contentCode259(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/table.md:36
 func contentCode260(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4163,7 +3904,6 @@ func contentCode260(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/table.md:53
 func contentCode261(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4177,7 +3917,6 @@ func contentCode261(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/table.md:63
 func contentCode262(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4193,7 +3932,6 @@ func contentCode262(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/table.md:73
 func contentCode263(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4207,7 +3945,6 @@ func contentCode263(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/table.md:83
 func contentCode264(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4223,7 +3960,6 @@ func contentCode264(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/table.md:95
 func contentCode265(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4238,7 +3974,6 @@ func contentCode265(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tabs.md:12
 func contentCode266(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4250,7 +3985,6 @@ func contentCode266(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tabs.md:20
 func contentCode267(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4266,7 +4000,6 @@ func contentCode267(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tabs.md:30
 func contentCode268(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4281,7 +4014,6 @@ func contentCode268(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tabs.md:40
 func contentCode269(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4295,7 +4027,6 @@ func contentCode269(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tabs.md:50
 func contentCode270(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4314,7 +4045,6 @@ func contentCode270(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tabs.md:65
 func contentCode271(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4330,7 +4060,6 @@ func contentCode271(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tabs.md:77
 func contentCode272(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4348,7 +4077,6 @@ func contentCode272(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tabs.md:91
 func contentCode273(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4365,7 +4093,6 @@ func contentCode273(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tabs.md:104
 func contentCode274(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4387,7 +4114,6 @@ func contentCode274(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-editor.md:14
 func contentCode275(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4398,7 +4124,6 @@ func contentCode275(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-editor.md:20
 func contentCode276(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4408,7 +4133,6 @@ func contentCode276(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-editor.md:26
 func contentCode277(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4425,7 +4149,6 @@ func main() {
 	}
 }
 
-
 // content/text-editor.md:42
 func contentCode278(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4435,7 +4158,6 @@ func contentCode278(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-editor.md:54
 func contentCode279(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4448,7 +4170,6 @@ func contentCode279(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-editor.md:64
 func contentCode280(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4463,7 +4184,6 @@ func contentCode280(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-editor.md:73
 func contentCode281(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4477,7 +4197,6 @@ func contentCode281(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-field.md:14
 func contentCode282(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4487,7 +4206,6 @@ func contentCode282(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-field.md:20
 func contentCode283(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4500,7 +4218,6 @@ func contentCode283(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-field.md:27
 func contentCode284(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4510,7 +4227,6 @@ func contentCode284(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-field.md:33
 func contentCode285(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4522,7 +4238,6 @@ func contentCode285(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-field.md:39
 func contentCode286(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4532,7 +4247,6 @@ func contentCode286(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-field.md:45
 func contentCode287(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4544,7 +4258,6 @@ func contentCode287(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-field.md:51
 func contentCode288(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4554,7 +4267,6 @@ func contentCode288(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-field.md:57
 func contentCode289(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4567,7 +4279,6 @@ func contentCode289(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-field.md:67
 func contentCode290(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4585,7 +4296,6 @@ func contentCode290(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-field.md:99
 func contentCode291(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4598,7 +4308,6 @@ func contentCode291(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text-field.md:108
 func contentCode292(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4614,7 +4323,6 @@ func contentCode292(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text-field.md:118
 func contentCode293(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4629,7 +4337,6 @@ func contentCode293(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text.md:10
 func contentCode294(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4639,7 +4346,6 @@ func contentCode294(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text.md:16
 func contentCode295(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4651,7 +4357,6 @@ func contentCode295(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text.md:22
 func contentCode296(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4662,7 +4367,6 @@ func contentCode296(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text.md:30
 func contentCode297(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4672,7 +4376,6 @@ func contentCode297(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/text.md:36
 func contentCode298(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4692,7 +4395,6 @@ func contentCode298(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/text.md:50
 func contentCode299(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4705,7 +4407,6 @@ func contentCode299(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tic-tac-toe-tutorial.md:11
 func contentCode300(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4728,7 +4429,6 @@ func contentCode300(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tic-tac-toe-tutorial.md:29
 func contentCode301(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4774,7 +4474,6 @@ func contentCode301(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tic-tac-toe-tutorial.md:70
 func contentCode302(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4838,7 +4537,6 @@ func contentCode302(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/time-picker.md:14
 func contentCode303(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4848,7 +4546,6 @@ func contentCode303(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/time-picker.md:22
 func contentCode304(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4863,7 +4560,6 @@ func contentCode304(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/time-picker.md:33
 func contentCode305(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4874,7 +4570,6 @@ func contentCode305(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/time-picker.md:39
 func contentCode306(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4884,7 +4579,6 @@ func contentCode306(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/time-picker.md:45
 func contentCode307(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4899,7 +4593,6 @@ func contentCode307(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/time-picker.md:56
 func contentCode308(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4909,7 +4602,6 @@ func contentCode308(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/time-picker.md:62
 func contentCode309(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4924,7 +4616,6 @@ func contentCode309(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/todo-list-tutorial.md:10
 func contentCode310(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4937,7 +4628,6 @@ func contentCode310(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/todo-list-tutorial.md:19
 func contentCode311(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4953,7 +4643,6 @@ func contentCode311(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/todo-list-tutorial.md:30
 func contentCode312(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -4974,7 +4663,6 @@ func contentCode312(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/toolbar.md:14
 func contentCode313(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -4992,7 +4680,6 @@ func contentCode313(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/toolbar.md:28
 func contentCode314(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5012,7 +4699,6 @@ func contentCode314(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/toolbar.md:44
 func contentCode315(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -5029,7 +4715,6 @@ func contentCode315(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/toolbar.md:57
 func contentCode316(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5049,7 +4734,6 @@ func contentCode316(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tooltip.md:10
 func contentCode317(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -5059,7 +4743,6 @@ func contentCode317(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tree.md:14
 func contentCode318(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5073,7 +4756,6 @@ func contentCode318(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tree.md:23
 func contentCode319(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5089,7 +4771,6 @@ func contentCode319(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tree.md:33
 func contentCode320(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -5103,7 +4784,6 @@ func contentCode320(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tree.md:45
 func contentCode321(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5120,7 +4800,6 @@ func contentCode321(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tree.md:57
 func contentCode322(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5142,7 +4821,6 @@ func contentCode322(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tree.md:75
 func contentCode323(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -5158,7 +4836,6 @@ func contentCode323(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/tree.md:87
 func contentCode324(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5176,7 +4853,6 @@ func contentCode324(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/tree.md:101
 func contentCode325(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -5190,7 +4866,6 @@ func contentCode325(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/update.md:10
 func contentCode326(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5206,7 +4881,6 @@ func contentCode326(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/update.md:21
 func contentCode327(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5226,7 +4900,6 @@ func contentCode327(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	}
 }
 
-
 // content/widget.md:14
 func contentCode328(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 	b := contentCodeParent
@@ -5236,7 +4909,6 @@ func contentCode328(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // content/widget.md:20
 func contentCode329(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
@@ -5249,7 +4921,6 @@ func contentCode329(contentCodeParent *core.Frame, contentCodeOut io.Writer) {
 
 	}
 }
-
 
 // Code blocks left out:
 //   content/events.md:212: assignment mismatch: 1 variable but ts.NewTab returns 2 values

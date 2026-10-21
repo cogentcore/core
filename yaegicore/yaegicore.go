@@ -108,6 +108,9 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 		// The symbols are made when they are first needed on the web.
 		basesymbols.Load()
 		coresymbols.Load()
+		for name, v := range content.CodeSymbols {
+			coresymbols.Symbols["."][name] = reflect.ValueOf(v)
+		}
 		in, new, err := getInterpreter(language)
 		if err != nil {
 			core.ErrorSnackbar(ed, err)
