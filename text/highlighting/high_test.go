@@ -6,9 +6,11 @@ package highlighting
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/colors"
 	_ "cogentcore.org/core/system/driver"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/lexer"
@@ -258,5 +260,27 @@ func TestMarkupNestedCode(t *testing.T) {
 		assert.Equal(t, "[{KeywordDeclaration 0 4 {0 0}} {NameFunction 5 9 {0 0}} {Punctuation 9 11 {0 0}} {Punctuation 12 13 {0 0}} {Keyword 14 20 {0 0}} {Punctuation 21 22 {0 0}}]", fmt.Sprint(tags[3]))
 		assert.Equal(t, "[{LitStr 0 3 {0 0}}]", fmt.Sprint(tags[4]))
 		assert.Empty(t, tags[6])
+	}
+}
+
+// TestMarkupErrorColor checks that a tag whose style entry has no color, such
+// as Error (only a border in the emacs style), keeps the default text color
+// (no fill color) and gets its dotted underline. Under goscript, the theme
+// color computed from the missing color was rgba(NaN, NaN, NaN, 0), which is
+// not nil, so the error tokens (#, ## and @ in Goal code) were drawn
+// transparent.
+func TestMarkupErrorColor(t *testing.T) {
+	hs := AvailableStyle(HighlightingName("emacs"))
+	entry := hs.Tag(token.Error)
+	assert.True(t, colors.IsNil(entry.Color))
+	assert.Equal(t, color.RGBA{}, entry.themeColor)
+
+	etags := lexer.Line{}
+	etags.AddLex(token.KeyToken{Token: token.Error}, 2, 4)
+	tx := MarkupLineRich(hs, rich.NewStyle(), []rune("x ## y"), nil, etags)
+	assert.Equal(t, "[]: \"x \"\n[dotted-underline]: \"##\"\n[]: \" y\"\n", fmt.Sprint(tx))
+	for si := range tx {
+		sty, _ := tx.Span(si)
+		assert.Nil(t, sty.FillColor(), "span %d", si)
 	}
 }

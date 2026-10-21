@@ -118,13 +118,18 @@ type StyleEntry struct {
 
 // UpdateFromTheme normalizes the colors of the style entry such that they have consistent
 // chromas and tones that guarantee sufficient text contrast in accordance with the color theme.
+// An entry without a color (such as Error, which only has a border in most
+// styles) has no theme color, so that its text keeps the default color.
 func (se *StyleEntry) UpdateFromTheme() {
-	hc := hct.FromColor(se.Color)
-	ctone := float32(40)
-	if matcolor.SchemeIsDark {
-		ctone = 80
+	se.themeColor = color.RGBA{}
+	if !colors.IsNil(se.Color) {
+		hc := hct.FromColor(se.Color)
+		ctone := float32(40)
+		if matcolor.SchemeIsDark {
+			ctone = 80
+		}
+		se.themeColor = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
 	}
-	se.themeColor = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
 
 	if !colors.IsNil(se.Background) {
 		hb := hct.FromColor(se.Background)
