@@ -18,11 +18,12 @@ import (
 // the faces of runes for before it starts over.
 const maxFaceSets = 64
 
-// fontMap is a [fontscan.FontMap] that keeps its candidate fonts when it is
-// given the query or script that it already has. The FontMap itself discards
-// them on every SetQuery and SetScript, which the shaper calls for every span
-// and the segmenter for every script run, and then rebuilds them on the next
-// face cache miss, which is costly.
+// fontMap is a [fontscan.FontMap] that keeps the faces of runes per query
+// and script, and does not set the query or script that it already has,
+// which the shaper sets for every span and the segmenter for every script
+// run. The FontMap keeps the candidate fonts of its recent queries and
+// scripts itself, which used to be built again on every face cache miss
+// after a new query, as text alternates between families.
 type fontMap struct {
 	*fontscan.FontMap
 
