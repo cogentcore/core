@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"github.com/gomarkdown/markdown/ast"
@@ -237,6 +238,10 @@ func (ct *Content) moveToBlockFrame(w core.Widget, id, txt string, top bool) {
 	tx.Styler(func(s *styles.Style) {
 		s.Max.X.In(8)
 		s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+	})
+	// Links in the caption are opened in the content, like those of the page text.
+	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
+		ct.OpenEvent(tl.URL, e)
 	})
 }
 
