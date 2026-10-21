@@ -142,10 +142,10 @@ func (sw *Scene) ConfigXYZ() {
 	if !sw.IsVisible() {
 		return
 	}
-	// The visible part of the scene is within its frame, except during a
-	// layout, as when a Toolbar renders the scene from its SizeUp, where the
-	// size of the scene is its minimum size until it is allocated its space:
-	// the frame then keeps its size until the layout is done.
+	// The visible part of the scene is within its frame once the layout is
+	// done. This only differs if the scene is rendered in the middle of a
+	// layout, where its size is its minimum size until it is allocated its
+	// space (which Toolbar used to do): the frame then keeps its size.
 	fb := sw.frameBBox()
 	if !sw.Geom.ContentBBox.In(fb) {
 		return
