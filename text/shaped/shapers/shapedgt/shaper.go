@@ -37,6 +37,13 @@ type Shaper struct {
 	// shapes caches the shaped outputs of recent texts for wrapping.
 	shapes shapeCache
 
+	// SimpleSpans is whether spans of simple text (Latin, Greek and Cyrillic
+	// scripts, common punctuation and symbols) are shaped without the go-text
+	// shaper, as a glyph for each rune with its nominal glyph,
+	// for a shaper whose outputs are measured again after shaping, as those
+	// of shapedjs are measured by the browser.
+	SimpleSpans bool
+
 	sync.Mutex
 }
 
@@ -162,6 +169,14 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, txt []rune) []
 		in.Size = math32.ToFixed(fsz)
 		in.Script = rich.Settings.Script
 		in.Language = rich.Settings.Language
+
+		// Simple text that is measured again after shaping is not shaped.
+		if sh.SimpleSpans {
+			if o, ok := sh.simpleOutput(&in); ok {
+				sh.outBuff = append(sh.outBuff, o)
+				continue
+			}
+		}
 
 		ins := sh.splitter.Split(in, &sh.fontMap) // this is essential
 		for _, in := range ins {

@@ -11,7 +11,6 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/font"
 )
 
 var theGlyphCache glyphCache
@@ -20,49 +19,82 @@ func init() {
 	theGlyphCache.init()
 }
 
-// glyphCache caches glyph sizing data by font and rune
+// glyphCache caches the measurements of glyph clusters by font and text.
+// They are cached by text, not by glyph id, as the runes of a font can be
+// shaped with glyphs of other (fallback) faces, whose glyph ids overlap.
 type glyphCache struct {
-	glyphs map[text.Font]map[font.GID]*Metrics
-
-	// last is the font of the last lookup and lastGlyphs its glyphs, as
-	// consecutive lookups are nearly always in the same font, which saves
-	// looking up the font in glyphs.
-	last       text.Font
-	lastGlyphs map[font.GID]*Metrics
+	fonts map[text.Font]*fontGlyphs
 
 	sync.Mutex
 }
 
-func (gc *glyphCache) init() {
-	gc.glyphs = make(map[text.Font]map[font.GID]*Metrics)
+// fontGlyphs are the glyph measurements of one font: those of clusters of
+// one rune by rune, and of the others by their text, and the widths of words.
+type fontGlyphs struct {
+	runes    map[rune]*Metrics
+	clusters map[string]*Metrics
+	words    map[string]float32
 }
 
-// Glyph returns the metric data for given GID in given font.
-func (gc *glyphCache) Glyph(ctx js.Value, fn *text.Font, tsty *text.Style, tx []rune, gid font.GID) *Metrics {
+func (gc *glyphCache) init() {
+	gc.fonts = make(map[text.Font]*fontGlyphs)
+}
+
+// reset forgets all measurements, as when fonts have loaded.
+func (gc *glyphCache) reset() {
 	gc.Lock()
 	defer gc.Unlock()
+	gc.init()
+}
 
-	// The glyphs of the font are those of the last lookup, or looked up.
-	fc := gc.lastGlyphs
-	if fc == nil || gc.last != *fn {
-		fc = gc.glyphs[*fn]
-		if fc == nil {
-			fc = make(map[font.GID]*Metrics)
-			gc.glyphs[*fn] = fc
-		}
-		gc.last, gc.lastGlyphs = *fn, fc
+// font returns the glyph measurements of the given font, which are only to
+// be used with the lock.
+func (gc *glyphCache) font(fn *text.Font) *fontGlyphs {
+	fg := gc.fonts[*fn]
+	if fg == nil {
+		fg = &fontGlyphs{runes: make(map[rune]*Metrics)}
+		gc.fonts[*fn] = fg
 	}
+	return fg
+}
 
-	// A glyph not measured yet is measured.
-	if g, ok := fc[gid]; ok {
+// glyph returns the measurements of the given glyph cluster text, measuring
+// it with the font set on the context if it is not cached.
+func (fg *fontGlyphs) glyph(ctx js.Value, tx []rune) *Metrics {
+	if len(tx) == 1 {
+		if g, ok := fg.runes[tx[0]]; ok {
+			return g
+		}
+		g := MeasureText(ctx, string(tx))
+		fg.runes[tx[0]] = g
 		return g
 	}
-	g := gc.measureGlyph(ctx, fn, tsty, tx)
-	fc[gid] = g
+	s := string(tx)
+	if g, ok := fg.clusters[s]; ok {
+		return g
+	}
+	if fg.clusters == nil {
+		fg.clusters = make(map[string]*Metrics)
+	}
+	g := MeasureText(ctx, s)
+	fg.clusters[s] = g
 	return g
 }
 
-func (gc *glyphCache) measureGlyph(ctx js.Value, fn *text.Font, tsty *text.Style, tx []rune) *Metrics {
-	SetFontStyle(ctx, fn, tsty, 0)
-	return MeasureText(ctx, string(tx))
+// word returns the width of the given word, measuring it with the font set
+// on the context if it is not cached.
+func (fg *fontGlyphs) word(ctx js.Value, word []rune) float32 {
+	s := string(word)
+	if w, ok := fg.words[s]; ok {
+		return w
+	}
+	if fg.words == nil || len(fg.words) >= maxWords {
+		fg.words = make(map[string]float32)
+	}
+	w := float32(ctx.Call("measureText", s).Get("width").Float())
+	fg.words[s] = w
+	return w
 }
+
+// maxWords is the number of word widths that a font keeps before it starts over.
+const maxWords = 16384
