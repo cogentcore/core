@@ -36,6 +36,12 @@ func ReadHTMLString(ctx *Context, parent core.Widget, s string) error {
 // readHTMLNode reads HTML from the given [*html.Node] and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
+	// The rest of a staged body is left for later.
+	if ctx.stageAt(n) {
+		ctx.rest, ctx.restParent = n, parent
+		return nil
+	}
+
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n

@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/maps"
 
@@ -125,7 +126,22 @@ type Content struct {
 
 	// if non-nil, a message is sent when content page is rendered
 	renderChan chan struct{}
+
+	// loads counts the pages loaded by [Content.loadPage], so that the rest of
+	// a staged page (see [Content.loadRest]) is only added to its own page.
+	loads int
+
+	// leftScroll is the vertical scroll offset of [Content.leftFrame] when
+	// a staged page was loaded, which [Content.loadRest] restores.
+	leftScroll float32
 }
+
+// stagePages is whether long pages are shown in two stages on the web: the
+// first part of the page is shown first, and the rest is added right after
+// (see [Content.loadRest]). Building, styling and laying out the widgets of a
+// long page takes much longer on the web than natively, and most of them are
+// not visible at first.
+var stagePages = true
 
 func init() {
 	// We want Command+[ and Command+] to work for browser back/forward navigation
@@ -498,9 +514,24 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		return err
 	}
 	ct.current.Page.ParseSpecials(b)
+
+	// A long page opened at its start is shown in two stages on the web.
+	ct.loads++
+	staged := stagePages && core.TheApp.Platform() == system.Web && ct.current.Heading == "" && !ct.inPDFRender
+	if staged {
+		ct.Context.StageSize = ct.stageSize()
+		ct.leftScroll = ct.leftFrame.Geom.Scroll.Y
+	}
 	err = htmlcore.ReadMD(ct.Context, w, b)
+	ct.Context.StageSize = 0
 	if err != nil {
 		return err
+	}
+	if ct.Context.HasRest() {
+		loads := ct.loads
+		w.Defer(func() {
+			go ct.loadRest(w, loads)
+		})
 	}
 
 	ct.makeTableOfContents(w, ct.current.Page)
@@ -517,6 +548,56 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	}
 	ct.rendered = ct.current
 	return nil
+}
+
+// stageSize returns the size of the first stage of a staged page (see
+// [htmlcore.Context.StageSize]): about three times the text that fits in
+// the window.
+func (ct *Content) stageSize() int {
+	sz := ct.Scene.SceneGeom.Size
+	charsPerLine := max(sz.X/9, 40)
+	lines := max(sz.Y/24, 20)
+	return 3 * charsPerLine * lines
+}
+
+// loadRest adds the rest of a staged page to the page frame w after the
+// first stage has been shown, unless another page has been loaded since
+// (the given loads is [Content.loads] when the page was loaded).
+func (ct *Content) loadRest(w *core.Frame, loads int) {
+	// The browser shows the first stage before the rest is added.
+	time.Sleep(time.Millisecond)
+	ct.AsyncLock()
+	defer ct.AsyncUnlock()
+	if ct.loads != loads || w.This == nil || !ct.Context.HasRest() {
+		return
+	}
+
+	// The widgets of the rest are updated, styled and laid out, and the
+	// table of contents is made again with their headings.
+	parent, start, err := ct.Context.ReadRest()
+	errors.Log(err)
+	pw := parent.AsWidget()
+	for _, c := range pw.Children[start:] {
+		c.(core.Widget).AsWidget().Update()
+	}
+	ct.makeTableOfContents(w, ct.current.Page)
+	if ct.tocTree != nil {
+		ct.tocTree.Update()
+	}
+	ct.leftFrame.NeedsLayout()
+	w.NeedsLayout()
+
+	// The sidebar is scrolled back to where it was before the page was
+	// loaded, which the shorter table of contents of the first stage may
+	// have limited, once the layout has updated its range.
+	if scroll := ct.leftScroll; scroll != 0 {
+		ct.leftFrame.Defer(func() {
+			if sb := ct.leftFrame.Scrolls[math32.Y]; sb != nil && ct.loads == loads {
+				sb.SetValue(-scroll)
+				ct.leftFrame.ScrollChanged(math32.Y, sb)
+			}
+		})
+	}
 }
 
 func (ct *Content) RenderWidget() {

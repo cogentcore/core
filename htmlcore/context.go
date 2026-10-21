@@ -100,6 +100,85 @@ type Context struct {
 
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
+
+	// StageSize, if positive, is the size of the content of the body (in
+	// runes of text, with estimates for other elements) after which
+	// [ReadHTML] stops adding the widgets of its top-level elements,
+	// leaving the rest for [Context.ReadRest]. This allows the first part
+	// of a long page to be shown sooner.
+	StageSize int
+
+	// stageSize is the size of the content of the body read so far.
+	stageSize int
+
+	// rest is the first top-level element of the body that has not been read,
+	// and restParent the widget that its widgets are added to.
+	rest       *html.Node
+	restParent core.Widget
+}
+
+// HasRest returns whether [ReadHTML] has left elements to read with
+// [Context.ReadRest] (see [Context.StageSize]).
+func (c *Context) HasRest() bool {
+	return c.rest != nil
+}
+
+// ReadRest adds the widgets of the elements that [ReadHTML] left (see
+// [Context.StageSize]), and returns the widget that they are added to
+// and the index of the first child added, which need to be updated.
+// The context must not have been used to read other HTML since.
+func (c *Context) ReadRest() (core.Widget, int, error) {
+	if c.rest == nil {
+		return nil, 0, nil
+	}
+	n, parent := c.rest, c.restParent
+	c.rest, c.restParent = nil, nil
+	c.StageSize = 0
+	start := parent.AsTree().NumChildren()
+	err := readHTMLNode(c, parent, n)
+	return parent, start, err
+}
+
+// stageAt returns whether the given node is a top-level element of the body
+// that starts the rest of a staged body (see [Context.StageSize]), adding
+// its size to the size of the body read so far otherwise. The rest starts at
+// a block element, whose widgets are new children of the body.
+func (c *Context) stageAt(n *html.Node) bool {
+	if c.StageSize <= 0 || n.Parent == nil || n.Parent.DataAtom != atom.Body {
+		return false
+	}
+	if c.stageSize >= c.StageSize && n.Type == html.ElementNode && stageBlocks[n.DataAtom] {
+		return true
+	}
+	c.stageSize += nodeSize(n)
+	return false
+}
+
+// stageBlocks are the block elements that the rest of a staged body can start at.
+var stageBlocks = map[atom.Atom]bool{
+	atom.P: true, atom.H1: true, atom.H2: true, atom.H3: true, atom.H4: true, atom.H5: true, atom.H6: true,
+	atom.Ul: true, atom.Ol: true, atom.Pre: true, atom.Table: true, atom.Div: true, atom.Blockquote: true,
+	atom.Hr: true, atom.Section: true, atom.Figure: true, atom.Details: true, atom.Dl: true,
+}
+
+// nodeSize returns an estimate of the size of the content of the node, in
+// runes of text, with fixed sizes for elements, larger for media.
+func nodeSize(n *html.Node) int {
+	size := 0
+	switch n.Type {
+	case html.TextNode:
+		size = len(strings.TrimSpace(n.Data))
+	case html.ElementNode:
+		size = 40
+		switch n.DataAtom {
+		case atom.Img, atom.Video, atom.Iframe, atom.Svg, atom.Embed, atom.Object, atom.Canvas:
+			size = 2000
+		}
+	}
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		size += nodeSize(c)
+	}
+	return size
 }
 
 // NewContext returns a new [Context] with basic defaults.
@@ -115,6 +194,8 @@ func NewContext() *Context {
 
 func (c *Context) reset() {
 	c.firstRow = false
+	c.stageSize = 0
+	c.rest, c.restParent = nil, nil
 }
 
 // Parent returns the current parent widget that a widget
