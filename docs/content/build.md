@@ -40,6 +40,37 @@ For apps that use [[content]], each content page is pre-rendered as its own HTML
 
 You can also build a freestanding website that consists only of these static HTML pages, without the Go wasm app, using `core build wasm -htmlonly`. The pages are the same, except that they do not load the app.
 
+## Code blocks of content apps
+
+In a [[content]] app, a ```` ```Go ```` (or ```` ```Goal ````) code block in a page is an interactive example: the page shows the code in a text editor and runs it, showing the widgets that it makes below it. `core build`, `core run`, `core install`, `core pack`, and `core generate` compile these code blocks into the app: they write a `contentcode_gen.go` file to the main package of the app with a Go function for each code block, and the page runs that function directly, without an interpreter, on all platforms (on `js`, GoScript compiles it with the rest of the app). This is faster, and the code blocks are type checked at build time.
+
+This happens automatically for any main package that imports the content package and embeds a directory of markdown files. The generated file records a hash of the code blocks, the options, and the `go.mod` file of the app, and nothing is done if that hash has not changed, so this only takes time (a few seconds) after you change a code block. You should commit the generated file, so that `go build` and `go run` also work.
+
+Code blocks are written as before: a list of statements that use the parent widget `b` and the Cogent Core packages without importing them, or a program with a `main` function. Unused variables are allowed. A code block that does not compile is left out and listed at the end of the generated file and in the output of the command.
+
+When someone edits a code block, the edited code runs in the [yaegi](https://github.com/traefik/yaegi) interpreter if the app includes it, by importing `cogentcore.org/core/yaegicore`; otherwise, edited code can not run. On the `js` platform, you can load the interpreter only when code is first edited, so that it does not slow down the startup of the app: instead of importing `yaegicore` for its side effects, set `content.BindTextEditor = yaegicore.BindTextEditor` in an `init` function of the app, and add `DeferredFunctions = ["cogentcore.org/core/yaegicore.BindTextEditor"]` to the `[Web]` section of `core.toml`. This website does that.
+
+### Goal code blocks
+
+```` ```Goal ```` code blocks, written in [Goal](https://cogentcore.org/lab/goal), are compiled too, if the module of the app requires [Cogent Lab](https://cogentcore.org/lab), whose Goal transpiler turns them into Go. As in the Goal interpreter, the Goal code blocks of a page run in order and share their variables: a block can use the variables and functions of the blocks before it on its page. Goal code can use the Cogent Lab packages (`tensor`, `plot`, `matrix`, ...) without importing them. A page is compiled up to its first Goal code block that does not compile; that block and the ones after it run in the Goal interpreter, if the app includes it.
+
+The Goal interpreter of edited code is `yaegilab.BindTextEditor` (`cogentcore.org/lab/yaegilab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/yaegilab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
+
+### Options
+
+Options for compiling code blocks go in the `[ContentCode]` section of `core.toml`:
+
+```toml
+[ContentCode]
+  # other packages that code blocks use without importing them (path or name=path)
+  Imports = ["github.com/me/sim/wavesim"]
+  # whether Goal math mode records its variables in tensorfs, as yaegilab does
+  # (on by default; turn it off if the Goal interpreter of the app does not)
+  GoalRecord = false
+```
+
+If you prefer `go generate`, you can add `//go:generate go run cogentcore.org/core/content/cmd/contentcode` to the main package of the app instead; the `core` tool then uses the same arguments (such as `-o` for the output file, `-import name=path` for other packages that code blocks use without importing them, or `-goal-record=false`), together with the options of `core.toml`.
+
 ## Details
 
 You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.

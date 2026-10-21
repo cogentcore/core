@@ -90,7 +90,11 @@ func buildJS(c *config.Config) error {
 			gs.Env[k] = v
 		}
 	}
-	err = gs.Run("goscript", "compile", "-p", ".", "--output", output, "-b", "-tags="+tags)
+	gsArgs := []string{"compile", "-p", ".", "--output", output, "-b", "-tags=" + tags}
+	for _, f := range c.Web.DeferredFunctions {
+		gsArgs = append(gsArgs, "--deferred-function", f)
+	}
+	err = gs.Run("goscript", gsArgs...)
 	if err != nil {
 		return fmt.Errorf("error compiling with goscript: %w", err)
 	}
@@ -120,7 +124,17 @@ func buildJS(c *config.Config) error {
 		}
 	}
 
-	args := []string{"build", "entry.ts", "--target", "browser", "--format", "esm", "--outfile", filepath.Join(c.Build.Output, "app.gs.js")}
+	args := []string{"build", "entry.ts", "--target", "browser", "--format", "esm"}
+	err = removeJSChunks(c.Build.Output)
+	if err != nil {
+		return err
+	}
+	if len(c.Web.DeferredFunctions) > 0 {
+		// The deferred functions are dynamic imports, each in its own chunk.
+		args = append(args, "--splitting", "--outdir", c.Build.Output, "--entry-naming", "app.gs.js", "--chunk-naming", jsChunkPrefix+"[hash].js")
+	} else {
+		args = append(args, "--outfile", filepath.Join(c.Build.Output, "app.gs.js"))
+	}
 	if !c.Build.Debug {
 		// Full minification puts many statements on one line, which is fine
 		// for tree.AutoPlanName, since its //goscript:callsite directive makes
@@ -136,6 +150,35 @@ func buildJS(c *config.Config) error {
 		return err
 	}
 	return makeFiles(c)
+}
+
+// jsChunkPrefix is the prefix of the names of the files of the bundle other
+// than app.gs.js: the chunks of [config.Web.DeferredFunctions].
+const jsChunkPrefix = "app.gs.chunk-"
+
+// removeJSChunks removes the chunk files of an earlier build from the given
+// build output directory.
+func removeJSChunks(odir string) error {
+	for _, f := range jsChunkFiles(odir) {
+		err := os.Remove(filepath.Join(odir, f))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// jsChunkFiles returns the names of the chunk files of the bundle in the
+// given build output directory (see [jsChunkPrefix]).
+func jsChunkFiles(odir string) []string {
+	entries, _ := os.ReadDir(odir)
+	var files []string
+	for _, e := range entries {
+		if !e.IsDir() && strings.HasPrefix(e.Name(), jsChunkPrefix) && strings.HasSuffix(e.Name(), ".js") {
+			files = append(files, e.Name())
+		}
+	}
+	return files
 }
 
 // jsExternalEmbedPatterns are the base name patterns of the embedded files of
@@ -239,8 +282,13 @@ func jsMainPackage(tags string) (pkg, mainFile string, err error) {
 
 // jsWorkDir returns the directory in the user cache directory that is used
 // for compiling and bundling the given package with GoScript, creating it
-// if it does not already exist.
+// if it does not already exist. The CORE_JS_WORK_DIR environment variable
+// sets another directory, such as for builds of the same package from
+// several worktrees.
 func jsWorkDir(pkg string) (string, error) {
+	if dir := os.Getenv("CORE_JS_WORK_DIR"); dir != "" {
+		return dir, os.MkdirAll(dir, 0777)
+	}
 	cache, err := os.UserCacheDir()
 	if err != nil {
 		return "", err

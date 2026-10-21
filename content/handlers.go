@@ -114,7 +114,7 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 		ed.SetProperty("html", codeHTML(ed.Lines.String(), lang))
 		return true
 	}
-	if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
+	if (lang == "Go" && len(CompiledCode) > 0) || (lang == "Goal" && len(CompiledGoal) > 0) || (BindTextEditor != nil && (lang == "Go" || lang == "Goal")) {
 		ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
 		parFrame := core.NewFrame(fr)
 		parFrame.Styler(func(s *styles.Style) {
@@ -135,7 +135,7 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 				parFrame.Styles.Grow.Y = s.Grow.Y
 			})
 		})
-		BindTextEditor(ed, parFrame, lang)
+		BindCode(ed, parFrame, lang)
 	} else {
 		ed.SetReadOnly(true)
 		ed.Lines.Settings.LineNumbers = false

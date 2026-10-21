@@ -89,6 +89,7 @@ func makeAppWorkerJS(c *config.Config) ([]byte, error) {
 			"manifest.webmanifest",
 			"index.html",
 		}
+		resources = append(resources, jsChunkFiles(c.Build.Output)...)
 		resources = append(resources, externalEmbedFiles(c.Build.Output)...)
 	}
 

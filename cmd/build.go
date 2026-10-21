@@ -15,7 +15,9 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/generate"
 	"cogentcore.org/core/cmd/mobile"
 	"cogentcore.org/core/cmd/web"
 )
@@ -25,6 +27,10 @@ import (
 func Build(c *config.Config) error { //types:add
 	if len(c.Build.Target) == 0 {
 		return errors.New("build: expected at least 1 platform")
+	}
+	// the go build reports the errors of the app if this fails
+	if err := generate.ContentCode(".", &c.ContentCode); err != nil {
+		logx.PrintlnWarn("warning:", err)
 	}
 	for _, platform := range c.Build.Target {
 		err := config.OSSupported(platform.OS)

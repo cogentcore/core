@@ -2,6 +2,10 @@
 
 Cogent Content is a package for making content-focused apps and websites consisting of Markdown, HTML, and Cogent Core.
 
+## Code blocks
+
+Code blocks marked as ```` ```Go ```` (or ```` ```Goal ````, with Cogent Lab) are interactive examples: the page shows their code in an editor and runs it. `core build`, `core run`, `core install`, `core pack` and `core generate` compile them into the app (as `contentcode_gen.go`, see [contentcode](contentcode)), so that they run without an interpreter; edited code runs in the yaegi interpreter if the app includes it (`cogentcore.org/core/yaegicore`). See https://cogentcore.org/core/build#code-blocks-of-content-apps.
+
 ## References
 
 Wikilink styles for scientific source references are supported, using the [csl](../text/csl) Citation Style Language format, with one citation per wikilink:

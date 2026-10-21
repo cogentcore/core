@@ -1,1 +1,5 @@
 About = "Cogent Core is a free and open source framework for building powerful, fast, elegant 2D and 3D apps that run on macOS, Windows, Linux, iOS, Android, and the web with a single pure Go codebase, allowing you to Code Once, Run Everywhere."
+
+[Web]
+  # yaegi is loaded when code is first edited (see yaegi.go)
+  DeferredFunctions = ["cogentcore.org/core/yaegicore.BindTextEditor"]

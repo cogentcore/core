@@ -52,6 +52,15 @@ type Web struct { //types:add
 	// This is often used for custom fonts; see https://cogentcore.org/core/font.
 	Styles []string
 
+	// DeferredFunctions are exported functions (package/path.Function) that
+	// js builds load when they are first called (GoScript --deferred-function):
+	// their packages, and the packages that only they use, are in separate
+	// files of the bundle, downloaded and initialized at that first call. Code
+	// that runs at startup may refer to them only as function values (and
+	// calls), such as cogentcore.org/core/yaegicore.BindTextEditor, the
+	// interpreter of edited content code.
+	DeferredFunctions []string
+
 	// The interval between each app auto-update while running in a web browser.
 	// Zero or negative values deactivate the auto-update mechanism. The auto-update
 	// mechanism updates the WASM file for the app from the server if it has changed.
