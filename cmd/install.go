@@ -57,7 +57,7 @@ func Install(c *config.Config) error { //types:add
 			}
 			return exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
 		default:
-			if err := generate.ContentCode("."); err != nil {
+			if err := generate.ContentCode(".", &c.ContentCode); err != nil {
 				logx.PrintlnWarn("warning:", err)
 			}
 			return exec.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install")

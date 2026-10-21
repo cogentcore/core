@@ -70,6 +70,11 @@ type Config struct { //types:add
 
 	// the configuration options for the generate command
 	Generate Generate `cmd:"generate"`
+
+	// ContentCode has the options for compiling the code blocks of content
+	// apps into them, which the build, install, run, pack, and generate
+	// commands do (see cogentcore.org/core/content/contentcode).
+	ContentCode ContentCode `cmd:"build,install,run,pack,generate"`
 }
 
 type Build struct { //types:add
@@ -147,6 +152,22 @@ type Generate struct { //types:add
 	// Icons, if specified, indicates to generate an icongen.go file with
 	// icon variables for the icon svg files in the specified folder.
 	Icons string
+}
+
+// ContentCode has the options for compiling the code blocks of content apps
+// into them (see cogentcore.org/core/content/contentcode). They add to the
+// arguments of a go:generate directive that runs contentcode, if there is one.
+type ContentCode struct { //types:add
+
+	// Imports are other packages that code blocks can use without
+	// importing them, as import paths or name=path.
+	Imports []string
+
+	// GoalRecord is whether Goal math mode records its variables in tensorfs
+	// and lists tensorfs to the output of the code block, as the Goal
+	// interpreter of Cogent Lab (cogentcore.org/lab/yaegilab) does. Turn it
+	// off for sites whose Goal interpreter does not.
+	GoalRecord bool `default:"true"`
 }
 
 func (c *Config) OnConfig(cmd string) error {

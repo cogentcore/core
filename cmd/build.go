@@ -29,7 +29,7 @@ func Build(c *config.Config) error { //types:add
 		return errors.New("build: expected at least 1 platform")
 	}
 	// the go build reports the errors of the app if this fails
-	if err := generate.ContentCode("."); err != nil {
+	if err := generate.ContentCode(".", &c.ContentCode); err != nil {
 		logx.PrintlnWarn("warning:", err)
 	}
 	for _, platform := range c.Build.Target {

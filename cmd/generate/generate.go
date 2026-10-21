@@ -122,7 +122,7 @@ func Generate(c *config.Config) error { //types:add
 		if pkg.Name != "main" || len(pkg.GoFiles) == 0 {
 			continue
 		}
-		err = ContentCode(filepath.Dir(pkg.GoFiles[0]))
+		err = ContentCode(filepath.Dir(pkg.GoFiles[0]), &c.ContentCode)
 		if err != nil {
 			return err
 		}
