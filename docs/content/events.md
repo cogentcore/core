@@ -210,8 +210,8 @@ A show event is triggered when the [[scene]] containing a widget is first shown 
 
 ```Go
 ts := core.NewTabs(b)
-home := ts.NewTab("Home")
-data := ts.NewTab("Data")
+ts.NewTab("Home")
+data, _ := ts.NewTab("Data")
 tx := core.NewText(data)
 tx.OnShow(func(e events.Event) {
     // Pretend this is some expensive computation that only needs to happen once this tab is visible
