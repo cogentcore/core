@@ -1897,8 +1897,8 @@ func (wb *WidgetBase) DirectRenderDrawBBoxes(srcFullBBox image.Rectangle) (destB
 	if pos.X < tbb.Min.X { // scrolled off left
 		srcBBox.Min.X = tbb.Min.X - pos.X
 	}
-	if pos.Y < tbb.Min.Y {
-		srcBBox.Min.X = tbb.Min.Y - pos.X
+	if pos.Y < tbb.Min.Y { // scrolled off top
+		srcBBox.Min.Y = tbb.Min.Y - pos.Y
 	}
 	sz := srcBBox.Size()
 	if sz.X <= 0 || sz.Y <= 0 {
