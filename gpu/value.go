@@ -195,6 +195,9 @@ func (vl *Value) Release() {
 		vl.buffer = nil
 	}
 	if vl.Texture != nil {
+		if vl.Texture.view != nil {
+			vl.varGroupDirty()
+		}
 		vl.Texture.Release()
 		vl.Texture = nil
 	}
@@ -427,10 +430,12 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // so set those before making this call.  It will not be re-configured
 // without manually releasing it.
 func (vl *Value) SetFromGoImage(img image.Image, layer int) *Texture {
+	view := vl.Texture.view
 	err := vl.Texture.SetFromGoImage(img, layer)
 	errors.Log(err)
 	err = vl.Texture.Sampler.Config(&vl.device)
 	errors.Log(err)
+	vl.textureChanged(view)
 	return vl.Texture
 }
 
@@ -439,10 +444,23 @@ func (vl *Value) SetFromGoImage(img image.Image, layer int) *Texture {
 // with the current settings, so set those before making this call.
 // It will not be re-configured without manually releasing it.
 func (vl *Value) SetFromTexture(tx *Texture) *Texture {
+	view := vl.Texture.view
 	vl.Texture.SetShared(tx)
 	err := vl.Texture.Sampler.Config(&vl.device)
 	errors.Log(err)
+	vl.textureChanged(view)
 	return vl.Texture
+}
+
+// textureChanged tells our VarGroup to make a new bind group if the view
+// of our Texture is no longer the given prior one, as when the texture
+// was remade at a new size: the bind group refers to the view, so it
+// would show the old texture, which is destroyed (see
+// [Texture.ReleaseTexture]) and must not be used in a new submit.
+func (vl *Value) textureChanged(prior *wgpu.TextureView) {
+	if vl.Texture.view != prior {
+		vl.varGroupDirty()
+	}
 }
 
 // CreateReadBuffer creates a read buffer for this value,

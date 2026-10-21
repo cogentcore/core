@@ -50,6 +50,10 @@ func (sc *Scene) Rebuild() {
 	if !sc.IsLive() {
 		return
 	}
+	// The lock keeps the textures and buffers that are released from
+	// being destroyed while a frame that uses them is being rendered.
+	sc.Lock()
+	defer sc.Unlock()
 	sc.Phong.ResetAll()
 	sc.ConfigNewPhong()
 }

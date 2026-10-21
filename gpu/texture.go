@@ -33,6 +33,12 @@ type Texture struct {
 	// Use SetShared method to set texture in this way.
 	shared bool
 
+	// hasSharers indicates that another Texture shares the current
+	// texture of this one (see [Texture.SetShared]), so it is only
+	// released and not destroyed when replaced, as the sharer may still
+	// use it until it gets the new one (see [Texture.ReleaseTexture]).
+	hasSharers bool
+
 	// WebGPU texture handle, in device memory
 	texture *wgpu.Texture `display:"-"`
 
@@ -81,7 +87,9 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 
 	nfmt := TextureFormat{Size: sz, Format: wgpu.TextureFormatRGBA8UnormSrgb, Layers: 1, Samples: 1}
 
-	if tx.texture == nil || tx.Format != nfmt {
+	// A shared texture belongs to another Texture: we make our own
+	// instead of writing into it.
+	if tx.texture == nil || tx.shared || tx.Format != nfmt {
 		tx.Format = nfmt
 		err := tx.CreateTexture(wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst)
 		if err != nil { // already logged
@@ -182,7 +190,11 @@ func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) error {
 // underlying GPU texture, with the shared flag set so that
 // it will not be released.
 func (tx *Texture) SetShared(ot *Texture) {
+	if tx.shared && tx.texture == ot.texture && tx.view == ot.view {
+		return
+	}
 	tx.ReleaseTexture()
+	ot.hasSharers = true
 	tx.texture = ot.texture
 	tx.view = ot.view
 	tx.shared = true
@@ -200,16 +212,29 @@ func (tx *Texture) ReleaseView() {
 	tx.view = nil
 }
 
-// ReleaseTexture frees device memory version of texture that we own
+// ReleaseTexture frees device memory version of texture that we own.
+// The texture is destroyed, which frees its memory right away instead
+// of when it is garbage collected, as on the web, where Release does
+// nothing, or when its last reference is released. WebGPU destroys it
+// only after the work already submitted, but it must not be used in
+// any new submit, so a bind group that uses it must be remade first:
+// a texture [Value] has a new bind group made when its view changes.
+// A texture that has been shared with another Texture (see
+// [Texture.SetShared]) is only released, as the sharer still refers
+// to it until it gets the new one.
 func (tx *Texture) ReleaseTexture() {
 	tx.ReleaseView()
 	if tx.texture == nil {
 		return
 	}
 	if !tx.shared {
+		if !tx.hasSharers {
+			tx.texture.Destroy()
+		}
 		tx.texture.Release()
 	}
 	tx.shared = false
+	tx.hasSharers = false
 	tx.texture = nil
 }
 
