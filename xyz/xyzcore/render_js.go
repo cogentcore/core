@@ -41,9 +41,10 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 func (sw *Scene) configFrame(sz image.Point) {
 	// Even though we are not in [xyzSource.Draw], we can get the Composer
 	// and use it to make the canvas element, which we may need before we
-	// get to [xyzSource.Draw]. Because we pass sw to ElementContext, we
-	// will have the same element as in [xyzSource.Draw], and so no duplicate
-	// elements will be created.
+	// get to [xyzSource.Draw]. Because we pass sw.This to ElementContext,
+	// the widget registered in [Scene.OnAdd], whose render source draws
+	// to the element of that context, we will have the same element as in
+	// [xyzSource.Draw], and so no duplicate elements will be created.
 	cw := core.TheApp.Window(0).Composer().(*composer.ComposerWeb)
 	elem := cw.ElementContext(sw.This, "canvas")
 	cw.SetElementGeom(elem, sw.Geom.ContentBBox.Min, sz)

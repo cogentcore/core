@@ -93,13 +93,16 @@ func (sw *Scene) Init() {
 	})
 }
 
+// OnAdd registers [tree.NodeBase.This] for direct rendering, which is the
+// outer widget when a type embeds Scene, so that the context of its render
+// source is that of the canvas made by configFrame on the web.
 func (sw *Scene) OnAdd() {
 	sw.WidgetBase.OnAdd()
-	sw.Scene.AddDirectRender(sw)
+	sw.Scene.AddDirectRender(sw.This.(core.Widget))
 }
 
 func (sw *Scene) Destroy() {
-	sw.Scene.DeleteDirectRender(sw)
+	sw.Scene.DeleteDirectRender(sw.This.(core.Widget))
 	sw.XYZ.Destroy()
 	sw.WidgetBase.Destroy()
 }
