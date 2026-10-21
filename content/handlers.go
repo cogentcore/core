@@ -450,6 +450,9 @@ func (ct *Content) openRef(url string) {
 	}
 	ref := strings.TrimPrefix(url, "ref://")
 	ct.current.Page = pg
+	// The reference is opened like a heading, so that a staged page is
+	// built whole and has the reference to scroll to.
+	ct.current.Heading = ref
 	ct.historyAdd(pg, "", url)
 	ct.deleteTableOfContents()
 	ct.updateScene()
