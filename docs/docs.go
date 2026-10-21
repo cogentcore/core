@@ -11,7 +11,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"reflect"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -25,9 +24,9 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/yaegicore"
-	"cogentcore.org/core/yaegicore/coresymbols"
 )
+
+//go:generate go run cogentcore.org/core/content/cmd/contentcode
 
 //go:embed content
 var econtent embed.FS
@@ -89,11 +88,6 @@ func main() {
 		})
 	})
 
-	coresymbols.Symbols["."]["econtent"] = reflect.ValueOf(econtent)
-	coresymbols.Symbols["."]["myImage"] = reflect.ValueOf(myImage)
-	coresymbols.Symbols["."]["mySVG"] = reflect.ValueOf(mySVG)
-	coresymbols.Symbols["."]["myFile"] = reflect.ValueOf(myFile)
-
 	ctx.ElementHandlers["home-page"] = homePage
 	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
 		splits := core.NewSplits(ctx.BlockParent)
@@ -116,7 +110,7 @@ func main() {
 			core.ErrorSnackbar(ed, ed.SaveQuiet(), "Error saving code")
 		})
 		parent := core.NewFrame(splits)
-		yaegicore.BindTextEditor(ed, parent, "Go")
+		content.BindCode(ed, parent, "Go")
 		return true
 	}
 	ctx.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {

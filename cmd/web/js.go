@@ -239,8 +239,13 @@ func jsMainPackage(tags string) (pkg, mainFile string, err error) {
 
 // jsWorkDir returns the directory in the user cache directory that is used
 // for compiling and bundling the given package with GoScript, creating it
-// if it does not already exist.
+// if it does not already exist. The CORE_JS_WORK_DIR environment variable
+// sets another directory, such as for builds of the same package from
+// several worktrees.
 func jsWorkDir(pkg string) (string, error) {
+	if dir := os.Getenv("CORE_JS_WORK_DIR"); dir != "" {
+		return dir, os.MkdirAll(dir, 0777)
+	}
 	cache, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
