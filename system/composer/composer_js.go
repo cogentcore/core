@@ -167,6 +167,22 @@ func (cw *ComposerWeb) ElementPointer(ptr uint64, tag string) js.Value {
 	return elem
 }
 
+// SetElementContext sets the HTML element for the given context value
+// to the given existing element, adding it back to the document if
+// [ComposerWeb.Compose] has removed it. Compose removes the element of a
+// source that is not drawn (such as a widget that is hidden), so a source
+// whose element has state that must persist, such as a canvas with a GPU
+// surface, keeps its element and sets it with this each time it is drawn,
+// instead of getting a new one with [ComposerWeb.ElementContext].
+func (cw *ComposerWeb) SetElementContext(ctx any, elem js.Value) {
+	ptr := ctxPointer(ctx)
+	cw.active[ptr] = struct{}{}
+	cw.Elements[ptr] = elem
+	if !elem.Get("isConnected").Bool() {
+		js.Global().Get("document").Get("body").Call("appendChild", elem)
+	}
+}
+
 // SetElementGeom sets the geometry of the given element.
 func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point) {
 	if !elem.Get("width").IsUndefined() {

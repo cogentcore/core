@@ -83,3 +83,6 @@ func (sw *Scene) configFrame(sz image.Point) {
 		sw.XYZ.ConfigOffscreenFromSurface(sf) // does a full build if Frame == nil, else just new size
 	})
 }
+
+// destroyFrame releases platform-specific resources of the render frame.
+func (sw *Scene) destroyFrame() {}

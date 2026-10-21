@@ -103,6 +103,7 @@ func (sw *Scene) OnAdd() {
 
 func (sw *Scene) Destroy() {
 	sw.Scene.DeleteDirectRender(sw.This.(core.Widget))
+	sw.destroyFrame()
 	sw.XYZ.Destroy()
 	sw.WidgetBase.Destroy()
 }
