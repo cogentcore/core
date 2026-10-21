@@ -128,6 +128,8 @@ github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
 github.com/oliverbestmann/webgpu v1.36.1-0.20261014070730-1e27ee21c8db h1:uTYKe94atu2WPSVTXaMynBj43/G+XGkSN2E48RGZLHs=
 github.com/oliverbestmann/webgpu v1.36.1-0.20261014070730-1e27ee21c8db/go.mod h1:GQectz+JGhriyME9VEChIZvHupghM2Y/lj5sfo53brI=
+github.com/oliverbestmann/webgpu v1.37.0 h1:Oa5Hv+eRNDezixKVXcFj3WpHPU0WqkIXmmmJlfFbPdU=
+github.com/oliverbestmann/webgpu v1.37.0/go.mod h1:GQectz+JGhriyME9VEChIZvHupghM2Y/lj5sfo53brI=
 github.com/oliverbestmann/webgpu/libs-android v0.0.0-20260628152806-6b27e30a172e h1:FX62Djj//RQiIrjnyo7oxhQJ4rdNlbzvLiICxTbE4z4=
 github.com/oliverbestmann/webgpu/libs-android v0.0.0-20260628152806-6b27e30a172e/go.mod h1:tczQXCdsoFy+FTJVsZSve/vF8cmWEkxhvjcyY2Rujp8=
 github.com/oliverbestmann/webgpu/libs-darwin v0.0.0-20260628152755-66a5dfa57f8d h1:DX7hw4Pmr73MNVEtOmEq4+nKH+rd8fSdL1a5PLHrqrE=

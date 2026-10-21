@@ -33,7 +33,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
-	github.com/oliverbestmann/webgpu v1.36.1-0.20261014070730-1e27ee21c8db
+	github.com/oliverbestmann/webgpu v1.37.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
 	golang.org/x/crypto v0.54.0
