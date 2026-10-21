@@ -21,8 +21,8 @@ import (
 )
 
 func (rs *Renderer) RenderImage(pr *pimage.Params) {
-	usrc := imagex.Unwrap(pr.Source)
-	umask := imagex.Unwrap(pr.Mask)
+	usrc := unwrapLocal(pr.Source)
+	umask := unwrapLocal(pr.Mask)
 
 	nilSrc := usrc == nil
 	if pr.Rect == (image.Rectangle{}) {
@@ -65,4 +65,15 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	} else {
 		rs.ctx.Call("putImageData", ji.JS.Data, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)
 	}
+}
+
+// unwrapLocal returns the local image of a wrapped image, except for a
+// [imagex.JSRGBA], which is drawn from its ImageBitmap: unwrapping it would
+// read its pixels back from the bitmap of an image that the browser decoded,
+// on every render.
+func unwrapLocal(im image.Image) image.Image {
+	if _, ok := im.(*imagex.JSRGBA); ok {
+		return im
+	}
+	return imagex.Unwrap(im)
 }
