@@ -313,6 +313,11 @@ func (tx *Text) Init() {
 	})
 
 	tx.FinalUpdater(func() {
+		// A text that has not been styled yet gets its rich text and size
+		// when it is styled and laid out.
+		if tx.Styles.Font.Size.Dots == 0 {
+			return
+		}
 		tx.updateRichText()
 		tx.configTextAlloc(tx.Geom.Size.Alloc.Content)
 	})
