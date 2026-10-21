@@ -457,7 +457,9 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	spos := ed.Geom.Pos.Content.Add(math32.FromPoint(scpos))
 	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
+	ed.Lines.Lock() // required by ViewMarkupLine; never called from renderLines
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
+	ed.Lines.Unlock()
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
 	for si := range tx { // tabs encoded as single chars at start
