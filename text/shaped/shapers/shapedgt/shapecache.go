@@ -102,6 +102,46 @@ func (sh *Shaper) ResetCache() {
 	sh.shapes.reset()
 }
 
+// ForgetTexts removes the cached texts for which forget returns true, given
+// the text and the custom font of its style, as when the fonts of some of
+// their runes have changed, and returns how many it removed.
+func (sh *Shaper) ForgetTexts(forget func(tx rich.Text, customFont rich.FontName) bool) int {
+	return sh.shapes.forget(forget)
+}
+
+// forget removes the entries for which forget returns true (see [Shaper.ForgetTexts]).
+func (sc *shapeCache) forget(forget func(tx rich.Text, customFont rich.FontName) bool) int {
+	removed := 0
+	for h, se := range sc.entries {
+		// The chain of the hash keeps the other entries, in order.
+		var kept, last *shapeEntry
+		for ; se != nil; se = se.next {
+			if forget(se.tx, se.customFont) {
+				removed++
+				continue
+			}
+			if last == nil {
+				kept = se
+			} else {
+				last.next = se
+			}
+			last = se
+		}
+		if last != nil {
+			last.next = nil
+		}
+
+		// A hash without entries is deleted.
+		if kept == nil {
+			delete(sc.entries, h)
+		} else {
+			sc.entries[h] = kept
+		}
+	}
+	sc.n -= removed
+	return removed
+}
+
 // reset empties the cache.
 func (sc *shapeCache) reset() {
 	sc.entries = nil

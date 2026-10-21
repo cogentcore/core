@@ -11,6 +11,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/text/shaped/shapers/shapedjs"
 )
 
 func init() {
@@ -40,16 +41,9 @@ func init() {
 	}))
 
 	// Texts laid out before their web fonts have loaded are measured with
-	// fallback fonts. The text shaper discards those measurements when fonts
-	// finish loading, and all windows are then restyled and laid out again.
-	if document := js.Global().Get("document"); document.Truthy() {
-		if fonts := document.Get("fonts"); fonts.Truthy() {
-			fonts.Call("addEventListener", "loadingdone", js.FuncOf(func(this js.Value, args []js.Value) any {
-				go restyleAll()
-				return nil
-			}))
-		}
-	}
+	// fallback fonts. The text shaper discards those measurements when the
+	// fonts finish loading, and all windows are then restyled and laid out again.
+	shapedjs.FontsChanged = restyleAll
 
 	webInstall = func() {
 		js.Global().Call("appShowInstallPrompt")

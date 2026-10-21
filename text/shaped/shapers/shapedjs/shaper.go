@@ -7,7 +7,6 @@
 package shapedjs
 
 import (
-	"sync/atomic"
 	"syscall/js"
 
 	"cogentcore.org/core/math32"
@@ -24,10 +23,6 @@ var (
 	canvasInited bool
 	canvas       js.Value
 	ctx          js.Value
-
-	// fontsLoaded counts the times that the browser has finished loading
-	// fonts, which changes the measurements of the texts that use them.
-	fontsLoaded atomic.Int32
 )
 
 // initCanvas ensures that the shared text measuring canvas is available.
@@ -40,15 +35,8 @@ func initCanvas() {
 	canvasInited = true
 
 	// Texts measured before their fonts load are measured with fallback
-	// fonts, so shapers discard their cached texts when fonts have loaded.
-	if doc := js.Global().Get("document"); doc.Truthy() {
-		if fonts := doc.Get("fonts"); fonts.Truthy() {
-			fonts.Call("addEventListener", "loadingdone", js.FuncOf(func(this js.Value, args []js.Value) any {
-				fontsLoaded.Add(1)
-				return nil
-			}))
-		}
-	}
+	// fonts, so shapers discard them when fonts have loaded.
+	listenFontLoads()
 }
 
 // Shaper is the html canvas version of text shaping,
@@ -56,9 +44,6 @@ func initCanvas() {
 // the results using the results of measuring the text.
 type Shaper struct {
 	shapedgt.Shaper
-
-	// fontsLoaded is the value of fontsLoaded when the cache was last reset.
-	fontsLoaded int32
 }
 
 // NewShaper returns a new text shaper.
@@ -71,7 +56,11 @@ func NewShaper() shaped.Shaper {
 	// The outputs are measured by the browser, so simple text is not shaped.
 	gs := sh.(*shapedgt.Shaper)
 	gs.SimpleSpans = true
-	return &Shaper{Shaper: *gs}
+	jsh := &Shaper{Shaper: *gs}
+	shapersMu.Lock()
+	shapers = append(shapers, jsh)
+	shapersMu.Unlock()
+	return jsh
 }
 
 // Shape turns given input spans into [Runs] of rendered text,
@@ -82,7 +71,6 @@ func NewShaper() shaped.Shaper {
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
-	sh.checkFonts()
 	return sh.shapeAdjust(tx, tsty, tx.Join())
 }
 
@@ -121,7 +109,6 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 16
 	}
-	sh.checkFonts()
 
 	// The outputs of shaping and wrapping are adjusted to the measurements of the browser.
 	return sh.WrapLinesBoundsCached(tx, defSty, tsty, size, func(outs []shaping.Output) {
@@ -133,16 +120,6 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 			sh.adjustOutput(out, fnt, tx, tsty)
 		}
 	})
-}
-
-// checkFonts discards the measurements of texts and glyphs made before
-// fonts finished loading, which may have been made with fallback fonts.
-func (sh *Shaper) checkFonts() {
-	if n := fontsLoaded.Load(); n != sh.fontsLoaded {
-		sh.fontsLoaded = n
-		sh.ResetCache()
-		theGlyphCache.reset()
-	}
 }
 
 // adjustOutput adjusts the given run metrics based on the html measureText results.

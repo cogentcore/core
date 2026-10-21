@@ -40,11 +40,19 @@ func (gc *glyphCache) init() {
 	gc.fonts = make(map[text.Font]*fontGlyphs)
 }
 
-// reset forgets all measurements, as when fonts have loaded.
-func (gc *glyphCache) reset() {
+// forget forgets the measurements of the fonts for which forget returns
+// true, as when their fonts have loaded, and returns how many fonts it forgot.
+func (gc *glyphCache) forget(forget func(fn *text.Font) bool) int {
 	gc.Lock()
 	defer gc.Unlock()
-	gc.init()
+	n := 0
+	for fn := range gc.fonts {
+		if forget(&fn) {
+			delete(gc.fonts, fn)
+			n++
+		}
+	}
+	return n
 }
 
 // font returns the glyph measurements of the given font, which are only to

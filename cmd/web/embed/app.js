@@ -18,10 +18,30 @@ window.wasm = null;
 let appServiceWorkerRegistration;
 let deferredPrompt = null;
 
+appLoadFonts();
 appWhenLoaded(appInitServiceWorker);
 appWatchForUpdate();
 appWatchForInstallable();
 appInitWebAssembly();
+
+// -----------------------------------------------------------------------------
+// Fonts
+// -----------------------------------------------------------------------------
+
+// appLoadFonts starts loading the regular and italic faces of the fonts of
+// the app (with the Latin runes; the faces have all weights), so that they
+// load while the app loads. The app measures its texts with them, and texts
+// measured before their face has loaded are measured with a fallback font,
+// so the app lays out all of its texts again when the face loads, which made
+// the first page with code or italic text take twice as long.
+function appLoadFonts() {
+  if (!document.fonts) {
+    return;
+  }
+  for (const font of ['16px "Noto Sans"', 'italic 16px "Noto Sans"', '16px "Roboto Mono"', 'italic 16px "Roboto Mono"']) {
+    document.fonts.load(font).catch(() => { });
+  }
+}
 
 // -----------------------------------------------------------------------------
 // Service Worker
