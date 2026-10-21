@@ -116,6 +116,8 @@ func TestGenerateSite(t *testing.T) {
 	assert.Contains(t, bt.HTML, `<pre class="code"><code class="language-go">`)
 	assert.NotContains(t, bt.HTML, "<textarea") // code only, without editors or results
 	assert.Contains(t, pages[""].HTML, "<tr>")
+	// The alt text of a figure is the plain text of its markdown caption.
+	assert.Contains(t, pages["func-button"].HTML, `alt="This is the first figure. It should be clear exactly what is going on here."`)
 	assert.Empty(t, pages[""].TOC)
 
 	assert.Equal(t, []string{"Concepts", "Widgets", "Other"}, []string{site.Categories[0].Name, site.Categories[1].Name, site.Categories[2].Name})

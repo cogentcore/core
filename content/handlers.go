@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
+	"cogentcore.org/core/text/htmltext"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
@@ -262,13 +263,32 @@ func (ct *Content) widgetHandlerFigure(w core.Widget, id string) {
 			s.Align.Self = styles.Center
 		}
 	})
+	if alt == "" {
+		return
+	}
+	// The alt text is markdown, rendered as the caption of a figure. The
+	// tooltip (which htmlcore sets to the alt text, and which is also the
+	// alt attribute of the pre-rendered HTML) is its plain text, with the
+	// wikilinks (citations, page links) replaced by their text as in the
+	// caption.
+	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
+	wb.SetTooltip(htmlPlainText(altf))
 	if !fig {
 		return
 	}
-	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
 	lbl := ct.current.Page.SpecialLabel(id)
 	lbf := "<b>" + lbl + ":</b> " + string(altf) + " <br><br> "
 	ct.moveToBlockFrame(w, id, lbf, false)
+}
+
+// htmlPlainText returns the text of the given HTML, without its markup, with
+// whitespace collapsed to single spaces.
+func htmlPlainText(htm []byte) string {
+	tx, err := htmltext.HTMLToRich(htm, rich.NewStyle(), nil)
+	if err != nil {
+		return strings.TrimSpace(string(htm))
+	}
+	return strings.Join(strings.Fields(string(tx.Join())), " ")
 }
 
 // citeWikilink processes citation links, which start with @
