@@ -435,6 +435,14 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	return srcp
 }
 
+// CharStartPos returns the starting (top left) render coords for the
+// given source text position, in the same scene-based coordinates the
+// editor uses to render text (see [Editor.charStartPos]). Popups such
+// as the completion popup anchor themselves relative to this position.
+func (ed *Base) CharStartPos(pos textpos.Pos) math32.Vector2 {
+	return ed.charStartPos(pos)
+}
+
 // charStartPos returns the starting (top left) render coords for the
 // given source text position.
 func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
