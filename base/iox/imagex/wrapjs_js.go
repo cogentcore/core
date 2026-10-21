@@ -8,6 +8,7 @@ package imagex
 
 import (
 	"image"
+	"image/color"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
@@ -136,17 +137,33 @@ func (im *JSRGBA) Bounds() image.Rectangle {
 
 // Update must be called any time the image has been updated!
 func (im *JSRGBA) Update() {
+	im.ensureRGBA()
 	im.JS.SetRGBA(im.RGBA)
 }
 
-// note: per https://github.com/whatwg/html/issues/4785 there is no way
-// to actually get the data back from the ImageBitmap :(
-
 // Underlying returns the underlying image data as a local image.RGBA.
-// Note that this may not be possible and a nil will be returned, because
-// there is no way to get the image data back from an ImageBitmap at this point.
+// For an image decoded by the browser, its pixels are read back from
+// its ImageBitmap the first time they are needed.
 func (im *JSRGBA) Underlying() image.Image {
+	im.ensureRGBA()
 	return im.RGBA
+}
+
+// At returns the color of the pixel at the given position,
+// reading the pixels back from the ImageBitmap if needed.
+func (im *JSRGBA) At(x, y int) color.Color {
+	im.ensureRGBA()
+	return im.RGBA.At(x, y)
+}
+
+// ensureRGBA makes sure that the pixels of the image are available in its
+// RGBA, reading them back from its ImageBitmap if it has none, as for an
+// image that the browser decoded.
+func (im *JSRGBA) ensureRGBA() {
+	if im.RGBA != nil || im.JS.Bitmap.IsUndefined() || im.JS.Bitmap.IsNull() {
+		return
+	}
+	im.RGBA = readBitmapPixels(im.JS.Bitmap, im.JS.Bounds)
 }
 
 // JSImageData has JavaScript pointers to the image bytes and an ImageBitmap

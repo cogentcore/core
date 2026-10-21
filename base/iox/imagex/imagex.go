@@ -97,8 +97,10 @@ func OpenFS(fsys fs.FS, filename string) (image.Image, Formats, error) {
 // The format is inferred automatically,
 // and is returned using the Formats enum.
 // png, jpeg, gif, tiff, bmp, and webp are supported.
+// On the web, the browser decodes the formats that it supports,
+// which is much faster, and the result is a [JSRGBA].
 func Read(r io.Reader) (image.Image, Formats, error) {
-	im, ext, err := image.Decode(r)
+	im, ext, err := decode(r)
 	if err != nil {
 		return im, None, err
 	}
