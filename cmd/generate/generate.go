@@ -11,6 +11,7 @@ package generate
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
 	"text/template"
 
@@ -115,6 +116,16 @@ func Generate(c *config.Config) error { //types:add
 	err = Icons(c)
 	if err != nil {
 		return fmt.Errorf("error running icongen: %w", err)
+	}
+	// the code blocks of content apps, after the types they may use
+	for _, pkg := range pkgs {
+		if pkg.Name != "main" || len(pkg.GoFiles) == 0 {
+			continue
+		}
+		err = ContentCode(filepath.Dir(pkg.GoFiles[0]))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

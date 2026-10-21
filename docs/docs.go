@@ -26,8 +26,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-//go:generate go run cogentcore.org/core/content/cmd/contentcode
-
 //go:embed content
 var econtent embed.FS
 

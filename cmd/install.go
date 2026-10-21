@@ -10,7 +10,9 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/generate"
 	"cogentcore.org/core/cmd/mobile"
 )
 
@@ -55,6 +57,9 @@ func Install(c *config.Config) error { //types:add
 			}
 			return exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
 		default:
+			if err := generate.ContentCode("."); err != nil {
+				logx.PrintlnWarn("warning:", err)
+			}
 			return exec.Major().SetEnv("GOOS", p.OS).SetEnv("GOARCH", runtime.GOARCH).Run("go", "install")
 		}
 	}

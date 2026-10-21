@@ -18,7 +18,8 @@ import (
 )
 
 // CodeFunc is a Go code block compiled into the app at build time
-// (see cogentcore.org/core/content/cmd/contentcode). It runs the code
+// (see cogentcore.org/core/content/contentcode, which the core tool
+// runs in core build and core generate). It runs the code
 // with the given parent widget, which the code knows as b, and writes
 // what the code prints to out.
 type CodeFunc func(b *core.Frame, out io.Writer)
@@ -46,7 +47,7 @@ func AddCompiledCode(code map[string]CodeFunc) {
 // CodeKey returns the key of the given code block source in [CompiledCode]:
 // a hash of the source without any whitespace, so that indentation (tabs
 // or spaces) and blank lines do not matter. The generator in
-// cogentcore.org/core/content/cmd/contentcode computes the same key.
+// cogentcore.org/core/content/contentcode computes the same key.
 func CodeKey(src string) string {
 	s := strings.Map(func(r rune) rune {
 		if unicode.IsSpace(r) {
