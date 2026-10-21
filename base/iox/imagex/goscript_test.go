@@ -14,8 +14,8 @@ import (
 
 func TestGoScript(t *testing.T) { goscript.Test(t) }
 
-// TestGoScriptBrowser runs the tests of decoding images with the browser
-// in Chrome, which has createImageBitmap.
+// TestGoScriptBrowser runs the tests of decoding, cropping and resizing
+// images with the browser in Chrome, which has createImageBitmap.
 func TestGoScriptBrowser(t *testing.T) {
-	goscript.Test(t, goscript.Options{Browser: true, BrowserChannel: "chrome", Run: "^TestDecodeBrowser$"})
+	goscript.Test(t, goscript.Options{Browser: true, BrowserChannel: "chrome", Run: "^(TestDecodeBrowser|TestCropResizeBrowser)$"})
 }

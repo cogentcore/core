@@ -9,6 +9,7 @@ package imagex
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
@@ -66,31 +67,46 @@ func Resize(src image.Image, size image.Point) image.Image {
 	default:
 		im = NewJSRGBA(AsRGBA(src), options)
 	}
-	im.JS.Bounds = image.Rectangle{Max: size}
+	im.bitmapOnly(size)
 	return im
 }
 
 // Crop returns a cropped region of the source image (which can be
 // [Wrapped]), returning a [WrapJS] image handle on web and using web-native
-// optimized code.
+// optimized code. The rectangle is relative to the origin of the source
+// bounds, and the result has its origin at (0, 0); any part of the
+// rectangle outside of the source is transparent.
 func Crop(src image.Image, rect image.Rectangle) image.Image {
-	im := &JSRGBA{}
-	args := []any{rect.Min.X, rect.Min.Y, rect.Dx(), rect.Dy()}
-	switch x := src.(type) {
-	case *JSRGBA:
+	// An image decoded or resized by the browser only has its bitmap,
+	// which the browser crops.
+	if x, ok := src.(*JSRGBA); ok && x.RGBA == nil {
+		im := &JSRGBA{}
 		*im = *x
+		args := []any{rect.Min.X, rect.Min.Y, rect.Dx(), rect.Dy()}
 		im.JS.Bitmap = logBitmap(createImageBitmap(im.JS.Bitmap, nil, args...))
+		im.bitmapOnly(rect.Size())
 		return im
-	case *image.RGBA:
-		im = NewJSRGBA(x, nil)
-	case *image.NRGBA:
-		im = NewJSRGBA(x, nil)
-	default:
-		im = NewJSRGBA(AsRGBA(src), nil)
 	}
-	im.JS.Bitmap = logBitmap(createImageBitmap(im.JS.Bitmap, nil, args...))
-	im.JS.Bounds = image.Rectangle{Max: rect.Size()}
-	return im
+	// Local pixels are cropped in Go, which copies only the cropped region
+	// to JavaScript, and keeps the pixels and the ImageData of the result
+	// consistent with its bitmap.
+	var local image.Image = src
+	if x, ok := src.(*JSRGBA); ok {
+		local = x.RGBA
+	}
+	dst := image.NewRGBA(image.Rectangle{Max: rect.Size()})
+	draw.Draw(dst, dst.Bounds(), local, local.Bounds().Min.Add(rect.Min), draw.Src)
+	return NewJSRGBA(dst, nil)
+}
+
+// bitmapOnly sets the image to have the given size after its bitmap has
+// been resized or cropped by the browser: its pixels and ImageData have the
+// size of the source, so they are cleared, and its pixels are read back
+// from the new bitmap if they are needed.
+func (im *JSRGBA) bitmapOnly(size image.Point) {
+	im.RGBA = nil
+	im.JS.Data = js.Undefined()
+	im.JS.Bounds = image.Rectangle{Max: size}
 }
 
 // JSRGBA is a wrapper around [image.RGBA] that adds [JSImageData] pointers.
