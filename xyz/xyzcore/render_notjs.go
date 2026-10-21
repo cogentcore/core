@@ -57,10 +57,14 @@ func (sw *Scene) RenderSource(op draw.Op) composer.Source {
 	defer sw.XYZ.Unlock()
 	rt := sw.XYZ.Frame.(*gpu.RenderTexture)
 	tex := rt.CurrentFrame()
-	bb, sbb, empty := sw.DirectRenderDrawBBoxes(tex.Format.Bounds())
-	if empty {
+	// The frame has the size of the whole scene, of which only the visible
+	// part, Geom.ContentBBox, is drawn, when it is scrolled out of its parent.
+	visible := sw.Geom.ContentBBox
+	sbb := visible.Sub(sw.frameBBox().Min).Intersect(tex.Format.Bounds())
+	if sbb.Empty() {
 		return nil
 	}
+	bb := image.Rectangle{Max: sbb.Size()}.Add(visible.Min.Add(sw.Scene.SceneGeom.Pos))
 	return &xyzSource{destBBox: bb, srcBBox: sbb, texture: tex, sw: sw}
 }
 

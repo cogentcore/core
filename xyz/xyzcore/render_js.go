@@ -32,13 +32,16 @@ type xyzSource struct {
 
 func (xs *xyzSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
-	elem := xs.sw.canvas(cw)
-	cw.SetElementGeom(elem, xs.sw.Geom.ContentBBox.Min, xs.sw.Geom.ContentBBox.Size())
+	sw := xs.sw
+	sw.setCanvasGeom(cw, sw.canvas(cw), sw.XYZ.Frame.Render().Format.Size)
 }
 
 // RenderSource returns the [composer.Source] for direct rendering.
+// It is nil while no part of the scene is visible, including when it is
+// scrolled out of its parent, so that the composer removes the canvas from
+// the document and nothing is drawn over the content around it.
 func (sw *Scene) RenderSource(op draw.Op) composer.Source {
-	if sw.XYZ.Frame == nil || !sw.IsVisible() {
+	if sw.XYZ.Frame == nil || !sw.IsVisible() || sw.Geom.ContentBBox.Empty() {
 		return nil
 	}
 	return &xyzSource{sw: sw}
@@ -58,6 +61,17 @@ func (sw *Scene) canvas(cw *composer.ComposerWeb) js.Value {
 	return elem
 }
 
+// setCanvasGeom places the canvas of the scene, of the given size of its
+// render frame, at the whole frame of the scene, and clips it to the visible
+// part of the scene, so that the view is clipped instead of shrunk while the
+// scene is partly scrolled out of its parent.
+func (sw *Scene) setCanvasGeom(cw *composer.ComposerWeb, elem js.Value, sz image.Point) {
+	off := sw.Scene.SceneGeom.Pos
+	frame := image.Rectangle{Max: sz}.Add(sw.frameBBox().Min.Add(off))
+	cw.SetElementGeom(elem, frame.Min, sz)
+	cw.SetElementClip(elem, frame, sw.Geom.ContentBBox.Add(off))
+}
+
 // configFrame configures the render frame in a platform-specific manner.
 // The GPU device, surface and Phong renderer are made once, the first time.
 // After that, a new size only reconfigures the surface and remakes its
@@ -70,7 +84,7 @@ func (sw *Scene) configFrame(sz image.Point) {
 	// textures that the surface gives, so it is set first.
 	cw := core.TheApp.Window(0).Composer().(*composer.ComposerWeb)
 	elem := sw.canvas(cw)
-	cw.SetElementGeom(elem, sw.Geom.ContentBBox.Min, sz)
+	sw.setCanvasGeom(cw, elem, sz)
 
 	sc := sw.XYZ
 	if sc.Frame != nil {

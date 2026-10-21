@@ -179,7 +179,7 @@ func (sw *Scene) handleSelectEvents() {
 
 func (sw *Scene) handleSelectEventsImpl(e events.Event) {
 	xy := sw.XYZ
-	pos := sw.Geom.ContentBBox.Min
+	pos := sw.frameBBox().Min
 	e.SetLocalOff(e.LocalOff().Add(pos))
 	ns := xyz.NodesUnderPoint(xy, e.Pos())
 	nsel := len(ns)
@@ -220,7 +220,7 @@ func (sw *Scene) handleSelectEventsImpl(e events.Event) {
 func (sw *Scene) handleSlideEvents() {
 	sw.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
-		pos := sw.Geom.ContentBBox.Min
+		pos := sw.frameBBox().Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
 		xy := sw.XYZ
 		if sw.CurrentManipPoint == nil || sw.CurrentSelected == nil {

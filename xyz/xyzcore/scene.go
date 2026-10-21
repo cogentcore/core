@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
@@ -75,7 +76,7 @@ func (sw *Scene) Init() {
 	})
 
 	sw.On(events.Scroll, func(e events.Event) {
-		pos := sw.Geom.ContentBBox.Min
+		pos := sw.frameBBox().Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
 		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
 		sw.NeedsRender()
@@ -128,11 +129,28 @@ func (sw *Scene) Render() {
 	sw.XYZ.Render()
 }
 
+// frameBBox returns the bounding box of the whole render frame of the
+// scene, in the coordinates of the core Scene. Unlike Geom.ContentBBox, it
+// is not clipped by the parents of the widget, so that the size of the frame
+// stays the same while the widget is partly scrolled out of its parent, and
+// only the visible part of it, Geom.ContentBBox, is shown.
+func (sw *Scene) frameBBox() image.Rectangle {
+	return math32.RectFromPosSizeMax(sw.Geom.Pos.Content, sw.Geom.Size.Actual.Content)
+}
+
 func (sw *Scene) ConfigXYZ() {
 	if !sw.IsVisible() {
 		return
 	}
-	sz := sw.Geom.ContentBBox.Size()
+	// The visible part of the scene is within its frame, except during a
+	// layout, as when a Toolbar renders the scene from its SizeUp, where the
+	// size of the scene is its minimum size until it is allocated its space:
+	// the frame then keeps its size until the layout is done.
+	fb := sw.frameBBox()
+	if !sw.Geom.ContentBBox.In(fb) {
+		return
+	}
+	sz := fb.Size()
 	if sz.X <= 0 || sz.Y <= 0 {
 		sz = image.Point{10, 10}
 	}

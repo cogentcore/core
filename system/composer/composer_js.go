@@ -209,3 +209,26 @@ func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point) {
 	style.Set("width", fmt.Sprintf("%gpx", float32(size.X)/cw.DPR))
 	style.Set("height", fmt.Sprintf("%gpx", float32(size.Y)/cw.DPR))
 }
+
+// SetElementClip clips the given element, whose geometry is the given
+// rectangle (set with [ComposerWeb.SetElementGeom]), to the given visible
+// region in the same coordinates. An element whose widget is partly
+// scrolled out of its parent then shows only its visible part, instead of
+// drawing over the content around that parent.
+func (cw *ComposerWeb) SetElementClip(elem js.Value, rect, visible image.Rectangle) {
+	// The clip is an inset from each side of the element, in CSS pixels.
+	style := elem.Get("style")
+	visible = visible.Intersect(rect)
+	if visible == rect {
+		style.Set("clipPath", "")
+		return
+	}
+	if visible.Empty() {
+		style.Set("clipPath", "inset(50%)")
+		return
+	}
+	px := func(v int) string { return fmt.Sprintf("%gpx", float32(v)/cw.DPR) }
+	top, right := px(visible.Min.Y-rect.Min.Y), px(rect.Max.X-visible.Max.X)
+	bottom, left := px(rect.Max.Y-visible.Max.Y), px(visible.Min.X-rect.Min.X)
+	style.Set("clipPath", "inset("+top+" "+right+" "+bottom+" "+left+")")
+}
