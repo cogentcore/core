@@ -47,3 +47,38 @@ func TestTextLink(t *testing.T) {
 	NewText(b).SetText(`Hello, <a href="https://example.com">world</a>!`)
 	b.AssertRender(t, "text/link")
 }
+
+// A restyle that changes neither the text nor its style keeps the rich
+// text, and one that changes either makes it again.
+func TestTextRichTextSource(t *testing.T) {
+	b := NewBody()
+	tx := NewText(b).SetText(`Some <b>bold</b> and <a href="https://example.com">linked</a> text`)
+	bold := false
+	tx.Styler(func(s *styles.Style) {
+		if bold {
+			s.Font.Weight = rich.Bold
+		}
+	})
+	tx.Style()
+	first := tx.richText
+	if len(first) < 3 || len(tx.Links) != 1 {
+		t.Fatalf("rich text %v with links %v", first, tx.Links)
+	}
+	tx.Style()
+	if &tx.richText[0][0] != &first[0][0] {
+		t.Error("restyle made the rich text again")
+	}
+
+	bold = true
+	tx.Style()
+	if &tx.richText[0][0] == &first[0][0] || tx.richText.String() == first.String() {
+		t.Error("style change kept the rich text")
+	}
+	styled := tx.richText
+
+	tx.SetText("Other <i>text</i>")
+	tx.Style()
+	if &tx.richText[0][0] == &styled[0][0] || len(tx.Links) != 0 {
+		t.Error("text change kept the rich text")
+	}
+}

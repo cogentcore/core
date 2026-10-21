@@ -50,6 +50,11 @@ type Text struct {
 	// This is what is actually rendered.
 	richText rich.Text
 
+	// richSource is the source that richText was made from, so that
+	// a restyle that changes neither the text nor its style does not
+	// parse the HTML again.
+	richSource richTextSource
+
 	// SelectRange is the selected range, in terms of rune indexes
 	// into the richText.Join() runes.
 	selectRange textpos.Range
@@ -326,12 +331,30 @@ func (tx *Text) Init() {
 // updateRichText gets the richtext from Text, using HTML parsing.
 func (tx *Text) updateRichText() {
 	sty, tsty := tx.Styles.NewRichText()
-	if tsty.WhiteSpace.KeepWhiteSpace() {
+	src := richTextSource{text: tx.Text, pre: tsty.WhiteSpace.KeepWhiteSpace(), style: sty.ToRunes()}
+	if tx.richText != nil && src.equal(&tx.richSource) {
+		return
+	}
+	tx.richSource = src
+	if src.pre {
 		tx.richText, _ = htmltext.HTMLPreToRich([]byte(tx.Text), sty, nil)
 	} else {
 		tx.richText, _ = htmltext.HTMLToRich([]byte(tx.Text), sty, nil)
 	}
 	tx.Links = tx.richText.GetLinks()
+}
+
+// richTextSource is the source of the rich text of a [Text]: its text,
+// whether its white space is kept, and its encoded rich text style.
+type richTextSource struct {
+	text  string
+	pre   bool
+	style []rune
+}
+
+// equal returns whether the sources are the same.
+func (rs *richTextSource) equal(o *richTextSource) bool {
+	return rs.text == o.text && rs.pre == o.pre && slices.Equal(rs.style, o.style)
 }
 
 // findLink finds the text link at the given scene-local position. If it
