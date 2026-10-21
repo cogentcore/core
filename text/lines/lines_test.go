@@ -22,7 +22,7 @@ func TestEdit(t *testing.T) {
 	lns := NewLines()
 	lns.Defaults()
 	lns.SetText([]byte(src))
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	st := textpos.Pos{1, 4}
 	ins := []rune("var ")
@@ -35,19 +35,19 @@ func TestEdit(t *testing.T) {
         return nil
     }
 `
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	assert.Equal(t, st, tbe.Region.Start)
 	ed := st
 	ed.Char += 4
 	assert.Equal(t, ed, tbe.Region.End)
 	assert.Equal(t, ins, tbe.Text[0])
 	lns.Undo()
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 	lns.Redo()
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	lns.NewUndoGroup()
 	lns.DeleteText(tbe.Region.Start, tbe.Region.End)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	ins = []rune(` // comment
     // next line`)
@@ -63,7 +63,7 @@ func TestEdit(t *testing.T) {
         return nil
     }
 `
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	assert.Equal(t, st, tbe.Region.Start)
 	ed = st
 	ed.Line = 3
@@ -72,12 +72,12 @@ func TestEdit(t *testing.T) {
 	assert.Equal(t, ins[:11], tbe.Text[0])
 	assert.Equal(t, ins[12:], tbe.Text[1])
 	lns.Undo()
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 	lns.Redo()
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	lns.NewUndoGroup()
 	lns.DeleteText(tbe.Region.Start, tbe.Region.End)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	// rect insert
 
@@ -94,7 +94,7 @@ func TestEdit(t *testing.T) {
     ghi}
 `
 
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	st.Line = 2
 	st.Char = 4
 	assert.Equal(t, st, tbe.Region.Start)
@@ -106,12 +106,12 @@ func TestEdit(t *testing.T) {
 	// assert.Equal(t, ins[12:], tbe.Text[1])
 	lns.Undo()
 	// fmt.Println(lns.String())
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 	lns.Redo()
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	lns.NewUndoGroup()
 	lns.DeleteTextRect(tbe.Region.Start, tbe.Region.End)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	// at end
 	lns.NewUndoGroup()
@@ -126,7 +126,7 @@ func TestEdit(t *testing.T) {
 `
 	// fmt.Println(lns.String())
 
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	st.Line = 2
 	st.Char = 19
 	assert.Equal(t, st, tbe.Region.Start)
@@ -144,10 +144,25 @@ func TestEdit(t *testing.T) {
 `
 
 	// fmt.Println(lns.String())
-	assert.Equal(t, srcsp+"\n", lns.String())
+	assert.Equal(t, srcsp, lns.String())
 	lns.Redo()
-	assert.Equal(t, edt+"\n", lns.String())
+	assert.Equal(t, edt, lns.String())
 	lns.NewUndoGroup()
 	lns.DeleteTextRect(tbe.Region.Start, tbe.Region.End)
-	assert.Equal(t, srcsp+"\n", lns.String())
+	assert.Equal(t, srcsp, lns.String())
+}
+
+// TestStringNewlines checks that text round-trips through Lines with
+// exactly one line feed at the end.
+func TestStringNewlines(t *testing.T) {
+	for src, want := range map[string]string{
+		"a\nb\n":   "a\nb\n",
+		"a\n\nb\n": "a\n\nb\n",
+		"a\nb":     "a\nb\n",
+		"a\nb\n\n": "a\nb\n\n",
+	} {
+		lns := NewLines()
+		lns.SetText([]byte(src))
+		assert.Equal(t, want, lns.String(), "source: %q", src)
+	}
 }

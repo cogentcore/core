@@ -239,27 +239,18 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 }
 
 // bytes returns the current text lines as a slice of bytes, up to
-// given number of lines if maxLines > 0.
-// Adds an additional line feed at the end, per POSIX standards.
+// given number of lines if maxLines > 0. Every line ends with a line
+// feed, including the last, per POSIX standards:
+// https://stackoverflow.com/questions/729692/why-should-text-files-end-with-a-newline
 func (ls *Lines) bytes(maxLines int) []byte {
 	nl := ls.numLines()
 	if maxLines > 0 {
 		nl = min(nl, maxLines)
 	}
-	nb := 80 * nl
-	b := make([]byte, 0, nb)
-	lastEmpty := false
+	b := make([]byte, 0, 80*nl)
 	for ln := range nl {
-		ll := []byte(string(ls.lines[ln]))
-		if len(ll) == 0 {
-			lastEmpty = true
-		}
-		b = append(b, ll...)
-		b = append(b, []byte("\n")...)
-	}
-	// https://stackoverflow.com/questions/729692/why-should-text-files-end-with-a-newline
-	if !lastEmpty {
-		b = append(b, []byte("\n")...)
+		b = append(b, string(ls.lines[ln])...)
+		b = append(b, '\n')
 	}
 	return b
 }

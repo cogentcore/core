@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
@@ -1137,7 +1138,7 @@ func (tf *TextField) completeText(s string) {
 	txt := string(tf.editText) // Reminder: do NOT call tf.Text() in an active editing context!
 	c := tf.complete.GetCompletion(s)
 	ed := tf.complete.EditFunc(tf.complete.Context, txt, tf.cursorPos, c, tf.complete.Seed)
-	st := tf.cursorPos - len(tf.complete.Seed)
+	st := tf.cursorPos - utf8.RuneCountInString(tf.complete.Seed)
 	tf.cursorPos = st
 	tf.cursorDelete(ed.ForwardDelete)
 	tf.insertAtCursor(ed.NewText)

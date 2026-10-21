@@ -204,7 +204,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		ed.cancelCorrect()
 		ed.iSearchCancel()
 		ed.qReplaceCancel()
-		ed.lastAutoInsert = 0
+		ed.autoInserted = nil
 	}
 
 	if kf != keymap.Recenter { // always start at centering
@@ -553,14 +553,40 @@ func (ed *Editor) keyInputInsertBracket(kt events.Event) {
 		} else {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + string(ket)))
 			pos.Char++
+			if ed.autoInsertLine != pos.Line {
+				ed.autoInserted = nil
+			}
+			ed.autoInserted = append(ed.autoInserted, ket)
+			ed.autoInsertLine = pos.Line
 		}
-		ed.lastAutoInsert = ket
 	} else {
 		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 		pos.Char++
 	}
 	ed.SetCursorShow(pos)
 	ed.setCursorColumn(ed.CursorPos)
+}
+
+// typeOverAutoInserted returns whether the given typed rune is the most
+// recently auto-inserted closing bracket that is still pending, right
+// after the cursor, in which case it is removed from the pending stack
+// and should be typed over instead of inserted.
+func (ed *Editor) typeOverAutoInserted(r rune) bool {
+	n := len(ed.autoInserted)
+	if n == 0 || ed.autoInserted[n-1] != r {
+		return false
+	}
+	pos := ed.CursorPos
+	if pos.Line != ed.autoInsertLine {
+		ed.autoInserted = nil
+		return false
+	}
+	ln := ed.Lines.Line(pos.Line)
+	if pos.Char >= len(ln) || ln[pos.Char] != r {
+		return false
+	}
+	ed.autoInserted = ed.autoInserted[:n-1]
+	return true
 }
 
 // keyInputInsertRune handles the insertion of a typed character
@@ -581,18 +607,16 @@ func (ed *Editor) keyInputInsertRune(kt events.Event) {
 		ed.keyInputInsertBracket(kt)
 	case kt.KeyRune() == '}' && ed.Lines.Settings.AutoIndent && ed.CursorPos.Char == ed.Lines.LineLen(ed.CursorPos.Line):
 		ed.CancelComplete()
-		ed.lastAutoInsert = 0
+		ed.autoInserted = nil
 		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 		tbe, _, cpos := ed.Lines.AutoIndent(ed.CursorPos.Line)
 		if tbe != nil {
 			ed.SetCursorShow(textpos.Pos{Line: tbe.Region.End.Line, Char: cpos})
 		}
-	case ed.lastAutoInsert == kt.KeyRune(): // if we type what we just inserted, just move past
+	case ed.typeOverAutoInserted(kt.KeyRune()): // just move past what we inserted
 		ed.CursorPos.Char++
 		ed.SetCursorShow(ed.CursorPos)
-		ed.lastAutoInsert = 0
 	default:
-		ed.lastAutoInsert = 0
 		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 		if kt.KeyRune() == ' ' {
 			ed.CancelComplete()

@@ -182,9 +182,16 @@ type Base struct { //core:embedder
 	// targetSet indicates that the CursorTarget is set
 	targetSet bool
 
-	lastRecenter   int
-	lastAutoInsert rune
-	lastFilename   string
+	lastRecenter int
+
+	// autoInserted is the stack of closing brackets that were
+	// auto-inserted after the cursor on line autoInsertLine, which are
+	// typed over when typed right before them, so that typing the
+	// closing bracket does not duplicate it.
+	autoInserted   []rune
+	autoInsertLine int
+
+	lastFilename string
 }
 
 func (ed *Base) WidgetValue() any { return ed.Lines.Text() }

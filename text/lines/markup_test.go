@@ -21,7 +21,7 @@ func TestMarkup(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.go", 40, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	mu0 := `[monospace bold fill-color]: "func"
 [monospace]: " "
@@ -65,7 +65,7 @@ func TestLineWrap(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	tmu := []string{`[monospace]: "The "
 [monospace fill-color]: "[rich.Text]"
@@ -122,7 +122,7 @@ func TestMarkupSpaces(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.go", 40, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	mu0 := `[monospace]: "Name"
 [monospace]: "           "
@@ -139,7 +139,7 @@ func TestLongLineWrap(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	tmu := []string{`[monospace]: "The "
 [monospace fill-color]: "[rich.Text]"
@@ -189,7 +189,7 @@ func TestLineWrapSVG(t *testing.T) {
 
 	lns, vid := NewLinesFromBytes("dummy.svg", 44, []byte(src))
 	vw := lns.view(vid)
-	assert.Equal(t, src+"\n", lns.String())
+	assert.Equal(t, src, lns.String())
 
 	tmu := []string{`[monospace fill-color]: "<svg"
 [monospace]: " "

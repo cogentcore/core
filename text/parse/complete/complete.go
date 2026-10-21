@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/icons"
@@ -223,24 +224,17 @@ func SeedAfter(text string, f func(r rune) bool) string {
 	return string(runes[seedStart:])
 }
 
-// EditWord replaces the completion seed and any text up to the next whitespace with completion
+// EditWord replaces the completion seed and any text up to the next whitespace with completion.
+// The cursorPos is a rune position, and the ForwardDelete runes include the seed.
 func EditWord(text string, cursorPos int, completion string, seed string) (ed Edit) {
-	s2 := string(text[cursorPos:])
-
-	fd := 0 // number of characters past seed in word to be deleted (forward delete)
-	r := rune(0)
-	if len(s2) > 0 {
-		for fd, r = range s2 {
-			if unicode.IsSpace(r) {
-				break
-			}
-		}
-	}
-	if fd == len(s2)-1 { // last word case
-		fd += 1
+	rn := []rune(text)
+	s2 := rn[min(cursorPos, len(rn)):]
+	fd := 0 // number of runes past seed in word to be deleted (forward delete)
+	for fd < len(s2) && !unicode.IsSpace(s2[fd]) {
+		fd++
 	}
 	ed.NewText = completion
-	ed.ForwardDelete = fd + len(seed)
+	ed.ForwardDelete = fd + utf8.RuneCountInString(seed)
 	ed.CursorAdjust = 0
 	return ed
 }

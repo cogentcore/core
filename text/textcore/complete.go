@@ -7,6 +7,7 @@ package textcore
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -79,11 +80,12 @@ func (ed *Editor) completeText(s string) {
 		ed.Lines.DeleteText(pos, delEn)
 	}
 	// now the normal completion insertion
+	// note: positions are in runes, not bytes
 	st = pos
-	st.Char -= len(ed.Complete.Seed)
+	st.Char -= utf8.RuneCountInString(ed.Complete.Seed)
 	ed.Lines.ReplaceText(st, pos, st, ced.NewText, lines.ReplaceNoMatchCase)
 	ep := st
-	ep.Char += len(ced.NewText) + ced.CursorAdjust
+	ep.Char += utf8.RuneCountInString(ced.NewText) + ced.CursorAdjust
 	ed.SetCursorShow(ep)
 }
 
