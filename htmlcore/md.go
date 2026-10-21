@@ -38,9 +38,49 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 	htm = bytes.ReplaceAll(htm, []byte("<p></div><!-- dummy --></p>"), []byte("</div>"))
 	// Every match of divRegex ends with this, and scanning for the regexp is slow.
 	if bytes.Contains(htm, []byte("><div></p>")) {
-		htm = divRegex.ReplaceAll(htm, []byte("<div${1}>"))
+		htm = replaceDivs(htm)
 	}
 	return htm
+}
+
+// replaceDivs returns divRegex.ReplaceAll(htm, []byte("<div${1}>")): each
+// leftmost "<p" followed on its line by "><div></p>" up to the first one
+// becomes "<div" with the text between them. The regexp backtracks over the
+// lines of all of the HTML, which is slow under JavaScript.
+func replaceDivs(htm []byte) []byte {
+	const open, end = "<p", "><div></p>"
+	var out []byte
+	last, i := 0, 0
+	for {
+		// The next "<p" starts a match if its line has the end after it.
+		p := bytes.Index(htm[i:], []byte(open))
+		if p < 0 {
+			break
+		}
+		p += i
+		from := p + len(open)
+		line := htm[from:]
+		if nl := bytes.IndexByte(line, '\n'); nl >= 0 {
+			line = line[:nl]
+		}
+		e := bytes.Index(line, []byte(end))
+		if e < 0 {
+			i = from
+			continue
+		}
+
+		// The match is replaced by "<div" and the text between.
+		out = append(out, htm[last:p]...)
+		out = append(out, "<div"...)
+		out = append(out, line[:e]...)
+		out = append(out, '>')
+		last = from + e + len(end)
+		i = last
+	}
+	if out == nil {
+		return htm
+	}
+	return append(out, htm[last:]...)
 }
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
