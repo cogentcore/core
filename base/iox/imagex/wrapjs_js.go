@@ -156,6 +156,48 @@ func (im *JSRGBA) At(x, y int) color.Color {
 	return im.RGBA.At(x, y)
 }
 
+// The other methods of image.RGBA that use its pixels are also
+// overridden, so that they read the pixels back first: the draw package
+// uses RGBA64At, for example.
+
+func (im *JSRGBA) RGBAAt(x, y int) color.RGBA {
+	im.ensureRGBA()
+	return im.RGBA.RGBAAt(x, y)
+}
+
+func (im *JSRGBA) RGBA64At(x, y int) color.RGBA64 {
+	im.ensureRGBA()
+	return im.RGBA.RGBA64At(x, y)
+}
+
+func (im *JSRGBA) Opaque() bool {
+	im.ensureRGBA()
+	return im.RGBA.Opaque()
+}
+
+func (im *JSRGBA) SubImage(r image.Rectangle) image.Image {
+	im.ensureRGBA()
+	return im.RGBA.SubImage(r)
+}
+
+// Set, SetRGBA and SetRGBA64 change the pixels: [JSRGBA.Update] must be
+// called after them.
+
+func (im *JSRGBA) Set(x, y int, c color.Color) {
+	im.ensureRGBA()
+	im.RGBA.Set(x, y, c)
+}
+
+func (im *JSRGBA) SetRGBA(x, y int, c color.RGBA) {
+	im.ensureRGBA()
+	im.RGBA.SetRGBA(x, y, c)
+}
+
+func (im *JSRGBA) SetRGBA64(x, y int, c color.RGBA64) {
+	im.ensureRGBA()
+	im.RGBA.SetRGBA64(x, y, c)
+}
+
 // ensureRGBA makes sure that the pixels of the image are available in its
 // RGBA, reading them back from its ImageBitmap if it has none, as for an
 // image that the browser decoded.
