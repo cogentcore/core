@@ -58,7 +58,7 @@ func Resize(src image.Image, size image.Point) image.Image {
 	switch x := src.(type) {
 	case *JSRGBA:
 		*im = *x
-		im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, options)
+		im.JS.Bitmap = logBitmap(createImageBitmap(im.JS.Bitmap, options))
 	case *image.RGBA:
 		im = NewJSRGBA(x, options)
 	case *image.NRGBA:
@@ -79,7 +79,7 @@ func Crop(src image.Image, rect image.Rectangle) image.Image {
 	switch x := src.(type) {
 	case *JSRGBA:
 		*im = *x
-		im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, nil, args...)
+		im.JS.Bitmap = logBitmap(createImageBitmap(im.JS.Bitmap, nil, args...))
 		return im
 	case *image.RGBA:
 		im = NewJSRGBA(x, nil)
@@ -88,7 +88,7 @@ func Crop(src image.Image, rect image.Rectangle) image.Image {
 	default:
 		im = NewJSRGBA(AsRGBA(src), nil)
 	}
-	im.JS.Bitmap, _ = createImageBitmap(im.JS.Bitmap, nil, args...)
+	im.JS.Bitmap = logBitmap(createImageBitmap(im.JS.Bitmap, nil, args...))
 	im.JS.Bounds = image.Rectangle{Max: rect.Size()}
 	return im
 }
@@ -221,16 +221,21 @@ type JSImageData struct {
 	Bounds image.Rectangle
 }
 
-// setImageData sets the JavaScript pointers from given bytes.
+// SetImageData sets the JavaScript pointers from given bytes.
 func (im *JSImageData) SetImageData(src []byte, sbb image.Rectangle, options map[string]any) {
-	jsBuf := jscp.BytesToJS(src)
+	// The ImageData keeps its bytes, so they must not be a view of the
+	// wasm memory, which is detached when that memory grows: then
+	// createImageBitmap fails, and so would drawing the ImageData later.
+	jsBuf := jscp.StableBytesToJS(src)
 	imageData := js.Global().Get("ImageData").New(jsBuf, sbb.Dx(), sbb.Dy())
 	im.Bounds = image.Rectangle{Max: sbb.Size()}
 	im.Data = imageData
-	im.Bitmap, _ = createImageBitmap(imageData, options)
+	im.Bitmap = logBitmap(createImageBitmap(imageData, options))
 }
 
-// createImageBitmap calls the JS createImageBitmap function with given args.
+// createImageBitmap calls the JS createImageBitmap function with given args,
+// returning an error with the reason if it fails, without logging it, as
+// a caller can handle the failure.
 func createImageBitmap(imageData js.Value, options map[string]any, args ...any) (js.Value, error) {
 	var imageBitmapPromise js.Value
 	if len(args) > 0 {
@@ -243,9 +248,19 @@ func createImageBitmap(imageData js.Value, options map[string]any, args ...any) 
 	imageBitmap, ok := jsx.Await(imageBitmapPromise)
 	if ok {
 		return imageBitmap, nil
-	} else {
-		return imageBitmap, errors.Log(errors.New("imagex.createImageBitmap failed"))
 	}
+	reason := "unknown reason"
+	if imageBitmap.Type() == js.TypeObject {
+		reason = imageBitmap.Call("toString").String()
+	}
+	return js.Undefined(), errors.New("imagex.createImageBitmap failed: " + reason)
+}
+
+// logBitmap returns the given ImageBitmap, logging the error of a
+// [createImageBitmap] call that the caller does not handle.
+func logBitmap(bitmap js.Value, err error) js.Value {
+	errors.Log(err)
+	return bitmap
 }
 
 // SetRGBA sets the JavaScript pointers from given image.RGBA.
