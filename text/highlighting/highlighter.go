@@ -135,7 +135,7 @@ func (hi *Highlighter) SetStyle(style HighlightingName) {
 	if style == "" {
 		return
 	}
-	st := AvailableStyle(hi.StyleName)
+	st := AvailableStyle(style)
 	if st == nil {
 		slog.Error("Highlighter Style not found:", "style", style)
 		return
