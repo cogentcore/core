@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Command contentcode compiles the runnable Go code blocks (```Go) of the
-// markdown files of a content app into the app (see
+// Command contentcode compiles the runnable Go and Goal code blocks (```Go,
+// ```Goal) of the markdown files of a content app into the app (see
 // [cogentcore.org/core/content/contentcode]).
 //
 // The core tool already does this for every content app in core build, run,
@@ -16,7 +16,7 @@
 //
 // Usage:
 //
-//	contentcode [-content content] [-o contentcode_gen.go] [-tags tags] [-import name=path]... [-force]
+//	contentcode [-content content] [-o contentcode_gen.go] [-tags tags] [-import name=path]... [-goal-record=false] [-force]
 package main
 
 import (

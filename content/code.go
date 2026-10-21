@@ -68,8 +68,14 @@ func CodeKey(src string) string {
 // app (see [CompiledCode]) runs directly. Other code, including edited
 // code, runs in the interpreter of [BindTextEditor] if there is one
 // (yaegi, through cogentcore.org/core/yaegicore); otherwise an edit shows
-// a message that this app can not run edited code.
+// a message that this app can not run edited code. Goal code runs
+// compiled while it matches the Goal code compiled for the page (see
+// [CompiledGoal]).
 func BindCode(ed *textcore.Editor, parent *core.Frame, language string) {
+	if language == "Goal" {
+		bindGoal(ed, parent)
+		return
+	}
 	if language == "Go" {
 		if f := CompiledCode[CodeKey(ed.Lines.String())]; f != nil {
 			bindCompiledCode(ed, parent, language, f)
@@ -99,7 +105,7 @@ func bindCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, 
 			if CodeKey(src) != key {
 				key = CodeKey(src)
 				f = g
-				runCompiledCode(ed, parent, f)
+				runCompiledCode(ed, parent, language, f)
 			}
 			return
 		}
@@ -111,11 +117,18 @@ func bindCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, 
 		interpreted = true
 		BindTextEditor(ed, parent, language)
 	})
-	runCompiledCode(ed, parent, f)
+	runCompiledCode(ed, parent, language, f)
 }
 
 // runCompiledCode runs f in parent, like the interpreter would.
-func runCompiledCode(ed *textcore.Editor, parent *core.Frame, f CodeFunc) {
+func runCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, f CodeFunc) {
+	runCode(ed, parent, language, func(out io.Writer) { f(parent, out) })
+}
+
+// runCode runs compiled code in parent, like the interpreter would: run
+// runs it with the given output, which is shown below the result, and
+// a panic is shown as an error.
+func runCode(ed *textcore.Editor, parent *core.Frame, language string, run func(out io.Writer)) {
 	parent.DeleteChildren()
 	// a program that makes a body and runs a window adds it to parent instead
 	core.ExternalParent = parent
@@ -127,7 +140,7 @@ func runCompiledCode(ed *textcore.Editor, parent *core.Frame, f CodeFunc) {
 				err = fmt.Errorf("panic: %v", r)
 			}
 		}()
-		f(parent, &out)
+		run(&out)
 		return nil
 	}()
 	if ostr := out.String(); len(strings.TrimSpace(ostr)) > 0 {
@@ -137,7 +150,7 @@ func runCompiledCode(ed *textcore.Editor, parent *core.Frame, f CodeFunc) {
 		oe.Lines.SetString(ostr)
 	}
 	if err != nil {
-		core.ErrorSnackbar(ed, err, "Error running Go code")
+		core.ErrorSnackbar(ed, err, "Error running "+language+" code")
 		return
 	}
 	parent.Update()

@@ -99,6 +99,26 @@ func getInterpreter(language string) (in Interpreter, new bool, err error) {
 	return in, true, nil
 }
 
+// replayGoal runs the Goal code of the page that ran compiled before
+// (see [content.GoalReplay]) in the given new interpreter of the page,
+// in the parent of the code that runs next (which deletes what it makes)
+// and with its output discarded, so that the code run next sees its
+// variables.
+func replayGoal(in Interpreter) {
+	replay := content.GoalReplay
+	content.GoalReplay = nil
+	if len(replay) == 0 {
+		return
+	}
+	for _, src := range replay {
+		interpOutput.Reset()
+		if _, err := in.Eval(src); err != nil {
+			errors.Log(fmt.Errorf("yaegicore: running the compiled Goal code of the page again: %w", err))
+		}
+	}
+	interpOutput.Reset()
+}
+
 // BindTextEditor binds the given text editor to a yaegi interpreter
 // such that the contents of the text editor are interpreted as code
 // of the given language, which is run in the context of the given parent widget.
@@ -127,6 +147,9 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 			errors.Log(in.Use(basesymbols.Symbols))
 			errors.Log(in.Use(coresymbols.Symbols))
 			in.ImportUsed()
+			if language == "Goal" {
+				replayGoal(in)
+			}
 		}
 
 		parent.DeleteChildren()

@@ -492,6 +492,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
 	}
+	resetGoal(ct.current.Page.Filename)
 	w.DeleteChildren()
 	b, err := ct.current.Page.ReadContent(ct.pagesByCategory)
 	if err != nil {
