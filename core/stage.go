@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/base/option"
@@ -196,6 +197,11 @@ type Stage struct { //types:add -setters
 	// and manages the main stages.
 	Mains *stages `set:"-"`
 
+	// mains is the same as [Stage.Mains], set with it by [Stage.storeMains].
+	// It is atomic, as [Scene.renderContext] reads it from other goroutines
+	// to find the lock of the render context, before they have that lock.
+	mains atomic.Pointer[stages]
+
 	// rendering context which has info about the RenderWindow onto which we render.
 	// This should be used instead of the RenderWindow itself for all relevant
 	// rendering information. This is only available once a Stage is Run,
@@ -256,7 +262,7 @@ func (st *Stage) setScene(sc *Scene) *Stage {
 // setMains sets the [Stage.Mains] to the given stack of main stages,
 // and also sets the RenderContext from that.
 func (st *Stage) setMains(sm *stages) *Stage {
-	st.Mains = sm
+	st.storeMains(sm)
 	st.renderContext = sm.renderContext
 	return st
 }
@@ -265,7 +271,7 @@ func (st *Stage) setMains(sm *stages) *Stage {
 // stage to which this popup stage belongs.
 func (st *Stage) setPopups(mainSt *Stage) *Stage {
 	st.Main = mainSt
-	st.Mains = mainSt.Mains
+	st.storeMains(mainSt.Mains)
 	st.popups = mainSt.popups
 	st.renderContext = st.Mains.renderContext
 	return st
@@ -392,6 +398,13 @@ func (st *Stage) delete() {
 	st.Scene = nil
 	st.Main = nil
 	st.popups = nil
-	st.Mains = nil
+	st.storeMains(nil)
 	st.renderContext = nil
+}
+
+// storeMains sets [Stage.Mains], and the atomic version of it,
+// to the given stack of main stages.
+func (st *Stage) storeMains(sm *stages) {
+	st.Mains = sm
+	st.mains.Store(sm)
 }

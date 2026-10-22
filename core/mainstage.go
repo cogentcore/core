@@ -279,7 +279,7 @@ func (st *Stage) runWindow() *Stage {
 			}
 		}
 	}
-	st.Mains = nil // reset
+	st.storeMains(nil) // reset
 	if DebugSettings.WindowRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
@@ -395,7 +395,7 @@ func (st *Stage) runDialog() *Stage {
 	}
 
 	if st.NewWindow {
-		st.Mains = nil
+		st.storeMains(nil)
 		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos

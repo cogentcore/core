@@ -258,7 +258,7 @@ func (sc *Scene) renderContext() *renderContext {
 	if sc.Stage == nil {
 		return nil
 	}
-	sm := sc.Stage.Mains
+	sm := sc.Stage.mains.Load()
 	if sm == nil {
 		return nil
 	}
@@ -291,7 +291,7 @@ func (sc *Scene) RenderWindow() *renderWindow {
 	if sc.Stage == nil {
 		return nil
 	}
-	sm := sc.Stage.Mains
+	sm := sc.Stage.mains.Load()
 	if sm == nil {
 		return nil
 	}

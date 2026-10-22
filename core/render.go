@@ -82,7 +82,9 @@ func (wb *WidgetBase) AsyncLock() {
 func (wb *WidgetBase) AsyncLockIfShown() bool {
 	// This is only read under the lock, as the widget can be destroyed
 	// (setting This to nil) under the lock at any time.
-	if wb.Scene == nil {
+	// A scene that has not been shown can be in the process of being run,
+	// in another goroutine without the lock of its render context.
+	if wb.Scene == nil || !wb.Scene.hasShown.Load() {
 		return false
 	}
 	rc := wb.Scene.renderContext()
