@@ -42,10 +42,8 @@ var raceRegexp = regexp.MustCompile(`(?m)^WARNING: DATA RACE$`)
 var raceFailRegexp = regexp.MustCompile(`(?m)^\s*--- FAIL: (\S+)`)
 
 // TestRace runs the tests of [racePackages] with the race detector, and
-// fails if it reports any data races. It takes about a minute, so it is
-// skipped in short mode (as in CI). Other test failures are logged but do
-// not fail it, as some tests that compare rendered images are sensitive to
-// the slower timing with the race detector.
+// fails if it reports any data races or if any of the tests fail. It takes
+// a few minutes, so it is skipped in short mode (as in CI).
 func TestRace(t *testing.T) {
 	if testing.Short() {
 		t.Skip("the race detector tests are skipped in short mode")
@@ -55,12 +53,13 @@ func TestRace(t *testing.T) {
 	cmd.Env = os.Environ()
 	out, err := cmd.CombinedOutput()
 	sout := string(out)
-	for _, m := range raceFailRegexp.FindAllStringSubmatch(sout, -1) {
-		t.Logf("failing test with the race detector: %s", m[1])
+	fails := raceFailRegexp.FindAllStringSubmatch(sout, -1)
+	for _, m := range fails {
+		t.Errorf("failing test with the race detector: %s", m[1])
 	}
 	races := raceRegexp.FindAllStringIndex(sout, -1)
 	if len(races) == 0 {
-		if err != nil && !strings.Contains(sout, "--- FAIL") {
+		if err != nil && len(fails) == 0 {
 			t.Fatalf("go test -race failed: %v\n%s", err, sout)
 		}
 		return
