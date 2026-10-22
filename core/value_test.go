@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -101,4 +102,46 @@ func TestValidatorInvalid(t *testing.T) {
 		defer b.AsyncUnlock()
 		v.SendChange() // trigger validation
 	})
+}
+
+// Accepting the dialog of a value whose widget has been deleted meanwhile,
+// as when the form that has it is remade, does nothing instead of crashing.
+func TestValueDialogDeletedWidget(t *testing.T) {
+	b := NewBody()
+	fb := NewFileButton(b)
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	b.waitNoEvents(rw)
+
+	accepted := false
+	b.AsyncLock()
+	openValueDialog(fb, func(d *Body) {
+		NewText(d).SetText("Dialog")
+	}, func() {
+		accepted = true
+	})
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+
+	b.AsyncLock()
+	var ok *Button
+	rw.mains.top().Scene.WalkDown(func(n tree.Node) bool {
+		if bt := AsButton(n); bt != nil && bt.Text == "OK" {
+			ok = bt
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	fb.Delete()
+	if assert.NotNil(t, ok) {
+		ok.Send(events.Click)
+	}
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+	assert.False(t, accepted)
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
 }
