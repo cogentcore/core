@@ -6,6 +6,7 @@ package enumgen
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -20,8 +21,12 @@ func TestGenerate(t *testing.T) {
 	c := &Config{}
 	assert.NoError(t, cli.SetFromDefaults(c))
 	c.Dir = "./testdata"
+	// write to a temporary file so that the test never changes testdata/enumgen.go,
+	// whose header records the command line of the test binary
+	output := filepath.Join(t.TempDir(), "enumgen.go")
+	c.Output = output
 	assert.NoError(t, Generate(c))
-	have, err := os.ReadFile("testdata/enumgen.go")
+	have, err := os.ReadFile(output)
 	assert.NoError(t, err)
 	want, err := os.ReadFile("testdata/enumgen.golden")
 	assert.NoError(t, err)
@@ -29,7 +34,7 @@ func TestGenerate(t *testing.T) {
 	// that can change based on where go test is run.
 	_, shave, got := strings.Cut(string(have), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/enumgen.go, but got %q", have)
+		t.Errorf("expected string with newline in the generated file, but got %q", have)
 	}
 	_, swant, got := strings.Cut(string(want), "\n")
 	if !got {
@@ -37,7 +42,7 @@ func TestGenerate(t *testing.T) {
 	}
 	swant = strings.ReplaceAll(swant, "\r\n", "\n")
 	if shave != swant {
-		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/enumgen.go and ./testdata/enumgen.golden to see the difference)")
+		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare the generated file and ./testdata/enumgen.golden to see the difference)")
 	}
 }
 

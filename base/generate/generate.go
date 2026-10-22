@@ -100,7 +100,11 @@ func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error), exclude ..
 
 // Filepath returns the filepath of a file in the given
 // package with the given filename relative to the package.
+// An absolute filename is returned unchanged.
 func Filepath(pkg *packages.Package, filename string) string {
+	if filepath.IsAbs(filename) {
+		return filename
+	}
 	dir := "."
 	if len(pkg.Syntax) > 0 {
 		dir = filepath.Dir(pkg.Fset.Position(pkg.Syntax[0].FileStart).Filename)
