@@ -15,6 +15,7 @@ require (
 	github.com/chewxy/math32 v1.11.2
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
+	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
 	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
@@ -22,7 +23,6 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260628091122-0bd588dc30cf
-	github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec
 	github.com/gomarkdown/markdown v0.0.0-20260417124207-7d523f7318df
 	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0

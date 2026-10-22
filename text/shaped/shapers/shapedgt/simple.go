@@ -8,9 +8,9 @@ import (
 	"math"
 	"unicode"
 
-	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/language"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/di"
+	"github.com/cogentcore/typesetting/language"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 

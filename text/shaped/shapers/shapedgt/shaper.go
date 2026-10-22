@@ -16,10 +16,10 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/fontscan"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/di"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/fontscan"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 

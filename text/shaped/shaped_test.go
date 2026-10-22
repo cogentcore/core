@@ -27,7 +27,7 @@ import (
 	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/font"
+	"github.com/cogentcore/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,7 +6,9 @@ package shapedgt
 
 import (
 	"reflect"
+	"runtime"
 	"slices"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -15,8 +17,8 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/language"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/language"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -201,4 +203,60 @@ func TestFontMapFaces(t *testing.T) {
 	if len(fm.faceSets) != 4 {
 		t.Errorf("%d face sets, want 4", len(fm.faceSets))
 	}
+}
+
+// TestSegmenterCache tests that wrapping long texts with the break
+// opportunities that the shape cache keeps, at more sizes than it keeps
+// wrappings for, gives the same lines as finding them for each wrapping.
+func TestSegmenterCache(t *testing.T) {
+	sh := NewShaper().(*Shaper)
+	tsty := testStyle()
+	defSty := rich.NewStyle()
+	plain := rich.NewStyle()
+	mono := *plain
+	mono.Family = rich.Monospace
+	para := "The quick brown fox jumps over the lazy dog, again and again, until it is tired. "
+	tx := rich.NewText(plain, []rune(para+para))
+	tx.AddSpan(&mono, []rune("Control+Shift+P\n"))
+	tx.AddSpan(plain, []rune(para+"\r\n"+para+" "+para))
+	txs := append(testTexts(), tx)
+	for range 2 {
+		for ti, tx := range txs {
+			for w := 15; w < 900; w += 29 {
+				size := math32.Vec2(float32(w), 2000)
+				txt := tx.Join()
+				outs := copyOutputs(sh.ShapeTextOutput(tx, tsty, txt))
+				lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, size)
+				want := sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+				got := sh.WrapLines(tx, defSty, tsty, size)
+				if !reflect.DeepEqual(got, want) {
+					t.Errorf("text %d width %d: lines wrapped with the cached segmenter differ:\n%v\n%v", ti, w, got, want)
+				}
+			}
+		}
+	}
+	se, _ := sh.shapes.get(tx, tsty)
+	if se == nil || se.seg == nil || se.seg.Len() != len(tx.Join()) {
+		t.Fatal("the long text has no segmenter of its runes")
+	}
+}
+
+// BenchmarkSegmenterMemory reports the memory that the segmenter of a
+// cached text takes, per rune of the text.
+func BenchmarkSegmenterMemory(b *testing.B) {
+	txt := []rune(strings.Repeat("The quick brown fox jumps over the lazy dog. ", 20))
+	var se *shapeEntry
+	for b.Loop() {
+		se = &shapeEntry{}
+		se.segmenter(txt)
+	}
+	var ms0, ms1 runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&ms0)
+	for range 1000 {
+		se = &shapeEntry{}
+		se.segmenter(txt)
+	}
+	runtime.ReadMemStats(&ms1)
+	b.ReportMetric(float64(ms1.TotalAlloc-ms0.TotalAlloc)/1000/float64(len(txt)), "B/rune")
 }

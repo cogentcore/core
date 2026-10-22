@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/shaping"
 )
 
 // TestSimpleSpans tests that spans of simple text are shaped with

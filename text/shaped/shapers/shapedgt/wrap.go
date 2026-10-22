@@ -12,8 +12,9 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/di"
+	"github.com/cogentcore/typesetting/segmenter"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -42,7 +43,7 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	if lines, ok := singleLine(outs, txt, cfg, maxSize, !cfg.DisableTrailingWhitespaceTrim); ok {
 		return lines, 0
 	}
-	return sh.wrapParagraph(cfg, maxSize, txt, outs)
+	return sh.wrapParagraph(cfg, maxSize, txt, outs, nil)
 }
 
 // singleLine returns the outputs as one line when they fit on one line, as
@@ -133,9 +134,15 @@ func hasMandatoryBreak(txt []rune) bool {
 // wrapParagraph wraps the outputs as the line wrapper's WrapParagraph does,
 // for outputs that [singleLine] has found need wrapping. WrapParagraph first
 // checks for the case of singleLine, finding the break opportunities of the
-// whole text, which it then finds again to wrap it.
-func (sh *Shaper) wrapParagraph(cfg shaping.WrapConfig, maxSize int, txt []rune, outs []shaping.Output) ([]shaping.Line, int) {
-	sh.wrapper.Prepare(cfg, txt, shaping.NewSliceIterator(outs))
+// whole text, which it then finds again to wrap it. The segmenter, if
+// non-nil, has the break opportunities of the text already, as kept for all
+// the wrappings of a cached text; otherwise they are found for this one.
+func (sh *Shaper) wrapParagraph(cfg shaping.WrapConfig, maxSize int, txt []rune, outs []shaping.Output, seg *segmenter.Segmenter) ([]shaping.Line, int) {
+	if seg != nil {
+		sh.wrapper.PrepareSegmented(cfg, seg, shaping.NewSliceIterator(outs))
+	} else {
+		sh.wrapper.Prepare(cfg, txt, shaping.NewSliceIterator(outs))
+	}
 	var lines []shaping.Line
 	for {
 		line, done := sh.wrapper.WrapNextLine(maxSize)

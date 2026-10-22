@@ -14,8 +14,8 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/shaping"
 	scale "golang.org/x/image/draw"
 )
 

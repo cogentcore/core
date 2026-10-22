@@ -19,8 +19,8 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/font/opentype"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/font/opentype"
 )
 
 // GlyphInfo returns info about a glyph.

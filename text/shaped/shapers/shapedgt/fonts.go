@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
-	"github.com/go-text/typesetting/fontscan"
+	"github.com/cogentcore/typesetting/fontscan"
 )
 
 // FontList returns the list of fonts that have been loaded.
@@ -29,5 +29,3 @@ func (sh *Shaper) FontList() []fonts.Info {
 	}
 	return fi
 }
-
-

@@ -9,8 +9,8 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/go-text/typesetting/font/opentype"
-	"github.com/go-text/typesetting/fontscan"
+	"github.com/cogentcore/typesetting/font/opentype"
+	"github.com/cogentcore/typesetting/fontscan"
 )
 
 // Embedded are embedded filesystems to get fonts from. By default,

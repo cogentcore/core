@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 

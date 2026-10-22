@@ -10,8 +10,8 @@ import (
 	"slices"
 
 	"cogentcore.org/core/text/rich"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/fontscan"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/fontscan"
 )
 
 // Info contains basic font information for aviailable fonts.

@@ -7,7 +7,7 @@ package shapedjs
 import (
 	"testing"
 
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 

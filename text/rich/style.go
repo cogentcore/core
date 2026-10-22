@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"github.com/go-text/typesetting/di"
+	"github.com/cogentcore/typesetting/di"
 )
 
 //go:generate core generate
 
 // IMPORTANT: enums must remain in sync with
-// "github.com/go-text/typesetting/font"
+// "github.com/cogentcore/typesetting/font"
 // and props.go must be updated as needed.
 
 // Style contains all of the rich text styling properties, that apply to one
