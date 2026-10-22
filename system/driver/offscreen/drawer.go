@@ -18,7 +18,7 @@ type Drawer struct {
 }
 
 func (dw *Drawer) Start() {
-	rect := image.Rectangle{Max: dw.Window.PixelSize}
+	rect := image.Rectangle{Max: dw.Window.Size()}
 	if dw.Image == nil || dw.Image.Rect != rect {
 		dw.Image = image.NewRGBA(rect)
 	}

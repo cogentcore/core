@@ -280,7 +280,7 @@ func (w *Window) SetGeometry(fullscreen bool, pos, size image.Point, screen *sys
 		pos = w.Pos
 	}
 	if size == (image.Point{}) {
-		size = w.PixelSize
+		size = w.Size()
 	}
 	if screen != nil {
 		pos = pos.Add(screen.Geometry.Min)
@@ -330,7 +330,7 @@ func (w *Window) ConstrainFrame(topOnly bool) sides.Sides[int] {
 	// fmt.Println("\tconstrainframe screen:", sc.Name, scSize, w.FrameSize, "geom:", w.Pos, w.WnSize)
 	frSize := image.Pt(w.FrameSize.Left+w.FrameSize.Right, w.FrameSize.Top+w.FrameSize.Bottom)
 	frOff := image.Pt(w.FrameSize.Left, w.FrameSize.Top)
-	sz := w.WnSize.Add(frSize)
+	sz := w.WinSize().Add(frSize)
 	scpos := w.Pos.Sub(sc.Geometry.Min)
 	pos := scpos.Sub(frOff)
 	cpos, csz := system.ConstrainWindowGeometry(pos, sz, scSize)
@@ -347,7 +347,7 @@ func (w *Window) ConstrainFrame(topOnly bool) sides.Sides[int] {
 		change = true
 		pos.Y = cpos.Y
 	}
-	sz = w.WnSize
+	sz = w.WinSize()
 	if !topOnly && csz.X < sz.X {
 		change = true
 		sz.X = csz.X
@@ -477,7 +477,7 @@ func (w *Window) WinResized(gw *glfw.Window, width, height int) {
 	go func() {
 		// w.app.GetScreens()  // this can crash here on win disconnect..
 		if ScreenDebug {
-			log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.PixelSize)
+			log.Printf("desktop.Window.WinResized: %v: %v (was: %v)\n", w.Nm, image.Pt(width, height), w.Size())
 		}
 		w.updateMaximized()
 		w.updateGeometry()
@@ -497,14 +497,16 @@ func (w *Window) updateGeometry() {
 	w.updateMaximized()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.Glw.GetSize()
-	w.WnSize = wsz
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.Glw.GetFramebufferSize()
+	w.GeomMu.Lock()
+	w.WnSize = wsz
 	w.PixelSize = fbsz
+	w.GeomMu.Unlock()
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = sc.LogicalDPI
 	w.Mu.Unlock()
-	w.Draw.System.Renderer.SetSize(w.PixelSize)
+	w.Draw.System.Renderer.SetSize(fbsz)
 	if cursc != w.ScreenWindow {
 		if ScreenDebug {
 			log.Printf("desktop.Window.updateGeometry: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
@@ -521,9 +523,9 @@ func (w *Window) FbResized(gw *glfw.Window, width, height int) {
 			height = sc.PixelSize.Y
 		}
 		fbsz := image.Point{width, height}
-		if w.PixelSize != fbsz {
+		if cur := w.Size(); cur != fbsz {
 			if ScreenDebug {
-				log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, w.PixelSize)
+				log.Printf("desktop.Window.FbResized: %v: %v (was: %v)\n", w.Nm, fbsz, cur)
 			}
 			w.updateGeometry()
 		}

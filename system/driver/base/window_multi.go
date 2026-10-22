@@ -11,6 +11,7 @@ package base
 
 import (
 	"image"
+	"sync"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles/sides"
@@ -31,6 +32,15 @@ type WindowMulti[A system.App, C composer.Composer] struct {
 
 	// Compose is the [composer.Composer] for this window.
 	Compose C `label:"Composer"`
+
+	// GeomMu protects the geometry fields of the window ([WindowMulti.Pos],
+	// [WindowMulti.WnSize], and [WindowMulti.PixelSize]), which goroutines
+	// such as the event loop and the content sizing of scenes read and set
+	// concurrently. It is separate from [Window.Mu], which is held during
+	// rendering and resizing, when they are also read (as by
+	// [Window.RenderGeom]), so it is only held for each read or write of
+	// them, without acquiring any other lock.
+	GeomMu sync.Mutex `display:"-"`
 
 	// Pos is the position of the window
 	Pos image.Point `label:"Position"`
@@ -76,21 +86,23 @@ func (w *WindowMulti[A, D]) Events() *events.Source {
 	return &w.Event
 }
 
+// Size returns the pixel size of the window. It uses [WindowMulti.GeomMu],
+// not [Window.Mu], which its callers can hold (such as rendering).
 func (w *WindowMulti[A, D]) Size() image.Point {
-	// w.Mu.Lock() // this prevents race conditions but also locks up
-	// defer w.Mu.Unlock()
+	w.GeomMu.Lock()
+	defer w.GeomMu.Unlock()
 	return w.PixelSize
 }
 
 func (w *WindowMulti[A, D]) WinSize() image.Point {
-	// w.Mu.Lock() // this prevents race conditions but also locks up
-	// defer w.Mu.Unlock()
+	w.GeomMu.Lock()
+	defer w.GeomMu.Unlock()
 	return w.WnSize
 }
 
 func (w *WindowMulti[A, D]) Position(screen *system.Screen) image.Point {
-	w.Mu.Lock()
-	defer w.Mu.Unlock()
+	w.GeomMu.Lock()
+	defer w.GeomMu.Unlock()
 	return w.Pos
 }
 
@@ -116,7 +128,9 @@ func (w *WindowMulti[A, D]) SetWinSize(sz image.Point) {
 	if w.This.IsClosed() {
 		return
 	}
+	w.GeomMu.Lock()
 	w.WnSize = sz
+	w.GeomMu.Unlock()
 }
 
 func (w *WindowMulti[A, D]) SetSize(sz image.Point) {
@@ -132,7 +146,9 @@ func (w *WindowMulti[A, D]) SetPos(pos image.Point, screen *system.Screen) {
 	if w.This.IsClosed() {
 		return
 	}
+	w.GeomMu.Lock()
 	w.Pos = pos
+	w.GeomMu.Unlock()
 }
 
 func (w *WindowMulti[A, D]) SetGeometry(fullscreen bool, pos image.Point, size image.Point, screen *system.Screen) {
@@ -142,7 +158,9 @@ func (w *WindowMulti[A, D]) SetGeometry(fullscreen bool, pos image.Point, size i
 	sc := w.This.Screen()
 	size = sc.WindowSizeFromPixels(size)
 	w.SetWinSize(size)
+	w.GeomMu.Lock()
 	w.Pos = pos
+	w.GeomMu.Unlock()
 }
 
 func (w *WindowMulti[A, D]) ConstrainFrame(topOnly bool) sides.Sides[int] {
