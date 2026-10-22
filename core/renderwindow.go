@@ -92,10 +92,15 @@ type renderWindow struct {
 	// The [RenderContext] in this manager is the original source for all Stages.
 	mains stages
 
-	// noEventsChan is a channel on which a signal is sent when there are
-	// no events left in the window [events.Deque]. It is used internally
-	// for event handling in tests.
+	// noEventsChan is a channel that the event loop closes after it
+	// handles an event when there are no events left in the window
+	// [events.Deque]. It is used internally for event handling in tests
+	// (see [Body.waitNoEvents]). It is protected by noEventsMu.
 	noEventsChan chan struct{}
+
+	// noEventsMu protects noEventsChan, which is set by the test
+	// goroutine and closed by the event loop.
+	noEventsMu sync.Mutex
 
 	// flags are atomic renderWindow flags.
 	flags renderWindowFlags
@@ -428,9 +433,7 @@ func (w *renderWindow) eventLoop() {
 			break
 		}
 		w.handleEvent(e)
-		if w.noEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
-			w.noEventsChan <- struct{}{}
-		}
+		w.signalNoEvents(d)
 	}
 	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.name)
@@ -438,6 +441,19 @@ func (w *renderWindow) eventLoop() {
 	windowWait.Done()
 	// our last act must be self destruction!
 	w.mains.deleteAll()
+}
+
+// signalNoEvents closes [renderWindow.noEventsChan], if a test waits on it,
+// when there are no events left in the given deque. It is closed instead of
+// sent on, so that the event loop never blocks on it.
+func (w *renderWindow) signalNoEvents(d *events.Deque) {
+	w.noEventsMu.Lock()
+	defer w.noEventsMu.Unlock()
+	if w.noEventsChan == nil || d.Len() > 0 {
+		return
+	}
+	close(w.noEventsChan)
+	w.noEventsChan = nil
 }
 
 // handleEvent processes given events.Event.

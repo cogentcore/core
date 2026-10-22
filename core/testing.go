@@ -73,10 +73,13 @@ func (b *Body) runAndShowNewWindow() {
 	<-showed
 }
 
-// waitNoEvents waits for all events to be handled and does any rendering
-// of the body necessary.
+// waitNoEvents waits until the event loop has handled an event and there
+// are no events left, which includes any rendering of the body necessary,
+// as rendering is done in response to the periodic paint events.
 func (b *Body) waitNoEvents(rw *renderWindow) {
-	rw.noEventsChan = make(chan struct{})
-	<-rw.noEventsChan
-	rw.noEventsChan = nil
+	ch := make(chan struct{})
+	rw.noEventsMu.Lock()
+	rw.noEventsChan = ch
+	rw.noEventsMu.Unlock()
+	<-ch
 }

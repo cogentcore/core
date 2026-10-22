@@ -145,6 +145,9 @@ type History struct {
 	Records []*Location
 }
 
+// Save adds the given location after the current one, removing any
+// locations after the current one, unless it is the same as the current
+// one, in which case nothing changes and Index stays valid.
 func (hs *History) Save(lc *Location) {
 	if hs.Records == nil {
 		hs.Records = make([]*Location, 1)
@@ -152,20 +155,11 @@ func (hs *History) Save(lc *Location) {
 		hs.Records[0] = lc
 		return
 	}
-	hs.Index++
-	if len(hs.Records) > hs.Index {
-		if hs.Index > 0 && *(hs.Records[hs.Index-1]) == *lc { // no repeats
-			return
-		}
-		hs.Records = hs.Records[:hs.Index+1]
-		hs.Records[hs.Index] = lc
-	} else {
-		hs.Index = len(hs.Records)                            // note: going to end first
-		if hs.Index > 0 && *(hs.Records[hs.Index-1]) == *lc { // no repeats
-			return
-		}
-		hs.Records = append(hs.Records, lc)
+	if *(hs.Records[hs.Index]) == *lc { // no repeats
+		return
 	}
+	hs.Records = append(hs.Records[:hs.Index+1], lc)
+	hs.Index++
 }
 
 // Back decrements Index and returns that location.
