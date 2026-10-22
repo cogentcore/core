@@ -11,7 +11,6 @@ import (
 )
 
 func TestColorPicker(t *testing.T) {
-	t.Skip("TODO(#1456): fix this test")
 	b := NewBody()
 	NewColorPicker(b).SetColor(colors.Orange)
 	b.AssertRender(t, "color-picker/basic")
