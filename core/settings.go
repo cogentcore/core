@@ -217,8 +217,8 @@ func UpdateSettings(ctx Widget, se Settings) {
 // so the rebuild happens after the current event of each window.
 func UpdateAll() { //types:add
 	// Some caches are invalid now:
-	clear(gradient.Cache)
-	clear(cursorimg.Cursors)
+	gradient.ClearCache()
+	cursorimg.ClearCache()
 
 	runInEachWindow(func(w *renderWindow, rc *renderContext) {
 		rc.logicalDPI = w.logicalDPI()
