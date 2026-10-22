@@ -14,14 +14,15 @@
 // use the parent widget b and the packages of the yaegicore symbols (core,
 // styles, ...) without importing them, or a program with a main function.
 // Code blocks that do not type check are left out (and listed in the output
-// file); an unused variable is used with `_ = x` instead, since yaegi allows
-// it.
+// file), and their errors are printed at their lines in the markdown files;
+// an unused variable is used with `_ = x` instead, since yaegi allows it.
 //
 // Goal code blocks (```Goal) are compiled per page, in order, so that a
 // block sees the variables of the blocks before it on its page, as in the
 // Goal interpreter (see goal.go and [cogentcore.org/core/content.GoalPage]).
 // That needs Cogent Lab's Goal transpiler, so the app's module must require
-// cogentcore.org/lab; Goal code can use the packages of Lab's yaegilab
+// cogentcore.org/lab (otherwise, the Goal code blocks are not compiled, with
+// a message that says so); Goal code can use the packages of Lab's yaegilab
 // symbols without importing them.
 //
 // The core tool runs [Generate] for every content app (see [App]) in
@@ -44,6 +45,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/printer"
+	"go/scanner"
 	"go/token"
 	"io/fs"
 	"os"
@@ -338,7 +340,12 @@ func Generate(c *Config) (bool, error) {
 		}
 	}
 	if err := transpileGoal(dir, pages, c.Tags, c.GoalRecord); err != nil {
-		return false, err
+		if !errors.Is(err, errNoLab) {
+			return false, err
+		}
+		// the Go code blocks are still compiled
+		fmt.Fprintf(os.Stderr, "%s:%d: Goal code blocks are not compiled into the app, since compiling Goal code needs Cogent Lab, which the module of the app does not require; to compile them, run: go get cogentcore.org/lab (until then, they run in the Goal interpreter, if the app has one)\n", displayPath(dir, pages[0].file), pages[0].blocks[0].line)
+		pages = nil
 	}
 	for i, pg := range pages {
 		pg.name = fmt.Sprintf("%s%d", goalPrefix, i)
@@ -361,11 +368,24 @@ func Generate(c *Config) (bool, error) {
 	for _, b := range blocks {
 		if b.err == "" {
 			n++
-		} else {
-			fmt.Fprintf(os.Stderr, "contentcode: %s:%d: left out: %s\n", b.file, b.line, b.err)
+			continue
+		}
+		// the errors of the block, at their place in the markdown file
+		file := displayPath(dir, b.file)
+		if len(b.errs) == 0 {
+			fmt.Fprintf(os.Stderr, "%s:%d: %s\n", file, b.line, b.err)
+		}
+		for _, e := range b.errs {
+			if e.col > 0 {
+				fmt.Fprintf(os.Stderr, "%s:%d:%d: %s\n", file, e.line, e.col, e.msg)
+			} else {
+				fmt.Fprintf(os.Stderr, "%s:%d: %s\n", file, e.line, e.msg)
+			}
 		}
 	}
-	if len(blocks) > 0 {
+	if n < len(blocks) {
+		fmt.Fprintf(os.Stderr, "contentcode: compiled %d of %d code blocks into %s; the others, with the errors above, run in the interpreter instead, if the app has one\n", n, len(blocks), output)
+	} else if len(blocks) > 0 {
 		fmt.Fprintf(os.Stderr, "contentcode: compiled %d of %d code blocks into %s\n", n, len(blocks), output)
 	}
 	if len(pages) > 0 {
@@ -375,7 +395,7 @@ func Generate(c *Config) (bool, error) {
 			nb += pg.n
 			if pg.n < len(pg.blocks) {
 				b := pg.blocks[pg.n]
-				fmt.Fprintf(os.Stderr, "contentcode: %s:%d: Goal code from here on left out (%d of %d blocks of the page): %s\n", pg.file, b.line, len(pg.blocks)-pg.n, len(pg.blocks), b.err)
+				fmt.Fprintf(os.Stderr, "%s:%d: %s\ncontentcode: this Goal code block and the %d after it on its page are not compiled into the app; they run in the Goal interpreter instead, if the app has one\n", displayPath(dir, pg.file), b.line, b.err, len(pg.blocks)-pg.n-1)
 			}
 		}
 		fmt.Fprintf(os.Stderr, "contentcode: compiled %d of %d Goal code blocks (%d pages) into %s\n", nb, ng, len(pages), output)
@@ -438,6 +458,7 @@ func typeCheckBlocks(dir, output, pkgName, hash, tags string, blocks []*block, p
 	var src []byte
 	for iter := 0; ; iter++ {
 		src = assemble(pkgName, hash, blocks, pages)
+		srcLines := strings.Split(string(src), "\n")
 		if iter == 20 {
 			return nil, fmt.Errorf("type checking did not converge")
 		}
@@ -449,6 +470,7 @@ func typeCheckBlocks(dir, output, pkgName, hash, tags string, blocks []*block, p
 			break
 		}
 		changed := false
+		failed := map[*block]bool{} // the blocks that fail in this iteration
 		unused := map[*block]map[int][]string{}
 		goalUnused := map[*goalPage]map[int][]string{}
 		goalErr := map[*goalPage]int{} // first block with an error
@@ -483,11 +505,20 @@ func typeCheckBlocks(dir, output, pkgName, hash, tags string, blocks []*block, p
 			}
 			if b.err == "" {
 				b.err = e.msg
+				failed[b] = true
 				changed = true
+			}
+			if failed[b] {
+				text := ""
+				if e.line >= 1 && e.line <= len(srcLines) {
+					text = srcLines[e.line-1]
+				}
+				line, col := b.markdownPos(e.line, e.col, text)
+				b.errs = append(b.errs, blockError{line: line, col: col, msg: e.msg})
 			}
 		}
 		for b, u := range unused {
-			if b.err != "" {
+			if b.err != "" || failed[b] {
 				continue
 			}
 			if err := b.useUnused(u); err != nil {
@@ -520,17 +551,96 @@ func typeCheckBlocks(dir, output, pkgName, hash, tags string, blocks []*block, p
 
 // block is one code block, and the Go code generated for it.
 type block struct {
-	file  string // markdown file, relative to the package directory
-	index int    // number of the code block in the file, from 1
-	line  int    // line of the code in the file
-	src   string // source of the code block
-	key   string // CodeKey of src
-	name  string // name of the generated function
-	code  string // generated Go declarations
-	pkgs  map[string]bool
-	err   string // why the block was left out
-	start int    // first line of code in the output file
-	end   int    // last line of code in the output file
+	file   string // markdown file, relative to the package directory
+	index  int    // number of the code block in the file, from 1
+	line   int    // line of the code in the file
+	src    string // source of the code block
+	key    string // CodeKey of src
+	name   string // name of the generated function
+	code   string // generated Go declarations
+	pkgs   map[string]bool
+	indent int          // indentation of the code block in the file
+	err    string       // why the block was left out
+	errs   []blockError // the errors that left it out, in the file
+	start  int          // first line of code in the output file
+	end    int          // last line of code in the output file
+}
+
+// blockError is an error of a code block at a line (and column, if known)
+// of its markdown file.
+type blockError struct {
+	line, col int
+	msg       string
+}
+
+// stmtLine is the line of the generated code of a block that is a list of
+// statements (from 0) at which its source code starts (see [block.generate]).
+const stmtLine = 4
+
+// markdownPos returns the line and column (0 if not known) in the markdown
+// file of the given line and column of the output file, whose text is given.
+// It finds the line of the code block whose text is that of the output line,
+// apart from whitespace and the changes made in [block.generate], which is
+// the closest to the line it would be at if the generated code had all of the
+// lines of the code block in order, as it does for a list of statements apart
+// from consecutive empty lines. It returns the first line of the code block
+// if no line matches.
+func (b *block) markdownPos(line, col int, text string) (int, int) {
+	lines := strings.Split(b.src, "\n")
+	hint := line - b.start - 1 - stmtLine
+	norm := func(s string) string {
+		s = strings.ReplaceAll(s, b.name+"_", "")
+		s = strings.ReplaceAll(s, "("+outVar+", ", "(")
+		s = strings.ReplaceAll(s, "("+outVar+")", "()")
+		s = strings.ReplaceAll(s, "fmt.Fprint", "fmt.Print")
+		s = strings.ReplaceAll(s, parentVar, "b")
+		return strings.Join(strings.Fields(s), "")
+	}
+	want := norm(text)
+	best := -1
+	for i, l := range lines {
+		if want == "" || norm(l) != want {
+			continue
+		}
+		if best < 0 || abs(i-hint) < abs(best-hint) {
+			best = i
+		}
+	}
+	if best < 0 {
+		return b.line, 0
+	}
+	// the column is known if the line is the same apart from indentation
+	src := lines[best]
+	tt, st := strings.TrimLeft(text, " \t"), strings.TrimLeft(src, " \t")
+	if tt != st || col <= len(text)-len(tt) {
+		return b.line + best, 0
+	}
+	return b.line + best, col - (len(text) - len(tt)) + (len(src) - len(st)) + b.indent
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+// displayPath returns the path of the given file, relative to dir, to show
+// in messages: relative to the current directory if it is in it.
+func displayPath(dir, file string) string {
+	p := filepath.Join(dir, filepath.FromSlash(file))
+	wd, err := os.Getwd()
+	if err != nil {
+		return p
+	}
+	ap, err := filepath.Abs(p)
+	if err != nil {
+		return p
+	}
+	if rel, err := filepath.Rel(wd, ap); err == nil && !strings.HasPrefix(rel, "..") {
+		return rel
+	}
+	return ap
 }
 
 // pathName returns the package name of an import path (its last element).
@@ -561,11 +671,11 @@ func readBlocks(dir, content string) ([]*block, error) {
 	var blocks []*block
 	seen := map[string]bool{}
 	err := walkMarkdown(dir, content, func(rel string, lines []string) {
-		forFences(lines, fenceStart, func(index, line int, src string) {
+		forFences(lines, fenceStart, func(index, line, indent int, src string) {
 			key := codeKey(src)
 			if !seen[key] {
 				seen[key] = true
-				blocks = append(blocks, &block{file: rel, index: index, line: line, src: src, key: key})
+				blocks = append(blocks, &block{file: rel, index: index, line: line, indent: indent, src: src, key: key})
 			}
 		})
 	})
@@ -593,10 +703,10 @@ func walkMarkdown(dir, content string, f func(rel string, lines []string)) error
 }
 
 // forFences calls f with the number (from 1, counting empty ones), line
-// (from 1) and source of each code block of the given lines that starts
-// with a line matching start (whose first group is the indentation), in
-// order, except empty ones.
-func forFences(lines []string, start *regexp.Regexp, f func(index, line int, src string)) {
+// (from 1), indentation (in bytes) and source of each code block of the
+// given lines that starts with a line matching start (whose first group is
+// the indentation), in order, except empty ones.
+func forFences(lines []string, start *regexp.Regexp, f func(index, line, indent int, src string)) {
 	index := 0
 	for i := 0; i < len(lines); i++ {
 		m := start.FindStringSubmatch(lines[i])
@@ -618,7 +728,7 @@ func forFences(lines []string, start *regexp.Regexp, f func(index, line int, src
 		}
 		src := strings.Join(code, "\n") + "\n"
 		if strings.TrimSpace(src) != "" {
-			f(index, first+1, src)
+			f(index, first+1, len(indent), src)
 		}
 		i = j
 	}
@@ -654,10 +764,23 @@ func (b *block) generate(importPaths map[string]string) error {
 	program := err == nil && file.Scope.Lookup("main") != nil
 	if !program {
 		// b is in an outer block, so that the code can declare its own b
+		// (the source starts at line stmtLine of the function)
 		text = "package main\n\nfunc " + b.name + "(" + parentVar + " *core.Frame, " + outVar + " io.Writer) {\nb := " + parentVar + "\n_ = b\n{\n" + b.src + "\n}\n}\n"
 		fset = token.NewFileSet()
 		file, err = parser.ParseFile(fset, "block.go", text, parser.ParseComments)
 		if err != nil {
+			var el scanner.ErrorList
+			if errors.As(err, &el) && len(el) > 0 {
+				for _, e := range el {
+					// an error after the end of the code is at its last line
+					i, col := e.Pos.Line-3-stmtLine, e.Pos.Column+b.indent
+					if last := strings.Count(b.src, "\n") - 1; i > last {
+						i, col = max(last, 0), 0
+					}
+					b.errs = append(b.errs, blockError{line: b.line + i, col: col, msg: e.Msg})
+				}
+				return errors.New(el[0].Msg)
+			}
 			return err
 		}
 	}
@@ -914,8 +1037,8 @@ func assemble(pkgName, hash string, blocks []*block, pages []*goalPage) []byte {
 
 // typeError is a type error at a line of the output file.
 type typeError struct {
-	line int
-	msg  string
+	line, col int
+	msg       string
 }
 
 func (e typeError) String() string { return fmt.Sprintf("%d: %s", e.line, e.msg) }
@@ -938,6 +1061,7 @@ func typeCheck(dir, output string, src []byte, tags string) ([]typeError, error)
 	}
 	base := filepath.Base(output)
 	var errs []typeError
+	var outside []string // the errors of the other files of the package
 	for _, l := range strings.Split(string(out), "\n") {
 		l = strings.TrimSpace(l)
 		if l == "" || strings.HasPrefix(l, "#") {
@@ -945,12 +1069,20 @@ func typeCheck(dir, output string, src []byte, tags string) ([]typeError, error)
 		}
 		file, rest, _ := strings.Cut(l, ":")
 		if filepath.Base(file) != base {
-			return nil, fmt.Errorf("error outside of the generated file: %s", l)
+			if strings.HasSuffix(file, ".go") && !filepath.IsAbs(file) {
+				l = displayPath(dir, file) + ":" + rest
+			}
+			outside = append(outside, l)
+			continue
 		}
 		ls, rest, _ := strings.Cut(rest, ":")
-		_, msg, _ := strings.Cut(rest, ": ")
+		cs, msg, _ := strings.Cut(rest, ": ")
 		line, _ := strconv.Atoi(ls)
-		errs = append(errs, typeError{line: line, msg: msg})
+		col, _ := strconv.Atoi(cs)
+		errs = append(errs, typeError{line: line, col: col, msg: msg})
+	}
+	if len(outside) > 0 {
+		return nil, fmt.Errorf("the code blocks can not be compiled, since the package of the app does not compile; fix these errors first:\n%s", strings.Join(outside, "\n"))
 	}
 	if len(errs) == 0 {
 		return nil, fmt.Errorf("go build: %v: %s", err, out)

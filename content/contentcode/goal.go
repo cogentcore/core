@@ -7,6 +7,7 @@ package contentcode
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -120,7 +121,7 @@ func readGoalPages(dir, content string) ([]*goalPage, error) {
 	var pages []*goalPage
 	err := walkMarkdown(dir, content, func(rel string, lines []string) {
 		var pg *goalPage
-		forFences(lines, goalFenceStart, func(index, line int, src string) {
+		forFences(lines, goalFenceStart, func(index, line, indent int, src string) {
 			if pg == nil {
 				key, _ := filepath.Rel(filepath.FromSlash(content), filepath.FromSlash(rel))
 				pg = &goalPage{file: rel, key: filepath.ToSlash(key)}
@@ -191,6 +192,10 @@ func main() {
 }
 `
 
+// errNoLab is the error of [transpileGoal] when the module of the app does
+// not provide Lab's Goal transpiler.
+var errNoLab = errors.New("the module of the app does not require cogentcore.org/lab, whose Goal transpiler compiles Goal code")
+
 // transpileGoal transpiles the Goal code of the pages to Go
 // (goalBlock.gocode), with MathRecord set to record, in the package in
 // pkgDir.
@@ -231,7 +236,10 @@ func transpileGoal(pkgDir string, pages []*goalPage, tags string, record bool) e
 	cmd := exec.Command("go", args...)
 	cmd.Dir = filepath.Dir(dir)
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("running the Goal transpiler (the app's module must require cogentcore.org/lab): %v: %s", err, out)
+		if strings.Contains(string(out), "cogentcore.org/lab/goal/transpile") {
+			return fmt.Errorf("%w: %s", errNoLab, out)
+		}
+		return fmt.Errorf("running the Goal transpiler: %v: %s", err, out)
 	}
 	b, err := os.ReadFile(outFile)
 	if err != nil {

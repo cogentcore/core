@@ -80,3 +80,93 @@ func TestGenerate(t *testing.T) {
 		t.Errorf("App(.) = %+v, %v; want nil", c, err)
 	}
 }
+
+func TestMarkdownPos(t *testing.T) {
+	imports := map[string]string{"core": "cogentcore.org/core/core"}
+	// outLine returns the line in the output file and the text of the line
+	// of the generated code of b that contains s, with b starting at line 100.
+	outLine := func(b *block, s string) (int, string) {
+		b.start = 100
+		for i, l := range strings.Split(b.code, "\n") {
+			if strings.Contains(l, s) {
+				return b.start + 1 + i, l
+			}
+		}
+		t.Fatalf("%q not in the code:\n%s", s, b.code)
+		return 0, ""
+	}
+
+	// statements
+	b := &block{line: 10, name: "contentCode3", src: "x := 5\ncore.NewText(b).SetText(undefinedThing)\n\n\n\ny := \"a\"+1\n"}
+	if err := b.generate(imports); err != nil {
+		t.Fatal(err)
+	}
+	line, text := outLine(b, "undefinedThing")
+	if l, c := b.markdownPos(line, strings.Index(text, "undefinedThing")+1, text); l != 11 || c != 25 {
+		t.Errorf("markdownPos = %d:%d; want 11:25", l, c)
+	}
+	// after empty lines, which the generated code has fewer of; the column
+	// is not known, since the code is formatted differently
+	line, text = outLine(b, `"a" + 1`)
+	if l, c := b.markdownPos(line, strings.Index(text, `"a"`)+1, text); l != 15 || c != 0 {
+		t.Errorf("markdownPos = %d:%d; want 15:0", l, c)
+	}
+	if l, c := b.markdownPos(line, 1, "unknown"); l != 10 || c != 0 {
+		t.Errorf("markdownPos of unknown text = %d:%d; want 10:0", l, c)
+	}
+
+	// a program, indented in the markdown file
+	b = &block{line: 20, indent: 4, name: "contentCode4", src: "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(b)\n\tvar s string = 5\n\t_ = s\n}\n"}
+	if err := b.generate(imports); err != nil {
+		t.Fatal(err)
+	}
+	line, text = outLine(b, "var s")
+	if l, c := b.markdownPos(line, strings.Index(text, "5")+1, text); l != 26 || c != 21 {
+		t.Errorf("markdownPos in a program = %d:%d; want 26:21", l, c)
+	}
+	line, text = outLine(b, "Fprintln")
+	if l, _ := b.markdownPos(line, 1, text); l != 25 {
+		t.Errorf("markdownPos of a changed line = %d; want 25", l)
+	}
+
+	// a syntax error, which is at the end of the code
+	b = &block{line: 30, name: "contentCode5", src: "x := 1\ncore.NewButton(b).SetText(\n"}
+	if err := b.generate(imports); err == nil || len(b.errs) == 0 {
+		t.Fatalf("generate = %v, %v; want errors", err, b.errs)
+	}
+	for _, e := range b.errs {
+		if e.line != 31 || e.col != 0 {
+			t.Errorf("syntax error at %d:%d; want 31:0", e.line, e.col)
+		}
+	}
+}
+
+func TestGenerateAppError(t *testing.T) {
+	dir, err := os.MkdirTemp("testdata", "tmp-app")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+	if err := os.CopyFS(dir, os.DirFS("testdata/app")); err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(filepath.Join(dir, "bad.go"), []byte("package main\n\nfunc bad() int { return \"x\" }\n\nfunc bad2() { undefinedFunc() }\n"), 0666)
+	c, err := App(dir)
+	if err != nil || c == nil {
+		t.Fatalf("App = %+v, %v", c, err)
+	}
+	// the errors of the app are all listed, with their files
+	_, err = Generate(c)
+	if err == nil {
+		t.Fatal("Generate succeeded with errors in the app")
+	}
+	bad := filepath.Join(dir, "bad.go")
+	for _, want := range []string{"fix these errors first", bad + ":3:25:", bad + ":5:15: undefined: undefinedFunc"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error does not contain %q: %v", want, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, c.Output)); err == nil {
+		t.Error("output written")
+	}
+}
