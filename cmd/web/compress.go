@@ -11,6 +11,7 @@ import (
 	"os"
 	osexec "os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -49,19 +50,21 @@ type bundleSize struct {
 	Brotli int
 }
 
-// add adds the sizes of the given file contents to the bundle size.
-func (bs *bundleSize) add(b []byte) error {
-	bs.Files++
-	bs.Size += len(b)
+// fileSize returns the size of a bundle of one file with the given contents.
+func fileSize(b []byte) (*bundleSize, error) {
 	gz, err := gzipBytes(b, gzip.DefaultCompression)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	bs.Gzip += len(gz)
-	if bs.Files == 1 || bs.Brotli > 0 {
-		bs.Brotli += brotliSize(b)
-	}
-	return nil
+	return &bundleSize{Files: 1, Size: len(b), Gzip: len(gz), Brotli: brotliSize(b)}, nil
+}
+
+// add adds the given size of other files to the bundle size.
+func (bs *bundleSize) add(o *bundleSize) {
+	bs.Files += o.Files
+	bs.Size += o.Size
+	bs.Gzip += o.Gzip
+	bs.Brotli += o.Brotli
 }
 
 // String returns the sizes in the form used in the build report.
@@ -77,44 +80,87 @@ func (bs *bundleSize) String() string {
 	return s
 }
 
+// jsStaticImport matches a static import of a file of the bundle in
+// the JavaScript output of esbuild, such as from"./app.gs.chunk-x.js",
+// but not a dynamic import("./app.gs.chunk-x.js").
+var jsStaticImport = regexp.MustCompile(`\b(?:from|import)\s*["']\./(app\.gs(?:\.chunk-[\w-]+)?\.js)["']`)
+
+// startupFiles returns the files of the bundle with the given contents that
+// the browser loads at startup: the first one, which is the entry, and the
+// files that it imports statically, directly or through each other. The
+// other files are chunks of [config.Web.DeferredFunctions], which are only
+// loaded when they are first called.
+func startupFiles(files []string, contents map[string][]byte) map[string]bool {
+	startup := map[string]bool{files[0]: true}
+	todo := []string{files[0]}
+	for len(todo) > 0 {
+		f := todo[len(todo)-1]
+		todo = todo[:len(todo)-1]
+		for _, m := range jsStaticImport.FindAllSubmatch(contents[f], -1) {
+			imp := string(m[1])
+			if _, ok := contents[imp]; ok && !startup[imp] {
+				startup[imp] = true
+				todo = append(todo, imp)
+			}
+		}
+	}
+	return startup
+}
+
 // processBundle measures the size of the app bundle in the build output
-// directory (see [bundleFiles]), and gzips its files in place if
+// directory (see [bundleFiles]), in total and of the files loaded at
+// startup (see [startupFiles]), and gzips its files in place if
 // [config.Web.Gzip] is on, in which case [Serve] serves them with
 // Content-Encoding gzip, as must any other server of the app.
-func processBundle(c *config.Config) (*bundleSize, error) {
-	bs := &bundleSize{}
-	for _, f := range bundleFiles(c) {
-		fn := filepath.Join(c.Build.Output, f)
-		b, err := os.ReadFile(fn)
+func processBundle(c *config.Config) (total, startup *bundleSize, err error) {
+	files := bundleFiles(c)
+	contents := map[string][]byte{}
+	for _, f := range files {
+		b, err := os.ReadFile(filepath.Join(c.Build.Output, f))
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		err = bs.add(b)
+		contents[f] = b
+	}
+	atStartup := startupFiles(files, contents)
+	total, startup = &bundleSize{}, &bundleSize{}
+	for _, f := range files {
+		fn := filepath.Join(c.Build.Output, f)
+		b := contents[f]
+		fs, err := fileSize(b)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
+		}
+		total.add(fs)
+		if atStartup[f] {
+			startup.add(fs)
 		}
 		if !c.Web.Gzip {
 			continue
 		}
 		gz, err := gzipBytes(b, gzip.BestCompression)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		err = os.WriteFile(fn, gz, 0666)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
-	return bs, nil
+	return total, startup, nil
 }
 
-// reportBundle prints the given size of the app bundle.
-func reportBundle(c *config.Config, bs *bundleSize) {
+// reportBundle prints the given total size of the app bundle, and the
+// size of its files loaded at startup if that is not all of them.
+func reportBundle(c *config.Config, total, startup *bundleSize) {
 	name := "app.wasm"
 	if IsJS(c) {
 		name = "app.gs.js"
 	}
-	msg := "bundle " + name + ": " + bs.String()
+	msg := "bundle " + name + ": " + total.String()
+	if startup.Files < total.Files {
+		msg += "; loaded at startup: " + startup.String()
+	}
 	if c.Web.Gzip {
 		msg += "; gzipped in place (serve with Content-Encoding: gzip)"
 	}

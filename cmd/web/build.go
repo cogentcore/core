@@ -44,7 +44,7 @@ func Build(c *config.Config) error {
 // finishBuild measures and compresses the app bundle (see [processBundle]),
 // makes the other files of the website, and then reports the bundle size.
 func finishBuild(c *config.Config) error {
-	bs, err := processBundle(c)
+	total, startup, err := processBundle(c)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func finishBuild(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	reportBundle(c, bs)
+	reportBundle(c, total, startup)
 	return nil
 }
 
