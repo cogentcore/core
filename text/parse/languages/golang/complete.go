@@ -40,8 +40,9 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos textpos.Pos) (ld
 		return // need a package
 	}
 
-	fs.SymsMu.RLock()
-	defer fs.SymsMu.RUnlock()
+	// not a read lock, as packages can be added to ExtSyms
+	fs.SymsMu.Lock()
+	defer fs.SymsMu.Unlock()
 
 	pr := gl.Parser()
 	if pr == nil {
@@ -150,8 +151,9 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos textpos.Po
 		return // need a package
 	}
 
-	fs.SymsMu.RLock()
-	defer fs.SymsMu.RUnlock()
+	// not a read lock, as packages can be added to ExtSyms
+	fs.SymsMu.Lock()
+	defer fs.SymsMu.Unlock()
 
 	pr := gl.Parser()
 	if pr == nil {
