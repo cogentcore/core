@@ -118,3 +118,24 @@ func TestRunInWindowEvent(t *testing.T) {
 	b.Close()
 	rc.Unlock()
 }
+
+// A function that [runInCurrentWindow] sends from a goroutine without a lock,
+// as the snackbar for an update of a web app from the browser, runs in the
+// event loop of the current window, with its lock.
+func TestRunInCurrentWindow(t *testing.T) {
+	b := NewBody()
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	done := make(chan *Stage)
+	go runInCurrentWindow(func() {
+		done <- NewBody().AddSnackbarText("A new version is available").
+			NewSnackbar(nil).SetTimeout(0).Run()
+	})
+	st := <-done
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	assert.Same(t, &rw.mains, st.Mains)
+	st.ClosePopup()
+	b.Close()
+	rc.Unlock()
+}

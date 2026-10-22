@@ -157,6 +157,22 @@ func runInEachWindow(f func(w *renderWindow, rc *renderContext)) {
 	}
 }
 
+// runInCurrentWindow runs the given function in the event loop of the
+// current window, where it has the lock of its render context, as for
+// updates from callbacks that do not have a window or a lock, such as
+// those of the browser on the web. It is sent as a custom event, so it
+// does not wait for the function to run. Nothing is done if there is no
+// current window.
+func runInCurrentWindow(f func()) {
+	renderWindowGlobalMu.Lock()
+	w := currentRenderWindow
+	renderWindowGlobalMu.Unlock()
+	if w == nil {
+		return
+	}
+	w.SystemWindow.Events().Custom(windowFunc(f))
+}
+
 // NeedsRender specifies that the widget needs to be rendered.
 func (wb *WidgetBase) NeedsRender() {
 	if DebugSettings.UpdateTrace {
