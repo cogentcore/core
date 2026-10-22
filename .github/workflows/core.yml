@@ -46,7 +46,7 @@ jobs:
         run: go install && core setup
 
       - name: Build Docs
-        run: core build wasm -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
+        run: core build js -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
 
       - name: Build Demo
         run: core build wasm -dir examples/demo -o static/demo
