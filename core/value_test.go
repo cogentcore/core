@@ -26,6 +26,8 @@ func TestBindUpdate(t *testing.T) {
 	name := "Gopher"
 	tf := Bind(&name, NewTextField(b))
 	b.AssertRender(t, "bind/update", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		name = "Cogent Core"
 		tf.Update()
 	})
@@ -37,6 +39,8 @@ func TestBindChange(t *testing.T) {
 
 	tf := Bind(&name, NewTextField(b))
 	b.AssertRender(t, "bind/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		tf.HandleEvent(events.NewKey(events.KeyChord, ' ', 0, 0))
@@ -83,6 +87,8 @@ func TestValidatorValid(t *testing.T) {
 	b := NewBody()
 	tf := Bind(validator("my@string"), NewTextField(b))
 	b.AssertRender(t, "bind/validator-valid", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
 	})
 }
@@ -91,6 +97,8 @@ func TestValidatorInvalid(t *testing.T) {
 	b := NewBody()
 	v := Bind(validator("my string"), NewTextField(b))
 	b.AssertRender(t, "bind/validator-invalid", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		v.SendChange() // trigger validation
 	})
 }

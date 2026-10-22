@@ -27,6 +27,10 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 	if sz == 0 {
 		return nil
 	}
+	// The markup is often done in a background goroutine (see
+	// lines.Lines), while the theme colors can be updated.
+	themeMu.RLock()
+	defer themeMu.RUnlock()
 
 	ttags := lexer.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	// fmt.Println(ttags)

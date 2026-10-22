@@ -55,6 +55,8 @@ func TestSwitchChange(t *testing.T) {
 		checked = sw.IsChecked()
 	})
 	b.AssertRender(t, "switch/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sw.Send(events.Click)
 		assert.True(t, checked)
 		sw.Send(events.Click)

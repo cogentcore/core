@@ -43,7 +43,13 @@ func TestTreeDuplicate(t *testing.T) {
 
 	// The duplicate is checked once its events are handled, before the
 	// window is closed and the tree destroyed.
-	b.AssertRender(t, "tree/duplicate", a.Duplicate, func() {
+	b.AssertRender(t, "tree/duplicate", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		a.Duplicate()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		if n := root.NumChildren(); n != 3 {
 			t.Fatalf("root has %d children after Duplicate, want 3", n)
 		}

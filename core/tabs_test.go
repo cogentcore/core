@@ -38,6 +38,8 @@ func TestTabsClick(t *testing.T) {
 	second, _ := ts.NewTab("Second")
 	NewText(second).SetText("I am second!")
 	b.AssertRender(t, "tabs/click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
 	})
 }
@@ -55,6 +57,8 @@ func TestTabsUpdateSelected(t *testing.T) {
 		text.SetText("I am second!")
 	})
 	b.AssertRender(t, "tabs/click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		// The content of a tab is updated when it is selected, not before.
 		assert.Zero(t, updates)
 		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
@@ -77,6 +81,8 @@ func TestTabsLazy(t *testing.T) {
 	// Only the content of the selected tab is made, and only once.
 	assert.Equal(t, 1, builds)
 	b.AssertRender(t, "tabs/click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		assert.Equal(t, 1, builds)
 		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
 	})
@@ -141,6 +147,8 @@ func TestTabsNewClick(t *testing.T) {
 	ts.NewTab("First")
 	ts.NewTab("Second")
 	b.AssertRender(t, "tabs/new-click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		AsWidget(ts.getTabs().ChildByName("new-tab-button")).Send(events.Click)
 		assert.Equal(t, ts.NumTabs(), 3)
 	})

@@ -55,6 +55,8 @@ func TestContentPages(t *testing.T) {
 				ct.AsyncUnlock()
 			}, func() {
 				time.Sleep(200 * time.Millisecond) // to give the image time to load
+				ct.AsyncLock()
+				defer ct.AsyncUnlock()
 				dumpLeftTrees(t, ct, filepath.Join("testdata", "pages", name+"-tree.txt"))
 			})
 		})

@@ -218,7 +218,7 @@ func UpdateAll() { //types:add
 	clear(gradient.Cache)
 	clear(cursorimg.Cursors)
 
-	for _, w := range AllRenderWindows {
+	for _, w := range AllRenderWindows.windows() {
 		rc := w.mains.renderContext
 		rc.logicalDPI = w.logicalDPI()
 		rc.rebuild = true // trigger full rebuild
@@ -228,7 +228,7 @@ func UpdateAll() { //types:add
 // restyleAll restyles and lays out all windows, as is needed when the fonts
 // that texts are measured with have changed.
 func restyleAll() {
-	for _, w := range AllRenderWindows {
+	for _, w := range AllRenderWindows.windows() {
 		rc := w.renderContext()
 		rc.Lock()
 		rc.restyle = true
@@ -418,7 +418,7 @@ func (as *AppearanceSettingsData) updateLogicalDPI() {
 // settings and zoom factor, and then updates all open windows as well.
 func (as *AppearanceSettingsData) applyDPI() {
 	as.updateLogicalDPI()
-	for _, w := range AllRenderWindows {
+	for _, w := range AllRenderWindows.windows() {
 		w.SystemWindow.SetLogicalDPI(w.SystemWindow.Screen().LogicalDPI)
 		// this isn't DPI-related, but this is the most efficient place to do it
 		w.SystemWindow.SetTitleBarIsDark(matcolor.SchemeIsDark)

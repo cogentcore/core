@@ -4,7 +4,12 @@
 
 package lines
 
-import "cogentcore.org/core/events"
+import (
+	"maps"
+	"slices"
+
+	"cogentcore.org/core/events"
+)
 
 // OnChange adds an event listener function to the view with given
 // unique id, for the [events.Change] event.
@@ -30,6 +35,21 @@ func (ls *Lines) OnInput(vid int, fun func(e events.Event)) {
 	vw := ls.view(vid)
 	if vw != nil {
 		vw.listeners.Add(events.Input, fun)
+	}
+}
+
+// SetAsyncRunner sets the function that runs the listeners of the view
+// with the given unique id for an event that is sent from a background
+// goroutine, as when the syntax highlighting markup has been updated.
+// It must call the given function with whatever lock the listeners need,
+// such as the AsyncLock of a widget, which already holds that lock for
+// events sent while it handles its own events.
+func (ls *Lines) SetAsyncRunner(vid int, run func(f func())) {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	if vw != nil {
+		vw.runAsync = run
 	}
 }
 
@@ -72,6 +92,28 @@ func (ls *Lines) sendInput() {
 	e.Init()
 	for _, vw := range ls.views {
 		vw.listeners.Call(e)
+	}
+}
+
+// sendInputAsync is [Lines.sendInput] for a background goroutine:
+// the listeners of each view are run by its [Lines.SetAsyncRunner]
+// function, if it has one.
+func (ls *Lines) sendInputAsync() {
+	if ls.batchUpdating {
+		return
+	}
+	e := &events.Base{Typ: events.Input}
+	e.Init()
+	// The views can be changed by the goroutines of their widgets meanwhile.
+	ls.Lock()
+	views := slices.Collect(maps.Values(ls.views))
+	ls.Unlock()
+	for _, vw := range views {
+		if vw.runAsync == nil {
+			vw.listeners.Call(e)
+			continue
+		}
+		vw.runAsync(func() { vw.listeners.Call(e) })
 	}
 }
 

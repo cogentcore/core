@@ -72,6 +72,8 @@ func TestFormChange(t *testing.T) {
 		value = p
 	})
 	b.AssertRender(t, "form/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		// [3] is value of second row, which is Age
 		fm.Child(3).(*Spinner).leadingIconButton.Send(events.Click)
 		assert.Equal(t, 1, n)

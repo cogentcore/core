@@ -114,6 +114,8 @@ func TestToolbarOverflow(t *testing.T) {
 func TestToolbarOverflowMenuOpen(t *testing.T) {
 	b, tb, _ := newOverflowToolbarBody(300, 10)
 	b.AssertRender(t, "toolbar/overflow-menu-open", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tb.overflowButton.Send(events.Click)
 	})
 }
@@ -176,6 +178,7 @@ func TestToolbarOverflowResize(t *testing.T) {
 			b.Scene.Resize(math32.Geom2DInt{Size: image.Pt(wd, ht)})
 			b.AsyncUnlock()
 			for range 6 {
+				rw.waitRenderDone() // or the render is skipped
 				rw.renderWindow()
 			}
 			b.AsyncLock()

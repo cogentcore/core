@@ -66,6 +66,8 @@ func TestImageScrolled(t *testing.T) {
 	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
 	b.AssertRender(t, "image/scrolled", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		b.SystemEvents().Scroll(image.Pt(10, 10), math32.Vec2(2, 3))
 	})
 }

@@ -311,7 +311,7 @@ func (sc *Scene) MenuSearchDialog(title, text string) {
 		s.Grow.Set(1, 0)
 	})
 	w.AddItemsFunc(func() {
-		for _, rw := range AllRenderWindows {
+		for _, rw := range AllRenderWindows.windows() {
 			for _, kv := range rw.mains.stack.Order {
 				st := kv.Value
 				// we do not include ourself

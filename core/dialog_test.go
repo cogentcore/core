@@ -18,6 +18,8 @@ func TestDialogMessage(t *testing.T) {
 		s.Min.Set(units.Dp(300))
 	})
 	b.AssertRender(t, "dialog/message", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		MessageDialog(b, "Something happened", "Message")
 	})
 }

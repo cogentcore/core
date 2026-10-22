@@ -129,7 +129,7 @@ func (ls *Lines) asyncMarkup() {
 	ls.Lock()
 	ls.markupApplyTags(tags)
 	ls.Unlock()
-	ls.sendInput()
+	ls.sendInputAsync()
 }
 
 // markupTags generates the new markup tags from the highligher.

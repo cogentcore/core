@@ -257,6 +257,12 @@ func (ed *Base) Init() {
 
 func (ed *Base) Destroy() {
 	ed.stopCursor()
+	// Our view is deleted so that its listeners, which use us,
+	// are not called anymore.
+	if ed.Lines != nil {
+		ed.Lines.DeleteView(ed.viewId)
+		ed.viewId = -1
+	}
 	ed.Frame.Destroy()
 }
 
@@ -350,6 +356,13 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 			}
 			ed.NeedsRender()
 			ed.SendInput()
+		})
+		// The markup is updated in the background, and then the
+		// listeners must have the lock of our scene.
+		ln.SetAsyncRunner(ed.viewId, func(f func()) {
+			ed.AsyncLock()
+			defer ed.AsyncUnlock()
+			f()
 		})
 		ln.OnClose(ed.viewId, func(e events.Event) {
 			ed.SetLines(nil)

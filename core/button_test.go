@@ -65,6 +65,8 @@ func TestButtonMenuClick(t *testing.T) {
 		NewButton(m).SetText("Send message")
 	})
 	b.AssertRender(t, "button/menu-click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		bt.Send(events.Click)
 	})
 }

@@ -52,8 +52,10 @@ var (
 	StylesChanged = false
 )
 
-// themeMu guards usedStyles.
-var themeMu sync.Mutex
+// themeMu guards usedStyles and the theme colors of the style entries,
+// which [UpdateFromTheme] sets while the syntax highlighting markup of
+// [MarkupLineRich] can read them in another goroutine.
+var themeMu sync.RWMutex
 
 // usedStyles holds the names of the styles that [AvailableStyle] has
 // returned. [UpdateFromTheme] updates only these styles, and AvailableStyle

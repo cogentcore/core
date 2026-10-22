@@ -32,6 +32,38 @@ func (wl *renderWindowList) delete(w *renderWindow) {
 	})
 }
 
+// windows returns a copy of the list, which can be used without
+// the lock that protects the list.
+func (wl *renderWindowList) windows() []*renderWindow {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	return slices.Clone(*wl)
+}
+
+// last returns the last window of the list, or nil if it is empty.
+func (wl *renderWindowList) last() *renderWindow {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	if len(*wl) == 0 {
+		return nil
+	}
+	return (*wl)[len(*wl)-1]
+}
+
+// moveToEnd moves the given window to the end of the list,
+// if it is not already the last one.
+func (wl *renderWindowList) moveToEnd(w *renderWindow) {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	if len(*wl) == 0 || (*wl)[len(*wl)-1] == w {
+		return
+	}
+	*wl = slices.DeleteFunc(*wl, func(rw *renderWindow) bool {
+		return rw == w
+	})
+	*wl = append(*wl, w)
+}
+
 // FindName finds the window with the given name or title
 // on the list (case sensitive).
 // It returns the window if found and nil otherwise.

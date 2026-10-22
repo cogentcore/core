@@ -38,6 +38,10 @@ type view struct {
 
 	// listeners is used for sending Change, Input, and Close events to views.
 	listeners events.Listeners
+
+	// runAsync, if set, runs the listeners for an event that is sent from
+	// a background goroutine (see [Lines.SetAsyncRunner]).
+	runAsync func(f func())
 }
 
 // viewLineLen returns the length in chars (runes) of the given view line.

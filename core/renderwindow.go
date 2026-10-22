@@ -105,8 +105,10 @@ type renderWindow struct {
 	// flags are atomic renderWindow flags.
 	flags renderWindowFlags
 
-	// lastResize is the time stamp of last resize event -- used for efficient updating.
-	lastResize time.Time
+	// lastResize is the time stamp of the last render after a resize event,
+	// in Unix nanoseconds, used for efficient updating. It is atomic, as it
+	// is read before the render context is locked.
+	lastResize atomic.Int64
 
 	lastSpriteDraw time.Time
 
@@ -376,8 +378,7 @@ func (w *renderWindow) closed() {
 	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.name)
 	}
-	if len(AllRenderWindows) > 0 {
-		pfw := AllRenderWindows[len(AllRenderWindows)-1]
+	if pfw := AllRenderWindows.last(); pfw != nil {
 		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.name, w.name)
 		}
@@ -538,10 +539,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future
-			if len(AllRenderWindows) > 0 && AllRenderWindows[len(AllRenderWindows)-1] != w {
-				AllRenderWindows.delete(w)
-				AllRenderWindows.add(w)
-			}
+			AllRenderWindows.moveToEnd(w)
 			if !w.flags.HasFlag(winGotFocus) {
 				w.flags.SetFlag(true, winGotFocus)
 				w.sendWinFocusEvent(events.WinFocus)
@@ -684,7 +682,7 @@ func (w *renderWindow) renderWindow() {
 
 	offscreen := TheApp.Platform() == system.Offscreen
 
-	sinceResize := time.Since(w.lastResize)
+	sinceResize := time.Since(time.Unix(0, w.lastResize.Load()))
 	if !offscreen && sinceResize < 100*time.Millisecond {
 		// get many rapid updates during resizing, so just rerender last one if so.
 		// this works best in practice after a lot of experimentation.
@@ -798,7 +796,7 @@ func (w *renderWindow) renderWindow() {
 		atomic.AddInt32(&w.winRenderCounter, 1)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
-			w.lastResize = time.Now()
+			w.lastResize.Store(time.Now().UnixNano())
 		}
 		w.flags.SetFlag(false, winResize)
 	} else {

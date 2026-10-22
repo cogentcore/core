@@ -47,6 +47,8 @@ func TestSliderArrowKeys(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
 	b.AssertRender(t, "slider/arrow-keys", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeLeftArrow, 0))
 		assert.Equal(t, float32(0.4), sr.Value)
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
@@ -68,6 +70,8 @@ func TestSliderStep(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetStep(0.3)
 	b.AssertRender(t, "slider/step", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeRightArrow, 0))
 		tolassert.Equal(t, float32(0.8), sr.Value)
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
@@ -79,6 +83,8 @@ func TestSliderEnforceStep(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetStep(0.2).SetEnforceStep(true)
 	b.AssertRender(t, "slider/enforce-step", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sr.SetValue(0.7)
 		tolassert.Equal(t, float32(0.8), sr.Value)
 	})
@@ -94,6 +100,8 @@ func TestSliderStart(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
 	b.AssertRender(t, "slider/start", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(60, 20), 0)
 	})
 }
@@ -117,6 +125,8 @@ func TestSliderChange(t *testing.T) {
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 		time.Sleep(500 * time.Millisecond)
 	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		assert.Equal(t, 1, n)
 		tolassert.EqualTol(t, 0.75, value, 0.24)
 	})
@@ -136,6 +146,8 @@ func TestSliderChangeClick(t *testing.T) {
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 		time.Sleep(100 * time.Millisecond)
 	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		assert.Equal(t, 1, n)
 		tolassert.EqualTol(t, 0.75, value, 0.24)
 	})
@@ -161,6 +173,8 @@ func TestSliderInput(t *testing.T) {
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 		time.Sleep(500 * time.Millisecond)
 	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tolassert.EqualTol(t, 5, float32(n), 4)
 		tolassert.EqualTol(t, 0.75, value, 0.24)
 	})

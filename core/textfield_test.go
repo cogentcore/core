@@ -56,6 +56,8 @@ func TestTextFieldPasswordClick(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).SetTypePassword().SetText("my password")
 	b.AssertRender(t, "text-field/password-click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.trailingIconButton.Send(events.Click)
 	})
 }
@@ -70,6 +72,8 @@ func TestTextFieldClearClick(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).AddClearButton().SetText("Hello, world!")
 	b.AssertRender(t, "text-field/clear-click", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.trailingIconButton.Send(events.Click)
 		assert.Equal(t, "", tf.Text())
 	})
@@ -82,6 +86,8 @@ func TestTextFieldIcons(t *testing.T) {
 		clicked = true
 	})
 	b.AssertRender(t, "text-field/icons", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.leadingIconButton.Send(events.Click)
 		assert.True(t, clicked)
 	})
@@ -97,6 +103,8 @@ func TestTextFieldValidatorValid(t *testing.T) {
 		return nil
 	})
 	b.AssertRender(t, "text-field/validator-valid", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
 	})
 }
@@ -114,6 +122,8 @@ func TestTextFieldValidatorInvalid(t *testing.T) {
 		return nil
 	})
 	b.AssertRender(t, "text-field/validator-invalid", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
 	})
 }
@@ -126,6 +136,8 @@ func TestTextFieldChange(t *testing.T) {
 		text = tf.Text()
 	})
 	b.AssertRender(t, "text-field/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		assert.Equal(t, "", text)
@@ -144,6 +156,8 @@ func TestTextFieldInput(t *testing.T) {
 		text = tf.Text()
 	})
 	b.AssertRender(t, "text-field/input", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 1, n)
 		assert.Equal(t, "G", text)
