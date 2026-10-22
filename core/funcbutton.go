@@ -348,31 +348,40 @@ func (fb *FuncButton) CallFunc() {
 	str := funcArgsToStruct(fb.Args)
 	sv := NewForm(d).SetStruct(str.Addr().Interface())
 
-	accept := func() {
+	// setArgs sets the arguments from the values edited in the dialog.
+	setArgs := func() {
 		for i := range fb.Args {
 			fb.Args[i].Value = str.Field(i).Interface()
 		}
+	}
+	accept := func() {
+		setArgs()
 		fb.callFuncShowReturns()
 	}
 
 	// If there is a single value button, automatically
 	// open its dialog instead of this one
 	if len(fb.Args) == 1 {
-		curWin := currentRenderWindow
 		sv.UpdateWidget() // need to update first
 		bt := AsButton(sv.Child(1))
 		if bt != nil {
 			bt.OnFinal(events.Change, func(e events.Event) {
-				// the dialog for the argument has been accepted, so we call the function
-				async := false
-				if !tree.IsNil(ctx) && currentRenderWindow != curWin { // calling from another window, must lock
-					async = true
-					ctx.AsWidget().AsyncLock()
+				// The dialog for the argument has been accepted, so we call the
+				// function. This runs in the event loop of the window of this
+				// button, so the arguments are set from it here, and the function
+				// is sent to the window of the context if that is another one,
+				// instead of waiting on its lock.
+				if tree.IsNil(ctx) {
+					accept()
+					return
 				}
-				accept()
-				if async {
-					ctx.AsWidget().AsyncUnlock()
+				cwb := ctx.AsWidget()
+				if cwb.Scene == nil || cwb.Scene.RenderWindow() == nil {
+					accept()
+					return
 				}
+				setArgs()
+				cwb.runInWindow(bt.AsWidget(), fb.callFuncShowReturns)
 			})
 			bt.Scene = fb.Scene // we must use this scene for context
 			bt.Send(events.Click)
