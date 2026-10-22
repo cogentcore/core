@@ -189,7 +189,11 @@ func (pr *Parser) LexAll(fs *FileState) {
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit(fs *FileState) bool {
 	fs.AnonCtr = 0
+	// The symbols of the last parse are cleared, which can still be updated
+	// in another goroutine under the lock, as for the imports of Go.
+	fs.SymsMu.Lock()
 	fs.ParseState.Init(&fs.Src, fs.AST)
+	fs.SymsMu.Unlock()
 	return true
 }
 

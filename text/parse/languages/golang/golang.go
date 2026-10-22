@@ -77,7 +77,11 @@ func (gl *GoLang) ParseFile(fss *parse.FileStates, txt []byte) {
 	// fmt.Println("done parse")
 	if len(pfs.ParseState.Scopes) > 0 { // should be for complete files, not for snippets
 		pkg := pfs.ParseState.Scopes[0]
+		// The symbols can still be updated in the goroutine of the last
+		// parse of this file state, under the lock.
+		pfs.SymsMu.Lock()
 		pfs.Syms[pkg.Name] = pkg // keep around..
+		pfs.SymsMu.Unlock()
 		// fmt.Printf("main pkg name: %v\n", pkg.Name)
 		pfs.WaitGp.Add(1)
 		go func() {
@@ -89,10 +93,12 @@ func (gl *GoLang) ParseFile(fss *parse.FileStates, txt []byte) {
 		if TraceTypes {
 			fmt.Printf("not importing scope for: %v\n", path)
 		}
+		pfs.SymsMu.Lock()
 		pfs.ClearAST()
 		if pfs.AST.HasChildren() {
 			pfs.AST.DeleteChildren()
 		}
+		pfs.SymsMu.Unlock()
 		// fmt.Println("done no import")
 	}
 }
