@@ -9,8 +9,9 @@ import (
 )
 
 func TestFilePicker(t *testing.T) {
-	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := NewBody()
-	NewFilePicker(b)
+	// The files of the directory do not change, unlike those of the
+	// current directory, which are shown by default.
+	NewFilePicker(b).SetFilename("testdata/file-picker/files/")
 	b.AssertRender(t, "file-picker/basic")
 }
