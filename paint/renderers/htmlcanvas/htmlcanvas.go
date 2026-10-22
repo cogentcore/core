@@ -11,6 +11,7 @@ package htmlcanvas
 
 import (
 	"image"
+	"image/draw"
 	"syscall/js"
 
 	"cogentcore.org/core/colors"
@@ -43,6 +44,10 @@ type Renderer struct {
 
 	// hexes holds the CSS color strings of colors, keyed by their RGBA values.
 	hexes map[uint32]string
+
+	// offscreen is whether the canvas was made by [NewImage],
+	// in which case [Renderer.Image] returns its contents.
+	offscreen bool
 }
 
 // canvasState is the part of the canvas context state that the renderer
@@ -77,9 +82,41 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	// rs.ctx.Set("imageSmoothingQuality", "high")
 }
 
-// todo: could return wrapped JS image grabbed from canvas.
-func (rs *Renderer) Image() image.Image { return nil }
-func (rs *Renderer) Source() []byte     { return nil }
+// NewImage returns an HTMLCanvas renderer that renders to a new canvas
+// element of the given size that is not in the document, so that the
+// rendered image can be obtained with [Renderer.Image]. Text is shaped
+// and drawn by the browser, unlike with the rasterx image renderer.
+func NewImage(size math32.Vector2) *Renderer {
+	rs := New(size).(*Renderer)
+	sz := size.ToPointCeil()
+	c := js.Global().Get("document").Call("createElement", "canvas")
+	c.Set("width", sz.X)
+	c.Set("height", sz.Y)
+	rs.SetCanvas(c)
+	rs.offscreen = true
+	return rs
+}
+
+// Image returns the contents of the canvas as an [image.RGBA] for a
+// renderer made by [NewImage], and nil otherwise, as the canvases of other
+// renderers are drawn directly in the document.
+func (rs *Renderer) Image() image.Image {
+	if !rs.offscreen {
+		return nil
+	}
+	w, h := rs.Canvas.Get("width").Int(), rs.Canvas.Get("height").Int()
+	img := image.NewNRGBA(image.Rect(0, 0, w, h))
+	if w == 0 || h == 0 {
+		return img
+	}
+	data := rs.ctx.Call("getImageData", 0, 0, w, h).Get("data")
+	js.CopyBytesToGo(img.Pix, js.Global().Get("Uint8Array").New(data.Get("buffer")))
+	rgba := image.NewRGBA(img.Rect)
+	draw.Draw(rgba, rgba.Rect, img, image.Point{}, draw.Src)
+	return rgba
+}
+
+func (rs *Renderer) Source() []byte { return nil }
 
 func (rs *Renderer) SetCanvas(c js.Value) {
 	// A change of the canvas size resets its state, so the cached state is
