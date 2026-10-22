@@ -16,8 +16,7 @@ import (
 	"github.com/go-text/typesetting/shaping"
 )
 
-// maxShapeCache is the number of texts that the shape cache holds before
-// it starts over.
+// maxShapeCache is the number of texts that the shape cache holds at most.
 const maxShapeCache = 8192
 
 // shapeCache caches the shaped outputs of texts. The layout of a text wraps
@@ -25,6 +24,10 @@ const maxShapeCache = 8192
 // different sizes, and pages repeat texts (such as the cells of a table), but
 // the shaping of a text does not depend on the size it is wrapped to. Shaping
 // is the main cost of wrapping, so the cache saves most of it.
+//
+// When the cache is full, the least recently used text is dropped, so the
+// texts that are in use, such as those of the rest of a window while an
+// editor scrolls through a long text, are kept.
 type shapeCache struct {
 
 	// entries are the cached texts by hash, with hash collisions chained.
@@ -32,6 +35,10 @@ type shapeCache struct {
 
 	// n is the number of entries.
 	n int
+
+	// newest and oldest are the most and least recently used entries,
+	// the ends of the list of entries in the order of their use.
+	newest, oldest *shapeEntry
 
 	// settings are the [rich.Settings] that the entries were shaped with.
 	settings rich.SettingsData
@@ -59,8 +66,14 @@ type shapeEntry struct {
 	// wraps are the most recent wrappings of the outputs.
 	wraps []wrapEntry
 
+	// hash is the hash of the text and style.
+	hash uint32
+
 	// next is the next entry with the same hash.
 	next *shapeEntry
+
+	// newer and older are the next entries in the order of their use.
+	newer, older *shapeEntry
 }
 
 // maxWraps is the number of wrappings of a text that a [shapeEntry] holds.
@@ -102,6 +115,7 @@ type boundsEntry struct {
 
 // ResetCache empties the cache of shaped and wrapped texts, as when the
 // fonts that they are measured with change.
+// This should already have the mutex lock.
 func (sh *Shaper) ResetCache() {
 	sh.shapes.reset()
 }
@@ -109,6 +123,7 @@ func (sh *Shaper) ResetCache() {
 // ForgetTexts removes the cached texts for which forget returns true, given
 // the text and the custom font of its style, as when the fonts of some of
 // their runes have changed, and returns how many it removed.
+// This should already have the mutex lock, and is used by shapedjs.
 func (sh *Shaper) ForgetTexts(forget func(tx rich.Text, customFont rich.FontName) bool) int {
 	return sh.shapes.forget(forget)
 }
@@ -121,6 +136,7 @@ func (sc *shapeCache) forget(forget func(tx rich.Text, customFont rich.FontName)
 		var kept, last *shapeEntry
 		for ; se != nil; se = se.next {
 			if forget(se.tx, se.customFont) {
+				sc.unlink(se)
 				removed++
 				continue
 			}
@@ -150,6 +166,7 @@ func (sc *shapeCache) forget(forget func(tx rich.Text, customFont rich.FontName)
 func (sc *shapeCache) reset() {
 	sc.entries = nil
 	sc.n = 0
+	sc.newest, sc.oldest = nil, nil
 }
 
 // hashText returns the hash of the text and the style values that shaping
@@ -192,6 +209,10 @@ func (sc *shapeCache) get(tx rich.Text, tsty *text.Style) (*shapeEntry, uint32) 
 	h := hashText(tx, tsty)
 	for se := sc.entries[h]; se != nil; se = se.next {
 		if se.matches(tx, tsty) {
+			if se != sc.newest {
+				sc.unlink(se)
+				sc.pushNewest(se)
+			}
 			return se, h
 		}
 	}
@@ -201,22 +222,72 @@ func (sc *shapeCache) get(tx rich.Text, tsty *text.Style) (*shapeEntry, uint32) 
 // add adds an entry with a copy of the outputs of the given text and style,
 // with the hash that get returned.
 func (sc *shapeCache) add(tx rich.Text, tsty *text.Style, h uint32, outs []shaping.Output) *shapeEntry {
-	// A full cache starts over.
-	if sc.entries == nil || sc.n >= maxShapeCache {
+	// A full cache drops its least recently used entry.
+	if sc.entries == nil {
 		sc.entries = make(map[uint32]*shapeEntry)
-		sc.n = 0
+	}
+	if sc.n >= maxShapeCache {
+		sc.remove(sc.oldest)
 	}
 
 	// The entry has its own copies of the text and the outputs.
-	se := &shapeEntry{tx: make(rich.Text, len(tx)), fontSize: tsty.FontSize.Dots, direction: tsty.Direction, customFont: tsty.CustomFont}
+	se := &shapeEntry{tx: make(rich.Text, len(tx)), fontSize: tsty.FontSize.Dots, direction: tsty.Direction, customFont: tsty.CustomFont, hash: h}
 	for i, s := range tx {
 		se.tx[i] = slices.Clone(s)
 	}
 	se.outs = copyOutputs(outs)
 	se.next = sc.entries[h]
 	sc.entries[h] = se
+	sc.pushNewest(se)
 	sc.n++
 	return se
+}
+
+// remove removes the entry from the cache.
+func (sc *shapeCache) remove(se *shapeEntry) {
+	// The entry is taken out of the chain of its hash.
+	var prev *shapeEntry
+	for e := sc.entries[se.hash]; e != se; e = e.next {
+		prev = e
+	}
+	switch {
+	case prev != nil:
+		prev.next = se.next
+	case se.next != nil:
+		sc.entries[se.hash] = se.next
+	default:
+		delete(sc.entries, se.hash)
+	}
+	sc.unlink(se)
+	sc.n--
+}
+
+// pushNewest adds the entry to the list of entries in the order of their
+// use as the most recently used one.
+func (sc *shapeCache) pushNewest(se *shapeEntry) {
+	se.older = sc.newest
+	se.newer = nil
+	if sc.newest != nil {
+		sc.newest.newer = se
+	} else {
+		sc.oldest = se
+	}
+	sc.newest = se
+}
+
+// unlink removes the entry from the list of entries in the order of their use.
+func (sc *shapeCache) unlink(se *shapeEntry) {
+	if se.newer != nil {
+		se.newer.older = se.older
+	} else {
+		sc.newest = se.older
+	}
+	if se.older != nil {
+		se.older.newer = se.newer
+	} else {
+		sc.oldest = se.newer
+	}
+	se.newer, se.older = nil, nil
 }
 
 // copyOutputs returns a copy of the outputs with their own glyphs, as line

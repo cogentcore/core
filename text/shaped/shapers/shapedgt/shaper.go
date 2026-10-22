@@ -87,6 +87,8 @@ func NewShaperWithFonts(fss []fs.FS) shaped.Shaper {
 func (sh *Shaper) FontMap() *fontscan.FontMap {
 	// The caller may set the query or script of the map, or add fonts,
 	// which can change how texts are shaped.
+	sh.Lock()
+	defer sh.Unlock()
 	sh.fontMap.forget()
 	sh.shapes.reset()
 	return sh.fontMap.FontMap
