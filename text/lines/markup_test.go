@@ -7,6 +7,7 @@ package lines
 import (
 	"testing"
 
+	"cogentcore.org/core/events"
 	_ "cogentcore.org/core/system/driver"
 	"github.com/stretchr/testify/assert"
 )
@@ -259,4 +260,34 @@ style="fill:#fbbd0e;stroke:none"/></svg>
 	}
 	// fmt.Println(jtxt)
 	assert.Equal(t, join, jtxt)
+}
+
+// The Input event of a background markup update is not sent to a view
+// that is deleted while the event is sent, as by the widget of the view
+// when it is closed meanwhile.
+func TestSendInputAsyncDeleted(t *testing.T) {
+	lns, vid0 := NewLinesFromBytes("dummy.go", 40, []byte("package main\n"))
+	vid1 := lns.NewView(40)
+	calls := map[int]int{}
+	for _, vid := range []int{vid0, vid1} {
+		lns.OnInput(vid, func(e events.Event) {
+			calls[vid]++
+		})
+		// The view that runs first deletes the other one.
+		lns.SetAsyncRunner(vid, func(f func()) {
+			if len(calls) == 0 {
+				other := vid0
+				if vid == vid0 {
+					other = vid1
+				}
+				lns.DeleteView(other)
+			}
+			f()
+		})
+	}
+	lns.sendInputAsync()
+	assert.Equal(t, 1, len(calls))
+	for _, n := range calls {
+		assert.Equal(t, 1, n)
+	}
 }

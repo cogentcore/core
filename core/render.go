@@ -70,6 +70,33 @@ func (wb *WidgetBase) AsyncLock() {
 	wb.Scene.setFlag(true, sceneUpdating)
 }
 
+// AsyncLockIfShown is like [WidgetBase.AsyncLock], but it never waits for
+// the scene to be shown or blocks forever: if the widget has been deleted,
+// or its [Scene] has no render context because it has not been shown yet
+// or is no longer shown (as while it is being closed), it returns false
+// without locking. Otherwise it locks and returns true, and it must have
+// a matching [WidgetBase.AsyncUnlock] after it. It is for updates from a
+// separate goroutine that only matter for a widget that is shown, such
+// as updates that just render it again, so that a goroutine that updates
+// several widgets is not stuck on one of them.
+func (wb *WidgetBase) AsyncLockIfShown() bool {
+	if wb.This == nil || wb.Scene == nil {
+		return false
+	}
+	rc := wb.Scene.renderContext()
+	if rc == nil {
+		return false
+	}
+	rc.Lock()
+	// The scene can have been closed while we waited for the lock.
+	if wb.This == nil || wb.Scene.renderContext() != rc {
+		rc.Unlock()
+		return false
+	}
+	wb.Scene.setFlag(true, sceneUpdating)
+	return true
+}
+
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncLock] before it.

@@ -116,6 +116,35 @@ func TestBaseMulti(t *testing.T) {
 	b.AssertRender(t, "multi")
 }
 
+// The views of a shared Lines get the updates of the background markup
+// even when there are other views whose scenes are not shown, which
+// must not block them.
+func TestBaseMultiNotShown(t *testing.T) {
+	b := core.NewBody()
+	tb := lines.NewLines()
+	ed := NewBase(b).SetLines(tb)
+	for range 8 {
+		NewBase(core.NewBody()).SetLines(tb)
+	}
+	inputs := make(chan struct{}, 100)
+	ed.OnInput(func(e events.Event) {
+		inputs <- struct{}{}
+	})
+	b.AssertRender(t, "multi-not-shown", func() {
+		b.AsyncLock()
+		tb.SetLanguage(fileinfo.Go).SetString("package main\n\nfunc main() {\n}\n")
+		b.AsyncUnlock()
+		for len(inputs) > 0 { // the inputs of setting the text
+			<-inputs
+		}
+		select {
+		case <-inputs:
+		case <-time.After(5 * time.Second):
+			t.Error("no input from the background markup")
+		}
+	})
+}
+
 func TestEditorChange(t *testing.T) {
 	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()

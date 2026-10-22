@@ -358,9 +358,14 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 			ed.SendInput()
 		})
 		// The markup is updated in the background, and then the
-		// listeners must have the lock of our scene.
+		// listeners must have the lock of our scene. They only render
+		// us again, so they are skipped if our scene is not shown, so
+		// that a scene that is closing does not block the updates of the
+		// other views.
 		ln.SetAsyncRunner(ed.viewId, func(f func()) {
-			ed.AsyncLock()
+			if !ed.AsyncLockIfShown() {
+				return
+			}
 			defer ed.AsyncUnlock()
 			f()
 		})

@@ -6,7 +6,6 @@ package lines
 
 import (
 	"maps"
-	"slices"
 
 	"cogentcore.org/core/events"
 )
@@ -104,17 +103,34 @@ func (ls *Lines) sendInputAsync() {
 	}
 	e := &events.Base{Typ: events.Input}
 	e.Init()
-	// The views can be changed by the goroutines of their widgets meanwhile.
+	// The views can be changed by the goroutines of their widgets meanwhile,
+	// so a view that has been deleted since is skipped: its widget can be
+	// gone. That is checked under the lock of the runner, which the widget
+	// holds when it deletes its view.
 	ls.Lock()
-	views := slices.Collect(maps.Values(ls.views))
+	views := maps.Clone(ls.views)
 	ls.Unlock()
-	for _, vw := range views {
+	for vid, vw := range views {
 		if vw.runAsync == nil {
-			vw.listeners.Call(e)
+			if ls.hasView(vid, vw) {
+				vw.listeners.Call(e)
+			}
 			continue
 		}
-		vw.runAsync(func() { vw.listeners.Call(e) })
+		vw.runAsync(func() {
+			if ls.hasView(vid, vw) {
+				vw.listeners.Call(e)
+			}
+		})
 	}
+}
+
+// hasView returns whether the given view is still the view with the
+// given id, so that it has not been deleted.
+func (ls *Lines) hasView(vid int, vw *view) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.views[vid] == vw
 }
 
 // sendClose sends a new [events.Close] event to all views listeners.

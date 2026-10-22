@@ -6,6 +6,7 @@ package core
 
 import (
 	"testing"
+	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -281,4 +282,44 @@ func TestNeedsRenderChild(t *testing.T) {
 	fr.AddChild(added)
 	assert.True(t, fr.hasFlag(widgetChildNeedsRender))
 	assert.True(t, sc.AsWidget().hasFlag(widgetChildNeedsRender))
+}
+
+// AsyncLockIfShown locks only for a widget that is shown, and it does not
+// block for a widget that is not shown yet, has been deleted, or whose
+// scene has been closed.
+func TestAsyncLockIfShown(t *testing.T) {
+	lockIfShown := func(w Widget) bool {
+		locked := make(chan bool)
+		go func() {
+			locked <- w.AsWidget().AsyncLockIfShown()
+		}()
+		select {
+		case ok := <-locked:
+			if ok {
+				w.AsWidget().AsyncUnlock()
+			}
+			return ok
+		case <-time.After(5 * time.Second):
+			t.Fatal("AsyncLockIfShown blocked")
+			return false
+		}
+	}
+
+	b := NewBody()
+	bt := NewButton(b)
+	other := NewButton(b)
+	assert.False(t, lockIfShown(bt), "not shown yet")
+	b.runAndShowNewWindow()
+	assert.True(t, lockIfShown(bt), "shown")
+
+	b.AsyncLock()
+	other.Delete()
+	b.AsyncUnlock()
+	assert.False(t, lockIfShown(other), "deleted")
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
+	assert.False(t, lockIfShown(bt), "closed")
 }
