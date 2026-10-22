@@ -29,19 +29,20 @@ appInitWebAssembly();
 // -----------------------------------------------------------------------------
 
 // appLoadFonts starts loading the regular and italic faces of the fonts of
-// the app (the faces have all weights), so that they load while the app
-// loads, without waiting for them. Regular Noto Sans also loads its Latin
-// Extended and Greek faces (about 190 KB), which names and math use;
-// otherwise they load when the first text that needs them is rendered, and
-// the app styles and lays out everything again then. The app measures its texts with them, and texts
-// measured before their face has loaded are measured with a fallback font,
-// so the app lays out all of its texts again when the face loads, which made
-// the first page with code or italic text take twice as long.
+// the app (with the Latin runes; the faces have all weights), so that they
+// load while the app loads, without waiting for them. The app measures its
+// texts with them, and texts measured before their face has loaded are
+// measured with a fallback font, so the app lays out all of its texts again
+// when the face loads, which made the first page with code or italic text
+// take twice as long. Regular Noto Sans also loads the faces of the
+// characters of the FontText web setting (the cogentcore-font-text meta
+// element), such as "āΩ" for Latin Extended and Greek.
 function appLoadFonts() {
   if (!document.fonts) {
     return;
   }
-  document.fonts.load('16px "Noto Sans"', 'aāΩ').catch(() => { }); // Latin, Latin Extended, Greek
+  const text = document.querySelector('meta[name="cogentcore-font-text"]')?.content || '';
+  document.fonts.load('16px "Noto Sans"', 'a' + text).catch(() => { });
   for (const font of ['italic 16px "Noto Sans"', '16px "Roboto Mono"', 'italic 16px "Roboto Mono"']) {
     document.fonts.load(font).catch(() => { });
   }

@@ -40,6 +40,9 @@
     </script>
     {{- end}}
     {{- end}}
+    {{- if .FontText}}
+    <meta name="cogentcore-font-text" content="{{.FontText}}">
+    {{- end}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link

@@ -52,6 +52,14 @@ type Web struct { //types:add
 	// This is often used for custom fonts; see https://cogentcore.org/core/font.
 	Styles []string
 
+	// FontText is text whose characters the app starts loading the faces
+	// of its regular text font for at startup, in addition to the Latin
+	// ones; for example, "āΩ" loads the Latin Extended and Greek faces
+	// (about 190 KB) for a site with names or math that use them. Without
+	// it, those faces load when the first text that needs them is rendered,
+	// and the app then styles and lays out everything again.
+	FontText string
+
 	// DeferredFunctions are exported functions (package/path.Function) that
 	// js builds load when they are first called (GoScript --deferred-function):
 	// their packages, and the packages that only they use, are in separate

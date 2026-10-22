@@ -7,6 +7,7 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"html"
 	"log/slog"
 	"os"
 	"text/template"
@@ -155,6 +156,7 @@ type indexHTMLData struct {
 	SiteName               string
 	Image                  string
 	Styles                 []string
+	FontText               string
 	VanityURL              string
 	GithubVanityRepository string
 	PreRenderHTML          string
@@ -188,6 +190,7 @@ func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPag
 		SiteName:               c.Name,
 		Image:                  c.Web.Image,
 		Styles:                 c.Web.Styles,
+		FontText:               html.EscapeString(c.Web.FontText),
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
 		PreRenderHTML:          prp.HTML,

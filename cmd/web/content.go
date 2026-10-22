@@ -248,6 +248,7 @@ func makeContentPage(c *config.Config, site *bcontent.Site, prp *bcontent.PreRen
 			SiteName:               html.EscapeString(c.Name),
 			Image:                  c.Web.Image,
 			Styles:                 c.Web.Styles,
+			FontText:               html.EscapeString(c.Web.FontText),
 			VanityURL:              c.Web.VanityURL,
 			GithubVanityRepository: c.Web.GithubVanityRepository,
 			JS:                     IsJS(c),
