@@ -49,7 +49,7 @@ jobs:
         run: core build js -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core
 
       - name: Build Demo
-        run: core build wasm -dir examples/demo -o static/demo
+        run: core build js -dir examples/demo -o static/demo
 
       - name: Setup Pages
         id: pages
