@@ -286,12 +286,14 @@ func ValuesExtended[T, E EnumConstraint](values []T, extendedValues []E) []Enum 
 	return res
 }
 
-// HasFlag returns whether this bit flag value has the given bit flag set.
+// HasFlag returns whether this bit flag value has the given bit flag set,
+// using an atomic load.
 func HasFlag(i *int64, f BitFlag) bool {
 	return atomic.LoadInt64(i)&(1<<uint32(f.Int64())) != 0
 }
 
-// HasAnyFlags returns whether this bit flag value has any of the given bit flags set.
+// HasAnyFlags returns whether this bit flag value has any of the given bit flags set,
+// using an atomic load.
 func HasAnyFlags(i *int64, f ...BitFlag) bool {
 	var mask int64
 	for _, v := range f {
@@ -300,19 +302,17 @@ func HasAnyFlags(i *int64, f ...BitFlag) bool {
 	return atomic.LoadInt64(i)&mask != 0
 }
 
-// SetFlag sets the value of the given flags in these flags to the given value.
+// SetFlag atomically sets the value of the given flags in these flags
+// to the given value.
 func SetFlag(i *int64, on bool, f ...BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
 	}
-	in := atomic.LoadInt64(i)
 	if on {
-		in |= mask
-		atomic.StoreInt64(i, in)
+		atomic.OrInt64(i, mask)
 	} else {
-		in &^= mask
-		atomic.StoreInt64(i, in)
+		atomic.AndInt64(i, ^mask)
 	}
 }
 

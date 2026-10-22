@@ -73,10 +73,14 @@ func (g *Generator) FindEnumTypes() error {
 	return generate.Inspect(g.Pkg, g.InspectForType, "enumgen.go", "typegen.go")
 }
 
-// AllowedEnumTypes are the types that can be used for enums
-// that are not bit flags (bit flags can only be int64s).
-// It is stored as a map for quick and convenient access.
-var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true, "int16": true, "int8": true, "uint": true, "uint64": true, "uint32": true, "uint16": true, "uint8": true}
+// AllowedEnumTypes are the types that can be used for enums and bit flags,
+// mapped to their number of bits (int and uint are counted as 32 bits,
+// their minimum size, for the bit flag limits).
+var AllowedEnumTypes = map[string]int64{"int": 32, "int64": 64, "int32": 32, "int16": 16, "int8": 8, "uint": 32, "uint64": 64, "uint32": 32, "uint16": 16, "uint8": 8}
+
+// AllowedAtomicTypes are the types that can be used for bit flags
+// with atomic operations (the -atomic flag).
+var AllowedAtomicTypes = map[string]bool{"int64": true, "int32": true}
 
 // InspectForType looks at the given AST node and adds it
 // to [Generator.Types] if it is marked with an appropriate
@@ -124,20 +128,23 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
 		utyp := typ.Underlying()
 
-		tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg}
+		tt := &Type{Name: ts.Name.Name, Type: ts, Config: cfg, Underlying: utyp.String(), Bits: AllowedEnumTypes[utyp.String()]}
 		// if our direct type isn't the same as our underlying type, we are extending our direct type
 		if cfg.Extend && typnm != utyp.String() {
 			tt.Extends = typnm
 		}
 		switch dir.Directive {
 		case "enum":
-			if !AllowedEnumTypes[utyp.String()] {
+			if tt.Bits == 0 {
 				return false, fmt.Errorf("enum type %s is not allowed; try using a standard [un]signed integer type instead", typnm)
 			}
 			tt.IsBitFlag = false
 		case "bitflag":
-			if utyp.String() != "int64" {
-				return false, fmt.Errorf("bit flag enum type %s is not allowed; bit flag enums must be of type int64", typnm)
+			if tt.Bits == 0 {
+				return false, fmt.Errorf("bit flag enum type %s is not allowed; try using a standard [un]signed integer type instead", typnm)
+			}
+			if cfg.Atomic && !AllowedAtomicTypes[tt.Underlying] {
+				return false, fmt.Errorf("atomic bit flag enum type %s is not allowed; atomic bit flag enums must be of type int32 or int64", typnm)
 			}
 			tt.IsBitFlag = true
 		}
@@ -197,6 +204,9 @@ func (g *Generator) Generate() (bool, error) {
 
 		g.BuildBasicMethods(values, typ)
 		if typ.IsBitFlag {
+			if typ.MaxValueP1 > typ.Bits {
+				return true, fmt.Errorf("bit flag type %s has bit index values up to %d, which do not fit in its %d-bit underlying type %s", typ.Name, typ.MaxValueP1-1, typ.Bits, typ.Underlying)
+			}
 			g.BuildBitFlagMethods(values, typ)
 		}
 

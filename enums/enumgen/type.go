@@ -28,9 +28,17 @@ type Type struct {
 	Name       string        // The name of the type
 	Type       *ast.TypeSpec // The standard AST type value
 	IsBitFlag  bool          // Whether the type is a bit flag type
+	Underlying string        // The underlying integer type of the type (int64, int32, etc)
+	Bits       int64         // The number of bits in the underlying integer type
 	Extends    string        // The type that this type extends, if any ("" if it doesn't extend)
 	MaxValueP1 int64         // the highest defined value for the type, plus one
 	Config     *Config       // Configuration information set in the comment directive for the type; is initialized to generator config info first
+}
+
+// AtomicType returns the name of the underlying type of the type
+// as used in the names of the [sync/atomic] functions (Int32 or Int64).
+func (t *Type) AtomicType() string {
+	return strcase.ToCamel(t.Underlying)
 }
 
 // Value represents a declared constant.

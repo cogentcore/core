@@ -20,7 +20,7 @@ package mypackage
 ...
 ```
 
-Enum types are simply defined as any other Go type would be, just with a comment directive after it. Standard enum types can be defined as any signed or unsigned integer type, although `int32` is preferred because enum types could need to be big but never need to be giant. Bit flag enum types must be `int64`; see [Bit flag enums](#bit-flag-enums) for why.
+Enum types are simply defined as any other Go type would be, just with a comment directive after it. Standard enum types can be defined as any signed or unsigned integer type, although `int32` is preferred because enum types could need to be big but never need to be giant. Bit flag enum types can also be any integer type with enough bits for all of their flags, and `int32` is preferred for them too; see [Bit flag enums](#bit-flag-enums) for more information.
 
 After the type declaration of *each* enum, add one of the following two comment directives:
 
@@ -42,7 +42,7 @@ const (
     Peach
 )
 
-type MyBitFlagEnum int64 //enums:bitflag
+type MyBitFlagEnum int32 //enums:bitflag
 
 const (
     Enabled MyBitFlagEnum = iota
@@ -115,7 +115,13 @@ Then `Sunday.Desc()` will be `Sunday is the first day of the week`.
 
 ## Bit flag enums
 
-Bit flag enums are just enums that are **not** mutually exclusive, so you can have multiple of them specified at once. Each option/flag that can be specified occupies one bit, meaning that you should have a large type to avoid running out of space. Therefore, enumgen currently requires all bit flags to be of type `int64`, and there can be no more than 64 values for a bit flag enum type.
+Bit flag enums are just enums that are **not** mutually exclusive, so you can have multiple of them specified at once. Each option/flag that can be specified occupies one bit, so the underlying integer type of a bit flag enum type must have at least as many bits as the type has values (including those of any enum it extends): no more than 64 values for `int64`, 32 for `int32` (and `int` and `uint`, which are treated as 32 bits for this), and so on. Enumgen reports an error for a bit flag type that does not have enough bits. Use `int32` unless you need more than 32 flags: `int64` values are much slower than `int32` values in JavaScript (the `js` platform), where they are represented as `BigInt`s.
+
+By default, the generated `HasFlag` and `SetFlag` methods are plain, non-atomic operations, like those on any other integer value, so a bit flag value that is set in one goroutine and read or set in another must be protected by a mutex. Alternatively, add the `-atomic` flag to the comment directive of a bit flag type that is accessed from multiple goroutines, and its `HasFlag` and `SetFlag` methods use atomic operations instead (`SetFlag` then atomically sets or clears the given bits without affecting any other bits). Atomic bit flags must be of type `int32` or `int64`:
+
+```go
+type WindowFlags int32 //enums:bitflag -atomic
+```
 
 This package implements bit flag enums using enum values that specify a _bit index_ for the flag, which is then used with bit shifting to create the actual bit mask.  Thus, the enum values are just sequential integers like a normal enum, which allows the names to be looked up using a slice index, and are generally easier to read and understand as simple integers.
 

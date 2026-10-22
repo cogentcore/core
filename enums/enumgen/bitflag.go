@@ -21,14 +21,52 @@ func (g *Generator) BuildBitFlagMethods(runs []Value, typ *Type) {
 	g.ExecTmpl(SetFlagMethodTmpl, typ)
 }
 
+// The HasFlag and SetFlag methods use the bit index of a flag of the
+// same type directly when [enums.FlagTypeAssert] is true (in JavaScript),
+// instead of calling its Int64 method through the [enums.BitFlag] interface.
+// Atomic bit flags use [sync/atomic] functions on their underlying int32
+// or int64 value.
+
 var HasFlagMethodTmpl = template.Must(template.New("HasFlagMethod").Parse(
 	`// HasFlag returns whether these bit flags have the given bit flag set.
-func (i *{{.Name}}) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+func (i *{{.Name}}) HasFlag(f enums.BitFlag) bool {
+	if enums.FlagTypeAssert {
+		if b, ok := f.({{.Name}}); ok {
+			return {{template "value" .}}&(1<<uint32(b)) != 0
+		}
+	}
+	return {{template "value" .}}&(1<<uint32(f.Int64())) != 0
+}
+{{- define "value"}}{{if .Config.Atomic}}atomic.Load{{.AtomicType}}((*{{.Underlying}})(i)){{else}}*i{{end}}{{end}}
 `))
 
 var SetFlagMethodTmpl = template.Must(template.New("SetFlagMethod").Parse(
 	`// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *{{.Name}}) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *{{.Name}}) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask {{if .Config.Atomic}}{{.Underlying}}{{else}}{{.Name}}{{end}}
+	for _, v := range f {
+		if enums.FlagTypeAssert {
+			if b, ok := v.({{.Name}}); ok {
+				mask |= 1 << uint32(b)
+				continue
+			}
+		}
+		mask |= 1 << v.Int64()
+	}
+{{- if .Config.Atomic}}
+	if on {
+		atomic.Or{{.AtomicType}}((*{{.Underlying}})(i), mask)
+	} else {
+		atomic.And{{.AtomicType}}((*{{.Underlying}})(i), ^mask)
+	}
+{{- else}}
+	if on {
+		*i |= mask
+	} else {
+		*i &^= mask
+	}
+{{- end}}
+}
 `))
 
 var StringMethodBitFlagTmpl = template.Must(template.New("StringMethodBitFlag").Parse(
