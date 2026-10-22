@@ -420,29 +420,7 @@ func (ps *State) RuleString(full bool) string {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-//  ScopeRuleSet and NonMatch
-
-// ScopeRule is a scope and a rule, for storing matches / nonmatch
-type ScopeRule struct {
-	Scope textpos.Region
-	Rule  *Rule
-}
-
-// ScopeRuleSet is a map by scope of RuleSets, for non-matching rules.
-type ScopeRuleSet map[ScopeRule]struct{}
-
-// Add a rule to scope set, with auto-alloc
-func (rs ScopeRuleSet) Add(scope textpos.Region, pr *Rule) {
-	sr := ScopeRule{scope, pr}
-	rs[sr] = struct{}{}
-}
-
-// Has checks if scope rule set has given scope, rule
-func (rs ScopeRuleSet) Has(scope textpos.Region, pr *Rule) bool {
-	sr := ScopeRule{scope, pr}
-	_, has := rs[sr]
-	return has
-}
+//  NonMatch
 
 // nonMatchSet has the rules that did not match for the scopes that start at
 // its position in [State.nonMatches], with the line and character of the end
