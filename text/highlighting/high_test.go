@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/token"
 	"github.com/alecthomas/chroma/v3"
-	"github.com/alecthomas/chroma/v3/lexers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -182,7 +181,7 @@ func TestMarkupDiff(t *testing.T) {
 	hi := Highlighter{}
 	hi.SetStyle(HighlightingName("emacs"))
 
-	clex := lexers.Get("diff")
+	clex := GetLexer("diff")
 	ctags, _ := ChromaTagsLine(clex, src)
 
 	// hitrg := `[{Name 0 4 {0 0}} {KeywordType: string 12 18 {0 0}} {EOS 18 18 {0 0}}]`
@@ -215,7 +214,7 @@ func TestMarkupSpellErr(t *testing.T) {
 	hi := Highlighter{}
 	hi.SetStyle(HighlightingName("emacs"))
 
-	clex := lexers.Get("markdown")
+	clex := GetLexer("markdown")
 	ctags, _ := ChromaTagsLine(clex, src)
 	etags := lexer.Line{}
 	etags.AddLex(token.KeyToken{Token: token.TextSpellErr}, 10, 16)
@@ -252,7 +251,7 @@ func TestMarkupSpellErr(t *testing.T) {
 // chroma lexes with a nested Go lexer pulled through iter.Pull.
 func TestMarkupNestedCode(t *testing.T) {
 	src := "# Title\n\n```go\nfunc main() { return }\n```\n\ntext\n"
-	hi := Highlighter{lexer: chroma.Coalesce(lexers.Get("markdown"))}
+	hi := Highlighter{lexer: chroma.Coalesce(GetLexer("markdown"))}
 	tags, err := hi.chromaTagsAll([]byte(src))
 	assert.NoError(t, err)
 	if assert.Len(t, tags, 7) {

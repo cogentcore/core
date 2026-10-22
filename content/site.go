@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/token"
 	"cogentcore.org/core/tree"
-	"github.com/alecthomas/chroma/v3/lexers"
 )
 
 // generateSite generates the JSON [bcontent.Site] data for the website
@@ -123,7 +122,7 @@ func codeHTML(code, lang string) string {
 	if strings.EqualFold(lx, "goal") {
 		lx = "go"
 	}
-	clex := lexers.Get(lx)
+	clex := highlighting.GetLexer(lx)
 	lines := strings.Split(strings.TrimRight(code, "\n"), "\n")
 	for i, ln := range lines {
 		if i > 0 {

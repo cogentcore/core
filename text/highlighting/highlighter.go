@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/text/token"
 	"github.com/alecthomas/chroma/v3"
 	"github.com/alecthomas/chroma/v3/formatters/html"
-	"github.com/alecthomas/chroma/v3/lexers"
 )
 
 // UseParse is whether syntax highlighting, completion, lookup and
@@ -101,9 +100,9 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	}
 
 	if hi.parseLanguage == nil {
-		lexer := lexers.MatchMimeType(info.Mime)
+		lexer := Lexers().MatchMimeType(info.Mime)
 		if lexer == nil {
-			lexer = lexers.Match(info.Name)
+			lexer = Lexers().Match(info.Name)
 		}
 		if lexer != nil {
 			hi.language = lexer.Config().Name
@@ -124,7 +123,7 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 	}
 
 	if hi.lexer != nil && hi.language != hi.lastLanguage {
-		hi.lexer = chroma.Coalesce(lexers.Get(hi.language))
+		hi.lexer = chroma.Coalesce(GetLexer(hi.language))
 		hi.formatter = html.New(html.WithClasses(true), html.TabWidth(hi.TabSize))
 		hi.lastLanguage = hi.language
 	}
