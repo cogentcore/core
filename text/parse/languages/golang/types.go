@@ -7,6 +7,7 @@ package golang
 import (
 	"fmt"
 	"strings"
+	"sync/atomic"
 
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/parser"
@@ -291,18 +292,18 @@ func (gl *GoLang) TypeFromASTPrim(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 	return nil, false
 }
 
-var typeDepth int
+// typeDepth is the depth of nested [GoLang.TypeFromASTComp] calls, to stop
+// runaway recursion. It is atomic because packages can be parsed in
+// different goroutines at the same time.
+var typeDepth atomic.Int32
 
 // TypeFromASTComp handles composite type processing
 func (gl *GoLang) TypeFromASTComp(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.AST) (*syms.Type, bool) {
-	typeDepth++
-	if typeDepth > 100 {
-		typeDepth = 0
+	if typeDepth.Add(1) > 100 {
+		typeDepth.Store(0)
 		return nil, false
 	}
-	defer func() {
-		typeDepth--
-	}()
+	defer typeDepth.Add(-1)
 
 	tnm := gl.ASTTypeName(tyast)
 	newTy := false
