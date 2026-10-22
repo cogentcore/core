@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"maps"
 	"sort"
+	"sync/atomic"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -30,6 +31,14 @@ type Map struct {
 
 	// list of colors to interpolate between
 	Colors []color.RGBA
+
+	// table is the lookup table of blended colors used by [Map.Map],
+	// built after lutMinCalls calls and rebuilt when Blend or Colors change.
+	table atomic.Pointer[lut]
+
+	// exactCalls is the number of calls to [Map.Map] blending exactly
+	// before the table is built.
+	exactCalls atomic.Int32
 }
 
 func (cm *Map) String() string {
@@ -38,7 +47,23 @@ func (cm *Map) String() string {
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor
 // which can be used to indicate missing values.
+// Unless Blend is [colors.RGB], which is fast to blend directly, colors
+// between the map colors come from a lookup table of the blended colors,
+// built once the map has been used enough for it to pay off, which is
+// within one level per channel of the exact blend returned by
+// [Map.MapExact] and usually equal to it.
 func (cm *Map) Map(val float32) color.RGBA {
+	return cm.mapValue(val, false)
+}
+
+// MapExact returns color for normalized value in range 0-1 like [Map.Map],
+// but blends the colors exactly instead of using a lookup table.
+func (cm *Map) MapExact(val float32) color.RGBA {
+	return cm.mapValue(val, true)
+}
+
+// mapValue implements [Map.Map] and [Map.MapExact].
+func (cm *Map) mapValue(val float32, exact bool) color.RGBA {
 	nc := len(cm.Colors)
 	if nc == 0 {
 		return color.RGBA{}
@@ -60,10 +85,36 @@ func (cm *Map) Map(val float32) color.RGBA {
 	if lidx == uidx {
 		return cm.Colors[int(lidx)]
 	}
+	if !exact && cm.Blend != colors.RGB {
+		if lt := cm.lookupTable(); lt != nil {
+			return lt.lookup(int(lidx), ival-lidx)
+		}
+	}
 	cmix := 100 * (1 - (ival - lidx))
 	lclr := cm.Colors[int(lidx)]
 	uclr := cm.Colors[int(uidx)]
 	return colors.Blend(cm.Blend, cmix, lclr, uclr)
+}
+
+// lutMinCalls is the number of calls to [Map.Map] that blend exactly
+// before the lookup table is built, which costs about as much as that,
+// so that maps used only a little (e.g., to show them) do not build it.
+const lutMinCalls = 1000
+
+// lookupTable returns the lookup table for the current Blend and Colors,
+// building it if needed, or nil if it is not built yet.
+// Concurrent callers may each build a table, and the last one built is kept.
+func (cm *Map) lookupTable() *lut {
+	lt := cm.table.Load()
+	if lt != nil && lt.matches(cm) {
+		return lt
+	}
+	if lt == nil && cm.exactCalls.Add(1) <= lutMinCalls {
+		return nil
+	}
+	lt = newLUT(cm)
+	cm.table.Store(lt)
+	return lt
 }
 
 // MapIndex returns color for given index, for scale in Indexed mode.

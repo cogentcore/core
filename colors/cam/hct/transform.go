@@ -104,6 +104,13 @@ func MinHueDistance(a, b float32) float32 {
 // blending is done directly on non-premultiplied HCT values, and
 // a correctly premultiplied color is returned.
 func Blend(pct float32, x, y color.Color) color.RGBA {
+	return BlendHCT(pct, x, y).AsRGBA()
+}
+
+// BlendHCT returns the HCT color that [Blend] returns as a [color.RGBA],
+// whose unrounded R, G, B, and A values are useful for interpolating
+// between blended colors.
+func BlendHCT(pct float32, x, y color.Color) HCT {
 	hx := FromColor(x)
 	hy := FromColor(y)
 	pct = math32.Clamp(pct, 0, 100)
@@ -120,7 +127,7 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	tone := px*hx.Tone + py*hy.Tone
 	hr := New(hue, chroma, tone)
 	hr.A = px*hx.A + py*hy.A
-	return hr.AsRGBA()
+	return hr
 }
 
 // IsLight returns whether the given color is light
