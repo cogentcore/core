@@ -128,9 +128,15 @@ type windowFunc func()
 // cannot deadlock. The function is not run if the widget is no longer shown,
 // or has been deleted by the time that it would run in the other window.
 func (wb *WidgetBase) runInWindow(from *WidgetBase, f func()) {
-	// A widget that has been deleted, such as one in a form that has been
-	// remade while a dialog that it opened was open, is not updated.
-	if wb.This == nil || wb.Scene == nil {
+	// A widget that has been deleted is not updated.
+	if wb.This == nil {
+		return
+	}
+	// A widget that is not in a window, such as the argument value of a
+	// solo [FuncButton] (see [CallFunc]), is updated directly, from the
+	// event loop of the other widget, as nothing renders it.
+	if wb.Scene == nil {
+		f()
 		return
 	}
 	rw := wb.Scene.RenderWindow()

@@ -104,8 +104,44 @@ func TestValidatorInvalid(t *testing.T) {
 	})
 }
 
-// Accepting the dialog of a value whose widget has been deleted meanwhile,
-// as when the form that has it is remade, does nothing instead of crashing.
+// Accepting the dialog of the argument of a function called with CallFunc,
+// as for a command run from a keyboard shortcut, calls the function: the
+// argument value widget of the solo FuncButton is not in any window.
+func TestCallFuncArgAccept(t *testing.T) {
+	b := NewBody()
+	ctx := NewText(b).SetText("Context")
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	b.waitNoEvents(rw)
+
+	called := make(chan callFuncItems, 1)
+	b.AsyncLock()
+	CallFunc(ctx, func(items callFuncItems) {
+		called <- items
+	})
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+
+	// Closing the dialog of the argument accepts it.
+	b.AsyncLock()
+	d := rw.mains.top().Scene
+	assert.NotEqual(t, b.Scene, d, "the dialog is not open")
+	d.Close()
+	b.AsyncUnlock()
+	select {
+	case <-called:
+	case <-time.After(10 * time.Second):
+		t.Fatal("the function was not called")
+	}
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
+}
+
+// Accepting the dialog of a value whose widget has been deleted meanwhile
+// does nothing instead of crashing.
 func TestValueDialogDeletedWidget(t *testing.T) {
 	b := NewBody()
 	fb := NewFileButton(b)
