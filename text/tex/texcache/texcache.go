@@ -36,8 +36,13 @@ type cached struct {
 	// use scale transform to render in new target size.
 	FontSizeDots float32
 
-	// actual loaded, scaled PPath.
+	// actual loaded PPath, in FontSizeDots.
 	pp ppath.Path
+
+	// sizes are the paths scaled from pp to other font sizes in dots,
+	// which are made once per size, so that texts of different sizes
+	// sharing an expression do not scale it again on each use.
+	sizes map[float32]ppath.Path
 
 	// call DeleteUnused to remove any that haven't been accessed or added.
 	used bool
@@ -84,9 +89,17 @@ func Get(expr string, fontSizeDots float32) ppath.Path {
 	if cd.FontSizeDots == fontSizeDots {
 		return cd.pp.Clone()
 	}
-	sc := fontSizeDots / cd.FontSizeDots
-	np := cd.pp.Clone().Scale(sc, sc)
-	cache[expr] = &cached{FontSizeDots: fontSizeDots, pp: np, used: true}
+	// Other sizes are scaled from the path in its own size, not from
+	// another scaled one, so they are the same in any order of use.
+	np, ok := cd.sizes[fontSizeDots]
+	if !ok {
+		sc := fontSizeDots / cd.FontSizeDots
+		np = cd.pp.Clone().Scale(sc, sc)
+		if cd.sizes == nil {
+			cd.sizes = make(map[float32]ppath.Path)
+		}
+		cd.sizes[fontSizeDots] = np
+	}
 	return np.Clone()
 }
 
