@@ -266,21 +266,16 @@ func (st *Stage) runWindow() *Stage {
 	// Desktop new windows and non-full windows can pref size.
 	if !TheApp.Platform().IsMobile() &&
 		(st.NewWindow || !st.FullWindow || cw == nil) {
-		sz = sc.contentSize(sz)
-		// On offscreen, we don't want any extra space, as we want the smallest
-		// possible representation of the content.
-		if TheApp.Platform() != system.Offscreen {
-			sz = sz.Add(image.Pt(20, 20))
-			screen := st.targetScreen()
-			if screen != nil {
-				st.SetScreen(screen.ScreenNumber)
-				if st.NewWindow && st.UseMinSize {
-					// we require windows to be at least 60% and no more than 80% of the
-					// screen size by default
-					scsz := screen.PixelSize
-					sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
-					sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
-				}
+		initSz := sz
+		sz = st.windowSize(initSz)
+		// A new window is first sized for the size class of a scene with
+		// no size yet. If that gives a size of another size class, it is
+		// sized again for that one, as it is laid out for it once shown.
+		if sc.RenderWindow() == nil {
+			if sizeClassOf(sc.dotsToDp(sz).X) != sizeClassOf(sc.dotsToDp(sc.SceneGeom.Size).X) {
+				sc.sizingSize = sz
+				sz = st.windowSize(initSz)
+				sc.sizingSize = image.Point{}
 			}
 		}
 	}
@@ -313,6 +308,30 @@ func (st *Stage) runWindow() *Stage {
 		st.setMains(ms)
 	}
 	return st
+}
+
+// windowSize returns the size of the window of the stage, based on the
+// size of the content of its scene within the given initial size.
+func (st *Stage) windowSize(initSz image.Point) image.Point {
+	sz := st.Scene.contentSize(initSz)
+	// On offscreen, we don't want any extra space, as we want the smallest
+	// possible representation of the content.
+	if TheApp.Platform() == system.Offscreen {
+		return sz
+	}
+	sz = sz.Add(image.Pt(20, 20))
+	screen := st.targetScreen()
+	if screen != nil {
+		st.SetScreen(screen.ScreenNumber)
+		if st.NewWindow && st.UseMinSize {
+			// we require windows to be at least 60% and no more than 80% of the
+			// screen size by default
+			scsz := screen.PixelSize
+			sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
+			sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
+		}
+	}
+	return sz
 }
 
 // getValidContext ensures that the Context is non-nil and has a valid

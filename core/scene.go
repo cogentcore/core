@@ -93,6 +93,11 @@ type Scene struct { //core:no-new
 	// source renderer for rendering the scene
 	Renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
+	// sizingSize is the size, in dots, that the scene of a new window is
+	// expected to have, which determines its [SizeClasses] while it is sized
+	// to its content (see [WidgetBase.SceneSize]).
+	sizingSize image.Point
+
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
 	lastRender renderParams

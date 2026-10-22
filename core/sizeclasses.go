@@ -4,7 +4,11 @@
 
 package core
 
-import "cogentcore.org/core/math32"
+import (
+	"image"
+
+	"cogentcore.org/core/math32"
+)
 
 // SizeClasses are the different size classes that a window can have.
 type SizeClasses int32 //enums:enum -trim-prefix Size
@@ -26,22 +30,38 @@ const (
 // SceneSize returns the effective size of the scene in which the widget is contained
 // in terms of dp (density-independent pixels).
 func (wb *WidgetBase) SceneSize() math32.Vector2 {
-	dots := math32.FromPoint(wb.Scene.SceneGeom.Size)
-	if wb.Scene.hasFlag(sceneContentSizing) {
-		if cw := getCurrentRenderWindow(); cw != nil {
-			rg := cw.SystemWindow.RenderGeom()
-			dots = math32.FromPoint(rg.Size)
+	sc := wb.Scene
+	dots := sc.SceneGeom.Size
+	// While the scene is sized to its content, the size of the window that it
+	// is shown in is used, if it has one. A scene of a new window does not
+	// have one yet, so the size it is expected to have is used instead, once
+	// that is known (see [Stage.runWindow]). It is
+	// never the current window, which a new window is not shown in, and which
+	// changes as other windows are opened and closed.
+	if sc.hasFlag(sceneContentSizing) {
+		if rw := sc.RenderWindow(); rw != nil {
+			dots = rw.SystemWindow.RenderGeom().Size
+		} else if sc.sizingSize != (image.Point{}) {
+			dots = sc.sizingSize
 		}
 	}
-	dpd := wb.Scene.Styles.UnitContext.Dp(1) // dots per dp
-	dp := dots.DivScalar(dpd)                // dots / (dots / dp) = dots * (dp / dots) = dp
-	return dp
+	return sc.dotsToDp(dots)
+}
+
+// dotsToDp converts the given size in dots to dp (density-independent pixels).
+func (sc *Scene) dotsToDp(dots image.Point) math32.Vector2 {
+	dpd := sc.Styles.UnitContext.Dp(1)           // dots per dp
+	return math32.FromPoint(dots).DivScalar(dpd) // dots / (dots / dp) = dots * (dp / dots) = dp
 }
 
 // SizeClass returns the size class of the scene in which the widget is contained
 // based on [WidgetBase.SceneSize].
 func (wb *WidgetBase) SizeClass() SizeClasses {
-	dp := wb.SceneSize().X
+	return sizeClassOf(wb.SceneSize().X)
+}
+
+// sizeClassOf returns the size class for the given width in dp.
+func sizeClassOf(dp float32) SizeClasses {
 	switch {
 	case dp < 600:
 		return SizeCompact
