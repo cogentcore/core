@@ -311,9 +311,10 @@ func (sc *Scene) MenuSearchDialog(title, text string) {
 		s.Grow.Set(1, 0)
 	})
 	w.AddItemsFunc(func() {
+		// The stages of other windows are read under the lock of their
+		// stack, and raised in the event loop of their window.
 		for _, rw := range AllRenderWindows.windows() {
-			for _, kv := range rw.mains.stack.Order {
-				st := kv.Value
+			for _, st := range rw.mains.list() {
 				// we do not include ourself
 				if st == sc.Stage || st == w.Scene.Stage {
 					continue
@@ -322,7 +323,11 @@ func (sc *Scene) MenuSearchDialog(title, text string) {
 					Text:    st.Title,
 					Icon:    icons.Toolbar,
 					Tooltip: "Show " + st.Title,
-					Func:    st.raise,
+					Func: func() {
+						if stsc := st.Scene; stsc != nil {
+							stsc.runInWindow(w.AsWidget(), st.raise)
+						}
+					},
 				})
 			}
 		}
