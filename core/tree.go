@@ -632,7 +632,14 @@ func (tr *Tree) Position() {
 	rn := tr.Root.AsCoreTree()
 	tr.setBranchState()
 	sz := &tr.Geom.Size
-	sz.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
+	// A node extends to the right edge of the root, so it is as wide as its
+	// parent node minus its offset from the parent (its indent within the
+	// content of the parent). The scene positions of the nodes can not be
+	// used for this, as they are only set after this, in ApplyScenePos,
+	// and they are not set yet for new nodes.
+	if ptr := AsTree(tr.Parent); ptr != nil && tr != rn {
+		sz.Actual.Total.X = ptr.widgetSize.X - (ptr.Geom.contentOffset.X + tr.Geom.RelPos.X)
+	}
 	sz.Actual.Content.X = sz.Actual.Total.X - sz.Space.X
 	tr.widgetSize.X = sz.Actual.Total.X
 	sz.Alloc = sz.Actual
