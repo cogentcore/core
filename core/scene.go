@@ -310,12 +310,16 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	}
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Renderer != nil {
+		// A renderer without an image (such as the HTML canvas renderer
+		// on the web) has the size of the scene it was last resized to.
 		img := sc.Renderer.Image()
 		if img != nil {
 			isz := img.Bounds().Size()
 			if isz == geom.Size {
 				return false
 			}
+		} else if _, rsz := sc.Renderer.Size(); rsz == sz && sc.SceneGeom.Size == geom.Size {
+			return false
 		}
 	} else {
 		sc.Renderer = paint.NewSourceRenderer(sz)
@@ -326,13 +330,18 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	// sc.updateScene() // note: doing this every resize can be very expensive, and is unnec in general. really you just need a layout.
-	sc.applyStyleScene()
+	// The scene is restyled by its next update, before it is laid out, so
+	// that several resizes before an update, as when a window is shown,
+	// style it only once.
+	sc.lastRender.invalidate()
 	// restart the multi-render updating after resize, to get windows to update correctly while
 	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584),
 	// to get windows on Windows (OS) to update after a window snap (see
 	// https://github.com/cogentcore/core/issues/497),
 	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered
 	// on both iOS and Android in different contexts.
+	// It also lays the scene out a second time, which wraps texts to their
+	// new sizes (the first layout sizes them to their previous allocation).
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()

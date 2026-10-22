@@ -315,10 +315,9 @@ func (w *renderWindow) resized() {
 			fmt.Printf("Win: %v same-size resized: %v newDPI: %v\n", w.name, curRg, newDPI)
 		}
 		if w.mains.resize(rg) || newDPI {
+			// The scenes are restyled by their next update.
 			for _, kv := range w.mains.stack.Order {
-				st := kv.Value
-				sc := st.Scene
-				sc.applyStyleScene()
+				kv.Value.Scene.lastRender.invalidate()
 			}
 		}
 		return
@@ -594,6 +593,12 @@ type renderParams struct {
 // params differ from those used in last render.
 func (rp *renderParams) needsRestyle(rc *renderContext) bool {
 	return rp.logicalDPI != rc.logicalDPI || rp.geom != rc.geom
+}
+
+// invalidate makes [renderParams.needsRestyle] return true until the next
+// [renderParams.saveRender], so that the scene is restyled by its next update.
+func (rp *renderParams) invalidate() {
+	rp.logicalDPI = -1 // never a valid DPI
 }
 
 // saveRender grabs current render context params
