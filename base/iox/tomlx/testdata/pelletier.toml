@@ -1,0 +1,252 @@
+EmbedName = 'embedded'
+EmbedInt = 7
+String = 'hello'
+Quoted = "it's \"quoted\" \\ back"
+Multiline = "line one\nline two\ttab"
+Unicode = 'héllo 世界'
+Bool = true
+Int = -42
+Int8 = -8
+Int64 = 1099511627776
+Uint8 = 200
+Uint32 = 4000000000
+Float32 = 3.14
+Float64 = 2.718281828459045
+WholeFloat = 100.0
+Dur = 5000000000
+Durs = [
+  1000000,
+  250000000,
+  120000000000
+]
+Time = 2024-03-15T10:30:00Z
+Enum = 'Banana'
+Enums = [
+  'Apple',
+  'Banana'
+]
+Chord = 'Control+S'
+Floats = [
+  0.25,
+  0.25,
+  0.5,
+  0.0
+]
+Ints = [
+  1,
+  2,
+  3
+]
+Strings = [
+  'a',
+  'b c',
+  "d'e"
+]
+EmptySlice = []
+NilSlice = []
+Bytes = [
+  98,
+  121,
+  116,
+  101,
+  115
+]
+renamed_field = 'renamed'
+AnyValue = 'any string'
+
+[Color]
+  R = 66
+  G = 133
+  B = 244
+  A = 255
+
+[Inner]
+  Name = 'inner'
+  Value = 0.5
+  Dur = 1500000000
+  Tags = [
+    'x',
+    'y'
+  ]
+
+  [Inner.Color]
+    R = 10
+    G = 20
+    B = 30
+    A = 255
+
+[InnerPtr]
+  Name = 'ptr'
+  Value = 2.5
+  Dur = 1500000000
+  Tags = [
+    'x',
+    'y'
+  ]
+
+  [InnerPtr.Color]
+    R = 10
+    G = 20
+    B = 30
+    A = 255
+
+[[Inners]]
+  Name = 'a'
+  Value = 1.0
+  Dur = 1500000000
+  Tags = [
+    'x',
+    'y'
+  ]
+
+  [Inners.Color]
+    R = 10
+    G = 20
+    B = 30
+    A = 255
+
+[[Inners]]
+  Name = 'b'
+  Value = 0.1
+  Dur = 1500000000
+  Tags = [
+    'x',
+    'y'
+  ]
+
+  [Inners.Color]
+    R = 10
+    G = 20
+    B = 30
+    A = 255
+
+[[InnerPtrs]]
+  Name = 'a'
+  Value = 1.0
+  Dur = 1500000000
+  Tags = [
+    'x',
+    'y'
+  ]
+
+  [InnerPtrs.Color]
+    R = 10
+    G = 20
+    B = 30
+    A = 255
+
+[StringMap]
+  'a.b' = 'dotted'
+  k1 = 'v1'
+  'key two' = 'v2'
+
+[IntMap]
+  -3 = 'minus three'
+  1 = 'one'
+  20 = 'twenty'
+
+[Int64Map]
+  100 = 1.5
+
+[UintMap]
+  7 = true
+
+[EnumMap]
+  Apple = 'red'
+  Banana = 'yellow'
+
+[EnumPtrMap]
+  [EnumPtrMap.Apple]
+    Name = 'ptr'
+    Value = 2.5
+    Dur = 1500000000
+    Tags = [
+      'x',
+      'y'
+    ]
+
+    [EnumPtrMap.Apple.Color]
+      R = 10
+      G = 20
+      B = 30
+      A = 255
+
+[ChordMap]
+  'Control+A' = 'Apple'
+  'Shift+B' = 'Banana'
+
+[StructMap]
+  [StructMap.first]
+    Name = 'a'
+    Value = 1.0
+    Dur = 1500000000
+    Tags = [
+      'x',
+      'y'
+    ]
+
+    [StructMap.first.Color]
+      R = 10
+      G = 20
+      B = 30
+      A = 255
+
+[IntBoolMap]
+  0 = true
+  1 = false
+
+[EmptyMap]
+
+[AnyMap]
+  Float = 1.5
+  Int = 3
+  Str = 's'
+
+  [AnyMap.Sub]
+    X = 1
+
+[NestedMap]
+  [NestedMap.outer]
+    1 = 'a'
+    2 = 'b'
+
+[Option]
+  Valid = true
+
+  [[Option.Value]]
+    Name = 'MacStandard'
+    Desc = 'Standard Mac'
+
+    [Option.Value.Map]
+      'Command+S' = 'Apple'
+      'Control+X' = 'Banana'
+
+  [[Option.Value]]
+    Name = 'Empty'
+    Desc = 'no map'
+
+[List]
+  Keys = [
+    'srv1'
+  ]
+
+  [[List.Values]]
+    Name = 'b'
+    Value = 0.1
+    Dur = 1500000000
+    Tags = [
+      'x',
+      'y'
+    ]
+
+    [List.Values.Color]
+      R = 10
+      G = 20
+      B = 30
+      A = 255
+
+[[SliceOfMaps]]
+  a = 1
+
+[[SliceOfMaps]]
+  b = 2
