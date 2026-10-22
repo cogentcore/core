@@ -452,7 +452,7 @@ func arrayData(data any) ([]any, bool) {
 // or from a string for a byte slice.
 func decodeSlice(v reflect.Value, data any, path string) error {
 	if s, ok := data.(string); ok && v.Type().Elem().Kind() == reflect.Uint8 {
-		v.Set(reflect.ValueOf([]byte(s)).Convert(v.Type()))
+		v.SetBytes([]byte(s))
 		return nil
 	}
 	a, ok := arrayData(data)

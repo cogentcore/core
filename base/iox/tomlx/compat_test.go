@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"cogentcore.org/core/base/goscript"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,35 +26,13 @@ func expectedCompat() *compatData {
 	return v
 }
 
-// assertCompat asserts that the given values are equal.
-// Under goscript, it compares their encodings instead, as its
-// reflect.DeepEqual does not yet treat values made by reflect the same
-// as the others, and it skips the fields with generic struct types,
-// which its reflect reports as having type any.
-func assertCompat(t *testing.T, want, got *compatData) {
-	t.Helper()
-	if !goscript.Enabled {
-		assert.Equal(t, want, got)
-		return
-	}
-	for _, v := range []*compatData{want, got} {
-		v.Option = compatOption[[]compatMapsItem]{}
-		v.List = compatList[string, *compatInner]{}
-	}
-	wb, err := WriteBytes(want)
-	require.NoError(t, err)
-	gb, err := WriteBytes(got)
-	require.NoError(t, err)
-	assert.Equal(t, string(wb), string(gb))
-}
-
 // TestReadPelletier tests reading a file written by the previous
 // pelletier-based version, which has durations as integers and maps
 // with integer and enum keys.
 func TestReadPelletier(t *testing.T) {
 	var v compatData
 	require.NoError(t, Open(&v, pelletierFile))
-	assertCompat(t, expectedCompat(), &v)
+	assert.Equal(t, expectedCompat(), &v)
 }
 
 // TestWritePelletier tests that the encoding is identical to that of
@@ -75,7 +52,7 @@ func TestRoundTrip(t *testing.T) {
 	require.NoError(t, err)
 	var v compatData
 	require.NoError(t, ReadBytes(&v, b))
-	assertCompat(t, expectedCompat(), &v)
+	assert.Equal(t, expectedCompat(), &v)
 
 	// the settings save code encodes a map of fields
 	m := map[string]any{"Dur": 2 * time.Second, "IntMap": map[int]string{3: "c"}, "Enum": enumApple, "Inners": compatValue().Inners}
@@ -109,7 +86,7 @@ func TestReadBurntSushi(t *testing.T) {
 	require.NoError(t, Open(&v, burntSushiFile))
 	want := burntSushiValue()
 	want.EmptyMap = map[string]int{}
-	assertCompat(t, want, &v)
+	assert.Equal(t, want, &v)
 }
 
 // TestMerge tests that reading into an existing value only changes
