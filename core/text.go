@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -331,8 +332,8 @@ func (tx *Text) Init() {
 // updateRichText gets the richtext from Text, using HTML parsing.
 func (tx *Text) updateRichText() {
 	sty, tsty := tx.Styles.NewRichText()
-	src := richTextSource{text: tx.Text, pre: tsty.WhiteSpace.KeepWhiteSpace(), style: sty.ToRunes()}
-	if tx.richText != nil && src.equal(&tx.richSource) {
+	src := richTextSource{text: tx.Text, pre: tsty.WhiteSpace.KeepWhiteSpace(), style: sty.ToRunes(), scheme: colors.Scheme}
+	if tx.richText != nil && src.equal(&tx.richSource) && !tx.NeedsRebuild() {
 		return
 	}
 	tx.richSource = src
@@ -345,16 +346,21 @@ func (tx *Text) updateRichText() {
 }
 
 // richTextSource is the source of the rich text of a [Text]: its text,
-// whether its white space is kept, and its encoded rich text style.
+// whether its white space is kept, its encoded rich text style, and
+// the color scheme, which gives the colors of links and of marked and
+// code text. [colors.SetSchemes] and [colors.SetScheme] (as in a change
+// of the color or theme settings) set a new scheme, and a full rebuild
+// ([UpdateAll]) also makes the rich text again.
 type richTextSource struct {
-	text  string
-	pre   bool
-	style []rune
+	text   string
+	pre    bool
+	style  []rune
+	scheme *matcolor.Scheme
 }
 
 // equal returns whether the sources are the same.
 func (rs *richTextSource) equal(o *richTextSource) bool {
-	return rs.text == o.text && rs.pre == o.pre && slices.Equal(rs.style, o.style)
+	return rs.text == o.text && rs.pre == o.pre && rs.scheme == o.scheme && slices.Equal(rs.style, o.style)
 }
 
 // findLink finds the text link at the given scene-local position. If it
