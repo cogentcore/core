@@ -20,6 +20,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// waitMarkup returns a function to pass to [core.Body.AssertRender] that
+// does the background syntax highlighting of the given editor again and
+// waits for its input event, so that the highlighting is always rendered.
+// Otherwise it is done after a delay, which can be before or after the
+// render, and its update is skipped while the editor is not shown yet.
+func waitMarkup(t *testing.T, ed *Base) func() {
+	inputs := make(chan struct{}, 100)
+	ed.OnInput(func(e events.Event) {
+		inputs <- struct{}{}
+	})
+	return func() {
+		for len(inputs) > 0 {
+			<-inputs
+		}
+		ed.Lines.ReMarkup()
+		select {
+		case <-inputs:
+		case <-time.After(10 * time.Second):
+			t.Error("no input from the background markup")
+		}
+	}
+}
+
 func TestBase(t *testing.T) {
 	b := core.NewBody()
 	NewBase(b)
@@ -43,7 +66,7 @@ func TestBaseLayout(t *testing.T) {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(25)
 	})
-	b.AssertRender(t, "layout")
+	b.AssertRender(t, "layout", waitMarkup(t, ed))
 }
 
 func TestBaseTabs(t *testing.T) {
@@ -53,7 +76,7 @@ func TestBaseTabs(t *testing.T) {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(25)
 	})
-	b.AssertRender(t, "tabs1")
+	b.AssertRender(t, "tabs1", waitMarkup(t, ed))
 }
 
 func TestBaseSetLanguage(t *testing.T) {
@@ -68,7 +91,7 @@ func main() {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(29)
 	})
-	b.AssertRender(t, "set-lang")
+	b.AssertRender(t, "set-lang", waitMarkup(t, ed))
 }
 
 //go:embed base.go
@@ -76,8 +99,9 @@ var myFile embed.FS
 
 func TestBaseOpenFS(t *testing.T) {
 	b := core.NewBody()
-	errors.Log(NewBase(b).Lines.OpenFS(myFile, "base.go"))
-	b.AssertRender(t, "open-fs")
+	ed := NewBase(b)
+	errors.Log(ed.Lines.OpenFS(myFile, "base.go"))
+	b.AssertRender(t, "open-fs", waitMarkup(t, ed))
 }
 
 func TestBaseOpen(t *testing.T) {
@@ -87,20 +111,20 @@ func TestBaseOpen(t *testing.T) {
 		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open("base.go"))
-	b.AssertRender(t, "open")
+	b.AssertRender(t, "open", waitMarkup(t, ed))
 }
 
 func TestBaseScroll(t *testing.T) {
-	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()
 	ed := NewBase(b)
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open("base.go"))
-	b.AssertRender(t, "scroll-40", func() {
+	b.AssertRender(t, "scroll-40", waitMarkup(t, ed), func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		ed.scrollToCenterIfHidden(textpos.Pos{Line: 40})
-		time.Sleep(300 * time.Millisecond)
 	})
 	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 42})
 	// b.AssertRender(t, "scroll-42")
@@ -146,7 +170,6 @@ func TestBaseMultiNotShown(t *testing.T) {
 }
 
 func TestEditorChange(t *testing.T) {
-	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()
 	ed := NewEditor(b)
 	n := 0
@@ -156,6 +179,9 @@ func TestEditorChange(t *testing.T) {
 		text = ed.Lines.String()
 	})
 	b.AssertRender(t, "change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		ed.SetFocus()
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 0, n)
 		assert.Equal(t, "", text)
@@ -170,12 +196,10 @@ func TestEditorChange(t *testing.T) {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, mods))
 		assert.Equal(t, 1, n)
 		assert.Equal(t, "Go\n\n", text)
-		time.Sleep(300 * time.Millisecond)
 	})
 }
 
 func TestEditorInput(t *testing.T) {
-	t.Skip("todo: unreliable, https://github.com/cogentcore/core/issues/1641")
 	b := core.NewBody()
 	ed := NewEditor(b)
 	n := 0
@@ -185,15 +209,17 @@ func TestEditorInput(t *testing.T) {
 		text = ed.Lines.String()
 	})
 	b.AssertRender(t, "input", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		ed.SetFocus()
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		assert.Equal(t, 1, n)
-		assert.Equal(t, "G\n\n", text)
+		assert.Equal(t, "G\n", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		assert.Equal(t, 2, n)
-		assert.Equal(t, "Go\n\n", text)
+		assert.Equal(t, "Go\n", text)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, 4, n)
 		assert.Equal(t, "Go\n\n", text)
-		time.Sleep(300 * time.Millisecond)
 	})
 }
