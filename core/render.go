@@ -80,7 +80,9 @@ func (wb *WidgetBase) AsyncLock() {
 // as updates that just render it again, so that a goroutine that updates
 // several widgets is not stuck on one of them.
 func (wb *WidgetBase) AsyncLockIfShown() bool {
-	if wb.This == nil || wb.Scene == nil {
+	// This is only read under the lock, as the widget can be destroyed
+	// (setting This to nil) under the lock at any time.
+	if wb.Scene == nil {
 		return false
 	}
 	rc := wb.Scene.renderContext()
