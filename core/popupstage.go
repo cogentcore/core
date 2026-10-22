@@ -156,7 +156,12 @@ func (st *Stage) runPopup() *Stage {
 	sc.showIter = 0
 
 	if st.Timeout > 0 {
+		// The timer runs outside of the event loop, so the popup is deleted
+		// with the lock of the render context that it was run in.
+		rc := st.renderContext
 		time.AfterFunc(st.Timeout, func() {
+			rc.Lock()
+			defer rc.Unlock()
 			if st.Main == nil {
 				return
 			}

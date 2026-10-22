@@ -594,7 +594,27 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 // edit, and uses supplied markup to render it, for preformatted output.
 // Calls sendInput to send an Input event to views, so they update.
 func (ls *Lines) AppendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Edit {
+	tbe := ls.appendTextMarkupLocked(text, markup)
+	ls.sendInput()
+	return tbe
+}
+
+// AppendTextMarkupAsync is [Lines.AppendTextMarkup] for a background
+// goroutine, such as that of [textcore.OutputBuffer]: the Input event is
+// sent to the listeners of each view with its [Lines.SetAsyncRunner]
+// function, which gets the lock that they need. It must not be called
+// with that lock held.
+func (ls *Lines) AppendTextMarkupAsync(text [][]rune, markup []rich.Text) *textpos.Edit {
+	tbe := ls.appendTextMarkupLocked(text, markup)
+	ls.sendInputAsync()
+	return tbe
+}
+
+// appendTextMarkupLocked does [Lines.AppendTextMarkup] under the mutex lock,
+// without sending the Input event.
+func (ls *Lines) appendTextMarkupLocked(text [][]rune, markup []rich.Text) *textpos.Edit {
 	ls.Lock()
+	defer ls.Unlock()
 	ls.fileModCheck()
 	tbe := ls.appendTextMarkup(text, markup)
 	if tbe != nil && ls.Autosave {
@@ -602,8 +622,6 @@ func (ls *Lines) AppendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 	}
 	ls.collectLinks()
 	ls.layoutViews()
-	ls.Unlock()
-	ls.sendInput()
 	return tbe
 }
 

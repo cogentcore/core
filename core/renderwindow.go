@@ -102,6 +102,10 @@ type renderWindow struct {
 	// goroutine and closed by the event loop.
 	noEventsMu sync.Mutex
 
+	// resizeMu serializes the resizes of the window by the goroutines of
+	// [Scene.ResizeToContent], so that they are applied in order.
+	resizeMu sync.Mutex
+
 	// flags are atomic renderWindow flags.
 	flags renderWindowFlags
 
@@ -478,6 +482,13 @@ func (w *renderWindow) handleEvent(e events.Event) {
 		w.handleWindowEvents(e)
 		rc.Unlock()
 		return
+	}
+	if ce, ok := e.(*events.CustomEvent); ok {
+		if f, ok := ce.Data.(windowFunc); ok { // from [WidgetBase.runInWindow]
+			f()
+			rc.Unlock()
+			return
+		}
 	}
 	if DebugSettings.EventTrace && (!w.isVisible() || w.SystemWindow.Is(system.Minimized)) {
 		log.Println("got event while invisible:", e)

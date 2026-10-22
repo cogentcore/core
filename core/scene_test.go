@@ -5,9 +5,12 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"testing"
+	"time"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
@@ -51,4 +54,67 @@ func TestSceneResizeRestyle(t *testing.T) {
 	// The next update styles the scene once.
 	sc.lastRender.saveRender(rc)
 	assert.False(t, sc.lastRender.needsRestyle(rc))
+}
+
+// Resizing a scene to its content sizes it in another goroutine, and the
+// timeout of a snackbar closes it in a timer, while the event loop and
+// other goroutines update the widgets of the scene, all with the render
+// lock, so that the race detector finds no races on the plain flags of
+// the scene and its widgets.
+func TestResizeToContentAsync(t *testing.T) {
+	b := NewBody()
+	bt := NewButton(b).SetText("Resize")
+	tx := NewText(b).SetText("Text")
+	bt.OnClick(func(e events.Event) {
+		// As in an event handler, with the render lock held.
+		b.Scene.ResizeToContent()
+		tx.SetText("Clicked").Update()
+	})
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	sc := b.Scene
+	for i := range 20 {
+		b.AsyncLock()
+		bt.Send(events.Click)
+		NewBody().AddSnackbarText("Snackbar").NewSnackbar(bt).SetTimeout(time.Millisecond).Run()
+		b.AsyncUnlock()
+		b.AsyncLock()
+		sc.ResizeToContent()
+		tx.SetText(fmt.Sprintf("Text %d", i)).Update()
+		bt.NeedsRender()
+		b.AsyncUnlock()
+		time.Sleep(time.Millisecond)
+	}
+	// The resizes of the goroutines above are done once we have their lock,
+	// and the snackbar timers are done after waiting for them.
+	time.Sleep(50 * time.Millisecond)
+	rw.resizeMu.Lock()
+	rw.resizeMu.Unlock()
+	b.waitNoEvents(rw)
+	rw.waitRenderDone()
+	rc := sc.renderContext()
+	rc.Lock()
+	assert.False(t, sc.hasFlag(sceneContentSizing))
+	b.Close()
+	rc.Unlock()
+}
+
+// A function that [WidgetBase.runInWindow] sends to the event loop of a
+// window runs there, with the render lock.
+func TestRunInWindowEvent(t *testing.T) {
+	b := NewBody()
+	tx := NewText(b).SetText("Text")
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	done := make(chan struct{})
+	rw.SystemWindow.Events().Custom(windowFunc(func() {
+		tx.SetText("Updated").Update()
+		close(done)
+	}))
+	<-done
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	assert.Equal(t, "Updated", tx.Text)
+	b.Close()
+	rc.Unlock()
 }

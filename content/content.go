@@ -615,7 +615,10 @@ func (ct *Content) loadRest(w *core.Frame, loads int) {
 func (ct *Content) RenderWidget() {
 	ct.Splits.RenderWidget()
 	if ct.renderChan != nil {
-		ct.renderChan <- struct{}{}
+		select {
+		case ct.renderChan <- struct{}{}:
+		default:
+		}
 	}
 }
 
@@ -912,11 +915,20 @@ func (ct *Content) PageRefs(page *bcontent.Page) *core.Frame {
 // LoadEachPage is a helper function to iterate through loading each page,
 // which is used for updating the math cache.
 func (ct *Content) LoadEachPage(after func()) error {
-	ct.renderChan = make(chan struct{})
+	// The render sends on the channel without blocking (it has the
+	// render lock), and a send for an earlier render is dropped before
+	// each page is opened.
+	ct.renderChan = make(chan struct{}, 1)
 	go func() {
 		for _, pg := range ct.pages {
 			fmt.Println("\n#### page:", pg.URL)
+			ct.AsyncLock()
+			select {
+			case <-ct.renderChan:
+			default:
+			}
 			ct.OpenEvent(pg.URL, nil)
+			ct.AsyncUnlock()
 			<-ct.renderChan
 			fmt.Println("rendered:", pg.URL)
 		}

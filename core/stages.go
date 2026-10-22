@@ -291,8 +291,8 @@ func (sm *stages) runDeferred() {
 
 		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
-			if !sc.hasFlag(sceneHasShown) {
-				sc.setFlag(true, sceneHasShown)
+			if !sc.hasShown.Load() {
+				sc.hasShown.Store(true)
 				sc.Shown()
 			}
 		}

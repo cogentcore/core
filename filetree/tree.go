@@ -120,7 +120,8 @@ func (fv *Tree) Destroy() {
 		fv.watcher = nil
 	}
 	if fv.doneWatcher != nil {
-		fv.doneWatcher <- true
+		// It is closed instead of sent on, as the watcher goroutine can be
+		// waiting for the render lock that we hold.
 		close(fv.doneWatcher)
 		fv.doneWatcher = nil
 	}

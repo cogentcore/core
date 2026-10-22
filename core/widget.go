@@ -10,7 +10,6 @@ package core
 import (
 	"image"
 	"log/slog"
-	"sync/atomic"
 
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/colors"
@@ -239,13 +238,14 @@ type WidgetBase struct {
 	// ValueTitle is the title to display for a dialog for this [Value].
 	ValueTitle string
 
-	/// flags are atomic bit flags for [WidgetBase] state.
+	// flags are bit flags for [WidgetBase] state. They are only accessed
+	// in the event loop or with the lock of the render context, as with
+	// [WidgetBase.AsyncLock].
 	flags widgetFlags
 }
 
-// widgetFlags are atomic bit flags for [WidgetBase] state.
-// They must be atomic to prevent race conditions.
-type widgetFlags int32 //enums:bitflag -atomic -trim-prefix widget
+// widgetFlags are bit flags for [WidgetBase] state.
+type widgetFlags int32 //enums:bitflag -trim-prefix widget
 
 const (
 	// widgetValueNewWindow indicates that the dialog of a [Value] should be opened
@@ -269,7 +269,7 @@ const (
 func (wb *WidgetBase) hasFlag(f widgetFlags) bool {
 	// This is equivalent to [widgetFlags.HasFlag] without converting the
 	// flag to an [enums.BitFlag], since it is called very frequently.
-	return atomic.LoadInt32((*int32)(&wb.flags))&(1<<uint32(f)) != 0
+	return wb.flags&(1<<uint32(f)) != 0
 }
 
 // setFlag sets the given flags to the given value.

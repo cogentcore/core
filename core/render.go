@@ -38,7 +38,7 @@ import (
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
-		if wb.Scene.hasFlag(sceneHasShown) {
+		if wb.Scene.hasShown.Load() {
 			// If the scene has been shown but there is no render context,
 			// we are probably being deleted, so we just block forever.
 			if DebugSettings.UpdateTrace {
@@ -109,6 +109,36 @@ func (wb *WidgetBase) AsyncUnlock() {
 		wb.Scene.setFlag(false, sceneUpdating)
 	}
 	rc.Unlock()
+}
+
+// windowFunc is a function that is run in the event loop of a window,
+// sent to it as the data of an [events.Custom] event by
+// [WidgetBase.runInWindow].
+type windowFunc func()
+
+// runInWindow runs the given function, which updates the widget (or other
+// widgets in its window), from the event handling of the given other widget.
+// The event loop of each window only holds the lock of its own render
+// context, so if the widgets are in different windows (on multi-window
+// platforms), the function is sent to the event loop of the window of the
+// widget, to run there later; otherwise it is run directly. This does not
+// wait on the other window, so that two windows that update each other
+// cannot deadlock. The function is not run if the widget is no longer shown,
+// or has been deleted by the time that it would run in the other window.
+func (wb *WidgetBase) runInWindow(from *WidgetBase, f func()) {
+	rw := wb.Scene.RenderWindow()
+	if rw == nil {
+		return
+	}
+	if rw == from.Scene.RenderWindow() {
+		f()
+		return
+	}
+	rw.SystemWindow.Events().Custom(windowFunc(func() {
+		if wb.This != nil {
+			f()
+		}
+	}))
 }
 
 // NeedsRender specifies that the widget needs to be rendered.

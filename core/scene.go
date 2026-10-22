@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"slices"
+	"sync/atomic"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -107,23 +108,27 @@ type Scene struct { //core:no-new
 	// this is our own text shaper in case we don't have a render context
 	textShaper shaped.Shaper
 
-	// flags are atomic bit flags for [Scene] state.
+	// hasShown is whether this scene has been shown.
+	// This is used to ensure that [events.Show] is only sent once.
+	// It is atomic, unlike the flags, as [WidgetBase.AsyncLock]
+	// reads it before it has the lock, when the scene has no
+	// render context.
+	hasShown atomic.Bool
+
+	// flags are bit flags for [Scene] state. They are only accessed
+	// in the event loop or with the lock of the render context, as
+	// with [WidgetBase.AsyncLock].
 	flags sceneFlags
 }
 
-// sceneFlags are atomic bit flags for [Scene] state.
-// They must be atomic to prevent race conditions.
-type sceneFlags int32 //enums:bitflag -atomic -trim-prefix scene
+// sceneFlags are bit flags for [Scene] state.
+type sceneFlags int32 //enums:bitflag -trim-prefix scene
 
 const (
-	// sceneHasShown is whether this scene has been shown.
-	// This is used to ensure that [events.Show] is only sent once.
-	sceneHasShown sceneFlags = iota
-
 	// sceneUpdating means the Scene is in the process of sceneUpdating.
 	// It is set for any kind of tree-level update.
 	// Skip any further update passes until it goes off.
-	sceneUpdating
+	sceneUpdating sceneFlags = iota
 
 	// sceneNeedsRender is whether anything in the Scene needs to be re-rendered
 	// (but not necessarily the whole scene itself).
@@ -149,7 +154,7 @@ const (
 
 // hasFlag returns whether the given flag is set.
 func (sc *Scene) hasFlag(f sceneFlags) bool {
-	return sc.flags.HasFlag(f)
+	return sc.flags&(1<<uint32(f)) != 0
 }
 
 // setFlag sets the given flags to the given value.
@@ -362,9 +367,28 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	if win == nil {
 		return
 	}
+	// The content is sized in a goroutine, as the caller typically holds
+	// the render context lock (for example in an event handler), which the
+	// goroutine needs, as the content sizing sets the layout state and
+	// flags of the scene and its widgets. The window is resized after it
+	// unlocks, as resizing can wait on the main thread, which can wait on
+	// the render context lock (as when closing a window).
+	rc := sc.renderContext()
+	if rc == nil {
+		return
+	}
 	go func() {
+		win.resizeMu.Lock()
+		defer win.resizeMu.Unlock()
+		rc.Lock()
+		// The scene can have been closed while we waited for the lock.
+		if sc.This == nil || sc.renderContext() != rc {
+			rc.Unlock()
+			return
+		}
 		scsz := system.TheApp.Screen(0).PixelSize
 		sz := sc.contentSize(scsz)
+		rc.Unlock()
 		if len(extra) == 1 {
 			sz = sz.Add(extra[0])
 		}

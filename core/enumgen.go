@@ -262,16 +262,16 @@ func (i *renderWindowFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "renderWindowFlags")
 }
 
-var _sceneFlagsValues = []sceneFlags{0, 1, 2, 3, 4, 5, 6}
+var _sceneFlagsValues = []sceneFlags{0, 1, 2, 3, 4, 5}
 
 // sceneFlagsN is the highest valid value for type sceneFlags, plus one.
-const sceneFlagsN sceneFlags = 7
+const sceneFlagsN sceneFlags = 6
 
-var _sceneFlagsValueMap = map[string]sceneFlags{`HasShown`: 0, `Updating`: 1, `NeedsRender`: 2, `NeedsLayout`: 3, `HasDeferred`: 4, `ImageUpdated`: 5, `ContentSizing`: 6}
+var _sceneFlagsValueMap = map[string]sceneFlags{`Updating`: 0, `NeedsRender`: 1, `NeedsLayout`: 2, `HasDeferred`: 3, `ImageUpdated`: 4, `ContentSizing`: 5}
 
-var _sceneFlagsDescMap = map[sceneFlags]string{0: `sceneHasShown is whether this scene has been shown. This is used to ensure that [events.Show] is only sent once.`, 1: `sceneUpdating means the Scene is in the process of sceneUpdating. It is set for any kind of tree-level update. Skip any further update passes until it goes off.`, 2: `sceneNeedsRender is whether anything in the Scene needs to be re-rendered (but not necessarily the whole scene itself).`, 3: `sceneNeedsLayout is whether the Scene needs a new layout pass.`, 4: `sceneHasDeferred is whether the Scene has elements with Deferred functions.`, 5: `sceneImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global [RenderWindow] rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 6: `sceneContentSizing means that this scene is currently doing a contentSize computation to compute the size of the scene (for sizing window for example). Affects layout size computation.`}
+var _sceneFlagsDescMap = map[sceneFlags]string{0: `sceneUpdating means the Scene is in the process of sceneUpdating. It is set for any kind of tree-level update. Skip any further update passes until it goes off.`, 1: `sceneNeedsRender is whether anything in the Scene needs to be re-rendered (but not necessarily the whole scene itself).`, 2: `sceneNeedsLayout is whether the Scene needs a new layout pass.`, 3: `sceneHasDeferred is whether the Scene has elements with Deferred functions.`, 4: `sceneImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global [RenderWindow] rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 5: `sceneContentSizing means that this scene is currently doing a contentSize computation to compute the size of the scene (for sizing window for example). Affects layout size computation.`}
 
-var _sceneFlagsMap = map[sceneFlags]string{0: `HasShown`, 1: `Updating`, 2: `NeedsRender`, 3: `NeedsLayout`, 4: `HasDeferred`, 5: `ImageUpdated`, 6: `ContentSizing`}
+var _sceneFlagsMap = map[sceneFlags]string{0: `Updating`, 1: `NeedsRender`, 2: `NeedsLayout`, 3: `HasDeferred`, 4: `ImageUpdated`, 5: `ContentSizing`}
 
 // String returns the string representation of this sceneFlags value.
 func (i sceneFlags) String() string { return enums.BitFlagString(i, _sceneFlagsValues) }
@@ -311,15 +311,15 @@ func (i sceneFlags) Values() []enums.Enum { return enums.Values(_sceneFlagsValue
 func (i *sceneFlags) HasFlag(f enums.BitFlag) bool {
 	if enums.FlagTypeAssert {
 		if b, ok := f.(sceneFlags); ok {
-			return atomic.LoadInt32((*int32)(i))&(1<<uint32(b)) != 0
+			return *i&(1<<uint32(b)) != 0
 		}
 	}
-	return atomic.LoadInt32((*int32)(i))&(1<<uint32(f.Int64())) != 0
+	return *i&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *sceneFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int32
+	var mask sceneFlags
 	for _, v := range f {
 		if enums.FlagTypeAssert {
 			if b, ok := v.(sceneFlags); ok {
@@ -330,9 +330,9 @@ func (i *sceneFlags) SetFlag(on bool, f ...enums.BitFlag) {
 		mask |= 1 << v.Int64()
 	}
 	if on {
-		atomic.OrInt32((*int32)(i), mask)
+		*i |= mask
 	} else {
-		atomic.AndInt32((*int32)(i), ^mask)
+		*i &^= mask
 	}
 }
 
@@ -774,15 +774,15 @@ func (i widgetFlags) Values() []enums.Enum { return enums.Values(_widgetFlagsVal
 func (i *widgetFlags) HasFlag(f enums.BitFlag) bool {
 	if enums.FlagTypeAssert {
 		if b, ok := f.(widgetFlags); ok {
-			return atomic.LoadInt32((*int32)(i))&(1<<uint32(b)) != 0
+			return *i&(1<<uint32(b)) != 0
 		}
 	}
-	return atomic.LoadInt32((*int32)(i))&(1<<uint32(f.Int64())) != 0
+	return *i&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *widgetFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int32
+	var mask widgetFlags
 	for _, v := range f {
 		if enums.FlagTypeAssert {
 			if b, ok := v.(widgetFlags); ok {
@@ -793,9 +793,9 @@ func (i *widgetFlags) SetFlag(on bool, f ...enums.BitFlag) {
 		mask |= 1 << v.Int64()
 	}
 	if on {
-		atomic.OrInt32((*int32)(i), mask)
+		*i |= mask
 	} else {
-		atomic.AndInt32((*int32)(i), ^mask)
+		*i &^= mask
 	}
 }
 
