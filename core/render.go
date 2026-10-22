@@ -143,6 +143,20 @@ func (wb *WidgetBase) runInWindow(from *WidgetBase, f func()) {
 	}))
 }
 
+// runInEachWindow runs the given function, which updates the render context
+// of a window, in the event loop of each window, where it has the lock of
+// the render context. It is sent to each window as a custom event, so it
+// never waits on the lock of any window: the caller typically holds the lock
+// of its own window, and waiting on another window while holding it could
+// deadlock with that window waiting on this one.
+func runInEachWindow(f func(w *renderWindow, rc *renderContext)) {
+	for _, w := range AllRenderWindows.windows() {
+		w.SystemWindow.Events().Custom(windowFunc(func() {
+			f(w, w.renderContext())
+		}))
+	}
+}
+
 // NeedsRender specifies that the widget needs to be rendered.
 func (wb *WidgetBase) NeedsRender() {
 	if DebugSettings.UpdateTrace {

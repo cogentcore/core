@@ -153,6 +153,7 @@ func TestTextRichTextRebuild(t *testing.T) {
 	scheme.Primary.Base = colors.Uniform(color.RGBA{200, 30, 30, 255})
 	b.AsyncUnlock()
 	UpdateAll()
+	b.waitNoEvents(rw) // the window is updated by its event loop
 	rw.waitRenderDone()
 	rw.renderWindow()
 	b.AsyncLock()
@@ -166,4 +167,47 @@ func TestTextRichTextRebuild(t *testing.T) {
 	rc.Lock()
 	b.Close()
 	rc.Unlock()
+}
+
+// [UpdateAll] can be called with the lock of a window, as in an event
+// handler, as it does not wait on the other windows: each window is rebuilt
+// by its own event loop. This test is also for the race detector.
+func TestUpdateAllOtherWindow(t *testing.T) {
+	a := NewBody()
+	NewText(a).SetText("Settings")
+	a.runAndShowNewWindow()
+	b := NewBody()
+	tx := NewText(b).SetText(`A <a href="https://example.com">link</a> and <code>code</code>`)
+	b.runAndShowNewWindow()
+	rwa, rw := a.Scene.RenderWindow(), b.Scene.RenderWindow()
+	a.waitNoEvents(rwa)
+	b.waitNoEvents(rw)
+
+	// The scheme is changed with the locks of both windows, which use it.
+	a.AsyncLock()
+	b.AsyncLock()
+	scheme := colors.Scheme // the window can set the scheme when it is shown
+	primary := scheme.Primary.Base
+	defer func() { scheme.Primary.Base = primary }()
+	scheme.Primary.Base = colors.Uniform(color.RGBA{30, 160, 30, 255})
+	b.AsyncUnlock()
+	UpdateAll() // as from an event handler of the window of a
+	a.AsyncUnlock()
+
+	b.waitNoEvents(rw)
+	rw.waitRenderDone()
+	rw.renderWindow()
+	b.AsyncLock()
+	rebuilt, _ := linkAndCodeColors(t, tx)
+	b.AsyncUnlock()
+	if rebuilt != colors.ToUniform(scheme.Primary.Base) {
+		t.Errorf("link color %v after a rebuild is not %v", rebuilt, scheme.Primary.Base)
+	}
+
+	for _, bd := range []*Body{a, b} {
+		rc := bd.Scene.renderContext()
+		rc.Lock()
+		bd.Close()
+		rc.Unlock()
+	}
 }

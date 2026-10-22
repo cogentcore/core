@@ -213,27 +213,25 @@ func UpdateSettings(ctx Widget, se Settings) {
 
 // UpdateAll updates all windows and triggers a full render rebuild.
 // It is typically called when user settings are changed.
+// The windows are updated by their event loops (see [runInEachWindow]),
+// so the rebuild happens after the current event of each window.
 func UpdateAll() { //types:add
 	// Some caches are invalid now:
 	clear(gradient.Cache)
 	clear(cursorimg.Cursors)
 
-	for _, w := range AllRenderWindows.windows() {
-		rc := w.mains.renderContext
+	runInEachWindow(func(w *renderWindow, rc *renderContext) {
 		rc.logicalDPI = w.logicalDPI()
 		rc.rebuild = true // trigger full rebuild
-	}
+	})
 }
 
 // restyleAll restyles and lays out all windows, as is needed when the fonts
 // that texts are measured with have changed.
 func restyleAll() {
-	for _, w := range AllRenderWindows.windows() {
-		rc := w.renderContext()
-		rc.Lock()
+	runInEachWindow(func(w *renderWindow, rc *renderContext) {
 		rc.restyle = true
-		rc.Unlock()
-	}
+	})
 }
 
 // AppearanceSettings are the currently active global Cogent Core appearance settings.
