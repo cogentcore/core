@@ -113,7 +113,7 @@ type Scene struct { //core:no-new
 
 // sceneFlags are atomic bit flags for [Scene] state.
 // They must be atomic to prevent race conditions.
-type sceneFlags int64 //enums:bitflag -trim-prefix scene
+type sceneFlags int32 //enums:bitflag -atomic -trim-prefix scene
 
 const (
 	// sceneHasShown is whether this scene has been shown.

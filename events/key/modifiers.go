@@ -13,7 +13,7 @@ import (
 )
 
 // Modifiers are used as bitflags representing a set of modifier keys.
-type Modifiers int64 //enums:bitflag
+type Modifiers int32 //enums:bitflag
 
 const (
 	// Control is the "Control" (Ctrl) key.

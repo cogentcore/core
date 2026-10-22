@@ -10,7 +10,7 @@ import "cogentcore.org/core/enums"
 
 // States are GUI states of elements that are relevant for styling based on
 // CSS pseudo-classes (https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
-type States int64 //enums:bitflag
+type States int32 //enums:bitflag
 
 const (
 	// Invisible elements are not displayable, and thus do not present

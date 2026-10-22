@@ -8,7 +8,7 @@ package gsbench
 
 // ladFlags are bit flags like those of text/rich.Decorations, for the
 // LadderBitFlag benchmarks.
-type ladFlags int64 //enums:bitflag
+type ladFlags int32 //enums:bitflag
 
 const (
 	ladFlagA ladFlags = iota

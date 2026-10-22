@@ -279,7 +279,7 @@ func (s Stretch) ToFloat32() float32 {
 
 // Decorations are underline, line-through, etc, as bit flags
 // that must be set using [Font.SetDecoration].
-type Decorations int64 //enums:bitflag -transform kebab
+type Decorations int32 //enums:bitflag -transform kebab
 
 const (
 	// Underline indicates to place a line below text.

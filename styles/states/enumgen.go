@@ -52,10 +52,33 @@ func StatesValues() []States { return _StatesValues }
 func (i States) Values() []enums.Enum { return enums.Values(_StatesValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i *States) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+func (i *States) HasFlag(f enums.BitFlag) bool {
+	if enums.FlagTypeAssert {
+		if b, ok := f.(States); ok {
+			return *i&(1<<uint32(b)) != 0
+		}
+	}
+	return *i&(1<<uint32(f.Int64())) != 0
+}
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *States) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *States) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask States
+	for _, v := range f {
+		if enums.FlagTypeAssert {
+			if b, ok := v.(States); ok {
+				mask |= 1 << uint32(b)
+				continue
+			}
+		}
+		mask |= 1 << v.Int64()
+	}
+	if on {
+		*i |= mask
+	} else {
+		*i &^= mask
+	}
+}
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i States) MarshalText() ([]byte, error) { return []byte(i.String()), nil }

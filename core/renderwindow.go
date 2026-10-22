@@ -838,7 +838,7 @@ func (sc *Scene) RenderSource(op draw.Op) composer.Source {
 
 // renderWindowFlags are atomic bit flags for [renderWindow] state.
 // They must be atomic to prevent race conditions.
-type renderWindowFlags int64 //enums:bitflag -trim-prefix win
+type renderWindowFlags int32 //enums:bitflag -atomic -trim-prefix win
 
 const (
 	// winResize indicates that the window was just resized.

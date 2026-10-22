@@ -15,7 +15,7 @@ import (
 // These flags are stored in the DirFlagMap for persistence.
 // This map is saved to a file, so these flags must be stored
 // as bit flags instead of a struct to ensure efficient serialization.
-type dirFlags int64 //enums:bitflag -trim-prefix dir
+type dirFlags int32 //enums:bitflag -trim-prefix dir
 
 const (
 	// dirIsOpen means directory is open -- else closed

@@ -245,7 +245,7 @@ type WidgetBase struct {
 
 // widgetFlags are atomic bit flags for [WidgetBase] state.
 // They must be atomic to prevent race conditions.
-type widgetFlags int64 //enums:bitflag -trim-prefix widget
+type widgetFlags int32 //enums:bitflag -atomic -trim-prefix widget
 
 const (
 	// widgetValueNewWindow indicates that the dialog of a [Value] should be opened
@@ -269,7 +269,7 @@ const (
 func (wb *WidgetBase) hasFlag(f widgetFlags) bool {
 	// This is equivalent to [widgetFlags.HasFlag] without converting the
 	// flag to an [enums.BitFlag], since it is called very frequently.
-	return atomic.LoadInt64((*int64)(&wb.flags))&(1<<uint32(f)) != 0
+	return atomic.LoadInt32((*int32)(&wb.flags))&(1<<uint32(f)) != 0
 }
 
 // setFlag sets the given flags to the given value.

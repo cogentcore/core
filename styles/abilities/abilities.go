@@ -12,7 +12,7 @@ import "cogentcore.org/core/enums"
 // and are aligned with the States flags.  All elements can be disabled.
 // These correspond to some of the global attributes in CSS:
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-type Abilities int64 //enums:bitflag
+type Abilities int32 //enums:bitflag
 
 const (
 	// Selectable means it can be Selected
@@ -84,7 +84,14 @@ var (
 	// Pressable is the list of abilities that makes something Pressable
 	Pressable = []Abilities{Selectable, Activatable, DoubleClickable, TripleClickable, Draggable, Slideable, Checkable, Clickable}
 
-	pressableBits = []enums.BitFlag{Selectable, Activatable, DoubleClickable, TripleClickable, Draggable, Slideable, Checkable, Clickable}
+	// pressableMask has the bits of all of the Pressable abilities set.
+	pressableMask = func() Abilities {
+		var m Abilities
+		for _, ab := range Pressable {
+			m |= 1 << ab
+		}
+		return m
+	}()
 )
 
 // Is is a shortcut for HasFlag for Abilities
@@ -95,7 +102,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 // IsPressable returns true when an element is Selectable, Activatable,
 // DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return enums.HasAnyFlags((*int64)(ab), pressableBits...)
+	return *ab&pressableMask != 0
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable

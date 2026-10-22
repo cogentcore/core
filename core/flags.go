@@ -5,8 +5,6 @@
 package core
 
 import (
-	"sync/atomic"
-
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -17,7 +15,7 @@ import (
 func (wb *WidgetBase) StateIs(state states.States) bool {
 	// This is equivalent to [states.States.HasFlag] without converting the
 	// flag to an [enums.BitFlag], since it is called very frequently.
-	return atomic.LoadInt64((*int64)(&wb.Styles.State))&(1<<uint32(state)) != 0
+	return wb.Styles.State&(1<<uint32(state)) != 0
 }
 
 // AbilityIs returns whether the widget has the given [abilities.Abilities] flag set.
