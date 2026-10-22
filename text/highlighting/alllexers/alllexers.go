@@ -7,10 +7,10 @@
 //
 //	import _ "cogentcore.org/core/text/highlighting/alllexers"
 //
-// This is already the default on native platforms; on the web, the default
-// is [highlighting.NewCoreLexers], which leaves out the definitions of the
-// hundreds of other languages that chroma supports, saving several
-// megabytes in the size of the app.
+// An editor of code in any language needs this. Otherwise, the default is
+// [highlighting.NewGoLexers], which highlights only Go and leaves out the
+// definitions of the hundreds of other languages that chroma supports,
+// saving several megabytes in the size of the app.
 package alllexers
 
 import (

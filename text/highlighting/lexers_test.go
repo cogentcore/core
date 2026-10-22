@@ -17,21 +17,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestCoreLexers checks that each lexer of [NewCoreLexers] has the same
+// TestGoLexers checks that each lexer of [NewGoLexers] has the same
 // configuration and produces the same tokens as the chroma lexer
 // of the same name.
-func TestCoreLexers(t *testing.T) {
+func TestGoLexers(t *testing.T) {
 	var sources []string
-	for _, fn := range []string{"highlighter.go", "lexers/bash.xml", "lexers/COPYING", "../../README.md"} {
+	for _, fn := range []string{"highlighter.go", "lexers/go_template.xml", "lexers/COPYING", "../../README.md"} {
 		b, err := os.ReadFile(fn)
 		require.NoError(t, err)
 		sources = append(sources, string(b))
 	}
-	sources = append(sources, "---\ntitle: test\n---\n# Code\n\n```go\nfunc main() {}\n```\n\n```Goal\nx := 1\n```\n")
+	sources = append(sources, "package main\n\nvar t = `{{range .X}}{{.}}{{end}}`\n")
 
-	core := NewCoreLexers()
-	assert.GreaterOrEqual(t, len(core.Lexers), 20)
-	for _, lex := range core.Lexers {
+	gol := NewGoLexers()
+	assert.Equal(t, 2, len(gol.Lexers))
+	for _, lex := range gol.Lexers {
 		cfg := lex.Config()
 		t.Run(cfg.Name, func(t *testing.T) {
 			full := lexers.GlobalLexerRegistry.Get(cfg.Name)
@@ -45,14 +45,12 @@ func TestCoreLexers(t *testing.T) {
 			}
 		})
 	}
-	for _, name := range []string{"go", "Goal", "sh", "toml", "json", "yaml", "md", "html", "css", "js", "ts", "python", "c", "c++", "tex", "text", "diff", "makefile", "xml", "ini"} {
-		if name == "Goal" { // goal is highlighted as go by content
-			assert.Nil(t, core.Get(name))
-			continue
-		}
-		assert.NotNil(t, core.Get(name), name)
+	for _, name := range []string{"go", "golang", "go-text-template", "main.go"} {
+		assert.NotNil(t, gol.Get(name), name)
 	}
-	assert.Nil(t, core.Get("solidity"))
+	for _, name := range []string{"Goal", "sh", "toml", "md"} {
+		assert.Nil(t, gol.Get(name), name)
+	}
 }
 
 func tokens(t *testing.T, lex chroma.Lexer, src string) []chroma.Token {

@@ -4,13 +4,12 @@
 
 package highlighting
 
-// This file contains copies of the Go and markdown lexers of
-// github.com/alecthomas/chroma/v3/lexers, which are defined in Go code
-// rather than XML, for [NewCoreLexers].
+// This file contains a copy of the Go lexer of
+// github.com/alecthomas/chroma/v3/lexers, which is defined in Go code
+// rather than XML, for [NewGoLexers].
 // Copyright (C) 2017 Alec Thomas, under an MIT License (see lexers/COPYING).
 
 import (
-	"iter"
 	"strings"
 
 	"github.com/alecthomas/chroma/v3"
@@ -70,110 +69,6 @@ func goRules(goTextTemplate chroma.Lexer) chroma.Rules {
 			{`([a-zA-Z_]\w*)(\s*)(\()`, chroma.ByGroups(chroma.NameFunction, chroma.UsingSelf("root"), chroma.Punctuation), nil},
 			{`[|^<>=!()\[\]{}.,;:~]`, chroma.Punctuation, nil},
 			{`[^\W\d]\w*`, chroma.NameOther, nil},
-		},
-	}
-}
-
-// newMarkdownLexer returns the markdown lexer, which gets the YAML lexer
-// for frontmatter from the given registry.
-func newMarkdownLexer(reg *chroma.LexerRegistry) chroma.Lexer {
-	return &markdownLexer{registry: reg, Lexer: chroma.MustNewLexer(
-		&chroma.Config{
-			Name:      "markdown",
-			Aliases:   []string{"md", "mkd"},
-			Filenames: []string{"*.md", "*.mkd", "*.markdown"},
-			MimeTypes: []string{"text/x-markdown"},
-		},
-		markdownRules,
-	)}
-}
-
-// markdownLexer wraps the base Markdown lexer to highlight top-of-file YAML frontmatter.
-type markdownLexer struct {
-	chroma.Lexer
-	registry *chroma.LexerRegistry
-}
-
-// Lexes Markdown, highlighting a leading YAML frontmatter block before delegating to Markdown rules.
-func (m *markdownLexer) Tokenise(options *chroma.TokeniseOptions, text string) (iter.Seq[chroma.Token], error) {
-	frontmatter, rest, ok := splitFrontmatter(text)
-	if !ok {
-		return m.Lexer.Tokenise(options, text)
-	}
-
-	yamlLexer := m.registry.Get("YAML")
-	if yamlLexer == nil {
-		return m.Lexer.Tokenise(options, text)
-	}
-
-	yamlTokens, err := yamlLexer.Tokenise(options, frontmatter)
-	if err != nil {
-		return nil, err
-	}
-	markdownTokens, err := m.Lexer.Tokenise(options, rest)
-	if err != nil {
-		return nil, err
-	}
-	return chroma.Concaterator(yamlTokens, markdownTokens), nil
-}
-
-// Extracts a leading YAML frontmatter block if the document starts with one.
-func splitFrontmatter(text string) (frontmatter string, rest string, ok bool) {
-	if !strings.HasPrefix(text, "---\n") && !strings.HasPrefix(text, "---\r\n") {
-		return "", text, false
-	}
-
-	lineEnd := strings.IndexByte(text, '\n')
-	if lineEnd < 0 {
-		return "", text, false
-	}
-	if strings.TrimSuffix(text[:lineEnd], "\r") != "---" {
-		return "", text, false
-	}
-
-	for pos := lineEnd + 1; pos < len(text); {
-		next := strings.IndexByte(text[pos:], '\n')
-		if next < 0 {
-			break
-		}
-		lineEnd = pos + next
-		line := strings.TrimSuffix(text[pos:lineEnd], "\r")
-		if line == "---" {
-			return text[:lineEnd+1], text[lineEnd+1:], true
-		}
-		pos = lineEnd + 1
-	}
-	return "", text, false
-}
-
-func markdownRules() chroma.Rules {
-	return chroma.Rules{
-		"root": {
-			{`<!--[\w\W]*?-->`, chroma.CommentMultiline, nil},
-			{`^(#[^#].+\n)`, chroma.ByGroups(chroma.GenericHeading), nil},
-			{`^(#{2,6}.+\n)`, chroma.ByGroups(chroma.GenericSubheading), nil},
-			{`^(\s*)([*-] )(\[[ xX]\])( .+\n)`, chroma.ByGroups(chroma.Text, chroma.Keyword, chroma.Keyword, chroma.UsingSelf("inline")), nil},
-			{`^(\s*)([*-])(\s)(.+\n)`, chroma.ByGroups(chroma.Text, chroma.Keyword, chroma.Text, chroma.UsingSelf("inline")), nil},
-			{`^(\s*)([0-9]+\.)( .+\n)`, chroma.ByGroups(chroma.Text, chroma.Keyword, chroma.UsingSelf("inline")), nil},
-			{`^(\s*>\s)(.+\n)`, chroma.ByGroups(chroma.Keyword, chroma.GenericEmph), nil},
-			{"^(```\\n)([\\w\\W]*?)(^```$)", chroma.ByGroups(chroma.String, chroma.Text, chroma.String), nil},
-			{
-				"^(```)(\\w+)(\\n)([\\w\\W]*?)(^```$)",
-				chroma.UsingByGroup(2, 4, chroma.String, chroma.String, chroma.String, chroma.Text, chroma.String),
-				nil,
-			},
-			chroma.Include("inline"),
-		},
-		"inline": {
-			{`<!--[\w\W]*?-->`, chroma.CommentMultiline, nil},
-			{`\\.`, chroma.Text, nil},
-			{`(\s)(\*|_)((?:(?!\2).)*)(\2)((?=\W|\n))`, chroma.ByGroups(chroma.Text, chroma.GenericEmph, chroma.GenericEmph, chroma.GenericEmph, chroma.Text), nil},
-			{`(\s)((\*\*|__).*?)\3((?=\W|\n))`, chroma.ByGroups(chroma.Text, chroma.GenericStrong, chroma.GenericStrong, chroma.Text), nil},
-			{`(\s)(~~[^~]+~~)((?=\W|\n))`, chroma.ByGroups(chroma.Text, chroma.GenericDeleted, chroma.Text), nil},
-			{"`[^`]+`", chroma.LiteralStringBacktick, nil},
-			{`[@#][\w/:]+`, chroma.NameEntity, nil},
-			{`(!?\[)([^]]+)(\])(\()([^)]+)(\))`, chroma.ByGroups(chroma.Text, chroma.NameTag, chroma.Text, chroma.Text, chroma.NameAttribute, chroma.Text), nil},
-			{`.|\n`, chroma.Text, nil},
 		},
 	}
 }

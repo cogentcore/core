@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !js
-
 package highlighting
 
 import "github.com/alecthomas/chroma/v3/lexers"
 
 func init() {
-	// all of the chroma lexers by default on native platforms
-	lexerRegistry = lexers.GlobalLexerRegistry
+	// the tests highlight languages other than Go
+	SetLexers(lexers.GlobalLexerRegistry)
 }

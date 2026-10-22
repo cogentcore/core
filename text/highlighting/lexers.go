@@ -14,14 +14,14 @@ import (
 var lexerRegistry *chroma.LexerRegistry
 
 // Lexers returns the registry of chroma lexers used for syntax highlighting.
-// On native platforms, it is the registry of all chroma lexers by default.
-// On the web, it is made by [NewCoreLexers] by default, which keeps the
-// definitions of all other languages out of the app, and importing
-// cogentcore.org/core/text/highlighting/alllexers switches it to all of the
-// chroma lexers. Code in languages without a lexer is not highlighted.
+// It is made by [NewGoLexers] by default, which keeps the definitions of the
+// hundreds of other languages that chroma supports out of the app, and
+// importing cogentcore.org/core/text/highlighting/alllexers switches it to
+// all of the chroma lexers, as an editor needs. Code in languages without
+// a lexer is not highlighted.
 func Lexers() *chroma.LexerRegistry {
 	if lexerRegistry == nil {
-		lexerRegistry = NewCoreLexers()
+		lexerRegistry = NewGoLexers()
 	}
 	return lexerRegistry
 }
@@ -38,41 +38,21 @@ func GetLexer(name string) chroma.Lexer {
 	return Lexers().Get(name)
 }
 
-// coreLexerFiles are the chroma XML lexer definitions of [NewCoreLexers],
+// goTemplateLexer is the chroma XML lexer definition of Go templates,
 // copied from github.com/alecthomas/chroma/v3/lexers/embedded.
 //
-//go:embed lexers/*.xml
-var coreLexerFiles embed.FS
+//go:embed lexers/go_template.xml
+var goTemplateLexer embed.FS
 
-// NewCoreLexers returns a new registry of the chroma lexers for a set of
-// common languages: Go, Go templates, Bash, C, C++, CSS, diff, HTML, INI,
-// JavaScript, JSON, makefile, markdown, plain text, Python, TeX, TOML,
-// TypeScript, XML and YAML. It is the default for [Lexers] on the web.
-// The rules of each lexer are loaded when the lexer is first used.
-func NewCoreLexers() *chroma.LexerRegistry {
+// NewGoLexers returns a new registry of the chroma lexers for Go and Go text
+// templates, which highlight the raw strings of Go code. It is the default
+// for [Lexers]. The rules of each lexer are loaded when the lexer is first used.
+func NewGoLexers() *chroma.LexerRegistry {
 	reg := chroma.NewLexerRegistry()
-	files, err := coreLexerFiles.ReadDir("lexers")
-	if err != nil {
-		panic(err)
-	}
-	for _, f := range files {
-		reg.Register(chroma.MustNewXMLLexer(coreLexerFiles, "lexers/"+f.Name()))
-	}
-
-	// The Go template lexers, as in chroma.
-	goTemplate := func() *chroma.RegexLexer {
-		return chroma.MustNewXMLLexer(coreLexerFiles, "lexers/go_template.xml")
-	}
-	html := chroma.MustNewXMLLexer(coreLexerFiles, "lexers/html.xml")
-	reg.Register(chroma.DelegatingLexer(html, goTemplate().SetConfig(&chroma.Config{
-		Name:    "Go HTML Template",
-		Aliases: []string{"go-html-template"},
-	})))
-	goTextTemplate := reg.Register(goTemplate().SetConfig(&chroma.Config{
+	goTextTemplate := reg.Register(chroma.MustNewXMLLexer(goTemplateLexer, "lexers/go_template.xml").SetConfig(&chroma.Config{
 		Name:    "Go Text Template",
 		Aliases: []string{"go-text-template"},
 	}))
 	reg.Register(newGoLexer(goTextTemplate))
-	reg.Register(newMarkdownLexer(reg))
 	return reg
 }
