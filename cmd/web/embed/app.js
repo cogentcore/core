@@ -30,10 +30,10 @@ appInitWebAssembly();
 
 // appLoadFonts starts loading the regular and italic faces of the fonts of
 // the app (the faces have all weights), so that they load while the app
-// loads, without waiting for them. Noto Sans also loads its Latin Extended
-// and Greek faces (about 60 KB), which names and math use; otherwise they
-// load when the first text that needs them is rendered, and the app styles
-// and lays out everything again then. The app measures its texts with them, and texts
+// loads, without waiting for them. Regular Noto Sans also loads its Latin
+// Extended and Greek faces (about 190 KB), which names and math use;
+// otherwise they load when the first text that needs them is rendered, and
+// the app styles and lays out everything again then. The app measures its texts with them, and texts
 // measured before their face has loaded are measured with a fallback font,
 // so the app lays out all of its texts again when the face loads, which made
 // the first page with code or italic text take twice as long.
@@ -41,10 +41,8 @@ function appLoadFonts() {
   if (!document.fonts) {
     return;
   }
-  for (const font of ['16px "Noto Sans"', 'italic 16px "Noto Sans"']) {
-    document.fonts.load(font, 'aāΩ').catch(() => { }); // Latin, Latin Extended, Greek
-  }
-  for (const font of ['16px "Roboto Mono"', 'italic 16px "Roboto Mono"']) {
+  document.fonts.load('16px "Noto Sans"', 'aāΩ').catch(() => { }); // Latin, Latin Extended, Greek
+  for (const font of ['italic 16px "Noto Sans"', '16px "Roboto Mono"', 'italic 16px "Roboto Mono"']) {
     document.fonts.load(font).catch(() => { });
   }
 }
