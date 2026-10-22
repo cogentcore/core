@@ -105,15 +105,26 @@ type Context struct {
 	// by default; see [NewImageCache].
 	ImageCache *ImageCache
 
-	// firstRow indicates the start of a table, where number of columns is counted.
-	firstRow bool
-
 	// StageSize, if positive, is the size of the content of the body (in
 	// runes of text, with estimates for other elements) after which
 	// [ReadHTML] stops adding the widgets of its top-level elements,
 	// leaving the rest for [Context.ReadRest]. This allows the first part
 	// of a long page to be shown sooner.
 	StageSize int
+
+	// readState is the state of the current read of HTML.
+	readState
+
+	// reading is whether HTML is being read, so that HTML read by an
+	// element handler meanwhile is read within that read (see [ReadHTML]).
+	reading bool
+}
+
+// readState is the state of a read of HTML by [ReadHTML].
+type readState struct {
+
+	// firstRow indicates the start of a table, where number of columns is counted.
+	firstRow bool
 
 	// stageSize is the size of the content of the body read so far.
 	stageSize int
@@ -142,6 +153,8 @@ func (c *Context) ReadRest() (core.Widget, int, error) {
 	c.rest, c.restParent = nil, nil
 	c.StageSize = 0
 	start := parent.AsTree().NumChildren()
+	c.reading = true
+	defer func() { c.reading = false }()
 	err := readHTMLNode(c, parent, n)
 	return parent, start, err
 }
@@ -197,12 +210,6 @@ func NewContext() *Context {
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
 		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
 	}
-}
-
-func (c *Context) reset() {
-	c.firstRow = false
-	c.stageSize = 0
-	c.rest, c.restParent = nil, nil
 }
 
 // Parent returns the current parent widget that a widget

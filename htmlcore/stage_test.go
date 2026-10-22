@@ -36,20 +36,47 @@ func TestStaged(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		testStaged(t, page, md)
+		testStaged(t, page, md, NewContext)
 	}
 }
 
-func testStaged(t *testing.T, page string, md []byte) {
+// TestStagedEmbedded tests that a body read in stages with an element
+// that reads more markdown when it is handled, as the <embed-page> of
+// content does, has the widgets of the body read at once.
+func TestStagedEmbedded(t *testing.T) {
+	var embedded, md strings.Builder
+	for i := range 30 {
+		fmt.Fprintf(&embedded, "Embedded paragraph %d with some text in it.\n\n", i)
+	}
+	for i := range 20 {
+		fmt.Fprintf(&md, "Paragraph %d of the page with some text in it.\n\n", i)
+		if i%5 == 2 {
+			md.WriteString("<embed-page></embed-page>\n\n")
+		}
+	}
+	newContext := func() *Context {
+		ctx := NewContext()
+		ctx.ElementHandlers["embed-page"] = func(ctx *Context) bool {
+			if err := ReadMDString(ctx, ctx.BlockParent, embedded.String()); err != nil {
+				t.Error(err)
+			}
+			return true
+		}
+		return ctx
+	}
+	testStaged(t, "embedded", []byte(md.String()), newContext)
+}
+
+func testStaged(t *testing.T, page string, md []byte, newContext func() *Context) {
 	whole := core.NewBody()
-	if err := ReadMD(NewContext(), whole, md); err != nil {
+	if err := ReadMD(newContext(), whole, md); err != nil {
 		t.Fatal(err)
 	}
 	want := treeDump(whole)
 	staged := 0
 	for size := 1; size < len(md)+100; size += 97 {
 		b := core.NewBody()
-		ctx := NewContext()
+		ctx := newContext()
 		ctx.StageSize = size
 		if err := ReadMD(ctx, b, md); err != nil {
 			t.Fatal(err)

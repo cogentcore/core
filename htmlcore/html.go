@@ -18,11 +18,23 @@ import (
 // ReadHTML reads HTML from the given [io.Reader] and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
-	ctx.reset()
 	n, err := html.Parse(r)
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
 	}
+
+	// HTML that an element handler reads while HTML is being read, such as
+	// the page that content embeds for an <embed-page>, is read whole, and
+	// the state of the outer read, including its staging, is kept.
+	if ctx.reading {
+		outer, stageSize := ctx.readState, ctx.StageSize
+		ctx.readState, ctx.StageSize = readState{}, 0
+		defer func() { ctx.readState, ctx.StageSize = outer, stageSize }()
+		return readHTMLNode(ctx, parent, n)
+	}
+	ctx.readState = readState{}
+	ctx.reading = true
+	defer func() { ctx.reading = false }()
 	return readHTMLNode(ctx, parent, n)
 }
 
