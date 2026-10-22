@@ -88,15 +88,6 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 
-	awjs, err := makeAppWorkerJS(c)
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(filepath.Join(odir, "app-worker.js"), awjs, 0666)
-	if err != nil {
-		return err
-	}
-
 	man, err := makeManifestJSON(c)
 	if err != nil {
 		return err
@@ -126,6 +117,14 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 	site, err := readSite(preRenderHTML)
+	if err != nil {
+		return err
+	}
+	awjs, err := makeAppWorkerJS(c, site != nil)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "app-worker.js"), awjs, 0666)
 	if err != nil {
 		return err
 	}
