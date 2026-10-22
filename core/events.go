@@ -713,8 +713,11 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 	*w = deep
 	// fmt.Println("setting new:", deep)
 	*pos = e.WindowPos()
+	// The window is found here, in the event loop, as the timer function
+	// can only read the stage of the scene under the render context lock,
+	// as the scene can be closed in the meantime.
+	win := em.RenderWindow()
 	*t = time.AfterFunc(stime, func() {
-		win := em.RenderWindow()
 		if win == nil {
 			return
 		}
@@ -724,7 +727,7 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 
 		em.timerMu.Lock() // then can get this
 		defer em.timerMu.Unlock()
-		if tree.IsNil(*w) {
+		if tree.IsNil(*w) || em.mains() == nil { // the scene was closed
 			return
 		}
 		(*w).AsWidget().Send(styp, e)
