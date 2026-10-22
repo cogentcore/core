@@ -1,0 +1,5 @@
+CursorBlinkTime = 0
+DoubleClickInterval = 400000000
+LongHoverTime = 1500000000
+ScrollWheelSpeed = 2.5
+SnackbarTimeout = 10000000000
