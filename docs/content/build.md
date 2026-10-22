@@ -18,7 +18,7 @@ The `core` command line tool provides four main build commands, as documented be
 
 You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run wasm` to serve an app on the web.
 
-There are two web platforms: `wasm` compiles the app to WebAssembly, and `js` compiles it to JavaScript with [GoScript](https://github.com/s4wave/goscript). The `js` platform installs GoScript and [bun](https://bun.sh) automatically if they are not already installed. The `web` platform name from earlier versions still works, and means `wasm`.
+There are two web platforms: `wasm` compiles the app to WebAssembly, and `js` compiles it to JavaScript with [GoScript](https://github.com/s4wave/goscript). The `js` platform installs GoScript and [bun](https://bun.sh) automatically if they are not already installed. We recommend `js`, which is what this website uses. Earlier versions had a single `web` platform, which has been replaced by `js` and `wasm` (it was the same as `wasm`, and its output was in `bin/web`).
 
 Note: `core run wasm` and `core run js` are mainly used for serving an app locally; to deploy an app on the web, you can use `core build wasm` or `core build js` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
 
@@ -77,7 +77,7 @@ You can build for Android on all desktop platforms, and for iOS on macOS only. C
 
 The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` (or `.js` for `js`) and associated `.html` and `.js` files on the web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
 
-For desktop platforms, `core run` just runs the executable directly. For mobile platforms, it installs the executable package on the target device (which can be a simulator or a real connected device) using `core install` and then starts it. For web, it serves the files in `bin/web` at http://localhost:8080.
+For desktop platforms, `core run` just runs the executable directly. For mobile platforms, it installs the executable package on the target device (which can be a simulator or a real connected device) using `core install` and then starts it. For `js` and `wasm`, it serves the files in `bin/js` or `bin/wasm` at http://localhost:8080.
 
 On mobile and web platforms, `core pack` is the same as `core build`, as that already makes a package on those platforms. On macOS, it makes a `.app` bundle file and a `.dmg` disk image installer file. On Windows, it makes a `.exe` installer file. On Linux, it makes a `.deb` package file.
 

@@ -52,8 +52,8 @@ type Config struct { //types:add
 
 	// Content, if specified, indicates that the app has core content pages
 	// located at this directory. If so, a directory tree will be made for all
-	// of the pages when building for platform web. This defaults to "content"
-	// when building an app for platform web that imports content.
+	// of the pages when building for the js and wasm platforms. This defaults
+	// to "content" when building an app for js or wasm that imports content.
 	Content string
 
 	// the configuration options for the build, install, run, and pack commands

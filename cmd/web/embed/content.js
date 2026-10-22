@@ -1,7 +1,7 @@
 // content.js provides the interactive navigation elements for Cogent Core
 // content websites, using Vue.js. The website is either the preview shown
-// while the wasm app is loading, or a freestanding website without the wasm
-// app (core build web -htmlonly).
+// while the app is loading, or a freestanding website without the
+// app (core build js -htmlonly).
 // It replicates the table of contents and categories trees and the page
 // search of the content package. The site navigation data is in
 // window.ccSite (from nav.js), and the current page data is in window.ccPage.

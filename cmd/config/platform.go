@@ -5,10 +5,9 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"strings"
-
-	"cogentcore.org/core/base/logx"
 )
 
 // Note: the maps in this file are derived from https://github.com/golang/go/blob/master/src/go/build/syslist.go
@@ -27,6 +26,10 @@ func (p Platform) String() string {
 // OSSupported determines whether the given operating system is supported by Cogent Core. If it is, it returns nil.
 // If it isn't, it returns an error detailing the issue with the operating system (not found or not supported).
 func OSSupported(os string) error {
+	// The web platform of earlier versions is now two platforms.
+	if os == "web" {
+		return errors.New("the web platform has been replaced by js and wasm: use js (recommended; compiles to JavaScript with GoScript) or wasm (compiles to WebAssembly)")
+	}
 	supported, ok := supportedOS[os]
 	if !ok {
 		return fmt.Errorf("could not find operating system %s; please check that you spelled it correctly", os)
@@ -57,11 +60,6 @@ func (p *Platform) SetString(platform string) error {
 	err := OSSupported(before)
 	if err != nil {
 		return fmt.Errorf("error parsing platform: %w", err)
-	}
-	// The wasm platform was called web, which is still accepted.
-	if p.OS == "web" {
-		logx.PrintlnWarn("the web platform is now called wasm; use wasm instead of web")
-		p.OS = "wasm"
 	}
 	if !found {
 		p.Arch = "*"
@@ -97,7 +95,6 @@ var supportedOS = map[string]bool{
 	"ios":       true,
 	"js":        true,
 	"wasm":      true,
-	"web":       true, // the old name of wasm
 	"linux":     true,
 	"nacl":      false,
 	"netbsd":    false,

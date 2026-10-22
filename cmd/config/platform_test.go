@@ -15,9 +15,12 @@ func TestPlatformSetString(t *testing.T) {
 	assert.NoError(t, p.SetString("wasm"))
 	assert.Equal(t, Platform{OS: "wasm", Arch: "*"}, p)
 
-	// The old name of the wasm platform still works.
-	assert.NoError(t, p.SetString("web"))
-	assert.Equal(t, "wasm", p.OS)
+	// The web platform of earlier versions is an error that names js and wasm.
+	err := p.SetString("web")
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "use js")
+		assert.Contains(t, err.Error(), "wasm")
+	}
 
 	assert.NoError(t, p.SetString("js"))
 	assert.Equal(t, "js", p.OS)
