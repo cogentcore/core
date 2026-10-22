@@ -32,6 +32,7 @@ var racePackages = []string{
 	"./text/rich",
 	"./text/shaped/...",
 	"./enums/...",
+	"./system/driver/offscreen",
 }
 
 // raceRegexp matches the start of a data race report of the race detector.
