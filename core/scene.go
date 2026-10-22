@@ -212,7 +212,7 @@ func (sc *Scene) Init() {
 		s.Padding.Set(units.Dp(8))
 	})
 	sc.OnShow(func(e events.Event) {
-		currentRenderWindow.SetStageTitle(sc.Stage.Title)
+		getCurrentRenderWindow().SetStageTitle(sc.Stage.Title)
 	})
 	sc.OnClose(func(e events.Event) {
 		sm := sc.Stage.Mains
@@ -227,7 +227,7 @@ func (sc *Scene) Init() {
 		}
 		// the stage that will be visible next
 		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
-		currentRenderWindow.SetStageTitle(st.Title)
+		getCurrentRenderWindow().SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
 		if TheApp.Platform() == system.Offscreen {

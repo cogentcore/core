@@ -164,9 +164,7 @@ func runInEachWindow(f func(w *renderWindow, rc *renderContext)) {
 // does not wait for the function to run. Nothing is done if there is no
 // current window.
 func runInCurrentWindow(f func()) {
-	renderWindowGlobalMu.Lock()
-	w := currentRenderWindow
-	renderWindowGlobalMu.Unlock()
+	w := getCurrentRenderWindow()
 	if w == nil {
 		return
 	}

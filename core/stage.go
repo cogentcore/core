@@ -371,11 +371,12 @@ func (st *Stage) doUpdate() (stageMods, sceneMods bool) {
 // raise moves the Stage to the top of its main [stages]
 // and raises the [renderWindow] it is in if necessary.
 func (st *Stage) raise() {
-	if st.Mains.renderWindow != currentRenderWindow {
-		st.Mains.renderWindow.Raise()
+	rw := st.Mains.renderWindow
+	if rw != getCurrentRenderWindow() {
+		rw.Raise() // which makes it the current window
 	}
 	st.Mains.moveToTop(st)
-	currentRenderWindow.SetStageTitle(st.Title)
+	rw.SetStageTitle(st.Title)
 }
 
 func (st *Stage) delete() {

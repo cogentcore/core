@@ -28,8 +28,8 @@ const (
 func (wb *WidgetBase) SceneSize() math32.Vector2 {
 	dots := math32.FromPoint(wb.Scene.SceneGeom.Size)
 	if wb.Scene.hasFlag(sceneContentSizing) {
-		if currentRenderWindow != nil {
-			rg := currentRenderWindow.SystemWindow.RenderGeom()
+		if cw := getCurrentRenderWindow(); cw != nil {
+			rg := cw.SystemWindow.RenderGeom()
 			dots = math32.FromPoint(rg.Size)
 		}
 	}

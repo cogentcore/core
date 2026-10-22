@@ -206,8 +206,8 @@ func (st *Stage) targetScreen() *system.Screen {
 	if st.Screen >= 0 && st.Screen < TheApp.NScreens() {
 		return TheApp.Screen(st.Screen)
 	}
-	if currentRenderWindow != nil {
-		return currentRenderWindow.SystemWindow.Screen()
+	if cw := getCurrentRenderWindow(); cw != nil {
+		return cw.SystemWindow.Screen()
 	}
 	return TheApp.Screen(0)
 }
@@ -244,7 +244,10 @@ func (st *Stage) configMainStage() {
 func (st *Stage) runWindow() *Stage {
 	sc := st.Scene
 	newWindow := st.NewWindow && !TheApp.Platform().IsMobile()
-	if currentRenderWindow == nil || newWindow {
+	// The current window is read once, as the event loop of a window that
+	// is closed sets it to another window.
+	cw := getCurrentRenderWindow()
+	if cw == nil || newWindow {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size.
 		// A new window also gets its own, which it keeps, so that it never
@@ -252,7 +255,7 @@ func (st *Stage) runWindow() *Stage {
 		// be rendering or closing in its own goroutine.
 		st.setMains(st.firstWindowStages())
 	} else {
-		st.setMains(&currentRenderWindow.mains)
+		st.setMains(&cw.mains)
 	}
 	st.configMainStage()
 	st.addSceneParts()
@@ -262,7 +265,7 @@ func (st *Stage) runWindow() *Stage {
 	// and thus don't consider pref size.
 	// Desktop new windows and non-full windows can pref size.
 	if !TheApp.Platform().IsMobile() &&
-		(st.NewWindow || !st.FullWindow || currentRenderWindow == nil) {
+		(st.NewWindow || !st.FullWindow || cw == nil) {
 		sz = sc.contentSize(sz)
 		// On offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content.
@@ -286,7 +289,7 @@ func (st *Stage) runWindow() *Stage {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
-	if st.NewWindow || currentRenderWindow == nil {
+	if st.NewWindow || cw == nil {
 		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		win := st.newRenderWindow(st.renderContext)
 		mainRenderWindows.add(win)
@@ -302,7 +305,7 @@ func (st *Stage) runWindow() *Stage {
 		ms.push(st)
 		st.setMains(ms)
 	} else {
-		ms := &currentRenderWindow.mains
+		ms := &cw.mains
 		msc := ms.top().Scene
 		sc.SceneGeom.Size = sz
 		sc.fitInWindow(msc.SceneGeom) // does resize
@@ -318,11 +321,12 @@ func (st *Stage) runWindow() *Stage {
 // the calling function must bail.
 func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
-		if currentRenderWindow == nil {
+		cw := getCurrentRenderWindow()
+		if cw == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = currentRenderWindow.mains.top().Scene
+		st.Context = cw.mains.top().Scene
 	}
 	return true
 }

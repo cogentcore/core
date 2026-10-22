@@ -62,6 +62,14 @@ func setCurrentRenderWindow(w *renderWindow) {
 	renderWindowGlobalMu.Unlock()
 }
 
+// getCurrentRenderWindow returns [currentRenderWindow] under its mutex, as
+// the event loop of a window that is closed sets it to another window.
+func getCurrentRenderWindow() *renderWindow {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	return currentRenderWindow
+}
+
 // renderWindow provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
 //
