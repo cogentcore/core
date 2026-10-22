@@ -243,9 +243,13 @@ func (st *Stage) configMainStage() {
 // runWindow runs a Window with current settings.
 func (st *Stage) runWindow() *Stage {
 	sc := st.Scene
-	if currentRenderWindow == nil {
+	newWindow := st.NewWindow && !TheApp.Platform().IsMobile()
+	if currentRenderWindow == nil || newWindow {
 		// If we have no current render window, we need to be in a new window,
-		// and we need a *temporary* Mains to get initial pref size
+		// and we need a *temporary* Mains to get initial pref size.
+		// A new window also gets its own, which it keeps, so that it never
+		// uses the render context of another window, which that window can
+		// be rendering or closing in its own goroutine.
 		st.setMains(st.firstWindowStages())
 	} else {
 		st.setMains(&currentRenderWindow.mains)
@@ -284,7 +288,7 @@ func (st *Stage) runWindow() *Stage {
 
 	if st.NewWindow || currentRenderWindow == nil {
 		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
-		win := st.newRenderWindow()
+		win := st.newRenderWindow(st.renderContext)
 		mainRenderWindows.add(win)
 		setCurrentRenderWindow(win)
 		win.goStartEventLoop()
@@ -372,7 +376,7 @@ func (st *Stage) runDialog() *Stage {
 		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
-		win := st.newRenderWindow()
+		win := st.newRenderWindow(nil)
 		dialogRenderWindows.add(win)
 		setCurrentRenderWindow(win)
 		win.goStartEventLoop()
@@ -385,7 +389,9 @@ func (st *Stage) runDialog() *Stage {
 	return st
 }
 
-func (st *Stage) newRenderWindow() *renderWindow {
+// newRenderWindow returns a new [renderWindow] for the stage, with the given
+// render context if it is non-nil and a new one otherwise.
+func (st *Stage) newRenderWindow(rc *renderContext) *renderWindow {
 	name := st.Name
 	title := st.Title
 	opts := &system.NewWindowOptions{
@@ -426,7 +432,10 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	AllRenderWindows.add(win)
 	// initialize Mains
 	win.mains.renderWindow = win
-	win.mains.renderContext = newRenderContext() // sets defaults according to Screen
+	if rc == nil {
+		rc = newRenderContext() // sets defaults according to Screen
+	}
+	win.mains.renderContext = rc
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
 	win.mains.push(st)
