@@ -98,6 +98,13 @@ type Context struct {
 	// if not set, then they are loaded immediately.
 	DelayedImageLoad bool
 
+	// ImageCache, if non-nil, caches the decoded images of img elements
+	// by their resolved URL, so that rebuilding a page does not decode
+	// them again. It must only be set when [Context.GetURL] returns the
+	// same content for the same URL until the cache is reset. It is nil
+	// by default; see [NewImageCache].
+	ImageCache *ImageCache
+
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
 

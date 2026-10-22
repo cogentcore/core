@@ -160,12 +160,20 @@ var keepCategories = true
 // [yaegicore.ResetGoalInterpreter]
 var NewPageInitFunc func()
 
+// ImageCacheBytes is the maximum total size in bytes of the decoded
+// images that a [Content] keeps in the [htmlcore.ImageCache] of its
+// [Content.Context], so that revisiting a page does not decode its
+// images again.
+var ImageCacheBytes = 64 << 20
+
 func (ct *Content) Init() {
 	ct.Splits.Init()
 	ct.SetSplits(0.2, 0.8)
 
 	ct.Context = htmlcore.NewContext()
 	ct.Context.DelayedImageLoad = false // not useful for content
+	// The source does not change until SetSource, which resets the cache.
+	ct.Context.ImageCache = htmlcore.NewImageCache(ImageCacheBytes)
 	ct.Context.OpenURL = func(url string, e events.Event) {
 		ct.OpenEvent(url, e)
 	}
@@ -364,6 +372,9 @@ func (ct *Content) pageByName(name string) *bcontent.Page {
 // SetSource sets the source filesystem for the content.
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
+	if ct.Context.ImageCache != nil {
+		ct.Context.ImageCache.Reset()
+	}
 	ct.pages = []*bcontent.Page{}
 	ct.pagesByName = map[string]*bcontent.Page{}
 	ct.pagesByURL = map[string]*bcontent.Page{}
