@@ -120,7 +120,9 @@ type Slider struct {
 	// previous sliding value (for computing the Input change)
 	prevSlide float32
 
-	// underlying drag position of slider; not subject to snapping
+	// slideStartPos is the underlying drag position of the slider where the
+	// mouse was pressed, relative to which a slide moves it; it is not
+	// subject to snapping.
 	slideStartPos float32
 }
 
@@ -218,21 +220,16 @@ func (sr *Slider) Init() {
 		pos := sr.pointToRelPos(e.Pos())
 		sr.setSliderPosEvent(pos)
 		sr.lastValue = -math32.MaxFloat32
-		sr.slideStartPos = sr.pos
+		// The slide moves are relative to where the mouse was pressed,
+		// not to where the slide started, which depends on how far the
+		// mouse moved before the slide start time.
+		sr.slideStartPos = pos - sr.slideDelta(e)
 	})
 	sr.On(events.SlideMove, func(e events.Event) {
-		del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
-		if sr.Flip {
-			del = -del
-		}
-		sr.setSliderPosEvent(sr.slideStartPos + del)
+		sr.setSliderPosEvent(sr.slideStartPos + sr.slideDelta(e))
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
-		if sr.Flip {
-			del = -del
-		}
-		sr.setSliderPosEvent(sr.slideStartPos + del)
+		sr.setSliderPosEvent(sr.slideStartPos + sr.slideDelta(e))
 		sr.sendChange()
 	})
 	sr.On(events.Click, func(e events.Event) {
@@ -496,6 +493,16 @@ func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 	}
 	res += fmt.Sprintf("(value: %.4g, minimum: %.4g, maximum: %.4g)", sr.Value, sr.Min, sr.Max)
 	return res, sr.DefaultTooltipPos()
+}
+
+// slideDelta returns the distance that the mouse has moved along the
+// slider since it was pressed, for the given slide event.
+func (sr *Slider) slideDelta(e events.Event) float32 {
+	del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
+	if sr.Flip {
+		del = -del
+	}
+	return del
 }
 
 // pointToRelPos translates a point in scene local pixel coords into relative
