@@ -19,8 +19,10 @@ type Web struct { //types:add
 	// It is enabled by default and should be kept on for easy deployment.
 	RandomVersion bool `default:"true"`
 
-	// Gzip is whether to gzip the app.wasm file that is built in the build command
-	// and serve it as a gzip-encoded file in the run command.
+	// Gzip is whether to gzip the files of the app bundle that the build
+	// command makes (app.wasm for wasm, and app.gs.js and its chunks for js)
+	// in place, without changing their names, so that they must be served
+	// with the Content-Encoding: gzip header, as the run command does.
 	Gzip bool
 
 	// GenerateHTML is whether to generate an HTML version of app content for

@@ -30,11 +30,7 @@ func Build(c *config.Config) error {
 		return buildJS(c)
 	}
 	output := filepath.Join(c.Build.Output, "app.wasm")
-	opath := output
-	if c.Web.Gzip {
-		opath += ".orig"
-	}
-	args := []string{"build", "-o", opath, "-ldflags", config.LinkerFlags(c)}
+	args := []string{"build", "-o", output, "-ldflags", config.LinkerFlags(c)}
 	if c.Build.Trimpath {
 		args = append(args, "-trimpath")
 	}
@@ -42,21 +38,22 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if c.Web.Gzip {
-		err = exec.RemoveAll(output + ".orig.gz")
-		if err != nil {
-			return err
-		}
-		err = exec.Run("gzip", output+".orig")
-		if err != nil {
-			return err
-		}
-		err = os.Rename(output+".orig.gz", output)
-		if err != nil {
-			return err
-		}
+	return finishBuild(c)
+}
+
+// finishBuild measures and compresses the app bundle (see [processBundle]),
+// makes the other files of the website, and then reports the bundle size.
+func finishBuild(c *config.Config) error {
+	bs, err := processBundle(c)
+	if err != nil {
+		return err
 	}
-	return makeFiles(c)
+	err = makeFiles(c)
+	if err != nil {
+		return err
+	}
+	reportBundle(c, bs)
+	return nil
 }
 
 // makeFiles makes the necessary static web files based on the given configuration information.

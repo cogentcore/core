@@ -149,7 +149,7 @@ func buildJS(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	return makeFiles(c)
+	return finishBuild(c)
 }
 
 // jsChunkPrefix is the prefix of the names of the files of the bundle other
