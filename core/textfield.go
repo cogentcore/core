@@ -1229,9 +1229,15 @@ func (tf *TextField) updateCursorPosition() {
 	}
 	ms := sc.Stage.Main
 	ms.Sprites.Lock()
-	defer ms.Sprites.Unlock()
-	if sp, ok := ms.Sprites.SpriteByNameNoLock(textFieldSpriteName); ok {
+	sp, ok := ms.Sprites.SpriteByNameNoLock(textFieldSpriteName)
+	if ok {
 		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
+	}
+	ms.Sprites.Unlock()
+	// The sprites are removed when the scene is rebuilt or resized,
+	// so the cursor of the focused text field is started again.
+	if !ok {
+		tf.startCursor()
 	}
 }
 

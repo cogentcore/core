@@ -57,9 +57,15 @@ func (ed *Base) updateCursorPosition() {
 	}
 	ms := sc.Stage.Main
 	ms.Sprites.Lock()
-	defer ms.Sprites.Unlock()
-	if sp, ok := ms.Sprites.SpriteByNameNoLock(cursorSpriteName); ok {
+	sp, ok := ms.Sprites.SpriteByNameNoLock(cursorSpriteName)
+	if ok {
 		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
+	}
+	ms.Sprites.Unlock()
+	// The sprites are removed when the scene is rebuilt or resized,
+	// so the cursor of the focused editor is started again.
+	if !ok {
+		ed.startCursor()
 	}
 }
 
