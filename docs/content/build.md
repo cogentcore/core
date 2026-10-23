@@ -18,9 +18,9 @@ The `core` command line tool provides four main build commands, as documented be
 
 You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run wasm` to serve an app on the web.
 
-There are two web platforms: `wasm` compiles the app to WebAssembly, and `js` compiles it to JavaScript with [GoScript](https://github.com/s4wave/goscript). The `js` platform installs GoScript and [bun](https://bun.sh) automatically if they are not already installed. We recommend `js`, which is what this website uses. Earlier versions had a single `web` platform, which has been replaced by `js` and `wasm` (it was the same as `wasm`, and its output was in `bin/web`).
+There are two web platforms: `wasm` compiles the app to WebAssembly, and `js` compiles it to JavaScript with [GoScript](https://github.com/s4wave/goscript). The `js` platform installs GoScript and [bun](https://bun.sh) automatically if they are not already installed. We recommend `js`, which is what this website uses.
 
-Note: `core run wasm` and `core run js` are mainly used for serving an app locally; to deploy an app on the web, you can use `core build wasm` or `core build js` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
+Note: `core run wasm` and `core run js` are mainly used for serving an app locally for testing; to deploy an app on the web, you can use `core build wasm` or `core build js` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
 
 If there is an `icon.svg` file in the current directory, it will be used as the app icon on all platforms.
 
@@ -42,7 +42,7 @@ You can also build a freestanding website that consists only of these static HTM
 
 ## Code blocks of content apps
 
-In a [[content]] app, a ```` ```Go ```` (or ```` ```Goal ````) code block in a page is an interactive example: the page shows the code in a text editor and runs it, showing the widgets that it makes below it. `core build`, `core run`, `core install`, `core pack`, and `core generate` compile these code blocks into the app: they write a `contentcode_gen.go` file to the main package of the app with a Go function for each code block, and the page runs that function directly, without an interpreter, on all platforms (on `js`, GoScript compiles it with the rest of the app). This is faster, and the code blocks are type checked at build time.
+In a [[content]] app, a `Go` (or `Goal` ) code block in a page is an interactive example: the page shows the code in a text editor and runs it, showing the widgets that it makes below it. `core build`, `core run`, `core install`, `core pack`, and `core generate` compile these code blocks into the app: they write a `contentcode_gen.go` file to the main package of the app with a Go function for each code block, and the page runs that function directly, without an interpreter, on all platforms (on `js`, GoScript compiles it with the rest of the app). This is faster, and the code blocks are type checked at build time.
 
 This happens automatically for any main package that imports the content package and embeds a directory of markdown files. The generated file records a hash of the code blocks, the options, and the `go.mod` file of the app, and nothing is done if that hash has not changed, so this only takes time (a few seconds) after you change a code block. You should commit the generated file, so that `go build` and `go run` also work.
 
@@ -52,7 +52,7 @@ When someone edits a code block, the edited code runs in the [yaegi](https://git
 
 ### Goal code blocks
 
-```` ```Goal ```` code blocks, written in [Goal](https://cogentcore.org/lab/goal), are compiled too, if the module of the app requires [Cogent Lab](https://cogentcore.org/lab), whose Goal transpiler turns them into Go (otherwise, the command says so, and they run in the Goal interpreter, if the app includes it). As in the Goal interpreter, the Goal code blocks of a page run in order and share their variables: a block can use the variables and functions of the blocks before it on its page. Goal code can use the Cogent Lab packages (`tensor`, `plot`, `matrix`, ...) without importing them. A page is compiled up to its first Goal code block that does not compile; that block and the ones after it run in the Goal interpreter, if the app includes it.
+`Goal` code blocks, written in [Goal](https://cogentcore.org/lab/goal), are compiled too, if the module of the app requires [Cogent Lab](https://cogentcore.org/lab), whose Goal transpiler turns them into Go (otherwise, the command says so, and they run in the Goal interpreter, if the app includes it). As in the Goal interpreter, the Goal code blocks of a page run in order and share their variables: a block can use the variables and functions of the blocks before it on its page. Goal code can use the Cogent Lab packages (`tensor`, `plot`, `matrix`, ...) without importing them. A page is compiled up to its first Goal code block that does not compile; that block and the ones after it run in the Goal interpreter, if the app includes it.
 
 The Goal interpreter of edited code is `yaegilab.BindTextEditor` (`cogentcore.org/lab/yaegilab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/yaegilab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
 
