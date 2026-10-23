@@ -32,7 +32,8 @@ var excluded = map[string]bool{
 	"emacslisp.xml":   true,
 	"erb.xml":         true,
 	"go_template.xml": true,
-	"jungle.xml":      true, // loops forever on code such as: key = "value" # comment
+	"jsonata.xml":     true, // loops forever on a lone " (chroma issue #1377)
+	"jungle.xml":      true, // loops forever on code such as: a = 1 (chroma issue #1377)
 	"plan9rc.xml":     true, // replaced by a lexer in Go
 	"typoscript.xml":  true, // replaced by a lexer in Go
 }

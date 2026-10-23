@@ -124,7 +124,6 @@ var all = map[string]func(reg *chroma.LexerRegistry){
 	"JavaScript":                  JavaScript,
 	"JQ":                          JQ,
 	"JSON":                        JSON,
-	"JSONata":                     JSONata,
 	"Jsonnet":                     Jsonnet,
 	"Julia":                       Julia,
 	"Kakoune":                     Kakoune,

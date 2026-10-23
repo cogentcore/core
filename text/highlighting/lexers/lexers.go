@@ -1082,15 +1082,6 @@ func JSON(reg *chroma.LexerRegistry) {
 	register(reg, "json.xml", xmlJSON)
 }
 
-//go:embed jsonata.xml
-var xmlJSONata string
-
-// JSONata adds the chroma lexer for JSONata (jsonata)
-// to the registry.
-func JSONata(reg *chroma.LexerRegistry) {
-	register(reg, "jsonata.xml", xmlJSONata)
-}
-
 //go:embed jsonnet.xml
 var xmlJsonnet string
 
