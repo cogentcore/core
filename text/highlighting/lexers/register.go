@@ -10,9 +10,13 @@
 //
 //	highlighting.AddLexers(lexers.Bash, lexers.TOML)
 //
-// The lexers are copies of the chroma lexers defined in XML, and Go. Each
-// function also adds the lexers that its lexer uses, such as the CSS and
-// JavaScript lexers for HTML.
+// The lexers are copies of the chroma lexers, for only the few languages
+// that Cogent Core apps use, until chroma provides individual lexers itself
+// (https://github.com/alecthomas/chroma/issues/1414). A language is added
+// by adding its XML file to the included list of gen.go. Each function also
+// adds the lexers that its lexer uses. Importing
+// cogentcore.org/core/text/highlighting/alllexers uses all of the chroma
+// lexers instead.
 // Copyright (C) 2017 Alec Thomas, under an MIT License (see COPYING).
 package lexers
 

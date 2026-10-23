@@ -29,7 +29,6 @@ func TestLexers(t *testing.T) {
 	for name, f := range all {
 		funcs[name] = f
 	}
-	assert.Greater(t, len(funcs), 250)
 	for name, f := range funcs {
 		t.Run(name, func(t *testing.T) {
 			reg := chroma.NewLexerRegistry()

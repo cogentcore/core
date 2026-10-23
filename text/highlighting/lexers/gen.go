@@ -4,9 +4,10 @@
 
 //go:build ignore
 
-// gen copies the XML lexer definitions of the chroma module in the
-// go.mod into this directory, except those that it leaves out, and writes lexers.go with a function
-// for each of them, and lexers_gen_test.go listing the functions.
+// gen copies the XML lexer definitions of the included chroma lexers, and
+// those of the lexers that they use, from the chroma module in the go.mod
+// into this directory, and writes lexers.go with a function for each of
+// them, and lexers_gen_test.go listing the functions.
 package main
 
 import (
@@ -23,19 +24,14 @@ import (
 	"unicode"
 )
 
-// excluded are the XML lexers that chroma extends or replaces in Go code,
-// so that the XML alone does not make the same lexer, and broken lexers. go_template.xml
-// is copied for the Go lexer, which is written by hand in go.go.
-var excluded = map[string]bool{
-	"astro.xml":       true,
-	"common_lisp.xml": true,
-	"emacslisp.xml":   true,
-	"erb.xml":         true,
-	"go_template.xml": true,
-	"jsonata.xml":     true, // loops forever on a lone " (chroma issue #1377)
-	"jungle.xml":      true, // loops forever on code such as: a = 1 (chroma issue #1377)
-	"plan9rc.xml":     true, // replaced by a lexer in Go
-	"typoscript.xml":  true, // replaced by a lexer in Go
+// included are the XML files of the lexers that have a function, which are
+// only those that Cogent Core apps use, until chroma provides individual
+// lexers itself (https://github.com/alecthomas/chroma/issues/1414).
+// go_template.xml is also copied for the Go lexer, written by hand in go.go.
+var included = []string{
+	"bash.xml",
+	"toml.xml",
+	"xml.xml",
 }
 
 // lexer is an XML lexer definition.
@@ -69,8 +65,8 @@ func main() {
 	}
 
 	// Read the definitions, copying go_template.xml for go.go.
-	var lexers []*lexer
 	byName := map[string]*lexer{}
+	byFile := map[string]*lexer{}
 	data := map[string][]byte{}
 	for _, f := range files {
 		b, err := os.ReadFile(f)
@@ -78,9 +74,6 @@ func main() {
 		base := filepath.Base(f)
 		if base == "go_template.xml" {
 			check(os.WriteFile(base, b, 0666))
-		}
-		if excluded[base] {
-			continue
 		}
 		data[base] = b
 		var cfg config
@@ -91,26 +84,31 @@ func main() {
 				lx.uses = append(lx.uses, m[1])
 			}
 		}
-		lexers = append(lexers, lx)
+		byFile[base] = lx
 		for _, n := range append([]string{cfg.Name}, cfg.Aliases...) {
 			byName[strings.ToLower(n)] = lx
 		}
 	}
 
-	// Resolve the lexers that each one uses, leaving out the lexers that
-	// use one that is not here.
+	// Resolve the lexers that the included ones use, which are included too.
 	var kept []*lexer
-	funcs := map[string]string{}
-	for _, lx := range lexers {
+	for _, file := range included {
+		lx := byFile[file]
 		if !lx.resolve(byName, map[*lexer]bool{lx: true}) {
-			fmt.Println("leaving out", lx.name, "which uses a lexer that is not here")
-			continue
+			panic(fmt.Sprintf("%s uses a lexer that is not in chroma", lx.name))
 		}
-		if other, ok := funcs[lx.fun]; ok {
-			panic(fmt.Sprintf("%s and %s have the same function name %s", other, lx.name, lx.fun))
+		for _, l := range append([]*lexer{lx}, lx.deps...) {
+			if slices.Contains(kept, l) {
+				continue
+			}
+			if l != lx {
+				l.resolve(byName, map[*lexer]bool{l: true})
+			}
+			kept = append(kept, l)
 		}
-		funcs[lx.fun] = lx.name
-		kept = append(kept, lx)
+	}
+	slices.SortFunc(kept, func(a, b *lexer) int { return strings.Compare(a.fun, b.fun) })
+	for _, lx := range kept {
 		check(os.WriteFile(lx.file, data[lx.file], 0666))
 	}
 	writeLexers(kept)
