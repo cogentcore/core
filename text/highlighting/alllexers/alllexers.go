@@ -10,7 +10,8 @@
 // An editor of code in any language needs this. Otherwise, the default is
 // [highlighting.NewGoLexers], which highlights only Go and leaves out the
 // definitions of the hundreds of other languages that chroma supports,
-// saving several megabytes in the size of the app.
+// saving several megabytes in the size of the app, and
+// [highlighting.AddLexers] adds the lexers of particular languages.
 package alllexers
 
 import (

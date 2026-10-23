@@ -22,6 +22,8 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/highlighting/lexers"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
@@ -51,6 +53,7 @@ func main() {
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
+	highlighting.AddLexers(lexers.Bash, lexers.TOML)
 	ct := content.NewContent(b).SetContent(econtent)
 	ctx := ct.Context
 	content.OfflineURL = "https://cogentcore.org/core"

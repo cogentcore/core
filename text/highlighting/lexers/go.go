@@ -2,18 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package highlighting
+package lexers
 
 // This file contains a copy of the Go lexer of
 // github.com/alecthomas/chroma/v3/lexers, which is defined in Go code
-// rather than XML, for [NewGoLexers].
-// Copyright (C) 2017 Alec Thomas, under an MIT License (see lexers/COPYING).
+// rather than XML.
+// Copyright (C) 2017 Alec Thomas, under an MIT License (see COPYING).
 
 import (
+	_ "embed"
 	"strings"
 
 	"github.com/alecthomas/chroma/v3"
 )
+
+//go:embed go_template.xml
+var xmlGoTemplate string
+
+// Go adds the chroma lexers for Go (go, golang) and Go text templates
+// (go-text-template), which highlight the raw strings of Go code,
+// to the registry.
+func Go(reg *chroma.LexerRegistry) {
+	goTextTemplate := reg.Register(chroma.MustNewXMLLexer(xmlFS{"go_template.xml", xmlGoTemplate}, "go_template.xml").SetConfig(&chroma.Config{
+		Name:    "Go Text Template",
+		Aliases: []string{"go-text-template"},
+	}))
+	reg.Register(newGoLexer(goTextTemplate))
+}
 
 // newGoLexer returns the Go lexer, using the given Go text template
 // lexer for raw strings.

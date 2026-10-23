@@ -25,6 +25,8 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/highlighting/lexers"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
@@ -33,6 +35,7 @@ import (
 var demoFile embed.FS
 
 func main() {
+	highlighting.AddLexers(lexers.XML)
 	b := core.NewBody("Cogent Core Demo")
 	ts := core.NewTabs(b)
 
