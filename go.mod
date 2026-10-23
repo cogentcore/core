@@ -23,7 +23,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260628091122-0bd588dc30cf
-	github.com/gomarkdown/markdown v0.0.0-20260417124207-7d523f7318df
+	github.com/gomarkdown/markdown v0.0.0-20260724235538-61af6e1e6971
 	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
