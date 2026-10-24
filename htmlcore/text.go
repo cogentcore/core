@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"slices"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -54,6 +55,7 @@ func extractTextExclude(ctx *Context, n *html.Node, excludeSubs ...string) (stri
 		// heuristic is much simpler.
 		return str, nil
 	}
+	isBr := n.Type == html.ElementNode && n.Data == "br"
 	if n.FirstChild != nil {
 		start, end := nodeString(n)
 		tx, excl := extractTextExclude(ctx, n.FirstChild, excludeSubs...)
@@ -61,9 +63,18 @@ func extractTextExclude(ctx *Context, n *html.Node, excludeSubs ...string) (stri
 		if excl != nil {
 			return str, excl
 		}
+	} else if isBr {
+		// A <br> has no children, but it must be kept, both for
+		// the rendered text and for HTML generated from it (see [core.ToHTML]).
+		str = "<br>"
 	}
 	if n.NextSibling != nil {
 		tx, excl := extractTextExclude(ctx, n.NextSibling, excludeSubs...)
+		if isBr {
+			// Markdown puts a newline after each <br>, which would
+			// otherwise be a second line break in pre-wrapped text.
+			tx = strings.TrimPrefix(tx, "\n")
+		}
 		str += tx
 		if excl != nil {
 			return str, excl

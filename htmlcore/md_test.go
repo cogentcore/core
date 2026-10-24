@@ -68,3 +68,14 @@ func TestReplaceDivs(t *testing.T) {
 		}
 	}
 }
+
+// TestLineBreakHTML checks that the line breaks of a backslash at the end of a
+// line and of <br> are kept in the text and in the HTML generated from it.
+func TestLineBreakHTML(t *testing.T) {
+	b := core.NewBody()
+	assert.NoError(t, ReadMDString(NewContext(), b, "A\\\nB\\\nC\n\nD<br>E\n"))
+	h, err := core.ToHTML(b)
+	assert.NoError(t, err)
+	assert.Contains(t, string(h), ">A<br>B<br>C</p>")
+	assert.Contains(t, string(h), ">D<br>E</p>")
+}

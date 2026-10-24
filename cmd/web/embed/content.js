@@ -114,6 +114,32 @@
 
   ////////  Trees
 
+  // Following a page link loads a new page, which rebuilds the trees. So that
+  // the trees do not jump, saveNavRow saves the position of the clicked row
+  // in the navigation panel, and restoreNavRow scrolls the selected row of the
+  // new page, which is the clicked one, to that position.
+  const navRowKey = "cc-nav-row";
+
+  function saveNavRow(row) {
+    try {
+      const top = row.getBoundingClientRect().top - nav.getBoundingClientRect().top;
+      sessionStorage.setItem(navRowKey, String(top));
+    } catch (e) {}
+  }
+
+  function restoreNavRow() {
+    let top = null;
+    try {
+      top = sessionStorage.getItem(navRowKey);
+      sessionStorage.removeItem(navRowKey);
+    } catch (e) {}
+    const row = nav.querySelector('[data-root="cats"] .cc-selected');
+    if (top === null || !row) {
+      return;
+    }
+    nav.scrollTop += row.getBoundingClientRect().top - nav.getBoundingClientRect().top - Number(top);
+  }
+
   // tocTree returns the table of contents tree for the page headings,
   // nested in the same way as in the content package.
   function tocTree() {
@@ -205,6 +231,8 @@
         this.root.selected = this.node.key;
         if (this.node.href && this.node.href[0] === "#") {
           setDrawer(false);
+        } else if (this.node.href) {
+          saveNavRow(e.currentTarget);
         }
       },
     },
@@ -241,10 +269,11 @@
         return { roots };
       },
       template: `
-        <div v-for="r in roots" :key="r.key" class="cc-tree-root" role="tree">
+        <div v-for="r in roots" :key="r.key" class="cc-tree-root" :data-root="r.key" role="tree">
           <tree-node :node="r" :depth="0" :root="r"></tree-node>
         </div>`,
     }).mount(nav);
+    restoreNavRow();
   }
 
   ////////  Search

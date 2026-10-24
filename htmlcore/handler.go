@@ -447,7 +447,8 @@ func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.N
 	}
 	tx := New[core.Text](ctx).SetText(et)
 	tag := ctx.Node.Data
-	if tag != "li" && strings.Contains(et, "\n") && !strings.Contains(et, `<span class="math display">`) {
+	hasBreak := strings.Contains(et, "\n") || strings.Contains(et, "<br>")
+	if tag != "li" && hasBreak && !strings.Contains(et, `<span class="math display">`) {
 		tx.Styler(func(s *styles.Style) {
 			s.Text.WhiteSpace = text.WhiteSpacePreWrap
 		})
