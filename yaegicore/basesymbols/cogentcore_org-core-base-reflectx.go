@@ -15,6 +15,7 @@ var _ = register(func() {
 		"CopyFields":         reflect.ValueOf(reflectx.CopyFields),
 		"CopyMapRobust":      reflect.ValueOf(reflectx.CopyMapRobust),
 		"CopySliceRobust":    reflect.ValueOf(reflectx.CopySliceRobust),
+		"CopyStructDeep":     reflect.ValueOf(reflectx.CopyStructDeep),
 		"FieldByPath":        reflect.ValueOf(reflectx.FieldByPath),
 		"FormatDefault":      reflect.ValueOf(reflectx.FormatDefault),
 		"IsNil":              reflect.ValueOf(reflectx.IsNil),

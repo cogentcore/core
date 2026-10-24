@@ -16,6 +16,7 @@ var _ = register(func() {
 		"Apply":             reflect.ValueOf(gradient.Apply),
 		"ApplyOpacity":      reflect.ValueOf(gradient.ApplyOpacity),
 		"Cache":             reflect.ValueOf(&gradient.Cache).Elem(),
+		"ClearCache":        reflect.ValueOf(gradient.ClearCache),
 		"CopyFrom":          reflect.ValueOf(gradient.CopyFrom),
 		"CopyOf":            reflect.ValueOf(gradient.CopyOf),
 		"FromAny":           reflect.ValueOf(gradient.FromAny),

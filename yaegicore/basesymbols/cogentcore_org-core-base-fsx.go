@@ -22,6 +22,7 @@ var _ = register(func() {
 		"Files":            reflect.ValueOf(fsx.Files),
 		"FindFilesOnPaths": reflect.ValueOf(fsx.FindFilesOnPaths),
 		"GoSrcDir":         reflect.ValueOf(fsx.GoSrcDir),
+		"GoSrcDirs":        reflect.ValueOf(fsx.GoSrcDirs),
 		"HasFile":          reflect.ValueOf(fsx.HasFile),
 		"LatestMod":        reflect.ValueOf(fsx.LatestMod),
 		"RelativeFilePath": reflect.ValueOf(fsx.RelativeFilePath),

@@ -16,7 +16,7 @@ require (
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
 	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
-	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
+	github.com/cogentcore/yaegi v0.0.0-20261024094450-b0c6fff779d9
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
 	github.com/faiface/beep v1.1.0
@@ -36,14 +36,14 @@ require (
 	github.com/oliverbestmann/webgpu v1.37.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
-	golang.org/x/crypto v0.54.0
+	golang.org/x/crypto v0.57.0
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96
 	golang.org/x/image v0.44.0
-	golang.org/x/net v0.57.0
+	golang.org/x/net v0.59.0
 	golang.org/x/oauth2 v0.28.0
-	golang.org/x/sys v0.47.0
-	golang.org/x/text v0.40.0
-	golang.org/x/tools v0.48.0
+	golang.org/x/sys v0.48.0
+	golang.org/x/text v0.42.0
+	golang.org/x/tools v0.50.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -74,8 +74,8 @@ require (
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
-	golang.org/x/mod v0.38.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	modernc.org/knuth v0.5.5 // indirect
 	modernc.org/token v1.1.0 // indirect
