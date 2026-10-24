@@ -232,7 +232,9 @@ func transpileGoal(pkgDir string, pages []*goalPage, tags string, record bool) e
 	if tags != "" {
 		args = append(args, "-tags="+tags)
 	}
-	args = append(args, "./"+filepath.Base(dir), inFile, outFile, strconv.FormatBool(record))
+	// The transpiler imports the GUI through tensorsymbols, so -nogui makes
+	// it use the offscreen driver, which works without a display (as in CI).
+	args = append(args, "./"+filepath.Base(dir), inFile, outFile, strconv.FormatBool(record), "-nogui")
 	cmd := exec.Command("go", args...)
 	cmd.Dir = filepath.Dir(dir)
 	if out, err := cmd.CombinedOutput(); err != nil {
