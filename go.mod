@@ -16,7 +16,7 @@ require (
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
 	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
-	github.com/cogentcore/yaegi v0.0.0-20261024125408-a9036a6a26bb
+	github.com/cogentcore/yaegi v0.0.0-20261024142200-c0b92ec4f6b6
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
 	github.com/faiface/beep v1.1.0

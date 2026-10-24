@@ -37,8 +37,8 @@ github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698 h1:GsehCn/Dw
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698/go.mod h1:pdlQowLCSMiGfeOM6M7yz09OmR2fzlmFYcvR/u6QaRQ=
 github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e h1:seoKVtXIRWYZrY3vlwaos/PifRWJsKi48xroc9cGXis=
 github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e/go.mod h1:3WDWvccSCRXvDZ5T0kvk2OTofeUQWLlQDTWaVYUZwhI=
-github.com/cogentcore/yaegi v0.0.0-20261024125408-a9036a6a26bb h1:tm0Hzh+Xd4ylnzetIoql1ubxEmu1gGAY88eDppJZr/w=
-github.com/cogentcore/yaegi v0.0.0-20261024125408-a9036a6a26bb/go.mod h1:o1kG6o9hHlM/exRCSdIenr+5NTxDg6ve/DsOkYfbt6k=
+github.com/cogentcore/yaegi v0.0.0-20261024142200-c0b92ec4f6b6 h1:f5OhUCmt00f7u2WbWRJ7JCIsLbDDPZZKGUdmHutmuKo=
+github.com/cogentcore/yaegi v0.0.0-20261024142200-c0b92ec4f6b6/go.mod h1:o1kG6o9hHlM/exRCSdIenr+5NTxDg6ve/DsOkYfbt6k=
 github.com/coreos/go-oidc/v3 v3.17.0 h1:hWBGaQfbi0iVviX4ibC7bk8OKT5qNr4klBaCHVNvehc=
 github.com/coreos/go-oidc/v3 v3.17.0/go.mod h1:wqPbKFrVnE90vty060SB40FCJ8fTHTxSwyXJqZH+sI8=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
