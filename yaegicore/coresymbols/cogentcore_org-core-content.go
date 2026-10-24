@@ -10,14 +10,26 @@ import (
 var _ = register(func() {
 	Symbols["cogentcore.org/core/content/content"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"AddCompiledCode": reflect.ValueOf(content.AddCompiledCode),
+		"AddCompiledGoal": reflect.ValueOf(content.AddCompiledGoal),
+		"BindCode":        reflect.ValueOf(content.BindCode),
 		"BindTextEditor":  reflect.ValueOf(&content.BindTextEditor).Elem(),
+		"CodeKey":         reflect.ValueOf(content.CodeKey),
+		"CodeSymbols":     reflect.ValueOf(&content.CodeSymbols).Elem(),
+		"CompiledCode":    reflect.ValueOf(&content.CompiledCode).Elem(),
+		"CompiledGoal":    reflect.ValueOf(&content.CompiledGoal).Elem(),
+		"GoalReplay":      reflect.ValueOf(&content.GoalReplay).Elem(),
+		"ImageCacheBytes": reflect.ValueOf(&content.ImageCacheBytes).Elem(),
 		"NewContent":      reflect.ValueOf(content.NewContent),
 		"NewPageInitFunc": reflect.ValueOf(&content.NewPageInitFunc).Elem(),
 		"OfflineURL":      reflect.ValueOf(&content.OfflineURL).Elem(),
 		"Settings":        reflect.ValueOf(&content.Settings).Elem(),
 
 		// type definitions
+		"CodeFunc":     reflect.ValueOf((*content.CodeFunc)(nil)),
 		"Content":      reflect.ValueOf((*content.Content)(nil)),
+		"GoalBlock":    reflect.ValueOf((*content.GoalBlock)(nil)),
+		"GoalPage":     reflect.ValueOf((*content.GoalPage)(nil)),
 		"History":      reflect.ValueOf((*content.History)(nil)),
 		"Location":     reflect.ValueOf((*content.Location)(nil)),
 		"SettingsData": reflect.ValueOf((*content.SettingsData)(nil)),

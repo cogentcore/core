@@ -22,6 +22,7 @@ var _ = register(func() {
 		"MDSetAttr":          reflect.ValueOf(htmlcore.MDSetAttr),
 		"MDToHTML":           reflect.ValueOf(htmlcore.MDToHTML),
 		"NewContext":         reflect.ValueOf(htmlcore.NewContext),
+		"NewImageCache":      reflect.ValueOf(htmlcore.NewImageCache),
 		"ReadHTML":           reflect.ValueOf(htmlcore.ReadHTML),
 		"ReadHTMLString":     reflect.ValueOf(htmlcore.ReadHTMLString),
 		"ReadMD":             reflect.ValueOf(htmlcore.ReadMD),
@@ -29,6 +30,7 @@ var _ = register(func() {
 
 		// type definitions
 		"Context":         reflect.ValueOf((*htmlcore.Context)(nil)),
+		"ImageCache":      reflect.ValueOf((*htmlcore.ImageCache)(nil)),
 		"WikilinkHandler": reflect.ValueOf((*htmlcore.WikilinkHandler)(nil)),
 	}
 })
