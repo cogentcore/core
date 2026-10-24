@@ -91,10 +91,33 @@ func ModifiersValues() []Modifiers { return _ModifiersValues }
 func (i Modifiers) Values() []enums.Enum { return enums.Values(_ModifiersValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i *Modifiers) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+func (i *Modifiers) HasFlag(f enums.BitFlag) bool {
+	if enums.FlagTypeAssert {
+		if b, ok := f.(Modifiers); ok {
+			return *i&(1<<uint32(b)) != 0
+		}
+	}
+	return *i&(1<<uint32(f.Int64())) != 0
+}
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *Modifiers) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *Modifiers) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask Modifiers
+	for _, v := range f {
+		if enums.FlagTypeAssert {
+			if b, ok := v.(Modifiers); ok {
+				mask |= 1 << uint32(b)
+				continue
+			}
+		}
+		mask |= 1 << v.Int64()
+	}
+	if on {
+		*i |= mask
+	} else {
+		*i &^= mask
+	}
+}
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Modifiers) MarshalText() ([]byte, error) { return []byte(i.String()), nil }

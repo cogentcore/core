@@ -298,7 +298,7 @@ func (tp Types) IsWindow() bool {
 }
 
 // EventFlags encode boolean event properties
-type EventFlags int64 //enums:bitflag
+type EventFlags int32 //enums:bitflag
 
 const (
 	// Handled indicates that the event has been handled

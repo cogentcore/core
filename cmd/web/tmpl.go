@@ -7,8 +7,13 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"html"
 	"log/slog"
+	"net/url"
 	"os"
+	"regexp"
+	"slices"
+	"strings"
 	"text/template"
 
 	"cogentcore.org/core/base/elide"
@@ -25,6 +30,10 @@ type appJSData struct {
 	Env                     string
 	WasmContentLengthHeader string
 	AutoUpdateInterval      int64
+
+	// JS is whether the app is compiled to JavaScript with GoScript
+	// (the js platform) instead of to WebAssembly.
+	JS bool
 }
 
 // makeAppJS exectues [appJSTmpl] based on the given configuration information.
@@ -50,6 +59,7 @@ func makeAppJS(c *config.Config) ([]byte, error) {
 		Env:                     string(wenv),
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
+		JS:                      IsJS(c),
 	}
 	b := &bytes.Buffer{}
 	err = appJSTmpl.Execute(b, d)
@@ -61,35 +71,70 @@ func makeAppJS(c *config.Config) ([]byte, error) {
 
 // appWorkerJSData is the data passed to [config.Config.Web.ServiceWorkerTemplate]
 type appWorkerJSData struct {
-	Version          string
-	ResourcesToCache string
+	Version                  string
+	ResourcesToCache         string
+	ExternalResourcesToCache string
+	CacheOrigins             string
 }
 
 // makeAppWorkerJS executes [config.Config.Web.ServiceWorkerTemplate]. If it empty, it
-// sets it to [appWorkerJS].
-func makeAppWorkerJS(c *config.Config) ([]byte, error) {
+// sets it to [appWorkerJS]. The service worker caches the files of the app
+// for offline use, including those of the website of a content app if
+// content is true (see [makeContentSite]).
+func makeAppWorkerJS(c *config.Config, content bool) ([]byte, error) {
 	resources := []string{
+		"./",
+		"index.html",
 		"app.css",
 		"app.js",
-		"app.wasm",
 		"manifest.webmanifest",
-		"wasm_exec.js",
-		"index.html",
+		"icons/32.png",
+		"icons/192.png",
+		"icons/svg.svg",
 	}
+	if IsJS(c) {
+		resources = append(resources, "app.gs.js")
+		resources = append(resources, jsChunkFiles(c.Build.Output)...)
+		resources = append(resources, externalEmbedFiles(c.Build.Output)...)
+	} else {
+		resources = append(resources, "app.wasm", "wasm_exec.js")
+	}
+	external := externalResources(indexHTML)
+	if content {
+		resources = append(resources, "content.css", "content.js", "nav.js")
+		external = append(external, externalResources(contentHTML)...)
+	}
+	external = append(external, c.Web.Styles...)
+	slices.Sort(external)
+	external = slices.Compact(external)
+	origins := []string{}
+	for _, r := range external {
+		u, err := url.Parse(r)
+		if err != nil || u.Host == "" {
+			continue
+		}
+		origins = append(origins, u.Scheme+"://"+u.Host)
+	}
+	// Google Fonts stylesheets load their fonts from this other origin.
+	origins = append(origins, "https://fonts.gstatic.com")
+	slices.Sort(origins)
+	origins = slices.Compact(origins)
 
 	tmpl, err := template.New("app-worker.js").Parse(appWorkerJS)
 	if err != nil {
 		return nil, err
 	}
 
-	rstr, err := json.Marshal(resources)
-	if err != nil {
-		return nil, err
-	}
-
-	d := appWorkerJSData{
-		Version:          c.Version,
-		ResourcesToCache: string(rstr),
+	d := appWorkerJSData{Version: c.Version}
+	for _, v := range []struct {
+		dst *string
+		src []string
+	}{{&d.ResourcesToCache, resources}, {&d.ExternalResourcesToCache, external}, {&d.CacheOrigins, origins}} {
+		b, err := json.Marshal(v.src)
+		if err != nil {
+			return nil, err
+		}
+		*v.dst = string(b)
 	}
 
 	b := &bytes.Buffer{}
@@ -98,6 +143,31 @@ func makeAppWorkerJS(c *config.Config) ([]byte, error) {
 		return nil, err
 	}
 	return b.Bytes(), nil
+}
+
+var (
+	// externalTagRe matches the link and script start tags in an HTML template.
+	externalTagRe = regexp.MustCompile(`<(?:link|script)\b[^>]*>`)
+
+	// externalURLRe matches a URL from another origin in a link or script tag,
+	// with the URL as its first submatch.
+	externalURLRe = regexp.MustCompile(`\s(?:href|src)="(https://[^"{]+)"`)
+)
+
+// externalResources returns the URLs of the stylesheets and scripts from
+// other origins (CDNs) that the given HTML template loads.
+func externalResources(tmpl string) []string {
+	var urls []string
+	for _, tag := range externalTagRe.FindAllString(tmpl, -1) {
+		if strings.HasPrefix(tag, "<link") && !strings.Contains(tag, `rel="stylesheet"`) {
+			continue
+		}
+		m := externalURLRe.FindStringSubmatch(tag)
+		if m != nil {
+			urls = append(urls, m[1])
+		}
+	}
+	return urls
 }
 
 // manifestJSONTmpl is the template used in [makeManifestJSON] to build the mainfest.webmanifest file
@@ -139,10 +209,15 @@ type indexHTMLData struct {
 	SiteName               string
 	Image                  string
 	Styles                 []string
+	FontText               string
 	VanityURL              string
 	GithubVanityRepository string
 	PreRenderHTML          string
 	IndexPage              string
+
+	// JS is whether the app is compiled to JavaScript with GoScript
+	// (the js platform), in which case wasm_exec.js is not needed.
+	JS bool
 }
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
@@ -168,10 +243,12 @@ func makeIndexHTML(c *config.Config, basePath string, prp *bcontent.PreRenderPag
 		SiteName:               c.Name,
 		Image:                  c.Web.Image,
 		Styles:                 c.Web.Styles,
+		FontText:               html.EscapeString(c.Web.FontText),
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
 		PreRenderHTML:          prp.HTML,
 		IndexPage:              indexPage,
+		JS:                     IsJS(c),
 	}
 
 	b := &bytes.Buffer{}

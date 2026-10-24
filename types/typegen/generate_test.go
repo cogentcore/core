@@ -6,6 +6,7 @@ package typegen
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"text/template"
@@ -40,11 +41,15 @@ func TestGenerate(t *testing.T) {
 		t.Errorf("programmer error: error setting config from default tags: %v", err)
 	}
 	c.Dir = "./testdata"
+	// write to a temporary file so that the test never changes testdata/typegen.go,
+	// whose header records the command line of the test binary
+	output := filepath.Join(t.TempDir(), "typegen.go")
+	c.Output = output
 	err = Generate(c)
 	if err != nil {
 		t.Errorf("error while generating: %v", err)
 	}
-	have, err := os.ReadFile("testdata/typegen.go")
+	have, err := os.ReadFile(output)
 	if err != nil {
 		t.Errorf("error while reading generated file: %v", err)
 	}
@@ -56,7 +61,7 @@ func TestGenerate(t *testing.T) {
 	// that can change based on where go test is ran.
 	_, shave, got := strings.Cut(string(have), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/typegen.go, but got %q", have)
+		t.Errorf("expected string with newline in the generated file, but got %q", have)
 	}
 	_, swant, got := strings.Cut(string(want), "\n")
 	if !got {
@@ -64,7 +69,7 @@ func TestGenerate(t *testing.T) {
 	}
 	swant = strings.ReplaceAll(swant, "\r\n", "\n")
 	if shave != swant {
-		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/typegen.go and ./testdata/typegen.golden to see the difference)")
+		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare the generated file and ./testdata/typegen.golden to see the difference)")
 	}
 }
 

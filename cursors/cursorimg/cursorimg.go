@@ -11,6 +11,7 @@ import (
 	"image"
 	"image/draw"
 	_ "image/png"
+	"sync"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -34,7 +35,28 @@ type Cursor struct {
 
 // Cursors contains all of the cached rendered cursors, specified first
 // by cursor enum and then by size.
+// It is used by different goroutines under a mutex, so it must only be
+// cleared with [ClearCache].
 var Cursors = map[enums.Enum]map[int]*Cursor{}
+
+// cursorsMu protects [Cursors].
+var cursorsMu sync.Mutex
+
+// ClearCache clears [Cursors], as is needed when the colors of the color
+// scheme that they use have changed.
+func ClearCache() {
+	cursorsMu.Lock()
+	defer cursorsMu.Unlock()
+	clear(Cursors)
+}
+
+// NumCached returns the number of cursor types in [Cursors], which is
+// 0 after [ClearCache].
+func NumCached() int {
+	cursorsMu.Lock()
+	defer cursorsMu.Unlock()
+	return len(Cursors)
+}
 
 // Get returns the cursor object corresponding to the given cursor enum,
 // with the given size. If it is not already cached in [Cursors], it renders and caches it.
@@ -46,6 +68,8 @@ var Cursors = map[enums.Enum]map[int]*Cursor{}
 //   - #0f0: [colors.Scheme].Success.Base
 //   - #ff0: [colors.Scheme].Warn.Base
 func Get(cursor enums.Enum, size int) (*Cursor, error) {
+	cursorsMu.Lock()
+	defer cursorsMu.Unlock()
 	sm := Cursors[cursor]
 	if sm == nil {
 		sm = map[int]*Cursor{}

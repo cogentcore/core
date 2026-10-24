@@ -14,3 +14,5 @@ As you can see in [[#figure_one]], the data turned out just as expected. However
 
 That just goes to show: science is always interesting.
 
+You can also hard-link to another file resource: [fig_one.png](media/fig_one.png).
+

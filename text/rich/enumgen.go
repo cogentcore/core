@@ -13,7 +13,7 @@ const FamilyN Family = 9
 
 var _FamilyValueMap = map[string]Family{`sans-serif`: 0, `serif`: 1, `monospace`: 2, `cursive`: 3, `fantasy`: 4, `math`: 5, `emoji`: 6, `fangsong`: 7, `custom`: 8}
 
-var _FamilyDescMap = map[Family]string{0: `SansSerif is a font without serifs, where glyphs have plain stroke endings, without ornamentation. Example sans-serif fonts include Arial, Helvetica, Open Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Liberation Sans, and Nimbus Sans L.`, 1: `Serif is a small line or stroke attached to the end of a larger stroke in a letter. In serif fonts, glyphs have finishing strokes, flared or tapering ends. Examples include Times New Roman, Lucida Bright, Lucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.`, 2: `Monospace fonts have all glyphs with he same fixed width. Example monospace fonts include Fira Mono, DejaVu Sans Mono, Menlo, Consolas, Liberation Mono, Monaco, and Lucida Console.`, 3: `Cursive glyphs generally have either joining strokes or other cursive characteristics beyond those of italic typefaces. The glyphs are partially or completely connected, and the result looks more like handwritten pen or brush writing than printed letter work. Example cursive fonts include Brush Script MT, Brush Script Std, Lucida Calligraphy, Lucida Handwriting, and Apple Chancery.`, 4: `Fantasy fonts are primarily decorative fonts that contain playful representations of characters. Example fantasy fonts include Papyrus, Herculanum, Party LET, Curlz MT, and Harrington.`, 5: `Math fonts are for displaying mathematical expressions, for example superscript and subscript, brackets that cross several lines, nesting expressions, and double-struck glyphs with distinct meanings.`, 6: `Emoji fonts are specifically designed to render emoji.`, 7: `Fangsong are a particular style of Chinese characters that are between serif-style Song and cursive-style Kai forms. This style is often used for government documents.`, 8: `Custom is a custom font name that is specified in the [text.Style] CustomFont name.`}
+var _FamilyDescMap = map[Family]string{0: `SansSerif is a font without serifs, where glyphs have plain stroke endings, without ornamentation. Example sans-serif fonts include Arial, Helvetica, Open Sans, Fira Sans, Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Liberation Sans, and Nimbus Sans L.`, 1: `Serif is a small line or stroke attached to the end of a larger stroke in a letter. In serif fonts, glyphs have finishing strokes, flared or tapering ends. Examples include Times New Roman, Lucida Bright, Lucida Fax, Palatino, Palatino Linotype, Palladio, and URW Palladio.`, 2: `Monospace fonts have all glyphs with he same fixed width. Example monospace fonts include Courier, Fira Mono, DejaVu Sans Mono, Menlo, Consolas, Liberation Mono, Monaco, and Lucida Console.`, 3: `Cursive glyphs generally have either joining strokes or other cursive characteristics beyond those of italic typefaces. The glyphs are partially or completely connected, and the result looks more like handwritten pen or brush writing than printed letter work. Example cursive fonts include Brush Script MT, Brush Script Std, Lucida Calligraphy, Lucida Handwriting, and Apple Chancery.`, 4: `Fantasy fonts are primarily decorative fonts that contain playful representations of characters. Example fantasy fonts include Papyrus, Herculanum, Party LET, Curlz MT, and Harrington.`, 5: `Math fonts are for displaying mathematical expressions, for example superscript and subscript, brackets that cross several lines, nesting expressions, and double-struck glyphs with distinct meanings.`, 6: `Emoji fonts are specifically designed to render emoji.`, 7: `Fangsong are a particular style of Chinese characters that are between serif-style Song and cursive-style Kai forms. This style is often used for government documents.`, 8: `Custom is a custom font name that is specified in the [text.Style] CustomFont name.`}
 
 var _FamilyMap = map[Family]string{0: `sans-serif`, 1: `serif`, 2: `monospace`, 3: `cursive`, 4: `fantasy`, 5: `math`, 6: `emoji`, 7: `fangsong`, 8: `custom`}
 
@@ -212,10 +212,33 @@ func DecorationsValues() []Decorations { return _DecorationsValues }
 func (i Decorations) Values() []enums.Enum { return enums.Values(_DecorationsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i *Decorations) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+func (i *Decorations) HasFlag(f enums.BitFlag) bool {
+	if enums.FlagTypeAssert {
+		if b, ok := f.(Decorations); ok {
+			return *i&(1<<uint32(b)) != 0
+		}
+	}
+	return *i&(1<<uint32(f.Int64())) != 0
+}
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *Decorations) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *Decorations) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask Decorations
+	for _, v := range f {
+		if enums.FlagTypeAssert {
+			if b, ok := v.(Decorations); ok {
+				mask |= 1 << uint32(b)
+				continue
+			}
+		}
+		mask |= 1 << v.Int64()
+	}
+	if on {
+		*i |= mask
+	} else {
+		*i &^= mask
+	}
+}
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i Decorations) MarshalText() ([]byte, error) { return []byte(i.String()), nil }

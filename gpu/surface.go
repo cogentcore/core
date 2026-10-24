@@ -42,8 +42,14 @@ type Surface struct {
 
 	config *wgpu.SurfaceConfiguration
 
-	// current texture: must release at end
+	// curTexture is the view of the current surface texture,
+	// released in Present.
 	curTexture *wgpu.TextureView
+
+	// curSurfaceTexture is the current texture of the surface, which
+	// we own until Present (see [wgpu.Surface.GetCurrentTexture]).
+	// It belongs to the surface, so it is released, not destroyed.
+	curSurfaceTexture *wgpu.Texture
 
 	sync.Mutex
 }
@@ -97,7 +103,9 @@ func (sf *Surface) SetSize(sz image.Point) {
 	if sf.Format.Size == sz || sz.X == 0 || sz.Y == 0 {
 		return
 	}
-	sf.render.SetSize(sz)
+	// The depth and multisample textures are remade by Reconfig, under
+	// the lock held from GetCurrentTexture to Present, so that they are
+	// not destroyed while a frame that uses them is being rendered.
 	sf.Format.Size = sz
 	sf.config.Width = uint32(sf.Format.Size.X)
 	sf.config.Height = uint32(sf.Format.Size.Y)
@@ -136,6 +144,9 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 	}
 	texture, ok := stexture.Get()
 	if !ok {
+		if texture != nil {
+			texture.Release()
+		}
 		sf.Unlock()
 		return nil, nil
 	}
@@ -148,9 +159,11 @@ func (sf *Surface) GetCurrentTexture() (*wgpu.TextureView, error) {
 		Format:          sf.Format.Format,
 	})
 	if errors.Log(err) != nil {
+		texture.Release()
 		sf.Unlock()
 		return nil, err
 	}
+	sf.curSurfaceTexture = texture
 	sf.curTexture = view
 	return view, nil
 }
@@ -162,6 +175,13 @@ func (sf *Surface) Present() {
 	if sf.curTexture != nil {
 		sf.curTexture.Release()
 		sf.curTexture = nil
+	}
+	// We own the surface texture natively, so it must be released after
+	// Present and before the next one, or it leaks with its device
+	// reference (see [wgpu.Surface.GetCurrentTexture]).
+	if sf.curSurfaceTexture != nil {
+		sf.curSurfaceTexture.Release()
+		sf.curSurfaceTexture = nil
 	}
 	sf.Unlock()
 }

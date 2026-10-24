@@ -59,7 +59,9 @@ func (is *Inspector) Init() {
 		if !ok {
 			return
 		}
-		sc.renderContext().rebuild = true // trigger full rebuild
+		sc.runInWindow(is.AsWidget(), func() {
+			sc.renderContext().rebuild = true // trigger full rebuild
+		})
 	}
 	tree.AddChildAt(is, "splits", func(w *Splits) {
 		w.SetSplits(.3, .7)
@@ -94,12 +96,15 @@ func (is *Inspector) Init() {
 						return
 					}
 					if wb := AsWidget(sn); wb != nil {
-						pselw := sc.selectedWidget
-						sc.selectedWidget = sn.(Widget)
-						wb.NeedsRender()
-						if pselw != nil {
-							pselw.AsWidget().NeedsRender()
-						}
+						// The inspected scene is typically in another window.
+						sc.runInWindow(is.AsWidget(), func() {
+							pselw := sc.selectedWidget
+							sc.selectedWidget = sn.(Widget)
+							wb.NeedsRender()
+							if pselw != nil {
+								pselw.AsWidget().NeedsRender()
+							}
+						})
 					}
 				})
 				w.OnChange(func(e events.Event) {
@@ -118,14 +123,16 @@ func (is *Inspector) Init() {
 				if !ok {
 					return
 				}
-				if sc.renderBBoxes {
-					is.toggleSelectionMode()
-				}
-				pselw := sc.selectedWidget
-				sc.selectedWidget = nil
-				if pselw != nil {
-					pselw.AsWidget().NeedsRender()
-				}
+				sc.runInWindow(is.AsWidget(), func() {
+					if sc.renderBBoxes {
+						is.toggleSelectionModeOf(sc)
+					}
+					pselw := sc.selectedWidget
+					sc.selectedWidget = nil
+					if pselw != nil {
+						pselw.AsWidget().NeedsRender()
+					}
+				})
 			})
 			w.Updater(func() {
 				w.SetStruct(is.currentNode)
@@ -186,6 +193,14 @@ func (is *Inspector) toggleSelectionMode() { //types:add
 	if !ok {
 		return
 	}
+	sc.runInWindow(is.AsWidget(), func() {
+		is.toggleSelectionModeOf(sc)
+	})
+}
+
+// toggleSelectionModeOf does [Inspector.toggleSelectionMode] for the given
+// inspected scene, in its window.
+func (is *Inspector) toggleSelectionModeOf(sc *Scene) {
 	sc.renderBBoxes = !sc.renderBBoxes
 	if sc.renderBBoxes {
 		sc.selectedWidgetChan = make(chan Widget)

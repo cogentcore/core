@@ -9,6 +9,7 @@ import (
 	"image"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	. "cogentcore.org/core/paint"
@@ -21,6 +22,7 @@ import (
 )
 
 func TestTextAscii(t *testing.T) {
+	goscript.Skip(t, "the js fonts have only metrics, so the image renderer cannot draw text glyphs")
 	size := image.Point{300, 100}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
@@ -54,6 +56,7 @@ func TestTextAscii(t *testing.T) {
 }
 
 func TestTextMarkup(t *testing.T) {
+	goscript.Skip(t, "the js fonts have only metrics, so the image renderer cannot draw text glyphs")
 	size := image.Point{480, 400}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
@@ -79,6 +82,7 @@ func TestTextMarkup(t *testing.T) {
 }
 
 func TestTextLines(t *testing.T) {
+	goscript.Skip(t, "the js fonts have only metrics, so the image renderer cannot draw text glyphs")
 	size := image.Point{480, 80}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()
@@ -112,6 +116,7 @@ func TestTextLines(t *testing.T) {
 }
 
 func TestTextColors(t *testing.T) {
+	goscript.Skip(t, "the js fonts have only metrics, so the image renderer cannot draw text glyphs")
 	size := image.Point{480, 80}
 	sizef := math32.FromPoint(size)
 	txtSh := shaped.NewShaper()

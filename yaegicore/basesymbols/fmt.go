@@ -10,7 +10,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["fmt/fmt"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Append":       reflect.ValueOf(fmt.Append),
@@ -53,7 +53,7 @@ func init() {
 		"_State":      reflect.ValueOf((*_fmt_State)(nil)),
 		"_Stringer":   reflect.ValueOf((*_fmt_Stringer)(nil)),
 	}
-}
+})
 
 // _fmt_Formatter is an interface wrapper for Formatter type
 type _fmt_Formatter struct {

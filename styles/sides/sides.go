@@ -231,11 +231,17 @@ func NewValues(vals ...units.Value) Values {
 	return Values{sides}
 }
 
+// newValues returns side/corner values with the given value for each
+// side/corner, without the slice and the switch of [NewValues].
+func newValues(top, right, bottom, left units.Value) Values {
+	return Values{Sides[units.Value]{Top: top, Right: right, Bottom: bottom, Left: left}}
+}
+
 // ToDots converts the values for each of the sides/corners
 // to raw display pixels (dots) and sets the Dots field for each
 // of the values. It returns the dot values as a Floats.
 func (sv *Values) ToDots(uc *units.Context) Floats {
-	return NewFloats(
+	return newFloats(
 		sv.Top.ToDots(uc),
 		sv.Right.ToDots(uc),
 		sv.Bottom.ToDots(uc),
@@ -246,7 +252,7 @@ func (sv *Values) ToDots(uc *units.Context) Floats {
 // Dots returns the dot values of the sides/corners as a Floats.
 // It does not compute them; see ToDots for that.
 func (sv Values) Dots() Floats {
-	return NewFloats(
+	return newFloats(
 		sv.Top.Dots,
 		sv.Right.Dots,
 		sv.Bottom.Dots,
@@ -267,10 +273,16 @@ func NewFloats(vals ...float32) Floats {
 	return Floats{sides}
 }
 
+// newFloats returns side/corner floats with the given value for each
+// side/corner, without the slice and the switch of [NewFloats].
+func newFloats(top, right, bottom, left float32) Floats {
+	return Floats{Sides[float32]{Top: top, Right: right, Bottom: bottom, Left: left}}
+}
+
 // Add adds the side floats to the
 // other side floats and returns the result
 func (sf Floats) Add(other Floats) Floats {
-	return NewFloats(
+	return newFloats(
 		sf.Top+other.Top,
 		sf.Right+other.Right,
 		sf.Bottom+other.Bottom,
@@ -281,7 +293,7 @@ func (sf Floats) Add(other Floats) Floats {
 // Sub subtracts the other side floats from
 // the side floats and returns the result
 func (sf Floats) Sub(other Floats) Floats {
-	return NewFloats(
+	return newFloats(
 		sf.Top-other.Top,
 		sf.Right-other.Right,
 		sf.Bottom-other.Bottom,
@@ -292,7 +304,7 @@ func (sf Floats) Sub(other Floats) Floats {
 // MulScalar multiplies each side by the given scalar value
 // and returns the result.
 func (sf Floats) MulScalar(s float32) Floats {
-	return NewFloats(
+	return newFloats(
 		sf.Top*s,
 		sf.Right*s,
 		sf.Bottom*s,
@@ -303,7 +315,7 @@ func (sf Floats) MulScalar(s float32) Floats {
 // Min returns a new side floats containing the
 // minimum values of the two side floats
 func (sf Floats) Min(other Floats) Floats {
-	return NewFloats(
+	return newFloats(
 		math32.Min(sf.Top, other.Top),
 		math32.Min(sf.Right, other.Right),
 		math32.Min(sf.Bottom, other.Bottom),
@@ -314,7 +326,7 @@ func (sf Floats) Min(other Floats) Floats {
 // Max returns a new side floats containing the
 // maximum values of the two side floats
 func (sf Floats) Max(other Floats) Floats {
-	return NewFloats(
+	return newFloats(
 		math32.Max(sf.Top, other.Top),
 		math32.Max(sf.Right, other.Right),
 		math32.Max(sf.Bottom, other.Bottom),
@@ -325,7 +337,7 @@ func (sf Floats) Max(other Floats) Floats {
 // Round returns a new side floats with each side value
 // rounded to the nearest whole number.
 func (sf Floats) Round() Floats {
-	return NewFloats(
+	return newFloats(
 		math32.Round(sf.Top),
 		math32.Round(sf.Right),
 		math32.Round(sf.Bottom),
@@ -346,7 +358,7 @@ func (sf Floats) Size() math32.Vector2 {
 // ToValues returns the side floats a
 // Values composed of [units.UnitDot] values
 func (sf Floats) ToValues() Values {
-	return NewValues(
+	return newValues(
 		units.Dot(sf.Top),
 		units.Dot(sf.Right),
 		units.Dot(sf.Bottom),

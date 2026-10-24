@@ -8,7 +8,9 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"maps"
 	"slices"
+	"sync"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -87,5 +89,109 @@ func TestColorMapIndexed(t *testing.T) {
 		} else {
 			assert.Equal(t, cm.Colors[i], c)
 		}
+	}
+}
+
+func TestMapTable(t *testing.T) {
+	n := 20000
+	if testing.Short() {
+		n = 2000
+	}
+	keys := slices.Sorted(maps.Keys(StandardMaps))
+	for _, bt := range []colors.BlendTypes{colors.HCT, colors.CAM16} {
+		for _, k := range keys {
+			cm := &Map{Name: k, Blend: bt, NoColor: StandardMaps[k].NoColor, Colors: StandardMaps[k].Colors}
+			cm.exactCalls.Store(lutMinCalls) // build the table on first use
+
+			// exact at the map colors, NaN, and out of range values
+			nc := len(cm.Colors)
+			for i, c := range cm.Colors {
+				assert.Equal(t, c, cm.Map(float32(i)/float32(nc-1)))
+			}
+			assert.Equal(t, cm.NoColor, cm.Map(math32.NaN()))
+			assert.Equal(t, cm.Colors[0], cm.Map(-0.1))
+			assert.Equal(t, cm.Colors[nc-1], cm.Map(1.1))
+
+			// within one level of the exact blend, except where the exact
+			// blend itself jumps by more than that over a tiny distance
+			const near = 1e-5
+			for i := range n {
+				v := (float32(i) + 0.5) / float32(n)
+				c := cm.Map(v)
+				ex := cm.MapExact(v)
+				if maxChannelDiff(c, ex) <= 1 {
+					continue
+				}
+				if maxChannelDiff(c, cm.MapExact(v-near)) <= 1 || maxChannelDiff(c, cm.MapExact(v+near)) <= 1 {
+					continue
+				}
+				t.Errorf("%s %s: Map(%g) = %v, exact %v", k, bt, v, c, ex)
+			}
+		}
+	}
+}
+
+func TestMapTableChanges(t *testing.T) {
+	cm := &Map{Colors: []color.RGBA{{0, 0, 255, 255}, {255, 0, 0, 255}}}
+	v := float32(0.3)
+	for range lutMinCalls {
+		assert.Equal(t, cm.MapExact(v), cm.Map(v))
+	}
+	assert.Nil(t, cm.table.Load())
+	assert.Equal(t, cm.MapExact(v), cm.Map(v))
+	assert.NotNil(t, cm.table.Load())
+
+	// changes to Blend and Colors, including in place, rebuild the table
+	cm.Blend = colors.CAM16
+	assert.Equal(t, cm.MapExact(v), cm.Map(v))
+	cm.Colors[1] = color.RGBA{0, 255, 0, 255}
+	assert.Equal(t, cm.MapExact(v), cm.Map(v))
+	cm.Colors = append(cm.Colors, color.RGBA{255, 255, 0, 255})
+	assert.Equal(t, cm.MapExact(v), cm.Map(v))
+}
+
+func TestMapTableConcurrent(t *testing.T) {
+	cm := &Map{Colors: StandardMaps["Viridis"].Colors}
+	cm.exactCalls.Store(lutMinCalls)
+	var wg sync.WaitGroup
+	for range 4 {
+		wg.Go(func() {
+			for i := range 100 {
+				v := float32(i) / 100
+				assert.Equal(t, cm.MapExact(v), cm.Map(v))
+			}
+		})
+	}
+	wg.Wait()
+}
+
+func BenchmarkMap(b *testing.B) {
+	for _, bt := range []colors.BlendTypes{colors.HCT, colors.CAM16, colors.RGB} {
+		cm := &Map{Blend: bt, Colors: StandardMaps["ColdHot"].Colors}
+		cm.exactCalls.Store(lutMinCalls)
+		b.Run(bt.String(), func(b *testing.B) {
+			i := 0
+			for b.Loop() {
+				cm.Map(float32(i%1000) / 1000)
+				i++
+			}
+		})
+		b.Run(bt.String()+"Exact", func(b *testing.B) {
+			i := 0
+			for b.Loop() {
+				cm.MapExact(float32(i%1000) / 1000)
+				i++
+			}
+		})
+	}
+}
+
+func BenchmarkMapTableBuild(b *testing.B) {
+	for _, k := range []string{"Viridis", "ColdHot", "Jet"} {
+		b.Run(k, func(b *testing.B) {
+			for b.Loop() {
+				newLUT(&Map{Colors: StandardMaps[k].Colors})
+			}
+		})
 	}
 }

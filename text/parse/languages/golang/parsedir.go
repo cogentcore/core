@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/syms"
 	"cogentcore.org/core/text/token"
-	"golang.org/x/tools/go/packages"
 )
 
 // ParseDirLock provides a lock protecting parsing of a package directory
@@ -134,25 +133,10 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 				// fmt.Printf("using cached path: %s to: %s\n", path, pkgPathAbs)
 			} else {
 				// fmt.Printf("mod: loading package: %s\n", path)
-				// packages automatically deals with GOPATH vs. modules, etc.
-				pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
-				if err != nil {
-					// this is too many errors!
-					// log.Println(err)
+				fgo, ok := packageGoFile(path)
+				if !ok {
 					return nil
 				}
-				if len(pkgs) != 1 {
-					fmt.Printf("More than one package for path: %v\n", path)
-					return nil
-				}
-				pkg := pkgs[0]
-
-				if len(pkg.GoFiles) == 0 {
-					// fmt.Printf("No Go files found in package: %v\n", path)
-					return nil
-				}
-				// files = pkg.GoFiles
-				fgo := pkg.GoFiles[0]
 				pkgPathAbs, _ = filepath.Abs(filepath.Dir(fgo))
 				// fmt.Printf("mod: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
 			}
@@ -332,6 +316,8 @@ func (gl *GoLang) ImportPathPkg(im string) (path, base, pkg string) {
 // PkgSyms attempts to find package symbols for given package name.
 // Is also passed any current package symbol context in psyms which might be
 // different from default filestate context.
+// It can add the package to ExtSyms, so the FileState SymsMu lock must
+// be locked by the caller.
 func (gl *GoLang) PkgSyms(fs *parse.FileState, psyms syms.SymMap, pnm string) (*syms.Symbol, bool) {
 	psym, has := fs.ExtSyms[pnm]
 	if has {
@@ -360,26 +346,27 @@ func (gl *GoLang) AddImportsToExts(fss *parse.FileStates, pfs *parse.FileState, 
 		if im.Name == "C" {
 			continue
 		}
-		// pfs.WaitGp.Add(1) // note: already under an outer-loop go routine
-		// with *same* waitgp
-		gl.AddImportToExts(pfs, im.Name, false) // no lock
+		// lock, as other parsing goroutines can add to the same ExtSyms
+		gl.AddImportToExts(pfs, im.Name, true)
 	}
-	// pfs.WaitGp.Wait() // each goroutine will do done when done..
 	// now all the info is in place: parse it
 	if TraceTypes {
 		fmt.Printf("\n#####################\nResolving Types now for: %v\n", pfs.Src.Filename)
 	}
 	gl.ResolveTypes(pfs, pkg, true) // true = do include function-internal scope items
 reset:
+	pfs.SymsMu.Lock()
 	pfs.ClearAST()
 	pkg.ClearAST()
+	pfs.SymsMu.Unlock()
 	// if pfs.AST.HasChildren() {
 	// 	pfs.AST.DeleteChildren()
 	// }
 }
 
-// AddImportToExts adds given import into parse.FileState.ExtSyms list
-// assumed to be called as a separate goroutine
+// AddImportToExts adds given import into parse.FileState.ExtSyms list.
+// If lock is true, it adds it under the FileState SymsMu lock, which
+// must otherwise already be locked by the caller.
 func (gl *GoLang) AddImportToExts(fs *parse.FileState, im string, lock bool) {
 	im, _, pkg := gl.ImportPathPkg(im)
 	psym := gl.ParseDir(fs, im, parse.LanguageDirOptions{})
@@ -392,9 +379,6 @@ func (gl *GoLang) AddImportToExts(fs *parse.FileState, im string, lock bool) {
 		if lock {
 			fs.SymsMu.Unlock()
 		}
-	}
-	if lock {
-		fs.WaitGp.Done()
 	}
 }
 
@@ -433,7 +417,9 @@ func (gl *GoLang) AddPkgToSyms(fs *parse.FileState, pkg *syms.Symbol) bool {
 func (gl *GoLang) AddPathToExts(fs *parse.FileState, path string) {
 	psym := gl.ParseDir(fs, path, parse.LanguageDirOptions{})
 	if psym != nil {
+		fs.SymsMu.Lock()
 		gl.AddPkgToExts(fs, psym)
+		fs.SymsMu.Unlock()
 	}
 }
 
@@ -441,6 +427,7 @@ func (gl *GoLang) AddPathToExts(fs *parse.FileState, path string) {
 // to parse.FileState.ExtSyms map -- merges with anything already there
 // does NOT add imports -- that is an optional second step.
 // Returns true if there was an existing entry for this package.
+// The FileState SymsMu lock must be locked by the caller.
 func (gl *GoLang) AddPkgToExts(fs *parse.FileState, pkg *syms.Symbol) bool {
 	psy, has := fs.ExtSyms[pkg.Name]
 	if has {

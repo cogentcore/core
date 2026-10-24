@@ -1,0 +1,24 @@
+Highlighting = 'monokai'
+MenuMax = 40
+Theme = 'Dark'
+Zoom = 120.0
+
+[Color]
+  R = 200
+  G = 50
+  B = 100
+  A = 255
+
+[InlineLengths]
+  Map = 3
+
+[Screens]
+  [Screens.'Built-in Retina Display']
+    Zoom = 150.0
+
+  [Screens.'DELL U2720Q']
+    Zoom = 90.0
+
+[Text]
+  Language = 'en-us'
+  SansSerif = 'Arial'

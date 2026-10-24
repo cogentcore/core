@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
@@ -75,7 +76,7 @@ func (sw *Scene) Init() {
 	})
 
 	sw.On(events.Scroll, func(e events.Event) {
-		pos := sw.Geom.ContentBBox.Min
+		pos := sw.frameBBox().Min
 		e.SetLocalOff(e.LocalOff().Add(pos))
 		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
 		sw.NeedsRender()
@@ -93,14 +94,18 @@ func (sw *Scene) Init() {
 	})
 }
 
+// OnAdd registers [tree.NodeBase.This] for direct rendering, which is the
+// outer widget when a type embeds Scene, so that the context of its render
+// source is that of the canvas made by configFrame on the web.
 func (sw *Scene) OnAdd() {
 	sw.WidgetBase.OnAdd()
-	sw.Scene.AddDirectRender(sw)
+	sw.Scene.AddDirectRender(sw.This.(core.Widget))
 }
 
 func (sw *Scene) Destroy() {
-	sw.Scene.DeleteDirectRender(sw)
+	sw.Scene.DeleteDirectRender(sw.This.(core.Widget))
 	sw.XYZ.Destroy()
+	sw.destroyFrame()
 	sw.WidgetBase.Destroy()
 }
 
@@ -124,11 +129,28 @@ func (sw *Scene) Render() {
 	sw.XYZ.Render()
 }
 
+// frameBBox returns the bounding box of the whole render frame of the
+// scene, in the coordinates of the core Scene. Unlike Geom.ContentBBox, it
+// is not clipped by the parents of the widget, so that the size of the frame
+// stays the same while the widget is partly scrolled out of its parent, and
+// only the visible part of it, Geom.ContentBBox, is shown.
+func (sw *Scene) frameBBox() image.Rectangle {
+	return math32.RectFromPosSizeMax(sw.Geom.Pos.Content, sw.Geom.Size.Actual.Content)
+}
+
 func (sw *Scene) ConfigXYZ() {
 	if !sw.IsVisible() {
 		return
 	}
-	sz := sw.Geom.ContentBBox.Size()
+	// The visible part of the scene is within its frame once the layout is
+	// done. This only differs if the scene is rendered in the middle of a
+	// layout, where its size is its minimum size until it is allocated its
+	// space (which Toolbar used to do): the frame then keeps its size.
+	fb := sw.frameBBox()
+	if !sw.Geom.ContentBBox.In(fb) {
+		return
+	}
+	sz := fb.Size()
 	if sz.X <= 0 || sz.Y <= 0 {
 		sz = image.Point{10, 10}
 	}

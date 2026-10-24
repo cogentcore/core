@@ -176,7 +176,8 @@ func (fp *FilePicker) Destroy() {
 		fp.watcher = nil
 	}
 	if fp.doneWatcher != nil {
-		fp.doneWatcher <- true
+		// It is closed instead of sent on, as the watcher goroutine can be
+		// waiting for the render lock that we hold.
 		close(fp.doneWatcher)
 		fp.doneWatcher = nil
 	}
@@ -466,7 +467,12 @@ func (fp *FilePicker) watchWatcher() {
 				case event.Op&fsnotify.Create == fsnotify.Create ||
 					event.Op&fsnotify.Remove == fsnotify.Remove ||
 					event.Op&fsnotify.Rename == fsnotify.Rename:
-					fp.Update()
+					// We are not in the event loop, so we update with the lock,
+					// only if the file picker is still shown.
+					if fp.AsyncLockIfShown() {
+						fp.Update()
+						fp.AsyncUnlock()
+					}
 				}
 			case err := <-watch.Errors:
 				_ = err

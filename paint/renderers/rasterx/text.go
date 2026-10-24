@@ -19,9 +19,9 @@ import (
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/font/opentype"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/font/opentype"
+	"github.com/cogentcore/typesetting/shaping"
 	_ "golang.org/x/image/tiff" // load image formats for users of the API
 )
 

@@ -4,7 +4,11 @@
 
 package lines
 
-import "cogentcore.org/core/events"
+import (
+	"maps"
+
+	"cogentcore.org/core/events"
+)
 
 // OnChange adds an event listener function to the view with given
 // unique id, for the [events.Change] event.
@@ -30,6 +34,21 @@ func (ls *Lines) OnInput(vid int, fun func(e events.Event)) {
 	vw := ls.view(vid)
 	if vw != nil {
 		vw.listeners.Add(events.Input, fun)
+	}
+}
+
+// SetAsyncRunner sets the function that runs the listeners of the view
+// with the given unique id for an event that is sent from a background
+// goroutine, as when the syntax highlighting markup has been updated.
+// It must call the given function with whatever lock the listeners need,
+// such as the AsyncLock of a widget, which already holds that lock for
+// events sent while it handles its own events.
+func (ls *Lines) SetAsyncRunner(vid int, run func(f func())) {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	if vw != nil {
+		vw.runAsync = run
 	}
 }
 
@@ -73,6 +92,45 @@ func (ls *Lines) sendInput() {
 	for _, vw := range ls.views {
 		vw.listeners.Call(e)
 	}
+}
+
+// sendInputAsync is [Lines.sendInput] for a background goroutine:
+// the listeners of each view are run by its [Lines.SetAsyncRunner]
+// function, if it has one.
+func (ls *Lines) sendInputAsync() {
+	if ls.batchUpdating {
+		return
+	}
+	e := &events.Base{Typ: events.Input}
+	e.Init()
+	// The views can be changed by the goroutines of their widgets meanwhile,
+	// so a view that has been deleted since is skipped: its widget can be
+	// gone. That is checked under the lock of the runner, which the widget
+	// holds when it deletes its view.
+	ls.Lock()
+	views := maps.Clone(ls.views)
+	ls.Unlock()
+	for vid, vw := range views {
+		if vw.runAsync == nil {
+			if ls.hasView(vid, vw) {
+				vw.listeners.Call(e)
+			}
+			continue
+		}
+		vw.runAsync(func() {
+			if ls.hasView(vid, vw) {
+				vw.listeners.Call(e)
+			}
+		})
+	}
+}
+
+// hasView returns whether the given view is still the view with the
+// given id, so that it has not been deleted.
+func (ls *Lines) hasView(vid int, vw *view) bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.views[vid] == vw
 }
 
 // sendClose sends a new [events.Close] event to all views listeners.

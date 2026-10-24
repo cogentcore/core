@@ -22,7 +22,7 @@ import (
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles/units"
 	. "cogentcore.org/core/svg"
-	"github.com/go-text/typesetting/font"
+	"github.com/cogentcore/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 

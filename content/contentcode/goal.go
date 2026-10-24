@@ -1,0 +1,393 @@
+// Copyright (c) 2026, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package contentcode
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"go/ast"
+	"go/format"
+	"go/parser"
+	"go/printer"
+	"go/token"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+// Goal code blocks (```Goal) are compiled per page: the Goal interpreter
+// runs all the Goal code of a page in one interpreter, so a block sees the
+// variables and functions of the blocks before it on the page. Each page
+// becomes one Go function that returns its first block as a closure, which
+// returns the next block as a closure in its own scope, and so on: the
+// code of a block is nested in the code of the blocks before it, so that
+// it can use their declarations and declare the same names again (as the
+// interpreter allows), while each block still runs when content shows it.
+//
+// The Goal code is transpiled to Go by Cogent Lab's Goal transpiler
+// (cogentcore.org/lab/goal/transpile), with one transpiler state per page,
+// as the interpreter does. Core does not depend on Lab, so the transpiler
+// runs in a small program that contentcode writes and runs with go run in
+// the app's package, whose module must require cogentcore.org/lab.
+//
+// A page is compiled up to its first block that does not compile; that
+// block and the ones after it run in the interpreter, after the compiled
+// ones run again there (see content.GoalReplay).
+
+// goalImports are the packages that Goal code can use without importing
+// them, in addition to [defaultImports]: those of the symbols of Lab's
+// Goal interpreter (yaegilab: tensorsymbols, labsymbols) and the standard
+// library packages that code commonly uses.
+var goalImports = []string{
+	"cogentcore.org/lab/goal/goalib",
+	"cogentcore.org/lab/lab",
+	"cogentcore.org/lab/matrix",
+	"cogentcore.org/lab/physics",
+	"cogentcore.org/lab/physics/builder",
+	"cogentcore.org/lab/physics/phyxyz",
+	"cogentcore.org/lab/plot",
+	"cogentcore.org/lab/plot/plots",
+	"cogentcore.org/lab/plotcore",
+	"cogentcore.org/lab/stats/cluster",
+	"cogentcore.org/lab/stats/convolve",
+	"cogentcore.org/lab/stats/glm",
+	"cogentcore.org/lab/stats/histogram",
+	"cogentcore.org/lab/stats/metric",
+	"cogentcore.org/lab/stats/stats",
+	"cogentcore.org/lab/table",
+	"cogentcore.org/lab/tensor",
+	"cogentcore.org/lab/tensor/tmath",
+	"cogentcore.org/lab/tensorcore",
+	"cogentcore.org/lab/tensorfs",
+	"cogentcore.org/lab/vector",
+	"bufio",
+	"bytes",
+	"cmp",
+	"io",
+	"maps",
+	"math/cmplx",
+	"math/rand",
+	"os",
+	"regexp",
+	"slices",
+	"sort",
+	"unicode",
+	"unicode/utf8",
+}
+
+const (
+	goalPrefix   = "contentGoal"
+	goalW        = prefix + "W"
+	tensorfsPath = "cogentcore.org/lab/tensorfs"
+)
+
+// goalPage is the Goal code of a page, and the Go code generated for it.
+type goalPage struct {
+	file   string       // markdown file, relative to the package directory
+	key    string       // page file name in the content (Page.Filename)
+	blocks []*goalBlock // all the Goal code blocks of the page
+	n      int          // number of blocks compiled: the first n
+	name   string       // name of the generated function
+	code   string       // generated Go declarations
+	pkgs   map[string]bool
+	start  int // first line of code in the output file
+	end    int // last line of code in the output file
+}
+
+// goalBlock is a Goal code block.
+type goalBlock struct {
+	index  int    // number of the code block in the file, from 1
+	line   int    // line of the code in the file
+	src    string // Goal source
+	key    string // CodeKey of src
+	gocode string // transpiled Go statements
+	err    string // why it is not compiled
+	start  int    // first line of the block's statements in the output file
+}
+
+var goalFenceStart = regexp.MustCompile("^(\\s*)```Goal\\s*$")
+
+// readGoalPages returns the pages of the markdown files in the content
+// directory of the package in dir that have ```Goal code blocks, with their
+// blocks in order.
+func readGoalPages(dir, content string) ([]*goalPage, error) {
+	var pages []*goalPage
+	err := walkMarkdown(dir, content, func(rel string, lines []string) {
+		var pg *goalPage
+		forFences(lines, goalFenceStart, func(index, line, indent int, src string) {
+			if pg == nil {
+				key, _ := filepath.Rel(filepath.FromSlash(content), filepath.FromSlash(rel))
+				pg = &goalPage{file: rel, key: filepath.ToSlash(key)}
+				pages = append(pages, pg)
+			}
+			pg.blocks = append(pg.blocks, &goalBlock{index: index, line: line, src: src, key: codeKey(src)})
+		})
+	})
+	return pages, err
+}
+
+// goalTranspiler is the program that transpiles the Goal code of the pages
+// with Lab's transpiler: it reads the pages (a JSON array of arrays of
+// block sources) from the file of its first argument and writes the
+// transpiled code and errors of each block to its second; its third
+// argument sets MathRecord.
+const goalTranspiler = `// Code generated by "contentcode"; DO NOT EDIT.
+
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+
+	"cogentcore.org/lab/goal/transpile"
+)
+
+type block struct{ Code, Err string }
+
+func main() {
+	b, err := os.ReadFile(os.Args[1])
+	if err != nil {
+		panic(err)
+	}
+	var pages [][]string
+	if err := json.Unmarshal(b, &pages); err != nil {
+		panic(err)
+	}
+	out := make([][]block, len(pages))
+	for i, srcs := range pages {
+		st := transpile.NewState()
+		st.MathRecord = os.Args[3] == "true"
+		for _, src := range srcs {
+			st.Errors = nil
+			st.TranspileCode(src)
+			code := st.Code()
+			st.ResetCode()
+			var bl block
+			bl.Code = code
+			if len(st.Errors) > 0 {
+				bl.Err = errors.Join(st.Errors...).Error()
+			} else if st.TotalDepth() != 0 {
+				bl.Err = fmt.Sprintf("unclosed parentheses, braces or brackets (depth %d)", st.TotalDepth())
+				st.ResetDepth()
+			}
+			out[i] = append(out[i], bl)
+		}
+	}
+	b, err = json.Marshal(out)
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(os.Args[2], b, 0666); err != nil {
+		panic(err)
+	}
+}
+`
+
+// errNoLab is the error of [transpileGoal] when the module of the app does
+// not provide Lab's Goal transpiler.
+var errNoLab = errors.New("the module of the app does not require cogentcore.org/lab, whose Goal transpiler compiles Goal code")
+
+// transpileGoal transpiles the Goal code of the pages to Go
+// (goalBlock.gocode), with MathRecord set to record, in the package in
+// pkgDir.
+func transpileGoal(pkgDir string, pages []*goalPage, tags string, record bool) error {
+	if len(pages) == 0 {
+		return nil
+	}
+	dir, err := os.MkdirTemp(pkgDir, "_contentcode_goal")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+	if dir, err = filepath.Abs(dir); err != nil {
+		return err
+	}
+	srcs := make([][]string, len(pages))
+	for i, pg := range pages {
+		for _, b := range pg.blocks {
+			srcs[i] = append(srcs[i], b.src)
+		}
+	}
+	in, err := json.Marshal(srcs)
+	if err != nil {
+		return err
+	}
+	inFile, outFile := filepath.Join(dir, "in.json"), filepath.Join(dir, "out.json")
+	if err := os.WriteFile(inFile, in, 0666); err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(goalTranspiler), 0666); err != nil {
+		return err
+	}
+	args := []string{"run"}
+	if tags != "" {
+		args = append(args, "-tags="+tags)
+	}
+	args = append(args, "./"+filepath.Base(dir), inFile, outFile, strconv.FormatBool(record))
+	cmd := exec.Command("go", args...)
+	cmd.Dir = filepath.Dir(dir)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		if strings.Contains(string(out), "cogentcore.org/lab/goal/transpile") {
+			return fmt.Errorf("%w: %s", errNoLab, out)
+		}
+		return fmt.Errorf("running the Goal transpiler: %v: %s", err, out)
+	}
+	b, err := os.ReadFile(outFile)
+	if err != nil {
+		return err
+	}
+	var res [][]struct{ Code, Err string }
+	if err := json.Unmarshal(b, &res); err != nil {
+		return err
+	}
+	for i, pg := range pages {
+		for j, bl := range pg.blocks {
+			bl.gocode, bl.err = res[i][j].Code, res[i][j].Err
+		}
+	}
+	return nil
+}
+
+// prepare sets the number of blocks of the page that can be compiled as far
+// as transpiling and parsing tell, and generates its code.
+func (pg *goalPage) prepare(importPaths map[string]string, record bool) {
+	pg.n = len(pg.blocks)
+	for i, b := range pg.blocks {
+		if b.err == "" {
+			// each block must be a list of statements
+			_, err := parser.ParseFile(token.NewFileSet(), "block.go", "package main\nfunc _() {\n"+b.gocode+"\n}\n", parser.SkipObjectResolution)
+			if err != nil {
+				b.err = err.Error()
+			}
+		}
+		if b.err != "" {
+			pg.n = i
+			break
+		}
+	}
+	if err := pg.generate(importPaths, record); err != nil {
+		pg.blocks[0].err = err.Error()
+		pg.n = 0
+	}
+}
+
+// truncate leaves out the blocks of the page from the i-th one on, for the
+// given reason, and generates its code again.
+func (pg *goalPage) truncate(i int, reason string, importPaths map[string]string, record bool) {
+	if pg.blocks[i].err == "" {
+		pg.blocks[i].err = reason
+	}
+	pg.n = i
+	if err := pg.generate(importPaths, record); err != nil {
+		pg.n = 0
+	}
+}
+
+// generate makes the Go declarations of the first n blocks of the page.
+func (pg *goalPage) generate(importPaths map[string]string, record bool) error {
+	pg.code = ""
+	pg.pkgs = map[string]bool{}
+	if pg.n == 0 {
+		return nil
+	}
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "package main\n\nfunc %s() content.GoalBlock {\n", pg.name)
+	fmt.Fprintf(&buf, "var %s io.Writer\n_ = %s\n", outVar, outVar)
+	for i, b := range pg.blocks[:pg.n] {
+		buf.WriteString("return func(" + parentVar + " *core.Frame, " + goalW + " io.Writer) content.GoalBlock {\n")
+		buf.WriteString(outVar + " = " + goalW + "\n")
+		if record {
+			buf.WriteString("tensorfs.ListOutput = " + goalW + "\ndefer func() { tensorfs.ListOutput = nil }()\n")
+			pg.pkgs[tensorfsPath] = true
+		}
+		buf.WriteString("b := " + parentVar + "\n_ = b\n{\n")
+		fmt.Fprintf(&buf, "// contentcode:block %d %s #%d\n", i, pg.file, b.index)
+		buf.WriteString(b.gocode)
+		buf.WriteString("\n")
+	}
+	buf.WriteString("return nil\n")
+	for range pg.n {
+		buf.WriteString("}\n}\n")
+	}
+	buf.WriteString("}\n")
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "page.go", buf.String(), parser.ParseComments)
+	if err != nil {
+		return err
+	}
+	ast.Inspect(file, func(n ast.Node) bool {
+		switch n := n.(type) {
+		case *ast.CallExpr:
+			if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
+				if x, ok := sel.X.(*ast.Ident); ok && x.Obj == nil && x.Name == "fmt" {
+					switch sel.Sel.Name {
+					case "Print", "Println", "Printf":
+						sel.Sel.Name = "Fp" + sel.Sel.Name[1:]
+						n.Args = append([]ast.Expr{ast.NewIdent(outVar)}, n.Args...)
+					}
+				}
+			}
+		case *ast.SelectorExpr:
+			if x, ok := n.X.(*ast.Ident); ok && x.Obj == nil {
+				if p, ok := importPaths[x.Name]; ok {
+					pg.pkgs[p] = true
+				}
+			}
+		}
+		return true
+	})
+	pg.pkgs["cogentcore.org/core/content"] = true
+	pg.pkgs["cogentcore.org/core/core"] = true
+	pg.pkgs["io"] = true
+	var out bytes.Buffer
+	for _, d := range file.Decls {
+		if err := printer.Fprint(&out, fset, &printer.CommentedNode{Node: d, Comments: file.Comments}); err != nil {
+			return err
+		}
+		out.WriteString("\n\n")
+	}
+	code, err := format.Source(out.Bytes())
+	if err != nil {
+		return err
+	}
+	pg.code = string(code)
+	return nil
+}
+
+// useUnused inserts `_ = x` after the statements that declare the unused
+// variables x of the page code, given by the line of the error (relative to
+// the start of the page's code: 1 is its first line).
+func (pg *goalPage) useUnused(unused map[int][]string) error {
+	code, err := useUnusedIn(pg.code, unused)
+	if err != nil {
+		return err
+	}
+	pg.code = code
+	return nil
+}
+
+var goalBlockMarker = regexp.MustCompile(`^\s*// contentcode:block (\d+) `)
+
+// blockAtLine returns the index of the block of the page at the given line
+// of the output file (between the page's start and end), using the block
+// markers in its code.
+func (pg *goalPage) blockAtLine(line int) int {
+	lines := strings.Split(pg.code, "\n")
+	idx := 0
+	for i := 0; i < len(lines) && pg.start+1+i <= line; i++ {
+		if m := goalBlockMarker.FindStringSubmatch(lines[i]); m != nil {
+			idx, _ = strconv.Atoi(m[1])
+		}
+	}
+	return idx
+}

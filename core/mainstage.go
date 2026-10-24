@@ -206,8 +206,8 @@ func (st *Stage) targetScreen() *system.Screen {
 	if st.Screen >= 0 && st.Screen < TheApp.NScreens() {
 		return TheApp.Screen(st.Screen)
 	}
-	if currentRenderWindow != nil {
-		return currentRenderWindow.SystemWindow.Screen()
+	if cw := getCurrentRenderWindow(); cw != nil {
+		return cw.SystemWindow.Screen()
 	}
 	return TheApp.Screen(0)
 }
@@ -243,12 +243,19 @@ func (st *Stage) configMainStage() {
 // runWindow runs a Window with current settings.
 func (st *Stage) runWindow() *Stage {
 	sc := st.Scene
-	if currentRenderWindow == nil {
+	newWindow := st.NewWindow && !TheApp.Platform().IsMobile()
+	// The current window is read once, as the event loop of a window that
+	// is closed sets it to another window.
+	cw := getCurrentRenderWindow()
+	if cw == nil || newWindow {
 		// If we have no current render window, we need to be in a new window,
-		// and we need a *temporary* Mains to get initial pref size
+		// and we need a *temporary* Mains to get initial pref size.
+		// A new window also gets its own, which it keeps, so that it never
+		// uses the render context of another window, which that window can
+		// be rendering or closing in its own goroutine.
 		st.setMains(st.firstWindowStages())
 	} else {
-		st.setMains(&currentRenderWindow.mains)
+		st.setMains(&cw.mains)
 	}
 	st.configMainStage()
 	st.addSceneParts()
@@ -258,33 +265,28 @@ func (st *Stage) runWindow() *Stage {
 	// and thus don't consider pref size.
 	// Desktop new windows and non-full windows can pref size.
 	if !TheApp.Platform().IsMobile() &&
-		(st.NewWindow || !st.FullWindow || currentRenderWindow == nil) {
-		sz = sc.contentSize(sz)
-		// On offscreen, we don't want any extra space, as we want the smallest
-		// possible representation of the content.
-		if TheApp.Platform() != system.Offscreen {
-			sz = sz.Add(image.Pt(20, 20))
-			screen := st.targetScreen()
-			if screen != nil {
-				st.SetScreen(screen.ScreenNumber)
-				if st.NewWindow && st.UseMinSize {
-					// we require windows to be at least 60% and no more than 80% of the
-					// screen size by default
-					scsz := screen.PixelSize
-					sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
-					sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
-				}
+		(st.NewWindow || !st.FullWindow || cw == nil) {
+		initSz := sz
+		sz = st.windowSize(initSz)
+		// A new window is first sized for the size class of a scene with
+		// no size yet. If that gives a size of another size class, it is
+		// sized again for that one, as it is laid out for it once shown.
+		if sc.RenderWindow() == nil {
+			if sizeClassOf(sc.dotsToDp(sz).X) != sizeClassOf(sc.dotsToDp(sc.SceneGeom.Size).X) {
+				sc.sizingSize = sz
+				sz = st.windowSize(initSz)
+				sc.sizingSize = image.Point{}
 			}
 		}
 	}
-	st.Mains = nil // reset
+	st.storeMains(nil) // reset
 	if DebugSettings.WindowRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
-	if st.NewWindow || currentRenderWindow == nil {
+	if st.NewWindow || cw == nil {
 		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
-		win := st.newRenderWindow()
+		win := st.newRenderWindow(st.renderContext)
 		mainRenderWindows.add(win)
 		setCurrentRenderWindow(win)
 		win.goStartEventLoop()
@@ -298,7 +300,7 @@ func (st *Stage) runWindow() *Stage {
 		ms.push(st)
 		st.setMains(ms)
 	} else {
-		ms := &currentRenderWindow.mains
+		ms := &cw.mains
 		msc := ms.top().Scene
 		sc.SceneGeom.Size = sz
 		sc.fitInWindow(msc.SceneGeom) // does resize
@@ -308,17 +310,42 @@ func (st *Stage) runWindow() *Stage {
 	return st
 }
 
+// windowSize returns the size of the window of the stage, based on the
+// size of the content of its scene within the given initial size.
+func (st *Stage) windowSize(initSz image.Point) image.Point {
+	sz := st.Scene.contentSize(initSz)
+	// On offscreen, we don't want any extra space, as we want the smallest
+	// possible representation of the content.
+	if TheApp.Platform() == system.Offscreen {
+		return sz
+	}
+	sz = sz.Add(image.Pt(20, 20))
+	screen := st.targetScreen()
+	if screen != nil {
+		st.SetScreen(screen.ScreenNumber)
+		if st.NewWindow && st.UseMinSize {
+			// we require windows to be at least 60% and no more than 80% of the
+			// screen size by default
+			scsz := screen.PixelSize
+			sz = image.Pt(max(sz.X, scsz.X*6/10), max(sz.Y, scsz.Y*6/10))
+			sz = image.Pt(min(sz.X, scsz.X*8/10), min(sz.Y, scsz.Y*8/10))
+		}
+	}
+	return sz
+}
+
 // getValidContext ensures that the Context is non-nil and has a valid
 // Scene pointer, using CurrentRenderWindow if the current Context is not valid.
 // If CurrentRenderWindow is nil (should not happen), then it returns false and
 // the calling function must bail.
 func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
-		if currentRenderWindow == nil {
+		cw := getCurrentRenderWindow()
+		if cw == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = currentRenderWindow.mains.top().Scene
+		st.Context = cw.mains.top().Scene
 	}
 	return true
 }
@@ -368,11 +395,11 @@ func (st *Stage) runDialog() *Stage {
 	}
 
 	if st.NewWindow {
-		st.Mains = nil
+		st.storeMains(nil)
 		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
-		win := st.newRenderWindow()
+		win := st.newRenderWindow(nil)
 		dialogRenderWindows.add(win)
 		setCurrentRenderWindow(win)
 		win.goStartEventLoop()
@@ -385,7 +412,9 @@ func (st *Stage) runDialog() *Stage {
 	return st
 }
 
-func (st *Stage) newRenderWindow() *renderWindow {
+// newRenderWindow returns a new [renderWindow] for the stage, with the given
+// render context if it is non-nil and a new one otherwise.
+func (st *Stage) newRenderWindow(rc *renderContext) *renderWindow {
 	name := st.Name
 	title := st.Title
 	opts := &system.NewWindowOptions{
@@ -426,7 +455,10 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	AllRenderWindows.add(win)
 	// initialize Mains
 	win.mains.renderWindow = win
-	win.mains.renderContext = newRenderContext() // sets defaults according to Screen
+	if rc == nil {
+		rc = newRenderContext() // sets defaults according to Screen
+	}
+	win.mains.renderContext = rc
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
 	win.mains.push(st)

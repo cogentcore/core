@@ -120,7 +120,9 @@ type Slider struct {
 	// previous sliding value (for computing the Input change)
 	prevSlide float32
 
-	// underlying drag position of slider; not subject to snapping
+	// slideStartPos is the underlying drag position of the slider where the
+	// mouse was pressed, relative to which a slide moves it; it is not
+	// subject to snapping.
 	slideStartPos float32
 }
 
@@ -218,21 +220,16 @@ func (sr *Slider) Init() {
 		pos := sr.pointToRelPos(e.Pos())
 		sr.setSliderPosEvent(pos)
 		sr.lastValue = -math32.MaxFloat32
-		sr.slideStartPos = sr.pos
+		// The slide moves are relative to where the mouse was pressed,
+		// not to where the slide started, which depends on how far the
+		// mouse moved before the slide start time.
+		sr.slideStartPos = pos - sr.slideDelta(e)
 	})
 	sr.On(events.SlideMove, func(e events.Event) {
-		del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
-		if sr.Flip {
-			del = -del
-		}
-		sr.setSliderPosEvent(sr.slideStartPos + del)
+		sr.setSliderPosEvent(sr.slideStartPos + sr.slideDelta(e))
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
-		if sr.Flip {
-			del = -del
-		}
-		sr.setSliderPosEvent(sr.slideStartPos + del)
+		sr.setSliderPosEvent(sr.slideStartPos + sr.slideDelta(e))
 		sr.sendChange()
 	})
 	sr.On(events.Click, func(e events.Event) {
@@ -427,11 +424,20 @@ func (sr *Slider) setSliderPosEvent(pos float32) bool {
 }
 
 // setPosFromValue sets the slider position based on the given value
-// (typically rs.Value)
+// (typically rs.Value), and marks the slider as needing to be rendered.
 func (sr *Slider) setPosFromValue(val float32) {
+	if sr.updatePos(val) {
+		sr.NeedsRender()
+	}
+}
+
+// updatePos sets the slider position based on the given value
+// (typically rs.Value), without marking it as needing to be rendered.
+// It returns false if the slider has no size yet.
+func (sr *Slider) updatePos(val float32) bool {
 	sz := sr.Geom.Size.Actual.Content.Dim(sr.Styles.Direction.Dim())
 	if sz <= 0 {
-		return
+		return false
 	}
 
 	effmax := sr.effectiveMax()
@@ -441,7 +447,7 @@ func (sr *Slider) setPosFromValue(val float32) {
 	thszh := .5 * thsz
 	sr.pos = 0.5*thsz + prel*(sz-thsz)
 	sr.pos = math32.Clamp(sr.pos, thszh, sz-thszh)
-	sr.NeedsRender()
+	return true
 }
 
 // setVisiblePercent sets the [Slider.visiblePercent] value for a [SliderScrollbar].
@@ -489,6 +495,16 @@ func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return res, sr.DefaultTooltipPos()
 }
 
+// slideDelta returns the distance that the mouse has moved along the
+// slider since it was pressed, for the given slide event.
+func (sr *Slider) slideDelta(e events.Event) float32 {
+	del := math32.FromPoint(e.StartDelta()).Dim(sr.Styles.Direction.Dim())
+	if sr.Flip {
+		del = -del
+	}
+	return del
+}
+
 // pointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) pointToRelPos(pt image.Point) float32 {
@@ -509,7 +525,9 @@ func (sr *Slider) scrollScale(del float32) float32 {
 }
 
 func (sr *Slider) Render() {
-	sr.setPosFromValue(sr.Value)
+	// The position is updated without marking the slider as needing to be
+	// rendered again, which would render it again by itself in the next update.
+	sr.updatePos(sr.Value)
 
 	pc := &sr.Scene.Painter
 	st := &sr.Styles

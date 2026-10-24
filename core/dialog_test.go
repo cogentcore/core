@@ -12,12 +12,13 @@ import (
 )
 
 func TestDialogMessage(t *testing.T) {
-	t.Skip("TODO(#1456): fix this test")
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(300))
 	})
 	b.AssertRender(t, "dialog/message", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		MessageDialog(b, "Something happened", "Message")
 	})
 }

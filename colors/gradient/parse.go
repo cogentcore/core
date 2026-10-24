@@ -18,10 +18,11 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"sync"
 
+	"cogentcore.org/core/base/iox/xmlx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"golang.org/x/net/html/charset"
 )
 
 // XMLAttr searches for given attribute in slice of xml attributes;
@@ -36,8 +37,39 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 }
 
 // Cache is a cache of the [image.Image] results of [FromString] calls
-// for each string passed to [FromString].
+// for each string passed to [FromString]. It is used by the goroutines
+// of different windows under a mutex, so it must only be cleared with
+// [ClearCache].
 var Cache map[string]image.Image
+
+// cacheMu protects [Cache].
+var cacheMu sync.Mutex
+
+// ClearCache clears [Cache], as is needed when the colors of the color
+// scheme that it uses have changed.
+func ClearCache() {
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+	clear(Cache)
+}
+
+// cached returns the cached image for the given string, if any.
+func cached(str string) (image.Image, bool) {
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+	img, ok := Cache[str]
+	return img, ok
+}
+
+// setCached caches the given image for the given string.
+func setCached(str string, img image.Image) {
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+	if Cache == nil {
+		Cache = make(map[string]image.Image)
+	}
+	Cache[str] = img
+}
 
 // FromString parses the given CSS image/gradient/color string and returns the resulting image.
 // FromString is based on https://www.w3schools.com/css/css3_gradients.asp.
@@ -51,11 +83,8 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		cc = colors.BaseContext(colors.Transparent)
 	}
 
-	if Cache == nil {
-		Cache = make(map[string]image.Image)
-	}
 	cnm := str
-	if img, ok := Cache[cnm]; ok {
+	if img, ok := cached(cnm); ok {
 		// TODO(kai): do we need to clone?
 		return img, nil
 	}
@@ -103,7 +132,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 			return nil, err
 		}
 		fixGradientStops(l.Stops)
-		Cache[cnm] = l
+		setCached(cnm, l)
 		return l, nil
 	case "radial", "repeating-radial":
 		r := NewRadial()
@@ -115,7 +144,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 			return nil, err
 		}
 		fixGradientStops(r.Stops)
-		Cache[cnm] = r
+		setCached(cnm, r)
 		return r, nil
 	}
 	return nil, fmt.Errorf("got unknown gradient type %q", gtyp)
@@ -316,7 +345,7 @@ func parseColorStop(stop *Stop, prev color.Color, par string) error {
 // sets the properties of the given gradient accordingly.
 func ReadXML(g *Gradient, reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
-	decoder.CharsetReader = charset.NewReaderLabel
+	decoder.CharsetReader = xmlx.CharsetReader
 
 	for {
 		t, err := decoder.Token()

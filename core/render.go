@@ -38,7 +38,7 @@ import (
 func (wb *WidgetBase) AsyncLock() {
 	rc := wb.Scene.renderContext()
 	if rc == nil {
-		if wb.Scene.hasFlag(sceneHasShown) {
+		if wb.Scene.hasShown.Load() {
 			// If the scene has been shown but there is no render context,
 			// we are probably being deleted, so we just block forever.
 			if DebugSettings.UpdateTrace {
@@ -70,6 +70,37 @@ func (wb *WidgetBase) AsyncLock() {
 	wb.Scene.setFlag(true, sceneUpdating)
 }
 
+// AsyncLockIfShown is like [WidgetBase.AsyncLock], but it never waits for
+// the scene to be shown or blocks forever: if the widget has been deleted,
+// or its [Scene] has no render context because it has not been shown yet
+// or is no longer shown (as while it is being closed), it returns false
+// without locking. Otherwise it locks and returns true, and it must have
+// a matching [WidgetBase.AsyncUnlock] after it. It is for updates from a
+// separate goroutine that only matter for a widget that is shown, such
+// as updates that just render it again, so that a goroutine that updates
+// several widgets is not stuck on one of them.
+func (wb *WidgetBase) AsyncLockIfShown() bool {
+	// This is only read under the lock, as the widget can be destroyed
+	// (setting This to nil) under the lock at any time.
+	// A scene that has not been shown can be in the process of being run,
+	// in another goroutine without the lock of its render context.
+	if wb.Scene == nil || !wb.Scene.hasShown.Load() {
+		return false
+	}
+	rc := wb.Scene.renderContext()
+	if rc == nil {
+		return false
+	}
+	rc.Lock()
+	// The scene can have been closed while we waited for the lock.
+	if wb.This == nil || wb.Scene.renderContext() != rc {
+		rc.Unlock()
+		return false
+	}
+	wb.Scene.setFlag(true, sceneUpdating)
+	return true
+}
+
 // AsyncUnlock must be called after making any updates in a separate goroutine
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncLock] before it.
@@ -84,14 +115,92 @@ func (wb *WidgetBase) AsyncUnlock() {
 	rc.Unlock()
 }
 
+// windowFunc is a function that is run in the event loop of a window,
+// sent to it as the data of an [events.Custom] event by
+// [WidgetBase.runInWindow].
+type windowFunc func()
+
+// runInWindow runs the given function, which updates the widget (or other
+// widgets in its window), from the event handling of the given other widget.
+// The event loop of each window only holds the lock of its own render
+// context, so if the widgets are in different windows (on multi-window
+// platforms), the function is sent to the event loop of the window of the
+// widget, to run there later; otherwise it is run directly. This does not
+// wait on the other window, so that two windows that update each other
+// cannot deadlock. The function is not run if the widget is no longer shown,
+// or has been deleted by the time that it would run in the other window.
+func (wb *WidgetBase) runInWindow(from *WidgetBase, f func()) {
+	// A widget that has been deleted is not updated.
+	if wb.This == nil {
+		return
+	}
+	// A widget that is not in a window, such as the argument value of a
+	// solo [FuncButton] (see [CallFunc]), is updated directly, from the
+	// event loop of the other widget, as nothing renders it.
+	if wb.Scene == nil {
+		f()
+		return
+	}
+	rw := wb.Scene.RenderWindow()
+	if rw == nil {
+		return
+	}
+	if from.Scene != nil && rw == from.Scene.RenderWindow() {
+		f()
+		return
+	}
+	rw.SystemWindow.Events().Custom(windowFunc(func() {
+		if wb.This != nil {
+			f()
+		}
+	}))
+}
+
+// runInEachWindow runs the given function, which updates the render context
+// of a window, in the event loop of each window, where it has the lock of
+// the render context. It is sent to each window as a custom event, so it
+// never waits on the lock of any window: the caller typically holds the lock
+// of its own window, and waiting on another window while holding it could
+// deadlock with that window waiting on this one.
+func runInEachWindow(f func(w *renderWindow, rc *renderContext)) {
+	for _, w := range AllRenderWindows.windows() {
+		w.SystemWindow.Events().Custom(windowFunc(func() {
+			f(w, w.renderContext())
+		}))
+	}
+}
+
+// runInCurrentWindow runs the given function in the event loop of the
+// current window, where it has the lock of its render context, as for
+// updates from callbacks that do not have a window or a lock, such as
+// those of the browser on the web. It is sent as a custom event, so it
+// does not wait for the function to run. Nothing is done if there is no
+// current window.
+func runInCurrentWindow(f func()) {
+	w := getCurrentRenderWindow()
+	if w == nil {
+		return
+	}
+	w.SystemWindow.Events().Custom(windowFunc(f))
+}
+
 // NeedsRender specifies that the widget needs to be rendered.
 func (wb *WidgetBase) NeedsRender() {
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
 	wb.setFlag(true, widgetNeedsRender)
+	wb.setParentsChildNeedsRender()
 	if wb.Scene != nil {
 		wb.Scene.setFlag(true, sceneNeedsRender)
+	}
+}
+
+// setParentsChildNeedsRender marks all of the parents of the widget as
+// having a widget inside of them that needs to be rendered.
+func (wb *WidgetBase) setParentsChildNeedsRender() {
+	for pwb := wb.parentWidget(); pwb != nil; pwb = pwb.parentWidget() {
+		pwb.setFlag(true, widgetChildNeedsRender)
 	}
 }
 
@@ -186,16 +295,22 @@ func (sc *Scene) Render() {
 }
 
 // doNeedsRender calls Render on tree from me for nodes
-// with NeedsRender flags set
+// with NeedsRender flags set. It only goes into the widgets
+// that have such nodes inside of them.
 func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
+			cwb.setFlag(false, widgetChildNeedsRender)
 			cw.RenderWidget()
 			return tree.Break // don't go any deeper
 		}
+		if !cwb.hasFlag(widgetChildNeedsRender) {
+			return tree.Break // nothing inside needs to be rendered
+		}
+		cwb.setFlag(false, widgetChildNeedsRender)
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
@@ -236,7 +351,7 @@ func (sc *Scene) doUpdate() bool {
 		sc.setFlag(false, sceneNeedsLayout, sceneNeedsRender)
 		sc.setFlag(true, sceneImageUpdated)
 		// pr.End()
-	case sc.lastRender.needsRestyle(rc):
+	case rc.restyle || sc.lastRender.needsRestyle(rc):
 		// pr := profile.Start("restyle")
 		sc.applyStyleScene()
 		sc.LayoutRenderScene()

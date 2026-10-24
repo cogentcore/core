@@ -37,6 +37,11 @@ func handleRecover(r any) {
 	}
 	timesCrashed++
 	system.HandleRecoverBase(r)
+	// Nobody can close a crash window that is rendered offscreen, as in
+	// tests, which would then wait for the event loop forever.
+	if TheApp.Platform() == system.Offscreen {
+		panic(r)
+	}
 	if timesCrashed > 1 {
 		return
 	}

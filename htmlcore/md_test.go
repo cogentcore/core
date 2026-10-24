@@ -46,3 +46,25 @@ func TestButtonInHeadingBug(t *testing.T) {
 	assert.NoError(t, ReadMDString(NewContext(), b, `<h1><button>A</button>B</h1>`))
 	b.AssertRender(t, "md/button-in-heading-bug")
 }
+
+// TestReplaceDivs tests that replaceDivs replaces as divRegex does.
+func TestReplaceDivs(t *testing.T) {
+	tests := []string{
+		"",
+		"<p><div></p>",
+		`<p class="a"><div></p>x<p id="b"><div></p>`,
+		"<p>a\n<p class=\"c\"><div></p>",
+		"<pre>code</pre><p><div></p> and <p><div></p><div></p>",
+		"<p\n><div></p>",
+		"no paragraphs",
+		"<p>only</p>",
+		"<p><p><div></p></p>",
+		"<path d='x'/><div></p>\n<p x><div></p>",
+	}
+	for _, s := range tests {
+		want := divRegex.ReplaceAll([]byte(s), []byte("<div${1}>"))
+		if got := replaceDivs([]byte(s)); string(got) != string(want) {
+			t.Errorf("%q: got %q, want %q", s, got, want)
+		}
+	}
+}

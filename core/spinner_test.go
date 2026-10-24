@@ -49,6 +49,8 @@ func TestSpinnerButtons(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b)
 	b.AssertRender(t, "spinner/buttons", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sp.leadingIconButton.Send(events.Click)
 		assert.Equal(t, float32(-0.1), sp.Value)
 		sp.trailingIconButton.Send(events.Click)
@@ -62,6 +64,8 @@ func TestSpinnerArrowKeys(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b)
 	b.AssertRender(t, "spinner/arrow-keys", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
 		assert.Equal(t, float32(-0.1), sp.Value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeUpArrow, 0))
@@ -79,6 +83,8 @@ func TestSpinnerStep(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetStep(0.3)
 	b.AssertRender(t, "spinner/step", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sp.leadingIconButton.Send(events.Click)
 		assert.Equal(t, float32(-0.3), sp.Value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
@@ -114,6 +120,8 @@ func TestSpinnerChangeButton(t *testing.T) {
 		value = sp.Value
 	})
 	b.AssertRender(t, "spinner/change-button", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sp.trailingIconButton.Send(events.Click)
 		tolassert.Equal(t, 0.1, value)
 	})
@@ -127,6 +135,8 @@ func TestSpinnerChangeArrowKey(t *testing.T) {
 		value = sp.Value
 	})
 	b.AssertRender(t, "spinner/change-arrow-key", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
 		tolassert.Equal(t, -0.1, value)
 	})
@@ -140,6 +150,8 @@ func TestSpinnerChangeNumberKey(t *testing.T) {
 		value = sp.Value
 	})
 	b.AssertRender(t, "spinner/change-number-key", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sp.HandleEvent(events.NewKey(events.KeyChord, '5', 0, 0))
 		tolassert.Equal(t, -1, value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))

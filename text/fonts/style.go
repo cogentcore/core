@@ -7,7 +7,7 @@ package fonts
 import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/font"
+	"github.com/cogentcore/typesetting/font"
 )
 
 // Style sets the [rich.Style] and [text.Style] for the given [font.Face].

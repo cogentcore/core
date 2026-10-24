@@ -41,6 +41,8 @@ func TestParentActualBackground(t *testing.T) {
 		s.SetAbilities(true, abilities.Hoverable)
 	})
 	sc.AssertRender(t, "style/parent-background-color/white-hovered-post", func() {
+		sc.AsyncLock()
+		defer sc.AsyncUnlock()
 		fr.SetState(true, states.Hovered)
 		fr.StyleTree()
 		fr.NeedsRender()
@@ -66,6 +68,8 @@ func TestParentActualBackground(t *testing.T) {
 		s.Background = colors.Scheme.OutlineVariant
 	})
 	sc.AssertRender(t, "style/parent-background-color/gray-hovered-post", func() {
+		sc.AsyncLock()
+		defer sc.AsyncUnlock()
 		fr.SetState(true, states.Hovered)
 		fr.StyleTree()
 		fr.NeedsRender()

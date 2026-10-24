@@ -12,7 +12,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["math/math"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Abs":                    reflect.ValueOf(math.Abs),
@@ -113,4 +113,4 @@ func init() {
 		"Y1":                     reflect.ValueOf(math.Y1),
 		"Yn":                     reflect.ValueOf(math.Yn),
 	}
-}
+})

@@ -1,19 +1,21 @@
 module cogentcore.org/core
 
-go 1.25.6
+go 1.27.0
 
 require (
 	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
+	github.com/BurntSushi/toml v1.6.0
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/Masterminds/vcs v1.13.3
 	github.com/adrg/strutil v0.3.1
-	github.com/alecthomas/chroma/v2 v2.23.0
+	github.com/alecthomas/chroma/v3 v3.0.0-alpha.5.0.20261015230651-e17ffc9bfce4
 	github.com/anthonynsimon/bild v0.14.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/bramvdbogaerde/go-scp v1.6.0
 	github.com/chewxy/math32 v1.11.2
 	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
+	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
 	github.com/cogentcore/yaegi v0.0.0-20260116172027-700fbf8949f3
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ericchiang/css v1.4.0
@@ -21,20 +23,17 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260628091122-0bd588dc30cf
-	github.com/go-text/typesetting v0.3.5-0.20260418130854-c41d02a44bec
-	github.com/gomarkdown/markdown v0.0.0-20260417124207-7d523f7318df
+	github.com/gomarkdown/markdown v0.0.0-20260724235538-61af6e1e6971
 	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.4
 	github.com/jackmordaunt/icns/v2 v2.2.7
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
-	github.com/jinzhu/copier v0.4.0
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
-	github.com/oliverbestmann/webgpu v1.36.1-0.20261006093257-de8bdd5d5976
-	github.com/pelletier/go-toml/v2 v2.2.4
+	github.com/oliverbestmann/webgpu v1.37.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
 	golang.org/x/crypto v0.54.0
@@ -53,7 +52,7 @@ require (
 	git.sr.ht/~sbinet/overlayfs v0.1.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/dlclark/regexp2/v2 v2.7.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gorilla/css v1.0.1 // indirect

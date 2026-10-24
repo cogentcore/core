@@ -44,7 +44,7 @@ func (tl *TexLang) Parser() *parse.Parser {
 	}
 	lp, _ := parse.LanguageSupport.Properties(fileinfo.TeX)
 	if lp.Parser == nil {
-		parse.LanguageSupport.OpenStandard()
+		parse.LanguageSupport.OpenLanguage(fileinfo.TeX)
 	}
 	tl.Pr = lp.Parser
 	if tl.Pr == nil {

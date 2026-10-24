@@ -46,6 +46,9 @@ func (ed *Base) reLayout() {
 }
 
 func (ed *Base) RenderWidget() {
+	if ed.Lines != nil {
+		ed.Lines.StartDeferredMarkup()
+	}
 	if ed.StartRender() {
 		ed.reLayout()
 		if ed.targetSet {
@@ -158,6 +161,7 @@ func (ed *Base) renderLines() {
 }
 
 type renderCache struct {
+	// tx is the rich text of the line, including the styles of its spans.
 	tx  []rune
 	lns *shaped.Lines
 }
@@ -185,7 +189,7 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		return lns
 	}
 	shapeSpan := func(stx rich.Text, ssz math32.Vector2) *shaped.Lines {
-		txt := stx.Join()
+		txt := slices.Concat(stx...) // with the styles, which change with highlighting
 		rc := ed.lineRenders[li]
 		if rc.lns != nil && slices.Compare(rc.tx, txt) == 0 {
 			return rc.lns
@@ -431,6 +435,14 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	return srcp
 }
 
+// CharStartPos returns the starting (top left) render coords for the
+// given source text position, in the same scene-based coordinates the
+// editor uses to render text (see [Editor.charStartPos]). Popups such
+// as the completion popup anchor themselves relative to this position.
+func (ed *Base) CharStartPos(pos textpos.Pos) math32.Vector2 {
+	return ed.charStartPos(pos)
+}
+
 // charStartPos returns the starting (top left) render coords for the
 // given source text position.
 func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
@@ -445,7 +457,9 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	spos := ed.Geom.Pos.Content.Add(math32.FromPoint(scpos))
 	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
+	ed.Lines.Lock() // required by ViewMarkupLine; never called from renderLines
 	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
+	ed.Lines.Unlock()
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
 	for si := range tx { // tabs encoded as single chars at start

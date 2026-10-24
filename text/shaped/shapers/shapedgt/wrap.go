@@ -6,13 +6,15 @@ package shapedgt
 
 import (
 	"fmt"
+	"math"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/di"
+	"github.com/cogentcore/typesetting/segmenter"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -31,16 +33,131 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
-	txt := tx.Join()
-	outs := sh.ShapeTextOutput(tx, tsty, txt)
-	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, size)
-	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+	return sh.WrapLinesBoundsCached(tx, defSty, tsty, size, nil)
 }
 
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call. Returns new lines and number of truncations.
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) ([]shaping.Line, int) {
+	cfg, maxSize := wrapConfig(defSty, tsty, size)
+	if lines, ok := singleLine(outs, txt, cfg, maxSize, !cfg.DisableTrailingWhitespaceTrim); ok {
+		return lines, 0
+	}
+	return sh.wrapParagraph(cfg, maxSize, txt, outs, nil)
+}
 
+// singleLine returns the outputs as one line when they fit on one line, as
+// the line wrapper returns them, with the trailing whitespace of more than one
+// run trimmed if trim, or false when the line wrapper is needed. The wrapper
+// returns a single run that fits as it is, when the text has no mandatory line
+// break before its end. For more than one run, the wrapper is needed when the
+// text has a line break character, may break at every opportunity, is vertical
+// or has runs in more than one direction, or does not fit.
+func singleLine(outs []shaping.Output, txt []rune, cfg shaping.WrapConfig, maxSize int, trim bool) ([]shaping.Line, bool) {
+	if len(outs) == 0 {
+		return nil, false
+	}
+	maxWidth := fixed.I(min(maxSize, math.MaxInt32>>6))
+
+	// A single run is checked as the wrapper checks it, in any direction.
+	if len(outs) == 1 {
+		if outs[0].Advance > maxWidth || hasMandatoryBreak(txt) {
+			return nil, false
+		}
+		return []shaping.Line{outs}, true
+	}
+
+	// More runs must all be in the horizontal direction of the paragraph.
+	dir := cfg.Direction
+	if cfg.BreakPolicy == shaping.Always || dir.IsVertical() || dir.Progression() != di.FromTopLeft {
+		return nil, false
+	}
+	var adv fixed.Int26_6
+	for i := range outs {
+		if outs[i].Direction != dir {
+			return nil, false
+		}
+		adv += outs[i].Advance
+	}
+	if adv > maxWidth {
+		return nil, false
+	}
+
+	// Any line break character (line break classes BK, CR, LF and NL) needs the wrapper.
+	for _, r := range txt {
+		if isLineBreak(r) {
+			return nil, false
+		}
+	}
+
+	// The wrapper sets the visual order of the runs (logical here)
+	// and trims the trailing whitespace.
+	for i := range outs {
+		outs[i].VisualIndex = int32(i)
+	}
+	if !trim {
+		return []shaping.Line{outs}, true
+	}
+	last := &outs[len(outs)-1]
+	if n := len(last.Glyphs); n > 0 {
+		if g := &last.Glyphs[n-1]; g.Width == 0 {
+			g.XAdvance = 0
+			g.Advance = 0
+		}
+		last.RecomputeAdvance()
+	}
+	return []shaping.Line{outs}, true
+}
+
+// isLineBreak returns whether the rune is a line break character
+// (line break classes BK, CR, LF and NL).
+func isLineBreak(r rune) bool {
+	switch r {
+	case '\n', '\r', '\v', '\f', 0x85, 0x2028, 0x2029:
+		return true
+	}
+	return false
+}
+
+// hasMandatoryBreak returns whether the text has a mandatory line break before
+// its end, as the line wrapper finds them: after a line break character other
+// than the last rune, where CR followed by LF breaks after the LF.
+func hasMandatoryBreak(txt []rune) bool {
+	for i := 0; i < len(txt)-1; i++ {
+		if r := txt[i]; isLineBreak(r) && !(r == '\r' && txt[i+1] == '\n') {
+			return true
+		}
+	}
+	return false
+}
+
+// wrapParagraph wraps the outputs as the line wrapper's WrapParagraph does,
+// for outputs that [singleLine] has found need wrapping. WrapParagraph first
+// checks for the case of singleLine, finding the break opportunities of the
+// whole text, which it then finds again to wrap it. The segmenter, if
+// non-nil, has the break opportunities of the text already, as kept for all
+// the wrappings of a cached text; otherwise they are found for this one.
+func (sh *Shaper) wrapParagraph(cfg shaping.WrapConfig, maxSize int, txt []rune, outs []shaping.Output, seg *segmenter.Segmenter) ([]shaping.Line, int) {
+	if seg != nil {
+		sh.wrapper.PrepareSegmented(cfg, seg, shaping.NewSliceIterator(outs))
+	} else {
+		sh.wrapper.Prepare(cfg, txt, shaping.NewSliceIterator(outs))
+	}
+	var lines []shaping.Line
+	for {
+		line, done := sh.wrapper.WrapNextLine(maxSize)
+		if line.Line != nil {
+			lines = append(lines, line.Line)
+		}
+		if done {
+			return lines, line.Truncated
+		}
+	}
+}
+
+// wrapConfig returns the line wrapping configuration and the maximum line
+// size for wrapping text with the given styles to the given size.
+func wrapConfig(defSty *rich.Style, tsty *text.Style, size math32.Vector2) (shaping.WrapConfig, int) {
 	lht := tsty.LineHeightDots(defSty)
 	dir := shaped.GoTextDirection(rich.Default, tsty)
 	nlines := int(math32.Floor(size.Y/lht)) * 2
@@ -82,8 +199,7 @@ func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Tex
 	// 	wc.Truncator = s.ShapeText(params.PxPerEm, params.Locale, []rune(params.Truncator))[0]
 	// }
 	// todo: WrapParagraph does NOT handle vertical text! file issue.
-
-	return sh.wrapper.WrapParagraph(cfg, maxSize, txt, shaping.NewSliceIterator(outs))
+	return cfg, maxSize
 }
 
 // This should already have the mutex lock, and is used by shapedjs but is

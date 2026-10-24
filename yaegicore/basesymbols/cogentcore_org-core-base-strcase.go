@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/strcase/strcase"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"CamelCase":        reflect.ValueOf(strcase.CamelCase),
@@ -51,4 +51,4 @@ func init() {
 		"SplitAction": reflect.ValueOf((*strcase.SplitAction)(nil)),
 		"WordCases":   reflect.ValueOf((*strcase.WordCases)(nil)),
 	}
-}
+})

@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,6 +27,8 @@ func TestBindUpdate(t *testing.T) {
 	name := "Gopher"
 	tf := Bind(&name, NewTextField(b))
 	b.AssertRender(t, "bind/update", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		name = "Cogent Core"
 		tf.Update()
 	})
@@ -37,6 +40,8 @@ func TestBindChange(t *testing.T) {
 
 	tf := Bind(&name, NewTextField(b))
 	b.AssertRender(t, "bind/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
 		tf.HandleEvent(events.NewKey(events.KeyChord, ' ', 0, 0))
@@ -83,6 +88,8 @@ func TestValidatorValid(t *testing.T) {
 	b := NewBody()
 	tf := Bind(validator("my@string"), NewTextField(b))
 	b.AssertRender(t, "bind/validator-valid", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
 	})
 }
@@ -91,6 +98,86 @@ func TestValidatorInvalid(t *testing.T) {
 	b := NewBody()
 	v := Bind(validator("my string"), NewTextField(b))
 	b.AssertRender(t, "bind/validator-invalid", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		v.SendChange() // trigger validation
 	})
+}
+
+// Accepting the dialog of the argument of a function called with CallFunc,
+// as for a command run from a keyboard shortcut, calls the function: the
+// argument value widget of the solo FuncButton is not in any window.
+func TestCallFuncArgAccept(t *testing.T) {
+	b := NewBody()
+	ctx := NewText(b).SetText("Context")
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	b.waitNoEvents(rw)
+
+	called := make(chan callFuncItems, 1)
+	b.AsyncLock()
+	CallFunc(ctx, func(items callFuncItems) {
+		called <- items
+	})
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+
+	// Closing the dialog of the argument accepts it.
+	b.AsyncLock()
+	d := rw.mains.top().Scene
+	assert.NotEqual(t, b.Scene, d, "the dialog is not open")
+	d.Close()
+	b.AsyncUnlock()
+	select {
+	case <-called:
+	case <-time.After(10 * time.Second):
+		t.Fatal("the function was not called")
+	}
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
+}
+
+// Accepting the dialog of a value whose widget has been deleted meanwhile
+// does nothing instead of crashing.
+func TestValueDialogDeletedWidget(t *testing.T) {
+	b := NewBody()
+	fb := NewFileButton(b)
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	b.waitNoEvents(rw)
+
+	accepted := false
+	b.AsyncLock()
+	openValueDialog(fb, func(d *Body) {
+		NewText(d).SetText("Dialog")
+	}, func() {
+		accepted = true
+	})
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+
+	b.AsyncLock()
+	var ok *Button
+	rw.mains.top().Scene.WalkDown(func(n tree.Node) bool {
+		if bt := AsButton(n); bt != nil && bt.Text == "OK" {
+			ok = bt
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	fb.Delete()
+	if assert.NotNil(t, ok) {
+		ok.Send(events.Click)
+	}
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+	assert.False(t, accepted)
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
 }

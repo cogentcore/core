@@ -40,8 +40,10 @@ type Frame struct {
 
 	// LayoutStackTopOnly is whether to only layout the top widget
 	// (specified by [Frame.StackTop]) for a [styles.Stacked] frame.
+	// The other children are also not updated or styled by updates
+	// of the tree (such as [WidgetBase.Update]) until they are on top.
 	// This is appropriate for widgets such as [Tabs], which do a full
-	// redraw on stack changes, but not for widgets such as [Switch]es
+	// update on stack changes, but not for widgets such as [Switch]es
 	// which don't.
 	LayoutStackTopOnly bool
 

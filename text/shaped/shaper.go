@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/di"
+	"github.com/cogentcore/typesetting/di"
 )
 
 //go:generate core generate

@@ -8,7 +8,6 @@ package fsx
 import (
 	"errors"
 	"fmt"
-	"go/build"
 	"io"
 	"io/fs"
 	"os"
@@ -25,7 +24,7 @@ type Filename string
 // GoSrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
 // full path. GOPATH may contain a list of paths. From Robin Elkind github.com/mewkiz/pkg.
 func GoSrcDir(dir string) (absDir string, err error) {
-	for _, srcDir := range build.Default.SrcDirs() {
+	for _, srcDir := range GoSrcDirs() {
 		absDir = filepath.Join(srcDir, dir)
 		finfo, err := os.Stat(absDir)
 		if err == nil && finfo.IsDir() {

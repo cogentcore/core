@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
@@ -52,7 +53,7 @@ func (ml *MarkdownLang) Parser() *parse.Parser {
 	}
 	lp, _ := parse.LanguageSupport.Properties(fileinfo.Markdown)
 	if lp.Parser == nil {
-		parse.LanguageSupport.OpenStandard()
+		parse.LanguageSupport.OpenLanguage(fileinfo.Markdown)
 	}
 	ml.Pr = lp.Parser
 	if ml.Pr == nil {
@@ -133,9 +134,10 @@ func (ml *MarkdownLang) CompleteEdit(fs *parse.FileStates, text string, cp int, 
 	// if the original is ChildByName() and the cursor is between d and B and the comp is Children,
 	// then delete the portion after "Child" and return the new comp and the number or runes past
 	// the cursor to delete
-	s2 := text[cp:]
+	rn := []rune(text)
+	s2 := string(rn[min(cp, len(rn)):]) // cp is a rune position
 	// gotParen := false
-	if len(s2) > 0 && lexer.IsLetterOrDigit(rune(s2[0])) {
+	if r, _ := utf8.DecodeRuneInString(s2); len(s2) > 0 && lexer.IsLetterOrDigit(r) {
 		for i, c := range s2 {
 			if c == '{' {
 				// gotParen = true
@@ -159,7 +161,7 @@ func (ml *MarkdownLang) CompleteEdit(fs *parse.FileStates, text string, cp int, 
 
 	// fmt.Printf("text: %v|%v  comp: %v  s2: %v\n", text[:cp], text[cp:], nw, s2)
 	ed.NewText = nw
-	ed.ForwardDelete = len(s2)
+	ed.ForwardDelete = utf8.RuneCountInString(s2)
 	return ed
 }
 

@@ -34,9 +34,12 @@ func Resize(src image.Image, size image.Point) image.Image {
 
 // Crop returns a cropped region of the source image (which can be
 // [Wrapped]), returning a [WrapJS] image handle on web and using web-native
-// optimized code.
+// optimized code. The rectangle is relative to the origin of the source
+// bounds, and the result has its origin at (0, 0); any part of the
+// rectangle outside of the source is transparent.
 func Crop(src image.Image, rect image.Rectangle) image.Image {
-	dst := image.NewRGBA(rect)
-	draw.Draw(dst, rect, src, image.Point{}, draw.Src)
+	src = Unwrap(src)
+	dst := image.NewRGBA(image.Rectangle{Max: rect.Size()})
+	draw.Draw(dst, dst.Bounds(), src, src.Bounds().Min.Add(rect.Min), draw.Src)
 	return dst
 }

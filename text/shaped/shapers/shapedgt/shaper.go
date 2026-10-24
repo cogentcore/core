@@ -16,10 +16,10 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/text"
-	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/fontscan"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/di"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/fontscan"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -27,12 +27,22 @@ import (
 type Shaper struct {
 	shaper   shaping.HarfbuzzShaper
 	wrapper  shaping.LineWrapper
-	fontMap  *fontscan.FontMap
+	fontMap  fontMap
 	splitter shaping.Segmenter
 	maths    map[int]*shaped.Math
 
 	// outBuff is the output buffer to avoid excessive memory consumption.
 	outBuff []shaping.Output
+
+	// shapes caches the shaped outputs of recent texts for wrapping.
+	shapes shapeCache
+
+	// SimpleSpans is whether spans of simple text (Latin, Greek and Cyrillic
+	// scripts, common punctuation and symbols) are shaped without the go-text
+	// shaper, as a glyph for each rune with its nominal glyph,
+	// for a shaper whose outputs are measured again after shaping, as those
+	// of shapedjs are measured by the browser.
+	SimpleSpans bool
 
 	sync.Mutex
 }
@@ -44,7 +54,7 @@ func (nl *nilLogger) Printf(format string, args ...any) {}
 // NewShaper returns a new text shaper.
 func NewShaper() shaped.Shaper {
 	sh := &Shaper{}
-	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
+	sh.fontMap.FontMap = fontscan.NewFontMap(&nilLogger{})
 	// TODO(text): figure out cache dir situation (especially on mobile and web)
 	str, err := os.UserCacheDir()
 	if errors.Log(err) != nil {
@@ -58,7 +68,7 @@ func NewShaper() shaped.Shaper {
 		// errors.Log(err)
 		// shaper.logger.Printf("failed loading system fonts: %v", err)
 	}
-	errors.Log(fonts.UseEmbeddedInMap(sh.fontMap))
+	errors.Log(fonts.UseEmbeddedInMap(sh.fontMap.FontMap))
 	sh.shaper.SetFontCacheSize(32)
 	return sh
 }
@@ -67,15 +77,21 @@ func NewShaper() shaped.Shaper {
 // given filesystem with fonts.
 func NewShaperWithFonts(fss []fs.FS) shaped.Shaper {
 	sh := &Shaper{}
-	sh.fontMap = fontscan.NewFontMap(&nilLogger{})
-	errors.Log(fonts.UseInMap(sh.fontMap, fss))
+	sh.fontMap.FontMap = fontscan.NewFontMap(&nilLogger{})
+	errors.Log(fonts.UseInMap(sh.fontMap.FontMap, fss))
 	sh.shaper.SetFontCacheSize(32)
 	return sh
 }
 
-// FontMap returns the font map used for this shaper
+// FontMap returns the font map used for this shaper.
 func (sh *Shaper) FontMap() *fontscan.FontMap {
-	return sh.fontMap
+	// The caller may set the query or script of the map, or add fonts,
+	// which can change how texts are shaped.
+	sh.Lock()
+	defer sh.Unlock()
+	sh.fontMap.forget()
+	sh.shapes.reset()
+	return sh.fontMap.FontMap
 }
 
 // Shape turns given input spans into [Runs] of rendered text,
@@ -156,7 +172,15 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, txt []rune) []
 		in.Script = rich.Settings.Script
 		in.Language = rich.Settings.Language
 
-		ins := sh.splitter.Split(in, sh.fontMap) // this is essential
+		// Simple text that is measured again after shaping is not shaped.
+		if sh.SimpleSpans {
+			if o, ok := sh.simpleOutput(&in); ok {
+				sh.outBuff = append(sh.outBuff, o)
+				continue
+			}
+		}
+
+		ins := sh.splitter.Split(in, &sh.fontMap) // this is essential
 		for _, in := range ins {
 			if in.Face == nil {
 				fmt.Println("nil face in input", len(stx), string(stx))

@@ -25,8 +25,8 @@ import (
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/font/opentype"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/font/opentype"
 )
 
 // Browser is a font browser.

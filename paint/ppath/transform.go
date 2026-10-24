@@ -91,12 +91,12 @@ func (p Path) Transform(m math32.Matrix2) Path {
 	return p
 }
 
-// Translate translates the path by (x,y) and returns a new path.
+// Translate translates the path by (x,y) in place and returns it.
 func (p Path) Translate(x, y float32) Path {
 	return p.Transform(math32.Identity2().Translate(x, y))
 }
 
-// Scale scales the path by (x,y) and returns a new path.
+// Scale scales the path by (x,y) in place and returns it.
 func (p Path) Scale(x, y float32) Path {
 	return p.Transform(math32.Identity2().Scale(x, y))
 }

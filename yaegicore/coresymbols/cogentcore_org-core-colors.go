@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/colors/colors"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Add":                  reflect.ValueOf(colors.Add),
@@ -227,7 +227,7 @@ func init() {
 		// interface wrapper definitions
 		"_Context": reflect.ValueOf((*_cogentcore_org_core_colors_Context)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_colors_Context is an interface wrapper for Context type
 type _cogentcore_org_core_colors_Context struct {

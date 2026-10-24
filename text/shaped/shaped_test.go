@@ -8,6 +8,7 @@ import (
 	"cmp"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -26,7 +27,7 @@ import (
 	_ "cogentcore.org/core/text/tex"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/font"
+	"github.com/cogentcore/typesetting/font"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -429,4 +430,28 @@ func TestGlyphSuperSub(t *testing.T) {
 		pos := math32.Vec2(10.3, 10.96875)
 		pc.DrawText(lns, pos)
 	})
+}
+
+// BenchmarkWrapLinesCold measures wrapping many short texts, as the labels of
+// a new window, with a new shaper, whose font map has not resolved any rune yet.
+func BenchmarkWrapLinesCold(b *testing.B) {
+	uc := units.Context{}
+	uc.Defaults()
+	tsty := text.NewStyle()
+	tsty.ToDots(&uc)
+	sty := rich.NewStyle()
+	bold := rich.NewStyle().SetWeight(rich.Bold)
+	words := strings.Fields("The quick brown fox jumps over the lazy dog: 0123456789, ÀÉÎÕÜ àéîõü!? Button Label Switch Slider Spinner Chooser Text Field Tabs Settings")
+	for b.Loop() {
+		b.StopTimer()
+		sh := shapedgt.NewShaper()
+		b.StartTimer()
+		for i, w := range words {
+			st := sty
+			if i%8 == 0 {
+				st = bold
+			}
+			sh.WrapLines(rich.NewText(st, []rune(w)), st, tsty, math32.Vec2(400, 100))
+		}
+	}
 }

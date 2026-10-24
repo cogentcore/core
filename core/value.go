@@ -148,15 +148,17 @@ func openValueDialog(v Value, mkfun func(d *Body), after ...func()) {
 	// OK and Cancel buttons
 	if len(after) == 0 {
 		d.OnClose(func(e events.Event) {
-			wb.UpdateChange()
+			wb.runInWindow(d.AsWidget(), func() { wb.UpdateChange() })
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
 		d.AddBottomBar(func(bar *Frame) {
 			d.AddCancel(bar)
 			d.AddOK(bar).OnClick(func(e events.Event) {
-				after[0]()
-				wb.UpdateChange()
+				wb.runInWindow(d.AsWidget(), func() {
+					after[0]()
+					wb.UpdateChange()
+				})
 			})
 		})
 	}

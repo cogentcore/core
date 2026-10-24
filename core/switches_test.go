@@ -25,6 +25,8 @@ func TestSwitchesItems(t *testing.T) {
 		SwitchItem{Value: "C++", Tooltip: "Hard to use and slow to compile"},
 	)
 	b.AssertRender(t, "switches/items", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		assert.Equal(t, "Slow and duck-typed", sw.Child(1).(Widget).AsWidget().Tooltip)
 	})
 }
@@ -33,6 +35,8 @@ func TestSwitchesMutex(t *testing.T) {
 	b := NewBody()
 	sw := NewSwitches(b).SetMutex(true).SetStrings("Go", "Python", "C++")
 	b.AssertRender(t, "switches/mutex", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sw.Child(0).(Widget).AsWidget().Send(events.Click)
 		sw.Child(1).(Widget).AsWidget().Send(events.Click)
 		assert.Equal(t, "Python", sw.SelectedItem().Value)
@@ -73,6 +77,8 @@ func TestSwitchesChange(t *testing.T) {
 		selected = sw.SelectedItems()
 	})
 	b.AssertRender(t, "switches/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		sw.Child(0).(Widget).AsWidget().Send(events.Click)
 		sw.Child(2).(Widget).AsWidget().Send(events.Click)
 		assert.Equal(t, []SwitchItem{{Value: "Go"}, {Value: "C++"}}, selected)

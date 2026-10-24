@@ -56,7 +56,11 @@ type OutputBuffer struct { //types:add -setters
 	sync.Mutex
 }
 
-// MonitorOutput monitors the output and updates the [Buffer].
+// MonitorOutput monitors the output and updates the [OutputBuffer.Lines].
+// It runs until the output ends, so it is typically called in a separate
+// goroutine. It must not be called with the lock of the views of the
+// [lines.Lines] held (as in an event handler), as their updates for the
+// new output get that lock (see [lines.Lines.AppendTextMarkupAsync]).
 func (ob *OutputBuffer) MonitorOutput() {
 	if ob.Batch == 0 {
 		ob.Batch = 200 * time.Millisecond
@@ -109,7 +113,7 @@ func (ob *OutputBuffer) outputToBuffer() {
 		return
 	}
 	ob.Lines.SetUndoOn(false)
-	ob.Lines.AppendTextMarkup(ob.bufferedLines, ob.bufferedMarkup)
+	ob.Lines.AppendTextMarkupAsync(ob.bufferedLines, ob.bufferedMarkup)
 	ob.bufferedLines = make([][]rune, 0, 100)
 	ob.bufferedMarkup = make([]rich.Text, 0, 100)
 }

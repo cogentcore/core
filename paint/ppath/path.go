@@ -8,8 +8,6 @@
 package ppath
 
 import (
-	"bytes"
-	"encoding/gob"
 	"slices"
 
 	"cogentcore.org/core/math32"
@@ -98,22 +96,6 @@ func (ps Paths) Empty() bool {
 // paths every iteration, and avoid new memory allocations.
 func (p *Path) Reset() {
 	*p = (*p)[:0]
-}
-
-// GobEncode implements the gob interface.
-func (p Path) GobEncode() ([]byte, error) {
-	b := bytes.Buffer{}
-	enc := gob.NewEncoder(&b)
-	if err := enc.Encode(p); err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
-}
-
-// GobDecode implements the gob interface.
-func (p *Path) GobDecode(b []byte) error {
-	dec := gob.NewDecoder(bytes.NewReader(b))
-	return dec.Decode(p)
 }
 
 // Empty returns true if p is an empty path or consists of only MoveTos and Closes.

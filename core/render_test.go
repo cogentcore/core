@@ -6,6 +6,7 @@ package core
 
 import (
 	"testing"
+	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -13,6 +14,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
+	"github.com/stretchr/testify/assert"
 )
 
 // For https://github.com/cogentcore/core/issues/614
@@ -161,7 +163,6 @@ func TestOverflowAutoDefinedMax(t *testing.T) {
 
 // For https://github.com/cogentcore/core/issues/615
 func TestRenderNestedScroll(t *testing.T) {
-	t.Skip("TODO(#1456): fix this test")
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(300))
@@ -246,4 +247,78 @@ func TestRenderParentGradient(t *testing.T) {
 		})
 	}
 	b.AssertRender(t, "render/parent-gradient")
+}
+
+func TestNeedsRenderChild(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	tx := NewText(fr).SetText("Hello")
+	b.runAndShowNewWindow()
+	sc := b.Scene
+	rc := sc.renderContext()
+	rc.Lock()
+	defer func() {
+		b.Close()
+		rc.Unlock()
+	}()
+	sc.doNeedsRender()
+
+	// A widget that needs to be rendered marks all of its parents.
+	tx.NeedsRender()
+	assert.True(t, tx.hasFlag(widgetNeedsRender))
+	assert.True(t, fr.hasFlag(widgetChildNeedsRender))
+	assert.True(t, sc.AsWidget().hasFlag(widgetChildNeedsRender))
+
+	// The render iteration renders it and clears the marks on the way.
+	sc.doNeedsRender()
+	assert.False(t, tx.hasFlag(widgetNeedsRender))
+	assert.False(t, fr.hasFlag(widgetChildNeedsRender))
+	assert.False(t, sc.AsWidget().hasFlag(widgetChildNeedsRender))
+
+	// A widget that needs to be rendered when it is added marks its new parents.
+	added := NewText()
+	added.NeedsRender()
+	fr.AddChild(added)
+	assert.True(t, fr.hasFlag(widgetChildNeedsRender))
+	assert.True(t, sc.AsWidget().hasFlag(widgetChildNeedsRender))
+}
+
+// AsyncLockIfShown locks only for a widget that is shown, and it does not
+// block for a widget that is not shown yet, has been deleted, or whose
+// scene has been closed.
+func TestAsyncLockIfShown(t *testing.T) {
+	lockIfShown := func(w Widget) bool {
+		locked := make(chan bool)
+		go func() {
+			locked <- w.AsWidget().AsyncLockIfShown()
+		}()
+		select {
+		case ok := <-locked:
+			if ok {
+				w.AsWidget().AsyncUnlock()
+			}
+			return ok
+		case <-time.After(5 * time.Second):
+			t.Fatal("AsyncLockIfShown blocked")
+			return false
+		}
+	}
+
+	b := NewBody()
+	bt := NewButton(b)
+	other := NewButton(b)
+	assert.False(t, lockIfShown(bt), "not shown yet")
+	b.runAndShowNewWindow()
+	assert.True(t, lockIfShown(bt), "shown")
+
+	b.AsyncLock()
+	other.Delete()
+	b.AsyncUnlock()
+	assert.False(t, lockIfShown(other), "deleted")
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
+	assert.False(t, lockIfShown(bt), "closed")
 }

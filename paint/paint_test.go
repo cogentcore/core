@@ -11,6 +11,7 @@ import (
 	"slices"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -67,6 +68,7 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Painter)
 }
 
 func TestRender(t *testing.T) {
+	goscript.Skip(t, "the js fonts have only metrics, so the image renderer cannot draw text glyphs")
 	txtSh := shaped.NewShaper()
 	RunTest(t, "render", 300, 300, func(pc *Painter) {
 		testimg, _, err := imagex.Open("testdata/test.png")

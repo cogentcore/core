@@ -25,6 +25,8 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/highlighting"
+	"cogentcore.org/core/text/highlighting/lexers"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 )
@@ -33,20 +35,21 @@ import (
 var demoFile embed.FS
 
 func main() {
+	highlighting.AddLexers(lexers.XML)
 	b := core.NewBody("Cogent Core Demo")
 	ts := core.NewTabs(b)
 
-	home(ts)
-	widgets(ts)
-	collections(ts)
-	valueBinding(ts)
-	makeStyles(ts)
+	// The content of each tab is made when the tab is first shown.
+	ts.NewLazyTab("Home", home)
+	ts.NewLazyTab("Widgets", widgets)
+	ts.NewLazyTab("Collections", collections)
+	ts.NewLazyTab("Value binding", valueBinding)
+	ts.NewLazyTab("Styles", makeStyles)
 
 	b.RunMainWindow()
 }
 
-func home(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Home")
+func home(tab *core.Frame) {
 	tab.Styler(func(s *styles.Style) {
 		s.CenterAll()
 	})
@@ -57,19 +60,17 @@ func home(ts *core.Tabs) {
 	core.NewText(tab).SetType(core.TextTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
-func widgets(ts *core.Tabs) {
-	wts := core.NewTabs(ts.NewTab("Widgets"))
-
-	text(wts)
-	buttons(wts)
-	inputs(wts)
-	sliders(wts)
-	dialogs(wts)
-	textEditors(wts)
+func widgets(tab *core.Frame) {
+	wts := core.NewTabs(tab)
+	wts.NewLazyTab("Text", text)
+	wts.NewLazyTab("Buttons", buttons)
+	wts.NewLazyTab("Inputs", inputs)
+	wts.NewLazyTab("Sliders", sliders)
+	wts.NewLazyTab("Dialogs", dialogs)
+	wts.NewLazyTab("Text editors", textEditors)
 }
 
-func text(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Text")
+func text(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text")
 	core.NewText(tab).SetText("Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.")
@@ -92,8 +93,7 @@ func makeRow(parent core.Widget) *core.Frame {
 	return row
 }
 
-func buttons(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Buttons")
+func buttons(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Buttons")
 
@@ -173,8 +173,7 @@ func buttons(ts *core.Tabs) {
 	}
 }
 
-func inputs(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Inputs")
+func inputs(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Inputs")
 	core.NewText(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
@@ -228,8 +227,7 @@ func inputs(ts *core.Tabs) {
 	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetStrings("Segmented Button 1", "Segmented Button 2", "Segmented Button 3")
 }
 
-func sliders(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Sliders")
+func sliders(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Sliders and meters")
 	core.NewText(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
@@ -254,8 +252,7 @@ func sliders(ts *core.Tabs) {
 	})
 }
 
-func textEditors(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Text editors")
+func textEditors(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text editors")
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
@@ -269,8 +266,7 @@ func textEditors(ts *core.Tabs) {
 	textcore.NewEditor(sp).Lines.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
 }
 
-func valueBinding(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Value binding")
+func valueBinding(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Value binding")
 	core.NewText(tab).SetText("Cogent Core provides the value binding system, which allows you to instantly bind Go values to interactive widgets with just a single simple line of code.")
@@ -336,7 +332,7 @@ func valueBinding(ts *core.Tabs) {
 	core.Bind(styles.NewStyle, core.NewFuncButton(tab)).SetConfirm(true).SetShowReturn(true)
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
-		core.InspectorWindow(ts.Scene)
+		core.InspectorWindow(tab.Scene)
 	})
 }
 
@@ -352,8 +348,7 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	return
 }
 
-func collections(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Collections")
+func collections(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Collections")
 	core.NewText(tab).SetText("Cogent Core provides powerful collection widgets that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
@@ -535,8 +530,7 @@ func (ts *testStruct) ShouldDisplay(field string) bool {
 	return true
 }
 
-func dialogs(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Dialogs")
+func dialogs(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Dialogs, snackbars, and windows")
 	core.NewText(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
@@ -679,8 +673,7 @@ func dialogs(ts *core.Tabs) {
 	})
 }
 
-func makeStyles(ts *core.Tabs) {
-	tab, _ := ts.NewTab("Styles")
+func makeStyles(tab *core.Frame) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Styles and layouts")
 	core.NewText(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and appearance of all widgets. You can edit the style properties of the outer frame below.")

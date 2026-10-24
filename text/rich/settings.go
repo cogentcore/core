@@ -7,7 +7,7 @@ package rich
 import (
 	"strings"
 
-	"github.com/go-text/typesetting/language"
+	"github.com/cogentcore/typesetting/language"
 )
 
 func init() {

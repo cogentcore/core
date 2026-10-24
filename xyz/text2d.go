@@ -7,7 +7,6 @@ package xyz
 import (
 	"fmt"
 
-	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/phong"
@@ -135,7 +134,7 @@ func (txt *Text2D) RenderText() {
 		pc.Clear()
 	}
 	pc.DrawText(txt.textRender, txt.TextPos)
-	img := imagex.AsRGBA(paint.RenderToImage(pc))
+	img := renderTextImage(pc)
 	var tx Texture
 	var err error
 	if txt.Material.Texture == nil {

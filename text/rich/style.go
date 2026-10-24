@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"github.com/go-text/typesetting/di"
+	"github.com/cogentcore/typesetting/di"
 )
 
 //go:generate core generate
 
 // IMPORTANT: enums must remain in sync with
-// "github.com/go-text/typesetting/font"
+// "github.com/cogentcore/typesetting/font"
 // and props.go must be updated as needed.
 
 // Style contains all of the rich text styling properties, that apply to one
@@ -279,7 +279,7 @@ func (s Stretch) ToFloat32() float32 {
 
 // Decorations are underline, line-through, etc, as bit flags
 // that must be set using [Font.SetDecoration].
-type Decorations int64 //enums:bitflag -transform kebab
+type Decorations int32 //enums:bitflag -transform kebab
 
 const (
 	// Underline indicates to place a line below text.

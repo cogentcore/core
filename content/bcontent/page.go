@@ -92,9 +92,9 @@ type Page struct {
 	Specials map[string][]string
 }
 
-// PreRenderPage contains the data for each page printed in JSON by a content app
-// run with the generatehtml tag, which is then handled by the core
-// build tool.
+// PreRenderPage contains the data for each page in the [Site] printed in JSON
+// by a content app run with the -generatehtml argument, which is then handled
+// by the core build tool.
 type PreRenderPage struct {
 	Page
 
@@ -103,6 +103,9 @@ type PreRenderPage struct {
 
 	// HTML is the pre-rendered HTML for the page.
 	HTML string
+
+	// TOC is the table of contents for the page.
+	TOC []*TOCHeading `json:",omitempty"`
 }
 
 // NewPage makes a new page in the given filesystem with the given filename,

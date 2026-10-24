@@ -50,7 +50,7 @@ func (cu *Cursor) Set(cursor enums.Enum) error {
 
 	// If the cursorimg cache got cleared (probably due to a theme change),
 	// we have to clear our cache as well.
-	if len(cursorimg.Cursors) == 0 {
+	if cursorimg.NumCached() == 0 {
 		clear(cu.cursors)
 		cu.prevSize = 0
 	}

@@ -11,6 +11,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/text/shaped/shapers/shapedjs"
 )
 
 func init() {
@@ -30,14 +31,17 @@ func init() {
 		os.Exit(1)
 	}
 
+	// The browser calls this outside of the event loop, so the snackbar
+	// is made in the event loop of the window, with its lock.
 	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
-		NewBody("web-update-available").
-			AddSnackbarText("A new version is available").
-			AddSnackbarButton("Reload", func(e events.Event) {
-				js.Global().Get("location").Call("reload")
-			}).NewSnackbar(nil).SetTimeout(0).Run()
+		runInCurrentWindow(webUpdateSnackbar)
 		return nil
 	}))
+
+	// Texts laid out before their web fonts have loaded are measured with
+	// fallback fonts. The text shaper discards those measurements when the
+	// fonts finish loading, and all windows are then restyled and laid out again.
+	shapedjs.FontsChanged = restyleAll
 
 	webInstall = func() {
 		js.Global().Call("appShowInstallPrompt")
@@ -49,4 +53,14 @@ func init() {
 		webCanInstall = js.Global().Call("appIsAppInstallable").Bool()
 		return nil
 	}))
+}
+
+// webUpdateSnackbar shows a snackbar saying that a new version of the app
+// is available, with a button to reload the page.
+func webUpdateSnackbar() {
+	NewBody("web-update-available").
+		AddSnackbarText("A new version is available").
+		AddSnackbarButton("Reload", func(e events.Event) {
+			js.Global().Get("location").Call("reload")
+		}).NewSnackbar(nil).SetTimeout(0).Run()
 }

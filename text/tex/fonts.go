@@ -17,6 +17,8 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/text/fonts"
+	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/font/opentype"
 	"github.com/go-fonts/latin-modern/lmmath"
 	"github.com/go-fonts/latin-modern/lmmono10italic"
 	"github.com/go-fonts/latin-modern/lmmono10regular"
@@ -69,8 +71,6 @@ import (
 	"github.com/go-fonts/latin-modern/lmsansdemicond10regular"
 	"github.com/go-fonts/latin-modern/lmsansquot8oblique"
 	"github.com/go-fonts/latin-modern/lmsansquot8regular"
-	"github.com/go-text/typesetting/font"
-	"github.com/go-text/typesetting/font/opentype"
 )
 
 const mmPerPt = 25.4 / 72.0

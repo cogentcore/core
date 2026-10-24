@@ -62,6 +62,14 @@ func setCurrentRenderWindow(w *renderWindow) {
 	renderWindowGlobalMu.Unlock()
 }
 
+// getCurrentRenderWindow returns [currentRenderWindow] under its mutex, as
+// the event loop of a window that is closed sets it to another window.
+func getCurrentRenderWindow() *renderWindow {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	return currentRenderWindow
+}
+
 // renderWindow provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
 //
@@ -92,16 +100,27 @@ type renderWindow struct {
 	// The [RenderContext] in this manager is the original source for all Stages.
 	mains stages
 
-	// noEventsChan is a channel on which a signal is sent when there are
-	// no events left in the window [events.Deque]. It is used internally
-	// for event handling in tests.
+	// noEventsChan is a channel that the event loop closes after it
+	// handles an event when there are no events left in the window
+	// [events.Deque]. It is used internally for event handling in tests
+	// (see [Body.waitNoEvents]). It is protected by noEventsMu.
 	noEventsChan chan struct{}
+
+	// noEventsMu protects noEventsChan, which is set by the test
+	// goroutine and closed by the event loop.
+	noEventsMu sync.Mutex
+
+	// resizeMu serializes the resizes of the window by the goroutines of
+	// [Scene.ResizeToContent], so that they are applied in order.
+	resizeMu sync.Mutex
 
 	// flags are atomic renderWindow flags.
 	flags renderWindowFlags
 
-	// lastResize is the time stamp of last resize event -- used for efficient updating.
-	lastResize time.Time
+	// lastResize is the time stamp of the last render after a resize event,
+	// in Unix nanoseconds, used for efficient updating. It is atomic, as it
+	// is read before the render context is locked.
+	lastResize atomic.Int64
 
 	lastSpriteDraw time.Time
 
@@ -308,10 +327,9 @@ func (w *renderWindow) resized() {
 			fmt.Printf("Win: %v same-size resized: %v newDPI: %v\n", w.name, curRg, newDPI)
 		}
 		if w.mains.resize(rg) || newDPI {
+			// The scenes are restyled by their next update.
 			for _, kv := range w.mains.stack.Order {
-				st := kv.Value
-				sc := st.Scene
-				sc.applyStyleScene()
+				kv.Value.Scene.lastRender.invalidate()
 			}
 		}
 		return
@@ -371,8 +389,7 @@ func (w *renderWindow) closed() {
 	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.name)
 	}
-	if len(AllRenderWindows) > 0 {
-		pfw := AllRenderWindows[len(AllRenderWindows)-1]
+	if pfw := AllRenderWindows.last(); pfw != nil {
 		if DebugSettings.WindowEventTrace {
 			fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.name, w.name)
 		}
@@ -428,9 +445,7 @@ func (w *renderWindow) eventLoop() {
 			break
 		}
 		w.handleEvent(e)
-		if w.noEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
-			w.noEventsChan <- struct{}{}
-		}
+		w.signalNoEvents(d)
 	}
 	if DebugSettings.WindowEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.name)
@@ -438,6 +453,19 @@ func (w *renderWindow) eventLoop() {
 	windowWait.Done()
 	// our last act must be self destruction!
 	w.mains.deleteAll()
+}
+
+// signalNoEvents closes [renderWindow.noEventsChan], if a test waits on it,
+// when there are no events left in the given deque. It is closed instead of
+// sent on, so that the event loop never blocks on it.
+func (w *renderWindow) signalNoEvents(d *events.Deque) {
+	w.noEventsMu.Lock()
+	defer w.noEventsMu.Unlock()
+	if w.noEventsChan == nil || d.Len() > 0 {
+		return
+	}
+	close(w.noEventsChan)
+	w.noEventsChan = nil
 }
 
 // handleEvent processes given events.Event.
@@ -462,6 +490,13 @@ func (w *renderWindow) handleEvent(e events.Event) {
 		w.handleWindowEvents(e)
 		rc.Unlock()
 		return
+	}
+	if ce, ok := e.(*events.CustomEvent); ok {
+		if f, ok := ce.Data.(windowFunc); ok { // from [WidgetBase.runInWindow]
+			f()
+			rc.Unlock()
+			return
+		}
 	}
 	if DebugSettings.EventTrace && (!w.isVisible() || w.SystemWindow.Is(system.Minimized)) {
 		log.Println("got event while invisible:", e)
@@ -522,10 +557,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		case events.WinFocus:
 			// if we are not already the last in AllRenderWins, we go there,
 			// as this allows focus to be restored to us in the future
-			if len(AllRenderWindows) > 0 && AllRenderWindows[len(AllRenderWindows)-1] != w {
-				AllRenderWindows.delete(w)
-				AllRenderWindows.add(w)
-			}
+			AllRenderWindows.moveToEnd(w)
 			if !w.flags.HasFlag(winGotFocus) {
 				w.flags.SetFlag(true, winGotFocus)
 				w.sendWinFocusEvent(events.WinFocus)
@@ -582,6 +614,12 @@ func (rp *renderParams) needsRestyle(rc *renderContext) bool {
 	return rp.logicalDPI != rc.logicalDPI || rp.geom != rc.geom
 }
 
+// invalidate makes [renderParams.needsRestyle] return true until the next
+// [renderParams.saveRender], so that the scene is restyled by its next update.
+func (rp *renderParams) invalidate() {
+	rp.logicalDPI = -1 // never a valid DPI
+}
+
 // saveRender grabs current render context params
 func (rp *renderParams) saveRender(rc *renderContext) {
 	rp.logicalDPI = rc.logicalDPI
@@ -606,6 +644,10 @@ type renderContext struct {
 
 	// rebuild is whether to force a rebuild of all Scene elements.
 	rebuild bool
+
+	// restyle is whether to restyle and lay out all Scenes, as when the
+	// fonts that texts are measured with have changed.
+	restyle bool
 
 	// TextShaper is the text shaping system for the render context,
 	// for doing text layout.
@@ -664,7 +706,7 @@ func (w *renderWindow) renderWindow() {
 
 	offscreen := TheApp.Platform() == system.Offscreen
 
-	sinceResize := time.Since(w.lastResize)
+	sinceResize := time.Since(time.Unix(0, w.lastResize.Load()))
 	if !offscreen && sinceResize < 100*time.Millisecond {
 		// get many rapid updates during resizing, so just rerender last one if so.
 		// this works best in practice after a lot of experimentation.
@@ -677,6 +719,7 @@ func (w *renderWindow) renderWindow() {
 	rc.Lock()
 	defer func() {
 		rc.rebuild = false
+		rc.restyle = false
 		rc.Unlock()
 	}()
 	rebuild := rc.rebuild
@@ -777,7 +820,7 @@ func (w *renderWindow) renderWindow() {
 		atomic.AddInt32(&w.winRenderCounter, 1)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
-			w.lastResize = time.Now()
+			w.lastResize.Store(time.Now().UnixNano())
 		}
 		w.flags.SetFlag(false, winResize)
 	} else {
@@ -814,7 +857,7 @@ func (sc *Scene) RenderSource(op draw.Op) composer.Source {
 
 // renderWindowFlags are atomic bit flags for [renderWindow] state.
 // They must be atomic to prevent race conditions.
-type renderWindowFlags int64 //enums:bitflag -trim-prefix win
+type renderWindowFlags int32 //enums:bitflag -atomic -trim-prefix win
 
 const (
 	// winResize indicates that the window was just resized.

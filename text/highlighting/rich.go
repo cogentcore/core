@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/runes"
 	"cogentcore.org/core/text/textpos"
-	"cogentcore.org/core/text/token"
 )
 
 // MarkupLineRich returns the [rich.Text] styled line for each tag.
@@ -28,6 +27,10 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 	if sz == 0 {
 		return nil
 	}
+	// The markup is often done in a background goroutine (see
+	// lines.Lines), while the theme colors can be updated.
+	themeMu.RLock()
+	defer themeMu.RUnlock()
 
 	ttags := lexer.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	// fmt.Println(ttags)
@@ -73,11 +76,9 @@ func MarkupLineRich(hs *Style, sty *rich.Style, txt []rune, hitags, tags lexer.L
 			entry := hs.Tag(tr.Token.Token)
 			if !entry.IsZero() {
 				entry.ToRichStyle(&cst)
-			} else {
-				if tr.Token.Token == token.TextSpellErr {
-					cst.SetDecoration(rich.DottedUnderline)
-					// fmt.Println(i, tr)
-				}
+			}
+			if tp, ok := Properties[tr.Token.Token]; ok {
+				applyPropertyDecorations(&cst, tp)
 			}
 		}
 		tx.SetSpanStyle(si, &cst)
@@ -136,4 +137,24 @@ func MarkupPathsAsLinks(txt []rune, mu rich.Text, maxFields int) rich.Text {
 	// 	panic("markup is not the same: " + string(txt) + " mu: " + string(mu.Join()))
 	// }
 	return mu
+}
+
+// applyPropertyDecorations applies the text-decoration flags from the
+// custom tag fallback [Properties] (for tags without explicit style
+// entries, such as TextSpellErr and Error) to the given rich style.
+func applyPropertyDecorations(cst *rich.Style, pr map[string]any) {
+	var bits uint32
+	switch dec := pr["text-decoration"].(type) {
+	case uint32:
+		bits = dec
+	case int:
+		bits = uint32(dec)
+	default:
+		return
+	}
+	for d := rich.Underline; d <= rich.ParagraphStart; d++ {
+		if bits&(1<<uint32(d)) != 0 {
+			cst.SetDecoration(d)
+		}
+	}
 }

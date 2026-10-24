@@ -227,7 +227,12 @@ func (sc *Scene) SetSize(sz image.Point) *Scene {
 	return sc
 }
 
+// Destroy releases the GPU resources of the scene. It locks the scene,
+// so that its textures are not destroyed while a frame that uses them is
+// being rendered.
 func (sc *Scene) Destroy() {
+	sc.Lock()
+	defer sc.Unlock()
 	if sc.Phong != nil {
 		sc.Phong.Release()
 		sc.Phong = nil

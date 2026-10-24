@@ -6,7 +6,9 @@ package enumgen
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"cogentcore.org/core/cli"
@@ -19,8 +21,12 @@ func TestGenerate(t *testing.T) {
 	c := &Config{}
 	assert.NoError(t, cli.SetFromDefaults(c))
 	c.Dir = "./testdata"
+	// write to a temporary file so that the test never changes testdata/enumgen.go,
+	// whose header records the command line of the test binary
+	output := filepath.Join(t.TempDir(), "enumgen.go")
+	c.Output = output
 	assert.NoError(t, Generate(c))
-	have, err := os.ReadFile("testdata/enumgen.go")
+	have, err := os.ReadFile(output)
 	assert.NoError(t, err)
 	want, err := os.ReadFile("testdata/enumgen.golden")
 	assert.NoError(t, err)
@@ -28,7 +34,7 @@ func TestGenerate(t *testing.T) {
 	// that can change based on where go test is run.
 	_, shave, got := strings.Cut(string(have), "\n")
 	if !got {
-		t.Errorf("expected string with newline in testdata/enumgen.go, but got %q", have)
+		t.Errorf("expected string with newline in the generated file, but got %q", have)
 	}
 	_, swant, got := strings.Cut(string(want), "\n")
 	if !got {
@@ -36,7 +42,16 @@ func TestGenerate(t *testing.T) {
 	}
 	swant = strings.ReplaceAll(swant, "\r\n", "\n")
 	if shave != swant {
-		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare ./testdata/enumgen.go and ./testdata/enumgen.golden to see the difference)")
+		t.Errorf("expected generated file and expected file to be the same after the first line, but they are not (compare the generated file and ./testdata/enumgen.golden to see the difference)")
+	}
+}
+
+func TestGenerateErrors(t *testing.T) {
+	for _, dir := range []string{"badatomic", "badbits"} {
+		c := &Config{}
+		assert.NoError(t, cli.SetFromDefaults(c))
+		c.Dir = "./testdata/" + dir
+		assert.Error(t, Generate(c), dir)
 	}
 }
 
@@ -155,4 +170,38 @@ func TestMoreLanguagesValuesGlobal(t *testing.T) {
 	}
 	have := testdata.MoreLanguagesN.Values()
 	assert.Equal(t, want, have)
+}
+
+func TestToppingsFlags(t *testing.T) {
+	var val testdata.Toppings
+	val.SetFlag(true, testdata.Mozzarella, testdata.Basil, testdata.Olives)
+	assert.Equal(t, "Mozzarella|Olives|Basil", val.String())
+	assert.True(t, val.HasFlag(testdata.Basil))
+	assert.False(t, val.HasFlag(testdata.Onions))
+	val.SetFlag(false, testdata.Basil, testdata.Mozzarella)
+	assert.Equal(t, testdata.Toppings(1<<testdata.Olives), val)
+	assert.NoError(t, val.SetString("Pineapple|Basil"))
+	assert.True(t, val.HasFlag(testdata.Basil))
+	assert.Equal(t, "Pineapple|Basil", val.String())
+}
+
+func TestStatesAtomic(t *testing.T) {
+	// Each goroutine repeatedly sets and clears its own flag; with atomic
+	// operations, no change to one flag can be lost by a change to another.
+	flags := []testdata.States{testdata.Enabled, testdata.Focused, testdata.Hovered, testdata.Selected}
+	var val testdata.States
+	var wg sync.WaitGroup
+	for _, f := range flags {
+		wg.Go(func() {
+			for range 1000 {
+				val.SetFlag(true, f)
+				val.SetFlag(false, f)
+			}
+			val.SetFlag(true, f)
+		})
+	}
+	wg.Wait()
+	for _, f := range flags {
+		assert.True(t, val.HasFlag(f), f.BitIndexString())
+	}
 }

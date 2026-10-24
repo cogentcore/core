@@ -116,10 +116,19 @@ func (tb *Toolbar) allItemsToChildren() {
 	tb.allItemsPlan = &tree.Plan{}
 	tb.Make(tb.allItemsPlan)
 	np := len(tb.allItemsPlan.Children)
-	if tb.NumChildren() != np {
-		tb.Scene.RenderWidget()
-		tb.Update() // todo: needs one more redraw here
+	if tb.NumChildren() == np {
+		return
 	}
+	// Remake the items that the last layout moved to the overflow menu,
+	// and update and style them so that they are ready for SizeUp.
+	// This is like [WidgetBase.Update], but without requesting another
+	// layout, as we are already in one; nothing must be rendered here,
+	// as the geometry of the scene is only partly computed.
+	tb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		cwb.UpdateWidget()
+		cw.Style()
+		return tree.Continue
+	})
 }
 
 func (tb *Toolbar) parentSize() float32 {

@@ -6,6 +6,6 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/base/num/num"] = map[string]reflect.Value{}
-}
+})

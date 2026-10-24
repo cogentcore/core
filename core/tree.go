@@ -500,6 +500,11 @@ func (tr *Tree) OnAdd() {
 	tr.WidgetBase.OnAdd()
 	tr.Text = tr.Name
 	if ptv := AsTree(tr.Parent); ptv != nil {
+		if ptv.Root == nil {
+			// The parent is the root of a tree that has not been added
+			// anywhere yet, such as the result of [tree.NodeBase.Clone].
+			ptv.Root = ptv.This.(Treer)
+		}
 		tr.Root = ptv.Root
 		tr.IconOpen = ptv.IconOpen
 		tr.IconClosed = ptv.IconClosed
@@ -509,9 +514,23 @@ func (tr *Tree) OnAdd() {
 			tr.Root = tr.This.(Treer)
 		}
 	}
+	// A subtree added as a whole (for example, a duplicate or a moved node)
+	// already has children, whose roots must now be the new root.
+	tr.setDescendantRoots(tr.Root)
 	troot := tr.Root.AsCoreTree()
 	if troot.TreeInit != nil {
 		troot.TreeInit(tr)
+	}
+}
+
+// setDescendantRoots sets the [Tree.Root] of all descendant tree
+// nodes of this node to the given root.
+func (tr *Tree) setDescendantRoots(root Treer) {
+	for _, c := range tr.Children {
+		if ct := AsTree(c); ct != nil {
+			ct.Root = root
+			ct.setDescendantRoots(root)
+		}
 	}
 }
 
@@ -613,7 +632,14 @@ func (tr *Tree) Position() {
 	rn := tr.Root.AsCoreTree()
 	tr.setBranchState()
 	sz := &tr.Geom.Size
-	sz.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
+	// A node extends to the right edge of the root, so it is as wide as its
+	// parent node minus its offset from the parent (its indent within the
+	// content of the parent). The scene positions of the nodes can not be
+	// used for this, as they are only set after this, in ApplyScenePos,
+	// and they are not set yet for new nodes.
+	if ptr := AsTree(tr.Parent); ptr != nil && tr != rn {
+		sz.Actual.Total.X = ptr.widgetSize.X - (ptr.Geom.contentOffset.X + tr.Geom.RelPos.X)
+	}
 	sz.Actual.Content.X = sz.Actual.Total.X - sz.Space.X
 	tr.widgetSize.X = sz.Actual.Total.X
 	sz.Alloc = sz.Actual

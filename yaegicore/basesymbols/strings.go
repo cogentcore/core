@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["strings/strings"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Clone":          reflect.ValueOf(strings.Clone),
@@ -76,4 +76,4 @@ func init() {
 		"Reader":   reflect.ValueOf((*strings.Reader)(nil)),
 		"Replacer": reflect.ValueOf((*strings.Replacer)(nil)),
 	}
-}
+})

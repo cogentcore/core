@@ -66,6 +66,13 @@ func (q *Deque) NextEvent() Event {
 	}
 }
 
+// Len returns the number of events in the deque.
+func (q *Deque) Len() int {
+	q.LockAndInit()
+	defer q.Mu.Unlock()
+	return len(q.Front) + len(q.Back)
+}
+
 // PollEvent returns the next event in the deque if available,
 // and returns true.
 // If none are available, it returns false immediately.

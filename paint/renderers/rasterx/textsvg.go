@@ -16,7 +16,7 @@ import (
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/shaping"
 )
 
 var svgGlyphCache map[glyphKey]image.Image

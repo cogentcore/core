@@ -19,7 +19,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["cogentcore.org/core/core/core"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AddAppSettings":                reflect.ValueOf(core.AddAppSettings),
@@ -389,7 +389,7 @@ func init() {
 		"_Valuer":            reflect.ValueOf((*_cogentcore_org_core_core_Valuer)(nil)),
 		"_Widget":            reflect.ValueOf((*_cogentcore_org_core_core_Widget)(nil)),
 	}
-}
+})
 
 // _cogentcore_org_core_core_ButtonEmbedder is an interface wrapper for ButtonEmbedder type
 type _cogentcore_org_core_core_ButtonEmbedder struct {

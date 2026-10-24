@@ -228,7 +228,7 @@ type Window interface {
 
 // WindowFlags contains all the binary properties of a window -- by default
 // with no other relevant flags a window is a main top-level window.
-type WindowFlags int64 //enums:bitflag
+type WindowFlags int32 //enums:bitflag -atomic
 
 const (
 	// Dialog indicates that this is a temporary, pop-up window.

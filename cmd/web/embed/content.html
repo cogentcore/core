@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}" data-base-path="{{.BasePath}}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="{{.Author}}">
+    <meta name="description" content="{{.Description}}">
+    <meta name="keywords" content="{{.Keywords}}">
+    {{- if .Wasm}}
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
+    {{- else}}
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    {{- end}}
+    <meta property="og:title" content="{{.Title}}">
+    <meta property="og:description" content="{{.Description}}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{.BasePath}}icons/512.png">
+    <meta property="og:site_name" content="{{.SiteName}}">
+    <title>{{.Title}}</title>
+    {{- if .VanityURL}}
+    <meta name="go-import" content="{{.VanityURL}} git https://github.com/{{.GithubVanityRepository}}">
+    <meta name="go-source"
+        content="{{.VanityURL}} https://github.com/{{.GithubVanityRepository}} https://github.com/{{.GithubVanityRepository}}/tree/master{/dir} https://github.com/{{.GithubVanityRepository}}/blob/master{/dir}/{file}#L{line}">
+    {{- end}}
+    <link rel="icon" href="{{.BasePath}}icons/32.png" type="image/png">
+    <link rel="icon" href="{{.BasePath}}icons/svg.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{.BasePath}}icons/192.png">
+    {{- if .Wasm}}
+    <link rel="manifest" href="{{.BasePath}}manifest.webmanifest">
+    {{- if .JS}}
+    <script>
+        // We start loading the app now, unless app.js will not load it (see appCanLoadWebAssembly).
+        if (!/bot|googlebot|crawler|spider|robot|crawling/i.test(navigator.userAgent) && new URLSearchParams(location.search).get("wasm") !== "false") {
+            const preload = document.createElement("link");
+            preload.rel = "modulepreload";
+            preload.href = "{{.BasePath}}app.gs.js";
+            document.head.appendChild(preload);
+        }
+    </script>
+    {{- end}}
+    {{- end}}
+    {{- if .FontText}}
+    <meta name="cogentcore-font-text" content="{{.FontText}}">
+    {{- end}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <link rel="stylesheet" href="{{.BasePath}}content.css">
+    {{- range $url := .Styles}}
+    <link rel="stylesheet" href="{{$url}}">
+    {{- end}}
+    <script defer src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script defer src="{{.BasePath}}nav.js"></script>
+    <script defer src="{{.BasePath}}content.js"></script>
+    {{- if .Wasm}}
+    {{- if not .JS}}
+    <script defer src="{{.BasePath}}wasm_exec.js"></script>
+    {{- end}}
+    <script defer src="{{.BasePath}}app.js"></script>
+    {{- end}}
+</head>
+
+<body{{if .Wasm}} role="application"{{end}}>
+    {{- if .Wasm}}
+    <input id="app-text-field" type="text">
+    {{- end}}
+    <!-- When loading the wasm app, this is the preview that is removed once the app renders. -->
+    <div class="cc-site"{{if .Wasm}} id="app-wasm-loader"{{end}}>
+        <header class="cc-toolbar">
+            <button id="cc-menu" class="cc-icon-button" type="button" title="Navigate pages and headings" aria-label="Navigate pages and headings" aria-controls="cc-nav" aria-expanded="false">
+                <svg viewBox="0 -960 960 960"><path d="M120-240v-60h720v60H120Zm0-210v-60h720v60H120Zm0-210v-60h720v60H120Z"/></svg>
+            </button>
+            <a class="cc-icon-button" href="{{.HomeURL}}" title="Home" aria-label="Home"><img src="{{.BasePath}}icons/svg.svg" alt=""></a>
+            <div id="cc-search"></div>
+            {{- if .Wasm}}
+            <div class="cc-loading" title="Loading the app">
+                <progress id="app-wasm-loader-progress" value="0"></progress>
+                <span id="app-wasm-loader-label">0%</span>
+            </div>
+            {{- end}}
+        </header>
+        <div class="cc-main">
+            <nav id="cc-nav" class="cc-nav" aria-label="Pages and headings">{{.NavHTML}}</nav>
+            <div id="cc-splitter" class="cc-splitter" role="separator" aria-orientation="vertical"><div></div></div>
+            <main id="cc-page" class="cc-page">{{.PageHTML}}</main>
+        </div>
+    </div>
+    <script>window.ccPage = {{.PageJSON}};</script>
+</body>
+
+</html>

@@ -57,4 +57,9 @@ type Config struct { //types:add
 
 	// generate gosl:start and gosl:end tags around generated N values.
 	Gosl bool
+
+	// whether to generate atomic HasFlag and SetFlag methods for bit flag types,
+	// which is needed for bit flags that are set and read from multiple goroutines.
+	// Atomic bit flags must be of type int32 or int64.
+	Atomic bool
 }

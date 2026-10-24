@@ -14,7 +14,11 @@ import (
 )
 
 func expect(t *testing.T, ref, val float32) {
-	if math32.Abs(ref-val) > 0.001 {
+	expectTol(t, ref, val, 0.001)
+}
+
+func expectTol(t *testing.T, ref, val, tol float32) {
+	if math32.Abs(ref-val) > tol {
 		t.Errorf("expected value: %g != %g\n", ref, val)
 	}
 }
@@ -47,7 +51,9 @@ func TestView(t *testing.T) {
 
 func TestCAM(t *testing.T) {
 	camw := FromSRGB(1, 1, 1)
-	expect(t, 209.492, camw.Hue)
+	// The hue of white depends on the platform (such as on the web, with a
+	// different math.Pow), as its opponent values are close to 0.
+	expectTol(t, 209.492, camw.Hue, 0.002)
 	expect(t, 2.869, camw.Chroma)
 	expect(t, 100, camw.Lightness)
 	expect(t, 2.265, camw.Colorfulness)

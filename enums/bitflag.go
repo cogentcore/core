@@ -11,7 +11,8 @@ package enums
 // that standard enums do, and additionally can check if they
 // have a given bit flag. Note that HasFlag is defined on
 // [BitFlagSetter] since it requires a pointer receiver for
-// atomic operations to prevent race conditions.
+// the atomic operations of bit flags with the -atomic flag,
+// which prevent race conditions.
 type BitFlag interface {
 	Enum
 

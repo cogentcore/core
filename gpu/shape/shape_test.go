@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,10 +30,15 @@ func printData(md *MeshData) {
 	fmt.Println("idx :=", goslice(md.Index))
 }
 
+// testData compares the mesh data with a small tolerance for floating point
+// values, as fused multiply-add (e.g., on arm64) changes the last bits.
 func testData(t *testing.T, md *MeshData, vtx, norm, tex math32.ArrayF32, idx math32.ArrayU32) {
-	assert.Equal(t, vtx, md.Vertex)
-	assert.Equal(t, norm, md.Normal)
-	assert.Equal(t, tex, md.TexCoord)
+	assert.Equal(t, len(vtx), len(md.Vertex))
+	assert.Equal(t, len(norm), len(md.Normal))
+	assert.Equal(t, len(tex), len(md.TexCoord))
+	tolassert.EqualTolSlice(t, vtx, md.Vertex, 1.0e-5)
+	tolassert.EqualTolSlice(t, norm, md.Normal, 1.0e-5)
+	tolassert.EqualTolSlice(t, tex, md.TexCoord, 1.0e-5)
 	assert.Equal(t, idx, md.Index)
 }
 

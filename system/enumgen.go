@@ -3,6 +3,8 @@
 package system
 
 import (
+	"sync/atomic"
+
 	"cogentcore.org/core/enums"
 )
 
@@ -138,10 +140,33 @@ func WindowFlagsValues() []WindowFlags { return _WindowFlagsValues }
 func (i WindowFlags) Values() []enums.Enum { return enums.Values(_WindowFlagsValues) }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i *WindowFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(i), f) }
+func (i *WindowFlags) HasFlag(f enums.BitFlag) bool {
+	if enums.FlagTypeAssert {
+		if b, ok := f.(WindowFlags); ok {
+			return atomic.LoadInt32((*int32)(i))&(1<<uint32(b)) != 0
+		}
+	}
+	return atomic.LoadInt32((*int32)(i))&(1<<uint32(f.Int64())) != 0
+}
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int32
+	for _, v := range f {
+		if enums.FlagTypeAssert {
+			if b, ok := v.(WindowFlags); ok {
+				mask |= 1 << uint32(b)
+				continue
+			}
+		}
+		mask |= 1 << v.Int64()
+	}
+	if on {
+		atomic.OrInt32((*int32)(i), mask)
+	} else {
+		atomic.AndInt32((*int32)(i), ^mask)
+	}
+}
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (i WindowFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }

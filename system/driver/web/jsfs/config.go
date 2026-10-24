@@ -14,6 +14,20 @@ import (
 	"syscall/js"
 )
 
+// Global returns the fs global JavaScript object, creating it if it does
+// not exist. With wasm, it is provided by wasm_exec.js and used by the Go
+// runtime; with goscript, it is created here and used by goscript as the
+// host filesystem once it is configured with [Config].
+func Global() js.Value {
+	jfs := js.Global().Get("fs")
+	if !jfs.Truthy() {
+		jfs = js.Global().Get("Object").New()
+		jfs.Set("constants", js.Global().Get("Object").New())
+		js.Global().Set("fs", jfs)
+	}
+	return jfs
+}
+
 // Config configures the given JavaScript object to be a filesystem that implements
 // the Node.js fs API. It is the main entry point for code using jsfs. It returns
 // the resulting [FS], which should not typically be needed.

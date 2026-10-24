@@ -6,6 +6,7 @@ package gpu
 
 import (
 	"image"
+	"sync/atomic"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -28,10 +29,16 @@ type Texture struct {
 	// Needed for textures used as fragment shader inputs.
 	Sampler Sampler
 
-	// indicates that this texture is shared with some other
-	// resource, and therefore should not be released when done.
-	// Use SetShared method to set texture in this way.
+	// shared indicates that this texture is shared from another
+	// Texture, which owns it (see [Texture.SetShared]).
 	shared bool
+
+	// holders counts the Textures that hold the current texture and view,
+	// when it has been shared (see [Texture.SetShared]): the owner and each
+	// sharer hold the same counter. The last one to let go of it destroys
+	// and releases it (see [Texture.ReleaseTexture]). It is nil when the
+	// texture has not been shared, so the owner alone holds it.
+	holders *atomic.Int32
 
 	// WebGPU texture handle, in device memory
 	texture *wgpu.Texture `display:"-"`
@@ -81,7 +88,9 @@ func (tx *Texture) SetFromGoImage(img image.Image, layer int) error {
 
 	nfmt := TextureFormat{Size: sz, Format: wgpu.TextureFormatRGBA8UnormSrgb, Layers: 1, Samples: 1}
 
-	if tx.texture == nil || tx.Format != nfmt {
+	// A shared texture belongs to another Texture: we make our own
+	// instead of writing into it.
+	if tx.texture == nil || tx.shared || tx.Format != nfmt {
 		tx.Format = nfmt
 		err := tx.CreateTexture(wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst)
 		if err != nil { // already logged
@@ -179,38 +188,70 @@ func (tx *Texture) ConfigMulti(dev *Device, imgFmt *TextureFormat) error {
 }
 
 // SetShared sets this texture to point to the given Texture's
-// underlying GPU texture, with the shared flag set so that
-// it will not be released.
+// underlying GPU texture and view, with the shared flag set.
+// Both Textures hold the texture until they let go of it, by
+// [Texture.ReleaseTexture] or by getting another one, and it is
+// destroyed by the last of them. Thus, the owner can replace its
+// texture (for example on a resize) while the sharer still uses the
+// old one in its bind group, and the old texture is destroyed when
+// the sharer gets the new one, before its next submit.
 func (tx *Texture) SetShared(ot *Texture) {
+	if tx.shared && tx.texture == ot.texture && tx.view == ot.view {
+		return
+	}
 	tx.ReleaseTexture()
+	if ot.texture == nil {
+		return
+	}
+	if ot.holders == nil {
+		ot.holders = &atomic.Int32{}
+		ot.holders.Store(1)
+	}
+	ot.holders.Add(1)
+	tx.holders = ot.holders
 	tx.texture = ot.texture
 	tx.view = ot.view
 	tx.shared = true
 	tx.Format = ot.Format
 }
 
-// ReleaseView destroys any existing view
+// ReleaseView releases the view, if we are the last holder of it.
+// The texture is not released: see [Texture.ReleaseTexture].
 func (tx *Texture) ReleaseView() {
 	if tx.view == nil {
 		return
 	}
-	if !tx.shared {
+	if tx.holders == nil {
 		tx.view.Release()
 	}
 	tx.view = nil
 }
 
-// ReleaseTexture frees device memory version of texture that we own
+// ReleaseTexture lets go of the texture and its view, and frees them if
+// no other Texture holds them (see [Texture.SetShared]). The texture is
+// destroyed, which frees its memory right away instead of when it is
+// garbage collected, as on the web, where Release does nothing, or when
+// its last reference is released. WebGPU destroys it only after the work
+// already submitted, but it must not be used in any new submit, so a
+// bind group that uses it must be remade first: a texture [Value] has a
+// new bind group made when its view changes.
 func (tx *Texture) ReleaseTexture() {
-	tx.ReleaseView()
-	if tx.texture == nil {
+	view, texture := tx.view, tx.texture
+	last := tx.holders == nil || tx.holders.Add(-1) == 0
+	tx.view = nil
+	tx.texture = nil
+	tx.holders = nil
+	tx.shared = false
+	if !last {
 		return
 	}
-	if !tx.shared {
-		tx.texture.Release()
+	if view != nil {
+		view.Release()
 	}
-	tx.shared = false
-	tx.texture = nil
+	if texture != nil {
+		texture.Destroy()
+		texture.Release()
+	}
 }
 
 // Release destroys any existing view, nils fields

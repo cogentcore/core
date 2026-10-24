@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"slices"
+	"sync/atomic"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -92,6 +93,11 @@ type Scene struct { //core:no-new
 	// source renderer for rendering the scene
 	Renderer render.Renderer `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
+	// sizingSize is the size, in dots, that the scene of a new window is
+	// expected to have, which determines its [SizeClasses] while it is sized
+	// to its content (see [WidgetBase.SceneSize]).
+	sizingSize image.Point
+
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
 	lastRender renderParams
@@ -107,23 +113,27 @@ type Scene struct { //core:no-new
 	// this is our own text shaper in case we don't have a render context
 	textShaper shaped.Shaper
 
-	// flags are atomic bit flags for [Scene] state.
+	// hasShown is whether this scene has been shown.
+	// This is used to ensure that [events.Show] is only sent once.
+	// It is atomic, unlike the flags, as [WidgetBase.AsyncLock]
+	// reads it before it has the lock, when the scene has no
+	// render context.
+	hasShown atomic.Bool
+
+	// flags are bit flags for [Scene] state. They are only accessed
+	// in the event loop or with the lock of the render context, as
+	// with [WidgetBase.AsyncLock].
 	flags sceneFlags
 }
 
-// sceneFlags are atomic bit flags for [Scene] state.
-// They must be atomic to prevent race conditions.
-type sceneFlags int64 //enums:bitflag -trim-prefix scene
+// sceneFlags are bit flags for [Scene] state.
+type sceneFlags int32 //enums:bitflag -trim-prefix scene
 
 const (
-	// sceneHasShown is whether this scene has been shown.
-	// This is used to ensure that [events.Show] is only sent once.
-	sceneHasShown sceneFlags = iota
-
 	// sceneUpdating means the Scene is in the process of sceneUpdating.
 	// It is set for any kind of tree-level update.
 	// Skip any further update passes until it goes off.
-	sceneUpdating
+	sceneUpdating sceneFlags = iota
 
 	// sceneNeedsRender is whether anything in the Scene needs to be re-rendered
 	// (but not necessarily the whole scene itself).
@@ -149,7 +159,7 @@ const (
 
 // hasFlag returns whether the given flag is set.
 func (sc *Scene) hasFlag(f sceneFlags) bool {
-	return sc.flags.HasFlag(f)
+	return sc.flags&(1<<uint32(f)) != 0
 }
 
 // setFlag sets the given flags to the given value.
@@ -207,7 +217,7 @@ func (sc *Scene) Init() {
 		s.Padding.Set(units.Dp(8))
 	})
 	sc.OnShow(func(e events.Event) {
-		currentRenderWindow.SetStageTitle(sc.Stage.Title)
+		getCurrentRenderWindow().SetStageTitle(sc.Stage.Title)
 	})
 	sc.OnClose(func(e events.Event) {
 		sm := sc.Stage.Mains
@@ -222,7 +232,7 @@ func (sc *Scene) Init() {
 		}
 		// the stage that will be visible next
 		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
-		currentRenderWindow.SetStageTitle(st.Title)
+		getCurrentRenderWindow().SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
 		if TheApp.Platform() == system.Offscreen {
@@ -248,7 +258,7 @@ func (sc *Scene) renderContext() *renderContext {
 	if sc.Stage == nil {
 		return nil
 	}
-	sm := sc.Stage.Mains
+	sm := sc.Stage.mains.Load()
 	if sm == nil {
 		return nil
 	}
@@ -281,7 +291,7 @@ func (sc *Scene) RenderWindow() *renderWindow {
 	if sc.Stage == nil {
 		return nil
 	}
-	sm := sc.Stage.Mains
+	sm := sc.Stage.mains.Load()
 	if sm == nil {
 		return nil
 	}
@@ -310,12 +320,16 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	}
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Renderer != nil {
+		// A renderer without an image (such as the HTML canvas renderer
+		// on the web) has the size of the scene it was last resized to.
 		img := sc.Renderer.Image()
 		if img != nil {
 			isz := img.Bounds().Size()
 			if isz == geom.Size {
 				return false
 			}
+		} else if _, rsz := sc.Renderer.Size(); rsz == sz && sc.SceneGeom.Size == geom.Size {
+			return false
 		}
 	} else {
 		sc.Renderer = paint.NewSourceRenderer(sz)
@@ -326,13 +340,18 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	sc.SceneGeom.Size = geom.Size // make sure
 
 	// sc.updateScene() // note: doing this every resize can be very expensive, and is unnec in general. really you just need a layout.
-	sc.applyStyleScene()
+	// The scene is restyled by its next update, before it is laid out, so
+	// that several resizes before an update, as when a window is shown,
+	// style it only once.
+	sc.lastRender.invalidate()
 	// restart the multi-render updating after resize, to get windows to update correctly while
 	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584),
 	// to get windows on Windows (OS) to update after a window snap (see
 	// https://github.com/cogentcore/core/issues/497),
 	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered
 	// on both iOS and Android in different contexts.
+	// It also lays the scene out a second time, which wraps texts to their
+	// new sizes (the first layout sizes them to their previous allocation).
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
 	sc.showIter = 0
 	sc.NeedsLayout()
@@ -353,9 +372,28 @@ func (sc *Scene) ResizeToContent(extra ...image.Point) {
 	if win == nil {
 		return
 	}
+	// The content is sized in a goroutine, as the caller typically holds
+	// the render context lock (for example in an event handler), which the
+	// goroutine needs, as the content sizing sets the layout state and
+	// flags of the scene and its widgets. The window is resized after it
+	// unlocks, as resizing can wait on the main thread, which can wait on
+	// the render context lock (as when closing a window).
+	rc := sc.renderContext()
+	if rc == nil {
+		return
+	}
 	go func() {
+		win.resizeMu.Lock()
+		defer win.resizeMu.Unlock()
+		rc.Lock()
+		// The scene can have been closed while we waited for the lock.
+		if sc.This == nil || sc.renderContext() != rc {
+			rc.Unlock()
+			return
+		}
 		scsz := system.TheApp.Screen(0).PixelSize
 		sz := sc.contentSize(scsz)
+		rc.Unlock()
 		if len(extra) == 1 {
 			sz = sz.Add(extra[0])
 		}

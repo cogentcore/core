@@ -15,7 +15,8 @@ import (
 	"cogentcore.org/core/text/shaped/shapers/shapedgt"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/shaping"
+	"golang.org/x/image/math/fixed"
 )
 
 var (
@@ -32,6 +33,10 @@ func initCanvas() {
 	canvas = js.Global().Get("OffscreenCanvas").New(1000, 100)
 	ctx = canvas.Call("getContext", "2d")
 	canvasInited = true
+
+	// Texts measured before their fonts load are measured with fallback
+	// fonts, so shapers discard them when fonts have loaded.
+	listenFontLoads()
 }
 
 // Shaper is the html canvas version of text shaping,
@@ -48,7 +53,14 @@ func NewShaper() shaped.Shaper {
 	if sh == nil {
 		panic("nil gt shaper!")
 	}
-	return &Shaper{Shaper: *sh.(*shapedgt.Shaper)}
+	// The outputs are measured by the browser, so simple text is not shaped.
+	gs := sh.(*shapedgt.Shaper)
+	gs.SimpleSpans = true
+	jsh := &Shaper{Shaper: *gs}
+	shapersMu.Lock()
+	shapers = append(shapers, jsh)
+	shapersMu.Unlock()
+	return jsh
 }
 
 // Shape turns given input spans into [Runs] of rendered text,
@@ -98,28 +110,16 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 		tsty.FontSize.Dots = 16
 	}
 
-	txt := tx.Join()
-	// sptx := tx.Clone()
-	// sptx.SplitSpaces() // no advantage to doing this
-	outs := sh.ShapeTextOutput(tx, tsty, txt)
-	for oi := range outs {
-		out := &outs[oi]
-		si, _, _ := tx.Index(out.Runes.Offset)
-		sty, _ := tx.Span(si)
-		fnt := text.NewFont(sty, tsty)
-		sh.adjustOutput(out, fnt, tx, tsty)
-	}
-	lines, truncated := sh.WrapLinesOutput(outs, txt, tx, defSty, tsty, size)
-	for _, lno := range lines {
-		for oi := range lno {
-			out := &lno[oi]
+	// The outputs of shaping and wrapping are adjusted to the measurements of the browser.
+	return sh.WrapLinesBoundsCached(tx, defSty, tsty, size, func(outs []shaping.Output) {
+		for oi := range outs {
+			out := &outs[oi]
 			si, _, _ := tx.Index(out.Runes.Offset)
 			sty, _ := tx.Span(si)
 			fnt := text.NewFont(sty, tsty)
 			sh.adjustOutput(out, fnt, tx, tsty)
 		}
-	}
-	return sh.LinesBounds(lines, truncated, tx, defSty, tsty, size)
+	})
 }
 
 // adjustOutput adjusts the given run metrics based on the html measureText results.
@@ -149,6 +149,12 @@ func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 	out.LineBounds.Descent = -math32.ToFixed(spm.FontBoundingBoxDescent)
 	out.GlyphBounds.Ascent = math32.ToFixed(spm.ActualBoundingBoxAscent)
 	out.GlyphBounds.Descent = -math32.ToFixed(spm.ActualBoundingBoxDescent)
+
+	// The glyph clusters are measured with the same font, whose measurements
+	// are looked up once.
+	theGlyphCache.Lock()
+	defer theGlyphCache.Unlock()
+	fg := theGlyphCache.font(fnt)
 	ng := len(out.Glyphs)
 	for gi := 0; gi < ng; gi++ {
 		g := &out.Glyphs[gi]
@@ -156,7 +162,7 @@ func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 		// nrtx := len(rtx)
 		ed := gri + g.GlyphsCount()
 		gtx := rtx[gri:ed]
-		gm := theGlyphCache.Glyph(ctx, fnt, tsty, gtx, g.GlyphID)
+		gm := fg.glyph(ctx, gtx)
 		if g.GlyphsCount() > 1 {
 			gi += g.GlyphsCount() - 1
 		}
@@ -169,4 +175,9 @@ func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text
 		g.XBearing = -math32.ToFixed(gm.ActualBoundingBoxLeft)
 		g.YBearing = math32.ToFixed(gm.ActualBoundingBoxAscent)
 	}
+
+	// The glyph advances of words are fit to the measured words.
+	fitWords(out, rtx, rng.Start, func(word []rune) fixed.Int26_6 {
+		return math32.ToFixed(fg.word(ctx, word))
+	})
 }

@@ -114,7 +114,16 @@ func (rt *RenderTexture) SetSize(size image.Point) {
 	}
 	rt.render.SetSize(size)
 	rt.Format.Size = size
-	rt.ConfigFrames()
+	if len(rt.Frames) != rt.NFrames {
+		rt.ConfigFrames()
+		return
+	}
+	// The frames are remade in place, destroying their old textures, so
+	// that a [Texture] obtained from [RenderTexture.CurrentFrame] stays
+	// valid and has the new texture.
+	for _, fr := range rt.Frames {
+		fr.ConfigRenderTexture(&rt.device, &rt.Format)
+	}
 }
 
 func (rt *RenderTexture) Size() image.Point {

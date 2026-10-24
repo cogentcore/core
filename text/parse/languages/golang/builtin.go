@@ -6,6 +6,7 @@ package golang
 
 import (
 	"strings"
+	"sync"
 	"unsafe"
 
 	"cogentcore.org/core/icons"
@@ -16,16 +17,19 @@ import (
 
 var BuiltinTypes syms.TypeMap
 
+// installBuiltinTypesOnce makes InstallBuiltinTypes initialize
+// the BuiltinTypes map only once, as parsing goroutines call it at once.
+var installBuiltinTypesOnce sync.Once
+
 // InstallBuiltinTypes initializes the BuiltinTypes map
 func InstallBuiltinTypes() {
-	if len(BuiltinTypes) != 0 {
-		return
-	}
-	for _, tk := range BuiltinTypeKind {
-		ty := syms.NewType(tk.Name, tk.Kind)
-		ty.Size = []int{tk.Size}
-		BuiltinTypes.Add(ty)
-	}
+	installBuiltinTypesOnce.Do(func() {
+		for _, tk := range BuiltinTypeKind {
+			ty := syms.NewType(tk.Name, tk.Kind)
+			ty.Size = []int{tk.Size}
+			BuiltinTypes.Add(ty)
+		}
+	})
 }
 
 func (gl *GoLang) CompleteBuiltins(fs *parse.FileState, seed string, md *complete.Matches) {

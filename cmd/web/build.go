@@ -11,12 +11,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/cmd/config"
 	"cogentcore.org/core/cmd/rendericon"
 	"cogentcore.org/core/content/bcontent"
@@ -25,12 +23,14 @@ import (
 
 // Build builds an app for web using the given configuration information.
 func Build(c *config.Config) error {
-	output := filepath.Join(c.Build.Output, "app.wasm")
-	opath := output
-	if c.Web.Gzip {
-		opath += ".orig"
+	if c.Web.HTMLOnly {
+		return buildHTMLOnly(c)
 	}
-	args := []string{"build", "-o", opath, "-ldflags", config.LinkerFlags(c)}
+	if IsJS(c) {
+		return buildJS(c)
+	}
+	output := filepath.Join(c.Build.Output, "app.wasm")
+	args := []string{"build", "-o", output, "-ldflags", config.LinkerFlags(c)}
 	if c.Build.Trimpath {
 		args = append(args, "-trimpath")
 	}
@@ -38,21 +38,22 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if c.Web.Gzip {
-		err = exec.RemoveAll(output + ".orig.gz")
-		if err != nil {
-			return err
-		}
-		err = exec.Run("gzip", output+".orig")
-		if err != nil {
-			return err
-		}
-		err = os.Rename(output+".orig.gz", output)
-		if err != nil {
-			return err
-		}
+	return finishBuild(c)
+}
+
+// finishBuild measures and compresses the app bundle (see [processBundle]),
+// makes the other files of the website, and then reports the bundle size.
+func finishBuild(c *config.Config) error {
+	total, startup, err := processBundle(c)
+	if err != nil {
+		return err
 	}
-	return makeFiles(c)
+	err = makeFiles(c)
+	if err != nil {
+		return err
+	}
+	reportBundle(c, total, startup)
+	return nil
 }
 
 // makeFiles makes the necessary static web files based on the given configuration information.
@@ -68,10 +69,11 @@ func makeFiles(c *config.Config) error {
 	// It is trusted, so we do not need a more advanced sanitizer.
 	c.About = strip.StripTags(c.About)
 
-	wej := []byte(wasmExecJS)
-	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
-	if err != nil {
-		return err
+	if !IsJS(c) {
+		err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), []byte(wasmExecJS), 0666)
+		if err != nil {
+			return err
+		}
 	}
 
 	ajs, err := makeAppJS(c)
@@ -79,15 +81,6 @@ func makeFiles(c *config.Config) error {
 		return err
 	}
 	err = os.WriteFile(filepath.Join(odir, "app.js"), ajs, 0666)
-	if err != nil {
-		return err
-	}
-
-	awjs, err := makeAppWorkerJS(c)
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(filepath.Join(odir, "app-worker.js"), awjs, 0666)
 	if err != nil {
 		return err
 	}
@@ -109,39 +102,43 @@ func makeFiles(c *config.Config) error {
 
 	preRenderHTML := ""
 	if c.Web.GenerateHTML {
-		preRenderHTML, err = exec.Output("go", "run", ".", "-generatehtml", "-nogui")
+		preRenderHTML, err = generateHTML()
 		if err != nil {
 			return err
 		}
-	}
-	prindex := &bcontent.PreRenderPage{
-		HTML: preRenderHTML,
-	}
-	prps := []*bcontent.PreRenderPage{}
-	if strings.HasPrefix(preRenderHTML, "[{") {
-		err := jsonx.Read(&prps, strings.NewReader(preRenderHTML))
-		if err != nil {
-			return err
-		}
-		if c.Content == "" {
-			c.Content = "content"
-		}
-	}
-	for _, prp := range prps {
-		if prp.URL == "" {
-			prindex = prp
-			break
-		}
-	}
-	prindex.Name = c.Name
-	if c.About != "" {
-		prindex.Description = c.About
 	}
 	// A custom index page replaces the pre-rendered preview of the root page
 	// only; the pre-rendered previews of any content pages are still used.
 	indexPage, err := readIndexPage()
 	if err != nil {
 		return err
+	}
+	site, err := readSite(preRenderHTML)
+	if err != nil {
+		return err
+	}
+	awjs, err := makeAppWorkerJS(c, site != nil)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(odir, "app-worker.js"), awjs, 0666)
+	if err != nil {
+		return err
+	}
+	if site != nil {
+		err = makeContentSite(c, site, true, indexPage)
+		if err != nil {
+			return err
+		}
+		return makeIcons(c)
+	}
+
+	prindex := &bcontent.PreRenderPage{
+		Page: bcontent.Page{Name: c.Name},
+		HTML: preRenderHTML,
+	}
+	if c.About != "" {
+		prindex.Description = c.About
 	}
 	iht, err := makeIndexHTML(c, "", prindex, indexPage)
 	if err != nil {
@@ -154,32 +151,22 @@ func makeFiles(c *config.Config) error {
 
 	// The 404 page is just the same as the index page, with an updated base path.
 	// The logic in the home page can then handle the error appropriately.
-	bpath404 := "../"
-	// TODO: this is a temporary hack to fix the 404 page for multi-nested old URLs in the Cogent Core Docs.
-	if c.Name == "Cogent Core Docs" {
-		if c.Build.Trimpath {
-			bpath404 = "https://www.cogentcore.org/core/" // production
-		} else {
-			bpath404 = "http://localhost:8080/" // dev
-		}
-	}
-	notFound, err := makeIndexHTML(c, bpath404, prindex, "")
+	notFound, err := makeIndexHTML(c, notFoundBasePath(c), prindex, "")
 	if err != nil {
 		return err
 	}
 	err = os.WriteFile(filepath.Join(odir, "404.html"), notFound, 0666)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	if c.Content != "" {
-		err := makePages(c, prps)
-		if err != nil {
-			return err
-		}
-	}
+	return makeIcons(c)
+}
 
-	err = os.MkdirAll(filepath.Join(odir, "icons"), 0777)
+// makeIcons makes the app icon files in the icons directory of the output.
+func makeIcons(c *config.Config) error {
+	odir := c.Build.Output
+	err := os.MkdirAll(filepath.Join(odir, "icons"), 0777)
 	if err != nil {
 		return err
 	}
@@ -202,26 +189,15 @@ func makeFiles(c *config.Config) error {
 	return nil
 }
 
-// makePages makes a directory structure of pages for
-// the core pages located at [config.Config.Pages].
-func makePages(c *config.Config, prps []*bcontent.PreRenderPage) error {
-	for _, prp := range prps {
-		if prp.URL == "" { // exclude root index (already handled)
-			continue
+// notFoundBasePath returns the base path for the 404.html page, which is
+// for pages one level below the root.
+func notFoundBasePath(c *config.Config) string {
+	// TODO: this is a temporary hack to fix the 404 page for multi-nested old URLs in the Cogent Core Docs.
+	if c.Name == "Cogent Core Docs" {
+		if c.Build.Trimpath {
+			return "https://www.cogentcore.org/core/" // production
 		}
-		opath := filepath.Join(c.Build.Output, prp.URL)
-		err := os.MkdirAll(opath, 0777)
-		if err != nil {
-			return err
-		}
-		b, err := makeIndexHTML(c, "../", prp, "")
-		if err != nil {
-			return err
-		}
-		err = os.WriteFile(filepath.Join(opath, "index.html"), b, 0666)
-		if err != nil {
-			return err
-		}
+		return "http://localhost:8080/" // dev
 	}
-	return nil
+	return "../"
 }

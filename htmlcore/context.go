@@ -21,6 +21,7 @@ import (
 	selcss "github.com/ericchiang/css"
 	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // Context contains context information about the current state of a htmlcore
@@ -97,8 +98,107 @@ type Context struct {
 	// if not set, then they are loaded immediately.
 	DelayedImageLoad bool
 
+	// ImageCache, if non-nil, caches the decoded images of img elements
+	// by their resolved URL, so that rebuilding a page does not decode
+	// them again. It must only be set when [Context.GetURL] returns the
+	// same content for the same URL until the cache is reset. It is nil
+	// by default; see [NewImageCache].
+	ImageCache *ImageCache
+
+	// StageSize, if positive, is the size of the content of the body (in
+	// runes of text, with estimates for other elements) after which
+	// [ReadHTML] stops adding the widgets of its top-level elements,
+	// leaving the rest for [Context.ReadRest]. This allows the first part
+	// of a long page to be shown sooner.
+	StageSize int
+
+	// readState is the state of the current read of HTML.
+	readState
+
+	// reading is whether HTML is being read, so that HTML read by an
+	// element handler meanwhile is read within that read (see [ReadHTML]).
+	reading bool
+}
+
+// readState is the state of a read of HTML by [ReadHTML].
+type readState struct {
+
 	// firstRow indicates the start of a table, where number of columns is counted.
 	firstRow bool
+
+	// stageSize is the size of the content of the body read so far.
+	stageSize int
+
+	// rest is the first top-level element of the body that has not been read,
+	// and restParent the widget that its widgets are added to.
+	rest       *html.Node
+	restParent core.Widget
+}
+
+// HasRest returns whether [ReadHTML] has left elements to read with
+// [Context.ReadRest] (see [Context.StageSize]).
+func (c *Context) HasRest() bool {
+	return c.rest != nil
+}
+
+// ReadRest adds the widgets of the elements that [ReadHTML] left (see
+// [Context.StageSize]), and returns the widget that they are added to
+// and the index of the first child added, which need to be updated.
+// The context must not have been used to read other HTML since.
+func (c *Context) ReadRest() (core.Widget, int, error) {
+	if c.rest == nil {
+		return nil, 0, nil
+	}
+	n, parent := c.rest, c.restParent
+	c.rest, c.restParent = nil, nil
+	c.StageSize = 0
+	start := parent.AsTree().NumChildren()
+	c.reading = true
+	defer func() { c.reading = false }()
+	err := readHTMLNode(c, parent, n)
+	return parent, start, err
+}
+
+// stageAt returns whether the given node is a top-level element of the body
+// that starts the rest of a staged body (see [Context.StageSize]), adding
+// its size to the size of the body read so far otherwise. The rest starts at
+// a block element, whose widgets are new children of the body.
+func (c *Context) stageAt(n *html.Node) bool {
+	if c.StageSize <= 0 || n.Parent == nil || n.Parent.DataAtom != atom.Body {
+		return false
+	}
+	if c.stageSize >= c.StageSize && n.Type == html.ElementNode && stageBlocks[n.DataAtom] {
+		return true
+	}
+	c.stageSize += nodeSize(n)
+	return false
+}
+
+// stageBlocks are the block elements that the rest of a staged body can start at.
+var stageBlocks = map[atom.Atom]bool{
+	atom.P: true, atom.H1: true, atom.H2: true, atom.H3: true, atom.H4: true, atom.H5: true, atom.H6: true,
+	atom.Ul: true, atom.Ol: true, atom.Pre: true, atom.Table: true, atom.Div: true, atom.Blockquote: true,
+	atom.Hr: true, atom.Section: true, atom.Figure: true, atom.Details: true, atom.Dl: true,
+}
+
+// nodeSize returns an estimate of the size of the content of the node, in
+// runes of text, with fixed sizes for elements, larger for media.
+func nodeSize(n *html.Node) int {
+	size := 0
+	switch n.Type {
+	case html.TextNode:
+		size = len(strings.TrimSpace(n.Data))
+	case html.ElementNode:
+		size = 40
+		switch n.DataAtom {
+		case atom.Img, atom.Video, atom.Iframe, atom.Svg, atom.Embed, atom.Object, atom.Canvas:
+			size = 2000
+		}
+	}
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		size += nodeSize(c)
+	}
+	return size
 }
 
 // NewContext returns a new [Context] with basic defaults.
@@ -110,10 +210,6 @@ func NewContext() *Context {
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
 		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
 	}
-}
-
-func (c *Context) reset() {
-	c.firstRow = false
 }
 
 // Parent returns the current parent widget that a widget
@@ -203,22 +299,62 @@ func (c *Context) addStyle(style string) {
 	root := rootNode(c.Node)
 
 	for _, rule := range ss.Rules {
-		var sel *selcss.Selector
-		if len(rule.Selectors) > 0 {
-			s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
-			if errors.Log(err) != nil {
-				s = &selcss.Selector{}
-			}
-			sel = s
-		} else {
-			sel = &selcss.Selector{}
-		}
-
-		matches := sel.Select(root)
-		for _, match := range matches {
+		for _, match := range selectRule(root, rule) {
 			c.styles[match] = append(c.styles[match], rule)
 		}
 	}
+}
+
+// selectRule returns the nodes under root that the selectors of the rule
+// select, once for each selector that selects them.
+func selectRule(root *html.Node, rule *css.Rule) []*html.Node {
+	// Selectors of element names, such as the user agent styles have, select
+	// the elements with those names, which one walk of the tree finds; the
+	// selector library walks the tree for each selector.
+	if names := selectorAtoms(rule.Selectors); names != nil {
+		var matches []*html.Node
+		var walk func(n *html.Node)
+		walk = func(n *html.Node) {
+			for range names[n.DataAtom] {
+				matches = append(matches, n)
+			}
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				if c.Type == html.ElementNode {
+					walk(c)
+				}
+			}
+		}
+		walk(root)
+		return matches
+	}
+
+	// Other selectors are matched by the selector library.
+	sel := &selcss.Selector{}
+	if len(rule.Selectors) > 0 {
+		s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
+		if errors.Log(err) == nil {
+			sel = s
+		}
+	}
+	return sel.Select(root)
+}
+
+// selectorAtoms returns the number of selectors of each element name, when
+// all of the selectors are lowercase element names, and otherwise nil.
+func selectorAtoms(selectors []string) map[atom.Atom]int {
+	if len(selectors) == 0 {
+		return nil
+	}
+	names := make(map[atom.Atom]int, len(selectors))
+	for _, s := range selectors {
+		s = strings.TrimSpace(s)
+		a := atom.Lookup([]byte(s))
+		if a == 0 || a.String() != s {
+			return nil
+		}
+		names[a]++
+	}
+	return names
 }
 
 // LinkButton is a helper function that makes the given button

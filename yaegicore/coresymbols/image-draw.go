@@ -12,7 +12,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["image/draw/draw"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Draw":           reflect.ValueOf(draw.Draw),
@@ -34,7 +34,7 @@ func init() {
 		"_Quantizer":   reflect.ValueOf((*_image_draw_Quantizer)(nil)),
 		"_RGBA64Image": reflect.ValueOf((*_image_draw_RGBA64Image)(nil)),
 	}
-}
+})
 
 // _image_draw_Drawer is an interface wrapper for Drawer type
 type _image_draw_Drawer struct {

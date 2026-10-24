@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"fmt"
+	"image"
 	"io"
 	"log/slog"
 	"net/http"
@@ -321,21 +322,29 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	if pstyle != "" {
 		ctx.SetStyleAttr(n, pstyle)
 	}
+	isSVG := strings.HasSuffix(src, ".svg")
 	var newWidget core.Widget
 	var resp *http.Response
 	var err error
-	if !ctx.DelayedImageLoad {
+	if !ctx.DelayedImageLoad && isSVG {
 		resp, err = Get(ctx, src)
 		if errors.Log(err) != nil {
 			return nil
 		}
 		defer resp.Body.Close()
 	}
+	var im image.Image
+	if !ctx.DelayedImageLoad && !isSVG {
+		im, err = readImage(ctx, src)
+		if errors.Log(err) != nil {
+			return nil
+		}
+	}
 
 	// Can be either image or svg.
 	var img *core.Image
 	var svg *core.SVG
-	if strings.HasSuffix(src, ".svg") {
+	if isSVG {
 		svg = New[core.SVG](ctx)
 		svg.SetTooltip(alt)
 		if pid != "" {
@@ -349,18 +358,12 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	} else {
 		img = New[core.Image](ctx)
 		img.SetTooltip(alt)
+		img.SetProperty("src", src) // for generatehtml
 		if pid != "" {
 			img.SetName(pid)
 			img.SetProperty("id", pid)
 		}
-		if !ctx.DelayedImageLoad {
-			im, _, err := imagex.Read(resp.Body)
-			if err != nil {
-				slog.Error("error loading image", "url", src, "err", err)
-			} else {
-				img.SetImage(im)
-			}
-		}
+		img.SetImage(im)
 		newWidget = img
 	}
 
@@ -368,29 +371,61 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		return newWidget
 	}
 	go func() {
-		resp, err := Get(ctx, src)
-		if errors.Log(err) != nil {
-			return
-		}
-		defer resp.Body.Close()
-		if svg != nil {
-			svg.AsyncLock()
-			errors.Log(svg.Read(resp.Body))
-			svg.Update()
-			svg.AsyncUnlock()
-		} else {
-			im, _, err := imagex.Read(resp.Body)
-			if err != nil {
-				slog.Error("error loading image", "url", src, "err", err)
+		if svg == nil {
+			im, err := readImage(ctx, src)
+			if errors.Log(err) != nil {
 				return
 			}
 			img.AsyncLock()
 			img.SetImage(im)
 			img.Update()
 			img.AsyncUnlock()
+			return
 		}
+		resp, err := Get(ctx, src)
+		if errors.Log(err) != nil {
+			return
+		}
+		defer resp.Body.Close()
+		svg.AsyncLock()
+		errors.Log(svg.Read(resp.Body))
+		svg.Update()
+		svg.AsyncUnlock()
 	}()
 	return newWidget
+}
+
+// readImage returns the decoded image at the given URL, using
+// [Context.ImageCache] if it is set. A decoding error is logged
+// and gives a nil image without an error, as the image widget is
+// still made then.
+func readImage(ctx *Context, src string) (image.Image, error) {
+	cache := ctx.ImageCache
+	key := ""
+	if cache != nil {
+		u, err := parseRelativeURL(src, ctx.PageURL)
+		if err != nil {
+			return nil, err
+		}
+		key = u.String()
+		if im := cache.Get(key); im != nil {
+			return im, nil
+		}
+	}
+	resp, err := Get(ctx, src)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	im, _, err := imagex.Read(resp.Body)
+	if err != nil {
+		slog.Error("error loading image", "url", src, "err", err)
+		return nil, nil
+	}
+	if cache != nil {
+		cache.Add(key, im)
+	}
+	return im, nil
 }
 
 // handleText creates a new [core.Text] from the given information, setting the text and

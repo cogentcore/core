@@ -26,7 +26,10 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
+	"cogentcore.org/core/text/htmltext"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"github.com/gomarkdown/markdown/ast"
@@ -109,7 +112,11 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 		ed.Lines.SetFileExt(lang)
 	}
 	ed.Lines.SetString(htmlcore.ExtractText(ctx))
-	if BindTextEditor != nil && (lang == "Go" || lang == "Goal") {
+	if system.GenerateHTMLArg() { // just the code, without running it
+		ed.SetProperty("html", codeHTML(ed.Lines.String(), lang))
+		return true
+	}
+	if (lang == "Go" && len(CompiledCode) > 0) || (lang == "Goal" && len(CompiledGoal) > 0) || (BindTextEditor != nil && (lang == "Go" || lang == "Goal")) {
 		ed.Lines.SpacesToTabs(0, ed.Lines.NumLines()) // Go uses tabs
 		parFrame := core.NewFrame(fr)
 		parFrame.Styler(func(s *styles.Style) {
@@ -130,7 +137,7 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 				parFrame.Styles.Grow.Y = s.Grow.Y
 			})
 		})
-		BindTextEditor(ed, parFrame, lang)
+		BindCode(ed, parFrame, lang)
 	} else {
 		ed.SetReadOnly(true)
 		ed.Lines.Settings.LineNumbers = false
@@ -233,6 +240,10 @@ func (ct *Content) moveToBlockFrame(w core.Widget, id, txt string, top bool) {
 		s.Max.X.In(8)
 		s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
 	})
+	// Links in the caption are opened in the content, like those of the page text.
+	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
+		ct.OpenEvent(tl.URL, e)
+	})
 }
 
 func (ct *Content) widgetHandlerFigure(w core.Widget, id string) {
@@ -252,13 +263,32 @@ func (ct *Content) widgetHandlerFigure(w core.Widget, id string) {
 			s.Align.Self = styles.Center
 		}
 	})
+	if alt == "" {
+		return
+	}
+	// The alt text is markdown, rendered as the caption of a figure. The
+	// tooltip (which htmlcore sets to the alt text, and which is also the
+	// alt attribute of the pre-rendered HTML) is its plain text, with the
+	// wikilinks (citations, page links) replaced by their text as in the
+	// caption.
+	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
+	wb.SetTooltip(htmlPlainText(altf))
 	if !fig {
 		return
 	}
-	altf := htmlcore.MDToHTML(ct.Context, []byte(alt))
 	lbl := ct.current.Page.SpecialLabel(id)
 	lbf := "<b>" + lbl + ":</b> " + string(altf) + " <br><br> "
 	ct.moveToBlockFrame(w, id, lbf, false)
+}
+
+// htmlPlainText returns the text of the given HTML, without its markup, with
+// whitespace collapsed to single spaces.
+func htmlPlainText(htm []byte) string {
+	tx, err := htmltext.HTMLToRich(htm, rich.NewStyle(), nil)
+	if err != nil {
+		return strings.TrimSpace(string(htm))
+	}
+	return strings.Join(strings.Fields(string(tx.Join())), " ")
 }
 
 // citeWikilink processes citation links, which start with @
@@ -420,7 +450,14 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	ct.current.Page = pg
-	ct.Scene.Update() // need to update the whole scene to also update the toolbar
+	// The table of contents of the old page is remade by loadPage,
+	// so it is deleted now instead of being updated first.
+	ct.deleteTableOfContents()
+	if !keepCategories && ct.categoriesTree != nil {
+		ct.categoriesTree.Delete()
+		ct.categoriesTree = nil
+	}
+	ct.updateScene() // need to update the whole scene to also update the toolbar
 	// We can only scroll to the heading after the page layout has been updated, so we defer.
 	ct.Defer(func() {
 		ct.setStageTitle()
@@ -438,8 +475,12 @@ func (ct *Content) openRef(url string) {
 	}
 	ref := strings.TrimPrefix(url, "ref://")
 	ct.current.Page = pg
+	// The reference is opened like a heading, so that a staged page is
+	// built whole and has the reference to scroll to.
+	ct.current.Heading = ref
 	ct.historyAdd(pg, "", url)
-	ct.Scene.Update()
+	ct.deleteTableOfContents()
+	ct.updateScene()
 	ct.Defer(func() {
 		ct.setStageTitle()
 		ct.openID(ref, "")

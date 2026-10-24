@@ -16,9 +16,11 @@ The `core` command line tool provides four main build commands, as documented be
 
 4. `core install` installs the app on the target system
 
-You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run web` to serve an app on the web.
+You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run wasm` to serve an app on the web.
 
-Note: `core run web` is mainly used for serving an app locally; to deploy an app on the web, you can use `core build web` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
+There are two web platforms: `wasm` compiles the app to WebAssembly, and `js` compiles it to JavaScript with [GoScript](https://github.com/s4wave/goscript). The `js` platform installs GoScript and [bun](https://bun.sh) automatically if they are not already installed. We recommend `js`, which is what this website uses.
+
+Note: `core run wasm` and `core run js` are mainly used for serving an app locally for testing; to deploy an app on the web, you can use `core build wasm` or `core build js` and a static site host (here is an [example](https://github.com/cogentcore/cogentcore.github.io/blob/main/.github/workflows/core.yml) using GitHub Pages).
 
 If there is an `icon.svg` file in the current directory, it will be used as the app icon on all platforms.
 
@@ -32,13 +34,50 @@ You can replace that automatic preview with your own content by making an `index
 
 You can include a `&lt;script&gt;` element in your index page, and it will run, but note that the entire loader element is removed as soon as the app finishes its first render. Anything that the script registered, such as a timer or an event listener, keeps running after that, so it must clean up after itself.
 
+## Content websites
+
+For apps that use [[content]], each content page is pre-rendered as its own HTML page, along with navigation trees for the table of contents and categories and a page search, which use [Vue.js](https://vuejs.org) and closely replicate the content app. Math is rendered with [KaTeX](https://katex.org). Code blocks are shown with syntax highlighting, but interactive Go examples are not run, so their resulting widgets are not shown. Any non-page files in the content directory, such as images, are copied into the website. These pages are shown while the app is loading, and they are what search engines see.
+
+You can also build a freestanding website that consists only of these static HTML pages, without the Go wasm app, using `core build wasm -htmlonly`. The pages are the same, except that they do not load the app.
+
+## Code blocks of content apps
+
+In a [[content]] app, a `Go` (or `Goal` ) code block in a page is an interactive example: the page shows the code in a text editor and runs it, showing the widgets that it makes below it. `core build`, `core run`, `core install`, `core pack`, and `core generate` compile these code blocks into the app: they write a `contentcode_gen.go` file to the main package of the app with a Go function for each code block, and the page runs that function directly, without an interpreter, on all platforms (on `js`, GoScript compiles it with the rest of the app). This is faster, and the code blocks are type checked at build time.
+
+This happens automatically for any main package that imports the content package and embeds a directory of markdown files. The generated file records a hash of the code blocks, the options, and the `go.mod` file of the app, and nothing is done if that hash has not changed, so this only takes time (a few seconds) after you change a code block. You should commit the generated file, so that `go build` and `go run` also work.
+
+Code blocks are written as before: a list of statements that use the parent widget `b` and the Cogent Core packages without importing them, or a program with a `main` function. Unused variables are allowed. A code block that does not compile is left out and listed at the end of the generated file, and the command prints its errors at their place in the markdown file (such as `content/button.md:15:25: undefined: x`). The code blocks can only be compiled if the rest of the app compiles, so `core generate` fails with the errors of the app if it does not.
+
+When someone edits a code block, the edited code runs in the [yaegi](https://github.com/traefik/yaegi) interpreter if the app includes it, by importing `cogentcore.org/core/yaegicore`; otherwise, edited code can not run. On the `js` platform, you can load the interpreter only when code is first edited, so that it does not slow down the startup of the app: instead of importing `yaegicore` for its side effects, set `content.BindTextEditor = yaegicore.BindTextEditor` in an `init` function of the app, and add `DeferredFunctions = ["cogentcore.org/core/yaegicore.BindTextEditor"]` to the `[Web]` section of `core.toml`. This website does that.
+
+### Goal code blocks
+
+`Goal` code blocks, written in [Goal](https://cogentcore.org/lab/goal), are compiled too, if the module of the app requires [Cogent Lab](https://cogentcore.org/lab), whose Goal transpiler turns them into Go (otherwise, the command says so, and they run in the Goal interpreter, if the app includes it). As in the Goal interpreter, the Goal code blocks of a page run in order and share their variables: a block can use the variables and functions of the blocks before it on its page. Goal code can use the Cogent Lab packages (`tensor`, `plot`, `matrix`, ...) without importing them. A page is compiled up to its first Goal code block that does not compile; that block and the ones after it run in the Goal interpreter, if the app includes it.
+
+The Goal interpreter of edited code is `yaegilab.BindTextEditor` (`cogentcore.org/lab/yaegilab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/yaegilab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
+
+### Options
+
+Options for compiling code blocks go in the `[ContentCode]` section of `core.toml`:
+
+```toml
+[ContentCode]
+  # other packages that code blocks use without importing them (path or name=path)
+  Imports = ["github.com/me/sim/wavesim"]
+  # whether Goal math mode records its variables in tensorfs, as yaegilab does
+  # (on by default; turn it off if the Goal interpreter of the app does not)
+  GoalRecord = false
+```
+
+If you prefer `go generate`, you can add `//go:generate go run cogentcore.org/core/content/cmd/contentcode` to the main package of the app instead; the `core` tool then uses the same arguments (such as `-o` for the output file, `-import name=path` for other packages that code blocks use without importing them, or `-goal-record=false`), together with the options of `core.toml`.
+
 ## Details
 
 You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.
 
-The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` and associated `.html` and `.js` files on Web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
+The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` (or `.js` for `js`) and associated `.html` and `.js` files on the web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
 
-For desktop platforms, `core run` just runs the executable directly. For mobile platforms, it installs the executable package on the target device (which can be a simulator or a real connected device) using `core install` and then starts it. For web, it serves the files in `bin/web` at http://localhost:8080.
+For desktop platforms, `core run` just runs the executable directly. For mobile platforms, it installs the executable package on the target device (which can be a simulator or a real connected device) using `core install` and then starts it. For `js` and `wasm`, it serves the files in `bin/js` or `bin/wasm` at http://localhost:8080.
 
 On mobile and web platforms, `core pack` is the same as `core build`, as that already makes a package on those platforms. On macOS, it makes a `.app` bundle file and a `.dmg` disk image installer file. On Windows, it makes a `.exe` installer file. On Linux, it makes a `.deb` package file.
 

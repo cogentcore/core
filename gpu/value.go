@@ -195,6 +195,9 @@ func (vl *Value) Release() {
 		vl.buffer = nil
 	}
 	if vl.Texture != nil {
+		if vl.Texture.view != nil {
+			vl.varGroupDirty()
+		}
 		vl.Texture.Release()
 		vl.Texture = nil
 	}
@@ -247,7 +250,7 @@ func (vl *Value) SetDynamicN(n int) {
 // Storage variables, as the alignment will not be correct;
 // See [SetDynamicFromBytes].
 func SetValueFrom[E any](vl *Value, from []E) error {
-	return vl.SetFromBytes(wgpu.ToBytes(from))
+	return vl.SetFromBytes(sliceToBytes(from))
 }
 
 // SetFromBytes copies given bytes into value buffer memory,
@@ -314,7 +317,7 @@ func (vl *Value) SetFromBytes(from []byte) error {
 // calling this.  Existing values will be preserved with
 // changes in DynamicN to the extent possible.
 func SetDynamicValueFrom[E any](vl *Value, idx int, from []E) error {
-	return vl.SetDynamicFromBytes(idx, wgpu.ToBytes(from))
+	return vl.SetDynamicFromBytes(idx, sliceToBytes(from))
 }
 
 // SetDynamicFromBytes copies given values into a staging buffer
@@ -427,10 +430,12 @@ func (vl *Value) bindGroupEntry(vr *Var) []wgpu.BindGroupEntry {
 // so set those before making this call.  It will not be re-configured
 // without manually releasing it.
 func (vl *Value) SetFromGoImage(img image.Image, layer int) *Texture {
+	view := vl.Texture.view
 	err := vl.Texture.SetFromGoImage(img, layer)
 	errors.Log(err)
 	err = vl.Texture.Sampler.Config(&vl.device)
 	errors.Log(err)
+	vl.textureChanged(view)
 	return vl.Texture
 }
 
@@ -439,10 +444,23 @@ func (vl *Value) SetFromGoImage(img image.Image, layer int) *Texture {
 // with the current settings, so set those before making this call.
 // It will not be re-configured without manually releasing it.
 func (vl *Value) SetFromTexture(tx *Texture) *Texture {
+	view := vl.Texture.view
 	vl.Texture.SetShared(tx)
 	err := vl.Texture.Sampler.Config(&vl.device)
 	errors.Log(err)
+	vl.textureChanged(view)
 	return vl.Texture
+}
+
+// textureChanged tells our VarGroup to make a new bind group if the view
+// of our Texture is no longer the given prior one, as when the texture
+// was remade at a new size: the bind group refers to the view, so it
+// would show the old texture, which is destroyed (see
+// [Texture.ReleaseTexture]) and must not be used in a new submit.
+func (vl *Value) textureChanged(prior *wgpu.TextureView) {
+	if vl.Texture.view != prior {
+		vl.varGroupDirty()
+	}
 }
 
 // CreateReadBuffer creates a read buffer for this value,
@@ -516,7 +534,7 @@ func (vl *Value) ReadSync() error {
 // This automatically calls Unmap() after copying,
 // which is essential for being able to re-use the read buffer again.
 func ReadToBytes[E any](vl *Value, dest []E) error {
-	return vl.ReadToBytes(wgpu.ToBytes(dest))
+	return readToSlice(vl, dest)
 }
 
 // ReadToBytes copies data from read buffer into given byte slice

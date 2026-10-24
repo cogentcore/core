@@ -17,26 +17,47 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/system/composer"
 )
 
+// AddEventListeners adds the event listeners of the app. Until the app has
+// rendered, the page shows the HTML loader with the static preview of the
+// page (see [composer.LoaderRemoved]), which the browser handles as a normal
+// page: the input events are not handled or prevented, and the listeners
+// that can prevent scrolling are only added once the loader is removed, so
+// that the preview scrolls without waiting for the app, which is often busy
+// starting.
 func (a *App) AddEventListeners() {
 	g := js.Global()
-	AddEventListener(g, "mousedown", a.OnMouseDown)
-	// see https://chromestatus.com/feature/5093566007214080
-	AddEventListener(g, "touchstart", a.OnTouchStart, map[string]any{"passive": false})
-	AddEventListener(g, "mouseup", a.OnMouseUp)
-	AddEventListener(g, "touchend", a.OnTouchEnd)
-	AddEventListener(g, "mousemove", a.OnMouseMove)
-	// see https://chromestatus.com/feature/5093566007214080
-	AddEventListener(g, "touchmove", a.OnTouchMove, map[string]any{"passive": false})
-	// see https://chromestatus.com/feature/6662647093133312
-	AddEventListener(g, "wheel", a.OnWheel, map[string]any{"passive": false})
-	AddEventListener(g, "contextmenu", a.OnContextMenu)
-	AddEventListener(g, "keydown", a.OnKeyDown)
-	AddEventListener(g, "keyup", a.OnKeyUp)
-	AddEventListener(g, "beforeinput", a.OnBeforeInput)
+	AddEventListener(g, "mousedown", appInput(a.OnMouseDown))
+	AddEventListener(g, "mouseup", appInput(a.OnMouseUp))
+	AddEventListener(g, "touchend", appInput(a.OnTouchEnd))
+	AddEventListener(g, "mousemove", appInput(a.OnMouseMove))
+	AddEventListener(g, "contextmenu", appInput(a.OnContextMenu))
+	AddEventListener(g, "keydown", appInput(a.OnKeyDown))
+	AddEventListener(g, "keyup", appInput(a.OnKeyUp))
+	AddEventListener(g, "beforeinput", appInput(a.OnBeforeInput))
 	AddEventListener(g.Get("visualViewport"), "resize", a.OnResize)
 	AddEventListener(g, "blur", a.OnBlur)
+	composer.OnLoaderRemoved(func() {
+		// see https://chromestatus.com/feature/5093566007214080
+		AddEventListener(g, "touchstart", a.OnTouchStart, map[string]any{"passive": false})
+		// see https://chromestatus.com/feature/5093566007214080
+		AddEventListener(g, "touchmove", a.OnTouchMove, map[string]any{"passive": false})
+		// see https://chromestatus.com/feature/6662647093133312
+		AddEventListener(g, "wheel", a.OnWheel, map[string]any{"passive": false})
+	})
+}
+
+// appInput returns an event listener that calls the given listener
+// only once the HTML loader has been removed (see [App.AddEventListeners]).
+func appInput(fn func(this js.Value, args []js.Value) any) func(this js.Value, args []js.Value) any {
+	return func(this js.Value, args []js.Value) any {
+		if !composer.LoaderRemoved() {
+			return nil
+		}
+		return fn(this, args)
+	}
 }
 
 func AddEventListener(v js.Value, nm string, fn func(this js.Value, args []js.Value) any, opts ...map[string]any) {

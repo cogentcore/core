@@ -16,6 +16,27 @@ import (
 // loaderRemoved is whether the HTML loader div has been removed.
 var loaderRemoved = false
 
+// loaderRemovedFuncs are the functions to call once the loader is removed
+// (see [OnLoaderRemoved]).
+var loaderRemovedFuncs []func()
+
+// LoaderRemoved returns whether the HTML loader div, which shows the loading
+// progress and the static preview of the page, has been removed, which
+// happens once the app has rendered.
+func LoaderRemoved() bool {
+	return loaderRemoved
+}
+
+// OnLoaderRemoved calls the given function once the HTML loader div has been
+// removed (see [LoaderRemoved]), or now if it already has been.
+func OnLoaderRemoved(f func()) {
+	if loaderRemoved {
+		f()
+		return
+	}
+	loaderRemovedFuncs = append(loaderRemovedFuncs, f)
+}
+
 // ComposerWeb is the web implementation of [Composer].
 type ComposerWeb struct {
 
@@ -99,7 +120,13 @@ func (cw *ComposerWeb) Compose() {
 	// Only remove the loader after we have successfully rendered.
 	if !loaderRemoved {
 		loaderRemoved = true
-		js.Global().Get("document").Call("getElementById", "app-wasm-loader").Call("remove")
+		if loader := js.Global().Get("document").Call("getElementById", "app-wasm-loader"); !loader.IsNull() {
+			loader.Call("remove")
+		}
+		for _, f := range loaderRemovedFuncs {
+			f()
+		}
+		loaderRemovedFuncs = nil
 	}
 }
 
@@ -140,6 +167,22 @@ func (cw *ComposerWeb) ElementPointer(ptr uint64, tag string) js.Value {
 	return elem
 }
 
+// SetElementContext sets the HTML element for the given context value
+// to the given existing element, adding it back to the document if
+// [ComposerWeb.Compose] has removed it. Compose removes the element of a
+// source that is not drawn (such as a widget that is hidden), so a source
+// whose element has state that must persist, such as a canvas with a GPU
+// surface, keeps its element and sets it with this each time it is drawn,
+// instead of getting a new one with [ComposerWeb.ElementContext].
+func (cw *ComposerWeb) SetElementContext(ctx any, elem js.Value) {
+	ptr := ctxPointer(ctx)
+	cw.active[ptr] = struct{}{}
+	cw.Elements[ptr] = elem
+	if !elem.Get("isConnected").Bool() {
+		js.Global().Get("document").Get("body").Call("appendChild", elem)
+	}
+}
+
 // SetElementGeom sets the geometry of the given element.
 func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point) {
 	if !elem.Get("width").IsUndefined() {
@@ -165,4 +208,27 @@ func (cw *ComposerWeb) SetElementGeom(elem js.Value, pos, size image.Point) {
 
 	style.Set("width", fmt.Sprintf("%gpx", float32(size.X)/cw.DPR))
 	style.Set("height", fmt.Sprintf("%gpx", float32(size.Y)/cw.DPR))
+}
+
+// SetElementClip clips the given element, whose geometry is the given
+// rectangle (set with [ComposerWeb.SetElementGeom]), to the given visible
+// region in the same coordinates. An element whose widget is partly
+// scrolled out of its parent then shows only its visible part, instead of
+// drawing over the content around that parent.
+func (cw *ComposerWeb) SetElementClip(elem js.Value, rect, visible image.Rectangle) {
+	// The clip is an inset from each side of the element, in CSS pixels.
+	style := elem.Get("style")
+	visible = visible.Intersect(rect)
+	if visible == rect {
+		style.Set("clipPath", "")
+		return
+	}
+	if visible.Empty() {
+		style.Set("clipPath", "inset(50%)")
+		return
+	}
+	px := func(v int) string { return fmt.Sprintf("%gpx", float32(v)/cw.DPR) }
+	top, right := px(visible.Min.Y-rect.Min.Y), px(rect.Max.X-visible.Max.X)
+	bottom, left := px(rect.Max.Y-visible.Max.Y), px(visible.Min.X-rect.Min.X)
+	style.Set("clipPath", "inset("+top+" "+right+" "+bottom+" "+left+")")
 }

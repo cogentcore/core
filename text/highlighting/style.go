@@ -118,13 +118,18 @@ type StyleEntry struct {
 
 // UpdateFromTheme normalizes the colors of the style entry such that they have consistent
 // chromas and tones that guarantee sufficient text contrast in accordance with the color theme.
+// An entry without a color (such as Error, which only has a border in most
+// styles) has no theme color, so that its text keeps the default color.
 func (se *StyleEntry) UpdateFromTheme() {
-	hc := hct.FromColor(se.Color)
-	ctone := float32(40)
-	if matcolor.SchemeIsDark {
-		ctone = 80
+	se.themeColor = color.RGBA{}
+	if !colors.IsNil(se.Color) {
+		hc := hct.FromColor(se.Color)
+		ctone := float32(40)
+		if matcolor.SchemeIsDark {
+			ctone = 80
+		}
+		se.themeColor = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
 	}
-	se.themeColor = hc.WithChroma(max(hc.Chroma, 48)).WithTone(ctone).AsRGBA()
 
 	if !colors.IsNil(se.Background) {
 		hb := hct.FromColor(se.Background)
@@ -399,9 +404,15 @@ func (hs Style) SaveJSON(filename fsx.Filename) error {
 }
 
 // Properties are default properties for custom tags (tokens); if set in style then used
-// there but otherwise we use these as a fallback; typically not overridden
+// there but otherwise we use these as a fallback; typically not overridden.
+// text-decoration flags here are applied to tagged spans even when the style
+// also defines other properties for the tag, so that diagnostic tags like
+// Error are always visibly decorated.
 var Properties = map[token.Tokens]map[string]any{
 	token.TextSpellErr: {
-		"text-decoration": 1 << uint32(rich.DottedUnderline), // bitflag!
+		"text-decoration": uint32(1) << uint32(rich.DottedUnderline), // bitflag!
+	},
+	token.Error: {
+		"text-decoration": uint32(1) << uint32(rich.DottedUnderline), // bitflag!
 	},
 }

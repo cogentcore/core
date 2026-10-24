@@ -45,7 +45,7 @@ const (
 )
 
 // States is a bitflag enum containing widget states
-type States int64 //enums:bitflag -no-text -line-comment -transform kebab -sql -trim-prefix Ho
+type States int32 //enums:bitflag -atomic -no-text -line-comment -transform kebab -sql -trim-prefix Ho
 
 const (
 	// Enabled indicates the widget is enabled
@@ -65,7 +65,7 @@ const (
 )
 
 // Languages is a bitflag enum containing programming languages
-type Languages int64 //enums:bitflag
+type Languages int64 //enums:bitflag -atomic
 
 const (
 	// Go is the best programming language
@@ -90,4 +90,18 @@ type MoreLanguages Languages //enums:bitflag -no-accept-lower
 
 const (
 	Perl MoreLanguages = MoreLanguages(LanguagesN) + iota
+)
+
+// Toppings is a small non-atomic bitflag enum containing pizza toppings
+type Toppings int8 //enums:bitflag
+
+const (
+	Mozzarella Toppings = iota
+	Mushrooms
+	Olives
+	Peppers
+	Pineapple
+	Sausage
+	Onions
+	Basil
 )

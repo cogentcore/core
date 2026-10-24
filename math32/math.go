@@ -19,7 +19,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/chewxy/math32"
+	math32 "cogentcore.org/core/math32/internal/fmath"
 )
 
 // These are mostly just wrappers around chewxy/math32, which has
@@ -853,7 +853,7 @@ func Truncate64(val float64, prec int) float64 {
 	// return math.Round(val*pow) / pow
 }
 
-// WrapsMax returns x wrapped in the interval [0..max).
+// WrapMax returns x wrapped in the interval [0..max).
 func WrapMax(x, mx float32) float32 {
 	// integer math: (max + x % max) % max
 	return Mod(mx+Mod(x, mx), mx)

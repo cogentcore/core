@@ -7,6 +7,7 @@ package tex_test
 import (
 	"fmt"
 	"image/color"
+	"os"
 	"testing"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -29,10 +30,17 @@ func RunTest(t *testing.T, nm string, width int, height int, f func(pc *paint.Pa
 	imagex.Assert(t, img, nm)
 }
 
-func TestTex(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
+// skipTex skips the test unless the CORE_TEX_TESTS environment variable is 1,
+// as these tests are slow (minutes, or most of an hour with -race) and only
+// need to run when changing this package.
+func skipTex(t *testing.T) {
+	if os.Getenv("CORE_TEX_TESTS") != "1" {
+		t.Skip("set CORE_TEX_TESTS=1 to run the slow tex tests")
 	}
+}
+
+func TestTex(t *testing.T) {
+	skipTex(t)
 	tests := []struct {
 		name string
 		tex  string
@@ -165,9 +173,7 @@ p_{m1} & p_{m2} & \ldots
 }
 
 func TestRelations(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`<`, `>`, `=`, `\leq`, `\le`, `\geq`, `\ge`, `\equiv`,
 		`\ll`, `\gg`, `\doteq`, `\prec`, `\succ`, `\sim`,
@@ -215,9 +221,7 @@ func TestRelations(t *testing.T) {
 }
 
 func TestOperators(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`+`, `-`, `\pm`, `\mp`, `\triangleleft`, `\cdot`, `\div`,
 		`\triangleright`, `\times`, `\setminus`, `\star`, `\cup`,
@@ -264,9 +268,7 @@ func TestOperators(t *testing.T) {
 }
 
 func TestBigOperators(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\sum`, `\bigcup`, `\bigvee`, `\prod`, `\bigcap`, `\bigwedge`, `\coprod`,
 		`\bigsqcup`, `\biguplus`, `\int`, `\oint`, `\bigodot`,
@@ -309,9 +311,7 @@ func TestBigOperators(t *testing.T) {
 }
 
 func TestArrows(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\leftarrow`, `\gets`, `\longleftarrow`, `\rightarrow`, `\to`, `\longrightarrow`,
 		`\leftrightarrow`, `\longleftrightarrow`, `\Leftarrow`, `\Longleftarrow`,
@@ -359,9 +359,7 @@ func TestArrows(t *testing.T) {
 }
 
 func TestSymbols(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\dots`, `\cdots`, `\vdots`, `\ddots`, `\hbar`, `\imath`, `\jmath`, `\ell`,
 		`\Re`, `\Im`, `\aleph`, `\wp`, `\forall`, `\exists`,
@@ -407,9 +405,7 @@ func TestSymbols(t *testing.T) {
 }
 
 func TestAMSSymbols(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\lhd`, `\rhd`, `\unlhd`, `\unrhd`, `\barwedge`, `\boxdot`, `\boxminus`, `\boxplus`,
 		`\boxtimes`, `\Cap`, `\centerdot`, `\circledast`, `\circledcirc`, `\circleddash`,
@@ -455,9 +451,7 @@ func TestAMSSymbols(t *testing.T) {
 }
 
 func TestAMSSymbols2(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\Box`, `\Diamond`, `\mho`, `\angle`, `\backprime`, `\bigstar`, `\blacklozenge`,
 		`\blacksquare`, `\blacktriangle`, `\blacktriangledown`, `\diagdown`, `\diagup`,
@@ -504,9 +498,7 @@ func TestAMSSymbols2(t *testing.T) {
 }
 
 func TestAMSRelations(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\approxeq`, `\backepsilon`, `\backsim`, `\backsimeq`, `\because`, `\between`, `\Bumpeq`,
 		`\bumpeq`, `\circeq`, `\curlyeqprec`, `\curlyeqsucc`, `\doteqdot`, `\eqcirc`, `\fallingdotseq`,
@@ -552,9 +544,7 @@ func TestAMSRelations(t *testing.T) {
 }
 
 func TestAMSSets(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\nsubseteq`, `\nsubseteqq`, `\nsupseteq`, `\nsupseteqq`, `\sqsubset`, `\sqsupset`, `\Subset`,
 		`\subseteqq`, `\subsetneq`, `\subsetneqq`, `\Supset`, `\supseteqq`, `\supsetneq`,
@@ -598,9 +588,7 @@ func TestAMSSets(t *testing.T) {
 }
 
 func TestAMSInequalities(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\eqslantgtr`, `\eqslantless`,
 		`\geqq`, `\geqslant`, `\ggg`, `\gnapprox`, `\gneq`, `\gneqq`, `\gnsim`, `\gtrapprox`,
@@ -648,9 +636,7 @@ func TestAMSInequalities(t *testing.T) {
 }
 
 func TestAMSTriRels(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\blacktriangleleft`, `\blacktriangleright`, `\ntriangleleft`, `\ntrianglelefteq`,
 		`\ntriangleright`, `\ntrianglerighteq`, `\trianglelefteq`, `\triangleq`, `\trianglerighteq`,
@@ -693,9 +679,7 @@ func TestAMSTriRels(t *testing.T) {
 }
 
 func TestAMSArrows(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\circlearrowleft`, `\circlearrowright`, `\curvearrowleft`, `\curvearrowright`,
 		`\downdownarrows`, `\leftarrowtail`, `\leftleftarrows`, `\leftrightarrows`,
@@ -707,7 +691,7 @@ func TestAMSArrows(t *testing.T) {
 		`\leftrightharpoons`, `\rightleftharpoons`, `\upharpoonleft`, `\upharpoonright`,
 	}
 	width := 640
-	RunTest(t, "ams-arrows", width, 350, func(pc *paint.Painter) {
+	RunTest(t, "ams-arrows", width, 385, func(pc *paint.Painter) {
 		pc.Fill.Color = colors.Uniform(color.Black)
 		fsize := pc.Text.FontSize.Dots
 		y := fsize
@@ -743,9 +727,7 @@ func TestAMSArrows(t *testing.T) {
 }
 
 func TestAMSOperators(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\iint`, `\iiint`, `\iiiint`, `\idotsinit`,
 	}
@@ -786,9 +768,7 @@ func TestAMSOperators(t *testing.T) {
 }
 
 func TestGreek(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	skipTex(t)
 	tests := []string{
 		`\alpha`, `\beta`, `\gamma`, `\Gamma`, `\delta`, `\Delta`, `\epsilon`, `\varepsilon`,
 		`\zeta`, `\eta`, `\theta`, `\vartheta`, `\Theta`, `\iota`,

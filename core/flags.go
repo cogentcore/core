@@ -13,7 +13,9 @@ import (
 
 // StateIs returns whether the widget has the given [states.States] flag set.
 func (wb *WidgetBase) StateIs(state states.States) bool {
-	return wb.Styles.State.HasFlag(state)
+	// This is equivalent to [states.States.HasFlag] without converting the
+	// flag to an [enums.BitFlag], since it is called very frequently.
+	return wb.Styles.State&(1<<uint32(state)) != 0
 }
 
 // AbilityIs returns whether the widget has the given [abilities.Abilities] flag set.

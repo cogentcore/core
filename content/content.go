@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/maps"
 
@@ -32,6 +33,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
@@ -101,6 +103,19 @@ type Content struct {
 	// by kebab-case heading name.
 	tocNodes map[string]*core.Tree
 
+	// tocTree is the table of contents tree of the current page in [Content.leftFrame].
+	tocTree *core.Tree
+
+	// categoriesTree is the categories tree in [Content.leftFrame]. It is made once
+	// and kept between pages; [Content.updateCategories] updates it for each page.
+	categoriesTree *core.Tree
+
+	// categoryTrees are the tree nodes of [Content.categories] in [Content.categoriesTree].
+	categoryTrees []*core.Tree
+
+	// categoryPages are the pages of the page nodes in [Content.categoriesTree].
+	categoryPages map[*core.Tree]*bcontent.Page
+
 	// inPDFRender indicates that it is rendering a PDF now, turning off
 	// elements that are not appropriate for that.
 	inPDFRender bool
@@ -111,7 +126,22 @@ type Content struct {
 
 	// if non-nil, a message is sent when content page is rendered
 	renderChan chan struct{}
+
+	// loads counts the pages loaded by [Content.loadPage], so that the rest of
+	// a staged page (see [Content.loadRest]) is only added to its own page.
+	loads int
+
+	// leftScroll is the vertical scroll offset of [Content.leftFrame] when
+	// a staged page was loaded, which [Content.loadRest] restores.
+	leftScroll float32
 }
+
+// stagePages is whether long pages are shown in two stages on the web: the
+// first part of the page is shown first, and the rest is added right after
+// (see [Content.loadRest]). Building, styling and laying out the widgets of a
+// long page takes much longer on the web than natively, and most of them are
+// not visible at first.
+var stagePages = true
 
 func init() {
 	// We want Command+[ and Command+] to work for browser back/forward navigation
@@ -121,10 +151,20 @@ func init() {
 	system.ReservedWebShortcuts = append(system.ReservedWebShortcuts, "Command+[", "Command+]")
 }
 
+// keepCategories is whether the categories tree is kept between pages,
+// instead of being made again for each page (tests compare the two).
+var keepCategories = true
+
 // NewPageInitFunc is called when a new page is just being rendered.
 // This can do any necessary new-page initialization, e.g.,
 // [yaegicore.ResetGoalInterpreter]
 var NewPageInitFunc func()
+
+// ImageCacheBytes is the maximum total size in bytes of the decoded
+// images that a [Content] keeps in the [htmlcore.ImageCache] of its
+// [Content.Context], so that revisiting a page does not decode its
+// images again.
+var ImageCacheBytes = 64 << 20
 
 func (ct *Content) Init() {
 	ct.Splits.Init()
@@ -132,6 +172,8 @@ func (ct *Content) Init() {
 
 	ct.Context = htmlcore.NewContext()
 	ct.Context.DelayedImageLoad = false // not useful for content
+	// The source does not change until SetSource, which resets the cache.
+	ct.Context.ImageCache = htmlcore.NewImageCache(ImageCacheBytes)
 	ct.Context.OpenURL = func(url string, e events.Event) {
 		ct.OpenEvent(url, e)
 	}
@@ -208,6 +250,9 @@ func (ct *Content) pageFrame() *core.Frame {
 // pageMaker is the maker function for a page
 func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 	tree.Add(p, func(w *core.Frame) {
+		if system.GenerateHTMLArg() {
+			w.SetProperty("class", "cc-page-frame") // responsive padding in the web content.css
+		}
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(1, 1)
@@ -234,6 +279,10 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 						w.SetText(ct.current.Page.Title)
 					})
 					w.SetType(core.TextDisplaySmall)
+					if system.GenerateHTMLArg() {
+						w.SetProperty("tag", "h1")
+						w.SetProperty("page-title", true) // not in table of contents
+					}
 				})
 			}
 			if !ct.inPDFRender && len(ct.current.Page.Authors) > 0 {
@@ -323,6 +372,9 @@ func (ct *Content) pageByName(name string) *bcontent.Page {
 // SetSource sets the source filesystem for the content.
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
+	if ct.Context.ImageCache != nil {
+		ct.Context.ImageCache.Reset()
+	}
 	ct.pages = []*bcontent.Page{}
 	ct.pagesByName = map[string]*bcontent.Page{}
 	ct.pagesByURL = map[string]*bcontent.Page{}
@@ -378,6 +430,11 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		}
 		return isCategory
 	})
+	// The categories tree of the old source is made again.
+	if ct.categoriesTree != nil {
+		ct.categoriesTree.Delete()
+		ct.categoriesTree = nil
+	}
 
 	if url := ct.getWebURL(); url != "" {
 		return ct.Open(url)
@@ -462,37 +519,119 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
 	}
+	resetGoal(ct.current.Page.Filename)
 	w.DeleteChildren()
 	b, err := ct.current.Page.ReadContent(ct.pagesByCategory)
 	if err != nil {
 		return err
 	}
 	ct.current.Page.ParseSpecials(b)
+
+	// A long page opened at its start is shown in two stages on the web.
+	ct.loads++
+	staged := stagePages && core.TheApp.Platform() == system.Web && ct.current.Heading == "" && !ct.inPDFRender
+	if staged {
+		ct.Context.StageSize = ct.stageSize()
+		ct.leftScroll = ct.leftFrame.Geom.Scroll.Y
+	}
 	err = htmlcore.ReadMD(ct.Context, w, b)
+	ct.Context.StageSize = 0
 	if err != nil {
 		return err
 	}
+	if ct.Context.HasRest() {
+		loads := ct.loads
+		w.Defer(func() {
+			go ct.loadRest(w, loads)
+		})
+	}
 
-	ct.leftFrame.DeleteChildren()
 	ct.makeTableOfContents(w, ct.current.Page)
-	ct.makeCategories()
-	ct.leftFrame.Update()
+	// A new categories tree is styled with the table of contents; a kept one only
+	// restyles the nodes whose selection changes, in updateCategories.
+	if ct.makeCategories() {
+		ct.leftFrame.Update()
+	} else {
+		ct.updateCategories(true)
+		if ct.tocTree != nil {
+			ct.tocTree.Update()
+		}
+		ct.leftFrame.NeedsLayout()
+	}
 	ct.rendered = ct.current
 	return nil
+}
+
+// stageSize returns the size of the first stage of a staged page (see
+// [htmlcore.Context.StageSize]): about three times the text that fits in
+// the window.
+func (ct *Content) stageSize() int {
+	sz := ct.Scene.SceneGeom.Size
+	charsPerLine := max(sz.X/9, 40)
+	lines := max(sz.Y/24, 20)
+	return 3 * charsPerLine * lines
+}
+
+// loadRest adds the rest of a staged page to the page frame w after the
+// first stage has been shown, unless another page has been loaded since
+// (the given loads is [Content.loads] when the page was loaded).
+func (ct *Content) loadRest(w *core.Frame, loads int) {
+	// The browser shows the first stage before the rest is added.
+	time.Sleep(time.Millisecond)
+	ct.AsyncLock()
+	defer ct.AsyncUnlock()
+	if ct.loads != loads || w.This == nil || !ct.Context.HasRest() {
+		return
+	}
+
+	// The widgets of the rest are updated, styled and laid out, and the
+	// table of contents is made again with their headings.
+	parent, start, err := ct.Context.ReadRest()
+	errors.Log(err)
+	pw := parent.AsWidget()
+	for _, c := range pw.Children[start:] {
+		c.(core.Widget).AsWidget().Update()
+	}
+	ct.makeTableOfContents(w, ct.current.Page)
+	if ct.tocTree != nil {
+		ct.tocTree.Update()
+	}
+	ct.leftFrame.NeedsLayout()
+	w.NeedsLayout()
+
+	// The sidebar is scrolled back to where it was before the page was
+	// loaded, which the shorter table of contents of the first stage may
+	// have limited, once the layout has updated its range.
+	if scroll := ct.leftScroll; scroll != 0 {
+		ct.leftFrame.Defer(func() {
+			if sb := ct.leftFrame.Scrolls[math32.Y]; sb != nil && ct.loads == loads {
+				sb.SetValue(-scroll)
+				ct.leftFrame.ScrollChanged(math32.Y, sb)
+			}
+		})
+	}
 }
 
 func (ct *Content) RenderWidget() {
 	ct.Splits.RenderWidget()
 	if ct.renderChan != nil {
-		ct.renderChan <- struct{}{}
+		select {
+		case ct.renderChan <- struct{}{}:
+		default:
+		}
 	}
 }
 
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
 func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
+	ct.deleteTableOfContents()
 	ct.tocNodes = map[string]*core.Tree{}
-	contents := core.NewTree(ct.leftFrame).SetText("<b>Contents</b>")
+	// The table of contents goes before the categories tree, which is kept between pages.
+	contents := core.NewTree()
+	ct.leftFrame.InsertChild(contents, 0)
+	contents.SetText("<b>Contents</b>")
+	ct.tocTree = contents
 	contents.SetReadOnly(true)
 	contents.OnSelect(func(e events.Event) {
 		if contents.IsRootSelected() {
@@ -534,14 +673,30 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	})
 
 	if contents.NumChildren() == 0 {
-		contents.Delete()
+		ct.deleteTableOfContents()
 	}
 }
 
-// makeCategories makes the categories tree for the current page and adds it to [Content.leftFrame].
-func (ct *Content) makeCategories() {
-	if len(ct.categories) == 0 {
-		return
+// deleteTableOfContents deletes the table of contents tree, if there is one.
+func (ct *Content) deleteTableOfContents() {
+	if ct.tocTree != nil {
+		ct.tocTree.Delete()
+		ct.tocTree = nil
+	}
+}
+
+// hasCategoriesTree returns whether [Content.categoriesTree] is the
+// current categories tree in [Content.leftFrame].
+func (ct *Content) hasCategoriesTree() bool {
+	cats := ct.categoriesTree
+	return cats != nil && cats.This != nil && ct.leftFrame != nil && cats.Parent == ct.leftFrame.This
+}
+
+// makeCategories makes the categories tree for the current page and adds it to
+// [Content.leftFrame] if it does not have it yet, returning whether it made it.
+func (ct *Content) makeCategories() bool {
+	if len(ct.categories) == 0 || ct.hasCategoriesTree() {
+		return false
 	}
 
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
@@ -551,11 +706,12 @@ func (ct *Content) makeCategories() {
 			ct.OpenEvent("", e)
 		}
 	})
-	for _, cat := range ct.categories {
+	ct.categoriesTree = cats
+	ct.categoryTrees = make([]*core.Tree, len(ct.categories))
+	ct.categoryPages = map[*core.Tree]*bcontent.Page{}
+	for i, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
-		if ct.current.Page.Name == cat {
-			catTree.SetSelected(true)
-		}
+		ct.categoryTrees[i] = catTree
 		catTree.OnSelect(func(e events.Event) {
 			if catPage := ct.pageByName(cat); catPage != nil {
 				ct.OpenEvent(catPage.URL, e)
@@ -568,15 +724,84 @@ func (ct *Content) makeCategories() {
 				continue
 			}
 			pgTree := core.NewTree(catTree).SetText(pg.Name)
-			if pg == ct.current.Page {
-				pgTree.SetSelected(true)
-				catTree.SetClosed(false)
-			}
+			ct.categoryPages[pgTree] = pg
 			pgTree.OnSelect(func(e events.Event) {
 				ct.OpenEvent(pg.URL, e)
 			})
 		}
 	}
+	ct.updateCategories(false)
+	return true
+}
+
+// updateCategories selects the nodes of the categories tree for the current page
+// and opens the categories that contain it, closing the others, as a new tree has them.
+// If restyle is true, the nodes whose selection changes are styled again.
+func (ct *Content) updateCategories(restyle bool) {
+	var selected []core.Treer
+	// setSelected sets whether the given node is selected.
+	setSelected := func(tr *core.Tree, sel bool) {
+		if sel {
+			selected = append(selected, tr)
+		}
+		if tr.StateIs(states.Selected) == sel {
+			return
+		}
+		tr.SetState(sel, states.Selected)
+		if restyle {
+			styleTreeNode(tr)
+		}
+	}
+
+	// The root is selected by a click on it until the home page opens.
+	setSelected(ct.categoriesTree, false)
+	for i, catTree := range ct.categoryTrees {
+		setSelected(catTree, ct.current.Page.Name == ct.categories[i])
+		hasPage := false
+		for _, k := range catTree.Children {
+			pgTree := k.(*core.Tree)
+			isPage := ct.categoryPages[pgTree] == ct.current.Page
+			hasPage = hasPage || isPage
+			setSelected(pgTree, isPage)
+		}
+		if hasPage {
+			catTree.Open()
+		} else {
+			catTree.Close()
+		}
+	}
+	ct.categoriesTree.SelectedNodes = selected
+}
+
+// styleTreeNode styles the given tree node and its parts, which inherit
+// its selection colors, but not its child nodes.
+func styleTreeNode(tr *core.Tree) {
+	tr.Style()
+	if tr.Parts != nil {
+		tr.Parts.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+			cw.Style()
+			return tree.Continue
+		})
+	}
+	tr.NeedsRender()
+}
+
+// updateScene updates the scene for a new page, as [core.WidgetBase.Update]
+// does, except for the categories tree, which [Content.loadPage] updates.
+func (ct *Content) updateScene() {
+	cats := ct.categoriesTree
+	if !ct.hasCategoriesTree() {
+		cats = nil
+	}
+	ct.Scene.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		if cats != nil && cwb == cats.AsWidget() {
+			return tree.Break
+		}
+		cwb.UpdateWidget()
+		cw.Style()
+		return tree.Continue
+	})
+	ct.Scene.NeedsLayout()
 }
 
 // embedPage handles an <embed-page> element by embedding the lead section
@@ -690,11 +915,20 @@ func (ct *Content) PageRefs(page *bcontent.Page) *core.Frame {
 // LoadEachPage is a helper function to iterate through loading each page,
 // which is used for updating the math cache.
 func (ct *Content) LoadEachPage(after func()) error {
-	ct.renderChan = make(chan struct{})
+	// The render sends on the channel without blocking (it has the
+	// render lock), and a send for an earlier render is dropped before
+	// each page is opened.
+	ct.renderChan = make(chan struct{}, 1)
 	go func() {
 		for _, pg := range ct.pages {
 			fmt.Println("\n#### page:", pg.URL)
+			ct.AsyncLock()
+			select {
+			case <-ct.renderChan:
+			default:
+			}
 			ct.OpenEvent(pg.URL, nil)
+			ct.AsyncUnlock()
 			<-ct.renderChan
 			fmt.Println("rendered:", pg.URL)
 		}

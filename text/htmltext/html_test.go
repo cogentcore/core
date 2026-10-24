@@ -5,6 +5,7 @@
 package htmltext
 
 import (
+	"bytes"
 	"testing"
 
 	"cogentcore.org/core/text/rich"
@@ -105,4 +106,22 @@ func TestBreak(t *testing.T) {
 []: ""
 `
 	assert.Equal(t, trg, tx.String())
+}
+
+// TestPlainText tests that plain texts give the same rich text as
+// the decoder gives them.
+func TestPlainText(t *testing.T) {
+	sty := rich.NewStyle()
+	for _, s := range []string{"UpArrow", "   ", "Control+P, Meta+UpArrow", "a > b", "x ]] > y", "naïve café 日本語 😀", "tab\tand\nnewline  spaces ", "'quotes' \"double\"", "a]]>b", "a & b", "<b>bold</b>", "\ufeffbom", "ctrl\x01char"} {
+		b := bytes.Join(bytes.Fields([]byte(s)), []byte(" "))
+		want, werr := htmlToRich(b, sty, nil)
+		got, gerr := HTMLToRich([]byte(s), sty, nil)
+		if !isPlainText(b) {
+			continue
+		}
+		assert.Equal(t, want, got, s)
+		assert.Equal(t, werr, gerr, s)
+	}
+	assert.True(t, isPlainText([]byte("Control+P, Meta+UpArrow")))
+	assert.False(t, isPlainText([]byte("a & b")))
 }

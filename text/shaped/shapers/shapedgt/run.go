@@ -6,12 +6,13 @@ package shapedgt
 
 import (
 	"fmt"
+	"slices"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/textpos"
-	"github.com/go-text/typesetting/shaping"
+	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -167,8 +168,12 @@ func (run *Run) LastGlyphAt(i int) int {
 }
 
 // SetGlyphXAdvance sets the x advance on all glyphs to given value:
-// for monospaced case.
+// for monospaced case. Glyphs that do not have it yet are copied first,
+// as runs of the shape cache share them.
 func (run *Run) SetGlyphXAdvance(adv fixed.Int26_6) {
+	if slices.ContainsFunc(run.Glyphs, func(g shaping.Glyph) bool { return g.Advance != adv }) {
+		run.Glyphs = slices.Clone(run.Glyphs)
+	}
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
 		g.Advance = adv

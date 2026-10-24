@@ -5,6 +5,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -25,6 +26,10 @@ func (p Platform) String() string {
 // OSSupported determines whether the given operating system is supported by Cogent Core. If it is, it returns nil.
 // If it isn't, it returns an error detailing the issue with the operating system (not found or not supported).
 func OSSupported(os string) error {
+	// The web platform of earlier versions is now two platforms.
+	if os == "web" {
+		return errors.New("the web platform has been replaced by js and wasm: use js (recommended; compiles to JavaScript with GoScript) or wasm (compiles to WebAssembly)")
+	}
 	supported, ok := supportedOS[os]
 	if !ok {
 		return fmt.Errorf("could not find operating system %s; please check that you spelled it correctly", os)
@@ -88,7 +93,8 @@ var supportedOS = map[string]bool{
 	"hurd":      false,
 	"illumos":   false,
 	"ios":       true,
-	"web":       true,
+	"js":        true,
+	"wasm":      true,
 	"linux":     true,
 	"nacl":      false,
 	"netbsd":    false,

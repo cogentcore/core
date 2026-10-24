@@ -182,9 +182,16 @@ type Base struct { //core:embedder
 	// targetSet indicates that the CursorTarget is set
 	targetSet bool
 
-	lastRecenter   int
-	lastAutoInsert rune
-	lastFilename   string
+	lastRecenter int
+
+	// autoInserted is the stack of closing brackets that were
+	// auto-inserted after the cursor on line autoInsertLine, which are
+	// typed over when typed right before them, so that typing the
+	// closing bracket does not duplicate it.
+	autoInserted   []rune
+	autoInsertLine int
+
+	lastFilename string
 }
 
 func (ed *Base) WidgetValue() any { return ed.Lines.Text() }
@@ -250,6 +257,12 @@ func (ed *Base) Init() {
 
 func (ed *Base) Destroy() {
 	ed.stopCursor()
+	// Our view is deleted so that its listeners, which use us,
+	// are not called anymore.
+	if ed.Lines != nil {
+		ed.Lines.DeleteView(ed.viewId)
+		ed.viewId = -1
+	}
 	ed.Frame.Destroy()
 }
 
@@ -343,6 +356,18 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 			}
 			ed.NeedsRender()
 			ed.SendInput()
+		})
+		// The markup is updated in the background, and then the
+		// listeners must have the lock of our scene. They only render
+		// us again, so they are skipped if our scene is not shown, so
+		// that a scene that is closing does not block the updates of the
+		// other views.
+		ln.SetAsyncRunner(ed.viewId, func(f func()) {
+			if !ed.AsyncLockIfShown() {
+				return
+			}
+			defer ed.AsyncUnlock()
+			f()
 		})
 		ln.OnClose(ed.viewId, func(e events.Event) {
 			ed.SetLines(nil)

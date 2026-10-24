@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["reflect/reflect"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Append":          reflect.ValueOf(reflect.Append),
@@ -92,7 +92,7 @@ func init() {
 		// interface wrapper definitions
 		"_Type": reflect.ValueOf((*_reflect_Type)(nil)),
 	}
-}
+})
 
 // _reflect_Type is an interface wrapper for Type type
 type _reflect_Type struct {

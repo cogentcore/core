@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/cli"
-	"github.com/go-text/typesetting/font/opentype"
+	"github.com/cogentcore/typesetting/font/opentype"
 )
 
 //go:generate core generate -add-types -add-funcs

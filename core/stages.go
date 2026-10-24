@@ -52,6 +52,19 @@ func (sm *stages) top() *Stage {
 	return sm.stack.ValueByIndex(sz - 1)
 }
 
+// list returns a copy of the stages in the stack, from bottom to top,
+// under the lock, for reading the stages of another window.
+func (sm *stages) list() []*Stage {
+	sm.Lock()
+	defer sm.Unlock()
+
+	sts := make([]*Stage, 0, sm.stack.Len())
+	for _, kv := range sm.stack.Order {
+		sts = append(sts, kv.Value)
+	}
+	return sts
+}
+
 // uniqueName returns unique name for given item
 func (sm *stages) uniqueName(nm string) string {
 	ctr := 0
@@ -291,8 +304,8 @@ func (sm *stages) runDeferred() {
 
 		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
-			if !sc.hasFlag(sceneHasShown) {
-				sc.setFlag(true, sceneHasShown)
+			if !sc.hasShown.Load() {
+				sc.hasShown.Store(true)
 				sc.Shown()
 			}
 		}

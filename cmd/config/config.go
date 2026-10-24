@@ -52,8 +52,8 @@ type Config struct { //types:add
 
 	// Content, if specified, indicates that the app has core content pages
 	// located at this directory. If so, a directory tree will be made for all
-	// of the pages when building for platform web. This defaults to "content"
-	// when building an app for platform web that imports content.
+	// of the pages when building for the js and wasm platforms. This defaults
+	// to "content" when building an app for js or wasm that imports content.
 	Content string
 
 	// the configuration options for the build, install, run, and pack commands
@@ -70,6 +70,11 @@ type Config struct { //types:add
 
 	// the configuration options for the generate command
 	Generate Generate `cmd:"generate"`
+
+	// ContentCode has the options for compiling the code blocks of content
+	// apps into them, which the build, install, run, pack, and generate
+	// commands do (see cogentcore.org/core/content/contentcode).
+	ContentCode ContentCode `cmd:"build,install,run,pack,generate"`
 }
 
 type Build struct { //types:add
@@ -149,6 +154,22 @@ type Generate struct { //types:add
 	Icons string
 }
 
+// ContentCode has the options for compiling the code blocks of content apps
+// into them (see cogentcore.org/core/content/contentcode). They add to the
+// arguments of a go:generate directive that runs contentcode, if there is one.
+type ContentCode struct { //types:add
+
+	// Imports are other packages that code blocks can use without
+	// importing them, as import paths or name=path.
+	Imports []string
+
+	// GoalRecord is whether Goal math mode records its variables in tensorfs
+	// and lists tensorfs to the output of the code block, as the Goal
+	// interpreter of Cogent Lab (cogentcore.org/lab/yaegilab) does. Turn it
+	// off for sites whose Goal interpreter does not.
+	GoalRecord bool `default:"true"`
+}
+
 func (c *Config) OnConfig(cmd string) error {
 	// if we have no target, we assume it is our current platform,
 	// unless we are in init, in which case we do not want to set
@@ -158,7 +179,7 @@ func (c *Config) OnConfig(cmd string) error {
 	}
 	if c.Build.Output == "" && len(c.Build.Target) > 0 {
 		t := c.Build.Target[0]
-		if cmd == "pack" || t.OS == "web" || t.OS == "android" || t.OS == "ios" {
+		if cmd == "pack" || t.OS == "wasm" || t.OS == "js" || t.OS == "android" || t.OS == "ios" {
 			c.Build.Output = filepath.Join("bin", t.OS)
 		}
 	}

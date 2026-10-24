@@ -13,7 +13,7 @@ import (
 	"reflect"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["log/slog/slog"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"Any":               reflect.ValueOf(slog.Any),
@@ -97,7 +97,7 @@ func init() {
 		"_Leveler":   reflect.ValueOf((*_log_slog_Leveler)(nil)),
 		"_LogValuer": reflect.ValueOf((*_log_slog_LogValuer)(nil)),
 	}
-}
+})
 
 // _log_slog_Handler is an interface wrapper for Handler type
 type _log_slog_Handler struct {

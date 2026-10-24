@@ -21,8 +21,8 @@ import (
 )
 
 func (rs *Renderer) RenderImage(pr *pimage.Params) {
-	usrc := imagex.Unwrap(pr.Source)
-	umask := imagex.Unwrap(pr.Mask)
+	usrc := unwrapLocal(pr.Source)
+	umask := unwrapLocal(pr.Mask)
 
 	nilSrc := usrc == nil
 	if pr.Rect == (image.Rectangle{}) {
@@ -36,7 +36,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		if u == nil || u.C == colors.Transparent {
 			rs.ctx.Call("clearRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		} else {
-			rs.ctx.Set("fillStyle", rs.imageToStyle(u))
+			rs.setFillStyle(rs.imageToStyle(u))
 			rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		}
 		return
@@ -44,7 +44,7 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 
 	if gr, ok := usrc.(gradient.Gradient); ok {
 		rs.curRect = pr.Rect
-		rs.ctx.Set("fillStyle", rs.imageToStyle(gr))
+		rs.setFillStyle(rs.imageToStyle(gr))
 		rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		return
 	}
@@ -65,4 +65,15 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	} else {
 		rs.ctx.Call("putImageData", ji.JS.Data, pr.Rect.Min.X, pr.Rect.Min.Y, pr.SourcePos.X, pr.SourcePos.Y, sw, sh)
 	}
+}
+
+// unwrapLocal returns the local image of a wrapped image, except for a
+// [imagex.JSRGBA], which is drawn from its ImageBitmap: unwrapping it would
+// read its pixels back from the bitmap of an image that the browser decoded,
+// on every render.
+func unwrapLocal(im image.Image) image.Image {
+	if _, ok := im.(*imagex.JSRGBA); ok {
+		return im
+	}
+	return imagex.Unwrap(im)
 }

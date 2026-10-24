@@ -47,11 +47,20 @@ func (vs *Values) SetN(vr *Var, dev *Device, nvals int) bool {
 	if cn == nvals {
 		return false
 	}
+	// Values that are dropped release their buffers and textures now,
+	// instead of when they are garbage collected.
+	for i := nvals; i < cn; i++ {
+		vs.Values[i].Release()
+	}
 	vs.Values = slicesx.SetLength(vs.Values, nvals)
 	for i := cn; i < nvals; i++ {
-		vl := NewValue(vr, dev, cn)
+		vl := NewValue(vr, dev, i)
 		vs.Values[i] = vl
 	}
+	if vs.current >= nvals {
+		vs.current = 0
+	}
+	vr.VarGroup.ValuesUpdated()
 	return true
 }
 

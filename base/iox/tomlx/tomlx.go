@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package tomlx provides functions for reading and writing TOML.
+// It parses TOML with github.com/BurntSushi/toml and has its own code for
+// setting the parsed values on Go values and for writing TOML, which is
+// compatible with the github.com/pelletier/go-toml/v2 based version used
+// before (which does not work in JavaScript, as it uses unsafe pointer
+// arithmetic): it reads all of the files that version wrote and writes
+// the same format, including [time.Duration] values as integer
+// nanoseconds and maps with non-string keys, such as enums and ints.
 package tomlx
 
 import (
@@ -11,11 +19,7 @@ import (
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox"
-	"github.com/pelletier/go-toml/v2"
 )
-
-// NewDecoder returns a new [iox.Decoder]
-func NewDecoder(r io.Reader) iox.Decoder { return toml.NewDecoder(r) }
 
 // Open reads the given object from the given filename using TOML encoding
 func Open(v any, filename string) error {
@@ -49,11 +53,6 @@ func Read(v any, reader io.Reader) error {
 // using TOML encoding
 func ReadBytes(v any, data []byte) error {
 	return iox.ReadBytes(v, data, NewDecoder)
-}
-
-// NewEncoder returns a new [iox.Encoder]
-func NewEncoder(w io.Writer) iox.Encoder {
-	return toml.NewEncoder(w).SetIndentTables(true).SetArraysMultiline(true)
 }
 
 // Save writes the given object to the given filename using TOML encoding

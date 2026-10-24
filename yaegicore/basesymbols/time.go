@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func init() {
+var _ = register(func() {
 	Symbols["time/time"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"ANSIC":                  reflect.ValueOf(constant.MakeFromLiteral("\"Mon Jan _2 15:04:05 2006\"", token.STRING, 0)),
@@ -91,4 +91,4 @@ func init() {
 		"Timer":      reflect.ValueOf((*time.Timer)(nil)),
 		"Weekday":    reflect.ValueOf((*time.Weekday)(nil)),
 	}
-}
+})

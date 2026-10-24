@@ -19,6 +19,10 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 `
 
 	lns, vid := NewLinesFromBytes("dummy.md", 80, []byte(src))
+	// The unexported functions tested here require the lock, which also
+	// keeps the background markup from changing the layout during the test.
+	lns.Lock()
+	defer lns.Unlock()
 	vw := lns.view(vid)
 
 	// for ln := range vw.viewLines {

@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/iox/xmlx"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/stack"
 	"cogentcore.org/core/colors"
@@ -29,7 +30,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/styleprops"
 	"cogentcore.org/core/tree"
-	"golang.org/x/net/html/charset"
 )
 
 // this file contains all the IO-related parsing etc routines
@@ -85,7 +85,7 @@ func (sv *SVG) ReadXML(reader io.Reader) error {
 	decoder.Strict = false
 	decoder.AutoClose = xml.HTMLAutoClose
 	decoder.Entity = xml.HTMLEntity
-	decoder.CharsetReader = charset.NewReaderLabel
+	decoder.CharsetReader = xmlx.CharsetReader
 	var err error
 outer:
 	for {

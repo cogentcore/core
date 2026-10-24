@@ -48,6 +48,8 @@ func TestKeyedListChange(t *testing.T) {
 		maps.Copy(value, m)
 	})
 	b.AssertRender(t, "keyed-list/change", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		// [3] is value of second row, which is "Go" since it is sorted alphabetically
 		mv.Child(3).(*Spinner).trailingIconButton.Send(events.Click)
 		assert.Equal(t, 1, n)
@@ -68,6 +70,8 @@ func TestKeyedListChangeKey(t *testing.T) {
 		maps.Copy(value, m)
 	})
 	b.AssertRender(t, "keyed-list/change-key", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		// [4] is key of third row, which is "Python" since it is sorted alphabetically
 		mv.Child(4).(*TextField).SetText("JavaScript").SendChange()
 		assert.Equal(t, 1, n)
