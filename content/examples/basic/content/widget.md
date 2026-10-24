@@ -8,3 +8,8 @@ A **widget** is a reusable app component that renders, stores information, and h
 
 * [[Button]]
     * [[Button#Types]]
+	
+Featured poetry\
+is weird\
+indeed.
+
