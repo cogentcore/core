@@ -15,24 +15,23 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/mvmcore/basesymbols"
 	"cogentcore.org/core/mvmcore/coresymbols"
 	"cogentcore.org/core/text/textcore"
-	"github.com/cogentcore/mvm/goparser"
 	"github.com/cogentcore/mvm/interp"
 	"github.com/cogentcore/mvm/lang/golang"
 	"github.com/cogentcore/mvm/stdlib"
 	_ "github.com/cogentcore/mvm/stdlib/core" // the core standard library
-	"github.com/cogentcore/mvm/symbol"
 )
 
 // Interpreters is a map from language names (such as "Go") to functions that
 // make a new [Interpreter] for that language, writing its output to out. The
 // base implementation is an mvm interpreter for Go (see [NewGo]), but other
-// packages can add other languages.
+// packages can add other languages, as cogentcore.org/lab/mvmlab does Goal.
 var Interpreters = map[string]func(out io.Writer) (Interpreter, error){
 	"Go": func(out io.Writer) (Interpreter, error) { return NewGo(out) },
 }
@@ -44,10 +43,10 @@ type Interpreter interface {
 	Eval(src string) (reflect.Value, error)
 }
 
-// dotPackage is the import path of the package of the names that code can
+// DotPackage is the import path of the package of the names that code can
 // use without a package: b, the parent widget of the code, and the names of
-// [content.CodeSymbols].
-const dotPackage = "cogentcore.org/core/mvmcore/dot"
+// [content.CodeSymbols]. Its symbols are [DotValues].
+const DotPackage = "cogentcore.org/core/mvmcore/dot"
 
 var (
 	autoPlanNameCounter uint64
@@ -56,9 +55,28 @@ var (
 	// updated before the code runs.
 	interpreterParent = new(*core.Frame)
 
-	// interpOutput is the output of the code.
+	// interpOutput is the output of the code. It is global because the
+	// Goal interpreter of a page is used for all of its code blocks.
 	interpOutput bytes.Buffer
+
+	// currentGoal is the Goal interpreter of the current page, which runs
+	// all of its Goal code blocks, so that they share their variables.
+	currentGoal Interpreter
 )
+
+func init() {
+	content.BindTextEditor = BindTextEditor
+	content.NewPageInitFunc = ResetGoalInterpreter
+}
+
+// Load adds the symbols of [basesymbols] and [coresymbols] to their Values,
+// once, with tree.AutoPlanName replaced by one that works for interpreted
+// code (see [autoPlanName]). It must be called before importing them.
+func Load() {
+	basesymbols.Load()
+	coresymbols.Load()
+	coresymbols.Values["cogentcore.org/core/tree"]["AutoPlanName"] = reflect.ValueOf(autoPlanName)
+}
 
 // Go is an mvm interpreter of Go code.
 type Go struct {
@@ -66,41 +84,19 @@ type Go struct {
 }
 
 // NewGo returns a new interpreter of Go code, writing its output to out,
-// with the symbols of [basesymbols.Values], [coresymbols.Values] and the mvm
-// core standard library imported, and with all of these packages usable
-// without an import.
+// with the symbols of [basesymbols.Values], [coresymbols.Values], the mvm
+// core standard library and [DotPackage] imported, and with all of these
+// packages usable without an import.
 func NewGo(out io.Writer) (*Go, error) {
-	basesymbols.Load()
-	coresymbols.Load()
-	coresymbols.Values["cogentcore.org/core/tree"]["AutoPlanName"] = reflect.ValueOf(autoPlanName)
+	Load()
 	in := interp.NewInterpreter(golang.GoSpec)
-	if stdlib.EmbeddedStd() == nil {
-		in.SetStdlibFS(basesymbols.StdSource())
-	}
 	in.SetIO(strings.NewReader(""), out, out)
-	in.ImportPackageValues(stdlib.Values)
-	in.ImportPackageValues(basesymbols.Values)
-	in.ImportPackageValues(coresymbols.Values)
-	in.ImportPackageValues(map[string]map[string]reflect.Value{dotPackage: dotValues()})
-	in.AutoImportPackages()
-
-	// The Cogent Core packages take the names that they share with standard
-	// library packages, as errors, whose functions base/errors also has.
-	for _, values := range []map[string]map[string]reflect.Value{basesymbols.Values, coresymbols.Values} {
-		for path := range values {
-			if !strings.HasPrefix(path, "cogentcore.org/") {
-				continue
-			}
-			name := goparser.PackageName(path)
-			in.SymSet(name, &symbol.Symbol{Kind: symbol.Pkg, PkgPath: path, Index: symbol.UnsetAddr, Name: name, AutoImport: true})
-		}
-	}
+	basesymbols.Import(in, stdlib.Values, basesymbols.Values, coresymbols.Values, map[string]map[string]reflect.Value{DotPackage: DotValues()})
 	return &Go{in}, nil
 }
 
-// dotValues returns the values of the names that code can use without a
-// package (see [dotPackage]).
-func dotValues() map[string]reflect.Value {
+// DotValues returns the values of the names of [DotPackage].
+func DotValues() map[string]reflect.Value {
 	values := map[string]reflect.Value{
 		"b": reflect.ValueOf(interpreterParent),
 	}
@@ -118,18 +114,56 @@ func dotValues() map[string]reflect.Value {
 // Eval runs the given Go code. Code without a main function is run in one,
 // so that it can be a list of statements, which then also handles type
 // declarations correctly; code with a main function, with declarations
-// outside of it, runs it. The names of [dotPackage] are imported in the
-// same source: importing them in an Eval of their own makes mvm fail to
-// run the next one.
+// outside of it, runs it. The names of [DotPackage] are imported in the
+// same source, as each Eval makes a new main function.
 func (g *Go) Eval(src string) (reflect.Value, error) {
 	if !strings.Contains(src, "func main()") {
 		src = "func main() {\n" + src + "\n}"
 	}
-	return g.Interp.Eval("code", fmt.Sprintf("import . %q\n", dotPackage)+src)
+	return g.Interp.Eval("code", fmt.Sprintf("import . %q\n", DotPackage)+src)
 }
 
-func init() {
-	content.BindTextEditor = BindTextEditor
+// ResetGoalInterpreter makes the next Goal code block use a new Goal
+// interpreter. It is the value of [content.NewPageInitFunc], so that each
+// page has its own.
+func ResetGoalInterpreter() {
+	currentGoal = nil
+}
+
+// getInterpreter returns the interpreter for the given language: a new one,
+// except for Goal, whose interpreter of the current page is used for all of
+// its code blocks. new is whether it is a new one.
+func getInterpreter(language string) (in Interpreter, new bool, err error) {
+	if language == "Goal" && currentGoal != nil {
+		return currentGoal, false, nil
+	}
+	f := Interpreters[language]
+	if f == nil {
+		return nil, false, fmt.Errorf("no entry in mvmcore.Interpreters for language %q", language)
+	}
+	in, err = f(&interpOutput)
+	if err != nil {
+		return nil, false, fmt.Errorf("making the %s interpreter: %w", language, err)
+	}
+	if language == "Goal" {
+		currentGoal = in
+	}
+	return in, true, nil
+}
+
+// replayGoal runs in the new Goal interpreter in the Goal code blocks of the
+// page that ran compiled before ([content.GoalReplay]), so that it has the
+// variables that they made.
+func replayGoal(in Interpreter) {
+	replay := content.GoalReplay
+	content.GoalReplay = nil
+	for _, src := range replay {
+		interpOutput.Reset()
+		if _, err := in.Eval(src); err != nil {
+			errors.Log(fmt.Errorf("mvmcore: running the compiled Goal code of the page again: %w", err))
+		}
+	}
+	interpOutput.Reset()
 }
 
 // BindTextEditor binds the given text editor to an mvm interpreter such that
@@ -138,18 +172,15 @@ func init() {
 // the value of [content.BindTextEditor] when this package is imported.
 func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 	oc := func() {
-		f := Interpreters[language]
-		if f == nil {
-			core.ErrorSnackbar(ed, fmt.Errorf("no entry in mvmcore.Interpreters for language %q", language))
-			return
-		}
-		in, err := f(&interpOutput)
+		in, new, err := getInterpreter(language)
 		if err != nil {
-			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error making the %s interpreter", language))
+			core.ErrorSnackbar(ed, err)
 			return
 		}
-		core.ExternalParent = parent
-		*interpreterParent = parent
+		SetParent(parent)
+		if new && language == "Goal" {
+			replayGoal(in)
+		}
 		parent.DeleteChildren()
 
 		interpOutput.Reset()
@@ -168,6 +199,13 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 	}
 	ed.OnChange(func(e events.Event) { oc() })
 	oc()
+}
+
+// SetParent sets the parent widget of the code that runs next, b, in which
+// the widgets that it makes are added (see [core.ExternalParent]).
+func SetParent(parent *core.Frame) {
+	core.ExternalParent = parent
+	*interpreterParent = parent
 }
 
 // autoPlanName returns a unique name for each tree.AddChild call of the
