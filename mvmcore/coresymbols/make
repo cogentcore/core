@@ -1,6 +1,6 @@
 #!/bin/sh
 # make generates the symbols of the packages, one gen_*.go file per package
-# (see ../internal/gen).
+# with mvm extract -register.
 set -e
 cd "$(dirname "$0")"
 /bin/rm -f gen_*.go
@@ -12,4 +12,4 @@ core="base/iox/imagex colors colors/gradient content core cursors events filetre
 
 pkgs="$std"
 for p in $core; do pkgs="$pkgs cogentcore.org/core/$p"; done
-go run ../internal/gen -pkg coresymbols $pkgs
+go run github.com/cogentcore/mvm/cmd/extract -register -pkg coresymbols $pkgs
