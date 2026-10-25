@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// goscriptPackage is the Go package of the GoScript compiler command.
-const goscriptPackage = "github.com/s4wave/goscript/cmd/goscript"
+// GoscriptPackage is the Go package of the GoScript compiler command.
+const GoscriptPackage = "github.com/s4wave/goscript/cmd/goscript"
 
 // ensureJSTools makes sure that the goscript and bun commands that the js
 // platform needs are available, installing them if they are not. GoScript is
@@ -55,6 +55,29 @@ func ensureTool(tool string, dirs []string, install func() error) error {
 		return nil
 	}
 	return fmt.Errorf("installed %s, but could not find it in %s", tool, strings.Join(dirs, ", "))
+}
+
+// ToolPath returns the path of the given tool that the js platform uses
+// (goscript or bun), on the PATH or in the directory it is normally installed
+// in, or "" if it is not installed.
+func ToolPath(tool string) string {
+	if path, err := exec.LookPath(tool); err == nil {
+		return path
+	}
+	dirs := goBinDirs()
+	if tool == "bun" {
+		dirs = bunBinDirs()
+	}
+	if runtime.GOOS == "windows" {
+		tool += ".exe"
+	}
+	for _, dir := range dirs {
+		path := filepath.Join(dir, tool)
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
 }
 
 // addToolDir adds the first of the given directories that contains the
@@ -112,7 +135,7 @@ func bunBinDirs() []string {
 
 // installGoscript installs the latest GoScript compiler with go install.
 func installGoscript() error {
-	return exec.Verbose().SetBuffer(false).Run("go", "install", goscriptPackage+"@latest")
+	return exec.Verbose().SetBuffer(false).Run("go", "install", GoscriptPackage+"@latest")
 }
 
 // installBun installs bun with its official install script: a shell script
