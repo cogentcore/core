@@ -3,12 +3,12 @@
 package basesymbols
 
 import (
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/base/num", `package num
+	genshim.Register("cogentcore.org/core/base/num", `package num
 
 
 func Abs[T Signed | Float](x T) T {

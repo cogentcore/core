@@ -3,12 +3,12 @@
 package basesymbols
 
 import (
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/base/slicesx", `package slicesx
+	genshim.Register("cogentcore.org/core/base/slicesx", `package slicesx
 
 import slices "slices"
 import unsafe "unsafe"

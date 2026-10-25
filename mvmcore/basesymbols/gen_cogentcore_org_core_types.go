@@ -4,12 +4,12 @@ package basesymbols
 
 import (
 	p_cogentcore_org_core_types "cogentcore.org/core/types"
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/types", `package types
+	genshim.Register("cogentcore.org/core/types", `package types
 
 
 func For[T any]() *Type {

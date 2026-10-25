@@ -4,12 +4,12 @@ package coresymbols
 
 import (
 	p_cogentcore_org_core_tree "cogentcore.org/core/tree"
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/tree", `package tree
+	genshim.Register("cogentcore.org/core/tree", `package tree
 
 import slicesx "cogentcore.org/core/base/slicesx"
 import slog "log/slog"

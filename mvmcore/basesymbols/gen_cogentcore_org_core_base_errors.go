@@ -4,12 +4,12 @@ package basesymbols
 
 import (
 	p_cogentcore_org_core_base_errors "cogentcore.org/core/base/errors"
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/base/errors", `package errors
+	genshim.Register("cogentcore.org/core/base/errors", `package errors
 
 import slog "log/slog"
 

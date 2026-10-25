@@ -4,12 +4,12 @@ package basesymbols
 
 import (
 	p_cogentcore_org_core_math32 "cogentcore.org/core/math32"
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/math32", `package math32
+	genshim.Register("cogentcore.org/core/math32", `package math32
 
 import cmp "cmp"
 

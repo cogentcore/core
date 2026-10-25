@@ -37,6 +37,8 @@ github.com/cogentcore/mvm v0.0.0-20261025171132-c4209321730a h1:gp2ib5IDpQS881hP
 github.com/cogentcore/mvm v0.0.0-20261025171132-c4209321730a/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/mvm v0.0.0-20261025172605-8bcb176ad33e h1:KtA3cR9+3jcIYsp3ckrz8Gep9TzJdPL9GIuvDZopNLk=
 github.com/cogentcore/mvm v0.0.0-20261025172605-8bcb176ad33e/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
+github.com/cogentcore/mvm v0.0.0-20261025173216-f0b0b75700d0 h1:HrV6HlbxUz6CIf25TAn7VpShkg6TIKi4Mk9/Yzp9emU=
+github.com/cogentcore/mvm v0.0.0-20261025173216-f0b0b75700d0/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666 h1:gmXMw/Xcva/2V5qRO920q4am1odNE0xFEGBzG7y7cus=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666/go.mod h1:HoDh/nWYrLffGjfVxUmbJHb0yZvcV3TwrN73WurddNs=
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698 h1:GsehCn/Dw8hhYAonDQO48EJz63sAAF4wxEhHmHt/xKA=

@@ -4,12 +4,12 @@ package coresymbols
 
 import (
 	p_cogentcore_org_core_htmlcore "cogentcore.org/core/htmlcore"
-	"github.com/cogentcore/mvm/goparser"
+	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	goparser.RegisterGenericShim("cogentcore.org/core/htmlcore", `package htmlcore
+	genshim.Register("cogentcore.org/core/htmlcore", `package htmlcore
 
 import core "cogentcore.org/core/core"
 import tree "cogentcore.org/core/tree"
