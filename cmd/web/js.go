@@ -55,7 +55,10 @@ func buildJS(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	tags := "goscript,purego,noasm"
+	// The mvmnosrc tag leaves the standard library sources out of the mvm
+	// interpreter (mvmcore), which only runs code using the packages bound
+	// to it, so that it adds much less to the bundle.
+	tags := "goscript,purego,noasm,mvmnosrc"
 	if c.Build.Debug {
 		tags += ",debug"
 	}
@@ -91,6 +94,13 @@ func buildJS(c *config.Config) error {
 		}
 	}
 	gsArgs := []string{"compile", "-p", ".", "--output", output, "-b", "-tags=" + tags}
+	overrides, err := jsOverrideDirs(tags)
+	if err != nil {
+		return err
+	}
+	for _, dir := range overrides {
+		gsArgs = append(gsArgs, "--gs-path", dir)
+	}
 	for _, f := range c.Web.DeferredFunctions {
 		gsArgs = append(gsArgs, "--deferred-function", f)
 	}
@@ -278,6 +288,34 @@ func jsMainPackage(tags string) (pkg, mainFile string, err error) {
 		}
 	}
 	return "", "", fmt.Errorf("no main function found in package %s", fields[0])
+}
+
+// jsOverrideDirs returns the GoScript override directories of the modules
+// that the package in the current directory depends on: a module provides
+// GoScript overrides of its packages, the TypeScript implementations that
+// GoScript compiles in place of their Go code, in a gsoverride directory at
+// its root, laid out by import path (such as the mvm interpreter in
+// github.com/cogentcore/mvm). GoScript is given each of them with --gs-path.
+func jsOverrideDirs(tags string) ([]string, error) {
+	out, err := exec.Minor().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").
+		Output("go", "list", "-deps", "-tags", tags, "-f", "{{with .Module}}{{.Dir}}{{end}}", ".")
+	if err != nil {
+		return nil, err
+	}
+	var dirs []string
+	seen := map[string]bool{}
+	for _, dir := range strings.Split(out, "\n") {
+		dir = strings.TrimSpace(dir)
+		if dir == "" || seen[dir] {
+			continue
+		}
+		seen[dir] = true
+		gs := filepath.Join(dir, "gsoverride")
+		if info, err := os.Stat(gs); err == nil && info.IsDir() {
+			dirs = append(dirs, gs)
+		}
+	}
+	return dirs, nil
 }
 
 // jsWorkDir returns the directory in the user cache directory that is used

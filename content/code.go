@@ -67,7 +67,7 @@ func CodeKey(src string) string {
 // and again whenever the code is edited. Code that was compiled into the
 // app (see [CompiledCode]) runs directly. Other code, including edited
 // code, runs in the interpreter of [BindTextEditor] if there is one
-// (yaegi, through cogentcore.org/core/yaegicore); otherwise an edit shows
+// (mvm, through cogentcore.org/core/mvmcore); otherwise an edit shows
 // a message that this app can not run edited code. Goal code runs
 // compiled while it matches the Goal code compiled for the page (see
 // [CompiledGoal]).

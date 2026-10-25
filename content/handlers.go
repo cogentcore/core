@@ -35,9 +35,9 @@ import (
 	"github.com/gomarkdown/markdown/ast"
 )
 
-// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
-// when importing yaegicore, which provides interactive editing functionality for Go
-// code blocks in text editors.
+// BindTextEditor is a function set to [cogentcore.org/core/mvmcore.BindTextEditor]
+// when importing mvmcore (or to that of yaegicore), which provides interactive
+// editing functionality for Go code blocks in text editors.
 var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)
 
 // handles the id attribute in htmlcore: needed for equation case

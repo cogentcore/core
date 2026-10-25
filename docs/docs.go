@@ -89,7 +89,7 @@ func main() {
 		})
 	})
 
-	// for the interpreter (yaegi.go), when code is edited
+	// for the interpreter (interp.go), when code is edited
 	content.CodeSymbols["econtent"] = econtent
 	content.CodeSymbols["myImage"] = myImage
 	content.CodeSymbols["mySVG"] = mySVG

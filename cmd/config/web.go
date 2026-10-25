@@ -67,7 +67,7 @@ type Web struct { //types:add
 	// their packages, and the packages that only they use, are in separate
 	// files of the bundle, downloaded and initialized at that first call. Code
 	// that runs at startup may refer to them only as function values (and
-	// calls), such as cogentcore.org/core/yaegicore.BindTextEditor, the
+	// calls), such as cogentcore.org/core/mvmcore.BindTextEditor, the
 	// interpreter of edited content code.
 	DeferredFunctions []string
 
