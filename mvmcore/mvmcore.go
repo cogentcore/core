@@ -104,8 +104,13 @@ func dotValues() map[string]reflect.Value {
 	values := map[string]reflect.Value{
 		"b": reflect.ValueOf(interpreterParent),
 	}
+	// Each is bound as a variable holding the value, a pointer to it, as mvm
+	// binds package variables: a pointer value bound as itself would be
+	// taken for a variable of its element type.
 	for name, v := range content.CodeSymbols {
-		values[name] = reflect.ValueOf(v)
+		rv := reflect.New(reflect.TypeOf(v))
+		rv.Elem().Set(reflect.ValueOf(v))
+		values[name] = rv
 	}
 	return values
 }

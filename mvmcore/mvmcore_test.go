@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"testing"
 
+	"cogentcore.org/core/content"
 	"cogentcore.org/core/core"
 )
 
@@ -91,5 +92,28 @@ core.NewForm(b).SetStruct(p)
 fmt.Println(p.Name)`)
 	if out != "Go\n" {
 		t.Errorf("got %q", out)
+	}
+}
+
+// TestCodeSymbols checks that the values of content.CodeSymbols, pointers
+// and others, can be used by code as they are.
+func TestCodeSymbols(t *testing.T) {
+	b := core.NewBody()
+	root := core.NewFrame(b)
+	content.CodeSymbols["root"] = root
+	content.CodeSymbols["label"] = "text"
+	defer delete(content.CodeSymbols, "root")
+	defer delete(content.CodeSymbols, "label")
+	var out bytes.Buffer
+	in, err := NewGo(&out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	*interpreterParent = core.NewFrame(b)
+	if _, err := in.Eval(`fr := core.NewFrame(root); fmt.Println(fr.Parent == root, label)`); err != nil {
+		t.Fatal(err)
+	}
+	if got := out.String(); got != "true text\n" {
+		t.Errorf("got %q", got)
 	}
 }
