@@ -54,7 +54,7 @@ When someone edits a code block, the edited code runs in the [mvm](https://githu
 
 `Goal` code blocks, written in [Goal](https://cogentcore.org/lab/goal), are compiled too, if the module of the app requires [Cogent Lab](https://cogentcore.org/lab), whose Goal transpiler turns them into Go (otherwise, the command says so, and they run in the Goal interpreter, if the app includes it). As in the Goal interpreter, the Goal code blocks of a page run in order and share their variables: a block can use the variables and functions of the blocks before it on its page. Goal code can use the Cogent Lab packages (`tensor`, `plot`, `matrix`, ...) without importing them. A page is compiled up to its first Goal code block that does not compile; that block and the ones after it run in the Goal interpreter, if the app includes it.
 
-The Goal interpreter of edited code is `yaegilab.BindTextEditor` (`cogentcore.org/lab/yaegilab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/yaegilab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
+The Goal interpreter of edited code is `mvmlab.BindTextEditor` (`cogentcore.org/lab/mvmlab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/mvmlab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
 
 ### Options
 
@@ -64,7 +64,7 @@ Options for compiling code blocks go in the `[ContentCode]` section of `core.tom
 [ContentCode]
   # other packages that code blocks use without importing them (path or name=path)
   Imports = ["github.com/me/sim/wavesim"]
-  # whether Goal math mode records its variables in tensorfs, as yaegilab does
+  # whether Goal math mode records its variables in tensorfs, as mvmlab does
   # (on by default; turn it off if the Goal interpreter of the app does not)
   GoalRecord = false
 ```

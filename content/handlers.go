@@ -36,7 +36,7 @@ import (
 )
 
 // BindTextEditor is a function set to [cogentcore.org/core/mvmcore.BindTextEditor]
-// when importing mvmcore (or to that of yaegicore), which provides interactive
+// when importing mvmcore, which provides interactive
 // editing functionality for Go code blocks in text editors.
 var BindTextEditor func(ed *textcore.Editor, parent *core.Frame, language string)
 

@@ -157,7 +157,7 @@ var keepCategories = true
 
 // NewPageInitFunc is called when a new page is just being rendered.
 // This can do any necessary new-page initialization, e.g.,
-// [yaegicore.ResetGoalInterpreter]
+// [mvmcore.ResetGoalInterpreter]
 var NewPageInitFunc func()
 
 // ImageCacheBytes is the maximum total size in bytes of the decoded

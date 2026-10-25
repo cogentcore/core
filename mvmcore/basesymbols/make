@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 # The standard library packages that mvm's stdlib/core does not have, then
 # the Cogent Core packages that do not use the GUI, including those that the
 # generic functions of the packages use.
-std="log/slog path/filepath reflect"
+std="io/fs log/slog path/filepath reflect"
 core="base/errors base/fileinfo base/fsx base/labels base/num base/reflectx base/slicesx base/strcase math32 types"
 
 pkgs="$std"

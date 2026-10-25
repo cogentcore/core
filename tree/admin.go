@@ -19,7 +19,7 @@ import (
 // New returns a new node of the given type with the given optional parent.
 // If the name is unspecified, it defaults to the ID (kebab-case) name of
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
-func New[T NodeValue](parent ...Node) *T { //yaegi:add
+func New[T NodeValue](parent ...Node) *T {
 	n := new(T)
 	ni := any(n).(Node)
 	InitNode(ni)
@@ -47,7 +47,8 @@ func NewOfType(typ *types.Type, parent ...Node) Node {
 }
 
 // InitNode initializes the node. It should not be called by end-user code.
-// It must be exported since it is referenced in generic functions included in yaegi.
+// It must be exported since it is referenced in generic functions that
+// interpreters run from source (such as the mvm generic shims of mvmcore).
 func InitNode(n Node) {
 	nb := n.AsTree()
 	if nb.This != n {

@@ -43,7 +43,7 @@ import (
 
 // goalImports are the packages that Goal code can use without importing
 // them, in addition to [defaultImports]: those of the symbols of Lab's
-// Goal interpreter (yaegilab: tensorsymbols, labsymbols) and the standard
+// Goal interpreter (mvmlab: tensorsymbols, labsymbols) and the standard
 // library packages that code commonly uses.
 var goalImports = []string{
 	"cogentcore.org/lab/goal/goalib",

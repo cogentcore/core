@@ -31,12 +31,6 @@ github.com/bramvdbogaerde/go-scp v1.6.0 h1:lDh0lUuz1dbIhJqlKLwWT7tzIRONCp1Mtx3pg
 github.com/bramvdbogaerde/go-scp v1.6.0/go.mod h1:on2aH5AxaFb2G0N5Vsdy6B0Ml7k9HuHSwfo1y0QzAbQ=
 github.com/chewxy/math32 v1.11.2 h1:IufN08Zwr1NKuWfY+4Tz55BcwKmyKKNdOP7KtumehnM=
 github.com/chewxy/math32 v1.11.2/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-github.com/cogentcore/mvm v0.0.0-20261025170409-323b8425dcd7 h1:iPM6k2iNKlUWYXV3mF/BlcY+nXjT3Vu0pyFtTle3KEU=
-github.com/cogentcore/mvm v0.0.0-20261025170409-323b8425dcd7/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
-github.com/cogentcore/mvm v0.0.0-20261025171132-c4209321730a h1:gp2ib5IDpQS881hP7SlZc6gy/EvrjM3zWjPKC0WX2CM=
-github.com/cogentcore/mvm v0.0.0-20261025171132-c4209321730a/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
-github.com/cogentcore/mvm v0.0.0-20261025172605-8bcb176ad33e h1:KtA3cR9+3jcIYsp3ckrz8Gep9TzJdPL9GIuvDZopNLk=
-github.com/cogentcore/mvm v0.0.0-20261025172605-8bcb176ad33e/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/mvm v0.0.0-20261025173216-f0b0b75700d0 h1:HrV6HlbxUz6CIf25TAn7VpShkg6TIKi4Mk9/Yzp9emU=
 github.com/cogentcore/mvm v0.0.0-20261025173216-f0b0b75700d0/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666 h1:gmXMw/Xcva/2V5qRO920q4am1odNE0xFEGBzG7y7cus=
@@ -45,8 +39,6 @@ github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698 h1:GsehCn/Dw
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698/go.mod h1:pdlQowLCSMiGfeOM6M7yz09OmR2fzlmFYcvR/u6QaRQ=
 github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e h1:seoKVtXIRWYZrY3vlwaos/PifRWJsKi48xroc9cGXis=
 github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e/go.mod h1:3WDWvccSCRXvDZ5T0kvk2OTofeUQWLlQDTWaVYUZwhI=
-github.com/cogentcore/yaegi v0.0.0-20261024142200-c0b92ec4f6b6 h1:f5OhUCmt00f7u2WbWRJ7JCIsLbDDPZZKGUdmHutmuKo=
-github.com/cogentcore/yaegi v0.0.0-20261024142200-c0b92ec4f6b6/go.mod h1:o1kG6o9hHlM/exRCSdIenr+5NTxDg6ve/DsOkYfbt6k=
 github.com/coreos/go-oidc/v3 v3.17.0 h1:hWBGaQfbi0iVviX4ibC7bk8OKT5qNr4klBaCHVNvehc=
 github.com/coreos/go-oidc/v3 v3.17.0/go.mod h1:wqPbKFrVnE90vty060SB40FCJ8fTHTxSwyXJqZH+sI8=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

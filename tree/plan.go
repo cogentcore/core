@@ -124,7 +124,7 @@ func (nb *NodeBase) RunUpdaters() {
 // on the file and line number of the calling function.
 //
 //goscript:callsite
-func Add[T NodeValue](p *Plan, init func(w *T)) { //yaegi:add
+func Add[T NodeValue](p *Plan, init func(w *T)) {
 	AddAt(p, AutoPlanName(2), init)
 }
 
@@ -150,7 +150,7 @@ func AutoPlanName(level int) string {
 // the given name and function to initialize the node. The node
 // is guaranteed to be added to its parent before the init function
 // is called.
-func AddAt[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add
+func AddAt[T NodeValue](p *Plan, name string, init func(w *T)) {
 	p.Add(name, func() Node {
 		return any(New[T]()).(Node)
 	}, func(n Node) {
@@ -164,7 +164,7 @@ func AddAt[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add
 // to its parent before the init function is called.
 // It should only be called instead of [Add] and [AddAt] when the node
 // must be made new, like when using [cogentcore.org/core/core.NewValue].
-func AddNew[T Node](p *Plan, name string, new func() T, init func(w T)) { //yaegi:add
+func AddNew[T Node](p *Plan, name string, new func() T, init func(w T)) {
 	p.Add(name, func() Node {
 		return new()
 	}, func(n Node) {
@@ -177,7 +177,7 @@ func AddNew[T Node](p *Plan, name string, new func() T, init func(w T)) { //yaeg
 // extending an existing [PlanItem], not adding a new one. The node is guaranteed to
 // be added to its parent before the init function is called. The init functions are
 // called in sequential ascending order.
-func AddInit[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add
+func AddInit[T NodeValue](p *Plan, name string, init func(w *T)) {
 	for _, child := range p.Children {
 		if child.Name == name {
 			child.Init = append(child.Init, func(n Node) {
@@ -194,7 +194,7 @@ func AddInit[T NodeValue](p *Plan, name string, init func(w *T)) { //yaegi:add
 // this adds a maker that will add a child to the given parent.
 //
 //goscript:callsite
-func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add
+func AddChild[T NodeValue](parent Node, init func(w *T)) {
 	name := AutoPlanName(2) // must get here to get correct name
 	parent.AsTree().Maker(func(p *Plan) {
 		AddAt(p, name, init)
@@ -204,7 +204,7 @@ func AddChild[T NodeValue](parent Node, init func(w *T)) { //yaegi:add
 // AddChildAt adds a new [NodeBase.Maker] to the the given parent [Node] that
 // adds a [PlanItem] with the given name and init function using [AddAt]. In other
 // words, this adds a maker that will add a child to the given parent.
-func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add
+func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) {
 	parent.AsTree().Maker(func(p *Plan) {
 		AddAt(p, name, init)
 	})
@@ -216,7 +216,7 @@ func AddChildAt[T NodeValue](parent Node, name string, init func(w *T)) { //yaeg
 // extending an existing [PlanItem], not adding a new one. The node is guaranteed
 // to be added to its parent before the init function is called. The init functions are
 // called in sequential ascending order.
-func AddChildInit[T NodeValue](parent Node, name string, init func(w *T)) { //yaegi:add
+func AddChildInit[T NodeValue](parent Node, name string, init func(w *T)) {
 	parent.AsTree().Maker(func(p *Plan) {
 		AddInit(p, name, init)
 	})
