@@ -29,8 +29,8 @@ github.com/aymerick/douceur v0.2.0 h1:Mv+mAeH1Q+n9Fr+oyamOlAkUNPWPlA8PPGR0QAaYuP
 github.com/aymerick/douceur v0.2.0/go.mod h1:wlT5vV2O3h55X9m7iVYN0TBM0NH/MmbLnd30/FjWUq4=
 github.com/chewxy/math32 v1.11.2 h1:IufN08Zwr1NKuWfY+4Tz55BcwKmyKKNdOP7KtumehnM=
 github.com/chewxy/math32 v1.11.2/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-github.com/cogentcore/mvm v0.0.0-20261026173403-46b3f46311f4 h1:iCXQbOFYjPuK9+4ual7llHfyCpD0TDRhuTdhlKweBbc=
-github.com/cogentcore/mvm v0.0.0-20261026173403-46b3f46311f4/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
+github.com/cogentcore/mvm v0.0.0-20261026193832-5ebd19c3fa21 h1:wqFj9c1Qc7f38QKuouoGnWOx2W3T5uNWJCec52TCpv4=
+github.com/cogentcore/mvm v0.0.0-20261026193832-5ebd19c3fa21/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666 h1:gmXMw/Xcva/2V5qRO920q4am1odNE0xFEGBzG7y7cus=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666/go.mod h1:HoDh/nWYrLffGjfVxUmbJHb0yZvcV3TwrN73WurddNs=
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698 h1:GsehCn/Dw8hhYAonDQO48EJz63sAAF4wxEhHmHt/xKA=
