@@ -15,7 +15,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
@@ -36,7 +35,7 @@ type Client struct {
 	sessionCounter int
 
 	// sftpClient copies files, made when first needed (see [Client.SFTP]).
-	sftpClient *sftp.Client
+	sftpClient sftpConn
 }
 
 // NewClient returns a new Client using given [Config] configuration
