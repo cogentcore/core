@@ -590,6 +590,39 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 	return tbe
 }
 
+// Replacement is a replacement of the text in Region by Text,
+// for [Lines.ReplaceTexts].
+type Replacement struct {
+	Region textpos.Region
+	Text   string
+}
+
+// ReplaceTexts does [Lines.ReplaceText] for each of the given
+// replacements, in order, as one batch update: they are one undo group,
+// with one autosave and one Input event at the end. Each replacement
+// applies to the text as changed by the prior ones, so multiple edits
+// computed for the same text, e.g., from a language server, are given
+// in reverse position order. Returns the number of replacements that
+// changed the text.
+func (ls *Lines) ReplaceTexts(reps []Replacement, matchCase bool) int {
+	ls.Lock()
+	ls.fileModCheck()
+	autoSave := ls.batchUpdateStart()
+	n := 0
+	for _, r := range reps {
+		if ls.replaceText(r.Region.Start, r.Region.End, r.Region.Start, r.Text, matchCase) != nil {
+			n++
+		}
+	}
+	ls.batchUpdateEnd(autoSave)
+	if n > 0 && ls.Autosave {
+		go ls.autoSave()
+	}
+	ls.Unlock()
+	ls.sendInput()
+	return n
+}
+
 // AppendTextMarkup appends new text to end of lines, using insert, returns
 // edit, and uses supplied markup to render it, for preformatted output.
 // Calls sendInput to send an Input event to views, so they update.

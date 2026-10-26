@@ -203,6 +203,18 @@ func (ed *Base) SetScrollParams(d math32.Dims, sb *core.Slider) {
 	}
 }
 
+// ScrollPos returns the vertical scroll position, in lines of text.
+func (ed *Base) ScrollPos() float32 {
+	return ed.scrollPos
+}
+
+// SetScrollPos sets the vertical scroll position, in lines of text,
+// e.g., to restore a position from [Base.ScrollPos] after the text has
+// been replaced.
+func (ed *Base) SetScrollPos(pos float32) {
+	ed.updateScroll(pos)
+}
+
 // updateScroll sets the scroll position to given value, in lines.
 // calls a NeedsRender if changed.
 func (ed *Base) updateScroll(pos float32) bool {
