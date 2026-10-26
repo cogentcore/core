@@ -117,11 +117,44 @@ func DotValues() map[string]reflect.Value {
 // outside of it, runs it. The names of [DotPackage] are imported in the
 // same source, as each Eval makes a new main function.
 func (g *Go) Eval(src string) (reflect.Value, error) {
+	lines := 1 // added before the code
 	if !strings.Contains(src, "func main()") {
 		src = "func main() {\n" + src + "\n}"
+		lines++
 	}
-	return g.Interp.Eval("code", fmt.Sprintf("import . %q\n", DotPackage)+src)
+	v, err := g.Interp.Eval("code", fmt.Sprintf("import . %q\n", DotPackage)+src)
+	if err == nil {
+		return v, nil
+	}
+	if d, ok := g.Diagnose(err); ok && d.Source == "code" && d.Line > lines {
+		return v, &Error{Line: d.Line - lines, Col: d.Col, Msg: d.Msg, Err: err}
+	}
+	return v, err
 }
+
+// Error is an error of Go code at a position in it, which
+// content.ShowCodeErrors shows there.
+type Error struct {
+
+	// Line and Col are the 1-based line and column (in bytes) of the error.
+	Line, Col int
+
+	// Msg is the message of the error, without its position.
+	Msg string
+
+	// Err is the error of the interpreter.
+	Err error
+}
+
+func (e *Error) Error() string { return fmt.Sprintf("%d:%d: %s", e.Line, e.Col, e.Msg) }
+
+func (e *Error) Unwrap() error { return e.Err }
+
+// CodePos returns the 1-based line and column of the error in the code.
+func (e *Error) CodePos() (line, col int) { return e.Line, e.Col }
+
+// CodeMessage returns the message of the error, without its position.
+func (e *Error) CodeMessage() string { return e.Msg }
 
 // ResetGoalInterpreter makes the next Goal code block use a new Goal
 // interpreter. It is the value of [content.NewPageInitFunc], so that each
@@ -178,6 +211,8 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 			return
 		}
 		SetParent(parent)
+		// a program that runs a window adds it to parent, but only while it runs
+		defer func() { core.ExternalParent = nil }()
 		if new && language == "Goal" {
 			replayGoal(in)
 		}
@@ -191,10 +226,7 @@ func BindTextEditor(ed *textcore.Editor, parent *core.Frame, language string) {
 			out.Lines.Settings.LineNumbers = false
 			out.Lines.SetString(ostr)
 		}
-		if err != nil {
-			core.ErrorSnackbar(ed, err, fmt.Sprintf("Error interpreting %s code", language))
-			return
-		}
+		content.ShowCodeErrors(ed, parent, err)
 		parent.Update()
 	}
 	ed.OnChange(func(e events.Event) { oc() })

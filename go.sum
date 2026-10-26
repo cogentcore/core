@@ -31,8 +31,8 @@ github.com/bramvdbogaerde/go-scp v1.6.0 h1:lDh0lUuz1dbIhJqlKLwWT7tzIRONCp1Mtx3pg
 github.com/bramvdbogaerde/go-scp v1.6.0/go.mod h1:on2aH5AxaFb2G0N5Vsdy6B0Ml7k9HuHSwfo1y0QzAbQ=
 github.com/chewxy/math32 v1.11.2 h1:IufN08Zwr1NKuWfY+4Tz55BcwKmyKKNdOP7KtumehnM=
 github.com/chewxy/math32 v1.11.2/go.mod h1:dOB2rcuFrCn6UHrze36WSLVPKtzPMRAQvBvUwkSsLqs=
-github.com/cogentcore/mvm v0.0.0-20261026170507-8b11940e39f0 h1:PswRJQDvNodNhVryeMmV91od0ASmvIpihQspL4vJfpo=
-github.com/cogentcore/mvm v0.0.0-20261026170507-8b11940e39f0/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
+github.com/cogentcore/mvm v0.0.0-20261026173403-46b3f46311f4 h1:iCXQbOFYjPuK9+4ual7llHfyCpD0TDRhuTdhlKweBbc=
+github.com/cogentcore/mvm v0.0.0-20261026173403-46b3f46311f4/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666 h1:gmXMw/Xcva/2V5qRO920q4am1odNE0xFEGBzG7y7cus=
 github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666/go.mod h1:HoDh/nWYrLffGjfVxUmbJHb0yZvcV3TwrN73WurddNs=
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698 h1:GsehCn/Dw8hhYAonDQO48EJz63sAAF4wxEhHmHt/xKA=

@@ -149,9 +149,6 @@ func runCode(ed *textcore.Editor, parent *core.Frame, language string, run func(
 		oe.Lines.Settings.LineNumbers = false
 		oe.Lines.SetString(ostr)
 	}
-	if err != nil {
-		core.ErrorSnackbar(ed, err, "Error running "+language+" code")
-		return
-	}
+	ShowCodeErrors(ed, parent, err)
 	parent.Update()
 }

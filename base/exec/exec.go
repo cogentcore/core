@@ -10,6 +10,7 @@ package exec
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -45,7 +46,31 @@ func (c *Config) exec(sio *StdIO, start bool, cmd string, args ...string) (excmd
 	if err == nil {
 		return excmd, true, nil
 	}
-	return excmd, ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
+	return excmd, ran, runError(cmd, args, err)
+}
+
+// RunError is an error of running a command, which wraps the error of
+// running it, such as [exec.ErrNotFound] or an [exec.ExitError].
+type RunError struct {
+	// Msg is the message of the error.
+	Msg string
+
+	// Err is the error of running the command.
+	Err error
+}
+
+func (e *RunError) Error() string { return e.Msg }
+
+func (e *RunError) Unwrap() error { return e.Err }
+
+// runError returns a [RunError] for the given error of running the given
+// command with the given args: one that it was not found, as in a shell,
+// or that it failed.
+func runError(cmd string, args []string, err error) error {
+	if errors.Is(err, exec.ErrNotFound) {
+		return &RunError{Msg: cmd + ": command not found", Err: err}
+	}
+	return &RunError{Msg: fmt.Sprintf("%q: %v", strings.Join(append([]string{cmd}, args...), " "), err), Err: err}
 }
 
 func (c *Config) run(sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
