@@ -11,11 +11,8 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/pkg/sftp"
 )
 
 // Location is a file path on a host, for [Copy]: on the host of the given
@@ -238,9 +235,9 @@ func (cp *copier) copyFile(dfs fileSystem, dst string, sfs fileSystem, src strin
 	cp.p.File, cp.p.Done, cp.p.Size = src, 0, info.Size()
 	cp.p.FileNum++
 	cp.report(false)
-	if sf, ok := w.(*sftp.File); ok {
+	if rf, ok := sftpReaderFrom(w); ok {
 		// The reader has the size, for SFTP to write concurrently.
-		_, err = sf.ReadFrom(&countReader{r: r, size: info.Size(), add: cp.add})
+		_, err = rf.ReadFrom(&countReader{r: r, size: info.Size(), add: cp.add})
 	} else {
 		// A remote source reads concurrently, to the writer (its WriteTo).
 		_, err = io.Copy(&countWriter{w: w, add: cp.add}, r)
@@ -312,18 +309,6 @@ type fileSystem interface {
 	base(p string) string
 }
 
-// locationFS returns the file system of the host of the given location.
-func locationFS(l Location) (fileSystem, error) {
-	if l.Client == nil {
-		return localFS{}, nil
-	}
-	sc, err := l.Client.SFTP()
-	if err != nil {
-		return nil, err
-	}
-	return &remoteFS{sc: sc, host: l.Client.Host, dir: l.Client.Dir}, nil
-}
-
 // localFS is the file system of the local host.
 type localFS struct{}
 
@@ -362,116 +347,6 @@ func (localFS) abs(p string) string {
 	return p
 }
 
-// remoteFS is the file system of a remote host, through SFTP.
-type remoteFS struct {
-	sc   *sftp.Client
-	host string
-	dir  string // the current directory
-}
-
-// The errors of SFTP do not have the path, which these add, with the host,
-// as an [fs.PathError].
-
-func (r *remoteFS) Stat(name string) (fs.FileInfo, error) {
-	info, err := r.sc.Stat(name)
-	return info, r.pathError("stat", name, err)
-}
-
-func (r *remoteFS) Open(name string) (io.ReadCloser, error) {
-	f, err := r.sc.Open(name)
-	if err != nil {
-		return nil, r.pathError("open", name, err)
-	}
-	return f, nil
-}
-
-func (r *remoteFS) Create(name string) (io.WriteCloser, error) {
-	f, err := r.sc.Create(name)
-	if err != nil {
-		return nil, r.pathError("create", name, err)
-	}
-	return f, nil
-}
-
-func (r *remoteFS) MkdirAll(name string, perm fs.FileMode) error {
-	return r.pathError("mkdir", name, r.sc.MkdirAll(name))
-}
-
-func (r *remoteFS) ReadDir(name string) ([]fs.FileInfo, error) {
-	infos, err := r.sc.ReadDir(name)
-	return infos, r.pathError("readdir", name, err)
-}
-
-func (r *remoteFS) Glob(pattern string) ([]string, error) {
-	m, err := r.sc.Glob(pattern)
-	return m, r.pathError("glob", pattern, err)
-}
-
-func (r *remoteFS) Chmod(name string, mode fs.FileMode) error {
-	return r.pathError("chmod", name, r.sc.Chmod(name, mode))
-}
-
-// pathError returns the given error of the given operation on the given
-// path as an [fs.PathError] with the host in the path, or nil if nil.
-func (r *remoteFS) pathError(op, name string, err error) error {
-	if err == nil {
-		return nil
-	}
-	return &fs.PathError{Op: op, Path: r.host + ":" + name, Err: err}
-}
-func (r *remoteFS) join(elem ...string) string { return path.Join(elem...) }
-func (r *remoteFS) base(p string) string       { return path.Base(p) }
-
-func (r *remoteFS) abs(p string) string {
-	if path.IsAbs(p) {
-		return path.Clean(p)
-	}
-	return path.Join(r.dir, p)
-}
-
-// SFTP returns the SFTP client of the connection to the host, which is
-// made when first needed, for copying files to and from the host.
-func (cl *Client) SFTP() (*sftp.Client, error) {
-	if cl.sftpClient != nil {
-		return cl.sftpClient, nil
-	}
-	if cl.Client == nil {
-		return nil, errors.New("ssh: not connected")
-	}
-	sc, err := sftp.NewClient(cl.Client, sftp.UseConcurrentReads(true), sftp.UseConcurrentWrites(true))
-	if err != nil {
-		return nil, fmt.Errorf("ssh: starting SFTP on %s: %w", cl.Host, err)
-	}
-	cl.sftpClient = sc
-	return sc, nil
-}
-
-// OpenFile opens the given file on the remote host, with the given flags
-// of os.OpenFile, such as os.O_CREATE|os.O_WRONLY|os.O_TRUNC to write it,
-// or os.O_APPEND to add to it, through SFTP. A relative path is relative to the current Dir of the
-// Client.
-func (cl *Client) OpenFile(name string, flag int) (*sftp.File, error) {
-	sc, err := cl.SFTP()
-	if err != nil {
-		return nil, err
-	}
-	rfs := &remoteFS{sc: sc, host: cl.Host, dir: cl.Dir}
-	name = rfs.abs(name)
-	f, err := sc.OpenFile(name, flag)
-	if err != nil {
-		return nil, rfs.pathError("open", name, err)
-	}
-	// SFTP servers can ignore the append flag, as OpenSSH does, so the
-	// writes start at the end.
-	if flag&os.O_APPEND != 0 {
-		if _, err := f.Seek(0, io.SeekEnd); err != nil {
-			f.Close()
-			return nil, rfs.pathError("seek", name, err)
-		}
-	}
-	return f, nil
-}
-
 // CopyLocalFileToHost copies the given local file or directory to the
 // given path on the remote host (see [Copy]). A relative host path is
 // relative to the current Dir of the Client.
@@ -484,51 +359,4 @@ func (cl *Client) CopyLocalFileToHost(ctx context.Context, localFilename, hostFi
 // relative to the current Dir of the Client.
 func (cl *Client) CopyHostToLocalFile(ctx context.Context, hostFilename, localFilename string) error {
 	return Copy(ctx, Location{Path: localFilename}, Location{Client: cl, Path: hostFilename})
-}
-
-// CopyLocalToHost copies the data of the given reader to the given file on
-// the remote host. The size is not needed. A relative host path is
-// relative to the current Dir of the Client.
-func (cl *Client) CopyLocalToHost(ctx context.Context, r io.Reader, size int64, hostFilename string) error {
-	sc, err := cl.SFTP()
-	if err != nil {
-		return err
-	}
-	rfs := &remoteFS{sc: sc, host: cl.Host, dir: cl.Dir}
-	w, err := sc.Create(rfs.abs(hostFilename))
-	if err != nil {
-		return err
-	}
-	stop := context.AfterFunc(ctx, func() { w.Close() })
-	defer stop()
-	_, err = io.Copy(w, r)
-	if cerr := w.Close(); err == nil {
-		err = cerr
-	}
-	if ctx.Err() != nil {
-		return ctx.Err()
-	}
-	return err
-}
-
-// CopyHostToLocal copies the given file on the remote host to the given
-// writer. A relative host path is relative to the current Dir of the Client.
-func (cl *Client) CopyHostToLocal(ctx context.Context, hostFilename string, w io.Writer) error {
-	sc, err := cl.SFTP()
-	if err != nil {
-		return err
-	}
-	rfs := &remoteFS{sc: sc, host: cl.Host, dir: cl.Dir}
-	r, err := sc.Open(rfs.abs(hostFilename))
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-	stop := context.AfterFunc(ctx, func() { r.Close() })
-	defer stop()
-	_, err = io.Copy(w, r)
-	if ctx.Err() != nil {
-		return ctx.Err()
-	}
-	return err
 }
