@@ -473,7 +473,7 @@ func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 	ed, _ = ls.validCharPos(ed)
 	tbe := ls.deleteText(st, ed)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -493,7 +493,7 @@ func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 	ed, _ = ls.validCharPos(ed)
 	tbe := ls.deleteTextRect(st, ed)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -511,7 +511,7 @@ func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 	st, _ = ls.validCharPos(st)
 	tbe := ls.insertText(st, []rune(string(text)))
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -529,7 +529,7 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 	st, _ = ls.validCharPos(st)
 	tbe := ls.insertText(st, text)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -547,7 +547,7 @@ func (ls *Lines) InsertTextLines(st textpos.Pos, text [][]rune) *textpos.Edit {
 	st, _ = ls.validCharPos(st)
 	tbe := ls.insertTextLines(st, text)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -564,7 +564,7 @@ func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 	ls.fileModCheck()
 	tbe = ls.insertTextRect(tbe)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -583,11 +583,44 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 	ls.fileModCheck()
 	tbe := ls.replaceText(delSt, delEd, insPos, insTxt, matchCase)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
 	return tbe
+}
+
+// Replacement is a replacement of the text in Region by Text,
+// for [Lines.ReplaceTexts].
+type Replacement struct {
+	Region textpos.Region
+	Text   string
+}
+
+// ReplaceTexts does [Lines.ReplaceText] for each of the given
+// replacements, in order, as one batch update: they are one undo group,
+// with one autosave and one Input event at the end. Each replacement
+// applies to the text as changed by the prior ones, so multiple edits
+// computed for the same text, e.g., from a language server, are given
+// in reverse position order. Returns the number of replacements that
+// changed the text.
+func (ls *Lines) ReplaceTexts(reps []Replacement, matchCase bool) int {
+	ls.Lock()
+	ls.fileModCheck()
+	autoSave := ls.batchUpdateStart()
+	n := 0
+	for _, r := range reps {
+		if ls.replaceText(r.Region.Start, r.Region.End, r.Region.Start, r.Text, matchCase) != nil {
+			n++
+		}
+	}
+	ls.batchUpdateEnd(autoSave)
+	if n > 0 && ls.Autosave {
+		ls.autoSaves.Go(func() { ls.autoSave() })
+	}
+	ls.Unlock()
+	ls.sendInput()
+	return n
 }
 
 // AppendTextMarkup appends new text to end of lines, using insert, returns
@@ -618,7 +651,7 @@ func (ls *Lines) appendTextMarkupLocked(text [][]rune, markup []rich.Text) *text
 	ls.fileModCheck()
 	tbe := ls.appendTextMarkup(text, markup)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.collectLinks()
 	ls.layoutViews()

@@ -30,7 +30,9 @@ func Build(c *config.Config) error {
 		return buildJS(c)
 	}
 	output := filepath.Join(c.Build.Output, "app.wasm")
-	args := []string{"build", "-o", output, "-ldflags", config.LinkerFlags(c)}
+	// The mvmnosrc tag leaves the standard library sources out of the mvm
+	// interpreter (see buildJS).
+	args := []string{"build", "-o", output, "-tags", "mvmnosrc", "-ldflags", config.LinkerFlags(c)}
 	if c.Build.Trimpath {
 		args = append(args, "-trimpath")
 	}

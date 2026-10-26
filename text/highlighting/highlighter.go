@@ -28,11 +28,21 @@ import (
 // cogentcore.org/core/text/parse/supportedlanguages to register them.
 var UseParse = false
 
+// ParseFilter, if set, further restricts [UseParse] to the languages for
+// which it returns true, so that a program can use [parse] for some
+// languages and other means (such as a language server) for the rest.
+// It can be called from any goroutine. Buffers pick up a change the next
+// time their file info is set (lines.Lines.SetFileInfo).
+var ParseFilter func(known fileinfo.Known) bool
+
 // ParseLanguage returns the [parse] language properties for the given
-// known file type if [UseParse] is on and the language is registered,
-// and nil otherwise.
+// known file type if [UseParse] is on, [ParseFilter] allows it, and the
+// language is registered, and nil otherwise.
 func ParseLanguage(known fileinfo.Known) *parse.LanguageProperties {
 	if !UseParse || known == fileinfo.Unknown {
+		return nil
+	}
+	if ParseFilter != nil && !ParseFilter(known) {
 		return nil
 	}
 	lp, err := parse.LanguageSupport.Properties(known)
@@ -122,10 +132,14 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 		hi.lastStyle = hi.StyleName
 	}
 
-	if hi.lexer != nil && hi.language != hi.lastLanguage {
+	if hi.lexer != nil {
+		// always coalesce the newly matched lexer, which can also follow
+		// a switch from parse back to chroma for the same language
 		hi.lexer = chroma.Coalesce(GetLexer(hi.language))
-		hi.formatter = html.New(html.WithClasses(true), html.TabWidth(hi.TabSize))
-		hi.lastLanguage = hi.language
+		if hi.language != hi.lastLanguage || hi.formatter == nil {
+			hi.formatter = html.New(html.WithClasses(true), html.TabWidth(hi.TabSize))
+			hi.lastLanguage = hi.language
+		}
 	}
 }
 

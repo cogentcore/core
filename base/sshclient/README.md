@@ -8,8 +8,10 @@ Each command execution process creates its own `ssh.Session` object that manages
 
 A good reference for similar package: https://github.com/helloyi/go-sshclient
 
-# scp
+# Copying files
 
-The https://github.com/bramvdbogaerde/go-scp package is used to implement the `scp` protocol on top of our client.
+Files are copied to and from hosts with the SFTP protocol of https://github.com/pkg/sftp, on the connection of the client: `Copy` copies files between any hosts, including the local one, as `cp -r` does, with wildcards, and `Client.OpenFile` opens a file on the host.
+
+The `sshtest` package provides an SSH server for tests, which runs commands and serves SFTP in the test process.
 
 

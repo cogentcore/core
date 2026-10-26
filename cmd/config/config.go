@@ -182,7 +182,7 @@ type ContentCode struct { //types:add
 
 	// GoalRecord is whether Goal math mode records its variables in tensorfs
 	// and lists tensorfs to the output of the code block, as the Goal
-	// interpreter of Cogent Lab (cogentcore.org/lab/yaegilab) does. Turn it
+	// interpreter of Cogent Lab (cogentcore.org/lab/mvmlab) does. Turn it
 	// off for sites whose Goal interpreter does not.
 	GoalRecord bool `default:"true"`
 }

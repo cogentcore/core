@@ -1,0 +1,16 @@
+#!/bin/sh
+# make generates the symbols of the packages, one gen_*.go file per package
+# with mvm extract -register.
+set -e
+cd "$(dirname "$0")"
+/bin/rm -f gen_*.go
+
+# The standard library packages that mvm's stdlib/core does not have, then
+# the Cogent Core packages that do not use the GUI, including those that the
+# generic functions of the packages use.
+std="io/fs log/slog path/filepath reflect"
+core="base/errors base/fileinfo base/fsx base/labels base/num base/reflectx base/slicesx base/strcase math32 types"
+
+pkgs="$std"
+for p in $core; do pkgs="$pkgs cogentcore.org/core/$p"; done
+go run github.com/cogentcore/mvm/cmd/extract -register -pkg basesymbols $pkgs

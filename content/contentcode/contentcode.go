@@ -7,22 +7,23 @@
 // Go file to the app's package that defines a function for each code block
 // and registers it in [cogentcore.org/core/content.CompiledCode] (Goal:
 // [cogentcore.org/core/content.CompiledGoal]). Content then runs those code
-// blocks directly, without an interpreter such as yaegi: natively as Go, and
+// blocks directly, without an interpreter such as mvm: natively as Go, and
 // in `core build js` apps as the GoScript output of the same code.
 //
-// Code blocks are written as yaegi runs them: a list of statements that
-// use the parent widget b and the packages of the yaegicore symbols (core,
-// styles, ...) without importing them, or a program with a main function.
+// Code blocks are written as the interpreter (mvmcore) runs them: a list of
+// statements that use the parent widget b and the packages of the mvmcore
+// symbols (core, styles, ...) without importing them, or a program with a
+// main function.
 // Code blocks that do not type check are left out (and listed in the output
 // file), and their errors are printed at their lines in the markdown files;
-// an unused variable is used with `_ = x` instead, since yaegi allows it.
+// an unused variable is used with `_ = x` instead, since mvm allows it.
 //
 // Goal code blocks (```Goal) are compiled per page, in order, so that a
 // block sees the variables of the blocks before it on its page, as in the
 // Goal interpreter (see goal.go and [cogentcore.org/core/content.GoalPage]).
 // That needs Cogent Lab's Goal transpiler, so the app's module must require
 // cogentcore.org/lab (otherwise, the Goal code blocks are not compiled, with
-// a message that says so); Goal code can use the packages of Lab's yaegilab
+// a message that says so); Goal code can use the packages of Lab's mvmlab
 // symbols without importing them.
 //
 // The core tool runs [Generate] for every content app (see [App]) in
@@ -60,7 +61,7 @@ import (
 )
 
 // defaultImports are the packages that code blocks can use without importing
-// them: those of yaegicore/basesymbols and yaegicore/coresymbols.
+// them: those of mvmcore/basesymbols and mvmcore/coresymbols.
 var defaultImports = []string{
 	"cogentcore.org/core/base/errors",
 	"cogentcore.org/core/base/fileinfo",
@@ -95,6 +96,7 @@ var defaultImports = []string{
 	"image/color",
 	"image/draw",
 	"image",
+	"io/fs",
 	"log/slog",
 	"math",
 	"path/filepath",
@@ -145,7 +147,7 @@ type Config struct {
 
 	// GoalRecord is whether Goal math mode records its variables in
 	// tensorfs and lists tensorfs to the output, as the Goal interpreter
-	// of Lab's yaegilab does. It is true by default; set it to false for
+	// of Lab's mvmlab does. It is true by default; set it to false for
 	// sites whose interpreter does not (such as plain goal).
 	GoalRecord bool
 
@@ -167,7 +169,7 @@ func ParseArgs(name string, args []string) (*Config, error) {
 	fs.StringVar(&c.Output, "o", "contentcode_gen.go", "output Go file, in the current package")
 	fs.StringVar(&c.Tags, "tags", "", "build tags for type checking")
 	fs.Var((*importFlags)(&c.Imports), "import", "extra package that code can use: path or name=path (repeatable)")
-	fs.BoolVar(&c.GoalRecord, "goal-record", true, "record the variables of Goal math mode in tensorfs and list tensorfs to the output, as Lab's yaegilab interpreter does")
+	fs.BoolVar(&c.GoalRecord, "goal-record", true, "record the variables of Goal math mode in tensorfs and list tensorfs to the output, as Lab's mvmlab interpreter does")
 	fs.BoolVar(&c.Force, "force", false, "generate even if the output is up to date")
 	if err := fs.Parse(args); err != nil {
 		return nil, err
@@ -753,7 +755,7 @@ func codeKey(src string) string {
 // generate makes the Go declarations of the block.
 func (b *block) generate(importPaths map[string]string) error {
 	b.pkgs = map[string]bool{}
-	// a program has a main function (like yaegi, which runs it); other code
+	// a program has a main function (like mvmcore, which runs it); other code
 	// is a list of statements, with the parent widget as b
 	text := b.src
 	if !strings.HasPrefix(strings.TrimSpace(text), "package ") {

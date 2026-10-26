@@ -58,8 +58,6 @@ func (st *StdIO) SetToOS() *StdIO {
 	cur.SetFromOS()
 	if sif, ok := st.In.(*os.File); ok {
 		os.Stdin = sif
-	} else {
-		fmt.Printf("In is not an *os.File: %#v\n", st.In)
 	}
 	if st.Out != nil {
 		if so, ok := st.Out.(*os.File); ok {
@@ -239,14 +237,14 @@ func (st *StdIOState) StackStart() {
 }
 
 // PopToStart unwinds the IO stacks to the depths recorded at [StackStart],
-// automatically closing the ones that are popped.
+// automatically closing the ones that are popped, such as the files and
+// pipes that were pushed.
 // It automatically checks if any of the Err items are the same as Out
 // and does not redundantly close those.
 func (st *StdIOState) PopToStart() {
 	for len(st.ErrStack) > st.ErrStart {
 		er := st.PopErr()
 		if !st.ErrIsInOut(er) {
-			fmt.Println("close err")
 			CloseWriter(er)
 		}
 	}
@@ -254,18 +252,21 @@ func (st *StdIOState) PopToStart() {
 		CloseWriter(st.PopOut())
 	}
 	for len(st.InStack) > st.InStart {
-		st.PopIn()
+		CloseReader(st.PopIn())
 	}
 	for len(st.PipeIn) > 0 {
 		CloseReader(st.PipeIn.Pop())
 	}
 }
 
-// ErrIsInOut returns true if the given Err writer is also present
-// within the active (> [OutStart]) stack of Outs.
+// ErrIsInOut returns true if the given Err writer is the current Out, or
+// present within the stack of Outs from [OutStart] on.
 // If this is true, then Err should not be closed, as it will be closed
 // when the Out is closed.
 func (st *StdIOState) ErrIsInOut(er io.Writer) bool {
+	if st.Out == er {
+		return true
+	}
 	for i := st.OutStart; i < len(st.OutStack); i++ {
 		if st.OutStack[i] == er {
 			return true

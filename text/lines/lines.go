@@ -171,6 +171,9 @@ type Lines struct {
 	// autoSaving is used in atomically safe way to protect autosaving
 	autoSaving bool
 
+	// autoSaves are the running autosave goroutines.
+	autoSaves sync.WaitGroup
+
 	// notSaved indicates if the text has been changed (edited) relative to the
 	// original, since last Save. This can be true even when changed flag is
 	// false, because changed is cleared on EditDone, e.g., when texteditor

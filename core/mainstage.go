@@ -82,7 +82,7 @@ func (st *Stage) RunMain() {
 // If it is set, calls to [Body.RunWindow] before [Wait] and
 // calls to [Body.RunMainWindow] and [Stage.RunMain] will add the [Body] to this
 // parent instead of creating a new window. It should typically not be
-// used by end users; it is used in yaegicore and for pre-rendering apps
+// used by end users; it is used in mvmcore and for pre-rendering apps
 // as HTML that can be used as a preview and for SEO purposes.
 var ExternalParent Widget
 

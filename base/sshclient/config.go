@@ -20,7 +20,8 @@ type User struct {
 	// path to ssh keys: ~/.ssh by default
 	KeyPath string
 
-	// name of ssh key file in KeyPath: .pub is appended for public key
+	// name of the private ssh key file in KeyPath. If it does not exist,
+	// the other standard ones are used: id_ed25519, id_ecdsa or id_rsa.
 	KeyFile string `default:"id_rsa"`
 }
 
@@ -50,11 +51,6 @@ type Config struct {
 	// home directory of user on remote host,
 	// which is captured at initial connection time.
 	HomeDir string
-
-	// ScpPath is the path to the `scp` executable on the host,
-	// for copying files between local and remote host.
-	// Defaults to /usr/bin/scp
-	ScpPath string `default:"/usr/bin/scp"`
 }
 
 // NewConfig returns a new ssh Config based on given
@@ -63,6 +59,5 @@ func NewConfig(cfg *exec.Config) *Config {
 	c := &Config{Config: *cfg}
 	c.User.Defaults()
 	c.Dir = "" // start empty until we get homedir
-	c.ScpPath = "/usr/bin/scp"
 	return c
 }
