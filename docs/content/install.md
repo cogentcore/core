@@ -14,6 +14,12 @@ go install cogentcore.org/core@main
 core setup
 ```
 
+Later, you can update the Cogent Core command line tool and the tools that it uses (such as the [GoScript](https://github.com/s4wave/goscript) compiler and [bun](https://bun.sh) for the js platform) to their latest versions with the following command. Add `-check` to only see which tools have updates.
+
+```sh
+core update
+```
+
 ## macOS
 
 This installs the [xcode-tools](https://mac.install.guide/commandlinetools/4). You may need to follow installer prompts.

@@ -75,6 +75,9 @@ type Config struct { //types:add
 	// apps into them, which the build, install, run, pack, and generate
 	// commands do (see cogentcore.org/core/content/contentcode).
 	ContentCode ContentCode `cmd:"build,install,run,pack,generate"`
+
+	// the configuration options for the update command
+	Update Update `cmd:"update"`
 }
 
 type Build struct { //types:add
@@ -136,6 +139,20 @@ type Log struct { //types:add
 
 	// messages not generated from your app equal to or above this log level will be shown
 	All string `default:"F"`
+}
+
+// Update has the options for the update command, which updates the core
+// command and the tools that it uses.
+type Update struct { //types:add
+
+	// Check only reports which tools have updates, without updating them.
+	Check bool
+
+	// Force updates tools that were built from a local source checkout
+	// (such as with go install in a clone), or that are newer than the
+	// latest version, which are otherwise left as they are, so that such
+	// a version is not replaced by accident.
+	Force bool
 }
 
 type Generate struct { //types:add
