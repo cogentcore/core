@@ -143,6 +143,17 @@ func (ed *Editor) spellCheck(reg *textpos.Edit) bool {
 	return true
 }
 
+// OfferCorrect pops up a menu of possible spelling corrections for the
+// word at the current CursorPos, if spelling correction is enabled there
+// and the word is misspelled, as the [keymap.Complete] key does.
+// Returns false if no menu was shown.
+func (ed *Editor) OfferCorrect() bool {
+	if !ed.isSpellEnabled(ed.CursorPos) {
+		return false
+	}
+	return ed.offerCorrect()
+}
+
 // offerCorrect pops up a menu of possible spelling corrections for word at
 // current CursorPos. If no misspelling there or not in spellcorrect mode
 // returns false
