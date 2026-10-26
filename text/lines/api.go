@@ -473,7 +473,7 @@ func (ls *Lines) DeleteText(st, ed textpos.Pos) *textpos.Edit {
 	ed, _ = ls.validCharPos(ed)
 	tbe := ls.deleteText(st, ed)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -493,7 +493,7 @@ func (ls *Lines) DeleteTextRect(st, ed textpos.Pos) *textpos.Edit {
 	ed, _ = ls.validCharPos(ed)
 	tbe := ls.deleteTextRect(st, ed)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -511,7 +511,7 @@ func (ls *Lines) InsertTextBytes(st textpos.Pos, text []byte) *textpos.Edit {
 	st, _ = ls.validCharPos(st)
 	tbe := ls.insertText(st, []rune(string(text)))
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -529,7 +529,7 @@ func (ls *Lines) InsertText(st textpos.Pos, text []rune) *textpos.Edit {
 	st, _ = ls.validCharPos(st)
 	tbe := ls.insertText(st, text)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -547,7 +547,7 @@ func (ls *Lines) InsertTextLines(st textpos.Pos, text [][]rune) *textpos.Edit {
 	st, _ = ls.validCharPos(st)
 	tbe := ls.insertTextLines(st, text)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -564,7 +564,7 @@ func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 	ls.fileModCheck()
 	tbe = ls.insertTextRect(tbe)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -583,7 +583,7 @@ func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, ma
 	ls.fileModCheck()
 	tbe := ls.replaceText(delSt, delEd, insPos, insTxt, matchCase)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -616,7 +616,7 @@ func (ls *Lines) ReplaceTexts(reps []Replacement, matchCase bool) int {
 	}
 	ls.batchUpdateEnd(autoSave)
 	if n > 0 && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.Unlock()
 	ls.sendInput()
@@ -651,7 +651,7 @@ func (ls *Lines) appendTextMarkupLocked(text [][]rune, markup []rich.Text) *text
 	ls.fileModCheck()
 	tbe := ls.appendTextMarkup(text, markup)
 	if tbe != nil && ls.Autosave {
-		go ls.autoSave()
+		ls.autoSaves.Go(func() { ls.autoSave() })
 	}
 	ls.collectLinks()
 	ls.layoutViews()

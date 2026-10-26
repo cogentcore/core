@@ -26,6 +26,7 @@ func TestAutosaveConcurrentEdits(t *testing.T) {
 	ls.SetFilename(fname)
 	ls.SetText([]byte(src))
 	ls.Autosave = true
+	t.Cleanup(ls.autoSaves.Wait) // before the directory is removed
 	for i := range 400 {
 		ln := ls.NumLines() - 2
 		if i%2 == 0 { // delete a line near the end
