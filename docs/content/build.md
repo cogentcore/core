@@ -48,13 +48,13 @@ This happens automatically for any main package that imports the content package
 
 Code blocks are written as before: a list of statements that use the parent widget `b` and the Cogent Core packages without importing them, or a program with a `main` function. Unused variables are allowed. A code block that does not compile is left out and listed at the end of the generated file, and the command prints its errors at their place in the markdown file (such as `content/button.md:15:25: undefined: x`). The code blocks can only be compiled if the rest of the app compiles, so `core generate` fails with the errors of the app if it does not.
 
-When someone edits a code block, the edited code runs in the [yaegi](https://github.com/traefik/yaegi) interpreter if the app includes it, by importing `cogentcore.org/core/yaegicore`; otherwise, edited code can not run. On the `js` platform, you can load the interpreter only when code is first edited, so that it does not slow down the startup of the app: instead of importing `yaegicore` for its side effects, set `content.BindTextEditor = yaegicore.BindTextEditor` in an `init` function of the app, and add `DeferredFunctions = ["cogentcore.org/core/yaegicore.BindTextEditor"]` to the `[Web]` section of `core.toml`. This website does that.
+When someone edits a code block, the edited code runs in the [mvm](https://github.com/cogentcore/mvm) Go interpreter if the app includes it, by importing `cogentcore.org/core/mvmcore`; otherwise, edited code can not run. On the `js` platform, you can load the interpreter only when code is first edited, so that it does not slow down the startup of the app: instead of importing `mvmcore` for its side effects, set `content.BindTextEditor = mvmcore.BindTextEditor` in an `init` function of the app, and add `DeferredFunctions = ["cogentcore.org/core/mvmcore.BindTextEditor"]` to the `[Web]` section of `core.toml`. This website does that.
 
 ### Goal code blocks
 
 `Goal` code blocks, written in [Goal](https://cogentcore.org/lab/goal), are compiled too, if the module of the app requires [Cogent Lab](https://cogentcore.org/lab), whose Goal transpiler turns them into Go (otherwise, the command says so, and they run in the Goal interpreter, if the app includes it). As in the Goal interpreter, the Goal code blocks of a page run in order and share their variables: a block can use the variables and functions of the blocks before it on its page. Goal code can use the Cogent Lab packages (`tensor`, `plot`, `matrix`, ...) without importing them. A page is compiled up to its first Goal code block that does not compile; that block and the ones after it run in the Goal interpreter, if the app includes it.
 
-The Goal interpreter of edited code is `yaegilab.BindTextEditor` (`cogentcore.org/lab/yaegilab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/yaegilab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
+The Goal interpreter of edited code is `mvmlab.BindTextEditor` (`cogentcore.org/lab/mvmlab`), or that of another package that adds more symbols to it. As for Go, set `content.BindTextEditor` to it in an `init` function and add it to `DeferredFunctions` in the `[Web]` section of `core.toml` (for example `DeferredFunctions = ["cogentcore.org/lab/mvmlab.BindTextEditor"]`), so that `js` builds load it when code is first edited.
 
 ### Options
 
@@ -64,7 +64,7 @@ Options for compiling code blocks go in the `[ContentCode]` section of `core.tom
 [ContentCode]
   # other packages that code blocks use without importing them (path or name=path)
   Imports = ["github.com/me/sim/wavesim"]
-  # whether Goal math mode records its variables in tensorfs, as yaegilab does
+  # whether Goal math mode records its variables in tensorfs, as mvmlab does
   # (on by default; turn it off if the Goal interpreter of the app does not)
   GoalRecord = false
 ```
@@ -82,3 +82,10 @@ For desktop platforms, `core run` just runs the executable directly. For mobile 
 On mobile and web platforms, `core pack` is the same as `core build`, as that already makes a package on those platforms. On macOS, it makes a `.app` bundle file and a `.dmg` disk image installer file. On Windows, it makes a `.exe` installer file. On Linux, it makes a `.deb` package file.
 
 For macOS, `core install` means running `core pack` and then copying the resulting `.app` file to `Applications`. It is not yet implemented on Linux and Windows. For mobile platforms, it installs the executable package on the target device, which can be a simulator or a real connected device. For web, it is not applicable.
+
+To silence this annoying warning on Mac: `ld: warning: ignoring duplicate libraries: '-lobjc'` do this in the terminal:
+
+```sh
+go env -w CGO_LDFLAGS="-O2 -g -Wl,-no_warn_duplicate_libraries"
+```
+

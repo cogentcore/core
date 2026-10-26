@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package rich provides the `rich.Text` type, which is the standard representation
+// for formatted text, used as the input to the `shaped` package for text layout
+// and rendering. It is encoded purely using `[]rune` slices for each span, with
+// the style information represented with special rune values at the start of
+// each span. This is an efficient and GPU-friendly pure-value format that
+// avoids any issues of style struct pointer management etc.
 package rich
 
 import (

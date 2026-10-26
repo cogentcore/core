@@ -73,27 +73,40 @@ func (fl *File) AllocLines() {
 }
 
 // LinesInserted inserts new lines -- called e.g., by core.TextBuf to sync
-// the markup with ongoing edits
+// the markup with ongoing edits. The lines can extend beyond the lines
+// of this file, which can be a partial or stale state that is updated
+// by the next parse, so they are clipped to it.
 func (fl *File) LinesInserted(stln, nlns int) {
-	// Lexs
-	n := len(fl.Lexs)
-	if stln > n {
-		stln = n
-	}
-	fl.Lexs = slices.Insert(fl.Lexs, stln, make([]Line, nlns)...)
-	fl.Comments = slices.Insert(fl.Comments, stln, make([]Line, nlns)...)
-	fl.LastStacks = slices.Insert(fl.LastStacks, stln, make([]Stack, nlns)...)
-	fl.EosPos = slices.Insert(fl.EosPos, stln, make([]EosPos, nlns)...)
+	fl.Lexs = insertLines(fl.Lexs, stln, nlns)
+	fl.Comments = insertLines(fl.Comments, stln, nlns)
+	fl.LastStacks = insertLines(fl.LastStacks, stln, nlns)
+	fl.EosPos = insertLines(fl.EosPos, stln, nlns)
 }
 
 // LinesDeleted deletes lines -- called e.g., by core.TextBuf to sync
-// the markup with ongoing edits
+// the markup with ongoing edits. The lines can extend beyond the lines
+// of this file, which can be a partial or stale state that is updated
+// by the next parse, e.g., only the first lines are parsed for the
+// initial markup, so they are clipped to it.
 func (fl *File) LinesDeleted(stln, edln int) {
-	edln = min(edln, len(fl.Lexs))
-	fl.Lexs = append(fl.Lexs[:stln], fl.Lexs[edln:]...)
-	fl.Comments = append(fl.Comments[:stln], fl.Comments[edln:]...)
-	fl.LastStacks = append(fl.LastStacks[:stln], fl.LastStacks[edln:]...)
-	fl.EosPos = append(fl.EosPos[:stln], fl.EosPos[edln:]...)
+	fl.Lexs = deleteLines(fl.Lexs, stln, edln)
+	fl.Comments = deleteLines(fl.Comments, stln, edln)
+	fl.LastStacks = deleteLines(fl.LastStacks, stln, edln)
+	fl.EosPos = deleteLines(fl.EosPos, stln, edln)
+}
+
+// insertLines inserts n zero lines at st in s, clipped to its length.
+func insertLines[T any](s []T, st, n int) []T {
+	return slices.Insert(s, min(max(st, 0), len(s)), make([]T, n)...)
+}
+
+// deleteLines deletes lines st to ed (exclusive) from s, clipped to its length.
+func deleteLines[T any](s []T, st, ed int) []T {
+	st, ed = max(st, 0), min(ed, len(s))
+	if st >= ed {
+		return s
+	}
+	return slices.Delete(s, st, ed)
 }
 
 // RunesFromBytes returns the lines of runes from a basic byte array

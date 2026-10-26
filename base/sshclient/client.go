@@ -8,13 +8,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
+	"io/fs"
 	"log/slog"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/bramvdbogaerde/go-scp"
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
@@ -34,8 +35,8 @@ type Client struct {
 	// over the lifetime of the Client.
 	sessionCounter int
 
-	// scpClient manages scp file copying
-	scpClient *scp.Client
+	// sftpClient copies files, made when first needed (see [Client.SFTP]).
+	sftpClient *sftp.Client
 }
 
 // NewClient returns a new Client using given [Config] configuration
@@ -52,7 +53,10 @@ func (cl *Client) Close() {
 	if cl.Client != nil {
 		cl.Client.Close()
 	}
-	cl.scpClient = nil
+	if cl.sftpClient != nil {
+		cl.sftpClient.Close()
+		cl.sftpClient = nil
+	}
 	cl.Client = nil
 }
 
@@ -94,8 +98,17 @@ func (cl *Client) Connect(host string) error {
 	if cl.User.KeyPath == "" {
 		return fmt.Errorf("ssh: key path (%q) is empty -- must be set", cl.User.KeyPath)
 	}
+	// The key file, or the other standard ones if it does not exist.
 	fn := filepath.Join(cl.User.KeyPath, cl.User.KeyFile)
 	key, err := os.ReadFile(fn)
+	for _, kf := range []string{"id_ed25519", "id_ecdsa", "id_rsa"} {
+		if !errors.Is(err, fs.ErrNotExist) {
+			break
+		}
+		if k, kerr := os.ReadFile(filepath.Join(cl.User.KeyPath, kf)); kerr == nil {
+			key, err = k, nil
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("ssh: unable to read private key from: %q %v", fn, err)
 	}
@@ -109,7 +122,7 @@ func (cl *Client) Connect(host string) error {
 	// more info: https://gist.github.com/Skarlso/34321a230cf0245018288686c9e70b2d
 	hostKeyCallback, err := knownhosts.New(filepath.Join(cl.User.KeyPath, "known_hosts"))
 	if err != nil {
-		log.Fatal("ssh: could not create hostkeycallback function: ", err)
+		return fmt.Errorf("ssh: could not read the known hosts: %w", err)
 	}
 
 	config := &ssh.ClientConfig{
@@ -122,7 +135,12 @@ func (cl *Client) Connect(host string) error {
 	}
 
 	// Connect to the remote server and perform the SSH handshake.
-	client, err := ssh.Dial("tcp", host+":22", config)
+	// The port is 22 unless the host has one, as in host:2222.
+	addr := host
+	if _, _, err := net.SplitHostPort(host); err != nil {
+		addr = net.JoinHostPort(host, "22")
+	}
+	client, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
 		err = fmt.Errorf("ssh: unable to connect to %s as user %s: %v", host, cl.User, err)
 		return err

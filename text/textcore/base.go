@@ -61,6 +61,11 @@ type Base struct { //core:embedder
 	// This should be set in Stylers like all other style properties.
 	SelectColor image.Image
 
+	// ErrorColor is the background color of the regions of the code errors
+	// of the text (see [Base.SetCodeErrors]).
+	// This should be set in Stylers like all other style properties.
+	ErrorColor image.Image
+
 	// HighlightColor is the color used for the text highlight background color (like in find).
 	// This should be set in Stylers like all other style properties.
 	HighlightColor image.Image
@@ -149,6 +154,9 @@ type Base struct { //core:embedder
 	// It is needed to update the render.
 	previousSelectRegion textpos.Region
 
+	// codeErrors are the code errors of the text (see [Base.SetCodeErrors]).
+	codeErrors []CodeError
+
 	// Highlights is a slice of regions representing the highlighted
 	// regions, e.g., for search results.
 	Highlights []textpos.Region `set:"-" edit:"-" json:"-" xml:"-"`
@@ -213,6 +221,7 @@ func (ed *Base) Init() {
 		ed.LineNumberColor = nil
 		ed.SelectColor = colors.Scheme.Select.Container
 		ed.HighlightColor = colors.Scheme.Warn.Container
+		ed.ErrorColor = colors.Scheme.Error.Container
 		ed.CursorColor = colors.Scheme.Primary.Base
 
 		s.Cursor = cursors.Text

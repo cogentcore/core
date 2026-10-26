@@ -420,19 +420,26 @@ func (ls *Lines) autosaveFilename() string {
 	return asfn
 }
 
-// autoSave does the autosave -- safe to call in a separate goroutine
+// autoSave does the autosave. It is called in a separate goroutine
+// after edits, which hold the lock, so it gets the lock to read the
+// text, which further edits could otherwise change while it is read.
 func (ls *Lines) autoSave() error {
+	ls.Lock()
 	if ls.autoSaving {
+		ls.Unlock()
 		return nil
 	}
 	ls.autoSaving = true
 	asfn := ls.autosaveFilename()
 	b := ls.bytes(0)
+	ls.Unlock()
 	err := os.WriteFile(asfn, b, 0644)
 	if err != nil {
 		log.Printf("Lines: Could not Autosave file: %v, error: %v\n", asfn, err)
 	}
+	ls.Lock()
 	ls.autoSaving = false
+	ls.Unlock()
 	return err
 }
 

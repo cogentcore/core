@@ -120,6 +120,7 @@ func (ed *Base) renderLines() {
 	}
 
 	ed.renderDepthBackground(spos, stln, edln)
+	ed.renderCodeErrors()
 	if ed.hasLineNumbers {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNumberPixels())

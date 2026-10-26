@@ -14,9 +14,9 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
+	_ "cogentcore.org/core/mvmcore"
 	"cogentcore.org/core/text/tex/texcache"
 	"cogentcore.org/core/tree"
-	_ "cogentcore.org/core/yaegicore"
 )
 
 //go:generate go run ./genmath.go

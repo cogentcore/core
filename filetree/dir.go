@@ -5,6 +5,7 @@
 package filetree
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -38,6 +39,16 @@ type DirFlagMap struct {
 
 	// mutex for accessing map
 	sync.Mutex
+}
+
+// Copy copies flag map from another map, safely avoiding copying the mutex.
+func (dm *DirFlagMap) Copy(cp *DirFlagMap) {
+	dm.init()
+	if cp.Map == nil {
+		return
+	}
+	maps.Copy(dm.Map, cp.Map)
+	dm.Unlock()
 }
 
 // init initializes the map, and sets the Mutex lock; must unlock manually.

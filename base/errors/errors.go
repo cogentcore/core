@@ -10,7 +10,33 @@ import (
 	"log/slog"
 	"runtime"
 	"strconv"
+	"sync/atomic"
 )
+
+// logHook is the function of [SetLogHook], if any.
+var logHook atomic.Pointer[func(err error) bool]
+
+// SetLogHook sets a function that [Log], [Log1] and [Log2] call with each
+// error before logging it: if it returns true, the error is not logged.
+// It returns the previous one (nil if none), to restore it. An interpreter
+// sets it while it runs code, to report the errors that the Go code that
+// the code calls logs as errors of the code, at the call.
+func SetLogHook(hook func(err error) bool) (prev func(err error) bool) {
+	var p *func(err error) bool
+	if hook != nil {
+		p = &hook
+	}
+	if old := logHook.Swap(p); old != nil {
+		prev = *old
+	}
+	return prev
+}
+
+// hooked returns whether the function of [SetLogHook] handles the error.
+func hooked(err error) bool {
+	h := logHook.Load()
+	return h != nil && (*h)(err)
+}
 
 // Log takes the given error and logs it if it is non-nil.
 // The intended usage is:
@@ -19,7 +45,7 @@ import (
 //	// or
 //	return errors.Log(MyFunc(v))
 func Log(err error) error {
-	if err != nil {
+	if err != nil && !hooked(err) {
 		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return err
@@ -30,8 +56,8 @@ func Log(err error) error {
 // if the error is non-nil. The intended usage is:
 //
 //	a := errors.Log1(MyFunc(v))
-func Log1[T any](v T, err error) T { //yaegi:add
-	if err != nil {
+func Log1[T any](v T, err error) T {
+	if err != nil && !hooked(err) {
 		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v
@@ -43,7 +69,7 @@ func Log1[T any](v T, err error) T { //yaegi:add
 //
 //	a, b := errors.Log2(MyFunc(v))
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
-	if err != nil {
+	if err != nil && !hooked(err) {
 		slog.Error(err.Error() + " | " + CallerInfo())
 	}
 	return v1, v2

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package filetree provides a GUI tree interface to a filesystem.
 package filetree
 
 //go:generate core generate
@@ -379,7 +380,8 @@ func (fn *Node) InitFileInfo() error {
 	}
 	var err error
 	if fn.FileRoot().FS == nil { // deal with symlinks
-		ls, err := os.Lstat(string(fn.Filepath))
+		var ls os.FileInfo
+		ls, err = os.Lstat(string(fn.Filepath))
 		if errors.Log(err) != nil {
 			return err
 		}

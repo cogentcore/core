@@ -1,0 +1,15 @@
+#!/bin/sh
+# make generates the symbols of the packages, one gen_*.go file per package
+# with mvm extract -register.
+set -e
+cd "$(dirname "$0")"
+/bin/rm -f gen_*.go
+
+# The standard library image packages, then the Cogent Core packages of the
+# GUI.
+std="image image/color image/draw"
+core="base/iox/imagex colors colors/gradient content core cursors events filetree htmlcore keymap paint styles styles/abilities styles/states styles/units text/lines text/rich text/text text/textcore tree"
+
+pkgs="$std"
+for p in $core; do pkgs="$pkgs cogentcore.org/core/$p"; done
+go run github.com/cogentcore/mvm/cmd/extract -register -pkg coresymbols $pkgs

@@ -31,8 +31,7 @@ ft.OnSelect(func(e events.Event) {
 
 You can filter which files or directories are shown:
 
-<!-- TODO: this is crashing yaegi -->
-```go
+```Go
 ft := filetree.NewTree(b)
 ft.FilterFunc = func(path string, info fs.FileInfo) bool {
     return info.IsDir() // only show directories

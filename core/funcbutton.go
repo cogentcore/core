@@ -236,7 +236,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 func isAnonymousFunction(fnm string) bool {
 	// FuncName.funcN indicates that a function was defined anonymously
 	funcN := len(fnm) > 0 && unicode.IsDigit(rune(fnm[len(fnm)-1])) && strings.Contains(fnm, ".func")
-	return funcN || fnm == "reflect.makeFuncStub" // used for anonymous functions in yaegi
+	return funcN || fnm == "reflect.makeFuncStub" // used for anonymous functions in interpreters
 }
 
 // setFuncImpl is the underlying implementation of [FuncButton.SetFunc].
@@ -250,7 +250,7 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 	// get name without package
 	li := strings.LastIndex(snm, ".")
 	isAnonymous := isAnonymousFunction(snm)
-	if snm == "reflect.makeFuncStub" { // used for anonymous functions in yaegi
+	if snm == "reflect.makeFuncStub" { // used for anonymous functions in interpreters
 		snm = "Anonymous function"
 		li = -1
 	} else if isAnonymous {

@@ -45,8 +45,8 @@ type OnBinder interface {
 // and during [WidgetBase.UpdateWidget]. It returns the widget to enable method chaining.
 // It also accepts an optional [reflect.StructTag], which is used to set properties
 // of certain value widgets.
-func Bind[T Value](value any, vw T, tags ...string) T { //yaegi:add
-	// TODO: make tags be reflect.StructTag once yaegi is fixed to work with that
+func Bind[T Value](value any, vw T, tags ...string) T {
+	// TODO: make tags be reflect.StructTag (yaegi did not support that)
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
@@ -79,7 +79,7 @@ func Bind[T Value](value any, vw T, tags ...string) T { //yaegi:add
 // from the old value persisting and being updated. For example, that issue happened
 // with slice and map pointers persisting in forms when a new struct was set.
 // It should not be called by end-user code; it must be exported since it is referenced
-// in a generic function added to yaegi ([Bind]).
+// in a generic function that interpreters run from source ([Bind]).
 func ResetWidgetValue(vw Value) {
 	rv := reflect.ValueOf(vw.WidgetValue())
 	if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
