@@ -26,6 +26,7 @@ func ContentCode(dir string, cc *config.ContentCode) error {
 		}
 	}
 	c.GoalRecord = c.GoalRecord && cc.GoalRecord
+	c.Interpret = append(c.Interpret, cc.Interpret...)
 	if _, err := contentcode.Generate(c); err != nil {
 		return fmt.Errorf("compiling the code blocks of the content: %w", err)
 	}

@@ -170,3 +170,19 @@ func TestGenerateAppError(t *testing.T) {
 		t.Error("output written")
 	}
 }
+
+// TestInterpreted checks the pages whose code blocks run in the interpreter.
+func TestInterpreted(t *testing.T) {
+	c := &Config{Content: "content", Interpret: []string{"neuron-channels", "sims/*.md", "/other.md"}}
+	for file, want := range map[string]bool{
+		"content/neuron-channels.md": true,
+		"content/neuron.md":          false,
+		"content/sims/a.md":          true,
+		"content/other.md":           true,
+		"content/sims/deep/a.md":     false,
+	} {
+		if got := c.interpreted(file); got != want {
+			t.Errorf("%s: interpreted %v, want %v", file, got, want)
+		}
+	}
+}

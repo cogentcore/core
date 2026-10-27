@@ -51,6 +51,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -151,8 +152,33 @@ type Config struct {
 	// sites whose interpreter does not (such as plain goal).
 	GoalRecord bool
 
+	// Interpret are the pages whose code blocks are not compiled into the
+	// app, so that they run in the interpreter, as markdown file paths in
+	// the content directory, with or without the .md extension, which can
+	// have the wildcards of [path.Match], such as neuron-*. On the web, an
+	// interpreter that is a deferred function is then loaded with the
+	// packages that the code uses only when such a page is shown, which
+	// keeps code that few pages use out of the startup of the app.
+	Interpret []string
+
 	// Force generates the output even if it is up to date.
 	Force bool
+}
+
+// interpreted returns whether the code blocks of the given markdown file,
+// relative to the package directory with slashes, run in the interpreter
+// (see [Config.Interpret]).
+func (c *Config) interpreted(file string) bool {
+	rel := strings.TrimPrefix(file, path.Clean(filepath.ToSlash(c.Content))+"/")
+	for _, pat := range c.Interpret {
+		pat = strings.TrimPrefix(pat, "/")
+		for _, name := range []string{rel, strings.TrimSuffix(rel, ".md")} {
+			if ok, _ := path.Match(pat, name); ok {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 type importFlags []string
@@ -170,6 +196,7 @@ func ParseArgs(name string, args []string) (*Config, error) {
 	fs.StringVar(&c.Tags, "tags", "", "build tags for type checking")
 	fs.Var((*importFlags)(&c.Imports), "import", "extra package that code can use: path or name=path (repeatable)")
 	fs.BoolVar(&c.GoalRecord, "goal-record", true, "record the variables of Goal math mode in tensorfs and list tensorfs to the output, as Lab's mvmlab interpreter does")
+	fs.Var((*importFlags)(&c.Interpret), "interpret", "page whose code blocks run in the interpreter instead of being compiled: a markdown file in the content directory, with or without .md, which can have wildcards (repeatable)")
 	fs.BoolVar(&c.Force, "force", false, "generate even if the output is up to date")
 	if err := fs.Parse(args); err != nil {
 		return nil, err
@@ -316,6 +343,8 @@ func Generate(c *Config) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	blocks = slices.DeleteFunc(blocks, func(b *block) bool { return c.interpreted(b.file) })
+	pages = slices.DeleteFunc(pages, func(pg *goalPage) bool { return c.interpreted(pg.file) })
 	old, _ := os.ReadFile(output)
 	if len(blocks) == 0 && len(pages) == 0 {
 		if bytes.HasPrefix(old, []byte(header)) {

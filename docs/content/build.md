@@ -67,9 +67,14 @@ Options for compiling code blocks go in the `[ContentCode]` section of `core.tom
   # whether Goal math mode records its variables in tensorfs, as mvmlab does
   # (on by default; turn it off if the Goal interpreter of the app does not)
   GoalRecord = false
+  # pages whose code blocks run in the interpreter instead of being compiled
+  # (markdown files in the content directory, with or without .md; wildcards ok)
+  Interpret = ["channel-plots"]
 ```
 
-If you prefer `go generate`, you can add `//go:generate go run cogentcore.org/core/content/cmd/contentcode` to the main package of the app instead; the `core` tool then uses the same arguments (such as `-o` for the output file, `-import name=path` for other packages that code blocks use without importing them, or `-goal-record=false`), together with the options of `core.toml`.
+Code that few pages use, such as that of interactive plots on one page, can be kept out of the startup of a `js` app with `Interpret`: the code blocks of those pages are not compiled into the app, so they run in the interpreter, which is then loaded (as a deferred function, with the packages that the code uses) only when one of those pages is shown.
+
+If you prefer `go generate`, you can add `//go:generate go run cogentcore.org/core/content/cmd/contentcode` to the main package of the app instead; the `core` tool then uses the same arguments (such as `-o` for the output file, `-import name=path` for other packages that code blocks use without importing them, `-interpret page` for pages whose code blocks run in the interpreter, or `-goal-record=false`), together with the options of `core.toml`.
 
 ## Details
 

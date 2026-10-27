@@ -185,6 +185,14 @@ type ContentCode struct { //types:add
 	// interpreter of Cogent Lab (cogentcore.org/lab/mvmlab) does. Turn it
 	// off for sites whose Goal interpreter does not.
 	GoalRecord bool `default:"true"`
+
+	// Interpret are pages whose code blocks are not compiled into the app,
+	// so that they run in the interpreter, as markdown files in the content
+	// directory, with or without the .md extension, which can have the
+	// wildcards of path.Match. On the web, an interpreter that is in
+	// Web.DeferredFunctions is then loaded, with the packages that the code
+	// uses, only when such a page is shown.
+	Interpret []string
 }
 
 func (c *Config) OnConfig(cmd string) error {
