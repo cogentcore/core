@@ -5,6 +5,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"io/fs"
@@ -15,7 +16,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 
 	"cogentcore.org/core/base/elide"
@@ -71,11 +71,8 @@ type FilePicker struct {
 	// index of currently selected file in Files list (-1 if none)
 	selectedIndex int
 
-	// change notify for current dir
-	watcher *fsnotify.Watcher
-
-	// channel to close watcher watcher
-	doneWatcher chan bool
+	// stopWatch stops watching the current directory for changes, if set.
+	stopWatch context.CancelFunc
 
 	// Previous path that was processed via UpdateFiles
 	prevPath string
@@ -124,19 +121,7 @@ func (fp *FilePicker) Init() {
 		fp.readFiles()
 
 		if fp.prevPath != fp.directory {
-			// TODO(#424): disable for all platforms for now; causing issues
-			if false && TheApp.Platform() != system.MacOS {
-				// mac is not supported in a high-capacity fashion at this point
-				if fp.prevPath == "" {
-					fp.configWatcher()
-				} else {
-					fp.watcher.Remove(fp.prevPath)
-				}
-				fp.watcher.Add(fp.directory)
-				if fp.prevPath == "" {
-					fp.watchWatcher()
-				}
-			}
+			fp.watchDirectory()
 			fp.prevPath = fp.directory
 		}
 
@@ -171,15 +156,9 @@ func (fp *FilePicker) Init() {
 
 func (fp *FilePicker) Destroy() {
 	fp.Frame.Destroy()
-	if fp.watcher != nil {
-		fp.watcher.Close()
-		fp.watcher = nil
-	}
-	if fp.doneWatcher != nil {
-		// It is closed instead of sent on, as the watcher goroutine can be
-		// waiting for the render lock that we hold.
-		close(fp.doneWatcher)
-		fp.doneWatcher = nil
+	if fp.stopWatch != nil {
+		fp.stopWatch()
+		fp.stopWatch = nil
 	}
 }
 
@@ -438,47 +417,28 @@ func (fp *FilePicker) makeSelectedRow(selected *tree.Plan) {
 	})
 }
 
-func (fp *FilePicker) configWatcher() error {
-	if fp.watcher != nil {
-		return nil
+// watchDirectory starts watching the current directory for changes
+// to its files, updating the file picker after them, and stops
+// watching any previous directory.
+func (fp *FilePicker) watchDirectory() {
+	if fp.stopWatch != nil {
+		fp.stopWatch()
+		fp.stopWatch = nil
 	}
-	var err error
-	fp.watcher, err = fsnotify.NewWatcher()
-	return err
-}
-
-func (fp *FilePicker) watchWatcher() {
-	if fp.watcher == nil || fp.watcher.Events == nil {
-		return
-	}
-	if fp.doneWatcher != nil {
-		return
-	}
-	fp.doneWatcher = make(chan bool)
-	go func() {
-		watch := fp.watcher
-		done := fp.doneWatcher
-		for {
-			select {
-			case <-done:
-				return
-			case event := <-watch.Events:
-				switch {
-				case event.Op&fsnotify.Create == fsnotify.Create ||
-					event.Op&fsnotify.Remove == fsnotify.Remove ||
-					event.Op&fsnotify.Rename == fsnotify.Rename:
-					// We are not in the event loop, so we update with the lock,
-					// only if the file picker is still shown.
-					if fp.AsyncLockIfShown() {
-						fp.Update()
-						fp.AsyncUnlock()
-					}
-				}
-			case err := <-watch.Errors:
-				_ = err
-			}
+	ctx, cancel := context.WithCancel(context.Background())
+	err := watchFilePickerDir(ctx, fp.directory, func() {
+		// We are not in the event loop, so we update with the lock,
+		// only if the file picker is still shown.
+		if fp.AsyncLockIfShown() {
+			fp.Update()
+			fp.AsyncUnlock()
 		}
-	}()
+	})
+	if err != nil {
+		cancel()
+		return // e.g., a directory that does not exist
+	}
+	fp.stopWatch = cancel
 }
 
 // updateFilesEvent updates the list of files and other views for the current path.

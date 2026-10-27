@@ -441,6 +441,7 @@ func (fn *Node) OnClose() {
 		return
 	}
 	fn.FileRoot().setDirClosed(fn.Filepath)
+	fn.FileRoot().syncWatchDirs()
 }
 
 func (fn *Node) CanOpen() bool {
@@ -454,6 +455,9 @@ func (fn *Node) openDir() {
 	}
 	fn.FileRoot().setDirOpen(fn.Filepath)
 	fn.Update()
+	if !fn.FileRoot().inOpenAll {
+		fn.FileRoot().syncWatchDirs()
+	}
 }
 
 // sortBys determines how to sort the selected files in the directory.
@@ -476,6 +480,7 @@ func (fn *Node) openAll() { //types:add
 	fn.FileRoot().inOpenAll = true // causes chaining of opening
 	fn.Tree.OpenAll()
 	fn.FileRoot().inOpenAll = false
+	fn.FileRoot().syncWatchDirs()
 }
 
 // removeFromExterns removes file from list of external files

@@ -5,7 +5,6 @@
 package filetree
 
 import (
-	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -15,32 +14,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 )
-
-// findDirNode finds directory node by given path.
-// Must be a relative path already rooted at tree, or absolute path within tree.
-func (fn *Node) findDirNode(path string) (*Node, error) {
-	rp := fn.RelativePathFrom(core.Filename(path))
-	if rp == "" {
-		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.Filepath)
-	}
-	if rp == "." {
-		return fn, nil
-	}
-	dirs := filepath.SplitList(rp)
-	dir := dirs[0]
-	dni := fn.ChildByName(dir, 0)
-	if dni == nil {
-		return nil, fmt.Errorf("could not find child %q", dir)
-	}
-	dn := AsNode(dni)
-	if len(dirs) == 1 {
-		if dn.IsDir() {
-			return dn, nil
-		}
-		return nil, fmt.Errorf("FindDirNode: item at path: %s is not a Directory", path)
-	}
-	return dn.findDirNode(filepath.Join(dirs[1:]...))
-}
 
 // FindFile finds first node representing given file (false if not found) --
 // looks for full path names that have the given string as their suffix, so
