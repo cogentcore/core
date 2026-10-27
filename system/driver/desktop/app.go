@@ -13,6 +13,7 @@ import (
 	"image"
 	"log"
 	"runtime"
+	"sync/atomic"
 
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
@@ -29,6 +30,7 @@ func Init() {
 
 	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
+	TheApp.watchTheme()
 }
 
 // TheApp is the single [system.App] for the desktop platform
@@ -43,6 +45,9 @@ type App struct {
 
 	// Monitors are pointers to the glfw monitors corresponding to Screens.
 	Monitors []*glfw.Monitor
+
+	// dark is whether the system color theme is dark; see [App.IsDark].
+	dark atomic.Bool
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing

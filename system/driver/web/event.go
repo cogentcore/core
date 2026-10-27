@@ -39,6 +39,10 @@ func (a *App) AddEventListeners() {
 	AddEventListener(g, "beforeinput", appInput(a.OnBeforeInput))
 	AddEventListener(g.Get("visualViewport"), "resize", a.OnResize)
 	AddEventListener(g, "blur", a.OnBlur)
+	// See https://stackoverflow.com/a/57795495
+	if g.Get("matchMedia").Truthy() {
+		AddEventListener(g.Call("matchMedia", "(prefers-color-scheme: dark)"), "change", a.OnThemeChange)
+	}
 	composer.OnLoaderRemoved(func() {
 		// see https://chromestatus.com/feature/5093566007214080
 		AddEventListener(g, "touchstart", a.OnTouchStart, map[string]any{"passive": false})
@@ -289,5 +293,13 @@ func (a *App) OnResize(this js.Value, args []js.Value) any {
 
 func (a *App) OnBlur(this js.Value, args []js.Value) any {
 	a.KeyMods = 0
+	return nil
+}
+
+// OnThemeChange is called when the system color theme changes. It sends an
+// [events.ScreenUpdate] event, which updates the color scheme when the Auto
+// theme is used.
+func (a *App) OnThemeChange(this js.Value, args []js.Value) any {
+	a.Event.Window(events.ScreenUpdate)
 	return nil
 }

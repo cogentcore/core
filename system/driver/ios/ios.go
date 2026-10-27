@@ -152,6 +152,7 @@ func updateConfig(width, height, orientation int32) {
 	physY := 25.4 * float32(height) / DisplayMetrics.DPI
 	TheApp.Scrn.PhysicalSize = image.Pt(int(physX), int(physY))
 
+	wasDark := TheApp.Dark
 	TheApp.Dark = bool(C.isDark())
 
 	// we only send OnSystemWindowCreated after we get the screen info
@@ -162,6 +163,10 @@ func updateConfig(width, height, orientation int32) {
 		TheApp.Draw.System.Renderer.SetSize(TheApp.Scrn.PixelSize)
 	}
 	TheApp.Event.WindowResize()
+	if TheApp.Dark != wasDark {
+		// updates the color scheme when the Auto theme is used
+		TheApp.Event.Window(events.ScreenUpdate)
+	}
 }
 
 //export lifecycleDead
