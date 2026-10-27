@@ -13,6 +13,7 @@ import (
 	"image"
 	"unicode/utf8"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/sides"
@@ -219,6 +220,18 @@ type Window interface {
 	// SendPaintEvent sends the WindowPaint event.
 	// Other updates / polling may be done at this point too.
 	SendPaintEvent()
+
+	// StartDrag starts an operating system drag-and-drop of the given data
+	// from this window, so that it can be dropped in other windows and apps.
+	// It is used when a drag within the window leaves the window, while the
+	// mouse button is still down. files are absolute paths of files being
+	// dragged, which are provided to other apps as files; otherwise data is
+	// provided, for other Cogent Core apps and as text. img is the image
+	// shown under the mouse during the drag, with its top-left corner at the
+	// mouse. Drags over the windows of this app, including this window, are
+	// then sent as external drag events (see [events.Source.DragExternal]).
+	// It returns false if not supported on this platform.
+	StartDrag(data mimedata.Mimes, files []string, img image.Image) bool
 }
 
 ////////////////////////////////////////////////////////////////////////////

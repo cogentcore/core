@@ -150,6 +150,17 @@ type Events struct {
 
 	// source data from DragStart event.
 	dragData any
+
+	// dragImage is the image of the drag sprite, from DragStart,
+	// used for a drag handed off to the operating system.
+	dragImage *image.RGBA
+
+	// dragFiles are the files of the current drag, from SetDragFiles.
+	dragFiles []string
+
+	// dragOS is set when the current drag has been handed off to the
+	// operating system after leaving the window (see [Events.dragToOS]).
+	dragOS bool
 }
 
 // mains returns the stack of main stages for our scene.
@@ -172,6 +183,10 @@ func (em *Events) RenderWindow() *renderWindow {
 
 func (em *Events) handleEvent(e events.Event) {
 	if e.IsHandled() {
+		return
+	}
+	if de, ok := e.(*events.DragDrop); ok {
+		em.handleExternalDrag(de)
 		return
 	}
 	switch {
@@ -230,6 +245,7 @@ func (em *Events) handleFocusEvent(e events.Event) {
 func (em *Events) resetOnMouseDown() {
 	em.press = nil
 	em.drag = nil
+	em.dragOS = false
 	em.dragPress = nil
 	em.slide = nil
 	em.slidePress = nil
@@ -255,6 +271,10 @@ func (em *Events) handlePosEvent(e events.Event) {
 	pos := e.Pos()
 	et := e.Type()
 	sc := em.scene
+
+	if em.handleDragOS(e) {
+		return
+	}
 
 	switch et {
 	case events.MouseDown:
@@ -827,8 +847,14 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	}
 	em.drag = w
 	em.dragData = data
+	em.dragFiles = nil
+	if fd, ok := w.(FileDragger); ok {
+		em.dragFiles = fd.DragFiles()
+	}
+	em.dragOS = false
 	// TODO: maybe show the number of items being dragged
 	img := clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
+	em.dragImage = img
 	sp := NewImageSprite(dragSpriteName, e.WindowPos(), img)
 	sp.Active = true
 	ms.Sprites.Add(sp)
@@ -916,7 +942,11 @@ func (em *Events) DropFinalize(de *events.DragDrop) {
 	}
 	de.Typ = events.DropDeleteSource
 	de.ClearHandled()
-	de.Source.(Widget).AsWidget().HandleEvent(de)
+	// the source can be in another window, for a drop from the operating system
+	src := de.Source.(Widget).AsWidget()
+	src.runInWindow(em.scene.AsWidget(), func() {
+		src.HandleEvent(de)
+	})
 }
 
 // Clipboard returns the [system.Clipboard], supplying the window context

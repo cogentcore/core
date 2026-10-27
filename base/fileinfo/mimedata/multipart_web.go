@@ -114,8 +114,8 @@ func readPart(part string) *Data {
 	b := []byte(part)
 	if cte == "base64" {
 		eb := make([]byte, base64.StdEncoding.DecodedLen(len(b)))
-		base64.StdEncoding.Decode(eb, b)
-		b = eb
+		n, _ := base64.StdEncoding.Decode(eb, b)
+		b = eb[:n]
 	}
 	d.Data = b
 	return d

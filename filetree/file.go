@@ -47,7 +47,7 @@ func (fn *Node) SelectedPaths() []string {
 	if n == 0 {
 		return nil
 	}
-	paths := make([]string, n)
+	paths := make([]string, 0, n)
 	fn.SelectedFunc(func(sn *Node) {
 		paths = append(paths, string(sn.Filepath))
 	})

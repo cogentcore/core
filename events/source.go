@@ -165,6 +165,26 @@ func (es *Source) DropExternal(where image.Point, md mimedata.Mimes) {
 	es.Deque.Send(ev)
 }
 
+// DragExternal creates and sends an external drag-and-drop event from the
+// operating system, for a drag over the window from another window or app
+// (or from this window, after the drag has left it). The type is
+// [DragMove] while the drag moves over the window, [DragLeave] when it
+// leaves the window without a drop, and [Drop] for the drop, with the
+// data in md. fromApp is true if the drag was started by this app.
+func (es *Source) DragExternal(typ Types, where image.Point, mods key.Modifiers, md mimedata.Mimes, fromApp bool) {
+	ev := NewExternalDrop(typ, Left, where, mods, md)
+	ev.FromApp = fromApp
+	if typ == DragMove { // successive moves can be compressed
+		ev.Flags.SetFlag(false, Unique)
+	}
+	es.Last.Mods = mods
+	if typ != DragLeave {
+		es.Last.MousePos = where
+	}
+	ev.Init()
+	es.Deque.Send(ev)
+}
+
 // Touch creates and sends a touch event with the given values.
 // It also creates and sends a corresponding mouse event.
 func (es *Source) Touch(typ Types, seq Sequence, where image.Point) {

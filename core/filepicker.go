@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/tree"
@@ -303,7 +304,9 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		}
 		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
+			s.SetAbilities(true, abilities.Draggable, abilities.Droppable)
 		})
+		fp.handleFilesDND(w)
 		w.OnSelect(func(e events.Event) {
 			fp.fileSelect(w.SelectedIndex)
 		})

@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/textcore"
+	"cogentcore.org/core/tree"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,
@@ -67,10 +68,56 @@ func (fn *Node) Paste() { //types:add
 
 func (fn *Node) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
-	md := de.Data.(mimedata.Mimes)
-	fn.pasteFiles(md, de.Source == nil, func() {
+	e.SetHandled()
+	md, ok := de.Data.(mimedata.Mimes)
+	if !ok {
+		return
+	}
+	external := de.Source == nil
+	if !external {
+		// files from another file tree (possibly in another window)
+		// are dropped by their paths, as for files from another app
+		sfn := AsNode(de.Source.(tree.Node))
+		if sfn == nil { // from another widget: only files that it has
+			md = nil
+			for _, p := range core.DroppedFiles(de) {
+				md = append(md, mimedata.NewTextData(p))
+			}
+			if len(md) == 0 {
+				return
+			}
+			external = true
+		} else if sfn.FileRoot() != fn.FileRoot() {
+			md = filePaths(md)
+			external = true
+		}
+	}
+	fn.pasteFiles(md, external, func() {
 		fn.DropFinalize(de)
 	})
+}
+
+// DragFiles returns the files of this node and the other selected nodes,
+// for dragging them to other apps (see [core.FileDragger]).
+func (fn *Node) DragFiles() []string {
+	files := []string{string(fn.Filepath)}
+	for _, sn := range fn.GetSelectedNodes() {
+		if sfn := AsNode(sn); sfn != nil && sfn != fn {
+			files = append(files, string(sfn.Filepath))
+		}
+	}
+	return files
+}
+
+// filePaths returns the file paths in the given mime data from [Node.MimeData],
+// which has three items per file, with the file path second.
+func filePaths(md mimedata.Mimes) mimedata.Mimes {
+	nf := len(md) / 3
+	paths := make(mimedata.Mimes, nf)
+	for i := range nf {
+		paths[i] = md[i*3+1]
+	}
+	return paths
 }
 
 // pasteCheckExisting checks for existing files in target node directory if
