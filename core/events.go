@@ -154,7 +154,7 @@ type Events struct {
 
 // mains returns the stack of main stages for our scene.
 func (em *Events) mains() *stages {
-	if em.scene == nil {
+	if em.scene == nil || em.scene.Stage == nil { // no stage when generating HTML
 		return nil
 	}
 	return em.scene.Stage.Mains
