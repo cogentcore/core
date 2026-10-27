@@ -204,7 +204,10 @@ func chromaTagsForLine(tags *lexer.Line, toks []chroma.Token) {
 			continue
 		}
 		ep := cp + slen
-		if tok.Type < chroma.Text {
+		// chroma marks the characters that a lexer does not know as errors,
+		// such as the # and $ of Goal, which is highlighted as Go: they are
+		// plain text, not the Error tags of diagnostics.
+		if tok.Type < chroma.Text && tok.Type != chroma.Error {
 			ht := TokenFromChroma(tok.Type)
 			tags.AddLex(token.KeyToken{Token: ht}, cp, ep)
 		}

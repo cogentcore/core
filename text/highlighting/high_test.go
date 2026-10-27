@@ -283,3 +283,15 @@ func TestMarkupErrorColor(t *testing.T) {
 		assert.Nil(t, sty.FillColor(), "span %d", si)
 	}
 }
+
+// TestChromaErrorsArePlain checks that the characters that a chroma lexer
+// does not know, such as the # and $ of Goal, which is highlighted as Go
+// on the web, are plain text, not the Error tags of diagnostics.
+func TestChromaErrorsArePlain(t *testing.T) {
+	tags, err := ChromaTagsLine(GetLexer("go"), "plots.NewLine(fig1, #zeros(8)#) $ls")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, tags)
+	for _, tg := range tags {
+		assert.NotEqual(t, token.Error, tg.Token.Token, "%d-%d", tg.Start, tg.End)
+	}
+}
