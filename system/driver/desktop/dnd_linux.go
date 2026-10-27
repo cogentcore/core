@@ -29,6 +29,12 @@ import (
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
+// isX11 returns whether GLFW is using X11, which drag-and-drop
+// requires, rather than Wayland, where only GLFW file drops work.
+func isX11() bool {
+	return glfw.GetPlatform() == glfw.PlatformX11
+}
+
 // xwindow returns the X11 Window of the window.
 func (w *Window) xwindow() C.Window {
 	return C.Window(w.Glw.GetX11Window())
@@ -37,6 +43,9 @@ func (w *Window) xwindow() C.Window {
 // initDrag sets up drag-and-drop for the window.
 // It must be called on the main thread.
 func (w *Window) initDrag() {
+	if !isX11() {
+		return
+	}
 	xw := w.xwindow()
 	addDragWindow(uintptr(xw), w)
 	C.registerDrag(xw)
@@ -45,13 +54,16 @@ func (w *Window) initDrag() {
 // closeDrag removes the window from drag-and-drop.
 // It must be called on the main thread.
 func (w *Window) closeDrag() {
+	if !isX11() {
+		return
+	}
 	xw := w.xwindow()
 	C.unregisterDrag(xw)
 	deleteDragWindow(uintptr(xw))
 }
 
 func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {
-	if w.Glw == nil {
+	if w.Glw == nil || !isX11() {
 		return false
 	}
 	mime, text := dragData(data, files)
