@@ -14,11 +14,11 @@
 package desktop
 
 import (
-	"fmt"
 	"log/slog"
 	"syscall"
 	"unsafe"
 
+	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -27,78 +27,39 @@ const (
 	themeRegName = `AppsUseLightTheme`                                            // <- For apps. Use SystemUsesLightTheme for taskbar and tray
 )
 
-// IsDark returns whether the system color theme is dark (as opposed to light).
-func (app *App) IsDark() bool {
-	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
+// watchTheme sets the initial system color theme and starts watching the
+// registry value for it for changes.
+func (a *App) watchTheme() {
+	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE|registry.NOTIFY)
 	if err != nil {
 		slog.Error("error opening theme registry key: " + err.Error())
-		return false
+		return
 	}
-	defer k.Close()
+	a.dark.Store(isDarkKey(k))
+	go func() {
+		defer k.Close()
+		for {
+			// this blocks until the key changes
+			err := windows.RegNotifyChangeKeyValue(windows.Handle(k), false, windows.REG_NOTIFY_CHANGE_LAST_SET, 0, false)
+			if err != nil {
+				slog.Error("error watching theme registry key: " + err.Error())
+				return
+			}
+			a.setDark(isDarkKey(k))
+		}
+	}()
+}
+
+// isDarkKey returns whether the system color theme is dark,
+// based on the given theme registry key.
+func isDarkKey(k registry.Key) bool {
 	val, _, err := k.GetIntegerValue(themeRegName)
 	if err != nil {
-		slog.Error("error getting theme registry value: " + err.Error())
+		// the value does not exist on versions of Windows without a dark theme
 		return false
 	}
 	// dark mode is 0
 	return val == 0
-}
-
-// TODO(kai): fix IsDarkMonitor on windows
-
-// IsDarkMonitor monitors the state of the dark mode and calls the given function
-// with the new value whenever it changes. It returns a channel that will
-// receive any errors that occur during the monitoring, as it happens in a
-// separate goroutine. It also returns any error that occurred during the
-// initial set up of the monitoring. If the error is non-nil, the error channel
-// will be nil. It also takes a done channel, and it will stop monitoring when
-// that done channel is closed.
-func (app *App) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
-	var regNotifyChangeKeyValue *syscall.Proc
-
-	if advapi32, err := syscall.LoadDLL("Advapi32.dll"); err == nil {
-		if p, err := advapi32.FindProc("RegNotifyChangeKeyValue"); err == nil {
-			regNotifyChangeKeyValue = p
-		} else {
-			return nil, fmt.Errorf("error finding function RegNotifyChangeKeyValue in Advapi32.dll: %w", err)
-		}
-	}
-
-	ec := make(chan error)
-	if regNotifyChangeKeyValue != nil {
-		go func() {
-			k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, syscall.KEY_NOTIFY|registry.QUERY_VALUE)
-			if err != nil {
-				ec <- fmt.Errorf("error opening theme registry key: %w", err)
-				return
-			}
-			// need haveSetWasDark to capture first change correctly
-			var wasDark, haveSetWasDark bool
-			for {
-				select {
-				case <-done:
-					// if done is closed, we return
-					return
-				default:
-					regNotifyChangeKeyValue.Call(uintptr(k), 0, 0x00000001|0x00000004, 0, 0)
-					val, _, err := k.GetIntegerValue(themeRegName)
-					if err != nil {
-						ec <- fmt.Errorf("error getting theme registry value: %w", err)
-						return
-					}
-					// dark mode is 0
-					isDark := val == 0
-
-					if isDark != wasDark || !haveSetWasDark {
-						fn(isDark)
-						wasDark = isDark
-						haveSetWasDark = true
-					}
-				}
-			}
-		}()
-	}
-	return ec, nil
 }
 
 func (w *Window) SetTitleBarIsDark(isDark bool) {

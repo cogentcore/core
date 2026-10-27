@@ -580,15 +580,23 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WindowEventTrace {
 				log.Println("Win: ScreenUpdate", w.name, screenConfig())
 			}
+			// the system color theme may have changed
+			themeChanged := AppearanceSettings.Theme == ThemeAuto && TheApp.IsDark() != matcolor.SchemeIsDark
+			if themeChanged {
+				AppearanceSettings.Apply()
+			}
 			if !TheApp.Platform().IsMobile() { // native desktop
 				if TheApp.NScreens() > 0 {
-					if TheApp.Platform() == system.Offscreen {
+					if TheApp.Platform() == system.Offscreen && !themeChanged {
 						// note: this improves testing reliability
 						AppearanceSettings.Apply()
 					}
 					UpdateAll()
 				}
 			} else {
+				if themeChanged {
+					UpdateAll()
+				}
 				w.resized()
 			}
 		}
