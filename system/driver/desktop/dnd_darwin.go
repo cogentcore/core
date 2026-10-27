@@ -17,81 +17,45 @@ bool startDrag(void* nswin, char** files, int nfiles, void* mime, int mimelen, v
 import "C"
 
 import (
-	"bytes"
 	"image"
-	"image/png"
-	"sync"
 	"unsafe"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 )
-
-// dragWindows maps the NSWindow of each window to the window,
-// for the drag-and-drop callbacks from Cocoa.
-var dragWindows = struct {
-	sync.Mutex
-	m map[unsafe.Pointer]*Window
-}{m: map[unsafe.Pointer]*Window{}}
 
 // initDrag sets up drag-and-drop for the window.
 // It must be called on the main thread.
 func (w *Window) initDrag() {
 	nw := w.Glw.GetCocoaWindow()
-	dragWindows.Lock()
-	dragWindows.m[nw] = w
-	dragWindows.Unlock()
+	addDragWindow(uintptr(nw), w)
 	C.registerDrag(nw)
 }
 
 // closeDrag removes the window from drag-and-drop.
 // It must be called on the main thread.
 func (w *Window) closeDrag() {
-	dragWindows.Lock()
-	delete(dragWindows.m, w.Glw.GetCocoaWindow())
-	dragWindows.Unlock()
-}
-
-// dragWindow returns the window for the given NSWindow, or nil.
-func dragWindow(nswin unsafe.Pointer) *Window {
-	dragWindows.Lock()
-	defer dragWindows.Unlock()
-	return dragWindows.m[nswin]
+	deleteDragWindow(uintptr(w.Glw.GetCocoaWindow()))
 }
 
 // macDragWindowOpen returns whether the given NSWindow is still open.
 //
 //export macDragWindowOpen
 func macDragWindowOpen(nswin unsafe.Pointer) C.bool {
-	return dragWindow(nswin) != nil
+	return dragWindow(uintptr(nswin)) != nil
 }
 
 func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {
 	if w.Glw == nil {
 		return false
 	}
-	var mime, text []byte
-	if len(files) == 0 {
-		mime = data.ToMultipart()
-		for _, d := range data {
-			if mimedata.IsText(d.Type) {
-				text = d.Data
-				break
-			}
-		}
-	}
-	var pngb []byte
+	mime, text := dragData(data, files)
+	pngb := dragImagePNG(img)
 	var imgw, imgh float64
-	if img != nil {
-		var b bytes.Buffer
-		if errors.Log(png.Encode(&b, img)) == nil {
-			pngb = b.Bytes()
-			sz := img.Bounds().Size()
-			imgw = float64(sz.X) / float64(w.DevicePixelRatio)
-			imgh = float64(sz.Y) / float64(w.DevicePixelRatio)
-		}
+	if pngb != nil {
+		sz := img.Bounds().Size()
+		imgw = float64(sz.X) / float64(w.DevicePixelRatio)
+		imgh = float64(sz.Y) / float64(w.DevicePixelRatio)
 	}
 	cfiles := make([]*C.char, len(files)+1)
 	for i, f := range files {
@@ -113,7 +77,7 @@ func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image)
 		if w.Glw == nil {
 			return
 		}
-		ok = bool(C.startDrag(unsafe.Pointer(w.Glw.GetCocoaWindow()), &cfiles[0], C.int(len(files)), cmime, cmimelen, ctext, ctextlen, cpng, cpnglen, C.double(imgw), C.double(imgh)))
+		ok = bool(C.startDrag(w.Glw.GetCocoaWindow(), &cfiles[0], C.int(len(files)), cmime, cmimelen, ctext, ctextlen, cpng, cpnglen, C.double(imgw), C.double(imgh)))
 	})
 	return ok
 }
@@ -149,41 +113,27 @@ func macMods(flags C.ulong) key.Modifiers {
 //
 //export macDragMove
 func macDragMove(nswin unsafe.Pointer, leave C.bool, x, y C.double, flags C.ulong, fromApp C.bool) {
-	w := dragWindow(nswin)
-	if w == nil {
-		return
+	if w := dragWindow(uintptr(nswin)); w != nil {
+		w.dragMove(bool(leave), w.MousePosToPoint(float64(x), float64(y)), macMods(flags), bool(fromApp))
 	}
-	typ := events.DragMove
-	if leave {
-		typ = events.DragLeave
-	}
-	where := w.MousePosToPoint(float64(x), float64(y))
-	w.Event.DragExternal(typ, where, macMods(flags), nil, bool(fromApp))
 }
 
 // macDragDrop is called for a drop on the window, with either files
-// or mime data from [Window.StartDrag].
+// or mime data from [dragData].
 //
 //export macDragDrop
 func macDragDrop(nswin unsafe.Pointer, x, y C.double, flags C.ulong, fromApp C.bool, files **C.char, nfiles C.int, mime unsafe.Pointer, mimelen C.int) {
-	w := dragWindow(nswin)
+	w := dragWindow(uintptr(nswin))
 	if w == nil {
 		return
 	}
-	var md mimedata.Mimes
-	if nfiles > 0 {
-		for _, f := range unsafe.Slice(files, int(nfiles)) {
-			md = append(md, mimedata.NewTextData(C.GoString(f)))
-		}
-	} else if mimelen > 0 {
-		b := C.GoBytes(mime, mimelen)
-		if isMulti, _, boundary, body := mimedata.IsMultipart(b); isMulti {
-			md = mimedata.FromMultipart(body, boundary)
-		}
+	var fs []string
+	for _, f := range unsafe.Slice(files, int(nfiles)) {
+		fs = append(fs, C.GoString(f))
 	}
-	if len(md) == 0 {
-		return
+	var mb []byte
+	if mimelen > 0 {
+		mb = C.GoBytes(mime, mimelen)
 	}
-	where := w.MousePosToPoint(float64(x), float64(y))
-	w.Event.DragExternal(events.Drop, where, macMods(flags), md, bool(fromApp))
+	w.dragDrop(w.MousePosToPoint(float64(x), float64(y)), macMods(flags), bool(fromApp), fs, mb)
 }

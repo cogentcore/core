@@ -847,6 +847,7 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	}
 	em.drag = w
 	em.dragData = data
+	em.slide = nil // a drag replaces any slide in progress
 	em.dragFiles = nil
 	if fd, ok := w.(FileDragger); ok {
 		em.dragFiles = fd.DragFiles()

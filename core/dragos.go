@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/tree"
+	"github.com/anthonynsimon/bild/clone"
 )
 
 // osDrag is the drag that this app most recently handed off to the
@@ -55,6 +56,38 @@ func (em *Events) SetDragFiles(files ...string) {
 	em.dragFiles = files
 }
 
+// SetDragImage sets the image shown under the mouse for the current drag,
+// instead of the image of the widget given to [Events.DragStart], with its
+// top-left corner at the mouse. It must be called after [Events.DragStart].
+func (em *Events) SetDragImage(img image.Image) {
+	ms := em.scene.Stage.Main
+	if ms == nil || img == nil {
+		return
+	}
+	em.dragImage = clone.AsRGBA(img)
+	sp, ok := ms.Sprites.SpriteByName(dragSpriteName)
+	if !ok {
+		return
+	}
+	nsp := NewImageSprite(dragSpriteName, sp.EventBBox.Min, em.dragImage)
+	nsp.Active = true
+	ms.Sprites.Add(nsp)
+}
+
+// InWindow returns whether the given position, in window coordinates
+// (see [events.Event.WindowPos]), is within the window. A drag that
+// leaves the window can be handed off to the operating system, so
+// widgets that handle their own mouse dragging can start a drag with
+// [Events.DragStart] when the mouse leaves the window, to drag their
+// data to other windows and apps.
+func (em *Events) InWindow(pos image.Point) bool {
+	rw := em.RenderWindow()
+	if rw == nil || rw.SystemWindow == nil {
+		return true
+	}
+	return pos.In(image.Rectangle{Max: rw.SystemWindow.Size()})
+}
+
 // handleDragOS handles a mouse event during a drag that may need to be
 // handed off to the operating system, when it leaves the window, and
 // mouse events while the operating system has the drag.
@@ -85,13 +118,10 @@ func (em *Events) handleDragOS(e events.Event) bool {
 // mouse is outside of the window and the platform supports it, so that
 // the data can be dropped in other windows and apps.
 func (em *Events) dragToOS(e events.Event) bool {
+	if em.InWindow(e.WindowPos()) {
+		return false
+	}
 	rw := em.RenderWindow()
-	if rw == nil || rw.SystemWindow == nil {
-		return false
-	}
-	if e.WindowPos().In(image.Rectangle{Max: rw.SystemWindow.Size()}) {
-		return false
-	}
 	md, _ := em.dragData.(mimedata.Mimes)
 	if len(md) == 0 && len(em.dragFiles) == 0 {
 		return false
