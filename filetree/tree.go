@@ -7,18 +7,15 @@ package filetree
 import (
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
-	"time"
+	"sync/atomic"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"github.com/fsnotify/fsnotify"
 )
 
 const (
@@ -76,20 +73,19 @@ type Tree struct {
 	// inOpenAll indicates whether we are in midst of an OpenAll call; nodes should open all dirs.
 	inOpenAll bool
 
-	// watcher does change notify for all dirs
-	watcher *fsnotify.Watcher
+	// NoWatch disables the file system watcher, which otherwise updates
+	// the tree when files change on disk. It must be set before [Tree.OpenPath].
+	NoWatch bool
 
-	// doneWatcher is channel to close watcher watcher
-	doneWatcher chan bool
+	// WatchFunc, if set, is called with each batch of changes detected by
+	// the file system watcher, after the tree has been updated for them.
+	// It is called under [core.WidgetBase.AsyncLock], so it can update the GUI
+	// directly. Only the files directly within the root and the open
+	// directories of the tree are watched, excluding hidden directories.
+	WatchFunc func(changes []FileChange) `display:"-" json:"-" xml:"-"`
 
-	// watchedPaths is map of paths that have been added to watcher; only active if bool = true
-	watchedPaths map[string]bool
-
-	// lastWatchUpdate is last path updated by watcher
-	lastWatchUpdate string
-
-	// lastWatchTime is timestamp of last update
-	lastWatchTime time.Time
+	// watch is the active file system watcher, if any.
+	watch atomic.Pointer[treeWatcher]
 }
 
 func (ft *Tree) Init() {
@@ -115,16 +111,7 @@ func (ft *Tree) Init() {
 }
 
 func (fv *Tree) Destroy() {
-	if fv.watcher != nil {
-		fv.watcher.Close()
-		fv.watcher = nil
-	}
-	if fv.doneWatcher != nil {
-		// It is closed instead of sent on, as the watcher goroutine can be
-		// waiting for the render lock that we hold.
-		close(fv.doneWatcher)
-		fv.doneWatcher = nil
-	}
+	fv.stopWatcher()
 	fv.Tree.Destroy()
 }
 
@@ -154,6 +141,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	ft.This.(Filer).GetFileInfo()
 	ft.Open()
 	ft.Update()
+	ft.startWatcher()
 	return ft
 }
 
@@ -164,6 +152,7 @@ func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = types.For[Node]()
 	}
+	ft.stopWatcher()
 	ft.FS = fsys
 	ft.Filepath = core.Filename(path)
 	ft.setDirOpen(core.Filename(path))
@@ -200,114 +189,6 @@ func (ft *Tree) OpenPaths() []string {
 	return ft.Dirs.openPaths(string(ft.Filepath))
 }
 
-// configWatcher configures a new watcher for tree
-func (ft *Tree) configWatcher() error {
-	if ft.watcher != nil {
-		return nil
-	}
-	ft.watchedPaths = make(map[string]bool)
-	var err error
-	ft.watcher, err = fsnotify.NewWatcher()
-	return err
-}
-
-// watchWatcher monitors the watcher channel for update events.
-// It must be called once some paths have been added to watcher --
-// safe to call multiple times.
-func (ft *Tree) watchWatcher() {
-	if ft.watcher == nil || ft.watcher.Events == nil {
-		return
-	}
-	if ft.doneWatcher != nil {
-		return
-	}
-	ft.doneWatcher = make(chan bool)
-	go func() {
-		watch := ft.watcher
-		done := ft.doneWatcher
-		for {
-			select {
-			case <-done:
-				return
-			case event := <-watch.Events:
-				switch {
-				case event.Op&fsnotify.Create == fsnotify.Create ||
-					event.Op&fsnotify.Remove == fsnotify.Remove ||
-					event.Op&fsnotify.Rename == fsnotify.Rename:
-					ft.watchUpdate(event.Name)
-				}
-			case err := <-watch.Errors:
-				_ = err
-			}
-		}
-	}()
-}
-
-// watchUpdate does the update for given path
-func (ft *Tree) watchUpdate(path string) {
-	ft.AsyncLock()
-	defer ft.AsyncUnlock()
-	// fmt.Println(path)
-
-	dir, _ := filepath.Split(path)
-	rp := ft.RelativePathFrom(core.Filename(dir))
-	if rp == ft.lastWatchUpdate {
-		now := time.Now()
-		lagMs := int(now.Sub(ft.lastWatchTime) / time.Millisecond)
-		if lagMs < 100 {
-			// fmt.Printf("skipping update to: %s  due to lag: %v\n", rp, lagMs)
-			return // no update
-		}
-	}
-	fn, err := ft.findDirNode(rp)
-	if err != nil {
-		// slog.Error(err.Error())
-		return
-	}
-	ft.lastWatchUpdate = rp
-	ft.lastWatchTime = time.Now()
-	if !fn.isOpen() {
-		// fmt.Printf("warning: watcher updating closed node: %s\n", rp)
-		return // shouldn't happen
-	}
-	fn.Update()
-}
-
-// watchPath adds given path to those watched
-func (ft *Tree) watchPath(path core.Filename) error {
-	return nil // TODO(#424): disable for all platforms for now; causing issues
-	if core.TheApp.Platform() == system.MacOS {
-		return nil // mac is not supported in a high-capacity fashion at this point
-	}
-	rp := ft.RelativePathFrom(path)
-	on, has := ft.watchedPaths[rp]
-	if on || has {
-		return nil
-	}
-	ft.configWatcher()
-	// fmt.Printf("watching path: %s\n", path)
-	err := ft.watcher.Add(string(path))
-	if err == nil {
-		ft.watchedPaths[rp] = true
-		ft.watchWatcher()
-	} else {
-		slog.Error(err.Error())
-	}
-	return err
-}
-
-// unWatchPath removes given path from those watched
-func (ft *Tree) unWatchPath(path core.Filename) {
-	rp := ft.RelativePathFrom(path)
-	on, has := ft.watchedPaths[rp]
-	if !on || !has {
-		return
-	}
-	ft.configWatcher()
-	ft.watcher.Remove(string(path))
-	ft.watchedPaths[rp] = false
-}
-
 // isDirOpen returns true if given directory path is open (i.e., has been
 // opened in the view)
 func (ft *Tree) isDirOpen(fpath core.Filename) bool {
@@ -322,14 +203,12 @@ func (ft *Tree) setDirOpen(fpath core.Filename) {
 	rp := ft.RelativePathFrom(fpath)
 	// fmt.Printf("setdiropen: %s\n", rp)
 	ft.Dirs.setOpen(rp, true)
-	ft.watchPath(fpath)
 }
 
 // setDirClosed sets the given directory path to be closed
 func (ft *Tree) setDirClosed(fpath core.Filename) {
 	rp := ft.RelativePathFrom(fpath)
 	ft.Dirs.setOpen(rp, false)
-	ft.unWatchPath(fpath)
 }
 
 // setDirSortBy sets the given directory path sort by option

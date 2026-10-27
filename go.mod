@@ -34,6 +34,7 @@ require (
 	github.com/muesli/termenv v0.16.0
 	github.com/oliverbestmann/webgpu v1.37.0
 	github.com/pkg/sftp v1.13.12
+	github.com/sgtdi/fswatcher v1.3.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
 	golang.org/x/crypto v0.58.0
