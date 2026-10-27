@@ -104,7 +104,16 @@ func (sw *Scene) OnAdd() {
 
 func (sw *Scene) Destroy() {
 	sw.Scene.DeleteDirectRender(sw.This.(core.Widget))
-	sw.XYZ.Destroy()
+	// A composite of the window that is being drawn in another goroutine
+	// can use the frame texture of the scene after its source is drawn
+	// (see [xyzSource.Draw]), so the scene is destroyed under the lock of
+	// the window, which the composite holds.
+	if win := sw.WidgetBase.Scene.Events.RenderWindow(); win != nil && win.SystemWindow.Lock() {
+		sw.XYZ.Destroy()
+		win.SystemWindow.Unlock()
+	} else {
+		sw.XYZ.Destroy()
+	}
 	sw.destroyFrame()
 	sw.WidgetBase.Destroy()
 }
