@@ -324,7 +324,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			open := NewButton(m).SetText("Open").SetIcon(icons.Open)
 			open.SetTooltip("Open the selected file using the default app")
 			open.OnClick(func(e events.Event) {
-				TheApp.OpenURL("file://" + fp.SelectedFile())
+				TheApp.OpenURL(fsx.FileURL(fp.SelectedFile()))
 			})
 			if TheApp.Platform() == system.Web {
 				open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")

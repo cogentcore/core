@@ -18,8 +18,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// newRenameTest returns a tree on a new git repository with
-// committed files a.go and sub/b.go, and untracked u.txt.
+// newRenameTest returns a tree on a new git repository (without a remote)
+// with committed files a.go and sub/b.go, and untracked u.txt.
 func newRenameTest(t *testing.T) *watchTest {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git is not available")
@@ -30,7 +30,6 @@ func newRenameTest(t *testing.T) *watchTest {
 	wt.write("a.go", "package a\n")
 	wt.write("sub/b.go", "package sub\n")
 	wt.git("init", "-q")
-	wt.git("remote", "add", "origin", "https://example.com/test.git") // vcs.NewRepo needs one
 	wt.git("add", ".")
 	wt.git("-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", "init")
 	wt.write("u.txt", "untracked\n")

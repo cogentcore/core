@@ -70,7 +70,7 @@ func (fn *Node) OpenFile() error {
 // OpenFileDefault opens file with default app for that file type (os defined)
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFileDefault() error {
-	core.TheApp.OpenURL("file://" + string(fn.Filepath))
+	core.TheApp.OpenURL(fsx.FileURL(string(fn.Filepath)))
 	return nil
 }
 

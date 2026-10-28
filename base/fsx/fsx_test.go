@@ -69,3 +69,11 @@ func TestCopyPath(t *testing.T) {
 	assert.Error(t, CopyPath(filepath.Join(src, "sub", "x"), src))
 	assert.NoDirExists(t, filepath.Join(src, "sub", "x"))
 }
+
+func TestFileURL(t *testing.T) {
+	assert.Equal(t, "file:///home/me/a%20b%23c.txt", FileURL("/home/me/a b#c.txt"))
+	assert.Equal(t, "file:///C:/Users/me/a.txt", FileURL(`C:/Users/me/a.txt`))
+	if filepath.Separator == '\\' {
+		assert.Equal(t, "file:///C:/Users/me/a.txt", FileURL(`C:\Users\me\a.txt`))
+	}
+}

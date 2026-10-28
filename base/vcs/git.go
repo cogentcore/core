@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"maps"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -202,23 +201,8 @@ func (gr *GitRepo) Move(oldpath, newpath string) error {
 		return fmt.Errorf("git mv: %w: %s", err, strings.TrimSpace(string(out)))
 	}
 	gr.Lock()
-	defer gr.Unlock()
-	if gr.files == nil {
-		return nil
-	}
-	prefix := oldrel + string(filepath.Separator)
-	moved := map[string]FileStatus{}
-	for f, st := range gr.files {
-		if f != oldrel && !strings.HasPrefix(f, prefix) {
-			continue
-		}
-		delete(gr.files, f)
-		if st != Untracked {
-			st = Added
-		}
-		moved[newrel+f[len(oldrel):]] = st
-	}
-	maps.Copy(gr.files, moved)
+	gr.files.moved(oldrel, newrel)
+	gr.Unlock()
 	return nil
 }
 

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -181,6 +182,17 @@ func FileExists(filePath string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// FileURL returns a file:// URL for the given absolute file path, with
+// any special characters escaped, as for opening the file with OpenURL.
+// Windows paths such as C:\a\b.txt become file:///C:/a/b.txt.
+func FileURL(path string) string {
+	p := filepath.ToSlash(path)
+	if !strings.HasPrefix(p, "/") { // Windows drive letter
+		p = "/" + p
+	}
+	return (&url.URL{Scheme: "file", Path: p}).String()
 }
 
 // Exists returns whether a file or directory exists at the given path.

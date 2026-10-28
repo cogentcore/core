@@ -10,7 +10,10 @@ package vcs
 
 import (
 	"errors"
+	"os/exec"
 	"path/filepath"
+	"reflect"
+	"unsafe"
 
 	"cogentcore.org/core/base/fsx"
 	"github.com/Masterminds/vcs"
@@ -107,6 +110,11 @@ type Repo interface {
 
 func NewRepo(remote, local string) (Repo, error) {
 	repo, err := vcs.NewRepo(remote, local)
+	if err != nil && DetectRepo(local) == Git {
+		if lerr := (*vcs.LocalError)(nil); errors.As(err, &lerr) && isGitNoRemote(local) {
+			repo, err = newGitRepoNoRemote(local)
+		}
+	}
 	if err == nil {
 		switch repo.Vcs() {
 		case vcs.Git:
@@ -146,4 +154,34 @@ func DetectRepo(path string) Types {
 func relPath(repo Repo, path string) string {
 	relpath, _ := filepath.Rel(repo.LocalPath(), path)
 	return relpath
+}
+
+// isGitNoRemote returns whether there is a valid git repository at the
+// given path without an origin remote, which [vcs.NewGitRepo] requires.
+func isGitNoRemote(local string) bool {
+	git := func(args ...string) error {
+		cmd := exec.Command("git", args...)
+		cmd.Dir = local
+		return cmd.Run()
+	}
+	return git("rev-parse", "--git-dir") == nil && git("config", "--get", "remote.origin.url") != nil
+}
+
+// newGitRepoNoRemote returns a [vcs.GitRepo] for the git repository at the
+// given path, which has no origin remote. [vcs.NewGitRepo] returns an error
+// for such a repository (it gets the remote to check it against the given
+// one), except for a directory that does not exist (yet), so the repo is
+// made for one, and then its (unexported) local path is set.
+// The vcs package is no longer developed, so its internals do not change.
+func newGitRepoNoRemote(local string) (*vcs.GitRepo, error) {
+	repo, err := vcs.NewGitRepo("", filepath.Join(local, "nonexistent-for-vcs"))
+	if err != nil {
+		return nil, err
+	}
+	lf := reflect.ValueOf(repo).Elem().FieldByName("local")
+	if !lf.IsValid() || lf.Kind() != reflect.String {
+		return nil, errors.New("vcs: cannot open git repository without a remote")
+	}
+	reflect.NewAt(lf.Type(), unsafe.Pointer(lf.UnsafeAddr())).Elem().SetString(local)
+	return repo, nil
 }

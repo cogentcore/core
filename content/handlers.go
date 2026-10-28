@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
@@ -432,8 +433,7 @@ func (ct *Content) open(url string, history bool) {
 			core.MessageSnackbar(ct, "Could not save resource at: "+fn)
 			return
 		}
-		af := "file://" + errors.Log1(filepath.Abs(fn))
-		core.TheApp.OpenURL(af)
+		core.TheApp.OpenURL(fsx.FileURL(errors.Log1(filepath.Abs(fn))))
 		return
 	}
 	curPg := ct.current

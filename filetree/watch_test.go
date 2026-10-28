@@ -202,7 +202,8 @@ func TestWatchOpenClose(t *testing.T) {
 	assert.True(t, wt.hasNode("closed/c.txt"))
 	wt.write("closed/d.txt", "d\n")
 	wt.waitFor("closed/d.txt node", func() bool { return wt.hasNode("closed/d.txt") })
-	assert.True(t, wt.hasChange("closed/d.txt", false))
+	// the node can be added by a VCS update before the (batched) change
+	wt.waitFor("closed/d.txt change", func() bool { return wt.hasChange("closed/d.txt", false) })
 
 	wt.b.AsyncLock()
 	wt.node("closed").Close()
