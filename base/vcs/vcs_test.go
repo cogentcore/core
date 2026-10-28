@@ -117,31 +117,105 @@ func TestFilesMoved(t *testing.T) {
 }
 
 // TestSvnOps tests svn operations in a working copy (if svn is installed),
-// which run in the repository directory.
+// which run in the repository directory, not the current one.
 func TestSvnOps(t *testing.T) {
 	if _, err := exec.LookPath("svnadmin"); err != nil {
 		t.Skip("svn is not available")
 	}
 	tmp, err := filepath.EvalSymlinks(t.TempDir())
 	require.NoError(t, err)
-	run := func(dir string, args ...string) {
+	run := func(dir string, args ...string) string {
 		cmd := exec.Command(args[0], args[1:]...)
 		cmd.Dir = dir
 		out, err := cmd.CombinedOutput()
 		require.NoError(t, err, string(out))
+		return string(out)
 	}
 	run(tmp, "svnadmin", "create", "repo")
-	run(tmp, "svn", "checkout", "-q", "file://"+filepath.ToSlash(filepath.Join(tmp, "repo")), "wc")
+	url := "file://" + filepath.ToSlash(filepath.Join(tmp, "repo"))
+	run(tmp, "svn", "checkout", "-q", url, "wc")
 	wc := filepath.Join(tmp, "wc")
-	require.NoError(t, os.WriteFile(filepath.Join(wc, "a.txt"), []byte("a\n"), 0o644))
+	path := func(name string) string { return filepath.Join(wc, name) }
+	write := func(name, text string) {
+		require.NoError(t, os.WriteFile(path(name), []byte(text), 0o644))
+	}
+	read := func(name string) string {
+		b, err := os.ReadFile(path(name))
+		require.NoError(t, err)
+		return string(b)
+	}
 
 	repo, err := NewRepo("", wc)
 	require.NoError(t, err)
 	require.Equal(t, Svn, repo.Type())
-	require.NoError(t, repo.Add(filepath.Join(wc, "a.txt")))
-	require.NoError(t, repo.CommitFile(filepath.Join(wc, "a.txt"), "add a"))
-	require.NoError(t, repo.Move(filepath.Join(wc, "a.txt"), filepath.Join(wc, "b.txt")))
-	assert.FileExists(t, filepath.Join(wc, "b.txt"))
-	st, _ := repo.Status(filepath.Join(wc, "b.txt"))
+	assert.Equal(t, wc, repo.LocalPath())
+	assert.Equal(t, url, repo.Remote())
+
+	write("a.txt", "a\n")
+	require.NoError(t, repo.Add(path("a.txt")))
+	st, _ := repo.Status(path("a.txt"))
 	assert.Equal(t, Added, st)
+	require.NoError(t, repo.CommitFile(path("a.txt"), "add a"))
+	st, _ = repo.Status(path("a.txt"))
+	assert.Equal(t, Stored, st)
+	cur, err := repo.Current()
+	require.NoError(t, err)
+	assert.Equal(t, "0", cur, "the working copy is at revision 0 until updated")
+	require.NoError(t, repo.Update())
+	cur, err = repo.Current()
+	require.NoError(t, err)
+	assert.Equal(t, "1", cur)
+
+	// the cached file status
+	files := make(chan Files, 1)
+	repo.Files(func(f Files) { files <- f })
+	<-files
+	assert.Equal(t, Stored, repo.StatusFast(path("a.txt")))
+
+	// local changes: the working copy file for "", committed for HEAD
+	write("a.txt", "changed\n")
+	st, _ = repo.Status(path("a.txt"))
+	assert.Equal(t, Modified, st)
+	b, err := repo.FileContents(path("a.txt"), "")
+	require.NoError(t, err)
+	assert.Equal(t, "changed\n", string(b))
+	b, err = repo.FileContents(path("a.txt"), "HEAD")
+	require.NoError(t, err)
+	assert.Equal(t, "a\n", string(b))
+	b, err = repo.FileContents(path("a.txt"), "1")
+	require.NoError(t, err)
+	assert.Equal(t, "a\n", string(b))
+	require.NoError(t, repo.RevertFile(path("a.txt")))
+	assert.Equal(t, "a\n", read("a.txt"))
+
+	blame, err := repo.Blame(path("a.txt"))
+	require.NoError(t, err)
+	assert.Contains(t, string(blame), "a")
+	lg, err := repo.Log(path("a.txt"), "")
+	require.NoError(t, err)
+	assert.Len(t, lg, 1)
+
+	require.NoError(t, repo.Move(path("a.txt"), path("b.txt")))
+	assert.FileExists(t, path("b.txt"))
+	st, _ = repo.Status(path("b.txt"))
+	assert.Equal(t, Added, st)
+	assert.Equal(t, Added, repo.StatusFast(path("b.txt")), "cache updated by Move")
+	require.NoError(t, repo.CommitFile(wc, "move a to b"))
+
+	require.NoError(t, repo.DeleteRemote(path("b.txt")))
+	assert.FileExists(t, path("b.txt"), "kept locally")
+	st, _ = repo.Status(path("b.txt"))
+	assert.Equal(t, Deleted, st)
+	require.NoError(t, repo.RevertFile(path("b.txt")))
+	require.NoError(t, repo.Delete(path("b.txt")))
+	assert.NoFileExists(t, path("b.txt"))
+
+	require.NoError(t, repo.Update())
+	require.NoError(t, repo.UpdateVersion("1"))
+	cur, err = repo.Current()
+	require.NoError(t, err)
+	assert.Equal(t, "1", cur)
+	assert.FileExists(t, path("a.txt"), "back at revision 1")
+
+	assert.Error(t, repo.Add(path("missing.txt")), "with svn's message")
 }

@@ -183,7 +183,7 @@ func (gr *GitRepo) charToStat(stat byte) FileStatus {
 
 // StatusFast returns file status based on the cached file info,
 // which might be slightly stale. Much faster than Status.
-// Returns Untracked if no cached files.
+// Returns Stored if no files have been cached yet.
 func (gr *GitRepo) StatusFast(fname string) FileStatus {
 	var ff Files
 	gr.Lock()
@@ -192,7 +192,7 @@ func (gr *GitRepo) StatusFast(fname string) FileStatus {
 	if ff != nil {
 		return ff.Status(gr, fname)
 	}
-	return Untracked
+	return Stored // not known yet: shown as normal
 }
 
 // Status returns status of given file; returns Untracked on any error.
@@ -291,8 +291,9 @@ func (s *GitRepo) UpdateVersion(version string) error {
 }
 
 // FileContents returns the contents of given file, as a []byte array
-// at given revision specifier. -1, -2 etc also work as universal
-// ways of specifying prior revisions.
+// at given revision specifier, or the current file in the working copy
+// if empty (use HEAD for the last commit). -1, -2 etc also work as
+// universal ways of specifying prior revisions.
 func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 	if rev == "" {
 		out, err := os.ReadFile(fname)

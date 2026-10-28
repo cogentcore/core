@@ -61,7 +61,7 @@ type Repo interface {
 
 	// StatusFast returns file status based on the cached file info,
 	// which might be slightly stale. Much faster than Status.
-	// Returns Untracked if no cached files.
+	// Returns Stored if no files have been cached yet (shown as normal).
 	StatusFast(fname string) FileStatus
 
 	// Status returns status of given file -- returns Untracked and error
@@ -91,7 +91,8 @@ type Repo interface {
 	RevertFile(fname string) error
 
 	// FileContents returns the contents of given file, as a []byte array
-	// at given revision specifier (if empty, defaults to current HEAD).
+	// at given revision specifier, or the current file in the working copy
+	// if empty (use HEAD for the last commit).
 	// -1, -2 etc also work as universal ways of specifying prior revisions.
 	FileContents(fname string, rev string) ([]byte, error)
 
@@ -148,6 +149,27 @@ func DetectRepo(path string) Types {
 	}
 	// todo: rest later..
 	return NoVCS
+}
+
+// DetectRepoRoot returns the root directory and type of the repository
+// containing the given directory path: the first one with a repository
+// found by [DetectRepo], starting from the path itself and going up.
+// It returns "", NoVCS if there is none.
+func DetectRepoRoot(path string) (string, Types) {
+	dir, err := filepath.Abs(path)
+	if err != nil {
+		return "", NoVCS
+	}
+	for {
+		if typ := DetectRepo(dir); typ != NoVCS {
+			return dir, typ
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", NoVCS
+		}
+		dir = parent
+	}
 }
 
 // relPath return the path relative to the repository LocalPath()

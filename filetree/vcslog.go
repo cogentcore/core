@@ -260,13 +260,13 @@ func vcsLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string
 
 // fileAtRevisionDialog shows a file at a given revision in a new dialog window
 func fileAtRevisionDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *core.Body {
+	if rev == "" { // FileContents returns the working copy for ""
+		rev = "HEAD"
+	}
 	fb, err := repo.FileContents(file, rev)
 	if err != nil {
 		core.ErrorDialog(ctx, err)
 		return nil
-	}
-	if rev == "" {
-		rev = "HEAD"
 	}
 	title := "File at VCS Revision: " + fsx.DirAndFile(file) + "@" + rev
 	d := core.NewBody(title)

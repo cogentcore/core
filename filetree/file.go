@@ -135,10 +135,11 @@ func (fn *Node) DeleteFile() error {
 	repo, _ := fn.Repo()
 	var err error
 	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
-		// fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.Filepath))
+		if err != nil && fsx.Exists(string(fn.Filepath)) { // not in the repository (status not yet known)
+			err = fn.Info.Delete()
+		}
 	} else {
-		// fmt.Printf("del raw: %v\n", fn.FPath)
 		err = fn.Info.Delete()
 	}
 	if err == nil {
@@ -180,7 +181,7 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	repo, _ := fn.Repo()
 	if repo != nil && (fn.IsDir() || fn.Info.VCS >= vcs.Stored) {
 		err = repo.Move(string(orgpath), newpath)
-		if err != nil && fn.IsDir() { // no files in the repository
+		if err != nil && fsx.Exists(string(orgpath)) { // not in the repository (status not yet known)
 			err = os.Rename(string(orgpath), newpath)
 		}
 	} else {

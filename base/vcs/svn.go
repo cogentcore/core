@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -150,7 +151,7 @@ func (gr *SvnRepo) updateFiles(onUpdated func(f Files)) {
 
 // StatusFast returns file status based on the cached file info,
 // which might be slightly stale. Much faster than Status.
-// Returns Untracked if no cached files.
+// Returns Stored if no files have been cached yet.
 func (gr *SvnRepo) StatusFast(fname string) FileStatus {
 	var ff Files
 	gr.Lock()
@@ -159,7 +160,7 @@ func (gr *SvnRepo) StatusFast(fname string) FileStatus {
 	if ff != nil {
 		return ff.Status(gr, fname)
 	}
-	return Untracked
+	return Stored // not known yet: shown as normal
 }
 
 // Status returns status of given file; returns Untracked on any error
@@ -218,7 +219,7 @@ func (gr *SvnRepo) Move(oldpath, newpath string) error {
 
 // Delete removes the file from the repo -- uses "force" option to ensure deletion
 func (gr *SvnRepo) Delete(fname string) error {
-	return gr.run("rm", "-f", relPath(gr, fname))
+	return gr.run("rm", "--force", relPath(gr, fname))
 }
 
 // DeleteRemote removes the file from the repo, but keeps local copy
@@ -240,13 +241,8 @@ func (gr *SvnRepo) RevertFile(fname string) error {
 // at given revision specifier (if empty, defaults to current HEAD).
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 func (gr *SvnRepo) FileContents(fname string, rev string) ([]byte, error) {
-	if rev == "" {
-		rev = "HEAD"
-		// } else if rev[0] == '-' { // no support at this point..
-		// 	rsp, err := strconv.Atoi(rev)
-		// 	if err == nil && rsp < 0 {
-		// 		rev = fmt.Sprintf("HEAD~%d:", rsp)
-		// 	}
+	if rev == "" { // the working copy, as for git
+		return os.ReadFile(fname)
 	}
 	out, err := gr.RunFromDir("svn", "-r", rev, "cat", relPath(gr, fname))
 	if err != nil {

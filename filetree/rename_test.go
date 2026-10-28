@@ -45,9 +45,11 @@ func newRenameTest(t *testing.T) *watchTest {
 	})
 	wt.b.RunWindow()
 	<-showed
-	wt.waitFor("vcs status", func() bool {
-		n := wt.node("a.go")
-		return n != nil && n.Info.VCS == vcs.Stored
+	wt.waitFor("vcs status", func() bool { // Stored until known
+		wt.ft.AsyncLock()
+		defer wt.ft.AsyncUnlock()
+		n := wt.node("u.txt")
+		return n != nil && n.Info.VCS == vcs.Untracked
 	})
 	return wt
 }
@@ -112,4 +114,49 @@ func TestRenameToDir(t *testing.T) {
 	assert.FileExists(t, wt.path("sub/a.go"))
 	status := wt.git("status", "--porcelain")
 	assert.True(t, strings.Contains(status, "R  a.go -> sub/a.go"), status)
+}
+
+// TestTreeInRepo tests a tree opened at a directory within a repository,
+// which uses that repository.
+func TestTreeInRepo(t *testing.T) {
+	wt := newRenameTest(t)
+	b := core.NewBody()
+	ft := NewTree(b)
+	ft.NoWatch = true
+	ft.OpenPath(wt.path("sub"))
+	showed := make(chan struct{})
+	b.OnFinal(events.Show, func(e events.Event) { showed <- struct{}{} })
+	b.RunWindow()
+	<-showed
+	wt.waitFor("vcs status in sub tree", func() bool {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		n := AsNode(ft.ChildByName("b.go", 0))
+		return n != nil && n.Info.VCS == vcs.Stored
+	})
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	repo, _ := ft.Repo()
+	require.NotNil(t, repo)
+	assert.Equal(t, wt.root, repo.LocalPath())
+}
+
+// TestStatusNotKnown tests renaming and deleting an untracked file
+// whose status is not known yet, which is shown as Stored:
+// git mv and git rm fail, so the file is renamed or deleted directly.
+func TestStatusNotKnown(t *testing.T) {
+	wt := newRenameTest(t)
+	wt.write("v.txt", "v\n")
+	wt.do(func() { wt.ft.UpdatePath(wt.root) })
+	wt.waitFor("v.txt", func() bool { return wt.hasNode("v.txt") })
+	wt.do(func() {
+		wt.node("u.txt").Info.VCS = vcs.Stored
+		wt.node("v.txt").Info.VCS = vcs.Stored
+	})
+	require.NoError(t, wt.rename("u.txt", "w.txt"))
+	assert.Equal(t, "untracked\n", wt.read("w.txt"))
+	var err error
+	wt.do(func() { err = wt.node("v.txt").DeleteFile() })
+	assert.NoError(t, err)
+	assert.NoFileExists(t, wt.path("v.txt"))
 }

@@ -45,15 +45,20 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 }
 
 // detectVCSRepo detects and configures DirRepo if this directory is root of
-// a VCS repository. returns true if a repository was newly found here.
+// a VCS repository, or for the root of the tree, within one.
+// Returns true if a repository was newly found here.
 func (fn *Node) detectVCSRepo() bool {
 	repo, _ := fn.Repo()
 	if repo != nil {
 		return false
 	}
 	path := string(fn.Filepath)
-	rtyp := vcs.DetectRepo(path)
-	if rtyp == vcs.NoVCS {
+	if fn.IsRoot() { // the tree can be within a repository
+		path, _ = vcs.DetectRepoRoot(path)
+	} else if vcs.DetectRepo(path) == vcs.NoVCS {
+		return false
+	}
+	if path == "" {
 		return false
 	}
 	var err error
