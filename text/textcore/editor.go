@@ -142,12 +142,11 @@ func (ed *Editor) Close(afterFunc func(canceled bool)) bool {
 
 func (ed *Editor) handleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
-		if ed.IsReadOnly() {
-			return
-		}
-		if ed.AbilityIs(abilities.Focusable) {
+		// the focused state is cleared by WidgetBase for all widgets,
+		// including read-only editors, which used to keep it
+		ed.SetState(false, states.Focused)
+		if !ed.IsReadOnly() && ed.AbilityIs(abilities.Focusable) {
 			ed.editDone()
-			ed.SetState(false, states.Focused)
 		}
 	})
 	ed.OnFocus(func(e events.Event) {

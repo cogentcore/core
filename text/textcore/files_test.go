@@ -14,6 +14,8 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/lines"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -91,4 +93,29 @@ func TestDiffEditorFromRevs(t *testing.T) {
 	assert.Equal(t, "HEAD", de.RevisionA)
 	assert.Contains(t, de.linesA.String(), "one")
 	assert.Contains(t, de.linesB.String(), "two")
+}
+
+// TestReadOnlyFocusLost tests that an editor that became read-only (and
+// thus not focusable) while it had the focus loses the focused state when
+// another editor gets the focus, instead of both looking focused.
+func TestReadOnlyFocusLost(t *testing.T) {
+	b := core.NewBody()
+	ed1 := NewEditor(b)
+	ed1.Lines.SetString("one\n")
+	ed2 := NewEditor(b)
+	ed2.Lines.SetString("two\n")
+	showed := make(chan struct{})
+	b.OnFinal(events.Show, func(e events.Event) { showed <- struct{}{} })
+	b.RunWindow()
+	<-showed
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	ed1.SetFocus()
+	assert.True(t, ed1.StateIs(states.Focused))
+	ed1.SetReadOnly(true)
+	ed1.Style()
+	assert.False(t, ed1.AbilityIs(abilities.Focusable))
+	ed2.SetFocus()
+	assert.True(t, ed2.StateIs(states.Focused))
+	assert.False(t, ed1.StateIs(states.Focused), "read-only editor still focused")
 }

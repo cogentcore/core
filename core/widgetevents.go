@@ -436,11 +436,11 @@ func (wb *WidgetBase) handleWidgetStateFromFocus() {
 		}
 	})
 	wb.OnFocusLost(func(e events.Event) {
-		if wb.AbilityIs(abilities.Focusable) {
-			wb.SetState(false, states.Focused)
-			if !wb.IsReadOnly() && wb.Styles.VirtualKeyboard != styles.KeyboardNone {
-				TheApp.HideVirtualKeyboard()
-			}
+		// The focused state is always cleared, as the widget can have
+		// become not focusable (such as read-only) since it got the focus.
+		wb.SetState(false, states.Focused)
+		if wb.AbilityIs(abilities.Focusable) && !wb.IsReadOnly() && wb.Styles.VirtualKeyboard != styles.KeyboardNone {
+			TheApp.HideVirtualKeyboard()
 		}
 	})
 }
