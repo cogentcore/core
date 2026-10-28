@@ -800,6 +800,11 @@ func (w *renderWindow) renderWindow() {
 		}
 	}
 
+	if winScene == nil { // the window was closed, leaving other stages such as a dialog
+		w.SystemWindow.Unlock()
+		return
+	}
+
 	// then add everyone above that
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
