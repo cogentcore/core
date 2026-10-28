@@ -5,8 +5,10 @@
 package vcs
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Files is a map used for storing files in a repository along with their status
@@ -23,6 +25,29 @@ func (fl *Files) Status(repo Repo, fname string) FileStatus {
 		return Untracked
 	}
 	return st
+}
+
+// moved updates the files for the file or directory at the relative path
+// oldrel being moved (renamed) to newrel in the repository: their status is
+// Added, as the rename is staged, unless they are untracked.
+// It does nothing for a nil map.
+func (fl Files) moved(oldrel, newrel string) {
+	if fl == nil {
+		return
+	}
+	prefix := oldrel + string(filepath.Separator)
+	moved := Files{}
+	for f, st := range fl {
+		if f != oldrel && !strings.HasPrefix(f, prefix) {
+			continue
+		}
+		delete(fl, f)
+		if st != Untracked {
+			st = Added
+		}
+		moved[newrel+f[len(oldrel):]] = st
+	}
+	maps.Copy(fl, moved)
 }
 
 // allFiles returns a slice of all the files, recursively, within a given directory

@@ -126,6 +126,7 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 		glw.SetIcon(opts.Icon)
 	}
 	w.Glw = glw
+	w.initDrag()
 	return nil
 }
 
@@ -428,6 +429,7 @@ func (w *Window) Close() {
 		if surf != nil { // note: release surface after draw
 			surf.Release()
 		}
+		w.closeDrag()
 		w.Glw.Destroy()
 		w.Glw = nil // marks as closed for all other calls
 		w.Draw = nil

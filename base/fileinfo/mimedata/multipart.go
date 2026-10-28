@@ -72,8 +72,8 @@ func FromMultipart(body []byte, boundary string) Mimes {
 			switch cte {
 			case "base64":
 				eb := make([]byte, base64.StdEncoding.DecodedLen(len(b)))
-				base64.StdEncoding.Decode(eb, b)
-				b = eb
+				n, _ := base64.StdEncoding.Decode(eb, b)
+				b = eb[:n]
 			}
 		}
 		d.Data = b

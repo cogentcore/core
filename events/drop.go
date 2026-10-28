@@ -38,6 +38,11 @@ type DragDrop struct {
 	// Target of the drop -- receiver of an accepted drop should set this to
 	// itself, so Source (if internal) can see who got it
 	Target any
+
+	// FromApp is set for an external drag-and-drop event from the operating
+	// system, when the drag was started by this app (see [system.Window.StartDrag]),
+	// so that the original Source and Data can be restored from the app.
+	FromApp bool
 }
 
 func NewDragDrop(typ Types, mdrag *Mouse) *DragDrop {

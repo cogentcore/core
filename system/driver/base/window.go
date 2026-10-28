@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
@@ -227,4 +228,8 @@ func (w *Window[A]) SetMousePos(x, y float64) {
 
 func (w *Window[A]) SetTitleBarIsDark(isDark bool) {
 	// no-op by default
+}
+
+func (w *Window[A]) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {
+	return false // not supported by default
 }

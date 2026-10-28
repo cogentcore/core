@@ -262,6 +262,10 @@ func (ls *Lines) setFilename(fn string) *Lines {
 func (ls *Lines) stat() error {
 	ls.fileModOK = false
 	err := ls.fileInfo.InitFile(string(ls.filename))
+	ls.diskModTime = time.Time{}
+	if info, serr := os.Stat(ls.fileInfo.Path); serr == nil {
+		ls.diskModTime = info.ModTime()
+	}
 	ls.configKnown() // may have gotten file type info even if not existing
 	return err
 }
@@ -366,6 +370,22 @@ func (ls *Lines) saveFile(filename string) error {
 	return err
 }
 
+// ChangedOnDisk returns whether the file has been modified on disk
+// since it was last opened or saved.
+func (ls *Lines) ChangedOnDisk() bool {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.changedOnDisk()
+}
+
+func (ls *Lines) changedOnDisk() bool {
+	if ls.filename == "" {
+		return false
+	}
+	info, err := os.Stat(string(ls.filename))
+	return err == nil && !info.ModTime().Equal(ls.diskModTime)
+}
+
 // fileModCheck checks if the underlying file has been modified since last
 // Stat (open, save); if haven't yet prompted, user is prompted to ensure
 // that this is OK. It returns true if the file was modified.
@@ -373,11 +393,7 @@ func (ls *Lines) fileModCheck() bool {
 	if ls.filename == "" || ls.fileModOK {
 		return false
 	}
-	info, err := os.Stat(string(ls.filename))
-	if err != nil {
-		return false
-	}
-	if info.ModTime() != time.Time(ls.fileInfo.ModTime) {
+	if ls.changedOnDisk() {
 		if !ls.notSaved { // we haven't edited: just revert
 			ls.revert()
 			return true

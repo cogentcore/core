@@ -432,6 +432,39 @@ func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	}
 }
 
+// selectedTop returns the selected nodes that are not within another
+// selected directory, for operations that also apply to the contents of
+// directories (such as deleting).
+func (fn *Node) selectedTop() []*Node {
+	var sels []*Node
+	fn.SelectedFunc(func(sn *Node) {
+		sels = append(sels, sn)
+	})
+	var top []*Node
+	for _, sn := range sels {
+		if !slices.ContainsFunc(sels, func(dn *Node) bool { return isWithin(string(sn.Filepath), string(dn.Filepath)) }) {
+			top = append(top, sn)
+		}
+	}
+	return top
+}
+
+// isWithin returns whether the given path is within the given directory path.
+func isWithin(path, dir string) bool {
+	return strings.HasPrefix(path, dir+string(filepath.Separator))
+}
+
+// topPaths returns the given paths without those within another of them.
+func topPaths(paths []string) []string {
+	var top []string
+	for _, p := range paths {
+		if !slices.ContainsFunc(paths, func(d string) bool { return isWithin(p, d) }) {
+			top = append(top, p)
+		}
+	}
+	return top
+}
+
 func (fn *Node) OnOpen() {
 	fn.openDir()
 }

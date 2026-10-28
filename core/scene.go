@@ -120,6 +120,13 @@ type Scene struct { //core:no-new
 	// render context.
 	hasShown atomic.Bool
 
+	// asyncLocked is the render context locked by [WidgetBase.AsyncLock]
+	// (or [WidgetBase.AsyncLockIfShown]), which [WidgetBase.AsyncUnlock]
+	// unlocks. The render context of the scene can be nil in between, as
+	// it briefly is while a new window is created, and that must not
+	// leave the render context locked. It is only accessed with the lock.
+	asyncLocked *renderContext
+
 	// flags are bit flags for [Scene] state. They are only accessed
 	// in the event loop or with the lock of the render context, as
 	// with [WidgetBase.AsyncLock].

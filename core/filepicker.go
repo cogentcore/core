@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/tree"
@@ -303,7 +304,9 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		}
 		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
+			s.SetAbilities(true, abilities.Draggable, abilities.Droppable)
 		})
+		fp.handleFilesDND(w)
 		w.OnSelect(func(e events.Event) {
 			fp.fileSelect(w.SelectedIndex)
 		})
@@ -321,7 +324,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			open := NewButton(m).SetText("Open").SetIcon(icons.Open)
 			open.SetTooltip("Open the selected file using the default app")
 			open.OnClick(func(e events.Event) {
-				TheApp.OpenURL("file://" + fp.SelectedFile())
+				TheApp.OpenURL(fsx.FileURL(fp.SelectedFile()))
 			})
 			if TheApp.Platform() == system.Web {
 				open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")

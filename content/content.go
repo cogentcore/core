@@ -881,7 +881,7 @@ func (ct *Content) PagePDF(path string) error {
 
 	core.MessageSnackbar(ct, "PDF saved to: "+fname)
 	af := errors.Log1(filepath.Abs(fname))
-	core.TheApp.OpenURL("file://" + af)
+	core.TheApp.OpenURL(fsx.FileURL(af))
 	return err
 }
 

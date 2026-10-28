@@ -192,18 +192,17 @@ func (gr *GitRepo) Add(fname string) error {
 	return nil
 }
 
-// Move moves updates the repo with the rename
+// Move renames the file or directory at oldpath to newpath with git mv,
+// which stages the rename (but not other changes to the files).
 func (gr *GitRepo) Move(oldpath, newpath string) error {
-	out, err := gr.RunFromDir("git", "mv", relPath(gr, oldpath), relPath(gr, newpath))
+	oldrel, newrel := relPath(gr, oldpath), relPath(gr, newpath)
+	out, err := gr.RunFromDir("git", "mv", oldrel, newrel)
 	if err != nil {
-		log.Println(string(out))
-		return err
+		return fmt.Errorf("git mv: %w: %s", err, strings.TrimSpace(string(out)))
 	}
-	out, err = gr.RunFromDir("git", "add", relPath(gr, newpath))
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
+	gr.Lock()
+	gr.files.moved(oldrel, newrel)
+	gr.Unlock()
 	return nil
 }
 

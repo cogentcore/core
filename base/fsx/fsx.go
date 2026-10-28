@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -183,6 +184,23 @@ func FileExists(filePath string) (bool, error) {
 	return false, err
 }
 
+// FileURL returns a file:// URL for the given absolute file path, with
+// any special characters escaped, as for opening the file with OpenURL.
+// Windows paths such as C:\a\b.txt become file:///C:/a/b.txt.
+func FileURL(path string) string {
+	p := filepath.ToSlash(path)
+	if !strings.HasPrefix(p, "/") { // Windows drive letter
+		p = "/" + p
+	}
+	return (&url.URL{Scheme: "file", Path: p}).String()
+}
+
+// Exists returns whether a file or directory exists at the given path.
+func Exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 // DirExists checks whether given directory exists, returning true if so,
 // false if not, and error if there is an error in accessing the file.
 func DirExists(filePath string) (bool, error) {
@@ -251,4 +269,50 @@ func CopyFile(dst, src string, perm os.FileMode) error {
 		return err
 	}
 	return os.Rename(tmp.Name(), dst)
+}
+
+// CopyPath copies the file or directory at src to dst, overwriting
+// existing files. A directory is copied with all of its contents,
+// merged into dst if that exists. It is an error to copy a directory
+// into itself or one of its subdirectories.
+func CopyPath(dst, src string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() {
+		return CopyFile(dst, src, info.Mode())
+	}
+	asrc, err := filepath.Abs(src)
+	if err != nil {
+		return err
+	}
+	adst, err := filepath.Abs(dst)
+	if err != nil {
+		return err
+	}
+	if rel, err := filepath.Rel(asrc, adst); err == nil && (rel == "." || filepath.IsLocal(rel)) {
+		return fmt.Errorf("cannot copy directory %s into itself", src)
+	}
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(dst, rel)
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		switch {
+		case d.IsDir():
+			return os.MkdirAll(target, info.Mode().Perm()|0700)
+		case info.Mode().IsRegular():
+			return CopyFile(target, path, info.Mode())
+		}
+		return nil // skip symlinks and special files
+	})
 }
