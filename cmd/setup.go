@@ -7,15 +7,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/config"
-	"github.com/mitchellh/go-homedir"
 )
 
 // Setup installs platform-specific dependencies for the current platform.
@@ -55,52 +52,7 @@ func Setup(c *config.Config) error { //types:add
 		}
 		return errors.New("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 	case "windows":
-		// We must be in the home directory to avoid permission issues with file downloading.
-		hd, err := homedir.Dir()
-		if err != nil {
-			return err
-		}
-		err = os.Chdir(hd)
-		if err != nil {
-			return err
-		}
-		if _, err := exec.LookPath("gcc"); err != nil {
-			err := vc.Run("curl", "-OL", "https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe")
-			if err != nil {
-				return err
-			}
-			path, err := filepath.Abs("w64devkit-x64-2.0.0.exe")
-			if err != nil {
-				return err
-			}
-			err = vc.Run(path, "x", "-oC:", "-aoa")
-			if err != nil {
-				return err
-			}
-			err = windowsRegistryAddPath(`C:\w64devkit\bin`)
-			if err != nil {
-				return err
-			}
-		} else {
-			logx.PrintlnWarn("gcc already installed")
-		}
-		if _, err := exec.LookPath("git"); err != nil {
-			err := vc.Run("curl", "-OL", "https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe")
-			if err != nil {
-				return err
-			}
-			path, err := filepath.Abs("Git-2.45.2-64-bit.exe")
-			if err != nil {
-				return err
-			}
-			err = vc.Run(path)
-			if err != nil {
-				return err
-			}
-		} else {
-			logx.PrintlnWarn("git already installed")
-		}
-		return nil
+		return setupWindows(vc)
 	}
 	return fmt.Errorf("platform %q not supported for core setup", runtime.GOOS)
 }
