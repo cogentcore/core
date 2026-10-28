@@ -74,7 +74,7 @@ func (fn *Node) Repo() (vcs.Repo, *Node) {
 	if fr == nil {
 		return nil, nil
 	}
-	if fn.isExternal() || fr == nil || fr.FS != nil {
+	if fn.isExternal() || fr.FS != nil {
 		return nil, nil
 	}
 	if fn.DirRepo != nil {

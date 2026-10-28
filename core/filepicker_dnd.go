@@ -74,7 +74,7 @@ func (fp *FilePicker) filesDrop(e events.Event) {
 	var existing []string
 	for _, p := range paths {
 		tp := filepath.Join(fp.directory, filepath.Base(p))
-		if tp != p && errors.Ignore1(fsx.FileExists(tp)) {
+		if tp != p && fsx.Exists(tp) {
 			existing = append(existing, filepath.Base(p))
 		}
 	}

@@ -6,8 +6,6 @@ package textcore
 
 import (
 	"fmt"
-	"os"
-	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
@@ -53,8 +51,7 @@ func Save(sc *core.Scene, lns *lines.Lines) error {
 	if fname == "" {
 		return errors.New("core.Editor: filename is empty for Save")
 	}
-	info, err := os.Stat(fname)
-	if err == nil && info.ModTime() != time.Time(lns.FileInfo().ModTime) {
+	if lns.ChangedOnDisk() {
 		d := core.NewBody("File Changed on Disk")
 		core.NewText(d).SetType(core.TextSupporting).SetText(fmt.Sprintf("File has changed on disk since you opened or saved it; what do you want to do?  File: %v", fname))
 		d.AddBottomBar(func(bar *core.Frame) {

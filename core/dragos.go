@@ -11,7 +11,6 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/fsx"
@@ -232,8 +231,8 @@ func (em *Events) handleExternalDrag(de *events.DragDrop) {
 	}
 }
 
-// DroppedFiles returns the absolute paths of the existing files in
-// the given drop: those of the source if it is a [FileDragger],
+// DroppedFiles returns the absolute paths of the existing files
+// (and directories) in the given drop: those of the source if it is a [FileDragger],
 // and otherwise the text items of the data that are such paths
 // (including file:// URLs), as for files dropped from other apps.
 func DroppedFiles(de *events.DragDrop) []string {
@@ -247,7 +246,7 @@ func DroppedFiles(de *events.DragDrop) []string {
 			continue
 		}
 		p := strings.TrimPrefix(string(d.Data), "file://")
-		if filepath.IsAbs(p) && errors.Ignore1(fsx.FileExists(p)) {
+		if filepath.IsAbs(p) && fsx.Exists(p) {
 			paths = append(paths, p)
 		}
 	}

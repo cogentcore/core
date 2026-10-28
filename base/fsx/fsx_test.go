@@ -63,4 +63,9 @@ func TestCopyPath(t *testing.T) {
 	b, err := os.ReadFile(filepath.Join(dst, "c.txt"))
 	assert.NoError(t, err)
 	assert.Equal(t, "new a", string(b))
+
+	// not into itself, which would recurse forever
+	assert.Error(t, CopyPath(src, src))
+	assert.Error(t, CopyPath(filepath.Join(src, "sub", "x"), src))
+	assert.NoDirExists(t, filepath.Join(src, "sub", "x"))
 }

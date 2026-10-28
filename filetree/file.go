@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/tree"
 )
 
 // Filer is an interface for file tree file actions that all [Node]s satisfy.
@@ -115,9 +116,9 @@ func (fn *Node) DeleteFilesNoPrompts() {
 	root := fn.FileRoot()
 	root.NeedsLayout()
 	var errs []error
-	fn.SelectedFunc(func(sn *Node) {
+	for _, sn := range fn.selectedTop() {
 		errs = append(errs, sn.DeleteFile())
-	})
+	}
 	core.ErrorSnackbar(root, errors.Join(errs...), "Error deleting file")
 }
 
@@ -177,12 +178,11 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		}
 	}
 	repo, _ := fn.Repo()
-	stored := false
-	if fn.IsDir() && !fn.HasChildren() {
-		err = os.Rename(string(orgpath), newpath)
-	} else if repo != nil && fn.Info.VCS >= vcs.Stored {
-		stored = true
+	if repo != nil && (fn.IsDir() || fn.Info.VCS >= vcs.Stored) {
 		err = repo.Move(string(orgpath), newpath)
+		if err != nil && fn.IsDir() { // no files in the repository
+			err = os.Rename(string(orgpath), newpath)
+		}
 	} else {
 		err = os.Rename(string(orgpath), newpath)
 	}
@@ -193,16 +193,40 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		fn.Filepath = core.Filename(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
 		fn.SetText(fn.Info.Name)
-	}
-	// todo: if you add orgpath here to git, then it will show the rename in status
-	if stored {
-		fn.AddToVCS()
+		if fn.IsDir() {
+			fn.movedDir(string(orgpath))
+		}
 	}
 	if root != nil {
 		root.UpdatePath(string(orgpath))
 		root.UpdatePath(newpath)
 	}
 	return err
+}
+
+// movedDir updates the paths of the nodes within this directory node,
+// which has been renamed (moved) from the given path, along with the
+// open state of the directories. Existing nodes are kept by name when
+// the directory is updated, with their paths unchanged.
+func (fn *Node) movedDir(orgpath string) {
+	root := fn.FileRoot()
+	newpath := string(fn.Filepath)
+	fn.WalkDown(func(k tree.Node) bool {
+		sfn := AsNode(k)
+		if sfn == nil || sfn == fn {
+			return tree.Continue
+		}
+		opath := string(sfn.Filepath)
+		if !isWithin(opath, orgpath) {
+			return tree.Continue
+		}
+		sfn.Filepath = core.Filename(newpath + opath[len(orgpath):])
+		sfn.This.(Filer).GetFileInfo()
+		if sfn.IsDir() && root.isDirOpen(core.Filename(opath)) {
+			root.setDirOpen(sfn.Filepath)
+		}
+		return tree.Continue
+	})
 }
 
 // newFiles makes a new file in selected directory
@@ -226,7 +250,7 @@ func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
 		ppath, _ = filepath.Split(ppath)
 	}
 	np := filepath.Join(ppath, filename)
-	f, err := os.Create(np)
+	f, err := os.OpenFile(np, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666) // not truncating an existing file
 	if err == nil {
 		err = f.Close()
 	}
@@ -274,27 +298,22 @@ func (fn *Node) newFolder(foldername string) { //types:add
 	fn.FileRoot().UpdatePath(ppath)
 }
 
-// copyFileToDir copies given file or directory path into node that is a directory.
-// This does NOT check for overwriting -- that must be done at higher level!
-func (fn *Node) copyFileToDir(filename string, perm os.FileMode) error {
+// copyFileToDir copies the file or directory at the given path into this
+// directory node, overwriting any existing file. A copy of a file that is
+// in version control in this tree is added to version control.
+func (fn *Node) copyFileToDir(filename string) error {
 	if fn.isExternal() {
 		return nil
 	}
 	ppath := string(fn.Filepath)
-	sfn := filepath.Base(filename)
-	tpath := filepath.Join(ppath, sfn)
-	var err error
-	if isDir, _ := fsx.DirExists(filename); isDir {
-		err = fsx.CopyPath(tpath, filename)
-	} else {
-		err = fsx.CopyFile(tpath, filename, perm)
-	}
+	tpath := filepath.Join(ppath, filepath.Base(filename))
+	err := fsx.CopyPath(tpath, filename)
 	fn.FileRoot().UpdatePath(ppath)
 	if err != nil {
 		return err
 	}
 	ofn, ok := fn.FileRoot().FindFile(filename)
-	if ok && ofn.Info.VCS >= vcs.Stored {
+	if ok && !ofn.IsDir() && ofn.Info.VCS >= vcs.Stored {
 		nfn, ok := fn.FileRoot().FindFile(tpath)
 		if ok && !nfn.IsRoot() {
 			if string(nfn.Filepath) != tpath {

@@ -107,6 +107,11 @@ type Lines struct {
 	// fileInfo is the full information about the current file, if one is set.
 	fileInfo fileinfo.FileInfo
 
+	// diskModTime is the modification time of the file on disk when it was
+	// last opened or saved, for detecting changes on disk. This is not
+	// fileInfo.ModTime, which is a fixed time when testing.
+	diskModTime time.Time
+
 	// parseState is the parsing state information for the file.
 	parseState parse.FileStates
 

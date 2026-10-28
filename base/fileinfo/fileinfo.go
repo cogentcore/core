@@ -262,32 +262,31 @@ func (fi *FileInfo) IsHidden() bool {
 //////////////////////////////////////////////////////////////////////////////
 //    File ops
 
-// Duplicate creates a copy of given file -- only works for regular files, not
-// directories.
+// Duplicate creates a copy of the file or directory (with all of its contents)
+// in the same directory, named with a _Copy suffix before the extension
+// (_Copy1, _Copy2, etc if that exists), and returns its path.
 func (fi *FileInfo) Duplicate() (string, error) { //types:add
-	if fi.IsDir() {
-		err := fmt.Errorf("core.Duplicate: cannot copy directory: %v", fi.Path)
-		log.Println(err)
-		return "", err
+	ext := filepath.Ext(fi.Name)
+	if fi.IsDir() || ext == fi.Name { // no extension for directories and .gitignore etc
+		ext = ""
 	}
-	ext := filepath.Ext(fi.Path)
 	noext := strings.TrimSuffix(fi.Path, ext)
 	dst := noext + "_Copy" + ext
-	cpcnt := 0
-	for {
-		if _, err := os.Stat(dst); !os.IsNotExist(err) {
-			cpcnt++
-			dst = noext + fmt.Sprintf("_Copy%d", cpcnt) + ext
-		} else {
+	for i := 1; ; i++ {
+		if _, err := os.Lstat(dst); errors.Is(err, fs.ErrNotExist) {
 			break
 		}
+		dst = noext + fmt.Sprintf("_Copy%d", i) + ext
 	}
-	return dst, fsx.CopyFile(dst, fi.Path, fi.Mode)
+	return dst, fsx.CopyPath(dst, fi.Path)
 }
 
 // Delete moves the file to the trash / recycling bin.
-// On mobile and web, it deletes it directly.
+// On mobile and web, and when testing, it deletes it directly.
 func (fi *FileInfo) Delete() error { //types:add
+	if testing.Testing() { // not filling the trash with test files
+		return os.RemoveAll(fi.Path)
+	}
 	err := wastebasket.Trash(fi.Path)
 	if errors.Is(err, wastebasket.ErrPlatformNotSupported) {
 		return os.RemoveAll(fi.Path)
@@ -298,28 +297,15 @@ func (fi *FileInfo) Delete() error { //types:add
 // Filenames recursively adds fullpath filenames within the starting directory to the "names" slice.
 // Directory names within the starting directory are not added.
 func Filenames(d os.File, names *[]string) (err error) {
-	nms, err := d.Readdirnames(-1)
-	if err != nil {
-		return err
-	}
-	for _, n := range nms {
-		fp := filepath.Join(d.Name(), n)
-		ffi, ferr := os.Stat(fp)
-		if ferr != nil {
-			return ferr
+	return filepath.WalkDir(d.Name(), func(path string, de fs.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
-		if ffi.IsDir() {
-			dd, err := os.Open(fp)
-			if err != nil {
-				return err
-			}
-			defer dd.Close()
-			Filenames(*dd, names)
-		} else {
-			*names = append(*names, fp)
+		if !de.IsDir() {
+			*names = append(*names, path)
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
 // Filenames returns a slice of file names from the starting directory and its subdirectories
@@ -341,7 +327,9 @@ func (fi *FileInfo) Filenames(names *[]string) (err error) {
 
 // RenamePath returns the new full path for renaming this file to the given
 // path, which is relative to the directory of the file if not absolute.
-// It returns "" if the path is the same as the current one.
+// It returns "" if the path is the same as the current one, and an error
+// if a different file already exists at the new path (a change of case
+// only is OK on case-insensitive file systems).
 // Does not actually do the renaming -- see Rename method.
 func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	if path == "" {
@@ -355,6 +343,11 @@ func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	}
 	if newpath == filepath.Clean(fi.Path) {
 		return "", nil
+	}
+	if ninfo, err := os.Lstat(newpath); err == nil {
+		if oinfo, err := os.Lstat(fi.Path); err != nil || !os.SameFile(ninfo, oinfo) {
+			return "", fmt.Errorf("cannot rename %s: %s already exists", fi.Name, newpath)
+		}
 	}
 	return newpath, nil
 }
