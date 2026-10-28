@@ -21,8 +21,7 @@ import (
 )
 
 // errorLog records the messages of error logs about the files of a test,
-// which include those shown in error snackbars. Trees of earlier tests
-// can still be updated, logging errors for their deleted directories.
+// which include those shown in error snackbars.
 type errorLog struct {
 	slog.Handler
 	root string

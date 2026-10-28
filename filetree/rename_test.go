@@ -13,7 +13,6 @@ import (
 
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,12 +38,7 @@ func newRenameTest(t *testing.T) *watchTest {
 	wt.ft.NoWatch = true
 	wt.ft.Dirs.setOpen("sub", true)
 	wt.ft.OpenPath(root)
-	showed := make(chan struct{})
-	wt.b.OnFinal(events.Show, func(e events.Event) {
-		showed <- struct{}{}
-	})
-	wt.b.RunWindow()
-	<-showed
+	runTestWindow(t, wt.b)
 	wt.waitFor("vcs status", func() bool { // Stored until known
 		wt.ft.AsyncLock()
 		defer wt.ft.AsyncUnlock()
@@ -124,10 +118,7 @@ func TestTreeInRepo(t *testing.T) {
 	ft := NewTree(b)
 	ft.NoWatch = true
 	ft.OpenPath(wt.path("sub"))
-	showed := make(chan struct{})
-	b.OnFinal(events.Show, func(e events.Event) { showed <- struct{}{} })
-	b.RunWindow()
-	<-showed
+	runTestWindow(t, b)
 	wt.waitFor("vcs status in sub tree", func() bool {
 		b.AsyncLock()
 		defer b.AsyncUnlock()

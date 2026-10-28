@@ -26,6 +26,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// testShell is the shell of the test terminals, which is dash on Debian
+// and Ubuntu, so the tests must not depend on line editing.
+const testShell = "/bin/sh"
+
+// lastTerminal is the last test terminal, whose text is logged when
+// [waitFor] times out.
+var lastTerminal *Terminal
+
 // testTerminal runs a terminal with a POSIX shell with a simple prompt
 // in a new window, which is closed at the end of the test.
 func testTerminal(t *testing.T) (*core.Body, *Terminal) {
@@ -34,7 +42,8 @@ func testTerminal(t *testing.T) (*core.Body, *Terminal) {
 		t.Skip("uses sh")
 	}
 	b := core.NewBody()
-	tm := NewTerminal(b).SetCommand("/bin/sh").SetEnv("PS1=$ ", "ENV=", "HISTFILE=")
+	tm := NewTerminal(b).SetCommand(testShell).SetEnv("PS1=$ ", "ENV=", "HISTFILE=")
+	lastTerminal = tm
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(40), units.Em(10))
 	})
@@ -69,7 +78,23 @@ func waitFor(t *testing.T, b *core.Body, what string, cond func() bool) {
 	}
 	b.AsyncLock()
 	defer b.AsyncUnlock()
+	if lastTerminal != nil {
+		t.Logf("terminal text: %q", linesText(lastTerminal))
+	}
 	t.Fatalf("timeout waiting for %s", what)
+}
+
+// hasOutputLine returns whether the lines view has a line of output
+// with the given text, which can follow a prompt: shells without line
+// editing (such as dash, the sh of Debian and Ubuntu) echo input that is
+// typed ahead before the prompt for it, so output follows a prompt.
+func hasOutputLine(tm *Terminal, s string) bool {
+	for _, ln := range strings.Split(linesText(tm), "\n") {
+		if strings.TrimPrefix(ln, "$ ") == s {
+			return true
+		}
+	}
+	return false
 }
 
 // linesText returns the text of the lines view, without trailing blank lines.
@@ -161,7 +186,7 @@ func TestTerminalCd(t *testing.T) {
 	tm.Run("pwd")
 	b.AsyncUnlock()
 	waitFor(t, b, "the directory", func() bool {
-		return strings.Contains(linesText(tm), "\n"+sub+"\n")
+		return hasOutputLine(tm, sub)
 	})
 }
 
@@ -213,7 +238,7 @@ func TestTerminalPaste(t *testing.T) {
 	tm.Paste("echo one\necho two\n")
 	b.AsyncUnlock()
 	waitFor(t, b, "the output", func() bool {
-		return strings.Contains(linesText(tm), "\none\n") && strings.Contains(linesText(tm), "\ntwo\n")
+		return hasOutputLine(tm, "one") && hasOutputLine(tm, "two")
 	})
 }
 
@@ -224,6 +249,7 @@ func renderTerminal(t *testing.T, name, cmds string, ready func(tm *Terminal) bo
 	}
 	b := core.NewBody()
 	tm := NewTerminal(b).SetCommand("/bin/sh", "-c", cmds+"; read x")
+	lastTerminal = tm
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(50), units.Em(12))
 	})
