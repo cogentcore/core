@@ -2,21 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package vcs provides a more complete version control system (ex: git)
-// interface, building on https://github.com/Masterminds/vcs.
+// Package vcs provides a version control system interface for git and
+// Subversion repositories, with file status information and operations,
+// using the git and svn commands.
 package vcs
 
 //go:generate core generate
 
 import (
 	"errors"
-	"os/exec"
 	"path/filepath"
-	"reflect"
-	"unsafe"
 
 	"cogentcore.org/core/base/fsx"
-	"github.com/Masterminds/vcs"
 )
 
 type Types int32 //enums:enum -accept-lower
@@ -29,11 +26,27 @@ const (
 	Hg
 )
 
-// Repo provides an interface extending [vcs.Repo]
-// (https://github.com/Masterminds/vcs)
-// with support for file status information and operations.
+// Repo is a version control repository, with support for
+// file status information and operations.
 type Repo interface {
-	vcs.Repo
+	// LocalPath returns the path of the local repository (working copy).
+	LocalPath() string
+
+	// Remote returns the location of the remote repository (a URL),
+	// or "" if there is none.
+	Remote() string
+
+	// Update updates the local repository from the remote (pull).
+	Update() error
+
+	// UpdateVersion checks out the given version (revision).
+	UpdateVersion(version string) error
+
+	// Current returns the current branch, or version if not on a branch.
+	Current() (string, error)
+
+	// Branches returns the list of branches.
+	Branches() ([]string, error)
 
 	// Type returns the type of repo we are using
 	Type() Types
@@ -108,30 +121,17 @@ type Repo interface {
 	Blame(fname string) ([]byte, error)
 }
 
+// NewRepo returns a [Repo] for the repository at the given local path,
+// of the type found by [DetectRepo]. The remote is the location (URL) of
+// the remote repository, or for git, the name of a remote (origin if empty).
 func NewRepo(remote, local string) (Repo, error) {
-	repo, err := vcs.NewRepo(remote, local)
-	if err != nil && DetectRepo(local) == Git {
-		if lerr := (*vcs.LocalError)(nil); errors.As(err, &lerr) && isGitNoRemote(local) {
-			repo, err = newGitRepoNoRemote(local)
-		}
+	switch DetectRepo(local) {
+	case Git:
+		return NewGitRepo(remote, local)
+	case Svn:
+		return NewSvnRepo(remote, local)
 	}
-	if err == nil {
-		switch repo.Vcs() {
-		case vcs.Git:
-			r := &GitRepo{}
-			r.GitRepo = *(repo.(*vcs.GitRepo))
-			return r, err
-		case vcs.Svn:
-			r := &SvnRepo{}
-			r.SvnRepo = *(repo.(*vcs.SvnRepo))
-			return r, err
-		case vcs.Hg:
-			err = errors.New("hg version control not yet supported")
-		case vcs.Bzr:
-			err = errors.New("bzr version control not yet supported")
-		}
-	}
-	return nil, err
+	return nil, errors.New("no supported version control repository at: " + local)
 }
 
 // DetectRepo attempts to detect the presence of a repository at the given
@@ -154,34 +154,4 @@ func DetectRepo(path string) Types {
 func relPath(repo Repo, path string) string {
 	relpath, _ := filepath.Rel(repo.LocalPath(), path)
 	return relpath
-}
-
-// isGitNoRemote returns whether there is a valid git repository at the
-// given path without an origin remote, which [vcs.NewGitRepo] requires.
-func isGitNoRemote(local string) bool {
-	git := func(args ...string) error {
-		cmd := exec.Command("git", args...)
-		cmd.Dir = local
-		return cmd.Run()
-	}
-	return git("rev-parse", "--git-dir") == nil && git("config", "--get", "remote.origin.url") != nil
-}
-
-// newGitRepoNoRemote returns a [vcs.GitRepo] for the git repository at the
-// given path, which has no origin remote. [vcs.NewGitRepo] returns an error
-// for such a repository (it gets the remote to check it against the given
-// one), except for a directory that does not exist (yet), so the repo is
-// made for one, and then its (unexported) local path is set.
-// The vcs package is no longer developed, so its internals do not change.
-func newGitRepoNoRemote(local string) (*vcs.GitRepo, error) {
-	repo, err := vcs.NewGitRepo("", filepath.Join(local, "nonexistent-for-vcs"))
-	if err != nil {
-		return nil, err
-	}
-	lf := reflect.ValueOf(repo).Elem().FieldByName("local")
-	if !lf.IsValid() || lf.Kind() != reflect.String {
-		return nil, errors.New("vcs: cannot open git repository without a remote")
-	}
-	reflect.NewAt(lf.Type(), unsafe.Pointer(lf.UnsafeAddr())).Elem().SetString(local)
-	return repo, nil
 }

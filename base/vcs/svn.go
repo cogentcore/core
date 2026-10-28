@@ -13,19 +13,55 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/Masterminds/vcs"
 )
 
+// SvnRepo is a Subversion working copy, using the svn command.
 type SvnRepo struct {
-	vcs.SvnRepo
+	repoBase
 	files        Files
 	gettingFiles bool
 	sync.Mutex
 }
 
+// NewSvnRepo returns an [SvnRepo] for the Subversion working copy at the
+// given local path. The remote is the URL of the repository: if empty,
+// it is the one of the working copy.
+func NewSvnRepo(remote, local string) (*SvnRepo, error) {
+	gr := &SvnRepo{}
+	gr.local = local
+	url, err := gr.runErr("svn", "info", "--show-item", "url")
+	if err != nil {
+		return nil, fmt.Errorf("not a Subversion working copy: %s: %w", local, err)
+	}
+	gr.remote = remote
+	if remote == "" {
+		gr.remote = url
+	}
+	return gr, nil
+}
+
 func (gr *SvnRepo) Type() Types {
 	return Svn
+}
+
+// Update updates the working copy from the repository (svn update).
+func (gr *SvnRepo) Update() error {
+	return gr.run("update")
+}
+
+// UpdateVersion updates the working copy to the given revision.
+func (gr *SvnRepo) UpdateVersion(version string) error {
+	return gr.run("update", "-r", version)
+}
+
+// Current returns the revision of the working copy.
+func (gr *SvnRepo) Current() (string, error) {
+	return gr.runErr("svn", "info", "--show-item", "revision")
+}
+
+// Branches returns nil: Subversion branches are just directories.
+func (gr *SvnRepo) Branches() ([]string, error) {
+	return nil, nil
 }
 
 func (gr *SvnRepo) CharToStat(stat byte) FileStatus {

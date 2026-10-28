@@ -385,7 +385,7 @@ func (fn *Node) UpdateAllVCS() {
 			}
 		}
 		repo := sfn.DirRepo
-		fmt.Printf("Updating %v repository: %s from: %s\n", repo.Vcs(), sfn.RelativePath(), repo.Remote())
+		fmt.Printf("Updating %v repository: %s from: %s\n", repo.Type(), sfn.RelativePath(), repo.Remote())
 		core.ErrorSnackbar(fn, repo.Update(), "Error updating VCS repository")
 		return tree.Break
 	})
