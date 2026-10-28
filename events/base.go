@@ -158,7 +158,7 @@ func (ev *Base) SetModifiers(mods ...enums.BitFlag) {
 
 // HasAllModifiers tests whether all of given modifier(s) were set
 func (ev Base) HasAllModifiers(mods ...enums.BitFlag) bool {
-	return key.HasAnyModifier(ev.Mods, mods...)
+	return key.HasAllModifiers(ev.Mods, mods...)
 }
 
 func (ev Base) HasAnyModifier(mods ...enums.BitFlag) bool {

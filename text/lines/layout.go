@@ -35,6 +35,31 @@ func (ls *Lines) layoutViewLines(vw *view) {
 	vw.viewLines = nln
 }
 
+// layoutViewLinesFrom updates the layout of the view lines from the
+// given source line onward, keeping the layout of the lines before it,
+// which must not have changed.
+func (ls *Lines) layoutViewLinesFrom(vw *view, start int) {
+	n := len(ls.markup)
+	if start <= 0 || n == 0 || start > len(vw.lineToVline) {
+		ls.layoutViewLines(vw)
+		return
+	}
+	vst := len(vw.vlineStarts)
+	if start < len(vw.lineToVline) {
+		vst = vw.lineToVline[start]
+	}
+	vw.markup = vw.markup[:vst]
+	vw.vlineStarts = vw.vlineStarts[:vst]
+	vw.lineToVline = slicesx.SetLength(vw.lineToVline, n)
+	for ln := start; ln < n; ln++ {
+		muls, vst := ls.layoutViewLine(ln, vw.width, ls.lines[ln], ls.markup[ln])
+		vw.lineToVline[ln] = len(vw.vlineStarts)
+		vw.markup = append(vw.markup, muls...)
+		vw.vlineStarts = append(vw.vlineStarts, vst...)
+	}
+	vw.viewLines = len(vw.vlineStarts)
+}
+
 // layoutViewLine performs layout and line wrapping on the given text,
 // for given view text, with the given markup rich.Text.
 // The layout is implemented in the markup that is returned.

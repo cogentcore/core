@@ -623,6 +623,21 @@ func (ls *Lines) ReplaceTexts(reps []Replacement, matchCase bool) int {
 	return n
 }
 
+// ReplaceLinesMarkup replaces the lines from start up to end (exclusive)
+// with the given lines of text and their markup, for preformatted text
+// that is updated in place, such as a terminal. An end < 0 replaces
+// through the last line. It does not record undo, does not affect the
+// changed state, and does not send any events: the caller updates its
+// views as needed. The view layout is only redone from the start line,
+// so replacing the final lines of a long text is fast. The text and
+// markup slices are used directly, not copied. The markup must not be
+// changed by syntax highlighting, so the Lines should not have a language.
+func (ls *Lines) ReplaceLinesMarkup(start, end int, text [][]rune, markup []rich.Text) {
+	ls.Lock()
+	defer ls.Unlock()
+	ls.replaceLinesMarkup(start, end, text, markup)
+}
+
 // AppendTextMarkup appends new text to end of lines, using insert, returns
 // edit, and uses supplied markup to render it, for preformatted output.
 // Calls sendInput to send an Input event to views, so they update.

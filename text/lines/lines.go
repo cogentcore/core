@@ -308,6 +308,61 @@ func (ls *Lines) appendTextMarkup(text [][]rune, markup []rich.Text) *textpos.Ed
 	return tbe
 }
 
+// replaceLinesMarkup does [Lines.ReplaceLinesMarkup] without locking.
+func (ls *Lines) replaceLinesMarkup(start, end int, text [][]rune, markup []rich.Text) {
+	if ls.fontStyle == nil {
+		ls.Defaults()
+	}
+	n := ls.numLines()
+	start = max(0, min(start, n))
+	if end < 0 || end > n {
+		end = n
+	}
+	end = max(end, start)
+	nt := len(text)
+	if len(markup) != nt {
+		mu := make([]rich.Text, nt)
+		for i := range nt {
+			if i < len(markup) {
+				mu[i] = markup[i]
+			} else {
+				mu[i] = rich.NewText(ls.fontStyle, text[i])
+			}
+		}
+		markup = mu
+	}
+	ls.lines = slices.Replace(ls.lines, start, end, text...)
+	ls.markup = slices.Replace(ls.markup, start, end, markup...)
+	ls.tags = slices.Replace(ls.tags, start, end, make([]lexer.Line, nt)...)
+	ls.hiTags = slices.Replace(ls.hiTags, start, end, make([]lexer.Line, nt)...)
+	if ls.numLines() == 0 { // there is always at least one line
+		ls.lines = [][]rune{{}}
+		ls.markup = []rich.Text{rich.NewText(ls.fontStyle, nil)}
+		ls.tags = make([]lexer.Line, 1)
+		ls.hiTags = make([]lexer.Line, 1)
+	}
+	if end == n { // only the tail changed, so other lines keep their indexes
+		for ln := range ls.links {
+			if ln >= start {
+				delete(ls.links, ln)
+			}
+		}
+		if ls.links == nil {
+			ls.links = make(map[int][]rich.Hyperlink)
+		}
+		for ln := start; ln < ls.numLines(); ln++ {
+			if lks := ls.markup[ln].GetLinks(); len(lks) > 0 {
+				ls.links[ln] = lks
+			}
+		}
+	} else {
+		ls.collectLinks()
+	}
+	for _, vw := range ls.views {
+		ls.layoutViewLinesFrom(vw, start)
+	}
+}
+
 ////////   Edits
 
 // validCharPos returns the position with a valid Char position,

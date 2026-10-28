@@ -52,18 +52,30 @@ func newWatchTest(t *testing.T) *watchTest {
 	wt.ft.Dirs.setOpen("sub", true)
 	wt.ft.OpenPath(root)
 	t.Cleanup(wt.ft.stopWatcher)
-
-	showed := make(chan struct{})
-	wt.b.OnFinal(events.Show, func(e events.Event) {
-		showed <- struct{}{}
-	})
-	wt.b.RunWindow()
-	<-showed
+	runTestWindow(t, wt.b)
 	require.True(t, wt.ft.waitWatchReady(5*time.Second), "watcher did not start")
 	// FSEvents can report the files written above just after starting.
 	time.Sleep(500 * time.Millisecond)
 	wt.clearChanges()
 	return wt
+}
+
+// runTestWindow runs a window with the given body, waits for it to be
+// shown, and closes it at the end of the test, before its files are
+// removed: otherwise its tree is updated later, during other tests, and
+// logs errors for its deleted directories.
+func runTestWindow(t *testing.T, b *core.Body) {
+	showed := make(chan struct{})
+	b.OnFinal(events.Show, func(e events.Event) {
+		showed <- struct{}{}
+	})
+	b.RunWindow()
+	<-showed
+	t.Cleanup(func() {
+		b.AsyncLock()
+		b.Close()
+		b.AsyncUnlock()
+	})
 }
 
 // path returns the absolute path for the given relative path.

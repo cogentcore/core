@@ -5,7 +5,7 @@ Textcore has various text-based `core.Widget`s, including:
 * `Editor` is a full-featured text editor built on Base.
 * `DiffEditor` provides side-by-side Editors showing the diffs between files.
 * `TwinEditors` provides two side-by-side Editors that sync their scrolling.
-* `Terminal` provides a VT100-style terminal built on Base (TODO).
+* The [terminal](../terminal) package has a terminal widget built on Editor.
 
 A critical design feature is that the Base widget can switch efficiently among different `lines.Lines` content. For example, in Cogent Code there are 2 editor widgets that are reused for all files, including viewing the same file across both editors. Thus, all of the state comes from the underlying Lines buffers.
 

@@ -9,6 +9,9 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/system"
+
 	"github.com/gomarkdown/markdown/ast"
 	"github.com/gomarkdown/markdown/parser"
 )
@@ -47,6 +50,21 @@ func GoDocWikilink(prefix string, pkg string) WikilinkHandler {
 	}
 }
 
+// reportInvalidWikilinks returns whether invalid wikilinks are logged, as
+// a reminder to fix them: only when running natively on a desktop
+// platform, as while working on the content locally, and not in tests
+// (the offscreen platform), on the web, or on mobile, where it is noise.
+func reportInvalidWikilinks() bool {
+	if core.TheApp == nil {
+		return false
+	}
+	switch core.TheApp.Platform() {
+	case system.MacOS, system.Windows, system.Linux:
+		return true
+	}
+	return false
+}
+
 // note: this is from: https://github.com/kensanata/oddmu/blob/main/parser.go
 
 // wikilink returns an inline parser function. This indirection is
@@ -64,7 +82,9 @@ func wikilink(ctx *Context, fn func(p *parser.Parser, data []byte, offset int) (
 
 		var node ast.Node
 		if len(url) == 0 && len(label) == 0 {
-			slog.Error("invalid wikilink", "link", string(inside))
+			if reportInvalidWikilinks() {
+				slog.Error("invalid wikilink", "link", string(inside))
+			}
 			// TODO: we just treat broken wikilinks like plaintext for now, but we should
 			// make red links instead at some point
 			node = &ast.Text{Leaf: ast.Leaf{Literal: append(inside, after...)}}
