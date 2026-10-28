@@ -89,20 +89,50 @@ func (g *Generator) Find() error {
 
 // GetInterfaces sets [Generator.Interfaces] based on
 // [Generator.Config.InterfaceConfigs]. It should typically not
-// be called by end-user code.
+// be called by end-user code. The interfaces are looked up in
+// the package and all of its dependencies, so the package does
+// not need to reference them directly.
 func (g *Generator) GetInterfaces() error {
 	if g.Config.InterfaceConfigs.Len() == 0 {
 		return nil
 	}
-	for _, typ := range g.Pkg.TypesInfo.Types {
-		nm := typ.Type.String()
-		if _, ok := g.Config.InterfaceConfigs.ValueByKeyTry(nm); ok {
-			utyp := typ.Type.Underlying()
-			iface, ok := utyp.(*types.Interface)
-			if !ok {
-				return fmt.Errorf("invalid InterfaceConfigs value: type %q is not a *types.Interface but a %T (type value %v)", nm, utyp, utyp)
-			}
-			g.Interfaces.Add(nm, iface)
+	for _, kv := range g.Config.InterfaceConfigs.Order {
+		nm := kv.Key
+		li := strings.LastIndex(nm, ".")
+		if li < 0 {
+			return fmt.Errorf("invalid InterfaceConfigs key: %q is not a fully qualified type name", nm)
+		}
+		pkg := findPackage(g.Pkg, nm[:li], map[*packages.Package]bool{})
+		if pkg == nil || pkg.Types == nil {
+			continue
+		}
+		obj := pkg.Types.Scope().Lookup(nm[li+1:])
+		if obj == nil {
+			continue
+		}
+		utyp := obj.Type().Underlying()
+		iface, ok := utyp.(*types.Interface)
+		if !ok {
+			return fmt.Errorf("invalid InterfaceConfigs value: type %q is not a *types.Interface but a %T (type value %v)", nm, utyp, utyp)
+		}
+		g.Interfaces.Add(nm, iface)
+	}
+	return nil
+}
+
+// findPackage returns the package with the given path among
+// the given package and its dependencies, or nil if there is none.
+func findPackage(pkg *packages.Package, path string, visited map[*packages.Package]bool) *packages.Package {
+	if pkg.PkgPath == path {
+		return pkg
+	}
+	visited[pkg] = true
+	for _, ip := range pkg.Imports {
+		if visited[ip] {
+			continue
+		}
+		if fp := findPackage(ip, path, visited); fp != nil {
+			return fp
 		}
 	}
 	return nil
