@@ -21,7 +21,7 @@ import (
 func vcsLabelFunc(fn *Node, label string) string {
 	repo, _ := fn.Repo()
 	if repo != nil {
-		label = strings.Replace(label, "VCS", string(repo.Vcs()), 1)
+		label = strings.Replace(label, "VCS", repo.Type().String(), 1)
 	}
 	return label
 }

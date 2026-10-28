@@ -73,15 +73,15 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 		}
 		bstr = lines.BytesToLineStrings(fb, false) // don't add new lines
 	}
+	if rev_a == "" { // FileContents returns the working copy for ""
+		rev_a = "HEAD"
+	}
 	fb, err := repo.FileContents(file, rev_a)
 	if err != nil {
 		core.ErrorDialog(ctx, err)
 		return nil, err
 	}
 	astr = lines.BytesToLineStrings(fb, false) // don't add new lines
-	if rev_a == "" {
-		rev_a = "HEAD"
-	}
 	return DiffEditorDialog(ctx, "DiffVcs: "+fsx.DirAndFile(file), astr, bstr, file, file, rev_a, rev_b), nil
 }
 

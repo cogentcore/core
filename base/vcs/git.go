@@ -14,19 +14,56 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/Masterminds/vcs"
 )
 
+// GitRepo is a git repository, using the git command.
 type GitRepo struct {
-	vcs.GitRepo
+	repoBase
 	files        Files
 	gettingFiles bool
 	sync.Mutex
 }
 
+// NewGitRepo returns a [GitRepo] for the git repository at the given local
+// path. The remote is the location (URL) of the remote repository, or the
+// name of a remote, which is origin if empty; it is "" if there is none.
+func NewGitRepo(remote, local string) (*GitRepo, error) {
+	gr := &GitRepo{}
+	gr.local = local
+	if _, err := gr.runErr("git", "rev-parse", "--git-dir"); err != nil {
+		return nil, fmt.Errorf("not a git repository: %s: %w", local, err)
+	}
+	gr.remote = remote
+	if !strings.ContainsAny(remote, "/:") { // a remote name
+		if remote == "" {
+			remote = "origin"
+		}
+		gr.remote, _ = gr.runErr("git", "config", "--get", "remote."+remote+".url")
+	}
+	return gr, nil
+}
+
 func (gr *GitRepo) Type() Types {
 	return Git
+}
+
+// Update updates the repository from the remote, with git pull,
+// or just git fetch if HEAD is detached (not on a branch).
+func (gr *GitRepo) Update() error {
+	if _, err := gr.runErr("git", "symbolic-ref", "-q", "HEAD"); err != nil {
+		_, err := gr.runErr("git", "fetch", "--tags")
+		return err
+	}
+	_, err := gr.runErr("git", "pull")
+	return err
+}
+
+// Current returns the current branch, or the commit hash if HEAD is detached.
+func (gr *GitRepo) Current() (string, error) {
+	if br, err := gr.runErr("git", "symbolic-ref", "-q", "--short", "HEAD"); err == nil {
+		return br, nil
+	}
+	return gr.runErr("git", "rev-parse", "HEAD")
 }
 
 // Files returns a map of the current files and their status,
@@ -146,7 +183,7 @@ func (gr *GitRepo) charToStat(stat byte) FileStatus {
 
 // StatusFast returns file status based on the cached file info,
 // which might be slightly stale. Much faster than Status.
-// Returns Untracked if no cached files.
+// Returns Stored if no files have been cached yet.
 func (gr *GitRepo) StatusFast(fname string) FileStatus {
 	var ff Files
 	gr.Lock()
@@ -155,7 +192,7 @@ func (gr *GitRepo) StatusFast(fname string) FileStatus {
 	if ff != nil {
 		return ff.Status(gr, fname)
 	}
-	return Untracked
+	return Stored // not known yet: shown as normal
 }
 
 // Status returns status of given file; returns Untracked on any error.
@@ -249,16 +286,14 @@ func (gr *GitRepo) RevertFile(fname string) error {
 
 // UpdateVersion sets the version of a package currently checked out via Git.
 func (s *GitRepo) UpdateVersion(version string) error {
-	out, err := s.RunFromDir("git", "switch", "--detach", version)
-	if err != nil {
-		return vcs.NewLocalError("Unable to update checked out version", err, string(out))
-	}
-	return nil
+	_, err := s.runErr("git", "switch", "--detach", version)
+	return err
 }
 
 // FileContents returns the contents of given file, as a []byte array
-// at given revision specifier. -1, -2 etc also work as universal
-// ways of specifying prior revisions.
+// at given revision specifier, or the current file in the working copy
+// if empty (use HEAD for the last commit). -1, -2 etc also work as
+// universal ways of specifying prior revisions.
 func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 	if rev == "" {
 		out, err := os.ReadFile(fname)
@@ -410,13 +445,13 @@ func (gr *GitRepo) Blame(fname string) ([]byte, error) {
 	return out, nil
 }
 
-// Branches returns a list of available branches on the RemoteLocation
+// Branches returns a list of the local branches.
 func (s *GitRepo) Branches() ([]string, error) {
-	out, err := s.RunFromDir("git", "branch")
+	out, err := s.runErr("git", "branch")
 	if err != nil {
-		return []string{}, vcs.NewLocalError("Unable to retrieve branches", err, string(out))
+		return []string{}, err
 	}
-	ff := strings.Fields(string(out))
+	ff := strings.Fields(out)
 	var br []string
 	for _, f := range ff {
 		if f != "*" {

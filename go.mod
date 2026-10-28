@@ -6,7 +6,6 @@ require (
 	github.com/Bios-Marcel/wastebasket/v2 v2.0.3
 	github.com/BurntSushi/toml v1.6.0
 	github.com/Masterminds/semver/v3 v3.2.1
-	github.com/Masterminds/vcs v1.13.3
 	github.com/adrg/strutil v0.3.1
 	github.com/alecthomas/chroma/v3 v3.0.0-alpha.5.0.20261015230651-e17ffc9bfce4
 	github.com/anthonynsimon/bild v0.14.0
