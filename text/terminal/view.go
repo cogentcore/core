@@ -5,19 +5,22 @@
 package terminal
 
 import (
+	"image"
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/terminal/vt"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/text/textpos"
@@ -70,11 +73,6 @@ func (vw *View) Init() {
 		if !vw.isGrid {
 			s.Overflow.Y = styles.OverflowScroll // stable width
 		}
-		// the cursor is shown as a highlight
-		s.Text.HighlightColor = colors.Uniform(colors.WithAF32(colors.ToUniform(colors.Scheme.Primary.Base), 0.5))
-		if !s.Is(states.Focused) {
-			s.Text.HighlightColor = colors.Scheme.OutlineVariant
-		}
 	})
 	vw.On(events.KeyDown, func(e events.Event) {
 		vw.lastKeyDown = e.KeyCode()
@@ -89,6 +87,41 @@ func (vw *View) Init() {
 		vw.Terminal.focusChanged(false)
 	})
 	vw.handleMouse()
+	vw.ContextMenus = nil // not those of the editor
+	vw.AddContextMenu(vw.contextMenu)
+	vw.AddContextMenu(func(m *core.Scene, pos image.Point) {
+		// those of the terminal, first
+		cms := vw.Terminal.ContextMenus
+		for i := len(cms) - 1; i >= 0; i-- {
+			if m.NumChildren() > 0 {
+				core.NewSeparator(m)
+			}
+			cms[i](m, pos)
+		}
+	})
+}
+
+// contextMenu adds the items of the terminal to the context menu.
+func (vw *View) contextMenu(m *core.Scene, pos image.Point) {
+	tm := vw.Terminal
+	if m.NumChildren() > 0 {
+		core.NewSeparator(m)
+	}
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
+		SetShortcut(ShortcutChord(keymap.Copy)).SetState(!vw.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			vw.copy()
+		})
+	core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
+		SetShortcut(ShortcutChord(keymap.Paste)).SetState(vw.Clipboard().IsEmpty(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tm.PasteClipboard()
+		})
+	core.NewButton(m).SetText("Clear scrollback").SetIcon(icons.ClearAll).
+		SetShortcut(ShortcutChord(keymap.Kill)).
+		OnClick(func(e events.Event) {
+			tm.ClearScrollback()
+		})
 }
 
 // SizeFinal resizes the terminal to fit the lines view.
@@ -135,27 +168,20 @@ func (vw *View) keyChord(e events.Event) {
 func (vw *View) shortcut(e events.Event) bool {
 	tm := vw.Terminal
 	mods := e.Modifiers()
-	rn := e.KeyRune()
-	// on macOS, Command is used; elsewhere, Control+Shift
-	gui := mods.HasFlag(key.Meta)
-	if system.TheApp == nil || system.TheApp.Platform() != system.MacOS {
-		gui = e.HasAllModifiers(key.Control, key.Shift)
+	switch KeyFunction(e) {
+	case keymap.Copy:
+		vw.copy()
+		return true
+	case keymap.Paste:
+		tm.PasteClipboard()
+		return true
+	case keymap.Kill:
+		tm.ClearScrollback()
+		return true
 	}
-	if gui {
-		switch rn {
-		case 'c', 'C':
-			vw.copy()
-			return true
-		case 'v', 'V':
-			tm.PasteClipboard()
-			return true
-		case 'k', 'K':
-			tm.ClearScrollback()
-			return true
-		}
-	}
-	// copy with Control+C with a selection, as in Windows Terminal
-	if mods.HasFlag(key.Control) && !mods.HasFlag(key.Shift) && (rn == 'c' || rn == 'C') && vw.HasSelection() {
+	// the Copy key copies when there is a selection, even if it goes to
+	// the program otherwise (Control+C), as in Windows Terminal
+	if keymap.Of(e.KeyChord()) == keymap.Copy && vw.HasSelection() {
 		vw.copy()
 		return true
 	}

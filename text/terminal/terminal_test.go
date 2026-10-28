@@ -5,6 +5,7 @@
 package terminal
 
 import (
+	"image"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,9 +16,12 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/terminal/vt"
+	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -89,7 +93,6 @@ func TestTerminalRun(t *testing.T) {
 	cur := tm.linesCursor
 	assert.Equal(t, 2, cur.Char, "the cursor is after the prompt")
 	assert.Equal(t, "$ ", string(tm.linesView.Lines.Line(cur.Line)[:2]))
-	assert.Equal(t, 1, len(tm.linesView.Highlights), "the cursor is shown")
 }
 
 func TestTerminalScrollback(t *testing.T) {
@@ -280,5 +283,52 @@ func TestTerminalKeys(t *testing.T) {
 	press(key.CodeC, mods(key.Control))
 	waitFor(t, b, "the interrupt", func() bool {
 		return strings.HasSuffix(linesText(tm), "\n$")
+	})
+}
+
+func TestTerminalContextMenu(t *testing.T) {
+	b, tm := testTerminal(t)
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	tm.AddContextMenu(func(m *core.Scene, pos image.Point) {
+		core.NewButton(m).SetText("App item")
+	})
+	m := core.NewScene()
+	cms := tm.linesView.ContextMenus
+	for i := len(cms) - 1; i >= 0; i-- {
+		cms[i](m, image.Point{})
+	}
+	var items []string
+	m.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		switch w := cw.(type) {
+		case *core.Button:
+			items = append(items, w.Text)
+		case *core.Separator:
+			items = append(items, "-")
+		}
+		return tree.Continue
+	})
+	assert.Equal(t, []string{"App item", "-", "Copy", "Paste", "Clear scrollback"}, items)
+}
+
+// TestTerminalKillKey tests that the key of [keymap.Kill] in a terminal
+// (see [ShortcutChord]) clears the scrollback.
+func TestTerminalKillKey(t *testing.T) {
+	b, tm := testTerminal(t)
+	b.AsyncLock()
+	tm.Run("echo hello")
+	tm.SetFocus()
+	ch := ShortcutChord(keymap.Kill)
+	b.AsyncUnlock()
+	waitFor(t, b, "the output", func() bool {
+		return strings.HasSuffix(linesText(tm), "hello\n$") && tm.linesView.StateIs(states.Focused)
+	})
+	require.NotEmpty(t, ch)
+	rn, code, mods, err := ch.Chords()[0].Decode()
+	require.NoError(t, err)
+	src := b.Scene.RenderWindow().SystemWindow.Events()
+	src.Key(events.KeyDown, rn, code, mods)
+	waitFor(t, b, "the scrollback to be cleared", func() bool {
+		return linesText(tm) == "$"
 	})
 }

@@ -162,6 +162,7 @@
 | Meta+C | Copy | Copy |              |                 |                   |             |
 | Meta+F | Find | Find |              |                 |                   |             |
 | Meta+H | DocHome | DocHome |              |                 |                   |             |
+| Meta+K | Kill | Kill |              |                 |                   |             |
 | Meta+L | DocEnd | DocEnd |              |                 |                   |             |
 | Meta+N | New | New |              |                 |                   |             |
 | Meta+O | Open | Open |              |                 |                   |             |

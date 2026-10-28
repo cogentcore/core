@@ -52,7 +52,7 @@ Snapshot saves a PNG image and an SVG vector representation of the current windo
 | BackspaceWord | Control+Backspace, Meta+Backspace, Alt+Backspace | Control+Backspace, Meta+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace | Control+Backspace, Alt+Backspace |
 | Delete | Delete, Control+D | Delete, Control+D | Delete, Control+D | Delete | Delete | Delete |
 | DeleteWord | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete | Control+Delete, Alt+Delete |
-| Kill | Control+K | Control+K | Control+K | Control+K | Control+K | Control+K |
+| Kill | Control+K, Meta+K | Control+K, Meta+K | Control+K | Control+K | Control+K | Control+K |
 | Duplicate | Alt+D | Alt+D | Alt+D | Alt+D | Alt+D | Alt+D |
 | Transpose | Control+T | Control+T | Control+T | Control+T | Control+T | Control+T |
 | TransposeWord | Alt+T | Alt+T | Alt+T | Alt+T | Alt+T | Alt+T |
@@ -183,6 +183,7 @@ Snapshot saves a PNG image and an SVG vector representation of the current windo
 | Meta+C | Copy | Copy |              |                 |                   |             |
 | Meta+F | Find | Find |              |                 |                   |             |
 | Meta+H | DocHome | DocHome |              |                 |                   |             |
+| Meta+K | Kill | Kill |              |                 |                   |             |
 | Meta+L | DocEnd | DocEnd |              |                 |                   |             |
 | Meta+N | New | New |              |                 |                   |             |
 | Meta+O | Open | Open |              |                 |                   |             |

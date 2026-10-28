@@ -53,6 +53,15 @@ type colorMap struct {
 
 	// links are the hyperlink URLs.
 	links []string
+
+	// cursor is the color of the cursor, which is blended with
+	// the background of the cell that it is on.
+	cursor color.RGBA
+
+	// cursorFocused is whether the view with the cursor is focused,
+	// in which case the cursor is blended, and otherwise it is
+	// [colorMap.cursor] as is.
+	cursorFocused bool
 }
 
 // newColorMap returns a new color map for the current color scheme.
@@ -151,29 +160,16 @@ func (cm *colorMap) link(rs *rich.Style, st vt.Style) *rich.Style {
 
 // lineMarkup returns the text and markup for the given cells, which
 // has one character for each cell, without the trailing blank cells,
-// but with at least minLen characters (for the cursor).
-func (cm *colorMap) lineMarkup(cells []vt.Cell, minLen int) ([]rune, rich.Text) {
+// but with at least minLen characters (for the cursor). The cursor is
+// shown on the cell at the given index, unless it is negative: it is
+// drawn as the background of the cell, which fills the cell exactly.
+func (cm *colorMap) lineMarkup(cells []vt.Cell, minLen, cursor int) ([]rune, rich.Text) {
 	n := len(cells)
 	for n > 0 && cells[n-1].IsBlank() {
 		n--
 	}
 	n = max(n, min(minLen, len(cells)))
 	rs := make([]rune, n, max(n, minLen))
-	var tx rich.Text
-	start := 0
-	var cur vt.Style
-	addSpan := func(end int) {
-		if end <= start {
-			return
-		}
-		sty := cm.style(cur)
-		if sty.Special == rich.Link {
-			tx.StartSpecial(sty, rich.Link, rs[start:end])
-			tx.EndSpecial()
-		} else {
-			tx.AddSpan(sty, rs[start:end])
-		}
-	}
 	for i := range n {
 		c := &cells[i]
 		switch {
@@ -184,25 +180,58 @@ func (cm *colorMap) lineMarkup(cells []vt.Cell, minLen int) ([]rune, rich.Text) 
 		default:
 			rs[i] = c.Rune
 		}
-		if i == 0 {
-			cur = c.Style
-			continue
-		}
-		if c.Style != cur {
-			addSpan(i)
-			start = i
-			cur = c.Style
-		}
 	}
-	addSpan(n)
 	for len(rs) < minLen {
 		rs = append(rs, ' ')
 	}
-	if len(rs) > n {
-		tx.AddSpan(cm.base, rs[n:])
+	var tx rich.Text
+	addSpan := func(sty *rich.Style, start, end int) {
+		if end <= start {
+			return
+		}
+		if sty.Special == rich.Link {
+			tx.StartSpecial(sty, rich.Link, rs[start:end])
+			tx.EndSpecial()
+		} else {
+			tx.AddSpan(sty, rs[start:end])
+		}
+	}
+	// the cells, with the cursor cell as its own span
+	cellStyle := func(i int) vt.Style {
+		if i < n {
+			return cells[i].Style
+		}
+		return vt.Style{}
+	}
+	start := 0
+	for i := 1; i <= len(rs); i++ {
+		if i < len(rs) && i != cursor && i-1 != cursor && cellStyle(i) == cellStyle(start) {
+			continue
+		}
+		sty := cm.style(cellStyle(start))
+		if start == cursor {
+			sty = cm.cursorStyle(sty)
+		}
+		addSpan(sty, start, i)
+		start = i
 	}
 	if len(tx) == 0 {
 		tx = rich.NewText(cm.base, rs)
 	}
 	return rs, tx
+}
+
+// cursorStyle returns the given style with the cursor background.
+func (cm *colorMap) cursorStyle(sty *rich.Style) *rich.Style {
+	cs := *sty
+	clr := cm.cursor
+	if cm.cursorFocused {
+		bg := cm.bg
+		if c := sty.Background(); c != nil {
+			bg = colors.AsRGBA(c)
+		}
+		clr = colors.Blend(colors.RGB, 50, cm.cursor, bg)
+	}
+	cs.SetBackground(clr)
+	return &cs
 }

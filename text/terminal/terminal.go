@@ -17,6 +17,7 @@ package terminal
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,6 +29,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
@@ -45,7 +47,9 @@ import (
 // unless it has been started already with [Terminal.Start]. It has a
 // lines view of the scrollback and the screen, and a grid view of the
 // alternate screen used by full-screen programs, in a stack, with the
-// one in use on top.
+// one in use on top. The context menus added to the terminal with
+// [core.WidgetBase.AddContextMenu] are shown in the context menu of
+// the views, before the items for copying, pasting, and clearing.
 type Terminal struct {
 	core.Frame
 
@@ -133,9 +137,6 @@ type Terminal struct {
 	// linesCursor is the position of the terminal cursor in the lines view,
 	// with a Line of -1 if it is not there.
 	linesCursor textpos.Pos
-
-	// cursorHidden is whether the cursor is hidden in the lines view.
-	cursorHidden bool
 }
 
 func (tm *Terminal) Init() {
@@ -513,7 +514,7 @@ func (tm *Terminal) focusChanged(focused bool) {
 			tm.send([]byte("\x1b[O"), false)
 		}
 	}
-	tm.updateCursor()
+	tm.scheduleSync() // the cursor color
 }
 
 // viewSized is called when the lines view has been sized,
@@ -563,6 +564,7 @@ func (tm *Terminal) sync() {
 	scrolled, cleared := t.TakeScrolled()
 	alt := t.IsAltScreen()
 	cm := newColorMap(lv.Lines.FontStyle(), slices.Clone(t.Links))
+	cm.cursor, cm.cursorFocused = tm.cursorColor()
 	t.Foreground, t.Background = cm.fg, cm.bg
 	md := t.Modes
 	cur := t.Cursor
@@ -570,11 +572,14 @@ func (tm *Terminal) sync() {
 	var gridMarkup []rich.Text
 	if alt {
 		for r, ln := range t.Lines() {
-			minLen := 0
+			minLen, cursor := 0, -1
 			if r == cur.Row {
 				minLen = cur.Col + 1
+				if !md.CursorHidden {
+					cursor = cur.Col
+				}
 			}
-			rs, mu := cm.lineMarkup(ln.Cells, minLen)
+			rs, mu := cm.lineMarkup(ln.Cells, minLen, cursor)
 			gridText = append(gridText, rs)
 			gridMarkup = append(gridMarkup, mu)
 		}
@@ -592,17 +597,10 @@ func (tm *Terminal) sync() {
 	toEnd := tm.toEnd || lv.IsScrolledToEnd()
 	tm.toEnd = false
 	if screen != nil {
-		tm.syncLines(cm, scrolled, cleared, screen, pcur)
-		tm.cursorHidden = md.CursorHidden || alt
-		tm.updateCursor()
+		tm.syncLines(cm, scrolled, cleared, screen, pcur, !md.CursorHidden && !alt)
 	}
 	if alt {
 		gv.Lines.ReplaceLinesMarkup(0, -1, gridText, gridMarkup)
-		gv.Highlights = nil
-		if !md.CursorHidden {
-			pos := textpos.Pos{Line: cur.Row, Char: cur.Col}
-			gv.Highlights = []textpos.Region{{Start: pos, End: textpos.Pos{Line: pos.Line, Char: pos.Char + 1}}}
-		}
 		gv.NeedsRender()
 	}
 	if alt != tm.altShown {
@@ -625,8 +623,9 @@ func (tm *Terminal) sync() {
 }
 
 // syncLines updates the lines view from the given lines scrolled into
-// the scrollback, and the lines of the primary screen, with its cursor.
-func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, screen []*vt.Line, cur vt.Cursor) {
+// the scrollback, and the lines of the primary screen, with its cursor,
+// which is shown if showCursor is true.
+func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, screen []*vt.Line, cur vt.Cursor, showCursor bool) {
 	lv := tm.linesView
 	ln := lv.Lines
 	if cleared {
@@ -640,7 +639,11 @@ func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, s
 		for _, r := range rows {
 			cells = append(cells, r.Cells...)
 		}
-		rs, mu := cm.lineMarkup(cells, cursorOff+1)
+		cursor := -1
+		if showCursor {
+			cursor = cursorOff
+		}
+		rs, mu := cm.lineMarkup(cells, cursorOff+1, cursor)
 		text = append(text, rs)
 		markup = append(markup, mu)
 	}
@@ -684,20 +687,15 @@ func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, s
 	}
 }
 
-// updateCursor shows the terminal cursor in the lines view.
-func (tm *Terminal) updateCursor() {
-	lv := tm.linesView
-	if lv == nil {
-		return
+// cursorColor returns the color of the cursor, and whether the view
+// that shows it is focused, in which case the color is blended with
+// the background of the cell.
+func (tm *Terminal) cursorColor() (color.RGBA, bool) {
+	vw := tm.ActiveView()
+	if vw != nil && vw.StateIs(states.Focused) {
+		return colors.ToUniform(colors.Scheme.Primary.Base), true
 	}
-	lv.Highlights = nil
-	if pos := tm.linesCursor; !tm.cursorHidden && pos.Line >= 0 {
-		lv.Highlights = []textpos.Region{{Start: pos, End: textpos.Pos{Line: pos.Line, Char: pos.Char + 1}}}
-	}
-	lv.NeedsRender()
-	if tm.gridView != nil {
-		tm.gridView.NeedsRender()
-	}
+	return colors.ToUniform(colors.Scheme.OutlineVariant), false
 }
 
 // sendInfo calls the listener functions for changes in the title,
