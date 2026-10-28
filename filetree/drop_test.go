@@ -19,11 +19,14 @@ import (
 // dropAt sends an external drag event of the given type
 // at the center of the row of the given node.
 func (wt *watchTest) dropAt(typ events.Types, rel string, md mimedata.Mimes) {
+	wt.b.AsyncLock()
 	n := wt.node(rel)
 	require.NotNil(wt.t, n, rel)
 	bb := n.Parts.Geom.TotalBBox
 	pos := bb.Min.Add(bb.Size().Div(2))
-	wt.ft.Events().RenderWindow().SystemWindow.Events().DragExternal(typ, pos, 0, md, false)
+	sw := wt.ft.Events().RenderWindow().SystemWindow
+	wt.b.AsyncUnlock()
+	sw.Events().DragExternal(typ, pos, 0, md, false)
 }
 
 // TestExternalDrop tests dragging a file from another app over the
@@ -36,11 +39,11 @@ func TestExternalDrop(t *testing.T) {
 
 	wt.dropAt(events.DragMove, "sub", nil)
 	wt.waitFor("drag hovered", func() bool {
-		return wt.node("sub").StateIs(states.DragHovered)
+		return wt.hovered("sub")
 	})
 	wt.dropAt(events.DragMove, "a.go", nil)
 	wt.waitFor("drag hover moved", func() bool {
-		return wt.node("a.go").StateIs(states.DragHovered) && !wt.node("sub").StateIs(states.DragHovered)
+		return wt.hovered("a.go") && !wt.hovered("sub")
 	})
 
 	wt.dropAt(events.Drop, "sub", mimedata.Mimes{mimedata.NewTextData(src)})
@@ -49,6 +52,13 @@ func TestExternalDrop(t *testing.T) {
 		return err == nil && string(b) == "new\n"
 	})
 	wt.waitFor("node", func() bool { return wt.hasNode("sub/new.txt") })
-	assert.False(t, wt.node("a.go").StateIs(states.DragHovered))
-	assert.False(t, wt.node("sub").StateIs(states.DragHovered))
+	assert.False(t, wt.hovered("a.go"))
+	assert.False(t, wt.hovered("sub"))
+}
+
+// hovered returns whether the node for the relative path is drag hovered.
+func (wt *watchTest) hovered(rel string) bool {
+	wt.b.AsyncLock()
+	defer wt.b.AsyncUnlock()
+	return wt.node(rel).StateIs(states.DragHovered)
 }
