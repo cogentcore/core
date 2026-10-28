@@ -96,3 +96,22 @@ func BenchmarkIDName(b *testing.B) {
 		_ = strcase.ToKebab(path[li+1:])
 	}
 }
+
+// TestInterfaceNotReferenced tests that the [Config.InterfaceConfigs]
+// apply to a package that implements the interface without
+// referencing it.
+func TestInterfaceNotReferenced(t *testing.T) {
+	c := &Config{
+		InterfaceConfigs: ordmap.Make([]ordmap.KeyValue[string, *Config]{{
+			"fmt.Stringer", &Config{AddTypes: true, Setters: true},
+		}}),
+	}
+	assert.NoError(t, cli.SetFromDefaults(c))
+	c.Dir = "./testdata/noref"
+	c.Output = filepath.Join(t.TempDir(), "typegen.go")
+	assert.NoError(t, Generate(c))
+	have, err := os.ReadFile(c.Output)
+	assert.NoError(t, err)
+	assert.Contains(t, string(have), "noref.Pet")
+	assert.Contains(t, string(have), "func (t *Pet) SetName(v string) *Pet")
+}
