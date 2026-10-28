@@ -67,6 +67,7 @@ func (wb *WidgetBase) AsyncLock() {
 		}
 		select {}
 	}
+	wb.Scene.asyncLocked = rc
 	wb.Scene.setFlag(true, sceneUpdating)
 }
 
@@ -97,6 +98,7 @@ func (wb *WidgetBase) AsyncLockIfShown() bool {
 		rc.Unlock()
 		return false
 	}
+	wb.Scene.asyncLocked = rc
 	wb.Scene.setFlag(true, sceneUpdating)
 	return true
 }
@@ -105,13 +107,19 @@ func (wb *WidgetBase) AsyncLockIfShown() bool {
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncLock] before it.
 func (wb *WidgetBase) AsyncUnlock() {
-	rc := wb.Scene.renderContext()
+	sc := wb.Scene
+	if sc == nil {
+		return
+	}
+	rc := sc.asyncLocked // the one that was locked
+	sc.asyncLocked = nil
+	if rc == nil {
+		rc = sc.renderContext()
+	}
 	if rc == nil {
 		return
 	}
-	if wb.Scene != nil {
-		wb.Scene.setFlag(false, sceneUpdating)
-	}
+	sc.setFlag(false, sceneUpdating)
 	rc.Unlock()
 }
 

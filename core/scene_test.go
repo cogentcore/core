@@ -139,3 +139,27 @@ func TestRunInCurrentWindow(t *testing.T) {
 	b.Close()
 	rc.Unlock()
 }
+
+// TestAsyncUnlockNoRenderContext tests that AsyncUnlock unlocks the render
+// context that AsyncLock locked, even if the scene has no render context
+// in between, as while a new window is being created. It used to leave it
+// locked, so that the event loop of the window blocked forever.
+func TestAsyncUnlockNoRenderContext(t *testing.T) {
+	b := NewBody()
+	b.runAndShowNewWindow()
+	st := b.Scene.Stage
+	rc := b.Scene.renderContext()
+	b.AsyncLock()
+	mains := st.Mains
+	st.storeMains(nil)
+	b.AsyncUnlock()
+	st.storeMains(mains)
+	if !rc.TryLock() {
+		t.Fatal("render context left locked")
+	}
+	rc.Unlock()
+
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
+}
