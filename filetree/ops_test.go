@@ -20,16 +20,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// errorLog records the messages of error logs,
-// which include those shown in error snackbars.
+// errorLog records the messages of error logs about the files of a test,
+// which include those shown in error snackbars. Trees of earlier tests
+// can still be updated, logging errors for their deleted directories.
 type errorLog struct {
 	slog.Handler
+	root string
 	mu   sync.Mutex
 	msgs []string
 }
 
 func (el *errorLog) Handle(ctx context.Context, r slog.Record) error {
-	if r.Level >= slog.LevelError {
+	if r.Level >= slog.LevelError && strings.Contains(r.Message, el.root) {
 		el.mu.Lock()
 		el.msgs = append(el.msgs, r.Message)
 		el.mu.Unlock()
@@ -46,11 +48,13 @@ func (el *errorLog) errors() []string {
 	return m
 }
 
-// logErrors records error logs for the duration of the test.
-func logErrors(t *testing.T) *errorLog {
+// logErrors records error logs about the files of the test
+// (in its root directory) for the duration of the test.
+func (wt *watchTest) logErrors() *errorLog {
+	t := wt.t
 	prev := slog.Default()
 	// not wrapping prev.Handler(), which logs through slog once replaced: a deadlock
-	el := &errorLog{Handler: slog.NewTextHandler(os.Stderr, nil)}
+	el := &errorLog{Handler: slog.NewTextHandler(os.Stderr, nil), root: wt.root}
 	slog.SetDefault(slog.New(el))
 	t.Cleanup(func() { slog.SetDefault(prev) })
 	return el
@@ -121,7 +125,7 @@ func (wt *watchTest) read(rel string) string {
 
 func TestNewFileFolder(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.selectNodes("sub")
 	wt.do(func() { wt.node("sub").newFiles("n.txt", false) })
 	assert.Equal(t, "", wt.read("sub/n.txt"))
@@ -141,7 +145,7 @@ func TestNewFileFolder(t *testing.T) {
 
 func TestDuplicateFiles(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.selectNodes("a.go", "sub")
 	wt.do(func() { wt.node("a.go").duplicateFiles() })
 	assert.Equal(t, "package a\n", wt.read("a_Copy.go"))
@@ -154,7 +158,7 @@ func TestDuplicateFiles(t *testing.T) {
 // within it, which must not report an error for the file.
 func TestDeleteFiles(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.selectNodes("sub", "sub/b.go", "u.txt", "a.go")
 	wt.do(func() { wt.node("a.go").DeleteFilesNoPrompts() })
 	assert.NoDirExists(t, wt.path("sub"))
@@ -169,7 +173,7 @@ func TestDeleteFiles(t *testing.T) {
 
 func TestRenameDirVCS(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	require.NoError(t, wt.rename("sub", "pkg"))
 	assert.NoDirExists(t, wt.path("sub"))
 	assert.Equal(t, "package sub\n", wt.read("pkg/b.go"))
@@ -202,7 +206,7 @@ func TestRenameExisting(t *testing.T) {
 
 func TestDropMove(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.drop("sub", events.DropMove, "a.go")
 	assert.Equal(t, "package a\n", wt.read("sub/a.go"))
 	assert.NoFileExists(t, wt.path("a.go"))
@@ -212,7 +216,7 @@ func TestDropMove(t *testing.T) {
 
 func TestDropCopy(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.drop("sub", events.DropCopy, "a.go", "u.txt")
 	assert.Equal(t, "package a\n", wt.read("sub/a.go"))
 	assert.Equal(t, "untracked\n", wt.read("sub/u.txt"))
@@ -225,7 +229,7 @@ func TestDropCopy(t *testing.T) {
 // a move does nothing (it used to delete them), and a copy duplicates them.
 func TestDropInPlace(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.drop("sub", events.DropMove, "sub/b.go")
 	assert.Equal(t, "package sub\n", wt.read("sub/b.go"))
 	assert.NoFileExists(t, wt.path("sub/b_Copy.go"))
@@ -248,7 +252,7 @@ func TestDropInPlace(t *testing.T) {
 // without deleting it.
 func TestDropIntoItself(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.drop("sub", events.DropMove, "sub")
 	assert.Equal(t, "package sub\n", wt.read("sub/b.go"))
 	assert.NoDirExists(t, wt.path("sub/sub"))
@@ -259,7 +263,7 @@ func TestDropIntoItself(t *testing.T) {
 // which is moved with the directory.
 func TestDropNested(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	wt.do(func() { wt.ft.newFolder("dst") })
 	wt.waitFor("dst", func() bool { return wt.hasNode("dst") })
 	wt.drop("dst", events.DropMove, "sub", "sub/b.go")
@@ -273,7 +277,7 @@ func TestDropNested(t *testing.T) {
 // file go into its directory, and directories and file modes are copied.
 func TestDropExternal(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	other := t.TempDir()
 	x := filepath.Join(other, "x.sh")
 	require.NoError(t, os.WriteFile(x, []byte("#!/bin/sh\n"), 0o755))
@@ -302,7 +306,7 @@ func TestDropExternal(t *testing.T) {
 // another app, which has the data of [Node.MimeData] without a source.
 func TestDropOtherApp(t *testing.T) {
 	wt := newRenameTest(t)
-	el := logErrors(t)
+	el := wt.logErrors()
 	other := t.TempDir()
 	x := filepath.Join(other, "x.txt")
 	require.NoError(t, os.WriteFile(x, []byte("x\n"), 0o644))
