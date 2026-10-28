@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"syscall"
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
@@ -168,7 +167,7 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	root := fn.FileRoot()
 	var err error
 	orgpath := fn.Filepath
-	newpath, err = fn.Info.Rename(newpath)
+	newpath, err = fn.Info.RenamePath(newpath) // the rename is done below
 	if len(newpath) == 0 || err != nil {
 		return err
 	}
@@ -186,9 +185,6 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		err = repo.Move(string(orgpath), newpath)
 	} else {
 		err = os.Rename(string(orgpath), newpath)
-		if err != nil && errors.Is(err, syscall.ENOENT) { // some kind of bogus error it seems?
-			err = nil
-		}
 	}
 	if err == nil {
 		err = fn.Info.InitFile(newpath)

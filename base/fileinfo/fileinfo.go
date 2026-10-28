@@ -339,7 +339,9 @@ func (fi *FileInfo) Filenames(names *[]string) (err error) {
 	return err
 }
 
-// RenamePath returns the proposed path or the new full path.
+// RenamePath returns the new full path for renaming this file to the given
+// path, which is relative to the directory of the file if not absolute.
+// It returns "" if the path is the same as the current one.
 // Does not actually do the renaming -- see Rename method.
 func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	if path == "" {
@@ -347,16 +349,12 @@ func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 		log.Println(err)
 		return path, err
 	}
-	if path == fi.Path {
-		return "", nil
+	newpath = path
+	if !filepath.IsAbs(newpath) {
+		newpath = filepath.Join(filepath.Dir(fi.Path), newpath)
 	}
-	ndir, np := filepath.Split(path)
-	if ndir == "" {
-		if np == fi.Name {
-			return path, nil
-		}
-		dir, _ := filepath.Split(fi.Path)
-		newpath = filepath.Join(dir, np)
+	if newpath == filepath.Clean(fi.Path) {
+		return "", nil
 	}
 	return newpath, nil
 }
@@ -367,7 +365,7 @@ func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 func (fi *FileInfo) Rename(path string) (newpath string, err error) { //types:add
 	orgpath := fi.Path
 	newpath, err = fi.RenamePath(path)
-	if err != nil {
+	if err != nil || newpath == "" {
 		return
 	}
 	err = os.Rename(string(orgpath), newpath)
