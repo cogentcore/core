@@ -6,6 +6,7 @@ package textcore
 
 import (
 	"fmt"
+	"image"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
@@ -201,6 +202,24 @@ func (ed *Base) SetScrollParams(d math32.Dims, sb *core.Slider) {
 	if ed.visSize.Y > 0 {
 		sb.PageStep = float32(ed.visSize.Y) * ed.charSize.Y
 	}
+}
+
+// VisibleSize returns the number of characters per line (excluding
+// any line numbers) and the number of lines that are visible, as of the
+// last layout, for example to size a terminal.
+func (ed *Base) VisibleSize() image.Point {
+	return image.Point{ed.linesSize.X, ed.visSize.Y}
+}
+
+// CharSize returns the size of one character cell, in dots.
+func (ed *Base) CharSize() math32.Vector2 {
+	return ed.charSize
+}
+
+// IsScrolledToEnd returns whether the view is scrolled to show the last
+// lines of the text, as of the last layout.
+func (ed *Base) IsScrolledToEnd() bool {
+	return !ed.HasScroll[math32.Y] || ed.scrollPos >= float32(ed.linesSize.Y-ed.visSize.Y)-0.5
 }
 
 // ScrollPos returns the vertical scroll position, in lines of text.

@@ -179,6 +179,9 @@ func (run *Run) SetGlyphXAdvance(adv fixed.Int26_6) {
 		g.Advance = adv
 	}
 	run.Output.Advance = adv * fixed.Int26_6(len(run.Glyphs))
+	if !run.Direction.IsVertical() { // the background etc use the max bounds
+		run.MaxBounds.Max.X = math32.FromFixed(run.Output.Advance)
+	}
 }
 
 // RuneAtPoint returns the index of the rune in the source, which contains given point,

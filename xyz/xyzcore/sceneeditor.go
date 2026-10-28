@@ -203,7 +203,7 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 				SetTooltip("first click (or + Shift) saves current view, second click restores to saved state").
 				OnClick(func(e events.Event) {
 					cam := nm
-					if e.HasAllModifiers(e.Modifiers(), key.Shift) {
+					if e.HasAllModifiers(key.Shift) {
 						sc.SaveCamera(cam)
 					} else {
 						err := sc.SetCamera(cam)
