@@ -6,7 +6,6 @@ package filetree
 
 import (
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -31,12 +30,7 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
 	if int(fn.Info.Size) < core.SystemSettings.BigFileSize {
-		in, err := os.Open(path)
-		if err != nil {
-			slog.Error(err.Error())
-			return
-		}
-		b, err := io.ReadAll(in)
+		b, err := os.ReadFile(path) // closes the file, which Windows can't delete while open
 		if err != nil {
 			slog.Error(err.Error())
 			return
@@ -164,8 +158,9 @@ func (fn *Node) pasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 }
 
 // pasteCopyFiles copies files in given data into given target directory
-func (fn *Node) pasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool) {
+func (fn *Node) pasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool) error {
 	froot := fn.FileRoot()
+	var errs []error
 	nf := len(md)
 	if !externalDrop {
 		nf /= 3
@@ -191,7 +186,21 @@ func (fn *Node) pasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool)
 		}
 		path := string(d.Data)
 		path = strings.TrimPrefix(path, "file://")
-		tdir.copyFileToDir(path, mode)
+		errs = append(errs, tdir.copyFileToDir(path, mode))
+	}
+	return errors.Join(errs...)
+}
+
+// pasteDone reports any error from copying the files of a paste or drop,
+// and otherwise calls dropFinal if non-nil, which deletes the source
+// files of a move: these are kept if anything failed.
+func (fn *Node) pasteDone(err error, dropFinal func()) {
+	if err != nil {
+		core.ErrorSnackbar(fn, err, "Error copying file")
+		return
+	}
+	if dropFinal != nil {
+		dropFinal()
 	}
 }
 
@@ -200,10 +209,7 @@ func (fn *Node) pasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool)
 func (fn *Node) pasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop bool, dropFinal func()) {
 	existing, _ := fn.pasteCheckExisting(tdir, md, externalDrop)
 	if len(existing) == 0 {
-		fn.pasteCopyFiles(tdir, md, externalDrop)
-		if dropFinal != nil {
-			dropFinal()
-		}
+		fn.pasteDone(fn.pasteCopyFiles(tdir, md, externalDrop), dropFinal)
 		return
 	}
 	d := core.NewBody("File(s) Exist in Target Dir, Overwrite?")
@@ -211,10 +217,7 @@ func (fn *Node) pasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
-			fn.pasteCopyFiles(tdir, md, externalDrop)
-			if dropFinal != nil {
-				dropFinal()
-			}
+			fn.pasteDone(fn.pasteCopyFiles(tdir, md, externalDrop), dropFinal)
 		})
 	})
 	d.RunDialog(fn)
@@ -266,10 +269,7 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				textcore.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
-				fsx.CopyFile(tpath, srcpath, mode)
-				if dropFinal != nil {
-					dropFinal()
-				}
+				fn.pasteDone(fsx.CopyFile(tpath, srcpath, mode), dropFinal)
 			})
 		})
 		d.RunDialog(fn)
@@ -286,17 +286,11 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				textcore.DiffFiles(fn, npath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fsx.CopyFile(tpath, srcpath, mode)
-				if dropFinal != nil {
-					dropFinal()
-				}
+				fn.pasteDone(fsx.CopyFile(tpath, srcpath, mode), dropFinal)
 			})
 			d.AddOK(bar).SetText("Overwrite existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.Filepath), fname)
-				fsx.CopyFile(npath, srcpath, mode)
-				if dropFinal != nil {
-					dropFinal()
-				}
+				fn.pasteDone(fsx.CopyFile(npath, srcpath, mode), dropFinal)
 			})
 		})
 		d.RunDialog(fn)
@@ -309,16 +303,10 @@ func (fn *Node) pasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				textcore.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fsx.CopyFile(tpath, srcpath, mode)
-				if dropFinal != nil {
-					dropFinal()
-				}
+				fn.pasteDone(fsx.CopyFile(tpath, srcpath, mode), dropFinal)
 			})
 			d.AddOK(bar).SetText("Copy new file").OnClick(func(e events.Event) {
-				tdir.copyFileToDir(srcpath, mode)
-				if dropFinal != nil {
-					dropFinal()
-				}
+				fn.pasteDone(tdir.copyFileToDir(srcpath, mode), dropFinal)
 			})
 		})
 		d.RunDialog(fn)
@@ -336,6 +324,7 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	nf := len(md) / 3 // always internal
+	var errs []error
 	for i := 0; i < nf; i++ {
 		npath := string(md[i*3].Data)
 		sfni := froot.FindPath(npath)
@@ -348,6 +337,7 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 			continue
 		}
 		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.Path(), sfn.FPath)
-		sfn.DeleteFile()
+		errs = append(errs, sfn.DeleteFile())
 	}
+	core.ErrorSnackbar(froot, errors.Join(errs...), "Error moving file")
 }

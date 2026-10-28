@@ -80,18 +80,22 @@ func (fp *FilePicker) filesDrop(e events.Event) {
 	}
 	move := de.DropMod == events.DropMove
 	drop := func() {
+		var errs []error
 		for _, p := range paths {
 			tp := filepath.Join(fp.directory, filepath.Base(p))
 			if tp == p {
 				continue
 			}
+			var err error
 			if move {
-				errors.Log(os.Rename(p, tp))
+				err = movePath(tp, p)
 			} else {
-				errors.Log(copyPath(tp, p))
+				err = fsx.CopyPath(tp, p)
 			}
+			errs = append(errs, err)
 		}
 		fp.updateFilesEvent()
+		ErrorSnackbar(fp, errors.Join(errs...), "Error copying file")
 	}
 	if len(existing) == 0 {
 		drop()
@@ -108,15 +112,15 @@ func (fp *FilePicker) filesDrop(e events.Event) {
 	d.RunDialog(fp)
 }
 
-// copyPath copies the file or directory at src to dst,
-// overwriting an existing file.
-func copyPath(dst, src string) error {
-	info, err := os.Stat(src)
-	if err != nil {
+// movePath moves the file or directory at src to dst, overwriting an
+// existing file. If it can't be renamed, for example on another drive,
+// it is copied, and then deleted if the copy succeeds.
+func movePath(dst, src string) error {
+	if os.Rename(src, dst) == nil {
+		return nil
+	}
+	if err := fsx.CopyPath(dst, src); err != nil {
 		return err
 	}
-	if info.IsDir() {
-		return os.CopyFS(dst, os.DirFS(src))
-	}
-	return fsx.CopyFile(dst, src, info.Mode())
+	return os.RemoveAll(src)
 }

@@ -21,7 +21,7 @@ import (
 // If afterFunc is non-nil, then it is called with the status of the user action.
 func SaveAs(sc *core.Scene, lns *lines.Lines, filename string, afterFunc func(canceled bool)) {
 	if !errors.Log1(fsx.FileExists(filename)) {
-		lns.SaveFile(filename)
+		saveFile(sc, lns, filename)
 		if afterFunc != nil {
 			afterFunc(false)
 		}
@@ -35,7 +35,7 @@ func SaveAs(sc *core.Scene, lns *lines.Lines, filename string, afterFunc func(ca
 				}
 			})
 			d.AddOK(bar).OnClick(func(e events.Event) {
-				lns.SaveFile(filename)
+				saveFile(sc, lns, filename)
 				if afterFunc != nil {
 					afterFunc(false)
 				}
@@ -46,7 +46,8 @@ func SaveAs(sc *core.Scene, lns *lines.Lines, filename string, afterFunc func(ca
 }
 
 // Save saves the given Lines into the current filename associated with this buffer,
-// prompting if the file is changed on disk since the last save.
+// prompting if the file is changed on disk since the last save, in which case it
+// returns nil without saving, and the user's choice determines what happens.
 func Save(sc *core.Scene, lns *lines.Lines) error {
 	fname := lns.Filename()
 	if fname == "" {
@@ -72,12 +73,21 @@ func Save(sc *core.Scene, lns *lines.Lines) error {
 			})
 			core.NewButton(bar).SetText("Save file, overwriting").OnClick(func(e events.Event) {
 				d.Close()
-				lns.SaveFile(fname)
+				saveFile(sc, lns, fname)
 			})
 		})
 		d.RunDialog(sc)
+		return nil
 	}
-	return lns.SaveFile(fname)
+	return saveFile(sc, lns, fname)
+}
+
+// saveFile saves the given Lines into the given file,
+// reporting any error in a snackbar.
+func saveFile(sc *core.Scene, lns *lines.Lines, fname string) error {
+	err := lns.SaveFile(fname)
+	core.ErrorSnackbar(sc, err, "Error saving file")
+	return err
 }
 
 // Close closes the lines viewed by this editor, prompting to save if there are changes.
@@ -130,6 +140,12 @@ func Close(sc *core.Scene, lns *lines.Lines, afterFunc func(canceled bool)) bool
 		core.NewButton(bar).SetText("Save").OnClick(func(e events.Event) {
 			d.Close()
 			Save(sc, lns)
+			if lns.IsNotSaved() { // save failed or is waiting for a prompt
+				if afterFunc != nil {
+					afterFunc(true)
+				}
+				return
+			}
 			Close(sc, lns, afterFunc) // 2nd time through won't prompt
 		})
 	})

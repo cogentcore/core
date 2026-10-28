@@ -252,3 +252,37 @@ func CopyFile(dst, src string, perm os.FileMode) error {
 	}
 	return os.Rename(tmp.Name(), dst)
 }
+
+// CopyPath copies the file or directory at src to dst, overwriting
+// existing files. A directory is copied with all of its contents,
+// merged into dst if that exists.
+func CopyPath(dst, src string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() {
+		return CopyFile(dst, src, info.Mode())
+	}
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(dst, rel)
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		switch {
+		case d.IsDir():
+			return os.MkdirAll(target, info.Mode().Perm()|0700)
+		case info.Mode().IsRegular():
+			return CopyFile(target, path, info.Mode())
+		}
+		return nil // skip symlinks and special files
+	})
+}

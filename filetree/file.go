@@ -76,10 +76,13 @@ func (fn *Node) OpenFileDefault() error {
 
 // duplicateFiles makes a copy of selected files
 func (fn *Node) duplicateFiles() { //types:add
-	fn.FileRoot().NeedsLayout()
+	root := fn.FileRoot()
+	root.NeedsLayout()
+	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		sn.duplicateFile()
+		errs = append(errs, sn.duplicateFile())
 	})
+	core.ErrorSnackbar(root, errors.Join(errs...), "Error duplicating file")
 }
 
 // duplicateFile creates a copy of given file -- only works for regular files, not
@@ -97,7 +100,7 @@ func (fn *Node) duplicateFile() error {
 // all files and subdirectories in that directory are also deleted.
 func (fn *Node) DeleteFiles() { //types:add
 	d := core.NewBody("Delete Files?")
-	core.NewText(d).SetType(core.TextSupporting).SetText("OK to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
+	core.NewText(d).SetType(core.TextSupporting).SetText("OK to delete file(s)? They are moved to the trash / recycle bin where available, and otherwise permanently deleted. If any selections are directories, all files and subdirectories in them are also deleted.")
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Delete Files").OnClick(func(e events.Event) {
@@ -108,15 +111,15 @@ func (fn *Node) DeleteFiles() { //types:add
 }
 
 // DeleteFilesNoPrompts does the actual deletion, no prompts.
+// Errors are reported in a snackbar.
 func (fn *Node) DeleteFilesNoPrompts() {
-	fn.FileRoot().NeedsLayout()
+	root := fn.FileRoot()
+	root.NeedsLayout()
+	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		if !sn.Info.IsDir() {
-			sn.DeleteFile()
-			return
-		}
-		sn.DeleteFile()
+		errs = append(errs, sn.DeleteFile())
 	})
+	core.ErrorSnackbar(root, errors.Join(errs...), "Error deleting file")
 }
 
 // DeleteFile deletes this file
@@ -227,9 +230,12 @@ func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
 		ppath, _ = filepath.Split(ppath)
 	}
 	np := filepath.Join(ppath, filename)
-	_, err := os.Create(np)
+	f, err := os.Create(np)
+	if err == nil {
+		err = f.Close()
+	}
 	if err != nil {
-		core.ErrorSnackbar(fn, err)
+		core.ErrorSnackbar(fn, err, "Error creating file")
 		return
 	}
 	if addToVCS {
@@ -266,23 +272,31 @@ func (fn *Node) newFolder(foldername string) { //types:add
 	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		core.ErrorSnackbar(fn, err)
+		core.ErrorSnackbar(fn, err, "Error creating folder")
 		return
 	}
 	fn.FileRoot().UpdatePath(ppath)
 }
 
-// copyFileToDir copies given file path into node that is a directory.
+// copyFileToDir copies given file or directory path into node that is a directory.
 // This does NOT check for overwriting -- that must be done at higher level!
-func (fn *Node) copyFileToDir(filename string, perm os.FileMode) {
+func (fn *Node) copyFileToDir(filename string, perm os.FileMode) error {
 	if fn.isExternal() {
-		return
+		return nil
 	}
 	ppath := string(fn.Filepath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
-	fsx.CopyFile(tpath, filename, perm)
+	var err error
+	if isDir, _ := fsx.DirExists(filename); isDir {
+		err = fsx.CopyPath(tpath, filename)
+	} else {
+		err = fsx.CopyFile(tpath, filename, perm)
+	}
 	fn.FileRoot().UpdatePath(ppath)
+	if err != nil {
+		return err
+	}
 	ofn, ok := fn.FileRoot().FindFile(filename)
 	if ok && ofn.Info.VCS >= vcs.Stored {
 		nfn, ok := fn.FileRoot().FindFile(tpath)
@@ -295,6 +309,7 @@ func (fn *Node) copyFileToDir(filename string, perm os.FileMode) {
 			nfn.Update()
 		}
 	}
+	return nil
 }
 
 // Shows file information about selected file(s)

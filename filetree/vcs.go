@@ -126,10 +126,12 @@ func (fn *Node) AddToVCS() {
 		return
 	}
 	err := repo.Add(string(fn.Filepath))
-	if errors.Log(err) == nil {
-		fn.Info.VCS = vcs.Added
-		fn.Update()
+	if err != nil {
+		core.ErrorSnackbar(fn, err, "Error adding file to VCS")
+		return
 	}
+	fn.Info.VCS = vcs.Added
+	fn.Update()
 }
 
 // deleteFromVCSSelected removes selected files from version control system
@@ -147,10 +149,12 @@ func (fn *Node) deleteFromVCS() {
 	}
 	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
 	err := repo.DeleteRemote(string(fn.Filepath))
-	if fn != nil && errors.Log(err) == nil {
-		fn.Info.VCS = vcs.Deleted
-		fn.Update()
+	if err != nil {
+		core.ErrorSnackbar(fn, err, "Error deleting file from VCS")
+		return
 	}
+	fn.Info.VCS = vcs.Deleted
+	fn.Update()
 }
 
 // commitToVCSSelected commits to version control system based on last selected file
@@ -184,9 +188,11 @@ func (fn *Node) commitToVCS(message string) (err error) {
 
 // revertVCSSelected removes selected files from version control system
 func (fn *Node) revertVCSSelected() { //types:add
+	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		sn.revertVCS()
+		errs = append(errs, sn.revertVCS())
 	})
+	core.ErrorSnackbar(fn, errors.Join(errs...), "Error reverting file")
 }
 
 // revertVCS reverts file changes since last commit
@@ -220,9 +226,11 @@ func (fn *Node) revertVCS() (err error) {
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffEditorDialog.
 func (fn *Node) diffVCSSelected(rev_a string, rev_b string) { //types:add
+	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		sn.diffVCS(rev_a, rev_b)
+		errs = append(errs, sn.diffVCS(rev_a, rev_b))
 	})
+	core.ErrorSnackbar(fn, errors.Join(errs...), "Error showing VCS diffs")
 }
 
 // diffVCS shows the diffs between two versions of this file, given by the
@@ -244,9 +252,12 @@ func (fn *Node) diffVCS(rev_a, rev_b string) error {
 
 // logVCSSelected shows the VCS log of commits for selected files.
 func (fn *Node) logVCSSelected() { //types:add
+	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		sn.LogVCS(false, "")
+		_, err := sn.LogVCS(false, "")
+		errs = append(errs, err)
 	})
+	core.ErrorSnackbar(fn, errors.Join(errs...), "Error showing VCS log")
 }
 
 // LogVCS shows the VCS log of commits for this file, optionally with a
@@ -280,9 +291,12 @@ func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 // blameVCSSelected shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
 func (fn *Node) blameVCSSelected() { //types:add
+	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		sn.blameVCS()
+		_, err := sn.blameVCS()
+		errs = append(errs, err)
 	})
+	core.ErrorSnackbar(fn, errors.Join(errs...), "Error showing VCS blame")
 }
 
 // blameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
@@ -372,10 +386,7 @@ func (fn *Node) UpdateAllVCS() {
 		}
 		repo := sfn.DirRepo
 		fmt.Printf("Updating %v repository: %s from: %s\n", repo.Vcs(), sfn.RelativePath(), repo.Remote())
-		err := repo.Update()
-		if err != nil {
-			fmt.Printf("error: %v\n", err)
-		}
+		core.ErrorSnackbar(fn, repo.Update(), "Error updating VCS repository")
 		return tree.Break
 	})
 }

@@ -40,3 +40,27 @@ func TestSplitRootPathFS(t *testing.T) {
 		assert.Equal(t, ts.rest, rest)
 	}
 }
+
+func TestCopyPath(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+	assert.NoError(t, os.MkdirAll(filepath.Join(src, "sub"), 0755))
+	assert.NoError(t, os.WriteFile(filepath.Join(src, "a.txt"), []byte("new a"), 0644))
+	assert.NoError(t, os.WriteFile(filepath.Join(src, "sub", "b.txt"), []byte("b"), 0644))
+
+	// an existing directory is merged into, overwriting files
+	assert.NoError(t, os.WriteFile(filepath.Join(dst, "a.txt"), []byte("old a"), 0644))
+	assert.NoError(t, os.WriteFile(filepath.Join(dst, "keep.txt"), []byte("keep"), 0644))
+	assert.NoError(t, CopyPath(dst, src))
+	for f, want := range map[string]string{"a.txt": "new a", "sub/b.txt": "b", "keep.txt": "keep"} {
+		b, err := os.ReadFile(filepath.Join(dst, f))
+		assert.NoError(t, err)
+		assert.Equal(t, want, string(b))
+	}
+
+	// a single file
+	assert.NoError(t, CopyPath(filepath.Join(dst, "c.txt"), filepath.Join(src, "a.txt")))
+	b, err := os.ReadFile(filepath.Join(dst, "c.txt"))
+	assert.NoError(t, err)
+	assert.Equal(t, "new a", string(b))
+}
