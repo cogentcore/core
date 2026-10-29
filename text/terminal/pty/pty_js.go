@@ -8,12 +8,9 @@ package pty
 
 import (
 	"context"
-	"errors"
+	"os"
 	"os/exec"
 )
-
-// ErrUnsupported is returned on platforms without pseudo-terminals.
-var ErrUnsupported = errors.New("pty: pseudo-terminals are not supported on this platform")
 
 func start(cmd *exec.Cmd, cols, rows int) (pseudoTerminal, error) {
 	return nil, ErrUnsupported
@@ -21,4 +18,12 @@ func start(cmd *exec.Cmd, cols, rows int) (pseudoTerminal, error) {
 
 func wait(ctx context.Context, cmd *exec.Cmd) error {
 	return ErrUnsupported
+}
+
+func open(cols, rows int) (pseudoTerminal, *os.File, error) {
+	return nil, nil, ErrUnsupported
+}
+
+func signals(pt pseudoTerminal) bool {
+	return false
 }

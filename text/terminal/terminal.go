@@ -43,7 +43,9 @@ import (
 )
 
 // Terminal is a terminal widget that runs a program, typically a shell,
-// in a pseudo-terminal. It starts the program when it is first shown,
+// in a pseudo-terminal: a command, or a function of this process, such
+// as an interpreter of the app (see [Terminal.Func]). It starts the
+// program when it is first shown,
 // unless it has been started already with [Terminal.Start]. It has a
 // lines view of the scrollback and the screen, and a grid view of the
 // alternate screen used by full-screen programs, in a stack, with the
@@ -56,6 +58,15 @@ type Terminal struct {
 	// Command is the program to run, with its arguments.
 	// The default is the user's shell (see [pty.DefaultShell]).
 	Command []string
+
+	// Func, if set, is run instead of [Terminal.Command], in a goroutine
+	// of this process, such as an interpreter of the app, with the
+	// terminal device of the pseudo-terminal as its standard input and
+	// output (see [pty.Run]); the program ends when it returns. As it
+	// gets no signals, use [Terminal.OnInterrupt] and [Terminal.OnResize]
+	// to handle interrupts and changes in the size of the terminal.
+	// It is not supported on Windows.
+	Func func(tty *os.File) error `set:"-" display:"-"`
 
 	// Dir is the directory to start the program in.
 	// The default is the current directory.
@@ -127,6 +138,8 @@ type Terminal struct {
 	titleFuncs, dirFuncs []func(s string)
 	exitFuncs            []func(err error)
 	commandFuncs         []func(c *vt.Command)
+	interruptFuncs       []func()
+	resizeFuncs          []func(cols, rows int)
 
 	// numCommands is the number of commands reported to listeners.
 	numCommands int
@@ -244,14 +257,6 @@ func (tm *Terminal) Start() error {
 	if tm.IsRunning() {
 		return nil
 	}
-	args := tm.Command
-	if len(args) == 0 {
-		args = pty.DefaultShell()
-	}
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Dir = tm.Dir
-	cmd.Env = append(os.Environ(), "TERM=xterm-256color", "COLORTERM=truecolor", "TERM_PROGRAM=CogentCore")
-	cmd.Env = append(cmd.Env, tm.Env...)
 	cols, rows := 80, 24
 	if tm.size.X > 0 && tm.size.Y > 0 {
 		cols, rows = tm.size.X, tm.size.Y
@@ -259,10 +264,26 @@ func (tm *Terminal) Start() error {
 	tm.emulator.Lock()
 	tm.emulator.Resize(cols, rows)
 	tm.emulator.Unlock()
-	p, err := pty.Start(cmd, cols, rows)
+	var p *pty.Pty
+	var err error
+	name := "the program"
+	if tm.Func != nil {
+		p, err = pty.Run(tm.Func, cols, rows)
+	} else {
+		args := tm.Command
+		if len(args) == 0 {
+			args = pty.DefaultShell()
+		}
+		name = strings.Join(args, " ")
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = tm.Dir
+		cmd.Env = append(os.Environ(), "TERM=xterm-256color", "COLORTERM=truecolor", "TERM_PROGRAM=CogentCore")
+		cmd.Env = append(cmd.Env, tm.Env...)
+		p, err = pty.Start(cmd, cols, rows)
+	}
 	if err != nil {
 		tm.emulator.Lock()
-		tm.emulator.WriteString(fmt.Sprintf("\r\n[could not start %s: %v]\r\n", strings.Join(args, " "), err))
+		tm.emulator.WriteString(fmt.Sprintf("\r\n[could not start %s: %v]\r\n", name, err))
 		tm.emulator.Unlock()
 		tm.scheduleSync()
 		return err
@@ -285,7 +306,7 @@ func (tm *Terminal) Stop() {
 		return
 	}
 	tm.pty.Close()
-	if tm.pty.Cmd.Process != nil && runtime.GOOS != "windows" {
+	if tm.pty.Cmd != nil && tm.pty.Cmd.Process != nil && runtime.GOOS != "windows" {
 		go func(p *os.Process) {
 			time.Sleep(time.Second)
 			p.Kill() // in case it ignores the hangup
@@ -367,6 +388,13 @@ func (tm *Terminal) send(b []byte, user bool) {
 	}
 	if iq := tm.input.Load(); iq != nil {
 		iq.send(b)
+	}
+	if user && tm.Func != nil && len(tm.interruptFuncs) > 0 && slices.Contains(b, 0x03) {
+		if p := tm.pty; p != nil && tm.IsRunning() && p.Signals() {
+			for _, fun := range tm.interruptFuncs {
+				fun()
+			}
+		}
 	}
 }
 
@@ -498,6 +526,22 @@ func (tm *Terminal) OnCommand(fun func(c *vt.Command)) {
 	tm.commandFuncs = append(tm.commandFuncs, fun)
 }
 
+// OnInterrupt adds a function to call when the user types the interrupt
+// character (Control+C) while the program does not read raw input, for
+// a program run with [Terminal.Func], which does not get the interrupt
+// signal that a command gets then.
+func (tm *Terminal) OnInterrupt(fun func()) {
+	tm.interruptFuncs = append(tm.interruptFuncs, fun)
+}
+
+// OnResize adds a function to call when the size of the terminal changes
+// while the program runs, with the new number of columns and rows. A
+// program run with [Terminal.Func] needs this, as it does not get the
+// window size signal that a command gets.
+func (tm *Terminal) OnResize(fun func(cols, rows int)) {
+	tm.resizeFuncs = append(tm.resizeFuncs, fun)
+}
+
 // modes returns the current terminal modes.
 func (tm *Terminal) modes() vt.Modes {
 	tm.emulator.Lock()
@@ -533,6 +577,9 @@ func (tm *Terminal) viewSized(sz image.Point) {
 	tm.emulator.Unlock()
 	if tm.IsRunning() {
 		tm.pty.Resize(sz.X, sz.Y)
+		for _, fun := range tm.resizeFuncs {
+			fun(sz.X, sz.Y)
+		}
 	}
 	tm.sync()
 }

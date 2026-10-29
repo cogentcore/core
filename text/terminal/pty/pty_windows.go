@@ -8,6 +8,7 @@ package pty
 
 import (
 	"context"
+	"os"
 	"os/exec"
 
 	"github.com/charmbracelet/x/xpty"
@@ -27,4 +28,13 @@ func start(cmd *exec.Cmd, cols, rows int) (pseudoTerminal, error) {
 
 func wait(ctx context.Context, cmd *exec.Cmd) error {
 	return xpty.WaitProcess(ctx, cmd)
+}
+
+// open is not supported: ConPTY has no terminal device for the program.
+func open(cols, rows int) (pseudoTerminal, *os.File, error) {
+	return nil, nil, ErrUnsupported
+}
+
+func signals(pt pseudoTerminal) bool {
+	return false
 }

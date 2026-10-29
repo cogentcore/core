@@ -62,10 +62,10 @@ func (vw *View) Init() {
 		s.SetAbilities(true, abilities.Focusable)
 		s.Cursor = cursors.Text
 		s.Text.LineHeight = 1 // the backgrounds of lines touch
-		s.Border.Radius.Zero()
+		s.Border.Radius = styles.BorderRadiusLarge // as in the editor
 		s.Border.Width.Zero()
-		s.MaxBorder.Width.Zero()
-		s.Padding.Set(units.Dp(4))
+		s.MaxBorder.Width.Set(units.Dp(2)) // the focus border, as in the editor
+		s.Padding.Set(units.Em(0.5)) // room for the radius, as in the editor
 		s.Background = colors.Scheme.Surface
 		s.Grow.Set(1, 1)
 		s.Min.X.Ch(20)

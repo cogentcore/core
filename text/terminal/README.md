@@ -9,19 +9,26 @@ tm.OnDir(func(dir string) { ... }) // with shell integration
 tm.Cd(filepath.Dir(filename))
 ```
 
+The program can also be a function of the app, such as an interpreter, which runs in the app with the terminal device of the pseudo-terminal as its standard input and output (`Func`, not on Windows): it can then work with the data of the app directly, while it gets a real terminal, as do the commands it runs. As there is no process for the terminal to signal, `OnInterrupt` is called for Control+C when the program is not reading raw input, and `OnResize` when the size changes.
+
+```go
+tm.Func = func(tty *os.File) error { ... } // reads and writes tty
+tm.OnInterrupt(func() { ... }) // interrupt what it is doing
+```
+
 ## Design
 
 There are three parts, each in its own package:
 
 * [vt](vt) has the terminal emulator, `vt.Emulator`, with the terminal state: a grid of character cells for the primary and alternate screens, the cursor, the modes set by the program, and so on, updated from the output of the program, which is parsed with [x/ansi](https://github.com/charmbracelet/x/tree/main/ansi). It has no GUI, and is tested directly with the control sequences. Lines that scroll off the top of the primary screen are taken by the widget for its scrollback.
 
-* [pty](pty) runs the program in a pseudo-terminal: [creack/pty](https://github.com/creack/pty) on Unix, and Windows ConPTY through [x/xpty](https://github.com/charmbracelet/x/tree/main/xpty).
+* [pty](pty) runs the program in a pseudo-terminal, a command or a function of the app (`pty.Run`): [creack/pty](https://github.com/creack/pty) on Unix, and Windows ConPTY through [x/xpty](https://github.com/charmbracelet/x/tree/main/xpty).
 
 * The `terminal` package has the widget, which is a `Stack` of two `View`s, which are read-only `textcore.Editor`s:
     * The lines view shows the scrollback and the primary screen as `lines.Lines` text, where each line is a logical line of output: the screen lines that the terminal wrapped (soft wraps) are joined, so the text is wrapped to the view width by `lines`, and rewrapped when the view is resized. The terminal size is set from this view, and its last lines are the screen. The text can be selected and copied, and scrolled back, as in an editor.
     * The grid view shows the alternate screen used by full-screen programs (editors, pagers, etc), with one line per screen row. It is on top while the program uses the alternate screen.
 
-Each cell is one character in the `lines.Lines` text, with a zero width space after a wide character, so the columns stay aligned and the cursor position maps directly. The cell styles are converted to `rich.Text` markup (with 16 color palettes for light and dark color schemes, and 256 and 24-bit colors). The terminal cursor is shown as a highlight.
+Each cell is one character in the `lines.Lines` text, with a zero width space after a wide character, so the columns stay aligned and the cursor position maps directly. The cell styles are converted to `rich.Text` markup (with 16 color palettes for light and dark color schemes, and 256 and 24-bit colors). The terminal cursor is shown as a cell background, in the primary color when the terminal has the focus.
 
 Keys are sent to the program, encoded as xterm does, including all of the Control keys, which programs use. The `keymap` bindings of the GUI are reached as in other terminals: chords with Meta (Command on macOS) are never sent to the program, and on other platforms, where the bindings use Control for Command, a binding of Control with a letter is reached with Control+Shift and the letter, which sends the same control character (see `KeyFunction` and `ShortcutChord`, which apps can use for their own terminal shortcuts). The terminal uses `keymap.Copy`, `Paste`, and `Kill` (which clears the scrollback), and the Copy key copies when there is a selection even if it otherwise goes to the program (Control+C). Shift with PageUp, PageDown, Home and End scroll the lines view. These are also in the context menu of the views, which shows the context menus added to the `Terminal` first. Mouse events are reported to full-screen programs that ask for them (Shift selects text instead), and the mouse wheel sends cursor keys to those that do not.
 
