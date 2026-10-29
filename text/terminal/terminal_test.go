@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/terminal/vt"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -338,7 +339,7 @@ func TestTerminalContextMenu(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	assert.Equal(t, []string{"App item", "-", "Copy", "Paste", "Clear scrollback"}, items)
+	assert.Equal(t, []string{"App item", "-", "Copy", "Select all", "Paste", "Clear scrollback"}, items)
 }
 
 // TestTerminalKillKey tests that the key of [keymap.Kill] in a terminal
@@ -456,4 +457,39 @@ func TestTerminalFunc(t *testing.T) {
 	waitFor(t, b, "the restart", func() bool {
 		return tm.IsRunning() && strings.HasSuffix(linesText(tm), "restart)\nready")
 	})
+}
+
+// TestTerminalSelectAll tests that select all selects up to the end of the
+// output, not the blank lines of the screen below it, and that the copied
+// text has no spaces at the ends of lines or blank lines at the end.
+func TestTerminalSelectAll(t *testing.T) {
+	b, tm := testTerminal(t)
+	b.AsyncLock()
+	tm.Run("echo hello")
+	b.AsyncUnlock()
+	waitFor(t, b, "the output", func() bool {
+		return strings.HasSuffix(linesText(tm), "hello\n$")
+	})
+	b.AsyncLock()
+	tm.SetFocus()
+	b.AsyncUnlock()
+	// after the window, which sets the key map of the platform
+	withPlatform("MacOS", "MacStandard", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		src.Key(events.KeyDown, 'a', key.CodeA, mods(key.Meta))
+		src.KeyChord('a', key.CodeA, mods(key.Meta))
+		src.Key(events.KeyUp, 'a', key.CodeA, mods(key.Meta))
+		waitFor(t, b, "the selection", func() bool { return tm.linesView.HasSelection() })
+	})
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	lv := tm.linesView
+	assert.Equal(t, textpos.Pos{}, lv.SelectRegion.Start)
+	assert.Equal(t, textpos.Pos{Line: 2, Char: 1}, lv.SelectRegion.End, "the end of the prompt")
+	assert.Greater(t, lv.Lines.NumLines(), 3, "blank lines of the screen")
+	assert.Equal(t, "$ echo hello\nhello\n$", lv.selectedText())
+
+	// any selection is copied without the padding
+	lv.SelectRegion.End = lv.Lines.EndPos()
+	assert.Equal(t, "$ echo hello\nhello\n$", lv.selectedText())
 }
