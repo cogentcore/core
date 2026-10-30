@@ -19,6 +19,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/pkg/sftp"
@@ -42,6 +44,67 @@ type Server struct {
 	KeyPath string
 
 	listener net.Listener
+
+	// down is whether the network is down (see [Server.NetworkDown]).
+	down atomic.Bool
+
+	// conns are the connections to the server.
+	conns   []*conn
+	connsMu sync.Mutex
+}
+
+// conn is a connection to the server, which drops all of the data that
+// it reads and writes once it is dead, as a connection does when the
+// network is lost, without it being closed.
+type conn struct {
+	net.Conn
+	dead atomic.Bool
+}
+
+func (c *conn) Read(b []byte) (int, error) {
+	for {
+		n, err := c.Conn.Read(b)
+		if err != nil || !c.dead.Load() {
+			return n, err
+		}
+	}
+}
+
+func (c *conn) Write(b []byte) (int, error) {
+	if c.dead.Load() {
+		return len(b), nil
+	}
+	return c.Conn.Write(b)
+}
+
+// NetworkDown simulates the loss of the network between the clients and
+// the server, as when a laptop sleeps or changes networks: the existing
+// connections drop all data from then on, without being closed, so a
+// client gets no replies, and new connections are closed right away,
+// until [Server.NetworkUp].
+func (s *Server) NetworkDown() {
+	s.down.Store(true)
+	s.connsMu.Lock()
+	defer s.connsMu.Unlock()
+	for _, c := range s.conns {
+		c.dead.Store(true)
+	}
+}
+
+// NetworkUp ends [Server.NetworkDown], such that new connections work.
+// The connections from before stay dead, as in a network.
+func (s *Server) NetworkUp() {
+	s.down.Store(false)
+}
+
+// closeConns closes all of the connections.
+func (s *Server) closeConns() {
+	s.connsMu.Lock()
+	defer s.connsMu.Unlock()
+	for _, c := range s.conns {
+		c.Conn.Close()
+	}
+	s.conns = nil
 }
 
 // NewServer starts a new SSH server for the test, which it stops at the
@@ -82,7 +145,10 @@ func NewServer(t testing.TB) *Server {
 	check(t, os.WriteFile(filepath.Join(s.KeyPath, "known_hosts"), []byte(line+"\n"), 0600))
 
 	go s.serve(config)
-	t.Cleanup(func() { s.listener.Close() })
+	t.Cleanup(func() {
+		s.listener.Close()
+		s.closeConns()
+	})
 	return s
 }
 
@@ -96,23 +162,31 @@ func check(t testing.TB, err error) {
 // serve accepts the connections to the server.
 func (s *Server) serve(config *ssh.ServerConfig) {
 	for {
-		conn, err := s.listener.Accept()
+		nc, err := s.listener.Accept()
 		if err != nil {
 			return
 		}
+		if s.down.Load() {
+			nc.Close()
+			continue
+		}
+		c := &conn{Conn: nc}
+		s.connsMu.Lock()
+		s.conns = append(s.conns, c)
+		s.connsMu.Unlock()
 		go func() {
-			_, chans, reqs, err := ssh.NewServerConn(conn, config)
+			_, chans, reqs, err := ssh.NewServerConn(c, config)
 			if err != nil {
-				conn.Close()
+				c.Close()
 				return
 			}
 			go ssh.DiscardRequests(reqs)
-			for nc := range chans {
-				if nc.ChannelType() != "session" {
-					nc.Reject(ssh.UnknownChannelType, "only sessions are supported")
+			for newCh := range chans {
+				if newCh.ChannelType() != "session" {
+					newCh.Reject(ssh.UnknownChannelType, "only sessions are supported")
 					continue
 				}
-				ch, reqs, err := nc.Accept()
+				ch, reqs, err := newCh.Accept()
 				if err != nil {
 					continue
 				}

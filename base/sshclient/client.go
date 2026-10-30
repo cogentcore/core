@@ -14,6 +14,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
@@ -21,10 +23,17 @@ import (
 
 // Client represents a persistent connection to an ssh host.
 // Commands are run by creating [ssh.Session]s from this client.
+//
+// The connection is checked with a keepalive request every [Config.KeepAlive],
+// and closed if the host does not reply within [Config.Timeout], as happens
+// when the network is lost, so that commands waiting on it fail instead of
+// hanging. A lost connection is made again the next time it is used
+// (see [Client.CheckConnection]), as when the network comes back.
 type Client struct {
 	Config
 
-	// ssh client is present (non-nil) after a successful Connect
+	// ssh client is present (non-nil) after a successful Connect,
+	// and nil while the connection is lost.
 	Client *ssh.Client
 
 	// keeps track of sessions that are being waited upon
@@ -36,6 +45,20 @@ type Client struct {
 
 	// sftpClient copies files, made when first needed (see [Client.SFTP]).
 	sftpClient sftpConn
+
+	// addr and sshConfig are those of the connection, for reconnecting.
+	addr      string
+	sshConfig *ssh.ClientConfig
+
+	// lost is closed when the connection is lost.
+	lost chan struct{}
+
+	// lastDial is the time of the last attempt to reconnect, which is
+	// only tried again after [Config.Timeout].
+	lastDial time.Time
+
+	// mu protects the connection while it is checked and made again.
+	mu sync.Mutex
 }
 
 // NewClient returns a new Client using given [Config] configuration
@@ -46,15 +69,24 @@ func NewClient(cfg *Config) *Client {
 }
 
 // Close terminates any open Sessions and then closes
-// the Client connection.
+// the Client connection, which is not made again.
 func (cl *Client) Close() {
+	cl.mu.Lock()
+	defer cl.mu.Unlock()
+	cl.closeConnection()
+	cl.addr = ""
+}
+
+// closeConnection closes the sessions, SFTP and ssh client of the
+// connection.
+func (cl *Client) closeConnection() {
 	cl.CloseSessions()
-	if cl.Client != nil {
-		cl.Client.Close()
-	}
 	if cl.sftpClient != nil {
 		cl.sftpClient.Close()
 		cl.sftpClient = nil
+	}
+	if cl.Client != nil {
+		cl.Client.Close()
 	}
 	cl.Client = nil
 }
@@ -139,25 +171,133 @@ func (cl *Client) Connect(host string) error {
 	if _, _, err := net.SplitHostPort(host); err != nil {
 		addr = net.JoinHostPort(host, "22")
 	}
-	client, err := ssh.Dial("tcp", addr, config)
+	cl.mu.Lock()
+	cl.closeConnection()
+	cl.addr, cl.sshConfig = addr, config
+	err = cl.dial()
+	cl.mu.Unlock()
 	if err != nil {
-		err = fmt.Errorf("ssh: unable to connect to %s as user %s: %v", host, cl.User, err)
 		return err
 	}
-
-	cl.Sessions = make(map[string]*ssh.Session)
-	cl.Client = client
 	cl.GetHomeDir()
 	return nil
 }
 
-// NewSession creates a new session, sets its input / outputs based on
-// config.  Only works if Client already connected.
-func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
-	if cl.Client == nil {
+// dial makes the connection to the host, with the [Config.Timeout] for
+// the connection and the SSH handshake, and starts the keepalive requests.
+func (cl *Client) dial() error {
+	cl.lastDial = time.Now()
+	conn, err := net.DialTimeout("tcp", cl.addr, cl.Timeout)
+	if err != nil {
+		return fmt.Errorf("ssh: unable to connect to %s as user %s: %v", cl.Host, cl.User.User, err)
+	}
+	if cl.Timeout > 0 {
+		conn.SetDeadline(time.Now().Add(cl.Timeout))
+	}
+	c, chans, reqs, err := ssh.NewClientConn(conn, cl.addr, cl.sshConfig)
+	if err != nil {
+		conn.Close()
+		return fmt.Errorf("ssh: unable to connect to %s as user %s: %v", cl.Host, cl.User.User, err)
+	}
+	conn.SetDeadline(time.Time{})
+	client := ssh.NewClient(c, chans, reqs)
+	cl.Sessions = make(map[string]*ssh.Session)
+	cl.Client = client
+	lost := make(chan struct{})
+	cl.lost = lost
+	var once sync.Once
+	setLost := func() { once.Do(func() { close(lost) }) }
+	go func() {
+		client.Wait()
+		setLost()
+	}()
+	if cl.KeepAlive > 0 {
+		go cl.keepAlive(client, lost, setLost)
+	}
+	return nil
+}
+
+// keepAlive sends keepalive requests on the given connection every
+// [Config.KeepAlive] until it is lost, and closes it when the host does
+// not reply within [Config.Timeout], calling setLost first, so that the
+// connection is known to be lost when what is waiting on it fails.
+func (cl *Client) keepAlive(client *ssh.Client, lost chan struct{}, setLost func()) {
+	tick := time.NewTicker(cl.KeepAlive)
+	defer tick.Stop()
+	for {
+		select {
+		case <-lost:
+			return
+		case <-tick.C:
+		}
+		reply := make(chan error, 1)
+		go func() {
+			// a host that does not know the request replies false, which is fine
+			_, _, err := client.SendRequest("keepalive@openssh.com", true, nil)
+			reply <- err
+		}()
+		timeout := time.NewTimer(cl.Timeout)
+		select {
+		case err := <-reply:
+			timeout.Stop()
+			if err == nil {
+				continue
+			}
+		case <-timeout.C:
+			slog.Error("ssh: lost connection: no reply from host", "host", cl.Host)
+		}
+		setLost()
+		client.Close() // also ends what is waiting on it
+		return
+	}
+}
+
+// CheckConnection returns nil if the client is connected, and otherwise
+// tries to connect again if the connection was lost, as when the network
+// was lost, returning an error if that fails. It only tries again after
+// the [Config.Timeout] since the last try, returning an error until then,
+// so that commands fail fast while the host cannot be reached.
+// It returns an error if the client was never connected, or was closed.
+func (cl *Client) CheckConnection() error {
+	_, err := cl.sshClient()
+	return err
+}
+
+// sshClient returns the ssh client of the connection, connecting again
+// if it was lost (see [Client.CheckConnection]).
+func (cl *Client) sshClient() (*ssh.Client, error) {
+	cl.mu.Lock()
+	defer cl.mu.Unlock()
+	if cl.Client != nil {
+		select {
+		case <-cl.lost:
+			cl.closeConnection()
+		default:
+			return cl.Client, nil
+		}
+	}
+	if cl.addr == "" {
 		return nil, errors.New("ssh: no client, must Connect first")
 	}
-	ses, err := cl.Client.NewSession()
+	if time.Since(cl.lastDial) < cl.Timeout {
+		return nil, fmt.Errorf("ssh: not connected to %s: the connection was lost", cl.Host)
+	}
+	if err := cl.dial(); err != nil {
+		return nil, err
+	}
+	slog.Info("ssh: connected again", "host", cl.Host)
+	return cl.Client, nil
+}
+
+// NewSession creates a new session, sets its input / outputs based on
+// config.  Only works if Client already connected, and connects again
+// if the connection was lost (see [Client.CheckConnection]).
+func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
+	client, err := cl.sshClient()
+	if err != nil {
+		return nil, err
+	}
+	ses, err := client.NewSession()
 	if err != nil {
 		return nil, err
 	}
