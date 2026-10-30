@@ -123,6 +123,7 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, tty *os.File, star
 		}
 		cmds = `cd '` + cl.Dir + `'; ` + cmds
 	}
+	cmds = cl.exports + cmds
 
 	if !cl.PrintOnly {
 		switch {

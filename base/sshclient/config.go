@@ -61,12 +61,19 @@ type Config struct {
 	// Timeout is the time to wait for the connection to the host, and for
 	// the replies to keepalive requests. 0 is no limit.
 	Timeout time.Duration
+
+	// LoginEnv is whether the commands get the environment variables of an
+	// interactive login shell of the user on the host, such as PATH, which
+	// it gets once when it connects. The commands are otherwise run by a
+	// shell that is not interactive, for which a standard ~/.bashrc returns
+	// before it sets them.
+	LoginEnv bool
 }
 
 // NewConfig returns a new ssh Config based on given
 // [exec.Config] parameters.
 func NewConfig(cfg *exec.Config) *Config {
-	c := &Config{Config: *cfg, KeepAlive: 15 * time.Second, Timeout: 15 * time.Second}
+	c := &Config{Config: *cfg, KeepAlive: 15 * time.Second, Timeout: 15 * time.Second, LoginEnv: true}
 	c.User.Defaults()
 	c.Dir = "" // start empty until we get homedir
 	return c

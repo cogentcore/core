@@ -44,6 +44,10 @@ type Client struct {
 	// over the lifetime of the Client.
 	sessionCounter int
 
+	// exports is the shell code that sets the variables of the login
+	// environment of the user for each command (see [Config.LoginEnv]).
+	exports string
+
 	// sftpClient copies files, made when first needed (see [Client.SFTP]).
 	sftpClient sftpConn
 
@@ -181,6 +185,9 @@ func (cl *Client) Connect(host string) error {
 		return err
 	}
 	cl.GetHomeDir()
+	if cl.LoginEnv {
+		cl.getLoginEnv()
+	}
 	return nil
 }
 
