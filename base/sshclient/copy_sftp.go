@@ -8,7 +8,6 @@ package sshclient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -111,13 +110,16 @@ func (r *remoteFS) abs(p string) string {
 // SFTP returns the SFTP client of the connection to the host, which is
 // made when first needed, for copying files to and from the host.
 func (cl *Client) SFTP() (*sftp.Client, error) {
+	client, err := cl.sshClient() // which drops the SFTP client of a lost connection
+	if err != nil {
+		return nil, err
+	}
+	cl.mu.Lock()
+	defer cl.mu.Unlock()
 	if cl.sftpClient != nil {
 		return cl.sftpClient, nil
 	}
-	if cl.Client == nil {
-		return nil, errors.New("ssh: not connected")
-	}
-	sc, err := sftp.NewClient(cl.Client, sftp.UseConcurrentReads(true), sftp.UseConcurrentWrites(true))
+	sc, err := sftp.NewClient(client, sftp.UseConcurrentReads(true), sftp.UseConcurrentWrites(true))
 	if err != nil {
 		return nil, fmt.Errorf("ssh: starting SFTP on %s: %w", cl.Host, err)
 	}

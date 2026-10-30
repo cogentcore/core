@@ -61,11 +61,11 @@ func (vw *View) Init() {
 	vw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
 		s.Cursor = cursors.Text
-		s.Text.LineHeight = 1 // the backgrounds of lines touch
-		s.Border.Radius.Zero()
+		s.Text.LineHeight = 1                      // the backgrounds of lines touch
+		s.Border.Radius = styles.BorderRadiusLarge // as in the editor
 		s.Border.Width.Zero()
-		s.MaxBorder.Width.Zero()
-		s.Padding.Set(units.Dp(4))
+		s.MaxBorder.Width.Set(units.Dp(2)) // the focus border, as in the editor
+		s.Padding.Set(units.Em(0.5))       // room for the radius, as in the editor
 		s.Background = colors.Scheme.Surface
 		s.Grow.Set(1, 1)
 		s.Min.X.Ch(20)
@@ -111,6 +111,11 @@ func (vw *View) contextMenu(m *core.Scene, pos image.Point) {
 		SetShortcut(ShortcutChord(keymap.Copy)).SetState(!vw.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			vw.copy()
+		})
+	core.NewButton(m).SetText("Select all").SetIcon(icons.SelectAll).
+		SetShortcut(ShortcutChord(keymap.SelectAll)).
+		OnClick(func(e events.Event) {
+			vw.selectAll()
 		})
 	core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
 		SetShortcut(ShortcutChord(keymap.Paste)).SetState(vw.Clipboard().IsEmpty(), states.Disabled).
@@ -172,6 +177,9 @@ func (vw *View) shortcut(e events.Event) bool {
 	case keymap.Copy:
 		vw.copy()
 		return true
+	case keymap.SelectAll:
+		vw.selectAll()
+		return true
 	case keymap.Paste:
 		tm.PasteClipboard()
 		return true
@@ -207,14 +215,47 @@ func (vw *View) shortcut(e events.Event) bool {
 	return true
 }
 
-// copy copies the selected text to the clipboard.
-func (vw *View) copy() {
-	tbe := vw.Selection()
-	if tbe == nil {
+// selectAll selects all of the text, up to the end of the last line that
+// is not blank, leaving out the blank lines of the screen below the output.
+func (vw *View) selectAll() {
+	ln := vw.Lines
+	if ln == nil {
 		return
 	}
+	end := textpos.Pos{}
+	for i := ln.NumLines() - 1; i >= 0; i-- {
+		if n := len([]rune(strings.TrimRight(string(ln.Line(i)), " "))); n > 0 {
+			end = textpos.Pos{Line: i, Char: n}
+			break
+		}
+	}
+	vw.SelectRegion.Start = textpos.PosZero
+	vw.SelectRegion.End = end
+	vw.NeedsRender()
+}
+
+// copy copies the selected text to the clipboard (see [View.selectedText]).
+func (vw *View) copy() {
+	if !vw.HasSelection() {
+		return
+	}
+	vw.Clipboard().Write(mimedata.NewText(vw.selectedText()))
+}
+
+// selectedText returns the selected text, without the spaces at the ends
+// of lines, which fill the lines of the terminal, and the blank lines at
+// the end.
+func (vw *View) selectedText() string {
+	tbe := vw.Selection()
+	if tbe == nil {
+		return ""
+	}
 	s := strings.ReplaceAll(string(tbe.ToBytes()), string(wideFiller), "")
-	vw.Clipboard().Write(mimedata.NewText(s))
+	lines := strings.Split(s, "\n")
+	for i, l := range lines {
+		lines[i] = strings.TrimRight(l, " ")
+	}
+	return strings.TrimRight(strings.Join(lines, "\n"), "\n")
 }
 
 // mouseReporting returns whether mouse events are reported to the

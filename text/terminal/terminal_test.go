@@ -5,6 +5,9 @@
 package terminal
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
 	"image"
 	"os"
 	"path/filepath"
@@ -21,9 +24,11 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/terminal/vt"
+	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/term"
 )
 
 // testShell is the shell of the test terminals, which is dash on Debian
@@ -334,7 +339,7 @@ func TestTerminalContextMenu(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	assert.Equal(t, []string{"App item", "-", "Copy", "Paste", "Clear scrollback"}, items)
+	assert.Equal(t, []string{"App item", "-", "Copy", "Select all", "Paste", "Clear scrollback"}, items)
 }
 
 // TestTerminalKillKey tests that the key of [keymap.Kill] in a terminal
@@ -357,4 +362,134 @@ func TestTerminalKillKey(t *testing.T) {
 	waitFor(t, b, "the scrollback to be cleared", func() bool {
 		return linesText(tm) == "$"
 	})
+}
+
+// TestTerminalFunc tests a program that is a function of this process,
+// with interrupts and size changes, which it gets as callbacks.
+func TestTerminalFunc(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("not supported")
+	}
+	b := core.NewBody()
+	tm := NewTerminal(b)
+	lastTerminal = tm
+	tm.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Ch(40), units.Em(10))
+	})
+	tm.Func = func(tty *os.File) error {
+		fd := int(tty.Fd())
+		fmt.Fprintln(tty, "ready")
+		rd := bufio.NewReader(tty)
+		for {
+			ln, err := rd.ReadString('\n')
+			if err != nil {
+				return err
+			}
+			switch ln = strings.TrimSpace(ln); ln {
+			case "quit":
+				return errors.New("quit")
+			case "raw":
+				st, err := term.MakeRaw(fd)
+				if err != nil {
+					return err
+				}
+				fmt.Fprint(tty, "raw\r\n")
+				c, _ := rd.ReadByte()
+				term.Restore(fd, st)
+				fmt.Fprintf(tty, "byte %d\n", c)
+			case "size":
+				w, h, _ := term.GetSize(fd)
+				fmt.Fprintf(tty, "size %d %d\n", w, h)
+			default:
+				fmt.Fprintf(tty, "got %s\n", ln)
+			}
+		}
+	}
+	interrupts := 0
+	tm.OnInterrupt(func() { interrupts++ })
+	var resized image.Point
+	tm.OnResize(func(cols, rows int) { resized = image.Pt(cols, rows) })
+	showed := make(chan struct{})
+	b.OnFinal(events.Show, func(e events.Event) { showed <- struct{}{} })
+	b.RunWindow()
+	<-showed
+	defer func() {
+		b.AsyncLock()
+		b.Close()
+		b.AsyncUnlock()
+	}()
+	waitFor(t, b, "the start", func() bool { return hasOutputLine(tm, "ready") })
+
+	b.AsyncLock()
+	tm.Run("hello")
+	b.AsyncUnlock()
+	waitFor(t, b, "the line", func() bool { return hasOutputLine(tm, "got hello") })
+
+	// Control+C is an interrupt, unless the program reads raw input
+	b.AsyncLock()
+	tm.SendText("\x03")
+	assert.Equal(t, 1, interrupts)
+	tm.Run("raw")
+	b.AsyncUnlock()
+	waitFor(t, b, "raw input", func() bool { return hasOutputLine(tm, "raw") })
+	b.AsyncLock()
+	tm.SendText("\x03")
+	assert.Equal(t, 1, interrupts)
+	b.AsyncUnlock()
+	waitFor(t, b, "the raw byte", func() bool { return hasOutputLine(tm, "byte 3") })
+
+	b.AsyncLock()
+	tm.viewSized(image.Pt(50, 12))
+	assert.Equal(t, image.Pt(50, 12), resized)
+	tm.Run("size")
+	b.AsyncUnlock()
+	waitFor(t, b, "the size", func() bool { return hasOutputLine(tm, "size 50 12") })
+
+	b.AsyncLock()
+	tm.Run("quit")
+	b.AsyncUnlock()
+	waitFor(t, b, "the exit", func() bool {
+		return !tm.IsRunning() && strings.Contains(linesText(tm), "[process exited: quit]")
+	})
+	b.AsyncLock()
+	assert.True(t, tm.restartOnKey())
+	b.AsyncUnlock()
+	waitFor(t, b, "the restart", func() bool {
+		return tm.IsRunning() && strings.HasSuffix(linesText(tm), "restart)\nready")
+	})
+}
+
+// TestTerminalSelectAll tests that select all selects up to the end of the
+// output, not the blank lines of the screen below it, and that the copied
+// text has no spaces at the ends of lines or blank lines at the end.
+func TestTerminalSelectAll(t *testing.T) {
+	b, tm := testTerminal(t)
+	b.AsyncLock()
+	tm.Run("echo hello")
+	b.AsyncUnlock()
+	waitFor(t, b, "the output", func() bool {
+		return strings.HasSuffix(linesText(tm), "hello\n$")
+	})
+	b.AsyncLock()
+	tm.SetFocus()
+	b.AsyncUnlock()
+	// after the window, which sets the key map of the platform
+	withPlatform("MacOS", "MacStandard", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		src.Key(events.KeyDown, 'a', key.CodeA, mods(key.Meta))
+		src.KeyChord('a', key.CodeA, mods(key.Meta))
+		src.Key(events.KeyUp, 'a', key.CodeA, mods(key.Meta))
+		waitFor(t, b, "the selection", func() bool { return tm.linesView.HasSelection() })
+	})
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	lv := tm.linesView
+	assert.Equal(t, textpos.Pos{}, lv.SelectRegion.Start)
+	assert.Equal(t, textpos.Pos{Line: 2, Char: 1}, lv.SelectRegion.End, "the end of the prompt")
+	assert.Greater(t, lv.Lines.NumLines(), 3, "blank lines of the screen")
+	assert.Equal(t, "$ echo hello\nhello\n$", lv.selectedText())
+
+	// any selection is copied without the padding
+	lv.SelectRegion.End = lv.Lines.EndPos()
+	assert.Equal(t, "$ echo hello\nhello\n$", lv.selectedText())
 }

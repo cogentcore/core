@@ -18,7 +18,7 @@ import (
 // configuration information and arguments,
 // waiting for it to complete before returning.
 func (c *Config) Run(cmd string, args ...string) error {
-	_, _, err := c.exec(&c.StdIO, false, cmd, args...)
+	_, _, err := c.exec(nil, &c.StdIO, false, cmd, args...)
 	return err
 }
 
@@ -29,7 +29,7 @@ func (c *Config) Run(cmd string, args ...string) error {
 // the command to finish (in a separate goroutine).
 // See [StartIO] for a version that manages dynamic IO routing for you.
 func (c *Config) Start(cmd string, args ...string) (*exec.Cmd, error) {
-	excmd, _, err := c.exec(&c.StdIO, true, cmd, args...)
+	excmd, _, err := c.exec(nil, &c.StdIO, true, cmd, args...)
 	return excmd, err
 }
 
@@ -39,7 +39,7 @@ func (c *Config) Output(cmd string, args ...string) (string, error) {
 	buf := &bytes.Buffer{}
 	sio := c.StdIO // copy
 	sio.Out = buf
-	_, _, err := c.exec(&sio, false, cmd, args...)
+	_, _, err := c.exec(nil, &sio, false, cmd, args...)
 	if c.StdIO.Out != nil {
 		c.StdIO.Out.Write(buf.Bytes())
 	}

@@ -7,6 +7,7 @@ package sshclient
 import (
 	"os/user"
 	"path/filepath"
+	"time"
 
 	"cogentcore.org/core/base/exec"
 )
@@ -51,12 +52,28 @@ type Config struct {
 	// home directory of user on remote host,
 	// which is captured at initial connection time.
 	HomeDir string
+
+	// KeepAlive is the interval between keepalive requests to the host,
+	// which detect a lost connection, as when the network is lost
+	// (see [Client]). 0 turns them off.
+	KeepAlive time.Duration
+
+	// Timeout is the time to wait for the connection to the host, and for
+	// the replies to keepalive requests. 0 is no limit.
+	Timeout time.Duration
+
+	// LoginEnv is whether the commands get the environment variables of an
+	// interactive login shell of the user on the host, such as PATH, which
+	// it gets once when it connects. The commands are otherwise run by a
+	// shell that is not interactive, for which a standard ~/.bashrc returns
+	// before it sets them.
+	LoginEnv bool
 }
 
 // NewConfig returns a new ssh Config based on given
 // [exec.Config] parameters.
 func NewConfig(cfg *exec.Config) *Config {
-	c := &Config{Config: *cfg}
+	c := &Config{Config: *cfg, KeepAlive: 15 * time.Second, Timeout: 15 * time.Second, LoginEnv: true}
 	c.User.Defaults()
 	c.Dir = "" // start empty until we get homedir
 	return c
