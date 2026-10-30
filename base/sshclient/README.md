@@ -20,7 +20,7 @@ A good reference for similar package: https://github.com/helloyi/go-sshclient
 
 # Copying files
 
-Files are copied to and from hosts with the SFTP protocol of https://github.com/pkg/sftp, on the connection of the client: `Copy` copies files between any hosts, including the local one, as `cp -r` does, with wildcards, and `Client.OpenFile` opens a file on the host.
+Files are copied to and from hosts with the SFTP protocol of https://github.com/pkg/sftp, on the connection of the client: `Copy` copies files between any hosts, including the local one, as `cp -r` does, with wildcards, `Client.OpenFile` opens a file on the host, and `Client.ReadDir` and `Client.Stat` list its directories. These are in all builds, returning an error on the web (js), where SSH can not connect, while `Client.SFTP`, the SFTP client itself, is not in js builds.
 
 The `sshtest` package provides an SSH server for tests, which runs commands and serves SFTP in the test process, and can simulate the loss of the network (`Server.NetworkDown` and `NetworkUp`).
 

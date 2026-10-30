@@ -13,6 +13,8 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"slices"
+	"strings"
 
 	"github.com/pkg/sftp"
 )
@@ -109,6 +111,9 @@ func (r *remoteFS) abs(p string) string {
 
 // SFTP returns the SFTP client of the connection to the host, which is
 // made when first needed, for copying files to and from the host.
+// It is not in js builds, which leave out SFTP: use the methods of
+// [Client] such as [Client.ReadDir] and [Client.OpenFile] for code that
+// is also built for the web.
 func (cl *Client) SFTP() (*sftp.Client, error) {
 	client, err := cl.sshClient() // which drops the SFTP client of a lost connection
 	if err != nil {
@@ -151,6 +156,33 @@ func (cl *Client) OpenFile(name string, flag int) (io.ReadWriteCloser, error) {
 		}
 	}
 	return f, nil
+}
+
+// ReadDir returns the entries in the given directory on the remote host,
+// sorted by name, through SFTP. Symbolic links are returned as such: use
+// [Client.Stat] for what they point to. A relative path is relative to the
+// current Dir of the Client.
+func (cl *Client) ReadDir(dir string) ([]fs.FileInfo, error) {
+	sc, err := cl.SFTP()
+	if err != nil {
+		return nil, err
+	}
+	rfs := &remoteFS{sc: sc, host: cl.Host, dir: cl.Dir}
+	infos, err := rfs.ReadDir(rfs.abs(dir))
+	slices.SortFunc(infos, func(a, b fs.FileInfo) int { return strings.Compare(a.Name(), b.Name()) })
+	return infos, err
+}
+
+// Stat returns the information about the given file on the remote host,
+// following symbolic links, through SFTP. A relative path is relative to
+// the current Dir of the Client.
+func (cl *Client) Stat(name string) (fs.FileInfo, error) {
+	sc, err := cl.SFTP()
+	if err != nil {
+		return nil, err
+	}
+	rfs := &remoteFS{sc: sc, host: cl.Host, dir: cl.Dir}
+	return rfs.Stat(rfs.abs(name))
 }
 
 // CopyLocalToHost copies the data of the given reader to the given file on

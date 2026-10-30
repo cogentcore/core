@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -184,4 +185,33 @@ func TestCopyProgress(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, int64(size), info.Size())
 	}
+}
+
+func TestReadDirStat(t *testing.T) {
+	cl, s := testClient(t)
+	writeFiles(t, s.Root, map[string]string{"sub/b.txt": "bb", "sub/a.txt": "a", "sub/dir/c.txt": "c"})
+	require.NoError(t, os.Symlink("dir", filepath.Join(s.Root, "sub", "link")))
+
+	infos, err := cl.ReadDir("sub")
+	require.NoError(t, err)
+	var names []string
+	for _, fi := range infos {
+		names = append(names, fi.Name())
+	}
+	assert.Equal(t, []string{"a.txt", "b.txt", "dir", "link"}, names)
+	assert.True(t, infos[2].IsDir())
+	assert.True(t, infos[3].Mode()&os.ModeSymlink != 0)
+
+	// Stat follows the link, with an absolute path
+	fi, err := cl.Stat(filepath.Join(s.Root, "sub", "link"))
+	require.NoError(t, err)
+	assert.True(t, fi.IsDir())
+	fi, err = cl.Stat("sub/b.txt")
+	require.NoError(t, err)
+	assert.Equal(t, int64(2), fi.Size())
+
+	_, err = cl.ReadDir("none")
+	assert.ErrorIs(t, err, fs.ErrNotExist)
+	_, err = cl.Stat("none")
+	assert.ErrorIs(t, err, fs.ErrNotExist)
 }
