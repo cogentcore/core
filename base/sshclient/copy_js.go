@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"io/fs"
 )
 
 // Copying files to and from remote hosts uses SFTP, which is not
@@ -36,6 +37,16 @@ func sftpReaderFrom(w io.Writer) (io.ReaderFrom, bool) {
 
 // OpenFile returns an error on the web.
 func (cl *Client) OpenFile(name string, flag int) (io.ReadWriteCloser, error) {
+	return nil, errNoSFTP
+}
+
+// ReadDir returns an error on the web.
+func (cl *Client) ReadDir(dir string) ([]fs.FileInfo, error) {
+	return nil, errNoSFTP
+}
+
+// Stat returns an error on the web.
+func (cl *Client) Stat(name string) (fs.FileInfo, error) {
 	return nil, errNoSFTP
 }
 
