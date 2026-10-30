@@ -23,18 +23,20 @@ func TestRunIOContext(t *testing.T) {
 	defer func(w time.Duration) { InterruptWait = w }(InterruptWait)
 	InterruptWait = 500 * time.Millisecond
 	c := &Config{}
-	run := func(script string) (time.Duration, error) {
+	run := func(cmd string, args ...string) (time.Duration, error) {
 		ctx, cancel := context.WithCancel(context.Background())
 		time.AfterFunc(200*time.Millisecond, cancel)
 		start := time.Now()
-		err := c.RunIOContext(ctx, NewCmdIO(c), "sh", "-c", script)
+		err := c.RunIOContext(ctx, NewCmdIO(c), cmd, args...)
 		return time.Since(start), err
 	}
-	took, err := run("sleep 10")
+	took, err := run("sleep", "10")
 	assert.Error(t, err)
 	assert.Less(t, took, 500*time.Millisecond, "interrupted")
 
-	took, err = run(`trap "" INT; sleep 10`)
+	// only the command gets the interrupt, not those that it runs, as
+	// a shell (dash) waits for, so this also tests the kill
+	took, err = run("sh", "-c", `trap "" INT; sleep 10`)
 	assert.Error(t, err)
 	assert.Greater(t, took, 600*time.Millisecond, "ignores the interrupt")
 	assert.Less(t, took, 2*time.Second, "killed after InterruptWait")
