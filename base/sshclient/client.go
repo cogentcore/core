@@ -19,6 +19,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
+	"golang.org/x/term"
 )
 
 // Client represents a persistent connection to an ssh host.
@@ -293,6 +294,9 @@ func (cl *Client) sshClient() (*ssh.Client, error) {
 // config.  Only works if Client already connected, and connects again
 // if the connection was lost (see [Client.CheckConnection]).
 func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
+	if interact {
+		return cl.newSession(nil)
+	}
 	client, err := cl.sshClient()
 	if err != nil {
 		return nil, err
@@ -303,20 +307,34 @@ func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
 	}
 	ses.Stdout = cl.StdIO.Out
 	ses.Stderr = cl.StdIO.Err
-	// ses.Stdin = nil // cl.StdIO.In // todo: cannot set this like this!
+	return ses, nil
+}
 
-	if interact {
-		modes := ssh.TerminalModes{
-			ssh.ECHO:          0,     // disable echoing
-			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
-			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
-		}
-		err := ses.RequestPty("xterm", 40, 80, modes)
-		if err != nil {
-			slog.Error(err.Error())
+// newSession returns a new interactive session, with a terminal on the
+// host (pty), as [Client.NewSession] does. If the given terminal of the
+// input is not nil, the terminal on the host has its size and echoes the
+// input, which it gets from it while the command runs (see [forwardInput]).
+func (cl *Client) newSession(tty *os.File) (*ssh.Session, error) {
+	ses, err := cl.NewSession(false)
+	if err != nil {
+		return nil, err
+	}
+	modes := ssh.TerminalModes{
+		ssh.ECHO:          0,     // disable echoing
+		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+	}
+	rows, cols := 40, 80
+	if tty != nil {
+		modes[ssh.ECHO] = 1
+		if w, h, err := term.GetSize(int(tty.Fd())); err == nil {
+			rows, cols = h, w
 		}
 	}
-
+	err = ses.RequestPty("xterm", rows, cols, modes)
+	if err != nil {
+		slog.Error(err.Error())
+	}
 	return ses, nil
 }
 
@@ -353,6 +371,6 @@ func (cl *Client) GetHomeDir() error {
 	}
 	cl.HomeDir = strings.TrimSpace(buf.String())
 	cl.Dir = cl.HomeDir
-	fmt.Println("home directory:", cl.HomeDir)
+	slog.Debug("ssh: home directory", "Host", cl.Host, "Dir", cl.HomeDir)
 	return nil
 }

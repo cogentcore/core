@@ -6,9 +6,12 @@ package sshclient
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
@@ -25,7 +28,22 @@ import (
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
 func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
-	ses, err := cl.NewSession(true)
+	return cl.ExecContext(nil, sio, start, output, cmd, args...)
+}
+
+// ExecContext is [Client.Exec] with a context: if it is not nil, a command
+// that is run (not started) is interrupted when the context is done, as a
+// shell does for Control+C: it gets an interrupt signal, and its session
+// is closed if it has not ended after [exec.InterruptWait], which ends it
+// with a hangup. A command that is run with its standard input from a
+// terminal gets the input of that terminal while it runs, such that
+// interactive programs such as more and editors work (not on Windows).
+func (cl *Client) ExecContext(ctx context.Context, sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
+	var tty *os.File
+	if !start && !output {
+		tty = terminalInput(sio.In)
+	}
+	ses, err := cl.newSession(tty)
 	if err != nil {
 		return "", err
 	}
@@ -46,10 +64,32 @@ func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, arg
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	return cl.run(ses, sio, start, output, cmd, args...)
+	if ctx != nil && !start {
+		done := make(chan struct{})
+		defer close(done)
+		go interruptOnDone(ctx, done, ses)
+	}
+	return cl.run(ses, sio, tty, start, output, cmd, args...)
 }
 
-func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
+// interruptOnDone interrupts the command of the given session when the
+// given context is done, unless done is closed first (see
+// [Client.ExecContext]).
+func interruptOnDone(ctx context.Context, done chan struct{}, ses *ssh.Session) {
+	select {
+	case <-done:
+		return
+	case <-ctx.Done():
+	}
+	ses.Signal(ssh.SIGINT) // not all servers support this
+	select {
+	case <-done:
+	case <-time.After(exec.InterruptWait):
+		ses.Close()
+	}
+}
+
+func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, tty *os.File, start, output bool, cmd string, args ...string) (string, error) {
 	for k, v := range cl.Env {
 		ses.Setenv(k, v)
 	}
@@ -62,6 +102,13 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 	}
 	if exec.IsPipe(sio.In) {
 		ses.Stdin = sio.In
+	}
+	if tty != nil && !cl.PrintOnly {
+		stop, err := forwardInput(ses, tty)
+		if err != nil {
+			return "", err
+		}
+		defer stop()
 	}
 
 	cdto := ""
@@ -113,4 +160,45 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 		}
 	}
 	return out, err
+}
+
+// Shell runs an interactive login shell on the host, in the current
+// directory of the client, with the terminal of the given standard input,
+// whose input it gets while it runs (see [Client.ExecContext]), until it
+// ends, as with exit or Control+D. Its exit status is not an error, as
+// it is that of the last command in it. It needs a terminal (not on
+// Windows).
+func (cl *Client) Shell(sio *exec.StdIOState) error {
+	tty := terminalInput(sio.In)
+	if tty == nil {
+		return errors.New("ssh: an interactive shell needs the input of a terminal")
+	}
+	ses, err := cl.newSession(tty)
+	if err != nil {
+		return err
+	}
+	defer ses.Close()
+	for k, v := range cl.Env {
+		ses.Setenv(k, v)
+	}
+	ses.Stdout, ses.Stderr = sio.Out, sio.Err
+	stop, err := forwardInput(ses, tty)
+	if err != nil {
+		return err
+	}
+	defer stop()
+	if cl.Dir != "" && cl.Dir != cl.HomeDir {
+		err = ses.Start(`cd '` + cl.Dir + `' && exec "$SHELL" -l`)
+	} else {
+		err = ses.Shell()
+	}
+	if err != nil {
+		return err
+	}
+	err = ses.Wait()
+	var ee *ssh.ExitError
+	if errors.As(err, &ee) {
+		return nil
+	}
+	return err
 }

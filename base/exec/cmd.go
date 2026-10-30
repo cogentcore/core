@@ -6,6 +6,7 @@ package exec
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -52,7 +53,14 @@ func NewCmdIO(c *Config) *CmdIO {
 // command in it as well, for easier management of
 // dynamically updated IO routing.
 func (c *Config) RunIO(cio *CmdIO, cmd string, args ...string) error {
-	cm, _, err := c.exec(&cio.StdIO, false, cmd, args...)
+	return c.RunIOContext(nil, cio, cmd, args...)
+}
+
+// RunIOContext is [Config.RunIO] with a context: if it is not nil, the
+// command is interrupted when the context is done, as a shell does for
+// Control+C, and killed if it has not ended after [InterruptWait].
+func (c *Config) RunIOContext(ctx context.Context, cio *CmdIO, cmd string, args ...string) error {
+	cm, _, err := c.exec(ctx, &cio.StdIO, false, cmd, args...)
 	cio.Cmd = cm
 	return err
 }
@@ -67,18 +75,24 @@ func (c *Config) RunIO(cio *CmdIO, cmd string, args ...string) error {
 // setting the IO values using Push commands, and then call
 // [PopToStart] after Wait finishes, to close any open IO and reset.
 func (c *Config) StartIO(cio *CmdIO, cmd string, args ...string) error {
-	cm, _, err := c.exec(&cio.StdIO, true, cmd, args...)
+	cm, _, err := c.exec(nil, &cio.StdIO, true, cmd, args...)
 	cio.Cmd = cm
 	return err
 }
 
 // OutputIO runs the command and returns the text from stdout.
 func (c *Config) OutputIO(cio *CmdIO, cmd string, args ...string) (string, error) {
+	return c.OutputIOContext(nil, cio, cmd, args...)
+}
+
+// OutputIOContext is [Config.OutputIO] with a context, with which the
+// command is interrupted as for [Config.RunIOContext].
+func (c *Config) OutputIOContext(ctx context.Context, cio *CmdIO, cmd string, args ...string) (string, error) {
 	// need to use buf to capture output
 	sio := cio.StdIO // copy
 	buf := &bytes.Buffer{}
 	sio.Out = buf
-	_, _, err := c.exec(&sio, false, cmd, args...)
+	_, _, err := c.exec(ctx, &sio, false, cmd, args...)
 	if cio.Out != nil {
 		cio.Out.Write(buf.Bytes())
 	}

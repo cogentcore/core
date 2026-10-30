@@ -22,7 +22,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
+	"cogentcore.org/core/text/terminal/pty"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
@@ -42,6 +44,12 @@ type Server struct {
 	// id_rsa, and a known_hosts file with the key of the server, for
 	// [cogentcore.org/core/base/sshclient.User.KeyPath].
 	KeyPath string
+
+	// Pty is whether the commands run in a terminal (pty) on the server
+	// when the client asks for one, as on a real server, such that the
+	// terminal handles their input, as for Control+C. It is off by
+	// default, as a terminal ends the lines of the output with \r\n.
+	Pty atomic.Bool
 
 	listener net.Listener
 
@@ -197,13 +205,52 @@ func (s *Server) serve(config *ssh.ServerConfig) {
 }
 
 // session serves the requests of a session: environment variables, a
-// command run with sh, and the SFTP subsystem.
+// command run with sh, which can get signals, the shell, which is sh,
+// and the SFTP subsystem.
 func (s *Server) session(ch ssh.Channel, reqs <-chan *ssh.Request) {
 	defer ch.Close()
-	env := []string{"HOME=" + s.Root, "PATH=" + os.Getenv("PATH")}
-	for req := range reqs {
+	env := []string{"HOME=" + s.Root, "PATH=" + os.Getenv("PATH"), "SHELL=/bin/sh"}
+	var cmd *exec.Cmd
+	var tm *pty.Pty // the terminal of the command, if cols > 0
+	cols, rows := 0, 0
+	ended := make(chan struct{})
+	defer func() {
+		if cmd == nil {
+			return
+		}
+		select {
+		case <-ended:
+		default: // the session was closed while the command runs: a hangup
+			cmd.Process.Kill()
+		}
+	}()
+	for {
+		var req *ssh.Request
+		select {
+		case req = <-reqs:
+		case <-ended: // the command ended
+			return
+		}
+		if req == nil {
+			return
+		}
 		switch req.Type {
-		case "pty-req", "window-change": // the client asks for a terminal for interactive commands
+		case "pty-req": // the client asks for a terminal for interactive commands
+			var pr struct {
+				Term       string
+				Cols, Rows uint32
+				W, H       uint32
+				Modes      string
+			}
+			if s.Pty.Load() && ssh.Unmarshal(req.Payload, &pr) == nil {
+				cols, rows = int(pr.Cols), int(pr.Rows)
+			}
+			req.Reply(true, nil)
+		case "window-change":
+			var wc struct{ Cols, Rows, W, H uint32 }
+			if tm != nil && ssh.Unmarshal(req.Payload, &wc) == nil {
+				tm.Resize(int(wc.Cols), int(wc.Rows))
+			}
 			req.Reply(true, nil)
 		case "env":
 			var kv struct{ Name, Value string }
@@ -211,33 +258,75 @@ func (s *Server) session(ch ssh.Channel, reqs <-chan *ssh.Request) {
 				env = append(env, kv.Name+"="+kv.Value)
 			}
 			req.Reply(true, nil)
-		case "exec":
-			var cmd struct{ Command string }
-			if ssh.Unmarshal(req.Payload, &cmd) != nil {
+		case "signal":
+			var sig struct{ Signal string }
+			if ssh.Unmarshal(req.Payload, &sig) == nil && sig.Signal == string(ssh.SIGINT) && cmd != nil {
+				cmd.Process.Signal(os.Interrupt)
+			}
+			req.Reply(true, nil)
+		case "exec", "shell":
+			var ex struct{ Command string }
+			if req.Type == "shell" { // the shell of the user
+				ex.Command = "exec $SHELL"
+			} else if ssh.Unmarshal(req.Payload, &ex) != nil {
 				req.Reply(false, nil)
 				continue
 			}
-			req.Reply(true, nil)
-			c := exec.Command("sh", "-c", cmd.Command)
-			c.Dir, c.Env = s.Root, env
-			c.Stdout, c.Stderr = ch, ch.Stderr()
-			stdin, _ := c.StdinPipe()
-			go func() {
-				io.Copy(stdin, ch)
-				stdin.Close()
-			}()
-			code := 0
-			if err := c.Run(); err != nil {
-				code = 1
-				var ee *exec.ExitError
-				if errors.As(err, &ee) {
-					code = ee.ExitCode()
-				}
+			if cmd != nil {
+				req.Reply(false, nil)
+				continue
 			}
-			status := make([]byte, 4)
-			binary.BigEndian.PutUint32(status, uint32(code))
-			ch.SendRequest("exit-status", false, status)
-			return
+			cmd = exec.Command("sh", "-c", ex.Command)
+			cmd.Dir, cmd.Env = s.Root, env
+			wait := cmd.Wait
+			if cols > 0 {
+				var err error
+				tm, err = pty.Start(cmd, cols, rows)
+				if err != nil {
+					req.Reply(false, nil)
+					return
+				}
+				go io.Copy(tm, ch)
+				output := make(chan struct{})
+				go func() {
+					io.Copy(ch, tm) // ends when the terminal is closed after the command
+					close(output)
+				}()
+				wait = func() error {
+					err := tm.Wait()
+					// reading the output does not end on macOS when the
+					// command ends, and it has to be read before closing
+					time.AfterFunc(100*time.Millisecond, func() { tm.Close() })
+					<-output
+					return err
+				}
+			} else {
+				cmd.Stdout, cmd.Stderr = ch, ch.Stderr()
+				stdin, _ := cmd.StdinPipe()
+				if err := cmd.Start(); err != nil {
+					req.Reply(false, nil)
+					return
+				}
+				go func() {
+					io.Copy(stdin, ch)
+					stdin.Close()
+				}()
+			}
+			req.Reply(true, nil)
+			go func() {
+				code := 0
+				if err := wait(); err != nil {
+					code = 1
+					var ee *exec.ExitError
+					if errors.As(err, &ee) {
+						code = ee.ExitCode()
+					}
+				}
+				status := make([]byte, 4)
+				binary.BigEndian.PutUint32(status, uint32(code))
+				ch.SendRequest("exit-status", false, status)
+				close(ended)
+			}()
 		case "subsystem":
 			var sub struct{ Name string }
 			if ssh.Unmarshal(req.Payload, &sub) != nil || sub.Name != "sftp" {

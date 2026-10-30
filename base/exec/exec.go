@@ -10,11 +10,13 @@ package exec
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/logx"
 )
@@ -29,7 +31,10 @@ import (
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func (c *Config) exec(sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, err error) {
+//
+// If ctx is not nil, a command that is run (not started) is interrupted
+// when it is done (see [Config.RunIOContext]).
+func (c *Config) exec(ctx context.Context, sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, err error) {
 	expand := func(s string) string {
 		s2, ok := c.Env[s]
 		if ok {
@@ -41,7 +46,7 @@ func (c *Config) exec(sio *StdIO, start bool, cmd string, args ...string) (excmd
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	excmd, ran, code, err := c.run(sio, start, cmd, args...)
+	excmd, ran, code, err := c.run(ctx, sio, start, cmd, args...)
 	_ = code
 	if err == nil {
 		return excmd, true, nil
@@ -73,8 +78,24 @@ func runError(cmd string, args []string, err error) error {
 	return &RunError{Msg: fmt.Sprintf("%q: %v", strings.Join(append([]string{cmd}, args...), " "), err), Err: err}
 }
 
-func (c *Config) run(sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
-	cm := exec.Command(cmd, args...)
+// InterruptWait is how long a command that is interrupted, when the
+// context it is run with is done, has to end, before it is killed.
+var InterruptWait = time.Second
+
+func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
+	var cm *exec.Cmd
+	if ctx != nil && !start {
+		cm = exec.CommandContext(ctx, cmd, args...)
+		cm.Cancel = func() error { // as a shell does for Control+C
+			if err := cm.Process.Signal(os.Interrupt); err != nil {
+				return cm.Process.Kill() // not supported on Windows
+			}
+			return nil
+		}
+		cm.WaitDelay = InterruptWait
+	} else {
+		cm = exec.Command(cmd, args...)
+	}
 	cm.Env = os.Environ()
 	for k, v := range c.Env {
 		cm.Env = append(cm.Env, k+"="+v)
