@@ -20,8 +20,8 @@ func wait(ctx context.Context, cmd *exec.Cmd) error {
 	return ErrUnsupported
 }
 
-func open(cols, rows int) (pseudoTerminal, *os.File, error) {
-	return nil, nil, ErrUnsupported
+func open(cols, rows int) (pseudoTerminal, *os.File, *os.File, error) {
+	return nil, nil, nil, ErrUnsupported
 }
 
 func signals(pt pseudoTerminal) bool {

@@ -84,7 +84,7 @@ var InterruptWait = time.Second
 
 func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
 	var cm *exec.Cmd
-	if ctx != nil && !start && interruptible() {
+	if ctx != nil && !start && interruptible(sio.In) {
 		cm = exec.CommandContext(ctx, cmd, args...)
 		cm.Cancel = func() error { return interrupt(cm.Process) }
 		cm.WaitDelay = InterruptWait

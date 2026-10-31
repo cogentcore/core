@@ -14,15 +14,22 @@ import (
 )
 
 // interruptible returns whether a command that is run with a context
-// is interrupted when the context is done (see [interrupt]). On Windows,
-// a command in the console of this process gets the Control+C typed in
-// it itself, as this process does (which is what typically makes the
-// context done), and handles it as it chooses, as in cmd.exe: for
-// example, a program that reads raw input, such as an editor, ignores it.
-// Such a command is not interrupted: only one without a console is.
-func interruptible() bool {
+// with the given standard input is interrupted when the context is done
+// (see [interrupt]). On Windows, a command in the console of this process
+// gets the Control+C typed in it itself, as this process does (which is
+// what typically makes the context done), and handles it as it chooses,
+// as in cmd.exe: for example, a program that reads raw input, such as an
+// editor, ignores it. Such a command is not interrupted: only one without
+// a console is, as given by the standard input of this process, or that
+// of the command, as for a console that this process is attached to with
+// cogentcore.org/core/text/terminal/pty.Run.
+func interruptible(in io.Reader) bool {
 	var mode uint32
-	return windows.GetConsoleMode(windows.Stdin, &mode) != nil
+	if windows.GetConsoleMode(windows.Stdin, &mode) == nil {
+		return false
+	}
+	f, ok := in.(*os.File)
+	return !ok || windows.GetConsoleMode(windows.Handle(f.Fd()), &mode) != nil
 }
 
 // interrupt kills the given process of a command whose context is done,

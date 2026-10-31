@@ -65,8 +65,7 @@ type Terminal struct {
 	// output (see [pty.Run]); the program ends when it returns. As it
 	// gets no signals, use [Terminal.OnInterrupt] and [Terminal.OnResize]
 	// to handle interrupts and changes in the size of the terminal.
-	// It is not supported on Windows.
-	Func func(tty *os.File) error `set:"-" display:"-"`
+	Func func(in, out *os.File) error `set:"-" display:"-"`
 
 	// Dir is the directory to start the program in.
 	// The default is the current directory.

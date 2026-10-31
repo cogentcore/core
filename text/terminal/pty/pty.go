@@ -19,8 +19,7 @@ import (
 	"time"
 )
 
-// ErrUnsupported is returned on platforms without pseudo-terminals,
-// and by [Run] on Windows.
+// ErrUnsupported is returned on platforms without pseudo-terminals.
 var ErrUnsupported = errors.New("pty: pseudo-terminals are not supported on this platform")
 
 // Pty is a command or function running in a pseudo-terminal. Reading from it
@@ -29,10 +28,11 @@ type Pty struct {
 	// Cmd is the command, if it was started with [Start].
 	Cmd *exec.Cmd
 
-	// Tty is the terminal device of the pseudo-terminal, if it was
-	// started with [Run]: the function uses it as its standard input
-	// and output, and gives it to the commands it runs.
-	Tty *os.File
+	// In and Out are the terminal device of the pseudo-terminal, if it
+	// was started with [Run]: the function uses them as its standard
+	// input and output, and gives them to the commands it runs.
+	// They are the same file, except on Windows.
+	In, Out *os.File
 
 	// pty is the pseudo-terminal.
 	pty pseudoTerminal
@@ -60,24 +60,37 @@ func Start(cmd *exec.Cmd, cols, rows int) (*Pty, error) {
 }
 
 // Run runs the given function in a goroutine with a new pseudo-terminal
-// of the given size, whose terminal device it gets: it uses that as its
-// standard input and output, as a command started with [Start] does,
-// and it can give it to the commands it runs. This is for programs that
-// run in this process, such as an interpreter of the app. The terminal
+// of the given size, whose terminal device it gets as in and out: it uses
+// them as its standard input and output, as a command started with [Start]
+// does, and it can give them to the commands it runs. This is for programs
+// that run in this process, such as an interpreter of the app. The terminal
 // device is closed when the function returns, and the program ends
 // (see [Pty.Wait]). Closing the pseudo-terminal makes the reads and
 // writes of the terminal device fail, which should make the function
 // return. Unlike a command, it gets no signals: see [Pty.Signals] and
-// [Pty.Resize]. It is not supported on Windows.
-func Run(fun func(tty *os.File) error, cols, rows int) (*Pty, error) {
-	pt, tty, err := open(cols, rows)
+// [Pty.Resize].
+//
+// In and out are the same file, except on Windows, where they are the
+// input and output of the console of the pseudo-terminal, which this
+// process is attached to while the function runs, instead of its own
+// console, if any, with its standard handles set to them. As a process
+// has only one console, only one function can run at a time there.
+// The commands that it runs are in that console, and get the Control+C
+// typed in it, which this process ignores, except that it ends a read
+// of the input that is not raw, with [io.EOF].
+func Run(fun func(in, out *os.File) error, cols, rows int) (*Pty, error) {
+	pt, in, out, err := open(cols, rows)
 	if err != nil {
 		return nil, err
 	}
-	p := &Pty{Tty: tty, pty: pt, done: make(chan struct{})}
+	p := &Pty{In: in, Out: out, pty: pt, done: make(chan struct{})}
 	go func() {
-		p.err = fun(tty)
-		tty.Close()
+		p.err = fun(in, out)
+		in.Close()
+		out.Close()
+		if d, ok := pt.(interface{ detach() }); ok {
+			d.detach() // on Windows, so that another function can run
+		}
 		close(p.done)
 		// reading the output does not end when the terminal device is
 		// closed on macOS, or while a read of it is still pending
@@ -109,8 +122,9 @@ func (p *Pty) Close() error {
 
 // Signals returns whether the terminal makes signals of the
 // interrupt, quit and suspend characters (ISIG), as it does unless the
-// program reads raw input. A function started with [Run] gets no
-// signals, so the caller has to tell it about these characters.
+// program reads raw input; on Windows, whether the console makes events
+// of Control+C (ENABLE_PROCESSED_INPUT). A function started with [Run]
+// gets no signals, so the caller has to tell it about these characters.
 func (p *Pty) Signals() bool {
 	return signals(p.pty)
 }

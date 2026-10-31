@@ -12,8 +12,9 @@ import (
 )
 
 // interruptible returns whether a command that is run with a context
-// is interrupted when the context is done (see [interrupt]).
-func interruptible() bool {
+// with the given standard input is interrupted when the context is done
+// (see [interrupt]).
+func interruptible(in io.Reader) bool {
 	return true
 }
 
