@@ -84,14 +84,9 @@ var InterruptWait = time.Second
 
 func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
 	var cm *exec.Cmd
-	if ctx != nil && !start {
+	if ctx != nil && !start && interruptible(sio.In) {
 		cm = exec.CommandContext(ctx, cmd, args...)
-		cm.Cancel = func() error { // as a shell does for Control+C
-			if err := cm.Process.Signal(os.Interrupt); err != nil {
-				return cm.Process.Kill() // not supported on Windows
-			}
-			return nil
-		}
+		cm.Cancel = func() error { return interrupt(cm.Process) }
 		cm.WaitDelay = InterruptWait
 	} else {
 		cm = exec.Command(cmd, args...)
@@ -126,7 +121,9 @@ func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, ar
 			err = cm.Start()
 			excmd = cm
 		} else {
+			restore := saveConsole(sio.In, sio.Out)
 			err = cm.Run()
+			restore()
 		}
 
 		// we must call InitColor after calling a system command

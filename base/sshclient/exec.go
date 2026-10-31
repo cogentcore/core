@@ -37,7 +37,7 @@ func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, arg
 // is closed if it has not ended after [exec.InterruptWait], which ends it
 // with a hangup. A command that is run with its standard input from a
 // terminal gets the input of that terminal while it runs, such that
-// interactive programs such as more and editors work (not on Windows).
+// interactive programs such as more and editors work.
 func (cl *Client) ExecContext(ctx context.Context, sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
 	var tty *os.File
 	if !start && !output {
@@ -167,8 +167,7 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, tty *os.File, star
 // directory of the client, with the terminal of the given standard input,
 // whose input it gets while it runs (see [Client.ExecContext]), until it
 // ends, as with exit or Control+D. Its exit status is not an error, as
-// it is that of the last command in it. It needs a terminal (not on
-// Windows).
+// it is that of the last command in it. It needs a terminal.
 func (cl *Client) Shell(sio *exec.StdIOState) error {
 	tty := terminalInput(sio.In)
 	if tty == nil {

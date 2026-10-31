@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -367,21 +368,20 @@ func TestTerminalKillKey(t *testing.T) {
 // TestTerminalFunc tests a program that is a function of this process,
 // with interrupts and size changes, which it gets as callbacks.
 func TestTerminalFunc(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("not supported")
-	}
 	b := core.NewBody()
 	tm := NewTerminal(b)
 	lastTerminal = tm
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(40), units.Em(10))
 	})
-	tm.Func = func(tty *os.File) error {
-		fd := int(tty.Fd())
-		fmt.Fprintln(tty, "ready")
-		rd := bufio.NewReader(tty)
+	tm.Func = func(in, out *os.File) error {
+		fmt.Fprintln(out, "ready")
+		rd := bufio.NewReader(in)
 		for {
 			ln, err := rd.ReadString('\n')
+			if err == io.EOF && runtime.GOOS == "windows" {
+				continue // Control+C ends a read of the console that is not raw
+			}
 			if err != nil {
 				return err
 			}
@@ -389,19 +389,19 @@ func TestTerminalFunc(t *testing.T) {
 			case "quit":
 				return errors.New("quit")
 			case "raw":
-				st, err := term.MakeRaw(fd)
+				st, err := term.MakeRaw(int(in.Fd()))
 				if err != nil {
 					return err
 				}
-				fmt.Fprint(tty, "raw\r\n")
+				fmt.Fprint(out, "raw mode\r\n")
 				c, _ := rd.ReadByte()
-				term.Restore(fd, st)
-				fmt.Fprintf(tty, "byte %d\n", c)
+				term.Restore(int(in.Fd()), st)
+				fmt.Fprintf(out, "byte %d\n", c)
 			case "size":
-				w, h, _ := term.GetSize(fd)
-				fmt.Fprintf(tty, "size %d %d\n", w, h)
+				w, h, _ := term.GetSize(int(out.Fd()))
+				fmt.Fprintf(out, "size %d %d\n", w, h)
 			default:
-				fmt.Fprintf(tty, "got %s\n", ln)
+				fmt.Fprintf(out, "got %s\n", ln)
 			}
 		}
 	}
@@ -431,7 +431,7 @@ func TestTerminalFunc(t *testing.T) {
 	assert.Equal(t, 1, interrupts)
 	tm.Run("raw")
 	b.AsyncUnlock()
-	waitFor(t, b, "raw input", func() bool { return hasOutputLine(tm, "raw") })
+	waitFor(t, b, "raw input", func() bool { return hasOutputLine(tm, "raw mode") })
 	b.AsyncLock()
 	tm.SendText("\x03")
 	assert.Equal(t, 1, interrupts)

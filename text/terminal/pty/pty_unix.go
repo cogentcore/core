@@ -30,19 +30,20 @@ func start(cmd *exec.Cmd, cols, rows int) (pseudoTerminal, error) {
 	return &unixPty{f}, nil
 }
 
-// open opens a new pty, returning its master side and terminal device.
-func open(cols, rows int) (pseudoTerminal, *os.File, error) {
+// open opens a new pty, returning its master side and terminal device,
+// as both the input and output.
+func open(cols, rows int) (pseudoTerminal, *os.File, *os.File, error) {
 	f, tty, err := pty.Open()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	p := &unixPty{f}
 	if err := p.Resize(cols, rows); err != nil {
 		f.Close()
 		tty.Close()
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return p, tty, nil
+	return p, tty, tty, nil
 }
 
 func signals(pt pseudoTerminal) bool {

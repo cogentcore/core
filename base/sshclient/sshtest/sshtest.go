@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -37,7 +38,8 @@ type Server struct {
 	Addr string
 
 	// Root is the root directory of the server, which is its home
-	// directory for the commands that it runs.
+	// directory for the commands that it runs. On Windows, its separator
+	// is /, as in the paths that pwd gives on the server (see [Server.session]).
 	Root string
 
 	// KeyPath is a directory with the private key of the client, as
@@ -122,6 +124,9 @@ func NewServer(t testing.TB) *Server {
 	s := &Server{Root: t.TempDir(), KeyPath: t.TempDir()}
 	if root, err := filepath.EvalSymlinks(s.Root); err == nil {
 		s.Root = root // as pwd gives it
+	}
+	if runtime.GOOS == "windows" {
+		s.Root = filepath.ToSlash(s.Root)
 	}
 
 	_, hostPriv, err := ed25519.GenerateKey(rand.Reader)
@@ -275,6 +280,10 @@ func (s *Server) session(ch ssh.Channel, reqs <-chan *ssh.Request) {
 			if cmd != nil {
 				req.Reply(false, nil)
 				continue
+			}
+			if runtime.GOOS == "windows" {
+				// the paths of sh (MSYS2) are not Windows paths, as SFTP and the tests use
+				ex.Command = "pwd() { command pwd -W; }; " + ex.Command
 			}
 			cmd = exec.Command("sh", "-c", ex.Command)
 			cmd.Dir, cmd.Env = s.Root, env

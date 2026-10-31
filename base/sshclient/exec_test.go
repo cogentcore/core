@@ -46,25 +46,22 @@ func TestRunInterrupt(t *testing.T) {
 // terminal gets the input of the terminal while it runs, and only then,
 // as for interactive programs, with Control+C interrupting it on the host.
 func TestRunTerminalInput(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("not supported")
-	}
 	cl, s := testClient(t)
 	s.Pty.Store(true)
 	result := make(chan string, 1)
-	readLine := func(tty *os.File) {
+	readLine := func(in *os.File) {
 		buf := make([]byte, 100)
-		n, _ := tty.Read(buf)
-		result <- string(buf[:n])
+		n, _ := in.Read(buf)
+		result <- strings.ReplaceAll(string(buf[:n]), "\r", "")
 	}
-	p, err := pty.Run(func(tty *os.File) error {
-		sio := &exec.StdIOState{StdIO: exec.StdIO{In: tty, Out: tty, Err: tty}}
+	p, err := pty.Run(func(in, out *os.File) error {
+		sio := &exec.StdIOState{StdIO: exec.StdIO{In: in, Out: out, Err: out}}
 		if err := cl.Run(sio, "head", "-1"); err != nil {
 			return err
 		}
-		readLine(tty) // the input that follows is for this process
+		readLine(in) // the input that follows is for this process
 		err := cl.Run(sio, "sleep", "10")
-		readLine(tty)
+		readLine(in)
 		return err
 	}, 80, 24)
 	require.NoError(t, err)
@@ -88,14 +85,14 @@ func TestRunTerminalInput(t *testing.T) {
 	time.Sleep(300 * time.Millisecond) // head is running
 	p.Write([]byte("to the host\r"))
 	time.Sleep(300 * time.Millisecond) // head is done
-	p.Write([]byte("after\n"))
+	p.Write([]byte("after\r"))
 	waitResult("after\n")
 
 	time.Sleep(300 * time.Millisecond) // sleep is running
 	start := time.Now()
 	p.Write([]byte{0x03})
 	time.Sleep(300 * time.Millisecond)
-	p.Write([]byte("after interrupt\n"))
+	p.Write([]byte("after interrupt\r"))
 	waitResult("after interrupt\n")
 	assert.Less(t, time.Since(start), 2*time.Second)
 	assert.Error(t, p.Wait()) // sleep was interrupted
@@ -107,15 +104,15 @@ func TestRunTerminalInput(t *testing.T) {
 // current directory of the client and ends with exit.
 func TestShell(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("not supported")
+		t.Skip("the paths of the test host (sh) are not Windows paths")
 	}
 	cl, s := testClient(t)
 	s.Pty.Store(true)
 	require.NoError(t, os.Mkdir(s.Root+"/sub", 0755))
 	shell := func(input ...string) string {
 		t.Helper()
-		p, err := pty.Run(func(tty *os.File) error {
-			return cl.Shell(&exec.StdIOState{StdIO: exec.StdIO{In: tty, Out: tty, Err: tty}})
+		p, err := pty.Run(func(in, out *os.File) error {
+			return cl.Shell(&exec.StdIOState{StdIO: exec.StdIO{In: in, Out: out, Err: out}})
 		}, 80, 24)
 		require.NoError(t, err)
 		defer p.Close()

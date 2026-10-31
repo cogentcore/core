@@ -13,6 +13,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -186,7 +187,7 @@ func (fn *Node) Init() {
 		repo, _ := fn.Repo()
 		files := fn.dirFileList()
 		for _, fi := range files {
-			fpath := filepath.Join(string(fn.Filepath), fi.Name())
+			fpath := fn.joinPath(string(fn.Filepath), fi.Name())
 			if fn.FileRoot().FilterFunc != nil && !fn.FileRoot().FilterFunc(fpath, fi) {
 				continue
 			}
@@ -206,6 +207,16 @@ func (fn *Node) Init() {
 			})
 		}
 	})
+}
+
+// joinPath joins the given directory and name of a file in it: paths in
+// [Tree.FS] always use / (see [io/fs]), whereas os paths use the separator
+// of the platform (\ on Windows).
+func (fn *Node) joinPath(dir, name string) string {
+	if fn.FileRoot().FS != nil {
+		return path.Join(dir, name)
+	}
+	return filepath.Join(dir, name)
 }
 
 // styleFromStatus updates font color from

@@ -102,11 +102,26 @@ func (r *remoteFS) pathError(op, name string, err error) error {
 func (r *remoteFS) join(elem ...string) string { return path.Join(elem...) }
 func (r *remoteFS) base(p string) string       { return path.Base(p) }
 
+// abs returns the absolute path of the given path on the host, relative to
+// its current directory. A path with a Windows drive, as pwd gives it on a
+// Windows host (C:/Users), is given as SFTP has it, with a / (/C:/Users).
 func (r *remoteFS) abs(p string) string {
-	if path.IsAbs(p) {
-		return path.Clean(p)
+	if !path.IsAbs(p) && !hasDrive(p) {
+		p = path.Join(r.dir, p)
 	}
-	return path.Join(r.dir, p)
+	if hasDrive(p) {
+		p = "/" + p
+	}
+	return path.Clean(p)
+}
+
+// hasDrive returns whether the given path starts with a Windows drive (C:/).
+func hasDrive(p string) bool {
+	if len(p) < 3 {
+		return false
+	}
+	c := p[0] | 0x20 // lower case
+	return 'a' <= c && c <= 'z' && p[1] == ':' && p[2] == '/'
 }
 
 // SFTP returns the SFTP client of the connection to the host, which is

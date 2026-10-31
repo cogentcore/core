@@ -56,29 +56,29 @@ func TestPty(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	if runtime.GOOS == "windows" || runtime.GOOS == "js" {
+	if runtime.GOOS == "js" {
 		t.Skip("no terminal device")
 	}
 	raw := make(chan struct{})
-	p, err := Run(func(tty *os.File) error {
-		if !term.IsTerminal(int(tty.Fd())) {
+	p, err := Run(func(in, out *os.File) error {
+		if !term.IsTerminal(int(in.Fd())) {
 			return errors.New("not a terminal")
 		}
-		w, h, err := term.GetSize(int(tty.Fd()))
+		w, h, err := term.GetSize(int(out.Fd()))
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(tty, "size %d %d\n", w, h)
+		fmt.Fprintf(out, "size %d %d\n", w, h)
 		var x string
-		fmt.Fscanln(tty, &x)
-		fmt.Fprintf(tty, "got %s\n", x)
-		st, err := term.MakeRaw(int(tty.Fd()))
+		fmt.Fscanln(in, &x)
+		fmt.Fprintf(out, "got %s\n", x)
+		st, err := term.MakeRaw(int(in.Fd()))
 		if err != nil {
 			return err
 		}
 		raw <- struct{}{}
 		<-raw
-		term.Restore(int(tty.Fd()), st)
+		term.Restore(int(in.Fd()), st)
 		return errors.New("done")
 	}, 33, 7)
 	require.NoError(t, err)
