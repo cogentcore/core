@@ -103,7 +103,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	// we have to remake the surface and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
 	wsd := &wgpu.SurfaceDescriptor{
-		MetalLayer: &wgpu.SurfaceDescriptorFromMetalLayer{
+		MetalLayer: &wgpu.SurfaceSourceMetalLayer{
 			Layer: unsafe.Pointer(winptr), // TODO: probably not layer
 		},
 	}
