@@ -27,14 +27,12 @@ type VirtualText struct {
 	// Pos is the source position that the text is shown at.
 	Pos textpos.Pos
 
-	// Text is the text, which can contain newlines, in which case
+	// Text is the styled text, which can contain newlines, in which case
 	// the following lines are shown as separate lines in the view,
 	// with the source text after Pos following the last line.
-	Text []rune
-
-	// Style is the style of the text. If nil, the style of the
-	// source text at Pos is used.
-	Style *rich.Style
+	// It can have multiple spans with different styles, such as the
+	// clauses of a composition, or the parts of an inlay hint.
+	Text rich.Text
 }
 
 // virtualText is a [VirtualText] as stored for its source line.
@@ -44,10 +42,7 @@ type virtualText struct {
 	char int
 
 	// lines are the lines of the text, split at newlines.
-	lines [][]rune
-
-	// style is the style of the text, or nil to use the source text style.
-	style *rich.Style
+	lines []rich.Text
 
 	// layer is the layer of the text (see [Lines.SetVirtualText]).
 	layer string
@@ -61,7 +56,7 @@ type virtualText struct {
 func (vt *virtualText) len() int {
 	n := 0
 	for _, l := range vt.lines {
-		n += len(l)
+		n += l.Len()
 	}
 	return n
 }
@@ -103,7 +98,7 @@ func (ls *Lines) VirtualText(layer string, vid int) []VirtualText {
 			if vt.layer != layer || vt.view != vid {
 				continue
 			}
-			vts = append(vts, VirtualText{Pos: textpos.Pos{Line: ln, Char: vt.char}, Text: runes.Join(vt.lines, []rune("\n")), Style: vt.style})
+			vts = append(vts, VirtualText{Pos: textpos.Pos{Line: ln, Char: vt.char}, Text: joinLines(vt.lines)})
 		}
 	}
 	return vts
@@ -173,7 +168,7 @@ func (ls *Lines) setVirtualText(layer string, vid int, vts ...VirtualText) {
 	}
 	for _, vt := range vts {
 		pos, ok := ls.validCharPos(vt.Pos)
-		if !ok || len(vt.Text) == 0 {
+		if !ok || vt.Text.Len() == 0 {
 			continue
 		}
 		lvt := ls.virtual[pos.Line]
@@ -181,7 +176,7 @@ func (ls *Lines) setVirtualText(layer string, vid int, vts ...VirtualText) {
 		for i > 0 && lvt[i-1].char > pos.Char {
 			i--
 		}
-		ls.virtual[pos.Line] = slices.Insert(lvt, i, virtualText{char: pos.Char, lines: runes.Split(vt.Text, []rune("\n")), style: vt.Style, layer: layer, view: vid})
+		ls.virtual[pos.Line] = slices.Insert(lvt, i, virtualText{char: pos.Char, lines: splitLines(vt.Text), layer: layer, view: vid})
 		changed = true
 	}
 	if changed {
@@ -342,52 +337,71 @@ func (ls *Lines) displayLine(vw *view, ln int, txt []rune, mu rich.Text) ([]rune
 		}
 		dtxt = append(dtxt, txt[src:vt.char]...)
 		src = vt.char
-		sty := vt.style
-		if sty == nil {
-			sty = styleAt(dmu, len(dtxt))
-		}
 		for li, l := range vt.lines {
 			if li > 0 {
 				breaks = append(breaks, len(dtxt))
 			}
-			insertSpan(&dmu, len(dtxt), sty, l)
-			dtxt = append(dtxt, l...)
+			insertSpans(&dmu, len(dtxt), l)
+			dtxt = append(dtxt, l.Join()...)
 		}
 	}
 	dtxt = append(dtxt, txt[src:]...)
 	return dtxt, dmu, breaks
 }
 
-// styleAt returns the style of the markup at the given char position,
-// or the last style if it is at the end.
-func styleAt(mu rich.Text, ch int) *rich.Style {
-	if len(mu) == 0 {
-		return &rich.Style{}
+// insertSpans inserts copies of the spans of the given text into the
+// markup at the given char position, which can be its end.
+func insertSpans(mu *rich.Text, ch int, tx rich.Text) {
+	si := len(*mu)
+	if ch < mu.Len() {
+		if si = mu.SplitSpan(ch); si < 0 {
+			si = len(*mu)
+		}
 	}
-	si, _, _ := mu.Index(ch)
-	if si < 0 {
-		si = len(mu) - 1
+	spans := make([][]rune, 0, len(tx))
+	for _, sp := range tx {
+		if _, rn := rich.SpanLen(sp); rn > 0 {
+			spans = append(spans, slices.Clone(sp))
+		}
 	}
-	sty, _ := mu.Span(si)
-	return sty
+	*mu = slices.Insert(*mu, si, spans...)
 }
 
-// insertSpan inserts a span with the given style and text into the markup
-// at the given char position, which can be its end.
-func insertSpan(mu *rich.Text, ch int, sty *rich.Style, txt []rune) {
-	if len(txt) == 0 {
-		return
+// splitLines splits the text into lines at newlines, keeping the
+// styles of the spans, which can contain multiple lines.
+func splitLines(tx rich.Text) []rich.Text {
+	lines := []rich.Text{{}}
+	for _, sp := range tx {
+		sn, _ := rich.SpanLen(sp)
+		for i, part := range runes.Split(sp[sn:], []rune("\n")) {
+			if i > 0 {
+				lines = append(lines, rich.Text{})
+			}
+			if len(part) > 0 {
+				ln := &lines[len(lines)-1]
+				*ln = append(*ln, append(slices.Clone(sp[:sn]), part...))
+			}
+		}
 	}
-	if ch >= mu.Len() {
-		mu.AddSpan(sty, txt)
-		return
+	return lines
+}
+
+// joinLines joins lines of text with newlines,
+// which is the inverse of [splitLines].
+func joinLines(lines []rich.Text) rich.Text {
+	var tx rich.Text
+	for li, l := range lines {
+		if li > 0 {
+			if len(tx) == 0 {
+				tx.AddSpan(rich.NewStyle(), nil)
+			}
+			tx.AddRunes([]rune("\n"))
+		}
+		for _, sp := range l {
+			tx = append(tx, slices.Clone(sp))
+		}
 	}
-	si := mu.SplitSpan(ch)
-	if si < 0 {
-		mu.AddSpan(sty, txt)
-		return
-	}
-	mu.InsertSpan(si, sty, txt)
+	return tx
 }
 
 // virtualInserted updates the virtual text for text inserted from st to ed,

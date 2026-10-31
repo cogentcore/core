@@ -8,9 +8,15 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
 )
+
+// plain returns the given text as [rich.Text] with the default style.
+func plain(s string) rich.Text {
+	return rich.NewText(rich.NewStyle(), []rune(s))
+}
 
 // viewText returns the text of each view line of the given view.
 func viewText(ls *Lines, vid int) []string {
@@ -58,7 +64,7 @@ func TestVirtualIME(t *testing.T) {
 	other := ls.NewView(80)
 	ec := countEvents(ls, vid)
 
-	ls.SetVirtualText("ime", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 6}, Text: []rune("にほんご")})
+	ls.SetVirtualText("ime", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 6}, Text: plain("にほんご")})
 	assert.Equal(t, []string{"hello にほんごworld", "second line"}, viewText(ls, vid))
 	assert.Equal(t, []string{"hello world", "second line"}, viewText(ls, other))
 	assert.Equal(t, "hello world\nsecond line\n", ls.String())
@@ -75,7 +81,7 @@ func TestVirtualIME(t *testing.T) {
 	checkRoundTrip(t, ls, vid)
 
 	// the composition is converted
-	ls.SetVirtualText("ime", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 6}, Text: []rune("日本語")})
+	ls.SetVirtualText("ime", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 6}, Text: plain("日本語")})
 	assert.Equal(t, []string{"hello 日本語world", "second line"}, viewText(ls, vid))
 
 	// and committed
@@ -95,7 +101,7 @@ func TestVirtualInlay(t *testing.T) {
 	ls, vid := NewLinesFromBytes("dummy.txt", 80, []byte("foo(1, 2)\nbar(3)\n"))
 	other := ls.NewView(80)
 	hint := func(ln, ch int, txt string) VirtualText {
-		return VirtualText{Pos: textpos.Pos{Line: ln, Char: ch}, Text: []rune(txt)}
+		return VirtualText{Pos: textpos.Pos{Line: ln, Char: ch}, Text: plain(txt)}
 	}
 	ls.SetVirtualText("inlay", -1, hint(0, 4, "a: "), hint(0, 7, "b: "), hint(1, 4, "c: "))
 	want := []string{"foo(a: 1, b: 2)", "bar(c: 3)"}
@@ -133,7 +139,7 @@ func TestVirtualInlay(t *testing.T) {
 // TestVirtualWrap tests wrapping of lines with virtual text.
 func TestVirtualWrap(t *testing.T) {
 	ls, vid := NewLinesFromBytes("dummy.txt", 12, []byte("alpha beta gamma delta\n"))
-	ls.SetVirtualText("inlay", -1, VirtualText{Pos: textpos.Pos{Line: 0, Char: 6}, Text: []rune("hint: ")})
+	ls.SetVirtualText("inlay", -1, VirtualText{Pos: textpos.Pos{Line: 0, Char: 6}, Text: plain("hint: ")})
 	assert.Equal(t, []string{"alpha hint: ", "beta gamma ", "delta"}, viewText(ls, vid))
 	// the cursor at the hint is shown before it, and the text after it is wrapped
 	assert.Equal(t, textpos.Pos{Line: 0, Char: 6}, ls.PosToView(vid, textpos.Pos{Line: 0, Char: 6}))
@@ -145,7 +151,7 @@ func TestVirtualWrap(t *testing.T) {
 // completion, whose lines are separate view lines that the cursor skips.
 func TestVirtualSuggestion(t *testing.T) {
 	ls, vid := NewLinesFromBytes("dummy.txt", 80, []byte("func f() {\n}\n"))
-	sug := VirtualText{Pos: textpos.Pos{Line: 0, Char: 10}, Text: []rune("\n  a := 1\n  return a")}
+	sug := VirtualText{Pos: textpos.Pos{Line: 0, Char: 10}, Text: plain("\n  a := 1\n  return a")}
 	ls.SetVirtualText("suggestion", vid, sug)
 	assert.Equal(t, []string{"func f() {", "  a := 1", "  return a", "}"}, viewText(ls, vid))
 	assert.Equal(t, textpos.Pos{Line: 0, Char: 10}, ls.PosFromView(vid, textpos.Pos{Line: 1, Char: 3}))
@@ -160,12 +166,49 @@ func TestVirtualSuggestion(t *testing.T) {
 	// accepting it inserts exactly its text
 	ls.ClearVirtualText("suggestion", vid)
 	assert.Equal(t, []string{"func f() {", "}"}, viewText(ls, vid))
-	ls.InsertText(sug.Pos, sug.Text)
+	ls.InsertText(sug.Pos, sug.Text.Join())
 	assert.Equal(t, "func f() {\n  a := 1\n  return a\n}\n", ls.String())
 
 	// in the middle of a line, the rest of the line follows its last line
-	ls.SetVirtualText("suggestion", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 5}, Text: []rune("X\nY")})
+	ls.SetVirtualText("suggestion", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 5}, Text: plain("X\nY")})
 	assert.Equal(t, []string{"func X", "Yf() {", "  a := 1", "  return a", "}"}, viewText(ls, vid))
 	assert.Equal(t, textpos.Pos{Line: 1, Char: 2}, ls.PosToView(vid, textpos.Pos{Line: 0, Char: 6}))
+	checkRoundTrip(t, ls, vid)
+}
+
+// TestVirtualSpans tests virtual text with multiple styled spans,
+// such as the clauses of a composition, including a span with a newline.
+func TestVirtualSpans(t *testing.T) {
+	ls, vid := NewLinesFromBytes("dummy.txt", 80, []byte("xyz\n"))
+	bold := rich.NewStyle()
+	bold.Weight = rich.Bold
+	under := rich.NewStyle().SetDecoration(rich.Underline)
+	var tx rich.Text
+	tx.AddSpan(bold, []rune("ab\ncd")).AddSpan(under, []rune("ef"))
+	ls.SetVirtualText("ime", vid, VirtualText{Pos: textpos.Pos{Line: 0, Char: 1}, Text: tx})
+	assert.Equal(t, []string{"xab", "cdefyz"}, viewText(ls, vid))
+
+	// spanStyles returns the text and style of each span of a view line.
+	spanStyles := func(vl int) ([]string, []*rich.Style) {
+		ls.Lock()
+		defer ls.Unlock()
+		mu := ls.view(vid).markup[vl]
+		var txt []string
+		var stys []*rich.Style
+		for si := range mu {
+			sty, r := mu.Span(si)
+			txt = append(txt, string(r))
+			stys = append(stys, sty)
+		}
+		return txt, stys
+	}
+	txt, stys := spanStyles(0)
+	assert.Equal(t, []string{"x", "ab"}, txt)
+	assert.Equal(t, bold, stys[1])
+	txt, stys = spanStyles(1)
+	assert.Equal(t, []string{"cd", "ef", "yz"}, txt)
+	assert.Equal(t, bold, stys[0])
+	assert.Equal(t, under, stys[1])
+	assert.Equal(t, "ab\ncdef", string(ls.VirtualText("ime", vid)[0].Text.Join()))
 	checkRoundTrip(t, ls, vid)
 }

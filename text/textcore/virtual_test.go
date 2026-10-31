@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/lines"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
 )
@@ -48,7 +49,7 @@ func TestEditorVirtualIME(t *testing.T) {
 	pos := textpos.Pos{Line: 0, Char: 6}
 	b.AssertRender(t, "virtual/ime", func() {
 		ed.SetCursorShow(pos)
-		ed.SetVirtualText("ime", lines.VirtualText{Pos: pos, Text: []rune("compose"), Style: ed.CompositionStyle()})
+		ed.SetVirtualText("ime", lines.VirtualText{Pos: pos, Text: rich.NewText(ed.CompositionStyle(), []rune("compose"))})
 	}, func() {
 		cw := ed.charSize.X
 		p6 := ed.CharStartPos(pos)
@@ -77,9 +78,9 @@ func TestEditorVirtualInlay(t *testing.T) {
 	twin.SetLines(ed.Lines)
 	b.AssertRender(t, "virtual/inlay", func() {
 		ed.Lines.SetVirtualText("inlay", -1,
-			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 4}, Text: []rune("a: "), Style: ed.HintStyle()},
-			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 7}, Text: []rune("b: "), Style: ed.HintStyle()})
-		ed.SetVirtualText("ime", lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 9}, Text: []rune("x"), Style: ed.CompositionStyle()})
+			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 4}, Text: rich.NewText(ed.HintStyle(), []rune("a: "))},
+			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 7}, Text: rich.NewText(ed.HintStyle(), []rune("b: "))})
+		ed.SetVirtualText("ime", lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 9}, Text: rich.NewText(ed.CompositionStyle(), []rune("x"))})
 	}, func() {
 		end := textpos.Pos{Line: 0, Char: 9}
 		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, ed.Lines.PosToView(ed.viewId, end))
@@ -101,7 +102,7 @@ func TestEditorVirtualSuggestion(t *testing.T) {
 	b := core.NewBody()
 	ed := newWideEditor(b)
 	ed.Lines.SetString("func f() {\n}\n")
-	sug := lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 10}, Text: []rune("\n\ta := 1\n\treturn a"), Style: ed.SuggestionStyle()}
+	sug := lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 10}, Text: rich.NewText(ed.SuggestionStyle(), []rune("\n\ta := 1\n\treturn a"))}
 	b.AssertRender(t, "virtual/suggestion", func() {
 		ed.SetCursorShow(sug.Pos)
 		ed.SetVirtualText("suggestion", sug)
@@ -116,6 +117,6 @@ func TestEditorVirtualSuggestion(t *testing.T) {
 
 	// accept
 	ed.ClearVirtualText("suggestion")
-	ed.Lines.InsertText(sug.Pos, sug.Text)
+	ed.Lines.InsertText(sug.Pos, sug.Text.Join())
 	assert.Equal(t, "func f() {\n\ta := 1\n\treturn a\n}\n", ed.Lines.String())
 }
