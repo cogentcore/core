@@ -58,7 +58,9 @@ func (c *Config) RunIO(cio *CmdIO, cmd string, args ...string) error {
 
 // RunIOContext is [Config.RunIO] with a context: if it is not nil, the
 // command is interrupted when the context is done, as a shell does for
-// Control+C, and killed if it has not ended after [InterruptWait].
+// Control+C, and killed if it has not ended after [InterruptWait]. On
+// Windows, a command in the console of this process is not interrupted, as
+// it gets the Control+C typed in the console itself.
 func (c *Config) RunIOContext(ctx context.Context, cio *CmdIO, cmd string, args ...string) error {
 	cm, _, err := c.exec(ctx, &cio.StdIO, false, cmd, args...)
 	cio.Cmd = cm

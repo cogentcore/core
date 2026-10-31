@@ -6,7 +6,16 @@
 
 package exec
 
-import "os"
+import (
+	"io"
+	"os"
+)
+
+// interruptible returns whether a command that is run with a context
+// is interrupted when the context is done (see [interrupt]).
+func interruptible() bool {
+	return true
+}
 
 // interrupt interrupts the given process of a command whose context is
 // done, with an interrupt signal, as a shell does for Control+C. It is
@@ -17,4 +26,10 @@ func interrupt(p *os.Process) error {
 		return p.Kill()
 	}
 	return nil
+}
+
+// saveConsole returns a function that restores the modes of the console
+// of the given standard input and output, which is only needed on Windows.
+func saveConsole(in io.Reader, out io.Writer) func() {
+	return func() {}
 }
