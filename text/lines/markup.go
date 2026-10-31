@@ -267,6 +267,13 @@ func (ls *Lines) linesEdited(tbe *textpos.Edit) {
 // linesInserted inserts new lines for all other line-based slices
 // corresponding to lines inserted in the lines slice.
 func (ls *Lines) linesInserted(tbe *textpos.Edit) {
+	ls.insertLineSlices(tbe)
+	ls.linesEdited(tbe)
+}
+
+// insertLineSlices inserts the per-line data for the lines inserted
+// in the given edit, after its start line.
+func (ls *Lines) insertLineSlices(tbe *textpos.Edit) {
 	stln := tbe.Region.Start.Line + 1
 	nsz := (tbe.Region.End.Line - tbe.Region.Start.Line)
 
@@ -275,6 +282,7 @@ func (ls *Lines) linesInserted(tbe *textpos.Edit) {
 		ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
 		ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
 		ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
+		ls.virtual = slices.Insert(ls.virtualLinesFor(len(ls.tags)-nsz), stln, make([][]virtualText, nsz)...)
 
 		for _, vw := range ls.views {
 			vw.lineToVline = slices.Insert(vw.lineToVline, stln, make([]int, nsz)...)
@@ -284,7 +292,6 @@ func (ls *Lines) linesInserted(tbe *textpos.Edit) {
 			pfs.Src.LinesInserted(stln, nsz)
 		}
 	}
-	ls.linesEdited(tbe)
 }
 
 // linesDeleted deletes lines in Markup corresponding to lines
@@ -297,6 +304,9 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 		ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
 		ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
 		ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
+		if len(ls.virtual) > edln {
+			ls.virtual = append(ls.virtual[:stln], ls.virtual[edln:]...)
+		}
 		if ls.Highlighter.UsingParse() {
 			pfs := ls.parseState.Done()
 			pfs.Src.LinesDeleted(stln, edln)

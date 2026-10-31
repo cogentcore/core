@@ -414,26 +414,26 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	if cp.Y < 0 {
 		return textpos.PosErr
 	}
+	// The chars of the view line are found in view coordinates, which
+	// include any virtual text, which maps to its source position.
 	vln := stln + int(math32.Floor(cp.Y))
 	vpos := textpos.Pos{Line: vln, Char: 0}
-	srcp := ed.Lines.PosFromView(ed.viewId, vpos)
-	stp := ed.charStartPos(srcp)
+	stp := ed.viewCharStartPos(vpos)
 	if ptf.X < stp.X {
-		return srcp
+		return ed.Lines.PosFromView(ed.viewId, vpos)
 	}
-	scc := srcp.Char
 	hc := 0.5 * ed.charSize.X
 	vll := ed.Lines.ViewLineLen(ed.viewId, vln)
 	for cc := range vll {
-		srcp.Char = scc + cc
-		edp := ed.charStartPos(textpos.Pos{Line: srcp.Line, Char: scc + cc + 1})
+		vpos.Char = cc
+		edp := ed.viewCharStartPos(textpos.Pos{Line: vln, Char: cc + 1})
 		if ptf.X >= stp.X-hc && ptf.X < edp.X-hc {
-			return srcp
+			return ed.Lines.PosFromView(ed.viewId, vpos)
 		}
 		stp = edp
 	}
-	srcp.Char = scc + vll
-	return srcp
+	vpos.Char = vll
+	return ed.Lines.PosFromView(ed.viewId, vpos)
 }
 
 // CharStartPos returns the starting (top left) render coords for the
@@ -450,11 +450,20 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	if ed.Lines == nil {
 		return math32.Vector2{}
 	}
+	return ed.viewCharStartPos(ed.Lines.PosToView(ed.viewId, pos))
+}
+
+// viewCharStartPos returns the starting (top left) render coords for the
+// given view position, in view lines and display chars, which include
+// any virtual text.
+func (ed *Base) viewCharStartPos(vpos textpos.Pos) math32.Vector2 {
+	if ed.Lines == nil {
+		return math32.Vector2{}
+	}
 	scpos := image.Point{}
 	if ed.Scene != nil {
 		scpos = ed.Scene.SceneGeom.Pos
 	}
-	vpos := ed.Lines.PosToView(ed.viewId, pos)
 	spos := ed.Geom.Pos.Content.Add(math32.FromPoint(scpos))
 	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y

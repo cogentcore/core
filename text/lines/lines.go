@@ -130,6 +130,10 @@ type Lines struct {
 	// hiTags are the syntax highlighting tags, which are auto-generated.
 	hiTags []lexer.Line
 
+	// virtual is the display-only virtual text for each line,
+	// in order of position (see [Lines.SetVirtualText]).
+	virtual [][]virtualText
+
 	// markup is the [rich.Text] encoded marked-up version of the text lines,
 	// with the results of syntax highlighting. It just has the raw markup without
 	// additional layout for a specific line width, which goes in a [view].
@@ -240,6 +244,7 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 	ls.tags = slicesx.SetLength(ls.tags, n)
 	ls.hiTags = slicesx.SetLength(ls.hiTags, n)
 	ls.markup = slicesx.SetLength(ls.markup, n)
+	ls.virtual = make([][]virtualText, n) // positions are not valid for new text
 	for ln, txt := range lns {
 		ls.lines[ln] = runes.SetFromBytes(ls.lines[ln], txt)
 		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln]) // start with raw
@@ -335,11 +340,13 @@ func (ls *Lines) replaceLinesMarkup(start, end int, text [][]rune, markup []rich
 	ls.markup = slices.Replace(ls.markup, start, end, markup...)
 	ls.tags = slices.Replace(ls.tags, start, end, make([]lexer.Line, nt)...)
 	ls.hiTags = slices.Replace(ls.hiTags, start, end, make([]lexer.Line, nt)...)
+	ls.virtual = slices.Replace(ls.virtualLinesFor(n), start, end, make([][]virtualText, nt)...)
 	if ls.numLines() == 0 { // there is always at least one line
 		ls.lines = [][]rune{{}}
 		ls.markup = []rich.Text{rich.NewText(ls.fontStyle, nil)}
 		ls.tags = make([]lexer.Line, 1)
 		ls.hiTags = make([]lexer.Line, 1)
+		ls.virtual = make([][]virtualText, 1)
 	}
 	if end == n { // only the tail changed, so other lines keep their indexes
 		for ln := range ls.links {
@@ -541,6 +548,7 @@ func (ls *Lines) deleteTextImpl(st, ed textpos.Pos) *textpos.Edit {
 		if st.Line < nl {
 			ec := min(ed.Char, len(ls.lines[st.Line])) // somehow region can still not be valid.
 			ls.lines[st.Line] = append(ls.lines[st.Line][:st.Char], ls.lines[st.Line][ec:]...)
+			ls.virtualDeleted(st, textpos.Pos{Line: st.Line, Char: ec})
 			ls.linesEdited(tbe)
 		}
 	} else {
@@ -564,6 +572,7 @@ func (ls *Lines) deleteTextImpl(st, ed textpos.Pos) *textpos.Edit {
 		if eoed != nil {
 			ls.lines[cpln] = append(ls.lines[cpln], eoed...)
 		}
+		ls.virtualDeleted(st, ed)
 		ls.linesDeleted(tbe)
 	}
 	ls.setChanged()
@@ -632,6 +641,7 @@ func (ls *Lines) appendLines(n int) {
 	ls.markup = append(ls.markup, make([]rich.Text, n)...)
 	ls.tags = append(ls.tags, make([]lexer.Line, n)...)
 	ls.hiTags = append(ls.hiTags, make([]lexer.Line, n)...)
+	ls.virtual = append(ls.virtualLinesFor(len(ls.tags)-n), make([][]virtualText, n)...)
 	for _, vw := range ls.views {
 		vw.lineToVline = append(vw.lineToVline, make([]int, n)...)
 	}
@@ -650,6 +660,7 @@ func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
 		ls.lines[st.Line] = slices.Insert(ls.lines[st.Line], st.Char, txt[0]...)
 		ed.Char += len(txt[0])
 		tbe = ls.region(st, ed)
+		ls.virtualInserted(st, ed)
 		ls.linesEdited(tbe)
 	} else {
 		if ls.lines[st.Line] == nil {
@@ -671,7 +682,9 @@ func (ls *Lines) insertTextImpl(st textpos.Pos, txt [][]rune) *textpos.Edit {
 			ls.lines[ed.Line] = append(ls.lines[ed.Line], eost...)
 		}
 		tbe = ls.region(st, ed)
-		ls.linesInserted(tbe)
+		ls.insertLineSlices(tbe)
+		ls.virtualInserted(st, ed)
+		ls.linesEdited(tbe)
 	}
 	ls.setChanged()
 	return tbe

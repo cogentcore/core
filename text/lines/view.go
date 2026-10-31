@@ -15,14 +15,18 @@ import (
 // the original [Lines.lines] source lines, with wrapping according to
 // the view width. Views are managed by the Lines.
 type view struct {
+	// id is the unique id of the view in its [Lines].
+	id int
+
 	// width is the current line width in rune characters, used for line wrapping.
 	width int
 
 	// viewLines is the total number of line-wrapped lines.
 	viewLines int
 
-	// vlineStarts are the positions in the original [Lines.lines] source for
-	// the start of each view line. This slice is viewLines in length.
+	// vlineStarts are the positions of the start of each view line, as the
+	// source line and the display char position in that line, which includes
+	// any [VirtualText] (see [Lines.srcToDisplay]). This slice is viewLines in length.
 	vlineStarts []textpos.Pos
 
 	// markup is the view-specific version of the [Lines.markup] markup for
@@ -57,15 +61,15 @@ func (ls *Lines) viewLineLen(vw *view, vl int) int {
 		vl = n - 1
 	}
 	vs := vw.vlineStarts[vl]
-	sl := ls.lines[vs.Line]
+	sl := ls.displayLineLen(vw, vs.Line)
 	if vl == vw.viewLines-1 {
-		return len(sl) + 1 - vs.Char
+		return sl + 1 - vs.Char
 	}
 	np := vw.vlineStarts[vl+1]
 	if np.Line == vs.Line {
 		return np.Char - vs.Char
 	}
-	return len(sl) + 1 - vs.Char
+	return sl + 1 - vs.Char
 }
 
 // viewLinesRange returns the start and end view lines for given
@@ -96,6 +100,26 @@ func (ls *Lines) validViewLine(vw *view, ln int) int {
 // offset into that view line for given source line, char position.
 // Is robust to out-of-range positions.
 func (ls *Lines) posToView(vw *view, pos textpos.Pos) textpos.Pos {
+	if pos.Line < 0 || pos.Line >= len(ls.lines) {
+		return ls.displayToView(vw, pos)
+	}
+	pos.Char = ls.srcToDisplay(vw, pos.Line, pos.Char)
+	vp := ls.displayToView(vw, pos)
+	// A position at the start of a view line that starts with virtual
+	// text is shown at the end of the previous view line, as the cursor
+	// is shown before virtual text.
+	if vp.Char == 0 && vp.Line > 0 && vp.Line < len(vw.vlineStarts) {
+		prev := vw.vlineStarts[vp.Line-1]
+		if prev.Line == pos.Line && ls.isVirtualDisplay(vw, pos.Line, pos.Char) {
+			return textpos.Pos{Line: vp.Line - 1, Char: pos.Char - prev.Char}
+		}
+	}
+	return vp
+}
+
+// displayToView returns the view position for the given position
+// in terms of the source line and display char in that line.
+func (ls *Lines) displayToView(vw *view, pos textpos.Pos) textpos.Pos {
 	vp := pos
 	vl := ls.validViewLine(vw, pos.Line)
 	vp.Line = vl
@@ -140,11 +164,14 @@ func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
 	if vlen == 0 {
 		vlen = 1
 	}
+	sp := vw.vlineStarts[vl]
+	if vl+1 < n && vw.vlineStarts[vl+1].Line == sp.Line && ls.isVirtualDisplay(vw, sp.Line, vw.vlineStarts[vl+1].Char) {
+		vlen++ // the end of the view line is before the virtual text that starts the next one
+	}
 	vp.Char = min(vp.Char, vlen-1)
 	pos := vp
-	sp := vw.vlineStarts[vl]
 	pos.Line = sp.Line
-	pos.Char = sp.Char + vp.Char
+	pos.Char = ls.displayToSrc(vw, sp.Line, sp.Char+vp.Char)
 	return pos
 }
 
@@ -185,7 +212,7 @@ func (ls *Lines) newView(width int) (*view, int) {
 		mxi = max(i, mxi)
 	}
 	id := mxi + 1
-	vw := &view{width: width}
+	vw := &view{id: id, width: width}
 	ls.views[id] = vw
 	ls.layoutViewLines(vw)
 	return vw, id

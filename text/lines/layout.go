@@ -26,7 +26,7 @@ func (ls *Lines) layoutViewLines(vw *view) {
 	vw.lineToVline = slicesx.SetLength(vw.lineToVline, n)
 	nln := 0
 	for ln, mu := range ls.markup {
-		muls, vst := ls.layoutViewLine(ln, vw.width, ls.lines[ln], mu)
+		muls, vst := ls.layoutViewLine(vw, ln, ls.lines[ln], mu)
 		vw.lineToVline[ln] = len(vw.vlineStarts)
 		vw.markup = append(vw.markup, muls...)
 		vw.vlineStarts = append(vw.vlineStarts, vst...)
@@ -52,7 +52,7 @@ func (ls *Lines) layoutViewLinesFrom(vw *view, start int) {
 	vw.vlineStarts = vw.vlineStarts[:vst]
 	vw.lineToVline = slicesx.SetLength(vw.lineToVline, n)
 	for ln := start; ln < n; ln++ {
-		muls, vst := ls.layoutViewLine(ln, vw.width, ls.lines[ln], ls.markup[ln])
+		muls, vst := ls.layoutViewLine(vw, ln, ls.lines[ln], ls.markup[ln])
 		vw.lineToVline[ln] = len(vw.vlineStarts)
 		vw.markup = append(vw.markup, muls...)
 		vw.vlineStarts = append(vw.vlineStarts, vst...)
@@ -64,7 +64,11 @@ func (ls *Lines) layoutViewLinesFrom(vw *view, start int) {
 // for given view text, with the given markup rich.Text.
 // The layout is implemented in the markup that is returned.
 // This clones and then modifies the given markup rich text.
-func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich.Text, []textpos.Pos) {
+// Any [VirtualText] for the view is included, so the returned
+// view line starts are in display chars (see [Lines.srcToDisplay]).
+func (ls *Lines) layoutViewLine(vw *view, ln int, txt []rune, mu rich.Text) ([]rich.Text, []textpos.Pos) {
+	width := vw.width
+	txt, mu, forced := ls.displayLine(vw, ln, txt, mu)
 	lt := mu.Clone()
 	n := len(txt)
 	sp := textpos.Pos{Line: ln, Char: 0} // source startinng position
@@ -75,6 +79,20 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 	prevWasTab := false
 	i := 0
 	for i < n {
+		if len(forced) > 0 && i >= forced[0] { // next line of multi-line virtual text
+			forced = forced[1:]
+			clen = 0
+			start = false
+			prevWasTab = false
+			if i > sp.Char || len(vst) == 0 {
+				sp.Char = i
+				vst = append(vst, sp)
+				if si := lt.SplitSpan(i); si >= 0 {
+					breaks = append(breaks, si)
+				}
+			}
+			continue
+		}
 		r := txt[i]
 		si, sn, ri := lt.Index(i)
 		startOfSpan := sn == ri
@@ -114,6 +132,9 @@ func (ls *Lines) layoutViewLine(ln, width int, txt []rune, mu rich.Text) ([]rich
 			}
 			prevWasTab = false
 			ns := NextSpace(txt, i)
+			if len(forced) > 0 && forced[0] < ns {
+				ns = forced[0]
+			}
 			wlen := ns - i // length of word
 			// fmt.Println("word at:", i, "ns:", ns, string(txt[i:ns]))
 			if clen+wlen > width { // need to wrap
