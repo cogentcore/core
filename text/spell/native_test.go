@@ -145,3 +145,20 @@ func TestSpellDataFallback(t *testing.T) {
 		t.Errorf("misspelled: %v", bad)
 	}
 }
+
+func TestCheckLexLine(t *testing.T) {
+	UseNative = false
+	defer func() { UseNative = true }()
+	sv := Spell
+	defer func() { Spell = sv }()
+	Spell = NewSpell("")
+	src := []rune("the “wrold” is, «quite» nice speling.")
+	ser := CheckLexLine(src, nil)
+	var got []string
+	for _, t := range ser {
+		got = append(got, string(t.Src(src)))
+	}
+	if !slices.Equal(got, []string{"wrold", "speling"}) {
+		t.Errorf("misspelled: %q", got)
+	}
+}

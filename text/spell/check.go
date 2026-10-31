@@ -6,6 +6,7 @@ package spell
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/token"
@@ -25,10 +26,9 @@ func CheckLexLine(src []rune, tags lexer.Line) lexer.Line {
 		if len(lwrd) <= 2 {
 			continue
 		}
-		widx := strings.Index(wrd, lwrd)
-		ld := len(wrd) - len(lwrd)
-		t.Start += widx
-		t.End += widx - ld
+		// Start and End are rune indexes.
+		t.Start += utf8.RuneCountInString(wrd[:strings.Index(wrd, lwrd)])
+		t.End = t.Start + utf8.RuneCountInString(lwrd)
 		lexs = append(lexs, t)
 		words = append(words, lwrd)
 	}
