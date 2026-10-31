@@ -12,9 +12,9 @@ import (
 
 func TestTree(t *testing.T) {
 	b := core.NewBody()
-	// testdata/events has empty files with the names of the files of
-	// the events package at one point, so that the image does not change
-	// when they change.
+	// testdata/events is a copy of the files of the events package at one
+	// point (their contents matter for generated files, which are shown
+	// differently), so that the image does not change when they change.
 	NewTree(b).OpenPath("testdata/events")
 	b.AssertRender(t, "basic")
 }
