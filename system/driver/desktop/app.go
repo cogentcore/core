@@ -80,9 +80,11 @@ func (a *App) MainLoop() {
 
 // InitGPU initializes glfw, gpu, and the screens.
 func (a *App) InitGPU() {
+	restore := imeInitApp()
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("system/driver/desktop failed to initialize glfw:", err)
 	}
+	restore()
 	glfw.SetMonitorCallback(a.MonitorChange)
 	a.GetScreens()
 }

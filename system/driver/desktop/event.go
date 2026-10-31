@@ -50,6 +50,9 @@ func (w *Window) FocusWindow() *Window {
 
 // physical key
 func (w *Window) KeyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
+	if w.imeKey(ky, scancode, action, mod) {
+		return
+	}
 	mods := GlfwMods(mod)
 	if TheApp.Platform() == system.MacOS {
 		mods.SetFlag(true, key.NumLock) // mac always acts like numlock is on
@@ -69,6 +72,9 @@ func (w *Window) KeyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glf
 
 // char input
 func (w *Window) CharEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
+	if w.imeChar() {
+		return
+	}
 	mods := GlfwMods(mod)
 	fw := w.FocusWindow()
 	fw.Event.KeyChord(char, key.CodeUnknown, mods)
