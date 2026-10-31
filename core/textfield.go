@@ -125,6 +125,9 @@ type TextField struct { //core:embedder
 	// cursorPos is the current cursor position as rune index into string.
 	cursorPos int
 
+	// composition is the state of text being composed with an input method.
+	composition textFieldComposition
+
 	// cursorLine is the current cursor line position, for word wrap case.
 	cursorLine int
 
@@ -1239,6 +1242,7 @@ func (tf *TextField) updateCursorPosition() {
 	if !ok {
 		tf.startCursor()
 	}
+	tf.updateTextInput()
 }
 
 // renderSelect renders the selected region, if any, underneath the text
@@ -1453,6 +1457,10 @@ func (tf *TextField) setCursorFromPixel(pt image.Point, selMode events.SelectMod
 }
 
 func (tf *TextField) handleKeyEvents() {
+	tf.On(events.Composition, func(e events.Event) {
+		tf.compose(e.(*events.TextComposition))
+		e.SetHandled()
+	})
 	tf.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
@@ -1627,6 +1635,8 @@ func (tf *TextField) handleKeyEvents() {
 			e.SetHandled()
 			return
 		}
+		tf.endComposition()
+		tf.ClearTextInput()
 		tf.editDone()
 	})
 }
@@ -1771,6 +1781,9 @@ func (tf *TextField) layoutCurrent() {
 	sty, tsty := tf.Styles.NewRichText()
 	tsty.Color = colors.ToUniform(clr)
 	tx := rich.NewText(sty, cur)
+	if tf.composition.active && !tf.NoEcho && len(tf.editText) > 0 {
+		tx = tf.compositionText(sty, cur)
+	}
 	tf.renderVisible = tf.Scene.TextShaper().WrapLines(tx, sty, tsty, availSz)
 	tf.renderedRange = tf.dispRange
 }
