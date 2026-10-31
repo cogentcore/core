@@ -30,7 +30,7 @@ func known(nc nativeChecker, w string) bool {
 
 func TestNative(t *testing.T) {
 	nc := testNative(t)
-	for _, w := range []string{"hello", "world", "don't", "Paris", "naïve"} {
+	for _, w := range []string{"hello", "world", "don't", "Paris"} {
 		if !known(nc, w) {
 			t.Errorf("%q should be known", w)
 		}
@@ -40,9 +40,18 @@ func TestNative(t *testing.T) {
 			t.Errorf("%q should not be known", w)
 		}
 	}
+	// The non-ASCII words test the mapping of offsets back to words,
+	// but not all English dictionaries have them (e.g., hunspell en_US).
 	words := []string{"naïve", "teh", "über", "quick", "wrold", "don't", "recieve", "the", "the"}
-	if bad, ok := nc.misspelled(words); !ok || !slices.Equal(bad, []int{1, 4, 6}) {
-		t.Errorf("misspelled: got %v, want [1 4 6]", bad)
+	want := []int{1, 4, 6}
+	for _, i := range []int{2, 0} {
+		if !known(nc, words[i]) {
+			want = slices.Insert(want, 0, i)
+		}
+	}
+	slices.Sort(want)
+	if bad, ok := nc.misspelled(words); !ok || !slices.Equal(bad, want) {
+		t.Errorf("misspelled: got %v, want %v", bad, want)
 	}
 	sugs := nc.suggest("speling")
 	if !slices.Contains(sugs, "spelling") {
