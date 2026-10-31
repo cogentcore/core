@@ -233,3 +233,7 @@ func (w *Window[A]) SetTitleBarIsDark(isDark bool) {
 func (w *Window[A]) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {
 	return false // not supported by default
 }
+
+func (w *Window[A]) SetTextInput(ti *system.TextInput) {
+	// no-op by default
+}

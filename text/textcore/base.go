@@ -135,6 +135,9 @@ type Base struct { //core:embedder
 	// It ensures that the target position is visible.
 	cursorTarget textpos.Pos
 
+	// composition is the state of text being composed with an input method.
+	composition composition
+
 	// cursorColumn is the desired cursor column, where the cursor was
 	// last when moved using left / right arrows.
 	// It is used when doing up / down to not always go to short line columns.

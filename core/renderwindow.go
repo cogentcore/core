@@ -96,6 +96,11 @@ type renderWindow struct {
 	// all the os-specific functions, including delivering events etc
 	SystemWindow system.Window `json:"-" xml:"-"`
 
+	// textInput is the current text input state set with
+	// [WidgetBase.SetTextInput], and textInputWidget the widget that set it.
+	textInput       *system.TextInput
+	textInputWidget Widget
+
 	// mains is the stack of main stages in this render window.
 	// The [RenderContext] in this manager is the original source for all Stages.
 	mains stages

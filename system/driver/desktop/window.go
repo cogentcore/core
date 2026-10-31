@@ -127,6 +127,7 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 	}
 	w.Glw = glw
 	w.initDrag()
+	w.initIME()
 	return nil
 }
 

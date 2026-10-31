@@ -148,6 +148,8 @@ func (ed *Editor) handleFocus() {
 		if !ed.IsReadOnly() && ed.AbilityIs(abilities.Focusable) {
 			ed.editDone()
 		}
+		ed.endComposition()
+		ed.ClearTextInput()
 	})
 	ed.OnFocus(func(e events.Event) {
 		ed.startCursor()
@@ -157,6 +159,10 @@ func (ed *Editor) handleFocus() {
 func (ed *Editor) handleKeyChord() {
 	ed.OnKeyChord(func(e events.Event) {
 		ed.keyInput(e)
+	})
+	ed.On(events.Composition, func(e events.Event) {
+		ed.compose(e.(*events.TextComposition))
+		e.SetHandled()
 	})
 }
 

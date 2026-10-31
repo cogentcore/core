@@ -168,6 +168,12 @@ const (
 	// It can be somewhat delayed relative to the KeyUp.
 	KeyChord
 
+	// Composition is sent to the focused widget while the user composes
+	// text with an input method (IME), with the text not yet committed
+	// (see [TextComposition]). The committed text is sent as KeyChord
+	// events, after a Composition event with empty text.
+	Composition
+
 	// TouchStart is when a touch event starts, for the low-level touch
 	// event processing.  TouchStart also activates MouseDown, Scroll,
 	// Magnify, or Rotate events depending on gesture recognition.

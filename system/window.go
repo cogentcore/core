@@ -232,6 +232,14 @@ type Window interface {
 	// then sent as external drag events (see [events.Source.DragExternal]).
 	// It returns false if not supported on this platform.
 	StartDrag(data mimedata.Mimes, files []string, img image.Image) bool
+
+	// SetTextInput sets the state of text input in this window for the
+	// input method (IME) of the operating system, which sends the text
+	// being composed as [events.Composition] events. The focused text
+	// widget sets it when it gets the focus and when its cursor moves,
+	// and sets it to nil when it loses the focus, which also ends any
+	// composition. It does nothing on platforms without support.
+	SetTextInput(ti *TextInput)
 }
 
 ////////////////////////////////////////////////////////////////////////////

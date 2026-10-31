@@ -67,6 +67,7 @@ func (ed *Base) updateCursorPosition() {
 	if !ok {
 		ed.startCursor()
 	}
+	ed.updateTextInput()
 }
 
 // cursorBBox returns a bounding-box for a cursor at given position
