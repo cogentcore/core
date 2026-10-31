@@ -48,7 +48,7 @@ func cstr(s string) (*C.char, C.int) {
 	return C.CString(s), C.int(len(s))
 }
 
-func (mc *macChecker) misspelled(words []string) []int {
+func (mc *macChecker) misspelled(words []string) ([]int, bool) {
 	// Check all of the words in one string, so that only one call to the
 	// spelling server is needed when there are no errors, and record the
 	// UTF-16 offset of each word to map the misspelled locations back.
@@ -74,7 +74,7 @@ func (mc *macChecker) misspelled(words []string) []int {
 	mc.mu.Unlock()
 	defer C.spellFreeLocations(res)
 	if res.count == 0 {
-		return nil
+		return nil, true
 	}
 	var bad []int
 	for _, loc := range unsafe.Slice(res.locs, int(res.count)) {
@@ -86,7 +86,7 @@ func (mc *macChecker) misspelled(words []string) []int {
 			bad = append(bad, i)
 		}
 	}
-	return bad
+	return bad, true
 }
 
 func (mc *macChecker) suggest(word string) []string {

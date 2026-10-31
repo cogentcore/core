@@ -236,18 +236,21 @@ func (sp *SpellData) Misspelled(words []string) []int {
 	}
 	sp.mu.RUnlock()
 	if len(check) > 0 {
-		bad := sp.native.misspelled(check)
-		sp.mu.Lock()
-		if len(sp.known)+len(check) > maxKnownCache {
-			clear(sp.known)
+		// If the check fails, nothing is cached, so the words are
+		// checked again next time.
+		if bad, ok := sp.native.misspelled(check); ok {
+			sp.mu.Lock()
+			if len(sp.known)+len(check) > maxKnownCache {
+				clear(sp.known)
+			}
+			for _, w := range check {
+				sp.known[w] = true
+			}
+			for _, bi := range bad {
+				sp.known[check[bi]] = false
+			}
+			sp.mu.Unlock()
 		}
-		for _, w := range check {
-			sp.known[w] = true
-		}
-		for _, bi := range bad {
-			sp.known[check[bi]] = false
-		}
-		sp.mu.Unlock()
 	}
 	sp.mu.RLock()
 	defer sp.mu.RUnlock()

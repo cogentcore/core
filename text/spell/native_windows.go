@@ -181,7 +181,7 @@ func (wc *winChecker) do(f func()) {
 	<-done
 }
 
-func (wc *winChecker) misspelled(words []string) []int {
+func (wc *winChecker) misspelled(words []string) ([]int, bool) {
 	// Check all of the words in one string, recording the UTF-16
 	// offset of each word to map the error locations back.
 	starts := make([]int, len(words))
@@ -200,14 +200,16 @@ func (wc *winChecker) misspelled(words []string) []int {
 	}
 	text, err := windows.UTF16PtrFromString(b.String())
 	if err != nil {
-		return nil
+		return nil, false
 	}
 	var bad []int
+	ok := false
 	wc.do(func() {
 		var errs comObject
 		if comCall(wc.checker, vtCheck, uintptr(unsafe.Pointer(text)), uintptr(unsafe.Pointer(&errs))) != 0 || errs == nil {
 			return
 		}
+		ok = true
 		defer comRelease(errs)
 		for {
 			var se comObject
@@ -230,7 +232,7 @@ func (wc *winChecker) misspelled(words []string) []int {
 			}
 		}
 	})
-	return bad
+	return bad, ok
 }
 
 func (wc *winChecker) suggest(word string) []string {

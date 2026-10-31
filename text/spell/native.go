@@ -6,13 +6,15 @@ package spell
 
 // nativeChecker is a platform spell checker provided by the operating
 // system (NSSpellChecker on macOS, UITextChecker on iOS, ISpellChecker
-// on Windows, Enchant on Linux). Words learned through it go to the system user dictionary,
-// shared with other apps. Implementations must be safe to call from
+// on Windows, Enchant on Linux, SpellCheckerSession on Android). Words
+// learned through it go to the system user dictionary, shared with other
+// apps (except on Android). Implementations must be safe to call from
 // any goroutine.
 type nativeChecker interface {
 	// misspelled returns the indexes of the misspelled words
-	// in the given list of words, in increasing order.
-	misspelled(words []string) []int
+	// in the given list of words, in increasing order. ok is false
+	// if the words could not be checked, so the result is not cached.
+	misspelled(words []string) (bad []int, ok bool)
 
 	// suggest returns suggested corrections for a misspelled word.
 	suggest(word string) []string

@@ -141,7 +141,7 @@ func localeTags() []string {
 	return append(tags, "en_US", "en")
 }
 
-func (ec *enchantChecker) misspelled(words []string) []int {
+func (ec *enchantChecker) misspelled(words []string) ([]int, bool) {
 	var bad []int
 	ec.mu.Lock()
 	defer ec.mu.Unlock()
@@ -152,7 +152,7 @@ func (ec *enchantChecker) misspelled(words []string) []int {
 		}
 		C.free(unsafe.Pointer(cw))
 	}
-	return bad
+	return bad, true
 }
 
 func (ec *enchantChecker) suggest(word string) []string {

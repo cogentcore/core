@@ -24,7 +24,8 @@ func testNative(t *testing.T) nativeChecker {
 }
 
 func known(nc nativeChecker, w string) bool {
-	return len(nc.misspelled([]string{w})) == 0
+	bad, _ := nc.misspelled([]string{w})
+	return len(bad) == 0
 }
 
 func TestNative(t *testing.T) {
@@ -40,7 +41,7 @@ func TestNative(t *testing.T) {
 		}
 	}
 	words := []string{"naïve", "teh", "über", "quick", "wrold", "don't", "recieve", "the", "the"}
-	if bad := nc.misspelled(words); !slices.Equal(bad, []int{1, 4, 6}) {
+	if bad, ok := nc.misspelled(words); !ok || !slices.Equal(bad, []int{1, 4, 6}) {
 		t.Errorf("misspelled: got %v, want [1 4 6]", bad)
 	}
 	sugs := nc.suggest("speling")

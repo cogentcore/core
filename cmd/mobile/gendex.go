@@ -61,12 +61,12 @@ func gendex() error {
 	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0775); err != nil {
 		return err
 	}
-	javaFiles, err := filepath.Glob("../../../system/driver/android/*.java")
+	javaFiles, err := filepath.Glob("../../system/driver/android/*.java")
 	if err != nil {
 		return err
 	}
 	if len(javaFiles) == 0 {
-		return errors.New("could not find ../../../system/driver/android/*.java files")
+		return errors.New("could not find ../../system/driver/android/*.java files")
 	}
 	platform, err := findLast(androidHome + "/platforms")
 	if err != nil {
@@ -74,6 +74,9 @@ func gendex() error {
 	}
 	cmd := exec.Command(
 		"javac",
+		// -parameters names the mandated outer instance parameter of inner
+		// class constructors, which d8 otherwise fails on with newer javac.
+		"-parameters",
 		"-source", "1.8",
 		"-target", "1.8",
 		"-bootclasspath", platform+"/android.jar",
