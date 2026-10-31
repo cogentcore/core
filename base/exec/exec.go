@@ -86,12 +86,7 @@ func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, ar
 	var cm *exec.Cmd
 	if ctx != nil && !start {
 		cm = exec.CommandContext(ctx, cmd, args...)
-		cm.Cancel = func() error { // as a shell does for Control+C
-			if err := cm.Process.Signal(os.Interrupt); err != nil {
-				return cm.Process.Kill() // not supported on Windows
-			}
-			return nil
-		}
+		cm.Cancel = func() error { return interrupt(cm.Process) }
 		cm.WaitDelay = InterruptWait
 	} else {
 		cm = exec.Command(cmd, args...)
