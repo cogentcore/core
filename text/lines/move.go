@@ -101,10 +101,9 @@ func (ls *Lines) moveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos
 	if !ls.isValidPos(pos) {
 		return pos
 	}
-	vl := vw.viewLines
 	vp := ls.posToView(vw, pos)
 	nvp := vp
-	nvp.Line = min(nvp.Line+steps, vl-1)
+	nvp.Line = ls.viewLinesMoved(vw, vp.Line, steps)
 	nvp.Char = col
 	dp := ls.posFromView(vw, nvp)
 	return dp
@@ -118,10 +117,33 @@ func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 	}
 	vp := ls.posToView(vw, pos)
 	nvp := vp
-	nvp.Line = max(nvp.Line-steps, 0)
+	nvp.Line = ls.viewLinesMoved(vw, vp.Line, -steps)
 	nvp.Char = col
 	dp := ls.posFromView(vw, nvp)
 	return dp
+}
+
+// viewLinesMoved returns the view line that is the given number of
+// steps (negative for up) from the given view line, within range,
+// skipping view lines that only contain virtual text.
+func (ls *Lines) viewLinesMoved(vw *view, vl, steps int) int {
+	dir := 1
+	if steps < 0 {
+		dir, steps = -1, -steps
+	}
+	nl := vl
+	for steps > 0 {
+		next := nl + dir
+		for next >= 0 && next < vw.viewLines && ls.isVirtualViewLine(vw, next) {
+			next += dir
+		}
+		if next < 0 || next >= vw.viewLines {
+			break
+		}
+		nl = next
+		steps--
+	}
+	return nl
 }
 
 // moveLineStart moves given source position to start of view line.

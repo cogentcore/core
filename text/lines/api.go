@@ -192,6 +192,7 @@ func (ls *Lines) Close() {
 	ls.lines = nil
 	ls.tags = nil
 	ls.hiTags = nil
+	ls.virtual = nil
 	ls.markup = nil
 	// ls.parseState.Reset() // todo
 	ls.undos.Reset()

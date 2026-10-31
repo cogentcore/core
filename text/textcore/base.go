@@ -378,6 +378,9 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 			defer ed.AsyncUnlock()
 			f()
 		})
+		ln.OnVirtualText(ed.viewId, func(e events.Event) {
+			ed.NeedsRender()
+		})
 		ln.OnClose(ed.viewId, func(e events.Event) {
 			ed.SetLines(nil)
 			ed.SendClose()
