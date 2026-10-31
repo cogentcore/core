@@ -17,8 +17,8 @@ import (
 // TestIBusText checks parsing of an IBusText as decoded from the wire.
 func TestIBusText(t *testing.T) {
 	type attr struct {
-		Name                   string
-		Attach                 map[string]dbus.Variant
+		Name                    string
+		Attach                  map[string]dbus.Variant
 		Type, Value, Start, End uint32
 	}
 	type attrList struct {

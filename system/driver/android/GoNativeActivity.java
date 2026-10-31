@@ -32,7 +32,10 @@ import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
 import android.view.GestureDetector;
@@ -54,12 +57,22 @@ public class GoNativeActivity extends NativeActivity {
 
 	private native void keyboardDelete();
 
+	private native void compositionChanged(String str, int start, int end);
+
 	private native void setDarkMode(boolean dark);
 
 	private native void scaled(float scaleFactor, float posX, float posY);
 
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
+
+	// committed is the text of mTextEdit outside of the composing span of the
+	// input method, as last sent, and composition is the composing text.
+	private String committed = " ";
+	private String composition = "";
+
+	// textChangePending is whether textChanged has been posted.
+	private boolean textChangePending = false;
 
 	public GoNativeActivity() {
 		super();
@@ -137,10 +150,7 @@ public class GoNativeActivity extends NativeActivity {
 				});
 
 				// always place one character so all keyboards can send backspace
-				ignoreKey = true;
-				mTextEdit.setText("0");
-				mTextEdit.setSelection(mTextEdit.getText().length());
-				ignoreKey = false;
+				resetText();
 
 				mTextEdit.setVisibility(View.VISIBLE);
 				mTextEdit.bringToFront();
@@ -167,6 +177,93 @@ public class GoNativeActivity extends NativeActivity {
 				mTextEdit.setVisibility(View.GONE);
 			}
 		});
+	}
+
+	// posted posts textChanged, returning the given result, for the input connection.
+	boolean posted(boolean result) {
+		postTextChanged();
+		return result;
+	}
+
+	// postTextChanged posts a call to textChanged, after the current
+	// edits of the input method, if one is not pending already.
+	void postTextChanged() {
+		if (textChangePending) {
+			return;
+		}
+		textChangePending = true;
+		mTextEdit.post(new Runnable() {
+			@Override
+			public void run() {
+				textChangePending = false;
+				Editable s = mTextEdit.getText();
+				textChanged(s);
+				// always place one character so all keyboards can send backspace
+				if (s.length() < 1) {
+					resetText();
+				}
+			}
+		});
+	}
+
+	// resetText resets the text of mTextEdit to one placeholder character,
+	// so that all keyboards can send backspace, ending any composition.
+	// It is a space, as keyboards do not compose words after other
+	// characters, such as digits.
+	void resetText() {
+		ignoreKey = true;
+		mTextEdit.setText(" ");
+		mTextEdit.setSelection(mTextEdit.getText().length());
+		ignoreKey = false;
+		committed = " ";
+		if (!composition.isEmpty()) {
+			composition = "";
+			compositionChanged("", 0, 0);
+		}
+	}
+
+	// textChanged sends the changes to the text of mTextEdit: the composing
+	// text of the input method (such as a word being typed, or text being
+	// converted to Chinese or Japanese characters), which is not yet
+	// committed, as a composition, and the changes to the other text as typed
+	// text and backspaces, at the cursor.
+	void textChanged(Editable s) {
+		String text = s.toString();
+		String comp = "";
+		String com = text;
+		int cs = BaseInputConnection.getComposingSpanStart(s);
+		int ce = BaseInputConnection.getComposingSpanEnd(s);
+		if (cs >= 0 && ce > cs && ce <= text.length()) {
+			comp = text.substring(cs, ce);
+			com = text.substring(0, cs) + text.substring(ce);
+		}
+		if (comp.isEmpty() && !composition.isEmpty()) { // ended before the committed text
+			composition = "";
+			compositionChanged("", 0, 0);
+		}
+		int n = Math.min(committed.length(), com.length());
+		int pre = 0;
+		while (pre < n && committed.charAt(pre) == com.charAt(pre)) {
+			pre++;
+		}
+		int suf = 0;
+		while (suf < n - pre && committed.charAt(committed.length() - 1 - suf) == com.charAt(com.length() - 1 - suf)) {
+			suf++;
+		}
+		String deleted = committed.substring(pre, committed.length() - suf);
+		for (int i = 0; i < deleted.codePointCount(0, deleted.length()); i++) {
+			keyboardDelete();
+		}
+		String inserted = com.substring(pre, com.length() - suf);
+		if (!inserted.isEmpty()) {
+			keyboardTyped(inserted);
+		}
+		committed = com;
+		if (!comp.isEmpty() && !comp.equals(composition)) {
+			composition = comp;
+			int cur = comp.codePointCount(0, comp.length());
+			compositionChanged(comp, cur, cur);
+		}
 	}
 
 	static int getRune(int deviceId, int keyCode, int metaState) {
@@ -229,7 +326,49 @@ public class GoNativeActivity extends NativeActivity {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				mTextEdit = new EditText(goNativeActivity);
+				// The input connection of the input method is wrapped to get the
+				// text and its composing span after each of its edits, as the
+				// span is set after the text changes, and can change by itself.
+				mTextEdit = new EditText(goNativeActivity) {
+					@Override
+					public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+						InputConnection ic = super.onCreateInputConnection(outAttrs);
+						if (ic == null) {
+							return null;
+						}
+						return new InputConnectionWrapper(ic, false) {
+							@Override
+							public boolean setComposingText(CharSequence text, int newCursorPosition) {
+								return posted(super.setComposingText(text, newCursorPosition));
+							}
+
+							@Override
+							public boolean setComposingRegion(int start, int end) {
+								return posted(super.setComposingRegion(start, end));
+							}
+
+							@Override
+							public boolean finishComposingText() {
+								return posted(super.finishComposingText());
+							}
+
+							@Override
+							public boolean commitText(CharSequence text, int newCursorPosition) {
+								return posted(super.commitText(text, newCursorPosition));
+							}
+
+							@Override
+							public boolean deleteSurroundingText(int beforeLength, int afterLength) {
+								return posted(super.deleteSurroundingText(beforeLength, afterLength));
+							}
+
+							@Override
+							public boolean endBatchEdit() {
+								return posted(super.endBatchEdit());
+							}
+						};
+					}
+				};
 				mTextEdit.setVisibility(View.GONE);
 				mTextEdit.setInputType(DEFAULT_INPUT_TYPE);
 
@@ -239,43 +378,24 @@ public class GoNativeActivity extends NativeActivity {
 				addContentView(mTextEdit, mEditTextLayoutParams);
 
 				// always place one character so all keyboards can send backspace
-				mTextEdit.setText("0");
+				mTextEdit.setText(" ");
 				mTextEdit.setSelection(mTextEdit.getText().length());
 
 				mTextEdit.addTextChangedListener(new TextWatcher() {
 					@Override
 					public void onTextChanged(CharSequence s, int start, int before, int count) {
-						if (ignoreKey) {
-							return;
-						}
-						if (count > 0) {
-							keyboardTyped(s.subSequence(start, start + count).toString());
-						}
 					}
 
 					@Override
 					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-						if (ignoreKey) {
-							return;
-						}
-						if (count > 0) {
-							for (int i = 0; i < count; i++) {
-								// send a backspace
-								keyboardDelete();
-							}
-						}
 					}
 
 					@Override
 					public void afterTextChanged(Editable s) {
-						// always place one character so all keyboards can send backspace
-						if (s.length() < 1) {
-							ignoreKey = true;
-							mTextEdit.setText("0");
-							mTextEdit.setSelection(mTextEdit.getText().length());
-							ignoreKey = false;
+						if (ignoreKey) {
 							return;
 						}
+						postTextChanged();
 					}
 				});
 			}
