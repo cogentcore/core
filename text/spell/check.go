@@ -17,23 +17,27 @@ import (
 // to token.TextSpellErr on returned Lex's
 func CheckLexLine(src []rune, tags lexer.Line) lexer.Line {
 	wrds := tags.NonCodeWords(src)
-	var ser lexer.Line
+	var lexs lexer.Line
+	var words []string
 	for _, t := range wrds {
 		wrd := string(t.Src(src))
 		lwrd := lexer.FirstWordApostrophe(wrd)
 		if len(lwrd) <= 2 {
 			continue
 		}
-		_, known := Spell.CheckWord(lwrd)
-		if !known {
-			t.Token.Token = token.TextSpellErr
-			widx := strings.Index(wrd, lwrd)
-			ld := len(wrd) - len(lwrd)
-			t.Start += widx
-			t.End += widx - ld
-			t.Now()
-			ser = append(ser, t)
-		}
+		widx := strings.Index(wrd, lwrd)
+		ld := len(wrd) - len(lwrd)
+		t.Start += widx
+		t.End += widx - ld
+		lexs = append(lexs, t)
+		words = append(words, lwrd)
+	}
+	var ser lexer.Line
+	for _, i := range Spell.Misspelled(words) {
+		t := lexs[i]
+		t.Token.Token = token.TextSpellErr
+		t.Now()
+		ser = append(ser, t)
 	}
 	return ser
 }
