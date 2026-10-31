@@ -88,7 +88,7 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	// we have to remake the surface and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
 	wsd := &wgpu.SurfaceDescriptor{
-		AndroidNativeWindow: &wgpu.SurfaceDescriptorFromAndroidNativeWindow{
+		AndroidNativeWindow: &wgpu.SurfaceSourceAndroidNativeWindow{
 			Window: unsafe.Pointer(winptr),
 		},
 	}

@@ -21,14 +21,14 @@ import (
 
 // initSpell ensures that the [spell.Spell] spell checker is set up.
 func initSpell() error {
-	if core.TheApp.Platform().IsMobile() { // todo: too slow -- fix with aspell
-		return nil
-	}
 	if spell.Spell != nil {
 		return nil
 	}
 	pdir := core.TheApp.CogentCoreDataDir()
 	openpath := filepath.Join(pdir, "user_dict_en_us")
+	if !spell.HasNative() && core.TheApp.Platform().IsMobile() {
+		return nil // the built-in checker is too slow on mobile
+	}
 	spell.Spell = spell.NewSpell(openpath)
 	return nil
 }
@@ -47,7 +47,7 @@ type spellCheck struct {
 	// word being checked
 	word string
 
-	// last word learned -- can be undone -- stored in lowercase format
+	// last word learned, which can be undone
 	lastLearned string
 
 	// the user's correction selection
@@ -169,14 +169,13 @@ func (sp *spellCheck) on(etype events.Types, fun func(e events.Event)) {
 
 // learnWord gets the misspelled/unknown word and passes to learnWord
 func (sp *spellCheck) learnWord() {
-	sp.lastLearned = strings.ToLower(sp.word)
+	sp.lastLearned = sp.word
 	spell.Spell.AddWord(sp.word)
 }
 
 // isLastLearned returns true if given word was the last one learned
 func (sp *spellCheck) isLastLearned(wrd string) bool {
-	lword := strings.ToLower(wrd)
-	return lword == sp.lastLearned
+	return sp.lastLearned != "" && strings.EqualFold(wrd, sp.lastLearned)
 }
 
 // unLearnLast unlearns the last learned word -- in case accidental

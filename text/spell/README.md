@@ -1,6 +1,6 @@
 # spell
 
-spell is a spell checking package, originally based on https://github.com/sajari/fuzzy
+spell is a spell checking package that uses the operating system spell checker when available (see the package docs), with a fallback built-in checker, originally based on https://github.com/sajari/fuzzy
 
 As of 7/2024, we only use a basic dictionary list of words as the input, and compute all the variants for checking on the fly after loading, to save massively on the file size.
 
