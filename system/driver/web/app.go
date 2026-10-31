@@ -64,6 +64,9 @@ type App struct {
 	// UnderlyingPlatform is the underlying system platform (Android, iOS, etc)
 	UnderlyingPlatform system.Platforms
 
+	// composing is whether an input method composition is being sent.
+	composing bool
+
 	// KeyMods are the current key mods
 	KeyMods key.Modifiers
 }
