@@ -1,4 +1,4 @@
-//go:build darwin && !ios
+//go:build darwin
 
 // Copyright (c) 2026, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style

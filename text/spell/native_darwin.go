@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build darwin && !ios && cgo
+//go:build darwin && cgo
 
 package spell
 
+// The C functions are implemented with NSSpellChecker on macOS
+// (native_darwin.m) and UITextChecker on iOS (native_ios.m).
+
 /*
 #cgo CFLAGS: -fobjc-arc
-#cgo LDFLAGS: -framework AppKit
+#cgo darwin,!ios LDFLAGS: -framework AppKit
+#cgo ios LDFLAGS: -framework UIKit -framework Foundation
 #include "native_darwin.h"
 #include <stdlib.h>
 */
@@ -31,8 +35,9 @@ func init() {
 	}
 }
 
-// macChecker uses the macOS NSSpellChecker, which uses the
-// language(s) and user dictionary set in the system settings.
+// macChecker uses NSSpellChecker on macOS, which uses the language(s)
+// and user dictionary set in the system settings, and UITextChecker
+// on iOS, which uses the user's preferred language.
 type macChecker struct {
 	// mu serializes access to the shared NSSpellChecker.
 	mu sync.Mutex

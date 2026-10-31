@@ -5,8 +5,8 @@
 package spell
 
 // nativeChecker is a platform spell checker provided by the operating
-// system (NSSpellChecker on macOS, ISpellChecker on Windows, Enchant on
-// Linux). Words learned through it go to the system user dictionary,
+// system (NSSpellChecker on macOS, UITextChecker on iOS, ISpellChecker
+// on Windows, Enchant on Linux). Words learned through it go to the system user dictionary,
 // shared with other apps. Implementations must be safe to call from
 // any goroutine.
 type nativeChecker interface {
