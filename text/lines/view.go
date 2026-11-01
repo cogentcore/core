@@ -176,8 +176,16 @@ func (ls *Lines) posFromView(vw *view, vp textpos.Pos) textpos.Pos {
 }
 
 // regionToView converts the given region in source coordinates into view coordinates.
+// The text of a region starts after any virtual text at its start, which
+// is not in it, as the cursor is shown before it.
 func (ls *Lines) regionToView(vw *view, reg textpos.Region) textpos.Region {
-	return textpos.Region{Start: ls.posToView(vw, reg.Start), End: ls.posToView(vw, reg.End)}
+	st := ls.posToView(vw, reg.Start)
+	ed := ls.posToView(vw, reg.End)
+	if n := ls.virtualLenAt(vw, reg.Start); n > 0 && reg.Start.IsLess(reg.End) {
+		d := ls.srcToDisplay(vw, reg.Start.Line, reg.Start.Char) + n
+		st = ls.displayToView(vw, textpos.Pos{Line: reg.Start.Line, Char: d})
+	}
+	return textpos.Region{Start: st, End: ed}
 }
 
 // regionFromView converts the given region in view coordinates into source coordinates.

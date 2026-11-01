@@ -232,6 +232,19 @@ func (ls *Lines) displayLineLen(vw *view, ln int) int {
 	return n
 }
 
+// virtualLenAt returns the length of the virtual text at the given
+// source position that is shown in the given view.
+func (ls *Lines) virtualLenAt(vw *view, pos textpos.Pos) int {
+	n := 0
+	for i := range ls.virtualAt(pos.Line) {
+		vt := &ls.virtual[pos.Line][i]
+		if vt.char == pos.Char && vt.shownIn(vw) {
+			n += vt.len()
+		}
+	}
+	return n
+}
+
 // srcToDisplay returns the display char position in the given view
 // for the given source char position in the given source line.
 // The cursor is shown before any virtual text at its position.
