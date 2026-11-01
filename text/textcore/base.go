@@ -138,8 +138,8 @@ type Base struct { //core:embedder
 	// composition is the state of text being composed with an input method.
 	composition composition
 
-	// cursorColumn is the desired cursor column, where the cursor was
-	// last when moved using left / right arrows.
+	// cursorColumn is the desired cursor column, in cells, where the cursor
+	// was last when moved using left / right arrows.
 	// It is used when doing up / down to not always go to short line columns.
 	cursorColumn int
 
@@ -167,6 +167,12 @@ type Base struct { //core:embedder
 	// scopelights is a slice of regions representing the highlighted
 	// regions specific to scope markers.
 	scopelights []textpos.Region
+
+	// InputPos, if set, returns the position at which text is input in a
+	// read-only editor that sends the text typed in it elsewhere, such as
+	// the cursor of a terminal, and whether text is input now. The text
+	// being composed with an input method (IME) is shown there.
+	InputPos func() (textpos.Pos, bool)
 
 	// LinkHandler handles link clicks.
 	// If it is nil, they are sent to the standard web URL handler.

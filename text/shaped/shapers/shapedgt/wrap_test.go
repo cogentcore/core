@@ -160,7 +160,7 @@ func TestBoundsCache(t *testing.T) {
 					t.Errorf("round %d text %d variant %d: the source is not the given text", round, ti, vi)
 				}
 				// Changes to the lines that callers make are their own.
-				got.SetGlyphXAdvance(fixed.I(3))
+				got.SetGlyphXAdvance(fixed.I(3), nil)
 				for li := range got.Lines {
 					ln := &got.Lines[li]
 					ln.Offset.X += 7

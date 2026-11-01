@@ -37,8 +37,13 @@ type composition struct {
 // showing the text being composed at the cursor as virtual text, or
 // ending the composition if it is empty, in which case the committed
 // text follows as KeyChord events.
+// In a read-only editor with an [Base.InputPos], it is shown there.
 func (ed *Editor) compose(e *events.TextComposition) {
-	if ed.Lines == nil || ed.IsReadOnly() {
+	if ed.Lines == nil {
+		return
+	}
+	ipos, input := ed.inputPos()
+	if !input {
 		return
 	}
 	if e.Text == "" {
@@ -46,7 +51,11 @@ func (ed *Editor) compose(e *events.TextComposition) {
 		return
 	}
 	cp := &ed.composition
-	if !cp.active {
+	switch {
+	case ed.InputPos != nil: // where text is input now
+		cp.active = true
+		cp.pos = ipos
+	case !cp.active:
 		if ed.HasSelection() { // typing replaces the selection
 			tbe := ed.deleteSelection()
 			ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textpos.AdjustPosDelStart)
@@ -59,6 +68,19 @@ func (ed *Editor) compose(e *events.TextComposition) {
 	cp.end = max(cp.start, min(e.End, len(txt)))
 	ed.SetVirtualText(imeLayer, lines.VirtualText{Pos: cp.pos, Text: ed.compositionText(txt, cp.start, cp.end)})
 	ed.NeedsRender()
+}
+
+// inputPos returns the position at which text is input, which is the
+// cursor, or the [Base.InputPos] if it is set, and whether text is
+// input, which it is not in a read-only editor without an InputPos.
+func (ed *Base) inputPos() (textpos.Pos, bool) {
+	if ed.InputPos != nil {
+		return ed.InputPos()
+	}
+	if ed.IsReadOnly() {
+		return textpos.Pos{}, false
+	}
+	return ed.CursorPos, true
 }
 
 // endComposition ends any composition, removing its text.
@@ -91,10 +113,15 @@ func (ed *Base) compositionText(txt []rune, start, end int) rich.Text {
 // method, with the position of the cursor, or that of the input method
 // within the text being composed, where its candidate window is shown.
 func (ed *Base) updateTextInput() {
-	if ed.IsReadOnly() || !ed.StateIs(states.Focused) {
+	if !ed.StateIs(states.Focused) {
 		return
 	}
-	pos := ed.charStartPos(ed.CursorPos)
+	ipos, input := ed.inputPos()
+	if !input {
+		ed.ClearTextInput()
+		return
+	}
+	pos := ed.charStartPos(ipos)
 	if cp := &ed.composition; cp.active {
 		if p, ok := ed.VirtualCharStartPos(imeLayer, cp.pos, cp.end); ok {
 			pos = p

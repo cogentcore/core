@@ -37,10 +37,11 @@ func TestEditorCompose(t *testing.T) {
 			assert.Equal(t, "日本", string(vts[0].Text.Join()))
 			assert.Len(t, vts[0].Text, 1) // all selected
 		}
-		// the input method cursor is at the end of the selected clause
+		// the input method cursor is at the end of the selected clause,
+		// of two wide chars
 		cur, ok := ed.VirtualCharStartPos(imeLayer, pos, 2)
 		assert.True(t, ok)
-		assert.Equal(t, ed.CharStartPos(pos).X+2*ed.charSize.X, cur.X)
+		assert.Equal(t, ed.CharStartPos(pos).X+4*ed.charSize.X, cur.X)
 	}, func() {
 		// commit
 		compose("", 0, 0)

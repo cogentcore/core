@@ -389,6 +389,19 @@ func (ls *Lines) ViewLineLen(vid int, vln int) int {
 	return ls.viewLineLen(vw, vln)
 }
 
+// ViewCell returns the cell column of the given view position,
+// where wide characters take two cells, and tabs go to tab stops
+// (see [LineCells]).
+func (ls *Lines) ViewCell(vid int, vpos textpos.Pos) int {
+	ls.Lock()
+	defer ls.Unlock()
+	vw := ls.view(vid)
+	if vw == nil {
+		return 0
+	}
+	return ls.viewCell(vw, vpos)
+}
+
 // ViewLineRegion returns the region in view coordinates of the given view line.
 func (ls *Lines) ViewLineRegion(vid int, vln int) textpos.Region {
 	ls.Lock()
@@ -777,6 +790,7 @@ func (ls *Lines) MoveBackwardWord(pos textpos.Pos, steps int) textpos.Pos {
 
 // MoveDown moves given source position down given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
+// The column is in cells (see [Lines.ViewCell]).
 func (ls *Lines) MoveDown(vid int, pos textpos.Pos, steps, col int) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()
@@ -789,6 +803,7 @@ func (ls *Lines) MoveDown(vid int, pos textpos.Pos, steps, col int) textpos.Pos 
 
 // MoveUp moves given source position up given number of display line steps,
 // always attempting to use the given column position if the line is long enough.
+// The column is in cells (see [Lines.ViewCell]).
 func (ls *Lines) MoveUp(vid int, pos textpos.Pos, steps, col int) textpos.Pos {
 	ls.Lock()
 	defer ls.Unlock()

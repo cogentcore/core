@@ -168,17 +168,31 @@ func (run *Run) LastGlyphAt(i int) int {
 }
 
 // SetGlyphXAdvance sets the x advance on all glyphs to given value:
-// for monospaced case. Glyphs that do not have it yet are copied first,
-// as runs of the shape cache share them.
-func (run *Run) SetGlyphXAdvance(adv fixed.Int26_6) {
-	if slices.ContainsFunc(run.Glyphs, func(g shaping.Glyph) bool { return g.Advance != adv }) {
+// for monospaced case. If cells is non-nil, the advance of each glyph is
+// multiplied by the number of cells for the index of its source rune,
+// for wide characters, which are centered in their cells. Glyphs that
+// do not have it yet are copied first, as runs of the shape cache share them.
+func (run *Run) SetGlyphXAdvance(adv fixed.Int26_6, cells func(ri int) int) {
+	ncells := func(g *shaping.Glyph) int {
+		if cells == nil {
+			return 1
+		}
+		return cells(g.TextIndex())
+	}
+	if slices.ContainsFunc(run.Glyphs, func(g shaping.Glyph) bool { return g.Advance != adv*fixed.Int26_6(ncells(&g)) }) {
 		run.Glyphs = slices.Clone(run.Glyphs)
 	}
+	run.Output.Advance = 0
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
-		g.Advance = adv
+		n := ncells(g)
+		gadv := adv * fixed.Int26_6(n)
+		if n > 1 { // center in the cells, from the last advance
+			g.XOffset += (gadv - g.Advance) / 2
+		}
+		g.Advance = gadv
+		run.Output.Advance += g.Advance
 	}
-	run.Output.Advance = adv * fixed.Int26_6(len(run.Glyphs))
 	if !run.Direction.IsVertical() { // the background etc use the max bounds
 		run.MaxBounds.Max.X = math32.FromFixed(run.Output.Advance)
 	}

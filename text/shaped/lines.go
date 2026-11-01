@@ -138,13 +138,25 @@ func (ls *Lines) StartAtBaseline() {
 }
 
 // SetGlyphXAdvance sets the x advance on all glyphs to given value:
-// for monospaced case.
-func (ls *Lines) SetGlyphXAdvance(adv fixed.Int26_6) {
+// for monospaced case. If width is non-nil, it returns the number of
+// cells for each rune, by which its advance is multiplied, for wide
+// characters that take two cells.
+func (ls *Lines) SetGlyphXAdvance(adv fixed.Int26_6, width func(r rune) int) {
+	var cells func(ri int) int
+	if width != nil {
+		src := ls.Source.Join()
+		cells = func(ri int) int {
+			if ri < 0 || ri >= len(src) {
+				return 1
+			}
+			return width(src[ri])
+		}
+	}
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		for ri := range ln.Runs {
 			rn := ln.Runs[ri]
-			rn.SetGlyphXAdvance(adv)
+			rn.SetGlyphXAdvance(adv, cells)
 		}
 	}
 }

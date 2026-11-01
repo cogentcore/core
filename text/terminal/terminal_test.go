@@ -41,14 +41,15 @@ const testShell = "/bin/sh"
 var lastTerminal *Terminal
 
 // testTerminal runs a terminal with a POSIX shell with a simple prompt
-// in a new window, which is closed at the end of the test.
-func testTerminal(t *testing.T) (*core.Body, *Terminal) {
+// in a new window, which is closed at the end of the test, with the
+// given additional environment variables.
+func testTerminal(t *testing.T, env ...string) (*core.Body, *Terminal) {
 	t.Helper()
 	if runtime.GOOS == "windows" {
 		t.Skip("uses sh")
 	}
 	b := core.NewBody()
-	tm := NewTerminal(b).SetCommand(testShell).SetEnv("PS1=$ ", "ENV=", "HISTFILE=")
+	tm := NewTerminal(b).SetCommand(testShell).SetEnv(append([]string{"PS1=$ ", "ENV=", "HISTFILE="}, env...)...)
 	lastTerminal = tm
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(40), units.Em(10))
@@ -316,6 +317,42 @@ func TestTerminalKeys(t *testing.T) {
 	waitFor(t, b, "the interrupt", func() bool {
 		return strings.HasSuffix(linesText(tm), "\n$")
 	})
+}
+
+// TestTerminalCompose tests composing text with an input method in the
+// terminal, which is shown at the terminal cursor, and then sent to the
+// program when it is committed, after which the cursor is after the wide
+// characters, which take two cells.
+func TestTerminalCompose(t *testing.T) {
+	b, tm := testTerminal(t, "LANG=en_US.UTF-8") // for bash (sh on macOS) to take UTF-8 input
+	b.AsyncLock()
+	tm.SetFocus()
+	b.AsyncUnlock()
+	src := b.Scene.RenderWindow().SystemWindow.Events()
+	lv := tm.linesView
+	src.Composition("にほん", 3, 3)
+	waitFor(t, b, "the composition", func() bool {
+		return len(lv.VirtualText("ime")) == 1
+	})
+	b.AsyncLock()
+	cur := tm.linesCursor
+	assert.Equal(t, 2, cur.Char, "the cursor is after the prompt")
+	assert.Equal(t, cur, lv.VirtualText("ime")[0].Pos)
+	assert.Equal(t, "にほん", string(lv.VirtualText("ime")[0].Text.Join()))
+	b.AsyncUnlock()
+
+	// commit
+	src.Composition("", 0, 0)
+	for _, r := range "日本" {
+		src.KeyChord(r, key.CodeUnknown, 0)
+	}
+	waitFor(t, b, "the echo", func() bool {
+		return strings.HasSuffix(linesText(tm), "$ 日本")
+	})
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	assert.Nil(t, lv.VirtualText("ime"))
+	assert.Equal(t, 4, tm.linesCursor.Char, "the cursor is after the text")
 }
 
 func TestTerminalContextMenu(t *testing.T) {

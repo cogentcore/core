@@ -55,3 +55,21 @@ func TestLineMarkupCursor(t *testing.T) {
 	assert.Equal(t, "$ ls", string(rs))
 	assert.Equal(t, []string{"$ ls"}, spans(cm, tx))
 }
+
+func TestLineMarkupWide(t *testing.T) {
+	cm := &colorMap{base: rich.NewStyle(), palette: &LightPalette, cursor: color.RGBA{255, 0, 0, 255}}
+	// a wide character takes two cells, the second of which has no
+	// character, and it has one char in the text, which takes two cells
+	cells := []vt.Cell{{Rune: 'a', Width: 1}, {Rune: '世', Width: 2}, {Width: 0}, {Rune: 'b', Width: 1}, {Width: 1}}
+	rs, tx := cm.lineMarkup(cells, 0, 3)
+	assert.Equal(t, "a世b", string(rs))
+	assert.Equal(t, []string{"a世", "[b]"}, spans(cm, tx))
+
+	rs, tx = cm.lineMarkup(cells, 5, 4) // after the text
+	assert.Equal(t, "a世b ", string(rs))
+	assert.Equal(t, []string{"a世b", "[ ]"}, spans(cm, tx))
+
+	for col, ch := range []int{0, 1, 1, 2, 3, 4} {
+		assert.Equal(t, ch, cellChar(cells, col), "column %d", col)
+	}
+}
