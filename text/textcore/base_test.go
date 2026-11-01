@@ -94,13 +94,18 @@ func main() {
 	b.AssertRender(t, "set-lang", waitMarkup(t, ed))
 }
 
-//go:embed base.go
+// testFile is the file opened by the tests, which is a copy of an older
+// version of base.go, so that the rendered images do not change when
+// base.go changes.
+const testFile = "testdata/base.go"
+
+//go:embed testdata/base.go
 var myFile embed.FS
 
 func TestBaseOpenFS(t *testing.T) {
 	b := core.NewBody()
 	ed := NewBase(b)
-	errors.Log(ed.Lines.OpenFS(myFile, "base.go"))
+	errors.Log(ed.Lines.OpenFS(myFile, testFile))
 	b.AssertRender(t, "open-fs", waitMarkup(t, ed))
 }
 
@@ -110,7 +115,7 @@ func TestBaseOpen(t *testing.T) {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(40)
 	})
-	errors.Log(ed.Lines.Open("base.go"))
+	errors.Log(ed.Lines.Open(testFile))
 	b.AssertRender(t, "open", waitMarkup(t, ed))
 }
 
@@ -120,7 +125,7 @@ func TestBaseScroll(t *testing.T) {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(40)
 	})
-	errors.Log(ed.Lines.Open("base.go"))
+	errors.Log(ed.Lines.Open(testFile))
 	b.AssertRender(t, "scroll-40", waitMarkup(t, ed), func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
