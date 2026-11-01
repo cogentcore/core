@@ -38,14 +38,45 @@ type goTool struct {
 
 	// path is the path of the installed command, or "" if it is not installed.
 	path string
+
+	// install is whether to install the command if it is not installed.
+	install bool
+}
+
+// goDevTools returns the Go tools for developing with Cogent Core, which
+// core setup installs, and core update updates, installing them if they
+// are not installed: goimports, which formats Go code and fixes its
+// imports, and goalimports and goalls, which do that for Goal code, and
+// are the language server for Go and Goal code, a proxy for gopls (see
+// cogentcore.org/lab/goal).
+func goDevTools() []goTool {
+	tools := []goTool{
+		{name: "goimports", pkg: "golang.org/x/tools/cmd/goimports", module: "golang.org/x/tools"},
+		{name: "goalimports", pkg: "cogentcore.org/lab/goal/cmd/goalimports", module: "cogentcore.org/lab"},
+		{name: "goalls", pkg: "cogentcore.org/lab/goal/cmd/goalls", module: "cogentcore.org/lab"},
+	}
+	for i := range tools {
+		t := &tools[i]
+		t.query = "latest"
+		t.install = true
+		t.path = web.ToolPath(t.name)
+	}
+	return tools
+}
+
+// installGoTool installs the latest version of the given tool.
+func installGoTool(t goTool) error {
+	return exec.Verbose().SetBuffer(false).SetDir(os.TempDir()).Run("go", "install", t.pkg+"@"+t.query)
 }
 
 // Update updates the core command and the tools that it uses to their
 // latest versions: the core command itself (from the main branch, as it is
-// installed), and the GoScript compiler and bun that the js platform uses, if
-// they are installed. A tool built from a local source checkout is not
-// replaced unless the force option is set, and the check option only
-// reports which tools have updates.
+// installed), the GoScript compiler and bun that the js platform uses, if
+// they are installed, and the Go tools for developing with Cogent Core
+// (goimports, goalimports, and goalls), which it installs if they are not
+// installed. A tool built from a local source checkout is not replaced
+// unless the force option is set, and the check option only reports
+// which tools have updates.
 func Update(c *config.Config) error { //types:add
 	core, err := os.Executable()
 	if err != nil {
@@ -55,6 +86,7 @@ func Update(c *config.Config) error { //types:add
 		{name: "core", pkg: "cogentcore.org/core", module: "cogentcore.org/core", query: "main", path: core},
 		{name: "goscript", pkg: web.GoscriptPackage, module: "github.com/s4wave/goscript", query: "latest", path: web.ToolPath("goscript")},
 	}
+	tools = append(tools, goDevTools()...)
 	var errs []error
 	for _, t := range tools {
 		if err := updateGoTool(c, t); err != nil {
@@ -72,7 +104,14 @@ func Update(c *config.Config) error { //types:add
 func updateGoTool(c *config.Config, t goTool) error {
 	// The installed version is the version of the main module of the
 	// command; a command built from a local source checkout has no sum.
-	if t.path == "" {
+	switch {
+	case t.path == "" && t.install && c.Update.Check:
+		fmt.Println(t.name + " is not installed; it can be installed")
+		return nil
+	case t.path == "" && t.install:
+		logx.PrintlnWarn("installing " + t.name)
+		return installGoTool(t)
+	case t.path == "":
 		fmt.Println(t.name + " is not installed")
 		return nil
 	}
@@ -107,7 +146,7 @@ func updateGoTool(c *config.Config, t goTool) error {
 		return nil
 	}
 	logx.PrintlnWarn(fmt.Sprintf("updating %s from %s to %s", t.name, installed, latest))
-	return exec.Verbose().SetBuffer(false).SetDir(os.TempDir()).Run("go", "install", t.pkg+"@"+t.query)
+	return installGoTool(t)
 }
 
 // latestModuleVersion returns the version of the given module for the given

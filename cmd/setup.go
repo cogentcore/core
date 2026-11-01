@@ -15,9 +15,23 @@ import (
 	"cogentcore.org/core/cmd/config"
 )
 
-// Setup installs platform-specific dependencies for the current platform.
+// Setup installs platform-specific dependencies for the current platform,
+// and the latest versions of the Go tools for developing with Cogent Core:
+// goimports, goalimports, and goalls (which core update keeps updated).
 // It only needs to be called once per system.
 func Setup(c *config.Config) error { //types:add
+	err := setupPlatform()
+	for _, t := range goDevTools() {
+		logx.PrintlnWarn("installing " + t.name)
+		if terr := installGoTool(t); terr != nil {
+			err = errors.Join(err, fmt.Errorf("%s: %w", t.name, terr))
+		}
+	}
+	return err
+}
+
+// setupPlatform installs platform-specific dependencies for the current platform.
+func setupPlatform() error {
 	vc := exec.Verbose().SetBuffer(false)
 	switch runtime.GOOS {
 	case "darwin":
