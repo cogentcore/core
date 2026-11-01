@@ -65,17 +65,23 @@ var codeSymbols = regexp.MustCompile(`\b(econtent|myImage|mySVG|myFile)\b`)
 // that use the embedded files of the docs app.
 func TestDocs(t *testing.T) {
 	blocks := docsBlocks(t)
-	failed := 0
+	ran, failed := 0, 0
 	for _, bl := range blocks {
 		if codeSymbols.MatchString(bl.src) {
 			continue
 		}
+		ran++
 		if err := runBlock(bl.src); err != nil {
 			failed++
 			t.Errorf("%s:%d: %v", bl.file, bl.line, firstLine(err))
 		}
 	}
-	t.Logf("%d of %d code blocks failed", failed, len(blocks))
+	// failures are only mentioned when there are some
+	if failed == 0 {
+		t.Logf("all %d code blocks ran successfully", ran)
+	} else {
+		t.Logf("%d of %d code blocks failed", failed, ran)
+	}
 }
 
 // runBlock runs src in a new interpreter, in a new frame.
