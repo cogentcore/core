@@ -72,6 +72,7 @@ func CodeKey(src string) string {
 // compiled while it matches the Goal code compiled for the page (see
 // [CompiledGoal]).
 func BindCode(ed *textcore.Editor, parent *core.Frame, language string) {
+	bindFormat(ed, language)
 	if language == "Goal" {
 		bindGoal(ed, parent)
 		return
