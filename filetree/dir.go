@@ -44,11 +44,11 @@ type DirFlagMap struct {
 // Copy copies flag map from another map, safely avoiding copying the mutex.
 func (dm *DirFlagMap) Copy(cp *DirFlagMap) {
 	dm.init()
+	defer dm.Unlock()
 	if cp.Map == nil {
 		return
 	}
 	maps.Copy(dm.Map, cp.Map)
-	dm.Unlock()
 }
 
 // init initializes the map, and sets the Mutex lock; must unlock manually.
