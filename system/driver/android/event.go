@@ -44,6 +44,11 @@ func keyboardDelete() {
 	TheApp.Event.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
+//export compositionChanged
+func compositionChanged(str *C.char, start, end C.int) {
+	TheApp.Event.Composition(C.GoString(str), int(start), int(end))
+}
+
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))

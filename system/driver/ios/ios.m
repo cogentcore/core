@@ -27,6 +27,11 @@ struct utsname sysInfo;
 @end
 
 @interface GoInputView : UITextField<UITextFieldDelegate>
+// committed is the text outside of the marked (composing) text of the
+// input method, as last sent, and composition is the marked text.
+@property (copy, nonatomic) NSString *committed;
+@property (copy, nonatomic) NSString *composition;
+- (void)resetText;
 @end
 
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
@@ -104,6 +109,8 @@ struct utsname sysInfo;
 	
 	self.inputView = [[GoInputView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
 	self.inputView.delegate = self.inputView;
+	[self.inputView addTarget:self.inputView action:@selector(textChanged) forControlEvents:UIControlEventEditingChanged];
+	[self.inputView resetText];
 	self.inputView.autocapitalizationType = UITextAutocapitalizationTypeNone;
 	self.inputView.autocorrectionType = UITextAutocorrectionTypeNo;
 	[self.view addSubview:self.inputView];
@@ -216,13 +223,73 @@ static void sendTouches(int change, NSSet* touches) {
     return YES;
 }
 
-- (void)deleteBackward {
-    keyboardDelete();
+// The keyboard edits the text of this hidden text field, which is read
+// after each change: its marked text, which the input method is composing
+// (such as Chinese or Japanese text being converted), is sent as a
+// composition, and the changes to the rest of the text as typed text and
+// backspaces, at the cursor.
+
+// resetText resets the text to one placeholder character, so that
+// keyboards can always send backspace, ending any composition. It is a
+// space, as keyboards do not compose after other characters, such as digits.
+- (void)resetText {
+    self.text = @" ";
+    self.committed = @" ";
+    if (self.composition.length > 0) {
+        self.composition = @"";
+        compositionChanged("", 0, 0);
+    }
 }
 
--(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-    keyboardTyped([string UTF8String]);
-    return NO;
+// runeCount returns the number of runes (Unicode code points) in s.
+static int runeCount(NSString *s) {
+    return (int)([s lengthOfBytesUsingEncoding:NSUTF32LittleEndianStringEncoding] / 4);
+}
+
+- (void)textChanged {
+    NSString *text = self.text ?: @"";
+    NSString *comp = @"";
+    NSString *com = text;
+    UITextRange *marked = self.markedTextRange;
+    if (marked != nil && !marked.isEmpty) {
+        NSInteger st = [self offsetFromPosition:self.beginningOfDocument toPosition:marked.start];
+        NSInteger ed = [self offsetFromPosition:self.beginningOfDocument toPosition:marked.end];
+        if (st >= 0 && ed > st && ed <= (NSInteger)text.length) {
+            comp = [text substringWithRange:NSMakeRange(st, ed - st)];
+            com = [[text substringToIndex:st] stringByAppendingString:[text substringFromIndex:ed]];
+        }
+    }
+    if (comp.length == 0 && self.composition.length > 0) { // ended before the committed text
+        self.composition = @"";
+        compositionChanged("", 0, 0);
+    }
+    NSString *old = self.committed ?: @"";
+    NSUInteger n = MIN(old.length, com.length);
+    NSUInteger pre = 0;
+    while (pre < n && [old characterAtIndex:pre] == [com characterAtIndex:pre]) {
+        pre++;
+    }
+    NSUInteger suf = 0;
+    while (suf < n - pre && [old characterAtIndex:old.length - 1 - suf] == [com characterAtIndex:com.length - 1 - suf]) {
+        suf++;
+    }
+    NSString *deleted = [old substringWithRange:NSMakeRange(pre, old.length - suf - pre)];
+    for (int i = 0; i < runeCount(deleted); i++) {
+        keyboardDelete();
+    }
+    NSString *inserted = [com substringWithRange:NSMakeRange(pre, com.length - suf - pre)];
+    if (inserted.length > 0) {
+        keyboardTyped((char *)[inserted UTF8String]);
+    }
+    self.committed = com;
+    if (comp.length > 0 && ![comp isEqualToString:self.composition]) {
+        self.composition = comp;
+        int cur = runeCount(comp);
+        compositionChanged((char *)[comp UTF8String], cur, cur);
+    }
+    if (text.length == 0) {
+        [self resetText];
+    }
 }
 
 @end
@@ -300,6 +367,7 @@ void showKeyboard(int keyboardType) {
         }
         // refresh settings if keyboard is already open
         [view reloadInputViews];
+        [view resetText];
 
         BOOL ret = [view becomeFirstResponder];
     });

@@ -127,6 +127,7 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 	}
 	w.Glw = glw
 	w.initDrag()
+	w.initIME()
 	return nil
 }
 
@@ -539,6 +540,7 @@ func (w *Window) OnCloseReq(gw *glfw.Window) {
 }
 
 func (w *Window) Focused(gw *glfw.Window, focused bool) {
+	w.imeFocus(focused)
 	// w.Flgs.SetFlag(focused, system.Focused)
 	if focused {
 		w.Event.Window(events.WinFocus)

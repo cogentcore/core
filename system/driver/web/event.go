@@ -37,6 +37,7 @@ func (a *App) AddEventListeners() {
 	AddEventListener(g, "keydown", appInput(a.OnKeyDown))
 	AddEventListener(g, "keyup", appInput(a.OnKeyUp))
 	AddEventListener(g, "beforeinput", appInput(a.OnBeforeInput))
+	a.addCompositionListeners()
 	AddEventListener(g.Get("visualViewport"), "resize", a.OnResize)
 	AddEventListener(g, "blur", a.OnBlur)
 	// See https://stackoverflow.com/a/57795495
@@ -251,6 +252,9 @@ func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 
 func (a *App) OnKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
+	if isComposing(e) { // for the input method
+		return nil
+	}
 	k := e.Get("key").String()
 	if !a.ShouldProcessKey(k) {
 		return nil
@@ -275,6 +279,9 @@ func (a *App) OnKeyUp(this js.Value, args []js.Value) any {
 
 func (a *App) OnBeforeInput(this js.Value, args []js.Value) any {
 	e := args[0]
+	if isComposing(e) { // committed at compositionend
+		return nil
+	}
 	data := e.Get("data").String()
 	if data == "" {
 		return nil

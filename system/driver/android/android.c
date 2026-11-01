@@ -203,6 +203,13 @@ void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass cla
 	keyboardDelete();
 }
 
+void Java_org_golang_app_GoNativeActivity_compositionChanged(JNIEnv *env, jclass clazz, jstring str, jint start, jint end)
+{
+	const char *cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
+	compositionChanged((char *)cstr, start, end);
+	(*env)->ReleaseStringUTFChars(env, str, cstr);
+}
+
 void Java_org_golang_app_GoNativeActivity_setDarkMode(JNIEnv *env, jclass clazz, jboolean dark)
 {
 	setDarkMode((bool)dark);
