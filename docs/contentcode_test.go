@@ -49,5 +49,13 @@ func TestCompiledCode(t *testing.T) {
 			return
 		}
 	}
-	t.Logf("compiled code blocks: %d ran, %d failed, %d blocked, of %d", ok, failed, blocked, len(content.CompiledCode))
+	// failures are only mentioned when there are some
+	sum := fmt.Sprintf("compiled code blocks: %d of %d ran successfully", ok, len(content.CompiledCode))
+	if failed > 0 {
+		sum += fmt.Sprintf(", %d failed", failed)
+	}
+	if blocked > 0 {
+		sum += fmt.Sprintf(", %d still running after 5s", blocked)
+	}
+	t.Log(sum)
 }
