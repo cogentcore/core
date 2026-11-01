@@ -48,7 +48,11 @@ func (ed *Base) toggleCursor(on bool) {
 
 // updateCursorPosition updates the position of the cursor.
 func (ed *Base) updateCursorPosition() {
-	if ed.IsReadOnly() || !ed.StateIs(states.Focused) {
+	if !ed.StateIs(states.Focused) {
+		return
+	}
+	if ed.IsReadOnly() { // no cursor, but there can be an InputPos
+		ed.updateTextInput()
 		return
 	}
 	sc := ed.Scene

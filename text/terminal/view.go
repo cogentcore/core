@@ -58,6 +58,7 @@ func (vw *View) Init() {
 	vw.Editor.Init()
 	vw.mouseDown = mouseNoButton
 	vw.SetReadOnly(true)
+	vw.InputPos = vw.inputPos
 	vw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
 		s.Cursor = cursors.Text
@@ -99,6 +100,20 @@ func (vw *View) Init() {
 			cms[i](m, pos)
 		}
 	})
+}
+
+// inputPos returns the position of the terminal cursor in the view,
+// where the text being composed with an input method is shown,
+// and whether the program is running there.
+func (vw *View) inputPos() (textpos.Pos, bool) {
+	tm := vw.Terminal
+	if tm == nil || !tm.IsRunning() {
+		return textpos.Pos{}, false
+	}
+	if vw.isGrid {
+		return tm.gridCursor, tm.altShown
+	}
+	return tm.linesCursor, !tm.altShown && tm.linesCursor.Line >= 0
 }
 
 // contextMenu adds the items of the terminal to the context menu.
@@ -250,8 +265,7 @@ func (vw *View) selectedText() string {
 	if tbe == nil {
 		return ""
 	}
-	s := strings.ReplaceAll(string(tbe.ToBytes()), string(wideFiller), "")
-	lines := strings.Split(s, "\n")
+	lines := strings.Split(string(tbe.ToBytes()), "\n")
 	for i, l := range lines {
 		lines[i] = strings.TrimRight(l, " ")
 	}

@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/textpos"
@@ -200,10 +201,23 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		return lns
 	}
 
-	rendSpan := func(lns *shaped.Lines, pos math32.Vector2, coff int) {
+	// The chars of the line are positioned in cells, where wide chars
+	// take two cells, and tabs go to tab stops.
+	cells := lines.LineCells(tx, ts)
+	cellX := func(ci int) float32 {
+		return float32(cells[min(ci, len(cells)-1)]) * ed.charSize.X
+	}
+
+	// rendSpan renders the given shaped span, starting at char coff,
+	// where tabCells is the width in cells of a tab, which is 0 otherwise.
+	rendSpan := func(lns *shaped.Lines, pos math32.Vector2, coff, tabCells int) {
 		lns.SelectReset()
 		lns.HighlightReset()
-		lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X))
+		if tabCells > 0 {
+			lns.SetGlyphXAdvance(math32.ToFixed(float32(tabCells)*ed.charSize.X), nil)
+		} else {
+			lns.SetGlyphXAdvance(math32.ToFixed(ed.charSize.X), lines.RuneWidth)
+		}
 		if !vseli.IsNil() {
 			lns.SelectRegion(textpos.Range{Start: vseli.Start.Char - coff, End: vseli.End.Char - coff})
 		}
@@ -215,63 +229,60 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 		}
 		pc.DrawText(lns, pos)
 	}
+	// rendTab renders the tab at char ci.
+	rendTab := func(stx rich.Text, ci int) {
+		pos := rpos
+		pos.X += cellX(ci)
+		tsz := sz
+		tsz.X -= cellX(ci)
+		rendSpan(shapeTab(stx, tsz), pos, ci, cells[ci+1]-cells[ci])
+	}
 
 	for si := range tx { // tabs encoded as single chars at start
 		sn, rn := rich.SpanLen(tx[si])
 		if rn == 1 && tx[si][sn] == '\t' {
-			lpos := rpos
-			ic := float32(ts*indent) * ed.charSize.X
-			lpos.X += ic
-			lsz := sz
-			lsz.X -= ic
-			rendSpan(shapeTab(tx[si:si+1], lsz), lpos, indent)
+			rendTab(tx[si:si+1], indent)
 			indent++
 		} else {
 			break
 		}
 	}
 	rtx := tx[indent:]
-	lpos := rpos
-	ic := float32(ts*indent) * ed.charSize.X
-	lpos.X += ic
-	lsz := sz
-	lsz.X -= ic
 	hasTab := false
 	for si := range rtx {
-		sn, rn := rich.SpanLen(tx[si])
-		if rn > 0 && tx[si][sn] == '\t' {
+		sn, rn := rich.SpanLen(rtx[si])
+		if rn > 0 && rtx[si][sn] == '\t' {
 			hasTab = true
 			break
 		}
 	}
 	if !hasTab {
-		rendSpan(shapeSpan(rtx, lsz), lpos, indent)
+		lpos := rpos
+		lpos.X += cellX(indent)
+		lsz := sz
+		lsz.X -= cellX(indent)
+		rendSpan(shapeSpan(rtx, lsz), lpos, indent, 0)
 		return
 	}
 	coff := indent
-	cc := ts * indent
-	scc := cc
 	for si := range rtx {
 		sn, rn := rich.SpanLen(rtx[si])
 		if rn == 0 {
 			continue
 		}
-		spos := lpos
-		spos.X += float32(cc-scc) * ed.charSize.X
-		if rtx[si][sn] != '\t' {
-			ssz := ed.charSize.Mul(math32.Vec2(float32(rn), 1))
-			rendSpan(shapeSpan(rtx[si:si+1], ssz), spos, coff)
-			cc += rn
-			coff += rn
+		if rtx[si][sn] == '\t' {
+			for range rn {
+				rendTab(rtx[si:si+1], coff)
+				coff++
+			}
 			continue
 		}
-		for range rn {
-			tcc := ((cc / 8) + 1) * 8
-			spos.X += float32(tcc-cc) * ed.charSize.X
-			cc = tcc
-			rendSpan(shapeTab(rtx[si:si+1], ed.charSize), spos, coff)
-			coff++
-		}
+		spos := rpos
+		spos.X += cellX(coff)
+		ssz := sz
+		ssz.X -= cellX(coff)
+		rendSpan(shapeSpan(rtx[si:si+1], ssz), spos, coff, 0)
+		coff += rn
 	}
 }
 
@@ -416,21 +427,21 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	}
 	// The chars of the view line are found in view coordinates, which
 	// include any virtual text, which maps to its source position.
+	// A point in the second half of a char is after it.
 	vln := stln + int(math32.Floor(cp.Y))
 	vpos := textpos.Pos{Line: vln, Char: 0}
 	stp := ed.viewCharStartPos(vpos)
 	if ptf.X < stp.X {
 		return ed.Lines.PosFromView(ed.viewId, vpos)
 	}
-	hc := 0.5 * ed.charSize.X
+	col := (ptf.X - stp.X) / ed.charSize.X
+	cells := ed.viewLineCells(vln)
 	vll := ed.Lines.ViewLineLen(ed.viewId, vln)
-	for cc := range vll {
-		vpos.Char = cc
-		edp := ed.viewCharStartPos(textpos.Pos{Line: vln, Char: cc + 1})
-		if ptf.X >= stp.X-hc && ptf.X < edp.X-hc {
+	for cc := range min(vll, len(cells)-1) {
+		if 2*col < float32(cells[cc]+cells[cc+1]) {
+			vpos.Char = cc
 			return ed.Lines.PosFromView(ed.viewId, vpos)
 		}
-		stp = edp
 	}
 	vpos.Char = vll
 	return ed.Lines.PosFromView(ed.viewId, vpos)
@@ -453,9 +464,18 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	return ed.viewCharStartPos(ed.Lines.PosToView(ed.viewId, pos))
 }
 
+// viewLineCells returns the cell column of the start of each char
+// of the given view line, followed by its end (see [lines.LineCells]).
+func (ed *Base) viewLineCells(vln int) []int {
+	ed.Lines.Lock() // required by ViewMarkupLine; never called from renderLines
+	tx := ed.Lines.ViewMarkupLine(ed.viewId, vln)
+	ed.Lines.Unlock()
+	return lines.LineCells(tx, ed.Lines.Settings.TabSize)
+}
+
 // viewCharStartPos returns the starting (top left) render coords for the
 // given view position, in view lines and display chars, which include
-// any virtual text.
+// any virtual text. Positions beyond the end of the line are at its end.
 func (ed *Base) viewCharStartPos(vpos textpos.Pos) math32.Vector2 {
 	if ed.Lines == nil {
 		return math32.Vector2{}
@@ -467,56 +487,8 @@ func (ed *Base) viewCharStartPos(vpos textpos.Pos) math32.Vector2 {
 	spos := ed.Geom.Pos.Content.Add(math32.FromPoint(scpos))
 	spos.X += ed.LineNumberPixels() - ed.Geom.Scroll.X
 	spos.Y += (float32(vpos.Line) - ed.scrollPos) * ed.charSize.Y
-	ed.Lines.Lock() // required by ViewMarkupLine; never called from renderLines
-	tx := ed.Lines.ViewMarkupLine(ed.viewId, vpos.Line)
-	ed.Lines.Unlock()
-	ts := ed.Lines.Settings.TabSize
-	indent := 0
-	for si := range tx { // tabs encoded as single chars at start
-		sn, rn := rich.SpanLen(tx[si])
-		if rn == 1 && tx[si][sn] == '\t' {
-			if vpos.Char == si {
-				spos.X += float32(indent*ts) * ed.charSize.X
-				return spos
-			}
-			indent++
-		} else {
-			break
-		}
-	}
-	rtx := tx[indent:]
-	lpos := spos
-	lpos.X += float32(ts*indent) * ed.charSize.X
-	coff := indent
-	cc := ts * indent
-	scc := cc
-	for si := range rtx {
-		sn, rn := rich.SpanLen(rtx[si])
-		if rn == 0 {
-			continue
-		}
-		spos := lpos
-		spos.X += float32(cc-scc) * ed.charSize.X
-		if rtx[si][sn] != '\t' {
-			rc := vpos.Char - coff
-			if rc >= 0 && rc < rn {
-				spos.X += float32(rc) * ed.charSize.X
-				return spos
-			}
-			cc += rn
-			coff += rn
-			continue
-		}
-		for ri := range rn {
-			if ri == vpos.Char-coff {
-				return spos
-			}
-			tcc := ((cc / 8) + 1) * 8
-			cc = tcc
-			coff++
-		}
-	}
-	spos = lpos
-	spos.X += float32(cc-scc) * ed.charSize.X
+	cells := ed.viewLineCells(vpos.Line)
+	ci := min(max(vpos.Char, 0), len(cells)-1)
+	spos.X += float32(cells[ci]) * ed.charSize.X
 	return spos
 }
