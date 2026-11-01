@@ -32,10 +32,9 @@ func formatGo(src string) (string, error) {
 
 // bindFormat formats the code of the given editor of a code block of the
 // given language when it is edited (see [FormatCode]), before it runs.
+// The function of the language is found then, as it can be added when
+// code is first edited, by a package that is loaded then.
 func bindFormat(ed *textcore.Editor, language string) {
-	if FormatCode[language] == nil {
-		return
-	}
 	ed.OnFirst(events.Change, func(e events.Event) {
 		formatEditor(ed, language)
 	})
