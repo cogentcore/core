@@ -154,12 +154,12 @@ func TestLongLineWrap(t *testing.T) {
 		`[monospace]: "usedastheinputtotheshapedpackagefortextlayoutandrenderingItisencodedpurelyusingr"
 `,
 
-		`[monospace]: "uneslicesforeachspanwiththestyleinformationrepresentedwithspecial "
+		`[monospace]: "uneslicesforeachspanwiththestyleinformationrepresentedwithspecial rune values at "
 `,
 
-		`[monospace]: "rune values at the start of each span. This is an efficient and GPU-friendly "
+		`[monospace]: "the start of each span. This is an efficient and GPU-friendly pure-value format "
 `,
-		`[monospace]: "pure-value format that avoids any issues of style struct pointer management etc."
+		`[monospace]: "that avoids any issues of style struct pointer management etc."
 `,
 	}
 
@@ -168,9 +168,9 @@ func TestLongLineWrap(t *testing.T) {
 	join := `The [rich.Text](http://rich.text.com) type is the standard representation for 
 formatted text, 
 usedastheinputtotheshapedpackagefortextlayoutandrenderingItisencodedpurelyusingr
-uneslicesforeachspanwiththestyleinformationrepresentedwithspecial 
-rune values at the start of each span. This is an efficient and GPU-friendly 
-pure-value format that avoids any issues of style struct pointer management etc.
+uneslicesforeachspanwiththestyleinformationrepresentedwithspecial rune values at 
+the start of each span. This is an efficient and GPU-friendly pure-value format 
+that avoids any issues of style struct pointer management etc.
 `
 
 	jtxt := ""
@@ -224,8 +224,7 @@ func TestLineWrapSVG(t *testing.T) {
 		`[monospace fill-color]: "none""
 [monospace fill-color]: "/><circle"
 [monospace]: " "
-`,
-		`[monospace fill-color]: "cx="
+[monospace fill-color]: "cx="
 [monospace fill-color]: "".53""
 [monospace]: " "
 [monospace fill-color]: "cy="
@@ -240,14 +239,13 @@ func TestLineWrapSVG(t *testing.T) {
 [monospace fill-color]: "/></svg>"
 `,
 	}
-	assert.Equal(t, 7, vw.viewLines)
+	assert.Equal(t, 6, vw.viewLines)
 
 	join := `<svg xmlns="http://www.w3.org/2000/svg" 
 width="256" height="256" viewBox="0 0 1 
 1"><path d="M.833.675a.35.35 0 1 1 0-.35" 
 style="stroke:#005bc0;stroke-width:.27;fill:
-none"/><circle 
-cx=".53" cy=".5" r=".23" 
+none"/><circle cx=".53" cy=".5" r=".23" 
 style="fill:#fbbd0e;stroke:none"/></svg>
 `
 

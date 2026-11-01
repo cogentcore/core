@@ -41,8 +41,10 @@ type Run interface {
 	RuneAtPoint(src rich.Text, pt math32.Vector2, start math32.Vector2) int
 
 	// SetGlyphXAdvance sets the x advance on all glyphs to given value:
-	// for monospaced case.
-	SetGlyphXAdvance(adv fixed.Int26_6)
+	// for monospaced case. If cells is non-nil, the advance of each glyph is
+	// multiplied by the number of cells for the index of its source rune,
+	// for wide characters.
+	SetGlyphXAdvance(adv fixed.Int26_6, cells func(ri int) int)
 }
 
 // Math holds the output of a TeX math expression.

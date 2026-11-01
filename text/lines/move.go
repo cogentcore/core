@@ -104,7 +104,7 @@ func (ls *Lines) moveDown(vw *view, pos textpos.Pos, steps, col int) textpos.Pos
 	vp := ls.posToView(vw, pos)
 	nvp := vp
 	nvp.Line = ls.viewLinesMoved(vw, vp.Line, steps)
-	nvp.Char = col
+	nvp.Char = cellChar(ls.viewLineCells(vw, nvp.Line), col)
 	dp := ls.posFromView(vw, nvp)
 	return dp
 }
@@ -118,7 +118,7 @@ func (ls *Lines) moveUp(vw *view, pos textpos.Pos, steps, col int) textpos.Pos {
 	vp := ls.posToView(vw, pos)
 	nvp := vp
 	nvp.Line = ls.viewLinesMoved(vw, vp.Line, -steps)
-	nvp.Char = col
+	nvp.Char = cellChar(ls.viewLineCells(vw, nvp.Line), col)
 	dp := ls.posFromView(vw, nvp)
 	return dp
 }

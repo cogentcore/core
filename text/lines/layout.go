@@ -135,9 +135,9 @@ func (ls *Lines) layoutViewLine(vw *view, ln int, txt []rune, mu rich.Text) ([]r
 			if len(forced) > 0 && forced[0] < ns {
 				ns = forced[0]
 			}
-			wlen := ns - i // length of word
+			wlen := textCells(txt[i:ns]) // width of word, in cells
 			// fmt.Println("word at:", i, "ns:", ns, string(txt[i:ns]))
-			if clen+wlen > width { // need to wrap
+			if clen+wlen > width && clen > 0 { // need to wrap
 				clen = 0
 				sp.Char = i
 				vst = append(vst, sp)
@@ -150,13 +150,11 @@ func (ls *Lines) layoutViewLine(vw *view, ln int, txt []rune, mu rich.Text) ([]r
 				} else {
 					breaks = append(breaks, si)
 				}
-				if wlen > width {
-					nb := wlen / width
-					if nb*width == wlen {
-						nb--
-					}
-					bp := i + width
-					for range nb {
+			}
+			if clen+wlen > width { // break the word, where it fills a line
+				for bp := i; bp < ns; bp++ {
+					w := RuneWidth(txt[bp])
+					if clen+w > width && clen > 0 {
 						si, sn, ri := lt.Index(bp)
 						if sn != ri { // not start of span already
 							lt.SplitSpan(bp)
@@ -169,12 +167,13 @@ func (ls *Lines) layoutViewLine(vw *view, ln int, txt []rune, mu rich.Text) ([]r
 						}
 						sp.Char = bp
 						vst = append(vst, sp)
-						bp += width
+						clen = 0
 					}
-					clen = wlen - (nb * width)
+					clen += w
 				}
+			} else {
+				clen += wlen
 			}
-			clen += wlen
 			i = ns
 		}
 	}

@@ -125,13 +125,13 @@ func (ed *Base) CursorToHistoryNext() bool {
 }
 
 // setCursorColumn sets the current target cursor column (cursorColumn) to that
-// of the given position
+// of the given position, in cells (see [lines.Lines.ViewCell]).
 func (ed *Base) setCursorColumn(pos textpos.Pos) {
 	if ed.Lines == nil {
 		return
 	}
 	vpos := ed.Lines.PosToView(ed.viewId, pos)
-	ed.cursorColumn = vpos.Char
+	ed.cursorColumn = ed.Lines.ViewCell(ed.viewId, vpos)
 }
 
 ////////  cursor moving

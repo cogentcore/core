@@ -149,6 +149,9 @@ type Terminal struct {
 	// linesCursor is the position of the terminal cursor in the lines view,
 	// with a Line of -1 if it is not there.
 	linesCursor textpos.Pos
+
+	// gridCursor is the position of the terminal cursor in the grid view.
+	gridCursor textpos.Pos
 }
 
 func (tm *Terminal) Init() {
@@ -624,6 +627,7 @@ func (tm *Terminal) sync() {
 				if !md.CursorHidden {
 					cursor = cur.Col
 				}
+				tm.gridCursor = textpos.Pos{Line: r, Char: cellChar(ln.Cells, cur.Col)}
 			}
 			rs, mu := cm.lineMarkup(ln.Cells, minLen, cursor)
 			gridText = append(gridText, rs)
@@ -715,10 +719,14 @@ func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, s
 			off := -1
 			if crow >= st && crow <= i {
 				off = cur.Col
+				var cells []vt.Cell
+				for _, pr := range live[st : i+1] {
+					cells = append(cells, pr.Cells...)
+				}
 				for _, pr := range live[st:crow] {
 					off += len(pr.Cells)
 				}
-				tm.linesCursor = textpos.Pos{Line: tm.numScrollback + len(text), Char: off}
+				tm.linesCursor = textpos.Pos{Line: tm.numScrollback + len(text), Char: cellChar(cells, off)}
 			}
 			addLine(live[st:i+1], off)
 			st = i + 1

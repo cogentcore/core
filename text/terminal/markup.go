@@ -13,11 +13,6 @@ import (
 	"cogentcore.org/core/text/terminal/vt"
 )
 
-// wideFiller is the character used for the cell after a wide character,
-// so that each cell has one character, which keeps the columns aligned.
-// It is a zero width space, which is removed from copied text.
-const wideFiller = '​'
-
 // Palette is the set of 16 standard terminal colors: black, red, green,
 // yellow, blue, magenta, cyan, white, and their bright versions.
 type Palette [16]color.RGBA
@@ -159,30 +154,36 @@ func (cm *colorMap) link(rs *rich.Style, st vt.Style) *rich.Style {
 }
 
 // lineMarkup returns the text and markup for the given cells, which
-// has one character for each cell, without the trailing blank cells,
-// but with at least minLen characters (for the cursor). The cursor is
-// shown on the cell at the given index, unless it is negative: it is
-// drawn as the background of the cell, which fills the cell exactly.
+// has one character for each cell, except the cell after a wide
+// character, as the wide character takes two cells in the view,
+// without the trailing blank cells, but with at least minLen cells (for
+// the cursor). The cursor is shown on the cell at the given index, unless
+// it is negative: it is drawn as the background of the cell, which fills
+// the cell exactly.
 func (cm *colorMap) lineMarkup(cells []vt.Cell, minLen, cursor int) ([]rune, rich.Text) {
 	n := len(cells)
 	for n > 0 && cells[n-1].IsBlank() {
 		n--
 	}
 	n = max(n, min(minLen, len(cells)))
-	rs := make([]rune, n, max(n, minLen))
-	for i := range n {
-		c := &cells[i]
+	rs := make([]rune, 0, max(n, minLen))
+	cellOf := make([]int, 0, max(n, minLen)) // the cell index of each char
+	for i := range max(n, minLen) {
 		switch {
-		case c.Width == 0:
-			rs[i] = wideFiller
-		case c.Rune == 0:
-			rs[i] = ' '
+		case i >= n:
+			rs = append(rs, ' ')
+		case cells[i].Width == 0: // after a wide character
+			continue
+		case cells[i].Rune == 0:
+			rs = append(rs, ' ')
 		default:
-			rs[i] = c.Rune
+			rs = append(rs, cells[i].Rune)
 		}
+		cellOf = append(cellOf, i)
 	}
-	for len(rs) < minLen {
-		rs = append(rs, ' ')
+	cursorChar := -1
+	if cursor >= 0 {
+		cursorChar = cellChar(cells, cursor)
 	}
 	var tx rich.Text
 	addSpan := func(sty *rich.Style, start, end int) {
@@ -196,20 +197,20 @@ func (cm *colorMap) lineMarkup(cells []vt.Cell, minLen, cursor int) ([]rune, ric
 			tx.AddSpan(sty, rs[start:end])
 		}
 	}
-	// the cells, with the cursor cell as its own span
-	cellStyle := func(i int) vt.Style {
-		if i < n {
-			return cells[i].Style
+	// the chars, with the cursor char as its own span
+	charStyle := func(i int) vt.Style {
+		if ci := cellOf[i]; ci < n {
+			return cells[ci].Style
 		}
 		return vt.Style{}
 	}
 	start := 0
 	for i := 1; i <= len(rs); i++ {
-		if i < len(rs) && i != cursor && i-1 != cursor && cellStyle(i) == cellStyle(start) {
+		if i < len(rs) && i != cursorChar && i-1 != cursorChar && charStyle(i) == charStyle(start) {
 			continue
 		}
-		sty := cm.style(cellStyle(start))
-		if start == cursor {
+		sty := cm.style(charStyle(start))
+		if start == cursorChar {
 			sty = cm.cursorStyle(sty)
 		}
 		addSpan(sty, start, i)
@@ -219,6 +220,19 @@ func (cm *colorMap) lineMarkup(cells []vt.Cell, minLen, cursor int) ([]rune, ric
 		tx = rich.NewText(cm.base, rs)
 	}
 	return rs, tx
+}
+
+// cellChar returns the index of the char for the cell at the given
+// column in the text of the given cells (see [colorMap.lineMarkup]),
+// where the cell after a wide character is part of it.
+func cellChar(cells []vt.Cell, col int) int {
+	ci := 0
+	for i := 1; i <= col; i++ {
+		if i >= len(cells) || cells[i].Width != 0 {
+			ci++
+		}
+	}
+	return ci
 }
 
 // cursorStyle returns the given style with the cursor background.
