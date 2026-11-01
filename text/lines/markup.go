@@ -242,7 +242,7 @@ func (ls *Lines) markupLines(st, ed int) bool {
 		ls.markup[ln] = mu
 	}
 	for _, vw := range ls.views {
-		ls.layoutViewLines(vw)
+		ls.layoutViewLinesRange(vw, st, ed)
 	}
 	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.

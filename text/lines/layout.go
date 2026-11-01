@@ -60,6 +60,40 @@ func (ls *Lines) layoutViewLinesFrom(vw *view, start int) {
 	vw.viewLines = len(vw.vlineStarts)
 }
 
+// layoutViewLinesRange updates the layout of the given range of source
+// lines (inclusive) in the given view, after their markup changed, keeping
+// the layout of the other lines, unless the number of view lines of the
+// range changed, in which case the lines after it are laid out again too.
+// This makes the markup of single lines, such as for tags, fast.
+func (ls *Lines) layoutViewLinesRange(vw *view, st, ed int) {
+	n := len(ls.markup)
+	if st < 0 || st > ed || ed >= n || len(vw.lineToVline) != n || len(vw.vlineStarts) != vw.viewLines || len(vw.markup) != vw.viewLines {
+		ls.layoutViewLinesFrom(vw, max(st, 0))
+		return
+	}
+	vst := vw.lineToVline[st]
+	ved := vw.viewLines // view lines of the range: [vst, ved)
+	if ed+1 < n {
+		ved = vw.lineToVline[ed+1]
+	}
+	var muls []rich.Text
+	var starts []textpos.Pos
+	vls := make([]int, 0, ed-st+1) // the first view line of each line
+	for ln := st; ln <= ed; ln++ {
+		mu, vs := ls.layoutViewLine(vw, ln, ls.lines[ln], ls.markup[ln])
+		vls = append(vls, vst+len(starts))
+		muls = append(muls, mu...)
+		starts = append(starts, vs...)
+	}
+	if len(starts) != ved-vst {
+		ls.layoutViewLinesFrom(vw, st)
+		return
+	}
+	copy(vw.markup[vst:ved], muls)
+	copy(vw.vlineStarts[vst:ved], starts)
+	copy(vw.lineToVline[st:ed+1], vls)
+}
+
 // layoutViewLine performs layout and line wrapping on the given text,
 // for given view text, with the given markup rich.Text.
 // The layout is implemented in the markup that is returned.
