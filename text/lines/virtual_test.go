@@ -109,6 +109,13 @@ func TestVirtualInlay(t *testing.T) {
 	assert.Equal(t, want, viewText(ls, other))
 	checkRoundTrip(t, ls, vid)
 
+	// the text of a region at a hint, such as a highlight, is after it
+	reg := func(sl, sc, el, ec int) textpos.Region {
+		return textpos.Region{Start: textpos.Pos{Line: sl, Char: sc}, End: textpos.Pos{Line: el, Char: ec}}
+	}
+	assert.Equal(t, reg(0, 7, 0, 8), ls.RegionToView(vid, reg(0, 4, 0, 5)))
+	assert.Equal(t, reg(0, 4, 0, 4), ls.RegionToView(vid, reg(0, 4, 0, 4)), "an empty region is at the cursor")
+
 	// text typed at a hint goes before it
 	ls.InsertText(textpos.Pos{Line: 0, Char: 4}, []rune("x"))
 	assert.Equal(t, []string{"foo(xa: 1, b: 2)", "bar(c: 3)"}, viewText(ls, vid))
