@@ -104,10 +104,33 @@ func BitFlagStringExtended[T, E BitFlagConstraint](i T, values []T, extendedValu
 	return str
 }
 
+// lookup returns the value of the given name in the given map from enum
+// names to values, or else of the one name that is the same regardless of
+// case, so that a name whose case changed, as Html to HTML, still works,
+// as in saved files.
+func lookup[T EnumConstraint](valueMap map[string]T, s string) (T, bool) {
+	if val, ok := valueMap[s]; ok {
+		return val, true
+	}
+	var val T
+	found := false
+	for name, v := range valueMap {
+		if !strings.EqualFold(name, s) {
+			continue
+		}
+		if found && v != val {
+			return val, false // ambiguous
+		}
+		val, found = v, true
+	}
+	return val, found
+}
+
 // SetString sets the given enum value from its string representation, the map from
 // enum names to values, and the name of the enum type, which is used for the error message.
+// The string is matched regardless of case if it does not match exactly.
 func SetString[T EnumConstraint](i *T, s string, valueMap map[string]T, typeName string) error {
-	if val, ok := valueMap[s]; ok {
+	if val, ok := lookup(valueMap, s); ok {
 		*i = val
 		return nil
 	}
@@ -122,7 +145,7 @@ func SetStringLower[T EnumConstraint](i *T, s string, valueMap map[string]T, typ
 		*i = val
 		return nil
 	}
-	if val, ok := valueMap[strings.ToLower(s)]; ok {
+	if val, ok := lookup(valueMap, strings.ToLower(s)); ok {
 		*i = val
 		return nil
 	}
@@ -137,7 +160,15 @@ func SetStringExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string, val
 		*i = val
 		return nil
 	}
-	return ie.SetString(s)
+	err := ie.SetString(s)
+	if err == nil {
+		return nil
+	}
+	if val, ok := lookup(valueMap, s); ok {
+		*i = val
+		return nil
+	}
+	return err
 }
 
 // SetStringLowerExtended sets the given enum value from its string representation and the map from

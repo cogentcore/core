@@ -137,6 +137,7 @@ type Terminal struct {
 	titleFuncs, dirFuncs []func(s string)
 	exitFuncs            []func(err error)
 	commandFuncs         []func(c *vt.Command)
+	userCommandFuncs     []func(cmd string)
 	interruptFuncs       []func()
 	resizeFuncs          []func(cols, rows int)
 
@@ -152,10 +153,21 @@ type Terminal struct {
 
 	// gridCursor is the position of the terminal cursor in the grid view.
 	gridCursor textpos.Pos
+
+	// inputStart is where the user started typing the current command line
+	// in the lines view, with a Line of -1 if not started, for
+	// [Terminal.OnUserCommand].
+	inputStart textpos.Pos
+
+	// entered are the starts of the command lines entered by the user,
+	// which are reported when the cursor has left their lines
+	// (see [Terminal.reportUserCommands]).
+	entered []textpos.Pos
 }
 
 func (tm *Terminal) Init() {
 	tm.Frame.Init()
+	tm.inputStart.Line = -1
 	tm.MaxScrollback = 10000
 	tm.AltAsMeta = true
 	tm.emulator = vt.NewEmulator(80, 24)
@@ -388,6 +400,9 @@ func (tm *Terminal) send(b []byte, user bool) {
 			tm.linesView.SetCursorTarget(textpos.PosErr)
 		}
 	}
+	if user {
+		tm.userInput(b)
+	}
 	if iq := tm.input.Load(); iq != nil {
 		iq.send(b)
 	}
@@ -528,6 +543,79 @@ func (tm *Terminal) OnCommand(fun func(c *vt.Command)) {
 	tm.commandFuncs = append(tm.commandFuncs, fun)
 }
 
+// OnUserCommand adds a function to call with each command line that the
+// user enters (with Return) at the prompt of the shell, or of another
+// program that reads lines on the primary screen, but not those that the
+// program runs itself, as in a script. It is the text of the line as the
+// program shows it, from where the user started typing, so that it
+// includes the changes of line editing, completion, and the history,
+// and it is reported once the program has accepted it: when the cursor
+// has left the line.
+func (tm *Terminal) OnUserCommand(fun func(cmd string)) {
+	tm.userCommandFuncs = append(tm.userCommandFuncs, fun)
+}
+
+// userInput records where the user starts typing a command line, and the
+// command lines entered with Return, for [Terminal.OnUserCommand].
+func (tm *Terminal) userInput(b []byte) {
+	if len(tm.userCommandFuncs) == 0 || tm.altShown {
+		return
+	}
+	for _, c := range b {
+		if c == '\r' {
+			if tm.inputStart.Line >= 0 {
+				tm.entered = append(tm.entered, tm.inputStart)
+				tm.inputStart.Line = -1
+			}
+			continue
+		}
+		if tm.inputStart.Line >= 0 || tm.linesCursor.Line < 0 {
+			continue
+		}
+		if n := len(tm.entered); n > 0 && tm.linesCursor.Line <= tm.entered[n-1].Line {
+			continue // the cursor is still on the last line entered
+		}
+		tm.inputStart = tm.linesCursor
+	}
+}
+
+// reportUserCommands reports the command lines entered by the user whose
+// lines the cursor has left (see [Terminal.OnUserCommand]).
+func (tm *Terminal) reportUserCommands() {
+	ln := tm.linesView.Lines
+	for len(tm.entered) > 0 {
+		st := tm.entered[0]
+		if tm.linesCursor.Line < 0 || tm.linesCursor.Line <= st.Line {
+			return // not accepted yet
+		}
+		tm.entered = tm.entered[1:]
+		if st.Line >= ln.NumLines() {
+			continue
+		}
+		line := ln.Line(st.Line)
+		cmd := strings.TrimSpace(string(line[min(st.Char, len(line)):]))
+		if cmd == "" {
+			continue
+		}
+		for _, f := range tm.userCommandFuncs {
+			f(cmd)
+		}
+	}
+}
+
+// shiftUserInput moves the positions of the user input up by the given
+// number of lines removed from the start of the lines view, removing
+// those that are no longer there.
+func (tm *Terminal) shiftUserInput(n int) {
+	if tm.inputStart.Line >= 0 {
+		tm.inputStart.Line = max(tm.inputStart.Line-n, -1)
+	}
+	tm.entered = slices.DeleteFunc(tm.entered, func(p textpos.Pos) bool { return p.Line < n })
+	for i := range tm.entered {
+		tm.entered[i].Line -= n
+	}
+}
+
 // OnInterrupt adds a function to call when the user types the interrupt
 // character (Control+C) while the program does not read raw input, for
 // a program run with [Terminal.Func], which does not get the interrupt
@@ -651,6 +739,7 @@ func (tm *Terminal) sync() {
 	lvIME, gvIME := lv.VirtualText(imeLayer), gv.VirtualText(imeLayer)
 	if screen != nil {
 		tm.syncLines(cm, scrolled, cleared, screen, pcur, !md.CursorHidden && !alt)
+		tm.reportUserCommands()
 	}
 	if alt {
 		gv.Lines.ReplaceLinesMarkup(0, -1, gridText, gridMarkup)
@@ -686,6 +775,8 @@ func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, s
 	if cleared {
 		tm.pending = nil
 		tm.numScrollback = 0
+		tm.inputStart.Line = -1
+		tm.entered = nil
 	}
 	var text [][]rune
 	var markup []rich.Text
@@ -743,6 +834,7 @@ func (tm *Terminal) syncLines(cm *colorMap, scrolled []*vt.Line, cleared bool, s
 		ln.ReplaceLinesMarkup(0, over, nil, nil)
 		tm.numScrollback -= over
 		tm.linesCursor.Line -= over
+		tm.shiftUserInput(over)
 	}
 }
 

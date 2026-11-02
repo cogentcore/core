@@ -295,3 +295,24 @@ func TestChromaErrorsArePlain(t *testing.T) {
 		assert.NotEqual(t, token.Error, tg.Token.Token, "%d-%d", tg.Start, tg.End)
 	}
 }
+
+// TestCodeLexers tests the lexers of the shading languages, and the
+// Go lexer for code without a lexer of its own, as SPIR-V assembly.
+func TestCodeLexers(t *testing.T) {
+	for file, lang := range map[string]string{
+		"shader.glsl":   "GLSL",
+		"shader.comp":   "GLSL",
+		"shader.frag":   "GLSL",
+		"shader.wgsl":   "WebGPU Shading Language",
+		"shader.hlsl":   "HLSL",
+		"shader.metal":  "Metal",
+		"shader.spvasm": "Go",
+	} {
+		fi, _ := fileinfo.NewFileInfo(file)
+		var pst parse.FileStates
+		pst.SetSrc(file, "", fi.Known)
+		hi := Highlighter{}
+		hi.Init(fi, &pst)
+		assert.Equal(t, lang, hi.language, file)
+	}
+}

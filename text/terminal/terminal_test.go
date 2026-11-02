@@ -535,3 +535,56 @@ func TestTerminalSelectAll(t *testing.T) {
 	lv.SelectRegion.End = lv.Lines.EndPos()
 	assert.Equal(t, "$ echo hello\nhello\n$", lv.selectedText())
 }
+
+// TestTerminalUserCommand tests that the command lines that the user
+// enters are reported, as the shell shows them, and not those that the
+// shell runs itself.
+func TestTerminalUserCommand(t *testing.T) {
+	b, tm := testTerminal(t)
+	var cmds []string
+	b.AsyncLock()
+	tm.OnUserCommand(func(cmd string) { cmds = append(cmds, cmd) })
+	tm.SetFocus()
+	b.AsyncUnlock()
+	src := b.Scene.RenderWindow().SystemWindow.Events()
+	typeText := func(s string) {
+		for _, r := range s {
+			src.KeyChord(r, key.CodeUnknown, 0)
+		}
+	}
+	press := func(code key.Codes) {
+		src.Key(events.KeyDown, key.CodeRuneMap[code], code, 0)
+		src.Key(events.KeyUp, key.CodeRuneMap[code], code, 0)
+	}
+	reported := func(n int) {
+		t.Helper()
+		waitFor(t, b, fmt.Sprintf("%d commands", n), func() bool { return len(cmds) >= n })
+	}
+
+	typeText("echo one")
+	press(key.CodeReturnEnter)
+	reported(1)
+
+	// with line editing
+	typeText("cd /tmx")
+	press(key.CodeBackspace)
+	typeText("p")
+	press(key.CodeReturnEnter)
+	reported(2)
+
+	// a script, whose commands are not reported
+	typeText(`sh -c 'cd /; echo three'`)
+	press(key.CodeReturnEnter)
+	reported(3)
+	waitFor(t, b, "the output", func() bool {
+		return strings.HasSuffix(linesText(tm), "three\n$")
+	})
+
+	// not entered
+	typeText("echo four")
+	time.Sleep(200 * time.Millisecond)
+
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	assert.Equal(t, []string{"echo one", "cd /tmp", `sh -c 'cd /; echo three'`}, cmds)
+}

@@ -11,13 +11,16 @@ var _ = register(func() {
 	add(map[string]map[string]reflect.Value{
 		"cogentcore.org/core/base/fsx": {
 			"CopyFile":         reflect.ValueOf(p_cogentcore_org_core_base_fsx.CopyFile),
+			"CopyPath":         reflect.ValueOf(p_cogentcore_org_core_base_fsx.CopyPath),
 			"DirAndFile":       reflect.ValueOf(p_cogentcore_org_core_base_fsx.DirAndFile),
 			"DirExists":        reflect.ValueOf(p_cogentcore_org_core_base_fsx.DirExists),
 			"DirFS":            reflect.ValueOf(p_cogentcore_org_core_base_fsx.DirFS),
 			"Dirs":             reflect.ValueOf(p_cogentcore_org_core_base_fsx.Dirs),
+			"Exists":           reflect.ValueOf(p_cogentcore_org_core_base_fsx.Exists),
 			"ExtSplit":         reflect.ValueOf(p_cogentcore_org_core_base_fsx.ExtSplit),
 			"FileExists":       reflect.ValueOf(p_cogentcore_org_core_base_fsx.FileExists),
 			"FileExistsFS":     reflect.ValueOf(p_cogentcore_org_core_base_fsx.FileExistsFS),
+			"FileURL":          reflect.ValueOf(p_cogentcore_org_core_base_fsx.FileURL),
 			"Filename":         reflect.ValueOf((*p_cogentcore_org_core_base_fsx.Filename)(nil)),
 			"Filenames":        reflect.ValueOf(p_cogentcore_org_core_base_fsx.Filenames),
 			"Files":            reflect.ValueOf(p_cogentcore_org_core_base_fsx.Files),

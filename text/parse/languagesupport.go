@@ -93,15 +93,15 @@ var StandardLanguageProperties = map[fileinfo.Known]*LanguageProperties{
 	fileinfo.Pascal:     {fileinfo.Pascal, "// ", " ", " }", nil, nil, nil},
 	fileinfo.Perl:       {fileinfo.Perl, "# ", "", "", nil, nil, nil},
 	fileinfo.Python:     {fileinfo.Python, "# ", "", "", []LanguageFlags{IndentSpace}, nil, nil},
-	fileinfo.Php:        {fileinfo.Php, "// ", "/* ", " */", nil, nil, nil},
+	fileinfo.PHP:        {fileinfo.PHP, "// ", "/* ", " */", nil, nil, nil},
 	fileinfo.R:          {fileinfo.R, "# ", "", "", nil, nil, nil},
 	fileinfo.Ruby:       {fileinfo.Ruby, "# ", "", "", nil, nil, nil},
 	fileinfo.Rust:       {fileinfo.Rust, "// ", "/* ", " */", nil, nil, nil},
 	fileinfo.Scala:      {fileinfo.Scala, "// ", "/* ", " */", nil, nil, nil},
-	fileinfo.Html:       {fileinfo.Html, "", "<!-- ", " -->", nil, nil, nil},
+	fileinfo.HTML:       {fileinfo.HTML, "", "<!-- ", " -->", nil, nil, nil},
 	fileinfo.TeX:        {fileinfo.TeX, "% ", "", "", nil, nil, nil},
 	fileinfo.Markdown:   {fileinfo.Markdown, "", "<!--- ", " -->", []LanguageFlags{IndentSpace}, nil, nil},
-	fileinfo.Yaml:       {fileinfo.Yaml, "#", "", "", []LanguageFlags{IndentSpace}, nil, nil},
+	fileinfo.YAML:       {fileinfo.YAML, "#", "", "", []LanguageFlags{IndentSpace}, nil, nil},
 }
 
 // LanguageSupporter provides general support for supported languages.

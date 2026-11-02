@@ -306,6 +306,8 @@ type NewWindowOptions struct {
 	Screen int
 
 	// Icon specifies the window icon (see [Window.SetIcon] for more info).
+	// On macOS, where windows have no icons, the largest image, if it is
+	// at least 256x256, is the app icon in the Dock.
 	Icon []image.Image
 
 	// Flags can be set using WindowFlags to request different types of windows

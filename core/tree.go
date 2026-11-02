@@ -1366,7 +1366,7 @@ func (tr *Tree) MimeData(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := jsonx.Write(tr.This, &buf)
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJSON, Data: buf.Bytes()})
 	} else {
 		ErrorSnackbar(tr, err, "Error encoding node")
 	}
@@ -1379,7 +1379,7 @@ func (tr *Tree) nodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == fileinfo.DataJson {
+		if d.Type == fileinfo.DataJSON {
 			nn, err := tree.UnmarshalRootJSON(d.Data)
 			if err == nil {
 				sl = append(sl, nn)
@@ -1433,7 +1433,7 @@ func (tr *Tree) Cut() { //types:add
 
 // Paste pastes clipboard at given node.
 func (tr *Tree) Paste() { //types:add
-	md := tr.Clipboard().Read([]string{fileinfo.DataJson})
+	md := tr.Clipboard().Read([]string{fileinfo.DataJSON})
 	if md != nil {
 		tr.pasteMenu(md)
 	}

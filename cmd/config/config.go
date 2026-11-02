@@ -56,6 +56,22 @@ type Config struct { //types:add
 	// to "content" when building an app for js or wasm that imports content.
 	Content string
 
+	// Opens are the types of files that the app opens, which the pack and
+	// install commands declare, so that the systems offer the app in their
+	// Open with choices of apps for those files, without making it their
+	// default app: categories of files (as Code or Text) or known types of
+	// files (as Markdown or TeX), as in cogentcore.org/core/base/fileinfo.
+	// The app gets the files to open as [events.OSOpenFiles] events,
+	// [system.App.OpenFiles] when it starts, or its arguments on Linux.
+	Opens []string
+
+	// AppGoSymlink makes the executable of the app installed in /Applications
+	// on macOS a symbolic link to the one installed by go install (in the
+	// Go bin directory), which the install command also does, so that go
+	// install is enough to update the app after that, as for apps that are
+	// updated often.
+	AppGoSymlink bool
+
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
 
