@@ -58,3 +58,7 @@ func setDefault(file string, app App) error {
 	}
 	return setXDGDefault(mt, app.ID)
 }
+
+func allApps() ([]App, error) {
+	return xdgAllApps(), nil
+}
