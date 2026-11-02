@@ -553,6 +553,7 @@ func (tf *TextField) revert() {
 	tf.renderVisible = nil
 	tf.editText = []rune(tf.text)
 	tf.edited = false
+	tf.cursorPos = min(tf.cursorPos, len(tf.editText)) // within a shorter text
 	tf.dispRange.Start = 0
 	tf.dispRange.End = tf.charWidth
 	tf.selectReset()

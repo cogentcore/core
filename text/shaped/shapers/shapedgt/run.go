@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/shaped"
 	"cogentcore.org/core/text/textpos"
+	"github.com/cogentcore/typesetting/di"
 	"github.com/cogentcore/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 )
@@ -225,10 +226,46 @@ func (run *Run) RuneAtPoint(src rich.Text, pt, off math32.Vector2) int {
 func (run *Run) RuneBounds(ri int) math32.Box2 {
 	gis := run.GlyphsAt(ri)
 	if len(gis) == 0 {
-		// fmt.Println("no glyphs")
-		return (math32.Box2{})
+		return run.clusterRuneBounds(ri)
 	}
 	return run.GlyphRegionBounds(gis[0], gis[len(gis)-1])
+}
+
+// clusterRuneBounds returns the bounds of the given rune within the glyph
+// cluster that it is shaped into, but does not start, such as the i of an
+// fi ligature: its share of the advance of the cluster, from the start of
+// the cluster in the direction of the run. Empty if it is not in a cluster.
+func (run *Run) clusterRuneBounds(ri int) math32.Box2 {
+	if run.Direction.IsVertical() {
+		return math32.Box2{}
+	}
+	off, adv := float32(0), float32(0)
+	nr, k := 0, -1
+	for gi := range run.Glyphs {
+		g := &run.Glyphs[gi]
+		ga := math32.FromFixed(g.Advance)
+		if g.ClusterIndex <= ri && ri < g.ClusterIndex+g.RuneCount {
+			adv += ga
+			nr, k = g.RuneCount, ri-g.ClusterIndex
+			continue
+		}
+		if k >= 0 {
+			break
+		}
+		off += ga
+	}
+	if k < 0 || nr == 0 {
+		return math32.Box2{}
+	}
+	// the share of the rune, counted from the right for right-to-left text
+	if run.Direction.Progression() != di.FromTopLeft {
+		k = nr - 1 - k
+	}
+	w := adv / float32(nr)
+	mb := run.MaxBounds
+	mb.Min.X = off + float32(k)*w
+	mb.Max.X = mb.Min.X + w
+	return mb
 }
 
 // GlyphRegionBounds returns the maximal line-bounds level bounding box

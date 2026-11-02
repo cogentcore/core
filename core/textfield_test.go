@@ -6,8 +6,10 @@ package core
 
 import (
 	"errors"
+	"math/rand"
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
@@ -168,4 +170,63 @@ func TestTextFieldInput(t *testing.T) {
 		assert.Equal(t, 2, n)
 		assert.Equal(t, "Go", text)
 	})
+}
+
+// TestTextFieldCursorArrows tests that the cursor stays on the line of a
+// text field while moving back to the start of random texts that are typed
+// in, and forward to the end, including within ligatures such as fi.
+func TestTextFieldCursorArrows(t *testing.T) {
+	if testing.Short() {
+		t.Skip("random texts")
+	}
+	b := NewBody()
+	tf := NewTextField(b)
+	tf.Styler(func(s *styles.Style) {
+		s.Min.X.Em(30)
+	})
+	chars := []rune("abcdefghijklmnopqrstuvwxyz ABCXYZ fffiflffi 0123 .,:;'\"-_()[]/\\!?@#$%&*+=<>")
+	rnd := rand.New(rand.NewSource(1))
+	texts := []string{"fix the bug", "off the file", "a  b"}
+	for range 20 {
+		rs := make([]rune, 1+rnd.Intn(20))
+		for i := range rs {
+			rs[i] = chars[rnd.Intn(len(chars))]
+		}
+		texts = append(texts, string(rs))
+	}
+	arrow := func(code key.Codes) {
+		tf.HandleEvent(events.NewKey(events.KeyChord, 0, code, 0))
+	}
+	var steps []func()
+	for _, s := range texts {
+		steps = append(steps, func() { // types the text, which is laid out after
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			tf.SetText("")
+			for _, r := range s {
+				tf.HandleEvent(events.NewKey(events.KeyChord, r, 0, 0))
+			}
+		}, func() {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			n := len([]rune(s))
+			for range n {
+				arrow(key.CodeLeftArrow)
+			}
+			assert.Equal(t, 0, tf.cursorPos, s)
+			start := tf.charRenderPos(0)
+			lastX := start.X
+			for i := range n {
+				arrow(key.CodeRightArrow)
+				assert.Equal(t, i+1, tf.cursorPos, s)
+				pos := tf.charRenderPos(tf.cursorPos)
+				assert.InDelta(t, start.Y, pos.Y, 1, "%q: line of the cursor at %d", s, tf.cursorPos)
+				assert.GreaterOrEqual(t, pos.X, lastX, "%q: the cursor goes right at %d", s, tf.cursorPos)
+				lastX = pos.X
+			}
+		})
+	}
+	imagex.UpdateTestImages = true // the image is not compared
+	defer func() { imagex.UpdateTestImages = false }()
+	b.AssertRender(t, "text-field/cursor-arrows", steps...)
 }
