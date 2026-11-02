@@ -45,8 +45,9 @@ type App struct { //types:add -setters
 // appIconImagesCache is a cached version of [appIconImages].
 var appIconImagesCache []image.Image
 
-// appIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
-// rendered from [AppIcon]. It returns nil if [AppIcon] is "" or if there is
+// appIconImages returns a slice of images of sizes 16x16, 32x32, 48x48,
+// and 512x512 rendered from [AppIcon], the largest of which is the app icon
+// in the Dock on macOS. It returns nil if [AppIcon] is "" or if there is
 // an error. It automatically logs any errors. It caches the result for future
 // calls.
 func appIconImages() []image.Image {
@@ -57,7 +58,7 @@ func appIconImages() []image.Image {
 		return nil
 	}
 
-	res := make([]image.Image, 3)
+	res := make([]image.Image, 4)
 
 	sv := svg.NewSVG(math32.Vec2(16, 16))
 	sv.DefaultFill = colors.Uniform(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
@@ -73,6 +74,9 @@ func appIconImages() []image.Image {
 
 	sv.SetSize(math32.Vec2(48, 48))
 	res[2] = sv.RenderImage()
+
+	sv.SetSize(math32.Vec2(512, 512))
+	res[3] = sv.RenderImage()
 
 	appIconImagesCache = res
 	return res

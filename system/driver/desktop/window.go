@@ -124,6 +124,7 @@ func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen)
 	}
 	if opts.Icon != nil {
 		glw.SetIcon(opts.Icon)
+		setAppIcon(opts.Icon)
 	}
 	w.Glw = glw
 	w.initDrag()
@@ -236,6 +237,7 @@ func (w *Window) SetIcon(images []image.Image) {
 			return
 		}
 		w.Glw.SetIcon(images)
+		setAppIcon(images)
 	})
 }
 

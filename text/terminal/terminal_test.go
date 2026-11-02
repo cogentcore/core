@@ -339,6 +339,11 @@ func TestTerminalCompose(t *testing.T) {
 	assert.Equal(t, 2, cur.Char, "the cursor is after the prompt")
 	assert.Equal(t, cur, lv.VirtualText("ime")[0].Pos)
 	assert.Equal(t, "にほん", string(lv.VirtualText("ime")[0].Text.Join()))
+
+	// it stays when the lines are updated, as for output or a resize
+	tm.sync()
+	require.Len(t, lv.VirtualText("ime"), 1)
+	assert.Equal(t, cur, lv.VirtualText("ime")[0].Pos)
 	b.AsyncUnlock()
 
 	// commit

@@ -13,6 +13,7 @@ import (
 	"image"
 	"log"
 	"runtime"
+	"sync"
 	"sync/atomic"
 
 	"cogentcore.org/core/gpu"
@@ -24,13 +25,13 @@ import (
 	"github.com/oliverbestmann/webgpu/wgpuglfw"
 )
 
+// Init sets up the desktop app. The windowing system is initialized
+// when it is first needed (see [App.initGUI]).
 func Init() {
 	// some operating systems require us to be on the main thread
 	runtime.LockOSThread()
 
-	TheApp.InitGPU()
 	base.Init(TheApp, &TheApp.App)
-	TheApp.watchTheme()
 }
 
 // TheApp is the single [system.App] for the desktop platform
@@ -48,18 +49,78 @@ type App struct {
 
 	// dark is whether the system color theme is dark; see [App.IsDark].
 	dark atomic.Bool
+
+	// guiOnce initializes the windowing system once (see [App.initGUI]).
+	guiOnce sync.Once
+
+	// guiDone is whether the windowing system has been initialized.
+	guiDone atomic.Bool
+
+	// guiInitializing is whether the windowing system is being initialized,
+	// during which the calls of [App.initGUI] on the main thread, as for the
+	// screens when they are updated, return at once.
+	guiInitializing atomic.Bool
+}
+
+// initGUI initializes the windowing system (glfw), the screens, and the
+// theme watcher the first time that they are needed, as for the first
+// window or the information about the screens, instead of when the
+// program starts, so that a program that does not use the GUI, such as
+// a server, does not initialize it, which gives it a dock icon on macOS.
+// Like glfw, it runs on the main thread: in [App.MainLoop], which calls
+// it first, so that it is done once the main loop runs, and before that,
+// on the main goroutine, which [Init] locks to the main thread.
+func (a *App) initGUI() {
+	if a.guiDone.Load() || (a.guiInitializing.Load() && onMainThread()) {
+		return
+	}
+	a.guiOnce.Do(func() {
+		if !onMainThread() {
+			panic("system/driver/desktop: the GUI must first be used on the main goroutine, as for the first window or screen information, before the main loop runs")
+		}
+		a.guiInitializing.Store(true)
+		defer a.guiInitializing.Store(false)
+		a.InitGPU()
+		a.watchTheme()
+		a.guiDone.Store(true)
+	})
+}
+
+// NScreens returns the number of screens, initializing the windowing system
+// if needed (see [App.initGUI]).
+func (a *App) NScreens() int {
+	a.initGUI()
+	return a.AppMulti.NScreens()
+}
+
+// Screen returns the given screen, initializing the windowing system
+// if needed (see [App.initGUI]).
+func (a *App) Screen(n int) *system.Screen {
+	a.initGUI()
+	return a.AppMulti.Screen(n)
+}
+
+// ScreenByName returns the screen with the given name, initializing the
+// windowing system if needed (see [App.initGUI]).
+func (a *App) ScreenByName(name string) *system.Screen {
+	a.initGUI()
+	return a.AppMulti.ScreenByName(name)
 }
 
 // SendEmptyEvent sends an empty, blank event to global event processing
 // system, which has the effect of pushing the system along during cases when
 // the event loop needs to be "pinged" to get things moving along..
 func (a *App) SendEmptyEvent() {
+	if !a.guiDone.Load() {
+		return // no event loop yet
+	}
 	glfw.PostEmptyEvent()
 }
 
 // MainLoop starts running event loop on main thread (must be called
 // from the main thread).
 func (a *App) MainLoop() {
+	a.initGUI()
 	a.MainQueue = make(chan base.FuncRun)
 	a.MainDone = make(chan struct{})
 	for {
@@ -90,6 +151,7 @@ func (a *App) InitGPU() {
 }
 
 func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
+	a.initGUI()
 	if len(a.Windows) == 0 && system.UpdateLogicalDPIScaleFunc != nil {
 		if ScreenDebug {
 			log.Println("app first new window calling UpdateLogicalDPIScaleFunc")
