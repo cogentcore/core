@@ -18,6 +18,10 @@ import (
 
 // Install installs the package on the local system.
 // It uses the same config info as build.
+// lsregister is the path of the macOS tool that registers apps
+// with Launch Services.
+const lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+
 func Install(c *config.Config) error { //types:add
 	for i, p := range c.Build.Target {
 		err := config.OSSupported(p.OS)
@@ -55,7 +59,12 @@ func Install(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			return exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
+			err = exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
+			if err != nil || len(c.Opens) == 0 {
+				return err
+			}
+			// so that the system knows the types of files that it opens now
+			return exec.Run(lsregister, "-f", filepath.Join("/Applications", c.Name+".app"))
 		default:
 			if err := generate.ContentCode(".", &c.ContentCode); err != nil {
 				logx.PrintlnWarn("warning:", err)
