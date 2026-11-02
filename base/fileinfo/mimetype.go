@@ -372,7 +372,7 @@ var StandardMimes = []MimeType{
 	{"text/x-prolog", []string{".ecl", ".prolog", ".pro"}, Code, Prolog}, // note: ".pl" conflicts
 
 	{"text/x-python", []string{".py", ".pyw"}, Code, Python},
-	{"application/x-python-code", []string{".pyc", ".pyo"}, Archive, Unknown},
+	{"application/x-python-code", []string{".pyc", ".pyo"}, Bin, Unknown},
 
 	{"text/x-rust", []string{".rs"}, Code, Rust},
 	{"text/rust", nil, Code, Rust},
@@ -483,7 +483,8 @@ var StandardMimes = []MimeType{
 	{"application/msaccess", []string{".mdb"}, Data, Unknown},
 	{"application/vnd.oasis.opendocument.database", []string{".odb"}, Data, Unknown},
 	{"text/tab-separated-values", []string{".tsv"}, Data, Tsv},
-	{"application/vnd.google-earth.kml+xml", []string{".kml", ".kmz"}, Data, Unknown},
+	{"application/vnd.google-earth.kml+xml", []string{".kml"}, Data, Unknown},
+	{"application/vnd.google-earth.kmz", []string{".kmz"}, Data, Unknown},
 	{"application/vnd.google-earth.kmz", nil, Data, Unknown},
 	{"application/x-sql", []string{".sql"}, Data, Unknown},
 
