@@ -21,6 +21,7 @@ var _ = register(func() {
 			"CloseAlt1":        reflect.ValueOf(p_cogentcore_org_core_keymap.CloseAlt1),
 			"CloseAlt2":        reflect.ValueOf(p_cogentcore_org_core_keymap.CloseAlt2),
 			"Complete":         reflect.ValueOf(p_cogentcore_org_core_keymap.Complete),
+			"ContextMenu":      reflect.ValueOf(p_cogentcore_org_core_keymap.ContextMenu),
 			"Copy":             reflect.ValueOf(p_cogentcore_org_core_keymap.Copy),
 			"Cut":              reflect.ValueOf(p_cogentcore_org_core_keymap.Cut),
 			"DefaultMap":       reflect.ValueOf(&p_cogentcore_org_core_keymap.DefaultMap),

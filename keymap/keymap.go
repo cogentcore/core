@@ -81,7 +81,8 @@ const (
 	Jump // jump to line
 	HistPrev
 	HistNext
-	Menu // put focus on menu
+	Menu        // put focus on menu
+	ContextMenu // the context menu of the focused widget
 	WinFocusNext
 	WinClose
 	WinSnapshot

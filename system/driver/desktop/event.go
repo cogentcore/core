@@ -374,6 +374,8 @@ func GlfwKeyCode(kcode glfw.Key) key.Codes {
 	// case glfw.KeyHelp:
 	// 	return key.CodeHelp
 	// 118: Keyboard Menu
+	case glfw.KeyMenu: // the Menu key of Windows keyboards: 101, Keyboard Application
+		return key.CodeContextMenu
 	// 119: Keyboard Select
 	// 120: Keyboard Stop
 	// 121: Keyboard Again

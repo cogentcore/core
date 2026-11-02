@@ -748,6 +748,17 @@ func (ed *Editor) handleLinkCursor() {
 
 ////////  Context Menu
 
+// ContextMenuPos returns the position of the context menu: that of the
+// mouse event, or else below the cursor, as for the keyboard.
+func (ed *Editor) ContextMenuPos(e events.Event) image.Point {
+	if e != nil && e.HasPos() {
+		return e.WindowPos()
+	}
+	pos := ed.charStartPos(ed.CursorPos)
+	pos.Y += ed.charSize.Y
+	return pos.ToPoint()
+}
+
 // ShowContextMenu displays the context menu with options dependent on situation
 func (ed *Editor) ShowContextMenu(e events.Event) {
 	if ed.spell != nil && !ed.HasSelection() && ed.isSpellEnabled(ed.CursorPos) {
