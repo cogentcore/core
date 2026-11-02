@@ -16,6 +16,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"cogentcore.org/core/base/vcs"
 )
 
 // FileChange is a change to a file or directory on disk,
@@ -60,6 +62,12 @@ type treeWatcher struct {
 	// watched are the directories being watched.
 	// It is only used in the event loop.
 	watched map[string]bool
+
+	// gitDirs are the git directories of the repositories in the tree
+	// being watched, with the nodes of the repositories, whose version
+	// control status is updated when they change (see [Tree.gitDirs]).
+	// It is only used in the event loop.
+	gitDirs map[string]*Node
 }
 
 // watchBackend is the interface to the platform file system watcher.
@@ -95,7 +103,8 @@ func (ft *Tree) startWatcher() {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	tw := &treeWatcher{root: root, ctx: ctx, cancel: cancel, ready: make(chan struct{}), watched: make(map[string]bool)}
-	dirs := ft.watchableDirs()
+	tw.gitDirs = ft.gitDirs()
+	dirs := append(ft.watchableDirs(), slices.Sorted(maps.Keys(tw.gitDirs))...)
 	be, err := watchDirs(ctx, dirs, tw.ready)
 	if err != nil || be == nil {
 		cancel()
@@ -135,14 +144,81 @@ func (ft *Tree) watchableDirs() []string {
 	return dirs
 }
 
+// gitDirs returns the git directories of the repositories in the tree:
+// of the root and the open directories that are repositories, with their
+// nodes. A commit, a switch of branch, or a change of what is staged
+// changes the files in them (as index, HEAD, and COMMIT_EDITMSG), but
+// not the files of the repository, so they are watched to update the
+// version control status of its files.
+func (ft *Tree) gitDirs() map[string]*Node {
+	dirs := make(map[string]*Node)
+	add := func(n *Node) {
+		if n.DirRepo == nil || n.DirRepo.Type() != vcs.Git {
+			return
+		}
+		if gd := gitDir(n.DirRepo.LocalPath()); gd != "" { // the tree can be in it
+			dirs[gd] = n
+		}
+	}
+	add(&ft.Node)
+	var walk func(n *Node)
+	walk = func(n *Node) {
+		for _, c := range n.Children {
+			cn := AsNode(c)
+			if cn == nil || !cn.IsDir() || !ft.isDirOpen(cn.Filepath) {
+				continue
+			}
+			add(cn)
+			walk(cn)
+		}
+	}
+	walk(&ft.Node)
+	return dirs
+}
+
+// gitDir returns the git directory of the repository in the given
+// directory: its .git directory, or the directory named by its .git
+// file, as for a worktree, or "" if there is none.
+func gitDir(dir string) string {
+	gp := filepath.Join(dir, ".git")
+	fi, err := os.Stat(gp)
+	if err != nil {
+		return ""
+	}
+	if fi.IsDir() {
+		return gp
+	}
+	b, err := os.ReadFile(gp)
+	if err != nil {
+		return ""
+	}
+	gd, ok := strings.CutPrefix(strings.TrimSpace(string(b)), "gitdir:")
+	if !ok {
+		return ""
+	}
+	gd = strings.TrimSpace(gd)
+	if !filepath.IsAbs(gd) {
+		gd = filepath.Join(dir, gd)
+	}
+	return filepath.Clean(gd)
+}
+
 // syncWatchDirs updates the watched directories to match
-// the open directories in the tree.
+// the open directories in the tree, and their git directories.
 func (ft *Tree) syncWatchDirs() {
 	tw := ft.watch.Load()
 	if tw == nil {
 		return
 	}
+	tw.gitDirs = ft.gitDirs()
 	want := make(map[string]bool)
+	for d := range tw.gitDirs {
+		want[d] = true
+		if !tw.watched[d] {
+			tw.watched[d] = true
+			tw.backend.add(d)
+		}
+	}
 	for _, d := range ft.watchableDirs() {
 		want[d] = true
 		if !tw.watched[d] {
@@ -233,10 +309,18 @@ func (ft *Tree) applyChanges(tw *treeWatcher, paths []string) bool {
 	}
 	changes := make([]FileChange, 0, len(paths))
 	update := make(map[*Node]bool)
+	repos := make(map[*Node]bool)
 	for _, path := range paths {
 		if path == "" { // lost events
 			update[&ft.Node] = true
 			changes = append(changes, FileChange{Path: tw.root, IsDir: true})
+			continue
+		}
+		if rn := tw.gitDirs[filepath.Dir(path)]; rn != nil {
+			repos[rn] = true // the git state, not the files of the tree
+			continue
+		}
+		if isGitPath(path) { // other changes in git directories
 			continue
 		}
 		fc := FileChange{Path: path}
@@ -251,13 +335,31 @@ func (ft *Tree) applyChanges(tw *treeWatcher, paths []string) bool {
 		}
 		changes = append(changes, fc)
 		ft.nodeToUpdate(fc, update)
+		if dn := ft.dirNode(filepath.Dir(path)); dn != nil {
+			if _, rn := dn.Repo(); rn != nil {
+				repos[rn] = true // as a modified file
+			}
+		}
 	}
 	ft.updateNodes(update)
+	// the version control status of the files of the repositories
+	// whose files or git directories changed, as for a commit
+	for rn := range repos {
+		if rn.This != nil {
+			rn.updateRepoFiles() // updates the nodes when it has the status
+		}
+	}
 	ft.syncWatchDirs()
 	if ft.WatchFunc != nil && len(changes) > 0 {
 		ft.WatchFunc(changes)
 	}
 	return true
+}
+
+// isGitPath returns whether the given path is a .git directory,
+// or within one.
+func isGitPath(path string) bool {
+	return slices.Contains(strings.Split(filepath.ToSlash(path), "/"), ".git")
 }
 
 // nodeToUpdate adds the node that needs to be updated for the
