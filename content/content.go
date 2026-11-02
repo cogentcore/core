@@ -833,12 +833,16 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
 }
 
-// setStageTitle sets the title of the stage based on the current page URL.
+// setStageTitle sets the title of the stage based on the current page URL,
+// which the window has again when a dialog on it closes.
 func (ct *Content) setStageTitle() {
 	if rw := ct.Scene.RenderWindow(); rw != nil && ct.current.Page != nil {
 		name := ct.current.Page.Name
 		if ct.current.Page.URL == "" { // Root page just gets app name
 			name = core.TheApp.Name()
+		}
+		if ct.Scene.Stage != nil {
+			ct.Scene.Stage.SetTitle(name)
 		}
 		rw.SetStageTitle(name)
 	}
