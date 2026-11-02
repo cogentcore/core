@@ -297,7 +297,7 @@ func TestChromaErrorsArePlain(t *testing.T) {
 }
 
 // TestCodeLexers tests the lexers of the shading languages, and the
-// C lexer for code without a lexer of its own, as SPIR-V assembly.
+// Go lexer for code without a lexer of its own, as SPIR-V assembly.
 func TestCodeLexers(t *testing.T) {
 	for file, lang := range map[string]string{
 		"shader.glsl":   "GLSL",
@@ -306,7 +306,7 @@ func TestCodeLexers(t *testing.T) {
 		"shader.wgsl":   "WebGPU Shading Language",
 		"shader.hlsl":   "HLSL",
 		"shader.metal":  "Metal",
-		"shader.spvasm": "C",
+		"shader.spvasm": "Go",
 	} {
 		fi, _ := fileinfo.NewFileInfo(file)
 		var pst parse.FileStates

@@ -116,8 +116,8 @@ func (hi *Highlighter) Init(info *fileinfo.FileInfo, pist *parse.FileStates) {
 		}
 		if lexer == nil && info.Cat == fileinfo.Code {
 			// code without a lexer of its own, as SPIR-V assembly, is
-			// highlighted as C, if there is a lexer for C
-			lexer = Lexers().Get("c")
+			// highlighted as Go, whose lexer is always in the Lexers
+			lexer = Lexers().Get("go")
 		}
 		if lexer != nil {
 			hi.language = lexer.Config().Name
