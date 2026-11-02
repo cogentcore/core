@@ -10,8 +10,9 @@ import (
 
 // IsDark returns whether the system color theme is dark (as opposed to light).
 // It is kept up to date by the platform-specific theme watcher started by
-// [App.watchTheme].
+// [App.watchTheme], when the windowing system is initialized (see [App.initGUI]).
 func (a *App) IsDark() bool {
+	a.initGUI()
 	return a.dark.Load()
 }
 
