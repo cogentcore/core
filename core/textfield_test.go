@@ -226,7 +226,6 @@ func TestTextFieldCursorArrows(t *testing.T) {
 			}
 		})
 	}
-	imagex.UpdateTestImages = true // the image is not compared
-	defer func() { imagex.UpdateTestImages = false }()
+	imagex.UpdateTestImagesFor(t) // the image is not compared
 	b.AssertRender(t, "text-field/cursor-arrows", steps...)
 }

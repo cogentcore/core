@@ -66,6 +66,8 @@ func TestNavigateKeepsSidebar(t *testing.T) {
 		{"heading", []navStep{navOpen("widget"), navOpen("button#types")}},
 	}
 	// The first window can have another size, from the saved window geometry.
+	update := imagex.UpdateTestImages // of the build tag or environment
+	defer func() { imagex.UpdateTestImages = update }()
 	imagex.UpdateTestImages = true
 	renderNav(t, filepath.Join("nav", "first"), nil)
 	imagex.UpdateTestImages = false

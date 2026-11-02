@@ -34,8 +34,7 @@ func TestWindowTitle(t *testing.T) {
 		assert.Equal(t, want, title(), what)
 	}
 	var d *Body
-	imagex.UpdateTestImages = true // the images are not compared
-	defer func() { imagex.UpdateTestImages = false }()
+	imagex.UpdateTestImagesFor(t) // the images are not compared
 	b.AssertRender(t, "title", func() {
 		waitTitle("App", "the title of the window")
 		MessageSnackbar(b, "A message")

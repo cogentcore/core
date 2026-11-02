@@ -41,8 +41,7 @@ func TestContextMenuKey(t *testing.T) {
 	bt.AddContextMenu(func(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Item")
 	})
-	imagex.UpdateTestImages = true // the image is not compared
-	defer func() { imagex.UpdateTestImages = false }()
+	imagex.UpdateTestImagesFor(t) // the image is not compared
 	b.AssertRender(t, "context-menu-key", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		var shift key.Modifiers
