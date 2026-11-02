@@ -190,6 +190,12 @@ type Lines struct {
 	// Use IsNotSaved() method to query state.
 	notSaved bool
 
+	// savedState is the state of the undo stack ([Undo.State]) when the text
+	// was last saved, or set, as when it was opened, so that undoing or
+	// redoing edits back to that state makes it not changed
+	// (see [Lines.updateSaved]).
+	savedState int
+
 	// fileModOK have already asked about fact that file has changed since being
 	// opened, user is ok
 	fileModOK bool
@@ -249,6 +255,7 @@ func (ls *Lines) setLineBytes(lns [][]byte) {
 		ls.lines[ln] = runes.SetFromBytes(ls.lines[ln], txt)
 		ls.markup[ln] = rich.NewText(ls.fontStyle, ls.lines[ln]) // start with raw
 	}
+	ls.savedState = ls.undos.CurrentState()
 }
 
 // bytes returns the current text lines as a slice of bytes, up to
