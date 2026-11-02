@@ -13,6 +13,7 @@ var _ = register(func() {
 			"AsNode":            reflect.ValueOf(p_cogentcore_org_core_filetree.AsNode),
 			"AsTree":            reflect.ValueOf(p_cogentcore_org_core_filetree.AsTree),
 			"DirFlagMap":        reflect.ValueOf((*p_cogentcore_org_core_filetree.DirFlagMap)(nil)),
+			"FileChange":        reflect.ValueOf((*p_cogentcore_org_core_filetree.FileChange)(nil)),
 			"Filer":             reflect.ValueOf((*p_cogentcore_org_core_filetree.Filer)(nil)),
 			"NewNode":           reflect.ValueOf(p_cogentcore_org_core_filetree.NewNode),
 			"NewTree":           reflect.ValueOf(p_cogentcore_org_core_filetree.NewTree),

@@ -15,6 +15,7 @@ var _ = register(func() {
 			"Base":                     reflect.ValueOf((*p_cogentcore_org_core_text_textcore.Base)(nil)),
 			"BaseEmbedder":             reflect.ValueOf((*p_cogentcore_org_core_text_textcore.BaseEmbedder)(nil)),
 			"Close":                    reflect.ValueOf(p_cogentcore_org_core_text_textcore.Close),
+			"CodeError":                reflect.ValueOf((*p_cogentcore_org_core_text_textcore.CodeError)(nil)),
 			"DiffEditor":               reflect.ValueOf((*p_cogentcore_org_core_text_textcore.DiffEditor)(nil)),
 			"DiffEditorDialog":         reflect.ValueOf(p_cogentcore_org_core_text_textcore.DiffEditorDialog),
 			"DiffEditorDialogFromRevs": reflect.ValueOf(p_cogentcore_org_core_text_textcore.DiffEditorDialogFromRevs),

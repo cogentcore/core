@@ -223,10 +223,18 @@ func (sc *Scene) Init() {
 
 		s.Padding.Set(units.Dp(8))
 	})
+	// the title of the window is that of its main stage on top: popups,
+	// such as snackbars, which have no title of their own, do not change it
 	sc.OnShow(func(e events.Event) {
+		if sc.Stage == nil || sc.Stage.Type.isPopup() {
+			return
+		}
 		getCurrentRenderWindow().SetStageTitle(sc.Stage.Title)
 	})
 	sc.OnClose(func(e events.Event) {
+		if sc.Stage == nil || sc.Stage.Type.isPopup() {
+			return
+		}
 		sm := sc.Stage.Mains
 		if sm == nil {
 			return

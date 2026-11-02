@@ -1260,7 +1260,7 @@ func (tr *Tree) OpenParents() {
 ////////  Modifying Source Tree
 
 func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
-	if e != nil {
+	if e != nil && e.HasPos() {
 		pos = e.WindowPos()
 		return
 	}

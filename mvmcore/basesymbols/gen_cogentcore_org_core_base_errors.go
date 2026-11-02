@@ -11,7 +11,6 @@ import (
 var _ = register(func() {
 	genshim.Register("cogentcore.org/core/base/errors", `package errors
 
-import slog "log/slog"
 
 func Ignore1[T any](v T, err error) T {
 	return v
@@ -22,16 +21,12 @@ func Ignore2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 }
 
 func Log1[T any](v T, err error) T {
-	if err != nil {
-		slog.Error(err.Error() + " | " + CallerInfo())
-	}
+	LogDepth(err, 1)
 	return v
 }
 
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
-	if err != nil {
-		slog.Error(err.Error() + " | " + CallerInfo())
-	}
+	LogDepth(err, 1)
 	return v1, v2
 }
 
@@ -48,7 +43,7 @@ func Must2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 	}
 	return v1, v2
 }
-`, []string{"CallerInfo"})
+`, []string{"LogDepth"})
 	add(map[string]map[string]reflect.Value{
 		"cogentcore.org/core/base/errors": {
 			"As":             reflect.ValueOf(p_cogentcore_org_core_base_errors.As),
@@ -57,8 +52,10 @@ func Must2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
 			"Is":             reflect.ValueOf(p_cogentcore_org_core_base_errors.Is),
 			"Join":           reflect.ValueOf(p_cogentcore_org_core_base_errors.Join),
 			"Log":            reflect.ValueOf(p_cogentcore_org_core_base_errors.Log),
+			"LogDepth":       reflect.ValueOf(p_cogentcore_org_core_base_errors.LogDepth),
 			"Must":           reflect.ValueOf(p_cogentcore_org_core_base_errors.Must),
 			"New":            reflect.ValueOf(p_cogentcore_org_core_base_errors.New),
+			"SetLogHook":     reflect.ValueOf(p_cogentcore_org_core_base_errors.SetLogHook),
 			"Unwrap":         reflect.ValueOf(p_cogentcore_org_core_base_errors.Unwrap),
 		},
 	})

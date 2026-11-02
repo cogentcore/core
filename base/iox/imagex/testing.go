@@ -30,6 +30,16 @@ type TestingT interface {
 // and it should only be set once and then turned back off.
 var UpdateTestImages = updateTestImages
 
+// UpdateTestImagesFor turns on [UpdateTestImages] for the given test, for
+// images that are only for looking at, which are not compared, and restores
+// its previous value at the end of the test, so that the update mode of the
+// build tag or environment variable still applies to the other tests.
+func UpdateTestImagesFor(t interface{ Cleanup(func()) }) {
+	prev := UpdateTestImages
+	UpdateTestImages = true
+	t.Cleanup(func() { UpdateTestImages = prev })
+}
+
 // Uint8Equal returns true if two numbers are within tol
 func Uint8Equal(cc, ic uint8, tol int) bool {
 	d := int(cc) - int(ic)

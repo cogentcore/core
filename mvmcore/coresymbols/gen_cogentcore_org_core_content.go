@@ -20,6 +20,7 @@ var _ = register(func() {
 			"CompiledCode":    reflect.ValueOf(&p_cogentcore_org_core_content.CompiledCode),
 			"CompiledGoal":    reflect.ValueOf(&p_cogentcore_org_core_content.CompiledGoal),
 			"Content":         reflect.ValueOf((*p_cogentcore_org_core_content.Content)(nil)),
+			"FormatCode":      reflect.ValueOf(&p_cogentcore_org_core_content.FormatCode),
 			"GoalBlock":       reflect.ValueOf((*p_cogentcore_org_core_content.GoalBlock)(nil)),
 			"GoalPage":        reflect.ValueOf((*p_cogentcore_org_core_content.GoalPage)(nil)),
 			"GoalReplay":      reflect.ValueOf(&p_cogentcore_org_core_content.GoalReplay),
@@ -31,6 +32,7 @@ var _ = register(func() {
 			"OfflineURL":      reflect.ValueOf(&p_cogentcore_org_core_content.OfflineURL),
 			"Settings":        reflect.ValueOf(&p_cogentcore_org_core_content.Settings),
 			"SettingsData":    reflect.ValueOf((*p_cogentcore_org_core_content.SettingsData)(nil)),
+			"ShowCodeErrors":  reflect.ValueOf(p_cogentcore_org_core_content.ShowCodeErrors),
 		},
 	})
 })

@@ -1259,6 +1259,12 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	case keymap.Find:
 		Search(sc, LastSearch, LastUseCase)
 		e.SetHandled()
+	case keymap.ContextMenu:
+		// at the widget: the key event has no position (see [Widget.ContextMenuPos])
+		if !tree.IsNil(em.focus) {
+			em.focus.AsWidget().Send(events.ContextMenu, e)
+			e.SetHandled()
+		}
 	case keymap.WinSnapshot:
 		img := sc.Renderer.Image()
 		scnm := strings.ReplaceAll(strings.ReplaceAll(strcase.ToKebab(sc.Name), "/", "-"), "•", "-")

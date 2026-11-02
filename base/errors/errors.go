@@ -51,15 +51,27 @@ func Log(err error) error {
 	return err
 }
 
+// LogDepth logs the given error if it is non-nil, as [Log] does, with the
+// information of the caller that is depth levels above the caller of
+// LogDepth: 0 is its caller, as for Log, and 1 is the caller of that.
+// It is for functions that log the errors of their callers, as [Log1]
+// and [Log2]: as these generic functions only use exported functions,
+// interpreters can run them, with [SetLogHook].
+func LogDepth(err error, depth int) error {
+	if err != nil && !hooked(err) {
+		pc, file, line, _ := runtime.Caller(depth + 1)
+		slog.Error(err.Error() + " | " + runtime.FuncForPC(pc).Name() + " " + file + ":" + strconv.Itoa(line))
+	}
+	return err
+}
+
 // Log1 takes the given value and error and returns the value if
 // the error is nil, and logs the error and returns a zero value
 // if the error is non-nil. The intended usage is:
 //
 //	a := errors.Log1(MyFunc(v))
 func Log1[T any](v T, err error) T {
-	if err != nil && !hooked(err) {
-		slog.Error(err.Error() + " | " + CallerInfo())
-	}
+	LogDepth(err, 1)
 	return v
 }
 
@@ -69,9 +81,7 @@ func Log1[T any](v T, err error) T {
 //
 //	a, b := errors.Log2(MyFunc(v))
 func Log2[T1, T2 any](v1 T1, v2 T2, err error) (T1, T2) {
-	if err != nil && !hooked(err) {
-		slog.Error(err.Error() + " | " + CallerInfo())
-	}
+	LogDepth(err, 1)
 	return v1, v2
 }
 

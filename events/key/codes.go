@@ -123,6 +123,10 @@ const (
 	CodeKeypad9           Codes = 97
 	CodeKeypad0           Codes = 98
 	CodeKeypadFullStop    Codes = 99
+
+	// CodeContextMenu is the Menu key of Windows keyboards (Application).
+	CodeContextMenu Codes = 101
+
 	CodeKeypadEqualSign   Codes = 103
 
 	CodeF13 Codes = 104

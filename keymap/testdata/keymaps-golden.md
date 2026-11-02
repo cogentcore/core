@@ -51,6 +51,7 @@
 | HistPrev |               |            |              |                 |                   |             |
 | HistNext |               |            |              |                 |                   |             |
 | Menu |               |            |              |                 |                   |             |
+| ContextMenu |               |            |              |                 |                   |             |
 | WinFocusNext |               |            |              |                 |                   |             |
 | WinClose |               |            |              |                 |                   |             |
 | WinSnapshot |               |            |              |                 |                   |             |
@@ -89,6 +90,7 @@
 | DownArrow | MoveDown | MoveDown | MoveDown | MoveDown | MoveDown | MoveDown |
 | UpArrow | MoveUp | MoveUp | MoveUp | MoveUp | MoveUp | MoveUp |
 | KeypadEnter | Enter | Enter | Enter | Enter | Enter | Enter |
+| ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu |
 
 
 ### Shift
@@ -96,6 +98,7 @@
 | Key                          | `MacStandard` | `MacEmacs` | `LinuxEmacs` | `LinuxStandard` | `WindowsStandard` | `ChromeStd` |
 | ---------------------------- | ------------- | ---------- | ------------ | --------------- | ----------------- | ----------- |
 | Shift+Tab | FocusPrev | FocusPrev | FocusPrev | FocusPrev | FocusPrev | FocusPrev |
+| Shift+F10 | ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu |
 
 
 ### Control
@@ -212,6 +215,7 @@
 | Alt+V | PageDown | PageDown | Paste |                 |                   |             |
 | Alt+W |               |            | Copy |                 |                   |             |
 | Alt+X |               |            | Cut |                 |                   |             |
+| Alt+ReturnEnter | ContextMenu | ContextMenu |              |                 |                   |             |
 | Alt+Backspace | BackspaceWord | BackspaceWord | BackspaceWord | BackspaceWord | BackspaceWord | BackspaceWord |
 | Alt+F6 |               |            | WinFocusNext | WinFocusNext | WinFocusNext | WinFocusNext |
 | Alt+Home | DocHome | DocHome | DocHome | DocHome | DocHome | DocHome |

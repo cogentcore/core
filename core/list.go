@@ -252,6 +252,9 @@ func (lb *ListBase) Init() {
 	lb.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(!lb.IsReadOnly(), abilities.Draggable, abilities.Droppable)
+		// read-only rows are not focusable, so the list takes the focus for
+		// moving among them with the keys
+		s.SetAbilities(lb.IsReadOnly() && lb.ReadOnlyKeyNav, abilities.Focusable)
 		s.Cursor = lb.currentCursor
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
@@ -533,7 +536,7 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			s.Min.Y.Em(6)
 		})
 		oc := func(e events.Event) {
-			// lb.SetFocus()
+			lb.focusReadOnly()
 			row, _, isValid := w.indexFromPixel(e.Pos())
 			if isValid {
 				lb.updateSelectRow(row, e.SelectMode())
@@ -574,6 +577,7 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 	})
 	wb.OnSelect(func(e events.Event) {
 		e.SetHandled()
+		lb.focusReadOnly()
 		row, _ := lb.widgetIndex(w)
 		lb.updateSelectRow(row, e.SelectMode())
 		lb.lastClick = row + lb.StartIndex
@@ -585,6 +589,15 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 	})
 	if !lb.IsReadOnly() {
 		wb.OnInput(lb.HandleEvent)
+	}
+}
+
+// focusReadOnly focuses a read-only list when its rows are clicked,
+// which are not focusable, so that the keys move among them. As for
+// other clicked widgets, the focus is set quietly, without the focus style.
+func (lb *ListBase) focusReadOnly() {
+	if lb.CanFocus() && !lb.ContainsFocus() {
+		lb.SetFocusQuiet()
 	}
 }
 

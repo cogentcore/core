@@ -158,10 +158,10 @@ func (wb *WidgetBase) applyContextMenus(m *Scene, pos image.Point) {
 // upper left corner.  The event will be from a mouse ContextMenu
 // event if non-nil: should handle both cases.
 func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
-	if e != nil {
+	if e != nil && e.HasPos() {
 		return e.WindowPos()
 	}
-	return wb.winPos(.5, .5) // center
+	return wb.winPos(.5, .5) // center, such as for the keyboard
 }
 
 func (wb *WidgetBase) handleWidgetContextMenu() {
