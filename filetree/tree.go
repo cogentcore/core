@@ -134,6 +134,7 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	if errors.Log(err) != nil {
 		abs = effpath
 	}
+	ft.resetForPath(nil, abs)
 	ft.FS = nil
 	ft.Filepath = core.Filename(abs)
 	ft.setDirOpen(core.Filename(abs))
@@ -145,6 +146,17 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	return ft
 }
 
+// resetForPath deletes the nodes of the tree if it is opened at another
+// path than its current one, or in a file system instead of the os one,
+// or the reverse: the nodes are made once for each name, with their
+// paths, so that a node of a directory with the same name would keep the
+// path of the old one. (File systems are not compared, which can panic.)
+func (ft *Tree) resetForPath(fsys fs.FS, path string) {
+	if ft.Filepath != "" && (ft.Filepath != core.Filename(path) || (ft.FS == nil) != (fsys == nil)) {
+		ft.DeleteChildren()
+	}
+}
+
 // OpenPathFS opens the filetree at the given [fs] file system directory path.
 // It reads all the files at the given path into this tree.
 // Only paths listed in [Tree.Dirs] will be opened.
@@ -153,6 +165,7 @@ func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
 		ft.FileNodeType = types.For[Node]()
 	}
 	ft.stopWatcher()
+	ft.resetForPath(fsys, path)
 	ft.FS = fsys
 	ft.Filepath = core.Filename(path)
 	ft.setDirOpen(core.Filename(path))
