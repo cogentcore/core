@@ -19,3 +19,7 @@ func openWith(file string, app App) error {
 func setDefault(file string, app App) error {
 	return errors.ErrUnsupported
 }
+
+func allApps() ([]App, error) {
+	return nil, errors.ErrUnsupported
+}

@@ -13,6 +13,8 @@ package apps
 import (
 	"errors"
 	"path/filepath"
+	"slices"
+	"strings"
 )
 
 // App is an app of the system that can open files.
@@ -43,6 +45,17 @@ func Default(file string) (App, bool, error) {
 		return App{}, false, err
 	}
 	return as[0], true, nil
+}
+
+// All returns all of the apps of the system that open files, sorted by
+// name, as for choosing one that does not declare that it opens a file,
+// which can still open it.
+func All() ([]App, error) {
+	as, err := allApps()
+	slices.SortFunc(as, func(a, b App) int {
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	})
+	return as, err
 }
 
 // OpenWith opens the given file with the given app.
