@@ -24,6 +24,18 @@ Note: `core run wasm` and `core run js` are mainly used for serving an app local
 
 If there is an `icon.svg` file in the current directory, it will be used as the app icon on all platforms.
 
+The `core` command also builds the icon into the app, as [[doc:core.AppIcon]], which is the icon of its windows, and on macOS its icon in the Dock while it runs. `go build` and `go install` do not, so an app built with them has the default Cogent Core icon in its windows, and keeps the icon of its app bundle in the Dock, as for an app installed with `AppGoSymlink` (see below). To have the icon of the app either way, embed `icon.svg` in the main package and set it at the start of `main`:
+
+```go
+//go:embed icon.svg
+var appIcon string
+
+func main() {
+	core.AppIcon = appIcon
+	...
+}
+```
+
 For development on Android, you need to install [Android Studio](https://developer.android.com/studio), and for development on iOS, you need to install [XCode](https://apps.apple.com/us/app/xcode/id497799835?mt=12). For Android development, if you run into any errors with the Android NDK, you should ensure that it is [installed](https://developer.android.com/studio/projects/install-ndk#default-version). You may also need to add the Android tools [to your PATH](https://stackoverflow.com/a/29083170).
 
 ## Web index page
@@ -87,6 +99,10 @@ For desktop platforms, `core run` just runs the executable directly. For mobile 
 On mobile and web platforms, `core pack` is the same as `core build`, as that already makes a package on those platforms. On macOS, it makes a `.app` bundle file and a `.dmg` disk image installer file. On Windows, it makes a `.exe` installer file. On Linux, it makes a `.deb` package file.
 
 For macOS, `core install` means running `core pack` and then copying the resulting `.app` file to `Applications`. It is not yet implemented on Linux and Windows. For mobile platforms, it installs the executable package on the target device, which can be a simulator or a real connected device. For web, it is not applicable.
+
+For an app that is updated often, `AppGoSymlink = true` in its `core.toml` makes `core install` on macOS also install it with `go install`, and make the executable of the app in `Applications` a symbolic link to that one, so that `go install` is enough to update the app after that.
+
+`Opens` in the `core.toml` of an app lists the types of files that it opens, which `core pack` and `core install` declare, so that the system offers the app in its "Open with" choices for those files, without making it their default app: categories of files (such as `Code` or `Text`) or known types of files (such as `Markdown` or `TeX`), as in [[doc:base/fileinfo]]. For example, Cogent Code has `Opens = ["Code", "Text", "Markdown", "TeX"]` (and more). The app gets the files to open as [[doc:events.OSOpenFiles]] events, or as arguments on Linux.
 
 To silence this annoying warning on Mac: `ld: warning: ignoring duplicate libraries: '-lobjc'` do this in the terminal:
 
