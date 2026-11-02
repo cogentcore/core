@@ -181,6 +181,9 @@ func (sl *Splits) Init() {
 	})
 	parts := sl.newParts()
 	parts.Maker(func(p *tree.Plan) {
+		// The tiles are updated for the children, which are made after the
+		// updater of the splits runs, the first time.
+		sl.updateSplits()
 		// handles are organized first between tiles, then within tiles.
 		sl.styleSplits()
 		addHand := func(hidx int) {

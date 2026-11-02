@@ -10,6 +10,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
+	"github.com/stretchr/testify/assert"
 )
 
 func makeSplits(n, w, h int) (*Body, *Splits) {
@@ -141,4 +143,22 @@ func TestSplitsTilesRowSpanPlus(t *testing.T) {
 	b, sp := makeSplits(5, 40, 20)
 	sp.SetTiles(TileSpan, TilePlus)
 	b.AssertRender(t, "splits/tiles-row-span-plus")
+}
+
+// TestSplitsPlanHandles tests that splits made by a plan, with children
+// made by a plan, have the handles between them after one update, as before
+// the first layout, which needs them.
+func TestSplitsPlanHandles(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	tree.AddChildAt(fr, "splits", func(w *Splits) {
+		tree.AddChildAt(w, "a", func(w *Text) { w.SetText("A") })
+		tree.AddChildAt(w, "b", func(w *Text) { w.SetText("B") })
+		tree.AddChildAt(w, "c", func(w *Text) { w.SetText("C") })
+	})
+	b.UpdateTree()
+	sl := fr.Child(0).(*Splits)
+	assert.Equal(t, 3, sl.NumChildren())
+	assert.Equal(t, 2, sl.Parts.NumChildren(), "the handles")
+	b.AssertRender(t, "splits/plan-handles")
 }
