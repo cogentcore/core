@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/terminal/vt"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/text/textpos"
@@ -114,6 +115,27 @@ func (vw *View) inputPos() (textpos.Pos, bool) {
 		return tm.gridCursor, tm.altShown
 	}
 	return tm.linesCursor, !tm.altShown && tm.linesCursor.Line >= 0
+}
+
+// imeLayer is the layer of the virtual text of the text being composed
+// with an input method, as in textcore.
+const imeLayer = "ime"
+
+// restoreComposition shows the given virtual text of the text being
+// composed with an input method again at the input position, after the
+// lines have been replaced, unless there is no input there any more.
+func (vw *View) restoreComposition(vts []lines.VirtualText) {
+	if len(vts) == 0 || len(vw.VirtualText(imeLayer)) > 0 {
+		return
+	}
+	pos, ok := vw.inputPos()
+	if !ok {
+		return
+	}
+	for i := range vts {
+		vts[i].Pos = pos
+	}
+	vw.SetVirtualText(imeLayer, vts...)
 }
 
 // contextMenu adds the items of the terminal to the context menu.

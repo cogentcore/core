@@ -646,6 +646,9 @@ func (tm *Terminal) sync() {
 
 	toEnd := tm.toEnd || lv.IsScrolledToEnd()
 	tm.toEnd = false
+	// the text being composed with an input method is virtual text at the
+	// cursor, which is lost when the lines are replaced, so it is shown again
+	lvIME, gvIME := lv.VirtualText(imeLayer), gv.VirtualText(imeLayer)
 	if screen != nil {
 		tm.syncLines(cm, scrolled, cleared, screen, pcur, !md.CursorHidden && !alt)
 	}
@@ -653,6 +656,8 @@ func (tm *Terminal) sync() {
 		gv.Lines.ReplaceLinesMarkup(0, -1, gridText, gridMarkup)
 		gv.NeedsRender()
 	}
+	lv.restoreComposition(lvIME)
+	gv.restoreComposition(gvIME)
 	if alt != tm.altShown {
 		tm.altShown = alt
 		focused := lv.StateIs(states.Focused) || gv.StateIs(states.Focused)
