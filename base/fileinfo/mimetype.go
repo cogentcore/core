@@ -313,7 +313,13 @@ var StandardMimes = []MimeType{
 	{"text/x-sh", []string{".bash", ".sh"}, Code, Bash},
 	{"application/x-sh", nil, Code, Bash},
 
-	{"text/x-csrc", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".hlsl", ".gsl", ".frag", ".vert", ".mm"}, Code, C}, // this is apparently the main one now
+	{"text/x-csrc", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".mm"}, Code, C}, // this is apparently the main one now
+	{"text/x-glsl", []string{".glsl", ".vert", ".frag", ".geom", ".tesc", ".tese", ".comp", ".gsl"}, Code, GLSL},
+	{"text/x-hlsl", []string{".hlsl", ".hlsli", ".fx", ".fxh"}, Code, HLSL},
+	{"text/x-metal", []string{".metal"}, Code, Metal},
+	{"text/x-spirv", []string{".spvasm"}, Code, SPIRV},
+	{"application/x-spirv", []string{".spv"}, Bin, Unknown}, // the binary of SPIR-V
+	{"text/wgsl", []string{".wgsl"}, Code, WGSL},
 	{"text/x-chdr", nil, Code, C},
 	{"text/x-c", nil, Code, C},
 	{"text/x-c++hdr", nil, Code, C},

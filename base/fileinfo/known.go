@@ -172,9 +172,11 @@ const (
 	Forth
 	Fortran
 	FSharp
+	GLSL // OpenGL Shading Language
 	Go
 	Goal
 	Haskell
+	HLSL // High-Level Shader Language of DirectX
 	Java
 	JavaScript
 	TypeScript
@@ -183,6 +185,7 @@ const (
 	Makefile
 	Mathematica
 	Matlab
+	Metal // Metal Shading Language
 	ObjC
 	OCaml
 	Pascal
@@ -194,8 +197,10 @@ const (
 	Ruby
 	Rust
 	Scala
+	SPIRV // SPIR-V assembly, the text form of the shaders of Vulkan
 	SQL
 	Tcl
+	WGSL // WebGPU Shading Language
 
 	// Doc is an editable word processing file including latex, markdown, html, css, etc
 	AnyDoc
