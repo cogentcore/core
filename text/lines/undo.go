@@ -38,6 +38,22 @@ type Undo struct {
 	// group counter
 	Group int
 
+	// State is the current state of the text, as a number that is the same
+	// for the same text in the history of the undo stack: each new edit
+	// makes a new state, and undoing and redoing return to the states before
+	// and after edits, also in the emacs mode, in which undoing the undos
+	// returns to the states before them. It is 0 at the start of the stack.
+	State int
+
+	// States are the states of the text after the edits in Stack.
+	States []int
+
+	// UndoStates are the states of the text after the edits in UndoStack.
+	UndoStates []int
+
+	// lastState is the number of the last new state.
+	lastState int
+
 	// mutex protecting all updates
 	Mu sync.Mutex `json:"-" xml:"-"`
 }
@@ -55,6 +71,26 @@ func (un *Undo) Reset() {
 	un.Group = 0
 	un.Stack = nil
 	un.UndoStack = nil
+	un.State = 0
+	un.States = nil
+	un.UndoStates = nil
+	un.lastState = 0
+}
+
+// CurrentState returns the current [Undo.State] of the text.
+func (un *Undo) CurrentState() int {
+	un.Mu.Lock()
+	defer un.Mu.Unlock()
+	return un.State
+}
+
+// stateAt returns the state of the text at the given position in the stack,
+// which is that after the edit before it, or 0 at the start.
+func (un *Undo) stateAt(pos int) int {
+	if pos == 0 {
+		return 0
+	}
+	return un.States[pos-1]
 }
 
 // Save saves given edit to undo stack, with current group marker unless timer interval
@@ -70,6 +106,7 @@ func (un *Undo) Save(tbe *textpos.Edit) {
 			fmt.Printf("Undo: resetting to pos: %v len was: %v\n", un.Pos, len(un.Stack))
 		}
 		un.Stack = un.Stack[:un.Pos]
+		un.States = un.States[:un.Pos]
 	}
 	if len(un.Stack) > 0 {
 		since := tbe.Region.Since(&un.Stack[len(un.Stack)-1].Region)
@@ -85,6 +122,9 @@ func (un *Undo) Save(tbe *textpos.Edit) {
 		fmt.Printf("Undo: save to pos: %v: group: %v\n->\t%v\n", un.Pos, un.Group, string(tbe.ToBytes()))
 	}
 	un.Stack = append(un.Stack, tbe)
+	un.lastState++
+	un.State = un.lastState
+	un.States = append(un.States, un.State)
 	un.Pos = len(un.Stack)
 }
 
@@ -99,6 +139,7 @@ func (un *Undo) UndoPop() *textpos.Edit {
 		return nil
 	}
 	un.Pos--
+	un.State = un.stateAt(un.Pos)
 	tbe := un.Stack[un.Pos]
 	if UndoTrace {
 		fmt.Printf("Undo: UndoPop of Gp: %v  pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
@@ -121,6 +162,7 @@ func (un *Undo) UndoPopIfGroup(gp int) *textpos.Edit {
 		return nil
 	}
 	un.Pos--
+	un.State = un.stateAt(un.Pos)
 	if UndoTrace {
 		fmt.Printf("Undo: UndoPopIfGroup of Gp: %v pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
@@ -128,9 +170,10 @@ func (un *Undo) UndoPopIfGroup(gp int) *textpos.Edit {
 }
 
 // SaveUndo saves given edit to UndoStack (stack of undoes that have have undone..)
-// for emacs mode.
+// for emacs mode, with the state that it returns to, which is the current one.
 func (un *Undo) SaveUndo(tbe *textpos.Edit) {
 	un.UndoStack = append(un.UndoStack, tbe)
+	un.UndoStates = append(un.UndoStates, un.State)
 }
 
 // UndoStackSave if EmacsUndo mode is active, saves the UndoStack
@@ -146,8 +189,10 @@ func (un *Undo) UndoStackSave() {
 		return
 	}
 	un.Stack = append(un.Stack, un.UndoStack...)
+	un.States = append(un.States, un.UndoStates...)
 	un.Pos = len(un.Stack)
 	un.UndoStack = nil
+	un.UndoStates = nil
 	if UndoTrace {
 		fmt.Printf("Undo: undo stack saved to main stack, new pos: %v\n", un.Pos)
 	}
@@ -168,6 +213,7 @@ func (un *Undo) RedoNext() *textpos.Edit {
 	if UndoTrace {
 		fmt.Printf("Undo: RedoNext of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
+	un.State = un.States[un.Pos]
 	un.Pos++
 	return tbe
 }
@@ -190,6 +236,7 @@ func (un *Undo) RedoNextIfGroup(gp int) *textpos.Edit {
 	if UndoTrace {
 		fmt.Printf("Undo: RedoNextIfGroup of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Region, string(tbe.ToBytes()))
 	}
+	un.State = un.States[un.Pos]
 	un.Pos++
 	return tbe
 }

@@ -235,10 +235,27 @@ func (ls *Lines) setChanged() {
 	ls.notSaved = true
 }
 
-// clearNotSaved sets Changed and NotSaved to false.
+// clearNotSaved sets Changed and NotSaved to false,
+// as when the text is saved, recording its state as saved.
 func (ls *Lines) clearNotSaved() {
 	ls.changed = false
 	ls.notSaved = false
+	ls.savedState = ls.undos.CurrentState()
+}
+
+// updateSaved makes the text not changed if it is in the state in which
+// it was last saved, after undoing or redoing edits, as back to it, while
+// the undo history before that is kept, so that edits before the save
+// can still be undone. This works in both undo modes: in the emacs mode,
+// undoing the undos past the save reaches the saved state again
+// (see [Undo.State]).
+func (ls *Lines) updateSaved() {
+	if ls.undos.CurrentState() != ls.savedState {
+		return
+	}
+	ls.changed = false
+	ls.notSaved = false
+	ls.autosaveDelete()
 }
 
 // setReadOnly sets whether the buffer is read-only.
