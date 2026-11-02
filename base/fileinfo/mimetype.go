@@ -314,7 +314,7 @@ var StandardMimes = []MimeType{
 	{"application/x-sh", nil, Code, Bash},
 
 	{"text/x-csrc", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".mm"}, Code, C}, // this is apparently the main one now
-	{"text/x-glsl", []string{".glsl", ".vert", ".frag", ".geom", ".tesc", ".tese", ".comp", ".gsl"}, Code, GLSL},
+	{"text/x-glslsrc", []string{".glsl", ".vert", ".frag", ".geom", ".tesc", ".tese", ".comp", ".gsl"}, Code, GLSL},
 	{"text/x-hlsl", []string{".hlsl", ".hlsli", ".fx", ".fxh"}, Code, HLSL},
 	{"text/x-metal", []string{".metal"}, Code, Metal},
 	{"text/x-spirv", []string{".spvasm"}, Code, SPIRV},
