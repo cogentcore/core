@@ -14,17 +14,18 @@ import (
 
 // openTypes returns the types of files of the given [config.Config.Opens]:
 // categories of files or known types of files, as in [fileinfo], whose
-// names are matched regardless of case, as in json for Json.
+// names are matched regardless of case, as enums do.
 func openTypes(opens []string) ([]fileinfo.MimeType, error) {
 	var cats []fileinfo.Categories
 	var knowns []fileinfo.Known
 	for _, op := range opens {
-		if cat, ok := enumByName(fileinfo.CategoriesValues(), op); ok && cat != fileinfo.UnknownCategory {
+		var cat fileinfo.Categories
+		if cat.SetString(op) == nil && cat != fileinfo.UnknownCategory {
 			cats = append(cats, cat)
 			continue
 		}
-		kn, ok := enumByName(fileinfo.KnownValues(), op)
-		if !ok || kn == fileinfo.Unknown {
+		kn, err := fileinfo.KnownByName(op)
+		if err != nil || kn == fileinfo.Unknown {
 			return nil, fmt.Errorf("Opens: %q is not a category or a known type of file", op)
 		}
 		knowns = append(knowns, kn)
@@ -40,18 +41,6 @@ func openTypes(opens []string) ([]fileinfo.MimeType, error) {
 		mts = append(mts, mt)
 	}
 	return mts, nil
-}
-
-// enumByName returns the one of the given values whose name is the given
-// one, regardless of case.
-func enumByName[T fmt.Stringer](values []T, name string) (T, bool) {
-	for _, v := range values {
-		if strings.EqualFold(v.String(), name) {
-			return v, true
-		}
-	}
-	var zero T
-	return zero, false
 }
 
 // typeName returns the name of the given type of files.
