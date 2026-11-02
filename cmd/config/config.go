@@ -65,6 +65,13 @@ type Config struct { //types:add
 	// [system.App.OpenFiles] when it starts, or its arguments on Linux.
 	Opens []string
 
+	// AppGoSymlink makes the executable of the app installed in /Applications
+	// on macOS a symbolic link to the one installed by go install (in the
+	// Go bin directory), which the install command also does, so that go
+	// install is enough to update the app after that, as for apps that are
+	// updated often.
+	AppGoSymlink bool
+
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
 

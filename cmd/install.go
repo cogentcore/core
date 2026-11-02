@@ -6,8 +6,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
@@ -59,12 +61,25 @@ func Install(c *config.Config) error { //types:add
 			if err != nil {
 				return err
 			}
-			err = exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
-			if err != nil || len(c.Opens) == 0 {
+			app := filepath.Join("/Applications", c.Name+".app")
+			// cp writes through a symbolic link of AppGoSymlink
+			if err := removeSymlink(appExecutable(c, app)); err != nil {
 				return err
 			}
+			err = exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
+			if err != nil {
+				return err
+			}
+			if c.AppGoSymlink {
+				if err := goSymlinkApp(c, app); err != nil {
+					return err
+				}
+			}
+			if len(c.Opens) == 0 {
+				return nil
+			}
 			// so that the system knows the types of files that it opens now
-			return exec.Run(lsregister, "-f", filepath.Join("/Applications", c.Name+".app"))
+			return exec.Run(lsregister, "-f", app)
 		default:
 			if err := generate.ContentCode(".", &c.ContentCode); err != nil {
 				logx.PrintlnWarn("warning:", err)
@@ -73,4 +88,40 @@ func Install(c *config.Config) error { //types:add
 		}
 	}
 	return nil
+}
+
+// appExecutable returns the path of the executable of the given macOS app
+// of the given config, as packed by [Pack].
+func appExecutable(c *config.Config, app string) string {
+	return filepath.Join(app, "Contents", "MacOS", c.Name+".app")
+}
+
+// removeSymlink removes the given file if it is a symbolic link.
+func removeSymlink(file string) error {
+	if fi, err := os.Lstat(file); err == nil && fi.Mode()&os.ModeSymlink != 0 {
+		return os.Remove(file)
+	}
+	return nil
+}
+
+// goSymlinkApp installs the app of the given config with go install, and
+// makes the executable of the given macOS app a symbolic link to the one
+// that it installs (see [config.Config.AppGoSymlink]).
+func goSymlinkApp(c *config.Config, app string) error {
+	if err := exec.Major().Run("go", "install"); err != nil {
+		return err
+	}
+	target, err := exec.Output("go", "list", "-f", "{{.Target}}")
+	if err != nil {
+		return err
+	}
+	target = strings.TrimSpace(target)
+	if target == "" {
+		return fmt.Errorf("AppGoSymlink: go install does not install an executable here")
+	}
+	exe := appExecutable(c, app)
+	if err := os.Remove(exe); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return os.Symlink(target, exe)
 }
