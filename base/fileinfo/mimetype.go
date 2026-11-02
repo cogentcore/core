@@ -334,8 +334,8 @@ var StandardMimes = []MimeType{
 	{"text/x-haskell", []string{".hs", ".lhs"}, Code, Haskell},
 	{"text/x-literate-haskell", nil, Code, Haskell}, // todo: not sure if same or not
 
-	{"text/x-java", []string{".java", ".jar"}, Code, Java},
-	{"application/java-archive", nil, Code, Java},
+	{"text/x-java", []string{".java"}, Code, Java},
+	{"application/java-archive", []string{".jar"}, Archive, Unknown},
 	{"application/javascript", []string{".js", ".es"}, Code, JavaScript},
 	{"application/ecmascript", nil, Code, JavaScript},
 	{"application/typescript", []string{".ts"}, Code, TypeScript},
@@ -371,8 +371,8 @@ var StandardMimes = []MimeType{
 	{"text/x-php", []string{".php", ".php3", ".php4", ".php5", ".inc"}, Code, Php},
 	{"text/x-prolog", []string{".ecl", ".prolog", ".pro"}, Code, Prolog}, // note: ".pl" conflicts
 
-	{"text/x-python", []string{".py", ".pyc", ".pyo", ".pyw"}, Code, Python},
-	{"application/x-python-code", nil, Code, Python},
+	{"text/x-python", []string{".py", ".pyw"}, Code, Python},
+	{"application/x-python-code", []string{".pyc", ".pyo"}, Archive, Unknown},
 
 	{"text/x-rust", []string{".rs"}, Code, Rust},
 	{"text/rust", nil, Code, Rust},
