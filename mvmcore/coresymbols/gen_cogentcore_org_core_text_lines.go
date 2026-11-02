@@ -24,6 +24,7 @@ var _ = register(func() {
 			"FileBytes":              reflect.ValueOf(p_cogentcore_org_core_text_lines.FileBytes),
 			"FileRegionBytes":        reflect.ValueOf(p_cogentcore_org_core_text_lines.FileRegionBytes),
 			"KnownComments":          reflect.ValueOf(p_cogentcore_org_core_text_lines.KnownComments),
+			"LineCells":              reflect.ValueOf(p_cogentcore_org_core_text_lines.LineCells),
 			"Lines":                  reflect.ValueOf((*p_cogentcore_org_core_text_lines.Lines)(nil)),
 			"NewDiffSelected":        reflect.ValueOf(p_cogentcore_org_core_text_lines.NewDiffSelected),
 			"NewLines":               reflect.ValueOf(p_cogentcore_org_core_text_lines.NewLines),
@@ -34,11 +35,14 @@ var _ = register(func() {
 			"PreCommentStart":        reflect.ValueOf(p_cogentcore_org_core_text_lines.PreCommentStart),
 			"ReplaceMatchCase":       reflect.ValueOf(p_cogentcore_org_core_text_lines.ReplaceMatchCase),
 			"ReplaceNoMatchCase":     reflect.ValueOf(p_cogentcore_org_core_text_lines.ReplaceNoMatchCase),
+			"Replacement":            reflect.ValueOf((*p_cogentcore_org_core_text_lines.Replacement)(nil)),
+			"RuneWidth":              reflect.ValueOf(p_cogentcore_org_core_text_lines.RuneWidth),
 			"Settings":               reflect.ValueOf((*p_cogentcore_org_core_text_lines.Settings)(nil)),
 			"StringLinesToByteLines": reflect.ValueOf(p_cogentcore_org_core_text_lines.StringLinesToByteLines),
 			"Undo":                   reflect.ValueOf((*p_cogentcore_org_core_text_lines.Undo)(nil)),
 			"UndoGroupDelay":         reflect.ValueOf(&p_cogentcore_org_core_text_lines.UndoGroupDelay),
 			"UndoTrace":              reflect.ValueOf(&p_cogentcore_org_core_text_lines.UndoTrace),
+			"VirtualText":            reflect.ValueOf((*p_cogentcore_org_core_text_lines.VirtualText)(nil)),
 		},
 	})
 })
