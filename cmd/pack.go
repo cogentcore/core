@@ -118,6 +118,11 @@ func packLinux(c *config.Config) error {
 		Desc: c.About,
 		Exec: anm,
 	}
+	mts, err := openTypes(c.Opens)
+	if err != nil {
+		return err
+	}
+	dfd.MimeTypes = mimeTypeList(mts)
 	err = desktopFileTmpl.Execute(fapp, dfd)
 	if err != nil {
 		return err
@@ -149,6 +154,10 @@ type desktopFileData struct {
 	Name string
 	Desc string
 	Exec string
+
+	// MimeTypes are the MIME types of the files that the app opens
+	// (see [config.Config.Opens]), as a MimeType value.
+	MimeTypes string
 }
 
 // TODO(kai): project website
@@ -160,9 +169,12 @@ Type=Application
 Version=1.0
 Name={{.Name}}
 Comment={{.Desc}}
-Exec={{.Exec}}
+Exec={{.Exec}}{{if .MimeTypes}} %F{{end}}
 Icon={{.Exec}}
 Terminal=false
+{{- if .MimeTypes}}
+MimeType={{.MimeTypes}}
+{{- end}}
 `))
 
 // debianControlData is the data passed to [debianControlTmpl]
@@ -245,6 +257,11 @@ func packDarwin(c *config.Config) error {
 		ShortVersionString: c.Version,
 		IconFile:           filepath.Join("Contents", "Resources", "icon.icns"),
 	}
+	mts, err := openTypes(c.Opens)
+	if err != nil {
+		return err
+	}
+	ipd.DocTypes = macDocTypes(mts)
 	err = infoPlistTmpl.Execute(fplist, ipd)
 	if err != nil {
 		return err
@@ -293,6 +310,10 @@ type infoPlistData struct {
 	InfoString         string
 	ShortVersionString string
 	IconFile           string
+
+	// DocTypes are the types of files that the app opens (see [config.Config.Opens]),
+	// with the rank Alternate, so that it is not their default app.
+	DocTypes []macDocType
 }
 
 // infoPlistTmpl is the template for the macOS .app Info.plist
@@ -319,6 +340,34 @@ var infoPlistTmpl = template.Must(template.New("infoPlistTmpl").Parse(
 		<string>{{ .ShortVersionString }}</string>
 		<key>CFBundleIconFile</key>
 		<string>{{ .IconFile }}</string>
+		{{- if .DocTypes }}
+		<key>CFBundleDocumentTypes</key>
+		<array>
+		{{- range .DocTypes }}
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>{{ .Name }}</string>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>LSHandlerRank</key>
+				<string>Alternate</string>
+				{{- if .UTI }}
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>{{ .UTI }}</string>
+				</array>
+				{{- else }}
+				<key>CFBundleTypeExtensions</key>
+				<array>
+				{{- range .Extensions }}
+					<string>{{ . }}</string>
+				{{- end }}
+				</array>
+				{{- end }}
+			</dict>
+		{{- end }}
+		</array>
+		{{- end }}
 	</dict>
 </plist>
 `))
