@@ -17,11 +17,13 @@ import (
 
 // MimeNoChar returns the mime string without any charset
 // encoding information, or anything else after a ;
+// in lowercase, as mime types are case-insensitive,
+// and they are lowercase in [AvailableMimes].
 func MimeNoChar(mime string) string {
 	if sidx := strings.Index(mime, ";"); sidx > 0 {
-		return strings.TrimSpace(mime[:sidx])
+		mime = strings.TrimSpace(mime[:sidx])
 	}
-	return mime
+	return strings.ToLower(mime)
 }
 
 // MimeTop returns the top-level main type category from mime type
@@ -218,10 +220,10 @@ func MimeFromKnown(ftyp Known) MimeType {
 func MergeAvailableMimes() {
 	AvailableMimes = make(map[string]MimeType, len(StandardMimes)+len(CustomMimes))
 	for _, mt := range StandardMimes {
-		AvailableMimes[mt.Mime] = mt
+		AvailableMimes[strings.ToLower(mt.Mime)] = mt
 	}
 	for _, mt := range CustomMimes {
-		AvailableMimes[mt.Mime] = mt // overwrite automatically
+		AvailableMimes[strings.ToLower(mt.Mime)] = mt // overwrite automatically
 	}
 	ExtMimeMap = make(map[string]string) // start over
 	KnownMimes = make(map[Known]MimeType)
@@ -284,11 +286,11 @@ var StandardMimes = []MimeType{
 	{"application/zip", []string{".zip"}, Archive, Zip},
 	{"application/gzip", []string{".gz"}, Archive, GZip},
 	{"application/x-7z-compressed", []string{".7z"}, Archive, SevenZ},
-	{"application/x-xz", []string{".xz"}, Archive, Xz},
+	{"application/x-xz", []string{".xz"}, Archive, XZ},
 	{"application/x-bzip", []string{".bz", ".bz2"}, Archive, BZip},
 	{"application/x-bzip2", nil, Archive, BZip},
 
-	{"application/x-apple-diskimage", []string{".dmg"}, Archive, Dmg},
+	{"application/x-apple-diskimage", []string{".dmg"}, Archive, DMG},
 	{"application/x-shar", []string{".shar"}, Archive, Shar},
 
 	{"application/x-bittorrent", []string{".torrent"}, Archive, Unknown},
@@ -368,7 +370,7 @@ var StandardMimes = []MimeType{
 	{"text/x-ocaml", []string{".ml", ".mli", ".mll", ".mly"}, Code, OCaml},
 	{"text/x-pascal", []string{".p", ".pas"}, Code, Pascal},
 	{"text/x-perl", []string{".pl", ".pm"}, Code, Perl},
-	{"text/x-php", []string{".php", ".php3", ".php4", ".php5", ".inc"}, Code, Php},
+	{"text/x-php", []string{".php", ".php3", ".php4", ".php5", ".inc"}, Code, PHP},
 	{"text/x-prolog", []string{".ecl", ".prolog", ".pro"}, Code, Prolog}, // note: ".pl" conflicts
 
 	{"text/x-python", []string{".py", ".pyw"}, Code, Python},
@@ -378,9 +380,9 @@ var StandardMimes = []MimeType{
 	{"text/rust", nil, Code, Rust},
 
 	{"text/x-r", []string{".r", ".S", ".R", ".Rhistory", ".Rprofile", ".Renviron"}, Code, R},
-	{"text/x-R", nil, Code, R},
-	{"text/S-Plus", nil, Code, R},
-	{"text/S", nil, Code, R},
+	{"text/x-r", nil, Code, R},
+	{"text/s-plus", nil, Code, R},
+	{"text/s", nil, Code, R},
 	{"text/x-r-source", nil, Code, R},
 	{"text/x-r-history", nil, Code, R},
 	{"text/x-r-profile", nil, Code, R},
@@ -403,15 +405,15 @@ var StandardMimes = []MimeType{
 	{"application/x-troff-me", nil, Doc, Troff},
 	{"application/x-troff-ms", nil, Doc, Troff},
 
-	{"text/html", []string{".html", ".htm", ".shtml", ".xhtml", ".xht"}, Doc, Html},
-	{"application/xhtml+xml", nil, Doc, Html},
+	{"text/html", []string{".html", ".htm", ".shtml", ".xhtml", ".xht"}, Doc, HTML},
+	{"application/xhtml+xml", nil, Doc, HTML},
 	{"text/mathml", []string{".mml"}, Doc, Unknown},
-	{"text/css", []string{".css"}, Doc, Css},
+	{"text/css", []string{".css"}, Doc, CSS},
 
 	{"text/markdown", []string{".md", ".markdown"}, Doc, Markdown},
 	{"text/x-markdown", nil, Doc, Markdown},
 
-	{"application/rtf", []string{".rtf"}, Doc, Rtf},
+	{"application/rtf", []string{".rtf"}, Doc, RTF},
 	{"text/richtext", []string{".rtx"}, Doc, Unknown},
 
 	{"application/mbox", []string{".mbox"}, Doc, Unknown},
@@ -436,11 +438,11 @@ var StandardMimes = []MimeType{
 	{"application/vnd.sun.xml.impress", nil, Doc, OpenPres},
 	{"application/vnd.sun.xml.impress.template", nil, Doc, OpenPres},
 
-	{"application/vnd.ms-powerpoint", []string{".ppt", ".pps", ".pptx", ".sldx", ".ppsx", ".potx"}, Doc, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.presentation", nil, Doc, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.slide", nil, Doc, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.slideshow", nil, Doc, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.template", nil, Doc, MSPowerpoint},
+	{"application/vnd.ms-powerpoint", []string{".ppt", ".pps", ".pptx", ".sldx", ".ppsx", ".potx"}, Doc, MSPowerPoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.presentation", nil, Doc, MSPowerPoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.slide", nil, Doc, MSPowerPoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.slideshow", nil, Doc, MSPowerPoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.template", nil, Doc, MSPowerPoint},
 
 	{"application/ms-tnef", nil, Doc, Unknown},
 	{"application/vnd.ms-tnef", nil, Doc, Unknown},
@@ -452,7 +454,7 @@ var StandardMimes = []MimeType{
 	{"application/pgp-signature", []string{".sig"}, Doc, Unknown},
 
 	{"application/vnd.amazon.ebook", []string{".azw"}, Doc, EBook},
-	{"application/epub+zip", []string{".epub"}, Doc, EPub},
+	{"application/epub+zip", []string{".epub"}, Doc, EPUB},
 
 	// Sheet
 	{"application/vnd.ms-excel", []string{".xls", ".xlb", ".xlt", ".xlsx", ".xltx"}, Sheet, MSExcel},
@@ -466,23 +468,23 @@ var StandardMimes = []MimeType{
 	{"application/vnd.sun.xml.calc.template", nil, Sheet, OpenSheet},
 
 	// Data
-	{"text/csv", []string{".csv"}, Data, Csv},
-	{"application/json", []string{".json"}, Data, Json},
-	{"application/xml", []string{".xml", ".xsd"}, Data, Xml},
-	{"text/xml", nil, Data, Xml},
+	{"text/csv", []string{".csv"}, Data, CSV},
+	{"application/json", []string{".json"}, Data, JSON},
+	{"application/xml", []string{".xml", ".xsd"}, Data, XML},
+	{"text/xml", nil, Data, XML},
 	{"text/x-protobuf", []string{".proto"}, Data, Protobuf},
-	{"text/x-ini", []string{".ini", ".cfg", ".inf"}, Data, Ini},
-	{"text/x-ini-file", nil, Data, Ini},
-	{"text/uri-list", nil, Data, Uri},
+	{"text/x-ini", []string{".ini", ".cfg", ".inf"}, Data, INI},
+	{"text/x-ini-file", nil, Data, INI},
+	{"text/uri-list", nil, Data, URI},
 	{"application/x-color", nil, Data, Color},
-	{"text/toml", []string{".toml"}, Data, Toml},
-	{"application/toml", nil, Data, Toml},
-	{"application/yaml", []string{".yaml"}, Data, Yaml},
+	{"text/toml", []string{".toml"}, Data, TOML},
+	{"application/toml", nil, Data, TOML},
+	{"application/yaml", []string{".yaml"}, Data, YAML},
 
 	{"application/rdf+xml", []string{".rdf"}, Data, Unknown},
 	{"application/msaccess", []string{".mdb"}, Data, Unknown},
 	{"application/vnd.oasis.opendocument.database", []string{".odb"}, Data, Unknown},
-	{"text/tab-separated-values", []string{".tsv"}, Data, Tsv},
+	{"text/tab-separated-values", []string{".tsv"}, Data, TSV},
 	{"application/vnd.google-earth.kml+xml", []string{".kml"}, Data, Unknown},
 	{"application/vnd.google-earth.kmz", []string{".kmz"}, Data, Unknown},
 	{"application/vnd.google-earth.kmz", nil, Data, Unknown},
@@ -496,8 +498,8 @@ var StandardMimes = []MimeType{
 	{"text/vcard", []string{".vcf", ".vcard"}, Text, VCard},
 
 	// Image
-	{"application/pdf", []string{".pdf"}, Image, Pdf},
-	{"application/postscript", []string{".ps", ".ai", ".eps", ".epsi", ".epsf", ".eps2", ".eps3"}, Image, Postscript},
+	{"application/pdf", []string{".pdf"}, Image, PDF},
+	{"application/postscript", []string{".ps", ".ai", ".eps", ".epsi", ".epsf", ".eps2", ".eps3"}, Image, PostScript},
 	{"application/vnd.oasis.opendocument.graphics", []string{".odc", ".odg", ".otg", ".odi", ".sxd", ".std"}, Image, Unknown},
 	{"application/vnd.oasis.opendocument.chart", nil, Image, Unknown},
 	{"application/vnd.oasis.opendocument.graphics-template", nil, Image, Unknown},
@@ -505,21 +507,21 @@ var StandardMimes = []MimeType{
 	{"application/vnd.sun.xml.draw", nil, Image, Unknown},
 	{"application/vnd.sun.xml.draw.template", nil, Image, Unknown},
 	{"application/x-xfig", []string{".fig"}, Image, Unknown},
-	{"application/x-xcf", []string{".xcf"}, Image, Gimp},
-	{"text/vnd.graphviz", []string{".gv"}, Image, GraphVis},
+	{"application/x-xcf", []string{".xcf"}, Image, GIMP},
+	{"text/vnd.graphviz", []string{".gv"}, Image, Graphviz},
 
-	{"image/gif", []string{".gif"}, Image, Gif},
+	{"image/gif", []string{".gif"}, Image, GIF},
 	{"image/ief", []string{".ief"}, Image, Unknown},
 	{"image/jp2", []string{".jp2", ".jpg2"}, Image, Unknown},
-	{"image/jpeg", []string{".jpeg", ".jpg", ".jpe"}, Image, Jpeg},
+	{"image/jpeg", []string{".jpeg", ".jpg", ".jpe"}, Image, JPEG},
 	{"image/jpm", []string{".jpm"}, Image, Unknown},
 	{"image/jpx", []string{".jpx", ".jpf"}, Image, Unknown},
 	{"image/pcx", []string{".pcx"}, Image, Unknown},
-	{"image/png", []string{".png"}, Image, Png},
-	{"image/heic", []string{".heic"}, Image, Heic},
-	{"image/heif", []string{".heif"}, Image, Heif},
-	{"image/svg+xml", []string{".svg", ".svgz"}, Image, Svg},
-	{"image/tiff", []string{".tiff", ".tif"}, Image, Tiff},
+	{"image/png", []string{".png"}, Image, PNG},
+	{"image/heic", []string{".heic"}, Image, HEIC},
+	{"image/heif", []string{".heif"}, Image, HEIF},
+	{"image/svg+xml", []string{".svg", ".svgz"}, Image, SVG},
+	{"image/tiff", []string{".tiff", ".tif"}, Image, TIFF},
 	{"image/vnd.djvu", []string{".djvu", ".djv"}, Image, Unknown},
 	{"image/vnd.microsoft.icon", []string{".ico"}, Image, Unknown},
 	{"image/vnd.wap.wbmp", []string{".wbmp"}, Image, Unknown},
@@ -533,33 +535,33 @@ var StandardMimes = []MimeType{
 	{"image/x-epson-erf", []string{".erf"}, Image, Unknown},
 	{"image/x-jg", []string{".art"}, Image, Unknown},
 	{"image/x-jng", []string{".jng"}, Image, Unknown},
-	{"image/x-ms-bmp", []string{".bmp"}, Image, Bmp},
+	{"image/x-ms-bmp", []string{".bmp"}, Image, BMP},
 	{"image/x-nikon-nef", []string{".nef"}, Image, Unknown},
 	{"image/x-olympus-orf", []string{".orf"}, Image, Unknown},
 	{"image/x-photoshop", []string{".psd"}, Image, Unknown},
-	{"image/x-portable-anymap", []string{".pnm"}, Image, Pnm},
-	{"image/x-portable-bitmap", []string{".pbm"}, Image, Pbm},
-	{"image/x-portable-graymap", []string{".pgm"}, Image, Pgm},
-	{"image/x-portable-pixmap", []string{".ppm"}, Image, Ppm},
+	{"image/x-portable-anymap", []string{".pnm"}, Image, PNM},
+	{"image/x-portable-bitmap", []string{".pbm"}, Image, PBM},
+	{"image/x-portable-graymap", []string{".pgm"}, Image, PGM},
+	{"image/x-portable-pixmap", []string{".ppm"}, Image, PPM},
 	{"image/x-rgb", []string{".rgb"}, Image, Unknown},
-	{"image/x-xbitmap", []string{".xbm"}, Image, Xbm},
-	{"image/x-xpixmap", []string{".xpm"}, Image, Xpm},
+	{"image/x-xbitmap", []string{".xbm"}, Image, XBM},
+	{"image/x-xpixmap", []string{".xpm"}, Image, XPM},
 	{"image/x-xwindowdump", []string{".xwd"}, Image, Unknown},
 
 	// Model
 	{"model/iges", []string{".igs", ".iges"}, Model, Unknown},
 	{"model/mesh", []string{".msh", ".mesh", ".silo"}, Model, Unknown},
-	{"model/vrml", []string{".wrl", ".vrml", ".vrm"}, Model, Vrml},
-	{"x-world/x-vrml", nil, Model, Vrml},
-	{"model/x3d+xml", []string{".x3dv", ".x3d", ".x3db"}, Model, X3d},
-	{"model/x3d+vrml", nil, Model, X3d},
-	{"model/x3d+binary", nil, Model, X3d},
-	{"application/object", []string{".obj", ".mtl"}, Model, Obj},
+	{"model/vrml", []string{".wrl", ".vrml", ".vrm"}, Model, VRML},
+	{"x-world/x-vrml", nil, Model, VRML},
+	{"model/x3d+xml", []string{".x3dv", ".x3d", ".x3db"}, Model, X3D},
+	{"model/x3d+vrml", nil, Model, X3D},
+	{"model/x3d+binary", nil, Model, X3D},
+	{"application/object", []string{".obj", ".mtl"}, Model, OBJ},
 
 	// Audio
-	{"audio/aac", []string{".aac"}, Audio, Aac},
-	{"audio/flac", []string{".flac"}, Audio, Flac},
-	{"audio/mpeg", []string{".mpga", ".mpega", ".mp2", ".mp3", ".m4a"}, Audio, Mp3},
+	{"audio/aac", []string{".aac"}, Audio, AAC},
+	{"audio/flac", []string{".flac"}, Audio, FLAC},
+	{"audio/mpeg", []string{".mpga", ".mpega", ".mp2", ".mp3", ".m4a"}, Audio, MP3},
 	{"audio/mpegurl", []string{".m3u"}, Audio, Unknown},
 	{"audio/x-mpegurl", nil, Audio, Unknown},
 	{"audio/ogg", []string{".oga", ".ogg", ".opus", ".spx"}, Audio, Ogg},
@@ -568,7 +570,7 @@ var StandardMimes = []MimeType{
 	{"audio/annodex", []string{".axa"}, Audio, Unknown},
 	{"audio/basic", []string{".au", ".snd"}, Audio, Unknown},
 	{"audio/csound", []string{".csd", ".orc", ".sco"}, Audio, Unknown},
-	{"audio/midi", []string{".mid", ".midi", ".kar"}, Audio, Midi},
+	{"audio/midi", []string{".mid", ".midi", ".kar"}, Audio, MIDI},
 	{"audio/prs.sid", []string{".sid"}, Audio, Unknown},
 	{"audio/x-aiff", []string{".aif", ".aiff", ".aifc"}, Audio, Unknown},
 	{"audio/x-gsm", []string{".gsm"}, Audio, Unknown},
@@ -578,7 +580,7 @@ var StandardMimes = []MimeType{
 	{"audio/x-realaudio", nil, Audio, Unknown},
 	{"audio/x-scpls", []string{".pls"}, Audio, Unknown},
 	{"audio/x-sd2", []string{".sd2"}, Audio, Unknown},
-	{"audio/x-wav", []string{".wav"}, Audio, Wav},
+	{"audio/x-wav", []string{".wav"}, Audio, WAV},
 
 	// Video
 	{"video/3gpp", []string{".3gp"}, Video, Unknown},
@@ -588,11 +590,11 @@ var StandardMimes = []MimeType{
 	{"video/fli", []string{".fli"}, Video, Unknown},
 	{"video/gl", []string{".gl"}, Video, Unknown},
 	{"video/h264", nil, Video, Unknown},
-	{"video/mpeg", []string{".mpeg", ".mpg", ".mpe"}, Video, Mpeg},
-	{"video/MP2T", nil, Video, Unknown},
-	{"video/mp4", []string{".mp4"}, Video, Mp4},
-	{"video/quicktime", []string{".qt", ".mov"}, Video, Mov},
-	{"video/ogg", []string{".ogv"}, Video, Ogv},
+	{"video/mpeg", []string{".mpeg", ".mpg", ".mpe"}, Video, MPEG},
+	{"video/mp2t", nil, Video, Unknown},
+	{"video/mp4", []string{".mp4"}, Video, MP4},
+	{"video/quicktime", []string{".qt", ".mov"}, Video, MOV},
+	{"video/ogg", []string{".ogv"}, Video, OGV},
 	{"video/webm", []string{".webm"}, Video, Unknown},
 	{"video/vnd.mpegurl", []string{".mxu"}, Video, Unknown},
 	{"video/x-flv", []string{".flv"}, Video, Unknown},
@@ -600,10 +602,10 @@ var StandardMimes = []MimeType{
 	{"video/x-mng", []string{".mng"}, Video, Unknown},
 	{"video/x-ms-asf", []string{".asf", ".asx"}, Video, Unknown},
 	{"video/x-ms-wm", []string{".wm"}, Video, Unknown},
-	{"video/x-ms-wmv", []string{".wmv"}, Video, Wmv},
+	{"video/x-ms-wmv", []string{".wmv"}, Video, WMV},
 	{"video/x-ms-wmx", []string{".wmx"}, Video, Unknown},
 	{"video/x-ms-wvx", []string{".wvx"}, Video, Unknown},
-	{"video/x-msvideo", []string{".avi"}, Video, Avi},
+	{"video/x-msvideo", []string{".avi"}, Video, AVI},
 	{"video/x-sgi-movie", []string{".movie"}, Video, Unknown},
 	{"video/x-matroska", []string{".mpv", ".mkv"}, Video, Unknown},
 	{"application/x-shockwave-flash", []string{".swf"}, Video, Unknown},

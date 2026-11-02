@@ -120,9 +120,9 @@ func KnownByName(name string) (Known, error) {
 // These are the super high-frequency used mime types, to have very quick const level support
 const (
 	TextPlain = "text/plain"
-	DataJson  = "application/json"
-	DataXml   = "application/xml"
-	DataCsv   = "text/csv"
+	DataJSON  = "application/json"
+	DataXML   = "application/xml"
+	DataCSV   = "text/csv"
 )
 
 // These are the known file types, organized by category
@@ -148,9 +148,9 @@ const (
 	Zip
 	GZip
 	SevenZ
-	Xz
+	XZ
 	BZip
-	Dmg
+	DMG
 	Shar
 
 	// Backup files
@@ -187,7 +187,7 @@ const (
 	OCaml
 	Pascal
 	Perl
-	Php
+	PHP
 	Prolog
 	Python
 	R
@@ -204,17 +204,17 @@ const (
 	Texinfo
 	Troff
 
-	Html
-	Css
+	HTML
+	CSS
 	Markdown
-	Rtf
+	RTF
 	MSWord
 	OpenText
 	OpenPres
-	MSPowerpoint
+	MSPowerPoint
 
 	EBook
-	EPub
+	EPUB
 
 	// Sheet is a spreadsheet file (.xls etc)
 	AnySheet
@@ -223,16 +223,16 @@ const (
 
 	// Data is some kind of data format (csv, json, database, etc)
 	AnyData
-	Csv
-	Json
-	Xml
+	CSV
+	JSON
+	XML
 	Protobuf
-	Ini
-	Tsv
-	Uri
+	INI
+	TSV
+	URI
 	Color
-	Yaml
-	Toml
+	YAML
+	TOML
 	// special support for data fs
 	Number
 	String
@@ -248,48 +248,48 @@ const (
 
 	// Image is an image (jpeg, png, svg, etc) *including* PDF
 	AnyImage
-	Pdf
-	Postscript
-	Gimp
-	GraphVis
-	Gif
-	Jpeg
-	Png
-	Svg
-	Tiff
-	Pnm
-	Pbm
-	Pgm
-	Ppm
-	Xbm
-	Xpm
-	Bmp
-	Heic
-	Heif
+	PDF
+	PostScript
+	GIMP
+	Graphviz
+	GIF
+	JPEG
+	PNG
+	SVG
+	TIFF
+	PNM
+	PBM
+	PGM
+	PPM
+	XBM
+	XPM
+	BMP
+	HEIC
+	HEIF
 
 	// Model is a 3D model
 	AnyModel
-	Vrml
-	X3d
-	Obj
+	VRML
+	X3D
+	OBJ
 
 	// Audio is an audio file
 	AnyAudio
-	Aac
-	Flac
-	Mp3
+	AAC
+	FLAC
+	MP3
 	Ogg
-	Midi
-	Wav
+	MIDI
+	WAV
 
 	// Video is a video file
 	AnyVideo
-	Mpeg
-	Mp4
-	Mov
-	Ogv
-	Wmv
-	Avi
+	MPEG
+	MP4
+	MOV
+	OGV
+	WMV
+	AVI
 
 	// Font is a font file
 	AnyFont

@@ -1263,7 +1263,7 @@ func (lb *ListBase) mimeDataIndex(md *mimedata.Mimes, idx int) {
 	val := lb.sliceValue(idx)
 	b, err := json.MarshalIndent(val, "", "  ")
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: b})
+		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJSON, Data: b})
 	} else {
 		log.Printf("ListBase MimeData JSON Marshall error: %v\n", err)
 	}
@@ -1274,7 +1274,7 @@ func (lb *ListBase) fromMimeData(md mimedata.Mimes) []any {
 	svtyp := lb.sliceUnderlying.Type()
 	sl := make([]any, 0, len(md))
 	for _, d := range md {
-		if d.Type == fileinfo.DataJson {
+		if d.Type == fileinfo.DataJSON {
 			nval := reflect.New(svtyp.Elem()).Interface()
 			err := json.Unmarshal(d.Data, nval)
 			if err == nil {
@@ -1290,7 +1290,7 @@ func (lb *ListBase) fromMimeData(md mimedata.Mimes) []any {
 // MimeDataType returns the data type for mime clipboard (copy / paste) data
 // e.g., fileinfo.DataJson
 func (lb *ListBase) MimeDataType() string {
-	return fileinfo.DataJson
+	return fileinfo.DataJSON
 }
 
 // CopySelectToMime copies selected rows to mime data

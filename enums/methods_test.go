@@ -77,12 +77,10 @@ func TestSetString(t *testing.T) {
 	assert.NoError(t, SetString(&i, "apple", valueMap, "Fruits"))
 	assert.Equal(t, enum(5), i)
 	i = enum(4)
-	err := SetString(&i, "Apple", valueMap, "Fruits")
-	if assert.Error(t, err) {
-		assert.Equal(t, "Apple is not a valid value for type Fruits", err.Error())
-	}
-	assert.Equal(t, enum(4), i)
-	err = SetString(&i, "Orange", valueMap, "Fruits")
+	assert.NoError(t, SetString(&i, "Apple", valueMap, "Fruits"), "regardless of case")
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	err := SetString(&i, "Orange", valueMap, "Fruits")
 	if assert.Error(t, err) {
 		assert.Equal(t, "Orange is not a valid value for type Fruits", err.Error())
 	}
@@ -106,7 +104,10 @@ func TestSetString(t *testing.T) {
 	assert.NoError(t, SetStringExtended(&i, &i, "Orange", valueMap))
 	assert.Equal(t, enum(7), i)
 	i = enum(4)
-	err = SetStringExtended(&i, &i, "Apple", valueMap)
+	assert.NoError(t, SetStringExtended(&i, &i, "Apple", valueMap), "regardless of case")
+	assert.Equal(t, enum(5), i)
+	i = enum(4)
+	err = SetStringExtended(&i, &i, "Strawberry", valueMap)
 	if assert.Error(t, err) {
 		assert.Equal(t, "invalid", err.Error())
 	}
@@ -126,6 +127,17 @@ func TestSetString(t *testing.T) {
 		assert.Equal(t, "invalid", err.Error())
 	}
 	assert.Equal(t, enum(4), i)
+}
+
+// TestSetStringAmbiguous tests that a name that matches several values
+// regardless of case, and none exactly, is not valid.
+func TestSetStringAmbiguous(t *testing.T) {
+	valueMap := map[string]enum{"HTML": 1, "Html": 2}
+	i := enum(0)
+	assert.NoError(t, SetString(&i, "Html", valueMap, "Kinds"))
+	assert.Equal(t, enum(2), i, "exact")
+	assert.Error(t, SetString(&i, "html", valueMap, "Kinds"))
+	assert.Equal(t, enum(2), i)
 }
 
 func TestSetStringOr(t *testing.T) {

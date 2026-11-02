@@ -393,7 +393,7 @@ func (tr *Tree) mimeDataSync(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := jsonx.Write(src, &buf)
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJSON, Data: buf.Bytes()})
 	} else {
 		ErrorSnackbar(tr, err, "Error encoding node")
 	}
@@ -407,7 +407,7 @@ func (tr *Tree) syncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string)
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == fileinfo.DataJson {
+		if d.Type == fileinfo.DataJSON {
 			nn, err := tree.UnmarshalRootJSON(d.Data)
 			if err == nil {
 				sl = append(sl, nn)

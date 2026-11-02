@@ -263,7 +263,7 @@ func textEditors(tab *core.Frame) {
 		s.Padding.Set(units.Em(core.ConstantSpacing(1)))
 	})
 	ed.Lines.OpenFS(demoFile, "demo.go")
-	textcore.NewEditor(sp).Lines.SetLanguage(fileinfo.Svg).SetString(core.AppIcon)
+	textcore.NewEditor(sp).Lines.SetLanguage(fileinfo.SVG).SetString(core.AppIcon)
 }
 
 func valueBinding(tab *core.Frame) {
