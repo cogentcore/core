@@ -37,6 +37,10 @@ func TestOpenTypes(t *testing.T) {
 	assert.NotContains(t, ms, "application/msword")
 	assert.Len(t, slices.Compact(slices.Sorted(slices.Values(ms))), len(ms), "no duplicates")
 
+	lower, err := openTypes([]string{"code", "MARKDOWN", "plaintext"})
+	require.NoError(t, err)
+	assert.Equal(t, ms, mimes(lower), "regardless of case")
+
 	_, err = openTypes([]string{"Code", "NotAType"})
 	assert.Error(t, err)
 	none, err := openTypes(nil)
