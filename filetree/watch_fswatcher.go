@@ -17,10 +17,10 @@ import (
 
 // watchDirs starts watching the files directly within the given
 // directories, until ctx is canceled. ready is closed when watching
-// has started. Version control directories are not watched.
+// has started. The changes in version control directories are
+// filtered by [Tree.applyChanges], as it watches git directories.
 func watchDirs(ctx context.Context, dirs []string, ready chan struct{}) (*watchBackend, error) {
 	opts := []fswatcher.WatcherOpt{
-		fswatcher.WithExcRegex(`[/\\]\.git([/\\]|$)`),
 		fswatcher.WithReadyChannel(ready),
 	}
 	for _, d := range dirs {

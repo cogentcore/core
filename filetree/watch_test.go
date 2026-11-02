@@ -5,13 +5,17 @@
 package filetree
 
 import (
+	"image/color"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"sync"
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/vcs"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"github.com/stretchr/testify/assert"
@@ -274,4 +278,67 @@ func TestWatchNoWatch(t *testing.T) {
 	ft = NewTree(b)
 	ft.OpenPathFS(os.DirFS(t.TempDir()), ".")
 	assert.Nil(t, ft.watch.Load(), "no watcher for an fs.FS")
+}
+
+// TestWatchVCSStatus tests that the version control status, and the
+// color, of the files in a git repository are updated when it changes
+// without the files changing: for a commit, which changes a modified
+// file back to stored, and for staging an untracked file, which only
+// change the git directory.
+func TestWatchVCSStatus(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git is not installed")
+	}
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	require.NoError(t, err)
+	git := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", args...)
+		cmd.Dir = root
+		cmd.Env = append(os.Environ(), "GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@example.com",
+			"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@example.com", "GIT_CONFIG_GLOBAL=/dev/null")
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+	wt := &watchTest{t: t, root: root}
+	wt.write("a.go", "package a\n")
+	git("init", "-q", "-b", "main")
+	git("add", "a.go")
+	git("commit", "-q", "-m", "a")
+	wt.write("b.go", "package a\n") // untracked
+
+	wt.b = core.NewBody()
+	wt.ft = NewTree(wt.b)
+	wt.ft.OpenPath(root)
+	t.Cleanup(wt.ft.stopWatcher)
+	runTestWindow(t, wt.b)
+	require.True(t, wt.ft.waitWatchReady(5*time.Second), "watcher did not start")
+	status := func(rel string, want vcs.FileStatus) func() bool {
+		return func() bool {
+			wt.b.AsyncLock()
+			defer wt.b.AsyncUnlock()
+			n := wt.node(rel)
+			return n != nil && n.Info.VCS == want
+		}
+	}
+	color := func(rel string) color.RGBA {
+		wt.b.AsyncLock()
+		defer wt.b.AsyncUnlock()
+		return colors.ToUniform(wt.node(rel).Styles.Color)
+	}
+	wt.waitFor("a.go stored", status("a.go", vcs.Stored))
+	wt.waitFor("b.go untracked", status("b.go", vcs.Untracked))
+	stored := color("a.go")
+	time.Sleep(500 * time.Millisecond) // FSEvents can report the files written above
+
+	wt.write("a.go", "package a\n\nvar x = 1\n")
+	wt.waitFor("a.go modified", status("a.go", vcs.Modified))
+	assert.NotEqual(t, stored, color("a.go"), "the color of modified")
+
+	git("commit", "-q", "-a", "-m", "x") // only the git directory changes
+	wt.waitFor("a.go stored after the commit", status("a.go", vcs.Stored))
+	assert.Equal(t, stored, color("a.go"), "the color of stored")
+
+	git("add", "b.go") // only the index changes
+	wt.waitFor("b.go not untracked after staging", func() bool { return !status("b.go", vcs.Untracked)() })
 }
