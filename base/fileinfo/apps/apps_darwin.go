@@ -18,6 +18,8 @@ import "C"
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"unsafe"
 )
@@ -62,4 +64,47 @@ func setDefault(file string, app App) error {
 		return errors.New("apps: could not make " + app.Name + " the default app for " + file + ": " + msg)
 	}
 	return nil
+}
+
+// appDirs are the directories with the apps, in which their subdirectories,
+// as Utilities, also have apps.
+var appDirs = []string{"/Applications", "/System/Applications", "~/Applications"}
+
+func allApps() ([]App, error) {
+	var as []App
+	seen := map[string]bool{}
+	add := func(path string) {
+		if seen[path] {
+			return
+		}
+		seen[path] = true
+		as = append(as, App{Name: strings.TrimSuffix(filepath.Base(path), ".app"), ID: path})
+	}
+	for _, dir := range appDirs {
+		if rest, ok := strings.CutPrefix(dir, "~/"); ok {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				continue
+			}
+			dir = filepath.Join(home, rest)
+		}
+		ents, _ := os.ReadDir(dir)
+		for _, ent := range ents {
+			path := filepath.Join(dir, ent.Name())
+			if strings.HasSuffix(ent.Name(), ".app") {
+				add(path)
+				continue
+			}
+			if !ent.IsDir() {
+				continue
+			}
+			subs, _ := os.ReadDir(path)
+			for _, sub := range subs {
+				if strings.HasSuffix(sub.Name(), ".app") {
+					add(filepath.Join(path, sub.Name()))
+				}
+			}
+		}
+	}
+	return as, nil
 }

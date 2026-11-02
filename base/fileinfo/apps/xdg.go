@@ -38,6 +38,10 @@ type desktopEntry struct {
 
 	// Hidden is whether the entry is deleted.
 	Hidden bool
+
+	// NoDisplay is whether the app is not shown in the menus of apps,
+	// although it can open the files of its MimeTypes.
+	NoDisplay bool
 }
 
 // envDirs returns the directories in the given XDG environment variables:
@@ -102,6 +106,8 @@ func readDesktopEntry(id, file string) *desktopEntry {
 			}
 		case "Hidden":
 			de.Hidden = strings.TrimSpace(val) == "true"
+		case "NoDisplay":
+			de.NoDisplay = strings.TrimSpace(val) == "true"
 		}
 	}
 	if !isApp || sc.Err() != nil {
@@ -233,6 +239,20 @@ func xdgApps(mime string) []App {
 		if slices.Contains(des[id].MimeTypes, mime) {
 			add(id, false)
 		}
+	}
+	return as
+}
+
+// xdgAllApps returns all of the apps that open files, those of the
+// desktop entries that are shown in the menus of apps and have a
+// command line.
+func xdgAllApps() []App {
+	var as []App
+	for id, de := range desktopEntries() {
+		if de.Hidden || de.NoDisplay || de.Exec == "" {
+			continue
+		}
+		as = append(as, App{Name: de.Name, ID: id})
 	}
 	return as
 }

@@ -38,6 +38,7 @@ func TestXDG(t *testing.T) {
 	writeFile(t, filepath.Join(sysData, "applications", "kde", "viewer.desktop"), entry("Viewer", "viewer --file=%f", "text/plain;"))
 	writeFile(t, filepath.Join(sysData, "applications", "gone.desktop"), entry("Gone", "gone", "text/plain", "Hidden=true"))
 	writeFile(t, filepath.Join(sysData, "applications", "removed.desktop"), entry("Removed", "removed", "text/plain"))
+	writeFile(t, filepath.Join(sysData, "applications", "helper.desktop"), entry("Helper", "helper", "text/plain", "NoDisplay=true"))
 	writeFile(t, filepath.Join(sysData, "applications", "link.desktop"), "[Desktop Entry]\nType=Link\nName=Link\nMimeType=text/plain\n")
 	writeFile(t, filepath.Join(data, "applications", "notes.desktop"), entry("Notes", "notes", "text/markdown"))
 	writeFile(t, filepath.Join(sysData, "applications", "mimeapps.list"),
@@ -51,11 +52,14 @@ func TestXDG(t *testing.T) {
 		return nms
 	}
 	as := xdgApps("text/plain")
-	assert.Equal(t, []string{"Viewer", "Notes", "Editor"}, names(as), "default, added, then by name")
+	assert.Equal(t, []string{"Viewer", "Notes", "Editor", "Helper"}, names(as), "default, added, then by name, with those not in menus")
 	assert.Equal(t, App{Name: "Viewer", ID: "kde-viewer.desktop", Default: true}, as[0])
 	assert.False(t, as[1].Default)
 	assert.Equal(t, []string{"Editor"}, names(xdgApps("text/x-go")))
 	assert.Empty(t, xdgApps("image/png"))
+	all := xdgAllApps()
+	slices.SortFunc(all, func(a, b App) int { return strings.Compare(a.Name, b.Name) })
+	assert.Equal(t, []string{"Editor", "Notes", "Removed", "Viewer"}, names(all), "not Hidden or NoDisplay")
 
 	// setting the default keeps the other contents of the user's file
 	writeFile(t, filepath.Join(config, "mimeapps.list"), "[Added Associations]\nimage/png=editor.desktop;\n\n[Default Applications]\ntext/x-go=editor.desktop;\n")
@@ -119,6 +123,13 @@ func TestFor(t *testing.T) {
 		assert.NotEmpty(t, a.Name)
 		assert.DirExists(t, a.ID, "the app bundle")
 	}
+	all, err := All()
+	require.NoError(t, err)
+	assert.Greater(t, len(all), len(as), "all of the apps")
+	assert.True(t, slices.ContainsFunc(all, func(a App) bool { return a.Name == "Calculator" }), "Calculator, which does not open text files")
+	assert.True(t, slices.IsSortedFunc(all, func(a, b App) int {
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	}))
 	def, ok, err := Default(file)
 	require.NoError(t, err)
 	assert.True(t, ok)
