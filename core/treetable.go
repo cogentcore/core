@@ -47,6 +47,10 @@ type TreeTable struct {
 	// Items is the pointer to the slice of the top-level items.
 	Items any `set:"-"`
 
+	// ShowItem, if set, returns whether to show the given item, a pointer
+	// to a struct, with its children, as for filtering the items.
+	ShowItem func(item any) bool `json:"-" xml:"-"`
+
 	// HideGroupValues is whether the items with children, which are groups
 	// of items, such as categories, show only the tree, and not the values
 	// of their other fields.
@@ -390,6 +394,9 @@ func (tt *TreeTable) updateRows() {
 
 	tt.rows = tt.rows[:0]
 	tt.walkItems(tt.itemsValue(), reflect.Value{}, 0, func(item, parent reflect.Value, depth int) bool {
+		if tt.ShowItem != nil && !tt.ShowItem(item.Interface()) {
+			return false
+		}
 		tt.rows = append(tt.rows, treeTableRow{item: item, parent: parent, depth: depth})
 		return !tt.itemClosed(item)
 	})

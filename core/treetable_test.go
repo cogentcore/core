@@ -835,3 +835,18 @@ func TestTreeTableInsertSorted(t *testing.T) {
 		assert.True(t, cell.Child(cell.NumChildren()-1).(Widget).AsWidget().StateIs(states.Focused), "the focus is on its row")
 	})
 }
+
+// TestTreeTableShowItem tests filtering the items with ShowItem.
+func TestTreeTableShowItem(t *testing.T) {
+	tasks := testTasks()
+	tt := NewTreeTable().SetItems(&tasks)
+	tt.ShowItem = func(item any) bool { return !item.(*task).Done }
+	tt.updateRows()
+	assert.Equal(t, []string{"Work", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt), "without Email, which is done")
+	tasks[0].Done = true
+	tt.updateRows()
+	assert.Equal(t, []string{"Home", "  Dishes"}, rowNames(tt), "without Work, with its children")
+	tt.ShowItem = nil
+	tt.updateRows()
+	assert.Len(t, tt.rows, 6)
+}
