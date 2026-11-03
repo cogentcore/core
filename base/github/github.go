@@ -141,7 +141,9 @@ func (c *Client) Do(method, path string, body, result any) error {
 	case resp.StatusCode == http.StatusNotModified && hasPrev:
 		data = prev.body
 	case resp.StatusCode < 200 || resp.StatusCode >= 300:
-		var msg struct{ Message string }
+		var msg struct {
+			Message string `json:"message"`
+		}
 		json.Unmarshal(data, &msg)
 		return &Error{Status: resp.StatusCode, Message: msg.Message}
 	case method == http.MethodGet && resp.Header.Get("ETag") != "":
@@ -156,6 +158,20 @@ func (c *Client) Do(method, path string, body, result any) error {
 		return nil
 	}
 	return json.Unmarshal(data, result)
+}
+
+// object is an object of a repository in a response of the API, with
+// its SHA. The JSON names of the API are lowercase, and are given in the
+// tags of the fields, which encoding/json v2 needs.
+type object struct {
+	SHA string `json:"sha"`
+}
+
+// signature is the author or committer of a commit in a response of the
+// API, with its time. It is a named type, as goscript cannot decode a
+// time.Time in an anonymous struct type.
+type signature struct {
+	Date time.Time `json:"date"`
 }
 
 // Commit is a commit of a repository.
@@ -183,7 +199,7 @@ type Commit struct {
 // and one without the branch 404.
 func (c *Client) Head(repo, branch string) (string, error) {
 	var ref struct {
-		Object struct{ SHA string }
+		Object object `json:"object"`
 	}
 	if err := c.Do(http.MethodGet, "/repos/"+repo+"/git/ref/heads/"+branch, nil, &ref); err != nil {
 		return "", err
@@ -200,12 +216,12 @@ func (c *Client) Commit(repo, sha string) (*Commit, error) {
 		return nil, errors.New("github: no commit SHA")
 	}
 	var cm struct {
-		SHA     string
-		Message string
-		Tree    struct{ SHA string }
-		Parents []struct{ SHA string }
+		SHA     string   `json:"sha"`
+		Message string   `json:"message"`
+		Tree    object   `json:"tree"`
+		Parents []object `json:"parents"`
 		// the time of the commit, after that of its author for a rebase
-		Committer struct{ Date time.Time }
+		Committer signature `json:"committer"`
 	}
 	if err := c.Do(http.MethodGet, "/repos/"+repo+"/git/commits/"+sha, nil, &cm); err != nil {
 		return nil, err
@@ -221,22 +237,22 @@ func (c *Client) Commit(repo, sha string) (*Commit, error) {
 type TreeEntry struct {
 
 	// Path is the path of the file in the tree, with slashes.
-	Path string
+	Path string `json:"path"`
 
 	// Type is blob for a file, and tree for a directory.
-	Type string
+	Type string `json:"type"`
 
 	// SHA is the SHA of the blob of a file (see [BlobSHA]),
 	// or of the tree of a directory.
-	SHA string
+	SHA string `json:"sha"`
 }
 
 // Files returns the files of the tree with the given SHA of the given
 // repository, with those in its directories, by path.
 func (c *Client) Files(repo, tree string) (map[string]TreeEntry, error) {
 	var tr struct {
-		Tree      []TreeEntry
-		Truncated bool
+		Tree      []TreeEntry `json:"tree"`
+		Truncated bool        `json:"truncated"`
 	}
 	if err := c.Do(http.MethodGet, "/repos/"+repo+"/git/trees/"+tree+"?recursive=1", nil, &tr); err != nil {
 		return nil, err
@@ -256,7 +272,10 @@ func (c *Client) Files(repo, tree string) (map[string]TreeEntry, error) {
 // Blob returns the contents of the blob of a file with the given SHA of
 // the given repository.
 func (c *Client) Blob(repo, sha string) ([]byte, error) {
-	var b struct{ Content, Encoding string }
+	var b struct {
+		Content  string `json:"content"`
+		Encoding string `json:"encoding"`
+	}
 	if err := c.Do(http.MethodGet, "/repos/"+repo+"/git/blobs/"+sha, nil, &b); err != nil {
 		return nil, err
 	}
@@ -270,10 +289,10 @@ func (c *Client) Blob(repo, sha string) ([]byte, error) {
 // as git computes it, for comparing files with those of a tree
 // without getting them.
 func BlobSHA(content []byte) string {
-	h := sha1.New()
-	fmt.Fprintf(h, "blob %d\x00", len(content))
-	h.Write(content)
-	return hex.EncodeToString(h.Sum(nil))
+	// sha1.Sum, not sha1.New, which returns a hash.Hash, which goscript lacks
+	b := append(fmt.Appendf(nil, "blob %d\x00", len(content)), content...)
+	h := sha1.Sum(b)
+	return hex.EncodeToString(h[:])
 }
 
 // CreateTree creates a tree of the given repository, with the files of
@@ -291,7 +310,7 @@ func (c *Client) CreateTree(repo, base string, files map[string][]byte) (string,
 		}
 		entries = append(entries, e)
 	}
-	var res struct{ SHA string }
+	var res object
 	err := c.Do(http.MethodPost, "/repos/"+repo+"/git/trees", map[string]any{"base_tree": base, "tree": entries}, &res)
 	return res.SHA, err
 }
@@ -300,7 +319,7 @@ func (c *Client) CreateTree(repo, base string, files map[string][]byte) (string,
 // message, tree and parents, returning its SHA. It does not update a
 // branch (see [Client.UpdateRef]).
 func (c *Client) CreateCommit(repo, message, tree string, parents ...string) (string, error) {
-	var res struct{ SHA string }
+	var res object
 	err := c.Do(http.MethodPost, "/repos/"+repo+"/git/commits", map[string]any{"message": message, "tree": tree, "parents": parents}, &res)
 	return res.SHA, err
 }
