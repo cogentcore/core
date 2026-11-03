@@ -529,3 +529,22 @@ func TestTreeTableColumnWidths(t *testing.T) {
 		assert.InDelta(t, 130*dots, tt.columnDots(2), 1)
 	})
 }
+
+// TestTreeTableColumnFill tests that the values of the tree cells fill
+// the width of the tree column when it is set wider than they would be.
+func TestTreeTableColumnFill(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.ColumnWidths = map[string]float32{"Name": 600}
+	b.AssertRender(t, "tree-table/column-fill", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		nw, _ := tt.RowWidgetNs()
+		for row := range 4 {
+			cell := AsWidget(tt.ListGrid.Child(row * nw))
+			value := AsWidget(cell.Child(cell.NumChildren() - 1))
+			assert.InDelta(t, cell.Geom.TotalBBox.Max.X, value.Geom.TotalBBox.Max.X, 2, "row %d", row)
+		}
+	})
+}

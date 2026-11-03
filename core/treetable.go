@@ -981,6 +981,7 @@ func (tt *TreeTable) StyleValue(w Widget, s *styles.Style, row, col int) {
 		return
 	}
 	s.Min.X.Em(2)
+	s.Max.X.Zero() // such as the 40ch of a TextField
 	s.Grow.X = 1
 	s.SetTextWrap(false)
 }
