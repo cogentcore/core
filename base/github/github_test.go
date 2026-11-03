@@ -7,6 +7,7 @@ package github_test
 import (
 	"errors"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"cogentcore.org/core/base/github"
@@ -73,4 +74,20 @@ func TestCommitFiles(t *testing.T) {
 
 	_, err = (&github.Client{API: s.URL}).Head(repo, "main")
 	assert.Equal(t, http.StatusUnauthorized, github.StatusOf(err))
+}
+
+// TestEmptySHA tests that a response without a SHA is an error,
+// and that there is no request for an empty SHA.
+func TestEmptySHA(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{}`))
+	}))
+	defer srv.Close()
+	c := &github.Client{API: srv.URL}
+	_, err := c.Head("me/lists", "main")
+	assert.Error(t, err)
+	_, err = c.Commit("me/lists", "")
+	assert.Error(t, err)
+	_, err = c.CommitFiles("me/lists", "main", "", "message", nil)
+	assert.Error(t, err)
 }

@@ -140,7 +140,7 @@ func (c *Client) Do(method, path string, body, result any) error {
 	switch {
 	case resp.StatusCode == http.StatusNotModified && hasPrev:
 		data = prev.body
-	case resp.StatusCode >= 300:
+	case resp.StatusCode < 200 || resp.StatusCode >= 300:
 		var msg struct{ Message string }
 		json.Unmarshal(data, &msg)
 		return &Error{Status: resp.StatusCode, Message: msg.Message}
@@ -188,11 +188,17 @@ func (c *Client) Head(repo, branch string) (string, error) {
 	if err := c.Do(http.MethodGet, "/repos/"+repo+"/git/ref/heads/"+branch, nil, &ref); err != nil {
 		return "", err
 	}
+	if ref.Object.SHA == "" {
+		return "", fmt.Errorf("github: the branch %s of %s has no commit", branch, repo)
+	}
 	return ref.Object.SHA, nil
 }
 
 // Commit returns the commit with the given SHA of the given repository.
 func (c *Client) Commit(repo, sha string) (*Commit, error) {
+	if sha == "" {
+		return nil, errors.New("github: no commit SHA")
+	}
 	var cm struct {
 		SHA     string
 		Message string
