@@ -39,6 +39,10 @@ import (
 // dragSpriteName is the name of the sprite added when dragging an object.
 const dragSpriteName = "__DragSprite__"
 
+// dragCopySpriteName is the name of the sprite of the green plus on the
+// drag sprite, which shows that the drop would copy.
+const dragCopySpriteName = "__DragCopySprite__"
+
 // note: Events should be in exclusive control of its own state
 // and IF we end up needing a mutex, it should be global on main
 // entry points (HandleEvent, anything else?)
@@ -169,6 +173,10 @@ type Events struct {
 
 	// dragCopy is whether the drag sprite shows that the drop would copy.
 	dragCopy bool
+
+	// dragCopyOffset is the offset of the sprite of the green plus from
+	// the drag sprite.
+	dragCopyOffset image.Point
 }
 
 // dragMover is implemented by widgets with an option for whether dragging
@@ -214,6 +222,9 @@ func (em *Events) handleEvent(e events.Event) {
 	if de, ok := e.(*events.DragDrop); ok {
 		em.handleExternalDrag(de)
 		return
+	}
+	if !tree.IsNil(em.drag) && e.NeedsFocus() { // the modifier keys of the drop
+		em.updateDragSprite(dragKeyMods(e))
 	}
 	switch {
 	case e.HasPos():
@@ -884,32 +895,46 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	em.dragMoves = dragMovesFrom(w)
 	em.dragCopy = events.DropModFor(e.Modifiers(), em.dragMoves) == events.DropCopy
 	// TODO: maybe show the number of items being dragged
-	img := clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
-	em.dragImage = img
-	sp := NewImageSprite(dragSpriteName, e.WindowPos(), em.dragSpriteImage())
-	sp.Active = true
-	ms.Sprites.Add(sp)
+	em.dragImage = clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
+	em.addDragSprites(e.WindowPos())
 }
 
-// dragSpriteImage returns the image of the drag sprite: the drag image,
-// with a green plus at its start if the drop would copy, which stays in
-// the window for wide images. It is at the bottom left, below the mouse
-// pointer at the top left, if the image is tall enough.
-func (em *Events) dragSpriteImage() *image.RGBA {
-	if !em.dragCopy || em.dragImage == nil {
-		return em.dragImage
+// addDragSprites adds the drag sprite, with the drag image, at the given
+// position, and the sprite on it of the green plus, which shows that the
+// drop would copy, at its start, which stays in the window for wide images.
+// It is at the bottom left, below the mouse pointer at the top left, if
+// the image is tall enough.
+func (em *Events) addDragSprites(pos image.Point) {
+	ms := em.scene.Stage.Main
+	if ms == nil || em.dragImage == nil {
+		return
 	}
-	img := clone.AsRGBA(em.dragImage)
-	sz := img.Bounds().Size()
+	sp := NewImageSprite(dragSpriteName, pos, em.dragImage)
+	sp.Active = true
+	ms.Sprites.Add(sp)
+
+	sz := em.dragImage.Bounds().Size()
 	rv := units.Dp(8)
 	r := min(int(math32.Ceil(rv.ToDots(&em.scene.Styles.UnitContext))), sz.X/2, sz.Y/2)
 	if r < 3 {
-		return img
+		ms.Sprites.Delete(dragCopySpriteName)
+		return
 	}
-	c := image.Pt(img.Bounds().Min.X+r+1, img.Bounds().Max.Y-r-1)
+	c := image.Pt(r+1, sz.Y-r-1)
 	if pointer := 9 * r / 4; c.Y-r < pointer { // too short to be below the pointer, about 18dp
-		c.Y = img.Bounds().Min.Y + r + 1
+		c.Y = r + 1
 	}
+	em.dragCopyOffset = c.Sub(image.Pt(r+1, r+1))
+	cp := NewImageSprite(dragCopySpriteName, pos.Add(em.dragCopyOffset), dragCopyImage(r))
+	cp.Active = em.dragCopy
+	ms.Sprites.Add(cp)
+}
+
+// dragCopyImage returns the image of the green plus that shows that a drop
+// would copy, with the given radius.
+func dragCopyImage(r int) *image.RGBA {
+	img := image.NewRGBA(image.Rect(0, 0, 2*r+3, 2*r+3))
+	c := image.Pt(r+1, r+1)
 	arm := r * 3 / 5
 	w := max(1, r/4)
 	abs := func(v int) int { return max(v, -v) }
@@ -931,8 +956,8 @@ func (em *Events) dragSpriteImage() *image.RGBA {
 	return img
 }
 
-// updateDragSprite updates the image of the drag sprite for whether the
-// drop would copy, with the given modifier keys.
+// updateDragSprite shows or hides the green plus on the drag sprite for
+// whether the drop would copy, with the given modifier keys.
 func (em *Events) updateDragSprite(mods key.Modifiers) {
 	cp := events.DropModFor(mods, em.dragMoves) == events.DropCopy
 	if cp == em.dragCopy {
@@ -943,13 +968,36 @@ func (em *Events) updateDragSprite(mods key.Modifiers) {
 	if ms == nil {
 		return
 	}
-	sp, ok := ms.Sprites.SpriteByName(dragSpriteName)
-	if !ok {
-		return
+	if sp, ok := ms.Sprites.SpriteByName(dragCopySpriteName); ok {
+		sp.Active = cp
+		ms.Sprites.SetModified()
+		em.scene.NeedsRender()
 	}
-	nsp := NewImageSprite(dragSpriteName, sp.EventBBox.Min, em.dragSpriteImage())
-	nsp.Active = true
-	ms.Sprites.Add(nsp)
+}
+
+// dragKeyMods returns the modifier keys after the given key event during a
+// drag, as the press or release of a modifier key may not have it yet.
+func dragKeyMods(e events.Event) key.Modifiers {
+	mods := e.Modifiers()
+	ke, ok := e.(*events.Key)
+	if !ok {
+		return mods
+	}
+	var m key.Modifiers
+	switch ke.Code {
+	case key.CodeLeftShift, key.CodeRightShift:
+		m = key.Shift
+	case key.CodeLeftControl, key.CodeRightControl:
+		m = key.Control
+	case key.CodeLeftAlt, key.CodeRightAlt:
+		m = key.Alt
+	case key.CodeLeftMeta, key.CodeRightMeta:
+		m = key.Meta
+	default:
+		return mods
+	}
+	mods.SetFlag(e.Type() == events.KeyDown, m)
+	return mods
 }
 
 // dragMove is generally handled entirely by the event manager
@@ -964,11 +1012,10 @@ func (em *Events) dragMove(e events.Event) {
 		return
 	}
 	em.updateDragSprite(e.Modifiers())
-	sp, ok = ms.Sprites.SpriteByName(dragSpriteName)
-	if !ok || sp == nil {
-		return
-	}
 	sp.SetPos(e.WindowPos())
+	if cp, ok := ms.Sprites.SpriteByName(dragCopySpriteName); ok {
+		cp.SetPos(e.WindowPos().Add(em.dragCopyOffset))
+	}
 	for _, w := range em.dragHovers {
 		w.AsWidget().ScrollToThis()
 	}
@@ -981,6 +1028,7 @@ func (em *Events) dragClearSprite() {
 		return
 	}
 	ms.Sprites.Delete(dragSpriteName)
+	ms.Sprites.Delete(dragCopySpriteName)
 }
 
 // DragMenuAddModText adds info about key modifiers for a drag drop menu.

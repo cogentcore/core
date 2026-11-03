@@ -732,3 +732,61 @@ func TestTreeTableHideGroupValues(t *testing.T) {
 		tt.Update()
 	})
 }
+
+// TestDragCopySprite tests that the sprite of the green plus on a drag
+// shows whether the drop would copy, as the shift key is pressed and
+// released during the drag, without moving the mouse.
+func TestDragCopySprite(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.DragMoves = true
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/drag-copy-sprite", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		nw, _ := tt.RowWidgetNs()
+		b.AsyncLock()
+		bb := tt.ListGrid.Child(1 * nw).(Widget).AsWidget().Geom.TotalBBox
+		b.AsyncUnlock()
+		from := image.Pt(bb.Min.X+4, (bb.Min.Y+bb.Max.Y)/2)
+		src.MouseButton(events.MouseDown, events.Left, from, 0)
+		time.Sleep(2 * TimingSettings.DragStartTime)
+		for i := 1; i <= 5; i++ {
+			src.MouseMove(from.Add(image.Pt(0, 10*i)))
+			time.Sleep(20 * time.Millisecond)
+		}
+		copySprite := func() (active bool, pos image.Point) {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			ms := b.Scene.Stage.Main
+			sp, ok := ms.Sprites.SpriteByName(dragCopySpriteName)
+			require.True(t, ok)
+			ds, _ := ms.Sprites.SpriteByName(dragSpriteName)
+			return sp.Active, sp.EventBBox.Min.Sub(ds.EventBBox.Min)
+		}
+		active, off := copySprite()
+		assert.False(t, active, "a move, without the plus")
+		var shift key.Modifiers
+		shift.SetFlag(true, key.Shift)
+		src.Key(events.KeyDown, 0, key.CodeLeftShift, 0)
+		time.Sleep(100 * time.Millisecond)
+		active, _ = copySprite()
+		assert.True(t, active, "a copy with shift, with the plus")
+		src.Key(events.KeyUp, 0, key.CodeLeftShift, shift)
+		time.Sleep(100 * time.Millisecond)
+		active, _ = copySprite()
+		assert.False(t, active, "a move again")
+		assert.Equal(t, 0, off.X, "at the start of the drag image")
+		src.MouseButton(events.MouseUp, events.Left, from.Add(image.Pt(0, 50)), 0)
+		time.Sleep(100 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		for range 50 { // the drop menu
+			if st := b.Scene.Stage.popups.top(); st != nil {
+				st.ClosePopup()
+				break
+			}
+		}
+	})
+}
