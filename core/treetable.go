@@ -1064,7 +1064,9 @@ func (tt *TreeTable) RowGrabFocus(row int) *WidgetBase {
 }
 
 // keyInput handles the keys for the tree: opening and closing items
-// when read-only, and inserting and duplicating items as siblings.
+// when read-only, and inserting, duplicating, and deleting items. The
+// keys of a text field, such as [keymap.Delete], come here after its
+// edits are accepted with [keymap.Accept].
 func (tt *TreeTable) keyInput(e events.Event) {
 	if !tt.IsReadOnly() {
 		tt.selectFocusedRow()
@@ -1091,6 +1093,9 @@ func (tt *TreeTable) keyInput(e events.Event) {
 		return
 	}
 	switch kf {
+	case keymap.Delete: // after the edits of a text field are accepted
+		tt.deleteSelected()
+		tt.IndexGrabFocus(tt.SelectedIndex) // if the focus was in the last row
 	case keymap.Insert:
 		tt.InsertBefore(idx)
 	case keymap.InsertAfter:
@@ -1127,7 +1132,7 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Add child").SetIcon(icons.SubdirectoryArrowRight).OnClick(func(e events.Event) {
 			tt.AddChild(idx)
 		})
-		NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+		NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).OnClick(func(e events.Event) {
 			tt.deleteSelected()
 		})
 		NewSeparator(m)

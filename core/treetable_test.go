@@ -398,3 +398,53 @@ func TestTreeTableContextMenu(t *testing.T) {
 		}
 	})
 }
+
+// TestTreeTableAcceptDelete tests that the delete key deletes a character
+// in a text field, and the item after its edits are accepted.
+func TestTreeTableAcceptDelete(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/accept-delete", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		press := func(kf keymap.Functions) { // with the chord of the active key map
+			for ch, f := range *keymap.ActiveMap {
+				if f != kf {
+					continue
+				}
+				r, code, mods, err := ch.Decode()
+				require.NoError(t, err)
+				src.Key(events.KeyDown, r, code, mods)
+				src.Key(events.KeyUp, r, code, mods)
+				time.Sleep(200 * time.Millisecond)
+				return
+			}
+			t.Fatal("no chord for", kf)
+		}
+		nw, _ := tt.RowWidgetNs()
+		b.AsyncLock()
+		cell := tt.ListGrid.Child(1 * nw).AsTree()
+		tf := cell.Child(cell.NumChildren() - 1).(*TextField) // Email
+		bb := tf.Geom.TotalBBox
+		b.AsyncUnlock()
+		pt := image.Pt(bb.Min.X+8, (bb.Min.Y+bb.Max.Y)/2) // before the text
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+
+		press(keymap.Delete)
+		b.AsyncLock()
+		assert.Equal(t, "mail", tf.Text(), "a character is deleted while editing")
+		b.AsyncUnlock()
+		press(keymap.Accept)
+		b.AsyncLock()
+		assert.Equal(t, "mail", tasks[0].Children[0].Name, "the edit is accepted")
+		b.AsyncUnlock()
+		press(keymap.Delete)
+		b.AsyncLock()
+		assert.Equal(t, []string{"Work", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt), "the item is deleted")
+		b.AsyncUnlock()
+	})
+}
