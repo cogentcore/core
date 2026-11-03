@@ -718,7 +718,8 @@ func TestTreeTableHideGroupValues(t *testing.T) {
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
 		hidden := func(row, col int) bool {
-			return AsWidget(tt.ListGrid.Child(row*nw+col)).Styles.Opacity == 0
+			_, ok := tt.ListGrid.Child(row*nw + col).(*Frame) // empty, instead of the value
+			return ok && col > 0
 		}
 		assert.True(t, hidden(0, 1), "Work, a group")
 		assert.True(t, hidden(0, 2))

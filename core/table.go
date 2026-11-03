@@ -7,7 +7,6 @@ package core
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -16,7 +15,6 @@ import (
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -402,7 +400,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 }
 
 // valueHider is implemented by tables such as [TreeTable] that do not show
-// some of their values, which are transparent, keeping their space.
+// some of their values, which have empty frames in their place.
 type valueHider interface {
 	// hideValue returns whether to hide the value of the given visible
 	// field at the given slice index.
@@ -433,22 +431,24 @@ func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
 	}
 	readOnlyTag := tags.Get("edit") == "-"
 
+	if vh, ok := tb.This.(valueHider); ok {
+		if si, _, invis := svi.SliceIndex(i); !invis && vh.hideValue(si, fli) {
+			// an empty frame in its cell, with its name, so that the value
+			// is made again for another item in the row
+			tree.AddAt(p, "hidden-"+valnm, func(w *Frame) {
+				w.SetProperty(ListRowProperty, i)
+				w.SetProperty(ListColProperty, fli)
+			})
+			return
+		}
+	}
+
 	tree.AddNew(p, valnm, func() Value {
 		return NewFieldValue(field.Name, valPtr, uvp.Interface(), tags)
 	}, func(w Value) {
 		wb := w.AsWidget()
 		tb.MakeValue(w, i)
 		w.AsTree().SetProperty(ListColProperty, fli)
-		if vh, ok := tb.This.(valueHider); ok {
-			wb.FinalStyler(func(s *styles.Style) {
-				// hidden values keep their space, for the columns
-				if si, _, invis := svi.SliceIndex(i); !invis && vh.hideValue(si, fli) {
-					s.Opacity = 0
-					s.Color = colors.Uniform(color.Transparent) // for text
-					s.Abilities = 0
-				}
-			})
-		}
 		if !tb.IsReadOnly() && !readOnlyTag {
 			wb.OnChange(func(e events.Event) {
 				tb.This.(Lister).UpdateMaxWidths()
