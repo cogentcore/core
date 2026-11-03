@@ -68,7 +68,7 @@ func (em *Events) SetDragImage(img image.Image) {
 	if !ok {
 		return
 	}
-	nsp := NewImageSprite(dragSpriteName, sp.EventBBox.Min, em.dragImage)
+	nsp := NewImageSprite(dragSpriteName, sp.EventBBox.Min, em.dragSpriteImage())
 	nsp.Active = true
 	ms.Sprites.Add(nsp)
 }

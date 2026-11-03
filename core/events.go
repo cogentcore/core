@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"log"
 	"log/slog"
 	"os"
@@ -161,6 +162,31 @@ type Events struct {
 	// dragOS is set when the current drag has been handed off to the
 	// operating system after leaving the window (see [Events.dragToOS]).
 	dragOS bool
+
+	// dragMoves is whether the last drag moves by default, instead of
+	// copying, as set by its source (see [dragMover]).
+	dragMoves bool
+
+	// dragCopy is whether the drag sprite shows that the drop would copy.
+	dragCopy bool
+}
+
+// dragMover is implemented by widgets with an option for whether dragging
+// their items moves them by default, instead of copying them, in which
+// case the modifier keys that otherwise move them copy them.
+type dragMover interface {
+	dragMovesDefault() bool
+}
+
+// dragMovesFrom returns whether a drag from the given widget moves by
+// default, as set by it or the first widget above it that is a [dragMover].
+func dragMovesFrom(w Widget) bool {
+	for n := tree.Node(w); n != nil; n = n.AsTree().Parent {
+		if dm, ok := n.(dragMover); ok {
+			return dm.dragMovesDefault()
+		}
+	}
+	return false
 }
 
 // mains returns the stack of main stages for our scene.
@@ -853,12 +879,70 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 		em.dragFiles = fd.DragFiles()
 	}
 	em.dragOS = false
+	em.dragMoves = dragMovesFrom(w)
+	em.dragCopy = events.DropModFor(e.Modifiers(), em.dragMoves) == events.DropCopy
 	// TODO: maybe show the number of items being dragged
 	img := clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
 	em.dragImage = img
-	sp := NewImageSprite(dragSpriteName, e.WindowPos(), img)
+	sp := NewImageSprite(dragSpriteName, e.WindowPos(), em.dragSpriteImage())
 	sp.Active = true
 	ms.Sprites.Add(sp)
+}
+
+// dragSpriteImage returns the image of the drag sprite: the drag image,
+// with a green plus at its top right corner if the drop would copy.
+func (em *Events) dragSpriteImage() *image.RGBA {
+	if !em.dragCopy || em.dragImage == nil {
+		return em.dragImage
+	}
+	img := clone.AsRGBA(em.dragImage)
+	sz := img.Bounds().Size()
+	rv := units.Dp(8)
+	r := min(int(math32.Ceil(rv.ToDots(&em.scene.Styles.UnitContext))), sz.X/2, sz.Y/2)
+	if r < 3 {
+		return img
+	}
+	c := image.Pt(img.Bounds().Max.X-r-1, img.Bounds().Min.Y+r+1)
+	arm := r * 3 / 5
+	w := max(1, r/4)
+	abs := func(v int) int { return max(v, -v) }
+	green := color.RGBA{30, 142, 62, 255}
+	for y := c.Y - r; y <= c.Y+r; y++ {
+		for x := c.X - r; x <= c.X+r; x++ {
+			dx, dy := x-c.X, y-c.Y
+			if dx*dx+dy*dy > r*r {
+				continue
+			}
+			plus := (abs(dx) <= arm && abs(dy) < w) || (abs(dy) <= arm && abs(dx) < w)
+			if plus {
+				img.Set(x, y, color.White)
+			} else {
+				img.Set(x, y, green)
+			}
+		}
+	}
+	return img
+}
+
+// updateDragSprite updates the image of the drag sprite for whether the
+// drop would copy, with the given modifier keys.
+func (em *Events) updateDragSprite(mods key.Modifiers) {
+	cp := events.DropModFor(mods, em.dragMoves) == events.DropCopy
+	if cp == em.dragCopy {
+		return
+	}
+	em.dragCopy = cp
+	ms := em.scene.Stage.Main
+	if ms == nil {
+		return
+	}
+	sp, ok := ms.Sprites.SpriteByName(dragSpriteName)
+	if !ok {
+		return
+	}
+	nsp := NewImageSprite(dragSpriteName, sp.EventBBox.Min, em.dragSpriteImage())
+	nsp.Active = true
+	ms.Sprites.Add(nsp)
 }
 
 // dragMove is generally handled entirely by the event manager
@@ -870,6 +954,11 @@ func (em *Events) dragMove(e events.Event) {
 	sp, ok := ms.Sprites.SpriteByName(dragSpriteName)
 	if !ok || sp == nil {
 		fmt.Println("Drag sprite not found")
+		return
+	}
+	em.updateDragSprite(e.Modifiers())
+	sp, ok = ms.Sprites.SpriteByName(dragSpriteName)
+	if !ok || sp == nil {
 		return
 	}
 	sp.SetPos(e.WindowPos())
@@ -890,10 +979,14 @@ func (em *Events) dragClearSprite() {
 // DragMenuAddModText adds info about key modifiers for a drag drop menu.
 func (em *Events) DragMenuAddModText(m *Scene, mod events.DropMods) {
 	text := ""
-	switch mod {
-	case events.DropCopy:
+	switch {
+	case mod == events.DropCopy && em.dragMoves:
+		text = "Copy:"
+	case mod == events.DropCopy:
 		text = "Copy (use Shift to move):"
-	case events.DropMove:
+	case mod == events.DropMove && em.dragMoves:
+		text = "Move (use Shift to copy):"
+	case mod == events.DropMove:
 		text = "Move:"
 	}
 	NewText(m).SetType(TextLabelLarge).SetText(text).Styler(func(s *styles.Style) {
@@ -925,6 +1018,7 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	}
 	targ := em.dragHovers[len(em.dragHovers)-1]
 	de := events.NewDragDrop(events.Drop, e.(*events.Mouse)) // gets the actual mod at this point
+	de.DropMod = events.DropModFor(de.Mods, em.dragMoves)
 	de.Data = data
 	de.Source = drag
 	de.Target = targ

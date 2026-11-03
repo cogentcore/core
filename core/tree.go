@@ -146,6 +146,11 @@ type Tree struct {
 	// SelectMode, when set on the root node, determines whether keyboard movements should update selection.
 	SelectMode bool
 
+	// DragMoves, when set on the root node, is whether dragging nodes moves
+	// them by default, instead of copying them, in which case the modifier
+	// keys that otherwise move them (Shift) copy them.
+	DragMoves bool
+
 	// Computed fields:
 
 	// linear index of this node within the entire tree.
@@ -177,6 +182,10 @@ type Tree struct {
 
 	// Branch is the branch widget that is used to open and close the tree node.
 	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-" display:"-"`
+}
+
+func (tr *Tree) dragMovesDefault() bool {
+	return tr.Root != nil && tr.Root.AsCoreTree().DragMoves
 }
 
 // AsCoreTree satisfies the [Treer] interface.

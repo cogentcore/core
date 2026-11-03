@@ -40,6 +40,8 @@ tasks := []*task{
 core.NewTreeTable(b).SetItems(&tasks).SetReadOnly(true)
 ```
 
+Dragging items copies them by default, and moves them with Shift. You can set `DragMoves` to move them by default, and copy them with Shift, as for a [[table]] and a [[tree]]. The image of the dragged items shows a green plus when they would be copied.
+
 ## Events
 
 You can detect when a user [[events#change]]s the items of a tree table:

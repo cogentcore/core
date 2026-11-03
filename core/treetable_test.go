@@ -114,7 +114,7 @@ func TestTreeTableEdit(t *testing.T) {
 	assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt))
 	assert.Len(t, tasks, 2)
 
-	tt.Duplicate() // nothing selected
+	tt.Duplicate()    // nothing selected
 	tt.SelectIndex(2) // Report
 	tt.Duplicate()
 	assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt))
@@ -445,6 +445,73 @@ func TestTreeTableAcceptDelete(t *testing.T) {
 		press(keymap.Delete)
 		b.AsyncLock()
 		assert.Equal(t, []string{"Work", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt), "the item is deleted")
+		b.AsyncUnlock()
+	})
+}
+
+// TestTreeTableDragMoves tests that dragging from a tree table with
+// DragMoves moves without modifier keys and copies with Shift, and that
+// the drag image shows whether the drop would copy.
+func TestTreeTableDragMoves(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.DragMoves = true
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/drag-moves", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		nw, _ := tt.RowWidgetNs()
+		drag := func(from, to int, mods key.Modifiers) (dragCopy bool) {
+			b.AsyncLock()
+			fbb := tt.ListGrid.Child(from * nw).(Widget).AsWidget().Geom.TotalBBox
+			tbb := tt.ListGrid.Child(to * nw).(Widget).AsWidget().Geom.TotalBBox
+			b.AsyncUnlock()
+			fp := image.Pt(fbb.Min.X+4, (fbb.Min.Y+fbb.Max.Y)/2)
+			tp := tbb.Min.Add(tbb.Size().Div(2))
+			src.MouseButton(events.MouseDown, events.Left, fp, mods)
+			for i := 1; i <= 10; i++ {
+				src.MouseMove(fp.Add(tp.Sub(fp).Mul(i).Div(10)))
+				time.Sleep(20 * time.Millisecond)
+			}
+			b.AsyncLock()
+			dragCopy = b.Scene.Events.dragCopy
+			b.AsyncUnlock()
+			src.MouseButton(events.MouseUp, events.Left, tp, mods)
+			var menu *Stage
+			for range 100 {
+				b.AsyncLock()
+				menu = b.Scene.Stage.popups.top()
+				b.AsyncUnlock()
+				if menu != nil {
+					break
+				}
+				time.Sleep(20 * time.Millisecond)
+			}
+			require.NotNil(t, menu, "the drop menu")
+			b.AsyncLock()
+			var child *Button
+			menu.Scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+				if bt, ok := cw.(*Button); ok && bt.Text == "Insert as child" {
+					child = bt
+				}
+				return child == nil
+			})
+			require.NotNil(t, child)
+			child.Send(events.Click)
+			b.AsyncUnlock()
+			time.Sleep(100 * time.Millisecond)
+			return
+		}
+		assert.False(t, drag(1, 5, 0), "no plus for a move") // Email into Dishes
+		b.AsyncLock()
+		assert.Equal(t, []string{"Work", "  Report", "    Outline", "Home", "  Dishes", "    Email"}, rowNames(tt), "moved")
+		b.AsyncUnlock()
+		var shift key.Modifiers
+		shift.SetFlag(true, key.Shift)
+		assert.True(t, drag(4, 1, shift), "a plus for a copy") // Dishes into Report
+		b.AsyncLock()
+		assert.Equal(t, []string{"Work", "  Report", "    Outline", "    Dishes", "      Email", "Home", "  Dishes", "    Email"}, rowNames(tt), "copied")
 		b.AsyncUnlock()
 	})
 }

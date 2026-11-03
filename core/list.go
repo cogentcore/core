@@ -224,6 +224,11 @@ type ListBase struct { //core:no-new
 	// SelectMode is whether to be in select rows mode or editing mode.
 	SelectMode bool `set:"-" copier:"-" json:"-" xml:"-"`
 
+	// DragMoves is whether dragging rows moves them by default, instead of
+	// copying them, in which case the modifier keys that otherwise move
+	// them (Shift) copy them.
+	DragMoves bool
+
 	// ReadOnlyMultiSelect: if list is ReadOnly, default selection mode is to
 	// choose one row only. If this is true, standard multiple selection logic
 	// with modifier keys is instead supported.
@@ -391,6 +396,8 @@ func (lb *ListBase) StyleValue(w Widget, s *styles.Style, row, col int) {
 	}
 	s.SetTextWrap(false)
 }
+
+func (lb *ListBase) dragMovesDefault() bool { return lb.DragMoves }
 
 func (lb *ListBase) AsListBase() *ListBase {
 	return lb
