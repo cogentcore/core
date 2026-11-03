@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -787,6 +788,27 @@ func TestDragCopySprite(t *testing.T) {
 				st.ClosePopup()
 				break
 			}
+		}
+	})
+}
+
+// TestTreeTableColumnLongText tests that the text fields of the tree cells
+// fit in the set width of the tree column, so that they scroll their text,
+// for text longer than that.
+func TestTreeTableColumnLongText(t *testing.T) {
+	long := strings.Repeat("long text ", 20)
+	tasks := []*task{{Name: long, Children: []*task{{Name: long}}}}
+	b := NewBody()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.ColumnWidths = map[string]float32{"Name": 200}
+	b.AssertRender(t, "tree-table/column-long-text", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		nw, _ := tt.RowWidgetNs()
+		for row := range 2 {
+			cell := AsWidget(tt.ListGrid.Child(row * nw))
+			value := AsWidget(cell.Child(cell.NumChildren() - 1))
+			assert.InDelta(t, cell.Geom.TotalBBox.Max.X, value.Geom.TotalBBox.Max.X, 2, "row %d", row)
 		}
 	})
 }

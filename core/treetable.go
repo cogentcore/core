@@ -974,7 +974,8 @@ func (tt *TreeTable) MakeRow(p *tree.Plan, i int) {
 // makeTreeCell adds the tree cell for the given widget row index to the
 // given plan: the indented branch and the value of the first field.
 func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
-	tree.AddAt(p, "tree-"+strconv.Itoa(i), func(w *Frame) {
+	tree.AddAt(p, "tree-"+strconv.Itoa(i), func(w *treeTableCell) {
+		w.tt = tt
 		w.SetProperty(ListRowProperty, i)
 		w.SetProperty(ListColProperty, 0)
 		w.Styler(func(s *styles.Style) {
@@ -1020,6 +1021,47 @@ func (tt *TreeTable) StyleValue(w Widget, s *styles.Style, row, col int) {
 	s.Max.X.Zero() // such as the 40ch of a TextField
 	s.Grow.X = 1
 	s.SetTextWrap(false)
+}
+
+// treeTableCell is the tree cell of a [TreeTable], with the indented branch
+// and the value of the first field, which fits in the width of the cell when
+// the width of the column is set, so that a text field scrolls its text,
+// instead of having the width of all of it.
+type treeTableCell struct {
+	Frame
+
+	// tt is the tree table of the cell.
+	tt *TreeTable
+}
+
+func (tc *treeTableCell) SizeDown(iter int) bool {
+	if tc.fitValue() {
+		tc.sizeFromChildrenFit(iter, SizeDownPass) // the layout of the new size
+	}
+	return tc.Frame.SizeDown(iter)
+}
+
+func (tc *treeTableCell) SizeFinal() {
+	tc.fitValue() // for the final width of the cell
+	tc.Frame.SizeFinal()
+}
+
+// fitValue fits the value in the width of the cell after the branch,
+// if the width of the column is set, returning whether it is.
+func (tc *treeTableCell) fitValue() bool {
+	if tc.tt == nil || tc.tt.columnWidth(0) == 0 || tc.NumChildren() < 2 {
+		return false
+	}
+	other := float32(0)
+	for _, c := range tc.Children[:tc.NumChildren()-1] {
+		other += AsWidget(c).Geom.Size.Actual.Total.X + tc.Styles.Gap.X.Dots
+	}
+	vs := &AsWidget(tc.Child(tc.NumChildren() - 1)).Geom.Size
+	width := max(tc.Geom.Size.Alloc.Content.X-other, 0)
+	space := vs.Actual.Total.X - vs.Actual.Content.X
+	vs.Actual.Total.X, vs.Actual.Content.X = width, max(width-space, 0)
+	vs.Max.X = vs.Actual.Content.X // as a TextField sizes itself to its text, up to its max
+	return true
 }
 
 // makeBranch adds the branch for the given widget row index to the given
