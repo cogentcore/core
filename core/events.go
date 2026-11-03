@@ -1499,7 +1499,13 @@ func (em *Events) triggerShortcut(chord key.Chord, e events.Event) bool {
 		fmt.Printf("Shortcut chord: %v, button: %v triggered\n", chord, sa.Text)
 	}
 	e.SetHandled()
+	prev := em.focus
 	sa.Send(events.Click)
+	if em.focus == sa.This && !tree.IsNil(prev) {
+		// the click focused the button, but the shortcut is not
+		// for moving the focus to it, as clicking it is
+		em.setFocusQuiet(prev)
+	}
 	return true
 }
 

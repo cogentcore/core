@@ -8,11 +8,14 @@ import (
 	"image"
 	"strings"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 )
@@ -114,4 +117,29 @@ func TestButtonFontSize(t *testing.T) {
 		s.Font.Size.Dp(48)
 	})
 	b.AssertRender(t, "button/font-size")
+}
+
+// TestButtonShortcutFocus tests that triggering a button with its shortcut
+// does not move the focus to it, as clicking it does.
+func TestButtonShortcutFocus(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b)
+	clicked := 0
+	bt := NewButton(b).SetText("Action").SetShortcut(key.Chord("Command+Shift+L").PlatformChord())
+	bt.OnClick(func(e events.Event) { clicked++ })
+	b.AssertRender(t, "button/shortcut-focus", func() {
+		b.AsyncLock()
+		tf.SetFocus()
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		r, code, mods, err := bt.Shortcut.Decode()
+		assert.NoError(t, err)
+		src.Key(events.KeyDown, r, code, mods)
+		src.Key(events.KeyUp, r, code, mods)
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, 1, clicked)
+		assert.True(t, tf.StateIs(states.Focused) || b.Scene.Events.focus == tf.This, "the text field keeps the focus")
+	})
 }
