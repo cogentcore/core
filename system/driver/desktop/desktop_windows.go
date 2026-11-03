@@ -50,13 +50,21 @@ var TheClipboard = &Clipboard{}
 // Clipboard is the [system.Clipboard] implementation for Windows
 type Clipboard struct{}
 
+// The clipboard is used on the main thread, as glfw requires.
+
 func (cl *Clipboard) IsEmpty() bool {
-	str := glfw.GetClipboardString()
+	var str string
+	TheApp.RunOnMain(func() {
+		str = glfw.GetClipboardString()
+	})
 	return len(str) == 0
 }
 
 func (cl *Clipboard) Read(types []string) mimedata.Mimes {
-	str := glfw.GetClipboardString()
+	var str string
+	TheApp.RunOnMain(func() {
+		str = glfw.GetClipboardString()
+	})
 	if len(str) == 0 {
 		return nil
 	}
@@ -84,16 +92,17 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
-	// w := theApp.ctxtwin
+	var str string
 	if len(data) > 1 { // multipart
-		mpd := data.ToMultipart()
-		glfw.SetClipboardString(string(mpd))
+		str = string(data.ToMultipart())
+	} else if d := data[0]; mimedata.IsText(d.Type) {
+		str = string(d.Data)
 	} else {
-		d := data[0]
-		if mimedata.IsText(d.Type) {
-			glfw.SetClipboardString(string(d.Data))
-		}
+		return nil
 	}
+	TheApp.RunOnMain(func() {
+		glfw.SetClipboardString(str)
+	})
 	return nil
 }
 

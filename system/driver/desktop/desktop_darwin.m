@@ -117,50 +117,59 @@ void pasteWriteAddText(char* data, int len) {
 	[ns_clip release]; // pastewrite owns
 }	
 
-void pasteWrite(NSPasteboard* pb) {
+bool pasteWrite(NSPasteboard* pb) {
     if(pasteWriteItems == NULL) {
-        return;
+        return true;
     }
-    [pb writeObjects: pasteWriteItems];
+    BOOL ok = [pb writeObjects: pasteWriteItems];
 	[pasteWriteItems release];
     pasteWriteItems = NULL;
+    return ok;
 }	
 
 // clip just calls paste versions with generalPasteboard
 
 bool clipIsEmpty() {
-    NSPasteboard *pb = [NSPasteboard generalPasteboard];
-    if(pb == NULL) {
-        return true;
+    @autoreleasepool {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+        if(pb == NULL) {
+            return true;
+        }
+        return pasteIsEmpty(pb);
     }
-    return pasteIsEmpty(pb);
 }
 
 void clipReadText() {
-    NSPasteboard *pb = [NSPasteboard generalPasteboard];
-    if(pb == NULL) {
-        return;
+    @autoreleasepool {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+        if(pb == NULL) {
+            return;
+        }
+        pasteReadText(pb);
     }
-    pasteReadText(pb);
 }
 
-void clipWrite() {
-    NSPasteboard *pb = [NSPasteboard generalPasteboard];
-    if(pb == NULL) {
-        return;
+bool clipWrite() {
+    @autoreleasepool {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+        if(pb == NULL) {
+            return false;
+        }
+        return pasteWrite(pb);
     }
-    pasteWrite(pb);
 }
 
 void clipClear() {
-    NSPasteboard *pb = [NSPasteboard generalPasteboard];
-    if(pb == NULL) {
-        return;
-    }
-    [pb clearContents];
-    if(pasteWriteItems != NULL) {
-		 [pasteWriteItems release];
-        pasteWriteItems = NULL;
+    @autoreleasepool {
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+        if(pb == NULL) {
+            return;
+        }
+        [pb clearContents];
+        if(pasteWriteItems != NULL) {
+            [pasteWriteItems release];
+            pasteWriteItems = NULL;
+        }
     }
 }
 
