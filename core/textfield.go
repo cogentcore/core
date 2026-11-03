@@ -960,7 +960,8 @@ func (tf *TextField) deleteSelection() string {
 	return cut
 }
 
-// copy copies any selected text to the clipboard.
+// copy copies any selected text to the clipboard, and then
+// clears the selection, which shows that it was copied.
 func (tf *TextField) copy() { //types:add
 	if tf.NoEcho {
 		return
@@ -972,6 +973,7 @@ func (tf *TextField) copy() { //types:add
 
 	md := mimedata.NewText(tf.selection())
 	tf.Clipboard().Write(md)
+	tf.selectReset()
 }
 
 // paste inserts text from the clipboard at current cursor position; if

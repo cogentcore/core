@@ -8,11 +8,13 @@ import (
 	"errors"
 	"math/rand"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
@@ -228,4 +230,34 @@ func TestTextFieldCursorArrows(t *testing.T) {
 	}
 	imagex.UpdateTestImagesFor(t) // the image is not compared
 	b.AssertRender(t, "text-field/cursor-arrows", steps...)
+}
+
+// TestTextFieldCopy tests that copying the selected text, with the keys,
+// clears the selection.
+func TestTextFieldCopy(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("Hello world")
+	b.AssertRender(t, "text-field/copy", func() {
+		b.AsyncLock()
+		tf.SetFocus()
+		tf.selectAll()
+		assert.True(t, tf.hasSelection())
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for ch, kf := range *keymap.ActiveMap {
+			if kf != keymap.Copy {
+				continue
+			}
+			r, code, mods, err := ch.Decode()
+			assert.NoError(t, err)
+			src.Key(events.KeyDown, r, code, mods)
+			src.Key(events.KeyUp, r, code, mods)
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		// the clipboard of the test driver does nothing, so it is not checked
+		assert.False(t, tf.hasSelection(), "the selection is cleared")
+	})
 }
