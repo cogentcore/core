@@ -28,6 +28,7 @@ var _ = register(func() {
 			"Scrollable":           reflect.ValueOf(p_cogentcore_org_core_styles_abilities.Scrollable),
 			"ScrollableUnattended": reflect.ValueOf(p_cogentcore_org_core_styles_abilities.ScrollableUnattended),
 			"Selectable":           reflect.ValueOf(p_cogentcore_org_core_styles_abilities.Selectable),
+			"SlidePriority":        reflect.ValueOf(p_cogentcore_org_core_styles_abilities.SlidePriority),
 			"Slideable":            reflect.ValueOf(p_cogentcore_org_core_styles_abilities.Slideable),
 			"TripleClickable":      reflect.ValueOf(p_cogentcore_org_core_styles_abilities.TripleClickable),
 		},

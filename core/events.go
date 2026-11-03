@@ -171,18 +171,6 @@ type Events struct {
 	dragCopy bool
 }
 
-// slideController is implemented by widgets such as [Handle] and [Slider]
-// that are controls for sliding, which slide instead of the dragging of the
-// widgets around them, however long the mouse is pressed before it moves.
-// Other sliding, such as the selection of text, gives way to dragging.
-type slideController interface {
-	slideControl()
-}
-
-func (hl *Handle) slideControl() {}
-
-func (sr *Slider) slideControl() {}
-
 // dragMover is implemented by widgets with an option for whether dragging
 // their items moves them by default, instead of copying them, in which
 // case the modifier keys that otherwise move them copy them.
@@ -373,7 +361,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 	}
 
 	var press, dragPress, slidePress, move, up, repeatClick Widget
-	slideControl := false // see [slideController]
+	slidePriority := false // see [abilities.SlidePriority]
 	for i := n - 1; i >= 0; i-- {
 		w := em.mouseInBBox[i]
 		wb := w.AsWidget()
@@ -407,7 +395,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			if tree.IsNil(press) && (wb.Styles.Abilities.IsPressable() || sc.renderBBoxes) {
 				press = w
 			}
-			if tree.IsNil(dragPress) && !slideControl && wb.AbilityIs(abilities.Draggable) {
+			if tree.IsNil(dragPress) && !slidePriority && wb.AbilityIs(abilities.Draggable) {
 				dragPress = w
 			}
 			if tree.IsNil(slidePress) && wb.AbilityIs(abilities.Slideable) {
@@ -417,7 +405,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 					continue
 				}
 				slidePress = w
-				_, slideControl = w.(slideController)
+				slidePriority = wb.AbilityIs(abilities.SlidePriority)
 			}
 			if repeatClick == nil && wb.Styles.Abilities.Is(abilities.RepeatClickable) {
 				repeatClick = w

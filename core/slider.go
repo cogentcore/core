@@ -167,7 +167,7 @@ func (sr *Slider) Init() {
 	sr.TrackSize = 0.5
 	sr.lastValue = -math32.MaxFloat32
 	sr.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.SlidePriority)
 
 		// we use a different color for the thumb and value color
 		// (compared to the background color) so that they get the

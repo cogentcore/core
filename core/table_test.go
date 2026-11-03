@@ -99,7 +99,7 @@ func TestTableColumnWidths(t *testing.T) {
 		pt := hb.Min.Add(hb.Size().Div(2))
 		src.MouseButton(events.MouseDown, events.Left, pt, 0)
 		// held longer than the drag start time, after which the table, which
-		// is draggable, would drag, except that the handle is a slide control
+		// is draggable, would drag, except that the handle has SlidePriority
 		time.Sleep(2 * TimingSettings.DragStartTime)
 		for i := 1; i <= 10; i++ {
 			src.MouseMove(pt.Add(image.Pt(5*i, 0)))

@@ -36,6 +36,7 @@ var _ = register(func() {
 			"DropDeleteSource":      reflect.ValueOf(p_cogentcore_org_core_events.DropDeleteSource),
 			"DropIgnore":            reflect.ValueOf(p_cogentcore_org_core_events.DropIgnore),
 			"DropLink":              reflect.ValueOf(p_cogentcore_org_core_events.DropLink),
+			"DropModFor":            reflect.ValueOf(p_cogentcore_org_core_events.DropModFor),
 			"DropMods":              reflect.ValueOf((*p_cogentcore_org_core_events.DropMods)(nil)),
 			"DropModsN":             reflect.ValueOf(p_cogentcore_org_core_events.DropModsN),
 			"DropModsValues":        reflect.ValueOf(p_cogentcore_org_core_events.DropModsValues),
