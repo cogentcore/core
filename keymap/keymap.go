@@ -69,6 +69,7 @@ const (
 	Redo
 	Insert
 	InsertAfter
+	InsertChild // insert as the last child, as in a tree
 	ZoomOut
 	ZoomIn
 	Refresh

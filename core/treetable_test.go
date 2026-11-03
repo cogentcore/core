@@ -576,3 +576,47 @@ func TestTreeTableFewerFields(t *testing.T) {
 		assert.Equal(t, []string{"a", "  b"}, rowNames(tt))
 	})
 }
+
+// TestTreeTableInsertChild tests adding a child with the keys of
+// [keymap.InsertChild], while editing the text field of an item.
+func TestTreeTableInsertChild(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/insert-child", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		nw, _ := tt.RowWidgetNs()
+		b.AsyncLock()
+		cell := tt.ListGrid.Child(1 * nw).AsTree() // Email
+		bb := cell.Child(cell.NumChildren() - 1).(Widget).AsWidget().Geom.TotalBBox
+		b.AsyncUnlock()
+		pt := bb.Min.Add(bb.Size().Div(2))
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+		n := 0
+		for ch, kf := range *keymap.ActiveMap {
+			if kf != keymap.InsertChild {
+				continue
+			}
+			r, code, mods, err := ch.Decode()
+			require.NoError(t, err)
+			src.Key(events.KeyDown, r, code, mods)
+			src.Key(events.KeyUp, r, code, mods)
+			time.Sleep(200 * time.Millisecond)
+			n++
+			b.AsyncLock()
+			assert.Len(t, tasks[0].Children[0].Children, n, string(ch))
+			nr := tt.rowOf(reflect.ValueOf(tasks[0].Children[0].Children[n-1]))
+			assert.Equal(t, nr, tt.SelectedIndex, "the new child is selected")
+			b.AsyncUnlock()
+			// back to Email, whose text field the keys then go to
+			src.MouseButton(events.MouseDown, events.Left, pt, 0)
+			src.MouseButton(events.MouseUp, events.Left, pt, 0)
+			time.Sleep(200 * time.Millisecond)
+		}
+		assert.GreaterOrEqual(t, n, 2, "the key map has chords for it")
+	})
+}

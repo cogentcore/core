@@ -1116,6 +1116,8 @@ func (tt *TreeTable) keyInput(e events.Event) {
 		tt.InsertBefore(idx)
 	case keymap.InsertAfter:
 		tt.InsertAfter(idx)
+	case keymap.InsertChild:
+		tt.AddChild(idx)
 	case keymap.Duplicate:
 		tt.Duplicate()
 	default:
@@ -1145,7 +1147,7 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Insert after").SetIcon(icons.Add).SetKey(keymap.InsertAfter).OnClick(func(e events.Event) {
 			tt.InsertAfter(idx)
 		})
-		NewButton(m).SetText("Add child").SetIcon(icons.SubdirectoryArrowRight).OnClick(func(e events.Event) {
+		NewButton(m).SetText("Add child").SetIcon(icons.SubdirectoryArrowRight).SetKey(keymap.InsertChild).OnClick(func(e events.Event) {
 			tt.AddChild(idx)
 		})
 		NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).OnClick(func(e events.Event) {

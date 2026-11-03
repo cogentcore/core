@@ -346,6 +346,9 @@ func (tr *Tree) Init() {
 			case keymap.InsertAfter:
 				tr.InsertAfter()
 				e.SetHandled()
+			case keymap.InsertChild:
+				tr.AddChildNode()
+				e.SetHandled()
 			case keymap.Cut:
 				tri.Cut()
 				e.SetHandled()
@@ -1306,10 +1309,10 @@ func (tr *Tree) contextMenu(m *Scene, pos image.Point) {
 		return
 	}
 	tri := tr.This.(Treer)
-	NewFuncButton(m).SetFunc(tr.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).
+	NewFuncButton(m).SetFunc(tr.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetKey(keymap.InsertChild).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).SetKey(keymap.Insert).
 		SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).
+	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).SetKey(keymap.InsertAfter).
 		SetEnabled(tr.HasSelection())
 	NewFuncButton(m).SetFunc(tr.Duplicate).SetIcon(icons.ContentCopy).
 		SetEnabled(tr.HasSelection())

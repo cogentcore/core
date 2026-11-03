@@ -38,6 +38,7 @@
 | Redo |               |            |              |                 |                   |             |
 | Insert |               |            |              |                 |                   |             |
 | InsertAfter |               |            |              |                 |                   |             |
+| InsertChild |               |            |              |                 |                   |             |
 | ZoomOut |               |            |              |                 |                   |             |
 | ZoomIn |               |            |              |                 |                   |             |
 | Refresh |               |            |              |                 |                   |             |
@@ -80,6 +81,7 @@
 | Tab | FocusNext | FocusNext | FocusNext | FocusNext | FocusNext | FocusNext |
 | F5 | Refresh | Refresh | Refresh | Refresh | Refresh | Refresh |
 | F10 | Menu | Menu | Menu | Menu | Menu | Menu |
+| Insert | Insert | Insert | Insert | Insert | Insert | Insert |
 | Home | Home | Home | Home | Home | Home | Home |
 | PageUp | PageUp | PageUp | PageUp | PageUp | PageUp | PageUp |
 | Delete | Delete | Delete | Delete | Delete | Delete | Delete |
@@ -149,7 +151,7 @@
 | Control+Shift+A |               |            |              | CancelSelect | CancelSelect | CancelSelect |
 | Control+Shift+G | WinSnapshot | WinSnapshot | WinSnapshot | WinSnapshot | WinSnapshot | WinSnapshot |
 | Control+Shift+N |               |            |              | NewAlt1 | NewAlt1 | NewAlt1 |
-| Control+Shift+O |               |            |              | OpenAlt1 | OpenAlt1 | OpenAlt1 |
+| Control+Shift+O | InsertChild | InsertChild |              | OpenAlt1 | OpenAlt1 | OpenAlt1 |
 | Control+Shift+S |               |            |              | SaveAs | SaveAs | SaveAs |
 | Control+Shift+V |               |            |              | PasteHist | PasteHist | PasteHist |
 | Control+Shift+W |               |            | WinClose | CloseAlt1 | CloseAlt1 | CloseAlt1 |
@@ -215,9 +217,10 @@
 | Alt+V | PageDown | PageDown | Paste |                 |                   |             |
 | Alt+W |               |            | Copy |                 |                   |             |
 | Alt+X |               |            | Cut |                 |                   |             |
-| Alt+ReturnEnter | ContextMenu | ContextMenu |              |                 |                   |             |
+| Alt+ReturnEnter | ContextMenu | ContextMenu | InsertChild | InsertChild | InsertChild | InsertChild |
 | Alt+Backspace | BackspaceWord | BackspaceWord | BackspaceWord | BackspaceWord | BackspaceWord | BackspaceWord |
 | Alt+F6 |               |            | WinFocusNext | WinFocusNext | WinFocusNext | WinFocusNext |
+| Alt+Insert | InsertChild | InsertChild | InsertChild | InsertChild | InsertChild | InsertChild |
 | Alt+Home | DocHome | DocHome | DocHome | DocHome | DocHome | DocHome |
 | Alt+Delete | DeleteWord | DeleteWord | DeleteWord | DeleteWord | DeleteWord | DeleteWord |
 | Alt+End | DocEnd | DocEnd | DocEnd | DocEnd | DocEnd | DocEnd |

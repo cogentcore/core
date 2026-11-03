@@ -43,6 +43,7 @@ var _ = register(func() {
 			"Home":             reflect.ValueOf(p_cogentcore_org_core_keymap.Home),
 			"Insert":           reflect.ValueOf(p_cogentcore_org_core_keymap.Insert),
 			"InsertAfter":      reflect.ValueOf(p_cogentcore_org_core_keymap.InsertAfter),
+			"InsertChild":      reflect.ValueOf(p_cogentcore_org_core_keymap.InsertChild),
 			"Jump":             reflect.ValueOf(p_cogentcore_org_core_keymap.Jump),
 			"Kill":             reflect.ValueOf(p_cogentcore_org_core_keymap.Kill),
 			"Lookup":           reflect.ValueOf(p_cogentcore_org_core_keymap.Lookup),
