@@ -109,6 +109,7 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 			"ColorMapButton":                reflect.ValueOf((*p_cogentcore_org_core_core.ColorMapButton)(nil)),
 			"ColorMapName":                  reflect.ValueOf((*p_cogentcore_org_core_core.ColorMapName)(nil)),
 			"ColorPicker":                   reflect.ValueOf((*p_cogentcore_org_core_core.ColorPicker)(nil)),
+			"ColumnWidther":                 reflect.ValueOf((*p_cogentcore_org_core_core.ColumnWidther)(nil)),
 			"Complete":                      reflect.ValueOf((*p_cogentcore_org_core_core.Complete)(nil)),
 			"CompleteEditText":              reflect.ValueOf(p_cogentcore_org_core_core.CompleteEditText),
 			"CompleterStage":                reflect.ValueOf(p_cogentcore_org_core_core.CompleterStage),

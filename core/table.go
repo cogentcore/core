@@ -334,9 +334,9 @@ func (tb *Table) columnWidth(fli int) float32 {
 	return tb.ColumnWidths[tb.visibleFields[fli].Name]
 }
 
-// columnWidthDots returns the width of the given column in dots,
-// or 0 if it is automatic (see [ListGrid.fixColumnWidths]).
-func (tb *Table) columnWidthDots(col int) float32 {
+// ColumnWidthDots returns the width of the given column in dots,
+// or 0 if it is automatic (see [ColumnWidther]).
+func (tb *Table) ColumnWidthDots(col int) float32 {
 	return tb.columnWidth(col) * tb.Styles.UnitContext.Dots(units.UnitDp)
 }
 

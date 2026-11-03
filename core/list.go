@@ -1960,19 +1960,21 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	return csz
 }
 
-// columnWidther is implemented by lists with columns whose widths
-// can be set, such as [Table].
-type columnWidther interface {
-	// columnWidthDots returns the width of the given column in dots,
+// ColumnWidther is implemented by lists with columns whose widths
+// can be set, such as [Table], for which the [ListGrid] makes the
+// cells of the columns have those widths, with the [ListColProperty]
+// of each cell as its column.
+type ColumnWidther interface {
+	// ColumnWidthDots returns the width of the given column in dots,
 	// or 0 if it is automatic.
-	columnWidthDots(col int) float32
+	ColumnWidthDots(col int) float32
 }
 
 // fixColumnWidths sets the widths of the cells in the columns whose
 // widths are set, which do not grow. This is done in the layout, where
 // the sizes of their padding, borders, and margins are known.
 func (lg *ListGrid) fixColumnWidths() {
-	cw, ok := lg.list().This.(columnWidther)
+	cw, ok := lg.list().This.(ColumnWidther)
 	if !ok {
 		return
 	}
@@ -1981,7 +1983,7 @@ func (lg *ListGrid) fixColumnWidths() {
 		if !ok {
 			return tree.Continue
 		}
-		width := cw.columnWidthDots(col)
+		width := cw.ColumnWidthDots(col)
 		if width <= 0 {
 			return tree.Continue
 		}
