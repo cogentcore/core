@@ -948,3 +948,51 @@ func testTreeTableFitWidth(t *testing.T, hide bool) {
 		assert.False(t, tt.ListGrid.HasScroll[math32.X], "no horizontal scrolling of the grid")
 	})
 }
+
+// TestTreeTableScrollHidden tests that scrolling a [TreeTable] with
+// [TreeTable.HideGroupValues] shows the values of the items that are not
+// groups in the rows that showed groups, whose values are hidden.
+func TestTreeTableScrollHidden(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Y.Dp(250)
+		s.Max.Y.Dp(250)
+	})
+	var tasks []*task
+	for g := range 10 {
+		tasks = append(tasks, &task{Name: fmt.Sprintf("Group %d", g), Children: []*task{
+			{Name: fmt.Sprintf("Task %d", g), Done: g%2 == 0},
+		}})
+	}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.HideGroupValues = true
+	b.AssertRender(t, "tree-table/scroll-hidden", func() {
+		b.AsyncLock()
+		bb := tt.ListGrid.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		odd := false // whether a scroll was by an odd number of rows, as the
+		// rows of groups and items alternate
+		for range 8 {
+			src.Scroll(bb.Min.Add(bb.Size().Div(2)), math32.Vec2(0, 25))
+			time.Sleep(100 * time.Millisecond)
+			b.AsyncLock()
+			odd = odd || tt.StartIndex%2 == 1
+			nw, idxOff := tt.RowWidgetNs()
+			for i := range tt.VisibleRows {
+				si, _, invis := tt.SliceIndex(i)
+				if invis {
+					continue
+				}
+				done := tt.ListGrid.Child(i*nw + idxOff + 1)
+				_, isSwitch := done.(*Switch)
+				assert.Equal(t, !tt.hideValue(si, 1), isSwitch, "row %d, item %d, start %d", i, si, tt.StartIndex)
+				if isSwitch { // laid out, after it is made in the place of a hidden value
+					assert.Greater(t, AsWidget(done).Geom.Size.Actual.Total.X, float32(0), "row %d, item %d, start %d", i, si, tt.StartIndex)
+				}
+			}
+			b.AsyncUnlock()
+		}
+		assert.True(t, odd, "scrolled by an odd number of rows")
+	})
+}
