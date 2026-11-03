@@ -77,7 +77,8 @@ func TestTableReadOnlyFocus(t *testing.T) {
 }
 
 // TestTableColumnWidths tests setting the width of a column by dragging
-// the handle after its header, and making it automatic again.
+// the handle after its header, after holding the mouse down, and making
+// it automatic again.
 func TestTableColumnWidths(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(300)) })
@@ -97,6 +98,9 @@ func TestTableColumnWidths(t *testing.T) {
 
 		pt := hb.Min.Add(hb.Size().Div(2))
 		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		// held longer than the drag start time, after which the table, which
+		// is draggable, would drag, except that the handle is a slide control
+		time.Sleep(2 * TimingSettings.DragStartTime)
 		for i := 1; i <= 10; i++ {
 			src.MouseMove(pt.Add(image.Pt(5*i, 0)))
 			time.Sleep(20 * time.Millisecond)

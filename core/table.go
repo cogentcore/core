@@ -295,7 +295,7 @@ func (tb *Table) makeColumnHandle(p *tree.Plan, fli int) {
 		w.SetTooltip("Drag to set the width of the column, or double click for the automatic width")
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
-			s.SetAbilities(false, abilities.Focusable, abilities.ScrollableUnattended)
+			s.SetAbilities(false, abilities.Focusable)
 			s.SetAbilities(true, abilities.DoubleClickable)
 		})
 		w.FinalStyler(func(s *styles.Style) {
