@@ -131,6 +131,29 @@ func buildEnvInit(c *config.Config) (cleanup func(), err error) {
 	return cleanupFn, nil
 }
 
+// appleLinkerFlags are the flags of CGO_LDFLAGS that only the Apple
+// linker has, which the Android linker does not accept, such as the flag
+// that the docs suggest for the warnings of duplicate libraries on macOS.
+var appleLinkerFlags = []string{"-Wl,-no_warn_duplicate_libraries"}
+
+// androidLDFlags returns the CGO_LDFLAGS of the go environment without
+// the [appleLinkerFlags], for building for Android on macOS.
+func androidLDFlags() string {
+	flags, err := exec.Output("go", "env", "CGO_LDFLAGS")
+	if err != nil {
+		return "-O2 -g" // the default
+	}
+	return withoutAppleFlags(flags)
+}
+
+// withoutAppleFlags returns the given linker flags without the
+// [appleLinkerFlags].
+func withoutAppleFlags(flags string) string {
+	return strings.Join(slices.DeleteFunc(strings.Fields(flags), func(f string) bool {
+		return slices.Contains(appleLinkerFlags, f)
+	}), " ")
+}
+
 func envInit(c *config.Config) (err error) {
 	// Setup the cross-compiler environments.
 	if ndkRoot, err := ndkRoot(c); err == nil {
@@ -160,6 +183,7 @@ func envInit(c *config.Config) (err error) {
 				"CC":          clang,
 				"CXX":         clangpp,
 				"CGO_ENABLED": "1",
+				"CGO_LDFLAGS": androidLDFlags(),
 			}
 			if arch == "arm" {
 				androidEnv[arch]["GOARM"] = "7"

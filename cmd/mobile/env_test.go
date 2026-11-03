@@ -164,3 +164,13 @@ func TestNdkRoot(t *testing.T) {
 		}
 	})
 }
+
+func TestWithoutAppleFlags(t *testing.T) {
+	// as in the docs, for the warnings of duplicate libraries on macOS
+	if got := withoutAppleFlags("-O2 -g -Wl,-no_warn_duplicate_libraries"); got != "-O2 -g" {
+		t.Errorf("got %q", got)
+	}
+	if got := withoutAppleFlags("-O2 -g\n"); got != "-O2 -g" {
+		t.Errorf("got %q", got)
+	}
+}

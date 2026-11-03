@@ -36,6 +36,11 @@ var (
 	// with a backup based on [debug.ReadBuildInfo].
 	CoreVersion = "dev"
 
+	// AppID is the ID of the current app, such as com.org.app, which is its
+	// package name on Android. It is set by a linker flag in the core command
+	// line tool, and is empty otherwise.
+	AppID = ""
+
 	// ReservedWebShortcuts is a list of shortcuts that are reserved on the web
 	// platform, meaning that they are handled by the browser instead of Cogent Core.
 	// By default, this list contains important web shortcuts like Command+r and Command+(1-9).

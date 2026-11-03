@@ -9,6 +9,7 @@ package android
 import (
 	"image"
 	"os"
+	"path/filepath"
 	"unsafe"
 
 	"cogentcore.org/core/events"
@@ -110,11 +111,16 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 }
 
 // DataDir returns the internal files directory of the app, where it can
-// write, which the activity gives in FILESDIR, before main is called, or
-// else /data/data, where it cannot, as before main.
+// write, which the activity gives in FILESDIR, before main is called. Before
+// that, as for the settings files of the packages, which are set in their
+// initialization, it is the same directory, /data/data/<id>/files, for the
+// [system.AppID] that the core tool sets, or /data/data without it.
 func (a *App) DataDir() string {
 	if dir := os.Getenv("FILESDIR"); dir != "" {
 		return dir
+	}
+	if system.AppID != "" {
+		return filepath.Join("/data/data", system.AppID, "files")
 	}
 	return "/data/data"
 }

@@ -293,6 +293,10 @@ func LinkerFlags(c *Config) string {
 		res += "-s -w "
 	}
 
+	if c.ID != "" {
+		res += "-X 'cogentcore.org/core/system.AppID=" + strings.ReplaceAll(c.ID, "'", `\'`) + "' "
+	}
+
 	if c.About != "" {
 		res += "-X 'cogentcore.org/core/core.AppAbout=" + strings.ReplaceAll(c.About, "'", `\'`) + "' "
 	}
