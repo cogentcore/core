@@ -352,3 +352,49 @@ func TestTreeTableClickSelect(t *testing.T) {
 		b.AsyncUnlock()
 	})
 }
+
+// TestTreeTableContextMenu tests that right clicks on the tree cell
+// outside of its value, and on its branch, select the row and show the
+// context menu of the tree table.
+func TestTreeTableContextMenu(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/context-menu", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		b.AsyncLock()
+		nw, _ := tt.RowWidgetNs()
+		cell := tt.ListGrid.Child(1 * nw).(Widget).AsWidget().Geom.TotalBBox
+		branch := tt.ListGrid.Child(2 * nw).AsTree().Child(0).(Widget).AsWidget().Geom.TotalBBox
+		b.AsyncUnlock()
+		for _, c := range []struct {
+			name string
+			pt   image.Point
+			row  int
+		}{
+			{"indentation", image.Pt(cell.Min.X+4, (cell.Min.Y+cell.Max.Y)/2), 1},
+			{"branch", branch.Min.Add(branch.Size().Div(2)), 2},
+		} {
+			src.MouseButton(events.MouseDown, events.Right, c.pt, 0)
+			src.MouseButton(events.MouseUp, events.Right, c.pt, 0)
+			time.Sleep(300 * time.Millisecond)
+			b.AsyncLock()
+			st := b.Scene.Stage.popups.top()
+			require.NotNil(t, st, c.name)
+			hasInsert := false
+			st.Scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+				if bt, ok := cw.(*Button); ok && bt.Text == "Insert after" {
+					hasInsert = true
+				}
+				return !hasInsert
+			})
+			assert.True(t, hasInsert, "%s: the menu of the tree table", c.name)
+			assert.Equal(t, c.row, tt.SelectedIndex, c.name)
+			st.ClosePopup()
+			b.AsyncUnlock()
+			time.Sleep(200 * time.Millisecond)
+		}
+	})
+}

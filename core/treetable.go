@@ -956,6 +956,7 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 		w.On(events.DropDeleteSource, func(e events.Event) {
 			tt.dropDeleteItems()
 		})
+		w.On(events.ContextMenu, tt.rowContextMenu(i))
 		w.Updater(func() {
 			_, _, invis := tt.SliceIndex(i)
 			w.SetState(invis, states.Invisible)
@@ -989,6 +990,7 @@ func (tt *TreeTable) makeBranch(p *tree.Plan, i int) {
 			si, _, _ := tt.SliceIndex(i)
 			tt.ToggleClose(si)
 		})
+		w.On(events.ContextMenu, tt.rowContextMenu(i))
 		w.On(events.KeyChord, func(e events.Event) {
 			si, _, _ := tt.SliceIndex(i)
 			switch keymap.Of(e.KeyChord()) {
@@ -1007,6 +1009,18 @@ func (tt *TreeTable) makeBranch(p *tree.Plan, i int) {
 			w.SetState(!leaf && !tt.IsClosed(si), states.Checked)
 		})
 	})
+}
+
+// rowContextMenu returns the handler of context menu events on the tree
+// cell for the given widget row index, and its branch, which selects the
+// row and shows the context menu of the tree table, as for the values.
+func (tt *TreeTable) rowContextMenu(i int) func(e events.Event) {
+	return func(e events.Event) {
+		if si, _, invis := tt.SliceIndex(i); !invis && !tt.indexIsSelected(si) {
+			tt.updateSelectRow(i, events.SelectOne)
+		}
+		tt.HandleEvent(e)
+	}
 }
 
 // RowGrabFocus grabs the focus for the first focusable value widget in the
