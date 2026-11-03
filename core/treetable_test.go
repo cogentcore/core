@@ -13,7 +13,9 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -293,6 +295,60 @@ func TestTreeTableBranchKeys(t *testing.T) {
 		b.AsyncLock()
 		assert.Equal(t, 2, tt.SelectedIndex)
 		assert.False(t, tt.IsClosed(2), "right opens")
+		b.AsyncUnlock()
+	})
+}
+
+// TestTreeTableClickSelect tests that clicking into the text field of a
+// row selects it, as does moving the focus to a row, so that the keys
+// insert items there.
+func TestTreeTableClickSelect(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/click-select", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		insertAfter := func() { // with the chord of the active key map
+			for ch, kf := range *keymap.ActiveMap {
+				if kf != keymap.InsertAfter {
+					continue
+				}
+				r, code, mods, err := ch.Decode()
+				require.NoError(t, err)
+				src.Key(events.KeyDown, r, code, mods)
+				src.Key(events.KeyUp, r, code, mods)
+				time.Sleep(200 * time.Millisecond)
+				return
+			}
+			t.Fatal("no chord for InsertAfter")
+		}
+		nw, _ := tt.RowWidgetNs()
+		value := func(row int) *WidgetBase { // the text field of the first field
+			cell := tt.ListGrid.Child(row * nw).AsTree()
+			return cell.Child(cell.NumChildren() - 1).(Widget).AsWidget()
+		}
+		b.AsyncLock()
+		bb := value(3).Geom.TotalBBox // Outline
+		b.AsyncUnlock()
+		pt := bb.Min.Add(bb.Size().Div(2))
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		assert.Equal(t, 3, tt.SelectedIndex, "the clicked row")
+		assert.True(t, value(3).StateIs(states.Focused) || value(3).ContainsFocus())
+		b.AsyncUnlock()
+		insertAfter()
+		b.AsyncLock()
+		assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "    ", "Home", "  Dishes"}, rowNames(tt))
+
+		value(5).SetFocus() // Home, as with the tab key
+		b.AsyncUnlock()
+		insertAfter()
+		b.AsyncLock()
+		assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "    ", "Home", "  Dishes", ""}, rowNames(tt))
 		b.AsyncUnlock()
 	})
 }

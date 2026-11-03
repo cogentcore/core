@@ -544,6 +544,15 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			}
 		}
 		w.OnClick(oc)
+		w.On(events.MouseDown, func(e events.Event) {
+			// value widgets such as text fields handle the clicks into them
+			if lb.IsReadOnly() || e.SelectMode() != events.SelectOne {
+				return
+			}
+			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
+				lb.selectIndexQuiet(row + lb.StartIndex)
+			}
+		})
 		w.On(events.ContextMenu, func(e events.Event) {
 			// we must select the row on right click so that the context menu
 			// corresponds to the right row
@@ -1108,6 +1117,41 @@ func (lb *ListBase) updateSelectIndex(idx int, sel bool, selMode events.SelectMo
 	}
 }
 
+// selectIndexQuiet selects only the given slice index, if it is not
+// already the selected one, without moving the focus, which is on that
+// row or is going there, as for a click into a row.
+func (lb *ListBase) selectIndexQuiet(idx int) {
+	if idx < 0 || idx >= lb.SliceSize || (idx == lb.SelectedIndex && len(lb.SelectedIndexes) == 1 && lb.indexIsSelected(idx)) {
+		return
+	}
+	lb.unselectAllIndexes()
+	lb.SelectedIndex = idx
+	lb.SelectIndex(idx)
+	lb.lastClick = idx
+	lb.Send(events.Select)
+	lb.Restyle()
+}
+
+// selectFocusedRow selects the row with the focus, as after moving
+// the focus there with the tab key, if it is not the selected one.
+func (lb *ListBase) selectFocusedRow() {
+	em := lb.Events()
+	if em == nil || tree.IsNil(em.focus) || lb.ListGrid == nil {
+		return
+	}
+	for n := em.focus.AsTree(); n != nil && n.This != lb.This; n = n.Parent.AsTree() {
+		if n.Parent == lb.ListGrid.This {
+			if row, ok := n.Property(ListRowProperty).(int); ok {
+				lb.selectIndexQuiet(row + lb.StartIndex)
+			}
+			return
+		}
+		if n.Parent == nil {
+			return
+		}
+	}
+}
+
 // indexIsSelected returns the selected status of given slice index
 func (lb *ListBase) indexIsSelected(idx int) bool {
 	if lb.IsReadOnly() && !lb.ReadOnlyMultiSelect {
@@ -1651,6 +1695,7 @@ func (lb *ListBase) keyInputNav(kt events.Event) {
 }
 
 func (lb *ListBase) keyInputEditable(kt events.Event) {
+	lb.selectFocusedRow()
 	lb.keyInputNav(kt)
 	if kt.IsHandled() {
 		return

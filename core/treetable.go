@@ -1050,6 +1050,9 @@ func (tt *TreeTable) RowGrabFocus(row int) *WidgetBase {
 // keyInput handles the keys for the tree: opening and closing items
 // when read-only, and inserting and duplicating items as siblings.
 func (tt *TreeTable) keyInput(e events.Event) {
+	if !tt.IsReadOnly() {
+		tt.selectFocusedRow()
+	}
 	idx := tt.SelectedIndex
 	if !tt.validIndex(idx) {
 		return
