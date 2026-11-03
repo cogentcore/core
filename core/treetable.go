@@ -977,6 +977,7 @@ func (tt *TreeTable) MakeRow(p *tree.Plan, i int) {
 	for fli := 1; fli < tt.numVisibleFields; fli++ {
 		tt.makeFieldValue(p, i, fli)
 	}
+	tt.makeRowButton(p, i)
 }
 
 // makeTreeCell adds the tree cell for the given widget row index to the

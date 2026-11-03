@@ -45,6 +45,10 @@ type Table struct {
 	// The other columns have automatic widths.
 	ColumnWidths map[string]float32
 
+	// rowButton is the button at the end of each row, if any
+	// (see [Table.SetRowButton]).
+	rowButton *tableRowButton
+
 	// sortIndex is the current sort index.
 	sortIndex int
 
@@ -64,6 +68,46 @@ type Table struct {
 	colMaxWidths []int
 
 	header *Frame
+}
+
+// tableRowButton is the button at the end of each row of a [Table].
+type tableRowButton struct {
+	icon    icons.Icon
+	tooltip string
+	fun     func(item any)
+}
+
+// SetRowButton adds an icon button with the given icon and tooltip at
+// the end of each row, which calls the given function with the item of
+// the row, a pointer to its struct, as for editing it in a [Form] on a
+// small screen, where the table shows only some of its fields.
+func (tb *Table) SetRowButton(icon icons.Icon, tooltip string, fun func(item any)) *Table {
+	tb.rowButton = &tableRowButton{icon: icon, tooltip: tooltip, fun: fun}
+	return tb
+}
+
+// makeRowButton adds the button at the end of the given widget row
+// index to the given plan, if there is one (see [Table.SetRowButton]).
+func (tb *Table) makeRowButton(p *tree.Plan, i int) {
+	rb := tb.rowButton
+	if rb == nil {
+		return
+	}
+	tree.AddAt(p, "row-button-"+strconv.Itoa(i), func(w *Button) {
+		w.SetType(ButtonAction).SetIcon(rb.icon).SetTooltip(rb.tooltip)
+		w.OnClick(func(e events.Event) {
+			// the row has the item at the time of the click,
+			// as the rows show other items as the list scrolls
+			si, _, invis := tb.This.(Lister).SliceIndex(i)
+			if !invis {
+				rb.fun(reflectx.UnderlyingPointer(tb.sliceElementValue(si)).Interface())
+			}
+		})
+		w.Updater(func() {
+			_, _, invis := tb.This.(Lister).SliceIndex(i)
+			w.SetState(invis, states.Invisible)
+		})
+	})
 }
 
 // TableStyler is a styling function for custom styling and
@@ -382,6 +426,9 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
+	if tb.rowButton != nil {
+		nWidgPerRow++
+	}
 	return
 }
 
@@ -397,6 +444,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	for fli := range tb.numVisibleFields {
 		tb.makeFieldValue(p, i, fli)
 	}
+	tb.makeRowButton(p, i)
 }
 
 // valueHider is implemented by tables such as [TreeTable] that do not show

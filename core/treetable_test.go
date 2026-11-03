@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
@@ -851,4 +852,35 @@ func TestTreeTableShowItem(t *testing.T) {
 	tt.ShowItem = nil
 	tt.updateRows()
 	assert.Len(t, tt.rows, 6)
+}
+
+// TestRowButton tests the button at the end of each row of a [Table] and
+// a [TreeTable], which calls its function with the item of its row.
+func TestRowButton(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	var clicked *task
+	tt.SetRowButton(icons.Edit, "Edit the task", func(item any) {
+		clicked = item.(*task)
+	})
+	b.AssertRender(t, "tree-table/row-button", func() {
+		b.AsyncLock()
+		nw, idxOff := tt.RowWidgetNs()
+		assert.Equal(t, tt.numVisibleFields+1, nw-idxOff, "the button after the values")
+		bt, ok := tt.ListGrid.Child(2*nw + nw - 1).(*Button) // of the third row
+		require.True(t, ok)
+		assert.Equal(t, icons.Edit, bt.Icon)
+		bb := bt.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		pt := bb.Min.Add(bb.Size().Div(2))
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		require.NotNil(t, clicked)
+		assert.Equal(t, "Report", clicked.Name)
+	})
 }
