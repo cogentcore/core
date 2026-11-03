@@ -620,3 +620,35 @@ func TestTreeTableInsertChild(t *testing.T) {
 		assert.GreaterOrEqual(t, n, 2, "the key map has chords for it")
 	})
 }
+
+// TestTreeTableSameType tests that setting new items of the same type,
+// as after an undo, keeps the selection, the widgets, and the focus.
+func TestTreeTableSameType(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	var items any = &tasks
+	tt := NewTreeTable(b)
+	tt.Updater(func() {
+		tt.SetItems(items)
+	})
+	b.AssertRender(t, "tree-table/same-type", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		nw, _ := tt.RowWidgetNs()
+		cell := tt.ListGrid.Child(2 * nw).AsTree() // Report
+		tf := cell.Child(cell.NumChildren() - 1).(*TextField)
+		tf.SetFocus()
+		tt.SelectIndexEvent(2, events.SelectOne)
+
+		again := testTasks()
+		again[0].Children[1].Name = "Report v2"
+		items = &again
+		tt.Update()
+		assert.Equal(t, 2, tt.SelectedIndex)
+		assert.True(t, tt.indexIsSelected(2))
+		cell = tt.ListGrid.Child(2 * nw).AsTree()
+		assert.Same(t, tf, cell.Child(cell.NumChildren()-1), "the same widget")
+		assert.Equal(t, "Report v2", tf.Text())
+		assert.True(t, tf.StateIs(states.Focused), "with the focus")
+	})
+}

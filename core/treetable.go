@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"image"
 	"log/slog"
+	"maps"
 	"reflect"
 	"slices"
 	"strconv"
@@ -122,7 +123,10 @@ func (tt *TreeTable) Init() {
 }
 
 // SetItems sets the items to the given pointer to a slice of pointers
-// to structs, which are the top-level items.
+// to structs, which are the top-level items. If they have the same type as
+// the current items, as for new values of them, such as after an undo, the
+// view stays the same: the scroll position, the selected rows, and the
+// widgets of the rows, with the focus.
 func (tt *TreeTable) SetItems(items any) *TreeTable {
 	if items == tt.itemsSet && items != nil {
 		tt.MakeIter = 0
@@ -135,6 +139,21 @@ func (tt *TreeTable) SetItems(items any) *TreeTable {
 
 // setItems sets the item type and rows for the Items.
 func (tt *TreeTable) setItems() {
+	if tt.sameItemType() {
+		tt.itemsSet = tt.Items
+		// the selection is by index, as the items are new
+		selected, current := maps.Clone(tt.SelectedIndexes), tt.SelectedIndex
+		tt.rows = nil
+		tt.closed = map[any]bool{}
+		tt.updateRows()
+		for idx := range selected {
+			if tt.validIndex(idx) {
+				tt.SelectedIndexes[idx] = struct{}{}
+			}
+		}
+		tt.SelectedIndex = min(current, len(tt.rows)-1)
+		return
+	}
 	tt.itemsSet = tt.Items
 	tt.itemType = nil
 	tt.rows = nil
@@ -158,6 +177,16 @@ func (tt *TreeTable) setItems() {
 	tt.cacheVisibleFields()
 	tt.updateRows()
 	tt.SetSliceBase()
+}
+
+// sameItemType returns whether the Items have the same type as those
+// for which the item type and rows were set.
+func (tt *TreeTable) sameItemType() bool {
+	if tt.itemType == nil || reflectx.IsNil(reflect.ValueOf(tt.Items)) {
+		return false
+	}
+	typ := reflect.TypeOf(tt.Items)
+	return typ.Kind() == reflect.Pointer && typ.Elem() == tt.sliceUnderlying.Type()
 }
 
 // setItemType sets the type of the items and their tree fields.
