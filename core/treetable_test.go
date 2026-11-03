@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"reflect"
 	"slices"
@@ -911,6 +912,17 @@ func TestTableShowField(t *testing.T) {
 // [TreeTable.FitWidth] has the width that the other columns leave, so that
 // the table fits in a narrow width without scrolling, with a long value.
 func TestTreeTableFitWidth(t *testing.T) {
+	for _, hide := range []bool{false, true} {
+		t.Run(fmt.Sprintf("hide-group-values-%v", hide), func(t *testing.T) {
+			testTreeTableFitWidth(t, hide)
+		})
+	}
+}
+
+// testTreeTableFitWidth tests [TreeTable.FitWidth], with the values of the
+// groups hidden if hide is true, as the first row is a group, whose hidden
+// values are empty frames, narrower than the values of the other rows.
+func testTreeTableFitWidth(t *testing.T, hide bool) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Dp(300)
@@ -920,15 +932,18 @@ func TestTreeTableFitWidth(t *testing.T) {
 	tasks[0].Name = strings.Repeat("a long name ", 10)
 	tt := NewTreeTable(b)
 	tt.FitWidth = true
+	tt.HideGroupValues = hide
 	tt.ShowField = func(field reflect.StructField) bool { return field.Name != "Hours" }
 	tt.SetRowButton(icons.Edit, "Edit", func(item any) {})
 	tt.SetItems(&tasks)
-	b.AssertRender(t, "tree-table/fit-width", func() {
+	b.AssertRender(t, fmt.Sprintf("tree-table/fit-width-hide-%v", hide), func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
-		last := AsWidget(tt.ListGrid.Child(nw - 1)).Geom.TotalBBox
-		assert.LessOrEqual(t, last.Max.X, tt.Geom.TotalBBox.Max.X, "the row button is in the table")
+		for row := range 3 { // also those of the rows that are not groups
+			last := AsWidget(tt.ListGrid.Child(row*nw + nw - 1)).Geom.TotalBBox
+			assert.LessOrEqual(t, last.Max.X, tt.Geom.TotalBBox.Max.X, "the row button is in the table")
+		}
 		assert.False(t, tt.HasScroll[math32.X], "no horizontal scrolling")
 		assert.False(t, tt.ListGrid.HasScroll[math32.X], "no horizontal scrolling of the grid")
 	})

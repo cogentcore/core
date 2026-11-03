@@ -1036,7 +1036,9 @@ func (tt *TreeTable) treeWidthSet() bool {
 // dots, or 0 if it is automatic: for the tree column with
 // [TreeTable.FitWidth], it is the width that the other columns leave in
 // the width of the table, which is known in the layout after the sizes of
-// the other columns are, without the scrollbar.
+// the other columns are, without the scrollbar. The width of each other
+// column is that of its widest cell, as in the grid: those of the rows of
+// groups can be narrower, with [TreeTable.HideGroupValues].
 func (tt *TreeTable) ColumnWidthDots(col int) float32 {
 	if col != 0 || !tt.FitWidth {
 		return tt.Table.ColumnWidthDots(col)
@@ -1046,10 +1048,14 @@ func (tt *TreeTable) ColumnWidthDots(col int) float32 {
 	if lg == nil || lg.NumChildren() < nw {
 		return 0
 	}
+	widths := make([]float32, nw)
+	for i, c := range lg.Children {
+		widths[i%nw] = max(widths[i%nw], AsWidget(c).Geom.Size.Actual.Total.X)
+	}
 	width := lg.Geom.Size.Alloc.Content.X - lg.Styles.ScrollbarWidth.Dots
-	for i := range nw {
+	for i, w := range widths {
 		if i != idxOff {
-			width -= AsWidget(lg.Child(i)).Geom.Size.Actual.Total.X
+			width -= w
 		}
 	}
 	width -= float32(nw-1) * lg.Styles.Gap.X.Dots
