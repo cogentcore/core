@@ -890,7 +890,9 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 }
 
 // dragSpriteImage returns the image of the drag sprite: the drag image,
-// with a green plus at its top right corner if the drop would copy.
+// with a green plus at its start if the drop would copy, which stays in
+// the window for wide images. It is at the bottom left, below the mouse
+// pointer at the top left, if the image is tall enough.
 func (em *Events) dragSpriteImage() *image.RGBA {
 	if !em.dragCopy || em.dragImage == nil {
 		return em.dragImage
@@ -902,7 +904,10 @@ func (em *Events) dragSpriteImage() *image.RGBA {
 	if r < 3 {
 		return img
 	}
-	c := image.Pt(img.Bounds().Max.X-r-1, img.Bounds().Min.Y+r+1)
+	c := image.Pt(img.Bounds().Min.X+r+1, img.Bounds().Max.Y-r-1)
+	if pointer := 9 * r / 4; c.Y-r < pointer { // too short to be below the pointer, about 18dp
+		c.Y = img.Bounds().Min.Y + r + 1
+	}
 	arm := r * 3 / 5
 	w := max(1, r/4)
 	abs := func(v int) int { return max(v, -v) }
