@@ -45,6 +45,12 @@ type Table struct {
 	// The other columns have automatic widths.
 	ColumnWidths map[string]float32
 
+	// ShowField, if set, returns whether to show the given field of the
+	// structs, which is otherwise shown unless its tags hide it, as for
+	// showing only some of the fields on a small screen. It must be set
+	// before the slice or items.
+	ShowField func(field reflect.StructField) bool `copier:"-" json:"-" xml:"-" display:"-"`
+
 	// rowButton is the button at the end of each row, if any
 	// (see [Table.SetRowButton]).
 	rowButton *tableRowButton
@@ -210,6 +216,9 @@ func (tb *Table) SetSlice(sl any) *Table {
 func (tb *Table) cacheVisibleFields() {
 	tb.visibleFields = make([]reflect.StructField, 0)
 	shouldShow := func(field reflect.StructField) bool {
+		if tb.ShowField != nil && !tb.ShowField(field) {
+			return false
+		}
 		tvtag := field.Tag.Get("table")
 		switch {
 		case tvtag == "+":

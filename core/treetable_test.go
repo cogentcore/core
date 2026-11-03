@@ -884,3 +884,24 @@ func TestRowButton(t *testing.T) {
 		assert.Equal(t, "Report", clicked.Name)
 	})
 }
+
+// TestTableShowField tests showing only some of the fields of the items
+// of a [TreeTable], with [Table.ShowField].
+func TestTableShowField(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tt := NewTreeTable(b)
+	tt.ShowField = func(field reflect.StructField) bool {
+		return field.Name != "Hours"
+	}
+	tt.SetItems(&tasks)
+	b.AssertRender(t, "tree-table/show-field", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		names := []string{}
+		for _, f := range tt.visibleFields {
+			names = append(names, f.Name)
+		}
+		assert.Equal(t, []string{"Name", "Done"}, names)
+	})
+}
