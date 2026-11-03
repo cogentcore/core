@@ -20,7 +20,7 @@ void clipClear();
 bool clipIsEmpty();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
-void clipWrite();
+bool clipWrite();
 void pushCursor(int);
 void popCursor();
 void setCursor(int);
@@ -86,8 +86,23 @@ type Clipboard struct {
 // CurMimeData is the current mime data to write to from cocoa side
 var CurMimeData *mimedata.Mimes
 
+// The clipboard is used on the main thread, as AppKit requires.
+
+// onMain runs the given function on the main thread,
+// directly if this is the main thread.
+func onMain(f func()) {
+	if onMainThread() {
+		f()
+		return
+	}
+	TheApp.RunOnMain(f)
+}
+
 func (cl *Clipboard) IsEmpty() bool {
-	ise := C.clipIsEmpty()
+	var ise C.bool
+	onMain(func() {
+		ise = C.clipIsEmpty()
+	})
 	return bool(ise)
 }
 
@@ -101,7 +116,9 @@ func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	wantText := mimedata.IsText(types[0])
 
 	if wantText {
-		C.clipReadText() // calls addMimeText
+		onMain(func() {
+			C.clipReadText() // calls addMimeText
+		})
 		if len(cl.Data) == 0 {
 			return nil
 		}
@@ -132,22 +149,29 @@ func (cl *Clipboard) WriteText(b []byte) {
 }
 
 func (cl *Clipboard) Write(data mimedata.Mimes) error {
-	cl.Clear()
-	if len(data) > 1 { // multipart
-		mpd := data.ToMultipart()
-		cl.WriteText(mpd)
-	} else {
-		d := data[0]
-		if mimedata.IsText(d.Type) {
+	if len(data) == 0 {
+		return nil
+	}
+	ok := C.bool(true)
+	onMain(func() {
+		C.clipClear()
+		if len(data) > 1 { // multipart
+			cl.WriteText(data.ToMultipart())
+		} else if d := data[0]; mimedata.IsText(d.Type) {
 			cl.WriteText(d.Data)
 		}
+		ok = C.clipWrite()
+	})
+	if !ok {
+		return errors.Log(errors.New("the clipboard was not written"))
 	}
-	C.clipWrite()
 	return nil
 }
 
 func (cl *Clipboard) Clear() {
-	C.clipClear()
+	onMain(func() {
+		C.clipClear()
+	})
 }
 
 //export addMimeText

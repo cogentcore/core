@@ -27,6 +27,7 @@ import (
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // Treer is an interface for [Tree] types
@@ -146,6 +147,17 @@ type Tree struct {
 	// SelectMode, when set on the root node, determines whether keyboard movements should update selection.
 	SelectMode bool
 
+	// NewNodeType, when set on the root node, is the type of the nodes that
+	// inserting before or after a node, or adding a child, adds one of,
+	// instead of prompting for the number and type of nodes to add.
+	// It applies to the [Tree.SyncNode] for a sync tree.
+	NewNodeType *types.Type `copier:"-" json:"-" xml:"-" edit:"-"`
+
+	// DragMoves, when set on the root node, is whether dragging nodes moves
+	// them by default, instead of copying them, in which case the modifier
+	// keys that otherwise move them (Shift) copy them.
+	DragMoves bool
+
 	// Computed fields:
 
 	// linear index of this node within the entire tree.
@@ -177,6 +189,10 @@ type Tree struct {
 
 	// Branch is the branch widget that is used to open and close the tree node.
 	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-" display:"-"`
+}
+
+func (tr *Tree) dragMovesDefault() bool {
+	return tr.Root != nil && tr.Root.AsCoreTree().DragMoves
 }
 
 // AsCoreTree satisfies the [Treer] interface.
@@ -329,6 +345,9 @@ func (tr *Tree) Init() {
 				e.SetHandled()
 			case keymap.InsertAfter:
 				tr.InsertAfter()
+				e.SetHandled()
+			case keymap.InsertChild:
+				tr.AddChildNode()
 				e.SetHandled()
 			case keymap.Cut:
 				tri.Cut()
@@ -1290,10 +1309,10 @@ func (tr *Tree) contextMenu(m *Scene, pos image.Point) {
 		return
 	}
 	tri := tr.This.(Treer)
-	NewFuncButton(m).SetFunc(tr.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).
+	NewFuncButton(m).SetFunc(tr.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetKey(keymap.InsertChild).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InsertBefore).SetIcon(icons.Add).SetKey(keymap.Insert).
 		SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).
+	NewFuncButton(m).SetFunc(tr.InsertAfter).SetIcon(icons.Add).SetKey(keymap.InsertAfter).
 		SetEnabled(tr.HasSelection())
 	NewFuncButton(m).SetFunc(tr.Duplicate).SetIcon(icons.ContentCopy).
 		SetEnabled(tr.HasSelection())

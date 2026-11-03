@@ -224,6 +224,11 @@ type ListBase struct { //core:no-new
 	// SelectMode is whether to be in select rows mode or editing mode.
 	SelectMode bool `set:"-" copier:"-" json:"-" xml:"-"`
 
+	// DragMoves is whether dragging rows moves them by default, instead of
+	// copying them, in which case the modifier keys that otherwise move
+	// them (Shift) copy them.
+	DragMoves bool
+
 	// ReadOnlyMultiSelect: if list is ReadOnly, default selection mode is to
 	// choose one row only. If this is true, standard multiple selection logic
 	// with modifier keys is instead supported.
@@ -253,8 +258,9 @@ func (lb *ListBase) Init() {
 		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(!lb.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 		// read-only rows are not focusable, so the list takes the focus for
-		// moving among them with the keys
-		s.SetAbilities(lb.IsReadOnly() && lb.ReadOnlyKeyNav, abilities.Focusable)
+		// moving among them with the keys, as it does when it has no rows,
+		// for the keys that insert them
+		s.SetAbilities((lb.IsReadOnly() && lb.ReadOnlyKeyNav) || (!lb.IsReadOnly() && lb.SliceSize == 0), abilities.Focusable)
 		s.Cursor = lb.currentCursor
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view
@@ -391,6 +397,8 @@ func (lb *ListBase) StyleValue(w Widget, s *styles.Style, row, col int) {
 	}
 	s.SetTextWrap(false)
 }
+
+func (lb *ListBase) dragMovesDefault() bool { return lb.DragMoves }
 
 func (lb *ListBase) AsListBase() *ListBase {
 	return lb
@@ -544,6 +552,15 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 			}
 		}
 		w.OnClick(oc)
+		w.On(events.MouseDown, func(e events.Event) {
+			// value widgets such as text fields handle the clicks into them
+			if lb.IsReadOnly() || e.SelectMode() != events.SelectOne {
+				return
+			}
+			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
+				lb.selectIndexQuiet(row + lb.StartIndex)
+			}
+		})
 		w.On(events.ContextMenu, func(e events.Event) {
 			// we must select the row on right click so that the context menu
 			// corresponds to the right row
@@ -1108,6 +1125,41 @@ func (lb *ListBase) updateSelectIndex(idx int, sel bool, selMode events.SelectMo
 	}
 }
 
+// selectIndexQuiet selects only the given slice index, if it is not
+// already the selected one, without moving the focus, which is on that
+// row or is going there, as for a click into a row.
+func (lb *ListBase) selectIndexQuiet(idx int) {
+	if idx < 0 || idx >= lb.SliceSize || (idx == lb.SelectedIndex && len(lb.SelectedIndexes) == 1 && lb.indexIsSelected(idx)) {
+		return
+	}
+	lb.unselectAllIndexes()
+	lb.SelectedIndex = idx
+	lb.SelectIndex(idx)
+	lb.lastClick = idx
+	lb.Send(events.Select)
+	lb.Restyle()
+}
+
+// selectFocusedRow selects the row with the focus, as after moving
+// the focus there with the tab key, if it is not the selected one.
+func (lb *ListBase) selectFocusedRow() {
+	em := lb.Events()
+	if em == nil || tree.IsNil(em.focus) || lb.ListGrid == nil {
+		return
+	}
+	for n := em.focus.AsTree(); n != nil && n.This != lb.This; n = n.Parent.AsTree() {
+		if n.Parent == lb.ListGrid.This {
+			if row, ok := n.Property(ListRowProperty).(int); ok {
+				lb.selectIndexQuiet(row + lb.StartIndex)
+			}
+			return
+		}
+		if n.Parent == nil {
+			return
+		}
+	}
+}
+
 // indexIsSelected returns the selected status of given slice index
 func (lb *ListBase) indexIsSelected(idx int) bool {
 	if lb.IsReadOnly() && !lb.ReadOnlyMultiSelect {
@@ -1363,8 +1415,21 @@ func (lb *ListBase) pasteIndex(idx int) { //types:add
 	}
 }
 
+// treeLister is implemented by lists of trees, such as [TreeTable], for
+// the copy and paste operations that work differently on trees, where
+// pasting is relative to the item at an index, and a move deletes the
+// moved items wherever they are, not those at the indexes of the rows.
+type treeLister interface {
+	makeTreePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
+	dropDeleteItems()
+}
+
 // makePasteMenu makes the menu of options for paste events
 func (lb *ListBase) makePasteMenu(m *Scene, pos image.Point, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+	if tp, ok := lb.This.(treeLister); ok {
+		tp.makeTreePasteMenu(m, md, idx, mod, fun)
+		return
+	}
 	ls := lb.This.(Lister)
 	if mod == events.DropCopy {
 		NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
@@ -1529,6 +1594,10 @@ func (lb *ListBase) dropFinalize(de *events.DragDrop) {
 
 // dropDeleteSource handles delete source event for DropMove case
 func (lb *ListBase) dropDeleteSource(e events.Event) {
+	if tl, ok := lb.This.(treeLister); ok {
+		tl.dropDeleteItems()
+		return
+	}
 	sort.Slice(lb.draggedIndexes, func(i, j int) bool {
 		return lb.draggedIndexes[i] > lb.draggedIndexes[j]
 	})
@@ -1634,6 +1703,7 @@ func (lb *ListBase) keyInputNav(kt events.Event) {
 }
 
 func (lb *ListBase) keyInputEditable(kt events.Event) {
+	lb.selectFocusedRow()
 	lb.keyInputNav(kt)
 	if kt.IsHandled() {
 		return
@@ -1866,6 +1936,7 @@ func (lg *ListGrid) Init() {
 }
 
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
+	lg.fixColumnWidths()
 	csz := lg.Frame.SizeFromChildren(iter, pass)
 	rht, err := lg.layout.rowHeight(0, 0)
 	rht += lg.layout.Gap.Y
@@ -1890,6 +1961,42 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	return csz
 }
 
+// ColumnWidther is implemented by lists with columns whose widths
+// can be set, such as [Table], for which the [ListGrid] makes the
+// cells of the columns have those widths, with the [ListColProperty]
+// of each cell as its column.
+type ColumnWidther interface {
+	// ColumnWidthDots returns the width of the given column in dots,
+	// or 0 if it is automatic.
+	ColumnWidthDots(col int) float32
+}
+
+// fixColumnWidths sets the widths of the cells in the columns whose
+// widths are set, which do not grow. This is done in the layout, where
+// the sizes of their padding, borders, and margins are known.
+func (lg *ListGrid) fixColumnWidths() {
+	cw, ok := lg.list().This.(ColumnWidther)
+	if !ok {
+		return
+	}
+	lg.forVisibleChildren(func(i int, w Widget, wb *WidgetBase) bool {
+		col, ok := wb.Property(ListColProperty).(int)
+		if !ok {
+			return tree.Continue
+		}
+		width := cw.ColumnWidthDots(col)
+		if width <= 0 {
+			return tree.Continue
+		}
+		wb.Styles.Grow.X = 0
+		sz := &wb.Geom.Size
+		space := sz.Actual.Total.X - sz.Actual.Content.X
+		sz.Actual.Total.X, sz.Actual.Content.X = width, max(width-space, 0)
+		sz.Alloc.Total.X, sz.Alloc.Content.X = sz.Actual.Total.X, sz.Actual.Content.X
+		return tree.Continue
+	})
+}
+
 func (lg *ListGrid) list() *ListBase {
 	ls := tree.ParentByType[Lister](lg)
 	return ls.AsListBase()
@@ -1910,6 +2017,11 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	ls.UpdateTree()
 	ls.NeedsRender()
 	// ls.NeedsLayout() // needed to recompute size after resize
+	if tt, ok := ls.This.(*TreeTable); ok && tt.HideGroupValues {
+		// the rows have other widgets for the items of groups,
+		// whose values are hidden, which need a layout
+		ls.NeedsLayout()
+	}
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {

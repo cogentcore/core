@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/textpos"
@@ -38,6 +39,22 @@ type Table struct {
 	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" display:"-" json:"-" xml:"-"`
 
+	// ColumnWidths are the widths of the columns, in Dp, by field name,
+	// for those whose widths are set, as the user does by dragging the
+	// handles between the column headers, which sends a change event.
+	// The other columns have automatic widths.
+	ColumnWidths map[string]float32
+
+	// ShowField, if set, returns whether to show the given field of the
+	// structs, which is otherwise shown unless its tags hide it, as for
+	// showing only some of the fields on a small screen. It must be set
+	// before the slice or items.
+	ShowField func(field reflect.StructField) bool `copier:"-" json:"-" xml:"-" display:"-"`
+
+	// rowButton is the button at the end of each row, if any
+	// (see [Table.SetRowButton]).
+	rowButton *tableRowButton
+
 	// sortIndex is the current sort index.
 	sortIndex int
 
@@ -57,6 +74,51 @@ type Table struct {
 	colMaxWidths []int
 
 	header *Frame
+}
+
+// tableRowButton is the button at the end of each row of a [Table].
+type tableRowButton struct {
+	icon    icons.Icon
+	tooltip string
+	fun     func(item any)
+}
+
+// SetRowButton adds an icon button with the given icon and tooltip at
+// the end of each row, which calls the given function with the item of
+// the row, a pointer to its struct, as for editing it in a [Form] on a
+// small screen, where the table shows only some of its fields. A nil
+// function removes the button.
+func (tb *Table) SetRowButton(icon icons.Icon, tooltip string, fun func(item any)) *Table {
+	if fun == nil {
+		tb.rowButton = nil
+		return tb
+	}
+	tb.rowButton = &tableRowButton{icon: icon, tooltip: tooltip, fun: fun}
+	return tb
+}
+
+// makeRowButton adds the button at the end of the given widget row
+// index to the given plan, if there is one (see [Table.SetRowButton]).
+func (tb *Table) makeRowButton(p *tree.Plan, i int) {
+	rb := tb.rowButton
+	if rb == nil {
+		return
+	}
+	tree.AddAt(p, "row-button-"+strconv.Itoa(i), func(w *Button) {
+		w.SetType(ButtonAction).SetIcon(rb.icon).SetTooltip(rb.tooltip)
+		w.OnClick(func(e events.Event) {
+			// the row has the item at the time of the click,
+			// as the rows show other items as the list scrolls
+			si, _, invis := tb.This.(Lister).SliceIndex(i)
+			if !invis {
+				rb.fun(reflectx.UnderlyingPointer(tb.sliceElementValue(si)).Interface())
+			}
+		})
+		w.Updater(func() {
+			_, _, invis := tb.This.(Lister).SliceIndex(i)
+			w.SetState(invis, states.Invisible)
+		})
+	})
 }
 
 // TableStyler is a styling function for custom styling and
@@ -106,10 +168,13 @@ func (tb *Table) Init() {
 
 // StyleValue performs additional value widget styling
 func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
-	hw := float32(tb.headerWidths[col])
-	if col == tb.sortIndex {
-		hw += 6
+	if tb.columnWidth(col) > 0 { // see ListGrid.fixColumnWidths
+		s.SetTextWrap(false)
+		return
 	}
+	// the header button has padding, the space of the sort indicator,
+	// and the handle after it
+	hw := float32(tb.headerWidths[col]) + 7
 	if len(tb.colMaxWidths) > col {
 		hw = max(float32(tb.colMaxWidths[col]), hw)
 	}
@@ -156,6 +221,9 @@ func (tb *Table) SetSlice(sl any) *Table {
 func (tb *Table) cacheVisibleFields() {
 	tb.visibleFields = make([]reflect.StructField, 0)
 	shouldShow := func(field reflect.StructField) bool {
+		if tb.ShowField != nil && !tb.ShowField(field) {
+			return false
+		}
 		tvtag := field.Tag.Get("table")
 		switch {
 		case tvtag == "+":
@@ -223,7 +291,7 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 		w.FinalStyler(func(s *styles.Style) {
 			s.Padding.Zero()
 			s.Grow.Set(0, 0)
-			s.Gap.Set(units.Em(0.5)) // matches grid default
+			s.Gap.Zero() // the widths of the columns include the gaps (see SizeFinal)
 		})
 		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
@@ -237,10 +305,15 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 			}
 			for fli := range tb.numVisibleFields {
 				field := tb.visibleFields[fli]
-				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
+				// the index is in the name, as it is in the closures, so that
+				// the header is remade when its field has another index
+				tree.AddAt(p, fmt.Sprintf("head-%d-%s", fli, field.Name), func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Styler(func(s *styles.Style) {
 						s.Justify.Content = styles.Start
+						if tb.compactHeader() {
+							s.Padding.SetHorizontal(units.Em(0.25))
+						}
 					})
 					w.OnClick(func(e events.Event) {
 						tb.SortColumn(fli)
@@ -265,14 +338,111 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 							} else {
 								w.SetIndicator(icons.KeyboardArrowUp)
 							}
+						} else if tb.compactHeader() {
+							w.SetIndicator(icons.None) // with only the room of the text
 						} else {
 							w.SetIndicator(icons.Blank)
 						}
 					})
 				})
+				tb.makeColumnHandle(p, fli)
 			}
 		})
 	})
+}
+
+// compactHeader returns whether the headers of the columns have only the
+// room of their text, as for a [TreeTable] with [TreeTable.FitWidth],
+// whose columns have the widths of their values.
+func (tb *Table) compactHeader() bool {
+	tt, ok := tb.This.(*TreeTable)
+	return ok && tt.FitWidth
+}
+
+// makeColumnHandle adds the handle after the header of the column of the
+// given visible field to the given plan, which sets its width by dragging,
+// and makes it automatic again by double clicking.
+func (tb *Table) makeColumnHandle(p *tree.Plan, fli int) {
+	field := tb.visibleFields[fli]
+	tree.AddAt(p, fmt.Sprintf("width-%d-%s", fli, field.Name), func(w *Handle) { // see head
+		w.SetTooltip("Drag to set the width of the column, or double click for the automatic width")
+		w.Styler(func(s *styles.Style) {
+			s.Direction = styles.Row
+			s.SetAbilities(false, abilities.Focusable)
+			s.SetAbilities(true, abilities.DoubleClickable)
+		})
+		w.FinalStyler(func(s *styles.Style) {
+			s.Min.X.Dp(3)
+			s.Min.Y.Em(1.5)
+			s.Margin.SetHorizontal(units.Dp(2))
+		})
+		var start float32 // the width of the column when the drag starts, in dots
+		w.On(events.SlideStart, func(e events.Event) {
+			start = tb.columnDots(fli)
+		})
+		w.On(events.SlideMove, func(e events.Event) {
+			e.SetHandled()
+			tb.setColumnWidth(fli, start+float32(e.Pos().X-e.StartPos().X))
+		})
+		w.On(events.SlideStop, func(e events.Event) {
+			tb.SendChange(e)
+		})
+		w.OnDoubleClick(func(e events.Event) {
+			delete(tb.ColumnWidths, field.Name)
+			tb.Restyle()
+			tb.NeedsLayout()
+			tb.SendChange(e)
+		})
+	})
+}
+
+// columnWidth returns the width of the column of the given visible field,
+// in Dp, if it is set, or else 0, for the automatic width.
+func (tb *Table) columnWidth(fli int) float32 {
+	if fli < 0 || fli >= len(tb.visibleFields) {
+		return 0
+	}
+	return tb.ColumnWidths[tb.visibleFields[fli].Name]
+}
+
+// ColumnWidthDots returns the width of the given column in dots,
+// or 0 if it is automatic (see [ColumnWidther]).
+func (tb *Table) ColumnWidthDots(col int) float32 {
+	return tb.columnWidth(col) * tb.Styles.UnitContext.Dots(units.UnitDp)
+}
+
+// columnCell returns the widget of the first row in the column of the
+// given visible field, or nil if there is none.
+func (tb *Table) columnCell(fli int) *WidgetBase {
+	_, idxOff := tb.This.(Lister).RowWidgetNs()
+	if tb.ListGrid == nil || idxOff+fli >= tb.ListGrid.NumChildren() {
+		return nil
+	}
+	return AsWidget(tb.ListGrid.Child(idxOff + fli))
+}
+
+// columnDots returns the width of the column of the given visible
+// field, in dots, without the gap after it.
+func (tb *Table) columnDots(fli int) float32 {
+	if c := tb.columnCell(fli); c != nil {
+		return c.Geom.Size.Alloc.Total.X
+	}
+	return 0
+}
+
+// setColumnWidth sets the width of the column of the given visible field
+// to the given width in dots, with a minimum of 16 Dp.
+func (tb *Table) setColumnWidth(fli int, dots float32) {
+	c := tb.columnCell(fli)
+	if c == nil {
+		return
+	}
+	if tb.ColumnWidths == nil {
+		tb.ColumnWidths = map[string]float32{}
+	}
+	tb.ColumnWidths[tb.visibleFields[fli].Name] = max(dots/tb.Styles.UnitContext.Dots(units.UnitDp), 16)
+	tb.Restyle()
+	tb.NeedsLayout()
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -283,6 +453,9 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
+	if tb.rowButton != nil {
+		nWidgPerRow++
+	}
 	return
 }
 
@@ -290,68 +463,99 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	val := tb.sliceElementValue(si)
-	valPtr := reflectx.UnderlyingPointer(val).Interface()
 
 	if tb.ShowIndexes {
 		tb.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
 	for fli := range tb.numVisibleFields {
-		field := tb.visibleFields[fli]
-		uvp := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
-		uv := uvp.Elem()
-		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
-		tags := field.Tag
-		if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
-			ni := reflect.StructTag(`display:"no-inline" new-window:"+"`)
-			if tags == "" {
-				tags += " " + ni
-			} else {
-				tags = ni
-			}
+		tb.makeFieldValue(p, i, fli)
+	}
+	tb.makeRowButton(p, i)
+}
+
+// valueHider is implemented by tables such as [TreeTable] that do not show
+// some of their values, which have empty frames in their place.
+type valueHider interface {
+	// hideValue returns whether to hide the value of the given visible
+	// field at the given slice index.
+	hideValue(si, fli int) bool
+}
+
+// makeFieldValue adds the value widget for the given visible field
+// at the given widget row index to the given plan.
+func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
+	svi := tb.This.(Lister)
+	si, _, _ := svi.SliceIndex(i)
+	itxt := strconv.Itoa(i)
+	val := tb.sliceElementValue(si)
+	valPtr := reflectx.UnderlyingPointer(val).Interface()
+
+	field := tb.visibleFields[fli]
+	uvp := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
+	uv := uvp.Elem()
+	valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
+	tags := field.Tag
+	if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
+		ni := reflect.StructTag(`display:"no-inline" new-window:"+"`)
+		if tags == "" {
+			tags += " " + ni
+		} else {
+			tags = ni
 		}
-		readOnlyTag := tags.Get("edit") == "-"
+	}
+	readOnlyTag := tags.Get("edit") == "-"
 
-		tree.AddNew(p, valnm, func() Value {
-			return NewFieldValue(field.Name, valPtr, uvp.Interface(), tags)
-		}, func(w Value) {
-			wb := w.AsWidget()
-			tb.MakeValue(w, i)
-			w.AsTree().SetProperty(ListColProperty, fli)
-			if !tb.IsReadOnly() && !readOnlyTag {
-				wb.OnChange(func(e events.Event) {
-					tb.This.(Lister).UpdateMaxWidths()
-					tb.SendChange()
-				})
-			}
-			wb.Updater(func() {
-				si, vi, invis := svi.SliceIndex(i)
-				val := tb.sliceElementValue(vi)
-				upv := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
-				Bind(upv.Interface(), w)
+	if vh, ok := tb.This.(valueHider); ok {
+		if si, _, invis := svi.SliceIndex(i); !invis && vh.hideValue(si, fli) {
+			// an empty frame in its cell, with its name, so that the value
+			// is made again for another item in the row
+			tree.AddAt(p, "hidden-"+valnm, func(w *Frame) {
+				w.SetProperty(ListRowProperty, i)
+				w.SetProperty(ListColProperty, fli)
+			})
+			return
+		}
+	}
 
-				vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
-				if !invis {
-					if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
-						slbl := lblr.ElemLabel(si)
-						if slbl != "" {
-							vc = joinValueTitle(tb.ValueTitle, slbl)
-						}
+	tree.AddNew(p, valnm, func() Value {
+		return NewFieldValue(field.Name, valPtr, uvp.Interface(), tags)
+	}, func(w Value) {
+		wb := w.AsWidget()
+		tb.MakeValue(w, i)
+		w.AsTree().SetProperty(ListColProperty, fli)
+		if !tb.IsReadOnly() && !readOnlyTag {
+			wb.OnChange(func(e events.Event) {
+				tb.This.(Lister).UpdateMaxWidths()
+				tb.SendChange()
+			})
+		}
+		wb.Updater(func() {
+			si, vi, invis := svi.SliceIndex(i)
+			val := tb.sliceElementValue(vi)
+			upv := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
+			Bind(upv.Interface(), w)
+
+			vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
+			if !invis {
+				if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
+					slbl := lblr.ElemLabel(si)
+					if slbl != "" {
+						vc = joinValueTitle(tb.ValueTitle, slbl)
 					}
 				}
-				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
-				wb.SetReadOnly(tb.IsReadOnly() || readOnlyTag)
-				wb.SetState(invis, states.Invisible)
-				if svi.HasStyler() {
-					w.Style()
-				}
-				if invis {
-					wb.SetSelected(false)
-				}
-			})
+			}
+			wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
+			wb.SetReadOnly(tb.IsReadOnly() || readOnlyTag)
+			wb.SetState(invis, states.Invisible)
+			if svi.HasStyler() {
+				w.Style()
+			}
+			if invis {
+				wb.SetSelected(false)
+			}
 		})
-	}
+	})
 }
 
 func (tb *Table) HasStyler() bool {
@@ -404,13 +608,14 @@ func (tb *Table) SortSlice() {
 
 // SortColumn sorts the slice for the given field index.
 // It toggles between ascending and descending if already
-// sorting on this field.
+// sorting on this field. It sends a change event if the
+// table is not read-only, as the slice is reordered.
 func (tb *Table) SortColumn(fieldIndex int) {
 	sgh := tb.header
 	_, idxOff := tb.RowWidgetNs()
 
 	for fli := range tb.numVisibleFields {
-		hdr := sgh.Child(idxOff + fli).(*Button)
+		hdr := sgh.Child(idxOff + 2*fli).(*Button) // with the handles after them
 		hdr.SetType(ButtonAction)
 		if fli == fieldIndex {
 			if tb.sortIndex == fli {
@@ -424,11 +629,14 @@ func (tb *Table) SortColumn(fieldIndex int) {
 	tb.sortIndex = fieldIndex
 	tb.SortSlice()
 	tb.Update()
+	if !tb.IsReadOnly() {
+		tb.SendChange()
+	}
 }
 
-// sortFieldName returns the name of the field being sorted, along with :up or
-// :down depending on ascending or descending sorting.
-func (tb *Table) sortFieldName() string {
+// SortFieldName returns the name of the field being sorted, along with :up or
+// :down depending on ascending or descending sorting, or "" if none is.
+func (tb *Table) SortFieldName() string {
 	if tb.sortIndex >= 0 && tb.sortIndex < tb.numVisibleFields {
 		nm := tb.visibleFields[tb.sortIndex].Name
 		if tb.sortDescending {
@@ -441,9 +649,11 @@ func (tb *Table) sortFieldName() string {
 	return ""
 }
 
-// setSortFieldName sets sorting to happen on given field and direction
-// see [Table.sortFieldName] for details.
-func (tb *Table) setSortFieldName(nm string) {
+// SetSortFieldName sets sorting to happen on given field and direction,
+// as from [Table.SortFieldName], with no sorting for "" or a field that
+// it does not have.
+func (tb *Table) SetSortFieldName(nm string) {
+	tb.sortIndex = -1
 	if nm == "" {
 		return
 	}
@@ -582,16 +792,32 @@ func (tb *Table) SizeFinal() {
 		return
 	}
 	sh := tb.header
-	sh.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		sgb := AsWidget(sg.Child(i))
-		gsz := &sgb.Geom.Size
-		ksz := &cwb.Geom.Size
-		ksz.Actual.Total.X = gsz.Actual.Total.X
-		ksz.Actual.Content.X = gsz.Actual.Content.X
-		ksz.Alloc.Total.X = gsz.Alloc.Total.X
-		ksz.Alloc.Content.X = gsz.Alloc.Content.X
-		return tree.Continue
-	})
+	// the header of each column, with the handle after it, has the width
+	// of the column, with the gap after it, as the header has no gaps
+	_, idxOff := tb.This.(Lister).RowWidgetNs()
+	if sh == nil || sh.NumChildren() != idxOff+2*tb.numVisibleFields || sg.NumChildren() < idxOff+tb.numVisibleFields {
+		return
+	}
+	gap := sg.Styles.Gap.X.Dots
+	setWidth := func(w *WidgetBase, width float32) {
+		ksz := &w.Geom.Size
+		d := width - ksz.Actual.Total.X
+		ksz.Actual.Total.X += d
+		ksz.Actual.Content.X += d
+		ksz.Alloc.Total.X = ksz.Actual.Total.X
+		ksz.Alloc.Content.X = ksz.Actual.Content.X
+	}
+	colWidth := func(i int) float32 {
+		return AsWidget(sg.Child(i)).Geom.Size.Alloc.Total.X + gap
+	}
+	if idxOff > 0 {
+		setWidth(AsWidget(sh.Child(0)), colWidth(0))
+	}
+	for fli := range tb.numVisibleFields {
+		hi := idxOff + 2*fli
+		handle := AsWidget(sh.Child(hi + 1)).Geom.Size.Actual.Total.X
+		setWidth(AsWidget(sh.Child(hi)), colWidth(idxOff+fli)-handle)
+	}
 	gsz := &sg.Geom.Size
 	ksz := &sh.Geom.Size
 	ksz.Actual.Total.X = gsz.Actual.Total.X

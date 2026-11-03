@@ -68,9 +68,7 @@ func (em *Events) SetDragImage(img image.Image) {
 	if !ok {
 		return
 	}
-	nsp := NewImageSprite(dragSpriteName, sp.EventBBox.Min, em.dragImage)
-	nsp.Active = true
-	ms.Sprites.Add(nsp)
+	em.addDragSprites(sp.EventBBox.Min)
 }
 
 // InWindow returns whether the given position, in window coordinates

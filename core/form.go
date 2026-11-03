@@ -134,6 +134,7 @@ func (fm *Form) Init() {
 		s.Display = styles.Grid
 		if fm.SizeClass() == SizeCompact {
 			s.Columns = 1
+			s.Grow.X = 1 // with the values, which fill it
 		} else {
 			s.Columns = 2
 		}
@@ -248,6 +249,14 @@ func (fm *Form) Init() {
 			}, func(w Value) {
 				valueWidget = w
 				wb := w.AsWidget()
+				wb.Styler(func(s *styles.Style) {
+					// the values fill the width of a small screen, but for a
+					// switch, which would be at the end of it
+					if _, isSwitch := w.(*Switch); fm.SizeClass() == SizeCompact && !fm.Inline && !isSwitch {
+						s.Grow.X = 1
+						s.Max.X.Zero() // such as the 40ch of a TextField
+					}
+				})
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
 				// InitValueButton may set starting wb.Tooltip in Init
 				if wb.Tooltip == "" {

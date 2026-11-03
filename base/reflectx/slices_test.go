@@ -6,6 +6,8 @@ package reflectx
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type TestStruct struct {
@@ -128,4 +130,23 @@ func TestSliceType(t *testing.T) {
 
 	// fmt.Printf("slsl kind: %v\n", SliceElType(slsl).Kind())
 
+}
+
+func TestStructSliceSortBool(t *testing.T) {
+	type item struct {
+		Name string
+		Done bool
+	}
+	items := []*item{{"a", true}, {"b", false}, {"c", true}, {"d", false}}
+	assert.NoError(t, StructSliceSort(items, []int{1}, true))
+	names := func() string {
+		s := ""
+		for _, it := range items {
+			s += it.Name
+		}
+		return s
+	}
+	assert.Equal(t, "bdac", names(), "false first, in the same order")
+	assert.NoError(t, StructSliceSort(items, []int{1}, false))
+	assert.Equal(t, "acbd", names(), "true first, in the same order")
 }

@@ -147,7 +147,9 @@ func SliceSort(sl any, ascending bool) error {
 }
 
 // StructSliceSort sorts the given slice of structs according to the given field
-// indexes and sort direction, using float, int, string, and [time.Time] conversions.
+// indexes and sort direction, using bool (false first), float, int, string,
+// and [time.Time] conversions. The sort is stable, so that the order of the
+// structs with equal values stays the same, as for sorting again.
 // It will panic if the field indexes are invalid.
 func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 	sv := reflect.ValueOf(structSlice)
@@ -165,8 +167,20 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 
 	// try all the numeric types first!
 	switch {
+	case vk == reflect.Bool:
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
+			ival := OnePointerValue(svnp.Index(i))
+			iv := ival.Elem().FieldByIndex(fieldIndex).Bool()
+			jval := OnePointerValue(svnp.Index(j))
+			jv := jval.Elem().FieldByIndex(fieldIndex).Bool()
+			if ascending {
+				return !iv && jv
+			}
+			return iv && !jv
+		})
+		return nil
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).Int()
 			jval := OnePointerValue(svnp.Index(j))
@@ -178,7 +192,7 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 		})
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).Uint()
 			jval := OnePointerValue(svnp.Index(j))
@@ -190,7 +204,7 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 		})
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).Float()
 			jval := OnePointerValue(svnp.Index(j))
@@ -202,7 +216,7 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 		})
 		return nil
 	case vk == reflect.Struct && ShortTypeName(fld.Type) == "time.Time":
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).Interface().(time.Time)
 			jval := OnePointerValue(svnp.Index(j))
@@ -217,7 +231,7 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 	// this stringer case will likely pick up most of the rest
 	switch fieldIf.(type) {
 	case fmt.Stringer:
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).Interface().(fmt.Stringer).String()
 			jval := OnePointerValue(svnp.Index(j))
@@ -233,7 +247,7 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 	// last resort!
 	switch {
 	case vk == reflect.String:
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
+		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).String()
 			jval := OnePointerValue(svnp.Index(j))

@@ -7,6 +7,7 @@ package core
 import (
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/colors"
@@ -297,6 +298,7 @@ func (dp *DatePicker) Init() {
 
 // TimeInput presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker dialogs.
+// The zero time is shown as blank, and clearing the date makes it zero.
 type TimeInput struct {
 	Frame
 	Time time.Time
@@ -333,13 +335,22 @@ func (ti *TimeInput) Init() {
 		}
 	}
 
+	// pickTime is the time for the pickers to start at, which is
+	// the current time for the zero time
+	pickTime := func() time.Time {
+		if ti.Time.IsZero() {
+			return time.Now()
+		}
+		return ti.Time
+	}
+
 	ti.Maker(func(p *tree.Plan) {
 		if ti.DisplayDate {
 			tree.Add(p, func(w *TextField) {
 				w.SetTooltip("The date")
 				w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 					d := NewBody("Select date")
-					dp := NewDatePicker(d).SetTime(ti.Time)
+					dp := NewDatePicker(d).SetTime(pickTime())
 					d.AddBottomBar(func(bar *Frame) {
 						d.AddCancel(bar)
 						d.AddOK(bar).OnClick(func(e events.Event) {
@@ -352,15 +363,28 @@ func (ti *TimeInput) Init() {
 				w.Styler(style)
 				w.Updater(func() {
 					w.SetReadOnly(ti.IsReadOnly())
-					w.SetText(ti.Time.Format("1/2/2006"))
+					if ti.Time.IsZero() {
+						w.SetText("")
+					} else {
+						w.SetText(ti.Time.Format("1/2/2006"))
+					}
 				})
 				w.SetValidator(func() error {
+					if strings.TrimSpace(w.Text()) == "" {
+						ti.Time = time.Time{}
+						ti.SendChange()
+						return nil
+					}
 					d, err := time.Parse("1/2/2006", w.Text())
 					if err != nil {
 						return err
 					}
-					// new date and old time
-					ti.Time = time.Date(d.Year(), d.Month(), d.Day(), ti.Time.Hour(), ti.Time.Minute(), ti.Time.Second(), ti.Time.Nanosecond(), ti.Time.Location())
+					// new date and old time, which is midnight for the zero time
+					loc := ti.Time.Location()
+					if ti.Time.IsZero() {
+						loc = time.Local
+					}
+					ti.Time = time.Date(d.Year(), d.Month(), d.Day(), ti.Time.Hour(), ti.Time.Minute(), ti.Time.Second(), ti.Time.Nanosecond(), loc)
 					ti.SendChange()
 					return nil
 				})
@@ -372,7 +396,7 @@ func (ti *TimeInput) Init() {
 				w.SetTooltip("The time")
 				w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
 					d := NewBody("Edit time")
-					tp := NewTimePicker(d).SetTime(ti.Time)
+					tp := NewTimePicker(d).SetTime(pickTime())
 					d.AddBottomBar(func(bar *Frame) {
 						d.AddCancel(bar)
 						d.AddOK(bar).OnClick(func(e events.Event) {
@@ -385,15 +409,28 @@ func (ti *TimeInput) Init() {
 				w.Styler(style)
 				w.Updater(func() {
 					w.SetReadOnly(ti.IsReadOnly())
-					w.SetText(ti.Time.Format(SystemSettings.TimeFormat()))
+					if ti.Time.IsZero() {
+						w.SetText("")
+					} else {
+						w.SetText(ti.Time.Format(SystemSettings.TimeFormat()))
+					}
 				})
 				w.SetValidator(func() error {
+					if strings.TrimSpace(w.Text()) == "" {
+						if ti.DisplayDate {
+							return nil // the date can be cleared
+						}
+						ti.Time = time.Time{}
+						ti.SendChange()
+						return nil
+					}
 					t, err := time.Parse(SystemSettings.TimeFormat(), w.Text())
 					if err != nil {
 						return err
 					}
-					// old date and new time
-					ti.Time = time.Date(ti.Time.Year(), ti.Time.Month(), ti.Time.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), ti.Time.Location())
+					// old date, which is today for the zero time, and new time
+					old := pickTime()
+					ti.Time = time.Date(old.Year(), old.Month(), old.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), old.Location())
 					ti.SendChange()
 					return nil
 				})

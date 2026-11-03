@@ -8,6 +8,7 @@
 package ios
 
 import (
+	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -123,12 +124,20 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	return nil
 }
 
+// DataDir returns the Library directory in the home directory of the app,
+// its sandbox container, which iOS gives in HOME, where the app can write.
+// It is not the home directory of the user, as from [user.Current], which
+// is /var/mobile, where the app cannot write.
 func (a *App) DataDir() string {
-	usr, err := user.Current()
-	if errors.Log(err) != nil {
-		return "/tmp"
+	home := os.Getenv("HOME")
+	if home == "" {
+		usr, err := user.Current()
+		if errors.Log(err) != nil {
+			return "/tmp"
+		}
+		home = usr.HomeDir
 	}
-	return filepath.Join(usr.HomeDir, "Library")
+	return filepath.Join(home, "Library")
 }
 
 func (a *App) Platform() system.Platforms {

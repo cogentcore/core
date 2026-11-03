@@ -6,6 +6,9 @@ package core
 
 import (
 	"testing"
+
+	"cogentcore.org/core/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTree(t *testing.T) {
@@ -75,5 +78,30 @@ func TestTreeDuplicate(t *testing.T) {
 			}
 			return true
 		})
+	})
+}
+
+// TestTreeNewNodeType tests that inserting and adding nodes adds one
+// of the NewNodeType, without a dialog, for a sync tree and a tree.
+func TestTreeNewNodeType(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame()
+	NewButton(fr)
+	NewText(fr)
+	st := NewTree(b).SyncTree(fr)
+	st.NewNodeType = types.For[Text]()
+	root := NewTree(b).SetText("root")
+	a := NewTree(root).SetText("a")
+	root.NewNodeType = types.For[Tree]()
+	b.AssertRender(t, "tree/new-node-type", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		AsTree(st.Child(0)).InsertAfter()
+		assert.Equal(t, 3, fr.NumChildren())
+		assert.IsType(t, &Text{}, fr.Child(1))
+		a.InsertBefore()
+		a.AddChildNode()
+		assert.Equal(t, 2, root.NumChildren())
+		assert.Equal(t, 1, a.NumChildren(), "added at once, without a dialog")
 	})
 }

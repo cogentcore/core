@@ -107,6 +107,13 @@ type TextField struct { //core:embedder
 	// edited is whether the text has been edited relative to the original.
 	edited bool
 
+	// accepted is whether the edits were accepted with [keymap.Accept],
+	// after which the text field has the focus without a cursor, and the
+	// keys of key functions go on to the widgets around it, such as for
+	// the items of a list, until editing resumes with the typing of a
+	// character, a click, or the focus.
+	accepted bool
+
 	// editText is the live text string being edited, with the latest modifications.
 	editText []rune
 
@@ -290,6 +297,7 @@ func (tf *TextField) Init() {
 		}
 	})
 	tf.OnClick(func(e events.Event) {
+		tf.accepted = false
 		if !tf.IsReadOnly() {
 			tf.SetFocus()
 		}
@@ -458,6 +466,13 @@ func (tf *TextField) Destroy() {
 func (tf *TextField) Text() string {
 	tf.editDone()
 	return tf.text
+}
+
+// Edited returns whether the text of the text field is edited, with edits
+// that are not applied yet, as while typing, which [TextField.SetText]
+// would revert.
+func (tf *TextField) Edited() bool {
+	return tf.edited
 }
 
 // SetText sets the text of the text field and reverts any current edits
@@ -952,7 +967,8 @@ func (tf *TextField) deleteSelection() string {
 	return cut
 }
 
-// copy copies any selected text to the clipboard.
+// copy copies any selected text to the clipboard, and then
+// clears the selection, which shows that it was copied.
 func (tf *TextField) copy() { //types:add
 	if tf.NoEcho {
 		return
@@ -964,6 +980,7 @@ func (tf *TextField) copy() { //types:add
 
 	md := mimedata.NewText(tf.selection())
 	tf.Clipboard().Write(md)
+	tf.selectReset()
 }
 
 // paste inserts text from the clipboard at current cursor position; if
@@ -1459,6 +1476,7 @@ func (tf *TextField) setCursorFromPixel(pt image.Point, selMode events.SelectMod
 
 func (tf *TextField) handleKeyEvents() {
 	tf.On(events.Composition, func(e events.Event) {
+		tf.accepted = false
 		tf.compose(e.(*events.TextComposition))
 		e.SetHandled()
 	})
@@ -1469,6 +1487,12 @@ func (tf *TextField) handleKeyEvents() {
 		}
 		if !tf.StateIs(states.Focused) && kf == keymap.Abort {
 			return
+		}
+		if tf.accepted {
+			if kf != keymap.None {
+				return
+			}
+			tf.accepted = false
 		}
 		tf.startCursor()
 
@@ -1548,6 +1572,7 @@ func (tf *TextField) handleKeyEvents() {
 			e.SetHandled()
 			tf.cancelComplete()
 			tf.editDone()
+			tf.accepted = true
 		case keymap.FocusPrev:
 			e.SetHandled()
 			tf.cancelComplete()
@@ -1625,6 +1650,7 @@ func (tf *TextField) handleKeyEvents() {
 		}
 	})
 	tf.OnFocus(func(e events.Event) {
+		tf.accepted = false
 		if tf.IsReadOnly() {
 			e.SetHandled()
 		} else {
