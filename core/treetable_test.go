@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -810,5 +811,27 @@ func TestTreeTableColumnLongText(t *testing.T) {
 			value := AsWidget(cell.Child(cell.NumChildren() - 1))
 			assert.InDelta(t, cell.Geom.TotalBBox.Max.X, value.Geom.TotalBBox.Max.X, 2, "row %d", row)
 		}
+	})
+}
+
+// TestTreeTableInsertSorted tests that inserting an item while the items
+// are sorted puts the focus on its row after it is sorted.
+func TestTreeTableInsertSorted(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.SetSortFieldName("Done:down") // Email, done, before Report
+	b.AssertRender(t, "tree-table/insert-sorted", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tt.Update()
+		assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt))
+		tt.InsertBefore(1) // before Email, but not done, so after it
+		nw, _ := tt.RowWidgetNs()
+		idx := slices.Index(rowNames(tt), "  ")
+		assert.Equal(t, 2, idx, "sorted after Email")
+		assert.Equal(t, idx, tt.SelectedIndex)
+		cell := tt.ListGrid.Child(idx * nw).AsTree()
+		assert.True(t, cell.Child(cell.NumChildren()-1).(Widget).AsWidget().StateIs(states.Focused), "the focus is on its row")
 	})
 }

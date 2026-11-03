@@ -448,13 +448,14 @@ func (tt *TreeTable) siblingsOf(idx int) (reflect.Value, int) {
 // edited updates the rows after the items are edited, selects
 // the given item, and sends a change event.
 func (tt *TreeTable) edited(item reflect.Value) {
+	tt.sortItems() // as the update does, so that the item is in its row
 	tt.updateRows()
 	idx := tt.rowOf(item)
 	if idx >= 0 {
 		tt.SelectIndexEvent(idx, events.SelectOne)
 	}
 	tt.UpdateChange()
-	if idx >= 0 {
+	if idx = tt.rowOf(item); idx >= 0 {
 		tt.IndexGrabFocus(idx)
 	}
 }
