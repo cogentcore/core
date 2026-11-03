@@ -707,3 +707,27 @@ func TestTreeTableSortBool(t *testing.T) {
 		assert.Equal(t, []string{"Work", "  Report", "    Outline", "  Email", "Home", "  Dishes", "Errands"}, rowNames(tt))
 	})
 }
+
+func TestTreeTableHideGroupValues(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.HideGroupValues = true
+	b.AssertRender(t, "tree-table/hide-group-values", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		nw, _ := tt.RowWidgetNs()
+		hidden := func(row, col int) bool {
+			return AsWidget(tt.ListGrid.Child(row*nw+col)).Styles.Opacity == 0
+		}
+		assert.True(t, hidden(0, 1), "Work, a group")
+		assert.True(t, hidden(0, 2))
+		assert.False(t, hidden(0, 0), "with its tree")
+		assert.False(t, hidden(1, 1), "Email, an item")
+		tt.HideGroupValues = false
+		tt.Update()
+		assert.False(t, hidden(0, 1))
+		tt.HideGroupValues = true // for the image
+		tt.Update()
+	})
+}

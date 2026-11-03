@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -399,6 +401,14 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	}
 }
 
+// valueHider is implemented by tables such as [TreeTable] that do not show
+// some of their values, which are transparent, keeping their space.
+type valueHider interface {
+	// hideValue returns whether to hide the value of the given visible
+	// field at the given slice index.
+	hideValue(si, fli int) bool
+}
+
 // makeFieldValue adds the value widget for the given visible field
 // at the given widget row index to the given plan.
 func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
@@ -429,6 +439,16 @@ func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
 		wb := w.AsWidget()
 		tb.MakeValue(w, i)
 		w.AsTree().SetProperty(ListColProperty, fli)
+		if vh, ok := tb.This.(valueHider); ok {
+			wb.FinalStyler(func(s *styles.Style) {
+				// hidden values keep their space, for the columns
+				if si, _, invis := svi.SliceIndex(i); !invis && vh.hideValue(si, fli) {
+					s.Opacity = 0
+					s.Color = colors.Uniform(color.Transparent) // for text
+					s.Abilities = 0
+				}
+			})
+		}
 		if !tb.IsReadOnly() && !readOnlyTag {
 			wb.OnChange(func(e events.Event) {
 				tb.This.(Lister).UpdateMaxWidths()

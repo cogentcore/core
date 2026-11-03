@@ -47,6 +47,11 @@ type TreeTable struct {
 	// Items is the pointer to the slice of the top-level items.
 	Items any `set:"-"`
 
+	// HideGroupValues is whether the items with children, which are groups
+	// of items, such as categories, show only the tree, and not the values
+	// of their other fields.
+	HideGroupValues bool
+
 	// itemsSet is the Items for which the item type and rows were set.
 	itemsSet any
 
@@ -1070,6 +1075,12 @@ func (tt *TreeTable) rowContextMenu(i int) func(e events.Event) {
 		}
 		tt.HandleEvent(e)
 	}
+}
+
+// hideValue returns whether to hide the value of the given visible
+// field at the given slice index, for [TreeTable.HideGroupValues].
+func (tt *TreeTable) hideValue(si, fli int) bool {
+	return tt.HideGroupValues && fli > 0 && tt.validIndex(si) && tt.numChildren(tt.rows[si].item) > 0
 }
 
 // RowGrabFocus grabs the focus for the first focusable value widget in the
