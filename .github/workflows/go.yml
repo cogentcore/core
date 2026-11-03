@@ -16,7 +16,10 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    # 24.04, not latest (26.04), for which ppa:savoury1/ffmpeg4 has no packages,
+    # so that apt installs ffmpeg 7+, without swr_alloc_set_opts, which reisen
+    # (video) uses; remove this when the video package no longer uses reisen
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
 
