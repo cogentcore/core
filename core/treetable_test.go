@@ -683,3 +683,27 @@ func TestTreeTableEmpty(t *testing.T) {
 		assert.False(t, tt.CanFocus(), "the rows have the focus now")
 	})
 }
+
+// TestTreeTableSortBool tests sorting by a bool column by clicking its
+// header, within the children of each item.
+func TestTreeTableSortBool(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tasks = append(tasks, &task{Name: "Errands", Done: true})
+	tt := NewTreeTable(b).SetItems(&tasks)
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/sort-bool", func() {
+		b.AsyncLock()
+		bb := AsWidget(tt.header.Child(2)).Geom.TotalBBox // the header of Done
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		pt := bb.Min.Add(bb.Size().Div(2))
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, 1, tt.sortIndex)
+		assert.Equal(t, []string{"Work", "  Report", "    Outline", "  Email", "Home", "  Dishes", "Errands"}, rowNames(tt))
+	})
+}
