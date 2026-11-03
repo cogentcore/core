@@ -154,6 +154,7 @@ func (tt *TreeTable) setItems() {
 		tt.SelectedIndex = min(current, len(tt.rows)-1)
 		return
 	}
+	sort := tt.SortFieldName() // kept by name, for the new fields
 	tt.itemsSet = tt.Items
 	tt.itemType = nil
 	tt.rows = nil
@@ -175,6 +176,7 @@ func (tt *TreeTable) setItems() {
 	tt.sliceUnderlying = rows.Elem()
 	tt.elementValue = reflect.New(tt.itemType).Elem()
 	tt.cacheVisibleFields()
+	tt.SetSortFieldName(sort) // before any update in SetSliceBase, which can set it
 	tt.updateRows()
 	tt.SetSliceBase()
 }

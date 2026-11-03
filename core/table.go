@@ -513,7 +513,8 @@ func (tb *Table) SortSlice() {
 
 // SortColumn sorts the slice for the given field index.
 // It toggles between ascending and descending if already
-// sorting on this field.
+// sorting on this field. It sends a change event if the
+// table is not read-only, as the slice is reordered.
 func (tb *Table) SortColumn(fieldIndex int) {
 	sgh := tb.header
 	_, idxOff := tb.RowWidgetNs()
@@ -533,11 +534,14 @@ func (tb *Table) SortColumn(fieldIndex int) {
 	tb.sortIndex = fieldIndex
 	tb.SortSlice()
 	tb.Update()
+	if !tb.IsReadOnly() {
+		tb.SendChange()
+	}
 }
 
-// sortFieldName returns the name of the field being sorted, along with :up or
-// :down depending on ascending or descending sorting.
-func (tb *Table) sortFieldName() string {
+// SortFieldName returns the name of the field being sorted, along with :up or
+// :down depending on ascending or descending sorting, or "" if none is.
+func (tb *Table) SortFieldName() string {
 	if tb.sortIndex >= 0 && tb.sortIndex < tb.numVisibleFields {
 		nm := tb.visibleFields[tb.sortIndex].Name
 		if tb.sortDescending {
@@ -550,9 +554,11 @@ func (tb *Table) sortFieldName() string {
 	return ""
 }
 
-// setSortFieldName sets sorting to happen on given field and direction
-// see [Table.sortFieldName] for details.
-func (tb *Table) setSortFieldName(nm string) {
+// SetSortFieldName sets sorting to happen on given field and direction,
+// as from [Table.SortFieldName], with no sorting for "" or a field that
+// it does not have.
+func (tb *Table) SetSortFieldName(nm string) {
+	tb.sortIndex = -1
 	if nm == "" {
 		return
 	}
