@@ -468,6 +468,13 @@ func (tf *TextField) Text() string {
 	return tf.text
 }
 
+// Edited returns whether the text of the text field is edited, with edits
+// that are not applied yet, as while typing, which [TextField.SetText]
+// would revert.
+func (tf *TextField) Edited() bool {
+	return tf.edited
+}
+
 // SetText sets the text of the text field and reverts any current edits
 // to reflect this new text.
 func (tf *TextField) SetText(text string) *TextField {

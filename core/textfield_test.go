@@ -261,3 +261,15 @@ func TestTextFieldCopy(t *testing.T) {
 		assert.False(t, tf.hasSelection(), "the selection is cleared")
 	})
 }
+
+func TestTextFieldEdited(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("text")
+	assert.False(t, tf.Edited())
+	tf.editText = []rune("texts")
+	tf.textEdited()
+	assert.True(t, tf.Edited())
+	tf.editDone()
+	assert.False(t, tf.Edited(), "applied")
+	assert.Equal(t, "texts", tf.Text())
+}
