@@ -117,14 +117,15 @@ func DefaultModBits(mods key.Modifiers) DropMods {
 // DropModFor returns the DropMod modifier action for the given modifier
 // keys, as [DefaultModBits] does, except that if moveDefault is true, the
 // action without modifier keys is to move, and the keys that otherwise
-// move instead copy.
+// move instead copy. The lock keys, CapsLock and NumLock, which the
+// macOS key events always have, are not modifier keys for this.
 func DropModFor(mods key.Modifiers, moveDefault bool) DropMods {
 	mod := DefaultModBits(mods)
 	if !moveDefault {
 		return mod
 	}
 	switch {
-	case mods == 0:
+	case !key.HasAnyModifier(mods, key.Control, key.Meta, key.Alt, key.Shift):
 		return DropMove
 	case mod == DropMove:
 		return DropCopy

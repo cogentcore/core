@@ -29,6 +29,10 @@ func TestDropModFor(t *testing.T) {
 		{mods(key.Meta), DropMove, DropCopy},
 		{mods(key.Control), DropCopy, DropCopy},
 		{mods(key.Alt), DropLink, DropLink},
+		// the lock keys, which the macOS key events always have
+		{mods(key.NumLock), DropCopy, DropMove},
+		{mods(key.CapsLock, key.NumLock), DropCopy, DropMove},
+		{mods(key.Shift, key.NumLock), DropMove, DropCopy},
 	} {
 		assert.Equal(t, c.copyDef, DropModFor(c.mods, false), c.mods.String())
 		assert.Equal(t, c.moveDef, DropModFor(c.mods, true), c.mods.String())

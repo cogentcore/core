@@ -769,9 +769,11 @@ func TestDragCopySprite(t *testing.T) {
 		}
 		active, off := copySprite()
 		assert.False(t, active, "a move, without the plus")
-		var shift key.Modifiers
-		shift.SetFlag(true, key.Shift)
-		src.Key(events.KeyDown, 0, key.CodeLeftShift, 0)
+		// the key events have NumLock, as on macOS
+		var lock, shift key.Modifiers
+		lock.SetFlag(true, key.NumLock)
+		shift.SetFlag(true, key.Shift, key.NumLock)
+		src.Key(events.KeyDown, 0, key.CodeLeftShift, lock)
 		time.Sleep(100 * time.Millisecond)
 		active, _ = copySprite()
 		assert.True(t, active, "a copy with shift, with the plus")
