@@ -8,6 +8,7 @@ package android
 
 import (
 	"image"
+	"os"
 	"unsafe"
 
 	"cogentcore.org/core/events"
@@ -108,7 +109,13 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	return nil
 }
 
+// DataDir returns the internal files directory of the app, where it can
+// write, which the activity gives in FILESDIR, before main is called, or
+// else /data/data, where it cannot, as before main.
 func (a *App) DataDir() string {
+	if dir := os.Getenv("FILESDIR"); dir != "" {
+		return dir
+	}
 	return "/data/data"
 }
 
