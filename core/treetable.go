@@ -1065,11 +1065,20 @@ func (tt *TreeTable) ColumnWidthDots(col int) float32 {
 // StyleValue styles the value widgets, where the value of the tree cell
 // fills it, if the width of the first column is set.
 func (tt *TreeTable) StyleValue(w Widget, s *styles.Style, row, col int) {
+	if col != 0 && tt.FitWidth {
+		// the other columns have the widths of their values, or of the text
+		// of their headers, without room for their sort indicators, and the
+		// tree column has the width that they leave
+		s.Grow.X = 0
+		if col < len(tt.headerWidths) {
+			hv := units.Ch(float32(tt.headerWidths[col]) + 1.5) // with the compact padding
+			s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
+		}
+		s.SetTextWrap(false)
+		return
+	}
 	if col != 0 || !tt.treeWidthSet() {
 		tt.Table.StyleValue(w, s, row, col)
-		if tt.FitWidth {
-			s.Grow.X = 0 // the tree column has the width that the others leave
-		}
 		return
 	}
 	s.Min.X.Em(2)

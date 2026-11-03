@@ -306,6 +306,9 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 					w.SetType(ButtonAction)
 					w.Styler(func(s *styles.Style) {
 						s.Justify.Content = styles.Start
+						if tb.compactHeader() {
+							s.Padding.SetHorizontal(units.Em(0.25))
+						}
 					})
 					w.OnClick(func(e events.Event) {
 						tb.SortColumn(fli)
@@ -330,6 +333,8 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 							} else {
 								w.SetIndicator(icons.KeyboardArrowUp)
 							}
+						} else if tb.compactHeader() {
+							w.SetIndicator(icons.None) // with only the room of the text
 						} else {
 							w.SetIndicator(icons.Blank)
 						}
@@ -339,6 +344,14 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 			}
 		})
 	})
+}
+
+// compactHeader returns whether the headers of the columns have only the
+// room of their text, as for a [TreeTable] with [TreeTable.FitWidth],
+// whose columns have the widths of their values.
+func (tb *Table) compactHeader() bool {
+	tt, ok := tb.This.(*TreeTable)
+	return ok && tt.FitWidth
 }
 
 // makeColumnHandle adds the handle after the header of the column of the
