@@ -548,3 +548,31 @@ func TestTreeTableColumnFill(t *testing.T) {
 		}
 	})
 }
+
+// TestTreeTableFewerFields tests setting the items of a tree table
+// to those of a type with fewer fields while it is shown, from its
+// updater, as an app does when the fields of the type change.
+func TestTreeTableFewerFields(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	type short struct { // without Done, before Hours
+		Name     string
+		Hours    float32
+		Children []*short
+	}
+	shorts := []*short{{Name: "a", Children: []*short{{Name: "b"}}}}
+	var items any = &tasks
+	tt := NewTreeTable(b)
+	tt.Updater(func() {
+		tt.SetItems(items)
+	})
+	b.AssertRender(t, "tree-table/fewer-fields", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		items = &shorts
+		tt.Update()
+		tt.Restyle()
+		assert.Equal(t, 2, tt.numVisibleFields)
+		assert.Equal(t, []string{"a", "  b"}, rowNames(tt))
+	})
+}

@@ -247,7 +247,9 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 			}
 			for fli := range tb.numVisibleFields {
 				field := tb.visibleFields[fli]
-				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
+				// the index is in the name, as it is in the closures, so that
+				// the header is remade when its field has another index
+				tree.AddAt(p, fmt.Sprintf("head-%d-%s", fli, field.Name), func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Styler(func(s *styles.Style) {
 						s.Justify.Content = styles.Start
@@ -291,7 +293,7 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 // and makes it automatic again by double clicking.
 func (tb *Table) makeColumnHandle(p *tree.Plan, fli int) {
 	field := tb.visibleFields[fli]
-	tree.AddAt(p, "width-"+field.Name, func(w *Handle) {
+	tree.AddAt(p, fmt.Sprintf("width-%d-%s", fli, field.Name), func(w *Handle) { // see head
 		w.SetTooltip("Drag to set the width of the column, or double click for the automatic width")
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
