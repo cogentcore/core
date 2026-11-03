@@ -652,3 +652,34 @@ func TestTreeTableSameType(t *testing.T) {
 		assert.True(t, tf.StateIs(states.Focused), "with the focus")
 	})
 }
+
+// TestTreeTableEmpty tests that an empty tree table takes the focus,
+// and that the insert keys then add its first item.
+func TestTreeTableEmpty(t *testing.T) {
+	b := NewBody()
+	var tasks []*task
+	tt := NewTreeTable(b).SetItems(&tasks)
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b.AssertRender(t, "tree-table/empty", func() {
+		b.AsyncLock()
+		assert.True(t, tt.CanFocus())
+		tt.SetFocus()
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for ch, kf := range *keymap.ActiveMap {
+			if kf != keymap.Insert {
+				continue
+			}
+			r, code, mods, err := ch.Decode()
+			require.NoError(t, err)
+			src.Key(events.KeyDown, r, code, mods)
+			src.Key(events.KeyUp, r, code, mods)
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Len(t, tasks, 1, "the first item")
+		assert.False(t, tt.CanFocus(), "the rows have the focus now")
+	})
+}

@@ -258,8 +258,9 @@ func (lb *ListBase) Init() {
 		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(!lb.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 		// read-only rows are not focusable, so the list takes the focus for
-		// moving among them with the keys
-		s.SetAbilities(lb.IsReadOnly() && lb.ReadOnlyKeyNav, abilities.Focusable)
+		// moving among them with the keys, as it does when it has no rows,
+		// for the keys that insert them
+		s.SetAbilities((lb.IsReadOnly() && lb.ReadOnlyKeyNav) || (!lb.IsReadOnly() && lb.SliceSize == 0), abilities.Focusable)
 		s.Cursor = lb.currentCursor
 		s.Direction = styles.Column
 		// absorb horizontal here, vertical in view

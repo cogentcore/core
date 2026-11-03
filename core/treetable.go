@@ -1117,10 +1117,18 @@ func (tt *TreeTable) keyInput(e events.Event) {
 		tt.selectFocusedRow()
 	}
 	idx := tt.SelectedIndex
+	kf := keymap.Of(e.KeyChord())
+	if len(tt.rows) == 0 && !tt.IsReadOnly() {
+		switch kf {
+		case keymap.Insert, keymap.InsertAfter, keymap.InsertChild:
+			tt.NewAt(-1) // the first item
+			e.SetHandled()
+		}
+		return
+	}
 	if !tt.validIndex(idx) {
 		return
 	}
-	kf := keymap.Of(e.KeyChord())
 	if tt.IsReadOnly() {
 		switch kf {
 		case keymap.MoveRight:
