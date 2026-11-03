@@ -7,6 +7,8 @@ package core
 import (
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testTime = time.Date(2021, 1, 4, 11, 16, 0, 0, time.UTC)
@@ -39,4 +41,28 @@ func TestDurationInputReadOnly(t *testing.T) {
 	b := NewBody()
 	NewDurationInput(b).SetDuration(2 * time.Minute).SetReadOnly(true)
 	b.AssertRender(t, "duration-input/read-only")
+}
+
+// TestTimeInputZero tests that the zero time is blank, and that clearing
+// the date makes the time zero again.
+func TestTimeInputZero(t *testing.T) {
+	b := NewBody()
+	ti := NewTimeInput(b)
+	b.AssertRender(t, "time-input/zero", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		date, tm := ti.Child(0).(*TextField), ti.Child(1).(*TextField)
+		assert.Equal(t, "", date.Text())
+		assert.Equal(t, "", tm.Text())
+
+		date.SetText("3/4/2026").SendChange()
+		assert.Equal(t, time.Date(2026, 3, 4, 0, 0, 0, 0, time.Local), ti.Time)
+		tm.SetText(time.Date(1, 1, 1, 14, 30, 0, 0, time.UTC).Format(SystemSettings.TimeFormat())).SendChange()
+		assert.Equal(t, time.Date(2026, 3, 4, 14, 30, 0, 0, time.Local), ti.Time)
+
+		date.SetText("").SendChange()
+		assert.True(t, ti.Time.IsZero(), "cleared")
+		ti.Update()
+		assert.Equal(t, "", tm.Text())
+	})
 }
