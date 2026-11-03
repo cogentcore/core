@@ -884,6 +884,10 @@ func TestRowButton(t *testing.T) {
 		defer b.AsyncUnlock()
 		require.NotNil(t, clicked)
 		assert.Equal(t, "Report", clicked.Name)
+
+		tt.SetRowButton("", "", nil)
+		nw2, _ := tt.RowWidgetNs()
+		assert.Equal(t, nw-1, nw2, "removed")
 	})
 }
 

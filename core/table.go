@@ -86,8 +86,13 @@ type tableRowButton struct {
 // SetRowButton adds an icon button with the given icon and tooltip at
 // the end of each row, which calls the given function with the item of
 // the row, a pointer to its struct, as for editing it in a [Form] on a
-// small screen, where the table shows only some of its fields.
+// small screen, where the table shows only some of its fields. A nil
+// function removes the button.
 func (tb *Table) SetRowButton(icon icons.Icon, tooltip string, fun func(item any)) *Table {
+	if fun == nil {
+		tb.rowButton = nil
+		return tb
+	}
 	tb.rowButton = &tableRowButton{icon: icon, tooltip: tooltip, fun: fun}
 	return tb
 }
