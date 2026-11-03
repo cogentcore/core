@@ -290,68 +290,78 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	val := tb.sliceElementValue(si)
-	valPtr := reflectx.UnderlyingPointer(val).Interface()
 
 	if tb.ShowIndexes {
 		tb.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
 	for fli := range tb.numVisibleFields {
-		field := tb.visibleFields[fli]
-		uvp := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
-		uv := uvp.Elem()
-		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
-		tags := field.Tag
-		if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
-			ni := reflect.StructTag(`display:"no-inline" new-window:"+"`)
-			if tags == "" {
-				tags += " " + ni
-			} else {
-				tags = ni
-			}
+		tb.makeFieldValue(p, i, fli)
+	}
+}
+
+// makeFieldValue adds the value widget for the given visible field
+// at the given widget row index to the given plan.
+func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
+	svi := tb.This.(Lister)
+	si, _, _ := svi.SliceIndex(i)
+	itxt := strconv.Itoa(i)
+	val := tb.sliceElementValue(si)
+	valPtr := reflectx.UnderlyingPointer(val).Interface()
+
+	field := tb.visibleFields[fli]
+	uvp := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
+	uv := uvp.Elem()
+	valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
+	tags := field.Tag
+	if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
+		ni := reflect.StructTag(`display:"no-inline" new-window:"+"`)
+		if tags == "" {
+			tags += " " + ni
+		} else {
+			tags = ni
 		}
-		readOnlyTag := tags.Get("edit") == "-"
+	}
+	readOnlyTag := tags.Get("edit") == "-"
 
-		tree.AddNew(p, valnm, func() Value {
-			return NewFieldValue(field.Name, valPtr, uvp.Interface(), tags)
-		}, func(w Value) {
-			wb := w.AsWidget()
-			tb.MakeValue(w, i)
-			w.AsTree().SetProperty(ListColProperty, fli)
-			if !tb.IsReadOnly() && !readOnlyTag {
-				wb.OnChange(func(e events.Event) {
-					tb.This.(Lister).UpdateMaxWidths()
-					tb.SendChange()
-				})
-			}
-			wb.Updater(func() {
-				si, vi, invis := svi.SliceIndex(i)
-				val := tb.sliceElementValue(vi)
-				upv := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
-				Bind(upv.Interface(), w)
+	tree.AddNew(p, valnm, func() Value {
+		return NewFieldValue(field.Name, valPtr, uvp.Interface(), tags)
+	}, func(w Value) {
+		wb := w.AsWidget()
+		tb.MakeValue(w, i)
+		w.AsTree().SetProperty(ListColProperty, fli)
+		if !tb.IsReadOnly() && !readOnlyTag {
+			wb.OnChange(func(e events.Event) {
+				tb.This.(Lister).UpdateMaxWidths()
+				tb.SendChange()
+			})
+		}
+		wb.Updater(func() {
+			si, vi, invis := svi.SliceIndex(i)
+			val := tb.sliceElementValue(vi)
+			upv := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
+			Bind(upv.Interface(), w)
 
-				vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
-				if !invis {
-					if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
-						slbl := lblr.ElemLabel(si)
-						if slbl != "" {
-							vc = joinValueTitle(tb.ValueTitle, slbl)
-						}
+			vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
+			if !invis {
+				if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
+					slbl := lblr.ElemLabel(si)
+					if slbl != "" {
+						vc = joinValueTitle(tb.ValueTitle, slbl)
 					}
 				}
-				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
-				wb.SetReadOnly(tb.IsReadOnly() || readOnlyTag)
-				wb.SetState(invis, states.Invisible)
-				if svi.HasStyler() {
-					w.Style()
-				}
-				if invis {
-					wb.SetSelected(false)
-				}
-			})
+			}
+			wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
+			wb.SetReadOnly(tb.IsReadOnly() || readOnlyTag)
+			wb.SetState(invis, states.Invisible)
+			if svi.HasStyler() {
+				w.Style()
+			}
+			if invis {
+				wb.SetSelected(false)
+			}
 		})
-	}
+	})
 }
 
 func (tb *Table) HasStyler() bool {

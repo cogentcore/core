@@ -1363,8 +1363,21 @@ func (lb *ListBase) pasteIndex(idx int) { //types:add
 	}
 }
 
+// treeLister is implemented by lists of trees, such as [TreeTable], for
+// the copy and paste operations that work differently on trees, where
+// pasting is relative to the item at an index, and a move deletes the
+// moved items wherever they are, not those at the indexes of the rows.
+type treeLister interface {
+	makeTreePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
+	dropDeleteItems()
+}
+
 // makePasteMenu makes the menu of options for paste events
 func (lb *ListBase) makePasteMenu(m *Scene, pos image.Point, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+	if tp, ok := lb.This.(treeLister); ok {
+		tp.makeTreePasteMenu(m, md, idx, mod, fun)
+		return
+	}
 	ls := lb.This.(Lister)
 	if mod == events.DropCopy {
 		NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
@@ -1529,6 +1542,10 @@ func (lb *ListBase) dropFinalize(de *events.DragDrop) {
 
 // dropDeleteSource handles delete source event for DropMove case
 func (lb *ListBase) dropDeleteSource(e events.Event) {
+	if tl, ok := lb.This.(treeLister); ok {
+		tl.dropDeleteItems()
+		return
+	}
 	sort.Slice(lb.draggedIndexes, func(i, j int) bool {
 		return lb.draggedIndexes[i] > lb.draggedIndexes[j]
 	})
