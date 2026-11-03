@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/textpos"
@@ -37,6 +38,12 @@ type Table struct {
 
 	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" display:"-" json:"-" xml:"-"`
+
+	// ColumnWidths are the widths of the columns, in Dp, by field name,
+	// for those whose widths are set, as the user does by dragging the
+	// handles between the column headers, which sends a change event.
+	// The other columns have automatic widths.
+	ColumnWidths map[string]float32
 
 	// sortIndex is the current sort index.
 	sortIndex int
@@ -106,10 +113,13 @@ func (tb *Table) Init() {
 
 // StyleValue performs additional value widget styling
 func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
-	hw := float32(tb.headerWidths[col])
-	if col == tb.sortIndex {
-		hw += 6
+	if tb.columnWidth(col) > 0 { // see ListGrid.fixColumnWidths
+		s.SetTextWrap(false)
+		return
 	}
+	// the header button has padding, the space of the sort indicator,
+	// and the handle after it
+	hw := float32(tb.headerWidths[col]) + 7
 	if len(tb.colMaxWidths) > col {
 		hw = max(float32(tb.colMaxWidths[col]), hw)
 	}
@@ -223,7 +233,7 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 		w.FinalStyler(func(s *styles.Style) {
 			s.Padding.Zero()
 			s.Grow.Set(0, 0)
-			s.Gap.Set(units.Em(0.5)) // matches grid default
+			s.Gap.Zero() // the widths of the columns include the gaps (see SizeFinal)
 		})
 		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
@@ -270,9 +280,96 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 						}
 					})
 				})
+				tb.makeColumnHandle(p, fli)
 			}
 		})
 	})
+}
+
+// makeColumnHandle adds the handle after the header of the column of the
+// given visible field to the given plan, which sets its width by dragging,
+// and makes it automatic again by double clicking.
+func (tb *Table) makeColumnHandle(p *tree.Plan, fli int) {
+	field := tb.visibleFields[fli]
+	tree.AddAt(p, "width-"+field.Name, func(w *Handle) {
+		w.SetTooltip("Drag to set the width of the column, or double click for the automatic width")
+		w.Styler(func(s *styles.Style) {
+			s.Direction = styles.Row
+			s.SetAbilities(false, abilities.Focusable, abilities.ScrollableUnattended)
+			s.SetAbilities(true, abilities.DoubleClickable)
+		})
+		w.FinalStyler(func(s *styles.Style) {
+			s.Min.X.Dp(3)
+			s.Min.Y.Em(1.5)
+			s.Margin.SetHorizontal(units.Dp(2))
+		})
+		var start float32 // the width of the column when the drag starts, in dots
+		w.On(events.SlideStart, func(e events.Event) {
+			start = tb.columnDots(fli)
+		})
+		w.On(events.SlideMove, func(e events.Event) {
+			e.SetHandled()
+			tb.setColumnWidth(fli, start+float32(e.Pos().X-e.StartPos().X))
+		})
+		w.On(events.SlideStop, func(e events.Event) {
+			tb.SendChange(e)
+		})
+		w.OnDoubleClick(func(e events.Event) {
+			delete(tb.ColumnWidths, field.Name)
+			tb.Restyle()
+			tb.NeedsLayout()
+			tb.SendChange(e)
+		})
+	})
+}
+
+// columnWidth returns the width of the column of the given visible field,
+// in Dp, if it is set, or else 0, for the automatic width.
+func (tb *Table) columnWidth(fli int) float32 {
+	if fli < 0 || fli >= len(tb.visibleFields) {
+		return 0
+	}
+	return tb.ColumnWidths[tb.visibleFields[fli].Name]
+}
+
+// columnWidthDots returns the width of the given column in dots,
+// or 0 if it is automatic (see [ListGrid.fixColumnWidths]).
+func (tb *Table) columnWidthDots(col int) float32 {
+	return tb.columnWidth(col) * tb.Styles.UnitContext.Dots(units.UnitDp)
+}
+
+// columnCell returns the widget of the first row in the column of the
+// given visible field, or nil if there is none.
+func (tb *Table) columnCell(fli int) *WidgetBase {
+	_, idxOff := tb.This.(Lister).RowWidgetNs()
+	if tb.ListGrid == nil || idxOff+fli >= tb.ListGrid.NumChildren() {
+		return nil
+	}
+	return AsWidget(tb.ListGrid.Child(idxOff + fli))
+}
+
+// columnDots returns the width of the column of the given visible
+// field, in dots, without the gap after it.
+func (tb *Table) columnDots(fli int) float32 {
+	if c := tb.columnCell(fli); c != nil {
+		return c.Geom.Size.Alloc.Total.X
+	}
+	return 0
+}
+
+// setColumnWidth sets the width of the column of the given visible field
+// to the given width in dots, with a minimum of 16 Dp.
+func (tb *Table) setColumnWidth(fli int, dots float32) {
+	c := tb.columnCell(fli)
+	if c == nil {
+		return
+	}
+	if tb.ColumnWidths == nil {
+		tb.ColumnWidths = map[string]float32{}
+	}
+	tb.ColumnWidths[tb.visibleFields[fli].Name] = max(dots/tb.Styles.UnitContext.Dots(units.UnitDp), 16)
+	tb.Restyle()
+	tb.NeedsLayout()
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -420,7 +517,7 @@ func (tb *Table) SortColumn(fieldIndex int) {
 	_, idxOff := tb.RowWidgetNs()
 
 	for fli := range tb.numVisibleFields {
-		hdr := sgh.Child(idxOff + fli).(*Button)
+		hdr := sgh.Child(idxOff + 2*fli).(*Button) // with the handles after them
 		hdr.SetType(ButtonAction)
 		if fli == fieldIndex {
 			if tb.sortIndex == fli {
@@ -592,16 +689,32 @@ func (tb *Table) SizeFinal() {
 		return
 	}
 	sh := tb.header
-	sh.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		sgb := AsWidget(sg.Child(i))
-		gsz := &sgb.Geom.Size
-		ksz := &cwb.Geom.Size
-		ksz.Actual.Total.X = gsz.Actual.Total.X
-		ksz.Actual.Content.X = gsz.Actual.Content.X
-		ksz.Alloc.Total.X = gsz.Alloc.Total.X
-		ksz.Alloc.Content.X = gsz.Alloc.Content.X
-		return tree.Continue
-	})
+	// the header of each column, with the handle after it, has the width
+	// of the column, with the gap after it, as the header has no gaps
+	_, idxOff := tb.This.(Lister).RowWidgetNs()
+	if sh == nil || sh.NumChildren() != idxOff+2*tb.numVisibleFields || sg.NumChildren() < idxOff+tb.numVisibleFields {
+		return
+	}
+	gap := sg.Styles.Gap.X.Dots
+	setWidth := func(w *WidgetBase, width float32) {
+		ksz := &w.Geom.Size
+		d := width - ksz.Actual.Total.X
+		ksz.Actual.Total.X += d
+		ksz.Actual.Content.X += d
+		ksz.Alloc.Total.X = ksz.Actual.Total.X
+		ksz.Alloc.Content.X = ksz.Actual.Content.X
+	}
+	colWidth := func(i int) float32 {
+		return AsWidget(sg.Child(i)).Geom.Size.Alloc.Total.X + gap
+	}
+	if idxOff > 0 {
+		setWidth(AsWidget(sh.Child(0)), colWidth(0))
+	}
+	for fli := range tb.numVisibleFields {
+		hi := idxOff + 2*fli
+		handle := AsWidget(sh.Child(hi + 1)).Geom.Size.Actual.Total.X
+		setWidth(AsWidget(sh.Child(hi)), colWidth(idxOff+fli)-handle)
+	}
 	gsz := &sg.Geom.Size
 	ksz := &sh.Geom.Size
 	ksz.Actual.Total.X = gsz.Actual.Total.X

@@ -951,6 +951,9 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 			// but it is not for spacing, so it stays the same, as in a Tree
 			s.Padding.Left.Em(ConstantSpacing(float32(tt.rowDepth(i))))
 			s.Grow.Set(1, 0)
+			if tt.columnWidth(0) > 0 { // see ListGrid.fixColumnWidths
+				s.Overflow.X = styles.OverflowHidden
+			}
 		})
 		w.On(events.DragStart, func(e events.Event) {
 			tt.dragStart(e, w)
@@ -968,6 +971,18 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 			tt.makeFieldValue(p, i, 0)
 		})
 	})
+}
+
+// StyleValue styles the value widgets, where the value of the tree cell
+// fills it, if the width of the first column is set.
+func (tt *TreeTable) StyleValue(w Widget, s *styles.Style, row, col int) {
+	if col != 0 || tt.columnWidth(0) == 0 {
+		tt.Table.StyleValue(w, s, row, col)
+		return
+	}
+	s.Min.X.Em(2)
+	s.Grow.X = 1
+	s.SetTextWrap(false)
 }
 
 // makeBranch adds the branch for the given widget row index to the given

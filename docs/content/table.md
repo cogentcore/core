@@ -6,6 +6,8 @@ A **table** is a [[widget]] that allows you to display a slice of structs to use
 
 For a slice of non-structs, use a [[list]] instead. For a single struct, use a [[form]]. For a map, use a [[keyed list]]. For a nested tree, use a [[tree]], and for a tree of structs, use a [[tree table]].
 
+Users can also set the width of a column by dragging the handle after its header, and double click the handle to make it automatic again. These widths are in `Table.ColumnWidths`, which you can save and restore, and changing them sends a [[events#change]] event.
+
 ## Properties
 
 You can make a table from any pointer to a slice of structs:

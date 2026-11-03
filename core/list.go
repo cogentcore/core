@@ -1935,6 +1935,7 @@ func (lg *ListGrid) Init() {
 }
 
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
+	lg.fixColumnWidths()
 	csz := lg.Frame.SizeFromChildren(iter, pass)
 	rht, err := lg.layout.rowHeight(0, 0)
 	rht += lg.layout.Gap.Y
@@ -1957,6 +1958,40 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 	// visHt := sg.RowHeight * float32(sg.VisRows)
 	csz.Y = minHt
 	return csz
+}
+
+// columnWidther is implemented by lists with columns whose widths
+// can be set, such as [Table].
+type columnWidther interface {
+	// columnWidthDots returns the width of the given column in dots,
+	// or 0 if it is automatic.
+	columnWidthDots(col int) float32
+}
+
+// fixColumnWidths sets the widths of the cells in the columns whose
+// widths are set, which do not grow. This is done in the layout, where
+// the sizes of their padding, borders, and margins are known.
+func (lg *ListGrid) fixColumnWidths() {
+	cw, ok := lg.list().This.(columnWidther)
+	if !ok {
+		return
+	}
+	lg.forVisibleChildren(func(i int, w Widget, wb *WidgetBase) bool {
+		col, ok := wb.Property(ListColProperty).(int)
+		if !ok {
+			return tree.Continue
+		}
+		width := cw.columnWidthDots(col)
+		if width <= 0 {
+			return tree.Continue
+		}
+		wb.Styles.Grow.X = 0
+		sz := &wb.Geom.Size
+		space := sz.Actual.Total.X - sz.Actual.Content.X
+		sz.Actual.Total.X, sz.Actual.Content.X = width, max(width-space, 0)
+		sz.Alloc.Total.X, sz.Alloc.Content.X = sz.Actual.Total.X, sz.Actual.Content.X
+		return tree.Continue
+	})
 }
 
 func (lg *ListGrid) list() *ListBase {

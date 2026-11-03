@@ -515,3 +515,17 @@ func TestTreeTableDragMoves(t *testing.T) {
 		b.AsyncUnlock()
 	})
 }
+
+func TestTreeTableColumnWidths(t *testing.T) {
+	b := NewBody()
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.ColumnWidths = map[string]float32{"Name": 90, "Hours": 130}
+	b.AssertRender(t, "tree-table/column-widths", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		dots := tt.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 90*dots, tt.columnDots(0), 1)
+		assert.InDelta(t, 130*dots, tt.columnDots(2), 1)
+	})
+}
