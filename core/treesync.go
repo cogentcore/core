@@ -192,6 +192,14 @@ func (tr *Tree) addSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	}
 }
 
+// newNodeType returns the [Tree.NewNodeType] of the root, or nil.
+func (tr *Tree) newNodeType() *types.Type {
+	if tr.Root == nil {
+		return nil
+	}
+	return tr.Root.AsCoreTree().NewNodeType
+}
+
 // newItemsData contains the data necessary to make a certain
 // number of items of a certain type, which can be used with a
 // [Form] in new item dialogs.
@@ -218,6 +226,15 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 		return
 	}
 	myidx += rel
+	parent := AsTree(tr.Parent)
+	if typ := tr.newNodeType(); typ != nil {
+		if tr.SyncNode != nil {
+			parent.addSyncNodes(rel, myidx, typ, 1)
+		} else {
+			parent.addTreeNodes(rel, myidx, typ, 1)
+		}
+		return
+	}
 	var typ *types.Type
 	if tr.SyncNode == nil {
 		typ = types.TypeByValue(tr.This)
@@ -231,7 +248,6 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 	d.AddBottomBar(func(bar *Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).OnClick(func(e events.Event) {
-			parent := AsTree(tr.Parent)
 			if tr.SyncNode != nil {
 				parent.addSyncNodes(rel, myidx, nd.Type, nd.Number)
 			} else {
@@ -246,6 +262,14 @@ func (tr *Tree) insertAt(rel int, actNm string) {
 // prompting the user for the type of node to add
 // If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) AddChildNode() { //types:add
+	if typ := tr.newNodeType(); typ != nil {
+		if tr.SyncNode != nil {
+			tr.addSyncNodes(0, 0, typ, 1)
+		} else {
+			tr.addTreeNodes(0, 0, typ, 1)
+		}
+		return
+	}
 	ttl := "Add child"
 	var typ *types.Type
 	if tr.SyncNode == nil {

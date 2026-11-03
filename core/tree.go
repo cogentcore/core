@@ -27,6 +27,7 @@ import (
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // Treer is an interface for [Tree] types
@@ -145,6 +146,12 @@ type Tree struct {
 
 	// SelectMode, when set on the root node, determines whether keyboard movements should update selection.
 	SelectMode bool
+
+	// NewNodeType, when set on the root node, is the type of the nodes that
+	// inserting before or after a node, or adding a child, adds one of,
+	// instead of prompting for the number and type of nodes to add.
+	// It applies to the [Tree.SyncNode] for a sync tree.
+	NewNodeType *types.Type `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// DragMoves, when set on the root node, is whether dragging nodes moves
 	// them by default, instead of copying them, in which case the modifier
