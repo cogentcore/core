@@ -947,7 +947,9 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 			s.Align.Items = styles.Center
 			s.Gap.X.Em(0.1)
 			s.Padding.Zero()
-			s.Padding.Left.Em(float32(tt.rowDepth(i)))
+			// the indentation is padding, which the spacing setting scales,
+			// but it is not for spacing, so it stays the same, as in a Tree
+			s.Padding.Left.Em(ConstantSpacing(float32(tt.rowDepth(i))))
 			s.Grow.Set(1, 0)
 		})
 		w.On(events.DragStart, func(e events.Event) {
