@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -50,6 +51,12 @@ type TreeTable struct {
 	// ShowItem, if set, returns whether to show the given item, a pointer
 	// to a struct, with its children, as for filtering the items.
 	ShowItem func(item any) bool `json:"-" xml:"-"`
+
+	// FitWidth is whether the tree column has the width that the other
+	// columns leave in the width of the table, so that the table fits in
+	// it, without scrolling, as on a small screen, with the values of the
+	// tree column fitting in it, instead of a width set in ColumnWidths.
+	FitWidth bool
 
 	// HideGroupValues is whether the items with children, which are groups
 	// of items, such as categories, show only the tree, and not the values
@@ -997,7 +1004,7 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 			// but it is not for spacing, so it stays the same, as in a Tree
 			s.Padding.Left.Em(ConstantSpacing(float32(tt.rowDepth(i))))
 			s.Grow.Set(1, 0)
-			if tt.columnWidth(0) > 0 { // see ListGrid.fixColumnWidths
+			if tt.treeWidthSet() { // see ListGrid.fixColumnWidths
 				s.Overflow.X = styles.OverflowHidden
 			}
 		})
@@ -1019,11 +1026,44 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 	})
 }
 
+// treeWidthSet returns whether the width of the tree column is set, in
+// ColumnWidths, or by [TreeTable.FitWidth].
+func (tt *TreeTable) treeWidthSet() bool {
+	return tt.FitWidth || tt.columnWidth(0) > 0
+}
+
+// ColumnWidthDots returns the width of the column at the given index in
+// dots, or 0 if it is automatic: for the tree column with
+// [TreeTable.FitWidth], it is the width that the other columns leave in
+// the width of the table, which is known in the layout after the sizes of
+// the other columns are, without the scrollbar.
+func (tt *TreeTable) ColumnWidthDots(col int) float32 {
+	if col != 0 || !tt.FitWidth {
+		return tt.Table.ColumnWidthDots(col)
+	}
+	lg := tt.ListGrid
+	nw, idxOff := tt.RowWidgetNs()
+	if lg == nil || lg.NumChildren() < nw {
+		return 0
+	}
+	width := lg.Geom.Size.Alloc.Content.X - lg.Styles.ScrollbarWidth.Dots
+	for i := range nw {
+		if i != idxOff {
+			width -= AsWidget(lg.Child(i)).Geom.Size.Actual.Total.X
+		}
+	}
+	width -= float32(nw-1) * lg.Styles.Gap.X.Dots
+	return max(width, 4*tt.Styles.UnitContext.Dots(units.UnitEm))
+}
+
 // StyleValue styles the value widgets, where the value of the tree cell
 // fills it, if the width of the first column is set.
 func (tt *TreeTable) StyleValue(w Widget, s *styles.Style, row, col int) {
-	if col != 0 || tt.columnWidth(0) == 0 {
+	if col != 0 || !tt.treeWidthSet() {
 		tt.Table.StyleValue(w, s, row, col)
+		if tt.FitWidth {
+			s.Grow.X = 0 // the tree column has the width that the others leave
+		}
 		return
 	}
 	s.Min.X.Em(2)
@@ -1058,7 +1098,7 @@ func (tc *treeTableCell) SizeFinal() {
 // fitValue fits the value in the width of the cell after the branch,
 // if the width of the column is set, returning whether it is.
 func (tc *treeTableCell) fitValue() bool {
-	if tc.tt == nil || tc.tt.columnWidth(0) == 0 || tc.NumChildren() < 2 {
+	if tc.tt == nil || !tc.tt.treeWidthSet() || tc.NumChildren() < 2 {
 		return false
 	}
 	other := float32(0)

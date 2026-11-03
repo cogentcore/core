@@ -14,9 +14,10 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -903,5 +904,32 @@ func TestTableShowField(t *testing.T) {
 			names = append(names, f.Name)
 		}
 		assert.Equal(t, []string{"Name", "Done"}, names)
+	})
+}
+
+// TestTreeTableFitWidth tests that the tree column of a [TreeTable] with
+// [TreeTable.FitWidth] has the width that the other columns leave, so that
+// the table fits in a narrow width without scrolling, with a long value.
+func TestTreeTableFitWidth(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(300)
+		s.Max.X.Dp(300)
+	})
+	tasks := testTasks()
+	tasks[0].Name = strings.Repeat("a long name ", 10)
+	tt := NewTreeTable(b)
+	tt.FitWidth = true
+	tt.ShowField = func(field reflect.StructField) bool { return field.Name != "Hours" }
+	tt.SetRowButton(icons.Edit, "Edit", func(item any) {})
+	tt.SetItems(&tasks)
+	b.AssertRender(t, "tree-table/fit-width", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		nw, _ := tt.RowWidgetNs()
+		last := AsWidget(tt.ListGrid.Child(nw - 1)).Geom.TotalBBox
+		assert.LessOrEqual(t, last.Max.X, tt.Geom.TotalBBox.Max.X, "the row button is in the table")
+		assert.False(t, tt.HasScroll[math32.X], "no horizontal scrolling")
+		assert.False(t, tt.ListGrid.HasScroll[math32.X], "no horizontal scrolling of the grid")
 	})
 }
