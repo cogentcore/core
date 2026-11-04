@@ -52,6 +52,9 @@ func (tp *Type) String() string {
 
 // ShortName returns the short name of the type (package.Type)
 func (tp *Type) ShortName() string {
+	if tp == nil {
+		return ""
+	}
 	li := strings.LastIndex(tp.Name, "/")
 	return tp.Name[li+1:]
 }

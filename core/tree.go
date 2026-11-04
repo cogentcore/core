@@ -151,7 +151,7 @@ type Tree struct {
 	// inserting before or after a node, or adding a child, adds one of,
 	// instead of prompting for the number and type of nodes to add.
 	// It applies to the [Tree.SyncNode] for a sync tree.
-	NewNodeType *types.Type `copier:"-" json:"-" xml:"-" edit:"-"`
+	NewNodeType *types.Type `copier:"-" json:"-" xml:"-" display:"-"`
 
 	// DragMoves, when set on the root node, is whether dragging nodes moves
 	// them by default, instead of copying them, in which case the modifier

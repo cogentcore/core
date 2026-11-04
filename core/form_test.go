@@ -115,3 +115,15 @@ func TestFormAddFields(t *testing.T) {
 	})
 	b.AssertRender(t, "form/addfields")
 }
+
+// TestFormTree tests a form of a tree, as in the demo, which has fields
+// of nil pointers, set again for another tree, as when one is selected.
+func TestFormTree(t *testing.T) {
+	b := NewBody()
+	tr := NewTree(b).SetText("Root")
+	child := NewTree(tr).SetText("Child")
+	fm := NewForm(b).SetStruct(tr)
+	b.RenderImage(func() {
+		fm.SetStruct(child).Update()
+	})
+}
