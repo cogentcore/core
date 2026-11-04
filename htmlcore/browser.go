@@ -174,14 +174,16 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			if isText {
 				s.Text.WhiteSpace = text.WrapAsNeeded
 			}
-			if ps != nil { // white-space is inherited in CSS
+			if ps != nil { // white-space and text-align are inherited in CSS
 				s.Text.WhiteSpace = ps.Text.WhiteSpace
+				s.Text.Align = ps.Text.Align
 			}
 		}
 		if tag == "" && isText {
 			s.Text.WhiteSpace = text.WrapAsNeeded
-			if ps != nil { // white-space is inherited in CSS
+			if ps != nil { // white-space and text-align are inherited in CSS
 				s.Text.WhiteSpace = ps.Text.WhiteSpace
+				s.Text.Align = ps.Text.Align
 			}
 		}
 		if tag != "" && isText { // texts for elements (as pre) fill their blocks

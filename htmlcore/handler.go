@@ -372,6 +372,12 @@ func handleTable(ctx *Context) core.Widget {
 	ctx.TableParent = w
 	cols := ctx.tableColumns(ctx.Node)
 	w.SetProperty("cols", cols)
+	if ctx.BrowserStyle && ctx.declaration(ctx.Node, "width") == "" && ctx.hasPercentColumns(ctx.Node) {
+		// An auto-width table with percentage columns is as wide as it needs
+		// to be to give them their shares, which is approximated by filling
+		// the width that it has (in which they grow up to their shares).
+		w.FinalStyler(func(s *styles.Style) { s.Grow.X = 1 })
+	}
 	w.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = cols
@@ -397,6 +403,30 @@ func (c *Context) tableFor(n *html.Node) core.Widget {
 		return c.TableParent
 	}
 	return c.Parent()
+}
+
+// hasPercentColumns returns whether the given table has cells with
+// percentage widths (in its rows, not in tables in it).
+func (ctx *Context) hasPercentColumns(table *html.Node) bool {
+	var rows func(n *html.Node) bool
+	rows = func(n *html.Node) bool {
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			switch c.Data {
+			case "thead", "tbody", "tfoot":
+				if rows(c) {
+					return true
+				}
+			case "tr":
+				for cell := c.FirstChild; cell != nil; cell = cell.NextSibling {
+					if (cell.Data == "td" || cell.Data == "th") && strings.HasSuffix(strings.TrimSpace(ctx.declaration(cell, "width")), "%") {
+						return true
+					}
+				}
+			}
+		}
+		return false
+	}
+	return rows(table)
 }
 
 // tableColumns returns the number of columns of the given table, the

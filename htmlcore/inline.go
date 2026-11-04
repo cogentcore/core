@@ -90,14 +90,17 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 	}
 	pre := c.isPre(first.Parent)
 	container := parent
-	if hasWidget && c.display(parent) != anonymousInline {
+	newContainer := func() core.Widget {
 		fr := core.NewFrame(parent)
 		fr.SetName("inline-container")
 		tree.SetUniqueName(fr)
 		c.Node = nil
 		c.browserStyler(nil, fr, nil)
 		c.blocks[fr].display = anonymousInline
-		container = fr
+		return fr
+	}
+	if hasWidget && c.display(parent) != anonymousInline {
+		container = newContainer()
 	}
 
 	var buf strings.Builder
@@ -135,6 +138,17 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		}
 	}
 	for n := first; ; n = n.NextSibling {
+		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
+			// a line break in a row of widgets ends the row, and the
+			// widgets after it are in another row (each is aligned)
+			flush()
+			start = true
+			container = newContainer()
+			if n == last {
+				break
+			}
+			continue
+		}
 		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.displayOf(n) != "none" {
 			flush()
 			start = false
