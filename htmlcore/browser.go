@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	_ "embed"
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -204,9 +205,16 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				calcEnv.vh = float64(uc.Vph / dp / 100)
 			}
 		}
+		calcEnv.rem = float64(c.rootFontSize())
 		calcEnv.fixedVh = c.MediaHeight > 0
 		if calcEnv.fixedVh {
 			calcEnv.vh = float64(c.MediaHeight / 100)
+		}
+		if tag == "body" && c.declaration(node, "font-size") == "" {
+			// the font size of the html element (which has no widget)
+			if rf := c.rootFontSize(); rf != 16 {
+				c.setCSS(st, s, ps, "font-size", fmt.Sprintf("%gpx", rf))
+			}
 		}
 		for _, d := range decls {
 			if !d.invalid {
@@ -407,7 +415,10 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		// which is 1 by default), and are at most as wide as a column
 		s.Shrink.X = 1
 		if main == math32.X && st.hasShrink {
-			s.Shrink.X = st.flexShrink
+			// a flex item that does not shrink (flex-shrink: 0) is still as
+			// wide as its content (on one line, for wrapped content), which
+			// core lays out for those that shrink, so it shrinks only a tiny bit
+			s.Shrink.X = max(st.flexShrink, 1e-4)
 		}
 		align := st.alignSelf
 		if align == "" || align == "auto" {
@@ -1229,6 +1240,11 @@ func parseLength(v string, pct units.Units) (units.Value, bool) {
 	if strings.HasSuffix(v, ")") {
 		return mathLength(v, pct)
 	}
+	if r, ok := strings.CutSuffix(v, "rem"); ok { // of the font size of the html element
+		if f, err := strconv.ParseFloat(r, 32); err == nil {
+			return units.Dp(float32(f) * float32(calcEnv.rem)), true
+		}
+	}
 	if strings.HasSuffix(v, "%") {
 		f, err := strconv.ParseFloat(strings.TrimSuffix(v, "%"), 32)
 		if err != nil {
@@ -1602,7 +1618,7 @@ func setFontSize(s, ps *styles.Style, v string) {
 	}
 	if strings.HasSuffix(v, "rem") {
 		if f, err := strconv.ParseFloat(strings.TrimSuffix(v, "rem"), 32); err == nil {
-			s.Font.Size = units.Dp(16 * float32(f))
+			s.Font.Size = units.Dp(float32(calcEnv.rem) * float32(f))
 		}
 		return
 	}
@@ -1825,3 +1841,50 @@ func ancestorTable(n *html.Node) *html.Node {
 	}
 	return nil
 }
+
+// rootFontSize returns the font size of the html element of the page in px,
+// which rem lengths are relative to (16 unless the page sets it), as the
+// html element has no widget.
+func (c *Context) rootFontSize() float32 {
+	if c.rootFont > 0 {
+		return c.rootFont
+	}
+	c.rootFont = 16
+	if c.Node == nil {
+		return c.rootFont
+	}
+	root := rootNode(c.Node)
+	var htmlNode *html.Node
+	if root.Type == html.ElementNode && root.Data == "html" {
+		htmlNode = root
+	}
+	for n := root.FirstChild; n != nil && htmlNode == nil; n = n.NextSibling {
+		if n.Type == html.ElementNode && n.Data == "html" {
+			htmlNode = n
+		}
+	}
+	if htmlNode == nil {
+		return c.rootFont
+	}
+	v := strings.TrimSpace(strings.ToLower(c.declaration(htmlNode, "font-size")))
+	num := func(suffix string) (float32, bool) {
+		f, err := strconv.ParseFloat(strings.TrimSuffix(v, suffix), 32)
+		return float32(f), err == nil && strings.HasSuffix(v, suffix)
+	}
+	if f, ok := num("%"); ok {
+		c.rootFont = 16 * f / 100
+	} else if f, ok := num("rem"); ok {
+		c.rootFont = 16 * f
+	} else if f, ok := num("em"); ok {
+		c.rootFont = 16 * f
+	} else if f, ok := num("px"); ok {
+		c.rootFont = f
+	} else if px, ok := fontSizeKeywords[v]; ok {
+		c.rootFont = px
+	}
+	return c.rootFont
+}
+
+// fontSizeKeywords are the font sizes of the absolute size keywords, in px.
+var fontSizeKeywords = map[string]float32{"xx-small": 9, "x-small": 10, "small": 13, "medium": 16,
+	"large": 18, "x-large": 24, "xx-large": 32, "xxx-large": 48}

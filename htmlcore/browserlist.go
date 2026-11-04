@@ -195,9 +195,21 @@ func listMarker(ctx *Context, n *html.Node) string {
 	list := n.Parent
 	styleType := ""
 	for p := n; p != nil && styleType == ""; p = p.Parent {
-		for _, prop := range []string{"list-style-type", "list-style"} {
-			if v := ctx.declaration(p, prop); v != "" {
-				styleType = strings.Fields(v)[0]
+		// the last of list-style-type and list-style applies
+		for _, d := range ctx.declarations(p) {
+			switch d.Property {
+			case "list-style-type":
+				styleType = strings.TrimSpace(d.Value)
+			case "list-style":
+				if fs := strings.Fields(d.Value); len(fs) > 0 {
+					styleType = fs[0]
+					for _, f := range fs {
+						if f != "inside" && f != "outside" && !strings.HasPrefix(f, "url(") {
+							styleType = f
+							break
+						}
+					}
+				}
 			}
 		}
 		if p == list {

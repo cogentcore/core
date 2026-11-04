@@ -84,6 +84,8 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		if ctx.BrowserStyle {
 			ctx.addStyleOrigin(browserStyles, originUserAgent)
 			ctx.addStyleSheets(n)
+			ctx.rootFont = 0
+			ctx.rootFontSize() // of this document, while ctx.Node is it
 		} else {
 			ctx.addStyleOrigin(userAgentStyles, originUserAgent)
 		}

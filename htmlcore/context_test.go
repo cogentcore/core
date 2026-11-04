@@ -262,3 +262,21 @@ p { color: var(--color); }
 	find(doc)
 	assert.Equal(t, "red", strings.TrimSpace(ctx.declaration(p, "color")))
 }
+
+func TestRootFontSize(t *testing.T) {
+	ctx := NewContext()
+	ctx.BrowserStyle = true
+	doc, _ := html.Parse(strings.NewReader(`<html><head><style>html { font-size: 62.5% }</style></head><body></body></html>`))
+	ctx.Node = doc
+	ctx.addStyleSheets(doc)
+	assert.InDelta(t, 10, ctx.rootFontSize(), 0.01)
+	saved := calcEnv
+	defer func() { calcEnv = saved }()
+	calcEnv.rem = 10
+	l, ok := parseLength("2rem", units.UnitPw)
+	assert.True(t, ok)
+	assert.Equal(t, units.Dp(20), l)
+	l, ok = parseLength("calc(1rem + 4px)", units.UnitPw)
+	assert.True(t, ok)
+	assert.Equal(t, units.Dp(14), l)
+}

@@ -298,7 +298,7 @@ func calcLinear(v string, em, vw, vh float64) (linear, bool) {
 	if inner, ok := strings.CutPrefix(v, "calc("); ok {
 		v = "(" + inner
 	}
-	p := &linearParser{s: v, em: em, vw: vw, vh: vh}
+	p := &linearParser{s: v, em: em, vw: vw, vh: vh, rem: calcEnv.rem}
 	l, ok := p.sum()
 	p.space()
 	return l, ok && p.i == len(p.s)
@@ -309,6 +309,7 @@ type linearParser struct {
 	s          string
 	i          int
 	em, vw, vh float64
+	rem        float64 // px per rem
 
 	// lengths is the number of lengths parsed.
 	lengths int
@@ -417,7 +418,7 @@ func (p *linearParser) factor() (linear, bool, bool) {
 	case strings.HasPrefix(rest, "px"):
 		return unit("px", 1)
 	case strings.HasPrefix(rest, "rem"):
-		return unit("rem", 16)
+		return unit("rem", p.rem)
 	case strings.HasPrefix(rest, "em"):
 		return unit("em", p.em)
 	case strings.HasPrefix(rest, "vw"):
@@ -442,7 +443,8 @@ func (p *linearParser) factor() (linear, bool, bool) {
 var calcEnv = struct {
 	em, vw, vh float64
 	fixedVh    bool
-}{16, 8, 6, false}
+	rem        float64 // the font size of the html element, in px
+}{16, 8, 6, false, 16}
 
 // mathLength returns the length of the given CSS math function (calc(),
 // min(), max(), clamp()), as a percentage of the given unit, or in dp.

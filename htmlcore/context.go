@@ -80,6 +80,10 @@ type Context struct {
 	// flattened has the blocks that are flattened (see flattensBlock).
 	flattened map[*html.Node]bool
 
+	// rootFont is the font size of the html element in px, once it is known
+	// (see rootFontSize).
+	rootFont float32
+
 	// blocks has the margin collapsing state of the block widgets,
 	// for [Context.BrowserStyle].
 	blocks map[core.Widget]*blockState
