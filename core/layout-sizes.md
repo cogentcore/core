@@ -31,6 +31,24 @@ each approximate one of the two sizes in their own way:
 - **Frames that do not grow** (`Frame.childSpace`, `layoutState.growExtra`):
   children that grow only get the actual size of the frame, while wrapping
   text still gets the whole allocation to wrap in.
+- **`GrowWrap`** (styles/style.go, set by `Text`): wrapping text "grows"
+  into the available width in the first `SizeDown` iteration, so that it
+  can wrap at that width, but not afterward, so that it can still be
+  aligned (elements that `Grow` absorb the extra space and cannot be).
+  It is special-cased in several places of core/layout.go (the cells of
+  `sizeDownGrowCells`, `childSpace`, the shrinking of columns, and
+  `growToAlloc`). It stands in for a preferred width: "as wide as the
+  space allows, up to the width of the text on one line".
+- **Text fields** (core/textfield.go): `Min.X` 20ch, `Max.X` 40ch, and
+  `Grow.X` 1, with `GrowWrap` off ("doesn't work with Grow"). The 40ch
+  `Max` keeps text fields from growing across a whole form or window,
+  which is a preferred width expressed as a cap on growth. These limits
+  may be a legacy of earlier problems of the layout logic (a todo of the
+  user is to revisit them).
+- In general, the many issues over time with text growing too much or too
+  little: wrapped text that is too narrow (the aspect ratio estimate),
+  text that does not wrap when it should (`FitWidth`), and text that
+  grows past the frame that it is in (fixed by `childSpace`).
 - Smaller ones: toolbars counting the items that grow at their size before
   overflowing, `TreeTable.FitWidth` and the table column widths, the
   percentage widths of htmlcore tables, the wrapped rows that shrink
@@ -86,6 +104,14 @@ What this could replace or simplify:
 
 - the aspect ratio estimate of wrapping text, and `FitWidth` (text would
   always start at its preferred width and wrap when narrowed);
+- `GrowWrap`: wrapping text would not need to grow to wrap well, as its
+  preferred width is the width of its text on one line, so it takes the
+  space that it needs (up to the allocation) without `Grow`, and can be
+  aligned;
+- the 40ch `Max` of text fields: a text field would have a preferred width
+  (for example 20ch, or that of its content) and grow from there only as
+  its `Grow` says, so a cap on growth would no longer be needed to keep it
+  from filling a form;
 - `minContentWidth` and the `minWord` cache (computed once in `SizeUp`);
 - most `SizeDown` re-wrap iterations, as widths are right from the start;
 - the special cases above (`childSpace`/`growExtra`, toolbar overflow,
