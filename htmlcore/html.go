@@ -110,9 +110,12 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 	if np := ctx.NewParent; np != nil && n.FirstChild != nil {
 		readHTMLNode(ctx, np, n.FirstChild)
 		if ctx.BrowserStyle && n.Type == html.ElementNode && ctx.rest == nil {
-			if d := ctx.displayOf(n); d == "grid" || d == "inline-grid" {
-				if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {
+			if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {
+				switch ctx.displayOf(n) {
+				case "grid", "inline-grid":
 					ctx.arrangeGrid(n, fr)
+				case "block", "list-item", "flow-root", "inline-block":
+					ctx.arrangeColumns(n, fr)
 				}
 			}
 		}
