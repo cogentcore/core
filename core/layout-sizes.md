@@ -1,0 +1,107 @@
+# Min and preferred sizes in layout (exploration notes)
+
+Notes for the `layout-sizes` branch (made from `html` on 2026-11-04), to
+explore whether core layout should track a minimum and a preferred size
+for each widget systematically. Not for the `html` PR.
+
+## The question
+
+Core layout has one size per widget from `SizeUp` (`Actual`), which is
+both the minimum (the hard requirement) and the starting size. An early
+version of the layout had both min and preferred sizes, but that seemed
+unnecessary and made everything much more complicated, and shrinking was
+left out for the same reason.
+
+Since then, the `html` branch has added several separate mechanisms that
+each approximate one of the two sizes in their own way:
+
+- **Wrapping text** (`GrowWrap`, `WhiteSpace` with word wrap): `Text.SizeUp`
+  starts from `shaped.WrapSizeEstimate`, a balanced aspect ratio, which is
+  neither its minimum nor its preferred width. `SizeDown` then re-wraps it
+  to the allocation, often with another iteration.
+- **`Text.FitWidth`** (used by htmlcore): starts the text as wide as it is
+  on one line, up to `Text.availableWidth`, as for the shrink-to-fit
+  widths of CSS. This is the preferred (max-content) width, but it is
+  then also the minimum.
+- **`Shrink` and min-content widths**: `minContentWidth` (core/layout.go)
+  walks the subtree of a widget on demand to compute its min-content width
+  (the longest word of text, with the cached `Text.minWord`), and
+  `Frame.shrinkWidths` narrows columns from their `SizeUp` widths down to
+  at most those. This is the minimum, computed separately from `SizeUp`.
+- **Frames that do not grow** (`Frame.childSpace`, `layoutState.growExtra`):
+  children that grow only get the actual size of the frame, while wrapping
+  text still gets the whole allocation to wrap in.
+- Smaller ones: toolbars counting the items that grow at their size before
+  overflowing, `TreeTable.FitWidth` and the table column widths, the
+  percentage widths of htmlcore tables, the wrapped rows that shrink
+  (`nosz` in `Frame.laySetContentFitOverflow`).
+
+## The experiment that prompted this
+
+`FitWidth` as the default for all `Text` (one line in `Text.Init`):
+only core changes (content, htmlcore, textcore and filetree are the same,
+as htmlcore already sets it), 25 images and one assertion:
+
+- Better: short texts in windows sized to their content stay on one line
+  (`text/type/*`: "Hello, world!" at display size went from a 157x304
+  wrapped box to 359x92; also `text/rem`, `text/link`, `bind/text`), and
+  `splits/mixed-vertical` is wide (one line per sentence) instead of a
+  123px wrapped column.
+- Worse: in `layout/parent-relative-splits`, "20% Split Frame" no longer
+  wraps in its narrow split: it is clipped, and the split scrolls
+  horizontally instead. The one-line width became the minimum, so a frame
+  that can scroll scrolls instead of letting the text wrap (a browser
+  wraps it).
+- `TestShrinkRow` fails: two texts of different lengths both get 152 (it
+  expects the longer one to be wider), probably for the same reason.
+
+The fix is the distinction that core lacks: the minimum should stay the
+min-content width (the longest word), and the one-line width should only
+be the preferred size.
+
+## A design to try: intrinsic widths only
+
+The earlier complexity came from tracking min and preferred sizes in both
+dimensions everywhere. CSS gets most of the benefit with less:
+
+- **Widths are intrinsic, heights follow.** Each widget computes two
+  widths in `SizeUp`: its _min-content_ width (below which its content
+  overflows) and its _max-content_ (preferred) width (its width without
+  any wrapping). Heights are not computed this way: they come from laying
+  out the content at the width that the widget is finally given, as now.
+- **Combining is simple and per layout type**: a row sums both of its
+  children's widths (plus gaps); a column takes the maximum of each; a
+  wrapped row takes the maximum of the min-contents and the sum of the
+  max-contents; a grid does the same per column, with spans spread over
+  their columns (as now for `ColSpan`).
+- **Allocation in `SizeDown`** then starts every widget at its preferred
+  width, clamped to the allocation, and shrinks toward the minimum only
+  when there is too little space (that is `Shrink`, which would no longer
+  need a separate walk), and grows by `Grow` when there is extra. A widget
+  is only wider than its allocation (overflowing, or scrolling) when the
+  allocation is less than its minimum.
+- `Min` and `Max` styles clamp both widths; `Actual` stays the final size.
+
+What this could replace or simplify:
+
+- the aspect ratio estimate of wrapping text, and `FitWidth` (text would
+  always start at its preferred width and wrap when narrowed);
+- `minContentWidth` and the `minWord` cache (computed once in `SizeUp`);
+- most `SizeDown` re-wrap iterations, as widths are right from the start;
+- the special cases above (`childSpace`/`growExtra`, toolbar overflow,
+  shrink-to-fit widths in htmlcore, `nosz`).
+
+Costs and risks:
+
+- two more numbers per widget, and the combining rules in each layout
+  (flex row, column, wrap, grid, stacked, floats, out-of-flow);
+- widgets with custom sizing (`SizeUp` overrides) need both widths;
+- many test images would change, as the starting widths of wrapping text
+  change everywhere (the 25 above are a lower bound: htmlcore already
+  behaves this way).
+
+Whether it is simpler overall is the open question: it adds one concept,
+and could remove several ad hoc ones. A first step that tests it cheaply:
+compute min-content and max-content widths in `SizeUp` for `Text` and
+frames only, use them for `Text` instead of the aspect ratio estimate,
+and see how many of the special cases can then be removed.
