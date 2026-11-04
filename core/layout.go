@@ -1986,7 +1986,11 @@ func (wb *WidgetBase) setPosFromParent() {
 	pwb := wb.parentWidget()
 	var parPos math32.Vector2
 	if pwb != nil {
-		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll) // critical that parent adds here but not to self
+		// critical that parent adds here but not to self; the scroll
+		// offset is in whole dots, so that the content is always at the
+		// same position relative to the pixels (otherwise lines thinner
+		// than a pixel come and go while scrolling)
+		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll.Round())
 	}
 	wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
 	wb.setContentPosFromPos()
