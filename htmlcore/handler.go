@@ -478,7 +478,21 @@ func handleCell(ctx *Context, tag string) core.Widget {
 		if err != nil || rspan < 1 {
 			rspan = 1
 		}
+		// a percentage width of a cell in a table that fills its width
+		// (see handleTable) is the width of its column
+		pct := float32(0)
+		if table := ancestorTable(ctx.Node); table != nil && ctx.declaration(table, "width") == "" && ctx.hasPercentColumns(table) {
+			if v, ok := strings.CutSuffix(strings.TrimSpace(ctx.declaration(ctx.Node, "width")), "%"); ok {
+				if f, err := strconv.ParseFloat(v, 32); err == nil {
+					pct = float32(f)
+				}
+			}
+		}
 		w.FinalStyler(func(s *styles.Style) {
+			if pct > 0 {
+				s.Min.X, s.Max.X = units.Pw(pct), units.Pw(pct)
+				s.BoxSizing = styles.BoxBorderBox
+			}
 			if span > 1 {
 				s.ColSpan = span
 			}
