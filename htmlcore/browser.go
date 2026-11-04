@@ -525,8 +525,12 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	// Overflow only scrolls (or clips) a box whose height is limited,
 	// and that of the body is that of the viewport, which scrolls anyway.
+	// A box that is out of flow with its top and bottom set is as high as
+	// they make it (in its containing block), so it can scroll too.
+	insetHeight := (s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed) &&
+		s.InsetSet.Top && s.InsetSet.Bottom
 	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
-		(st.height == nil && st.maxHeight == nil && s.Overflow.Y != styles.OverflowVisible) {
+		(st.height == nil && st.maxHeight == nil && !insetHeight && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
 	}
 	if st.height != nil {
