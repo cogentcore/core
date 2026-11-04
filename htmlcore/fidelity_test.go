@@ -45,10 +45,19 @@ import (
 //
 //	go test -run TestFidelity -fidelity
 //
+// The snapshots of real pages (see [TestSnapshot]) are compared with:
+//
+//	go test -run TestFidelity -fidelity -fidelity-dir testdata/snapshots -fidelity-width 1024
+//
 // Each element of a page is marked with a data-fid attribute, and the
 // border box of each element in Chrome is compared with the box of the
-// widget made for it. The results, with screenshots of both renderings
-// side by side, are written to testdata/fidelity/out/report.html.
+// widget made for it. Chrome uses the fonts of Cogent Core (see
+// chromeFontScript), and local pages are rendered without the network in
+// both. The results, with screenshots of both renderings side by side, the
+// origins of the differences of the layouts, and the differences of the
+// computed styles (see analyzeFidelity), are written to
+// testdata/fidelity/out/report.html, with the analysis of each page in
+// name.json there, and the changes from the previous run in the report.
 
 var (
 	fidelityFlag      = flag.Bool("fidelity", false, "run the fidelity comparison with Chrome")
@@ -79,6 +88,10 @@ type fidBox struct {
 	Widget  string // core only
 	X, Y    float32
 	W, H    float32
+
+	// Style has the computed values of the CSS properties in
+	// fidStyleProps, in px (font-weight is a number).
+	Style map[string]float32
 }
 
 func (b *fidBox) rect() image.Rectangle {
@@ -107,6 +120,19 @@ type fidResult struct {
 	Err        string
 	Missing    int
 	InlineOnly int
+
+	// Origins are the elements where the differences of the layout start
+	// (see analyzeFidelity), in document order.
+	Origins []*fidOrigin
+
+	// StyleDiffs are the differences of the computed styles.
+	StyleDiffs []*fidStyleDiff
+
+	// PropCounts are the numbers of StyleDiffs of each property.
+	PropCounts []fidPropCount
+
+	// Change is the change of the score from the previous run.
+	Change string
 }
 
 func TestFidelity(t *testing.T) {
@@ -117,6 +143,9 @@ func TestFidelity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// and the pages in directories of their own, as the snapshots
+	dirs, _ := filepath.Glob(filepath.Join(*fidelityDir, "*", "index.html"))
+	files = append(files, dirs...)
 	var re *regexp.Regexp
 	if *fidelityRun != "" {
 		re = regexp.MustCompile(*fidelityRun)
@@ -129,7 +158,7 @@ func TestFidelity(t *testing.T) {
 
 	var results []*fidResult
 	for _, f := range files {
-		name := strings.TrimSuffix(filepath.Base(f), ".html")
+		name := fidelityName(f)
 		if re != nil && !re.MatchString(name) {
 			continue
 		}
@@ -139,10 +168,27 @@ func TestFidelity(t *testing.T) {
 			t.Errorf("%s: %s", name, res.Err)
 			continue
 		}
-		t.Logf("%-28s %3d/%-3d boxes match (%.0f%%), missing %d, height chrome %d core %d",
-			name, res.OK, res.Total, 100*res.Score, res.Missing, res.ChromeH, res.CoreH)
+	}
+	prev := saveFidelitySummary(outDir, results)
+	for _, res := range results {
+		if res.Err != "" {
+			continue
+		}
+		res.Change = res.change(prev)
+		t.Logf("%-20s %4d/%-4d boxes match (%.0f%%) %s, missing %d, height chrome %d core %d, %d origins, %d style diffs",
+			res.Name, res.OK, res.Total, 100*res.Score, res.Change, res.Missing, res.ChromeH, res.CoreH, len(res.Origins), len(res.StyleDiffs))
+		logFidelity(res, t.Logf)
 	}
 	writeFidelityReport(t, outDir, results)
+}
+
+// fidelityName returns the name of the fidelity page in the given file:
+// its name, or the name of its directory for an index.html.
+func fidelityName(file string) string {
+	if filepath.Base(file) == "index.html" {
+		return filepath.Base(filepath.Dir(file))
+	}
+	return strings.TrimSuffix(filepath.Base(file), ".html")
 }
 
 // fidelityPage compares the rendering of one page.
@@ -153,7 +199,7 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 		res.Err = err.Error()
 		return res
 	}
-	tagged, tags, err := tagFidelityHTML(src)
+	tagged, fd, err := tagFidelityHTML(src)
 	if err != nil {
 		res.Err = err.Error()
 		return res
@@ -165,14 +211,21 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 		tagged = insertInHead(tagged, `<base href="`+baseURL+`">`)
 	}
 
-	chromeBoxes, chromeH, err := chromeRender(tagged, absDir, filepath.Join(outDir, name+".chrome.png"))
+	// a local page (without a base URL on the web) is rendered without the
+	// network, so that it renders the same at any time
+	offline := baseURL == ""
+	chromeBoxes, chromeH, viewport, err := chromeRender(tagged, absDir, filepath.Join(outDir, name+".chrome.png"), offline)
 	if err != nil {
 		res.Err = "chrome: " + err.Error()
 		return res
 	}
 	res.ChromeH = chromeH
 
-	coreBoxes, coreImg, coreH := coreRender(tagged, absDir, baseURL)
+	var remote func(u string)
+	if offline {
+		remote = func(u string) { t.Logf("%s: a resource on the web is not read: %s", name, u) }
+	}
+	coreBoxes, coreImg, coreH := coreRenderWidth(tagged, absDir, baseURL, fidelityWidth(), viewport, remote)
 	if coreImg == nil {
 		res.Err = "core: no image"
 		return res
@@ -199,7 +252,7 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 	}
 	sort.Ints(order)
 	for _, f := range order {
-		el := &fidElem{Fid: f, Tag: tags[f], Chrome: chromeBoxes[f], Core: coreBoxes[f]}
+		el := &fidElem{Fid: f, Tag: fd.Tag[f], Chrome: chromeBoxes[f], Core: coreBoxes[f]}
 		switch {
 		case el.Chrome == nil:
 			el.Status = "extra"
@@ -239,6 +292,10 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 	if res.Total > 0 {
 		res.Score = float32(res.OK) / float32(res.Total)
 	}
+	analyzeFidelity(res, fd)
+	if b, err := json.MarshalIndent(map[string]any{"Origins": res.Origins, "StyleDiffs": res.StyleDiffs}, "", "\t"); err == nil {
+		os.WriteFile(filepath.Join(outDir, name+".json"), b, 0666)
+	}
 	return res
 }
 
@@ -251,8 +308,6 @@ func boxDelta(a, b *fidBox) float32 {
 	return d
 }
 
-// tagFidelityHTML adds a data-fid attribute to each element of the HTML,
-// returning the HTML and the tag of each fid.
 // chromeTimeout is the longest that a run of Chrome can take, as for a
 // screenshot of a very long page, after which it is stopped.
 const chromeTimeout = 2 * time.Minute
@@ -261,7 +316,21 @@ const chromeTimeout = 2 * time.Minute
 // from the -fidelity-width flag.
 func fidelityWidth() int { return *fidelityWidthFlag }
 
-func tagFidelityHTML(src []byte) (string, map[int]string, error) {
+// fidDoc has the elements of a fidelity page, by their fid.
+type fidDoc struct {
+	// Tag is the tag of each element.
+	Tag map[int]string
+
+	// Desc describes each element: its tag, id, and classes, as in CSS.
+	Desc map[int]string
+
+	// Parent is the fid of the parent element of each element (0 for body).
+	Parent map[int]int
+}
+
+// tagFidelityHTML adds a data-fid attribute to each element of the body of
+// the HTML (from 1 for the body), returning the HTML and its elements.
+func tagFidelityHTML(src []byte) (string, *fidDoc, error) {
 	// The pages are compared as browsers without JavaScript render them,
 	// which is how htmlcore renders them: the content of noscript elements
 	// is in the page (it is unwrapped, as Chrome is run with JavaScript only
@@ -272,31 +341,34 @@ func tagFidelityHTML(src []byte) (string, map[int]string, error) {
 		return "", nil, err
 	}
 	unwrapNoscript(doc)
-	tags := map[int]string{}
+	fd := &fidDoc{Tag: map[int]string{}, Desc: map[int]string{}, Parent: map[int]int{}}
 	n := 0
 	inBody := false
-	var walk func(nd *html.Node)
-	walk = func(nd *html.Node) {
+	var walk func(nd *html.Node, parent int)
+	walk = func(nd *html.Node, parent int) {
 		if nd.Type == html.ElementNode {
 			if nd.Data == "body" {
 				inBody = true
 			}
 			if inBody {
 				n++
-				tags[n] = nd.Data
+				fd.Tag[n] = nd.Data
+				fd.Desc[n] = elementDesc(nd)
+				fd.Parent[n] = parent
+				parent = n
 				nd.Attr = append(nd.Attr, html.Attribute{Key: "data-fid", Val: strconv.Itoa(n)})
 			}
 		}
 		for c := nd.FirstChild; c != nil; c = c.NextSibling {
-			walk(c)
+			walk(c, parent)
 		}
 	}
-	walk(doc)
+	walk(doc, 0)
 	var b bytes.Buffer
 	if err := html.Render(&b, doc); err != nil {
 		return "", nil, err
 	}
-	return b.String(), tags, nil
+	return b.String(), fd, nil
 }
 
 // headTag matches the start tag of the head element, with any attributes.
@@ -331,7 +403,8 @@ func unwrapNoscript(n *html.Node) {
 	}
 }
 
-// chromeHarnessStyle makes Chrome use the same default font as Cogent Core.
+// chromeHarnessStyle has the fonts of Cogent Core, Noto Sans (the default)
+// and Roboto Mono, for Chrome (see chromeFontScript).
 func chromeHarnessStyle() string {
 	fonts, _ := filepath.Abs("../text/fonts/noto")
 	var sb strings.Builder
@@ -346,6 +419,17 @@ func chromeHarnessStyle() string {
 		fmt.Fprintf(&sb, "@font-face { font-family: \"Noto Sans\"; src: url(\"file://%s/NotoSans-%s.ttf\"); font-weight: %s; font-style: %s; }\n",
 			fonts, f.file, f.weight, f.style)
 	}
+	mono, _ := filepath.Abs("../text/fonts/robotomono")
+	for _, f := range []struct {
+		file, weight, style string
+	}{
+		{"Regular", "400", "normal"}, {"Italic", "400", "italic"},
+		{"Medium", "500", "normal"}, {"MediumItalic", "500", "italic"},
+		{"Bold", "700", "normal"}, {"BoldItalic", "700", "italic"},
+	} {
+		fmt.Fprintf(&sb, "@font-face { font-family: \"Roboto Mono\"; src: url(\"file://%s/RobotoMono-%s.ttf\"); font-weight: %s; font-style: %s; }\n",
+			mono, f.file, f.weight, f.style)
+	}
 	sb.WriteString("html { font-family: \"Noto Sans\"; }\n</style>\n")
 	return sb.String()
 }
@@ -353,13 +437,51 @@ func chromeHarnessStyle() string {
 // chromeHarnessCSP allows only the harness script to run in Chrome.
 const chromeHarnessCSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-fidelity'">`
 
+// chromeFontScript makes Chrome use the fonts that Cogent Core uses for the
+// font families of the elements (see fontFamily): Roboto Mono for monospace
+// fonts, and Noto Sans for all others, so that the differences of the
+// layouts are not those of the fonts. It defines fidelityFonts, a promise
+// of when the fonts are set and loaded.
+const chromeFontScript = `<script nonce="fidelity">
+const fidelityFonts = new Promise(resolve => addEventListener('DOMContentLoaded', async () => {
+	const mono = /^(monospace|courier|courier new|consolas|menlo|monaco|roboto mono|ui-monospace|sfmono-regular)$/;
+	const known = /^(serif|times|times new roman|georgia|garamond|ui-serif|sans-serif|arial|helvetica|helvetica neue|verdana|tahoma|system-ui|-apple-system|segoe ui|roboto|noto sans|ui-sans-serif|cursive|fantasy)$/;
+	const coreFont = ff => {
+		for (let f of ff.split(',')) {
+			f = f.trim().replace(/^["']|["']$/g, '').toLowerCase();
+			if (mono.test(f)) return '"Roboto Mono"';
+			if (known.test(f)) return '"Noto Sans"';
+		}
+		return '"Noto Sans"';
+	};
+	const els = [document.documentElement, ...document.documentElement.querySelectorAll('*')];
+	const fonts = els.map(e => coreFont(getComputedStyle(e).fontFamily)); // before any is set
+	els.forEach((e, i) => e.style && e.style.setProperty('font-family', fonts[i], 'important'));
+	await document.fonts.ready;
+	resolve();
+}));
+</script>
+`
+
+// fidStyleProps are the CSS properties whose computed values are compared.
+var fidStyleProps = []string{"font-size", "font-weight",
+	"margin-top", "margin-right", "margin-bottom", "margin-left",
+	"padding-top", "padding-right", "padding-bottom", "padding-left",
+	"border-top-width", "border-right-width", "border-bottom-width", "border-left-width"}
+
+// chromeHarnessScript gets the boxes and styles of the elements, and the
+// height of the page, which it puts in a pre element at the end of the body.
 const chromeHarnessScript = `<script nonce="fidelity">
-document.fonts.ready.then(() => {
+fidelityFonts.then(() => {
+	const props = PROPS;
 	const boxes = [];
 	for (const e of document.querySelectorAll('[data-fid]')) {
 		const r = e.getBoundingClientRect();
-		boxes.push({Fid: +e.dataset.fid, Tag: e.tagName.toLowerCase(), Display: getComputedStyle(e).display,
-			X: r.x, Y: r.y, W: r.width, H: r.height});
+		const cs = getComputedStyle(e);
+		const st = {};
+		for (const p of props) st[p] = parseFloat(cs.getPropertyValue(p)) || 0;
+		boxes.push({Fid: +e.dataset.fid, Tag: e.tagName.toLowerCase(), Display: cs.display,
+			X: r.x, Y: r.y, W: r.width, H: r.height, Style: st});
 	}
 	const h = Math.ceil(Math.max(document.documentElement.getBoundingClientRect().height, document.documentElement.scrollHeight > innerHeight ? document.documentElement.scrollHeight : 0));
 	const pre = document.createElement('pre');
@@ -373,75 +495,101 @@ document.fonts.ready.then(() => {
 var fidelityJSON = regexp.MustCompile(`(?s)<pre id="__fidelity">(.*?)</pre>`)
 
 // chromeRender renders the HTML in Chrome, returning the boxes of the
-// elements and the height of the page, and saving a screenshot.
-func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
-	page := insertInHead(tagged, chromeHarnessCSP+chromeHarnessStyle())
-	boxPage := strings.Replace(page, "</body>", chromeHarnessScript+"</body>", 1)
+// elements, the height of the page, and the height of the viewport, and
+// saving a screenshot. The viewport is as high as the page in a viewport
+// of 600px, as for the screenshot, so that vh lengths are the same in the
+// boxes as in the screenshot (and in the rendering of core, which uses it).
+func chromeRender(tagged, dir, shot string, offline bool) (map[int]*fidBox, int, int, error) {
+	props, _ := json.Marshal(fidStyleProps)
+	page := insertInHead(tagged, chromeHarnessCSP+chromeHarnessStyle()+chromeFontScript)
+	boxPage := strings.Replace(page, "</body>", strings.Replace(chromeHarnessScript, "PROPS", string(props), 1)+"</body>", 1)
 	tmp := filepath.Join(dir, ".fidelity-tmp.html")
 	defer os.Remove(tmp)
 
-	if err := os.WriteFile(tmp, []byte(boxPage), 0666); err != nil {
-		return nil, 0, err
-	}
 	args := []string{"--headless", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
 		"--force-device-scale-factor=1", "--virtual-time-budget=3000",
 		"--user-agent=" + UserAgent} // as htmlcore; some sites block headless Chrome
-	ctx, cancel := context.WithTimeout(context.Background(), chromeTimeout)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, chromePath(), append(args, fmt.Sprintf("--window-size=%d,600", fidelityWidth()),
-		"--dump-dom", "file://"+tmp)...).Output()
-	if err != nil {
-		return nil, 0, err
+	if offline { // no host can be resolved
+		args = append(args, "--host-resolver-rules=MAP * ~NOTFOUND")
 	}
-	m := fidelityJSON.FindSubmatch(out)
-	if m == nil {
-		return nil, 0, fmt.Errorf("no box output")
+	run := func(page string, height int, out ...string) ([]byte, error) {
+		if err := os.WriteFile(tmp, []byte(page), 0666); err != nil {
+			return nil, err
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), chromeTimeout)
+		defer cancel()
+		a := append(append(args, fmt.Sprintf("--window-size=%d,%d", fidelityWidth(), height)), out...)
+		cmd := exec.CommandContext(ctx, chromePath(), append(a, "file://"+tmp)...)
+		if len(out) > 0 && out[0] == "--dump-dom" {
+			return cmd.Output()
+		}
+		b, err := cmd.CombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("%w: %s", err, b)
+		}
+		return b, nil
 	}
-	var data struct {
+	type chromeData struct {
 		H     int
 		Boxes []*fidBox
 	}
-	if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), &data); err != nil {
-		return nil, 0, err
+	boxesAt := func(height int) (*chromeData, error) {
+		out, err := run(boxPage, height, "--dump-dom")
+		if err != nil {
+			return nil, err
+		}
+		m := fidelityJSON.FindSubmatch(out)
+		if m == nil {
+			return nil, fmt.Errorf("no box output")
+		}
+		data := &chromeData{}
+		if err := json.Unmarshal([]byte(html.UnescapeString(string(m[1]))), data); err != nil {
+			return nil, err
+		}
+		return data, nil
+	}
+	data, err := boxesAt(600)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	viewport := max(data.H, 50)
+	if viewport != 600 {
+		if data, err = boxesAt(viewport); err != nil {
+			return nil, 0, 0, err
+		}
 	}
 	boxes := map[int]*fidBox{}
 	for _, b := range data.Boxes {
 		boxes[b.Fid] = b
 	}
-
-	// screenshot without the script
-	if err := os.WriteFile(tmp, []byte(page), 0666); err != nil {
-		return nil, 0, err
-	}
-	h := max(data.H, 50)
 	absShot, _ := filepath.Abs(shot)
-	sctx, scancel := context.WithTimeout(context.Background(), chromeTimeout)
-	defer scancel()
-	cmd := exec.CommandContext(sctx, chromePath(), append(args, fmt.Sprintf("--window-size=%d,%d", fidelityWidth(), h),
-		"--screenshot="+absShot, "file://"+tmp)...)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return nil, 0, fmt.Errorf("screenshot: %w: %s", err, out)
+	if _, err := run(page, viewport, "--screenshot="+absShot); err != nil { // without the box script
+		return nil, 0, 0, fmt.Errorf("screenshot: %w", err)
 	}
-	return boxes, h, nil
+	return boxes, max(data.H, 50), viewport, nil
 }
 
-// coreRender renders the HTML with htmlcore, returning the boxes of the
-// widgets of the elements and the rendered image.
-func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int) {
+// coreRenderWidth renders the HTML with htmlcore in a viewport of the given
+// width and height (for @media rules and vh lengths), returning the boxes of
+// the widgets of the elements with a data-fid attribute, the rendered image,
+// and the height of the page. If remote is not nil, the resources of the
+// page are only read from local files, and it is called with the URL of
+// each resource on the web that the page requests instead.
+func coreRenderWidth(tagged, dir, baseURL string, width, height int, remote func(u string)) (map[int]*fidBox, *image.RGBA, int) {
 	b := core.NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Padding.Zero()
 		s.Gap.Zero()
-		s.Min.X.Dp(float32(fidelityWidth()))
-		s.Max.X.Dp(float32(fidelityWidth()))
+		s.Min.X.Dp(float32(width))
+		s.Max.X.Dp(float32(width))
 		s.ScrollbarWidth.Zero() // as Chrome is run with hidden scrollbars
 	})
 	b.Scene.Styler(func(s *styles.Style) { // like the viewport of a browser
 		s.Padding.Zero()
 	})
 	ctx := NewContext()
-	ctx.MediaWidth = float32(fidelityWidth())
-	ctx.MediaHeight = 600 // the height of the Chrome window
+	ctx.MediaWidth = float32(width)
+	ctx.MediaHeight = float32(height)
 	ctx.PageURL = "file://" + dir + "/page.html"
 	if baseURL != "" {
 		ctx.PageURL = baseURL
@@ -452,6 +600,10 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int)
 			return nil, err
 		}
 		if pu.Scheme == "http" || pu.Scheme == "https" {
+			if remote != nil {
+				remote(u)
+				return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found", Body: io.NopCloser(strings.NewReader(""))}, nil
+			}
 			return getURL(u) // as the default GetURL does
 		}
 		p := pu.Path
@@ -468,7 +620,7 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int)
 		return nil, nil, 0
 	}
 	boxes := map[int]*fidBox{}
-	height := 0 // of the page, in dp, as laid out (the window can be higher)
+	pageHeight := 0 // in dp, as laid out (the window can be higher)
 	img := b.RenderImage(func() {
 		dp := b.Styles.UnitContext.Dots(units.UnitDp)
 		bottom := float32(0) // of the content, as the body grows to fill the window
@@ -476,7 +628,7 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int)
 			bottom = max(bottom, cwb.Geom.Pos.Total.Y+cwb.Geom.Size.Actual.Total.Y)
 			return tree.Continue
 		})
-		height = int(math32.Ceil(bottom / dp))
+		pageHeight = int(math32.Ceil(bottom / dp))
 		b.WalkDown(func(n tree.Node) bool {
 			w, ok := n.(core.Widget)
 			if !ok {
@@ -501,6 +653,21 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int)
 			if tag, ok := wb.Property("tag").(string); ok {
 				bx.Tag = tag
 			}
+			// the box of a list item is that of its content (see
+			// handleBrowserListItem), and its margins are of the item
+			sw := w
+			if pw, ok := wb.Parent.(core.Widget); ok && wb.Name == "content" && pw.AsWidget().Property("tag") == "li" {
+				sw = pw
+			}
+			bx.Style = coreStyle(&sw.AsWidget().Styles, dp)
+			if bs := ctx.blocks[sw]; bs != nil && bs.markers { // in the padding of the list
+				uc := &sw.AsWidget().Styles.UnitContext
+				bx.Style["padding-left"] += math32.Round(uc.ToDots(markerWidth.Value, markerWidth.Unit)/dp*100) / 100
+			}
+			if bs := ctx.blocks[sw]; bs != nil { // before the margins collapse
+				bx.Style["margin-top"] = math32.Round(bs.marginTop/dp*100) / 100
+				bx.Style["margin-bottom"] = math32.Round(bs.marginBottom/dp*100) / 100
+			}
 			if wb.Styles.Display == styles.DisplayNone || wb.StateIs(states.Invisible) {
 				bx.W, bx.H = 0, 0
 			}
@@ -513,10 +680,10 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int)
 			return tree.Continue
 		})
 	})
-	if img != nil && height > 0 && height < img.Bounds().Dy() {
-		img = img.SubImage(image.Rect(0, 0, img.Bounds().Dx(), height)).(*image.RGBA)
+	if img != nil && pageHeight > 0 && pageHeight < img.Bounds().Dy() {
+		img = img.SubImage(image.Rect(0, 0, img.Bounds().Dx(), pageHeight)).(*image.RGBA)
 	}
-	return boxes, img, height
+	return boxes, img, pageHeight
 }
 
 func readPNG(path string) image.Image {
@@ -577,13 +744,22 @@ h2 { margin-top: 32px; }
 </style></head><body>
 <h1>htmlcore fidelity vs Chrome</h1>
 <p>Each page: Chrome on the left, Cogent Core on the right. Boxes are border boxes in px; an element matches when every edge is within {{.Tol}}px.</p>
-<table><tr><th>page</th><th>match</th><th>missing</th><th>height chrome / core</th></tr>
-{{range .Results}}<tr><td><a href="#{{.Name}}">{{.Name}}</a></td><td>{{.OK}}/{{.Total}} ({{pct .Score}})</td><td>{{.Missing}}</td><td>{{.ChromeH}} / {{.CoreH}}</td></tr>
+<p>Origins are the elements where differences of the layout start: a width that differs from Chrome while that of the parent does not, a height that differs while those of the children do not, or a position in the parent that differs while the element before it matches. Style differences are of the computed values of the CSS (the cascade), separate from the layout.</p>
+<table><tr><th>page</th><th>match</th><th>change</th><th>missing</th><th>height chrome / core</th><th>origins</th><th>style diffs</th></tr>
+{{range .Results}}<tr><td><a href="#{{.Name}}">{{.Name}}</a></td><td>{{.OK}}/{{.Total}} ({{pct .Score}})</td><td>{{.Change}}</td><td>{{.Missing}}</td><td>{{.ChromeH}} / {{.CoreH}}</td><td>{{len .Origins}}</td><td>{{len .StyleDiffs}}</td></tr>
 {{end}}</table>
 {{range .Results}}
 <h2 id="{{.Name}}">{{.Name}} — {{pct .Score}}</h2>
 {{if .Err}}<p>Error: {{.Err}}</p>{{else}}
 <img src="{{.Image}}">
+{{if .Origins}}<details open><summary>origins ({{len .Origins}})</summary>
+<table><tr><th>fid</th><th>element</th><th>kind</th><th>Δ</th><th>chrome</th><th>core</th></tr>
+{{range .Origins}}<tr><td>{{.Fid}}</td><td>{{.Desc}}</td><td>{{.Kind}}</td><td>{{round .Delta}}</td><td>{{box .Chrome}}</td><td>{{box .Core}}</td></tr>
+{{end}}</table></details>{{end}}
+{{if .StyleDiffs}}<details><summary>style differences: {{range .PropCounts}}{{.Prop}} {{.Count}}; {{end}}</summary>
+<table><tr><th>fid</th><th>element</th><th>property</th><th>chrome</th><th>core</th></tr>
+{{range .StyleDiffs}}<tr><td>{{.Fid}}</td><td>{{.Desc}}</td><td>{{.Prop}}</td><td>{{.Chrome}}</td><td>{{.Core}}</td></tr>
+{{end}}</table></details>{{end}}
 <details><summary>boxes</summary>
 <table><tr><th>fid</th><th>tag</th><th>status</th><th>chrome</th><th>core</th><th>Δ</th><th>display / widget</th></tr>
 {{range .Elems}}<tr class="{{.Status}}"><td>{{.Fid}}</td><td>{{.Tag}}</td><td>{{.Status}}</td><td>{{box .Chrome}}</td><td>{{box .Core}}</td><td>{{round .Delta}}</td><td>{{if .Chrome}}{{.Chrome.Display}}{{end}} / {{if .Core}}{{.Core.Widget}}{{end}}</td></tr>

@@ -1,5 +1,6 @@
-# Real web pages for TestFidelity -fidelity-dir testdata/fidelity/real,
-# saved by fetch-real.sh (the saved pages are not committed). Each line
+# Real web pages, saved with their resources in testdata/snapshots by
+# go test -run TestSnapshot -snapshot (for TestPages and TestFidelity), and
+# as the HTML alone in real/ by fetch-real.sh (not committed). Each line
 # is a name and a URL. They are pages that work without JavaScript.
 example https://example.com/
 wikipedia https://en.wikipedia.org/wiki/Cascading_Style_Sheets
