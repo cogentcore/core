@@ -279,6 +279,8 @@ func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 		case "color", "background-color":
 			if cl, ok := cssColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
 				val = colors.AsHex(cl)
+			} else if strings.Contains(val, "(") {
+				continue // a function that is not supported (as color-mix())
 			}
 		}
 		fmt.Fprintf(&style, "%s:%s;", prop, val)

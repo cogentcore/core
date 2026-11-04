@@ -121,6 +121,10 @@ func TestCSSColorFunction(t *testing.T) {
 		"rgb(100%, 50%, 0%)":         {255, 128, 0, 255},
 		"hsl(120, 100%, 50%)":        {0, 255, 0, 255},
 		"hsla(240deg 100% 50% / .5)": colors.FromNRGBA(0, 0, 255, 128),
+		"color(srgb 1 0 0)":          {255, 0, 0, 255},
+		"color(display-p3 1 1 1)":    {255, 255, 255, 255},
+		"oklch(1 0 0)":               {255, 255, 255, 255},
+		"oklab(0 0 0 / 50%)":         colors.FromNRGBA(0, 0, 0, 128),
 	}
 	for v, want := range tests {
 		got, ok := cssColorFunction(v)
