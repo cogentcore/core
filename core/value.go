@@ -82,7 +82,7 @@ func Bind[T Value](value any, vw T, tags ...string) T {
 // in a generic function that interpreters run from source ([Bind]).
 func ResetWidgetValue(vw Value) {
 	rv := reflect.ValueOf(vw.WidgetValue())
-	if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
+	if rv.IsValid() && rv.Type().Kind() == reflect.Pointer && !rv.IsNil() {
 		rv.Elem().SetZero()
 	}
 }

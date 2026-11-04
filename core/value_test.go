@@ -181,3 +181,15 @@ func TestValueDialogDeletedWidget(t *testing.T) {
 	b.Close()
 	rc.Unlock()
 }
+
+// nilValue is a value widget whose value is a nil pointer.
+type nilValue struct{ WidgetBase }
+
+func (nv *nilValue) WidgetValue() any { return (*int)(nil) }
+
+// TestResetWidgetValueNil tests that resetting a value widget whose
+// value is a nil pointer does not panic, as when a field of a form
+// is bound again (crashed the Tree tab of the demo).
+func TestResetWidgetValueNil(t *testing.T) {
+	ResetWidgetValue(&nilValue{})
+}
