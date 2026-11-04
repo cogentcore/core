@@ -49,15 +49,13 @@ import (
 // side by side, are written to testdata/fidelity/out/report.html.
 
 var (
-	fidelityFlag = flag.Bool("fidelity", false, "run the fidelity comparison with Chrome")
-	fidelityRun  = flag.String("fidelity-run", "", "regexp selecting the fidelity pages to compare")
-	fidelityDir  = flag.String("fidelity-dir", "testdata/fidelity", "directory of the fidelity pages; a page.url file next to a page has the URL that its relative URLs are relative to")
+	fidelityFlag      = flag.Bool("fidelity", false, "run the fidelity comparison with Chrome")
+	fidelityRun       = flag.String("fidelity-run", "", "regexp selecting the fidelity pages to compare")
+	fidelityWidthFlag = flag.Int("fidelity-width", 800, "width of the viewport of the fidelity comparison, in CSS px")
+	fidelityDir       = flag.String("fidelity-dir", "testdata/fidelity", "directory of the fidelity pages; a page.url file next to a page has the URL that its relative URLs are relative to")
 )
 
 const (
-	// fidelityWidth is the width of the viewport, in CSS px (= dp = dots).
-	fidelityWidth = 800
-
 	// fidelityTolerance is the largest difference in each edge of a box,
 	// in px, for the box to be counted as matching.
 	fidelityTolerance = 6
@@ -125,7 +123,7 @@ func TestFidelity(t *testing.T) {
 	os.MkdirAll(outDir, 0750)
 
 	// The screen is tall enough for any page.
-	system.TheApp.Screen(0).PixelSize = image.Pt(fidelityWidth, 6000)
+	system.TheApp.Screen(0).PixelSize = image.Pt(fidelityWidth(), 6000)
 
 	var results []*fidResult
 	for _, f := range files {
@@ -162,7 +160,7 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 	baseURL := ""
 	if b, err := os.ReadFile(strings.TrimSuffix(file, ".html") + ".url"); err == nil {
 		baseURL = strings.TrimSpace(string(b))
-		tagged = strings.Replace(tagged, "<head>", `<head><base href="`+baseURL+`">`, 1)
+		tagged = insertInHead(tagged, `<base href="`+baseURL+`">`)
 	}
 
 	chromeBoxes, chromeH, err := chromeRender(tagged, absDir, filepath.Join(outDir, name+".chrome.png"))
@@ -253,6 +251,10 @@ func boxDelta(a, b *fidBox) float32 {
 
 // tagFidelityHTML adds a data-fid attribute to each element of the HTML,
 // returning the HTML and the tag of each fid.
+// fidelityWidth returns the width of the viewport, in CSS px (= dp = dots),
+// from the -fidelity-width flag.
+func fidelityWidth() int { return *fidelityWidthFlag }
+
 func tagFidelityHTML(src []byte) (string, map[int]string, error) {
 	// The pages are compared as browsers without JavaScript render them,
 	// which is how htmlcore renders them: the content of noscript elements
@@ -289,6 +291,18 @@ func tagFidelityHTML(src []byte) (string, map[int]string, error) {
 		return "", nil, err
 	}
 	return b.String(), tags, nil
+}
+
+// headTag matches the start tag of the head element, with any attributes.
+var headTag = regexp.MustCompile(`(?i)<head(\s[^>]*)?>`)
+
+// insertInHead returns the page with the given HTML at the start of its head.
+func insertInHead(page, s string) string {
+	loc := headTag.FindStringIndex(page)
+	if loc == nil {
+		return page
+	}
+	return page[:loc[1]] + s + page[loc[1]:]
 }
 
 // unwrapNoscript replaces the noscript elements under n with their children.
@@ -355,7 +369,7 @@ var fidelityJSON = regexp.MustCompile(`(?s)<pre id="__fidelity">(.*?)</pre>`)
 // chromeRender renders the HTML in Chrome, returning the boxes of the
 // elements and the height of the page, and saving a screenshot.
 func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
-	page := strings.Replace(tagged, "<head>", "<head>"+chromeHarnessCSP+chromeHarnessStyle(), 1)
+	page := insertInHead(tagged, chromeHarnessCSP+chromeHarnessStyle())
 	boxPage := strings.Replace(page, "</body>", chromeHarnessScript+"</body>", 1)
 	tmp := filepath.Join(dir, ".fidelity-tmp.html")
 	defer os.Remove(tmp)
@@ -364,8 +378,9 @@ func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
 		return nil, 0, err
 	}
 	args := []string{"--headless", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
-		"--force-device-scale-factor=1", "--virtual-time-budget=3000"}
-	out, err := exec.Command(chromePath(), append(args, fmt.Sprintf("--window-size=%d,600", fidelityWidth),
+		"--force-device-scale-factor=1", "--virtual-time-budget=3000",
+		"--user-agent=" + UserAgent} // as htmlcore; some sites block headless Chrome
+	out, err := exec.Command(chromePath(), append(args, fmt.Sprintf("--window-size=%d,600", fidelityWidth()),
 		"--dump-dom", "file://"+tmp)...).Output()
 	if err != nil {
 		return nil, 0, err
@@ -392,7 +407,7 @@ func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
 	}
 	h := max(data.H, 50)
 	absShot, _ := filepath.Abs(shot)
-	cmd := exec.Command(chromePath(), append(args, fmt.Sprintf("--window-size=%d,%d", fidelityWidth, h),
+	cmd := exec.Command(chromePath(), append(args, fmt.Sprintf("--window-size=%d,%d", fidelityWidth(), h),
 		"--screenshot="+absShot, "file://"+tmp)...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return nil, 0, fmt.Errorf("screenshot: %w: %s", err, out)
@@ -407,8 +422,8 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 	b.Styler(func(s *styles.Style) {
 		s.Padding.Zero()
 		s.Gap.Zero()
-		s.Min.X.Dp(fidelityWidth)
-		s.Max.X.Dp(fidelityWidth)
+		s.Min.X.Dp(float32(fidelityWidth()))
+		s.Max.X.Dp(float32(fidelityWidth()))
 		s.ScrollbarWidth.Zero() // as Chrome is run with hidden scrollbars
 	})
 	b.Scene.Styler(func(s *styles.Style) { // like the viewport of a browser
@@ -416,7 +431,7 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 	})
 	ctx := NewContext()
 	ctx.BrowserStyle = true
-	ctx.MediaWidth = fidelityWidth
+	ctx.MediaWidth = float32(fidelityWidth())
 	ctx.MediaHeight = 600 // the height of the Chrome window
 	ctx.PageURL = "file://" + dir + "/page.html"
 	if baseURL != "" {

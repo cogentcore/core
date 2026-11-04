@@ -233,6 +233,11 @@ type Style struct { //types:add
 	// on the given sides, as the clear property of CSS.
 	Clear Clears
 
+	// BoxSizing is whether the Min and Max sizes are of the content
+	// (the default), or also include the padding and border, as the
+	// box-sizing property of CSS.
+	BoxSizing BoxSizings
+
 	// ZIndex orders the rendering of widgets that are not [PositionStatic],
 	// as the z-index property of CSS: they are rendered after the other
 	// children of their parent (on top of them), in increasing order of

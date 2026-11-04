@@ -40,8 +40,16 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 		ctx.handleWidget(ctx.Node, w)
 		if p := ctx.Node.Parent; tag == "caption" && p != nil && p.Data == "table" {
 			// the caption is above the cells, across all of the columns
-			span := tableColumns(p)
+			span := ctx.tableColumns(p)
 			w.FinalStyler(func(s *styles.Style) { s.ColSpan = span })
+		}
+		if p := ctx.Node.Parent; p != nil && p.Data != "table" && ctx.displayOf(ctx.Node) == "table-caption" {
+			// The caption of an element displayed as a table wraps in the
+			// width of the table without widening it, which for a figure is
+			// that of its image when it has a width (as for a thumbnail).
+			if iw := tableImageWidth(p); iw > 0 {
+				w.FinalStyler(func(s *styles.Style) { s.Max.X = units.Dp(iw); s.BoxSizing = styles.BoxBorderBox })
+			}
 		}
 		return true
 	case "li":
@@ -235,4 +243,25 @@ func listMarker(ctx *Context, n *html.Node) string {
 		return string(rune('A'+(num-1)%26)) + ". "
 	}
 	return strconv.Itoa(num) + ". "
+}
+
+// tableImageWidth returns the width attribute of the first image in the
+// given element (other than in its caption), or 0 if it has none.
+func tableImageWidth(n *html.Node) float32 {
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type != html.ElementNode || c.Data == "figcaption" || c.Data == "caption" {
+			continue
+		}
+		if c.Data == "img" {
+			w, err := strconv.ParseFloat(GetAttr(c, "width"), 32)
+			if err != nil {
+				return 0
+			}
+			return float32(w)
+		}
+		if w := tableImageWidth(c); w > 0 {
+			return w
+		}
+	}
+	return 0
 }

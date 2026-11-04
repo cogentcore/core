@@ -268,3 +268,16 @@ const (
 	// ClearBoth moves the widget below all of the floats.
 	ClearBoth
 )
+
+// BoxSizings are the boxes that the Min and Max sizes are of,
+// as the box-sizing property of CSS.
+type BoxSizings int32 //enums:enum -trim-prefix Box -transform kebab
+
+const (
+	// BoxContentBox is the default: the sizes are of the content,
+	// without the padding and border.
+	BoxContentBox BoxSizings = iota
+
+	// BoxBorderBox is for sizes that include the padding and border.
+	BoxBorderBox
+)

@@ -349,7 +349,7 @@ func handleTable(ctx *Context) core.Widget {
 	}
 	ctx.tables[ctx.Node] = w
 	ctx.TableParent = w
-	cols := tableColumns(ctx.Node)
+	cols := ctx.tableColumns(ctx.Node)
 	w.SetProperty("cols", cols)
 	w.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
@@ -379,8 +379,9 @@ func (c *Context) tableFor(n *html.Node) core.Widget {
 }
 
 // tableColumns returns the number of columns of the given table, the
-// largest number of cells (with their column spans) in any of its rows.
-func tableColumns(table *html.Node) int {
+// largest number of cells (with their column spans) in any of its rows,
+// not counting those that are not displayed.
+func (ctx *Context) tableColumns(table *html.Node) int {
 	cols := 0
 	var rows func(n *html.Node)
 	rows = func(n *html.Node) {
@@ -391,7 +392,7 @@ func tableColumns(table *html.Node) int {
 			case "tr":
 				n := 0
 				for cell := c.FirstChild; cell != nil; cell = cell.NextSibling {
-					if cell.Data == "td" || cell.Data == "th" {
+					if (cell.Data == "td" || cell.Data == "th") && !(ctx.BrowserStyle && ctx.displayOf(cell) == "none") {
 						span, err := strconv.Atoi(GetAttr(cell, "colspan"))
 						if err != nil || span < 1 {
 							span = 1

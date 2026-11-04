@@ -306,6 +306,12 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 			st.margin[2] = &m
 		}
 	}
+	if pbs != nil && s.Float != styles.FloatNone {
+		switch pbs.display {
+		case "flex", "inline-flex", "grid", "inline-grid":
+			s.Float = styles.FloatNone // float does not apply to flex and grid items
+		}
+	}
 	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
 	outOfFlow := s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed
 	if outOfFlow || s.Float != styles.FloatNone {
@@ -409,16 +415,12 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	dp := max(uc.ToDots(1, units.UnitDp), 0.01)
 	spaceX := (pad.Left + pad.Right + bw.Left + bw.Right) / dp
 	spaceY := (pad.Top + pad.Bottom + bw.Top + bw.Bottom) / dp
+	// core subtracts the padding and border of a border box (see styles.BoxSizing)
+	if st.borderBox {
+		s.BoxSizing = styles.BoxBorderBox
+	}
 	contentBox := func(v units.Value, space float32) (min, max units.Value) {
-		min, max = v, v
-		if v.Unit != units.UnitDp {
-			return
-		}
-		if st.borderBox {
-			min.Value -= space
-			max.Value -= space
-		}
-		return
+		return v, v
 	}
 	if st.width != nil {
 		s.Min.X, s.Max.X = contentBox(*st.width, spaceX)

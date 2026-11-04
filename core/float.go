@@ -107,19 +107,21 @@ func (fr *Frame) layoutFloats() bool {
 			return tree.Continue
 		}
 		ksz := &cwb.Geom.Size
+		cy := y // below the floats that it clears
 		switch cwb.Styles.Clear {
 		case styles.ClearLeft:
-			y = max(y, below(true, false))
+			cy = max(y, below(true, false))
 		case styles.ClearRight:
-			y = max(y, below(false, true))
+			cy = max(y, below(false, true))
 		case styles.ClearBoth:
-			y = max(y, below(true, true))
+			cy = max(y, below(true, true))
 		}
 		if cwb.isFloat() {
+			// a float that clears is moved down, but not the flow after it
 			w := min(ksz.Actual.Total.X, width)
 			h := ksz.Actual.Total.Y
 			left := cwb.Styles.Float == styles.FloatLeft
-			fy := y
+			fy := cy
 			for range len(floats) + 1 { // down below floats until it fits
 				l, r := edges(fy)
 				if r-l >= w || l == 0 && r == width {
@@ -151,6 +153,7 @@ func (fr *Frame) layoutFloats() bool {
 			fl.size.Y = max(fl.size.Y, fy+h)
 			return tree.Continue
 		}
+		y = cy
 		l, r := edges(y)
 		w := ksz.Alloc.Total.X
 		if cwb.Styles.Grow.X > 0 || w > r-l {

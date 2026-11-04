@@ -336,6 +336,49 @@ func (i Clears) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Clears) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Clears") }
 
+var _BoxSizingsValues = []BoxSizings{0, 1}
+
+// BoxSizingsN is the highest valid value for type BoxSizings, plus one.
+const BoxSizingsN BoxSizings = 2
+
+var _BoxSizingsValueMap = map[string]BoxSizings{`content-box`: 0, `border-box`: 1}
+
+var _BoxSizingsDescMap = map[BoxSizings]string{0: `BoxContentBox is the default: the sizes are of the content, without the padding and border.`, 1: `BoxBorderBox is for sizes that include the padding and border.`}
+
+var _BoxSizingsMap = map[BoxSizings]string{0: `content-box`, 1: `border-box`}
+
+// String returns the string representation of this BoxSizings value.
+func (i BoxSizings) String() string { return enums.String(i, _BoxSizingsMap) }
+
+// SetString sets the BoxSizings value from its string representation,
+// and returns an error if the string is invalid.
+func (i *BoxSizings) SetString(s string) error {
+	return enums.SetString(i, s, _BoxSizingsValueMap, "BoxSizings")
+}
+
+// Int64 returns the BoxSizings value as an int64.
+func (i BoxSizings) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the BoxSizings value from an int64.
+func (i *BoxSizings) SetInt64(in int64) { *i = BoxSizings(in) }
+
+// Desc returns the description of the BoxSizings value.
+func (i BoxSizings) Desc() string { return enums.Desc(i, _BoxSizingsDescMap) }
+
+// BoxSizingsValues returns all possible values for the type BoxSizings.
+func BoxSizingsValues() []BoxSizings { return _BoxSizingsValues }
+
+// Values returns all possible values for the type BoxSizings.
+func (i BoxSizings) Values() []enums.Enum { return enums.Values(_BoxSizingsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i BoxSizings) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *BoxSizings) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "BoxSizings")
+}
+
 var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
 
 // ObjectFitsN is the highest valid value for type ObjectFits, plus one.

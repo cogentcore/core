@@ -685,12 +685,33 @@ func (wb *WidgetBase) sizeFromStyle() {
 	if s.Max.Y.Unit == units.UnitPw || s.Max.Y.Unit == units.UnitPh {
 		sz.Max.Y = 0
 	}
+	if bs := wb.boxSizingSpace(); bs != (math32.Vector2{}) {
+		for d := math32.X; d <= math32.Y; d++ {
+			if m := sz.Min.Dim(d); m > 0 {
+				sz.Min.SetDim(d, max(m-bs.Dim(d), 0))
+			}
+			if m := sz.Max.Dim(d); m > 0 {
+				sz.Max.SetDim(d, max(m-bs.Dim(d), 1))
+			}
+		}
+	}
 	sz.Internal.SetZero()
 	sz.setInitContentMin(sz.Min)
 	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
 		fmt.Println(wb, "SizeUp from Style:", sz.Actual.Content.String())
 	}
+}
+
+// boxSizingSpace returns the size of the padding and border of the widget
+// if its Min and Max sizes include them ([styles.BoxBorderBox]), which is
+// subtracted from them for the size of the content, or zero otherwise.
+func (wb *WidgetBase) boxSizingSpace() math32.Vector2 {
+	s := &wb.Styles
+	if s.BoxSizing != styles.BoxBorderBox {
+		return math32.Vector2{}
+	}
+	return s.Padding.Dots().Size().Add(s.Border.Width.Dots().Size())
 }
 
 // updateParentRelSizes updates any parent-relative Min, Max size values
@@ -704,23 +725,24 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 	effmin := sz.Min
 	s := &wb.Styles
 	psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
+	bs := wb.boxSizingSpace()
 	got := false
 	for d := math32.X; d <= math32.Y; d++ {
 		if s.Min.Dim(d).Unit == units.UnitPw {
 			got = true
-			effmin.SetDim(d, psz.X*0.01*s.Min.Dim(d).Value)
+			effmin.SetDim(d, max(psz.X*0.01*s.Min.Dim(d).Value-bs.Dim(d), 0))
 		}
 		if s.Min.Dim(d).Unit == units.UnitPh {
 			got = true
-			effmin.SetDim(d, psz.Y*0.01*s.Min.Dim(d).Value)
+			effmin.SetDim(d, max(psz.Y*0.01*s.Min.Dim(d).Value-bs.Dim(d), 0))
 		}
 		if s.Max.Dim(d).Unit == units.UnitPw {
 			got = true
-			sz.Max.SetDim(d, psz.X*0.01*s.Max.Dim(d).Value)
+			sz.Max.SetDim(d, max(psz.X*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
 		}
 		if s.Max.Dim(d).Unit == units.UnitPh {
 			got = true
-			sz.Max.SetDim(d, psz.Y*0.01*s.Max.Dim(d).Value)
+			sz.Max.SetDim(d, max(psz.Y*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
 		}
 	}
 	if got {

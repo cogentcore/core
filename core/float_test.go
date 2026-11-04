@@ -54,3 +54,29 @@ func TestFloat(t *testing.T) {
 		_ = x0
 	})
 }
+
+// TestFloatClearFlow tests that a float that clears the floats before it
+// is below them, but the widgets after it are still beside them.
+func TestFloatClearFlow(t *testing.T) {
+	b := NewBody()
+	col := NewFrame(b)
+	col.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Min.X.Dp(400)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	first := fixedFrame(col, 100, 100)
+	first.Styler(func(s *styles.Style) { s.Float = styles.FloatRight })
+	second := fixedFrame(col, 100, 50)
+	second.Styler(func(s *styles.Style) { s.Float = styles.FloatRight; s.Clear = styles.ClearRight })
+	beside := NewFrame(col)
+	beside.Styler(func(s *styles.Style) { s.Min.Y.Dp(20); s.Grow.X = 1 })
+	layoutGeom(b, func() {
+		dp := col.Styles.UnitContext.Dots(units.UnitDp)
+		y0 := col.Geom.Pos.Content.Y
+		assert.InDelta(t, y0+100*dp, second.Geom.Pos.Total.Y, 2)
+		assert.InDelta(t, y0, beside.Geom.Pos.Total.Y, 2)
+		assert.InDelta(t, 300*dp, beside.Geom.Size.Alloc.Total.X, 2)
+	})
+}
