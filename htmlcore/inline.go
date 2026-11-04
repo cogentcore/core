@@ -210,7 +210,7 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 			return "<br>"
 		}
 		var sb strings.Builder
-		start, end := c.nodeMarkup(n)
+		start, end := c.nodeMarkup(n, pre)
 		sb.WriteString(start)
 		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
 			sb.WriteString(c.inlineMarkup(ch, pre))
@@ -222,8 +222,11 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 }
 
 // cssStyledTags are the rich text tags that have styles of their own in
-// rich text (as a background for code), which are spans in browser style,
-// so that they only have their CSS styles (from browser.css and the page).
+// rich text (as a background for code), which are spans in preformatted
+// text (as of pre elements), so that they only have their CSS styles
+// there, without boxes behind the code in the boxes of the pre elements.
+// Elsewhere they have their styles of rich text (code is monospace on a
+// background), as in Cogent Core.
 var cssStyledTags = map[string]bool{"code": true, "kbd": true, "samp": true, "tt": true, "mark": true}
 
 // richTags are the tags that rich text markup has, which other inline
@@ -244,10 +247,11 @@ var inlineProperties = map[string]bool{
 }
 
 // nodeMarkup returns the start and end tags of the markup for the given
-// element of text, with the CSS styles of the element in its style.
-func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
+// element of text, with the CSS styles of the element in its style,
+// in preformatted text if pre.
+func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 	tag := n.Data
-	if !richTags[tag] || cssStyledTags[tag] {
+	if !richTags[tag] || (pre && cssStyledTags[tag]) {
 		tag = "span"
 	}
 	var sb strings.Builder
