@@ -115,3 +115,21 @@ func TestShrinkWrapRow(t *testing.T) {
 		assert.InDelta(t, 20*dp, row.Geom.Size.Actual.Total.Y, 2) // two lines
 	})
 }
+
+func TestShrinkMinContent(t *testing.T) {
+	var word *Text
+	shrinkTest(t, func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 2
+	}, func(fr *Frame) {
+		// texts that are as wide as they are on one line, as in htmlcore
+		word = shrinkingText(fr, "Unbreakable").SetFitWidth(true)
+		shrinkingText(fr, wrapText+wrapText).SetFitWidth(true)
+	}, func(fr *Frame, dp float32) {
+		// the column is not narrower than the word
+		w := word.minContentWidth()
+		assert.Greater(t, w, float32(40)*dp)
+		assert.GreaterOrEqual(t, word.Geom.Size.Alloc.Total.X, w-1)
+		assert.LessOrEqual(t, word.Geom.Size.Actual.Total.Y, 30*dp) // one line
+	})
+}

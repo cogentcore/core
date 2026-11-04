@@ -172,6 +172,7 @@ func handleBrowserListItem(ctx *Context) {
 		delete(li.Properties, "data-fid")
 	}
 	ctx.blocks[content].display = "block"
+	content.FinalStyler(func(s *styles.Style) { s.Shrink.X = 1 }) // beside its marker
 	ctx.Node = n
 	ctx.NewParent = content
 }

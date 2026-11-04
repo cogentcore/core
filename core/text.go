@@ -9,6 +9,8 @@ import (
 	"image"
 	"slices"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
@@ -57,6 +59,12 @@ type Text struct {
 	// richText is the conversion of the HTML text source.
 	// This is what is actually rendered.
 	richText rich.Text
+
+	// minWordKey is the text and font size that minWord is for.
+	minWordKey string
+
+	// minWord is the cached width of the longest word, for minContentWidth.
+	minWord float32
 
 	// richSource is the source that richText was made from, so that
 	// a restyle that changes neither the text nor its style does not
@@ -590,6 +598,33 @@ func (tx *Text) SizeUp() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
+}
+
+// minContentWidth returns the min-content width of the content of the
+// text: the width of its longest word if it wraps, or of its line if not.
+// It is cached for the text and its font size.
+func (tx *Text) minContentWidth() float32 {
+	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || tx.Scene == nil || tx.Styles.Font.Size.Dots == 0 {
+		return tx.Geom.Size.Actual.Content.X
+	}
+	key := fmt.Sprintf("%s\x00%g", tx.Text, tx.Styles.Font.Size.Dots)
+	if tx.minWordKey == key {
+		return tx.minWord
+	}
+	longest := ""
+	for _, w := range strings.Fields(string(tx.richText.Join())) {
+		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
+			longest = w
+		}
+	}
+	width := float32(0)
+	if longest != "" {
+		sty, tsty := tx.Styles.NewRichText()
+		lines := tx.Scene.TextShaper().WrapLines(rich.NewText(sty, []rune(longest)), sty, tsty, math32.Vec2(1e6, 1e6))
+		width = math32.Ceil(lines.Bounds.Size().X)
+	}
+	tx.minWordKey, tx.minWord = key, width
+	return width
 }
 
 // availableWidth returns the width available to the text for [Text.FitWidth]:

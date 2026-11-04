@@ -155,6 +155,12 @@ type GeomSize struct {
 	// to a growing widget whose allocation is limited by its Max size,
 	// which it is aligned within, and 0 otherwise.
 	slot math32.Vector2
+
+	// preferred is the actual total size of the widget from the SizeUp
+	// pass, before its parent allocates it less, which is its max-content
+	// size for widgets that shrink ([styles.Style.Shrink]), so that they
+	// are as wide as they can be in the space that they have.
+	preferred math32.Vector2
 }
 
 func (ls GeomSize) String() string {
@@ -1303,6 +1309,12 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
 	fr.updateParentRelSizes()
+	if iter == 0 { // the sizes of the children from SizeUp
+		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cwb.Geom.Size.preferred = cwb.Geom.Size.Actual.Total
+			return tree.Continue
+		})
+	}
 	sz := &fr.Geom.Size
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
@@ -1453,9 +1465,9 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	var maxExtra, exn math32.Vector2
 	var widths []float32
 	colWidth := fr.columnWidth()
-	if extra.X < 0 {
-		widths = fr.shrinkWidths()
-	}
+	// columns that shrink are narrowed to fit, or widened back to their
+	// widths from SizeUp after they were narrower
+	widths = fr.shrinkWidths()
 	for exitr := range 2 {
 		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
@@ -1535,13 +1547,11 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				if span := fr.rowSpan(cwb); ma == math32.Y && span > 1 {
 					asz = fr.rowSpanAlloc(cidx, span, exd)
 				}
-				if ma == math32.X && extra.X < 0 {
-					if widths != nil {
-						asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
-					}
-					if colWidth > 0 && asz > colWidth && limitsWidth(cwb) {
-						asz = colWidth
-					}
+				if ma == math32.X && widths != nil {
+					asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
+				}
+				if ma == math32.X && extra.X < 0 && colWidth > 0 && asz > colWidth && limitsWidth(cwb) {
+					asz = colWidth
 				}
 				if DebugSettings.LayoutTraceDetail {
 					fmt.Println(cwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
@@ -1591,13 +1601,10 @@ func (fr *Frame) shrinkWidths() []float32 {
 	if li.Wraps != nil || len(li.Cells) == 0 || !rowOrGrid {
 		return nil
 	}
-	deficit := sz.Internal.X - sz.Alloc.Content.X
-	if deficit <= 0.5 {
-		return nil
-	}
 	n := li.Shape.X
 	shrink := make([]float32, n)
 	minw := make([]float32, n)
+	pref := make([]float32, n) // the widths of the columns from SizeUp
 	any := false
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		c := cwb.Geom.Cell.X
@@ -1608,16 +1615,40 @@ func (fr *Frame) shrinkWidths() []float32 {
 			shrink[c] = sh
 			any = true
 		}
-		minw[c] = max(minw[c], cwb.Styles.Min.X.Dots+cwb.Styles.BoxSpace().Size().X)
+		pref[c] = max(pref[c], cwb.Geom.Size.preferred.X)
 		return tree.Continue
 	})
 	if !any {
 		return nil
 	}
+	// The columns that shrink start from their widths from SizeUp, so
+	// that they are as wide as they can be when they were narrower before.
 	widths := make([]float32, n)
+	cur := float32(0)
 	for c := range n {
 		widths[c] = li.cell(math32.X, c, 0).Size.X
+		cur += widths[c]
+		if shrink[c] > 0 {
+			widths[c] = max(widths[c], pref[c])
+		}
 	}
+	total := float32(0)
+	for c := range n {
+		total += widths[c]
+	}
+	deficit := sz.Internal.X - cur + total - sz.Alloc.Content.X
+	if deficit <= 0.5 {
+		if total > cur+0.5 {
+			return widths
+		}
+		return nil
+	}
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if c := cwb.Geom.Cell.X; c < n && fr.colSpan(cwb) == 1 && shrink[c] > 0 {
+			minw[c] = max(minw[c], minContentWidth(cw))
+		}
+		return tree.Continue
+	})
 	for range 2 { // again for those that are not at their minimum
 		sum := float32(0)
 		for c := range n {
@@ -1647,6 +1678,61 @@ func (fr *Frame) shrinkWidths() []float32 {
 		deficit = left // those that can shrink more do
 	}
 	return widths
+}
+
+// minContentWidth returns the min-content width of the given widget, as in
+// CSS: the total width (with its margins, borders, and padding) below which
+// its content overflows, which columns do not shrink below. It is that of
+// the longest word of text, and that of the children of frames for their
+// layout (the sum for rows that do not wrap, and otherwise the largest).
+func minContentWidth(w Widget) float32 {
+	wb := w.AsWidget()
+	s := &wb.Styles
+	sz := &wb.Geom.Size
+	v := float32(0)
+	switch {
+	case s.Overflow.X >= styles.OverflowAuto: // it scrolls
+	case s.Display == styles.DisplayNone:
+		return 0
+	default:
+		if tx, ok := w.(*Text); ok {
+			v = tx.minContentWidth()
+			break
+		}
+		fr, ok := w.(*Frame)
+		if !ok || !fr.HasChildren() {
+			v = sz.Actual.Content.X // its natural size
+			break
+		}
+		row := s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap
+		cols := map[int]float32{} // of a grid, by column
+		n := 0
+		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			m := minContentWidth(cw)
+			switch {
+			case row:
+				v += m
+				n++
+			case s.Display == styles.Grid && fr.colSpan(cwb) == 1:
+				cols[cwb.Geom.Cell.X] = max(cols[cwb.Geom.Cell.X], m)
+			default:
+				v = max(v, m)
+			}
+			return tree.Continue
+		})
+		if row && n > 1 {
+			v += float32(n-1) * fr.layout.Gap.X
+		}
+		if len(cols) > 0 {
+			sum := float32(len(cols)-1) * fr.layout.Gap.X
+			for _, m := range cols {
+				sum += m
+			}
+			v = max(v, sum)
+		}
+	}
+	v = max(v, sz.Min.X)
+	return v + s.BoxSpace().Size().X
 }
 
 // shrinkAlloc returns the allocated width of the given child in the column
@@ -1821,6 +1907,9 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 			}
 			if ma == math32.X && widths != nil {
 				asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
+			}
+			if ma == math32.X && colWidth > 0 && cwb.Styles.Shrink.X > 0 && widths == nil {
+				asz = max(asz, cwb.Geom.Size.preferred.X) // as wide as it can be
 			}
 			if ma == math32.X && colWidth > 0 && asz > colWidth && limitsWidth(cwb) {
 				asz = colWidth

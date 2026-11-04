@@ -73,6 +73,13 @@ type Context struct {
 	// for [Context.BrowserStyle].
 	nodeWidgets map[*html.Node]core.Widget
 
+	// floatSiblings has whether the unstyled blocks in each element
+	// have floats in them, for flattensBlock.
+	floatSiblings map[*html.Node]bool
+
+	// flattened has the blocks that are flattened (see flattensBlock).
+	flattened map[*html.Node]bool
+
 	// blocks has the margin collapsing state of the block widgets,
 	// for [Context.BrowserStyle].
 	blocks map[core.Widget]*blockState

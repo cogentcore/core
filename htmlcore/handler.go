@@ -105,6 +105,11 @@ func handleElement(ctx *Context) {
 		}
 		ctx.addStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
+		if ctx.BrowserStyle && ctx.displayOf(ctx.Node) == "block" && ctx.flattensBlock(ctx.Node) {
+			ctx.NewParent = ctx.BlockParent // it has no box of its own
+			ctx.inlineParent = nil
+			break
+		}
 		w := New[core.Frame](ctx)
 		newWidget = w
 		ctx.NewParent = w
@@ -167,6 +172,10 @@ func handleElement(ctx *Context) {
 			switch display := ctx.displayOf(ctx.Node); {
 			case display == "none":
 				// not rendered, and neither are its children
+			case display == "block" && ctx.flattensBlock(ctx.Node):
+				// its children are in its parent, as it has no box of its own
+				ctx.NewParent = ctx.BlockParent
+				ctx.inlineParent = nil
 			case isBlockDisplay(display) || display == "inline-block" || display == "inline-flex":
 				w := New[core.Frame](ctx)
 				newWidget = w
@@ -423,9 +432,16 @@ func handleCell(ctx *Context, tag string) core.Widget {
 		// which the length of the text is a proxy, only when the table
 		// has a width to grow into.
 		weight := float32(max(len([]rune(strings.TrimSpace(nodeText(ctx.Node)))), 1))
+		rspan, err := strconv.Atoi(GetAttr(ctx.Node, "rowspan"))
+		if err != nil || rspan < 1 {
+			rspan = 1
+		}
 		w.FinalStyler(func(s *styles.Style) {
 			if span > 1 {
 				s.ColSpan = span
+			}
+			if rspan > 1 {
+				s.RowSpan = rspan
 			}
 			if s.Grow.X > 0 {
 				s.Grow.X = weight / float32(span)
@@ -803,4 +819,84 @@ func (c *Context) cssBaseURL() string {
 		return c.cssBase
 	}
 	return c.PageURL
+}
+
+// flattensBlock returns whether the given block element, in the flow of
+// blocks of its parent, has no styles of its own (only its display), so
+// that its children can be read into its parent. Then the floats in it
+// are beside the blocks after it, as in CSS, where they are not limited
+// to the block that they are in (as they are in core). Such blocks are
+// common wrappers, as the section elements of Wikipedia.
+func (ctx *Context) flattensBlock(n *html.Node) bool {
+	switch n.Data {
+	case "body", "html", "form", "a", "button", "label", "details", "dialog", "fieldset":
+		return false // they have widgets with a function
+	}
+	p := n.Parent
+	if p == nil || p.Type != html.ElementNode || p.Data == "html" {
+		return false
+	}
+	switch ctx.displayOf(p) {
+	case "block", "list-item", "flow-root", "table-cell":
+	default:
+		return false // a flex, grid, or table item
+	}
+	if !ctx.unstyledBlock(n) {
+		return false
+	}
+	// Only the blocks among siblings that have floats in them are
+	// flattened, so that the floats are beside all of their content.
+	if ctx.floatSiblings == nil {
+		ctx.floatSiblings = map[*html.Node]bool{}
+	}
+	if ctx.flattened[n] { // flattened already
+		return true
+	}
+	has, ok := ctx.floatSiblings[p]
+	if !ok && ctx.flattened[p] {
+		has, ok = true, true // in a flattened block, as beside its floats
+	}
+	if !ok {
+		for c := p.FirstChild; c != nil && !has; c = c.NextSibling {
+			if c.Type == html.ElementNode && ctx.unstyledBlock(c) {
+				has = ctx.hasFloatChild(c)
+			}
+		}
+		ctx.floatSiblings[p] = has
+	}
+	if has {
+		if ctx.flattened == nil {
+			ctx.flattened = map[*html.Node]bool{}
+		}
+		ctx.flattened[n] = true
+	}
+	return has
+}
+
+// unstyledBlock returns whether the given element has no declarations
+// other than its display (and custom properties).
+func (ctx *Context) unstyledBlock(n *html.Node) bool {
+	for _, d := range ctx.declarations(n) {
+		switch d.Property {
+		case "display", "unicode-bidi":
+		default:
+			if !strings.HasPrefix(d.Property, "--") {
+				return false
+			}
+		}
+	}
+	return ctx.displayOf(n) == "block"
+}
+
+// hasFloatChild returns whether the given element has a child that floats.
+func (ctx *Context) hasFloatChild(n *html.Node) bool {
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type != html.ElementNode {
+			continue
+		}
+		if f := ctx.declaration(c, "float"); f != "" && f != "none" && ctx.displayOf(c) != "none" {
+			return true
+		}
+	}
+	return false
 }
