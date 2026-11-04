@@ -41,6 +41,7 @@ ul ul, ul ol, ol ul, ol ol, ul menu, ol menu, menu ul, menu ol { margin-top: 0; 
 
 pre, xmp, plaintext, listing { font-family: monospace; white-space: pre; margin: 1em 0; }
 code, kbd, samp, tt { font-family: monospace; }
+mark { background-color: yellow; color: black; }
 
 /* the default size of monospace fonts is 13px, not 16px */
 pre, xmp, plaintext, listing, code, kbd, samp, tt, textarea { font-size: 0.8125em; }

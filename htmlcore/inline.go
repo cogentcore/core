@@ -202,6 +202,11 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 	return ""
 }
 
+// cssStyledTags are the rich text tags that have styles of their own in
+// rich text (as a background for code), which are spans in browser style,
+// so that they only have their CSS styles (from browser.css and the page).
+var cssStyledTags = map[string]bool{"code": true, "kbd": true, "samp": true, "tt": true, "mark": true}
+
 // richTags are the tags that rich text markup has, which other inline
 // elements are made into spans in place of.
 var richTags = map[string]bool{
@@ -223,7 +228,7 @@ var inlineProperties = map[string]bool{
 // element of text, with the CSS styles of the element in its style.
 func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 	tag := n.Data
-	if !richTags[tag] {
+	if !richTags[tag] || (c.BrowserStyle && cssStyledTags[tag]) {
 		tag = "span"
 	}
 	var sb strings.Builder
