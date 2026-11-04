@@ -40,6 +40,10 @@ type cssDecl struct {
 	Value     string
 	Important bool
 
+	// invalid is whether the value is invalid, as with a var()
+	// of a custom property in a cycle.
+	invalid bool
+
 	origin      cssOrigin
 	specificity int
 	order       int
@@ -150,6 +154,9 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 	ds := c.declarations(n)
 	for i := len(ds) - 1; i >= 0; i-- {
 		if ds[i].Property == prop {
+			if ds[i].invalid {
+				return ""
+			}
 			return ds[i].Value
 		}
 	}
@@ -219,7 +226,20 @@ func selectNodes(root *html.Node, sel string) []*html.Node {
 	if s == nil {
 		return nil
 	}
-	return s.Select(root)
+	nodes := s.Select(root)
+	// The selector library matches :root to the document node, not to
+	// the html element that it is in CSS.
+	for i, n := range nodes {
+		if n.Type == html.DocumentNode {
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				if c.Type == html.ElementNode {
+					nodes[i] = c
+					break
+				}
+			}
+		}
+	}
+	return nodes
 }
 
 // specificity returns the specificity of the given selector,
@@ -275,25 +295,35 @@ func isNameChar(ch byte) bool {
 
 // resolveVars substitutes the values of the custom properties (variables)
 // in the var() functions of the given declarations of the given node.
+// A custom property whose value is in a cycle is invalid, as is a property
+// with a var() of an invalid custom property and no fallback.
 func (c *Context) resolveVars(n *html.Node, ds []*cssDecl) {
 	for _, d := range ds {
-		if strings.Contains(d.Value, "var(") {
-			d.Value = c.substituteVars(n, d.Value, 0)
+		if !strings.Contains(d.Value, "var(") {
+			continue
 		}
+		var visiting map[string]bool
+		if strings.HasPrefix(d.Property, "--") {
+			visiting = map[string]bool{d.Property: true}
+		}
+		v, ok := c.substituteVars(n, d.Value, visiting)
+		d.Value = v
+		d.invalid = !ok
 	}
 }
 
 // substituteVars returns the given value with its var() functions replaced
 // by the values of the custom properties for the given node, which are
-// inherited, or their fallback values.
-func (c *Context) substituteVars(n *html.Node, value string, depth int) string {
-	if depth > 10 { // cycles
-		return value
-	}
+// inherited, or their fallback values, and whether it is valid. The names
+// being substituted are in visiting: a reference to one is a cycle, which
+// makes the value invalid.
+func (c *Context) substituteVars(n *html.Node, value string, visiting map[string]bool) (string, bool) {
+	var sb strings.Builder
 	for {
 		i := strings.Index(value, "var(")
 		if i < 0 {
-			return value
+			sb.WriteString(value)
+			return sb.String(), true
 		}
 		// the matching parenthesis
 		end, level := -1, 0
@@ -309,15 +339,34 @@ func (c *Context) substituteVars(n *html.Node, value string, depth int) string {
 			}
 		}
 		if end < 0 {
-			return value
+			return "", false
 		}
-		name, fallback, _ := strings.Cut(value[i+4:end], ",")
-		v, ok := c.customProperty(n, strings.ToLower(strings.TrimSpace(name))) // property names are lowercase
+		name, fallback, hasFallback := strings.Cut(value[i+4:end], ",")
+		name = strings.ToLower(strings.TrimSpace(name)) // property names are lowercase
+		if visiting[name] {
+			return "", false // a cycle
+		}
+		v, ok := c.customProperty(n, name)
+		if ok && strings.Contains(v, "var(") {
+			if visiting == nil {
+				visiting = map[string]bool{}
+			}
+			visiting[name] = true
+			v, ok = c.substituteVars(n, v, visiting)
+			delete(visiting, name)
+		}
 		if !ok {
-			v = strings.TrimSpace(fallback)
+			if !hasFallback {
+				return "", false
+			}
+			v, ok = c.substituteVars(n, strings.TrimSpace(fallback), visiting)
+			if !ok {
+				return "", false
+			}
 		}
-		v = c.substituteVars(n, v, depth+1)
-		value = value[:i] + v + value[end+1:]
+		sb.WriteString(value[:i])
+		sb.WriteString(v)
+		value = value[end+1:]
 	}
 }
 
@@ -334,7 +383,7 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 		}
 		for i := len(ds) - 1; i >= 0; i-- {
 			if ds[i].Property == name {
-				return ds[i].Value, true
+				return ds[i].Value, !ds[i].invalid
 			}
 		}
 	}

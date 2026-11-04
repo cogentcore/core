@@ -51,6 +51,11 @@ func TestSelectNodes(t *testing.T) {
 			if s, err := selcss.Parse(sel); err == nil {
 				want = s.Select(doc)
 			}
+			for i, n := range want { // :root is the html element
+				if n.Type == html.DocumentNode {
+					want[i] = n.FirstChild
+				}
+			}
 			assert.ElementsMatch(t, want, selectNodes(doc, sel), sel)
 		}
 	}
@@ -64,4 +69,38 @@ func TestSpecificity(t *testing.T) {
 	for sel, want := range tests {
 		assert.Equal(t, want, specificity(sel), sel)
 	}
+}
+
+// TestCSSVariables tests the substitution of custom properties, with
+// inheritance, fallbacks, and cycles, which are invalid.
+func TestCSSVariables(t *testing.T) {
+	doc, err := html.Parse(strings.NewReader(`<html><head><style>
+:root { --main: red; --size: 10px; --a: var(--b); --b: var(--a); --self: var(--self, blue) }
+div { --size: 20px; color: var(--main); width: var(--size); height: var(--none, var(--size)) }
+p { color: var(--a, green); background-color: var(--self) }
+</style></head><body><div><p>x</p></div></body></html>`))
+	assert.NoError(t, err)
+	ctx := NewContext()
+	ctx.BrowserStyle = true
+	ctx.Node = doc
+	ctx.addStyleSheets(doc)
+	var div, p *html.Node
+	var find func(n *html.Node)
+	find = func(n *html.Node) {
+		switch n.Data {
+		case "div":
+			div = n
+		case "p":
+			p = n
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			find(c)
+		}
+	}
+	find(doc)
+	assert.Equal(t, "red", ctx.declaration(div, "color"))
+	assert.Equal(t, "20px", ctx.declaration(div, "width"))
+	assert.Equal(t, "20px", ctx.declaration(div, "height"))
+	assert.Equal(t, "green", ctx.declaration(p, "color"))
+	assert.Equal(t, "", ctx.declaration(p, "background-color")) // a cycle is invalid, even with a fallback
 }

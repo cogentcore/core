@@ -185,7 +185,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			st.background, st.hasBg = trBg, true
 		}
 		for _, d := range decls {
-			c.setCSS(st, s, ps, d.Property, d.Value)
+			if !d.invalid {
+				c.setCSS(st, s, ps, d.Property, d.Value)
+			}
 		}
 		if node != nil {
 			st.display = c.displayOf(node)

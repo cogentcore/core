@@ -235,7 +235,7 @@ func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 	}
 	var style strings.Builder
 	for _, d := range c.declarations(n) {
-		if !inlineProperties[d.Property] || d.origin == originUserAgent {
+		if !inlineProperties[d.Property] || d.origin == originUserAgent || d.invalid {
 			continue
 		}
 		prop, val := d.Property, d.Value

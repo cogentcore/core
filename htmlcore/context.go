@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -237,7 +238,7 @@ func NewContext() *Context {
 	return &Context{
 		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
-		GetURL:            http.Get,
+		GetURL:            getURL,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
 		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
 	}
@@ -377,4 +378,24 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}
+}
+
+// UserAgent is the User-Agent header of the requests of the default
+// [Context.GetURL], which sites that reject the default of the Go HTTP
+// client (as Wikipedia does) accept.
+var UserAgent = "Mozilla/5.0 (compatible; CogentCore; +https://cogentcore.org)"
+
+// httpClient is the client of the default [Context.GetURL], with a timeout
+// so that a server that does not respond does not stop the reading of a
+// page (as a style sheet or image of the page).
+var httpClient = &http.Client{Timeout: 15 * time.Second}
+
+// getURL gets the given URL with an HTTP GET request, with the [UserAgent].
+func getURL(url string) (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", UserAgent)
+	return httpClient.Do(req)
 }
