@@ -1388,6 +1388,9 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	sz := &fr.Geom.Size
 	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
 	change := false
+	// The scene is being sized to fit its content, from no size,
+	// so it does not overflow: scrollbars would only make it bigger.
+	sizing := fr.Parent == nil && fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)
 	if iter == 0 {
 		fr.layout.ScrollSize.SetZero()
 		fr.setScrollsOff()
@@ -1409,7 +1412,7 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 		// note: this shouldn't happen -- just have this in here for monitoring
 		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 		case styles.OverflowAuto:
-			if ofd < 0.5 {
+			if ofd < 0.5 || sizing {
 				if fr.HasScroll[d] {
 					if DebugSettings.LayoutTrace {
 						fmt.Println(fr, "turned off scroll", d)
