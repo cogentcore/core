@@ -55,6 +55,10 @@ type Context struct {
 	// without JavaScript to another one). It must be reset before each read.
 	RefreshURL string
 
+	// Title is the text of the first title element in the HTML read,
+	// if any, as for the title of a window or tab that shows the page.
+	Title string
+
 	// MediaWidth, if positive, is the width of the viewport in CSS px (dp)
 	// that the @media rules of style sheets are for; otherwise, it is the
 	// width of the screen.

@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/andybalholm/cascadia"
 	"github.com/aymerick/douceur/css"
@@ -217,10 +218,16 @@ type compiledSelector struct {
 
 // selectorCache has the compiled selectors, with nil for ones
 // that are not supported (as pseudo-elements, which select no nodes).
+// It is shared by the contexts that read pages, as in other goroutines.
 var selectorCache = map[string]*compiledSelector{}
+
+// selectorCacheMu protects selectorCache.
+var selectorCacheMu sync.Mutex
 
 // compileSelector returns the compiled selector, or nil if it is not supported.
 func compileSelector(sel string) *compiledSelector {
+	selectorCacheMu.Lock()
+	defer selectorCacheMu.Unlock()
 	if cs, ok := selectorCache[sel]; ok {
 		return cs
 	}

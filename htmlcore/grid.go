@@ -123,6 +123,8 @@ func gridTracks(v string) []string {
 // tracks are as wide as their content when other tracks are flexible
 // (and auto tracks share the rest of the width when none are).
 func gridTrackStyle(s *styles.Style, track string, flexible bool) {
+	calcEnvMu.Lock() // for parseLength
+	defer calcEnvMu.Unlock()
 	if strings.HasPrefix(track, "minmax(") {
 		inner := strings.TrimSuffix(strings.TrimPrefix(track, "minmax("), ")")
 		_, mx, _ := strings.Cut(inner, ",")

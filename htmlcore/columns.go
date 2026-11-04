@@ -26,6 +26,17 @@ import (
 // columnCount returns the number of columns of the given element, or 0
 // if it does not have a multi-column layout.
 func (c *Context) columnCount(n *html.Node) int {
+	has := false
+	for _, d := range c.declarations(n) {
+		if d.Property == "columns" || d.Property == "column-count" || d.Property == "column-width" {
+			has = true
+			break
+		}
+	}
+	if !has {
+		return 0
+	}
+	defer c.lockCalcEnv()()
 	count := 0
 	width := float32(0)
 	set := func(v string) {
@@ -130,9 +141,11 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	}
 	count = min(count, len(kids))
 	gap := units.Em(1)
+	unlock := c.lockCalcEnv()
 	if g, ok := parseLength(c.declaration(n, "column-gap"), units.UnitPw); ok {
 		gap = g
 	}
+	unlock()
 	fr.FinalStyler(func(s *styles.Style) {
 		s.Display = styles.Flex
 		s.Direction = styles.Row

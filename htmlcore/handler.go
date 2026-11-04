@@ -68,8 +68,13 @@ func handleElement(ctx *Context) {
 	var newWidget core.Widget
 
 	switch tag {
-	case "script", "title":
+	case "script":
 		// we don't render anything
+	case "title":
+		// it is not rendered, but it is the title of the page (the first one)
+		if ctx.Title == "" {
+			ctx.Title = strings.Join(strings.Fields(ExtractText(ctx)), " ")
+		}
 	case "meta":
 		if strings.EqualFold(GetAttr(ctx.Node, "http-equiv"), "refresh") && ctx.RefreshURL == "" {
 			// content is "delay" or "delay;url=URL"
@@ -1017,6 +1022,8 @@ var svgAttr = regexp.MustCompile(`(?is)\s(width|height|viewBox)\s*=\s*["']([^"']
 // from the width and height of its root element, or the size of its view
 // box for those that are not set, as for the size of an img of it.
 func svgSize(data []byte) (w, h float32, ok bool) {
+	calcEnvMu.Lock() // for parseLength (of absolute lengths)
+	defer calcEnvMu.Unlock()
 	tag := svgRootTag.Find(data)
 	if tag == nil {
 		return 0, 0, false

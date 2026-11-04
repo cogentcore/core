@@ -141,6 +141,8 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		}
 	}
 	wb.Styler(func(s *styles.Style) {
+		calcEnvMu.Lock() // for the lengths of the styles (as calc())
+		defer calcEnvMu.Unlock()
 		pw, _ := wb.Parent.(core.Widget)
 		var ps *styles.Style
 		var pbs *blockState

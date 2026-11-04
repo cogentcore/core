@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )

@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
@@ -85,6 +86,15 @@ func (c *Context) mediaWidth() float32 {
 	if c.MediaWidth > 0 {
 		return c.MediaWidth
 	}
+	return ScreenMediaWidth()
+}
+
+// ScreenMediaWidth returns the width of the screen in CSS px (dp), for the
+// @media rules of style sheets when [Context.MediaWidth] is not set, or
+// 1024 if there is no screen. An app that reads HTML in another goroutine
+// should set MediaWidth (as to this) in its main goroutine first, as the
+// screens can change in it (as when a window is made).
+func ScreenMediaWidth() float32 {
 	if system.TheApp != nil && system.TheApp.NScreens() > 0 {
 		sc := system.TheApp.Screen(0)
 		if sc.LogicalDPI > 0 && sc.PixelSize.X > 0 {
@@ -440,6 +450,8 @@ func (p *linearParser) factor() (linear, bool, bool) {
 // width and height. It is set by [Context.browserStyler], as styling
 // is done in one goroutine at a time. fixedVh is whether vh is from
 // [Context.MediaHeight], to which all vh lengths are then relative.
+// It is only used with calcEnvMu locked, as pages can be read and styled in
+// different goroutines (see [lockCalcEnv]).
 var calcEnv = struct {
 	em, vw, vh float64
 	fixedVh    bool
@@ -575,4 +587,23 @@ func mediaRangeMatches(f string, width, height float32) bool {
 		}
 	}
 	return feature
+}
+
+// calcEnvMu protects calcEnv.
+var calcEnvMu sync.Mutex
+
+// lockCalcEnv locks calcEnv for parsing lengths outside of styling (as
+// when a page is read), with the sizes of the given context: an em of 16px
+// (as the font size of the element is not known yet), its rem, and its
+// viewport. It returns the function that unlocks it.
+func (c *Context) lockCalcEnv() func() {
+	rem := float64(c.rootFontSize())
+	calcEnvMu.Lock()
+	calcEnv.em, calcEnv.rem = 16, rem
+	calcEnv.vw = float64(c.mediaWidth()) / 100
+	calcEnv.fixedVh = c.MediaHeight > 0
+	if calcEnv.fixedVh {
+		calcEnv.vh = float64(c.MediaHeight) / 100
+	}
+	return calcEnvMu.Unlock
 }
