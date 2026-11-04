@@ -31,6 +31,16 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 		}
 	}
 	switch tag {
+	case "html", "head", "body", "img", "input", "button", "select", "textarea", "svg", "video", "iframe", "canvas", "br":
+	default:
+		if ctx.displayOf(ctx.Node) == "contents" {
+			// it has no box, and its children are in its parent
+			ctx.NewParent = ctx.BlockParent
+			ctx.inlineParent = nil
+			return true
+		}
+	}
+	switch tag {
 	case "html", "head":
 		ctx.NewParent = ctx.BlockParent
 		return true
