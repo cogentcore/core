@@ -5,6 +5,10 @@
 package htmlcore
 
 import (
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -279,4 +283,21 @@ func TestRootFontSize(t *testing.T) {
 	l, ok = parseLength("calc(1rem + 4px)", units.UnitPw)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(14), l)
+}
+
+func TestGetFileURL(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "page.html")
+	assert.NoError(t, os.WriteFile(path, []byte("<p>local</p>"), 0666))
+	resp, err := getURL("file://" + filepath.ToSlash(path))
+	if assert.NoError(t, err) {
+		b, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, "<p>local</p>", string(b))
+	}
+	resp, err = getURL("file://" + filepath.ToSlash(filepath.Join(dir, "missing.html")))
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	}
 }

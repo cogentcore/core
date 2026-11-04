@@ -18,3 +18,4 @@ craigslist https://www.craigslist.org/about/sites
 daringfireball https://daringfireball.net/
 rust https://www.rust-lang.org/
 google https://www.google.com/
+css2026 https://www.w3.org/TR/css-2026/

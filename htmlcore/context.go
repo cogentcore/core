@@ -7,6 +7,10 @@ package htmlcore
 import (
 	"io"
 	"net/http"
+	neturl "net/url"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -438,10 +442,39 @@ var httpClient = &http.Client{Timeout: 15 * time.Second}
 
 // getURL gets the given URL with an HTTP GET request, with the [UserAgent].
 func getURL(url string) (*http.Response, error) {
+	if strings.HasPrefix(url, "file:") {
+		return getFileURL(url)
+	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("User-Agent", UserAgent)
 	return httpClient.Do(req)
+}
+
+// getFileURL gets the local file at the given file: URL, as a response
+// with the status of a server: 404 Not Found if it does not exist.
+func getFileURL(rawURL string) (*http.Response, error) {
+	u, err := neturl.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	path := u.Path
+	if runtime.GOOS == "windows" {
+		path = strings.TrimPrefix(path, "/") // file:///C:/dir
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found",
+			Body: io.NopCloser(strings.NewReader("")), Request: &http.Request{URL: u}}, nil
+	}
+	if fi, err := f.Stat(); err == nil && fi.IsDir() { // its index.html, as servers do
+		f.Close()
+		if f, err = os.Open(filepath.Join(path, "index.html")); err != nil {
+			return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found",
+				Body: io.NopCloser(strings.NewReader("")), Request: &http.Request{URL: u}}, nil
+		}
+	}
+	return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Body: f, Request: &http.Request{URL: u}}, nil
 }
