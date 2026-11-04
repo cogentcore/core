@@ -42,6 +42,7 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Margin.ToDots(uc)
 	s.Gap.ToDots(uc)
 	s.ScrollbarWidth.ToDots(uc)
+	s.Inset.ToDots(uc)
 
 	// max must be at least as much as min
 	if s.Max.X.Dots > 0 {
@@ -209,4 +210,30 @@ const (
 	// and is otherwise identical to Auto.  However, only during Viewport PrefSize call,
 	// the actual content size is used -- otherwise it behaves just like Auto.
 	OverflowScroll
+)
+
+// Positions are the ways that widgets can be positioned, as with the
+// position property of CSS (see [Style.Position]).
+type Positions int32 //enums:enum -trim-prefix Position -transform kebab
+
+const (
+	// PositionStatic is the default: the widget is in the layout of its parent.
+	PositionStatic Positions = iota
+
+	// PositionRelative is in the layout of its parent, and then offset
+	// from its position in the layout by [Style.Inset], without changing
+	// the layout. It is also the containing block of the widgets in it
+	// that are [PositionAbsolute].
+	PositionRelative
+
+	// PositionAbsolute is not in the layout of its parent: it is positioned
+	// by [Style.Inset] relative to its containing block, which is the nearest
+	// widget that it is in that is not [PositionStatic], or the scene.
+	// Its size is that of its content, unless both of the opposite sides
+	// of an inset are set, in which case it fills the space between them.
+	PositionAbsolute
+
+	// PositionFixed is like [PositionAbsolute], but positioned relative
+	// to the scene, so that it does not scroll.
+	PositionFixed
 )

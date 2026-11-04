@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/rich"
@@ -245,6 +246,9 @@ func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 			if val == "" {
 				continue
 			}
+			if cl, ok := cssColorFunction(val); ok {
+				val = colors.AsHex(cl)
+			}
 		case "font-weight":
 			if w, err := strconv.Atoi(val); err == nil {
 				val = "normal"
@@ -259,6 +263,10 @@ func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 			}
 		case "font-family":
 			val = fontFamily(val).String()
+		case "color", "background-color":
+			if cl, ok := cssColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
+				val = colors.AsHex(cl)
+			}
 		}
 		fmt.Fprintf(&style, "%s:%s;", prop, val)
 	}

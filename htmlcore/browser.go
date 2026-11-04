@@ -7,6 +7,8 @@ package htmlcore
 import (
 	_ "embed"
 	"image"
+	"image/color"
+	"math"
 	"strconv"
 	"strings"
 
@@ -281,6 +283,10 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		}
 	}
 	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
+	outOfFlow := s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed
+	if outOfFlow {
+		bs.block = false // not in the flow of blocks, and its width fits its content
+	}
 	if st.display == "table-cell" {
 		s.Grow.Set(1, 1)
 		switch st.verticalAlign {
@@ -733,6 +739,27 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		st.maxWidth = lengthPtr(lval, units.UnitPw)
 	case "max-height":
 		st.maxHeight = lengthPtr(lval, units.UnitPh)
+	case "position":
+		switch lval {
+		case "relative", "sticky": // sticky is not supported, and is like relative
+			s.Position = styles.PositionRelative
+		case "absolute":
+			s.Position = styles.PositionAbsolute
+		case "fixed":
+			s.Position = styles.PositionFixed
+		default:
+			s.Position = styles.PositionStatic
+		}
+	case "top", "right", "bottom", "left":
+		setInset(s, sideIndex("-"+prop), lval)
+	case "inset":
+		for i, v := range expandSides(strings.Fields(lval)) {
+			setInset(s, i, v)
+		}
+	case "z-index":
+		if z, err := strconv.Atoi(lval); err == nil {
+			s.ZIndex = z
+		}
 	case "vertical-align":
 		st.verticalAlign = lval
 	case "border-collapse":
@@ -997,6 +1024,20 @@ func setSidePtr[T any](top, right, bottom, left *T, i int, v T) {
 	}
 }
 
+// setInset sets the given side (top, right, bottom, left) of the inset
+// of a positioned element; auto is not set.
+func setInset(s *styles.Style, i int, v string) {
+	pct := units.UnitPw
+	if i == 0 || i == 2 {
+		pct = units.UnitPh
+	}
+	l, ok := parseLength(v, pct)
+	setSide(&s.InsetSet, i, ok)
+	if ok {
+		setValueSide(&s.Inset, i, l)
+	}
+}
+
 func setMargin(st *cssState, i int, v string) {
 	if v == "auto" {
 		st.marginAuto[i] = true
@@ -1184,6 +1225,9 @@ func parseColor(v string) image.Image {
 			}
 		}
 	}
+	if cl, ok := cssColorFunction(v); ok {
+		return colors.Uniform(cl)
+	}
 	cl, err := colors.FromString(v)
 	if err != nil {
 		img, err := gradient.FromString(v)
@@ -1193,6 +1237,82 @@ func parseColor(v string) image.Image {
 		return img
 	}
 	return colors.Uniform(cl)
+}
+
+// cssColorFunction returns the color of the given CSS rgb(), rgba(),
+// hsl() or hsla() function, with the syntax of CSS: components that
+// are numbers or percentages, separated by commas or spaces, and an
+// alpha (after a comma or a /) from 0 to 1 or a percentage.
+func cssColorFunction(v string) (color.RGBA, bool) {
+	lv := strings.ToLower(strings.TrimSpace(v))
+	name, args, ok := strings.Cut(lv, "(")
+	if !ok || !strings.HasSuffix(args, ")") {
+		return color.RGBA{}, false
+	}
+	switch name {
+	case "rgb", "rgba", "hsl", "hsla":
+	default:
+		return color.RGBA{}, false
+	}
+	args = strings.NewReplacer(",", " ", "/", " ").Replace(strings.TrimSuffix(args, ")"))
+	fs := strings.Fields(args)
+	if len(fs) < 3 {
+		return color.RGBA{}, false
+	}
+	// num returns the component, with a percentage of the given scale
+	num := func(f string, scale float64) float64 {
+		f = strings.TrimSuffix(f, "deg")
+		if p, ok := strings.CutSuffix(f, "%"); ok {
+			n, _ := strconv.ParseFloat(p, 64)
+			return n / 100 * scale
+		}
+		n, _ := strconv.ParseFloat(f, 64)
+		return n
+	}
+	a := 1.0
+	if len(fs) > 3 {
+		a = math.Max(0, math.Min(1, num(fs[3], 1)))
+	}
+	var r, g, b float64
+	if name[0] == 'r' {
+		r, g, b = num(fs[0], 255)/255, num(fs[1], 255)/255, num(fs[2], 255)/255
+	} else {
+		h := math.Mod(num(fs[0], 360), 360) / 360
+		if h < 0 {
+			h++
+		}
+		sat, l := num(fs[1], 1), num(fs[2], 1)
+		if !strings.HasSuffix(fs[1], "%") {
+			sat /= 100
+		}
+		if !strings.HasSuffix(fs[2], "%") {
+			l /= 100
+		}
+		hue := func(p, q, t float64) float64 {
+			if t < 0 {
+				t++
+			} else if t > 1 {
+				t--
+			}
+			switch {
+			case t < 1.0/6:
+				return p + (q-p)*6*t
+			case t < 0.5:
+				return q
+			case t < 2.0/3:
+				return p + (q-p)*(2.0/3-t)*6
+			}
+			return p
+		}
+		q := l + sat - l*sat
+		if l < 0.5 {
+			q = l * (1 + sat)
+		}
+		p := 2*l - q
+		r, g, b = hue(p, q, h+1.0/3), hue(p, q, h), hue(p, q, h-1.0/3)
+	}
+	c8 := func(f float64) uint8 { return uint8(math.Round(math.Max(0, math.Min(1, f)) * 255)) }
+	return colors.FromNRGBA(c8(r), c8(g), c8(b), c8(a)), true
 }
 
 // cssFontSizes are the absolute font size keywords, in px.

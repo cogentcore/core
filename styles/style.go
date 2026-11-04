@@ -196,11 +196,30 @@ type Style struct { //types:add
 	// has [Style.Display] = [Custom].
 	Pos units.XY `display:"inline"`
 
-	// TODO: support these properties
+	// Position is the way that the widget is positioned, as with the
+	// position property of CSS. The default, [PositionStatic], is in the
+	// layout of its parent. See [Positions] for the others, which are
+	// positioned by [Style.Inset].
+	Position Positions
 
-	// // ordering factor for rendering depth -- lower numbers rendered first.
-	// // Sort children according to this factor
-	// ZIndex int
+	// Inset has the offsets (top, right, bottom, left) of the edges of
+	// a widget that is not [PositionStatic] from those of its containing
+	// block ([PositionAbsolute], [PositionFixed]), or from its position in
+	// the layout ([PositionRelative]), for the sides in [Style.InsetSet].
+	Inset sides.Values `display:"inline"`
+
+	// InsetSet has the sides of [Style.Inset] that are set, as opposed to
+	// auto (the default), for which the size or the position in the layout
+	// of the widget determine its position.
+	InsetSet sides.Sides[bool] `display:"inline"`
+
+	// ZIndex orders the rendering of widgets that are not [PositionStatic],
+	// as the z-index property of CSS: they are rendered after the other
+	// children of their parent (on top of them), in increasing order of
+	// ZIndex, except that those with a negative ZIndex are rendered first.
+	ZIndex int
+
+	// TODO: support these properties
 
 	// // specifies the row that this element should appear within a grid layout
 	// Row int
@@ -466,6 +485,15 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 		bg = pabg
 	} else if u, ok := bg.(*image.Uniform); ok && colors.IsNil(u.C) {
 		bg = pabg
+	} else if ok && pabg != nil {
+		// A translucent background is what it looks like over the
+		// background of the parent, so that the widgets in it (which
+		// render the background of their parent) do not blend it again.
+		if c := colors.AsRGBA(u.C); c.A < 255 {
+			if pu, ok := pabg.(*image.Uniform); ok {
+				bg = colors.Uniform(colors.AlphaBlend(pu.C, c))
+			}
+		}
 	}
 
 	if s.Opacity >= 1 && s.StateLayer <= 0 {

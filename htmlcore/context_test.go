@@ -8,6 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"image/color"
+
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"github.com/aymerick/douceur/parser"
 	selcss "github.com/ericchiang/css"
@@ -103,4 +106,20 @@ p { color: var(--a, green); background-color: var(--self) }
 	assert.Equal(t, "20px", ctx.declaration(div, "height"))
 	assert.Equal(t, "green", ctx.declaration(p, "color"))
 	assert.Equal(t, "", ctx.declaration(p, "background-color")) // a cycle is invalid, even with a fallback
+}
+
+func TestCSSColorFunction(t *testing.T) {
+	tests := map[string]color.RGBA{
+		"rgb(255, 0, 0)":             {255, 0, 0, 255},
+		"rgba(0, 0, 255, 0.2)":       colors.FromNRGBA(0, 0, 255, 51),
+		"rgb(0 0 255 / 20%)":         colors.FromNRGBA(0, 0, 255, 51),
+		"rgb(100%, 50%, 0%)":         {255, 128, 0, 255},
+		"hsl(120, 100%, 50%)":        {0, 255, 0, 255},
+		"hsla(240deg 100% 50% / .5)": colors.FromNRGBA(0, 0, 255, 128),
+	}
+	for v, want := range tests {
+		got, ok := cssColorFunction(v)
+		assert.True(t, ok, v)
+		assert.Equal(t, want, got, v)
+	}
 }

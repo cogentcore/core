@@ -817,7 +817,7 @@ func (fr *Frame) setInitCellsFlex() {
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
 	idx := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		math32.SetPointDim(&cwb.Geom.Cell, li.MainAxis, idx)
 		math32.SetPointDim(&cwb.Geom.Cell, ca, 0)
 		idx++
@@ -836,7 +836,7 @@ func (fr *Frame) setInitCellsWrap() {
 	li := &fr.layout
 	li.MainAxis = math32.Dims(fr.Styles.Direction)
 	ni := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ni++
 		return tree.Continue
 	})
@@ -870,7 +870,7 @@ func (fr *Frame) setWrapIndexes() {
 	li := &fr.layout
 	idx := 0
 	var maxc image.Point
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ic := li.wrapIndexToCoord(idx)
 		cwb.Geom.Cell = ic
 		if ic.X > maxc.X {
@@ -915,7 +915,7 @@ func (fr *Frame) setInitCellsGrid() {
 	ci := 0
 	ri := 0
 	fr.layout.spans = false
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cs := min(max(cwb.Styles.ColSpan, 1), cols)
 		if cs > 1 {
 			fr.layout.spans = true
@@ -988,7 +988,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		width float32
 	}
 	var spans []spanning
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		sz := cwb.Geom.Size.Actual.Total
 		grw := cwb.Styles.Grow
@@ -1208,6 +1208,7 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		}
 	}
 	fr.This.(Layouter).SizeDownSetAllocs(iter)
+	fr.sizeDownOutOfFlow()
 	redo := fr.sizeDownChildren(iter)
 	if redo || wrapped {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
@@ -1340,7 +1341,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	}
 	var maxExtra, exn math32.Vector2
 	for exitr := range 2 {
-		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
 			ksz := &cwb.Geom.Size
 			grw := cwb.Styles.Grow
@@ -1466,7 +1467,7 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 	var sum float32
 	var n int
 	var wraps []int
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := cwb.Geom.Size.Actual.Total
 		if first {
 			n = 1
@@ -1560,7 +1561,7 @@ func (fr *Frame) sizeDownAllocActual(iter int) {
 // Note however that due to max sizing for row / column,
 // this size can actually be different than original actual.
 func (fr *Frame) sizeDownAllocActualCells(iter int) {
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
 		cidx := cwb.Geom.Cell
 		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
@@ -1696,6 +1697,7 @@ func (fr *Frame) SizeFinal() {
 	}
 	fr.Geom.RelPos.SetZero()
 	fr.sizeFinalChildren() // kids do their own thing
+	fr.sizeDownOutOfFlow() // their final size is still that of their inset
 	fr.sizeFromChildrenFit(0, SizeFinalPass)
 	fr.growToAlloc()
 	fr.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
@@ -1846,7 +1848,7 @@ func (fr *Frame) positionCellsMainX() {
 	var lastSz math32.Vector2
 	idx := 0
 	line := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
 			pos.X = stPos.X
@@ -1883,7 +1885,7 @@ func (fr *Frame) lineSpaces(ma math32.Dims, size float32) []math32.Vector2 {
 	gap := fr.layout.Gap.Dim(ma)
 	var widths []float32
 	var counts []int
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if math32.PointDim(cwb.Geom.Cell, ma) == 0 || len(widths) == 0 {
 			widths = append(widths, 0)
 			counts = append(counts, 0)
@@ -1934,7 +1936,7 @@ func (fr *Frame) positionCellsMainY() {
 	pos := stPos
 	idx := 0
 	line := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.Y == 0 && idx > 0 {
 			pos.Y = stPos.Y
@@ -1992,7 +1994,14 @@ func (wb *WidgetBase) setPosFromParent() {
 		// than a pixel come and go while scrolling)
 		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll.Round())
 	}
-	wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
+	switch {
+	case pwb != nil && wb.outOfFlow():
+		wb.setPosOutOfFlow(parPos)
+	case wb.Styles.Position == styles.PositionRelative:
+		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos).Add(wb.relativeOffset())
+	default:
+		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
+	}
 	wb.setContentPosFromPos()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Geom.Pos.Total, "parPos:", parPos)
@@ -2020,6 +2029,11 @@ func (wb *WidgetBase) setBBoxes() {
 		}
 	} else {
 		parBB = pwb.Geom.ContentBBox
+		if wb.outOfFlow() { // not clipped by its parent (see [WidgetBase.RenderWidget])
+			if gp := pwb.parentWidget(); gp != nil {
+				parBB = gp.Geom.ContentBBox
+			}
+		}
 		bb := wb.Geom.totalRect()
 		wb.Geom.TotalBBox = parBB.Intersect(bb)
 		if DebugSettings.LayoutTrace {

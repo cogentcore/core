@@ -1,0 +1,21 @@
+<!doctype html>
+<html><head><title>Position</title>
+<style>
+.box { position: relative; height: 120px; background-color: #eee; margin-bottom: 16px; }
+.tl { position: absolute; top: 8px; left: 8px; background-color: #9bd; padding: 4px; }
+.br { position: absolute; bottom: 8px; right: 8px; background-color: #db9; padding: 4px; }
+.fill { position: absolute; top: 30px; left: 40px; right: 40px; bottom: 30px; background-color: rgba(0, 0, 255, 0.2); }
+.rel { position: relative; top: 10px; left: 20px; background-color: #bdb; }
+.badge { position: relative; display: inline-block; padding: 6px 12px; background-color: #ccc; }
+.badge span { position: absolute; top: -6px; right: -6px; background-color: red; color: white; font-size: 12px; padding: 0 5px; border-radius: 8px; }
+.over { position: relative; z-index: 1; background-color: #fdb; margin-top: -10px; margin-left: 30px; width: 200px; }
+</style></head>
+<body>
+<div class="box"><div class="tl">top left</div><div class="br">bottom right</div><p style="margin:0">In the flow.</p></div>
+<div class="box"><div class="fill">inset on all sides</div></div>
+<p class="rel">Relative, offset 20 right and 10 down.</p>
+<p>The next paragraph is where it would have been.</p>
+<div class="badge">Inbox<span>3</span></div>
+<div style="background-color:#ddf; height: 40px">under</div>
+<div class="over">over (z-index 1)</div>
+</body></html>

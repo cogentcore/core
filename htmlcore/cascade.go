@@ -398,6 +398,16 @@ func (c *Context) displayOf(n *html.Node) string {
 	if !c.BrowserStyle || n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
 		return d
 	}
+	// absolutely positioned elements are blockified too
+	switch c.declaration(n, "position") {
+	case "absolute", "fixed":
+		switch d {
+		case "", "inline", "inline-block", "list-item":
+			return "block"
+		case "inline-flex":
+			return "flex"
+		}
+	}
 	switch c.declaration(n.Parent, "display") {
 	case "flex", "inline-flex", "grid", "inline-grid":
 		switch d {

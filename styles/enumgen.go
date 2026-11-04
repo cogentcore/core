@@ -215,6 +215,49 @@ func (i *Overflows) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Overflows")
 }
 
+var _PositionsValues = []Positions{0, 1, 2, 3}
+
+// PositionsN is the highest valid value for type Positions, plus one.
+const PositionsN Positions = 4
+
+var _PositionsValueMap = map[string]Positions{`static`: 0, `relative`: 1, `absolute`: 2, `fixed`: 3}
+
+var _PositionsDescMap = map[Positions]string{0: `PositionStatic is the default: the widget is in the layout of its parent.`, 1: `PositionRelative is in the layout of its parent, and then offset from its position in the layout by [Style.Inset], without changing the layout. It is also the containing block of the widgets in it that are [PositionAbsolute].`, 2: `PositionAbsolute is not in the layout of its parent: it is positioned by [Style.Inset] relative to its containing block, which is the nearest widget that it is in that is not [PositionStatic], or the scene. Its size is that of its content, unless both of the opposite sides of an inset are set, in which case it fills the space between them.`, 3: `PositionFixed is like [PositionAbsolute], but positioned relative to the scene, so that it does not scroll.`}
+
+var _PositionsMap = map[Positions]string{0: `static`, 1: `relative`, 2: `absolute`, 3: `fixed`}
+
+// String returns the string representation of this Positions value.
+func (i Positions) String() string { return enums.String(i, _PositionsMap) }
+
+// SetString sets the Positions value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Positions) SetString(s string) error {
+	return enums.SetString(i, s, _PositionsValueMap, "Positions")
+}
+
+// Int64 returns the Positions value as an int64.
+func (i Positions) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Positions value from an int64.
+func (i *Positions) SetInt64(in int64) { *i = Positions(in) }
+
+// Desc returns the description of the Positions value.
+func (i Positions) Desc() string { return enums.Desc(i, _PositionsDescMap) }
+
+// PositionsValues returns all possible values for the type Positions.
+func PositionsValues() []Positions { return _PositionsValues }
+
+// Values returns all possible values for the type Positions.
+func (i Positions) Values() []enums.Enum { return enums.Values(_PositionsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Positions) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Positions) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "Positions")
+}
+
 var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
 
 // ObjectFitsN is the highest valid value for type ObjectFits, plus one.

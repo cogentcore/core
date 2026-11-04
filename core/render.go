@@ -535,6 +535,18 @@ func (wb *WidgetBase) RenderWidget() {
 		wb.renderChildren()
 		wb.renderParts()
 		wb.EndRender()
+		wb.renderOutOfFlowChildren()
+	}
+}
+
+// renderOutOfFlowChildren renders the children of the widget that are out
+// of the flow of its layout (absolute and fixed positions), after the
+// widget, outside of its clipping, as they can be outside of it.
+func (wb *WidgetBase) renderOutOfFlowChildren() {
+	for _, cw := range wb.renderOrder() {
+		if cw.AsWidget().outOfFlow() {
+			cw.RenderWidget()
+		}
 	}
 }
 
@@ -546,6 +558,14 @@ func (wb *WidgetBase) renderParts() {
 
 // renderChildren renders all of the widget's children.
 func (wb *WidgetBase) renderChildren() {
+	if order := wb.renderOrder(); order != nil { // positioned children
+		for _, cw := range order {
+			if !cw.AsWidget().outOfFlow() { // rendered after (see RenderWidget)
+				cw.RenderWidget()
+			}
+		}
+		return
+	}
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cw.RenderWidget()
 		return tree.Continue
