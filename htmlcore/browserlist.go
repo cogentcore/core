@@ -1,0 +1,159 @@
+// Copyright (c) 2026, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package htmlcore
+
+import (
+	"slices"
+	"strconv"
+	"strings"
+
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
+	"golang.org/x/net/html"
+)
+
+// handleBrowserElement handles the elements that are handled differently
+// for [Context.BrowserStyle], returning whether it handled the element.
+func handleBrowserElement(ctx *Context, tag string) bool {
+	switch tag {
+	case "html", "head":
+		ctx.NewParent = ctx.BlockParent
+		return true
+	case "pre", "p", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "dt", "dd", "figcaption", "caption", "summary", "legend":
+		w := New[core.Frame](ctx)
+		ctx.NewParent = w
+		ctx.handleWidget(ctx.Node, w)
+		return true
+	case "li":
+		handleBrowserListItem(ctx)
+		return true
+	}
+	if slices.Contains(textTags, tag) { // not in a run of inline content
+		switch display := ctx.declaration(ctx.Node, "display"); display {
+		case "none":
+			return true
+		case "", "inline":
+			ctx.handleWidget(ctx.Node, handleTextTag(ctx))
+			return true
+		}
+		w := New[core.Frame](ctx)
+		ctx.NewParent = w
+		ctx.handleWidget(ctx.Node, w)
+		return true
+	}
+	return false
+}
+
+// markerWidth is the width of the box of a list marker,
+// which is in the padding of the list.
+var markerWidth = units.Em(1.5)
+
+// handleBrowserListItem handles a li element for [Context.BrowserStyle]:
+// it is a row of the marker and a block of the content of the item.
+// The marker is to the left of the box of the item, in the padding
+// of the list, as in browsers.
+func handleBrowserListItem(ctx *Context) {
+	n := ctx.Node
+	li := New[core.Frame](ctx)
+	ctx.handleWidget(n, li)
+	li.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Align.Items = styles.Start
+	})
+	if marker := listMarker(ctx, n); marker != "" {
+		mk := core.NewText(li).SetText(marker)
+		mk.SetName("marker")
+		ctx.handleWidget(nil, mk)
+		mk.Styler(func(s *styles.Style) {
+			s.Min.X = markerWidth
+			s.Max.X = markerWidth
+			s.Grow.X = 0
+			s.GrowWrap = false
+			s.Text.Align = text.End
+			s.Text.WhiteSpace = text.WrapNever
+		})
+	}
+	content := core.NewFrame(li)
+	content.SetName("content")
+	ctx.handleWidget(nil, content)
+	if fid := li.Property("data-fid"); fid != nil { // the box of the item is that of its content
+		content.SetProperty("data-fid", fid)
+		delete(li.Properties, "data-fid")
+	}
+	ctx.blocks[content].display = "block"
+	ctx.Node = n
+	ctx.NewParent = content
+}
+
+// listMarker returns the marker text for the given li element.
+func listMarker(ctx *Context, n *html.Node) string {
+	list := n.Parent
+	styleType := ""
+	for p := n; p != nil && styleType == ""; p = p.Parent {
+		for _, prop := range []string{"list-style-type", "list-style"} {
+			if v := ctx.declaration(p, prop); v != "" {
+				styleType = strings.Fields(v)[0]
+			}
+		}
+		if p == list {
+			break
+		}
+	}
+	if list == nil {
+		return "• "
+	}
+	if styleType == "" {
+		if list.Data == "ol" {
+			styleType = "decimal"
+		} else {
+			depth := 0
+			for p := list; p != nil; p = p.Parent {
+				if p.Data == "ul" || p.Data == "ol" {
+					depth++
+				}
+			}
+			switch depth {
+			case 1:
+				styleType = "disc"
+			case 2:
+				styleType = "circle"
+			default:
+				styleType = "square"
+			}
+		}
+	}
+	switch styleType {
+	case "none":
+		return ""
+	case "disc":
+		return "• "
+	case "circle":
+		return "◦ "
+	case "square":
+		return "▪ "
+	}
+	// numbered
+	num := 1
+	if st, err := strconv.Atoi(GetAttr(list, "start")); err == nil {
+		num = st
+	}
+	for p := list.FirstChild; p != nil && p != n; p = p.NextSibling {
+		if p.Type == html.ElementNode && p.Data == "li" {
+			num++
+		}
+	}
+	if v, err := strconv.Atoi(GetAttr(n, "value")); err == nil {
+		num = v
+	}
+	switch styleType {
+	case "lower-alpha", "lower-latin":
+		return string(rune('a'+(num-1)%26)) + ". "
+	case "upper-alpha", "upper-latin":
+		return string(rune('A'+(num-1)%26)) + ". "
+	}
+	return strconv.Itoa(num) + ". "
+}

@@ -37,31 +37,31 @@ func TestNoInlineContainer(t *testing.T) {
 	}
 }
 
-// TestSelectRule tests that the rules of the user agent styles select the
-// same nodes as the selector library selects.
-func TestSelectRule(t *testing.T) {
+// TestSelectNodes tests that the selectors of the user agent styles select
+// the same nodes as the selector library selects.
+func TestSelectNodes(t *testing.T) {
 	doc, err := html.Parse(strings.NewReader(`<html><body><h1>Title</h1><p>Text <b>bold</b></p><ul><li>one</li><li>two</li></ul><div><table><tr><td>cell</td><th>head</th></tr></table></div><ruby>x<rt>y</rt><rp>z</rp></ruby><svg><p>svg p</p></svg><center>c</center></body></html>`))
 	assert.NoError(t, err)
-	ss, err := parser.Parse(userAgentStyles + "\nH1, p { color: red; }\ndiv, *, p { color: blue; }\np, p { color: green; }")
+	ss, err := parser.Parse(userAgentStyles + browserStyles + "\nH1, p { color: red; }\ndiv, *, p { color: blue; }\np, p { color: green; }")
 	assert.NoError(t, err)
-	simple := 0
 	for _, rule := range ss.Rules {
-		want := []*html.Node{}
-		if s, err := selcss.Parse(strings.Join(rule.Selectors, ",")); err == nil {
-			want = s.Select(doc)
-		}
-		got := selectRule(doc, rule)
-		if selectorAtoms(rule.Selectors) != nil {
-			simple++
-		}
-		count := func(nodes []*html.Node) map[*html.Node]int {
-			m := map[*html.Node]int{}
-			for _, n := range nodes {
-				m[n]++
+		for _, sel := range rule.Selectors {
+			sel = strings.TrimSpace(sel)
+			want := []*html.Node{}
+			if s, err := selcss.Parse(sel); err == nil {
+				want = s.Select(doc)
 			}
-			return m
+			assert.ElementsMatch(t, want, selectNodes(doc, sel), sel)
 		}
-		assert.Equal(t, count(want), count(got), rule.Selectors)
 	}
-	assert.Greater(t, simple, 5)
+}
+
+func TestSpecificity(t *testing.T) {
+	tests := map[string]int{
+		"p": 1, "*": 0, "div p": 2, ".a": 100, "p.a.b": 201, "#x": 10000, "#x .a p": 10101,
+		"div > p.direct": 102, "h2 + p": 2, "a:hover": 101, "p::before": 2, "[type=text]": 100,
+	}
+	for sel, want := range tests {
+		assert.Equal(t, want, specificity(sel), sel)
+	}
 }

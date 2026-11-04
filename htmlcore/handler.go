@@ -50,6 +50,10 @@ func handleElement(ctx *Context) {
 		}
 	}
 
+	if ctx.BrowserStyle && handleBrowserElement(ctx, tag) {
+		return
+	}
+
 	if slices.Contains(textTags, tag) {
 		ctx.handleWidget(ctx.Node, handleTextTag(ctx))
 		return
@@ -86,6 +90,9 @@ func handleElement(ctx *Context) {
 		w := New[core.Frame](ctx)
 		newWidget = w
 		ctx.NewParent = w
+		if ctx.BrowserStyle {
+			break
+		}
 		switch tag {
 		case "body":
 			w.Styler(func(s *styles.Style) {
@@ -115,21 +122,70 @@ func handleElement(ctx *Context) {
 		}
 	case "button":
 		newWidget = New[core.Button](ctx).SetText(ExtractText(ctx))
-	case "h1":
-		newWidget = handleText(ctx, tag).SetType(core.TextDisplaySmall)
-	case "h2":
-		newWidget = handleText(ctx, tag).SetType(core.TextHeadlineMedium)
-	case "h3":
-		newWidget = handleText(ctx, tag).SetType(core.TextTitleLarge)
-	case "h4":
-		newWidget = handleText(ctx, tag).SetType(core.TextTitleMedium)
-	case "h5":
-		newWidget = handleText(ctx, tag).SetType(core.TextTitleSmall)
-	case "h6":
-		newWidget = handleText(ctx, tag).SetType(core.TextLabelSmall)
+	case "h1", "h2", "h3", "h4", "h5", "h6":
+		newWidget = handleHeading(ctx, tag)
 	case "p":
 		newWidget = handleText(ctx, tag)
 	case "pre":
+		newWidget = handlePre(ctx, tag)
+	case "li":
+		newWidget = handleListItem(ctx)
+	case "img":
+		newWidget = handleImage(ctx, tag)
+	case "input":
+		newWidget = handleInput(ctx)
+	case "textarea":
+		buf := lines.NewLines()
+		buf.SetText([]byte(ExtractText(ctx)))
+		newWidget = New[textcore.Editor](ctx).SetLines(buf)
+	case "table":
+		newWidget = handleTable(ctx)
+	case "th", "td":
+		newWidget = handleCell(ctx, tag)
+	case "thead", "tbody", "tfoot", "tr":
+		ctx.NewParent = ctx.tableFor(ctx.Node)
+	default:
+		if ctx.BrowserStyle {
+			switch display := ctx.declaration(ctx.Node, "display"); {
+			case display == "none":
+				// not rendered, and neither are its children
+			case isBlockDisplay(display) || display == "inline-block" || display == "inline-flex":
+				w := New[core.Frame](ctx)
+				newWidget = w
+				ctx.NewParent = w
+			default:
+				ctx.NewParent = ctx.Parent()
+			}
+			break
+		}
+		ctx.NewParent = ctx.Parent()
+	}
+	if newWidget != nil {
+		ctx.handleWidget(ctx.Node, newWidget)
+	}
+}
+
+// handleHeading handles a heading element in the Cogent Core style.
+func handleHeading(ctx *Context, tag string) core.Widget {
+	switch tag {
+	case "h1":
+		return handleText(ctx, tag).SetType(core.TextDisplaySmall)
+	case "h2":
+		return handleText(ctx, tag).SetType(core.TextHeadlineMedium)
+	case "h3":
+		return handleText(ctx, tag).SetType(core.TextTitleLarge)
+	case "h4":
+		return handleText(ctx, tag).SetType(core.TextTitleMedium)
+	case "h5":
+		return handleText(ctx, tag).SetType(core.TextTitleSmall)
+	}
+	return handleText(ctx, tag).SetType(core.TextLabelSmall)
+}
+
+// handlePre handles a pre element.
+func handlePre(ctx *Context, tag string) core.Widget {
+	var newWidget core.Widget
+	{
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
 			codeEl := ctx.Node.FirstChild
@@ -160,7 +216,14 @@ func handleElement(ctx *Context) {
 				s.Text.WhiteSpace = text.WhiteSpacePreWrap
 			})
 		}
-	case "li":
+	}
+	return newWidget
+}
+
+// handleListItem handles a li element.
+func handleListItem(ctx *Context) core.Widget {
+	var newWidget core.Widget
+	{
 		// if we have a p as our first or second child, which is typical
 		// for markdown-generated HTML, we use it directly for data extraction
 		// to prevent double elements and unnecessary line breaks.
@@ -221,9 +284,14 @@ func handleElement(ctx *Context) {
 		if sublist != nil {
 			readHTMLNode(ctx, ctx.Parent(), sublist)
 		}
-	case "img":
-		newWidget = handleImage(ctx, tag)
-	case "input":
+	}
+	return newWidget
+}
+
+// handleInput handles an input element.
+func handleInput(ctx *Context) core.Widget {
+	var newWidget core.Widget
+	{
 		ityp := GetAttr(ctx.Node, "type")
 		val := GetAttr(ctx.Node, "value")
 		switch ityp {
@@ -250,63 +318,138 @@ func handleElement(ctx *Context) {
 		default:
 			newWidget = New[core.TextField](ctx).SetText(val)
 		}
-	case "textarea":
-		buf := lines.NewLines()
-		buf.SetText([]byte(ExtractText(ctx)))
-		newWidget = New[textcore.Editor](ctx).SetLines(buf)
-	case "table":
+	}
+	return newWidget
+}
+
+// handleTable handles a table element.
+func handleTable(ctx *Context) core.Widget {
+	if ctx.BrowserStyle {
+		// The table is in a row of its own, so that it is allocated
+		// only its own width, which its columns grow to fill.
+		n := ctx.Node
+		wrap := core.NewFrame(ctx.Parent())
+		wrap.SetName("table-row")
+		ctx.Node = nil
+		ctx.handleWidget(nil, wrap)
+		ctx.blocks[wrap].display = tableRow
+		ctx.Node = n
+		ctx.BlockParent = wrap
+		ctx.inlineParent = nil
+	}
+	w := New[core.Frame](ctx)
+	ctx.NewParent = w
+	if ctx.tables == nil {
+		ctx.tables = map[*html.Node]*core.Frame{}
+	}
+	ctx.tables[ctx.Node] = w
+	ctx.TableParent = w
+	cols := tableColumns(ctx.Node)
+	w.SetProperty("cols", cols)
+	w.Styler(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = cols
+		if ctx.BrowserStyle {
+			return
+		}
+		s.Overflow.X = styles.OverflowAuto
+		s.Grow.Set(1, 0)
+		s.Gap.X.Dp(core.ConstantSpacing(6))
+		s.Justify.Content = styles.Center
+	})
+	return w
+}
+
+// tableFor returns the widget of the table that the given node is in.
+func (c *Context) tableFor(n *html.Node) core.Widget {
+	if t := ancestorTable(n); t != nil {
+		if w := c.tables[t]; w != nil {
+			return w
+		}
+	}
+	if c.TableParent != nil {
+		return c.TableParent
+	}
+	return c.Parent()
+}
+
+// tableColumns returns the number of columns of the given table, the
+// largest number of cells (with their column spans) in any of its rows.
+func tableColumns(table *html.Node) int {
+	cols := 0
+	var rows func(n *html.Node)
+	rows = func(n *html.Node) {
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			switch c.Data {
+			case "thead", "tbody", "tfoot":
+				rows(c)
+			case "tr":
+				n := 0
+				for cell := c.FirstChild; cell != nil; cell = cell.NextSibling {
+					if cell.Data == "td" || cell.Data == "th" {
+						span, err := strconv.Atoi(GetAttr(cell, "colspan"))
+						if err != nil || span < 1 {
+							span = 1
+						}
+						n += span
+					}
+				}
+				cols = max(cols, n)
+			}
+		}
+	}
+	rows(table)
+	return max(cols, 1)
+}
+
+// handleCell handles a th or td element.
+func handleCell(ctx *Context, tag string) core.Widget {
+	ctx.BlockParent = ctx.tableFor(ctx.Node)
+	ctx.inlineParent = nil
+	span, err := strconv.Atoi(GetAttr(ctx.Node, "colspan"))
+	if err != nil || span < 1 {
+		span = 1
+	}
+	if ctx.BrowserStyle {
 		w := New[core.Frame](ctx)
-		newWidget = w
 		ctx.NewParent = w
-		ctx.TableParent = w
-		ctx.firstRow = true
-		w.SetProperty("cols", 0)
-		w.Styler(func(s *styles.Style) {
-			s.Display = styles.Grid
-			s.Overflow.X = styles.OverflowAuto
-			s.Grow.Set(1, 0)
-			s.Columns = w.Property("cols").(int)
-			s.Gap.X.Dp(core.ConstantSpacing(6))
-			s.Justify.Content = styles.Center
+		// Columns grow by the size of their content, as in browsers,
+		// for which the length of the text is a proxy.
+		// Columns grow by the size of their content, as in browsers, for
+		// which the length of the text is a proxy, only when the table
+		// has a width to grow into.
+		weight := float32(max(len([]rune(strings.TrimSpace(nodeText(ctx.Node)))), 1))
+		w.FinalStyler(func(s *styles.Style) {
+			if span > 1 {
+				s.ColSpan = span
+			}
+			if s.Grow.X > 0 {
+				s.Grow.X = weight / float32(span)
+			}
 		})
-	case "th", "td":
-		if ctx.TableParent != nil && ctx.firstRow {
-			cols := ctx.TableParent.Property("cols").(int)
-			cols++
-			ctx.TableParent.SetProperty("cols", cols)
-		}
-		tx := handleText(ctx, tag)
-		if tx.Parent == nil { // if empty we need a real empty text to keep structure
-			tx = New[core.Text](ctx)
-		}
-		newWidget = tx
-		// fmt.Println(tag, "val:", tx.Text)
-		if tag == "th" {
-			tx.Styler(func(s *styles.Style) {
-				s.Font.Weight = rich.Bold
-				s.Border.Width.Bottom.Dp(2)
-				s.Margin.Bottom.Dp(6)
-				s.Margin.Top.Dp(6)
-			})
-		} else {
-			tx.Styler(func(s *styles.Style) {
-				s.Margin.Bottom.Dp(6)
-				s.Margin.Top.Dp(6)
-			})
-		}
-	case "thead", "tbody":
-		ctx.NewParent = ctx.TableParent
-	case "tr":
-		if ctx.TableParent != nil && ctx.firstRow && ctx.TableParent.NumChildren() > 0 {
-			ctx.firstRow = false
-		}
-		ctx.NewParent = ctx.TableParent
-	default:
-		ctx.NewParent = ctx.Parent()
+		return w
 	}
-	if newWidget != nil {
-		ctx.handleWidget(ctx.Node, newWidget)
+	tx := handleText(ctx, tag)
+	if tx.Parent == nil { // if empty we need a real empty text to keep structure
+		tx = New[core.Text](ctx)
 	}
+	if span > 1 {
+		tx.Styler(func(s *styles.Style) { s.ColSpan = span })
+	}
+	if tag == "th" {
+		tx.Styler(func(s *styles.Style) {
+			s.Font.Weight = rich.Bold
+			s.Border.Width.Bottom.Dp(2)
+			s.Margin.Bottom.Dp(6)
+			s.Margin.Top.Dp(6)
+		})
+	} else {
+		tx.Styler(func(s *styles.Style) {
+			s.Margin.Bottom.Dp(6)
+			s.Margin.Top.Dp(6)
+		})
+	}
+	return tx
 }
 
 func handleImage(ctx *Context, tag string) core.Widget {
@@ -541,4 +684,16 @@ func Get(ctx *Context, url string) (*http.Response, error) {
 		return resp, fmt.Errorf("got error status %q (code %d)", resp.Status, resp.StatusCode)
 	}
 	return resp, nil
+}
+
+// nodeText returns all of the text in the given node.
+func nodeText(n *html.Node) string {
+	if n.Type == html.TextNode {
+		return n.Data
+	}
+	var sb strings.Builder
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		sb.WriteString(nodeText(c))
+	}
+	return sb.String()
 }

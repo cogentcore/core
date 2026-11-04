@@ -47,6 +47,13 @@ type Text struct {
 	// Links is the list of links in the text.
 	Links []rich.Hyperlink `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// FitWidth makes text that wraps start out as wide as it is on one
+	// line, up to the width of the scene, so that it only wraps when its
+	// allocated width is less, as with the shrink-to-fit widths of CSS.
+	// Otherwise, it starts out with an estimated size of a balanced
+	// aspect ratio. It is used for HTML in browser style.
+	FitWidth bool
+
 	// richText is the conversion of the HTML text source.
 	// This is what is actually rendered.
 	richText rich.Text
@@ -564,7 +571,10 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
+	if tx.Styles.Text.WhiteSpace.HasWordWrap() && tx.FitWidth && tx.Scene != nil {
+		w := tx.availableWidth()
+		tx.configTextSize(math32.Vec2(max(w, sz.Actual.Content.X), sz.Actual.Content.Y))
+	} else if tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		sty, tsty := tx.Styles.NewRichText()
 		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), .5, sty, tsty)
 		tx.configTextSize(est)
@@ -580,6 +590,47 @@ func (tx *Text) SizeUp() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
+}
+
+// availableWidth returns the width available to the text for [Text.FitWidth]:
+// the width of the scene, less the space (margins, borders, and padding)
+// of the widgets that it is in, and within any Max widths of those widgets.
+func (tx *Text) availableWidth() float32 {
+	var ancestors []*WidgetBase
+	for p := tx.parentWidget(); p != nil; p = p.parentWidget() {
+		ancestors = append(ancestors, p)
+	}
+	avail := float32(tx.Scene.SceneGeom.Size.X)
+	if avail <= 0 {
+		avail = 1e6
+	}
+	for i := len(ancestors) - 1; i >= 0; i-- {
+		awb := ancestors[i]
+		s := &awb.Styles
+		space := s.BoxSpace().Size().X
+		if mx := s.Max.X.Dots; mx > 0 {
+			avail = min(avail, mx) // Max is of the total size
+		}
+		avail -= space
+		if s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap {
+			// the minimum widths of the other widgets in the row are not available
+			var path *WidgetBase = &tx.WidgetBase
+			if i > 0 {
+				path = ancestors[i-1]
+			}
+			n := 0
+			awb.forVisibleChildren(func(_ int, cw Widget, cwb *WidgetBase) bool {
+				n++
+				if cwb != path {
+					avail -= cwb.Styles.Min.X.Dots + cwb.Styles.BoxSpace().Size().X
+				}
+				return true
+			})
+			avail -= float32(max(n-1, 0)) * s.Gap.X.Dots
+		}
+	}
+	avail -= tx.Styles.BoxSpace().Size().X
+	return max(avail, 0)
 }
 
 func (tx *Text) SizeDown(iter int) bool {

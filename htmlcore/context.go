@@ -16,9 +16,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
-	selcss "github.com/ericchiang/css"
 	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -31,8 +29,28 @@ type Context struct {
 	// Node is the node that is currently being read.
 	Node *html.Node
 
-	// styles are the CSS styling rules for each node.
-	styles map[*html.Node][]*css.Rule
+	// styles are the CSS declarations for each node, which are
+	// sorted in the order of the cascade by [Context.declarations].
+	styles map[*html.Node][]*cssDecl
+
+	// sorted records the nodes whose declarations are sorted,
+	// and hinted those whose attributes have been added.
+	sorted, hinted map[*html.Node]bool
+
+	// cssOrder is the order of the last declaration added.
+	cssOrder int
+
+	// BrowserStyle makes the rendering follow the default styles and
+	// layout of web browsers as closely as possible: block elements are
+	// spaced by their (collapsed) margins instead of gaps, headings are
+	// sized by the user agent styles, and so on. It is for showing web
+	// pages and email; without it, HTML and markdown are shown in the
+	// more compact Cogent Core style, as used by content.
+	BrowserStyle bool
+
+	// blocks has the margin collapsing state of the block widgets,
+	// for [Context.BrowserStyle].
+	blocks map[core.Widget]*blockState
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
@@ -123,8 +141,8 @@ type Context struct {
 // readState is the state of a read of HTML by [ReadHTML].
 type readState struct {
 
-	// firstRow indicates the start of a table, where number of columns is counted.
-	firstRow bool
+	// tables has the widget of each table element.
+	tables map[*html.Node]*core.Frame
 
 	// stageSize is the size of the content of the body read so far.
 	stageSize int
@@ -204,7 +222,7 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		styles:            map[*html.Node][]*css.Rule{},
+		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            http.Get,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
@@ -217,15 +235,7 @@ func NewContext() *Context {
 // It may make changes to the widget tree, so the widget
 // must be added to the resulting parent immediately.
 func (c *Context) Parent() core.Widget {
-	rules := c.styles[c.Node]
-	display := ""
-	for _, rule := range rules {
-		for _, decl := range rule.Declarations {
-			if decl.Property == "display" {
-				display = decl.Value
-			}
-		}
-	}
+	display := c.declaration(c.Node, "display")
 	var parent core.Widget
 	switch display {
 	case "inline", "inline-block", "":
@@ -247,31 +257,12 @@ func (c *Context) config(w core.Widget) {
 		case "id":
 			wb.SetName(attr.Val)
 			wb.SetProperty("id", attr.Val)
-		case "style":
-			c.SetStyleAttr(c.Node, attr.Val)
+		case "style": // in the cascade
 		default:
 			wb.SetProperty(attr.Key, attr.Val)
 		}
 	}
 	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
-}
-
-func (c *Context) SetStyleAttr(node *html.Node, style string) error {
-	// our CSS parser is strict about semicolons, but
-	// they aren't needed in normal inline styles in HTML
-	if !strings.HasSuffix(style, ";") {
-		style += ";"
-	}
-	decls, err := parser.ParseDeclarations(style)
-	if errors.Log(err) != nil {
-		return err
-	}
-	rule := &css.Rule{Declarations: decls}
-	if c.styles == nil {
-		c.styles = map[*html.Node][]*css.Rule{}
-	}
-	c.styles[c.Node] = append(c.styles[c.Node], rule)
-	return nil
 }
 
 // InlineParent returns the current parent widget that inline
@@ -291,70 +282,16 @@ func (c *Context) InlineParent() core.Widget {
 
 // addStyle adds the given CSS style string to the page's compiled styles.
 func (c *Context) addStyle(style string) {
+	c.addStyleOrigin(style, originAuthor)
+}
+
+// addStyleOrigin adds the given CSS style string with the given origin.
+func (c *Context) addStyleOrigin(style string, origin cssOrigin) {
 	ss, err := parser.Parse(style)
 	if errors.Log(err) != nil {
 		return
 	}
-
-	root := rootNode(c.Node)
-
-	for _, rule := range ss.Rules {
-		for _, match := range selectRule(root, rule) {
-			c.styles[match] = append(c.styles[match], rule)
-		}
-	}
-}
-
-// selectRule returns the nodes under root that the selectors of the rule
-// select, once for each selector that selects them.
-func selectRule(root *html.Node, rule *css.Rule) []*html.Node {
-	// Selectors of element names, such as the user agent styles have, select
-	// the elements with those names, which one walk of the tree finds; the
-	// selector library walks the tree for each selector.
-	if names := selectorAtoms(rule.Selectors); names != nil {
-		var matches []*html.Node
-		var walk func(n *html.Node)
-		walk = func(n *html.Node) {
-			for range names[n.DataAtom] {
-				matches = append(matches, n)
-			}
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				if c.Type == html.ElementNode {
-					walk(c)
-				}
-			}
-		}
-		walk(root)
-		return matches
-	}
-
-	// Other selectors are matched by the selector library.
-	sel := &selcss.Selector{}
-	if len(rule.Selectors) > 0 {
-		s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
-		if errors.Log(err) == nil {
-			sel = s
-		}
-	}
-	return sel.Select(root)
-}
-
-// selectorAtoms returns the number of selectors of each element name, when
-// all of the selectors are lowercase element names, and otherwise nil.
-func selectorAtoms(selectors []string) map[atom.Atom]int {
-	if len(selectors) == 0 {
-		return nil
-	}
-	names := make(map[atom.Atom]int, len(selectors))
-	for _, s := range selectors {
-		s = strings.TrimSpace(s)
-		a := atom.Lookup([]byte(s))
-		if a == 0 || a.String() != s {
-			return nil
-		}
-		names[a]++
-	}
-	return names
+	c.addRules(rootNode(c.Node), ss, origin)
 }
 
 // LinkButton is a helper function that makes the given button
@@ -395,20 +332,29 @@ func (c *Context) AddWidgetHandler(f func(w core.Widget)) {
 }
 
 func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
+	if node == nil || node.Type != html.ElementNode {
+		node = nil // text nodes only inherit
+	}
 	wb := w.AsWidget()
-	rules := c.styles[c.Node]
-	wb.Styler(func(s *styles.Style) {
-		for _, rule := range rules {
-			for _, decl := range rule.Declarations {
-				if strings.HasPrefix(decl.Property, "paginate-") {
-					wb.SetProperty(decl.Property, decl.Value)
+	decls := c.declarations(node)
+	for _, d := range decls {
+		if strings.HasPrefix(d.Property, "paginate-") {
+			wb.SetProperty(d.Property, d.Value)
+		}
+	}
+	if !c.BrowserStyle {
+		wb.Styler(func(s *styles.Style) {
+			for _, d := range decls {
+				if strings.HasPrefix(d.Property, "paginate-") {
 					continue
 				}
 				// TODO(kai/styproperties): parent style and context
-				s.FromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
+				s.FromProperty(s, d.Property, d.Value, colors.BaseContext(colors.ToUniform(s.Color)))
 			}
-		}
-	})
+		})
+		return
+	}
+	c.browserStyler(node, w, decls)
 }
 
 // handleWidget applies accumulated style rules,

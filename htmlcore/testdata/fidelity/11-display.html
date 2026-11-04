@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><title>Display</title>
+<style>
+.ib { display: inline-block; width: 120px; height: 40px; background-color: #cde; margin: 4px; }
+.block { display: block; background-color: #edc; }
+.none { display: none; }
+.inline { display: inline; background-color: #dec; }
+</style></head>
+<body>
+<div><span class="ib">inline-block</span><span class="ib">inline-block</span><span class="ib">inline-block</span></div>
+<p>Before <span class="block">span as block</span> after.</p>
+<p>Hidden: <span class="none">you should not see this</span>done.</p>
+<div class="none">Hidden div.</div>
+<div><div class="inline">div as inline</div> <div class="inline">another inline div</div></div>
+</body></html>
