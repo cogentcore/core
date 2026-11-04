@@ -64,6 +64,10 @@ type blockState struct {
 	// space of its left padding.
 	markers bool
 
+	// definiteHeight is whether the element has a definite height,
+	// which percentage heights of its children are relative to.
+	definiteHeight bool
+
 	// openTop and openBottom are whether the margins of the first
 	// and last children collapse with those of the widget, when it
 	// has no padding or border there.
@@ -369,8 +373,29 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		s.Min.X, s.Max.X = contentBox(*st.width, spaceX)
 		s.Grow.X = 0
 	}
+	// A percentage height is only of a parent with a definite height,
+	// and the viewport is definite. Content that overflows a height is
+	// shown in CSS, but it is clipped in core, so the height is only a
+	// minimum unless the overflow is clipped anyway.
+	parentDefinite := pbs == nil || pbs.definiteHeight
+	for _, h := range []**units.Value{&st.height, &st.minHeight, &st.maxHeight} {
+		if *h != nil && (*h).Unit == units.UnitPh && !parentDefinite {
+			*h = nil // auto
+		}
+	}
+	bs.definiteHeight = st.height != nil
+	// Overflow only scrolls (or clips) a box whose height is limited,
+	// and that of the body is that of the viewport, which scrolls anyway.
+	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
+		(st.height == nil && st.maxHeight == nil && s.Overflow.Y != styles.OverflowVisible) {
+		s.Overflow.Y = styles.OverflowVisible
+	}
 	if st.height != nil {
-		s.Min.Y, s.Max.Y = contentBox(*st.height, spaceY)
+		mn, mx := contentBox(*st.height, spaceY)
+		s.Min.Y = mn
+		if s.Overflow.Y != styles.OverflowVisible {
+			s.Max.Y = mx
+		}
 		s.Grow.Y = 0
 	}
 	if st.minWidth != nil {
@@ -952,12 +977,15 @@ func parseLength(v string, pct units.Units) (units.Value, bool) {
 	if f, err := strconv.ParseFloat(v, 32); err == nil {
 		return units.Dp(float32(f)), true
 	}
-	if strings.HasSuffix(v, "px") {
-		f, err := strconv.ParseFloat(strings.TrimSuffix(v, "px"), 32)
-		if err != nil {
-			return units.Value{}, false
+	// absolute units are relative to px in CSS (96px per inch)
+	for _, u := range cssAbsoluteUnits {
+		if num, ok := strings.CutSuffix(v, u.suffix); ok {
+			f, err := strconv.ParseFloat(num, 32)
+			if err != nil {
+				return units.Value{}, false
+			}
+			return units.Dp(float32(f) * u.px), true
 		}
-		return units.Dp(float32(f)), true
 	}
 	var l units.Value
 	if err := l.SetString(v); err != nil {
@@ -965,6 +993,12 @@ func parseLength(v string, pct units.Units) (units.Value, bool) {
 	}
 	return l, true
 }
+
+// cssAbsoluteUnits are the absolute units of CSS, in px.
+var cssAbsoluteUnits = []struct {
+	suffix string
+	px     float32
+}{{"px", 1}, {"pt", 96.0 / 72}, {"pc", 16}, {"in", 96}, {"cm", 96 / 2.54}, {"mm", 96 / 25.4}, {"q", 96 / 101.6}}
 
 func lengthPtr(v string, pct units.Units) *units.Value {
 	l, ok := parseLength(v, pct)

@@ -51,6 +51,24 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 			s.Cursor = cursors.Pointer
 		})
 		return true
+	case "input":
+		typ := strings.ToLower(GetAttr(ctx.Node, "type"))
+		if typ != "submit" && typ != "button" && typ != "reset" {
+			return false
+		}
+		label := GetAttr(ctx.Node, "value")
+		if !HasAttr(ctx.Node, "value") {
+			label = map[string]string{"submit": "Submit", "reset": "Reset"}[typ]
+		}
+		w := New[core.Frame](ctx)
+		ctx.handleWidget(ctx.Node, w)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.Clickable)
+			s.Cursor = cursors.Pointer
+		})
+		tx := core.NewText(w).SetText(html.EscapeString(label))
+		ctx.handleWidget(nil, tx)
+		return true
 	case "svg":
 		if ctx.displayOf(ctx.Node) == "none" {
 			return true

@@ -51,8 +51,8 @@ func TestLayoutDump(t *testing.T) {
 				depth++
 			}
 			s := &wb.Styles
-			fmt.Printf("%*s%s %v pos %v act %v alloc %v grow %v gw %v min %v max %v marg %v pad %v\n", depth*2, "", wb.Name, wb.Property("tag"),
-				wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, wb.Geom.Size.Alloc.Total, s.Grow, s.GrowWrap, s.Min.Dots(), s.Max.Dots(), s.Margin.Dots(), s.Padding.Dots())
+			fmt.Printf("%*s%s %v pos %v act %v alloc %v grow %v gw %v min %v max %v marg %v pad %v disp %v dir %v ovf %v op %v color %v\n", depth*2, "", wb.Name, wb.Property("tag"),
+				wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, wb.Geom.Size.Alloc.Total, s.Grow, s.GrowWrap, s.Min.Dots(), s.Max.Dots(), s.Margin.Dots(), s.Padding.Dots(), s.Display, s.Direction, s.Overflow, s.Opacity, s.Color)
 			return tree.Continue
 		})
 	})
