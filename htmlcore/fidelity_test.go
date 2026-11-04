@@ -170,12 +170,12 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 	}
 	res.ChromeH = chromeH
 
-	coreBoxes, coreImg := coreRender(tagged, absDir, baseURL)
+	coreBoxes, coreImg, coreH := coreRender(tagged, absDir, baseURL)
 	if coreImg == nil {
 		res.Err = "core: no image"
 		return res
 	}
-	res.CoreH = coreImg.Bounds().Dy()
+	res.CoreH = coreH
 	savePNG(filepath.Join(outDir, name+".core.png"), coreImg)
 
 	// side by side image
@@ -417,7 +417,7 @@ func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
 
 // coreRender renders the HTML with htmlcore, returning the boxes of the
 // widgets of the elements and the rendered image.
-func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
+func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA, int) {
 	b := core.NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Padding.Zero()
@@ -456,10 +456,18 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 		return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Body: f, Request: &http.Request{URL: pu}}, nil
 	}
 	if err := ReadHTMLString(ctx, b, tagged); err != nil {
-		return nil, nil
+		return nil, nil, 0
 	}
 	boxes := map[int]*fidBox{}
+	height := 0 // of the page, in dp, as laid out (the window can be higher)
 	img := b.RenderImage(func() {
+		dp := b.Styles.UnitContext.Dots(units.UnitDp)
+		bottom := float32(0) // of the content, as the body grows to fill the window
+		b.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+			bottom = max(bottom, cwb.Geom.Pos.Total.Y+cwb.Geom.Size.Actual.Total.Y)
+			return tree.Continue
+		})
+		height = int(math32.Ceil(bottom / dp))
 		b.WalkDown(func(n tree.Node) bool {
 			w, ok := n.(core.Widget)
 			if !ok {
@@ -496,7 +504,10 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 			return tree.Continue
 		})
 	})
-	return boxes, img
+	if img != nil && height > 0 && height < img.Bounds().Dy() {
+		img = img.SubImage(image.Rect(0, 0, img.Bounds().Dx(), height)).(*image.RGBA)
+	}
+	return boxes, img, height
 }
 
 func readPNG(path string) image.Image {

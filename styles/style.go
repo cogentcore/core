@@ -252,13 +252,14 @@ type Style struct { //types:add
 	// // specifies the column that this element should appear within a grid layout
 	// Col int
 
-	// // specifies the number of sequential rows that this element should occupy
-	// // within a grid layout (todo: not currently supported)
-	// RowSpan int
-
 	// specifies the number of sequential columns that this element should occupy
 	// within a grid layout
 	ColSpan int
+
+	// RowSpan is the number of sequential rows that this element occupies
+	// within a grid layout. The cells after it in the rows below it are
+	// placed in the columns after it.
+	RowSpan int
 
 	// ScrollbarWidth is the width of layout scrollbars. It defaults
 	// to [DefaultScrollbarWidth], and it is inherited.

@@ -390,6 +390,19 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 				s.Grow.SetDim(cross, 1)
 			}
 		}
+	case parentDisplay == "grid" || parentDisplay == "inline-grid":
+		// grid items are stretched to their cells by default
+		align := st.alignSelf
+		if align == "" || align == "auto" {
+			align = pbs.alignItems
+		}
+		if st.width == nil {
+			s.Grow.X = 1
+		}
+		if (align == "" || align == "stretch" || align == "normal") && st.height == nil {
+			s.Grow.Y = 1
+		}
+		s.Shrink.X = 1
 	case bs.block && st.display != "table":
 		s.Grow.X = 1
 	case st.display == "table-cell":
@@ -440,8 +453,23 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	// minimum unless the overflow is clipped anyway.
 	parentDefinite := pbs == nil || pbs.definiteHeight
 	for _, h := range []**units.Value{&st.height, &st.minHeight, &st.maxHeight} {
-		if *h != nil && (*h).Unit == units.UnitPh && !parentDefinite {
+		if *h == nil || (*h).Unit != units.UnitPh {
+			continue
+		}
+		switch {
+		case !parentDefinite:
 			*h = nil // auto
+		case pbs == nil:
+			// a percentage of the viewport (the containing block of the
+			// top element), not of the scene, which is as high as the page
+			v := (*h).Value
+			if c.MediaHeight > 0 {
+				*h = new(units.Value)
+				**h = units.Dp(v * c.MediaHeight / 100)
+			} else {
+				*h = new(units.Value)
+				**h = units.Vh(v)
+			}
 		}
 	}
 	bs.definiteHeight = st.height != nil

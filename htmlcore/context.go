@@ -288,6 +288,9 @@ func (c *Context) config(w core.Widget) {
 		}
 	}
 	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
+	if c.BrowserStyle {
+		wb.SetProperty("node", c.Node) // for the grid-area of a grid item
+	}
 }
 
 // InlineParent returns the current parent widget that inline

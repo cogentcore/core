@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -22,6 +23,7 @@ import (
 //	LAYOUT_HTML='<p>Some <b>text</b></p>' go test -run TestLayoutDump -v
 //
 // LAYOUT_FILE=file.html reads the HTML from the file instead,
+// LAYOUT_WIDTH=N sets the viewport width (800 by default),
 // and LAYOUT_TRACE=1 also traces the layout passes.
 func TestLayoutDump(t *testing.T) {
 	src := os.Getenv("LAYOUT_HTML")
@@ -35,12 +37,16 @@ func TestLayoutDump(t *testing.T) {
 	if src == "" {
 		t.Skip()
 	}
+	width := float32(800)
+	if w, err := strconv.Atoi(os.Getenv("LAYOUT_WIDTH")); err == nil {
+		width = float32(w)
+	}
 	b := core.NewBody()
 	b.Scene.Styler(func(s *styles.Style) { s.Padding.Zero() })
-	b.Styler(func(s *styles.Style) { s.Padding.Zero(); s.Gap.Zero(); s.Min.X.Dp(800); s.Max.X.Dp(800) })
+	b.Styler(func(s *styles.Style) { s.Padding.Zero(); s.Gap.Zero(); s.Min.X.Dp(width); s.Max.X.Dp(width) })
 	ctx := NewContext()
 	ctx.BrowserStyle = true
-	ctx.MediaWidth = 800
+	ctx.MediaWidth = width
 	ctx.MediaHeight = 600
 	if f := os.Getenv("LAYOUT_FILE"); f != "" {
 		if u, err := os.ReadFile(strings.TrimSuffix(f, ".html") + ".url"); err == nil {

@@ -102,8 +102,15 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		ctx.NewParent = parent
 	}
 
-	if ctx.NewParent != nil && n.FirstChild != nil {
-		readHTMLNode(ctx, ctx.NewParent, n.FirstChild)
+	if np := ctx.NewParent; np != nil && n.FirstChild != nil {
+		readHTMLNode(ctx, np, n.FirstChild)
+		if ctx.BrowserStyle && n.Type == html.ElementNode && ctx.rest == nil {
+			if d := ctx.displayOf(n); d == "grid" || d == "inline-grid" {
+				if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {
+					ctx.arrangeGrid(n, fr)
+				}
+			}
+		}
 	}
 }
 
