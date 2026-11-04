@@ -53,9 +53,58 @@ func buildHTMLOnly(c *config.Config) error {
 
 // generateHTML runs the app with the -generatehtml argument, which prints
 // the pre-rendered HTML for the app, or the JSON [bcontent.Site] data
-// for apps that use the content package.
+// for apps that use the content package. The HTML generator of
+// [tohtmlPackage] is linked into the app for this run (see [tohtmlOverlay]).
 func generateHTML() (string, error) {
-	return exec.Output("go", "run", ".", "-generatehtml", "-nogui")
+	args := []string{"run"}
+	overlay, err := tohtmlOverlay()
+	if err != nil {
+		return "", err
+	}
+	if overlay != "" {
+		defer os.RemoveAll(filepath.Dir(overlay))
+		args = append(args, "-overlay", overlay)
+	}
+	args = append(args, ".", "-generatehtml", "-nogui")
+	return exec.Output("go", args...)
+}
+
+// tohtmlPackage is the package that sets the HTML generator of an app
+// for the -generatehtml argument (core.GenerateHTML) when it is imported.
+const tohtmlPackage = "cogentcore.org/core/htmlcore/tohtml"
+
+// tohtmlOverlay returns the path of a go build -overlay file that adds a
+// file importing [tohtmlPackage] to the main package of the app in the
+// current directory, so that apps need not import it themselves, without
+// changing the files of the app. The caller removes the directory of the
+// returned file. It returns "" if the version of Cogent Core that the app
+// uses does not have that package (versions in which core itself has the
+// HTML generator).
+func tohtmlOverlay() (string, error) {
+	if _, err := exec.Minor().SetStderr(nil).Output("go", "list", tohtmlPackage); err != nil {
+		return "", nil
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	tdir, err := os.MkdirTemp("", "cogentcore-generatehtml-")
+	if err != nil {
+		return "", err
+	}
+	src := filepath.Join(tdir, "generatehtml.go")
+	err = os.WriteFile(src, []byte("package main\n\nimport _ \""+tohtmlPackage+"\"\n"), 0666)
+	if err != nil {
+		return "", err
+	}
+	ov, err := json.Marshal(map[string]map[string]string{
+		"Replace": {filepath.Join(wd, "cogentcore_generatehtml.go"): src},
+	})
+	if err != nil {
+		return "", err
+	}
+	overlay := filepath.Join(tdir, "overlay.json")
+	return overlay, os.WriteFile(overlay, ov, 0666)
 }
 
 // readSite returns the [bcontent.Site] data in the given output of

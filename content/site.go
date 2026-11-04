@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/content/bcontent"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/tohtml"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/token"
 	"cogentcore.org/core/tree"
@@ -37,7 +38,7 @@ func generateSite(ct *Content) string {
 		ct.Open(pg.URL)
 		prp := &bcontent.PreRenderPage{
 			Page:        *pg,
-			HTML:        core.GenerateHTMLCore(ct.rightFrame),
+			HTML:        tohtml.Generate(ct.rightFrame),
 			Description: pageDescription(ct),
 			TOC:         pageTOC(ct.rightFrame),
 		}
@@ -92,7 +93,7 @@ func pageTOC(w *core.Frame) []*bcontent.TOCHeading {
 		}
 		id, ok := cwb.Property("id").(string)
 		if !ok {
-			id = cwb.Name // consistent with [core.ToHTML]
+			id = cwb.Name // consistent with [tohtml.Widget]
 		}
 		toc = append(toc, &bcontent.TOCHeading{Level: level, Text: text, ID: id})
 		return tree.Continue
