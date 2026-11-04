@@ -5,6 +5,10 @@
 package htmlcore
 
 import (
+	"bytes"
+	"encoding/binary"
+	"image"
+	"image/png"
 	"io"
 	"net/http"
 	"os"
@@ -300,4 +304,24 @@ func TestGetFileURL(t *testing.T) {
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	}
+}
+
+func TestICO(t *testing.T) {
+	// an ICO file with one 2x1 PNG image
+	var pngBuf bytes.Buffer
+	img := image.NewRGBA(image.Rect(0, 0, 2, 1))
+	assert.NoError(t, png.Encode(&pngBuf, img))
+	var ico bytes.Buffer
+	ico.Write([]byte{0, 0, 1, 0, 1, 0})        // header: icon, 1 image
+	ico.Write([]byte{2, 1, 0, 0, 1, 0, 32, 0}) // 2x1, planes, bpp
+	binary.Write(&ico, binary.LittleEndian, uint32(pngBuf.Len()))
+	binary.Write(&ico, binary.LittleEndian, uint32(22)) // offset
+	ico.Write(pngBuf.Bytes())
+	im, format, err := image.Decode(bytes.NewReader(ico.Bytes()))
+	if assert.NoError(t, err) {
+		assert.Equal(t, "ico", format)
+		assert.Equal(t, image.Rect(0, 0, 2, 1), im.Bounds())
+	}
+	assert.True(t, looksLikeSVG([]byte(`<?xml version="1.0"?>\n<svg xmlns="x"></svg>`)))
+	assert.False(t, looksLikeSVG(pngBuf.Bytes()))
 }

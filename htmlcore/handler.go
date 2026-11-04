@@ -534,17 +534,48 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	var newWidget core.Widget
 	var resp *http.Response
 	var err error
+	// imageError handles an error getting the image, which is only logged
+	// at the debug level in browser style, as browsers just do not show
+	// images that are missing or not supported.
+	imageError := func(err error) bool {
+		if err == nil {
+			return false
+		}
+		if ctx.BrowserStyle {
+			slog.Debug("error loading image", "url", src, "err", err)
+		} else {
+			errors.Log(err)
+		}
+		return true
+	}
+	var svgData []byte
 	if !ctx.DelayedImageLoad && isSVG {
 		resp, err = Get(ctx, src)
-		if errors.Log(err) != nil {
+		if imageError(err) {
 			return nil
 		}
 		defer resp.Body.Close()
 	}
 	var im image.Image
-	if !ctx.DelayedImageLoad && !isSVG {
+	if !ctx.DelayedImageLoad && !isSVG && ctx.BrowserStyle && ctx.ImageCache == nil {
+		// An image is an svg by its type (not only the extension of its URL).
+		resp, err = Get(ctx, src)
+		if imageError(err) {
+			return nil
+		}
+		data, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if imageError(err) {
+			return nil
+		}
+		if strings.Contains(resp.Header.Get("Content-Type"), "svg") || looksLikeSVG(data) {
+			isSVG, svgData = true, data
+		} else if im, _, err = imagex.Read(bytes.NewReader(data)); imageError(err) {
+			return nil
+		}
+	} else if !ctx.DelayedImageLoad && !isSVG {
 		im, err = readImage(ctx, src)
-		if errors.Log(err) != nil {
+		if imageError(err) {
 			return nil
 		}
 	}
@@ -560,7 +591,10 @@ func handleImage(ctx *Context, tag string) core.Widget {
 			svg.SetProperty("id", pid)
 		}
 		if !ctx.DelayedImageLoad {
-			data, err := io.ReadAll(resp.Body)
+			data, err := svgData, error(nil)
+			if data == nil {
+				data, err = io.ReadAll(resp.Body)
+			}
 			if errors.Log(err) == nil {
 				errors.Log(svg.Read(bytes.NewReader(data)))
 				if w, h, ok := svgSize(data); ok { // its intrinsic size, for browser style
@@ -633,7 +667,11 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 	defer resp.Body.Close()
 	im, _, err := imagex.Read(resp.Body)
 	if err != nil {
-		slog.Error("error loading image", "url", src, "err", err)
+		if ctx.BrowserStyle { // browsers just do not show images that are not supported
+			slog.Debug("error loading image", "url", src, "err", err)
+		} else {
+			slog.Error("error loading image", "url", src, "err", err)
+		}
 		return nil, nil
 	}
 	if cache != nil {
@@ -947,6 +985,12 @@ func (ctx *Context) hasFloatChild(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// looksLikeSVG returns whether the given image data is an SVG document.
+func looksLikeSVG(data []byte) bool {
+	head := data[:min(len(data), 512)]
+	return bytes.Contains(head, []byte("<svg")) || (bytes.HasPrefix(bytes.TrimSpace(head), []byte("<?xml")) && bytes.Contains(data[:min(len(data), 4096)], []byte("<svg")))
 }
 
 // svgRootTag matches the start tag of the root svg element.
