@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
@@ -98,6 +99,9 @@ type cssState struct {
 	borderCollapse bool
 	legacyCenter   bool
 	verticalAlign  string
+
+	// overflowHidden is whether the overflow in each dimension is hidden.
+	overflowHidden [2]bool
 }
 
 // browserStyler adds the styler for the CSS declarations of the given node
@@ -372,6 +376,14 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	if st.width != nil {
 		s.Min.X, s.Max.X = contentBox(*st.width, spaceX)
 		s.Grow.X = 0
+		_, isImage := wb.This.(*core.Image)
+		if st.width.Unit == units.UnitPw && !isImage {
+			// A percentage of the width of the parent fills that much
+			// of it, which as a minimum would make a parent that is as
+			// wide as its content grow without end.
+			s.Min.X = units.Value{}
+			s.Grow.X = 1
+		}
 	}
 	// A percentage height is only of a parent with a definite height,
 	// and the viewport is definite. Content that overflows a height is
@@ -384,6 +396,10 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		}
 	}
 	bs.definiteHeight = st.height != nil
+	if (st.overflowHidden[0] || s.Overflow.X == styles.OverflowVisible) &&
+		(st.overflowHidden[1] || s.Overflow.Y == styles.OverflowVisible) && (st.overflowHidden[0] || st.overflowHidden[1]) {
+		s.ScrollbarWidth.Zero() // hidden, not scrolled
+	}
 	// Overflow only scrolls (or clips) a box whose height is limited,
 	// and that of the body is that of the viewport, which scrolls anyway.
 	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
@@ -478,6 +494,28 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	if st.margin[3] != nil {
 		s.Margin.Left = *st.margin[3]
+	}
+	// The width of the body is that of the viewport, not of its content,
+	// as in browsers, so that the percentage widths of its content are of
+	// the viewport (otherwise content that is wider than the viewport makes
+	// them as wide, which keeps it that wide).
+	if tag := wb.Property("tag"); tag == "body" && st.width == nil && uc.Vpw > 0 {
+		mx := uc.Vpw - pad.Left - pad.Right - bw.Left - bw.Right - dots(st.margin[1]) - dots(st.margin[3])
+		// less the vertical scrollbars that the frames it is in can have
+		for p := wb.Parent; p != nil; p = p.AsTree().Parent {
+			if pw, ok := p.(core.Widget); ok {
+				pst := &pw.AsWidget().Styles
+				if pst.Overflow.Y >= styles.OverflowAuto {
+					mx -= pst.ScrollbarWidth.Dots
+				}
+				if pst.Padding.Left.Dots+pst.Padding.Right.Dots > 0 {
+					mx -= pst.Padding.Left.Dots + pst.Padding.Right.Dots
+				}
+			}
+		}
+		if st.maxWidth == nil || s.Max.X.Unit != units.UnitDp || dp*s.Max.X.Value > mx {
+			s.Max.X = units.Dot(max(mx, 0))
+		}
 	}
 	spc := core.AppearanceSettings.Spacing / 100
 	if spc <= 0 {
@@ -837,27 +875,38 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		s.Align.Self = alignValue(lval)
 	case "align-content":
 		s.Align.Content = alignValue(lval)
-	case "overflow":
-		switch lval {
-		case "hidden", "clip":
-			s.Overflow.Set(styles.OverflowHidden)
-		case "auto", "scroll":
-			s.Overflow.Set(styles.OverflowAuto)
-		default:
-			s.Overflow.Set(styles.OverflowVisible)
+	case "overflow", "overflow-x", "overflow-y":
+		// Overflow that is hidden is clipped to the size of the box, which
+		// does not grow to fit it, as with a scrolling overflow in core, but
+		// without scrollbars (OverflowHidden in core does not clip).
+		vals := strings.Fields(lval)
+		if len(vals) == 0 {
+			return
 		}
-	case "overflow-x", "overflow-y":
-		ov := styles.OverflowVisible
-		switch lval {
-		case "hidden", "clip":
-			ov = styles.OverflowHidden
-		case "auto", "scroll":
-			ov = styles.OverflowAuto
+		if len(vals) == 1 {
+			vals = append(vals, vals[0])
 		}
-		if prop == "overflow-x" {
-			s.Overflow.X = ov
-		} else {
-			s.Overflow.Y = ov
+		for d, v := range vals[:2] {
+			if prop == "overflow-x" && d == 1 || prop == "overflow-y" && d == 0 {
+				continue
+			}
+			ov := styles.OverflowVisible
+			hd := d
+			if prop == "overflow-y" {
+				hd = 1
+			}
+			st.overflowHidden[hd] = false
+			switch v {
+			case "hidden", "clip":
+				ov = styles.OverflowAuto
+				st.overflowHidden[hd] = true
+			case "auto", "scroll":
+				ov = styles.OverflowAuto
+			}
+			if prop == "overflow-y" {
+				d = 1
+			}
+			s.Overflow.SetDim(math32.Dims(d), ov)
 		}
 	case "grid-template-columns":
 		s.Columns = gridColumns(lval)

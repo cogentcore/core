@@ -65,8 +65,17 @@ func handleElement(ctx *Context) {
 	var newWidget core.Widget
 
 	switch tag {
-	case "script", "title", "meta":
+	case "script", "title":
 		// we don't render anything
+	case "meta":
+		if strings.EqualFold(GetAttr(ctx.Node, "http-equiv"), "refresh") && ctx.RefreshURL == "" {
+			// content is "delay" or "delay;url=URL"
+			_, u, _ := strings.Cut(GetAttr(ctx.Node, "content"), ";")
+			u = strings.TrimSpace(u)
+			if len(u) > 4 && strings.EqualFold(u[:4], "url=") {
+				ctx.RefreshURL = strings.Trim(strings.TrimSpace(u[4:]), `'"`)
+			}
+		}
 	case "link":
 		if ctx.BrowserStyle { // all style sheets are added first
 			return
@@ -735,7 +744,7 @@ func (c *Context) addStyleSheets(root *html.Node) {
 	walk = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			switch n.Data {
-			case "noscript", "template":
+			case "template":
 				return
 			case "style":
 				if c.mediaMatches(GetAttr(n, "media")) {

@@ -380,6 +380,7 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 		s.Gap.Zero()
 		s.Min.X.Dp(fidelityWidth)
 		s.Max.X.Dp(fidelityWidth)
+		s.ScrollbarWidth.Zero() // as Chrome is run with hidden scrollbars
 	})
 	b.Scene.Styler(func(s *styles.Style) { // like the viewport of a browser
 		s.Padding.Zero()

@@ -18,7 +18,10 @@ import (
 // ReadHTML reads HTML from the given [io.Reader] and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
-	n, err := html.Parse(r)
+	// In browser style, the HTML is parsed as browsers do without
+	// JavaScript (which htmlcore does not run), so that the content
+	// of noscript elements is shown.
+	n, err := html.ParseWithOptions(r, html.ParseOptionEnableScripting(!ctx.BrowserStyle))
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
 	}

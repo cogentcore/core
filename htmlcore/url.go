@@ -47,3 +47,8 @@ func GetURLFromFS(fsys fs.FS, rawURL string) (*http.Response, error) {
 		ContentLength: -1,
 	}, nil
 }
+
+// ParseRelativeURL parses the given raw URL relative to the given base URL.
+func ParseRelativeURL(rawURL, base string) (*url.URL, error) {
+	return parseRelativeURL(rawURL, base)
+}

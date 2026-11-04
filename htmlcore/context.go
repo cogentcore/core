@@ -38,6 +38,12 @@ type Context struct {
 	// cssOrder is the order of the last declaration added.
 	cssOrder int
 
+	// RefreshURL is the URL of the first meta element with an http-equiv
+	// of refresh in the HTML read, if any, which an app that shows web pages
+	// can open next, as browsers do (as for a page that redirects browsers
+	// without JavaScript to another one). It must be reset before each read.
+	RefreshURL string
+
 	// MediaWidth, if positive, is the width of the viewport in CSS px (dp)
 	// that the @media rules of style sheets are for; otherwise, it is the
 	// width of the screen.

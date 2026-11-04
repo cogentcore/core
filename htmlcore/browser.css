@@ -6,7 +6,7 @@ h1, h2, h3, h4, h5, h6, hgroup, nav, section, dir, dd, dl, dt, menu, ol, ul, det
     display: block;
 }
 
-head, script, style, link, meta, title, datalist, param, noframes, template, area, base, basefont, noscript, rp {
+head, script, style, link, meta, title, datalist, param, noframes, template, area, base, basefont, rp {
     display: none;
 }
 
