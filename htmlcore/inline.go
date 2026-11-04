@@ -234,21 +234,34 @@ func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 		}
 		fmt.Fprintf(&sb, ` %s="%s"`, a.Key, html.EscapeString(a.Val))
 	}
-	var style strings.Builder
+	// The last declaration of each property is the one that applies,
+	// and one that inherits is that of the parent, which the span has.
+	var props []string
+	vals := map[string]string{}
 	for _, d := range c.declarations(n) {
 		if !inlineProperties[d.Property] || d.origin == originUserAgent || d.invalid {
 			continue
 		}
 		prop, val := d.Property, d.Value
-		switch prop {
-		case "background":
+		if prop == "background" {
 			prop, val = "background-color", backgroundColor(val)
 			if val == "" {
 				continue
 			}
-			if cl, ok := cssColorFunction(val); ok {
-				val = colors.AsHex(cl)
-			}
+		}
+		if _, ok := vals[prop]; !ok {
+			props = append(props, prop)
+		}
+		vals[prop] = val
+	}
+	var style strings.Builder
+	for _, prop := range props {
+		val := vals[prop]
+		switch strings.ToLower(val) {
+		case "inherit", "unset", "revert", "revert-layer":
+			continue
+		}
+		switch prop {
 		case "font-weight":
 			if w, err := strconv.Atoi(val); err == nil {
 				val = "normal"
