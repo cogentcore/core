@@ -11,7 +11,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/text/printer"
 	"cogentcore.org/core/tree"
 )
 
@@ -60,12 +59,11 @@ func (p *pager) extract() []*item {
 		}
 	}
 
-	// The blocks are spaced by half of the font size of the text,
-	// as by the default gap of frames, which is not in the browser
-	// style of htmlcore, whose block margins are dropped for this
+	// The blocks are spaced by at least the gap of the first input
+	// (as the page of content), as frames of the browser style of
+	// htmlcore have no gap, and their CSS margins are dropped for this
 	// (see below).
-	fs := printer.Settings.FontSize
-	blockGap := math32.Floor(0.5 * fs.ToDots(&p.ctx))
+	blockGap := widg(p.ins[0]).Styles.Gap.Dots().Floor().Y
 
 	var its []*item
 	for {

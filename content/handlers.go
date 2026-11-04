@@ -26,6 +26,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/htmltext"
@@ -169,8 +170,14 @@ func (ct *Content) widgetHandler(w core.Widget) {
 	hdr := len(tag) == 2 && tag[0] == 'h'
 	// the layout is from the styles of the page (CSS), with the docs font size
 	if tx, ok := w.(*core.Text); ok {
+		pdf := ct.inPDFRender
 		tx.Styler(func(s *styles.Style) {
 			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+			if tag := tx.HTMLTag(); pdf && tag != "td" && tag != "th" {
+				// the blocks of PDFs are spaced by the margins of their texts
+				// (which add), and not by the CSS margins of the page
+				s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
+			}
 		})
 	}
 	if hdr {

@@ -184,22 +184,36 @@ func APAHeaders(tx *core.Text) {
 	}
 	s := &tx.Styles
 	base := printer.Settings.FontSize
+	// the line heights are of the types of text of the headings
+	// (as h2 is [core.TextHeadlineMedium])
 	switch headerLevel {
 	case 1: // e.g., chapter level
+		s.Text.LineHeight = 44.0 / 36
 		s.Font.Size = base
 		s.Font.Size.Value *= 16.0 / 11.0
 		s.Font.Weight = rich.Bold
 	case 2:
+		s.Text.LineHeight = 36.0 / 28
 		s.Font.Size = base
 		s.Font.Size.Value *= 14.0 / 11.0
 		s.Font.Weight = rich.Bold
 	case 3:
+		s.Text.LineHeight = 28.0 / 22
 		s.Font.Size = base
 		s.Font.Size.Value *= 12.0 / 11.0
 		s.Font.Weight = rich.Bold
 	case 4:
+		s.Text.LineHeight = 24.0 / 16
 		s.Font.Size = base
 		s.Font.Weight = rich.Bold
 		s.Font.Slant = rich.Italic
+	case 5: // as [core.TextTitleSmall], from the 0.83em of the CSS of h5
+		s.Text.LineHeight = 20.0 / 14
+		s.Font.Size.Value *= (14.0 / 16) / 0.83
+		s.Font.Weight = rich.Medium
+	case 6: // as [core.TextLabelSmall], from the 0.67em of the CSS of h6
+		s.Text.LineHeight = 16.0 / 11
+		s.Font.Size.Value *= (11.0 / 16) / 0.67
+		s.Font.Weight = rich.Medium
 	}
 }
