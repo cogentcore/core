@@ -1,0 +1,246 @@
+@import url("18f23b4dd045.css");
+@import url("126a6e36e159.css");
+
+@font-face {
+  font-family: Embedded Gill Sans;
+  font-style: normal;
+  font-weight: normal;
+  src: url("data:,");
+}
+@font-face {
+  font-family: Embedded Gill Sans;
+  font-style: normal;
+  font-weight: 700;
+  src: url("data:,");
+}
+@font-face {
+  font-family: Embedded Gill Sans;
+  font-style: oblique;
+  font-weight: normal;
+  src: url("data:,");
+}
+@font-face {
+  font-family: Embedded Gill Sans;
+  font-style: oblique;
+  font-weight: 700;
+  src: url("data:,");
+}
+
+body {
+  background: white;
+  color: black;
+  font: medium/1.2 "Gill Sans MT", "Gill Sans", GillSans, sans-serif}
+
+#banner h2 {display: none}
+
+p {margin: 0}
+h1 {line-height: 1; color: #555; margin: 0.4em 0; text-align: center}
+h1 em {display: block}
+h2 {line-height: 1; margin: 0 0 0.3em 0; text-align: center}
+
+img {max-width: 100%; border: none}
+
+
+/* Lists with triangles for bullets */
+
+ul, ol {padding-left: 1.5em; margin: 0}
+li {margin: 0.6em 0}
+ul {list-style: none}
+ul > li:before {
+  display: inline-block;
+  width: 0.9em;
+  margin-left: -1.5em;
+  content: "\25C0";
+  margin-right: 0.6em}
+
+ul {padding-left: 0}
+ul li:before {margin-left: 0}
+
+dt {display: run-in; font-weight: bold; margin-right: 0.6em}
+dd {margin: 0 0 0.6em 0}
+
+#banner {text-align: center; font-weight: bold; letter-spacing: 0.1em}
+#banner li:before {content: ""; content: none; width: 0; margin: 0}
+
+/* The feed icon goes in the top left corner of the div.section */
+
+.feed {position: absolute; top: 0.4em; right: 0.4em; width: 1.2em}
+
+/* A 3 by 4 layout */
+
+body,
+h1 ~ .section ~ .section,
+#banner {
+  overflow: hidden;
+  margin: 0; padding: 0.5em;
+  -moz-box-sizing: border-box; box-sizing: border-box;
+  position: fixed; z-index: 3;
+  height: 32%; width: 23.75%;
+}
+
+body {top: 34%; left: 25.75%; width: 48.5%; height: 32%; overflow: auto}
+#banner {top: 1%; left: 1%}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner) {
+  top: 1%; left: 25.75%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner) {
+  top: 1%; left: 50.5%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  top: 34%; left: 1%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  top: 34%; left: 75.25%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner) {
+  top: 67%; left: 1%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  top: 67%; left: 25.75%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  top: 67%; left: 50.5%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner) {
+  top: 1%; left: 75.25%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  top: 67%; left: 75.25%}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  position: static; height: auto; width: auto; overflow: visible;
+}
+
+#banner {
+  background: hsl(0,100%,60%); color: white}
+#banner p.more {
+  background-image: url("12ac0a53dd0d.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner) {
+  background: hsl(36,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner) p.more {
+ background-image: url("935756e62f7a.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  background: hsl(72,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) p.more {
+  background-image: url("2085b2e89a60.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  background: hsl(324,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) p.more {
+  background-image: url("b979c8d059e4.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  background: hsl(144,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) p.more {
+  background-image: url("2d03b0e88a54.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  background: hsl(288,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) p.more {
+  background-image: url("86d56aa3762b.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  background: hsl(252,100%,60%); color: white}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) p.more {
+  background-image: url("518c6c6b1a74.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  background: hsl(216,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) p.more {
+  background-image: url("83786c61e698.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  background: hsl(108,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) p.more {
+  background-image: url("0710ecd9c199.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) {
+  background: hsl(180,100%,60%); color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner) p.more {
+  background-image: url("80880ee3e576.png")}
+
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) {
+  background: none; color: black}
+h1 ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) ~ .section:not(#banner)
+  ~ .section:not(#banner) p.more {
+  background-image: none}
+
+:link {color: inherit; text-decoration: underline}
+:visited {color: inherit; text-decoration: none; border-bottom: thin dotted}
+
+#intro h2, #summary h2 {display: none}
+
+
+p.more {
+  text-align: right }
+p.more a {
+  font-weight: bold;
+  background: black;
+  color: white;
+  padding: 0 0.3em }
+
+#translations abbr {font-variant: small-caps; border: none}
+.icon {float: right; max-width: 4em; margin: 0 0 0 .5em}
+
+/* The buttons and other endmatter */
+
+img.photo {width: 3em; float: right; margin: 0 0 0.3em 0.5em}
+img.button {max-width: 50%; float: right; clear: right; margin: 0 0 0.3em 0.5em}

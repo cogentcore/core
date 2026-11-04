@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		sandbox
+	</title><g fill="#000"><path d="M3 1h2v2H3zm0 4h2v2H3zm0 4h2v2H3zm0 4h2v2H3zm0 4h2v2H3zm4 0h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 1h2v2H7zm4 0h2v2h-2zm4 8h2v2h-2zm0 4h2v2h-2zm1.661-7.404-5.375 5.376-.096.039-1.767.707-.65-.65.706-1.768.04-.096 5.375-5.376zm2.829-2.828-1.414 1.414-1.767-1.768L17.723 1z"/></g></svg>

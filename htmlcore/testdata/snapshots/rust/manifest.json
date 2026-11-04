@@ -1,0 +1,24 @@
+{
+	"URL": "https://www.rust-lang.org/",
+	"Saved": "2026-11-04T15:32:18.851903Z",
+	"Resources": {
+		"https://rust-lang.org/static/images/apple-touch-icon.png?v=ngJW8jGAmR": "files/6386252dd53f.png",
+		"https://rust-lang.org/static/images/bluesky.svg": "files/facd3445c62d.svg",
+		"https://rust-lang.org/static/images/cli.svg": "files/3aae21630dd1.svg",
+		"https://rust-lang.org/static/images/embedded.svg": "files/3d19b82a95a0.svg",
+		"https://rust-lang.org/static/images/favicon-16x16.png": "files/734307e8255c.png",
+		"https://rust-lang.org/static/images/favicon-32x32.png": "files/b41744762922.png",
+		"https://rust-lang.org/static/images/favicon.svg": "files/03f395a43cdf.svg",
+		"https://rust-lang.org/static/images/github.svg": "files/b4d51fbc53fe.svg",
+		"https://rust-lang.org/static/images/mastodon.svg": "files/6db6914a1e67.svg",
+		"https://rust-lang.org/static/images/networking.svg": "files/c166b96ffcd5.svg",
+		"https://rust-lang.org/static/images/rust-logo-blk.svg": "files/baf3a76c7754.svg",
+		"https://rust-lang.org/static/images/safari-pinned-tab.svg?v=ngJW8jGAmR": "files/156072abf9ea.svg",
+		"https://rust-lang.org/static/images/webassembly.svg": "files/d320b81b9660.svg",
+		"https://rust-lang.org/static/images/youtube.svg": "files/47ec2b131e25.svg",
+		"https://rust-lang.org/static/styles/a11y-dark.css": "files/0116cf80e979.css",
+		"https://rust-lang.org/static/styles/app_17774143076088586802.css": "files/458b2508c9ef.css",
+		"https://rust-lang.org/static/styles/fonts_8049871103083011125.css": "files/8e50381a6f25.css",
+		"https://rust-lang.org/static/styles/vendor_10880690442070639967.css": "files/2fa7ffeda767.css"
+	}
+}

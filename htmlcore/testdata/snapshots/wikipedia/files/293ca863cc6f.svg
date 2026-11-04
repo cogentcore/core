@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		lab flask
+	</title><g fill="#fff"><path d="M7 3H5.5V1h9v2H13v5.7l6 7.7V19H1v-2.6l6-7.7zm4 6.3V3H9v6.3L4.6 15h10.8z"/></g></svg>

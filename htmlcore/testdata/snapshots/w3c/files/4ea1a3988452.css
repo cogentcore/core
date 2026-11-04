@@ -1,0 +1,38 @@
+.skip {display: none}
+
+html {background: url("79589d772376.png") top left repeat-y #6d6d6d}
+body {background: white; margin: 4em 2em 10em 130px;
+  border: 1em solid #be0000; padding: 1em; max-width: 50em;
+  font: medium/1.3 "Gill Sans MT", "Gill Sans", GillSans, sans-serif;
+  text-align: justify}
+
+h1, h2, p, ul, ol, dl {margin: 0}
+h1, h2 {display: run-in; line-height: 0.8}
+h1 {color: gray}
+h2 {font-size: 240%; font-weight: normal}
+a:link {color: #be0000}
+a:visited {color: #555}
+h1:after, h2:after {content: "\A0\20"}
+ul, ol {padding-left: 1.5em}
+dd {margin-left: 1.5em}
+p.feed {float: right; clear: right; margin: 0 0 0 0.5em; width: 1.2em}
+p.feed img {background: #6d6d6d}
+p.more {font-weight: bold}
+p.more a {color: #be0000}
+div.section {margin: 0.2em 0}
+div.banner ul {padding: 0}
+div.banner li {display: inline; margin: 0 1em 0 0}
+a.home {float: left; position: relative; left: -67px; margin-left: -3em}
+li.search {float: right; margin: 0 0 0.5em 1em}
+.figure {margin: 1em 0}
+
+span.updated::before {content: "["; margin-right: 0.3em}
+span.updated::after {content: "]"; margin-left: 0.3em}
+span.updated {font-size: smaller}
+span.updated::before, span.updated:after {font-weight: bold}
+
+img {max-width: 100%}
+a img {border: none}
+.icon {float: right; max-width: 4em; margin: 0 0 0 .5em}
+
+#translations ul {columns: 12em; list-style: none; padding-left: 0}

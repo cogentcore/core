@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		menu
+	</title><g fill="#000"><path d="M1 3h18v2H1zm0 6h18v2H1zm0 6h18v2H1z"/></g></svg>

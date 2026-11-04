@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		log out
+	</title><g fill="#000"><path d="M13 3H3v14h10v2H1V1h12z"/><path d="M19 9.293v1.414l-4.69 4.707L12.895 14l3-3H6V9h9.896l-3-3 1.414-1.414z"/></g></svg>

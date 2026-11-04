@@ -38,6 +38,12 @@ import (
 // Scripts, iframes, and refreshes are removed (the pages work without
 // JavaScript), and fonts are not saved (as Cogent Core uses its own),
 // so nothing is loaded from the network in Chrome either.
+//
+// The snapshots are in the repository, so that the tests do not depend on
+// pages on the web that change. The pages that were long were trimmed by
+// hand to a few screens each, cutting content that is more of the same and
+// the resources that it used, so saving a page again (with -snapshot-run)
+// also undoes that trimming: only do so to deliberately replace a page.
 
 var (
 	snapshotFlag = flag.Bool("snapshot", false, "save the snapshots of the pages of real-urls.txt in testdata/snapshots")

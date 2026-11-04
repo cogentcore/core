@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		tray
+	</title><g fill="#36c"><path d="M1 1h18v18H1zm2 2v10h4l1.7 2h2.6l1.7-2h4V3z"/></g></svg>

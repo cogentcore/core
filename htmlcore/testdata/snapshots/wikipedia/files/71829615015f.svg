@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		lock
+	</title><g fill="#fff"><path d="M11 15H9v-3h2z"/><path d="M10 1a4 4 0 0 1 4 4v3h3v11H3V8h3V5a4 4 0 0 1 4-4M5 17h10v-7H5zm5-14a2 2 0 0 0-2 2v3h4V5a2 2 0 0 0-2-2"/></g></svg>

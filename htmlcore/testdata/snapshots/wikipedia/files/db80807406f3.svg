@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		user contributions
+	</title><g fill="#fff"><path d="M1 3h18v2H1zm0 6h10v2H1zm0 6h8v2H1zm10 2v-1a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v1z"/><circle cx="15" cy="10" r="2"/></g></svg>

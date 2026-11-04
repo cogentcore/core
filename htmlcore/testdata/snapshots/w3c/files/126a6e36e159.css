@@ -1,0 +1,22 @@
+/*
+Fade the bottom of div.section elements to yellow/
+Relies on the presence of one p.more element in the div.section.
+Override the background image to get a different color.
+Side effect: sets the div.section to 'position: relative'.
+*/
+
+h1 ~ .section ~ .section {
+  position: relative }
+h1 ~ .section ~ .section p.more {
+  background: url("a31ce9a224f5.png") bottom left repeat-x; /* 32px high */
+  min-height: 32px;
+  padding: 0 1em;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1 }
+
+h1 ~ .section ~ .section:before, h1 ~ .section ~ .section:after {
+  z-index: 2 }			/* Must be on top of the fade */
+

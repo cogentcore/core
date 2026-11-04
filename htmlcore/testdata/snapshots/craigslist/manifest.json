@@ -1,0 +1,20 @@
+{
+	"URL": "https://www.craigslist.org/about/sites",
+	"Saved": "2026-11-04T15:32:12.683469Z",
+	"Resources": {
+		"https://www.craigslist.org/images/animated-spinny.gif": "files/1658a8fed64c.gif",
+		"https://www.craigslist.org/images/cl_logo-vert.png": "files/2944d018fd23.png",
+		"https://www.craigslist.org/images/map/enter-fullscreen.png": "files/c864511e5f99.png",
+		"https://www.craigslist.org/images/map/exit-fullscreen.png": "files/3277565f65db.png",
+		"https://www.craigslist.org/images/map/zoom-in.png": "files/e4df1b26efbe.png",
+		"https://www.craigslist.org/images/map/zoom-out.png": "files/83d933222ff1.png",
+		"https://www.craigslist.org/images/sprite-16px.png": "files/f35a65c76409.png",
+		"https://www.craigslist.org/images/sprite-32px.png": "files/069e7111d611.png",
+		"https://www.craigslist.org/styles/MarkerCluster.css?v=9bea97021e746649c6837e95dd9723e8": "files/d94a9d5e9cf6.css",
+		"https://www.craigslist.org/styles/cl.css?v=a8535e95610a4de7d8679f19550ba8c3": "files/75325538437e.css",
+		"https://www.craigslist.org/styles/images/layers-2x.png": "error: 404 Not Found",
+		"https://www.craigslist.org/styles/images/layers.png": "error: 404 Not Found",
+		"https://www.craigslist.org/styles/images/marker-icon.png": "error: 404 Not Found",
+		"https://www.craigslist.org/styles/leaflet.css?v=0f4d551db6acb09b44ffa70152f466d1": "files/11b5626ecc98.css"
+	}
+}

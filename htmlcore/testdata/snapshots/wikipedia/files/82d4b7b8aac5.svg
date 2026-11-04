@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		user talk
+	</title><g fill="#fff"><path d="M15 9c-.82 2.33-2.39 3-5 3s-4.18-.67-5-3z"/><path d="M19 16H7.352l-3.75 3H1V1h18zm-16 .918 3.375-2.7.274-.218H17V3H3z"/><circle cx="6.5" cy="6.5" r="1.5"/><circle cx="13.5" cy="6.5" r="1.5"/></g></svg>

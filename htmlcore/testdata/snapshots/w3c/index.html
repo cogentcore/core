@@ -1,0 +1,690 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"><!-- Editors &amp; translators, please, edit Overview.en.tmpl, not .html --><html lang="en"><head profile="http://microformats.org/profile/hcard">
+  <title>Cascading Style Sheets</title>
+
+  <meta content="W3C&#39;s overview of Web style sheets: CSS." name="description"/>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+  <meta content="width=device-width" name="viewport"/>
+  <link href="files/0ddb39a89906.css" media="screen, handheld, projection, tv" rel="stylesheet" title="Main"/>
+  <link href="files/cb694e41d302.css" media="screen, handheld, projection, tv" rel="alternate stylesheet" title="Cascade"/>
+  <link href="files/604c137f4e96.css" media="screen, handheld, projection, tv" rel="alternate stylesheet" title="Cascade"/>
+  <link href="files/9f0699756b7e.css" media="screen, handheld, projection, tv" rel="alternate stylesheet" title="Cascade (older browsers)"/>
+  <link href="files/604c137f4e96.css" media="screen, handheld, projection, tv" rel="alternate stylesheet" title="Cascade (older browsers)"/>
+  <link href="files/9275503151b1.css" media="screen, handheld, projection, tv" rel="alternate stylesheet" title="Asymmetric"/>
+  <link href="files/4ea1a3988452.css" media="screen, projection, tv" rel="alternate stylesheet" title="Draft 3"/>
+  <link href="files/c39577ba8501.css" media="screen, projection, tv" rel="alternate stylesheet" title="Draft 2"/>
+  <link href="files/b7ebdb2a2fbe.css" media="print" rel="stylesheet"/>
+  <link href="https://www.w3.org/" rel="home" title="W3C"/>
+  <link href="https://www.w3.org/Style/CSS/" rel="top" title="CSS"/>
+  <link href="https://www.w3.org/Style/CSS/current-work" rel="chapter" title="Roadmap"/>
+  <link href="https://www.w3.org/Style/Examples/007/" rel="chapter" title="Examples"/>
+  <link href="https://www.w3.org/Consortium/activities" rel="bookmark" title="Activities"/>
+  <link href="https://www.w3.org/TR/" rel="bookmark" title="Tech. reports"/>
+  <link href="https://www.w3.org/Consortium/Translation/" rel="bookmark" title="Translations"/>
+  <link href="https://www.w3.org/Status" rel="bookmark" title="Software"/>
+  <link href="https://www.w3.org/Consortium/siteindex" rel="index" title="Site index"/>
+  <link href="https://www.w3.org/Style/CSS/opensearch.xml" rel="search" title="Search W3C" type="application/opensearchdescription+xml"/>
+  <link href="https://www.w3.org/Help/search" rel="search" title="Search W3C" type="text/html"/>
+  <link href="https://www.w3.org/Consortium/Legal/ipr-notice.html#Copyright" rel="copyright" title="Copyright"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.en.html" rel="canonical"/>
+  <link href="mailto:bert@w3.org%20(Bert%20Bos)" rel="author"/>
+  <style media="screen, handheld, projection, tv" title="Cascade" type="text/css">
+   a[href="./"] {text-decoration: underline; opacity: 0.5}
+  </style>
+  <style media="screen, handheld, projection, tv" title="Main" type="text/css">
+   a[href="./"] {background: #EEE}
+  </style>
+  <style type="text/css">
+   .status td:first-child + td + td + td,
+   .status th:first-child + th + th + th {display: none}
+   .status td:last-child, .status th:last-child {padding-left: 0.6em}
+  </style>
+  <link href="https://www.w3.org/Style/CSS/Overview.atom" rel="alternate" title="CSS news [Atom]" type="application/atom+xml"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.rss" rel="alternate" title="CSS news [RSS]" type="application/rss+xml"/>
+  <link href="https://www.w3.org/blog/CSS/feed/atom" rel="alternate" title="CSS Working Group news" type="application/atom+xml"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.be.html" hreflang="be" rel="alternate" title="беларуская [Belarusian, 2010-10-25]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.cs.html" hreflang="cs" rel="alternate" title="Česky [Czech, 2008-12-15]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.de.html" hreflang="de" rel="alternate" title="Deutsch [2017-07-11]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.en.html" hreflang="en" rel="alternate" title="English"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.fa.html" hreflang="fa" rel="alternate" title="فارسی [2022-03-31]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.fr.html" hreflang="fr" rel="alternate" title="Français [French, 2016-04-15]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.nl.html" hreflang="nl" rel="alternate" title="Nederlands [Dutch, 2016-04-15]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.pl.html" hreflang="pl" rel="alternate" title="Polski [Polish, 2010-11-08]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.ru.html" hreflang="ru" rel="alternate" title="Русский [Russian, 2010-10-16]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.sl.html" hreflang="sl" rel="alternate" title="Slovenščina [Slovenian, 2013-07-19]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.tg.html" hreflang="tg" rel="alternate" title="Тоҷикӣ [Tajik, 2010-12-04]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.uk.html" hreflang="uk" rel="alternate" title="Українська [Ukrainian, 2010-10-29]"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.ur.html" hreflang="ur" rel="alternate" title="اردو [2017-03-03]"/>
+  <link href="https://www.w3.org/Style/" rel="up" title="Web Style Sheets"/>
+  <link href="https://www.w3.org/Style/CSS/Overview.en" rel="first" title="Cascading Style Sheets"/>
+  <link href="https://www.w3.org/Style/CSS/learning.en" rel="next" title="Learning CSS"/>
+  <link href="https://www.w3.org/Style/CSS/Planet/" rel="last" title="The Future of Style - W3C"/>
+
+ </head><body class="portal">
+  <div class="section" id="language">
+   <p><a href="#translations">Languages</a>
+  </p></div>
+
+  <h1><em>Cascading Style Sheets</em> home page</h1>
+
+  <div class="section" id="summary">
+   <h2>What is CSS?</h2>
+
+   <p>Cascading Style Sheets (CSS) is a core language of the <strong>open web platform</strong>, and is used for adding style (e.g.,
+    fonts, colors, spacing) to Web documents.
+
+   </p><p>These pages contain information on how to <a href="https://www.w3.org/Style/CSS/learning">learn
+    and use CSS</a> and on available <a href="https://www.w3.org/Style/CSS/software">software.</a> They
+    also contain news from the <a href="https://www.w3.org/Style/CSS/members">CSS working group.</a>
+
+   </p><div class="aside">
+    <h3>High­lights</h3>
+
+    <ul>
+     <li><a href="https://www.w3.org/TR/CSS/">The <cite>“CSS Snapshot”</cite>
+      (latest: 2025) lists the parts that are ready for implementers</a>
+    </li></ul>
+   </div>
+  </div>
+
+  <div class="section" id="news">
+   <h2>News <a class="feed" href="https://www.w3.org/Style/CSS/Overview.atom"><img alt="(Also available as Atom news feed.)" src="files/b3e6f8838c45.png" title="News feed"/></a></h2>
+
+   <ul class="dated">
+    <li id="n2026-11-01"><span class="updated" title="2026-11-01"><span>
+     1</span> Nov 2026</span> Updated Candidate Recommendation Draft: <a href="https://www.w3.org/TR/2026/CRD-css-color-4-20261101/"><cite>CSS Color
+     Level 4</cite></a>.
+
+    </li><li id="n2026-10-27"><span class="updated" title="2026-10-27"><span>27</span> Oct 2026</span> Updated Candidate Recommendation Draft:
+     <a href="https://www.w3.org/TR/2026/CRD-css-color-4-20261027/"><cite>CSS Color
+     Level 4</cite></a>.
+
+    </li><li id="n2026-10-26"><span class="updated" title="2026-10-26"><span>26</span> Oct 2026</span> Updated Working Draft: <a href="https://www.w3.org/TR/2026/WD-css-color-hdr-1-20261026/"><cite>CSS Color
+     HDR Level 1</cite></a>. Updated Working Draft: <a href="https://www.w3.org/TR/2026/WD-css-color-5-20261026/"><cite>CSS Color
+     Level 5</cite></a>.
+
+    </li><li id="n2026-10-22"><span class="updated" title="2026-10-22"><span>22</span> Oct 2026</span> Updated Working Draft: <a href="https://www.w3.org/TR/2026/WD-css-fonts-4-20261022/"><cite>CSS Fonts
+     Level 4</cite></a>.
+
+    </li><li id="n2026-10-21"><span class="updated" title="2026-10-21"><span>21</span> Oct 2026</span> Updated Working Draft: <a href="https://www.w3.org/TR/2026/WD-css-image-animation-1-20261021/"><cite>CSS
+     Image Animation Level 1</cite></a>.
+   </li></ul>
+
+   <p class="stb">For more news, see our syndicator <a href="https://www.w3.org/Style/CSS/Planet/">“The
+    Future of Style.”</a>
+
+   </p><p class="more"><a href="mailto:bert@w3.org?subject=For%20news%20section%20of%20CSS%20page"> Suggest a link ✉︎</a>
+  </p></div>
+
+  <div class="section" id="roadmap">
+   <h2>Stan­dards &amp; drafts <a class="feed" href="https://www.w3.org/Style/CSS/current-work.atom"><img alt="(Also available as Atom news feed.)" src="files/b3e6f8838c45.png" title="New publications feed"/></a></h2>
+
+   <p>Some of the specifications and drafts by the <a href="https://www.w3.org/Style/CSS/members">CSS
+    Working Group:</a>
+
+   <table class="status">
+    <tbody id="completed">
+     <tr>
+      <th scope="rowgroup">Com­pleted work
+
+      </th><th scope="col">Sta­tus
+
+      </th><th scope="col">Up­com­ing
+
+      </th><th scope="col">Notes
+
+      </th><th scope="col"><abbr title="Summary">ℹ⃝</abbr>
+
+     </th></tr><tr id="css-2026">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2026/" lang="en">CSS Snapshot
+       2026</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2026/">NOTE</a>
+
+      </td><td class=""><a href="https://drafts.csswg.org/css-2026/"></a>
+
+      </td><td><a href="https://www.w3.org/TR/CSS">Latest stable CSS</a>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2026" title="Summary of CSS Snapshot 2026">🛈</a>
+
+     </td></tr><tr id="css-2025">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2025/" lang="en">CSS Snapshot
+       2025</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2025/">NOTE</a>
+
+      </td><td class=""><a href="https://drafts.csswg.org/css-2025/"></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2025" title="Summary of CSS Snapshot 2025">🛈</a>
+
+     </td></tr><tr id="css-2024">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2024/" lang="en">CSS Snapshot
+       2024</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2024/">NOTE</a>
+
+      </td><td class=""><a href="https://drafts.csswg.org/css-2024/"></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2024" title="Summary of CSS Snapshot 2024">🛈</a>
+
+     </td></tr><tr id="css-2023">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2023/" lang="en">CSS Snapshot
+       2023</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2023/">NOTE</a>
+
+      </td><td class=""><a href="https://drafts.csswg.org/css-2023/"></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2023" title="Summary of CSS Snapshot 2023">🛈</a>
+
+     </td></tr><tr id="css-2022">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2022/" lang="en">CSS Snapshot
+       2022</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2022/">NOTE</a>
+
+      </td><td class=""><a href="https://drafts.csswg.org/css-2022/"></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2022" title="Summary of CSS Snapshot 2022">🛈</a>
+
+     </td></tr><tr id="css-2021">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2021" lang="en">CSS Snapshot
+       2021</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2021">NOTE</a>
+
+      </td><td class=""><a href="https://drafts.csswg.org/css-2021/"></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2021" title="Summary of CSS Snapshot 2021">🛈</a>
+
+     </td></tr><tr id="css-2020">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2020" lang="en">CSS Snapshot
+       2020</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2020">NOTE</a>
+
+      </td><td class=""><a></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2020" title="Summary of CSS Snapshot 2020">🛈</a>
+
+     </td></tr><tr id="css-2018">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2018" lang="en">CSS Snapshot
+       2018</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2018">NOTE</a>
+
+      </td><td class=""><a></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2018" title="Summary of CSS Snapshot 2018">🛈</a>
+
+     </td></tr><tr id="css-2017">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2017" lang="en">CSS Snapshot
+       2017</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2017">NOTE</a>
+
+      </td><td class=""><a></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2017" title="Summary of CSS Snapshot 2017">🛈</a>
+
+     </td></tr><tr id="css-2015">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2015" lang="en">CSS Snapshot
+       2015</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2015">NOTE</a>
+
+      </td><td class=""><a></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2015" title="Summary of CSS Snapshot 2015">🛈</a>
+
+     </td></tr><tr id="css-2010">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-2010/" lang="en">CSS Snapshot
+       2010</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-2010/">NOTE</a>
+
+      </td><td class=""><a></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-2010" title="Summary of CSS Snapshot 2010">🛈</a>
+
+     </td></tr><tr id="beijing">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-beijing/" lang="en">CSS
+       Snapshot 2007</a>
+
+      </td><td class="note"><a href="https://www.w3.org/TR/css-beijing/">NOTE</a>
+
+      </td><td class=""><a></a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#beijing" title="Summary of CSS Snapshot 2007">🛈</a>
+
+     </td></tr><tr id="color">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-color-3/" lang="en">CSS Color
+       Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-color-3/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-color-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#color" title="Summary of CSS Color Level 3">🛈</a>
+
+     </td></tr><tr id="namespace">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-namespaces/" lang="en">CSS
+       Namespaces</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-namespaces/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-namespaces/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#namespace" title="Summary of CSS Namespaces">🛈</a>
+
+     </td></tr><tr id="selectors">
+      <td><a class="notranslate" href="https://www.w3.org/TR/selectors-3/" lang="en">Selectors
+       Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/selectors-3/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/selectors-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#selectors" title="Summary of Selectors Level 3">🛈</a>
+
+     </td></tr><tr id="css21">
+      <td><a class="notranslate" href="https://www.w3.org/TR/CSS2/" lang="en">CSS Level 2
+       Revision 1</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/CSS2/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css2/">REC</a>
+
+      </td><td>See <a href="https://www.w3.org/Style/css2-updates/REC-CSS2-20110607-errata.html">Errata</a>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css21" title="Summary of CSS Level 2 Revision 1">🛈</a>
+
+     </td></tr><tr id="mediaqueries">
+      <td><a class="notranslate" href="https://www.w3.org/TR/mediaqueries-3/" lang="en">Media
+       Queries Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/mediaqueries-3/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/mediaqueries-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#mediaqueries" title="Summary of Media Queries Level 3">🛈</a>
+
+     </td></tr><tr id="style-attr">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-style-attr/" lang="en">CSS
+       Style Attributes</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-style-attr/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-style-attr/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#style-attr" title="Summary of CSS Style Attributes">🛈</a>
+
+     </td></tr><tr id="cascade">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-cascade-3/" lang="en">CSS
+       Cascading and Inheritance Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-cascade-3/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-cascade-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#cascade" title="Summary of CSS Cascading and Inheritance Level 3">🛈</a>
+
+     </td></tr><tr id="fonts">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-fonts-3/" lang="en">CSS Fonts
+       Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-fonts-3/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-fonts-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#fonts" title="Summary of CSS Fonts Level 3">🛈</a>
+
+     </td></tr><tr id="writing-modes">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-writing-modes-3" lang="en">CSS Writing Modes Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-writing-modes-3">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-writing-modes-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#text-layout" title="Summary of CSS Writing Modes Level 3">🛈</a>
+
+     </td></tr><tr id="ui">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-ui-3" lang="en">CSS Basic
+       User Interface Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-ui-3">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-ui-3/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#ui" title="Summary of CSS Basic User Interface Level 3">🛈</a>
+
+     </td></tr><tr id="box">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-box-3" lang="en">CSS Box
+       Model Level 3</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-box-3">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-box/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#box" title="Summary of CSS Box Model Level 3">🛈</a>
+
+     </td></tr><tr id="css-contain-1">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-contain-1/" lang="en">CSS
+       Containment Level 1</a>
+
+      </td><td class="rec"><a href="https://www.w3.org/TR/css-contain-1/">REC</a>
+
+      </td><td class="rec"><a href="https://drafts.csswg.org/css-contain-1/">REC</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#css-contain-1" title="Summary of CSS Containment Level 1">🛈</a>
+
+    </td></tr></tbody><tbody id="high-prio">
+     <tr>
+      <th scope="rowgroup">Sta­ble drafts
+
+      </th><th scope="col">Sta­tus
+
+      </th><th scope="col">Up­com­ing
+
+      </th><th scope="col">Notes
+
+      </th><th scope="col"><abbr title="Summary">ℹ⃝</abbr>
+
+     </th></tr><tr id="background">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-backgrounds-3/" lang="en">CSS
+       Backgrounds and Borders Level 3</a>
+
+      </td><td class="crd"><a href="https://www.w3.org/TR/css-backgrounds-3/">CRD</a>
+
+      </td><td class="cr"><a href="https://drafts.csswg.org/css-backgrounds-3/">CR</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#background" title="Summary of CSS Backgrounds and Borders Level 3">🛈</a>
+
+     </td></tr><tr id="conditional">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-conditional-3/" lang="en">CSS
+       Conditional Rules Level 3</a>
+
+      </td><td class="cr"><a href="https://www.w3.org/TR/css-conditional-3/">CR</a>
+
+      </td><td class="cr"><a href="https://drafts.csswg.org/css-conditional-3/">CR</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#conditional" title="Summary of CSS Conditional Rules Level 3">🛈</a>
+
+     </td></tr><tr id="multicol">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-multicol-1/" lang="en">CSS
+       Multi-column Layout Level 1</a>
+
+      </td><td class="cr"><a href="https://www.w3.org/TR/css-multicol-1/">CR</a>
+
+      </td><td class="pr"><a href="https://drafts.csswg.org/css-multicol-1/">PR</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#multicol" title="Summary of CSS Multi-column Layout Level 1">🛈</a>
+
+     </td></tr><tr id="values">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-values-3/" lang="en">CSS
+       Values and Units Level 3</a>
+
+      </td><td class="cr"><a href="https://www.w3.org/TR/css-values-3/">CR</a>
+
+      </td><td class="pr"><a href="https://drafts.csswg.org/css-values-3/">PR</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#values" title="Summary of CSS Values and Units Level 3">🛈</a>
+
+     </td></tr><tr id="flexbox">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-flexbox-1/" lang="en">CSS
+       Flexible Box Layout Level 1</a>
+
+      </td><td class="cr"><a href="https://www.w3.org/TR/css-flexbox-1/">CR</a>
+
+      </td><td class="pr"><a href="https://drafts.csswg.org/css-flexbox-1/">PR</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#flexbox" title="Summary of CSS Flexible Box Layout Level 1">🛈</a>
+
+     </td></tr><tr id="counter-styles">
+      <td><a class="notranslate" href="https://www.w3.org/TR/css-counter-styles-3/" lang="en">CSS Counter Styles Level 3</a>
+
+      </td><td class="cr"><a href="https://www.w3.org/TR/css-counter-styles-3/">CR</a>
+
+      </td><td class="pr"><a href="https://drafts.csswg.org/css-counter-styles-3/">PR</a>
+
+      </td><td>
+
+      </td><td><a href="https://www.w3.org/Style/CSS/specs#counter-styles" title="Summary of CSS Counter Styles Level 3">🛈</a>
+   </td></tr></tbody></table>
+
+   </p><p class="more"><a href="https://www.w3.org/Style/CSS/current-work">More »</a>
+  </p></div>
+
+  <div class="section" id="wg-news">
+   <h2>Working group news <a class="feed" href="https://www.w3.org/blog/CSS/feed/atom"><img alt="(Also available as Atom news feed.)" src="files/b3e6f8838c45.png" title="CSS WG news feed"/></a></h2>
+
+   <p>The <a href="https://www.w3.org/Style/CSS/members">working group</a> regularly publishes reports
+    on its <a href="https://www.w3.org/blog/CSS/">blog;</a> here are the most recent:
+
+   </p><ul>
+    <li><a dir="ltr" href="https://www.w3.org/blog/CSS/2026/03/06/css-gap-decorations-level-1-updated-working-draft/" lang="en">CSS Gap Decorations Level 1 Updated Working Draft</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/10/09/minutes-2025-10-08/" lang="en">Minutes Telecon 2025-10-08</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/10/07/css-anchor-position-wd-refinements/" lang="en">CSS Anchor Positioning Level 1 Updated Working Draft</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/25/minutes-2025-09-24/" lang="en">Minutes Telecon 2025-09-24</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/24/css-values-breakout-2025-09-24/" lang="en">Minutes CSS Values Breakout 2025-09-24</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/18/minutes-2025-09-17/" lang="en">Minutes Telecon 2025-09-17</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/18/masonry-update-issues/" lang="en">Masonry Spec Update and Open Issues</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/17/minutes-breakout-2025-09-17/" lang="en">Minutes CSS Overflow Breakout 2025-09-17</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/12/minutes-2025-09-10/" lang="en">Minutes Telecon 2025-09-10</a>
+
+    </li><li><a dir="ltr" href="https://www.w3.org/blog/CSS/2025/09/05/minutes-2025-09-03/" lang="en">Minutes Telecon 2025-09-03</a>
+   </li></ul>
+
+   <div class="figure">
+    <p><img alt="[Photo: group photo in San Francisco]" src="files/b0a862ffe245.jpg"/>
+
+    </p><p>A part of the CSS WG in May 2016.
+   </p></div>
+
+   <p class="more"><a href="https://www.w3.org/blog/CSS">More »</a>
+  </p></div>
+
+  <div class="section" id="join">
+   <h2>Join­ing the dis­cus­sion</h2>
+
+   <p>The most direct way to contribute is to get an account on <strong>GitHub</strong> and raise issues in the <a href="https://github.com/w3c/csswg-drafts">repository of CSS
+    editors&#39; drafts</a>. There is also a <a href="https://github.com/w3c/css-houdini-drafts">repository for
+    ‘Houdini’ <abbr title="Application Programming Interface">APIs</abbr>.</a>
+
+   </p><p>The <a href="https://lists.w3.org/Archives/Public/www-style/">
+    &lt;www-style@w3.org&gt; mailing list</a> contains the agenda and
+    the minutes of meetings of the <a href="https://www.w3.org/Style/CSS/members">CSS working group</a>. Everybody can <a href="mailto:www-style-request@w3.org?subject=subscribe">
+    subscribe</a> (or <a href="mailto:www-style-request@w3.org?subject=unsubscribe">
+    unsubscribe,</a> or see <a href="https://www.w3.org/Mail/Request">
+    instructions.</a>)
+
+   </p><p>If you work for a <a href="https://www.w3.org/Consortium/Member/List">W3C
+    member organization,</a> you can also join the working group.
+
+   </p><p class="more"><a href="https://www.w3.org/Style/CSS/current-work#contribute">More »</a>
+  </p></div>
+
+  <div class="section" id="software">
+   <h2>Soft­ware <a class="feed" href="https://www.w3.org/Style/CSS/software.atom"><img alt="(Also available as Atom news feed.)" src="files/b3e6f8838c45.png" title="Software news feed"/></a></h2>
+
+   <p>Nearly all <a href="https://www.w3.org/Style/CSS/software#browsers">browsers</a> nowadays
+    support CSS and many <a href="https://www.w3.org/Style/CSS/software#other">other applications</a>
+    do, too. To write CSS, you don&#39;t need more than a text editor, but
+    there are many <a href="https://www.w3.org/Style/CSS/software#editors">tools</a> available that
+    make it even easier.
+
+   </p><p>Of course, all software has bugs, even after several updates. And
+    some programs are further ahead implementing the <a href="https://www.w3.org/Style/CSS/current-work">latest CSS modules</a> than others. Various sites
+    describe <a href="https://www.w3.org/Style/CSS/software#support">bugs and work-arounds</a>.
+
+   </p><p class="more"><a href="https://www.w3.org/Style/CSS/software">More »</a>
+  </p></div>
+
+  <div class="section" id="learning">
+   <h2>Learn­ing CSS <a class="feed" href="https://www.w3.org/Style/CSS/learning.atom"><img alt="(Also available as Atom news feed.)" src="files/b3e6f8838c45.png" title="New articles feed"/></a></h2>
+
+   <p>For beginners, <a href="https://www.w3.org/Style/Examples/011/firstcss"><cite>Starting
+    with HTML + CSS</cite></a> teaches how to create a style sheet. For
+    a quick introduction to CSS, try <a href="https://www.w3.org/Style/LieBos2e/enter/">chapter 2</a> of <a href="https://www.w3.org/Style/CSS/learning#LieBos1999"><cite>Lie &amp;
+    Bos</cite></a> or <a href="https://www.w3.org/MarkUp/Guide/Style">Dave Raggett&#39;s
+    intro to CSS</a>. Or see examples of <a href="https://www.w3.org/Style/styling-XML">styling XML</a> and <a href="https://www.w3.org/Style/Examples/007/">CSS tips &amp;
+    tricks</a>.
+
+   </p><p>Another page also has some <a href="https://www.w3.org/Style/CSS/learning#books">books,</a> <a href="https://www.w3.org/Style/CSS/learning#fora">mailing lists</a> and similar fora, and links
+    to <a href="https://www.w3.org/Style/CSS/learning#secondary">other directories.</a>
+
+   </p><p>The history of CSS is described in <a href="https://www.w3.org/Style/LieBos2e/history/">chapter 20</a> of the book <a href="http://www.informit.com/store/cascading-style-sheets-designing-for-the-web-9780321193124?rll=1"> <cite class="notranslate" lang="en">Cascading Style Sheets, designing
+    for the Web,</cite></a> by Håkon Wium Lie and Bert Bos (2nd ed.,
+    1999, Addison Wesley, ISBN 0-201-59625-3)
+
+   </p><p class="more"><a href="https://www.w3.org/Style/CSS/learning">More »</a>
+  </p></div>
+
+  <div class="section" id="related">
+   <h2>Re­lated</h2>
+
+   <dl>
+    <dt><a href="https://jigsaw.w3.org/css-validator/">The CSS
+     validator</a>
+
+    </dt><dd>Checks the syntax (and more) of style sheets.
+
+    </dd><dt><a href="https://www.w3.org/dpub/">Digital Publishing Activity</a>
+
+    </dt><dd>An Interest Group that looks at how Web technology, including
+     CSS, can be used in publishing, and how those technologies can be
+     improved.
+
+    </dd><dt><a href="https://www.w3.org/StyleSheets/Core/">Core Style Sheets</a>
+
+    </dt><dd>A set of simple style sheets designed when browsers&#39;
+     compatibility was a bigger problem than today, but still useful.
+
+    </dd><dt><a href="https://www.w3.org/TR/WCAG20-TECHS/css.html"><cite>CSS Techniques
+     for WCAG 2.0</cite></a>
+
+    </dt><dd>A note about the role of CSS in making pages accessible.
+
+    </dd><dt><a href="https://www.w3.org/Style/CSS/SAC/">SAC: The Simple API for CSS</a>
+
+    </dt><dd>An interface between CSS parsers and CSS processors.
+
+    </dd><dt><a href="https://www.w3.org/Style/XSL/">XSL (Extensible Stylesheet Language)</a>
+
+    </dt><dd>XSL and CSS share many features, but XSL is focused on complex
+     layout tasks, especially for print.
+
+    </dd><dt><a href="https://www.w3.org/TR/mathml-for-css/">A MathML for CSS profile</a>
+
+    </dt><dd>Describes a subset of MathML that can be reasonably formatted
+     with just CSS level 2
+   </dd></dl>
+  </div>
+
+  <div class="section" id="song">
+   <h2>A song</h2>
+
+   <div class="figure">
+    <p><a href="https://www.youtube.com/watch?v=lbqOCS9bMpk"><img alt="[Still from the song&#39;s video with      the text ‘watch out!!’]" src="files/383517f97de3.jpg"/></a>
+   </p></div>
+
+   <p>CSS inspired ‘quayjn’ to write the song <a href="https://www.youtube.com/watch?v=lbqOCS9bMpk">‘CSS is OK’</a>.
+  </p></div>
+
+  <div class="section" id="banner">
+   <h2>Site navigation</h2>
+
+   <form action="https://www.w3.org/Help/search">
+    <ul>
+     <li class="home"><a href="https://www.w3.org/" rel="home"><img alt="W3C" src="files/a158ca0325bb.svg"/></a>
+
+     </li><li><a href="https://www.w3.org/Style/CSS/">CSS home</a>
+
+     </li><li><a href="https://www.w3.org/Style/CSS/learning">Learn &amp; use</a>
+
+     </li><li><a href="https://www.w3.org/Style/CSS/software">Soft­ware</a>
+
+     </li><li><a href="https://www.w3.org/Style/CSS/current-work" title="Participate in the development of the CSS standard">Par­tic­i­pate / <span title="All specifications and drafts">drafts</span></a>
+
+     </li><li class="search"><input accesskey="E" id="inputField" maxlength="255" name="q" size="10"/><button accesskey="G" name="sa" type="submit"><img alt="Search" src="files/ee9888389b6d.png" title="Search"/></button>
+    </li></ul>
+   </form>
+  </div>
+
+  <div class="section" id="endmatter">
+   <address class="vcard h-card"><a class="fn url p-name u-url" href="https://www.w3.org/People/Bos/">Bert Bos</a><br/>
+    <small><a href="https://www.w3.org/Consortium/Legal/ipr-notice#Copyright" rel="copyright">Copyright</a> © <!--@@@-->1994–2026<!--/@@@--> <a href="https://www.w3.org/"><abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup></a></small> <a href="https://www.w3.org/Consortium/Legal/ipr-notice">Privacy
+    policy</a></address>
+
+   <p><a href="https://www.w3.org/Style/CSS/Buttons"><img alt="Made with CSS!" class="button" src="files/1ebe14511e89.png"/></a> <a href="https://jigsaw.w3.org/css-validator/check/referer"><img alt="Valid CSS!" class="button" src="files/aab1f7310d16.png"/></a> Last
+    updated <!--@@@-->Mon 02 Nov 2026 03:55:47 PM UTC<!--/@@@-->
+  </p></div>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: html
+sgml-indent-step:1
+sgml-basic-offset:1
+End:
+-->
+</body></html>

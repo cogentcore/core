@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		trash
+	</title><g fill="#d73333"><path d="M10 0a3 3 0 0 1 3 3v1h5v2h-2v14H4V6H2V4h5V3a3 3 0 0 1 3-3M6 18h8V6H6zm4-16a1 1 0 0 0-1 1v1h2V3a1 1 0 0 0-1-1"/></g></svg>
