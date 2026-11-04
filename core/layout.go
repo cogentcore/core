@@ -169,6 +169,26 @@ func (ls *GeomSize) setInitContentMin(styMin math32.Vector2) {
 	styles.SetClampMaxVector(csz, ls.Max)
 }
 
+// maxTotal returns the Max size as a Total size, adding the Space
+// to each dimension that has a Max (which is 0 for no Max).
+func (ls *GeomSize) maxTotal() math32.Vector2 {
+	mt := ls.Max
+	for d := math32.X; d <= math32.Y; d++ {
+		if mt.Dim(d) > 0 {
+			mt.SetDim(d, mt.Dim(d)+ls.Space.Dim(d))
+		}
+	}
+	return mt
+}
+
+// fitTotalMax increases the given Total size to fit the given fm value,
+// subject to the Max constraint on the content, as [GeomSize.FitSizeMax]
+// does for a content size.
+func (ls *GeomSize) fitTotalMax(to *math32.Vector2, fm math32.Vector2) {
+	styles.SetClampMinVector(to, fm)
+	styles.SetClampMaxVector(to, ls.maxTotal())
+}
+
 // FitSizeMax increases given size to fit given fm value, subject to Max constraints
 func (ls *GeomSize) FitSizeMax(to *math32.Vector2, fm math32.Vector2) {
 	styles.SetClampMinVector(to, fm)
@@ -389,6 +409,12 @@ type layoutState struct {
 
 	// spans is whether a grid has cells that span columns.
 	spans bool
+
+	// growExtra is the extra space that children with a Grow factor grow
+	// into, which is within the actual size of a frame that does not grow
+	// (see [Frame.childSpace]), while other children (such as GrowWrap
+	// text) are allocated all of the extra allocation of the frame.
+	growExtra math32.Vector2
 
 	// GapSize has the total extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
@@ -692,8 +718,8 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 		}
 	}
 	if got {
-		sz.FitSizeMax(&sz.Actual.Total, effmin)
-		sz.FitSizeMax(&sz.Alloc.Total, effmin)
+		sz.fitTotalMax(&sz.Actual.Total, effmin)
+		sz.fitTotalMax(&sz.Alloc.Total, effmin)
 		sz.SetContentFromTotal(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc)
 	}
@@ -1076,7 +1102,7 @@ func (wb *WidgetBase) sizeDownParts(iter int) bool {
 	}
 	sz := &wb.Geom.Size
 	psz := &wb.Parts.Geom.Size
-	pgrow, _ := wb.growToAllocSize(sz.Actual.Content, sz.Alloc.Content)
+	pgrow, _ := wb.growToAllocSize(sz.Actual.Content, sz.Alloc.Content, sz.Max)
 	psz.Alloc.Total = pgrow // parts = content
 	psz.SetContentFromTotal(&psz.Alloc)
 	redo := wb.Parts.SizeDown(iter)
@@ -1127,7 +1153,9 @@ func (fr *Frame) sizeDownChildren(iter int) bool {
 // If Grow is < 1, then the size is increased in proportion, but
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change.
-func (wb *WidgetBase) growToAllocSize(act, alloc math32.Vector2) (math32.Vector2, bool) {
+// The given max is the Max size for the given sizes, which are both either
+// Content or Total sizes, with 0 for no Max.
+func (wb *WidgetBase) growToAllocSize(act, alloc, mx math32.Vector2) (math32.Vector2, bool) {
 	change := false
 	for d := math32.X; d <= math32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
@@ -1136,7 +1164,7 @@ func (wb *WidgetBase) growToAllocSize(act, alloc math32.Vector2) (math32.Vector2
 		if grw > 0 && allocd > actd {
 			grw := min(1, grw)
 			nsz := math32.Ceil(actd + grw*(allocd-actd))
-			styles.SetClampMax(&nsz, wb.Geom.Size.Max.Dim(d))
+			styles.SetClampMax(&nsz, mx.Dim(d))
 			if nsz != actd {
 				change = true
 			}
@@ -1195,6 +1223,8 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 func (fr *Frame) SizeDownSetAllocs(iter int) {
 	sz := &fr.Geom.Size
 	extra := sz.Alloc.Content.Sub(sz.Internal) // note: critical to use internal to be accurate
+	// Children that grow only grow within the space of the frame.
+	fr.layout.growExtra = fr.childSpace().Sub(sz.Internal)
 	if extra.X > 0 || extra.Y > 0 {
 		if DebugSettings.LayoutTrace {
 			fmt.Println(fr, "SizeDown extra:", extra, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
@@ -1203,6 +1233,26 @@ func (fr *Frame) SizeDownSetAllocs(iter int) {
 	} else {
 		fr.sizeDownAllocActual(iter) // set allocations as is
 	}
+}
+
+// childSpace returns the content size that the frame allocates to its
+// children: its allocation in the dimensions in which it grows, and
+// otherwise its actual size, which is all that it takes up even when it
+// is allocated more (for example, as the width of the column that it is
+// in), so that its children only grow within it.
+func (fr *Frame) childSpace() math32.Vector2 {
+	sz := &fr.Geom.Size
+	csz := sz.Alloc.Content
+	if fr.Parent == nil || (fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) {
+		return csz
+	}
+	for d := math32.X; d <= math32.Y; d++ {
+		grows := fr.Styles.Grow.Dim(d) > 0 || (d == math32.X && fr.Styles.GrowWrap)
+		if !grows && fr.Styles.Overflow.Dim(d) < styles.OverflowAuto {
+			csz.SetDim(d, min(csz.Dim(d), sz.Actual.Content.Dim(d)))
+		}
+	}
+	return csz
 }
 
 // ManageOverflow uses overflow settings to determine if scrollbars
@@ -1304,6 +1354,9 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				gr := grw.Dim(ma)
 				ca := ma.Other()     // cross axis = Y then X
 				exd := extra.Dim(ma) // row.X = extra width for cols; col.Y = extra height for rows in this col
+				if cwb.Styles.Grow.Dim(ma) > 0 {
+					exd = min(exd, li.growExtra.Dim(ma))
+				}
 				if exd < 0 {
 					exd = 0
 				}
@@ -1335,7 +1388,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 					redo = true
 					asz = math32.Round(mx + exd*(gr/gsum))
 					oasz := asz
-					styles.SetClampMax(&asz, ksz.Max.Dim(ma))
+					styles.SetClampMax(&asz, ksz.maxTotal().Dim(ma))
 					if asz < oasz { // didn't consume its full amount
 						ksz.slot.SetDim(ma, oasz)
 						if exitr == 0 {
@@ -1610,7 +1663,7 @@ func (wb *WidgetBase) growToAlloc() bool {
 		return false
 	}
 	sz := &wb.Geom.Size
-	act, change := wb.growToAllocSize(sz.Actual.Total, sz.Alloc.Total)
+	act, change := wb.growToAllocSize(sz.Actual.Total, sz.Alloc.Total, sz.maxTotal())
 	if change {
 		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "GrowToAlloc:", sz.Alloc.Total, "from actual:", sz.Actual.Total)

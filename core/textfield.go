@@ -1729,7 +1729,7 @@ func (tf *TextField) SizeDown(iter int) bool {
 	sz := &tf.Geom.Size
 	prevContent := sz.Actual.Content
 	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
-	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content) // get before update
+	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content, sz.Max) // get before update
 	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)
 	rsz := tf.configTextSize(availSz)

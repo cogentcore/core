@@ -325,8 +325,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 		s.Grow.X = 1
 	}
 
-	// sizes: Min is the size of the content box, and Max (as core layout
-	// uses it) that of the border box
+	// sizes: Min and Max are the size of the content box
 	pad := sideDots(&s.Padding, dots)
 	if bs.markers { // the markers of the items take the space of the padding
 		mw := dots(&markerWidth)
@@ -345,8 +344,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 		}
 		if st.borderBox {
 			min.Value -= space
-		} else {
-			max.Value += space
+			max.Value -= space
 		}
 		return
 	}

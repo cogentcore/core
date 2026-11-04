@@ -322,9 +322,14 @@ func handleInput(ctx *Context) core.Widget {
 	return newWidget
 }
 
+// tableRowWrapper is whether tables are put in rows of their own.
+// TODO: remove if the core layout change of not passing spare space
+// to growing children of frames that do not grow is kept.
+var tableRowWrapper = false
+
 // handleTable handles a table element.
 func handleTable(ctx *Context) core.Widget {
-	if ctx.BrowserStyle {
+	if ctx.BrowserStyle && tableRowWrapper {
 		// The table is in a row of its own, so that it is allocated
 		// only its own width, which its columns grow to fill.
 		n := ctx.Node
