@@ -139,34 +139,24 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 	name, value, _ := strings.Cut(f, ":")
 	name, value = strings.TrimSpace(name), strings.TrimSpace(value)
 	length := func() (float32, bool) {
-		v := strings.TrimSuffix(value, "px")
-		scale := float32(1)
-		if strings.HasSuffix(value, "em") {
-			v = strings.TrimSuffix(strings.TrimSuffix(value, "rem"), "em")
-			scale = 16
-		}
-		n, err := strconv.ParseFloat(v, 32)
-		return float32(n) * scale, err == nil
+		return calcPx(value)
 	}
 	width := c.mediaWidth()
 	height := width * 3 / 4
 	switch name {
-	case "min-width":
-		if l, ok := length(); ok {
-			return width >= l
+	case "min-width", "max-width", "min-height", "max-height":
+		l, ok := length()
+		if !ok {
+			return false // as browsers do for a query that is not valid
 		}
-	case "max-width":
-		if l, ok := length(); ok {
-			return width <= l
+		v := width
+		if strings.HasSuffix(name, "height") {
+			v = height
 		}
-	case "min-height":
-		if l, ok := length(); ok {
-			return height >= l
+		if strings.HasPrefix(name, "min") {
+			return v >= l
 		}
-	case "max-height":
-		if l, ok := length(); ok {
-			return height <= l
-		}
+		return v <= l
 	case "prefers-color-scheme":
 		return value == "light"
 	case "prefers-reduced-motion", "prefers-contrast", "forced-colors":
@@ -179,4 +169,107 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 		return value == "fine"
 	}
 	return true
+}
+
+// calcPx returns the value in px of the given length, which can be a
+// calc() expression of lengths in px, em, and rem (of 16px), and numbers,
+// with +, -, *, / and parentheses, as in media queries.
+func calcPx(v string) (float32, bool) {
+	v = strings.TrimSpace(strings.ToLower(v))
+	if inner, ok := strings.CutPrefix(v, "calc("); ok {
+		v = "(" + inner
+	}
+	p := &calcParser{s: v}
+	f, ok := p.sum()
+	p.space()
+	return float32(f), ok && p.i == len(p.s)
+}
+
+// calcParser parses calc expressions.
+type calcParser struct {
+	s string
+	i int
+}
+
+func (p *calcParser) space() {
+	for p.i < len(p.s) && p.s[p.i] == ' ' {
+		p.i++
+	}
+}
+
+func (p *calcParser) sum() (float64, bool) {
+	f, ok := p.product()
+	for ok {
+		p.space()
+		if p.i >= len(p.s) || (p.s[p.i] != '+' && p.s[p.i] != '-') {
+			break
+		}
+		op := p.s[p.i]
+		p.i++
+		g, gok := p.product()
+		if !gok {
+			return 0, false
+		}
+		if op == '+' {
+			f += g
+		} else {
+			f -= g
+		}
+	}
+	return f, ok
+}
+
+func (p *calcParser) product() (float64, bool) {
+	f, ok := p.factor()
+	for ok {
+		p.space()
+		if p.i >= len(p.s) || (p.s[p.i] != '*' && p.s[p.i] != '/') {
+			break
+		}
+		op := p.s[p.i]
+		p.i++
+		g, gok := p.factor()
+		if !gok || (op == '/' && g == 0) {
+			return 0, false
+		}
+		if op == '*' {
+			f *= g
+		} else {
+			f /= g
+		}
+	}
+	return f, ok
+}
+
+func (p *calcParser) factor() (float64, bool) {
+	p.space()
+	if p.i < len(p.s) && p.s[p.i] == '(' {
+		p.i++
+		f, ok := p.sum()
+		p.space()
+		if !ok || p.i >= len(p.s) || p.s[p.i] != ')' {
+			return 0, false
+		}
+		p.i++
+		return f, true
+	}
+	start := p.i
+	for p.i < len(p.s) && (p.s[p.i] >= '0' && p.s[p.i] <= '9' || p.s[p.i] == '.' || (p.i == start && p.s[p.i] == '-')) {
+		p.i++
+	}
+	n, err := strconv.ParseFloat(p.s[start:p.i], 64)
+	if err != nil {
+		return 0, false
+	}
+	switch {
+	case strings.HasPrefix(p.s[p.i:], "px"):
+		p.i += 2
+	case strings.HasPrefix(p.s[p.i:], "rem"):
+		p.i += 3
+		n *= 16
+	case strings.HasPrefix(p.s[p.i:], "em"):
+		p.i += 2
+		n *= 16
+	}
+	return n, true
 }

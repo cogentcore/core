@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/andybalholm/cascadia"
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
-	selcss "github.com/ericchiang/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -83,12 +83,27 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				}
 			case "@supports", "@layer", "@container", "@scope":
 				c.addRuleList(root, rule.Rules, origin)
+			case "@import":
+				// url("x") or "x", and a media query list
+				url, media := importURL(rule.Prelude)
+				if url != "" && c.mediaMatches(media) {
+					c.addLinkedStyle(url)
+				}
 			}
 			continue
 		}
-		for _, sel := range rule.Selectors {
+		// the parser splits the selectors at commas in parentheses,
+		// as in :is(a, b), so they are split from the prelude
+		selectors := rule.Selectors
+		if strings.Contains(rule.Prelude, "(") {
+			selectors = splitSelectors(rule.Prelude)
+		}
+		for _, sel := range selectors {
 			sel = strings.TrimSpace(sel)
 			spec := specificity(sel)
+			if cs := compileSelector(sel); cs != nil {
+				spec = cs.specificity
+			}
 			for _, n := range selectNodes(root, sel) {
 				c.addDecls(n, rule.Declarations, origin, spec)
 			}
@@ -194,9 +209,69 @@ func (c *Context) SetStyleAttr(node *html.Node, style string) error {
 	return nil
 }
 
+// compiledSelector is a compiled selector, with its specificity.
+type compiledSelector struct {
+	sel         cascadia.Sel
+	specificity int
+}
+
 // selectorCache has the compiled selectors, with nil for ones
-// that are not supported.
-var selectorCache = map[string]*selcss.Selector{}
+// that are not supported (as pseudo-elements, which select no nodes).
+var selectorCache = map[string]*compiledSelector{}
+
+// compileSelector returns the compiled selector, or nil if it is not supported.
+func compileSelector(sel string) *compiledSelector {
+	if cs, ok := selectorCache[sel]; ok {
+		return cs
+	}
+	var cs *compiledSelector
+	if s, err := cascadia.Parse(rewriteSelector(sel)); err == nil && s.PseudoElement() == "" {
+		sp := s.Specificity()
+		cs = &compiledSelector{sel: s, specificity: sp[0]*10000 + sp[1]*100 + sp[2]}
+	}
+	selectorCache[sel] = cs
+	return cs
+}
+
+// rewriteSelector rewrites the parts of the given selector that the selector
+// library does not support as ones that it does: :is(X) and :where(X) as
+// :not(:not(X)), and :focus-within and :focus-visible as :focus (which
+// selects nothing, as for :hover, in a static rendering).
+func rewriteSelector(sel string) string {
+	if !strings.Contains(sel, ":is(") && !strings.Contains(sel, ":where(") && !strings.Contains(sel, ":focus-") {
+		return sel
+	}
+	sel = strings.ReplaceAll(sel, ":focus-within", ":focus")
+	sel = strings.ReplaceAll(sel, ":focus-visible", ":focus")
+	var sb strings.Builder
+	var closes []bool // for each open parenthesis, whether its close is doubled
+	for i := 0; i < len(sel); i++ {
+		switch {
+		case strings.HasPrefix(sel[i:], ":is("):
+			sb.WriteString(":not(:not(")
+			closes = append(closes, true)
+			i += len(":is(") - 1
+		case strings.HasPrefix(sel[i:], ":where("):
+			sb.WriteString(":not(:not(")
+			closes = append(closes, true)
+			i += len(":where(") - 1
+		case sel[i] == '(':
+			sb.WriteByte('(')
+			closes = append(closes, false)
+		case sel[i] == ')':
+			sb.WriteByte(')')
+			if n := len(closes); n > 0 {
+				if closes[n-1] {
+					sb.WriteByte(')')
+				}
+				closes = closes[:n-1]
+			}
+		default:
+			sb.WriteByte(sel[i])
+		}
+	}
+	return sb.String()
+}
 
 // selectNodes returns the nodes under root that the given selector selects.
 func selectNodes(root *html.Node, sel string) []*html.Node {
@@ -218,28 +293,11 @@ func selectNodes(root *html.Node, sel string) []*html.Node {
 		walk(root)
 		return matches
 	}
-	s, ok := selectorCache[sel]
-	if !ok {
-		s, _ = selcss.Parse(sel) // unsupported selectors (:hover etc) select nothing
-		selectorCache[sel] = s
-	}
-	if s == nil {
+	cs := compileSelector(sel)
+	if cs == nil {
 		return nil
 	}
-	nodes := s.Select(root)
-	// The selector library matches :root to the document node, not to
-	// the html element that it is in CSS.
-	for i, n := range nodes {
-		if n.Type == html.DocumentNode {
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				if c.Type == html.ElementNode {
-					nodes[i] = c
-					break
-				}
-			}
-		}
-	}
-	return nodes
+	return cascadia.QueryAll(root, cs.sel)
 }
 
 // specificity returns the specificity of the given selector,
@@ -422,4 +480,62 @@ func (c *Context) displayOf(n *html.Node) string {
 		}
 	}
 	return d
+}
+
+// importURL returns the URL and the media query list of the given
+// prelude of an @import rule (url("x") media, or "x" media).
+func importURL(prelude string) (url, media string) {
+	p := strings.TrimSpace(prelude)
+	if rest, ok := strings.CutPrefix(p, "url("); ok {
+		end := strings.Index(rest, ")")
+		if end < 0 {
+			return "", ""
+		}
+		url, media = rest[:end], rest[end+1:]
+	} else if len(p) > 0 && (p[0] == '"' || p[0] == '\'') {
+		end := strings.IndexByte(p[1:], p[0])
+		if end < 0 {
+			return "", ""
+		}
+		url, media = p[:end+2], p[end+2:]
+	} else {
+		return "", ""
+	}
+	url = strings.Trim(strings.TrimSpace(url), `"'`)
+	media = strings.TrimSpace(media)
+	// layer() and supports() conditions are not supported, and are ignored
+	if strings.HasPrefix(media, "layer") || strings.HasPrefix(media, "supports(") {
+		media = ""
+	}
+	return url, media
+}
+
+// splitSelectors splits the given selector list at the commas that are
+// not in parentheses, brackets, or quotes.
+func splitSelectors(list string) []string {
+	var sels []string
+	depth := 0
+	var quote byte
+	start := 0
+	for i := 0; i < len(list); i++ {
+		ch := list[i]
+		switch {
+		case quote != 0:
+			if ch == '\\' {
+				i++
+			} else if ch == quote {
+				quote = 0
+			}
+		case ch == '"' || ch == '\'':
+			quote = ch
+		case ch == '(' || ch == '[':
+			depth++
+		case ch == ')' || ch == ']':
+			depth--
+		case ch == ',' && depth == 0:
+			sels = append(sels, strings.TrimSpace(list[start:i]))
+			start = i + 1
+		}
+	}
+	return append(sels, strings.TrimSpace(list[start:]))
 }

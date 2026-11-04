@@ -756,6 +756,22 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		for i, v := range expandSides(strings.Fields(lval)) {
 			setInset(s, i, v)
 		}
+	case "inset-inline", "inset-block":
+		fs := strings.Fields(lval)
+		if len(fs) == 0 {
+			return
+		}
+		start, end := fs[0], fs[0]
+		if len(fs) > 1 {
+			end = fs[1]
+		}
+		if prop == "inset-inline" {
+			setInset(s, 3, start)
+			setInset(s, 1, end)
+		} else {
+			setInset(s, 0, start)
+			setInset(s, 2, end)
+		}
 	case "z-index":
 		if z, err := strconv.Atoi(lval); err == nil {
 			s.ZIndex = z
@@ -966,6 +982,8 @@ var logicalProperties = map[string]string{
 	"border-block-start-width": "border-top-width", "border-block-end-width": "border-bottom-width",
 	"border-inline-start-color": "border-left-color", "border-inline-end-color": "border-right-color",
 	"border-block-start-color": "border-top-color", "border-block-end-color": "border-bottom-color",
+	"inset-inline-start": "left", "inset-inline-end": "right",
+	"inset-block-start": "top", "inset-block-end": "bottom",
 	"border-start-start-radius": "border-top-left-radius", "border-start-end-radius": "border-top-right-radius",
 	"border-end-start-radius": "border-bottom-left-radius", "border-end-end-radius": "border-bottom-right-radius",
 }

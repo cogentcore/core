@@ -39,6 +39,12 @@ type Context struct {
 	// cssOrder is the order of the last declaration added.
 	cssOrder int
 
+	// cssBase is the URL of the style sheet being added, if it is from a
+	// URL, which the URLs in it are relative to, and cssImports has the
+	// URLs of the style sheets that have been added (for cycles of @import).
+	cssBase    string
+	cssImports map[string]bool
+
 	// RefreshURL is the URL of the first meta element with an http-equiv
 	// of refresh in the HTML read, if any, which an app that shows web pages
 	// can open next, as browsers do (as for a page that redirects browsers

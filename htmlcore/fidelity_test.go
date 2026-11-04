@@ -254,10 +254,16 @@ func boxDelta(a, b *fidBox) float32 {
 // tagFidelityHTML adds a data-fid attribute to each element of the HTML,
 // returning the HTML and the tag of each fid.
 func tagFidelityHTML(src []byte) (string, map[int]string, error) {
-	doc, err := html.Parse(bytes.NewReader(src))
+	// The pages are compared as browsers without JavaScript render them,
+	// which is how htmlcore renders them: the content of noscript elements
+	// is in the page (it is unwrapped, as Chrome is run with JavaScript only
+	// for the harness, so it would not show it), and the page scripts are
+	// blocked by a Content-Security-Policy (see chromeRender).
+	doc, err := html.ParseWithOptions(bytes.NewReader(src), html.ParseOptionEnableScripting(false))
 	if err != nil {
 		return "", nil, err
 	}
+	unwrapNoscript(doc)
 	tags := map[int]string{}
 	n := 0
 	inBody := false
@@ -285,6 +291,26 @@ func tagFidelityHTML(src []byte) (string, map[int]string, error) {
 	return b.String(), tags, nil
 }
 
+// unwrapNoscript replaces the noscript elements under n with their children.
+func unwrapNoscript(n *html.Node) {
+	for c := n.FirstChild; c != nil; {
+		next := c.NextSibling
+		if c.Type == html.ElementNode && c.Data == "noscript" {
+			for gc := c.FirstChild; gc != nil; {
+				gnext := gc.NextSibling
+				c.RemoveChild(gc)
+				n.InsertBefore(gc, c)
+				unwrapNoscript(gc)
+				gc = gnext
+			}
+			n.RemoveChild(c)
+		} else {
+			unwrapNoscript(c)
+		}
+		c = next
+	}
+}
+
 // chromeHarnessStyle makes Chrome use the same default font as Cogent Core.
 func chromeHarnessStyle() string {
 	fonts, _ := filepath.Abs("../text/fonts/noto")
@@ -304,7 +330,10 @@ func chromeHarnessStyle() string {
 	return sb.String()
 }
 
-const chromeHarnessScript = `<script>
+// chromeHarnessCSP allows only the harness script to run in Chrome.
+const chromeHarnessCSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-fidelity'">`
+
+const chromeHarnessScript = `<script nonce="fidelity">
 document.fonts.ready.then(() => {
 	const boxes = [];
 	for (const e of document.querySelectorAll('[data-fid]')) {
@@ -326,7 +355,7 @@ var fidelityJSON = regexp.MustCompile(`(?s)<pre id="__fidelity">(.*?)</pre>`)
 // chromeRender renders the HTML in Chrome, returning the boxes of the
 // elements and the height of the page, and saving a screenshot.
 func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
-	page := strings.Replace(tagged, "<head>", "<head>"+chromeHarnessStyle(), 1)
+	page := strings.Replace(tagged, "<head>", "<head>"+chromeHarnessCSP+chromeHarnessStyle(), 1)
 	boxPage := strings.Replace(page, "</body>", chromeHarnessScript+"</body>", 1)
 	tmp := filepath.Join(dir, ".fidelity-tmp.html")
 	defer os.Remove(tmp)
@@ -398,7 +427,7 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 			return nil, err
 		}
 		if pu.Scheme == "http" || pu.Scheme == "https" {
-			return http.Get(u)
+			return getURL(u) // as the default GetURL does
 		}
 		p := pu.Path
 		if !filepath.IsAbs(p) {

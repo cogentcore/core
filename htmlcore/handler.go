@@ -768,8 +768,21 @@ func (c *Context) addStyleSheets(root *html.Node) {
 }
 
 // addLinkedStyle adds the style sheet at the given URL.
+// Its URL is relative to the URL of the style sheet that it is in,
+// cssBase, if it is imported by one, or else to the page.
 func (c *Context) addLinkedStyle(href string) {
-	resp, err := Get(c, href)
+	u, err := parseRelativeURL(href, c.cssBaseURL())
+	if errors.Log(err) != nil {
+		return
+	}
+	if c.cssImports == nil {
+		c.cssImports = map[string]bool{}
+	}
+	if c.cssImports[u.String()] || len(c.cssImports) > 100 { // cycles
+		return
+	}
+	c.cssImports[u.String()] = true
+	resp, err := Get(c, u.String())
 	if errors.Log(err) != nil {
 		return
 	}
@@ -778,5 +791,17 @@ func (c *Context) addLinkedStyle(href string) {
 	if errors.Log(err) != nil {
 		return
 	}
+	base := c.cssBase
+	c.cssBase = u.String()
 	c.addStyleOrigin(string(b), originAuthor)
+	c.cssBase = base
+}
+
+// cssBaseURL returns the URL that the URLs in the current style sheet are
+// relative to: the URL of the style sheet, or that of the page.
+func (c *Context) cssBaseURL() string {
+	if c.cssBase != "" {
+		return c.cssBase
+	}
+	return c.PageURL
 }

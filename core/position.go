@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -83,6 +84,20 @@ func (fr *Frame) sizeDownOutOfFlow() {
 		in := cwb.Styles.Inset.Dots()
 		set := cwb.Styles.InsetSet
 		_, cbsz := cwb.containingBlock().paddingBox()
+		// sizes that are relative to the parent are of the containing block
+		space := sz.Space
+		for d := math32.X; d <= math32.Y; d++ {
+			for _, v := range []units.Value{cwb.Styles.Min.Dim(d), cwb.Styles.Max.Dim(d)} {
+				if v.Value > 0 && (v.Unit == units.UnitPw || v.Unit == units.UnitPh) {
+					ref := cbsz.X
+					if v.Unit == units.UnitPh {
+						ref = cbsz.Y
+					}
+					sz.Actual.Total.SetDim(d, ref*v.Value/100+space.Dim(d))
+					break
+				}
+			}
+		}
 		if set.Left && set.Right {
 			sz.Actual.Total.X = max(cbsz.X-in.Left-in.Right, 0)
 		}
