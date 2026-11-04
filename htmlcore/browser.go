@@ -75,6 +75,11 @@ type blockState struct {
 	// and last children collapse with those of the widget, when it
 	// has no padding or border there.
 	openTop, openBottom bool
+
+	// marginTop and marginBottom are the computed top and bottom margins
+	// of the element in dots, before they collapse (as in the computed
+	// style of a browser).
+	marginTop, marginBottom float32
 }
 
 // cssState has the values of a widget's declarations that are
@@ -660,6 +665,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		spc = 1
 	}
 	top, bottom := dots(st.margin[0]), dots(st.margin[2])
+	bs.marginTop, bs.marginBottom = top, bottom
 	c.collapseMargins(wb, s, ps, bs, pbs, pad, bw, &top, &bottom)
 	s.Margin.Top = units.Dot(top / spc)
 	s.Margin.Bottom = units.Dot(bottom / spc)
@@ -1697,18 +1703,27 @@ func fontFamily(v string) rich.Family {
 
 // setFont sets the font shorthand: [style] [weight] size[/line-height] family.
 func setFont(st *cssState, s, ps *styles.Style, v string) {
+	// the shorthand resets the properties that it does not set, as
+	// font-weight to normal, once it is valid (with a size and family)
 	fs := strings.Fields(v)
+	slant, weight := rich.SlantNormal, ""
 	for i, f := range fs {
 		lf := strings.ToLower(f)
 		switch {
 		case lf == "italic" || lf == "oblique":
-			s.Font.Slant = rich.Italic
+			slant = rich.Italic
 		case lf == "bold" || lf == "bolder" || lf == "lighter" || (len(lf) == 3 && lf[1] == '0' && lf[2] == '0'):
-			setFontWeight(s, ps, lf)
+			weight = lf
 		case lf == "normal" || lf == "small-caps":
 		case len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.') || cssFontSizes[lf] > 0:
+			s.Font.Slant = slant
+			s.Font.Weight = rich.Normal
+			if weight != "" {
+				setFontWeight(s, ps, weight)
+			}
 			size, lh, _ := strings.Cut(lf, "/")
 			setFontSize(s, ps, size)
+			st.lineHeight = "normal"
 			if lh != "" {
 				st.lineHeight = lh
 			}

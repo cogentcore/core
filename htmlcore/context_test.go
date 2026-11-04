@@ -20,7 +20,9 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 	"github.com/andybalholm/cascadia"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
@@ -227,13 +229,15 @@ func TestMediaRange(t *testing.T) {
 	c.MediaWidth = 800
 	c.MediaHeight = 600
 	for q, want := range map[string]bool{
-		"(width >= 50rem)":                 true,
-		"(width >= 64rem)":                 false,
-		"only screen and (width <= 52rem)": true,
-		"(30rem < width <= 60rem)":         true,
-		"(40rem < width)":                  true,
-		"(height > 700px)":                 false,
-		"(min-width: 600px)":               true,
+		"(width >= 50rem)":                          true,
+		"(width >= 64rem)":                          false,
+		"only screen and (width <= 52rem)":          true,
+		"(30rem < width <= 60rem)":                  true,
+		"(40rem < width)":                           true,
+		"(height > 700px)":                          false,
+		"(min-width: 600px)":                        true,
+		"only screen and (max-device-width: 480px)": false,
+		"(min-device-width: 600px)":                 true,
 	} {
 		assert.Equal(t, want, c.mediaMatches(q), q)
 	}
@@ -321,4 +325,24 @@ func TestICO(t *testing.T) {
 	}
 	assert.True(t, looksLikeSVG([]byte(`<?xml version="1.0"?>\n<svg xmlns="x"></svg>`)))
 	assert.False(t, looksLikeSVG(pngBuf.Bytes()))
+}
+
+// TestFontShorthandResets tests that the font shorthand resets the
+// properties that it does not set, as the bold of a heading.
+func TestFontShorthandResets(t *testing.T) {
+	st := &cssState{}
+	s := styles.NewStyle()
+	s.Font.Weight = rich.Bold
+	s.Font.Slant = rich.Italic
+	setFont(st, s, nil, "100% sans-serif")
+	assert.Equal(t, rich.Normal, s.Font.Weight)
+	assert.Equal(t, rich.SlantNormal, s.Font.Slant)
+	assert.Equal(t, "normal", st.lineHeight)
+	setFont(st, s, nil, "italic bold 12px/1.5 serif")
+	assert.Equal(t, rich.Bold, s.Font.Weight)
+	assert.Equal(t, rich.Italic, s.Font.Slant)
+	assert.Equal(t, "1.5", st.lineHeight)
+	s.Font.Weight = rich.Bold
+	setFont(st, s, nil, "inherit") // not a valid shorthand of values
+	assert.Equal(t, rich.Bold, s.Font.Weight)
 }

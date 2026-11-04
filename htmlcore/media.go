@@ -162,6 +162,9 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 	if !strings.Contains(f, ":") && strings.ContainsAny(f, "<>=") {
 		return mediaRangeMatches(f, width, height)
 	}
+	// the device is taken to be the size of the viewport, as for the
+	// screen of a phone (and the window of headless Chrome)
+	name = strings.Replace(name, "device-", "", 1)
 	switch name {
 	case "min-width", "max-width", "min-height", "max-height":
 		l, ok := length()
