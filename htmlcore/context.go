@@ -401,6 +401,27 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	}
 }
 
+// NewPage returns a new context for reading a new page, with the settings
+// of this context (as for media, styles, URLs, and handlers), but none of
+// the state from reading a page (as its style sheets). A context that is
+// used to read pages one after another (as in a browser) should get a new
+// one for each page with this, so that nothing of one page affects the next.
+func (c *Context) NewPage() *Context {
+	n := NewContext()
+	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
+	n.BrowserStyle = c.BrowserStyle
+	n.PageURL = c.PageURL
+	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
+	n.ElementHandlers = c.ElementHandlers
+	n.WikilinkHandlers = c.WikilinkHandlers
+	n.AttributeHandlers = c.AttributeHandlers
+	n.WidgetHandlers = c.WidgetHandlers
+	n.DelayedImageLoad = c.DelayedImageLoad
+	n.ImageCache = c.ImageCache
+	n.StageSize = c.StageSize
+	return n
+}
+
 // UserAgent is the User-Agent header of the requests of the default
 // [Context.GetURL], which sites that reject the default of the Go HTTP
 // client (as Wikipedia does) accept.
