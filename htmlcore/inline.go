@@ -125,6 +125,8 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 				trail = "\u00a0"
 			}
 			str = lead + strings.TrimSpace(str) + trail
+			// white space at the start of a line is not shown
+			str = brSpace.ReplaceAllString(str, "$1")
 		}
 		tx := core.NewText(container).SetText(str)
 		tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
@@ -182,6 +184,9 @@ func (c *Context) isPre(n *xhtml.Node) bool {
 	}
 	return false
 }
+
+// brSpace matches a line break with the white space after it.
+var brSpace = regexp.MustCompile(`(<br\s*/?>)[ \t\n\r\f]+`)
 
 var spaceRun = regexp.MustCompile(`[ \t\n\r\f]+`)
 
@@ -248,6 +253,11 @@ func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 	var sb strings.Builder
 	sb.WriteString("<" + tag)
 	for _, a := range n.Attr {
+		if a.Key == "class" && (a.Val == "math inline" || a.Val == "math display") {
+			// the math of markdown, which rich text renders
+			fmt.Fprintf(&sb, ` class="%s"`, a.Val)
+			continue
+		}
 		if a.Key == "style" || a.Key == "class" || a.Key == "id" || strings.HasPrefix(a.Key, "data-") {
 			continue
 		}

@@ -30,13 +30,8 @@ func (ct *Content) nearestHeading() string {
 		if wpos > 100 {
 			return tree.Break
 		}
-		tx, ok := cw.(*core.Text)
-		if !ok {
-			return tree.Continue
-		}
-		tag, ok := tx.Property("tag").(string)
-		if ok && len(tag) == 2 && tag[0] == 'h' {
-			lastHead = tx.Text
+		if _, text, ok := headingOf(cw); ok {
+			lastHead = text
 		}
 		return tree.Continue
 	})

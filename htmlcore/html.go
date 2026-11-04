@@ -36,6 +36,9 @@ func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
 		return readHTMLNode(ctx, parent, n)
 	}
 	ctx.readState = readState{}
+	// the style sheets of the new page are imported again, and it has its title
+	ctx.cssImports = nil
+	ctx.Title = ""
 	ctx.reading = true
 	defer func() { ctx.reading = false }()
 	return readHTMLNode(ctx, parent, n)
@@ -80,6 +83,9 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		ctx.Node = n
 		if ctx.BrowserStyle {
 			ctx.addStyleOrigin(browserStyles, originUserAgent)
+			if ctx.Style != "" { // before the style sheets of the page, which override it
+				ctx.addStyleOrigin(ctx.Style, originAuthor)
+			}
 			ctx.addStyleSheets(n)
 			ctx.rootFont = 0
 			ctx.rootFontSize() // of this document, while ctx.Node is it

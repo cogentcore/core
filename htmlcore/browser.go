@@ -651,27 +651,10 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	if st.margin[3] != nil {
 		s.Margin.Left = *st.margin[3]
 	}
-	// The width of the body is that of the viewport, not of its content,
-	// as in browsers, so that the percentage widths of its content are of
-	// the viewport (otherwise content that is wider than the viewport makes
-	// them as wide, which keeps it that wide).
-	if tag := wb.Property("tag"); tag == "body" && st.width == nil && uc.Vpw > 0 {
-		mx := uc.Vpw - pad.Left - pad.Right - bw.Left - bw.Right - dots(st.margin[1]) - dots(st.margin[3])
-		// less the vertical scrollbars that the frames it is in can have
-		for p := wb.Parent; p != nil; p = p.AsTree().Parent {
-			if pw, ok := p.(core.Widget); ok {
-				pst := &pw.AsWidget().Styles
-				if pst.Overflow.Y >= styles.OverflowAuto {
-					mx -= pst.ScrollbarWidth.Dots
-				}
-				if pst.Padding.Left.Dots+pst.Padding.Right.Dots > 0 {
-					mx -= pst.Padding.Left.Dots + pst.Padding.Right.Dots
-				}
-			}
-		}
-		if st.maxWidth == nil || s.Max.X.Unit != units.UnitDp || dp*s.Max.X.Value > mx {
-			s.Max.X = units.Dot(max(mx, 0))
-		}
+	if tag := wb.Property("tag"); tag == "body" && st.width == nil {
+		// it fills the width of its parent (the viewport, as in a browser,
+		// or a panel of a page, as in content), and no more
+		s.Grow.X, s.Shrink.X = 1, 1
 	}
 	spc := core.AppearanceSettings.Spacing / 100
 	if spc <= 0 {

@@ -81,6 +81,29 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		b.WriteString(h)
 		return nil
 	}
+	// Text without a tag of its own in a widget with a tag (as the text of an
+	// element in the browser style of htmlcore) is just its content, and an
+	// inline container of it is just its children.
+	_, hasTag := wb.Property("tag").(string)
+	if tx, ok := w.(*Text); ok && !hasTag {
+		if pw := wb.parentWidget(); pw != nil {
+			if _, ok := pw.Property("tag").(string); ok || strings.HasPrefix(pw.Name, "inline-container") {
+				if err := e.Flush(); err != nil {
+					return err
+				}
+				b.WriteString(textParagraphReplacer.Replace(tx.Text))
+				return nil
+			}
+		}
+	}
+	if _, ok := w.(*Frame); ok && !hasTag && strings.HasPrefix(wb.Name, "inline-container") {
+		var err error
+		wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			err = toHTML(cw, e, b)
+			return err == nil
+		})
+		return err
+	}
 	se := &xml.StartElement{}
 	typ := wb.NodeType()
 	idName := typ.IDName

@@ -55,6 +55,11 @@ type Context struct {
 	// without JavaScript to another one). It must be reset before each read.
 	RefreshURL string
 
+	// Style is CSS that is added to the style sheets of each page that is
+	// read in [Context.BrowserStyle], before those of the page (as a user
+	// style sheet of a browser), as for the margins of an app's pages.
+	Style string
+
 	// Title is the text of the first title element in the HTML read,
 	// if any, as for the title of a window or tab that shows the page.
 	Title string
@@ -72,9 +77,9 @@ type Context struct {
 	// BrowserStyle makes the rendering follow the default styles and
 	// layout of web browsers as closely as possible: block elements are
 	// spaced by their (collapsed) margins instead of gaps, headings are
-	// sized by the user agent styles, and so on. It is for showing web
-	// pages and email; without it, HTML and markdown are shown in the
-	// more compact Cogent Core style, as used by content.
+	// sized by the user agent styles, and so on. It is the default (see
+	// [NewContext]); without it, HTML and markdown are shown in the older
+	// Cogent Core style.
 	BrowserStyle bool
 
 	// nodeWidgets has the widgets of the controls of forms,
@@ -266,6 +271,7 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
+		BrowserStyle:      true,
 		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            getURL,
@@ -431,6 +437,7 @@ func (c *Context) NewPage() *Context {
 	n.DelayedImageLoad = c.DelayedImageLoad
 	n.ImageCache = c.ImageCache
 	n.StageSize = c.StageSize
+	n.Style = c.Style
 	return n
 }
 

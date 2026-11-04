@@ -1464,7 +1464,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	}
 	var maxExtra, exn math32.Vector2
 	var widths []float32
-	colWidth := fr.columnWidth()
+	colWidth, colScrolls := fr.columnWidth()
 	// columns that shrink are narrowed to fit, or widened back to their
 	// widths from SizeUp after they were narrower
 	widths = fr.shrinkWidths()
@@ -1550,7 +1550,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				if ma == math32.X && widths != nil {
 					asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
 				}
-				if ma == math32.X && extra.X < 0 && colWidth > 0 && asz > colWidth && limitsWidth(cwb) {
+				if ma == math32.X && extra.X < 0 && colWidth > 0 && asz > colWidth && limitsWidth(cwb, colScrolls) {
 					asz = colWidth
 				}
 				if DebugSettings.LayoutTraceDetail {
@@ -1749,27 +1749,32 @@ func (fr *Frame) shrinkAlloc(widths []float32, cidx image.Point, span int) float
 }
 
 // columnWidth returns the width of the content of the frame if it is a
-// column (or a wrapped row) that does not scroll in width, within which
-// its children that grow or shrink in width are allocated at most that
-// width so that their content (such as text) can wrap in it,
-// or -1 otherwise.
-func (fr *Frame) columnWidth() float32 {
+// column (or a wrapped row), within which its children that grow or shrink
+// in width are allocated at most that width so that their content (such
+// as text) can wrap in it, or -1 otherwise, and whether the frame scrolls
+// in width, in which case only the children that shrink are limited.
+func (fr *Frame) columnWidth() (width float32, scrolls bool) {
 	s := &fr.Styles
-	if s.Display != styles.Flex || s.Overflow.X >= styles.OverflowAuto { // content that scrolls can be wider
-		return -1
+	if s.Display != styles.Flex {
+		return -1, false
 	}
+	// content that scrolls can be wider, except for children that shrink
+	scrolls = s.Overflow.X >= styles.OverflowAuto
 	if s.Direction == styles.Column && !s.Wrap {
-		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X
+		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, scrolls
 	}
 	if s.Direction == styles.Row && s.Wrap && s.Shrink.X > 0 {
-		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X
+		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, scrolls
 	}
-	return -1
+	return -1, false
 }
 
 // limitsWidth returns whether a child that is allocated more than
-// the [Frame.columnWidth] is limited to it.
-func limitsWidth(cwb *WidgetBase) bool {
+// the [Frame.columnWidth] is limited to it, given whether the frame scrolls.
+func limitsWidth(cwb *WidgetBase, scrolls bool) bool {
+	if scrolls { // in a frame that scrolls, only those that shrink
+		return cwb.Styles.Shrink.X > 0
+	}
 	return cwb.Styles.Grow.X > 0 || cwb.Styles.GrowWrap || cwb.Styles.Shrink.X > 0
 }
 
@@ -1885,7 +1890,7 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 	// In a column that is narrower than its content (and does not scroll in
 	// width), the children that grow (or wrap) in width get at most its width,
 	// so that text can wrap in it.
-	colWidth := fr.columnWidth()
+	colWidth, colScrolls := fr.columnWidth()
 	widths := fr.shrinkWidths()
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
@@ -1911,7 +1916,7 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 			if ma == math32.X && colWidth > 0 && cwb.Styles.Shrink.X > 0 && widths == nil {
 				asz = max(asz, cwb.Geom.Size.preferred.X) // as wide as it can be
 			}
-			if ma == math32.X && colWidth > 0 && asz > colWidth && limitsWidth(cwb) {
+			if ma == math32.X && colWidth > 0 && asz > colWidth && limitsWidth(cwb, colScrolls) {
 				asz = colWidth
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)

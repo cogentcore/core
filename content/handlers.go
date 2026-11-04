@@ -167,9 +167,23 @@ func (ct *Content) widgetHandler(w core.Widget) {
 	if t, ok := wb.Properties["title"]; ok {
 		title = t.(string)
 	}
+	hdr := len(tag) == 2 && tag[0] == 'h'
+	if ct.Context.BrowserStyle {
+		// the layout is from the styles of the page (CSS), with the docs font size
+		if tx, ok := w.(*core.Text); ok {
+			tx.Styler(func(s *styles.Style) {
+				s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+			})
+		}
+		if hdr {
+			wb.SetProperty("paginate-no-break-after", true)
+		}
+	}
 	switch x := w.(type) {
 	case *core.Text:
-		hdr := len(tag) > 0 && tag[0] == 'h'
+		if ct.Context.BrowserStyle {
+			break
+		}
 		x.Styler(func(s *styles.Style) {
 			if tag == "td" {
 				s.Margin.SetVertical(units.Em(0)) // use gap
@@ -518,8 +532,7 @@ func (ct *Content) openHeading(heading string) {
 	}
 	tr.UnselectAll()
 	tr.Select()
-	tx := tr.Property("page-text").(*core.Text)
-	// fmt.Println("scroll to top:", tx.Text, tx.Geom.Pos.Total.Y)
+	tx := tr.Property("page-text").(core.Widget).AsWidget() // the heading
 	tx.ScrollThisToTop()
 	ct.Defer(func() {
 		tx.ScrollThisToTop() // try try again -- without this, is somewhat unreliable..
