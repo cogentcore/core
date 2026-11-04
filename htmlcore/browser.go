@@ -27,9 +27,6 @@ import (
 //go:embed browser.css
 var browserStyles string
 
-// tableRow is the display of the row that a table is in.
-const tableRow = "table-row-wrapper"
-
 // lineHeightNormal is the line height of the "normal" value, which
 // is given by the metrics of the font in browsers; this is the value
 // for the default Noto Sans font.
@@ -217,7 +214,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 		s.Align.Items = styles.Center
 		s.Align.Content = styles.Center
 	}
-	if pbs != nil && pbs.legacyCenter && (st.display == "table" || st.display == "inline-table" || st.display == tableRow) {
+	if pbs != nil && pbs.legacyCenter && (st.display == "table" || st.display == "inline-table") {
 		s.Text.Align = text.Start // tables do not inherit the legacy center
 	}
 	if st.hasBg {
@@ -233,13 +230,6 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 		s.Display = styles.Grid
 	case "none":
 		s.Display = styles.DisplayNone
-	case tableRow:
-		s.Display = styles.Flex
-		s.Direction = styles.Row
-		if pbs != nil && pbs.legacyCenter {
-			s.Justify.Content = styles.Center
-			st.legacyCenter = true
-		}
 	case anonymousInline:
 		s.Display = styles.Flex
 		s.Direction = styles.Row
@@ -253,7 +243,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 			st.margin[2] = &m
 		}
 	}
-	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline || st.display == tableRow
+	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
 	if st.display == "table-cell" {
 		s.Grow.Set(1, 1)
 		switch st.verticalAlign {
@@ -417,9 +407,6 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 			s.Align.Self = styles.Center
 		} else if st.marginAuto[3] {
 			s.Align.Self = styles.End
-		}
-		if pbs != nil && pbs.display == tableRow { // a table is aligned in its row
-			ps.Justify.Content = s.Align.Self
 		}
 		// A block of a fixed width grows to its width (its Max), so that
 		// it is aligned within the width of its parent.
