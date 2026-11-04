@@ -22,6 +22,8 @@ func TestBrowserStyleSpacing(t *testing.T) {
 	ReadHTMLString(ctx, b, `<div style="padding: 10px 20px; margin-left: 30px; gap: 4px; display: flex">x</div>`)
 	var div *core.Frame
 	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		core.AppearanceSettings.Spacing = 30
 		b.Scene.StyleTree()
 		b.Scene.NeedsLayout()

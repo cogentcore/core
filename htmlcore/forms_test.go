@@ -131,6 +131,8 @@ func TestDetails(t *testing.T) {
 		assert.False(t, visible(texts["Hidden text"]))
 		assert.True(t, visible(texts["Shown text"]))
 		assert.NotNil(t, texts["▸ "], "a closed marker")
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		summaries[0].Send(events.Click)
 	}, func() {
 		assert.True(t, visible(texts["Hidden text"]), "opened by a click")
