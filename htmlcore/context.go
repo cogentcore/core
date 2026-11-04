@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
@@ -56,7 +55,7 @@ type Context struct {
 	RefreshURL string
 
 	// Style is CSS that is added to the style sheets of each page that is
-	// read in [Context.BrowserStyle], before those of the page (as a user
+	// read, before those of the page (as a user
 	// style sheet of a browser), as for the margins of an app's pages.
 	Style string
 
@@ -74,16 +73,7 @@ type Context struct {
 	// height of the scene.
 	MediaHeight float32
 
-	// BrowserStyle makes the rendering follow the default styles and
-	// layout of web browsers as closely as possible: block elements are
-	// spaced by their (collapsed) margins instead of gaps, headings are
-	// sized by the user agent styles, and so on. It is the default (see
-	// [NewContext]); without it, HTML and markdown are shown in the older
-	// Cogent Core style.
-	BrowserStyle bool
-
-	// nodeWidgets has the widgets of the controls of forms,
-	// for [Context.BrowserStyle].
+	// nodeWidgets has the widgets of the controls of forms.
 	nodeWidgets map[*html.Node]core.Widget
 
 	// floatSiblings has whether the unstyled blocks in each element
@@ -97,8 +87,7 @@ type Context struct {
 	// (see rootFontSize).
 	rootFont float32
 
-	// blocks has the margin collapsing state of the block widgets,
-	// for [Context.BrowserStyle].
+	// blocks has the margin collapsing state of the block widgets.
 	blocks map[core.Widget]*blockState
 
 	// NewParent is the current parent widget that children of
@@ -271,7 +260,6 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		BrowserStyle:      true,
 		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            getURL,
@@ -313,9 +301,7 @@ func (c *Context) config(w core.Widget) {
 		}
 	}
 	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
-	if c.BrowserStyle {
-		wb.SetProperty("node", c.Node) // for the grid-area of a grid item
-	}
+	wb.SetProperty("node", c.Node)     // for the grid-area of a grid item
 }
 
 // InlineParent returns the current parent widget that inline
@@ -391,18 +377,6 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 			wb.SetProperty(d.Property, d.Value)
 		}
 	}
-	if !c.BrowserStyle {
-		wb.Styler(func(s *styles.Style) {
-			for _, d := range decls {
-				if strings.HasPrefix(d.Property, "paginate-") {
-					continue
-				}
-				// TODO(kai/styproperties): parent style and context
-				s.FromProperty(s, d.Property, d.Value, colors.BaseContext(colors.ToUniform(s.Color)))
-			}
-		})
-		return
-	}
 	c.browserStyler(node, w, decls)
 }
 
@@ -411,9 +385,7 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 // in order added so last one has override priority.
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
-	if c.BrowserStyle {
-		c.handleFormWidget(node, w)
-	}
+	c.handleFormWidget(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}
@@ -427,7 +399,6 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
-	n.BrowserStyle = c.BrowserStyle
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
 	n.ElementHandlers = c.ElementHandlers

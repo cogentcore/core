@@ -19,7 +19,7 @@ import (
 	xhtml "golang.org/x/net/html"
 )
 
-// The inline content of block elements, for [Context.BrowserStyle], is read
+// The inline content of block elements is read
 // in runs of consecutive inline-level nodes: the text of a run (its text
 // nodes and the elements of text, such as span and b) is made into one
 // [core.Text], with the inline elements as rich text markup, and a run that
@@ -247,7 +247,7 @@ var inlineProperties = map[string]bool{
 // element of text, with the CSS styles of the element in its style.
 func (c *Context) nodeMarkup(n *xhtml.Node) (start, end string) {
 	tag := n.Data
-	if !richTags[tag] || (c.BrowserStyle && cssStyledTags[tag]) {
+	if !richTags[tag] || cssStyledTags[tag] {
 		tag = "span"
 	}
 	var sb strings.Builder

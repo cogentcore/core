@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// The forms of [Context.BrowserStyle] are submitted with the GET method,
+// The forms are submitted with the GET method,
 // as browsers do, by opening the URL of their action with the values of
 // their controls in the query, when a submit button is clicked or Enter
 // is pressed in one of their text fields.

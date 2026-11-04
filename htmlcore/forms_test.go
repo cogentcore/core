@@ -20,7 +20,6 @@ import (
 func TestFormSubmit(t *testing.T) {
 	b := core.NewBody()
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	ctx.PageURL = "https://www.example.com/page"
 	var opened []string
 	ctx.OpenURL = func(url string, e events.Event) { opened = append(opened, url) }
@@ -61,7 +60,6 @@ func TestFormSubmit(t *testing.T) {
 func TestFormSelect(t *testing.T) {
 	b := core.NewBody()
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	ctx.PageURL = "https://www.example.com/page"
 	var opened []string
 	ctx.OpenURL = func(url string, e events.Event) { opened = append(opened, url) }
@@ -95,7 +93,6 @@ func TestFormSelect(t *testing.T) {
 func TestDetails(t *testing.T) {
 	b := core.NewBody()
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	ReadHTMLString(ctx, b, `<details><summary>More</summary><p>Hidden text</p></details>
 <details open><summary>Open</summary><p>Shown text</p></details>`)
 	var summaries []*core.Frame

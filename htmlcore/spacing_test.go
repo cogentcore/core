@@ -18,7 +18,6 @@ import (
 func TestBrowserStyleSpacing(t *testing.T) {
 	b := core.NewBody()
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	ReadHTMLString(ctx, b, `<div style="padding: 10px 20px; margin-left: 30px; gap: 4px; display: flex">x</div>`)
 	var div *core.Frame
 	b.RenderImage(func() {

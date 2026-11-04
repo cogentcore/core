@@ -17,7 +17,7 @@ import (
 )
 
 // TestLayoutDump prints the layout geometry of the widgets for the HTML in
-// the LAYOUT_HTML environment variable, read with [Context.BrowserStyle],
+// the LAYOUT_HTML environment variable,
 // for debugging layout:
 //
 //	LAYOUT_HTML='<p>Some <b>text</b></p>' go test -run TestLayoutDump -v
@@ -45,7 +45,6 @@ func TestLayoutDump(t *testing.T) {
 	b.Scene.Styler(func(s *styles.Style) { s.Padding.Zero() })
 	b.Styler(func(s *styles.Style) { s.Padding.Zero(); s.Gap.Zero(); s.Min.X.Dp(width); s.Max.X.Dp(width) })
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	ctx.MediaWidth = width
 	ctx.MediaHeight = 600
 	if f := os.Getenv("LAYOUT_FILE"); f != "" {

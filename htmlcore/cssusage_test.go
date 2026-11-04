@@ -82,7 +82,6 @@ func TestCSSUsage(t *testing.T) {
 			t.Fatal(err)
 		}
 		ctx := NewContext()
-		ctx.BrowserStyle = true
 		ctx.MediaWidth = float32(fidelityWidth())
 		if b, err := os.ReadFile(strings.TrimSuffix(f, ".html") + ".url"); err == nil {
 			ctx.PageURL = strings.TrimSpace(string(b))

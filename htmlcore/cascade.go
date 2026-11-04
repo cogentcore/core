@@ -459,11 +459,11 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 }
 
 // displayOf returns the display of the given node, with the children of
-// flex and grid containers blockified for [Context.BrowserStyle], as in CSS:
+// flex and grid containers blockified, as in CSS:
 // they are flex or grid items, which are block-level.
 func (c *Context) displayOf(n *html.Node) string {
 	d := c.declaration(n, "display")
-	if !c.BrowserStyle || n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
+	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
 		return d
 	}
 	// absolutely positioned and floating elements are blockified too

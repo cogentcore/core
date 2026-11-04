@@ -54,7 +54,7 @@ func TestNoInlineContainer(t *testing.T) {
 func TestSelectNodes(t *testing.T) {
 	doc, err := html.Parse(strings.NewReader(`<html><body><h1>Title</h1><p class="a">Text <b>bold</b></p><ul><li>one</li><li>two</li></ul><div><table><tr><td>cell</td><th>head</th></tr></table></div><ruby>x<rt>y</rt><rp>z</rp></ruby><svg><p>svg p</p></svg><center>c</center><a href="#">link</a></body></html>`))
 	assert.NoError(t, err)
-	ss, err := parser.Parse(userAgentStyles + browserStyles + "\nH1, p { color: red; }\ndiv, *, p { color: blue; }\np, p { color: green; }")
+	ss, err := parser.Parse(browserStyles + "\nH1, p { color: red; }\ndiv, *, p { color: blue; }\np, p { color: green; }")
 	assert.NoError(t, err)
 	for _, rule := range ss.Rules {
 		for _, sel := range rule.Selectors {
@@ -97,7 +97,6 @@ p { color: var(--a, green); background-color: var(--self) }
 </style></head><body><div><p>x</p></div></body></html>`))
 	assert.NoError(t, err)
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	ctx.Node = doc
 	ctx.addStyleSheets(doc)
 	var div, p *html.Node
@@ -250,7 +249,6 @@ func TestGridTracks(t *testing.T) {
 // are initial (as for light-dark() without native support), which are not set.
 func TestCSSVariableInitial(t *testing.T) {
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	doc, _ := html.Parse(strings.NewReader(`<html><head><style>
 :root { --light: initial; --toggle: var(--light) blue; --color: var(--toggle, red); }
 p { color: var(--color); }
@@ -273,7 +271,6 @@ p { color: var(--color); }
 
 func TestRootFontSize(t *testing.T) {
 	ctx := NewContext()
-	ctx.BrowserStyle = true
 	doc, _ := html.Parse(strings.NewReader(`<html><head><style>html { font-size: 62.5% }</style></head><body></body></html>`))
 	ctx.Node = doc
 	ctx.addStyleSheets(doc)

@@ -25,8 +25,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// browserStyles are the user agent styles for [Context.BrowserStyle],
-// which follow those of web browsers.
+// browserStyles are the user agent styles, which follow those of web browsers.
 //
 //go:embed browser.css
 var browserStyles string
@@ -36,8 +35,8 @@ var browserStyles string
 // for the default Noto Sans font.
 const lineHeightNormal = 1.362
 
-// blockState is the state of a widget for laying out blocks
-// in [Context.BrowserStyle], mainly for collapsing margins.
+// blockState is the state of a widget for laying out blocks,
+// mainly for collapsing margins.
 type blockState struct {
 	// display is the CSS display of the element.
 	display string
@@ -110,7 +109,7 @@ type cssState struct {
 }
 
 // browserStyler adds the styler for the CSS declarations of the given node
-// to the given widget, for [Context.BrowserStyle].
+// to the given widget.
 func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl) {
 	wb := w.AsWidget()
 	tx, isText := w.(*core.Text)

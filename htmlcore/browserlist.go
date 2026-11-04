@@ -20,8 +20,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-// handleBrowserElement handles the elements that are handled differently
-// for [Context.BrowserStyle], returning whether it handled the element.
+// handleBrowserElement handles the elements with layouts of their own,
+// as lists, returning whether it handled the element.
 func handleBrowserElement(ctx *Context, tag string) bool {
 	switch tag {
 	case "style", "link", "script", "title", "meta", "head", "html":
@@ -162,7 +162,7 @@ func (c *Context) linkFrame(w *core.Frame, href string) {
 // which is in the padding of the list.
 var markerWidth = units.Em(1.5)
 
-// handleBrowserListItem handles a li element for [Context.BrowserStyle]:
+// handleBrowserListItem handles a li element:
 // it is a row of the marker and a block of the content of the item.
 // The marker is to the left of the box of the item, in the padding
 // of the list, as in browsers.

@@ -21,7 +21,7 @@ func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
 	// In browser style, the HTML is parsed as browsers do without
 	// JavaScript (which htmlcore does not run), so that the content
 	// of noscript elements is shown.
-	n, err := html.ParseWithOptions(r, html.ParseOptionEnableScripting(!ctx.BrowserStyle))
+	n, err := html.ParseWithOptions(r, html.ParseOptionEnableScripting(false))
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
 	}
@@ -61,7 +61,7 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 			ctx.rest, ctx.restParent = n, parent
 			return nil
 		}
-		if ctx.BrowserStyle && n.Parent != nil && ctx.isInlineLevel(n) {
+		if n.Parent != nil && ctx.isInlineLevel(n) {
 			last := n
 			for last.NextSibling != nil && ctx.isInlineLevel(last.NextSibling) && !ctx.stageAt(last.NextSibling) {
 				last = last.NextSibling
@@ -81,17 +81,13 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n
-		if ctx.BrowserStyle {
-			ctx.addStyleOrigin(browserStyles, originUserAgent)
-			if ctx.Style != "" { // before the style sheets of the page, which override it
-				ctx.addStyleOrigin(ctx.Style, originAuthor)
-			}
-			ctx.addStyleSheets(n)
-			ctx.rootFont = 0
-			ctx.rootFontSize() // of this document, while ctx.Node is it
-		} else {
-			ctx.addStyleOrigin(userAgentStyles, originUserAgent)
+		ctx.addStyleOrigin(browserStyles, originUserAgent)
+		if ctx.Style != "" { // before the style sheets of the page, which override it
+			ctx.addStyleOrigin(ctx.Style, originAuthor)
 		}
+		ctx.addStyleSheets(n)
+		ctx.rootFont = 0
+		ctx.rootFontSize() // of this document, while ctx.Node is it
 	}
 
 	switch n.Type {
@@ -112,7 +108,7 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 
 	if np := ctx.NewParent; np != nil && n.FirstChild != nil {
 		readHTMLNode(ctx, np, n.FirstChild)
-		if ctx.BrowserStyle && n.Type == html.ElementNode && ctx.rest == nil {
+		if n.Type == html.ElementNode && ctx.rest == nil {
 			if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {
 				switch ctx.displayOf(n) {
 				case "grid", "inline-grid":

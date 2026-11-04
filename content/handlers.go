@@ -26,7 +26,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/csl"
 	"cogentcore.org/core/text/htmltext"
@@ -168,34 +167,16 @@ func (ct *Content) widgetHandler(w core.Widget) {
 		title = t.(string)
 	}
 	hdr := len(tag) == 2 && tag[0] == 'h'
-	if ct.Context.BrowserStyle {
-		// the layout is from the styles of the page (CSS), with the docs font size
-		if tx, ok := w.(*core.Text); ok {
-			tx.Styler(func(s *styles.Style) {
-				s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
-			})
-		}
-		if hdr {
-			wb.SetProperty("paginate-no-break-after", true)
-		}
+	// the layout is from the styles of the page (CSS), with the docs font size
+	if tx, ok := w.(*core.Text); ok {
+		tx.Styler(func(s *styles.Style) {
+			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+		})
+	}
+	if hdr {
+		wb.SetProperty("paginate-no-break-after", true)
 	}
 	switch x := w.(type) {
-	case *core.Text:
-		if ct.Context.BrowserStyle {
-			break
-		}
-		x.Styler(func(s *styles.Style) {
-			if tag == "td" {
-				s.Margin.SetVertical(units.Em(0)) // use gap
-			} else {
-				s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
-			}
-			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
-			s.Max.X.In(8) // big enough to not constrain PDF render
-			if hdr {
-				x.SetProperty("paginate-no-break-after", true)
-			}
-		})
 	case *core.Image:
 		ct.widgetHandlerFigure(w, id)
 		x.OnDoubleClick(func(e events.Event) {

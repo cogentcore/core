@@ -20,7 +20,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
@@ -29,7 +28,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
-	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
@@ -56,20 +54,15 @@ func handleElement(ctx *Context) {
 		}
 	}
 
-	if ctx.BrowserStyle && handleBrowserElement(ctx, tag) {
-		return
-	}
-
-	if slices.Contains(textTags, tag) {
-		ctx.handleWidget(ctx.Node, handleTextTag(ctx))
+	if handleBrowserElement(ctx, tag) {
 		return
 	}
 
 	var newWidget core.Widget
 
 	switch tag {
-	case "script":
-		// we don't render anything
+	case "script", "link", "style":
+		// nothing is rendered, and the style sheets are added first
 	case "title":
 		// it is not rendered, but it is the title of the page (the first one)
 		if ctx.Title == "" {
@@ -84,88 +77,6 @@ func handleElement(ctx *Context) {
 				ctx.RefreshURL = strings.Trim(strings.TrimSpace(u[4:]), `'"`)
 			}
 		}
-	case "link":
-		if ctx.BrowserStyle { // all style sheets are added first
-			return
-		}
-		rel := GetAttr(ctx.Node, "rel")
-		// TODO(kai/htmlcore): maybe handle preload
-		if rel == "preload" {
-			return
-		}
-		// TODO(kai/htmlcore): support links other than stylesheets
-		if rel != "stylesheet" {
-			return
-		}
-		resp, err := Get(ctx, GetAttr(ctx.Node, "href"))
-		if errors.Log(err) != nil {
-			return
-		}
-		defer resp.Body.Close()
-		b, err := io.ReadAll(resp.Body)
-		if errors.Log(err) != nil {
-			return
-		}
-		ctx.addStyle(string(b))
-	case "style":
-		if ctx.BrowserStyle {
-			return
-		}
-		ctx.addStyle(ExtractText(ctx))
-	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
-		if ctx.BrowserStyle && ctx.displayOf(ctx.Node) == "contents" && tag != "body" {
-			ctx.NewParent = ctx.BlockParent // it has no box, and its children are in its parent
-			ctx.inlineParent = nil
-			break
-		}
-		if ctx.BrowserStyle && ctx.displayOf(ctx.Node) == "block" && ctx.flattensBlock(ctx.Node) {
-			ctx.NewParent = ctx.BlockParent // it has no box of its own
-			ctx.inlineParent = nil
-			break
-		}
-		w := New[core.Frame](ctx)
-		newWidget = w
-		ctx.NewParent = w
-		if ctx.BrowserStyle {
-			break
-		}
-		switch tag {
-		case "body":
-			w.Styler(func(s *styles.Style) {
-				s.Grow.Set(1, 1)
-			})
-		case "ol", "ul":
-			ld := listDepth(ctx, w.This.(core.Widget)) + 1
-			w.SetProperty("listDepth", ld)
-			if tag == "ol" {
-				w.SetProperty("listCount", 0)
-			}
-			w.FinalStyler(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
-				s.Padding.Left.Ch(core.ConstantSpacing(float32(4 * ld)))
-			})
-		case "div":
-			w.Styler(func(s *styles.Style) {
-				s.Grow.Set(1, 1)
-				s.Overflow.Y = styles.OverflowAuto
-			})
-		case "blockquote":
-			w.Styler(func(s *styles.Style) { // todo: need a better marker
-				s.Grow.Set(1, 0)
-				s.Direction = styles.Column
-				s.Background = colors.Scheme.SurfaceContainer
-			})
-		}
-	case "button":
-		newWidget = New[core.Button](ctx).SetText(ExtractText(ctx))
-	case "h1", "h2", "h3", "h4", "h5", "h6":
-		newWidget = handleHeading(ctx, tag)
-	case "p":
-		newWidget = handleText(ctx, tag)
-	case "pre":
-		newWidget = handlePre(ctx, tag)
-	case "li":
-		newWidget = handleListItem(ctx)
 	case "img":
 		newWidget = handleImage(ctx, tag)
 	case "input":
@@ -181,155 +92,28 @@ func handleElement(ctx *Context) {
 	case "thead", "tbody", "tfoot", "tr":
 		ctx.NewParent = ctx.tableFor(ctx.Node)
 	default:
-		if ctx.BrowserStyle {
-			switch display := ctx.displayOf(ctx.Node); {
-			case display == "none":
-				// not rendered, and neither are its children
-			case display == "contents":
-				// it has no box, and its children are in its parent
-				ctx.NewParent = ctx.BlockParent
-				ctx.inlineParent = nil
-			case display == "block" && ctx.flattensBlock(ctx.Node):
-				// its children are in its parent, as it has no box of its own
-				ctx.NewParent = ctx.BlockParent
-				ctx.inlineParent = nil
-			case isBlockDisplay(display) || display == "inline-block" || display == "inline-flex":
-				w := New[core.Frame](ctx)
-				newWidget = w
-				ctx.NewParent = w
-			default:
-				ctx.NewParent = ctx.Parent()
-			}
-			break
+		switch display := ctx.displayOf(ctx.Node); {
+		case display == "none":
+			// not rendered, and neither are its children
+		case display == "contents" && tag != "body":
+			// it has no box, and its children are in its parent
+			ctx.NewParent = ctx.BlockParent
+			ctx.inlineParent = nil
+		case display == "block" && ctx.flattensBlock(ctx.Node):
+			// its children are in its parent, as it has no box of its own
+			ctx.NewParent = ctx.BlockParent
+			ctx.inlineParent = nil
+		case isBlockDisplay(display) || tag == "body" || strings.HasPrefix(display, "inline-"):
+			w := New[core.Frame](ctx)
+			newWidget = w
+			ctx.NewParent = w
+		default:
+			ctx.NewParent = ctx.Parent()
 		}
-		ctx.NewParent = ctx.Parent()
 	}
 	if newWidget != nil {
 		ctx.handleWidget(ctx.Node, newWidget)
 	}
-}
-
-// handleHeading handles a heading element in the Cogent Core style.
-func handleHeading(ctx *Context, tag string) core.Widget {
-	switch tag {
-	case "h1":
-		return handleText(ctx, tag).SetType(core.TextDisplaySmall)
-	case "h2":
-		return handleText(ctx, tag).SetType(core.TextHeadlineMedium)
-	case "h3":
-		return handleText(ctx, tag).SetType(core.TextTitleLarge)
-	case "h4":
-		return handleText(ctx, tag).SetType(core.TextTitleMedium)
-	case "h5":
-		return handleText(ctx, tag).SetType(core.TextTitleSmall)
-	}
-	return handleText(ctx, tag).SetType(core.TextLabelSmall)
-}
-
-// handlePre handles a pre element.
-func handlePre(ctx *Context, tag string) core.Widget {
-	var newWidget core.Widget
-	{
-		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
-		if hasCode {
-			codeEl := ctx.Node.FirstChild
-			lang := GetLanguage(GetAttr(codeEl, "class"))
-			id := GetAttr(codeEl, "id")
-			var ed *textcore.Editor
-			ed = New[textcore.Editor](ctx)
-			if id != "" {
-				ed.SetName(id)
-			}
-			newWidget = ed
-			ctx.Node = codeEl
-			if lang != "" {
-				ed.Lines.SetFileExt(lang)
-			}
-			ed.Lines.SetString(ExtractText(ctx))
-			ed.SetReadOnly(true)
-			ed.Lines.Settings.LineNumbers = false
-			ed.Styler(func(s *styles.Style) {
-				s.Border.Width.Zero()
-				s.MaxBorder.Width.Zero()
-				s.StateLayer = 0
-				s.Background = colors.Scheme.SurfaceContainer
-			})
-		} else {
-			newWidget = handleText(ctx, tag)
-			newWidget.AsWidget().Styler(func(s *styles.Style) {
-				s.Text.WhiteSpace = text.WhiteSpacePreWrap
-			})
-		}
-	}
-	return newWidget
-}
-
-// handleListItem handles a li element.
-func handleListItem(ctx *Context) core.Widget {
-	var newWidget core.Widget
-	{
-		// if we have a p as our first or second child, which is typical
-		// for markdown-generated HTML, we use it directly for data extraction
-		// to prevent double elements and unnecessary line breaks.
-		hasPChild := false
-		if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "p" {
-			ctx.Node = ctx.Node.FirstChild
-			hasPChild = true
-		} else if ctx.Node.FirstChild != nil && ctx.Node.FirstChild.NextSibling != nil && ctx.Node.FirstChild.NextSibling.Data == "p" {
-			ctx.Node = ctx.Node.FirstChild.NextSibling
-		}
-		text, sublist := handleTextExclude(ctx, "ol", "ul") // exclude other lists
-		newWidget = text
-		start := ""
-		if pw, ok := text.Parent.(core.Widget); ok {
-			pwt := pw.AsTree()
-			switch pwt.Property("tag") {
-			case "ol":
-				number := pwt.Property("listCount").(int) + 1
-				pwt.SetProperty("listCount", number)
-				start = strconv.Itoa(number) + ". "
-			case "ul":
-				ld := pwt.Property("listDepth").(int)
-				if ld%2 == 1 {
-					start = "• "
-				} else {
-					start = "◦ "
-				}
-			}
-		}
-		text.SetText(start + text.Text)
-
-		if hasPChild { // handle potential additional <p> blocks that should be indented
-			cnode := ctx.Node
-			orignode := cnode
-			// ctx.BlockParent = text.Parent.(core.Widget)
-			got := false
-			for cnode.NextSibling != nil {
-				cnode = cnode.NextSibling
-				if cnode.Data != "p" {
-					break
-				}
-				ctx.Node = cnode
-				got = true
-				txt, psub := handleTextExclude(ctx, "ol", "ul")
-				txt.SetText(txt.Text)
-				ctx.handleWidget(cnode, txt)
-				if psub != nil {
-					if psub != sublist {
-						readHTMLNode(ctx, ctx.Parent(), psub)
-					}
-					break
-				}
-			}
-			if !got && cnode != nil && cnode != orignode {
-				readHTMLNode(ctx, ctx.Parent(), cnode)
-			}
-		}
-		if sublist != nil {
-			readHTMLNode(ctx, ctx.Parent(), sublist)
-		}
-	}
-	return newWidget
 }
 
 // handleInput handles an input element.
@@ -377,7 +161,7 @@ func handleTable(ctx *Context) core.Widget {
 	ctx.TableParent = w
 	cols := ctx.tableColumns(ctx.Node)
 	w.SetProperty("cols", cols)
-	if ctx.BrowserStyle && ctx.declaration(ctx.Node, "width") == "" && ctx.hasPercentColumns(ctx.Node) {
+	if ctx.declaration(ctx.Node, "width") == "" && ctx.hasPercentColumns(ctx.Node) {
 		// An auto-width table with percentage columns is as wide as it needs
 		// to be to give them their shares, which is approximated by filling
 		// the width that it has (in which they grow up to their shares).
@@ -386,13 +170,6 @@ func handleTable(ctx *Context) core.Widget {
 	w.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = cols
-		if ctx.BrowserStyle {
-			return
-		}
-		s.Overflow.X = styles.OverflowAuto
-		s.Grow.Set(1, 0)
-		s.Gap.X.Dp(core.ConstantSpacing(6))
-		s.Justify.Content = styles.Center
 	})
 	return w
 }
@@ -448,7 +225,7 @@ func (ctx *Context) tableColumns(table *html.Node) int {
 			case "tr":
 				n := 0
 				for cell := c.FirstChild; cell != nil; cell = cell.NextSibling {
-					if (cell.Data == "td" || cell.Data == "th") && !(ctx.BrowserStyle && ctx.displayOf(cell) == "none") {
+					if (cell.Data == "td" || cell.Data == "th") && ctx.displayOf(cell) != "none" {
 						span, err := strconv.Atoi(GetAttr(cell, "colspan"))
 						if err != nil || span < 1 {
 							span = 1
@@ -472,99 +249,63 @@ func handleCell(ctx *Context, tag string) core.Widget {
 	if err != nil || span < 1 {
 		span = 1
 	}
-	if ctx.BrowserStyle {
-		w := New[core.Frame](ctx)
-		ctx.NewParent = w
-		// Columns grow by the size of their content, as in browsers, for
-		// which the length of the text is a proxy, only when the table
-		// has a width to grow into.
-		weight := float32(max(len([]rune(strings.TrimSpace(nodeText(ctx.Node)))), 1))
-		rspan, err := strconv.Atoi(GetAttr(ctx.Node, "rowspan"))
-		if err != nil || rspan < 1 {
-			rspan = 1
-		}
-		// a percentage width of a cell in a table that fills its width
-		// (see handleTable) is the width of its column
-		pct := float32(0)
-		if table := ancestorTable(ctx.Node); table != nil && ctx.declaration(table, "width") == "" && ctx.hasPercentColumns(table) {
-			if v, ok := strings.CutSuffix(strings.TrimSpace(ctx.declaration(ctx.Node, "width")), "%"); ok {
-				if f, err := strconv.ParseFloat(v, 32); err == nil {
-					pct = float32(f)
-				}
+	w := New[core.Frame](ctx)
+	ctx.NewParent = w
+	// Columns grow by the size of their content, as in browsers, for
+	// which the length of the text is a proxy, only when the table
+	// has a width to grow into.
+	weight := float32(max(len([]rune(strings.TrimSpace(nodeText(ctx.Node)))), 1))
+	rspan, err := strconv.Atoi(GetAttr(ctx.Node, "rowspan"))
+	if err != nil || rspan < 1 {
+		rspan = 1
+	}
+	// a percentage width of a cell in a table that fills its width
+	// (see handleTable) is the width of its column
+	pct := float32(0)
+	if table := ancestorTable(ctx.Node); table != nil && ctx.declaration(table, "width") == "" && ctx.hasPercentColumns(table) {
+		if v, ok := strings.CutSuffix(strings.TrimSpace(ctx.declaration(ctx.Node, "width")), "%"); ok {
+			if f, err := strconv.ParseFloat(v, 32); err == nil {
+				pct = float32(f)
 			}
 		}
-		w.FinalStyler(func(s *styles.Style) {
-			if pct > 0 {
-				s.Min.X, s.Max.X = units.Pw(pct), units.Pw(pct)
-				s.BoxSizing = styles.BoxBorderBox
-			}
-			if span > 1 {
-				s.ColSpan = span
-			}
-			if rspan > 1 {
-				s.RowSpan = rspan
-			}
-			if s.Grow.X > 0 {
-				s.Grow.X = weight / float32(span)
-			}
-		})
-		return w
 	}
-	tx := handleText(ctx, tag)
-	if tx.Parent == nil { // if empty we need a real empty text to keep structure
-		tx = New[core.Text](ctx)
-	}
-	if span > 1 {
-		tx.Styler(func(s *styles.Style) { s.ColSpan = span })
-	}
-	if tag == "th" {
-		tx.Styler(func(s *styles.Style) {
-			s.Font.Weight = rich.Bold
-			s.Border.Width.Bottom.Dp(2)
-			s.Margin.Bottom.Dp(6)
-			s.Margin.Top.Dp(6)
-		})
-	} else {
-		tx.Styler(func(s *styles.Style) {
-			s.Margin.Bottom.Dp(6)
-			s.Margin.Top.Dp(6)
-		})
-	}
-	return tx
+	w.FinalStyler(func(s *styles.Style) {
+		if pct > 0 {
+			s.Min.X, s.Max.X = units.Pw(pct), units.Pw(pct)
+			s.BoxSizing = styles.BoxBorderBox
+		}
+		if span > 1 {
+			s.ColSpan = span
+		}
+		if rspan > 1 {
+			s.RowSpan = rspan
+		}
+		if s.Grow.X > 0 {
+			s.Grow.X = weight / float32(span)
+		}
+	})
+	return w
 }
 
 func handleImage(ctx *Context, tag string) core.Widget {
-	pid := ""
-	pstyle := ""
-	if ctx.BrowserStyle && strings.TrimSpace(GetAttr(ctx.Node, "src")) == "" {
+	if strings.TrimSpace(GetAttr(ctx.Node, "src")) == "" {
 		return nil // an image without a source is not shown
-	}
-	if ctx.BlockParent != nil && !ctx.BrowserStyle { // these attributes get put on a block parent element
-		pstyle = GetAttr(ctx.Node.Parent, "style")
-		pid = GetAttr(ctx.Node.Parent, "id")
 	}
 	n := ctx.Node
 	src := GetAttr(n, "src")
 	alt := GetAttr(n, "alt")
-	if pstyle != "" {
-		ctx.SetStyleAttr(n, pstyle)
-	}
 	isSVG := strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg")
 	var newWidget core.Widget
 	var resp *http.Response
 	var err error
 	// imageError handles an error getting the image, which is only logged
-	// at the debug level in browser style, as browsers just do not show
-	// images that are missing or not supported.
+	// at the debug level, as browsers just do not show images that are
+	// missing or not supported.
 	imageError := func(err error) bool {
 		if err == nil {
 			return false
 		}
-		if ctx.BrowserStyle {
-			slog.Debug("error loading image", "url", src, "err", err)
-		} else {
-			errors.Log(err)
-		}
+		slog.Debug("error loading image", "url", src, "err", err)
 		return true
 	}
 	var svgData []byte
@@ -576,7 +317,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		defer resp.Body.Close()
 	}
 	var im image.Image
-	if !ctx.DelayedImageLoad && !isSVG && ctx.BrowserStyle && ctx.ImageCache == nil {
+	if !ctx.DelayedImageLoad && !isSVG && ctx.ImageCache == nil {
 		// An image is an svg by its type (not only the extension of its URL).
 		resp, err = Get(ctx, src)
 		if imageError(err) {
@@ -605,10 +346,6 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	if isSVG {
 		svg = New[core.SVG](ctx)
 		svg.SetTooltip(alt)
-		if pid != "" {
-			svg.SetName(pid)
-			svg.SetProperty("id", pid)
-		}
 		if !ctx.DelayedImageLoad {
 			data, err := svgData, error(nil)
 			if data == nil {
@@ -616,7 +353,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 			}
 			if errors.Log(err) == nil {
 				errors.Log(svg.Read(bytes.NewReader(data)))
-				if w, h, ok := svgSize(data); ok { // its intrinsic size, for browser style
+				if w, h, ok := svgSize(data); ok { // its intrinsic size
 					svg.SetProperty("svg-size", math32.Vec2(w, h))
 				}
 			}
@@ -626,10 +363,6 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		img = New[core.Image](ctx)
 		img.SetTooltip(alt)
 		img.SetProperty("src", src) // for generatehtml
-		if pid != "" {
-			img.SetName(pid)
-			img.SetProperty("id", pid)
-		}
 		img.SetImage(im)
 		newWidget = img
 	}
@@ -686,48 +419,14 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 	defer resp.Body.Close()
 	im, _, err := imagex.Read(resp.Body)
 	if err != nil {
-		if ctx.BrowserStyle { // browsers just do not show images that are not supported
-			slog.Debug("error loading image", "url", src, "err", err)
-		} else {
-			slog.Error("error loading image", "url", src, "err", err)
-		}
+		// browsers just do not show images that are not supported
+		slog.Debug("error loading image", "url", src, "err", err)
 		return nil, nil
 	}
 	if cache != nil {
 		cache.Add(key, im)
 	}
 	return im, nil
-}
-
-// handleText creates a new [core.Text] from the given information, setting the text and
-// the text click function so that URLs are opened according to [Context.OpenURL].
-func handleText(ctx *Context, tag string) *core.Text {
-	tx, _ := handleTextExclude(ctx)
-	return tx
-}
-
-// handleTextExclude creates a new [core.Text] from the given information, setting the text and
-// the text click function so that URLs are opened according to [Context.OpenURL].
-// excludeSubs is a list of sub-node types to exclude in processing this element.
-// If one of those types is encountered, it is returned.
-func handleTextExclude(ctx *Context, excludeSubs ...string) (*core.Text, *html.Node) {
-	et, excl := ExtractTextExclude(ctx, excludeSubs...)
-	if et == "" {
-		// Empty text elements do not render, so we just return a fake one (to avoid panics).
-		return core.NewText(), excl
-	}
-	tx := New[core.Text](ctx).SetText(et)
-	tag := ctx.Node.Data
-	hasBreak := strings.Contains(et, "\n") || strings.Contains(et, "<br>")
-	if tag != "li" && hasBreak && !strings.Contains(et, `<span class="math display">`) {
-		tx.Styler(func(s *styles.Style) {
-			s.Text.WhiteSpace = text.WhiteSpacePreWrap
-		})
-	}
-	tx.HandleTextClick(func(tl *rich.Hyperlink, e events.Event) {
-		ctx.OpenURL(tl.URL, e)
-	})
-	return tx, excl
 }
 
 // handleTextTag creates a new [core.Text] from the given information, setting the text and
@@ -743,23 +442,6 @@ func handleTextTag(ctx *Context) *core.Text {
 		ctx.OpenURL(tl.URL, e)
 	})
 	return tx
-}
-
-// listDepth returns the depth of list elements ("ol", "ul") above
-// the given widget. 0 = none, 1 = 1 etc.
-func listDepth(ctx *Context, w core.Widget) int {
-	ld := 0
-	pw, ok := w.AsTree().Parent.(core.Widget)
-	for ok {
-		ptag := pw.AsTree().Property("tag")
-		if ptag == "ol" || ptag == "ul" {
-			ld++
-			pw, ok = pw.AsTree().Parent.(core.Widget)
-		} else {
-			break
-		}
-	}
-	return ld
 }
 
 // GetAttr gets the given attribute from the given node, returning ""
