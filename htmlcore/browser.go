@@ -297,8 +297,35 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		s.Shrink.X = 1
 	}
 	if size, ok := wb.Property("svg-size").(math32.Vector2); ok {
-		// an img of an svg has the size of the svg, or that of its aspect
+		// an img of an svg has the size of the svg, or that of its aspect,
+		// within percentage max sizes of a parent with a size
+		cb := node // the containing block: the nearest block it is in
+		for cb != nil && cb.Parent != nil && cb.Parent.Type == html.ElementNode {
+			cb = cb.Parent
+			if d := c.displayOf(cb); d != "" && d != "inline" && d != "contents" {
+				break
+			}
+		}
+		if cb != nil && cb != node && cb.Type == html.ElementNode {
+			scale := float32(1)
+			for i, mx := range []*units.Value{st.maxWidth, st.maxHeight} {
+				if mx == nil || (mx.Unit != units.UnitPw && mx.Unit != units.UnitPh) {
+					continue
+				}
+				prop := "width"
+				if i == 1 {
+					prop = "height"
+				}
+				if px, ok := c.lengthPx(c.declaration(cb, prop)); ok && px > 0 {
+					scale = min(scale, px*mx.Value/100/size.Dim(math32.Dims(i)))
+				}
+			}
+			size = size.MulScalar(scale)
+		}
 		switch {
+		case st.width != nil && st.height != nil && st.height.Unit != units.UnitPh:
+			mh := *st.height
+			s.Max.Y = mh // as an image is not higher than its height
 		case st.width == nil && st.height == nil:
 			s.Min.Set(units.Dp(size.X), units.Dp(size.Y))
 			s.Max = s.Min

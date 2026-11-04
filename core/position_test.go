@@ -5,7 +5,11 @@
 package core
 
 import (
+	"image"
 	"testing"
+
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles/abilities"
 
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -99,5 +103,31 @@ func TestPositionRenderOrder(t *testing.T) {
 	e.Styler(func(s *styles.Style) { s.Position = styles.PositionAbsolute; s.ZIndex = -1 })
 	layoutGeom(b, func() {
 		assert.Equal(t, []Widget{e, d, c, a}, b.renderOrder())
+	})
+}
+
+// TestPositionEvents tests that a positioned widget that is rendered over
+// a widget after it in the tree gets the events at their overlap.
+func TestPositionEvents(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+	over := fixedFrame(b, 100, 100)
+	over.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.SetAbilities(true, abilities.Clickable)
+	})
+	under := fixedFrame(b, 300, 300)
+	under.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Clickable) })
+	var clicked Widget
+	over.OnClick(func(e events.Event) { clicked = over })
+	under.OnClick(func(e events.Event) { clicked = under })
+	b.AssertRender(t, "position/events", func() {
+		pos := over.Geom.TotalBBox.Min.Add(image.Pt(10, 10))
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.Equal(t, Widget(over), clicked)
 	})
 }

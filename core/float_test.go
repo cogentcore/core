@@ -80,3 +80,30 @@ func TestFloatClearFlow(t *testing.T) {
 		assert.InDelta(t, 300*dp, beside.Geom.Size.Alloc.Total.X, 2)
 	})
 }
+
+// TestFloatNotHigher tests that a float is not placed higher than the
+// floats before it, even where there is room above.
+func TestFloatNotHigher(t *testing.T) {
+	b := NewBody()
+	col := NewFrame(b)
+	col.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Min.X.Dp(300)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	tall := fixedFrame(col, 100, 200)
+	tall.Styler(func(s *styles.Style) { s.Float = styles.FloatLeft })
+	short := fixedFrame(col, 100, 50)
+	short.Styler(func(s *styles.Style) { s.Float = styles.FloatLeft })
+	cleared := fixedFrame(col, 100, 50) // below both, at the left
+	cleared.Styler(func(s *styles.Style) { s.Float = styles.FloatLeft; s.Clear = styles.ClearBoth })
+	next := fixedFrame(col, 100, 50) // beside it, not in the room below the short one
+	next.Styler(func(s *styles.Style) { s.Float = styles.FloatLeft })
+	layoutGeom(b, func() {
+		dp := col.Styles.UnitContext.Dots(units.UnitDp)
+		y0 := col.Geom.Pos.Content.Y
+		assert.InDelta(t, y0+200*dp, cleared.Geom.Pos.Total.Y, 2)
+		assert.InDelta(t, y0+200*dp, next.Geom.Pos.Total.Y, 2)
+	})
+}

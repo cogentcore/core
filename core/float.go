@@ -102,6 +102,7 @@ func (fr *Frame) layoutFloats() bool {
 	}
 	changed := false
 	y := float32(0)
+	floatTop := float32(0) // the top of the last float
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if cwb.outOfFlow() {
 			return tree.Continue
@@ -121,7 +122,8 @@ func (fr *Frame) layoutFloats() bool {
 			w := min(ksz.Actual.Total.X, width)
 			h := ksz.Actual.Total.Y
 			left := cwb.Styles.Float == styles.FloatLeft
-			fy := cy
+			// a float is not higher than the floats before it, as in CSS
+			fy := max(cy, floatTop)
 			for range len(floats) + 1 { // down below floats until it fits
 				l, r := edges(fy)
 				if r-l >= w || l == 0 && r == width {
@@ -144,6 +146,7 @@ func (fr *Frame) layoutFloats() bool {
 				x = r - w
 			}
 			floats = append(floats, rect{left, x, fy, w, h})
+			floatTop = fy
 			if ksz.Alloc.Total.X != w {
 				changed = true
 			}
