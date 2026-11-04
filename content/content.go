@@ -172,7 +172,7 @@ func (ct *Content) Init() {
 	ct.Context = htmlcore.NewContext()
 	// in the page, which has its own padding, and not too wide to read
 	// (as on a wide screen), and big enough to not constrain PDF render
-	ct.Context.Style = "body { margin: 0; max-width: 8in; }"
+	ct.Context.Style = "body { margin: 0; max-width: 9in; }"
 	ct.Context.DelayedImageLoad = false // not useful for content
 	// The source does not change until SetSource, which resets the cache.
 	ct.Context.ImageCache = htmlcore.NewImageCache(ImageCacheBytes)
