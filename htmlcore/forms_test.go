@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/tree"
@@ -89,4 +90,49 @@ func TestFormSelect(t *testing.T) {
 	ch.SetCurrentIndex(2)
 	submit.Send(events.Click)
 	assert.Equal(t, []string{"https://www.example.com/go?lang=fr", "https://www.example.com/go?lang=Deutsch"}, opened)
+}
+
+func TestDetails(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	ctx.BrowserStyle = true
+	ReadHTMLString(ctx, b, `<details><summary>More</summary><p>Hidden text</p></details>
+<details open><summary>Open</summary><p>Shown text</p></details>`)
+	var summaries []*core.Frame
+	texts := map[string]*core.Text{}
+	b.WalkDown(func(n tree.Node) bool {
+		switch w := n.(type) {
+		case *core.Frame:
+			if w.Property("tag") == "summary" {
+				summaries = append(summaries, w)
+			}
+		case *core.Text:
+			texts[w.Text] = w
+		}
+		return tree.Continue
+	})
+	if !assert.Len(t, summaries, 2) || !assert.NotNil(t, texts["Hidden text"]) {
+		return
+	}
+	visible := func(tx *core.Text) bool {
+		for w := tx.AsWidget(); w != nil; {
+			if w.Styles.Display == styles.DisplayNone {
+				return false
+			}
+			p, ok := w.Parent.(core.Widget)
+			if !ok {
+				break
+			}
+			w = p.AsWidget()
+		}
+		return true
+	}
+	b.RenderImage(func() {
+		assert.False(t, visible(texts["Hidden text"]))
+		assert.True(t, visible(texts["Shown text"]))
+		assert.NotNil(t, texts["▸ "], "a closed marker")
+		summaries[0].Send(events.Click)
+	}, func() {
+		assert.True(t, visible(texts["Hidden text"]), "opened by a click")
+	})
 }

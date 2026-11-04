@@ -40,6 +40,7 @@ ul, menu, dir, ol { margin: 1em 0; padding-left: 40px; }
 ul ul, ul ol, ol ul, ol ol, ul menu, ol menu, menu ul, menu ol { margin-top: 0; margin-bottom: 0; }
 
 pre, xmp, plaintext, listing { font-family: monospace; white-space: pre; margin: 1em 0; }
+details > summary:first-of-type { display: list-item; list-style-type: disclosure-closed; }
 a[href] { color: #0000ee; text-decoration: underline; cursor: pointer; }
 code, kbd, samp, tt { font-family: monospace; }
 mark { background-color: yellow; color: black; }
