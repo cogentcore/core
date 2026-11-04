@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"fmt"
 	"log/slog"
 	"net/url"
 	"strings"
@@ -159,6 +160,9 @@ func (c *Context) controlValue(n, submitter *html.Node) (string, bool) {
 		}
 		return nodeText(n), true
 	case "select":
+		if ch, ok := w.(*core.Chooser); ok && ch.CurrentIndex >= 0 {
+			return fmt.Sprint(ch.CurrentItem.Value), true
+		}
 		for o := range optionNodes(n) {
 			if HasAttr(o, "selected") {
 				return optionValue(o), true

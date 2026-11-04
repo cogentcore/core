@@ -55,6 +55,19 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 	case "li":
 		handleBrowserListItem(ctx)
 		return true
+	case "select":
+		// a chooser of its options, which are not read as content
+		ch := New[core.Chooser](ctx)
+		current := -1
+		for o := range optionNodes(ctx.Node) {
+			if HasAttr(o, "selected") && current < 0 {
+				current = len(ch.Items)
+			}
+			ch.Items = append(ch.Items, core.ChooserItem{Value: optionValue(o), Text: strings.TrimSpace(nodeText(o))})
+		}
+		ch.SetCurrentIndex(max(current, 0))
+		ctx.handleWidget(ctx.Node, ch)
+		return true
 	case "button":
 		// a button is a block of its content, styled by CSS, that is clickable
 		w := New[core.Frame](ctx)

@@ -56,3 +56,37 @@ func TestFormSubmit(t *testing.T) {
 		"/about",
 	}, opened)
 }
+
+func TestFormSelect(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	ctx.BrowserStyle = true
+	ctx.PageURL = "https://www.example.com/page"
+	var opened []string
+	ctx.OpenURL = func(url string, e events.Event) { opened = append(opened, url) }
+	ReadHTMLString(ctx, b, `<form action="/go"><select name="lang"><option value="en">English</option>
+<option value="fr" selected>Français</option><option>Deutsch</option></select>
+<input type="submit" value="Go"></form>`)
+	var ch *core.Chooser
+	var submit *core.Frame
+	b.WalkDown(func(n tree.Node) bool {
+		switch w := n.(type) {
+		case *core.Chooser:
+			ch = w
+		case *core.Frame:
+			if w.Property("tag") == "input" {
+				submit = w
+			}
+		}
+		return tree.Continue
+	})
+	if !assert.NotNil(t, ch) || !assert.NotNil(t, submit) {
+		return
+	}
+	assert.Len(t, ch.Items, 3)
+	assert.Equal(t, "Français", ch.CurrentItem.Text)
+	submit.Send(events.Click)
+	ch.SetCurrentIndex(2)
+	submit.Send(events.Click)
+	assert.Equal(t, []string{"https://www.example.com/go?lang=fr", "https://www.example.com/go?lang=Deutsch"}, opened)
+}
