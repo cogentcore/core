@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
@@ -99,9 +100,26 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
 		ctx.handleWidget(ctx.Node, w)
+		if href := GetAttr(ctx.Node, "href"); tag == "a" && href != "" {
+			ctx.linkFrame(w, href)
+		}
 		return true
 	}
 	return false
+}
+
+// linkFrame makes the given frame of an a element open the given URL.
+func (c *Context) linkFrame(w *core.Frame, href string) {
+	w.SetProperty("href", href)
+	w.SetTooltip(href)
+	w.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable)
+		s.Cursor = cursors.Pointer
+	})
+	w.OnClick(func(e events.Event) {
+		e.SetHandled()
+		c.OpenURL(href, e)
+	})
 }
 
 // markerWidth is the width of the box of a list marker,

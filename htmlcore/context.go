@@ -51,6 +51,10 @@ type Context struct {
 	// more compact Cogent Core style, as used by content.
 	BrowserStyle bool
 
+	// nodeWidgets has the widgets of the controls of forms,
+	// for [Context.BrowserStyle].
+	nodeWidgets map[*html.Node]core.Widget
+
 	// blocks has the margin collapsing state of the block widgets,
 	// for [Context.BrowserStyle].
 	blocks map[core.Widget]*blockState
@@ -361,6 +365,9 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 // in order added so last one has override priority.
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
+	if c.BrowserStyle {
+		c.handleFormWidget(node, w)
+	}
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}
