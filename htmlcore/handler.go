@@ -108,6 +108,11 @@ func handleElement(ctx *Context) {
 		}
 		ctx.addStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
+		if ctx.BrowserStyle && ctx.displayOf(ctx.Node) == "contents" && tag != "body" {
+			ctx.NewParent = ctx.BlockParent // it has no box, and its children are in its parent
+			ctx.inlineParent = nil
+			break
+		}
 		if ctx.BrowserStyle && ctx.displayOf(ctx.Node) == "block" && ctx.flattensBlock(ctx.Node) {
 			ctx.NewParent = ctx.BlockParent // it has no box of its own
 			ctx.inlineParent = nil
@@ -175,6 +180,10 @@ func handleElement(ctx *Context) {
 			switch display := ctx.displayOf(ctx.Node); {
 			case display == "none":
 				// not rendered, and neither are its children
+			case display == "contents":
+				// it has no box, and its children are in its parent
+				ctx.NewParent = ctx.BlockParent
+				ctx.inlineParent = nil
 			case display == "block" && ctx.flattensBlock(ctx.Node):
 				// its children are in its parent, as it has no box of its own
 				ctx.NewParent = ctx.BlockParent

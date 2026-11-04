@@ -441,6 +441,9 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 		}
 		for i := len(ds) - 1; i >= 0; i-- {
 			if ds[i].Property == name {
+				if strings.EqualFold(strings.TrimSpace(ds[i].Value), "initial") {
+					return "", false // the guaranteed-invalid value, as when not set
+				}
 				return ds[i].Value, !ds[i].invalid
 			}
 		}

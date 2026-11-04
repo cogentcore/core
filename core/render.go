@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
@@ -466,7 +467,11 @@ func (wb *WidgetBase) StartRender() bool {
 	if pc.State == nil {
 		return false
 	}
-	pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	if wb.noClip() { // its children can be outside of it
+		pc.PushContext(nil, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
+	} else {
+		pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	}
 	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)

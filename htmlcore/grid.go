@@ -93,14 +93,15 @@ func cutTopLevel(s string, sep byte) (before, after string, found bool) {
 	return s, "", false
 }
 
+// gridLineNames matches the line names of a track list, as [a b].
+var gridLineNames = regexp.MustCompile(`\[[^\]]*\]`)
+
 // gridTracks returns the track sizes of a grid-template-columns value,
 // with repeat() of a number expanded and line names removed.
 func gridTracks(v string) []string {
 	var tracks []string
+	v = gridLineNames.ReplaceAllString(v, " ")
 	for _, f := range splitColors(v) { // fields outside of parentheses
-		if strings.HasPrefix(f, "[") {
-			continue // line names
-		}
 		if strings.HasPrefix(f, "repeat(") {
 			inner := strings.TrimSuffix(strings.TrimPrefix(f, "repeat("), ")")
 			n, rest, _ := strings.Cut(inner, ",")

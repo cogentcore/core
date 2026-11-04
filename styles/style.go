@@ -233,6 +233,12 @@ type Style struct { //types:add
 	// on the given sides, as the clear property of CSS.
 	Clear Clears
 
+	// NoClip is whether the children of the widget are not clipped to its
+	// content box, as for content that overflows it in CSS with visible
+	// overflow: they are clipped by the nearest widget that it is in that
+	// does clip (or scrolls) instead.
+	NoClip bool
+
 	// BoxSizing is whether the Min and Max sizes are of the content
 	// (the default), or also include the padding and border, as the
 	// box-sizing property of CSS.

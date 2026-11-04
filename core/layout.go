@@ -2405,6 +2405,28 @@ func (wb *WidgetBase) setBBoxesFromAllocs() {
 	wb.Geom.ContentBBox = wb.Geom.contentRect()
 }
 
+// childClipBBox returns the bounding box that the children of the widget
+// are clipped to: its content box, or, if it does not clip its children
+// ([styles.Style.NoClip]), that of the nearest widget that it is in that does.
+func (wb *WidgetBase) childClipBBox() image.Rectangle {
+	clip := wb
+	for clip.noClip() {
+		p := clip.parentWidget()
+		if p == nil {
+			break
+		}
+		clip = p
+	}
+	return clip.Geom.ContentBBox
+}
+
+// noClip returns whether the widget does not clip its children
+// ([styles.Style.NoClip], with overflow that does not scroll).
+func (wb *WidgetBase) noClip() bool {
+	s := &wb.Styles
+	return s.NoClip && s.Overflow.X < styles.OverflowAuto && s.Overflow.Y < styles.OverflowAuto
+}
+
 func (wb *WidgetBase) setBBoxes() {
 	pwb := wb.parentWidget()
 	var parBB image.Rectangle
@@ -2417,12 +2439,13 @@ func (wb *WidgetBase) setBBoxes() {
 			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)
 		}
 	} else {
-		parBB = pwb.Geom.ContentBBox
+		clip := pwb
 		if wb.outOfFlow() { // not clipped by its parent (see [WidgetBase.RenderWidget])
 			if gp := pwb.parentWidget(); gp != nil {
-				parBB = gp.Geom.ContentBBox
+				clip = gp
 			}
 		}
+		parBB = clip.childClipBBox()
 		bb := wb.Geom.totalRect()
 		wb.Geom.TotalBBox = parBB.Intersect(bb)
 		if DebugSettings.LayoutTrace {

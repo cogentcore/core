@@ -115,16 +115,18 @@ p { color: var(--a, green); background-color: var(--self) }
 
 func TestCSSColorFunction(t *testing.T) {
 	tests := map[string]color.RGBA{
-		"rgb(255, 0, 0)":             {255, 0, 0, 255},
-		"rgba(0, 0, 255, 0.2)":       colors.FromNRGBA(0, 0, 255, 51),
-		"rgb(0 0 255 / 20%)":         colors.FromNRGBA(0, 0, 255, 51),
-		"rgb(100%, 50%, 0%)":         {255, 128, 0, 255},
-		"hsl(120, 100%, 50%)":        {0, 255, 0, 255},
-		"hsla(240deg 100% 50% / .5)": colors.FromNRGBA(0, 0, 255, 128),
-		"color(srgb 1 0 0)":          {255, 0, 0, 255},
-		"color(display-p3 1 1 1)":    {255, 255, 255, 255},
-		"oklch(1 0 0)":               {255, 255, 255, 255},
-		"oklab(0 0 0 / 50%)":         colors.FromNRGBA(0, 0, 0, 128),
+		"rgb(255, 0, 0)":              {255, 0, 0, 255},
+		"rgba(0, 0, 255, 0.2)":        colors.FromNRGBA(0, 0, 255, 51),
+		"rgb(0 0 255 / 20%)":          colors.FromNRGBA(0, 0, 255, 51),
+		"rgb(100%, 50%, 0%)":          {255, 128, 0, 255},
+		"hsl(120, 100%, 50%)":         {0, 255, 0, 255},
+		"hsla(240deg 100% 50% / .5)":  colors.FromNRGBA(0, 0, 255, 128),
+		"color(srgb 1 0 0)":           {255, 0, 0, 255},
+		"color(display-p3 1 1 1)":     {255, 255, 255, 255},
+		"oklch(1 0 0)":                {255, 255, 255, 255},
+		"oklab(0 0 0 / 50%)":          colors.FromNRGBA(0, 0, 0, 128),
+		"light-dark(#fff, #000)":      {255, 255, 255, 255},
+		"light-dark(rgb(1 2 3), red)": {1, 2, 3, 255},
 	}
 	for v, want := range tests {
 		got, ok := cssColorFunction(v)
@@ -228,4 +230,35 @@ func TestMediaRange(t *testing.T) {
 	} {
 		assert.Equal(t, want, c.mediaMatches(q), q)
 	}
+}
+
+func TestGridTracks(t *testing.T) {
+	assert.Equal(t, []string{"minmax(15rem,1fr)", "2rem", "minmax(0,48rem)"},
+		gridTracks("[full-start left-start] minmax(15rem,1fr) [left-end] 2rem [content-start] minmax(0,48rem) [full-end right-end]"))
+	assert.Equal(t, []string{"1fr", "1fr", "1fr", "auto"}, gridTracks("repeat(3, 1fr) auto"))
+}
+
+// TestCSSVariableInitial tests the space toggle of custom properties that
+// are initial (as for light-dark() without native support), which are not set.
+func TestCSSVariableInitial(t *testing.T) {
+	ctx := NewContext()
+	ctx.BrowserStyle = true
+	doc, _ := html.Parse(strings.NewReader(`<html><head><style>
+:root { --light: initial; --toggle: var(--light) blue; --color: var(--toggle, red); }
+p { color: var(--color); }
+</style></head><body><p>x</p></body></html>`))
+	ctx.Node = doc
+	ctx.addStyleSheets(doc)
+	var p *html.Node
+	var find func(n *html.Node)
+	find = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "p" {
+			p = n
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			find(c)
+		}
+	}
+	find(doc)
+	assert.Equal(t, "red", strings.TrimSpace(ctx.declaration(p, "color")))
 }

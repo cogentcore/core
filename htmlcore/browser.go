@@ -165,8 +165,16 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			s.Margin.Zero()
 			s.Grow.Set(0, 0)
 			s.Overflow.Set(styles.OverflowVisible)
+			if isFrame {
+				// content that overflows a box is shown, unless the
+				// overflow is hidden or scrolls
+				s.NoClip = true
+			}
 			if isText {
 				s.Text.WhiteSpace = text.WrapAsNeeded
+			}
+			if ps != nil { // white-space is inherited in CSS
+				s.Text.WhiteSpace = ps.Text.WhiteSpace
 			}
 		}
 		if tag == "" && isText {
@@ -265,6 +273,9 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		s.Display = styles.Flex
 	case "grid", "inline-grid":
 		s.Display = styles.Grid
+		if s.Columns == 0 { // one column without column tracks, as in CSS
+			s.Columns = 1
+		}
 	case "none":
 		s.Display = styles.DisplayNone
 	case anonymousInline:
@@ -281,12 +292,15 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		case st.width == nil && st.height == nil:
 			s.Min.Set(units.Dp(size.X), units.Dp(size.Y))
 			s.Max = s.Min
-		case st.height == nil && st.width.Unit == units.UnitDp:
-			s.Min.Y = units.Dp(st.width.Value * size.Y / size.X)
+		// the other dimension is of the aspect of the svg, in the same unit
+		case st.height == nil && st.width.Unit != units.UnitPw:
+			s.Min.Y = units.Value{Value: st.width.Value * size.Y / size.X, Unit: st.width.Unit}
 			s.Max.Y = s.Min.Y
-		case st.width == nil && st.height.Unit == units.UnitDp:
-			s.Min.X = units.Dp(st.height.Value * size.X / size.Y)
+		case st.width == nil && st.height.Unit != units.UnitPh && st.height.Unit != units.UnitPw:
+			s.Min.X = units.Value{Value: st.height.Value * size.X / size.Y, Unit: st.height.Unit}
 			s.Max.X = s.Min.X
+			mh := *st.height
+			s.Max.Y = mh // as an image is not higher than its height
 		}
 	}
 	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil && node.Data == "svg" {
@@ -741,7 +755,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	}
 	switch prop {
 	case "margin-inline", "margin-block", "padding-inline", "padding-block":
-		fs := strings.Fields(val)
+		fs := splitColors(val)
 		if len(fs) == 0 {
 			return
 		}
@@ -761,7 +775,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "display":
 		st.display = lval
 	case "margin":
-		vals := expandSides(strings.Fields(lval))
+		vals := expandSides(splitColors(lval))
 		for i, v := range vals {
 			setMargin(st, i, v)
 		}
@@ -774,7 +788,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "margin-left":
 		setMargin(st, 3, lval)
 	case "padding":
-		vals := expandSides(strings.Fields(lval))
+		vals := expandSides(splitColors(lval))
 		for i, v := range vals {
 			if l, ok := parseLength(v, units.UnitPw); ok {
 				setValueSide(&s.Padding, i, l)
@@ -789,11 +803,11 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "border-top", "border-right", "border-bottom", "border-left":
 		setBorder(s, sideIndex(prop), val)
 	case "border-width":
-		for i, v := range expandSides(strings.Fields(lval)) {
+		for i, v := range expandSides(splitColors(lval)) {
 			setValueSide(&s.Border.Width, i, borderWidth(v))
 		}
 	case "border-style":
-		for i, v := range expandSides(strings.Fields(lval)) {
+		for i, v := range expandSides(splitColors(lval)) {
 			setBorderStyle(s, i, v)
 		}
 	case "border-color":
@@ -856,11 +870,11 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "top", "right", "bottom", "left":
 		setInset(s, sideIndex("-"+prop), lval)
 	case "inset":
-		for i, v := range expandSides(strings.Fields(lval)) {
+		for i, v := range expandSides(splitColors(lval)) {
 			setInset(s, i, v)
 		}
 	case "inset-inline", "inset-block":
-		fs := strings.Fields(lval)
+		fs := splitColors(lval)
 		if len(fs) == 0 {
 			return
 		}
@@ -1009,7 +1023,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			}
 		}
 	case "gap", "grid-gap":
-		fs := strings.Fields(lval)
+		fs := splitColors(lval)
 		if len(fs) > 0 {
 			if l, ok := parseLength(fs[0], units.UnitPh); ok {
 				s.Gap.Y = l
@@ -1030,7 +1044,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			s.Gap.X = l
 		}
 	case "border-spacing":
-		fs := strings.Fields(lval)
+		fs := splitColors(lval)
 		if len(fs) > 0 {
 			if l, ok := parseLength(fs[0], units.UnitPw); ok {
 				s.Gap.Set(l)
@@ -1320,7 +1334,7 @@ func setBorder(s *styles.Style, side int, val string) {
 }
 
 // splitColors splits the given value into fields at spaces
-// that are not inside of parentheses, as in rgb(...).
+// that are not inside of parentheses, as in rgb(...) and calc(...).
 func splitColors(v string) []string {
 	var fs []string
 	depth := 0
@@ -1407,6 +1421,14 @@ func cssColorFunction(v string) (color.RGBA, bool) {
 	name, args, ok := strings.Cut(lv, "(")
 	if !ok || !strings.HasSuffix(args, ")") {
 		return color.RGBA{}, false
+	}
+	if name == "light-dark" { // the light color, as for the light color scheme
+		light, _, _ := cutTopLevel(strings.TrimSuffix(args, ")"), ',')
+		if cl, ok := cssColorFunction(light); ok {
+			return cl, true
+		}
+		cl, err := colors.FromString(light)
+		return color.RGBA(colors.AsRGBA(cl)), err == nil
 	}
 	switch name {
 	case "rgb", "rgba", "hsl", "hsla", "color", "oklab", "oklch":

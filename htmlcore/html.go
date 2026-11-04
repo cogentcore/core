@@ -25,6 +25,9 @@ func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("error parsing HTML: %w", err)
 	}
+	if ctx.BrowserStyle {
+		closeDetails(n)
+	}
 
 	// HTML that an element handler reads while HTML is being read, such as
 	// the page that content embeds for an <embed-page>, is read whole, and
@@ -120,4 +123,31 @@ func rootNode(n *html.Node) *html.Node {
 		n = n.Parent
 	}
 	return n
+}
+
+// closeDetails removes the content of the details elements under n that
+// are closed (without an open attribute), other than their summary, as
+// browsers only show the summary of those.
+func closeDetails(n *html.Node) {
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		closeDetails(c)
+	}
+	if n.Type != html.ElementNode || n.Data != "details" {
+		return
+	}
+	for _, a := range n.Attr {
+		if a.Key == "open" {
+			return
+		}
+	}
+	summary := false
+	for c := n.FirstChild; c != nil; {
+		next := c.NextSibling
+		if c.Type == html.ElementNode && c.Data == "summary" && !summary {
+			summary = true
+		} else {
+			n.RemoveChild(c)
+		}
+		c = next
+	}
 }
