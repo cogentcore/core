@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -145,6 +146,12 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 	}
 	width := c.mediaWidth()
 	height := width * 3 / 4
+	if c.MediaHeight > 0 {
+		height = c.MediaHeight
+	}
+	if !strings.Contains(f, ":") && strings.ContainsAny(f, "<>=") {
+		return mediaRangeMatches(f, width, height)
+	}
 	switch name {
 	case "min-width", "max-width", "min-height", "max-height":
 		l, ok := length()
@@ -513,4 +520,57 @@ func mathLength(v string, pct units.Units) (units.Value, bool) {
 		return units.Value{Value: float32(l.pct), Unit: pct}, true
 	}
 	return units.Dp(float32(l.px)), true
+}
+
+// mediaRangeOp matches the comparison operators of the range syntax
+// of media features, as in (width >= 50rem) or (30rem < width <= 60rem).
+var mediaRangeOp = regexp.MustCompile(`<=|>=|<|>|=`)
+
+// mediaRangeMatches returns whether the given media feature in the range
+// syntax matches the given viewport width and height.
+func mediaRangeMatches(f string, width, height float32) bool {
+	ops := mediaRangeOp.FindAllString(f, -1)
+	parts := mediaRangeOp.Split(f, -1)
+	if len(parts) != len(ops)+1 || len(ops) == 0 || len(ops) > 2 {
+		return false
+	}
+	// value returns the value of an operand: the feature or a length.
+	value := func(s string) (float32, bool, bool) { // value, ok, isFeature
+		switch strings.TrimSpace(s) {
+		case "width":
+			return width, true, true
+		case "height":
+			return height, true, true
+		case "aspect-ratio":
+			return width / height, true, true
+		}
+		v, ok := calcPx(strings.TrimSpace(s))
+		return v, ok, false
+	}
+	feature := false
+	for i, op := range ops {
+		a, aok, af := value(parts[i])
+		b, bok, bf := value(parts[i+1])
+		if !aok || !bok {
+			return false // as browsers do for a query that is not valid
+		}
+		feature = feature || af || bf
+		var r bool
+		switch op {
+		case "<=":
+			r = a <= b
+		case ">=":
+			r = a >= b
+		case "<":
+			r = a < b
+		case ">":
+			r = a > b
+		case "=":
+			r = a == b
+		}
+		if !r {
+			return false
+		}
+	}
+	return feature
 }

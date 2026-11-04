@@ -466,6 +466,11 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	// shown in CSS, but it is clipped in core, so the height is only a
 	// minimum unless the overflow is clipped anyway.
 	parentDefinite := pbs == nil || pbs.definiteHeight
+	if pbs == nil && node != nil && node.Parent != nil && node.Parent.Data == "html" {
+		// The html element (which has no widget) has a definite height,
+		// taken to be that of the viewport, only when it has a height.
+		parentDefinite = c.declaration(node.Parent, "height") != ""
+	}
 	for _, h := range []**units.Value{&st.height, &st.minHeight, &st.maxHeight} {
 		if *h == nil || (*h).Unit != units.UnitPh {
 			continue

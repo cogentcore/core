@@ -119,13 +119,14 @@ func gridTracks(v string) []string {
 // gridTrackStyle sets the style of a child in a grid column with the given
 // track size: a length is its width, a flexible (fr) track grows by its
 // factor (and minmax(0, length) grows up to the length), and the other
-// tracks are as wide as their content when other tracks are flexible.
+// tracks are as wide as their content when other tracks are flexible
+// (and auto tracks share the rest of the width when none are).
 func gridTrackStyle(s *styles.Style, track string, flexible bool) {
 	if strings.HasPrefix(track, "minmax(") {
 		inner := strings.TrimSuffix(strings.TrimPrefix(track, "minmax("), ")")
 		_, mx, _ := strings.Cut(inner, ",")
 		mx = strings.TrimSpace(mx)
-		if strings.HasSuffix(mx, "fr") {
+		if strings.HasSuffix(mx, "fr") || mx == "auto" {
 			track = mx
 		} else if l, ok := parseLength(mx, units.UnitPw); ok {
 			s.Grow.X, s.Shrink.X = 1, 1
@@ -140,14 +141,21 @@ func gridTrackStyle(s *styles.Style, track string, flexible bool) {
 		}
 		return
 	}
-	if l, ok := parseLength(track, units.UnitPw); ok && l.Unit != units.UnitPw {
+	if l, ok := parseLength(track, units.UnitPw); ok {
+		s.BoxSizing = styles.BoxBorderBox
+		if l.Unit == units.UnitPw { // a percentage of the grid, which it fills
+			s.Max.X = l
+			s.Grow.X, s.Shrink.X = 1, 1
+			return
+		}
 		s.Min.X, s.Max.X = l, l
 		s.Grow.X, s.Shrink.X = 0, 0
-		s.BoxSizing = styles.BoxBorderBox
 		return
 	}
 	if flexible { // auto, min-content, max-content, and fit-content()
 		s.Grow.X = 0
+	} else if track == "auto" { // auto tracks share the rest of the width
+		s.Grow.X, s.Shrink.X = 1, 1
 	}
 }
 

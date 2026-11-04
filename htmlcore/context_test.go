@@ -208,3 +208,20 @@ func TestSVGSize(t *testing.T) {
 	_, _, ok := svgSize([]byte(`<svg>`))
 	assert.False(t, ok)
 }
+
+func TestMediaRange(t *testing.T) {
+	c := NewContext()
+	c.MediaWidth = 800
+	c.MediaHeight = 600
+	for q, want := range map[string]bool{
+		"(width >= 50rem)":                 true,
+		"(width >= 64rem)":                 false,
+		"only screen and (width <= 52rem)": true,
+		"(30rem < width <= 60rem)":         true,
+		"(40rem < width)":                  true,
+		"(height > 700px)":                 false,
+		"(min-width: 600px)":               true,
+	} {
+		assert.Equal(t, want, c.mediaMatches(q), q)
+	}
+}
