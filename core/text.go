@@ -608,8 +608,10 @@ func (tx *Text) availableWidth() float32 {
 		awb := ancestors[i]
 		s := &awb.Styles
 		space := s.BoxSpace().Size().X
-		if mx := s.Max.X.Dots; mx > 0 {
-			avail = min(avail, mx) // Max is of the total size
+		// the Max of the layout, which is not set for one that is relative
+		// to the parent until the parent is sized, and is of the content
+		if mx := awb.Geom.Size.Max.X; mx > 0 {
+			avail = min(avail, mx+space)
 		}
 		avail -= space
 		if s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap {

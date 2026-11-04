@@ -186,6 +186,14 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if trBg != nil {
 			st.background, st.hasBg = trBg, true
 		}
+		if ps != nil { // for calc()
+			uc := &ps.UnitContext
+			if dp := uc.Dots(units.UnitDp); dp > 0 {
+				calcEnv.em = float64(uc.FontEm / dp)
+				calcEnv.vw = float64(uc.Vpw / dp / 100)
+				calcEnv.vh = float64(uc.Vph / dp / 100)
+			}
+		}
 		for _, d := range decls {
 			if !d.invalid {
 				c.setCSS(st, s, ps, d.Property, d.Value)
@@ -284,7 +292,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
 	outOfFlow := s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed
-	if outOfFlow {
+	if outOfFlow || s.Float != styles.FloatNone {
 		bs.block = false // not in the flow of blocks, and its width fits its content
 	}
 	if st.display == "table-cell" {
@@ -533,6 +541,21 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	c.collapseMargins(wb, s, ps, bs, pbs, pad, bw, &top, &bottom)
 	s.Margin.Top = units.Dot(top / spc)
 	s.Margin.Bottom = units.Dot(bottom / spc)
+	// The spacing of the page is that of its CSS, not scaled by the
+	// Spacing setting, which applies to the spacing of Cogent Core widgets
+	// (see core.WidgetBase.styleSettings, which multiplies by it).
+	if _, isFrame := wb.This.(*core.Frame); isFrame || isTextWidget(wb) {
+		for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
+			&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
+			v.Value /= spc
+		}
+	}
+}
+
+// isTextWidget returns whether the widget is a [core.Text].
+func isTextWidget(wb *core.WidgetBase) bool {
+	_, ok := wb.This.(*core.Text)
+	return ok
 }
 
 // sideDots returns the given sides in dots, using the given function.
@@ -771,6 +794,26 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		} else {
 			setInset(s, 0, start)
 			setInset(s, 2, end)
+		}
+	case "float":
+		switch lval {
+		case "left", "inline-start":
+			s.Float = styles.FloatLeft
+		case "right", "inline-end":
+			s.Float = styles.FloatRight
+		default:
+			s.Float = styles.FloatNone
+		}
+	case "clear":
+		switch lval {
+		case "left", "inline-start":
+			s.Clear = styles.ClearLeft
+		case "right", "inline-end":
+			s.Clear = styles.ClearRight
+		case "both":
+			s.Clear = styles.ClearBoth
+		default:
+			s.Clear = styles.ClearNone
 		}
 	case "z-index":
 		if z, err := strconv.Atoi(lval); err == nil {
@@ -1076,6 +1119,9 @@ func parseLength(v string, pct units.Units) (units.Value, bool) {
 	switch v {
 	case "", "auto", "none", "normal", "inherit", "initial":
 		return units.Value{}, false
+	}
+	if strings.HasSuffix(v, ")") {
+		return mathLength(v, pct)
 	}
 	if strings.HasSuffix(v, "%") {
 		f, err := strconv.ParseFloat(strings.TrimSuffix(v, "%"), 32)

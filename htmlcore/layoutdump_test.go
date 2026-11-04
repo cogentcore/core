@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -37,6 +38,11 @@ func TestLayoutDump(t *testing.T) {
 	ctx := NewContext()
 	ctx.BrowserStyle = true
 	ctx.MediaWidth = 800
+	if f := os.Getenv("LAYOUT_FILE"); f != "" {
+		if u, err := os.ReadFile(strings.TrimSuffix(f, ".html") + ".url"); err == nil {
+			ctx.PageURL = strings.TrimSpace(string(u))
+		}
+	}
 	ReadHTMLString(ctx, b, src)
 	img := b.RenderImage(func() {
 		fmt.Println("scene", b.Scene.Geom.Size.Actual.Total)
@@ -51,7 +57,14 @@ func TestLayoutDump(t *testing.T) {
 				depth++
 			}
 			s := &wb.Styles
-			fmt.Printf("%*s%s %v pos %v act %v alloc %v grow %v gw %v min %v max %v marg %v pad %v disp %v dir %v ovf %v op %v color %v\n", depth*2, "", wb.Name, wb.Property("tag"),
+			if tx, ok := w.(*core.Text); ok {
+				txt := tx.Text
+				if len(txt) > 30 {
+					txt = txt[:30]
+				}
+				fmt.Printf("%*s%q\n", depth*2, "", txt)
+			}
+			fmt.Printf("%*s%s %v %v pos %v act %v alloc %v grow %v gw %v min %v max %v marg %v pad %v disp %v dir %v ovf %v op %v color %v\n", depth*2, "", wb.Name, wb.Property("tag"), wb.Property("class"),
 				wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, wb.Geom.Size.Alloc.Total, s.Grow, s.GrowWrap, s.Min.Dots(), s.Max.Dots(), s.Margin.Dots(), s.Padding.Dots(), s.Display, s.Direction, s.Overflow, s.Opacity, s.Color)
 			return tree.Continue
 		})

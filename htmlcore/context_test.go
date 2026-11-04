@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles/units"
 	"github.com/andybalholm/cascadia"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
@@ -156,4 +157,24 @@ func TestCalcPx(t *testing.T) {
 	}
 	_, ok := calcPx("calc(100% - 1px)")
 	assert.False(t, ok)
+}
+
+func TestMathLength(t *testing.T) {
+	calcEnv.em, calcEnv.vw, calcEnv.vh = 16, 8, 6
+	for v, want := range map[string]units.Value{
+		"calc(100% - 20px)":        units.Pw(100),
+		"calc(10px + 2em)":         units.Dp(42),
+		"calc(100vh - 100px)":      units.Dp(500),
+		"min(25vw, 350px)":         units.Dp(200),
+		"max(10px, 1rem)":          units.Dp(16),
+		"clamp(1rem, 5vw, 2rem)":   units.Dp(32),
+		"calc((100px - 20px) / 2)": units.Dp(40),
+		"calc(2 * (10px + 5px))":   units.Dp(30),
+		"min(100%, 600px)":         units.Dp(600),
+	} {
+		got, ok := parseLength(v, units.UnitPw)
+		assert.True(t, ok, v)
+		assert.InDelta(t, want.Value, got.Value, 0.01, v)
+		assert.Equal(t, want.Unit, got.Unit, v)
+	}
 }

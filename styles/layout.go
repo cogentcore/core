@@ -237,3 +237,34 @@ const (
 	// to the scene, so that it does not scroll.
 	PositionFixed
 )
+
+// Floats are the ways that widgets can float (see [Style.Float]).
+type Floats int32 //enums:enum -trim-prefix Float -transform kebab
+
+const (
+	// FloatNone is the default: the widget does not float.
+	FloatNone Floats = iota
+
+	// FloatLeft floats the widget to the left of its parent.
+	FloatLeft
+
+	// FloatRight floats the widget to the right of its parent.
+	FloatRight
+)
+
+// Clears are the sides of the floats that a widget is below (see [Style.Clear]).
+type Clears int32 //enums:enum -trim-prefix Clear -transform kebab
+
+const (
+	// ClearNone is the default: the widget is not moved below floats.
+	ClearNone Clears = iota
+
+	// ClearLeft moves the widget below the floats on the left.
+	ClearLeft
+
+	// ClearRight moves the widget below the floats on the right.
+	ClearRight
+
+	// ClearBoth moves the widget below all of the floats.
+	ClearBoth
+)

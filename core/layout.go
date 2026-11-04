@@ -410,6 +410,9 @@ type layoutState struct {
 	// spans is whether a grid has cells that span columns.
 	spans bool
 
+	// floats is the layout of a column with floating children, if it has any.
+	floats *floatLayout
+
 	// growExtra is the extra space that children with a Grow factor grow
 	// into, which is within the actual size of a frame that does not grow
 	// (see [Frame.childSpace]), while other children (such as GrowWrap
@@ -1056,6 +1059,9 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		fmt.Println(li.String())
 	}
 	ksz := li.cellsSize()
+	if fl := li.floats; fl != nil { // the column is as tall as its floats
+		ksz.Y = max(ksz.Y, fl.size.Y-li.GapSize.Y)
+	}
 	return ksz
 }
 
@@ -1209,7 +1215,8 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	}
 	fr.This.(Layouter).SizeDownSetAllocs(iter)
 	fr.sizeDownOutOfFlow()
-	redo := fr.sizeDownChildren(iter)
+	floatsChanged := fr.layoutFloats()
+	redo := fr.sizeDownChildren(iter) || floatsChanged
 	if redo || wrapped {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
 	}
@@ -1561,6 +1568,14 @@ func (fr *Frame) sizeDownAllocActual(iter int) {
 // Note however that due to max sizing for row / column,
 // this size can actually be different than original actual.
 func (fr *Frame) sizeDownAllocActualCells(iter int) {
+	// In a column that is narrower than its content (and does not scroll in
+	// width), the children that grow (or wrap) in width get at most its width,
+	// so that text can wrap in it.
+	colWidth := float32(-1)
+	if fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Column && !fr.Styles.Wrap &&
+		fr.Styles.Overflow.X < styles.OverflowAuto { // content that scrolls can be wider
+		colWidth = fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X
+	}
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
 		cidx := cwb.Geom.Cell
@@ -1575,6 +1590,9 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 			asz := md.Size.Dim(ma)
 			if span := fr.colSpan(cwb); ma == math32.X && span > 1 {
 				asz = fr.spanAlloc(cidx, span, 0)
+			}
+			if ma == math32.X && colWidth > 0 && asz > colWidth && (cwb.Styles.Grow.X > 0 || cwb.Styles.GrowWrap) {
+				asz = colWidth
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
@@ -1698,6 +1716,7 @@ func (fr *Frame) SizeFinal() {
 	fr.Geom.RelPos.SetZero()
 	fr.sizeFinalChildren() // kids do their own thing
 	fr.sizeDownOutOfFlow() // their final size is still that of their inset
+	fr.layoutFloats()      // with the final sizes
 	fr.sizeFromChildrenFit(0, SizeFinalPass)
 	fr.growToAlloc()
 	fr.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
@@ -1923,6 +1942,9 @@ func (fr *Frame) lineSpaces(ma math32.Dims, size float32) []math32.Vector2 {
 
 // Main axis = Y
 func (fr *Frame) positionCellsMainY() {
+	if fr.positionFloats() {
+		return
+	}
 	gap := fr.layout.Gap
 	sz := &fr.Geom.Size
 	if DebugSettings.LayoutTraceDetail {

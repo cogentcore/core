@@ -213,6 +213,16 @@ type Style struct { //types:add
 	// of the widget determine its position.
 	InsetSet sides.Sides[bool] `display:"inline"`
 
+	// Float makes the widget float to the left or right of its parent,
+	// as the float property of CSS: it is out of the flow of the layout of
+	// its parent (a column), and the widgets after it that start beside it
+	// are narrowed to be beside it.
+	Float Floats
+
+	// Clear moves the widget down below the widgets before it that float
+	// on the given sides, as the clear property of CSS.
+	Clear Clears
+
 	// ZIndex orders the rendering of widgets that are not [PositionStatic],
 	// as the z-index property of CSS: they are rendered after the other
 	// children of their parent (on top of them), in increasing order of

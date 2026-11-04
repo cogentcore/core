@@ -28,10 +28,11 @@ func (wb *WidgetBase) outOfFlow() bool {
 }
 
 // forFlowChildren calls the given function for the visible children
-// that are in the flow of the layout (not [WidgetBase.outOfFlow]).
+// that are in the flow of the layout (not [WidgetBase.outOfFlow],
+// and not floating, [WidgetBase.isFloat]).
 func (wb *WidgetBase) forFlowChildren(fun func(i int, cw Widget, cwb *WidgetBase) bool) {
 	wb.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		if cwb.outOfFlow() {
+		if cwb.outOfFlow() || cwb.isFloat() {
 			return tree.Continue
 		}
 		return fun(i, cw, cwb)
@@ -161,13 +162,14 @@ func (wb *WidgetBase) relativeOffset() math32.Vector2 {
 }
 
 // renderOrder returns the children of the widget in the order that they are
-// rendered: those that are positioned (not static) after the others,
+// rendered: those that float after the others (over their backgrounds),
+// and those that are positioned (not static) after them,
 // in the increasing order of their ZIndex, except that those with a negative
 // ZIndex are first. It returns nil if they are rendered in order.
 func (wb *WidgetBase) renderOrder() []Widget {
 	positioned := false
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		if cwb.Styles.Position != styles.PositionStatic {
+		if cwb.Styles.Position != styles.PositionStatic || cwb.isFloat() {
 			positioned = true
 			return tree.Break
 		}
@@ -178,17 +180,20 @@ func (wb *WidgetBase) renderOrder() []Widget {
 	}
 	type item struct {
 		w     Widget
-		layer int // -1: negative z-index; 0: static; 1: positioned
+		layer int // -1: negative z-index; 0: static; 1: float; 2: positioned
 		z     int
 	}
 	var items []item
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		it := item{w: cw}
-		if cwb.Styles.Position != styles.PositionStatic {
-			it.layer, it.z = 1, cwb.Styles.ZIndex
+		switch {
+		case cwb.Styles.Position != styles.PositionStatic:
+			it.layer, it.z = 2, cwb.Styles.ZIndex
 			if it.z < 0 {
 				it.layer = -1
 			}
+		case cwb.isFloat():
+			it.layer = 1
 		}
 		items = append(items, it)
 		return tree.Continue

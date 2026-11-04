@@ -258,6 +258,84 @@ func (i *Positions) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Positions")
 }
 
+var _FloatsValues = []Floats{0, 1, 2}
+
+// FloatsN is the highest valid value for type Floats, plus one.
+const FloatsN Floats = 3
+
+var _FloatsValueMap = map[string]Floats{`none`: 0, `left`: 1, `right`: 2}
+
+var _FloatsDescMap = map[Floats]string{0: `FloatNone is the default: the widget does not float.`, 1: `FloatLeft floats the widget to the left of its parent.`, 2: `FloatRight floats the widget to the right of its parent.`}
+
+var _FloatsMap = map[Floats]string{0: `none`, 1: `left`, 2: `right`}
+
+// String returns the string representation of this Floats value.
+func (i Floats) String() string { return enums.String(i, _FloatsMap) }
+
+// SetString sets the Floats value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Floats) SetString(s string) error { return enums.SetString(i, s, _FloatsValueMap, "Floats") }
+
+// Int64 returns the Floats value as an int64.
+func (i Floats) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Floats value from an int64.
+func (i *Floats) SetInt64(in int64) { *i = Floats(in) }
+
+// Desc returns the description of the Floats value.
+func (i Floats) Desc() string { return enums.Desc(i, _FloatsDescMap) }
+
+// FloatsValues returns all possible values for the type Floats.
+func FloatsValues() []Floats { return _FloatsValues }
+
+// Values returns all possible values for the type Floats.
+func (i Floats) Values() []enums.Enum { return enums.Values(_FloatsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Floats) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Floats) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Floats") }
+
+var _ClearsValues = []Clears{0, 1, 2, 3}
+
+// ClearsN is the highest valid value for type Clears, plus one.
+const ClearsN Clears = 4
+
+var _ClearsValueMap = map[string]Clears{`none`: 0, `left`: 1, `right`: 2, `both`: 3}
+
+var _ClearsDescMap = map[Clears]string{0: `ClearNone is the default: the widget is not moved below floats.`, 1: `ClearLeft moves the widget below the floats on the left.`, 2: `ClearRight moves the widget below the floats on the right.`, 3: `ClearBoth moves the widget below all of the floats.`}
+
+var _ClearsMap = map[Clears]string{0: `none`, 1: `left`, 2: `right`, 3: `both`}
+
+// String returns the string representation of this Clears value.
+func (i Clears) String() string { return enums.String(i, _ClearsMap) }
+
+// SetString sets the Clears value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Clears) SetString(s string) error { return enums.SetString(i, s, _ClearsValueMap, "Clears") }
+
+// Int64 returns the Clears value as an int64.
+func (i Clears) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Clears value from an int64.
+func (i *Clears) SetInt64(in int64) { *i = Clears(in) }
+
+// Desc returns the description of the Clears value.
+func (i Clears) Desc() string { return enums.Desc(i, _ClearsDescMap) }
+
+// ClearsValues returns all possible values for the type Clears.
+func ClearsValues() []Clears { return _ClearsValues }
+
+// Values returns all possible values for the type Clears.
+func (i Clears) Values() []enums.Enum { return enums.Values(_ClearsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Clears) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Clears) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Clears") }
+
 var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
 
 // ObjectFitsN is the highest valid value for type ObjectFits, plus one.
