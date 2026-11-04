@@ -7,7 +7,6 @@ package paginate
 import (
 	"strconv"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
@@ -180,11 +179,8 @@ func CenteredTitle(title, authors, affiliations, url, date, version, reference, 
 // second level header ## is used for most top-level headers within a page.
 func APAHeaders(tx *core.Text) {
 	headerLevel := 0
-	if t, ok := tx.Properties["tag"]; ok {
-		tag := t.(string)
-		if len(tag) > 1 && tag[0] == 'h' {
-			headerLevel = errors.Log1(strconv.Atoi(tag[1:]))
-		}
+	if tag := tx.HTMLTag(); len(tag) > 1 && tag[0] == 'h' {
+		headerLevel, _ = strconv.Atoi(tag[1:])
 	}
 	s := &tx.Styles
 	base := printer.Settings.FontSize

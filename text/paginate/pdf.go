@@ -33,6 +33,21 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	colors.SetScheme(false)
 	cset := pdf.UseStandardFonts()
 
+	// The inputs are sized for the pages by final stylers, which are
+	// removed afterward, so that they are as they were on the screen.
+	nfinal := make([]int, len(ins))
+	for i, in := range ins {
+		nfinal[i] = len(in.AsWidget().Stylers.Final)
+	}
+	defer func() {
+		for i, in := range ins {
+			iw := in.AsWidget()
+			iw.Stylers.Final = iw.Stylers.Final[:nfinal[i]]
+			iw.Style()
+			iw.NeedsLayout()
+		}
+	}()
+
 	p := pager{opts: &opts, ins: ins}
 	p.ctx = *units.NewContext() // generic, invariant of actual context
 	p.opts.ToDots(&p.ctx)
@@ -104,6 +119,17 @@ func (p *pager) assemble() {
 		}
 		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			if tx, ok := cwb.This.(*core.Text); ok {
+				// The text is laid out in the pages without the widget of
+				// its element (as in the browser style of htmlcore), so it
+				// gets the tag and id of the element, for the styles of
+				// headings and the anchors.
+				if el := tx.HTMLElement(); el != cwb {
+					for _, k := range []string{"tag", "id"} {
+						if v, ok := el.Property(k).(string); ok {
+							cwb.SetProperty(k, v)
+						}
+					}
+				}
 				if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
 					cwb.Styler(func(s *styles.Style) {
 						if tx.Styles.Font.Family == rich.SansSerif {
