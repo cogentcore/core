@@ -418,8 +418,6 @@ func handleCell(ctx *Context, tag string) core.Widget {
 	if ctx.BrowserStyle {
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
-		// Columns grow by the size of their content, as in browsers,
-		// for which the length of the text is a proxy.
 		// Columns grow by the size of their content, as in browsers, for
 		// which the length of the text is a proxy, only when the table
 		// has a width to grow into.

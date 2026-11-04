@@ -178,3 +178,15 @@ func TestMathLength(t *testing.T) {
 		assert.Equal(t, want.Unit, got.Unit, v)
 	}
 }
+
+func TestMediaHeightVh(t *testing.T) {
+	saved := calcEnv
+	defer func() { calcEnv = saved }()
+	calcEnv.vh, calcEnv.fixedVh = 6, true // a 600 px viewport
+	l, ok := parseLength("50vh", units.UnitPh)
+	assert.True(t, ok)
+	assert.Equal(t, units.Dp(300), l)
+	l, ok = parseLength("calc(100vh - 100px)", units.UnitPh)
+	assert.True(t, ok)
+	assert.Equal(t, units.Dp(500), l)
+}

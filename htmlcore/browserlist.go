@@ -38,6 +38,11 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
 		ctx.handleWidget(ctx.Node, w)
+		if p := ctx.Node.Parent; tag == "caption" && p != nil && p.Data == "table" {
+			// the caption is above the cells, across all of the columns
+			span := tableColumns(p)
+			w.FinalStyler(func(s *styles.Style) { s.ColSpan = span })
+		}
 		return true
 	case "li":
 		handleBrowserListItem(ctx)

@@ -97,6 +97,16 @@ type Style struct { //types:add
 	// available space). Do NOT set this for non-Text elements.
 	GrowWrap bool
 
+	// Shrink is the proportional amount that the element can shrink in width,
+	// below its actual size, if there is less space available, as in the CSS
+	// flex-shrink property. 0 = default = no shrinking. A shrinking element
+	// in a column is at most as wide as the column, and in a row or a grid,
+	// the columns that have elements that shrink are narrowed in proportion
+	// to Shrink and their width, to fit within the frame. Elements that
+	// wrap their content (such as text) then wrap it within their width.
+	// Only the X (width) dimension is currently supported.
+	Shrink math32.Vector2
+
 	// RenderBox determines whether to render the standard box model for the element.
 	// This is typically necessary for most elements and helps prevent text, border,
 	// and box shadow from rendering over themselves. Therefore, it should be kept at

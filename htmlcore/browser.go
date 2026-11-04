@@ -93,6 +93,8 @@ type cssState struct {
 	borderBox  bool
 	flexGrow   float32
 	hasGrow    bool
+	flexShrink float32
+	hasShrink  bool
 	alignSelf  string
 	alignItems string
 	background image.Image
@@ -194,6 +196,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				calcEnv.vh = float64(uc.Vph / dp / 100)
 			}
 		}
+		calcEnv.fixedVh = c.MediaHeight > 0
+		if calcEnv.fixedVh {
+			calcEnv.vh = float64(c.MediaHeight / 100)
+		}
 		for _, d := range decls {
 			if !d.invalid {
 				c.setCSS(st, s, ps, d.Property, d.Value)
@@ -243,10 +249,18 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	if st.hasBg {
 		s.Background = st.background
 	}
+	isTable := node != nil && node.Data == "table" // laid out as a grid of its cells
 	switch st.display {
-	case "block", "list-item", "table-cell", "flow-root", "inline-block":
+	case "block", "list-item", "table-cell", "flow-root", "inline-block", "table-caption":
 		s.Display = styles.Flex
 		s.Direction = styles.Column
+	case "table", "inline-table", "table-row-group", "table-header-group", "table-footer-group":
+		if !isTable && (node == nil || !strings.HasPrefix(node.Data, "t")) {
+			// other elements displayed as tables are approximated by their
+			// rows (or caption and content) in a column
+			s.Display = styles.Flex
+			s.Direction = styles.Column
+		}
 	case "flex", "inline-flex":
 		s.Display = styles.Flex
 	case "grid", "inline-grid":
@@ -258,6 +272,8 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		s.Direction = styles.Row
 		s.Wrap = true
 		s.Align.Items = styles.End // close to the baseline for images
+		// as wide as its content on one line, and wraps in less width
+		s.Shrink.X = 1
 	}
 	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil {
 		// an svg without a size is as wide as its container, and as
@@ -353,6 +369,12 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		if st.hasGrow {
 			s.Grow.SetDim(main, st.flexGrow)
 		}
+		// flex items shrink to fit in the main dimension (by flex-shrink,
+		// which is 1 by default), and are at most as wide as a column
+		s.Shrink.X = 1
+		if main == math32.X && st.hasShrink {
+			s.Shrink.X = st.flexShrink
+		}
 		align := st.alignSelf
 		if align == "" || align == "auto" {
 			align = pbs.alignItems
@@ -364,6 +386,15 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		}
 	case bs.block && st.display != "table":
 		s.Grow.X = 1
+	case st.display == "table-cell":
+		s.Shrink.X = 1 // the columns of a table fit in its width
+	case st.width == nil:
+		// shrink-to-fit (tables, inline blocks, cells, and inline elements):
+		// as wide as the content, up to the available width
+		s.Shrink.X = 1
+	}
+	if _, isText := wb.This.(*core.Text); isText {
+		s.Shrink.X = 1 // wraps in the available width
 	}
 
 	// sizes: Min and Max are the size of the content box
@@ -903,16 +934,28 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		if f, err := strconv.ParseFloat(lval, 32); err == nil {
 			st.flexGrow, st.hasGrow = float32(f), true
 		}
+	case "flex-shrink":
+		if f, err := strconv.ParseFloat(lval, 32); err == nil {
+			st.flexShrink, st.hasShrink = float32(f), true
+		}
 	case "flex":
 		switch lval {
 		case "none":
 			st.flexGrow, st.hasGrow = 0, true
+			st.flexShrink, st.hasShrink = 0, true
 		case "auto":
 			st.flexGrow, st.hasGrow = 1, true
+			st.flexShrink, st.hasShrink = 1, true
 		default:
 			if fs := strings.Fields(lval); len(fs) > 0 {
 				if f, err := strconv.ParseFloat(fs[0], 32); err == nil {
 					st.flexGrow, st.hasGrow = float32(f), true
+				}
+				st.flexShrink, st.hasShrink = 1, true
+				if len(fs) > 1 {
+					if f, err := strconv.ParseFloat(fs[1], 32); err == nil {
+						st.flexShrink = float32(f)
+					}
 				}
 			}
 		}
@@ -1146,6 +1189,9 @@ func parseLength(v string, pct units.Units) (units.Value, bool) {
 	var l units.Value
 	if err := l.SetString(v); err != nil {
 		return units.Value{}, false
+	}
+	if l.Unit == units.UnitVh && calcEnv.fixedVh {
+		return units.Dp(l.Value * float32(calcEnv.vh)), true
 	}
 	return l, true
 }

@@ -56,6 +56,11 @@ type Context struct {
 	// width of the screen.
 	MediaWidth float32
 
+	// MediaHeight, if positive, is the height of the viewport in CSS px (dp)
+	// that vh lengths are relative to; otherwise, they are relative to the
+	// height of the scene.
+	MediaHeight float32
+
 	// BrowserStyle makes the rendering follow the default styles and
 	// layout of web browsers as closely as possible: block elements are
 	// spaced by their (collapsed) margins instead of gaps, headings are

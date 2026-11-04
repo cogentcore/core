@@ -20,6 +20,9 @@ import (
 // for debugging layout:
 //
 //	LAYOUT_HTML='<p>Some <b>text</b></p>' go test -run TestLayoutDump -v
+//
+// LAYOUT_FILE=file.html reads the HTML from the file instead,
+// and LAYOUT_TRACE=1 also traces the layout passes.
 func TestLayoutDump(t *testing.T) {
 	src := os.Getenv("LAYOUT_HTML")
 	if f := os.Getenv("LAYOUT_FILE"); f != "" {
@@ -38,12 +41,17 @@ func TestLayoutDump(t *testing.T) {
 	ctx := NewContext()
 	ctx.BrowserStyle = true
 	ctx.MediaWidth = 800
+	ctx.MediaHeight = 600
 	if f := os.Getenv("LAYOUT_FILE"); f != "" {
 		if u, err := os.ReadFile(strings.TrimSuffix(f, ".html") + ".url"); err == nil {
 			ctx.PageURL = strings.TrimSpace(string(u))
 		}
 	}
 	ReadHTMLString(ctx, b, src)
+	if os.Getenv("LAYOUT_TRACE") != "" { // trace the layout passes
+		core.DebugSettings.LayoutTrace = true
+		defer func() { core.DebugSettings.LayoutTrace = false }()
+	}
 	img := b.RenderImage(func() {
 		fmt.Println("scene", b.Scene.Geom.Size.Actual.Total)
 		b.WalkDown(func(n tree.Node) bool {
@@ -64,8 +72,8 @@ func TestLayoutDump(t *testing.T) {
 				}
 				fmt.Printf("%*s%q\n", depth*2, "", txt)
 			}
-			fmt.Printf("%*s%s %v %v pos %v act %v alloc %v grow %v gw %v min %v max %v marg %v pad %v disp %v dir %v ovf %v op %v color %v\n", depth*2, "", wb.Name, wb.Property("tag"), wb.Property("class"),
-				wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, wb.Geom.Size.Alloc.Total, s.Grow, s.GrowWrap, s.Min.Dots(), s.Max.Dots(), s.Margin.Dots(), s.Padding.Dots(), s.Display, s.Direction, s.Overflow, s.Opacity, s.Color)
+			fmt.Printf("%*s%s %v %v pos %v act %v alloc %v grow %v shrink %v gw %v min %v max %v marg %v pad %v disp %v dir %v ovf %v op %v color %v\n", depth*2, "", wb.Name, wb.Property("tag"), wb.Property("class"),
+				wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, wb.Geom.Size.Alloc.Total, s.Grow, s.Shrink.X, s.GrowWrap, s.Min.Dots(), s.Max.Dots(), s.Margin.Dots(), s.Padding.Dots(), s.Display, s.Direction, s.Overflow, s.Opacity, s.Color)
 			return tree.Continue
 		})
 	})

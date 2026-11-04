@@ -417,6 +417,7 @@ func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 	ctx := NewContext()
 	ctx.BrowserStyle = true
 	ctx.MediaWidth = fidelityWidth
+	ctx.MediaHeight = 600 // the height of the Chrome window
 	ctx.PageURL = "file://" + dir + "/page.html"
 	if baseURL != "" {
 		ctx.PageURL = baseURL

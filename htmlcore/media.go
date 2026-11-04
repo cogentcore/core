@@ -430,8 +430,12 @@ func (p *linearParser) factor() (linear, bool, bool) {
 // calcEnv has the sizes that calc() lengths are relative to, in px, for
 // the widget being styled: the em (font size) and 1% of the viewport
 // width and height. It is set by [Context.browserStyler], as styling
-// is done in one goroutine at a time.
-var calcEnv = struct{ em, vw, vh float64 }{16, 8, 6}
+// is done in one goroutine at a time. fixedVh is whether vh is from
+// [Context.MediaHeight], to which all vh lengths are then relative.
+var calcEnv = struct {
+	em, vw, vh float64
+	fixedVh    bool
+}{16, 8, 6, false}
 
 // mathLength returns the length of the given CSS math function (calc(),
 // min(), max(), clamp()), as a percentage of the given unit, or in dp.
