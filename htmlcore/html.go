@@ -77,6 +77,7 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		ctx.Node = n
 		if ctx.BrowserStyle {
 			ctx.addStyleOrigin(browserStyles, originUserAgent)
+			ctx.addStyleSheets(n)
 		} else {
 			ctx.addStyleOrigin(userAgentStyles, originUserAgent)
 		}

@@ -5,11 +5,14 @@
 package htmlcore
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"image"
 	"io"
 	"log/slog"
 	"net/http"
+	neturl "net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -65,6 +68,9 @@ func handleElement(ctx *Context) {
 	case "script", "title", "meta":
 		// we don't render anything
 	case "link":
+		if ctx.BrowserStyle { // all style sheets are added first
+			return
+		}
 		rel := GetAttr(ctx.Node, "rel")
 		// TODO(kai/htmlcore): maybe handle preload
 		if rel == "preload" {
@@ -85,6 +91,9 @@ func handleElement(ctx *Context) {
 		}
 		ctx.addStyle(string(b))
 	case "style":
+		if ctx.BrowserStyle {
+			return
+		}
 		ctx.addStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul", "blockquote":
 		w := New[core.Frame](ctx)
@@ -146,7 +155,7 @@ func handleElement(ctx *Context) {
 		ctx.NewParent = ctx.tableFor(ctx.Node)
 	default:
 		if ctx.BrowserStyle {
-			switch display := ctx.declaration(ctx.Node, "display"); {
+			switch display := ctx.displayOf(ctx.Node); {
 			case display == "none":
 				// not rendered, and neither are its children
 			case isBlockDisplay(display) || display == "inline-block" || display == "inline-flex":
@@ -442,7 +451,10 @@ func handleCell(ctx *Context, tag string) core.Widget {
 func handleImage(ctx *Context, tag string) core.Widget {
 	pid := ""
 	pstyle := ""
-	if ctx.BlockParent != nil { // these attributes get put on a block parent element
+	if ctx.BrowserStyle && strings.TrimSpace(GetAttr(ctx.Node, "src")) == "" {
+		return nil // an image without a source is not shown
+	}
+	if ctx.BlockParent != nil && !ctx.BrowserStyle { // these attributes get put on a block parent element
 		pstyle = GetAttr(ctx.Node.Parent, "style")
 		pid = GetAttr(ctx.Node.Parent, "id")
 	}
@@ -452,7 +464,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	if pstyle != "" {
 		ctx.SetStyleAttr(n, pstyle)
 	}
-	isSVG := strings.HasSuffix(src, ".svg")
+	isSVG := strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg")
 	var newWidget core.Widget
 	var resp *http.Response
 	var err error
@@ -658,6 +670,9 @@ func GetLanguage(class string) string {
 // it is not [http.StatusOK]. If the error is nil, then the response body is
 // not closed and must be closed by the caller.
 func Get(ctx *Context, url string) (*http.Response, error) {
+	if strings.HasPrefix(url, "data:") {
+		return dataURL(url)
+	}
 	u, err := parseRelativeURL(url, ctx.PageURL)
 	if err != nil {
 		return nil, err
@@ -683,4 +698,76 @@ func nodeText(n *html.Node) string {
 		sb.WriteString(nodeText(c))
 	}
 	return sb.String()
+}
+
+// dataURL returns a response with the data of the given data URL.
+func dataURL(u string) (*http.Response, error) {
+	meta, data, ok := strings.Cut(strings.TrimPrefix(u, "data:"), ",")
+	if !ok {
+		return nil, fmt.Errorf("invalid data URL")
+	}
+	var b []byte
+	if strings.HasSuffix(meta, ";base64") {
+		var err error
+		b, err = base64.StdEncoding.DecodeString(data)
+		if err != nil {
+			b, err = base64.RawStdEncoding.DecodeString(data)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		d, err := neturl.PathUnescape(data)
+		if err != nil {
+			return nil, err
+		}
+		b = []byte(d)
+	}
+	return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Body: io.NopCloser(bytes.NewReader(b)),
+		Header: http.Header{"Content-Type": {strings.Split(meta, ";")[0]}}}, nil
+}
+
+// addStyleSheets adds the style sheets of the style and link elements of
+// the document of the given root node, in document order, so that they
+// apply to all of the elements, as in browsers, wherever they are.
+func (c *Context) addStyleSheets(root *html.Node) {
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			switch n.Data {
+			case "noscript", "template":
+				return
+			case "style":
+				if c.mediaMatches(GetAttr(n, "media")) {
+					c.addStyleOrigin(nodeText(n), originAuthor)
+				}
+				return
+			case "link":
+				if strings.EqualFold(GetAttr(n, "rel"), "stylesheet") && c.mediaMatches(GetAttr(n, "media")) {
+					c.addLinkedStyle(GetAttr(n, "href"))
+				}
+				return
+			case "svg":
+				return
+			}
+		}
+		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
+			walk(ch)
+		}
+	}
+	walk(root)
+}
+
+// addLinkedStyle adds the style sheet at the given URL.
+func (c *Context) addLinkedStyle(href string) {
+	resp, err := Get(c, href)
+	if errors.Log(err) != nil {
+		return
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if errors.Log(err) != nil {
+		return
+	}
+	c.addStyleOrigin(string(b), originAuthor)
 }

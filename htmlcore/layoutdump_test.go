@@ -21,6 +21,13 @@ import (
 //	LAYOUT_HTML='<p>Some <b>text</b></p>' go test -run TestLayoutDump -v
 func TestLayoutDump(t *testing.T) {
 	src := os.Getenv("LAYOUT_HTML")
+	if f := os.Getenv("LAYOUT_FILE"); f != "" {
+		b, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		src = string(b)
+	}
 	if src == "" {
 		t.Skip()
 	}
@@ -29,6 +36,7 @@ func TestLayoutDump(t *testing.T) {
 	b.Styler(func(s *styles.Style) { s.Padding.Zero(); s.Gap.Zero(); s.Min.X.Dp(800); s.Max.X.Dp(800) })
 	ctx := NewContext()
 	ctx.BrowserStyle = true
+	ctx.MediaWidth = 800
 	ReadHTMLString(ctx, b, src)
 	img := b.RenderImage(func() {
 		fmt.Println("scene", b.Scene.Geom.Size.Actual.Total)

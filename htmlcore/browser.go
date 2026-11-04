@@ -166,7 +166,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if tag != "" && isText { // texts for elements (as pre) fill their blocks
 			s.GrowWrap = false
 		}
-		st := &cssState{display: c.declaration(node, "display")}
+		st := &cssState{display: c.displayOf(node)}
 		if node == nil { // anonymous text or block
 			st.display = bs.display
 			if st.display == "" && isFrame {
@@ -179,7 +179,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		for _, d := range decls {
 			c.setCSS(st, s, ps, d.Property, d.Value)
 		}
-		c.resolveCSS(wb, st, s, ps, bs, pbs)
+		if node != nil {
+			st.display = c.displayOf(node)
+		}
+		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
 		if tag == "body" && st.hasBg && pw != nil { // the canvas has the background of the body
 			pw.AsWidget().Styles.Background = st.background
 		}
@@ -205,7 +208,7 @@ func isBlockDisplay(d string) bool {
 
 // resolveCSS resolves the declarations that depend on each other
 // and on the parent, after all of them have been set.
-func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.Style, bs, pbs *blockState) {
+func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState, s, ps *styles.Style, bs, pbs *blockState) {
 	bs.display = st.display
 	bs.alignItems = st.alignItems
 	bs.borderCollapse = st.borderCollapse
@@ -235,6 +238,30 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, st *cssState, s, ps *styles.St
 		s.Direction = styles.Row
 		s.Wrap = true
 		s.Align.Items = styles.End // close to the baseline for images
+	}
+	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil {
+		// an svg without a size is as wide as its container, and as
+		// high as the aspect ratio of its view box makes it
+		if st.width == nil {
+			s.Min.X, s.Max.X = units.Pw(100), units.Pw(100)
+		}
+		if st.height == nil {
+			aspect := float32(0.5)
+			vb := strings.Fields(strings.ReplaceAll(GetAttr(node, "viewBox")+GetAttr(node, "viewbox"), ",", " "))
+			if len(vb) == 4 {
+				w, _ := strconv.ParseFloat(vb[2], 32)
+				h, _ := strconv.ParseFloat(vb[3], 32)
+				if w > 0 && h > 0 {
+					aspect = float32(h / w)
+				}
+			}
+			if st.width != nil && st.width.Unit == units.UnitDp {
+				s.Min.Y = units.Dp(st.width.Value * aspect)
+			} else {
+				s.Min.Y = units.Pw(100 * aspect)
+			}
+			s.Max.Y = s.Min.Y
+		}
 	}
 	if _, isImage := wb.This.(*core.Image); isImage && pbs != nil && pbs.display == anonymousInline {
 		// images are on the baseline, above the descent of the text
@@ -535,7 +562,28 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
 		return
 	}
+	if p, ok := logicalProperties[prop]; ok {
+		prop = p
+	}
 	switch prop {
+	case "margin-inline", "margin-block", "padding-inline", "padding-block":
+		fs := strings.Fields(val)
+		if len(fs) == 0 {
+			return
+		}
+		start, end := fs[0], fs[0]
+		if len(fs) > 1 {
+			end = fs[1]
+		}
+		base, dir, _ := strings.Cut(prop, "-")
+		if dir == "inline" {
+			c.setCSS(st, s, ps, base+"-left", start)
+			c.setCSS(st, s, ps, base+"-right", end)
+		} else {
+			c.setCSS(st, s, ps, base+"-top", start)
+			c.setCSS(st, s, ps, base+"-bottom", end)
+		}
+		return
 	case "display":
 		st.display = lval
 	case "margin":
@@ -584,6 +632,12 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		setBorderStyle(s, sideIndex(prop), lval)
 	case "border-top-color", "border-right-color", "border-bottom-color", "border-left-color":
 		setSide(&s.Border.Color, sideIndex(prop), parseColor(val))
+	case "border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius":
+		if l, ok := parseLength(strings.Fields(lval + " 0")[0], units.UnitEw); ok {
+			i := map[string]int{"border-top-left-radius": 0, "border-top-right-radius": 1,
+				"border-bottom-right-radius": 2, "border-bottom-left-radius": 3}[prop]
+			setValueSide(&s.Border.Radius, i, l)
+		}
 	case "border-radius":
 		vals := strings.Fields(strings.Split(lval, "/")[0])
 		for i, v := range expandSides(vals) {
@@ -791,6 +845,26 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			s.Opacity = 0
 		}
 	}
+}
+
+// logicalProperties are the physical properties for the logical
+// properties of CSS, for horizontal, left to right text.
+var logicalProperties = map[string]string{
+	"inline-size": "width", "block-size": "height",
+	"min-inline-size": "min-width", "max-inline-size": "max-width",
+	"min-block-size": "min-height", "max-block-size": "max-height",
+	"margin-inline-start": "margin-left", "margin-inline-end": "margin-right",
+	"margin-block-start": "margin-top", "margin-block-end": "margin-bottom",
+	"padding-inline-start": "padding-left", "padding-inline-end": "padding-right",
+	"padding-block-start": "padding-top", "padding-block-end": "padding-bottom",
+	"border-inline-start": "border-left", "border-inline-end": "border-right",
+	"border-block-start": "border-top", "border-block-end": "border-bottom",
+	"border-inline-start-width": "border-left-width", "border-inline-end-width": "border-right-width",
+	"border-block-start-width": "border-top-width", "border-block-end-width": "border-bottom-width",
+	"border-inline-start-color": "border-left-color", "border-inline-end-color": "border-right-color",
+	"border-block-start-color": "border-top-color", "border-block-end-color": "border-bottom-color",
+	"border-start-start-radius": "border-top-left-radius", "border-start-end-radius": "border-top-right-radius",
+	"border-end-start-radius": "border-bottom-left-radius", "border-end-end-radius": "border-bottom-right-radius",
 }
 
 // expandSides expands the 1 to 4 values of a CSS shorthand for

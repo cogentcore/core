@@ -38,7 +38,7 @@ func (c *Context) isInlineLevel(n *xhtml.Node) bool {
 		if _, ok := c.ElementHandlers[n.Data]; ok {
 			return false
 		}
-		switch c.declaration(n, "display") {
+		switch c.displayOf(n) {
 		case "", "inline", "inline-block", "inline-flex", "inline-grid", "inline-table":
 			return true
 		}
@@ -61,7 +61,7 @@ func (c *Context) isTextElement(n *xhtml.Node) bool {
 		case "img", "button", "input", "select", "textarea", "svg", "video", "iframe", "canvas", "object", "embed", "math":
 			return false
 		}
-		switch c.declaration(n, "display") {
+		switch c.displayOf(n) {
 		case "", "inline", "none":
 		default:
 			return false
@@ -80,7 +80,7 @@ func (c *Context) isTextElement(n *xhtml.Node) bool {
 func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 	hasWidget := false
 	for n := first; ; n = n.NextSibling {
-		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.declaration(n, "display") != "none" {
+		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.displayOf(n) != "none" {
 			hasWidget = true
 		}
 		if n == last {
@@ -134,7 +134,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		}
 	}
 	for n := first; ; n = n.NextSibling {
-		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.declaration(n, "display") != "none" {
+		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.displayOf(n) != "none" {
 			flush()
 			start = false
 			c.inlineParent = container
@@ -183,7 +183,7 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 		}
 		return html.EscapeString(t)
 	case xhtml.ElementNode:
-		if c.declaration(n, "display") == "none" {
+		if c.displayOf(n) == "none" {
 			return ""
 		}
 		if n.Data == "br" {

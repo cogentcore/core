@@ -9,8 +9,11 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
 	"golang.org/x/net/html"
@@ -19,6 +22,13 @@ import (
 // handleBrowserElement handles the elements that are handled differently
 // for [Context.BrowserStyle], returning whether it handled the element.
 func handleBrowserElement(ctx *Context, tag string) bool {
+	switch tag {
+	case "style", "link", "script", "title", "meta", "head", "html":
+	default:
+		if ctx.displayOf(ctx.Node) == "none" {
+			return true // not rendered, and neither are its children
+		}
+	}
 	switch tag {
 	case "html", "head":
 		ctx.NewParent = ctx.BlockParent
@@ -31,12 +41,40 @@ func handleBrowserElement(ctx *Context, tag string) bool {
 	case "li":
 		handleBrowserListItem(ctx)
 		return true
+	case "button":
+		// a button is a block of its content, styled by CSS, that is clickable
+		w := New[core.Frame](ctx)
+		ctx.NewParent = w
+		ctx.handleWidget(ctx.Node, w)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.Clickable)
+			s.Cursor = cursors.Pointer
+		})
+		return true
+	case "svg":
+		if ctx.displayOf(ctx.Node) == "none" {
+			return true
+		}
+		var b strings.Builder
+		if err := html.Render(&b, ctx.Node); err != nil {
+			return true
+		}
+		sv := New[core.SVG](ctx)
+		errors.Log(sv.ReadString(b.String()))
+		ctx.handleWidget(ctx.Node, sv)
+		return true
 	}
 	if slices.Contains(textTags, tag) { // not in a run of inline content
-		switch display := ctx.declaration(ctx.Node, "display"); display {
+		switch display := ctx.displayOf(ctx.Node); display {
 		case "none":
 			return true
 		case "", "inline":
+			if !ctx.isTextElement(ctx.Node) {
+				// an inline element with widgets in it, which are in the run
+				// of inline content that it is in
+				ctx.NewParent = ctx.Parent()
+				return true
+			}
 			ctx.handleWidget(ctx.Node, handleTextTag(ctx))
 			return true
 		}

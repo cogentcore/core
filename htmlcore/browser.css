@@ -60,3 +60,11 @@ sub, sup { font-size: smaller; }
 fieldset { margin: 0 2px; padding: 0.35em 0.75em 0.625em; border: 2px groove #c0c0c0; }
 legend { padding: 0 2px; }
 ruby > rt { display: block; font-size: 50%; text-align: start; }
+
+button {
+    padding: 1px 6px; border: 1px solid #767676; border-radius: 3px;
+    background-color: #efefef; font-size: 13.333px; text-align: center; box-sizing: border-box;
+    flex-direction: row; justify-content: center; align-items: center;
+}
+svg:not(:root) { overflow: hidden; }
+input[type=hidden] { display: none; }

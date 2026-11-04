@@ -9,14 +9,12 @@ import (
 	"net/http"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/aymerick/douceur/parser"
 	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -39,6 +37,11 @@ type Context struct {
 
 	// cssOrder is the order of the last declaration added.
 	cssOrder int
+
+	// MediaWidth, if positive, is the width of the viewport in CSS px (dp)
+	// that the @media rules of style sheets are for; otherwise, it is the
+	// width of the screen.
+	MediaWidth float32
 
 	// BrowserStyle makes the rendering follow the default styles and
 	// layout of web browsers as closely as possible: block elements are
@@ -235,7 +238,7 @@ func NewContext() *Context {
 // It may make changes to the widget tree, so the widget
 // must be added to the resulting parent immediately.
 func (c *Context) Parent() core.Widget {
-	display := c.declaration(c.Node, "display")
+	display := c.displayOf(c.Node)
 	var parent core.Widget
 	switch display {
 	case "inline", "inline-block", "":
@@ -287,11 +290,7 @@ func (c *Context) addStyle(style string) {
 
 // addStyleOrigin adds the given CSS style string with the given origin.
 func (c *Context) addStyleOrigin(style string, origin cssOrigin) {
-	ss, err := parser.Parse(style)
-	if errors.Log(err) != nil {
-		return
-	}
-	c.addRules(rootNode(c.Node), ss, origin)
+	c.addRules(rootNode(c.Node), parseCSS(style), origin)
 }
 
 // LinkButton is a helper function that makes the given button

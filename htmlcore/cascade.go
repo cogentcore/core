@@ -64,8 +64,22 @@ func (c *Context) addRules(root *html.Node, ss *css.Stylesheet, origin cssOrigin
 	if c.styles == nil {
 		c.styles = map[*html.Node][]*cssDecl{}
 	}
-	for _, rule := range ss.Rules {
-		if rule.Kind != css.QualifiedRule { // @media etc are not supported yet
+	c.addRuleList(root, ss.Rules, origin)
+}
+
+// addRuleList adds the given rules, including those in @media rules
+// that match and in @supports rules.
+func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrigin) {
+	for _, rule := range rules {
+		if rule.Kind == css.AtRule {
+			switch strings.ToLower(rule.Name) {
+			case "@media":
+				if c.mediaMatches(rule.Prelude) {
+					c.addRuleList(root, rule.Rules, origin)
+				}
+			case "@supports", "@layer", "@container", "@scope":
+				c.addRuleList(root, rule.Rules, origin)
+			}
 			continue
 		}
 		for _, sel := range rule.Selectors {
@@ -115,6 +129,7 @@ func (c *Context) declarations(n *html.Node) []*cssDecl {
 	if !c.sorted[n] {
 		c.sorted[n] = true
 		ds := c.styles[n]
+		defer c.resolveVars(n, ds)
 		sort.SliceStable(ds, func(i, j int) bool {
 			a, b := ds[i], ds[j]
 			if a.rank() != b.rank() {
@@ -256,4 +271,96 @@ func specificity(sel string) int {
 
 func isNameChar(ch byte) bool {
 	return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '-' || ch == '_'
+}
+
+// resolveVars substitutes the values of the custom properties (variables)
+// in the var() functions of the given declarations of the given node.
+func (c *Context) resolveVars(n *html.Node, ds []*cssDecl) {
+	for _, d := range ds {
+		if strings.Contains(d.Value, "var(") {
+			d.Value = c.substituteVars(n, d.Value, 0)
+		}
+	}
+}
+
+// substituteVars returns the given value with its var() functions replaced
+// by the values of the custom properties for the given node, which are
+// inherited, or their fallback values.
+func (c *Context) substituteVars(n *html.Node, value string, depth int) string {
+	if depth > 10 { // cycles
+		return value
+	}
+	for {
+		i := strings.Index(value, "var(")
+		if i < 0 {
+			return value
+		}
+		// the matching parenthesis
+		end, level := -1, 0
+		for j := i + 3; j < len(value); j++ {
+			if value[j] == '(' {
+				level++
+			} else if value[j] == ')' {
+				level--
+				if level == 0 {
+					end = j
+					break
+				}
+			}
+		}
+		if end < 0 {
+			return value
+		}
+		name, fallback, _ := strings.Cut(value[i+4:end], ",")
+		v, ok := c.customProperty(n, strings.ToLower(strings.TrimSpace(name))) // property names are lowercase
+		if !ok {
+			v = strings.TrimSpace(fallback)
+		}
+		v = c.substituteVars(n, v, depth+1)
+		value = value[:i] + v + value[end+1:]
+	}
+}
+
+// customProperty returns the value of the given custom property for the
+// given node, from it or the nearest ancestor that declares it.
+func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
+	for p := n; p != nil; p = p.Parent {
+		if p.Type != html.ElementNode {
+			continue
+		}
+		ds := c.styles[p]
+		if !c.hinted[p] || !c.sorted[p] {
+			ds = c.declarations(p)
+		}
+		for i := len(ds) - 1; i >= 0; i-- {
+			if ds[i].Property == name {
+				return ds[i].Value, true
+			}
+		}
+	}
+	return "", false
+}
+
+// displayOf returns the display of the given node, with the children of
+// flex and grid containers blockified for [Context.BrowserStyle], as in CSS:
+// they are flex or grid items, which are block-level.
+func (c *Context) displayOf(n *html.Node) string {
+	d := c.declaration(n, "display")
+	if !c.BrowserStyle || n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
+		return d
+	}
+	switch c.declaration(n.Parent, "display") {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		switch d {
+		case "", "inline", "inline-block", "list-item", "flow-root":
+			return "block"
+		case "inline-flex":
+			return "flex"
+		case "inline-grid":
+			return "grid"
+		case "inline-table":
+			return "table"
+		}
+	}
+	return d
 }

@@ -51,6 +51,7 @@ import (
 var (
 	fidelityFlag = flag.Bool("fidelity", false, "run the fidelity comparison with Chrome")
 	fidelityRun  = flag.String("fidelity-run", "", "regexp selecting the fidelity pages to compare")
+	fidelityDir  = flag.String("fidelity-dir", "testdata/fidelity", "directory of the fidelity pages; a page.url file next to a page has the URL that its relative URLs are relative to")
 )
 
 const (
@@ -112,7 +113,7 @@ func TestFidelity(t *testing.T) {
 	if !*fidelityFlag {
 		t.Skip("run with -fidelity to compare with Chrome")
 	}
-	files, err := filepath.Glob("testdata/fidelity/*.html")
+	files, err := filepath.Glob(filepath.Join(*fidelityDir, "*.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,6 +159,11 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 		return res
 	}
 	absDir, _ := filepath.Abs(filepath.Dir(file))
+	baseURL := ""
+	if b, err := os.ReadFile(strings.TrimSuffix(file, ".html") + ".url"); err == nil {
+		baseURL = strings.TrimSpace(string(b))
+		tagged = strings.Replace(tagged, "<head>", `<head><base href="`+baseURL+`">`, 1)
+	}
 
 	chromeBoxes, chromeH, err := chromeRender(tagged, absDir, filepath.Join(outDir, name+".chrome.png"))
 	if err != nil {
@@ -166,7 +172,7 @@ func fidelityPage(t *testing.T, file, name, outDir string) *fidResult {
 	}
 	res.ChromeH = chromeH
 
-	coreBoxes, coreImg := coreRender(tagged, absDir)
+	coreBoxes, coreImg := coreRender(tagged, absDir, baseURL)
 	if coreImg == nil {
 		res.Err = "core: no image"
 		return res
@@ -367,7 +373,7 @@ func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
 
 // coreRender renders the HTML with htmlcore, returning the boxes of the
 // widgets of the elements and the rendered image.
-func coreRender(tagged, dir string) (map[int]*fidBox, *image.RGBA) {
+func coreRender(tagged, dir, baseURL string) (map[int]*fidBox, *image.RGBA) {
 	b := core.NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Padding.Zero()
@@ -380,11 +386,18 @@ func coreRender(tagged, dir string) (map[int]*fidBox, *image.RGBA) {
 	})
 	ctx := NewContext()
 	ctx.BrowserStyle = true
+	ctx.MediaWidth = fidelityWidth
 	ctx.PageURL = "file://" + dir + "/page.html"
+	if baseURL != "" {
+		ctx.PageURL = baseURL
+	}
 	ctx.GetURL = func(u string) (*http.Response, error) {
 		pu, err := url.Parse(u)
 		if err != nil {
 			return nil, err
+		}
+		if pu.Scheme == "http" || pu.Scheme == "https" {
+			return http.Get(u)
 		}
 		p := pu.Path
 		if !filepath.IsAbs(p) {
