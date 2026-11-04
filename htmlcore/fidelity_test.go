@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -26,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
@@ -251,6 +253,10 @@ func boxDelta(a, b *fidBox) float32 {
 
 // tagFidelityHTML adds a data-fid attribute to each element of the HTML,
 // returning the HTML and the tag of each fid.
+// chromeTimeout is the longest that a run of Chrome can take, as for a
+// screenshot of a very long page, after which it is stopped.
+const chromeTimeout = 2 * time.Minute
+
 // fidelityWidth returns the width of the viewport, in CSS px (= dp = dots),
 // from the -fidelity-width flag.
 func fidelityWidth() int { return *fidelityWidthFlag }
@@ -380,7 +386,9 @@ func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
 	args := []string{"--headless", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
 		"--force-device-scale-factor=1", "--virtual-time-budget=3000",
 		"--user-agent=" + UserAgent} // as htmlcore; some sites block headless Chrome
-	out, err := exec.Command(chromePath(), append(args, fmt.Sprintf("--window-size=%d,600", fidelityWidth()),
+	ctx, cancel := context.WithTimeout(context.Background(), chromeTimeout)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, chromePath(), append(args, fmt.Sprintf("--window-size=%d,600", fidelityWidth()),
 		"--dump-dom", "file://"+tmp)...).Output()
 	if err != nil {
 		return nil, 0, err
@@ -407,7 +415,9 @@ func chromeRender(tagged, dir, shot string) (map[int]*fidBox, int, error) {
 	}
 	h := max(data.H, 50)
 	absShot, _ := filepath.Abs(shot)
-	cmd := exec.Command(chromePath(), append(args, fmt.Sprintf("--window-size=%d,%d", fidelityWidth(), h),
+	sctx, scancel := context.WithTimeout(context.Background(), chromeTimeout)
+	defer scancel()
+	cmd := exec.CommandContext(sctx, chromePath(), append(args, fmt.Sprintf("--window-size=%d,%d", fidelityWidth(), h),
 		"--screenshot="+absShot, "file://"+tmp)...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return nil, 0, fmt.Errorf("screenshot: %w: %s", err, out)

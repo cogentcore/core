@@ -13,6 +13,7 @@ import (
 	"log/slog"
 	"net/http"
 	neturl "net/url"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -22,8 +23,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -518,7 +521,13 @@ func handleImage(ctx *Context, tag string) core.Widget {
 			svg.SetProperty("id", pid)
 		}
 		if !ctx.DelayedImageLoad {
-			errors.Log(svg.Read(resp.Body))
+			data, err := io.ReadAll(resp.Body)
+			if errors.Log(err) == nil {
+				errors.Log(svg.Read(bytes.NewReader(data)))
+				if w, h, ok := svgSize(data); ok { // its intrinsic size, for browser style
+					svg.SetProperty("svg-size", math32.Vec2(w, h))
+				}
+			}
 		}
 		newWidget = svg
 	} else {
@@ -899,4 +908,50 @@ func (ctx *Context) hasFloatChild(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// svgRootTag matches the start tag of the root svg element.
+var svgRootTag = regexp.MustCompile(`(?is)<svg\b[^>]*>`)
+
+// svgAttr matches an attribute of a start tag.
+var svgAttr = regexp.MustCompile(`(?is)\s(width|height|viewBox)\s*=\s*["']([^"']*)["']`)
+
+// svgSize returns the intrinsic size of the given SVG document, in px,
+// from the width and height of its root element, or the size of its view
+// box for those that are not set, as for the size of an img of it.
+func svgSize(data []byte) (w, h float32, ok bool) {
+	tag := svgRootTag.Find(data)
+	if tag == nil {
+		return 0, 0, false
+	}
+	var vw, vh float32
+	for _, m := range svgAttr.FindAllSubmatch(tag, -1) {
+		v := string(m[2])
+		switch strings.ToLower(string(m[1])) {
+		case "width":
+			if l, lok := parseLength(v, units.UnitPw); lok && l.Unit == units.UnitDp {
+				w = l.Value
+			}
+		case "height":
+			if l, lok := parseLength(v, units.UnitPh); lok && l.Unit == units.UnitDp {
+				h = l.Value
+			}
+		case "viewbox":
+			vb := strings.Fields(strings.ReplaceAll(v, ",", " "))
+			if len(vb) == 4 {
+				x, _ := strconv.ParseFloat(vb[2], 32)
+				y, _ := strconv.ParseFloat(vb[3], 32)
+				vw, vh = float32(x), float32(y)
+			}
+		}
+	}
+	switch {
+	case w > 0 && h == 0 && vw > 0:
+		h = w * vh / vw
+	case h > 0 && w == 0 && vh > 0:
+		w = h * vw / vh
+	case w == 0 && h == 0:
+		w, h = vw, vh
+	}
+	return w, h, w > 0 && h > 0
 }

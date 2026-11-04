@@ -190,3 +190,21 @@ func TestMediaHeightVh(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(500), l)
 }
+
+func TestSVGSize(t *testing.T) {
+	for _, c := range []struct {
+		src  string
+		w, h float32
+	}{
+		{`<svg width="16" height="16" viewBox="0 0 16 16">`, 16, 16},
+		{`<?xml version="1.0"?><svg xmlns="x" viewBox="0 0 200 100">`, 200, 100},
+		{`<svg width="50px" viewBox="0 0 200 100">`, 50, 25},
+	} {
+		w, h, ok := svgSize([]byte(c.src))
+		assert.True(t, ok, c.src)
+		assert.InDelta(t, c.w, w, 0.01, c.src)
+		assert.InDelta(t, c.h, h, 0.01, c.src)
+	}
+	_, _, ok := svgSize([]byte(`<svg>`))
+	assert.False(t, ok)
+}

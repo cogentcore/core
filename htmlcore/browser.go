@@ -275,7 +275,21 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		// as wide as its content on one line, and wraps in less width
 		s.Shrink.X = 1
 	}
-	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil {
+	if size, ok := wb.Property("svg-size").(math32.Vector2); ok {
+		// an img of an svg has the size of the svg, or that of its aspect
+		switch {
+		case st.width == nil && st.height == nil:
+			s.Min.Set(units.Dp(size.X), units.Dp(size.Y))
+			s.Max = s.Min
+		case st.height == nil && st.width.Unit == units.UnitDp:
+			s.Min.Y = units.Dp(st.width.Value * size.Y / size.X)
+			s.Max.Y = s.Min.Y
+		case st.width == nil && st.height.Unit == units.UnitDp:
+			s.Min.X = units.Dp(st.height.Value * size.X / size.Y)
+			s.Max.X = s.Min.X
+		}
+	}
+	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil && node.Data == "svg" {
 		// an svg without a size is as wide as its container, and as
 		// high as the aspect ratio of its view box makes it
 		if st.width == nil {
