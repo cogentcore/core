@@ -51,6 +51,25 @@ jobs:
         search_artifacts: true
         if_no_artifact_found: warn
 
+    # The snapshots of real pages of htmlcore (saved with their resources,
+    # see htmlcore/snapshot_test.go) are not in the repository: they are
+    # saved from the web once, when there are none, and kept as an artifact,
+    # so that they stay the same for the regression tests of htmlcore.
+    - name: Download htmlcore snapshots
+      id: snapshots
+      uses: dawidd6/action-download-artifact@v21
+      with:
+        name: htmlcore-snapshots
+        path: htmlcore/testdata/snapshots
+        workflow_search: true
+        search_artifacts: true
+        if_no_artifact_found: warn
+
+    - name: Save htmlcore snapshots
+      if: steps.snapshots.outputs.found_artifact != 'true'
+      continue-on-error: true # a page that cannot be saved is left out
+      run: go test ./htmlcore -run TestSnapshot -snapshot -v
+
     - name: Set CORE_UPDATE_TESTDATA env var
       if: inputs.updateTestdata
       run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
@@ -63,7 +82,17 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: testdata
-        path: "**/testdata/**/*.png"
+        path: |
+          **/testdata/**/*.png
+          !htmlcore/testdata/snapshots/**
+
+    - name: Upload htmlcore snapshots
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: htmlcore-snapshots
+        path: htmlcore/testdata/snapshots/
+        if-no-files-found: ignore
 
     - name: Upload failure testdata
       uses: actions/upload-artifact@v7
