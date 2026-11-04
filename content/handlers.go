@@ -173,7 +173,7 @@ func (ct *Content) widgetHandler(w core.Widget) {
 		pdf := ct.inPDFRender
 		tx.Styler(func(s *styles.Style) {
 			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
-			if tag := tx.HTMLTag(); pdf && tag != "td" && tag != "th" {
+			if tag := htmlcore.TextTag(tx); pdf && tag != "td" && tag != "th" {
 				// the blocks of PDFs are spaced by the margins of their texts
 				// (which add), and not by the CSS margins of the page
 				s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))

@@ -119,17 +119,6 @@ func (p *pager) assemble() {
 		}
 		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			if tx, ok := cwb.This.(*core.Text); ok {
-				// The text is laid out in the pages without the widget of
-				// its element (as in the browser style of htmlcore), so it
-				// gets the tag and id of the element, for the styles of
-				// headings and the anchors.
-				if el := tx.HTMLElement(); el != cwb {
-					for _, k := range []string{"tag", "id"} {
-						if v, ok := el.Property(k).(string); ok {
-							cwb.SetProperty(k, v)
-						}
-					}
-				}
 				if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
 					cwb.Styler(func(s *styles.Style) {
 						if tx.Styles.Font.Family == rich.SansSerif {

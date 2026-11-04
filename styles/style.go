@@ -250,14 +250,6 @@ type Style struct { //types:add
 	// ZIndex, except that those with a negative ZIndex are rendered first.
 	ZIndex int
 
-	// TODO: support these properties
-
-	// // specifies the row that this element should appear within a grid layout
-	// Row int
-
-	// // specifies the column that this element should appear within a grid layout
-	// Col int
-
 	// specifies the number of sequential columns that this element should occupy
 	// within a grid layout
 	ColSpan int

@@ -460,3 +460,53 @@ func getFileURL(rawURL string) (*http.Response, error) {
 	}
 	return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Body: f, Request: &http.Request{URL: u}}, nil
 }
+
+// TextElement returns the widget of the HTML element that the given text
+// is the text of: the text itself if it has a "tag" property, or else the
+// widget with a tag that it is in (possibly in an inline container of it),
+// as the text of a paragraph or heading is in the frame of its element.
+func TextElement(tx *core.Text) *core.WidgetBase {
+	if _, ok := tx.Property("tag").(string); ok {
+		return tx.AsWidget()
+	}
+	pw := core.AsWidget(tx.Parent)
+	if pw != nil && strings.HasPrefix(pw.Name, "inline-container") {
+		pw = core.AsWidget(pw.Parent)
+	}
+	if pw != nil {
+		if _, ok := pw.Property("tag").(string); ok {
+			return pw
+		}
+	}
+	return tx.AsWidget()
+}
+
+// TextTag returns the name of the HTML element that the given text is the
+// text of (see [TextElement]), such as "h2" for the text of a heading,
+// or "" if there is none.
+func TextTag(tx *core.Text) string {
+	tag, _ := TextElement(tx).Property("tag").(string)
+	return tag
+}
+
+// TagTexts gives each text in the given widget the "tag" and "id"
+// properties of the HTML element that it is the text of (see
+// [TextElement]), if it does not have its own, as for printing it apart
+// from the widget of its element (as in a PDF, which styles headings by
+// their tags, and links to their ids).
+func TagTexts(w core.Widget) {
+	w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		tx, ok := cw.(*core.Text)
+		if !ok {
+			return tree.Continue
+		}
+		if el := TextElement(tx); el != cwb {
+			for _, k := range []string{"tag", "id"} {
+				if v, ok := el.Property(k).(string); ok {
+					cwb.SetProperty(k, v)
+				}
+			}
+		}
+		return tree.Continue
+	})
+}
