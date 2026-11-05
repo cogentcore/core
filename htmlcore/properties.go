@@ -176,7 +176,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			pct = units.UnitPh
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
-			*st.sizeOf(prop) = st.env.lengthPtr(lval, pct)
+			st.setSize(prop, st.env.lengthPtr(lval, pct))
 		})
 	case "position":
 		pos := styles.PositionStatic
@@ -510,21 +510,22 @@ func colorFunc(v string) func() image.Image {
 	return func() image.Image { return parseColor(v) }
 }
 
-// sizeOf returns the field of the given size property (as max-width).
-func (st *cssState) sizeOf(prop string) **units.Value {
+// setSize sets the given size property (as max-width) to the given length.
+func (st *cssState) setSize(prop string, v *units.Value) {
 	switch prop {
 	case "width":
-		return &st.width
+		st.width = v
 	case "height":
-		return &st.height
+		st.height = v
 	case "min-width":
-		return &st.minWidth
+		st.minWidth = v
 	case "min-height":
-		return &st.minHeight
+		st.minHeight = v
 	case "max-width":
-		return &st.maxWidth
+		st.maxWidth = v
+	default:
+		st.maxHeight = v
 	}
-	return &st.maxHeight
 }
 
 // compileBorder compiles the border shorthand for the given side, or all if -1.
