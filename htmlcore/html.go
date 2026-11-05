@@ -110,15 +110,7 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		readHTMLNode(ctx, np, n.FirstChild)
 		if n.Type == html.ElementNode && ctx.rest == nil {
 			if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {
-				switch ctx.displayOf(n) {
-				case "grid", "inline-grid":
-					ctx.arrangeGrid(n, fr)
-				case "block", "list-item", "flow-root", "inline-block":
-					ctx.arrangeColumns(n, fr)
-				}
-				if n.Data == "details" {
-					ctx.arrangeDetails(n, fr)
-				}
+				ctx.arrange(n, fr)
 			}
 		}
 	}

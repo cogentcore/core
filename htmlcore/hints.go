@@ -109,13 +109,3 @@ func fontElementSize(v string) (string, bool) {
 	}
 	return sizes[min(max(n, 1), 7)-1], true
 }
-
-// ancestorTable returns the table element that the given cell is in.
-func ancestorTable(n *html.Node) *html.Node {
-	for p := n.Parent; p != nil; p = p.Parent {
-		if p.Data == "table" {
-			return p
-		}
-	}
-	return nil
-}

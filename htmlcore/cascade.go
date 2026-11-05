@@ -5,10 +5,12 @@
 package htmlcore
 
 import (
+	"io"
 	"sort"
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/base/errors"
 	"github.com/andybalholm/cascadia"
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
@@ -552,4 +554,74 @@ func splitSelectors(list string) []string {
 		}
 	}
 	return append(sels, strings.TrimSpace(list[start:]))
+}
+
+// addStyleSheets adds the style sheets of the style and link elements of
+// the document of the given root node, in document order, so that they
+// apply to all of the elements, as in browsers, wherever they are.
+func (c *Context) addStyleSheets(root *html.Node) {
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			switch n.Data {
+			case "template":
+				return
+			case "style":
+				if c.mediaMatches(GetAttr(n, "media")) {
+					c.addStyleOrigin(nodeText(n), originAuthor)
+				}
+				return
+			case "link":
+				if strings.EqualFold(GetAttr(n, "rel"), "stylesheet") && c.mediaMatches(GetAttr(n, "media")) {
+					c.addLinkedStyle(GetAttr(n, "href"))
+				}
+				return
+			case "svg":
+				return
+			}
+		}
+		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
+			walk(ch)
+		}
+	}
+	walk(root)
+}
+
+// addLinkedStyle adds the style sheet at the given URL.
+// Its URL is relative to the URL of the style sheet that it is in,
+// cssBase, if it is imported by one, or else to the page.
+func (c *Context) addLinkedStyle(href string) {
+	u, err := parseRelativeURL(href, c.cssBaseURL())
+	if errors.Log(err) != nil {
+		return
+	}
+	if c.cssImports == nil {
+		c.cssImports = map[string]bool{}
+	}
+	if c.cssImports[u.String()] || len(c.cssImports) > 100 { // cycles
+		return
+	}
+	c.cssImports[u.String()] = true
+	resp, err := Get(c, u.String())
+	if errors.Log(err) != nil {
+		return
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if errors.Log(err) != nil {
+		return
+	}
+	base := c.cssBase
+	c.cssBase = u.String()
+	c.addStyleOrigin(string(b), originAuthor)
+	c.cssBase = base
+}
+
+// cssBaseURL returns the URL that the URLs in the current style sheet are
+// relative to: the URL of the style sheet, or that of the page.
+func (c *Context) cssBaseURL() string {
+	if c.cssBase != "" {
+		return c.cssBase
+	}
+	return c.PageURL
 }

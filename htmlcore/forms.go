@@ -8,11 +8,16 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/textcore"
 	"golang.org/x/net/html"
@@ -201,4 +206,82 @@ func optionValue(o *html.Node) string {
 		return GetAttr(o, "value")
 	}
 	return strings.TrimSpace(nodeText(o))
+}
+
+// handleSelect handles a select element: a chooser of its options,
+// which are not read as content.
+func handleSelect(ctx *Context) {
+	ch := New[core.Chooser](ctx)
+	current := -1
+	for o := range optionNodes(ctx.Node) {
+		if HasAttr(o, "selected") && current < 0 {
+			current = len(ch.Items)
+		}
+		ch.Items = append(ch.Items, core.ChooserItem{Value: optionValue(o), Text: strings.TrimSpace(nodeText(o))})
+	}
+	ch.SetCurrentIndex(max(current, 0))
+	ctx.handleWidget(ctx.Node, ch)
+}
+
+// handleButton handles a button element: a block of its content,
+// styled by CSS, that is clickable.
+func handleButton(ctx *Context) {
+	w := New[core.Frame](ctx)
+	ctx.NewParent = w
+	ctx.handleWidget(ctx.Node, w)
+	w.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable)
+		s.Cursor = cursors.Pointer
+	})
+}
+
+// handleInputButton handles an input element of the given type that is
+// a button (submit, button or reset): a block of its label, as a button.
+func handleInputButton(ctx *Context, typ string) {
+	label := GetAttr(ctx.Node, "value")
+	if !HasAttr(ctx.Node, "value") {
+		label = map[string]string{"submit": "Submit", "reset": "Reset"}[typ]
+	}
+	w := New[core.Frame](ctx)
+	ctx.handleWidget(ctx.Node, w)
+	w.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable)
+		s.Cursor = cursors.Pointer
+	})
+	tx := core.NewText(w).SetText(html.EscapeString(label))
+	ctx.handleWidget(nil, tx)
+}
+
+// handleInput handles an input element.
+func handleInput(ctx *Context) core.Widget {
+	var newWidget core.Widget
+	{
+		ityp := GetAttr(ctx.Node, "type")
+		val := GetAttr(ctx.Node, "value")
+		switch ityp {
+		case "number":
+			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
+			newWidget = New[core.Spinner](ctx).SetValue(fval)
+		case "checkbox":
+			newWidget = New[core.Switch](ctx).SetType(core.SwitchCheckbox).
+				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+		case "radio":
+			newWidget = New[core.Switch](ctx).SetType(core.SwitchRadioButton).
+				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+		case "range":
+			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
+			newWidget = New[core.Slider](ctx).SetValue(fval)
+		case "button", "submit":
+			newWidget = New[core.Button](ctx).SetText(val)
+		case "color":
+			newWidget = core.Bind(val, New[core.ColorButton](ctx))
+		case "datetime":
+			newWidget = core.Bind(val, New[core.TimeInput](ctx))
+		case "file":
+			newWidget = core.Bind(val, New[core.FileButton](ctx))
+		default:
+			newWidget = New[core.TextField](ctx).SetText(val)
+		}
+	}
+	return newWidget
 }
