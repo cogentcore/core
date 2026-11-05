@@ -36,7 +36,7 @@ func (c *Context) columnCount(n *html.Node) int {
 	if !has {
 		return 0
 	}
-	defer c.lockCalcEnv()()
+	env := c.readEnv()
 	count := 0
 	width := float32(0)
 	set := func(v string) {
@@ -45,7 +45,7 @@ func (c *Context) columnCount(n *html.Node) int {
 		}
 		if i, err := strconv.Atoi(v); err == nil {
 			count = i
-		} else if px, ok := c.lengthPx(v); ok {
+		} else if px, ok := env.lengthPx(v); ok {
 			width = px
 		}
 	}
@@ -72,10 +72,10 @@ func (c *Context) columnCount(n *html.Node) int {
 		return 0
 	}
 	gap := float32(16) // the normal column gap is 1em
-	if g, ok := c.lengthPx(c.declaration(n, "column-gap")); ok {
+	if g, ok := env.lengthPx(c.declaration(n, "column-gap")); ok {
 		gap = g
 	}
-	fit := int((c.availableWidth(n) + gap) / (width + gap))
+	fit := int((c.availableWidth(env, n) + gap) / (width + gap))
 	if count > 0 {
 		fit = min(fit, count)
 	}
@@ -85,31 +85,10 @@ func (c *Context) columnCount(n *html.Node) int {
 	return fit
 }
 
-// lengthPx returns the given CSS length in px, for lengths that are
-// absolute or relative to the font size (taken to be 16px for em).
-func (c *Context) lengthPx(v string) (float32, bool) {
-	v = strings.TrimSpace(v)
-	if f, ok := strings.CutSuffix(v, "rem"); ok {
-		if x, err := strconv.ParseFloat(f, 32); err == nil {
-			return float32(x) * c.rootFontSize(), true
-		}
-	}
-	if f, ok := strings.CutSuffix(v, "em"); ok {
-		if x, err := strconv.ParseFloat(f, 32); err == nil {
-			return float32(x) * 16, true
-		}
-	}
-	l, ok := parseLength(v, units.UnitPw)
-	if !ok || l.Unit != units.UnitDp {
-		return 0, false
-	}
-	return l.Value, true
-}
-
 // availableWidth returns an estimate of the width of the content of the
 // given element, in px: that of the viewport, within the widths and max
 // widths of it and the elements that it is in, less their spaces.
-func (c *Context) availableWidth(n *html.Node) float32 {
+func (c *Context) availableWidth(env *lengthEnv, n *html.Node) float32 {
 	w := c.mediaWidth()
 	var chain []*html.Node
 	for p := n; p != nil && p.Type == html.ElementNode; p = p.Parent {
@@ -119,11 +98,11 @@ func (c *Context) availableWidth(n *html.Node) float32 {
 		p := chain[i]
 		// the spaces are outside of the width (of the content box)
 		for _, base := range []string{"padding", "margin"} {
-			l, r := c.horizontalSides(p, base)
+			l, r := c.horizontalSides(env, p, base)
 			w -= max(l, 0) + max(r, 0)
 		}
 		for _, prop := range []string{"width", "max-width"} {
-			if px, ok := c.lengthPx(c.declaration(p, prop)); ok && px > 0 {
+			if px, ok := env.lengthPx(c.declaration(p, prop)); ok && px > 0 {
 				w = min(w, px)
 			}
 		}
@@ -154,11 +133,9 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	}
 	count = min(count, len(kids))
 	gap := units.Em(1)
-	unlock := c.lockCalcEnv()
-	if g, ok := parseLength(c.declaration(n, "column-gap"), units.UnitPw); ok {
+	if g, ok := c.readEnv().length(c.declaration(n, "column-gap"), units.UnitPw); ok {
 		gap = g
 	}
-	unlock()
 	fr.FinalStyler(func(s *styles.Style) {
 		s.Display = styles.Flex
 		s.Direction = styles.Row
@@ -210,9 +187,9 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 // horizontalSides returns the left and right lengths in px of the given
 // sides property (padding or margin) of the given element, from its
 // declarations in the order of the cascade (with the shorthand).
-func (c *Context) horizontalSides(n *html.Node, base string) (left, right float32) {
+func (c *Context) horizontalSides(env *lengthEnv, n *html.Node, base string) (left, right float32) {
 	px := func(v string) float32 {
-		l, _ := c.lengthPx(v)
+		l, _ := env.lengthPx(v)
 		return l
 	}
 	for _, d := range c.declarations(n) {

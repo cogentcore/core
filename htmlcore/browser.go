@@ -85,6 +85,9 @@ type blockState struct {
 // cssState has the values of a widget's declarations that are
 // resolved after all of them have been read.
 type cssState struct {
+	// env is the length environment of the style pass.
+	env *lengthEnv
+
 	display    string
 	width      *units.Value
 	height     *units.Value
@@ -140,8 +143,6 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		}
 	}
 	wb.Styler(func(s *styles.Style) {
-		calcEnvMu.Lock() // for the lengths of the styles (as calc())
-		defer calcEnvMu.Unlock()
 		pw, _ := wb.Parent.(core.Widget)
 		var ps *styles.Style
 		var pbs *blockState
@@ -190,7 +191,8 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if tag != "" && isText { // texts for elements (as pre) fill their blocks
 			s.GrowWrap = false
 		}
-		st := &cssState{display: c.displayOf(node)}
+		st := &cssState{display: c.displayOf(node), env: defaultLengthEnv()}
+		env := st.env
 		if node == nil { // anonymous text or block
 			st.display = bs.display
 			if st.display == "" && isFrame {
@@ -203,15 +205,15 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if ps != nil { // for calc()
 			uc := &ps.UnitContext
 			if dp := uc.Dots(units.UnitDp); dp > 0 {
-				calcEnv.em = float64(uc.FontEm / dp)
-				calcEnv.vw = float64(uc.Vpw / dp / 100)
-				calcEnv.vh = float64(uc.Vph / dp / 100)
+				env.em = float64(uc.FontEm / dp)
+				env.vw = float64(uc.Vpw / dp / 100)
+				env.vh = float64(uc.Vph / dp / 100)
 			}
 		}
-		calcEnv.rem = float64(c.rootFontSize())
-		calcEnv.fixedVh = c.MediaHeight > 0
-		if calcEnv.fixedVh {
-			calcEnv.vh = float64(c.MediaHeight / 100)
+		env.rem = float64(c.rootFontSize())
+		env.fixedVh = c.MediaHeight > 0
+		if env.fixedVh {
+			env.vh = float64(c.MediaHeight / 100)
 		}
 		if tag == "body" && c.declaration(node, "font-size") == "" {
 			// the font size of the html element (which has no widget)
@@ -317,7 +319,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 				if i == 1 {
 					prop = "height"
 				}
-				if px, ok := c.lengthPx(c.declaration(cb, prop)); ok && px > 0 {
+				if px, ok := st.env.lengthPx(c.declaration(cb, prop)); ok && px > 0 {
 					scale = min(scale, px*mx.Value/100/size.Dim(math32.Dims(i)))
 				}
 			}
@@ -328,7 +330,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 			// keeping its aspect, as its width and height are auto
 			for i, prop := range []string{"max-width", "max-height"} {
 				d := math32.Dims(i)
-				if px, ok := c.lengthPx(c.declaration(node, prop)); ok && px > 0 && px < size.Dim(d) {
+				if px, ok := st.env.lengthPx(c.declaration(node, prop)); ok && px > 0 && px < size.Dim(d) {
 					size = size.MulScalar(px / size.Dim(d))
 				}
 			}
@@ -436,7 +438,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	default:
 		if f, err := strconv.ParseFloat(lh, 32); err == nil {
 			s.Text.LineHeight = float32(f)
-		} else if v, ok := parseLength(lh, units.UnitEm); ok {
+		} else if v, ok := st.env.length(lh, units.UnitEm); ok {
 			if v.Unit == units.UnitEm {
 				s.Text.LineHeight = v.Value / 100 // from %
 				if !strings.HasSuffix(lh, "%") {
@@ -839,21 +841,21 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "padding":
 		vals := expandSides(splitColors(lval))
 		for i, v := range vals {
-			if l, ok := parseLength(v, units.UnitPw); ok {
+			if l, ok := st.env.length(v, units.UnitPw); ok {
 				setValueSide(&s.Padding, i, l)
 			}
 		}
 	case "padding-top", "padding-right", "padding-bottom", "padding-left":
-		if l, ok := parseLength(lval, units.UnitPw); ok {
+		if l, ok := st.env.length(lval, units.UnitPw); ok {
 			setValueSide(&s.Padding, sideIndex(prop), l)
 		}
 	case "border":
-		setBorder(s, -1, val)
+		setBorder(st.env, s, -1, val)
 	case "border-top", "border-right", "border-bottom", "border-left":
-		setBorder(s, sideIndex(prop), val)
+		setBorder(st.env, s, sideIndex(prop), val)
 	case "border-width":
 		for i, v := range expandSides(splitColors(lval)) {
-			setValueSide(&s.Border.Width, i, borderWidth(v))
+			setValueSide(&s.Border.Width, i, st.env.borderWidth(v))
 		}
 	case "border-style":
 		for i, v := range expandSides(splitColors(lval)) {
@@ -864,13 +866,13 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			setSide(&s.Border.Color, i, parseColor(v))
 		}
 	case "border-top-width", "border-right-width", "border-bottom-width", "border-left-width":
-		setValueSide(&s.Border.Width, sideIndex(prop), borderWidth(lval))
+		setValueSide(&s.Border.Width, sideIndex(prop), st.env.borderWidth(lval))
 	case "border-top-style", "border-right-style", "border-bottom-style", "border-left-style":
 		setBorderStyle(s, sideIndex(prop), lval)
 	case "border-top-color", "border-right-color", "border-bottom-color", "border-left-color":
 		setSide(&s.Border.Color, sideIndex(prop), parseColor(val))
 	case "border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius":
-		if l, ok := parseLength(strings.Fields(lval + " 0")[0], units.UnitEw); ok {
+		if l, ok := st.env.length(strings.Fields(lval + " 0")[0], units.UnitEw); ok {
 			i := map[string]int{"border-top-left-radius": 0, "border-top-right-radius": 1,
 				"border-bottom-right-radius": 2, "border-bottom-left-radius": 3}[prop]
 			setValueSide(&s.Border.Radius, i, l)
@@ -878,7 +880,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "border-radius":
 		vals := strings.Fields(strings.Split(lval, "/")[0])
 		for i, v := range expandSides(vals) {
-			if l, ok := parseLength(v, units.UnitEw); ok {
+			if l, ok := st.env.length(v, units.UnitEw); ok {
 				setValueSide(&s.Border.Radius, i, l)
 			}
 		}
@@ -894,17 +896,17 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			s.Color = cl
 		}
 	case "width":
-		st.width = lengthPtr(lval, units.UnitPw)
+		st.width = st.env.lengthPtr(lval, units.UnitPw)
 	case "height":
-		st.height = lengthPtr(lval, units.UnitPh)
+		st.height = st.env.lengthPtr(lval, units.UnitPh)
 	case "min-width":
-		st.minWidth = lengthPtr(lval, units.UnitPw)
+		st.minWidth = st.env.lengthPtr(lval, units.UnitPw)
 	case "min-height":
-		st.minHeight = lengthPtr(lval, units.UnitPh)
+		st.minHeight = st.env.lengthPtr(lval, units.UnitPh)
 	case "max-width":
-		st.maxWidth = lengthPtr(lval, units.UnitPw)
+		st.maxWidth = st.env.lengthPtr(lval, units.UnitPw)
 	case "max-height":
-		st.maxHeight = lengthPtr(lval, units.UnitPh)
+		st.maxHeight = st.env.lengthPtr(lval, units.UnitPh)
 	case "position":
 		switch lval {
 		case "relative", "sticky": // sticky is not supported, and is like relative
@@ -917,10 +919,10 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			s.Position = styles.PositionStatic
 		}
 	case "top", "right", "bottom", "left":
-		setInset(s, sideIndex("-"+prop), lval)
+		setInset(st.env, s, sideIndex("-"+prop), lval)
 	case "inset":
 		for i, v := range expandSides(splitColors(lval)) {
-			setInset(s, i, v)
+			setInset(st.env, s, i, v)
 		}
 	case "inset-inline", "inset-block":
 		fs := splitColors(lval)
@@ -932,11 +934,11 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			end = fs[1]
 		}
 		if prop == "inset-inline" {
-			setInset(s, 3, start)
-			setInset(s, 1, end)
+			setInset(st.env, s, 3, start)
+			setInset(st.env, s, 1, end)
 		} else {
-			setInset(s, 0, start)
-			setInset(s, 2, end)
+			setInset(st.env, s, 0, start)
+			setInset(st.env, s, 2, end)
 		}
 	case "float":
 		switch lval {
@@ -969,7 +971,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "box-sizing":
 		st.borderBox = lval == "border-box"
 	case "font-size":
-		setFontSize(s, ps, lval)
+		setFontSize(st.env, s, ps, lval)
 	case "font-weight":
 		setFontWeight(s, ps, lval)
 	case "font-style":
@@ -1012,7 +1014,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 			s.Text.WhiteSpace = text.WrapAsNeeded
 		}
 	case "text-indent":
-		if l, ok := parseLength(lval, units.UnitPw); ok {
+		if l, ok := st.env.length(lval, units.UnitPw); ok {
 			s.Text.Indent = l
 		}
 	case "text-decoration", "text-decoration-line":
@@ -1074,33 +1076,33 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "gap", "grid-gap":
 		fs := splitColors(lval)
 		if len(fs) > 0 {
-			if l, ok := parseLength(fs[0], units.UnitPh); ok {
+			if l, ok := st.env.length(fs[0], units.UnitPh); ok {
 				s.Gap.Y = l
 				s.Gap.X = l
 			}
 		}
 		if len(fs) > 1 {
-			if l, ok := parseLength(fs[1], units.UnitPw); ok {
+			if l, ok := st.env.length(fs[1], units.UnitPw); ok {
 				s.Gap.X = l
 			}
 		}
 	case "row-gap":
-		if l, ok := parseLength(lval, units.UnitPh); ok {
+		if l, ok := st.env.length(lval, units.UnitPh); ok {
 			s.Gap.Y = l
 		}
 	case "column-gap":
-		if l, ok := parseLength(lval, units.UnitPw); ok {
+		if l, ok := st.env.length(lval, units.UnitPw); ok {
 			s.Gap.X = l
 		}
 	case "border-spacing":
 		fs := splitColors(lval)
 		if len(fs) > 0 {
-			if l, ok := parseLength(fs[0], units.UnitPw); ok {
+			if l, ok := st.env.length(fs[0], units.UnitPw); ok {
 				s.Gap.Set(l)
 			}
 		}
 		if len(fs) > 1 {
-			if l, ok := parseLength(fs[1], units.UnitPh); ok {
+			if l, ok := st.env.length(fs[1], units.UnitPh); ok {
 				s.Gap.Y = l
 			}
 		}
@@ -1242,12 +1244,12 @@ func setSidePtr[T any](top, right, bottom, left *T, i int, v T) {
 
 // setInset sets the given side (top, right, bottom, left) of the inset
 // of a positioned element; auto is not set.
-func setInset(s *styles.Style, i int, v string) {
+func setInset(env *lengthEnv, s *styles.Style, i int, v string) {
 	pct := units.UnitPw
 	if i == 0 || i == 2 {
 		pct = units.UnitPh
 	}
-	l, ok := parseLength(v, pct)
+	l, ok := env.length(v, pct)
 	setSide(&s.InsetSet, i, ok)
 	if ok {
 		setValueSide(&s.Inset, i, l)
@@ -1261,84 +1263,9 @@ func setMargin(st *cssState, i int, v string) {
 		return
 	}
 	st.marginAuto[i] = false
-	if l, ok := parseLength(v, units.UnitPw); ok {
+	if l, ok := st.env.length(v, units.UnitPw); ok {
 		st.margin[i] = &l
 	}
-}
-
-// parseLength parses the given CSS length, with px as dp (which is
-// what px is in browsers), % as the given unit, and lengths without
-// units, as in the attributes of HTML elements, as dp.
-func parseLength(v string, pct units.Units) (units.Value, bool) {
-	v = strings.TrimSpace(v)
-	switch v {
-	case "", "auto", "none", "normal", "inherit", "initial":
-		return units.Value{}, false
-	}
-	if strings.HasSuffix(v, ")") {
-		return mathLength(v, pct)
-	}
-	if r, ok := strings.CutSuffix(v, "rem"); ok { // of the font size of the html element
-		if f, err := strconv.ParseFloat(r, 32); err == nil {
-			return units.Dp(float32(f) * float32(calcEnv.rem)), true
-		}
-	}
-	if strings.HasSuffix(v, "%") {
-		f, err := strconv.ParseFloat(strings.TrimSuffix(v, "%"), 32)
-		if err != nil {
-			return units.Value{}, false
-		}
-		return units.Value{Value: float32(f), Unit: pct}, true
-	}
-	if f, err := strconv.ParseFloat(v, 32); err == nil {
-		return units.Dp(float32(f)), true
-	}
-	// absolute units are relative to px in CSS (96px per inch)
-	for _, u := range cssAbsoluteUnits {
-		if num, ok := strings.CutSuffix(v, u.suffix); ok {
-			f, err := strconv.ParseFloat(num, 32)
-			if err != nil {
-				return units.Value{}, false
-			}
-			return units.Dp(float32(f) * u.px), true
-		}
-	}
-	var l units.Value
-	if err := l.SetString(v); err != nil {
-		return units.Value{}, false
-	}
-	if l.Unit == units.UnitVh && calcEnv.fixedVh {
-		return units.Dp(l.Value * float32(calcEnv.vh)), true
-	}
-	return l, true
-}
-
-// cssAbsoluteUnits are the absolute units of CSS, in px.
-var cssAbsoluteUnits = []struct {
-	suffix string
-	px     float32
-}{{"px", 1}, {"pt", 96.0 / 72}, {"pc", 16}, {"in", 96}, {"cm", 96 / 2.54}, {"mm", 96 / 25.4}, {"q", 96 / 101.6}}
-
-func lengthPtr(v string, pct units.Units) *units.Value {
-	l, ok := parseLength(v, pct)
-	if !ok {
-		return nil
-	}
-	return &l
-}
-
-// borderWidth returns the given CSS border width.
-func borderWidth(v string) units.Value {
-	switch v {
-	case "thin":
-		return units.Dp(1)
-	case "medium":
-		return units.Dp(3)
-	case "thick":
-		return units.Dp(5)
-	}
-	l, _ := parseLength(v, units.UnitDp)
-	return l
 }
 
 var borderStyleNames = map[string]bool{"none": true, "hidden": true, "solid": true, "dotted": true, "dashed": true,
@@ -1358,7 +1285,7 @@ func setBorderStyle(s *styles.Style, i int, v string) {
 }
 
 // setBorder sets the border shorthand for the given side, or all if -1.
-func setBorder(s *styles.Style, side int, val string) {
+func setBorder(env *lengthEnv, s *styles.Style, side int, val string) {
 	width := units.Dp(3) // medium
 	style := "none"
 	var color image.Image = colors.Uniform(colors.ToUniform(s.Color))
@@ -1368,7 +1295,7 @@ func setBorder(s *styles.Style, side int, val string) {
 		case borderStyleNames[lf]:
 			style = lf
 		case lf == "thin" || lf == "medium" || lf == "thick" || (len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.')):
-			width = borderWidth(lf)
+			width = env.borderWidth(lf)
 		default:
 			if cl := parseColor(f); cl != nil {
 				color = cl
@@ -1627,7 +1554,7 @@ var cssFontSizes = map[string]float32{
 }
 
 // setFontSize sets the font size, relative to the inherited one.
-func setFontSize(s, ps *styles.Style, v string) {
+func setFontSize(env *lengthEnv, s, ps *styles.Style, v string) {
 	inherited := s.Font.Size
 	if ps != nil {
 		inherited = ps.Font.Size
@@ -1656,7 +1583,7 @@ func setFontSize(s, ps *styles.Style, v string) {
 	}
 	if strings.HasSuffix(v, "rem") {
 		if f, err := strconv.ParseFloat(strings.TrimSuffix(v, "rem"), 32); err == nil {
-			s.Font.Size = units.Dp(float32(calcEnv.rem) * float32(f))
+			s.Font.Size = units.Dp(float32(env.rem) * float32(f))
 		}
 		return
 	}
@@ -1666,7 +1593,7 @@ func setFontSize(s, ps *styles.Style, v string) {
 		}
 		return
 	}
-	if l, ok := parseLength(v, units.UnitDp); ok {
+	if l, ok := env.length(v, units.UnitDp); ok {
 		s.Font.Size = l
 	}
 }
@@ -1737,7 +1664,7 @@ func setFont(st *cssState, s, ps *styles.Style, v string) {
 				setFontWeight(s, ps, weight)
 			}
 			size, lh, _ := strings.Cut(lf, "/")
-			setFontSize(s, ps, size)
+			setFontSize(st.env, s, ps, size)
 			st.lineHeight = "normal"
 			if lh != "" {
 				st.lineHeight = lh

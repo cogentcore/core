@@ -704,8 +704,7 @@ var svgAttr = regexp.MustCompile(`(?is)\s(width|height|viewBox)\s*=\s*["']([^"']
 // from the width and height of its root element, or the size of its view
 // box for those that are not set, as for the size of an img of it.
 func svgSize(data []byte) (w, h float32, ok bool) {
-	calcEnvMu.Lock() // for parseLength (of absolute lengths)
-	defer calcEnvMu.Unlock()
+	env := defaultLengthEnv() // only absolute lengths are used
 	tag := svgRootTag.Find(data)
 	if tag == nil {
 		return 0, 0, false
@@ -715,11 +714,11 @@ func svgSize(data []byte) (w, h float32, ok bool) {
 		v := string(m[2])
 		switch strings.ToLower(string(m[1])) {
 		case "width":
-			if l, lok := parseLength(v, units.UnitPw); lok && l.Unit == units.UnitDp {
+			if l, lok := env.length(v, units.UnitPw); lok && l.Unit == units.UnitDp {
 				w = l.Value
 			}
 		case "height":
-			if l, lok := parseLength(v, units.UnitPh); lok && l.Unit == units.UnitDp {
+			if l, lok := env.length(v, units.UnitPh); lok && l.Unit == units.UnitDp {
 				h = l.Value
 			}
 		case "viewbox":
