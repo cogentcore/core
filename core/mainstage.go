@@ -37,6 +37,10 @@ func generateHTMLBody(bd *Body) {
 	if !system.GenerateHTMLArg() || ExternalParent != nil {
 		return
 	}
+	if GenerateHTML == nil {
+		fmt.Fprintln(os.Stderr, "-generatehtml: no HTML generator is linked into this app; import _ \"cogentcore.org/core/htmlcore/tohtml\" (the core tool does this when it runs -generatehtml)")
+		os.Exit(1)
+	}
 	wb := NewWidgetBase()
 	ExternalParent = wb
 	wb.SetOnChildAdded(func(n tree.Node) {

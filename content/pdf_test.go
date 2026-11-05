@@ -52,18 +52,19 @@ func TestPagePDF(t *testing.T) {
 	})
 }
 
-// TestTextHTMLTag tests that the texts of headings in the browser style of
+// TestTextTag tests that the texts of headings in the browser style of
 // htmlcore, which are in the widgets of their elements, have the tags of
 // those elements, which the PDF uses for its styles of headings.
-func TestTextHTMLTag(t *testing.T) {
+func TestTextTag(t *testing.T) {
 	b := core.NewBody()
 	assert.NoError(t, htmlcore.ReadMDString(htmlcore.NewContext(), b, "# Title\n\n## Sub `code` and [a link](https://example.com)\n\nText"))
 	b.StyleTree()
 	tags := map[string]string{}
 	b.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 		if tx, ok := cw.(*core.Text); ok {
-			tags[tx.Text] = tx.HTMLTag()
-			if tx.HTMLTag() == "h1" {
+			tags[tx.Text] = htmlcore.TextTag(tx)
+			if htmlcore.TextTag(tx) == "h1" {
+				htmlcore.TagTexts(tx) // as for the PDF
 				paginate.APAHeaders(tx)
 				assert.Equal(t, rich.Bold, tx.Styles.Font.Weight)
 			}

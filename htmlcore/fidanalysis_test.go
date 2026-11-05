@@ -40,10 +40,10 @@ import (
 
 // fidOrigin is an element where a difference of the layout starts.
 type fidOrigin struct {
-	Fid   int
-	Desc  string
-	Kind  string // width, height, or position
-	Delta float32
+	Fid          int
+	Desc         string
+	Kind         string // width, height, or position
+	Delta        float32
 	Chrome, Core *fidBox
 }
 

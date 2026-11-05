@@ -873,6 +873,10 @@ func (ct *Content) PagePDF(path string) error {
 		return err
 	}
 	opts := Settings.PageSettings(ct, ct.current.Page)
+	// the texts are laid out in the pages without the frames of their
+	// elements, so they need the tags (for the styles of headings)
+	// and ids (for links) of them
+	htmlcore.TagTexts(ct.pageFrame())
 	if refs != nil {
 		paginate.PDF(f, opts.PDF, ct.pageFrame(), refs)
 	} else {

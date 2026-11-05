@@ -179,7 +179,7 @@ func CenteredTitle(title, authors, affiliations, url, date, version, reference, 
 // second level header ## is used for most top-level headers within a page.
 func APAHeaders(tx *core.Text) {
 	headerLevel := 0
-	if tag := tx.HTMLTag(); len(tag) > 1 && tag[0] == 'h' {
+	if tag, ok := tx.Properties["tag"].(string); ok && len(tag) > 1 && tag[0] == 'h' {
 		headerLevel, _ = strconv.Atoi(tag[1:])
 	}
 	s := &tx.Styles

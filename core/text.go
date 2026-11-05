@@ -535,46 +535,16 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // This is the only point at which we know we have the final
 // shaped.Lines for a text item.
 func (tx *Text) setAnchorFromProperties() {
-	el := tx.HTMLElement()
 	anc := ""
-	if id, ok := el.Property("id").(string); ok {
+	if id, ok := tx.Properties["id"].(string); ok {
 		anc = id
 	}
-	if tag := tx.HTMLTag(); len(tag) > 1 && tag[0] == 'h' { // header
+	if tag, ok := tx.Properties["tag"].(string); ok && len(tag) > 1 && tag[0] == 'h' { // header
 		if level, err := strconv.Atoi(tag[1:]); err == nil {
 			anc += fmt.Sprintf(";Header %d:%s", level, tx.Text)
 		}
 	}
 	tx.paintText.Anchor = anc
-}
-
-// HTMLElement returns the widget of the HTML element that the text is the
-// text of: the text itself if it has a tag property, or else the widget
-// with a tag that it is in (possibly in an inline container of it), as
-// for the text of an element in the browser style of htmlcore.
-func (tx *Text) HTMLElement() *WidgetBase {
-	if _, ok := tx.Property("tag").(string); ok {
-		return tx.AsWidget()
-	}
-	pw := tx.parentWidget()
-	if pw != nil && strings.HasPrefix(pw.Name, "inline-container") {
-		pw = pw.parentWidget()
-	}
-	if pw != nil {
-		if _, ok := pw.Property("tag").(string); ok {
-			return pw
-		}
-	}
-	return tx.AsWidget()
-}
-
-// HTMLTag returns the name of the HTML element that the text is the text
-// of (its "tag" property, or that of the widget of the element that it is
-// in, as in the browser style of htmlcore), or "" if there is none.
-// For example, it is "h2" for the text of a heading.
-func (tx *Text) HTMLTag() string {
-	tag, _ := tx.HTMLElement().Property("tag").(string)
-	return tag
 }
 
 // configTextAlloc is used for determining how much space the text
