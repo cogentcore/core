@@ -177,7 +177,7 @@ func TestCalcPx(t *testing.T) {
 }
 
 func TestMathLength(t *testing.T) {
-	calcEnv.em, calcEnv.vw, calcEnv.vh = 16, 8, 6
+	env := defaultLengthEnv() // an em of 16px, vw of 8px, and vh of 6px
 	for v, want := range map[string]units.Value{
 		"calc(100% - 20px)":        units.Pw(100),
 		"calc(10px + 2em)":         units.Dp(42),
@@ -189,7 +189,7 @@ func TestMathLength(t *testing.T) {
 		"calc(2 * (10px + 5px))":   units.Dp(30),
 		"min(100%, 600px)":         units.Dp(600),
 	} {
-		got, ok := parseLength(v, units.UnitPw)
+		got, ok := env.length(v, units.UnitPw)
 		assert.True(t, ok, v)
 		assert.InDelta(t, want.Value, got.Value, 0.01, v)
 		assert.Equal(t, want.Unit, got.Unit, v)
@@ -197,13 +197,12 @@ func TestMathLength(t *testing.T) {
 }
 
 func TestMediaHeightVh(t *testing.T) {
-	saved := calcEnv
-	defer func() { calcEnv = saved }()
-	calcEnv.vh, calcEnv.fixedVh = 6, true // a 600 px viewport
-	l, ok := parseLength("50vh", units.UnitPh)
+	env := defaultLengthEnv()
+	env.vh, env.fixedVh = 6, true // a 600 px viewport
+	l, ok := env.length("50vh", units.UnitPh)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(300), l)
-	l, ok = parseLength("calc(100vh - 100px)", units.UnitPh)
+	l, ok = env.length("calc(100vh - 100px)", units.UnitPh)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(500), l)
 }
@@ -387,13 +386,12 @@ func TestRootFontSize(t *testing.T) {
 	ctx.Node = doc
 	ctx.addStyleSheets(doc)
 	assert.InDelta(t, 10, ctx.rootFontSize(), 0.01)
-	saved := calcEnv
-	defer func() { calcEnv = saved }()
-	calcEnv.rem = 10
-	l, ok := parseLength("2rem", units.UnitPw)
+	env := ctx.readEnv()
+	assert.Equal(t, 10.0, env.rem)
+	l, ok := env.length("2rem", units.UnitPw)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(20), l)
-	l, ok = parseLength("calc(1rem + 4px)", units.UnitPw)
+	l, ok = env.length("calc(1rem + 4px)", units.UnitPw)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(14), l)
 }
@@ -438,7 +436,7 @@ func TestICO(t *testing.T) {
 // TestFontShorthandResets tests that the font shorthand resets the
 // properties that it does not set, as the bold of a heading.
 func TestFontShorthandResets(t *testing.T) {
-	st := &cssState{}
+	st := &cssState{env: defaultLengthEnv()}
 	s := styles.NewStyle()
 	s.Font.Weight = rich.Bold
 	s.Font.Slant = rich.Italic

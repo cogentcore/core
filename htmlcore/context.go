@@ -31,23 +31,6 @@ type Context struct {
 	// Node is the node that is currently being read.
 	Node *html.Node
 
-	// styles are the CSS declarations for each node, which are
-	// sorted in the order of the cascade by [Context.declarations].
-	styles map[*html.Node][]*cssDecl
-
-	// sorted records the nodes whose declarations are sorted,
-	// and hinted those whose attributes have been added.
-	sorted, hinted map[*html.Node]bool
-
-	// cssOrder is the order of the last declaration added.
-	cssOrder int
-
-	// cssBase is the URL of the style sheet being added, if it is from a
-	// URL, which the URLs in it are relative to, and cssImports has the
-	// URLs of the style sheets that have been added (for cycles of @import).
-	cssBase    string
-	cssImports map[string]bool
-
 	// RefreshURL is the URL of the first meta element with an http-equiv
 	// of refresh in the HTML read, if any, which an app that shows web pages
 	// can open next, as browsers do (as for a page that redirects browsers
@@ -72,23 +55,6 @@ type Context struct {
 	// that vh lengths are relative to; otherwise, they are relative to the
 	// height of the scene.
 	MediaHeight float32
-
-	// nodeWidgets has the widgets of the controls of forms.
-	nodeWidgets map[*html.Node]core.Widget
-
-	// floatSiblings has whether the unstyled blocks in each element
-	// have floats in them, for flattensBlock.
-	floatSiblings map[*html.Node]bool
-
-	// flattened has the blocks that are flattened (see flattensBlock).
-	flattened map[*html.Node]bool
-
-	// rootFont is the font size of the html element in px, once it is known
-	// (see rootFontSize).
-	rootFont float32
-
-	// blocks has the margin collapsing state of the block widgets.
-	blocks map[core.Widget]*blockState
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
@@ -168,12 +134,55 @@ type Context struct {
 	// of a long page to be shown sooner.
 	StageSize int
 
+	// pageState is the state of the pages read with the context: their
+	// style sheets and the state of their widgets.
+	pageState
+
 	// readState is the state of the current read of HTML.
 	readState
 
 	// reading is whether HTML is being read, so that HTML read by an
 	// element handler meanwhile is read within that read (see [ReadHTML]).
 	reading bool
+}
+
+// pageState is the state of the pages read with a [Context], which
+// [Context.NewPage] starts anew: the style sheets and declarations of
+// their elements, and the state of their widgets for styling them.
+type pageState struct {
+	// styles are the CSS declarations for each node, which are
+	// sorted in the order of the cascade by [Context.declarations].
+	styles map[*html.Node][]*cssDecl
+
+	// sorted records the nodes whose declarations are sorted,
+	// and hinted those whose attributes have been added.
+	sorted, hinted map[*html.Node]bool
+
+	// cssOrder is the order of the last declaration added.
+	cssOrder int
+
+	// cssBase is the URL of the style sheet being added, if it is from a
+	// URL, which the URLs in it are relative to, and cssImports has the
+	// URLs of the style sheets that have been added (for cycles of @import).
+	cssBase    string
+	cssImports map[string]bool
+
+	// nodeWidgets has the widgets of the controls of forms.
+	nodeWidgets map[*html.Node]core.Widget
+
+	// floatSiblings has whether the unstyled blocks in each element
+	// have floats in them, for flattensBlock.
+	floatSiblings map[*html.Node]bool
+
+	// flattened has the blocks that are flattened (see flattensBlock).
+	flattened map[*html.Node]bool
+
+	// rootFont is the font size of the html element in px, once it is known
+	// (see rootFontSize).
+	rootFont float32
+
+	// blocks has the margin collapsing state of the block widgets.
+	blocks map[core.Widget]*blockState
 }
 
 // readState is the state of a read of HTML by [ReadHTML].
@@ -260,7 +269,7 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		styles:            map[*html.Node][]*cssDecl{},
+		pageState:         pageState{styles: map[*html.Node][]*cssDecl{}},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            getURL,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},

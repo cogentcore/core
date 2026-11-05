@@ -122,16 +122,14 @@ func gridTracks(v string) []string {
 // factor (and minmax(0, length) grows up to the length), and the other
 // tracks are as wide as their content when other tracks are flexible
 // (and auto tracks share the rest of the width when none are).
-func gridTrackStyle(s *styles.Style, track string, flexible bool) {
-	calcEnvMu.Lock() // for parseLength
-	defer calcEnvMu.Unlock()
+func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool) {
 	if strings.HasPrefix(track, "minmax(") {
 		inner := strings.TrimSuffix(strings.TrimPrefix(track, "minmax("), ")")
 		_, mx, _ := strings.Cut(inner, ",")
 		mx = strings.TrimSpace(mx)
 		if strings.HasSuffix(mx, "fr") || mx == "auto" {
 			track = mx
-		} else if l, ok := parseLength(mx, units.UnitPw); ok {
+		} else if l, ok := env.length(mx, units.UnitPw); ok {
 			s.Grow.X, s.Shrink.X = 1, 1
 			s.Max.X = l
 			s.BoxSizing = styles.BoxBorderBox
@@ -144,7 +142,7 @@ func gridTrackStyle(s *styles.Style, track string, flexible bool) {
 		}
 		return
 	}
-	if l, ok := parseLength(track, units.UnitPw); ok {
+	if l, ok := env.length(track, units.UnitPw); ok {
 		s.BoxSizing = styles.BoxBorderBox
 		if l.Unit == units.UnitPw { // a percentage of the grid, which it fills
 			s.Max.X = l
@@ -166,6 +164,7 @@ func gridTrackStyle(s *styles.Style, track string, flexible bool) {
 // its node by its grid template (see the comment at the top of grid.go).
 func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 	areas, ncols, tracks := c.gridTemplate(n)
+	env := c.readEnv() // for the lengths of the tracks
 	if ncols == 0 {
 		return
 	}
@@ -205,7 +204,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 			for _, k := range auto { // the tracks of the columns of the children in order
 				if kw, ok := k.(core.Widget); ok {
 					i := slices.Index(auto, k) % ncols
-					kw.AsWidget().FinalStyler(func(s *styles.Style) { gridTrackStyle(s, trackOf(i), flexible) })
+					kw.AsWidget().FinalStyler(func(s *styles.Style) { gridTrackStyle(env, s, trackOf(i), flexible) })
 				}
 			}
 		}
@@ -245,7 +244,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 				it.w.AsWidget().FinalStyler(func(s *styles.Style) {
 					s.ColSpan, s.RowSpan = a.cols, a.rows
 					if a.cols == 1 {
-						gridTrackStyle(s, track, flexible)
+						gridTrackStyle(env, s, track, flexible)
 					}
 				})
 				continue
@@ -261,7 +260,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 				s.Margin.Zero()
 				s.Gap.Zero()
 				s.Background = nil
-				gridTrackStyle(s, track, flexible)
+				gridTrackStyle(env, s, track, flexible)
 			})
 			kids = append(kids, filler)
 		}

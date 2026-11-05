@@ -19,7 +19,7 @@ import (
 
 var cssUsageFlag = flag.Bool("css-usage", false, "report the CSS properties used by the pages of -fidelity-dir")
 
-// supportedProperties are the CSS properties that [Context.setCSS] handles
+// supportedProperties are the CSS properties that [Context.compileCSS] handles
 // (and those of inline elements), for [TestCSSUsage].
 var supportedProperties = map[string]bool{}
 
