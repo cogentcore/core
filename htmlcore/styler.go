@@ -132,6 +132,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			trBg = parseColor(bg)
 		}
 	}
+	ops := c.compileDecls(decls)
 	wb.Styler(func(s *styles.Style) {
 		pw, _ := wb.Parent.(core.Widget)
 		var ps *styles.Style
@@ -208,13 +209,13 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if tag == "body" && c.declaration(node, "font-size") == "" {
 			// the font size of the html element (which has no widget)
 			if rf := c.rootFontSize(); rf != 16 {
-				c.setCSS(st, s, ps, "font-size", fmt.Sprintf("%gpx", rf))
+				for _, op := range c.compileCSS("font-size", fmt.Sprintf("%gpx", rf)) {
+					op(st, s, ps)
+				}
 			}
 		}
-		for _, d := range decls {
-			if !d.invalid {
-				c.setCSS(st, s, ps, d.Property, d.Value)
-			}
+		for _, op := range ops {
+			op(st, s, ps)
 		}
 		if node != nil {
 			st.display = c.displayOf(node)

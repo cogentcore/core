@@ -18,13 +18,37 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
-// setCSS sets the given CSS property to the given value.
-func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
+// styleOp applies a compiled CSS declaration to the given style, with the
+// state of the style pass (as its length environment) and the parent style.
+type styleOp func(st *cssState, s, ps *styles.Style)
+
+// compileDecls compiles the given declarations, in the order of the cascade,
+// without those that are invalid (see [Context.compileCSS]).
+func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
+	var ops []styleOp
+	for _, d := range decls {
+		if !d.invalid {
+			ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+		}
+	}
+	return ops
+}
+
+// compileCSS compiles the declaration of the given CSS property with the
+// given value into the operations that apply it to a style. The parts of
+// the value that are the same for every element, as keywords, numbers and
+// colors, are parsed once here; lengths are parsed when it is applied, as
+// they depend on the length environment of the style pass (as for em, rem
+// and calc()). It returns nil for a property that is not supported, or
+// a value that is not valid.
+func (c *Context) compileCSS(prop, val string) []styleOp {
 	val = strings.TrimSpace(val)
 	lval := strings.ToLower(val)
+	op := func(f styleOp) []styleOp { return []styleOp{f} }
 	if lval == "inherit" || lval == "initial" || lval == "unset" {
-		s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
-		return
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
+		})
 	}
 	if p, ok := logicalProperties[prop]; ok {
 		prop = p
@@ -33,7 +57,7 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 	case "margin-inline", "margin-block", "padding-inline", "padding-block":
 		fs := splitColors(val)
 		if len(fs) == 0 {
-			return
+			return nil
 		}
 		start, end := fs[0], fs[0]
 		if len(fs) > 1 {
@@ -41,352 +65,503 @@ func (c *Context) setCSS(st *cssState, s, ps *styles.Style, prop, val string) {
 		}
 		base, dir, _ := strings.Cut(prop, "-")
 		if dir == "inline" {
-			c.setCSS(st, s, ps, base+"-left", start)
-			c.setCSS(st, s, ps, base+"-right", end)
-		} else {
-			c.setCSS(st, s, ps, base+"-top", start)
-			c.setCSS(st, s, ps, base+"-bottom", end)
+			return append(c.compileCSS(base+"-left", start), c.compileCSS(base+"-right", end)...)
 		}
-		return
+		return append(c.compileCSS(base+"-top", start), c.compileCSS(base+"-bottom", end)...)
 	case "display":
-		st.display = lval
+		return op(func(st *cssState, s, ps *styles.Style) { st.display = lval })
 	case "margin":
 		vals := expandSides(splitColors(lval))
-		for i, v := range vals {
-			setMargin(st, i, v)
-		}
-	case "margin-top":
-		setMargin(st, 0, lval)
-	case "margin-right":
-		setMargin(st, 1, lval)
-	case "margin-bottom":
-		setMargin(st, 2, lval)
-	case "margin-left":
-		setMargin(st, 3, lval)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, v := range vals {
+				setMargin(st, i, v)
+			}
+		})
+	case "margin-top", "margin-right", "margin-bottom", "margin-left":
+		i := sideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) { setMargin(st, i, lval) })
 	case "padding":
 		vals := expandSides(splitColors(lval))
-		for i, v := range vals {
-			if l, ok := st.env.length(v, units.UnitPw); ok {
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, v := range vals {
+				if l, ok := st.env.length(v, units.UnitPw); ok {
+					setValueSide(&s.Padding, i, l)
+				}
+			}
+		})
+	case "padding-top", "padding-right", "padding-bottom", "padding-left":
+		i := sideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if l, ok := st.env.length(lval, units.UnitPw); ok {
 				setValueSide(&s.Padding, i, l)
 			}
-		}
-	case "padding-top", "padding-right", "padding-bottom", "padding-left":
-		if l, ok := st.env.length(lval, units.UnitPw); ok {
-			setValueSide(&s.Padding, sideIndex(prop), l)
-		}
+		})
 	case "border":
-		setBorder(st.env, s, -1, val)
+		return op(compileBorder(-1, val))
 	case "border-top", "border-right", "border-bottom", "border-left":
-		setBorder(st.env, s, sideIndex(prop), val)
+		return op(compileBorder(sideIndex(prop), val))
 	case "border-width":
-		for i, v := range expandSides(splitColors(lval)) {
-			setValueSide(&s.Border.Width, i, st.env.borderWidth(v))
-		}
+		vals := expandSides(splitColors(lval))
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, v := range vals {
+				setValueSide(&s.Border.Width, i, st.env.borderWidth(v))
+			}
+		})
 	case "border-style":
-		for i, v := range expandSides(splitColors(lval)) {
-			setBorderStyle(s, i, v)
-		}
+		vals := expandSides(splitColors(lval))
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, v := range vals {
+				setBorderStyle(s, i, v)
+			}
+		})
 	case "border-color":
-		for i, v := range expandSides(splitColors(val)) {
-			setSide(&s.Border.Color, i, parseColor(v))
+		var cfs []func() image.Image
+		for _, v := range expandSides(splitColors(val)) {
+			cfs = append(cfs, colorFunc(v))
 		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, cf := range cfs {
+				setSide(&s.Border.Color, i, cf())
+			}
+		})
 	case "border-top-width", "border-right-width", "border-bottom-width", "border-left-width":
-		setValueSide(&s.Border.Width, sideIndex(prop), st.env.borderWidth(lval))
+		i := sideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) { setValueSide(&s.Border.Width, i, st.env.borderWidth(lval)) })
 	case "border-top-style", "border-right-style", "border-bottom-style", "border-left-style":
-		setBorderStyle(s, sideIndex(prop), lval)
+		i := sideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) { setBorderStyle(s, i, lval) })
 	case "border-top-color", "border-right-color", "border-bottom-color", "border-left-color":
-		setSide(&s.Border.Color, sideIndex(prop), parseColor(val))
+		i, cf := sideIndex(prop), colorFunc(val)
+		return op(func(st *cssState, s, ps *styles.Style) { setSide(&s.Border.Color, i, cf()) })
 	case "border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius":
-		if l, ok := st.env.length(strings.Fields(lval + " 0")[0], units.UnitEw); ok {
-			i := map[string]int{"border-top-left-radius": 0, "border-top-right-radius": 1,
-				"border-bottom-right-radius": 2, "border-bottom-left-radius": 3}[prop]
-			setValueSide(&s.Border.Radius, i, l)
-		}
-	case "border-radius":
-		vals := strings.Fields(strings.Split(lval, "/")[0])
-		for i, v := range expandSides(vals) {
+		v := strings.Fields(lval + " 0")[0]
+		i := map[string]int{"border-top-left-radius": 0, "border-top-right-radius": 1,
+			"border-bottom-right-radius": 2, "border-bottom-left-radius": 3}[prop]
+		return op(func(st *cssState, s, ps *styles.Style) {
 			if l, ok := st.env.length(v, units.UnitEw); ok {
 				setValueSide(&s.Border.Radius, i, l)
 			}
-		}
+		})
+	case "border-radius":
+		vals := expandSides(strings.Fields(strings.Split(lval, "/")[0]))
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, v := range vals {
+				if l, ok := st.env.length(v, units.UnitEw); ok {
+					setValueSide(&s.Border.Radius, i, l)
+				}
+			}
+		})
 	case "background", "background-color":
-		if bg := backgroundColor(val); bg != "" {
-			st.background, st.hasBg = parseColor(bg), true
-			if bg == "transparent" || bg == "none" {
+		bg := backgroundColor(val)
+		if bg == "" {
+			return nil
+		}
+		none := bg == "transparent" || bg == "none"
+		cf := colorFunc(bg)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			st.background, st.hasBg = cf(), true
+			if none {
 				st.background = nil
 			}
-		}
+		})
 	case "color":
-		if cl := parseColor(val); cl != nil {
-			s.Color = cl
+		if parseColor(val) == nil {
+			return nil
 		}
-	case "width":
-		st.width = st.env.lengthPtr(lval, units.UnitPw)
-	case "height":
-		st.height = st.env.lengthPtr(lval, units.UnitPh)
-	case "min-width":
-		st.minWidth = st.env.lengthPtr(lval, units.UnitPw)
-	case "min-height":
-		st.minHeight = st.env.lengthPtr(lval, units.UnitPh)
-	case "max-width":
-		st.maxWidth = st.env.lengthPtr(lval, units.UnitPw)
-	case "max-height":
-		st.maxHeight = st.env.lengthPtr(lval, units.UnitPh)
+		cf := colorFunc(val)
+		return op(func(st *cssState, s, ps *styles.Style) { s.Color = cf() })
+	case "width", "height", "min-width", "min-height", "max-width", "max-height":
+		pct := units.UnitPw
+		if strings.HasSuffix(prop, "height") {
+			pct = units.UnitPh
+		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			*st.sizeOf(prop) = st.env.lengthPtr(lval, pct)
+		})
 	case "position":
+		pos := styles.PositionStatic
 		switch lval {
 		case "relative", "sticky": // sticky is not supported, and is like relative
-			s.Position = styles.PositionRelative
+			pos = styles.PositionRelative
 		case "absolute":
-			s.Position = styles.PositionAbsolute
+			pos = styles.PositionAbsolute
 		case "fixed":
-			s.Position = styles.PositionFixed
-		default:
-			s.Position = styles.PositionStatic
+			pos = styles.PositionFixed
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Position = pos })
 	case "top", "right", "bottom", "left":
-		setInset(st.env, s, sideIndex("-"+prop), lval)
+		i := sideIndex("-" + prop)
+		return op(func(st *cssState, s, ps *styles.Style) { setInset(st.env, s, i, lval) })
 	case "inset":
-		for i, v := range expandSides(splitColors(lval)) {
-			setInset(st.env, s, i, v)
-		}
+		vals := expandSides(splitColors(lval))
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for i, v := range vals {
+				setInset(st.env, s, i, v)
+			}
+		})
 	case "inset-inline", "inset-block":
 		fs := splitColors(lval)
 		if len(fs) == 0 {
-			return
+			return nil
 		}
 		start, end := fs[0], fs[0]
 		if len(fs) > 1 {
 			end = fs[1]
 		}
-		if prop == "inset-inline" {
-			setInset(st.env, s, 3, start)
-			setInset(st.env, s, 1, end)
-		} else {
-			setInset(st.env, s, 0, start)
-			setInset(st.env, s, 2, end)
+		first, second := 3, 1 // the sides of the start and end
+		if prop == "inset-block" {
+			first, second = 0, 2
 		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			setInset(st.env, s, first, start)
+			setInset(st.env, s, second, end)
+		})
 	case "float":
+		f := styles.FloatNone
 		switch lval {
 		case "left", "inline-start":
-			s.Float = styles.FloatLeft
+			f = styles.FloatLeft
 		case "right", "inline-end":
-			s.Float = styles.FloatRight
-		default:
-			s.Float = styles.FloatNone
+			f = styles.FloatRight
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Float = f })
 	case "clear":
+		cl := styles.ClearNone
 		switch lval {
 		case "left", "inline-start":
-			s.Clear = styles.ClearLeft
+			cl = styles.ClearLeft
 		case "right", "inline-end":
-			s.Clear = styles.ClearRight
+			cl = styles.ClearRight
 		case "both":
-			s.Clear = styles.ClearBoth
-		default:
-			s.Clear = styles.ClearNone
+			cl = styles.ClearBoth
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Clear = cl })
 	case "z-index":
-		if z, err := strconv.Atoi(lval); err == nil {
-			s.ZIndex = z
+		z, err := strconv.Atoi(lval)
+		if err != nil {
+			return nil
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.ZIndex = z })
 	case "vertical-align":
-		st.verticalAlign = lval
+		return op(func(st *cssState, s, ps *styles.Style) { st.verticalAlign = lval })
 	case "border-collapse":
-		st.borderCollapse = lval == "collapse"
+		collapse := lval == "collapse"
+		return op(func(st *cssState, s, ps *styles.Style) { st.borderCollapse = collapse })
 	case "box-sizing":
-		st.borderBox = lval == "border-box"
+		borderBox := lval == "border-box"
+		return op(func(st *cssState, s, ps *styles.Style) { st.borderBox = borderBox })
 	case "font-size":
-		setFontSize(st.env, s, ps, lval)
+		return op(func(st *cssState, s, ps *styles.Style) { setFontSize(st.env, s, ps, lval) })
 	case "font-weight":
-		setFontWeight(s, ps, lval)
+		return op(func(st *cssState, s, ps *styles.Style) { setFontWeight(s, ps, lval) })
 	case "font-style":
+		slant := rich.SlantNormal
 		if lval == "italic" || lval == "oblique" {
-			s.Font.Slant = rich.Italic
-		} else {
-			s.Font.Slant = rich.SlantNormal
+			slant = rich.Italic
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Slant = slant })
 	case "font-family":
-		s.Font.Family = fontFamily(val)
+		family := fontFamily(val)
+		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Family = family })
 	case "font":
-		setFont(st, s, ps, val)
+		return op(func(st *cssState, s, ps *styles.Style) { setFont(st, s, ps, val) })
 	case "line-height":
-		st.lineHeight = lval
+		return op(func(st *cssState, s, ps *styles.Style) { st.lineHeight = lval })
 	case "text-align":
+		align, legacy := text.Start, false
 		switch lval {
 		case "left", "start":
-			s.Text.Align = text.Start
 		case "right", "end":
-			s.Text.Align = text.End
+			align = text.End
 		case "center":
-			s.Text.Align = text.Center
+			align = text.Center
 		case "-webkit-center":
 			// the legacy center of the align attribute,
 			// which also centers the blocks in the element
-			s.Text.Align = text.Center
-			st.legacyCenter = true
+			align, legacy = text.Center, true
 		case "justify":
-			s.Text.Align = text.Justify
+			align = text.Justify
+		default:
+			return nil
 		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.Text.Align = align
+			if legacy {
+				st.legacyCenter = true
+			}
+		})
 	case "white-space":
+		ws := text.WrapAsNeeded
 		switch lval {
 		case "nowrap":
-			s.Text.WhiteSpace = text.WrapNever
+			ws = text.WrapNever
 		case "pre":
-			s.Text.WhiteSpace = text.WhiteSpacePre
+			ws = text.WhiteSpacePre
 		case "pre-wrap", "pre-line", "break-spaces":
-			s.Text.WhiteSpace = text.WhiteSpacePreWrap
-		default:
-			s.Text.WhiteSpace = text.WrapAsNeeded
+			ws = text.WhiteSpacePreWrap
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Text.WhiteSpace = ws })
 	case "text-indent":
-		if l, ok := st.env.length(lval, units.UnitPw); ok {
-			s.Text.Indent = l
-		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if l, ok := st.env.length(lval, units.UnitPw); ok {
+				s.Text.Indent = l
+			}
+		})
 	case "text-decoration", "text-decoration-line":
-		s.Font.Decoration = 0
+		var deco rich.Decorations
 		for _, f := range strings.Fields(lval) {
 			switch f {
 			case "underline":
-				s.Font.Decoration.SetFlag(true, rich.Underline)
+				deco.SetFlag(true, rich.Underline)
 			case "overline":
-				s.Font.Decoration.SetFlag(true, rich.Overline)
+				deco.SetFlag(true, rich.Overline)
 			case "line-through":
-				s.Font.Decoration.SetFlag(true, rich.LineThrough)
+				deco.SetFlag(true, rich.LineThrough)
 			}
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Decoration = deco })
 	case "flex-direction":
+		dir := styles.Row
 		if strings.HasPrefix(lval, "column") {
-			s.Direction = styles.Column
-		} else {
-			s.Direction = styles.Row
+			dir = styles.Column
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Direction = dir })
 	case "flex-wrap":
-		s.Wrap = lval == "wrap" || lval == "wrap-reverse"
+		wrap := lval == "wrap" || lval == "wrap-reverse"
+		return op(func(st *cssState, s, ps *styles.Style) { s.Wrap = wrap })
 	case "flex-flow":
+		var ops []styleOp
 		for _, f := range strings.Fields(lval) {
-			c.setCSS(st, s, ps, "flex-direction", f)
+			ops = append(ops, c.compileCSS("flex-direction", f)...)
 			if strings.Contains(f, "wrap") {
-				c.setCSS(st, s, ps, "flex-wrap", f)
+				ops = append(ops, c.compileCSS("flex-wrap", f)...)
 			}
 		}
-	case "flex-grow":
-		if f, err := strconv.ParseFloat(lval, 32); err == nil {
-			st.flexGrow, st.hasGrow = float32(f), true
+		return ops
+	case "flex-grow", "flex-shrink":
+		f, err := strconv.ParseFloat(lval, 32)
+		if err != nil {
+			return nil
 		}
-	case "flex-shrink":
-		if f, err := strconv.ParseFloat(lval, 32); err == nil {
-			st.flexShrink, st.hasShrink = float32(f), true
+		if prop == "flex-grow" {
+			return op(func(st *cssState, s, ps *styles.Style) { st.flexGrow, st.hasGrow = float32(f), true })
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { st.flexShrink, st.hasShrink = float32(f), true })
 	case "flex":
+		var grow, shrink float32
+		hasGrow, hasShrink := false, false
 		switch lval {
 		case "none":
-			st.flexGrow, st.hasGrow = 0, true
-			st.flexShrink, st.hasShrink = 0, true
+			hasGrow, hasShrink = true, true
 		case "auto":
-			st.flexGrow, st.hasGrow = 1, true
-			st.flexShrink, st.hasShrink = 1, true
+			grow, hasGrow, shrink, hasShrink = 1, true, 1, true
 		default:
-			if fs := strings.Fields(lval); len(fs) > 0 {
-				if f, err := strconv.ParseFloat(fs[0], 32); err == nil {
-					st.flexGrow, st.hasGrow = float32(f), true
-				}
-				st.flexShrink, st.hasShrink = 1, true
-				if len(fs) > 1 {
-					if f, err := strconv.ParseFloat(fs[1], 32); err == nil {
-						st.flexShrink = float32(f)
-					}
+			fs := strings.Fields(lval)
+			if len(fs) == 0 {
+				return nil
+			}
+			if f, err := strconv.ParseFloat(fs[0], 32); err == nil {
+				grow, hasGrow = float32(f), true
+			}
+			shrink, hasShrink = 1, true
+			if len(fs) > 1 {
+				if f, err := strconv.ParseFloat(fs[1], 32); err == nil {
+					shrink = float32(f)
 				}
 			}
 		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if hasGrow {
+				st.flexGrow, st.hasGrow = grow, true
+			}
+			if hasShrink {
+				st.flexShrink, st.hasShrink = shrink, true
+			}
+		})
 	case "gap", "grid-gap":
 		fs := splitColors(lval)
-		if len(fs) > 0 {
-			if l, ok := st.env.length(fs[0], units.UnitPh); ok {
-				s.Gap.Y = l
-				s.Gap.X = l
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if len(fs) > 0 {
+				if l, ok := st.env.length(fs[0], units.UnitPh); ok {
+					s.Gap.Y = l
+					s.Gap.X = l
+				}
 			}
-		}
-		if len(fs) > 1 {
-			if l, ok := st.env.length(fs[1], units.UnitPw); ok {
-				s.Gap.X = l
+			if len(fs) > 1 {
+				if l, ok := st.env.length(fs[1], units.UnitPw); ok {
+					s.Gap.X = l
+				}
 			}
-		}
+		})
 	case "row-gap":
-		if l, ok := st.env.length(lval, units.UnitPh); ok {
-			s.Gap.Y = l
-		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if l, ok := st.env.length(lval, units.UnitPh); ok {
+				s.Gap.Y = l
+			}
+		})
 	case "column-gap":
-		if l, ok := st.env.length(lval, units.UnitPw); ok {
-			s.Gap.X = l
-		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if l, ok := st.env.length(lval, units.UnitPw); ok {
+				s.Gap.X = l
+			}
+		})
 	case "border-spacing":
 		fs := splitColors(lval)
-		if len(fs) > 0 {
-			if l, ok := st.env.length(fs[0], units.UnitPw); ok {
-				s.Gap.Set(l)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if len(fs) > 0 {
+				if l, ok := st.env.length(fs[0], units.UnitPw); ok {
+					s.Gap.Set(l)
+				}
 			}
-		}
-		if len(fs) > 1 {
-			if l, ok := st.env.length(fs[1], units.UnitPh); ok {
-				s.Gap.Y = l
+			if len(fs) > 1 {
+				if l, ok := st.env.length(fs[1], units.UnitPh); ok {
+					s.Gap.Y = l
+				}
 			}
-		}
-	case "justify-content":
-		s.Justify.Content = alignValue(lval)
-	case "justify-items":
-		s.Justify.Items = alignValue(lval)
-	case "justify-self":
-		s.Justify.Self = alignValue(lval)
+		})
+	case "justify-content", "justify-items", "justify-self", "align-content":
+		a := alignValue(lval)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			switch prop {
+			case "justify-content":
+				s.Justify.Content = a
+			case "justify-items":
+				s.Justify.Items = a
+			case "justify-self":
+				s.Justify.Self = a
+			default:
+				s.Align.Content = a
+			}
+		})
 	case "align-items":
-		st.alignItems = lval
-		s.Align.Items = alignValue(lval)
+		a := alignValue(lval)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			st.alignItems = lval
+			s.Align.Items = a
+		})
 	case "align-self":
-		st.alignSelf = lval
-		s.Align.Self = alignValue(lval)
-	case "align-content":
-		s.Align.Content = alignValue(lval)
+		a := alignValue(lval)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			st.alignSelf = lval
+			s.Align.Self = a
+		})
 	case "overflow", "overflow-x", "overflow-y":
 		// Overflow that is hidden is clipped to the size of the box, which
 		// does not grow to fit it, as with a scrolling overflow in core, but
 		// without scrollbars (OverflowHidden in core does not clip).
 		vals := strings.Fields(lval)
 		if len(vals) == 0 {
-			return
+			return nil
 		}
 		if len(vals) == 1 {
 			vals = append(vals, vals[0])
 		}
+		type dimOverflow struct {
+			dim    math32.Dims
+			ov     styles.Overflows
+			hidden bool
+		}
+		var dims []dimOverflow
 		for d, v := range vals[:2] {
 			if prop == "overflow-x" && d == 1 || prop == "overflow-y" && d == 0 {
 				continue
 			}
-			ov := styles.OverflowVisible
-			hd := d
-			if prop == "overflow-y" {
-				hd = 1
-			}
-			st.overflowHidden[hd] = false
+			do := dimOverflow{dim: math32.Dims(d), ov: styles.OverflowVisible}
 			switch v {
 			case "hidden", "clip":
-				ov = styles.OverflowAuto
-				st.overflowHidden[hd] = true
+				do.ov, do.hidden = styles.OverflowAuto, true
 			case "auto", "scroll":
-				ov = styles.OverflowAuto
+				do.ov = styles.OverflowAuto
 			}
-			if prop == "overflow-y" {
-				d = 1
-			}
-			s.Overflow.SetDim(math32.Dims(d), ov)
+			dims = append(dims, do)
 		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			for _, do := range dims {
+				st.overflowHidden[do.dim] = do.hidden
+				s.Overflow.SetDim(do.dim, do.ov)
+			}
+		})
 	case "grid-template-columns":
-		s.Columns = gridColumns(lval)
+		cols := gridColumns(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { s.Columns = cols })
 	case "opacity":
-		if f, err := strconv.ParseFloat(lval, 32); err == nil {
-			s.Opacity = float32(f)
+		f, err := strconv.ParseFloat(lval, 32)
+		if err != nil {
+			return nil
 		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = float32(f) })
 	case "visibility":
 		if lval == "hidden" || lval == "collapse" {
-			s.Opacity = 0
+			return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = 0 })
+		}
+	}
+	return nil
+}
+
+// colorFunc returns a function that returns the given CSS color (or nil if
+// it is not one). A uniform color is parsed once, and is shared by the
+// styles; other colors (as gradients) are parsed for each style, so that
+// each has its own.
+func colorFunc(v string) func() image.Image {
+	cl := parseColor(v)
+	if _, ok := cl.(*image.Uniform); ok || cl == nil {
+		return func() image.Image { return cl }
+	}
+	return func() image.Image { return parseColor(v) }
+}
+
+// sizeOf returns the field of the given size property (as max-width).
+func (st *cssState) sizeOf(prop string) **units.Value {
+	switch prop {
+	case "width":
+		return &st.width
+	case "height":
+		return &st.height
+	case "min-width":
+		return &st.minWidth
+	case "min-height":
+		return &st.minHeight
+	case "max-width":
+		return &st.maxWidth
+	}
+	return &st.maxHeight
+}
+
+// compileBorder compiles the border shorthand for the given side, or all if -1.
+func compileBorder(side int, val string) styleOp {
+	style, width := "none", ""
+	var color func() image.Image // the color of the text if none
+	for _, f := range splitColors(val) {
+		lf := strings.ToLower(f)
+		switch {
+		case borderStyleNames[lf]:
+			style = lf
+		case lf == "thin" || lf == "medium" || lf == "thick" || (len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.')):
+			width = lf
+		default:
+			if parseColor(f) != nil {
+				color = colorFunc(f)
+			}
+		}
+	}
+	return func(st *cssState, s, ps *styles.Style) {
+		w := units.Dp(3) // medium
+		if width != "" {
+			w = st.env.borderWidth(width)
+		}
+		var cl image.Image = colors.Uniform(colors.ToUniform(s.Color))
+		if color != nil {
+			cl = color()
+		}
+		for i := range 4 {
+			if side >= 0 && i != side {
+				continue
+			}
+			setSide(&s.Border.Color, i, cl)
+			setBorderStyle(s, i, style)
+			if style != "none" && style != "hidden" {
+				setValueSide(&s.Border.Width, i, w)
+			}
 		}
 	}
 }
@@ -506,36 +681,6 @@ func setBorderStyle(s *styles.Style, i int, v string) {
 	var bs styles.BorderStyles
 	if bs.SetString(v) == nil {
 		setSide(&s.Border.Style, i, bs)
-	}
-}
-
-// setBorder sets the border shorthand for the given side, or all if -1.
-func setBorder(env *lengthEnv, s *styles.Style, side int, val string) {
-	width := units.Dp(3) // medium
-	style := "none"
-	var color image.Image = colors.Uniform(colors.ToUniform(s.Color))
-	for _, f := range splitColors(val) {
-		lf := strings.ToLower(f)
-		switch {
-		case borderStyleNames[lf]:
-			style = lf
-		case lf == "thin" || lf == "medium" || lf == "thick" || (len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.')):
-			width = env.borderWidth(lf)
-		default:
-			if cl := parseColor(f); cl != nil {
-				color = cl
-			}
-		}
-	}
-	for i := range 4 {
-		if side >= 0 && i != side {
-			continue
-		}
-		setSide(&s.Border.Color, i, color)
-		setBorderStyle(s, i, style)
-		if style != "none" && style != "hidden" {
-			setValueSide(&s.Border.Width, i, width)
-		}
 	}
 }
 
