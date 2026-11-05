@@ -485,8 +485,12 @@ func TextElement(tx *core.Text) *core.WidgetBase {
 // text of (see [TextElement]), such as "h2" for the text of a heading,
 // or "" if there is none.
 func TextTag(tx *core.Text) string {
-	tag, _ := TextElement(tx).Property("tag").(string)
-	return tag
+	// note: checking ok, as a failed assertion of a nil value to a
+	// string is null instead of "" under goscript (js)
+	if tag, ok := TextElement(tx).Property("tag").(string); ok {
+		return tag
+	}
+	return ""
 }
 
 // TagTexts gives each text in the given widget the "tag" and "id"
