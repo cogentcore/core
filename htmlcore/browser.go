@@ -117,13 +117,8 @@ type cssState struct {
 // to the given widget.
 func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl) {
 	wb := w.AsWidget()
-	tx, isText := w.(*core.Text)
+	_, isText := w.(*core.Text)
 	_, isFrame := w.(*core.Frame)
-	if isText {
-		// text has its one-line width until it needs to wrap,
-		// for the shrink-to-fit widths of CSS
-		tx.SetFitWidth(true)
-	}
 	plain := isText || isFrame // widgets whose look is all from CSS
 	tag := ""
 	if node != nil {
@@ -328,6 +323,16 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 			}
 			size = size.MulScalar(scale)
 		}
+		if st.width == nil && st.height == nil && node != nil {
+			// an absolute max-width or max-height scales it down to it,
+			// keeping its aspect, as its width and height are auto
+			for i, prop := range []string{"max-width", "max-height"} {
+				d := math32.Dims(i)
+				if px, ok := c.lengthPx(c.declaration(node, prop)); ok && px > 0 && px < size.Dim(d) {
+					size = size.MulScalar(px / size.Dim(d))
+				}
+			}
+		}
 		switch {
 		case st.width != nil && st.height != nil && st.height.Unit != units.UnitPh:
 			mh := *st.height
@@ -397,6 +402,16 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 			s.Justify.Content = styles.End
 		default:
 			s.Justify.Content = styles.Center // middle
+		}
+	} else if !bs.block {
+		// an inline element is aligned in the height of its line
+		switch st.verticalAlign {
+		case "middle":
+			s.Align.Self = styles.Center
+		case "top", "text-top":
+			s.Align.Self = styles.Start
+		case "bottom", "text-bottom":
+			s.Align.Self = styles.End
 		}
 	}
 

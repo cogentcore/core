@@ -135,8 +135,21 @@ func (c *Context) availableWidth(n *html.Node) float32 {
 // element into frames for its columns, as above.
 func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	count := c.columnCount(n)
+	if count < 2 {
+		return
+	}
+	// The content of an element with only one child (as a list in a div
+	// with columns, as for the references of Wikipedia) is that of the
+	// child, which is split into the columns, as in CSS.
+	for fr.NumChildren() == 1 {
+		k, ok := fr.Child(0).(*core.Frame)
+		if !ok || k.NumChildren() < 2 {
+			break
+		}
+		fr = k
+	}
 	kids := append([]tree.Node(nil), fr.Children...)
-	if count < 2 || len(kids) < 2 {
+	if len(kids) < 2 {
 		return
 	}
 	count = min(count, len(kids))

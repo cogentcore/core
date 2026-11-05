@@ -91,18 +91,22 @@ type Style struct { //types:add
 	Grow math32.Vector2
 
 	// GrowWrap is a special case for Text elements where it grows initially
-	// in the horizontal axis to allow for longer, word wrapped text to fill
-	// the available space, but then it does not grow thereafter, so that alignment
-	// operations still work (Grow elements do not align because they absorb all
-	// available space). Do NOT set this for non-Text elements.
+	// in the horizontal axis, so that its text is wrapped and aligned within
+	// all of the available space, but then it does not grow thereafter, so
+	// that alignment operations still work (Grow elements do not align because
+	// they absorb all available space). Text that is aligned at the start does
+	// not need this, as it starts out at its preferred width (its width on one
+	// line), so it is only set for text with other alignments (such as
+	// centered). Do NOT set this for non-Text elements.
 	GrowWrap bool
 
-	// Shrink is the proportional amount that the element can shrink in width,
-	// below its actual size, if there is less space available, as in the CSS
-	// flex-shrink property. 0 = default = no shrinking. A shrinking element
-	// in a column is at most as wide as the column, and in a row or a grid,
-	// the columns that have elements that shrink are narrowed in proportion
-	// to Shrink and their width, to fit within the frame. Elements that
+	// Shrink is the proportional amount that the element shrinks in width,
+	// from its preferred width toward its min-content width, if there is less
+	// space available, as in the CSS flex-shrink property. Every element that
+	// can be narrower than its preferred width (such as wrapping text) shrinks:
+	// 0 = default = a factor of 1. In a row or a grid, the columns are narrowed
+	// in proportion to Shrink and their width, to fit within the frame, and an
+	// element in a column is at most as wide as the column. Elements that
 	// wrap their content (such as text) then wrap it within their width.
 	// Only the X (width) dimension is currently supported.
 	Shrink math32.Vector2

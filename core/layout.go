@@ -156,11 +156,43 @@ type GeomSize struct {
 	// which it is aligned within, and 0 otherwise.
 	slot math32.Vector2
 
+	// extent is the total size of the widget including any content of it
+	// that overflows it visibly (as for a frame with a Max narrower than
+	// its content), which is beyond its Actual size; it is zero or Actual
+	// when there is none. See [Frame.sizeOverflow].
+	extent math32.Vector2
+
 	// preferred is the actual total size of the widget from the SizeUp
 	// pass, before its parent allocates it less, which is its max-content
 	// size for widgets that shrink ([styles.Style.Shrink]), so that they
 	// are as wide as they can be in the space that they have.
 	preferred math32.Vector2
+
+	// minWidth is the min-content width of the widget from the SizeUp
+	// pass, as in CSS: its total width (with its Space) below which its
+	// content overflows, such as the width of the longest word of text.
+	// The layout does not narrow a widget below it.
+	minWidth float32
+
+	// prefWidth is the max-content (preferred) width of the widget from
+	// the SizeUp pass: its total width without any wrapping, such as the
+	// width of text on one line. A widget starts at this width, and is
+	// narrowed toward its minWidth only when there is too little space.
+	prefWidth float32
+}
+
+// setIntrinsicWidths sets the minWidth and prefWidth from the given
+// min-content and max-content widths of the content, within the Min and
+// Max sizes, with the Space added.
+func (ls *GeomSize) setIntrinsicWidths(minw, prefw float32) {
+	minw = max(minw, ls.Min.X)
+	prefw = max(prefw, minw)
+	if mx := ls.Max.X; mx > 0 {
+		minw = min(minw, mx)
+		prefw = min(prefw, mx)
+	}
+	ls.minWidth = math32.Ceil(minw + ls.Space.X)
+	ls.prefWidth = math32.Ceil(prefw + ls.Space.X)
 }
 
 func (ls GeomSize) String() string {
@@ -428,6 +460,16 @@ type layoutState struct {
 	// text) are allocated all of the extra allocation of the frame.
 	growExtra math32.Vector2
 
+	// minContent is the min-content width of the content of the frame,
+	// from its children (see [Frame.sizeUpIntrinsicFrame]), which it
+	// scrolls in width only if it is narrower than.
+	minContent float32
+
+	// overflow is the size of the content of the frame including the
+	// content of its children that overflows them visibly (see
+	// [Frame.sizeOverflow]), which the frame scrolls over.
+	overflow math32.Vector2
+
 	// GapSize has the total extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
 	// For SizeUp / Down Gap contributes to Space like other cases,
@@ -650,9 +692,10 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 
 // SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 // based on Styles.Min / Max sizes and actual content sizing
-// (e.g., text size).  Flexible elements (e.g., [Text], Flex Wrap,
-// [Toolbar]) should reserve the _minimum_ size possible at this stage,
-// and then Grow based on SizeDown allocation.
+// (e.g., text size), along with the intrinsic min-content and preferred
+// widths (see layoutintrinsic.go). Wrapping [Text] starts out at its
+// preferred width (on one line), and is re-wrapped to its allocated width
+// in SizeDown; flex wrap layouts are wrapped in SizeDown.
 func (wb *WidgetBase) SizeUp() {
 	wb.SizeUpWidget()
 }
@@ -663,6 +706,17 @@ func (wb *WidgetBase) SizeUpWidget() {
 	wb.sizeUpParts()
 	sz := &wb.Geom.Size
 	sz.SetTotalFromContent(&sz.Actual)
+	wb.sizeUpIntrinsic()
+}
+
+// sizeUpIntrinsic sets the intrinsic widths of a widget that has no
+// children of its own in the layout: both are its actual width. A widget
+// with parts (such as a button, switch, or chooser) is not narrowed, as
+// its parts are laid out within its actual size: its label stays on one
+// line, and the frame that it is in scrolls if it does not fit.
+func (wb *WidgetBase) sizeUpIntrinsic() {
+	sz := &wb.Geom.Size
+	sz.minWidth, sz.prefWidth = sz.Actual.Total.X, sz.Actual.Total.X
 }
 
 // spaceFromStyle sets the Space based on Style BoxSpace().Size(),
@@ -789,6 +843,7 @@ func (fr *Frame) SizeUp() {
 	fr.This.(Layouter).LayoutSpace()
 	fr.sizeUpChildren() // kids do their own thing
 	fr.sizeFromChildrenFit(0, SizeUpPass)
+	fr.sizeUpIntrinsicFrame()
 	if fr.Parts != nil {
 		fr.Parts.SizeUp() // just to get sizes -- no std role in layout
 	}
@@ -1049,6 +1104,7 @@ func (fr *Frame) rowSpanAlloc(cidx image.Point, span int, extra float32) float32
 func (fr *Frame) sizeFromChildrenFit(iter int, pass LayoutPasses) {
 	ksz := fr.This.(Layouter).SizeFromChildren(iter, pass)
 	fr.laySetContentFitOverflow(ksz, pass)
+	fr.sizeOverflow()
 	if DebugSettings.LayoutTrace {
 		sz := &fr.Geom.Size
 		fmt.Println(fr, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
@@ -1092,11 +1148,14 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		span := fr.colSpan(cwb)
 		rspan := fr.rowSpan(cwb)
 		if pass == SizeFinalPass {
+			// the cell is the allocation of the child, unless its content
+			// overflows it (as a frame narrowed below its minimum), which
+			// then counts for the frame to scroll
 			if grw.X == 0 && !cwb.Styles.GrowWrap {
-				sz.X = cwb.Geom.Size.Alloc.Total.X
+				sz.X = max(sz.X, cwb.Geom.Size.Alloc.Total.X)
 			}
 			if grw.Y == 0 {
-				sz.Y = cwb.Geom.Size.Alloc.Total.Y
+				sz.Y = max(sz.Y, cwb.Geom.Size.Alloc.Total.Y)
 			}
 		}
 		if pass <= SizeDownPass && iter == 0 && cwb.Styles.GrowWrap {
@@ -1316,6 +1375,13 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		})
 	}
 	sz := &fr.Geom.Size
+	if fr.Parent != nil {
+		// A frame is never allocated less than its Min (as a min-width in
+		// CSS), even when its parent narrows it (as a block in a column):
+		// its children are laid out in at least that, and it then
+		// overflows its parent, which scrolls if it can.
+		styles.SetClampMinVector(&sz.Alloc.Content, sz.Min)
+	}
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
 	if DebugSettings.LayoutTrace {
@@ -1406,6 +1472,9 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	}
 	for d := math32.X; d <= math32.Y; d++ {
 		maxSize, visSize, _ := fr.This.(Layouter).ScrollValues(d)
+		if d == math32.X {
+			maxSize = fr.overflowWidth(iter, maxSize)
+		}
 		ofd := maxSize - visSize
 		switch fr.Styles.Overflow.Dim(d) {
 		// case styles.OverflowVisible:
@@ -1467,10 +1536,17 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	}
 	var maxExtra, exn math32.Vector2
 	var widths []float32
-	colWidth, colScrolls := fr.columnWidth()
+	colWidth, colBlock := fr.columnWidth()
 	// columns that shrink are narrowed to fit, or widened back to their
 	// widths from SizeUp after they were narrower
-	widths = fr.shrinkWidths()
+	widths, shrunk := fr.shrinkWidths()
+	// When the columns fit at the widths of shrinkWidths (widened back to
+	// their preferred widths), those are their base widths, and the columns
+	// that grow share the width that is left, not the extra width from
+	// their earlier (narrower) sizes, which would make them overflow.
+	if widths != nil && !shrunk {
+		widths = fr.growWidths(widths, alloc.X)
+	}
 	for exitr := range 2 {
 		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
@@ -1551,10 +1627,14 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 					asz = fr.rowSpanAlloc(cidx, span, exd)
 				}
 				if ma == math32.X && widths != nil {
+					// from the widths of shrinkWidths, which those that grow
+					// grow from into the width that is left (see above)
 					asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
 				}
-				if ma == math32.X && extra.X < 0 && colWidth > 0 && asz > colWidth && limitsWidth(cwb, colScrolls) {
-					asz = colWidth
+				if ma == math32.X && colWidth > 0 {
+					// as wide as it can be (see sizeDownAllocActualCells)
+					asz = max(asz, ksz.preferred.X)
+					asz = narrowTo(cwb, asz, colWidth, colBlock)
 				}
 				if DebugSettings.LayoutTraceDetail {
 					fmt.Println(cwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
@@ -1596,13 +1676,14 @@ func (fr *Frame) spanAlloc(cidx image.Point, span int, extra float32) float32 {
 // in a row, or the columns of a grid), narrowed to fit within its allocated
 // width, in proportion to their width and the [styles.Style.Shrink] of the
 // children in them, or nil if it fits or none shrink. It is not for wrapped
-// layouts.
-func (fr *Frame) shrinkWidths() []float32 {
+// layouts. shrunk is whether they were narrowed to fit, in which case their
+// widths are final (they do not also grow), as in CSS.
+func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 	li := &fr.layout
 	sz := &fr.Geom.Size
 	rowOrGrid := fr.Styles.Display == styles.Grid || (fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Row)
 	if li.Wraps != nil || len(li.Cells) == 0 || !rowOrGrid {
-		return nil
+		return nil, false
 	}
 	n := li.Shape.X
 	shrink := make([]float32, n)
@@ -1614,19 +1695,35 @@ func (fr *Frame) shrinkWidths() []float32 {
 		if c >= n || fr.colSpan(cwb) > 1 {
 			return tree.Continue
 		}
-		if sh := cwb.Styles.Shrink.X; sh > shrink[c] {
-			shrink[c] = sh
+		ksz := &cwb.Geom.Size
+		// every widget that can be narrower than it is shrinks, by 1
+		// unless its style says otherwise
+		if ksz.minWidth < ksz.preferred.X {
+			sh := cwb.Styles.Shrink.X
+			if sh == 0 {
+				sh = 1
+			}
+			shrink[c] = max(shrink[c], sh)
 			any = true
 		}
-		pref[c] = max(pref[c], cwb.Geom.Size.preferred.X)
+		p := ksz.preferred.X
+		if cwb.Styles.Grow.X > 0 {
+			// a widget that grows up to its Max (as for a width in CSS)
+			// starts from it, so that those that have the same Max shrink
+			// to the same width, as for the flex basis of CSS
+			if mw := fr.growMaxWidth(cwb); mw > 0 {
+				p = mw
+			}
+		}
+		pref[c] = max(pref[c], p)
 		return tree.Continue
 	})
 	if !any {
-		return nil
+		return nil, false
 	}
 	// The columns that shrink start from their widths from SizeUp, so
 	// that they are as wide as they can be when they were narrower before.
-	widths := make([]float32, n)
+	widths = make([]float32, n)
 	cur := float32(0)
 	for c := range n {
 		widths[c] = li.cell(math32.X, c, 0).Size.X
@@ -1642,13 +1739,13 @@ func (fr *Frame) shrinkWidths() []float32 {
 	deficit := sz.Internal.X - cur + total - sz.Alloc.Content.X
 	if deficit <= 0.5 {
 		if total > cur+0.5 {
-			return widths
+			return widths, false
 		}
-		return nil
+		return nil, false
 	}
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if c := cwb.Geom.Cell.X; c < n && fr.colSpan(cwb) == 1 && shrink[c] > 0 {
-			minw[c] = max(minw[c], minContentWidth(cw))
+			minw[c] = max(minw[c], cwb.Geom.Size.minWidth)
 		}
 		return tree.Continue
 	})
@@ -1659,8 +1756,8 @@ func (fr *Frame) shrinkWidths() []float32 {
 				sum += shrink[c] * widths[c]
 			}
 		}
-		if sum <= 0 {
-			return nil
+		if sum <= 0 { // none can shrink any more
+			break
 		}
 		left := deficit
 		for c := range n {
@@ -1680,62 +1777,7 @@ func (fr *Frame) shrinkWidths() []float32 {
 		}
 		deficit = left // those that can shrink more do
 	}
-	return widths
-}
-
-// minContentWidth returns the min-content width of the given widget, as in
-// CSS: the total width (with its margins, borders, and padding) below which
-// its content overflows, which columns do not shrink below. It is that of
-// the longest word of text, and that of the children of frames for their
-// layout (the sum for rows that do not wrap, and otherwise the largest).
-func minContentWidth(w Widget) float32 {
-	wb := w.AsWidget()
-	s := &wb.Styles
-	sz := &wb.Geom.Size
-	v := float32(0)
-	switch {
-	case s.Overflow.X >= styles.OverflowAuto: // it scrolls
-	case s.Display == styles.DisplayNone:
-		return 0
-	default:
-		if tx, ok := w.(*Text); ok {
-			v = tx.minContentWidth()
-			break
-		}
-		fr, ok := w.(*Frame)
-		if !ok || !fr.HasChildren() {
-			v = sz.Actual.Content.X // its natural size
-			break
-		}
-		row := s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap
-		cols := map[int]float32{} // of a grid, by column
-		n := 0
-		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-			m := minContentWidth(cw)
-			switch {
-			case row:
-				v += m
-				n++
-			case s.Display == styles.Grid && fr.colSpan(cwb) == 1:
-				cols[cwb.Geom.Cell.X] = max(cols[cwb.Geom.Cell.X], m)
-			default:
-				v = max(v, m)
-			}
-			return tree.Continue
-		})
-		if row && n > 1 {
-			v += float32(n-1) * fr.layout.Gap.X
-		}
-		if len(cols) > 0 {
-			sum := float32(len(cols)-1) * fr.layout.Gap.X
-			for _, m := range cols {
-				sum += m
-			}
-			v = max(v, sum)
-		}
-	}
-	v = max(v, sz.Min.X)
-	return v + s.BoxSpace().Size().X
+	return widths, true
 }
 
 // shrinkAlloc returns the allocated width of the given child in the column
@@ -1752,33 +1794,21 @@ func (fr *Frame) shrinkAlloc(widths []float32, cidx image.Point, span int) float
 }
 
 // columnWidth returns the width of the content of the frame if it is a
-// column (or a wrapped row), within which its children that grow or shrink
-// in width are allocated at most that width so that their content (such
-// as text) can wrap in it, or -1 otherwise, and whether the frame scrolls
-// in width, in which case only the children that shrink are limited.
-func (fr *Frame) columnWidth() (width float32, scrolls bool) {
+// column (block is true) or a wrapped row, within which each of its
+// children is allocated at most that width (see [narrowTo]), so that its
+// content (such as text) can wrap in it, or -1 otherwise.
+func (fr *Frame) columnWidth() (width float32, block bool) {
 	s := &fr.Styles
 	if s.Display != styles.Flex {
 		return -1, false
 	}
-	// content that scrolls can be wider, except for children that shrink
-	scrolls = s.Overflow.X >= styles.OverflowAuto
 	if s.Direction == styles.Column && !s.Wrap {
-		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, scrolls
+		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, true
 	}
-	if s.Direction == styles.Row && s.Wrap && s.Shrink.X > 0 {
-		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, scrolls
+	if s.Direction == styles.Row && s.Wrap {
+		return fr.Geom.Size.Alloc.Content.X, false
 	}
 	return -1, false
-}
-
-// limitsWidth returns whether a child that is allocated more than
-// the [Frame.columnWidth] is limited to it, given whether the frame scrolls.
-func limitsWidth(cwb *WidgetBase, scrolls bool) bool {
-	if scrolls { // in a frame that scrolls, only those that shrink
-		return cwb.Styles.Shrink.X > 0
-	}
-	return cwb.Styles.Grow.X > 0 || cwb.Styles.GrowWrap || cwb.Styles.Shrink.X > 0
 }
 
 func (fr *Frame) sizeDownWrap(iter int) bool {
@@ -1804,7 +1834,10 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			first = false
 			return tree.Continue
 		}
-		if sum+ksz.Dim(d) > fit+0.5 { // sum has the gap before it
+		// The sizes of the items are each rounded up to whole dots, so
+		// items whose exact sizes fit together (as widths in CSS that add
+		// up to that of their container) can be up to a dot each over it.
+		if sum+ksz.Dim(d) > fit+float32(n+1) { // sum has the gap before it
 			if DebugSettings.LayoutTraceDetail {
 				fmt.Println(fr, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}
@@ -1890,11 +1923,11 @@ func (fr *Frame) sizeDownAllocActual(iter int) {
 // Note however that due to max sizing for row / column,
 // this size can actually be different than original actual.
 func (fr *Frame) sizeDownAllocActualCells(iter int) {
-	// In a column that is narrower than its content (and does not scroll in
-	// width), the children that grow (or wrap) in width get at most its width,
-	// so that text can wrap in it.
-	colWidth, colScrolls := fr.columnWidth()
-	widths := fr.shrinkWidths()
+	// In a column that is narrower than its content, the children get at
+	// most its width (but not less than their minimum), so that text can
+	// wrap in it.
+	colWidth, colBlock := fr.columnWidth()
+	widths, _ := fr.shrinkWidths()
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
 		cidx := cwb.Geom.Cell
@@ -1916,11 +1949,11 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 			if ma == math32.X && widths != nil {
 				asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
 			}
-			if ma == math32.X && colWidth > 0 && cwb.Styles.Shrink.X > 0 && widths == nil {
-				asz = max(asz, cwb.Geom.Size.preferred.X) // as wide as it can be
-			}
-			if ma == math32.X && colWidth > 0 && asz > colWidth && limitsWidth(cwb, colScrolls) {
-				asz = colWidth
+			if ma == math32.X && colWidth > 0 {
+				// as wide as it can be: its preferred width, within the
+				// column, even after it was narrower in an earlier iteration
+				asz = max(asz, cwb.Geom.Size.preferred.X)
+				asz = narrowTo(cwb, asz, colWidth, colBlock)
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}

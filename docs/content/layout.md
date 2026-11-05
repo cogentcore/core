@@ -38,7 +38,7 @@ The three types of passes are:
 
 ### SizeUp
 
-This is the _bottom-up_ pass, from terminal leaf widgets up to through their container frames, and sets the `Actual` sizes based on the styling and text "hard" constraints.
+This is the _bottom-up_ pass, from terminal leaf widgets up to through their container frames, and sets the `Actual` sizes based on the styling and text "hard" constraints, along with the intrinsic widths of each widget (see [[#intrinsic widths]]).
 
 ### SizeDown
 
@@ -81,15 +81,19 @@ With a [[doc:styles.Style.BoxSizing]] of [[doc:styles.BoxBorderBox]], `Min` and 
 
 ### Growing within frames that do not grow
 
-A frame can be allocated more space than its own `Actual` size: for example, the width of a column in a grid is that of its widest element, which is allocated to every element in the column. A frame that does not grow in a given dimension only gives its children that grow the space within its own actual size, so that they fill the frame but do not grow beyond it. Children that wrap their content (such as [[text]] with `GrowWrap`) still get all of the allocation to wrap within.
+A frame can be allocated more space than its own `Actual` size: for example, the width of a column in a grid is that of its widest element, which is allocated to every element in the column. A frame that does not grow in a given dimension only gives its children that grow the space within its own actual size, so that they fill the frame but do not grow beyond it. Children that wrap their content within all of the space that they can have (centered [[text]], with `GrowWrap`) still get all of the allocation to wrap within.
+
+### Intrinsic widths
+
+Widths are _intrinsic_ and heights follow from them, as in CSS. In `SizeUp`, each widget computes two widths: its _min-content_ width, below which its content overflows (the width of the longest word of [[text]]), and its _max-content_ or preferred width, its width without any wrapping (the width of text on one line). Frames combine those of their children for their layout: a row sums them, a column takes the largest of each, a wrapped row takes the largest minimum and the sum of the preferred widths, and a grid does each per column. A frame that scrolls in width has no minimum of its own, as its content scrolls.
+
+A widget starts out at its preferred width, within the width allocated to it, and is narrowed toward its minimum only when there is too little room. Its height is that of its content at the width that it is finally given, so text wraps where it needs to, and stays on one line when it fits. A frame that scrolls only scrolls in width if its content is wider than it at its minimum. When a window or dialog is sized to fit its content, the preferred width of text is limited to a readable measure of 70 characters, within which it wraps, so that the window is not as wide as a long text on one line.
 
 ### Shrinking
 
-[[doc:styles.Style.Shrink]] is the counterpart of `Grow` for when there is too little space, like `flex-shrink` in CSS, and currently only applies to widths. During `SizeDown`, if the children of a row (or the columns of a grid) are wider than the allocated width, the columns with elements that shrink are narrowed, in proportion to their `Shrink` factor and their width, but never below their _min-content_ width: the width below which their content would overflow, which is that of the longest word of text. A shrinking element in a column is at most as wide as the column. Elements that wrap their content then re-wrap it within their new width.
+[[doc:styles.Style.Shrink]] is the counterpart of `Grow` for when there is too little space, like `flex-shrink` in CSS, and currently only applies to widths. Every widget that can be narrower than its preferred width shrinks, with a factor of 1 unless `Shrink` says otherwise. During `SizeDown`, if the children of a row (or the columns of a grid) are wider than the allocated width, the columns are narrowed in proportion to their `Shrink` factor and their width, but never below their min-content width. A column that grows up to a `Max` (as for a width in CSS) starts from that `Max`, so that columns with the same `Max` shrink to the same width, as for the flex basis of CSS.
 
-### Text sizes
-
-Text that wraps has no single natural size: in `SizeUp`, it starts out with an estimated size of a balanced aspect ratio, which is then re-wrapped to the actual allocation in `SizeDown`. With [[doc:core.Text.FitWidth]], it instead starts out as wide as it is on one line (up to the width of the scene), so that it only wraps when there is not enough room, as with the shrink-to-fit widths of CSS.
+The children of a column are at most as wide as the column. A frame in a column is narrowed to the width of the column even below its minimum, so that its content then overflows it (as a block in CSS), while other widgets, such as text, are not narrowed below their minimum, which keeps the words of text whole. The items of a wrapped row are not narrowed below their minimum.
 
 ### Grids
 
