@@ -17,8 +17,10 @@ import (
 // widget with such a tag with its text in it (as in the browser style of
 // htmlcore), which is the widget of the heading (as for scrolling to it).
 func headingOf(w core.Widget) (level int, text string, ok bool) {
-	tag, _ := w.AsWidget().Property("tag").(string)
-	if len(tag) != 2 || tag[0] != 'h' {
+	// note: checking ok first, as a failed assertion of a nil value to a
+	// string is null instead of "" under goscript (js)
+	tag, ok := w.AsWidget().Property("tag").(string)
+	if !ok || len(tag) != 2 || tag[0] != 'h' {
 		return 0, "", false
 	}
 	level, err := strconv.Atoi(tag[1:])
