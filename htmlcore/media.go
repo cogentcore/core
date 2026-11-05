@@ -101,12 +101,56 @@ func ScreenMediaWidth() float32 {
 	return 1024
 }
 
-// mediaMatches returns whether the given media query list matches.
+// mediaMatches returns whether the given media query list matches,
+// recording its result for [Context.MediaChanged].
 func (c *Context) mediaMatches(query string) bool {
 	query = strings.ToLower(strings.TrimSpace(query))
 	if query == "" {
 		return true
 	}
+	m := c.mediaListMatches(query)
+	if !c.checkingMedia {
+		if c.mediaUses == nil {
+			c.mediaUses = map[string]bool{}
+		}
+		c.mediaUses[query] = m
+	}
+	return m
+}
+
+// MediaChanged returns whether the HTML read with the context would be
+// read differently for a viewport of the given width in CSS px (dp):
+// whether a media query of its style sheets (as of an @media rule) or a
+// number of columns estimated from the width (for column-width) has
+// another result for it. An app that shows pages in a viewport whose
+// width can change, as when its window is resized, can then read the
+// page again with a new context (see [Context.NewPage]) with that
+// [Context.MediaWidth], as browsers apply the rules of the new width.
+// It must be called in the goroutine that styles the widgets of the page,
+// once the page has been read.
+func (c *Context) MediaChanged(width float32) bool {
+	if width <= 0 {
+		return false
+	}
+	saved := c.MediaWidth
+	c.MediaWidth, c.checkingMedia = width, true
+	defer func() { c.MediaWidth, c.checkingMedia = saved, false }()
+	for q, m := range c.mediaUses {
+		if c.mediaListMatches(q) != m {
+			return true
+		}
+	}
+	for n, count := range c.columnUses {
+		if c.columnCount(n) != count {
+			return true
+		}
+	}
+	return false
+}
+
+// mediaListMatches returns whether the given (non-empty, lowercase)
+// media query list matches.
+func (c *Context) mediaListMatches(query string) bool {
 	for _, q := range strings.Split(query, ",") {
 		if c.mediaQueryMatches(strings.TrimSpace(q)) {
 			return true

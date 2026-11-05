@@ -452,3 +452,33 @@ func TestFontShorthandResets(t *testing.T) {
 	setFont(st, s, nil, "inherit") // not a valid shorthand of values
 	assert.Equal(t, rich.Bold, s.Font.Weight)
 }
+
+// TestMediaChanged tests that a page reports a change of its media only
+// when the width crosses a boundary of one of its media queries or of
+// its estimated number of columns.
+func TestMediaChanged(t *testing.T) {
+	read := func(page string) *Context {
+		ctx := NewContext()
+		ctx.MediaWidth = 800
+		assert.NoError(t, ReadHTMLString(ctx, core.NewBody(), page))
+		return ctx
+	}
+	ctx := read(`<html><head><style>p { color: red }
+@media (max-width: 600px) { p { color: blue } }</style></head><body><p>Text</p></body></html>`)
+	assert.False(t, ctx.MediaChanged(700), "within the same range")
+	assert.False(t, ctx.MediaChanged(1200), "within the same range")
+	assert.True(t, ctx.MediaChanged(500), "across the max-width")
+	assert.Equal(t, float32(800), ctx.MediaWidth, "the width of the context is kept")
+
+	ctx = read(`<html><head><link rel="stylesheet" media="(min-width: 1000px)" href="data:text/css,p{color:red}"></head><body><p>Text</p></body></html>`)
+	assert.False(t, ctx.MediaChanged(900))
+	assert.True(t, ctx.MediaChanged(1100), "across the media of a style sheet")
+
+	ctx = read(`<html><body style="margin: 0"><div style="column-width: 300px"><p>A</p><p>B</p><p>C</p></div></body></html>`)
+	assert.False(t, ctx.MediaChanged(850), "2 columns either way")
+	assert.True(t, ctx.MediaChanged(1000), "3 columns")
+	assert.True(t, ctx.MediaChanged(500), "1 column")
+
+	ctx = read(`<html><body><p style="width: 50vw">Text</p></body></html>`)
+	assert.False(t, ctx.MediaChanged(300), "no media queries or columns")
+}

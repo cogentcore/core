@@ -183,6 +183,14 @@ type pageState struct {
 
 	// blocks has the margin collapsing state of the block widgets.
 	blocks map[core.Widget]*blockState
+
+	// mediaUses has the media query lists evaluated in reading the pages,
+	// with their results, and columnUses the numbers of columns estimated
+	// from the width of the viewport, for [Context.MediaChanged], while
+	// checkingMedia is whether it is evaluating them for another width.
+	mediaUses     map[string]bool
+	columnUses    map[*html.Node]int
+	checkingMedia bool
 }
 
 // readState is the state of a read of HTML by [ReadHTML].
