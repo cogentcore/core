@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package core
+// Package tohtml converts Cogent Core widgets to HTML, which the core
+// tool uses to pre-render apps for a preview while the app loads and for
+// SEO purposes. Importing it sets [core.GenerateHTML] to [Generate],
+// which the app calls when it runs with the -generatehtml argument.
+// The core tool links it into the app for that run, so apps do not need
+// to import it themselves.
+package tohtml
 
 import (
 	"bytes"
@@ -13,21 +19,22 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
-// ToHTML converts the given widget and all of its children to HTML.
+// Widget converts the given widget and all of its children to HTML.
 // This is not guaranteed to be perfect HTML, and it should not be used as a
 // replacement for a Cogent Core app. However, it is good enough to be used as
-// a preview or for SEO purposes (see generatehtml.go). The following
+// a preview or for SEO purposes (see [Generate]). The following
 // [tree.NodeBase.Properties] of widgets are used:
 //   - "tag": the HTML element name.
 //   - "id": the HTML id, which is otherwise only set for headings.
 //   - "class": the HTML class.
 //   - "href" and "src": the corresponding HTML attributes.
 //   - "html": HTML that is used for the widget and its children instead.
-func ToHTML(w Widget) ([]byte, error) {
+func Widget(w core.Widget) ([]byte, error) {
 	b := &bytes.Buffer{}
 	e := xml.NewEncoder(b)
 	err := toHTML(w, e, b)
@@ -69,11 +76,11 @@ func addAttr(se *xml.StartElement, name, value string) {
 	se.Attr = append(se.Attr, xml.Attr{Name: xml.Name{Local: name}, Value: value})
 }
 
-// toHTML is the recursive implementation of [ToHTML].
-func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
+// toHTML is the recursive implementation of [Widget].
+func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	wb := w.AsWidget()
 	if h, ok := wb.Property("html").(string); ok {
-		// Custom HTML for this widget and its children (see [ToHTML]).
+		// Custom HTML for this widget and its children (see [Widget]).
 		err := e.Flush()
 		if err != nil {
 			return err
@@ -85,8 +92,8 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	// element in the browser style of htmlcore) is just its content, and an
 	// inline container of it is just its children.
 	_, hasTag := wb.Property("tag").(string)
-	if tx, ok := w.(*Text); ok && !hasTag {
-		if pw := wb.parentWidget(); pw != nil {
+	if tx, ok := w.(*core.Text); ok && !hasTag {
+		if pw := core.AsWidget(wb.Parent); pw != nil {
 			if _, ok := pw.Property("tag").(string); ok || strings.HasPrefix(pw.Name, "inline-container") {
 				if err := e.Flush(); err != nil {
 					return err
@@ -96,9 +103,9 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 			}
 		}
 	}
-	if _, ok := w.(*Frame); ok && !hasTag && strings.HasPrefix(wb.Name, "inline-container") {
+	if _, ok := w.(*core.Frame); ok && !hasTag && strings.HasPrefix(wb.Name, "inline-container") {
 		var err error
-		wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
 			err = toHTML(cw, e, b)
 			return err == nil
 		})
@@ -144,7 +151,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		addAttr(se, "style", imageCSS(&wb.Styles))
 	default:
 		css := styles.ToCSS(&wb.Styles, idName, se.Name.Local) + growCSS(wb)
-		if _, ok := w.(*Button); ok && se.Name.Local == "a" {
+		if _, ok := w.(*core.Button); ok && se.Name.Local == "a" {
 			css += ";text-decoration:none" // link button
 		}
 		addAttr(se, "style", strings.TrimPrefix(css, ";"))
@@ -159,22 +166,22 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	handleChildren := true
 
 	switch w := w.(type) {
-	case *TextField:
+	case *core.TextField:
 		addAttr(se, "type", "text")
-		addAttr(se, "value", w.text)
+		addAttr(se, "value", w.Text())
 		handleChildren = false
-	case *Spinner:
+	case *core.Spinner:
 		addAttr(se, "type", "number")
 		addAttr(se, "value", fmt.Sprintf("%g", w.Value))
 		handleChildren = false
-	case *Slider:
+	case *core.Slider:
 		addAttr(se, "type", "range")
 		addAttr(se, "value", fmt.Sprintf("%g", w.Value))
 		handleChildren = false
-	case *Switch:
+	case *core.Switch:
 		addAttr(se, "type", "checkbox")
 		addAttr(se, "value", strconv.FormatBool(w.IsChecked()))
-	case *Collapser:
+	case *core.Collapser:
 		se.Name.Local = "details"
 		if w.Open {
 			addAttr(se, "open", "open")
@@ -196,16 +203,16 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	}
 
 	switch w := w.(type) {
-	case *Text:
+	case *core.Text:
 		// We don't want any escaping of HTML-formatted text, so we write directly.
 		// Paragraphs within the text (such as in a figure caption) are rendered
 		// inline in a Text, and are not allowed within a <p>, so we remove them.
 		b.WriteString(textParagraphReplacer.Replace(w.Text))
-	case *Icon:
+	case *core.Icon:
 		// TODO: just remove the width and height attributes from the source SVGs?
 		icon := strings.ReplaceAll(string(w.Icon), ` width="48" height="48"`, "")
 		b.WriteString(icon)
-	case *SVG:
+	case *core.SVG:
 		w.SVG.PhysicalWidth = wb.Styles.Min.X
 		w.SVG.PhysicalHeight = wb.Styles.Min.Y
 		err := w.SVG.WriteXML(b, false)
@@ -218,7 +225,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	}
 
 	switch w := w.(type) {
-	case *Collapser:
+	case *core.Collapser:
 		err = collapserToHTML(w, e, b)
 		if err != nil {
 			return err
@@ -233,7 +240,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	}
 
 	if handleChildren {
-		wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
 			if idName == "switch" && cwb.Name == "stack" {
 				return tree.Continue
 			}
@@ -254,7 +261,7 @@ func toHTML(w Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	return e.Flush()
 }
 
-// textParagraphReplacer removes paragraph tags within [Text.Text] in [ToHTML].
+// textParagraphReplacer removes paragraph tags within [core.Text.Text] in [Widget].
 var textParagraphReplacer = strings.NewReplacer("<p>", "", "</p>", "")
 
 // isHTMLHeading returns whether the given HTML element name is a heading (h1-h6).
@@ -282,11 +289,11 @@ func imageCSS(s *styles.Style) string {
 
 // tableToHTML writes the children of the given table frame, which are laid
 // out in a grid, as the rows of an HTML table.
-func tableToHTML(wb *WidgetBase, e *xml.Encoder, b *bytes.Buffer) error {
+func tableToHTML(wb *core.WidgetBase, e *xml.Encoder, b *bytes.Buffer) error {
 	cols := max(wb.Styles.Columns, 1)
 	tr := xml.StartElement{Name: xml.Name{Local: "tr"}}
 	var err error
-	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
 		if i%cols == 0 {
 			if i > 0 {
 				err = e.EncodeToken(tr.End())
@@ -316,14 +323,14 @@ func tableToHTML(wb *WidgetBase, e *xml.Encoder, b *bytes.Buffer) error {
 
 // collapserToHTML writes the children of the given collapser as the
 // <summary> and contents of a <details> element, excluding the toggle switch.
-func collapserToHTML(cl *Collapser, e *xml.Encoder, b *bytes.Buffer) error {
+func collapserToHTML(cl *core.Collapser, e *xml.Encoder, b *bytes.Buffer) error {
 	sum := xml.StartElement{Name: xml.Name{Local: "summary"}}
 	err := e.EncodeToken(sum)
 	if err != nil {
 		return err
 	}
-	cl.Summary.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		if _, ok := cw.(*Switch); ok {
+	cl.Summary.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+		if _, ok := cw.(*core.Switch); ok {
 			return tree.Continue
 		}
 		err = toHTML(cw, e, b)
@@ -339,7 +346,7 @@ func collapserToHTML(cl *Collapser, e *xml.Encoder, b *bytes.Buffer) error {
 	if err != nil {
 		return err
 	}
-	cl.Details.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	cl.Details.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
 		err = toHTML(cw, e, b)
 		if err != nil {
 			return tree.Break
@@ -352,11 +359,11 @@ func collapserToHTML(cl *Collapser, e *xml.Encoder, b *bytes.Buffer) error {
 // growCSS returns additional CSS for the grow factors of the given widget
 // relative to the layout direction of its parent, since [styles.ToCSS]
 // does not have access to the parent.
-func growCSS(wb *WidgetBase) string {
+func growCSS(wb *core.WidgetBase) string {
 	if wb.Parent == nil {
 		return ""
 	}
-	pw := AsWidget(wb.Parent)
+	pw := core.AsWidget(wb.Parent)
 	if pw == nil || pw.Styles.Display != styles.Flex {
 		return ""
 	}

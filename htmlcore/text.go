@@ -65,7 +65,7 @@ func extractTextExclude(ctx *Context, n *html.Node, excludeSubs ...string) (stri
 		}
 	} else if isBr {
 		// A <br> has no children, but it must be kept, both for
-		// the rendered text and for HTML generated from it (see [core.ToHTML]).
+		// the rendered text and for HTML generated from it (see [cogentcore.org/core/htmlcore/tohtml.Widget]).
 		str = "<br>"
 	}
 	if n.NextSibling != nil {

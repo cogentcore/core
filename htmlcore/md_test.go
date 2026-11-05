@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/tohtml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,7 +75,7 @@ func TestReplaceDivs(t *testing.T) {
 func TestLineBreakHTML(t *testing.T) {
 	b := core.NewBody()
 	assert.NoError(t, ReadMDString(NewContext(), b, "A\\\nB\\\nC\n\nD<br>E\n"))
-	h, err := core.ToHTML(b)
+	h, err := tohtml.Widget(b)
 	assert.NoError(t, err)
 	assert.Contains(t, string(h), ">A<br>B<br>C</p>")
 	assert.Contains(t, string(h), ">D<br>E</p>")

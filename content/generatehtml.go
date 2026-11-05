@@ -6,6 +6,7 @@ package content
 
 import (
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/tohtml"
 	"cogentcore.org/core/tree"
 )
 
@@ -29,7 +30,7 @@ func generateHTML(w core.Widget) string {
 		return tree.Continue
 	})
 	if ct == nil {
-		return core.GenerateHTMLCore(w) // basic fallback
+		return tohtml.Generate(w) // basic fallback
 	}
 	return generateSite(ct)
 }
