@@ -416,7 +416,7 @@ func TestTerminalFunc(t *testing.T) {
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(40), units.Em(10))
 	})
-	tm.Func = func(in, out *os.File) error {
+	tm.Func =func(in, out *os.File) error {
 		fmt.Fprintln(out, "ready")
 		rd := bufio.NewReader(in)
 		for {
@@ -480,12 +480,19 @@ func TestTerminalFunc(t *testing.T) {
 	b.AsyncUnlock()
 	waitFor(t, b, "the raw byte", func() bool { return hasOutputLine(tm, "byte 3") })
 
+	// The program gets the size set here, unless a layout of the view
+	// (for example when the output scrolls) has already resized the
+	// terminal back to the size of the view, which it gets then.
 	b.AsyncLock()
+	viewSize := tm.size
 	tm.viewSized(image.Pt(50, 12))
 	assert.Equal(t, image.Pt(50, 12), resized)
 	tm.Run("size")
 	b.AsyncUnlock()
-	waitFor(t, b, "the size", func() bool { return hasOutputLine(tm, "size 50 12") })
+	waitFor(t, b, "the size", func() bool {
+		return hasOutputLine(tm, "size 50 12") ||
+			hasOutputLine(tm, fmt.Sprintf("size %d %d", viewSize.X, viewSize.Y))
+	})
 
 	b.AsyncLock()
 	tm.Run("quit")
