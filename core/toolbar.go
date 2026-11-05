@@ -87,7 +87,10 @@ func (tb *Toolbar) SizeDown(iter int) bool {
 	if iter == 0 {
 		return true // ensure a second pass
 	}
-	if tb.Scene.showIter > 0 {
+	// The items that do not fit are moved to the overflow menu in the
+	// iterations of the layout that redo (not in those after them, in
+	// which it only settles), as they are only moved and not moved back.
+	if tb.Scene.showIter > 0 && iter < layoutIters {
 		tb.moveToOverflow()
 	}
 	return redo

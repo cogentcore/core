@@ -266,7 +266,7 @@ func (fr *Frame) layoutFrame(size math32.Vector2) {
 	// than their final content. The redo of some widgets is always true,
 	// so it is not enough to know that they have settled. Sizes that
 	// alternate (as a scrollbar that is added and removed) stop it too.
-	const maxIter, maxSettle = 3, 6
+	const maxIter, maxSettle = layoutIters, 6
 	var sizes, prev, prev2 float64
 	for iter := 0; iter < maxSettle; iter++ {
 		redo := fr.SizeDown(iter)
@@ -296,6 +296,11 @@ func (fr *Frame) layoutFrame(size math32.Vector2) {
 		fmt.Println("\n############################\nScenePos start:", fr)
 	}
 }
+
+// layoutIters is the number of SizeDown iterations that a layout takes
+// while it needs to redo, after which it only continues while the sizes of
+// the widgets are still changing (see [Frame.layoutFrame]).
+const layoutIters = 3
 
 // sizesSum returns the sum of the actual sizes of the frame and the
 // widgets in it, which changes when any of them changes (practically),
