@@ -175,6 +175,10 @@ func (tb *Toolbar) moveToOverflow() {
 			return tree.Break
 		}
 		ksz := cwb.Geom.Size.Alloc.Total.Dim(ma)
+		if cwb.Styles.Grow.Dim(ma) > 0 && cwb.Geom.Size.preferred.Dim(ma) > 0 {
+			// one that grows takes only its size before growing
+			ksz = min(ksz, cwb.Geom.Size.preferred.Dim(ma))
+		}
 		szsum += ksz
 		if szsum > avsz {
 			if !hasOv {

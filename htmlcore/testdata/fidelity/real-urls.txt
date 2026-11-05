@@ -1,0 +1,22 @@
+# Real web pages, saved with their resources in testdata/snapshots by
+# go test -run TestSnapshot -snapshot (for TestPages and TestFidelity), and
+# as the HTML alone in real/ by fetch-real.sh (not committed). Each line
+# is a name and a URL. They are pages that work without JavaScript.
+example https://example.com/
+wikipedia https://en.wikipedia.org/wiki/Cascading_Style_Sheets
+mdn https://developer.mozilla.org/en-US/docs/Web/CSS/display
+gopkg https://pkg.go.dev/net/http
+effectivego https://go.dev/doc/effective_go
+hackernews https://news.ycombinator.com/
+lobsters https://lobste.rs/
+npr https://text.npr.org/
+cnn https://lite.cnn.com/
+pythondocs https://docs.python.org/3/tutorial/index.html
+gnuemacs https://www.gnu.org/software/emacs/
+duckduckgo https://html.duckduckgo.com/html/?q=cogent+core
+w3c https://www.w3.org/Style/CSS/
+craigslist https://www.craigslist.org/about/sites
+daringfireball https://daringfireball.net/
+rust https://www.rust-lang.org/
+google https://www.google.com/
+css2026 https://www.w3.org/TR/css-2026/

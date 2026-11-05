@@ -7,18 +7,18 @@ package htmlcore
 import (
 	"io"
 	"net/http"
+	neturl "net/url"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/aymerick/douceur/css"
-	"github.com/aymerick/douceur/parser"
-	selcss "github.com/ericchiang/css"
 	"github.com/gomarkdown/markdown/ast"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -31,8 +31,64 @@ type Context struct {
 	// Node is the node that is currently being read.
 	Node *html.Node
 
-	// styles are the CSS styling rules for each node.
-	styles map[*html.Node][]*css.Rule
+	// styles are the CSS declarations for each node, which are
+	// sorted in the order of the cascade by [Context.declarations].
+	styles map[*html.Node][]*cssDecl
+
+	// sorted records the nodes whose declarations are sorted,
+	// and hinted those whose attributes have been added.
+	sorted, hinted map[*html.Node]bool
+
+	// cssOrder is the order of the last declaration added.
+	cssOrder int
+
+	// cssBase is the URL of the style sheet being added, if it is from a
+	// URL, which the URLs in it are relative to, and cssImports has the
+	// URLs of the style sheets that have been added (for cycles of @import).
+	cssBase    string
+	cssImports map[string]bool
+
+	// RefreshURL is the URL of the first meta element with an http-equiv
+	// of refresh in the HTML read, if any, which an app that shows web pages
+	// can open next, as browsers do (as for a page that redirects browsers
+	// without JavaScript to another one). It must be reset before each read.
+	RefreshURL string
+
+	// Style is CSS that is added to the style sheets of each page that is
+	// read, before those of the page (as a user
+	// style sheet of a browser), as for the margins of an app's pages.
+	Style string
+
+	// Title is the text of the first title element in the HTML read,
+	// if any, as for the title of a window or tab that shows the page.
+	Title string
+
+	// MediaWidth, if positive, is the width of the viewport in CSS px (dp)
+	// that the @media rules of style sheets are for; otherwise, it is the
+	// width of the screen.
+	MediaWidth float32
+
+	// MediaHeight, if positive, is the height of the viewport in CSS px (dp)
+	// that vh lengths are relative to; otherwise, they are relative to the
+	// height of the scene.
+	MediaHeight float32
+
+	// nodeWidgets has the widgets of the controls of forms.
+	nodeWidgets map[*html.Node]core.Widget
+
+	// floatSiblings has whether the unstyled blocks in each element
+	// have floats in them, for flattensBlock.
+	floatSiblings map[*html.Node]bool
+
+	// flattened has the blocks that are flattened (see flattensBlock).
+	flattened map[*html.Node]bool
+
+	// rootFont is the font size of the html element in px, once it is known
+	// (see rootFontSize).
+	rootFont float32
+
+	// blocks has the margin collapsing state of the block widgets.
+	blocks map[core.Widget]*blockState
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
@@ -123,8 +179,8 @@ type Context struct {
 // readState is the state of a read of HTML by [ReadHTML].
 type readState struct {
 
-	// firstRow indicates the start of a table, where number of columns is counted.
-	firstRow bool
+	// tables has the widget of each table element.
+	tables map[*html.Node]*core.Frame
 
 	// stageSize is the size of the content of the body read so far.
 	stageSize int
@@ -204,9 +260,9 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		styles:            map[*html.Node][]*css.Rule{},
+		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
-		GetURL:            http.Get,
+		GetURL:            getURL,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
 		AttributeHandlers: map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool{},
 	}
@@ -217,15 +273,7 @@ func NewContext() *Context {
 // It may make changes to the widget tree, so the widget
 // must be added to the resulting parent immediately.
 func (c *Context) Parent() core.Widget {
-	rules := c.styles[c.Node]
-	display := ""
-	for _, rule := range rules {
-		for _, decl := range rule.Declarations {
-			if decl.Property == "display" {
-				display = decl.Value
-			}
-		}
-	}
+	display := c.displayOf(c.Node)
 	var parent core.Widget
 	switch display {
 	case "inline", "inline-block", "":
@@ -247,31 +295,13 @@ func (c *Context) config(w core.Widget) {
 		case "id":
 			wb.SetName(attr.Val)
 			wb.SetProperty("id", attr.Val)
-		case "style":
-			c.SetStyleAttr(c.Node, attr.Val)
+		case "style": // in the cascade
 		default:
 			wb.SetProperty(attr.Key, attr.Val)
 		}
 	}
 	wb.SetProperty("tag", c.Node.Data) // this is needed by handleWidget in general
-}
-
-func (c *Context) SetStyleAttr(node *html.Node, style string) error {
-	// our CSS parser is strict about semicolons, but
-	// they aren't needed in normal inline styles in HTML
-	if !strings.HasSuffix(style, ";") {
-		style += ";"
-	}
-	decls, err := parser.ParseDeclarations(style)
-	if errors.Log(err) != nil {
-		return err
-	}
-	rule := &css.Rule{Declarations: decls}
-	if c.styles == nil {
-		c.styles = map[*html.Node][]*css.Rule{}
-	}
-	c.styles[c.Node] = append(c.styles[c.Node], rule)
-	return nil
+	wb.SetProperty("node", c.Node)     // for the grid-area of a grid item
 }
 
 // InlineParent returns the current parent widget that inline
@@ -291,70 +321,12 @@ func (c *Context) InlineParent() core.Widget {
 
 // addStyle adds the given CSS style string to the page's compiled styles.
 func (c *Context) addStyle(style string) {
-	ss, err := parser.Parse(style)
-	if errors.Log(err) != nil {
-		return
-	}
-
-	root := rootNode(c.Node)
-
-	for _, rule := range ss.Rules {
-		for _, match := range selectRule(root, rule) {
-			c.styles[match] = append(c.styles[match], rule)
-		}
-	}
+	c.addStyleOrigin(style, originAuthor)
 }
 
-// selectRule returns the nodes under root that the selectors of the rule
-// select, once for each selector that selects them.
-func selectRule(root *html.Node, rule *css.Rule) []*html.Node {
-	// Selectors of element names, such as the user agent styles have, select
-	// the elements with those names, which one walk of the tree finds; the
-	// selector library walks the tree for each selector.
-	if names := selectorAtoms(rule.Selectors); names != nil {
-		var matches []*html.Node
-		var walk func(n *html.Node)
-		walk = func(n *html.Node) {
-			for range names[n.DataAtom] {
-				matches = append(matches, n)
-			}
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				if c.Type == html.ElementNode {
-					walk(c)
-				}
-			}
-		}
-		walk(root)
-		return matches
-	}
-
-	// Other selectors are matched by the selector library.
-	sel := &selcss.Selector{}
-	if len(rule.Selectors) > 0 {
-		s, err := selcss.Parse(strings.Join(rule.Selectors, ","))
-		if errors.Log(err) == nil {
-			sel = s
-		}
-	}
-	return sel.Select(root)
-}
-
-// selectorAtoms returns the number of selectors of each element name, when
-// all of the selectors are lowercase element names, and otherwise nil.
-func selectorAtoms(selectors []string) map[atom.Atom]int {
-	if len(selectors) == 0 {
-		return nil
-	}
-	names := make(map[atom.Atom]int, len(selectors))
-	for _, s := range selectors {
-		s = strings.TrimSpace(s)
-		a := atom.Lookup([]byte(s))
-		if a == 0 || a.String() != s {
-			return nil
-		}
-		names[a]++
-	}
-	return names
+// addStyleOrigin adds the given CSS style string with the given origin.
+func (c *Context) addStyleOrigin(style string, origin cssOrigin) {
+	c.addRules(rootNode(c.Node), parseCSS(style), origin)
 }
 
 // LinkButton is a helper function that makes the given button
@@ -395,20 +367,17 @@ func (c *Context) AddWidgetHandler(f func(w core.Widget)) {
 }
 
 func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
+	if node == nil || node.Type != html.ElementNode {
+		node = nil // text nodes only inherit
+	}
 	wb := w.AsWidget()
-	rules := c.styles[c.Node]
-	wb.Styler(func(s *styles.Style) {
-		for _, rule := range rules {
-			for _, decl := range rule.Declarations {
-				if strings.HasPrefix(decl.Property, "paginate-") {
-					wb.SetProperty(decl.Property, decl.Value)
-					continue
-				}
-				// TODO(kai/styproperties): parent style and context
-				s.FromProperty(s, decl.Property, decl.Value, colors.BaseContext(colors.ToUniform(s.Color)))
-			}
+	decls := c.declarations(node)
+	for _, d := range decls {
+		if strings.HasPrefix(d.Property, "paginate-") {
+			wb.SetProperty(d.Property, d.Value)
 		}
-	})
+	}
+	c.browserStyler(node, w, decls)
 }
 
 // handleWidget applies accumulated style rules,
@@ -416,7 +385,128 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 // in order added so last one has override priority.
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
+	c.handleFormWidget(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}
+}
+
+// NewPage returns a new context for reading a new page, with the settings
+// of this context (as for media, styles, URLs, and handlers), but none of
+// the state from reading a page (as its style sheets). A context that is
+// used to read pages one after another (as in a browser) should get a new
+// one for each page with this, so that nothing of one page affects the next.
+func (c *Context) NewPage() *Context {
+	n := NewContext()
+	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
+	n.PageURL = c.PageURL
+	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
+	n.ElementHandlers = c.ElementHandlers
+	n.WikilinkHandlers = c.WikilinkHandlers
+	n.AttributeHandlers = c.AttributeHandlers
+	n.WidgetHandlers = c.WidgetHandlers
+	n.DelayedImageLoad = c.DelayedImageLoad
+	n.ImageCache = c.ImageCache
+	n.StageSize = c.StageSize
+	n.Style = c.Style
+	return n
+}
+
+// UserAgent is the User-Agent header of the requests of the default
+// [Context.GetURL], which sites that reject the default of the Go HTTP
+// client (as Wikipedia does) accept.
+var UserAgent = "Mozilla/5.0 (compatible; CogentCore; +https://cogentcore.org)"
+
+// httpClient is the client of the default [Context.GetURL], with a timeout
+// so that a server that does not respond does not stop the reading of a
+// page (as a style sheet or image of the page).
+var httpClient = &http.Client{Timeout: 15 * time.Second}
+
+// getURL gets the given URL with an HTTP GET request, with the [UserAgent].
+func getURL(url string) (*http.Response, error) {
+	if strings.HasPrefix(url, "file:") {
+		return getFileURL(url)
+	}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", UserAgent)
+	return httpClient.Do(req)
+}
+
+// getFileURL gets the local file at the given file: URL, as a response
+// with the status of a server: 404 Not Found if it does not exist.
+func getFileURL(rawURL string) (*http.Response, error) {
+	u, err := neturl.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	path := u.Path
+	if runtime.GOOS == "windows" {
+		path = strings.TrimPrefix(path, "/") // file:///C:/dir
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found",
+			Body: io.NopCloser(strings.NewReader("")), Request: &http.Request{URL: u}}, nil
+	}
+	if fi, err := f.Stat(); err == nil && fi.IsDir() { // its index.html, as servers do
+		f.Close()
+		if f, err = os.Open(filepath.Join(path, "index.html")); err != nil {
+			return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found",
+				Body: io.NopCloser(strings.NewReader("")), Request: &http.Request{URL: u}}, nil
+		}
+	}
+	return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Body: f, Request: &http.Request{URL: u}}, nil
+}
+
+// TextElement returns the widget of the HTML element that the given text
+// is the text of: the text itself if it has a "tag" property, or else the
+// widget with a tag that it is in (possibly in an inline container of it),
+// as the text of a paragraph or heading is in the frame of its element.
+func TextElement(tx *core.Text) *core.WidgetBase {
+	if _, ok := tx.Property("tag").(string); ok {
+		return tx.AsWidget()
+	}
+	pw := core.AsWidget(tx.Parent)
+	if pw != nil && strings.HasPrefix(pw.Name, "inline-container") {
+		pw = core.AsWidget(pw.Parent)
+	}
+	if pw != nil {
+		if _, ok := pw.Property("tag").(string); ok {
+			return pw
+		}
+	}
+	return tx.AsWidget()
+}
+
+// TextTag returns the name of the HTML element that the given text is the
+// text of (see [TextElement]), such as "h2" for the text of a heading,
+// or "" if there is none.
+func TextTag(tx *core.Text) string {
+	tag, _ := TextElement(tx).Property("tag").(string)
+	return tag
+}
+
+// TagTexts gives each text in the given widget the "tag" and "id"
+// properties of the HTML element that it is the text of (see
+// [TextElement]), if it does not have its own, as for printing it apart
+// from the widget of its element (as in a PDF, which styles headings by
+// their tags, and links to their ids).
+func TagTexts(w core.Widget) {
+	w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		tx, ok := cw.(*core.Text)
+		if !ok {
+			return tree.Continue
+		}
+		if el := TextElement(tx); el != cwb {
+			for _, k := range []string{"tag", "id"} {
+				if v, ok := el.Property(k).(string); ok {
+					cwb.SetProperty(k, v)
+				}
+			}
+		}
+		return tree.Continue
+	})
 }

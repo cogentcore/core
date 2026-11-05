@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><title>Flex</title>
+<style>
+.flex { display: flex; background-color: #eee; margin-bottom: 10px; }
+.flex > div { background-color: #9bd; padding: 6px; }
+.gap { gap: 10px; }
+.col { flex-direction: column; }
+.between { justify-content: space-between; }
+.center { justify-content: center; }
+.end { justify-content: flex-end; }
+.aic { align-items: center; height: 80px; }
+.grow > div { flex-grow: 1; }
+.wrap { flex-wrap: wrap; width: 300px; }
+.fixed > div { width: 100px; }
+</style></head>
+<body>
+<div class="flex"><div>One</div><div>Two</div><div>Three</div></div>
+<div class="flex gap"><div>Gap</div><div>of</div><div>10</div></div>
+<div class="flex col gap"><div>Column</div><div>direction</div></div>
+<div class="flex between"><div>Space</div><div>between</div><div>items</div></div>
+<div class="flex center"><div>Centered</div><div>items</div></div>
+<div class="flex end"><div>Flex</div><div>end</div></div>
+<div class="flex aic"><div>Align</div><div>items center</div></div>
+<div class="flex grow gap"><div>Grow</div><div>grow</div><div>grow</div></div>
+<div class="flex wrap fixed gap"><div>Wrap 1</div><div>Wrap 2</div><div>Wrap 3</div><div>Wrap 4</div></div>
+</body></html>

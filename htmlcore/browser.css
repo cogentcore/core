@@ -1,0 +1,73 @@
+/* User agent styles for BrowserStyle, following those of Chrome (html.css). */
+
+html, address, blockquote, body, center, dialog, div, figure, figcaption, footer, form,
+header, hr, legend, listing, main, p, plaintext, pre, search, xmp, article, aside,
+h1, h2, h3, h4, h5, h6, hgroup, nav, section, dir, dd, dl, dt, menu, ol, ul, details, summary, fieldset {
+    display: block;
+}
+
+head, script, style, link, meta, title, datalist, param, noframes, template, area, base, basefont, rp {
+    display: none;
+}
+
+li { display: list-item; }
+table { display: table; }
+caption { display: table-caption; }
+tr { display: table-row; }
+thead { display: table-header-group; }
+tbody { display: table-row-group; }
+tfoot { display: table-footer-group; }
+td, th { display: table-cell; }
+img, button, input, select, textarea, meter, progress, marquee { display: inline-block; }
+
+html { line-height: normal; }
+body { margin: 8px; }
+
+p, dl, multicol { margin: 1em 0; }
+dd { margin-left: 40px; }
+blockquote, figure { margin: 1em 40px; }
+address, cite, em, i, var, dfn { font-style: italic; }
+center { text-align: -webkit-center; }
+
+h1 { font-size: 2em; margin: 0.67em 0; font-weight: bold; }
+h2 { font-size: 1.5em; margin: 0.83em 0; font-weight: bold; }
+h3 { font-size: 1.17em; margin: 1em 0; font-weight: bold; }
+h4 { font-size: 1em; margin: 1.33em 0; font-weight: bold; }
+h5 { font-size: 0.83em; margin: 1.67em 0; font-weight: bold; }
+h6 { font-size: 0.67em; margin: 2.33em 0; font-weight: bold; }
+
+ul, menu, dir, ol { margin: 1em 0; padding-left: 40px; }
+ul ul, ul ol, ol ul, ol ol, ul menu, ol menu, menu ul, menu ol { margin-top: 0; margin-bottom: 0; }
+
+pre, xmp, plaintext, listing { font-family: monospace; white-space: pre; margin: 1em 0; }
+details > summary:first-of-type { display: list-item; list-style-type: disclosure-closed; }
+a[href] { color: #0000ee; text-decoration: underline; cursor: pointer; }
+code, kbd, samp, tt { font-family: monospace; }
+mark { background-color: yellow; color: black; }
+
+/* the default size of monospace fonts is 13px, not 16px */
+pre, xmp, plaintext, listing, code, kbd, samp, tt, textarea { font-size: 0.8125em; }
+pre code, pre kbd, pre samp, pre tt { font-size: 1em; }
+
+hr { margin: 0.5em auto; border: 1px inset #808080; color: gray; }
+
+table { border-spacing: 2px; border-color: gray; }
+td, th { padding: 1px; }
+th { font-weight: bold; text-align: center; }
+caption { text-align: center; }
+
+b, strong { font-weight: bold; }
+small { font-size: smaller; }
+big { font-size: larger; }
+sub, sup { font-size: smaller; }
+fieldset { margin: 0 2px; padding: 0.35em 0.75em 0.625em; border: 2px groove #c0c0c0; }
+legend { padding: 0 2px; }
+ruby > rt { display: block; font-size: 50%; text-align: start; }
+
+button, input[type=submit], input[type=button], input[type=reset] {
+    padding: 1px 6px; border: 1px solid #767676; border-radius: 3px;
+    background-color: #efefef; font-size: 13.333px; text-align: center; box-sizing: border-box;
+    flex-direction: row; justify-content: center; align-items: center;
+}
+svg:not(:root) { overflow: hidden; }
+input[type=hidden] { display: none; }

@@ -1,0 +1,6 @@
+/* system color scheme (system contrast) */
+
+@import url("261718c98750.css"); /* default */
+@import url("efd02d80e942.css") (not (prefers-color-scheme: dark)) and (prefers-contrast: more);
+@import url("f7e3842313cc.css") (prefers-color-scheme: dark) and (not (prefers-contrast: more));
+@import url("c687996a763f.css") (prefers-color-scheme: dark) and (prefers-contrast: more);

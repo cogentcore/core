@@ -1,0 +1,24 @@
+/*
+Round the corners of div.section elements.
+Assumes the background behind the element is white.
+Side-effect: sets div.section to be 'position: relative'.
+Bug: FF <= 3.0.6 doesn't handle 'position' on ':before'
+*/
+
+h1 ~ .section ~ .section {
+  position: relative }
+h1 ~ .section ~ .section:before, h1 ~ .section ~ .section:after {
+  position: absolute;
+  text-align: left;		/* Just in case an ancestor changed it */
+  line-height: 0;
+  height: 17px;			/* Height of corner image */
+  left: 0;
+  width: 100% }
+h1 ~ .section ~ .section:before {
+  content: url("7c6ef1097eee.png");
+  background: url("d44cfff17a58.png") top right no-repeat;
+  top: 0 }
+h1 ~ .section ~ .section:after {
+  content: url("c5d714bfe6d5.png");
+  background: url("087b520ef846.png") bottom right no-repeat;
+  bottom: 0 }

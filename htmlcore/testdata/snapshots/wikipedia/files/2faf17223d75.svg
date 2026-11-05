@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		bell
+	</title><g fill="#36c"><path d="M8 17h4v1a2 2 0 1 1-4 0zM9 0h2v1.6a5 5 0 0 1 4 5v4l2 2.8V16H3v-2.6l2-2.8v-4a5 5 0 0 1 4-5zm4 6.5a3 3 0 0 0-6 0v4.8L5 14h10l-2-2.7z"/></g></svg>

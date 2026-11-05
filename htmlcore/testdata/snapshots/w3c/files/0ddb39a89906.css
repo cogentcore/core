@@ -1,0 +1,455 @@
+/* Style sheet for http://www.w3.org/Style/CSS and related pages.
+
+Graphic design by Divya Manian (December 2010), with help from
+fantasai, based on graphic elements of the W3C home page of 2010.
+Adapted by Bert Bos <bert@w3.org> (April 2011)
+
+Copyright © 2010 Divya Manian (design)
+Copyright © 2011 W3C (code), see
+http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
+
+*/
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: bold;
+  font-display: swap;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: bold;
+  font-display: swap;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: normal;
+  font-display: swap;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: OFL Sorts Mill Goudy;
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff"),
+    url("data:,") format("svg") }
+
+@font-face {
+  font-family: My Noto Nastaliq Urdu;
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: url("data:,");
+  src: url("data:,") format('embedded-opentype'),
+    url("data:,") format('woff2'),
+    url("data:,") format('woff'),
+    url("data:,") format('truetype') }
+
+
+html {
+  background: #DCE3E6;
+  padding: 0 3% }
+
+body {
+  max-width: 60em;
+  padding: 0 20px;
+  margin: 6em auto 19em;
+  background: #fff;
+  color: #333;
+  font: 1.156em/1.3 My Gill Sans, Lato, sans-serif;
+  font-size-adjust: 0.45;
+  position: relative;
+  box-shadow: 0 .3em 1em #000 }
+.portal {max-width: none}	/* The main page has columns instead */
+
+/* English pages need no space for the translation warning */
+body:lang(en) {margin-top: 2em}
+
+a {color: #059; text-decoration: none}
+:visited {color: #609}
+a:hover, :focus {outline: thin solid orange}
+a > img {border: none}
+img, pre {max-width: 100%; overflow: auto}
+img {height: auto; object-fit: scale-down}
+ul, blockquote {padding-left: 1em}
+[dir=rtl] ul, [dir=rtl] blockquote {padding-left: 0; padding-right: 1em}
+dt {display: run-in; font-weight: bold}
+dt:after {content: " \2013  "}
+dd {margin: 0 0 .65em 1em; }
+[dir=rtl] dd {margin: 0 1em 0.65em 0}
+sup {line-height: 0}
+td {vertical-align: baseline}
+th {vertical-align: bottom; text-align: left}
+[dir=rtl] th {text-align: right}
+p, blockquote {margin: 1.3em 0}
+/* Make H1 and H2 (other than the main title and section titles) less visible */
+h1, h2 {font-size: 1.2em}
+h2 {font-weight: normal}
+
+.feed img {max-height: 1.2em; min-height: .5em}
+/* .feed::before {content: leader(space)} */
+.icon {clear: right; float: right; max-width: 4em; margin: 0 0 .5em .5em}
+[dir=rtl] .icon {clear: left; float: left; margin: 0 .5em .5em 0}
+.button {max-height: 2em}
+
+body > h1, .section > h2:first-child, .aside h3 {
+  letter-spacing: .051em;
+  font: normal 1.5em/1.1 OFL Sorts Mill Goudy, Noto Nastaliq Urdu,
+    My Noto Nastaliq Urdu, Georgia, serif;
+  font-size-adjust: 0.43}
+body > h1:lang(fa), .section > h2:lang(fa):first-child, .aside h3:lang(fa),
+body > h1:lang(ur), .section > h2:lang(ur):first-child, .aside h3:lang(ur) {
+  line-height: 1.8}
+body > h1 {
+  column-span: all;
+  margin: 0 -20px 3em -20px; /* Room below for #banner menu */
+  padding: .6em 1em;
+  height: 3.3em;
+  border-left: solid transparent 90px; /* Room for W3C logo */
+  border-right: solid transparent 110px; /* Room for language link */
+  color: #666;
+  background: #eee }
+body > h1:lang(ur), body > h1:lang(fa) {
+  font-size: 1.2em;
+  padding: .75em 1.25em;
+  margin-bottom: 3.75em;
+  height: 4.125em }
+
+body > h1 em {font-style: normal; display: block}
+h3 {
+  font-size: 1em;
+  font-weight: normal;
+  font-style: italic;
+  border-bottom: thin solid }
+
+.section {break-inside: avoid; margin: 0 0 2em 0; padding: 1.3em 1em 0 1em}
+.section > :first-child {margin-top: 0}
+.long {break-inside: auto}
+
+.section, .aside {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box }
+
+#banner .home {
+  position: absolute;
+  display: block;
+  top: -6.75em;
+  left: 0;
+  margin: -7px 0 0 0;
+  width: 90px;			/* = border-left of body > h1 */
+  height: 6.75em;
+  padding: 0;
+  text-align: center;
+  line-height: 0 }
+
+*>.home img {
+  max-height: 100%;
+  box-sizing: border-box;
+  padding: 0.4em }
+.home a {text-decoration: none} .home a:after {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: center / auto 80% no-repeat
+    url("54729840fc8b.svg") #005a9c }
+#banner {
+  border-top: double 8px #ddd;
+  position: absolute;
+  left: 0;
+  top: 6.75em;
+  right: 0;
+  height: 2.6em;
+  margin: -1px 0 0 0;
+  padding: .5em 20px;
+  text-transform: uppercase }
+
+#banner ul {margin: 0; padding: 0 0 0 90px}
+#banner li {display: inline; margin: 0 1.5em 0 0}
+#banner li a {margin: 0 -.5em; padding: .3em .5em; font-size: .9em}
+#banner h2 {display: none}
+
+#summary {
+  column-span: all;
+  color: #fff;
+  background: url("682d34511b4b.jpg") #315780;
+  background-size: 20em 14em;
+  text-shadow: 0 1px 1px #000;
+  border: 1px solid hsl(212, 44%, 33%);
+  border-width: 1px 0;
+  padding: 1.5em 2em 1.5em 0;
+  margin: 0 -20px 20px -20px }
+
+#endmatter:after,
+#summary:after,
+#news li:after {content: " "; height: 0; display: block; clear: both}
+
+#summary > * {float: right; width: 60%; margin: 0 0 1.3em 0}
+
+#summary .aside {
+  float: none;
+  background: #156aa6;
+  width: 35%;
+  margin: 0 auto 0 -3px;
+  padding: 20px 20px 1px 20px;
+  border-radius: 0 .4em .4em 0;
+  box-shadow: 0 1px 3px #000 }
+
+#summary a {color: #c2eafe}
+#summary .aside a {color: inherit}
+
+.aside li a {
+  display: block;
+  margin: 0 -10px;
+  padding: .4em 20px;
+  overflow: auto }
+.aside h3 {margin: 0 0 .5em 0; border-bottom: none}
+.aside ul {padding: 0}
+.aside li {
+  display: block;
+  margin: 0 -10px;
+  border-top: 1px solid hsl(205, 41%, 50%);
+  border-bottom: 1px solid hsl(205, 91%, 18%) }
+.aside li:first-child {border-top: none}
+.aside li:last-child {border-bottom: none}
+
+.section > h2:first-child, .aside h3 {text-transform: uppercase}
+
+#banner .search {white-space: nowrap; float: right; margin-right: 0}
+
+input {border-radius: .25em; padding: .2em .5em; border: thin solid #ddc}
+button {background: none; border: 0}
+button img {vertical-align: middle}
+
+.more a {
+  background: url("b11511d65119.png") repeat-x #025a9a;
+  background-size: 100% 100%;
+  background: linear-gradient(#025a9a,#0c3d5f);
+  color: #fff;
+  text-shadow: 1px 1px 1px #000;
+  padding: .2em 1em;
+  border-radius: .25em;
+  line-height: 1.7;
+  border: 0 }
+
+.more a:hover, .more :focus {
+  outline: none;
+  background-image: url("06fc7124b75f.png");
+  background-image: linear-gradient(#0c3d5f,#025a9a) }
+
+#news, #intro {
+  color: #000;
+  background: #DAE4F0;
+  border-radius: .5em;
+  overflow: auto }
+
+#news ul {padding: 0}
+
+#news li {
+  display: block;
+  padding: .7em 0 0 0;
+  margin: 0 0 .7em 0;
+  border-top: 1px dotted hsl(212, 44%, 53%) }
+
+#news li:first-child {border-top: none; padding-top: 0}
+
+.updated, .dt-updated {
+  background: url("0ab6bc918329.png") repeat-x #1875b9;
+  background-size: 100% 100%;
+  background: linear-gradient(#025a9a,#1875b9);
+  color: #fff;
+  font-size: .8em;
+  line-height: 1;
+  border-radius: 2px;
+  text-shadow: 0 0 1px #0c3d5f;
+  border-bottom: none;		/* Override any border on ABBR */
+  padding: .2em .3em;
+  margin: 0 .33em 0 0 }
+#summary .updated, #summary .dt-updated {display: none}
+
+#news .updated, #news .dt-updated {
+  float: left;
+  width: 3em;
+  text-align: center;
+  text-transform: uppercase;
+  outline: 1px solid #aaa;
+  outline-offset: 2px;
+  margin: 0 1em 4px 3px;
+  padding: .2em .1em .5em .1em }
+[dir=rtl] #news .updated, [dir=rtl] #news .dt-updated {
+  float: right;
+  margin: 0 3px 4px 1em }
+
+#news .updated span, #news .dt-updated span {
+  font-size: 1.5em;
+  font-style: normal;
+  font-weight: bold;
+  display: block }
+
+.dated li {clear: left}
+
+li:not(:lang(en)) > [lang|=en]:before,
+ul:not(:lang(en)) > [lang|=en]:before,
+ol:not(:lang(en)) > [lang|=en]:before,
+:not(:lang(en)) > p[lang|=en]:before {
+  content: url("12ae4e9f867d.png") " " }
+
+#translations {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  margin: 0;
+  break-inside: auto }
+
+@supports (transform: translate(0,100%)) {
+  /* static position incorrect in Safari 9.1 and Chrome 50, so use this: */
+  #translations {bottom: 0; transform: translate(0,100%)}
+}
+
+#translations a, #language a {color: inherit}
+
+#translations p, #translations li, #translations h2 {break-inside: avoid}
+
+#translations h2 {display: none}
+#translations p {font-weight: bold}
+#translations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  -moz-column-width: 8em;
+  -webkit-column-width: 8em;
+  column-width: 8em }
+#translations li {margin: 0 0 1.3em 0}
+
+#language, #language p {margin: 0; padding: 0; text-align: center}
+
+#language p:first-child + p {
+  position: absolute;
+  top: -5.5em;
+  left: 1.11em;
+  right: 1.11em;
+  font-size: .9em }
+
+#language p:first-child + p a {font-weight: bold}
+
+#language a[href="#translations"] {
+  position: absolute;
+  top: .9em;
+  right: 20px;
+  line-height: 1 }
+
+#language a[href="#translations"]:before {
+  content: url("06068757c7c7.png") "\A";
+  white-space: pre }
+
+#language .old {color: red}
+
+/* #endmatter#endmatter would be shorter, but fails in Edge 40.15063.0.0 */
+#endmatter.section.section.section.section.section {
+  column-span: all;
+  clear: both;
+  font-size: .9em;
+  text-align: left;
+  margin: 1em -20px 0 -20px;
+  color: #666;
+  background: #eee;
+  padding: 1.11em }
+
+address {
+  float: right;
+  width: 40%;
+  text-align: right;
+  padding: 0;
+  margin: 0 0 -1.11em 1em }
+
+#endmatter .photo {
+  float: right;
+  margin: -1.11em -1.11em 0 .5em;
+  height: 6em }
+#endmatter span ~ span .photo {clear: right; margin-top: 0}
+
+#endmatter p {text-transform: uppercase; margin: 0}
+#endmatter small {font-size: 1em; display: block}
+#endmatter img {float: left; margin-right: .5em}
+
+.figure {margin: 1em 0; text-align: center; font-style: italic}
+.figure p {margin: 0; font-size: .9em}
+
+.status {margin: .6em 0; border-collapse: collapse}
+.status td, .status th {
+  padding: .1em .3em .1em 0;
+  border-bottom: thin dotted #BBF }
+.status tbody + tbody th {padding-top: 1em}
+
+ .status td + td, .status th + th, .status .wd, .status .lc, .status .crd,
+.status .cr, .status .pr, .status .rec, .status .note {padding-left: .3em}
+.wd a, .pa a, .lc a, .alpha a, .cr a, .beta a, .pr a, .rc a, .rec a, .fin a,
+.spsd a, .fpwd a, .note a, .abandoned a, .crd a {color: inherit}
+.fpwd {background: hsl(10,55%,55%); color: #fff}
+.wd, .pa {background: hsl(20, 78%, 55%); color: #fff}
+.lc, .crd, .alpha {background: hsl(30, 68%, 65%)}
+.cr, .beta {background: hsl(62, 86%, 45%)}
+.pr, .rc {background: hsl(89, 53%, 44%); color: #fff}
+.rec, .note, .fin, .spsd {background: hsl(129, 53%, 40%); color: #fff}
+.abandoned {background: hsl(275,60%,65%); color: #fff}
+td + td + .wd {background: hsl(20, 78%, 64%)}
+td + td + .lc, td + td + .crd {background: hsl(30, 68%, 72%)}
+td + td + .cr {background: hsl(62, 70%, 55%)}
+td + td + .pr {background: hsl(89, 41%, 55%)}
+td + td + .rec, td + td + .note, td + td + .spsd {background: hsl(129, 35%, 52%)}
+td + td + .abandoned {background: hsl(275,60%,79%)}
+
+
+@media all and (min-width: 50em) {
+  .portal .section {float: left; width: 50%}
+  .portal :first-child:not(#language) ~ .section:nth-of-type(2n),
+  .portal :first-child#language ~ .section:nth-of-type(2n+1) {clear: both}
+
+  .portal #language, .portal #translations, .portal #banner, .portal #summary,
+  .portal #endmatter {float: none; width: auto}
+  body > h1 {height: 2.2em}
+  body > h1:lang(ur), body > h1:lang(fa) {height: 2.75em}
+  #banner {top: 5.1em; text-align: left}
+  #banner .home {top: -5.1em; height: 5.1em}
+  .portal #news {float: right}
+}
+
+@media all and (min-width: 100em) {
+  .portal .section {width: 33.3%}
+  .portal :first-child:not(#language) ~ .section:nth-of-type(2n),
+  .portal :first-child#language ~ .section:nth-of-type(2n+1) {clear: none}
+  .portal :first-child:not(#language) ~ .section:nth-of-type(3n+2),
+  .portal :first-child#language ~ .section:nth-of-type(3n) {clear: both}
+}
+
+@media all and (max-width: 40em) {
+  body > h1:lang(ur), body > h1:lang(fa),
+  body > h1 {
+    font-size: 1em;
+    letter-spacing: normal;
+    margin-bottom: 5.5em;
+    padding: .6em 1em;
+    height: 5.55em }
+  #banner ul {padding-left: 0}
+  .aside h3 {letter-spacing: normal; font-size: 1.1em}
+}

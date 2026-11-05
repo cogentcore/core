@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><title>Selectors</title>
+<style>
+p { color: #444; }
+.a { color: blue; }
+#unique { color: green; }
+div p { font-style: italic; }
+div > p.direct { font-weight: bold; }
+p.a.b { background-color: #fdd; }
+h2 + p { color: maroon; }
+.outer .inner { background-color: #dfd; }
+p { margin-left: 10px; }
+.override { color: red; }
+.override { color: purple; }
+</style></head>
+<body>
+<p>Element selector.</p>
+<p class="a">Class selector.</p>
+<p id="unique" class="a">Id beats class.</p>
+<div><p>Descendant italic.</p><p class="direct">Child and class bold.</p></div>
+<p class="a b">Two classes.</p>
+<h2>Heading</h2>
+<p>Adjacent sibling maroon.</p>
+<div class="outer"><div><div class="inner">Nested descendant.</div></div></div>
+<p class="override">Later rule wins (purple).</p>
+<p style="color: orange">Inline style orange.</p>
+</body></html>

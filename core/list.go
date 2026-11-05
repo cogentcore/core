@@ -2014,14 +2014,16 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	ls.StartIndex = int(floor)
 	lg.Geom.Scroll.Y = (floor - quo) * rht
 	ls.ApplyScenePos()
+	if tt, ok := ls.This.(*TreeTable); ok && tt.HideGroupValues {
+		// the rows have other widgets for the items of groups,
+		// whose values are hidden, which are new, so they need to be
+		// styled and laid out
+		ls.Update()
+		return
+	}
 	ls.UpdateTree()
 	ls.NeedsRender()
 	// ls.NeedsLayout() // needed to recompute size after resize
-	if tt, ok := ls.This.(*TreeTable); ok && tt.HideGroupValues {
-		// the rows have other widgets for the items of groups,
-		// whose values are hidden, which need a layout
-		ls.NeedsLayout()
-	}
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {

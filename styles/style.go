@@ -97,6 +97,16 @@ type Style struct { //types:add
 	// available space). Do NOT set this for non-Text elements.
 	GrowWrap bool
 
+	// Shrink is the proportional amount that the element can shrink in width,
+	// below its actual size, if there is less space available, as in the CSS
+	// flex-shrink property. 0 = default = no shrinking. A shrinking element
+	// in a column is at most as wide as the column, and in a row or a grid,
+	// the columns that have elements that shrink are narrowed in proportion
+	// to Shrink and their width, to fit within the frame. Elements that
+	// wrap their content (such as text) then wrap it within their width.
+	// Only the X (width) dimension is currently supported.
+	Shrink math32.Vector2
+
 	// RenderBox determines whether to render the standard box model for the element.
 	// This is typically necessary for most elements and helps prevent text, border,
 	// and box shadow from rendering over themselves. Therefore, it should be kept at
@@ -196,25 +206,58 @@ type Style struct { //types:add
 	// has [Style.Display] = [Custom].
 	Pos units.XY `display:"inline"`
 
-	// TODO: support these properties
+	// Position is the way that the widget is positioned, as with the
+	// position property of CSS. The default, [PositionStatic], is in the
+	// layout of its parent. See [Positions] for the others, which are
+	// positioned by [Style.Inset].
+	Position Positions
 
-	// // ordering factor for rendering depth -- lower numbers rendered first.
-	// // Sort children according to this factor
-	// ZIndex int
+	// Inset has the offsets (top, right, bottom, left) of the edges of
+	// a widget that is not [PositionStatic] from those of its containing
+	// block ([PositionAbsolute], [PositionFixed]), or from its position in
+	// the layout ([PositionRelative]), for the sides in [Style.InsetSet].
+	Inset sides.Values `display:"inline"`
 
-	// // specifies the row that this element should appear within a grid layout
-	// Row int
+	// InsetSet has the sides of [Style.Inset] that are set, as opposed to
+	// auto (the default), for which the size or the position in the layout
+	// of the widget determine its position.
+	InsetSet sides.Sides[bool] `display:"inline"`
 
-	// // specifies the column that this element should appear within a grid layout
-	// Col int
+	// Float makes the widget float to the left or right of its parent,
+	// as the float property of CSS: it is out of the flow of the layout of
+	// its parent (a column), and the widgets after it that start beside it
+	// are narrowed to be beside it.
+	Float Floats
 
-	// // specifies the number of sequential rows that this element should occupy
-	// // within a grid layout (todo: not currently supported)
-	// RowSpan int
+	// Clear moves the widget down below the widgets before it that float
+	// on the given sides, as the clear property of CSS.
+	Clear Clears
+
+	// NoClip is whether the children of the widget are not clipped to its
+	// content box, as for content that overflows it in CSS with visible
+	// overflow: they are clipped by the nearest widget that it is in that
+	// does clip (or scrolls) instead.
+	NoClip bool
+
+	// BoxSizing is whether the Min and Max sizes are of the content
+	// (the default), or also include the padding and border, as the
+	// box-sizing property of CSS.
+	BoxSizing BoxSizings
+
+	// ZIndex orders the rendering of widgets that are not [PositionStatic],
+	// as the z-index property of CSS: they are rendered after the other
+	// children of their parent (on top of them), in increasing order of
+	// ZIndex, except that those with a negative ZIndex are rendered first.
+	ZIndex int
 
 	// specifies the number of sequential columns that this element should occupy
 	// within a grid layout
 	ColSpan int
+
+	// RowSpan is the number of sequential rows that this element occupies
+	// within a grid layout. The cells after it in the rows below it are
+	// placed in the columns after it.
+	RowSpan int
 
 	// ScrollbarWidth is the width of layout scrollbars. It defaults
 	// to [DefaultScrollbarWidth], and it is inherited.
@@ -466,6 +509,15 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 		bg = pabg
 	} else if u, ok := bg.(*image.Uniform); ok && colors.IsNil(u.C) {
 		bg = pabg
+	} else if ok && pabg != nil {
+		// A translucent background is what it looks like over the
+		// background of the parent, so that the widgets in it (which
+		// render the background of their parent) do not blend it again.
+		if c := colors.AsRGBA(u.C); c.A < 255 {
+			if pu, ok := pabg.(*image.Uniform); ok {
+				bg = colors.Uniform(colors.AlphaBlend(pu.C, c))
+			}
+		}
 	}
 
 	if s.Opacity >= 1 && s.StateLayer <= 0 {

@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><title>Page layout</title>
+<style>
+body { margin: 0; }
+header { background-color: #234; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { font-size: 20px; margin: 0; }
+nav a { color: #cde; margin-left: 16px; }
+.wrap { display: flex; gap: 20px; padding: 20px; }
+aside { width: 180px; background-color: #eef; padding: 10px; }
+aside ul { margin: 0; padding-left: 20px; }
+main { flex: 1; }
+main h2 { margin-top: 0; }
+.card { border: 1px solid #ccc; border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+footer { border-top: 1px solid #ddd; padding: 10px 20px; color: #777; font-size: 13px; }
+</style></head>
+<body>
+<header><h1>Site Name</h1><nav><a href="#">Home</a><a href="#">About</a><a href="#">Contact</a></nav></header>
+<div class="wrap">
+<aside><strong>Sections</strong><ul><li>Intro</li><li>Details</li><li>Summary</li></ul></aside>
+<main>
+<h2>Main content</h2>
+<div class="card"><p style="margin:0">A card with a border and rounded corners, holding a paragraph of text that wraps within the card.</p></div>
+<div class="card"><p style="margin:0">A second card.</p></div>
+</main>
+</div>
+<footer>Footer text</footer>
+</body></html>

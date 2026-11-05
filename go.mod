@@ -8,6 +8,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/adrg/strutil v0.3.1
 	github.com/alecthomas/chroma/v3 v3.0.0-alpha.5.0.20261015230651-e17ffc9bfce4
+	github.com/andybalholm/cascadia v1.3.3
 	github.com/anthonynsimon/bild v0.14.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/charmbracelet/x/ansi v0.11.9
@@ -20,7 +21,6 @@ require (
 	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/creack/pty v1.1.24
-	github.com/ericchiang/css v1.4.0
 	github.com/faiface/beep v1.1.0
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260628091122-0bd588dc30cf

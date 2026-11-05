@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/paint/render"
 	_ "cogentcore.org/core/paint/renderers" // installs default renderer
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
@@ -466,7 +467,11 @@ func (wb *WidgetBase) StartRender() bool {
 	if pc.State == nil {
 		return false
 	}
-	pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	if wb.noClip() { // its children can be outside of it
+		pc.PushContext(nil, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
+	} else {
+		pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+	}
 	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
@@ -535,6 +540,18 @@ func (wb *WidgetBase) RenderWidget() {
 		wb.renderChildren()
 		wb.renderParts()
 		wb.EndRender()
+		wb.renderOutOfFlowChildren()
+	}
+}
+
+// renderOutOfFlowChildren renders the children of the widget that are out
+// of the flow of its layout (absolute and fixed positions), after the
+// widget, outside of its clipping, as they can be outside of it.
+func (wb *WidgetBase) renderOutOfFlowChildren() {
+	for _, cw := range wb.renderOrder() {
+		if cw.AsWidget().outOfFlow() {
+			cw.RenderWidget()
+		}
 	}
 }
 
@@ -546,6 +563,14 @@ func (wb *WidgetBase) renderParts() {
 
 // renderChildren renders all of the widget's children.
 func (wb *WidgetBase) renderChildren() {
+	if order := wb.renderOrder(); order != nil { // positioned children
+		for _, cw := range order {
+			if !cw.AsWidget().outOfFlow() { // rendered after (see RenderWidget)
+				cw.RenderWidget()
+			}
+		}
+		return
+	}
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cw.RenderWidget()
 		return tree.Continue

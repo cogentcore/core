@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/text/textpos"
@@ -35,6 +36,10 @@ func TestShowCodeErrors(t *testing.T) {
 	ed := textcore.NewEditor(b)
 	ed.Lines.SetString("x := 1\ny := x + zz\nfmt.Println(y)\n")
 	parent := core.NewFrame(b)
+	parent.Styler(func(s *styles.Style) { // as the output frame of code in content
+		s.Direction = styles.Column
+		s.Grow.Set(1, 0)
+	})
 	err := errors.Join(&testCodeError{2, 10, "undefined: zz"}, errors.New("a command failed"))
 
 	// clearing the errors clears the tooltips

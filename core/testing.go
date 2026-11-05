@@ -30,6 +30,22 @@ type getImager interface {
 // the the filename, and forward slashes are automatically replaced with
 // backslashes on Windows.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
+	img := b.RenderImage(fun...)
+	if img == nil {
+		t.Errorf("AssertRender: the window of %s was closed", filename)
+		return
+	}
+	imagex.Assert(t, img, filename)
+}
+
+// RenderImage makes a new window from the body, waits until it is shown
+// and all events have been handled, does any necessary re-rendering,
+// and returns a copy of its rendered image, closing the window after.
+// It is the rendering part of [Body.AssertRender], with the same handling
+// of the optional functions, which are called after the window is shown,
+// and it is only for offscreen rendering (testing). It returns nil if the
+// window was closed before its image could be copied.
+func (b *Body) RenderImage(fun ...func()) *image.RGBA {
 	b.runAndShowNewWindow()
 
 	rw := b.Scene.RenderWindow()
@@ -59,12 +75,10 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	// composed, as paint events can still make the event loop render.
 	dw := rw.SystemWindow.Composer().(*composer.ComposerDrawer).Drawer
 	if !rw.SystemWindow.Lock() {
-		t.Errorf("AssertRender: the window of %s was closed", filename)
-		return
+		return nil
 	}
 	img := imagex.CloneAsRGBA(dw.(getImager).GetImage())
 	rw.SystemWindow.Unlock()
-	imagex.Assert(t, img, filename)
 
 	// When closing the scene, our access to the render context stops working,
 	// so using normal AsyncLock and AsyncUnlock will lead to AsyncLock failing.
@@ -74,6 +88,7 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	rc.Lock()
 	b.Close()
 	rc.Unlock()
+	return img
 }
 
 // runAndShowNewWindow runs a new window and waits for it to be shown.

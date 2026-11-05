@@ -150,6 +150,17 @@ type GeomSize struct {
 
 	// Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size
 	Max math32.Vector2
+
+	// slot is the size that the parent layout would have allocated
+	// to a growing widget whose allocation is limited by its Max size,
+	// which it is aligned within, and 0 otherwise.
+	slot math32.Vector2
+
+	// preferred is the actual total size of the widget from the SizeUp
+	// pass, before its parent allocates it less, which is its max-content
+	// size for widgets that shrink ([styles.Style.Shrink]), so that they
+	// are as wide as they can be in the space that they have.
+	preferred math32.Vector2
 }
 
 func (ls GeomSize) String() string {
@@ -162,6 +173,26 @@ func (ls *GeomSize) setInitContentMin(styMin math32.Vector2) {
 	csz := &ls.Actual.Content
 	*csz = styMin
 	styles.SetClampMaxVector(csz, ls.Max)
+}
+
+// maxTotal returns the Max size as a Total size, adding the Space
+// to each dimension that has a Max (which is 0 for no Max).
+func (ls *GeomSize) maxTotal() math32.Vector2 {
+	mt := ls.Max
+	for d := math32.X; d <= math32.Y; d++ {
+		if mt.Dim(d) > 0 {
+			mt.SetDim(d, mt.Dim(d)+ls.Space.Dim(d))
+		}
+	}
+	return mt
+}
+
+// fitTotalMax increases the given Total size to fit the given fm value,
+// subject to the Max constraint on the content, as [GeomSize.FitSizeMax]
+// does for a content size.
+func (ls *GeomSize) fitTotalMax(to *math32.Vector2, fm math32.Vector2) {
+	styles.SetClampMinVector(to, fm)
+	styles.SetClampMaxVector(to, ls.maxTotal())
 }
 
 // FitSizeMax increases given size to fit given fm value, subject to Max constraints
@@ -382,6 +413,21 @@ type layoutState struct {
 	// Gap is the Styles.Gap size
 	Gap math32.Vector2
 
+	// spans is whether a grid has cells that span columns.
+	spans bool
+
+	// rowSpans is whether a grid has cells that span rows.
+	rowSpans bool
+
+	// floats is the layout of a column with floating children, if it has any.
+	floats *floatLayout
+
+	// growExtra is the extra space that children with a Grow factor grow
+	// into, which is within the actual size of a frame that does not grow
+	// (see [Frame.childSpace]), while other children (such as GrowWrap
+	// text) are allocated all of the extra allocation of the frame.
+	growExtra math32.Vector2
+
 	// GapSize has the total extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
 	// For SizeUp / Down Gap contributes to Space like other cases,
@@ -581,7 +627,10 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 	sz.setInitContentMin(sz.Min) // start from style
 	*isz = nsz                   // internal is always accurate!
 	oflow := &fr.Styles.Overflow
-	nosz := pass == SizeUpPass && fr.Styles.IsFlexWrap()
+	// wrapped content is sized by its allocation, except that wrapped
+	// rows that shrink are as wide as they are on one line, until then
+	nosz := pass == SizeUpPass && fr.Styles.IsFlexWrap() &&
+		!(fr.Styles.Shrink.X > 0 && fr.Styles.Direction == styles.Row)
 	mx := sz.Max
 	for d := math32.X; d <= math32.Y; d++ {
 		if nosz {
@@ -645,12 +694,33 @@ func (wb *WidgetBase) sizeFromStyle() {
 	if s.Max.Y.Unit == units.UnitPw || s.Max.Y.Unit == units.UnitPh {
 		sz.Max.Y = 0
 	}
+	if bs := wb.boxSizingSpace(); bs != (math32.Vector2{}) {
+		for d := math32.X; d <= math32.Y; d++ {
+			if m := sz.Min.Dim(d); m > 0 {
+				sz.Min.SetDim(d, max(m-bs.Dim(d), 0))
+			}
+			if m := sz.Max.Dim(d); m > 0 {
+				sz.Max.SetDim(d, max(m-bs.Dim(d), 1))
+			}
+		}
+	}
 	sz.Internal.SetZero()
 	sz.setInitContentMin(sz.Min)
 	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace && (sz.Actual.Content.X > 0 || sz.Actual.Content.Y > 0) {
 		fmt.Println(wb, "SizeUp from Style:", sz.Actual.Content.String())
 	}
+}
+
+// boxSizingSpace returns the size of the padding and border of the widget
+// if its Min and Max sizes include them ([styles.BoxBorderBox]), which is
+// subtracted from them for the size of the content, or zero otherwise.
+func (wb *WidgetBase) boxSizingSpace() math32.Vector2 {
+	s := &wb.Styles
+	if s.BoxSizing != styles.BoxBorderBox {
+		return math32.Vector2{}
+	}
+	return s.Padding.Dots().Size().Add(s.Border.Width.Dots().Size())
 }
 
 // updateParentRelSizes updates any parent-relative Min, Max size values
@@ -664,28 +734,29 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 	effmin := sz.Min
 	s := &wb.Styles
 	psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
+	bs := wb.boxSizingSpace()
 	got := false
 	for d := math32.X; d <= math32.Y; d++ {
 		if s.Min.Dim(d).Unit == units.UnitPw {
 			got = true
-			effmin.SetDim(d, psz.X*0.01*s.Min.Dim(d).Value)
+			effmin.SetDim(d, max(psz.X*0.01*s.Min.Dim(d).Value-bs.Dim(d), 0))
 		}
 		if s.Min.Dim(d).Unit == units.UnitPh {
 			got = true
-			effmin.SetDim(d, psz.Y*0.01*s.Min.Dim(d).Value)
+			effmin.SetDim(d, max(psz.Y*0.01*s.Min.Dim(d).Value-bs.Dim(d), 0))
 		}
 		if s.Max.Dim(d).Unit == units.UnitPw {
 			got = true
-			sz.Max.SetDim(d, psz.X*0.01*s.Max.Dim(d).Value)
+			sz.Max.SetDim(d, max(psz.X*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
 		}
 		if s.Max.Dim(d).Unit == units.UnitPh {
 			got = true
-			sz.Max.SetDim(d, psz.Y*0.01*s.Max.Dim(d).Value)
+			sz.Max.SetDim(d, max(psz.Y*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
 		}
 	}
 	if got {
-		sz.FitSizeMax(&sz.Actual.Total, effmin)
-		sz.FitSizeMax(&sz.Alloc.Total, effmin)
+		sz.fitTotalMax(&sz.Actual.Total, effmin)
+		sz.fitTotalMax(&sz.Alloc.Total, effmin)
 		sz.SetContentFromTotal(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc)
 	}
@@ -783,7 +854,7 @@ func (fr *Frame) setInitCellsFlex() {
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
 	idx := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		math32.SetPointDim(&cwb.Geom.Cell, li.MainAxis, idx)
 		math32.SetPointDim(&cwb.Geom.Cell, ca, 0)
 		idx++
@@ -802,7 +873,7 @@ func (fr *Frame) setInitCellsWrap() {
 	li := &fr.layout
 	li.MainAxis = math32.Dims(fr.Styles.Direction)
 	ni := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ni++
 		return tree.Continue
 	})
@@ -814,6 +885,12 @@ func (fr *Frame) setInitCellsWrap() {
 		if DebugSettings.LayoutTrace {
 			fmt.Println(fr, "no items:", ni)
 		}
+		return
+	}
+	if fr.Styles.Shrink.X > 0 && li.MainAxis == math32.X {
+		// all on one line, its widest, which wraps in its allocation
+		li.Wraps = []int{ni}
+		fr.setWrapIndexes()
 		return
 	}
 	nm := max(int(math32.Sqrt(float32(ni))), 1)
@@ -836,7 +913,7 @@ func (fr *Frame) setWrapIndexes() {
 	li := &fr.layout
 	idx := 0
 	var maxc image.Point
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ic := li.wrapIndexToCoord(idx)
 		cwb.Geom.Cell = ic
 		if ic.X > maxc.X {
@@ -874,29 +951,97 @@ func (fr *Frame) setInitCellsGrid() {
 	if cols == 0 {
 		cols = int(math32.Sqrt(float32(n)))
 	}
-	rows := n / cols
-	for rows*cols < n {
-		rows++
+	if cols == 0 {
+		fmt.Println(fr, "no cols:", cols)
 	}
-	if rows == 0 || cols == 0 {
-		fmt.Println(fr, "no rows or cols:", rows, cols)
-	}
-	fr.layout.Shape = image.Point{max(cols, 1), max(rows, 1)}
+	cols = max(cols, 1)
 	ci := 0
 	ri := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		cwb.Geom.Cell = image.Point{ci, ri}
-		ci++
-		cs := cwb.Styles.ColSpan
-		if cs > 1 {
-			ci += cs - 1
+	fr.layout.spans = false
+	fr.layout.rowSpans = false
+	// occupied has the cells occupied by cells that span rows from above,
+	// which the cells after them are placed after.
+	occupied := map[image.Point]bool{}
+	free := func(c, r, cs int) bool {
+		for x := c; x < c+cs; x++ {
+			if occupied[image.Point{x, r}] {
+				return false
+			}
 		}
+		return true
+	}
+	rows := 0
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		cs := min(max(cwb.Styles.ColSpan, 1), cols)
+		rs := max(cwb.Styles.RowSpan, 1)
+		if cs > 1 {
+			fr.layout.spans = true
+		}
+		if rs > 1 {
+			fr.layout.rowSpans = true
+		}
+		for {
+			if ci > 0 && ci+cs > cols { // a spanning cell that does not fit starts a new row
+				ci = 0
+				ri++
+			}
+			if free(ci, ri, cs) {
+				break
+			}
+			ci++
+		}
+		cwb.Geom.Cell = image.Point{ci, ri}
+		for r := ri + 1; r < ri+rs; r++ {
+			for x := ci; x < ci+cs; x++ {
+				occupied[image.Point{x, r}] = true
+			}
+		}
+		rows = max(rows, ri+rs)
+		ci += cs
 		if ci >= cols {
 			ci = 0
 			ri++
 		}
 		return tree.Continue
 	})
+	fr.layout.Shape = image.Point{cols, max(rows, 1)}
+}
+
+// colSpan returns the number of grid columns that the widget spans.
+func (fr *Frame) colSpan(cwb *WidgetBase) int {
+	if fr.Styles.Display != styles.Grid {
+		return 1
+	}
+	return min(max(cwb.Styles.ColSpan, 1), fr.layout.Shape.X-cwb.Geom.Cell.X)
+}
+
+// rowSpan returns the number of grid rows that the widget spans.
+func (fr *Frame) rowSpan(cwb *WidgetBase) int {
+	if fr.Styles.Display != styles.Grid {
+		return 1
+	}
+	return min(max(cwb.Styles.RowSpan, 1), fr.layout.Shape.Y-cwb.Geom.Cell.Y)
+}
+
+// rowSpanAlloc returns the allocated height of a grid cell at the given
+// cell that spans the given number of rows: the total of the heights of
+// the rows and the gaps between them, with the given extra height that
+// the rows grow into, in proportion to their grow factors.
+func (fr *Frame) rowSpanAlloc(cidx image.Point, span int, extra float32) float32 {
+	li := &fr.layout
+	gsum := float32(0)
+	for r := range li.Shape.Y {
+		gsum += li.cell(math32.Y, r, cidx.X).Grow.Y
+	}
+	sum := li.Gap.Y * float32(span-1)
+	for r := range span {
+		cd := li.cell(math32.Y, cidx.Y+r, cidx.X)
+		sum += cd.Size.Y
+		if gsum > 0 && extra > 0 {
+			sum += math32.Round(extra * cd.Grow.Y / gsum)
+		}
+	}
+	return sum
 }
 
 // sizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
@@ -934,10 +1079,18 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	//   +--+--+
 	li := &fr.layout
 	li.initCells()
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	type spanning struct {
+		cell  image.Point
+		span  int
+		width float32
+	}
+	var spans, rowSpans []spanning
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		sz := cwb.Geom.Size.Actual.Total
 		grw := cwb.Styles.Grow
+		span := fr.colSpan(cwb)
+		rspan := fr.rowSpan(cwb)
 		if pass == SizeFinalPass {
 			if grw.X == 0 && !cwb.Styles.GrowWrap {
 				sz.X = cwb.Geom.Size.Alloc.Total.X
@@ -964,7 +1117,13 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			}
 			msz := sz.Dim(ma) // main axis size dim: X, Y
 			mx := md.Size.Dim(ma)
-			mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
+			if ma == math32.X && span > 1 { // sized below, over its columns
+				spans = append(spans, spanning{cidx, span, msz})
+			} else if ma == math32.Y && rspan > 1 { // sized below, over its rows
+				rowSpans = append(rowSpans, spanning{cidx, rspan, msz})
+			} else {
+				mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
+			}
 			md.Size.SetDim(ma, mx)
 			sm := cd.Size.Dim(ma)
 			sm += msz
@@ -979,11 +1138,40 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		}
 		return tree.Continue
 	})
+	// The columns that a cell spans are widened evenly to fit it.
+	for _, sp := range spans {
+		sum := li.Gap.X * float32(sp.span-1)
+		for c := range sp.span {
+			sum += li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Size.X
+		}
+		if extra := sp.width - sum; extra > 0 {
+			for c := range sp.span {
+				cd := li.cell(math32.X, sp.cell.X+c, sp.cell.Y)
+				cd.Size.X += extra / float32(sp.span)
+			}
+		}
+	}
+	// The rows that a cell spans are heightened evenly to fit it.
+	for _, sp := range rowSpans {
+		sum := li.Gap.Y * float32(sp.span-1)
+		for r := range sp.span {
+			sum += li.cell(math32.Y, sp.cell.Y+r, sp.cell.X).Size.Y
+		}
+		if extra := sp.width - sum; extra > 0 {
+			for r := range sp.span {
+				cd := li.cell(math32.Y, sp.cell.Y+r, sp.cell.X)
+				cd.Size.Y += extra / float32(sp.span)
+			}
+		}
+	}
 	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(fr, "SizeFromChildren")
 		fmt.Println(li.String())
 	}
 	ksz := li.cellsSize()
+	if fl := li.floats; fl != nil { // the column is as tall as its floats
+		ksz.Y = max(ksz.Y, fl.size.Y-li.GapSize.Y)
+	}
 	return ksz
 }
 
@@ -1030,7 +1218,7 @@ func (wb *WidgetBase) sizeDownParts(iter int) bool {
 	}
 	sz := &wb.Geom.Size
 	psz := &wb.Parts.Geom.Size
-	pgrow, _ := wb.growToAllocSize(sz.Actual.Content, sz.Alloc.Content)
+	pgrow, _ := wb.growToAllocSize(sz.Actual.Content, sz.Alloc.Content, sz.Max)
 	psz.Alloc.Total = pgrow // parts = content
 	psz.SetContentFromTotal(&psz.Alloc)
 	redo := wb.Parts.SizeDown(iter)
@@ -1081,7 +1269,9 @@ func (fr *Frame) sizeDownChildren(iter int) bool {
 // If Grow is < 1, then the size is increased in proportion, but
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change.
-func (wb *WidgetBase) growToAllocSize(act, alloc math32.Vector2) (math32.Vector2, bool) {
+// The given max is the Max size for the given sizes, which are both either
+// Content or Total sizes, with 0 for no Max.
+func (wb *WidgetBase) growToAllocSize(act, alloc, mx math32.Vector2) (math32.Vector2, bool) {
 	change := false
 	for d := math32.X; d <= math32.Y; d++ {
 		grw := wb.Styles.Grow.Dim(d)
@@ -1090,7 +1280,7 @@ func (wb *WidgetBase) growToAllocSize(act, alloc math32.Vector2) (math32.Vector2
 		if grw > 0 && allocd > actd {
 			grw := min(1, grw)
 			nsz := math32.Ceil(actd + grw*(allocd-actd))
-			styles.SetClampMax(&nsz, wb.Geom.Size.Max.Dim(d))
+			styles.SetClampMax(&nsz, mx.Dim(d))
 			if nsz != actd {
 				change = true
 			}
@@ -1119,6 +1309,12 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		return fr.WidgetBase.SizeDown(iter) // behave like a widget
 	}
 	fr.updateParentRelSizes()
+	if iter == 0 { // the sizes of the children from SizeUp
+		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			cwb.Geom.Size.preferred = cwb.Geom.Size.Actual.Total
+			return tree.Continue
+		})
+	}
 	sz := &fr.Geom.Size
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
@@ -1134,7 +1330,9 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		}
 	}
 	fr.This.(Layouter).SizeDownSetAllocs(iter)
-	redo := fr.sizeDownChildren(iter)
+	fr.sizeDownOutOfFlow()
+	floatsChanged := fr.layoutFloats()
+	redo := fr.sizeDownChildren(iter) || floatsChanged
 	if redo || wrapped {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
 	}
@@ -1149,6 +1347,8 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 func (fr *Frame) SizeDownSetAllocs(iter int) {
 	sz := &fr.Geom.Size
 	extra := sz.Alloc.Content.Sub(sz.Internal) // note: critical to use internal to be accurate
+	// Children that grow only grow within the space of the frame.
+	fr.layout.growExtra = fr.childSpace().Sub(sz.Internal)
 	if extra.X > 0 || extra.Y > 0 {
 		if DebugSettings.LayoutTrace {
 			fmt.Println(fr, "SizeDown extra:", extra, "Internal:", sz.Internal, "Alloc:", sz.Alloc.Content)
@@ -1157,6 +1357,26 @@ func (fr *Frame) SizeDownSetAllocs(iter int) {
 	} else {
 		fr.sizeDownAllocActual(iter) // set allocations as is
 	}
+}
+
+// childSpace returns the content size that the frame allocates to its
+// children: its allocation in the dimensions in which it grows, and
+// otherwise its actual size, which is all that it takes up even when it
+// is allocated more (for example, as the width of the column that it is
+// in), so that its children only grow within it.
+func (fr *Frame) childSpace() math32.Vector2 {
+	sz := &fr.Geom.Size
+	csz := sz.Alloc.Content
+	if fr.Parent == nil || (fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) {
+		return csz
+	}
+	for d := math32.X; d <= math32.Y; d++ {
+		grows := fr.Styles.Grow.Dim(d) > 0 || (d == math32.X && fr.Styles.GrowWrap)
+		if !grows && fr.Styles.Overflow.Dim(d) < styles.OverflowAuto {
+			csz.SetDim(d, min(csz.Dim(d), sz.Actual.Content.Dim(d)))
+		}
+	}
+	return csz
 }
 
 // ManageOverflow uses overflow settings to determine if scrollbars
@@ -1168,6 +1388,9 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	sz := &fr.Geom.Size
 	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
 	change := false
+	// The scene is being sized to fit its content, from no size,
+	// so it does not overflow: scrollbars would only make it bigger.
+	sizing := fr.Parent == nil && fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)
 	if iter == 0 {
 		fr.layout.ScrollSize.SetZero()
 		fr.setScrollsOff()
@@ -1189,7 +1412,7 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 		// note: this shouldn't happen -- just have this in here for monitoring
 		// fmt.Println(ly, "OverflowVisible ERROR -- shouldn't have overflow:", d, ofd)
 		case styles.OverflowAuto:
-			if ofd < 0.5 {
+			if ofd < 0.5 || sizing {
 				if fr.HasScroll[d] {
 					if DebugSettings.LayoutTrace {
 						fmt.Println(fr, "turned off scroll", d)
@@ -1243,8 +1466,13 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 		return false
 	}
 	var maxExtra, exn math32.Vector2
+	var widths []float32
+	colWidth, colScrolls := fr.columnWidth()
+	// columns that shrink are narrowed to fit, or widened back to their
+	// widths from SizeUp after they were narrower
+	widths = fr.shrinkWidths()
 	for exitr := range 2 {
-		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
 			ksz := &cwb.Geom.Size
 			grw := cwb.Styles.Grow
@@ -1258,6 +1486,9 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				gr := grw.Dim(ma)
 				ca := ma.Other()     // cross axis = Y then X
 				exd := extra.Dim(ma) // row.X = extra width for cols; col.Y = extra height for rows in this col
+				if cwb.Styles.Grow.Dim(ma) > 0 {
+					exd = min(exd, li.growExtra.Dim(ma))
+				}
 				if exd < 0 {
 					exd = 0
 				}
@@ -1271,6 +1502,16 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				mx := md.Size.Dim(ma)
 				asz := mx
 				gsum := cd.Grow.Dim(ma)
+				if li.spans && ma == math32.X {
+					// the columns of a grid grow consistently in every row,
+					// by the grow of the column, also with spanning cells
+					gr = md.Grow.X
+					gsum = 0
+					for c := range li.Shape.X {
+						gsum += li.cell(math32.X, c, ci).Grow.X
+					}
+				}
+				ksz.slot.SetDim(ma, 0)
 				if gsum > 0 && exd > 0 {
 					if gr > gsum {
 						fmt.Println(fr, "SizeDownGrowCells error: grow > grow sum:", gr, gsum)
@@ -1279,8 +1520,9 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 					redo = true
 					asz = math32.Round(mx + exd*(gr/gsum))
 					oasz := asz
-					styles.SetClampMax(&asz, ksz.Max.Dim(ma))
+					styles.SetClampMax(&asz, ksz.maxTotal().Dim(ma))
 					if asz < oasz { // didn't consume its full amount
+						ksz.slot.SetDim(ma, oasz)
 						if exitr == 0 {
 							maxExtra.SetDim(ma, maxExtra.Dim(ma)+(oasz-asz))
 							exn.SetDim(ma, exn.Dim(ma)+gr)
@@ -1302,6 +1544,18 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 						}
 					}
 				}
+				if span := fr.colSpan(cwb); ma == math32.X && span > 1 {
+					asz = fr.spanAlloc(cidx, span, exd)
+				}
+				if span := fr.rowSpan(cwb); ma == math32.Y && span > 1 {
+					asz = fr.rowSpanAlloc(cidx, span, exd)
+				}
+				if ma == math32.X && widths != nil {
+					asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
+				}
+				if ma == math32.X && extra.X < 0 && colWidth > 0 && asz > colWidth && limitsWidth(cwb, colScrolls) {
+					asz = colWidth
+				}
 				if DebugSettings.LayoutTraceDetail {
 					fmt.Println(cwb, ma, "alloc:", asz, "was act:", sz.Actual.Total.Dim(ma), "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd)
 				}
@@ -1315,6 +1569,216 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 		}
 	}
 	return redo
+}
+
+// spanAlloc returns the allocated width of a grid cell at the given cell
+// that spans the given number of columns, given the extra width that the
+// columns grow into: the total of the widths of the columns and the gaps
+// between them.
+func (fr *Frame) spanAlloc(cidx image.Point, span int, extra float32) float32 {
+	li := &fr.layout
+	gsum := float32(0)
+	for c := range li.Shape.X {
+		gsum += li.cell(math32.X, c, cidx.Y).Grow.X
+	}
+	sum := li.Gap.X * float32(span-1)
+	for c := range span {
+		cd := li.cell(math32.X, cidx.X+c, cidx.Y)
+		sum += cd.Size.X
+		if gsum > 0 && extra > 0 {
+			sum += math32.Round(extra * cd.Grow.X / gsum)
+		}
+	}
+	return sum
+}
+
+// shrinkWidths returns the widths of the columns of the frame (its children
+// in a row, or the columns of a grid), narrowed to fit within its allocated
+// width, in proportion to their width and the [styles.Style.Shrink] of the
+// children in them, or nil if it fits or none shrink. It is not for wrapped
+// layouts.
+func (fr *Frame) shrinkWidths() []float32 {
+	li := &fr.layout
+	sz := &fr.Geom.Size
+	rowOrGrid := fr.Styles.Display == styles.Grid || (fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Row)
+	if li.Wraps != nil || len(li.Cells) == 0 || !rowOrGrid {
+		return nil
+	}
+	n := li.Shape.X
+	shrink := make([]float32, n)
+	minw := make([]float32, n)
+	pref := make([]float32, n) // the widths of the columns from SizeUp
+	any := false
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		c := cwb.Geom.Cell.X
+		if c >= n || fr.colSpan(cwb) > 1 {
+			return tree.Continue
+		}
+		if sh := cwb.Styles.Shrink.X; sh > shrink[c] {
+			shrink[c] = sh
+			any = true
+		}
+		pref[c] = max(pref[c], cwb.Geom.Size.preferred.X)
+		return tree.Continue
+	})
+	if !any {
+		return nil
+	}
+	// The columns that shrink start from their widths from SizeUp, so
+	// that they are as wide as they can be when they were narrower before.
+	widths := make([]float32, n)
+	cur := float32(0)
+	for c := range n {
+		widths[c] = li.cell(math32.X, c, 0).Size.X
+		cur += widths[c]
+		if shrink[c] > 0 {
+			widths[c] = max(widths[c], pref[c])
+		}
+	}
+	total := float32(0)
+	for c := range n {
+		total += widths[c]
+	}
+	deficit := sz.Internal.X - cur + total - sz.Alloc.Content.X
+	if deficit <= 0.5 {
+		if total > cur+0.5 {
+			return widths
+		}
+		return nil
+	}
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if c := cwb.Geom.Cell.X; c < n && fr.colSpan(cwb) == 1 && shrink[c] > 0 {
+			minw[c] = max(minw[c], minContentWidth(cw))
+		}
+		return tree.Continue
+	})
+	for range 2 { // again for those that are not at their minimum
+		sum := float32(0)
+		for c := range n {
+			if shrink[c] > 0 {
+				sum += shrink[c] * widths[c]
+			}
+		}
+		if sum <= 0 {
+			return nil
+		}
+		left := deficit
+		for c := range n {
+			if shrink[c] == 0 {
+				continue
+			}
+			w := widths[c]
+			nw := max(math32.Round(w-deficit*shrink[c]*w/sum), minw[c])
+			left -= w - nw
+			widths[c] = nw
+			if nw == minw[c] {
+				shrink[c] = 0 // cannot shrink any more
+			}
+		}
+		if left <= 0.5 {
+			break
+		}
+		deficit = left // those that can shrink more do
+	}
+	return widths
+}
+
+// minContentWidth returns the min-content width of the given widget, as in
+// CSS: the total width (with its margins, borders, and padding) below which
+// its content overflows, which columns do not shrink below. It is that of
+// the longest word of text, and that of the children of frames for their
+// layout (the sum for rows that do not wrap, and otherwise the largest).
+func minContentWidth(w Widget) float32 {
+	wb := w.AsWidget()
+	s := &wb.Styles
+	sz := &wb.Geom.Size
+	v := float32(0)
+	switch {
+	case s.Overflow.X >= styles.OverflowAuto: // it scrolls
+	case s.Display == styles.DisplayNone:
+		return 0
+	default:
+		if tx, ok := w.(*Text); ok {
+			v = tx.minContentWidth()
+			break
+		}
+		fr, ok := w.(*Frame)
+		if !ok || !fr.HasChildren() {
+			v = sz.Actual.Content.X // its natural size
+			break
+		}
+		row := s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap
+		cols := map[int]float32{} // of a grid, by column
+		n := 0
+		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			m := minContentWidth(cw)
+			switch {
+			case row:
+				v += m
+				n++
+			case s.Display == styles.Grid && fr.colSpan(cwb) == 1:
+				cols[cwb.Geom.Cell.X] = max(cols[cwb.Geom.Cell.X], m)
+			default:
+				v = max(v, m)
+			}
+			return tree.Continue
+		})
+		if row && n > 1 {
+			v += float32(n-1) * fr.layout.Gap.X
+		}
+		if len(cols) > 0 {
+			sum := float32(len(cols)-1) * fr.layout.Gap.X
+			for _, m := range cols {
+				sum += m
+			}
+			v = max(v, sum)
+		}
+	}
+	v = max(v, sz.Min.X)
+	return v + s.BoxSpace().Size().X
+}
+
+// shrinkAlloc returns the allocated width of the given child in the column
+// at the given index, from the given shrunk column widths.
+func (fr *Frame) shrinkAlloc(widths []float32, cidx image.Point, span int) float32 {
+	if span <= 1 {
+		return widths[cidx.X]
+	}
+	w := float32(0)
+	for c := cidx.X; c < min(cidx.X+span, len(widths)); c++ {
+		w += widths[c]
+	}
+	return w + float32(span-1)*fr.layout.Gap.X
+}
+
+// columnWidth returns the width of the content of the frame if it is a
+// column (or a wrapped row), within which its children that grow or shrink
+// in width are allocated at most that width so that their content (such
+// as text) can wrap in it, or -1 otherwise, and whether the frame scrolls
+// in width, in which case only the children that shrink are limited.
+func (fr *Frame) columnWidth() (width float32, scrolls bool) {
+	s := &fr.Styles
+	if s.Display != styles.Flex {
+		return -1, false
+	}
+	// content that scrolls can be wider, except for children that shrink
+	scrolls = s.Overflow.X >= styles.OverflowAuto
+	if s.Direction == styles.Column && !s.Wrap {
+		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, scrolls
+	}
+	if s.Direction == styles.Row && s.Wrap && s.Shrink.X > 0 {
+		return fr.Geom.Size.Alloc.Content.X - fr.Geom.Size.InnerSpace.X, scrolls
+	}
+	return -1, false
+}
+
+// limitsWidth returns whether a child that is allocated more than
+// the [Frame.columnWidth] is limited to it, given whether the frame scrolls.
+func limitsWidth(cwb *WidgetBase, scrolls bool) bool {
+	if scrolls { // in a frame that scrolls, only those that shrink
+		return cwb.Styles.Shrink.X > 0
+	}
+	return cwb.Styles.Grow.X > 0 || cwb.Styles.GrowWrap || cwb.Styles.Shrink.X > 0
 }
 
 func (fr *Frame) sizeDownWrap(iter int) bool {
@@ -1332,7 +1796,7 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 	var sum float32
 	var n int
 	var wraps []int
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := cwb.Geom.Size.Actual.Total
 		if first {
 			n = 1
@@ -1340,12 +1804,12 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			first = false
 			return tree.Continue
 		}
-		if sum+ksz.Dim(d)+gap >= fit {
+		if sum+ksz.Dim(d) > fit+0.5 { // sum has the gap before it
 			if DebugSettings.LayoutTraceDetail {
 				fmt.Println(fr, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}
 			wraps = append(wraps, n)
-			sum = ksz.Dim(d)
+			sum = ksz.Dim(d) + gap
 			n = 1 // this guy is on next line
 		} else {
 			sum += ksz.Dim(d) + gap
@@ -1426,7 +1890,12 @@ func (fr *Frame) sizeDownAllocActual(iter int) {
 // Note however that due to max sizing for row / column,
 // this size can actually be different than original actual.
 func (fr *Frame) sizeDownAllocActualCells(iter int) {
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	// In a column that is narrower than its content (and does not scroll in
+	// width), the children that grow (or wrap) in width get at most its width,
+	// so that text can wrap in it.
+	colWidth, colScrolls := fr.columnWidth()
+	widths := fr.shrinkWidths()
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
 		cidx := cwb.Geom.Cell
 		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
@@ -1438,6 +1907,21 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 				continue
 			}
 			asz := md.Size.Dim(ma)
+			if span := fr.colSpan(cwb); ma == math32.X && span > 1 {
+				asz = fr.spanAlloc(cidx, span, 0)
+			}
+			if span := fr.rowSpan(cwb); ma == math32.Y && span > 1 {
+				asz = fr.rowSpanAlloc(cidx, span, 0)
+			}
+			if ma == math32.X && widths != nil {
+				asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
+			}
+			if ma == math32.X && colWidth > 0 && cwb.Styles.Shrink.X > 0 && widths == nil {
+				asz = max(asz, cwb.Geom.Size.preferred.X) // as wide as it can be
+			}
+			if ma == math32.X && colWidth > 0 && asz > colWidth && limitsWidth(cwb, colScrolls) {
+				asz = colWidth
+			}
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
 		ksz.SetContentFromTotal(&ksz.Alloc)
@@ -1526,7 +2010,7 @@ func (wb *WidgetBase) growToAlloc() bool {
 		return false
 	}
 	sz := &wb.Geom.Size
-	act, change := wb.growToAllocSize(sz.Actual.Total, sz.Alloc.Total)
+	act, change := wb.growToAllocSize(sz.Actual.Total, sz.Alloc.Total, sz.maxTotal())
 	if change {
 		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "GrowToAlloc:", sz.Alloc.Total, "from actual:", sz.Actual.Total)
@@ -1559,6 +2043,8 @@ func (fr *Frame) SizeFinal() {
 	}
 	fr.Geom.RelPos.SetZero()
 	fr.sizeFinalChildren() // kids do their own thing
+	fr.sizeDownOutOfFlow() // their final size is still that of their inset
+	fr.layoutFloats()      // with the final sizes
 	fr.sizeFromChildrenFit(0, SizeFinalPass)
 	fr.growToAlloc()
 	fr.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
@@ -1609,10 +2095,18 @@ func (wb *WidgetBase) Position() {
 	wb.positionParts()
 }
 
+// alignSize returns the size that the widget is aligned within:
+// its allocation, or the slot that its Max size limited it within.
+func (wb *WidgetBase) alignSize() math32.Vector2 {
+	sz := &wb.Geom.Size
+	return sz.Alloc.Total.Max(sz.slot)
+}
+
 func (wb *WidgetBase) positionWithinAllocMainX(pos math32.Vector2, parJustify, parAlign styles.Aligns) {
 	sz := &wb.Geom.Size
-	pos.X += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
-	pos.Y += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
+	asz := wb.alignSize()
+	pos.X += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.X, asz.X)
+	pos.Y += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.Y, asz.Y)
 	wb.Geom.RelPos = pos
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "Position within Main=X:", pos)
@@ -1621,8 +2115,9 @@ func (wb *WidgetBase) positionWithinAllocMainX(pos math32.Vector2, parJustify, p
 
 func (wb *WidgetBase) positionWithinAllocMainY(pos math32.Vector2, parJustify, parAlign styles.Aligns) {
 	sz := &wb.Geom.Size
-	pos.Y += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.Y, sz.Alloc.Total.Y)
-	pos.X += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.X, sz.Alloc.Total.X)
+	asz := wb.alignSize()
+	pos.Y += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.Y, asz.Y)
+	pos.X += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.X, asz.X)
 	wb.Geom.RelPos = pos
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "Position within Main=Y:", pos)
@@ -1677,6 +2172,10 @@ func (fr *Frame) Position() {
 }
 
 func (fr *Frame) positionCells() {
+	if fr.Styles.Display == styles.Grid && fr.layout.rowSpans {
+		fr.positionCellsGrid()
+		return
+	}
 	if fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Column {
 		fr.positionCellsMainY()
 		return
@@ -1685,6 +2184,49 @@ func (fr *Frame) positionCells() {
 }
 
 // Main axis = X
+// positionCellsGrid positions the cells of a grid that has cells that
+// span rows, at the positions of their columns and rows, which are as wide
+// and high as the widest and highest of their cells that do not span.
+func (fr *Frame) positionCellsGrid() {
+	li := &fr.layout
+	gap := li.Gap
+	sz := &fr.Geom.Size
+	colW := make([]float32, li.Shape.X)
+	rowH := make([]float32, li.Shape.Y)
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		c := cwb.Geom.Cell
+		alloc := cwb.Geom.Size.Alloc.Total
+		if fr.colSpan(cwb) == 1 && c.X < len(colW) {
+			colW[c.X] = max(colW[c.X], alloc.X)
+		}
+		if fr.rowSpan(cwb) == 1 && c.Y < len(rowH) {
+			rowH[c.Y] = max(rowH[c.Y], alloc.Y)
+		}
+		return tree.Continue
+	})
+	var stPos math32.Vector2
+	stPos.X = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
+	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
+	colX := make([]float32, li.Shape.X)
+	rowY := make([]float32, li.Shape.Y)
+	for c := range colX {
+		if c > 0 {
+			colX[c] = colX[c-1] + colW[c-1] + gap.X
+		}
+	}
+	for r := range rowY {
+		if r > 0 {
+			rowY[r] = rowY[r-1] + rowH[r-1] + gap.Y
+		}
+	}
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		c := cwb.Geom.Cell
+		pos := stPos.Add(math32.Vec2(colX[min(c.X, len(colX)-1)], rowY[min(c.Y, len(rowY)-1)]))
+		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
+		return tree.Continue
+	})
+}
+
 func (fr *Frame) positionCellsMainX() {
 	// todo: can break apart further into Flex rows
 	gap := fr.layout.Gap
@@ -1695,14 +2237,24 @@ func (fr *Frame) positionCellsMainX() {
 	var stPos math32.Vector2
 	stPos.X = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
 	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
+	spaces := fr.lineSpaces(math32.X, sz.Actual.Content.X)
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	line := 0
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
 			pos.X = stPos.X
 			pos.Y += lastSz.Y + gap.Y
+			line++
+		}
+		if spaces != nil && line < len(spaces) {
+			if cidx.X == 0 {
+				pos.X += spaces[line].X
+			} else {
+				pos.X += spaces[line].Y
+			}
 		}
 		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
 		alloc := cwb.Geom.Size.Alloc.Total
@@ -1713,8 +2265,61 @@ func (fr *Frame) positionCellsMainX() {
 	})
 }
 
+// lineSpaces returns, for each line of the children along the given main
+// axis, the space before the first child (X) and between the children (Y)
+// for the distributed [styles.Style.Justify] Content values (SpaceBetween,
+// SpaceAround, SpaceEvenly) of the frame, given its content size along
+// the axis. It returns nil for the other values, which position all of
+// the children as a block.
+func (fr *Frame) lineSpaces(ma math32.Dims, size float32) []math32.Vector2 {
+	jc := fr.Styles.Justify.Content
+	if jc != styles.SpaceBetween && jc != styles.SpaceAround && jc != styles.SpaceEvenly {
+		return nil
+	}
+	gap := fr.layout.Gap.Dim(ma)
+	var widths []float32
+	var counts []int
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if math32.PointDim(cwb.Geom.Cell, ma) == 0 || len(widths) == 0 {
+			widths = append(widths, 0)
+			counts = append(counts, 0)
+		}
+		ln := len(widths) - 1
+		if counts[ln] > 0 {
+			widths[ln] += gap
+		}
+		widths[ln] += cwb.Geom.Size.Alloc.Total.Dim(ma)
+		counts[ln]++
+		return tree.Continue
+	})
+	spaces := make([]math32.Vector2, len(widths))
+	for ln, w := range widths {
+		extra := size - w
+		n := float32(counts[ln])
+		if extra <= 0 || n == 0 {
+			continue
+		}
+		switch jc {
+		case styles.SpaceBetween:
+			if n > 1 {
+				spaces[ln].Y = extra / (n - 1)
+			}
+		case styles.SpaceAround:
+			spaces[ln].Y = extra / n
+			spaces[ln].X = spaces[ln].Y / 2
+		case styles.SpaceEvenly:
+			spaces[ln].Y = extra / (n + 1)
+			spaces[ln].X = spaces[ln].Y
+		}
+	}
+	return spaces
+}
+
 // Main axis = Y
 func (fr *Frame) positionCellsMainY() {
+	if fr.positionFloats() {
+		return
+	}
 	gap := fr.layout.Gap
 	sz := &fr.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
@@ -1724,13 +2329,23 @@ func (fr *Frame) positionCellsMainY() {
 	var stPos math32.Vector2
 	stPos.Y = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	stPos.X = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
+	spaces := fr.lineSpaces(math32.Y, sz.Actual.Content.Y)
 	pos := stPos
 	idx := 0
-	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+	line := 0
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.Y == 0 && idx > 0 {
 			pos.Y = stPos.Y
 			pos.X += lastSz.X + gap.X
+			line++
+		}
+		if spaces != nil && line < len(spaces) {
+			if cidx.Y == 0 {
+				pos.Y += spaces[line].X
+			} else {
+				pos.Y += spaces[line].Y
+			}
 		}
 		cwb.positionWithinAllocMainY(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
 		alloc := cwb.Geom.Size.Alloc.Total
@@ -1770,9 +2385,20 @@ func (wb *WidgetBase) setPosFromParent() {
 	pwb := wb.parentWidget()
 	var parPos math32.Vector2
 	if pwb != nil {
-		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll) // critical that parent adds here but not to self
+		// critical that parent adds here but not to self; the scroll
+		// offset is in whole dots, so that the content is always at the
+		// same position relative to the pixels (otherwise lines thinner
+		// than a pixel come and go while scrolling)
+		parPos = pwb.Geom.Pos.Content.Add(pwb.Geom.Scroll.Round())
 	}
-	wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
+	switch {
+	case pwb != nil && wb.outOfFlow():
+		wb.setPosOutOfFlow(parPos)
+	case wb.Styles.Position == styles.PositionRelative:
+		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos).Add(wb.relativeOffset())
+	default:
+		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
+	}
 	wb.setContentPosFromPos()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Geom.Pos.Total, "parPos:", parPos)
@@ -1787,6 +2413,28 @@ func (wb *WidgetBase) setBBoxesFromAllocs() {
 	wb.Geom.ContentBBox = wb.Geom.contentRect()
 }
 
+// childClipBBox returns the bounding box that the children of the widget
+// are clipped to: its content box, or, if it does not clip its children
+// ([styles.Style.NoClip]), that of the nearest widget that it is in that does.
+func (wb *WidgetBase) childClipBBox() image.Rectangle {
+	clip := wb
+	for clip.noClip() {
+		p := clip.parentWidget()
+		if p == nil {
+			break
+		}
+		clip = p
+	}
+	return clip.Geom.ContentBBox
+}
+
+// noClip returns whether the widget does not clip its children
+// ([styles.Style.NoClip], with overflow that does not scroll).
+func (wb *WidgetBase) noClip() bool {
+	s := &wb.Styles
+	return s.NoClip && s.Overflow.X < styles.OverflowAuto && s.Overflow.Y < styles.OverflowAuto
+}
+
 func (wb *WidgetBase) setBBoxes() {
 	pwb := wb.parentWidget()
 	var parBB image.Rectangle
@@ -1799,7 +2447,13 @@ func (wb *WidgetBase) setBBoxes() {
 			fmt.Println(wb, "Content BBox:", wb.Geom.ContentBBox)
 		}
 	} else {
-		parBB = pwb.Geom.ContentBBox
+		clip := pwb
+		if wb.outOfFlow() { // not clipped by its parent (see [WidgetBase.RenderWidget])
+			if gp := pwb.parentWidget(); gp != nil {
+				clip = gp
+			}
+		}
+		parBB = clip.childClipBBox()
 		bb := wb.Geom.totalRect()
 		wb.Geom.TotalBBox = parBB.Intersect(bb)
 		if DebugSettings.LayoutTrace {

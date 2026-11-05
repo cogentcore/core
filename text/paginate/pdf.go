@@ -33,6 +33,21 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 	colors.SetScheme(false)
 	cset := pdf.UseStandardFonts()
 
+	// The inputs are sized for the pages by final stylers, which are
+	// removed afterward, so that they are as they were on the screen.
+	nfinal := make([]int, len(ins))
+	for i, in := range ins {
+		nfinal[i] = len(in.AsWidget().Stylers.Final)
+	}
+	defer func() {
+		for i, in := range ins {
+			iw := in.AsWidget()
+			iw.Stylers.Final = iw.Stylers.Final[:nfinal[i]]
+			iw.Style()
+			iw.NeedsLayout()
+		}
+	}()
+
 	p := pager{opts: &opts, ins: ins}
 	p.ctx = *units.NewContext() // generic, invariant of actual context
 	p.opts.ToDots(&p.ctx)

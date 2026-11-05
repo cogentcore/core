@@ -17,7 +17,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 
@@ -171,6 +170,9 @@ func (ct *Content) Init() {
 	ct.SetSplits(0.2, 0.8)
 
 	ct.Context = htmlcore.NewContext()
+	// in the page, which has its own padding, and not too wide to read
+	// (as on a wide screen), and big enough to not constrain PDF render
+	ct.Context.Style = "body { margin: 0; max-width: 9in; }"
 	ct.Context.DelayedImageLoad = false // not useful for content
 	// The source does not change until SetSource, which resets the cache.
 	ct.Context.ImageCache = htmlcore.NewImageCache(ImageCacheBytes)
@@ -256,6 +258,7 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(1, 1)
+			s.Shrink.X = 1 // as wide as the page panel, in which the text wraps
 			switch w.SizeClass() {
 			case core.SizeCompact, core.SizeMedium:
 				s.Padding.SetHorizontal(units.Em(0.5))
@@ -341,6 +344,7 @@ func (ct *Content) pageMaker(p *tree.Plan, tabIdx int) {
 				w.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
 					s.Grow.Set(1, 1)
+					s.Shrink.X = 1
 				})
 				w.Updater(func() {
 					errors.Log(ct.loadPage(w))
@@ -643,13 +647,8 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
 	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		tx, ok := cw.(*core.Text)
-		if !ok {
-			return tree.Continue
-		}
-		tag, ok := tx.Property("tag").(string)
-		if ok && len(tag) == 2 && tag[0] == 'h' {
-			num := errors.Log1(strconv.Atoi(tag[1:]))
+		num, text, ok := headingOf(cw)
+		if ok {
 			parent := contents
 			// Our parent is the last heading with a lower level (closer to h1).
 			for i := num - 1; i >= 1; i-- {
@@ -658,14 +657,14 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 					break
 				}
 			}
-			tr := core.NewTree(parent).SetText(tx.Text)
-			tr.SetProperty("page-text", tx)
+			tr := core.NewTree(parent).SetText(text)
+			tr.SetProperty("page-text", cw)
 			last[num] = tr
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
 				ct.saveUpdatedPos(ct.current, ct.current.Page, ct.current.Heading)
-				tx.ScrollThisToTop()
+				cwb.ScrollThisToTop()
 				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})
 		}
@@ -874,6 +873,10 @@ func (ct *Content) PagePDF(path string) error {
 		return err
 	}
 	opts := Settings.PageSettings(ct, ct.current.Page)
+	// the texts are laid out in the pages without the frames of their
+	// elements, so they need the tags (for the styles of headings)
+	// and ids (for links) of them
+	htmlcore.TagTexts(ct.pageFrame())
 	if refs != nil {
 		paginate.PDF(f, opts.PDF, ct.pageFrame(), refs)
 	} else {

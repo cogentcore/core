@@ -1,0 +1,18 @@
+<!doctype html>
+<html><head><title>Not yet supported</title>
+<style>
+.float { float: right; width: 120px; height: 60px; background-color: #cde; margin-left: 10px; }
+.rel { position: relative; top: 10px; left: 20px; background-color: #edc; }
+.abs-parent { position: relative; height: 60px; background-color: #eee; }
+.abs { position: absolute; right: 10px; bottom: 10px; background-color: #9bd; padding: 4px; }
+.va { vertical-align: middle; }
+.grid { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+.grid div { background-color: #dfd; padding: 4px; }
+</style></head>
+<body>
+<div class="float">float right</div>
+<p>Text that should wrap around a floated box on the right, which is a common way of placing images in articles, and is not yet supported.</p>
+<div class="rel">position relative</div>
+<div class="abs-parent"><div class="abs">absolute</div></div>
+<div class="grid"><div>1fr</div><div>2fr</div><div>three</div><div>four</div></div>
+</body></html>

@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
@@ -99,6 +100,27 @@ func (im *Image) SizeUp() {
 		sz.Actual.Content = osz
 		sz.SetTotalFromContent(&sz.Actual)
 	}
+}
+
+// SizeDown sets the height of an image whose width is relative
+// to its parent (and whose height is not set) from that width,
+// which is only known now, keeping the aspect ratio of the image.
+func (im *Image) SizeDown(iter int) bool {
+	redo := im.WidgetBase.SizeDown(iter)
+	minX, minY := im.Styles.Min.X, im.Styles.Min.Y
+	if im.Image == nil || minY.Value != 0 || (minX.Unit != units.UnitPw && minX.Unit != units.UnitPh) {
+		return redo
+	}
+	sz := &im.Geom.Size
+	obj := math32.FromPoint(im.Image.Bounds().Size())
+	w := sz.Actual.Content.X
+	h := math32.Floor((w / obj.X) * obj.Y)
+	if w <= 0 || sz.Actual.Content.Y == h {
+		return redo
+	}
+	sz.Actual.Content.Y = h
+	sz.SetTotalFromContent(&sz.Actual)
+	return true
 }
 
 func (im *Image) Render() {

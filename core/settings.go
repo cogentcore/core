@@ -259,7 +259,9 @@ type AppearanceSettingsData struct { //types:add
 
 	// the overall spacing factor as a percentage of the default amount of spacing
 	// (higher numbers lead to more space and lower numbers lead to higher density).
-	Spacing float32 `default:"100" min:"10" max:"500" step:"10" format:"%g%%"`
+	// Its default depends on the platform (see [DefaultSpacing]), so that
+	// it is always saved, as there is no fixed default value to compare with.
+	Spacing float32 `min:"10" max:"500" step:"10" format:"%g%%"`
 
 	// the overall font size factor applied to all text as a percentage
 	// of the default font size (higher numbers lead to larger text).
@@ -308,6 +310,22 @@ type AppearanceSettingsData struct { //types:add
 
 func (as *AppearanceSettingsData) Defaults() {
 	as.Text.Defaults()
+	as.Spacing = DefaultSpacing()
+}
+
+// DefaultSpacing returns the default [AppearanceSettingsData.Spacing] for
+// the current platform: 100% on mobile platforms, which follows the
+// touch-first sizes of Material Design 3, and 60% elsewhere, which is
+// closer to the denser spacing of desktop platforms. It is 100% on the
+// offscreen platform, so that the images of tests have the standard spacing.
+func DefaultSpacing() float32 {
+	if TheApp == nil {
+		return 100
+	}
+	if p := TheApp.SystemPlatform(); p.IsMobile() || p == system.Offscreen {
+		return 100
+	}
+	return 60
 }
 
 // InlineLengths has the length of inline elements to display for containers in Form widgets.

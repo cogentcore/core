@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		user
+	</title><g fill="#000"><path d="M12 11a6 6 0 0 1 6 6v2H2v-2a6 6 0 0 1 6-6z"/><circle cx="10" cy="5" r="4"/></g></svg>

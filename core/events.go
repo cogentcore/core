@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"image"
 	"image/color"
@@ -361,6 +362,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 
 	em.mouseInBBox = nil
 	em.getMouseInBBox(sc, pos)
+	sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
 	if n == 0 {
@@ -822,6 +824,75 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		}
 		return tree.Continue
 	})
+}
+
+// sortByRenderLayer sorts the given widgets under the mouse (in the order
+// of the tree, with those that are handled first last) by the order in
+// which they are rendered (see [WidgetBase.renderOrder]), so that a widget
+// that is rendered over another (as one with a position) gets the events.
+// Of two widgets, the one in the child of their nearest common ancestor
+// that is rendered later is later, as is a widget in another.
+func sortByRenderLayer(ws []Widget) {
+	layered := false
+	for _, w := range ws {
+		if renderLayer(w.AsWidget()) != 0 {
+			layered = true
+			break
+		}
+	}
+	if !layered {
+		return
+	}
+	// path returns the widgets from the root to the given one
+	path := func(w *WidgetBase) []*WidgetBase {
+		var p []*WidgetBase
+		for ; w != nil; w = w.parentWidget() {
+			p = append(p, w)
+		}
+		slices.Reverse(p)
+		return p
+	}
+	paths := make([][]*WidgetBase, len(ws))
+	for i, w := range ws {
+		paths[i] = path(w.AsWidget())
+	}
+	idx := make([]int, len(ws))
+	for i := range idx {
+		idx[i] = i
+	}
+	slices.SortStableFunc(idx, func(a, b int) int {
+		pa, pb := paths[a], paths[b]
+		for i := 0; i < len(pa) && i < len(pb); i++ {
+			if pa[i] != pb[i] { // the children of their common ancestor
+				if c := cmp.Compare(renderLayer(pa[i]), renderLayer(pb[i])); c != 0 {
+					return c
+				}
+				break
+			}
+		}
+		return cmp.Compare(a, b) // the order of the tree
+	})
+	sorted := make([]Widget, len(ws))
+	for i, j := range idx {
+		sorted[i] = ws[j]
+	}
+	copy(ws, sorted)
+}
+
+// renderLayer returns the layer in which the widget is rendered among its
+// siblings (see [WidgetBase.renderOrder]): 2 plus its z-index if it is
+// positioned (or -1 for a negative z-index), 1 if it floats, or else 0.
+func renderLayer(wb *WidgetBase) int {
+	switch {
+	case wb.Styles.Position != styles.PositionStatic:
+		if wb.Styles.ZIndex < 0 {
+			return -1
+		}
+		return 2 + wb.Styles.ZIndex
+	case wb.isFloat():
+		return 1
+	}
+	return 0
 }
 
 func (em *Events) cancelLongPress() {

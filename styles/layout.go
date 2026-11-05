@@ -42,6 +42,7 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Margin.ToDots(uc)
 	s.Gap.ToDots(uc)
 	s.ScrollbarWidth.ToDots(uc)
+	s.Inset.ToDots(uc)
 
 	// max must be at least as much as min
 	if s.Max.X.Dots > 0 {
@@ -209,4 +210,74 @@ const (
 	// and is otherwise identical to Auto.  However, only during Viewport PrefSize call,
 	// the actual content size is used -- otherwise it behaves just like Auto.
 	OverflowScroll
+)
+
+// Positions are the ways that widgets can be positioned, as with the
+// position property of CSS (see [Style.Position]).
+type Positions int32 //enums:enum -trim-prefix Position -transform kebab
+
+const (
+	// PositionStatic is the default: the widget is in the layout of its parent.
+	PositionStatic Positions = iota
+
+	// PositionRelative is in the layout of its parent, and then offset
+	// from its position in the layout by [Style.Inset], without changing
+	// the layout. It is also the containing block of the widgets in it
+	// that are [PositionAbsolute].
+	PositionRelative
+
+	// PositionAbsolute is not in the layout of its parent: it is positioned
+	// by [Style.Inset] relative to its containing block, which is the nearest
+	// widget that it is in that is not [PositionStatic], or the scene.
+	// Its size is that of its content, unless both of the opposite sides
+	// of an inset are set, in which case it fills the space between them.
+	PositionAbsolute
+
+	// PositionFixed is like [PositionAbsolute], but positioned relative
+	// to the scene, so that it does not scroll.
+	PositionFixed
+)
+
+// Floats are the ways that widgets can float (see [Style.Float]).
+type Floats int32 //enums:enum -trim-prefix Float -transform kebab
+
+const (
+	// FloatNone is the default: the widget does not float.
+	FloatNone Floats = iota
+
+	// FloatLeft floats the widget to the left of its parent.
+	FloatLeft
+
+	// FloatRight floats the widget to the right of its parent.
+	FloatRight
+)
+
+// Clears are the sides of the floats that a widget is below (see [Style.Clear]).
+type Clears int32 //enums:enum -trim-prefix Clear -transform kebab
+
+const (
+	// ClearNone is the default: the widget is not moved below floats.
+	ClearNone Clears = iota
+
+	// ClearLeft moves the widget below the floats on the left.
+	ClearLeft
+
+	// ClearRight moves the widget below the floats on the right.
+	ClearRight
+
+	// ClearBoth moves the widget below all of the floats.
+	ClearBoth
+)
+
+// BoxSizings are the boxes that the Min and Max sizes are of,
+// as the box-sizing property of CSS.
+type BoxSizings int32 //enums:enum -trim-prefix Box -transform kebab
+
+const (
+	// BoxContentBox is the default: the sizes are of the content,
+	// without the padding and border.
+	BoxContentBox BoxSizings = iota
+
+	// BoxBorderBox is for sizes that include the padding and border.
+	BoxBorderBox
 )

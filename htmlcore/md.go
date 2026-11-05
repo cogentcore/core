@@ -40,8 +40,16 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 	if bytes.Contains(htm, []byte("><div></p>")) {
 		htm = replaceDivs(htm)
 	}
+	if bytes.Contains(htm, []byte("><img ")) {
+		// The attributes of a paragraph that is just an image, as
+		// {id="figure_one" style="height:10em"} before it, are of the image.
+		htm = imageParagraph.ReplaceAll(htm, []byte("<p><img${1}${2}/></p>"))
+	}
 	return htm
 }
+
+// imageParagraph matches a paragraph with attributes that is just an image.
+var imageParagraph = regexp.MustCompile(`<p((?: [a-z-]+="[^"]*")+)><img((?: [a-z-]+="[^"]*")*) ?/?></p>`)
 
 // replaceDivs returns divRegex.ReplaceAll(htm, []byte("<div${1}>")): each
 // leftmost "<p" followed on its line by "><div></p>" up to the first one

@@ -1,0 +1,129 @@
+.skip {display: none}
+
+body {margin: 2em auto;
+  padding: 1em 3em;
+  width: 75%; max-width: 48em}
+body {border-radius: 2em}
+
+@media all and (max-width: 10em) {
+  body {margin: 0.5em; padding: 0; width: auto}
+}
+
+ul {padding-left: 1.5em}
+dd {margin-left: 1.5em}
+
+a.home {position: absolute; top: 1em; left: 1em}
+
+div.banner {text-align: center; width: 46%;
+  margin: 0 0 1.5em 0; padding: 0.5em;
+  height: 8.4em; overflow: auto;
+  border-radius: 1em}
+div.banner ul {margin: 0; padding: 0; list-style: none}
+div.banner {float: left; text-align: left}
+
+input[type=text], input:not([type]) {border: none;
+  background: none; border-bottom: thin dashed}
+input[type=submit], input[type=reset] {border: none; background: none}
+
+h2 {margin: 2.5em 0 0.6em 0}
+
+p {margin: 0}
+p + p {text-indent: 1.5em}
+p.feed + p { text-indent: 0}
+
+img {max-width: 100%}
+
+p.feed {float: right; width: 1.2em; margin: 0 -2.2em 0 0 }
+
+p.more {text-align: right; text-indent: 0}
+
+#digest ul {list-style-position: inside; padding: 0}
+
+div.section {clear: both}
+
+div.endmatter {margin: 6em 0 0 0; overflow: hidden}
+div.endmatter address {float: left; width: 49.9%; text-align: left}
+div.endmatter img.photo {float: left; margin: 0 0.5em 0 0}
+div.endmatter p {float: right; width: 49.9%; text-align: right}
+div.endmatter p img {clear: right; float: right; margin: 0 0 0 0.5em;
+  width: 5em}
+
+h1 {text-align: left; margin: 0 0 1em 0; margin: 0 0 1em 0.625em; clear: both}
+h1 em {display: block; margin: 0 0 -0.3em -2em; margin: 0 0 -0.3em -0.625em;
+  display: block;
+  position: relative;
+  z-index: 1}
+
+div.figure {text-align: center; font-style: italic; margin: 1.2em 1em}
+div.figure p {text-indent: 0}
+div.figure img {box-sizing: border-box}
+
+a img {border: none}
+
+
+/* Generated text */
+
+body:not(:lang(en)) li:lang(en)::before {content: "[en] "; font-size: 80%}
+body:not(:lang(en)) li:lang(en)::before {content: url("35f9f7942159.png");
+  margin-right: 0.3em}
+div.banner a::after {content: "\A0\27A1"}
+div.banner a.home::after {content: ""; content: none}
+span.updated::before {content: "["; margin-right: 0.3em}
+span.updated::after {content: "]"; margin-left: 0.3em}
+
+.icon {float: right; clear: right; margin: 0 0 0.3em 0.5em; max-width: 5em}
+
+/* Fonts */
+
+body {font: 1em/1.2 "Gill Sans MT", "Gill Sans", GillSans, sans-serif;
+  text-align: justify}
+h2 {font-weight: bold; font-style: italic; font-size: 140%}
+
+#language > p + p {font-style: italic}
+div.banner, div.endmatter {font-size: medium}
+
+input[type=text], input:not([type]) {font-family: monospace}
+input[type=submit], input[type=reset] {font-weight: bold}
+
+h1 {font-size: 240%; line-height: 0.9; text-transform: uppercase}
+h1 em {text-transform: none}
+
+a:link, a:visited {text-decoration: none}
+
+address {font-style: normal}
+p.more {font-weight: bold}
+span.updated {font-size: smaller}
+span.updated::before, span.updated:after {font-weight: bold}
+
+sup {line-height: 0}
+
+
+/* Colors */
+
+html {background: url("ef11703c10eb.png") green;
+  color: white; text-shadow: 1px 1px 2px #030}
+body {background: url("d456adac8955.png"); color: white}
+h1, h2, span.updated {color: orange; color: hsl(37,100%,60%)}
+h1 em {color: white; text-shadow: 2px 2px 4px #030}
+a:link {color: #B2B2FF; color: hsl(60,100%,88%)}
+a:visited {color: #EEB2FF; color: hsl(287,100%,88%)}
+a:link, a:visited {text-shadow: 1px 1px 2px #030, 0px 0px 5px #FFB032}
+
+div.figure img {border: 0.4em solid white;
+  border: 0.4em solid rgba(100%,100%,100%,0.5)}
+
+p.feed img {background: hsl(37,100%,60%)}
+
+input[type=submit], input[type=reset] {color: #B2B2FF; color: hsl(60,100%,88%);
+  text-shadow: 1px 1px 2px #030, 0px 0px 5px #FFB032, 0px 0px 5px #FFB032}
+input[type=text], input:not([type]) {color: white}
+
+div.banner {background: orange;
+  background: hsl(37,100%,60%);
+  background: #A50;
+  background: hsla(0,0%,100%,0.2);
+  background: url("c7b140390593.png")}
+
+.spec td, .spec td a, .test td, .test td a {text-shadow: none}
+
+#translations ul {columns: 12em; list-style: none; padding-left: 0}

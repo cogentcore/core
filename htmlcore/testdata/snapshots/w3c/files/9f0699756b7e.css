@@ -1,0 +1,327 @@
+/*
+Author: Bert Bos <bert@w3.org>
+Created: August 2009
+
+Copyright 2009 W3C. See
+http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
+*/
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: normal;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: normal;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: 700;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: 700;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+
+@font-face { 
+  font-family: My Snell Roundhand;
+  font-style: normal;
+  font-weight: 500;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+@font-face { 
+  font-family: My Snell Roundhand;
+  font-style: normal;
+  font-weight: 700;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+@font-face { 
+  font-family: My Snell Roundhand;
+  font-style: normal;
+  font-weight: 900;
+  src: url("data:,") format("eot"), url("data:,") format("woff");
+}
+
+body, #intro h2, #summary h2 {
+  font-family: Gill Sans MT, Gill Sans, My Gill Sans, sans-serif
+}
+body {
+  line-height: 1.3;
+  text-align: justify;
+  color: black;
+  background: url("bdd6aa9548a9.png") top left repeat-y #3F3F3F;
+  margin: 0;
+  padding: 10px 20px 10px 254px; /* 254 = width of bg image + 20px */
+}
+.skip {display: none}
+
+sup {line-height: 0}
+img {max-width: 100%}
+a img {border: none}
+th {text-align: left}
+ul, ol {padding-left: 1.5em; margin: 0}
+dd {margin-left: 1.5em}
+:target {outline: dashed red}
+
+h3 {
+  font-size: 1em;
+  font-weight: normal;
+  font-style: italic;
+  border-bottom: thin dotted }
+
+p {margin: 0}
+p + p {text-indent: 1.5em}
+p.feed + p {text-indent: 0}
+p.stb {margin-top: 1.2em; text-indent: 0}
+
+blockquote {margin: 1.2em 1.5em}
+form {margin: 0}
+li {margin: 0.6em 0}
+*>ul {list-style: none}
+li > p:first-child {display: inline} /* li:before cannot yet be 'marker' */
+
+ul > li:before {
+  display: inline-block;
+  vertical-align: bottom;	/* For Konqueror 3.5  */
+  width: 0.9em;
+  content: "\25C0";
+  text-align: right;
+  direction: rtl;	/* Browser bug: needed to make text-align work */
+  margin: 0 0.6em 0 -1.5em;
+}
+
+.section {
+  margin: 40px 0 0 0;
+  clear: both;
+  padding: 10px 11px 12px 11px;
+  position: relative;		/* For positioning the feed icon */
+  background: url("a6560a6a096b.png") bottom right no-repeat #FFF;
+  break-inside: avoid;
+  max-width: 55em;
+}
+*>.section {margin: 0}		/* Hide from IE6 */
+* + .section {margin-top: 40px}
+#translations, #language, #endmatter {background: #CCC; color: black}
+#translations :link, #language :link, #endmatter :link {color: #00467E}
+#translations :visited, #language :visited, #endmatter :visited {color: #00315E}
+
+#intro, #summary, #banner {
+  position: absolute;
+  padding: 0;
+  width: 204px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: white;
+  text-shadow: 0 0 2px #000;
+  margin: 0;
+  text-align: left;
+}
+*>#intro, *>#summary, *>#banner {position: fixed} /* Hide from IE6 */
+#intro li, #summary li, #banner li {margin: 0}
+#intro, #summary {top: 20%}
+#intro h2, #summary h2 {
+  font-size-adjust: none;
+  font-size: 1em;
+  color: #e0ca00;
+  margin: 0 0 0.5em 0;
+  background: none;
+  padding: 0;
+  border: none;
+  max-width: none;
+}
+
+/* Rounded corners on div.section */
+
+.section {position: relative}
+.section:before, .section:after {
+  position: absolute;
+  text-align: left;		/* Just in case an ancestor changed it */
+  line-height: 0;
+  height: 16px;			/* Height of corner image */
+  left: 0;
+  width: 100%;
+}
+.section:before {
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAPFBMVEU/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz/DhPEJAAAAE3RSTlPwpWMzEwPZYgoA9XIF2ivNFKZkAIn1zAAAAEtJREFUGJVdyFcOgDAMBFFD6qZS7n9XFAmQvfM3T+4/2Xbng3wbU8bqhVIboKAPQMM8YKCrX1AGLFRYiI0gwYJkghMEF4Nj8AyB4AEuIgqdOI9CmQAAAABJRU5ErkJggg==");
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAPFBMVEU/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz/DhPEJAAAAE3RSTlMDEzNjpfAACmLZBXL1K9oUzaZkbDUfHgAAAEVJREFUGFddyEkSgCAQBMEBpNhB8f9/9WYEncc0cz5c8f0ZACmXM6C2fgaMKcG6JVhTgtElaBq1SJA1UpTg0dgaXsNp2AcxaAh5ibCreAAAAABJRU5ErkJggg==") top right no-repeat;
+  top: 0;
+}
+.section:after {
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAPFBMVEU/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz/DhPEJAAAAE3RSTlMDABMzZKbwCmLZBXL1K9oUzaVjA3MrDAAAAEJJREFUGFddyDkCgDAMBDGTQO4L9v9/pfaolNnlWWBExs14GCkjVBi1IdQZYyK0NkJnI7QmQqM3H1It2YeU3i8G+wGBswTui19x7gAAAABJRU5ErkJggg==");
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAPFBMVEU/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz/DhPEJAAAAE3RSTlMAAxMzZKYK8GIF2XIr9RTazWOljx5JaAAAAEdJREFUGFetykEKgDAQQ9EkU4YOLQW9/2FdKNi4NsuXL/io/yH1AU2HEhxUDlMwWJEGSw07TAY2qMGGF7Kz5/2IiuPkqKfEBVF5AQ9hTJ5LAAAAAElFTkSuQmCC") bottom right no-repeat;
+  bottom: 0;
+}
+
+#intro:before, #intro:after, #banner:before, #banner:after {content: normal}
+
+.section h2 {
+  font-size: 140%;
+  font-weight: bold;
+  margin: -22px 1.07em 1em 1.07em;
+  clear: right;
+  color: #660;
+  text-align: left;
+  background: #EFE7A2;
+  padding: 0.5em;
+  max-width: 50%;
+  border: 1px solid #BBC4B2;
+  border-style: none dotted solid dotted;
+}
+
+.feed {position: absolute; top: 0.5em; right: 0.5em; width: 1.2em}
+
+h1, h2 {
+  font: 900 2em/0.95 Snell Roundhand, My Snell Roundhand,
+    Bickham Script Pro, Brush Script, Brush Script Std, Caflisch
+    Script Pro, Savoye LET, Monotype Corsiva, cursive;
+  font-size-adjust: 0.36;
+}
+h1 {
+  color: white;
+  padding: 0 0.5em;
+  max-width: 16em;
+  margin: 1.3em auto 1em auto;
+  text-align: right;
+}
+h1 em {
+  display: block;
+  font-size: 120%;
+  font-weight: normal;
+  color: #e0ca00;
+  position: relative; z-index: 1; /* Descenders overlap next line */
+  text-align: left;
+  text-shadow: 0 0 2.5ex #000;
+}
+
+#translations p + p {
+  text-indent: 0;
+  margin-top: 0.6em;
+}
+#language p:first-child {font-weight: bold; display: run-in}
+#language p:first-child:before {content: "\2691\A0"}
+#language p:first-child + p {text-indent: 0}
+#language p:first-child + p:before {content: " \2013  "}
+
+#translations h2 {display: none}
+
+#translations a:before {content: " \2013  "}
+#translations a:first-child:before {content: ""}
+
+#translations p + p a {font-weight: bold}
+
+#news i {font-style: normal}
+
+#banner {bottom: 9px; font-weight: bold}
+#banner h2 {display: none}
+#banner img {vertical-align: middle}
+
+#banner input {
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-bottom: thin dashed;
+}
+#banner input[type=submit] {font-family: inherit; border: none; padding: 0}
+
+:link {text-decoration: none; color: blue}
+:visited {text-decoration: none; color: purple}
+#intro :link, #summary :link, #banner :link {color: #e0ca00}
+#intro :visited, #summary :visited, #banner :visited {color: #BBF}
+a:hover {text-decoration: underline}
+[href^="mailto:"]:after {content: "\A0(\2709)"}
+.more {clear: right; text-align: right; font-weight: bold}
+
+.figure {margin: 1.5em}
+.figure p {text-align: center; font-style: italic; text-indent: 0}
+
+ul.dated:not(:lang(en)) > li[lang|=en]:before { /* url("data:,") */
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAMAAACejr5sAAABMlBMVEU7OobdUlKGhrWqqsuseZX1zMzVXGG7u9XOzuHy8vchIXaAbJv//f3NAAD54eDZ2ejX1+YICGfgXl7XMTG1eZDibW2Ocpvvq6v75+irq8vsnp4AAGLeVVXbSEiSkrzYREUJCWfXMDDu5uvwtbX98/PYSkv65ubxubmteZQDA2TVWl/urKyMcZvYTE5vb6aVlb7toaH43d3w8Pb87u7qlJQfH3X9+/zwtLT98vLia2vt5eyDbZurq8y+d4nDdITYQkP43Nzz8/gzM4HcSkpsbKW9d4vxt7f7+vzFc4I+Pog9PIeIiLbgYWHQ0OJsYJf87OzqkpL539+3t9NpXpf////WLy+vr87XMzMCAmM7O4fvra31zc26utW4uNPv7/UzM4IxMYC2eI/WLi7FxdzDw9r6+vwBvGF+AAAAt0lEQVQYlWNgVPONlwYCZl7eMBCd4JokziASKuXurQATFOTWFfJPZogIZpMN5PeECDLYhbo56mkySEubsggHmOkH8fKy68hbWsRwSUszMDMzS1pFOYSE8PLyKLOGGNkABRjCYYCXF85k4MUCsKsEmRkXEm3Ow8sbEmKorQQ2E2h7rIqovRjIdjkzE0UNkO0RLpzqoR5eEHdGCvA5a/lpMqQY+6haI3zElGqQlMgQlWTrhOJ3DgkZAAmELXM7J86rAAAAAElFTkSuQmCC");
+  margin: 0 0.1em 0 -1em;
+}
+ul.dated:not(:lang(de)) > li[lang|=de]:before { /* url("data:,") */
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANBAMAAABbflNtAAAAD1BMVEUAAADoRQD/zgCTAADdAACeSLz2AAAAGUlEQVQIW2NhgAMWgkxjBFOQkNqzJKhFMAFXmQFXCNB9HgAAAABJRU5ErkJggg==");
+  margin: 0 0.1em 0 -1em;
+}
+ul.dated:not(:lang(fr)) > li[lang|=fr]:before { /* url("data:,") */
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANBAMAAABbflNtAAAAD1BMVEXtKTlVbLgAI5XzcHv///8jDRRxAAAAFUlEQVQImWNQUlIScXFxZgCCQcAEAKtfEIJbyD2XAAAAAElFTkSuQmCC");
+  margin: 0 0.1em 0 -1em;
+}
+ul.dated:not(:lang(it)) > li[lang|=it]:before { /* url("data:,") */
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANBAMAAABbflNtAAAAD1BMVEVWt4QAkkbOKzfecXn///+f2+YKAAAAFklEQVQImWMQFBRkcXFxVlJSYhgETAAOGRJJS2xDCgAAAABJRU5ErkJggg==");
+  margin: 0 0.1em 0 -1em;
+}
+ul.dated:not(:lang(nl)) > li[lang|=nl]:before { /* url("data:,") */
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANBAMAAABbflNtAAAAD1BMVEW1wdjks7f///8hRouuHChvUg9HAAAAG0lEQVQIW2N0YYABRoJMQQRTiRCTAcE0Jp4JAMO4AmHr+fUkAAAAAElFTkSuQmCC");
+  margin: 0 0.1em 0 -1em;
+}
+ul.dated:not(:lang(pt)) > li[lang|=pt]:before { /* url("data:,") */
+  content: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAMAAACejr5sAAAAilBMVEVflQCtRxLchwvbkADVvL0cdADlYQDoMyu8NxDiZwCPrQDmngDF0QCgaht7kgo/hQDtPQD3GgDQXC+kttrnWQDnVwDxQADuJBFYkQD4GwB6pQDlfADWvb5BhwD/AACitdrbytNWkADRXjEddAA/hgDkMRLOWh3ZydPaWBgAZgDxPwDpNC3ISxZsnAAnqD+iAAAATklEQVQYlWPQhAI5JMBAqqCKoqgWuqAUL6OqGieqoDIPu4K6NpsgiiA/l5CwvBKzAIogK4OODIsGtySqmbp8HOJM0ui2y0qIiFHgeFRBAIVaIJsmXIxGAAAAAElFTkSuQmCC");
+  margin: 0 0.1em 0 -1em;
+}
+
+.updated {font-size: smaller; color: #660}
+.icon {float: right; max-width: 4em; margin: 0 0 0 0.5em}
+
+#endmatter {text-align: left; font-size: small; min-height: 72px} /* photo */
+address {float: right; margin-left: 1em; width: 45%; text-align: right}
+address img {float: right; margin: 0 0 0 0.5em}
+.button {float: left; clear: left; margin: 0 0.5em 0 0}
+
+.status {margin: 0.6em auto 0.6em 1.5em; border-collapse: collapse}
+.status td, .status th {
+  border-bottom: thin solid #BBF;
+  padding: 0.1em 0.3em 0.1em 0;
+  text-align: left;
+}
+.status td + td, .status th + th {padding-left: 0.3em}
+.wd, .pa {background: #FFFF00}
+.lc, .alpha {background: #FFCC00}
+.cr, .beta {background: #00FF00}
+.pr, .rc {background: #00CCFF}
+.rec, .fin {background: #3399FF}
+td + td + .wd {background: #FFFF71}
+td + td + .lc {background: #FFE371}
+td + td + .cr {background: #71FF71}
+td + td + .pr {background: #71E3FF}
+td + td + .rec {background: #8EC6FF}
+
+*>.home {position: fixed; top: 10px; left: 20px} /* W3C logo; hide from IE6 */
+ul > .home:before {content: ""}	/* Remove list marker */
+
+/* Replace logo (except on IE6) */
+*>.home img {display: none}
+.home a:before {content: url("8c34f20763e4.png")}
+.home a:hover:before {content: url("22445b9b84aa.png")}
+
+@media all and (max-width: 44em), all and (max-height: 547px) {
+  body {padding: 10px; background-image: none}
+  #intro, #summary, #banner {position: static; width: auto; text-shadow: none}
+  #banner form {margin: 0}
+  #intro, #summary, #intro h2, #summary h2 {text-align: center}
+  #intro p, #summary p {text-indent: 0}
+  #intro, #summary, #banner {margin: 3em 0 0 0; border: none; background: none}
+  #language {margin-left: 82px} /* Room for W3C logo */
+  #banner .home {position: absolute}
+  :target {outline: none}
+  .section h2 {max-width: none}
+}
+
+@media all and (min-width: 68em) { /* 2 columns if window is wide. */
+  body {
+    column-count: 2; -moz-column-count: 2;
+    column-gap: 20px; -moz-column-gap: 20px;
+  }
+}
+
+@media all and (min-width: 92em) { /* 3 columns if window is very wide. */
+  body {column-count: 3; -moz-column-count: 3}
+}

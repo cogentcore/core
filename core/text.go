@@ -9,8 +9,9 @@ import (
 	"image"
 	"slices"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
@@ -47,9 +48,22 @@ type Text struct {
 	// Links is the list of links in the text.
 	Links []rich.Hyperlink `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// FitWidth makes text that wraps start out as wide as it is on one
+	// line, up to the width of the scene, so that it only wraps when its
+	// allocated width is less, as with the shrink-to-fit widths of CSS.
+	// Otherwise, it starts out with an estimated size of a balanced
+	// aspect ratio. It is used for HTML in browser style.
+	FitWidth bool
+
 	// richText is the conversion of the HTML text source.
 	// This is what is actually rendered.
 	richText rich.Text
+
+	// minWordKey is the text and font size that minWord is for.
+	minWordKey string
+
+	// minWord is the cached width of the longest word, for minContentWidth.
+	minWord float32
 
 	// richSource is the source that richText was made from, so that
 	// a restyle that changes neither the text nor its style does not
@@ -522,13 +536,11 @@ func (tx *Text) configTextSize(sz math32.Vector2) {
 // shaped.Lines for a text item.
 func (tx *Text) setAnchorFromProperties() {
 	anc := ""
-	if id, ok := tx.Properties["id"]; ok {
-		anc = id.(string)
+	if id, ok := tx.Properties["id"].(string); ok {
+		anc = id
 	}
-	if t, ok := tx.Properties["tag"]; ok {
-		tag := t.(string)
-		if len(tag) > 1 && tag[0] == 'h' { // header
-			level := errors.Log1(strconv.Atoi(tag[1:]))
+	if tag, ok := tx.Properties["tag"].(string); ok && len(tag) > 1 && tag[0] == 'h' { // header
+		if level, err := strconv.Atoi(tag[1:]); err == nil {
 			anc += fmt.Sprintf(";Header %d:%s", level, tx.Text)
 		}
 	}
@@ -564,7 +576,10 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	if tx.Styles.Text.WhiteSpace.HasWordWrap() {
+	if tx.Styles.Text.WhiteSpace.HasWordWrap() && tx.FitWidth && tx.Scene != nil {
+		w := tx.availableWidth()
+		tx.configTextSize(math32.Vec2(max(w, sz.Actual.Content.X), sz.Actual.Content.Y))
+	} else if tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		sty, tsty := tx.Styles.NewRichText()
 		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), .5, sty, tsty)
 		tx.configTextSize(est)
@@ -580,6 +595,76 @@ func (tx *Text) SizeUp() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
+}
+
+// minContentWidth returns the min-content width of the content of the
+// text: the width of its longest word if it wraps, or of its line if not.
+// It is cached for the text and its font size.
+func (tx *Text) minContentWidth() float32 {
+	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || tx.Scene == nil || tx.Styles.Font.Size.Dots == 0 {
+		return tx.Geom.Size.Actual.Content.X
+	}
+	key := fmt.Sprintf("%s\x00%g", tx.Text, tx.Styles.Font.Size.Dots)
+	if tx.minWordKey == key {
+		return tx.minWord
+	}
+	longest := ""
+	for _, w := range strings.Fields(string(tx.richText.Join())) {
+		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
+			longest = w
+		}
+	}
+	width := float32(0)
+	if longest != "" {
+		sty, tsty := tx.Styles.NewRichText()
+		lines := tx.Scene.TextShaper().WrapLines(rich.NewText(sty, []rune(longest)), sty, tsty, math32.Vec2(1e6, 1e6))
+		width = math32.Ceil(lines.Bounds.Size().X)
+	}
+	tx.minWordKey, tx.minWord = key, width
+	return width
+}
+
+// availableWidth returns the width available to the text for [Text.FitWidth]:
+// the width of the scene, less the space (margins, borders, and padding)
+// of the widgets that it is in, and within any Max widths of those widgets.
+func (tx *Text) availableWidth() float32 {
+	var ancestors []*WidgetBase
+	for p := tx.parentWidget(); p != nil; p = p.parentWidget() {
+		ancestors = append(ancestors, p)
+	}
+	avail := float32(tx.Scene.SceneGeom.Size.X)
+	if avail <= 0 {
+		avail = 1e6
+	}
+	for i := len(ancestors) - 1; i >= 0; i-- {
+		awb := ancestors[i]
+		s := &awb.Styles
+		space := s.BoxSpace().Size().X
+		// the Max of the layout, which is not set for one that is relative
+		// to the parent until the parent is sized, and is of the content
+		if mx := awb.Geom.Size.Max.X; mx > 0 {
+			avail = min(avail, mx+space)
+		}
+		avail -= space
+		if s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap {
+			// the minimum widths of the other widgets in the row are not available
+			var path *WidgetBase = &tx.WidgetBase
+			if i > 0 {
+				path = ancestors[i-1]
+			}
+			n := 0
+			awb.forVisibleChildren(func(_ int, cw Widget, cwb *WidgetBase) bool {
+				n++
+				if cwb != path {
+					avail -= cwb.Styles.Min.X.Dots + cwb.Styles.BoxSpace().Size().X
+				}
+				return true
+			})
+			avail -= float32(max(n-1, 0)) * s.Gap.X.Dots
+		}
+	}
+	avail -= tx.Styles.BoxSpace().Size().X
+	return max(avail, 0)
 }
 
 func (tx *Text) SizeDown(iter int) bool {

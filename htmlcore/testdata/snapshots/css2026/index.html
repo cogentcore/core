@@ -1,0 +1,1134 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+  <title>CSS Snapshot 2026</title>
+  <meta content="NOTE" name="w3c-status"/>
+  <meta content="Bikeshed version d113b2e81, updated Tue Jun 9 14:57:55 2026 -0700" name="generator"/>
+  <link href="https://www.w3.org/TR/css-2026/" rel="canonical"/>
+  <meta content="55be96ecf388b2445075fda22274524197803e74" name="revision"/>
+  <meta content="dark light" name="color-scheme"/>
+<style>/* Boilerplate: style-autolinks */
+.css.css, .property.property, .descriptor.descriptor {
+    color: var(--a-normal-text);
+    font-size: inherit;
+    font-family: inherit;
+}
+.css::before, .property::before, .descriptor::before {
+    content: "‘";
+}
+.css::after, .property::after, .descriptor::after {
+    content: "’";
+}
+.property, .descriptor {
+    /* Don't wrap property and descriptor names */
+    white-space: nowrap;
+}
+.type { /* CSS value <type> */
+    font-style: italic;
+}
+pre .property::before, pre .property::after {
+    content: "";
+}
+[data-link-type="property"]::before,
+[data-link-type="propdesc"]::before,
+[data-link-type="descriptor"]::before,
+[data-link-type="value"]::before,
+[data-link-type="function"]::before,
+[data-link-type="at-rule"]::before,
+[data-link-type="selector"]::before,
+[data-link-type="maybe"]::before {
+    content: "‘";
+}
+[data-link-type="property"]::after,
+[data-link-type="propdesc"]::after,
+[data-link-type="descriptor"]::after,
+[data-link-type="value"]::after,
+[data-link-type="function"]::after,
+[data-link-type="at-rule"]::after,
+[data-link-type="selector"]::after,
+[data-link-type="maybe"]::after {
+    content: "’";
+}
+
+[data-link-type].production::before,
+[data-link-type].production::after,
+.prod [data-link-type]::before,
+.prod [data-link-type]::after {
+    content: "";
+}
+
+[data-link-type=element],
+[data-link-type=element-attr] {
+    font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    font-size: .9em;
+}
+[data-link-type=element]::before { content: "<" }
+[data-link-type=element]::after  { content: ">" }
+
+[data-link-type=biblio] {
+    white-space: pre;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --selflink-text: black;
+        --selflink-bg: silver;
+        --selflink-hover-text: white;
+    }
+}
+</style>
+<style>/* Boilerplate: style-colors */
+/* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
+:root {
+    color-scheme: light dark;
+
+    --text: black;
+    --bg: white;
+
+    --unofficial-watermark: url("files/60af2ca9567a.png");
+
+    --logo-bg: #1a5e9a;
+    --logo-active-bg: #c00;
+    --logo-text: white;
+
+    --tocnav-normal-text: #707070;
+    --tocnav-normal-bg: var(--bg);
+    --tocnav-hover-text: var(--tocnav-normal-text);
+    --tocnav-hover-bg: #f8f8f8;
+    --tocnav-active-text: #c00;
+    --tocnav-active-bg: var(--tocnav-normal-bg);
+
+    --tocsidebar-text: var(--text);
+    --tocsidebar-bg: #f7f8f9;
+    --tocsidebar-shadow: rgba(0,0,0,.1);
+    --tocsidebar-heading-text: hsla(203,20%,40%,.7);
+
+    --toclink-text: var(--text);
+    --toclink-underline: #3980b5;
+    --toclink-visited-text: var(--toclink-text);
+    --toclink-visited-underline: #054572;
+
+    --heading-text: #005a9c;
+
+    --hr-text: var(--text);
+
+    --algo-border: #def;
+
+    --del-text: red;
+    --del-bg: transparent;
+    --ins-text: #080;
+    --ins-bg: transparent;
+
+    --a-normal-text: #034575;
+    --a-normal-underline: #bbb;
+    --a-visited-text: var(--a-normal-text);
+    --a-visited-underline: #707070;
+    --a-hover-bg: rgba(75%, 75%, 75%, .25);
+    --a-active-text: #c00;
+    --a-active-underline: #c00;
+
+    --blockquote-border: silver;
+    --blockquote-bg: transparent;
+    --blockquote-text: currentcolor;
+
+    --issue-border: #e05252;
+    --issue-bg: #fbe9e9;
+    --issue-text: var(--text);
+    --issueheading-text: #831616;
+
+    --example-border: #e0cb52;
+    --example-bg: #fcfaee;
+    --example-text: var(--text);
+    --exampleheading-text: #574b0f;
+
+    --note-border: #52e052;
+    --note-bg: #e9fbe9;
+    --note-text: var(--text);
+    --noteheading-text: hsl(120, 70%, 30%);
+    --notesummary-underline: silver;
+
+    --assertion-border: #aaa;
+    --assertion-bg: #eee;
+    --assertion-text: black;
+
+    --advisement-border: orange;
+    --advisement-bg: #fec;
+    --advisement-text: var(--text);
+    --advisementheading-text: #b35f00;
+
+    --warning-border: red;
+    --warning-bg: hsla(40,100%,50%,0.95);
+    --warning-text: var(--text);
+
+    --amendment-border: #330099;
+    --amendment-bg: #F5F0FF;
+    --amendment-text: var(--text);
+    --amendmentheading-text: #220066;
+
+    --def-border: #8ccbf2;
+    --def-bg: #def;
+    --def-text: var(--text);
+    --defrow-border: #bbd7e9;
+
+    --datacell-border: silver;
+
+    --indexinfo-text: #707070;
+
+    --indextable-hover-text: black;
+    --indextable-hover-bg: #f7f8f9;
+
+    --outdatedspec-bg: rgba(0, 0, 0, .5);
+    --outdatedspec-text: black;
+    --outdated-bg: maroon;
+    --outdated-text: white;
+    --outdated-shadow: red;
+
+    --editedrec-bg: darkorange;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: #ddd;
+        --bg: black;
+
+        --unofficial-watermark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='%23100808' transform='translate(200 200) rotate(-45) translate(-200 -200)' stroke='%23100808' stroke-width='3'%3E%3Ctext x='50%25' y='220' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EUNOFFICIAL%3C/text%3E%3Ctext x='50%25' y='305' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EDRAFT%3C/text%3E%3C/g%3E%3C/svg%3E");
+
+        --logo-bg: #1a5e9a;
+        --logo-active-bg: #c00;
+        --logo-text: white;
+
+        --tocnav-normal-text: #999;
+        --tocnav-normal-bg: var(--bg);
+        --tocnav-hover-text: var(--tocnav-normal-text);
+        --tocnav-hover-bg: #080808;
+        --tocnav-active-text: #f44;
+        --tocnav-active-bg: var(--tocnav-normal-bg);
+
+        --tocsidebar-text: var(--text);
+        --tocsidebar-bg: #080808;
+        --tocsidebar-shadow: rgba(255,255,255,.1);
+        --tocsidebar-heading-text: hsla(203,20%,40%,.7);
+
+        --toclink-text: var(--text);
+        --toclink-underline: #6af;
+        --toclink-visited-text: var(--toclink-text);
+        --toclink-visited-underline: #054572;
+
+        --heading-text: #8af;
+
+        --hr-text: var(--text);
+
+        --algo-border: #456;
+
+        --del-text: #f44;
+        --del-bg: transparent;
+        --ins-text: #4a4;
+        --ins-bg: transparent;
+
+        --a-normal-text: #6af;
+        --a-normal-underline: #555;
+        --a-visited-text: var(--a-normal-text);
+        --a-visited-underline: var(--a-normal-underline);
+        --a-hover-bg: rgba(25%, 25%, 25%, .2);
+        --a-active-text: #f44;
+        --a-active-underline: var(--a-active-text);
+
+        --borderedblock-bg: rgba(255, 255, 255, .05);
+
+        --blockquote-border: silver;
+        --blockquote-bg: var(--borderedblock-bg);
+        --blockquote-text: currentcolor;
+
+        --issue-border: #e05252;
+        --issue-bg: var(--borderedblock-bg);
+        --issue-text: var(--text);
+        --issueheading-text: hsl(0deg, 70%, 70%);
+
+        --example-border: hsl(50deg, 90%, 60%);
+        --example-bg: var(--borderedblock-bg);
+        --example-text: var(--text);
+        --exampleheading-text: hsl(50deg, 70%, 70%);
+
+        --note-border: hsl(120deg, 100%, 35%);
+        --note-bg: var(--borderedblock-bg);
+        --note-text: var(--text);
+        --noteheading-text: hsl(120, 70%, 70%);
+        --notesummary-underline: silver;
+
+        --assertion-border: #444;
+        --assertion-bg: var(--borderedblock-bg);
+        --assertion-text: var(--text);
+
+        --advisement-border: orange;
+        --advisement-bg: #222218;
+        --advisement-text: var(--text);
+        --advisementheading-text: #f84;
+
+        --warning-border: red;
+        --warning-bg: hsla(40,100%,20%,0.95);
+        --warning-text: var(--text);
+
+        --amendment-border: #330099;
+        --amendment-bg: #080010;
+        --amendment-text: var(--text);
+        --amendmentheading-text: #cc00ff;
+
+        --def-border: #8ccbf2;
+        --def-bg: #080818;
+        --def-text: var(--text);
+        --defrow-border: #136;
+
+        --datacell-border: silver;
+
+        --indexinfo-text: #aaa;
+
+        --indextable-hover-text: var(--text);
+        --indextable-hover-bg: #181818;
+
+        --outdatedspec-bg: rgba(255, 255, 255, .5);
+        --outdatedspec-text: black;
+        --outdated-bg: maroon;
+        --outdated-text: white;
+        --outdated-shadow: red;
+
+        --editedrec-bg: darkorange;
+    }
+    /* In case a transparent-bg image doesn't expect to be on a dark bg,
+       which is quite common in practice... */
+    img { background: white; }
+}
+</style>
+<style>/* Boilerplate: style-counters */
+body {
+    counter-reset: example figure issue table;
+}
+.issue {
+    counter-increment: issue;
+}
+.issue:not(.no-marker)::before {
+    content: "Issue " counter(issue);
+}
+
+.example {
+    counter-increment: example;
+}
+.example:not(.no-marker)::before {
+    content: "Example " counter(example);
+}
+.invalid.example:not(.no-marker)::before,
+.illegal.example:not(.no-marker)::before {
+    content: "Invalid Example " counter(example);
+}
+
+figcaption {
+    counter-increment: figure;
+}
+figcaption:not(.no-marker)::before {
+    content: "Figure " counter(figure) " ";
+}
+
+figure.table figcaption {
+    counter-increment: table;
+}
+figure.table figcaption:not(.no-marker)::before {
+    content: "Table " counter(table) " ";
+}
+</style>
+<style>/* Boilerplate: style-dfn-panel */
+:root {
+    --dfnpanel-bg: #ddd;
+    --dfnpanel-text: var(--text);
+    --dfnpanel-target-bg: #ffc;
+    --dfnpanel-target-outline: orange;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dfnpanel-bg: #222;
+        --dfnpanel-text: var(--text);
+        --dfnpanel-target-bg: #333;
+        --dfnpanel-target-outline: silver;
+    }
+}
+.dfn-panel {
+    position: absolute;
+    z-index: 35;
+    width: 20em;
+    width: 300px;
+    height: auto;
+    max-height: 500px;
+    overflow: auto;
+    padding: 0.5em 0.75em;
+    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+    background: var(--dfnpanel-bg);
+    color: var(--dfnpanel-text);
+    border: outset 0.2em;
+    white-space: normal; /* in case it's moved into a pre */
+}
+.dfn-panel:not(.on) { display: none; }
+.dfn-panel * { margin: 0; padding: 0; text-indent: 0; }
+.dfn-panel > b { display: block; }
+.dfn-panel a { color: var(--dfnpanel-text); }
+.dfn-panel a:not(:hover) { text-decoration: none !important; border-bottom: none !important; }
+.dfn-panel a:focus {
+    outline: 5px auto Highlight;
+    outline: 5px auto -webkit-focus-ring-color;
+}
+.dfn-panel > b + b { margin-top: 0.25em; }
+.dfn-panel ul { padding: 0 0 0 1em; list-style: none; }
+.dfn-panel li a {
+    max-width: calc(300px - 1.5em - 1em);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dfn-panel.activated {
+    display: inline-block;
+    position: fixed;
+    left: 8px;
+    bottom: 2em;
+    margin: 0 auto;
+    max-width: calc(100vw - 1.5em - .4em - .5em);
+    max-height: 30vh;
+    transition: left 1s ease-out, bottom 1s ease-out;
+}
+
+.dfn-panel .link-item:hover {
+    text-decoration: underline;
+}
+.dfn-panel .link-item .copy-icon {
+    opacity: 0;
+}
+.dfn-panel .link-item:hover .copy-icon,
+.dfn-panel .link-item .copy-icon:focus {
+    opacity: 1;
+}
+
+.dfn-panel .copy-icon {
+    display: inline-block;
+    margin-right: 0.5em;
+    width: 0.85em;
+    height: 1em;
+    border-radius: 3px;
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.dfn-panel .copy-icon .icon {
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.dfn-panel .copy-icon .icon::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+    background-color: #ccc;
+    opacity: 0.25;
+    transform: translate(3px, -3px);
+}
+
+.dfn-panel .copy-icon:active .icon::before {
+    opacity: 1;
+}
+
+.dfn-paneled[role="button"] { cursor: help; }
+
+.highlighted {
+    animation: target-fade 3s;
+}
+
+@keyframes target-fade {
+    from {
+        background-color: var(--dfnpanel-target-bg);
+        outline: 5px solid var(--dfnpanel-target-outline);
+    }
+    to {
+        color: var(--a-normal-text);
+        background-color: transparent;
+        outline: transparent;
+    }
+}
+</style>
+<style>/* Boilerplate: style-issues */
+a[href].issue-return {
+    float: right;
+    float: inline-end;
+    color: var(--issueheading-text);
+    font-weight: bold;
+    text-decoration: none;
+}
+</style>
+<style>/* Boilerplate: style-md-lists */
+/* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+[data-md] > :first-child {
+    margin-top: 0;
+}
+[data-md] > :last-child {
+    margin-bottom: 0;
+}
+</style>
+<style>/* Boilerplate: style-ref-hints */
+:root {
+    --ref-hint-bg: #ddd;
+    --ref-hint-text: var(--text);
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ref-hint-bg: #222;
+        --ref-hint-text: var(--text);
+    }
+}
+
+.ref-hint {
+    display: inline-block;
+    position: absolute;
+    z-index: 35;
+    width: 20em;
+    width: 300px;
+    height: auto;
+    max-height: 500px;
+    overflow: auto;
+    padding: 0.5em 0.5em;
+    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+    background: var(--ref-hint-bg);
+    color: var(--ref-hint-text);
+    border: outset 0.2em;
+    white-space: normal; /* in case it's moved into a pre */
+}
+
+.ref-hint * { margin: 0; padding: 0; text-indent: 0; }
+
+.ref-hint ul { padding: 0 0 0 1em; list-style: none; }
+</style>
+<style>/* Boilerplate: style-selflinks */
+:root {
+    --selflink-text: white;
+    --selflink-bg: gray;
+    --selflink-hover-text: black;
+}
+.heading, .issue, .note, .example, li, dt {
+    position: relative;
+}
+a.self-link {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * (3.5rem - 26px));
+    width: calc(3.5rem - 26px);
+    height: 2em;
+    text-align: center;
+    border: none;
+    transition: opacity .2s;
+    opacity: .5;
+}
+a.self-link:hover {
+    opacity: 1;
+}
+.heading > a.self-link {
+    font-size: 83%;
+}
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
+}
+li > a.self-link {
+    left: calc(-1 * (3.5rem - 26px) - 2em);
+}
+dfn > a.self-link {
+    top: auto;
+    left: auto;
+    opacity: 0;
+    width: 1.5em;
+    height: 1.5em;
+    background: var(--selflink-bg);
+    color: var(--selflink-text);
+    font-style: normal;
+    transition: opacity .2s, background-color .2s, color .2s;
+}
+dfn:hover > a.self-link {
+    opacity: 1;
+}
+dfn > a.self-link:hover {
+    color: var(--selflink-hover-text);
+}
+
+a.self-link::before            { content: "¶"; }
+.heading > a.self-link::before { content: "§"; }
+dfn > a.self-link::before      { content: "#"; }
+</style>
+  <link href="files/fa85e0cb8ab0.css" rel="stylesheet"/>
+  <link href="files/c9791028e308.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css"/>
+ </head><body class="h-entry">
+  <div class="head">
+   <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/">
+    <img alt="W3C" height="48" src="files/ce3e1f9a8bf1.svg" width="72"/>
+</a>
+</p>
+   <h1 class="no-ref p-name" id="title">CSS Snapshot 2026</h1>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#NOTE">W3C Group Note</a>,
+    <time class="dt-updated" datetime="2026-06-22">22 June 2026</time></p>
+   <details open="">
+    <summary>More details about this document</summary>
+    <div data-fill-with="spec-metadata">
+     <dl>
+      <dt>This version:
+      </dt><dd><a class="u-url" href="https://www.w3.org/TR/2026/NOTE-css-2026-20260622/">https://www.w3.org/TR/2026/NOTE-css-2026-20260622/</a>
+      </dd><dt>Latest published version:
+      </dt><dd><a href="https://www.w3.org/TR/css-2026/">https://www.w3.org/TR/css-2026/</a>
+      </dd><dt>Editor&#39;s Draft:
+      </dt><dd><a href="https://drafts.csswg.org/css-2026/">https://drafts.csswg.org/css-2026/</a>
+      </dd><dt>Previous Versions:
+      </dt><dd><a href="https://www.w3.org/TR/2026/NOTE-css-2026-20260326/" rel="prev">https://www.w3.org/TR/2026/NOTE-css-2026-20260326/</a>
+      </dd><dt>History:
+      </dt><dd><a class="u-url" href="https://www.w3.org/standards/history/css-2026/">https://www.w3.org/standards/history/css-2026/</a>
+      </dd><dt>Feedback:
+      </dt><dd><a href="https://github.com/w3c/csswg-drafts/labels/css-2026">CSSWG Issues Repository</a>
+      </dd><dt class="editor">Editors:
+      </dt><dd class="editor h-card p-author vcard" data-editor-id="42199"><a class="fn p-name u-url url" href="http://xanthir.com/">Tab Atkins Jr.</a> (<span class="org p-org">Google</span>)
+      </dd><dd class="editor h-card p-author vcard" data-editor-id="35400"><a class="fn p-name u-url url" href="http://fantasai.inkedblade.net/contact">Elika J. Etemad / fantasai</a> (<span class="org p-org">Apple</span>)
+      </dd><dd class="editor h-card p-author vcard" data-editor-id="43241"><a class="fn p-name u-url url" href="https://florian.rivoal.net">Florian Rivoal</a> (<span class="org p-org">Invited Expert</span>)
+      </dd><dd class="editor h-card p-author vcard" data-editor-id="1438"><a class="fn p-name u-url url" href="https://svgees.us/">Chris Lilley</a> (<span class="org p-org">W3C</span>)
+      </dd><dd class="editor h-card p-author vcard" data-editor-id="64937"><a class="email fn p-name u-email" href="mailto:sebastianzartner@gmail.com">Sebastian Zartner</a> (<span class="org p-org">Invited Expert</span>)
+      </dd><dt>Suggest an Edit for this Spec:
+      </dt><dd><a href="https://github.com/w3c/csswg-drafts/blob/main/css-2026/Overview.bs">GitHub Editor</a>
+     </dd></dl>
+    </div>
+   </details>
+   <div data-fill-with="warning"></div>
+   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2026 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/copyright/software-license/" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply.
+</p>
+   <hr title="Separator for header"/>
+  </div>
+  <div class="p-summary" data-fill-with="abstract">
+   <h2 class="heading no-num no-ref no-toc settled" id="abstract"><span class="content">Abstract</span></h2>
+   <p>This document collects together into one definition all the specs that
+together form the current state of Cascading Style Sheets (CSS) as of 2026.
+The primary audience is CSS implementers, not CSS authors, as this definition
+includes modules by specification stability, not Web browser adoption rate.</p>
+   
+
+
+<a href="https://www.w3.org/TR/CSS/">CSS</a> is a language for describing the rendering of structured documents
+(such as HTML and XML)
+on screen, on paper, etc.
+
+
+  </div>
+  <h2 class="heading no-num no-ref no-toc settled" id="sotd"><span class="content">Status of this document</span></h2>
+  <div data-fill-with="status">
+   <p><em>This section describes the status of this document at the time of its publication.
+	A list of current W3C publications
+	and the latest revision of this technical report
+	can be found in the <a href="https://www.w3.org/TR/">W3C standards and drafts index.</a></em>
+
+</p>
+   <p data-deliverer="32061">
+	This document was published
+	by the <a href="https://www.w3.org/groups/wg/css">CSS Working Group</a>
+	as a Group Note
+	using the <a href="https://www.w3.org/policies/process/20250818/#recs-and-notes">Note track</a>.
+	Group Notes are not endorsed by W3C nor its Members.
+
+</p>
+   <p>Please send feedback
+	by <a href="https://github.com/w3c/csswg-drafts/issues">filing issues in GitHub</a> (preferred),
+	including the spec code “css-2026” in the title, like this:
+	“[css-2026] <i>…summary of comment…</i>”.
+	All issues and comments are <a href="https://lists.w3.org/Archives/Public/public-css-archive/">archived</a>.
+	Alternately, feedback can be sent to the (<a href="https://lists.w3.org/Archives/Public/www-style/">archived</a>) public mailing list
+	<a href="mailto:www-style@w3.org?Subject=%5Bcss-2026%5D%20PUT%20SUBJECT%20HERE">www-style@w3.org</a>.
+
+</p>
+   <p>This document is governed by the
+	<a href="https://www.w3.org/policies/process/20250818/" id="w3c_process_revision">18 August 2025 W3C Process Document</a>.
+
+</p>
+   <p>The <a href="https://www.w3.org/policies/patent-policy/20200915/">15 September 2020 W3C Patent Policy</a>
+	does not carry any licensing requirements or commitments on this document.
+
+
+</p>
+   <p>This document represents the state of CSS as of 2026.</p>
+  </div>
+  <div data-fill-with="at-risk"></div>
+  <nav data-fill-with="table-of-contents" id="toc">
+   <h2 class="no-num no-ref no-toc" id="contents">Table of Contents</h2>
+   <ol class="toc">
+    <li>
+     <a href="#intro"><span class="secno">1</span> <span class="content">Introduction</span></a>
+     
+    </li><li>
+     <a href="#module-classification"><span class="secno">2</span> <span class="content">
+Classification of CSS Specifications</span></a>
+     
+    </li><li>
+     <a href="#responsible"><span class="secno">3</span> <span class="content">
+Requirements for Responsible Implementation of CSS</span></a>
+     
+    </li><li><a href="#CR-exceptions"><span class="secno">4</span> <span class="content">
+Safe to Release pre-CR Exceptions</span></a>
+    </li><li><a href="#media-type"><span class="secno">5</span> <span class="content">The text/css media type</span></a>
+    </li><li><a href="#security"><span class="secno">6</span> <span class="content">
+	Security Considerations
+</span></a>
+    </li><li><a href="#privacy"><span class="secno">7</span> <span class="content">
+	Privacy Considerations
+</span></a>
+    </li><li>
+     <a href="#indices"><span class="secno">8</span> <span class="content">Indices</span></a>
+     
+    </li><li><a href="#acks"><span class="secno">9</span> <span class="content">Acknowledgements</span></a>
+    </li><li>
+     <a href="#w3c-conformance"><span class="secno"></span> <span class="content">
+Conformance</span></a>
+     
+    </li><li>
+     <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
+     
+   </li></ol>
+  </nav>
+  <main>
+   <h2 class="heading settled" data-level="1" id="intro"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#intro"></a></h2>
+   <p>When the first CSS specification was published,
+	all of CSS was contained in one document that defined CSS Level 1.
+	CSS Level 2 was defined also by a single, multi-chapter document.
+	However for CSS beyond Level 2,
+	the CSS Working Group chose to adopt a modular approach,
+	where each module defines a part of CSS,
+	rather than to define a single monolithic specification.
+	This breaks the specification into more manageable chunks
+	and allows more immediate, incremental improvement to CSS.</p>
+   <p>Since different CSS modules are at different levels of stability,
+	the CSS Working Group has chosen to publish this profile
+	to define the current scope and state of Cascading Style Sheets as of 2026.</p>
+   <h3 class="heading settled" data-level="1.1" id="css-glossary"><span class="secno">1.1. </span><span class="content">
+What is CSS?</span><a class="self-link" href="#css-glossary"></a></h3>
+   <dl>
+    <dt><dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" data-lt="CSS | Cascading Style Sheets" id="css">Cascading Style Sheets (CSS)</dfn>
+		
+    </dt><dd>
+			CSS is a language for writing <a data-link-type="dfn" href="#style-sheet" id="ref-for-style-sheet">style sheets</a>,
+			and is designed to describe the rendering of structured documents
+			(such as HTML and XML)
+			on a variety of media.
+			CSS is used to describe the presentation of a <a data-link-type="dfn" href="#source-document" id="ref-for-source-document">source document</a>,
+			and usually does not change the underlying semantics
+			expressed by its <a data-link-type="dfn" href="https://www.w3.org/TR/selectors-4/#document-language" id="ref-for-document-language">document language</a>.
+
+		
+    </dd><dt><dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="style-sheet">Style sheet</dfn>
+		
+    </dt><dd>
+			A set of rules that specify the presentation of a document.
+			Style sheets are written by an <a data-link-type="dfn" href="#author" id="ref-for-author">Author</a>,
+			and interpreted by a <a data-link-type="dfn" href="#user-agent" id="ref-for-user-agent">user agent</a>,
+			to present the document to the <a data-link-type="dfn" href="#user" id="ref-for-user">User</a>.
+
+		
+    </dd><dt><dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="source-document">Source document</dfn>
+		
+    </dt><dd>
+			The document to which one or more style sheets apply.
+			A source document’s structure and semantics are encoded
+			using a <a data-link-type="dfn" href="https://www.w3.org/TR/selectors-4/#document-language" id="ref-for-document-language①">document language</a> (e.g., HTML, XHTML, or SVG).
+
+		
+    </dd><dt><dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="author">Author</dfn>
+		
+    </dt><dd>
+			An author is a person who writes documents and associated style sheets.
+			An <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="authoring-tool">authoring tool</dfn> is a <a data-link-type="dfn" href="#user-agent" id="ref-for-user-agent①">user agent</a> that generates style sheets.
+
+		
+    </dd></dl>
+   
+   
+   
+   
+   
+   <h2 class="heading settled" data-level="2" id="module-classification"><span class="secno">2. </span><span class="content">
+Classification of CSS Specifications</span><a class="self-link" href="#module-classification"></a></h2>
+   <p><strong class="advisement">
+	A list of all CSS modules, stable and in-progress,
+	and their statuses
+	can be found at the <a href="https://www.w3.org/Style/CSS/current-work">CSS Current Work page</a>.</strong></p>
+   <h3 class="heading settled" data-level="2.1" id="css-official"><span class="secno">2.1. </span><span class="content">Cascading Style Sheets (CSS) — The Official Definition</span><a class="self-link" href="#css-official"></a></h3>
+   <p>This profile includes only specifications that we consider stable
+	<em>and</em> for which we have enough implementation experience that we are sure of that stability.</p>
+   <p class="note" role="note"><span class="marker">Note:</span> This is not intended to be a CSS Desktop Browser Profile:
+	inclusion in this profile is based on feature stability only
+	and not on expected use or Web browser adoption.
+	This profile defines CSS in its most complete form.</p>
+   <p>As of 2026,
+	<dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="cascading-style-sheets-css">Cascading Style Sheets (CSS)</dfn> is defined by the following
+	specifications.</p>
+   <dl>
+    <dt><a href="https://www.w3.org/TR/CSS2/">CSS Level 2, latest revision</a> (including errata)
+		<a data-link-type="biblio" href="#biblio-css2" title="Cascading Style Sheets Level 2 Revision 1 (CSS 2.1) Specification">[CSS2]</a>
+		
+    </dt><dd>
+			This defines the core of CSS, parts of which are overridden by later specifications.
+			We recommend in particular reading <a href="https://www.w3.org/TR/CSS2/intro.html">Chapter 2</a>,
+			which introduces some of the basic concepts of CSS
+			and its design principles.
+
+		
+    </dd><dt><a href="https://www.w3.org/TR/css-syntax-3/">CSS Syntax Module Level 3</a>
+		<a data-link-type="biblio" href="#biblio-css-syntax-3" title="CSS Syntax Module Level 3">[CSS-SYNTAX-3]</a>
+		
+    </dt><dd>
+			Replaces CSS2§4.1, CSS2§4.2, CSS2§4.4, and CSS2§G,
+			redefining how CSS is parsed.
+
+		
+    </dd><dt><a href="https://www.w3.org/TR/css-style-attr/">CSS Style Attributes</a>
+		<a data-link-type="biblio" href="#biblio-css-style-attr" title="CSS Style Attributes">[CSS-STYLE-ATTR]</a>
+		
+    </dt><dd>
+			Defines how CSS declarations can be embedded in markup attributes.
+
+		
+    </dd><dt><a href="https://www.w3.org/TR/css3-mediaqueries/">Media Queries Level 3</a>
+		<a data-link-type="biblio" href="#biblio-css3-mediaqueries" title="Media Queries Level 3">[CSS3-MEDIAQUERIES]</a>
+		
+    </dt><dd>
+			Replaces CSS2§7.3 and expands on the syntax for media-specific styles.
+
+		
+    </dd></dl>
+   <p class="note" role="note"><span class="marker">Note:</span> Although we don’t anticipate significant changes to the specifications that form this snapshot,
+	their inclusion does not mean they are frozen.
+	The Working Group will continue to address problems as they are found in these specs.
+	Implementers should monitor <a href="https://lists.w3.org/Archives/Public/www-style/">www-style</a>
+	and/or the <a href="https://www.w3.org/blog/CSS">CSS Working Group Blog</a>
+	for any resulting changes, corrections, or clarifications.</p>
+   <h3 class="heading settled" data-level="2.2" id="reliable-cr"><span class="secno">2.2. </span><span class="content">
+Reliable Candidate Recommendations</span><a class="self-link" href="#reliable-cr"></a></h3>
+   <p>The following specifications are considered to be in a reliable state, meaning they have largely stable implementations and specifications, but are not yet at the Recommendation level due to minor issues or the need for additional implementation reports.</p>
+   <dl>
+    <dt><a href="https://www.w3.org/TR/mediaqueries-4/">Media Queries Level 4</a>
+	<a data-link-type="biblio" href="#biblio-mediaqueries-4" title="Media Queries Level 4">[MEDIAQUERIES-4]</a>
+	
+    </dt><dd>
+		Extends and supersedes <a data-link-type="biblio" href="#biblio-css3-mediaqueries" title="Media Queries Level 3">[CSS3-MEDIAQUERIES]</a>,
+		expanding the syntax,
+		deprecating most media types,
+		and introducing new media features.
+
+	
+    </dd><dt><a href="https://www.w3.org/TR/css-scroll-snap-1/">CSS Scroll Snap Module Level 1</a>
+	<a data-link-type="biblio" href="#biblio-css-scroll-snap-1" title="CSS Scroll Snap Module Level 1">[CSS-SCROLL-SNAP-1]</a>
+	
+    </dt><dd>
+		Contains features to control panning and scrolling behavior with “snap positions”.
+
+	
+    </dd><dt><a href="https://www.w3.org/TR/css-scrollbars-1/">CSS Scrollbars Styling Module Level 1</a>
+	<a data-link-type="biblio" href="#biblio-css-scrollbars-1" title="CSS Scrollbars Styling Module Level 1">[CSS-SCROLLBARS-1]</a>
+	
+    </dt><dd>
+		Defines properties to influence the visual styling of scrollbars,
+		introducing controls for their color and width.
+
+	
+    </dd><dt><a href="https://www.w3.org/TR/css-grid-1/">CSS Grid Layout Module Level 1</a>
+	<a data-link-type="biblio" href="#biblio-css-grid-1" title="CSS Grid Layout Module Level 1">[CSS-GRID-1]</a>
+	
+    </dt><dd>
+		Introduces a two-dimensional grid-based layout system,
+		optimized for user interface design.
+		In the grid layout model, the children of a grid container
+		can be positioned into arbitrary slots in a predefined flexible or fixed-size layout grid.
+
+	
+    </dd></dl>
+   <h3 class="heading settled" data-level="2.3" id="fairly-stable"><span class="secno">2.3. </span><span class="content">
+Fairly Stable Modules with limited implementation experience</span><a class="self-link" href="#fairly-stable"></a></h3>
+   <p>The following modules have completed design work,
+	and are fairly stable,
+	but have not received much testing and implementation experience yet.
+	We hope to incorporate them into the <a href="#css-official">official definition of CSS</a> in a future snapshot.</p>
+   <dl>
+    <dt><a href="https://www.w3.org/TR/css-display-3/">CSS Display Module Level 3</a>
+		<a data-link-type="biblio" href="#biblio-css-display-3" title="CSS Display Module Level 3">[CSS-DISPLAY-3]</a>
+		
+    </dt><dd>
+			Replaces CSS2§9.1.2, §9.2.1 (but not §9.2.1.1), §9.2.2 (but not §9.2.2.1), §9.2.3, and §9.2.4 (and lays the foundations for replacing §9.7),
+			defining how the CSS formatting box tree is generated
+			from the document element tree
+			and defining the <a class="css property" data-link-type="property" href="https://www.w3.org/TR/css-display-3/#propdef-display" id="ref-for-propdef-display">display</a> property that controls it.
+
+		
+    </dd><dt><a href="https://www.w3.org/TR/css-writing-modes-4/">CSS Writing Modes Level 4</a>
+		<a data-link-type="biblio" href="#biblio-css-writing-modes-4" title="CSS Writing Modes Level 4">[CSS-WRITING-MODES-4]</a>
+		
+    </dt><dd>
+			Extends and supersedes <a data-link-type="biblio" href="#biblio-css-writing-modes-3" title="CSS Writing Modes Level 3">[CSS-WRITING-MODES-3]</a>,
+			adding more options for vertical writing.
+
+		
+    </dd><dt><a href="https://www.w3.org/TR/css-break-3/">CSS Fragmentation Module Level 3</a>
+		<a data-link-type="biblio" href="#biblio-css-break-3" title="CSS Fragmentation Module Level 3">[CSS-BREAK-3]</a>
+		
+    </dt><dd>
+			Describes the fragmentation model that partitions a flow into pages, columns, or regions
+			and defines properties that control it.
+			Extends and supersedes CSS2§13.3.
+
+		
+    </dd><dt><a href="https://www.w3.org/TR/css-align-3/">CSS Box Alignment Module Level 3</a>
+		<a data-link-type="biblio" href="#biblio-css-align-3" title="CSS Box Alignment Module Level 3">[CSS-ALIGN-3]</a>
+		
+    </dt><dd>
+			Introduces properties to control the alignment of boxes
+			within their containers in the various CSS box layout models:
+			block layout, table layout, flex layout, and grid layout.
+
+		
+    </dd></dl>
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   <h4 class="heading settled" data-level="3.2.1" id="experimental"><span class="secno">3.2.1. </span><span class="content">
+Experimentation and Unstable Features</span><a class="self-link" href="#experimental"></a></h4>
+   <p>Implementations of <a data-link-type="dfn" href="#unstable" id="ref-for-unstable①">unstable</a> features
+	that are described in W3C specifications
+	but are not interoperable
+	should not be released broadly for general use;
+	but may be released for limited, experimental use in controlled environments.</p>
+   <details class="why">
+    <summary>Why?</summary>
+    
+		We want to allow both authors and implementors to experiment with the feature and give feedback,
+		but prevent authors from relying on them in production websites
+		and thereby accidentally &#34;locking in&#34; (through content dependence)
+		certain syntax or behavior that might change later.
+	
+   </details>
+   <div class="example" id="example-e5f16ed9"><a class="self-link" href="#example-e5f16ed9"></a>
+		For example,
+		a UA could release an <a data-link-type="dfn" href="#unstable" id="ref-for-unstable②">unstable</a> features for experimentation
+		through beta or other testing-stage builds;
+		behind a hidden configuration flag;
+		behind a switch enabled only for specific testing partners;
+		or through some other means of limiting dependent use.
+	</div>
+   <p>A CSS feature is considered <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="unstable">unstable</dfn> until
+	its specification has reached the Candidate Recommendation (CR) stage in the W3C process.
+	In exceptional cases,
+	the CSSWG may additionally, by an officially-recorded resolution,
+	add pre-CR features to the set that are considered safe to release for broad use.
+	See <a href="#CR-exceptions">§ 4 Safe to Release pre-CR Exceptions</a>.</p>
+   <p class="note" role="note"><span class="marker">Note:</span> Vendors should consult the WG explicitly and not make assumptions on this point,
+	as a pre-CR spec that hasn’t changed in awhile is usually more out-of-date than stable.</p>
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+   
+   
+   
+   
+   <h2 class="heading settled" data-level="8" id="indices"><span class="secno">8. </span><span class="content">Indices</span><a class="self-link" href="#indices"></a></h2>
+   <p><em>These sections are non-normative.</em></p>
+   <h3 class="heading settled" data-level="8.1" id="terms"><span class="secno">8.1. </span><span class="content">Terms Index</span><a class="self-link" href="#terms"></a></h3>
+   <div data-link-spec="
+	compositing-1,
+	css-align-3,
+	css-animations-1,
+	css-backgrounds-3,
+	css-box-3,
+	css-break-3,
+	css-cascade-4,
+	css-cascade-5,
+	css-color-3,
+	css-color-4,
+	css-color-5,
+	css-color-adjust-1,
+	css-conditional-3,
+	css-conditional-4,
+	css-contain-1,
+	css-contain-2,
+	css-counter-styles-3,
+	css-display-3,
+	css-easing-1,
+	css-flexbox-1,
+	css-font-loading-3,
+	css-fonts-4,
+	css-grid-1,
+	css-grid-1,
+	css-images-3,
+	css-lists-3,
+	css-logical-1,
+	css-masking-1,
+	css-multicol-1,
+	css-namespaces-3,
+	css-position-3,
+	css-scrollbars-1,
+	css-sizing-3,
+	css-scroll-anchoring-1,
+	css-scroll-snap-1,
+	css-shapes-1,
+	css-speech-1,
+	css-style-attr,
+	css-syntax-3,
+	css-text-3,
+	css-text-decor-3,
+	css-transforms-1,
+	css-transforms-2,
+	css-transitions-1,
+	css-ui-3,
+	css-values-3,
+	css-variables-1,
+	css-view-transitions-1,
+	css-will-change-1,
+	css-writing-modes-3,
+	css-writing-modes-4,
+	css2,
+	cssom-1,
+	cssom-view-1,
+	filter-effects-1,
+	mediaqueries-3,
+	mediaqueries-4,
+	motion-1,
+	resize-observer-1,
+	selectors-3,
+	selectors-4,
+	web-animations-1" data-link-status="TR">
+    <ul class="index">
+     <li><a href="https://www.w3.org/TR/CSS2/selector.html#x18"></a>
+     </li><li>
+      =
+      <ul>
+       <li><a href="https://www.w3.org/TR/CSS2/selector.html#x14">in css2</a>
+       </li><li><a href="https://www.w3.org/TR/CSS2/selector.html#x18">in css2</a>
+      </li></ul>
+     </li><li><a href="https://www.w3.org/TR/CSS2/selector.html#x16">~=</a>
+     </li><li><a href="https://drafts.csswg.org/css-backgrounds-3/#shadow-offset-x">1st &lt;length&gt;</a>
+     </li><li><a href="https://drafts.csswg.org/css-transforms-1/#2d-matrix">2d matrix</a>
+     </li><li><a href="https://drafts.csswg.org/css-backgrounds-3/#shadow-offset-y">2nd &lt;length&gt;</a>
+     </li><li><a href="https://drafts.csswg.org/css-transforms-2/#3d-matrix">3d matrix</a>
+     </li><li><a href="https://drafts.csswg.org/css-transforms-2/#3d-rendering-context">3d rendering context</a>
+     </li><li><a href="https://drafts.csswg.org/css-transforms-2/#3d-transformed-element">3d transformed element</a>
+     </li><li><a href="https://drafts.csswg.org/css-transforms-2/#3d-transform-functions">3d transform functions</a>
+     </li></ul>
+   </div>
+   
+   
+   
+   
+   
+   
+   
+   
+   <h2 class="heading settled" data-level="9" id="acks"><span class="secno">9. </span><span class="content">Acknowledgements</span><a class="self-link" href="#acks"></a></h2>
+   <p>Special thanks to Florian Rivoal for creating the initial draft of the <a href="#experimental">§ 3.2.1 Experimentation and Unstable Features</a> recommendations.</p>
+  </main>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h2 class="heading no-num no-ref settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
+  <h3 class="heading no-num no-ref settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
+  <dl>
+   <dt id="biblio-compositing">[COMPOSITING]
+   </dt><dd>Chris Harrelson. <a href="https://www.w3.org/TR/compositing-1/"><cite>Compositing and Blending Level 1</cite></a>. 21 March 2024. CRD. URL: <a href="https://www.w3.org/TR/compositing-1/">https://www.w3.org/TR/compositing-1/</a>
+   </dd><dt id="biblio-css-backgrounds-3">[CSS-BACKGROUNDS-3]
+   </dt><dd>Elika Etemad; Brad Kemper. <a href="https://www.w3.org/TR/css-backgrounds-3/"><cite>CSS Backgrounds and Borders Module Level 3</cite></a>. 11 March 2024. CRD. URL: <a href="https://www.w3.org/TR/css-backgrounds-3/">https://www.w3.org/TR/css-backgrounds-3/</a>
+   </dd><dt id="biblio-css-box-3">[CSS-BOX-3]
+   </dt><dd>Elika Etemad. <a href="https://www.w3.org/TR/css-box-3/"><cite>CSS Box Model Module Level 3</cite></a>. 11 April 2024. REC. URL: <a href="https://www.w3.org/TR/css-box-3/">https://www.w3.org/TR/css-box-3/</a>
+   </dd><dt id="biblio-css-cascade-4">[CSS-CASCADE-4]
+   </dt><dd>Elika Etemad; Tab Atkins Jr.. <a href="https://www.w3.org/TR/css-cascade-4/"><cite>CSS Cascading and Inheritance Level 4</cite></a>. 13 January 2022. CR. URL: <a href="https://www.w3.org/TR/css-cascade-4/">https://www.w3.org/TR/css-cascade-4/</a>
+   </dd><dt id="biblio-css-color-4">[CSS-COLOR-4]
+   </dt><dd>Tab Atkins Jr.; Chris Lilley; Lea Verou. <a href="https://www.w3.org/TR/css-color-4/"><cite>CSS Color Module Level 4</cite></a>. 2 May 2026. CRD. URL: <a href="https://www.w3.org/TR/css-color-4/">https://www.w3.org/TR/css-color-4/</a>
+   </dd><dt id="biblio-css-color-5">[CSS-COLOR-5]
+   </dt><dd>Chris Lilley; Una Kravets; Lea Verou. <a href="https://www.w3.org/TR/css-color-5/"><cite>CSS Color Module Level 5</cite></a>. 7 May 2026. WD. URL: <a href="https://www.w3.org/TR/css-color-5/">https://www.w3.org/TR/css-color-5/</a>
+   </dd></dl>
+  <h3 class="heading no-num no-ref settled" id="informative"><span class="content">Non-Normative References</span><a class="self-link" href="#informative"></a></h3>
+  <dl>
+   <dt id="biblio-css-align-3">[CSS-ALIGN-3]
+   </dt><dd>Elika Etemad; Tab Atkins Jr.. <a href="https://www.w3.org/TR/css-align-3/"><cite>CSS Box Alignment Module Level 3</cite></a>. 30 January 2026. WD. URL: <a href="https://www.w3.org/TR/css-align-3/">https://www.w3.org/TR/css-align-3/</a>
+   </dd><dt id="biblio-css-animations-1">[CSS-ANIMATIONS-1]
+   </dt><dd>David Baron; et al. <a href="https://www.w3.org/TR/css-animations-1/"><cite>CSS Animations Level 1</cite></a>. 2 March 2023. WD. URL: <a href="https://www.w3.org/TR/css-animations-1/">https://www.w3.org/TR/css-animations-1/</a>
+   </dd><dt id="biblio-css-break-3">[CSS-BREAK-3]
+   </dt><dd>Rossen Atanassov; Elika Etemad. <a href="https://www.w3.org/TR/css-break-3/"><cite>CSS Fragmentation Module Level 3</cite></a>. 4 December 2018. CR. URL: <a href="https://www.w3.org/TR/css-break-3/">https://www.w3.org/TR/css-break-3/</a>
+   </dd><dt id="biblio-css-cascade-3">[CSS-CASCADE-3]
+   </dt><dd>Elika Etemad; Tab Atkins Jr.. <a href="https://www.w3.org/TR/css-cascade-3/"><cite>CSS Cascading and Inheritance Level 3</cite></a>. 11 February 2021. REC. URL: <a href="https://www.w3.org/TR/css-cascade-3/">https://www.w3.org/TR/css-cascade-3/</a>
+   </dd><dt id="biblio-css-cascade-5">[CSS-CASCADE-5]
+   </dt><dd>Elika Etemad; Miriam Suzanne; Tab Atkins Jr.. <a href="https://www.w3.org/TR/css-cascade-5/"><cite>CSS Cascading and Inheritance Level 5</cite></a>. 13 January 2022. CR. URL: <a href="https://www.w3.org/TR/css-cascade-5/">https://www.w3.org/TR/css-cascade-5/</a>
+   </dd><dt id="biblio-css-color-3">[CSS-COLOR-3]
+   </dt><dd>Tantek Çelik; Chris Lilley; David Baron. <a href="https://www.w3.org/TR/css-color-3/"><cite>CSS Color Module Level 3</cite></a>. 18 January 2022. REC. URL: <a href="https://www.w3.org/TR/css-color-3/">https://www.w3.org/TR/css-color-3/</a>
+   </dd></dl>
+
+
+</body></html>

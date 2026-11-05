@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>
+		move
+	</title><g fill="#fff"><path d="M13 3.5V4h-2v5h5V7h.5l3 3-3 3H16v-2h-5v5h2v.5l-3 3-3-3V16h2v-5H4v2h-.5l-3-3 3-3H4v2h5V4H7v-.5l3-3z"/></g></svg>

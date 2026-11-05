@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><title>Box model</title>
+<style>
+.box { background-color: #cde; }
+.w200 { width: 200px; }
+.h50 { height: 50px; }
+.pad { padding: 10px; }
+.pad4 { padding: 5px 10px 15px 20px; }
+.mar { margin: 20px; }
+.border { border: 3px solid #336; }
+.bb { box-sizing: border-box; }
+</style></head>
+<body>
+<div class="box">Plain box</div>
+<div class="box w200">Width 200</div>
+<div class="box w200 h50">Width 200 height 50</div>
+<div class="box pad">Padding 10</div>
+<div class="box pad4">Padding 5 10 15 20</div>
+<div class="box mar">Margin 20</div>
+<div class="box border">Border 3</div>
+<div class="box w200 pad border">Width 200 padding border</div>
+<div class="box w200 pad border bb">Border-box 200</div>
+</body></html>

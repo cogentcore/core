@@ -215,6 +215,170 @@ func (i *Overflows) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Overflows")
 }
 
+var _PositionsValues = []Positions{0, 1, 2, 3}
+
+// PositionsN is the highest valid value for type Positions, plus one.
+const PositionsN Positions = 4
+
+var _PositionsValueMap = map[string]Positions{`static`: 0, `relative`: 1, `absolute`: 2, `fixed`: 3}
+
+var _PositionsDescMap = map[Positions]string{0: `PositionStatic is the default: the widget is in the layout of its parent.`, 1: `PositionRelative is in the layout of its parent, and then offset from its position in the layout by [Style.Inset], without changing the layout. It is also the containing block of the widgets in it that are [PositionAbsolute].`, 2: `PositionAbsolute is not in the layout of its parent: it is positioned by [Style.Inset] relative to its containing block, which is the nearest widget that it is in that is not [PositionStatic], or the scene. Its size is that of its content, unless both of the opposite sides of an inset are set, in which case it fills the space between them.`, 3: `PositionFixed is like [PositionAbsolute], but positioned relative to the scene, so that it does not scroll.`}
+
+var _PositionsMap = map[Positions]string{0: `static`, 1: `relative`, 2: `absolute`, 3: `fixed`}
+
+// String returns the string representation of this Positions value.
+func (i Positions) String() string { return enums.String(i, _PositionsMap) }
+
+// SetString sets the Positions value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Positions) SetString(s string) error {
+	return enums.SetString(i, s, _PositionsValueMap, "Positions")
+}
+
+// Int64 returns the Positions value as an int64.
+func (i Positions) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Positions value from an int64.
+func (i *Positions) SetInt64(in int64) { *i = Positions(in) }
+
+// Desc returns the description of the Positions value.
+func (i Positions) Desc() string { return enums.Desc(i, _PositionsDescMap) }
+
+// PositionsValues returns all possible values for the type Positions.
+func PositionsValues() []Positions { return _PositionsValues }
+
+// Values returns all possible values for the type Positions.
+func (i Positions) Values() []enums.Enum { return enums.Values(_PositionsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Positions) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Positions) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "Positions")
+}
+
+var _FloatsValues = []Floats{0, 1, 2}
+
+// FloatsN is the highest valid value for type Floats, plus one.
+const FloatsN Floats = 3
+
+var _FloatsValueMap = map[string]Floats{`none`: 0, `left`: 1, `right`: 2}
+
+var _FloatsDescMap = map[Floats]string{0: `FloatNone is the default: the widget does not float.`, 1: `FloatLeft floats the widget to the left of its parent.`, 2: `FloatRight floats the widget to the right of its parent.`}
+
+var _FloatsMap = map[Floats]string{0: `none`, 1: `left`, 2: `right`}
+
+// String returns the string representation of this Floats value.
+func (i Floats) String() string { return enums.String(i, _FloatsMap) }
+
+// SetString sets the Floats value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Floats) SetString(s string) error { return enums.SetString(i, s, _FloatsValueMap, "Floats") }
+
+// Int64 returns the Floats value as an int64.
+func (i Floats) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Floats value from an int64.
+func (i *Floats) SetInt64(in int64) { *i = Floats(in) }
+
+// Desc returns the description of the Floats value.
+func (i Floats) Desc() string { return enums.Desc(i, _FloatsDescMap) }
+
+// FloatsValues returns all possible values for the type Floats.
+func FloatsValues() []Floats { return _FloatsValues }
+
+// Values returns all possible values for the type Floats.
+func (i Floats) Values() []enums.Enum { return enums.Values(_FloatsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Floats) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Floats) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Floats") }
+
+var _ClearsValues = []Clears{0, 1, 2, 3}
+
+// ClearsN is the highest valid value for type Clears, plus one.
+const ClearsN Clears = 4
+
+var _ClearsValueMap = map[string]Clears{`none`: 0, `left`: 1, `right`: 2, `both`: 3}
+
+var _ClearsDescMap = map[Clears]string{0: `ClearNone is the default: the widget is not moved below floats.`, 1: `ClearLeft moves the widget below the floats on the left.`, 2: `ClearRight moves the widget below the floats on the right.`, 3: `ClearBoth moves the widget below all of the floats.`}
+
+var _ClearsMap = map[Clears]string{0: `none`, 1: `left`, 2: `right`, 3: `both`}
+
+// String returns the string representation of this Clears value.
+func (i Clears) String() string { return enums.String(i, _ClearsMap) }
+
+// SetString sets the Clears value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Clears) SetString(s string) error { return enums.SetString(i, s, _ClearsValueMap, "Clears") }
+
+// Int64 returns the Clears value as an int64.
+func (i Clears) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Clears value from an int64.
+func (i *Clears) SetInt64(in int64) { *i = Clears(in) }
+
+// Desc returns the description of the Clears value.
+func (i Clears) Desc() string { return enums.Desc(i, _ClearsDescMap) }
+
+// ClearsValues returns all possible values for the type Clears.
+func ClearsValues() []Clears { return _ClearsValues }
+
+// Values returns all possible values for the type Clears.
+func (i Clears) Values() []enums.Enum { return enums.Values(_ClearsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Clears) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Clears) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Clears") }
+
+var _BoxSizingsValues = []BoxSizings{0, 1}
+
+// BoxSizingsN is the highest valid value for type BoxSizings, plus one.
+const BoxSizingsN BoxSizings = 2
+
+var _BoxSizingsValueMap = map[string]BoxSizings{`content-box`: 0, `border-box`: 1}
+
+var _BoxSizingsDescMap = map[BoxSizings]string{0: `BoxContentBox is the default: the sizes are of the content, without the padding and border.`, 1: `BoxBorderBox is for sizes that include the padding and border.`}
+
+var _BoxSizingsMap = map[BoxSizings]string{0: `content-box`, 1: `border-box`}
+
+// String returns the string representation of this BoxSizings value.
+func (i BoxSizings) String() string { return enums.String(i, _BoxSizingsMap) }
+
+// SetString sets the BoxSizings value from its string representation,
+// and returns an error if the string is invalid.
+func (i *BoxSizings) SetString(s string) error {
+	return enums.SetString(i, s, _BoxSizingsValueMap, "BoxSizings")
+}
+
+// Int64 returns the BoxSizings value as an int64.
+func (i BoxSizings) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the BoxSizings value from an int64.
+func (i *BoxSizings) SetInt64(in int64) { *i = BoxSizings(in) }
+
+// Desc returns the description of the BoxSizings value.
+func (i BoxSizings) Desc() string { return enums.Desc(i, _BoxSizingsDescMap) }
+
+// BoxSizingsValues returns all possible values for the type BoxSizings.
+func BoxSizingsValues() []BoxSizings { return _BoxSizingsValues }
+
+// Values returns all possible values for the type BoxSizings.
+func (i BoxSizings) Values() []enums.Enum { return enums.Values(_BoxSizingsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i BoxSizings) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *BoxSizings) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "BoxSizings")
+}
+
 var _ObjectFitsValues = []ObjectFits{0, 1, 2, 3, 4}
 
 // ObjectFitsN is the highest valid value for type ObjectFits, plus one.

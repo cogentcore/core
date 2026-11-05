@@ -1,0 +1,1689 @@
+<!DOCTYPE html><html lang="en" data-theme="auto"><head>
+
+
+
+  
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#00add8"/>
+<link rel="canonical" href="https://go.dev/doc/effective_go"/>
+<link rel="stylesheet" href="files/4cee35f2f3f7.css"/>
+<link rel="stylesheet" href="files/119de061d806.css"/>
+<link rel="icon" href="files/e8559a2a4077.png" sizes="any"/>
+<link rel="apple-touch-icon" href="files/ff5fe25a3987.png"/>
+<link rel="icon" href="files/8e6581b6b4e8.svg" type="image/svg+xml"/>
+<link rel="me" href="https://hachyderm.io/@golang"/>
+
+  
+  
+  
+
+<meta name="og:url" content="https://go.dev/doc/effective_go"/>
+<meta name="og:title" content="Effective Go - The Go Programming Language"/>
+<title>Effective Go - The Go Programming Language</title>
+
+<meta name="og:image" content="https://go.dev/doc/gopher/gopher5logo.jpg"/>
+<meta name="twitter:image" content="https://go.dev/doc/gopher/gopherbelly300.jpg"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:site" content="@golang"/>
+</head>
+<body class="Site">
+  
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W8MVQXG" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  
+
+
+
+<header class="Site-header js-siteHeader">
+  <div class="Header Header--dark">
+    <nav class="Header-nav">
+      <a href="https://go.dev/">
+        <img class="js-headerLogo Header-logo" src="files/eedf9823f84b.svg" alt="Go"/>
+      </a>
+      <div class="skip-navigation-wrapper">
+        <a aria-label="Skip to main content" class="skip-to-content-link" href="#main-content"> Skip to Main Content </a>
+      </div>
+      <div class="Header-rightContent">
+        <ul class="Header-menu">
+          <li class="Header-menuItem ">
+            <a aria-describedby="dropdown-description" aria-label="Why Go" class="js-desktop-menu-hover" href="#">
+              Why Go <i aria-hidden="true" class="material-icons">arrow_drop_down</i>
+            </a>
+            <div class="screen-reader-only" id="dropdown-description" hidden="">
+              Press Enter to activate/deactivate dropdown
+            </div>
+              <ul class="Header-submenu js-desktop-submenu-hover" aria-label="submenu">
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/solutions/case-studies">
+                          Case Studies
+                          
+                        </a>
+                    </div>
+                    <p>Common problems companies solve with Go</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/solutions/use-cases">
+                          Use Cases
+                          
+                        </a>
+                    </div>
+                    <p>Stories about how and why companies use Go</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/security/">
+                          Security
+                          
+                        </a>
+                    </div>
+                    <p>How Go can help keep you secure by default</p>
+                  </li>
+              </ul>
+          </li>
+          <li class="Header-menuItem ">
+            <a aria-describedby="dropdown-description" aria-label="Learn" href="https://go.dev/learn/">
+              Learn 
+            </a>
+            <div class="screen-reader-only" id="dropdown-description" hidden="">
+              Press Enter to activate/deactivate dropdown
+            </div>
+          </li>
+          <li class="Header-menuItem  Header-menuItem--active">
+            <a aria-describedby="dropdown-description" aria-label="Docs" class="js-desktop-menu-hover" href="#">
+              Docs <i aria-hidden="true" class="material-icons">arrow_drop_down</i>
+            </a>
+            <div class="screen-reader-only" id="dropdown-description" hidden="">
+              Press Enter to activate/deactivate dropdown
+            </div>
+              <ul class="Header-submenu js-desktop-submenu-hover" aria-label="submenu">
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/ref/spec">
+                          Go Spec
+                          
+                        </a>
+                    </div>
+                    <p>The official Go language specification</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/doc">
+                          Go User Manual
+                          
+                        </a>
+                    </div>
+                    <p>A complete introduction to building software with Go</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://pkg.go.dev/std">
+                          Standard library
+                          
+                        </a>
+                    </div>
+                    <p>Reference documentation for Go&#39;s standard library</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/doc/devel/release">
+                          Release Notes
+                          
+                        </a>
+                    </div>
+                    <p>Learn what&#39;s new in each Go release</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/doc/effective_go">
+                          Effective Go
+                          
+                        </a>
+                    </div>
+                    <p>Tips for writing clear, performant, and idiomatic Go code</p>
+                  </li>
+              </ul>
+          </li>
+          <li class="Header-menuItem ">
+            <a aria-describedby="dropdown-description" aria-label="Packages" href="https://pkg.go.dev">
+              Packages 
+            </a>
+            <div class="screen-reader-only" id="dropdown-description" hidden="">
+              Press Enter to activate/deactivate dropdown
+            </div>
+          </li>
+          <li class="Header-menuItem ">
+            <a aria-describedby="dropdown-description" aria-label="Community" class="js-desktop-menu-hover" href="#">
+              Community <i aria-hidden="true" class="material-icons">arrow_drop_down</i>
+            </a>
+            <div class="screen-reader-only" id="dropdown-description" hidden="">
+              Press Enter to activate/deactivate dropdown
+            </div>
+              <ul class="Header-submenu js-desktop-submenu-hover" aria-label="submenu">
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/talks/">
+                          Recorded Talks
+                          
+                        </a>
+                    </div>
+                    <p>Videos from prior events</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://www.meetup.com/pro/go">
+                          Meetups
+                           <i class="material-icons">open_in_new</i>
+                        </a>
+                    </div>
+                    <p>Meet other local Go developers</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/wiki/Conferences">
+                          Conferences
+                           <i class="material-icons">open_in_new</i>
+                        </a>
+                    </div>
+                    <p>Learn and network with Go developers from around the world</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/blog">
+                          Go blog
+                          
+                        </a>
+                    </div>
+                    <p>The Go project&#39;s official blog.</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        <a href="https://go.dev/help">
+                          Go project
+                          
+                        </a>
+                    </div>
+                    <p>Get help and stay informed from Go</p>
+                  </li>
+                  <li class="Header-submenuItem">
+                    <div>
+                        Get connected
+                    </div>
+                    <p></p>
+                      <div class="Header-socialIcons">
+                        
+                        <a aria-label="Get connected with google-groups (Opens in new window)" class="Header-socialIcon" href="https://groups.google.com/g/golang-nuts"><img src="files/ca85b7c24cf3.svg"/></a>
+                        <a aria-label="Get connected with github (Opens in new window)" class="Header-socialIcon" href="https://github.com/golang"><img src="files/375c25733bd7.svg"/></a>
+                        <a aria-label="Get connected with bluesky (Opens in new window)" class="Header-socialIcon" href="https://bsky.app/profile/golang.org"><img src="files/a193d26ddaba.svg"/></a>
+                        <a aria-label="Get connected with mastodon (Opens in new window)" class="Header-socialIcon" href="https://hachyderm.io/@golang"><img src="files/3ed21c730e96.svg"/></a>
+                        <a aria-label="Get connected with twitter (Opens in new window)" class="Header-socialIcon" href="https://twitter.com/golang"><img src="files/2591a24d0a25.svg"/></a>
+                        <a aria-label="Get connected with reddit (Opens in new window)" class="Header-socialIcon" href="https://www.reddit.com/r/golang/"><img src="files/bc3d69d33d4c.svg"/></a>
+                        <a aria-label="Get connected with slack (Opens in new window)" class="Header-socialIcon" href="https://invite.slack.golangbridge.org/"><img src="files/f23c542efbf8.svg"/></a>
+                        <a aria-label="Get connected with stack-overflow (Opens in new window)" class="Header-socialIcon" href="https://stackoverflow.com/tags/go"><img src="files/e37c1d9b7171.svg"/></a>
+                      </div>
+                  </li>
+              </ul>
+          </li>
+        </ul>
+        <button class="Header-navOpen js-headerMenuButton Header-navOpen--white" aria-label="Open navigation.">
+        </button>
+      </div>
+    </nav>
+    
+  </div>
+</header>
+<aside class="NavigationDrawer js-header">
+  <nav class="NavigationDrawer-nav">
+    <div class="NavigationDrawer-header">
+      <a href="https://go.dev/">
+        <img class="NavigationDrawer-logo" src="files/0bea998395c1.svg" alt="Go."/>
+      </a>
+    </div>
+    <ul class="NavigationDrawer-list">
+        
+          <li class="NavigationDrawer-listItem js-mobile-subnav-trigger  NavigationDrawer-hasSubnav">
+            <a href="#"><span>Why Go</span> <i class="material-icons">navigate_next</i></a>
+
+            <div class="NavigationDrawer NavigationDrawer-submenuItem">
+              <nav class="NavigationDrawer-nav">
+                <div class="NavigationDrawer-header">
+                  <a href="#"><i class="material-icons">navigate_before</i>Why Go</a>
+                </div>
+                <ul class="NavigationDrawer-list">
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/solutions/case-studies">
+                          Case Studies
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/solutions/use-cases">
+                          Use Cases
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/security/">
+                          Security
+                          
+                        </a>
+                      
+                    </li>
+                </ul>
+              </nav></div>
+            
+          </li>
+
+        
+        
+          <li class="NavigationDrawer-listItem ">
+            <a href="https://go.dev/learn/">Learn</a>
+          </li>
+        
+        
+          <li class="NavigationDrawer-listItem js-mobile-subnav-trigger  NavigationDrawer-listItem--active NavigationDrawer-hasSubnav">
+            <a href="#"><span>Docs</span> <i class="material-icons">navigate_next</i></a>
+
+            <div class="NavigationDrawer NavigationDrawer-submenuItem">
+              <nav class="NavigationDrawer-nav">
+                <div class="NavigationDrawer-header">
+                  <a href="#"><i class="material-icons">navigate_before</i>Docs</a>
+                </div>
+                <ul class="NavigationDrawer-list">
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/ref/spec">
+                          Go Spec
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/doc">
+                          Go User Manual
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://pkg.go.dev/std">
+                          Standard library
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/doc/devel/release">
+                          Release Notes
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/doc/effective_go">
+                          Effective Go
+                          
+                        </a>
+                      
+                    </li>
+                </ul>
+              </nav></div>
+            
+          </li>
+
+        
+        
+          <li class="NavigationDrawer-listItem ">
+            <a href="https://pkg.go.dev">Packages</a>
+          </li>
+        
+        
+          <li class="NavigationDrawer-listItem js-mobile-subnav-trigger  NavigationDrawer-hasSubnav">
+            <a href="#"><span>Community</span> <i class="material-icons">navigate_next</i></a>
+
+            <div class="NavigationDrawer NavigationDrawer-submenuItem">
+              <nav class="NavigationDrawer-nav">
+                <div class="NavigationDrawer-header">
+                  <a href="#"><i class="material-icons">navigate_before</i>Community</a>
+                </div>
+                <ul class="NavigationDrawer-list">
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/talks/">
+                          Recorded Talks
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://www.meetup.com/pro/go">
+                          Meetups
+                           <i class="material-icons">open_in_new</i>
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/wiki/Conferences">
+                          Conferences
+                           <i class="material-icons">open_in_new</i>
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/blog">
+                          Go blog
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <a href="https://go.dev/help">
+                          Go project
+                          
+                        </a>
+                      
+                    </li>
+                    <li class="NavigationDrawer-listItem">
+                        <div>Get connected</div>
+                        <div class="Header-socialIcons">
+                          
+                            <a class="Header-socialIcon" href="https://groups.google.com/g/golang-nuts"><img src="files/ca85b7c24cf3.svg"/></a>
+                            <a class="Header-socialIcon" href="https://github.com/golang"><img src="files/375c25733bd7.svg"/></a>
+                            <a class="Header-socialIcon" href="https://bsky.app/profile/golang.org"><img src="files/a193d26ddaba.svg"/></a>
+                            <a class="Header-socialIcon" href="https://hachyderm.io/@golang"><img src="files/3ed21c730e96.svg"/></a>
+                            <a class="Header-socialIcon" href="https://twitter.com/golang"><img src="files/2591a24d0a25.svg"/></a>
+                            <a class="Header-socialIcon" href="https://www.reddit.com/r/golang/"><img src="files/bc3d69d33d4c.svg"/></a>
+                            <a class="Header-socialIcon" href="https://invite.slack.golangbridge.org/"><img src="files/f23c542efbf8.svg"/></a>
+                            <a class="Header-socialIcon" href="https://stackoverflow.com/tags/go"><img src="files/e37c1d9b7171.svg"/></a>
+                        </div>
+                    </li>
+                </ul>
+              </nav></div>
+            
+          </li>
+
+        
+    </ul>
+  </nav>
+</aside>
+<div class="NavigationDrawer-scrim js-scrim" role="presentation"></div>
+<main class="SiteContent SiteContent--default" id="main-content">
+  
+
+
+<article class="Doc Article">
+
+
+
+  
+<ol class="SiteBreadcrumb">
+  
+<li class="BreadcrumbNav-li ">
+  <a class="BreadcrumbNav-link" href="https://go.dev/doc/">
+  Documentation
+  </a>
+</li>
+<li class="BreadcrumbNav-li active">
+  <a class="BreadcrumbNav-link" href="https://go.dev/doc/effective_go">
+  Effective Go
+  </a>
+</li>
+</ol>
+
+
+
+<h1>Effective Go</h1>
+
+
+
+
+
+
+<div id="nav" class="TOC"></div>
+
+
+
+
+
+
+
+
+
+<div class="Note">
+<strong>Note:</strong> This document was written for Go&#39;s release in 2009 and
+is not actively updated. While it remains a good guide for using the core language,
+it does not cover significant changes to the language (generics), ecosystem (modules),
+or libraries added since. See <a href="https://go.dev/issue/28782">issue 28782</a> for context.
+For a complete list of changes,
+see the <a href="https://go.dev/doc/devel/release">release notes</a>.
+</div>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>
+Go is an open-source programming language that focuses on simplicity, reliability,
+and efficiency, specifically designed to make it easy to build software at scale.
+Although it borrows ideas from existing languages,
+it has unusual properties that make effective Go programs
+different in character from programs written in its relatives.
+A straightforward translation of a C++ or Java program into Go
+is unlikely to produce a satisfactory result—Java programs
+are written in Java, not Go.
+On the other hand, thinking about the problem from a Go
+perspective could produce a successful but quite different
+program.
+In other words,
+to write Go well, it&#39;s important to understand its properties
+and idioms.
+It&#39;s also important to know the established conventions for
+programming in Go, such as naming, formatting, program
+construction, and so on, so that programs you write
+will be easy for other Go programmers to understand.
+</p>
+
+<p>
+This document gives tips for writing clear, idiomatic Go code.
+It augments the <a href="https://go.dev/ref/spec">language specification</a>,
+the <a href="https://go.dev/tour/">Tour of Go</a>,
+and <a href="https://go.dev/doc/code.html">How to Write Go Code</a>,
+all of which you
+should read first.
+</p>
+
+
+
+<h3 id="examples">Examples</h3>
+
+<p>
+The <a href="https://go.dev/src/">Go package sources</a>
+are intended to serve not
+only as the core library but also as examples of how to
+use the language.
+Moreover, many of the packages contain working, self-contained
+executable examples you can run directly from the
+<a href="https://go.dev/">go.dev</a> web site, such as
+<a href="https://go.dev/pkg/strings/#example-Map">this one</a> (if
+necessary, click on the word &#34;Example&#34; to open it up).
+If you have a question about how to approach a problem or how something
+might be implemented, the documentation, code and examples in the
+library can provide answers, ideas and
+background.
+</p>
+
+
+<h2 id="formatting">Formatting</h2>
+
+<p>
+Formatting issues are the most contentious
+but the least consequential.
+People can adapt to different formatting styles
+but it&#39;s better if they don&#39;t have to, and
+less time is devoted to the topic
+if everyone adheres to the same style.
+The problem is how to approach this Utopia without a long
+prescriptive style guide.
+</p>
+
+<p>
+With Go we take an unusual
+approach and let the machine
+take care of most formatting issues.
+The <code>gofmt</code> program
+(also available as <code>go fmt</code>, which
+operates at the package level rather than source file level)
+reads a Go program
+and emits the source in a standard style of indentation
+and vertical alignment, retaining and if necessary
+reformatting comments.
+If you want to know how to handle some new layout
+situation, run <code>gofmt</code>; if the answer doesn&#39;t
+seem right, rearrange your program (or file a bug about <code>gofmt</code>),
+don&#39;t work around it.
+</p>
+
+<p>
+As an example, there&#39;s no need to spend time lining up
+the comments on the fields of a structure.
+<code>Gofmt</code> will do that for you.  Given the
+declaration
+</p>
+
+<pre>type T struct {
+    name string // name of the object
+    value int // its value
+}
+</pre>
+
+<p>
+<code>gofmt</code> will line up the columns:
+</p>
+
+<pre>type T struct {
+    name    string // name of the object
+    value   int    // its value
+}
+</pre>
+
+<p>
+All Go code in the standard packages has been formatted with <code>gofmt</code>.
+</p>
+
+
+<p>
+Some formatting details remain.  Very briefly:
+</p>
+
+<dl>
+    <dt>Indentation</dt>
+    <dd>We use tabs for indentation and <code>gofmt</code> emits them by default.
+    Use spaces only if you must.
+    </dd>
+    <dt>Line length</dt>
+    <dd>
+    Go has no line length limit.  Don&#39;t worry about overflowing a punched card.
+    If a line feels too long, wrap it and indent with an extra tab.
+    </dd>
+    <dt>Parentheses</dt>
+    <dd>
+    Go needs fewer parentheses than C and Java: control structures (<code>if</code>,
+    <code>for</code>, <code>switch</code>) do not have parentheses in
+    their syntax.
+    Also, the operator precedence hierarchy is shorter and clearer, so
+<pre>x&lt;&lt;8 + y&lt;&lt;16
+</pre>
+    means what the spacing implies, unlike in the other languages.
+    </dd>
+</dl>
+
+<h2 id="commentary">Commentary</h2>
+
+<p>
+Go provides C-style <code>/* */</code> block comments
+and C++-style <code>//</code> line comments.
+Line comments are the norm;
+block comments appear mostly as package comments, but
+are useful within an expression or to disable large swaths of code.
+</p>
+
+<p>
+Comments that appear before top-level declarations, with no intervening newlines,
+are considered to document the declaration itself.
+These “doc comments” are the primary documentation for a given Go package or command.
+For more about doc comments, see “<a href="https://go.dev/doc/comment">Go Doc Comments</a>”.
+</p>
+
+<h2 id="names">Names</h2>
+
+<p>
+Names are as important in Go as in any other language.
+They even have semantic effect:
+the visibility of a name outside a package is determined by whether its
+first character is upper case.
+It&#39;s therefore worth spending a little time talking about naming conventions
+in Go programs.
+</p>
+
+
+<h3 id="package-names">Package names</h3>
+
+<p>
+When a package is imported, the package name becomes an accessor for the
+contents.  After
+</p>
+
+<pre>import &#34;bytes&#34;
+</pre>
+
+<p>
+the importing package can talk about <code>bytes.Buffer</code>.  It&#39;s
+helpful if everyone using the package can use the same name to refer to
+its contents, which implies that the package name should be good:
+short, concise, evocative.  By convention, packages are given
+lower case, single-word names; there should be no need for underscores
+or mixedCaps.
+Err on the side of brevity, since everyone using your
+package will be typing that name.
+And don&#39;t worry about collisions <i>a priori</i>.
+The package name is only the default name for imports; it need not be unique
+across all source code, and in the rare case of a collision the
+importing package can choose a different name to use locally.
+In any case, confusion is rare because the file name in the import
+determines just which package is being used.
+</p>
+
+<p>
+Another convention is that the package name is the base name of
+its source directory;
+the package in <code>src/encoding/base64</code>
+is imported as <code>&#34;encoding/base64&#34;</code> but has name <code>base64</code>,
+not <code>encoding_base64</code> and not <code>encodingBase64</code>.
+</p>
+
+<p>
+The importer of a package will use the name to refer to its contents,
+so exported names in the package can use that fact
+to avoid repetition.
+(Don&#39;t use the <code>import .</code> notation, which can simplify
+tests that must run outside the package they are testing, but should otherwise be avoided.)
+For instance, the buffered reader type in the <code>bufio</code> package is called <code>Reader</code>,
+not <code>BufReader</code>, because users see it as <code>bufio.Reader</code>,
+which is a clear, concise name.
+Moreover,
+because imported entities are always addressed with their package name, <code>bufio.Reader</code>
+does not conflict with <code>io.Reader</code>.
+Similarly, the function to make new instances of <code>ring.Ring</code>—which
+is the definition of a <em>constructor</em> in Go—would
+normally be called <code>NewRing</code>, but since
+<code>Ring</code> is the only type exported by the package, and since the
+package is called <code>ring</code>, it&#39;s called just <code>New</code>,
+which clients of the package see as <code>ring.New</code>.
+Use the package structure to help you choose good names.
+</p>
+
+<p>
+Another short example is <code>once.Do</code>;
+<code>once.Do(setup)</code> reads well and would not be improved by
+writing <code>once.DoOrWaitUntilDone(setup)</code>.
+Long names don&#39;t automatically make things more readable.
+A helpful doc comment can often be more valuable than an extra long name.
+</p>
+
+<h3 id="Getters">Getters</h3>
+
+<p>
+Go doesn&#39;t provide automatic support for getters and setters.
+There&#39;s nothing wrong with providing getters and setters yourself,
+and it&#39;s often appropriate to do so, but it&#39;s neither idiomatic nor necessary
+to put <code>Get</code> into the getter&#39;s name.  If you have a field called
+<code>owner</code> (lower case, unexported), the getter method should be
+called <code>Owner</code> (upper case, exported), not <code>GetOwner</code>.
+The use of upper-case names for export provides the hook to discriminate
+the field from the method.
+A setter function, if needed, will likely be called <code>SetOwner</code>.
+Both names read well in practice:
+</p>
+<pre>owner := obj.Owner()
+if owner != user {
+    obj.SetOwner(user)
+}
+</pre>
+
+<h3 id="interface-names">Interface names</h3>
+
+<p>
+By convention, one-method interfaces are named by
+the method name plus an -er suffix or similar modification
+to construct an agent noun: <code>Reader</code>,
+<code>Writer</code>, <code>Formatter</code>,
+<code>CloseNotifier</code> etc.
+</p>
+
+<p>
+There are a number of such names and it&#39;s productive to honor them and the function
+names they capture.
+<code>Read</code>, <code>Write</code>, <code>Close</code>, <code>Flush</code>,
+<code>String</code> and so on have
+canonical signatures and meanings.  To avoid confusion,
+don&#39;t give your method one of those names unless it
+has the same signature and meaning.
+Conversely, if your type implements a method with the
+same meaning as a method on a well-known type,
+give it the same name and signature;
+call your string-converter method <code>String</code> not <code>ToString</code>.
+</p>
+
+<h3 id="mixed-caps">MixedCaps</h3>
+
+<p>
+Finally, the convention in Go is to use <code>MixedCaps</code>
+or <code>mixedCaps</code> rather than underscores to write
+multiword names.
+</p>
+
+<h2 id="semicolons">Semicolons</h2>
+
+<p>
+Like C, Go&#39;s formal grammar uses semicolons to terminate statements,
+but unlike in C, those semicolons do not appear in the source.
+Instead the lexer uses a simple rule to insert semicolons automatically
+as it scans, so the input text is mostly free of them.
+</p>
+
+<p>
+The rule is this. If the last token before a newline is an identifier
+(which includes words like <code>int</code> and <code>float64</code>),
+a basic literal such as a number or string constant, or one of the
+tokens
+</p>
+<pre>break continue fallthrough return ++ -- ) }
+</pre>
+<p>
+the lexer always inserts a semicolon after the token.
+This could be summarized as, “if the newline comes
+after a token that could end a statement, insert a semicolon”.
+</p>
+
+<p>
+A semicolon can also be omitted immediately before a closing brace,
+so a statement such as
+</p>
+<pre>    go func() { for { dst &lt;- &lt;-src } }()
+</pre>
+<p>
+needs no semicolons.
+Idiomatic Go programs have semicolons only in places such as
+<code>for</code> loop clauses, to separate the initializer, condition, and
+continuation elements.  They are also necessary to separate multiple
+statements on a line, should you write code that way.
+</p>
+
+<p>
+One consequence of the semicolon insertion rules
+is that you cannot put the opening brace of a
+control structure (<code>if</code>, <code>for</code>, <code>switch</code>,
+or <code>select</code>) on the next line.  If you do, a semicolon
+will be inserted before the brace, which could cause unwanted
+effects.  Write them like this
+</p>
+
+<pre>if i &lt; f() {
+    g()
+}
+</pre>
+<p>
+not like this
+</p>
+<pre>if i &lt; f()  // wrong!
+{           // wrong!
+    g()
+}
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</main>
+<footer class="Site-footer">
+  <div class="Footer">
+    <div class="Container">
+      <div class="Footer-links">
+          <div class="Footer-linkColumn">
+            <a aria-describedby="footer-description" class="Footer-link Footer-link--primary" href="https://go.dev/solutions/">
+              Why Go
+            </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/solutions/use-cases">
+                Use Cases
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/solutions/case-studies">
+                Case Studies
+              </a>
+          </div>
+          <div class="Footer-linkColumn">
+            <a aria-describedby="footer-description" class="Footer-link Footer-link--primary" href="https://go.dev/learn/">
+              Get Started
+            </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/play">
+                Playground
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/tour/">
+                Tour
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://stackoverflow.com/questions/tagged/go?tab=Newest">
+                Stack Overflow
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/help/">
+                Help
+              </a>
+          </div>
+          <div class="Footer-linkColumn">
+            <a aria-describedby="footer-description" class="Footer-link Footer-link--primary" href="https://pkg.go.dev">
+              Packages
+            </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/pkg/">
+                Standard Library
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://pkg.go.dev/about">
+                About Go Packages
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://pkg.go.dev/api">
+                pkg.go.dev API
+              </a>
+          </div>
+          <div class="Footer-linkColumn">
+            <a aria-describedby="footer-description" class="Footer-link Footer-link--primary" href="https://go.dev/project">
+              About
+            </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/dl/">
+                Download
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/blog/">
+                Blog
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://github.com/golang/go/issues">
+                Issue Tracker
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/doc/devel/release">
+                Release Notes
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/brand">
+                Brand Guidelines
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://go.dev/conduct">
+                Code of Conduct
+              </a>
+          </div>
+          <div class="Footer-linkColumn">
+            <a aria-describedby="footer-description" class="Footer-link Footer-link--primary" href="https://go.dev/wiki/#the-go-community">
+              Connect
+            </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://bsky.app/profile/golang.org">
+                Bluesky
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://hachyderm.io/@golang">
+                Mastodon
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://www.twitter.com/golang">
+                Twitter
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://github.com/golang">
+                GitHub
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://invite.slack.golangbridge.org/">
+                Slack
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://reddit.com/r/golang">
+                r/golang
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://www.meetup.com/pro/go">
+                Meetup
+              </a>
+              <a aria-describedby="footer-description" class="Footer-link" href="https://golangweekly.com/">
+                Golang Weekly
+              </a>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="screen-reader-only" id="footer-description" hidden="">
+          Opens in new window.
+  </div>
+  <div class="Footer">
+    <div class="Container Container--fullBleed">
+      <div class="Footer-bottom">
+        <img class="Footer-gopher" src="files/7e325bfe863d.svg" alt="The Go Gopher"/>
+        <ul class="Footer-listRow">
+          <li class="Footer-listItem">
+            <a aria-describedby="footer-description" href="https://go.dev/copyright">Copyright</a>
+          </li>
+          <li class="Footer-listItem">
+            <a aria-describedby="footer-description" href="https://go.dev/tos">Terms of Service</a>
+          </li>
+          <li class="Footer-listItem">
+            <a aria-describedby="footer-description" href="http://www.google.com/intl/en/policies/privacy/" rel="noopener" target="_blank">
+              Privacy Policy
+            </a>
+            </li>
+          <li class="Footer-listItem">
+            <a aria-describedby="footer-description" href="https://go.dev/s/website-issue" rel="noopener" target="_blank">
+              Report an Issue
+            </a>
+          </li>
+          <li class="Footer-listItem go-Footer-listItem">
+            <button class="go-Button go-Button--text go-Footer-toggleTheme js-toggleTheme" aria-label="Toggle theme">
+              <img data-value="auto" class="go-Icon go-Icon--inverted" height="24" width="24" src="files/09e87c3db65d.svg" alt="System theme"/>
+              <img data-value="dark" class="go-Icon go-Icon--inverted" height="24" width="24" src="files/3878d0e448cd.svg" alt="Dark theme"/>
+              <img data-value="light" class="go-Icon go-Icon--inverted" height="24" width="24" src="files/d8669399a87e.svg" alt="Light theme"/>
+            </button>
+          </li>
+        </ul>
+        <a class="Footer-googleLogo" href="https://google.com" rel="noopener" target="_blank">
+          <img class="Footer-googleLogoImg" src="files/c448627965b5.png" alt="Google logo"/>
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+</footer>
+<section class="Cookie-notice js-cookieNotice">
+  <div>go.dev uses cookies from Google to deliver and enhance the quality of its services and to
+  analyze traffic. <a href="https://policies.google.com/technologies/cookies" target="_blank">Learn more.</a></div>
+  <div><button class="go-Button">Okay</button></div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

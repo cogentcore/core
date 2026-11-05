@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"strings"
 	"testing"
@@ -22,7 +23,9 @@ func treeDump(w core.Widget) string {
 		if tx, ok := n.(*core.Text); ok {
 			fmt.Fprintf(&sb, " %q", tx.Text)
 		}
-		fmt.Fprintf(&sb, " %v\n", n.AsTree().Properties)
+		props := maps.Clone(n.AsTree().Properties)
+		delete(props, "node") // the html node, which differs in each read
+		fmt.Fprintf(&sb, " %v\n", props)
 		return tree.Continue
 	})
 	return sb.String()

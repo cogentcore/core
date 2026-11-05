@@ -1,0 +1,32 @@
+{
+	"URL": "https://go.dev/doc/effective_go",
+	"Saved": "2026-11-04T15:31:30.876444Z",
+	"Resources": {
+		"https://fonts.googleapis.com/css?family=Material+Icons": "files/4cee35f2f3f7.css",
+		"https://go.dev/css/styles.css": "files/119de061d806.css",
+		"https://go.dev/images/favicon-gopher-plain.png": "files/ff5fe25a3987.png",
+		"https://go.dev/images/favicon-gopher.png": "files/e8559a2a4077.png",
+		"https://go.dev/images/favicon-gopher.svg": "files/8e6581b6b4e8.svg",
+		"https://go.dev/images/go-logo-blue.svg": "files/0bea998395c1.svg",
+		"https://go.dev/images/go-logo-white.svg": "files/eedf9823f84b.svg",
+		"https://go.dev/images/google-white.png": "files/c448627965b5.png",
+		"https://go.dev/images/gophers/pilot-bust.svg": "files/7e325bfe863d.svg",
+		"https://go.dev/images/icons/arrow-forward-dark.svg": "files/d54102d4624d.svg",
+		"https://go.dev/images/icons/arrow-forward.svg": "files/d3c132a13559.svg",
+		"https://go.dev/images/icons/brightness_2_gm_grey_24dp.svg": "files/3878d0e448cd.svg",
+		"https://go.dev/images/icons/brightness_6_gm_grey_24dp.svg": "files/09e87c3db65d.svg",
+		"https://go.dev/images/icons/light_mode_gm_grey_24dp.svg": "files/d8669399a87e.svg",
+		"https://go.dev/images/learn/star-rating.png": "files/d0d8d43b1df9.png",
+		"https://go.dev/images/logos/social/bluesky.svg": "files/a193d26ddaba.svg",
+		"https://go.dev/images/logos/social/github.svg": "files/375c25733bd7.svg",
+		"https://go.dev/images/logos/social/google-groups.svg": "files/ca85b7c24cf3.svg",
+		"https://go.dev/images/logos/social/mastodon.svg": "files/3ed21c730e96.svg",
+		"https://go.dev/images/logos/social/reddit.svg": "files/bc3d69d33d4c.svg",
+		"https://go.dev/images/logos/social/slack.svg": "files/f23c542efbf8.svg",
+		"https://go.dev/images/logos/social/stack-overflow.svg": "files/e37c1d9b7171.svg",
+		"https://go.dev/images/logos/social/twitter.svg": "files/2591a24d0a25.svg",
+		"https://go.dev/images/menu-24px-white.svg": "files/e13bb2dd9f2b.svg",
+		"https://go.dev/images/menu-24px.svg": "files/b334fc3df10d.svg",
+		"https://go.dev/images/play-link.svg": "files/2e09dc4a71c2.svg"
+	}
+}

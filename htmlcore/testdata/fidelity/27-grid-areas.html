@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { margin: 8px; font-size: 16px; }
+.page { display: grid; grid-template: min-content 1fr min-content / 200px minmax(0,1fr);
+  grid-template-areas: 'notice notice' 'side main' 'foot foot'; gap: 0; }
+.notice { grid-area: notice; background: #eee; height: 30px; }
+.side { grid-area: side; background: #def; }
+.main { grid-area: main; display: grid; grid-template-columns: minmax(0, 400px) min-content;
+  grid-template-areas: 'title .' 'tabs tools' 'body tools'; }
+.title { grid-area: title; font-size: 24px; }
+.tabs { grid-area: tabs; background: #fed; }
+.tools { grid-area: tools; background: #efe; width: 120px; }
+.body { grid-area: body; }
+.foot { grid-area: foot; background: #ddd; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="notice">Notice</div>
+  <div class="side">Sidebar with some items<br>one<br>two<br>three</div>
+  <div class="main">
+    <div class="title">Title</div>
+    <div class="tabs">Article Talk</div>
+    <div class="tools">Tools<br>a<br>b<br>c<br>d</div>
+    <div class="body"><p>The body text of the page, which is long enough to wrap in the width of its column of the grid.</p></div>
+  </div>
+  <div class="foot">Footer</div>
+</div>
+</body>
+</html>

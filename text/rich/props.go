@@ -11,6 +11,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/styles/styleprops"
+	"strconv"
+	"strings"
 )
 
 // FromProperties sets style field values based on the given property list.
@@ -69,6 +71,15 @@ var styleFuncs = map[string]styleprops.Func{
 		case string:
 			if psz, ok := FontSizes[vt]; ok {
 				fs.Size = psz
+			} else if pct, ok := strings.CutSuffix(vt, "%"); ok {
+				// relative to the size of the surrounding text
+				if f, err := strconv.ParseFloat(strings.TrimSpace(pct), 32); err == nil {
+					fs.Size = float32(f) / 100
+				}
+			} else if em, ok := strings.CutSuffix(vt, "em"); ok {
+				if f, err := strconv.ParseFloat(strings.TrimSpace(em), 32); err == nil {
+					fs.Size = float32(f)
+				}
 			}
 		}
 	},

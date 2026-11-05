@@ -59,11 +59,14 @@ jobs:
     - name: Test
       run: go test -short -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system | grep -v video) -coverprofile cover.out -timeout 2m
 
+    # the images of the snapshots of htmlcore are files of the pages, in the repository
     - name: Upload testdata
       uses: actions/upload-artifact@v7
       with:
         name: testdata
-        path: "**/testdata/**/*.png"
+        path: |
+          **/testdata/**/*.png
+          !htmlcore/testdata/snapshots/**
 
     - name: Upload failure testdata
       uses: actions/upload-artifact@v7

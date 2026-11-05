@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"html"
 	"slices"
-	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -71,9 +70,9 @@ func pageDescription(ct *Content) string {
 		if desc != "" {
 			return tree.Break
 		}
-		if tx, ok := n.(*core.Text); ok {
-			if tx.Property("tag") == "p" && !strings.HasPrefix(tx.Text, "<em>") {
-				desc = tx.Text
+		if w, ok := n.(core.Widget); ok {
+			if text, ok := paragraphText(w); ok && !strings.HasPrefix(text, "<em>") {
+				desc = text
 				return tree.Break
 			}
 		}
@@ -87,23 +86,15 @@ func pageDescription(ct *Content) string {
 func pageTOC(w *core.Frame) []*bcontent.TOCHeading {
 	var toc []*bcontent.TOCHeading
 	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		tx, ok := cw.(*core.Text)
+		level, text, ok := headingOf(cw)
+		if !ok || cwb.Property("page-title") != nil {
+			return tree.Continue
+		}
+		id, ok := cwb.Property("id").(string)
 		if !ok {
-			return tree.Continue
+			id = cwb.Name // consistent with [core.ToHTML]
 		}
-		tag, ok := tx.Property("tag").(string)
-		if !ok || len(tag) != 2 || tag[0] != 'h' || tx.Property("page-title") != nil {
-			return tree.Continue
-		}
-		level, err := strconv.Atoi(tag[1:])
-		if err != nil {
-			return tree.Continue
-		}
-		id, ok := tx.Property("id").(string)
-		if !ok {
-			id = tx.Name // consistent with [core.ToHTML]
-		}
-		toc = append(toc, &bcontent.TOCHeading{Level: level, Text: tx.Text, ID: id})
+		toc = append(toc, &bcontent.TOCHeading{Level: level, Text: text, ID: id})
 		return tree.Continue
 	})
 	return toc

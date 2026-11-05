@@ -167,21 +167,23 @@ func (ct *Content) widgetHandler(w core.Widget) {
 	if t, ok := wb.Properties["title"]; ok {
 		title = t.(string)
 	}
-	switch x := w.(type) {
-	case *core.Text:
-		hdr := len(tag) > 0 && tag[0] == 'h'
-		x.Styler(func(s *styles.Style) {
-			if tag == "td" {
-				s.Margin.SetVertical(units.Em(0)) // use gap
-			} else {
+	hdr := len(tag) == 2 && tag[0] == 'h'
+	// the layout is from the styles of the page (CSS), with the docs font size
+	if tx, ok := w.(*core.Text); ok {
+		pdf := ct.inPDFRender
+		tx.Styler(func(s *styles.Style) {
+			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
+			if tag := htmlcore.TextTag(tx); pdf && tag != "td" && tag != "th" {
+				// the blocks of PDFs are spaced by the margins of their texts
+				// (which add), and not by the CSS margins of the page
 				s.Margin.SetVertical(units.Em(core.ConstantSpacing(0.25)))
 			}
-			s.Font.Size.Value *= core.AppearanceSettings.DocsFontSize / 100
-			s.Max.X.In(8) // big enough to not constrain PDF render
-			if hdr {
-				x.SetProperty("paginate-no-break-after", true)
-			}
 		})
+	}
+	if hdr {
+		wb.SetProperty("paginate-no-break-after", true)
+	}
+	switch x := w.(type) {
 	case *core.Image:
 		ct.widgetHandlerFigure(w, id)
 		x.OnDoubleClick(func(e events.Event) {
@@ -518,8 +520,7 @@ func (ct *Content) openHeading(heading string) {
 	}
 	tr.UnselectAll()
 	tr.Select()
-	tx := tr.Property("page-text").(*core.Text)
-	// fmt.Println("scroll to top:", tx.Text, tx.Geom.Pos.Total.Y)
+	tx := tr.Property("page-text").(core.Widget).AsWidget() // the heading
 	tx.ScrollThisToTop()
 	ct.Defer(func() {
 		tx.ScrollThisToTop() // try try again -- without this, is somewhat unreliable..

@@ -1,0 +1,140 @@
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: normal;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: bold;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: bold;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: normal;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: 300;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: 300;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: 600;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: oblique;
+  font-weight: 600;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Gill Sans;
+  font-style: normal;
+  font-weight: 1000;
+  src: url("data:,") format("embedded-opentype"),
+    url("data:,") format("woff")}
+
+@font-face {
+  font-family: My Noto Nastaliq Urdu;
+  font-style: normal;
+  font-weight: normal;
+  src: url("data:,");
+  src: url("data:,") format('embedded-opentype'),
+    url("data:,") format('woff2'),
+    url("data:,") format('woff'),
+    url("data:,") format('truetype') }
+
+@page {margin: 1.5cm 1.2cm}
+
+html {font: 10pt/1.3 Gill Sans MT, Gill Sans, My Gill Sans, sans-serif;
+  hyphens: auto; -moz-column-count: 2; -webkit-column-count: 2; -ah-columns: 2;
+  columns: 2; column-gap: 2em; widows: 2; orphans: 2}
+body > h1, .section > h2:first-child, .aside h3 {
+  letter-spacing: .051em;
+  font: normal 1.5em/1.1 OFL Sorts Mill Goudy, Noto Nastaliq Urdu,
+    My Noto Nastaliq Urdu, Georgia, serif }
+p {text-align: justify; letter-spacing: 0; margin: 0}
+p + p {text-indent: 1.5em}
+h2 + *, p.stb {text-indent: 0}
+h2 + * {page-break-before: avoid; break-before: avoid}
+p.stb {page-break-before: auto; break-before: auto; margin-top: 0.6em}
+:link, :visited {text-decoration: none}
+h2, h3 {font-size: 1.2em; font-weight: normal; margin: 0.8em 0 0.4em}
+h2 {text-transform: uppercase; hyphens: manual}
+h3 {font-style: italic}
+.section {margin: 0 0 2em 0}
+.feed img {max-height: 1.2em; min-height: .5em}
+img {max-width: 100%}
+.icon {float: right; max-width: 4em; margin: 0 0 0 .5em}
+h1 {font-weight: 900; font-size: 2em; line-height: 0.95;
+  padding: 2em 0 0.5em;
+  border-top: thin solid; border-bottom: thin solid;
+  margin: 0 0 0.5em 0; text-align: right; column-span: all}
+h1 em {display: block; font-size: 120%; font-weight: normal;
+  position: relative; z-index: 1 /* Descenders overlap next line */}
+pre {font: normal 0.9em/1.2 Courier New, Courier, monospace}
+ul {padding-left: 0; margin-left: 1.5em}
+table {margin: .6em 0}
+td {vertical-align: baseline}
+th {vertical-align: bottom; text-align: left}
+.figure {margin: 1em 0; font-style: italic}
+.figure p {text-align: center; font-size: .9em; text-indent: 0}
+.figure p + p {margin: 0 1em}
+#banner li, #banner h2 {display: none}
+#banner li.home {display: block; float: right; margin-left: 0.5em}
+.photo {float: left; margin-right: 0.5em}
+#banner {clear: both; margin-top: 2.6em}
+#language {display: none}
+.status {margin: .6em 0; border-collapse: collapse}
+.status td, .status th {
+  padding: .1em .3em .1em 0;
+  border-bottom: thin dotted #BBF }
+.status tbody + tbody th {padding-top: 1em}
+.status td + td, .status th + th, .status .wd, .status .lc,
+.status .cr, .status .pr, .status .rec, .status .note {padding-left: .3em}
+.wd a, .pa a, .lc a, .alpha a, .cr a, .beta a, .pr a, .rc a, .rec a, .fin a,
+.spsd a, .fpwd a, .note a, .abandoned a {color: inherit}
+.fpwd {background: hsl(10,55%,55%); color: #fff}
+.wd, .pa {background: hsl(20, 78%, 55%); color: #fff}
+.lc, .alpha {background: hsl(30, 68%, 65%)}
+.cr, .beta {background: hsl(62, 86%, 45%)}
+.pr, .rc {background: hsl(89, 53%, 44%); color: #fff}
+.rec, .note, .fin, .spsd {background: hsl(129, 53%, 40%); color: #fff}
+.abandoned {background: hsl(275,60%,65%); color: #fff}
+td + td + .wd {background: hsl(20, 78%, 64%)}
+td + td + .lc {background: hsl(30, 68%, 72%)}
+td + td + .cr {background: hsl(62, 70%, 55%)}
+td + td + .pr {background: hsl(89, 41%, 55%)}
+td + td + .rec, td + td + .note, td + td + .spsd {background: hsl(129, 35%, 52%)}
+td + td + .abandoned {background: hsl(275,60%,79%)}
+.dt-updated, .updated {color: #990}
+#summary .updated, #summary .dt-updated {display: none}
+#summary .aside {border: solid;
+  margin: 1.2em 0; padding: 0 1em}

@@ -1,0 +1,378 @@
+<!DOCTYPE html><html lang="en-US"><head>
+    <meta charset="utf-8"/>
+    <title>
+            Rust Programming Language
+        </title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="A language empowering everyone to build reliable and efficient software."/>
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:site" content="@rustlang"/>
+    <meta name="twitter:creator" content="@rustlang"/>
+    <meta name="twitter:title" content=""/>
+    <meta name="twitter:description" content="A language empowering everyone to build reliable and efficient software."/>
+    <meta name="twitter:image" content="https://www.rust-lang.org/static/images/rust-social.jpg"/>
+
+    <!-- Facebook OpenGraph -->
+    <meta property="og:title" content=""/>
+    <meta property="og:description" content="A language empowering everyone to build reliable and efficient software."/>
+    <meta property="og:image" content="https://www.rust-lang.org/static/images/rust-social-wide.jpg"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:locale" content="en_US"/>
+
+    <!-- styles -->
+    <link rel="stylesheet" href="files/0116cf80e979.css"/>
+    <link rel="stylesheet" href="files/2fa7ffeda767.css"/>
+    <link rel="stylesheet" href="files/8e50381a6f25.css"/>
+    <link rel="stylesheet" href="files/458b2508c9ef.css"/>
+
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="files/6386252dd53f.png"/>
+    <link rel="icon" sizes="16x16" type="image/png" href="files/734307e8255c.png"/>
+    <link rel="icon" sizes="32x32" type="image/png" href="files/b41744762922.png"/>
+    <link rel="icon" type="image/svg+xml" href="files/03f395a43cdf.svg"/>
+    
+    <link rel="mask-icon" href="files/156072abf9ea.svg" color="#000000"/>
+    <meta name="msapplication-TileColor" content="#ffffff"/>
+    <meta name="msapplication-config" content="/static/images/browserconfig.xml?v=ngJW8jGAmR"/>
+    <meta name="theme-color" content="#ffffff"/>
+
+        <!-- locales -->
+<link rel="alternate" href="https://www.rust-lang.org/en-US" hreflang="en-US"/>
+<link rel="alternate" href="https://www.rust-lang.org/es" hreflang="es"/>
+<link rel="alternate" href="https://www.rust-lang.org/fr" hreflang="fr"/>
+<link rel="alternate" href="https://www.rust-lang.org/it" hreflang="it"/>
+<link rel="alternate" href="https://www.rust-lang.org/ja" hreflang="ja"/>
+<link rel="alternate" href="https://www.rust-lang.org/pt-BR" hreflang="pt-BR"/>
+<link rel="alternate" href="https://www.rust-lang.org/ru" hreflang="ru"/>
+<link rel="alternate" href="https://www.rust-lang.org/tr" hreflang="tr"/>
+<link rel="alternate" href="https://www.rust-lang.org/zh-CN" hreflang="zh-CN"/>
+<link rel="alternate" href="https://www.rust-lang.org/zh-TW" hreflang="zh-TW"/>
+<link rel="alternate" href="https://www.rust-lang.org/" hreflang="x-default"/>
+
+    
+
+    <!-- Custom Highlight pack with: Rust, Markdown, TOML, Bash, JSON, YAML,
+         and plaintext. -->
+    
+    
+  </head>
+  <body>
+    <nav class="flex flex-row justify-center justify-end-l items-center flex-wrap ph2 pl3-ns pr3-ns pb3">
+      <div class="brand flex-auto w-100 w-auto-l self-start tc tl-l">
+        <a class="brand" href="https://rust-lang.org/">
+          <img class="v-mid ml0-l" alt="Rust Logo" src="files/baf3a76c7754.svg"/>
+        </a>
+      </div>
+    
+      <ul class="nav list w-100 w-auto-l flex flex-none flex-row flex-wrap justify-center justify-end-l items-center pv2 ph0 ph4-ns">
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://rust-lang.org/tools/install">Install</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://rust-lang.org/learn">Learn</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://play.rust-lang.org/">Playground</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://rust-lang.org/tools">Tools</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://rust-lang.org/governance">Governance</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://rust-lang.org/funding">Funding</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://rust-lang.org/community">Community</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://blog.rust-lang.org/">Blog</a></li>
+      </ul>
+    
+      <div class=" w-100 w-auto-l flex-none flex justify-center pv4 pv-0-l languages">
+        <div class="select">
+          <label for="language-nav" class="hidden">Language</label>
+          <select id="language-nav" data-current-lang="en-US">
+            <option title="English (en-US)" value="en-US">English (en-US)</option>
+            <option title="Español (es)" value="es">Español (es)</option>
+            <option title="Français (fr)" value="fr">Français (fr)</option>
+            <option title="Italiano (it)" value="it">Italiano (it)</option>
+            <option title="日本語 (ja)" value="ja">日本語 (ja)</option>
+            <option title="Português (pt-BR)" value="pt-BR">Português (pt-BR)</option>
+            <option title="Русский (ru)" value="ru">Русский (ru)</option>
+            <option title="Türkçe (tr)" value="tr">Türkçe (tr)</option>
+            <option title="简体中文 (zh-CN)" value="zh-CN">简体中文 (zh-CN)</option>
+            <option title="正體中文 (zh-TW)" value="zh-TW">正體中文 (zh-TW)</option>
+          </select>
+        </div>
+      </div>
+    
+    </nav>
+    <main><header class="mt3 mb6 w-100 mw-none ph3 mw8-m mw9-l center">
+  <div class="flex flex-column flex-row-l">
+    <div class="w-70-l mw8-l">
+      <h1>Rust</h1>
+      <h2 class="mt4 mb0 f2 f1-ns">
+        A language empowering everyone <br class="dn db-ns"/> to build reliable and efficient software.
+      </h2>
+    </div>
+    <div class="w-30-l flex-column pl0-l pr0-l pl3 pr3">
+      <a class="button button-download ph4 mt0 w-100" href="https://rust-lang.org/learn/get-started">
+        Get Started
+      </a>
+      <p class="tc f3 f2-l mt3">
+        <a class="download-link" href="https://blog.rust-lang.org/releases/latest">Version 1.99.1</a>
+      </p>
+    </div>
+  </div>
+</header>
+
+<section id="language-values" class="green">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <header class="pb0">
+      <h2>
+        Why Rust?
+      </h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="flex-none flex-l">
+      <section class="w-100 pv2 pv0-l mt4">
+        <h3 class="f2 f1-l">Performance</h3>
+        <p class="f3 lh-copy">
+          Rust is blazingly fast and memory-efficient: with no runtime or
+garbage collector, it can power performance-critical services, run on
+embedded devices, and easily integrate with other languages.
+        </p>
+      </section>
+      <section class="w-100 pv2 pv0-l mt4 mh5-l">
+        <h3 class="f2 f1-l">Reliability</h3>
+        <p class="f3 lh-copy">
+          Rust’s rich type system and ownership model guarantee memory-safety
+and thread-safety — enabling you to eliminate many classes of
+bugs at compile-time.
+        </p>
+      </section>
+      <section class="w-100 pv2 pv0-l mt4">
+        <h3 class="f2 f1-l">Productivity</h3>
+        <p class="f3 lh-copy">
+          Rust has great documentation, a friendly compiler with useful error
+messages, and top-notch tooling — an integrated package manager
+and build tool, smart multi-editor support with auto-completion and
+type inspections, an auto-formatter, and more.
+        </p>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="purple">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <header>
+      <h2>
+        Build it in Rust
+      </h2>
+      <div class="highlight"></div>
+    </header>
+
+    <div class="flex-none flex-l flex-row">
+      <p class="flex-grow-1 pb2">
+        In 2018, the Rust community decided to improve the programming experience
+for a few distinct domains (see <a href="https://blog.rust-lang.org/2018/03/12/roadmap.html">the 2018
+roadmap</a>). For these, you can find many high-quality crates and some
+awesome guides on how to get started.
+      </p>
+    </div>
+
+    <div class="flex-none flex-l flex-row">
+      <div class="flex flex-row flex-column-l justify-between-l mw8 measure-wide-l w-100 mt5 mt2-l">
+        <div class="v-top tc-l">
+          <img src="files/3aae21630dd1.svg" alt="terminal" class="mw3 mw4-ns"/>
+        </div>
+        <div class="v-top pl4 pl0-l pt0 pt3-l measure-wide-l flex-l flex-column-l flex-auto-l justify-between-l">
+          <h3 class="tc-l">
+            Command Line
+          </h3>
+          <p class="flex-grow-1">
+            Whip up a CLI tool quickly with Rust’s robust ecosystem.
+Rust helps you maintain your app with confidence and distribute it with ease.
+          </p>
+          <a class="button button-secondary" href="https://rust-lang.org/what/cli">Building Tools</a>
+        </div>
+      </div>
+
+      <div class="flex flex-row flex-column-l justify-between-l mw8 measure-wide-l w-100 mt5 mt2-l pl4-l">
+        <div class="v-top tc-l">
+          <img src="files/d320b81b9660.svg" alt="gear with puzzle piece elements" class="mw3 mw4-ns"/>
+        </div>
+        <div class="v-top pl4 pl0-l pt0 pt3-l measure-wide-l flex-l flex-column-l flex-auto-l justify-between-l">
+          <h3 class="tc-l">
+            WebAssembly
+          </h3>
+          <p class="flex-grow-1">
+          Use Rust to supercharge your JavaScript, one module at a time.
+Publish to npm, bundle with webpack, and you’re off to the races.
+          </p>
+          <a class="button button-secondary" href="https://rust-lang.org/what/wasm">Writing Web Apps</a>
+        </div>
+      </div>
+
+      <div class="flex flex-row flex-column-l justify-between-l mw8 measure-wide-l w-100 mt5 mt2-l pl4-l">
+        <div class="v-top tc-l">
+          <img src="files/c166b96ffcd5.svg" alt="a cloud with nodes" class="mw3 mw4-ns"/>
+        </div>
+        <div class="v-top pl4 pl0-l pt0 pt3-l measure-wide-l flex-l flex-column-l flex-auto-l justify-between-l">
+          <h3 class="tc-l">
+            Networking
+          </h3>
+          <p class="flex-grow-1">
+            Predictable performance. Tiny resource footprint. Rock-solid reliability.
+Rust is great for network services.
+          </p>
+          <a class="button button-secondary" href="https://rust-lang.org/what/networking">Working On Servers</a>
+        </div>
+      </div>
+
+      <div class="flex flex-row flex-column-l justify-between-l mw8 measure-wide-l w-100 mt5 mt2-l pl4-l">
+        <div class="v-top tc-l">
+          <img src="files/3d19b82a95a0.svg" alt="an embedded device chip" class="mw3 mw4-ns"/>
+        </div>
+        <div class="v-top pl4 pl0-l pt0 pt3-l measure-wide-l flex-l flex-column-l flex-auto-l justify-between-l">
+          <h3 class="tc-l">
+            Embedded
+          </h3>
+          <p class="flex-grow-1">
+            Targeting low-resource devices?
+Need low-level control without giving up high-level conveniences?
+Rust has you covered.
+          </p>
+          <a class="button button-secondary" href="https://rust-lang.org/what/embedded">Starting With Embedded</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="white production">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center">
+    <header>
+      <h2>Rust in production</h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="description">
+      <p class="lh-copy f2">
+        Hundreds of companies around the world are using Rust in production
+today for fast, low-resource, cross-platform solutions. <strong>From startups to large
+corporations, from embedded devices to scalable web services, Rust is a great fit.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+<section class="get-involved red">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <header>
+      <h2>Get involved</h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="flex flex-column flex-row-l">
+      <div id="read-rust" class="mw-50-l mr4-l pt0 flex flex-column justify-between-l">
+        <h3>Read Rust</h3>
+        <p class="flex-grow-1">We love documentation! Take a look at the books available online, as well as key blog posts and user guides.</p>
+        <a class="button button-secondary" href="https://rust-lang.org/learn">Read the book</a>
+      </div>
+      <div id="watch-rust" class="mw-50-l pt3 pt0-l flex flex-column justify-between-l">
+        <h3>Watch Rust</h3>
+        <p class="flex-grow-1">The Rust community has a dedicated YouTube channel collecting a huge range of presentations and
+tutorials.</p>
+        <a class="button button-secondary" href="https://www.youtube.com/channel/UCaYhcUwRBNscFNUKTjgPFiA">Watch the Videos</a>
+      </div>
+    </div>
+    <div class="pt3">
+      <h3>Contribute code</h3>
+      <p>
+      Rust is truly a community effort, and we welcome contribution from hobbyists and production users, from
+newcomers and seasoned professionals. Come help us make the Rust experience even better!
+      </p>
+      <a class="button button-secondary" href="https://rustc-dev-guide.rust-lang.org/getting-started.html">
+        Read Contribution Guide
+      </a>
+    </div>
+  </div>
+</section>
+<section class="white thanks">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center">
+    <header>
+      <h2>Thanks</h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="description">
+      <p class="lh-copy f2">
+        Rust would not exist without the generous contributions of time, work, and resources from individuals and companies. We are very grateful for the support!
+      </p>
+    </div>
+    <div class="flex flex-column flex-row-l">
+      <div id="individual-code" class="mw-50-l mr4-l pt0 flex flex-column justify-between-l">
+        <h3>Individuals</h3>
+        <p class="flex-grow-1">Rust is a community project and is very thankful for the many community contributions it receives.</p>
+        <a class="button button-secondary" href="https://thanks.rust-lang.org/">See individual contributors</a>
+      </div>
+      <div id="company-sponsorships" class="mw-50-l pt3 pt0-l flex flex-column justify-between-l">
+        <h3>Corporate sponsors</h3>
+        <p class="flex-grow-1">The Rust project receives support from companies through the Rust Foundation.</p>
+        <a class="button button-secondary" href="https://foundation.rust-lang.org/members">See Foundation members</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+    </main>
+    <footer>
+      <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+        <div class="flex flex-column flex-row-l pv0-l">
+          <div class="flex flex-column mw8 w-100 measure-wide-l pv2 pv5-m pv2-ns ph4-m ph4-l" id="get-help">
+            <h4>Get help!</h4>
+            <ul>
+              <li><a href="https://rust-lang.org/learn">Documentation</a></li>
+              <li><a href="http://forge.rust-lang.org">Rust Forge (Contributor Documentation)</a></li>
+              <li><a href="https://users.rust-lang.org">Ask a Question on the Users Forum</a></li>
+            </ul>
+            <div class="languages">
+              <div class="select">
+                <label for="language-footer" class="hidden">Language</label>
+                <select id="language-footer">
+                  <option title="English (en-US)" value="en-US">English (en-US)</option>
+                  <option title="Español (es)" value="es">Español (es)</option>
+                  <option title="Français (fr)" value="fr">Français (fr)</option>
+                  <option title="Italiano (it)" value="it">Italiano (it)</option>
+                  <option title="日本語 (ja)" value="ja">日本語 (ja)</option>
+                  <option title="Português (pt-BR)" value="pt-BR">Português (pt-BR)</option>
+                  <option title="Русский (ru)" value="ru">Русский (ru)</option>
+                  <option title="Türkçe (tr)" value="tr">Türkçe (tr)</option>
+                  <option title="简体中文 (zh-CN)" value="zh-CN">简体中文 (zh-CN)</option>
+                  <option title="正體中文 (zh-TW)" value="zh-TW">正體中文 (zh-TW)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-column mw8 w-100 measure-wide-l pv2 pv5-m pv2-ns ph4-m ph4-l">
+            <h4>Terms and policies</h4>
+            <ul>
+              <li><a href="https://rust-lang.org/policies/code-of-conduct">Code of Conduct</a></li>
+              <li><a href="https://rust-lang.org/policies/licenses">Licenses</a></li>
+              <li><a href="https://foundation.rust-lang.org/policies/logo-policy-and-media-guide/">Logo Policy and Media Guide</a></li>
+              <li><a href="https://rust-lang.org/policies/security">Security Disclosures</a></li>
+              <li><a href="https://foundation.rust-lang.org/policies/privacy-policy/">Privacy Notice</a>
+              </li>
+              <li><a href="https://rust-lang.org/policies">All Policies</a></li>
+            </ul>
+          </div>
+          <div class="flex flex-column mw8 w-100 measure-wide-l pv2 pv5-m pv2-ns ph4-m ph4-l">
+            <h4>Social</h4>
+            <div class="flex flex-row flex-wrap items-center">
+              <a href="https://social.rust-lang.org/@rust" rel="me" target="_blank"><img src="files/6db6914a1e67.svg" alt="Mastodon" title="Mastodon"/></a>
+              <a href="https://bsky.app/profile/rust-lang.org" rel="me" target="_blank"><img src="files/facd3445c62d.svg" alt="Bluesky" title="Bluesky"/></a>
+              <a href="https://www.youtube.com/channel/UCaYhcUwRBNscFNUKTjgPFiA" target="_blank"><img class="pv2" src="files/47ec2b131e25.svg" alt="youtube logo" title="YouTube"/></a>
+              <a href="https://github.com/rust-lang" target="_blank"><img src="files/b4d51fbc53fe.svg" alt="github logo" title="GitHub"/></a>
+            </div>
+          </div>
+    
+        </div>
+        <div class="attribution">
+          <p>
+            Maintained by the Rust Team. See a bug?
+<a href="https://github.com/rust-lang/www.rust-lang.org/issues/new/choose" target="_blank">File an issue!</a>
+          </p>
+          <p>Web site built every day at 22:00 UTC</p>
+        </div>
+      </div>
+    </footer>
+    
+  
+
+</body></html>
