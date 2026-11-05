@@ -403,6 +403,16 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		default:
 			s.Justify.Content = styles.Center // middle
 		}
+	} else if !bs.block {
+		// an inline element is aligned in the height of its line
+		switch st.verticalAlign {
+		case "middle":
+			s.Align.Self = styles.Center
+		case "top", "text-top":
+			s.Align.Self = styles.Start
+		case "bottom", "text-bottom":
+			s.Align.Self = styles.End
+		}
 	}
 
 	// units context for converting to dots

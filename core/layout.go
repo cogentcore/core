@@ -1834,7 +1834,10 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			first = false
 			return tree.Continue
 		}
-		if sum+ksz.Dim(d) > fit+0.5 { // sum has the gap before it
+		// The sizes of the items are each rounded up to whole dots, so
+		// items whose exact sizes fit together (as widths in CSS that add
+		// up to that of their container) can be up to a dot each over it.
+		if sum+ksz.Dim(d) > fit+float32(n+1) { // sum has the gap before it
 			if DebugSettings.LayoutTraceDetail {
 				fmt.Println(fr, "wrapped:", i, sum, ksz.Dim(d), fit)
 			}

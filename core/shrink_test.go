@@ -111,7 +111,9 @@ func TestShrinkWrapRow(t *testing.T) {
 			fixedFrame(row, 50, 10)
 		}
 	}, func(fr *Frame, dp float32) {
-		assert.LessOrEqual(t, row.Geom.Size.Actual.Total.X, 300*dp+1)
+		// six fit on a line, as they do exactly (6 * 50 dp in 300 dp), with
+		// their sizes rounded up to whole dots (less than a dot each)
+		assert.LessOrEqual(t, row.Geom.Size.Actual.Total.X, 300*dp+6)
 		assert.InDelta(t, 20*dp, row.Geom.Size.Actual.Total.Y, 2) // two lines
 	})
 }

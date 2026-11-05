@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"image"
 	"image/png"
 	"io"
@@ -258,6 +259,76 @@ func TestSVGMaxWidth(t *testing.T) {
 		sz := sv.Geom.Size.Actual.Content
 		assert.InDelta(t, 96*dp, sz.X, 2, "it is as wide as its max-width")
 		assert.InDelta(t, 48*dp, sz.Y, 2, "and keeps its aspect")
+	})
+}
+
+// TestInlineBlocksExactFit tests inline blocks whose widths add up exactly
+// to the width of their container (as the sister project links of
+// Wikipedia: a logo of 31px and a link of 7px + 182px in 220px), which are
+// on one line, although their sizes are each rounded up to whole dots, and
+// which are aligned in it by their vertical-align: middle.
+func TestInlineBlocksExactFit(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(400) })
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body><ul style="width: 220px; padding: 0; margin: 0; list-style: none"><li>`+
+		`<span class="logo" style="display: inline-block; width: 31px; height: 31px; vertical-align: middle; background: gray"></span>`+
+		`<span class="link" style="display: inline-block; margin-left: 7px; width: 182px; vertical-align: middle">Definitions from Wiktionary</span>`+
+		`</li></ul></body></html>`))
+	find := func(class string) *core.WidgetBase {
+		var w *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == class {
+				w = wb
+			}
+			return tree.Continue
+		})
+		return w
+	}
+	logo, link := find("logo"), find("link")
+	if !assert.NotNil(t, logo) || !assert.NotNil(t, link) {
+		return
+	}
+	b.RenderImage(func() {
+		assert.Equal(t, logo.Geom.Cell.Y, link.Geom.Cell.Y, "they are on the same line")
+		assert.Greater(t, link.Geom.Pos.Total.X, logo.Geom.Pos.Total.X, "the link is after the logo")
+		lc := logo.Geom.Pos.Total.Y + logo.Geom.Size.Actual.Total.Y/2
+		kc := link.Geom.Pos.Total.Y + link.Geom.Size.Actual.Total.Y/2
+		assert.InDelta(t, lc, kc, 2, "the link is in the middle of the line")
+	})
+}
+
+// TestColumnsOfList tests columns of an element with only one child, a
+// list (as for the references of Wikipedia: a div with a column-width and
+// an ol): the items of the list are split into the columns, as in CSS.
+func TestColumnsOfList(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(600); s.Max.X.Dp(600) })
+	ctx := NewContext()
+	ctx.MediaWidth = 600
+	items := ""
+	for i := range 6 {
+		items += fmt.Sprintf(`<li class="item%d">Item %d</li>`, i, i)
+	}
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body style="margin: 0"><div style="column-width: 200px"><ol>`+items+`</ol></div></body></html>`))
+	var first, last *core.WidgetBase
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil {
+			switch fmt.Sprint(wb.Property("class")) {
+			case "item0":
+				first = wb
+			case "item5":
+				last = wb
+			}
+		}
+		return tree.Continue
+	})
+	if !assert.NotNil(t, first) || !assert.NotNil(t, last) {
+		return
+	}
+	b.RenderImage(func() {
+		assert.Greater(t, last.Geom.Pos.Total.X, first.Geom.Pos.Total.X+100, "the last item is in a column to the right")
+		assert.Less(t, last.Geom.Pos.Total.Y, first.Geom.Pos.Total.Y+100, "near the top")
 	})
 }
 
