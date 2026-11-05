@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"slices"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -1230,6 +1231,21 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	ksz := li.cellsSize()
 	if fl := li.floats; fl != nil { // the column is as tall as its floats
 		ksz.Y = max(ksz.Y, fl.size.Y-li.GapSize.Y)
+		if fr.onlyFloats() { // and as wide, when it only has floats
+			ksz.X = max(ksz.X, fl.floatsWidth)
+		}
+	}
+	sizing := fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)
+	if pass > SizeUpPass && li.Wraps != nil && li.MainAxis == math32.X && !sizing {
+		// The lines of a wrapped row whose items are wider than it only by
+		// the rounding of their sizes to whole dots, which sizeDownWrap
+		// allows, fit it (as their exact sizes do), so that it does not
+		// overflow by those dots (except when the scene is sized to fit
+		// its content, which it is then as wide as).
+		fit := fr.Geom.Size.Alloc.Content.X
+		if over := ksz.X - fit; over > 0 && over <= float32(slices.Max(li.Wraps)) {
+			ksz.X = fit
+		}
 	}
 	return ksz
 }
@@ -1828,6 +1844,13 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 	var wraps []int
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := cwb.Geom.Size.Actual.Total
+		if d == math32.X && cwb.HasChildren() {
+			// A frame in a wrapped row is as wide as it can be in it
+			// (see sizeDownAllocActualCells): its preferred width, within
+			// the row, which its line needs room for, as for the
+			// hypothetical main size of a flex item in CSS.
+			ksz.X = max(ksz.X, min(cwb.Geom.Size.preferred.X, fit))
+		}
 		if first {
 			n = 1
 			sum = ksz.Dim(d) + gap

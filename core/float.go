@@ -41,6 +41,11 @@ type floatLayout struct {
 	// size is the size of the content of the column,
 	// with the floats and the space that clearing them adds.
 	size math32.Vector2
+
+	// floatsWidth is the width that the floats take, on the left and the
+	// right side, which is the width of a column that only has floats
+	// (see [Frame.onlyFloats]).
+	floatsWidth float32
 }
 
 // hasFloats returns whether the frame is a column with floating children.
@@ -57,6 +62,20 @@ func (fr *Frame) hasFloats() bool {
 		return tree.Continue
 	})
 	return has
+}
+
+// onlyFloats returns whether the frame is a column with floating children
+// and no other children in the flow of its layout.
+func (fr *Frame) onlyFloats() bool {
+	if !fr.hasFloats() {
+		return false
+	}
+	flow := false
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		flow = true
+		return tree.Break
+	})
+	return !flow
 }
 
 // layoutFloats computes the [floatLayout] of the frame from the current
@@ -101,6 +120,7 @@ func (fr *Frame) layoutFloats() bool {
 		return b
 	}
 	changed := false
+	var maxLeft, maxRight float32
 	y := float32(0)
 	floatTop := float32(0) // the top of the last float
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
@@ -120,6 +140,12 @@ func (fr *Frame) layoutFloats() bool {
 		if cwb.isFloat() {
 			// a float that clears is moved down, but not the flow after it
 			w := min(ksz.Actual.Total.X, width)
+			if cf := AsFrame(cw); cf != nil && cf.onlyFloats() {
+				// A float that only has floats in it (which have no size
+				// in its flow) is as wide as its content (shrink-to-fit,
+				// as in CSS): its preferred width, within the column.
+				w = min(max(w, ksz.prefWidth), width)
+			}
 			h := ksz.Actual.Total.Y
 			left := cwb.Styles.Float == styles.FloatLeft
 			// a float is not higher than the floats before it, as in CSS
@@ -154,6 +180,11 @@ func (fr *Frame) layoutFloats() bool {
 			ksz.SetContentFromTotal(&ksz.Alloc)
 			fl.places[i] = floatPlace{pos: math32.Vec2(x, fy), width: w}
 			fl.size.Y = max(fl.size.Y, fy+h)
+			if left { // the widths that the floats take on each side
+				maxLeft = max(maxLeft, x+w)
+			} else {
+				maxRight = max(maxRight, width-x)
+			}
 			return tree.Continue
 		}
 		y = cy
@@ -173,6 +204,7 @@ func (fr *Frame) layoutFloats() bool {
 	})
 	fl.size.Y = max(fl.size.Y, y-gap)
 	fl.size.X = width
+	fl.floatsWidth = maxLeft + maxRight
 	fr.layout.floats = fl
 	return changed
 }

@@ -80,6 +80,22 @@ func (fr *Frame) childrenIntrinsicWidths() (minw, prefw float32) {
 		minw = max(minw, fl.size.X)
 		prefw = max(prefw, fl.size.X)
 	}
+	if fr.onlyFloats() {
+		// A column that only has floats is as wide as the widest one at
+		// least, and has them side by side when there is room for all of
+		// them (as in CSS, in which the max-content width of a block has
+		// its floats on one line), as for a float of floats.
+		var fmin, fpref float32
+		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			if cwb.isFloat() {
+				fmin = max(fmin, cwb.Geom.Size.minWidth)
+				fpref += cwb.Geom.Size.prefWidth
+			}
+			return tree.Continue
+		})
+		minw = max(minw, fmin)
+		prefw = max(prefw, fpref)
+	}
 	return minw, prefw
 }
 
@@ -204,12 +220,19 @@ func (fr *Frame) growMaxWidth(cwb *WidgetBase) float32 {
 // overflow of its own beyond its size, and the content of a frame only
 // overflows it beyond a Max, as its actual size otherwise fits it (the
 // content size of wrapped layouts can be ahead of their actual size).
+// The overflow of a child only counts beyond the room that it has in the
+// content of the frame (see [Frame.overflowRoom]).
 func (fr *Frame) sizeOverflow() {
 	sz := &fr.Geom.Size
 	var excess math32.Vector2
+	room := fr.overflowRoom()
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
-		excess.SetMax(ksz.extent.Sub(ksz.Actual.Total))
+		over := ksz.extent.Sub(ksz.Actual.Total)
+		if r := room(cwb); over.X > 0 || over.Y > 0 {
+			over = over.Sub(r)
+		}
+		excess.SetMax(over)
 		return tree.Continue
 	})
 	fr.layout.overflow = sz.Internal.Add(excess)
@@ -226,6 +249,38 @@ func (fr *Frame) sizeOverflow() {
 			continue
 		}
 		sz.extent.SetDim(d, max(sz.extent.Dim(d), ov+sz.Space.Dim(d)))
+	}
+}
+
+// overflowRoom returns a function that returns the room that each child
+// of the frame, called in order, has after it in the content of the frame,
+// in each dimension, which content that overflows the child visibly can
+// take without overflowing the frame. In a flex layout on one line, the
+// position of a child along its axis follows from the sizes of the
+// children before it, and that across it from its alignment. For a grid,
+// wrapped lines, and distributed justification, the positions are not known
+// when it is sized, so there is no room.
+func (fr *Frame) overflowRoom() func(cwb *WidgetBase) math32.Vector2 {
+	sz := &fr.Geom.Size
+	jc := fr.Styles.Justify.Content
+	if fr.Styles.Display != styles.Flex || fr.Styles.Wrap ||
+		jc == styles.SpaceBetween || jc == styles.SpaceAround || jc == styles.SpaceEvenly {
+		return func(cwb *WidgetBase) math32.Vector2 { return math32.Vector2{} }
+	}
+	content := sz.Actual.Content
+	ma := fr.Styles.Direction.Dim()
+	ca := ma.Other()
+	gap := fr.layout.Gap.Dim(ma)
+	pos := styles.AlignPos(jc, sz.Internal.Dim(ma), content.Dim(ma))
+	return func(cwb *WidgetBase) math32.Vector2 {
+		size := cwb.Geom.Size.Actual.Total
+		var room math32.Vector2
+		room.SetDim(ma, max(content.Dim(ma)-pos-size.Dim(ma), 0))
+		align := styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self)
+		cpos := styles.AlignPos(align, size.Dim(ca), content.Dim(ca))
+		room.SetDim(ca, max(content.Dim(ca)-cpos-size.Dim(ca), 0))
+		pos += size.Dim(ma) + gap
+		return room
 	}
 }
 

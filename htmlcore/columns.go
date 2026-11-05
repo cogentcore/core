@@ -80,7 +80,13 @@ func (c *Context) columnCount(n *html.Node) int {
 		fit = min(fit, count)
 	}
 	if fit < 2 {
-		return 0
+		fit = 0
+	}
+	if !c.checkingMedia { // it depends on the width of the viewport
+		if c.columnUses == nil {
+			c.columnUses = map[*html.Node]int{}
+		}
+		c.columnUses[n] = fit
 	}
 	return fit
 }

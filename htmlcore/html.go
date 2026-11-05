@@ -38,6 +38,7 @@ func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
 	ctx.readState = readState{}
 	// the style sheets of the new page are imported again, and it has its title
 	ctx.cssImports = nil
+	ctx.mediaUses, ctx.columnUses = nil, nil // of the new page
 	ctx.Title = ""
 	ctx.reading = true
 	defer func() { ctx.reading = false }()

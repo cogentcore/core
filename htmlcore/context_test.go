@@ -12,6 +12,7 @@ import (
 	"image/png"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -451,4 +452,123 @@ func TestFontShorthandResets(t *testing.T) {
 	s.Font.Weight = rich.Bold
 	setFont(st, s, nil, "inherit") // not a valid shorthand of values
 	assert.Equal(t, rich.Bold, s.Font.Weight)
+}
+
+// TestMediaChanged tests that a page reports a change of its media only
+// when the width crosses a boundary of one of its media queries or of
+// its estimated number of columns.
+func TestMediaChanged(t *testing.T) {
+	read := func(page string) *Context {
+		ctx := NewContext()
+		ctx.MediaWidth = 800
+		assert.NoError(t, ReadHTMLString(ctx, core.NewBody(), page))
+		return ctx
+	}
+	ctx := read(`<html><head><style>p { color: red }
+@media (max-width: 600px) { p { color: blue } }</style></head><body><p>Text</p></body></html>`)
+	assert.False(t, ctx.MediaChanged(700), "within the same range")
+	assert.False(t, ctx.MediaChanged(1200), "within the same range")
+	assert.True(t, ctx.MediaChanged(500), "across the max-width")
+	assert.Equal(t, float32(800), ctx.MediaWidth, "the width of the context is kept")
+
+	ctx = read(`<html><head><link rel="stylesheet" media="(min-width: 1000px)" href="data:text/css,p{color:red}"></head><body><p>Text</p></body></html>`)
+	assert.False(t, ctx.MediaChanged(900))
+	assert.True(t, ctx.MediaChanged(1100), "across the media of a style sheet")
+
+	ctx = read(`<html><body style="margin: 0"><div style="column-width: 300px"><p>A</p><p>B</p><p>C</p></div></body></html>`)
+	assert.False(t, ctx.MediaChanged(850), "2 columns either way")
+	assert.True(t, ctx.MediaChanged(1000), "3 columns")
+	assert.True(t, ctx.MediaChanged(500), "1 column")
+
+	ctx = read(`<html><body><p style="width: 50vw">Text</p></body></html>`)
+	assert.False(t, ctx.MediaChanged(300), "no media queries or columns")
+}
+
+// TestTableCellWidthMinimum tests that the width of a table cell is not
+// a limit, as in CSS: a cell with a width of 1% and text that does not
+// wrap (as the group headers of the navigation boxes of Wikipedia) is as
+// wide as its text, which does not overflow it.
+func TestTableCellWidthMinimum(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(600) })
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body><table style="width: 100%"><tr>`+
+		`<th class="group" style="width: 1%; white-space: nowrap">Cascading style sheets</th>`+
+		`<td>Some text in the other column of the table</td></tr></table></body></html>`))
+	var th *core.WidgetBase
+	var tx *core.Text
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == "group" {
+			th = wb
+			wb.WalkDown(func(n tree.Node) bool {
+				if t, ok := n.(*core.Text); ok {
+					tx = t
+				}
+				return tree.Continue
+			})
+		}
+		return tree.Continue
+	})
+	if !assert.NotNil(t, th) || !assert.NotNil(t, tx) {
+		return
+	}
+	b.RenderImage(func() {
+		right := th.Geom.Pos.Total.X + th.Geom.Size.Actual.Total.X
+		assert.LessOrEqual(t, tx.Geom.Pos.Total.X+tx.Geom.Size.Actual.Total.X, right+1, "the text is within its cell")
+		assert.Greater(t, th.Geom.Size.Actual.Total.X, float32(100), "the cell is as wide as its text")
+	})
+}
+
+// TestLayoutSettles tests that the layout of a page in a frame that
+// scrolls (as in a browser) settles, so that the content of the article of
+// the Wikipedia snapshot (in a grid of columns, in which the heights of the
+// text follow widths that change in each iteration of the layout) is not
+// followed by blank space down to the footer.
+func TestLayoutSettles(t *testing.T) {
+	file := filepath.Join(snapshotsDir, "wikipedia", "index.html")
+	src, err := os.ReadFile(file)
+	if err != nil {
+		t.Skip("no Wikipedia snapshot")
+	}
+	dir, _ := filepath.Abs(filepath.Dir(file))
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(1200), units.Dp(800))
+		s.Padding.Zero()
+	})
+	scroller := core.NewFrame(b)
+	scroller.Styler(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Grow.Set(1, 1)
+		s.Direction = styles.Column
+		s.Padding.Zero()
+	})
+	ctx := NewContext()
+	ctx.MediaWidth = 1200
+	ctx.PageURL = "file://" + dir + "/index.html"
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		pu, err := url.Parse(u)
+		if err != nil || pu.Scheme != "file" {
+			return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found", Body: io.NopCloser(strings.NewReader(""))}, nil
+		}
+		return getURL(u)
+	}
+	assert.NoError(t, ReadHTMLString(ctx, scroller, string(src)))
+	b.RenderImage(func() {
+		var text, output *core.WidgetBase
+		scroller.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+			switch {
+			case cwb.Name == "mw-content-text":
+				text = cwb
+			case text != nil && output == nil && strings.Contains(fmt.Sprint(cwb.Property("class")), "mw-parser-output"):
+				output = cwb
+			}
+			return tree.Continue
+		})
+		if !assert.NotNil(t, text) || !assert.NotNil(t, output) {
+			return
+		}
+		blank := (text.Geom.Pos.Total.Y + text.Geom.Size.Actual.Total.Y) - (output.Geom.Pos.Total.Y + output.Geom.Size.Actual.Total.Y)
+		assert.Less(t, blank, float32(100), "no blank space after the content of the article")
+	})
 }

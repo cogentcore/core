@@ -258,15 +258,30 @@ func (fr *Frame) layoutFrame(size math32.Vector2) {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nSizeDown start:", fr)
 	}
-	maxIter := 3
-	for iter := 0; iter < maxIter; iter++ { // 3  > 2; 4 same as 3
+	// The layout takes up to maxIter iterations while it needs to redo.
+	// After those, it continues (up to maxSettle in all) only while the
+	// sizes of the widgets are still changing, as when the heights of
+	// nested blocks of text follow widths that changed in the previous
+	// iteration, which otherwise leaves them (and their parents) higher
+	// than their final content. The redo of some widgets is always true,
+	// so it is not enough to know that they have settled. Sizes that
+	// alternate (as a scrollbar that is added and removed) stop it too.
+	const maxIter, maxSettle = 3, 6
+	var sizes, prev, prev2 float64
+	for iter := 0; iter < maxSettle; iter++ {
 		redo := fr.SizeDown(iter)
-		if redo && iter < maxIter-1 {
-			if DebugSettings.LayoutTrace {
-				fmt.Println("\n############################\nSizeDown redo:", fr, "iter:", iter+1)
-			}
-		} else {
+		if !redo {
 			break
+		}
+		if iter >= maxIter-2 {
+			prev2, prev = prev, sizes
+			sizes = fr.sizesSum()
+			if iter >= maxIter-1 && (sizes == prev || sizes == prev2) {
+				break
+			}
+		}
+		if DebugSettings.LayoutTrace {
+			fmt.Println("\n############################\nSizeDown redo:", fr, "iter:", iter+1)
 		}
 	}
 	if DebugSettings.LayoutTrace {
@@ -280,6 +295,19 @@ func (fr *Frame) layoutFrame(size math32.Vector2) {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nScenePos start:", fr)
 	}
+}
+
+// sizesSum returns the sum of the actual sizes of the frame and the
+// widgets in it, which changes when any of them changes (practically),
+// for knowing whether the layout has settled.
+func (fr *Frame) sizesSum() float64 {
+	sum := float64(0)
+	fr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		sz := cwb.Geom.Size.Actual.Total
+		sum += float64(sz.X)*1.0001 + float64(sz.Y)
+		return tree.Continue
+	})
+	return sum
 }
 
 // layoutFrame does a layout on the given Frame using given size.
