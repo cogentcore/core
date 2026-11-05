@@ -80,6 +80,22 @@ func (fr *Frame) childrenIntrinsicWidths() (minw, prefw float32) {
 		minw = max(minw, fl.size.X)
 		prefw = max(prefw, fl.size.X)
 	}
+	if fr.onlyFloats() {
+		// A column that only has floats is as wide as the widest one at
+		// least, and has them side by side when there is room for all of
+		// them (as in CSS, in which the max-content width of a block has
+		// its floats on one line), as for a float of floats.
+		var fmin, fpref float32
+		fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			if cwb.isFloat() {
+				fmin = max(fmin, cwb.Geom.Size.minWidth)
+				fpref += cwb.Geom.Size.prefWidth
+			}
+			return tree.Continue
+		})
+		minw = max(minw, fmin)
+		prefw = max(prefw, fpref)
+	}
 	return minw, prefw
 }
 

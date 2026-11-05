@@ -859,3 +859,38 @@ func TestLayoutWrapRoundingFits(t *testing.T) {
 		assert.False(t, scroller.HasScroll[math32.X], "the frame does not scroll for the rounding")
 	})
 }
+
+// TestLayoutFloatOfFloats is for a float that only has floats in it (as
+// the icons in the footer of Wikipedia: a list that floats right, of
+// items that float left): as in CSS, the float is as wide as its floats
+// side by side, which are in it, within the column, instead of having no
+// width and its floats overflowing the column on top of each other.
+func TestLayoutFloatOfFloats(t *testing.T) {
+	b := NewBody()
+	page := columnFrame(b, 0)
+	page.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(400)
+		s.Padding.Zero()
+	})
+	fixedFrame(page, 100, 20)
+	list := NewFrame(page)
+	list.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Float = styles.FloatRight
+		s.Padding.Zero()
+	})
+	var items []*Frame
+	for range 2 {
+		it := fixedFrame(list, 50, 20)
+		it.Styler(func(s *styles.Style) { s.Float = styles.FloatLeft })
+		items = append(items, it)
+	}
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		right := page.Geom.Pos.Content.X + page.Geom.Size.Actual.Content.X
+		assert.InDelta(t, 100*dp, list.Geom.Size.Actual.Total.X, 2, "the list is as wide as its floats")
+		assert.Less(t, items[0].Geom.Pos.Total.X+1, items[1].Geom.Pos.Total.X, "the floats are side by side")
+		for _, it := range items {
+			assert.LessOrEqual(t, it.Geom.Pos.Total.X+it.Geom.Size.Actual.Total.X, right+1, "within the column")
+		}
+	})
+}

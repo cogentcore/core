@@ -1231,6 +1231,9 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	ksz := li.cellsSize()
 	if fl := li.floats; fl != nil { // the column is as tall as its floats
 		ksz.Y = max(ksz.Y, fl.size.Y-li.GapSize.Y)
+		if fr.onlyFloats() { // and as wide, when it only has floats
+			ksz.X = max(ksz.X, fl.floatsWidth)
+		}
 	}
 	sizing := fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)
 	if pass > SizeUpPass && li.Wraps != nil && li.MainAxis == math32.X && !sizing {

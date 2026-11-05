@@ -482,3 +482,38 @@ func TestMediaChanged(t *testing.T) {
 	ctx = read(`<html><body><p style="width: 50vw">Text</p></body></html>`)
 	assert.False(t, ctx.MediaChanged(300), "no media queries or columns")
 }
+
+// TestTableCellWidthMinimum tests that the width of a table cell is not
+// a limit, as in CSS: a cell with a width of 1% and text that does not
+// wrap (as the group headers of the navigation boxes of Wikipedia) is as
+// wide as its text, which does not overflow it.
+func TestTableCellWidthMinimum(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(600) })
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body><table style="width: 100%"><tr>`+
+		`<th class="group" style="width: 1%; white-space: nowrap">Cascading style sheets</th>`+
+		`<td>Some text in the other column of the table</td></tr></table></body></html>`))
+	var th *core.WidgetBase
+	var tx *core.Text
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == "group" {
+			th = wb
+			wb.WalkDown(func(n tree.Node) bool {
+				if t, ok := n.(*core.Text); ok {
+					tx = t
+				}
+				return tree.Continue
+			})
+		}
+		return tree.Continue
+	})
+	if !assert.NotNil(t, th) || !assert.NotNil(t, tx) {
+		return
+	}
+	b.RenderImage(func() {
+		right := th.Geom.Pos.Total.X + th.Geom.Size.Actual.Total.X
+		assert.LessOrEqual(t, tx.Geom.Pos.Total.X+tx.Geom.Size.Actual.Total.X, right+1, "the text is within its cell")
+		assert.Greater(t, th.Geom.Size.Actual.Total.X, float32(100), "the cell is as wide as its text")
+	})
+}

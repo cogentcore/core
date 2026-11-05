@@ -372,6 +372,15 @@ func (r *resolver) sizes() {
 			s.Min.X = units.Value{}
 			s.Grow.X = 1
 		}
+		nowrap := s.Text.WhiteSpace == text.WrapNever || s.Text.WhiteSpace == text.WhiteSpacePre
+		if st.display == "table-cell" && st.width.Unit == units.UnitPw && nowrap {
+			// The column of a table cell is at least as wide as its content,
+			// as in CSS, which for text that does not wrap is its whole
+			// width: then a percentage width is not a limit (as for a cell
+			// with a width of 1% to be as narrow as its text). Text that
+			// wraps fits the percentage, which is kept (as for halves).
+			s.Max.X = units.Value{}
+		}
 	}
 	// A percentage height is only of a parent with a definite height,
 	// and the viewport is definite. Content that overflows a height is
