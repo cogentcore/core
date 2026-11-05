@@ -12,6 +12,7 @@ import (
 	"image/png"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -515,5 +516,59 @@ func TestTableCellWidthMinimum(t *testing.T) {
 		right := th.Geom.Pos.Total.X + th.Geom.Size.Actual.Total.X
 		assert.LessOrEqual(t, tx.Geom.Pos.Total.X+tx.Geom.Size.Actual.Total.X, right+1, "the text is within its cell")
 		assert.Greater(t, th.Geom.Size.Actual.Total.X, float32(100), "the cell is as wide as its text")
+	})
+}
+
+// TestLayoutSettles tests that the layout of a page in a frame that
+// scrolls (as in a browser) settles, so that the content of the article of
+// the Wikipedia snapshot (in a grid of columns, in which the heights of the
+// text follow widths that change in each iteration of the layout) is not
+// followed by blank space down to the footer.
+func TestLayoutSettles(t *testing.T) {
+	file := filepath.Join(snapshotsDir, "wikipedia", "index.html")
+	src, err := os.ReadFile(file)
+	if err != nil {
+		t.Skip("no Wikipedia snapshot")
+	}
+	dir, _ := filepath.Abs(filepath.Dir(file))
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(1200), units.Dp(800))
+		s.Padding.Zero()
+	})
+	scroller := core.NewFrame(b)
+	scroller.Styler(func(s *styles.Style) {
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Grow.Set(1, 1)
+		s.Direction = styles.Column
+		s.Padding.Zero()
+	})
+	ctx := NewContext()
+	ctx.MediaWidth = 1200
+	ctx.PageURL = "file://" + dir + "/index.html"
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		pu, err := url.Parse(u)
+		if err != nil || pu.Scheme != "file" {
+			return &http.Response{StatusCode: http.StatusNotFound, Status: "404 Not Found", Body: io.NopCloser(strings.NewReader(""))}, nil
+		}
+		return getURL(u)
+	}
+	assert.NoError(t, ReadHTMLString(ctx, scroller, string(src)))
+	b.RenderImage(func() {
+		var text, output *core.WidgetBase
+		scroller.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+			switch {
+			case cwb.Name == "mw-content-text":
+				text = cwb
+			case text != nil && output == nil && strings.Contains(fmt.Sprint(cwb.Property("class")), "mw-parser-output"):
+				output = cwb
+			}
+			return tree.Continue
+		})
+		if !assert.NotNil(t, text) || !assert.NotNil(t, output) {
+			return
+		}
+		blank := (text.Geom.Pos.Total.Y + text.Geom.Size.Actual.Total.Y) - (output.Geom.Pos.Total.Y + output.Geom.Size.Actual.Total.Y)
+		assert.Less(t, blank, float32(100), "no blank space after the content of the article")
 	})
 }
