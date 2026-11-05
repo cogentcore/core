@@ -167,7 +167,6 @@ func (fr *Frame) overflowWidth(iter int, maxSize float32) float32 {
 	return min(maxSize, fr.layout.minContent)
 }
 
-
 // growMaxWidth returns the total width of the Max of the given child
 // (with its Space), as it is (or will be) for the content width of the
 // frame, which a parent-relative Max is relative to, or 0 if it has none.

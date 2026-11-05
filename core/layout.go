@@ -1527,7 +1527,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	colWidth, colBlock := fr.columnWidth()
 	// columns that shrink are narrowed to fit, or widened back to their
 	// widths from SizeUp after they were narrower
-	widths = fr.shrinkWidths()
+	widths, shrunk := fr.shrinkWidths()
 	for exitr := range 2 {
 		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
@@ -1611,13 +1611,15 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 					// a column that grows into extra width is at least its
 					// preferred width, which shrinkWidths only widens it to
 					w := fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
-					if exd > 0 {
+					if exd > 0 && !shrunk {
 						asz = max(asz, w)
 					} else {
 						asz = w
 					}
 				}
 				if ma == math32.X && colWidth > 0 {
+					// as wide as it can be (see sizeDownAllocActualCells)
+					asz = max(asz, ksz.preferred.X)
 					asz = narrowTo(cwb, asz, colWidth, colBlock)
 				}
 				if DebugSettings.LayoutTraceDetail {
@@ -1660,13 +1662,14 @@ func (fr *Frame) spanAlloc(cidx image.Point, span int, extra float32) float32 {
 // in a row, or the columns of a grid), narrowed to fit within its allocated
 // width, in proportion to their width and the [styles.Style.Shrink] of the
 // children in them, or nil if it fits or none shrink. It is not for wrapped
-// layouts.
-func (fr *Frame) shrinkWidths() []float32 {
+// layouts. shrunk is whether they were narrowed to fit, in which case their
+// widths are final (they do not also grow), as in CSS.
+func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 	li := &fr.layout
 	sz := &fr.Geom.Size
 	rowOrGrid := fr.Styles.Display == styles.Grid || (fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Row)
 	if li.Wraps != nil || len(li.Cells) == 0 || !rowOrGrid {
-		return nil
+		return nil, false
 	}
 	n := li.Shape.X
 	shrink := make([]float32, n)
@@ -1702,11 +1705,11 @@ func (fr *Frame) shrinkWidths() []float32 {
 		return tree.Continue
 	})
 	if !any {
-		return nil
+		return nil, false
 	}
 	// The columns that shrink start from their widths from SizeUp, so
 	// that they are as wide as they can be when they were narrower before.
-	widths := make([]float32, n)
+	widths = make([]float32, n)
 	cur := float32(0)
 	for c := range n {
 		widths[c] = li.cell(math32.X, c, 0).Size.X
@@ -1722,9 +1725,9 @@ func (fr *Frame) shrinkWidths() []float32 {
 	deficit := sz.Internal.X - cur + total - sz.Alloc.Content.X
 	if deficit <= 0.5 {
 		if total > cur+0.5 {
-			return widths
+			return widths, false
 		}
-		return nil
+		return nil, false
 	}
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if c := cwb.Geom.Cell.X; c < n && fr.colSpan(cwb) == 1 && shrink[c] > 0 {
@@ -1760,7 +1763,7 @@ func (fr *Frame) shrinkWidths() []float32 {
 		}
 		deficit = left // those that can shrink more do
 	}
-	return widths
+	return widths, true
 }
 
 // shrinkAlloc returns the allocated width of the given child in the column
@@ -1907,7 +1910,7 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 	// most its width (but not less than their minimum), so that text can
 	// wrap in it.
 	colWidth, colBlock := fr.columnWidth()
-	widths := fr.shrinkWidths()
+	widths, _ := fr.shrinkWidths()
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		ksz := &cwb.Geom.Size
 		cidx := cwb.Geom.Cell
@@ -1929,10 +1932,10 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 			if ma == math32.X && widths != nil {
 				asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
 			}
-			if ma == math32.X && colWidth > 0 && cwb.Styles.Shrink.X > 0 && widths == nil {
-				asz = max(asz, cwb.Geom.Size.preferred.X) // as wide as it can be
-			}
 			if ma == math32.X && colWidth > 0 {
+				// as wide as it can be: its preferred width, within the
+				// column, even after it was narrower in an earlier iteration
+				asz = max(asz, cwb.Geom.Size.preferred.X)
 				asz = narrowTo(cwb, asz, colWidth, colBlock)
 			}
 			ksz.Alloc.Total.SetDim(ma, asz)

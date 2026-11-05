@@ -39,6 +39,17 @@ The first step of the design below is implemented (core/layoutintrinsic.go):
   width in the SizeFinal cells, so the frame that it is in scrolls to it;
   widgets with parts (buttons, switches, choosers) are not narrowed
   (min = pref = actual), as their parts are laid out in their actual size.
+- When the columns of a row or grid had to shrink to fit (`shrinkWidths`
+  reports `shrunk`), their widths are final: they do not also grow from
+  stale cell widths in later iterations (unequal "100%" columns). Children
+  of a column start from their preferred width within it in every
+  iteration (was only for `Shrink` > 0).
+- Focused tests in core/layout_test.go (TestLayoutNestedScrollMin,
+  OverflowScrolls, PartsNotNarrowed, TextWrapHeight, ShrinkToMin,
+  ShrinkMaxBasis, GridGrowShrinkable, ContentSizingMeasure, TextScrollbar),
+  each checked to fail with its fix reverted, except: the late rewrap of
+  text is only caught by the w3c snapshot of htmlcore, and the widening to
+  the preferred width in columns by none (kept as the general rule).
 - Removed: `Text.FitWidth`, `Text.availableWidth`, the aspect ratio estimate
   in `Text.SizeUp`. `GrowWrap` stays only for text that is not aligned at
   the start (centered text is aligned within all of the available width).
