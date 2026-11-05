@@ -762,3 +762,100 @@ func TestLayoutWrapInRow(t *testing.T) {
 		assert.LessOrEqual(t, wrap.Geom.Size.Actual.Total.X, wa+1, "the items wrap within the wrapped row")
 	})
 }
+
+// TestLayoutOverflowWithinRoom is for a frame whose content overflows
+// it visibly beyond its Max, at the start of a row that fills the width
+// of a frame that scrolls (as the icons of a footer on Wikipedia): the
+// overflow is within the room after the frame in the row, so the frame
+// that scrolls does not scroll in width for it.
+func TestLayoutOverflowWithinRoom(t *testing.T) {
+	b := NewBody()
+	scroller := scrollFrame(b)
+	scroller.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(240)
+	})
+	page := columnFrame(scroller, 0)
+	page.Styler(func(s *styles.Style) {
+		s.Padding.Zero()
+	})
+	row := NewFrame(page)
+	row.Styler(func(s *styles.Style) {
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	box := NewFrame(row)
+	box.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(80)
+		s.Padding.Zero()
+	})
+	wideRow(box, 1, 120) // overflows the box by 40
+	fixedFrame(row, 160, 20)
+	// the sizes are whole dots (at 1.0125 dots per dp), so that they fit
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		assert.LessOrEqual(t, box.Geom.Size.Actual.Total.X, 80*dp+1, "the box is within its Max")
+		assert.False(t, scroller.HasScroll[math32.X], "the overflow of the box is within the row")
+	})
+}
+
+// TestLayoutWrapEmptyItem is for a wrapped row with a gap, of a frame of
+// text that is wider than the row on one line and an empty frame after it
+// (as the table of contents of MDN and the empty element of its ads): as
+// in CSS, the text frame takes the width of the row, and the empty frame
+// is on the next line, so that the line does not overflow the row by the
+// gap.
+func TestLayoutWrapEmptyItem(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Wrap = true
+		s.Min.X.Dp(200)
+		s.Max.X.Dp(200)
+		s.Gap.Set(units.Dp(8))
+		s.Padding.Zero()
+	})
+	textFrame := NewFrame(row)
+	textFrame.Styler(func(s *styles.Style) {
+		s.Padding.Zero()
+	})
+	NewText(textFrame).SetText(wrapText)
+	empty := NewFrame(row)
+	empty.Styler(func(s *styles.Style) {
+		s.Padding.Zero()
+	})
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		assert.LessOrEqual(t, row.Geom.Size.Actual.Total.X, 200*dp+1, "the line fits the row")
+		assert.Equal(t, 1, empty.Geom.Cell.Y, "the empty frame is on the next line")
+	})
+}
+
+// TestLayoutWrapRoundingFits is for a wrapped row of items whose exact
+// widths fit it together, in a frame that scrolls: their widths are each
+// rounded up to whole dots, which keeps them on one line (see
+// TestShrinkWrapRow), and the row is still as wide as the frame, which
+// does not scroll in width for those dots (as the navigation of the Rust
+// site).
+func TestLayoutWrapRoundingFits(t *testing.T) {
+	b := NewBody()
+	scroller := scrollFrame(b)
+	scroller.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(100)
+		s.Padding.Zero()
+	})
+	row := NewFrame(scroller)
+	row.Styler(func(s *styles.Style) {
+		s.Wrap = true
+		s.Grow.Set(1, 0)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	var items []*Frame
+	for range 4 { // 25.4 dots each, 26 rounded up, in 102 dots
+		items = append(items, fixedFrame(row, 25.09, 20))
+	}
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		for _, it := range items {
+			assert.Equal(t, 0, it.Geom.Cell.Y, "the items are on one line")
+		}
+		assert.False(t, scroller.HasScroll[math32.X], "the frame does not scroll for the rounding")
+	})
+}
