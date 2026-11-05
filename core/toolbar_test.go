@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -215,4 +216,48 @@ func TestToolbarOverflowResize(t *testing.T) {
 			assert.True(t, finals[sz], "render at a transitional size %v", sz)
 		}
 	})
+}
+
+// TestToolbarSettlingKeepsItems tests that a toolbar in a top bar with an
+// address field that grows (as in a web browser) keeps its items that fit
+// when the toolbar is updated as content is added (as a page that has
+// been opened): they are moved to the overflow menu only in the iterations
+// of the layout that redo, not in those after them in which it settles.
+func TestToolbarSettlingKeepsItems(t *testing.T) {
+	b := NewBody()
+	var tb *Toolbar
+	b.AddTopBar(func(bar *Frame) {
+		tb = NewToolbar(bar)
+		tb.Maker(func(p *tree.Plan) {
+			for _, name := range []string{"back", "forward", "reload"} {
+				tree.AddAt(p, name, func(w *Button) { w.SetIcon(icons.Refresh) })
+			}
+			tree.AddAt(p, "url", func(w *TextField) {
+				w.Styler(func(s *styles.Style) {
+					s.Grow.Set(1, 0)
+					s.Min.X.Em(30)
+					s.Max.X.Ch(80)
+				})
+			})
+		})
+	})
+	var names []string
+	b.RenderImage(func() {
+		// the content is added and the toolbar updated, as when a page opens
+		b.AsyncLock()
+		content := NewFrame(b)
+		content.Styler(func(s *styles.Style) { s.Grow.Set(1, 1); s.Direction = styles.Column })
+		NewText(content).SetText("A page")
+		content.Update()
+		tb.Update()
+		b.Update()
+		b.AsyncUnlock()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		for _, k := range tb.Children {
+			names = append(names, k.AsTree().Name)
+		}
+	})
+	assert.Contains(t, names, "url", "the address field is in the toolbar")
 }
