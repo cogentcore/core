@@ -31,6 +31,14 @@ The first step of the design below is implemented (core/layoutintrinsic.go):
 - A scene sized to its content (windows, dialogs) limits the preferred
   width of text to 70ch (`contentSizingMeasure`), as the old aspect ratio
   estimate did in its way; otherwise a long message is a screen-wide line.
+- Fixes from the demo (narrow Inputs tab): a frame is never allocated less
+  than its own `Min` (as a CSS min-width; its content then overflows up to
+  the nearest scroller, instead of every nested scrolling frame scrolling);
+  a child that overflows its allocation (a frame narrowed below its
+  minimum, as the non-wrapping segmented buttons) counts at its actual
+  width in the SizeFinal cells, so the frame that it is in scrolls to it;
+  widgets with parts (buttons, switches, choosers) are not narrowed
+  (min = pref = actual), as their parts are laid out in their actual size.
 - Removed: `Text.FitWidth`, `Text.availableWidth`, the aspect ratio estimate
   in `Text.SizeUp`. `GrowWrap` stays only for text that is not aligned at
   the start (centered text is aligned within all of the available width).

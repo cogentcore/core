@@ -699,19 +699,13 @@ func (wb *WidgetBase) SizeUpWidget() {
 }
 
 // sizeUpIntrinsic sets the intrinsic widths of a widget that has no
-// children of its own in the layout: those of its parts, if it has them,
-// and otherwise its actual width.
+// children of its own in the layout: both are its actual width. A widget
+// with parts (such as a button, switch, or chooser) is not narrowed, as
+// its parts are laid out within its actual size: its label stays on one
+// line, and the frame that it is in scrolls if it does not fit.
 func (wb *WidgetBase) sizeUpIntrinsic() {
 	sz := &wb.Geom.Size
-	if wb.Parts == nil {
-		sz.minWidth, sz.prefWidth = sz.Actual.Total.X, sz.Actual.Total.X
-		return
-	}
-	psz := &wb.Parts.Geom.Size
-	sz.setIntrinsicWidths(psz.minWidth, psz.prefWidth)
-	// its actual width is within them
-	sz.minWidth = min(sz.minWidth, sz.Actual.Total.X)
-	sz.prefWidth = max(sz.prefWidth, sz.Actual.Total.X)
+	sz.minWidth, sz.prefWidth = sz.Actual.Total.X, sz.Actual.Total.X
 }
 
 // spaceFromStyle sets the Space based on Style BoxSpace().Size(),
@@ -1142,11 +1136,14 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		span := fr.colSpan(cwb)
 		rspan := fr.rowSpan(cwb)
 		if pass == SizeFinalPass {
+			// the cell is the allocation of the child, unless its content
+			// overflows it (as a frame narrowed below its minimum), which
+			// then counts for the frame to scroll
 			if grw.X == 0 && !cwb.Styles.GrowWrap {
-				sz.X = cwb.Geom.Size.Alloc.Total.X
+				sz.X = max(sz.X, cwb.Geom.Size.Alloc.Total.X)
 			}
 			if grw.Y == 0 {
-				sz.Y = cwb.Geom.Size.Alloc.Total.Y
+				sz.Y = max(sz.Y, cwb.Geom.Size.Alloc.Total.Y)
 			}
 		}
 		if pass <= SizeDownPass && iter == 0 && cwb.Styles.GrowWrap {
@@ -1366,6 +1363,13 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		})
 	}
 	sz := &fr.Geom.Size
+	if fr.Parent != nil {
+		// A frame is never allocated less than its Min (as a min-width in
+		// CSS), even when its parent narrows it (as a block in a column):
+		// its children are laid out in at least that, and it then
+		// overflows its parent, which scrolls if it can.
+		styles.SetClampMinVector(&sz.Alloc.Content, sz.Min)
+	}
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
 	if DebugSettings.LayoutTrace {
