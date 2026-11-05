@@ -46,10 +46,23 @@ The first step of the design below is implemented (core/layoutintrinsic.go):
   iteration (was only for `Shrink` > 0).
 - Focused tests in core/layout_test.go (TestLayoutNestedScrollMin,
   OverflowScrolls, PartsNotNarrowed, TextWrapHeight, ShrinkToMin,
-  ShrinkMaxBasis, GridGrowShrinkable, ContentSizingMeasure, TextScrollbar),
+  ShrinkMaxBasis, GridGrowShrinkable, ContentSizingMeasure, TextScrollbar,
+  OverflowBeyondMax, GrowWithinRow; htmlcore TestSVGMaxWidth),
   each checked to fail with its fix reverted, except: the late rewrap of
   text is only caught by the w3c snapshot of htmlcore, and the widening to
   the preferred width in columns by none (kept as the general rule).
+- Visible overflow beyond a Max (a row of cards in a page with a
+  max-width): `GeomSize.extent` and `layoutState.overflow`
+  (`Frame.sizeOverflow`) carry the content that overflows a frame beyond its
+  Max up to the frame that scrolls, whose `ScrollValues` (and first-pass
+  `overflowWidth`) include it, so it scrolls over all of it.
+- When the columns of a row fit at the widths from `shrinkWidths` (widened
+  to their preferred widths), `growWidths` grows the growing ones into the
+  width that is left, passing on what a column cannot take beyond its Max,
+  instead of growing from stale cell widths (the Rust header overflowed).
+- htmlcore: an img of an svg without width and height is scaled down to an
+  absolute max-width / max-height, keeping its aspect (the Rust icons were
+  512px wide with a max-width of 6rem).
 - Removed: `Text.FitWidth`, `Text.availableWidth`, the aspect ratio estimate
   in `Text.SizeUp`. `GrowWrap` stays only for text that is not aligned at
   the start (centered text is aligned within all of the available width).

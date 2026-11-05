@@ -671,3 +671,61 @@ func TestLayoutTextScrollbar(t *testing.T) {
 		}
 	})
 }
+
+// TestLayoutOverflowBeyondMax is for content that overflows a frame with a
+// Max narrower than it, in a frame that scrolls (as a row of cards in a
+// page with a max-width in CSS): the overflow is still visible, and the
+// frame that scrolls scrolls over all of it, not only to the Max.
+func TestLayoutOverflowBeyondMax(t *testing.T) {
+	b := NewBody()
+	scroller := scrollFrame(b)
+	scroller.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(300)
+	})
+	page := columnFrame(scroller, 0)
+	page.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(200)
+		s.Padding.Zero()
+	})
+	row := wideRow(page, 3, 150)
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		assert.LessOrEqual(t, page.Geom.Size.Actual.Total.X, 200*dp+1, "the page is within its Max")
+		assert.GreaterOrEqual(t, row.Geom.Size.Actual.Total.X, 450*dp-1, "the row overflows it")
+		assert.True(t, scroller.HasScroll[math32.X], "the frame scrolls in width")
+		maxSize, _, _ := scroller.ScrollValues(math32.X)
+		assert.GreaterOrEqual(t, maxSize, 450*dp-1, "over all of the row")
+	})
+}
+
+// TestLayoutGrowWithinRow is for a row with a column that grows up to a
+// Max and has text that can shrink, beside a column that grows and cannot
+// shrink (as the header of a page with a heading and a button): when they
+// fit, they grow into the width that is left, and do not overflow the row.
+func TestLayoutGrowWithinRow(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(400)
+		s.Max.X.Dp(400)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	heading := columnFrame(row, 0)
+	heading.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(300)
+		s.Padding.Zero()
+	})
+	NewText(heading).SetText(wrapText)
+	side := columnFrame(row, 0)
+	side.Styler(func(s *styles.Style) {
+		s.Max.X.Pw(30)
+		s.Padding.Zero()
+	})
+	fixedFrame(side, 80, 20)
+	layoutAtWidth(b, 800, 600, func(dp float32) {
+		w := heading.Geom.Size.Alloc.Total.X + side.Geom.Size.Alloc.Total.X
+		assert.LessOrEqual(t, w, 400*dp+1, "the columns fit in the row")
+		assert.GreaterOrEqual(t, w, 400*dp-2, "and fill it")
+		assert.LessOrEqual(t, row.Geom.Size.Internal.X, 400*dp+1, "the row does not overflow")
+	})
+}

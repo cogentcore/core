@@ -129,7 +129,8 @@ func (fr *Frame) ScrollUpdateFromGeom(d math32.Dims) {
 // needed in the first place
 func (fr *Frame) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
 	sz := &fr.Geom.Size
-	maxSize = sz.Internal.Dim(d)
+	// all of the content, including any that overflows children visibly
+	maxSize = max(sz.Internal.Dim(d), fr.layout.overflow.Dim(d))
 	visSize = sz.Alloc.Content.Dim(d)
 	visPct = visSize / maxSize
 	return

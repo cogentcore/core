@@ -156,6 +156,12 @@ type GeomSize struct {
 	// which it is aligned within, and 0 otherwise.
 	slot math32.Vector2
 
+	// extent is the total size of the widget including any content of it
+	// that overflows it visibly (as for a frame with a Max narrower than
+	// its content), which is beyond its Actual size; it is zero or Actual
+	// when there is none. See [Frame.sizeOverflow].
+	extent math32.Vector2
+
 	// preferred is the actual total size of the widget from the SizeUp
 	// pass, before its parent allocates it less, which is its max-content
 	// size for widgets that shrink ([styles.Style.Shrink]), so that they
@@ -458,6 +464,11 @@ type layoutState struct {
 	// from its children (see [Frame.sizeUpIntrinsicFrame]), which it
 	// scrolls in width only if it is narrower than.
 	minContent float32
+
+	// overflow is the size of the content of the frame including the
+	// content of its children that overflows them visibly (see
+	// [Frame.sizeOverflow]), which the frame scrolls over.
+	overflow math32.Vector2
 
 	// GapSize has the total extra gap sizing between elements, which adds to Space.
 	// This depends on cell layout so it can vary for Wrap case.
@@ -1093,6 +1104,7 @@ func (fr *Frame) rowSpanAlloc(cidx image.Point, span int, extra float32) float32
 func (fr *Frame) sizeFromChildrenFit(iter int, pass LayoutPasses) {
 	ksz := fr.This.(Layouter).SizeFromChildren(iter, pass)
 	fr.laySetContentFitOverflow(ksz, pass)
+	fr.sizeOverflow()
 	if DebugSettings.LayoutTrace {
 		sz := &fr.Geom.Size
 		fmt.Println(fr, pass, "FromChildren:", ksz, "Content:", sz.Actual.Content, "Internal:", sz.Internal)
@@ -1528,6 +1540,13 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	// columns that shrink are narrowed to fit, or widened back to their
 	// widths from SizeUp after they were narrower
 	widths, shrunk := fr.shrinkWidths()
+	// When the columns fit at the widths of shrinkWidths (widened back to
+	// their preferred widths), those are their base widths, and the columns
+	// that grow share the width that is left, not the extra width from
+	// their earlier (narrower) sizes, which would make them overflow.
+	if widths != nil && !shrunk {
+		widths = fr.growWidths(widths, alloc.X)
+	}
 	for exitr := range 2 {
 		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
@@ -1608,14 +1627,9 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 					asz = fr.rowSpanAlloc(cidx, span, exd)
 				}
 				if ma == math32.X && widths != nil {
-					// a column that grows into extra width is at least its
-					// preferred width, which shrinkWidths only widens it to
-					w := fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
-					if exd > 0 && !shrunk {
-						asz = max(asz, w)
-					} else {
-						asz = w
-					}
+					// from the widths of shrinkWidths, which those that grow
+					// grow from into the width that is left (see above)
+					asz = fr.shrinkAlloc(widths, cidx, fr.colSpan(cwb))
 				}
 				if ma == math32.X && colWidth > 0 {
 					// as wide as it can be (see sizeDownAllocActualCells)

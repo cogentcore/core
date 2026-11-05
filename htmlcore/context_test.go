@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/tree"
 	"github.com/andybalholm/cascadia"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
@@ -222,6 +223,42 @@ func TestSVGSize(t *testing.T) {
 	}
 	_, _, ok := svgSize([]byte(`<svg>`))
 	assert.False(t, ok)
+}
+
+// TestSVGMaxWidth tests that an img of an svg without a width or height
+// is scaled down to an absolute max-width, keeping its aspect, as for icons
+// that are much larger than their max-width (the Rust snapshot).
+func TestSVGMaxWidth(t *testing.T) {
+	dir := t.TempDir()
+	svg := `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="256" viewBox="0 0 512 256"><rect width="512" height="256"/></svg>`
+	assert.NoError(t, os.WriteFile(filepath.Join(dir, "icon.svg"), []byte(svg), 0666))
+	b := core.NewBody()
+	ctx := NewContext()
+	ctx.PageURL = "file://" + dir + "/page.html"
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		f, err := os.Open(filepath.Join(dir, filepath.Base(u)))
+		if err != nil {
+			return nil, err
+		}
+		return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Body: f}, nil
+	}
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body><img src="icon.svg" style="max-width: 6rem"></body></html>`))
+	var sv *core.SVG
+	b.WalkDown(func(n tree.Node) bool {
+		if s, ok := n.(*core.SVG); ok {
+			sv = s
+		}
+		return tree.Continue
+	})
+	if !assert.NotNil(t, sv) {
+		return
+	}
+	b.RenderImage(func() {
+		dp := sv.Styles.UnitContext.Dots(units.UnitDp)
+		sz := sv.Geom.Size.Actual.Content
+		assert.InDelta(t, 96*dp, sz.X, 2, "it is as wide as its max-width")
+		assert.InDelta(t, 48*dp, sz.Y, 2, "and keeps its aspect")
+	})
 }
 
 func TestMediaRange(t *testing.T) {

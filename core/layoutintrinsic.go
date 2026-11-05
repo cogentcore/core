@@ -5,6 +5,9 @@
 package core
 
 import (
+	"slices"
+
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -158,13 +161,15 @@ func narrowTo(cwb *WidgetBase, alloc, width float32, block bool) float32 {
 // would overflow in, for deciding whether it needs to scroll in width:
 // in the first SizeDown iteration, the children still have their
 // preferred widths from SizeUp, which they are narrowed from to fit, so
-// the frame only overflows its min-content width; afterward, it is the
-// actual width of its content, as given.
+// the frame only overflows its min-content width, plus any content that
+// overflows its children visibly beyond their Max (see [Frame.sizeOverflow]);
+// afterward, it is the actual width of its content, as given.
 func (fr *Frame) overflowWidth(iter int, maxSize float32) float32 {
 	if iter > 0 || !fr.HasChildren() || fr.Styles.Display == styles.Custom {
 		return maxSize
 	}
-	return min(maxSize, fr.layout.minContent)
+	excess := max(fr.layout.overflow.X-fr.Geom.Size.Internal.X, 0)
+	return min(maxSize, fr.layout.minContent+excess)
 }
 
 // growMaxWidth returns the total width of the Max of the given child
@@ -186,4 +191,103 @@ func (fr *Frame) growMaxWidth(cwb *WidgetBase) float32 {
 		return 0
 	}
 	return w + ksz.Space.X
+}
+
+// sizeOverflow sets the overflow size of the content of the frame
+// (layoutState.overflow), and its own extent ([GeomSize.extent]), from the
+// visible overflow of its children: the content that overflows a child
+// (which is beyond its Actual size, as for a frame with a Max narrower
+// than its content) is still shown, and the frame that scrolls around it
+// scrolls over it, as for the scrollable overflow of CSS. The overflow is
+// the content size plus the largest overflow of a child, in each
+// dimension. A frame that clips its content (not visible overflow) has no
+// overflow of its own beyond its size, and the content of a frame only
+// overflows it beyond a Max, as its actual size otherwise fits it (the
+// content size of wrapped layouts can be ahead of their actual size).
+func (fr *Frame) sizeOverflow() {
+	sz := &fr.Geom.Size
+	var excess math32.Vector2
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		ksz := &cwb.Geom.Size
+		excess.SetMax(ksz.extent.Sub(ksz.Actual.Total))
+		return tree.Continue
+	})
+	fr.layout.overflow = sz.Internal.Add(excess)
+	sz.extent = sz.Actual.Total
+	for d := math32.X; d <= math32.Y; d++ {
+		// Its own content only overflows it beyond a Max (otherwise its
+		// actual size fits its content), while that of its children
+		// overflows it in any case.
+		ov := sz.Actual.Content.Dim(d) + excess.Dim(d)
+		if sz.Max.Dim(d) > 0 {
+			ov = max(ov, fr.layout.overflow.Dim(d))
+		}
+		if fr.Styles.Overflow.Dim(d) != styles.OverflowVisible {
+			continue
+		}
+		sz.extent.SetDim(d, max(sz.extent.Dim(d), ov+sz.Space.Dim(d)))
+	}
+}
+
+// growWidths returns the given widths of the columns of the frame (from
+// [Frame.shrinkWidths], when they fit), grown into the rest of the given
+// width by the columns that grow, in proportion to their Grow, up to their
+// Max: the width that a column cannot take beyond its Max goes to the others.
+func (fr *Frame) growWidths(widths []float32, width float32) []float32 {
+	li := &fr.layout
+	n := len(widths)
+	grow := make([]float32, n)
+	maxw := make([]float32, n) // 0 for none
+	hasMax := make([]bool, n)
+	for c := range n {
+		grow[c] = li.cell(math32.X, c, 0).Grow.X
+		hasMax[c] = true
+	}
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		c := cwb.Geom.Cell.X
+		if c >= n || fr.colSpan(cwb) > 1 {
+			return tree.Continue
+		}
+		if mx := cwb.Geom.Size.maxTotal().X; mx > 0 && cwb.Geom.Size.Max.X > 0 {
+			maxw[c] = max(maxw[c], mx)
+		} else {
+			hasMax[c] = false
+		}
+		return tree.Continue
+	})
+	left := width
+	for _, w := range widths {
+		left -= w
+	}
+	grown := slices.Clone(widths)
+	for range n { // again when some reach their Max
+		if left < 0.5 {
+			break
+		}
+		gsum := float32(0)
+		for c := range n {
+			gsum += grow[c]
+		}
+		if gsum <= 0 {
+			break
+		}
+		used := float32(0)
+		for c := range n {
+			if grow[c] == 0 {
+				continue
+			}
+			nw := grown[c] + left*grow[c]/gsum
+			if hasMax[c] && maxw[c] > 0 && nw >= maxw[c] {
+				nw = max(grown[c], maxw[c])
+				grow[c] = 0 // at its Max
+			}
+			used += nw - grown[c]
+			grown[c] = nw
+		}
+		left -= used
+	}
+	for c := range n {
+		grown[c] = math32.Floor(grown[c])
+	}
+	return grown
 }

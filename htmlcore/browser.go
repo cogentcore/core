@@ -323,6 +323,16 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 			}
 			size = size.MulScalar(scale)
 		}
+		if st.width == nil && st.height == nil && node != nil {
+			// an absolute max-width or max-height scales it down to it,
+			// keeping its aspect, as its width and height are auto
+			for i, prop := range []string{"max-width", "max-height"} {
+				d := math32.Dims(i)
+				if px, ok := c.lengthPx(c.declaration(node, prop)); ok && px > 0 && px < size.Dim(d) {
+					size = size.MulScalar(px / size.Dim(d))
+				}
+			}
+		}
 		switch {
 		case st.width != nil && st.height != nil && st.height.Unit != units.UnitPh:
 			mh := *st.height
