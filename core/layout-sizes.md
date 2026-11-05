@@ -47,7 +47,8 @@ The first step of the design below is implemented (core/layoutintrinsic.go):
 - Focused tests in core/layout_test.go (TestLayoutNestedScrollMin,
   OverflowScrolls, PartsNotNarrowed, TextWrapHeight, ShrinkToMin,
   ShrinkMaxBasis, GridGrowShrinkable, ContentSizingMeasure, TextScrollbar,
-  OverflowBeyondMax, GrowWithinRow; htmlcore TestSVGMaxWidth),
+  OverflowBeyondMax, GrowWithinRow, WrapInRow; htmlcore TestSVGMaxWidth,
+  TestInlineBlocksExactFit, TestColumnsOfList),
   each checked to fail with its fix reverted, except: the late rewrap of
   text is only caught by the w3c snapshot of htmlcore, and the widening to
   the preferred width in columns by none (kept as the general rule).
@@ -76,11 +77,24 @@ mixed-vertical splits one line per sentence, dialogs sized to content);
 htmlcore fidelity vs Chrome 285 -> 291 of 370 boxes (23-email-complex
 15/15), no case worse; snapshots the same or better (w3c, rust columns).
 
-Not done yet (candidates for the next steps): `childSpace`/`growExtra`,
-toolbar overflow (`preferred`), `nosz` for wrapped rows, the 40ch `Max` of
-text fields, the `Shrink` settings in htmlcore that are now the default,
-and `GrowWrap` for centered text (could become alignment within the
-allocation at SizeFinal).
+Not done (2026-11-05 assessment):
+
+- `nosz` for wrapped rows: tried starting every wrapped row on one line in
+  SizeUp (its preferred width) outside content sizing: no observable
+  change (tests, TestLayoutWrapInRow), and `nosz` is still needed for
+  scenes sized to their content (a square start, so windows are not as wide
+  as all items on one line), so it is not simpler. Kept as is.
+- htmlcore `Shrink.X = 1` settings: not redundant, as `Shrink > 0` on a
+  wrapped row still means it starts on one line; removing them changed the
+  gopkg, mdn and rust snapshots. Kept.
+- `GrowWrap` for text that is not aligned at the start: removing it needs
+  the shaper to align lines within the given width (it aligns them to the
+  widest line); filling the allocation in SizeFinal conflicted with parents
+  that justify their children. Kept.
+- The 40ch `Max` of text fields: a design decision for the user (with
+  intrinsic widths it is no longer needed for the layout to work).
+- `childSpace`/`growExtra`: still needed. Toolbar overflow (`preferred`):
+  consistent with the model, no change needed.
 
 ## The question
 

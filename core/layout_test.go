@@ -729,3 +729,36 @@ func TestLayoutGrowWithinRow(t *testing.T) {
 		assert.LessOrEqual(t, row.Geom.Size.Internal.X, 400*dp+1, "the row does not overflow")
 	})
 }
+
+// TestLayoutWrapInRow is for a wrapped row (that does not shrink) beside
+// text in a row: the wrapped row has its preferred width (its items on
+// one line) and its min-content width (its widest item), so that both it
+// and the text get their share of the row, and its items wrap within it.
+func TestLayoutWrapInRow(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(300)
+		s.Max.X.Dp(300)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	tx := NewText(row).SetText(wrapText)
+	wrap := NewFrame(row)
+	wrap.Styler(func(s *styles.Style) {
+		s.Wrap = true
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	for range 5 {
+		fixedFrame(wrap, 50, 20)
+	}
+	layoutAtWidth(b, 800, 600, func(dp float32) {
+		wa := wrap.Geom.Size.Alloc.Total.X
+		ta := tx.Geom.Size.Alloc.Total.X
+		assert.LessOrEqual(t, wa+ta, 300*dp+1, "they fit in the row")
+		assert.GreaterOrEqual(t, wa, 50*dp-1, "the wrapped row has at least its widest item")
+		assert.Greater(t, ta, 50*dp, "the text has some of the row")
+		assert.LessOrEqual(t, wrap.Geom.Size.Actual.Total.X, wa+1, "the items wrap within the wrapped row")
+	})
+}
