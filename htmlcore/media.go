@@ -101,6 +101,13 @@ func ScreenMediaWidth() float32 {
 	return 1024
 }
 
+// MediaMatches returns whether the given media query list (as of an
+// @media rule) matches the viewport of the context, as for matchMedia
+// in the scripts of a page.
+func (c *Context) MediaMatches(query string) bool {
+	return c.mediaMatches(query)
+}
+
 // mediaMatches returns whether the given media query list matches,
 // recording its result for [Context.MediaChanged].
 func (c *Context) mediaMatches(query string) bool {

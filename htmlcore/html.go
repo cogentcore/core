@@ -18,14 +18,33 @@ import (
 // ReadHTML reads HTML from the given [io.Reader] and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadHTML(ctx *Context, parent core.Widget, r io.Reader) error {
-	// In browser style, the HTML is parsed as browsers do without
-	// JavaScript (which htmlcore does not run), so that the content
-	// of noscript elements is shown.
-	n, err := html.ParseWithOptions(r, html.ParseOptionEnableScripting(false))
+	n, err := ParseHTML(ctx, r)
 	if err != nil {
-		return fmt.Errorf("error parsing HTML: %w", err)
+		return err
 	}
+	return ReadDocument(ctx, parent, n)
+}
 
+// ParseHTML parses the given HTML as browsers do: with scripting enabled
+// if [Context.Scripting] is set (so that the content of noscript elements
+// is their text, which is not shown), and otherwise as browsers do without
+// JavaScript, so that the content of noscript elements is shown.
+func ParseHTML(ctx *Context, r io.Reader) (*html.Node, error) {
+	n, err := html.ParseWithOptions(r, html.ParseOptionEnableScripting(ctx.Scripting))
+	if err != nil {
+		return nil, fmt.Errorf("error parsing HTML: %w", err)
+	}
+	return n, nil
+}
+
+// ReadDocument adds the Cogent Core widgets for the given parsed HTML
+// document (or other node, with its next siblings) to the given widget,
+// using the given context, as [ReadHTML] does after it parses its HTML.
+// It allows the document to be read again after it is changed, as by the
+// scripts of a page (which need its nodes), with a new context for each
+// read (see [Context.NewPage]); the nodes of the document are those of the
+// widgets (see [NodeOf]).
+func ReadDocument(ctx *Context, parent core.Widget, n *html.Node) error {
 	// HTML that an element handler reads while HTML is being read, such as
 	// the page that content embeds for an <embed-page>, is read whole, and
 	// the state of the outer read, including its staging, is kept.

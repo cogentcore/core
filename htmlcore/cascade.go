@@ -464,6 +464,9 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 // flex and grid containers blockified, as in CSS:
 // they are flex or grid items, which are block-level.
 func (c *Context) displayOf(n *html.Node) string {
+	if c.Scripting && n != nil && n.Type == html.ElementNode && n.Data == "noscript" {
+		return "none" // its content is for browsers without scripts
+	}
 	d := c.declaration(n, "display")
 	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
 		return d

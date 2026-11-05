@@ -56,6 +56,12 @@ type Context struct {
 	// height of the scene.
 	MediaHeight float32
 
+	// Scripting is whether the scripts of the pages are run (by the app
+	// that reads them, as htmlcore does not run them): the HTML is then
+	// parsed with scripting enabled (see [ParseHTML]), and noscript
+	// elements are not displayed, as in browsers with JavaScript.
+	Scripting bool
+
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
 	NewParent core.Widget
@@ -416,6 +422,7 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
+	n.Scripting = c.Scripting
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
 	n.ElementHandlers = c.ElementHandlers
@@ -530,4 +537,17 @@ func TagTexts(w core.Widget) {
 		}
 		return tree.Continue
 	})
+}
+
+// NodeOf returns the HTML node of the element that the given widget is
+// for, or that of the nearest widget that it is in that has one (as for
+// the text of an element), or nil if there is none. The nodes are those
+// of the document that was read (see [ReadDocument]).
+func NodeOf(w core.Widget) *html.Node {
+	for wb := w.AsWidget(); wb != nil; wb = core.AsWidget(wb.Parent) {
+		if n, ok := wb.Property("node").(*html.Node); ok && n != nil {
+			return n
+		}
+	}
+	return nil
 }

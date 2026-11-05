@@ -572,3 +572,89 @@ func TestLayoutSettles(t *testing.T) {
 		assert.Less(t, blank, float32(100), "no blank space after the content of the article")
 	})
 }
+
+// TestReadDocument tests reading a parsed document, changing it (as the
+// scripts of a page do), and reading it again with a new context, and
+// that the widgets of its elements have their nodes (NodeOf).
+func TestReadDocument(t *testing.T) {
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><body><p id="p">First</p><button id="b"><span>Go</span></button></body></html>`))
+	if !assert.NoError(t, err) {
+		return
+	}
+	texts := func(b *core.Body) []string {
+		var ts []string
+		b.WalkDown(func(n tree.Node) bool {
+			if tx, ok := n.(*core.Text); ok {
+				ts = append(ts, tx.Text)
+			}
+			return tree.Continue
+		})
+		return ts
+	}
+	b := core.NewBody()
+	assert.NoError(t, ReadDocument(ctx, b, doc))
+	assert.Contains(t, texts(b), "First")
+	var button *core.Text
+	b.WalkDown(func(n tree.Node) bool {
+		if tx, ok := n.(*core.Text); ok && strings.Contains(tx.Text, "Go") {
+			button = tx
+		}
+		return tree.Continue
+	})
+	if assert.NotNil(t, button) {
+		// the text of a run of inline content is in the frame of its
+		// element, which has the node
+		n := NodeOf(button)
+		if assert.NotNil(t, n) {
+			assert.Equal(t, "button", n.Data)
+		}
+	}
+
+	// change the text of the paragraph, as a script does, and read it again
+	var p *html.Node
+	var find func(n *html.Node)
+	find = func(n *html.Node) {
+		if n.Type == html.ElementNode && GetAttr(n, "id") == "p" {
+			p = n
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			find(c)
+		}
+	}
+	find(doc)
+	if !assert.NotNil(t, p) {
+		return
+	}
+	p.FirstChild.Data = "Second"
+	b2 := core.NewBody()
+	assert.NoError(t, ReadDocument(ctx.NewPage(), b2, doc))
+	assert.Contains(t, texts(b2), "Second")
+	assert.NotContains(t, texts(b2), "First")
+}
+
+// TestScriptingNoscript tests that the content of a noscript element is
+// shown without scripting (as htmlcore reads pages by default) and not
+// with it, as in browsers with and without JavaScript.
+func TestScriptingNoscript(t *testing.T) {
+	src := `<html><body><p>Page</p><noscript><p>Enable JavaScript</p></noscript></body></html>`
+	for _, scripting := range []bool{false, true} {
+		ctx := NewContext()
+		ctx.Scripting = scripting
+		b := core.NewBody()
+		assert.NoError(t, ReadHTMLString(ctx, b, src))
+		found := false
+		b.WalkDown(func(n tree.Node) bool {
+			if tx, ok := n.(*core.Text); ok && strings.Contains(tx.Text, "Enable JavaScript") {
+				found = true
+			}
+			return tree.Continue
+		})
+		assert.Equal(t, !scripting, found, "noscript content shown, with scripting %v", scripting)
+		assert.Equal(t, scripting, ctx.NewPage().Scripting, "NewPage keeps Scripting")
+	}
+	ctx := NewContext()
+	ctx.MediaWidth = 800
+	assert.True(t, ctx.MediaMatches("(min-width: 600px)"))
+	assert.False(t, ctx.MediaMatches("(max-width: 600px)"))
+}
