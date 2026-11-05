@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
@@ -48,13 +49,6 @@ type Text struct {
 	// Links is the list of links in the text.
 	Links []rich.Hyperlink `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// FitWidth makes text that wraps start out as wide as it is on one
-	// line, up to the width of the scene, so that it only wraps when its
-	// allocated width is less, as with the shrink-to-fit widths of CSS.
-	// Otherwise, it starts out with an estimated size of a balanced
-	// aspect ratio. It is used for HTML in browser style.
-	FitWidth bool
-
 	// richText is the conversion of the HTML text source.
 	// This is what is actually rendered.
 	richText rich.Text
@@ -64,6 +58,10 @@ type Text struct {
 
 	// minWord is the cached width of the longest word, for minContentWidth.
 	minWord float32
+
+	// wrapWidth is the width that the text was last wrapped in by SizeDown,
+	// which it wraps in again only if its allocated width changes.
+	wrapWidth float32
 
 	// richSource is the source that richText was made from, so that
 	// a restyle that changes neither the text nor its style does not
@@ -168,7 +166,7 @@ func (tx *Text) Init() {
 		if !tx.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
-		s.GrowWrap = true
+		s.GrowWrap = true // for text that is not aligned at the start; see below
 
 		// Text styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// We use Em for line height so that it scales properly with font size changes.
@@ -239,6 +237,13 @@ func (tx *Text) Init() {
 		}
 	})
 	tx.FinalStyler(func(s *styles.Style) {
+		// Text aligned at the start starts out at its preferred width,
+		// while other text (centered, for example) is aligned within all
+		// of the width that it can have, as text is in a block in CSS
+		// (see [styles.Style.GrowWrap]).
+		if s.Text.Align == text.Start {
+			s.GrowWrap = false
+		}
 		tx.normalCursor = s.Cursor
 		tx.updateRichText() // note: critical to update with final styles
 		if tx.paintText != nil && tx.Text != "" {
@@ -561,6 +566,10 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	}
 	tsh := tx.Scene.TextShaper()
 	sty, tsty := tx.Styles.NewRichText()
+	// The height of the text follows from wrapping it in the width, so it
+	// is not limited by the allocated height, which is only that of one
+	// line when it starts out at its preferred width.
+	sz.Y = 0
 	rsz := sz
 	if tsty.Align != text.Start && tsty.AlignV != text.Start {
 		etxs := *tsty
@@ -573,16 +582,30 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	return tx.paintText.Bounds.Size().Ceil()
 }
 
+// contentSizingMeasure is the width in characters (ch) that text is
+// limited to when its scene is sized to fit its content (as for a window
+// or dialog), within which it wraps, so that the scene is not as wide as
+// the text on one line: a readable measure of text.
+const contentSizingMeasure = 70
+
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	if tx.Styles.Text.WhiteSpace.HasWordWrap() && tx.FitWidth && tx.Scene != nil {
-		w := tx.availableWidth()
-		tx.configTextSize(math32.Vec2(max(w, sz.Actual.Content.X), sz.Actual.Content.Y))
-	} else if tx.Styles.Text.WhiteSpace.HasWordWrap() {
-		sty, tsty := tx.Styles.NewRichText()
-		est := shaped.WrapSizeEstimate(sz.Actual.Content, len(tx.Text), .5, sty, tsty)
-		tx.configTextSize(est)
+	wraps := tx.Styles.Text.WhiteSpace.HasWordWrap()
+	if wraps {
+		// as wide as it is on one line (its preferred width), within any Max
+		w := float32(1e6)
+		if sz.Max.X > 0 {
+			w = sz.Max.X
+		}
+		if tx.Scene != nil && tx.Scene.hasFlag(sceneContentSizing) {
+			// a window (or dialog) sized to its content is not wider than
+			// a readable measure of text, which it wraps at
+			m := units.Ch(contentSizingMeasure)
+			m.ToDots(&tx.Styles.UnitContext)
+			w = min(w, m.Dots)
+		}
+		tx.configTextSize(math32.Vec2(w, sz.Actual.Content.Y))
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
@@ -592,6 +615,11 @@ func (tx *Text) SizeUp() {
 	rsz := tx.paintText.Bounds.Size().Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
+	if wraps {
+		sz.setIntrinsicWidths(tx.minContentWidth(), sz.Actual.Content.X)
+	} else {
+		sz.minWidth, sz.prefWidth = sz.Actual.Total.X, sz.Actual.Total.X
+	}
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tx, "Text SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
@@ -624,55 +652,18 @@ func (tx *Text) minContentWidth() float32 {
 	return width
 }
 
-// availableWidth returns the width available to the text for [Text.FitWidth]:
-// the width of the scene, less the space (margins, borders, and padding)
-// of the widgets that it is in, and within any Max widths of those widgets.
-func (tx *Text) availableWidth() float32 {
-	var ancestors []*WidgetBase
-	for p := tx.parentWidget(); p != nil; p = p.parentWidget() {
-		ancestors = append(ancestors, p)
-	}
-	avail := float32(tx.Scene.SceneGeom.Size.X)
-	if avail <= 0 {
-		avail = 1e6
-	}
-	for i := len(ancestors) - 1; i >= 0; i-- {
-		awb := ancestors[i]
-		s := &awb.Styles
-		space := s.BoxSpace().Size().X
-		// the Max of the layout, which is not set for one that is relative
-		// to the parent until the parent is sized, and is of the content
-		if mx := awb.Geom.Size.Max.X; mx > 0 {
-			avail = min(avail, mx+space)
-		}
-		avail -= space
-		if s.Display == styles.Flex && s.Direction == styles.Row && !s.Wrap {
-			// the minimum widths of the other widgets in the row are not available
-			var path *WidgetBase = &tx.WidgetBase
-			if i > 0 {
-				path = ancestors[i-1]
-			}
-			n := 0
-			awb.forVisibleChildren(func(_ int, cw Widget, cwb *WidgetBase) bool {
-				n++
-				if cwb != path {
-					avail -= cwb.Styles.Min.X.Dots + cwb.Styles.BoxSpace().Size().X
-				}
-				return true
-			})
-			avail -= float32(max(n-1, 0)) * s.Gap.X.Dots
-		}
-	}
-	avail -= tx.Styles.BoxSpace().Size().X
-	return max(avail, 0)
-}
-
 func (tx *Text) SizeDown(iter int) bool {
-	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || iter > 1 {
+	if !tx.Styles.Text.WhiteSpace.HasWordWrap() {
 		return false
 	}
 	sz := &tx.Geom.Size
 	asz := sz.Alloc.Content
+	// The width settles in the first iterations, but can still change
+	// after them, as when a parent-relative Max is resolved.
+	if iter > 1 && asz.X == tx.wrapWidth {
+		return false
+	}
+	tx.wrapWidth = asz.X
 	rsz := tx.configTextAlloc(asz) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess

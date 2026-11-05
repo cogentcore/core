@@ -4,6 +4,52 @@ Notes for the `layout-sizes` branch (made from `html` on 2026-11-04), to
 explore whether core layout should track a minimum and a preferred size
 for each widget systematically. Not for the `html` PR.
 
+## Status (2026-11-05)
+
+The first step of the design below is implemented (core/layoutintrinsic.go):
+
+- `GeomSize.minWidth` and `prefWidth` are computed in `SizeUp` for every
+  widget: text has the width of its longest word and its width on one line;
+  frames combine those of their children per layout (row: sum, column: max,
+  wrapped row: max of mins and sum of prefs, grid: per column, with spans).
+  A frame that scrolls in width has no minimum of its own.
+- `Text` starts at its preferred (one-line) width, and is re-wrapped in
+  `SizeDown` at its allocated width with unlimited height (the shaper
+  truncated text to twice the lines that fit the height), and again
+  whenever that width changes, after the first iterations too.
+- Every widget whose minimum is less than its preferred width shrinks in
+  rows and grids (`Shrink` 0 now means 1), down to its `minWidth` (the
+  separate `minContentWidth` walk is gone). A column that grows up to a
+  `Max` (a CSS width) starts shrinking from it, as for the flex basis.
+- Children of a column are at most as wide as the column: frames even below
+  their minimum (as blocks in CSS: their content overflows), other widgets
+  (text) not below it (the shaper would otherwise break words). Wrapped
+  rows also limit their items, not below their minimum. `limitsWidth` is
+  gone.
+- A frame scrolls in width in the first iteration only if its content is
+  wider than it at its min-content width.
+- A scene sized to its content (windows, dialogs) limits the preferred
+  width of text to 70ch (`contentSizingMeasure`), as the old aspect ratio
+  estimate did in its way; otherwise a long message is a screen-wide line.
+- Removed: `Text.FitWidth`, `Text.availableWidth`, the aspect ratio estimate
+  in `Text.SizeUp`. `GrowWrap` stays only for text that is not aligned at
+  the start (centered text is aligned within all of the available width).
+- Fixed on the way: `shrinkWidths` returned nil (no shrinking at all) when
+  the columns reached their minimum in the second pass; a column with extra
+  width that grows kept only its preferred width from `shrinkWidths`.
+
+Results: 13 core images changed, all reviewed as the same or better (short
+texts on one line, no spurious horizontal scrollbars in lists and trees,
+mixed-vertical splits one line per sentence, dialogs sized to content);
+htmlcore fidelity vs Chrome 285 -> 291 of 370 boxes (23-email-complex
+15/15), no case worse; snapshots the same or better (w3c, rust columns).
+
+Not done yet (candidates for the next steps): `childSpace`/`growExtra`,
+toolbar overflow (`preferred`), `nosz` for wrapped rows, the 40ch `Max` of
+text fields, the `Shrink` settings in htmlcore that are now the default,
+and `GrowWrap` for centered text (could become alignment within the
+allocation at SizeFinal).
+
 ## The question
 
 Core layout has one size per widget from `SizeUp` (`Actual`), which is

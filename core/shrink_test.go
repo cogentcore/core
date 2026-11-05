@@ -123,8 +123,8 @@ func TestShrinkMinContent(t *testing.T) {
 		s.Columns = 2
 	}, func(fr *Frame) {
 		// texts that are as wide as they are on one line, as in htmlcore
-		word = shrinkingText(fr, "Unbreakable").SetFitWidth(true)
-		shrinkingText(fr, wrapText+wrapText).SetFitWidth(true)
+		word = shrinkingText(fr, "Unbreakable")
+		shrinkingText(fr, wrapText+wrapText)
 	}, func(fr *Frame, dp float32) {
 		// the column is not narrower than the word
 		w := word.minContentWidth()

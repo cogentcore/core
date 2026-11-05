@@ -117,13 +117,8 @@ type cssState struct {
 // to the given widget.
 func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl) {
 	wb := w.AsWidget()
-	tx, isText := w.(*core.Text)
+	_, isText := w.(*core.Text)
 	_, isFrame := w.(*core.Frame)
-	if isText {
-		// text has its one-line width until it needs to wrap,
-		// for the shrink-to-fit widths of CSS
-		tx.SetFitWidth(true)
-	}
 	plain := isText || isFrame // widgets whose look is all from CSS
 	tag := ""
 	if node != nil {
