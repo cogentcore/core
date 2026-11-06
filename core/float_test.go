@@ -153,4 +153,3 @@ func TestFloatNegativeMargin(t *testing.T) {
 		assert.False(t, inRail.Geom.TotalBBox.Empty(), "its content is visible")
 	})
 }
-
