@@ -1,0 +1,53 @@
+// Copyright (c) 2026, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package svg_test
+
+import (
+	"image"
+	"path/filepath"
+	"testing"
+
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
+	_ "cogentcore.org/core/paint/renderers"
+	. "cogentcore.org/core/svg"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+// renderFile renders the given SVG file of the testdata at 640x480.
+func renderFile(t *testing.T, fname string) *image.RGBA {
+	size := math32.Vec2(640, 480)
+	sv := NewSVG(size)
+	require.NoError(t, sv.OpenXML(filepath.Join("testdata", "svg", fname)))
+	img := paint.NewImageRenderer(size).Render(sv.Render(nil).RenderDone()).Image()
+	return img.(*image.RGBA)
+}
+
+// TestClipMask tests clip paths (in user space and objectBoundingBox
+// units, with clip-rule, on shapes and groups, in style sheets, with
+// transforms), masks (by luminance, with their regions), the opacity of
+// groups, and that elements that are not supported (foreignObject) do not
+// render, as in browsers (see testdata/svg/clip-mask.svg).
+func TestClipMask(t *testing.T) {
+	img := renderFile(t, "clip-mask.svg")
+	alpha := func(x, y int) uint8 { return img.RGBAAt(x, y).A }
+	assert.Equal(t, uint8(255), alpha(100, 100), "in the clip circle")
+	assert.Equal(t, uint8(0), alpha(45, 45), "in the rect, outside of the clip circle")
+	assert.Equal(t, uint8(255), alpha(260, 140), "in the clip triangle (objectBoundingBox)")
+	assert.Equal(t, uint8(0), alpha(205, 45), "outside of the clip triangle")
+	assert.Equal(t, uint8(255), alpha(350, 50), "in the ring (evenodd)")
+	assert.Equal(t, uint8(0), alpha(400, 100), "in the hole of the ring")
+	assert.Equal(t, uint8(255), alpha(560, 100), "in the transformed clip circle")
+	assert.Equal(t, uint8(0), alpha(505, 45), "outside of the transformed clip circle")
+	assert.Greater(t, alpha(50, 300), uint8(220), "the white end of the mask gradient")
+	assert.Less(t, alpha(190, 300), uint8(40), "the black end of the mask gradient")
+	assert.Equal(t, uint8(0), alpha(320, 300), "in the black circle of the mask")
+	assert.Equal(t, uint8(255), alpha(250, 230), "in the white of the mask")
+	assert.InDelta(t, 128, int(alpha(450, 230)), 2, "the group opacity")
+	assert.Equal(t, img.RGBAAt(450, 230), img.RGBAAt(520, 300), "overlapping items in a group with opacity")
+	assert.Equal(t, uint8(255), alpha(100, 440), "in a link")
+	assert.Equal(t, uint8(0), alpha(250, 440), "in a foreignObject")
+}

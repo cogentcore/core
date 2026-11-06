@@ -21,6 +21,9 @@ func (g *Polygon) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.Polygon(g.Points...)
 	pc.Draw()
 

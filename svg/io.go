@@ -17,6 +17,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"log/slog"
 	"os"
 	"slices"
 	"strings"
@@ -613,6 +614,25 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						cp.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
+			case nm == "mask":
+				curPar = NewMask(curPar)
+				mk := curPar.(*Mask)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(mk, attr.Name.Local, attr.Value) {
+						continue
+					}
+					mk.SetProperty(attr.Name.Local, attr.Value)
+				}
+			case nm == "a" || nm == "switch":
+				curPar = NewGroup(curPar)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
+						continue
+					}
+					if attr.Name.Local != "href" {
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
 			case nm == "marker":
 				curPar = NewMarker(curPar)
 				mrk := curPar.(*Marker)
@@ -760,9 +780,12 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			default:
-				errStr := "SVG Cannot process svg element " + se.Name.Local
-				log.Println(errStr)
-				// IconAutoOpen = false
+				// an element that is not supported, which is not rendered
+				// (nor are its children), and keeps the nesting of the
+				// elements after it (its end pops it)
+				slog.Debug("svg: element not supported", "element", se.Name.Local)
+				curPar = NewMetaData(curPar)
+				curPar.AsNodeBase().Class = nm
 			}
 		case xml.EndElement:
 			nm := se.Name.Local

@@ -64,9 +64,26 @@ type Context struct {
 	// prior to adding to Render.
 	ClipPath ppath.Path
 
-	// Mask is the current masking element, as rendered to a separate image.
-	// This is composited with the rendering output to produce the final result.
-	Mask image.Image
+	// ClipMask, if not empty, clips the rendering within this context
+	// (the items between its [ContextPush] and [ContextPop]) to where
+	// these items render: by the alpha of their rendering. It is set
+	// for this context only (not inherited, as the rendering within
+	// this context is clipped as a whole), as for an SVG clipPath,
+	// whose shapes render as opaque fills. Its items are in the same
+	// (device) coordinates as the other items.
+	ClipMask Render
+
+	// Mask, if not empty, masks the rendering within this context by
+	// the rendering of these items: by its luminance times its alpha,
+	// as for an SVG mask. It is set for this context only, as is the
+	// [Context.ClipMask].
+	Mask Render
+
+	// Opacity, if > 0 and < 1, is the opacity of the rendering within
+	// this context as a whole (group opacity), which is not the same
+	// as that of each of its items when they overlap. It is set for
+	// this context only, as is the [Context.ClipMask].
+	Opacity float32
 
 	// Filter // todo add filtering effects here
 }
@@ -98,7 +115,6 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 		ctx.Cumulative = sty.Transform
 		ctx.SetBounds(bounds)
 		ctx.ClipPath = sty.ClipPath
-		ctx.Mask = sty.Mask
 		return
 	}
 	ctx.Transform = ctx.Style.Transform
@@ -111,7 +127,13 @@ func (ctx *Context) Init(sty *styles.Paint, bounds *Bounds, parent *Context) {
 	// todo: not clear if following are needed:
 	// ctx.Bounds.Path = ctx.Bounds.Path.And(parent.Bounds.Path) // intersect
 	// ctx.ClipPath = ctx.Style.ClipPath.And(parent.ClipPath)
-	ctx.Mask = parent.Mask // todo: intersect with our own mask
+}
+
+// IsLayer returns whether the rendering within this context is
+// composited as a whole (as a layer): if it has a [Context.ClipMask],
+// a [Context.Mask], or an [Context.Opacity] < 1.
+func (ctx *Context) IsLayer() bool {
+	return len(ctx.ClipMask) > 0 || len(ctx.Mask) > 0 || (ctx.Opacity > 0 && ctx.Opacity < 1)
 }
 
 // SetBounds sets the context bounds, and updates the Bounds.Path

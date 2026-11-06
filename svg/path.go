@@ -63,6 +63,9 @@ func (g *Path) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.State.Path = g.Data.Clone() // note: yes this Clone() is absolutely necessary.
 	pc.Draw()
 

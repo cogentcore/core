@@ -49,6 +49,9 @@ func (g *Line) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Draw()
 

@@ -160,6 +160,7 @@ func (g *Text) Render(sv *SVG) {
 		if !g.PushContext(sv) {
 			return
 		}
+		g.setLayer(sv, math32.Identity2())
 		pc := g.Painter(sv)
 		g.RenderChildren(sv)
 		pc.PopContext()

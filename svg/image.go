@@ -118,6 +118,9 @@ func (g *Image) Render(sv *SVG) {
 	if !vis {
 		return
 	}
+	if g.pushLayer(sv) {
+		defer g.Painter(sv).PopContext()
+	}
 	g.DrawImage(sv)
 	g.RenderChildren(sv)
 }

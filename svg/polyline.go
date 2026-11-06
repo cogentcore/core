@@ -43,6 +43,9 @@ func (g *Polyline) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.Polyline(g.Points...)
 	pc.Draw()
 

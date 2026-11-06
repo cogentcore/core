@@ -51,6 +51,9 @@ func (g *Rect) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.Rectangle(g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 	} else {

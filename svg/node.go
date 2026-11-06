@@ -101,6 +101,14 @@ type NodeBase struct {
 
 	// isDef is whether this is in [SVG.Defs].
 	isDef bool
+
+	// clipRef is the name of the clipPath that the clip-path property
+	// refers to, if any.
+	clipRef string
+
+	// maskRef is the name of the mask that the mask property refers to,
+	// if any.
+	maskRef string
 }
 
 func (g *NodeBase) AsNodeBase() *NodeBase         { return g }
@@ -248,9 +256,13 @@ func (g *NodeBase) Style(sv *SVG) {
 		g.CSSAgg = nil
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
+	g.clipRef, g.maskRef = "", ""
+	g.setLayerRefs(g.Properties)
 	g.StyleCSS(sv, g.CSSAgg)
-	pc.Stroke.Opacity *= pc.Opacity // applies to all
-	pc.Fill.Opacity *= pc.Opacity
+	if !g.isGroupOpacity() { // groups are rendered with their opacity as a whole
+		pc.Stroke.Opacity *= pc.Opacity // applies to all
+		pc.Fill.Opacity *= pc.Opacity
+	}
 	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
 }
 
@@ -281,6 +293,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	} else {
 		pc.SetProperties(nil, pmap, ctxt)
 	}
+	g.setLayerRefs(pmap)
 	return true
 }
 
