@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -101,6 +102,19 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 	case "grid", "inline-grid":
 		s.Display = styles.Grid
+		if node != nil && s.Columns <= 1 && strings.Contains(r.c.declaration(node, "grid-auto-flow"), "column") &&
+			r.c.declaration(node, "grid-template-rows") == "" {
+			// the items are in a row of columns (one row without row
+			// tracks, as for a marquee)
+			n := 0
+			r.wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+				if p := cwb.Styles.Position; p != styles.PositionAbsolute && p != styles.PositionFixed {
+					n++
+				}
+				return tree.Continue
+			})
+			s.Columns = max(n, 1)
+		}
 		if s.Columns == 0 { // one column without column tracks, as in CSS
 			s.Columns = 1
 		}
@@ -219,6 +233,12 @@ func (r *resolver) flow() {
 		}
 	}
 	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
+	if s.Position != styles.PositionStatic {
+		// positioned elements are painted after the others, which the
+		// background of the parent in their margins would cover (margins
+		// are transparent in CSS)
+		s.FillMargin = false
+	}
 	outOfFlow := s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed
 	if outOfFlow || s.Float != styles.FloatNone {
 		bs.block = false // not in the flow of blocks, and its width fits its content
@@ -362,6 +382,7 @@ func (r *resolver) sizes() {
 		s.BoxSizing = styles.BoxBorderBox
 	}
 	if st.width != nil {
+		intrinsic := s.Min.X
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
@@ -371,6 +392,13 @@ func (r *resolver) sizes() {
 			// wide as its content grow without end.
 			s.Min.X = units.Value{}
 			s.Grow.X = 1
+			if _, isField := wb.This.(*core.TextField); isField && intrinsic.Value > 0 {
+				// A text field (input) is as wide as its intrinsic width
+				// in a parent that is as wide as its content, and can
+				// shrink, as in CSS (as the email field of github.com).
+				s.Min.X = intrinsic
+				s.Shrink.X = 1
+			}
 		}
 		nowrap := s.Text.WhiteSpace == text.WrapNever || s.Text.WhiteSpace == text.WhiteSpacePre
 		if st.display == "table-cell" && st.width.Unit == units.UnitPw && nowrap {
@@ -436,7 +464,11 @@ func (r *resolver) sizes() {
 		s.Grow.Y = 0
 	}
 	if st.minWidth != nil {
-		s.Min.X = *st.minWidth
+		_, isField := r.wb.This.(*core.TextField)
+		if !(isField && st.minWidth.Value == 0 && s.Shrink.X > 0) {
+			// (a text field that can shrink keeps its intrinsic width)
+			s.Min.X = *st.minWidth
+		}
 	}
 	if st.minHeight != nil {
 		s.Min.Y = *st.minHeight

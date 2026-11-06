@@ -5,6 +5,7 @@
 package shapedgt
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -36,6 +37,10 @@ type Shaper struct {
 
 	// shapes caches the shaped outputs of recent texts for wrapping.
 	shapes shapeCache
+
+	// webFonts is the number of the web fonts of [fonts.WebFonts]
+	// that have been added to the font map.
+	webFonts int
 
 	// SimpleSpans is whether spans of simple text (Latin, Greek and Cyrillic
 	// scripts, common punctuation and symbols) are shaped without the go-text
@@ -102,6 +107,7 @@ func (sh *Shaper) FontMap() *fontscan.FontMap {
 func (sh *Shaper) Shape(tx rich.Text, tsty *text.Style) []shaped.Run {
 	sh.Lock()
 	defer sh.Unlock()
+	sh.addWebFonts()
 	return sh.ShapeText(tx, tsty, tx.Join())
 }
 
@@ -273,4 +279,20 @@ func FixOutputZeros(o *shaping.Output) {
 			g.Height = o.Size
 		}
 	}
+}
+
+// addWebFonts adds the web fonts of [fonts.WebFonts] that have been added
+// since it was last called to the font map (with the lock held).
+func (sh *Shaper) addWebFonts() {
+	wfs, n := fonts.WebFonts(sh.webFonts)
+	if len(wfs) == 0 {
+		return
+	}
+	for i, wf := range wfs {
+		id := fmt.Sprintf("web-font-%d-%s", sh.webFonts+i, wf.Family)
+		errors.Log(sh.fontMap.AddFont(bytes.NewReader(wf.Data), id, wf.Family))
+	}
+	sh.webFonts = n
+	sh.fontMap.forget()
+	sh.shapes.reset()
 }

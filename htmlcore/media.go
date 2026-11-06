@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"cogentcore.org/core/system"
 	"github.com/aymerick/douceur/css"
@@ -19,6 +20,47 @@ import (
 // rules is parsed on its own, so that only the rules that do not parse are
 // left out.
 func parseCSS(style string) *css.Stylesheet {
+	// The style sheets of a page are parsed again each time that it is read
+	// (as for each change that its scripts make), so they are cached (as
+	// they are not changed after they are parsed).
+	parsedCSSMu.Lock()
+	ss, ok := parsedCSS[style]
+	parsedCSSMu.Unlock()
+	if ok {
+		return ss
+	}
+	ss = parseCSSText(style)
+	if len(style) >= minCachedCSS {
+		parsedCSSMu.Lock()
+		if parsedCSSSize+len(style) > maxParsedCSS {
+			parsedCSS, parsedCSSSize = map[string]*css.Stylesheet{}, 0
+		}
+		parsedCSS[style] = ss
+		parsedCSSSize += len(style)
+		parsedCSSMu.Unlock()
+	}
+	return ss
+}
+
+// parsedCSS has the style sheets that have been parsed, by their text,
+// up to maxParsedCSS bytes of text (after which it is cleared). Only style
+// sheets of at least minCachedCSS bytes are cached (as small ones, as of
+// style attributes, are parsed quickly).
+var (
+	parsedCSSMu   sync.Mutex
+	parsedCSS     = map[string]*css.Stylesheet{}
+	parsedCSSSize int
+)
+
+const (
+	maxParsedCSS = 16 << 20
+	minCachedCSS = 1024
+)
+
+// parseCSSText parses the given style sheet (see [parseCSS]).
+func parseCSSText(style string) *css.Stylesheet {
+	style = removeStrayCSS(style)
+	style = unknownGroupingRule.ReplaceAllString(style, "@supports$1{")
 	if ss, err := parser.Parse(style); err == nil {
 		return ss
 	}
@@ -31,6 +73,145 @@ func parseCSS(style string) *css.Stylesheet {
 		ss.Rules = append(ss.Rules, bs.Rules...)
 	}
 	return ss
+}
+
+// unknownGroupingRule matches the start of the block of a grouping
+// at-rule that the parser does not know has rules in it (and parses as
+// declarations, failing at the end of the first rule in it, as for the
+// @container rules in the @layer of the style sheet of github.com), which
+// are parsed as @supports rules, whose rules apply (see addRuleList).
+var unknownGroupingRule = regexp.MustCompile(`@(?:layer|container|scope|starting-style)\b([^;{}]*)\{`)
+
+// groupingRules are the at-rules whose blocks have rules (not declarations).
+var groupingRules = []string{"@media", "@supports", "@layer", "@container", "@document", "@-moz-document", "@scope", "@starting-style"}
+
+// removeStrayCSS returns the given style sheet without what cannot be a
+// rule where rules are expected (at the top level and in the blocks of
+// grouping at-rules such as @media): statements that end with a semicolon
+// but are not at-rules (as "a;b{...}"), and blocks without a selector
+// (as "{a:b}", which CSS-in-JS libraries can make). The parser does not
+// end on these (it does not skip a semicolon in a selector).
+func removeStrayCSS(style string) string {
+	if !strings.ContainsAny(style, ";{") {
+		return style
+	}
+	type level struct {
+		rules           bool // whether rules are expected (not declarations)
+		stmtIn, stmtOut int  // the start of the current statement in style and out
+	}
+	out := make([]byte, 0, len(style))
+	levels := []level{{rules: true}}
+	var quote byte
+	for i := 0; i < len(style); i++ {
+		ch := style[i]
+		lv := &levels[len(levels)-1]
+		switch {
+		case quote != 0:
+			if ch == '\\' && i+1 < len(style) {
+				out = append(out, ch)
+				i++
+				ch = style[i]
+			} else if ch == quote {
+				quote = 0
+			}
+		case ch == '"' || ch == '\'':
+			quote = ch
+		case ch == '/' && i+1 < len(style) && style[i+1] == '*':
+			end := strings.Index(style[i+2:], "*/")
+			if end < 0 {
+				end = len(style) - i - 2
+			} else {
+				end += 2
+			}
+			out = append(out, style[i:i+2+end]...)
+			i += 1 + end
+			continue
+		case ch == '{':
+			prelude := strings.TrimSpace(withoutComments(style[lv.stmtIn:i]))
+			if lv.rules && prelude == "" { // skip the block
+				i = blockEnd(style, i)
+				out = out[:lv.stmtOut]
+				lv.stmtIn, lv.stmtOut = i+1, len(out)
+				continue
+			}
+			rules := false
+			for _, g := range groupingRules {
+				if strings.HasPrefix(strings.ToLower(prelude), g) {
+					rules = true
+				}
+			}
+			out = append(out, ch)
+			levels = append(levels, level{rules: rules, stmtIn: i + 1, stmtOut: len(out)})
+			continue
+		case ch == '}':
+			if len(levels) > 1 {
+				levels = levels[:len(levels)-1]
+			}
+			out = append(out, ch)
+			lv = &levels[len(levels)-1]
+			lv.stmtIn, lv.stmtOut = i+1, len(out)
+			continue
+		case ch == ';':
+			if lv.rules && !strings.HasPrefix(strings.TrimSpace(withoutComments(style[lv.stmtIn:i])), "@") {
+				out = out[:lv.stmtOut] // a stray statement
+			} else {
+				out = append(out, ch)
+			}
+			lv.stmtIn, lv.stmtOut = i+1, len(out)
+			continue
+		}
+		out = append(out, ch)
+	}
+	return string(out)
+}
+
+// withoutComments returns the given CSS without its comments.
+func withoutComments(s string) string {
+	for {
+		i := strings.Index(s, "/*")
+		if i < 0 {
+			return s
+		}
+		end := strings.Index(s[i+2:], "*/")
+		if end < 0 {
+			return s[:i]
+		}
+		s = s[:i] + " " + s[i+2+end+2:]
+	}
+}
+
+// blockEnd returns the index of the brace that closes the block that
+// starts at the given index of the given CSS (or the last index).
+func blockEnd(style string, start int) int {
+	depth := 0
+	var quote byte
+	for i := start; i < len(style); i++ {
+		ch := style[i]
+		switch {
+		case quote != 0:
+			if ch == '\\' {
+				i++
+			} else if ch == quote {
+				quote = 0
+			}
+		case ch == '"' || ch == '\'':
+			quote = ch
+		case ch == '/' && i+1 < len(style) && style[i+1] == '*':
+			end := strings.Index(style[i+2:], "*/")
+			if end < 0 {
+				return len(style) - 1
+			}
+			i += end + 3
+		case ch == '{':
+			depth++
+		case ch == '}':
+			depth--
+			if depth == 0 {
+				return i
+			}
+		}
+	}
+	return len(style) - 1
 }
 
 // topLevelBlocks splits the given style sheet into its top-level rules,
@@ -99,6 +280,13 @@ func ScreenMediaWidth() float32 {
 		}
 	}
 	return 1024
+}
+
+// MediaMatches returns whether the given media query list (as of an
+// @media rule) matches the viewport of the context, as for matchMedia
+// in the scripts of a page.
+func (c *Context) MediaMatches(query string) bool {
+	return c.mediaMatches(query)
 }
 
 // mediaMatches returns whether the given media query list matches,

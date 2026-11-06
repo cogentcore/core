@@ -33,6 +33,12 @@ type Renderer struct {
 
 	// scan spanner
 	ImgSpanner *scan.ImgSpanner
+
+	// layers are the layers of the contexts that are pushed (see layer.go).
+	layers []layer
+
+	// freeLayers are the images of layers that can be used again.
+	freeLayers []*image.RGBA
 }
 
 func New(size math32.Vector2) render.Renderer {
@@ -58,10 +64,21 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	rs.ImgSpanner = scan.NewImgSpanner(rs.image)
 	rs.Scanner = scan.NewScanner(rs.ImgSpanner, psz.X, psz.Y)
 	rs.Raster = NewDasher(psz.X, psz.Y, rs.Scanner)
+	rs.layers = nil
+	rs.freeLayers = nil
 }
 
 // Render is the main rendering function.
 func (rs *Renderer) Render(r render.Render) render.Renderer {
+	rs.renderItems(r)
+	for len(rs.layers) > 0 { // contexts that are not popped
+		rs.popContext()
+	}
+	return rs
+}
+
+// renderItems renders the given items.
+func (rs *Renderer) renderItems(r render.Render) {
 	for _, ri := range r {
 		switch x := ri.(type) {
 		case *render.Path:
@@ -70,9 +87,12 @@ func (rs *Renderer) Render(r render.Render) render.Renderer {
 			x.Render(rs.image)
 		case *render.Text:
 			rs.RenderText(x)
+		case *render.ContextPush:
+			rs.pushContext(&x.Context)
+		case *render.ContextPop:
+			rs.popContext()
 		}
 	}
-	return rs
 }
 
 func (rs *Renderer) RenderPath(pt *render.Path) {

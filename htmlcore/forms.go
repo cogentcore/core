@@ -5,8 +5,10 @@
 package htmlcore
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
+	"mime/multipart"
 	"net/url"
 	"strconv"
 	"strings"
@@ -23,10 +25,10 @@ import (
 	"golang.org/x/net/html"
 )
 
-// The forms are submitted with the GET method,
-// as browsers do, by opening the URL of their action with the values of
-// their controls in the query, when a submit button is clicked or Enter
-// is pressed in one of their text fields.
+// The forms are submitted as browsers do, when a submit button is clicked
+// or Enter is pressed in one of their text fields: with the GET method by
+// opening the URL of their action with the values of their controls in the
+// query, and with the POST method by [Context.PostURL].
 
 // ancestorForm returns the form element that the given node is in.
 func ancestorForm(n *html.Node) *html.Node {
@@ -87,19 +89,32 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 }
 
 // submitForm submits the given form, with the given submit button,
-// if it was submitted by one.
+// if it was submitted by one: with the GET method, by opening the URL of
+// its action with the values of its controls in the query, and with the
+// POST method, by [Context.PostURL] with them in the body.
 func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
-	if method := strings.ToLower(GetAttr(form, "method")); method != "" && method != "get" {
-		slog.Error("htmlcore: only forms with the GET method can be submitted", "method", method)
+	// the method, action and encoding, which the submit button can override
+	attr := func(name string) string {
+		if submitter != nil && HasAttr(submitter, "form"+name) {
+			return GetAttr(submitter, "form"+name)
+		}
+		return GetAttr(form, name)
+	}
+	method := strings.ToLower(attr("method"))
+	post := method == "post"
+	if method != "" && method != "get" && !post || post && c.PostURL == nil {
+		slog.Error("htmlcore: forms with this method can not be submitted", "method", method)
 		return
 	}
-	values := url.Values{}
+	// the values of the controls, in order
+	var names, values []string
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			if name := GetAttr(n, "name"); name != "" && !HasAttr(n, "disabled") {
 				if v, ok := c.controlValue(n, submitter); ok {
-					values.Add(name, v)
+					names = append(names, name)
+					values = append(values, v)
 				}
 			}
 		}
@@ -108,10 +123,8 @@ func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
 		}
 	}
 	walk(form)
-	action := GetAttr(form, "action")
-	if submitter != nil && HasAttr(submitter, "formaction") {
-		action = GetAttr(submitter, "formaction")
-	}
+	// the URL of the action
+	action := attr("action")
 	if action == "" {
 		action = c.PageURL
 	}
@@ -120,8 +133,49 @@ func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
 		slog.Error("htmlcore: invalid form action", "action", action, "err", err)
 		return
 	}
-	u.RawQuery = values.Encode()
+	if post {
+		contentType, body := encodeForm(strings.ToLower(attr("enctype")), names, values)
+		c.PostURL(u.String(), contentType, body, e)
+		return
+	}
+	u.RawQuery = urlEncode(names, values)
 	c.OpenURL(u.String(), e)
+}
+
+// urlEncode returns the given names and values encoded as for a query,
+// in their order.
+func urlEncode(names, values []string) string {
+	var b strings.Builder
+	for i, name := range names {
+		if i > 0 {
+			b.WriteByte('&')
+		}
+		b.WriteString(url.QueryEscape(name) + "=" + url.QueryEscape(values[i]))
+	}
+	return b.String()
+}
+
+// encodeForm returns the content type and body of a POST request for the
+// given names and values of the controls of a form, with the given
+// encoding (its enctype attribute).
+func encodeForm(enctype string, names, values []string) (string, []byte) {
+	switch enctype {
+	case "multipart/form-data":
+		var b bytes.Buffer
+		w := multipart.NewWriter(&b)
+		for i, name := range names {
+			w.WriteField(name, values[i])
+		}
+		w.Close()
+		return w.FormDataContentType(), b.Bytes()
+	case "text/plain":
+		var b strings.Builder
+		for i, name := range names {
+			b.WriteString(name + "=" + values[i] + "\r\n")
+		}
+		return "text/plain", []byte(b.String())
+	}
+	return "application/x-www-form-urlencoded", []byte(urlEncode(names, values))
 }
 
 // controlValue returns the value of the given form control element,

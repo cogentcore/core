@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480" viewBox="0 0 640 480">
+  <use href="#later" x="20" y="20"/>
+  <symbol id="star" viewBox="0 0 10 10">
+    <polygon points="5,0 6.5,3.5 10,4 7.5,6.5 8,10 5,8 2,10 2.5,6.5 0,4 3.5,3.5" fill="gold" stroke="black" stroke-width="0.3"/>
+  </symbol>
+  <use xlink:href="#star" x="200" y="20" width="100" height="100"/>
+  <use href="#star" x="320" y="20" width="200" height="100"/>
+  <use href="#star" x="40" y="200" width="60" height="60" transform="rotate(10)"/>
+  <g id="pair" fill="steelblue">
+    <circle cx="300" cy="300" r="30"/>
+    <circle cx="370" cy="300" r="30"/>
+  </g>
+  <use href="#pair" y="100" fill="crimson"/>
+  <circle id="later" cx="60" cy="60" r="40" fill="green"/>
+</svg>

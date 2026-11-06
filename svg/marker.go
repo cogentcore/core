@@ -6,6 +6,7 @@ package svg
 
 import (
 	"log"
+	"strings"
 
 	"cogentcore.org/core/math32"
 )
@@ -28,6 +29,9 @@ type Marker struct {
 
 	// orientation of the marker -- either 'auto' or an angle
 	Orient string `xml:"orient"`
+
+	// start is whether the marker is rendered as a marker-start.
+	start bool
 
 	// current vertex position
 	VertexPos math32.Vector2
@@ -58,6 +62,15 @@ const (
 	MarkerUnitsN
 )
 
+// RenderMarkerStart renders the marker as a marker-start, with the given
+// vertex position, angle (in radians), and stroke width: as
+// [Marker.RenderMarker], reversed for an orient of auto-start-reverse.
+func (mrk *Marker) RenderMarkerStart(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
+	mrk.start = true
+	mrk.RenderMarker(sv, vertexPos, vertexAng, strokeWidth)
+	mrk.start = false
+}
+
 // RenderMarker renders the marker using given vertex position, angle (in
 // radians), and stroke width
 func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
@@ -71,7 +84,13 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 	}
 
 	ang := vertexAng
-	if mrk.Orient != "auto" {
+	switch strings.TrimSpace(mrk.Orient) {
+	case "auto":
+	case "auto-start-reverse": // the start marker points backward
+		if mrk.start {
+			ang += math32.Pi
+		}
+	default:
 		ang, _ = math32.ParseAngle32(mrk.Orient)
 	}
 	if mrk.ViewBox.Size == (math32.Vector2{}) {

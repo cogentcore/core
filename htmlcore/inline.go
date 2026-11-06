@@ -14,6 +14,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	xhtml "golang.org/x/net/html"
@@ -105,11 +107,29 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 
 	var buf strings.Builder
 	start := true // at the start of the run
-	flush := func() {
+	// flush makes a text of the inline content so far; between is whether
+	// it is between inline widgets (before one, after content)
+	flush := func(between bool) {
 		str := buf.String()
 		buf.Reset()
 		if pre && last.NextSibling == nil { // a last line break makes no line
 			str = lastBreak.ReplaceAllString(str, "$1")
+		}
+		if str != "" && strings.TrimSpace(str) == "" && !pre && between && container != parent {
+			// White space between inline widgets (as the words in inline
+			// blocks of the heading of github.com) is a space, as in
+			// browsers: a box as wide as one in the font, as a text of
+			// only a no-break space has no width (as trailing space).
+			sp := core.NewFrame(container)
+			sp.SetName("space")
+			tree.SetUniqueName(sp)
+			c.handleWidget(nil, sp)
+			sp.FinalStyler(func(s *styles.Style) {
+				s.Min.X = units.Em(0.28)
+				s.Grow.Set(0, 0)
+			})
+			c.blocks[sp].display = "inline"
+			return
 		}
 		if str == "" || (strings.TrimSpace(str) == "" && !pre) {
 			return
@@ -133,6 +153,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			c.OpenURL(tl.URL, e)
 		})
 		c.handleWidget(nil, tx)
+		c.handleInLink(first.Parent, tx) // the element that the run is in
 		if container != parent || c.display(parent) == anonymousInline {
 			c.blocks[tx].display = "inline"
 		} else {
@@ -143,7 +164,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
 			// a line break in a row of widgets ends the row, and the
 			// widgets after it are in another row (each is aligned)
-			flush()
+			flush(false)
 			start = true
 			container = newContainer()
 			if n == last {
@@ -152,7 +173,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			continue
 		}
 		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.displayOf(n) != "none" {
-			flush()
+			flush(!start)
 			start = false
 			c.inlineParent = container
 			c.BlockParent = container
@@ -164,7 +185,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			break
 		}
 	}
-	flush()
+	flush(false)
 	c.inlineParent = nil
 }
 
@@ -308,7 +329,13 @@ func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 				continue
 			}
 		case "font-family":
-			val = fontFamily(val).String()
+			if c.WebFonts && webFontFamily(val) != "" {
+				// the custom font of the text (as the web font of the
+				// element of the text, which runs cannot have their own)
+				val = rich.Custom.String()
+			} else {
+				val = fontFamily(val).String()
+			}
 		case "color", "background-color":
 			if cl, ok := cssColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
 				val = colors.AsHex(cl)

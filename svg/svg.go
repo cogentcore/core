@@ -64,6 +64,12 @@ type SVG struct {
 	// DefaultFill can be set to provide a default Fill color for the root node.
 	DefaultFill image.Image
 
+	// Color is the current color (currentColor) of the root of the SVG,
+	// which its elements inherit, unless they set it with the color
+	// property: as the CSS color of the element of a page that it is in.
+	// It is black if nil.
+	Color image.Image
+
 	// Size is size of image, Pos is offset within any parent viewport.
 	// The bounding boxes within the scene _include_ the Pos offset already.
 	Geom math32.Geom2DInt
@@ -185,9 +191,12 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 			return grad.Grad
 		}
 	}
-	ne := sv.FindNamedElement(val)
-	if grad, ok := ne.(*Gradient); ok {
-		return grad.Grad
+	ne := sv.findByName(val)
+	switch x := ne.(type) {
+	case *Gradient:
+		return x.Grad
+	case *Pattern:
+		return &patternFill{pattern: x}
 	}
 	return nil
 }

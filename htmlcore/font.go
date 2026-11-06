@@ -116,8 +116,9 @@ func fontFamily(v string) rich.Family {
 	return rich.SansSerif
 }
 
-// setFont sets the font shorthand: [style] [weight] size[/line-height] family.
-func setFont(st *cssState, s, ps *styles.Style, v string) {
+// setFont sets the font shorthand: [style] [weight] size[/line-height] family,
+// returning the family list if it is valid.
+func setFont(st *cssState, s, ps *styles.Style, v string) string {
 	// the shorthand resets the properties that it does not set, as
 	// font-weight to normal, once it is valid (with a size and family)
 	fs := strings.Fields(v)
@@ -142,10 +143,12 @@ func setFont(st *cssState, s, ps *styles.Style, v string) {
 			if lh != "" {
 				st.lineHeight = lh
 			}
-			s.Font.Family = fontFamily(strings.Join(fs[i+1:], " "))
-			return
+			family := strings.Join(fs[i+1:], " ")
+			s.Font.Family = fontFamily(family)
+			return family
 		}
 	}
+	return ""
 }
 
 // rootFontSize returns the font size of the html element of the page in px,

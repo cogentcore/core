@@ -2158,9 +2158,13 @@ func (wb *WidgetBase) alignSize() math32.Vector2 {
 	return sz.Alloc.Total.Max(sz.slot)
 }
 
-func (wb *WidgetBase) positionWithinAllocMainX(pos math32.Vector2, parJustify, parAlign styles.Aligns) {
+// positionWithinAllocMainX positions the widget within its allocation,
+// in a row (main axis X), and within the given cross size (the height
+// of its line), if larger, for its alignment on the cross axis.
+func (wb *WidgetBase) positionWithinAllocMainX(pos math32.Vector2, parJustify, parAlign styles.Aligns, cross float32) {
 	sz := &wb.Geom.Size
 	asz := wb.alignSize()
+	asz.Y = max(asz.Y, cross)
 	pos.X += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.X, asz.X)
 	pos.Y += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.Y, asz.Y)
 	wb.Geom.RelPos = pos
@@ -2169,9 +2173,13 @@ func (wb *WidgetBase) positionWithinAllocMainX(pos math32.Vector2, parJustify, p
 	}
 }
 
-func (wb *WidgetBase) positionWithinAllocMainY(pos math32.Vector2, parJustify, parAlign styles.Aligns) {
+// positionWithinAllocMainY positions the widget within its allocation,
+// in a column (main axis Y), and within the given cross size (the width
+// of its line), if larger, for its alignment on the cross axis.
+func (wb *WidgetBase) positionWithinAllocMainY(pos math32.Vector2, parJustify, parAlign styles.Aligns, cross float32) {
 	sz := &wb.Geom.Size
 	asz := wb.alignSize()
+	asz.X = max(asz.X, cross)
 	pos.Y += styles.AlignPos(styles.ItemAlign(parJustify, wb.Styles.Justify.Self), sz.Actual.Total.Y, asz.Y)
 	pos.X += styles.AlignPos(styles.ItemAlign(parAlign, wb.Styles.Align.Self), sz.Actual.Total.X, asz.X)
 	wb.Geom.RelPos = pos
@@ -2215,7 +2223,7 @@ func (fr *Frame) Position() {
 		return
 	}
 	if fr.Parent == nil {
-		fr.positionWithinAllocMainY(math32.Vector2{}, fr.Styles.Justify.Items, fr.Styles.Align.Items)
+		fr.positionWithinAllocMainY(math32.Vector2{}, fr.Styles.Justify.Items, fr.Styles.Align.Items, 0)
 	}
 	fr.ConfigScrolls() // and configure the scrolls
 	if fr.Styles.Display == styles.Stacked {
@@ -2278,7 +2286,7 @@ func (fr *Frame) positionCellsGrid() {
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		c := cwb.Geom.Cell
 		pos := stPos.Add(math32.Vec2(colX[min(c.X, len(colX)-1)], rowY[min(c.Y, len(rowY)-1)]))
-		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
+		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items, 0)
 		return tree.Continue
 	})
 }
@@ -2294,6 +2302,7 @@ func (fr *Frame) positionCellsMainX() {
 	stPos.X = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
 	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	spaces := fr.lineSpaces(math32.X, sz.Actual.Content.X)
+	crosses := fr.lineCrosses(math32.X)
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
@@ -2312,13 +2321,34 @@ func (fr *Frame) positionCellsMainX() {
 				pos.X += spaces[line].Y
 			}
 		}
-		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
+		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items, crosses[min(line, len(crosses)-1)])
 		alloc := cwb.Geom.Size.Alloc.Total
 		pos.X += alloc.X + gap.X
 		lastSz = alloc
 		idx++
 		return tree.Continue
 	})
+}
+
+// lineCrosses returns, for each line of the children along the given main
+// axis, its size on the cross axis: the largest allocation of its children,
+// within which they are aligned on the cross axis (as a child that is
+// centered in a column next to a child that grows to its width). It has
+// one line (of size 0) if there are no children.
+func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
+	ca := ma.Other()
+	crosses := []float32{0}
+	idx := 0
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if math32.PointDim(cwb.Geom.Cell, ma) == 0 && idx > 0 {
+			crosses = append(crosses, 0)
+		}
+		ln := len(crosses) - 1
+		crosses[ln] = max(crosses[ln], cwb.Geom.Size.Alloc.Total.Dim(ca))
+		idx++
+		return tree.Continue
+	})
+	return crosses
 }
 
 // lineSpaces returns, for each line of the children along the given main
@@ -2386,6 +2416,7 @@ func (fr *Frame) positionCellsMainY() {
 	stPos.Y = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	stPos.X = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
 	spaces := fr.lineSpaces(math32.Y, sz.Actual.Content.Y)
+	crosses := fr.lineCrosses(math32.Y)
 	pos := stPos
 	idx := 0
 	line := 0
@@ -2403,7 +2434,7 @@ func (fr *Frame) positionCellsMainY() {
 				pos.Y += spaces[line].Y
 			}
 		}
-		cwb.positionWithinAllocMainY(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items)
+		cwb.positionWithinAllocMainY(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items, crosses[min(line, len(crosses)-1)])
 		alloc := cwb.Geom.Size.Alloc.Total
 		pos.Y += alloc.Y + gap.Y
 		lastSz = alloc
@@ -2455,6 +2486,7 @@ func (wb *WidgetBase) setPosFromParent() {
 	default:
 		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
 	}
+	wb.Geom.Pos.Total.SetAdd(wb.translateOffset())
 	wb.setContentPosFromPos()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Geom.Pos.Total, "parPos:", parPos)
@@ -2511,6 +2543,14 @@ func (wb *WidgetBase) setBBoxes() {
 		}
 		parBB = clip.childClipBBox()
 		bb := wb.Geom.totalRect()
+		if m := wb.Styles.Margin.Dots(); m.Left < 0 || m.Right < 0 || m.Top < 0 || m.Bottom < 0 {
+			// The box inside negative margins (as for a CSS float pulled
+			// beside another with a negative margin) is larger than the
+			// total box: it is visible where it is, not only in that.
+			pos := wb.Geom.Pos.Total.Add(math32.Vec2(m.Left, m.Top))
+			sz := wb.Geom.Size.Actual.Total.Sub(math32.Vec2(m.Left+m.Right, m.Top+m.Bottom))
+			bb = bb.Union(math32.RectFromPosSizeMax(pos, sz))
+		}
 		wb.Geom.TotalBBox = parBB.Intersect(bb)
 		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Geom.TotalBBox)

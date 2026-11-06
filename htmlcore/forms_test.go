@@ -52,9 +52,48 @@ func TestFormSubmit(t *testing.T) {
 	links[0].Send(events.Click)
 	assert.Equal(t, []string{
 		"https://www.example.com/search?hl=nl&q=cogent+core&safe=on",
-		"https://www.example.com/search?btnI=Lucky&hl=nl&q=cogent+core&safe=on",
+		"https://www.example.com/search?hl=nl&q=cogent+core&safe=on&btnI=Lucky",
 		"/about",
 	}, opened)
+}
+
+// TestFormPost tests submitting forms with the POST method, as the
+// cookie consent of google.com, in each encoding.
+func TestFormPost(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	ctx.PageURL = "https://consent.example.com/ml"
+	type post struct{ url, contentType, body string }
+	var posts []post
+	ctx.PostURL = func(url, contentType string, body []byte, e events.Event) {
+		posts = append(posts, post{url, contentType, string(body)})
+	}
+	ReadHTMLString(ctx, b, `<form action="/save" method="POST"><input type="hidden" name="set_eom" value="true">
+<input type="hidden" name="continue" value="https://www.example.com/?q=a&b"><button>Reject all</button></form>
+<form action="/save" method="post" enctype="multipart/form-data"><input type="hidden" name="x" value="1"><button>Multi</button></form>
+<form method="post" enctype="text/plain"><input type="hidden" name="x" value="1"><button>Text</button></form>`)
+	var buttons []*core.Frame
+	b.WalkDown(func(n tree.Node) bool {
+		if w, ok := n.(*core.Frame); ok && w.Property("tag") == "button" {
+			buttons = append(buttons, w)
+		}
+		return tree.Continue
+	})
+	if !assert.Len(t, buttons, 3) {
+		return
+	}
+	for _, bt := range buttons {
+		bt.Send(events.Click)
+	}
+	if !assert.Len(t, posts, 3) {
+		return
+	}
+	assert.Equal(t, post{"https://consent.example.com/save", "application/x-www-form-urlencoded",
+		"set_eom=true&continue=https%3A%2F%2Fwww.example.com%2F%3Fq%3Da%26b"}, posts[0])
+	assert.Equal(t, "https://consent.example.com/save", posts[1].url)
+	assert.Contains(t, posts[1].contentType, "multipart/form-data; boundary=")
+	assert.Contains(t, posts[1].body, "name=\"x\"\r\n\r\n1\r\n")
+	assert.Equal(t, post{"https://consent.example.com/ml", "text/plain", "x=1\r\n"}, posts[2])
 }
 
 func TestFormSelect(t *testing.T) {

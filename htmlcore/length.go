@@ -5,11 +5,17 @@
 package htmlcore
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // lengthEnv has the sizes that relative lengths are resolved with, in px:
@@ -23,6 +29,10 @@ type lengthEnv struct {
 	em, vw, vh float64
 	fixedVh    bool
 	rem        float64
+
+	// ch, if set, returns the size of the ch unit of the element in px:
+	// the advance of the 0 glyph of its font, as in CSS.
+	ch func() float64
 }
 
 // defaultLengthEnv returns the length environment of a 16px font
@@ -56,6 +66,13 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 	}
 	if strings.HasSuffix(v, ")") {
 		return e.math(v, pct)
+	}
+	if r, ok := strings.CutSuffix(v, "ch"); ok && e.ch != nil {
+		if f, err := strconv.ParseFloat(r, 32); err == nil {
+			if ch := e.ch(); ch > 0 {
+				return units.Dp(float32(f * ch)), true
+			}
+		}
 	}
 	if r, ok := strings.CutSuffix(v, "rem"); ok { // of the font size of the html element
 		if f, err := strconv.ParseFloat(r, 32); err == nil {
@@ -369,4 +386,55 @@ func (e *lengthEnv) lengthPx(v string) (float32, bool) {
 		return 0, false
 	}
 	return l.Value, true
+}
+
+// chShaper is the text shaper that measures the ch unit when the scene
+// of an element has none yet.
+var (
+	chShaper     shaped.Shaper
+	chShaperOnce sync.Once
+)
+
+// chRatios are the advances of the 0 glyph of fonts relative to their
+// size, by their family and weight, for the ch unit.
+var chRatios struct {
+	sync.Mutex
+	ratios map[string]float64
+}
+
+// chOf returns the size of the ch unit of CSS in px for the font of the
+// given style (whose font size is the given em, in px), measured with the
+// given text shaper: the advance of its 0 glyph, as in browsers. It is 0
+// if it cannot be measured.
+func chOf(sh shaped.Shaper, s *styles.Style, em float64) float64 {
+	if em <= 0 {
+		return 0
+	}
+	key := fmt.Sprintf("%v %s %v", s.Font.Family, s.Font.CustomFont, s.Font.Weight)
+	chRatios.Lock()
+	r, ok := chRatios.ratios[key]
+	chRatios.Unlock()
+	if !ok {
+		if sh == nil { // before the scene has one
+			chShaperOnce.Do(func() { chShaper = shaped.NewShaper() })
+			sh = chShaper
+		}
+		sty := rich.NewStyle()
+		sty.Family, sty.Weight = s.Font.Family, s.Font.Weight
+		tsty := text.NewStyle()
+		tsty.CustomFont = s.Font.CustomFont
+		tsty.FontSize.Dots = 100
+		var adv float32
+		for _, run := range sh.Shape(rich.NewText(sty, []rune("0")), tsty) {
+			adv += run.Advance()
+		}
+		r = float64(adv) / 100
+		chRatios.Lock()
+		if chRatios.ratios == nil {
+			chRatios.ratios = map[string]float64{}
+		}
+		chRatios.ratios[key] = r
+		chRatios.Unlock()
+	}
+	return r * em
 }

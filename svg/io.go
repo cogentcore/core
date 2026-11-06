@@ -17,6 +17,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"log/slog"
 	"os"
 	"slices"
 	"strings"
@@ -130,6 +131,10 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	var curTspn *Text
 	var defPrevPar Node // previous parent before a def encountered
 	var groupStack stack.Stack[string]
+	var uses []pendingUse
+	defer func() { sv.resolveUses(uses) }()
+	sawRoot := false  // whether the root svg element has started
+	var nested []Node // the inner groups of nested svg elements
 
 	for {
 		var t xml.Token
@@ -192,7 +197,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			}
 
 			switch {
+			case nm == "svg" && sawRoot:
+				curPar = sv.nestedSVG(curPar, curSvg, se.Attr, len(nested))
+				nested = append(nested, curPar)
 			case nm == "svg":
+				sawRoot = true
 				// if curPar != sv.This {
 				// 	curPar = curPar.NewChild(TypeSVG, "svg").(Node)
 				// }
@@ -239,17 +248,17 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						x, err = math32.ParseFloat32(attr.Value)
+						x, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "y":
-						y, err = math32.ParseFloat32(attr.Value)
+						y, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "width":
-						w, err = math32.ParseFloat32(attr.Value)
+						w, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "height":
-						h, err = math32.ParseFloat32(attr.Value)
+						h, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "rx":
-						rx, err = math32.ParseFloat32(attr.Value)
+						rx, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "ry":
-						ry, err = math32.ParseFloat32(attr.Value)
+						ry, err = sv.parseLength(curSvg, attr.Value, 'y')
 					default:
 						rect.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -269,11 +278,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "cx":
-						cx, err = math32.ParseFloat32(attr.Value)
+						cx, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "cy":
-						cy, err = math32.ParseFloat32(attr.Value)
+						cy, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "r":
-						r, err = math32.ParseFloat32(attr.Value)
+						r, err = sv.parseLength(curSvg, attr.Value, 'r')
 					default:
 						circle.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -292,13 +301,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "cx":
-						cx, err = math32.ParseFloat32(attr.Value)
+						cx, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "cy":
-						cy, err = math32.ParseFloat32(attr.Value)
+						cy, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "rx":
-						rx, err = math32.ParseFloat32(attr.Value)
+						rx, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "ry":
-						ry, err = math32.ParseFloat32(attr.Value)
+						ry, err = sv.parseLength(curSvg, attr.Value, 'y')
 					default:
 						ellipse.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -317,13 +326,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x1":
-						x1, err = math32.ParseFloat32(attr.Value)
+						x1, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "y1":
-						y1, err = math32.ParseFloat32(attr.Value)
+						y1, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "x2":
-						x2, err = math32.ParseFloat32(attr.Value)
+						x2, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "y2":
-						y2, err = math32.ParseFloat32(attr.Value)
+						y2, err = sv.parseLength(curSvg, attr.Value, 'y')
 					default:
 						line.SetProperty(attr.Name.Local, attr.Value)
 					}
@@ -423,13 +432,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						x, err = math32.ParseFloat32(attr.Value)
+						x, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "y":
-						y, err = math32.ParseFloat32(attr.Value)
+						y, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "width":
-						w, err = math32.ParseFloat32(attr.Value)
+						w, err = sv.parseLength(curSvg, attr.Value, 'x')
 					case "height":
-						h, err = math32.ParseFloat32(attr.Value)
+						h, err = sv.parseLength(curSvg, attr.Value, 'y')
 					case "preserveAspectRatio":
 						img.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					case "href":
@@ -470,9 +479,15 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					curTxt = txt
 				} else {
 					if (inTxt && curTxt != nil) || curPar == nil {
+						// the text of the text element before it is a span
+						// of its own, as are all of its runs of text
+						if curTxt.Text != "" {
+							anon := NewText(curTxt)
+							tree.SetUniqueName(anon)
+							anon.Text, curTxt.Text = curTxt.Text, ""
+						}
 						txt = NewText(curTxt)
 						tree.SetUniqueName(txt)
-						txt.Pos = curTxt.Pos
 					} else if curTxt != nil {
 						txt = NewText(curPar)
 						tree.SetUniqueName(txt)
@@ -492,15 +507,17 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosX = pts
-						} else if len(pts) == 1 {
-							txt.Pos.X = pts[0]
+						}
+						if len(pts) > 0 {
+							txt.Pos.X, txt.absPos.X, txt.hasX = pts[0], pts[0], true
 						}
 					case "y":
 						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosY = pts
-						} else if len(pts) == 1 {
-							txt.Pos.Y = pts[0]
+						}
+						if len(pts) > 0 {
+							txt.Pos.Y, txt.absPos.Y, txt.hasY = pts[0], pts[0], true
 						}
 					case "dx":
 						pts := math32.ReadPoints(attr.Value)
@@ -518,8 +535,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							txt.CharRots = pts
 						}
 					case "textLength":
-						tl, err := math32.ParseFloat32(attr.Value)
-						if err != nil {
+						if tl, err := math32.ParseFloat32(attr.Value); err == nil {
 							txt.TextLength = tl
 						}
 					case "lengthAdjust":
@@ -613,6 +629,25 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						cp.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
+			case nm == "mask":
+				curPar = NewMask(curPar)
+				mk := curPar.(*Mask)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(mk, attr.Name.Local, attr.Value) {
+						continue
+					}
+					mk.SetProperty(attr.Name.Local, attr.Value)
+				}
+			case nm == "a" || nm == "switch":
+				curPar = NewGroup(curPar)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
+						continue
+					}
+					if attr.Name.Local != "href" {
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
 			case nm == "marker":
 				curPar = NewMarker(curPar)
 				mrk := curPar.(*Marker)
@@ -659,44 +694,79 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				mrk.RefPos.Set(rx, ry)
 				mrk.Size.Set(szx, szy)
 			case nm == "use":
-				link := gradient.XMLAttr("href", se.Attr)
-				itm := sv.FindNamedElement(link)
-				if itm == nil {
-					fmt.Println("can't find use:", link)
-					break
-				}
-				cln := itm.AsTree().Clone().(Node)
-				if cln == nil {
-					break
-				}
-				curPar.AsTree().AddChild(cln)
-				var xo, yo float64
+				// a group with the transform and properties of the use,
+				// with a copy of the element that it refers to, which is
+				// resolved after the parsing (it can be after the use)
+				ug := NewGroup(curPar)
+				pu := pendingUse{group: ug}
+				var tr string
 				for _, attr := range se.Attr {
-					if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(ug, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
+					case "href":
+						pu.link = strings.TrimPrefix(strings.TrimSpace(attr.Value), "#")
 					case "x":
-						xo, _ = reflectx.ToFloat(attr.Value)
+						pu.x, _ = sv.parseLength(curSvg, attr.Value, 'x')
 					case "y":
-						yo, _ = reflectx.ToFloat(attr.Value)
+						pu.y, _ = sv.parseLength(curSvg, attr.Value, 'y')
+					case "width":
+						pu.width, _ = sv.parseLength(curSvg, attr.Value, 'x')
+					case "height":
+						pu.height, _ = sv.parseLength(curSvg, attr.Value, 'y')
+					case "transform":
+						tr = attr.Value
 					default:
-						cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
+						ug.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
-				if xo != 0 || yo != 0 {
-					xf := math32.Translate2D(float32(xo), float32(yo))
-					if txp, has := cln.AsTree().Properties["transform"]; has {
-						exf := math32.Identity2()
-						exf.SetString(txp.(string))
-						exf = exf.Translate(float32(xo), float32(yo))
-						cln.AsTree().SetProperty("transform", exf.String())
-					} else {
-						cln.AsTree().SetProperty("transform", xf.String())
+				if pu.x != 0 || pu.y != 0 {
+					tr += fmt.Sprintf(" translate(%g %g)", pu.x, pu.y)
+				}
+				if tr = strings.TrimSpace(tr); tr != "" {
+					ug.SetProperty("transform", tr)
+				}
+				uses = append(uses, pu)
+			case nm == "pattern":
+				curPar = NewPattern(curPar)
+				pat := curPar.(*Pattern)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(pat, attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "viewBox":
+						pts := math32.ReadPoints(attr.Value)
+						if len(pts) == 4 {
+							pat.ViewBox.Min.Set(pts[0], pts[1])
+							pat.ViewBox.Size.Set(pts[2], pts[3])
+						}
+					case "preserveAspectRatio":
+						pat.ViewBox.PreserveAspectRatio.SetString(attr.Value)
+					default:
+						pat.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
-				if p, ok := cln.(*Path); ok {
-					p.SetData(p.DataStr) // defs don't apply paths
+			case nm == "symbol":
+				curPar = NewSymbol(curPar)
+				sym := curPar.(*Symbol)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(sym, attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "viewBox":
+						pts := math32.ReadPoints(attr.Value)
+						if len(pts) == 4 {
+							sym.ViewBox.Min.Set(pts[0], pts[1])
+							sym.ViewBox.Size.Set(pts[2], pts[3])
+						}
+					case "preserveAspectRatio":
+						sym.ViewBox.PreserveAspectRatio.SetString(attr.Value)
+					default:
+						sym.SetProperty(attr.Name.Local, attr.Value)
+					}
 				}
 			case nm == "Work":
 				fallthrough
@@ -760,9 +830,12 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			default:
-				errStr := "SVG Cannot process svg element " + se.Name.Local
-				log.Println(errStr)
-				// IconAutoOpen = false
+				// an element that is not supported, which is not rendered
+				// (nor are its children), and keeps the nesting of the
+				// elements after it (its end pops it)
+				slog.Debug("svg: element not supported", "element", se.Name.Local)
+				curPar = NewMetaData(curPar)
+				curPar.AsNodeBase().Class = nm
 			}
 		case xml.EndElement:
 			nm := se.Name.Local
@@ -794,6 +867,12 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			if sv.groupFilterSkip {
 				break
 			}
+			if nm == "svg" && len(nested) > 0 && curPar == nested[len(nested)-1] {
+				// the end of a nested svg: its inner and outer groups
+				nested = nested[:len(nested)-1]
+				curPar = curPar.AsTree().Parent.AsTree().Parent.(Node)
+				break
+			}
 			switch nm {
 			case "title":
 				inTitle = false
@@ -803,6 +882,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				inCSS = false
 				curCSS = nil
 			case "text":
+				if curTxt != nil {
+					curTxt.trimSpans()
+				}
 				inTxt = false
 				curTxt = nil
 			case "tspan":
@@ -850,9 +932,17 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case inDesc:
 				sv.Desc += trspc
 			case inTspn && curTspn != nil:
-				curTspn.Text = trspc
+				curTspn.Text += collapseSpace(string(se))
 			case inTxt && curTxt != nil:
-				curTxt.Text = trspc
+				if t := collapseSpace(string(se)); curTxt.NumChildren() > 0 {
+					if strings.TrimSpace(t) != "" || t == " " { // the text after a span is a span of its own
+						anon := NewText(curTxt)
+						tree.SetUniqueName(anon)
+						anon.Text = t
+					}
+				} else {
+					curTxt.Text += t
+				}
 			case inCSS && curCSS != nil:
 				curCSS.ParseString(trspc)
 				cp := curCSS.CSSProperties()

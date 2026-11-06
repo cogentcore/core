@@ -77,6 +77,10 @@ func (g *MetaData) SVGName() string {
 	return "metadata"
 }
 
+// Render does nothing: the children of metadata (and of elements that
+// are not supported) are not rendered.
+func (g *MetaData) Render(sv *SVG) {}
+
 func (g *MetaData) EnforceSVGName() bool {
 	return false
 }

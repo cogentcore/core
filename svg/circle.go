@@ -46,6 +46,9 @@ func (g *Circle) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.Circle(g.Pos.X, g.Pos.Y, g.Radius)
 	pc.Draw()
 	g.RenderChildren(sv)

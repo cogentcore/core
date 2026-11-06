@@ -56,6 +56,24 @@ type Context struct {
 	// height of the scene.
 	MediaHeight float32
 
+	// Zoom, if positive, is the zoom factor of the page, as in browsers:
+	// all of its sizes are multiplied by it (see
+	// [styles.Style.Zoom]). MediaWidth and MediaHeight are then the size of
+	// the viewport divided by it, as its CSS px are larger (or smaller).
+	Zoom float32
+
+	// WebFonts is whether the web fonts of the @font-face rules of the
+	// style sheets of pages are loaded (once for each URL, for all pages),
+	// and used for the font families that they are for (see
+	// [fonts.AddWebFont]). Fonts in the WOFF2 format need a [FontDecoder].
+	WebFonts bool
+
+	// Scripting is whether the scripts of the pages are run (by the app
+	// that reads them, as htmlcore does not run them): the HTML is then
+	// parsed with scripting enabled (see [ParseHTML]), and noscript
+	// elements are not displayed, as in browsers with JavaScript.
+	Scripting bool
+
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
 	NewParent core.Widget
@@ -84,6 +102,12 @@ type Context struct {
 	// GetURL is the function used to get resources from URLs,
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
+
+	// PostURL, if not nil, is the function used to open URLs with a POST
+	// request with the given body of the given content type, as for
+	// submitting forms with the POST method. If it is nil, those forms
+	// can not be submitted.
+	PostURL func(url, contentType string, body []byte, e events.Event)
 
 	// ElementHandlers is a map of handler functions for each HTML element
 	// type (eg: "button", "input", "p"). It is empty by default, but can be
@@ -150,6 +174,10 @@ type Context struct {
 // [Context.NewPage] starts anew: the style sheets and declarations of
 // their elements, and the state of their widgets for styling them.
 type pageState struct {
+	// selIndex is the index of the nodes of the document for selecting
+	// the nodes of style rules (see [Context.selectNodes]).
+	selIndex *selectorIndex
+
 	// styles are the CSS declarations for each node, which are
 	// sorted in the order of the cascade by [Context.declarations].
 	styles map[*html.Node][]*cssDecl
@@ -173,6 +201,10 @@ type pageState struct {
 	// floatSiblings has whether the unstyled blocks in each element
 	// have floats in them, for flattensBlock.
 	floatSiblings map[*html.Node]bool
+
+	// linkFrames has the URLs of the links that are frames (blocks), by
+	// their nodes, for the widgets in them (see linkFrame).
+	linkFrames map[*html.Node]string
 
 	// flattened has the blocks that are flattened (see flattensBlock).
 	flattened map[*html.Node]bool
@@ -403,6 +435,7 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
 	c.handleFormWidget(node, w)
+	c.handleInLink(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}
@@ -415,9 +448,10 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 // one for each page with this, so that nothing of one page affects the next.
 func (c *Context) NewPage() *Context {
 	n := NewContext()
-	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
+	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
+	n.Scripting, n.WebFonts = c.Scripting, c.WebFonts
 	n.PageURL = c.PageURL
-	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
+	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers
 	n.WikilinkHandlers = c.WikilinkHandlers
 	n.AttributeHandlers = c.AttributeHandlers
@@ -430,16 +464,88 @@ func (c *Context) NewPage() *Context {
 }
 
 // UserAgent is the User-Agent header of the requests of the default
-// [Context.GetURL], which sites that reject the default of the Go HTTP
-// client (as Wikipedia does) accept.
-var UserAgent = "Mozilla/5.0 (compatible; CogentCore; +https://cogentcore.org)"
+// [Context.GetURL] (see [SetRequestHeaders]). It has the form of the user
+// agents of browsers, for the platform that the app runs on, naming
+// Cogent Core: sites treat the "compatible; ...; +url" form of crawlers
+// (and the default of the Go HTTP client) as bots. Scripts should report
+// the same value (navigator.userAgent), since sites check that they match.
+var UserAgent = "Mozilla/5.0 (" + userAgentPlatform() + ") AppleWebKit/537.36 (KHTML, like Gecko) CogentCore/1.0 Safari/537.36"
+
+// userAgentPlatform returns the platform part of the [UserAgent], as
+// browsers report it for the platform that the app runs on.
+func userAgentPlatform() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "Windows NT 10.0; Win64; x64"
+	case "linux":
+		return "X11; Linux x86_64"
+	case "android":
+		return "Linux; Android 10; K"
+	case "ios":
+		return "iPhone; CPU iPhone OS 17_0 like Mac OS X"
+	default:
+		return "Macintosh; Intel Mac OS X 10_15_7"
+	}
+}
+
+// AcceptLanguage is the Accept-Language header of the requests of the
+// default [Context.GetURL] (see [SetRequestHeaders]), from the locale of
+// the system (the LC_ALL, LC_MESSAGES, or LANG environment variable) or
+// US English. Some sites send reduced pages to requests without it.
+var AcceptLanguage = acceptLanguage(firstEnv("LC_ALL", "LC_MESSAGES", "LANG"))
+
+// firstEnv returns the value of the first of the given environment
+// variables that is set.
+func firstEnv(names ...string) string {
+	for _, n := range names {
+		if v := os.Getenv(n); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// acceptLanguage returns the Accept-Language header for the given POSIX
+// locale (as "fr_CA.UTF-8"): "fr-CA,fr;q=0.9,en;q=0.8". It is US English
+// for the C and POSIX locales and for an empty one.
+func acceptLanguage(locale string) string {
+	loc, _, _ := strings.Cut(locale, ".")
+	loc, _, _ = strings.Cut(loc, "@")
+	if loc == "" || loc == "C" || loc == "POSIX" {
+		return "en-US,en;q=0.9"
+	}
+	tag := strings.ReplaceAll(loc, "_", "-")
+	lang, _, _ := strings.Cut(tag, "-")
+	h := tag
+	if lang != tag {
+		h += "," + lang + ";q=0.9"
+	}
+	if lang != "en" {
+		h += ",en;q=0.8"
+	}
+	return h
+}
+
+// acceptHeader is the Accept header of requests, as browsers send it for
+// pages (and accepted for their resources).
+const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+
+// SetRequestHeaders sets the headers of the given request that browsers
+// send: the [UserAgent], [AcceptLanguage], and Accept. (Accept-Encoding is
+// set by the Go HTTP client, which decompresses the gzip responses.)
+func SetRequestHeaders(req *http.Request) {
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("Accept", acceptHeader)
+	req.Header.Set("Accept-Language", AcceptLanguage)
+}
 
 // httpClient is the client of the default [Context.GetURL], with a timeout
 // so that a server that does not respond does not stop the reading of a
 // page (as a style sheet or image of the page).
 var httpClient = &http.Client{Timeout: 15 * time.Second}
 
-// getURL gets the given URL with an HTTP GET request, with the [UserAgent].
+// getURL gets the given URL with an HTTP GET request, with the headers of
+// [SetRequestHeaders].
 func getURL(url string) (*http.Response, error) {
 	if strings.HasPrefix(url, "file:") {
 		return getFileURL(url)
@@ -448,7 +554,7 @@ func getURL(url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", UserAgent)
+	SetRequestHeaders(req)
 	return httpClient.Do(req)
 }
 
@@ -530,4 +636,17 @@ func TagTexts(w core.Widget) {
 		}
 		return tree.Continue
 	})
+}
+
+// NodeOf returns the HTML node of the element that the given widget is
+// for, or that of the nearest widget that it is in that has one (as for
+// the text of an element), or nil if there is none. The nodes are those
+// of the document that was read (see [ReadDocument]).
+func NodeOf(w core.Widget) *html.Node {
+	for wb := w.AsWidget(); wb != nil; wb = core.AsWidget(wb.Parent) {
+		if n, ok := wb.Property("node").(*html.Node); ok && n != nil {
+			return n
+		}
+	}
+	return nil
 }

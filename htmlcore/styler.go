@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"cogentcore.org/core/text/shaped"
 	_ "embed"
 	"fmt"
 	"image"
@@ -138,6 +139,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			ps = &pw.AsWidget().Styles
 			pbs = c.blocks[pw]
 		}
+		if c.Zoom > 0 {
+			s.Zoom = c.Zoom // (inherited, but set on each for widgets outside of the page)
+		}
 		fsz := core.AppearanceSettings.FontSize / 100
 		if plain {
 			// Only the inherited and CSS styles apply,
@@ -199,6 +203,17 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			}
 		}
 		env.rem = float64(c.rootFontSize())
+		env.ch = func() float64 { // of the font of the element as it is styled
+			em := env.em
+			if s.Font.Size.Unit == units.UnitDp && s.Font.Size.Value > 0 {
+				em = float64(s.Font.Size.Value)
+			}
+			var sh shaped.Shaper
+			if wb.Scene != nil {
+				sh = wb.Scene.TextShaper()
+			}
+			return chOf(sh, s, em)
+		}
 		env.fixedVh = c.MediaHeight > 0
 		if env.fixedVh {
 			env.vh = float64(c.MediaHeight / 100)

@@ -24,14 +24,26 @@ type styleOp func(st *cssState, s, ps *styles.Style)
 
 // compileDecls compiles the given declarations, in the order of the cascade,
 // without those that are invalid (see [Context.compileCSS]).
+// The font properties are first, as in CSS the font size of an element
+// is computed before the lengths that are relative to it (as the ch unit,
+// and em in calc()).
 func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 	var ops []styleOp
-	for _, d := range decls {
-		if !d.invalid {
-			ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+	for _, font := range []bool{true, false} {
+		for _, d := range decls {
+			if !d.invalid && fontProperties[d.Property] == font {
+				ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+			}
 		}
 	}
 	return ops
+}
+
+// fontProperties are the properties of fonts, which are compiled first
+// (with line-height, which the font shorthand sets).
+var fontProperties = map[string]bool{
+	"font": true, "font-family": true, "font-size": true, "font-weight": true,
+	"font-style": true, "line-height": true,
 }
 
 // compileCSS compiles the declaration of the given CSS property with the
@@ -45,7 +57,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	val = strings.TrimSpace(val)
 	lval := strings.ToLower(val)
 	op := func(f styleOp) []styleOp { return []styleOp{f} }
-	if lval == "inherit" || lval == "initial" || lval == "unset" {
+	if lval == "unset" { // inherit for the inherited properties, initial otherwise
+		lval = "initial"
+		if inheritedProperties[prop] {
+			lval = "inherit"
+		}
+	}
+	if lval == "inherit" || lval == "initial" {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
 		})
@@ -153,6 +171,17 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		})
 	case "background", "background-color":
 		bg := backgroundColor(val)
+		if bg == "" && prop == "background" && !strings.Contains(lval, "url(") && !strings.Contains(lval, "gradient(") {
+			// The shorthand without a color (as "0 0" or "none", as
+			// github.com resets its buttons with) sets the color to
+			// transparent; with an image or gradient, which are not
+			// supported, the color before it (a fallback) is kept.
+			switch lval {
+			case "inherit", "unset", "revert", "revert-layer":
+			default:
+				bg = "transparent"
+			}
+		}
 		if bg == "" {
 			return nil
 		}
@@ -236,6 +265,15 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			cl = styles.ClearBoth
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Clear = cl })
+	case "transform", "translate":
+		x, y, ok := cssTranslate(prop, lval)
+		if !ok {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.Translate.X, _ = st.env.length(x, units.UnitEw)
+			s.Translate.Y, _ = st.env.length(y, units.UnitEh)
+		})
 	case "z-index":
 		z, err := strconv.Atoi(lval)
 		if err != nil {
@@ -262,9 +300,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Slant = slant })
 	case "font-family":
 		family := fontFamily(val)
-		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Family = family })
+		return op(func(st *cssState, s, ps *styles.Style) { c.setFontFamily(s, val, family) })
 	case "font":
-		return op(func(st *cssState, s, ps *styles.Style) { setFont(st, s, ps, val) })
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if family := setFont(st, s, ps, val); family != "" {
+				c.setFontFamily(s, family, s.Font.Family)
+			}
+		})
 	case "line-height":
 		return op(func(st *cssState, s, ps *styles.Style) { st.lineHeight = lval })
 	case "text-align":
@@ -567,6 +609,18 @@ func compileBorder(side int, val string) styleOp {
 	}
 }
 
+// inheritedProperties are the properties that are inherited in CSS, for
+// which unset is inherit (and initial for the others).
+var inheritedProperties = map[string]bool{
+	"color": true, "font": true, "font-family": true, "font-size": true, "font-style": true,
+	"font-weight": true, "font-variant": true, "line-height": true, "letter-spacing": true,
+	"word-spacing": true, "text-align": true, "text-indent": true, "text-transform": true,
+	"text-shadow": true, "white-space": true, "visibility": true, "cursor": true, "direction": true,
+	"list-style": true, "list-style-type": true, "list-style-position": true, "quotes": true,
+	"word-break": true, "overflow-wrap": true, "hyphens": true, "tab-size": true,
+	"border-collapse": true, "border-spacing": true, "caption-side": true, "empty-cells": true,
+}
+
 // logicalProperties are the physical properties for the logical
 // properties of CSS, for horizontal, left to right text.
 var logicalProperties = map[string]string{
@@ -746,4 +800,62 @@ func gridColumns(v string) int {
 		}
 	}
 	return len(splitColors(v))
+}
+
+// cssTranslate returns the translation of the given value of the transform
+// property (the sum of its translate functions; the other functions, as
+// rotate and scale, are not supported), or of the translate property, as
+// the lengths of x and y. It returns false if it is not valid.
+func cssTranslate(prop, v string) (x, y string, ok bool) {
+	x, y = "0", "0"
+	if v == "none" || v == "" {
+		return x, y, true
+	}
+	if prop == "translate" { // x [y [z]]
+		fs := strings.Fields(v)
+		if len(fs) > 0 {
+			x = fs[0]
+		}
+		if len(fs) > 1 {
+			y = fs[1]
+		}
+		return x, y, true
+	}
+	var xs, ys []string
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			return "", "", false
+		}
+		as := strings.Split(args[:end], ",")
+		for i := range as {
+			as[i] = strings.TrimSpace(as[i])
+		}
+		switch strings.TrimSpace(name) {
+		case "translate", "translate3d":
+			xs = append(xs, as[0])
+			if len(as) > 1 {
+				ys = append(ys, as[1])
+			}
+		case "translatex":
+			xs = append(xs, as[0])
+		case "translatey":
+			ys = append(ys, as[0])
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	sum := func(ls []string) string {
+		switch len(ls) {
+		case 0:
+			return "0"
+		case 1:
+			return ls[0]
+		}
+		return "calc(" + strings.Join(ls, " + ") + ")"
+	}
+	return sum(xs), sum(ys), true
 }

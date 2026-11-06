@@ -21,6 +21,9 @@ func (g *Polygon) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.Polygon(g.Points...)
 	pc.Draw()
 
@@ -29,7 +32,7 @@ func (g *Polygon) Render(sv *SVG) {
 		pt := g.Points[0]
 		ptn := g.Points[1]
 		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
-		mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
+		mrk.RenderMarkerStart(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]

@@ -86,6 +86,10 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				}
 			case "@supports", "@layer", "@container", "@scope":
 				c.addRuleList(root, rule.Rules, origin)
+			case "@font-face":
+				if c.WebFonts {
+					c.addFontFace(rule.Declarations)
+				}
 			case "@import":
 				// url("x") or "x", and a media query list
 				url, media := importURL(rule.Prelude)
@@ -107,7 +111,7 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 			if cs := compileSelector(sel); cs != nil {
 				spec = cs.specificity
 			}
-			for _, n := range selectNodes(root, sel) {
+			for _, n := range c.selectNodes(root, sel) {
 				c.addDecls(n, rule.Declarations, origin, spec)
 			}
 		}
@@ -181,6 +185,46 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 	return ""
 }
 
+// ComputedValue returns the value of the given CSS property for the given
+// element, as cascaded by the style sheets of the page that it was read
+// with (with var() resolved): that of the declaration of the element that
+// applies, or, for an inherited property (or one that is inherit), that
+// of its nearest ancestor with one, or "" if there is none (as for the
+// initial value). It is for the computed styles of scripts, which can
+// convert its values (as colors and relative lengths) as they need.
+func (c *Context) ComputedValue(n *html.Node, prop string) string {
+	prop = strings.TrimSpace(prop)
+	if strings.HasPrefix(prop, "--") { // custom properties are inherited
+		v, _ := c.customProperty(n, prop)
+		return strings.TrimSpace(v)
+	}
+	prop = strings.ToLower(prop)
+	for ; n != nil; n = n.Parent {
+		if n.Type != html.ElementNode {
+			continue
+		}
+		v := strings.TrimSpace(c.declaration(n, prop))
+		switch strings.ToLower(v) {
+		case "inherit":
+			continue
+		case "initial", "revert", "revert-layer":
+			return ""
+		case "unset":
+			if !inheritedProperties[prop] {
+				return ""
+			}
+			continue
+		case "":
+			if !inheritedProperties[prop] {
+				return ""
+			}
+			continue
+		}
+		return v
+	}
+	return ""
+}
+
 // addInline adds the declarations of the given style attribute.
 func (c *Context) addInline(n *html.Node, style string) {
 	// our CSS parser is strict about semicolons, but
@@ -216,6 +260,12 @@ func (c *Context) SetStyleAttr(node *html.Node, style string) error {
 type compiledSelector struct {
 	sel         cascadia.Sel
 	specificity int
+
+	// keyKind and key are a part of the last compound selector that every
+	// node that it selects has, for finding them in a [selectorIndex]:
+	// an id ('#'), a class ('.'), or an element name ('t'), or none (0).
+	keyKind byte
+	key     string
 }
 
 // selectorCache has the compiled selectors, with nil for ones
@@ -237,6 +287,7 @@ func compileSelector(sel string) *compiledSelector {
 	if s, err := cascadia.Parse(rewriteSelector(sel)); err == nil && s.PseudoElement() == "" {
 		sp := s.Specificity()
 		cs = &compiledSelector{sel: s, specificity: sp[0]*10000 + sp[1]*100 + sp[2]}
+		cs.keyKind, cs.key = selectorKey(sel)
 	}
 	selectorCache[sel] = cs
 	return cs
@@ -280,6 +331,140 @@ func rewriteSelector(sel string) string {
 		}
 	}
 	return sb.String()
+}
+
+// selectorKey returns a part of the last compound selector of the given
+// selector that every node that it selects has (see compiledSelector.key):
+// its id, else its first class, else its element name, or none if it has
+// none of them outside of functions and attribute selectors (or has
+// escapes, which are not decoded here).
+func selectorKey(sel string) (byte, string) {
+	if strings.ContainsAny(sel, "\\|") { // escapes and namespaces
+		return 0, ""
+	}
+	// the start of the last compound selector, after the last combinator
+	// at the top level
+	start, depth := 0, 0
+	for i := 0; i < len(sel); i++ {
+		switch ch := sel[i]; ch {
+		case '(', '[':
+			depth++
+		case ')', ']':
+			depth--
+		case ' ', '>', '+', '~', '\t', '\n':
+			if depth == 0 {
+				start = i + 1
+			}
+		}
+	}
+	last := sel[start:]
+	isName := func(ch byte) bool {
+		return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '-' || ch == '_' || ch >= 0x80
+	}
+	name := func(i int) string {
+		j := i
+		for j < len(last) && isName(last[j]) {
+			j++
+		}
+		return last[i:j]
+	}
+	var class string
+	depth = 0
+	for i := 0; i < len(last); i++ {
+		switch ch := last[i]; {
+		case ch == '(' || ch == '[':
+			depth++
+		case ch == ')' || ch == ']':
+			depth--
+		case depth == 0 && ch == '#':
+			if id := name(i + 1); id != "" {
+				return '#', id
+			}
+		case depth == 0 && ch == '.' && class == "":
+			class = name(i + 1)
+		}
+	}
+	if class != "" {
+		return '.', class
+	}
+	if tag := name(0); tag != "" {
+		return 't', strings.ToLower(tag)
+	}
+	return 0, ""
+}
+
+// selectorIndex has the element nodes of a document by id, class, and
+// element name, in document order, for selecting the nodes of style rules
+// (see [Context.selectNodes]), so that each selector is only matched
+// against the nodes that have its key, as in browsers.
+type selectorIndex struct {
+	root                 *html.Node
+	byID, byClass, byTag map[string][]*html.Node
+	all                  []*html.Node
+}
+
+// newSelectorIndex returns the index of the element nodes under root.
+func newSelectorIndex(root *html.Node) *selectorIndex {
+	ix := &selectorIndex{root: root, byID: map[string][]*html.Node{}, byClass: map[string][]*html.Node{}, byTag: map[string][]*html.Node{}}
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			if c.Type != html.ElementNode {
+				continue
+			}
+			ix.all = append(ix.all, c)
+			ix.byTag[strings.ToLower(c.Data)] = append(ix.byTag[strings.ToLower(c.Data)], c)
+			for _, a := range c.Attr {
+				if a.Namespace != "" {
+					continue
+				}
+				switch a.Key {
+				case "id":
+					ix.byID[a.Val] = append(ix.byID[a.Val], c)
+				case "class":
+					seen := map[string]bool{}
+					for _, cl := range strings.Fields(a.Val) {
+						if !seen[cl] {
+							seen[cl] = true
+							ix.byClass[cl] = append(ix.byClass[cl], c)
+						}
+					}
+				}
+			}
+			walk(c)
+		}
+	}
+	walk(root)
+	return ix
+}
+
+// selectNodes returns the nodes under root that the given selector selects,
+// using the index of the nodes of root, which it makes for the first root
+// (the nodes of a document do not change while it is read).
+func (c *Context) selectNodes(root *html.Node, sel string) []*html.Node {
+	cs := compileSelector(sel)
+	if cs == nil || cs.keyKind == 0 {
+		return selectNodes(root, sel)
+	}
+	if c.selIndex == nil || c.selIndex.root != root {
+		c.selIndex = newSelectorIndex(root)
+	}
+	var cands []*html.Node
+	switch cs.keyKind {
+	case '#':
+		cands = c.selIndex.byID[cs.key]
+	case '.':
+		cands = c.selIndex.byClass[cs.key]
+	case 't':
+		cands = c.selIndex.byTag[cs.key]
+	}
+	var matches []*html.Node
+	for _, n := range cands {
+		if cs.sel.Match(n) {
+			matches = append(matches, n)
+		}
+	}
+	return matches
 }
 
 // selectNodes returns the nodes under root that the given selector selects.
@@ -464,6 +649,9 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 // flex and grid containers blockified, as in CSS:
 // they are flex or grid items, which are block-level.
 func (c *Context) displayOf(n *html.Node) string {
+	if c.Scripting && n != nil && n.Type == html.ElementNode && n.Data == "noscript" {
+		return "none" // its content is for browsers without scripts
+	}
 	d := c.declaration(n, "display")
 	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
 		return d
@@ -591,6 +779,9 @@ func (c *Context) addStyleSheets(root *html.Node) {
 // Its URL is relative to the URL of the style sheet that it is in,
 // cssBase, if it is imported by one, or else to the page.
 func (c *Context) addLinkedStyle(href string) {
+	if strings.TrimSpace(href) == "" {
+		return // as in browsers (it would be the page itself)
+	}
 	u, err := parseRelativeURL(href, c.cssBaseURL())
 	if errors.Log(err) != nil {
 		return
@@ -607,6 +798,12 @@ func (c *Context) addLinkedStyle(href string) {
 		return
 	}
 	defer resp.Body.Close()
+	if ct := strings.ToLower(resp.Header.Get("Content-Type")); ct != "" && !strings.Contains(ct, "css") && !strings.Contains(ct, "text/plain") && !strings.Contains(ct, "octet-stream") {
+		// as in browsers, a style sheet must be CSS (not, as for a link
+		// of a style sheet that is missing, a page of HTML, on which the
+		// CSS parser does not end)
+		return
+	}
 	b, err := io.ReadAll(resp.Body)
 	if errors.Log(err) != nil {
 		return

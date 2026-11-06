@@ -7,6 +7,7 @@ package core
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -140,7 +141,18 @@ func (fr *Frame) layoutFloats() bool {
 		if cwb.isFloat() {
 			// a float that clears is moved down, but not the flow after it
 			w := min(ksz.Actual.Total.X, width)
-			if cf := AsFrame(cw); cf != nil && cf.onlyFloats() {
+			if cwb.Styles.Grow.X > 0 {
+				// a growing float (as for a percentage width in CSS) takes
+				// the width of the column, up to its Max
+				// (a percentage Max is of the column, which it may not
+				// have been resolved for yet)
+				w = width
+				if mx := cwb.Styles.Max.X; mx.Unit == units.UnitPw && mx.Value > 0 {
+					w = min(w, width*mx.Value/100+ksz.Space.X-cwb.boxSizingSpace().X)
+				} else if mt := ksz.maxTotal().X; mt > 0 {
+					w = min(w, mt)
+				}
+			} else if cf := AsFrame(cw); cf != nil && cf.onlyFloats() {
 				// A float that only has floats in it (which have no size
 				// in its flow) is as wide as its content (shrink-to-fit,
 				// as in CSS): its preferred width, within the column.

@@ -212,6 +212,10 @@ func (c *Context) arrange(n *html.Node, fr *core.Frame) {
 
 // linkFrame makes the given frame of an a element open the given URL.
 func (c *Context) linkFrame(w *core.Frame, href string) {
+	if c.linkFrames == nil {
+		c.linkFrames = map[*html.Node]string{}
+	}
+	c.linkFrames[c.Node] = href
 	w.SetProperty("href", href)
 	w.SetTooltip(href)
 	w.Styler(func(s *styles.Style) {
@@ -222,6 +226,37 @@ func (c *Context) linkFrame(w *core.Frame, href string) {
 		e.SetHandled()
 		c.OpenURL(href, e)
 	})
+}
+
+// handleInLink makes the given widget of the given node, if it is in a
+// link that is a frame (see linkFrame), open the link when clicked on, as
+// the frame does: the widgets in it that can be pressed, as its text,
+// otherwise get the clicks instead of the frame.
+func (c *Context) handleInLink(node *html.Node, w core.Widget) {
+	if len(c.linkFrames) == 0 {
+		return
+	}
+	for n := node; n != nil; n = n.Parent {
+		href, ok := c.linkFrames[n]
+		if !ok {
+			continue
+		}
+		if n == node {
+			if _, isFrame := w.(*core.Frame); isFrame {
+				return // the link frame itself
+			}
+		}
+		wb := w.AsWidget()
+		wb.Styler(func(s *styles.Style) { s.Cursor = cursors.Pointer })
+		wb.OnClick(func(e events.Event) {
+			if e.IsHandled() {
+				return
+			}
+			e.SetHandled()
+			c.OpenURL(href, e)
+		})
+		return
+	}
 }
 
 // flattensBlock returns whether the given block element, in the flow of
