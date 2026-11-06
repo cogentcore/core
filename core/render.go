@@ -668,6 +668,17 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
+	if wb.outOfFlow() && wb.Styles.Background == nil {
+		// An absolute or fixed widget is painted over the widgets that it overlaps,
+		// so without a background of its own it does not paint that of its
+		// parent over them (its actual background is kept for its content).
+		abg, fm := wb.Styles.ActualBackground, wb.Styles.FillMargin
+		clear := colors.Uniform(colors.Transparent)
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = clear, false
+		wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, clear)
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
+		return
+	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 

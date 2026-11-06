@@ -16,9 +16,11 @@ import (
 
 // TestHiddenOverContent tests that elements with visibility: hidden or
 // opacity: 0 do not paint over the content under them (as the dropdown
-// menus of the header of github.com, which are positioned over it).
+// menus of the header of github.com, which are positioned over it),
 func TestHiddenOverContent(t *testing.T) {
-	for _, hide := range []string{"visibility: hidden", "opacity: 0"} {
+	// and a positioned element without a background (as the particles of
+	// the mascot of github.com, over its image)
+	for _, hide := range []string{"visibility: hidden", "opacity: 0", "background: none"} {
 		b := core.NewBody()
 		ctx := NewContext()
 		assert.NoError(t, ReadHTMLString(ctx, b, `<div style="position: relative; width: 200px; height: 100px">`+
