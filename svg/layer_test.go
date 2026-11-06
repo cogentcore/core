@@ -51,3 +51,19 @@ func TestClipMask(t *testing.T) {
 	assert.Equal(t, uint8(255), alpha(100, 440), "in a link")
 	assert.Equal(t, uint8(0), alpha(250, 440), "in a foreignObject")
 }
+
+// TestUseSymbol tests use elements: of symbols (scaled from their view
+// box to the size of the use), of groups, with transforms, and of
+// elements after them (see testdata/svg/use-symbol.svg).
+func TestUseSymbol(t *testing.T) {
+	img := renderFile(t, "use-symbol.svg")
+	alpha := func(x, y int) uint8 { return img.RGBAAt(x, y).A }
+	assert.Equal(t, uint8(255), alpha(80, 80), "the use of a circle after it")
+	assert.Equal(t, uint8(255), alpha(60, 60), "the circle")
+	assert.Equal(t, uint8(255), alpha(250, 70), "the center of the scaled star")
+	assert.Equal(t, uint8(0), alpha(205, 25), "the corner of the scaled star")
+	assert.Equal(t, uint8(255), alpha(420, 70), "the star centered in a wider use")
+	assert.Equal(t, uint8(0), alpha(330, 70), "the star centered in a wider use: not at its left")
+	assert.Equal(t, uint8(255), alpha(300, 400), "the use of a group")
+	assert.Equal(t, uint8(0), alpha(100, 300), "symbols are not rendered themselves")
+}

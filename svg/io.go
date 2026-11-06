@@ -131,6 +131,8 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	var curTspn *Text
 	var defPrevPar Node // previous parent before a def encountered
 	var groupStack stack.Stack[string]
+	var uses []pendingUse
+	defer func() { sv.resolveUses(uses) }()
 
 	for {
 		var t xml.Token
@@ -679,44 +681,59 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				mrk.RefPos.Set(rx, ry)
 				mrk.Size.Set(szx, szy)
 			case nm == "use":
-				link := gradient.XMLAttr("href", se.Attr)
-				itm := sv.FindNamedElement(link)
-				if itm == nil {
-					fmt.Println("can't find use:", link)
-					break
-				}
-				cln := itm.AsTree().Clone().(Node)
-				if cln == nil {
-					break
-				}
-				curPar.AsTree().AddChild(cln)
-				var xo, yo float64
+				// a group with the transform and properties of the use,
+				// with a copy of the element that it refers to, which is
+				// resolved after the parsing (it can be after the use)
+				ug := NewGroup(curPar)
+				pu := pendingUse{group: ug}
+				var tr string
 				for _, attr := range se.Attr {
-					if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(ug, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
+					case "href":
+						pu.link = strings.TrimPrefix(strings.TrimSpace(attr.Value), "#")
 					case "x":
-						xo, _ = reflectx.ToFloat(attr.Value)
+						pu.x, _ = math32.ParseFloat32(attr.Value)
 					case "y":
-						yo, _ = reflectx.ToFloat(attr.Value)
+						pu.y, _ = math32.ParseFloat32(attr.Value)
+					case "width":
+						pu.width, _ = math32.ParseFloat32(attr.Value)
+					case "height":
+						pu.height, _ = math32.ParseFloat32(attr.Value)
+					case "transform":
+						tr = attr.Value
 					default:
-						cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
+						ug.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
-				if xo != 0 || yo != 0 {
-					xf := math32.Translate2D(float32(xo), float32(yo))
-					if txp, has := cln.AsTree().Properties["transform"]; has {
-						exf := math32.Identity2()
-						exf.SetString(txp.(string))
-						exf = exf.Translate(float32(xo), float32(yo))
-						cln.AsTree().SetProperty("transform", exf.String())
-					} else {
-						cln.AsTree().SetProperty("transform", xf.String())
-					}
+				if pu.x != 0 || pu.y != 0 {
+					tr += fmt.Sprintf(" translate(%g %g)", pu.x, pu.y)
 				}
-				if p, ok := cln.(*Path); ok {
-					p.SetData(p.DataStr) // defs don't apply paths
+				if tr = strings.TrimSpace(tr); tr != "" {
+					ug.SetProperty("transform", tr)
+				}
+				uses = append(uses, pu)
+			case nm == "symbol":
+				curPar = NewSymbol(curPar)
+				sym := curPar.(*Symbol)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(sym, attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "viewBox":
+						pts := math32.ReadPoints(attr.Value)
+						if len(pts) == 4 {
+							sym.ViewBox.Min.Set(pts[0], pts[1])
+							sym.ViewBox.Size.Set(pts[2], pts[3])
+						}
+					case "preserveAspectRatio":
+						sym.ViewBox.PreserveAspectRatio.SetString(attr.Value)
+					default:
+						sym.SetProperty(attr.Name.Local, attr.Value)
+					}
 				}
 			case nm == "Work":
 				fallthrough

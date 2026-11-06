@@ -313,3 +313,14 @@ func (t *Text) SetTextLength(v float32) *Text { t.TextLength = v; return t }
 // SetAdjustGlyphs sets the [Text.AdjustGlyphs]:
 // in attempting to match TextLength, should we adjust glyphs in addition to spacing?
 func (t *Text) SetAdjustGlyphs(v bool) *Text { t.AdjustGlyphs = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Symbol", IDName: "symbol", Doc: "Symbol is an SVG symbol element, which is only rendered by the use\nelements that refer to it, scaled from its ViewBox to their size.", Embeds: []types.Field{{Name: "Group"}}, Fields: []types.Field{{Name: "ViewBox", Doc: "ViewBox is the view box of the symbol, if any."}}})
+
+// NewSymbol returns a new [Symbol] with the given optional parent:
+// Symbol is an SVG symbol element, which is only rendered by the use
+// elements that refer to it, scaled from its ViewBox to their size.
+func NewSymbol(parent ...tree.Node) *Symbol { return tree.New[Symbol](parent...) }
+
+// SetViewBox sets the [Symbol.ViewBox]:
+// ViewBox is the view box of the symbol, if any.
+func (t *Symbol) SetViewBox(v ViewBox) *Symbol { t.ViewBox = v; return t }
