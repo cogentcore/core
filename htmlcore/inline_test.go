@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -20,12 +21,22 @@ func TestSpaceBetweenInlineBlocks(t *testing.T) {
 	b := core.NewBody()
 	ctx := NewContext()
 	assert.NoError(t, ReadHTMLString(ctx, b, "<h1> <span style=\"display: inline-block\">Software</span> <span style=\"display: inline-block\">still</span> </h1>"))
-	var texts []string
+	var items []string
+	var sp *core.WidgetBase
 	b.WalkDown(func(n tree.Node) bool {
 		if tx, ok := n.(*core.Text); ok {
-			texts = append(texts, tx.Text)
+			items = append(items, tx.Text)
+		} else if strings.HasPrefix(n.AsTree().Name, "space") {
+			items = append(items, "space")
+			sp = core.AsWidget(n)
 		}
 		return tree.Continue
 	})
-	assert.Equal(t, []string{"Software", " ", "still"}, texts)
+	assert.Equal(t, []string{"Software", "space", "still"}, items)
+	if sp == nil {
+		return
+	}
+	b.RenderImage(func() {
+		assert.Greater(t, sp.Geom.Size.Actual.Total.X, float32(5), "as wide as a space")
+	})
 }

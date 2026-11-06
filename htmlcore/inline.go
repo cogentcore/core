@@ -14,6 +14,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	xhtml "golang.org/x/net/html"
@@ -113,15 +115,26 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		if pre && last.NextSibling == nil { // a last line break makes no line
 			str = lastBreak.ReplaceAllString(str, "$1")
 		}
-		space := str != "" && strings.TrimSpace(str) == "" && !pre && between && container != parent
-		if space {
-			// white space between inline widgets (as words in inline
-			// blocks, as on github.com) is a space, as in browsers
-			str = "\u00a0"
-		} else if str == "" || (strings.TrimSpace(str) == "" && !pre) {
+		if str != "" && strings.TrimSpace(str) == "" && !pre && between && container != parent {
+			// White space between inline widgets (as the words in inline
+			// blocks of the heading of github.com) is a space, as in
+			// browsers: a box as wide as one in the font, as a text of
+			// only a no-break space has no width (as trailing space).
+			sp := core.NewFrame(container)
+			sp.SetName("space")
+			tree.SetUniqueName(sp)
+			c.handleWidget(nil, sp)
+			sp.FinalStyler(func(s *styles.Style) {
+				s.Min.X = units.Em(0.28)
+				s.Grow.Set(0, 0)
+			})
+			c.blocks[sp].display = "inline"
 			return
 		}
-		if !pre && !space {
+		if str == "" || (strings.TrimSpace(str) == "" && !pre) {
+			return
+		}
+		if !pre {
 			// Spaces at the start and end of the run are not shown, but
 			// those next to inline widgets are, as non-breaking spaces.
 			lead, trail := "", ""
