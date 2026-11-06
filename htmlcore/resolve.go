@@ -362,6 +362,7 @@ func (r *resolver) sizes() {
 		s.BoxSizing = styles.BoxBorderBox
 	}
 	if st.width != nil {
+		intrinsic := s.Min.X
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
@@ -371,6 +372,13 @@ func (r *resolver) sizes() {
 			// wide as its content grow without end.
 			s.Min.X = units.Value{}
 			s.Grow.X = 1
+			if _, isField := wb.This.(*core.TextField); isField && intrinsic.Value > 0 {
+				// A text field (input) is as wide as its intrinsic width
+				// in a parent that is as wide as its content, and can
+				// shrink, as in CSS (as the email field of github.com).
+				s.Min.X = intrinsic
+				s.Shrink.X = 1
+			}
 		}
 		nowrap := s.Text.WhiteSpace == text.WrapNever || s.Text.WhiteSpace == text.WhiteSpacePre
 		if st.display == "table-cell" && st.width.Unit == units.UnitPw && nowrap {
@@ -436,7 +444,11 @@ func (r *resolver) sizes() {
 		s.Grow.Y = 0
 	}
 	if st.minWidth != nil {
-		s.Min.X = *st.minWidth
+		_, isField := r.wb.This.(*core.TextField)
+		if !(isField && st.minWidth.Value == 0 && s.Shrink.X > 0) {
+			// (a text field that can shrink keeps its intrinsic width)
+			s.Min.X = *st.minWidth
+		}
 	}
 	if st.minHeight != nil {
 		s.Min.Y = *st.minHeight
