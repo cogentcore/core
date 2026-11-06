@@ -492,6 +492,9 @@ func (wb *WidgetBase) StartRender() bool {
 	if !wb.IsVisible() {
 		return false
 	}
+	if wb.Styles.Opacity <= 0 { // fully transparent (as for visibility: hidden in CSS): nothing to render
+		return false
+	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
 	if wb.Scene == nil {
 		return false
