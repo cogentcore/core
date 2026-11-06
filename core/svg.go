@@ -152,6 +152,10 @@ func (sv *SVG) Render() {
 		return
 	}
 	needsRender := !sv.IsReadOnly() || sv.NeedsRebuild()
+	if sv.SVG.Color != sv.Styles.Color { // the current color of the SVG (currentColor)
+		sv.SVG.Color = sv.Styles.Color
+		needsRender = true
+	}
 	if !needsRender {
 		if sv.image == nil {
 			needsRender = true

@@ -6,9 +6,12 @@ package svg_test
 
 import (
 	"image"
+	"image/color"
+	"strings"
 	"path/filepath"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	_ "cogentcore.org/core/paint/renderers"
@@ -92,4 +95,27 @@ func TestPattern(t *testing.T) {
 	}
 	assert.Greater(t, n, 40, "navy stripes")
 	assert.Less(t, n, 140, "stripes, not a solid fill")
+}
+
+// TestCurrentColor tests that currentColor is the color property of the
+// element or its ancestors (as octicons: fill="currentColor"), or the
+// Color of the SVG (as the CSS color of the element of a page that it is
+// in), black by default.
+func TestCurrentColor(t *testing.T) {
+	src := `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 10" width="30" height="10" fill="currentColor">` +
+		`<rect width="10" height="10"/><g color="#00ff00"><rect x="10" width="10" height="10"/></g>` +
+		`<rect x="20" width="10" height="10" style="color: #0000ff; fill: currentColor"/></svg>`
+	render := func(clr image.Image) *image.RGBA {
+		sv := NewSVG(math32.Vec2(30, 10))
+		sv.Color = clr
+		require.NoError(t, sv.ReadXML(strings.NewReader(src)))
+		return paint.NewImageRenderer(math32.Vec2(30, 10)).Render(sv.Render(nil).RenderDone()).Image().(*image.RGBA)
+	}
+	img := render(nil)
+	assert.Equal(t, color.RGBA{0, 0, 0, 255}, img.RGBAAt(5, 5), "black by default")
+	assert.Equal(t, color.RGBA{0, 255, 0, 255}, img.RGBAAt(15, 5), "the color of the group")
+	assert.Equal(t, color.RGBA{0, 0, 255, 255}, img.RGBAAt(25, 5), "the color of the style")
+	img = render(colors.Uniform(color.RGBA{255, 0, 0, 255}))
+	assert.Equal(t, color.RGBA{255, 0, 0, 255}, img.RGBAAt(5, 5), "the color of the SVG")
+	assert.Equal(t, color.RGBA{0, 255, 0, 255}, img.RGBAAt(15, 5), "the color of the group")
 }
