@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"cogentcore.org/core/system"
 	"github.com/aymerick/douceur/css"
@@ -19,6 +20,45 @@ import (
 // rules is parsed on its own, so that only the rules that do not parse are
 // left out.
 func parseCSS(style string) *css.Stylesheet {
+	// The style sheets of a page are parsed again each time that it is read
+	// (as for each change that its scripts make), so they are cached (as
+	// they are not changed after they are parsed).
+	parsedCSSMu.Lock()
+	ss, ok := parsedCSS[style]
+	parsedCSSMu.Unlock()
+	if ok {
+		return ss
+	}
+	ss = parseCSSText(style)
+	if len(style) >= minCachedCSS {
+		parsedCSSMu.Lock()
+		if parsedCSSSize+len(style) > maxParsedCSS {
+			parsedCSS, parsedCSSSize = map[string]*css.Stylesheet{}, 0
+		}
+		parsedCSS[style] = ss
+		parsedCSSSize += len(style)
+		parsedCSSMu.Unlock()
+	}
+	return ss
+}
+
+// parsedCSS has the style sheets that have been parsed, by their text,
+// up to maxParsedCSS bytes of text (after which it is cleared). Only style
+// sheets of at least minCachedCSS bytes are cached (as small ones, as of
+// style attributes, are parsed quickly).
+var (
+	parsedCSSMu   sync.Mutex
+	parsedCSS     = map[string]*css.Stylesheet{}
+	parsedCSSSize int
+)
+
+const (
+	maxParsedCSS = 16 << 20
+	minCachedCSS = 1024
+)
+
+// parseCSSText parses the given style sheet (see [parseCSS]).
+func parseCSSText(style string) *css.Stylesheet {
 	style = removeStrayCSS(style)
 	if ss, err := parser.Parse(style); err == nil {
 		return ss

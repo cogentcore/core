@@ -884,3 +884,25 @@ func TestZoom(t *testing.T) {
 	assert.InDelta(t, 2*box1, box2, 2, "lengths")
 	assert.InDelta(t, 2*font1, font2, 0.5, "font sizes")
 }
+
+// TestSelectorIndex tests that selecting the nodes of selectors with the
+// index of the nodes by id, class, and element name selects the same nodes
+// as matching them against all of the nodes.
+func TestSelectorIndex(t *testing.T) {
+	doc, err := html.Parse(strings.NewReader(`<html><body><div id="main" class="a b"><p class="a">x <span class="c a">y</span></p>
+<ul class="list"><li class="item first">1</li><li class="item">2</li></ul><svg><linearGradient id="g"></linearGradient><rect class="r"/></svg>
+<p id="p2" class="b">z</p><a href="#" class="a-b_c">link</a></div></body></html>`))
+	assert.NoError(t, err)
+	sels := []string{"p", "P", ".a", "#main", "div.a.b", "#main > .a", ".a span.c", "p.a:not(.b)", ".list .item:first-child",
+		"li.item + li", "ul > li.first ~ li", "div :is(.a, .b)", ".a-b_c", "a[href='#'].a-b_c", "span:not(.a)", "#p2.b",
+		"svg rect.r", "linearGradient", "lineargradient", "#g", "*", ".missing", "#missing", "p .a", "[class~=a]",
+		"div p:not([id])", ".b > p", ".item.first", ".a\\:b", "html|p"}
+	c := NewContext()
+	for _, sel := range sels {
+		assert.ElementsMatch(t, selectNodes(doc, sel), c.selectNodes(doc, sel), sel)
+	}
+	kind, key := selectorKey("div > .x :is(.y) #z.w")
+	assert.Equal(t, "#z", string(kind)+key)
+	kind, key = selectorKey("ul li:not(.a)")
+	assert.Equal(t, "tli", string(kind)+key)
+}

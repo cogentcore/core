@@ -168,6 +168,10 @@ type Context struct {
 // [Context.NewPage] starts anew: the style sheets and declarations of
 // their elements, and the state of their widgets for styling them.
 type pageState struct {
+	// selIndex is the index of the nodes of the document for selecting
+	// the nodes of style rules (see [Context.selectNodes]).
+	selIndex *selectorIndex
+
 	// styles are the CSS declarations for each node, which are
 	// sorted in the order of the cascade by [Context.declarations].
 	styles map[*html.Node][]*cssDecl
