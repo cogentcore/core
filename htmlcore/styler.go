@@ -138,6 +138,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			ps = &pw.AsWidget().Styles
 			pbs = c.blocks[pw]
 		}
+		if c.Zoom > 0 {
+			s.Zoom = c.Zoom // (inherited, but set on each for widgets outside of the page)
+		}
 		fsz := core.AppearanceSettings.FontSize / 100
 		if plain {
 			// Only the inherited and CSS styles apply,

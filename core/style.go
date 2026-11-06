@@ -176,6 +176,9 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	} else {
 		st.UnitContext.DPI = 160
 	}
+	if st.Zoom > 0 {
+		st.UnitContext.DPI *= st.Zoom
+	}
 	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
 	st.Font.ToDots(&st.UnitContext) // key to set first
 	st.Font.SetUnitContext(&st.UnitContext)

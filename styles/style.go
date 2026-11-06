@@ -185,6 +185,12 @@ type Style struct { //types:add
 	// of this element and all of its children.
 	Opacity float32
 
+	// Zoom, if positive, is a factor that all of the absolute sizes of the
+	// widget (as dp, px, and pt, and its font sizes) are multiplied by,
+	// as the DPI of its [units.Context] is. It is inherited, as for zooming
+	// the content of a frame (as a page in a web browser). Zero is 1.
+	Zoom float32
+
 	// StateLayer, if above zero, indicates to create a state layer over
 	// the element with this much opacity (on a scale of 0-1) and the
 	// color Color (or StateColor if it defined). It is automatically
@@ -411,6 +417,7 @@ func (s *Style) InheritFields(parent *Style) {
 	s.Color = parent.Color
 	s.Opacity = parent.Opacity
 	s.ScrollbarWidth = parent.ScrollbarWidth
+	s.Zoom = parent.Zoom
 	s.IconSize = parent.IconSize
 	s.Font.InheritFields(&parent.Font)
 	s.Text.InheritFields(&parent.Text)

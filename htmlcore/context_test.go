@@ -856,3 +856,31 @@ func TestSVGVars(t *testing.T) {
 	assert.NotContains(t, s, "stroke", "attributes with invalid var() functions are removed")
 	assert.NoError(t, core.NewSVG(b).ReadString(s))
 }
+
+// TestZoom tests that the sizes of a page are multiplied by the zoom of
+// the context, as in browsers: lengths, font sizes, and images.
+func TestZoom(t *testing.T) {
+	sizes := func(zoom float32) (box, font float32) {
+		b := core.NewBody()
+		b.Styler(func(s *styles.Style) { s.Min.X.Dp(800) })
+		ctx := NewContext()
+		ctx.Zoom = zoom
+		assert.NoError(t, ReadHTMLString(ctx, b, `<div class="box" style="width: 100px; height: 40px; padding: 10px; font-size: 20px">text</div>`))
+		var w *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == "box" {
+				w = wb
+			}
+			return tree.Continue
+		})
+		b.RenderImage(func() {
+			box = w.Geom.Size.Actual.Total.X
+			font = w.Styles.Font.Size.Dots
+		})
+		return
+	}
+	box1, font1 := sizes(0)
+	box2, font2 := sizes(2)
+	assert.InDelta(t, 2*box1, box2, 2, "lengths")
+	assert.InDelta(t, 2*font1, font2, 0.5, "font sizes")
+}

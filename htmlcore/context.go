@@ -56,6 +56,12 @@ type Context struct {
 	// height of the scene.
 	MediaHeight float32
 
+	// Zoom, if positive, is the zoom factor of the page, as in browsers:
+	// all of its sizes are multiplied by it (see
+	// [styles.Style.Zoom]). MediaWidth and MediaHeight are then the size of
+	// the viewport divided by it, as its CSS px are larger (or smaller).
+	Zoom float32
+
 	// Scripting is whether the scripts of the pages are run (by the app
 	// that reads them, as htmlcore does not run them): the HTML is then
 	// parsed with scripting enabled (see [ParseHTML]), and noscript
@@ -432,7 +438,7 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 // one for each page with this, so that nothing of one page affects the next.
 func (c *Context) NewPage() *Context {
 	n := NewContext()
-	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
+	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
 	n.Scripting = c.Scripting
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
