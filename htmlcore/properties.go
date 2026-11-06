@@ -24,14 +24,26 @@ type styleOp func(st *cssState, s, ps *styles.Style)
 
 // compileDecls compiles the given declarations, in the order of the cascade,
 // without those that are invalid (see [Context.compileCSS]).
+// The font properties are first, as in CSS the font size of an element
+// is computed before the lengths that are relative to it (as the ch unit,
+// and em in calc()).
 func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 	var ops []styleOp
-	for _, d := range decls {
-		if !d.invalid {
-			ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+	for _, font := range []bool{true, false} {
+		for _, d := range decls {
+			if !d.invalid && fontProperties[d.Property] == font {
+				ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+			}
 		}
 	}
 	return ops
+}
+
+// fontProperties are the properties of fonts, which are compiled first
+// (with line-height, which the font shorthand sets).
+var fontProperties = map[string]bool{
+	"font": true, "font-family": true, "font-size": true, "font-weight": true,
+	"font-style": true, "line-height": true,
 }
 
 // compileCSS compiles the declaration of the given CSS property with the

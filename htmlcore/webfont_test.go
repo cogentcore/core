@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/fonts/robotomono"
 	"cogentcore.org/core/text/rich"
@@ -72,4 +73,28 @@ func TestWebFonts(t *testing.T) {
 	assert.Equal(t, rich.Custom, families["short"], "the font shorthand")
 	assert.Equal(t, rich.Serif, families["plain"])
 	assert.Greater(t, widths["web"], widths["plain"]*3/2, "monospace i are wider")
+}
+
+// TestChUnit tests that the ch unit is the advance of the 0 glyph of the
+// font of the element, as in CSS (about 0.57em in Noto Sans, and 0.6em in
+// monospace fonts), not a fraction of the em of all fonts.
+func TestChUnit(t *testing.T) {
+	goscript.Skip(t, "the js shaper uses the fonts of the browser")
+	b := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<div class="sans" style="width: 10ch; font-size: 20px; height: 5px"></div>`+
+		`<div class="mono" style="width: 10ch; font-size: 20px; font-family: monospace; height: 5px"></div>`))
+	widths := map[string]float32{}
+	b.RenderImage(func() {
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil {
+				if cl, ok := wb.Property("class").(string); ok {
+					widths[cl] = wb.Geom.Size.Actual.Content.X / wb.Styles.UnitContext.Dots(units.UnitDp)
+				}
+			}
+			return tree.Continue
+		})
+	})
+	assert.InDelta(t, 114, widths["sans"], 6, "10ch of 20px Noto Sans")
+	assert.InDelta(t, 120, widths["mono"], 3, "10ch of a 20px monospace font")
 }
