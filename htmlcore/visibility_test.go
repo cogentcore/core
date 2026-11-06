@@ -68,3 +68,27 @@ func TestTranslate(t *testing.T) {
 	assert.InDelta(t, pos["c"][0]+20, pos["b"][0], 0.5)
 	assert.InDelta(t, pos["c"][1]-40+5, pos["b"][1], 0.5)
 }
+
+// TestGridAutoFlowColumn tests that the items of a grid with
+// grid-auto-flow: column (and no row tracks) are in one row (as the
+// activity marquee of github.com).
+func TestGridAutoFlowColumn(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<ul style="display: grid; grid-auto-flow: column; list-style: none; width: max-content">`+
+		`<li class="a">one</li><li class="b">two</li><li class="c">three</li></ul>`))
+	pos := map[string][2]float32{}
+	b.RenderImage(func() {
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil {
+				if cl, ok := wb.Property("class").(string); ok {
+					pos[cl] = [2]float32{wb.Geom.Pos.Total.X, wb.Geom.Pos.Total.Y}
+				}
+			}
+			return tree.Continue
+		})
+	})
+	assert.Equal(t, pos["a"][1], pos["c"][1], "in one row")
+	assert.Less(t, pos["a"][0], pos["b"][0])
+	assert.Less(t, pos["b"][0], pos["c"][0])
+}

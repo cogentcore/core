@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/text/text"
 	"golang.org/x/net/html"
 )
@@ -101,6 +102,19 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 	case "grid", "inline-grid":
 		s.Display = styles.Grid
+		if node != nil && s.Columns <= 1 && strings.Contains(r.c.declaration(node, "grid-auto-flow"), "column") &&
+			r.c.declaration(node, "grid-template-rows") == "" {
+			// the items are in a row of columns (one row without row
+			// tracks, as for a marquee)
+			n := 0
+			r.wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+				if p := cwb.Styles.Position; p != styles.PositionAbsolute && p != styles.PositionFixed {
+					n++
+				}
+				return tree.Continue
+			})
+			s.Columns = max(n, 1)
+		}
 		if s.Columns == 0 { // one column without column tracks, as in CSS
 			s.Columns = 1
 		}
