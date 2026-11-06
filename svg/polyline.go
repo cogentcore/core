@@ -54,7 +54,7 @@ func (g *Polyline) Render(sv *SVG) {
 		pt := g.Points[0]
 		ptn := g.Points[1]
 		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
-		mrk.RenderMarker(sv, pt, ang, g.Paint.Stroke.Width.Dots)
+		mrk.RenderMarkerStart(sv, pt, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]

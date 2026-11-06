@@ -5,6 +5,9 @@
 package svg
 
 import (
+	"strings"
+	"unicode"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/htmltext"
@@ -54,6 +57,112 @@ type Text struct {
 
 	// in attempting to match TextLength, should we adjust glyphs in addition to spacing?
 	AdjustGlyphs bool
+
+	// hasX and hasY are whether the x and y of the text are specified,
+	// which for a span (tspan) is an absolute position (absPos), which
+	// otherwise follows the span before it.
+	hasX, hasY bool
+
+	// absPos is the absolute position of a span, for hasX and hasY.
+	absPos math32.Vector2
+
+	// laidOut is whether the span is laid out by its parent text
+	// (which aligns its spans by its text-anchor).
+	laidOut bool
+}
+
+// collapseSpace returns the given text with its runs of white space
+// collapsed to a single space, as SVG text is by default.
+func collapseSpace(s string) string {
+	var sb strings.Builder
+	space := false
+	for _, r := range s {
+		if unicode.IsSpace(r) {
+			space = true
+			continue
+		}
+		if space {
+			sb.WriteByte(' ')
+			space = false
+		}
+		sb.WriteRune(r)
+	}
+	if space {
+		sb.WriteByte(' ')
+	}
+	return sb.String()
+}
+
+// trimSpans trims the space at the start and end of the text (of the
+// first and last of its spans, if it has them), as SVG text does.
+func (g *Text) trimSpans() {
+	if g.NumChildren() == 0 {
+		g.Text = strings.TrimSpace(g.Text)
+		return
+	}
+	if first, ok := g.Child(0).(*Text); ok {
+		first.Text = strings.TrimLeft(first.Text, " ")
+	}
+	if last, ok := g.Child(g.NumChildren() - 1).(*Text); ok {
+		last.Text = strings.TrimRight(last.Text, " ")
+	}
+}
+
+// layoutSpans positions the spans of a parent text: each after the one
+// before it (from the position of the text), unless it has an absolute
+// position, with its dx and dy offsets, and the spans of each chunk (from
+// an absolute position) aligned as a whole by the text-anchor of the span
+// that starts it.
+func (g *Text) layoutSpans(sv *SVG) {
+	pen := g.Pos
+	var chunk []*Text
+	chunkStart := pen.X
+	flush := func() {
+		if len(chunk) == 0 {
+			return
+		}
+		w := pen.X - chunkStart
+		shift := float32(0)
+		switch chunk[0].Paint.Text.Align { // that of the span that starts the chunk
+
+		case text.Center:
+			shift = -w / 2
+		case text.End:
+			shift = -w
+		}
+		for _, kt := range chunk {
+			kt.Pos.X += shift
+		}
+		chunk = chunk[:0]
+	}
+	for _, k := range g.Children {
+		kt, ok := k.(*Text)
+		if !ok {
+			continue
+		}
+		if kt.hasX {
+			flush()
+			pen.X = kt.absPos.X
+			chunkStart = pen.X
+		}
+		if kt.hasY {
+			pen.Y = kt.absPos.Y
+		}
+		if len(kt.CharPosDX) > 0 {
+			pen.X += kt.CharPosDX[0]
+		}
+		if len(kt.CharPosDY) > 0 {
+			pen.Y += kt.CharPosDY[0]
+		}
+		kt.Pos = pen
+		kt.laidOut = true
+		kt.LocalBBox(sv)
+		if kt.TextShaped != nil {
+			pen.X += kt.TextShaped.Bounds.Size().X
+		}
+		chunk = append(chunk, kt)
+	}
+	flush()
 }
 
 func (g *Text) SVGName() string {
@@ -86,7 +195,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	pc := &g.Paint
 	fs := pc.Font
 	if pc.Fill.Color != nil {
-		fs.SetFillColor(colors.ToUniform(pc.Fill.Color))
+		fs.SetFillColor(colors.ApplyOpacity(colors.ToUniform(pc.Fill.Color), pc.Fill.Opacity))
 	}
 	tx, _ := htmltext.HTMLToRich([]byte(g.Text), &fs, nil)
 	// fmt.Println(tx)
@@ -145,6 +254,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 
 func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	if g.IsParText() {
+		g.layoutSpans(sv)
 		g.BBoxesFromChildren(sv, parTransform)
 		return
 	}
@@ -180,7 +290,8 @@ func (g *Text) RenderText(sv *SVG) {
 	pc := g.Painter(sv)
 	pos := g.Pos
 	bsz := g.TextShaped.Bounds.Size()
-	if pc.Text.Align == text.Center {
+	if g.laidOut { // aligned by the parent text
+	} else if pc.Text.Align == text.Center {
 		pos.X -= bsz.X * .5
 	} else if pc.Text.Align == text.End {
 		pos.X -= bsz.X

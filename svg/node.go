@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -115,6 +116,9 @@ type NodeBase struct {
 	// color property or that of its parent.
 	color color.RGBA
 
+	// anchor is the text-anchor of the node (set on it or inherited).
+	anchor string
+
 	// fillCurrent and strokeCurrent are whether the fill and stroke of
 	// the node are currentColor (set on it or inherited), which is that
 	// of the node, not of the node that it is inherited from.
@@ -149,10 +153,13 @@ func (g *NodeBase) setColor(sv *SVG) {
 			g.color = colors.AsRGBA(c)
 		}
 	}
-	g.fillCurrent, g.strokeCurrent = false, false
+	g.fillCurrent, g.strokeCurrent, g.anchor = false, false, ""
 	if pn, ok := g.Parent.(Node); ok {
 		pb := pn.AsNodeBase()
-		g.fillCurrent, g.strokeCurrent = pb.fillCurrent, pb.strokeCurrent
+		g.fillCurrent, g.strokeCurrent, g.anchor = pb.fillCurrent, pb.strokeCurrent, pb.anchor
+	}
+	if v, ok := g.ownProperty("text-anchor"); ok {
+		g.anchor = v
 	}
 	if v, ok := g.ownProperty("fill"); ok {
 		g.fillCurrent = strings.EqualFold(v, "currentcolor")
@@ -334,6 +341,14 @@ func (g *NodeBase) Style(sv *SVG) {
 	g.clipRef, g.maskRef = "", ""
 	g.setLayerRefs(g.Properties)
 	g.StyleCSS(sv, g.CSSAgg)
+	switch g.anchor { // text-anchor, as the text alignment
+	case "middle":
+		pc.Text.Align = text.Center
+	case "end":
+		pc.Text.Align = text.End
+	case "start":
+		pc.Text.Align = text.Start
+	}
 	if g.fillCurrent && pc.Fill.Color != nil { // the current color of this node
 		pc.Fill.Color = colors.Uniform(g.color)
 	}

@@ -119,3 +119,45 @@ func TestCurrentColor(t *testing.T) {
 	assert.Equal(t, color.RGBA{255, 0, 0, 255}, img.RGBAAt(5, 5), "the color of the SVG")
 	assert.Equal(t, color.RGBA{0, 255, 0, 255}, img.RGBAAt(15, 5), "the color of the group")
 }
+
+// TestFeatures tests features of SVG compared with browsers (see
+// testdata/svg/features.svg): nested svg elements (with their view box,
+// clipped to their viewport), percentage lengths, text spans laid out
+// after each other, text-anchor, the opacity of text, space-separated
+// dashes, and markers with orient auto-start-reverse.
+func TestFeatures(t *testing.T) {
+	img := renderFile(t, "features.svg")
+	at := func(x, y int) color.RGBA { return img.RGBAAt(x, y) }
+	assert.Equal(t, color.RGBA{128, 0, 128, 255}, at(80, 80), "the center of the nested svg circle")
+	assert.Equal(t, uint8(0), at(150, 80).A, "outside of the nested svg")
+	red := 0
+	for x := 70; x < 140; x++ {
+		for y := 245; y < 275; y++ {
+			if c := at(x, y); c.R > 200 && c.G < 60 && c.B < 60 {
+				red++
+			}
+		}
+	}
+	assert.Greater(t, red, 20, "the red span after the text")
+	left := 640
+	for x := 0; x < 160; x++ {
+		for y := 235; y < 275; y++ {
+			if at(x, y).A > 128 && x < left {
+				left = x
+			}
+		}
+	}
+	assert.Less(t, left, 60, "the text is centered on its x (80)")
+	maxA := uint8(0)
+	for x := 500; x < 560; x++ {
+		for y := 180; y < 205; y++ {
+			maxA = max(maxA, at(x, y).A)
+		}
+	}
+	assert.Greater(t, maxA, uint8(64), "the text before its end (560)")
+	assert.Less(t, maxA, uint8(160), "the text with an opacity of 0.5")
+	assert.Equal(t, uint8(0), at(45, 300).A, "a gap of the dashes")
+	assert.Equal(t, uint8(255), at(30, 300).A, "a dash")
+	c := at(334, 320)
+	assert.True(t, c.R > 150 && c.G < 80, "the start marker points back, its tip at the left: %v", c)
+}

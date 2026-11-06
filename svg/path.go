@@ -81,7 +81,7 @@ func (g *Path) Render(sv *SVG) {
 		if mrk_start != nil && np > 1 {
 			dir0 := pos[1].Sub(pos[0])
 			ang := ppath.Angle(dir0) // dir[0]: has average but last 2 works better
-			mrk_start.RenderMarker(sv, pos[0], ang, g.Paint.Stroke.Width.Dots)
+			mrk_start.RenderMarkerStart(sv, pos[0], ang, g.Paint.Stroke.Width.Dots)
 		}
 		if mrk_end != nil && np > 1 {
 			dirn := pos[np-1].Sub(pos[np-2])
