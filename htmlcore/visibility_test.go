@@ -37,8 +37,14 @@ func TestHiddenOverContent(t *testing.T) {
 // github.com that are centered vertically), which do not change the layout.
 func TestTranslate(t *testing.T) {
 	assert.Equal(t, [2]string{"10px", "0"}, func() [2]string { x, y, _ := cssTranslate("transform", "translatex(10px)"); return [2]string{x, y} }())
-	assert.Equal(t, [2]string{"0", "-50%"}, func() [2]string { x, y, _ := cssTranslate("transform", "translatey(-50%) rotate(45deg)"); return [2]string{x, y} }())
-	assert.Equal(t, [2]string{"1px", "2px"}, func() [2]string { x, y, _ := cssTranslate("transform", "translate3d(1px, 2px, 0)"); return [2]string{x, y} }())
+	assert.Equal(t, [2]string{"0", "-50%"}, func() [2]string {
+		x, y, _ := cssTranslate("transform", "translatey(-50%) rotate(45deg)")
+		return [2]string{x, y}
+	}())
+	assert.Equal(t, [2]string{"1px", "2px"}, func() [2]string {
+		x, y, _ := cssTranslate("transform", "translate3d(1px, 2px, 0)")
+		return [2]string{x, y}
+	}())
 	b := core.NewBody()
 	ctx := NewContext()
 	assert.NoError(t, ReadHTMLString(ctx, b, `<div class="a" style="width: 100px; height: 40px; transform: translateY(-50%) translateX(10px)">a</div>`+
