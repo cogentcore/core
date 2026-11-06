@@ -736,6 +736,13 @@ func (tf *TextField) cursorStart() {
 	tf.NeedsRender()
 }
 
+// SetCursorEnd moves the cursor to the end of the text, as for a text
+// field that replaces another in which the user was typing.
+func (tf *TextField) SetCursorEnd() *TextField {
+	tf.cursorEnd()
+	return tf
+}
+
 // cursorEnd moves the cursor to the end of the text, updating selection
 // if select mode is active.
 func (tf *TextField) cursorEnd() {
