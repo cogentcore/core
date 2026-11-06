@@ -159,6 +159,17 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		})
 	case "background", "background-color":
 		bg := backgroundColor(val)
+		if bg == "" && prop == "background" && !strings.Contains(lval, "url(") && !strings.Contains(lval, "gradient(") {
+			// The shorthand without a color (as "0 0" or "none", as
+			// github.com resets its buttons with) sets the color to
+			// transparent; with an image or gradient, which are not
+			// supported, the color before it (a fallback) is kept.
+			switch lval {
+			case "inherit", "unset", "revert", "revert-layer":
+			default:
+				bg = "transparent"
+			}
+		}
 		if bg == "" {
 			return nil
 		}
