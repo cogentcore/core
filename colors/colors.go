@@ -264,6 +264,13 @@ func FromHex(hex string) (color.RGBA, error) {
 		r |= r << 4
 		g |= g << 4
 		b |= b << 4
+	} else if len(hex) == 4 { // #RGBA, as in CSS
+		format := "%1x%1x%1x%1x"
+		fmt.Sscanf(hex, format, &r, &g, &b, &a)
+		r |= r << 4
+		g |= g << 4
+		b |= b << 4
+		a |= a << 4
 	} else if len(hex) == 6 {
 		format := "%02x%02x%02x"
 		fmt.Sscanf(hex, format, &r, &g, &b)

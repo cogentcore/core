@@ -139,6 +139,14 @@ func ExampleFromHex_shortLower() {
 	// Output: {187 187 102 255} <nil>
 }
 
+func ExampleFromHex_shortOpacity() {
+	fmt.Println(FromHex("#F3A8"))
+	fmt.Println(FromHex("#0000"))
+	// Output:
+	// {136 27 91 136} <nil>
+	// {0 0 0 0} <nil>
+}
+
 func ExampleFromHex_error() {
 	fmt.Println(FromHex("#ef"))
 	// Output: {0 0 0 0} colors.FromHex: could not process "ef"
