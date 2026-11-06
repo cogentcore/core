@@ -458,16 +458,88 @@ func (c *Context) NewPage() *Context {
 }
 
 // UserAgent is the User-Agent header of the requests of the default
-// [Context.GetURL], which sites that reject the default of the Go HTTP
-// client (as Wikipedia does) accept.
-var UserAgent = "Mozilla/5.0 (compatible; CogentCore; +https://cogentcore.org)"
+// [Context.GetURL] (see [SetRequestHeaders]). It has the form of the user
+// agents of browsers, for the platform that the app runs on, naming
+// Cogent Core: sites treat the "compatible; ...; +url" form of crawlers
+// (and the default of the Go HTTP client) as bots. Scripts should report
+// the same value (navigator.userAgent), since sites check that they match.
+var UserAgent = "Mozilla/5.0 (" + userAgentPlatform() + ") AppleWebKit/537.36 (KHTML, like Gecko) CogentCore/1.0 Safari/537.36"
+
+// userAgentPlatform returns the platform part of the [UserAgent], as
+// browsers report it for the platform that the app runs on.
+func userAgentPlatform() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "Windows NT 10.0; Win64; x64"
+	case "linux":
+		return "X11; Linux x86_64"
+	case "android":
+		return "Linux; Android 10; K"
+	case "ios":
+		return "iPhone; CPU iPhone OS 17_0 like Mac OS X"
+	default:
+		return "Macintosh; Intel Mac OS X 10_15_7"
+	}
+}
+
+// AcceptLanguage is the Accept-Language header of the requests of the
+// default [Context.GetURL] (see [SetRequestHeaders]), from the locale of
+// the system (the LC_ALL, LC_MESSAGES, or LANG environment variable) or
+// US English. Some sites send reduced pages to requests without it.
+var AcceptLanguage = acceptLanguage(firstEnv("LC_ALL", "LC_MESSAGES", "LANG"))
+
+// firstEnv returns the value of the first of the given environment
+// variables that is set.
+func firstEnv(names ...string) string {
+	for _, n := range names {
+		if v := os.Getenv(n); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// acceptLanguage returns the Accept-Language header for the given POSIX
+// locale (as "fr_CA.UTF-8"): "fr-CA,fr;q=0.9,en;q=0.8". It is US English
+// for the C and POSIX locales and for an empty one.
+func acceptLanguage(locale string) string {
+	loc, _, _ := strings.Cut(locale, ".")
+	loc, _, _ = strings.Cut(loc, "@")
+	if loc == "" || loc == "C" || loc == "POSIX" {
+		return "en-US,en;q=0.9"
+	}
+	tag := strings.ReplaceAll(loc, "_", "-")
+	lang, _, _ := strings.Cut(tag, "-")
+	h := tag
+	if lang != tag {
+		h += "," + lang + ";q=0.9"
+	}
+	if lang != "en" {
+		h += ",en;q=0.8"
+	}
+	return h
+}
+
+// acceptHeader is the Accept header of requests, as browsers send it for
+// pages (and accepted for their resources).
+const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+
+// SetRequestHeaders sets the headers of the given request that browsers
+// send: the [UserAgent], [AcceptLanguage], and Accept. (Accept-Encoding is
+// set by the Go HTTP client, which decompresses the gzip responses.)
+func SetRequestHeaders(req *http.Request) {
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("Accept", acceptHeader)
+	req.Header.Set("Accept-Language", AcceptLanguage)
+}
 
 // httpClient is the client of the default [Context.GetURL], with a timeout
 // so that a server that does not respond does not stop the reading of a
 // page (as a style sheet or image of the page).
 var httpClient = &http.Client{Timeout: 15 * time.Second}
 
-// getURL gets the given URL with an HTTP GET request, with the [UserAgent].
+// getURL gets the given URL with an HTTP GET request, with the headers of
+// [SetRequestHeaders].
 func getURL(url string) (*http.Response, error) {
 	if strings.HasPrefix(url, "file:") {
 		return getFileURL(url)
@@ -476,7 +548,7 @@ func getURL(url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", UserAgent)
+	SetRequestHeaders(req)
 	return httpClient.Do(req)
 }
 
