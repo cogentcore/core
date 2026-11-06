@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/html"
 )
 
 // TestBackgroundShorthand tests that the background shorthand without a
@@ -41,4 +42,30 @@ func TestBackgroundShorthand(t *testing.T) {
 	assert.Contains(t, []string{"none", "#00000000"}, bg["reset"], "transparent")
 	assert.Equal(t, "#EFEFEF", bg["plain"], "the default of buttons")
 	assert.Equal(t, "#336699", bg["grad"], "the fallback color")
+}
+
+// TestComputedValue tests the values of properties as cascaded for the
+// computed styles of scripts: of the rule that applies, inherited for
+// inherited properties, and not for others.
+func TestComputedValue(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<style>:root{--c:green} .a{text-align:center;color:var(--c);width:10px} .a .b{color:inherit;width:inherit} .c{text-align:initial}</style>`+
+		`<div class="a"><h1 class="b">x</h1><p class="c" style="color: red !important">y</p></div>`))
+	var doc *html.Node
+	b.WalkDown(func(n tree.Node) bool {
+		if nd, ok := core.AsWidget(n).Property("node").(*html.Node); ok && doc == nil {
+			for doc = nd; doc.Parent != nil; doc = doc.Parent {
+			}
+		}
+		return tree.Continue
+	})
+	h1 := selectNodes(doc, "h1")[0]
+	p := selectNodes(doc, "p")[0]
+	assert.Equal(t, "center", ctx.ComputedValue(h1, "text-align"), "inherited")
+	assert.Equal(t, "green", ctx.ComputedValue(h1, "color"), "inherit, with var()")
+	assert.Equal(t, "10px", ctx.ComputedValue(h1, "width"), "width: inherit")
+	assert.Equal(t, "", ctx.ComputedValue(p, "width"), "not inherited")
+	assert.Equal(t, "", ctx.ComputedValue(p, "text-align"), "initial")
+	assert.Equal(t, "red", ctx.ComputedValue(p, "color"), "the inline style")
 }

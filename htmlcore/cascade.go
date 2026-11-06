@@ -181,6 +181,41 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 	return ""
 }
 
+// ComputedValue returns the value of the given CSS property for the given
+// element, as cascaded by the style sheets of the page that it was read
+// with (with var() resolved): that of the declaration of the element that
+// applies, or, for an inherited property (or one that is inherit), that
+// of its nearest ancestor with one, or "" if there is none (as for the
+// initial value). It is for the computed styles of scripts, which can
+// convert its values (as colors and relative lengths) as they need.
+func (c *Context) ComputedValue(n *html.Node, prop string) string {
+	prop = strings.ToLower(strings.TrimSpace(prop))
+	for ; n != nil; n = n.Parent {
+		if n.Type != html.ElementNode {
+			continue
+		}
+		v := strings.TrimSpace(c.declaration(n, prop))
+		switch strings.ToLower(v) {
+		case "inherit":
+			continue
+		case "initial", "revert", "revert-layer":
+			return ""
+		case "unset":
+			if !inheritedProperties[prop] {
+				return ""
+			}
+			continue
+		case "":
+			if !inheritedProperties[prop] {
+				return ""
+			}
+			continue
+		}
+		return v
+	}
+	return ""
+}
+
 // addInline adds the declarations of the given style attribute.
 func (c *Context) addInline(n *html.Node, style string) {
 	// our CSS parser is strict about semicolons, but
