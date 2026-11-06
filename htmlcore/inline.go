@@ -329,7 +329,13 @@ func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 				continue
 			}
 		case "font-family":
-			val = fontFamily(val).String()
+			if c.WebFonts && webFontFamily(val) != "" {
+				// the custom font of the text (as the web font of the
+				// element of the text, which runs cannot have their own)
+				val = rich.Custom.String()
+			} else {
+				val = fontFamily(val).String()
+			}
 		case "color", "background-color":
 			if cl, ok := cssColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
 				val = colors.AsHex(cl)

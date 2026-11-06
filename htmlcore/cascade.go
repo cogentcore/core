@@ -86,6 +86,10 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				}
 			case "@supports", "@layer", "@container", "@scope":
 				c.addRuleList(root, rule.Rules, origin)
+			case "@font-face":
+				if c.WebFonts {
+					c.addFontFace(rule.Declarations)
+				}
 			case "@import":
 				// url("x") or "x", and a media query list
 				url, media := importURL(rule.Prelude)

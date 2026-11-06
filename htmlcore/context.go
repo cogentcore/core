@@ -62,6 +62,12 @@ type Context struct {
 	// the viewport divided by it, as its CSS px are larger (or smaller).
 	Zoom float32
 
+	// WebFonts is whether the web fonts of the @font-face rules of the
+	// style sheets of pages are loaded (once for each URL, for all pages),
+	// and used for the font families that they are for (see
+	// [fonts.AddWebFont]). Fonts in the WOFF2 format need a [FontDecoder].
+	WebFonts bool
+
 	// Scripting is whether the scripts of the pages are run (by the app
 	// that reads them, as htmlcore does not run them): the HTML is then
 	// parsed with scripting enabled (see [ParseHTML]), and noscript
@@ -443,7 +449,7 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
-	n.Scripting = c.Scripting
+	n.Scripting, n.WebFonts = c.Scripting, c.WebFonts
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers

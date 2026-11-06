@@ -279,9 +279,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Slant = slant })
 	case "font-family":
 		family := fontFamily(val)
-		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Family = family })
+		return op(func(st *cssState, s, ps *styles.Style) { c.setFontFamily(s, val, family) })
 	case "font":
-		return op(func(st *cssState, s, ps *styles.Style) { setFont(st, s, ps, val) })
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if family := setFont(st, s, ps, val); family != "" {
+				c.setFontFamily(s, family, s.Font.Family)
+			}
+		})
 	case "line-height":
 		return op(func(st *cssState, s, ps *styles.Style) { st.lineHeight = lval })
 	case "text-align":
