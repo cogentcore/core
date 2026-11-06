@@ -216,3 +216,15 @@ func ExampleSub() {
 	fmt.Println(Sub(Purple, Blue))
 	// Output: {128 0 0 0}
 }
+
+func ExampleFromString_cssAlpha() {
+	fmt.Println(FromString("rgba(255, 0, 0, 0.5)"))
+	fmt.Println(FromString("rgb(255 0 0 / 50%)"))
+	fmt.Println(FromString("rgb(100% 0% 0%)"))
+	fmt.Println(FromString("hsl(120deg 100% 25% / 0.5)"))
+	// Output:
+	// {128 0 0 128} <nil>
+	// {128 0 0 128} <nil>
+	// {255 0 0 255} <nil>
+	// {0 64 0 128} <nil>
+}

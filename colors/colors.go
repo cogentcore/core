@@ -125,33 +125,20 @@ func FromString(str string, base ...color.Color) (color.RGBA, error) {
 	case lstr[0] == '#':
 		return FromHex(str)
 	case strings.HasPrefix(lstr, "rgb("), strings.HasPrefix(lstr, "rgba("):
-		val := lstr[strings.Index(lstr, "(")+1:]
-		val = strings.TrimRight(val, ")")
-		val = strings.Trim(val, "%")
-		var r, g, b, a int
-		a = 255
-		if strings.Count(val, ",") == 3 {
-			format := "%d,%d,%d,%d"
-			fmt.Sscanf(val, format, &r, &g, &b, &a)
-		} else {
-			format := "%d,%d,%d"
-			fmt.Sscanf(val, format, &r, &g, &b)
+		fs, a := colorArgs(lstr)
+		if len(fs) < 3 {
+			return color.RGBA{}, fmt.Errorf("colors.FromString: not enough components in %q", str)
 		}
-		return FromNRGBA(uint8(r), uint8(g), uint8(b), uint8(a)), nil
+		c := func(f string) uint8 { return uint8(math32.Clamp(colorArg(f, 255), 0, 255) + 0.5) }
+		return FromNRGBA(c(fs[0]), c(fs[1]), c(fs[2]), a), nil
 	case strings.HasPrefix(lstr, "hsl("), strings.HasPrefix(lstr, "hsla("):
-		val := lstr[strings.Index(lstr, "(")+1:]
-		val = strings.TrimRight(val, ")")
-		val = strings.Trim(val, "%")
-		var h, s, l, a int
-		a = 255
-		if strings.Count(val, ",") == 3 {
-			format := "%d,%d,%d,%d"
-			fmt.Sscanf(val, format, &h, &s, &l, &a)
-		} else {
-			format := "%d,%d,%d"
-			fmt.Sscanf(val, format, &h, &s, &l)
+		fs, a := colorArgs(lstr)
+		if len(fs) < 3 {
+			return color.RGBA{}, fmt.Errorf("colors.FromString: not enough components in %q", str)
 		}
-		return WithA(hsl.New(float32(h), float32(s)/100.0, float32(l)/100.0), uint8(a)), nil
+		pct := func(f string) float32 { return colorArg(strings.TrimSuffix(f, "%"), 100) / 100 }
+		h := colorArg(strings.TrimSuffix(fs[0], "deg"), 360)
+		return WithA(hsl.New(h, pct(fs[1]), pct(fs[2])), a), nil
 	case strings.HasPrefix(lstr, "hct("), strings.HasPrefix(lstr, "hcta("):
 		val := lstr[strings.Index(lstr, "(")+1:]
 		val = strings.TrimRight(val, ")")
@@ -455,4 +442,39 @@ func Sub(c, dc color.Color) color.RGBA {
 		a = 0
 	}
 	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+}
+
+// colorArgs returns the components of the given color function (as
+// rgb(...)), separated by commas, spaces, or a slash (before the alpha, as
+// in CSS), and its alpha, which is 255 (opaque) if it has none: a fraction
+// from 0 to 1 or a percentage, as in CSS, or else a number from 0 to 255.
+func colorArgs(fn string) ([]string, uint8) {
+	val := fn[strings.Index(fn, "(")+1:]
+	val = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(val), ")"))
+	fs := strings.Fields(strings.NewReplacer(",", " ", "/", " ").Replace(val))
+	a := uint8(255)
+	if len(fs) > 3 {
+		f := fs[3]
+		if pct, ok := strings.CutSuffix(f, "%"); ok {
+			v, _ := strconv.ParseFloat(pct, 32)
+			a = uint8(math32.Clamp(float32(v)/100, 0, 1)*255 + 0.5)
+		} else if v, err := strconv.ParseFloat(f, 32); err == nil {
+			if v <= 1 {
+				v *= 255
+			}
+			a = uint8(math32.Clamp(float32(v), 0, 255) + 0.5)
+		}
+	}
+	return fs, a
+}
+
+// colorArg returns the value of the given component of a color function:
+// a number, or a percentage of the given full value.
+func colorArg(f string, full float32) float32 {
+	if pct, ok := strings.CutSuffix(f, "%"); ok {
+		v, _ := strconv.ParseFloat(pct, 32)
+		return float32(v) / 100 * full
+	}
+	v, _ := strconv.ParseFloat(f, 32)
+	return float32(v)
 }
