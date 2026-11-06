@@ -219,6 +219,12 @@ func (r *resolver) flow() {
 		}
 	}
 	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
+	if s.Position != styles.PositionStatic {
+		// positioned elements are painted after the others, which the
+		// background of the parent in their margins would cover (margins
+		// are transparent in CSS)
+		s.FillMargin = false
+	}
 	outOfFlow := s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed
 	if outOfFlow || s.Float != styles.FloatNone {
 		bs.block = false // not in the flow of blocks, and its width fits its content

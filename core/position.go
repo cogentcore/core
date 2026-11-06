@@ -161,6 +161,25 @@ func (wb *WidgetBase) relativeOffset() math32.Vector2 {
 	return off
 }
 
+// translateOffset returns the offset of the [styles.Style.Translate] of the
+// widget in dots, with percentages of the element width and height of its
+// own size.
+func (wb *WidgetBase) translateOffset() math32.Vector2 {
+	tr := &wb.Styles.Translate
+	if tr.X.Value == 0 && tr.Y.Value == 0 {
+		return math32.Vector2{}
+	}
+	sz := wb.Geom.Size.Actual.Total
+	dots := func(v units.Value, size float32) float32 {
+		switch v.Unit {
+		case units.UnitEw, units.UnitEh:
+			return v.Value / 100 * size
+		}
+		return wb.Styles.UnitContext.ToDots(v.Value, v.Unit)
+	}
+	return math32.Vec2(dots(tr.X, sz.X), dots(tr.Y, sz.Y))
+}
+
 // renderOrder returns the children of the widget in the order that they are
 // rendered: those that float after the others (over their backgrounds),
 // and those that are positioned (not static) after them,

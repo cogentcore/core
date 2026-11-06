@@ -2486,6 +2486,7 @@ func (wb *WidgetBase) setPosFromParent() {
 	default:
 		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
 	}
+	wb.Geom.Pos.Total.SetAdd(wb.translateOffset())
 	wb.setContentPosFromPos()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb, "pos:", wb.Geom.Pos.Total, "parPos:", parPos)

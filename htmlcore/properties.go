@@ -265,6 +265,15 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			cl = styles.ClearBoth
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Clear = cl })
+	case "transform", "translate":
+		x, y, ok := cssTranslate(prop, lval)
+		if !ok {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.Translate.X, _ = st.env.length(x, units.UnitEw)
+			s.Translate.Y, _ = st.env.length(y, units.UnitEh)
+		})
 	case "z-index":
 		z, err := strconv.Atoi(lval)
 		if err != nil {
@@ -791,4 +800,62 @@ func gridColumns(v string) int {
 		}
 	}
 	return len(splitColors(v))
+}
+
+// cssTranslate returns the translation of the given value of the transform
+// property (the sum of its translate functions; the other functions, as
+// rotate and scale, are not supported), or of the translate property, as
+// the lengths of x and y. It returns false if it is not valid.
+func cssTranslate(prop, v string) (x, y string, ok bool) {
+	x, y = "0", "0"
+	if v == "none" || v == "" {
+		return x, y, true
+	}
+	if prop == "translate" { // x [y [z]]
+		fs := strings.Fields(v)
+		if len(fs) > 0 {
+			x = fs[0]
+		}
+		if len(fs) > 1 {
+			y = fs[1]
+		}
+		return x, y, true
+	}
+	var xs, ys []string
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			return "", "", false
+		}
+		as := strings.Split(args[:end], ",")
+		for i := range as {
+			as[i] = strings.TrimSpace(as[i])
+		}
+		switch strings.TrimSpace(name) {
+		case "translate", "translate3d":
+			xs = append(xs, as[0])
+			if len(as) > 1 {
+				ys = append(ys, as[1])
+			}
+		case "translatex":
+			xs = append(xs, as[0])
+		case "translatey":
+			ys = append(ys, as[0])
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	sum := func(ls []string) string {
+		switch len(ls) {
+		case 0:
+			return "0"
+		case 1:
+			return ls[0]
+		}
+		return "calc(" + strings.Join(ls, " + ") + ")"
+	}
+	return sum(xs), sum(ys), true
 }

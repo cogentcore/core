@@ -233,6 +233,12 @@ type Style struct { //types:add
 	// of the widget determine its position.
 	InsetSet sides.Sides[bool] `display:"inline"`
 
+	// Translate moves the widget from its position by this offset when it
+	// is rendered, without changing the layout, as the translate of the
+	// transform property of CSS. Percentages of the element width and
+	// height ([units.UnitEw], [units.UnitEh]) are of its own size.
+	Translate units.XY `display:"inline"`
+
 	// Float makes the widget float to the left or right of its parent,
 	// as the float property of CSS: it is out of the flow of the layout of
 	// its parent (a column), and the widgets after it that start beside it

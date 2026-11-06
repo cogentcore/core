@@ -266,10 +266,7 @@ func (fr *Frame) RenderChildren() {
 		}
 		return
 	}
-	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		cw.RenderWidget()
-		return tree.Continue
-	})
+	fr.renderChildren() // in the order of their positions and z-index
 }
 
 func (fr *Frame) RenderWidget() {
@@ -279,6 +276,7 @@ func (fr *Frame) RenderWidget() {
 		fr.renderParts()
 		fr.RenderScrolls()
 		fr.EndRender()
+		fr.renderOutOfFlowChildren()
 	}
 }
 
