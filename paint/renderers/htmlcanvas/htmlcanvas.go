@@ -248,8 +248,11 @@ type toJSer interface {
 
 func (rs *Renderer) imageToStyle(clr image.Image) any {
 	if g, ok := clr.(gradient.Gradient); ok {
-		g.Update(1, math32.B2FromRect(rs.curRect), math32.Identity2()) // TODO: opacity, transform?
-		return g.(toJSer).ToJS(rs.ctx)
+		if tj, ok := g.(toJSer); ok {
+			g.Update(1, math32.B2FromRect(rs.curRect), math32.Identity2()) // TODO: opacity, transform?
+			return tj.ToJS(rs.ctx)
+		}
+		// others (as SVG patterns) are not supported yet: their uniform color
 	}
 	// TODO: handle more cases for things like pattern functions and [image.RGBA] images?
 	// The strings of the colors are kept, as there are only a few of them.

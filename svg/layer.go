@@ -106,6 +106,7 @@ func (g *NodeBase) isGroupOpacity() bool {
 // renders. The context has no transform of its own, but its clip mask and
 // mask are in the user space of the shape (with its transform).
 func (g *NodeBase) pushLayer(sv *SVG) bool {
+	g.preparePatterns(sv, g.Paint.Transform)
 	if g.clipRef == "" && g.maskRef == "" {
 		return false
 	}

@@ -67,3 +67,29 @@ func TestUseSymbol(t *testing.T) {
 	assert.Equal(t, uint8(255), alpha(300, 400), "the use of a group")
 	assert.Equal(t, uint8(0), alpha(100, 300), "symbols are not rendered themselves")
 }
+
+// TestPattern tests pattern fills and strokes: in user space and
+// objectBoundingBox units, with patternTransform, viewBox, and href (see
+// testdata/svg/pattern.svg).
+func TestPattern(t *testing.T) {
+	img := renderFile(t, "pattern.svg")
+	at := func(x, y int) [4]uint8 { c := img.RGBAAt(x, y); return [4]uint8{c.R, c.G, c.B, c.A} }
+	assert.Equal(t, [4]uint8{255, 0, 0, 255}, at(30, 30), "a dot")
+	assert.Equal(t, [4]uint8{255, 255, 224, 255}, at(40, 40), "between dots")
+	assert.Equal(t, [4]uint8{0, 0, 0, 255}, at(250, 50), "a black square of the checker (objectBoundingBox)")
+	assert.Equal(t, uint8(0), at(270, 50)[3], "a transparent square of the checker")
+	assert.Equal(t, [4]uint8{0, 128, 0, 255}, at(45, 285), "a square of the view box pattern")
+	assert.Equal(t, uint8(0), at(65, 285)[3], "between the squares of the view box pattern")
+	assert.Equal(t, uint8(0), at(275, 285)[3], "the pattern of the href is moved by its x")
+	assert.Equal(t, [4]uint8{0, 128, 0, 255}, at(295, 285), "the pattern of the href is moved by its x")
+	assert.Equal(t, uint8(0), at(540, 340)[3], "inside of the pattern stroke")
+	assert.Equal(t, uint8(255), at(470, 340)[3], "the pattern stroke")
+	n := 0
+	for x := 430; x < 610; x++ {
+		if c := at(x, 110); c[2] > 100 && c[0] < 50 {
+			n++
+		}
+	}
+	assert.Greater(t, n, 40, "navy stripes")
+	assert.Less(t, n, 140, "stripes, not a solid fill")
+}

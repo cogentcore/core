@@ -220,6 +220,18 @@ func NewPath(parent ...tree.Node) *Path { return tree.New[Path](parent...) }
 // string version of the path data
 func (t *Path) SetDataStr(v string) *Path { t.DataStr = v; return t }
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Pattern", IDName: "pattern", Doc: "Pattern is an SVG pattern element: the fill or stroke of the elements\nthat refer to it (as fill=\"url(#name)\") is its children, rendered in a\ntile that repeats. It is not rendered itself.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "ViewBox", Doc: "ViewBox is the view box of the pattern, if any."}}})
+
+// NewPattern returns a new [Pattern] with the given optional parent:
+// Pattern is an SVG pattern element: the fill or stroke of the elements
+// that refer to it (as fill="url(#name)") is its children, rendered in a
+// tile that repeats. It is not rendered itself.
+func NewPattern(parent ...tree.Node) *Pattern { return tree.New[Pattern](parent...) }
+
+// SetViewBox sets the [Pattern.ViewBox]:
+// ViewBox is the view box of the pattern, if any.
+func (t *Pattern) SetViewBox(v ViewBox) *Pattern { t.ViewBox = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Polygon", IDName: "polygon", Doc: "Polygon is a SVG polygon", Embeds: []types.Field{{Name: "Polyline"}}})
 
 // NewPolygon returns a new [Polygon] with the given optional parent:

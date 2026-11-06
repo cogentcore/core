@@ -715,6 +715,26 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					ug.SetProperty("transform", tr)
 				}
 				uses = append(uses, pu)
+			case nm == "pattern":
+				curPar = NewPattern(curPar)
+				pat := curPar.(*Pattern)
+				for _, attr := range se.Attr {
+					if SetStandardXMLAttr(pat, attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "viewBox":
+						pts := math32.ReadPoints(attr.Value)
+						if len(pts) == 4 {
+							pat.ViewBox.Min.Set(pts[0], pts[1])
+							pat.ViewBox.Size.Set(pts[2], pts[3])
+						}
+					case "preserveAspectRatio":
+						pat.ViewBox.PreserveAspectRatio.SetString(attr.Value)
+					default:
+						pat.SetProperty(attr.Name.Local, attr.Value)
+					}
+				}
 			case nm == "symbol":
 				curPar = NewSymbol(curPar)
 				sym := curPar.(*Symbol)

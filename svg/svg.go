@@ -185,9 +185,12 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 			return grad.Grad
 		}
 	}
-	ne := sv.FindNamedElement(val)
-	if grad, ok := ne.(*Gradient); ok {
-		return grad.Grad
+	ne := sv.findByName(val)
+	switch x := ne.(type) {
+	case *Gradient:
+		return x.Grad
+	case *Pattern:
+		return &patternFill{pattern: x}
 	}
 	return nil
 }

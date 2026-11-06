@@ -161,6 +161,7 @@ func (g *Text) Render(sv *SVG) {
 			return
 		}
 		g.setLayer(sv, math32.Identity2())
+		g.preparePatterns(sv, math32.Identity2())
 		pc := g.Painter(sv)
 		g.RenderChildren(sv)
 		pc.PopContext()
