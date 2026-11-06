@@ -129,6 +129,17 @@ func FromString(str string, base ...color.Color) (color.RGBA, error) {
 		if len(fs) < 3 {
 			return color.RGBA{}, fmt.Errorf("colors.FromString: not enough components in %q", str)
 		}
+		if strings.Contains(lstr, ",") { // the legacy syntax: all numbers or all percentages
+			pcts := 0
+			for _, f := range fs[:3] {
+				if strings.HasSuffix(f, "%") {
+					pcts++
+				}
+			}
+			if pcts != 0 && pcts != 3 {
+				return color.RGBA{}, fmt.Errorf("colors.FromString: numbers and percentages mixed in %q", str)
+			}
+		}
 		c := func(f string) uint8 { return uint8(math32.Clamp(colorArg(f, 255), 0, 255) + 0.5) }
 		return FromNRGBA(c(fs[0]), c(fs[1]), c(fs[2]), a), nil
 	case strings.HasPrefix(lstr, "hsl("), strings.HasPrefix(lstr, "hsla("):

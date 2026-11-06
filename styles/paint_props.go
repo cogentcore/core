@@ -115,7 +115,12 @@ var styleStrokeFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.Color = errors.Log1(gradient.FromAny(val, cc))
+		// an invalid color is ignored, as in CSS (it keeps the inherited or initial one)
+		if c, err := gradient.FromAny(val, cc); err == nil {
+			fs.Color = c
+		} else {
+			errors.Log(err)
+		}
 	},
 	"stroke-opacity": styleprops.Float(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -162,7 +167,12 @@ var styleFillFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.Color = errors.Log1(gradient.FromAny(val, cc))
+		// an invalid color is ignored, as in CSS (it keeps the inherited or initial one)
+		if c, err := gradient.FromAny(val, cc); err == nil {
+			fs.Color = c
+		} else {
+			errors.Log(err)
+		}
 	},
 	"fill-opacity": styleprops.Float(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),

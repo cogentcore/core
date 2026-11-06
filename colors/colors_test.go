@@ -222,9 +222,12 @@ func ExampleFromString_cssAlpha() {
 	fmt.Println(FromString("rgb(255 0 0 / 50%)"))
 	fmt.Println(FromString("rgb(100% 0% 0%)"))
 	fmt.Println(FromString("hsl(120deg 100% 25% / 0.5)"))
+	_, err := FromString("rgb(0, 100%, 255)")
+	fmt.Println(err != nil)
 	// Output:
 	// {128 0 0 128} <nil>
 	// {128 0 0 128} <nil>
 	// {255 0 0 255} <nil>
 	// {0 64 0 128} <nil>
+	// true
 }
