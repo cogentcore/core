@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"image/color"
 
@@ -27,6 +28,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"github.com/andybalholm/cascadia"
+	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
@@ -716,4 +718,28 @@ func TestUnset(t *testing.T) {
 			assert.Zero(t, p.Styles.Padding.Top.Value, "the padding is initial")
 		}
 	})
+}
+
+// TestStrayCSS tests that style sheets with semicolons and blocks where
+// rules are expected (as CSS-in-JS on the Guardian makes) are parsed
+// without them, instead of the parser never ending.
+func TestStrayCSS(t *testing.T) {
+	style := `a{color:red} ; {x:y} b;c{color:blue} /* {;} */ @import "s;{.css";
+		@media screen{ ;d{color:green;} {e:f} } {flex-direction:column;}`
+	done := make(chan *css.Stylesheet)
+	go func() { done <- parseCSS(style) }()
+	select {
+	case ss := <-done:
+		var rules []string
+		for _, r := range ss.Rules {
+			rules = append(rules, strings.Join(r.Selectors, ",")+r.Prelude)
+			for _, e := range r.Rules {
+				rules = append(rules, " "+strings.Join(e.Selectors, ","))
+			}
+		}
+		assert.Equal(t, []string{"aa", "cc", "\"s;{.css\"", "screen", " d"}, rules)
+	case <-time.After(5 * time.Second):
+		t.Fatal("parsing did not end")
+	}
+	assert.Equal(t, "a{b:c}@media x{d{e:f}}", removeStrayCSS("a{b:c};@media x{;d{e:f}{g:h}}"))
 }
