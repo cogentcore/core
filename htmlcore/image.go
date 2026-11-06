@@ -25,12 +25,67 @@ import (
 // handleSVG handles an svg element, which is rendered by an SVG widget.
 func handleSVG(ctx *Context) {
 	var b strings.Builder
-	if err := html.Render(&b, ctx.Node); err != nil {
+	if err := html.Render(&b, ctx.svgWithVars(ctx.Node)); err != nil {
 		return
 	}
 	sv := New[core.SVG](ctx)
 	errors.Log(sv.ReadString(b.String()))
 	ctx.handleWidget(ctx.Node, sv)
+}
+
+// svgWithVars returns the given svg element as it is to be rendered: a
+// copy of it with the var() functions in its attributes (as in fill and
+// style, as in the icons of BBC News) replaced by the values of the custom
+// properties of its elements, which the SVG reader does not know, and the
+// attributes whose var() functions are invalid removed. It returns the
+// element itself if it has no var() functions.
+func (c *Context) svgWithVars(n *html.Node) *html.Node {
+	has := false
+	var check func(n *html.Node)
+	check = func(n *html.Node) {
+		for _, a := range n.Attr {
+			if strings.Contains(a.Val, "var(") {
+				has = true
+				return
+			}
+		}
+		for ch := n.FirstChild; ch != nil && !has; ch = ch.NextSibling {
+			check(ch)
+		}
+	}
+	check(n)
+	if !has {
+		return n
+	}
+	var clone func(n *html.Node) *html.Node
+	clone = func(n *html.Node) *html.Node {
+		cn := &html.Node{Type: n.Type, Data: n.Data, DataAtom: n.DataAtom, Namespace: n.Namespace}
+		for _, a := range n.Attr {
+			if strings.Contains(a.Val, "var(") {
+				if a.Key == "style" { // each of its declarations
+					var ds []string
+					for _, d := range strings.Split(a.Val, ";") {
+						if v, ok := c.substituteVars(n, d, nil); ok {
+							ds = append(ds, v)
+						}
+					}
+					a.Val = strings.Join(ds, ";")
+				} else {
+					v, ok := c.substituteVars(n, a.Val, nil)
+					if !ok {
+						continue
+					}
+					a.Val = v
+				}
+			}
+			cn.Attr = append(cn.Attr, a)
+		}
+		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
+			cn.AppendChild(clone(ch))
+		}
+		return cn
+	}
+	return clone(n)
 }
 
 func handleImage(ctx *Context, tag string) core.Widget {

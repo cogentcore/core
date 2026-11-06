@@ -824,3 +824,35 @@ func TestBlockLinkClick(t *testing.T) {
 		assert.Equal(t, []string{"/auburn", "/bham", "/bn", "/block"}, opened)
 	})
 }
+
+// TestSVGVars tests that the var() functions in the attributes of an svg
+// element (as in the icons of BBC News) are replaced by the values of the
+// custom properties for its elements, which the SVG reader does not know.
+func TestSVGVars(t *testing.T) {
+	ctx := NewContext()
+	b := core.NewBody()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<div style="--fg: #ff0000; --bg: blue"><svg viewBox="0 0 10 10" width="10" height="10">`+
+		`<rect class="a" width="5" height="5" fill="var(--fg)"/>`+
+		`<rect class="b" width="5" height="5" style="fill: var(--bg); stroke: var(--none)"/>`+
+		`<rect class="c" width="5" height="5" fill="var(--none, green)" stroke="var(--none)"/></svg></div>`))
+	assert.NoError(t, err)
+	assert.NoError(t, ReadDocument(ctx, b, doc))
+	var svg *html.Node
+	walkNodes(doc, func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "svg" {
+			svg = n
+		}
+	})
+	if !assert.NotNil(t, svg) {
+		return
+	}
+	var sb strings.Builder
+	assert.NoError(t, html.Render(&sb, ctx.svgWithVars(svg)))
+	s := sb.String()
+	assert.NotContains(t, s, "var(")
+	assert.Contains(t, s, `fill="#ff0000"`)
+	assert.Contains(t, s, `style="fill: blue"`, "the invalid declaration is removed")
+	assert.Contains(t, s, `fill="green"`, "the fallback")
+	assert.NotContains(t, s, "stroke", "attributes with invalid var() functions are removed")
+	assert.NoError(t, core.NewSVG(b).ReadString(s))
+}
