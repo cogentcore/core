@@ -186,6 +186,10 @@ type pageState struct {
 	// have floats in them, for flattensBlock.
 	floatSiblings map[*html.Node]bool
 
+	// linkFrames has the URLs of the links that are frames (blocks), by
+	// their nodes, for the widgets in them (see linkFrame).
+	linkFrames map[*html.Node]string
+
 	// flattened has the blocks that are flattened (see flattensBlock).
 	flattened map[*html.Node]bool
 
@@ -415,6 +419,7 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
 	c.handleFormWidget(node, w)
+	c.handleInLink(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}

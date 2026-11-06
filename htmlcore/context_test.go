@@ -23,6 +23,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
@@ -784,5 +785,42 @@ func TestFloatColumns(t *testing.T) {
 		rp := core.AsWidget(rail.Parent).Geom
 		assert.InDelta(t, rp.Pos.Content.X+rp.Size.Actual.Content.X, rail.Geom.Pos.Content.X+rail.Geom.Size.Actual.Content.X, 2, "at the right")
 		assert.False(t, rail.Geom.TotalBBox.Empty(), "and visible")
+	})
+}
+
+// TestBlockLinkClick tests that clicking on the text of links that are
+// blocks (as the links in the columns of craigslist.org, which have
+// display: block) opens them: the text, which can be pressed (to select
+// it), gets the click instead of the frame of the link.
+func TestBlockLinkClick(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(1000) })
+	ctx := NewContext()
+	var opened []string
+	ctx.OpenURL = func(url string, e events.Event) { opened = append(opened, url) }
+	assert.NoError(t, ReadHTMLString(ctx, b, `<style>.box{overflow:hidden;float:left;width:23%}.box a{display:block}</style>
+<div style="overflow:hidden"><div class="box"><ul><li><a href="/auburn">auburn</a></li><li><a href="/bham">birmingham</a></li></ul></div>
+<div class="box"><ul><li><a href="/bn">bloomington</a></li></ul></div></div>
+<a href="/block" style="display:block">block link</a>`))
+	var links []*core.WidgetBase
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil && wb.Property("href") != nil {
+			links = append(links, wb)
+		}
+		return tree.Continue
+	})
+	if !assert.Len(t, links, 4) {
+		return
+	}
+	b.RenderImage(func() {
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		for _, l := range links {
+			bb := l.Geom.TotalBBox
+			pos := image.Pt(bb.Min.X+5, (bb.Min.Y+bb.Max.Y)/2) // on its text
+			ev.MouseButton(events.MouseDown, events.Left, pos, 0)
+			ev.MouseButton(events.MouseUp, events.Left, pos, 0)
+		}
+	}, func() {
+		assert.Equal(t, []string{"/auburn", "/bham", "/bn", "/block"}, opened)
 	})
 }

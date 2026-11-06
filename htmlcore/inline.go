@@ -133,6 +133,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			c.OpenURL(tl.URL, e)
 		})
 		c.handleWidget(nil, tx)
+		c.handleInLink(first.Parent, tx) // the element that the run is in
 		if container != parent || c.display(parent) == anonymousInline {
 			c.blocks[tx].display = "inline"
 		} else {
