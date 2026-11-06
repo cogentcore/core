@@ -105,16 +105,23 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 
 	var buf strings.Builder
 	start := true // at the start of the run
-	flush := func() {
+	// flush makes a text of the inline content so far; between is whether
+	// it is between inline widgets (before one, after content)
+	flush := func(between bool) {
 		str := buf.String()
 		buf.Reset()
 		if pre && last.NextSibling == nil { // a last line break makes no line
 			str = lastBreak.ReplaceAllString(str, "$1")
 		}
-		if str == "" || (strings.TrimSpace(str) == "" && !pre) {
+		space := str != "" && strings.TrimSpace(str) == "" && !pre && between && container != parent
+		if space {
+			// white space between inline widgets (as words in inline
+			// blocks, as on github.com) is a space, as in browsers
+			str = "\u00a0"
+		} else if str == "" || (strings.TrimSpace(str) == "" && !pre) {
 			return
 		}
-		if !pre {
+		if !pre && !space {
 			// Spaces at the start and end of the run are not shown, but
 			// those next to inline widgets are, as non-breaking spaces.
 			lead, trail := "", ""
@@ -144,7 +151,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
 			// a line break in a row of widgets ends the row, and the
 			// widgets after it are in another row (each is aligned)
-			flush()
+			flush(false)
 			start = true
 			container = newContainer()
 			if n == last {
@@ -153,7 +160,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			continue
 		}
 		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.displayOf(n) != "none" {
-			flush()
+			flush(!start)
 			start = false
 			c.inlineParent = container
 			c.BlockParent = container
@@ -165,7 +172,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			break
 		}
 	}
-	flush()
+	flush(false)
 	c.inlineParent = nil
 }
 
