@@ -658,3 +658,41 @@ func TestScriptingNoscript(t *testing.T) {
 	assert.True(t, ctx.MediaMatches("(min-width: 600px)"))
 	assert.False(t, ctx.MediaMatches("(max-width: 600px)"))
 }
+
+// TestLinkedStyleNotCSS tests that a link of a style sheet with an empty
+// href, which would be the page itself, and a style sheet that is served
+// as HTML are not added, as in browsers (the CSS parser does not end on
+// a page of HTML, as for a page of GitHub).
+func TestLinkedStyleNotCSS(t *testing.T) {
+	ctx := NewContext()
+	ctx.PageURL = "https://example.com/page"
+	var gets []string
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		gets = append(gets, u)
+		pu, _ := url.Parse(u)
+		ct := "text/css"
+		if strings.HasSuffix(u, ".html") {
+			ct = "text/html; charset=utf-8"
+		}
+		return &http.Response{StatusCode: 200, Status: "200 OK", Header: http.Header{"Content-Type": {ct}},
+			Body: io.NopCloser(strings.NewReader(`p { color: rgb(255, 0, 0) }`)), Request: &http.Request{URL: pu}}, nil
+	}
+	b := core.NewBody()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><head><link rel="stylesheet" href=""><link rel="stylesheet" href="/style.html"></head><body><p>Text</p></body></html>`))
+	assert.Equal(t, []string{"https://example.com/style.html"}, gets, "no request for the empty href")
+	assert.Empty(t, ctx.declaration(findTag(b, "p"), "color"), "the style sheet served as HTML is not added")
+}
+
+// findTag returns the node of the first widget for an element of the given tag.
+func findTag(b *core.Body, tag string) *html.Node {
+	var found *html.Node
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil && found == nil {
+			if nd, ok := wb.Property("node").(*html.Node); ok && nd.Data == tag {
+				found = nd
+			}
+		}
+		return tree.Continue
+	})
+	return found
+}

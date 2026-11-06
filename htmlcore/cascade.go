@@ -594,6 +594,9 @@ func (c *Context) addStyleSheets(root *html.Node) {
 // Its URL is relative to the URL of the style sheet that it is in,
 // cssBase, if it is imported by one, or else to the page.
 func (c *Context) addLinkedStyle(href string) {
+	if strings.TrimSpace(href) == "" {
+		return // as in browsers (it would be the page itself)
+	}
 	u, err := parseRelativeURL(href, c.cssBaseURL())
 	if errors.Log(err) != nil {
 		return
@@ -610,6 +613,12 @@ func (c *Context) addLinkedStyle(href string) {
 		return
 	}
 	defer resp.Body.Close()
+	if ct := strings.ToLower(resp.Header.Get("Content-Type")); ct != "" && !strings.Contains(ct, "css") && !strings.Contains(ct, "text/plain") && !strings.Contains(ct, "octet-stream") {
+		// as in browsers, a style sheet must be CSS (not, as for a link
+		// of a style sheet that is missing, a page of HTML, on which the
+		// CSS parser does not end)
+		return
+	}
 	b, err := io.ReadAll(resp.Body)
 	if errors.Log(err) != nil {
 		return
