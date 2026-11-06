@@ -696,3 +696,24 @@ func findTag(b *core.Body, tag string) *html.Node {
 	})
 	return found
 }
+
+// TestUnset tests that unset is inherit for an inherited property (as
+// color) and initial for one that is not, as in CSS.
+func TestUnset(t *testing.T) {
+	ctx := NewContext()
+	b := core.NewBody()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body style="color: rgb(0, 128, 0)"><p style="color: unset; padding: 10px; padding: unset">Text</p></body></html>`))
+	b.RenderImage(func() {
+		var p *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && wb.Property("tag") == "p" && p == nil {
+				p = wb
+			}
+			return tree.Continue
+		})
+		if assert.NotNil(t, p) {
+			assert.Equal(t, "#008000", colors.AsHex(colors.ToUniform(p.Styles.Color)), "the color is inherited")
+			assert.Zero(t, p.Styles.Padding.Top.Value, "the padding is initial")
+		}
+	})
+}

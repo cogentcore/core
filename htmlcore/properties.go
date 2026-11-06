@@ -45,7 +45,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	val = strings.TrimSpace(val)
 	lval := strings.ToLower(val)
 	op := func(f styleOp) []styleOp { return []styleOp{f} }
-	if lval == "inherit" || lval == "initial" || lval == "unset" {
+	if lval == "unset" { // inherit for the inherited properties, initial otherwise
+		lval = "initial"
+		if inheritedProperties[prop] {
+			lval = "inherit"
+		}
+	}
+	if lval == "inherit" || lval == "initial" {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
 		})
@@ -565,6 +571,18 @@ func compileBorder(side int, val string) styleOp {
 			}
 		}
 	}
+}
+
+// inheritedProperties are the properties that are inherited in CSS, for
+// which unset is inherit (and initial for the others).
+var inheritedProperties = map[string]bool{
+	"color": true, "font": true, "font-family": true, "font-size": true, "font-style": true,
+	"font-weight": true, "font-variant": true, "line-height": true, "letter-spacing": true,
+	"word-spacing": true, "text-align": true, "text-indent": true, "text-transform": true,
+	"text-shadow": true, "white-space": true, "visibility": true, "cursor": true, "direction": true,
+	"list-style": true, "list-style-type": true, "list-style-position": true, "quotes": true,
+	"word-break": true, "overflow-wrap": true, "hyphens": true, "tab-size": true,
+	"border-collapse": true, "border-spacing": true, "caption-side": true, "empty-cells": true,
 }
 
 // logicalProperties are the physical properties for the logical
