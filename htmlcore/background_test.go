@@ -68,4 +68,6 @@ func TestComputedValue(t *testing.T) {
 	assert.Equal(t, "", ctx.ComputedValue(p, "width"), "not inherited")
 	assert.Equal(t, "", ctx.ComputedValue(p, "text-align"), "initial")
 	assert.Equal(t, "red", ctx.ComputedValue(p, "color"), "the inline style")
+	assert.Equal(t, "green", ctx.ComputedValue(p, "--c"), "a custom property")
+	assert.Equal(t, "", ctx.ComputedValue(p, "--C"), "custom properties are case sensitive")
 }

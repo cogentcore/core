@@ -189,7 +189,12 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 // initial value). It is for the computed styles of scripts, which can
 // convert its values (as colors and relative lengths) as they need.
 func (c *Context) ComputedValue(n *html.Node, prop string) string {
-	prop = strings.ToLower(strings.TrimSpace(prop))
+	prop = strings.TrimSpace(prop)
+	if strings.HasPrefix(prop, "--") { // custom properties are inherited
+		v, _ := c.customProperty(n, prop)
+		return strings.TrimSpace(v)
+	}
+	prop = strings.ToLower(prop)
 	for ; n != nil; n = n.Parent {
 		if n.Type != html.ElementNode {
 			continue
