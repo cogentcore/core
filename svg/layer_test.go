@@ -7,8 +7,8 @@ package svg_test
 import (
 	"image"
 	"image/color"
-	"strings"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/colors"
