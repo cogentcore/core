@@ -60,6 +60,7 @@ const (
 // parseCSSText parses the given style sheet (see [parseCSS]).
 func parseCSSText(style string) *css.Stylesheet {
 	style = removeStrayCSS(style)
+	style = unknownGroupingRule.ReplaceAllString(style, "@supports$1{")
 	if ss, err := parser.Parse(style); err == nil {
 		return ss
 	}
@@ -73,6 +74,13 @@ func parseCSSText(style string) *css.Stylesheet {
 	}
 	return ss
 }
+
+// unknownGroupingRule matches the start of the block of a grouping
+// at-rule that the parser does not know has rules in it (and parses as
+// declarations, failing at the end of the first rule in it, as for the
+// @container rules in the @layer of the style sheet of github.com), which
+// are parsed as @supports rules, whose rules apply (see addRuleList).
+var unknownGroupingRule = regexp.MustCompile(`@(?:layer|container|scope|starting-style)\b([^;{}]*)\{`)
 
 // groupingRules are the at-rules whose blocks have rules (not declarations).
 var groupingRules = []string{"@media", "@supports", "@layer", "@container", "@document", "@-moz-document", "@scope", "@starting-style"}
