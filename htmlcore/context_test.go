@@ -743,3 +743,46 @@ func TestStrayCSS(t *testing.T) {
 	}
 	assert.Equal(t, "a{b:c}@media x{d{e:f}}", removeStrayCSS("a{b:c};@media x{;d{e:f}{g:h}}"))
 }
+
+// TestFloatColumns tests floats with a percentage width, as the columns
+// of craigslist.org (float: left; width: 23%), and a sidebar beside a main
+// column, as on slashdot.org (a float with a width of 100% and a right
+// margin inside it, and a float after it pulled back beside it by a
+// negative left margin).
+func TestFloatColumns(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Padding.Zero(); s.Min.X.Dp(600); s.Max.X.Dp(600) })
+	ctx := NewContext()
+	ctx.MediaWidth = 600
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body>
+<div style="overflow: hidden"><div class="c1" style="float: left; width: 23%; overflow: hidden">A<br>a<br>a</div>`+
+		`<div class="c2" style="float: left; width: 23%; overflow: hidden">B<br>b</div></div>
+<p class="after" style="margin: 0">after</p>
+<div><div style="float: left; width: 100%"><div class="main" style="margin-right: 200px">main</div></div>`+
+		`<aside class="rail" style="float: left; width: 200px; margin-left: -200px; overflow: hidden">rail</aside></div>
+</body></html>`))
+	find := func(class string) *core.WidgetBase {
+		var w *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == class {
+				w = wb
+			}
+			return tree.Continue
+		})
+		return w
+	}
+	c1, c2, after, main, rail := find("c1"), find("c2"), find("after"), find("main"), find("rail")
+	if !assert.NotNil(t, c1) || !assert.NotNil(t, c2) || !assert.NotNil(t, after) || !assert.NotNil(t, main) || !assert.NotNil(t, rail) {
+		return
+	}
+	b.RenderImage(func() {
+		w := core.AsWidget(c1.Parent).Geom.Size.Actual.Content.X
+		assert.InDelta(t, 0.23*w, c1.Geom.Size.Actual.Total.X, 2, "a column is 23% wide")
+		assert.InDelta(t, c1.Geom.Pos.Total.Y, c2.Geom.Pos.Total.Y, 1, "the columns are beside each other")
+		assert.InDelta(t, c1.Geom.Pos.Total.Y+c1.Geom.Size.Actual.Total.Y, after.Geom.Pos.Total.Y, 1, "what is after them is below the tallest")
+		assert.InDelta(t, main.Geom.Pos.Total.Y, rail.Geom.Pos.Total.Y, 1, "the rail is beside the main column")
+		rp := core.AsWidget(rail.Parent).Geom
+		assert.InDelta(t, rp.Pos.Content.X+rp.Size.Actual.Content.X, rail.Geom.Pos.Content.X+rail.Geom.Size.Actual.Content.X, 2, "at the right")
+		assert.False(t, rail.Geom.TotalBBox.Empty(), "and visible")
+	})
+}

@@ -107,3 +107,50 @@ func TestFloatNotHigher(t *testing.T) {
 		assert.InDelta(t, y0+200*dp, next.Geom.Pos.Total.Y, 2)
 	})
 }
+
+// TestFloatNegativeMargin tests the layout of a sidebar beside a main
+// column, as on slashdot.org: the main column is a float that grows to
+// the whole width, with a right margin inside it for the sidebar, which
+// is a float after it pulled back beside it by a negative left margin
+// (that makes its total width 0). The sidebar is visible, though its
+// total box is empty, and it clips its content to its own box.
+func TestFloatNegativeMargin(t *testing.T) {
+	b := NewBody()
+	col := NewFrame(b)
+	col.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Min.X.Dp(500)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	main := NewFrame(col)
+	main.Styler(func(s *styles.Style) {
+		s.Float = styles.FloatLeft
+		s.Grow.Set(1, 0)
+		s.Padding.Zero()
+		s.Margin.Zero()
+	})
+	content := fixedFrame(main, 100, 50)
+	content.Styler(func(s *styles.Style) { s.Margin.Right.Dp(200) })
+	rail := NewFrame(col)
+	rail.Styler(func(s *styles.Style) {
+		s.Float = styles.FloatLeft
+		s.Min.X.Dp(200)
+		s.Max.X.Dp(200)
+		s.Margin.Zero()
+		s.Margin.Left.Dp(-200)
+		s.Padding.Zero()
+		s.Overflow.Set(styles.OverflowHidden)
+	})
+	inRail := fixedFrame(rail, 200, 50)
+	layoutGeom(b, func() {
+		dp := col.Styles.UnitContext.Dots(units.UnitDp)
+		x0 := col.Geom.Pos.Content.X
+		assert.InDelta(t, 500*dp, main.Geom.Size.Actual.Total.X, 2, "the main column grows to the whole width")
+		assert.InDelta(t, x0+300*dp, rail.Geom.Pos.Content.X, 2, "the sidebar is beside it")
+		assert.InDelta(t, col.Geom.Pos.Content.Y, rail.Geom.Pos.Content.Y, 2)
+		assert.False(t, rail.Geom.TotalBBox.Empty(), "the sidebar is visible")
+		assert.False(t, inRail.Geom.TotalBBox.Empty(), "its content is visible")
+	})
+}
+

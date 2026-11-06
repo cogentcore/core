@@ -2511,6 +2511,14 @@ func (wb *WidgetBase) setBBoxes() {
 		}
 		parBB = clip.childClipBBox()
 		bb := wb.Geom.totalRect()
+		if m := wb.Styles.Margin.Dots(); m.Left < 0 || m.Right < 0 || m.Top < 0 || m.Bottom < 0 {
+			// The box inside negative margins (as for a CSS float pulled
+			// beside another with a negative margin) is larger than the
+			// total box: it is visible where it is, not only in that.
+			pos := wb.Geom.Pos.Total.Add(math32.Vec2(m.Left, m.Top))
+			sz := wb.Geom.Size.Actual.Total.Sub(math32.Vec2(m.Left+m.Right, m.Top+m.Bottom))
+			bb = bb.Union(math32.RectFromPosSizeMax(pos, sz))
+		}
 		wb.Geom.TotalBBox = parBB.Intersect(bb)
 		if DebugSettings.LayoutTrace {
 			fmt.Println(wb, "Total BBox:", bb, "parBB:", parBB, "BBox:", wb.Geom.TotalBBox)
