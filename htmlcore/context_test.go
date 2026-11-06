@@ -847,7 +847,7 @@ func TestSVGVars(t *testing.T) {
 		return
 	}
 	var sb strings.Builder
-	assert.NoError(t, html.Render(&sb, ctx.svgWithVars(svg)))
+	assert.NoError(t, html.Render(&sb, ctx.svgForRender(svg)))
 	s := sb.String()
 	assert.NotContains(t, s, "var(")
 	assert.Contains(t, s, `fill="#ff0000"`)

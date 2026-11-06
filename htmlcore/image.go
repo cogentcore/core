@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -25,7 +26,7 @@ import (
 // handleSVG handles an svg element, which is rendered by an SVG widget.
 func handleSVG(ctx *Context) {
 	var b strings.Builder
-	if err := html.Render(&b, ctx.svgWithVars(ctx.Node)); err != nil {
+	if err := html.Render(&b, ctx.svgForRender(ctx.Node)); err != nil {
 		return
 	}
 	sv := New[core.SVG](ctx)
@@ -33,52 +34,65 @@ func handleSVG(ctx *Context) {
 	ctx.handleWidget(ctx.Node, sv)
 }
 
-// svgWithVars returns the given svg element as it is to be rendered: a
-// copy of it with the var() functions in its attributes (as in fill and
-// style, as in the icons of BBC News) replaced by the values of the custom
-// properties of its elements, which the SVG reader does not know, and the
-// attributes whose var() functions are invalid removed. It returns the
-// element itself if it has no var() functions.
-func (c *Context) svgWithVars(n *html.Node) *html.Node {
-	has := false
-	var check func(n *html.Node)
-	check = func(n *html.Node) {
-		for _, a := range n.Attr {
-			if strings.Contains(a.Val, "var(") {
-				has = true
-				return
-			}
-		}
-		for ch := n.FirstChild; ch != nil && !has; ch = ch.NextSibling {
-			check(ch)
-		}
-	}
-	check(n)
-	if !has {
-		return n
-	}
+// svgProperties are the CSS properties of SVG elements that the SVG
+// reader gets from their style attribute, which are given to it from the
+// cascade of the page (as the rules of its style sheets for SVG icons).
+var svgProperties = map[string]bool{
+	"fill": true, "fill-opacity": true, "fill-rule": true, "stroke": true, "stroke-width": true,
+	"stroke-opacity": true, "stroke-linecap": true, "stroke-linejoin": true, "stroke-dasharray": true,
+	"stroke-dashoffset": true, "stroke-miterlimit": true, "opacity": true, "display": true,
+	"color": true, "clip-path": true, "clip-rule": true, "mask": true, "font-size": true,
+	"font-family": true, "font-weight": true, "font-style": true, "text-anchor": true,
+	"stop-color": true, "stop-opacity": true, "vector-effect": true, "transform": true,
+	"visibility": true,
+}
+
+// svgRootSkip are the svgProperties that are not given for the svg element
+// itself, which are those of its widget.
+var svgRootSkip = map[string]bool{"display": true, "visibility": true, "opacity": true, "transform": true}
+
+// svgForRender returns the given svg element as it is to be rendered: a
+// copy of it whose elements have the values of the SVG properties of the
+// cascade of the page (as of its style sheets, which the SVG reader does
+// not know) in their style attribute, with the var() functions in their
+// attributes (as in fill, as in the icons of BBC News) replaced by the
+// values of the custom properties of their elements, and the attributes
+// whose var() functions are invalid removed.
+func (c *Context) svgForRender(n *html.Node) *html.Node {
 	var clone func(n *html.Node) *html.Node
 	clone = func(n *html.Node) *html.Node {
 		cn := &html.Node{Type: n.Type, Data: n.Data, DataAtom: n.DataAtom, Namespace: n.Namespace}
+		style := c.svgStyle(n, n == c.Node || n.Data == "svg" && n.Parent != nil && n.Parent.Namespace != "svg")
 		for _, a := range n.Attr {
+			if a.Key == "style" && n.Type == html.ElementNode {
+				continue // in style
+			}
+			if _, ok := style[a.Key]; ok {
+				continue // the style has precedence over presentation attributes
+			}
 			if strings.Contains(a.Val, "var(") {
-				if a.Key == "style" { // each of its declarations
-					var ds []string
-					for _, d := range strings.Split(a.Val, ";") {
-						if v, ok := c.substituteVars(n, d, nil); ok {
-							ds = append(ds, v)
-						}
-					}
-					a.Val = strings.Join(ds, ";")
-				} else {
-					v, ok := c.substituteVars(n, a.Val, nil)
-					if !ok {
-						continue
-					}
-					a.Val = v
+				v, ok := c.substituteVars(n, a.Val, nil)
+				if !ok {
+					continue
 				}
+				a.Val = v
 			}
 			cn.Attr = append(cn.Attr, a)
+		}
+		if len(style) > 0 {
+			props := make([]string, 0, len(style))
+			for p := range style {
+				props = append(props, p)
+			}
+			sort.Strings(props)
+			var sb strings.Builder
+			for i, p := range props {
+				if i > 0 {
+					sb.WriteString("; ")
+				}
+				sb.WriteString(p + ": " + style[p])
+			}
+			cn.Attr = append(cn.Attr, html.Attribute{Key: "style", Val: sb.String()})
 		}
 		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
 			cn.AppendChild(clone(ch))
@@ -87,6 +101,45 @@ func (c *Context) svgWithVars(n *html.Node) *html.Node {
 	}
 	return clone(n)
 }
+
+// svgStyle returns the values of the SVG properties of the given element
+// in the cascade of the page (its style sheets and style attribute, with
+// var() resolved, not the defaults of the browser), as the SVG reader
+// understands them; for the root svg element, without those of its widget.
+func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
+	if n.Type != html.ElementNode {
+		return nil
+	}
+	var style map[string]string
+	for _, d := range c.declarations(n) { // in the order of the cascade: the last one wins
+		if d.origin == originUserAgent || !svgProperties[d.Property] || (root && svgRootSkip[d.Property]) {
+			continue
+		}
+		if style == nil {
+			style = map[string]string{}
+		}
+		v := strings.TrimSpace(d.Value)
+		if d.invalid || v == "" || strings.Contains(v, "var(") {
+			delete(style, d.Property)
+			continue
+		}
+		switch d.Property {
+		case "visibility": // hidden as not displayed (the SVG reader has no visibility)
+			if strings.EqualFold(v, "hidden") || strings.EqualFold(v, "collapse") {
+				style["display"] = "none"
+			}
+			continue
+		case "transform": // CSS units, which SVG transforms do not have
+			v = cssTransformUnits.ReplaceAllString(v, "$1")
+		}
+		style[d.Property] = v
+	}
+	return style
+}
+
+// cssTransformUnits matches the units of the numbers of CSS transforms that
+// are the user units of SVG transforms (px, and deg for angles).
+var cssTransformUnits = regexp.MustCompile(`(-?[0-9.]+)(px|deg)\b`)
 
 func handleImage(ctx *Context, tag string) core.Widget {
 	if strings.TrimSpace(GetAttr(ctx.Node, "src")) == "" {
