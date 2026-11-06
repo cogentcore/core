@@ -91,6 +91,12 @@ type Context struct {
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
 
+	// PostURL, if not nil, is the function used to open URLs with a POST
+	// request with the given body of the given content type, as for
+	// submitting forms with the POST method. If it is nil, those forms
+	// can not be submitted.
+	PostURL func(url, contentType string, body []byte, e events.Event)
+
 	// ElementHandlers is a map of handler functions for each HTML element
 	// type (eg: "button", "input", "p"). It is empty by default, but can be
 	// used by anyone in need of behavior different than the default behavior
@@ -424,7 +430,7 @@ func (c *Context) NewPage() *Context {
 	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
 	n.Scripting = c.Scripting
 	n.PageURL = c.PageURL
-	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
+	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers
 	n.WikilinkHandlers = c.WikilinkHandlers
 	n.AttributeHandlers = c.AttributeHandlers
