@@ -225,19 +225,26 @@ func (r *resolver) replacedSize() {
 	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil && node.Data == "svg" {
 		// an svg without a size is as wide as its container, and as
 		// high as the aspect ratio of its view box makes it
-		if st.width == nil {
+		aspect := float32(0.5)
+		hasAspect := false
+		vb := strings.Fields(strings.ReplaceAll(GetAttr(node, "viewBox")+GetAttr(node, "viewbox"), ",", " "))
+		if len(vb) == 4 {
+			w, _ := strconv.ParseFloat(vb[2], 32)
+			h, _ := strconv.ParseFloat(vb[3], 32)
+			if w > 0 && h > 0 {
+				aspect, hasAspect = float32(h/w), true
+			}
+		}
+		switch {
+		case st.width == nil && st.height != nil && st.height.Unit == units.UnitDp && hasAspect:
+			// as wide as its height makes it (as the logos of github.com,
+			// which were as wide as their container)
+			s.Min.X = units.Dp(st.height.Value / aspect)
+			s.Max.X = s.Min.X
+		case st.width == nil:
 			s.Min.X, s.Max.X = units.Pw(100), units.Pw(100)
 		}
 		if st.height == nil {
-			aspect := float32(0.5)
-			vb := strings.Fields(strings.ReplaceAll(GetAttr(node, "viewBox")+GetAttr(node, "viewbox"), ",", " "))
-			if len(vb) == 4 {
-				w, _ := strconv.ParseFloat(vb[2], 32)
-				h, _ := strconv.ParseFloat(vb[3], 32)
-				if w > 0 && h > 0 {
-					aspect = float32(h / w)
-				}
-			}
 			if st.width != nil && st.width.Unit == units.UnitDp {
 				s.Min.Y = units.Dp(st.width.Value * aspect)
 			} else {

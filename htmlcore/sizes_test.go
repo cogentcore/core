@@ -414,3 +414,15 @@ func TestContainerUnits(t *testing.T) {
 			assert.InDelta(t, 100*dp, ws["inline"].Geom.Size.Actual.Total.X, 2)
 		})
 }
+
+// TestSVGHeightAspect tests that an svg with a height and no width is as
+// wide as the aspect ratio of its view box makes it (as the logos of
+// github.com, which were as wide as their container).
+func TestSVGHeightAspect(t *testing.T) {
+	widgetsByID(t, `<div style="display: flex; width: 800px"><svg id="logo" viewBox="0 0 400 94" style="height: 32px"><rect width="400" height="94"/></svg></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			sz := ws["logo"].Geom.Size.Actual.Content
+			assert.InDelta(t, 32*dp, sz.Y, 1)
+			assert.InDelta(t, 32*400/94.0*dp, sz.X, 2)
+		})
+}
