@@ -234,7 +234,7 @@ func (c *Context) stackGrid(w core.Widget) bool {
 // given number of columns from the numbers of its start lines in its
 // grid-row and grid-column (or grid-area), if it has both (as the cells
 // of the repository grid of github.com, as grid-column: 1; grid-row: 1).
-func (c *Context) gridPlacement(n *html.Node, ncols int) (gridArea, bool) {
+func (c *Context) gridPlacement(n *html.Node, ncols, nrows int) (gridArea, bool) {
 	if n == nil {
 		return gridArea{}, false
 	}
@@ -261,7 +261,7 @@ func (c *Context) gridPlacement(n *html.Node, ncols int) (gridArea, bool) {
 	if !okc || cl > ncols {
 		return gridArea{}, false
 	}
-	a := gridArea{row: r - 1, col: cl - 1, rows: gridSpan(row, 0), cols: min(gridSpan(col, ncols), ncols-cl+1)}
+	a := gridArea{row: r - 1, col: cl - 1, rows: gridSpan(row, nrows), cols: min(gridSpan(col, ncols), ncols-cl+1)}
 	if !okr {
 		a.row = -1 // auto: in the first row where its columns are free
 	}
@@ -360,6 +360,21 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 	if fr := frameOf(w); fr != nil && len(tracks) > 0 && !slices.ContainsFunc(tracks, func(t string) bool { return !strings.HasSuffix(t, "fr") && !strings.HasSuffix(t, "fr)") }) {
 		fr.FrColumns = true // all of its tracks are fr (see core.Frame.FrColumns)
 	}
+	// the row tracks: of grid-template-rows, or before the / of grid-template
+	rowsDecl := ""
+	if prop, v := c.lastDeclaration(n, "grid-template-rows", "grid-template"); prop == "grid-template" {
+		if r, _, ok := cutTopLevel(v, '/'); ok && !strings.ContainsAny(r, `"'`) {
+			rowsDecl = r
+		}
+	} else {
+		rowsDecl = v
+	}
+	rowTracks := gridTracks(rowsDecl)
+	if fr := frameOf(w); fr != nil {
+		// the last row is flexible, and the others are auto (see core.Frame.FrLastRow)
+		fr.FrLastRow = len(rowTracks) > 1 && strings.HasSuffix(rowTracks[len(rowTracks)-1], "fr") &&
+			!slices.ContainsFunc(rowTracks[:len(rowTracks)-1], func(t string) bool { return t != "auto" && t != "min-content" && t != "max-content" })
+	}
 	trackOf := func(col int) string {
 		if col < len(tracks) {
 			return tracks[col]
@@ -380,7 +395,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		if kw, ok := k.(core.Widget); ok {
 			kn, _ := kw.AsWidget().Property("node").(*html.Node)
 			name, _, _ := cutTopLevel(c.declaration(kn, "grid-area"), '/')
-			if a, ok := c.gridPlacement(kn, ncols); (ok && a.row >= 0) || (name != "" && areas[name] != (gridArea{})) {
+			if a, ok := c.gridPlacement(kn, ncols, len(rowTracks)); (ok && a.row >= 0) || (name != "" && areas[name] != (gridArea{})) {
 				explicitRow = true
 				break
 			}
@@ -399,7 +414,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		}
 		if a, ok := areas[name]; ok && name != "" {
 			items = append(items, placed{kw, a})
-		} else if a, ok := c.gridPlacement(kn, ncols); ok && (a.row >= 0 || explicitRow) {
+		} else if a, ok := c.gridPlacement(kn, ncols, len(rowTracks)); ok && (a.row >= 0 || explicitRow) {
 			items = append(items, placed{kw, a})
 		} else {
 			auto = append(auto, k)

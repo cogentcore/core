@@ -1315,6 +1315,10 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			sum += li.cell(math32.Y, sp.cell.Y+r, sp.cell.X).Size.Y
 		}
 		if extra := sp.width - sum; extra > 0 {
+			if fr.FrLastRow { // all in the last one (see Frame.FrLastRow)
+				li.cell(math32.Y, sp.cell.Y+sp.span-1, sp.cell.X).Size.Y += extra
+				continue
+			}
 			for r := range sp.span {
 				cd := li.cell(math32.Y, sp.cell.Y+r, sp.cell.X)
 				cd.Size.Y += extra / float32(sp.span)
@@ -2543,6 +2547,25 @@ func (fr *Frame) positionCellsGrid() {
 		}
 		if fr.rowSpan(cwb) == 1 && c.Y < len(rowH) {
 			rowH[c.Y] = max(rowH[c.Y], alloc.Y)
+		}
+		return tree.Continue
+	})
+	// the columns that cells span are widened evenly to fit them (as for
+	// the sizes of the cells), as when all of the cells span columns (as
+	// the stories of npr.org, of 8 and 4 of 12 columns)
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		c, span := cwb.Geom.Cell.X, fr.colSpan(cwb)
+		if span <= 1 || c+span > len(colW) {
+			return tree.Continue
+		}
+		sum := gap.X * float32(span-1)
+		for k := range span {
+			sum += colW[c+k]
+		}
+		if extra := cwb.Geom.Size.Alloc.Total.X - sum; extra > 0 {
+			for k := range span {
+				colW[c+k] += extra / float32(span)
+			}
 		}
 		return tree.Continue
 	})

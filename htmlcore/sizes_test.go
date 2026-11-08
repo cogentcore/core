@@ -511,3 +511,32 @@ func TestGridJustifyItemsStacked(t *testing.T) {
 		assert.InDelta(t, float32(g.Min.X+g.Max.X)/2, float32(logo.Min.X+logo.Max.X)/2, 2, "centered")
 	})
 }
+
+// TestFlexOrder tests the order property of flex items (as the images of
+// the stories of npr.org, before their titles by an order of -1).
+func TestFlexOrder(t *testing.T) {
+	src := `<div style="display: flex; flex-direction: column; width: 300px"><div id="title" style="height: 20px">Title</div>` +
+		`<div id="image" style="order: -1; height: 50px; background: blue"></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.Less(t, ws["image"].Geom.TotalBBox.Min.Y, ws["title"].Geom.TotalBBox.Min.Y, "the image is first")
+	})
+}
+
+// TestGridRowSpanLastRow tests a grid of auto rows and a last row of 1fr,
+// with an item that spans all of its rows (1 / -1) beside the others, all
+// of which span columns (as the stories of npr.org, with their image
+// beside their topic and title): the rows of the others stay together,
+// and the extra height of the image is in the last row; the image is in
+// its columns.
+func TestGridRowSpanLastRow(t *testing.T) {
+	src := `<div id="card" style="display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(2, auto) 1fr; width: 600px">` +
+		`<div id="topic" style="grid-column: 1 / span 8; height: 20px">Congress</div>` +
+		`<div id="title" style="grid-column: 1 / span 8; height: 40px">Title</div>` +
+		`<div id="image" style="grid-area: 1 / 9 / -1 / span 4; height: 200px; background: blue"></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		topic, title, img, card := ws["topic"].Geom.TotalBBox, ws["title"].Geom.TotalBBox, ws["image"].Geom.TotalBBox, ws["card"].Geom.TotalBBox
+		assert.InDelta(t, float32(topic.Max.Y), float32(title.Min.Y), 2, "the title is below the topic")
+		assert.Greater(t, img.Min.X, card.Min.X+int(390*dp), "the image is in its columns")
+		assert.Equal(t, topic.Min.Y, img.Min.Y, "beside the topic")
+	})
+}

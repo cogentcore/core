@@ -54,6 +54,14 @@ type Frame struct {
 	// Otherwise, the columns start at the preferred widths of their cells.
 	FrColumns bool `set:"-" display:"-"`
 
+	// FrLastRow is whether the last row of a [styles.Grid] frame is
+	// flexible and the others are sized by their content, as for a
+	// grid-template-rows of auto rows and a last one of 1fr in CSS: the
+	// extra height of a cell that spans rows (beyond that of the rows) is
+	// in the last row that it spans, not in all of them (as the image of
+	// a story of npr.org beside its title, whose rows stay together).
+	FrLastRow bool `set:"-" display:"-"`
+
 	// layout contains implementation state info for doing layout
 	layout layoutState
 

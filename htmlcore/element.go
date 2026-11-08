@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/core"
@@ -14,6 +15,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -218,6 +220,10 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 // the content of details.
 func (c *Context) arrange(n *html.Node, fr *core.Frame) {
 	switch c.displayOf(n) {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		c.arrangeOrder(fr)
+	}
+	switch c.displayOf(n) {
 	case "grid", "inline-grid":
 		c.arrangeGrid(n, fr)
 	case "block", "list-item", "flow-root", "inline-block":
@@ -226,6 +232,29 @@ func (c *Context) arrange(n *html.Node, fr *core.Frame) {
 	if n.Data == "details" {
 		c.arrangeDetails(n, fr)
 	}
+}
+
+// arrangeOrder puts the children of the given flex or grid container in
+// the order of their order property (stably: those of the same order are
+// in the order of the document), as in CSS (as the images of the stories
+// of npr.org, before their titles by an order of -1).
+func (c *Context) arrangeOrder(fr *core.Frame) {
+	orders := map[tree.Node]int{}
+	for _, k := range fr.Children {
+		kw, ok := k.(core.Widget)
+		if !ok {
+			continue
+		}
+		if kn := NodeOf(kw); kn != nil {
+			if o, err := strconv.Atoi(strings.TrimSpace(c.declaration(kn, "order"))); err == nil && o != 0 {
+				orders[k] = o
+			}
+		}
+	}
+	if len(orders) == 0 {
+		return
+	}
+	slices.SortStableFunc(fr.Children, func(a, b tree.Node) int { return orders[a] - orders[b] })
 }
 
 // linkFrame makes the given frame of an a element open the given URL.
