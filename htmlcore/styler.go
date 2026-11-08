@@ -261,6 +261,26 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			st.display = c.displayOf(node)
 		}
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
+		if node != nil && node.Type == html.ElementNode && st.display == "inline-block" && c.isInlineBox(node) {
+			if d := strings.TrimSpace(c.declaration(node, "display")); d == "" || d == "inline" {
+				// an inline element that is a box (see isInlineBox) does not
+				// change the height of its line by its vertical padding and
+				// border, as in CSS (as the padded links of the sidebar of
+				// daringfireball.net, in lines as high as their text)
+				// (in dots when the units are converted)
+				lessBy := func(m units.Value, by ...units.Value) units.Value {
+					return units.Value{Custom: func(uc *units.Context) float32 {
+						v := m.ToDots(uc)
+						for _, b := range by {
+							v -= b.ToDots(uc)
+						}
+						return v
+					}}
+				}
+				s.Margin.Top = lessBy(s.Margin.Top, s.Padding.Top, s.Border.Width.Top)
+				s.Margin.Bottom = lessBy(s.Margin.Bottom, s.Padding.Bottom, s.Border.Width.Bottom)
+			}
+		}
 		if s.ZIndex != 0 && s.Position == styles.PositionStatic && (pbs == nil || !isFlexOrGrid(pbs.display)) {
 			// as in CSS, the z-index of a static element only applies to
 			// flex and grid items (as the site header of pkg.go.dev, over

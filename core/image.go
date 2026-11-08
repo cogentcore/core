@@ -5,6 +5,10 @@
 package core
 
 import (
+	"image/color"
+	stddraw "image/draw"
+
+	"cogentcore.org/core/paint"
 	"image"
 	"io/fs"
 
@@ -13,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -160,6 +165,11 @@ func (im *Image) Render() {
 		} else {
 			rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
 		}
+		// the image is in its rounded corners, as in CSS (as the round
+		// avatars of lobste.rs)
+		if radius := im.Styles.Border.Radius.Dots(); !sides.AreZero(radius.Sides) {
+			rimg = roundCorners(rimg, radius)
+		}
 		im.prevRenderImage = rimg
 	}
 	pim := im.Scene.Painter.DrawImage(rimg, im.Image, r, sp, draw.Over)
@@ -172,4 +182,40 @@ func (im *Image) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(im.Open).SetIcon(icons.Open)
 	})
+}
+
+// roundCorners returns the given image with its corners rounded by the
+// given radii (top left, top right, bottom right, bottom left), outside of
+// which it is transparent, with antialiased edges.
+func roundCorners(img image.Image, radius sides.Floats) image.Image {
+	b := img.Bounds()
+	w, h := float32(b.Dx()), float32(b.Dy())
+	radius = paint.ClampBorderRadius(radius, w, h)
+	out := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	mask := image.NewAlpha(out.Bounds())
+	for y := 0; y < b.Dy(); y++ {
+		for x := 0; x < b.Dx(); x++ {
+			px, py := float32(x)+0.5, float32(y)+0.5
+			// the center of the corner that the pixel is in, if any
+			var r, cx, cy float32
+			switch {
+			case px < radius.Top && py < radius.Top:
+				r, cx, cy = radius.Top, radius.Top, radius.Top
+			case px > w-radius.Right && py < radius.Right:
+				r, cx, cy = radius.Right, w-radius.Right, radius.Right
+			case px > w-radius.Bottom && py > h-radius.Bottom:
+				r, cx, cy = radius.Bottom, w-radius.Bottom, h-radius.Bottom
+			case px < radius.Left && py > h-radius.Left:
+				r, cx, cy = radius.Left, radius.Left, h-radius.Left
+			}
+			a := float32(1)
+			if r > 0 {
+				d := math32.Hypot(px-cx, py-cy)
+				a = math32.Clamp(r-d+0.5, 0, 1)
+			}
+			mask.SetAlpha(x, y, color.Alpha{uint8(a*255 + 0.5)})
+		}
+	}
+	stddraw.DrawMask(out, out.Bounds(), img, b.Min, mask, image.Point{}, stddraw.Over)
+	return out
 }

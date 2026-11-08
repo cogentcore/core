@@ -5,8 +5,11 @@
 package htmlcore
 
 import (
+	"bytes"
+	"encoding/base64"
 	"image"
 	"image/color"
+	"image/png"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -79,4 +82,33 @@ func TestBorderTriangle(t *testing.T) {
 	assert.NotEqual(t, red, at(0.9, 0.8), "the corners below its sides are not")
 	assert.NotEqual(t, red, at(0.3, 0.75), "beside its sloped edges, it is not")
 	assert.NotEqual(t, red, at(0.7, 0.75), "beside its sloped edges, it is not")
+}
+
+// TestImageBorderRadius tests that an image is in its rounded corners (as
+// the round avatars of lobste.rs, in lines of text): the corners of a red
+// image with a border-radius of 50% are not red, and its center is.
+func TestImageBorderRadius(t *testing.T) {
+	red := image.NewRGBA(image.Rect(0, 0, 32, 32))
+	for i := range red.Pix {
+		red.Pix[i] = []uint8{255, 0, 0, 255}[i%4]
+	}
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, red))
+	src := `<p>by <img id="avatar" style="border-radius: 50%; width: 32px; height: 32px" src="data:image/png;base64,` + base64.StdEncoding.EncodeToString(buf.Bytes()) + `"> someone</p>`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
+	var av *core.WidgetBase
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil && wb.Property("id") == "avatar" {
+			av = wb
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, av)
+	var bb image.Rectangle
+	img := bd.RenderImage(func() {}, func() { bb = av.Geom.ContentBBox })
+	at := func(x, y int) color.RGBA { return color.RGBAModel.Convert(img.At(x, y)).(color.RGBA) }
+	c := bb.Min.Add(bb.Size().Div(2))
+	assert.Equal(t, color.RGBA{255, 0, 0, 255}, at(c.X, c.Y), "the center is red")
+	assert.NotEqual(t, color.RGBA{255, 0, 0, 255}, at(bb.Min.X+1, bb.Min.Y+1), "the corner is not")
 }

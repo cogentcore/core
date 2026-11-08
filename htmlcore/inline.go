@@ -52,6 +52,67 @@ func (c *Context) isInlineLevel(n *xhtml.Node) bool {
 	return false
 }
 
+// isInlineBox returns whether the given inline element is a box of its
+// own in its line, which is not all text in the markup of a [core.Text]
+// (which has no borders or padding): an element with a border that does
+// not wrap (as the tags of lobste.rs, with rounded corners), or with a
+// border or horizontal padding and no text beside it (as the padded links
+// of the footer of lobste.rs, in a nav). Elements in text that wraps (as
+// links with a bottom border, or code with padding) are text.
+func (c *Context) isInlineBox(n *xhtml.Node) bool {
+	// only an element of text, which is text otherwise (with no images)
+	for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
+		if !c.isTextElement(ch) {
+			return false
+		}
+	}
+	border := false
+	for _, prop := range []string{"border", "border-top", "border-right", "border-bottom", "border-left", "border-width", "border-style"} {
+		if v := strings.ToLower(strings.TrimSpace(c.declaration(n, prop))); !noLength(v) {
+			border = true
+			break
+		}
+	}
+	if ws := strings.TrimSpace(c.declaration(n, "white-space")); border && (ws == "nowrap" || ws == "pre") {
+		return true
+	}
+	padding := border
+	for _, prop := range []string{"padding-left", "padding-right", "padding-inline", "padding-inline-start", "padding-inline-end"} {
+		if !noLength(strings.TrimSpace(c.declaration(n, prop))) {
+			padding = true
+		}
+	}
+	if v := strings.Fields(c.declaration(n, "padding")); len(v) > 0 {
+		// the horizontal padding is the second value, or the only one
+		h := v[0]
+		if len(v) > 1 {
+			h = v[1]
+		}
+		padding = padding || !noLength(h)
+	}
+	if !padding || n.Parent == nil || n.Parent.Type != xhtml.ElementNode {
+		return false
+	}
+	// in a block, not in an inline element (whose margins would be lost,
+	// as the links of the navigation of w3.org, in inline items)
+	switch strings.TrimSpace(c.declaration(n.Parent, "display")) {
+	case "", "inline", "contents":
+		return false
+	}
+	for s := n.Parent.FirstChild; s != nil; s = s.NextSibling {
+		if s.Type == xhtml.TextNode && strings.TrimSpace(s.Data) != "" {
+			return false
+		}
+	}
+	return true
+}
+
+// noLength returns whether the given CSS value is no length (or none).
+func noLength(v string) bool {
+	v = strings.ToLower(v)
+	return v == "" || strings.Contains(v, "none") || strings.Contains(v, "hidden") || v == "0" || strings.HasPrefix(v, "0 ") || strings.HasPrefix(v, "0px")
+}
+
 // isTextElement returns whether the given element is all text, which is
 // represented in the markup of a [core.Text]: an element of text (such as
 // span and b) that is displayed inline, with only text in it.

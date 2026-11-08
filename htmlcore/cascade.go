@@ -715,6 +715,9 @@ func (c *Context) displayOf(n *html.Node) string {
 			return "table"
 		}
 	}
+	if (d == "" || d == "inline") && richTags[n.Data] && n.Data != "br" && c.isInlineBox(n) {
+		return "inline-block" // a box of its own in its line (see isInlineBox)
+	}
 	return d
 }
 
