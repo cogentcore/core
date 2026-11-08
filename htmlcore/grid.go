@@ -158,11 +158,9 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 	}
 	if l, ok := env.length(track, units.UnitPw); ok {
 		s.BoxSizing = styles.BoxBorderBox
-		if l.Unit == units.UnitPw { // a percentage of the grid, which it fills
-			s.Max.X = l
-			s.Grow.X, s.Shrink.X = 1, 1
-			return
-		}
+		// a length or a percentage of the grid is the width of the track,
+		// which its content does not narrow (as the 21.5% navigation of
+		// pkg.go.dev, beside documentation with wide lines of code)
 		s.Min.X, s.Max.X = l, l
 		s.Grow.X, s.Shrink.X = 0, 0
 		return

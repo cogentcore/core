@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -458,5 +459,34 @@ func TestTransparentControlHover(t *testing.T) {
 		assert.Greater(t, label.Styles.StateLayer, float32(0))
 		sw.Send(events.MouseLeave)
 		assert.False(t, label.StateIs(states.Hovered))
+	})
+}
+
+// TestSelectOneLine tests a select that is a block of 100% width (as the
+// navigation select of pkg.go.dev): the text of its option is on one line
+// with its arrow, at its start, and a select with no appearance (which
+// draws its own arrow, as a background) has no arrow of its own.
+func TestSelectOneLine(t *testing.T) {
+	src := `<div style="width: 400px"><select id="a" style="display: block; width: 100%"><option>Documentation</option></select>` +
+		`<select id="b" style="appearance: none"><option>English</option></select></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		a := ws["a"]
+		var text, indicator *core.WidgetBase
+		a.WidgetWalkDown(func(k core.Widget, kb *core.WidgetBase) bool {
+			switch kb.Name {
+			case "text":
+				text = kb
+			case "indicator":
+				indicator = kb
+			}
+			return tree.Continue
+		})
+		require.NotNil(t, text)
+		require.NotNil(t, indicator)
+		assert.Less(t, text.Geom.TotalBBox.Min.X-a.Geom.TotalBBox.Min.X, int(40*dp), "the text is at the start")
+		assert.Greater(t, indicator.Geom.TotalBBox.Min.X, text.Geom.TotalBBox.Max.X-1, "the arrow is after the text")
+		assert.Less(t, indicator.Geom.TotalBBox.Min.Y, text.Geom.TotalBBox.Max.Y, "on one line")
+		b := ws["b"].This.(*core.Chooser)
+		assert.Equal(t, icons.None, b.Indicator, "no arrow")
 	})
 }

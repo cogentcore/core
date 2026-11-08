@@ -841,6 +841,10 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 		}
 	}
 	if got {
+		// the min is of the content, and the total has the space around it
+		// (as the padding of the 21.5% navigation of pkg.go.dev, which was
+		// narrower by its padding)
+		effmin = effmin.Add(sz.Space)
 		sz.fitTotalMax(&sz.Actual.Total, effmin)
 		sz.fitTotalMax(&sz.Alloc.Total, effmin)
 		sz.SetContentFromTotal(&sz.Actual)

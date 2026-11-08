@@ -23,7 +23,9 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/text/textcore"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -309,7 +311,33 @@ func handleSelect(ctx *Context) {
 		ch.Items = append(ch.Items, core.ChooserItem{Value: optionValue(o), Text: strings.TrimSpace(nodeText(o))})
 	}
 	ch.SetCurrentIndex(max(current, 0))
+	// with no appearance, the page draws its own arrow (as a background)
+	if a := ctx.declaration(ctx.Node, "appearance"); a == "none" || ctx.declaration(ctx.Node, "-webkit-appearance") == "none" {
+		ch.SetIndicator(icons.None)
+	}
+	alignDeclared := ctx.declaration(ctx.Node, "text-align") != ""
 	ctx.handleWidget(ctx.Node, ch)
+	// as in browsers, the text of the current option is at the start, on
+	// one line with the arrow at the end, in a select of any display (as
+	// the navigation select of pkg.go.dev, a block of 100% width)
+	ch.FinalStyler(func(s *styles.Style) {
+		s.Display = styles.Flex
+		s.Direction = styles.Row
+		s.Wrap = false
+		s.Align.Items = styles.Center
+		s.Justify.Content = styles.Start
+		if !alignDeclared {
+			s.Text.Align = text.Start
+		}
+	})
+	ch.Maker(func(p *tree.Plan) {
+		tree.AddInit(p, "text", func(w *core.Text) {
+			w.FinalStyler(func(s *styles.Style) {
+				s.Grow.X = 1
+				s.Text.Align = ch.Styles.Text.Align
+			})
+		})
+	})
 }
 
 // handleButton handles a button element: a block of its content,

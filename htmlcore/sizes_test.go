@@ -483,3 +483,16 @@ func TestCalcPercentLength(t *testing.T) {
 			assert.LessOrEqual(t, ws["min"].Geom.Size.Actual.Total.X, 400*dp+1)
 		})
 }
+
+// TestGridPercentTrack tests a grid column of a percentage (as the 21.5%
+// navigation of pkg.go.dev), with padding, beside a column of wide content:
+// the column is that percentage of the grid, which the content beside it
+// does not narrow, and the padding is within it (with border-box).
+func TestGridPercentTrack(t *testing.T) {
+	src := `<div id="grid" style="display: grid; grid-template: min-content / 20% minmax(0, auto); grid-template-areas: 'nav article'; width: 500px">` +
+		`<nav id="nav" style="grid-area: nav; padding-left: 24px; box-sizing: border-box"><a href="#">Index</a></nav>` +
+		`<article style="grid-area: article; overflow: auto"><pre>` + strings.Repeat("wide content ", 30) + `</pre></article></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.InDelta(t, 100*dp, ws["nav"].Geom.Size.Actual.Total.X, 2, "20% of the grid")
+	})
+}

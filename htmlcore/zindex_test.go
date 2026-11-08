@@ -47,3 +47,36 @@ func TestZIndexFlexItem(t *testing.T) {
 	})
 	assert.Equal(t, color.RGBA{255, 0, 0, 255}, color.RGBAModel.Convert(img.At(c.X, c.Y)), "the menu is over the main")
 }
+
+// TestBorderTriangle tests the borders of a box of no size with a colored
+// top and transparent sides, which is a triangle in CSS (as the arrow of
+// the language select of the Rust site, in its ::after): the sides of a
+// border are filled between its outer and inner edges, with mitered
+// corners.
+func TestBorderTriangle(t *testing.T) {
+	src := `<div id="tri" style="width: 0; height: 0; border-top: 20px solid red; border-right: 20px solid transparent; border-left: 20px solid transparent"></div>`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
+	var tri *core.WidgetBase
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil && wb.Property("id") == "tri" {
+			tri = wb
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, tri)
+	var bb image.Rectangle
+	img := bd.RenderImage(func() {}, func() { bb = tri.Geom.TotalBBox })
+	red := color.RGBA{255, 0, 0, 255}
+	at := func(fx, fy float32) color.RGBA {
+		x := bb.Min.X + int(fx*float32(bb.Dx()))
+		y := bb.Min.Y + int(fy*float32(bb.Dy()))
+		return color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
+	}
+	assert.Equal(t, red, at(0.5, 0.2), "the middle of the top is red")
+	assert.Equal(t, red, at(0.5, 0.8), "the point of the triangle is red")
+	assert.NotEqual(t, red, at(0.1, 0.8), "the corners below its sides are not")
+	assert.NotEqual(t, red, at(0.9, 0.8), "the corners below its sides are not")
+	assert.NotEqual(t, red, at(0.3, 0.75), "beside its sloped edges, it is not")
+	assert.NotEqual(t, red, at(0.7, 0.75), "beside its sloped edges, it is not")
+}
