@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
@@ -301,4 +302,26 @@ func TestMaxWidthNarrower(t *testing.T) {
 			assert.InDelta(t, 800*dp, ws["container"].Geom.Size.Actual.Total.X, 2)
 			assert.LessOrEqual(t, ws["text"].Geom.Size.Actual.Total.X, 800*dp)
 		})
+}
+
+// TestScrollContentWidth tests that a box that scrolls in width, in a flex
+// row, is as wide as its content when there is room (as the scrolling list
+// of the chapters of the video of github.com, which was not shown), and
+// narrower, scrolling its content, when there is not.
+func TestScrollContentWidth(t *testing.T) {
+	item := `<li style="flex-shrink: 0; display: flex"><button style="padding: 8px 16px"><span style="display: block">Review changes</span></button></li>`
+	page := func(width string) string {
+		return `<div style="display: flex; justify-content: center; gap: 8px; width: ` + width + `">` +
+			`<div id="chapters" style="min-width: 0"><div id="viewport" style="overflow-x: auto"><ul id="list" style="gap: 12px; width: max-content; margin: 0 auto; padding: 0; list-style: none; display: flex">` +
+			item + item + item + `</ul></div></div><button>play</button></div>`
+	}
+	widgetsByID(t, page("1000px"), func(ws map[string]*core.WidgetBase, dp float32) {
+		list := ws["list"].Geom.Size.Actual.Total.X
+		assert.Greater(t, list, 300*dp)
+		assert.InDelta(t, list, ws["chapters"].Geom.Size.Actual.Total.X, 1, "as wide as its content")
+	})
+	widgetsByID(t, page("200px"), func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.Less(t, ws["chapters"].Geom.Size.Actual.Total.X, 200*dp, "narrowed to fit")
+		assert.True(t, core.AsFrame(ws["viewport"].This).HasScroll[math32.X], "its content scrolls")
+	})
 }

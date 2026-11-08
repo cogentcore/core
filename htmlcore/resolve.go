@@ -489,6 +489,12 @@ func (r *resolver) sizes() {
 		(st.overflowHidden[1] || s.Overflow.Y == styles.OverflowVisible) && (st.overflowHidden[0] || st.overflowHidden[1]) {
 		s.ScrollbarWidth.Zero() // hidden, not scrolled
 	}
+	if s.Overflow.X >= styles.OverflowAuto && s.Shrink.X == 0 {
+		// a box that scrolls is as wide as its content, narrowed to fit
+		// (to nothing), as in CSS (as the scrolling list of the chapters of
+		// the video of github.com)
+		s.Shrink.X = 1
+	}
 	// Overflow only scrolls (or clips) a box whose height is limited,
 	// and that of the body is that of the viewport, which scrolls anyway.
 	// A box that is out of flow with its top and bottom set is as high as

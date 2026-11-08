@@ -679,7 +679,11 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 		if nosz {
 			continue
 		}
-		if !(fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil {
+		// a frame that scrolls is as large as its style, unless it shrinks
+		// in width (as in CSS, where it starts at the width of its content,
+		// and is narrowed to fit, down to nothing: see sizeUpIntrinsicFrame)
+		shrinks := pass == SizeUpPass && d == math32.X && fr.Styles.Shrink.X > 0
+		if !(fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil && !shrinks {
 			if mx.Dim(d) > 0 {
 				asz.SetDim(d, styles.ClampMax(styles.ClampMin(asz.Dim(d), nsz.Dim(d)), mx.Dim(d)))
 			}
