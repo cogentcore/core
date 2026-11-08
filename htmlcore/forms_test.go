@@ -490,3 +490,44 @@ func TestSelectOneLine(t *testing.T) {
 		assert.Equal(t, icons.None, b.Indicator, "no arrow")
 	})
 }
+
+// TestTextarea tests that a textarea is a text field of its text (which
+// wraps on lines, as the search box of Google), not an editor, which is
+// only for monospaced text.
+func TestTextarea(t *testing.T) {
+	widgetsByID(t, `<textarea id="t" placeholder="Search">hello world</textarea>`, func(ws map[string]*core.WidgetBase, dp float32) {
+		tf, ok := ws["t"].This.(*core.TextField)
+		require.True(t, ok, "a text field")
+		assert.Equal(t, "hello world", tf.Text())
+		assert.True(t, tf.Styles.Text.WhiteSpace.HasWordWrap(), "it wraps")
+	})
+}
+
+// TestPointerEventsNone tests a button under an overlay that is positioned
+// over it with pointer-events: none, which its children inherit (as the
+// transparent overlays of the search box of Google, over its buttons):
+// the button gets the clicks.
+func TestPointerEventsNone(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	var button *core.WidgetBase
+	clicks := 0
+	ctx.AddWidgetHandler(func(w core.Widget) {
+		if n, ok := w.AsWidget().Property("node").(*html.Node); ok && n.Data == "button" {
+			button = w.AsWidget()
+			button.OnClick(func(e events.Event) { clicks++ })
+		}
+	})
+	require.NoError(t, ReadHTMLString(ctx, b, `<div style="position: relative; width: 200px; height: 60px"><button style="width: 120px; height: 40px">Search</button>`+
+		`<div style="position: absolute; inset: 0; pointer-events: none"><div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.1)"></div></div></div>`))
+	require.NotNil(t, button)
+	b.RenderImage(func() {
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		bb := button.Geom.TotalBBox
+		pos := image.Pt((bb.Min.X+bb.Max.X)/2, (bb.Min.Y+bb.Max.Y)/2)
+		ev.MouseButton(events.MouseDown, events.Left, pos, 0)
+		ev.MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.Equal(t, 1, clicks)
+	})
+}

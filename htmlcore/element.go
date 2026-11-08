@@ -14,8 +14,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/lines"
-	"cogentcore.org/core/text/textcore"
 	"golang.org/x/net/html"
 )
 
@@ -107,9 +105,11 @@ func handleElement(ctx *Context) {
 			newWidget = handleInput(ctx)
 		}
 	case "textarea":
-		buf := lines.NewLines()
-		buf.SetText([]byte(ExtractText(ctx)))
-		newWidget = New[textcore.Editor](ctx).SetLines(buf)
+		// a text field, which wraps its text on lines (an editor is only
+		// for monospaced text)
+		tf := New[core.TextField](ctx).SetText(ExtractText(ctx))
+		tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
+		newWidget = tf
 	case "svg":
 		handleSVG(ctx)
 	case "img":

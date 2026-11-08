@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
-	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
@@ -115,7 +114,7 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 		})
 		return
 	}
-	if tf, ok := w.(*core.TextField); ok {
+	if tf, ok := w.(*core.TextField); ok && n.Data != "textarea" { // enter submits, but not in a textarea
 		tf.OnFirst(events.KeyChord, func(e events.Event) {
 			if kf := keymap.Of(e.KeyChord()); kf == keymap.Enter || kf == keymap.Accept {
 				e.SetHandled()
@@ -251,8 +250,8 @@ func (c *Context) controlValue(n, submitter *html.Node) (string, bool) {
 		}
 		return GetAttr(n, "value"), true
 	case "textarea":
-		if ed, ok := w.(*textcore.Editor); ok {
-			return ed.Lines.String(), true
+		if tf, ok := w.(*core.TextField); ok {
+			return tf.Text(), true
 		}
 		return nodeText(n), true
 	case "select":

@@ -2845,8 +2845,25 @@ func (fr *Frame) positionCellsMainY() {
 }
 
 func (fr *Frame) positionStacked() {
+	avail := fr.Geom.Size.Alloc.Content.Sub(fr.Geom.Size.InnerSpace)
 	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cwb.Geom.RelPos.SetZero()
+		// a child that is smaller than the stack is aligned in it by its
+		// Justify.Self and Align.Self, if they are set (as the logo of
+		// Google, in a grid cell that it is centered in)
+		for d, al := range []styles.Aligns{cwb.Styles.Justify.Self, cwb.Styles.Align.Self} {
+			dim := math32.Dims(d)
+			extra := avail.Dim(dim) - cwb.Geom.Size.Actual.Total.Dim(dim)
+			if extra <= 0 {
+				continue
+			}
+			switch al {
+			case styles.Center:
+				cwb.Geom.RelPos.SetDim(dim, math32.Floor(extra/2))
+			case styles.End:
+				cwb.Geom.RelPos.SetDim(dim, extra)
+			}
+		}
 		if !fr.LayoutStackTopOnly || i == fr.StackTop {
 			cw.Position()
 		}

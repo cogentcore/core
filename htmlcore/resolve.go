@@ -343,7 +343,7 @@ func (r *resolver) lineHeight() {
 // itemGrowth sets how the widget grows and shrinks in the formatting context
 // of its parent: block, flex, grid or table, or shrink-to-fit.
 func (r *resolver) itemGrowth() {
-	wb, st, s, ps, bs, pbs := r.wb, r.st, r.s, r.ps, r.bs, r.pbs
+	c, node, wb, st, s, ps, bs, pbs := r.c, r.node, r.wb, r.st, r.s, r.ps, r.bs, r.pbs
 	// block-level elements fill the width of a block container,
 	// and flex items are stretched in the cross dimension
 	if ps != nil && pbs != nil {
@@ -381,8 +381,19 @@ func (r *resolver) itemGrowth() {
 		if align == "" || align == "auto" {
 			align = pbs.alignItems
 		}
+		// and to the width of their cells, unless they are justified in
+		// them (as the logo of Google, centered by justify-items)
+		justify := strings.TrimSpace(c.declaration(node, "justify-self"))
+		if (justify == "" || justify == "auto") && node != nil && node.Parent != nil {
+			justify = strings.TrimSpace(c.declaration(node.Parent, "justify-items"))
+		}
 		if st.width == nil {
-			s.Grow.X = 1
+			switch justify {
+			case "", "auto", "normal", "stretch":
+				s.Grow.X = 1
+			default:
+				s.Justify.Self = alignValue(justify)
+			}
 		}
 		if (align == "" || align == "stretch" || align == "normal") && st.height == nil {
 			s.Grow.Y = 1

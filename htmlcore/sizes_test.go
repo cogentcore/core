@@ -496,3 +496,18 @@ func TestGridPercentTrack(t *testing.T) {
 		assert.InDelta(t, 100*dp, ws["nav"].Geom.Size.Actual.Total.X, 2, "20% of the grid")
 	})
 }
+
+// TestGridJustifyItemsStacked tests the items of a grid with justify-items:
+// center that are in the same cell (as the logo of Google, and a hidden
+// doodle over it): the one that is shown is as wide as its content, and
+// centered in the cell.
+func TestGridJustifyItemsStacked(t *testing.T) {
+	src := `<div id="grid" style="display: grid; justify-items: center; width: 600px">` +
+		`<div id="logo" style="grid-area: 1 / 1"><div style="width: 200px; height: 50px; background: blue"></div></div>` +
+		`<div style="grid-area: 1 / 1; opacity: 0; visibility: hidden"><div style="width: 100px; height: 50px"></div></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		g, logo := ws["grid"].Geom.TotalBBox, ws["logo"].Geom.TotalBBox
+		assert.InDelta(t, 200*dp, float32(logo.Dx()), 2, "as wide as its content")
+		assert.InDelta(t, float32(g.Min.X+g.Max.X)/2, float32(logo.Min.X+logo.Max.X)/2, 2, "centered")
+	})
+}

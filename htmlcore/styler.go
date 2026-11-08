@@ -248,6 +248,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				}
 			}
 		}
+		if ps != nil { // pointer-events is inherited
+			s.PointerEventsNone = ps.PointerEventsNone
+		}
 		for _, op := range inherit {
 			op(st, s, ps)
 		}

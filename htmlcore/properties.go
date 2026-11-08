@@ -618,6 +618,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			return nil
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = float32(f) })
+	case "pointer-events":
+		none := lval == "none"
+		return op(func(st *cssState, s, ps *styles.Style) { s.PointerEventsNone = none })
 	case "visibility":
 		// (applied with the inherited visibility; see resolveCSS)
 		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = lval })
@@ -700,7 +703,7 @@ var inheritedProperties = map[string]bool{
 	"color": true, "font": true, "font-family": true, "font-size": true, "font-style": true,
 	"font-weight": true, "font-variant": true, "line-height": true, "letter-spacing": true,
 	"word-spacing": true, "text-align": true, "text-indent": true, "text-transform": true,
-	"text-shadow": true, "white-space": true, "visibility": true, "cursor": true, "direction": true,
+	"text-shadow": true, "white-space": true, "visibility": true, "cursor": true, "direction": true, "pointer-events": true,
 	"list-style": true, "list-style-type": true, "list-style-position": true, "quotes": true,
 	"word-break": true, "overflow-wrap": true, "hyphens": true, "tab-size": true,
 	"border-collapse": true, "border-spacing": true, "caption-side": true, "empty-cells": true,
