@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 )
@@ -252,6 +253,49 @@ func TestPositionHiddenEvents(t *testing.T) {
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
 	}, func() {
 		assert.Equal(t, Widget(after), clicked)
+	})
+}
+
+// TestPositionCoveredEvents tests that a widget under a raised widget that
+// has no abilities (as the background of an open menu of Wikipedia, over a
+// button of the page) does not get the hover nor the clicks over it, as in
+// CSS, where only the element on top and those that it is in get them.
+func TestPositionCoveredEvents(t *testing.T) {
+	b := NewBody()
+	header := NewFrame(b)
+	header.Styler(func(s *styles.Style) { s.Padding.Zero(); s.NoClip = true })
+	wrap := fixedFrame(header, 50, 20)
+	wrap.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative; s.NoClip = true })
+	menu := fixedFrame(wrap, 100, 100)
+	menu.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.ZIndex = 5
+		s.Inset.Top, s.Inset.Left = units.Ph(100), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Background = colors.Uniform(colors.White)
+	})
+	menu.FinalStyler(func(s *styles.Style) { s.Abilities = 0 })
+	under := fixedFrame(b, 300, 300)
+	under.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Clickable, abilities.Hoverable) })
+	clicked := false
+	under.OnClick(func(e events.Event) { clicked = true })
+	var pos image.Point
+	b.RenderImage(func() {
+		pos = menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
+		assert.True(t, pos.In(under.Geom.TotalBBox), "over the widget under it")
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		ev.MouseMove(pos.Sub(image.Pt(2, 2)))
+		ev.MouseMove(pos)
+		ev.MouseButton(events.MouseDown, events.Left, pos, 0)
+		ev.MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.False(t, under.StateIs(states.Hovered), "not hovered under the menu")
+		assert.False(t, clicked, "not clicked under the menu")
+		// and outside of the menu, it is
+		out := under.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
+		b.Scene.RenderWindow().SystemWindow.Events().MouseMove(out)
+	}, func() {
+		assert.True(t, under.StateIs(states.Hovered), "hovered outside of the menu")
 	})
 }
 

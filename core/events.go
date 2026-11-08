@@ -362,7 +362,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 
 	em.mouseInBBox = nil
 	em.getMouseInBBox(sc, pos)
-	sortByRenderLayer(em.mouseInBBox)
+	em.mouseInBBox = sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
 	if n == 0 {
@@ -843,7 +843,10 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 // that is rendered over another (as one with a position) gets the events.
 // Of two widgets, the one in the child of their nearest common ancestor
 // that is rendered later is later, as is a widget in another.
-func sortByRenderLayer(ws []Widget) {
+// It returns only the widget that is rendered on top and the widgets that
+// it is in, as in CSS: the widgets under one that is rendered over them
+// (as those under an open menu) do not get the events (as hover).
+func sortByRenderLayer(ws []Widget) []Widget {
 	layered := false
 	for _, w := range ws {
 		if renderLayer(w.AsWidget()) != 0 {
@@ -852,7 +855,7 @@ func sortByRenderLayer(ws []Widget) {
 		}
 	}
 	if !layered {
-		return
+		return ws
 	}
 	// path returns the widgets from the root to the given one
 	path := func(w *WidgetBase) []*WidgetBase {
@@ -883,11 +886,18 @@ func sortByRenderLayer(ws []Widget) {
 		}
 		return cmp.Compare(a, b) // the order of the tree
 	})
-	sorted := make([]Widget, len(ws))
-	for i, j := range idx {
-		sorted[i] = ws[j]
+	top := paths[idx[len(idx)-1]]
+	in := make(map[*WidgetBase]bool, len(top))
+	for _, w := range top {
+		in[w] = true
 	}
-	copy(ws, sorted)
+	sorted := make([]Widget, 0, len(ws))
+	for _, j := range idx {
+		if in[ws[j].AsWidget()] {
+			sorted = append(sorted, ws[j])
+		}
+	}
+	return sorted
 }
 
 // pathLayer returns the layer in which the widget at the given index of the
