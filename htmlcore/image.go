@@ -165,7 +165,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	}
 	var svgData []byte
 	if !ctx.DelayedImageLoad && isSVG {
-		resp, err = Get(ctx, src)
+		resp, err = getImage(ctx, src)
 		if imageError(err) {
 			return nil
 		}
@@ -174,7 +174,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	var im image.Image
 	if !ctx.DelayedImageLoad && !isSVG && ctx.ImageCache == nil {
 		// An image is an svg by its type (not only the extension of its URL).
-		resp, err = Get(ctx, src)
+		resp, err = getImage(ctx, src)
 		if imageError(err) {
 			return nil
 		}
@@ -185,7 +185,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		}
 		if strings.Contains(resp.Header.Get("Content-Type"), "svg") || looksLikeSVG(data) {
 			isSVG, svgData = true, data
-		} else if im, _, err = imagex.Read(bytes.NewReader(data)); imageError(err) {
+		} else if im, err = decodeImage(bytes.NewReader(data)); imageError(err) {
 			return nil
 		}
 	} else if !ctx.DelayedImageLoad && !isSVG {
@@ -265,7 +265,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 			img.AsyncUnlock()
 			return
 		}
-		resp, err := Get(ctx, src)
+		resp, err := getImage(ctx, src)
 		if logGetError(err) != nil {
 			return
 		}
@@ -295,12 +295,12 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 			return im, nil
 		}
 	}
-	resp, err := Get(ctx, src)
+	resp, err := getImage(ctx, src)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	im, _, err := imagex.Read(resp.Body)
+	im, err := decodeImage(resp.Body)
 	if err != nil {
 		// browsers just do not show images that are not supported
 		slog.Debug("error loading image", "url", src, "err", err)
@@ -310,6 +310,36 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 		cache.Add(key, im)
 	}
 	return im, nil
+}
+
+// getImage returns the response for the image at the given URL, also
+// for an error status if it has an image (as the default icon of the
+// favicons of duckduckgo.com, which browsers show, with a status of 404).
+func getImage(ctx *Context, src string) (*http.Response, error) {
+	resp, err := Get(ctx, src)
+	if err == nil || resp == nil || !strings.HasPrefix(resp.Header.Get("Content-Type"), "image/") {
+		return resp, err
+	}
+	u, perr := parseRelativeURL(src, ctx.PageURL)
+	if perr != nil {
+		return resp, err
+	}
+	again, gerr := ctx.GetURL(u.String()) // with its body, which Get closed
+	if gerr != nil {
+		return resp, err
+	}
+	return again, nil
+}
+
+// decodeImage decodes the image in the given reader, of any format that
+// is registered, as ICO (see ico.go), which [imagex.Read] decodes but
+// returns an error for, as it is not one of its formats.
+func decodeImage(r io.Reader) (image.Image, error) {
+	im, _, err := imagex.Read(r)
+	if im != nil {
+		return im, nil
+	}
+	return nil, err
 }
 
 // looksLikeSVG returns whether the given image data is an SVG document.

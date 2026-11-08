@@ -781,6 +781,52 @@ func (wb *WidgetBase) sizeFromStyle() {
 	}
 }
 
+// specifiedHeight returns the height of the content of the widget that is
+// specified by its style, if it is: its Min height in units that are not
+// relative to its parent, or a percentage of the specified height of its
+// parent, if it has a Min height and no Max height (as for a height in CSS).
+func (wb *WidgetBase) specifiedHeight() (float32, bool) {
+	s := &wb.Styles
+	mn := s.Min.Y
+	if mn.Value <= 0 || mn.Custom != nil || s.Max.Y.Value > 0 {
+		return 0, false
+	}
+	switch mn.Unit {
+	case units.UnitPw:
+		return 0, false
+	case units.UnitPh:
+		pwb := wb.parentWidget()
+		if pwb == nil {
+			return 0, false
+		}
+		ph, ok := pwb.specifiedHeight()
+		if !ok {
+			return 0, false
+		}
+		return max(ph*0.01*mn.Value-wb.boxSizingSpace().Y, 0), true
+	}
+	return math32.Ceil(mn.Dots) - wb.boxSizingSpace().Y, true
+}
+
+// styleMinDots returns the Min size of the style in dots, rounded up,
+// without the dimensions that are relative to the size of the parent
+// (pw and ph units), which are not known until the parent is sized (see
+// [WidgetBase.updateParentRelSizes]), as in [WidgetBase.sizeFromStyle]:
+// their dots are of the size of the parent when the widget was styled (as
+// the scene, for a text field of a height of 100% of the search box of
+// duckduckgo.com, which was as high as the window).
+func (wb *WidgetBase) styleMinDots() math32.Vector2 {
+	s := &wb.Styles
+	m := s.Min.Dots().Ceil()
+	if s.Min.X.Unit == units.UnitPw || s.Min.X.Unit == units.UnitPh {
+		m.X = 0
+	}
+	if s.Min.Y.Unit == units.UnitPw || s.Min.Y.Unit == units.UnitPh {
+		m.Y = 0
+	}
+	return m
+}
+
 // boxSizingSpace returns the size of the padding and border of the widget
 // if its Min and Max sizes include them ([styles.BoxBorderBox]), which is
 // subtracted from them for the size of the content, or zero otherwise.
@@ -803,6 +849,14 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 	effmin := sz.Min
 	s := &wb.Styles
 	psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
+	if h, ok := pwb.specifiedHeight(); ok {
+		// a percentage of the height of the parent is of its specified
+		// height, as in CSS, not of the height that it is given, which can
+		// be that of its content: with that, a text field of a height of
+		// 100% in frames of 100% (as the search box of duckduckgo.com)
+		// made them higher by its padding on each pass
+		psz.Y = h
+	}
 	bs := wb.boxSizingSpace()
 	got := false
 	for d := math32.X; d <= math32.Y; d++ {

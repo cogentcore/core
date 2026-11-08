@@ -673,7 +673,7 @@ func (tx *Text) SizeDown(iter int) bool {
 	rsz := tx.configTextAlloc(asz) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
-	sz.setInitContentMin(tx.Styles.Min.Dots().Ceil())
+	sz.setInitContentMin(tx.styleMinDots())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content

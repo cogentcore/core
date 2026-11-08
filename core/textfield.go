@@ -1735,7 +1735,7 @@ func (tf *TextField) SizeUp() {
 func (tf *TextField) SizeDown(iter int) bool {
 	sz := &tf.Geom.Size
 	prevContent := sz.Actual.Content
-	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
+	sz.setInitContentMin(tf.styleMinDots())
 	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content, sz.Max) // get before update
 	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)
