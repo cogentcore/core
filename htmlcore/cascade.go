@@ -107,6 +107,10 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 		}
 		for _, sel := range selectors {
 			sel = strings.TrimSpace(sel)
+			if base, kind, ok := pseudoSelector(sel); ok {
+				c.addPseudoRule(root, base, kind, rule.Declarations, origin)
+				continue
+			}
 			spec := specificity(sel)
 			if cs := compileSelector(sel); cs != nil {
 				spec = cs.specificity

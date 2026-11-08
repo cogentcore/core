@@ -233,9 +233,11 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 		var sb strings.Builder
 		start, end := c.nodeMarkup(n, pre)
 		sb.WriteString(start)
+		sb.WriteString(html.EscapeString(c.pseudoContent(n, "before")))
 		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
 			sb.WriteString(c.inlineMarkup(ch, pre))
 		}
+		sb.WriteString(html.EscapeString(c.pseudoContent(n, "after")))
 		sb.WriteString(end)
 		return sb.String()
 	}

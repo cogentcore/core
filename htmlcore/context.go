@@ -182,6 +182,10 @@ type pageState struct {
 	// sorted in the order of the cascade by [Context.declarations].
 	styles map[*html.Node][]*cssDecl
 
+	// pseudoStyles are the declarations of the ::before and ::after
+	// pseudo-elements of the elements (see pseudo.go).
+	pseudoStyles map[pseudoKey][]*cssDecl
+
 	// sorted records the nodes whose declarations are sorted,
 	// and hinted those whose attributes have been added.
 	sorted, hinted map[*html.Node]bool
