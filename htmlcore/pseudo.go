@@ -115,6 +115,24 @@ func (c *Context) pseudoBox(n *html.Node, kind string) bool {
 	return false
 }
 
+// pseudoAttr is the attribute of the elements of the boxes of
+// pseudo-elements (see [Context.pseudoBoxNode]), which no element of a
+// document has, and which no selector matches.
+const pseudoAttr = ":pseudo"
+
+// PseudoElement returns the kind of the pseudo-element ("before" or
+// "after") whose box the given element is (an element that is not in the
+// document; see the widgets of [NodeOf]), or "" if it is not one, as for
+// an app that gives the elements of the document events: the clicks on a
+// pseudo-element are those of its element (as the chevrons of the sidebar
+// of MDN).
+func PseudoElement(n *html.Node) string {
+	if n == nil || n.Type != html.ElementNode || len(n.Attr) != 1 || n.Attr[0].Key != pseudoAttr {
+		return ""
+	}
+	return n.Attr[0].Val
+}
+
 // pseudoBoxNode returns an element for the given pseudo-element of the
 // given element if it is a box (see [Context.pseudoBox]), or nil: an
 // element that is not in the document, with the declarations of the
@@ -123,7 +141,7 @@ func (c *Context) pseudoBoxNode(el *html.Node, kind string) *html.Node {
 	if !c.pseudoBox(el, kind) {
 		return nil
 	}
-	pn := &html.Node{Type: html.ElementNode, Data: "span"}
+	pn := &html.Node{Type: html.ElementNode, Data: "span", Attr: []html.Attribute{{Key: pseudoAttr, Val: kind}}}
 	var decls []*cssDecl
 	for _, d := range c.pseudoStyles[pseudoKey{el, kind}] {
 		if d.Property != "content" {

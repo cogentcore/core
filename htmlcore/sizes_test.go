@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"image"
+	"image/color"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
@@ -437,5 +439,27 @@ func TestVisibilityInherit(t *testing.T) {
 			assert.Equal(t, float32(1), ws["shown"].Styles.Opacity)
 			assert.Equal(t, float32(0), ws["hidden"].Styles.Opacity)
 			assert.Equal(t, float32(0), ws["inh"].Styles.Opacity, "the hidden of its parent")
+		})
+}
+
+// TestPseudoElementMarked tests that the widget of the box of a
+// pseudo-element is marked as one (PseudoElement), as for an app that
+// gives the elements their clicks, and that no selector matches it.
+func TestPseudoElementMarked(t *testing.T) {
+	widgetsByID(t, `<style>.s::before { content: ""; display: inline-block; width: 10px; height: 10px; background: red } [title] { background: blue }</style><div id="s" class="s">text</div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			var kind string
+			var box *core.WidgetBase
+			ws["s"].WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+				if k := PseudoElement(NodeOf(cw)); k != "" {
+					kind, box = k, cwb
+				}
+				return true
+			})
+			assert.Equal(t, "before", kind)
+			if assert.NotNil(t, box) {
+				assert.Equal(t, color.RGBA{255, 0, 0, 255}, colors.AsRGBA(colors.ToUniform(box.Styles.Background)))
+			}
+			assert.Equal(t, "", PseudoElement(NodeOf(ws["s"].This.(core.Widget))))
 		})
 }
