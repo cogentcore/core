@@ -804,10 +804,15 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !cwb.IsVisible() {
+		if cwb.StateIs(states.Invisible) { // (its ancestors are displayable)
 			return tree.Break
 		}
 		if !cwb.posInScBBox(pos) {
+			if cwb.noClip() {
+				// its children can be outside of it (as positioned ones,
+				// as the toggles of the contents of Wikipedia)
+				return tree.Continue
+			}
 			return tree.Break
 		}
 		em.mouseInBBox = append(em.mouseInBBox, cw)

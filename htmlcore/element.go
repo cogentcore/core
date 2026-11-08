@@ -233,6 +233,7 @@ func (c *Context) linkFrame(w *core.Frame, href string) {
 // the frame does: the widgets in it that can be pressed, as its text,
 // otherwise get the clicks instead of the frame.
 func (c *Context) handleInLink(node *html.Node, w core.Widget) {
+	c.handleInButton(node, w)
 	if len(c.linkFrames) == 0 {
 		return
 	}
@@ -337,4 +338,22 @@ func (ctx *Context) hasFloatChild(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// handleInButton makes the text of the given widget, if it is in a button
+// element (at the given node or in it), not selectable, as in browsers, so
+// that the button gets the presses and clicks on it (as the toggles of the
+// contents of Wikipedia, whose text is in elements in the button).
+func (c *Context) handleInButton(node *html.Node, w core.Widget) {
+	if _, isText := w.(*core.Text); !isText {
+		return
+	}
+	for n := node; n != nil; n = n.Parent {
+		if n.Type == html.ElementNode && n.Data == "button" {
+			w.AsWidget().Styler(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable, abilities.Slideable)
+			})
+			return
+		}
+	}
 }

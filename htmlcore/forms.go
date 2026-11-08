@@ -67,6 +67,26 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 		c.nodeWidgets = map[*html.Node]core.Widget{}
 	}
 	c.nodeWidgets[n] = w
+	if sw, ok := w.(*core.Switch); ok && strings.EqualFold(GetAttr(n, "type"), "radio") && GetAttr(n, "name") != "" {
+		// a radio button that is checked unchecks the others of its group
+		// (with its name, in its form or outside of forms)
+		sw.OnChange(func(e events.Event) {
+			if !sw.IsChecked() {
+				return
+			}
+			for on, ow := range c.nodeWidgets {
+				osw, ok := ow.(*core.Switch)
+				if !ok || on == n || !strings.EqualFold(GetAttr(on, "type"), "radio") ||
+					GetAttr(on, "name") != GetAttr(n, "name") || ancestorForm(on) != ancestorForm(n) {
+					continue
+				}
+				if osw.IsChecked() {
+					osw.SetChecked(false)
+					osw.NeedsRender()
+				}
+			}
+		})
+	}
 	form := ancestorForm(n)
 	if form == nil {
 		return
@@ -316,12 +336,14 @@ func handleInput(ctx *Context) core.Widget {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			newWidget = New[core.Spinner](ctx).SetValue(fval)
-		case "checkbox":
-			newWidget = New[core.Switch](ctx).SetType(core.SwitchCheckbox).
-				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
-		case "radio":
-			newWidget = New[core.Switch](ctx).SetType(core.SwitchRadioButton).
-				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+		case "checkbox", "radio":
+			// (SetState returns the WidgetBase, which is not the widget)
+			sw := New[core.Switch](ctx).SetType(core.SwitchCheckbox)
+			if ityp == "radio" {
+				sw.SetType(core.SwitchRadioButton)
+			}
+			sw.SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+			newWidget = sw
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			newWidget = New[core.Slider](ctx).SetValue(fval)

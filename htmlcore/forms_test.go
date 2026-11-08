@@ -5,6 +5,8 @@
 package htmlcore
 
 import (
+	"fmt"
+	"image"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -13,6 +15,8 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/net/html"
 )
 
 // TestFormSubmit tests submitting a form, as the search of google.com,
@@ -172,5 +176,66 @@ func TestDetails(t *testing.T) {
 		summaries[0].Send(events.Click)
 	}, func() {
 		assert.True(t, visible(texts["Hidden text"]), "opened by a click")
+	})
+}
+
+// TestRadioGroup tests that radio buttons are switches (as the widgets of
+// the page, for the scripts), and that checking one unchecks the others
+// of its group (as the appearance settings of Wikipedia).
+func TestRadioGroup(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	var kinds []string
+	ctx.AddWidgetHandler(func(w core.Widget) {
+		if n, ok := w.AsWidget().Property("node").(*html.Node); ok && n.Data == "input" {
+			kinds = append(kinds, fmt.Sprintf("%T", w))
+		}
+	})
+	require.NoError(t, ReadHTMLString(ctx, b, `<input type="radio" name="size" id="a" checked><input type="radio" name="size" id="b"><input type="radio" name="other" id="c" checked><input type="checkbox" id="d">`))
+	assert.Equal(t, []string{"*core.Switch", "*core.Switch", "*core.Switch", "*core.Switch"}, kinds)
+	sw := map[string]*core.Switch{}
+	b.WalkDown(func(n tree.Node) bool {
+		if s, ok := n.(*core.Switch); ok {
+			sw[s.Name] = s
+		}
+		return tree.Continue
+	})
+	b.RenderImage(func() {
+		sw["b"].Send(events.Click)
+	}, func() {
+		assert.True(t, sw["b"].IsChecked())
+		assert.False(t, sw["a"].IsChecked(), "unchecked by the other of its group")
+		assert.True(t, sw["c"].IsChecked(), "another group")
+	})
+}
+
+// TestPositionedButtonClick tests clicks with the mouse on a button that is
+// positioned partly outside of its parent, with its text in an element (as
+// the toggles of the contents of Wikipedia): the button gets them, not its
+// text, also where it is outside of its parent.
+func TestPositionedButtonClick(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	var button *core.WidgetBase
+	clicks := 0
+	ctx.AddWidgetHandler(func(w core.Widget) {
+		if n, ok := w.AsWidget().Property("node").(*html.Node); ok && n.Data == "button" {
+			button = w.AsWidget()
+			button.OnClick(func(e events.Event) { clicks++ })
+		}
+	})
+	require.NoError(t, ReadHTMLString(ctx, b, `<ul style="list-style: none; margin-left: 40px"><li style="position: relative; padding-left: 20px">`+
+		`<button style="position: absolute; left: -20px; top: 0; width: 30px; height: 22px"><span>v</span></button><a href="#x">Syntax</a></li></ul>`))
+	require.NotNil(t, button)
+	b.RenderImage(func() {
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		bb := button.Geom.TotalBBox
+		for _, x := range []int{bb.Min.X + 3, (bb.Min.X + bb.Max.X) / 2, bb.Max.X - 3} { // outside of its parent, on its text, inside
+			pos := image.Pt(x, (bb.Min.Y+bb.Max.Y)/2)
+			ev.MouseButton(events.MouseDown, events.Left, pos, 0)
+			ev.MouseButton(events.MouseUp, events.Left, pos, 0)
+		}
+	}, func() {
+		assert.Equal(t, 3, clicks)
 	})
 }
