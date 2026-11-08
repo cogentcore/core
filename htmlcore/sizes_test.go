@@ -426,3 +426,16 @@ func TestSVGHeightAspect(t *testing.T) {
 			assert.InDelta(t, 32*400/94.0*dp, sz.X, 2)
 		})
 }
+
+// TestVisibilityInherit tests that visibility: inherit overrides a
+// visibility of hidden (as the repository panels of github.com, which a
+// script shows with visibility: inherit, over the hidden of their class).
+func TestVisibilityInherit(t *testing.T) {
+	widgetsByID(t, `<style>.p { visibility: hidden }</style><div><div id="shown" class="p" style="visibility: inherit">a</div><div id="hidden" class="p">b</div></div>`+
+		`<div style="visibility: hidden"><div id="inh" style="visibility: inherit">c</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Equal(t, float32(1), ws["shown"].Styles.Opacity)
+			assert.Equal(t, float32(0), ws["hidden"].Styles.Opacity)
+			assert.Equal(t, float32(0), ws["inh"].Styles.Opacity, "the hidden of its parent")
+		})
+}

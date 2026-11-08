@@ -64,6 +64,16 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			lval = "inherit"
 		}
 	}
+	if prop == "visibility" && (lval == "inherit" || lval == "initial") {
+		// that of the parent, or visible (as the repository panels of
+		// github.com, which a script shows with visibility: inherit over
+		// the hidden of their class, which was kept)
+		v := "visible"
+		if lval == "inherit" {
+			v = "" // (see resolve: that of the parent)
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = v })
+	}
 	if lval == "initial" && (prop == "background" || prop == "background-color") {
 		// transparent, over the background of a control (as the menu
 		// buttons of MDN, which were gray)
