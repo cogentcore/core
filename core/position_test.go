@@ -279,3 +279,27 @@ func TestPositionTransparentContent(t *testing.T) {
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0, 0x80, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the fill under the text")
 }
+
+// TestPositionPercentOfContainingBlock tests that the percentages of an
+// absolute widget (as of its margins) are of its containing block, as in
+// CSS, not of its parent (as the dot under the bookmark icon of
+// Wikipedia, with a margin of 50% of its item, which was a long bar).
+func TestPositionPercentOfContainingBlock(t *testing.T) {
+	b := NewBody()
+	item := fixedFrame(b, 40, 40)
+	item.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative; s.NoClip = true })
+	wide := NewFrame(item) // a static parent, wider than the item
+	wide.Styler(func(s *styles.Style) { s.Min.X = units.Dp(400); s.NoClip = true })
+	dot := fixedFrame(wide, 12, 12)
+	dot.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Margin.Left = units.Pw(50)
+	})
+	layoutGeom(b, func() {
+		dp := dot.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 20*dp, dot.Styles.Margin.Left.Dots, 1.5, "50% of the item")
+		assert.Less(t, dot.Geom.Size.Actual.Total.X, 40*dp)
+	})
+}

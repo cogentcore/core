@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
@@ -337,5 +338,29 @@ func TestInputButtonLabelClick(t *testing.T) {
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
 	}, func() {
 		assert.Equal(t, []string{"https://www.example.com/compare?diff=2"}, opened)
+	})
+}
+
+// TestButtonHover tests that buttons (button elements and input buttons,
+// as the Compare selected revisions button of Wikipedia) are darkened
+// when the mouse is over them, by the state layer of their hover state.
+func TestButtonHover(t *testing.T) {
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), b, `<form><input type="submit" value="Compare"> <button>Go</button></form>`))
+	var buttons []*core.Frame
+	b.WalkDown(func(n tree.Node) bool {
+		if fr, ok := n.(*core.Frame); ok && (fr.Property("tag") == "input" || fr.Property("tag") == "button") {
+			buttons = append(buttons, fr)
+		}
+		return tree.Continue
+	})
+	require.Len(t, buttons, 2)
+	b.RenderImage(func() {}, func() {
+		for _, bt := range buttons {
+			assert.True(t, bt.Styles.Abilities.IsHoverable(), bt.Property("tag"))
+			bt.SetState(true, states.Hovered)
+			bt.Style()
+			assert.Greater(t, bt.Styles.StateLayer, float32(0), "a state layer when hovered")
+		}
 	})
 }

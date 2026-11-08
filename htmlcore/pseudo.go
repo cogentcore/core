@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/tree"
 	"github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 )
@@ -374,5 +375,6 @@ func (c *Context) pseudoText(parent core.Widget, el *html.Node, kind string) {
 	}
 	tx := core.NewText(parent).SetText(c.pseudoMarkup(el, kind))
 	tx.SetName(kind)
+	tree.SetUniqueName(tx)
 	c.handleWidget(nil, tx)
 }

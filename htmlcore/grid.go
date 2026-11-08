@@ -261,6 +261,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 			}
 			filler := core.NewFrame(w) // moved into its place below
 			filler.SetName("grid-filler")
+			tree.SetUniqueName(filler) // (names of children must be unique, as for the inspector)
 			track := trackOf(col)
 			filler.Styler(func(s *styles.Style) {
 				s.Padding.Zero()

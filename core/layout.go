@@ -2137,7 +2137,7 @@ func (wb *WidgetBase) styleSizeUpdate() bool {
 	wb.updateParentRelSizes()
 	scsz := wb.Scene.SceneGeom.Size
 	sz := wb.Geom.Size.Alloc.Content
-	psz := pwb.Geom.Size.Alloc.Content
+	psz := wb.percentBase(pwb)
 	chg := wb.Styles.UnitContext.SetSizes(float32(scsz.X), float32(scsz.Y), sz.X, sz.Y, psz.X, psz.Y)
 	if chg {
 		wb.Styles.ToDots()

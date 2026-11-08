@@ -208,3 +208,22 @@ func TestTableFixedLayout(t *testing.T) {
 			assert.Contains(t, text, "−", "the marker of the empty cell")
 		})
 }
+
+// TestUniqueNames tests that the names of the children of each widget are
+// unique, as tree updates require (the inspector crashed with a duplicate
+// name of the fillers of a grid, and an id can be on more than one
+// element of a page).
+func TestUniqueNames(t *testing.T) {
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, `<div style="display: grid; grid-template-areas: 'a a b' 'c . .'"><div style="grid-area: a">a</div><div style="grid-area: c">c</div></div>`+
+		`<p id="dup">one</p><p id="dup">two</p><style>.e::before { content: "x" }</style><div><span class="e"></span><span class="e"></span></div>`))
+	bd.WalkDown(func(k tree.Node) bool {
+		names := map[string]bool{}
+		for _, c := range k.AsTree().Children {
+			name := c.AsTree().Name
+			assert.False(t, names[name], "duplicate name %q in %s", name, k.AsTree().Path())
+			names[name] = true
+		}
+		return tree.Continue
+	})
+}

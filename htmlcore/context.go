@@ -358,6 +358,7 @@ func (c *Context) config(w core.Widget) {
 		switch attr.Key {
 		case "id":
 			wb.SetName(attr.Val)
+			uniqueName(wb)
 			wb.SetProperty("id", attr.Val)
 		case "style": // in the cascade
 		default:
@@ -664,4 +665,20 @@ func NodeOf(w core.Widget) *html.Node {
 		}
 	}
 	return nil
+}
+
+// uniqueName makes the name of the given widget unique among its siblings
+// (as for an id that is on more than one element of a page), as tree
+// updates require (as of the inspector).
+func uniqueName(wb *core.WidgetBase) {
+	p := wb.Parent
+	if p == nil {
+		return
+	}
+	for _, k := range p.AsTree().Children {
+		if k != wb.This && k.AsTree().Name == wb.Name {
+			tree.SetUniqueName(wb)
+			return
+		}
+	}
 }

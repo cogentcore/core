@@ -82,6 +82,13 @@ func (fr *Frame) sizeDownOutOfFlow() {
 			return tree.Continue
 		}
 		sz := &cwb.Geom.Size
+		if cwb.styleSizeUpdate() {
+			// its percentages are of its containing block (see
+			// [WidgetBase.percentBase]), as its margins, which are in
+			// the space of its size from before
+			cwb.spaceFromStyle()
+			sz.SetTotalFromContent(&sz.Actual)
+		}
 		in := cwb.Styles.Inset.Dots()
 		set := cwb.Styles.InsetSet
 		_, cbsz := cwb.containingBlock().paddingBox()

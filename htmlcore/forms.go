@@ -306,7 +306,9 @@ func handleButton(ctx *Context) {
 	ctx.NewParent = w
 	ctx.handleWidget(ctx.Node, w)
 	w.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable)
+		// hoverable for the state layer of buttons when the mouse is over
+		// them (as the darkening of buttons in browsers, by their :hover)
+		s.SetAbilities(true, abilities.Clickable, abilities.Hoverable)
 		s.Cursor = cursors.Pointer
 	})
 }
@@ -321,7 +323,9 @@ func handleInputButton(ctx *Context, typ string) {
 	w := New[core.Frame](ctx)
 	ctx.handleWidget(ctx.Node, w)
 	w.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable)
+		// hoverable for the state layer of buttons when the mouse is over
+		// them (as the darkening of buttons in browsers, by their :hover)
+		s.SetAbilities(true, abilities.Clickable, abilities.Hoverable)
 		s.Cursor = cursors.Pointer
 	})
 	tx := core.NewText(w).SetText(html.EscapeString(label))
