@@ -88,6 +88,15 @@ type Context struct {
 	// root shows (in a slot) only when they are open.
 	Unrendered func(n *html.Node) bool
 
+	// ToggleDetails, if set, toggles the given details element open or
+	// closed in the document that the page is read from (its open
+	// attribute), on a click of its summary, as for an app that runs
+	// scripts, which reads the page again then: its [open] selectors
+	// apply (as the rotated chevrons of the sidebar of MDN), and it stays
+	// open when the page is read again. Otherwise, the details of the page
+	// that is read are shown or hidden in place.
+	ToggleDetails func(n *html.Node)
+
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
 	NewParent core.Widget
@@ -483,6 +492,7 @@ func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
 	n.Scripting, n.WebFonts, n.Checked, n.Unrendered = c.Scripting, c.WebFonts, c.Checked, c.Unrendered
+	n.ToggleDetails = c.ToggleDetails
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers

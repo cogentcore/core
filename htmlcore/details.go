@@ -66,10 +66,17 @@ func (c *Context) arrangeDetails(n *html.Node, fr *core.Frame) {
 	}
 	setMarker()
 	summary.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable)
+		// hoverable for summary:hover (as the highlight of the items of
+		// the sidebar of MDN)
+		s.SetAbilities(true, abilities.Clickable, abilities.Hoverable)
 		s.Cursor = cursors.Pointer
 	})
+	toggle := c.ToggleDetails
 	summary.OnClick(func(e events.Event) {
+		if toggle != nil { // in the document, which is read again
+			toggle(n)
+			return
+		}
 		e.SetHandled()
 		open = !open
 		setMarker()

@@ -178,6 +178,34 @@ func TestDetails(t *testing.T) {
 		summaries[0].Send(events.Click)
 	}, func() {
 		assert.True(t, visible(texts["Hidden text"]), "opened by a click")
+		assert.True(t, summaries[0].Styles.Abilities.IsHoverable(), "for summary:hover")
+	})
+}
+
+// TestToggleDetails tests that a click on a summary toggles its details
+// with Context.ToggleDetails when it is set, as for an app that runs
+// scripts (as the sidebar of MDN), which changes the document.
+func TestToggleDetails(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	var toggled []*html.Node
+	ctx.ToggleDetails = func(n *html.Node) { toggled = append(toggled, n) }
+	ReadHTMLString(ctx, b, `<details id="d"><summary>More</summary><p>Hidden text</p></details>`)
+	var summary *core.Frame
+	b.WalkDown(func(n tree.Node) bool {
+		if f, ok := n.(*core.Frame); ok && f.Property("tag") == "summary" {
+			summary = f
+		}
+		return tree.Continue
+	})
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		summary.Send(events.Click)
+	}, func() {
+		if assert.Len(t, toggled, 1) {
+			assert.Equal(t, "d", GetAttr(toggled[0], "id"))
+		}
 	})
 }
 
