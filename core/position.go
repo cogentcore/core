@@ -161,6 +161,57 @@ func (wb *WidgetBase) relativeOffset() math32.Vector2 {
 	return off
 }
 
+// stickyOffset returns the offset of a [styles.PositionSticky] widget at
+// the given position in the layout of the given parent: the widget stays
+// at its [styles.Style.Inset] from the edges of the visible part of the
+// frame that it scrolls in (as it is scrolled past them), within the
+// content of its parent.
+func (wb *WidgetBase) stickyOffset(pwb *WidgetBase, pos math32.Vector2) math32.Vector2 {
+	var off math32.Vector2
+	sf := wb.parentScrollFrame()
+	if sf == nil {
+		return off
+	}
+	in := wb.Styles.Inset.Dots()
+	set := wb.Styles.InsetSet
+	size := wb.Geom.Size.Actual.Total
+	// the visible part of the scroll frame, and the content of the parent
+	// (all of the content of the scroll frame, if it is the parent)
+	view := math32.Box2{Min: sf.Geom.Pos.Content, Max: sf.Geom.Pos.Content.Add(sf.Geom.Size.Actual.Content)}
+	cmin := pwb.Geom.Pos.Content
+	csize := pwb.Geom.Size.Actual.Content
+	if pwb == sf.AsWidget() {
+		cmin = cmin.Add(sf.Geom.Scroll.Round())
+		csize = sf.Geom.Size.Internal
+	}
+	cmax := cmin.Add(csize)
+	for d := math32.X; d <= math32.Y; d++ {
+		start, end := set.Left, set.Right
+		ins, ine := in.Left, in.Right
+		if d == math32.Y {
+			start, end = set.Top, set.Bottom
+			ins, ine = in.Top, in.Bottom
+		}
+		p, sz := pos.Dim(d), size.Dim(d)
+		np := p
+		if start {
+			np = max(np, view.Min.Dim(d)+ins)
+		}
+		if end {
+			np = min(np, view.Max.Dim(d)-ine-sz)
+		}
+		// within the content of its parent (but not before its position
+		// in the layout for start, or after it for end)
+		if np > p {
+			np = max(min(np, cmax.Dim(d)-sz), p)
+		} else if np < p {
+			np = min(max(np, cmin.Dim(d)), p)
+		}
+		off.SetDim(d, np-p)
+	}
+	return off
+}
+
 // translateOffset returns the offset of the [styles.Style.Translate] of the
 // widget in dots, with percentages of the element width and height of its
 // own size.

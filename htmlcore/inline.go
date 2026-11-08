@@ -164,7 +164,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 	// in, at its start and end (as for elements that are widgets, as the
 	// edit links of Wikipedia, which are inline blocks)
 	if el := first.Parent; el != nil && el.FirstChild == first {
-		buf.WriteString(html.EscapeString(c.pseudoContent(el, "before")))
+		buf.WriteString(c.pseudoMarkup(el, "before"))
 	}
 	for n := first; ; n = n.NextSibling {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
@@ -192,7 +192,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		}
 	}
 	if el := last.Parent; el != nil && el.LastChild == last {
-		buf.WriteString(html.EscapeString(c.pseudoContent(el, "after")))
+		buf.WriteString(c.pseudoMarkup(el, "after"))
 	}
 	flush(false)
 	c.inlineParent = nil
@@ -242,11 +242,11 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 		var sb strings.Builder
 		start, end := c.nodeMarkup(n, pre)
 		sb.WriteString(start)
-		sb.WriteString(html.EscapeString(c.pseudoContent(n, "before")))
+		sb.WriteString(c.pseudoMarkup(n, "before"))
 		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
 			sb.WriteString(c.inlineMarkup(ch, pre))
 		}
-		sb.WriteString(html.EscapeString(c.pseudoContent(n, "after")))
+		sb.WriteString(c.pseudoMarkup(n, "after"))
 		sb.WriteString(end)
 		return sb.String()
 	}

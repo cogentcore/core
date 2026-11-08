@@ -211,7 +211,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "position":
 		pos := styles.PositionStatic
 		switch lval {
-		case "relative", "sticky": // sticky is not supported, and is like relative
+		case "sticky":
+			pos = styles.PositionSticky
+		case "relative":
 			pos = styles.PositionRelative
 		case "absolute":
 			pos = styles.PositionAbsolute

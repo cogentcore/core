@@ -125,7 +125,7 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 		s.Direction = styles.Row
 		s.Wrap = true
-		s.Align.Items = styles.End // close to the baseline for images
+		s.Align.Items = styles.Baseline // texts, and the end for images
 		// as wide as its content on one line, and wraps in less width
 		s.Shrink.X = 1
 	}

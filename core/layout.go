@@ -2303,6 +2303,7 @@ func (fr *Frame) positionCellsMainX() {
 	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	spaces := fr.lineSpaces(math32.X, sz.Actual.Content.X)
 	crosses := fr.lineCrosses(math32.X)
+	baselines := fr.lineBaselines()
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
@@ -2322,6 +2323,18 @@ func (fr *Frame) positionCellsMainX() {
 			}
 		}
 		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items, crosses[min(line, len(crosses)-1)])
+		if baselines != nil && styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self) == styles.Baseline {
+			// the baselines of the items of the line with text are at the
+			// same place, within the line; the others are at its end
+			cross := crosses[min(line, len(crosses)-1)]
+			h := cwb.Geom.Size.Actual.Total.Y
+			if b, ok := cwb.firstBaseline(); ok {
+				off := min(cross-baselines[min(line, len(baselines)-1)]-b, cross-h)
+				cwb.Geom.RelPos.Y = pos.Y + math32.Floor(max(off, 0))
+			} else {
+				cwb.Geom.RelPos.Y = pos.Y + math32.Floor(max(cross-h, 0))
+			}
+		}
 		alloc := cwb.Geom.Size.Alloc.Total
 		pos.X += alloc.X + gap.X
 		lastSz = alloc
@@ -2349,6 +2362,65 @@ func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
 		return tree.Continue
 	})
 	return crosses
+}
+
+// lineBaselines returns, for each line of the children of the frame in
+// a row, the largest distance from the baselines of its children that are
+// aligned on their baselines (see [styles.Baseline]) and have text to
+// their bottoms: they are aligned on a baseline that far from the end of
+// the line (and the children without text are at the end of the line, as
+// with [styles.End]). It returns nil if no children are aligned on their
+// baselines.
+func (fr *Frame) lineBaselines() []float32 {
+	var bases []float32
+	any := false
+	idx := 0
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if cwb.Geom.Cell.X == 0 || idx == 0 {
+			bases = append(bases, 0)
+		}
+		idx++
+		if styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self) != styles.Baseline {
+			return tree.Continue
+		}
+		any = true
+		if b, ok := cwb.firstBaseline(); ok {
+			ln := len(bases) - 1
+			bases[ln] = max(bases[ln], cwb.Geom.Size.Actual.Total.Y-b)
+		}
+		return tree.Continue
+	})
+	if !any {
+		return nil
+	}
+	return bases
+}
+
+// firstBaseline returns the distance from the top of the widget to the
+// baseline of its first line of text: that of a [Text], or of the first
+// child of a [Frame] that has one, and whether there is one.
+func (wb *WidgetBase) firstBaseline() (float32, bool) {
+	top := wb.Styles.BoxSpace().Top
+	switch w := wb.This.(type) {
+	case *Text:
+		if w.paintText == nil || len(w.paintText.Lines) == 0 {
+			return 0, false
+		}
+		ls := w.paintText
+		return top + ls.Lines[0].Offset.Y - ls.Bounds.Min.Y, true
+	case *Frame:
+		var base float32
+		found := false
+		w.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			if b, ok := cwb.firstBaseline(); ok {
+				base, found = top+b, true
+				return tree.Break
+			}
+			return tree.Continue
+		})
+		return base, found
+	}
+	return 0, false
 }
 
 // lineSpaces returns, for each line of the children along the given main
@@ -2483,6 +2555,8 @@ func (wb *WidgetBase) setPosFromParent() {
 		wb.setPosOutOfFlow(parPos)
 	case wb.Styles.Position == styles.PositionRelative:
 		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos).Add(wb.relativeOffset())
+	case pwb != nil && wb.Styles.Position == styles.PositionSticky:
+		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos).Add(wb.stickyOffset(pwb, wb.Geom.RelPos.Add(parPos)))
 	default:
 		wb.Geom.Pos.Total = wb.Geom.RelPos.Add(parPos)
 	}

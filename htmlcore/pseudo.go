@@ -56,9 +56,7 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 		key := pseudoKey{n, kind}
 		for _, d := range decls {
 			p := strings.ToLower(strings.TrimSpace(d.Property))
-			switch p {
-			case "content", "display", "visibility", "opacity":
-			default:
+			if !pseudoProperties[p] {
 				continue // only the text of pseudo-elements is supported
 			}
 			c.cssOrder++
@@ -68,22 +66,146 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 	}
 }
 
-// pseudoContent returns the text of the given pseudo-element ("before" or
-// "after") of the given element: that of its content property, with the
-// strings (with their escapes), attr() values, and quotes of it, without
-// its alternative text (after a /), or "" if it has none.
-func (c *Context) pseudoContent(n *html.Node, kind string) string {
+// pseudoProperties are the properties of pseudo-elements that are
+// supported: those of their text, its color, and its horizontal space.
+var pseudoProperties = map[string]bool{"content": true, "display": true, "visibility": true,
+	"opacity": true, "color": true, "margin": true, "margin-left": true, "margin-right": true,
+	"margin-inline": true, "margin-inline-start": true, "margin-inline-end": true,
+	"padding": true, "padding-left": true, "padding-right": true, "padding-inline": true,
+	"padding-inline-start": true, "padding-inline-end": true}
+
+// pseudoDecls returns the winning declaration of each property of the
+// given pseudo-element ("before" or "after") of the given element, as in
+// the cascade, or nil if it has none.
+func (c *Context) pseudoDecls(n *html.Node, kind string) map[string]*cssDecl {
 	ds := c.pseudoStyles[pseudoKey{n, kind}]
 	if len(ds) == 0 {
-		return ""
+		return nil
 	}
-	// the winning declaration of each property, as in the cascade
 	win := map[string]*cssDecl{}
 	for _, d := range ds {
 		w := win[d.Property]
 		if w == nil || d.rank() > w.rank() || d.rank() == w.rank() && (d.specificity > w.specificity || d.specificity == w.specificity && d.order > w.order) {
 			win[d.Property] = d
 		}
+	}
+	return win
+}
+
+// pseudoMarkup returns the rich text markup of the given pseudo-element
+// ("before" or "after") of the given element: its text, in its color, with
+// its horizontal margins and padding as spaces of their widths (as the
+// space between the brackets and the edit links of Wikipedia), or "".
+func (c *Context) pseudoMarkup(n *html.Node, kind string) string {
+	t := c.pseudoContent(n, kind)
+	if t == "" {
+		return ""
+	}
+	win := c.pseudoDecls(n, kind)
+	// the margin and padding of each side: the declaration of it that is
+	// last in the cascade (as margin-inline after margin-right)
+	type side struct {
+		v     string
+		order int
+	}
+	sides := map[string]side{} // margin-left, padding-right, ...
+	set := func(d *cssDecl, prop, v string) {
+		if s, ok := sides[prop]; !ok || d.order > s.order {
+			sides[prop] = side{v, d.order}
+		}
+	}
+	for _, pre := range []string{"margin", "padding"} {
+		if d := win[pre]; d != nil {
+			fs := strings.Fields(d.Value)
+			switch len(fs) {
+			case 1:
+				set(d, pre+"-left", fs[0])
+				set(d, pre+"-right", fs[0])
+			case 2, 3:
+				set(d, pre+"-left", fs[1])
+				set(d, pre+"-right", fs[1])
+			case 4:
+				set(d, pre+"-left", fs[3])
+				set(d, pre+"-right", fs[1])
+			}
+		}
+		if d := win[pre+"-inline"]; d != nil {
+			fs := strings.Fields(d.Value)
+			if len(fs) == 1 {
+				fs = append(fs, fs[0])
+			}
+			set(d, pre+"-left", fs[0])
+			set(d, pre+"-right", fs[1])
+		}
+		for _, sd := range [][2]string{{"-left", "-left"}, {"-inline-start", "-left"}, {"-right", "-right"}, {"-inline-end", "-right"}} {
+			if d := win[pre+sd[0]]; d != nil {
+				set(d, pre+sd[1], d.Value)
+			}
+		}
+	}
+	left := emLength(sides["margin-left"].v) + emLength(sides["padding-left"].v)
+	right := emLength(sides["margin-right"].v) + emLength(sides["padding-right"].v)
+	m := html.EscapeString(t)
+	// the word joiners keep the spaces from being trimmed (at the start
+	// or end of a text)
+	if sp := emSpaces(left); sp != "" {
+		m = "\u2060" + sp + m
+	}
+	if sp := emSpaces(right); sp != "" {
+		m += sp + "\u2060"
+	}
+	if d := win["color"]; d != nil {
+		clr, ok := c.substituteVars(n, d.Value, nil)
+		if ok && clr != "" && !strings.ContainsAny(clr, `"<>`) {
+			m = `<span style="color: ` + clr + `">` + m + `</span>`
+		}
+	}
+	return m
+}
+
+// emLength returns the given CSS length in em, with px for 16px to the
+// em (and rem as em), or 0 if it is not one of these.
+func emLength(v string) float64 {
+	v = strings.TrimSpace(strings.ToLower(v))
+	for _, u := range []struct {
+		suffix string
+		scale  float64
+	}{{"rem", 1}, {"em", 1}, {"px", 1.0 / 16}} {
+		if num, ok := strings.CutSuffix(v, u.suffix); ok {
+			f, err := strconv.ParseFloat(num, 64)
+			if err != nil {
+				return 0
+			}
+			return f * u.scale
+		}
+	}
+	return 0
+}
+
+// emSpaces returns a string of space characters (which are not collapsed
+// or trimmed) about as wide as the given number of em.
+func emSpaces(em float64) string {
+	var sb strings.Builder
+	for _, sp := range []struct {
+		r rune
+		w float64
+	}{{'\u2003', 1}, {'\u2002', 0.5}, {'\u2004', 1.0 / 3}, {'\u2005', 0.25}, {'\u2006', 1.0 / 6}, {'\u200A', 0.1}} {
+		for em >= sp.w-0.04 && sb.Len() < 64 {
+			sb.WriteRune(sp.r)
+			em -= sp.w
+		}
+	}
+	return sb.String()
+}
+
+// pseudoContent returns the text of the given pseudo-element ("before" or
+// "after") of the given element: that of its content property, with the
+// strings (with their escapes), attr() values, and quotes of it, without
+// its alternative text (after a /), or "" if it has none.
+func (c *Context) pseudoContent(n *html.Node, kind string) string {
+	win := c.pseudoDecls(n, kind)
+	if win == nil {
+		return ""
 	}
 	if d := win["display"]; d != nil && strings.EqualFold(d.Value, "none") {
 		return ""
@@ -183,11 +305,10 @@ func cssString(v string, start int) (string, int) {
 // pseudoText adds a text with the content of the ::before or ::after (the
 // given kind) of the given element to the given parent, if it has any.
 func (c *Context) pseudoText(parent core.Widget, el *html.Node, kind string) {
-	t := c.pseudoContent(el, kind)
-	if strings.TrimSpace(t) == "" {
+	if strings.TrimSpace(c.pseudoContent(el, kind)) == "" {
 		return
 	}
-	tx := core.NewText(parent).SetText(html.EscapeString(t))
+	tx := core.NewText(parent).SetText(c.pseudoMarkup(el, kind))
 	tx.SetName(kind)
 	c.handleWidget(nil, tx)
 }

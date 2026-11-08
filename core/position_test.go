@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
 
 	"cogentcore.org/core/styles"
@@ -129,5 +130,48 @@ func TestPositionEvents(t *testing.T) {
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
 	}, func() {
 		assert.Equal(t, Widget(over), clicked)
+	})
+}
+
+// TestPositionSticky tests a sticky widget at the top of a section of a
+// frame that scrolls: it stays at its inset from the top of the visible
+// part of the frame while the section is scrolled past it, and then goes
+// with the end of the section.
+func TestPositionSticky(t *testing.T) {
+	b := NewBody()
+	scroller := NewFrame(b)
+	scroller.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Min.Set(units.Dp(200), units.Dp(200))
+		s.Max.Set(units.Dp(200), units.Dp(200))
+		s.Padding.Zero()
+		s.Gap.Zero()
+	})
+	section := NewFrame(scroller)
+	section.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Padding.Zero()
+		s.Gap.Zero()
+	})
+	sticky := fixedFrame(section, 100, 30)
+	sticky.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionSticky
+		s.Inset.Top = units.Dp(5)
+		s.InsetSet.Top = true
+	})
+	fixedFrame(section, 100, 500)
+	fixedFrame(scroller, 100, 1000) // after the section
+	b.RenderImage(func() {
+		dp := scroller.Styles.UnitContext.Dots(units.UnitDp)
+		top := scroller.Geom.Pos.Content.Y
+		assert.InDelta(t, top+5*dp, sticky.Geom.Pos.Total.Y, 1.5, "at its inset, below its place in the layout")
+		scroller.ScrollDimToStart(math32.Y, int(top+200*dp))
+		scroller.ApplyScenePos()
+		assert.InDelta(t, top+5*dp, sticky.Geom.Pos.Total.Y, 1.5, "at its inset from the top")
+		scroller.ScrollDimToStart(math32.Y, int(top+(530-10)*dp))
+		scroller.ApplyScenePos()
+		sectionEnd := section.Geom.Pos.Total.Y + section.Geom.Size.Actual.Total.Y
+		assert.InDelta(t, sectionEnd-30*dp, sticky.Geom.Pos.Total.Y, 1.5, "within its section")
 	})
 }

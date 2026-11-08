@@ -132,6 +132,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		}
 	}
 	ops := c.compileDecls(decls)
+	inherit := c.inlineInheritedOps(node, wb)
 	wb.Styler(func(s *styles.Style) {
 		pw, _ := wb.Parent.(core.Widget)
 		var ps *styles.Style
@@ -227,6 +228,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				}
 			}
 		}
+		for _, op := range inherit {
+			op(st, s, ps)
+		}
 		for _, op := range ops {
 			op(st, s, ps)
 		}
@@ -255,4 +259,41 @@ func isBlockDisplay(d string) bool {
 		return true
 	}
 	return false
+}
+
+// inlineInheritedOps returns the style operations of the inherited
+// properties of the inline elements that the given element is in, between
+// it and the element of its parent widget, outermost first. These have no
+// widgets of their own (they are in the text of a run), but their
+// inherited properties apply to the widgets of their children, as the font
+// size of the edit links of Wikipedia, which are inline blocks.
+func (c *Context) inlineInheritedOps(node *html.Node, wb *core.WidgetBase) []styleOp {
+	if node == nil || node.Type != html.ElementNode {
+		return nil
+	}
+	pw, _ := wb.Parent.(core.Widget)
+	if pw == nil {
+		return nil
+	}
+	pn := NodeOf(pw)
+	var chain []*html.Node
+	for p := node.Parent; p != nil && p != pn && p.Type == html.ElementNode; p = p.Parent {
+		switch c.displayOf(p) {
+		case "", "inline", "contents":
+			chain = append(chain, p)
+			continue
+		}
+		break
+	}
+	var ops []styleOp
+	for i := len(chain) - 1; i >= 0; i-- {
+		var inh []*cssDecl
+		for _, d := range c.declarations(chain[i]) {
+			if inheritedProperties[d.Property] {
+				inh = append(inh, d)
+			}
+		}
+		ops = append(ops, c.compileDecls(inh)...)
+	}
+	return ops
 }

@@ -236,6 +236,13 @@ const (
 	// PositionFixed is like [PositionAbsolute], but positioned relative
 	// to the scene, so that it does not scroll.
 	PositionFixed
+
+	// PositionSticky is in the layout of its parent, like [PositionStatic],
+	// but when its parent frame that scrolls is scrolled past it, it stays
+	// at the [Style.Inset] (top, bottom, left, right) from the edges of the
+	// visible part of that frame, within its parent, as the sticky
+	// position of CSS (as a table of contents beside a long page).
+	PositionSticky
 )
 
 // Floats are the ways that widgets can float (see [Style.Float]).
