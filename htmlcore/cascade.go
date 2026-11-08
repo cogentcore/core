@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"io"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -187,6 +188,23 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 		}
 	}
 	return ""
+}
+
+// lastDeclaration returns the property and value of the declaration of
+// the given element that applies of those of the given properties (as a
+// shorthand and its longhand): the last of them in the cascade, or "" if
+// there is none (or it is invalid).
+func (c *Context) lastDeclaration(n *html.Node, props ...string) (prop, value string) {
+	ds := c.declarations(n)
+	for i := len(ds) - 1; i >= 0; i-- {
+		if slices.Contains(props, ds[i].Property) {
+			if ds[i].invalid {
+				return ds[i].Property, ""
+			}
+			return ds[i].Property, ds[i].Value
+		}
+	}
+	return "", ""
 }
 
 // ComputedValue returns the value of the given CSS property for the given

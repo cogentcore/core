@@ -36,15 +36,22 @@ var gridAreaStrings = regexp.MustCompile(`"([^"]*)"|'([^']*)'`)
 // gridTemplate returns the areas, the number of columns, and the column
 // tracks of the grid template of the given grid container.
 func (c *Context) gridTemplate(n *html.Node) (areas map[string]gridArea, ncols int, tracks []string) {
-	areasDecl := c.declaration(n, "grid-template-areas")
-	colsDecl := c.declaration(n, "grid-template-columns")
-	if t := c.declaration(n, "grid-template"); t != "" {
-		if _, cols, ok := cutTopLevel(t, '/'); ok {
+	// the shorthand or the longhand that is last in the cascade applies
+	// (as a grid-template-columns of a more specific rule)
+	colsDecl, areasDecl := "", ""
+	if prop, v := c.lastDeclaration(n, "grid-template-columns", "grid-template"); prop == "grid-template" {
+		if _, cols, ok := cutTopLevel(v, '/'); ok {
 			colsDecl = cols
 		}
-		if strings.ContainsAny(t, `"'`) {
-			areasDecl = t
+	} else {
+		colsDecl = v
+	}
+	if prop, v := c.lastDeclaration(n, "grid-template-areas", "grid-template"); prop == "grid-template" {
+		if strings.ContainsAny(v, `"'`) {
+			areasDecl = v
 		}
+	} else {
+		areasDecl = v
 	}
 	tracks = gridTracks(colsDecl)
 	var rows [][]string

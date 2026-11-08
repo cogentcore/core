@@ -360,6 +360,45 @@ func TestGridTracks(t *testing.T) {
 	assert.Equal(t, []string{"1fr", "1fr", "1fr", "auto"}, gridTracks("repeat(3, 1fr) auto"))
 }
 
+// TestGridTemplateCascade tests that the grid-template shorthand and its
+// longhands apply in the order of the cascade (as the page container of
+// Wikipedia without a table of contents, whose more specific rule has
+// grid-template-columns and grid-template-areas of one column, after a
+// grid-template of two columns).
+func TestGridTemplateCascade(t *testing.T) {
+	ctx := NewContext()
+	doc, _ := html.Parse(strings.NewReader(`<html><head><style>
+.a { display: grid; grid-template: min-content 1fr / 12rem minmax(0,1fr); grid-template-areas: 'start content' }
+.x .a { grid-template-columns: minmax(0,1fr); grid-template-areas: 'content' 'start' }
+.b { grid-template-columns: 1fr 1fr 1fr; grid-template-areas: 'p q r' }
+.x .b { grid-template: 'p' 'q' / 3rem }
+</style></head><body class="x"><div class="a"></div><div class="b"></div></body></html>`))
+	ctx.Node = doc
+	ctx.addStyleSheets(doc)
+	var a, b *html.Node
+	var find func(n *html.Node)
+	find = func(n *html.Node) {
+		switch GetAttr(n, "class") {
+		case "a":
+			a = n
+		case "b":
+			b = n
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			find(c)
+		}
+	}
+	find(doc)
+	areas, ncols, tracks := ctx.gridTemplate(a)
+	assert.Equal(t, []string{"minmax(0,1fr)"}, tracks, "the longhand of the later rule")
+	assert.Equal(t, 1, ncols)
+	assert.Equal(t, gridArea{row: 1, col: 0, rows: 1, cols: 1}, areas["start"])
+	areas, ncols, tracks = ctx.gridTemplate(b)
+	assert.Equal(t, []string{"3rem"}, tracks, "the shorthand of the later rule")
+	assert.Equal(t, 1, ncols)
+	assert.Equal(t, gridArea{row: 1, col: 0, rows: 1, cols: 1}, areas["q"])
+}
+
 // TestCSSVariableInitial tests the space toggle of custom properties that
 // are initial (as for light-dark() without native support), which are not set.
 func TestCSSVariableInitial(t *testing.T) {

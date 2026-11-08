@@ -54,6 +54,9 @@ func handleElement(ctx *Context) {
 	if h, ok := ctx.ElementHandlers[tag]; ok && h(ctx) {
 		return
 	}
+	if ctx.iconNodes[ctx.Node] {
+		return // the icon of a text field (see [Context.inputIcons])
+	}
 	display := ctx.displayOf(ctx.Node)
 	if display == "none" && !documentTags[tag] {
 		return // not rendered, and neither are its children

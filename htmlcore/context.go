@@ -206,6 +206,10 @@ type pageState struct {
 	cssBase    string
 	cssImports map[string]bool
 
+	// iconNodes are the elements that are the icons of text fields (see
+	// [Context.inputIcons]), which are not rendered themselves.
+	iconNodes map[*html.Node]bool
+
 	// nodeWidgets has the widgets of the controls of forms.
 	nodeWidgets map[*html.Node]core.Widget
 

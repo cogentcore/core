@@ -17,10 +17,12 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/textcore"
 	"golang.org/x/net/html"
 )
@@ -356,10 +358,99 @@ func handleInput(ctx *Context) core.Widget {
 		case "file":
 			newWidget = core.Bind(val, New[core.FileButton](ctx))
 		default:
-			newWidget = New[core.TextField](ctx).SetText(val)
+			tf := New[core.TextField](ctx).SetText(val)
+			tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
+			tf.FinalStyler(func(s *styles.Style) { s.SetTextWrap(false) }) // an input is one line
+
+			ctx.inputIcons(ctx.Node, tf)
+			newWidget = tf
 		}
 	}
 	return newWidget
+}
+
+// inputIcons makes the icons that are positioned over the given text input
+// element the icons of its text field: elements after it with no content
+// that are absolutely positioned and have an SVG mask or background image
+// (as the search icon of the search field of Wikipedia, at its start). It
+// is the leading icon for one at the left (or else the trailing one, for
+// one at the right), with the padding of the field on its side as the
+// space before the icon. The elements are not rendered.
+func (c *Context) inputIcons(n *html.Node, tf *core.TextField) {
+	for s := n.NextSibling; s != nil; s = s.NextSibling {
+		if s.Type == html.TextNode && strings.TrimSpace(s.Data) == "" || s.Type == html.CommentNode {
+			continue
+		}
+		icon, side, ok := c.iconElement(s)
+		if !ok {
+			return
+		}
+		if c.iconNodes == nil {
+			c.iconNodes = map[*html.Node]bool{}
+		}
+		c.iconNodes[s] = true
+		inset := strings.TrimSpace(c.declaration(s, side))
+		env := c.readEnv()
+		pad, hasPad := env.length(inset, units.UnitPw)
+		if side == "left" {
+			tf.SetLeadingIcon(icon)
+		} else {
+			tf.SetTrailingIcon(icon)
+		}
+		tf.FinalStyler(func(st *styles.Style) {
+			if !hasPad {
+				return
+			}
+			if side == "left" {
+				st.Padding.Left = pad
+			} else {
+				st.Padding.Right = pad
+			}
+		})
+	}
+}
+
+// iconElement returns the icon of the given element if it is an icon over
+// a text input (see [Context.inputIcons]), and the side of the input that
+// it is at ("left" or "right").
+func (c *Context) iconElement(n *html.Node) (icon icons.Icon, side string, ok bool) {
+	if n.Type != html.ElementNode || c.declaration(n, "position") != "absolute" || c.displayOf(n) == "none" {
+		return
+	}
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.TextNode || strings.TrimSpace(k.Data) != "" {
+			return // it has content
+		}
+	}
+	mask := true
+	u := maskURL(c.declaration(n, "mask-image"))
+	if u == "" {
+		u = maskURL(c.declaration(n, "-webkit-mask-image"))
+	}
+	if u == "" {
+		u = maskURL(c.declaration(n, "mask"))
+	}
+	if u == "" {
+		u, mask = maskURL(c.declaration(n, "background-image")), false
+	}
+	if u == "" {
+		return
+	}
+	src := c.maskSourceOf(u)
+	if src == nil || len(src.svg) == 0 {
+		return
+	}
+	svg := string(src.svg)
+	if mask { // the shape of a mask has the color of the text
+		for _, black := range []string{`fill="#000"`, `fill="#000000"`, `fill="black"`} {
+			svg = strings.ReplaceAll(svg, black, `fill="currentColor"`)
+		}
+	}
+	side = "left"
+	if c.declaration(n, "left") == "" && c.declaration(n, "right") != "" {
+		side = "right"
+	}
+	return icons.Icon(svg), side, true
 }
 
 // isChecked returns whether the given checkbox or radio input element is

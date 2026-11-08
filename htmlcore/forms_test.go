@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -273,4 +274,40 @@ func TestCheckedSelector(t *testing.T) {
 		require.NotNil(t, input)
 		assert.False(t, HasAttr(input, "checked"), "the attribute is restored")
 	}
+}
+
+// TestInputIcon tests an icon that is positioned over the start of a text
+// input (as the search icon of the search field of Wikipedia): it is the
+// leading icon of the text field, with the space before it as the padding
+// of the field, and it is not rendered as an element over the field.
+func TestInputIcon(t *testing.T) {
+	icon := `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="%23000"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1"/></svg>')`
+	ctx := NewContext()
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, bd, `<style>.w { position: relative } .w input { padding-left: 36px }`+
+		`.w .icon { position: absolute; left: 9px; top: 50%; width: 20px; height: 20px; mask-image: `+icon+` }</style>`+
+		`<div class="w"><input type="search" placeholder="Search"> <span class="icon"></span></div>`))
+	var tf *core.TextField
+	spans := 0
+	bd.WalkDown(func(k tree.Node) bool {
+		if f, ok := k.(*core.TextField); ok {
+			tf = f
+		}
+		if wb := core.AsWidget(k); wb != nil {
+			if n, ok := wb.Property("node").(*html.Node); ok && n.Data == "span" {
+				spans++
+			}
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, tf)
+	assert.Contains(t, string(tf.LeadingIcon), `<path d="M8 1a7`, "the SVG of the icon")
+	assert.Contains(t, string(tf.LeadingIcon), `fill="currentColor"`, "a mask has the color of the text")
+	assert.Equal(t, 0, spans, "the icon element is not rendered")
+	assert.Equal(t, "Search", tf.Placeholder)
+	bd.RenderImage(func() {}, func() {
+		dp := tf.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 9*dp, tf.Styles.Padding.Left.Dots, 1, "the space before the icon")
+		assert.False(t, tf.Styles.Text.WhiteSpace.HasWordWrap(), "an input is one line")
+	})
 }
