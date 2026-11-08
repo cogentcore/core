@@ -675,6 +675,9 @@ func (c *Context) displayOf(n *html.Node) string {
 	if c.Scripting && n != nil && n.Type == html.ElementNode && n.Data == "noscript" {
 		return "none" // its content is for browsers without scripts
 	}
+	if c.Unrendered != nil && n != nil && n.Type == html.ElementNode && c.Unrendered(n) {
+		return "none" // as a child of a shadow host that is in no slot
+	}
 	d := c.declaration(n, "display")
 	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
 		return d

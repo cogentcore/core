@@ -81,6 +81,13 @@ type Context struct {
 	// the checked attribute (the initial state).
 	Checked func(n *html.Node) bool
 
+	// Unrendered, if set, returns whether the given element is not rendered
+	// for a reason outside of its styles, as a child of an element with a
+	// shadow root (made by a script) that it is not assigned to a slot of,
+	// as the closed dropdown panels of the menus of MDN, which its shadow
+	// root shows (in a slot) only when they are open.
+	Unrendered func(n *html.Node) bool
+
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
 	NewParent core.Widget
@@ -475,7 +482,7 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
-	n.Scripting, n.WebFonts, n.Checked = c.Scripting, c.WebFonts, c.Checked
+	n.Scripting, n.WebFonts, n.Checked, n.Unrendered = c.Scripting, c.WebFonts, c.Checked, c.Unrendered
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers

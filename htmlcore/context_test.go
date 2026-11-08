@@ -32,6 +32,7 @@ import (
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
 )
 
@@ -959,4 +960,23 @@ func TestSelectorIndex(t *testing.T) {
 	assert.Equal(t, "#z", string(kind)+key)
 	kind, key = selectorKey("ul li:not(.a)")
 	assert.Equal(t, "tli", string(kind)+key)
+}
+
+// TestUnrendered tests that the elements that the Unrendered function of
+// the context reports are not displayed (as the light children of shadow
+// hosts that are in no slot, as the closed menus of MDN).
+func TestUnrendered(t *testing.T) {
+	ctx := NewContext()
+	ctx.Unrendered = func(n *html.Node) bool { return GetAttr(n, "slot") == "dropdown" }
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, b, `<mdn-dropdown><button id="open">About</button><div slot="dropdown" id="panel">Get to know MDN better</div></mdn-dropdown>`))
+	ids := map[string]bool{}
+	b.WalkDown(func(k tree.Node) bool {
+		if id, ok := k.AsTree().Property("id").(string); ok {
+			ids[id] = true
+		}
+		return tree.Continue
+	})
+	assert.True(t, ids["open"])
+	assert.False(t, ids["panel"], "not rendered")
 }
