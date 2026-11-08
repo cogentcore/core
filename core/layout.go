@@ -1655,6 +1655,9 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	// columns that shrink are narrowed to fit, or widened back to their
 	// widths from SizeUp after they were narrower
 	widths, shrunk := fr.shrinkWidths()
+	if fw := fr.frWidths(alloc.X); fw != nil { // (as fr tracks)
+		widths, shrunk = fw, true
+	}
 	// When the columns fit at the widths of shrinkWidths (widened back to
 	// their preferred widths), those are their base widths, and the columns
 	// that grow share the width that is left, not the extra width from
@@ -1941,6 +1944,95 @@ func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 		deficit = left // those that can shrink more do
 	}
 	return widths, true
+}
+
+// frWidths returns the widths of the columns of a grid whose columns all
+// grow, from the given width of its content, as the fr tracks of CSS: each
+// is its share of the width by its grow, or its minimum (the min-content
+// width of the cells in it) when that is more, with the others sharing the
+// rest, or nil if it is not such a grid. Their preferred widths do not
+// count (as the columns of the top stories of bbc.com, whose wider photos
+// made their columns wider).
+func (fr *Frame) frWidths(width float32) []float32 {
+	li := &fr.layout
+	if !fr.FrColumns || fr.Styles.Display != styles.Grid || li.Wraps != nil || fr.Styles.MaxContentWidth {
+		return nil
+	}
+	n := li.Shape.X
+	if n < 2 || width <= 0 {
+		return nil
+	}
+	grow := make([]float32, n)
+	for c := range n {
+		grow[c] = li.cell(math32.X, c, 0).Grow.X
+		if grow[c] <= 0 {
+			return nil
+		}
+	}
+	minw := make([]float32, n)
+	type spanning struct {
+		col, span int
+		minw      float32
+	}
+	var spans []spanning
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		c := cwb.Geom.Cell.X
+		if c >= n {
+			return tree.Continue
+		}
+		if span := fr.colSpan(cwb); span > 1 {
+			spans = append(spans, spanning{c, span, cwb.Geom.Size.minWidth})
+		} else {
+			minw[c] = max(minw[c], cwb.Geom.Size.minWidth)
+		}
+		return tree.Continue
+	})
+	for _, sp := range spans { // spread over their columns, as in SizeUp
+		end := min(sp.col+sp.span, n)
+		sum := li.Gap.X * float32(end-sp.col-1)
+		for c := sp.col; c < end; c++ {
+			sum += minw[c]
+		}
+		if extra := sp.minw - sum; extra > 0 {
+			for c := sp.col; c < end; c++ {
+				minw[c] += extra / float32(end-sp.col)
+			}
+		}
+	}
+	fixed := make([]bool, n) // (the width is without the gaps)
+	widths := make([]float32, n)
+	for range n {
+		left, flex := width, float32(0)
+		for c := range n {
+			if fixed[c] {
+				left -= minw[c]
+			} else {
+				flex += grow[c]
+			}
+		}
+		if flex <= 0 {
+			break
+		}
+		unit := max(left, 0) / flex
+		changed := false
+		for c := range n {
+			if !fixed[c] && minw[c] > unit*grow[c] {
+				fixed[c], changed = true, true
+			}
+		}
+		if changed {
+			continue
+		}
+		for c := range n {
+			if fixed[c] {
+				widths[c] = minw[c]
+			} else {
+				widths[c] = unit * grow[c]
+			}
+		}
+		return widths
+	}
+	return minw
 }
 
 // shrinkAlloc returns the allocated width of the given child in the column

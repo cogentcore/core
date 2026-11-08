@@ -47,6 +47,13 @@ type Frame struct {
 	// which don't.
 	LayoutStackTopOnly bool
 
+	// FrColumns is whether the columns of a [styles.Grid] frame whose
+	// columns all grow are sized as the fr tracks of CSS: each is its share
+	// of the width by its grow, or the min-content width of its cells if
+	// that is more, and the preferred widths of the cells do not count.
+	// Otherwise, the columns start at the preferred widths of their cells.
+	FrColumns bool `set:"-" display:"-"`
+
 	// layout contains implementation state info for doing layout
 	layout layoutState
 

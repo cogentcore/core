@@ -1076,3 +1076,39 @@ func TestGridOutOfFlowChild(t *testing.T) {
 			assert.InDelta(t, 500*dp, ws["s"].Geom.Size.Actual.Total.X, 3)
 		})
 }
+
+// TestGridAutoRowColumn tests a child of a grid with a column and an auto
+// row, before children placed in row 1 (as the top stories of bbc.com):
+// it is in row 1, where its columns are free, between them.
+func TestGridAutoRowColumn(t *testing.T) {
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(24, 1fr); width: 1200px">`+
+		`<div id="mid" style="grid-area: auto / 7 / auto / span 12; height: 20px"></div>`+
+		`<div id="left" style="grid-area: 1 / 1 / span 1 / span 6; height: 20px"></div>`+
+		`<div id="right" style="grid-area: 1 / 19 / span 1 / span 6; height: 20px"></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			l, m, r := ws["left"].Geom, ws["mid"].Geom, ws["right"].Geom
+			assert.InDelta(t, l.Pos.Total.Y, m.Pos.Total.Y, 1, "in the same row")
+			assert.InDelta(t, l.Pos.Total.Y, r.Pos.Total.Y, 1)
+			assert.InDelta(t, 600*dp, m.Size.Actual.Total.X, 6, "12 of 24 columns (with rounding)")
+			assert.InDelta(t, l.Pos.Total.X+300*dp, m.Pos.Total.X, 6, "after the 6 columns of the left")
+		})
+}
+
+// TestGridFrColumns tests that 1fr columns share the width equally,
+// whatever the preferred widths of their content (as the top stories of
+// bbc.com, whose wider photos made their columns wider), unless the
+// minimum of their content is more than that.
+func TestGridFrColumns(t *testing.T) {
+	long := strings.Repeat("wide content of the first column ", 6)
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(3, 1fr); width: 900px">`+
+		`<div id="a">`+long+`</div><div id="b">b</div><div id="c">c</div></div>`+
+		`<div style="display: grid; grid-template-columns: repeat(3, 1fr); width: 900px">`+
+		`<div id="d"><div style="width: 500px; height: 10px"></div></div><div id="e">e</div><div id="f">f</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, id := range []string{"a", "b", "c"} {
+				assert.InDelta(t, 300*dp, ws[id].Geom.Size.Actual.Total.X, 3, id)
+			}
+			assert.InDelta(t, 500*dp, ws["d"].Geom.Size.Actual.Total.X, 3, "its minimum")
+			assert.InDelta(t, 200*dp, ws["e"].Geom.Size.Actual.Total.X, 3, "the rest shared")
+		})
+}

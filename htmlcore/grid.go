@@ -260,10 +260,56 @@ func (c *Context) gridPlacement(n *html.Node, ncols int) (gridArea, bool) {
 	}
 	r, okr := start(row)
 	cl, okc := start(col)
-	if !okr || !okc || cl > ncols {
+	if !okc || cl > ncols {
 		return gridArea{}, false
 	}
-	return gridArea{row: r - 1, col: cl - 1, rows: gridSpan(row, 0), cols: min(gridSpan(col, ncols), ncols-cl+1)}, true
+	a := gridArea{row: r - 1, col: cl - 1, rows: gridSpan(row, 0), cols: min(gridSpan(col, ncols), ncols-cl+1)}
+	if !okr {
+		a.row = -1 // auto: in the first row where its columns are free
+	}
+	return a, true
+}
+
+// placeAutoRows places the given grid items that have a column and an auto
+// row (-1) in the first rows where their columns are free of the others,
+// in order, as the auto-placement of CSS (as the middle column of the top
+// stories of bbc.com, which was in a row of its own below the others).
+func placeAutoRows[T any](items []T, area func(*T) *gridArea) {
+	covered := map[[2]int]bool{}
+	cover := func(a *gridArea) {
+		for r := a.row; r < a.row+a.rows; r++ {
+			for c := a.col; c < a.col+a.cols; c++ {
+				covered[[2]int{r, c}] = true
+			}
+		}
+	}
+	for i := range items {
+		if a := area(&items[i]); a.row >= 0 {
+			cover(a)
+		}
+	}
+	for i := range items {
+		a := area(&items[i])
+		if a.row >= 0 {
+			continue
+		}
+		for r := 0; ; r++ {
+			free := true
+			for rr := r; rr < r+a.rows && free; rr++ {
+				for c := a.col; c < a.col+a.cols; c++ {
+					if covered[[2]int{rr, c}] {
+						free = false
+						break
+					}
+				}
+			}
+			if free {
+				a.row = r
+				break
+			}
+		}
+		cover(a)
+	}
 }
 
 // gridSpan returns the number of tracks that the given value of
@@ -313,6 +359,9 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		return
 	}
 	flexible := slices.ContainsFunc(tracks, func(t string) bool { return strings.HasSuffix(t, "fr") || strings.HasSuffix(t, "fr)") })
+	if fr := frameOf(w); fr != nil && len(tracks) > 0 && !slices.ContainsFunc(tracks, func(t string) bool { return !strings.HasSuffix(t, "fr") && !strings.HasSuffix(t, "fr)") }) {
+		fr.FrColumns = true // all of its tracks are fr (see core.Frame.FrColumns)
+	}
 	trackOf := func(col int) string {
 		if col < len(tracks) {
 			return tracks[col]
@@ -325,6 +374,20 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 	}
 	var items []placed
 	var auto []tree.Node
+	// Children with a column and an auto row are placed only with others
+	// placed in rows (or areas), as otherwise they are in the order of the
+	// children, with the others.
+	explicitRow := false
+	for _, k := range w.AsTree().Children {
+		if kw, ok := k.(core.Widget); ok {
+			kn, _ := kw.AsWidget().Property("node").(*html.Node)
+			name, _, _ := cutTopLevel(c.declaration(kn, "grid-area"), '/')
+			if a, ok := c.gridPlacement(kn, ncols); (ok && a.row >= 0) || (name != "" && areas[name] != (gridArea{})) {
+				explicitRow = true
+				break
+			}
+		}
+	}
 	for _, k := range w.AsTree().Children {
 		kw, ok := k.(core.Widget)
 		if !ok {
@@ -338,12 +401,13 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		}
 		if a, ok := areas[name]; ok && name != "" {
 			items = append(items, placed{kw, a})
-		} else if a, ok := c.gridPlacement(kn, ncols); ok {
+		} else if a, ok := c.gridPlacement(kn, ncols); ok && (a.row >= 0 || explicitRow) {
 			items = append(items, placed{kw, a})
 		} else {
 			auto = append(auto, k)
 		}
 	}
+	placeAutoRows(items, func(p *placed) *gridArea { return &p.area })
 	w.AsWidget().FinalStyler(func(s *styles.Style) { s.Columns = ncols })
 	if len(items) == 0 {
 		// The children in order, with the columns and rows that they span
