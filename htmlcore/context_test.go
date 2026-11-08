@@ -980,3 +980,32 @@ func TestUnrendered(t *testing.T) {
 	assert.True(t, ids["open"])
 	assert.False(t, ids["panel"], "not rendered")
 }
+
+// TestGridColumnSpan tests the spans of grid-column (as the 12-column
+// grids of github.com, whose features span 6 and then 4 columns, in two
+// rows, which were all in one row).
+func TestGridColumnSpan(t *testing.T) {
+	assert.Equal(t, 6, gridSpan("auto / span 6", 12))
+	assert.Equal(t, 4, gridSpan("span 4", 12))
+	assert.Equal(t, 2, gridSpan("1 / 3", 12))
+	assert.Equal(t, 12, gridSpan("1 / -1", 12))
+	assert.Equal(t, 1, gridSpan("auto", 12))
+	cell := `<section style="grid-column: auto / span %d"><div style="height: 20px"></div></section>`
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), b, `<div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); width: 1200px">`+
+		fmt.Sprintf(cell+cell+cell+cell+cell, 6, 6, 4, 4, 4)+`</div>`))
+	var secs []*core.WidgetBase
+	b.RenderImage(func() {
+		b.WalkDown(func(k tree.Node) bool {
+			if wb := core.AsWidget(k); wb != nil && wb.Property("tag") == "section" {
+				secs = append(secs, wb)
+			}
+			return tree.Continue
+		})
+	})
+	require.Len(t, secs, 5)
+	dp := b.Styles.UnitContext.Dots(units.UnitDp)
+	assert.InDelta(t, 600*dp, secs[0].Geom.Size.Actual.Total.X, 3, "half")
+	assert.InDelta(t, 400*dp, secs[2].Geom.Size.Actual.Total.X, 3, "a third")
+	assert.Greater(t, secs[2].Geom.Pos.Total.Y, secs[0].Geom.Pos.Total.Y, "in the second row")
+}

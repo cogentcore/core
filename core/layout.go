@@ -1259,6 +1259,15 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			mx = md.Grow.Dim(ma)
 			mx = max(mx, gsz)
 			md.Grow.SetDim(ma, mx)
+			if ma == math32.X && span > 1 {
+				// all of the columns that it spans grow (as the columns
+				// of a grid of 1fr that cells span), not only the first
+				for k := 1; k < span; k++ {
+					if kd := li.cell(ma, mi+k, ci); kd != nil {
+						kd.Grow.SetDim(ma, max(kd.Grow.Dim(ma), gsz))
+					}
+				}
+			}
 			sm = cd.Grow.Dim(ma)
 			sm += gsz
 			cd.Grow.SetDim(ma, sm)

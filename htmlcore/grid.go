@@ -213,6 +213,41 @@ func (c *Context) stackGrid(w core.Widget) bool {
 	return true
 }
 
+// gridSpan returns the number of tracks that the given value of
+// grid-column or grid-row spans: span N (with auto or a start line before
+// or after it), or from a start line to an end line (with -1 the last line
+// of the given number of tracks, if known), or 1.
+func gridSpan(v string, ntracks int) int {
+	start, end, slash := cutTopLevel(strings.ToLower(v), '/')
+	start, end = strings.TrimSpace(start), strings.TrimSpace(end)
+	for _, p := range []string{start, end} {
+		if n, ok := strings.CutPrefix(p, "span"); ok {
+			if k, err := strconv.Atoi(strings.TrimSpace(n)); err == nil && k > 0 {
+				return k
+			}
+		}
+	}
+	if !slash {
+		return 1
+	}
+	a, errA := strconv.Atoi(start)
+	b, errB := strconv.Atoi(end)
+	if errA != nil || errB != nil {
+		return 1
+	}
+	lines := ntracks + 1
+	if a < 0 && ntracks > 0 {
+		a += lines + 1
+	}
+	if b < 0 && ntracks > 0 {
+		b += lines + 1
+	}
+	if b <= a || a <= 0 {
+		return 1
+	}
+	return b - a
+}
+
 // arrangeGrid places the children of the given grid container widget for
 // its node by its grid template (see the comment at the top of grid.go).
 func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
@@ -256,13 +291,37 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 	}
 	w.AsWidget().FinalStyler(func(s *styles.Style) { s.Columns = ncols })
 	if len(items) == 0 {
-		if len(tracks) > 0 {
-			for _, k := range auto { // the tracks of the columns of the children in order
-				if kw, ok := k.(core.Widget); ok {
-					i := slices.Index(auto, k) % ncols
-					kw.AsWidget().FinalStyler(func(s *styles.Style) { gridTrackStyle(env, s, trackOf(i), flexible) })
-				}
+		// The children in order, with the columns and rows that they span
+		// (as the 12 columns of the grids of github.com, of which its
+		// features span 6 or 4), and the tracks of the columns that they
+		// are in.
+		col := 0
+		for _, k := range auto {
+			kw, ok := k.(core.Widget)
+			if !ok {
+				continue
 			}
+			cs, rs := 1, 1
+			if kn, _ := kw.AsWidget().Property("node").(*html.Node); kn != nil {
+				cs = gridSpan(c.declaration(kn, "grid-column"), ncols)
+				rs = gridSpan(c.declaration(kn, "grid-row"), 0)
+			}
+			cs = min(cs, ncols)
+			if col > 0 && col+cs > ncols { // it starts the next row
+				col = 0
+			}
+			i := col
+			kw.AsWidget().FinalStyler(func(s *styles.Style) {
+				if cs > 1 {
+					s.ColSpan = cs
+				} else if len(tracks) > 0 {
+					gridTrackStyle(env, s, trackOf(i), flexible)
+				}
+				if rs > 1 {
+					s.RowSpan = rs
+				}
+			})
+			col = (col + cs) % ncols
 		}
 		return
 	}
