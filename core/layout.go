@@ -2351,9 +2351,42 @@ func (fr *Frame) Position() {
 		fr.positionStacked()
 	} else {
 		fr.positionCells()
+		fr.positionStatic()
 		fr.positionChildren()
 	}
 	fr.positionParts()
+}
+
+// positionStatic sets the positions in the layout of the children of the
+// frame that are out of its flow (absolute and fixed ones), which they have
+// in the dimensions in which their inset is not set (their static position
+// in CSS): right after the child in the flow before them, below it in a
+// column (as the dropdown panels of the menus of MDN, below their buttons,
+// which covered them), and beside it in a row, or at the start.
+func (fr *Frame) positionStatic() {
+	var prev *WidgetBase
+	column := fr.Styles.Display != styles.Grid && fr.Styles.Direction == styles.Column
+	fr.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if cwb.StateIs(states.Invisible) {
+			return tree.Continue
+		}
+		if !cwb.outOfFlow() {
+			prev = cwb
+			return tree.Continue
+		}
+		var pos math32.Vector2
+		if prev != nil {
+			pos = prev.Geom.RelPos
+			if column {
+				pos.X = 0
+				pos.Y += prev.Geom.Size.Actual.Total.Y
+			} else {
+				pos.X += prev.Geom.Size.Actual.Total.X
+			}
+		}
+		cwb.Geom.RelPos = pos
+		return tree.Continue
+	})
 }
 
 func (fr *Frame) positionCells() {

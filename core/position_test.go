@@ -380,3 +380,29 @@ func TestPositionNegativeZIndex(t *testing.T) {
 	assert.Equal(t, uint32(0), r, "the shadow below the surface")
 	assert.Greater(t, g, uint32(0))
 }
+
+// TestPositionStatic tests that an absolute widget without a top (or
+// left) inset is at its static position in those dimensions: below the
+// widget before it in a column (as the dropdown panels of the menus of
+// MDN, below their buttons, which they covered).
+func TestPositionStatic(t *testing.T) {
+	b := NewBody()
+	col := NewFrame(b)
+	col.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Position = styles.PositionRelative
+		s.NoClip = true
+	})
+	button := fixedFrame(col, 80, 40)
+	panel := fixedFrame(col, 200, 100)
+	panel.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Left = units.Dp(0)
+		s.InsetSet.Left = true
+	})
+	b.RenderImage(func() {
+		bb, pb := button.Geom.TotalBBox, panel.Geom.Pos.Total
+		assert.InDelta(t, float32(bb.Max.Y), pb.Y, 1, "below the button")
+		assert.InDelta(t, col.Geom.Pos.Content.X, pb.X, 1, "at the left of its containing block")
+	})
+}

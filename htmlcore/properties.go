@@ -64,6 +64,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			lval = "inherit"
 		}
 	}
+	if lval == "initial" && (prop == "background" || prop == "background-color") {
+		// transparent, over the background of a control (as the menu
+		// buttons of MDN, which were gray)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			st.background, st.hasBg, st.bgCurrentColor = nil, true, false
+		})
+	}
 	if lval == "inherit" || lval == "initial" {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
@@ -196,10 +203,11 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			return imageOp
 		}
 		none := bg == "transparent" || bg == "none"
+		current := strings.EqualFold(bg, "currentcolor")
 		cf := colorFunc(bg)
 		return append(imageOp, op(func(st *cssState, s, ps *styles.Style) {
-			st.background, st.hasBg = cf(), true
-			if none {
+			st.background, st.hasBg, st.bgCurrentColor = cf(), true, current
+			if none || current {
 				st.background = nil
 			}
 		})...)

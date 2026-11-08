@@ -102,6 +102,9 @@ func (r *resolver) blockState() {
 	}
 	if st.hasBg {
 		s.Background = st.background
+		if st.bgCurrentColor { // the color of the element, as it is styled
+			s.Background = s.Color
+		}
 	}
 	r.c.applyMask(st, s)
 	r.c.applyBackgroundImage(st, s)

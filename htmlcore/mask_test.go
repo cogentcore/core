@@ -127,3 +127,41 @@ func TestRotatedMask(t *testing.T) {
 	assert.False(t, dark("right", 0.85, 0.5), "rotated: not the right half")
 	assert.False(t, dark("right", 0.5, 0.15), "rotated: not the top")
 }
+
+// TestMaskCurrentColor tests a mask over a background of currentcolor (as
+// the chevrons of the menu buttons of MDN, which were not shown, as the
+// color was transparent), and that a background-color of initial is
+// transparent (as those buttons, which were gray).
+func TestMaskCurrentColor(t *testing.T) {
+	chevron := `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"%3E%3Cpath d="m6 9 6 6 6-6"/%3E%3C/svg%3E`
+	b := core.NewBody()
+	assert.NoError(t, ReadHTMLString(NewContext(), b, `<style>.b { background-color: initial; color: #000; display: flex; align-items: center; padding: 8px }
+.b::after { content: ""; background-color: currentcolor; width: 20px; height: 20px; mask-size: cover; mask-image: url('`+chevron+`') }</style>
+<div style="display: flex"><button class="b" type="button"><span>HTML</span></button></div>`))
+	var button, caret *core.WidgetBase
+	img := b.RenderImage(func() {
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil {
+				if wb.Property("class") == "b" {
+					button = wb
+				} else if button != nil && wb.Parent == button.This && wb.Geom.Size.Actual.Total.X < 25 {
+					caret = wb
+				}
+			}
+			return tree.Continue
+		})
+	})
+	if assert.NotNil(t, caret) {
+		dark := 0
+		bb := caret.Geom.TotalBBox
+		for y := bb.Min.Y; y < bb.Max.Y; y++ {
+			for x := bb.Min.X; x < bb.Max.X; x++ {
+				if c := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA); c.R < 100 {
+					dark++
+				}
+			}
+		}
+		assert.Greater(t, dark, 10, "the chevron")
+	}
+	assert.Nil(t, button.Styles.Background, "transparent")
+}

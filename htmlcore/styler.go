@@ -80,30 +80,35 @@ type cssState struct {
 	// env is the length environment of the style pass.
 	env *lengthEnv
 
-	display    string
-	hideText   bool   // a large negative text-indent, which moves the text out of view
-	zeroScale  bool   // a transform scales the box to nothing (as scaleX(0)), so it is not shown
-	visibility string // the visibility property, if any
-	width      *units.Value
-	height     *units.Value
-	minWidth   *units.Value
-	minHeight  *units.Value
-	maxWidth   *units.Value
-	maxHeight  *units.Value
-	margin     [4]*units.Value // top, right, bottom, left; nil for auto
-	marginAuto [4]bool
-	lineHeight string
-	borderBox  bool
-	flexGrow   float32
-	hasGrow    bool
-	flexShrink float32
-	hasShrink  bool
-	alignSelf  string
-	alignItems string
-	background image.Image
-	hasBg      bool
-	mask       *cssMask
-	bgImage    *cssMask // the background image, with its size, position and repeat
+	display   string
+	hideText  bool // a large negative text-indent, which moves the text out of view
+	zeroScale bool // a transform scales the box to nothing (as scaleX(0)), so it is not shown
+
+	// bgCurrentColor is whether the background color is currentcolor,
+	// the color of the element as it is styled (as the masked chevrons of
+	// the menus of MDN), which was transparent.
+	bgCurrentColor bool
+	visibility     string // the visibility property, if any
+	width          *units.Value
+	height         *units.Value
+	minWidth       *units.Value
+	minHeight      *units.Value
+	maxWidth       *units.Value
+	maxHeight      *units.Value
+	margin         [4]*units.Value // top, right, bottom, left; nil for auto
+	marginAuto     [4]bool
+	lineHeight     string
+	borderBox      bool
+	flexGrow       float32
+	hasGrow        bool
+	flexShrink     float32
+	hasShrink      bool
+	alignSelf      string
+	alignItems     string
+	background     image.Image
+	hasBg          bool
+	mask           *cssMask
+	bgImage        *cssMask // the background image, with its size, position and repeat
 
 	borderCollapse bool
 	legacyCenter   bool

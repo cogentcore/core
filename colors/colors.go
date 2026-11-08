@@ -118,7 +118,7 @@ func FromName(name string) (color.RGBA, error) {
 //   - blend-VAL-color: blends given percent of given color relative to base in RGB space
 func FromString(str string, base ...color.Color) (color.RGBA, error) {
 	str = strings.TrimSpace(str) // as after the colon of a style property
-	if len(str) == 0 { // consider it null
+	if len(str) == 0 {           // consider it null
 		return color.RGBA{}, nil
 	}
 	lstr := strings.ToLower(str)
@@ -165,6 +165,24 @@ func FromString(str string, base ...color.Color) (color.RGBA, error) {
 			fmt.Sscanf(val, format, &h, &c, &t)
 		}
 		return WithA(hct.New(float32(h), float32(c), float32(t)), uint8(a)), nil
+	case strings.HasPrefix(lstr, "light-dark(") && strings.HasSuffix(lstr, ")"):
+		// the light color, as for the light color scheme (of CSS, as in
+		// the SVGs of MDN), which was taken for a lighten-like function
+		args := str[len("light-dark(") : len(str)-1]
+		depth := 0
+		for i, r := range args {
+			switch r {
+			case '(':
+				depth++
+			case ')':
+				depth--
+			case ',':
+				if depth == 0 {
+					return FromString(args[:i], base...)
+				}
+			}
+		}
+		return color.RGBA{}, fmt.Errorf("colors.FromString: light-dark needs two colors: %q", str)
 	default:
 		var bc color.Color = Transparent
 		if len(base) > 0 {
