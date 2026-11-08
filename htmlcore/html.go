@@ -138,7 +138,29 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		ctx.NewParent = parent
 	}
 
-	if np := ctx.NewParent; np != nil && n.FirstChild != nil {
+	np := ctx.NewParent
+	// the boxes of the ::before and ::after of an element (see
+	// [Context.pseudoBoxNode]) are its first and last children while they
+	// are read, in its flow (as in a run of its inline content)
+	if np != nil && n.Type == html.ElementNode && n.Parent != nil && ctx.pseudoStyles != nil {
+		if before := ctx.pseudoBoxNode(n, "before"); before != nil {
+			n.InsertBefore(before, n.FirstChild)
+			defer n.RemoveChild(before)
+		}
+		if after := ctx.pseudoBoxNode(n, "after"); after != nil {
+			n.AppendChild(after)
+			defer n.RemoveChild(after)
+		}
+	}
+	if np != nil && n.FirstChild == nil && n.Type == html.ElementNode && n.Parent != nil && ctx.pseudoStyles != nil {
+		// the text of the ::before and ::after of an empty element (as the
+		// markers of the lines of the diffs of Wikipedia, in empty cells)
+		if t := strings.TrimSpace(ctx.pseudoContent(n, "before") + ctx.pseudoContent(n, "after")); t != "" {
+			ctx.pseudoText(np, n, "before")
+			ctx.pseudoText(np, n, "after")
+		}
+	}
+	if np != nil && n.FirstChild != nil {
 		readHTMLNode(ctx, np, n.FirstChild)
 		if n.Type == html.ElementNode && ctx.rest == nil {
 			if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {

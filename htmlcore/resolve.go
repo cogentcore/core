@@ -101,6 +101,7 @@ func (r *resolver) blockState() {
 		s.Background = st.background
 	}
 	r.c.applyMask(st, s)
+	r.c.applyBackgroundImage(st, s)
 }
 
 // layoutDisplay sets the core layout for the display of the element.
@@ -112,11 +113,13 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 		s.Direction = styles.Column
 	case "table", "inline-table", "table-row-group", "table-header-group", "table-footer-group":
-		if isTable && !strings.EqualFold(strings.TrimSpace(r.c.declaration(node, "table-layout")), "fixed") {
+		if isTable && !strings.EqualFold(strings.TrimSpace(r.c.declaration(node, "table-layout")), "fixed") &&
+			st.width != nil && st.width.Unit != units.UnitPw {
 			// the width of a table is at least that of its cells (as the
 			// infoboxes of Wikipedia with images wider than their width)
 			s.ContentMinWidth = true
 		}
+
 		if !isTable && (node == nil || !strings.HasPrefix(node.Data, "t")) {
 			// other elements displayed as tables are approximated by their
 			// rows (or caption and content) in a column

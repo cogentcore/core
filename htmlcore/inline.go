@@ -41,6 +41,9 @@ func (c *Context) isInlineLevel(n *xhtml.Node) bool {
 		if _, ok := c.ElementHandlers[n.Data]; ok {
 			return false
 		}
+		if n.Data == "colgroup" || n.Data == "col" {
+			return false // the columns of a table, which have no boxes
+		}
 		switch c.displayOf(n) {
 		case "", "inline", "inline-block", "inline-flex", "inline-grid", "inline-table":
 			return true

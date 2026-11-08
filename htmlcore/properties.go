@@ -170,7 +170,16 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 				}
 			}
 		})
+	case "background-image", "background-size", "background-position", "background-repeat":
+		if m := compileBackgroundImage(prop, val); m != nil {
+			return op(m)
+		}
+		return nil
 	case "background", "background-color":
+		var imageOp []styleOp
+		if prop == "background" {
+			imageOp = op(compileBackgroundImage(prop, val))
+		}
 		bg := backgroundColor(val)
 		if bg == "" && prop == "background" && !strings.Contains(lval, "url(") && !strings.Contains(lval, "gradient(") {
 			// The shorthand without a color (as "0 0" or "none", as
@@ -184,16 +193,16 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		}
 		if bg == "" {
-			return nil
+			return imageOp
 		}
 		none := bg == "transparent" || bg == "none"
 		cf := colorFunc(bg)
-		return op(func(st *cssState, s, ps *styles.Style) {
+		return append(imageOp, op(func(st *cssState, s, ps *styles.Style) {
 			st.background, st.hasBg = cf(), true
 			if none {
 				st.background = nil
 			}
-		})
+		})...)
 	case "color":
 		if parseColor(val) == nil {
 			return nil

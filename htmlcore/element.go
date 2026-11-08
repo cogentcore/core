@@ -120,6 +120,9 @@ func handleElement(ctx *Context) {
 		newWidget = handleCell(ctx, tag)
 	case "thead", "tbody", "tfoot", "tr":
 		ctx.NewParent = ctx.tableFor(ctx.Node)
+	case "colgroup", "col":
+		// the columns of a table, which have no boxes of their own (and
+		// the white space in a colgroup is not a cell of the table)
 	default:
 		switch {
 		case textBlockTags[tag]:

@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"io"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -128,7 +129,7 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 	for _, d := range decls {
 		c.cssOrder++
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)),
-			Value: strings.TrimSpace(d.Value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder})
+			Value: c.absoluteURLs(strings.TrimSpace(d.Value)), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder})
 	}
 	delete(c.sorted, n)
 }
@@ -816,7 +817,7 @@ func (c *Context) addLinkedStyle(href string) {
 	}
 	c.cssImports[u.String()] = true
 	resp, err := Get(c, u.String())
-	if errors.Log(err) != nil {
+	if logGetError(err) != nil {
 		return
 	}
 	defer resp.Body.Close()
@@ -834,6 +835,31 @@ func (c *Context) addLinkedStyle(href string) {
 	c.cssBase = u.String()
 	c.addStyleOrigin(string(b), originAuthor)
 	c.cssBase = base
+}
+
+// cssURLs matches the url() of CSS values, with its URL quoted or not.
+var cssURLs = regexp.MustCompile(`url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s]*))\s*\)`)
+
+// absoluteURLs returns the given CSS value with the relative URLs of its
+// url() functions made absolute, for the URL of the current style sheet
+// (to which they are relative, as the icons of MDN in its style sheets),
+// as they are used later relative to the page (see [Context.cssBaseURL]).
+func (c *Context) absoluteURLs(v string) string {
+	if c.cssBase == "" || !strings.Contains(v, "url(") {
+		return v
+	}
+	return cssURLs.ReplaceAllStringFunc(v, func(m string) string {
+		sm := cssURLs.FindStringSubmatch(m)
+		u := sm[1] + sm[2] + sm[3]
+		if u == "" || strings.HasPrefix(u, "data:") || strings.HasPrefix(u, "#") {
+			return m
+		}
+		abs, err := parseRelativeURL(u, c.cssBase)
+		if err != nil {
+			return m
+		}
+		return `url("` + strings.ReplaceAll(abs.String(), `"`, `%22`) + `")`
+	})
 }
 
 // cssBaseURL returns the URL that the URLs in the current style sheet are

@@ -6,6 +6,12 @@ package htmlcore
 
 import (
 	"image"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -94,4 +100,84 @@ func TestBoxShadowColor(t *testing.T) {
 	img := bd.RenderImage(func() {}, func() { bb = bar.Geom.TotalBBox })
 	r, g, b, _ := img.At(bb.Min.X+10, bb.Max.Y+1).RGBA()
 	assert.Equal(t, [3]uint32{200, 0, 0}, [3]uint32{r >> 8, g >> 8, b >> 8}, "below the box, in its color")
+}
+
+// TestPseudoBox tests ::before and ::after that are boxes without text (as
+// the line under the title of Wikipedia, an absolute ::after of 1px at the
+// bottom of the title bar, and icons with masks): they are rendered with
+// their background, position, size, and mask.
+func TestPseudoBox(t *testing.T) {
+	icon := `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="%23000"/></svg>')`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, `<style>.bar { position: relative; width: 200px; height: 40px } .bar::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background-color: rgb(162, 169, 177) }`+
+		`.icon::before { content: ""; display: inline-block; width: 20px; height: 20px; background-color: rgb(0, 0, 200); mask-image: `+icon+` } .text::after { content: "text" }</style>`+
+		`<div class="bar" id="bar">Title</div><p class="icon" id="icon">x</p><p class="text">plain </p>`))
+	var bar, ic *core.WidgetBase
+	texts := 0
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			switch wb.Property("id") {
+			case "bar":
+				bar = wb
+			case "icon":
+				ic = wb
+			}
+		}
+		if tx, ok := k.(*core.Text); ok && tx.Text == "plain text" {
+			texts++
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, bar)
+	require.NotNil(t, ic)
+	var bb, ib image.Rectangle
+	img := bd.RenderImage(func() {}, func() { bb, ib = bar.Geom.TotalBBox, ic.Geom.TotalBBox })
+	r, g, b, _ := img.At(bb.Min.X+50, bb.Max.Y-1).RGBA()
+	assert.Equal(t, [3]uint32{162, 169, 177}, [3]uint32{r >> 8, g >> 8, b >> 8}, "the line at the bottom")
+	r, g, b, _ = img.At(ib.Min.X+5, ib.Min.Y+(ib.Dy()/2)).RGBA()
+	assert.Equal(t, [3]uint32{0, 0, 200}, [3]uint32{r >> 8, g >> 8, b >> 8}, "the icon")
+	assert.Equal(t, 1, texts, "the text of a pseudo-element with text is in the text of its element")
+}
+
+// TestBackgroundImage tests background images (as the browser icons of
+// MDN and the chevrons of go.dev): an image placed at an offset (as in a
+// sprite) and repeated on one axis, and its url() in a linked style sheet,
+// which is relative to the style sheet.
+func TestBackgroundImage(t *testing.T) {
+	// a 4x4 image: red on its top half, blue on its bottom half
+	img := `<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="2" fill="red"/><rect y="2" width="4" height="2" fill="blue"/></svg>`
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "css"), 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "css", "icon.svg"), []byte(img), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "css", "style.css"), []byte(`#sprite { background: url(icon.svg) 0 -2px repeat-x }`), 0644))
+	ctx := NewContext()
+	ctx.PageURL = "file://" + dir + "/page.html"
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		pu, _ := url.Parse(u)
+		b, err := os.ReadFile(pu.Path)
+		if err != nil {
+			return &http.Response{StatusCode: 404, Status: "404", Body: io.NopCloser(strings.NewReader(""))}, nil
+		}
+		return &http.Response{StatusCode: 200, Status: "200 OK", Request: &http.Request{URL: pu}, Body: io.NopCloser(strings.NewReader(string(b)))}, nil
+	}
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, bd, `<link rel="stylesheet" href="css/style.css"><div id="sprite" style="width: 40px; height: 20px"></div>`))
+	var sp *core.WidgetBase
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil && wb.Property("id") == "sprite" {
+			sp = wb
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, sp)
+	var bb image.Rectangle
+	rendered := bd.RenderImage(func() {}, func() { bb = sp.Geom.TotalBBox })
+	at := func(x, y int) [3]uint32 {
+		r, g, b, _ := rendered.At(bb.Min.X+x, bb.Min.Y+y).RGBA()
+		return [3]uint32{r >> 8, g >> 8, b >> 8}
+	}
+	dp := int(sp.Styles.UnitContext.Dots(units.UnitDp) + 0.5)
+	assert.Equal(t, [3]uint32{0, 0, 255}, at(1, 0), "the bottom half of the image, moved up by the offset")
+	assert.Equal(t, [3]uint32{0, 0, 255}, at(30*dp, 0), "repeated on x")
+	assert.Equal(t, [3]uint32{255, 255, 255}, at(1, 10*dp), "not repeated on y")
 }

@@ -227,7 +227,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	go func() {
 		if svg == nil {
 			im, err := readImage(ctx, src)
-			if errors.Log(err) != nil {
+			if logGetError(err) != nil {
 				return
 			}
 			img.AsyncLock()
@@ -237,7 +237,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 			return
 		}
 		resp, err := Get(ctx, src)
-		if errors.Log(err) != nil {
+		if logGetError(err) != nil {
 			return
 		}
 		defer resp.Body.Close()

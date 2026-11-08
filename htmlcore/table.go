@@ -133,10 +133,41 @@ func handleCell(ctx *Context, tag string) core.Widget {
 			}
 		}
 	}
+	// the columns of a table with the fixed layout are as wide as its
+	// columns (col) say, not as its content, which wraps (as the diffs of
+	// Wikipedia, whose long lines are in columns of 48%)
+	fixed, fixedWeight, fixedPct := false, float32(0), float32(0)
+	if table := ancestorTable(ctx.Node); table != nil && strings.EqualFold(strings.TrimSpace(ctx.declaration(table, "table-layout")), "fixed") {
+		fixed = true
+		cols := ctx.columnWidths(table)
+		start := cellColumn(ctx.Node)
+		allPct := true
+		for c := start; c < start+span; c++ {
+			if c < len(cols) && cols[c] > 0 {
+				fixedWeight += cols[c]
+				fixedPct += cols[c]
+			} else {
+				fixedWeight += 1
+				allPct = false
+			}
+		}
+		if !allPct {
+			fixedPct = 0
+		}
+	}
 	w.FinalStyler(func(s *styles.Style) {
 		if pct > 0 {
 			s.Min.X, s.Max.X = units.Pw(pct), units.Pw(pct)
 			s.BoxSizing = styles.BoxBorderBox
+		}
+		if fixed {
+			s.Overflow.X = styles.OverflowAuto // no min-content width (it wraps)
+			s.ScrollbarWidth.Zero()
+			s.Grow.X, s.Shrink.X = fixedWeight, 1
+			if fixedPct > 0 { // the percentage of the table of its columns
+				s.Min.X, s.Max.X = units.Pw(fixedPct), units.Pw(fixedPct)
+				s.BoxSizing = styles.BoxBorderBox
+			}
 		}
 		if span > 1 {
 			s.ColSpan = span
@@ -144,11 +175,66 @@ func handleCell(ctx *Context, tag string) core.Widget {
 		if rspan > 1 {
 			s.RowSpan = rspan
 		}
-		if s.Grow.X > 0 {
+		if s.Grow.X > 0 && !fixed {
 			s.Grow.X = weight / float32(span)
 		}
 	})
 	return w
+}
+
+// columnWidths returns the widths of the columns of the given table from
+// its col elements (with span), as percentages, or 0 for those without
+// one (or with a width that is not a percentage).
+func (c *Context) columnWidths(table *html.Node) []float32 {
+	var ws []float32
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			if k.Type != html.ElementNode {
+				continue
+			}
+			switch k.Data {
+			case "colgroup":
+				walk(k)
+			case "col":
+				span, err := strconv.Atoi(GetAttr(k, "span"))
+				if err != nil || span < 1 {
+					span = 1
+				}
+				w := strings.TrimSpace(c.declaration(k, "width"))
+				if w == "" {
+					w = GetAttr(k, "width")
+				}
+				pct := float32(0)
+				if v, ok := strings.CutSuffix(w, "%"); ok {
+					if f, err := strconv.ParseFloat(v, 32); err == nil {
+						pct = float32(f)
+					}
+				}
+				for range span {
+					ws = append(ws, pct)
+				}
+			}
+		}
+	}
+	walk(table)
+	return ws
+}
+
+// cellColumn returns the index of the first column of the given cell in
+// its row, from the column spans of the cells before it.
+func cellColumn(cell *html.Node) int {
+	col := 0
+	for k := cell.PrevSibling; k != nil; k = k.PrevSibling {
+		if k.Type == html.ElementNode && (k.Data == "td" || k.Data == "th") {
+			span, err := strconv.Atoi(GetAttr(k, "colspan"))
+			if err != nil || span < 1 {
+				span = 1
+			}
+			col += span
+		}
+	}
+	return col
 }
 
 // tableImageWidth returns the width attribute of the first image in the

@@ -102,6 +102,7 @@ type cssState struct {
 	background image.Image
 	hasBg      bool
 	mask       *cssMask
+	bgImage    *cssMask // the background image, with its size, position and repeat
 
 	borderCollapse bool
 	legacyCenter   bool

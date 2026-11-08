@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/text/rich"
@@ -81,6 +83,16 @@ func GetLanguage(class string) string {
 // code of the response and closes the response body and returns an error if
 // it is not [http.StatusOK]. If the error is nil, then the response body is
 // not closed and must be closed by the caller.
+// logGetError logs the given error of [Get], if any, unless it is because
+// the getting was canceled (as for a page whose opening was stopped, as
+// when a page is opened while its style sheets are gotten), and returns it.
+func logGetError(err error) error {
+	if err != nil && !errors.Is(err, context.Canceled) {
+		errors.Log(err)
+	}
+	return err
+}
+
 func Get(ctx *Context, url string) (*http.Response, error) {
 	if strings.HasPrefix(url, "data:") {
 		return dataURL(url)
