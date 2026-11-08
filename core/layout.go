@@ -1676,9 +1676,11 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				mx := md.Size.Dim(ma)
 				asz := mx
 				gsum := cd.Grow.Dim(ma)
-				if li.spans && ma == math32.X {
+				if (li.spans || fr.Styles.Display == styles.Grid) && ma == math32.X {
 					// the columns of a grid grow consistently in every row,
 					// by the grow of the column, also with spanning cells
+					// (and in a last row that is not full, whose cells took
+					// all of the width of the row)
 					gr = md.Grow.X
 					gsum = 0
 					for c := range li.Shape.X {

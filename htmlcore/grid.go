@@ -132,9 +132,16 @@ func gridTracks(v string) []string {
 func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool) {
 	if strings.HasPrefix(track, "minmax(") {
 		inner := strings.TrimSuffix(strings.TrimPrefix(track, "minmax("), ")")
-		_, mx, _ := strings.Cut(inner, ",")
+		mn, mx, _ := strings.Cut(inner, ",")
 		mx = strings.TrimSpace(mx)
 		if strings.HasSuffix(mx, "fr") || mx == "auto" {
+			if mn = strings.TrimSpace(mn); (mn == "0" || mn == "0px") && strings.HasSuffix(mx, "fr") && s.Contain == styles.ContainNone {
+				// the content of a cell does not size its track, so the
+				// tracks share the width by their fr (as the cells of the
+				// repository grid of github.com, whose hidden panels
+				// widened their columns), and it overflows them
+				s.Contain = styles.ContainInlineSize
+			}
 			track = mx
 		} else if l, ok := env.length(mx, units.UnitPw); ok {
 			s.Grow.X, s.Shrink.X = 1, 1
@@ -213,6 +220,40 @@ func (c *Context) stackGrid(w core.Widget) bool {
 	return true
 }
 
+// gridPlacement returns the area of the given child of a grid with the
+// given number of columns from the numbers of its start lines in its
+// grid-row and grid-column (or grid-area), if it has both (as the cells
+// of the repository grid of github.com, as grid-column: 1; grid-row: 1).
+func (c *Context) gridPlacement(n *html.Node, ncols int) (gridArea, bool) {
+	if n == nil {
+		return gridArea{}, false
+	}
+	row, col := c.declaration(n, "grid-row"), c.declaration(n, "grid-column")
+	if ga := c.declaration(n, "grid-area"); ga != "" && row == "" && col == "" {
+		parts := strings.Split(ga, "/")
+		if len(parts) >= 2 {
+			row, col = strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+			if len(parts) >= 3 {
+				row += " / " + strings.TrimSpace(parts[2])
+			}
+			if len(parts) >= 4 {
+				col += " / " + strings.TrimSpace(parts[3])
+			}
+		}
+	}
+	start := func(v string) (int, bool) {
+		s, _, _ := cutTopLevel(v, '/')
+		k, err := strconv.Atoi(strings.TrimSpace(s))
+		return k, err == nil && k > 0
+	}
+	r, okr := start(row)
+	cl, okc := start(col)
+	if !okr || !okc || cl > ncols {
+		return gridArea{}, false
+	}
+	return gridArea{row: r - 1, col: cl - 1, rows: gridSpan(row, 0), cols: min(gridSpan(col, ncols), ncols-cl+1)}, true
+}
+
 // gridSpan returns the number of tracks that the given value of
 // grid-column or grid-row spans: span N (with auto or a start line before
 // or after it), or from a start line to an end line (with -1 the last line
@@ -285,6 +326,8 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		}
 		if a, ok := areas[name]; ok && name != "" {
 			items = append(items, placed{kw, a})
+		} else if a, ok := c.gridPlacement(kn, ncols); ok {
+			items = append(items, placed{kw, a})
 		} else {
 			auto = append(auto, k)
 		}
@@ -303,6 +346,14 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 			}
 			cs, rs := 1, 1
 			if kn, _ := kw.AsWidget().Property("node").(*html.Node); kn != nil {
+				// children out of the flow are in no cell (as a visually
+				// hidden heading, which took the first column of the
+				// testimonials of github.com, so the others were in the
+				// tracks after theirs)
+				pos := strings.TrimSpace(c.declaration(kn, "position"))
+				if pos == "absolute" || pos == "fixed" || c.displayOf(kn) == "none" {
+					continue
+				}
 				cs = gridSpan(c.declaration(kn, "grid-column"), ncols)
 				rs = gridSpan(c.declaration(kn, "grid-row"), 0)
 			}

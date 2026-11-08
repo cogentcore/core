@@ -25,6 +25,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
@@ -1008,4 +1009,50 @@ func TestGridColumnSpan(t *testing.T) {
 	assert.InDelta(t, 600*dp, secs[0].Geom.Size.Actual.Total.X, 3, "half")
 	assert.InDelta(t, 400*dp, secs[2].Geom.Size.Actual.Total.X, 3, "a third")
 	assert.Greater(t, secs[2].Geom.Pos.Total.Y, secs[0].Geom.Pos.Total.Y, "in the second row")
+}
+
+// TestGridPlacement tests children of a grid placed by the numbers of
+// their lines (as the cells of the repository grid of github.com), in
+// any order, with an empty cell between them.
+func TestGridPlacement(t *testing.T) {
+	cell := func(id string, r, c int) string {
+		return fmt.Sprintf(`<div id="%s" style="grid-row: %d; grid-column: %d; height: 20px"></div>`, id, r, c)
+	}
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 300px">`+
+		cell("c", 2, 1)+cell("a", 1, 1)+cell("b", 1, 3)+`</div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			pos := func(id string) math32.Vector2 { return ws[id].Geom.Pos.Total.Sub(ws["a"].Geom.Pos.Total) }
+			assert.InDelta(t, 200*dp, pos("b").X, 3, "in the third column")
+			assert.InDelta(t, 0, pos("b").Y, 1)
+			assert.InDelta(t, 0, pos("c").X, 1, "in the second row")
+			assert.Greater(t, pos("c").Y, float32(10))
+			assert.InDelta(t, 100*dp, ws["c"].Geom.Size.Actual.Total.X, 3, "one column wide, in a last row that is not full")
+		})
+}
+
+// TestGridMinmaxZero tests that the columns of minmax(0, 1fr) are equal,
+// whatever the widths of their content (as the repository grid of
+// github.com, whose long hidden texts widened their columns).
+func TestGridMinmaxZero(t *testing.T) {
+	long := strings.Repeat("a long text of a hidden panel ", 5)
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 300px">`+
+		`<div id="a">`+long+`</div><div id="b">b</div><div id="c">c</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, id := range []string{"a", "b", "c"} {
+				assert.InDelta(t, 100*dp, ws[id].Geom.Size.Actual.Total.X, 3, id)
+			}
+		})
+}
+
+// TestGridOutOfFlowChild tests that a child of a grid that is out of its
+// flow (as a visually hidden heading) does not take a track, so the
+// children after it are in their tracks (as the 8fr and 5fr columns of
+// the testimonials of github.com, which were swapped).
+func TestGridOutOfFlowChild(t *testing.T) {
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: minmax(0px, 8fr) minmax(0px, 5fr); width: 1300px; position: relative">`+
+		`<h2 style="position: absolute; width: 1px; height: 1px; overflow: hidden">Testimonials</h2><div id="q">quotes</div><div id="s">stats</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 800*dp, ws["q"].Geom.Size.Actual.Total.X, 3)
+			assert.InDelta(t, 500*dp, ws["s"].Geom.Size.Actual.Total.X, 3)
+		})
 }
