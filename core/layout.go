@@ -1706,12 +1706,34 @@ func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 	minw := make([]float32, n)
 	pref := make([]float32, n) // the widths of the columns from SizeUp
 	any := false
+	type spanning struct {
+		col, span int
+		minw      float32
+	}
+	var spans []spanning
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		c := cwb.Geom.Cell.X
-		if c >= n || fr.colSpan(cwb) > 1 {
+		if c >= n {
 			return tree.Continue
 		}
 		ksz := &cwb.Geom.Size
+		if span := fr.colSpan(cwb); span > 1 {
+			// a cell that spans columns (as a footer over the columns of a
+			// grid) shrinks with them: they shrink when it can, down to
+			// the widths that it needs (see below)
+			spans = append(spans, spanning{c, span, ksz.minWidth})
+			if ksz.minWidth < ksz.preferred.X {
+				sh := cwb.Styles.Shrink.X
+				if sh == 0 {
+					sh = 1
+				}
+				for k := c; k < min(c+span, n); k++ {
+					shrink[k] = max(shrink[k], sh)
+				}
+				any = true
+			}
+			return tree.Continue
+		}
 		// every widget that can be narrower than it is shrinks, by 1
 		// unless its style says otherwise
 		if ksz.minWidth < ksz.preferred.X {
@@ -1765,6 +1787,29 @@ func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 		}
 		return tree.Continue
 	})
+	// The columns that a cell spans are at least as wide as it needs to be,
+	// widened evenly (as in SizeUp), so that its row is not wider than the
+	// others (as a header over two columns of a table).
+	for _, sp := range spans {
+		end := min(sp.col+sp.span, n)
+		sum := fr.layout.Gap.X * float32(end-sp.col-1)
+		nshrink := 0
+		for c := sp.col; c < end; c++ {
+			if shrink[c] > 0 {
+				sum += minw[c]
+				nshrink++
+			} else {
+				sum += widths[c]
+			}
+		}
+		if extra := sp.minw - sum; extra > 0 && nshrink > 0 {
+			for c := sp.col; c < end; c++ {
+				if shrink[c] > 0 {
+					minw[c] += extra / float32(nshrink)
+				}
+			}
+		}
+	}
 	for range 2 { // again for those that are not at their minimum
 		sum := float32(0)
 		for c := range n {

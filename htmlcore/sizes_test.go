@@ -259,3 +259,46 @@ func TestWrapRowInBlock(t *testing.T) {
 			assert.Less(t, ic.Y, 30*dp)
 		})
 }
+
+// TestTableSpanFixedWidth tests that a cell that spans columns, with a fixed
+// width, in a table narrower than its content (as the party column of a table
+// of donations on Wikipedia) shrinks with its columns, as in Chrome: its row
+// was wider than the others, which made the page wider than its window.
+func TestTableSpanFixedWidth(t *testing.T) {
+	notes := strings.Repeat("Notes about the donations of the party. ", 20)
+	widgetsByID(t, `<div style="width: 500px"><table id="table"><tr><th id="party" colspan="2" style="width:150px">Party</th><th id="amount">Amount</th><th id="notes">Notes</th></tr>`+
+		`<tr><td style="width: 2px; background-color: blue"></td><td id="name">New Zealand National Party</td><td>$1</td><td id="note">`+notes+`</td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			right := func(id string) float32 {
+				g := ws[id].Geom
+				return g.Pos.Total.X + g.Size.Actual.Total.X
+			}
+			assert.InDelta(t, right("name"), right("party"), 1, "the party cell over its columns")
+			assert.InDelta(t, right("note"), right("notes"), 1)
+			assert.LessOrEqual(t, ws["table"].Geom.Size.Actual.Total.X, 500*dp+2)
+		})
+}
+
+// TestMaxWidthNarrower tests that a block with a max-width that is wider
+// than its parent, and long text in it, is as wide as its parent (as the
+// page container of Wikipedia, which was its max-width, wider than the
+// window, after the window was widened).
+func TestMaxWidthNarrower(t *testing.T) {
+	text := strings.Repeat("The text of the footer of the page. ", 40)
+	widgetsByID(t, `<div id="outer" style="width: 800px"><div id="container" style="max-width: 1000px; margin: 0 auto; padding: 0 24px; box-sizing: border-box">`+
+		`<div><footer><ul><li id="text">`+text+`</li></ul></footer></div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 800*dp, ws["container"].Geom.Size.Actual.Total.X, 1)
+			assert.LessOrEqual(t, ws["text"].Geom.Size.Actual.Total.X, 800*dp)
+		})
+	// in a grid with areas, with the text in an area over both columns
+	widgetsByID(t, `<style>.inner { display: grid; column-gap: 24px; grid-template: min-content 1fr min-content / 196px minmax(0, 1fr); `+
+		`grid-template-areas: "notice notice" "start content" "footer footer" }</style>`+
+		`<div id="outer" style="width: 800px"><div id="container" style="max-width: 1000px; margin: 0 auto; padding: 0 24px; box-sizing: border-box">`+
+		`<div class="inner"><div style="grid-area: notice">notice</div><div style="grid-area: start">start</div><main style="grid-area: content">content</main>`+
+		`<div style="grid-area: footer"><footer><ul><li id="text">`+text+`</li></ul></footer></div></div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 800*dp, ws["container"].Geom.Size.Actual.Total.X, 2)
+			assert.LessOrEqual(t, ws["text"].Geom.Size.Actual.Total.X, 800*dp)
+		})
+}
