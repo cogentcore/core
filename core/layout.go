@@ -1488,7 +1488,7 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	if redo || wrapped {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
 	}
-	fr.sizeDownParts(iter) // no std role, just get sizes
+	fr.sizeDownParts(iter)    // no std role, just get sizes
 	if fr.sizeAspect(false) { // after its content (which can make it higher)
 		aspect = true
 	}
