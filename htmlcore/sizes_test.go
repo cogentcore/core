@@ -540,3 +540,16 @@ func TestGridRowSpanLastRow(t *testing.T) {
 		assert.Equal(t, topic.Min.Y, img.Min.Y, "beside the topic")
 	})
 }
+
+// TestPercentHeightChain tests heights of 100% in a box of a specified
+// height, down to a text field (as the search box of duckduckgo.com): they
+// are of its height, and it is not higher, where the text field was as
+// high as the window.
+func TestPercentHeightChain(t *testing.T) {
+	src := `<form><div id="box" style="height: 48px; position: relative"><div style="height: 100%; display: flex; align-items: center">` +
+		`<div style="height: 100%; display: flex; align-items: center"><input id="in" style="height: 100%; box-sizing: border-box; display: block" value="cogent core"></div></div></div></form>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.InDelta(t, 48*dp, float32(ws["box"].Geom.TotalBBox.Dy()), 2, "the box is as high as specified")
+		assert.InDelta(t, 48*dp, float32(ws["in"].Geom.TotalBBox.Dy()), 2, "the text field is as high as it")
+	})
+}
