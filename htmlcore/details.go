@@ -73,8 +73,7 @@ func (c *Context) arrangeDetails(n *html.Node, fr *core.Frame) {
 	})
 	toggle := c.ToggleDetails
 	summary.OnClick(func(e events.Event) {
-		if toggle != nil { // in the document, which is read again
-			toggle(n)
+		if toggle != nil && toggle(n) { // in the document, which is read again
 			return
 		}
 		e.SetHandled()

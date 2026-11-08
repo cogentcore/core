@@ -189,7 +189,7 @@ func TestToggleDetails(t *testing.T) {
 	b := core.NewBody()
 	ctx := NewContext()
 	var toggled []*html.Node
-	ctx.ToggleDetails = func(n *html.Node) { toggled = append(toggled, n) }
+	ctx.ToggleDetails = func(n *html.Node) bool { toggled = append(toggled, n); return true }
 	ReadHTMLString(ctx, b, `<details id="d"><summary>More</summary><p>Hidden text</p></details>`)
 	var summary *core.Frame
 	b.WalkDown(func(n tree.Node) bool {

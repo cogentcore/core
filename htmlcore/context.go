@@ -93,9 +93,10 @@ type Context struct {
 	// attribute), on a click of its summary, as for an app that runs
 	// scripts, which reads the page again then: its [open] selectors
 	// apply (as the rotated chevrons of the sidebar of MDN), and it stays
-	// open when the page is read again. Otherwise, the details of the page
-	// that is read are shown or hidden in place.
-	ToggleDetails func(n *html.Node)
+	// open when the page is read again. It returns whether it toggled them:
+	// otherwise (or if it is not set), the details of the page that is read
+	// are shown or hidden in place (as when the scripts were stopped).
+	ToggleDetails func(n *html.Node) bool
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
