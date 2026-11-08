@@ -117,6 +117,7 @@ func FromName(name string) (color.RGBA, error) {
 //   - clearer-VAL or opaquer-VAL: manipulates the alpha level by VAL
 //   - blend-VAL-color: blends given percent of given color relative to base in RGB space
 func FromString(str string, base ...color.Color) (color.RGBA, error) {
+	str = strings.TrimSpace(str) // as after the colon of a style property
 	if len(str) == 0 { // consider it null
 		return color.RGBA{}, nil
 	}

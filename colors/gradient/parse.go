@@ -474,8 +474,8 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 							continue
 						}
 						a := xml.Attr{}
-						a.Name.Local = s[:ci]
-						a.Value = s[ci+1:]
+						a.Name.Local = strings.TrimSpace(s[:ci])
+						a.Value = strings.TrimSpace(s[ci+1:])
 						ats = append(ats, a)
 					}
 				}
