@@ -347,3 +347,36 @@ func TestPositionPercentOfContainingBlock(t *testing.T) {
 		assert.Less(t, dot.Geom.Size.Actual.Total.X, 40*dp)
 	})
 }
+
+// TestPositionNegativeZIndex tests that an absolute widget with a negative
+// z-index is rendered under the other children of its parent (as the
+// offset shadows of the screenshots of github.com, under their surface).
+func TestPositionNegativeZIndex(t *testing.T) {
+	b := NewBody()
+	box := NewFrame(b)
+	box.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionRelative
+		s.Padding.Zero()
+		s.NoClip = true
+	})
+	shadow := NewFrame(box)
+	shadow.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.ZIndex = -1
+		s.Inset.Top, s.Inset.Left = units.Dp(4), units.Dp(-4)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Min.Set(units.Dp(100), units.Dp(100))
+		s.Background = colors.Uniform(colors.Green)
+	})
+	surface := fixedFrame(box, 100, 100)
+	surface.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.White) })
+	b.Styler(func(s *styles.Style) { s.NoClip = true })
+	fixedFrame(b, 200, 50) // room below the box for its shadow
+	img := b.RenderImage()
+	c := surface.Geom.TotalBBox.Min.Add(surface.Geom.TotalBBox.Size().Div(2))
+	r, g, bl, _ := img.At(c.X, c.Y).RGBA()
+	assert.Equal(t, [3]uint32{0xffff, 0xffff, 0xffff}, [3]uint32{r, g, bl}, "the surface over the shadow")
+	r, g, _, _ = img.At(c.X, surface.Geom.TotalBBox.Max.Y+1).RGBA()
+	assert.Equal(t, uint32(0), r, "the shadow below the surface")
+	assert.Greater(t, g, uint32(0))
+}

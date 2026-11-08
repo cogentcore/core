@@ -676,8 +676,8 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 		!(fr.Styles.Shrink.X > 0 && fr.Styles.Direction == styles.Row)
 	mx := sz.Max
 	for d := math32.X; d <= math32.Y; d++ {
-		if nosz {
-			continue
+		if nosz || fr.contained(d) {
+			continue // (contained: as if it had no content)
 		}
 		// a frame that scrolls is as large as its style, unless it shrinks
 		// in width (as in CSS, where it starts at the width of its content,
@@ -720,6 +720,7 @@ func (wb *WidgetBase) SizeUpWidget() {
 	wb.sizeUpParts()
 	sz := &wb.Geom.Size
 	sz.SetTotalFromContent(&sz.Actual)
+	wb.sizeAspect(false)
 	wb.sizeUpIntrinsic()
 }
 
@@ -831,6 +832,58 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 	return got
 }
 
+// contained returns whether the size of the widget in the given dimension
+// does not depend on its content ([styles.Style.Contain]).
+func (wb *WidgetBase) contained(d math32.Dims) bool {
+	c := wb.Styles.Contain
+	return c == styles.ContainSize || (c == styles.ContainInlineSize && d == math32.X)
+}
+
+// aspectHeight returns the height of the content of the widget for its
+// [styles.Style.AspectRatio] at the given width of its content, or 0 if
+// it has none, or if its height is set (by its Min).
+func (wb *WidgetBase) aspectHeight(w float32) float32 {
+	r := wb.Styles.AspectRatio
+	if r <= 0 || w <= 0 || wb.Styles.Min.Y.Value > 0 {
+		return 0
+	}
+	if wb.Styles.BoxSizing == styles.BoxBorderBox {
+		bs := wb.boxSizingSpace()
+		return max(math32.Ceil((w+bs.X)/r-bs.Y), 0)
+	}
+	return math32.Ceil(w / r)
+}
+
+// sizeAspect makes the actual height of the content of the widget at
+// least the height for its aspect ratio at its actual width (see
+// [WidgetBase.aspectHeight]), and its allocated height too if alloc,
+// for its children (in SizeDown). It returns whether the actual height
+// changed.
+func (wb *WidgetBase) sizeAspect(alloc bool) bool {
+	sz := &wb.Geom.Size
+	w := sz.Actual.Content.X
+	if alloc && wb.Styles.Grow.X > 0 && sz.Alloc.Content.X > w {
+		w = sz.Alloc.Content.X // as wide as its allocation (as a block)
+		if sz.Max.X > 0 {
+			w = min(w, sz.Max.X)
+		}
+	}
+	h := wb.aspectHeight(w)
+	if h <= 0 {
+		return false
+	}
+	if alloc && sz.Alloc.Content.Y < h {
+		sz.Alloc.Content.Y = h
+		sz.SetTotalFromContent(&sz.Alloc)
+	}
+	if sz.Actual.Content.Y >= h {
+		return false
+	}
+	sz.Actual.Content.Y = h
+	sz.SetTotalFromContent(&sz.Actual)
+	return true
+}
+
 // sizeUpParts adjusts the Content size to hold the Parts layout if present
 func (wb *WidgetBase) sizeUpParts() {
 	if wb.Parts == nil {
@@ -858,6 +911,7 @@ func (fr *Frame) SizeUp() {
 	fr.sizeUpChildren() // kids do their own thing
 	fr.sizeFromChildrenFit(0, SizeUpPass)
 	fr.sizeUpIntrinsicFrame()
+	fr.sizeAspect(false)
 	if fr.Parts != nil {
 		fr.Parts.SizeUp() // just to get sizes -- no std role in layout
 	}
@@ -1296,8 +1350,9 @@ func (fr *Frame) sizeFromChildrenStacked() math32.Vector2 {
 // Returns true if any change in Actual size occurred.
 func (wb *WidgetBase) SizeDown(iter int) bool {
 	wb.updateParentRelSizes()
+	aspect := wb.sizeAspect(true)
 	redo := wb.sizeDownParts(iter)
-	return redo
+	return redo || aspect
 }
 
 func (wb *WidgetBase) sizeDownParts(iter int) bool {
@@ -1413,6 +1468,8 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 	}
 	styles.SetClampMaxVector(&sz.Alloc.Content, sz.Max) // can't be more than max..
 	sz.SetTotalFromContent(&sz.Alloc)
+	// as high as its aspect ratio makes it, for its children too
+	aspect := fr.sizeAspect(true)
 	if DebugSettings.LayoutTrace {
 		fmt.Println(fr, "Managing Alloc:", sz.Alloc.Content)
 	}
@@ -1432,7 +1489,10 @@ func (fr *Frame) sizeDownFrame(iter int) bool {
 		fr.sizeFromChildrenFit(iter, SizeDownPass)
 	}
 	fr.sizeDownParts(iter) // no std role, just get sizes
-	return chg || wrapped || redo
+	if fr.sizeAspect(false) { // after its content (which can make it higher)
+		aspect = true
+	}
+	return chg || wrapped || redo || aspect
 }
 
 // SizeDownSetAllocs is the key SizeDown step that sets the allocations
@@ -2110,6 +2170,7 @@ func (wb *WidgetBase) SizeFinal() {
 	sz := &wb.Geom.Size
 	sz.Internal = sz.Actual.Content // keep it before we grow
 	wb.growToAlloc()
+	wb.sizeAspect(false) // for its final width
 	wb.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
 	wb.sizeFinalParts()
 	sz.SetTotalFromContent(&sz.Actual)
@@ -2162,6 +2223,7 @@ func (fr *Frame) SizeFinal() {
 	fr.layoutFloats()      // with the final sizes
 	fr.sizeFromChildrenFit(0, SizeFinalPass)
 	fr.growToAlloc()
+	fr.sizeAspect(false) // for its final width
 	fr.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
 	fr.sizeFinalParts()
 }

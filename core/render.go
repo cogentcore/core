@@ -607,7 +607,7 @@ func (wb *WidgetBase) RenderWidget() {
 // widget, outside of its clipping, as they can be outside of it.
 func (wb *WidgetBase) renderOutOfFlowChildren() {
 	for _, cw := range wb.renderOrder() {
-		if cw.AsWidget().outOfFlow() {
+		if cw.AsWidget().outOfFlow() && cw.AsWidget().Styles.ZIndex >= 0 {
 			if root := cw.AsWidget().raisedTo(); root != nil {
 				root.raised = append(root.raised, cw)
 				continue
@@ -673,7 +673,10 @@ func (wb *WidgetBase) renderParts() {
 func (wb *WidgetBase) renderChildren() {
 	if order := wb.renderOrder(); order != nil { // positioned children
 		for _, cw := range order {
-			if !cw.AsWidget().outOfFlow() { // rendered after (see RenderWidget)
+			// out of flow ones are rendered after (see RenderWidget), except
+			// those with a negative z-index, which are under the others (as
+			// the offset shadows of github.com, under their content)
+			if cwb := cw.AsWidget(); !cwb.outOfFlow() || cwb.Styles.ZIndex < 0 {
 				if root := cw.AsWidget().raisedTo(); root != nil {
 					root.raised = append(root.raised, cw)
 					continue

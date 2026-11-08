@@ -197,6 +197,12 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 		ctx.NewParent = ctx.BlockParent
 		ctx.inlineParent = nil
 	case isBlockDisplay(display) || tag == "body" || strings.HasPrefix(display, "inline-"):
+		if container, inline := ctx.isContainer(ctx.Node); container {
+			w := New[containerFrame](ctx)
+			w.inline = inline
+			ctx.NewParent = w
+			return w
+		}
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
 		return w
@@ -255,7 +261,7 @@ func (c *Context) handleInLink(node *html.Node, w core.Widget) {
 			continue
 		}
 		if n == node {
-			if _, isFrame := w.(*core.Frame); isFrame {
+			if frameOf(w) != nil {
 				return // the link frame itself
 			}
 		}

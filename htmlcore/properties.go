@@ -302,6 +302,26 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 			st.zeroScale = zero // (see resolve)
 		})
+	case "container-type", "container", "contain":
+		c := styles.ContainNone
+		v := lval
+		if prop == "container" { // name / type
+			_, v, _ = strings.Cut(lval, "/")
+		}
+		for _, f := range strings.Fields(v) {
+			switch f {
+			case "size", "strict":
+				c = styles.ContainSize
+			case "inline-size":
+				if c == styles.ContainNone {
+					c = styles.ContainInlineSize
+				}
+			}
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Contain = c })
+	case "aspect-ratio":
+		r := cssAspectRatio(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { s.AspectRatio = r })
 	case "rotate":
 		rot := cssAngle(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Rotate = rot })
@@ -853,6 +873,25 @@ func gridColumns(v string) int {
 // property (the sum of its translate functions; the other functions, as
 // rotate and scale, are not supported), or of the translate property, as
 // the lengths of x and y. It returns false if it is not valid.
+// cssAspectRatio returns the ratio of width to height of the given value
+// of the aspect-ratio property (as 16 / 9, 1.5, or auto 4/3), or 0 for
+// none (auto).
+func cssAspectRatio(v string) float32 {
+	v = strings.TrimSpace(strings.Replace(v, "auto", "", 1))
+	a, b, slash := strings.Cut(v, "/")
+	w, err := strconv.ParseFloat(strings.TrimSpace(a), 32)
+	if err != nil || w <= 0 {
+		return 0
+	}
+	h := 1.0
+	if slash {
+		if h, err = strconv.ParseFloat(strings.TrimSpace(b), 32); err != nil || h <= 0 {
+			return 0
+		}
+	}
+	return float32(w / h)
+}
+
 // cssZeroScale returns whether the given transform scales the element
 // to nothing in either dimension (as scaleX(0), for a progress bar
 // that is not started), which is then not shown.

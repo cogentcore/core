@@ -32,6 +32,9 @@ func (fr *Frame) sizeUpIntrinsicFrame() {
 	if fr.Styles.Overflow.X >= styles.OverflowAuto {
 		minw = 0 // its content scrolls
 	}
+	if fr.contained(math32.X) { // as if it had no content
+		minw, prefw = 0, 0
+	}
 	if fr.Styles.MaxContentWidth {
 		// as wide as its content on one line, which it is not narrowed from
 		minw = prefw

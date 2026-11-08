@@ -22,7 +22,7 @@ import (
 func (c *Context) arrangeDetails(n *html.Node, fr *core.Frame) {
 	var summary *core.Frame
 	for _, k := range fr.Children {
-		if kf, ok := k.(*core.Frame); ok && kf.Property("tag") == "summary" {
+		if kf := frameOf(k); kf != nil && kf.Property("tag") == "summary" {
 			summary = kf
 			break
 		}

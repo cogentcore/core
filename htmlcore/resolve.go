@@ -487,7 +487,8 @@ func (r *resolver) sizes() {
 			}
 		}
 	}
-	bs.definiteHeight = st.height != nil
+	// (an aspect ratio makes the height follow the width, which is definite)
+	bs.definiteHeight = st.height != nil || s.AspectRatio > 0
 	if (st.overflowHidden[0] || s.Overflow.X == styles.OverflowVisible) &&
 		(st.overflowHidden[1] || s.Overflow.Y == styles.OverflowVisible) && (st.overflowHidden[0] || st.overflowHidden[1]) {
 		s.ScrollbarWidth.Zero() // hidden, not scrolled
@@ -655,7 +656,7 @@ func (r *resolver) margins() {
 	// The spacing of the page is that of its CSS, not scaled by the
 	// Spacing setting, which applies to the spacing of Cogent Core widgets
 	// (see core.WidgetBase.styleSettings, which multiplies by it).
-	if _, isFrame := wb.This.(*core.Frame); isFrame || isTextWidget(wb) {
+	if frameOf(wb.This) != nil || isTextWidget(wb) {
 		for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
 			&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
 			v.Value /= spc

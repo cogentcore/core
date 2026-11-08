@@ -163,7 +163,7 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 	if np != nil && n.FirstChild != nil {
 		readHTMLNode(ctx, np, n.FirstChild)
 		if n.Type == html.ElementNode && ctx.rest == nil {
-			if fr, ok := np.(*core.Frame); ok && fr.Property("node") == n {
+			if fr := frameOf(np); fr != nil && fr.Property("node") == n {
 				ctx.arrange(n, fr)
 			}
 		}

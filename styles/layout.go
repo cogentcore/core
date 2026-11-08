@@ -276,6 +276,24 @@ const (
 	ClearBoth
 )
 
+// Containments are the dimensions in which the size of an element does
+// not depend on its content, as the size containment of CSS (which a
+// container for container queries has).
+type Containments int32 //enums:enum -trim-prefix Contain -transform kebab
+
+const (
+	// ContainNone is the default: the size of the element depends on its content.
+	ContainNone Containments = iota
+
+	// ContainInlineSize is for an element whose width does not depend on its
+	// content (as if it were empty), which overflows it instead.
+	ContainInlineSize
+
+	// ContainSize is for an element whose width and height do not depend on
+	// its content (as if it were empty), which overflows it instead.
+	ContainSize
+)
+
 // BoxSizings are the boxes that the Min and Max sizes are of,
 // as the box-sizing property of CSS.
 type BoxSizings int32 //enums:enum -trim-prefix Box -transform kebab

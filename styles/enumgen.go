@@ -336,6 +336,49 @@ func (i Clears) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Clears) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Clears") }
 
+var _ContainmentsValues = []Containments{0, 1, 2}
+
+// ContainmentsN is the highest valid value for type Containments, plus one.
+const ContainmentsN Containments = 3
+
+var _ContainmentsValueMap = map[string]Containments{`none`: 0, `inline-size`: 1, `size`: 2}
+
+var _ContainmentsDescMap = map[Containments]string{0: `ContainNone is the default: the size of the element depends on its content.`, 1: `ContainInlineSize is for an element whose width does not depend on its content (as if it were empty), which overflows it instead.`, 2: `ContainSize is for an element whose width and height do not depend on its content (as if it were empty), which overflows it instead.`}
+
+var _ContainmentsMap = map[Containments]string{0: `none`, 1: `inline-size`, 2: `size`}
+
+// String returns the string representation of this Containments value.
+func (i Containments) String() string { return enums.String(i, _ContainmentsMap) }
+
+// SetString sets the Containments value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Containments) SetString(s string) error {
+	return enums.SetString(i, s, _ContainmentsValueMap, "Containments")
+}
+
+// Int64 returns the Containments value as an int64.
+func (i Containments) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Containments value from an int64.
+func (i *Containments) SetInt64(in int64) { *i = Containments(in) }
+
+// Desc returns the description of the Containments value.
+func (i Containments) Desc() string { return enums.Desc(i, _ContainmentsDescMap) }
+
+// ContainmentsValues returns all possible values for the type Containments.
+func ContainmentsValues() []Containments { return _ContainmentsValues }
+
+// Values returns all possible values for the type Containments.
+func (i Containments) Values() []enums.Enum { return enums.Values(_ContainmentsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Containments) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Containments) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "Containments")
+}
+
 var _BoxSizingsValues = []BoxSizings{0, 1}
 
 // BoxSizingsN is the highest valid value for type BoxSizings, plus one.

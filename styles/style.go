@@ -186,6 +186,19 @@ type Style struct { //types:add
 	// max-content in CSS (as a ticker of items in a row that scrolls).
 	MaxContentWidth bool
 
+	// AspectRatio, if positive, is the ratio of the width to the height of
+	// the element, from which its height follows its width when its height
+	// is not set (by its Min), as the aspect-ratio property of CSS (its
+	// content can still make it higher). It is of the content box, or of
+	// the border box for [BoxBorderBox].
+	AspectRatio float32
+
+	// Contain is the dimensions in which the size of the element does not
+	// depend on its content, as the size containment of CSS (for container
+	// queries, which are of the size of the container, so its content
+	// cannot change it).
+	Contain Containments
+
 	// BoxShadowOutside is whether the box shadows are outside of the
 	// layout of the element, as in CSS: no space is allocated for them
 	// around it (they are not in its effective margin), and they are

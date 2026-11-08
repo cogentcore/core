@@ -118,7 +118,7 @@ type cssState struct {
 func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl) {
 	wb := w.AsWidget()
 	_, isText := w.(*core.Text)
-	_, isFrame := w.(*core.Frame)
+	isFrame := frameOf(w) != nil
 	plain := isText || isFrame // widgets whose look is all from CSS
 	tag := ""
 	if node != nil {
@@ -233,6 +233,8 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if env.fixedVh {
 			env.vh = float64(c.MediaHeight / 100)
 		}
+		// the container query units, of the container of the element
+		env.cqw, env.cqh = containerUnits(w, env.vw, env.vh)
 		if tag == "body" && c.declaration(node, "font-size") == "" {
 			// the font size of the html element (which has no widget)
 			if rf := c.rootFontSize(); rf != 16 {

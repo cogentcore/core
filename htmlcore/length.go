@@ -30,6 +30,11 @@ type lengthEnv struct {
 	fixedVh    bool
 	rem        float64
 
+	// cqw and cqh are the container query units (1% of the width and the
+	// height of the container of the element; see container.go), which
+	// are those of the viewport (vw, vh) if they are not set.
+	cqw, cqh float64
+
 	// ch, if set, returns the size of the ch unit of the element in px:
 	// the advance of the 0 glyph of its font, as in CSS.
 	ch func() float64
@@ -74,6 +79,9 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 			}
 		}
 	}
+	if l, ok := e.containerLength(v); ok {
+		return l, true
+	}
 	if r, ok := strings.CutSuffix(v, "rem"); ok { // of the font size of the html element
 		if f, err := strconv.ParseFloat(r, 32); err == nil {
 			return units.Dp(float32(f) * float32(e.rem)), true
@@ -107,6 +115,53 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 		return units.Dp(l.Value * float32(e.vh)), true
 	}
 	return l, true
+}
+
+// containerUnits returns the size in px of 1% of the width and height of
+// the container of the element (cqw, cqh), or of the viewport if none.
+func (e *lengthEnv) containerUnits() (cqw, cqh float64) {
+	cqw, cqh = e.cqw, e.cqh
+	if cqw <= 0 {
+		cqw = e.vw
+	}
+	if cqh <= 0 {
+		cqh = e.vh
+	}
+	return
+}
+
+// cqUnits are the container query units of CSS, by how they are of the
+// width (cqw, cqi) and height (cqh, cqb) of the container, or the smaller
+// (cqmin) or larger (cqmax) of them.
+var cqUnits = []string{"cqmin", "cqmax", "cqw", "cqh", "cqi", "cqb"}
+
+// cqUnit returns the size in px of the given container query unit.
+func (e *lengthEnv) cqUnit(u string) float64 {
+	cqw, cqh := e.containerUnits()
+	switch u {
+	case "cqw", "cqi":
+		return cqw
+	case "cqh", "cqb":
+		return cqh
+	case "cqmin":
+		return math.Min(cqw, cqh)
+	}
+	return math.Max(cqw, cqh)
+}
+
+// containerLength returns the given length if it is in a container
+// query unit (as 50cqw), in dp.
+func (e *lengthEnv) containerLength(v string) (units.Value, bool) {
+	for _, u := range cqUnits {
+		if num, ok := strings.CutSuffix(v, u); ok {
+			f, err := strconv.ParseFloat(num, 64)
+			if err != nil {
+				return units.Value{}, false
+			}
+			return units.Dp(float32(f * e.cqUnit(u))), true
+		}
+	}
+	return units.Value{}, false
 }
 
 // cssAbsoluteUnits are the absolute units of CSS, in px.
@@ -152,7 +207,7 @@ func (e *lengthEnv) linear(v string) (linear, bool) {
 	if inner, ok := strings.CutPrefix(v, "calc("); ok {
 		v = "(" + inner
 	}
-	p := &linearParser{s: v, em: e.em, vw: e.vw, vh: e.vh, rem: e.rem}
+	p := &linearParser{s: v, em: e.em, vw: e.vw, vh: e.vh, rem: e.rem, env: e}
 	l, ok := p.sum()
 	p.space()
 	return l, ok && p.i == len(p.s)
@@ -164,6 +219,7 @@ type linearParser struct {
 	i          int
 	em, vw, vh float64
 	rem        float64 // px per rem
+	env        *lengthEnv // for the container query units
 
 	// lengths is the number of lengths parsed.
 	lengths int
@@ -263,6 +319,13 @@ func (p *linearParser) factor() (linear, bool, bool) {
 		p.i += len(u)
 		p.lengths++
 		return linear{px: n * scale}, true, true
+	}
+	if p.env != nil {
+		for _, u := range cqUnits {
+			if strings.HasPrefix(rest, u) {
+				return unit(u, p.env.cqUnit(u))
+			}
+		}
 	}
 	switch {
 	case strings.HasPrefix(rest, "%"):

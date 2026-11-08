@@ -373,3 +373,44 @@ func TestGridStack(t *testing.T) {
 			assert.Greater(t, ws["value"].Geom.Size.Actual.Total.X, 80*dp, "with its value shown")
 		})
 }
+
+// TestAspectRatio tests the aspect-ratio property: the height of a box
+// follows its width (as the visuals of the platform features of
+// github.com, which were as high as their content), unless its height
+// is set, and its content can make it higher.
+func TestAspectRatio(t *testing.T) {
+	widgetsByID(t, `<div style="width: 400px"><div id="box" style="aspect-ratio: 16 / 15; position: relative"><div id="child" style="height: 100%"></div></div>`+
+		`<div id="set" style="aspect-ratio: 2; height: 50px"></div><div id="tall" style="aspect-ratio: 4"><div style="height: 300px"></div></div>`+
+		`<div id="border" style="aspect-ratio: 1; box-sizing: border-box; padding: 20px; width: 100px"></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			box := ws["box"].Geom.Size.Actual.Total
+			assert.InDelta(t, 400*dp, box.X, 1)
+			assert.InDelta(t, 375*dp, box.Y, 2, "from its width")
+			assert.InDelta(t, 375*dp, ws["child"].Geom.Size.Actual.Total.Y, 2, "a percentage of that height")
+			assert.InDelta(t, 50*dp, ws["set"].Geom.Size.Actual.Total.Y, 1, "its height")
+			assert.GreaterOrEqual(t, ws["tall"].Geom.Size.Actual.Total.Y, 300*dp, "its content")
+			b := ws["border"].Geom.Size.Actual.Total
+			assert.InDelta(t, b.X, b.Y, 1, "of its border box")
+		})
+}
+
+// TestContainerUnits tests the container query units (cqw, cqh), of the
+// size of the nearest container (container-type: size or inline-size),
+// as the screenshots of the platform features of github.com, whose width
+// is a min() of calc()s of the width and height of their container,
+// which were empty boxes.
+func TestContainerUnits(t *testing.T) {
+	widgetsByID(t, `<div style="width: 400px"><div id="container" style="container-type: size; aspect-ratio: 16 / 15; position: relative">`+
+		`<div style="display: flex; padding: 10px"><div id="half" style="width: 50cqw; height: 10px"></div></div>`+
+		`<div id="content" style="inline-size: min(calc(100cqw - 32px), calc((100cqh - 64px) * 984 / 840)); aspect-ratio: 984 / 840"></div></div>`+
+		`<div style="container-type: inline-size; width: 200px"><div id="inline" style="width: 50cqw; height: 50cqh"></div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 375*dp, ws["container"].Geom.Size.Actual.Total.Y, 2)
+			assert.InDelta(t, 200*dp, ws["half"].Geom.Size.Actual.Total.X, 2, "50% of the width of its container, not of its parent")
+			// min(400 - 32, (375 - 64) * 984 / 840 = 364.3)
+			content := ws["content"].Geom.Size.Actual.Total
+			assert.InDelta(t, 364.3*dp, content.X, 3, "of the height of its container")
+			assert.InDelta(t, 364.3*840/984*dp, content.Y, 3)
+			assert.InDelta(t, 100*dp, ws["inline"].Geom.Size.Actual.Total.X, 2)
+		})
+}
