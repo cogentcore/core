@@ -2409,6 +2409,9 @@ func (wb *WidgetBase) firstBaseline() (float32, bool) {
 		ls := w.paintText
 		return top + ls.Lines[0].Offset.Y - ls.Bounds.Min.Y, true
 	case *Frame:
+		if b, ok := w.rowBaseline(); ok {
+			return top + b, true
+		}
 		var base float32
 		found := false
 		w.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
@@ -2421,6 +2424,38 @@ func (wb *WidgetBase) firstBaseline() (float32, bool) {
 		return base, found
 	}
 	return 0, false
+}
+
+// rowBaseline returns the baseline of the first line of a frame that is
+// a row aligned on baselines (see [Frame.lineBaselines]), from the top of
+// its content, and whether it has one: where its items with text are
+// aligned, in the line of the size of its largest item.
+func (fr *Frame) rowBaseline() (float32, bool) {
+	if fr.Styles.Direction != styles.Row || fr.Styles.Align.Items != styles.Baseline {
+		return 0, false
+	}
+	var cross, desc float32
+	found := false
+	idx := 0
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if cwb.Geom.Cell.X == 0 && idx > 0 {
+			return tree.Break // the first line only
+		}
+		idx++
+		h := cwb.Geom.Size.Actual.Total.Y
+		cross = max(cross, h)
+		if styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self) != styles.Baseline {
+			return tree.Continue
+		}
+		if b, ok := cwb.firstBaseline(); ok {
+			desc, found = max(desc, h-b), true
+		}
+		return tree.Continue
+	})
+	if !found {
+		return 0, false
+	}
+	return cross - desc, true
 }
 
 // lineSpaces returns, for each line of the children along the given main

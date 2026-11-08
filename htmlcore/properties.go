@@ -363,6 +363,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			if l, ok := st.env.length(lval, units.UnitPw); ok {
 				s.Text.Indent = l
+				// the text is moved out of view (as the labels of icons,
+				// which have it), as an indent is not otherwise supported
+				st.hideText = (l.Unit == units.UnitDp || l.Unit == units.UnitPx) && l.Value <= -500
 			}
 		})
 	case "text-decoration", "text-decoration-line":
@@ -539,6 +542,20 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 				s.Overflow.SetDim(do.dim, do.ov)
 			}
 		})
+	case "box-shadow":
+		if lval == "none" {
+			return op(func(st *cssState, s, ps *styles.Style) { s.BoxShadow = nil })
+		}
+		items := splitTopLevel(val, ',')
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.BoxShadow = nil
+			for _, item := range items {
+				if sh, ok := boxShadow(st.env, item); ok {
+					s.BoxShadow = append(s.BoxShadow, sh)
+				}
+			}
+			s.BoxShadowOutside = true // they take no space, as in CSS
+		})
 	case "grid-template-columns":
 		cols := gridColumns(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Columns = cols })
@@ -549,9 +566,8 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = float32(f) })
 	case "visibility":
-		if lval == "hidden" || lval == "collapse" {
-			return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = 0 })
-		}
+		// (applied with the inherited visibility; see resolveCSS)
+		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = lval })
 	}
 	return nil
 }
@@ -910,4 +926,38 @@ func cssAngle(v string) float32 {
 	}
 	f, _ := strconv.ParseFloat(v, 64)
 	return float32(f)
+}
+
+// boxShadow returns the shadow of the given item of a box-shadow value:
+// [inset] offset-x offset-y [blur [spread]] [color], and whether it is
+// one (an inset shadow is not supported, and is not rendered).
+func boxShadow(env *lengthEnv, item string) (styles.Shadow, bool) {
+	var sh styles.Shadow
+	var lens []units.Value
+	clr := ""
+	for _, f := range splitColors(item) {
+		if strings.EqualFold(f, "inset") {
+			return sh, false
+		}
+		if l, ok := env.length(f, units.UnitDp); ok && len(lens) < 4 && (f == "0" || strings.IndexAny(f, "0123456789") >= 0) && parseColor(f) == nil {
+			lens = append(lens, l)
+			continue
+		}
+		clr = f
+	}
+	if len(lens) < 2 {
+		return sh, false
+	}
+	sh.OffsetX, sh.OffsetY = lens[0], lens[1]
+	if len(lens) > 2 {
+		sh.Blur = lens[2]
+	}
+	if len(lens) > 3 {
+		sh.Spread = lens[3]
+	}
+	sh.Color = colors.Uniform(colors.Black)
+	if c := parseColor(clr); c != nil {
+		sh.Color = c
+	}
+	return sh, true
 }

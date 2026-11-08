@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"cogentcore.org/core/colors"
 	"strconv"
 	"strings"
 
@@ -53,6 +54,24 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	r.textAlign()
 	r.tableBorders()
 	r.margins()
+	// visibility: hidden (inherited, unless visible) is not rendered, and
+	// gets no events (as the items of the closed menus of Wikipedia, over
+	// the page, which got the clicks there)
+	switch st.visibility {
+	case "hidden", "collapse":
+		bs.hidden = true
+	case "visible":
+		bs.hidden = false
+	default:
+		bs.hidden = pbs != nil && pbs.hidden
+	}
+	if bs.hidden {
+		s.Opacity = 0
+		s.Abilities = 0
+	}
+	if st.hideText { // the text is not shown, and its box is (with its background)
+		s.Color = colors.Uniform(colors.Transparent)
+	}
 }
 
 // dots returns the given length in dots, or 0 if it is nil.
@@ -93,6 +112,11 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 		s.Direction = styles.Column
 	case "table", "inline-table", "table-row-group", "table-header-group", "table-footer-group":
+		if isTable && !strings.EqualFold(strings.TrimSpace(r.c.declaration(node, "table-layout")), "fixed") {
+			// the width of a table is at least that of its cells (as the
+			// infoboxes of Wikipedia with images wider than their width)
+			s.ContentMinWidth = true
+		}
 		if !isTable && (node == nil || !strings.HasPrefix(node.Data, "t")) {
 			// other elements displayed as tables are approximated by their
 			// rows (or caption and content) in a column
@@ -486,7 +510,18 @@ func (r *resolver) sizes() {
 			s.Min.Y = *st.minHeight
 		}
 	}
-	if st.maxWidth != nil {
+	switch {
+	case st.maxWidth == nil:
+	case st.width != nil && st.width.Unit != units.UnitPw && st.maxWidth.Unit == units.UnitPw:
+		// a fixed width with a percentage max-width (as max-width: 100%) is
+		// the width (the smaller of the two in CSS, as the width is, but
+		// for a narrower parent, in which it overflows), as for the
+		// percentage bars of Wikipedia (which filled the max-width)
+	case st.width != nil && st.width.Unit != units.UnitPw:
+		if r.dots(st.maxWidth) < r.dots(st.width) { // the smaller of the two
+			s.Min.X, s.Max.X = *st.maxWidth, *st.maxWidth
+		}
+	default:
 		s.Max.X = *st.maxWidth
 	}
 	if st.maxHeight != nil {

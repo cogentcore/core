@@ -520,7 +520,15 @@ func (wb *WidgetBase) StartRender() bool {
 	if wb.noClip() || sty != nil { // its children can be outside of it
 		pc.PushContext(sty, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
 	} else {
-		pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+		if wb.Styles.BoxShadowOutside && wb.Styles.HasBoxShadow() { // the shadows are around the box
+			m := wb.Styles.BoxShadowMargin()
+			bb := wb.Geom.TotalBBox
+			bb.Min = bb.Min.Sub(image.Pt(int(math32.Ceil(m.Left)), int(math32.Ceil(m.Top))))
+			bb.Max = bb.Max.Add(image.Pt(int(math32.Ceil(m.Right)), int(math32.Ceil(m.Bottom))))
+			pc.PushContext(nil, render.NewBoundsRect(bb, sides.Floats{}))
+		} else {
+			pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+		}
 	}
 	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {

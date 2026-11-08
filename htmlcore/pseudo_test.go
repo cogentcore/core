@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
@@ -102,4 +103,90 @@ func TestInlineBlockInHeading(t *testing.T) {
 		assert.Less(t, sb.Max.Y, bb.Max.Y, "on the baseline, above the descent of the heading")
 		assert.Greater(t, sb.Min.Y, bb.Min.Y)
 	}
+}
+
+// TestBoxShadow tests box-shadow (as of the menus of Wikipedia, with a
+// negative spread): its shadows, which take no space in the layout.
+func TestBoxShadow(t *testing.T) {
+	env := defaultLengthEnv()
+	sh, ok := boxShadow(env, "0 2px 6px -1px rgba(0,0,0,0.2)")
+	assert.True(t, ok)
+	assert.Equal(t, units.Dp(2), sh.OffsetY)
+	assert.Equal(t, units.Dp(6), sh.Blur)
+	assert.Equal(t, units.Dp(-1), sh.Spread)
+	_, ok = boxShadow(env, "inset 0 0 4px red")
+	assert.False(t, ok, "inset is not supported")
+
+	bd := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, bd, `<div id="a" style="width: 100px; height: 50px">a</div><div id="b" style="width: 100px; height: 50px; box-shadow: 0 2px 6px -1px rgba(0,0,0,0.2), 1px 1px blue">b</div>`))
+	var a, b *core.WidgetBase
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			switch wb.Property("id") {
+			case "a":
+				a = wb
+			case "b":
+				b = wb
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		assert.Len(t, b.Styles.BoxShadow, 2)
+		assert.True(t, b.Styles.BoxShadowOutside)
+		assert.Equal(t, a.Geom.Size.Actual.Total, b.Geom.Size.Actual.Total, "the shadows take no space")
+	})
+}
+
+// TestTextIndentHidden tests the hiding of text with a large negative
+// text-indent (as the labels of the icons of the forms of Wikipedia,
+// which showed as "sh" for "show"): the text is not shown.
+func TestTextIndentHidden(t *testing.T) {
+	bd := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, bd, `<p>Filter <span style="display: inline-block; text-indent: -9999px; width: 20px; height: 20px">show</span> after</p>`))
+	var show, after *core.Text
+	bd.WalkDown(func(k tree.Node) bool {
+		if tx, ok := k.(*core.Text); ok {
+			if strings.Contains(tx.Text, "show") {
+				show = tx
+			} else if strings.Contains(tx.Text, "after") {
+				after = tx
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		_, _, _, a := show.Styles.Color.At(0, 0).RGBA()
+		assert.Equal(t, uint32(0), a, "the text is transparent")
+		_, _, _, a = after.Styles.Color.At(0, 0).RGBA()
+		assert.NotEqual(t, uint32(0), a)
+	})
+}
+
+// TestListMarkerBaseline tests that the marker of a list item is on the
+// baseline of the first line of its content, below its top when the line
+// is taller than the text (as the radio buttons in the items of the
+// history of a page of Wikipedia).
+func TestListMarkerBaseline(t *testing.T) {
+	bd := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, bd, `<ul><li><span style="display: inline-block; width: 10px; height: 40px"></span>text</li></ul>`))
+	var marker, text *core.Text
+	bd.WalkDown(func(k tree.Node) bool {
+		if tx, ok := k.(*core.Text); ok {
+			if tx.Name == "marker" {
+				marker = tx
+			} else if strings.Contains(tx.Text, "text") {
+				text = tx
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		mb, tb := marker.Geom.TotalBBox, text.Geom.TotalBBox
+		assert.InDelta(t, tb.Max.Y, mb.Max.Y, 1.5, "the same baseline (the same font)")
+		assert.Greater(t, mb.Min.Y, marker.Parent.(core.Widget).AsWidget().Geom.TotalBBox.Min.Y+10, "below the top of the item")
+	})
 }

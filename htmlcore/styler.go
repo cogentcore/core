@@ -32,6 +32,10 @@ type blockState struct {
 	// block is whether the widget is block-level.
 	block bool
 
+	// hidden is whether the element is not visible (visibility: hidden),
+	// which its descendants inherit.
+	hidden bool
+
 	// alignItems is the CSS align-items of a flex container.
 	alignItems string
 
@@ -77,6 +81,8 @@ type cssState struct {
 	env *lengthEnv
 
 	display    string
+	hideText   bool   // a large negative text-indent, which moves the text out of view
+	visibility string // the visibility property, if any
 	width      *units.Value
 	height     *units.Value
 	minWidth   *units.Value
@@ -133,6 +139,11 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 	}
 	ops := c.compileDecls(decls)
 	inherit := c.inlineInheritedOps(node, wb)
+	wb.FinalStyler(func(s *styles.Style) {
+		if bs.hidden { // after the abilities of the widget (as scrolling)
+			s.Abilities = 0
+		}
+	})
 	wb.Styler(func(s *styles.Style) {
 		pw, _ := wb.Parent.(core.Widget)
 		var ps *styles.Style

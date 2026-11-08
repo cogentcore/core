@@ -174,6 +174,18 @@ type Style struct { //types:add
 	// effective margin to allocate for the element.
 	MaxBoxShadow []Shadow
 
+	// ContentMinWidth is whether the width of the element is at least the
+	// min-content width of its content, even over its Max width, as for the
+	// width of a table in CSS (with an automatic layout), which is as wide
+	// as its cells need to be when they are wider than it.
+	ContentMinWidth bool
+
+	// BoxShadowOutside is whether the box shadows are outside of the
+	// layout of the element, as in CSS: no space is allocated for them
+	// around it (they are not in its effective margin), and they are
+	// rendered around its box, outside of its bounds.
+	BoxShadowOutside bool
+
 	// Color specifies the text / content color, and it is inherited.
 	Color image.Image
 
@@ -492,6 +504,9 @@ func (s *Style) TotalMargin() sides.Floats {
 		mbw.Left = 0
 	}
 
+	if s.BoxShadowOutside {
+		return s.Margin.Dots().Add(mbw)
+	}
 	mbsm := s.MaxBoxShadowMargin()
 	if sides.AreZero(mbsm.Sides) {
 		mbsm = s.BoxShadowMargin()

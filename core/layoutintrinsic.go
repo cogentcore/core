@@ -32,6 +32,12 @@ func (fr *Frame) sizeUpIntrinsicFrame() {
 	if fr.Styles.Overflow.X >= styles.OverflowAuto {
 		minw = 0 // its content scrolls
 	}
+	if fr.Styles.ContentMinWidth && sz.Max.X > 0 && minw > sz.Max.X {
+		// as wide as its content needs to be (as a table in CSS)
+		sz.Max.X = math32.Ceil(minw)
+		sz.Actual.Content.X = max(sz.Actual.Content.X, sz.Max.X)
+		sz.SetTotalFromContent(&sz.Actual)
+	}
 	sz.setIntrinsicWidths(minw, prefw)
 }
 

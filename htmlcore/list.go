@@ -29,7 +29,8 @@ func handleListItem(ctx *Context) {
 	ctx.handleWidget(n, li)
 	li.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
-		s.Align.Items = styles.Start
+		// the marker is on the baseline of the first line of the content
+		s.Align.Items = styles.Baseline
 	})
 	if marker := listMarker(ctx, n); marker != "" {
 		mk := core.NewText(li).SetText(marker)
