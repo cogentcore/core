@@ -239,6 +239,11 @@ type Style struct { //types:add
 	// height ([units.UnitEw], [units.UnitEh]) are of its own size.
 	Translate units.XY `display:"inline"`
 
+	// Rotate rotates the rendering of the widget by this angle in degrees
+	// (clockwise) around its center, without changing the layout, as the
+	// rotate of the transform property of CSS.
+	Rotate float32
+
 	// Float makes the widget float to the left or right of its parent,
 	// as the float property of CSS: it is out of the flow of the layout of
 	// its parent (a column), and the widgets after it that start beside it

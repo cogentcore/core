@@ -503,8 +503,15 @@ func (wb *WidgetBase) StartRender() bool {
 	if pc.State == nil {
 		return false
 	}
-	if wb.noClip() { // its children can be outside of it
-		pc.PushContext(nil, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
+	var sty *styles.Paint
+	if rot := wb.Styles.Rotate; rot != 0 { // around its center
+		sty = styles.NewPaint()
+		sty.UnitContext = pc.Context().Style.UnitContext
+		pos, size := wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total
+		sty.Transform = math32.Rotate2DAround(math32.DegToRad(rot), pos.Add(size.MulScalar(0.5)))
+	}
+	if wb.noClip() || sty != nil { // its children can be outside of it
+		pc.PushContext(sty, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
 	} else {
 		pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 	}

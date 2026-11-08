@@ -22,6 +22,7 @@ import (
 func TestMaskImage(t *testing.T) {
 	assert.Equal(t, "a b.svg", maskURL(`url("a b.svg")`))
 	assert.Equal(t, "x.svg", maskURL(`url(x.svg) no-repeat center`))
+	assert.Equal(t, `data:image/svg+xml;utf8,<svg a="1">`, maskURL(`url("data:image/svg+xml;utf8,<svg a=\"1\">")`), "escaped quotes")
 	x, y := maskPosition("left top")
 	assert.Equal(t, [2]float32{0, 0}, [2]float32{x, y})
 	x, y = maskPosition("50% 50%")
@@ -89,4 +90,40 @@ func TestMinWidthBelowWidth(t *testing.T) {
 	assert.InDelta(t, 20, sizes["a"].X, 1)
 	assert.InDelta(t, 20, sizes["a"].Y, 1)
 	assert.InDelta(t, 30, sizes["b"].X, 1, "a larger min-width wins")
+}
+
+// TestRotatedMask tests that the rotate of a transform rotates the
+// rendering of an element (as the carets of the contents of Wikipedia,
+// down-pointing icons rotated by -90deg to point right), including its
+// masked background.
+func TestRotatedMask(t *testing.T) {
+	assert.Equal(t, float32(-90), cssRotate("transform", "rotate(-90deg)"))
+	assert.InDelta(t, 90, cssAngle("0.25turn"), 0.01)
+	// a triangle in the top half of the box, pointing down
+	tri := `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" width="10" height="10"%3E%3Cpath d="M0 0 H10 L5 5 Z"/%3E%3C/svg%3E`
+	b := core.NewBody()
+	ctx := NewContext()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<style>.caret { display: block; width: 40px; height: 40px; background-color: #000000; mask-image: url('`+tri+`'); mask-size: 40px; mask-repeat: no-repeat }</style>`+
+		`<div class="down"><span class="caret"></span></div><div class="right" style="transform: rotate(-90deg)"><span class="caret"></span></div>`))
+	boxes := map[string]image.Rectangle{}
+	img := b.RenderImage(func() {
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil {
+				if cl, ok := wb.Property("class").(string); ok && cl != "caret" {
+					boxes[cl] = wb.Children[0].(core.Widget).AsWidget().Geom.TotalBBox
+				}
+			}
+			return tree.Continue
+		})
+	})
+	dark := func(cl string, fx, fy float32) bool {
+		bb := boxes[cl]
+		c := color.RGBAModel.Convert(img.At(bb.Min.X+int(fx*float32(bb.Dx())), bb.Min.Y+int(fy*float32(bb.Dy())))).(color.RGBA)
+		return c.R < 100
+	}
+	assert.True(t, dark("down", 0.5, 0.15), "the top half")
+	assert.False(t, dark("down", 0.5, 0.85), "not the bottom half")
+	assert.True(t, dark("right", 0.15, 0.5), "rotated -90deg: the left half")
+	assert.False(t, dark("right", 0.85, 0.5), "rotated: not the right half")
+	assert.False(t, dark("right", 0.5, 0.15), "rotated: not the top")
 }

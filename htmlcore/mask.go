@@ -124,6 +124,12 @@ type maskFill struct {
 	box     image.Rectangle
 	tile    *image.Alpha
 	opacity float32
+
+	// inverse is the inverse of the rotation of the rendering (as of a
+	// caret with a rotate transform), if any, around the center of the
+	// box, with which pixels are mapped to the mask.
+	inverse   math32.Matrix2
+	isRotated bool
 }
 
 func (mf *maskFill) AsBase() *gradient.Base { return &mf.base }
@@ -146,6 +152,17 @@ func (mf *maskFill) Update(opacity float32, box math32.Box2, objTransform math32
 	mf.mu.Lock()
 	defer mf.mu.Unlock()
 	mf.opacity = opacity
+	// the rotation (and skew) of the transform, without its translation
+	// and scale, which the box already has
+	rot := objTransform
+	rot.X0, rot.Y0 = 0, 0
+	sx, sy := rot.ExtractScale()
+	mf.isRotated = rot.XY != 0 || rot.YX != 0
+	if mf.isRotated && sx != 0 && sy != 0 {
+		c := box.Center()
+		rot = rot.Scale(1/sx, 1/sy)
+		mf.inverse = math32.Translate2D(c.X, c.Y).Mul(rot.Inverse()).Mul(math32.Translate2D(-c.X, -c.Y))
+	}
 	b := box.ToRect()
 	if b == mf.box && mf.tile != nil {
 		return
@@ -193,7 +210,12 @@ func (mf *maskFill) At(x, y int) color.Color {
 	if mf.tile == nil {
 		return color.RGBA{}
 	}
-	p := image.Pt(x, y).Sub(mf.placed.Min)
+	pt := image.Pt(x, y)
+	if mf.isRotated {
+		q := mf.inverse.MulPoint(math32.Vec2(float32(x)+0.5, float32(y)+0.5))
+		pt = image.Pt(int(math32.Floor(q.X)), int(math32.Floor(q.Y)))
+	}
+	p := pt.Sub(mf.placed.Min)
 	ts := mf.placed.Size()
 	if mf.mask.repeat && ts.X > 0 && ts.Y > 0 {
 		p.X, p.Y = ((p.X%ts.X)+ts.X)%ts.X, ((p.Y%ts.Y)+ts.Y)%ts.Y
@@ -294,12 +316,23 @@ func maskURL(v string) string {
 	}
 	rest := v[i+4:]
 	end := strings.Index(rest, ")")
-	if strings.HasPrefix(strings.TrimSpace(rest), `"`) || strings.HasPrefix(strings.TrimSpace(rest), `'`) {
-		q := strings.TrimSpace(rest)[0]
-		t := strings.TrimSpace(rest)[1:]
-		if j := strings.IndexByte(t, q); j >= 0 {
-			return t[:j]
+	if t := strings.TrimSpace(rest); strings.HasPrefix(t, `"`) || strings.HasPrefix(t, `'`) {
+		// a CSS string, with backslash escapes (as the quotes of the
+		// attributes of an SVG in a data URL)
+		q := t[0]
+		var sb strings.Builder
+		for i := 1; i < len(t); i++ {
+			switch c := t[i]; {
+			case c == '\\' && i+1 < len(t):
+				i++
+				sb.WriteByte(t[i])
+			case c == q:
+				return sb.String()
+			default:
+				sb.WriteByte(c)
+			}
 		}
+		return ""
 	}
 	if end < 0 {
 		return ""

@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"image"
+	"math"
 	"strconv"
 	"strings"
 
@@ -276,10 +277,17 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		if !ok {
 			return nil
 		}
+		rot := cssRotate(prop, lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.Translate.X, _ = st.env.length(x, units.UnitEw)
 			s.Translate.Y, _ = st.env.length(y, units.UnitEh)
+			if prop == "transform" {
+				s.Rotate = rot
+			}
 		})
+	case "rotate":
+		rot := cssAngle(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { s.Rotate = rot })
 	case "z-index":
 		z, err := strconv.Atoi(lval)
 		if err != nil {
@@ -864,4 +872,40 @@ func cssTranslate(prop, v string) (x, y string, ok bool) {
 		return "calc(" + strings.Join(ls, " + ") + ")"
 	}
 	return sum(xs), sum(ys), true
+}
+
+// cssRotate returns the sum of the angles of the rotate functions of the
+// given transform, in degrees.
+func cssRotate(prop, v string) float32 {
+	var deg float32
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			break
+		}
+		if n := strings.TrimSpace(name); n == "rotate" || n == "rotatez" {
+			deg += cssAngle(strings.TrimSpace(args[:end]))
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	return deg
+}
+
+// cssAngle returns the given CSS angle in degrees (deg, rad, grad, turn).
+func cssAngle(v string) float32 {
+	for _, u := range []struct {
+		suffix string
+		deg    float64
+	}{{"deg", 1}, {"grad", 0.9}, {"rad", 180 / math.Pi}, {"turn", 360}} {
+		if n, ok := strings.CutSuffix(v, u.suffix); ok {
+			f, _ := strconv.ParseFloat(strings.TrimSpace(n), 64)
+			return float32(f * u.deg)
+		}
+	}
+	f, _ := strconv.ParseFloat(v, 64)
+	return float32(f)
 }
