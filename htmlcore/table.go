@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -266,4 +267,82 @@ func ancestorTable(n *html.Node) *html.Node {
 		}
 	}
 	return nil
+}
+
+// tableRows is the state of the rows of a table as they are read, for the
+// slots of the rows below that cells with row spans take (see
+// [Context.endTableRow]).
+type tableRows struct {
+	cols  int
+	spans []int // for each column, the number of rows below that it takes
+}
+
+// endTableRow fills the rest of the given row of a table (tr), after its
+// cells, with empty cells, so that the cells of the next row are in the
+// next row, as in HTML, and not in the slots that this row leaves empty
+// (as the major debates table of Wikipedia, whose header row of parties
+// has fewer cells than its columns). The slots of the row that cells
+// above it take with their row spans are not filled.
+func (c *Context) endTableRow(tr *html.Node) {
+	table := ancestorTable(tr)
+	if table == nil {
+		return
+	}
+	if c.tableRowState == nil {
+		c.tableRowState = map[*html.Node]*tableRows{}
+	}
+	st := c.tableRowState[table]
+	if st == nil {
+		cols := c.tableColumns(table)
+		st = &tableRows{cols: cols, spans: make([]int, cols)}
+		c.tableRowState[table] = st
+	}
+	taken := make([]bool, st.cols)
+	for i, n := range st.spans {
+		if n > 0 {
+			taken[i] = true
+			st.spans[i]--
+		}
+	}
+	col := 0
+	for cell := tr.FirstChild; cell != nil; cell = cell.NextSibling {
+		if cell.Type != html.ElementNode || (cell.Data != "td" && cell.Data != "th") || c.displayOf(cell) == "none" {
+			continue
+		}
+		for col < st.cols && taken[col] {
+			col++
+		}
+		span, err := strconv.Atoi(GetAttr(cell, "colspan"))
+		if err != nil || span < 1 {
+			span = 1
+		}
+		rspan, err := strconv.Atoi(GetAttr(cell, "rowspan"))
+		if err != nil || rspan < 1 {
+			rspan = 1
+		}
+		for k := col; k < col+span && k < st.cols; k++ {
+			taken[k] = true
+			if rspan > 1 {
+				st.spans[k] = rspan - 1
+			}
+		}
+		col += span
+	}
+	empty := 0
+	for _, t := range taken {
+		if !t {
+			empty++
+		}
+	}
+	w := c.tableFor(tr)
+	for range empty {
+		filler := core.NewFrame(w)
+		filler.SetName("row-filler")
+		tree.SetUniqueName(filler)
+		filler.Styler(func(s *styles.Style) {
+			s.Padding.Zero()
+			s.Margin.Zero()
+			s.Grow.Set(0, 0)
+		})
+	}
 }

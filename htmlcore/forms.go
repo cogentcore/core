@@ -69,6 +69,19 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 		c.nodeWidgets = map[*html.Node]core.Widget{}
 	}
 	c.nodeWidgets[n] = w
+	if sw, ok := w.(*core.Switch); ok {
+		// the element after it, which shows the hover of a transparent
+		// control over it (see [Context.handleHoverTarget])
+		for k := n.NextSibling; k != nil; k = k.NextSibling {
+			if k.Type == html.ElementNode {
+				if c.hoverTargets == nil {
+					c.hoverTargets = map[*html.Node]*core.Switch{}
+				}
+				c.hoverTargets[k] = sw
+				break
+			}
+		}
+	}
 	if sw, ok := w.(*core.Switch); ok && strings.EqualFold(GetAttr(n, "type"), "radio") && GetAttr(n, "name") != "" {
 		// a radio button that is checked unchecks the others of its group
 		// (with its name, in its form or outside of forms)
@@ -509,4 +522,27 @@ func toggleAttr(n *html.Node, key string) {
 		}
 	}
 	n.Attr = append(n.Attr, html.Attribute{Key: key})
+}
+
+// handleHoverTarget makes the widget of the given element show the hover
+// of the control before it, if that is transparent: a checkbox or radio
+// button over the element that shows it, as the hidden checkboxes of the
+// menu buttons of Wikipedia (over their labels) and its radio buttons
+// (over their icons), which browsers style with :hover of the control.
+func (c *Context) handleHoverTarget(n *html.Node, w core.Widget) {
+	sw := c.hoverTargets[n]
+	if sw == nil {
+		return
+	}
+	delete(c.hoverTargets, n)
+	target := w.AsWidget()
+	hover := func(on bool) {
+		if sw.Styles.Opacity > 0 || target.StateIs(states.Hovered) == on {
+			return // a visible control shows its own hover
+		}
+		target.SetState(on, states.Hovered)
+		target.Restyle()
+	}
+	sw.On(events.MouseEnter, func(e events.Event) { hover(true) })
+	sw.On(events.MouseLeave, func(e events.Event) { hover(false) })
 }

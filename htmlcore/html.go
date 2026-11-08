@@ -168,6 +168,9 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 			}
 		}
 	}
+	if n.Type == html.ElementNode && n.Data == "tr" && ctx.rest == nil && ctx.displayOf(n) != "none" {
+		ctx.endTableRow(n) // the next row starts in the next row of the grid
+	}
 }
 
 // rootNode returns the root node of the given node.

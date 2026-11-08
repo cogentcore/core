@@ -206,6 +206,15 @@ type pageState struct {
 	cssBase    string
 	cssImports map[string]bool
 
+	// tableRowState has the state of the rows of the tables being read
+	// (see [Context.endTableRow]).
+	tableRowState map[*html.Node]*tableRows
+
+	// hoverTargets are the elements after checkboxes and radio buttons,
+	// which show their hover when they are transparent (see
+	// [Context.handleHoverTarget]).
+	hoverTargets map[*html.Node]*core.Switch
+
 	// iconNodes are the elements that are the icons of text fields (see
 	// [Context.inputIcons]), which are not rendered themselves.
 	iconNodes map[*html.Node]bool
@@ -451,6 +460,7 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
 	c.handleFormWidget(node, w)
+	c.handleHoverTarget(node, w)
 	c.handleInLink(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)

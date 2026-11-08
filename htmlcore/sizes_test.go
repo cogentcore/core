@@ -227,3 +227,20 @@ func TestUniqueNames(t *testing.T) {
 		return tree.Continue
 	})
 }
+
+// TestTableShortRows tests that a row of a table with fewer cells than the
+// table has columns leaves the rest of its row empty (as the header of the
+// parties of the major debates table of Wikipedia), so that the cells of
+// the next row are in the next row, also below cells with row spans.
+func TestTableShortRows(t *testing.T) {
+	widgetsByID(t, `<table><tr><th rowspan="3" id="date">Date</th><th colspan="3">Participants</th></tr>`+
+		`<tr><th id="p1">A</th><th id="p2">B</th></tr><tr><th id="s1">a</th><th id="s2">b</th></tr>`+
+		`<tr><td>1</td><td id="d1">x</td><td>y</td><td>z</td></tr></table>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			cell := func(id string) image.Point { return ws[id].Geom.Cell }
+			assert.Equal(t, image.Pt(1, 1), cell("p1"))
+			assert.Equal(t, image.Pt(2, 1), cell("p2"))
+			assert.Equal(t, image.Pt(1, 2), cell("s1"), "in its own row, beside the row span")
+			assert.Equal(t, image.Pt(1, 3), cell("d1"))
+		})
+}

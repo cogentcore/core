@@ -364,3 +364,32 @@ func TestButtonHover(t *testing.T) {
 		}
 	})
 }
+
+// TestTransparentControlHover tests that the element after a transparent
+// checkbox (as the hidden checkboxes of the menu buttons of Wikipedia,
+// over their labels) shows the hover of the checkbox, with a state layer.
+func TestTransparentControlHover(t *testing.T) {
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), b, `<div style="position: relative"><input type="checkbox" id="cb" style="opacity: 0; position: absolute"><label for="cb" id="lb" style="display: inline-block">Menu</label></div>`))
+	var sw *core.Switch
+	var label *core.WidgetBase
+	b.WalkDown(func(n tree.Node) bool {
+		if s, ok := n.(*core.Switch); ok {
+			sw = s
+		}
+		if wb := core.AsWidget(n); wb != nil && wb.Property("id") == "lb" && label == nil {
+			label = wb
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, sw)
+	require.NotNil(t, label)
+	b.RenderImage(func() {}, func() {
+		sw.Send(events.MouseEnter)
+		assert.True(t, label.StateIs(states.Hovered), "the label shows the hover")
+		label.Style()
+		assert.Greater(t, label.Styles.StateLayer, float32(0))
+		sw.Send(events.MouseLeave)
+		assert.False(t, label.StateIs(states.Hovered))
+	})
+}
