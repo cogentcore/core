@@ -214,9 +214,21 @@ func (c *Context) stackGrid(w core.Widget) bool {
 		}
 		cell = row + "/" + col
 	}
-	last := fr.NumChildren() - 1
+	// the one on top that is shown: the last that is not transparent or
+	// hidden (as the name of a repository of github.com, before a copy of
+	// it for the accessibility tree, of opacity 0, which hid it)
+	top := fr.NumChildren() - 1
+	for i := top; i >= 0; i-- {
+		kn, _ := core.AsWidget(fr.Child(i)).Property("node").(*html.Node)
+		op := strings.TrimSpace(c.declaration(kn, "opacity"))
+		vis := strings.TrimSpace(c.declaration(kn, "visibility"))
+		if op != "0" && vis != "hidden" {
+			top = i
+			break
+		}
+	}
 	fr.FinalStyler(func(s *styles.Style) { s.Display = styles.Stacked })
-	fr.StackTop = last
+	fr.StackTop = top
 	return true
 }
 

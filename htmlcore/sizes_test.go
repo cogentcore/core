@@ -374,6 +374,13 @@ func TestGridStack(t *testing.T) {
 			assert.Less(t, ws["value"].Geom.Size.Actual.Total.Y, 60*dp, "one line high")
 			assert.Greater(t, ws["value"].Geom.Size.Actual.Total.X, 80*dp, "with its value shown")
 		})
+	// the copy that is not shown is last (as the names of the repositories
+	// of github.com, which were hidden)
+	widgetsByID(t, `<p id="name" style="display: grid"><span id="shown" style="grid-area: 1 / 1">hyprwm / Hyprland</span>`+
+		`<span id="copy" style="grid-area: 1 / 1; opacity: 0">hyprwm / Hyprland</span></p>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Equal(t, 0, core.AsFrame(ws["name"].This).StackTop, "the copy that is shown")
+		})
 }
 
 // TestAspectRatio tests the aspect-ratio property: the height of a box
