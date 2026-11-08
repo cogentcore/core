@@ -297,9 +297,11 @@ type Style struct { //types:add
 	BoxSizing BoxSizings
 
 	// ZIndex orders the rendering of widgets that are not [PositionStatic],
-	// as the z-index property of CSS: they are rendered after the other
-	// children of their parent (on top of them), in increasing order of
-	// ZIndex, except that those with a negative ZIndex are rendered first.
+	// or that are and have a ZIndex other than 0 (as the flex and grid items
+	// of CSS with a z-index), as the z-index property of CSS: they are
+	// rendered after the other children of their parent (on top of them),
+	// in increasing order of ZIndex, except that those with a negative
+	// ZIndex are rendered first.
 	ZIndex int
 
 	// specifies the number of sequential columns that this element should occupy

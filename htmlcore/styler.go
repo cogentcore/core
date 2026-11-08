@@ -258,6 +258,12 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			st.display = c.displayOf(node)
 		}
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
+		if s.ZIndex != 0 && s.Position == styles.PositionStatic && (pbs == nil || !isFlexOrGrid(pbs.display)) {
+			// as in CSS, the z-index of a static element only applies to
+			// flex and grid items (as the site header of pkg.go.dev, over
+			// the sticky header of the page)
+			s.ZIndex = 0
+		}
 		if tag == "body" && st.hasBg && pw != nil { // the canvas has the background of the body
 			pw.AsWidget().Styles.Background = st.background
 		}
@@ -270,6 +276,17 @@ func (c *Context) display(w core.Widget) string {
 		return bs.display
 	}
 	return ""
+}
+
+// isFlexOrGrid returns whether the given display is that of a flex or grid
+// container, whose items are stacked by their z-index (see
+// [styles.Style.ZIndex]) even if they are not positioned.
+func isFlexOrGrid(d string) bool {
+	switch d {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		return true
+	}
+	return false
 }
 
 // isBlockDisplay returns whether the given display is block-level.

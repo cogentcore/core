@@ -305,6 +305,45 @@ func TestCheckedSelector(t *testing.T) {
 	}
 }
 
+// TestHoverSelector tests the :hover selector with the hovered elements
+// from [Context.Hovered], as for the menus of pkg.go.dev: a submenu after
+// a span in a menu item shows on the hover of the item, which
+// [Context.HoverAffects] reports, and the document is unchanged after it
+// is read.
+func TestHoverSelector(t *testing.T) {
+	src := `<style>.sub { display: none } .item:hover > .label:not(.closed) ~ .sub { display: block } a:hover { color: red }</style>` +
+		`<ul><li class="item"><span class="label">Why Go</span><div class="sub"><p>Case studies</p></div></li><li class="other"><a href="x">Docs</a></li></ul>`
+	for _, hovered := range []bool{false, true} {
+		ctx := NewContext()
+		var item, other *html.Node
+		ctx.Hovered = func(n *html.Node) bool {
+			switch GetAttr(n, "class") {
+			case "item":
+				item = n
+				return hovered
+			case "other":
+				other = n
+			}
+			return false
+		}
+		bd := core.NewBody()
+		require.NoError(t, ReadHTMLString(ctx, bd, src))
+		shown := false
+		bd.WalkDown(func(k tree.Node) bool {
+			if tx, ok := k.(*core.Text); ok && tx.Text == "Case studies" {
+				shown = true
+			}
+			return tree.Continue
+		})
+		assert.Equal(t, hovered, shown, "the submenu shows on the hover of the item")
+		require.NotNil(t, item)
+		require.NotNil(t, other)
+		assert.True(t, ctx.HoverAffects(item), "the hover of the item affects its submenu")
+		assert.False(t, ctx.HoverAffects(other), "the hover of the other item affects nothing")
+		assert.False(t, HasAttr(item, hoverAttr), "the attribute is removed")
+	}
+}
+
 // TestInputIcon tests an icon that is positioned over the start of a text
 // input (as the search icon of the search field of Wikipedia): it is the
 // leading icon of the text field, with the space before it as the padding

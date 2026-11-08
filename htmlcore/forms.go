@@ -486,13 +486,18 @@ func (c *Context) isChecked(n *html.Node) bool {
 // library matches the attribute), and returns a function that restores
 // them.
 func (c *Context) setCheckedAttrs(root *html.Node) func() {
-	if c.Checked == nil {
+	if c.Checked == nil && c.Hovered == nil {
 		return func() {}
 	}
 	var changed []*html.Node
+	var hovered []*html.Node
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "input" {
+		if c.Hovered != nil && n.Type == html.ElementNode && c.Hovered(n) {
+			n.Attr = append(n.Attr, html.Attribute{Key: hoverAttr}) // for :hover
+			hovered = append(hovered, n)
+		}
+		if c.Checked != nil && n.Type == html.ElementNode && n.Data == "input" {
 			if typ := strings.ToLower(GetAttr(n, "type")); typ == "checkbox" || typ == "radio" {
 				if c.Checked(n) != HasAttr(n, "checked") {
 					toggleAttr(n, "checked")
@@ -508,6 +513,9 @@ func (c *Context) setCheckedAttrs(root *html.Node) func() {
 	return func() {
 		for _, n := range changed {
 			toggleAttr(n, "checked")
+		}
+		for _, n := range hovered {
+			toggleAttr(n, hoverAttr)
 		}
 	}
 }

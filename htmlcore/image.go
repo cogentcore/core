@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"bytes"
+	svgpkg "cogentcore.org/core/svg"
 	"image"
 	"io"
 	"log/slog"
@@ -194,6 +195,31 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		}
 	}
 
+	// A filter (as the white wedges of pkg.go.dev, grey icons inverted) is
+	// applied to the pixels of the image, and to those of an svg rendered
+	// at twice its size (shown as an image of its size).
+	var filteredSize math32.Vector2
+	if filter := parseFilter(ctx.declaration(n, "filter")); filter != nil && !ctx.DelayedImageLoad {
+		if isSVG {
+			data := svgData
+			if data == nil && resp != nil {
+				data, _ = io.ReadAll(resp.Body)
+				svgData = data
+			}
+			w, h, ok := svgSize(data)
+			if !ok {
+				w, h = 24, 24
+			}
+			sv := svgpkg.NewSVG(math32.Vec2(math32.Ceil(2*w), math32.Ceil(2*h)))
+			if sv.ReadXML(bytes.NewReader(data)) == nil {
+				im, isSVG = filter.apply(sv.RenderImage()), false
+				filteredSize = math32.Vec2(w, h)
+			}
+		} else if im != nil {
+			im = filter.apply(im)
+		}
+	}
+
 	// Can be either image or svg.
 	var img *core.Image
 	var svg *core.SVG
@@ -218,6 +244,9 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		img.SetTooltip(alt)
 		img.SetProperty("src", src) // for generatehtml
 		img.SetImage(im)
+		if filteredSize != (math32.Vector2{}) {
+			img.SetProperty("svg-size", filteredSize) // its intrinsic size
+		}
 		newWidget = img
 	}
 

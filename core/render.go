@@ -619,14 +619,14 @@ func (wb *WidgetBase) renderOutOfFlowChildren() {
 }
 
 // raisedTo returns the stacking context that the widget is rendered in
-// (see [WidgetBase.raised]) if it is positioned with a positive z-index
-// and that is not its parent, or nil: the nearest widget that it is in
-// that is positioned with a z-index (as in CSS, where a z-index of auto,
+// (see [WidgetBase.raised]) if it has a positive z-index (see
+// [styles.Style.ZIndex]) and that is not its parent, or nil: the nearest
+// widget that it is in that has a z-index (as in CSS, where a z-index of auto,
 // the default, makes no stacking context), or the top widget. As in CSS,
 // it is then rendered over the widgets after the ones that it is in (as
 // the dropdown menus in the header of Wikipedia, over the page).
 func (wb *WidgetBase) raisedTo() *WidgetBase {
-	if wb.Styles.ZIndex <= 0 || wb.Styles.Position == styles.PositionStatic {
+	if wb.Styles.ZIndex <= 0 {
 		return nil
 	}
 	parent := wb.parentWidget()
@@ -636,7 +636,7 @@ func (wb *WidgetBase) raisedTo() *WidgetBase {
 	root := parent
 	for p := parent; p != nil; p = p.parentWidget() {
 		root = p
-		if p.Styles.Position != styles.PositionStatic && p.Styles.ZIndex != 0 {
+		if p.Styles.ZIndex != 0 {
 			break
 		}
 	}

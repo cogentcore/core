@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func layoutTestDir(t *testing.T) string {
@@ -857,6 +858,34 @@ func TestLayoutWrapRoundingFits(t *testing.T) {
 			assert.Equal(t, 0, it.Geom.Cell.Y, "the items are on one line")
 		}
 		assert.False(t, scroller.HasScroll[math32.X], "the frame does not scroll for the rounding")
+	})
+}
+
+// TestTextWrapRounding is for a text that wraps, in a frame that is
+// narrower than its preferred width (rounded up to whole dots) by less than
+// a dot (as the menu items of pkg.go.dev, a text and an icon in a link
+// whose width rounds down): it stays on one line.
+func TestTextWrapRounding(t *testing.T) {
+	var w float32
+	b := NewBody()
+	tx := NewText(b).SetText("Why Go")
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		w = tx.paintText.Bounds.Size().X // exactly, not rounded up
+	})
+	require.Greater(t, w, float32(0))
+	b = NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Max.X.Dot(math32.Ceil(w) - 1) // less than w, by less than 1
+		s.Padding.Zero()
+	})
+	tx = NewText(fr).SetText("Why Go")
+	var h float32
+	b2 := NewBody()
+	one := NewText(b2).SetText("Why Go")
+	layoutAtWidth(b2, 800, 400, func(dp float32) { h = one.Geom.Size.Actual.Content.Y })
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		assert.Equal(t, h, tx.Geom.Size.Actual.Content.Y, "one line")
 	})
 }
 

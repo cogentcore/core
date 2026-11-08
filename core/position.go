@@ -238,6 +238,13 @@ func (wb *WidgetBase) translateOffset() math32.Vector2 {
 	return math32.Vec2(dots(tr.X, sz.X), dots(tr.Y, sz.Y))
 }
 
+// stacked returns whether the widget is rendered in the order of its
+// z-index among its siblings: if it is positioned (not static), or has a
+// z-index (see [styles.Style.ZIndex]).
+func (wb *WidgetBase) stacked() bool {
+	return wb.Styles.Position != styles.PositionStatic || wb.Styles.ZIndex != 0
+}
+
 // renderOrder returns the children of the widget in the order that they are
 // rendered: those that float after the others (over their backgrounds),
 // and those that are positioned (not static) after them,
@@ -246,7 +253,7 @@ func (wb *WidgetBase) translateOffset() math32.Vector2 {
 func (wb *WidgetBase) renderOrder() []Widget {
 	positioned := false
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		if cwb.Styles.Position != styles.PositionStatic || cwb.isFloat() {
+		if cwb.stacked() || cwb.isFloat() {
 			positioned = true
 			return tree.Break
 		}
@@ -264,7 +271,7 @@ func (wb *WidgetBase) renderOrder() []Widget {
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		it := item{w: cw}
 		switch {
-		case cwb.Styles.Position != styles.PositionStatic:
+		case cwb.stacked():
 			it.layer, it.z = 2, cwb.Styles.ZIndex
 			if it.z < 0 {
 				it.layer = -1

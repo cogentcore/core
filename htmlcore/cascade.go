@@ -109,6 +109,9 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 		}
 		for _, sel := range selectors {
 			sel = strings.TrimSpace(sel)
+			if strings.Contains(sel, ":hover") {
+				c.addHoverTrigger(sel)
+			}
 			if base, kind, ok := pseudoSelector(sel); ok {
 				c.addPseudoRule(root, base, kind, rule.Declarations, origin)
 				continue
@@ -321,6 +324,9 @@ func compileSelector(sel string) *compiledSelector {
 // :not(:not(X)), and :focus-within and :focus-visible as :focus (which
 // selects nothing, as for :hover, in a static rendering).
 func rewriteSelector(sel string) string {
+	// :hover selects the elements that are marked hovered (see
+	// [Context.Hovered]), or none
+	sel = strings.ReplaceAll(sel, ":hover", "["+hoverAttr+"]")
 	if !strings.Contains(sel, ":is(") && !strings.Contains(sel, ":where(") && !strings.Contains(sel, ":focus-") {
 		return sel
 	}
@@ -872,4 +878,74 @@ func (c *Context) cssBaseURL() string {
 		return c.cssBase
 	}
 	return c.PageURL
+}
+
+// hoverAttr is the attribute of the elements that are hovered while a page
+// is read (see [Context.Hovered]), which no element of a document has.
+const hoverAttr = "data-htmlcore-hover"
+
+// addHoverTrigger adds the trigger of the given selector with :hover, if
+// the compound selector with :hover is followed by others (as .menuItem of
+// .menuItem:hover > a ~ .submenu): the hover of the elements that it
+// selects changes the style of others (see [Context.HoverAffects]).
+func (c *Context) addHoverTrigger(sel string) {
+	i := strings.Index(sel, ":hover")
+	if i < 0 {
+		return
+	}
+	isCombinator := func(b byte) bool { return b == ' ' || b == '>' || b == '+' || b == '~' }
+	depth, start := 0, 0
+	for j := i - 1; j >= 0; j-- {
+		switch sel[j] {
+		case ')':
+			depth++
+		case '(':
+			depth--
+		}
+		if depth == 0 && isCombinator(sel[j]) {
+			start = j + 1
+			break
+		}
+	}
+	end := len(sel)
+	depth = 0
+	for j := i + len(":hover"); j < len(sel); j++ {
+		switch sel[j] {
+		case '(':
+			depth++
+		case ')':
+			depth--
+		}
+		if depth == 0 && isCombinator(sel[j]) {
+			end = j
+			break
+		}
+	}
+	if strings.TrimSpace(sel[end:]) == "" {
+		return // the hovered element itself, which its widget shows
+	}
+	compound := strings.ReplaceAll(sel[start:end], ":hover", "")
+	if strings.TrimSpace(compound) == "" {
+		compound = "*"
+	}
+	if m, err := cascadia.Parse(rewriteSelector(compound)); err == nil {
+		c.hoverTriggers = append(c.hoverTriggers, m)
+	}
+}
+
+// HoverAffects returns whether the hover of the given element changes the
+// styles of other elements, by the :hover selectors of the style sheets of
+// the page that was read (as the menu items of pkg.go.dev, whose submenus
+// are shown on their hover), for which an app that sets [Context.Hovered]
+// reads the page again when the hover of the element changes.
+func (c *Context) HoverAffects(n *html.Node) bool {
+	if n == nil || n.Type != html.ElementNode {
+		return false
+	}
+	for _, m := range c.hoverTriggers {
+		if m.Match(n) {
+			return true
+		}
+	}
+	return false
 }

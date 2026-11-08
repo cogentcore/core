@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"github.com/andybalholm/cascadia"
 	"io"
 	"net/http"
 	neturl "net/url"
@@ -97,6 +98,19 @@ type Context struct {
 	// otherwise (or if it is not set), the details of the page that is read
 	// are shown or hidden in place (as when the scripts were stopped).
 	ToggleDetails func(n *html.Node) bool
+
+	// Hovered, if set, returns whether the mouse is over the given element
+	// (in it, or in an element in it), for the :hover selectors of CSS (as
+	// the submenus of pkg.go.dev, shown on the :hover of their menu items),
+	// as for an app that reads the page again when that changes for the
+	// elements for which [Context.HoverAffects] is true. Otherwise, :hover
+	// selects nothing.
+	Hovered func(n *html.Node) bool
+
+	// hoverTriggers are the parts of the selectors of the style sheets with
+	// :hover that are followed by others (as .menuItem of
+	// .menuItem:hover > .submenu), without :hover (see [Context.HoverAffects]).
+	hoverTriggers []cascadia.Sel
 
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
@@ -493,7 +507,7 @@ func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
 	n.Scripting, n.WebFonts, n.Checked, n.Unrendered = c.Scripting, c.WebFonts, c.Checked, c.Unrendered
-	n.ToggleDetails = c.ToggleDetails
+	n.ToggleDetails, n.Hovered = c.ToggleDetails, c.Hovered
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers

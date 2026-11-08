@@ -927,7 +927,7 @@ func pathLayer(path []*WidgetBase, i int) int {
 // positioned (or -1 for a negative z-index), 1 if it floats, or else 0.
 func renderLayer(wb *WidgetBase) int {
 	switch {
-	case wb.Styles.Position != styles.PositionStatic:
+	case wb.stacked():
 		if wb.Styles.ZIndex < 0 {
 			return -1
 		}
