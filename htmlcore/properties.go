@@ -265,6 +265,12 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			cl = styles.ClearBoth
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Clear = cl })
+	case "mask", "mask-image", "mask-size", "mask-position", "mask-repeat",
+		"-webkit-mask", "-webkit-mask-image", "-webkit-mask-size", "-webkit-mask-position", "-webkit-mask-repeat":
+		if m := compileMask(prop, val); m != nil {
+			return op(m)
+		}
+		return nil
 	case "transform", "translate":
 		x, y, ok := cssTranslate(prop, lval)
 		if !ok {

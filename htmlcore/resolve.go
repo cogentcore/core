@@ -81,6 +81,7 @@ func (r *resolver) blockState() {
 	if st.hasBg {
 		s.Background = st.background
 	}
+	r.c.applyMask(st, s)
 }
 
 // layoutDisplay sets the core layout for the display of the element.
@@ -465,13 +466,25 @@ func (r *resolver) sizes() {
 	}
 	if st.minWidth != nil {
 		_, isField := r.wb.This.(*core.TextField)
-		if !(isField && st.minWidth.Value == 0 && s.Shrink.X > 0) {
+		// a fixed width larger than the min-width is kept, as min-width
+		// only raises the width in CSS
+		keepWidth := st.width != nil && st.width.Unit != units.UnitPw && r.dots(st.width) >= r.dots(st.minWidth)
+		if !(isField && st.minWidth.Value == 0 && s.Shrink.X > 0) && !keepWidth {
 			// (a text field that can shrink keeps its intrinsic width)
 			s.Min.X = *st.minWidth
 		}
 	}
+	defer func() { // min-width wins over width and max-width, as in CSS
+		if st.minWidth != nil && st.minWidth.Unit != units.UnitPw && s.Max.X.Value > 0 && s.Max.X.Unit != units.UnitPw &&
+			r.dots(st.minWidth) > r.dots(&s.Max.X) {
+			s.Max.X = *st.minWidth
+		}
+	}()
 	if st.minHeight != nil {
-		s.Min.Y = *st.minHeight
+		keepHeight := st.height != nil && st.height.Unit != units.UnitPh && r.dots(st.height) >= r.dots(st.minHeight)
+		if !keepHeight {
+			s.Min.Y = *st.minHeight
+		}
 	}
 	if st.maxWidth != nil {
 		s.Max.X = *st.maxWidth

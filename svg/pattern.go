@@ -208,6 +208,15 @@ func (pf *patternFill) prepare(sv *SVG, target *NodeBase, xf math32.Matrix2) {
 
 func (pf *patternFill) AsBase() *gradient.Base { return &pf.base }
 
+// CopyGradient returns a copy of the pattern fill, which shares its tile.
+func (pf *patternFill) CopyGradient() gradient.Gradient {
+	pf.once.Do(func() { pf.renderTile() })
+	cp := &patternFill{pattern: pf.pattern, items: pf.items, size: pf.size, toTile: pf.toTile, tile: pf.tile, opacity: pf.opacity}
+	cp.once.Do(func() {}) // the tile is shared
+	cp.base.ApplyFuncs = pf.base.ApplyFuncs.Clone()
+	return cp
+}
+
 // Update sets the opacity of the pattern, before it is rendered.
 func (pf *patternFill) Update(opacity float32, box math32.Box2, objTransform math32.Matrix2) {
 	pf.opacity = opacity
@@ -222,13 +231,7 @@ func (pf *patternFill) Bounds() image.Rectangle {
 // At returns the color of the pattern at the given pixel: of the pixel
 // of the tile that it is at.
 func (pf *patternFill) At(x, y int) color.Color {
-	pf.once.Do(func() {
-		if len(pf.items) == 0 || paint.NewImageRenderer == nil {
-			return
-		}
-		img := paint.NewImageRenderer(math32.FromPoint(pf.size)).Render(pf.items).Image()
-		pf.tile, _ = img.(*image.RGBA)
-	})
+	pf.once.Do(func() { pf.renderTile() })
 	if pf.tile == nil {
 		return color.RGBA{}
 	}
@@ -246,5 +249,17 @@ func (pf *patternFill) At(x, y int) color.Color {
 		o := pf.opacity
 		c = color.RGBA{uint8(float32(c.R) * o), uint8(float32(c.G) * o), uint8(float32(c.B) * o), uint8(float32(c.A) * o)}
 	}
+	if len(pf.base.ApplyFuncs) > 0 {
+		return pf.base.ApplyFuncs.Apply(c)
+	}
 	return c
+}
+
+// renderTile renders the image of the tile of the pattern.
+func (pf *patternFill) renderTile() {
+	if len(pf.items) == 0 || paint.NewImageRenderer == nil {
+		return
+	}
+	img := paint.NewImageRenderer(math32.FromPoint(pf.size)).Render(pf.items).Image()
+	pf.tile, _ = img.(*image.RGBA)
 }

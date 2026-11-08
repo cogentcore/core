@@ -95,6 +95,7 @@ type cssState struct {
 	alignItems string
 	background image.Image
 	hasBg      bool
+	mask       *cssMask
 
 	borderCollapse bool
 	legacyCenter   bool
