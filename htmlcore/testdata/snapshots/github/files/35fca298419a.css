@@ -1,0 +1,4 @@
+@keyframes flip-in__8hw43S{0%{opacity:0;transform:scaleY(0)}30%{opacity:1}to{opacity:1;transform:scaleY(1)}}
+@keyframes fade-in__BfS4mv{0%{opacity:0}to{opacity:1}}
+@keyframes wave-in__lQ2iiS{0%{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slide-in__5l_JIj{0%{opacity:0;transform:translateX(var(--slide-from,120px))}40%{opacity:1}to{opacity:1;transform:translate(0)}}

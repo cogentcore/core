@@ -387,6 +387,13 @@ func (r *resolver) itemGrowth() {
 	if _, isText := wb.This.(*core.Text); isText {
 		s.Shrink.X = 1 // wraps in the available width
 	}
+	if s.IsFlexWrap() && s.Direction == styles.Row && s.Shrink.X == 0 {
+		// a row that wraps is as wide as its content on one line, and wraps
+		// in less width, as in CSS, wherever it is (as the social icons in
+		// the footer of github.com, in a block in a flex item, which were
+		// in a column at its min-content width)
+		s.Shrink.X = 1
+	}
 }
 
 // sizes sets the sizes (Min and Max, of the content box), with percentage

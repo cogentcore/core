@@ -1,0 +1,86 @@
+@keyframes blink{50%{background-color:#0000}}
+
+details-dialog{z-index:999;width:448px;max-width:90vw;max-height:80vh;margin:10vh auto;position:fixed;top:0;left:50%;overflow:auto;transform:translate(-50%)}
+
+body [role=button]:focus:not(:focus-visible),body [role=tabpanel][tabindex="0"]:focus:not(:focus-visible),body button:focus:not(:focus-visible),body summary:focus:not(:focus-visible),body a:focus:not(:focus-visible){box-shadow:none;outline:none}
+
+body [tabindex="0"]:focus:not(:focus-visible),body details-dialog:focus:not(:focus-visible){outline:none}
+
+auto-complete,details-dialog,details-menu,file-attachment,filter-input,remote-input,tab-container,text-expander,turbo-frame,[data-catalyst]{display:block}
+@media (prefers-reduced-motion:no-preference){
+.HeaderMktg.header-logged-out:before{transition-property:opacity,transform;transition-duration:.5s;transition-timing-function:cubic-bezier(.16,1,.3,1)}
+}
+
+.HeaderMktg{z-index:32;padding-top:var(--base-size-12);padding-bottom:var(--base-size-12);color:var(--fgColor-white);background-color:var(--header-bgColor);position:relative}
+
+.HeaderMktg:not([data-marketing-header]) a:focus-visible,.HeaderMktg:not([data-marketing-header]) button:focus-visible{outline:2px solid var(--fgColor-white);outline-offset:0;box-shadow:none}
+@media (width<=1011.98px){
+body:has(.header-logged-out.open){height:100%;overflow:hidden}
+.HeaderMktg.header-logged-out:before{pointer-events:none;content:"";background-color:var(--header-bgColor);opacity:0;width:100%;height:100%;position:absolute;top:0;left:0}
+}
+
+@keyframes checkmarkIn{0%{clip-path:inset(16px 0 0)}to{clip-path:inset(0)}}
+
+@keyframes checkmarkOut{0%{clip-path:inset(0)}to{clip-path:inset(16px 0 0)}}
+
+.ajax-error-message{z-index:9999;width:974px;margin:0 3px 0 -487px;transition:top .5s ease-in-out;position:fixed;top:0;left:50%}
+
+.ajax-error-message>.octicon-alert{vertical-align:text-top}
+
+.prose-diff :not(.changed)>:not(.github-user-ins):not(.github-user-del)>.removed,.prose-diff :not(.changed)>:not(.github-user-ins):not(.github-user-del)>del{text-decoration:none}
+
+relative-time{white-space:nowrap}
+
+.markdown-body a:has(>p,>div,>pre,>blockquote){display:block}
+
+.markdown-body a:has(>p,>div,>pre,>blockquote):not(:has(.snippet-clipboard-content,>pre)){overflow-wrap:anywhere;width:fit-content}
+
+.markdown-body a:has(>p,>div,>pre,>blockquote):has(.snippet-clipboard-content,>pre):focus-visible{outline:2px solid var(--focus-outlineColor,var(--color-accent-fg));outline-offset:2px}
+
+@keyframes skeleton-loading{0%{transform:translate(-33%)}to{transform:translate(33%)}}
+
+[data-a11y-link-underlines=true] .markdown-body a,[data-a11y-link-underlines=true] .markdown-body a:hover,[data-a11y-link-underlines=true] .markdown-body-short a,[data-a11y-link-underlines=true] .markdown-body-short a:hover,[data-a11y-link-underlines=true] .commit-desc a,[data-a11y-link-underlines=true] .commit-desc a:hover,[data-a11y-link-underlines=true] .Link--inTextBlock,[data-a11y-link-underlines=true] .Link--inTextBlock:hover,[data-a11y-link-underlines=true] .TimelineItem-body .Link--secondary,[data-a11y-link-underlines=true] .TimelineItem-body .Link--secondary:hover,[data-a11y-link-underlines=true] .TimelineItem-body:not(.timeline-comment-group) .text-normal .Link--primary:not(.text-bold),[data-a11y-link-underlines=true] .TimelineItem-body:not(.timeline-comment-group) .text-normal .Link--primary:not(.text-bold):hover,[data-a11y-link-underlines=true] .TimelineItem-body .Details-element .Link,[data-a11y-link-underlines=true] .TimelineItem-body .Details-element .Link:hover,[data-a11y-link-underlines=true] .TimelineItem-body .Link--muted time,[data-a11y-link-underlines=true] .TimelineItem-body .Link--muted time:hover,[data-a11y-link-underlines=true] .TimelineItem-body .markdown-title,[data-a11y-link-underlines=true] .TimelineItem-body .markdown-title:hover,[data-a11y-link-underlines=true] .TimelineBody [class*=timelineAgoLink],[data-a11y-link-underlines=true] .TimelineBody [class*=timelineAgoLink]:hover,[data-a11y-link-underlines=true] .TimelineBody .Link--secondary,[data-a11y-link-underlines=true] .TimelineBody .Link--secondary:hover,[data-a11y-link-underlines=true] .TimelineItem-body .Link:not(.Link--primary),[data-a11y-link-underlines=true] .TimelineItem-body .Link:not(.Link--primary):hover,[data-a11y-link-underlines=true] .Links--underline a,[data-a11y-link-underlines=true] .Links--underline a:hover,[data-a11y-link-underlines=true] .repos-list-description a,[data-a11y-link-underlines=true] .extended-commit-description-container a{text-underline-offset:.2rem;text-decoration:underline}
+
+[data-a11y-link-underlines=true] .js-issue-row .opened-by>a:hover,[data-a11y-link-underlines=true] .js-issue-row .milestone-link:hover,[data-a11y-link-underlines=true] .js-issue-row .milestone-link:hover>.css-truncate-target,[data-a11y-link-underlines=true] .markdown-body :is(h1,h2,h3,h4,h5,h6,.markdown-heading)>.anchor,[data-a11y-link-underlines=true] .markdown-body .tasklist-issue-content a{text-decoration:none}
+
+.progress-pjax-loader{z-index:99999;opacity:0;background:0 0;transition:opacity .4s linear .4s;height:2px!important}
+
+.progress-pjax-loader>.progress-pjax-loader-bar{background-color:#79b8ff;transition:width .4s}
+
+@keyframes hx-fade-out{0%{opacity:1}to{opacity:0}}
+
+.Box--overlay [data-close-dialog],.Box-overlay--narrow [data-close-dialog],.Box-overlay--wide [data-close-dialog]{z-index:1}
+
+::-webkit-calendar-picker-indicator{filter:invert(50%)}
+
+@font-face{font-family:Noto Sans Backtick Fix;src:local(sans-serif),local(Arial),local(Helvetica);font-display:swap;unicode-range:U+60}
+
+:root,[data-color-mode=light][data-light-theme*=light],[data-color-mode=dark][data-dark-theme*=light]{--color-workflow-card-bg:var(--bgColor-default);--color-workflow-card-header-shadow:#0000;--color-bg-discussions-row-emoji-box:#d1d5da80;--color-notifications-row-read-bg:var(--bgColor-muted);--color-notifications-row-bg:var(--bgColor-white);--color-user-mention-fg:var(--fgColor-default);--color-mktg-btn-shadow-outline:#00000026 0 0 0 1px inset;--color-marketing-icon-primary:#218bff;--color-marketing-icon-secondary:#54aeff;--color-project-header-bg:#24292f;--color-project-sidebar-bg:var(--bgColor-white);--color-project-gradient-in:var(--bgColor-white);--color-project-gradient-out:#fff0;--color-diff-blob-selected-line-highlight-mix-blend-mode:multiply;--color-text-white:var(--fgColor-white)}
+@media (width<=767px){
+@keyframes dropdown-menu-animation{0%{opacity:0;transform:scale(.9)}}
+}
+@media (width<=767px){
+.page-responsive .hx_rsm[open]>summary:before{background-color:var(--overlay-backdrop-bgColor,var(--color-primer-canvas-backdrop))}
+.page-responsive .hx_rsm .select-menu-modal,.page-responsive .hx_rsm-modal{top:75px;left:var(--base-size-16);flex-direction:column;width:auto;height:80%;margin:0;animation:.24s cubic-bezier(0,.1,.1,1) .12s backwards hx_rsm-modal-animation;display:flex;right:var(--base-size-16)!important;position:fixed!important}
+@keyframes hx_rsm-trigger-animation{0%{opacity:0}}
+@keyframes hx_rsm-modal-animation{0%{opacity:0;transform:scale(.9)}}
+.page-responsive .hx_rsm-dialog{max-width:none;height:auto;max-height:80%;transform:none}
+}
+@media (width<=767px) and (height<=500px){
+.page-responsive .hx_rsm .select-menu-modal,.page-responsive .hx_rsm-modal{bottom:var(--base-size-16);height:auto}
+}
+
+[data-turbo-body]{isolation:isolate}
+
+#__primerPortalRoot__{z-index:1}
+
+.details-overlay-dark[open]>summary:before{z-index:111!important}
+
+:root>.turbo-progress-bar[data-render-mode=transform]{width:100%;transform:scaleX(var(--turbo-progress-bar-scale,0));transform-origin:0;transition:transform var(--base-duration-300) var(--base-easing-easeOut),opacity calc(var(--base-duration-300)/2) calc(var(--base-duration-300)/2) var(--base-easing-easeIn)}
+@supports not selector(:popover-open){
+[popover]:not(.\:popover-open){display:none}
+}
+
+.markdown-body>:first-child>.heading-element:first-child{margin-top:0!important}
+
+details.details-overlay:not([open])>:not(summary){display:none!important}

@@ -1,0 +1,29 @@
+.application-main{min-height:100vh}
+
+[class^=Primer_Brand__Link-module__Link___]{contain:content;padding-bottom:.15em}
+
+[class^=Primer_Brand__Link-module__Link___]:after{bottom:0}
+
+@keyframes mascotsGlowPulse{0%,to{opacity:1}50%{opacity:.8}}
+
+@keyframes mascotsFloat{0%,to{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.lp-CustomerStories-gridColumn:not(:last-child):not(:has(+.lp-CustomerStories-gridColumn--dummy)){border-bottom:var(--borderWidth-thin) solid var(--borderColor-default)}
+@media (width>=768px) and (width<=1011px){
+.lp-CustomerStories-gridColumn .lp-CustomerStories-grid--customerStories:not(:has(.lp-CustomerStories-gridColumn)) .lp-CustomerStories-gridColumn{border-right:var(--borderWidth-thin) solid var(--borderColor-default)}
+}
+@media (width>=1012px){
+.lp-CustomerStories-gridColumn:not(:nth-child(3n)){border-right:var(--borderWidth-thin) solid var(--borderColor-default)}
+}
+
+@keyframes lp-Intro-anim{0%{opacity:1}}
+@media (width>=768px) and (width<=1011px){
+.Security-gridColumn:not(:nth-child(2n)){border-right:var(--borderWidth-thin) solid var(--borderColor-default)}
+}
+@media (width>=1012px){
+.Security-gridColumn:not(.Security-gridColumn--half):not(:nth-child(3n)),.Security-gridColumn.Security-gridColumn--half:not(:nth-child(2n)){border-right:var(--borderWidth-thin) solid var(--borderColor-default)}
+}
+
+.CtaFormControl-container:has(.CtaFormControl-input:not(:placeholder-shown)) .CtaFormControl-label,.CtaFormControl-container:focus-within .CtaFormControl-label{transform:translateY(-8px)scale(.8)}
+
+@keyframes lp-Footnotes-item-anim{33%{outline-color:var(--brand-color-focus)}}

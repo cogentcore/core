@@ -244,3 +244,18 @@ func TestTableShortRows(t *testing.T) {
 			assert.Equal(t, image.Pt(1, 3), cell("d1"))
 		})
 }
+
+// TestWrapRowInBlock tests that a flex row that wraps, in a block in a flex
+// item (as the social icons in the footer of github.com), is as wide as its
+// content on one line when there is room (it was a column of one icon).
+func TestWrapRowInBlock(t *testing.T) {
+	icon := `<li><a href="#" style="display: inline-flex; width: 24px; height: 24px"></a></li>`
+	widgetsByID(t, `<div style="display: flex; justify-content: space-between; width: 800px"><nav>legal links</nav>`+
+		`<div style="display: flex; flex-wrap: wrap; gap: 32px"><nav><ul id="icons" style="display: flex; flex-wrap: wrap; gap: 16px; list-style: none; margin: 0; padding: 0">`+
+		strings.Repeat(icon, 5)+`</ul></nav><button>English</button></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			ic := ws["icons"].Geom.Size.Actual.Total
+			assert.Greater(t, ic.X, 5*24*dp, "the icons in one row")
+			assert.Less(t, ic.Y, 30*dp)
+		})
+}
