@@ -239,3 +239,38 @@ func TestPositionedButtonClick(t *testing.T) {
 		assert.Equal(t, 3, clicks)
 	})
 }
+
+// TestCheckedSelector tests the :checked selector with the state of the
+// controls from [Context.Checked], as for the CSS menus of Wikipedia: a
+// menu after a hidden checkbox shows when the checkbox is checked, and the
+// checked attributes of the document are restored after it is read.
+func TestCheckedSelector(t *testing.T) {
+	src := `<style>.menu { display: none } .cb:checked ~ .menu { display: block }</style>` +
+		`<div><input type="checkbox" class="cb" id="cb"><label for="cb">Menu</label><div class="menu"><p>Item</p></div></div>`
+	for _, checked := range []bool{false, true} {
+		ctx := NewContext()
+		var input *html.Node
+		ctx.Checked = func(n *html.Node) bool {
+			input = n
+			return checked
+		}
+		bd := core.NewBody()
+		require.NoError(t, ReadHTMLString(ctx, bd, src))
+		shown := false
+		var sw *core.Switch
+		bd.WalkDown(func(k tree.Node) bool {
+			if tx, ok := k.(*core.Text); ok && tx.Text == "Item" {
+				shown = true
+			}
+			if s, ok := k.(*core.Switch); ok {
+				sw = s
+			}
+			return tree.Continue
+		})
+		assert.Equal(t, checked, shown, "the menu shows when the checkbox is checked")
+		require.NotNil(t, sw)
+		assert.Equal(t, checked, sw.IsChecked(), "the state of the switch")
+		require.NotNil(t, input)
+		assert.False(t, HasAttr(input, "checked"), "the attribute is restored")
+	}
+}

@@ -8,6 +8,7 @@ import (
 	"image"
 	"testing"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
@@ -174,4 +175,45 @@ func TestPositionSticky(t *testing.T) {
 		sectionEnd := section.Geom.Pos.Total.Y + section.Geom.Size.Actual.Total.Y
 		assert.InDelta(t, sectionEnd-30*dp, sticky.Geom.Pos.Total.Y, 1.5, "within its section")
 	})
+}
+
+// TestPositionRaised tests an absolute widget with a positive z-index in a
+// widget that is not a stacking context (as the dropdown menus in the
+// header of Wikipedia): it is rendered over the widgets after the one that
+// it is in, as in CSS, and it gets the events at their overlap.
+func TestPositionRaised(t *testing.T) {
+	b := NewBody()
+	header := NewFrame(b)
+	header.Styler(func(s *styles.Style) { s.Padding.Zero(); s.NoClip = true })
+	wrap := fixedFrame(header, 50, 20)
+	wrap.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative; s.NoClip = true })
+	menu := fixedFrame(wrap, 100, 100)
+	menu.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.ZIndex = 5
+		s.Inset.Top, s.Inset.Left = units.Ph(100), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Background = colors.Uniform(colors.Red)
+		s.SetAbilities(true, abilities.Clickable)
+	})
+	after := fixedFrame(b, 300, 300)
+	after.Styler(func(s *styles.Style) {
+		s.Background = colors.Uniform(colors.Blue)
+		s.SetAbilities(true, abilities.Clickable)
+	})
+	var clicked Widget
+	menu.OnClick(func(e events.Event) { clicked = menu })
+	after.OnClick(func(e events.Event) { clicked = after })
+	var pos image.Point
+	img := b.RenderImage(func() {
+		assert.Equal(t, b.Scene.AsWidget(), menu.raisedTo(), "raised to the scene")
+		pos = menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
+		assert.True(t, pos.In(after.Geom.TotalBBox), "over the widget after")
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.Equal(t, Widget(menu), clicked)
+	})
+	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+	assert.Equal(t, [3]uint32{0xffff, 0, 0}, [3]uint32{r, g, bl}, "rendered over the widget after")
 }

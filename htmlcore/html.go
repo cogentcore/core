@@ -115,7 +115,9 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		if ctx.Style != "" { // before the style sheets of the page, which override it
 			ctx.addStyleOrigin(ctx.Style, originAuthor)
 		}
+		restore := ctx.setCheckedAttrs(n)
 		ctx.addStyleSheets(n)
+		restore()
 		ctx.rootFont = 0
 		ctx.rootFontSize() // of this document, while ctx.Node is it
 	}

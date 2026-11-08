@@ -221,6 +221,11 @@ type WidgetBase struct {
 	// [WidgetBase.Defer] to add a function.
 	Deferred []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
+	// raised are the out of flow widgets with a positive z-index in this
+	// widget, as their stacking context, that are rendered after it (see
+	// [WidgetBase.raised]), collected while it renders.
+	raised []Widget
+
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`

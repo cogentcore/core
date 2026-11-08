@@ -74,6 +74,13 @@ type Context struct {
 	// elements are not displayed, as in browsers with JavaScript.
 	Scripting bool
 
+	// Checked, if set, returns whether the given checkbox or radio input
+	// element is checked, for the :checked selector of CSS, as for a control
+	// that the user or a script has checked (as the CSS menus of Wikipedia,
+	// which show when their hidden checkbox is checked). By default, it is
+	// the checked attribute (the initial state).
+	Checked func(n *html.Node) bool
+
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
 	NewParent core.Widget
@@ -453,7 +460,7 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 func (c *Context) NewPage() *Context {
 	n := NewContext()
 	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
-	n.Scripting, n.WebFonts = c.Scripting, c.WebFonts
+	n.Scripting, n.WebFonts, n.Checked = c.Scripting, c.WebFonts, c.Checked
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
 	n.ElementHandlers = c.ElementHandlers

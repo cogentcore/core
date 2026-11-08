@@ -869,7 +869,7 @@ func sortByRenderLayer(ws []Widget) {
 		pa, pb := paths[a], paths[b]
 		for i := 0; i < len(pa) && i < len(pb); i++ {
 			if pa[i] != pb[i] { // the children of their common ancestor
-				if c := cmp.Compare(renderLayer(pa[i]), renderLayer(pb[i])); c != 0 {
+				if c := cmp.Compare(pathLayer(pa, i), pathLayer(pb, i)); c != 0 {
 					return c
 				}
 				break
@@ -882,6 +882,28 @@ func sortByRenderLayer(ws []Widget) {
 		sorted[i] = ws[j]
 	}
 	copy(ws, sorted)
+}
+
+// pathLayer returns the layer in which the widget at the given index of the
+// given path (from the top) is rendered among its siblings (see
+// [renderLayer]), or that of a widget in it that is raised to a stacking
+// context above it (see [WidgetBase.raisedTo]), which is rendered over the
+// widgets after the ones that it is in, if that is higher.
+func pathLayer(path []*WidgetBase, i int) int {
+	l := renderLayer(path[i])
+	for j := i + 1; j < len(path); j++ {
+		r := path[j].raisedTo()
+		if r == nil {
+			continue
+		}
+		for k := 0; k < i; k++ {
+			if path[k] == r {
+				l = max(l, 2+path[j].Styles.ZIndex)
+				break
+			}
+		}
+	}
+	return l
 }
 
 // renderLayer returns the layer in which the widget is rendered among its

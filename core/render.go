@@ -5,12 +5,14 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"image"
 	"os"
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"slices"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -347,6 +349,11 @@ func (wb *WidgetBase) doNeedsRender() {
 		if cwb.hasFlag(widgetNeedsRender) {
 			cwb.setFlag(false, widgetChildNeedsRender)
 			cw.RenderWidget()
+			// the widgets in it that are raised to the widgets that it is in,
+			// which are not rendered now, are rendered over it
+			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {
+				p.renderRaised()
+			}
 			return tree.Break // don't go any deeper
 		}
 		if !cwb.hasFlag(widgetChildNeedsRender) {
@@ -593,8 +600,58 @@ func (wb *WidgetBase) RenderWidget() {
 func (wb *WidgetBase) renderOutOfFlowChildren() {
 	for _, cw := range wb.renderOrder() {
 		if cw.AsWidget().outOfFlow() {
+			if root := cw.AsWidget().raisedTo(); root != nil {
+				root.raised = append(root.raised, cw)
+				continue
+			}
 			cw.RenderWidget()
 		}
+	}
+	wb.renderRaised()
+}
+
+// raisedTo returns the stacking context that the widget is rendered in
+// (see [WidgetBase.raised]) if it is positioned with a positive z-index
+// and that is not its parent, or nil: the nearest widget that it is in
+// that is positioned with a z-index (as in CSS, where a z-index of auto,
+// the default, makes no stacking context), or the top widget. As in CSS,
+// it is then rendered over the widgets after the ones that it is in (as
+// the dropdown menus in the header of Wikipedia, over the page).
+func (wb *WidgetBase) raisedTo() *WidgetBase {
+	if wb.Styles.ZIndex <= 0 || wb.Styles.Position == styles.PositionStatic {
+		return nil
+	}
+	parent := wb.parentWidget()
+	if parent == nil {
+		return nil
+	}
+	root := parent
+	for p := parent; p != nil; p = p.parentWidget() {
+		root = p
+		if p.Styles.Position != styles.PositionStatic && p.Styles.ZIndex != 0 {
+			break
+		}
+	}
+	if root == parent {
+		return nil
+	}
+	return root
+}
+
+// renderRaised renders the widgets that are raised to this one as their
+// stacking context (see [WidgetBase.raisedTo]), in the order of their
+// z-index, after its other content.
+func (wb *WidgetBase) renderRaised() {
+	if len(wb.raised) == 0 {
+		return
+	}
+	raised := wb.raised
+	wb.raised = nil
+	slices.SortStableFunc(raised, func(a, b Widget) int {
+		return cmp.Compare(a.AsWidget().Styles.ZIndex, b.AsWidget().Styles.ZIndex)
+	})
+	for _, cw := range raised {
+		cw.RenderWidget()
 	}
 }
 
@@ -609,6 +666,10 @@ func (wb *WidgetBase) renderChildren() {
 	if order := wb.renderOrder(); order != nil { // positioned children
 		for _, cw := range order {
 			if !cw.AsWidget().outOfFlow() { // rendered after (see RenderWidget)
+				if root := cw.AsWidget().raisedTo(); root != nil {
+					root.raised = append(root.raised, cw)
+					continue
+				}
 				cw.RenderWidget()
 			}
 		}

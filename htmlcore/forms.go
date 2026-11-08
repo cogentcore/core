@@ -212,7 +212,7 @@ func (c *Context) controlValue(n, submitter *html.Node) (string, bool) {
 			}
 			return GetAttr(n, "value"), true
 		case "checkbox", "radio":
-			checked := HasAttr(n, "checked")
+			checked := c.isChecked(n)
 			if w != nil {
 				checked = w.AsWidget().StateIs(states.Checked)
 			}
@@ -342,7 +342,7 @@ func handleInput(ctx *Context) core.Widget {
 			if ityp == "radio" {
 				sw.SetType(core.SwitchRadioButton)
 			}
-			sw.SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+			sw.SetState(ctx.isChecked(ctx.Node), states.Checked)
 			newWidget = sw
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
@@ -360,4 +360,57 @@ func handleInput(ctx *Context) core.Widget {
 		}
 	}
 	return newWidget
+}
+
+// isChecked returns whether the given checkbox or radio input element is
+// checked: from [Context.Checked] if it is set, or else its attribute.
+func (c *Context) isChecked(n *html.Node) bool {
+	if c.Checked != nil {
+		return c.Checked(n)
+	}
+	return HasAttr(n, "checked")
+}
+
+// setCheckedAttrs sets the checked attributes of the checkbox and radio
+// inputs of the given document to their state from [Context.Checked], if
+// it is set, for the :checked selectors of the style sheets (the selector
+// library matches the attribute), and returns a function that restores
+// them.
+func (c *Context) setCheckedAttrs(root *html.Node) func() {
+	if c.Checked == nil {
+		return func() {}
+	}
+	var changed []*html.Node
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "input" {
+			if typ := strings.ToLower(GetAttr(n, "type")); typ == "checkbox" || typ == "radio" {
+				if c.Checked(n) != HasAttr(n, "checked") {
+					toggleAttr(n, "checked")
+					changed = append(changed, n)
+				}
+			}
+		}
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			walk(k)
+		}
+	}
+	walk(root)
+	return func() {
+		for _, n := range changed {
+			toggleAttr(n, "checked")
+		}
+	}
+}
+
+// toggleAttr removes the given attribute of the given element if it has
+// it, or else adds it (with no value).
+func toggleAttr(n *html.Node, key string) {
+	for i, a := range n.Attr {
+		if a.Key == key && a.Namespace == "" {
+			n.Attr = append(n.Attr[:i], n.Attr[i+1:]...)
+			return
+		}
+	}
+	n.Attr = append(n.Attr, html.Attribute{Key: key})
 }
