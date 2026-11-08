@@ -181,3 +181,30 @@ func TestBackgroundImage(t *testing.T) {
 	assert.Equal(t, [3]uint32{0, 0, 255}, at(30*dp, 0), "repeated on x")
 	assert.Equal(t, [3]uint32{255, 255, 255}, at(1, 10*dp), "not repeated on y")
 }
+
+// TestTableFixedLayout tests a table with the fixed layout and col widths
+// (as the diffs of Wikipedia): the cells are in their columns (the
+// colgroup is not a cell), with the widths of the columns, and the long
+// lines in them do not make them wider; the marker text of an empty cell,
+// from its ::before, is shown.
+func TestTableFixedLayout(t *testing.T) {
+	long := strings.Repeat("word ", 200)
+	widgetsByID(t, `<style>.m::before { content: attr(data-marker) }</style><div style="width: 500px"><table id="t" style="table-layout: fixed; width: 100%"><colgroup><col style="width: 2%"> <col style="width: 48%"> <col style="width: 2%"> <col style="width: 48%"></colgroup>`+
+		`<tr><td colspan="2" id="ot">old</td><td colspan="2" id="nt">new</td></tr>`+
+		`<tr><td class="m" id="m" data-marker="−"></td><td id="a">`+long+`</td><td class="m" data-marker="+"></td><td id="b">b</td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			tw := ws["t"].Geom.Size.Actual.Total.X
+			assert.InDelta(t, 500*dp, tw, float64(4*dp), "the width of the table")
+			assert.InDelta(t, 0.48*tw, ws["a"].Geom.Size.Actual.Total.X, float64(8*dp), "48% (the long line wraps), less the spacing")
+			assert.Less(t, ws["m"].Geom.Size.Actual.Total.X, 0.05*tw, "2%")
+			assert.InDelta(t, ws["nt"].Geom.Pos.Total.X, ws["m"].Geom.Pos.Total.X+0.5*tw, float64(6*dp), "the titles span two columns each")
+			text := ""
+			ws["m"].WalkDown(func(k tree.Node) bool {
+				if tx, ok := k.(*core.Text); ok {
+					text += tx.Text
+				}
+				return tree.Continue
+			})
+			assert.Contains(t, text, "−", "the marker of the empty cell")
+		})
+}
