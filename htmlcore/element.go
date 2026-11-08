@@ -86,7 +86,13 @@ func handleElement(ctx *Context) {
 			}
 		}
 	case "li":
-		handleListItem(ctx)
+		// as a list item when its display is list-item (the default),
+		// also when it is blockified (as in a flex container)
+		if d := ctx.declaration(ctx.Node, "display"); d == "" || d == "list-item" {
+			handleListItem(ctx)
+		} else { // as a box of its display (as inline-flex), without a marker
+			newWidget = handleBox(ctx, tag, display)
+		}
 	case "select":
 		handleSelect(ctx)
 	case "button":

@@ -160,6 +160,12 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			c.blocks[tx].display = "block"
 		}
 	}
+	// the text of the ::before and ::after of the element that the run is
+	// in, at its start and end (as for elements that are widgets, as the
+	// edit links of Wikipedia, which are inline blocks)
+	if el := first.Parent; el != nil && el.FirstChild == first {
+		buf.WriteString(html.EscapeString(c.pseudoContent(el, "before")))
+	}
 	for n := first; ; n = n.NextSibling {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
 			// a line break in a row of widgets ends the row, and the
@@ -184,6 +190,9 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		if n == last {
 			break
 		}
+	}
+	if el := last.Parent; el != nil && el.LastChild == last {
+		buf.WriteString(html.EscapeString(c.pseudoContent(el, "after")))
 	}
 	flush(false)
 	c.inlineParent = nil

@@ -75,11 +75,21 @@ func ReadHTMLString(ctx *Context, parent core.Widget, s string) error {
 // and adds corresponding Cogent Core widgets to the given [core.Widget],
 // using the given context.
 func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
+	// the text of the ::before and ::after of the element, as texts of
+	// their own when its first and last children are not in a run of
+	// inline content (which has them; see [Context.readInlineRun])
+	el := n.Parent
+	if el != nil && el.Type == html.ElementNode && el.FirstChild == n && !ctx.isInlineLevel(n) {
+		ctx.pseudoText(parent, el, "before")
+	}
 	for ; n != nil; n = n.NextSibling {
 		// The rest of a staged body is left for later.
 		if ctx.stageAt(n) {
 			ctx.rest, ctx.restParent = n, parent
 			return nil
+		}
+		if n.NextSibling == nil && el != nil && el.Type == html.ElementNode && el.LastChild == n && !ctx.isInlineLevel(n) {
+			defer ctx.pseudoText(parent, el, "after")
 		}
 		if n.Parent != nil && ctx.isInlineLevel(n) {
 			last := n

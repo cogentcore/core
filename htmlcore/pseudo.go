@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 )
@@ -177,4 +178,16 @@ func cssString(v string, start int) (string, int) {
 		i++
 	}
 	return sb.String(), i
+}
+
+// pseudoText adds a text with the content of the ::before or ::after (the
+// given kind) of the given element to the given parent, if it has any.
+func (c *Context) pseudoText(parent core.Widget, el *html.Node, kind string) {
+	t := c.pseudoContent(el, kind)
+	if strings.TrimSpace(t) == "" {
+		return
+	}
+	tx := core.NewText(parent).SetText(html.EscapeString(t))
+	tx.SetName(kind)
+	c.handleWidget(nil, tx)
 }
