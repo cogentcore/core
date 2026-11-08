@@ -354,6 +354,21 @@ func TestMediaRange(t *testing.T) {
 	}
 }
 
+// TestMediaReducedMotion tests that pages are told that motion is reduced,
+// as animations are not run: content that fades in when animated (as the
+// headings of github.com) is shown.
+func TestMediaReducedMotion(t *testing.T) {
+	c := NewContext()
+	assert.True(t, c.mediaMatches("(prefers-reduced-motion: reduce)"))
+	assert.True(t, c.mediaMatches("(prefers-reduced-motion)"))
+	assert.False(t, c.mediaMatches("(prefers-reduced-motion: no-preference)"))
+	widgetsByID(t, `<style>@media (prefers-reduced-motion: no-preference) { .heading > * { opacity: 0 } }</style>`+
+		`<div class="heading"><h2 id="h">GitHub Platform</h2></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Equal(t, float32(1), ws["h"].Styles.Opacity, "shown")
+		})
+}
+
 func TestGridTracks(t *testing.T) {
 	assert.Equal(t, []string{"minmax(15rem,1fr)", "2rem", "minmax(0,48rem)"},
 		gridTracks("[full-start left-start] minmax(15rem,1fr) [left-end] 2rem [content-start] minmax(0,48rem) [full-end right-end]"))

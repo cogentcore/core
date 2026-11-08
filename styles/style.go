@@ -180,6 +180,12 @@ type Style struct { //types:add
 	// as its cells need to be when they are wider than it.
 	ContentMinWidth bool
 
+	// MaxContentWidth is whether the width of the element is the width of
+	// its content without wrapping (its preferred width), whatever the width
+	// that it is given, which it then overflows, as for a width of
+	// max-content in CSS (as a ticker of items in a row that scrolls).
+	MaxContentWidth bool
+
 	// BoxShadowOutside is whether the box shadows are outside of the
 	// layout of the element, as in CSS: no space is allocated for them
 	// around it (they are not in its effective margin), and they are

@@ -324,4 +324,52 @@ func TestScrollContentWidth(t *testing.T) {
 		assert.Less(t, ws["chapters"].Geom.Size.Actual.Total.X, 200*dp, "narrowed to fit")
 		assert.True(t, core.AsFrame(ws["viewport"].This).HasScroll[math32.X], "its content scrolls")
 	})
+	// a button that hides its overflow, in a flex item, is as wide as its
+	// label (as the chapter buttons of github.com, which were empty pills)
+	widgetsByID(t, `<div style="display: flex; width: 600px"><button id="button" style="padding: 8px 16px; overflow: hidden"><span id="label" style="display: block">Review changes</span></button></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Greater(t, ws["button"].Geom.Size.Actual.Total.X, ws["label"].Geom.Size.Actual.Total.X+30*dp)
+		})
+}
+
+// TestWidthMaxContent tests a width of max-content (as the track of the
+// ticker of activity of github.com, a grid of items in one row in a box
+// that hides its overflow): it is as wide as its content on one line,
+// over the width of its parent, and its items are not wrapped.
+func TestWidthMaxContent(t *testing.T) {
+	item := `<li style="display: grid; overflow-wrap: anywhere; border-right: 1px solid gray"><a href="#" style="padding: 24px">repo forked from someone-somewhere</a></li>`
+	widgetsByID(t, `<div style="width: 400px; overflow: hidden"><ul id="track" style="width: max-content; display: grid; grid-auto-flow: column; margin: 0; padding: 0; list-style: none">`+
+		strings.Replace(item, "<li ", `<li id="first" `, 1)+item+item+`</ul></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			first := ws["first"].Geom.Size.Actual.Total
+			assert.Greater(t, first.X, 200*dp, "an item on one line")
+			assert.Less(t, first.Y, 80*dp)
+			assert.Greater(t, ws["track"].Geom.Size.Actual.Total.X, 3*200*dp, "over the width of its parent")
+		})
+}
+
+// TestTransformZeroScale tests that an element that a transform scales to
+// nothing is not shown (as the progress bar over the label of the current
+// chapter button of github.com, before the video plays), and that a later
+// transform that does not undoes that.
+func TestTransformZeroScale(t *testing.T) {
+	widgetsByID(t, `<style>.bar { transform: scaleX(0) } .bar.on { transform: scaleX(1) }</style>`+
+		`<div id="off" class="bar">a</div><div id="on" class="bar on">b</div><div id="both" style="transform: translateY(-50%) scale(0, 1)">c</div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Equal(t, float32(0), ws["off"].Styles.Opacity)
+			assert.Equal(t, float32(1), ws["on"].Styles.Opacity)
+			assert.Equal(t, float32(0), ws["both"].Styles.Opacity)
+		})
+}
+
+// TestGridStack tests a grid whose children are all in its first cell (as
+// the counters of github.com: a hidden copy of the value under it, which
+// keeps its width): they are over each other, not in rows.
+func TestGridStack(t *testing.T) {
+	widgetsByID(t, `<div style="font-size: 40px"><span id="value" style="display: inline-grid">`+
+		`<span style="grid-area: 1 / 1; opacity: 0">225M+</span><span style="grid-area: 1 / 1">225M+</span></span></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Less(t, ws["value"].Geom.Size.Actual.Total.Y, 60*dp, "one line high")
+			assert.Greater(t, ws["value"].Geom.Size.Actual.Total.X, 80*dp, "with its value shown")
+		})
 }

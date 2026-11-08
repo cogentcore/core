@@ -167,9 +167,58 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 	}
 }
 
+// stackGrid makes the given grid container widget a stack, showing its
+// last child, if all of its children (two or more) are in the same cell
+// of it by number (as grid-area: 1 / 1), over each other (as the counters
+// of github.com, with a hidden copy of the value under it, for its width),
+// and returns whether it did. (Core grids do not overlap their cells.)
+func (c *Context) stackGrid(w core.Widget) bool {
+	fr := core.AsFrame(w)
+	if fr == nil || fr.NumChildren() < 2 {
+		return false
+	}
+	cell := ""
+	for _, k := range fr.Children {
+		kw, ok := k.(core.Widget)
+		if !ok {
+			return false
+		}
+		kn, _ := kw.AsWidget().Property("node").(*html.Node)
+		if kn == nil {
+			return false
+		}
+		row, col, _ := cutTopLevel(c.declaration(kn, "grid-area"), '/')
+		row, col = strings.TrimSpace(row), strings.TrimSpace(col)
+		if row == "" {
+			row = strings.TrimSpace(c.declaration(kn, "grid-row"))
+			col = strings.TrimSpace(c.declaration(kn, "grid-column"))
+		}
+		if _, err := strconv.Atoi(row); err != nil {
+			return false
+		}
+		if col == "" {
+			col = "1"
+		}
+		if _, err := strconv.Atoi(strings.TrimSpace(col)); err != nil {
+			return false
+		}
+		if cell != "" && cell != row+"/"+col {
+			return false
+		}
+		cell = row + "/" + col
+	}
+	last := fr.NumChildren() - 1
+	fr.FinalStyler(func(s *styles.Style) { s.Display = styles.Stacked })
+	fr.StackTop = last
+	return true
+}
+
 // arrangeGrid places the children of the given grid container widget for
 // its node by its grid template (see the comment at the top of grid.go).
 func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
+	if c.stackGrid(w) {
+		return
+	}
 	areas, ncols, tracks := c.gridTemplate(n)
 	env := c.readEnv() // for the lengths of the tracks
 	if ncols == 0 {

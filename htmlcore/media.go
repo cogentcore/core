@@ -410,7 +410,12 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 		return v <= l
 	case "prefers-color-scheme":
 		return value == "light"
-	case "prefers-reduced-motion", "prefers-contrast", "forced-colors":
+	case "prefers-reduced-motion":
+		// CSS animations and transitions are not run, so pages show the
+		// final states of what they animate (as the headings of github.com
+		// that fade in, which were hidden)
+		return value == "reduce" || value == ""
+	case "prefers-contrast", "forced-colors":
 		return value == "no-preference" || value == "none"
 	case "orientation":
 		return value == "landscape"

@@ -32,6 +32,12 @@ func (fr *Frame) sizeUpIntrinsicFrame() {
 	if fr.Styles.Overflow.X >= styles.OverflowAuto {
 		minw = 0 // its content scrolls
 	}
+	if fr.Styles.MaxContentWidth {
+		// as wide as its content on one line, which it is not narrowed from
+		minw = prefw
+		sz.Actual.Content.X = max(sz.Actual.Content.X, math32.Ceil(prefw))
+		sz.SetTotalFromContent(&sz.Actual)
+	}
 	if fr.Styles.ContentMinWidth && sz.Max.X > 0 && minw > sz.Max.X {
 		// as wide as its content needs to be (as a table in CSS)
 		sz.Max.X = math32.Ceil(minw)
@@ -170,6 +176,9 @@ func (fr *Frame) gridIntrinsicWidths() (minw, prefw float32) {
 func narrowTo(cwb *WidgetBase, alloc, width float32, block bool) float32 {
 	if alloc <= width {
 		return alloc
+	}
+	if cwb.Styles.MaxContentWidth { // not narrowed: it overflows
+		return max(alloc, cwb.Geom.Size.minWidth)
 	}
 	if block && cwb.HasChildren() {
 		if _, ok := cwb.This.(Layouter); ok {

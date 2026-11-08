@@ -215,6 +215,10 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			pct = units.UnitPh
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
+			if prop == "width" {
+				// as wide as its content on one line (see styles.MaxContentWidth)
+				s.MaxContentWidth = lval == "max-content"
+			}
 			st.setSize(prop, st.env.lengthPtr(lval, pct))
 		})
 	case "position":
@@ -289,12 +293,14 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			return nil
 		}
 		rot := cssRotate(prop, lval)
+		zero := prop == "transform" && cssZeroScale(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.Translate.X, _ = st.env.length(x, units.UnitEw)
 			s.Translate.Y, _ = st.env.length(y, units.UnitEh)
 			if prop == "transform" {
 				s.Rotate = rot
 			}
+			st.zeroScale = zero // (see resolve)
 		})
 	case "rotate":
 		rot := cssAngle(lval)
@@ -847,6 +853,42 @@ func gridColumns(v string) int {
 // property (the sum of its translate functions; the other functions, as
 // rotate and scale, are not supported), or of the translate property, as
 // the lengths of x and y. It returns false if it is not valid.
+// cssZeroScale returns whether the given transform scales the element
+// to nothing in either dimension (as scaleX(0), for a progress bar
+// that is not started), which is then not shown.
+func cssZeroScale(v string) bool {
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			break
+		}
+		as := strings.Split(args[:end], ",")
+		zero := func(i int) bool {
+			if i >= len(as) {
+				return false
+			}
+			f, err := strconv.ParseFloat(strings.TrimSpace(as[i]), 64)
+			return err == nil && f == 0
+		}
+		switch strings.TrimSpace(name) {
+		case "scale", "scale3d":
+			if zero(0) || (len(as) > 1 && zero(1)) {
+				return true
+			}
+		case "scalex", "scaley":
+			if zero(0) {
+				return true
+			}
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	return false
+}
+
 func cssTranslate(prop, v string) (x, y string, ok bool) {
 	x, y = "0", "0"
 	if v == "none" || v == "" {

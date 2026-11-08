@@ -82,6 +82,7 @@ type cssState struct {
 
 	display    string
 	hideText   bool   // a large negative text-indent, which moves the text out of view
+	zeroScale  bool   // a transform scales the box to nothing (as scaleX(0)), so it is not shown
 	visibility string // the visibility property, if any
 	width      *units.Value
 	height     *units.Value

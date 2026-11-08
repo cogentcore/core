@@ -69,6 +69,9 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		s.Opacity = 0
 		s.Abilities = 0
 	}
+	if st.zeroScale { // a transform scales it to nothing, so it is not shown
+		s.Opacity = 0
+	}
 	if st.hideText { // the text is not shown, and its box is (with its background)
 		s.Color = colors.Uniform(colors.Transparent)
 	}

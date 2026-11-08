@@ -681,13 +681,22 @@ func (fr *Frame) laySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 		}
 		// a frame that scrolls is as large as its style, unless it shrinks
 		// in width (as in CSS, where it starts at the width of its content,
-		// and is narrowed to fit, down to nothing: see sizeUpIntrinsicFrame)
-		shrinks := pass == SizeUpPass && d == math32.X && fr.Styles.Shrink.X > 0
-		if !(fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil && !shrinks {
+		// and is narrowed to fit, down to nothing: see sizeUpIntrinsicFrame),
+		// which is then as wide as its content up to its allocation
+		shrinks := d == math32.X && fr.Styles.Shrink.X > 0
+		scrolls := !(fr.Scene != nil && fr.Scene.hasFlag(sceneContentSizing)) && oflow.Dim(d) >= styles.OverflowAuto && fr.Parent != nil
+		switch {
+		case scrolls && shrinks && pass != SizeUpPass:
+			w := nsz.X
+			if al := sz.Alloc.Content.X; al > 0 {
+				w = min(w, al)
+			}
+			asz.X = styles.ClampMin(asz.X, w)
+		case scrolls && !shrinks:
 			if mx.Dim(d) > 0 {
 				asz.SetDim(d, styles.ClampMax(styles.ClampMin(asz.Dim(d), nsz.Dim(d)), mx.Dim(d)))
 			}
-		} else {
+		default:
 			asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
 		}
 	}
@@ -1702,7 +1711,8 @@ func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 	li := &fr.layout
 	sz := &fr.Geom.Size
 	rowOrGrid := fr.Styles.Display == styles.Grid || (fr.Styles.Display == styles.Flex && fr.Styles.Direction == styles.Row)
-	if li.Wraps != nil || len(li.Cells) == 0 || !rowOrGrid {
+	if li.Wraps != nil || len(li.Cells) == 0 || !rowOrGrid || fr.Styles.MaxContentWidth {
+		// (the content of a frame as wide as its content is not narrowed)
 		return nil, false
 	}
 	n := li.Shape.X
