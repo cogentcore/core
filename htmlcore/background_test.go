@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -70,4 +71,16 @@ func TestComputedValue(t *testing.T) {
 	assert.Equal(t, "red", ctx.ComputedValue(p, "color"), "the inline style")
 	assert.Equal(t, "green", ctx.ComputedValue(p, "--c"), "a custom property")
 	assert.Equal(t, "", ctx.ComputedValue(p, "--C"), "custom properties are case sensitive")
+}
+
+// TestBackgroundInherit tests a background-color of inherit over the
+// background of an earlier rule (as the code of the Python docs, pre with
+// background-color: inherit of the gray of its highlight block, over a
+// green for pre): it is that of the parent.
+func TestBackgroundInherit(t *testing.T) {
+	src := `<style>pre { background-color: #eeffcc } .hl { background: #f8f8f8 } .hl pre { background-color: inherit }</style>` +
+		`<div class="hl"><pre id="code">code</pre></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.Equal(t, color.RGBA{248, 248, 248, 255}, colors.AsRGBA(colors.ToUniform(ws["code"].Styles.Background)))
+	})
 }

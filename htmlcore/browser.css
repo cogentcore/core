@@ -69,5 +69,9 @@ button, input[type=submit], input[type=button], input[type=reset] {
     background-color: #efefef; font-size: 13.333px; text-align: center; box-sizing: border-box;
     flex-direction: row; justify-content: center; align-items: center;
 }
+select {
+    padding: 1px 2px; border: 1px solid #767676; border-radius: 3px;
+    background-color: white; color: black; font-size: 13.333px; box-sizing: border-box;
+}
 svg:not(:root) { overflow: hidden; }
 input[type=hidden] { display: none; }

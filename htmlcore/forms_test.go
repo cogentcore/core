@@ -531,3 +531,16 @@ func TestPointerEventsNone(t *testing.T) {
 		assert.Equal(t, 1, clicks)
 	})
 }
+
+// TestSelectDefaultStyle tests the style of a select with no CSS of its own,
+// which is that of browsers (small, with a thin border), not the larger
+// style of a chooser (as the version selects of the Python docs, which made
+// their header taller).
+func TestSelectDefaultStyle(t *testing.T) {
+	widgetsByID(t, `<select id="s"><option>English</option></select>`, func(ws map[string]*core.WidgetBase, dp float32) {
+		s := ws["s"]
+		assert.LessOrEqual(t, s.Styles.Padding.Left.Dots, 3*dp, "a small padding")
+		assert.InDelta(t, 1*dp, s.Styles.Border.Width.Top.Dots, 0.5, "a thin border")
+		assert.Less(t, float32(s.Geom.TotalBBox.Dy()), 30*dp, "not tall")
+	})
+}

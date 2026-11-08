@@ -81,6 +81,18 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			st.background, st.hasBg, st.bgCurrentColor = nil, true, false
 		})
 	}
+	if lval == "inherit" && (prop == "background" || prop == "background-color") {
+		// that of the parent, over a background of an earlier rule (as
+		// the code of the Python docs, pre with background-color: inherit
+		// of the gray of its highlight block, over a green for pre)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			var bg image.Image
+			if ps != nil {
+				bg = ps.Background
+			}
+			st.background, st.hasBg, st.bgCurrentColor = bg, true, false
+		})
+	}
 	if lval == "inherit" || lval == "initial" {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
