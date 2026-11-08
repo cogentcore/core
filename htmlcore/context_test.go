@@ -185,7 +185,6 @@ func TestCalcPx(t *testing.T) {
 func TestMathLength(t *testing.T) {
 	env := defaultLengthEnv() // an em of 16px, vw of 8px, and vh of 6px
 	for v, want := range map[string]units.Value{
-		"calc(100% - 20px)":        units.Pw(100),
 		"calc(10px + 2em)":         units.Dp(42),
 		"calc(100vh - 100px)":      units.Dp(500),
 		"min(25vw, 350px)":         units.Dp(200),
@@ -193,12 +192,33 @@ func TestMathLength(t *testing.T) {
 		"clamp(1rem, 5vw, 2rem)":   units.Dp(32),
 		"calc((100px - 20px) / 2)": units.Dp(40),
 		"calc(2 * (10px + 5px))":   units.Dp(30),
-		"min(100%, 600px)":         units.Dp(600),
 	} {
 		got, ok := env.length(v, units.UnitPw)
 		assert.True(t, ok, v)
 		assert.InDelta(t, want.Value, got.Value, 0.01, v)
 		assert.Equal(t, want.Unit, got.Unit, v)
+	}
+	// a percentage with a length is computed with the size of the parent
+	// (custom), in the layout
+	uc := &units.Context{}
+	uc.Defaults()
+	uc.Paw = 1000
+	dp := uc.Dots(units.UnitDp)
+	for v, want := range map[string]float32{
+		"calc(100% - 20px)":        1000 - 20*dp,
+		"min(100%, 600px)":         600 * dp,
+		"min(100%, 2000px)":        1000,
+		"max(50%, 600px)":          600 * dp,
+		"clamp(100px, 50%, 400px)": 400 * dp,
+		"calc(100% - 2 * 128px)":   1000 - 256*dp,
+		"calc(50% + 10px)":         500 + 10*dp,
+		// with vw of 8px: clamp(20px, (800 - 768) / 4 = 8px, 128px) = 20px
+		"calc(100% - 2 * clamp(1.25rem, calc((100vw - 768px) / 4), 8rem))": 1000 - 40*dp,
+	} {
+		got, ok := env.length(v, units.UnitPw)
+		if assert.True(t, ok, v) && assert.NotNil(t, got.Custom, v) {
+			assert.InDelta(t, want, got.Custom(uc), 0.01, v)
+		}
 	}
 }
 

@@ -822,6 +822,23 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 			got = true
 			sz.Max.SetDim(d, max(psz.Y*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
 		}
+		// custom sizes are computed with the size of the parent too (as a
+		// calc() of CSS with a percentage and a length, as the width of
+		// calc(100% - 256px) of the grids of github.com)
+		if mn := s.Min.Dim(d); mn.Custom != nil {
+			got = true
+			uc := s.UnitContext
+			uc.Paw, uc.Pah = psz.X, psz.Y
+			v := max(math32.Ceil(mn.Custom(&uc))-bs.Dim(d), 0)
+			effmin.SetDim(d, v)
+			sz.Min.SetDim(d, v)
+		}
+		if mx := s.Max.Dim(d); mx.Custom != nil {
+			got = true
+			uc := s.UnitContext
+			uc.Paw, uc.Pah = psz.X, psz.Y
+			sz.Max.SetDim(d, max(math32.Ceil(mx.Custom(&uc))-bs.Dim(d), 1))
+		}
 	}
 	if got {
 		sz.fitTotalMax(&sz.Actual.Total, effmin)

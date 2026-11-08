@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -306,6 +307,38 @@ func (p *linearParser) factor() (linear, bool, bool) {
 		p.i += 4
 		return p.factor()
 	}
+	if p.env != nil {
+		for _, fn := range []string{"min(", "max(", "clamp("} {
+			if !strings.HasPrefix(p.s[p.i:], fn) {
+				continue
+			}
+			// a math function in a calc() (as the gutters of github.com, in
+			// calc(100% - 2 * clamp(1.25rem, calc((100vw - 768px) / 4), 8rem))),
+			// of lengths that are not percentages
+			depth, end := 0, -1
+			for j := p.i + len(fn) - 1; j < len(p.s); j++ {
+				if p.s[j] == '(' {
+					depth++
+				} else if p.s[j] == ')' {
+					depth--
+					if depth == 0 {
+						end = j
+						break
+					}
+				}
+			}
+			if end < 0 {
+				return linear{}, false, false
+			}
+			v, ok := p.env.math(p.s[p.i:end+1], units.UnitPw)
+			if !ok || v.Custom != nil || v.Unit != units.UnitDp {
+				return linear{}, false, false
+			}
+			p.i = end + 1
+			p.lengths++
+			return linear{px: float64(v.Value)}, true, true
+		}
+	}
 	start := p.i
 	for p.i < len(p.s) && (p.s[p.i] >= '0' && p.s[p.i] <= '9' || p.s[p.i] == '.' || (p.i == start && (p.s[p.i] == '-' || p.s[p.i] == '+'))) {
 		p.i++
@@ -403,6 +436,11 @@ func (e *lengthEnv) math(v string, pct units.Units) (units.Value, bool) {
 			}
 			return b
 		}
+		if mixed := slices.ContainsFunc(vals, func(l linear) bool { return l.pct != 0 }) &&
+			slices.ContainsFunc(vals, func(l linear) bool { return l.px != 0 || l.pct == 0 }); mixed {
+			// compared when the size of the parent is known, in the layout
+			return customLength(name, vals, pct), true
+		}
 		switch name {
 		case "min":
 			l = vals[0]
@@ -424,10 +462,52 @@ func (e *lengthEnv) math(v string, pct units.Units) (units.Value, bool) {
 	if !ok {
 		return units.Value{}, false
 	}
+	if l.pct != 0 && l.px != 0 { // as the width of calc(100% - 256px)
+		return customLength("calc", []linear{l}, pct), true
+	}
 	if l.pct != 0 {
 		return units.Value{Value: float32(l.pct), Unit: pct}, true
 	}
 	return units.Dp(float32(l.px)), true
+}
+
+// customLength returns a custom length (see [units.Value.Custom]) of the
+// given CSS math function (calc, min, max, or clamp) of the given linear
+// lengths, with percentages of the given unit, which core computes with the
+// size of the parent in the layout: a percentage and a length cannot be
+// one unit (as the width of calc(100% - 256px) of the grids of github.com,
+// which was taken to be 100%).
+func customLength(fn string, vals []linear, pct units.Units) units.Value {
+	vals = slices.Clone(vals)
+	return units.Custom(func(uc *units.Context) float32 {
+		base := uc.Paw
+		switch pct {
+		case units.UnitPh:
+			base = uc.Pah
+		case units.UnitEw:
+			base = uc.Elw
+		case units.UnitEh:
+			base = uc.Elh
+		}
+		dp := uc.Dots(units.UnitDp)
+		dots := func(l linear) float32 { return float32(l.pct/100)*base + float32(l.px)*dp }
+		v := dots(vals[0])
+		switch fn {
+		case "min":
+			for _, l := range vals[1:] {
+				v = min(v, dots(l))
+			}
+		case "max":
+			for _, l := range vals[1:] {
+				v = max(v, dots(l))
+			}
+		case "clamp":
+			if len(vals) == 3 {
+				v = max(dots(vals[0]), min(dots(vals[1]), dots(vals[2])))
+			}
+		}
+		return v
+	})
 }
 
 // lengthPx returns the given CSS length in px, for lengths that are

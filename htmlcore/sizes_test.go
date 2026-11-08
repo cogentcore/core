@@ -463,3 +463,16 @@ func TestPseudoElementMarked(t *testing.T) {
 			assert.Equal(t, "", PseudoElement(NodeOf(ws["s"].This.(core.Widget))))
 		})
 }
+
+// TestCalcPercentLength tests a width of a calc() with a percentage and a
+// length (as calc(100% - 256px) of the grids of github.com, which was taken
+// to be 100%), and a max-width of a min() of them, which are computed with
+// the width of the parent in the layout.
+func TestCalcPercentLength(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div id="calc" style="width: calc(100% - 200px); height: 10px"></div></div>`+
+		`<div style="width: 400px"><div id="min" style="max-width: min(100%, 600px)">`+strings.Repeat("text that is long ", 20)+`</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 600*dp, ws["calc"].Geom.Size.Actual.Total.X, 2)
+			assert.LessOrEqual(t, ws["min"].Geom.Size.Actual.Total.X, 400*dp+1)
+		})
+}
