@@ -75,7 +75,11 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 			pc.Stroke.Color = nil
 			// note: applying 0.5 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			pc.Fill.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
+			if st.BoxShadowOutside { // CSS shadows have their color
+				pc.Fill.Color = shadow.Color
+			} else {
+				pc.Fill.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
+			}
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msize)
 

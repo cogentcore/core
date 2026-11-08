@@ -326,6 +326,7 @@ func handleInputButton(ctx *Context, typ string) {
 	})
 	tx := core.NewText(w).SetText(html.EscapeString(label))
 	ctx.handleWidget(nil, tx)
+	buttonText(tx) // the button gets the clicks on its label
 }
 
 // handleInput handles an input element.

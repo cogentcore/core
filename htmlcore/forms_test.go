@@ -311,3 +311,31 @@ func TestInputIcon(t *testing.T) {
 		assert.False(t, tf.Styles.Text.WhiteSpace.HasWordWrap(), "an input is one line")
 	})
 }
+
+// TestInputButtonLabelClick tests that a mouse click on the label of an
+// input submit button (as the Compare selected revisions button of the
+// history of Wikipedia) submits its form: the label is not selectable
+// text, which would get the press.
+func TestInputButtonLabelClick(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	ctx.PageURL = "https://www.example.com/page"
+	var opened []string
+	ctx.OpenURL = func(url string, e events.Event) { opened = append(opened, url) }
+	require.NoError(t, ReadHTMLString(ctx, b, `<form action="/compare"><input type="hidden" name="diff" value="2"><input type="submit" value="Compare selected revisions"></form>`))
+	var label *core.Text
+	b.WalkDown(func(n tree.Node) bool {
+		if tx, ok := n.(*core.Text); ok && tx.Text == "Compare selected revisions" {
+			label = tx
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, label)
+	b.RenderImage(func() {
+		pos := label.Geom.TotalBBox.Min.Add(label.Geom.TotalBBox.Size().Div(2))
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.Equal(t, []string{"https://www.example.com/compare?diff=2"}, opened)
+	})
+}

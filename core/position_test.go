@@ -217,3 +217,65 @@ func TestPositionRaised(t *testing.T) {
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0xffff, 0, 0}, [3]uint32{r, g, bl}, "rendered over the widget after")
 }
+
+// TestPositionHiddenEvents tests that a raised widget that is not rendered
+// (opacity 0, with no abilities, as for visibility: hidden in CSS) does
+// not get the events at its overlap with a widget after it, nor do the
+// clickable widgets in it, as the items of the closed menus of Wikipedia.
+func TestPositionHiddenEvents(t *testing.T) {
+	b := NewBody()
+	header := NewFrame(b)
+	header.Styler(func(s *styles.Style) { s.Padding.Zero(); s.NoClip = true })
+	wrap := fixedFrame(header, 50, 20)
+	wrap.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative; s.NoClip = true })
+	menu := fixedFrame(wrap, 100, 100)
+	menu.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.ZIndex = 5
+		s.Inset.Top, s.Inset.Left = units.Ph(100), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Opacity = 0
+		s.NoClip = true
+	})
+	menu.FinalStyler(func(s *styles.Style) { s.Abilities = 0 })
+	item := fixedFrame(menu, 100, 100)
+	item.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Clickable) })
+	after := fixedFrame(b, 300, 300)
+	after.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Clickable) })
+	var clicked Widget
+	item.OnClick(func(e events.Event) { clicked = item })
+	after.OnClick(func(e events.Event) { clicked = after })
+	b.RenderImage(func() {
+		pos := menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
+		assert.True(t, pos.In(after.Geom.TotalBBox))
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
+		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.Equal(t, Widget(after), clicked)
+	})
+}
+
+// TestPositionTransparentContent tests that the widgets in an absolute
+// widget without a background do not paint the background of their
+// parents over the widgets that they overlap (as the text over the green
+// fill of the percentage bars of Wikipedia).
+func TestPositionTransparentContent(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+	fill := fixedFrame(b, 200, 40)
+	fill.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.Green) })
+	over := NewFrame(b)
+	over.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Min.Set(units.Dp(200), units.Dp(40))
+		s.Padding.Zero()
+	})
+	tx := NewText(over).SetText("  ")
+	tx.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(200), units.Dp(40)) })
+	var pos image.Point
+	img := b.RenderImage(func() { pos = tx.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+	assert.Equal(t, [3]uint32{0, 0x80, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the fill under the text")
+}

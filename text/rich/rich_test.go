@@ -176,3 +176,24 @@ func TestSplitSpaces(t *testing.T) {
 	// fmt.Println(tx)
 	assert.Equal(t, trg, tx.String())
 }
+
+// TestLinkNonASCII tests a link with a URL that is not ASCII (as those of
+// Wikipedia with accents, as Chlöe_Swarbrick), whose length is in runes:
+// it took the first letter of the link text for each extra byte, and a
+// link without colors, whose URL is encoded too.
+func TestLinkNonASCII(t *testing.T) {
+	for _, colored := range []bool{true, false} {
+		sty := NewStyle()
+		if colored {
+			sty.SetFillColor(colors.Blue)
+		}
+		tx := Text{}
+		tx.AddSpanString(NewStyle(), "& ")
+		tx.AddLink(sty, "/wiki/Chlöe_Swarbrick", "Chlöe Swarbrick")
+		assert.Equal(t, "& Chlöe Swarbrick", string(tx.Join()))
+		lks := tx.GetLinks()
+		if assert.Len(t, lks, 1) {
+			assert.Equal(t, "/wiki/Chlöe_Swarbrick", lks[0].URL)
+		}
+	}
+}

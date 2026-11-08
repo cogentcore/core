@@ -2304,6 +2304,18 @@ func (fr *Frame) positionCellsMainX() {
 	spaces := fr.lineSpaces(math32.X, sz.Actual.Content.X)
 	crosses := fr.lineCrosses(math32.X)
 	baselines := fr.lineBaselines()
+	// the cells of a grid are at the positions of their columns, which a
+	// cell narrower than its column (as one with a max width) does not move
+	var colW []float32
+	if fr.Styles.Display == styles.Grid && fr.layout.Shape.X > 0 {
+		colW = make([]float32, fr.layout.Shape.X)
+		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+			if c := cwb.Geom.Cell.X; c < len(colW) && fr.colSpan(cwb) == 1 {
+				colW[c] = max(colW[c], cwb.Geom.Size.Alloc.Total.X)
+			}
+			return tree.Continue
+		})
+	}
 	pos := stPos
 	var lastSz math32.Vector2
 	idx := 0
@@ -2336,7 +2348,11 @@ func (fr *Frame) positionCellsMainX() {
 			}
 		}
 		alloc := cwb.Geom.Size.Alloc.Total
-		pos.X += alloc.X + gap.X
+		if c := cidx.X; colW != nil && c < len(colW) && fr.colSpan(cwb) == 1 {
+			pos.X += max(alloc.X, colW[c]) + gap.X
+		} else {
+			pos.X += alloc.X + gap.X
+		}
 		lastSz = alloc
 		idx++
 		return tree.Continue

@@ -807,6 +807,12 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		if cwb.StateIs(states.Invisible) { // (its ancestors are displayable)
 			return tree.Break
 		}
+		if cwb.Styles.Opacity <= 0 && cwb.Styles.Abilities == 0 {
+			// it is not rendered, and neither is anything in it (as for
+			// visibility: hidden in CSS): only a transparent widget that
+			// is clickable (as a hidden checkbox over a button) gets events
+			return tree.Break
+		}
 		if !cwb.posInScBBox(pos) {
 			if cwb.noClip() {
 				// its children can be outside of it (as positioned ones,

@@ -744,10 +744,12 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	if wb.outOfFlow() && wb.Styles.Background == nil {
+	if wb.Styles.Background == nil && wb.inTransparentOutOfFlow() {
 		// An absolute or fixed widget is painted over the widgets that it overlaps,
 		// so without a background of its own it does not paint that of its
-		// parent over them (its actual background is kept for its content).
+		// parent over them (its actual background is kept for its content),
+		// and neither do the widgets in it without one (as the text over
+		// the percentage bars of Wikipedia).
 		abg, fm := wb.Styles.ActualBackground, wb.Styles.FillMargin
 		clear := colors.Uniform(colors.Transparent)
 		wb.Styles.ActualBackground, wb.Styles.FillMargin = clear, false
@@ -756,6 +758,21 @@ func (wb *WidgetBase) RenderStandardBox() {
 		return
 	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// inTransparentOutOfFlow returns whether the widget is out of flow (see
+// [WidgetBase.outOfFlow]), or in one, with no backgrounds from it to the
+// widget, so that it is painted over the widgets that it overlaps.
+func (wb *WidgetBase) inTransparentOutOfFlow() bool {
+	for w := wb; w != nil; w = w.parentWidget() {
+		if w.outOfFlow() {
+			return true
+		}
+		if w != wb && w.Styles.Background != nil {
+			return false
+		}
+	}
+	return false
 }
 
 // RenderAllocBox renders the standard box model using Alloc size, instead of Actual.

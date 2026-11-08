@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"image"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -74,4 +75,23 @@ func TestVisibilityHidden(t *testing.T) {
 			}
 			assert.Greater(t, ws["after"].Geom.Pos.Total.Y, ws["menu"].Geom.Pos.Total.Y+40*dp, "it keeps its space")
 		})
+}
+
+// TestBoxShadowColor tests that a CSS box shadow has its color (as the
+// line under the toolbar of Wikipedia, a shadow of 1px without blur, which
+// was half as opaque as in core, so very faint).
+func TestBoxShadowColor(t *testing.T) {
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, `<div style="padding: 20px"><div id="bar" style="width: 100px; height: 20px; box-shadow: 0 4px 0 0 rgb(200, 0, 0)"></div></div>`))
+	var bar *core.WidgetBase
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil && wb.Property("id") == "bar" {
+			bar = wb
+		}
+		return tree.Continue
+	})
+	var bb image.Rectangle
+	img := bd.RenderImage(func() {}, func() { bb = bar.Geom.TotalBBox })
+	r, g, b, _ := img.At(bb.Min.X+10, bb.Max.Y+1).RGBA()
+	assert.Equal(t, [3]uint32{200, 0, 0}, [3]uint32{r >> 8, g >> 8, b >> 8}, "below the box, in its color")
 }

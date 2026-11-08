@@ -359,10 +359,16 @@ func (c *Context) handleInButton(node *html.Node, w core.Widget) {
 	}
 	for n := node; n != nil; n = n.Parent {
 		if n.Type == html.ElementNode && n.Data == "button" {
-			w.AsWidget().Styler(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable, abilities.Slideable)
-			})
+			buttonText(w)
 			return
 		}
 	}
+}
+
+// buttonText makes the given text of a button not selectable, so that the
+// button gets the presses and clicks on it.
+func buttonText(w core.Widget) {
+	w.AsWidget().Styler(func(s *styles.Style) {
+		s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable, abilities.Slideable)
+	})
 }

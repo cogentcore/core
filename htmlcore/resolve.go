@@ -425,6 +425,15 @@ func (r *resolver) sizes() {
 				s.Shrink.X = 1
 			}
 		}
+		if st.display == "table-cell" && st.width.Unit != units.UnitPw {
+			// the width of a cell is the least width of its column, which
+			// it fills (as the cells of the names under the photos of the
+			// infoboxes of Wikipedia, narrower than the photos), without
+			// taking the extra width of the table, which the columns of
+			// automatic width get (as for the logo of Hacker News)
+			s.Max.X = units.Value{}
+			s.Grow.X = 0.001
+		}
 		nowrap := s.Text.WhiteSpace == text.WrapNever || s.Text.WhiteSpace == text.WhiteSpacePre
 		if st.display == "table-cell" && st.width.Unit == units.UnitPw && nowrap {
 			// The column of a table cell is at least as wide as its content,
