@@ -591,7 +591,8 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 			if len(repeats) > 0 {
 				m.repeatValue(strings.Join(repeats, " "))
 			}
-			*layer(st) = m
+			l := layer(st) // (not *layer(st) = m, which goscript cannot compile)
+			*l = m
 		}
 	}
 	return nil
