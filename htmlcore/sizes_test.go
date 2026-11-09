@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
@@ -737,5 +738,39 @@ func TestImageSrcsetDensity(t *testing.T) {
 	bd.RenderImage(func() {}, func() {
 		dp := img.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 50*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels of 2x in dp")
+	})
+}
+
+func TestZeroAreaClip(t *testing.T) {
+	for _, tt := range []struct {
+		prop, val string
+		zero      bool
+	}{
+		{"clip", "rect(0 0 0 0)", true},
+		{"clip", "rect(1px, 1px, 1px, 1px)", true},
+		{"clip", "rect(0px 10px 10px 0px)", false},
+		{"clip", "rect(0 auto auto 0)", false},
+		{"clip", "auto", false},
+		{"clip-path", "inset(50%)", true},
+		{"clip-path", "inset(100% 0 0 0)", true},
+		{"clip-path", "inset(10%)", false},
+		{"clip-path", "circle(40%)", false},
+	} {
+		assert.Equal(t, tt.zero, zeroAreaClip(tt.prop, tt.val), tt.prop+": "+tt.val)
+	}
+}
+
+// TestClippedOutHidden tests that an element clipped to nothing (as the
+// visually hidden skip links of go.dev) is not rendered and gets no
+// events, and is shown again when the clip is unset (as on its focus).
+func TestClippedOutHidden(t *testing.T) {
+	src := `<style>.skip { position: absolute; clip: rect(0 0 0 0) } .shown { clip: unset }</style>
+<div><div id="hidden" class="skip">Skip</div></div><div><div id="shown" class="skip shown">Shown</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		require.NotNil(t, ws["hidden"])
+		require.NotNil(t, ws["shown"])
+		assert.Equal(t, float32(0), ws["hidden"].Styles.Opacity, "clipped to nothing")
+		assert.Equal(t, abilities.Abilities(0), ws["hidden"].Styles.Abilities, "no events")
+		assert.Equal(t, float32(1), ws["shown"].Styles.Opacity, "the clip unset")
 	})
 }

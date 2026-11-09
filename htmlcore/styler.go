@@ -80,9 +80,10 @@ type cssState struct {
 	// env is the length environment of the style pass.
 	env *lengthEnv
 
-	display   string
-	hideText  bool // a large negative text-indent, which moves the text out of view
-	zeroScale bool // a transform scales the box to nothing (as scaleX(0)), so it is not shown
+	display    string
+	hideText   bool // a large negative text-indent, which moves the text out of view
+	zeroScale  bool // a transform scales the box to nothing (as scaleX(0)), so it is not shown
+	clippedOut bool // a clip (or clip-path) to nothing hides it (see zeroAreaClip)
 
 	// bgCurrentColor is whether the background color is currentcolor,
 	// the color of the element as it is styled (as the masked chevrons of

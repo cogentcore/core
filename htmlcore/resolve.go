@@ -69,6 +69,10 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 		s.Opacity = 0
 		s.Abilities = 0
 	}
+	if st.clippedOut { // nothing of it is shown, nor gets events
+		s.Opacity = 0
+		s.Abilities = 0
+	}
 	if st.zeroScale { // a transform scales it to nothing, so it is not shown
 		s.Opacity = 0
 	}

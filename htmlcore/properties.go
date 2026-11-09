@@ -71,6 +71,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			lval = "inherit"
 		}
 	}
+	if prop == "clip" || prop == "clip-path" {
+		// a clip to nothing hides the element (as the visually hidden
+		// skip links of go.dev, of clip: rect(0 0 0 0), unset on focus);
+		// other clips are not applied
+		zero := zeroAreaClip(prop, lval)
+		return op(func(st *cssState, s, ps *styles.Style) { st.clippedOut = zero })
+	}
 	if prop == "visibility" && (lval == "inherit" || lval == "initial") {
 		// that of the parent, or visible (as the repository panels of
 		// github.com, which a script shows with visibility: inherit over
@@ -648,6 +655,65 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = lval })
 	}
 	return nil
+}
+
+// zeroAreaClip returns whether the given value of clip (a rect) or of
+// clip-path (an inset) clips the element to nothing, as in the visually
+// hidden elements of pages (rect(0 0 0 0), rect(1px, 1px, 1px, 1px),
+// inset(50%)).
+func zeroAreaClip(prop, v string) bool {
+	fn := "rect("
+	if prop == "clip-path" {
+		fn = "inset("
+	}
+	args, ok := strings.CutPrefix(v, fn)
+	if !ok || !strings.HasSuffix(args, ")") {
+		return false
+	}
+	f := strings.Fields(strings.ReplaceAll(strings.TrimSuffix(args, ")"), ",", " "))
+	if prop == "clip-path" { // insets of 50% or more from opposite sides
+		if len(f) == 0 || len(f) > 4 || strings.Contains(args, "round") {
+			return false
+		}
+		pct := func(x string) float64 {
+			if x == "0" || x == "0px" {
+				return 0
+			}
+			n, ok := strings.CutSuffix(x, "%")
+			if !ok {
+				return -1
+			}
+			p, err := strconv.ParseFloat(n, 64)
+			if err != nil {
+				return -1
+			}
+			return p
+		}
+		// the sides of the shorthand: top, right, bottom, left
+		var sides [4]float64
+		for i := range sides {
+			j := [4][4]int{{0, 0, 0, 0}, {0, 1, 0, 1}, {0, 1, 2, 1}, {0, 1, 2, 3}}[len(f)-1][i]
+			sides[i] = pct(f[j])
+		}
+		top, right, bottom, left := sides[0], sides[1], sides[2], sides[3]
+		return top >= 0 && bottom >= 0 && top+bottom >= 100 || right >= 0 && left >= 0 && right+left >= 100
+	}
+	if len(f) != 4 { // top, right, bottom, left, of the top left corner
+		return false
+	}
+	env := defaultLengthEnv()
+	var px [4]float32
+	for i, x := range f {
+		if x == "auto" {
+			return false
+		}
+		l, ok := env.lengthPx(x)
+		if !ok {
+			return false
+		}
+		px[i] = l
+	}
+	return px[2] <= px[0] || px[1] <= px[3]
 }
 
 // colorFunc returns a function that returns the given CSS color (or nil if
