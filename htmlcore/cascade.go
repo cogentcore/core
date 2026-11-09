@@ -56,6 +56,11 @@ type cssDecl struct {
 	// container is the condition of the @container rule that the
 	// declaration is in, if any (see [Context.containerMatches]).
 	container *containerCond
+
+	// rule is the index of the style rule of the declaration in the
+	// rules of the context plus one, or 0 if it is not of a rule (see
+	// [Context.Restyle]).
+	rule int
 }
 
 // rank returns the rank of the declaration in the cascade,
@@ -136,12 +141,15 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				continue
 			}
 			spec := specificity(sel)
-			if cs := compileSelector(sel); cs != nil {
+			cs := compileSelector(sel)
+			if cs != nil {
 				spec = cs.specificity
+				c.recordRule(root, sel, cs, rule.Declarations, origin, spec)
 			}
 			for _, n := range c.selectNodes(root, sel) {
 				c.addDecls(n, rule.Declarations, origin, spec)
 			}
+			c.curRule = 0
 		}
 	}
 }
@@ -156,7 +164,7 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 		c.cssOrder++
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
 			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
-			container: c.curContainer})
+			container: c.curContainer, rule: c.curRule})
 	}
 	if c.curContainer != nil {
 		if c.containerQueried == nil {

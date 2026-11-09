@@ -27,6 +27,11 @@ var browserStyles string
 // blockState is the state of a widget for laying out blocks,
 // mainly for collapsing margins.
 type blockState struct {
+	// ops are the style operations of the declarations of the element,
+	// and inherit those of the inherited properties of the inline
+	// elements that it is in (see [Context.inlineInheritedOps]).
+	ops, inherit []styleOp
+
 	// display is the CSS display of the element.
 	display string
 
@@ -148,8 +153,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			trBg = parseColor(bg)
 		}
 	}
-	ops := c.compileDecls(decls)
-	inherit := c.inlineInheritedOps(node, wb)
+	// (in the state of the block, as they are compiled again when the
+	// declarations of the element change; see Context.Restyle)
+	bs.ops = c.compileDecls(decls)
+	bs.inherit = c.inlineInheritedOps(node, wb)
 	wb.FinalStyler(func(s *styles.Style) {
 		if bs.hidden { // after the abilities of the widget (as scrolling)
 			s.Abilities = 0
@@ -259,10 +266,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if ps != nil { // pointer-events is inherited
 			s.SetAbilities(ps.Abilities.HasFlag(abilities.NoPointerEvents), abilities.NoPointerEvents)
 		}
-		for _, op := range inherit {
+		for _, op := range bs.inherit {
 			op(st, s, ps)
 		}
-		for _, op := range ops {
+		for _, op := range bs.ops {
 			op(st, s, ps)
 		}
 		if node != nil {

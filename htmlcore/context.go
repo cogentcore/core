@@ -270,6 +270,22 @@ type pageState struct {
 	containerQueried map[*html.Node]bool
 	containers       map[*html.Node]*containerFrame
 
+	// rules are the style rules that have been added, in order, by which
+	// the declarations of elements are found again when they change (see
+	// [Context.Restyle]), with ruleIndex, and pseudoRules those of the
+	// pseudo-elements; curRule is the index of the rule being added plus
+	// one. relational is whether a rule has a :has() selector, which
+	// selects elements by those after and in them.
+	rules       []*styleRule
+	ruleIndex   *ruleIndex
+	pseudoRules []*pseudoRule
+	curRule     int
+	relational  bool
+
+	// elementWidgets has the widgets that are styled by the declarations
+	// of each element (see [Context.Restyle]).
+	elementWidgets map[*html.Node][]core.Widget
+
 	// nodeWidgets has the widgets of the controls of forms.
 	nodeWidgets map[*html.Node]core.Widget
 
@@ -496,6 +512,12 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 		node = nil // text nodes only inherit
 	}
 	wb := w.AsWidget()
+	if node != nil {
+		if c.elementWidgets == nil {
+			c.elementWidgets = map[*html.Node][]core.Widget{}
+		}
+		c.elementWidgets[node] = append(c.elementWidgets[node], w)
+	}
 	decls := c.declarations(node)
 	for _, d := range decls {
 		if strings.HasPrefix(d.Property, "paginate-") {
