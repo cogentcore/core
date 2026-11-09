@@ -923,3 +923,32 @@ func TestLayoutFloatOfFloats(t *testing.T) {
 		}
 	})
 }
+
+// TestLayoutFloatsBesideInline tests right floats after inline content that
+// is on one line (as the theme and search box of the header of the Python
+// docs, after its links), which are on that line, beside it, when they fit,
+// as in CSS; after a block (which takes its line in CSS), a float is below.
+func TestLayoutFloatsBesideInline(t *testing.T) {
+	b := NewBody()
+	page := columnFrame(b, 0)
+	page.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(600)
+		s.Padding.Zero()
+	})
+	tx := NewText(page).SetText("Python » Tutorial")
+	var floats []*Frame
+	for range 2 {
+		f := fixedFrame(page, 80, 20)
+		f.Styler(func(s *styles.Style) { s.Float = styles.FloatRight })
+		floats = append(floats, f)
+	}
+	block := fixedFrame(page, 100, 20)
+	after := fixedFrame(page, 80, 20)
+	after.Styler(func(s *styles.Style) { s.Float = styles.FloatRight })
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		for _, f := range floats {
+			assert.Equal(t, tx.Geom.TotalBBox.Min.Y, f.Geom.TotalBBox.Min.Y, "the float is on the line of the text")
+		}
+		assert.GreaterOrEqual(t, after.Geom.TotalBBox.Min.Y, block.Geom.TotalBBox.Max.Y-1, "a float after a block is below it")
+	})
+}

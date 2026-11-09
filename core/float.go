@@ -124,6 +124,9 @@ func (fr *Frame) layoutFloats() bool {
 	var maxLeft, maxRight float32
 	y := float32(0)
 	floatTop := float32(0) // the top of the last float
+	// the last child in the flow, if it is inline content: its top, and its
+	// preferred width (on one line)
+	lastFlow, lastFlowY, lastFlowPref := false, float32(0), float32(0)
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if cwb.outOfFlow() {
 			return tree.Continue
@@ -162,6 +165,15 @@ func (fr *Frame) layoutFloats() bool {
 			left := cwb.Styles.Float == styles.FloatLeft
 			// a float is not higher than the floats before it, as in CSS
 			fy := max(cy, floatTop)
+			if !left && lastFlow && cwb.Styles.Clear == styles.ClearNone && lastFlowY >= floatTop {
+				// a right float after content that is on one line is on that
+				// line, beside it, if it fits there (as the theme and search
+				// box of the header of the Python docs, after its links), as
+				// in CSS, where it is on the line of the content before it
+				if l, r := edges(lastFlowY); r-w >= l+lastFlowPref {
+					fy = lastFlowY
+				}
+			}
 			for range len(floats) + 1 { // down below floats until it fits
 				l, r := edges(fy)
 				if r-l >= w || l == 0 && r == width {
@@ -211,6 +223,11 @@ func (fr *Frame) layoutFloats() bool {
 			ksz.SetContentFromTotal(&ksz.Alloc)
 		}
 		fl.places[i] = floatPlace{pos: math32.Vec2(l, y), width: w}
+		// only inline content (a text, or a row of inline content that
+		// wraps), not a block, which a float after it is below in CSS
+		_, isText := cw.(*Text)
+		inline := isText || cwb.Styles.Direction == styles.Row && cwb.Styles.Wrap
+		lastFlow, lastFlowY, lastFlowPref = inline, y, ksz.prefWidth
 		y += ksz.Actual.Total.Y + gap
 		return tree.Continue
 	})
