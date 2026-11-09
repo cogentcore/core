@@ -406,3 +406,37 @@ func TestPositionStatic(t *testing.T) {
 		assert.InDelta(t, col.Geom.Pos.Content.X, pb.X, 1, "at the left of its containing block")
 	})
 }
+
+// TestPositionEmptyParentRendered tests that the positioned children of a
+// widget that has no size and does not clip them are rendered, as in CSS
+// (as the consent banner of nytimes.com, in a fixed div of no size, which
+// was not shown, though it got the clicks).
+func TestPositionEmptyParentRendered(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+	fill := fixedFrame(b, 200, 100)
+	fill.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.Green) })
+	holder := NewFrame(b)
+	holder.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Padding.Zero()
+		s.ZIndex = 10
+		s.NoClip = true
+	})
+	banner := fixedFrame(holder, 50, 50)
+	banner.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Background = colors.Uniform(colors.Red)
+	})
+	var pos image.Point
+	img := b.RenderImage(func() {
+		assert.True(t, holder.Geom.TotalBBox.Empty(), "the holder has no size")
+		pos = banner.Geom.TotalBBox.Min.Add(image.Pt(5, 5))
+	})
+	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+	assert.Equal(t, [3]uint32{0xff, 0, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the banner over the fill")
+}

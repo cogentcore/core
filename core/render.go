@@ -496,7 +496,7 @@ func (wb *WidgetBase) StartRender() bool {
 		return false
 	}
 	wb.setFlag(false, widgetNeedsRender) // done!
-	if !wb.IsVisible() {
+	if !wb.IsVisible() && !wb.rendersOverflow() {
 		return false
 	}
 	if wb.Styles.Opacity <= 0 { // fully transparent (as for visibility: hidden in CSS): nothing to render
@@ -600,6 +600,17 @@ func (wb *WidgetBase) RenderWidget() {
 		wb.EndRender()
 		wb.renderOutOfFlowChildren()
 	}
+}
+
+// rendersOverflow returns whether the widget is rendered although it has no
+// size, for its children: if it does not clip them (see
+// [styles.Style.NoClip]), they can be outside of it, as in CSS, where a
+// box with overflow visible shows its overflowing content (as the fixed
+// consent banner of nytimes.com, in a fixed div that has no size, which
+// was not shown and took the clicks of the page).
+func (wb *WidgetBase) rendersOverflow() bool {
+	sz := wb.Geom.Size.Actual.Total
+	return (sz.X <= 0 || sz.Y <= 0) && wb.noClip() && wb.HasChildren() && wb.IsDisplayable()
 }
 
 // renderOutOfFlowChildren renders the children of the widget that are out
