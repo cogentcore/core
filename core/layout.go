@@ -1717,6 +1717,27 @@ func (fr *Frame) sizeDownGrow(iter int, extra math32.Vector2) bool {
 	return redo
 }
 
+// wrapLines returns, for a row that wraps (of [Frame.layout] Wraps, with
+// X as its main axis), the width that the widgets of each of its lines
+// use (without the gaps between them) and the sum of their grow in X, by
+// line, or nils if it does not wrap.
+func (fr *Frame) wrapLines() (used, grow []float32) {
+	li := &fr.layout
+	if li.Wraps == nil || li.MainAxis != math32.X {
+		return nil, nil
+	}
+	n := len(li.Wraps)
+	used, grow = make([]float32, n), make([]float32, n)
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if r := cwb.Geom.Cell.Y; r >= 0 && r < n {
+			used[r] += cwb.Geom.Size.Actual.Total.X
+			grow[r] += cwb.Styles.Grow.X
+		}
+		return tree.Continue
+	})
+	return used, grow
+}
+
 func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	redo := false
 	sz := &fr.Geom.Size
@@ -1743,6 +1764,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	if widths != nil && !shrunk {
 		widths = fr.growWidths(widths, alloc.X)
 	}
+	lineUsed, lineGrow := fr.wrapLines()
 	for exitr := range 2 {
 		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
@@ -1774,6 +1796,16 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				mx := md.Size.Dim(ma)
 				asz := mx
 				gsum := cd.Grow.Dim(ma)
+				if lineUsed != nil && ma == math32.X && ci < len(lineUsed) {
+					// a line of a wrapped row grows into the width that is
+					// left in it (not by the widest widgets in its column
+					// across the lines, as the first of two items of width
+					// 100% on lines of their own, which did not grow)
+					mx = ksz.Actual.Total.X
+					asz = mx
+					exd = max(alloc.X-lineUsed[ci], 0)
+					gsum = lineGrow[ci]
+				}
 				if (li.spans || fr.Styles.Display == styles.Grid) && ma == math32.X {
 					// the columns of a grid grow consistently in every row,
 					// by the grow of the column, also with spanning cells
@@ -2168,6 +2200,17 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			// hypothetical main size of a flex item in CSS.
 			ksz.X = max(ksz.X, min(cwb.Geom.Size.preferred.X, fit))
 		}
+		if d == math32.X && cwb.Styles.Grow.X > 0 && cwb.Styles.Max.X.Unit == units.UnitPw && cwb.Styles.Min.X.Unit == units.UnitPw {
+			// A widget whose width is a percentage of the row (its Max,
+			// with a Min of 0 in percent: as for a percentage width in
+			// CSS, not a max-width) needs that much room in its line, as
+			// for the hypothetical main size of a flex item in CSS (as the
+			// containers of width: 100% of edition.cnn.com, each on a line
+			// of its own, which were all on one line).
+			if mw := fr.growMaxWidth(cwb); mw > 0 {
+				ksz.X = max(ksz.X, min(mw, fit))
+			}
+		}
 		if first {
 			n = 1
 			sum = ksz.Dim(d) + gap
@@ -2460,6 +2503,13 @@ func (wb *WidgetBase) styleSizeUpdate() bool {
 	chg := wb.Styles.UnitContext.SetSizes(float32(scsz.X), float32(scsz.Y), sz.X, sz.Y, psz.X, psz.Y)
 	if chg {
 		wb.Styles.ToDots()
+		// padding and margins of percentages that changed were not those
+		// of the layout (as the padding-bottom: 56.25% of the boxes of
+		// the images of edition.cnn.com that its scripts make, which were
+		// of the width of the page before it was laid out)
+		if space := wb.Styles.BoxSpace().Size().Ceil(); math32.Abs(space.X-wb.Geom.Size.Space.X) > 0.5 || math32.Abs(space.Y-wb.Geom.Size.Space.Y) > 0.5 {
+			wb.Scene.spaceChanged = true
+		}
 	}
 	return chg
 }

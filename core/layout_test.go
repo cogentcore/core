@@ -1046,3 +1046,30 @@ func TestLayoutGridSpanPercentMax(t *testing.T) {
 		assert.InDelta(t, g.Geom.Size.Actual.Content.X, wide.Geom.Size.Actual.Total.X, 1, "as wide as the grid")
 	})
 }
+
+// TestLayoutPercentPaddingFirst tests that a percentage padding is of the
+// width of the parent in the first layout of a widget, not of the width
+// that its unit context had when it was styled (as the boxes of the
+// aspect ratios of the images of edition.cnn.com, of padding-bottom:
+// 56.25%, which its scripts make).
+func TestLayoutPercentPaddingFirst(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) { s.Direction = styles.Column; s.Min.X.Dp(200); s.Max.X.Dp(200) })
+	NewText(fr).SetText("before")
+	b.RenderImage(func() {
+		// a box added after the page is laid out (as by a script), in
+		// one layout
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		// (in a new parent, which has no size yet when it is styled)
+		wrap := NewFrame(fr)
+		wrap.Styler(func(s *styles.Style) { s.Grow.X = 1 })
+		box := NewFrame(wrap)
+		box.Styler(func(s *styles.Style) { s.Grow.X = 1; s.Padding.Bottom = units.Pw(50) })
+		wrap.Update()
+		b.Scene.LayoutScene()
+		dp := b.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 100*dp, box.Geom.Size.Actual.Total.Y, 3)
+	})
+}

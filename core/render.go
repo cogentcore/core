@@ -247,7 +247,15 @@ func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
+	sc.spaceChanged = false
 	sc.layoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+	for range 3 { // with the padding and margins of the final sizes
+		if !sc.spaceChanged || sc.hasFlag(sceneContentSizing) {
+			break
+		}
+		sc.spaceChanged = false
+		sc.layoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+	}
 	sc.ApplyScenePos()
 }
 
