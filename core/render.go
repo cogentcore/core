@@ -629,14 +629,20 @@ func (wb *WidgetBase) renderOutOfFlowChildren() {
 	wb.renderRaised()
 }
 
-// raisedTo returns the stacking context that the widget is rendered in
-// (see [WidgetBase.raised]) if it has a positive z-index (see
+// raisedTo returns the widget that the widget is rendered after the
+// content of (see [WidgetBase.raised]): its positioned ancestor for an
+// absolute or fixed widget of no z-index (see
+// [WidgetBase.positionedAncestor]), or the stacking context that the
+// widget is rendered in if it has a positive z-index (see
 // [styles.Style.ZIndex]) and that is not its parent, or nil: the nearest
 // widget that it is in that has a z-index (as in CSS, where a z-index of auto,
 // the default, makes no stacking context), or the top widget. As in CSS,
 // it is then rendered over the widgets after the ones that it is in (as
 // the dropdown menus in the header of Wikipedia, over the page).
 func (wb *WidgetBase) raisedTo() *WidgetBase {
+	if wb.Styles.ZIndex == 0 && wb.outOfFlow() {
+		return wb.positionedAncestor()
+	}
 	if wb.Styles.ZIndex <= 0 {
 		return nil
 	}
@@ -655,6 +661,25 @@ func (wb *WidgetBase) raisedTo() *WidgetBase {
 		return nil
 	}
 	return root
+}
+
+// positionedAncestor returns the nearest widget that the widget is in that
+// is positioned (not [styles.PositionStatic]), if that is not its parent,
+// or nil. An absolute or fixed widget of no z-index is rendered after the
+// content of that one, as in CSS, where it is painted after the widgets in
+// the flow (as the absolute images of edition.cnn.com, in a picture before
+// the ::after of their box, which painted over them).
+func (wb *WidgetBase) positionedAncestor() *WidgetBase {
+	parent := wb.parentWidget()
+	if parent == nil || parent.Styles.Position != styles.PositionStatic {
+		return nil
+	}
+	for p := parent.parentWidget(); p != nil; p = p.parentWidget() {
+		if p.Styles.Position != styles.PositionStatic || p.Styles.ZIndex != 0 {
+			return p
+		}
+	}
+	return nil
 }
 
 // renderRaised renders the widgets that are raised to this one as their

@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"image"
 	"image/color"
+	"image/draw"
 	"image/png"
 	"io"
 	"net/http"
@@ -910,4 +911,49 @@ func TestFlexBasisZero(t *testing.T) {
 		assert.InEpsilon(t, 3*w, c.Geom.Size.Actual.Total.X, 0.04)
 		assert.Equal(t, a.Geom.TotalBBox.Min.Y, c.Geom.TotalBBox.Min.Y, "in one row")
 	})
+}
+
+// TestPictureSourcesHidden tests that the source elements of a picture
+// have no box, as in browsers: they were a line of text, as high as the
+// pictures of edition.cnn.com (of absolute images), which clipped them.
+func TestPictureSourcesHidden(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, image.NewRGBA(image.Rect(0, 0, 160, 90))))
+	u := "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
+	src := `<div style="width: 320px"><picture id="pic" style="display: block"><source media="(min-width: 1280px)" srcset="` + u + ` 1x" type="image/png"><source media="(max-width: 479px)" srcset="` + u + ` 1x"><img id="im" src="` + u + `" style="display: block"></picture></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		pic, im := ws["pic"], ws["im"]
+		require.NotNil(t, im)
+		assert.InDelta(t, im.Geom.Size.Actual.Total.Y, pic.Geom.Size.Actual.Total.Y, 1, "only the image")
+	})
+}
+
+// TestAbsoluteOverInFlow tests that an absolute image (of no z-index) is
+// rendered over the widgets in the flow of its positioned ancestor after
+// the one that it is in, as in CSS: the images of edition.cnn.com, in a
+// picture before the ::after that gives their box its height, were
+// painted over by it.
+func TestAbsoluteOverInFlow(t *testing.T) {
+	var buf bytes.Buffer
+	red := image.NewRGBA(image.Rect(0, 0, 160, 90))
+	draw.Draw(red, red.Bounds(), image.NewUniform(color.RGBA{255, 0, 0, 255}), image.Point{}, draw.Src)
+	require.NoError(t, png.Encode(&buf, red))
+	u := "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
+	src := `<style>.media { display: flex; flex-direction: column; position: relative; width: 320px }
+.media::after { content: ""; padding-bottom: 56.25%; display: block }
+.media img { position: absolute; top: 0; left: 0; width: 100%; height: 100% }</style>
+<div class="media"><picture><img src="` + u + `"></picture></div>`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
+	img := bd.RenderImage()
+	n := 0
+	for y := 0; y < img.Bounds().Dy(); y++ {
+		for x := 0; x < img.Bounds().Dx(); x++ {
+			if r, g, _, _ := img.At(x, y).RGBA(); r > 0xf000 && g < 0x1000 {
+				n++
+			}
+		}
+	}
+	dp := bd.Styles.UnitContext.Dots(units.UnitDp)
+	assert.InEpsilon(t, 320*180*dp*dp, float32(n), 0.05, "the image fills its box")
 }
