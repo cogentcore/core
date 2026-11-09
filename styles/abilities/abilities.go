@@ -85,6 +85,12 @@ const (
 	// sliding, such as [core.Handle] and [core.Slider], unlike other
 	// sliding, such as the selection of text, which gives way to dragging.
 	SlidePriority
+
+	// NoPointerEvents means that it does not get the events of the mouse,
+	// which go to the widgets under it, as for pointer-events: none in CSS
+	// (as the transparent overlays of the search box of Google, over its
+	// buttons). The widgets in it still get them, unless they have it too.
+	NoPointerEvents
 )
 
 var (

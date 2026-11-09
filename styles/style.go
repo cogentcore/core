@@ -318,12 +318,6 @@ type Style struct { //types:add
 	// ZIndex are rendered first.
 	ZIndex int
 
-	// PointerEventsNone is whether the widget does not get the events of
-	// the mouse, which go to the widgets under it, as for pointer-events:
-	// none in CSS (as the transparent overlays of the search box of
-	// Google, over its buttons). The widgets in it still get them.
-	PointerEventsNone bool
-
 	// specifies the number of sequential columns that this element should occupy
 	// within a grid layout
 	ColSpan int

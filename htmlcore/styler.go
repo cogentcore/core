@@ -13,6 +13,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
 	"golang.org/x/net/html"
@@ -252,7 +253,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			}
 		}
 		if ps != nil { // pointer-events is inherited
-			s.PointerEventsNone = ps.PointerEventsNone
+			s.SetAbilities(ps.Abilities.HasFlag(abilities.NoPointerEvents), abilities.NoPointerEvents)
 		}
 		for _, op := range inherit {
 			op(st, s, ps)

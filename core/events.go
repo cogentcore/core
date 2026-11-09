@@ -821,7 +821,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 			}
 			return tree.Break
 		}
-		if !cwb.Styles.PointerEventsNone {
+		if !cwb.Styles.Abilities.HasFlag(abilities.NoPointerEvents) {
 			em.mouseInBBox = append(em.mouseInBBox, cw)
 		}
 		if cwb.Parts != nil {

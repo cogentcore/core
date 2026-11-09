@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
@@ -630,7 +631,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = float32(f) })
 	case "pointer-events":
 		none := lval == "none"
-		return op(func(st *cssState, s, ps *styles.Style) { s.PointerEventsNone = none })
+		return op(func(st *cssState, s, ps *styles.Style) { s.SetAbilities(none, abilities.NoPointerEvents) })
 	case "visibility":
 		// (applied with the inherited visibility; see resolveCSS)
 		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = lval })
