@@ -34,6 +34,13 @@ type Image struct {
 	// Image is the [image.Image].
 	Image image.Image `xml:"-" json:"-"`
 
+	// NaturalDp is whether the natural size of the image (when it has no
+	// Min size) is its size in pixels in dp, as for the CSS px of images
+	// in web pages, rather than in dots: on a screen with two dots per dp,
+	// it is twice as large, as in browsers (as the photos of the postings
+	// of craigslist.org, which were half their size on retina screens).
+	NaturalDp bool `set:"-" display:"-"`
+
 	// prevImage is the cached last [Image.Image].
 	prevImage image.Image
 
@@ -81,6 +88,9 @@ func (im *Image) SizeUp() {
 	if im.Image != nil {
 		sz := &im.Geom.Size
 		obj := math32.FromPoint(im.Image.Bounds().Size())
+		if dp := im.Styles.UnitContext.Dots(units.UnitDp); im.NaturalDp && dp > 0 {
+			obj = obj.MulScalar(dp)
+		}
 		csz := sz.Actual.Content
 		// if only one min size is specified, then allow the other to expand
 		if im.Styles.Min.Y.Value != 0 && im.Styles.Min.X.Value == 0 {

@@ -5,8 +5,11 @@
 package htmlcore
 
 import (
+	"bytes"
+	"encoding/base64"
 	"image"
 	"image/color"
+	"image/png"
 	"io"
 	"net/http"
 	"net/url"
@@ -632,5 +635,33 @@ func TestFloatOfBlockOfFloats(t *testing.T) {
 		assert.Equal(t, c1.Min.Y, c3.Min.Y, "the crumbs are on one line")
 		assert.GreaterOrEqual(t, nav.Max.X, c3.Max.X-1, "the nav is as wide as its crumbs")
 		assert.Less(t, h.Dy(), 45, "the header is one line")
+	})
+}
+
+// TestImageNaturalSizeDp tests that an image with no size is its size in
+// pixels in CSS px (dp), not in dots, so that it is as large as in
+// browsers on a screen with more dots per dp (as the photos of the postings
+// of craigslist.org, which were half their size on retina screens).
+func TestImageNaturalSizeDp(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, image.NewRGBA(image.Rect(0, 0, 100, 50))))
+	src := `<div style="width: 400px"><img id="i" src="data:image/png;base64,` + base64.StdEncoding.EncodeToString(buf.Bytes()) + `"></div>`
+	// at a zoom of 2, as for a screen of two dots per dp
+	ctx := NewContext()
+	ctx.Zoom = 2
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, bd, src))
+	var img *core.Image
+	bd.WalkDown(func(k tree.Node) bool {
+		if im, ok := k.(*core.Image); ok {
+			img = im
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, img)
+	bd.RenderImage(func() {}, func() {
+		dp := img.Styles.UnitContext.Dots(units.UnitDp)
+		assert.Greater(t, dp, float32(1.5))
+		assert.InDelta(t, 100*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels in dp")
 	})
 }

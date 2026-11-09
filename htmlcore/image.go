@@ -241,6 +241,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		newWidget = svg
 	} else {
 		img = New[core.Image](ctx)
+		img.NaturalDp = true // in CSS px (see core.Image.NaturalDp)
 		img.SetTooltip(alt)
 		img.SetProperty("src", src) // for generatehtml
 		img.SetImage(im)
