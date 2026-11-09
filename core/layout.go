@@ -849,6 +849,18 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 	effmin := sz.Min
 	s := &wb.Styles
 	psz := pwb.Geom.Size.Alloc.Content.Sub(pwb.Geom.Size.InnerSpace)
+	// A percentage Max width of a child of a grid that spans columns (and
+	// that is not also its Min, as for the percentage tracks of grids and
+	// the widths of the columns of tables, which are of the grid, as are
+	// those of the cells of one column of tables) is of its grid area, the
+	// columns that it spans with the gaps between them, as in CSS, not of
+	// the grid without all of its gaps (as a max-width of 100% of a child
+	// of 12 columns of nytimes.com/wirecutter, which was narrower than the
+	// grid by its 11 gaps).
+	maxBase := psz.X
+	if pwb.Styles.Display == styles.Grid && sz.Alloc.Total.X > 0 && s.Min.X.Unit != units.UnitPw && s.ColSpan > 1 {
+		maxBase = sz.Alloc.Total.X
+	}
 	if h, ok := pwb.specifiedHeight(); ok {
 		// a percentage of the height of the parent is of its specified
 		// height, as in CSS, not of the height that it is given, which can
@@ -870,7 +882,11 @@ func (wb *WidgetBase) updateParentRelSizes() bool {
 		}
 		if s.Max.Dim(d).Unit == units.UnitPw {
 			got = true
-			sz.Max.SetDim(d, max(psz.X*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
+			base := psz.X
+			if d == math32.X {
+				base = maxBase
+			}
+			sz.Max.SetDim(d, max(base*0.01*s.Max.Dim(d).Value-bs.Dim(d), 1))
 		}
 		if s.Max.Dim(d).Unit == units.UnitPh {
 			got = true

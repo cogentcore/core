@@ -1009,3 +1009,40 @@ func TestBaselineFields(t *testing.T) {
 		assert.InDelta(t, want, base(tf.AsWidget()), 2, "the text field")
 	})
 }
+
+// TestLayoutGridSpanPercentMax tests that a percentage Max width of a
+// child of a grid is of its grid area, the columns that it spans with the
+// gaps between them, as in CSS: a child of 12 columns with a Max of 100%
+// (as the block of the sections of nytimes.com/wirecutter, of max-width:
+// 100%) is as wide as the grid, not narrower by its 11 gaps.
+func TestLayoutGridSpanPercentMax(t *testing.T) {
+	b := NewBody()
+	g := NewFrame(b)
+	g.FrColumns = true
+	g.Styler(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 12
+		s.Gap.Set(units.Dp(20), units.Dp(0))
+		s.Min.X.Dp(1024)
+		s.Max.X.Dp(1024)
+		s.Padding.Zero()
+	})
+	var wide *Frame
+	for i, span := range []int{12, 8} {
+		f := NewFrame(g)
+		NewText(f).SetText("text")
+		f.Styler(func(s *styles.Style) {
+			s.ColSpan = span
+			s.Grow.Set(1, 1)
+			if i == 0 {
+				s.Max.X = units.Pw(100)
+			}
+		})
+		if i == 0 {
+			wide = f
+		}
+	}
+	b.RenderImage(func() {
+		assert.InDelta(t, g.Geom.Size.Actual.Content.X, wide.Geom.Size.Actual.Total.X, 1, "as wide as the grid")
+	})
+}
