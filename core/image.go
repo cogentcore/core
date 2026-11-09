@@ -127,12 +127,14 @@ func (im *Image) SizeUp() {
 }
 
 // SizeDown sets the height of an image whose width is relative
-// to its parent (and whose height is not set) from that width,
-// which is only known now, keeping the aspect ratio of the image.
+// to its parent, or is limited by a Max relative to it (as an image of
+// max-width: 100% in web pages), and whose height is not set, from that
+// width, which is only known now, keeping the aspect ratio of the image.
 func (im *Image) SizeDown(iter int) bool {
 	redo := im.WidgetBase.SizeDown(iter)
-	minX, minY := im.Styles.Min.X, im.Styles.Min.Y
-	if im.Image == nil || minY.Value != 0 || (minX.Unit != units.UnitPw && minX.Unit != units.UnitPh) {
+	minX, minY, maxX := im.Styles.Min.X, im.Styles.Min.Y, im.Styles.Max.X
+	relative := func(u units.Units) bool { return u == units.UnitPw || u == units.UnitPh }
+	if im.Image == nil || minY.Value != 0 || (!relative(minX.Unit) && !relative(maxX.Unit)) {
 		return redo
 	}
 	sz := &im.Geom.Size

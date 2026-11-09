@@ -821,3 +821,23 @@ func TestGridLonghandsAndColumnStart(t *testing.T) {
 		assert.Greater(t, box("wide").Min.Y, box("intro").Min.Y, "below them")
 	})
 }
+
+// TestImageMaxWidthPercentCaps tests that an image with a width attribute
+// and a max-width of 100% (the common responsive images) is no wider than
+// its container, with the height of its aspect at that width, as the
+// photos of the picks of nytimes.com/wirecutter (width="399" in boxes of
+// 200px of aspect-ratio 1/1), which overflowed onto their titles.
+func TestImageMaxWidthPercentCaps(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, image.NewRGBA(image.Rect(0, 0, 399, 266))))
+	src := `<style>img { display: block; height: auto; max-width: 100% } .box { aspect-ratio: 1/1; width: 200px }</style>
+<div style="display: flex; gap: 20px; align-items: center; width: 800px"><div class="box" id="box"><a href="#x"><img id="im" src="data:image/png;base64,` + base64.StdEncoding.EncodeToString(buf.Bytes()) + `" width="399" height="266"></a></div><div id="txt">Our pick for most commuters</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		box, im, txt := ws["box"], ws["im"], ws["txt"]
+		require.NotNil(t, im)
+		assert.InDelta(t, 200*dp, im.Geom.Size.Actual.Total.X, 2, "as wide as the box")
+		assert.InDelta(t, 200*dp*266/399, im.Geom.Size.Actual.Total.Y, 5, "of its aspect at that width")
+		assert.InDelta(t, 200*dp, box.Geom.Size.Actual.Total.Y, 2, "the box is of its aspect ratio")
+		assert.GreaterOrEqual(t, txt.Geom.TotalBBox.Min.X, box.Geom.TotalBBox.Max.X+int(20*dp)-1, "the text after the box")
+	})
+}

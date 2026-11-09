@@ -576,8 +576,16 @@ func (r *resolver) sizes() {
 			s.Min.Y = *st.minHeight
 		}
 	}
+	_, isImage := wb.This.(*core.Image)
+	_, isSVG := wb.This.(*core.SVG)
 	switch {
 	case st.maxWidth == nil:
+	case (isImage || isSVG) && st.width != nil && st.maxWidth.Unit == units.UnitPw:
+		// an image is the smaller of its width and its percentage
+		// max-width (as the responsive images of max-width: 100%, as the
+		// photos of the picks of nytimes.com/wirecutter, of width="399"
+		// in boxes of 200px, which they overflowed)
+		s.Max.X = *st.maxWidth
 	case st.width != nil && st.width.Unit != units.UnitPw && st.maxWidth.Unit == units.UnitPw:
 		// a fixed width with a percentage max-width (as max-width: 100%) is
 		// the width (the smaller of the two in CSS, as the width is, but
