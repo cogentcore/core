@@ -246,10 +246,12 @@ func (r *resolver) replacedSize() {
 			}
 		}
 		switch {
-		case st.width == nil && st.height != nil && st.height.Unit == units.UnitDp && hasAspect:
-			// as wide as its height makes it (as the logos of github.com,
-			// which were as wide as their container)
-			s.Min.X = units.Dp(st.height.Value / aspect)
+		case st.width == nil && st.height != nil && !percentUnit(st.height.Unit) && hasAspect:
+			// as wide as its height makes it, in the same unit (as the
+			// logos of github.com, which were as wide as their container,
+			// and the quotation marks of height: 0.7em of the opinion
+			// headlines of theguardian.com, which were as wide as theirs)
+			s.Min.X = units.Value{Value: st.height.Value / aspect, Unit: st.height.Unit}
 			s.Max.X = s.Min.X
 		case st.width == nil:
 			s.Min.X, s.Max.X = units.Pw(100), units.Pw(100)
@@ -268,6 +270,12 @@ func (r *resolver) replacedSize() {
 			s.Max.Y = s.Min.Y
 		}
 	}
+}
+
+// percentUnit returns whether the given unit is a percentage of a size of
+// the parent or the element, which is not definite for a replaced element.
+func percentUnit(u units.Units) bool {
+	return u == units.UnitPw || u == units.UnitPh || u == units.UnitEw || u == units.UnitEh
 }
 
 // flow sets whether the widget is block-level, in the flow of blocks,

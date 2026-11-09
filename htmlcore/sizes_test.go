@@ -442,6 +442,19 @@ func TestSVGHeightAspect(t *testing.T) {
 		})
 }
 
+// TestSVGEmHeightAspect tests that an svg in a heading with a height in em
+// and width: auto is as wide as its height and view box make it, before
+// the text (as the quotation marks of the opinion headlines of
+// theguardian.com, which were as wide as the headline, above it).
+func TestSVGEmHeightAspect(t *testing.T) {
+	widgetsByID(t, `<div style="width: 400px"><h4 id="h" style="font-size: 20px; margin: 0"><svg id="q" viewBox="0 0 22 14" style="height: 0.7em; width: auto; margin-right: 4px"><path d="M0 0h22v14H0z"/></svg><span id="t">Trump is angry</span></h4></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			sz := ws["q"].Geom.Size.Actual.Content
+			assert.InDelta(t, 14*dp, sz.Y, 1)
+			assert.InDelta(t, 22*dp, sz.X, 2)
+		})
+}
+
 // TestVisibilityInherit tests that visibility: inherit overrides a
 // visibility of hidden (as the repository panels of github.com, which a
 // script shows with visibility: inherit, over the hidden of their class).
