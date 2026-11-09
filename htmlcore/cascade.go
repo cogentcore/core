@@ -6,6 +6,8 @@ package htmlcore
 
 import (
 	"io"
+	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -50,6 +52,10 @@ type cssDecl struct {
 	origin      cssOrigin
 	specificity int
 	order       int
+
+	// container is the condition of the @container rule that the
+	// declaration is in, if any (see [Context.containerMatches]).
+	container *containerCond
 }
 
 // rank returns the rank of the declaration in the cascade,
@@ -84,8 +90,27 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				if c.mediaMatches(rule.Prelude) {
 					c.addRuleList(root, rule.Rules, origin)
 				}
-			case "@supports", "@layer", "@container", "@scope":
+			case "@container":
+				prev := c.curContainer
+				c.curContainer = parseContainerCond(rule.Prelude, prev)
 				c.addRuleList(root, rule.Rules, origin)
+				c.curContainer = prev
+			case "@supports", "@layer", "@scope":
+				if cond, ok := strings.CutPrefix(strings.TrimSpace(rule.Prelude), containerMark); ok {
+					prev := c.curContainer
+					c.curContainer = parseContainerCond(cond, prev)
+					c.addRuleList(root, rule.Rules, origin)
+					c.curContainer = prev
+					continue
+				}
+				if strings.ToLower(rule.Name) == "@supports" && !supportsMatches(rule.Prelude) {
+					continue
+				}
+				c.addRuleList(root, rule.Rules, origin)
+			case "@font-face":
+				if c.WebFonts {
+					c.addFontFace(rule.Declarations)
+				}
 			case "@import":
 				// url("x") or "x", and a media query list
 				url, media := importURL(rule.Prelude)
@@ -103,11 +128,18 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 		}
 		for _, sel := range selectors {
 			sel = strings.TrimSpace(sel)
+			if strings.Contains(sel, ":hover") {
+				c.addHoverTrigger(sel)
+			}
+			if base, kind, ok := pseudoSelector(sel); ok {
+				c.addPseudoRule(root, base, kind, rule.Declarations, origin)
+				continue
+			}
 			spec := specificity(sel)
 			if cs := compileSelector(sel); cs != nil {
 				spec = cs.specificity
 			}
-			for _, n := range selectNodes(root, sel) {
+			for _, n := range c.selectNodes(root, sel) {
 				c.addDecls(n, rule.Declarations, origin, spec)
 			}
 		}
@@ -119,7 +151,14 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 	for _, d := range decls {
 		c.cssOrder++
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)),
-			Value: strings.TrimSpace(d.Value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder})
+			Value: c.absoluteURLs(strings.TrimSpace(d.Value)), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
+			container: c.curContainer})
+	}
+	if c.curContainer != nil {
+		if c.containerQueried == nil {
+			c.containerQueried = map[*html.Node]bool{}
+		}
+		c.containerQueried[n] = true
 	}
 	delete(c.sorted, n)
 }
@@ -163,6 +202,9 @@ func (c *Context) declarations(n *html.Node) []*cssDecl {
 			return a.order < b.order
 		})
 	}
+	if c.containerQueried[n] {
+		return c.containerDecls(n, c.styles[n])
+	}
 	return c.styles[n]
 }
 
@@ -177,6 +219,63 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 			}
 			return ds[i].Value
 		}
+	}
+	return ""
+}
+
+// lastDeclaration returns the property and value of the declaration of
+// the given element that applies of those of the given properties (as a
+// shorthand and its longhand): the last of them in the cascade, or "" if
+// there is none (or it is invalid).
+func (c *Context) lastDeclaration(n *html.Node, props ...string) (prop, value string) {
+	ds := c.declarations(n)
+	for i := len(ds) - 1; i >= 0; i-- {
+		if slices.Contains(props, ds[i].Property) {
+			if ds[i].invalid {
+				return ds[i].Property, ""
+			}
+			return ds[i].Property, ds[i].Value
+		}
+	}
+	return "", ""
+}
+
+// ComputedValue returns the value of the given CSS property for the given
+// element, as cascaded by the style sheets of the page that it was read
+// with (with var() resolved): that of the declaration of the element that
+// applies, or, for an inherited property (or one that is inherit), that
+// of its nearest ancestor with one, or "" if there is none (as for the
+// initial value). It is for the computed styles of scripts, which can
+// convert its values (as colors and relative lengths) as they need.
+func (c *Context) ComputedValue(n *html.Node, prop string) string {
+	prop = strings.TrimSpace(prop)
+	if strings.HasPrefix(prop, "--") { // custom properties are inherited
+		v, _ := c.customProperty(n, prop)
+		return strings.TrimSpace(v)
+	}
+	prop = strings.ToLower(prop)
+	for ; n != nil; n = n.Parent {
+		if n.Type != html.ElementNode {
+			continue
+		}
+		v := strings.TrimSpace(c.declaration(n, prop))
+		switch strings.ToLower(v) {
+		case "inherit":
+			continue
+		case "initial", "revert", "revert-layer":
+			return ""
+		case "unset":
+			if !inheritedProperties[prop] {
+				return ""
+			}
+			continue
+		case "":
+			if !inheritedProperties[prop] {
+				return ""
+			}
+			continue
+		}
+		return v
 	}
 	return ""
 }
@@ -216,6 +315,12 @@ func (c *Context) SetStyleAttr(node *html.Node, style string) error {
 type compiledSelector struct {
 	sel         cascadia.Sel
 	specificity int
+
+	// keyKind and key are a part of the last compound selector that every
+	// node that it selects has, for finding them in a [selectorIndex]:
+	// an id ('#'), a class ('.'), or an element name ('t'), or none (0).
+	keyKind byte
+	key     string
 }
 
 // selectorCache has the compiled selectors, with nil for ones
@@ -237,6 +342,7 @@ func compileSelector(sel string) *compiledSelector {
 	if s, err := cascadia.Parse(rewriteSelector(sel)); err == nil && s.PseudoElement() == "" {
 		sp := s.Specificity()
 		cs = &compiledSelector{sel: s, specificity: sp[0]*10000 + sp[1]*100 + sp[2]}
+		cs.keyKind, cs.key = selectorKey(sel)
 	}
 	selectorCache[sel] = cs
 	return cs
@@ -247,6 +353,12 @@ func compileSelector(sel string) *compiledSelector {
 // :not(:not(X)), and :focus-within and :focus-visible as :focus (which
 // selects nothing, as for :hover, in a static rendering).
 func rewriteSelector(sel string) string {
+	// :hover selects the elements that are marked hovered (see
+	// [Context.Hovered]), or none
+	sel = strings.ReplaceAll(sel, ":hover", "["+hoverAttr+"]")
+	// :modal selects the dialogs that scripts show as modal (with
+	// showModal), which they mark with ModalAttr
+	sel = strings.ReplaceAll(sel, ":modal", "["+ModalAttr+"]")
 	if !strings.Contains(sel, ":is(") && !strings.Contains(sel, ":where(") && !strings.Contains(sel, ":focus-") {
 		return sel
 	}
@@ -280,6 +392,140 @@ func rewriteSelector(sel string) string {
 		}
 	}
 	return sb.String()
+}
+
+// selectorKey returns a part of the last compound selector of the given
+// selector that every node that it selects has (see compiledSelector.key):
+// its id, else its first class, else its element name, or none if it has
+// none of them outside of functions and attribute selectors (or has
+// escapes, which are not decoded here).
+func selectorKey(sel string) (byte, string) {
+	if strings.ContainsAny(sel, "\\|") { // escapes and namespaces
+		return 0, ""
+	}
+	// the start of the last compound selector, after the last combinator
+	// at the top level
+	start, depth := 0, 0
+	for i := 0; i < len(sel); i++ {
+		switch ch := sel[i]; ch {
+		case '(', '[':
+			depth++
+		case ')', ']':
+			depth--
+		case ' ', '>', '+', '~', '\t', '\n':
+			if depth == 0 {
+				start = i + 1
+			}
+		}
+	}
+	last := sel[start:]
+	isName := func(ch byte) bool {
+		return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '-' || ch == '_' || ch >= 0x80
+	}
+	name := func(i int) string {
+		j := i
+		for j < len(last) && isName(last[j]) {
+			j++
+		}
+		return last[i:j]
+	}
+	var class string
+	depth = 0
+	for i := 0; i < len(last); i++ {
+		switch ch := last[i]; {
+		case ch == '(' || ch == '[':
+			depth++
+		case ch == ')' || ch == ']':
+			depth--
+		case depth == 0 && ch == '#':
+			if id := name(i + 1); id != "" {
+				return '#', id
+			}
+		case depth == 0 && ch == '.' && class == "":
+			class = name(i + 1)
+		}
+	}
+	if class != "" {
+		return '.', class
+	}
+	if tag := name(0); tag != "" {
+		return 't', strings.ToLower(tag)
+	}
+	return 0, ""
+}
+
+// selectorIndex has the element nodes of a document by id, class, and
+// element name, in document order, for selecting the nodes of style rules
+// (see [Context.selectNodes]), so that each selector is only matched
+// against the nodes that have its key, as in browsers.
+type selectorIndex struct {
+	root                 *html.Node
+	byID, byClass, byTag map[string][]*html.Node
+	all                  []*html.Node
+}
+
+// newSelectorIndex returns the index of the element nodes under root.
+func newSelectorIndex(root *html.Node) *selectorIndex {
+	ix := &selectorIndex{root: root, byID: map[string][]*html.Node{}, byClass: map[string][]*html.Node{}, byTag: map[string][]*html.Node{}}
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			if c.Type != html.ElementNode {
+				continue
+			}
+			ix.all = append(ix.all, c)
+			ix.byTag[strings.ToLower(c.Data)] = append(ix.byTag[strings.ToLower(c.Data)], c)
+			for _, a := range c.Attr {
+				if a.Namespace != "" {
+					continue
+				}
+				switch a.Key {
+				case "id":
+					ix.byID[a.Val] = append(ix.byID[a.Val], c)
+				case "class":
+					seen := map[string]bool{}
+					for _, cl := range strings.Fields(a.Val) {
+						if !seen[cl] {
+							seen[cl] = true
+							ix.byClass[cl] = append(ix.byClass[cl], c)
+						}
+					}
+				}
+			}
+			walk(c)
+		}
+	}
+	walk(root)
+	return ix
+}
+
+// selectNodes returns the nodes under root that the given selector selects,
+// using the index of the nodes of root, which it makes for the first root
+// (the nodes of a document do not change while it is read).
+func (c *Context) selectNodes(root *html.Node, sel string) []*html.Node {
+	cs := compileSelector(sel)
+	if cs == nil || cs.keyKind == 0 {
+		return selectNodes(root, sel)
+	}
+	if c.selIndex == nil || c.selIndex.root != root {
+		c.selIndex = newSelectorIndex(root)
+	}
+	var cands []*html.Node
+	switch cs.keyKind {
+	case '#':
+		cands = c.selIndex.byID[cs.key]
+	case '.':
+		cands = c.selIndex.byClass[cs.key]
+	case 't':
+		cands = c.selIndex.byTag[cs.key]
+	}
+	var matches []*html.Node
+	for _, n := range cands {
+		if cs.sel.Match(n) {
+			matches = append(matches, n)
+		}
+	}
+	return matches
 }
 
 // selectNodes returns the nodes under root that the given selector selects.
@@ -464,6 +710,12 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 // flex and grid containers blockified, as in CSS:
 // they are flex or grid items, which are block-level.
 func (c *Context) displayOf(n *html.Node) string {
+	if c.Scripting && n != nil && n.Type == html.ElementNode && n.Data == "noscript" {
+		return "none" // its content is for browsers without scripts
+	}
+	if c.Unrendered != nil && n != nil && n.Type == html.ElementNode && c.Unrendered(n) {
+		return "none" // as a child of a shadow host that is in no slot
+	}
 	d := c.declaration(n, "display")
 	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
 		return d
@@ -494,6 +746,9 @@ func (c *Context) displayOf(n *html.Node) string {
 		case "inline-table":
 			return "table"
 		}
+	}
+	if (d == "" || d == "inline") && richTags[n.Data] && n.Data != "br" && c.isInlineBox(n) {
+		return "inline-block" // a box of its own in its line (see isInlineBox)
 	}
 	return d
 }
@@ -591,6 +846,9 @@ func (c *Context) addStyleSheets(root *html.Node) {
 // Its URL is relative to the URL of the style sheet that it is in,
 // cssBase, if it is imported by one, or else to the page.
 func (c *Context) addLinkedStyle(href string) {
+	if strings.TrimSpace(href) == "" {
+		return // as in browsers (it would be the page itself)
+	}
 	u, err := parseRelativeURL(href, c.cssBaseURL())
 	if errors.Log(err) != nil {
 		return
@@ -603,10 +861,16 @@ func (c *Context) addLinkedStyle(href string) {
 	}
 	c.cssImports[u.String()] = true
 	resp, err := Get(c, u.String())
-	if errors.Log(err) != nil {
+	if logGetError(err) != nil {
 		return
 	}
 	defer resp.Body.Close()
+	if ct := strings.ToLower(resp.Header.Get("Content-Type")); ct != "" && !strings.Contains(ct, "css") && !strings.Contains(ct, "text/plain") && !strings.Contains(ct, "octet-stream") {
+		// as in browsers, a style sheet must be CSS (not, as for a link
+		// of a style sheet that is missing, a page of HTML, on which the
+		// CSS parser does not end)
+		return
+	}
 	b, err := io.ReadAll(resp.Body)
 	if errors.Log(err) != nil {
 		return
@@ -617,6 +881,31 @@ func (c *Context) addLinkedStyle(href string) {
 	c.cssBase = base
 }
 
+// cssURLs matches the url() of CSS values, with its URL quoted or not.
+var cssURLs = regexp.MustCompile(`url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s]*))\s*\)`)
+
+// absoluteURLs returns the given CSS value with the relative URLs of its
+// url() functions made absolute, for the URL of the current style sheet
+// (to which they are relative, as the icons of MDN in its style sheets),
+// as they are used later relative to the page (see [Context.cssBaseURL]).
+func (c *Context) absoluteURLs(v string) string {
+	if c.cssBase == "" || !strings.Contains(v, "url(") {
+		return v
+	}
+	return cssURLs.ReplaceAllStringFunc(v, func(m string) string {
+		sm := cssURLs.FindStringSubmatch(m)
+		u := sm[1] + sm[2] + sm[3]
+		if u == "" || strings.HasPrefix(u, "data:") || strings.HasPrefix(u, "#") {
+			return m
+		}
+		abs, err := parseRelativeURL(u, c.cssBase)
+		if err != nil {
+			return m
+		}
+		return `url("` + strings.ReplaceAll(abs.String(), `"`, `%22`) + `")`
+	})
+}
+
 // cssBaseURL returns the URL that the URLs in the current style sheet are
 // relative to: the URL of the style sheet, or that of the page.
 func (c *Context) cssBaseURL() string {
@@ -624,4 +913,79 @@ func (c *Context) cssBaseURL() string {
 		return c.cssBase
 	}
 	return c.PageURL
+}
+
+// ModalAttr is the attribute of the dialogs that are shown as modal (as
+// by the showModal of scripts), which the :modal selector of CSS selects
+// (and the style of browsers for them, in the top layer).
+const ModalAttr = "data-htmlcore-modal"
+
+// hoverAttr is the attribute of the elements that are hovered while a page
+// is read (see [Context.Hovered]), which no element of a document has.
+const hoverAttr = "data-htmlcore-hover"
+
+// addHoverTrigger adds the trigger of the given selector with :hover, if
+// the compound selector with :hover is followed by others (as .menuItem of
+// .menuItem:hover > a ~ .submenu): the hover of the elements that it
+// selects changes the style of others (see [Context.HoverAffects]).
+func (c *Context) addHoverTrigger(sel string) {
+	i := strings.Index(sel, ":hover")
+	if i < 0 {
+		return
+	}
+	isCombinator := func(b byte) bool { return b == ' ' || b == '>' || b == '+' || b == '~' }
+	depth, start := 0, 0
+	for j := i - 1; j >= 0; j-- {
+		switch sel[j] {
+		case ')':
+			depth++
+		case '(':
+			depth--
+		}
+		if depth == 0 && isCombinator(sel[j]) {
+			start = j + 1
+			break
+		}
+	}
+	end := len(sel)
+	depth = 0
+	for j := i + len(":hover"); j < len(sel); j++ {
+		switch sel[j] {
+		case '(':
+			depth++
+		case ')':
+			depth--
+		}
+		if depth == 0 && isCombinator(sel[j]) {
+			end = j
+			break
+		}
+	}
+	if strings.TrimSpace(sel[end:]) == "" {
+		return // the hovered element itself, which its widget shows
+	}
+	compound := strings.ReplaceAll(sel[start:end], ":hover", "")
+	if strings.TrimSpace(compound) == "" {
+		compound = "*"
+	}
+	if m, err := cascadia.Parse(rewriteSelector(compound)); err == nil {
+		c.hoverTriggers = append(c.hoverTriggers, m)
+	}
+}
+
+// HoverAffects returns whether the hover of the given element changes the
+// styles of other elements, by the :hover selectors of the style sheets of
+// the page that was read (as the menu items of pkg.go.dev, whose submenus
+// are shown on their hover), for which an app that sets [Context.Hovered]
+// reads the page again when the hover of the element changes.
+func (c *Context) HoverAffects(n *html.Node) bool {
+	if n == nil || n.Type != html.ElementNode {
+		return false
+	}
+	for _, m := range c.hoverTriggers {
+		if m.Match(n) {
+			return true
+		}
+	}
+	return false
 }

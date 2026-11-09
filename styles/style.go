@@ -174,6 +174,44 @@ type Style struct { //types:add
 	// effective margin to allocate for the element.
 	MaxBoxShadow []Shadow
 
+	// ContentMinWidth is whether the width of the element is at least the
+	// min-content width of its content, even over its Max width, as for the
+	// width of a table in CSS (with an automatic layout), which is as wide
+	// as its cells need to be when they are wider than it.
+	ContentMinWidth bool
+
+	// MaxContentWidth is whether the width of the element is the width of
+	// its content without wrapping (its preferred width), whatever the width
+	// that it is given, which it then overflows, as for a width of
+	// max-content in CSS (as a ticker of items in a row that scrolls).
+	MaxContentWidth bool
+
+	// FlexBasis, if positive, is the width that the widget starts from in a
+	// row that wraps, which its line needs room for (down to its min-content
+	// width), instead of its preferred width, as the flex-basis of CSS (as
+	// the hypothetical main size of a flex item). It grows and shrinks from
+	// there by Grow and Shrink, as usual.
+	FlexBasis units.Value
+
+	// AspectRatio, if positive, is the ratio of the width to the height of
+	// the element, from which its height follows its width when its height
+	// is not set (by its Min), as the aspect-ratio property of CSS (its
+	// content can still make it higher). It is of the content box, or of
+	// the border box for [BoxBorderBox].
+	AspectRatio float32
+
+	// Contain is the dimensions in which the size of the element does not
+	// depend on its content, as the size containment of CSS (for container
+	// queries, which are of the size of the container, so its content
+	// cannot change it).
+	Contain Containments
+
+	// BoxShadowOutside is whether the box shadows are outside of the
+	// layout of the element, as in CSS: no space is allocated for them
+	// around it (they are not in its effective margin), and they are
+	// rendered around its box, outside of its bounds.
+	BoxShadowOutside bool
+
 	// Color specifies the text / content color, and it is inherited.
 	Color image.Image
 
@@ -184,6 +222,12 @@ type Style struct { //types:add
 	// alpha value between 0 and 1 to apply to the foreground and background
 	// of this element and all of its children.
 	Opacity float32
+
+	// Zoom, if positive, is a factor that all of the absolute sizes of the
+	// widget (as dp, px, and pt, and its font sizes) are multiplied by,
+	// as the DPI of its [units.Context] is. It is inherited, as for zooming
+	// the content of a frame (as a page in a web browser). Zero is 1.
+	Zoom float32
 
 	// StateLayer, if above zero, indicates to create a state layer over
 	// the element with this much opacity (on a scale of 0-1) and the
@@ -227,6 +271,24 @@ type Style struct { //types:add
 	// of the widget determine its position.
 	InsetSet sides.Sides[bool] `display:"inline"`
 
+	// InsetCenter is, for each dimension (X, Y), whether a widget that is
+	// not [PositionStatic] and has both of its insets set in it (as left
+	// and right) keeps its own size in it, centered between them, instead
+	// of being stretched to them, as for auto margins of an element with a
+	// definite size in CSS (as a modal dialog, centered in the window).
+	InsetCenter [2]bool
+
+	// Translate moves the widget from its position by this offset when it
+	// is rendered, without changing the layout, as the translate of the
+	// transform property of CSS. Percentages of the element width and
+	// height ([units.UnitEw], [units.UnitEh]) are of its own size.
+	Translate units.XY `display:"inline"`
+
+	// Rotate rotates the rendering of the widget by this angle in degrees
+	// (clockwise) around its center, without changing the layout, as the
+	// rotate of the transform property of CSS.
+	Rotate float32
+
 	// Float makes the widget float to the left or right of its parent,
 	// as the float property of CSS: it is out of the flow of the layout of
 	// its parent (a column), and the widgets after it that start beside it
@@ -249,9 +311,11 @@ type Style struct { //types:add
 	BoxSizing BoxSizings
 
 	// ZIndex orders the rendering of widgets that are not [PositionStatic],
-	// as the z-index property of CSS: they are rendered after the other
-	// children of their parent (on top of them), in increasing order of
-	// ZIndex, except that those with a negative ZIndex are rendered first.
+	// or that are and have a ZIndex other than 0 (as the flex and grid items
+	// of CSS with a z-index), as the z-index property of CSS: they are
+	// rendered after the other children of their parent (on top of them),
+	// in increasing order of ZIndex, except that those with a negative
+	// ZIndex are rendered first.
 	ZIndex int
 
 	// specifies the number of sequential columns that this element should occupy
@@ -411,6 +475,7 @@ func (s *Style) InheritFields(parent *Style) {
 	s.Color = parent.Color
 	s.Opacity = parent.Opacity
 	s.ScrollbarWidth = parent.ScrollbarWidth
+	s.Zoom = parent.Zoom
 	s.IconSize = parent.IconSize
 	s.Font.InheritFields(&parent.Font)
 	s.Text.InheritFields(&parent.Text)
@@ -474,6 +539,9 @@ func (s *Style) TotalMargin() sides.Floats {
 		mbw.Left = 0
 	}
 
+	if s.BoxShadowOutside {
+		return s.Margin.Dots().Add(mbw)
+	}
 	mbsm := s.MaxBoxShadowMargin()
 	if sides.AreZero(mbsm.Sides) {
 		mbsm = s.BoxShadowMargin()

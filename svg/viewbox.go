@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"strings"
@@ -240,4 +241,96 @@ func (pa *ViewBoxPreserveAspectRatio) SetFromStyle(s *styles.Style) {
 	case styles.FitCover, styles.FitScaleDown: // note: FitScaleDown not handled
 		pa.MeetOrSlice = Slice
 	}
+}
+
+// parseLength parses the given SVG length attribute (as x or width) of an
+// element in the given root: a number of user units, with an optional
+// unit (px, or absolute units, or em for 16px), or a percentage of the
+// size of the view box of the root (its width for the x axis, its height
+// for y, and their normalized diagonal for r, as for a circle radius).
+func (sv *SVG) parseLength(root *Root, v string, axis byte) (float32, error) {
+	v = strings.TrimSpace(v)
+	if pct, ok := strings.CutSuffix(v, "%"); ok {
+		f, err := math32.ParseFloat32(strings.TrimSpace(pct))
+		if err != nil {
+			return 0, err
+		}
+		size := root.ViewBox.Size
+		if size.X <= 0 || size.Y <= 0 {
+			size = math32.FromPoint(sv.Geom.Size)
+		}
+		switch axis {
+		case 'x':
+			return f / 100 * size.X, nil
+		case 'y':
+			return f / 100 * size.Y, nil
+		default:
+			return f / 100 * math32.Sqrt((size.X*size.X+size.Y*size.Y)/2), nil
+		}
+	}
+	scale := float32(1)
+	for _, u := range []struct {
+		suffix string
+		scale  float32
+	}{{"px", 1}, {"pt", 4.0 / 3}, {"pc", 16}, {"mm", 96 / 25.4}, {"cm", 96 / 2.54}, {"in", 96}, {"em", 16}} {
+		if rest, ok := strings.CutSuffix(v, u.suffix); ok {
+			v, scale = strings.TrimSpace(rest), u.scale
+			break
+		}
+	}
+	f, err := math32.ParseFloat32(v)
+	return f * scale, err
+}
+
+// nestedSVG adds the groups of a nested svg element with the given
+// attributes (in the given root) to the given parent: an outer group
+// clipped to its viewport (x, y, width, height, 100% by default), as
+// browsers clip nested svg elements, and an inner group with the transform
+// of its view box to its viewport, which it returns, for its children.
+func (sv *SVG) nestedSVG(parent Node, root *Root, attrs []xml.Attr, n int) Node {
+	outer := NewGroup(parent)
+	inner := NewGroup(outer)
+	var x, y float32
+	w, _ := sv.parseLength(root, "100%", 'x')
+	h, _ := sv.parseLength(root, "100%", 'y')
+	var vb ViewBox
+	for _, attr := range attrs {
+		if SetStandardXMLAttr(inner, attr.Name.Local, attr.Value) {
+			continue
+		}
+		switch attr.Name.Local {
+		case "x":
+			x, _ = sv.parseLength(root, attr.Value, 'x')
+		case "y":
+			y, _ = sv.parseLength(root, attr.Value, 'y')
+		case "width":
+			w, _ = sv.parseLength(root, attr.Value, 'x')
+		case "height":
+			h, _ = sv.parseLength(root, attr.Value, 'y')
+		case "viewBox":
+			if pts := math32.ReadPoints(attr.Value); len(pts) == 4 {
+				vb.Min.Set(pts[0], pts[1])
+				vb.Size.Set(pts[2], pts[3])
+			}
+		case "preserveAspectRatio":
+			vb.PreserveAspectRatio.SetString(attr.Value)
+		case "xmlns", "version", "overflow":
+		default:
+			inner.SetProperty(attr.Name.Local, attr.Value)
+		}
+	}
+	xf := math32.Translate2D(x, y)
+	if vb.Size.X > 0 && vb.Size.Y > 0 {
+		_, trans, scale := vb.Transform(math32.Vec2(w, h))
+		trans.SetSub(vb.Min)
+		xf = xf.Mul(math32.Scale2D(scale.X, scale.Y).Translate(trans.X, trans.Y))
+	}
+	inner.SetProperty("transform", xf.String())
+	cp := NewClipPath(sv.Defs)
+	cp.SetName(fmt.Sprintf("nested-svg-clip-%d-%p", n, outer))
+	rect := NewRect(cp)
+	rect.Pos.Set(x, y)
+	rect.Size.Set(w, h)
+	outer.SetProperty("clip-path", "url(#"+cp.Name+")")
+	return inner
 }

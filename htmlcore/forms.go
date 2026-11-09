@@ -5,8 +5,10 @@
 package htmlcore
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
+	"mime/multipart"
 	"net/url"
 	"strconv"
 	"strings"
@@ -15,18 +17,21 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/text/textcore"
+	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
-// The forms are submitted with the GET method,
-// as browsers do, by opening the URL of their action with the values of
-// their controls in the query, when a submit button is clicked or Enter
-// is pressed in one of their text fields.
+// The forms are submitted as browsers do, when a submit button is clicked
+// or Enter is pressed in one of their text fields: with the GET method by
+// opening the URL of their action with the values of their controls in the
+// query, and with the POST method by [Context.PostURL].
 
 // ancestorForm returns the form element that the given node is in.
 func ancestorForm(n *html.Node) *html.Node {
@@ -65,6 +70,39 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 		c.nodeWidgets = map[*html.Node]core.Widget{}
 	}
 	c.nodeWidgets[n] = w
+	if sw, ok := w.(*core.Switch); ok {
+		// the element after it, which shows the hover of a transparent
+		// control over it (see [Context.handleHoverTarget])
+		for k := n.NextSibling; k != nil; k = k.NextSibling {
+			if k.Type == html.ElementNode {
+				if c.hoverTargets == nil {
+					c.hoverTargets = map[*html.Node]*core.Switch{}
+				}
+				c.hoverTargets[k] = sw
+				break
+			}
+		}
+	}
+	if sw, ok := w.(*core.Switch); ok && strings.EqualFold(GetAttr(n, "type"), "radio") && GetAttr(n, "name") != "" {
+		// a radio button that is checked unchecks the others of its group
+		// (with its name, in its form or outside of forms)
+		sw.OnChange(func(e events.Event) {
+			if !sw.IsChecked() {
+				return
+			}
+			for on, ow := range c.nodeWidgets {
+				osw, ok := ow.(*core.Switch)
+				if !ok || on == n || !strings.EqualFold(GetAttr(on, "type"), "radio") ||
+					GetAttr(on, "name") != GetAttr(n, "name") || ancestorForm(on) != ancestorForm(n) {
+					continue
+				}
+				if osw.IsChecked() {
+					osw.SetChecked(false)
+					osw.NeedsRender()
+				}
+			}
+		})
+	}
 	form := ancestorForm(n)
 	if form == nil {
 		return
@@ -76,7 +114,7 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 		})
 		return
 	}
-	if tf, ok := w.(*core.TextField); ok {
+	if tf, ok := w.(*core.TextField); ok && n.Data != "textarea" { // enter submits, but not in a textarea
 		tf.OnFirst(events.KeyChord, func(e events.Event) {
 			if kf := keymap.Of(e.KeyChord()); kf == keymap.Enter || kf == keymap.Accept {
 				e.SetHandled()
@@ -87,19 +125,32 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 }
 
 // submitForm submits the given form, with the given submit button,
-// if it was submitted by one.
+// if it was submitted by one: with the GET method, by opening the URL of
+// its action with the values of its controls in the query, and with the
+// POST method, by [Context.PostURL] with them in the body.
 func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
-	if method := strings.ToLower(GetAttr(form, "method")); method != "" && method != "get" {
-		slog.Error("htmlcore: only forms with the GET method can be submitted", "method", method)
+	// the method, action and encoding, which the submit button can override
+	attr := func(name string) string {
+		if submitter != nil && HasAttr(submitter, "form"+name) {
+			return GetAttr(submitter, "form"+name)
+		}
+		return GetAttr(form, name)
+	}
+	method := strings.ToLower(attr("method"))
+	post := method == "post"
+	if method != "" && method != "get" && !post || post && c.PostURL == nil {
+		slog.Error("htmlcore: forms with this method can not be submitted", "method", method)
 		return
 	}
-	values := url.Values{}
+	// the values of the controls, in order
+	var names, values []string
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			if name := GetAttr(n, "name"); name != "" && !HasAttr(n, "disabled") {
 				if v, ok := c.controlValue(n, submitter); ok {
-					values.Add(name, v)
+					names = append(names, name)
+					values = append(values, v)
 				}
 			}
 		}
@@ -108,10 +159,8 @@ func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
 		}
 	}
 	walk(form)
-	action := GetAttr(form, "action")
-	if submitter != nil && HasAttr(submitter, "formaction") {
-		action = GetAttr(submitter, "formaction")
-	}
+	// the URL of the action
+	action := attr("action")
 	if action == "" {
 		action = c.PageURL
 	}
@@ -120,8 +169,49 @@ func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
 		slog.Error("htmlcore: invalid form action", "action", action, "err", err)
 		return
 	}
-	u.RawQuery = values.Encode()
+	if post {
+		contentType, body := encodeForm(strings.ToLower(attr("enctype")), names, values)
+		c.PostURL(u.String(), contentType, body, e)
+		return
+	}
+	u.RawQuery = urlEncode(names, values)
 	c.OpenURL(u.String(), e)
+}
+
+// urlEncode returns the given names and values encoded as for a query,
+// in their order.
+func urlEncode(names, values []string) string {
+	var b strings.Builder
+	for i, name := range names {
+		if i > 0 {
+			b.WriteByte('&')
+		}
+		b.WriteString(url.QueryEscape(name) + "=" + url.QueryEscape(values[i]))
+	}
+	return b.String()
+}
+
+// encodeForm returns the content type and body of a POST request for the
+// given names and values of the controls of a form, with the given
+// encoding (its enctype attribute).
+func encodeForm(enctype string, names, values []string) (string, []byte) {
+	switch enctype {
+	case "multipart/form-data":
+		var b bytes.Buffer
+		w := multipart.NewWriter(&b)
+		for i, name := range names {
+			w.WriteField(name, values[i])
+		}
+		w.Close()
+		return w.FormDataContentType(), b.Bytes()
+	case "text/plain":
+		var b strings.Builder
+		for i, name := range names {
+			b.WriteString(name + "=" + values[i] + "\r\n")
+		}
+		return "text/plain", []byte(b.String())
+	}
+	return "application/x-www-form-urlencoded", []byte(urlEncode(names, values))
 }
 
 // controlValue returns the value of the given form control element,
@@ -138,7 +228,7 @@ func (c *Context) controlValue(n, submitter *html.Node) (string, bool) {
 			}
 			return GetAttr(n, "value"), true
 		case "checkbox", "radio":
-			checked := HasAttr(n, "checked")
+			checked := c.isChecked(n)
 			if w != nil {
 				checked = w.AsWidget().StateIs(states.Checked)
 			}
@@ -160,8 +250,8 @@ func (c *Context) controlValue(n, submitter *html.Node) (string, bool) {
 		}
 		return GetAttr(n, "value"), true
 	case "textarea":
-		if ed, ok := w.(*textcore.Editor); ok {
-			return ed.Lines.String(), true
+		if tf, ok := w.(*core.TextField); ok {
+			return tf.Text(), true
 		}
 		return nodeText(n), true
 	case "select":
@@ -220,7 +310,33 @@ func handleSelect(ctx *Context) {
 		ch.Items = append(ch.Items, core.ChooserItem{Value: optionValue(o), Text: strings.TrimSpace(nodeText(o))})
 	}
 	ch.SetCurrentIndex(max(current, 0))
+	// with no appearance, the page draws its own arrow (as a background)
+	if a := ctx.declaration(ctx.Node, "appearance"); a == "none" || ctx.declaration(ctx.Node, "-webkit-appearance") == "none" {
+		ch.SetIndicator(icons.None)
+	}
+	alignDeclared := ctx.declaration(ctx.Node, "text-align") != ""
 	ctx.handleWidget(ctx.Node, ch)
+	// as in browsers, the text of the current option is at the start, on
+	// one line with the arrow at the end, in a select of any display (as
+	// the navigation select of pkg.go.dev, a block of 100% width)
+	ch.FinalStyler(func(s *styles.Style) {
+		s.Display = styles.Flex
+		s.Direction = styles.Row
+		s.Wrap = false
+		s.Align.Items = styles.Center
+		s.Justify.Content = styles.Start
+		if !alignDeclared {
+			s.Text.Align = text.Start
+		}
+	})
+	ch.Maker(func(p *tree.Plan) {
+		tree.AddInit(p, "text", func(w *core.Text) {
+			w.FinalStyler(func(s *styles.Style) {
+				s.Grow.X = 1
+				s.Text.Align = ch.Styles.Text.Align
+			})
+		})
+	})
 }
 
 // handleButton handles a button element: a block of its content,
@@ -230,7 +346,9 @@ func handleButton(ctx *Context) {
 	ctx.NewParent = w
 	ctx.handleWidget(ctx.Node, w)
 	w.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable)
+		// hoverable for the state layer of buttons when the mouse is over
+		// them (as the darkening of buttons in browsers, by their :hover)
+		s.SetAbilities(true, abilities.Clickable, abilities.Hoverable)
 		s.Cursor = cursors.Pointer
 	})
 }
@@ -245,11 +363,14 @@ func handleInputButton(ctx *Context, typ string) {
 	w := New[core.Frame](ctx)
 	ctx.handleWidget(ctx.Node, w)
 	w.Styler(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable)
+		// hoverable for the state layer of buttons when the mouse is over
+		// them (as the darkening of buttons in browsers, by their :hover)
+		s.SetAbilities(true, abilities.Clickable, abilities.Hoverable)
 		s.Cursor = cursors.Pointer
 	})
 	tx := core.NewText(w).SetText(html.EscapeString(label))
 	ctx.handleWidget(nil, tx)
+	buttonText(tx) // the button gets the clicks on its label
 }
 
 // handleInput handles an input element.
@@ -262,12 +383,14 @@ func handleInput(ctx *Context) core.Widget {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			newWidget = New[core.Spinner](ctx).SetValue(fval)
-		case "checkbox":
-			newWidget = New[core.Switch](ctx).SetType(core.SwitchCheckbox).
-				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
-		case "radio":
-			newWidget = New[core.Switch](ctx).SetType(core.SwitchRadioButton).
-				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
+		case "checkbox", "radio":
+			// (SetState returns the WidgetBase, which is not the widget)
+			sw := New[core.Switch](ctx).SetType(core.SwitchCheckbox)
+			if ityp == "radio" {
+				sw.SetType(core.SwitchRadioButton)
+			}
+			sw.SetState(ctx.isChecked(ctx.Node), states.Checked)
+			newWidget = sw
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
 			newWidget = New[core.Slider](ctx).SetValue(fval)
@@ -280,8 +403,194 @@ func handleInput(ctx *Context) core.Widget {
 		case "file":
 			newWidget = core.Bind(val, New[core.FileButton](ctx))
 		default:
-			newWidget = New[core.TextField](ctx).SetText(val)
+			// outlined, so that its borders are those of its CSS, on all
+			// sides (filled ones have only a line at the bottom)
+			tf := New[core.TextField](ctx).SetText(val).SetType(core.TextFieldOutlined)
+			tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
+			cssFieldBorder(tf)
+			tf.FinalStyler(func(s *styles.Style) { s.SetTextWrap(false) }) // an input is one line
+
+			ctx.inputIcons(ctx.Node, tf)
+			newWidget = tf
 		}
 	}
 	return newWidget
+}
+
+// inputIcons makes the icons that are positioned over the given text input
+// element the icons of its text field: elements after it with no content
+// that are absolutely positioned and have an SVG mask or background image
+// (as the search icon of the search field of Wikipedia, at its start). It
+// is the leading icon for one at the left (or else the trailing one, for
+// one at the right), with the padding of the field on its side as the
+// space before the icon. The elements are not rendered.
+func (c *Context) inputIcons(n *html.Node, tf *core.TextField) {
+	for s := n.NextSibling; s != nil; s = s.NextSibling {
+		if s.Type == html.TextNode && strings.TrimSpace(s.Data) == "" || s.Type == html.CommentNode {
+			continue
+		}
+		icon, side, ok := c.iconElement(s)
+		if !ok {
+			return
+		}
+		if c.iconNodes == nil {
+			c.iconNodes = map[*html.Node]bool{}
+		}
+		c.iconNodes[s] = true
+		inset := strings.TrimSpace(c.declaration(s, side))
+		env := c.readEnv()
+		pad, hasPad := env.length(inset, units.UnitPw)
+		if side == "left" {
+			tf.SetLeadingIcon(icon)
+		} else {
+			tf.SetTrailingIcon(icon)
+		}
+		tf.FinalStyler(func(st *styles.Style) {
+			if !hasPad {
+				return
+			}
+			if side == "left" {
+				st.Padding.Left = pad
+			} else {
+				st.Padding.Right = pad
+			}
+		})
+	}
+}
+
+// iconElement returns the icon of the given element if it is an icon over
+// a text input (see [Context.inputIcons]), and the side of the input that
+// it is at ("left" or "right").
+func (c *Context) iconElement(n *html.Node) (icon icons.Icon, side string, ok bool) {
+	if n.Type != html.ElementNode || c.declaration(n, "position") != "absolute" || c.displayOf(n) == "none" {
+		return
+	}
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.TextNode || strings.TrimSpace(k.Data) != "" {
+			return // it has content
+		}
+	}
+	mask := true
+	u := maskURL(c.declaration(n, "mask-image"))
+	if u == "" {
+		u = maskURL(c.declaration(n, "-webkit-mask-image"))
+	}
+	if u == "" {
+		u = maskURL(c.declaration(n, "mask"))
+	}
+	if u == "" {
+		u, mask = maskURL(c.declaration(n, "background-image")), false
+	}
+	if u == "" {
+		return
+	}
+	src := c.maskSourceOf(u)
+	if src == nil || len(src.svg) == 0 {
+		return
+	}
+	svg := string(src.svg)
+	if mask { // the shape of a mask has the color of the text
+		for _, black := range []string{`fill="#000"`, `fill="#000000"`, `fill="black"`} {
+			svg = strings.ReplaceAll(svg, black, `fill="currentColor"`)
+		}
+	}
+	side = "left"
+	if c.declaration(n, "left") == "" && c.declaration(n, "right") != "" {
+		side = "right"
+	}
+	return icons.Icon(svg), side, true
+}
+
+// isChecked returns whether the given checkbox or radio input element is
+// checked: from [Context.Checked] if it is set, or else its attribute.
+func (c *Context) isChecked(n *html.Node) bool {
+	if c.Checked != nil {
+		return c.Checked(n)
+	}
+	return HasAttr(n, "checked")
+}
+
+// setCheckedAttrs sets the checked attributes of the checkbox and radio
+// inputs of the given document to their state from [Context.Checked], if
+// it is set, for the :checked selectors of the style sheets (the selector
+// library matches the attribute), and returns a function that restores
+// them.
+func (c *Context) setCheckedAttrs(root *html.Node) func() {
+	if c.Checked == nil && c.Hovered == nil {
+		return func() {}
+	}
+	var changed []*html.Node
+	var hovered []*html.Node
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if c.Hovered != nil && n.Type == html.ElementNode && c.Hovered(n) {
+			n.Attr = append(n.Attr, html.Attribute{Key: hoverAttr}) // for :hover
+			hovered = append(hovered, n)
+		}
+		if c.Checked != nil && n.Type == html.ElementNode && n.Data == "input" {
+			if typ := strings.ToLower(GetAttr(n, "type")); typ == "checkbox" || typ == "radio" {
+				if c.Checked(n) != HasAttr(n, "checked") {
+					toggleAttr(n, "checked")
+					changed = append(changed, n)
+				}
+			}
+		}
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			walk(k)
+		}
+	}
+	walk(root)
+	return func() {
+		for _, n := range changed {
+			toggleAttr(n, "checked")
+		}
+		for _, n := range hovered {
+			toggleAttr(n, hoverAttr)
+		}
+	}
+}
+
+// toggleAttr removes the given attribute of the given element if it has
+// it, or else adds it (with no value).
+func toggleAttr(n *html.Node, key string) {
+	for i, a := range n.Attr {
+		if a.Key == key && a.Namespace == "" {
+			n.Attr = append(n.Attr[:i], n.Attr[i+1:]...)
+			return
+		}
+	}
+	n.Attr = append(n.Attr, html.Attribute{Key: key})
+}
+
+// handleHoverTarget makes the widget of the given element show the hover
+// of the control before it, if that is transparent: a checkbox or radio
+// button over the element that shows it, as the hidden checkboxes of the
+// menu buttons of Wikipedia (over their labels) and its radio buttons
+// (over their icons), which browsers style with :hover of the control.
+func (c *Context) handleHoverTarget(n *html.Node, w core.Widget) {
+	sw := c.hoverTargets[n]
+	if sw == nil {
+		return
+	}
+	delete(c.hoverTargets, n)
+	target := w.AsWidget()
+	hover := func(on bool) {
+		if sw.Styles.Opacity > 0 || target.StateIs(states.Hovered) == on {
+			return // a visible control shows its own hover
+		}
+		target.SetState(on, states.Hovered)
+		target.Restyle()
+	}
+	sw.On(events.MouseEnter, func(e events.Event) { hover(true) })
+	sw.On(events.MouseLeave, func(e events.Event) { hover(false) })
+}
+
+// cssFieldBorder makes the border of the given text field of an input (or
+// textarea) that of its CSS when it has the focus too, with no space for
+// the thicker border of an outlined field with the focus (which made it
+// higher than its CSS height, as for the search box of duckduckgo.com).
+func cssFieldBorder(tf *core.TextField) {
+	tf.FinalStyler(func(s *styles.Style) {
+		s.MaxBorder = s.Border
+	})
 }

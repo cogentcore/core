@@ -5,11 +5,18 @@
 package htmlcore
 
 import (
+	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
+	"sync"
 
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/shaped"
+	"cogentcore.org/core/text/text"
 )
 
 // lengthEnv has the sizes that relative lengths are resolved with, in px:
@@ -23,6 +30,15 @@ type lengthEnv struct {
 	em, vw, vh float64
 	fixedVh    bool
 	rem        float64
+
+	// cqw and cqh are the container query units (1% of the width and the
+	// height of the container of the element; see container.go), which
+	// are those of the viewport (vw, vh) if they are not set.
+	cqw, cqh float64
+
+	// ch, if set, returns the size of the ch unit of the element in px:
+	// the advance of the 0 glyph of its font, as in CSS.
+	ch func() float64
 }
 
 // defaultLengthEnv returns the length environment of a 16px font
@@ -57,6 +73,16 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 	if strings.HasSuffix(v, ")") {
 		return e.math(v, pct)
 	}
+	if r, ok := strings.CutSuffix(v, "ch"); ok && e.ch != nil {
+		if f, err := strconv.ParseFloat(r, 32); err == nil {
+			if ch := e.ch(); ch > 0 {
+				return units.Dp(float32(f * ch)), true
+			}
+		}
+	}
+	if l, ok := e.containerLength(v); ok {
+		return l, true
+	}
 	if r, ok := strings.CutSuffix(v, "rem"); ok { // of the font size of the html element
 		if f, err := strconv.ParseFloat(r, 32); err == nil {
 			return units.Dp(float32(f) * float32(e.rem)), true
@@ -90,6 +116,53 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 		return units.Dp(l.Value * float32(e.vh)), true
 	}
 	return l, true
+}
+
+// containerUnits returns the size in px of 1% of the width and height of
+// the container of the element (cqw, cqh), or of the viewport if none.
+func (e *lengthEnv) containerUnits() (cqw, cqh float64) {
+	cqw, cqh = e.cqw, e.cqh
+	if cqw <= 0 {
+		cqw = e.vw
+	}
+	if cqh <= 0 {
+		cqh = e.vh
+	}
+	return
+}
+
+// cqUnits are the container query units of CSS, by how they are of the
+// width (cqw, cqi) and height (cqh, cqb) of the container, or the smaller
+// (cqmin) or larger (cqmax) of them.
+var cqUnits = []string{"cqmin", "cqmax", "cqw", "cqh", "cqi", "cqb"}
+
+// cqUnit returns the size in px of the given container query unit.
+func (e *lengthEnv) cqUnit(u string) float64 {
+	cqw, cqh := e.containerUnits()
+	switch u {
+	case "cqw", "cqi":
+		return cqw
+	case "cqh", "cqb":
+		return cqh
+	case "cqmin":
+		return math.Min(cqw, cqh)
+	}
+	return math.Max(cqw, cqh)
+}
+
+// containerLength returns the given length if it is in a container
+// query unit (as 50cqw), in dp.
+func (e *lengthEnv) containerLength(v string) (units.Value, bool) {
+	for _, u := range cqUnits {
+		if num, ok := strings.CutSuffix(v, u); ok {
+			f, err := strconv.ParseFloat(num, 64)
+			if err != nil {
+				return units.Value{}, false
+			}
+			return units.Dp(float32(f * e.cqUnit(u))), true
+		}
+	}
+	return units.Value{}, false
 }
 
 // cssAbsoluteUnits are the absolute units of CSS, in px.
@@ -135,7 +208,7 @@ func (e *lengthEnv) linear(v string) (linear, bool) {
 	if inner, ok := strings.CutPrefix(v, "calc("); ok {
 		v = "(" + inner
 	}
-	p := &linearParser{s: v, em: e.em, vw: e.vw, vh: e.vh, rem: e.rem}
+	p := &linearParser{s: v, em: e.em, vw: e.vw, vh: e.vh, rem: e.rem, env: e}
 	l, ok := p.sum()
 	p.space()
 	return l, ok && p.i == len(p.s)
@@ -146,7 +219,8 @@ type linearParser struct {
 	s          string
 	i          int
 	em, vw, vh float64
-	rem        float64 // px per rem
+	rem        float64    // px per rem
+	env        *lengthEnv // for the container query units
 
 	// lengths is the number of lengths parsed.
 	lengths int
@@ -233,6 +307,38 @@ func (p *linearParser) factor() (linear, bool, bool) {
 		p.i += 4
 		return p.factor()
 	}
+	if p.env != nil {
+		for _, fn := range []string{"min(", "max(", "clamp("} {
+			if !strings.HasPrefix(p.s[p.i:], fn) {
+				continue
+			}
+			// a math function in a calc() (as the gutters of github.com, in
+			// calc(100% - 2 * clamp(1.25rem, calc((100vw - 768px) / 4), 8rem))),
+			// of lengths that are not percentages
+			depth, end := 0, -1
+			for j := p.i + len(fn) - 1; j < len(p.s); j++ {
+				if p.s[j] == '(' {
+					depth++
+				} else if p.s[j] == ')' {
+					depth--
+					if depth == 0 {
+						end = j
+						break
+					}
+				}
+			}
+			if end < 0 {
+				return linear{}, false, false
+			}
+			v, ok := p.env.math(p.s[p.i:end+1], units.UnitPw)
+			if !ok || v.Custom != nil || v.Unit != units.UnitDp {
+				return linear{}, false, false
+			}
+			p.i = end + 1
+			p.lengths++
+			return linear{px: float64(v.Value)}, true, true
+		}
+	}
 	start := p.i
 	for p.i < len(p.s) && (p.s[p.i] >= '0' && p.s[p.i] <= '9' || p.s[p.i] == '.' || (p.i == start && (p.s[p.i] == '-' || p.s[p.i] == '+'))) {
 		p.i++
@@ -246,6 +352,13 @@ func (p *linearParser) factor() (linear, bool, bool) {
 		p.i += len(u)
 		p.lengths++
 		return linear{px: n * scale}, true, true
+	}
+	if p.env != nil {
+		for _, u := range cqUnits {
+			if strings.HasPrefix(rest, u) {
+				return unit(u, p.env.cqUnit(u))
+			}
+		}
 	}
 	switch {
 	case strings.HasPrefix(rest, "%"):
@@ -323,6 +436,11 @@ func (e *lengthEnv) math(v string, pct units.Units) (units.Value, bool) {
 			}
 			return b
 		}
+		if mixed := slices.ContainsFunc(vals, func(l linear) bool { return l.pct != 0 }) &&
+			slices.ContainsFunc(vals, func(l linear) bool { return l.px != 0 || l.pct == 0 }); mixed {
+			// compared when the size of the parent is known, in the layout
+			return customLength(name, vals, pct), true
+		}
 		switch name {
 		case "min":
 			l = vals[0]
@@ -344,10 +462,52 @@ func (e *lengthEnv) math(v string, pct units.Units) (units.Value, bool) {
 	if !ok {
 		return units.Value{}, false
 	}
+	if l.pct != 0 && l.px != 0 { // as the width of calc(100% - 256px)
+		return customLength("calc", []linear{l}, pct), true
+	}
 	if l.pct != 0 {
 		return units.Value{Value: float32(l.pct), Unit: pct}, true
 	}
 	return units.Dp(float32(l.px)), true
+}
+
+// customLength returns a custom length (see [units.Value.Custom]) of the
+// given CSS math function (calc, min, max, or clamp) of the given linear
+// lengths, with percentages of the given unit, which core computes with the
+// size of the parent in the layout: a percentage and a length cannot be
+// one unit (as the width of calc(100% - 256px) of the grids of github.com,
+// which was taken to be 100%).
+func customLength(fn string, vals []linear, pct units.Units) units.Value {
+	vals = slices.Clone(vals)
+	return units.Custom(func(uc *units.Context) float32 {
+		base := uc.Paw
+		switch pct {
+		case units.UnitPh:
+			base = uc.Pah
+		case units.UnitEw:
+			base = uc.Elw
+		case units.UnitEh:
+			base = uc.Elh
+		}
+		dp := uc.Dots(units.UnitDp)
+		dots := func(l linear) float32 { return float32(l.pct/100)*base + float32(l.px)*dp }
+		v := dots(vals[0])
+		switch fn {
+		case "min":
+			for _, l := range vals[1:] {
+				v = min(v, dots(l))
+			}
+		case "max":
+			for _, l := range vals[1:] {
+				v = max(v, dots(l))
+			}
+		case "clamp":
+			if len(vals) == 3 {
+				v = max(dots(vals[0]), min(dots(vals[1]), dots(vals[2])))
+			}
+		}
+		return v
+	})
 }
 
 // lengthPx returns the given CSS length in px, for lengths that are
@@ -369,4 +529,55 @@ func (e *lengthEnv) lengthPx(v string) (float32, bool) {
 		return 0, false
 	}
 	return l.Value, true
+}
+
+// chShaper is the text shaper that measures the ch unit when the scene
+// of an element has none yet.
+var (
+	chShaper     shaped.Shaper
+	chShaperOnce sync.Once
+)
+
+// chRatios are the advances of the 0 glyph of fonts relative to their
+// size, by their family and weight, for the ch unit.
+var chRatios struct {
+	sync.Mutex
+	ratios map[string]float64
+}
+
+// chOf returns the size of the ch unit of CSS in px for the font of the
+// given style (whose font size is the given em, in px), measured with the
+// given text shaper: the advance of its 0 glyph, as in browsers. It is 0
+// if it cannot be measured.
+func chOf(sh shaped.Shaper, s *styles.Style, em float64) float64 {
+	if em <= 0 {
+		return 0
+	}
+	key := fmt.Sprintf("%v %s %v", s.Font.Family, s.Font.CustomFont, s.Font.Weight)
+	chRatios.Lock()
+	r, ok := chRatios.ratios[key]
+	chRatios.Unlock()
+	if !ok {
+		if sh == nil { // before the scene has one
+			chShaperOnce.Do(func() { chShaper = shaped.NewShaper() })
+			sh = chShaper
+		}
+		sty := rich.NewStyle()
+		sty.Family, sty.Weight = s.Font.Family, s.Font.Weight
+		tsty := text.NewStyle()
+		tsty.CustomFont = s.Font.CustomFont
+		tsty.FontSize.Dots = 100
+		var adv float32
+		for _, run := range sh.Shape(rich.NewText(sty, []rune("0")), tsty) {
+			adv += run.Advance()
+		}
+		r = float64(adv) / 100
+		chRatios.Lock()
+		if chRatios.ratios == nil {
+			chRatios.ratios = map[string]float64{}
+		}
+		chRatios.ratios[key] = r
+		chRatios.Unlock()
+	}
+	return r * em
 }

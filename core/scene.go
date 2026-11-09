@@ -78,6 +78,12 @@ type Scene struct { //core:no-new
 	// renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode.
 	renderBBoxHue float32
 
+	// spaceChanged is whether the padding or margins of a widget, of
+	// percentages, changed with the sizes of the last layout (see
+	// [WidgetBase.styleSizeUpdate]), for [Scene.LayoutScene] to lay it out
+	// again with them.
+	spaceChanged bool
+
 	// selectedWidget is the currently selected/hovered widget through the [Inspector] selection mode
 	// that should be highlighted with a background color.
 	selectedWidget Widget

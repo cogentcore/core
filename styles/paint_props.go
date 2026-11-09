@@ -115,7 +115,12 @@ var styleStrokeFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.Color = errors.Log1(gradient.FromAny(val, cc))
+		// an invalid color is ignored, as in CSS (it keeps the inherited or initial one)
+		if c, err := gradient.FromAny(val, cc); err == nil {
+			fs.Color = c
+		} else {
+			errors.Log(err)
+		}
 	},
 	"stroke-opacity": styleprops.Float(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -162,7 +167,12 @@ var styleFillFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
-		fs.Color = errors.Log1(gradient.FromAny(val, cc))
+		// an invalid color is ignored, as in CSS (it keeps the inherited or initial one)
+		if c, err := gradient.FromAny(val, cc); err == nil {
+			fs.Color = c
+		} else {
+			errors.Log(err)
+		}
 	},
 	"fill-opacity": styleprops.Float(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
@@ -204,15 +214,19 @@ func parseDashesString(str string) []float32 {
 	if len(str) == 0 || str == "none" {
 		return nil
 	}
-	ds := strings.Split(str, ",")
+	// separated by commas and/or spaces, with optional px units
+	ds := strings.Fields(strings.ReplaceAll(str, ",", " "))
 	dl := make([]float32, len(ds))
 	for i, dstr := range ds {
-		d, err := strconv.ParseFloat(strings.TrimSpace(dstr), 32)
+		d, err := strconv.ParseFloat(strings.TrimSuffix(dstr, "px"), 32)
 		if err != nil {
 			log.Printf("core.ParseDashesString parsing error: %v\n", err)
 			return nil
 		}
 		dl[i] = float32(d)
+	}
+	if len(dl)%2 == 1 { // an odd list is repeated, as in SVG
+		dl = append(dl, dl...)
 	}
 	return dl
 }

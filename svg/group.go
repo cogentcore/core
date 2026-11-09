@@ -40,6 +40,7 @@ func (g *Group) Render(sv *SVG) {
 	}
 	pc := g.Painter(sv)
 	pc.PushContext(&g.Paint, nil)
+	g.setLayer(sv, math32.Identity2())
 	g.RenderChildren(sv)
 	pc.PopContext()
 }

@@ -77,6 +77,10 @@ type State struct {
 
 	// Path is the current path state we are adding to.
 	Path ppath.Path
+
+	// pushes are the indexes in Render of the [render.ContextPush] items
+	// of the contexts of the Stack after the base one.
+	pushes []int
 }
 
 // Init initializes the rendering state, creating a new Stack
@@ -90,6 +94,7 @@ func (rs *State) Init(sty *styles.Paint, size math32.Vector2) {
 	rs.Stack = []*render.Context{render.NewContext(sty, bounds, nil)}
 	rs.Render = nil
 	rs.Path = nil
+	rs.pushes = nil
 }
 
 // RenderDone should be called when the full set of rendering
@@ -105,6 +110,7 @@ func (rs *State) RenderDone() render.Render {
 	if len(rs.Stack) > 1 { // ensure back to baseline stack
 		rs.Stack = rs.Stack[:1]
 	}
+	rs.pushes = rs.pushes[:0]
 	return npr
 }
 
@@ -123,8 +129,41 @@ func (rs *State) PushContext(sty *styles.Paint, bounds *render.Bounds) *render.C
 	parent := rs.Context()
 	g := render.NewContext(sty, bounds, parent)
 	rs.Stack = append(rs.Stack, g)
+	rs.pushes = append(rs.pushes, len(rs.Render))
 	rs.Render.Add(&render.ContextPush{Context: *g})
 	return g
+}
+
+// SetLayer sets the [render.Context.ClipMask], [render.Context.Mask], and
+// [render.Context.Opacity] of the context at the top of the stack (pushed
+// with [State.PushContext]), with which its rendering is composited as a
+// whole (as a layer). The masks are typically rendered with
+// [State.RenderSeparately] after the context is pushed, so that they
+// have its transform.
+func (rs *State) SetLayer(clipMask, mask render.Render, opacity float32) {
+	n := len(rs.pushes)
+	if n == 0 {
+		return
+	}
+	g := rs.Stack[len(rs.Stack)-1]
+	g.ClipMask, g.Mask, g.Opacity = clipMask, mask, opacity
+	if i := rs.pushes[n-1]; i < len(rs.Render) {
+		if cp, ok := rs.Render[i].(*render.ContextPush); ok {
+			cp.Context.ClipMask, cp.Context.Mask, cp.Context.Opacity = clipMask, mask, opacity
+		}
+	}
+}
+
+// RenderSeparately calls the given function, which renders with this
+// state, and returns what it renders, which is not added to the current
+// rendering (as for the items of a mask, see [State.SetLayer]).
+func (rs *State) RenderSeparately(f func()) render.Render {
+	saved, savedPushes := rs.Render, rs.pushes
+	rs.Render, rs.pushes = nil, nil
+	f()
+	r := rs.Render
+	rs.Render, rs.pushes = saved, savedPushes
+	return r
 }
 
 // PopContext pops the current Context off of the Stack.
@@ -135,5 +174,8 @@ func (rs *State) PopContext() {
 		return
 	}
 	rs.Stack = rs.Stack[:n-1]
+	if m := len(rs.pushes); m > 0 {
+		rs.pushes = rs.pushes[:m-1]
+	}
 	rs.Render.Add(&render.ContextPop{})
 }

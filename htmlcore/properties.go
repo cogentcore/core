@@ -6,12 +6,14 @@ package htmlcore
 
 import (
 	"image"
+	"math"
 	"strconv"
 	"strings"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
@@ -24,14 +26,26 @@ type styleOp func(st *cssState, s, ps *styles.Style)
 
 // compileDecls compiles the given declarations, in the order of the cascade,
 // without those that are invalid (see [Context.compileCSS]).
+// The font properties are first, as in CSS the font size of an element
+// is computed before the lengths that are relative to it (as the ch unit,
+// and em in calc()).
 func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 	var ops []styleOp
-	for _, d := range decls {
-		if !d.invalid {
-			ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+	for _, font := range []bool{true, false} {
+		for _, d := range decls {
+			if !d.invalid && fontProperties[d.Property] == font {
+				ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+			}
 		}
 	}
 	return ops
+}
+
+// fontProperties are the properties of fonts, which are compiled first
+// (with line-height, which the font shorthand sets).
+var fontProperties = map[string]bool{
+	"font": true, "font-family": true, "font-size": true, "font-weight": true,
+	"font-style": true, "line-height": true,
 }
 
 // compileCSS compiles the declaration of the given CSS property with the
@@ -42,10 +56,59 @@ func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 // and calc()). It returns nil for a property that is not supported, or
 // a value that is not valid.
 func (c *Context) compileCSS(prop, val string) []styleOp {
+	if p, ok := strings.CutPrefix(prop, "-webkit-"); ok && webkitAliases[p] {
+		// the old prefixed property is the standard one (as the
+		// -webkit-transform with which the slider of the photos of the
+		// postings of craigslist.org moves its slides); the last of them
+		// in the cascade applies, as in browsers
+		prop = p
+	}
 	val = strings.TrimSpace(val)
 	lval := strings.ToLower(val)
 	op := func(f styleOp) []styleOp { return []styleOp{f} }
-	if lval == "inherit" || lval == "initial" || lval == "unset" {
+	if lval == "unset" { // inherit for the inherited properties, initial otherwise
+		lval = "initial"
+		if inheritedProperties[prop] {
+			lval = "inherit"
+		}
+	}
+	if prop == "clip" || prop == "clip-path" {
+		// a clip to nothing hides the element (as the visually hidden
+		// skip links of go.dev, of clip: rect(0 0 0 0), unset on focus);
+		// other clips are not applied
+		zero := zeroAreaClip(prop, lval)
+		return op(func(st *cssState, s, ps *styles.Style) { st.clippedOut = zero })
+	}
+	if prop == "visibility" && (lval == "inherit" || lval == "initial") {
+		// that of the parent, or visible (as the repository panels of
+		// github.com, which a script shows with visibility: inherit over
+		// the hidden of their class, which was kept)
+		v := "visible"
+		if lval == "inherit" {
+			v = "" // (see resolve: that of the parent)
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = v })
+	}
+	if lval == "initial" && (prop == "background" || prop == "background-color") {
+		// transparent, over the background of a control (as the menu
+		// buttons of MDN, which were gray)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			st.background, st.hasBg, st.bgCurrentColor = nil, true, false
+		})
+	}
+	if lval == "inherit" && (prop == "background" || prop == "background-color") {
+		// that of the parent, over a background of an earlier rule (as
+		// the code of the Python docs, pre with background-color: inherit
+		// of the gray of its highlight block, over a green for pre)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			var bg image.Image
+			if ps != nil {
+				bg = ps.Background
+			}
+			st.background, st.hasBg, st.bgCurrentColor = bg, true, false
+		})
+	}
+	if lval == "inherit" || lval == "initial" {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
 		})
@@ -151,19 +214,40 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 				}
 			}
 		})
+	case "background-image", "background-size", "background-position", "background-repeat":
+		if m := compileBackgroundImage(prop, val); m != nil {
+			return op(m)
+		}
+		return nil
 	case "background", "background-color":
+		var imageOp []styleOp
+		if prop == "background" {
+			imageOp = op(compileBackgroundImage(prop, val))
+		}
 		bg := backgroundColor(val)
+		if bg == "" && prop == "background" && !strings.Contains(lval, "url(") && !strings.Contains(lval, "gradient(") {
+			// The shorthand without a color (as "0 0" or "none", as
+			// github.com resets its buttons with) sets the color to
+			// transparent; with an image or gradient, which are not
+			// supported, the color before it (a fallback) is kept.
+			switch lval {
+			case "inherit", "unset", "revert", "revert-layer":
+			default:
+				bg = "transparent"
+			}
+		}
 		if bg == "" {
-			return nil
+			return imageOp
 		}
 		none := bg == "transparent" || bg == "none"
+		current := strings.EqualFold(bg, "currentcolor")
 		cf := colorFunc(bg)
-		return op(func(st *cssState, s, ps *styles.Style) {
-			st.background, st.hasBg = cf(), true
-			if none {
+		return append(imageOp, op(func(st *cssState, s, ps *styles.Style) {
+			st.background, st.hasBg, st.bgCurrentColor = cf(), true, current
+			if none || current {
 				st.background = nil
 			}
-		})
+		})...)
 	case "color":
 		if parseColor(val) == nil {
 			return nil
@@ -176,12 +260,21 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			pct = units.UnitPh
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
+			if prop == "width" {
+				// as wide as its content on one line (see styles.MaxContentWidth)
+				s.MaxContentWidth = lval == "max-content"
+			}
+			if prop == "height" { // the height of its content (as for a modal dialog)
+				st.heightFit = strings.Contains(lval, "fit-content") || lval == "max-content" || lval == "min-content"
+			}
 			st.setSize(prop, st.env.lengthPtr(lval, pct))
 		})
 	case "position":
 		pos := styles.PositionStatic
 		switch lval {
-		case "relative", "sticky": // sticky is not supported, and is like relative
+		case "sticky":
+			pos = styles.PositionSticky
+		case "relative":
 			pos = styles.PositionRelative
 		case "absolute":
 			pos = styles.PositionAbsolute
@@ -236,6 +329,50 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			cl = styles.ClearBoth
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Clear = cl })
+	case "mask", "mask-image", "mask-size", "mask-position", "mask-repeat",
+		"-webkit-mask", "-webkit-mask-image", "-webkit-mask-size", "-webkit-mask-position", "-webkit-mask-repeat":
+		if m := compileMask(prop, val); m != nil {
+			return op(m)
+		}
+		return nil
+	case "transform", "translate":
+		x, y, ok := cssTranslate(prop, lval)
+		if !ok {
+			return nil
+		}
+		rot := cssRotate(prop, lval)
+		zero := prop == "transform" && cssZeroScale(lval)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.Translate.X, _ = st.env.length(x, units.UnitEw)
+			s.Translate.Y, _ = st.env.length(y, units.UnitEh)
+			if prop == "transform" {
+				s.Rotate = rot
+			}
+			st.zeroScale = zero // (see resolve)
+		})
+	case "container-type", "container", "contain":
+		c := styles.ContainNone
+		v := lval
+		if prop == "container" { // name / type
+			_, v, _ = strings.Cut(lval, "/")
+		}
+		for _, f := range strings.Fields(v) {
+			switch f {
+			case "size", "strict":
+				c = styles.ContainSize
+			case "inline-size":
+				if c == styles.ContainNone {
+					c = styles.ContainInlineSize
+				}
+			}
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Contain = c })
+	case "aspect-ratio":
+		r := cssAspectRatio(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { s.AspectRatio = r })
+	case "rotate":
+		rot := cssAngle(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { s.Rotate = rot })
 	case "z-index":
 		z, err := strconv.Atoi(lval)
 		if err != nil {
@@ -262,9 +399,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Slant = slant })
 	case "font-family":
 		family := fontFamily(val)
-		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Family = family })
+		return op(func(st *cssState, s, ps *styles.Style) { c.setFontFamily(s, val, family) })
 	case "font":
-		return op(func(st *cssState, s, ps *styles.Style) { setFont(st, s, ps, val) })
+		return op(func(st *cssState, s, ps *styles.Style) {
+			if family := setFont(st, s, ps, val); family != "" {
+				c.setFontFamily(s, family, s.Font.Family)
+			}
+		})
 	case "line-height":
 		return op(func(st *cssState, s, ps *styles.Style) { st.lineHeight = lval })
 	case "text-align":
@@ -305,6 +446,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) {
 			if l, ok := st.env.length(lval, units.UnitPw); ok {
 				s.Text.Indent = l
+				// the text is moved out of view (as the labels of icons,
+				// which have it), as an indent is not otherwise supported
+				st.hideText = (l.Unit == units.UnitDp || l.Unit == units.UnitPx) && l.Value <= -500
 			}
 		})
 	case "text-decoration", "text-decoration-line":
@@ -348,36 +492,17 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { st.flexShrink, st.hasShrink = float32(f), true })
 	case "flex":
-		var grow, shrink float32
-		hasGrow, hasShrink := false, false
-		switch lval {
-		case "none":
-			hasGrow, hasShrink = true, true
-		case "auto":
-			grow, hasGrow, shrink, hasShrink = 1, true, 1, true
-		default:
-			fs := strings.Fields(lval)
-			if len(fs) == 0 {
-				return nil
-			}
-			if f, err := strconv.ParseFloat(fs[0], 32); err == nil {
-				grow, hasGrow = float32(f), true
-			}
-			shrink, hasShrink = 1, true
-			if len(fs) > 1 {
-				if f, err := strconv.ParseFloat(fs[1], 32); err == nil {
-					shrink = float32(f)
-				}
-			}
+		grow, shrink, basis, ok := parseFlex(lval)
+		if !ok {
+			return nil
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if hasGrow {
-				st.flexGrow, st.hasGrow = grow, true
-			}
-			if hasShrink {
-				st.flexShrink, st.hasShrink = shrink, true
-			}
+			st.flexGrow, st.hasGrow = grow, true
+			st.flexShrink, st.hasShrink = shrink, true
+			st.flexBasis = basis
 		})
+	case "flex-basis":
+		return op(func(st *cssState, s, ps *styles.Style) { st.flexBasis = lval })
 	case "gap", "grid-gap":
 		fs := splitColors(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
@@ -481,6 +606,20 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 				s.Overflow.SetDim(do.dim, do.ov)
 			}
 		})
+	case "box-shadow":
+		if lval == "none" {
+			return op(func(st *cssState, s, ps *styles.Style) { s.BoxShadow = nil })
+		}
+		items := splitTopLevel(val, ',')
+		return op(func(st *cssState, s, ps *styles.Style) {
+			s.BoxShadow = nil
+			for _, item := range items {
+				if sh, ok := boxShadow(st.env, item); ok {
+					s.BoxShadow = append(s.BoxShadow, sh)
+				}
+			}
+			s.BoxShadowOutside = true // they take no space, as in CSS
+		})
 	case "grid-template-columns":
 		cols := gridColumns(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Columns = cols })
@@ -490,12 +629,73 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			return nil
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = float32(f) })
+	case "pointer-events":
+		none := lval == "none"
+		return op(func(st *cssState, s, ps *styles.Style) { s.SetAbilities(none, abilities.NoPointerEvents) })
 	case "visibility":
-		if lval == "hidden" || lval == "collapse" {
-			return op(func(st *cssState, s, ps *styles.Style) { s.Opacity = 0 })
-		}
+		// (applied with the inherited visibility; see resolveCSS)
+		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = lval })
 	}
 	return nil
+}
+
+// zeroAreaClip returns whether the given value of clip (a rect) or of
+// clip-path (an inset) clips the element to nothing, as in the visually
+// hidden elements of pages (rect(0 0 0 0), rect(1px, 1px, 1px, 1px),
+// inset(50%)).
+func zeroAreaClip(prop, v string) bool {
+	fn := "rect("
+	if prop == "clip-path" {
+		fn = "inset("
+	}
+	args, ok := strings.CutPrefix(v, fn)
+	if !ok || !strings.HasSuffix(args, ")") {
+		return false
+	}
+	f := strings.Fields(strings.ReplaceAll(strings.TrimSuffix(args, ")"), ",", " "))
+	if prop == "clip-path" { // insets of 50% or more from opposite sides
+		if len(f) == 0 || len(f) > 4 || strings.Contains(args, "round") {
+			return false
+		}
+		pct := func(x string) float64 {
+			if x == "0" || x == "0px" {
+				return 0
+			}
+			n, ok := strings.CutSuffix(x, "%")
+			if !ok {
+				return -1
+			}
+			p, err := strconv.ParseFloat(n, 64)
+			if err != nil {
+				return -1
+			}
+			return p
+		}
+		// the sides of the shorthand: top, right, bottom, left
+		var sides [4]float64
+		for i := range sides {
+			j := [4][4]int{{0, 0, 0, 0}, {0, 1, 0, 1}, {0, 1, 2, 1}, {0, 1, 2, 3}}[len(f)-1][i]
+			sides[i] = pct(f[j])
+		}
+		top, right, bottom, left := sides[0], sides[1], sides[2], sides[3]
+		return top >= 0 && bottom >= 0 && top+bottom >= 100 || right >= 0 && left >= 0 && right+left >= 100
+	}
+	if len(f) != 4 { // top, right, bottom, left, of the top left corner
+		return false
+	}
+	env := defaultLengthEnv()
+	var px [4]float32
+	for i, x := range f {
+		if x == "auto" {
+			return false
+		}
+		l, ok := env.lengthPx(x)
+		if !ok {
+			return false
+		}
+		px[i] = l
+	}
+	return px[2] <= px[0] || px[1] <= px[3]
 }
 
 // colorFunc returns a function that returns the given CSS color (or nil if
@@ -565,6 +765,64 @@ func compileBorder(side int, val string) styleOp {
 			}
 		}
 	}
+}
+
+// parseFlex returns the grow, shrink, and basis of the given value of the
+// flex shorthand, as in CSS, where a number alone (as flex: 1) has a basis
+// of 0, not of the width of the item.
+func parseFlex(v string) (grow, shrink float32, basis string, ok bool) {
+	switch v {
+	case "none":
+		return 0, 0, "auto", true
+	case "auto":
+		return 1, 1, "auto", true
+	case "initial":
+		return 0, 1, "auto", true
+	}
+	fs := strings.Fields(v)
+	if len(fs) == 0 {
+		return 0, 0, "", false
+	}
+	shrink, basis = 1, "0"
+	nums := 0
+	for _, f := range fs {
+		x, err := strconv.ParseFloat(f, 32)
+		switch {
+		case err == nil && nums == 0:
+			grow = float32(x)
+			nums++
+		case err == nil && nums == 1:
+			shrink = float32(x)
+			nums++
+		default:
+			basis = f
+			if nums == 0 { // flex: <basis> has a grow of 1
+				grow = 1
+			}
+		}
+	}
+	return grow, shrink, basis, true
+}
+
+// webkitAliases are the properties whose -webkit- prefixed names are
+// aliases of them in browsers, which pages may set only with the prefix.
+var webkitAliases = map[string]bool{
+	"transform": true, "transform-origin": true, "box-sizing": true, "box-shadow": true,
+	"border-radius": true, "flex": true, "flex-direction": true, "flex-wrap": true, "flex-flow": true,
+	"flex-grow": true, "flex-shrink": true, "flex-basis": true, "order": true, "align-items": true,
+	"align-self": true, "justify-content": true, "user-select": true, "appearance": true,
+}
+
+// inheritedProperties are the properties that are inherited in CSS, for
+// which unset is inherit (and initial for the others).
+var inheritedProperties = map[string]bool{
+	"color": true, "font": true, "font-family": true, "font-size": true, "font-style": true,
+	"font-weight": true, "font-variant": true, "line-height": true, "letter-spacing": true,
+	"word-spacing": true, "text-align": true, "text-indent": true, "text-transform": true,
+	"text-shadow": true, "white-space": true, "visibility": true, "cursor": true, "direction": true, "pointer-events": true,
+	"list-style": true, "list-style-type": true, "list-style-position": true, "quotes": true,
+	"word-break": true, "overflow-wrap": true, "hyphens": true, "tab-size": true,
+	"border-collapse": true, "border-spacing": true, "caption-side": true, "empty-cells": true,
 }
 
 // logicalProperties are the physical properties for the logical
@@ -746,4 +1004,187 @@ func gridColumns(v string) int {
 		}
 	}
 	return len(splitColors(v))
+}
+
+// cssTranslate returns the translation of the given value of the transform
+// property (the sum of its translate functions; the other functions, as
+// rotate and scale, are not supported), or of the translate property, as
+// the lengths of x and y. It returns false if it is not valid.
+// cssAspectRatio returns the ratio of width to height of the given value
+// of the aspect-ratio property (as 16 / 9, 1.5, or auto 4/3), or 0 for
+// none (auto).
+func cssAspectRatio(v string) float32 {
+	v = strings.TrimSpace(strings.Replace(v, "auto", "", 1))
+	a, b, slash := strings.Cut(v, "/")
+	w, err := strconv.ParseFloat(strings.TrimSpace(a), 32)
+	if err != nil || w <= 0 {
+		return 0
+	}
+	h := 1.0
+	if slash {
+		if h, err = strconv.ParseFloat(strings.TrimSpace(b), 32); err != nil || h <= 0 {
+			return 0
+		}
+	}
+	return float32(w / h)
+}
+
+// cssZeroScale returns whether the given transform scales the element
+// to nothing in either dimension (as scaleX(0), for a progress bar
+// that is not started), which is then not shown.
+func cssZeroScale(v string) bool {
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			break
+		}
+		as := strings.Split(args[:end], ",")
+		zero := func(i int) bool {
+			if i >= len(as) {
+				return false
+			}
+			f, err := strconv.ParseFloat(strings.TrimSpace(as[i]), 64)
+			return err == nil && f == 0
+		}
+		switch strings.TrimSpace(name) {
+		case "scale", "scale3d":
+			if zero(0) || (len(as) > 1 && zero(1)) {
+				return true
+			}
+		case "scalex", "scaley":
+			if zero(0) {
+				return true
+			}
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	return false
+}
+
+func cssTranslate(prop, v string) (x, y string, ok bool) {
+	x, y = "0", "0"
+	if v == "none" || v == "" {
+		return x, y, true
+	}
+	if prop == "translate" { // x [y [z]]
+		fs := strings.Fields(v)
+		if len(fs) > 0 {
+			x = fs[0]
+		}
+		if len(fs) > 1 {
+			y = fs[1]
+		}
+		return x, y, true
+	}
+	var xs, ys []string
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			return "", "", false
+		}
+		as := strings.Split(args[:end], ",")
+		for i := range as {
+			as[i] = strings.TrimSpace(as[i])
+		}
+		switch strings.TrimSpace(name) {
+		case "translate", "translate3d":
+			xs = append(xs, as[0])
+			if len(as) > 1 {
+				ys = append(ys, as[1])
+			}
+		case "translatex":
+			xs = append(xs, as[0])
+		case "translatey":
+			ys = append(ys, as[0])
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	sum := func(ls []string) string {
+		switch len(ls) {
+		case 0:
+			return "0"
+		case 1:
+			return ls[0]
+		}
+		return "calc(" + strings.Join(ls, " + ") + ")"
+	}
+	return sum(xs), sum(ys), true
+}
+
+// cssRotate returns the sum of the angles of the rotate functions of the
+// given transform, in degrees.
+func cssRotate(prop, v string) float32 {
+	var deg float32
+	for rest := v; rest != ""; {
+		name, args, found := strings.Cut(rest, "(")
+		if !found {
+			break
+		}
+		end := strings.Index(args, ")")
+		if end < 0 {
+			break
+		}
+		if n := strings.TrimSpace(name); n == "rotate" || n == "rotatez" {
+			deg += cssAngle(strings.TrimSpace(args[:end]))
+		}
+		rest = strings.TrimSpace(args[end+1:])
+	}
+	return deg
+}
+
+// cssAngle returns the given CSS angle in degrees (deg, rad, grad, turn).
+func cssAngle(v string) float32 {
+	for _, u := range []struct {
+		suffix string
+		deg    float64
+	}{{"deg", 1}, {"grad", 0.9}, {"rad", 180 / math.Pi}, {"turn", 360}} {
+		if n, ok := strings.CutSuffix(v, u.suffix); ok {
+			f, _ := strconv.ParseFloat(strings.TrimSpace(n), 64)
+			return float32(f * u.deg)
+		}
+	}
+	f, _ := strconv.ParseFloat(v, 64)
+	return float32(f)
+}
+
+// boxShadow returns the shadow of the given item of a box-shadow value:
+// [inset] offset-x offset-y [blur [spread]] [color], and whether it is
+// one (an inset shadow is not supported, and is not rendered).
+func boxShadow(env *lengthEnv, item string) (styles.Shadow, bool) {
+	var sh styles.Shadow
+	var lens []units.Value
+	clr := ""
+	for _, f := range splitColors(item) {
+		if strings.EqualFold(f, "inset") {
+			return sh, false
+		}
+		if l, ok := env.length(f, units.UnitDp); ok && len(lens) < 4 && (f == "0" || strings.IndexAny(f, "0123456789") >= 0) && parseColor(f) == nil {
+			lens = append(lens, l)
+			continue
+		}
+		clr = f
+	}
+	if len(lens) < 2 {
+		return sh, false
+	}
+	sh.OffsetX, sh.OffsetY = lens[0], lens[1]
+	if len(lens) > 2 {
+		sh.Blur = lens[2]
+	}
+	if len(lens) > 3 {
+		sh.Spread = lens[3]
+	}
+	sh.Color = colors.Uniform(colors.Black)
+	if c := parseColor(clr); c != nil {
+		sh.Color = c
+	}
+	return sh, true
 }

@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func layoutTestDir(t *testing.T) string {
@@ -860,6 +861,34 @@ func TestLayoutWrapRoundingFits(t *testing.T) {
 	})
 }
 
+// TestTextWrapRounding is for a text that wraps, in a frame that is
+// narrower than its preferred width (rounded up to whole dots) by less than
+// a dot (as the menu items of pkg.go.dev, a text and an icon in a link
+// whose width rounds down): it stays on one line.
+func TestTextWrapRounding(t *testing.T) {
+	var w float32
+	b := NewBody()
+	tx := NewText(b).SetText("Why Go")
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		w = tx.paintText.Bounds.Size().X // exactly, not rounded up
+	})
+	require.Greater(t, w, float32(0))
+	b = NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Max.X.Dot(math32.Ceil(w) - 1) // less than w, by less than 1
+		s.Padding.Zero()
+	})
+	tx = NewText(fr).SetText("Why Go")
+	var h float32
+	b2 := NewBody()
+	one := NewText(b2).SetText("Why Go")
+	layoutAtWidth(b2, 800, 400, func(dp float32) { h = one.Geom.Size.Actual.Content.Y })
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		assert.Equal(t, h, tx.Geom.Size.Actual.Content.Y, "one line")
+	})
+}
+
 // TestLayoutFloatOfFloats is for a float that only has floats in it (as
 // the icons in the footer of Wikipedia: a list that floats right, of
 // items that float left): as in CSS, the float is as wide as its floats
@@ -892,5 +921,155 @@ func TestLayoutFloatOfFloats(t *testing.T) {
 		for _, it := range items {
 			assert.LessOrEqual(t, it.Geom.Pos.Total.X+it.Geom.Size.Actual.Total.X, right+1, "within the column")
 		}
+	})
+}
+
+// TestLayoutFloatsBesideInline tests right floats after inline content that
+// is on one line (as the theme and search box of the header of the Python
+// docs, after its links), which are on that line, beside it, when they fit,
+// as in CSS; after a block (which takes its line in CSS), a float is below.
+func TestLayoutFloatsBesideInline(t *testing.T) {
+	b := NewBody()
+	page := columnFrame(b, 0)
+	page.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(600)
+		s.Padding.Zero()
+	})
+	tx := NewText(page).SetText("Python » Tutorial")
+	var floats []*Frame
+	for range 2 {
+		f := fixedFrame(page, 80, 20)
+		f.Styler(func(s *styles.Style) { s.Float = styles.FloatRight })
+		floats = append(floats, f)
+	}
+	block := fixedFrame(page, 100, 20)
+	after := fixedFrame(page, 80, 20)
+	after.Styler(func(s *styles.Style) { s.Float = styles.FloatRight })
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		for _, f := range floats {
+			assert.Equal(t, tx.Geom.TotalBBox.Min.Y, f.Geom.TotalBBox.Min.Y, "the float is on the line of the text")
+		}
+		assert.GreaterOrEqual(t, after.Geom.TotalBBox.Min.Y, block.Geom.TotalBBox.Max.Y-1, "a float after a block is below it")
+	})
+}
+
+// TestLayoutFloatsRounding tests floats whose widths fit a row exactly but
+// are each rounded up to whole dots (as the nine slides of the photos of
+// the postings of craigslist.org, of 442px in a row of nine times that):
+// they are all on one row, without the last one wrapping below.
+func TestLayoutFloatsRounding(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Min.X.Dot(9 * 100.4)
+		s.Max.X.Dot(9 * 100.4)
+		s.Padding.Zero()
+	})
+	var slides []*Frame
+	for range 9 {
+		f := NewFrame(row)
+		f.Styler(func(s *styles.Style) {
+			s.Float = styles.FloatLeft
+			s.Min.Set(units.Dot(100.4), units.Dot(20))
+			s.Max.Set(units.Dot(100.4), units.Dot(20))
+			s.Padding.Zero()
+		})
+		slides = append(slides, f)
+	}
+	layoutAtWidth(b, 1200, 400, func(dp float32) {
+		for _, f := range slides {
+			assert.Equal(t, slides[0].Geom.TotalBBox.Min.Y, f.Geom.TotalBBox.Min.Y, "on one row")
+		}
+	})
+}
+
+// TestBaselineFields tests the baselines of a text field and a chooser in
+// a row aligned on baselines beside a text (as the search field and the
+// theme select of the header of the Python docs, beside their labels):
+// their texts are on the baseline of the text.
+func TestBaselineFields(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Align.Items = styles.Baseline
+	})
+	tx := NewText(row).SetText("Theme")
+	ch := NewChooser(row).SetStrings("Auto", "Light")
+	tf := NewTextField(row).SetText("Quick search")
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		base := func(wb *WidgetBase) float32 {
+			bl, ok := wb.firstBaseline()
+			require.True(t, ok)
+			return wb.Geom.Pos.Total.Y + bl
+		}
+		want := base(tx.AsWidget())
+		assert.InDelta(t, want, base(ch.AsWidget()), 2, "the chooser")
+		assert.InDelta(t, want, base(tf.AsWidget()), 2, "the text field")
+	})
+}
+
+// TestLayoutGridSpanPercentMax tests that a percentage Max width of a
+// child of a grid is of its grid area, the columns that it spans with the
+// gaps between them, as in CSS: a child of 12 columns with a Max of 100%
+// (as the block of the sections of nytimes.com/wirecutter, of max-width:
+// 100%) is as wide as the grid, not narrower by its 11 gaps.
+func TestLayoutGridSpanPercentMax(t *testing.T) {
+	b := NewBody()
+	g := NewFrame(b)
+	g.FrColumns = true
+	g.Styler(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 12
+		s.Gap.Set(units.Dp(20), units.Dp(0))
+		s.Min.X.Dp(1024)
+		s.Max.X.Dp(1024)
+		s.Padding.Zero()
+	})
+	var wide *Frame
+	for i, span := range []int{12, 8} {
+		f := NewFrame(g)
+		NewText(f).SetText("text")
+		f.Styler(func(s *styles.Style) {
+			s.ColSpan = span
+			s.Grow.Set(1, 1)
+			if i == 0 {
+				s.Max.X = units.Pw(100)
+			}
+		})
+		if i == 0 {
+			wide = f
+		}
+	}
+	b.RenderImage(func() {
+		assert.InDelta(t, g.Geom.Size.Actual.Content.X, wide.Geom.Size.Actual.Total.X, 1, "as wide as the grid")
+	})
+}
+
+// TestLayoutPercentPaddingFirst tests that a percentage padding is of the
+// width of the parent in the first layout of a widget, not of the width
+// that its unit context had when it was styled (as the boxes of the
+// aspect ratios of the images of edition.cnn.com, of padding-bottom:
+// 56.25%, which its scripts make).
+func TestLayoutPercentPaddingFirst(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) { s.Direction = styles.Column; s.Min.X.Dp(200); s.Max.X.Dp(200) })
+	NewText(fr).SetText("before")
+	b.RenderImage(func() {
+		// a box added after the page is laid out (as by a script), in
+		// one layout
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		// (in a new parent, which has no size yet when it is styled)
+		wrap := NewFrame(fr)
+		wrap.Styler(func(s *styles.Style) { s.Grow.X = 1 })
+		box := NewFrame(wrap)
+		box.Styler(func(s *styles.Style) { s.Grow.X = 1; s.Padding.Bottom = units.Pw(50) })
+		wrap.Update()
+		b.Scene.LayoutScene()
+		dp := b.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 100*dp, box.Geom.Size.Actual.Total.Y, 3)
 	})
 }

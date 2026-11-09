@@ -87,9 +87,6 @@ func (s *Style) FromRunes(rs []rune) []rune {
 func (s *Style) ToRunes() []rune {
 	r := RuneFromStyle(s)
 	rs := []rune{r, rune(math.Float32bits(s.Size))}
-	if s.Decoration.NumColors() == 0 {
-		return rs
-	}
 	if s.Decoration.HasFlag(fillColor) {
 		rs = append(rs, ColorToRune(s.fillColor))
 	}
@@ -99,9 +96,10 @@ func (s *Style) ToRunes() []rune {
 	if s.Decoration.HasFlag(background) {
 		rs = append(rs, ColorToRune(s.background))
 	}
-	if s.Special == Link {
-		rs = append(rs, rune(len(s.URL)))
-		rs = append(rs, []rune(s.URL)...)
+	if s.Special == Link { // its length in runes (not bytes), as it is read
+		url := []rune(s.URL)
+		rs = append(rs, rune(len(url)))
+		rs = append(rs, url...)
 	}
 	return rs
 }

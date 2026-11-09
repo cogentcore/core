@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"github.com/andybalholm/cascadia"
 	"io"
 	"net/http"
 	neturl "net/url"
@@ -56,6 +57,61 @@ type Context struct {
 	// height of the scene.
 	MediaHeight float32
 
+	// Zoom, if positive, is the zoom factor of the page, as in browsers:
+	// all of its sizes are multiplied by it (see
+	// [styles.Style.Zoom]). MediaWidth and MediaHeight are then the size of
+	// the viewport divided by it, as its CSS px are larger (or smaller).
+	Zoom float32
+
+	// WebFonts is whether the web fonts of the @font-face rules of the
+	// style sheets of pages are loaded (once for each URL, for all pages),
+	// and used for the font families that they are for (see
+	// [fonts.AddWebFont]). Fonts in the WOFF2 format need a [FontDecoder].
+	WebFonts bool
+
+	// Scripting is whether the scripts of the pages are run (by the app
+	// that reads them, as htmlcore does not run them): the HTML is then
+	// parsed with scripting enabled (see [ParseHTML]), and noscript
+	// elements are not displayed, as in browsers with JavaScript.
+	Scripting bool
+
+	// Checked, if set, returns whether the given checkbox or radio input
+	// element is checked, for the :checked selector of CSS, as for a control
+	// that the user or a script has checked (as the CSS menus of Wikipedia,
+	// which show when their hidden checkbox is checked). By default, it is
+	// the checked attribute (the initial state).
+	Checked func(n *html.Node) bool
+
+	// Unrendered, if set, returns whether the given element is not rendered
+	// for a reason outside of its styles, as a child of an element with a
+	// shadow root (made by a script) that it is not assigned to a slot of,
+	// as the closed dropdown panels of the menus of MDN, which its shadow
+	// root shows (in a slot) only when they are open.
+	Unrendered func(n *html.Node) bool
+
+	// ToggleDetails, if set, toggles the given details element open or
+	// closed in the document that the page is read from (its open
+	// attribute), on a click of its summary, as for an app that runs
+	// scripts, which reads the page again then: its [open] selectors
+	// apply (as the rotated chevrons of the sidebar of MDN), and it stays
+	// open when the page is read again. It returns whether it toggled them:
+	// otherwise (or if it is not set), the details of the page that is read
+	// are shown or hidden in place (as when the scripts were stopped).
+	ToggleDetails func(n *html.Node) bool
+
+	// Hovered, if set, returns whether the mouse is over the given element
+	// (in it, or in an element in it), for the :hover selectors of CSS (as
+	// the submenus of pkg.go.dev, shown on the :hover of their menu items),
+	// as for an app that reads the page again when that changes for the
+	// elements for which [Context.HoverAffects] is true. Otherwise, :hover
+	// selects nothing.
+	Hovered func(n *html.Node) bool
+
+	// hoverTriggers are the parts of the selectors of the style sheets with
+	// :hover that are followed by others (as .menuItem of
+	// .menuItem:hover > .submenu), without :hover (see [Context.HoverAffects]).
+	hoverTriggers []cascadia.Sel
+
 	// NewParent is the current parent widget that children of
 	// the previously read element should be added to, if any.
 	NewParent core.Widget
@@ -81,9 +137,21 @@ type Context struct {
 	// which defaults to [system.App.OpenURL].
 	OpenURL func(url string, e events.Event)
 
+	// OpenLink, if set, is used in place of OpenURL for the clicks on the
+	// frames of links (and the widgets in them), with the link element
+	// (as for a page with scripts, which get the click of the element
+	// that is clicked, not of another link to the same URL).
+	OpenLink func(link *html.Node, url string, e events.Event)
+
 	// GetURL is the function used to get resources from URLs,
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
+
+	// PostURL, if not nil, is the function used to open URLs with a POST
+	// request with the given body of the given content type, as for
+	// submitting forms with the POST method. If it is nil, those forms
+	// can not be submitted.
+	PostURL func(url, contentType string, body []byte, e events.Event)
 
 	// ElementHandlers is a map of handler functions for each HTML element
 	// type (eg: "button", "input", "p"). It is empty by default, but can be
@@ -150,9 +218,17 @@ type Context struct {
 // [Context.NewPage] starts anew: the style sheets and declarations of
 // their elements, and the state of their widgets for styling them.
 type pageState struct {
+	// selIndex is the index of the nodes of the document for selecting
+	// the nodes of style rules (see [Context.selectNodes]).
+	selIndex *selectorIndex
+
 	// styles are the CSS declarations for each node, which are
 	// sorted in the order of the cascade by [Context.declarations].
 	styles map[*html.Node][]*cssDecl
+
+	// pseudoStyles are the declarations of the ::before and ::after
+	// pseudo-elements of the elements (see pseudo.go).
+	pseudoStyles map[pseudoKey][]*cssDecl
 
 	// sorted records the nodes whose declarations are sorted,
 	// and hinted those whose attributes have been added.
@@ -167,12 +243,37 @@ type pageState struct {
 	cssBase    string
 	cssImports map[string]bool
 
+	// tableRowState has the state of the rows of the tables being read
+	// (see [Context.endTableRow]).
+	tableRowState map[*html.Node]*tableRows
+
+	// hoverTargets are the elements after checkboxes and radio buttons,
+	// which show their hover when they are transparent (see
+	// [Context.handleHoverTarget]).
+	hoverTargets map[*html.Node]*core.Switch
+
+	// iconNodes are the elements that are the icons of text fields (see
+	// [Context.inputIcons]), which are not rendered themselves.
+	iconNodes map[*html.Node]bool
+
+	// curContainer is the condition of the @container rule whose rules
+	// are being added, containerQueried has the elements with declarations
+	// in such rules, and containers has the frames of the containers by
+	// their elements (see [Context.containerMatches]).
+	curContainer     *containerCond
+	containerQueried map[*html.Node]bool
+	containers       map[*html.Node]*containerFrame
+
 	// nodeWidgets has the widgets of the controls of forms.
 	nodeWidgets map[*html.Node]core.Widget
 
 	// floatSiblings has whether the unstyled blocks in each element
 	// have floats in them, for flattensBlock.
 	floatSiblings map[*html.Node]bool
+
+	// linkFrames has the URLs of the links that are frames (blocks), by
+	// their nodes, for the widgets in them (see linkFrame).
+	linkFrames map[*html.Node]string
 
 	// flattened has the blocks that are flattened (see flattensBlock).
 	flattened map[*html.Node]bool
@@ -311,6 +412,7 @@ func (c *Context) config(w core.Widget) {
 		switch attr.Key {
 		case "id":
 			wb.SetName(attr.Val)
+			uniqueName(wb)
 			wb.SetProperty("id", attr.Val)
 		case "style": // in the cascade
 		default:
@@ -403,6 +505,8 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 	c.applyStyleRules(node, w)
 	c.handleFormWidget(node, w)
+	c.handleHoverTarget(node, w)
+	c.handleInLink(node, w)
 	for _, f := range c.WidgetHandlers {
 		f(w)
 	}
@@ -415,9 +519,12 @@ func (c *Context) handleWidget(node *html.Node, w core.Widget) {
 // one for each page with this, so that nothing of one page affects the next.
 func (c *Context) NewPage() *Context {
 	n := NewContext()
-	n.MediaWidth, n.MediaHeight = c.MediaWidth, c.MediaHeight
+	n.MediaWidth, n.MediaHeight, n.Zoom = c.MediaWidth, c.MediaHeight, c.Zoom
+	n.Scripting, n.WebFonts, n.Checked, n.Unrendered = c.Scripting, c.WebFonts, c.Checked, c.Unrendered
+	n.ToggleDetails, n.Hovered = c.ToggleDetails, c.Hovered
 	n.PageURL = c.PageURL
-	n.OpenURL, n.GetURL = c.OpenURL, c.GetURL
+	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
+	n.OpenLink = c.OpenLink
 	n.ElementHandlers = c.ElementHandlers
 	n.WikilinkHandlers = c.WikilinkHandlers
 	n.AttributeHandlers = c.AttributeHandlers
@@ -430,16 +537,91 @@ func (c *Context) NewPage() *Context {
 }
 
 // UserAgent is the User-Agent header of the requests of the default
-// [Context.GetURL], which sites that reject the default of the Go HTTP
-// client (as Wikipedia does) accept.
-var UserAgent = "Mozilla/5.0 (compatible; CogentCore; +https://cogentcore.org)"
+// [Context.GetURL] (see [SetRequestHeaders]). It has the form of the user
+// agents of browsers, for the platform that the app runs on, naming
+// Cogent Core: sites treat the "compatible; ...; +url" form of crawlers
+// (and the default of the Go HTTP client) as bots. Scripts should report
+// the same value (navigator.userAgent), since sites check that they match.
+var UserAgent = "Mozilla/5.0 (" + userAgentPlatform() + ") AppleWebKit/537.36 (KHTML, like Gecko) CogentCore/1.0 Safari/537.36"
+
+// userAgentPlatform returns the platform part of the [UserAgent], as
+// browsers report it for the platform that the app runs on.
+func userAgentPlatform() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "Windows NT 10.0; Win64; x64"
+	case "linux":
+		return "X11; Linux x86_64"
+	case "android":
+		return "Linux; Android 10; K"
+	case "ios":
+		return "iPhone; CPU iPhone OS 17_0 like Mac OS X"
+	default:
+		return "Macintosh; Intel Mac OS X 10_15_7"
+	}
+}
+
+// AcceptLanguage is the Accept-Language header of the requests of the
+// default [Context.GetURL] (see [SetRequestHeaders]), from the locale of
+// the system (the LC_ALL, LC_MESSAGES, or LANG environment variable) or
+// US English. Some sites send reduced pages to requests without it.
+var AcceptLanguage = acceptLanguage(firstEnv("LC_ALL", "LC_MESSAGES", "LANG"))
+
+// firstEnv returns the value of the first of the given environment
+// variables that is set.
+func firstEnv(names ...string) string {
+	for _, n := range names {
+		if v := os.Getenv(n); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// acceptLanguage returns the Accept-Language header for the given POSIX
+// locale (as "fr_CA.UTF-8"): "fr-CA,fr;q=0.9,en;q=0.8". It is US English
+// for the C and POSIX locales and for an empty one.
+func acceptLanguage(locale string) string {
+	loc, _, _ := strings.Cut(locale, ".")
+	loc, _, _ = strings.Cut(loc, "@")
+	if loc == "" || loc == "C" || loc == "POSIX" {
+		return "en-US,en;q=0.9"
+	}
+	tag := strings.ReplaceAll(loc, "_", "-")
+	lang, _, _ := strings.Cut(tag, "-")
+	h := tag
+	if lang != tag {
+		h += "," + lang + ";q=0.9"
+	}
+	if lang != "en" {
+		h += ",en;q=0.8"
+	}
+	return h
+}
+
+// acceptHeader is the Accept header of requests, as browsers send it for
+// pages (and accepted for their resources), without image/avif, which
+// images cannot be decoded from (and which image servers send to those
+// who accept it, as those of theguardian.com and nytimes.com, whose
+// images were blank).
+const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+
+// SetRequestHeaders sets the headers of the given request that browsers
+// send: the [UserAgent], [AcceptLanguage], and Accept. (Accept-Encoding is
+// set by the Go HTTP client, which decompresses the gzip responses.)
+func SetRequestHeaders(req *http.Request) {
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("Accept", acceptHeader)
+	req.Header.Set("Accept-Language", AcceptLanguage)
+}
 
 // httpClient is the client of the default [Context.GetURL], with a timeout
 // so that a server that does not respond does not stop the reading of a
 // page (as a style sheet or image of the page).
 var httpClient = &http.Client{Timeout: 15 * time.Second}
 
-// getURL gets the given URL with an HTTP GET request, with the [UserAgent].
+// getURL gets the given URL with an HTTP GET request, with the headers of
+// [SetRequestHeaders].
 func getURL(url string) (*http.Response, error) {
 	if strings.HasPrefix(url, "file:") {
 		return getFileURL(url)
@@ -448,7 +630,7 @@ func getURL(url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", UserAgent)
+	SetRequestHeaders(req)
 	return httpClient.Do(req)
 }
 
@@ -530,4 +712,43 @@ func TagTexts(w core.Widget) {
 		}
 		return tree.Continue
 	})
+}
+
+// NodeOf returns the HTML node of the element that the given widget is
+// for, or that of the nearest widget that it is in that has one (as for
+// the text of an element), or nil if there is none. The nodes are those
+// of the document that was read (see [ReadDocument]).
+func NodeOf(w core.Widget) *html.Node {
+	for wb := w.AsWidget(); wb != nil; wb = core.AsWidget(wb.Parent) {
+		if n, ok := wb.Property("node").(*html.Node); ok && n != nil {
+			return n
+		}
+	}
+	return nil
+}
+
+// uniqueName makes the name of the given widget unique among its siblings
+// (as for an id that is on more than one element of a page), as tree
+// updates require (as of the inspector).
+func uniqueName(wb *core.WidgetBase) {
+	p := wb.Parent
+	if p == nil {
+		return
+	}
+	for _, k := range p.AsTree().Children {
+		if k != wb.This && k.AsTree().Name == wb.Name {
+			tree.SetUniqueName(wb)
+			return
+		}
+	}
+}
+
+// openLink opens the URL of the given link element, with OpenLink if it
+// is set, or else OpenURL.
+func (c *Context) openLink(link *html.Node, url string, e events.Event) {
+	if c.OpenLink != nil && link != nil {
+		c.OpenLink(link, url, e)
+		return
+	}
+	c.OpenURL(url, e)
 }

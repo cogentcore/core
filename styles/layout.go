@@ -43,6 +43,7 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Gap.ToDots(uc)
 	s.ScrollbarWidth.ToDots(uc)
 	s.Inset.ToDots(uc)
+	s.FlexBasis.ToDots(uc)
 
 	// max must be at least as much as min
 	if s.Max.X.Dots > 0 {
@@ -236,6 +237,13 @@ const (
 	// PositionFixed is like [PositionAbsolute], but positioned relative
 	// to the scene, so that it does not scroll.
 	PositionFixed
+
+	// PositionSticky is in the layout of its parent, like [PositionStatic],
+	// but when its parent frame that scrolls is scrolled past it, it stays
+	// at the [Style.Inset] (top, bottom, left, right) from the edges of the
+	// visible part of that frame, within its parent, as the sticky
+	// position of CSS (as a table of contents beside a long page).
+	PositionSticky
 )
 
 // Floats are the ways that widgets can float (see [Style.Float]).
@@ -267,6 +275,24 @@ const (
 
 	// ClearBoth moves the widget below all of the floats.
 	ClearBoth
+)
+
+// Containments are the dimensions in which the size of an element does
+// not depend on its content, as the size containment of CSS (which a
+// container for container queries has).
+type Containments int32 //enums:enum -trim-prefix Contain -transform kebab
+
+const (
+	// ContainNone is the default: the size of the element depends on its content.
+	ContainNone Containments = iota
+
+	// ContainInlineSize is for an element whose width does not depend on its
+	// content (as if it were empty), which overflows it instead.
+	ContainInlineSize
+
+	// ContainSize is for an element whose width and height do not depend on
+	// its content (as if it were empty), which overflows it instead.
+	ContainSize
 )
 
 // BoxSizings are the boxes that the Min and Max sizes are of,

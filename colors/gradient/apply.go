@@ -70,6 +70,9 @@ func Apply(img image.Image, f ApplyFunc) image.Image {
 		return image.NewUniform(f(colors.AsRGBA(im)))
 	case Gradient:
 		cp := CopyOf(im)
+		if cp == nil { // a gradient that cannot be copied
+			return NewApplier(img, f)
+		}
 		cp.AsBase().ApplyFuncs.Add(f)
 		return cp
 	default:
@@ -94,6 +97,15 @@ func ApplyOpacity(img image.Image, opacity float32) image.Image {
 		return image.NewUniform(colors.ApplyOpacity(colors.AsRGBA(im), opacity))
 	case Gradient:
 		cp := CopyOf(im)
+		if cp == nil { // a gradient that cannot be copied
+			return NewApplier(img, func(c color.Color) color.Color {
+				return colors.ApplyOpacity(c, opacity)
+			})
+		}
+		if len(cp.AsBase().Stops) == 0 { // as a Copier
+			cp.AsBase().ApplyFuncs.Add(func(c color.Color) color.Color { return colors.ApplyOpacity(c, opacity) })
+			return cp
+		}
 		cp.AsBase().ApplyOpacityToStops(opacity)
 		return cp
 	default:

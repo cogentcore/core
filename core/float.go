@@ -7,6 +7,7 @@ package core
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -123,6 +124,9 @@ func (fr *Frame) layoutFloats() bool {
 	var maxLeft, maxRight float32
 	y := float32(0)
 	floatTop := float32(0) // the top of the last float
+	// the last child in the flow, if it is inline content: its top, and its
+	// preferred width (on one line)
+	lastFlow, lastFlowY, lastFlowPref := false, float32(0), float32(0)
 	fr.forVisibleChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		if cwb.outOfFlow() {
 			return tree.Continue
@@ -140,19 +144,48 @@ func (fr *Frame) layoutFloats() bool {
 		if cwb.isFloat() {
 			// a float that clears is moved down, but not the flow after it
 			w := min(ksz.Actual.Total.X, width)
-			if cf := AsFrame(cw); cf != nil && cf.onlyFloats() {
-				// A float that only has floats in it (which have no size
-				// in its flow) is as wide as its content (shrink-to-fit,
-				// as in CSS): its preferred width, within the column.
+			if cwb.Styles.Grow.X > 0 {
+				// a growing float (as for a percentage width in CSS) takes
+				// the width of the column, up to its Max
+				// (a percentage Max is of the column, which it may not
+				// have been resolved for yet)
+				w = width
+				if mx := cwb.Styles.Max.X; mx.Unit == units.UnitPw && mx.Value > 0 {
+					w = min(w, width*mx.Value/100+ksz.Space.X-cwb.boxSizingSpace().X)
+				} else if mt := ksz.maxTotal().X; mt > 0 {
+					w = min(w, mt)
+				}
+			} else if AsFrame(cw) != nil {
+				// A float is as wide as its content (shrink-to-fit, as in
+				// CSS): its preferred width, within the column, also when
+				// its content is floats (which have no size in its flow), or
+				// a block of floats (as the breadcrumbs of the header of
+				// craigslist.org, a list of floats in a floating nav, which
+				// had no width, so its crumbs were each on a line).
 				w = min(max(w, ksz.prefWidth), width)
 			}
 			h := ksz.Actual.Total.Y
 			left := cwb.Styles.Float == styles.FloatLeft
 			// a float is not higher than the floats before it, as in CSS
 			fy := max(cy, floatTop)
+			if !left && lastFlow && cwb.Styles.Clear == styles.ClearNone && lastFlowY >= floatTop {
+				// a right float after content that is on one line is on that
+				// line, beside it, if it fits there (as the theme and search
+				// box of the header of the Python docs, after its links), as
+				// in CSS, where it is on the line of the content before it
+				if l, r := edges(lastFlowY); r-w >= l+lastFlowPref {
+					fy = lastFlowY
+				}
+			}
+			// the widths of the floats are rounded up to whole dots, by less
+			// than a dot each: a float fits in a space that is narrower by
+			// less than that for the floats before it (as the nine slides of
+			// the photos of the postings of craigslist.org, of 442px each in
+			// a row of 3978px, the last of which wrapped)
+			slack := float32(len(floats))
 			for range len(floats) + 1 { // down below floats until it fits
 				l, r := edges(fy)
-				if r-l >= w || l == 0 && r == width {
+				if r-l+slack >= w || l == 0 && r == width {
 					break
 				}
 				next := float32(-1) // the next bottom of a float
@@ -178,6 +211,14 @@ func (fr *Frame) layoutFloats() bool {
 			}
 			ksz.Alloc.Total = math32.Vec2(w, h)
 			ksz.SetContentFromTotal(&ksz.Alloc)
+			if AsFrame(cw) != nil && ksz.Actual.Total.X < w {
+				// the box of a float is its width (shrink-to-fit), also when
+				// it is finally sized before its width is set here (as the
+				// breadcrumbs of craigslist.org, a nav of a list of floats,
+				// which stayed as wide as nothing)
+				ksz.Actual.Total.X = w
+				ksz.SetContentFromTotal(&ksz.Actual)
+			}
 			fl.places[i] = floatPlace{pos: math32.Vec2(x, fy), width: w}
 			fl.size.Y = max(fl.size.Y, fy+h)
 			if left { // the widths that the floats take on each side
@@ -199,6 +240,11 @@ func (fr *Frame) layoutFloats() bool {
 			ksz.SetContentFromTotal(&ksz.Alloc)
 		}
 		fl.places[i] = floatPlace{pos: math32.Vec2(l, y), width: w}
+		// only inline content (a text, or a row of inline content that
+		// wraps), not a block, which a float after it is below in CSS
+		_, isText := cw.(*Text)
+		inline := isText || cwb.Styles.Direction == styles.Row && cwb.Styles.Wrap
+		lastFlow, lastFlowY, lastFlowPref = inline, y, ksz.prefWidth
 		y += ksz.Actual.Total.Y + gap
 		return tree.Continue
 	})

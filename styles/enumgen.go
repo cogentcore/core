@@ -215,16 +215,16 @@ func (i *Overflows) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Overflows")
 }
 
-var _PositionsValues = []Positions{0, 1, 2, 3}
+var _PositionsValues = []Positions{0, 1, 2, 3, 4}
 
 // PositionsN is the highest valid value for type Positions, plus one.
-const PositionsN Positions = 4
+const PositionsN Positions = 5
 
-var _PositionsValueMap = map[string]Positions{`static`: 0, `relative`: 1, `absolute`: 2, `fixed`: 3}
+var _PositionsValueMap = map[string]Positions{`static`: 0, `relative`: 1, `absolute`: 2, `fixed`: 3, `sticky`: 4}
 
-var _PositionsDescMap = map[Positions]string{0: `PositionStatic is the default: the widget is in the layout of its parent.`, 1: `PositionRelative is in the layout of its parent, and then offset from its position in the layout by [Style.Inset], without changing the layout. It is also the containing block of the widgets in it that are [PositionAbsolute].`, 2: `PositionAbsolute is not in the layout of its parent: it is positioned by [Style.Inset] relative to its containing block, which is the nearest widget that it is in that is not [PositionStatic], or the scene. Its size is that of its content, unless both of the opposite sides of an inset are set, in which case it fills the space between them.`, 3: `PositionFixed is like [PositionAbsolute], but positioned relative to the scene, so that it does not scroll.`}
+var _PositionsDescMap = map[Positions]string{0: `PositionStatic is the default: the widget is in the layout of its parent.`, 1: `PositionRelative is in the layout of its parent, and then offset from its position in the layout by [Style.Inset], without changing the layout. It is also the containing block of the widgets in it that are [PositionAbsolute].`, 2: `PositionAbsolute is not in the layout of its parent: it is positioned by [Style.Inset] relative to its containing block, which is the nearest widget that it is in that is not [PositionStatic], or the scene. Its size is that of its content, unless both of the opposite sides of an inset are set, in which case it fills the space between them.`, 3: `PositionFixed is like [PositionAbsolute], but positioned relative to the scene, so that it does not scroll.`, 4: `PositionSticky is in the layout of its parent, like [PositionStatic], but when its parent frame that scrolls is scrolled past it, it stays at the [Style.Inset] (top, bottom, left, right) from the edges of the visible part of that frame, within its parent, as the sticky position of CSS (as a table of contents beside a long page).`}
 
-var _PositionsMap = map[Positions]string{0: `static`, 1: `relative`, 2: `absolute`, 3: `fixed`}
+var _PositionsMap = map[Positions]string{0: `static`, 1: `relative`, 2: `absolute`, 3: `fixed`, 4: `sticky`}
 
 // String returns the string representation of this Positions value.
 func (i Positions) String() string { return enums.String(i, _PositionsMap) }
@@ -335,6 +335,49 @@ func (i Clears) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Clears) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Clears") }
+
+var _ContainmentsValues = []Containments{0, 1, 2}
+
+// ContainmentsN is the highest valid value for type Containments, plus one.
+const ContainmentsN Containments = 3
+
+var _ContainmentsValueMap = map[string]Containments{`none`: 0, `inline-size`: 1, `size`: 2}
+
+var _ContainmentsDescMap = map[Containments]string{0: `ContainNone is the default: the size of the element depends on its content.`, 1: `ContainInlineSize is for an element whose width does not depend on its content (as if it were empty), which overflows it instead.`, 2: `ContainSize is for an element whose width and height do not depend on its content (as if it were empty), which overflows it instead.`}
+
+var _ContainmentsMap = map[Containments]string{0: `none`, 1: `inline-size`, 2: `size`}
+
+// String returns the string representation of this Containments value.
+func (i Containments) String() string { return enums.String(i, _ContainmentsMap) }
+
+// SetString sets the Containments value from its string representation,
+// and returns an error if the string is invalid.
+func (i *Containments) SetString(s string) error {
+	return enums.SetString(i, s, _ContainmentsValueMap, "Containments")
+}
+
+// Int64 returns the Containments value as an int64.
+func (i Containments) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the Containments value from an int64.
+func (i *Containments) SetInt64(in int64) { *i = Containments(in) }
+
+// Desc returns the description of the Containments value.
+func (i Containments) Desc() string { return enums.Desc(i, _ContainmentsDescMap) }
+
+// ContainmentsValues returns all possible values for the type Containments.
+func ContainmentsValues() []Containments { return _ContainmentsValues }
+
+// Values returns all possible values for the type Containments.
+func (i Containments) Values() []enums.Enum { return enums.Values(_ContainmentsValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Containments) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Containments) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "Containments")
+}
 
 var _BoxSizingsValues = []BoxSizings{0, 1}
 

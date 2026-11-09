@@ -29,6 +29,7 @@ import (
 func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) *shaped.Lines {
 	sh.Lock()
 	defer sh.Unlock()
+	sh.addWebFonts()
 	if tsty.FontSize.Dots == 0 {
 		tsty.FontSize.Dots = 16
 	}

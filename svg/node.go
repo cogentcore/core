@@ -6,6 +6,7 @@ package svg
 
 import (
 	"fmt"
+	"image/color"
 	"maps"
 	"reflect"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
 )
 
@@ -101,6 +103,91 @@ type NodeBase struct {
 
 	// isDef is whether this is in [SVG.Defs].
 	isDef bool
+
+	// clipRef is the name of the clipPath that the clip-path property
+	// refers to, if any.
+	clipRef string
+
+	// maskRef is the name of the mask that the mask property refers to,
+	// if any.
+	maskRef string
+
+	// color is the current color of the node (currentColor), from its
+	// color property or that of its parent.
+	color color.RGBA
+
+	// anchor is the text-anchor of the node (set on it or inherited).
+	anchor string
+
+	// fillCurrent and strokeCurrent are whether the fill and stroke of
+	// the node are currentColor (set on it or inherited), which is that
+	// of the node, not of the node that it is inherited from.
+	fillCurrent, strokeCurrent bool
+}
+
+// nodeContext is the [colors.Context] of the properties of a node: that of
+// its SVG, with its current color as the base color (currentColor).
+type nodeContext struct {
+	*SVG
+	color color.RGBA
+}
+
+func (nc *nodeContext) Base() color.RGBA { return nc.color }
+
+// setColor sets the current color of the node, from its color property
+// (in its properties or the rules of the style sheets that apply to it),
+// or that of its parent (or of the SVG, for the root).
+func (g *NodeBase) setColor(sv *SVG) {
+	if g.Parent != nil {
+		if pn, ok := g.Parent.(Node); ok {
+			g.color = pn.AsNodeBase().color
+		}
+	} else {
+		g.color = colors.AsRGBA(colors.ToUniform(sv.Color))
+		if sv.Color == nil {
+			g.color = color.RGBA{0, 0, 0, 255}
+		}
+	}
+	if v, ok := g.ownProperty("color"); ok {
+		if c, err := colors.FromString(v, g.color); err == nil {
+			g.color = colors.AsRGBA(c)
+		}
+	}
+	g.fillCurrent, g.strokeCurrent, g.anchor = false, false, ""
+	if pn, ok := g.Parent.(Node); ok {
+		pb := pn.AsNodeBase()
+		g.fillCurrent, g.strokeCurrent, g.anchor = pb.fillCurrent, pb.strokeCurrent, pb.anchor
+	}
+	if v, ok := g.ownProperty("text-anchor"); ok {
+		g.anchor = v
+	}
+	if v, ok := g.ownProperty("fill"); ok {
+		g.fillCurrent = strings.EqualFold(v, "currentcolor")
+	}
+	if v, ok := g.ownProperty("stroke"); ok {
+		g.strokeCurrent = strings.EqualFold(v, "currentcolor")
+	}
+}
+
+// ownProperty returns the value of the given property that is set on the
+// node, in its properties or the rules of the style sheets that apply to
+// it (the last that applies), and whether it is set.
+func (g *NodeBase) ownProperty(name string) (string, bool) {
+	vals := []any{g.Properties[name]}
+	if g.CSSAgg != nil {
+		for _, sel := range []string{strings.ToLower(g.NodeType().Name), "." + strings.ToLower(g.Class), "#" + strings.ToLower(g.Name)} {
+			if pm, ok := g.CSSAgg[sel].(map[string]any); ok {
+				vals = append(vals, pm[name])
+			}
+		}
+	}
+	val, has := "", false
+	for _, v := range vals {
+		if s, ok := v.(string); ok && strings.TrimSpace(s) != "" {
+			val, has = strings.TrimSpace(s), true
+		}
+	}
+	return val, has
 }
 
 func (g *NodeBase) AsNodeBase() *NodeBase         { return g }
@@ -227,13 +314,22 @@ func FirstNonGroupNode(n Node) Node {
 func (g *NodeBase) Style(sv *SVG) {
 	pc := &g.Paint
 	pc.Defaults()
-	ctxt := colors.Context(sv)
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg map[string]any
 	if g.Parent != nil { // && g.Par != sv.Root.This
+		parCSSAgg = g.Parent.(Node).AsNodeBase().CSSAgg
+	}
+	if parCSSAgg != nil {
+		AggCSS(&g.CSSAgg, parCSSAgg)
+	} else {
+		g.CSSAgg = nil
+	}
+	AggCSS(&g.CSSAgg, g.CSS)
+	g.setColor(sv)
+	ctxt := colors.Context(&nodeContext{sv, g.color})
+	if g.Parent != nil { // && g.Par != sv.Root.This
 		pn := g.Parent.(Node)
-		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.AsNodeBase().PaintStyle()
 		pc.CopyStyleFrom(pp)
 		pc.SetProperties(pp, g.Properties, ctxt)
@@ -242,15 +338,27 @@ func (g *NodeBase) Style(sv *SVG) {
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
-	if parCSSAgg != nil {
-		AggCSS(&g.CSSAgg, parCSSAgg)
-	} else {
-		g.CSSAgg = nil
-	}
-	AggCSS(&g.CSSAgg, g.CSS)
+	g.clipRef, g.maskRef = "", ""
+	g.setLayerRefs(g.Properties)
 	g.StyleCSS(sv, g.CSSAgg)
-	pc.Stroke.Opacity *= pc.Opacity // applies to all
-	pc.Fill.Opacity *= pc.Opacity
+	switch g.anchor { // text-anchor, as the text alignment
+	case "middle":
+		pc.Text.Align = text.Center
+	case "end":
+		pc.Text.Align = text.End
+	case "start":
+		pc.Text.Align = text.Start
+	}
+	if g.fillCurrent && pc.Fill.Color != nil { // the current color of this node
+		pc.Fill.Color = colors.Uniform(g.color)
+	}
+	if g.strokeCurrent && pc.Stroke.Color != nil {
+		pc.Stroke.Color = colors.Uniform(g.color)
+	}
+	if !g.isGroupOpacity() { // groups are rendered with their opacity as a whole
+		pc.Stroke.Opacity *= pc.Opacity // applies to all
+		pc.Fill.Opacity *= pc.Opacity
+	}
 	pc.Off = (pc.Stroke.Color == nil && pc.Fill.Color == nil)
 }
 
@@ -274,13 +382,14 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 		return false
 	}
 	pc := &g.Paint
-	ctxt := colors.Context(sv)
+	ctxt := colors.Context(&nodeContext{sv, g.color})
 	if g.Parent != sv.Root.This {
 		pp := g.Parent.(Node).AsNodeBase().PaintStyle()
 		pc.SetProperties(pp, pmap, ctxt)
 	} else {
 		pc.SetProperties(nil, pmap, ctxt)
 	}
+	g.setLayerRefs(pmap)
 	return true
 }
 

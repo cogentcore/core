@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"cogentcore.org/core/text/shaped"
 	_ "embed"
 	"fmt"
 	"image"
@@ -12,6 +13,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
 	"golang.org/x/net/html"
@@ -30,6 +32,10 @@ type blockState struct {
 
 	// block is whether the widget is block-level.
 	block bool
+
+	// hidden is whether the element is not visible (visibility: hidden),
+	// which its descendants inherit.
+	hidden bool
 
 	// alignItems is the CSS align-items of a flex container.
 	alignItems string
@@ -76,24 +82,37 @@ type cssState struct {
 	env *lengthEnv
 
 	display    string
-	width      *units.Value
-	height     *units.Value
-	minWidth   *units.Value
-	minHeight  *units.Value
-	maxWidth   *units.Value
-	maxHeight  *units.Value
-	margin     [4]*units.Value // top, right, bottom, left; nil for auto
-	marginAuto [4]bool
-	lineHeight string
-	borderBox  bool
-	flexGrow   float32
-	hasGrow    bool
-	flexShrink float32
-	hasShrink  bool
-	alignSelf  string
-	alignItems string
-	background image.Image
-	hasBg      bool
+	hideText   bool // a large negative text-indent, which moves the text out of view
+	zeroScale  bool // a transform scales the box to nothing (as scaleX(0)), so it is not shown
+	clippedOut bool // a clip (or clip-path) to nothing hides it (see zeroAreaClip)
+
+	// bgCurrentColor is whether the background color is currentcolor,
+	// the color of the element as it is styled (as the masked chevrons of
+	// the menus of MDN), which was transparent.
+	bgCurrentColor bool
+	visibility     string // the visibility property, if any
+	width          *units.Value
+	heightFit      bool // a height of fit-content (or max- or min-content)
+	height         *units.Value
+	minWidth       *units.Value
+	minHeight      *units.Value
+	maxWidth       *units.Value
+	maxHeight      *units.Value
+	margin         [4]*units.Value // top, right, bottom, left; nil for auto
+	marginAuto     [4]bool
+	lineHeight     string
+	borderBox      bool
+	flexGrow       float32
+	hasGrow        bool
+	flexShrink     float32
+	hasShrink      bool
+	flexBasis      string // the flex-basis, or "" if it is not set
+	alignSelf      string
+	alignItems     string
+	background     image.Image
+	hasBg          bool
+	mask           *cssMask
+	bgImage        *cssMask // the background image, with its size, position and repeat
 
 	borderCollapse bool
 	legacyCenter   bool
@@ -108,7 +127,7 @@ type cssState struct {
 func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl) {
 	wb := w.AsWidget()
 	_, isText := w.(*core.Text)
-	_, isFrame := w.(*core.Frame)
+	isFrame := frameOf(w) != nil
 	plain := isText || isFrame // widgets whose look is all from CSS
 	tag := ""
 	if node != nil {
@@ -130,6 +149,12 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		}
 	}
 	ops := c.compileDecls(decls)
+	inherit := c.inlineInheritedOps(node, wb)
+	wb.FinalStyler(func(s *styles.Style) {
+		if bs.hidden { // after the abilities of the widget (as scrolling)
+			s.Abilities = 0
+		}
+	})
 	wb.Styler(func(s *styles.Style) {
 		pw, _ := wb.Parent.(core.Widget)
 		var ps *styles.Style
@@ -137,6 +162,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if pw != nil {
 			ps = &pw.AsWidget().Styles
 			pbs = c.blocks[pw]
+		}
+		if c.Zoom > 0 {
+			s.Zoom = c.Zoom // (inherited, but set on each for widgets outside of the page)
 		}
 		fsz := core.AppearanceSettings.FontSize / 100
 		if plain {
@@ -199,10 +227,23 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			}
 		}
 		env.rem = float64(c.rootFontSize())
+		env.ch = func() float64 { // of the font of the element as it is styled
+			em := env.em
+			if s.Font.Size.Unit == units.UnitDp && s.Font.Size.Value > 0 {
+				em = float64(s.Font.Size.Value)
+			}
+			var sh shaped.Shaper
+			if wb.Scene != nil {
+				sh = wb.Scene.TextShaper()
+			}
+			return chOf(sh, s, em)
+		}
 		env.fixedVh = c.MediaHeight > 0
 		if env.fixedVh {
 			env.vh = float64(c.MediaHeight / 100)
 		}
+		// the container query units, of the container of the element
+		env.cqw, env.cqh = containerUnits(w, env.vw, env.vh)
 		if tag == "body" && c.declaration(node, "font-size") == "" {
 			// the font size of the html element (which has no widget)
 			if rf := c.rootFontSize(); rf != 16 {
@@ -211,6 +252,12 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				}
 			}
 		}
+		if ps != nil { // pointer-events is inherited
+			s.SetAbilities(ps.Abilities.HasFlag(abilities.NoPointerEvents), abilities.NoPointerEvents)
+		}
+		for _, op := range inherit {
+			op(st, s, ps)
+		}
 		for _, op := range ops {
 			op(st, s, ps)
 		}
@@ -218,6 +265,51 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			st.display = c.displayOf(node)
 		}
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
+		if node != nil && node.Type == html.ElementNode && st.display == "inline-block" && c.isInlineBox(node) {
+			if d := strings.TrimSpace(c.declaration(node, "display")); d == "" || d == "inline" {
+				// an inline element that is a box (see isInlineBox) does not
+				// change the height of its line by its vertical padding and
+				// border, as in CSS (as the padded links of the sidebar of
+				// daringfireball.net, in lines as high as their text)
+				// (in dots when the units are converted)
+				lessBy := func(m units.Value, by ...units.Value) units.Value {
+					return units.Value{Custom: func(uc *units.Context) float32 {
+						v := m.ToDots(uc)
+						for _, b := range by {
+							v -= b.ToDots(uc)
+						}
+						return v
+					}}
+				}
+				s.Margin.Top = lessBy(s.Margin.Top, s.Padding.Top, s.Border.Width.Top)
+				s.Margin.Bottom = lessBy(s.Margin.Bottom, s.Padding.Bottom, s.Border.Width.Bottom)
+			}
+		}
+		if node != nil && isButtonNode(node) && c.declaration(node, "justify-content") == "" {
+			// the content of a button is aligned by its text-align (center
+			// by default), and at the start of one with a display of flex
+			// or grid (as the jump button of pkg.go.dev, which is left
+			// aligned with both)
+			switch c.declaration(node, "display") {
+			case "flex", "inline-flex", "grid", "inline-grid":
+				s.Justify.Content = styles.Start
+			default:
+				switch s.Text.Align {
+				case text.Center:
+					s.Justify.Content = styles.Center
+				case text.End:
+					s.Justify.Content = styles.End
+				default:
+					s.Justify.Content = styles.Start
+				}
+			}
+		}
+		if s.ZIndex != 0 && s.Position == styles.PositionStatic && (pbs == nil || !isFlexOrGrid(pbs.display)) {
+			// as in CSS, the z-index of a static element only applies to
+			// flex and grid items (as the site header of pkg.go.dev, over
+			// the sticky header of the page)
+			s.ZIndex = 0
+		}
 		if tag == "body" && st.hasBg && pw != nil { // the canvas has the background of the body
 			pw.AsWidget().Styles.Background = st.background
 		}
@@ -232,11 +324,77 @@ func (c *Context) display(w core.Widget) string {
 	return ""
 }
 
+// isFlexOrGrid returns whether the given display is that of a flex or grid
+// container, whose items are stacked by their z-index (see
+// [styles.Style.ZIndex]) even if they are not positioned.
+func isFlexOrGrid(d string) bool {
+	switch d {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		return true
+	}
+	return false
+}
+
 // isBlockDisplay returns whether the given display is block-level.
 func isBlockDisplay(d string) bool {
 	switch d {
 	case "block", "list-item", "flex", "grid", "table", "flow-root":
 		return true
+	}
+	return false
+}
+
+// inlineInheritedOps returns the style operations of the inherited
+// properties of the inline elements that the given element is in, between
+// it and the element of its parent widget, outermost first. These have no
+// widgets of their own (they are in the text of a run), but their
+// inherited properties apply to the widgets of their children, as the font
+// size of the edit links of Wikipedia, which are inline blocks.
+func (c *Context) inlineInheritedOps(node *html.Node, wb *core.WidgetBase) []styleOp {
+	if node == nil || node.Type != html.ElementNode {
+		return nil
+	}
+	pw, _ := wb.Parent.(core.Widget)
+	if pw == nil {
+		return nil
+	}
+	pn := NodeOf(pw)
+	var chain []*html.Node
+	for p := node.Parent; p != nil && p != pn && p.Type == html.ElementNode; p = p.Parent {
+		switch c.displayOf(p) {
+		case "", "inline", "contents":
+			chain = append(chain, p)
+			continue
+		}
+		break
+	}
+	var ops []styleOp
+	for i := len(chain) - 1; i >= 0; i-- {
+		var inh []*cssDecl
+		for _, d := range c.declarations(chain[i]) {
+			if inheritedProperties[d.Property] {
+				inh = append(inh, d)
+			}
+		}
+		ops = append(ops, c.compileDecls(inh)...)
+	}
+	return ops
+}
+
+// isButtonNode returns whether the given node is a button: a button element,
+// or an input of a type of submit, button or reset.
+func isButtonNode(n *html.Node) bool {
+	if n.Type != html.ElementNode {
+		return false
+	}
+	switch n.Data {
+	case "button":
+		return true
+	case "input":
+		switch strings.ToLower(GetAttr(n, "type")) {
+		case "submit", "button", "reset":
+			return true
+		}
 	}
 	return false
 }

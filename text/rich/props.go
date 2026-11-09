@@ -133,6 +133,16 @@ var styleFuncs = map[string]styleprops.Func{
 			}
 			return
 		}
+		if str, ok := val.(string); ok && strings.EqualFold(strings.TrimSpace(str), "currentcolor") {
+			// the color that it inherits (as the links of github.com,
+			// whose text was transparent)
+			if ps, ok := parent.(*Style); ok && ps != nil {
+				fs.SetFillColor(ps.FillColor())
+			} else {
+				fs.SetFillColor(nil)
+			}
+			return
+		}
 		fs.SetFillColor(colors.ToUniform(errors.Log1(gradient.FromAny(val, cc))))
 	},
 	"stroke-color": func(obj any, key string, val any, parent any, cc colors.Context) {

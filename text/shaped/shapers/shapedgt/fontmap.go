@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cogentcore/typesetting/font"
+	"github.com/cogentcore/typesetting/font/opentype"
 	"github.com/cogentcore/typesetting/fontscan"
 	"github.com/cogentcore/typesetting/language"
 )
@@ -39,6 +40,43 @@ type fontMap struct {
 	// costs more than shaping the rune when the query changes span by span.
 	faces    map[rune]*font.Face
 	faceSets map[string]map[rune]*font.Face
+
+	// variants are the faces of variable fonts with the weight of a query
+	// (as the variable web fonts of pages, of which the FontMap gives the
+	// default instance), which are faces of their own, as the runs that
+	// are shaped with them keep them for rendering.
+	variants map[faceVariant]*font.Face
+}
+
+// faceVariant is the key of a variant of a face of a variable font.
+type faceVariant struct {
+	face   *font.Face
+	weight float32
+}
+
+// wghtTag is the tag of the weight axis of variable fonts.
+var wghtTag = opentype.MustNewTag("wght")
+
+// variant returns the face with the weight of the query, for a variable
+// font with a weight axis, or the face itself.
+func (fm *fontMap) variant(face *font.Face) *font.Face {
+	if face == nil || !fm.hasQuery || fm.query.Aspect.Weight == 0 {
+		return face
+	}
+	key := faceVariant{face, float32(fm.query.Aspect.Weight)}
+	if v, ok := fm.variants[key]; ok {
+		return v
+	}
+	v := font.NewFace(face.Font)
+	v.SetVariations([]font.Variation{{Tag: wghtTag, Value: key.weight}})
+	if len(v.Coords()) == 0 { // not a variable font
+		v = face
+	}
+	if fm.variants == nil || len(fm.variants) >= 256 {
+		fm.variants = map[faceVariant]*font.Face{}
+	}
+	fm.variants[key] = v
+	return v
 }
 
 // ResolveFace returns the face of the rune for the query and script.
@@ -55,7 +93,7 @@ func (fm *fontMap) ResolveFace(r rune) *font.Face {
 	if face, ok := fm.faces[r]; ok {
 		return face
 	}
-	face := fm.FontMap.ResolveFace(r)
+	face := fm.variant(fm.FontMap.ResolveFace(r))
 	fm.faces[r] = face
 	return face
 }

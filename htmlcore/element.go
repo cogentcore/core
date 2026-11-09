@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/core"
@@ -14,8 +15,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/text/lines"
-	"cogentcore.org/core/text/textcore"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -54,6 +54,9 @@ func handleElement(ctx *Context) {
 	if h, ok := ctx.ElementHandlers[tag]; ok && h(ctx) {
 		return
 	}
+	if ctx.iconNodes[ctx.Node] {
+		return // the icon of a text field (see [Context.inputIcons])
+	}
 	display := ctx.displayOf(ctx.Node)
 	if display == "none" && !documentTags[tag] {
 		return // not rendered, and neither are its children
@@ -86,7 +89,13 @@ func handleElement(ctx *Context) {
 			}
 		}
 	case "li":
-		handleListItem(ctx)
+		// as a list item when its display is list-item (the default),
+		// also when it is blockified (as in a flex container)
+		if d := ctx.declaration(ctx.Node, "display"); d == "" || d == "list-item" {
+			handleListItem(ctx)
+		} else { // as a box of its display (as inline-flex), without a marker
+			newWidget = handleBox(ctx, tag, display)
+		}
 	case "select":
 		handleSelect(ctx)
 	case "button":
@@ -98,9 +107,12 @@ func handleElement(ctx *Context) {
 			newWidget = handleInput(ctx)
 		}
 	case "textarea":
-		buf := lines.NewLines()
-		buf.SetText([]byte(ExtractText(ctx)))
-		newWidget = New[textcore.Editor](ctx).SetLines(buf)
+		// a text field, which wraps its text on lines (an editor is only
+		// for monospaced text)
+		tf := New[core.TextField](ctx).SetText(ExtractText(ctx)).SetType(core.TextFieldOutlined)
+		cssFieldBorder(tf)
+		tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
+		newWidget = tf
 	case "svg":
 		handleSVG(ctx)
 	case "img":
@@ -111,6 +123,9 @@ func handleElement(ctx *Context) {
 		newWidget = handleCell(ctx, tag)
 	case "thead", "tbody", "tfoot", "tr":
 		ctx.NewParent = ctx.tableFor(ctx.Node)
+	case "colgroup", "col":
+		// the columns of a table, which have no boxes of their own (and
+		// the white space in a colgroup is not a cell of the table)
 	default:
 		switch {
 		case textBlockTags[tag]:
@@ -185,6 +200,16 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 		ctx.NewParent = ctx.BlockParent
 		ctx.inlineParent = nil
 	case isBlockDisplay(display) || tag == "body" || strings.HasPrefix(display, "inline-"):
+		if container, inline := ctx.isContainer(ctx.Node); container {
+			w := New[containerFrame](ctx)
+			w.inline = inline
+			if ctx.containers == nil {
+				ctx.containers = map[*html.Node]*containerFrame{}
+			}
+			ctx.containers[ctx.Node] = w
+			ctx.NewParent = w
+			return w
+		}
 		w := New[core.Frame](ctx)
 		ctx.NewParent = w
 		return w
@@ -200,6 +225,18 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 // the content of details.
 func (c *Context) arrange(n *html.Node, fr *core.Frame) {
 	switch c.displayOf(n) {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		c.arrangeOrder(fr)
+	}
+	switch c.displayOf(n) {
+	case "flex", "inline-flex":
+		if strings.HasSuffix(c.flexDirection(n), "-reverse") {
+			// the items from the end (as the image of the lead story of
+			// theguardian.com, on the right of its text by row-reverse)
+			slices.Reverse(fr.Children)
+		}
+	}
+	switch c.displayOf(n) {
 	case "grid", "inline-grid":
 		c.arrangeGrid(n, fr)
 	case "block", "list-item", "flow-root", "inline-block":
@@ -210,8 +247,52 @@ func (c *Context) arrange(n *html.Node, fr *core.Frame) {
 	}
 }
 
+// arrangeOrder puts the children of the given flex or grid container in
+// the order of their order property (stably: those of the same order are
+// in the order of the document), as in CSS (as the images of the stories
+// of npr.org, before their titles by an order of -1).
+func (c *Context) arrangeOrder(fr *core.Frame) {
+	orders := map[tree.Node]int{}
+	for _, k := range fr.Children {
+		kw, ok := k.(core.Widget)
+		if !ok {
+			continue
+		}
+		if kn := NodeOf(kw); kn != nil {
+			if o, err := strconv.Atoi(strings.TrimSpace(c.declaration(kn, "order"))); err == nil && o != 0 {
+				orders[k] = o
+			}
+		}
+	}
+	if len(orders) == 0 {
+		return
+	}
+	slices.SortStableFunc(fr.Children, func(a, b tree.Node) int { return orders[a] - orders[b] })
+}
+
+// flexDirection returns the flex-direction of the given element, of the
+// longhand or the flex-flow shorthand that is last in the cascade.
+func (c *Context) flexDirection(n *html.Node) string {
+	prop, v := c.lastDeclaration(n, "flex-direction", "flex-flow")
+	v = strings.ToLower(strings.TrimSpace(v))
+	if prop == "flex-flow" {
+		for _, f := range strings.Fields(v) {
+			if strings.HasPrefix(f, "row") || strings.HasPrefix(f, "column") {
+				return f
+			}
+		}
+		return ""
+	}
+	return v
+}
+
 // linkFrame makes the given frame of an a element open the given URL.
 func (c *Context) linkFrame(w *core.Frame, href string) {
+	if c.linkFrames == nil {
+		c.linkFrames = map[*html.Node]string{}
+	}
+	link := c.Node
+	c.linkFrames[link] = href
 	w.SetProperty("href", href)
 	w.SetTooltip(href)
 	w.Styler(func(s *styles.Style) {
@@ -220,8 +301,41 @@ func (c *Context) linkFrame(w *core.Frame, href string) {
 	})
 	w.OnClick(func(e events.Event) {
 		e.SetHandled()
-		c.OpenURL(href, e)
+		c.openLink(link, href, e)
 	})
+}
+
+// handleInLink makes the given widget of the given node, if it is in a
+// link that is a frame (see linkFrame), open the link when clicked on, as
+// the frame does: the widgets in it that can be pressed, as its text,
+// otherwise get the clicks instead of the frame.
+func (c *Context) handleInLink(node *html.Node, w core.Widget) {
+	c.handleInButton(node, w)
+	if len(c.linkFrames) == 0 {
+		return
+	}
+	for n := node; n != nil; n = n.Parent {
+		href, ok := c.linkFrames[n]
+		if !ok {
+			continue
+		}
+		if n == node {
+			if frameOf(w) != nil {
+				return // the link frame itself
+			}
+		}
+		wb := w.AsWidget()
+		wb.Styler(func(s *styles.Style) { s.Cursor = cursors.Pointer })
+		link := n
+		wb.OnClick(func(e events.Event) {
+			if e.IsHandled() {
+				return
+			}
+			e.SetHandled()
+			c.openLink(link, href, e)
+		})
+		return
+	}
 }
 
 // flattensBlock returns whether the given block element, in the flow of
@@ -281,14 +395,28 @@ func (ctx *Context) flattensBlock(n *html.Node) bool {
 func (ctx *Context) unstyledBlock(n *html.Node) bool {
 	for _, d := range ctx.declarations(n) {
 		switch d.Property {
-		case "display", "unicode-bidi":
+		case "display", "unicode-bidi", "will-change", "orphans", "widows", "user-select", "-webkit-user-select":
 		default:
-			if !strings.HasPrefix(d.Property, "--") {
+			if !strings.HasPrefix(d.Property, "--") && !noBoxProperty(d.Property) {
 				return false
 			}
 		}
 	}
 	return ctx.displayOf(n) == "block"
+}
+
+// noBoxProperty returns whether the given property does not change the box
+// of an element or what is drawn for it (as the animations and transitions
+// of the rule for reduced motion of Wikipedia, for all elements, so that
+// its sections were not flattened, and the next one was below the floats
+// of one).
+func noBoxProperty(prop string) bool {
+	for _, p := range []string{"animation", "transition", "scroll-", "page-break-", "break-"} {
+		if strings.HasPrefix(prop, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // hasFloatChild returns whether the given element has a child that floats.
@@ -302,4 +430,28 @@ func (ctx *Context) hasFloatChild(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// handleInButton makes the text of the given widget, if it is in a button
+// element (at the given node or in it), not selectable, as in browsers, so
+// that the button gets the presses and clicks on it (as the toggles of the
+// contents of Wikipedia, whose text is in elements in the button).
+func (c *Context) handleInButton(node *html.Node, w core.Widget) {
+	if _, isText := w.(*core.Text); !isText {
+		return
+	}
+	for n := node; n != nil; n = n.Parent {
+		if n.Type == html.ElementNode && n.Data == "button" {
+			buttonText(w)
+			return
+		}
+	}
+}
+
+// buttonText makes the given text of a button not selectable, so that the
+// button gets the presses and clicks on it.
+func buttonText(w core.Widget) {
+	w.AsWidget().Styler(func(s *styles.Style) {
+		s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable, abilities.Slideable)
+	})
 }

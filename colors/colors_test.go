@@ -139,6 +139,14 @@ func ExampleFromHex_shortLower() {
 	// Output: {187 187 102 255} <nil>
 }
 
+func ExampleFromHex_shortOpacity() {
+	fmt.Println(FromHex("#F3A8"))
+	fmt.Println(FromHex("#0000"))
+	// Output:
+	// {136 27 91 136} <nil>
+	// {0 0 0 0} <nil>
+}
+
 func ExampleFromHex_error() {
 	fmt.Println(FromHex("#ef"))
 	// Output: {0 0 0 0} colors.FromHex: could not process "ef"
@@ -207,4 +215,19 @@ func ExampleAdd() {
 func ExampleSub() {
 	fmt.Println(Sub(Purple, Blue))
 	// Output: {128 0 0 0}
+}
+
+func ExampleFromString_cssAlpha() {
+	fmt.Println(FromString("rgba(255, 0, 0, 0.5)"))
+	fmt.Println(FromString("rgb(255 0 0 / 50%)"))
+	fmt.Println(FromString("rgb(100% 0% 0%)"))
+	fmt.Println(FromString("hsl(120deg 100% 25% / 0.5)"))
+	_, err := FromString("rgb(0, 100%, 255)")
+	fmt.Println(err != nil)
+	// Output:
+	// {128 0 0 128} <nil>
+	// {128 0 0 128} <nil>
+	// {255 0 0 255} <nil>
+	// {0 64 0 128} <nil>
+	// true
 }

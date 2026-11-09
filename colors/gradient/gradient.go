@@ -194,8 +194,21 @@ func CopyOf(g Gradient) Gradient {
 	case *Radial:
 		res = &Radial{}
 		CopyFrom(res, g)
+	case Copier:
+		res = g.CopyGradient()
 	}
 	return res
+}
+
+// Copier is a [Gradient] of another type than [Linear] and [Radial] (as
+// the patterns of SVG, and the masked backgrounds of HTML) that can be
+// copied, by [CopyOf]. Its color should have the [Base.ApplyFuncs] of its
+// copy applied to it.
+type Copier interface {
+	Gradient
+
+	// CopyGradient returns a copy of the gradient, with a copy of its Base.
+	CopyGradient() Gradient
 }
 
 // CopyStopsFrom copies the base gradient stops from the given base gradient

@@ -127,7 +127,8 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	// with columns, as for the references of Wikipedia) is that of the
 	// child, which is split into the columns, as in CSS.
 	for fr.NumChildren() == 1 {
-		k, ok := fr.Child(0).(*core.Frame)
+		k := frameOf(fr.Child(0))
+		ok := k != nil
 		if !ok || k.NumChildren() < 2 {
 			break
 		}

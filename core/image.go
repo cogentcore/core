@@ -5,6 +5,10 @@
 package core
 
 import (
+	"image/color"
+	stddraw "image/draw"
+
+	"cogentcore.org/core/paint"
 	"image"
 	"io/fs"
 
@@ -13,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/renderers/rasterx"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
@@ -28,6 +33,19 @@ type Image struct {
 
 	// Image is the [image.Image].
 	Image image.Image `xml:"-" json:"-"`
+
+	// NaturalDp is whether the natural size of the image (when it has no
+	// Min size) is its size in pixels in dp, as for the CSS px of images
+	// in web pages, rather than in dots: on a screen with two dots per dp,
+	// it is twice as large, as in browsers (as the photos of the postings
+	// of craigslist.org, which were half their size on retina screens).
+	NaturalDp bool `set:"-" display:"-"`
+
+	// Density is the number of pixels of the image per dp of its natural
+	// size with NaturalDp (as of a candidate of the srcset of an img in a
+	// web page, as an image of 2x is shown at half its size in pixels);
+	// 0 is 1.
+	Density float32 `set:"-" display:"-"`
 
 	// prevImage is the cached last [Image.Image].
 	prevImage image.Image
@@ -76,6 +94,12 @@ func (im *Image) SizeUp() {
 	if im.Image != nil {
 		sz := &im.Geom.Size
 		obj := math32.FromPoint(im.Image.Bounds().Size())
+		if dp := im.Styles.UnitContext.Dots(units.UnitDp); im.NaturalDp && dp > 0 {
+			obj = obj.MulScalar(dp)
+			if im.Density > 0 {
+				obj = obj.DivScalar(im.Density)
+			}
+		}
 		csz := sz.Actual.Content
 		// if only one min size is specified, then allow the other to expand
 		if im.Styles.Min.Y.Value != 0 && im.Styles.Min.X.Value == 0 {
@@ -103,12 +127,15 @@ func (im *Image) SizeUp() {
 }
 
 // SizeDown sets the height of an image whose width is relative
-// to its parent (and whose height is not set) from that width,
-// which is only known now, keeping the aspect ratio of the image.
+// to its parent, or is limited by a Max relative to it (as an image of
+// max-width: 100% in web pages), and whose height is not set, from that
+// width, which is only known now, keeping the aspect ratio of the image.
 func (im *Image) SizeDown(iter int) bool {
 	redo := im.WidgetBase.SizeDown(iter)
-	minX, minY := im.Styles.Min.X, im.Styles.Min.Y
-	if im.Image == nil || minY.Value != 0 || (minX.Unit != units.UnitPw && minX.Unit != units.UnitPh) {
+	minX, minY, maxX := im.Styles.Min.X, im.Styles.Min.Y, im.Styles.Max.X
+	// (a custom length is of the parent too, as min(2rem, 100%))
+	relative := func(v units.Value) bool { return v.Unit == units.UnitPw || v.Unit == units.UnitPh || v.Custom != nil }
+	if im.Image == nil || minY.Value != 0 || (!relative(minX) && !relative(maxX)) {
 		return redo
 	}
 	sz := &im.Geom.Size
@@ -160,6 +187,11 @@ func (im *Image) Render() {
 		} else {
 			rimg = im.Styles.ResizeImage(im.Image, im.Geom.Size.Actual.Content)
 		}
+		// the image is in its rounded corners, as in CSS (as the round
+		// avatars of lobste.rs)
+		if radius := im.Styles.Border.Radius.Dots(); !sides.AreZero(radius.Sides) {
+			rimg = roundCorners(rimg, radius)
+		}
 		im.prevRenderImage = rimg
 	}
 	pim := im.Scene.Painter.DrawImage(rimg, im.Image, r, sp, draw.Over)
@@ -172,4 +204,40 @@ func (im *Image) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(im.Open).SetIcon(icons.Open)
 	})
+}
+
+// roundCorners returns the given image with its corners rounded by the
+// given radii (top left, top right, bottom right, bottom left), outside of
+// which it is transparent, with antialiased edges.
+func roundCorners(img image.Image, radius sides.Floats) image.Image {
+	b := img.Bounds()
+	w, h := float32(b.Dx()), float32(b.Dy())
+	radius = paint.ClampBorderRadius(radius, w, h)
+	out := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	mask := image.NewAlpha(out.Bounds())
+	for y := 0; y < b.Dy(); y++ {
+		for x := 0; x < b.Dx(); x++ {
+			px, py := float32(x)+0.5, float32(y)+0.5
+			// the center of the corner that the pixel is in, if any
+			var r, cx, cy float32
+			switch {
+			case px < radius.Top && py < radius.Top:
+				r, cx, cy = radius.Top, radius.Top, radius.Top
+			case px > w-radius.Right && py < radius.Right:
+				r, cx, cy = radius.Right, w-radius.Right, radius.Right
+			case px > w-radius.Bottom && py > h-radius.Bottom:
+				r, cx, cy = radius.Bottom, w-radius.Bottom, h-radius.Bottom
+			case px < radius.Left && py > h-radius.Left:
+				r, cx, cy = radius.Left, radius.Left, h-radius.Left
+			}
+			a := float32(1)
+			if r > 0 {
+				d := math32.Hypot(px-cx, py-cy)
+				a = math32.Clamp(r-d+0.5, 0, 1)
+			}
+			mask.SetAlpha(x, y, color.Alpha{uint8(a*255 + 0.5)})
+		}
+	}
+	stddraw.DrawMask(out, out.Bounds(), img, b.Min, mask, image.Point{}, stddraw.Over)
+	return out
 }

@@ -14,6 +14,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	xhtml "golang.org/x/net/html"
@@ -39,12 +41,128 @@ func (c *Context) isInlineLevel(n *xhtml.Node) bool {
 		if _, ok := c.ElementHandlers[n.Data]; ok {
 			return false
 		}
+		if n.Data == "colgroup" || n.Data == "col" {
+			return false // the columns of a table, which have no boxes
+		}
+		if c.absoluteInRun(n) {
+			// out of the flow, in the run where it is, which it does not
+			// break into lines (as the reply info of the postings of
+			// craigslist.org, between the reply button and the actions)
+			return true
+		}
 		switch c.displayOf(n) {
 		case "", "inline", "inline-block", "inline-flex", "inline-grid", "inline-table":
 			return true
 		}
 	}
 	return false
+}
+
+// isInlineBox returns whether the given inline element is a box of its
+// own in its line, which is not all text in the markup of a [core.Text]
+// (which has no borders or padding): an element with a border that does
+// not wrap (as the tags of lobste.rs, with rounded corners), or with a
+// border or horizontal padding and no text beside it (as the padded links
+// of the footer of lobste.rs, in a nav). Elements in text that wraps (as
+// links with a bottom border, or code with padding) are text.
+func (c *Context) isInlineBox(n *xhtml.Node) bool {
+	// only an element of text, which is text otherwise (with no images)
+	for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
+		if !c.isTextElement(ch) {
+			return false
+		}
+	}
+	border := false
+	for _, prop := range []string{"border", "border-top", "border-right", "border-bottom", "border-left", "border-width", "border-style"} {
+		if v := strings.ToLower(strings.TrimSpace(c.declaration(n, prop))); !noLength(v) {
+			border = true
+			break
+		}
+	}
+	if ws := strings.TrimSpace(c.declaration(n, "white-space")); border && (ws == "nowrap" || ws == "pre") {
+		return true
+	}
+	padding := border
+	for _, prop := range []string{"padding-left", "padding-right", "padding-inline", "padding-inline-start", "padding-inline-end"} {
+		if !noLength(strings.TrimSpace(c.declaration(n, prop))) {
+			padding = true
+		}
+	}
+	if v := strings.Fields(c.declaration(n, "padding")); len(v) > 0 {
+		// the horizontal padding is the second value, or the only one
+		h := v[0]
+		if len(v) > 1 {
+			h = v[1]
+		}
+		padding = padding || !noLength(h)
+	}
+	if !padding || n.Parent == nil || n.Parent.Type != xhtml.ElementNode {
+		return false
+	}
+	// in a block, not in an inline element (whose margins would be lost,
+	// as the links of the navigation of w3.org, in inline items)
+	switch strings.TrimSpace(c.declaration(n.Parent, "display")) {
+	case "", "inline", "contents":
+		return false
+	}
+	for s := n.Parent.FirstChild; s != nil; s = s.NextSibling {
+		if s.Type == xhtml.TextNode && strings.TrimSpace(s.Data) != "" {
+			return false
+		}
+	}
+	return true
+}
+
+// noLength returns whether the given CSS value is no length (or none).
+func noLength(v string) bool {
+	v = strings.ToLower(v)
+	return v == "" || strings.Contains(v, "none") || strings.Contains(v, "hidden") || v == "0" || strings.HasPrefix(v, "0 ") || strings.HasPrefix(v, "0px")
+}
+
+// absoluteInRun returns whether the given element is absolutely positioned
+// (or fixed) between inline-level content in a block container, which it is
+// in the run of, as it is out of the flow (in CSS, it is blockified, but it
+// does not break the line that it is in).
+func (c *Context) absoluteInRun(n *xhtml.Node) bool {
+	pos := strings.TrimSpace(c.declaration(n, "position"))
+	if (pos != "absolute" && pos != "fixed") || n.Parent == nil || c.displayOf(n) == "none" {
+		return false
+	}
+	switch c.displayOf(n.Parent) {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		return false
+	}
+	// the element (or text) before and after it, which are inline-level
+	sibling := func(next bool) *xhtml.Node {
+		s := n.PrevSibling
+		if next {
+			s = n.NextSibling
+		}
+		for s != nil {
+			if s.Type == xhtml.ElementNode || (s.Type == xhtml.TextNode && strings.TrimSpace(s.Data) != "") {
+				return s
+			}
+			if next {
+				s = s.NextSibling
+			} else {
+				s = s.PrevSibling
+			}
+		}
+		return nil
+	}
+	inline := func(s *xhtml.Node) bool {
+		if s == nil {
+			return false
+		}
+		if s.Type == xhtml.TextNode {
+			return true
+		}
+		if p := strings.TrimSpace(c.declaration(s, "position")); p == "absolute" || p == "fixed" {
+			return false
+		}
+		return c.isInlineLevel(s)
+	}
+	return inline(sibling(false)) && inline(sibling(true))
 }
 
 // isTextElement returns whether the given element is all text, which is
@@ -105,11 +223,29 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 
 	var buf strings.Builder
 	start := true // at the start of the run
-	flush := func() {
+	// flush makes a text of the inline content so far; between is whether
+	// it is between inline widgets (before one, after content)
+	flush := func(between bool) {
 		str := buf.String()
 		buf.Reset()
 		if pre && last.NextSibling == nil { // a last line break makes no line
 			str = lastBreak.ReplaceAllString(str, "$1")
+		}
+		if str != "" && strings.TrimSpace(str) == "" && !pre && between && container != parent {
+			// White space between inline widgets (as the words in inline
+			// blocks of the heading of github.com) is a space, as in
+			// browsers: a box as wide as one in the font, as a text of
+			// only a no-break space has no width (as trailing space).
+			sp := core.NewFrame(container)
+			sp.SetName("space")
+			tree.SetUniqueName(sp)
+			c.handleWidget(nil, sp)
+			sp.FinalStyler(func(s *styles.Style) {
+				s.Min.X = units.Em(0.28)
+				s.Grow.Set(0, 0)
+			})
+			c.blocks[sp].display = "inline"
+			return
 		}
 		if str == "" || (strings.TrimSpace(str) == "" && !pre) {
 			return
@@ -133,17 +269,24 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			c.OpenURL(tl.URL, e)
 		})
 		c.handleWidget(nil, tx)
+		c.handleInLink(first.Parent, tx) // the element that the run is in
 		if container != parent || c.display(parent) == anonymousInline {
 			c.blocks[tx].display = "inline"
 		} else {
 			c.blocks[tx].display = "block"
 		}
 	}
+	// the text of the ::before and ::after of the element that the run is
+	// in, at its start and end (as for elements that are widgets, as the
+	// edit links of Wikipedia, which are inline blocks)
+	if el := first.Parent; el != nil && el.FirstChild == first {
+		buf.WriteString(c.pseudoMarkup(el, "before"))
+	}
 	for n := first; ; n = n.NextSibling {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
 			// a line break in a row of widgets ends the row, and the
 			// widgets after it are in another row (each is aligned)
-			flush()
+			flush(false)
 			start = true
 			container = newContainer()
 			if n == last {
@@ -152,7 +295,7 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			continue
 		}
 		if n.Type == xhtml.ElementNode && !c.isTextElement(n) && c.displayOf(n) != "none" {
-			flush()
+			flush(!start)
 			start = false
 			c.inlineParent = container
 			c.BlockParent = container
@@ -164,7 +307,10 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 			break
 		}
 	}
-	flush()
+	if el := last.Parent; el != nil && el.LastChild == last {
+		buf.WriteString(c.pseudoMarkup(el, "after"))
+	}
+	flush(false)
 	c.inlineParent = nil
 }
 
@@ -212,9 +358,11 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 		var sb strings.Builder
 		start, end := c.nodeMarkup(n, pre)
 		sb.WriteString(start)
+		sb.WriteString(c.pseudoMarkup(n, "before"))
 		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
 			sb.WriteString(c.inlineMarkup(ch, pre))
 		}
+		sb.WriteString(c.pseudoMarkup(n, "after"))
 		sb.WriteString(end)
 		return sb.String()
 	}
@@ -308,7 +456,13 @@ func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 				continue
 			}
 		case "font-family":
-			val = fontFamily(val).String()
+			if c.WebFonts && webFontFamily(val) != "" {
+				// the custom font of the text (as the web font of the
+				// element of the text, which runs cannot have their own)
+				val = rich.Custom.String()
+			} else {
+				val = fontFamily(val).String()
+			}
 		case "color", "background-color":
 			if cl, ok := cssColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
 				val = colors.AsHex(cl)

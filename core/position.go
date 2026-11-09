@@ -82,6 +82,13 @@ func (fr *Frame) sizeDownOutOfFlow() {
 			return tree.Continue
 		}
 		sz := &cwb.Geom.Size
+		if cwb.styleSizeUpdate() {
+			// its percentages are of its containing block (see
+			// [WidgetBase.percentBase]), as its margins, which are in
+			// the space of its size from before
+			cwb.spaceFromStyle()
+			sz.SetTotalFromContent(&sz.Actual)
+		}
 		in := cwb.Styles.Inset.Dots()
 		set := cwb.Styles.InsetSet
 		_, cbsz := cwb.containingBlock().paddingBox()
@@ -99,10 +106,11 @@ func (fr *Frame) sizeDownOutOfFlow() {
 				}
 			}
 		}
-		if set.Left && set.Right {
+		center := cwb.Styles.InsetCenter
+		if set.Left && set.Right && !center[0] {
 			sz.Actual.Total.X = max(cbsz.X-in.Left-in.Right, 0)
 		}
-		if set.Top && set.Bottom {
+		if set.Top && set.Bottom && !center[1] {
 			sz.Actual.Total.Y = max(cbsz.Y-in.Top-in.Bottom, 0)
 		}
 		sz.SetContentFromTotal(&sz.Actual)
@@ -125,13 +133,18 @@ func (wb *WidgetBase) setPosOutOfFlow(parPos math32.Vector2) {
 	set := wb.Styles.InsetSet
 	sz := wb.Geom.Size.Actual.Total
 	pos := wb.Geom.RelPos.Add(parPos) // the static position
+	center := wb.Styles.InsetCenter
 	switch {
+	case set.Left && set.Right && center[0]: // centered between them
+		pos.X = cbpos.X + in.Left + math32.Floor((cbsz.X-in.Left-in.Right-sz.X)/2)
 	case set.Left:
 		pos.X = cbpos.X + in.Left
 	case set.Right:
 		pos.X = cbpos.X + cbsz.X - in.Right - sz.X
 	}
 	switch {
+	case set.Top && set.Bottom && center[1]:
+		pos.Y = cbpos.Y + in.Top + math32.Floor((cbsz.Y-in.Top-in.Bottom-sz.Y)/2)
 	case set.Top:
 		pos.Y = cbpos.Y + in.Top
 	case set.Bottom:
@@ -161,6 +174,83 @@ func (wb *WidgetBase) relativeOffset() math32.Vector2 {
 	return off
 }
 
+// stickyOffset returns the offset of a [styles.PositionSticky] widget at
+// the given position in the layout of the given parent: the widget stays
+// at its [styles.Style.Inset] from the edges of the visible part of the
+// frame that it scrolls in (as it is scrolled past them), within the
+// content of its parent.
+func (wb *WidgetBase) stickyOffset(pwb *WidgetBase, pos math32.Vector2) math32.Vector2 {
+	var off math32.Vector2
+	sf := wb.parentScrollFrame()
+	if sf == nil {
+		return off
+	}
+	in := wb.Styles.Inset.Dots()
+	set := wb.Styles.InsetSet
+	size := wb.Geom.Size.Actual.Total
+	// the visible part of the scroll frame, and the content of the parent
+	// (all of the content of the scroll frame, if it is the parent)
+	view := math32.Box2{Min: sf.Geom.Pos.Content, Max: sf.Geom.Pos.Content.Add(sf.Geom.Size.Actual.Content)}
+	cmin := pwb.Geom.Pos.Content
+	csize := pwb.Geom.Size.Actual.Content
+	if pwb == sf.AsWidget() {
+		cmin = cmin.Add(sf.Geom.Scroll.Round())
+		csize = sf.Geom.Size.Internal
+	}
+	cmax := cmin.Add(csize)
+	for d := math32.X; d <= math32.Y; d++ {
+		start, end := set.Left, set.Right
+		ins, ine := in.Left, in.Right
+		if d == math32.Y {
+			start, end = set.Top, set.Bottom
+			ins, ine = in.Top, in.Bottom
+		}
+		p, sz := pos.Dim(d), size.Dim(d)
+		np := p
+		if start {
+			np = max(np, view.Min.Dim(d)+ins)
+		}
+		if end {
+			np = min(np, view.Max.Dim(d)-ine-sz)
+		}
+		// within the content of its parent (but not before its position
+		// in the layout for start, or after it for end)
+		if np > p {
+			np = max(min(np, cmax.Dim(d)-sz), p)
+		} else if np < p {
+			np = min(max(np, cmin.Dim(d)), p)
+		}
+		off.SetDim(d, np-p)
+	}
+	return off
+}
+
+// translateOffset returns the offset of the [styles.Style.Translate] of the
+// widget in dots, with percentages of the element width and height of its
+// own size.
+func (wb *WidgetBase) translateOffset() math32.Vector2 {
+	tr := &wb.Styles.Translate
+	if tr.X.Value == 0 && tr.Y.Value == 0 {
+		return math32.Vector2{}
+	}
+	sz := wb.Geom.Size.Actual.Total
+	dots := func(v units.Value, size float32) float32 {
+		switch v.Unit {
+		case units.UnitEw, units.UnitEh:
+			return v.Value / 100 * size
+		}
+		return wb.Styles.UnitContext.ToDots(v.Value, v.Unit)
+	}
+	return math32.Vec2(dots(tr.X, sz.X), dots(tr.Y, sz.Y))
+}
+
+// stacked returns whether the widget is rendered in the order of its
+// z-index among its siblings: if it is positioned (not static), or has a
+// z-index (see [styles.Style.ZIndex]).
+func (wb *WidgetBase) stacked() bool {
+	return wb.Styles.Position != styles.PositionStatic || wb.Styles.ZIndex != 0
+}
+
 // renderOrder returns the children of the widget in the order that they are
 // rendered: those that float after the others (over their backgrounds),
 // and those that are positioned (not static) after them,
@@ -169,7 +259,7 @@ func (wb *WidgetBase) relativeOffset() math32.Vector2 {
 func (wb *WidgetBase) renderOrder() []Widget {
 	positioned := false
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-		if cwb.Styles.Position != styles.PositionStatic || cwb.isFloat() {
+		if cwb.stacked() || cwb.isFloat() {
 			positioned = true
 			return tree.Break
 		}
@@ -187,7 +277,7 @@ func (wb *WidgetBase) renderOrder() []Widget {
 	wb.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		it := item{w: cw}
 		switch {
-		case cwb.Styles.Position != styles.PositionStatic:
+		case cwb.stacked():
 			it.layer, it.z = 2, cwb.Styles.ZIndex
 			if it.z < 0 {
 				it.layer = -1

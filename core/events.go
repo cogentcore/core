@@ -362,7 +362,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 
 	em.mouseInBBox = nil
 	em.getMouseInBBox(sc, pos)
-	sortByRenderLayer(em.mouseInBBox)
+	em.mouseInBBox = sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
 	if n == 0 {
@@ -804,13 +804,26 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
-		if !cwb.IsVisible() {
+		if cwb.StateIs(states.Invisible) { // (its ancestors are displayable)
+			return tree.Break
+		}
+		if cwb.Styles.Opacity <= 0 && cwb.Styles.Abilities == 0 {
+			// it is not rendered, and neither is anything in it (as for
+			// visibility: hidden in CSS): only a transparent widget that
+			// is clickable (as a hidden checkbox over a button) gets events
 			return tree.Break
 		}
 		if !cwb.posInScBBox(pos) {
+			if cwb.noClip() {
+				// its children can be outside of it (as positioned ones,
+				// as the toggles of the contents of Wikipedia)
+				return tree.Continue
+			}
 			return tree.Break
 		}
-		em.mouseInBBox = append(em.mouseInBBox, cw)
+		if !cwb.Styles.Abilities.HasFlag(abilities.NoPointerEvents) {
+			em.mouseInBBox = append(em.mouseInBBox, cw)
+		}
 		if cwb.Parts != nil {
 			em.getMouseInBBox(cwb.Parts, pos)
 		}
@@ -826,13 +839,33 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 	})
 }
 
+// WidgetAt returns the widget that mouse events at the given position (in
+// the dots of the scene) go to first: the deepest one rendered on top
+// there (see [sortByRenderLayer]), as for elementFromPoint in the scripts
+// of web pages. It returns nil if there is none.
+func (sc *Scene) WidgetAt(pos image.Point) Widget {
+	em := &sc.Events
+	saved := em.mouseInBBox
+	em.mouseInBBox = nil
+	em.getMouseInBBox(sc, pos)
+	ws := sortByRenderLayer(em.mouseInBBox)
+	em.mouseInBBox = saved
+	if len(ws) == 0 {
+		return nil
+	}
+	return ws[len(ws)-1]
+}
+
 // sortByRenderLayer sorts the given widgets under the mouse (in the order
 // of the tree, with those that are handled first last) by the order in
 // which they are rendered (see [WidgetBase.renderOrder]), so that a widget
 // that is rendered over another (as one with a position) gets the events.
 // Of two widgets, the one in the child of their nearest common ancestor
 // that is rendered later is later, as is a widget in another.
-func sortByRenderLayer(ws []Widget) {
+// It returns only the widget that is rendered on top and the widgets that
+// it is in, as in CSS: the widgets under one that is rendered over them
+// (as those under an open menu) do not get the events (as hover).
+func sortByRenderLayer(ws []Widget) []Widget {
 	layered := false
 	for _, w := range ws {
 		if renderLayer(w.AsWidget()) != 0 {
@@ -841,7 +874,7 @@ func sortByRenderLayer(ws []Widget) {
 		}
 	}
 	if !layered {
-		return
+		return ws
 	}
 	// path returns the widgets from the root to the given one
 	path := func(w *WidgetBase) []*WidgetBase {
@@ -864,7 +897,7 @@ func sortByRenderLayer(ws []Widget) {
 		pa, pb := paths[a], paths[b]
 		for i := 0; i < len(pa) && i < len(pb); i++ {
 			if pa[i] != pb[i] { // the children of their common ancestor
-				if c := cmp.Compare(renderLayer(pa[i]), renderLayer(pb[i])); c != 0 {
+				if c := cmp.Compare(pathLayer(pa, i), pathLayer(pb, i)); c != 0 {
 					return c
 				}
 				break
@@ -872,11 +905,40 @@ func sortByRenderLayer(ws []Widget) {
 		}
 		return cmp.Compare(a, b) // the order of the tree
 	})
-	sorted := make([]Widget, len(ws))
-	for i, j := range idx {
-		sorted[i] = ws[j]
+	top := paths[idx[len(idx)-1]]
+	in := make(map[*WidgetBase]bool, len(top))
+	for _, w := range top {
+		in[w] = true
 	}
-	copy(ws, sorted)
+	sorted := make([]Widget, 0, len(ws))
+	for _, j := range idx {
+		if in[ws[j].AsWidget()] {
+			sorted = append(sorted, ws[j])
+		}
+	}
+	return sorted
+}
+
+// pathLayer returns the layer in which the widget at the given index of the
+// given path (from the top) is rendered among its siblings (see
+// [renderLayer]), or that of a widget in it that is raised to a stacking
+// context above it (see [WidgetBase.raisedTo]), which is rendered over the
+// widgets after the ones that it is in, if that is higher.
+func pathLayer(path []*WidgetBase, i int) int {
+	l := renderLayer(path[i])
+	for j := i + 1; j < len(path); j++ {
+		r := path[j].raisedTo()
+		if r == nil {
+			continue
+		}
+		for k := 0; k < i; k++ {
+			if path[k] == r {
+				l = max(l, 2+path[j].Styles.ZIndex)
+				break
+			}
+		}
+	}
+	return l
 }
 
 // renderLayer returns the layer in which the widget is rendered among its
@@ -884,7 +946,7 @@ func sortByRenderLayer(ws []Widget) {
 // positioned (or -1 for a negative z-index), 1 if it floats, or else 0.
 func renderLayer(wb *WidgetBase) int {
 	switch {
-	case wb.Styles.Position != styles.PositionStatic:
+	case wb.stacked():
 		if wb.Styles.ZIndex < 0 {
 			return -1
 		}

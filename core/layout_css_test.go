@@ -139,3 +139,35 @@ func TestLayoutImagePercentWidth(t *testing.T) {
 		_ = math32.Vector2{}
 	})
 }
+
+// TestLayoutAlignBaseline tests a row aligned on baselines: texts of
+// different sizes have the same baseline, as a group at the end of the
+// line, and a frame without text is at the end of the line.
+func TestLayoutAlignBaseline(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Align.Items = styles.Baseline
+		s.Padding.Zero()
+		s.Gap.Zero()
+	})
+	big := NewText(row).SetText("Big")
+	big.Styler(func(s *styles.Style) { s.Font.Size = units.Dp(40) })
+	small := NewText(row).SetText("small")
+	small.Styler(func(s *styles.Style) { s.Font.Size = units.Dp(12) })
+	box := fixedFrame(row, 10, 10)
+	tall := fixedFrame(row, 10, 80) // the line is taller than the texts
+	layoutGeom(b, func() {
+		bigBase, ok := big.firstBaseline()
+		assert.True(t, ok)
+		smallBase, ok := small.firstBaseline()
+		assert.True(t, ok)
+		_, ok = box.firstBaseline()
+		assert.False(t, ok, "no text")
+		assert.InDelta(t, big.Geom.Pos.Total.Y+bigBase, small.Geom.Pos.Total.Y+smallBase, 1, "the same baseline")
+		lineEnd := tall.Geom.Pos.Total.Y + tall.Geom.Size.Actual.Total.Y
+		assert.InDelta(t, lineEnd, big.Geom.Pos.Total.Y+big.Geom.Size.Actual.Total.Y, 1, "the texts are at the end of the line")
+		assert.InDelta(t, lineEnd, box.Geom.Pos.Total.Y+box.Geom.Size.Actual.Total.Y, 1, "a frame without text is at the end")
+	})
+}

@@ -1,0 +1,7 @@
+@font-face{font-family:Mona Sans;src:url("data:,")format("woff2 supports variations"),url("data:,")format("woff2-variations");font-weight:200 900;font-display:swap;font-synthesis:none;font-feature-settings:"liga" 0}
+@font-face{font-family:MonaSansFallback;size-adjust:104.5%;ascent-override:71%;src:local(Arial)}
+@font-face{font-family:MonaSansHeaderFallback;size-adjust:103.1%;ascent-override:70%;src:local(Arial Bold)}
+@font-face{font-family:Hubot Sans;src:url("data:,")format("woff2 supports variations"),url("data:,")format("woff2-variations");font-weight:200 900;font-display:swap}
+@font-face{font-family:Mona Sans Mono;src:url("data:,")format("woff2 supports variations"),url("data:,")format("woff2-variations");font-weight:200 900;font-display:swap;font-synthesis:none}
+@media (prefers-reduced-motion:reduce){*,:before,:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+html[data-css-features~=site_disable_smooth_scrolling i]{scroll-behavior:auto!important}

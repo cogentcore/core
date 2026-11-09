@@ -49,13 +49,16 @@ func (g *Line) Render(sv *SVG) {
 		return
 	}
 	pc := g.Painter(sv)
+	if g.pushLayer(sv) {
+		defer pc.PopContext()
+	}
 	pc.Line(g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Draw()
 
 	g.PushContext(sv)
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
-		mrk.RenderMarker(sv, g.Start, ang, g.Paint.Stroke.Width.Dots)
+		mrk.RenderMarkerStart(sv, g.Start, ang, g.Paint.Stroke.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)

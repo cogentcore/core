@@ -736,6 +736,13 @@ func (tf *TextField) cursorStart() {
 	tf.NeedsRender()
 }
 
+// SetCursorEnd moves the cursor to the end of the text, as for a text
+// field that replaces another in which the user was typing.
+func (tf *TextField) SetCursorEnd() *TextField {
+	tf.cursorEnd()
+	return tf
+}
+
 // cursorEnd moves the cursor to the end of the text, updating selection
 // if select mode is active.
 func (tf *TextField) cursorEnd() {
@@ -1728,7 +1735,7 @@ func (tf *TextField) SizeUp() {
 func (tf *TextField) SizeDown(iter int) bool {
 	sz := &tf.Geom.Size
 	prevContent := sz.Actual.Content
-	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
+	sz.setInitContentMin(tf.styleMinDots())
 	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content, sz.Max) // get before update
 	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)

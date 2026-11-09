@@ -16,6 +16,7 @@ import (
 	"image"
 	"image/color"
 	"io"
+	"log/slog"
 	"strconv"
 	"strings"
 	"sync"
@@ -90,9 +91,11 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 	}
 	str = strings.TrimSpace(str)
 	if strings.HasPrefix(str, "url(") {
+		// A url that is not found (or is of an element that is not
+		// supported, as an SVG pattern) paints nothing, as in browsers.
 		img := cc.ImageByURL(str)
 		if img == nil {
-			return nil, fmt.Errorf("unable to find url %q", str)
+			slog.Debug("gradient: unable to find url", "url", str)
 		}
 		return img, nil
 	}
@@ -471,8 +474,8 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 							continue
 						}
 						a := xml.Attr{}
-						a.Name.Local = s[:ci]
-						a.Value = s[ci+1:]
+						a.Name.Local = strings.TrimSpace(s[:ci])
+						a.Value = strings.TrimSpace(s[ci+1:])
 						ats = append(ats, a)
 					}
 				}

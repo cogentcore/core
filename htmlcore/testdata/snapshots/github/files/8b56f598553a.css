@@ -1,0 +1,18 @@
+rect{shape-rendering:crispedges}
+
+.octocat-spinner{background-image:url("d337d1105ac0.gif");background-position:50%;background-repeat:no-repeat;min-height:64px}
+@media only screen and (-moz-min-device-pixel-ratio:2),only screen and (min-device-pixel-ratio:2),only screen and (resolution>=192dpi),only screen and (resolution>=2x){
+.octocat-spinner{background-image:url("21d210c1e274.gif");background-size:64px 64px}
+}
+
+.ClipboardButton{position:relative}
+@media print{
+#serverstats,.HeaderMktg,.Header,.header-search,.reponav,.comment:before,.comment:after,.footer,.pagehead-actions,.discussion-timeline-actions,.timeline-comment-actions,.timeline-new-comment,.thread-subscription-status,.lock-toggle-link,.header,.file-actions,.js-expandable-line,.gh-header-sticky,.pr-toolbar.is-placeholder,.language-color{display:none!important}
+p,.comment h2{break-inside:avoid}
+}
+
+@keyframes show-pane{0%{transform:translate(390px)}to{transform:translate(0)}}
+
+@keyframes sponsors-progress-animation{0%{background-position:100%}to{background-position:0%}}
+
+@keyframes circle-progress{0%{stroke-dasharray:0 100}}

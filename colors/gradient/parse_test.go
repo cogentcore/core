@@ -84,6 +84,15 @@ func TestReadXML(t *testing.T) {
 			AddStop(errors.Log1(colors.FromHex("#f31")), 0.6).
 			AddStop(errors.Log1(colors.FromHex("#bbbff6")), 1.2)},
 
+		// a style with spaces after its colons (as in the SVGs of NPR)
+		{`<linearGradient id="styled">
+		<stop offset="0.6" style="stop-color: #f31; stop-opacity: 1" />
+		<stop offset="1.2" style=" stop-color : #bbbff6 " />
+	  </linearGradient>`, NewLinear().
+			SetEnd(math32.Vec2(1, 0)).
+			AddStop(errors.Log1(colors.FromHex("#f31")), 0.6, 1).
+			AddStop(errors.Log1(colors.FromHex("#bbbff6")), 1.2)},
+
 		{`<linearGradient id="something" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />
 		<stop offset="95%" stop-color="red" />

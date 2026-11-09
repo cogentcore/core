@@ -6,11 +6,13 @@ package htmlcore
 
 import (
 	"bytes"
+	svgpkg "cogentcore.org/core/svg"
 	"image"
 	"io"
 	"log/slog"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -25,7 +27,7 @@ import (
 // handleSVG handles an svg element, which is rendered by an SVG widget.
 func handleSVG(ctx *Context) {
 	var b strings.Builder
-	if err := html.Render(&b, ctx.Node); err != nil {
+	if err := html.Render(&b, ctx.svgForRender(ctx.Node)); err != nil {
 		return
 	}
 	sv := New[core.SVG](ctx)
@@ -33,12 +35,119 @@ func handleSVG(ctx *Context) {
 	ctx.handleWidget(ctx.Node, sv)
 }
 
+// svgProperties are the CSS properties of SVG elements that the SVG
+// reader gets from their style attribute, which are given to it from the
+// cascade of the page (as the rules of its style sheets for SVG icons).
+var svgProperties = map[string]bool{
+	"fill": true, "fill-opacity": true, "fill-rule": true, "stroke": true, "stroke-width": true,
+	"stroke-opacity": true, "stroke-linecap": true, "stroke-linejoin": true, "stroke-dasharray": true,
+	"stroke-dashoffset": true, "stroke-miterlimit": true, "opacity": true, "display": true,
+	"color": true, "clip-path": true, "clip-rule": true, "mask": true, "font-size": true,
+	"font-family": true, "font-weight": true, "font-style": true, "text-anchor": true,
+	"stop-color": true, "stop-opacity": true, "vector-effect": true, "transform": true,
+	"visibility": true,
+}
+
+// svgRootSkip are the svgProperties that are not given for the svg element
+// itself, which are those of its widget.
+var svgRootSkip = map[string]bool{"display": true, "visibility": true, "opacity": true, "transform": true}
+
+// svgForRender returns the given svg element as it is to be rendered: a
+// copy of it whose elements have the values of the SVG properties of the
+// cascade of the page (as of its style sheets, which the SVG reader does
+// not know) in their style attribute, with the var() functions in their
+// attributes (as in fill, as in the icons of BBC News) replaced by the
+// values of the custom properties of their elements, and the attributes
+// whose var() functions are invalid removed.
+func (c *Context) svgForRender(n *html.Node) *html.Node {
+	var clone func(n *html.Node) *html.Node
+	clone = func(n *html.Node) *html.Node {
+		cn := &html.Node{Type: n.Type, Data: n.Data, DataAtom: n.DataAtom, Namespace: n.Namespace}
+		style := c.svgStyle(n, n == c.Node || n.Data == "svg" && n.Parent != nil && n.Parent.Namespace != "svg")
+		for _, a := range n.Attr {
+			if a.Key == "style" && n.Type == html.ElementNode {
+				continue // in style
+			}
+			if _, ok := style[a.Key]; ok {
+				continue // the style has precedence over presentation attributes
+			}
+			if strings.Contains(a.Val, "var(") {
+				v, ok := c.substituteVars(n, a.Val, nil)
+				if !ok {
+					continue
+				}
+				a.Val = v
+			}
+			cn.Attr = append(cn.Attr, a)
+		}
+		if len(style) > 0 {
+			props := make([]string, 0, len(style))
+			for p := range style {
+				props = append(props, p)
+			}
+			sort.Strings(props)
+			var sb strings.Builder
+			for i, p := range props {
+				if i > 0 {
+					sb.WriteString("; ")
+				}
+				sb.WriteString(p + ": " + style[p])
+			}
+			cn.Attr = append(cn.Attr, html.Attribute{Key: "style", Val: sb.String()})
+		}
+		for ch := n.FirstChild; ch != nil; ch = ch.NextSibling {
+			cn.AppendChild(clone(ch))
+		}
+		return cn
+	}
+	return clone(n)
+}
+
+// svgStyle returns the values of the SVG properties of the given element
+// in the cascade of the page (its style sheets and style attribute, with
+// var() resolved, not the defaults of the browser), as the SVG reader
+// understands them; for the root svg element, without those of its widget.
+func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
+	if n.Type != html.ElementNode {
+		return nil
+	}
+	var style map[string]string
+	for _, d := range c.declarations(n) { // in the order of the cascade: the last one wins
+		if d.origin == originUserAgent || !svgProperties[d.Property] || (root && svgRootSkip[d.Property]) {
+			continue
+		}
+		if style == nil {
+			style = map[string]string{}
+		}
+		v := strings.TrimSpace(d.Value)
+		if d.invalid || v == "" || strings.Contains(v, "var(") {
+			delete(style, d.Property)
+			continue
+		}
+		switch d.Property {
+		case "visibility": // hidden as not displayed (the SVG reader has no visibility)
+			if strings.EqualFold(v, "hidden") || strings.EqualFold(v, "collapse") {
+				style["display"] = "none"
+			}
+			continue
+		case "transform": // CSS units, which SVG transforms do not have
+			v = cssTransformUnits.ReplaceAllString(v, "$1")
+		}
+		style[d.Property] = v
+	}
+	return style
+}
+
+// cssTransformUnits matches the units of the numbers of CSS transforms that
+// are the user units of SVG transforms (px, and deg for angles).
+var cssTransformUnits = regexp.MustCompile(`(-?[0-9.]+)(px|deg)\b`)
+
 func handleImage(ctx *Context, tag string) core.Widget {
-	if strings.TrimSpace(GetAttr(ctx.Node, "src")) == "" {
+	n := ctx.Node
+	src, density := ctx.imageSource(n) // of its srcset or picture, or its src
+	if src == "" {
 		return nil // an image without a source is not shown
 	}
-	n := ctx.Node
-	src := GetAttr(n, "src")
 	alt := GetAttr(n, "alt")
 	isSVG := strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg")
 	var newWidget core.Widget
@@ -56,7 +165,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	}
 	var svgData []byte
 	if !ctx.DelayedImageLoad && isSVG {
-		resp, err = Get(ctx, src)
+		resp, err = getImage(ctx, src)
 		if imageError(err) {
 			return nil
 		}
@@ -65,7 +174,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	var im image.Image
 	if !ctx.DelayedImageLoad && !isSVG && ctx.ImageCache == nil {
 		// An image is an svg by its type (not only the extension of its URL).
-		resp, err = Get(ctx, src)
+		resp, err = getImage(ctx, src)
 		if imageError(err) {
 			return nil
 		}
@@ -76,13 +185,38 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		}
 		if strings.Contains(resp.Header.Get("Content-Type"), "svg") || looksLikeSVG(data) {
 			isSVG, svgData = true, data
-		} else if im, _, err = imagex.Read(bytes.NewReader(data)); imageError(err) {
+		} else if im, err = decodeImage(bytes.NewReader(data)); imageError(err) {
 			return nil
 		}
 	} else if !ctx.DelayedImageLoad && !isSVG {
 		im, err = readImage(ctx, src)
 		if imageError(err) {
 			return nil
+		}
+	}
+
+	// A filter (as the white wedges of pkg.go.dev, grey icons inverted) is
+	// applied to the pixels of the image, and to those of an svg rendered
+	// at twice its size (shown as an image of its size).
+	var filteredSize math32.Vector2
+	if filter := parseFilter(ctx.declaration(n, "filter")); filter != nil && !ctx.DelayedImageLoad {
+		if isSVG {
+			data := svgData
+			if data == nil && resp != nil {
+				data, _ = io.ReadAll(resp.Body)
+				svgData = data
+			}
+			w, h, ok := svgSize(data)
+			if !ok {
+				w, h = 24, 24
+			}
+			sv := svgpkg.NewSVG(math32.Vec2(math32.Ceil(2*w), math32.Ceil(2*h)))
+			if sv.ReadXML(bytes.NewReader(data)) == nil {
+				im, isSVG = filter.apply(sv.RenderImage()), false
+				filteredSize = math32.Vec2(w, h)
+			}
+		} else if im != nil {
+			im = filter.apply(im)
 		}
 	}
 
@@ -107,9 +241,14 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		newWidget = svg
 	} else {
 		img = New[core.Image](ctx)
+		img.NaturalDp = true  // in CSS px (see core.Image.NaturalDp)
+		img.Density = density // of its srcset candidate
 		img.SetTooltip(alt)
 		img.SetProperty("src", src) // for generatehtml
 		img.SetImage(im)
+		if filteredSize != (math32.Vector2{}) {
+			img.SetProperty("svg-size", filteredSize) // its intrinsic size
+		}
 		newWidget = img
 	}
 
@@ -119,7 +258,7 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	go func() {
 		if svg == nil {
 			im, err := readImage(ctx, src)
-			if errors.Log(err) != nil {
+			if logGetError(err) != nil {
 				return
 			}
 			img.AsyncLock()
@@ -128,8 +267,8 @@ func handleImage(ctx *Context, tag string) core.Widget {
 			img.AsyncUnlock()
 			return
 		}
-		resp, err := Get(ctx, src)
-		if errors.Log(err) != nil {
+		resp, err := getImage(ctx, src)
+		if logGetError(err) != nil {
 			return
 		}
 		defer resp.Body.Close()
@@ -158,12 +297,12 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 			return im, nil
 		}
 	}
-	resp, err := Get(ctx, src)
+	resp, err := getImage(ctx, src)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	im, _, err := imagex.Read(resp.Body)
+	im, err := decodeImage(resp.Body)
 	if err != nil {
 		// browsers just do not show images that are not supported
 		slog.Debug("error loading image", "url", src, "err", err)
@@ -173,6 +312,36 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 		cache.Add(key, im)
 	}
 	return im, nil
+}
+
+// getImage returns the response for the image at the given URL, also
+// for an error status if it has an image (as the default icon of the
+// favicons of duckduckgo.com, which browsers show, with a status of 404).
+func getImage(ctx *Context, src string) (*http.Response, error) {
+	resp, err := Get(ctx, src)
+	if err == nil || resp == nil || !strings.HasPrefix(resp.Header.Get("Content-Type"), "image/") {
+		return resp, err
+	}
+	u, perr := parseRelativeURL(src, ctx.PageURL)
+	if perr != nil {
+		return resp, err
+	}
+	again, gerr := ctx.GetURL(u.String()) // with its body, which Get closed
+	if gerr != nil {
+		return resp, err
+	}
+	return again, nil
+}
+
+// decodeImage decodes the image in the given reader, of any format that
+// is registered, as ICO (see ico.go), which [imagex.Read] decodes but
+// returns an error for, as it is not one of its formats.
+func decodeImage(r io.Reader) (image.Image, error) {
+	im, _, err := imagex.Read(r)
+	if im != nil {
+		return im, nil
+	}
+	return nil, err
 }
 
 // looksLikeSVG returns whether the given image data is an SVG document.

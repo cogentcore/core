@@ -6,7 +6,7 @@ h1, h2, h3, h4, h5, h6, hgroup, nav, section, dir, dd, dl, dt, menu, ol, ul, det
     display: block;
 }
 
-head, script, style, link, meta, title, datalist, param, noframes, template, area, base, basefont, rp {
+head, script, style, link, meta, title, datalist, param, noframes, template, area, base, basefont, rp, source, track {
     display: none;
 }
 
@@ -66,8 +66,27 @@ ruby > rt { display: block; font-size: 50%; text-align: start; }
 
 button, input[type=submit], input[type=button], input[type=reset] {
     padding: 1px 6px; border: 1px solid #767676; border-radius: 3px;
-    background-color: #efefef; font-size: 13.333px; text-align: center; box-sizing: border-box;
-    flex-direction: row; justify-content: center; align-items: center;
+    background-color: #efefef; font-size: 13.333px; line-height: normal; text-align: center; box-sizing: border-box;
+    flex-direction: row; align-items: center;
+}
+input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url],
+input[type=password], input[type=tel], input[type=number], textarea {
+    padding: 1px 2px; border: 1px solid #767676; border-radius: 2px;
+    background-color: white; color: black; font-size: 13.333px; line-height: normal;
+}
+select {
+    padding: 1px 2px; border: 1px solid #767676; border-radius: 3px;
+    background-color: white; color: black; font-size: 13.333px; line-height: normal; box-sizing: border-box;
+}
+dialog {
+    position: absolute; left: 0; right: 0; width: fit-content; height: fit-content; margin: auto;
+    border: solid; padding: 1em; background-color: white; color: black;
+}
+dialog:not([open]) { display: none; }
+dialog:modal {
+    position: fixed; inset: 0; margin: auto; width: fit-content; height: fit-content;
+    max-width: calc(100% - 6px - 2em); max-height: calc(100% - 6px - 2em);
+    z-index: 2147483647;
 }
 svg:not(:root) { overflow: hidden; }
 input[type=hidden] { display: none; }

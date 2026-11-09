@@ -59,7 +59,7 @@ func (wb *WidgetBase) Style() {
 		}
 		psz := math32.Vector2{}
 		if pw != nil {
-			psz = pw.Geom.Size.Alloc.Content
+			psz = wb.percentBase(pw)
 		}
 		setUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Alloc.Content, psz)
 	}()
@@ -176,6 +176,9 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	} else {
 		st.UnitContext.DPI = 160
 	}
+	if st.Zoom > 0 {
+		st.UnitContext.DPI *= st.Zoom
+	}
 	st.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
 	st.Font.ToDots(&st.UnitContext) // key to set first
 	st.Font.SetUnitContext(&st.UnitContext)
@@ -226,4 +229,21 @@ func styleFromTags(w Widget, tags reflect.StructTag) {
 	if tags.Get("new-window") == "+" {
 		w.AsWidget().setFlag(true, widgetValueNewWindow)
 	}
+}
+
+// percentBase returns the size that the percentages of the parent's size
+// (as [units.UnitPw]) of the widget, with the given parent, are of: that of
+// the content of its parent, or, for a widget that is out of flow (absolute
+// or fixed), that of the padding box of its containing block, as in CSS
+// (as for the margin of 50% of the dot under the bookmark icon of
+// Wikipedia, of its item, which was a long bar as a margin of its parent).
+func (wb *WidgetBase) percentBase(pw *WidgetBase) math32.Vector2 {
+	if wb.outOfFlow() {
+		if cb := wb.containingBlock(); cb != nil && cb != pw {
+			if _, sz := cb.paddingBox(); sz.X > 0 || sz.Y > 0 {
+				return sz
+			}
+		}
+	}
+	return pw.Geom.Size.Alloc.Content
 }

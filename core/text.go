@@ -664,10 +664,16 @@ func (tx *Text) SizeDown(iter int) bool {
 		return false
 	}
 	tx.wrapWidth = asz.X
+	if pw := sz.prefWidth - sz.Space.X; asz.X < pw && pw-asz.X <= 1 {
+		// its preferred width (on one line) is rounded up, so it fits on
+		// one line in a width that is less than 1 dot narrower than that
+		// (as the menu items of pkg.go.dev, with an icon after the text)
+		asz.X = pw
+	}
 	rsz := tx.configTextAlloc(asz) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
-	sz.setInitContentMin(tx.Styles.Min.Dots().Ceil())
+	sz.setInitContentMin(tx.styleMinDots())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content

@@ -5,12 +5,14 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"image"
 	"os"
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"slices"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -245,7 +247,15 @@ func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
+	sc.spaceChanged = false
 	sc.layoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+	for range 3 { // with the padding and margins of the final sizes
+		if !sc.spaceChanged || sc.hasFlag(sceneContentSizing) {
+			break
+		}
+		sc.spaceChanged = false
+		sc.layoutFrame(math32.FromPoint(sc.SceneGeom.Size))
+	}
 	sc.ApplyScenePos()
 }
 
@@ -347,6 +357,11 @@ func (wb *WidgetBase) doNeedsRender() {
 		if cwb.hasFlag(widgetNeedsRender) {
 			cwb.setFlag(false, widgetChildNeedsRender)
 			cw.RenderWidget()
+			// the widgets in it that are raised to the widgets that it is in,
+			// which are not rendered now, are rendered over it
+			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {
+				p.renderRaised()
+			}
 			return tree.Break // don't go any deeper
 		}
 		if !cwb.hasFlag(widgetChildNeedsRender) {
@@ -489,7 +504,10 @@ func (wb *WidgetBase) StartRender() bool {
 		return false
 	}
 	wb.setFlag(false, widgetNeedsRender) // done!
-	if !wb.IsVisible() {
+	if !wb.IsVisible() && !wb.rendersOverflow() {
+		return false
+	}
+	if wb.Styles.Opacity <= 0 { // fully transparent (as for visibility: hidden in CSS): nothing to render
 		return false
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
@@ -500,10 +518,25 @@ func (wb *WidgetBase) StartRender() bool {
 	if pc.State == nil {
 		return false
 	}
-	if wb.noClip() { // its children can be outside of it
-		pc.PushContext(nil, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
+	var sty *styles.Paint
+	if rot := wb.Styles.Rotate; rot != 0 { // around its center
+		sty = styles.NewPaint()
+		sty.UnitContext = pc.Context().Style.UnitContext
+		pos, size := wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total
+		sty.Transform = math32.Rotate2DAround(math32.DegToRad(rot), pos.Add(size.MulScalar(0.5)))
+	}
+	if wb.noClip() || sty != nil { // its children can be outside of it
+		pc.PushContext(sty, render.NewBoundsRect(wb.childClipBBox(), sides.Floats{}))
 	} else {
-		pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+		if wb.Styles.BoxShadowOutside && wb.Styles.HasBoxShadow() { // the shadows are around the box
+			m := wb.Styles.BoxShadowMargin()
+			bb := wb.Geom.TotalBBox
+			bb.Min = bb.Min.Sub(image.Pt(int(math32.Ceil(m.Left)), int(math32.Ceil(m.Top))))
+			bb.Max = bb.Max.Add(image.Pt(int(math32.Ceil(m.Right)), int(math32.Ceil(m.Bottom))))
+			pc.PushContext(nil, render.NewBoundsRect(bb, sides.Floats{}))
+		} else {
+			pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
+		}
 	}
 	pc.Paint.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
@@ -577,14 +610,100 @@ func (wb *WidgetBase) RenderWidget() {
 	}
 }
 
+// rendersOverflow returns whether the widget is rendered although it has no
+// size, for its children: if it does not clip them (see
+// [styles.Style.NoClip]), they can be outside of it, as in CSS, where a
+// box with overflow visible shows its overflowing content (as the fixed
+// consent banner of nytimes.com, in a fixed div that has no size, which
+// was not shown and took the clicks of the page).
+func (wb *WidgetBase) rendersOverflow() bool {
+	sz := wb.Geom.Size.Actual.Total
+	return (sz.X <= 0 || sz.Y <= 0) && wb.noClip() && wb.HasChildren() && wb.IsDisplayable()
+}
+
 // renderOutOfFlowChildren renders the children of the widget that are out
 // of the flow of its layout (absolute and fixed positions), after the
 // widget, outside of its clipping, as they can be outside of it.
 func (wb *WidgetBase) renderOutOfFlowChildren() {
 	for _, cw := range wb.renderOrder() {
-		if cw.AsWidget().outOfFlow() {
+		if cw.AsWidget().outOfFlow() && cw.AsWidget().Styles.ZIndex >= 0 {
+			if root := cw.AsWidget().raisedTo(); root != nil {
+				root.raised = append(root.raised, cw)
+				continue
+			}
 			cw.RenderWidget()
 		}
+	}
+	wb.renderRaised()
+}
+
+// raisedTo returns the widget that the widget is rendered after the
+// content of (see [WidgetBase.raised]): its positioned ancestor for an
+// absolute or fixed widget of no z-index (see
+// [WidgetBase.positionedAncestor]), or the stacking context that the
+// widget is rendered in if it has a positive z-index (see
+// [styles.Style.ZIndex]) and that is not its parent, or nil: the nearest
+// widget that it is in that has a z-index (as in CSS, where a z-index of auto,
+// the default, makes no stacking context), or the top widget. As in CSS,
+// it is then rendered over the widgets after the ones that it is in (as
+// the dropdown menus in the header of Wikipedia, over the page).
+func (wb *WidgetBase) raisedTo() *WidgetBase {
+	if wb.Styles.ZIndex == 0 && wb.outOfFlow() {
+		return wb.positionedAncestor()
+	}
+	if wb.Styles.ZIndex <= 0 {
+		return nil
+	}
+	parent := wb.parentWidget()
+	if parent == nil {
+		return nil
+	}
+	root := parent
+	for p := parent; p != nil; p = p.parentWidget() {
+		root = p
+		if p.Styles.ZIndex != 0 {
+			break
+		}
+	}
+	if root == parent {
+		return nil
+	}
+	return root
+}
+
+// positionedAncestor returns the nearest widget that the widget is in that
+// is positioned (not [styles.PositionStatic]), if that is not its parent,
+// or nil. An absolute or fixed widget of no z-index is rendered after the
+// content of that one, as in CSS, where it is painted after the widgets in
+// the flow (as the absolute images of edition.cnn.com, in a picture before
+// the ::after of their box, which painted over them).
+func (wb *WidgetBase) positionedAncestor() *WidgetBase {
+	parent := wb.parentWidget()
+	if parent == nil || parent.Styles.Position != styles.PositionStatic {
+		return nil
+	}
+	for p := parent.parentWidget(); p != nil; p = p.parentWidget() {
+		if p.Styles.Position != styles.PositionStatic || p.Styles.ZIndex != 0 {
+			return p
+		}
+	}
+	return nil
+}
+
+// renderRaised renders the widgets that are raised to this one as their
+// stacking context (see [WidgetBase.raisedTo]), in the order of their
+// z-index, after its other content.
+func (wb *WidgetBase) renderRaised() {
+	if len(wb.raised) == 0 {
+		return
+	}
+	raised := wb.raised
+	wb.raised = nil
+	slices.SortStableFunc(raised, func(a, b Widget) int {
+		return cmp.Compare(a.AsWidget().Styles.ZIndex, b.AsWidget().Styles.ZIndex)
+	})
+	for _, cw := range raised {
+		cw.RenderWidget()
 	}
 }
 
@@ -598,7 +717,14 @@ func (wb *WidgetBase) renderParts() {
 func (wb *WidgetBase) renderChildren() {
 	if order := wb.renderOrder(); order != nil { // positioned children
 		for _, cw := range order {
-			if !cw.AsWidget().outOfFlow() { // rendered after (see RenderWidget)
+			// out of flow ones are rendered after (see RenderWidget), except
+			// those with a negative z-index, which are under the others (as
+			// the offset shadows of github.com, under their content)
+			if cwb := cw.AsWidget(); !cwb.outOfFlow() || cwb.Styles.ZIndex < 0 {
+				if root := cw.AsWidget().raisedTo(); root != nil {
+					root.raised = append(root.raised, cw)
+					continue
+				}
 				cw.RenderWidget()
 			}
 		}
@@ -665,7 +791,63 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
+	if wb.Styles.Background == nil && wb.inTransparentOverlap() {
+		// An absolute or fixed widget is painted over the widgets that it overlaps,
+		// so without a background of its own it does not paint that of its
+		// parent over them (its actual background is kept for its content),
+		// and neither do the widgets in it without one (as the text over
+		// the percentage bars of Wikipedia). The same holds for a widget
+		// that overlaps the one before it by a negative margin (as the
+		// comments of news.ycombinator.com over their headers).
+		abg, fm := wb.Styles.ActualBackground, wb.Styles.FillMargin
+		clear := colors.Uniform(colors.Transparent)
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = clear, false
+		wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, clear)
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
+		return
+	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// inTransparentOverlap returns whether the widget is out of flow (see
+// [WidgetBase.outOfFlow]) or overlaps the widget before it (see
+// [WidgetBase.overlapsPrevious]), or is in one that is, with no
+// backgrounds from it to the widget, so that it is painted over the
+// widgets that it overlaps.
+func (wb *WidgetBase) inTransparentOverlap() bool {
+	for w := wb; w != nil; w = w.parentWidget() {
+		if w.outOfFlow() || w.overlapsPrevious() {
+			return true
+		}
+		if w != wb && w.Styles.Background != nil {
+			return false
+		}
+	}
+	return false
+}
+
+// overlapsPrevious returns whether the widget can overlap the widget
+// before it in its parent, by a negative top or left margin of its own, or
+// a negative bottom or right margin of that one, as in CSS.
+func (wb *WidgetBase) overlapsPrevious() bool {
+	m := &wb.Styles.Margin
+	if m.Top.Dots < 0 || m.Left.Dots < 0 {
+		return true
+	}
+	p := wb.parentWidget()
+	if p == nil {
+		return false
+	}
+	i := wb.IndexInParent()
+	if i <= 0 {
+		return false
+	}
+	prev := AsWidget(p.Child(i - 1))
+	if prev == nil {
+		return false
+	}
+	pm := &prev.Styles.Margin
+	return pm.Bottom.Dots < 0 || pm.Right.Dots < 0
 }
 
 // RenderAllocBox renders the standard box model using Alloc size, instead of Actual.

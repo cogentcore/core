@@ -17,18 +17,23 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"image/color"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"github.com/andybalholm/cascadia"
+	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
 )
 
@@ -180,7 +185,6 @@ func TestCalcPx(t *testing.T) {
 func TestMathLength(t *testing.T) {
 	env := defaultLengthEnv() // an em of 16px, vw of 8px, and vh of 6px
 	for v, want := range map[string]units.Value{
-		"calc(100% - 20px)":        units.Pw(100),
 		"calc(10px + 2em)":         units.Dp(42),
 		"calc(100vh - 100px)":      units.Dp(500),
 		"min(25vw, 350px)":         units.Dp(200),
@@ -188,12 +192,33 @@ func TestMathLength(t *testing.T) {
 		"clamp(1rem, 5vw, 2rem)":   units.Dp(32),
 		"calc((100px - 20px) / 2)": units.Dp(40),
 		"calc(2 * (10px + 5px))":   units.Dp(30),
-		"min(100%, 600px)":         units.Dp(600),
 	} {
 		got, ok := env.length(v, units.UnitPw)
 		assert.True(t, ok, v)
 		assert.InDelta(t, want.Value, got.Value, 0.01, v)
 		assert.Equal(t, want.Unit, got.Unit, v)
+	}
+	// a percentage with a length is computed with the size of the parent
+	// (custom), in the layout
+	uc := &units.Context{}
+	uc.Defaults()
+	uc.Paw = 1000
+	dp := uc.Dots(units.UnitDp)
+	for v, want := range map[string]float32{
+		"calc(100% - 20px)":        1000 - 20*dp,
+		"min(100%, 600px)":         600 * dp,
+		"min(100%, 2000px)":        1000,
+		"max(50%, 600px)":          600 * dp,
+		"clamp(100px, 50%, 400px)": 400 * dp,
+		"calc(100% - 2 * 128px)":   1000 - 256*dp,
+		"calc(50% + 10px)":         500 + 10*dp,
+		// with vw of 8px: clamp(20px, (800 - 768) / 4 = 8px, 128px) = 20px
+		"calc(100% - 2 * clamp(1.25rem, calc((100vw - 768px) / 4), 8rem))": 1000 - 40*dp,
+	} {
+		got, ok := env.length(v, units.UnitPw)
+		if assert.True(t, ok, v) && assert.NotNil(t, got.Custom, v) {
+			assert.InDelta(t, want, got.Custom(uc), 0.01, v)
+		}
 	}
 }
 
@@ -351,10 +376,64 @@ func TestMediaRange(t *testing.T) {
 	}
 }
 
+// TestMediaReducedMotion tests that pages are told that motion is reduced,
+// as animations are not run: content that fades in when animated (as the
+// headings of github.com) is shown.
+func TestMediaReducedMotion(t *testing.T) {
+	c := NewContext()
+	assert.True(t, c.mediaMatches("(prefers-reduced-motion: reduce)"))
+	assert.True(t, c.mediaMatches("(prefers-reduced-motion)"))
+	assert.False(t, c.mediaMatches("(prefers-reduced-motion: no-preference)"))
+	widgetsByID(t, `<style>@media (prefers-reduced-motion: no-preference) { .heading > * { opacity: 0 } }</style>`+
+		`<div class="heading"><h2 id="h">GitHub Platform</h2></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Equal(t, float32(1), ws["h"].Styles.Opacity, "shown")
+		})
+}
+
 func TestGridTracks(t *testing.T) {
 	assert.Equal(t, []string{"minmax(15rem,1fr)", "2rem", "minmax(0,48rem)"},
 		gridTracks("[full-start left-start] minmax(15rem,1fr) [left-end] 2rem [content-start] minmax(0,48rem) [full-end right-end]"))
 	assert.Equal(t, []string{"1fr", "1fr", "1fr", "auto"}, gridTracks("repeat(3, 1fr) auto"))
+}
+
+// TestGridTemplateCascade tests that the grid-template shorthand and its
+// longhands apply in the order of the cascade (as the page container of
+// Wikipedia without a table of contents, whose more specific rule has
+// grid-template-columns and grid-template-areas of one column, after a
+// grid-template of two columns).
+func TestGridTemplateCascade(t *testing.T) {
+	ctx := NewContext()
+	doc, _ := html.Parse(strings.NewReader(`<html><head><style>
+.a { display: grid; grid-template: min-content 1fr / 12rem minmax(0,1fr); grid-template-areas: 'start content' }
+.x .a { grid-template-columns: minmax(0,1fr); grid-template-areas: 'content' 'start' }
+.b { grid-template-columns: 1fr 1fr 1fr; grid-template-areas: 'p q r' }
+.x .b { grid-template: 'p' 'q' / 3rem }
+</style></head><body class="x"><div class="a"></div><div class="b"></div></body></html>`))
+	ctx.Node = doc
+	ctx.addStyleSheets(doc)
+	var a, b *html.Node
+	var find func(n *html.Node)
+	find = func(n *html.Node) {
+		switch GetAttr(n, "class") {
+		case "a":
+			a = n
+		case "b":
+			b = n
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			find(c)
+		}
+	}
+	find(doc)
+	areas, ncols, tracks := ctx.gridTemplate(a)
+	assert.Equal(t, []string{"minmax(0,1fr)"}, tracks, "the longhand of the later rule")
+	assert.Equal(t, 1, ncols)
+	assert.Equal(t, gridArea{row: 1, col: 0, rows: 1, cols: 1}, areas["start"])
+	areas, ncols, tracks = ctx.gridTemplate(b)
+	assert.Equal(t, []string{"3rem"}, tracks, "the shorthand of the later rule")
+	assert.Equal(t, 1, ncols)
+	assert.Equal(t, gridArea{row: 1, col: 0, rows: 1, cols: 1}, areas["q"])
 }
 
 // TestCSSVariableInitial tests the space toggle of custom properties that
@@ -571,4 +650,465 @@ func TestLayoutSettles(t *testing.T) {
 		blank := (text.Geom.Pos.Total.Y + text.Geom.Size.Actual.Total.Y) - (output.Geom.Pos.Total.Y + output.Geom.Size.Actual.Total.Y)
 		assert.Less(t, blank, float32(100), "no blank space after the content of the article")
 	})
+}
+
+// TestReadDocument tests reading a parsed document, changing it (as the
+// scripts of a page do), and reading it again with a new context, and
+// that the widgets of its elements have their nodes (NodeOf).
+func TestReadDocument(t *testing.T) {
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><body><p id="p">First</p><button id="b"><span>Go</span></button></body></html>`))
+	if !assert.NoError(t, err) {
+		return
+	}
+	texts := func(b *core.Body) []string {
+		var ts []string
+		b.WalkDown(func(n tree.Node) bool {
+			if tx, ok := n.(*core.Text); ok {
+				ts = append(ts, tx.Text)
+			}
+			return tree.Continue
+		})
+		return ts
+	}
+	b := core.NewBody()
+	assert.NoError(t, ReadDocument(ctx, b, doc))
+	assert.Contains(t, texts(b), "First")
+	var button *core.Text
+	b.WalkDown(func(n tree.Node) bool {
+		if tx, ok := n.(*core.Text); ok && strings.Contains(tx.Text, "Go") {
+			button = tx
+		}
+		return tree.Continue
+	})
+	if assert.NotNil(t, button) {
+		// the text of a run of inline content is in the frame of its
+		// element, which has the node
+		n := NodeOf(button)
+		if assert.NotNil(t, n) {
+			assert.Equal(t, "button", n.Data)
+		}
+	}
+
+	// change the text of the paragraph, as a script does, and read it again
+	var p *html.Node
+	var find func(n *html.Node)
+	find = func(n *html.Node) {
+		if n.Type == html.ElementNode && GetAttr(n, "id") == "p" {
+			p = n
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			find(c)
+		}
+	}
+	find(doc)
+	if !assert.NotNil(t, p) {
+		return
+	}
+	p.FirstChild.Data = "Second"
+	b2 := core.NewBody()
+	assert.NoError(t, ReadDocument(ctx.NewPage(), b2, doc))
+	assert.Contains(t, texts(b2), "Second")
+	assert.NotContains(t, texts(b2), "First")
+}
+
+// TestScriptingNoscript tests that the content of a noscript element is
+// shown without scripting (as htmlcore reads pages by default) and not
+// with it, as in browsers with and without JavaScript.
+func TestScriptingNoscript(t *testing.T) {
+	src := `<html><body><p>Page</p><noscript><p>Enable JavaScript</p></noscript></body></html>`
+	for _, scripting := range []bool{false, true} {
+		ctx := NewContext()
+		ctx.Scripting = scripting
+		b := core.NewBody()
+		assert.NoError(t, ReadHTMLString(ctx, b, src))
+		found := false
+		b.WalkDown(func(n tree.Node) bool {
+			if tx, ok := n.(*core.Text); ok && strings.Contains(tx.Text, "Enable JavaScript") {
+				found = true
+			}
+			return tree.Continue
+		})
+		assert.Equal(t, !scripting, found, "noscript content shown, with scripting %v", scripting)
+		assert.Equal(t, scripting, ctx.NewPage().Scripting, "NewPage keeps Scripting")
+	}
+	ctx := NewContext()
+	ctx.MediaWidth = 800
+	assert.True(t, ctx.MediaMatches("(min-width: 600px)"))
+	assert.False(t, ctx.MediaMatches("(max-width: 600px)"))
+}
+
+// TestLinkedStyleNotCSS tests that a link of a style sheet with an empty
+// href, which would be the page itself, and a style sheet that is served
+// as HTML are not added, as in browsers (the CSS parser does not end on
+// a page of HTML, as for a page of GitHub).
+func TestLinkedStyleNotCSS(t *testing.T) {
+	ctx := NewContext()
+	ctx.PageURL = "https://example.com/page"
+	var gets []string
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		gets = append(gets, u)
+		pu, _ := url.Parse(u)
+		ct := "text/css"
+		if strings.HasSuffix(u, ".html") {
+			ct = "text/html; charset=utf-8"
+		}
+		return &http.Response{StatusCode: 200, Status: "200 OK", Header: http.Header{"Content-Type": {ct}},
+			Body: io.NopCloser(strings.NewReader(`p { color: rgb(255, 0, 0) }`)), Request: &http.Request{URL: pu}}, nil
+	}
+	b := core.NewBody()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><head><link rel="stylesheet" href=""><link rel="stylesheet" href="/style.html"></head><body><p>Text</p></body></html>`))
+	assert.Equal(t, []string{"https://example.com/style.html"}, gets, "no request for the empty href")
+	assert.Empty(t, ctx.declaration(findTag(b, "p"), "color"), "the style sheet served as HTML is not added")
+}
+
+// findTag returns the node of the first widget for an element of the given tag.
+func findTag(b *core.Body, tag string) *html.Node {
+	var found *html.Node
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil && found == nil {
+			if nd, ok := wb.Property("node").(*html.Node); ok && nd.Data == tag {
+				found = nd
+			}
+		}
+		return tree.Continue
+	})
+	return found
+}
+
+// TestUnset tests that unset is inherit for an inherited property (as
+// color) and initial for one that is not, as in CSS.
+func TestUnset(t *testing.T) {
+	ctx := NewContext()
+	b := core.NewBody()
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body style="color: rgb(0, 128, 0)"><p style="color: unset; padding: 10px; padding: unset">Text</p></body></html>`))
+	b.RenderImage(func() {
+		var p *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && wb.Property("tag") == "p" && p == nil {
+				p = wb
+			}
+			return tree.Continue
+		})
+		if assert.NotNil(t, p) {
+			assert.Equal(t, "#008000", colors.AsHex(colors.ToUniform(p.Styles.Color)), "the color is inherited")
+			assert.Zero(t, p.Styles.Padding.Top.Value, "the padding is initial")
+		}
+	})
+}
+
+// TestStrayCSS tests that style sheets with semicolons and blocks where
+// rules are expected (as CSS-in-JS on the Guardian makes) are parsed
+// without them, instead of the parser never ending.
+func TestStrayCSS(t *testing.T) {
+	style := `a{color:red} ; {x:y} b;c{color:blue} /* {;} */ @import "s;{.css";
+		@media screen{ ;d{color:green;} {e:f} } {flex-direction:column;}`
+	done := make(chan *css.Stylesheet)
+	go func() { done <- parseCSS(style) }()
+	select {
+	case ss := <-done:
+		var rules []string
+		for _, r := range ss.Rules {
+			rules = append(rules, strings.Join(r.Selectors, ",")+r.Prelude)
+			for _, e := range r.Rules {
+				rules = append(rules, " "+strings.Join(e.Selectors, ","))
+			}
+		}
+		assert.Equal(t, []string{"aa", "cc", "\"s;{.css\"", "screen", " d"}, rules)
+	case <-time.After(5 * time.Second):
+		t.Fatal("parsing did not end")
+	}
+	assert.Equal(t, "a{b:c}@media x{d{e:f}}", removeStrayCSS("a{b:c};@media x{;d{e:f}{g:h}}"))
+}
+
+// TestFloatColumns tests floats with a percentage width, as the columns
+// of craigslist.org (float: left; width: 23%), and a sidebar beside a main
+// column, as on slashdot.org (a float with a width of 100% and a right
+// margin inside it, and a float after it pulled back beside it by a
+// negative left margin).
+func TestFloatColumns(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Padding.Zero(); s.Min.X.Dp(600); s.Max.X.Dp(600) })
+	ctx := NewContext()
+	ctx.MediaWidth = 600
+	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body>
+<div style="overflow: hidden"><div class="c1" style="float: left; width: 23%; overflow: hidden">A<br>a<br>a</div>`+
+		`<div class="c2" style="float: left; width: 23%; overflow: hidden">B<br>b</div></div>
+<p class="after" style="margin: 0">after</p>
+<div><div style="float: left; width: 100%"><div class="main" style="margin-right: 200px">main</div></div>`+
+		`<aside class="rail" style="float: left; width: 200px; margin-left: -200px; overflow: hidden">rail</aside></div>
+</body></html>`))
+	find := func(class string) *core.WidgetBase {
+		var w *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == class {
+				w = wb
+			}
+			return tree.Continue
+		})
+		return w
+	}
+	c1, c2, after, main, rail := find("c1"), find("c2"), find("after"), find("main"), find("rail")
+	if !assert.NotNil(t, c1) || !assert.NotNil(t, c2) || !assert.NotNil(t, after) || !assert.NotNil(t, main) || !assert.NotNil(t, rail) {
+		return
+	}
+	b.RenderImage(func() {
+		w := core.AsWidget(c1.Parent).Geom.Size.Actual.Content.X
+		assert.InDelta(t, 0.23*w, c1.Geom.Size.Actual.Total.X, 2, "a column is 23% wide")
+		assert.InDelta(t, c1.Geom.Pos.Total.Y, c2.Geom.Pos.Total.Y, 1, "the columns are beside each other")
+		assert.InDelta(t, c1.Geom.Pos.Total.Y+c1.Geom.Size.Actual.Total.Y, after.Geom.Pos.Total.Y, 1, "what is after them is below the tallest")
+		assert.InDelta(t, main.Geom.Pos.Total.Y, rail.Geom.Pos.Total.Y, 1, "the rail is beside the main column")
+		rp := core.AsWidget(rail.Parent).Geom
+		assert.InDelta(t, rp.Pos.Content.X+rp.Size.Actual.Content.X, rail.Geom.Pos.Content.X+rail.Geom.Size.Actual.Content.X, 2, "at the right")
+		assert.False(t, rail.Geom.TotalBBox.Empty(), "and visible")
+	})
+}
+
+// TestBlockLinkClick tests that clicking on the text of links that are
+// blocks (as the links in the columns of craigslist.org, which have
+// display: block) opens them: the text, which can be pressed (to select
+// it), gets the click instead of the frame of the link.
+func TestBlockLinkClick(t *testing.T) {
+	b := core.NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(1000) })
+	ctx := NewContext()
+	var opened []string
+	ctx.OpenURL = func(url string, e events.Event) { opened = append(opened, url) }
+	assert.NoError(t, ReadHTMLString(ctx, b, `<style>.box{overflow:hidden;float:left;width:23%}.box a{display:block}</style>
+<div style="overflow:hidden"><div class="box"><ul><li><a href="/auburn">auburn</a></li><li><a href="/bham">birmingham</a></li></ul></div>
+<div class="box"><ul><li><a href="/bn">bloomington</a></li></ul></div></div>
+<a href="/block" style="display:block">block link</a>`))
+	var links []*core.WidgetBase
+	b.WalkDown(func(n tree.Node) bool {
+		if wb := core.AsWidget(n); wb != nil && wb.Property("href") != nil {
+			links = append(links, wb)
+		}
+		return tree.Continue
+	})
+	if !assert.Len(t, links, 4) {
+		return
+	}
+	b.RenderImage(func() {
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		for _, l := range links {
+			bb := l.Geom.TotalBBox
+			pos := image.Pt(bb.Min.X+5, (bb.Min.Y+bb.Max.Y)/2) // on its text
+			ev.MouseButton(events.MouseDown, events.Left, pos, 0)
+			ev.MouseButton(events.MouseUp, events.Left, pos, 0)
+		}
+	}, func() {
+		assert.Equal(t, []string{"/auburn", "/bham", "/bn", "/block"}, opened)
+	})
+}
+
+// TestSVGVars tests that the var() functions in the attributes of an svg
+// element (as in the icons of BBC News) are replaced by the values of the
+// custom properties for its elements, which the SVG reader does not know.
+func TestSVGVars(t *testing.T) {
+	ctx := NewContext()
+	b := core.NewBody()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<div style="--fg: #ff0000; --bg: blue"><svg viewBox="0 0 10 10" width="10" height="10">`+
+		`<rect class="a" width="5" height="5" fill="var(--fg)"/>`+
+		`<rect class="b" width="5" height="5" style="fill: var(--bg); stroke: var(--none)"/>`+
+		`<rect class="c" width="5" height="5" fill="var(--none, green)" stroke="var(--none)"/></svg></div>`))
+	assert.NoError(t, err)
+	assert.NoError(t, ReadDocument(ctx, b, doc))
+	var svg *html.Node
+	walkNodes(doc, func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "svg" {
+			svg = n
+		}
+	})
+	if !assert.NotNil(t, svg) {
+		return
+	}
+	var sb strings.Builder
+	assert.NoError(t, html.Render(&sb, ctx.svgForRender(svg)))
+	s := sb.String()
+	assert.NotContains(t, s, "var(")
+	assert.Contains(t, s, `fill="#ff0000"`)
+	assert.Contains(t, s, `style="fill: blue"`, "the invalid declaration is removed")
+	assert.Contains(t, s, `fill="green"`, "the fallback")
+	assert.NotContains(t, s, "stroke", "attributes with invalid var() functions are removed")
+	assert.NoError(t, core.NewSVG(b).ReadString(s))
+}
+
+// TestZoom tests that the sizes of a page are multiplied by the zoom of
+// the context, as in browsers: lengths, font sizes, and images.
+func TestZoom(t *testing.T) {
+	sizes := func(zoom float32) (box, font float32) {
+		b := core.NewBody()
+		b.Styler(func(s *styles.Style) { s.Min.X.Dp(800) })
+		ctx := NewContext()
+		ctx.Zoom = zoom
+		assert.NoError(t, ReadHTMLString(ctx, b, `<div class="box" style="width: 100px; height: 40px; padding: 10px; font-size: 20px">text</div>`))
+		var w *core.WidgetBase
+		b.WalkDown(func(n tree.Node) bool {
+			if wb := core.AsWidget(n); wb != nil && fmt.Sprint(wb.Property("class")) == "box" {
+				w = wb
+			}
+			return tree.Continue
+		})
+		b.RenderImage(func() {
+			box = w.Geom.Size.Actual.Total.X
+			font = w.Styles.Font.Size.Dots
+		})
+		return
+	}
+	box1, font1 := sizes(0)
+	box2, font2 := sizes(2)
+	assert.InDelta(t, 2*box1, box2, 2, "lengths")
+	assert.InDelta(t, 2*font1, font2, 0.5, "font sizes")
+}
+
+// TestSelectorIndex tests that selecting the nodes of selectors with the
+// index of the nodes by id, class, and element name selects the same nodes
+// as matching them against all of the nodes.
+func TestSelectorIndex(t *testing.T) {
+	doc, err := html.Parse(strings.NewReader(`<html><body><div id="main" class="a b"><p class="a">x <span class="c a">y</span></p>
+<ul class="list"><li class="item first">1</li><li class="item">2</li></ul><svg><linearGradient id="g"></linearGradient><rect class="r"/></svg>
+<p id="p2" class="b">z</p><a href="#" class="a-b_c">link</a></div></body></html>`))
+	assert.NoError(t, err)
+	sels := []string{"p", "P", ".a", "#main", "div.a.b", "#main > .a", ".a span.c", "p.a:not(.b)", ".list .item:first-child",
+		"li.item + li", "ul > li.first ~ li", "div :is(.a, .b)", ".a-b_c", "a[href='#'].a-b_c", "span:not(.a)", "#p2.b",
+		"svg rect.r", "linearGradient", "lineargradient", "#g", "*", ".missing", "#missing", "p .a", "[class~=a]",
+		"div p:not([id])", ".b > p", ".item.first", ".a\\:b", "html|p"}
+	c := NewContext()
+	for _, sel := range sels {
+		assert.ElementsMatch(t, selectNodes(doc, sel), c.selectNodes(doc, sel), sel)
+	}
+	kind, key := selectorKey("div > .x :is(.y) #z.w")
+	assert.Equal(t, "#z", string(kind)+key)
+	kind, key = selectorKey("ul li:not(.a)")
+	assert.Equal(t, "tli", string(kind)+key)
+}
+
+// TestUnrendered tests that the elements that the Unrendered function of
+// the context reports are not displayed (as the light children of shadow
+// hosts that are in no slot, as the closed menus of MDN).
+func TestUnrendered(t *testing.T) {
+	ctx := NewContext()
+	ctx.Unrendered = func(n *html.Node) bool { return GetAttr(n, "slot") == "dropdown" }
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, b, `<mdn-dropdown><button id="open">About</button><div slot="dropdown" id="panel">Get to know MDN better</div></mdn-dropdown>`))
+	ids := map[string]bool{}
+	b.WalkDown(func(k tree.Node) bool {
+		if id, ok := k.AsTree().Property("id").(string); ok {
+			ids[id] = true
+		}
+		return tree.Continue
+	})
+	assert.True(t, ids["open"])
+	assert.False(t, ids["panel"], "not rendered")
+}
+
+// TestGridColumnSpan tests the spans of grid-column (as the 12-column
+// grids of github.com, whose features span 6 and then 4 columns, in two
+// rows, which were all in one row).
+func TestGridColumnSpan(t *testing.T) {
+	assert.Equal(t, 6, gridSpan("auto / span 6", 12))
+	assert.Equal(t, 4, gridSpan("span 4", 12))
+	assert.Equal(t, 2, gridSpan("1 / 3", 12))
+	assert.Equal(t, 12, gridSpan("1 / -1", 12))
+	assert.Equal(t, 1, gridSpan("auto", 12))
+	cell := `<section style="grid-column: auto / span %d"><div style="height: 20px"></div></section>`
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), b, `<div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); width: 1200px">`+
+		fmt.Sprintf(cell+cell+cell+cell+cell, 6, 6, 4, 4, 4)+`</div>`))
+	var secs []*core.WidgetBase
+	b.RenderImage(func() {
+		b.WalkDown(func(k tree.Node) bool {
+			if wb := core.AsWidget(k); wb != nil && wb.Property("tag") == "section" {
+				secs = append(secs, wb)
+			}
+			return tree.Continue
+		})
+	})
+	require.Len(t, secs, 5)
+	dp := b.Styles.UnitContext.Dots(units.UnitDp)
+	assert.InDelta(t, 600*dp, secs[0].Geom.Size.Actual.Total.X, 3, "half")
+	assert.InDelta(t, 400*dp, secs[2].Geom.Size.Actual.Total.X, 3, "a third")
+	assert.Greater(t, secs[2].Geom.Pos.Total.Y, secs[0].Geom.Pos.Total.Y, "in the second row")
+}
+
+// TestGridPlacement tests children of a grid placed by the numbers of
+// their lines (as the cells of the repository grid of github.com), in
+// any order, with an empty cell between them.
+func TestGridPlacement(t *testing.T) {
+	cell := func(id string, r, c int) string {
+		return fmt.Sprintf(`<div id="%s" style="grid-row: %d; grid-column: %d; height: 20px"></div>`, id, r, c)
+	}
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 300px">`+
+		cell("c", 2, 1)+cell("a", 1, 1)+cell("b", 1, 3)+`</div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			pos := func(id string) math32.Vector2 { return ws[id].Geom.Pos.Total.Sub(ws["a"].Geom.Pos.Total) }
+			assert.InDelta(t, 200*dp, pos("b").X, 3, "in the third column")
+			assert.InDelta(t, 0, pos("b").Y, 1)
+			assert.InDelta(t, 0, pos("c").X, 1, "in the second row")
+			assert.Greater(t, pos("c").Y, float32(10))
+			assert.InDelta(t, 100*dp, ws["c"].Geom.Size.Actual.Total.X, 3, "one column wide, in a last row that is not full")
+		})
+}
+
+// TestGridMinmaxZero tests that the columns of minmax(0, 1fr) are equal,
+// whatever the widths of their content (as the repository grid of
+// github.com, whose long hidden texts widened their columns).
+func TestGridMinmaxZero(t *testing.T) {
+	long := strings.Repeat("a long text of a hidden panel ", 5)
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 300px">`+
+		`<div id="a">`+long+`</div><div id="b">b</div><div id="c">c</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, id := range []string{"a", "b", "c"} {
+				assert.InDelta(t, 100*dp, ws[id].Geom.Size.Actual.Total.X, 3, id)
+			}
+		})
+}
+
+// TestGridOutOfFlowChild tests that a child of a grid that is out of its
+// flow (as a visually hidden heading) does not take a track, so the
+// children after it are in their tracks (as the 8fr and 5fr columns of
+// the testimonials of github.com, which were swapped).
+func TestGridOutOfFlowChild(t *testing.T) {
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: minmax(0px, 8fr) minmax(0px, 5fr); width: 1300px; position: relative">`+
+		`<h2 style="position: absolute; width: 1px; height: 1px; overflow: hidden">Testimonials</h2><div id="q">quotes</div><div id="s">stats</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 800*dp, ws["q"].Geom.Size.Actual.Total.X, 3)
+			assert.InDelta(t, 500*dp, ws["s"].Geom.Size.Actual.Total.X, 3)
+		})
+}
+
+// TestGridAutoRowColumn tests a child of a grid with a column and an auto
+// row, before children placed in row 1 (as the top stories of bbc.com):
+// it is in row 1, where its columns are free, between them.
+func TestGridAutoRowColumn(t *testing.T) {
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(24, 1fr); width: 1200px">`+
+		`<div id="mid" style="grid-area: auto / 7 / auto / span 12; height: 20px"></div>`+
+		`<div id="left" style="grid-area: 1 / 1 / span 1 / span 6; height: 20px"></div>`+
+		`<div id="right" style="grid-area: 1 / 19 / span 1 / span 6; height: 20px"></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			l, m, r := ws["left"].Geom, ws["mid"].Geom, ws["right"].Geom
+			assert.InDelta(t, l.Pos.Total.Y, m.Pos.Total.Y, 1, "in the same row")
+			assert.InDelta(t, l.Pos.Total.Y, r.Pos.Total.Y, 1)
+			assert.InDelta(t, 600*dp, m.Size.Actual.Total.X, 6, "12 of 24 columns (with rounding)")
+			assert.InDelta(t, l.Pos.Total.X+300*dp, m.Pos.Total.X, 6, "after the 6 columns of the left")
+		})
+}
+
+// TestGridFrColumns tests that 1fr columns share the width equally,
+// whatever the preferred widths of their content (as the top stories of
+// bbc.com, whose wider photos made their columns wider), unless the
+// minimum of their content is more than that.
+func TestGridFrColumns(t *testing.T) {
+	long := strings.Repeat("wide content of the first column ", 6)
+	widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(3, 1fr); width: 900px">`+
+		`<div id="a">`+long+`</div><div id="b">b</div><div id="c">c</div></div>`+
+		`<div style="display: grid; grid-template-columns: repeat(3, 1fr); width: 900px">`+
+		`<div id="d"><div style="width: 500px; height: 10px"></div></div><div id="e">e</div><div id="f">f</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, id := range []string{"a", "b", "c"} {
+				assert.InDelta(t, 300*dp, ws[id].Geom.Size.Actual.Total.X, 3, id)
+			}
+			assert.InDelta(t, 500*dp, ws["d"].Geom.Size.Actual.Total.X, 3, "its minimum")
+			assert.InDelta(t, 200*dp, ws["e"].Geom.Size.Actual.Total.X, 3, "the rest shared")
+		})
 }

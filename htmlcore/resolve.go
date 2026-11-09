@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"cogentcore.org/core/colors"
 	"strconv"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html"
 )
 
@@ -48,10 +50,37 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	r.flow()
 	r.lineHeight()
 	r.itemGrowth()
+	r.flexBasis()
 	r.sizes()
+	r.flexBasisGrowth()
 	r.textAlign()
 	r.tableBorders()
 	r.margins()
+	// visibility: hidden (inherited, unless visible) is not rendered, and
+	// gets no events (as the items of the closed menus of Wikipedia, over
+	// the page, which got the clicks there)
+	switch st.visibility {
+	case "hidden", "collapse":
+		bs.hidden = true
+	case "visible":
+		bs.hidden = false
+	default:
+		bs.hidden = pbs != nil && pbs.hidden
+	}
+	if bs.hidden {
+		s.Opacity = 0
+		s.Abilities = 0
+	}
+	if st.clippedOut { // nothing of it is shown, nor gets events
+		s.Opacity = 0
+		s.Abilities = 0
+	}
+	if st.zeroScale { // a transform scales it to nothing, so it is not shown
+		s.Opacity = 0
+	}
+	if st.hideText { // the text is not shown, and its box is (with its background)
+		s.Color = colors.Uniform(colors.Transparent)
+	}
 }
 
 // dots returns the given length in dots, or 0 if it is nil.
@@ -79,7 +108,12 @@ func (r *resolver) blockState() {
 	}
 	if st.hasBg {
 		s.Background = st.background
+		if st.bgCurrentColor { // the color of the element, as it is styled
+			s.Background = s.Color
+		}
 	}
+	r.c.applyMask(st, s)
+	r.c.applyBackgroundImage(st, s)
 }
 
 // layoutDisplay sets the core layout for the display of the element.
@@ -90,7 +124,18 @@ func (r *resolver) layoutDisplay() {
 	case "block", "list-item", "table-cell", "flow-root", "inline-block", "table-caption":
 		s.Display = styles.Flex
 		s.Direction = styles.Column
+		// flex-wrap (and flex-flow) only apply to flex containers (as the
+		// body of the postings of craigslist.org, a block with a flex-flow
+		// of column wrap for narrow screens, whose floats were not laid out)
+		s.Wrap = false
 	case "table", "inline-table", "table-row-group", "table-header-group", "table-footer-group":
+		if isTable && !strings.EqualFold(strings.TrimSpace(r.c.declaration(node, "table-layout")), "fixed") &&
+			st.width != nil && st.width.Unit != units.UnitPw {
+			// the width of a table is at least that of its cells (as the
+			// infoboxes of Wikipedia with images wider than their width)
+			s.ContentMinWidth = true
+		}
+
 		if !isTable && (node == nil || !strings.HasPrefix(node.Data, "t")) {
 			// other elements displayed as tables are approximated by their
 			// rows (or caption and content) in a column
@@ -101,6 +146,19 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 	case "grid", "inline-grid":
 		s.Display = styles.Grid
+		if node != nil && s.Columns <= 1 && strings.Contains(r.c.declaration(node, "grid-auto-flow"), "column") &&
+			r.c.declaration(node, "grid-template-rows") == "" {
+			// the items are in a row of columns (one row without row
+			// tracks, as for a marquee)
+			n := 0
+			r.wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+				if p := cwb.Styles.Position; p != styles.PositionAbsolute && p != styles.PositionFixed {
+					n++
+				}
+				return tree.Continue
+			})
+			s.Columns = max(n, 1)
+		}
 		if s.Columns == 0 { // one column without column tracks, as in CSS
 			s.Columns = 1
 		}
@@ -110,7 +168,7 @@ func (r *resolver) layoutDisplay() {
 		s.Display = styles.Flex
 		s.Direction = styles.Row
 		s.Wrap = true
-		s.Align.Items = styles.End // close to the baseline for images
+		s.Align.Items = styles.Baseline // texts, and the end for images
 		// as wide as its content on one line, and wraps in less width
 		s.Shrink.X = 1
 	}
@@ -177,27 +235,47 @@ func (r *resolver) replacedSize() {
 	if _, isSVG := wb.This.(*core.SVG); isSVG && node != nil && node.Data == "svg" {
 		// an svg without a size is as wide as its container, and as
 		// high as the aspect ratio of its view box makes it
-		if st.width == nil {
+		aspect := float32(0.5)
+		hasAspect := false
+		vb := strings.Fields(strings.ReplaceAll(GetAttr(node, "viewBox")+GetAttr(node, "viewbox"), ",", " "))
+		if len(vb) == 4 {
+			w, _ := strconv.ParseFloat(vb[2], 32)
+			h, _ := strconv.ParseFloat(vb[3], 32)
+			if w > 0 && h > 0 {
+				aspect, hasAspect = float32(h/w), true
+			}
+		}
+		switch {
+		case st.width == nil && st.height != nil && !percentUnit(st.height.Unit) && hasAspect:
+			// as wide as its height makes it, in the same unit (as the
+			// logos of github.com, which were as wide as their container,
+			// and the quotation marks of height: 0.7em of the opinion
+			// headlines of theguardian.com, which were as wide as theirs)
+			s.Min.X = units.Value{Value: st.height.Value / aspect, Unit: st.height.Unit}
+			s.Max.X = s.Min.X
+		case st.width == nil:
 			s.Min.X, s.Max.X = units.Pw(100), units.Pw(100)
 		}
 		if st.height == nil {
-			aspect := float32(0.5)
-			vb := strings.Fields(strings.ReplaceAll(GetAttr(node, "viewBox")+GetAttr(node, "viewbox"), ",", " "))
-			if len(vb) == 4 {
-				w, _ := strconv.ParseFloat(vb[2], 32)
-				h, _ := strconv.ParseFloat(vb[3], 32)
-				if w > 0 && h > 0 {
-					aspect = float32(h / w)
-				}
-			}
 			if st.width != nil && st.width.Unit == units.UnitDp {
 				s.Min.Y = units.Dp(st.width.Value * aspect)
+			} else if st.width != nil && st.width.Unit == units.UnitPw {
+				// of its percentage of the width (as the illustration of
+				// width: 20% of the article footer of MDN, which was as high
+				// as the width of the footer)
+				s.Min.Y = units.Pw(st.width.Value * aspect)
 			} else {
 				s.Min.Y = units.Pw(100 * aspect)
 			}
 			s.Max.Y = s.Min.Y
 		}
 	}
+}
+
+// percentUnit returns whether the given unit is a percentage of a size of
+// the parent or the element, which is not definite for a replaced element.
+func percentUnit(u units.Units) bool {
+	return u == units.UnitPw || u == units.UnitPh || u == units.UnitEw || u == units.UnitEh
 }
 
 // flow sets whether the widget is block-level, in the flow of blocks,
@@ -219,6 +297,12 @@ func (r *resolver) flow() {
 		}
 	}
 	bs.block = isBlockDisplay(st.display) || st.display == anonymousInline
+	if s.Position != styles.PositionStatic {
+		// positioned elements are painted after the others, which the
+		// background of the parent in their margins would cover (margins
+		// are transparent in CSS)
+		s.FillMargin = false
+	}
 	outOfFlow := s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed
 	if outOfFlow || s.Float != styles.FloatNone {
 		bs.block = false // not in the flow of blocks, and its width fits its content
@@ -282,7 +366,7 @@ func (r *resolver) lineHeight() {
 // itemGrowth sets how the widget grows and shrinks in the formatting context
 // of its parent: block, flex, grid or table, or shrink-to-fit.
 func (r *resolver) itemGrowth() {
-	wb, st, s, ps, bs, pbs := r.wb, r.st, r.s, r.ps, r.bs, r.pbs
+	c, node, wb, st, s, ps, bs, pbs := r.c, r.node, r.wb, r.st, r.s, r.ps, r.bs, r.pbs
 	// block-level elements fill the width of a block container,
 	// and flex items are stretched in the cross dimension
 	if ps != nil && pbs != nil {
@@ -320,8 +404,19 @@ func (r *resolver) itemGrowth() {
 		if align == "" || align == "auto" {
 			align = pbs.alignItems
 		}
+		// and to the width of their cells, unless they are justified in
+		// them (as the logo of Google, centered by justify-items)
+		justify := strings.TrimSpace(c.declaration(node, "justify-self"))
+		if (justify == "" || justify == "auto") && node != nil && node.Parent != nil {
+			justify = strings.TrimSpace(c.declaration(node.Parent, "justify-items"))
+		}
 		if st.width == nil {
-			s.Grow.X = 1
+			switch justify {
+			case "", "auto", "normal", "stretch":
+				s.Grow.X = 1
+			default:
+				s.Justify.Self = alignValue(justify)
+			}
 		}
 		if (align == "" || align == "stretch" || align == "normal") && st.height == nil {
 			s.Grow.Y = 1
@@ -329,6 +424,17 @@ func (r *resolver) itemGrowth() {
 		s.Shrink.X = 1
 	case bs.block && st.display != "table":
 		s.Grow.X = 1
+		if w := strings.TrimSpace(r.c.declaration(r.node, "width")); ((st.width == nil && (w == "" || w == "auto")) || (st.width != nil && st.width.Unit == units.UnitPw)) && !s.MaxContentWidth &&
+			st.display == "flex" && s.Contain == styles.ContainNone && r.c.hasRigidItem(r.node) && r.c.inBlockFlow(r.node) {
+			// a flex container of an auto (or percentage) width in blocks in
+			// the flow, with
+			// an item that does not shrink, is as wide as its containing
+			// block, which its content that is wider overflows, as in CSS,
+			// and does not widen (as the header of edition.cnn.com, with
+			// the items of its navigation, which its script hides until
+			// the rest fit in it, by its width)
+			s.Contain = styles.ContainInlineSize
+		}
 	case st.display == "table-cell":
 		s.Shrink.X = 1 // the columns of a table fit in its width
 	case st.width == nil:
@@ -339,6 +445,236 @@ func (r *resolver) itemGrowth() {
 	if _, isText := wb.This.(*core.Text); isText {
 		s.Shrink.X = 1 // wraps in the available width
 	}
+	if s.IsFlexWrap() && s.Direction == styles.Row && s.Shrink.X == 0 {
+		// a row that wraps is as wide as its content on one line, and wraps
+		// in less width, as in CSS, wherever it is (as the social icons in
+		// the footer of github.com, in a block in a flex item, which were
+		// in a column at its min-content width)
+		s.Shrink.X = 1
+	}
+}
+
+// flexBasis sets the width of a flex item in a row from its flex-basis,
+// which overrides its width, as in CSS. A basis of 0 (as of flex: 1) is
+// none: when all of the items of the row have one, they are as wide as
+// their share of the grow of the row, of its width less its gaps (as the
+// columns of edition.cnn.com, of flex: 3 1 0, 4 1 0 and 3 1 0, with a
+// width of 100%, which put each in a row of its own).
+func (r *resolver) flexBasis() {
+	c, node, st, ps, pbs := r.c, r.node, r.st, r.ps, r.pbs
+	if ps == nil || pbs == nil || (pbs.display != "flex" && pbs.display != "inline-flex") || ps.Direction != styles.Row {
+		return
+	}
+	switch st.flexBasis {
+	case "", "auto", "content":
+		return
+	}
+	if !zeroLength(st.flexBasis) {
+		if st.hasGrow && st.flexGrow > 0 && (!st.hasShrink || st.flexShrink > 0) {
+			// an item that grows and shrinks from its basis is sized by
+			// its content and grow in core, which can break a row that
+			// wraps into lines by the width of its content (as the events
+			// of the current events portal of Wikipedia, of flex: 100 1
+			// 200px, which were 200px wide with the basis as a width)
+			// (its basis is where it starts from in a row that wraps)
+			st.width = nil
+			if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
+				r.s.FlexBasis = l
+			}
+			return
+		}
+		if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
+			st.width = &l
+		}
+		return
+	}
+	st.width = nil
+	if node == nil || node.Parent == nil || st.flexGrow <= 0 {
+		return
+	}
+	sum, n := float32(0), 0
+	for sib := node.Parent.FirstChild; sib != nil; sib = sib.NextSibling {
+		if sib.Type != html.ElementNode || !c.inFlexFlow(sib) {
+			continue
+		}
+		grow, basis := c.flexOf(sib)
+		if !zeroLength(basis) || grow <= 0 {
+			return
+		}
+		sum += grow
+		n++
+	}
+	if n < 2 {
+		return
+	}
+	// (percentages of the width of a row in core are of it less its gaps;
+	// a custom length, not a percentage width, which a row that wraps
+	// would need room for in a line)
+	l := customLength("calc", []linear{{pct: float64(100 * st.flexGrow / sum)}}, units.UnitPw)
+	st.width = &l
+}
+
+// flexBasisGrowth restores the grow of a flex item with a flex-basis after
+// [resolver.sizes], which does not grow elements with a width: the basis
+// is where it starts from.
+func (r *resolver) flexBasisGrowth() {
+	st, s, ps, pbs := r.st, r.s, r.ps, r.pbs
+	if ps == nil || pbs == nil || (pbs.display != "flex" && pbs.display != "inline-flex") || ps.Direction != styles.Row {
+		return
+	}
+	switch st.flexBasis {
+	case "", "auto", "content":
+		return
+	}
+	if st.width == nil {
+		return
+	}
+	if !zeroLength(st.flexBasis) {
+		if st.hasGrow && st.flexGrow > 0 {
+			s.Grow.X = st.flexGrow
+			return
+		}
+		if strings.HasSuffix(strings.TrimSpace(st.flexBasis), "%") && !ps.IsFlexWrap() && s.Max.X.Unit == units.UnitPw {
+			// an item that does not grow is as wide as its percentage
+			// basis (of the row less its gaps in core), not only up to
+			// it, and starts from it, so that the items that grow have
+			// only the rest of the row (as the images of the cards of
+			// theguardian.com, of flex-basis: 50%, beside text of
+			// flex-grow: 1 that took their width)
+			s.Min.X, s.FlexBasis = s.Max.X, s.Max.X
+			s.Grow.X = 0
+		}
+		return
+	}
+	if !st.hasGrow || st.flexGrow <= 0 {
+		return
+	}
+	// the share of the row, as a percentage width: it grows up to it,
+	// from no minimum, so that the items are in one row while the
+	// percentage is resolved
+	s.Min.X = units.Value{}
+	s.Grow.X = 1
+	s.Shrink.X = 1
+}
+
+// zeroLength returns whether the given CSS length is zero (as 0, 0px, 0%).
+func zeroLength(v string) bool {
+	v = strings.TrimSpace(v)
+	v = strings.TrimRight(v, "abcdefghijklmnopqrstuvwxyz%")
+	f, err := strconv.ParseFloat(v, 32)
+	return err == nil && f == 0
+}
+
+// flexOf returns the flex grow and basis of the given element, from its
+// flex, flex-grow and flex-basis declarations, as for its siblings.
+func (c *Context) flexOf(n *html.Node) (grow float32, basis string) {
+	for _, d := range c.declarations(n) {
+		if d.invalid {
+			continue
+		}
+		v := strings.ToLower(strings.TrimSpace(d.Value))
+		switch d.Property {
+		case "flex", "-webkit-flex":
+			if g, _, b, ok := parseFlex(v); ok {
+				grow, basis = g, b
+			}
+		case "flex-grow", "-webkit-flex-grow":
+			if f, err := strconv.ParseFloat(v, 32); err == nil {
+				grow = float32(f)
+			}
+		case "flex-basis", "-webkit-flex-basis":
+			basis = v
+		}
+	}
+	return
+}
+
+// inBlockFlow returns whether the given element is in blocks in the flow
+// up to the body of a page of a known width ([Context.MediaWidth]) or an
+// element with a width: each of its ancestors is a
+// block (not a float, an absolute or fixed element, or a flex or grid
+// item, which can be as wide as their content), so its width does not
+// depend on its content, as in CSS.
+func (c *Context) inBlockFlow(n *html.Node) bool {
+	for p := n.Parent; p != nil && p.Type == html.ElementNode; p = p.Parent {
+		if p.Data == "body" || p.Data == "html" {
+			// the body is as wide as the viewport of a page whose width is
+			// known (not as wide as its content, as in a window or a
+			// dialog sized to its content)
+			return c.MediaWidth > 0
+		}
+		switch strings.TrimSpace(c.displayOf(p)) {
+		case "block", "flow-root", "list-item":
+		default:
+			return false
+		}
+		switch strings.TrimSpace(c.declaration(p, "position")) {
+		case "absolute", "fixed":
+			return false
+		}
+		if f := strings.TrimSpace(c.declaration(p, "float")); f != "" && f != "none" {
+			return false
+		}
+		if pp := p.Parent; pp != nil && pp.Type == html.ElementNode {
+			switch strings.TrimSpace(c.displayOf(pp)) {
+			case "flex", "inline-flex", "grid", "inline-grid", "table-cell", "inline-block":
+				return false
+			}
+		}
+		if w := strings.TrimSpace(c.declaration(p, "width")); w != "" && w != "auto" && !strings.Contains(w, "content") {
+			return true
+		}
+	}
+	return false
+}
+
+// hasRigidItem returns whether the given flex container has an item that
+// does not shrink (of flex: none, or a flex-shrink of 0).
+func (c *Context) hasRigidItem(n *html.Node) bool {
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode {
+			continue
+		}
+		shrink := float32(1)
+		for _, d := range c.declarations(k) {
+			if d.invalid {
+				continue
+			}
+			v := strings.ToLower(strings.TrimSpace(d.Value))
+			switch d.Property {
+			case "flex":
+				if _, sh, _, ok := parseFlex(v); ok {
+					shrink = sh
+				}
+			case "flex-shrink":
+				if f, err := strconv.ParseFloat(v, 32); err == nil {
+					shrink = float32(f)
+				}
+			}
+		}
+		if shrink == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// inFlexFlow returns whether the given element is an item in the flow of
+// its flex container: it is displayed, and not absolute or fixed.
+func (c *Context) inFlexFlow(n *html.Node) bool {
+	switch strings.TrimSpace(c.declaration(n, "display")) {
+	case "none", "contents":
+		return false
+	}
+	switch strings.TrimSpace(c.declaration(n, "position")) {
+	case "absolute", "fixed":
+		return false
+	}
+	switch n.Data {
+	case "script", "style", "template", "link", "meta":
+		return false
+	}
+	return true
 }
 
 // sizes sets the sizes (Min and Max, of the content box), with percentage
@@ -362,6 +698,7 @@ func (r *resolver) sizes() {
 		s.BoxSizing = styles.BoxBorderBox
 	}
 	if st.width != nil {
+		intrinsic := s.Min.X
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
@@ -371,6 +708,30 @@ func (r *resolver) sizes() {
 			// wide as its content grow without end.
 			s.Min.X = units.Value{}
 			s.Grow.X = 1
+			if _, isField := wb.This.(*core.TextField); isField && intrinsic.Value > 0 {
+				// A text field (input) is as wide as its intrinsic width
+				// in a parent that is as wide as its content, and can
+				// shrink, as in CSS (as the email field of github.com).
+				s.Min.X = intrinsic
+				s.Shrink.X = 1
+			}
+			if r.ps != nil && r.pbs != nil && r.pbs.display == "flex" && r.ps.Wrap && r.ps.Direction == styles.Row {
+				// In a row that wraps, an item needs its width in its
+				// line, as for its hypothetical main size in CSS (as the
+				// containers of width: 100% of edition.cnn.com, each on a
+				// line of its own, which were all on one line): a Min of
+				// 0 in percent of the width marks it for core (as no Min).
+				s.Min.X = units.Pw(0)
+			}
+		}
+		if st.display == "table-cell" && st.width.Unit != units.UnitPw {
+			// the width of a cell is the least width of its column, which
+			// it fills (as the cells of the names under the photos of the
+			// infoboxes of Wikipedia, narrower than the photos), without
+			// taking the extra width of the table, which the columns of
+			// automatic width get (as for the logo of Hacker News)
+			s.Max.X = units.Value{}
+			s.Grow.X = 0.001
 		}
 		nowrap := s.Text.WhiteSpace == text.WrapNever || s.Text.WhiteSpace == text.WhiteSpacePre
 		if st.display == "table-cell" && st.width.Unit == units.UnitPw && nowrap {
@@ -412,10 +773,17 @@ func (r *resolver) sizes() {
 			}
 		}
 	}
-	bs.definiteHeight = st.height != nil
+	// (an aspect ratio makes the height follow the width, which is definite)
+	bs.definiteHeight = st.height != nil || s.AspectRatio > 0
 	if (st.overflowHidden[0] || s.Overflow.X == styles.OverflowVisible) &&
 		(st.overflowHidden[1] || s.Overflow.Y == styles.OverflowVisible) && (st.overflowHidden[0] || st.overflowHidden[1]) {
 		s.ScrollbarWidth.Zero() // hidden, not scrolled
+	}
+	if s.Overflow.X >= styles.OverflowAuto && s.Shrink.X == 0 {
+		// a box that scrolls is as wide as its content, narrowed to fit
+		// (to nothing), as in CSS (as the scrolling list of the chapters of
+		// the video of github.com)
+		s.Shrink.X = 1
 	}
 	// Overflow only scrolls (or clips) a box whose height is limited,
 	// and that of the body is that of the viewport, which scrolls anyway.
@@ -427,6 +795,14 @@ func (r *resolver) sizes() {
 		(st.height == nil && st.maxHeight == nil && !insetHeight && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
 	}
+	if s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed {
+		// an element with both insets in a dimension, auto margins in it,
+		// and a definite size in it is centered between the insets, not
+		// stretched to them (as the modal dialogs of pkg.go.dev, centered
+		// in the window)
+		s.InsetCenter[0] = s.InsetSet.Left && s.InsetSet.Right && st.marginAuto[1] && st.marginAuto[3] && st.width != nil
+		s.InsetCenter[1] = s.InsetSet.Top && s.InsetSet.Bottom && st.marginAuto[0] && st.marginAuto[2] && (st.height != nil || st.heightFit)
+	}
 	if st.height != nil {
 		mn, mx := *st.height, *st.height
 		s.Min.Y = mn
@@ -436,12 +812,52 @@ func (r *resolver) sizes() {
 		s.Grow.Y = 0
 	}
 	if st.minWidth != nil {
-		s.Min.X = *st.minWidth
+		_, isField := r.wb.This.(*core.TextField)
+		// a fixed width larger than the min-width is kept, as min-width
+		// only raises the width in CSS
+		keepWidth := st.width != nil && st.width.Unit != units.UnitPw && r.dots(st.width) >= r.dots(st.minWidth)
+		if !(isField && st.minWidth.Value == 0 && s.Shrink.X > 0) && !keepWidth {
+			// (a text field that can shrink keeps its intrinsic width)
+			s.Min.X = *st.minWidth
+		}
 	}
+	defer func() { // min-width wins over width and max-width, as in CSS
+		if st.minWidth != nil && st.minWidth.Unit != units.UnitPw && s.Max.X.Value > 0 && s.Max.X.Unit != units.UnitPw &&
+			r.dots(st.minWidth) > r.dots(&s.Max.X) {
+			s.Max.X = *st.minWidth
+		}
+	}()
 	if st.minHeight != nil {
-		s.Min.Y = *st.minHeight
+		keepHeight := st.height != nil && st.height.Unit != units.UnitPh && r.dots(st.height) >= r.dots(st.minHeight)
+		if !keepHeight {
+			s.Min.Y = *st.minHeight
+		}
 	}
-	if st.maxWidth != nil {
+	_, isImage := wb.This.(*core.Image)
+	_, isSVG := wb.This.(*core.SVG)
+	switch {
+	case st.maxWidth == nil:
+	case (isImage || isSVG) && st.width != nil && st.maxWidth.Unit == units.UnitPw:
+		// an image is the smaller of its width and its percentage
+		// max-width (as the responsive images of max-width: 100%, as the
+		// photos of the picks of nytimes.com/wirecutter, of width="399"
+		// in boxes of 200px, which they overflowed): the smaller of the two
+		// (as the ducky of github.com, of width: 2rem and max-width: 100%,
+		// which was as wide as its container)
+		s.Max.X = *st.maxWidth
+		if st.width.Unit == units.UnitDp {
+			s.Max.X = customLength("min", []linear{{px: float64(st.width.Value)}, {pct: float64(st.maxWidth.Value)}}, units.UnitPw)
+		}
+	case st.width != nil && st.width.Unit != units.UnitPw && st.maxWidth.Unit == units.UnitPw:
+		// a fixed width with a percentage max-width (as max-width: 100%) is
+		// the width (the smaller of the two in CSS, as the width is, but
+		// for a narrower parent, in which it overflows), as for the
+		// percentage bars of Wikipedia (which filled the max-width)
+	case st.width != nil && st.width.Unit != units.UnitPw:
+		if r.dots(st.maxWidth) < r.dots(st.width) { // the smaller of the two
+			s.Min.X, s.Max.X = *st.maxWidth, *st.maxWidth
+		}
+	default:
 		s.Max.X = *st.maxWidth
 	}
 	if st.maxHeight != nil {
@@ -547,7 +963,7 @@ func (r *resolver) margins() {
 	// The spacing of the page is that of its CSS, not scaled by the
 	// Spacing setting, which applies to the spacing of Cogent Core widgets
 	// (see core.WidgetBase.styleSettings, which multiplies by it).
-	if _, isFrame := wb.This.(*core.Frame); isFrame || isTextWidget(wb) {
+	if frameOf(wb.This) != nil || isTextWidget(wb) {
 		for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
 			&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
 			v.Value /= spc
