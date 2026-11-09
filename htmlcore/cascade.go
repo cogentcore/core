@@ -149,9 +149,13 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 // addDecls adds the given declarations to the given node.
 func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOrigin, spec int) {
 	for _, d := range decls {
+		prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
+		if !validDeclaration(prop, value) {
+			continue // dropped, so that the declaration before it applies
+		}
 		c.cssOrder++
-		c.styles[n] = append(c.styles[n], &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)),
-			Value: c.absoluteURLs(strings.TrimSpace(d.Value)), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
+		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
+			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
 			container: c.curContainer})
 	}
 	if c.curContainer != nil {
@@ -161,6 +165,36 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 		c.containerQueried[n] = true
 	}
 	delete(c.sorted, n)
+}
+
+// otherVendorValue matches a keyword of the vendor prefix of another
+// browser engine (as -moz-available), which is invalid in browsers of
+// WebKit and Blink, as Cogent Core is.
+var otherVendorValue = regexp.MustCompile(`(^|[\s,(])-(moz|ms|o)-[a-z]`)
+
+// validDeclaration returns whether a declaration of the given property
+// and value is valid, as in browsers, which drop the declarations that
+// are not when they are parsed, so that the declarations before them of
+// the same property apply (as height: 100vh before height:
+// -webkit-fill-available, of the captcha frames of DataDome for Safari,
+// which were of the height of no content). A size of
+// -webkit-fill-available is invalid here too, as it is not laid out, and
+// the declaration before it is meant as a fallback for it. Custom
+// properties and values with variables are only known when they are used.
+func validDeclaration(prop, value string) bool {
+	if strings.HasPrefix(prop, "--") || strings.Contains(value, "var(") {
+		return true
+	}
+	if otherVendorValue.MatchString(strings.ToLower(value)) {
+		return false
+	}
+	switch prop {
+	case "width", "height", "min-width", "min-height", "max-width", "max-height", "inline-size", "block-size":
+		if strings.Contains(strings.ToLower(value), "-webkit-fill-available") {
+			return false
+		}
+	}
+	return true
 }
 
 // addHint adds a declaration of a presentational attribute to the node.

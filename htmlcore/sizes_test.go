@@ -1186,14 +1186,16 @@ func TestGridAutoFlowColumnRows(t *testing.T) {
 // TestIframeBox tests the box of an iframe: 300 by 150 by default with a
 // border, of its width and height attributes, without a border for
 // frameborder="0", and of its styles, and that its children (for browsers
-// without frames) are not shown. It had no box (as an inline element
+// without frames) are not shown, and a percentage width with a height in
+// its style (as the captchas of DataDome). It had no box (as an inline element
 // without content), so the captchas of bot checks were not shown.
 func TestIframeBox(t *testing.T) {
 	src := `<div style="width: 800px"><iframe id="a" src="https://example.com/"></iframe><br>` +
 		`<iframe id="b" width="400" height="200" frameborder="0" src="x"></iframe><br>` +
-		`<iframe id="c" style="width: 500px; height: 100px; border: 0" src="y"><p>no frames</p></iframe></div>`
+		`<iframe id="c" style="width: 500px; height: 100px; border: 0" src="y"><p>no frames</p></iframe><br>` +
+		`<iframe id="d" width="100%" height="100%" style="height: 300px" frameborder="0" src="z"></iframe></div>`
 	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
-		for _, id := range []string{"a", "b", "c"} {
+		for _, id := range []string{"a", "b", "c", "d"} {
 			require.NotNil(t, ws[id], id)
 		}
 		size := func(id string) math32.Vector2 { return ws[id].Geom.Size.Actual.Total }
@@ -1204,5 +1206,24 @@ func TestIframeBox(t *testing.T) {
 		assert.InDelta(t, 500*dp, size("c").X, 1)
 		assert.InDelta(t, 100*dp, size("c").Y, 1)
 		assert.Equal(t, 0, ws["c"].NumChildren(), "its children are not shown")
+		// a percentage width (as the captchas of DataDome), and a height
+		// that is not only a minimum
+		assert.InDelta(t, 800*dp, size("d").X, 1)
+		assert.InDelta(t, 300*dp, size("d").Y, 1)
 	})
+}
+
+// TestInvalidDeclarationDropped tests that a declaration that is invalid
+// (a keyword of another engine's vendor prefix, or a size of
+// -webkit-fill-available, which is not laid out) is dropped, so that the
+// declaration of the same property before it applies, as in browsers (as
+// the height: 100vh of the captcha frames of DataDome for Safari, followed
+// by height: -webkit-fill-available, which were of no height).
+func TestInvalidDeclarationDropped(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div id="a" style="height: 300px; height: -webkit-fill-available">x</div>`+
+		`<div id="b" style="width: 300px; width: -moz-available">y</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 300*dp, ws["a"].Geom.Size.Actual.Total.Y, 4)
+			assert.InDelta(t, 300*dp, ws["b"].Geom.Size.Actual.Total.X, 4)
+		})
 }

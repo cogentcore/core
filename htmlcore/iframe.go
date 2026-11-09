@@ -32,11 +32,7 @@ func handleIframe(ctx *Context) core.Widget {
 	fb := strings.ToLower(strings.TrimSpace(GetAttr(ctx.Node, "frameborder")))
 	border := fb != "0" && fb != "no"
 	fr.Styler(func(s *styles.Style) {
-		// the defaults, which its styles (and width and height
-		// attributes) override
-		s.Min.Set(units.Dp(IframeDefaultWidth), units.Dp(IframeDefaultHeight))
-		s.Max = s.Min
-		s.Grow.Set(0, 0)
+		// (its size is that of a replaced element: see [resolver.sizes])
 		s.Overflow.Set(styles.OverflowHidden) // its document scrolls itself
 		s.Padding.Zero()
 		s.Gap.Zero()

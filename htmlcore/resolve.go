@@ -272,6 +272,11 @@ func (r *resolver) replacedSize() {
 	}
 }
 
+// isIframe returns whether the element is an iframe.
+func (r *resolver) isIframe() bool {
+	return r.node != nil && r.node.Data == "iframe"
+}
+
 // percentUnit returns whether the given unit is a percentage of a size of
 // the parent or the element, which is not definite for a replaced element.
 func percentUnit(u units.Units) bool {
@@ -702,6 +707,7 @@ func (r *resolver) sizes() {
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
+		isImage = isImage || r.isIframe() // (replaced elements)
 		if st.width.Unit == units.UnitPw && !isImage {
 			// A percentage of the width of the parent fills that much
 			// of it, which as a minimum would make a parent that is as
@@ -772,6 +778,20 @@ func (r *resolver) sizes() {
 				**h = units.Vh(v)
 			}
 		}
+	}
+	if r.isIframe() {
+		// an iframe is a replaced element, of 300 by 150 without a width
+		// or height (as of a percentage of a parent with an auto height),
+		// and exactly of its height, as its document scrolls in it
+		if st.width == nil {
+			s.Min.X = units.Dp(IframeDefaultWidth)
+			s.Max.X, s.Grow.X = s.Min.X, 0
+		}
+		if st.height == nil {
+			h := units.Dp(IframeDefaultHeight)
+			st.height = &h
+		}
+		defer func() { s.Max.Y = s.Min.Y }()
 	}
 	// (an aspect ratio makes the height follow the width, which is definite)
 	bs.definiteHeight = st.height != nil || s.AspectRatio > 0
