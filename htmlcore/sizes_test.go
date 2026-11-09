@@ -1050,3 +1050,22 @@ func TestSVGPercentWidthHeight(t *testing.T) {
 		assert.InDelta(t, 120*dp, s.Geom.Size.Actual.Total.Y, 2)
 	})
 }
+
+// TestFlexBasisWrapRow tests items of a definite flex-basis that grow and
+// shrink in a row that wraps (as the events and calendar of the current
+// events portal of Wikipedia, of flex: 100 1 200px and 1 100 250px): they
+// start from their bases, so they are on one line, and the events grow
+// into the rest of it, beside the calendar at its content width. They
+// were 200px wide, and then each on a line of its own.
+func TestFlexBasisWrapRow(t *testing.T) {
+	src := `<style>.m { display: flex; flex-flow: wrap } .e { flex: 100 1 200px } .c { flex: 1 100 250px }</style>
+<div style="width: 960px"><div class="m"><div class="e" id="e"><p>` + strings.Repeat("The man who opened fire in the square dies at a hospital. ", 6) + `</p></div>
+<div class="c" id="c"><table style="width: 360px"><tr><td>calendar</td></tr></table></div></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		e, c := ws["e"], ws["c"]
+		require.NotNil(t, c)
+		assert.Equal(t, e.Geom.TotalBBox.Min.Y, c.Geom.TotalBBox.Min.Y, "on one line")
+		assert.InDelta(t, 960*dp, e.Geom.Size.Actual.Total.X+c.Geom.Size.Actual.Total.X, 4, "filling it")
+		assert.Greater(t, e.Geom.Size.Actual.Total.X, 500*dp, "the events grow")
+	})
+}

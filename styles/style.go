@@ -186,6 +186,13 @@ type Style struct { //types:add
 	// max-content in CSS (as a ticker of items in a row that scrolls).
 	MaxContentWidth bool
 
+	// FlexBasis, if positive, is the width that the widget starts from in a
+	// row that wraps, which its line needs room for (down to its min-content
+	// width), instead of its preferred width, as the flex-basis of CSS (as
+	// the hypothetical main size of a flex item). It grows and shrinks from
+	// there by Grow and Shrink, as usual.
+	FlexBasis units.Value
+
 	// AspectRatio, if positive, is the ratio of the width to the height of
 	// the element, from which its height follows its width when its height
 	// is not set (by its Min), as the aspect-ratio property of CSS (its

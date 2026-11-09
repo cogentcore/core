@@ -462,6 +462,19 @@ func (r *resolver) flexBasis() {
 		return
 	}
 	if !zeroLength(st.flexBasis) {
+		if st.hasGrow && st.flexGrow > 0 && (!st.hasShrink || st.flexShrink > 0) {
+			// an item that grows and shrinks from its basis is sized by
+			// its content and grow in core, which can break a row that
+			// wraps into lines by the width of its content (as the events
+			// of the current events portal of Wikipedia, of flex: 100 1
+			// 200px, which were 200px wide with the basis as a width)
+			// (its basis is where it starts from in a row that wraps)
+			st.width = nil
+			if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
+				r.s.FlexBasis = l
+			}
+			return
+		}
 		if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
 			st.width = &l
 		}
@@ -505,11 +518,16 @@ func (r *resolver) flexBasisGrowth() {
 	case "", "auto", "content":
 		return
 	}
-	if st.width == nil || !st.hasGrow || st.flexGrow <= 0 {
+	if st.width == nil {
 		return
 	}
 	if !zeroLength(st.flexBasis) {
-		s.Grow.X = st.flexGrow
+		if st.hasGrow && st.flexGrow > 0 {
+			s.Grow.X = st.flexGrow
+		}
+		return
+	}
+	if !st.hasGrow || st.flexGrow <= 0 {
 		return
 	}
 	// the share of the row, as a percentage width: it grows up to it,

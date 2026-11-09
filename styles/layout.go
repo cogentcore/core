@@ -43,6 +43,7 @@ func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Gap.ToDots(uc)
 	s.ScrollbarWidth.ToDots(uc)
 	s.Inset.ToDots(uc)
+	s.FlexBasis.ToDots(uc)
 
 	// max must be at least as much as min
 	if s.Max.X.Dots > 0 {

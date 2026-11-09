@@ -1000,12 +1000,39 @@ func (fr *Frame) SizeUp() {
 	fr.setInitCells()
 	fr.This.(Layouter).LayoutSpace()
 	fr.sizeUpChildren() // kids do their own thing
+	fr.sizeUpFlexBasis()
 	fr.sizeFromChildrenFit(0, SizeUpPass)
 	fr.sizeUpIntrinsicFrame()
 	fr.sizeAspect(false)
 	if fr.Parts != nil {
 		fr.Parts.SizeUp() // just to get sizes -- no std role in layout
 	}
+}
+
+// sizeUpFlexBasis sets the width of the children of a row that have a
+// [styles.Style.FlexBasis] to it (down to their min-content width), as
+// their preferred width, from which they grow and shrink, as a flex item
+// in CSS (as the events of the current events portal of Wikipedia, of
+// flex: 100 1 200px, which started from their text on one line).
+func (fr *Frame) sizeUpFlexBasis() {
+	if fr.Styles.Display != styles.Flex || fr.Styles.Direction != styles.Row {
+		return
+	}
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		fb := cwb.Styles.FlexBasis.Dots
+		if fb <= 0 {
+			return tree.Continue
+		}
+		sz := &cwb.Geom.Size
+		w := math32.Ceil(max(fb+sz.Space.X, sz.minWidth))
+		if mx := sz.Max.X; mx > 0 {
+			w = min(w, mx+sz.Space.X)
+		}
+		sz.Actual.Total.X = w
+		sz.SetContentFromTotal(&sz.Actual)
+		sz.preferred.X = w
+		return tree.Continue
+	})
 }
 
 // LayoutSpace sets our Space based on Styles and Scroll.
@@ -2199,6 +2226,10 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			// the row, which its line needs room for, as for the
 			// hypothetical main size of a flex item in CSS.
 			ksz.X = max(ksz.X, min(cwb.Geom.Size.preferred.X, fit))
+		}
+		if fb := cwb.Styles.FlexBasis.Dots; d == math32.X && fb > 0 {
+			// its basis, down to its min-content width (see [styles.Style.FlexBasis])
+			ksz.X = min(max(fb+cwb.Geom.Size.Space.X, cwb.Geom.Size.minWidth), fit)
 		}
 		if d == math32.X && cwb.Styles.Grow.X > 0 && cwb.Styles.Max.X.Unit == units.UnitPw && cwb.Styles.Min.X.Unit == units.UnitPw {
 			// A widget whose width is a percentage of the row (its Max,
