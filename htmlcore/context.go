@@ -600,8 +600,11 @@ func acceptLanguage(locale string) string {
 }
 
 // acceptHeader is the Accept header of requests, as browsers send it for
-// pages (and accepted for their resources).
-const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+// pages (and accepted for their resources), without image/avif, which
+// images cannot be decoded from (and which image servers send to those
+// who accept it, as those of theguardian.com and nytimes.com, whose
+// images were blank).
+const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
 
 // SetRequestHeaders sets the headers of the given request that browsers
 // send: the [UserAgent], [AcceptLanguage], and Accept. (Accept-Encoding is

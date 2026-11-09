@@ -103,6 +103,9 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 					c.curContainer = prev
 					continue
 				}
+				if strings.ToLower(rule.Name) == "@supports" && !supportsMatches(rule.Prelude) {
+					continue
+				}
 				c.addRuleList(root, rule.Rules, origin)
 			case "@font-face":
 				if c.WebFonts {

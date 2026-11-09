@@ -229,6 +229,14 @@ func (c *Context) arrange(n *html.Node, fr *core.Frame) {
 		c.arrangeOrder(fr)
 	}
 	switch c.displayOf(n) {
+	case "flex", "inline-flex":
+		if strings.HasSuffix(c.flexDirection(n), "-reverse") {
+			// the items from the end (as the image of the lead story of
+			// theguardian.com, on the right of its text by row-reverse)
+			slices.Reverse(fr.Children)
+		}
+	}
+	switch c.displayOf(n) {
 	case "grid", "inline-grid":
 		c.arrangeGrid(n, fr)
 	case "block", "list-item", "flow-root", "inline-block":
@@ -260,6 +268,22 @@ func (c *Context) arrangeOrder(fr *core.Frame) {
 		return
 	}
 	slices.SortStableFunc(fr.Children, func(a, b tree.Node) int { return orders[a] - orders[b] })
+}
+
+// flexDirection returns the flex-direction of the given element, of the
+// longhand or the flex-flow shorthand that is last in the cascade.
+func (c *Context) flexDirection(n *html.Node) string {
+	prop, v := c.lastDeclaration(n, "flex-direction", "flex-flow")
+	v = strings.ToLower(strings.TrimSpace(v))
+	if prop == "flex-flow" {
+		for _, f := range strings.Fields(v) {
+			if strings.HasPrefix(f, "row") || strings.HasPrefix(f, "column") {
+				return f
+			}
+		}
+		return ""
+	}
+	return v
 }
 
 // linkFrame makes the given frame of an a element open the given URL.

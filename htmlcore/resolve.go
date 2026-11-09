@@ -524,6 +524,17 @@ func (r *resolver) flexBasisGrowth() {
 	if !zeroLength(st.flexBasis) {
 		if st.hasGrow && st.flexGrow > 0 {
 			s.Grow.X = st.flexGrow
+			return
+		}
+		if strings.HasSuffix(strings.TrimSpace(st.flexBasis), "%") && !ps.IsFlexWrap() && s.Max.X.Unit == units.UnitPw {
+			// an item that does not grow is as wide as its percentage
+			// basis (of the row less its gaps in core), not only up to
+			// it, and starts from it, so that the items that grow have
+			// only the rest of the row (as the images of the cards of
+			// theguardian.com, of flex-basis: 50%, beside text of
+			// flex-grow: 1 that took their width)
+			s.Min.X, s.FlexBasis = s.Max.X, s.Max.X
+			s.Grow.X = 0
 		}
 		return
 	}

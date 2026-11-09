@@ -1069,3 +1069,76 @@ func TestFlexBasisWrapRow(t *testing.T) {
 		assert.Greater(t, e.Geom.Size.Actual.Total.X, 500*dp, "the events grow")
 	})
 }
+
+// TestGridNamedLines tests the placement of grid items by the names of the
+// lines of the tracks (as the sections of theguardian.com, of a title in
+// grid-area: headline / title and the content in content-toggleable /
+// content), the width of items that span tracks of lengths (whose content
+// widened the tracks), an empty item over the others (a decoration of
+// grid-area: 1 / decoration / -1, which took their cells), and the
+// fallback of @supports not (display: grid), which applied.
+func TestGridNamedLines(t *testing.T) {
+	src := `<style>.g { display: grid; column-gap: 20px; grid-template-rows: [headline-start content-start] auto [content-toggleable-start] auto [headline-end content-end];
+grid-template-columns: minmax(0px, 1fr) [decoration-start title-start] repeat(2, 60px) [title-end content-start] repeat(4, 60px) [decoration-end content-end] minmax(0px, 1fr) }
+@supports not (display: grid) { .g { width: 300px; margin: 0 auto } }
+.deco { grid-area: 1 / decoration / -1 } .title { grid-area: headline / title } .content { grid-area: content-toggleable / content }</style>
+<div style="width: 800px"><section class="g" id="g"><div class="deco"></div><div class="title" id="title">News</div>
+<div class="content" id="content">A story with a long line of text that is wider than the tracks of the content of the section</div></section></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		g, title, content := ws["g"], ws["title"], ws["content"]
+		require.NotNil(t, content)
+		assert.InDelta(t, 800*dp, g.Geom.Size.Actual.Total.X, 2, "the grid, not the fallback")
+		// 800 = 2 fr + 6*60 + 7 gaps of 20 → fr = 150
+		assert.InDelta(t, (150+20)*dp, title.Geom.Pos.Total.X-g.Geom.Pos.Total.X, 3, "title at decoration-start")
+		assert.InDelta(t, 140*dp, title.Geom.Size.Actual.Total.X, 3, "title over 2 tracks")
+		assert.InDelta(t, (150+20+140+20)*dp, content.Geom.Pos.Total.X-g.Geom.Pos.Total.X, 3, "content at content-start")
+		assert.InDelta(t, 300*dp, content.Geom.Size.Actual.Total.X, 3, "content over 4 tracks, not its text")
+	})
+}
+
+// TestFlexRowReverse tests that the items of a flex container of
+// flex-direction: row-reverse are from the right (as the image of the lead
+// story of theguardian.com, on the right of its text).
+func TestFlexRowReverse(t *testing.T) {
+	src := `<div style="display: flex; flex-direction: row-reverse; width: 600px"><div id="img" style="width: 400px; height: 10px"></div><div id="text" style="flex-grow: 1">Text</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		text, img := ws["text"], ws["img"]
+		require.NotNil(t, img)
+		assert.Greater(t, img.Geom.Pos.Total.X, text.Geom.Pos.Total.X, "the image on the right")
+	})
+}
+
+// TestFlexBasisPercentNoGrow tests that a flex item of a percentage
+// flex-basis that does not grow is as wide as its basis, beside an item
+// that grows (as the images of the cards of theguardian.com, of
+// flex-basis: 50%, which were a few px wide beside their text).
+func TestFlexBasisPercentNoGrow(t *testing.T) {
+	src := `<style>.row { display: flex; column-gap: 20px; width: 100% }
+.img { flex-basis: 50%; position: relative; align-self: flex-start }
+.pic { display: block; padding-top: 80%; position: relative } .pic > * { position: absolute; top: 0; left: 0; width: 100%; height: 100% }
+.text { display: flex; flex-direction: column; flex-grow: 1; flex-basis: 50% }</style>
+<div style="width: 460px"><div class="row"><div class="img" id="img"><div class="pic"><img style="width: 100%; display: block" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="></div></div>
+<div class="text" id="text"><h3>Polish prosecutors say too early to tell if Krakow gunman was motivated by political ideology</h3></div></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		img, text := ws["img"], ws["text"]
+		require.NotNil(t, text)
+		assert.InDelta(t, 220*dp, img.Geom.Size.Actual.Total.X, 3, "the image at its basis")
+		assert.InDelta(t, 220*dp, text.Geom.Size.Actual.Total.X, 3, "the text in the rest")
+	})
+}
+
+// TestGridMinmaxFrAfterItem tests that the last track of minmax(0px, 1fr)
+// after an item placed by its column lines takes its share of the width
+// (as the top bar of the masthead of theguardian.com, between margins of
+// minmax(0px, 1fr), which was moved right by the width of the last one).
+func TestGridMinmaxFrAfterItem(t *testing.T) {
+	src := `<div style="width: 800px"><div id="g" style="display: grid; column-gap: 20px; grid-template-columns: [viewport-start] minmax(0px, 1fr) [content-start] repeat(4, 100px) [content-end] minmax(0px, 1fr) [viewport-end]">
+<div id="bar" style="grid-column: content-start / content-end">bar</div></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		g, bar := ws["g"], ws["bar"]
+		require.NotNil(t, bar)
+		// 800 = 2 fr + 400 + 5 gaps of 20 → fr = 150
+		assert.InDelta(t, 170*dp, bar.Geom.Pos.Total.X-g.Geom.Pos.Total.X, 3)
+		assert.InDelta(t, 460*dp, bar.Geom.Size.Actual.Total.X, 3)
+	})
+}
