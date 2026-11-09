@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -111,4 +112,37 @@ func TestImageBorderRadius(t *testing.T) {
 	c := bb.Min.Add(bb.Size().Div(2))
 	assert.Equal(t, color.RGBA{255, 0, 0, 255}, at(c.X, c.Y), "the center is red")
 	assert.NotEqual(t, color.RGBA{255, 0, 0, 255}, at(bb.Min.X+1, bb.Min.Y+1), "the corner is not")
+}
+
+// TestModalDialog tests a dialog that scripts show as modal (marked with
+// ModalAttr, as by showModal), with the style of browsers for :modal and a
+// fixed width (as the jump dialog of pkg.go.dev): it is centered in the
+// window, as high as its content, over the page; a closed dialog is not
+// shown.
+func TestModalDialog(t *testing.T) {
+	src := `<div style="height: 600px">page</div><dialog id="modal" open ` + ModalAttr + ` style="width: 300px"><p>Jump to</p></dialog>` +
+		`<dialog id="closed"><p>closed</p></dialog>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		m := ws["modal"]
+		require.NotNil(t, m)
+		bb := m.Geom.TotalBBox
+		sc := m.Scene.Geom.TotalBBox
+		assert.InDelta(t, float32(sc.Min.X+sc.Max.X)/2, float32(bb.Min.X+bb.Max.X)/2, float64(3*dp), "centered across")
+		assert.InDelta(t, float32(sc.Min.Y+sc.Max.Y)/2, float32(bb.Min.Y+bb.Max.Y)/2, float64(3*dp), "centered down")
+		assert.Less(t, float32(bb.Dy()), 150*dp, "as high as its content")
+		if c := ws["closed"]; c != nil {
+			assert.True(t, c.Geom.TotalBBox.Empty(), "the closed dialog is not shown")
+		}
+	})
+}
+
+// TestButtonAlign tests the alignment of the content of buttons: centered
+// by default, and at the start of one with text-align: left and a display
+// of flex (as the jump button of pkg.go.dev).
+func TestButtonAlign(t *testing.T) {
+	src := `<button id="a" style="width: 300px">Center</button><button id="b" style="width: 300px; display: flex; text-align: left">Jump to</button>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.Equal(t, styles.Center, ws["a"].Styles.Justify.Content)
+		assert.Equal(t, styles.Start, ws["b"].Styles.Justify.Content)
+	})
 }

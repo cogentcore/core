@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"fmt"
 	"image"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -543,4 +544,22 @@ func TestSelectDefaultStyle(t *testing.T) {
 		assert.InDelta(t, 1*dp, s.Styles.Border.Width.Top.Dots, 0.5, "a thin border")
 		assert.Less(t, float32(s.Geom.TotalBBox.Dy()), 30*dp, "not tall")
 	})
+}
+
+// TestSummaryNoMarker tests a summary with list-style: none (as the
+// tooltips of pkg.go.dev), which has no disclosure marker, and one with
+// the default style, which has one.
+func TestSummaryNoMarker(t *testing.T) {
+	src := `<style>.tip > summary { list-style: none }</style><details class="tip"><summary>Tagged</summary><p>more</p></details>` +
+		`<details><summary>Plain</summary><p>more</p></details>`
+	b := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), b, src))
+	markers := 0
+	b.WalkDown(func(k tree.Node) bool {
+		if tx, ok := k.(*core.Text); ok && strings.HasPrefix(tx.Text, "▸") {
+			markers++
+		}
+		return tree.Continue
+	})
+	assert.Equal(t, 1, markers, "only the plain summary has a marker")
 }

@@ -90,6 +90,7 @@ type cssState struct {
 	bgCurrentColor bool
 	visibility     string // the visibility property, if any
 	width          *units.Value
+	heightFit      bool // a height of fit-content (or max- or min-content)
 	height         *units.Value
 	minWidth       *units.Value
 	minHeight      *units.Value
@@ -281,6 +282,25 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				s.Margin.Bottom = lessBy(s.Margin.Bottom, s.Padding.Bottom, s.Border.Width.Bottom)
 			}
 		}
+		if node != nil && isButtonNode(node) && c.declaration(node, "justify-content") == "" {
+			// the content of a button is aligned by its text-align (center
+			// by default), and at the start of one with a display of flex
+			// or grid (as the jump button of pkg.go.dev, which is left
+			// aligned with both)
+			switch c.declaration(node, "display") {
+			case "flex", "inline-flex", "grid", "inline-grid":
+				s.Justify.Content = styles.Start
+			default:
+				switch s.Text.Align {
+				case text.Center:
+					s.Justify.Content = styles.Center
+				case text.End:
+					s.Justify.Content = styles.End
+				default:
+					s.Justify.Content = styles.Start
+				}
+			}
+		}
 		if s.ZIndex != 0 && s.Position == styles.PositionStatic && (pbs == nil || !isFlexOrGrid(pbs.display)) {
 			// as in CSS, the z-index of a static element only applies to
 			// flex and grid items (as the site header of pkg.go.dev, over
@@ -356,4 +376,22 @@ func (c *Context) inlineInheritedOps(node *html.Node, wb *core.WidgetBase) []sty
 		ops = append(ops, c.compileDecls(inh)...)
 	}
 	return ops
+}
+
+// isButtonNode returns whether the given node is a button: a button element,
+// or an input of a type of submit, button or reset.
+func isButtonNode(n *html.Node) bool {
+	if n.Type != html.ElementNode {
+		return false
+	}
+	switch n.Data {
+	case "button":
+		return true
+	case "input":
+		switch strings.ToLower(GetAttr(n, "type")) {
+		case "submit", "button", "reset":
+			return true
+		}
+	}
+	return false
 }

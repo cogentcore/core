@@ -264,6 +264,13 @@ type Style struct { //types:add
 	// of the widget determine its position.
 	InsetSet sides.Sides[bool] `display:"inline"`
 
+	// InsetCenter is, for each dimension (X, Y), whether a widget that is
+	// not [PositionStatic] and has both of its insets set in it (as left
+	// and right) keeps its own size in it, centered between them, instead
+	// of being stretched to them, as for auto margins of an element with a
+	// definite size in CSS (as a modal dialog, centered in the window).
+	InsetCenter [2]bool
+
 	// Translate moves the widget from its position by this offset when it
 	// is rendered, without changing the layout, as the translate of the
 	// transform property of CSS. Percentages of the element width and

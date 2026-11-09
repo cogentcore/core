@@ -327,6 +327,9 @@ func rewriteSelector(sel string) string {
 	// :hover selects the elements that are marked hovered (see
 	// [Context.Hovered]), or none
 	sel = strings.ReplaceAll(sel, ":hover", "["+hoverAttr+"]")
+	// :modal selects the dialogs that scripts show as modal (with
+	// showModal), which they mark with ModalAttr
+	sel = strings.ReplaceAll(sel, ":modal", "["+ModalAttr+"]")
 	if !strings.Contains(sel, ":is(") && !strings.Contains(sel, ":where(") && !strings.Contains(sel, ":focus-") {
 		return sel
 	}
@@ -882,6 +885,11 @@ func (c *Context) cssBaseURL() string {
 	}
 	return c.PageURL
 }
+
+// ModalAttr is the attribute of the dialogs that are shown as modal (as
+// by the showModal of scripts), which the :modal selector of CSS selects
+// (and the style of browsers for them, in the top layer).
+const ModalAttr = "data-htmlcore-modal"
 
 // hoverAttr is the attribute of the elements that are hovered while a page
 // is read (see [Context.Hovered]), which no element of a document has.

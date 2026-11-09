@@ -106,10 +106,11 @@ func (fr *Frame) sizeDownOutOfFlow() {
 				}
 			}
 		}
-		if set.Left && set.Right {
+		center := cwb.Styles.InsetCenter
+		if set.Left && set.Right && !center[0] {
 			sz.Actual.Total.X = max(cbsz.X-in.Left-in.Right, 0)
 		}
-		if set.Top && set.Bottom {
+		if set.Top && set.Bottom && !center[1] {
 			sz.Actual.Total.Y = max(cbsz.Y-in.Top-in.Bottom, 0)
 		}
 		sz.SetContentFromTotal(&sz.Actual)
@@ -132,13 +133,18 @@ func (wb *WidgetBase) setPosOutOfFlow(parPos math32.Vector2) {
 	set := wb.Styles.InsetSet
 	sz := wb.Geom.Size.Actual.Total
 	pos := wb.Geom.RelPos.Add(parPos) // the static position
+	center := wb.Styles.InsetCenter
 	switch {
+	case set.Left && set.Right && center[0]: // centered between them
+		pos.X = cbpos.X + in.Left + math32.Floor((cbsz.X-in.Left-in.Right-sz.X)/2)
 	case set.Left:
 		pos.X = cbpos.X + in.Left
 	case set.Right:
 		pos.X = cbpos.X + cbsz.X - in.Right - sz.X
 	}
 	switch {
+	case set.Top && set.Bottom && center[1]:
+		pos.Y = cbpos.Y + in.Top + math32.Floor((cbsz.Y-in.Top-in.Bottom-sz.Y)/2)
 	case set.Top:
 		pos.Y = cbpos.Y + in.Top
 	case set.Bottom:

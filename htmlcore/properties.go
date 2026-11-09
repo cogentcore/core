@@ -249,6 +249,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 				// as wide as its content on one line (see styles.MaxContentWidth)
 				s.MaxContentWidth = lval == "max-content"
 			}
+			if prop == "height" { // the height of its content (as for a modal dialog)
+				st.heightFit = strings.Contains(lval, "fit-content") || lval == "max-content" || lval == "min-content"
+			}
 			st.setSize(prop, st.env.lengthPtr(lval, pct))
 		})
 	case "position":

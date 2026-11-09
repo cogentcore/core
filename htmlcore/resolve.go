@@ -530,6 +530,14 @@ func (r *resolver) sizes() {
 		(st.height == nil && st.maxHeight == nil && !insetHeight && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
 	}
+	if s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed {
+		// an element with both insets in a dimension, auto margins in it,
+		// and a definite size in it is centered between the insets, not
+		// stretched to them (as the modal dialogs of pkg.go.dev, centered
+		// in the window)
+		s.InsetCenter[0] = s.InsetSet.Left && s.InsetSet.Right && st.marginAuto[1] && st.marginAuto[3] && st.width != nil
+		s.InsetCenter[1] = s.InsetSet.Top && s.InsetSet.Bottom && st.marginAuto[0] && st.marginAuto[2] && (st.height != nil || st.heightFit)
+	}
 	if st.height != nil {
 		mn, mx := *st.height, *st.height
 		s.Min.Y = mn
