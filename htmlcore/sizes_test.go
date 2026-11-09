@@ -586,3 +586,51 @@ func TestWebkitTransform(t *testing.T) {
 		assert.InDelta(t, 50, ws["d"].Styles.Translate.X.Value, 0.1)
 	})
 }
+
+// TestFloatOfBlockOfFloats tests a float whose content is a block of
+// floats (as the breadcrumbs of the header of craigslist.org, a floating
+// nav of a list of floating crumbs): it is as wide as its floats, side by
+// side, so that the header has one line.
+func TestFloatOfBlockOfFloats(t *testing.T) {
+	src := `<style>* { margin: 0; padding: 0 } ul { list-style: none }
+.global-header { background: #eee; height: 1.925em; line-height: 1.925em }
+.header-logo { display: block; float: left; margin-top: 3px }
+.breadcrumbs-container { float: left; font-size: 0.9375em; min-height: 1.3em; position: relative }
+.breadcrumbs { margin-top: 4px; columns: 1 }
+.crumb { float: left; line-height: 1.5em; margin: 0 5px 0 0 }
+@media (orientation: landscape) { .breadcrumbs { columns: 2; margin-top: 1px } .breadcrumbs .section { break-before: column } }
+@media only screen and (min-width: 840px) { .breadcrumbs { columns: 1; margin-top: 4px } }
+.userlinks { float: right; font-size: 0.9em }
+.user-actions { float: right; margin-left: 5px; margin-top: 5px }
+.user-actions li { float: left; line-height: 1.4em; margin-right: 5px }</style>
+<div style="width: 1000px"><header class="global-header" id="h"><a class="header-logo" href="/">CL</a>
+<nav class="breadcrumbs-container" id="nav"><ul class="breadcrumbs" id="ul">
+<li class="crumb" id="c1"><p><a href="/a">boulder</a> <span>&gt;</span></p></li>
+<li class="crumb section" id="c2"><p><a href="/b">for sale by owner</a> <span>&gt;</span></p></li>
+<li class="crumb" id="c3"><p><a href="/c">bicycles</a></p></li></ul></nav>
+<div class="userlinks" id="ul2"><ul class="user-actions"><li><a href="/p">post</a></li><li><a href="/acc">account</a></li></ul></div></header>
+<p id="after">reply</p></div>`
+	ctx := NewContext()
+	ctx.MediaWidth = 1290
+	bd := core.NewBody()
+	ReadHTMLString(ctx, bd, src)
+	ws := map[string]*core.WidgetBase{}
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			if id, ok := wb.Property("id").(string); ok {
+				ws[id] = wb
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		// laid out again, as a page is when its scripts change it
+		bd.AsyncLock()
+		bd.Scene.LayoutScene()
+		bd.AsyncUnlock()
+		nav, c1, c3, h := ws["nav"].Geom.TotalBBox, ws["c1"].Geom.TotalBBox, ws["c3"].Geom.TotalBBox, ws["h"].Geom.TotalBBox
+		assert.Equal(t, c1.Min.Y, c3.Min.Y, "the crumbs are on one line")
+		assert.GreaterOrEqual(t, nav.Max.X, c3.Max.X-1, "the nav is as wide as its crumbs")
+		assert.Less(t, h.Dy(), 45, "the header is one line")
+	})
+}

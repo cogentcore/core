@@ -155,10 +155,13 @@ func (fr *Frame) layoutFloats() bool {
 				} else if mt := ksz.maxTotal().X; mt > 0 {
 					w = min(w, mt)
 				}
-			} else if cf := AsFrame(cw); cf != nil && cf.onlyFloats() {
-				// A float that only has floats in it (which have no size
-				// in its flow) is as wide as its content (shrink-to-fit,
-				// as in CSS): its preferred width, within the column.
+			} else if AsFrame(cw) != nil {
+				// A float is as wide as its content (shrink-to-fit, as in
+				// CSS): its preferred width, within the column, also when
+				// its content is floats (which have no size in its flow), or
+				// a block of floats (as the breadcrumbs of the header of
+				// craigslist.org, a list of floats in a floating nav, which
+				// had no width, so its crumbs were each on a line).
 				w = min(max(w, ksz.prefWidth), width)
 			}
 			h := ksz.Actual.Total.Y
@@ -208,6 +211,14 @@ func (fr *Frame) layoutFloats() bool {
 			}
 			ksz.Alloc.Total = math32.Vec2(w, h)
 			ksz.SetContentFromTotal(&ksz.Alloc)
+			if AsFrame(cw) != nil && ksz.Actual.Total.X < w {
+				// the box of a float is its width (shrink-to-fit), also when
+				// it is finally sized before its width is set here (as the
+				// breadcrumbs of craigslist.org, a nav of a list of floats,
+				// which stayed as wide as nothing)
+				ksz.Actual.Total.X = w
+				ksz.SetContentFromTotal(&ksz.Actual)
+			}
 			fl.places[i] = floatPlace{pos: math32.Vec2(x, fy), width: w}
 			fl.size.Y = max(fl.size.Y, fy+h)
 			if left { // the widths that the floats take on each side
