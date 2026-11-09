@@ -257,6 +257,11 @@ func (r *resolver) replacedSize() {
 		if st.height == nil {
 			if st.width != nil && st.width.Unit == units.UnitDp {
 				s.Min.Y = units.Dp(st.width.Value * aspect)
+			} else if st.width != nil && st.width.Unit == units.UnitPw {
+				// of its percentage of the width (as the illustration of
+				// width: 20% of the article footer of MDN, which was as high
+				// as the width of the footer)
+				s.Min.Y = units.Pw(st.width.Value * aspect)
 			} else {
 				s.Min.Y = units.Pw(100 * aspect)
 			}
@@ -799,8 +804,13 @@ func (r *resolver) sizes() {
 		// an image is the smaller of its width and its percentage
 		// max-width (as the responsive images of max-width: 100%, as the
 		// photos of the picks of nytimes.com/wirecutter, of width="399"
-		// in boxes of 200px, which they overflowed)
+		// in boxes of 200px, which they overflowed): the smaller of the two
+		// (as the ducky of github.com, of width: 2rem and max-width: 100%,
+		// which was as wide as its container)
 		s.Max.X = *st.maxWidth
+		if st.width.Unit == units.UnitDp {
+			s.Max.X = customLength("min", []linear{{px: float64(st.width.Value)}, {pct: float64(st.maxWidth.Value)}}, units.UnitPw)
+		}
 	case st.width != nil && st.width.Unit != units.UnitPw && st.maxWidth.Unit == units.UnitPw:
 		// a fixed width with a percentage max-width (as max-width: 100%) is
 		// the width (the smaller of the two in CSS, as the width is, but

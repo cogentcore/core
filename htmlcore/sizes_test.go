@@ -1001,3 +1001,52 @@ func TestContainerQuery(t *testing.T) {
 		assert.InDelta(t, 537*dp*2/3, ws["box"].Geom.Size.Actual.Total.Y, 3, "of aspect 3/2")
 	})
 }
+
+// TestFloatIntoNextSectionWithUniversalRule tests that a float in a section
+// is beside the content of the next section, also with a rule for all
+// elements that does not change their boxes (as the rule for reduced
+// motion of Wikipedia, of animations and transitions), with which the
+// heading of the next section was below the infobox at the full width.
+func TestFloatIntoNextSectionWithUniversalRule(t *testing.T) {
+	src := `<style>*,::before,::after{animation-delay:-0.01ms !important;transition-duration:0ms !important;scroll-behavior:auto !important}</style>
+<div style="width: 737px"><section><div style="float: right; width: 300px; height: 600px">infobox</div><p>Intro text that is beside the box.</p></section>
+<section><div id="h" style="display: flow-root"><h2 style="display: inline; margin: 0">Syntax</h2></div></section></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		h := ws["h"]
+		require.NotNil(t, h)
+		assert.Less(t, h.Geom.Pos.Total.Y, 300*dp, "beside the float, not below it")
+		assert.Less(t, h.Geom.Size.Actual.Total.X, 450*dp, "narrowed by the float")
+	})
+}
+
+// TestImageWidthAndPercentMaxWidth tests that an image of a width and a
+// percentage max-width is the smaller of the two: the ducky of github.com
+// (width: 2rem, with img { max-width: 100% }), absolute in a track as
+// wide as the page, was as wide as it.
+func TestImageWidthAndPercentMaxWidth(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, image.NewRGBA(image.Rect(0, 0, 100, 96))))
+	u := "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
+	src := `<style>img { max-width: 100% } .ducky { width: 2rem; aspect-ratio: 25/24; height: auto; position: absolute; right: 0; top: 0 }</style>
+<div style="width: 1000px; position: relative; height: 8px"><div style="position: absolute; inset: 0"><img id="d" class="ducky" src="` + u + `"></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		d := ws["d"]
+		require.NotNil(t, d)
+		assert.InDelta(t, 32*dp, d.Geom.Size.Actual.Total.X, 2)
+		assert.Less(t, d.Geom.Size.Actual.Total.Y, 40*dp)
+	})
+}
+
+// TestSVGPercentWidthHeight tests that an svg of a percentage width and no
+// height is as high as its aspect makes that width, as the illustration of
+// width: 20% of the article footer of MDN, which was as high as the width
+// of the footer.
+func TestSVGPercentWidthHeight(t *testing.T) {
+	src := `<div style="width: 600px; position: relative"><svg id="s" style="position: absolute; right: 0; top: 0; width: 20%; height: auto" width="162" height="162" viewBox="0 0 162 162"><circle cx="81" cy="81" r="60"/></svg></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		s := ws["s"]
+		require.NotNil(t, s)
+		assert.InDelta(t, 120*dp, s.Geom.Size.Actual.Total.X, 2)
+		assert.InDelta(t, 120*dp, s.Geom.Size.Actual.Total.Y, 2)
+	})
+}

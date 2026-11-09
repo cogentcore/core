@@ -371,14 +371,28 @@ func (ctx *Context) flattensBlock(n *html.Node) bool {
 func (ctx *Context) unstyledBlock(n *html.Node) bool {
 	for _, d := range ctx.declarations(n) {
 		switch d.Property {
-		case "display", "unicode-bidi":
+		case "display", "unicode-bidi", "will-change", "orphans", "widows", "user-select", "-webkit-user-select":
 		default:
-			if !strings.HasPrefix(d.Property, "--") {
+			if !strings.HasPrefix(d.Property, "--") && !noBoxProperty(d.Property) {
 				return false
 			}
 		}
 	}
 	return ctx.displayOf(n) == "block"
+}
+
+// noBoxProperty returns whether the given property does not change the box
+// of an element or what is drawn for it (as the animations and transitions
+// of the rule for reduced motion of Wikipedia, for all elements, so that
+// its sections were not flattened, and the next one was below the floats
+// of one).
+func noBoxProperty(prop string) bool {
+	for _, p := range []string{"animation", "transition", "scroll-", "page-break-", "break-"} {
+		if strings.HasPrefix(prop, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // hasFloatChild returns whether the given element has a child that floats.

@@ -133,8 +133,9 @@ func (im *Image) SizeUp() {
 func (im *Image) SizeDown(iter int) bool {
 	redo := im.WidgetBase.SizeDown(iter)
 	minX, minY, maxX := im.Styles.Min.X, im.Styles.Min.Y, im.Styles.Max.X
-	relative := func(u units.Units) bool { return u == units.UnitPw || u == units.UnitPh }
-	if im.Image == nil || minY.Value != 0 || (!relative(minX.Unit) && !relative(maxX.Unit)) {
+	// (a custom length is of the parent too, as min(2rem, 100%))
+	relative := func(v units.Value) bool { return v.Unit == units.UnitPw || v.Unit == units.UnitPh || v.Custom != nil }
+	if im.Image == nil || minY.Value != 0 || (!relative(minX) && !relative(maxX)) {
 		return redo
 	}
 	sz := &im.Geom.Size
