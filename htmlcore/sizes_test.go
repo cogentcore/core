@@ -876,3 +876,38 @@ func TestNegativeMarginOverlapShown(t *testing.T) {
 	}
 	assert.Greater(t, dark, 20, "the lower half of the header is shown")
 }
+
+// TestPseudoPaddingBox tests that a ::before or ::after with only padding
+// (and content "") is a box, as the boxes of the aspect ratios of the
+// images of edition.cnn.com (of padding-bottom: 56.25%), in which the
+// image is absolute, which were of no height, so the images were slits.
+func TestPseudoPaddingBox(t *testing.T) {
+	src := `<style>.media { display: flex; flex-direction: column; position: relative; overflow: hidden; width: 320px }
+.media::after { content: ""; padding-bottom: 56.25%; display: block }
+.media img { position: absolute; top: 0; left: 0; width: 100%; height: 100% }</style>
+<div class="media" id="media"><picture><img src="x.png"></picture></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		require.NotNil(t, ws["media"])
+		assert.InDelta(t, 180*dp, ws["media"].Geom.Size.Actual.Total.Y, 2, "of its ::after, of 56.25% of its width")
+	})
+}
+
+// TestFlexBasisZero tests flex items of a basis of 0 (as flex: 3 1 0),
+// which overrides their width of 100%, as the columns of edition.cnn.com
+// (in a row that wraps), which were each in a row of its own: they are in
+// one row, as wide as their shares of its grow.
+func TestFlexBasisZero(t *testing.T) {
+	src := `<style>.row { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 24px; width: 1024px }
+.row > div { width: 100% } .row > div:first-child { flex: 3 1 0 } .row > div:nth-child(2) { flex: 4 1 0 } .row > div:nth-child(3) { flex: 3 1 0 }</style>
+<div class="row"><div id="a">Gunman who killed at least 6 in Kraków mass shooting has died in hospital</div><div id="b">Trump says deportation policy was too tough, and other 60 Minutes interview takeaways</div><div id="c">Catch up on today's global news</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		a, b, c := ws["a"], ws["b"], ws["c"]
+		require.NotNil(t, c)
+		w := (1024 - 48) * dp / 10
+		// (they are up to 3% narrower than in Chrome)
+		assert.InEpsilon(t, 3*w, a.Geom.Size.Actual.Total.X, 0.04)
+		assert.InEpsilon(t, 4*w, b.Geom.Size.Actual.Total.X, 0.04)
+		assert.InEpsilon(t, 3*w, c.Geom.Size.Actual.Total.X, 0.04)
+		assert.Equal(t, a.Geom.TotalBBox.Min.Y, c.Geom.TotalBBox.Min.Y, "in one row")
+	})
+}

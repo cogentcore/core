@@ -68,8 +68,8 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 // of the given element is a box, which has a widget of its own (see
 // [Context.pseudoBoxWidget]): it has content without text (as "", for the
 // decorations of pages, as the line under the title of Wikipedia), is
-// displayed, and has a background, a border, a size, or an absolute or
-// fixed position.
+// displayed, and has a background, a border, a size, padding, or an
+// absolute or fixed position.
 func (c *Context) pseudoBox(n *html.Node, kind string) bool {
 	win := c.pseudoDecls(n, kind)
 	if win == nil {
@@ -106,8 +106,14 @@ func (c *Context) pseudoBox(n *html.Node, kind string) bool {
 			if v != "none" && v != "0" && v != "" {
 				return true
 			}
-		case prop == "width" || prop == "height":
+		case prop == "width" || prop == "height" || prop == "min-width" || prop == "min-height" || prop == "aspect-ratio":
 			if v != "auto" && v != "" && v != "0" {
+				return true
+			}
+		case strings.HasPrefix(prop, "padding"):
+			// as the boxes of the aspect ratios of the images of
+			// edition.cnn.com, of padding-bottom: 56.25%
+			if strings.Trim(v, "0 .pxem%") != "" || strings.ContainsAny(v, "123456789") {
 				return true
 			}
 		}
