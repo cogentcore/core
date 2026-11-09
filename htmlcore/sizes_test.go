@@ -1142,3 +1142,30 @@ func TestGridMinmaxFrAfterItem(t *testing.T) {
 		assert.InDelta(t, 460*dp, bar.Geom.Size.Actual.Total.X, 3)
 	})
 }
+
+// TestGridAutoFlowColumnRows tests that the items of a grid of grid-auto-flow:
+// column with row tracks fill each column before the next (as the two
+// lists of the "Most popular" of theguardian.com, of display: contents
+// sections in 2 columns, which were interleaved).
+func TestGridAutoFlowColumnRows(t *testing.T) {
+	src := `<div style="width: 400px"><div style="display: grid; grid-auto-flow: column; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, auto)">
+<section style="display: contents"><h3 id="h1" style="margin: 0">One</h3><ol style="display: contents"><li id="a1">a1</li><li id="a2">a2</li></ol></section>
+<section style="display: contents"><h3 id="h2" style="margin: 0">Two</h3><ol style="display: contents"><li id="b1">b1</li></ol></section>
+</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		for _, id := range []string{"h1", "a1", "a2", "h2", "b1"} {
+			require.NotNil(t, ws[id], id)
+		}
+		x := func(id string) float32 { return ws[id].Geom.Pos.Total.X }
+		y := func(id string) float32 { return ws[id].Geom.Pos.Total.Y }
+		// the first list is in the first column, the second in the second
+		assert.InDelta(t, x("h1"), x("a1"), 1)
+		assert.InDelta(t, x("h1"), x("a2"), 1)
+		assert.Greater(t, x("h2"), x("h1")+150*dp)
+		assert.InDelta(t, x("h2"), x("b1"), 1)
+		// in their rows
+		assert.InDelta(t, y("h1"), y("h2"), 1)
+		assert.InDelta(t, y("a1"), y("b1"), 1)
+		assert.Greater(t, y("a2"), y("a1"))
+	})
+}

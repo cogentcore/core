@@ -620,6 +620,59 @@ func gridSpan(v string, ntracks int) int {
 	return b - a
 }
 
+// columnFlowOrder returns the given auto-placed children of a grid of
+// grid-auto-flow: column, with the given numbers of columns and rows, in
+// the row-major order of the core grid: they fill each column before the
+// next (as the two lists of 10 of the "Most popular" of theguardian.com,
+// in 2 columns of 11 rows, which were interleaved), with fillers from the
+// given function for the empty cells. They are as they are if any of them
+// spans or is placed, or if they need more columns.
+func (c *Context) columnFlowOrder(auto []tree.Node, ncols, nrows int, names gridNames, filler func(col int) tree.Node) []tree.Node {
+	if ncols < 2 || nrows < 1 {
+		return auto
+	}
+	// The children in cells, and the others (out of the flow, or not
+	// widgets), which are after them.
+	var cells, rest []tree.Node
+	for _, k := range auto {
+		kw, ok := k.(core.Widget)
+		if !ok {
+			rest = append(rest, k)
+			continue
+		}
+		kn, _ := kw.AsWidget().Property("node").(*html.Node)
+		if kn != nil {
+			pos := strings.TrimSpace(c.declaration(kn, "position"))
+			if pos == "absolute" || pos == "fixed" || c.displayOf(kn) == "none" {
+				rest = append(rest, k)
+				continue
+			}
+			if c.gridLines(kn, "column", names.cols) != "" || c.gridLines(kn, "row", names.rows) != "" {
+				return auto
+			}
+		}
+		cells = append(cells, k)
+	}
+	if len(cells) > ncols*nrows {
+		return auto
+	}
+	// Each row in turn, with fillers for the empty cells before the last
+	// child.
+	var kids []tree.Node
+	left := len(cells)
+	for r := 0; r < nrows && left > 0; r++ {
+		for col := 0; col < ncols && left > 0; col++ {
+			if i := col*nrows + r; i < len(cells) {
+				kids = append(kids, cells[i])
+				left--
+			} else {
+				kids = append(kids, filler(col))
+			}
+		}
+	}
+	return append(kids, rest...)
+}
+
 // arrangeGrid places the children of the given grid container widget for
 // its node by its grid template (see the comment at the top of grid.go).
 func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
@@ -731,6 +784,13 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		col := 0
 		var kids []tree.Node
 		filled := false
+		if strings.Contains(c.declaration(n, "grid-auto-flow"), "column") {
+			ordered := c.columnFlowOrder(auto, ncols, len(rowTracks), names, func(col int) tree.Node {
+				return c.gridFiller(w, env, trackOf(col), flexible)
+			})
+			filled = !slices.Equal(ordered, auto) // (children are set from kids)
+			auto = ordered
+		}
 		fill := func(n int) { // the n cells from col
 			for i := range n {
 				kids = append(kids, c.gridFiller(w, env, trackOf((col+i)%ncols), flexible))
