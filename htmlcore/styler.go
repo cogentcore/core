@@ -105,6 +105,7 @@ type cssState struct {
 	hasGrow        bool
 	flexShrink     float32
 	hasShrink      bool
+	flexBasis      string // the flex-basis, or "" if it is not set
 	alignSelf      string
 	alignItems     string
 	background     image.Image

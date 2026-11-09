@@ -491,36 +491,17 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { st.flexShrink, st.hasShrink = float32(f), true })
 	case "flex":
-		var grow, shrink float32
-		hasGrow, hasShrink := false, false
-		switch lval {
-		case "none":
-			hasGrow, hasShrink = true, true
-		case "auto":
-			grow, hasGrow, shrink, hasShrink = 1, true, 1, true
-		default:
-			fs := strings.Fields(lval)
-			if len(fs) == 0 {
-				return nil
-			}
-			if f, err := strconv.ParseFloat(fs[0], 32); err == nil {
-				grow, hasGrow = float32(f), true
-			}
-			shrink, hasShrink = 1, true
-			if len(fs) > 1 {
-				if f, err := strconv.ParseFloat(fs[1], 32); err == nil {
-					shrink = float32(f)
-				}
-			}
+		grow, shrink, basis, ok := parseFlex(lval)
+		if !ok {
+			return nil
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if hasGrow {
-				st.flexGrow, st.hasGrow = grow, true
-			}
-			if hasShrink {
-				st.flexShrink, st.hasShrink = shrink, true
-			}
+			st.flexGrow, st.hasGrow = grow, true
+			st.flexShrink, st.hasShrink = shrink, true
+			st.flexBasis = basis
 		})
+	case "flex-basis":
+		return op(func(st *cssState, s, ps *styles.Style) { st.flexBasis = lval })
 	case "gap", "grid-gap":
 		fs := splitColors(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
@@ -783,6 +764,43 @@ func compileBorder(side int, val string) styleOp {
 			}
 		}
 	}
+}
+
+// parseFlex returns the grow, shrink, and basis of the given value of the
+// flex shorthand, as in CSS, where a number alone (as flex: 1) has a basis
+// of 0, not of the width of the item.
+func parseFlex(v string) (grow, shrink float32, basis string, ok bool) {
+	switch v {
+	case "none":
+		return 0, 0, "auto", true
+	case "auto":
+		return 1, 1, "auto", true
+	case "initial":
+		return 0, 1, "auto", true
+	}
+	fs := strings.Fields(v)
+	if len(fs) == 0 {
+		return 0, 0, "", false
+	}
+	shrink, basis = 1, "0"
+	nums := 0
+	for _, f := range fs {
+		x, err := strconv.ParseFloat(f, 32)
+		switch {
+		case err == nil && nums == 0:
+			grow = float32(x)
+			nums++
+		case err == nil && nums == 1:
+			shrink = float32(x)
+			nums++
+		default:
+			basis = f
+			if nums == 0 { // flex: <basis> has a grow of 1
+				grow = 1
+			}
+		}
+	}
+	return grow, shrink, basis, true
 }
 
 // webkitAliases are the properties whose -webkit- prefixed names are

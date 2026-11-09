@@ -5,6 +5,8 @@
 package htmlcore
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/colors"
 	"strconv"
 	"strings"
@@ -50,7 +52,9 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	r.flow()
 	r.lineHeight()
 	r.itemGrowth()
+	r.flexBasis()
 	r.sizes()
+	r.flexBasisGrowth()
 	r.textAlign()
 	r.tableBorders()
 	r.margins()
@@ -426,6 +430,131 @@ func (r *resolver) itemGrowth() {
 		// in a column at its min-content width)
 		s.Shrink.X = 1
 	}
+}
+
+// flexBasis sets the width of a flex item in a row from its flex-basis,
+// which overrides its width, as in CSS. A basis of 0 (as of flex: 1) is
+// none: when all of the items of the row have one, they are as wide as
+// their share of the grow of the row, of its width less its gaps (as the
+// columns of edition.cnn.com, of flex: 3 1 0, 4 1 0 and 3 1 0, with a
+// width of 100%, which put each in a row of its own).
+func (r *resolver) flexBasis() {
+	c, node, st, ps, pbs := r.c, r.node, r.st, r.ps, r.pbs
+	if ps == nil || pbs == nil || (pbs.display != "flex" && pbs.display != "inline-flex") || ps.Direction != styles.Row {
+		return
+	}
+	switch st.flexBasis {
+	case "", "auto", "content":
+		return
+	}
+	if !zeroLength(st.flexBasis) {
+		if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
+			st.width = &l
+		}
+		return
+	}
+	st.width = nil
+	if node == nil || node.Parent == nil || st.flexGrow <= 0 {
+		return
+	}
+	sum, n := float32(0), 0
+	for sib := node.Parent.FirstChild; sib != nil; sib = sib.NextSibling {
+		if sib.Type != html.ElementNode || !c.inFlexFlow(sib) {
+			continue
+		}
+		grow, basis := c.flexOf(sib)
+		if !zeroLength(basis) || grow <= 0 {
+			return
+		}
+		sum += grow
+		n++
+	}
+	if n < 2 {
+		return
+	}
+	px := units.Px(1)
+	gaps := float32(n-1) * r.dots(&ps.Gap.X) / max(r.dots(&px), 1e-6)
+	expr := fmt.Sprintf("calc((100%% - %gpx) * %g / %g)", gaps, st.flexGrow, sum)
+	if l, ok := st.env.length(expr, units.UnitPw); ok {
+		st.width = &l
+	}
+}
+
+// flexBasisGrowth restores the grow of a flex item with a flex-basis after
+// [resolver.sizes], which does not grow elements with a width: the basis
+// is where it starts from.
+func (r *resolver) flexBasisGrowth() {
+	st, s, ps, pbs := r.st, r.s, r.ps, r.pbs
+	if ps == nil || pbs == nil || (pbs.display != "flex" && pbs.display != "inline-flex") || ps.Direction != styles.Row {
+		return
+	}
+	switch st.flexBasis {
+	case "", "auto", "content":
+		return
+	}
+	if st.width == nil || !st.hasGrow || st.flexGrow <= 0 {
+		return
+	}
+	if !zeroLength(st.flexBasis) {
+		s.Grow.X = st.flexGrow
+		return
+	}
+	// the share of the row, as a percentage width: it grows up to it,
+	// from no minimum, so that the items are in one row while the
+	// percentage is resolved
+	s.Min.X = units.Value{}
+	s.Grow.X = 1
+	s.Shrink.X = 1
+}
+
+// zeroLength returns whether the given CSS length is zero (as 0, 0px, 0%).
+func zeroLength(v string) bool {
+	v = strings.TrimSpace(v)
+	v = strings.TrimRight(v, "abcdefghijklmnopqrstuvwxyz%")
+	f, err := strconv.ParseFloat(v, 32)
+	return err == nil && f == 0
+}
+
+// flexOf returns the flex grow and basis of the given element, from its
+// flex, flex-grow and flex-basis declarations, as for its siblings.
+func (c *Context) flexOf(n *html.Node) (grow float32, basis string) {
+	for _, d := range c.declarations(n) {
+		if d.invalid {
+			continue
+		}
+		v := strings.ToLower(strings.TrimSpace(d.Value))
+		switch d.Property {
+		case "flex", "-webkit-flex":
+			if g, _, b, ok := parseFlex(v); ok {
+				grow, basis = g, b
+			}
+		case "flex-grow", "-webkit-flex-grow":
+			if f, err := strconv.ParseFloat(v, 32); err == nil {
+				grow = float32(f)
+			}
+		case "flex-basis", "-webkit-flex-basis":
+			basis = v
+		}
+	}
+	return
+}
+
+// inFlexFlow returns whether the given element is an item in the flow of
+// its flex container: it is displayed, and not absolute or fixed.
+func (c *Context) inFlexFlow(n *html.Node) bool {
+	switch strings.TrimSpace(c.declaration(n, "display")) {
+	case "none", "contents":
+		return false
+	}
+	switch strings.TrimSpace(c.declaration(n, "position")) {
+	case "absolute", "fixed":
+		return false
+	}
+	switch n.Data {
+	case "script", "style", "template", "link", "meta":
+		return false
+	}
+	return true
 }
 
 // sizes sets the sizes (Min and Max, of the content box), with percentage
