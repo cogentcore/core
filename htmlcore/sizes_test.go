@@ -553,3 +553,36 @@ func TestPercentHeightChain(t *testing.T) {
 		assert.InDelta(t, 48*dp, float32(ws["in"].Geom.TotalBBox.Dy()), 2, "the text field is as high as it")
 	})
 }
+
+// TestBlockFlexFlowFloats tests a block with a flex-flow of column wrap
+// (for a flex display of narrow screens, as the body of the postings of
+// craigslist.org), which only applies to flex containers: its floats are
+// laid out, side by side, below its centered body of 100% up to a
+// max-width (which is not narrowed to its content).
+func TestBlockFlexFlowFloats(t *testing.T) {
+	src := `<style>figure, section, div { margin: 0; padding: 0 }
+		.body { width: 100%; max-width: 600px; margin: 0 auto; box-sizing: border-box }
+		.userbody { display: block; flex-flow: column wrap }
+		.iw { width: 100%; max-width: 300px; float: left }
+		.attrs { float: right; width: 200px }
+		#text { clear: left }</style>
+		<div style="width: 800px"><section class="body" id="body"><section class="userbody"><figure class="iw" id="iw"><div style="height: 100px">photo</div></figure>
+		<div class="attrs" id="attrs"><p>bicycle type</p></div><section id="text">Heybike Explore</section></section></section></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		body, iw, attrs, tx := ws["body"].Geom.TotalBBox, ws["iw"].Geom.TotalBBox, ws["attrs"].Geom.TotalBBox, ws["text"].Geom.TotalBBox
+		assert.InDelta(t, 600*dp, float32(body.Dx()), 2, "the body is its max-width")
+		assert.InDelta(t, 300*dp, float32(iw.Dx()), 2, "the figure is its max-width")
+		assert.Equal(t, iw.Min.Y, attrs.Min.Y, "the floats are side by side")
+		assert.Greater(t, attrs.Min.X, iw.Max.X, "at the right")
+		assert.GreaterOrEqual(t, tx.Min.Y, iw.Max.Y-1, "the text clears the figure")
+	})
+}
+
+// TestWebkitTransform tests a -webkit-transform, which is the transform
+// (as with which the slider of the photos of craigslist.org moves its
+// slides, which were all on each other).
+func TestWebkitTransform(t *testing.T) {
+	widgetsByID(t, `<div id="d" style="-webkit-transform: translate(50px, 0)">slide</div>`, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.InDelta(t, 50, ws["d"].Styles.Translate.X.Value, 0.1)
+	})
+}

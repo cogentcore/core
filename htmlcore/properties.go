@@ -55,6 +55,13 @@ var fontProperties = map[string]bool{
 // and calc()). It returns nil for a property that is not supported, or
 // a value that is not valid.
 func (c *Context) compileCSS(prop, val string) []styleOp {
+	if p, ok := strings.CutPrefix(prop, "-webkit-"); ok && webkitAliases[p] {
+		// the old prefixed property is the standard one (as the
+		// -webkit-transform with which the slider of the photos of the
+		// postings of craigslist.org moves its slides); the last of them
+		// in the cascade applies, as in browsers
+		prop = p
+	}
 	val = strings.TrimSpace(val)
 	lval := strings.ToLower(val)
 	op := func(f styleOp) []styleOp { return []styleOp{f} }
@@ -710,6 +717,15 @@ func compileBorder(side int, val string) styleOp {
 			}
 		}
 	}
+}
+
+// webkitAliases are the properties whose -webkit- prefixed names are
+// aliases of them in browsers, which pages may set only with the prefix.
+var webkitAliases = map[string]bool{
+	"transform": true, "transform-origin": true, "box-sizing": true, "box-shadow": true,
+	"border-radius": true, "flex": true, "flex-direction": true, "flex-wrap": true, "flex-flow": true,
+	"flex-grow": true, "flex-shrink": true, "flex-basis": true, "order": true, "align-items": true,
+	"align-self": true, "justify-content": true, "user-select": true, "appearance": true,
 }
 
 // inheritedProperties are the properties that are inherited in CSS, for

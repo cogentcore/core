@@ -403,8 +403,11 @@ func handleInput(ctx *Context) core.Widget {
 		case "file":
 			newWidget = core.Bind(val, New[core.FileButton](ctx))
 		default:
-			tf := New[core.TextField](ctx).SetText(val)
+			// outlined, so that its borders are those of its CSS, on all
+			// sides (filled ones have only a line at the bottom)
+			tf := New[core.TextField](ctx).SetText(val).SetType(core.TextFieldOutlined)
 			tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
+			cssFieldBorder(tf)
 			tf.FinalStyler(func(s *styles.Style) { s.SetTextWrap(false) }) // an input is one line
 
 			ctx.inputIcons(ctx.Node, tf)
@@ -580,4 +583,14 @@ func (c *Context) handleHoverTarget(n *html.Node, w core.Widget) {
 	}
 	sw.On(events.MouseEnter, func(e events.Event) { hover(true) })
 	sw.On(events.MouseLeave, func(e events.Event) { hover(false) })
+}
+
+// cssFieldBorder makes the border of the given text field of an input (or
+// textarea) that of its CSS when it has the focus too, with no space for
+// the thicker border of an outlined field with the focus (which made it
+// higher than its CSS height, as for the search box of duckduckgo.com).
+func cssFieldBorder(tf *core.TextField) {
+	tf.FinalStyler(func(s *styles.Style) {
+		s.MaxBorder = s.Border
+	})
 }

@@ -952,3 +952,60 @@ func TestLayoutFloatsBesideInline(t *testing.T) {
 		assert.GreaterOrEqual(t, after.Geom.TotalBBox.Min.Y, block.Geom.TotalBBox.Max.Y-1, "a float after a block is below it")
 	})
 }
+
+// TestLayoutFloatsRounding tests floats whose widths fit a row exactly but
+// are each rounded up to whole dots (as the nine slides of the photos of
+// the postings of craigslist.org, of 442px in a row of nine times that):
+// they are all on one row, without the last one wrapping below.
+func TestLayoutFloatsRounding(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Min.X.Dot(9 * 100.4)
+		s.Max.X.Dot(9 * 100.4)
+		s.Padding.Zero()
+	})
+	var slides []*Frame
+	for range 9 {
+		f := NewFrame(row)
+		f.Styler(func(s *styles.Style) {
+			s.Float = styles.FloatLeft
+			s.Min.Set(units.Dot(100.4), units.Dot(20))
+			s.Max.Set(units.Dot(100.4), units.Dot(20))
+			s.Padding.Zero()
+		})
+		slides = append(slides, f)
+	}
+	layoutAtWidth(b, 1200, 400, func(dp float32) {
+		for _, f := range slides {
+			assert.Equal(t, slides[0].Geom.TotalBBox.Min.Y, f.Geom.TotalBBox.Min.Y, "on one row")
+		}
+	})
+}
+
+// TestBaselineFields tests the baselines of a text field and a chooser in
+// a row aligned on baselines beside a text (as the search field and the
+// theme select of the header of the Python docs, beside their labels):
+// their texts are on the baseline of the text.
+func TestBaselineFields(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Direction = styles.Row
+		s.Align.Items = styles.Baseline
+	})
+	tx := NewText(row).SetText("Theme")
+	ch := NewChooser(row).SetStrings("Auto", "Light")
+	tf := NewTextField(row).SetText("Quick search")
+	layoutAtWidth(b, 800, 400, func(dp float32) {
+		base := func(wb *WidgetBase) float32 {
+			bl, ok := wb.firstBaseline()
+			require.True(t, ok)
+			return wb.Geom.Pos.Total.Y + bl
+		}
+		want := base(tx.AsWidget())
+		assert.InDelta(t, want, base(ch.AsWidget()), 2, "the chooser")
+		assert.InDelta(t, want, base(tf.AsWidget()), 2, "the text field")
+	})
+}

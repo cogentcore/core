@@ -2779,22 +2779,40 @@ func (wb *WidgetBase) firstBaseline() (float32, bool) {
 		}
 		ls := w.paintText
 		return top + ls.Lines[0].Offset.Y - ls.Bounds.Min.Y, true
-	case *Frame:
-		if b, ok := w.rowBaseline(); ok {
-			return top + b, true
+	case *TextField:
+		// its line of text, at the top of its content (as the search
+		// field of the Python docs, beside the text of its label)
+		if w.renderAll == nil || len(w.renderAll.Lines) == 0 {
+			return 0, false
 		}
-		var base float32
-		found := false
-		w.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
-			if b, ok := cwb.firstBaseline(); ok {
-				base, found = top+b, true
-				return tree.Break
-			}
-			return tree.Continue
-		})
-		return base, found
+		ls := w.renderAll
+		return top + ls.Lines[0].Offset.Y - ls.Bounds.Min.Y, true
 	}
-	return 0, false
+	// a frame, or a widget that is one (as a chooser, whose text is the
+	// baseline of the select of the Python docs, beside its label)
+	fr := AsFrame(wb.This)
+	if fr == nil {
+		return 0, false
+	}
+	if b, ok := fr.rowBaseline(); ok {
+		return top + b, true
+	}
+	var base float32
+	found := false
+	content := fr.Geom.Size.Actual.Content.Y
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if b, ok := cwb.firstBaseline(); ok {
+			// a child of a row that is centered (as the text of a chooser)
+			// is lower by half of the space around it
+			if fr.Styles.Direction == styles.Row && styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self) == styles.Center {
+				b += max(content-cwb.Geom.Size.Actual.Total.Y, 0) / 2
+			}
+			base, found = top+b, true
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	return base, found
 }
 
 // rowBaseline returns the baseline of the first line of a frame that is

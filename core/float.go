@@ -174,9 +174,15 @@ func (fr *Frame) layoutFloats() bool {
 					fy = lastFlowY
 				}
 			}
+			// the widths of the floats are rounded up to whole dots, by less
+			// than a dot each: a float fits in a space that is narrower by
+			// less than that for the floats before it (as the nine slides of
+			// the photos of the postings of craigslist.org, of 442px each in
+			// a row of 3978px, the last of which wrapped)
+			slack := float32(len(floats))
 			for range len(floats) + 1 { // down below floats until it fits
 				l, r := edges(fy)
-				if r-l >= w || l == 0 && r == width {
+				if r-l+slack >= w || l == 0 && r == width {
 					break
 				}
 				next := float32(-1) // the next bottom of a float

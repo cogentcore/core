@@ -109,7 +109,8 @@ func handleElement(ctx *Context) {
 	case "textarea":
 		// a text field, which wraps its text on lines (an editor is only
 		// for monospaced text)
-		tf := New[core.TextField](ctx).SetText(ExtractText(ctx))
+		tf := New[core.TextField](ctx).SetText(ExtractText(ctx)).SetType(core.TextFieldOutlined)
+		cssFieldBorder(tf)
 		tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
 		newWidget = tf
 	case "svg":

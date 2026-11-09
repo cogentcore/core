@@ -118,6 +118,10 @@ func (r *resolver) layoutDisplay() {
 	case "block", "list-item", "table-cell", "flow-root", "inline-block", "table-caption":
 		s.Display = styles.Flex
 		s.Direction = styles.Column
+		// flex-wrap (and flex-flow) only apply to flex containers (as the
+		// body of the postings of craigslist.org, a block with a flex-flow
+		// of column wrap for narrow screens, whose floats were not laid out)
+		s.Wrap = false
 	case "table", "inline-table", "table-row-group", "table-header-group", "table-footer-group":
 		if isTable && !strings.EqualFold(strings.TrimSpace(r.c.declaration(node, "table-layout")), "fixed") &&
 			st.width != nil && st.width.Unit != units.UnitPw {
