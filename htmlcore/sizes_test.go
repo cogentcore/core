@@ -841,3 +841,38 @@ func TestImageMaxWidthPercentCaps(t *testing.T) {
 		assert.GreaterOrEqual(t, txt.Geom.TotalBBox.Min.X, box.Geom.TotalBBox.Max.X+int(20*dp)-1, "the text after the box")
 	})
 }
+
+// TestNegativeMarginOverlapShown tests that a block that overlaps the one
+// before it by a negative margin does not paint the background of its
+// parent over it, as in the comments of news.ycombinator.com, whose
+// headers (with a margin-bottom of -10px, followed by a br) were cut off.
+func TestNegativeMarginOverlapShown(t *testing.T) {
+	src := `<div style="background: #f6f6ef; font-size: 10pt"><div id="head" style="margin-top: 2px; margin-bottom: -10px"><span style="font-size: 8pt">rzk 4 hours ago | next</span></div><br>
+<div style="font-size: 9pt">It seems to be an A/B testing experiment</div></div>`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
+	var head *core.WidgetBase
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil && head == nil {
+			if id, ok := wb.Property("id").(string); ok && id == "head" {
+				head = wb
+			}
+		}
+		return tree.Continue
+	})
+	var bb image.Rectangle
+	img := bd.RenderImage(func() {}, func() {
+		require.NotNil(t, head)
+		bb = head.Geom.ContentBBox
+	})
+	// the text is dark in the lower half of the box of the header
+	dark := 0
+	for y := (bb.Min.Y + bb.Max.Y) / 2; y < bb.Max.Y; y++ {
+		for x := bb.Min.X; x < bb.Max.X; x++ {
+			if r, _, _, _ := img.At(x, y).RGBA(); r < 0xc000 {
+				dark++
+			}
+		}
+	}
+	assert.Greater(t, dark, 20, "the lower half of the header is shown")
+}

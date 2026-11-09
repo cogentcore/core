@@ -758,12 +758,14 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	if wb.Styles.Background == nil && wb.inTransparentOutOfFlow() {
+	if wb.Styles.Background == nil && wb.inTransparentOverlap() {
 		// An absolute or fixed widget is painted over the widgets that it overlaps,
 		// so without a background of its own it does not paint that of its
 		// parent over them (its actual background is kept for its content),
 		// and neither do the widgets in it without one (as the text over
-		// the percentage bars of Wikipedia).
+		// the percentage bars of Wikipedia). The same holds for a widget
+		// that overlaps the one before it by a negative margin (as the
+		// comments of news.ycombinator.com over their headers).
 		abg, fm := wb.Styles.ActualBackground, wb.Styles.FillMargin
 		clear := colors.Uniform(colors.Transparent)
 		wb.Styles.ActualBackground, wb.Styles.FillMargin = clear, false
@@ -774,12 +776,14 @@ func (wb *WidgetBase) RenderStandardBox() {
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
-// inTransparentOutOfFlow returns whether the widget is out of flow (see
-// [WidgetBase.outOfFlow]), or in one, with no backgrounds from it to the
-// widget, so that it is painted over the widgets that it overlaps.
-func (wb *WidgetBase) inTransparentOutOfFlow() bool {
+// inTransparentOverlap returns whether the widget is out of flow (see
+// [WidgetBase.outOfFlow]) or overlaps the widget before it (see
+// [WidgetBase.overlapsPrevious]), or is in one that is, with no
+// backgrounds from it to the widget, so that it is painted over the
+// widgets that it overlaps.
+func (wb *WidgetBase) inTransparentOverlap() bool {
 	for w := wb; w != nil; w = w.parentWidget() {
-		if w.outOfFlow() {
+		if w.outOfFlow() || w.overlapsPrevious() {
 			return true
 		}
 		if w != wb && w.Styles.Background != nil {
@@ -787,6 +791,30 @@ func (wb *WidgetBase) inTransparentOutOfFlow() bool {
 		}
 	}
 	return false
+}
+
+// overlapsPrevious returns whether the widget can overlap the widget
+// before it in its parent, by a negative top or left margin of its own, or
+// a negative bottom or right margin of that one, as in CSS.
+func (wb *WidgetBase) overlapsPrevious() bool {
+	m := &wb.Styles.Margin
+	if m.Top.Dots < 0 || m.Left.Dots < 0 {
+		return true
+	}
+	p := wb.parentWidget()
+	if p == nil {
+		return false
+	}
+	i := wb.IndexInParent()
+	if i <= 0 {
+		return false
+	}
+	prev := AsWidget(p.Child(i - 1))
+	if prev == nil {
+		return false
+	}
+	pm := &prev.Styles.Margin
+	return pm.Bottom.Dots < 0 || pm.Right.Dots < 0
 }
 
 // RenderAllocBox renders the standard box model using Alloc size, instead of Actual.
