@@ -25,6 +25,7 @@ import (
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/net/html"
 )
 
 // widgetsByID reads the given HTML and returns the widgets of its elements
@@ -663,5 +664,78 @@ func TestImageNaturalSizeDp(t *testing.T) {
 		dp := img.Styles.UnitContext.Dots(units.UnitDp)
 		assert.Greater(t, dp, float32(1.5))
 		assert.InDelta(t, 100*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels in dp")
+	})
+}
+
+// firstElement returns the first element of the given tag in the given HTML.
+func firstElement(t *testing.T, src, tag string) *html.Node {
+	doc, err := html.Parse(strings.NewReader(src))
+	require.NoError(t, err)
+	var found *html.Node
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if found != nil {
+			return
+		}
+		if n.Type == html.ElementNode && n.Data == tag {
+			found = n
+			return
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(doc)
+	require.NotNil(t, found)
+	return found
+}
+
+func TestImageSrcset(t *testing.T) {
+	tests := []struct {
+		name    string
+		src     string
+		zoom    float32
+		url     string
+		density float32
+	}{
+		{"src is 1x", `<img src="a.png" srcset="b.png 2x">`, 0, "a.png", 1},
+		{"src is 1x, 2x screen", `<img src="a.png" srcset="b.png 2x">`, 2, "b.png", 2},
+		{"srcset only", `<img srcset="s.png 1x, l.png 2x">`, 0, "s.png", 1},
+		{"no descriptor", `<img srcset="s.png">`, 0, "s.png", 1},
+		{"commas in url", `<img srcset="a.jpg?w=1,2 1x, b.jpg 2x">`, 0, "a.jpg?w=1,2", 1},
+		{"widths and sizes", `<img src="f.jpg" srcset="w300.jpg 300w, w600.jpg 600w, w1200.jpg 1200w" sizes="(max-width: 500px) 100vw, 400px">`, 0, "w600.jpg", 1.5},
+		{"picture", `<picture><source media="(max-width: 412px)" srcset="small.jpg"><source type="image/avif" srcset="x.avif"><source srcset="big.jpg 1x"><img src="fb.jpg"></picture>`, 0, "big.jpg", 1},
+		{"picture fallback", `<picture><source media="(max-width: 412px)" srcset="small.jpg"><img src="fb.jpg"></picture>`, 0, "fb.jpg", 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := NewContext()
+			ctx.MediaWidth = 1280
+			ctx.Zoom = tt.zoom
+			url, density := ctx.imageSource(firstElement(t, tt.src, "img"))
+			assert.Equal(t, tt.url, url)
+			assert.InDelta(t, tt.density, density, 0.001)
+		})
+	}
+}
+
+func TestImageSrcsetDensity(t *testing.T) {
+	// an image of only a srcset of 2x is shown at half its size in pixels
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, image.NewRGBA(image.Rect(0, 0, 100, 50))))
+	src := `<div style="width: 400px"><img srcset="data:image/png;base64,` + base64.StdEncoding.EncodeToString(buf.Bytes()) + ` 2x"></div>`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
+	var img *core.Image
+	bd.WalkDown(func(k tree.Node) bool {
+		if im, ok := k.(*core.Image); ok {
+			img = im
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, img, "an img of only a srcset is shown")
+	bd.RenderImage(func() {}, func() {
+		dp := img.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 50*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels of 2x in dp")
 	})
 }

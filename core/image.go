@@ -41,6 +41,12 @@ type Image struct {
 	// of craigslist.org, which were half their size on retina screens).
 	NaturalDp bool `set:"-" display:"-"`
 
+	// Density is the number of pixels of the image per dp of its natural
+	// size with NaturalDp (as of a candidate of the srcset of an img in a
+	// web page, as an image of 2x is shown at half its size in pixels);
+	// 0 is 1.
+	Density float32 `set:"-" display:"-"`
+
 	// prevImage is the cached last [Image.Image].
 	prevImage image.Image
 
@@ -90,6 +96,9 @@ func (im *Image) SizeUp() {
 		obj := math32.FromPoint(im.Image.Bounds().Size())
 		if dp := im.Styles.UnitContext.Dots(units.UnitDp); im.NaturalDp && dp > 0 {
 			obj = obj.MulScalar(dp)
+			if im.Density > 0 {
+				obj = obj.DivScalar(im.Density)
+			}
 		}
 		csz := sz.Actual.Content
 		// if only one min size is specified, then allow the other to expand

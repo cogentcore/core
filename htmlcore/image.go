@@ -143,11 +143,11 @@ func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
 var cssTransformUnits = regexp.MustCompile(`(-?[0-9.]+)(px|deg)\b`)
 
 func handleImage(ctx *Context, tag string) core.Widget {
-	if strings.TrimSpace(GetAttr(ctx.Node, "src")) == "" {
+	n := ctx.Node
+	src, density := ctx.imageSource(n) // of its srcset or picture, or its src
+	if src == "" {
 		return nil // an image without a source is not shown
 	}
-	n := ctx.Node
-	src := GetAttr(n, "src")
 	alt := GetAttr(n, "alt")
 	isSVG := strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg")
 	var newWidget core.Widget
@@ -241,7 +241,8 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		newWidget = svg
 	} else {
 		img = New[core.Image](ctx)
-		img.NaturalDp = true // in CSS px (see core.Image.NaturalDp)
+		img.NaturalDp = true  // in CSS px (see core.Image.NaturalDp)
+		img.Density = density // of its srcset candidate
 		img.SetTooltip(alt)
 		img.SetProperty("src", src) // for generatehtml
 		img.SetImage(im)
