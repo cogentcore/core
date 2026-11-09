@@ -226,6 +226,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				env.vh = float64(uc.Vph / dp / 100)
 			}
 		}
+		if c.MediaHeight > 0 { // (of the viewport, not of the scene)
+			env.vh, env.fixedVh = float64(c.MediaHeight)/100, true
+		}
+		env.vhUsed = &c.viewportHeightUsed
 		env.rem = float64(c.rootFontSize())
 		env.ch = func() float64 { // of the font of the element as it is styled
 			em := env.em

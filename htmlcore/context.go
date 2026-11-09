@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/core"
@@ -53,9 +54,14 @@ type Context struct {
 	MediaWidth float32
 
 	// MediaHeight, if positive, is the height of the viewport in CSS px (dp)
-	// that vh lengths are relative to; otherwise, they are relative to the
-	// height of the scene.
+	// that vh lengths (and percentage heights of the viewport) are
+	// relative to; otherwise, they are relative to the height of the scene.
+	// Whether the page used it is [Context.ViewportHeightUsed].
 	MediaHeight float32
+
+	// viewportHeightUsed is whether the page has used the height of the
+	// viewport (see [Context.ViewportHeightUsed]).
+	viewportHeightUsed atomic.Bool
 
 	// Zoom, if positive, is the zoom factor of the page, as in browsers:
 	// all of its sizes are multiplied by it (see
@@ -534,6 +540,16 @@ func (c *Context) NewPage() *Context {
 	n.StageSize = c.StageSize
 	n.Style = c.Style
 	return n
+}
+
+// ViewportHeightUsed returns whether the page that the context has read
+// used the height of the viewport ([Context.MediaHeight]): in vh lengths,
+// percentage heights of the viewport (as html and body of height: 100%),
+// or media queries of height, so that it is read again for another
+// height of its viewport (as the footer of google.com, which was below
+// the bottom of the viewport, as it was as high as the window).
+func (c *Context) ViewportHeightUsed() bool {
+	return c.viewportHeightUsed.Load()
 }
 
 // UserAgent is the User-Agent header of the requests of the default

@@ -1227,3 +1227,41 @@ func TestInvalidDeclarationDropped(t *testing.T) {
 			assert.InDelta(t, 300*dp, ws["b"].Geom.Size.Actual.Total.X, 4)
 		})
 }
+
+// TestViewportHeight tests that the percentage heights of the viewport
+// (html and body of height: 100%, in a flex column of height: 100%, as on
+// google.com) are of [Context.MediaHeight], not of the scene, which in a
+// browser is higher than the viewport of the page (with its toolbar and
+// tabs), so that its footer was below the viewport, with a scrollbar; and
+// that the context says that the page used the height of the viewport,
+// for it to be read again for another one, and not for a page that does
+// not.
+func TestViewportHeight(t *testing.T) {
+	src := `<html style="height: 100%; margin: 0"><body style="height: 100%; margin: 0"><div id="col" style="display: flex; flex-direction: column; height: 100%">` +
+		`<div style="height: 60px; flex-shrink: 0">head</div><div id="mid" style="height: calc(100% - 560px); min-height: 150px; flex-shrink: 0"></div>` +
+		`<div style="flex-grow: 1">main</div><div style="height: 40px; flex-shrink: 0">foot</div></div></body></html>`
+	ctx := NewContext()
+	ctx.MediaHeight = 500
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, bd, src))
+	ws := map[string]*core.WidgetBase{}
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			if id, ok := wb.Property("id").(string); ok {
+				ws[id] = wb
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 500*dp, ws["col"].Geom.Size.Actual.Total.Y, 2)
+		assert.InDelta(t, 150*dp, ws["mid"].Geom.Size.Actual.Total.Y, 2, "calc(100% - 560px) of 500, at least 150")
+	})
+	assert.True(t, ctx.ViewportHeightUsed())
+
+	plain := NewContext()
+	plain.MediaHeight = 500
+	require.NoError(t, ReadHTMLString(plain, core.NewBody(), `<p style="height: 20px">text</p>`))
+	assert.False(t, plain.ViewportHeightUsed())
+}

@@ -769,6 +769,7 @@ func (r *resolver) sizes() {
 		case pbs == nil:
 			// a percentage of the viewport (the containing block of the
 			// top element), not of the scene, which is as high as the page
+			c.viewportHeightUsed.Store(true)
 			v := (*h).Value
 			if c.MediaHeight > 0 {
 				*h = new(units.Value)

@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -30,6 +31,10 @@ type lengthEnv struct {
 	em, vw, vh float64
 	fixedVh    bool
 	rem        float64
+
+	// vhUsed, if set, is set when a length uses vh (or vmin and vmax) of
+	// the viewport (see [Context.ViewportHeightUsed]).
+	vhUsed *atomic.Bool
 
 	// cqw and cqh are the container query units (1% of the width and the
 	// height of the container of the element; see container.go), which
@@ -58,6 +63,7 @@ func (c *Context) readEnv() *lengthEnv {
 	if e.fixedVh {
 		e.vh = float64(c.MediaHeight) / 100
 	}
+	e.vhUsed = &c.viewportHeightUsed
 	return e
 }
 
@@ -112,10 +118,21 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 	if err := l.SetString(v); err != nil {
 		return units.Value{}, false
 	}
+	switch l.Unit {
+	case units.UnitVh, units.UnitVmin, units.UnitVmax:
+		e.useVh()
+	}
 	if l.Unit == units.UnitVh && e.fixedVh {
 		return units.Dp(l.Value * float32(e.vh)), true
 	}
 	return l, true
+}
+
+// useVh records that a length uses the height of the viewport.
+func (e *lengthEnv) useVh() {
+	if e.vhUsed != nil {
+		e.vhUsed.Store(true)
+	}
 }
 
 // containerUnits returns the size in px of 1% of the width and height of
@@ -374,10 +391,13 @@ func (p *linearParser) factor() (linear, bool, bool) {
 	case strings.HasPrefix(rest, "vw"):
 		return unit("vw", p.vw)
 	case strings.HasPrefix(rest, "vh"):
+		p.env.useVh()
 		return unit("vh", p.vh)
 	case strings.HasPrefix(rest, "vmin"):
+		p.env.useVh()
 		return unit("vmin", math.Min(p.vw, p.vh))
 	case strings.HasPrefix(rest, "vmax"):
+		p.env.useVh()
 		return unit("vmax", math.Max(p.vw, p.vh))
 	case strings.HasPrefix(rest, "pt"):
 		return unit("pt", 96.0/72)
