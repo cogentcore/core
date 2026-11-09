@@ -774,3 +774,50 @@ func TestClippedOutHidden(t *testing.T) {
 		assert.Equal(t, float32(1), ws["shown"].Styles.Opacity, "the clip unset")
 	})
 }
+
+// TestGridLonghandsAndColumnStart tests the grid of the articles of
+// nytimes.com/wirecutter: a 12 column grid (of repeat(var(--grid-cols),
+// 1fr)) in the middle column of 1fr 1024px 1fr, whose children span
+// columns by grid-column-end (span var(), span 8), one starting at column
+// 10 by grid-column-start, in the order of their order. Their columns were
+// not read, so they were all in one row, and the space of the empty third
+// column of the outer grid went to the first.
+func TestGridLonghandsAndColumnStart(t *testing.T) {
+	src := `<div style="width: 1280px"><style>
+.outer { display: grid; grid-template-columns: 1fr 1024px 1fr }
+.outer > * { grid-column: 2/2 }
+.inner { --grid-cols: 12; column-gap: 20px; display: grid; grid-template-columns: repeat(var(--grid-cols), 1fr); grid-column-start: 2 }
+.inner > * { grid-column-end: span var(--grid-cols) }
+.s3 { grid-column-end: span 3 } .c10 { grid-column-start: 10 } .s8 { grid-column-end: span 8 }
+</style><div class="outer"><div id="inner" class="inner">
+<div id="head">The Best Ebike for Commuters</div>
+<div id="side" class="s3 c10" style="order: 3">sidebar</div>
+<div id="intro" class="s8" style="order: 2">Live at the top of a steep hill? No problem.</div>
+<div id="wide" style="order: 4">wide</div>
+</div></div></div>`
+	ctx := NewContext()
+	ctx.MediaWidth = 1280
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, bd, src))
+	ws := map[string]*core.WidgetBase{}
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			if id, ok := wb.Property("id").(string); ok {
+				ws[id] = wb
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
+		box := func(id string) image.Rectangle { return ws[id].Geom.TotalBBox }
+		inner := box("inner")
+		assert.InDelta(t, 1024*dp, float32(inner.Dx()), float64(3*dp), "the middle column")
+		assert.InDelta(t, float32(box("head").Dx()), float32(inner.Dx()), 2, "the head spans 12 columns")
+		col := (1024 - 11*20) / 12.0 // the width of a column, in dp
+		assert.InDelta(t, float32(8*col+7*20)*dp, float32(box("intro").Dx()), float64(3*dp), "the intro spans 8 columns")
+		assert.Equal(t, box("intro").Min.Y, box("side").Min.Y, "the sidebar is beside the intro")
+		assert.InDelta(t, float32(inner.Min.X)+float32(9*(col+20))*dp, float32(box("side").Min.X), float64(3*dp), "the sidebar starts at column 10")
+		assert.Greater(t, box("wide").Min.Y, box("intro").Min.Y, "below them")
+	})
+}

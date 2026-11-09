@@ -195,8 +195,8 @@ func (c *Context) stackGrid(w core.Widget) bool {
 		row, col, _ := cutTopLevel(c.declaration(kn, "grid-area"), '/')
 		row, col = strings.TrimSpace(row), strings.TrimSpace(col)
 		if row == "" {
-			row = strings.TrimSpace(c.declaration(kn, "grid-row"))
-			col = strings.TrimSpace(c.declaration(kn, "grid-column"))
+			// (lines with an end, as 1 / span 2, are not one cell)
+			row, col = c.gridLines(kn, "row"), c.gridLines(kn, "column")
 		}
 		if _, err := strconv.Atoi(row); err != nil {
 			return false
@@ -230,6 +230,61 @@ func (c *Context) stackGrid(w core.Widget) bool {
 	return true
 }
 
+// gridFiller returns a new empty widget of the given grid, for a cell in
+// a column of the given track that no child is in, which the caller moves
+// into its place in the children.
+func (c *Context) gridFiller(w core.Widget, env *lengthEnv, track string, flexible bool) *core.Frame {
+	filler := core.NewFrame(w)
+	filler.SetName("grid-filler")
+	tree.SetUniqueName(filler) // (names of children must be unique, as for the inspector)
+	filler.Styler(func(s *styles.Style) {
+		s.Padding.Zero()
+		s.Margin.Zero()
+		s.Gap.Zero()
+		s.Background = nil
+		gridTrackStyle(env, s, track, flexible)
+	})
+	return filler
+}
+
+// gridLines returns the lines of the given element in the given axis of
+// its grid (column or row) as "start / end", from its grid-column (or
+// grid-row) shorthand and its -start and -end longhands, in the order of
+// the cascade (as the 12 column grid of nytimes.com/wirecutter, of
+// grid-column-end: span 8 and grid-column-start: 10), or "" if it has none.
+func (c *Context) gridLines(n *html.Node, axis string) string {
+	if n == nil {
+		return ""
+	}
+	short := "grid-" + axis
+	start, end := "", ""
+	for _, d := range c.declarations(n) {
+		if d.invalid {
+			continue
+		}
+		v := strings.TrimSpace(d.Value)
+		switch d.Property {
+		case short:
+			st, en, _ := cutTopLevel(v, '/')
+			start, end = strings.TrimSpace(st), strings.TrimSpace(en)
+		case short + "-start":
+			start = v
+		case short + "-end":
+			end = v
+		}
+	}
+	if start == "" && end == "" {
+		return ""
+	}
+	if start == "" {
+		start = "auto"
+	}
+	if end == "" {
+		return start
+	}
+	return start + " / " + end
+}
+
 // gridPlacement returns the area of the given child of a grid with the
 // given number of columns from the numbers of its start lines in its
 // grid-row and grid-column (or grid-area), if it has both (as the cells
@@ -238,7 +293,7 @@ func (c *Context) gridPlacement(n *html.Node, ncols, nrows int) (gridArea, bool)
 	if n == nil {
 		return gridArea{}, false
 	}
-	row, col := c.declaration(n, "grid-row"), c.declaration(n, "grid-column")
+	row, col := c.gridLines(n, "row"), c.gridLines(n, "column")
 	if ga := c.declaration(n, "grid-area"); ga != "" && row == "" && col == "" {
 		parts := strings.Split(ga, "/")
 		if len(parts) >= 2 {
@@ -427,10 +482,23 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		// (as the 12 columns of the grids of github.com, of which its
 		// features span 6 or 4), and the tracks of the columns that they
 		// are in.
+		// An item with a column start (and an auto row) is placed at it,
+		// in the next row if the cells before it in this one are taken
+		// (as the sidebar of nytimes.com/wirecutter at column 10, after
+		// the text in columns 1 to 8), with empty cells before it.
 		col := 0
+		var kids []tree.Node
+		filled := false
+		fill := func(n int) {
+			for range n {
+				kids = append(kids, c.gridFiller(w, env, trackOf(len(kids)%ncols), flexible))
+			}
+			filled = filled || n > 0
+		}
 		for _, k := range auto {
 			kw, ok := k.(core.Widget)
 			if !ok {
+				kids = append(kids, k)
 				continue
 			}
 			cs, rs := 1, 1
@@ -443,13 +511,25 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 				if pos == "absolute" || pos == "fixed" || c.displayOf(kn) == "none" {
 					continue
 				}
-				cs = gridSpan(c.declaration(kn, "grid-column"), ncols)
-				rs = gridSpan(c.declaration(kn, "grid-row"), 0)
+				cols := c.gridLines(kn, "column")
+				cs = gridSpan(cols, ncols)
+				rs = gridSpan(c.gridLines(kn, "row"), 0)
+				st, _, _ := cutTopLevel(cols, '/')
+				if start, err := strconv.Atoi(strings.TrimSpace(st)); err == nil && start > 0 && start <= ncols {
+					if start-1 < col { // in the next row
+						fill(ncols - col)
+						col = 0
+					}
+					fill(start - 1 - col)
+					col = start - 1
+					cs = min(cs, ncols-col)
+				}
 			}
 			cs = min(cs, ncols)
 			if col > 0 && col+cs > ncols { // it starts the next row
 				col = 0
 			}
+			kids = append(kids, k)
 			i := col
 			kw.AsWidget().FinalStyler(func(s *styles.Style) {
 				if cs > 1 {
@@ -462,6 +542,15 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 				}
 			})
 			col = (col + cs) % ncols
+		}
+		if filled && col > 0 {
+			// the flexible tracks after the last item take their share
+			for ; col < ncols && strings.HasSuffix(trackOf(col), "fr"); col++ {
+				fill(1)
+			}
+		}
+		if filled {
+			w.AsTree().Children = kids
 		}
 		return
 	}
@@ -487,7 +576,11 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 	next := 0
 	for r := 0; r <= last.row; r++ {
 		for col := range ncols {
-			if r == last.row && col > last.col {
+			if r == last.row && col > last.col && !strings.HasSuffix(trackOf(col), "fr") {
+				// the cells after the last item are empty, but those of
+				// flexible tracks take their share of the width (as the
+				// third column of 1fr 1024px 1fr of nytimes.com/wirecutter,
+				// whose space went to the first)
 				break
 			}
 			if next < len(items) && items[next].area.row == r && items[next].area.col == col {
@@ -507,18 +600,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 			if covered[[2]int{r, col}] {
 				continue
 			}
-			filler := core.NewFrame(w) // moved into its place below
-			filler.SetName("grid-filler")
-			tree.SetUniqueName(filler) // (names of children must be unique, as for the inspector)
-			track := trackOf(col)
-			filler.Styler(func(s *styles.Style) {
-				s.Padding.Zero()
-				s.Margin.Zero()
-				s.Gap.Zero()
-				s.Background = nil
-				gridTrackStyle(env, s, track, flexible)
-			})
-			kids = append(kids, filler)
+			kids = append(kids, c.gridFiller(w, env, trackOf(col), flexible)) // moved into its place below
 		}
 	}
 	for ; next < len(items); next++ { // items that share a start with another
