@@ -203,6 +203,10 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 		if container, inline := ctx.isContainer(ctx.Node); container {
 			w := New[containerFrame](ctx)
 			w.inline = inline
+			if ctx.containers == nil {
+				ctx.containers = map[*html.Node]*containerFrame{}
+			}
+			ctx.containers[ctx.Node] = w
 			ctx.NewParent = w
 			return w
 		}

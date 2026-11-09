@@ -957,3 +957,47 @@ func TestAbsoluteOverInFlow(t *testing.T) {
 	dp := bd.Styles.UnitContext.Dots(units.UnitDp)
 	assert.InEpsilon(t, 320*180*dp*dp, float32(n), 0.05, "the image fills its box")
 }
+
+// TestFlexWrapPercentWidth tests that items of width: 100% in a row that
+// wraps are each on a line of their own, as in CSS, as the containers of
+// the stacks of edition.cnn.com, which were all side by side.
+func TestFlexWrapPercentWidth(t *testing.T) {
+	src := `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; width: 300px">
+<div id="a" style="width: 100%">Nvidia CEO admits affair</div><div id="b" style="width: 100%">US and Iran are negotiating</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		a, b := ws["a"], ws["b"]
+		require.NotNil(t, b)
+		assert.InDelta(t, 300*dp, a.Geom.Size.Actual.Total.X, 2)
+		assert.InDelta(t, 300*dp, b.Geom.Size.Actual.Total.X, 2)
+		assert.Greater(t, b.Geom.TotalBBox.Min.Y, a.Geom.TotalBBox.Min.Y, "on the next line")
+	})
+}
+
+// TestGridAutoFit tests the tracks of repeat(auto-fit, minmax(25%, 1fr)),
+// as many as fit and as there are items, as the 3 cards of a grid of
+// edition.cnn.com, which were in one column.
+func TestGridAutoFit(t *testing.T) {
+	src := `<div style="width: 561px"><div style="display: grid; gap: 32px 24px; grid-template-columns: repeat(auto-fit, minmax(25%, 1fr))">
+<div id="a">Hegseth impeachment drama</div><div id="b">Blanche: The Constitution</div><div id="c">Congress returns</div></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		a, b, c := ws["a"], ws["b"], ws["c"]
+		require.NotNil(t, c)
+		assert.Equal(t, a.Geom.TotalBBox.Min.Y, c.Geom.TotalBBox.Min.Y, "in one row")
+		assert.InDelta(t, (561-48)*dp/3, b.Geom.Size.Actual.Total.X, 4)
+	})
+}
+
+// TestContainerQuery tests the conditions of @container rules, of the
+// width of the named container: as the image boxes of the spotlight cards
+// of edition.cnn.com, of aspect-ratio 3/2 in a container of 537px (width <=
+// 799px), not the 2/3 of a later rule (width <= 382px), which all applied.
+func TestContainerQuery(t *testing.T) {
+	src := `<style>.card { container: spotlight / inline-size; width: 537px }
+@container spotlight (width <= 799px) { .box { aspect-ratio: 3/2 } }
+@container spotlight (width <= 382px) { .box { aspect-ratio: 2/3 } }</style>
+<div class="card"><div class="box" id="box"></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		require.NotNil(t, ws["box"])
+		assert.InDelta(t, 537*dp*2/3, ws["box"].Geom.Size.Actual.Total.Y, 3, "of aspect 3/2")
+	})
+}

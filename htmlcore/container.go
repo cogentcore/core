@@ -116,3 +116,87 @@ func frameOf(w any) *core.Frame {
 	}
 	return nil
 }
+
+// containerCond is the condition of an @container rule: the name of the
+// container that it queries ("" for the nearest one), and its query (as
+// (width <= 799px)), and that of an @container rule that it is in.
+type containerCond struct {
+	name, query string
+	outer       *containerCond
+}
+
+// parseContainerCond returns the condition of an @container rule of the
+// given prelude (as "spotlight (width <= 799px)"), in the given one.
+func parseContainerCond(prelude string, outer *containerCond) *containerCond {
+	prelude = strings.TrimSpace(prelude)
+	cc := &containerCond{query: prelude, outer: outer}
+	if i := strings.IndexAny(prelude, "( "); i > 0 && !strings.HasPrefix(strings.ToLower(prelude), "not") {
+		name := strings.TrimSpace(prelude[:i])
+		if name != "" && !strings.ContainsAny(name, "()") {
+			cc.name = name
+			cc.query = strings.TrimSpace(prelude[i:])
+		}
+	}
+	return cc
+}
+
+// containerDecls returns the given declarations of the given element
+// without those of @container rules whose conditions it does not match.
+func (c *Context) containerDecls(n *html.Node, ds []*cssDecl) []*cssDecl {
+	out := make([]*cssDecl, 0, len(ds))
+	for _, d := range ds {
+		if d.container == nil || c.containerMatches(n, d.container) {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
+// containerMatches returns whether the given element matches the given
+// @container condition: of the width of its nearest container (of that
+// name) in its last layout, as the container query units (see
+// [containerUnits]), or of the viewport before it is laid out, as the
+// spotlight cards of edition.cnn.com, whose aspect ratios were those of
+// the last of their @container rules, which all applied.
+func (c *Context) containerMatches(n *html.Node, cc *containerCond) bool {
+	for ; cc != nil; cc = cc.outer {
+		width := c.mediaWidth()
+		for p := n.Parent; p != nil && p.Type == html.ElementNode; p = p.Parent {
+			if ok, _ := c.isContainer(p); !ok {
+				continue
+			}
+			if cc.name != "" && !c.containerNamed(p, cc.name) {
+				continue
+			}
+			if cf := c.containers[p]; cf != nil && cf.size.X > 0 {
+				if dp := cf.Styles.UnitContext.Dots(units.UnitDp); dp > 0 {
+					width = cf.size.X / dp
+				}
+			}
+			break
+		}
+		saved, checking := c.MediaWidth, c.checkingMedia
+		c.MediaWidth, c.checkingMedia = width, true
+		m := c.mediaListMatches(strings.ToLower(cc.query))
+		c.MediaWidth, c.checkingMedia = saved, checking
+		if !m {
+			return false
+		}
+	}
+	return true
+}
+
+// containerNamed returns whether the given container has the given name
+// (of container-name, or the container shorthand).
+func (c *Context) containerNamed(n *html.Node, name string) bool {
+	names := c.declaration(n, "container-name")
+	if v := c.declaration(n, "container"); v != "" {
+		names, _, _ = strings.Cut(v, "/")
+	}
+	for _, f := range strings.Fields(names) {
+		if f == name {
+			return true
+		}
+	}
+	return false
+}

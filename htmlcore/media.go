@@ -60,6 +60,8 @@ const (
 // parseCSSText parses the given style sheet (see [parseCSS]).
 func parseCSSText(style string) *css.Stylesheet {
 	style = removeStrayCSS(style)
+	// (the condition of an @container rule is kept, after containerMark)
+	style = containerRule.ReplaceAllString(style, "@supports "+containerMark+"$1{")
 	style = unknownGroupingRule.ReplaceAllString(style, "@supports$1{")
 	if ss, err := parser.Parse(style); err == nil {
 		return ss
@@ -81,6 +83,14 @@ func parseCSSText(style string) *css.Stylesheet {
 // @container rules in the @layer of the style sheet of github.com), which
 // are parsed as @supports rules, whose rules apply (see addRuleList).
 var unknownGroupingRule = regexp.MustCompile(`@(?:layer|container|scope|starting-style)\b([^;{}]*)\{`)
+
+// containerRule matches the start of the block of an @container rule, which
+// is parsed as an @supports rule with its condition after containerMark.
+var containerRule = regexp.MustCompile(`@container\b([^;{}]*)\{`)
+
+// containerMark marks the prelude of an @supports rule that is an
+// @container rule (see [containerRule]).
+const containerMark = "--container:"
 
 // groupingRules are the at-rules whose blocks have rules (not declarations).
 var groupingRules = []string{"@media", "@supports", "@layer", "@container", "@document", "@-moz-document", "@scope", "@starting-style"}

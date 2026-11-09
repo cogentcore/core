@@ -256,6 +256,14 @@ type pageState struct {
 	// [Context.inputIcons]), which are not rendered themselves.
 	iconNodes map[*html.Node]bool
 
+	// curContainer is the condition of the @container rule whose rules
+	// are being added, containerQueried has the elements with declarations
+	// in such rules, and containers has the frames of the containers by
+	// their elements (see [Context.containerMatches]).
+	curContainer     *containerCond
+	containerQueried map[*html.Node]bool
+	containers       map[*html.Node]*containerFrame
+
 	// nodeWidgets has the widgets of the controls of forms.
 	nodeWidgets map[*html.Node]core.Widget
 

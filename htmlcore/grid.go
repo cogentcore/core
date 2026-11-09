@@ -53,7 +53,7 @@ func (c *Context) gridTemplate(n *html.Node) (areas map[string]gridArea, ncols i
 	} else {
 		areasDecl = v
 	}
-	tracks = gridTracks(colsDecl)
+	tracks = gridTracksAuto(colsDecl, func(track string, fit bool) int { return c.autoRepeatCount(n, track, fit) })
 	var rows [][]string
 	for _, m := range gridAreaStrings.FindAllStringSubmatch(areasDecl, -1) {
 		row := strings.Fields(m[1] + m[2])
@@ -106,15 +106,27 @@ var gridLineNames = regexp.MustCompile(`\[[^\]]*\]`)
 // gridTracks returns the track sizes of a grid-template-columns value,
 // with repeat() of a number expanded and line names removed.
 func gridTracks(v string) []string {
+	return gridTracksAuto(v, nil)
+}
+
+// gridTracksAuto is [gridTracks] with repeat(auto-fit, ...) and
+// repeat(auto-fill, ...) expanded to the number of tracks that the given
+// function returns for the repeated track (and whether it is auto-fit).
+func gridTracksAuto(v string, autoCount func(track string, fit bool) int) []string {
 	var tracks []string
 	v = gridLineNames.ReplaceAllString(v, " ")
 	for _, f := range splitColors(v) { // fields outside of parentheses
 		if strings.HasPrefix(f, "repeat(") {
 			inner := strings.TrimSuffix(strings.TrimPrefix(f, "repeat("), ")")
 			n, rest, _ := strings.Cut(inner, ",")
-			if count, err := strconv.Atoi(strings.TrimSpace(n)); err == nil {
+			n = strings.TrimSpace(n)
+			count, err := strconv.Atoi(n)
+			if err != nil && (n == "auto-fit" || n == "auto-fill") && autoCount != nil {
+				count, err = autoCount(strings.TrimSpace(rest), n == "auto-fit"), nil
+			}
+			if err == nil {
 				for range count {
-					tracks = append(tracks, gridTracks(rest)...)
+					tracks = append(tracks, gridTracksAuto(rest, autoCount)...)
 				}
 			}
 			continue
@@ -122,6 +134,61 @@ func gridTracks(v string) []string {
 		tracks = append(tracks, f)
 	}
 	return tracks
+}
+
+// autoRepeatCount returns the number of tracks of the given track of a
+// repeat(auto-fit or auto-fill) of the grid of the given node: as many as
+// fit in its width at their minimum size (of minmax(), or their size), with
+// the column gap, as in CSS, of the width of the page when the grid has no
+// width of its own to go by (which a percentage minimum does not depend
+// on much), and at most as many as the grid has items for auto-fit, whose
+// empty tracks collapse (as the 3 cards of repeat(auto-fit, minmax(25%,
+// 1fr)) of edition.cnn.com, which were in one column).
+func (c *Context) autoRepeatCount(n *html.Node, track string, fit bool) int {
+	mn := track
+	if inner, ok := strings.CutPrefix(track, "minmax("); ok {
+		mn, _, _ = strings.Cut(strings.TrimSuffix(inner, ")"), ",")
+		mn = strings.TrimSpace(mn)
+	}
+	env := c.readEnv()
+	width := c.mediaWidth()
+	if w, ok := env.lengthPx(strings.TrimSpace(c.declaration(n, "width"))); ok && w > 0 {
+		width = w
+	}
+	gap := float32(0)
+	g := strings.TrimSpace(c.declaration(n, "column-gap"))
+	if g == "" {
+		if _, col, ok := cutTopLevel(strings.TrimSpace(c.declaration(n, "gap")), ' '); ok {
+			g = col
+		} else {
+			g = strings.TrimSpace(c.declaration(n, "gap"))
+		}
+	}
+	if px, ok := env.lengthPx(g); ok {
+		gap = px
+	}
+	size := float32(0)
+	if p, ok := strings.CutSuffix(mn, "%"); ok {
+		if f, err := strconv.ParseFloat(p, 32); err == nil {
+			size = width * float32(f) / 100
+		}
+	} else if px, ok := env.lengthPx(mn); ok {
+		size = px
+	}
+	count := 1
+	if size > 0 {
+		count = max(int((width+gap)/(size+gap)), 1)
+	}
+	if fit && n != nil {
+		items := 0
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			if k.Type == html.ElementNode && c.inFlexFlow(k) {
+				items++
+			}
+		}
+		count = max(min(count, items), 1)
+	}
+	return count
 }
 
 // gridTrackStyle sets the style of a child in a grid column with the given

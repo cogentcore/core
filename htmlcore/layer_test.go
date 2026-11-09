@@ -28,6 +28,6 @@ func TestLayerRules(t *testing.T) {
 			}
 		}
 	}
-	assert.Equal(t, []string{"@layerbase, brand", "@supportsbrand", "  .a", "  @supports(width>=1280px)", "    .b", "  .c",
+	assert.Equal(t, []string{"@layerbase, brand", "@supportsbrand", "  .a", "  @supports--container: (width>=1280px)", "    .b", "  .c",
 		"@supports(.x)", "  .d", "@supports", "  .e", ".f"}, sels)
 }

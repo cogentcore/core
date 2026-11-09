@@ -5,8 +5,6 @@
 package htmlcore
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/colors"
 	"strconv"
 	"strings"
@@ -413,6 +411,17 @@ func (r *resolver) itemGrowth() {
 		s.Shrink.X = 1
 	case bs.block && st.display != "table":
 		s.Grow.X = 1
+		if w := strings.TrimSpace(r.c.declaration(r.node, "width")); ((st.width == nil && (w == "" || w == "auto")) || (st.width != nil && st.width.Unit == units.UnitPw)) && !s.MaxContentWidth &&
+			st.display == "flex" && s.Contain == styles.ContainNone && r.c.hasRigidItem(r.node) && r.c.inBlockFlow(r.node) {
+			// a flex container of an auto (or percentage) width in blocks in
+			// the flow, with
+			// an item that does not shrink, is as wide as its containing
+			// block, which its content that is wider overflows, as in CSS,
+			// and does not widen (as the header of edition.cnn.com, with
+			// the items of its navigation, which its script hides until
+			// the rest fit in it, by its width)
+			s.Contain = styles.ContainInlineSize
+		}
 	case st.display == "table-cell":
 		s.Shrink.X = 1 // the columns of a table fit in its width
 	case st.width == nil:
@@ -472,12 +481,11 @@ func (r *resolver) flexBasis() {
 	if n < 2 {
 		return
 	}
-	px := units.Px(1)
-	gaps := float32(n-1) * r.dots(&ps.Gap.X) / max(r.dots(&px), 1e-6)
-	expr := fmt.Sprintf("calc((100%% - %gpx) * %g / %g)", gaps, st.flexGrow, sum)
-	if l, ok := st.env.length(expr, units.UnitPw); ok {
-		st.width = &l
-	}
+	// (percentages of the width of a row in core are of it less its gaps;
+	// a custom length, not a percentage width, which a row that wraps
+	// would need room for in a line)
+	l := customLength("calc", []linear{{pct: float64(100 * st.flexGrow / sum)}}, units.UnitPw)
+	st.width = &l
 }
 
 // flexBasisGrowth restores the grow of a flex item with a flex-basis after
@@ -539,6 +547,76 @@ func (c *Context) flexOf(n *html.Node) (grow float32, basis string) {
 	return
 }
 
+// inBlockFlow returns whether the given element is in blocks in the flow
+// up to the body of a page of a known width ([Context.MediaWidth]) or an
+// element with a width: each of its ancestors is a
+// block (not a float, an absolute or fixed element, or a flex or grid
+// item, which can be as wide as their content), so its width does not
+// depend on its content, as in CSS.
+func (c *Context) inBlockFlow(n *html.Node) bool {
+	for p := n.Parent; p != nil && p.Type == html.ElementNode; p = p.Parent {
+		if p.Data == "body" || p.Data == "html" {
+			// the body is as wide as the viewport of a page whose width is
+			// known (not as wide as its content, as in a window or a
+			// dialog sized to its content)
+			return c.MediaWidth > 0
+		}
+		switch strings.TrimSpace(c.displayOf(p)) {
+		case "block", "flow-root", "list-item":
+		default:
+			return false
+		}
+		switch strings.TrimSpace(c.declaration(p, "position")) {
+		case "absolute", "fixed":
+			return false
+		}
+		if f := strings.TrimSpace(c.declaration(p, "float")); f != "" && f != "none" {
+			return false
+		}
+		if pp := p.Parent; pp != nil && pp.Type == html.ElementNode {
+			switch strings.TrimSpace(c.displayOf(pp)) {
+			case "flex", "inline-flex", "grid", "inline-grid", "table-cell", "inline-block":
+				return false
+			}
+		}
+		if w := strings.TrimSpace(c.declaration(p, "width")); w != "" && w != "auto" && !strings.Contains(w, "content") {
+			return true
+		}
+	}
+	return false
+}
+
+// hasRigidItem returns whether the given flex container has an item that
+// does not shrink (of flex: none, or a flex-shrink of 0).
+func (c *Context) hasRigidItem(n *html.Node) bool {
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode {
+			continue
+		}
+		shrink := float32(1)
+		for _, d := range c.declarations(k) {
+			if d.invalid {
+				continue
+			}
+			v := strings.ToLower(strings.TrimSpace(d.Value))
+			switch d.Property {
+			case "flex":
+				if _, sh, _, ok := parseFlex(v); ok {
+					shrink = sh
+				}
+			case "flex-shrink":
+				if f, err := strconv.ParseFloat(v, 32); err == nil {
+					shrink = float32(f)
+				}
+			}
+		}
+		if shrink == 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // inFlexFlow returns whether the given element is an item in the flow of
 // its flex container: it is displayed, and not absolute or fixed.
 func (c *Context) inFlexFlow(n *html.Node) bool {
@@ -594,6 +672,14 @@ func (r *resolver) sizes() {
 				// shrink, as in CSS (as the email field of github.com).
 				s.Min.X = intrinsic
 				s.Shrink.X = 1
+			}
+			if r.ps != nil && r.pbs != nil && r.pbs.display == "flex" && r.ps.Wrap && r.ps.Direction == styles.Row {
+				// In a row that wraps, an item needs its width in its
+				// line, as for its hypothetical main size in CSS (as the
+				// containers of width: 100% of edition.cnn.com, each on a
+				// line of its own, which were all on one line): a Min of
+				// 0 in percent of the width marks it for core (as no Min).
+				s.Min.X = units.Pw(0)
 			}
 		}
 		if st.display == "table-cell" && st.width.Unit != units.UnitPw {

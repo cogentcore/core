@@ -52,6 +52,10 @@ type cssDecl struct {
 	origin      cssOrigin
 	specificity int
 	order       int
+
+	// container is the condition of the @container rule that the
+	// declaration is in, if any (see [Context.containerMatches]).
+	container *containerCond
 }
 
 // rank returns the rank of the declaration in the cascade,
@@ -86,7 +90,19 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				if c.mediaMatches(rule.Prelude) {
 					c.addRuleList(root, rule.Rules, origin)
 				}
-			case "@supports", "@layer", "@container", "@scope":
+			case "@container":
+				prev := c.curContainer
+				c.curContainer = parseContainerCond(rule.Prelude, prev)
+				c.addRuleList(root, rule.Rules, origin)
+				c.curContainer = prev
+			case "@supports", "@layer", "@scope":
+				if cond, ok := strings.CutPrefix(strings.TrimSpace(rule.Prelude), containerMark); ok {
+					prev := c.curContainer
+					c.curContainer = parseContainerCond(cond, prev)
+					c.addRuleList(root, rule.Rules, origin)
+					c.curContainer = prev
+					continue
+				}
 				c.addRuleList(root, rule.Rules, origin)
 			case "@font-face":
 				if c.WebFonts {
@@ -132,7 +148,14 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 	for _, d := range decls {
 		c.cssOrder++
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)),
-			Value: c.absoluteURLs(strings.TrimSpace(d.Value)), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder})
+			Value: c.absoluteURLs(strings.TrimSpace(d.Value)), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
+			container: c.curContainer})
+	}
+	if c.curContainer != nil {
+		if c.containerQueried == nil {
+			c.containerQueried = map[*html.Node]bool{}
+		}
+		c.containerQueried[n] = true
 	}
 	delete(c.sorted, n)
 }
@@ -175,6 +198,9 @@ func (c *Context) declarations(n *html.Node) []*cssDecl {
 			}
 			return a.order < b.order
 		})
+	}
+	if c.containerQueried[n] {
+		return c.containerDecls(n, c.styles[n])
 	}
 	return c.styles[n]
 }
