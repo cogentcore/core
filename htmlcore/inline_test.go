@@ -62,3 +62,19 @@ func TestInlineBoxes(t *testing.T) {
 		assert.Less(t, float32(ws["side"].Geom.TotalBBox.Dy()), 26*dp, "its vertical padding does not make its line higher")
 	})
 }
+
+// TestInlineRunWithAbsolute tests an absolutely positioned element between
+// inline blocks (as the reply info of the postings of craigslist.org,
+// between the reply button and the actions): it is out of the flow, and
+// does not break the line, so the inline blocks are on one line.
+func TestInlineRunWithAbsolute(t *testing.T) {
+	src := `<div style="width: 600px"><button id="reply">reply</button>` +
+		`<div style="position: absolute"></div>` +
+		`<div id="fav" style="display: inline-block; width: 60px">favorite</div><div id="hide" style="display: inline-block; width: 60px">hide</div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		reply, fav, hide := ws["reply"].Geom.TotalBBox, ws["fav"].Geom.TotalBBox, ws["hide"].Geom.TotalBBox
+		assert.Less(t, fav.Min.Y, reply.Max.Y, "the actions are on the line of the button")
+		assert.Greater(t, fav.Min.X, reply.Max.X-1, "after it")
+		assert.Equal(t, fav.Min.Y, hide.Min.Y)
+	})
+}

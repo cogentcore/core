@@ -44,6 +44,12 @@ func (c *Context) isInlineLevel(n *xhtml.Node) bool {
 		if n.Data == "colgroup" || n.Data == "col" {
 			return false // the columns of a table, which have no boxes
 		}
+		if c.absoluteInRun(n) {
+			// out of the flow, in the run where it is, which it does not
+			// break into lines (as the reply info of the postings of
+			// craigslist.org, between the reply button and the actions)
+			return true
+		}
 		switch c.displayOf(n) {
 		case "", "inline", "inline-block", "inline-flex", "inline-grid", "inline-table":
 			return true
@@ -111,6 +117,52 @@ func (c *Context) isInlineBox(n *xhtml.Node) bool {
 func noLength(v string) bool {
 	v = strings.ToLower(v)
 	return v == "" || strings.Contains(v, "none") || strings.Contains(v, "hidden") || v == "0" || strings.HasPrefix(v, "0 ") || strings.HasPrefix(v, "0px")
+}
+
+// absoluteInRun returns whether the given element is absolutely positioned
+// (or fixed) between inline-level content in a block container, which it is
+// in the run of, as it is out of the flow (in CSS, it is blockified, but it
+// does not break the line that it is in).
+func (c *Context) absoluteInRun(n *xhtml.Node) bool {
+	pos := strings.TrimSpace(c.declaration(n, "position"))
+	if (pos != "absolute" && pos != "fixed") || n.Parent == nil || c.displayOf(n) == "none" {
+		return false
+	}
+	switch c.displayOf(n.Parent) {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		return false
+	}
+	// the element (or text) before and after it, which are inline-level
+	sibling := func(next bool) *xhtml.Node {
+		s := n.PrevSibling
+		if next {
+			s = n.NextSibling
+		}
+		for s != nil {
+			if s.Type == xhtml.ElementNode || (s.Type == xhtml.TextNode && strings.TrimSpace(s.Data) != "") {
+				return s
+			}
+			if next {
+				s = s.NextSibling
+			} else {
+				s = s.PrevSibling
+			}
+		}
+		return nil
+	}
+	inline := func(s *xhtml.Node) bool {
+		if s == nil {
+			return false
+		}
+		if s.Type == xhtml.TextNode {
+			return true
+		}
+		if p := strings.TrimSpace(c.declaration(s, "position")); p == "absolute" || p == "fixed" {
+			return false
+		}
+		return c.isInlineLevel(s)
+	}
+	return inline(sibling(false)) && inline(sibling(true))
 }
 
 // isTextElement returns whether the given element is all text, which is
