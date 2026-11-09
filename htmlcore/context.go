@@ -137,6 +137,12 @@ type Context struct {
 	// which defaults to [system.App.OpenURL].
 	OpenURL func(url string, e events.Event)
 
+	// OpenLink, if set, is used in place of OpenURL for the clicks on the
+	// frames of links (and the widgets in them), with the link element
+	// (as for a page with scripts, which get the click of the element
+	// that is clicked, not of another link to the same URL).
+	OpenLink func(link *html.Node, url string, e events.Event)
+
 	// GetURL is the function used to get resources from URLs,
 	// which defaults to [http.Get].
 	GetURL func(url string) (*http.Response, error)
@@ -510,6 +516,7 @@ func (c *Context) NewPage() *Context {
 	n.ToggleDetails, n.Hovered = c.ToggleDetails, c.Hovered
 	n.PageURL = c.PageURL
 	n.OpenURL, n.GetURL, n.PostURL = c.OpenURL, c.GetURL, c.PostURL
+	n.OpenLink = c.OpenLink
 	n.ElementHandlers = c.ElementHandlers
 	n.WikilinkHandlers = c.WikilinkHandlers
 	n.AttributeHandlers = c.AttributeHandlers
@@ -723,4 +730,14 @@ func uniqueName(wb *core.WidgetBase) {
 			return
 		}
 	}
+}
+
+// openLink opens the URL of the given link element, with OpenLink if it
+// is set, or else OpenURL.
+func (c *Context) openLink(link *html.Node, url string, e events.Event) {
+	if c.OpenLink != nil && link != nil {
+		c.OpenLink(link, url, e)
+		return
+	}
+	c.OpenURL(url, e)
 }

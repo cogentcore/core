@@ -563,3 +563,35 @@ func TestSummaryNoMarker(t *testing.T) {
 	})
 	assert.Equal(t, 1, markers, "only the plain summary has a marker")
 }
+
+// TestOpenLink tests that the clicks on a link frame (and its text) go to
+// Context.OpenLink with the link element, when it is set (as for scripts,
+// which get the click of the link that is clicked, as an item of the jump
+// dialog of pkg.go.dev, not of another link to the same URL).
+func TestOpenLink(t *testing.T) {
+	b := core.NewBody()
+	ctx := NewContext()
+	var got []string
+	ctx.OpenLink = func(link *html.Node, url string, e events.Event) {
+		got = append(got, GetAttr(link, "id")+" "+url)
+	}
+	var second *core.WidgetBase
+	ctx.AddWidgetHandler(func(w core.Widget) {
+		if n, ok := w.AsWidget().Property("node").(*html.Node); ok && GetAttr(n, "id") == "second" {
+			if _, isText := w.(*core.Text); !isText {
+				second = w.AsWidget()
+			}
+		}
+	})
+	require.NoError(t, ReadHTMLString(ctx, b, `<a id="first" href="#x" style="display: block">First</a><a id="second" href="#x" style="display: block">Second <i>link</i></a>`))
+	require.NotNil(t, second)
+	b.RenderImage(func() {
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		bb := second.Geom.TotalBBox
+		pos := image.Pt(bb.Min.X+5, (bb.Min.Y+bb.Max.Y)/2)
+		ev.MouseButton(events.MouseDown, events.Left, pos, 0)
+		ev.MouseButton(events.MouseUp, events.Left, pos, 0)
+	}, func() {
+		assert.Equal(t, []string{"second #x"}, got)
+	})
+}

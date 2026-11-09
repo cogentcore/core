@@ -262,7 +262,8 @@ func (c *Context) linkFrame(w *core.Frame, href string) {
 	if c.linkFrames == nil {
 		c.linkFrames = map[*html.Node]string{}
 	}
-	c.linkFrames[c.Node] = href
+	link := c.Node
+	c.linkFrames[link] = href
 	w.SetProperty("href", href)
 	w.SetTooltip(href)
 	w.Styler(func(s *styles.Style) {
@@ -271,7 +272,7 @@ func (c *Context) linkFrame(w *core.Frame, href string) {
 	})
 	w.OnClick(func(e events.Event) {
 		e.SetHandled()
-		c.OpenURL(href, e)
+		c.openLink(link, href, e)
 	})
 }
 
@@ -296,12 +297,13 @@ func (c *Context) handleInLink(node *html.Node, w core.Widget) {
 		}
 		wb := w.AsWidget()
 		wb.Styler(func(s *styles.Style) { s.Cursor = cursors.Pointer })
+		link := n
 		wb.OnClick(func(e events.Event) {
 			if e.IsHandled() {
 				return
 			}
 			e.SetHandled()
-			c.OpenURL(href, e)
+			c.openLink(link, href, e)
 		})
 		return
 	}
