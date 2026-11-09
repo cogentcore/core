@@ -1182,3 +1182,27 @@ func TestGridAutoFlowColumnRows(t *testing.T) {
 		assert.Greater(t, y("a2"), y("a1"))
 	})
 }
+
+// TestIframeBox tests the box of an iframe: 300 by 150 by default with a
+// border, of its width and height attributes, without a border for
+// frameborder="0", and of its styles, and that its children (for browsers
+// without frames) are not shown. It had no box (as an inline element
+// without content), so the captchas of bot checks were not shown.
+func TestIframeBox(t *testing.T) {
+	src := `<div style="width: 800px"><iframe id="a" src="https://example.com/"></iframe><br>` +
+		`<iframe id="b" width="400" height="200" frameborder="0" src="x"></iframe><br>` +
+		`<iframe id="c" style="width: 500px; height: 100px; border: 0" src="y"><p>no frames</p></iframe></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		for _, id := range []string{"a", "b", "c"} {
+			require.NotNil(t, ws[id], id)
+		}
+		size := func(id string) math32.Vector2 { return ws[id].Geom.Size.Actual.Total }
+		assert.InDelta(t, 304*dp, size("a").X, 1)
+		assert.InDelta(t, 154*dp, size("a").Y, 1)
+		assert.InDelta(t, 400*dp, size("b").X, 1)
+		assert.InDelta(t, 200*dp, size("b").Y, 1)
+		assert.InDelta(t, 500*dp, size("c").X, 1)
+		assert.InDelta(t, 100*dp, size("c").Y, 1)
+		assert.Equal(t, 0, ws["c"].NumChildren(), "its children are not shown")
+	})
+}

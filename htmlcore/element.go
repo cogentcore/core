@@ -117,6 +117,8 @@ func handleElement(ctx *Context) {
 		handleSVG(ctx)
 	case "img":
 		newWidget = handleImage(ctx, tag)
+	case "iframe":
+		newWidget = handleIframe(ctx)
 	case "table":
 		newWidget = handleTable(ctx)
 	case "th", "td":
