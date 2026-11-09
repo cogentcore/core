@@ -766,6 +766,14 @@ func (sc *Scene) runDeferred() {
 // [WidgetBase.OnShow] updating as needed.
 func (wb *WidgetBase) DeferShown() {
 	wb.Defer(func() {
+		// Before its scene has been shown, its widgets are not sent the
+		// show event, as the scene sends it to all of them once it is, and
+		// they cannot be updated from other goroutines before then (see
+		// [WidgetBase.AsyncLockIfShown]), as for the tab that is selected
+		// in a window that is about to be shown.
+		if wb.Scene == nil || !wb.Scene.hasShown.Load() {
+			return
+		}
 		wb.Shown()
 	})
 }

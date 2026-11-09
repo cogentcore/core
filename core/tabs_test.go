@@ -153,3 +153,28 @@ func TestTabsNewClick(t *testing.T) {
 		assert.Equal(t, ts.NumTabs(), 3)
 	})
 }
+
+// TestTabsShowBeforeShown tests that the widgets of a tab that is selected
+// before its window is shown get the show event once its scene has been
+// shown, when they can be updated from other goroutines
+// (AsyncLockIfShown), not before (as the scripts of the pages of the tabs
+// of the web browser of Cogent, which were stopped as their page seemed
+// to be gone).
+func TestTabsShowBeforeShown(t *testing.T) {
+	b := NewBody()
+	ts := NewTabs(b)
+	ts.NewTab("First")
+	second, _ := ts.NewTab("Second")
+	tx := NewText(second).SetText("second")
+	var shows, early int
+	tx.OnShow(func(e events.Event) {
+		shows++
+		if !tx.Scene.hasShown.Load() {
+			early++
+		}
+	})
+	ts.SelectTabIndex(1)
+	b.RenderImage()
+	assert.Equal(t, 0, early, "shown before its scene was")
+	assert.GreaterOrEqual(t, shows, 1)
+}
