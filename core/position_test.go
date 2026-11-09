@@ -440,3 +440,36 @@ func TestPositionEmptyParentRendered(t *testing.T) {
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0xff, 0, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the banner over the fill")
 }
+
+// TestSceneWidgetAt tests that the widget at a position is the one that
+// gets the events there: one rendered over the others, and none in one
+// that is not rendered (as for visibility: hidden in CSS).
+func TestSceneWidgetAt(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+	under := fixedFrame(b, 200, 100)
+	over := fixedFrame(b, 50, 50)
+	over.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+	})
+	hidden := fixedFrame(b, 50, 50)
+	hidden.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(100)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Opacity = 0
+		s.Abilities = 0
+	})
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		at := func(w *Frame) Widget {
+			return b.Scene.WidgetAt(w.Geom.TotalBBox.Min.Add(image.Pt(5, 5)))
+		}
+		assert.Equal(t, Widget(over), at(over), "the widget rendered over the other")
+		assert.Equal(t, Widget(under), at(hidden), "not the hidden one over it")
+		assert.Nil(t, b.Scene.WidgetAt(image.Pt(-10, -10)))
+	})
+}

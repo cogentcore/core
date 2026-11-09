@@ -839,6 +839,23 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 	})
 }
 
+// WidgetAt returns the widget that mouse events at the given position (in
+// the dots of the scene) go to first: the deepest one rendered on top
+// there (see [sortByRenderLayer]), as for elementFromPoint in the scripts
+// of web pages. It returns nil if there is none.
+func (sc *Scene) WidgetAt(pos image.Point) Widget {
+	em := &sc.Events
+	saved := em.mouseInBBox
+	em.mouseInBBox = nil
+	em.getMouseInBBox(sc, pos)
+	ws := sortByRenderLayer(em.mouseInBBox)
+	em.mouseInBBox = saved
+	if len(ws) == 0 {
+		return nil
+	}
+	return ws[len(ws)-1]
+}
+
 // sortByRenderLayer sorts the given widgets under the mouse (in the order
 // of the tree, with those that are handled first last) by the order in
 // which they are rendered (see [WidgetBase.renderOrder]), so that a widget
