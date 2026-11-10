@@ -5,7 +5,6 @@
 package htmlcore
 
 import (
-	"github.com/andybalholm/cascadia"
 	"io"
 	"net/http"
 	neturl "net/url"
@@ -13,8 +12,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/andybalholm/cascadia"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -265,10 +267,14 @@ type pageState struct {
 	// curContainer is the condition of the @container rule whose rules
 	// are being added, containerQueried has the elements with declarations
 	// in such rules, and containers has the frames of the containers by
-	// their elements (see [Context.containerMatches]).
+	// their elements (see [Context.containerMatches]); keptContainers has
+	// the sizes that they start with (see [Context.KeepContainerSizes]),
+	// and containerMu guards the sizes of the containers in containers.
 	curContainer     *containerCond
 	containerQueried map[*html.Node]bool
 	containers       map[*html.Node]*containerFrame
+	keptContainers   map[*html.Node]containerSizes
+	containerMu      sync.Mutex
 
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see

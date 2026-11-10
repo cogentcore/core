@@ -430,6 +430,41 @@ func TestContainerUnits(t *testing.T) {
 		})
 }
 
+// TestKeepContainerSizes tests that the containers of a page that is read
+// again with the sizes of those of its last reading (see
+// [Context.KeepContainerSizes]) style the elements in them for those
+// sizes before they are laid out, not for the viewport, as the panels of
+// repositories of github.com, of font-size: 1cqw, which were shown much
+// larger each time that the scripts of the page changed it.
+func TestKeepContainerSizes(t *testing.T) {
+	src := `<div style="container-type: inline-size; width: 200px"><div id="text" style="font-size: 10cqw">text</div></div>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(src))
+	require.NoError(t, err)
+	fontSize := func(bd *core.Body) float32 {
+		var size float32
+		bd.WalkDown(func(k tree.Node) bool {
+			if wb := core.AsWidget(k); wb != nil && wb.Property("id") == "text" {
+				size = wb.Styles.Font.Size.Dots
+			}
+			return tree.Continue
+		})
+		return size
+	}
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var want float32
+	bd.RenderImage(func() {}, func() { want = fontSize(bd) })
+	require.NotZero(t, want)
+
+	again := ctx.NewPage()
+	again.KeepContainerSizes(ctx)
+	bd2 := core.NewBody()
+	require.NoError(t, ReadDocument(again, bd2, doc))
+	bd2.StyleTree() // before it is laid out
+	assert.InDelta(t, want, fontSize(bd2), 0.5, "10% of the width of its container, before it is laid out")
+}
+
 // TestSVGHeightAspect tests that an svg with a height and no width is as
 // wide as the aspect ratio of its view box makes it (as the logos of
 // github.com, which were as wide as their container).

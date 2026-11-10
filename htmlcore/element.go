@@ -204,7 +204,10 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 	case isBlockDisplay(display) || tag == "body" || strings.HasPrefix(display, "inline-"):
 		if container, inline := ctx.isContainer(ctx.Node); container {
 			w := New[containerFrame](ctx)
-			w.inline = inline
+			w.inline, w.ctx = inline, ctx
+			if ks, ok := ctx.keptContainers[ctx.Node]; ok {
+				w.size, w.prev = ks.size, ks.prev
+			}
 			if ctx.containers == nil {
 				ctx.containers = map[*html.Node]*containerFrame{}
 			}
