@@ -93,6 +93,16 @@ func TestReadXML(t *testing.T) {
 			AddStop(errors.Log1(colors.FromHex("#f31")), 0.6, 1).
 			AddStop(errors.Log1(colors.FromHex("#bbbff6")), 1.2)},
 
+		// an animation in it (as the spinners of GitHub), which is skipped
+		{`<linearGradient id="animated">
+		<stop offset="0.6" stop-color="#f31" />
+		<animateTransform attributeName="gradientTransform" type="rotate" from="0" to="360" dur="1s" repeatCount="indefinite"></animateTransform>
+		<stop offset="1.2" stop-color="#bbbff6"><animate attributeName="offset" values="0;1" dur="1s" /></stop>
+	  </linearGradient>`, NewLinear().
+			SetEnd(math32.Vec2(1, 0)).
+			AddStop(errors.Log1(colors.FromHex("#f31")), 0.6).
+			AddStop(errors.Log1(colors.FromHex("#bbbff6")), 1.2)},
+
 		{`<linearGradient id="something" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />
 		<stop offset="95%" stop-color="red" />

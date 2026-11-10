@@ -20,8 +20,21 @@ import (
 // read again whole, whose new widgets are only shown with it held), which
 // takes about 0.1ms for each (as for theguardian.com, whose body of 5000
 // elements took 650ms, while the widgets of all of it were shown and laid
-// out in about 100ms).
+// out in about 100ms). On a page of more elements, a third of them may be
+// read again (see [Context.rereadLimit]).
 const maxReread = 1000
+
+// rereadLimit returns the number of elements beyond which the elements to
+// read again are read with the rest of the page: [maxReread], or a third
+// of the elements of a large page, which takes far longer to read again
+// whole (as the pull request files of GitHub, of 35000 elements, read
+// again whole in 9s for each 3000 elements of the diffs that it loads as
+// it is scrolled, which seemed stuck).
+func (c *Context) rereadLimit(root *html.Node) int {
+	n := 0
+	walkElements(root, func(*html.Node) { n++ })
+	return max(maxReread, n/3)
+}
 
 // recordSheet records the given style or link element as one whose style
 // sheet has been added (or not, as for its media), so that a page with a
@@ -49,7 +62,7 @@ func (c *Context) recordSheet(n *html.Node) {
 // widgets of those that are not read again are styled again. It returns
 // false, leaving the page as it was, if the changes can not be made so,
 // for the page to be read again: for a new style sheet, a change of the
-// html element itself, or more elements to read than [maxReread].
+// html element itself, or more elements to read than [Context.rereadLimit].
 func (c *Context) Reread(self, children []*html.Node) bool {
 	if len(self) == 0 && len(children) == 0 {
 		return true
@@ -121,7 +134,7 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	}
 	// the elements to read are not too many, have no new style sheets,
 	// and their widgets are all in their frames, which have only theirs
-	size := 0
+	size, limit := 0, c.rereadLimit(root)
 	for _, r := range roots {
 		ok := true
 		walkElements(r, func(n *html.Node) {
@@ -135,7 +148,7 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 				}
 			}
 		})
-		if !ok || size > maxReread {
+		if !ok || size > limit {
 			return false
 		}
 		c.elementWidgets[r][0].AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {

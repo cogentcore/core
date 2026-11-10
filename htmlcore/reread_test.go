@@ -198,6 +198,19 @@ func TestReread(t *testing.T) {
 			return nil, []*html.Node{b}
 		})
 	})
+	t.Run("large page", func(t *testing.T) {
+		// on a page of many elements, more of them may be read again than
+		// on a small one (as the diffs that the pull requests of GitHub
+		// load into a page of 35000 elements), which is still far faster
+		// than reading it all again
+		rest := `<div id="rest">` + strings.Repeat(`<div><span>r</span><span>s</span></div>`, 2*maxReread) + `</div>`
+		big := strings.Replace(page, `<div id="after"`, `<div id="big">`+strings.Repeat(`<span>x</span>`, maxReread)+`</div>`+rest+`<div id="after"`, 1)
+		testReread(t, big, true, func(doc *html.Node) (self, children []*html.Node) {
+			b := elementByID(doc, "big")
+			appendHTML(t, b, `<span>y</span>`)
+			return nil, []*html.Node{b}
+		})
+	})
 	t.Run("style sheet", func(t *testing.T) {
 		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
 			m := elementByID(doc, "main")
