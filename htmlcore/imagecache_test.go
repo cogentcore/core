@@ -108,3 +108,57 @@ func TestImageCacheLRU(t *testing.T) {
 	assert.Equal(t, 800, ic.bytes)
 	assert.Len(t, ic.images, 2)
 }
+
+// TestImageCacheReads tests that the images of the current read are kept
+// over those of the reads before it, and that when they do not all fit
+// the rest are not cached, so that a page read again finds most of its
+// images (a plain LRU, read in the same order each time, found none, as
+// the photos of nytimes.com, decoded again in each read of the page), and
+// that the URLs of images that failed are kept.
+func TestImageCacheReads(t *testing.T) {
+	newImage := func() image.Image { return image.NewRGBA(image.Rect(0, 0, 10, 10)) } // 400 bytes
+	ic := NewImageCache(1000)
+	read := func() (hits int) {
+		ic.NewRead()
+		for _, u := range []string{"a", "b", "c", "d"} { // 1600 bytes
+			if ic.Get(u) != nil {
+				hits++
+				continue
+			}
+			ic.Add(u, newImage())
+		}
+		return hits
+	}
+	assert.Equal(t, 0, read())
+	assert.Equal(t, 2, read(), "the first two of the page are kept")
+	assert.Equal(t, 2, read())
+
+	// the images of an earlier read make room for those of a new page
+	ic.NewRead()
+	ic.Add("e", newImage())
+	assert.NotNil(t, ic.Get("e"))
+
+	assert.False(t, ic.Failed("x"))
+	ic.AddFailed("x")
+	assert.True(t, ic.Failed("x"))
+	ic.Reset()
+	assert.False(t, ic.Failed("x"))
+}
+
+// TestImageCacheFailed tests that an image that can not be decoded is not
+// gotten again when the page is read again.
+func TestImageCacheFailed(t *testing.T) {
+	fsys := fstest.MapFS{"bad.png": {Data: []byte("not an image")}}
+	gets := map[string]int{}
+	ctx := NewContext()
+	ctx.ImageCache = NewImageCache(1 << 20)
+	ctx.GetURL = func(url string) (*http.Response, error) {
+		gets[url]++
+		return GetURLFromFS(fsys, url)
+	}
+	for range 2 {
+		ctx.PageURL = "/page"
+		assert.NoError(t, ReadHTMLString(ctx, core.NewBody(), `<img src="bad.png">`))
+	}
+	assert.Equal(t, map[string]int{"/bad.png": 1}, gets)
+}

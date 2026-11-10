@@ -361,9 +361,15 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 		if im := cache.Get(key); im != nil {
 			return im, nil
 		}
+		if cache.Failed(key) {
+			return nil, nil // (not tried again)
+		}
 	}
 	resp, err := getImage(ctx, src)
 	if err != nil {
+		if cache != nil {
+			cache.AddFailed(key)
+		}
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -371,6 +377,9 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 	if err != nil {
 		// browsers just do not show images that are not supported
 		slog.Debug("error loading image", "url", src, "err", err)
+		if cache != nil {
+			cache.AddFailed(key)
+		}
 		return nil, nil
 	}
 	if cache != nil {
