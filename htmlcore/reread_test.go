@@ -228,3 +228,33 @@ func TestReread(t *testing.T) {
 		})
 	})
 }
+
+// TestRereadFallback tests the reasons that a reread and a restyle report
+// when they can not make their changes, for the page to be read whole (as
+// the verbose console of cogent web shows, as nytimes.com was read whole
+// about 20 times as it loads, and its elements resized each time).
+func TestRereadFallback(t *testing.T) {
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>.gone { display: none }</style></head><body>`+
+		`<div id="big">`+strings.Repeat(`<span>x</span>`, maxReread)+`</div><div id="a">a</div></body></html>`))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	bd.RenderImage(func() {
+		bd.AsyncLock()
+		defer bd.AsyncUnlock()
+		big := elementByID(doc, "big")
+		appendHTML(t, big, `<span>y</span>`)
+		assert.False(t, ctx.Reread(nil, []*html.Node{big}))
+		assert.Contains(t, ctx.Fallback(), "elements to read again")
+		assert.Contains(t, ctx.Fallback(), "div#big")
+
+		a := elementByID(doc, "a")
+		setAttr(a, "class", "gone")
+		assert.False(t, ctx.Restyle([]*html.Node{a}))
+		assert.Contains(t, ctx.Fallback(), `display of div#a.gone from "block" to "none"`)
+		setAttr(a, "class", "")
+		assert.True(t, ctx.Restyle([]*html.Node{a}))
+		assert.Equal(t, "", ctx.Fallback())
+	})
+}

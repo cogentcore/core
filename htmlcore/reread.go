@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,39 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
+
+// Fallback returns why the last [Context.Reread] or [Context.Restyle]
+// could not make its changes, for the page to be read again whole (as for
+// the verbose console of an app), or "" if it could.
+func (c *Context) Fallback() string {
+	return c.fallback
+}
+
+// noChange records the given reason why the changes of the page can not
+// be made (see [Context.Fallback]), and returns false.
+func (c *Context) noChange(why string) bool {
+	c.fallback = why
+	return false
+}
+
+// describeNode returns a short description of the given element, as
+// div#id.class, for the reasons of [Context.Fallback].
+func describeNode(n *html.Node) string {
+	if n == nil {
+		return "nothing"
+	}
+	if n.Type != html.ElementNode {
+		return "a text"
+	}
+	d := n.Data
+	if id := GetAttr(n, "id"); id != "" {
+		d += "#" + id
+	}
+	if cl := strings.Fields(GetAttr(n, "class")); len(cl) > 0 {
+		d += "." + cl[0]
+	}
+	return d
+}
 
 // maxReread is the number of elements beyond which the elements that
 // [Context.Reread] would read again are read with the rest of the page:
@@ -69,8 +103,9 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	if len(self) == 0 && len(children) == 0 {
 		return true
 	}
+	c.fallback = ""
 	if c.reading || c.rest != nil || c.elementWidgets == nil {
-		return false
+		return c.noChange("the page is being read")
 	}
 	// the changed elements (that of a text node is its parent, whose
 	// children have changed)
@@ -89,12 +124,12 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 			return true
 		}
 		if n == nil || n.Type != html.ElementNode {
-			return false
+			return c.noChange("a change of the document itself")
 		}
 		if root == nil {
 			root = rootNode(n)
 		} else if rootNode(n) != root {
-			return false
+			return c.noChange("changes of different documents")
 		}
 		// (an element that has changed itself may have another box, as
 		// for its display, in that of its parent)
@@ -104,7 +139,7 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		}
 		r := c.rereadRoot(from)
 		if r == nil {
-			return false
+			return c.noChange("no element of " + describeNode(from) + " can be read again alone")
 		}
 		roots = append(roots, r)
 		if own {
@@ -153,8 +188,11 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 				}
 			}
 		})
-		if !ok || size > limit {
-			return false
+		if !ok {
+			return c.noChange("a new style sheet, or an element moved, in " + describeNode(r))
+		}
+		if size > limit {
+			return c.noChange(fmt.Sprintf("%d elements to read again (more than %d), in %s", size, limit, describeNode(r)))
 		}
 		c.elementWidgets[r][0].AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			if n := ownNode(cw); n != nil && rootNode(n) == root && !inRoots(n) {
@@ -163,12 +201,12 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 			return ok
 		})
 		if !ok {
-			return false
+			return c.noChange("widgets of other elements in those of " + describeNode(r))
 		}
 	}
 	u, ok := c.updateDecls(changed, roots, inRoots)
 	if !ok {
-		return false
+		return false // (with the fallback of updateDecls)
 	}
 	for n := range u.freeChanged {
 		selfDirty[n] = true

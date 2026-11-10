@@ -811,7 +811,7 @@ type varValue struct {
 // customIndex is an index of the custom properties of the sorted
 // declarations of an element (see [Context.customDecl]).
 type customIndex struct {
-	ds []*cssDecl           // the declarations that it is of
+	ds []*cssDecl          // the declarations that it is of
 	m  map[string]*cssDecl // the last declaration of each custom property
 }
 

@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
@@ -198,6 +199,7 @@ type nodeStyles struct {
 // or a table), or one of an element that has no widget of its own (as an
 // inline element in a run of text).
 func (c *Context) Restyle(changed []*html.Node) bool {
+	c.fallback = ""
 	if len(changed) == 0 {
 		return true
 	}
@@ -290,21 +292,23 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		}
 		return true
 	}
+	tooMany := fmt.Sprintf("more than %d elements to style again", maxRestyled)
 	for _, n := range whole {
 		if !add(n) {
-			return nil, false
+			return nil, c.noChange(tooMany)
 		}
 	}
 	for _, n := range changed {
 		if n == nil || n.Type != html.ElementNode || rootNode(n) != root {
-			return nil, false
+			return nil, c.noChange("a change that is not of an element of the page")
 		}
 		if (n.Namespace != "" || inForeign(n)) && !isFree(n) {
-			return nil, false // svg and math, which are read differently
+			// svg and math, which are read differently
+			return nil, c.noChange("a change in svg or math: " + describeNode(n))
 		}
 		for s := n; s != nil; s = s.NextSibling {
 			if !add(s) {
-				return nil, false
+				return nil, c.noChange(tooMany)
 			}
 		}
 	}
@@ -314,7 +318,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		// the elements that :has() selectors select, which may be any,
 		// whose matches have changed
 		if !c.relationalChanges(root, add) {
-			return nil, false
+			return nil, c.noChange("the elements that :has() selects")
 		}
 	}
 	// the declarations as they were (all of them first, as those of an
@@ -374,7 +378,8 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			}
 			if !isFree(n) {
 				undo()
-				return nil, false // its pseudo-element, which may be a widget
+				// its pseudo-element, which may be a widget
+				return nil, c.noChange("a change of the ::" + kind + " of " + describeNode(n))
 			}
 			c.setPseudo(n, kind, nd, len(nd) > 0)
 			pseudoChanged[n] = true
@@ -395,23 +400,28 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			continue
 		}
 		ws := c.elementWidgets[n]
-		if c.displayOf(n) != oldDisplay[n] || (len(ws) == 0 && !c.undisplayed(n)) {
+		if d := c.displayOf(n); d != oldDisplay[n] {
 			undo()
-			return nil, false
+			return nil, c.noChange(fmt.Sprintf("display of %s from %q to %q", describeNode(n), oldDisplay[n], d))
+		}
+		if len(ws) == 0 && !c.undisplayed(n) {
+			undo()
+			return nil, c.noChange(fmt.Sprintf("%s of %s, which has no widget of its own", strings.Join(props, ", "), describeNode(n)))
 		}
 		for _, p := range props {
 			if !c.restylable(n, p) {
 				undo()
-				return nil, false
+				return nil, c.noChange(fmt.Sprintf("%s of %s", p, describeNode(n)))
 			}
 			u.layout = u.layout || !paintProperties[p]
 		}
 		u.widgets = append(u.widgets, ws...)
 	}
 	for _, n := range whole {
-		if c.displayOf(n) != oldDisplay[n] {
+		if d := c.displayOf(n); d != oldDisplay[n] {
 			undo()
-			return nil, false // it may not have a frame of its own
+			// it may not have a frame of its own
+			return nil, c.noChange(fmt.Sprintf("display of %s from %q to %q", describeNode(n), oldDisplay[n], d))
 		}
 	}
 	// the declarations of the elements, with those of their attributes, as

@@ -252,6 +252,10 @@ type pageState struct {
 	// elements with many declarations (see [Context.customDecl]).
 	customIndexes map[*html.Node]*customIndex
 
+	// fallback is why the last Reread or Restyle could not make its
+	// changes (see [Context.Fallback]).
+	fallback string
+
 	// varMemo has the values of the custom properties of elements, as
 	// they are inherited, for var() (see [Context.customProperty]). It is
 	// cleared when the declarations of any element change.
