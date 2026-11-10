@@ -1286,3 +1286,16 @@ func TestVisibleInHidden(t *testing.T) {
 			assert.False(t, in(hw, "hid"), "the hidden item does not")
 		})
 }
+
+// TestZeroHeightFlexEnd tests that a flex row of a height of 0 is that high,
+// with its items at its end, above it, as in CSS (as the edition bar of
+// nytimes.com, which was as high as its content, over the logo below it).
+func TestZeroHeightFlexEnd(t *testing.T) {
+	widgetsByID(t, `<section id="s" style="display: flex; height: 0; align-items: flex-end"><div id="c"><div>Today's</div><div>Paper</div></div></section><div id="after">after</div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			s, c := ws["s"].Geom, ws["c"].Geom
+			assert.Less(t, s.Size.Actual.Total.Y, 2*dp, "of a height of 0")
+			assert.InDelta(t, s.Pos.Total.Y+s.Size.Actual.Total.Y, c.Pos.Total.Y+c.Size.Actual.Total.Y, 2, "its item ends at its end")
+			assert.InDelta(t, s.Pos.Total.Y+s.Size.Actual.Total.Y, ws["after"].Geom.Pos.Total.Y, 2, "the next block is right after it")
+		})
+}

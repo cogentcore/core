@@ -2771,6 +2771,14 @@ func (fr *Frame) positionCellsGrid() {
 	})
 }
 
+// fixedSingleLine returns whether the frame is a row of one line (of the
+// given number of lines) whose height is fixed, so that its items that are
+// higher are aligned in it as they overflow it: its overflow is hidden in
+// the layout but not clipped (as a box of a fixed height in CSS).
+func (fr *Frame) fixedSingleLine(lines int) bool {
+	return lines <= 1 && fr.Styles.Overflow.Y == styles.OverflowHidden && fr.Styles.NoClip && fr.Styles.Max.Y.Dots > 0
+}
+
 func (fr *Frame) positionCellsMainX() {
 	// todo: can break apart further into Flex rows
 	gap := fr.layout.Gap
@@ -2815,6 +2823,16 @@ func (fr *Frame) positionCellsMainX() {
 			}
 		}
 		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items, crosses[min(line, len(crosses)-1)])
+		if fr.fixedSingleLine(len(crosses)) {
+			// an item higher than a row of a fixed height (its overflow is
+			// hidden in the layout, but not clipped) is aligned in the row,
+			// out of it, as in CSS (as the edition bar of nytimes.com, of a
+			// height of 0, with its content at its end, above it)
+			if extra := sz.Actual.Content.Y - cwb.Geom.Size.Actual.Total.Y; extra < 0 {
+				f := styles.AlignFactor(styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self))
+				cwb.Geom.RelPos.Y = pos.Y + math32.Floor(f*extra)
+			}
+		}
 		if baselines != nil && styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self) == styles.Baseline {
 			// the baselines of the items of the line with text are at the
 			// same place, within the line; the others are at its end

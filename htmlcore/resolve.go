@@ -971,6 +971,12 @@ func (r *resolver) sizes() {
 			// overflows it visibly (as the instructions of the reCAPTCHA
 			// challenge, whose text is higher than them): its overflow is
 			// hidden in the layout, but not clipped (NoClip)
+			if r.dots(&mx) <= 0 {
+				// a height of 0 (as the edition bar of nytimes.com, whose
+				// content hangs above it, aligned at its end), which is not
+				// a Max in core (that is none)
+				mx = units.Dot(0.001)
+			}
 			s.Max.Y = mx
 			s.Overflow.Y = styles.OverflowHidden
 		}
