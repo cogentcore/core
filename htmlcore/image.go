@@ -6,7 +6,6 @@ package htmlcore
 
 import (
 	"bytes"
-	svgpkg "cogentcore.org/core/svg"
 	"image"
 	"io"
 	"log/slog"
@@ -15,6 +14,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"cogentcore.org/core/styles"
+	svgpkg "cogentcore.org/core/svg"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -241,6 +243,11 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		newWidget = svg
 	} else {
 		img = New[core.Image](ctx)
+		// stretched to its box, as for object-fit: fill, the default of
+		// CSS (it kept its aspect ratio, as the tiles of the challenges of
+		// reCAPTCHA, of the image of all of the tiles, which showed the
+		// wrong parts of it); before the styler of its CSS (object-fit)
+		img.Styler(func(s *styles.Style) { s.ObjectFit = styles.FitFill })
 		img.NaturalDp = true  // in CSS px (see core.Image.NaturalDp)
 		img.Density = density // of its srcset candidate
 		img.SetTooltip(alt)

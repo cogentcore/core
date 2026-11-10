@@ -623,6 +623,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "grid-template-columns":
 		cols := gridColumns(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Columns = cols })
+	case "object-fit":
+		fit, ok := map[string]styles.ObjectFits{"fill": styles.FitFill, "contain": styles.FitContain, "cover": styles.FitCover,
+			"none": styles.FitNone, "scale-down": styles.FitScaleDown}[lval]
+		if !ok {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.ObjectFit = fit })
 	case "opacity":
 		f, err := strconv.ParseFloat(lval, 32)
 		if err != nil {

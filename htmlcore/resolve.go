@@ -754,6 +754,28 @@ func (r *resolver) sizes() {
 	// shown in CSS, but it is clipped in core, so the height is only a
 	// minimum unless the overflow is clipped anyway.
 	parentDefinite := pbs == nil || pbs.definiteHeight
+	if pbs != nil && pbs.display == anonymousInline {
+		// An element in a run of inline content (as an image), in the
+		// anonymous frame of the run, whose height is that of its line:
+		// the percentages of its heights and of its top and bottom are of
+		// its containing block, the block that the run is in, as in CSS
+		// (as the tiles of the challenges of reCAPTCHA, images of height:
+		// 300% and top: -100% in wrappers of 126px, of which only the
+		// first row showed).
+		if cbh, ok := r.containingBlockHeight(); ok {
+			for _, h := range []**units.Value{&st.height, &st.minHeight, &st.maxHeight} {
+				if *h != nil && (*h).Unit == units.UnitPh {
+					v := units.Dp((*h).Value * cbh / 100)
+					*h = &v
+				}
+			}
+			for _, side := range []*units.Value{&s.Inset.Top, &s.Inset.Bottom} {
+				if side.Unit == units.UnitPh {
+					*side = units.Dp(side.Value * cbh / 100)
+				}
+			}
+		}
+	}
 	if pbs == nil && node != nil && node.Parent != nil && node.Parent.Data == "html" {
 		// The html element (which has no widget) has a definite height,
 		// taken to be that of the viewport, only when it has a height.
@@ -884,6 +906,29 @@ func (r *resolver) sizes() {
 	if st.maxHeight != nil {
 		s.Max.Y = *st.maxHeight
 	}
+}
+
+// containingBlockHeight returns the height in px of the containing block
+// of the element of an anonymous frame of a run of inline content (the
+// block that the run is in), from its height in CSS, if that is an
+// absolute length.
+func (r *resolver) containingBlockHeight() (float32, bool) {
+	pw, _ := r.wb.Parent.(core.Widget)
+	for pw != nil {
+		pbs := r.c.blocks[pw]
+		if pbs == nil || pbs.display != anonymousInline {
+			break
+		}
+		pw, _ = pw.AsWidget().Parent.(core.Widget)
+	}
+	if pw == nil {
+		return 0, false
+	}
+	n, _ := pw.AsWidget().Property("node").(*html.Node)
+	if n == nil {
+		return 0, false
+	}
+	return r.st.env.lengthPx(strings.TrimSpace(r.c.declaration(n, "height")))
 }
 
 // textAlign aligns text and inline rows within their block for text-align.

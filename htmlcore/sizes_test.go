@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
@@ -1355,5 +1356,36 @@ func TestFormControlSizes(t *testing.T) {
 			a := ws["area"]
 			assert.Equal(t, rich.Monospace, a.Styles.Font.Family, "textarea font")
 			assert.InDelta(t, 30*0.6+1.15, a.Geom.Size.Actual.Content.X/a.Styles.UnitContext.FontEm, 0.5, "textarea cols")
+		})
+}
+
+// pngDataURL returns a data URL of a PNG image of the given size.
+func pngDataURL(w, h int) string {
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	var b bytes.Buffer
+	png.Encode(&b, img)
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(b.Bytes())
+}
+
+// TestImageTilePercentages tests an image in a run of inline content (in
+// the anonymous frame of the run) with a percentage height and top, which
+// are of its containing block (the block that the run is in), not of the
+// frame of the run, and that it is stretched to its box (object-fit: fill,
+// the default of CSS), as the tiles of the challenges of reCAPTCHA, images
+// of 300% by 300% at -100% in wrappers of 126px (of which only the first
+// row showed, with the wrong parts of the image).
+func TestImageTilePercentages(t *testing.T) {
+	src := pngDataURL(200, 100)
+	widgetsByID(t, `<div id="w" style="width: 126px; height: 126px; overflow: hidden; position: relative">`+
+		`<img id="i" src="`+src+`" style="position: relative; width: 300%; height: 300%; top: -100%; left: -200%"></div>`+
+		`<img id="contain" src="`+src+`" style="width: 50px; height: 50px; object-fit: contain">`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			w, i := ws["w"], ws["i"]
+			assert.InDelta(t, 378*dp, i.Geom.Size.Actual.Content.Y, 2, "300% of the height of the wrapper")
+			assert.InDelta(t, 378*dp, i.Geom.Size.Actual.Content.X, 2, "300% of its width")
+			assert.InDelta(t, -126*dp, i.Geom.Pos.Total.Y-w.Geom.Pos.Content.Y, 2, "top: -100% of the wrapper")
+			assert.InDelta(t, -252*dp, i.Geom.Pos.Total.X-w.Geom.Pos.Content.X, 2, "left: -200% of the wrapper")
+			assert.Equal(t, styles.FitFill, i.Styles.ObjectFit, "stretched to its box")
+			assert.Equal(t, styles.FitContain, ws["contain"].Styles.ObjectFit, "object-fit: contain")
 		})
 }
