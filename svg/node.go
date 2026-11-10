@@ -78,6 +78,10 @@ type NodeBase struct {
 	// CSSAgg is the aggregated css properties from all higher nodes down to this node.
 	CSSAgg map[string]any `copier:"-" json:"-" xml:"-" set:"-" display:"no-inline"`
 
+	// vars are the custom properties of CSS (--name) of the node, as they
+	// apply to it (see vars.go).
+	vars map[string]string
+
 	// BBox is the bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
 	// VisBBox is intersected and only shows visible portion.
@@ -326,15 +330,21 @@ func (g *NodeBase) Style(sv *SVG) {
 		g.CSSAgg = nil
 	}
 	AggCSS(&g.CSSAgg, g.CSS)
+	var parVars map[string]string
+	if pn, ok := g.Parent.(Node); ok && pn != nil {
+		parVars = pn.AsNodeBase().vars
+	}
+	g.vars = g.customVars(parVars)
+	props := resolveVarsIn(g.Properties, g.vars)
 	g.setColor(sv)
 	ctxt := colors.Context(&nodeContext{sv, g.color})
 	if g.Parent != nil { // && g.Par != sv.Root.This
 		pn := g.Parent.(Node)
 		pp := pn.AsNodeBase().PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetProperties(pp, g.Properties, ctxt)
+		pc.SetProperties(pp, props, ctxt)
 	} else {
-		pc.SetProperties(nil, g.Properties, ctxt)
+		pc.SetProperties(nil, props, ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -381,6 +391,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	if !ok {
 		return false
 	}
+	pmap = resolveVarsIn(pmap, g.vars)
 	pc := &g.Paint
 	ctxt := colors.Context(&nodeContext{sv, g.color})
 	if g.Parent != sv.Root.This {
