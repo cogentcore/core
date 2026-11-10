@@ -16,10 +16,11 @@ on:
 jobs:
 
   build:
-    # 24.04, not latest (26.04), for which ppa:savoury1/ffmpeg4 has no packages,
-    # so that apt installs ffmpeg 7+, without swr_alloc_set_opts, which reisen
-    # (video) uses; remove this when the video package no longer uses reisen
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    env:
+      # the FFmpeg version required by the go-astiav version in go.mod (video)
+      FFMPEG_VERSION: n9.0.2
+      FFMPEG_PATH: /home/runner/ffmpeg
     steps:
     - uses: actions/checkout@v6
 
@@ -34,8 +35,32 @@ jobs:
     - name: Set up Core
       run: go install && core setup
 
-    - name: "Install video dependencies (TODO: move to a command)"
-      run: sudo add-apt-repository ppa:savoury1/ffmpeg4 && sudo apt install libswscale-dev libavcodec-dev libavformat-dev libswresample-dev libavutil-dev libasound2-dev
+    - name: Install audio dependencies (video)
+      run: sudo apt-get install -y libasound2-dev
+
+    # apt does not have the FFmpeg version that go-astiav requires, so it is
+    # built from source, as in the CI of go-astiav, and cached
+    - name: Load FFmpeg cache
+      id: ffmpeg-cache
+      uses: actions/cache@v5
+      with:
+        path: ${{ env.FFMPEG_PATH }}
+        key: ffmpeg-${{ env.FFMPEG_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Build FFmpeg (video)
+      if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get install -y nasm
+        git clone --depth 1 --branch "$FFMPEG_VERSION" https://github.com/FFmpeg/FFmpeg "$RUNNER_TEMP/ffmpeg-src"
+        cd "$RUNNER_TEMP/ffmpeg-src"
+        ./configure --prefix="$FFMPEG_PATH" --enable-shared --disable-static --disable-autodetect --disable-programs --disable-doc
+        make -j"$(nproc)"
+        make install
+
+    - name: Set FFmpeg environment variables
+      run: |
+        echo "PKG_CONFIG_PATH=$FFMPEG_PATH/lib/pkgconfig" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$FFMPEG_PATH/lib" >> $GITHUB_ENV
 
     - name: Build
       run: go build -v ./...
