@@ -403,6 +403,12 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			return nil, false // it may not have a frame of its own
 		}
 	}
+	// the declarations of the elements, with those of their attributes, as
+	// the widgets are styled with them (not the attributes of the elements
+	// then, which the scripts of a page may be changing meanwhile)
+	for _, n := range order {
+		c.declarations(n)
+	}
 	return u, true
 }
 
