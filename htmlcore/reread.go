@@ -32,7 +32,9 @@ const maxReread = 1000
 // it is scrolled, which seemed stuck).
 func (c *Context) rereadLimit(root *html.Node) int {
 	n := 0
-	walkElements(root, func(*html.Node) { n++ })
+	if root != nil {
+		walkElements(root, func(*html.Node) { n++ })
+	}
 	return max(maxReread, n/3)
 }
 
@@ -131,6 +133,9 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 			}
 		}
 		return false
+	}
+	if len(roots) == 0 {
+		return true // (only elements that are not rendered changed)
 	}
 	// the elements to read are not too many, have no new style sheets,
 	// and their widgets are all in their frames, which have only theirs

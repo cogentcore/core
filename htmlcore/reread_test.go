@@ -211,6 +211,15 @@ func TestReread(t *testing.T) {
 			return nil, []*html.Node{b}
 		})
 	})
+	t.Run("unshown only", func(t *testing.T) {
+		// changes of elements that are not rendered only (as a script that
+		// a page changes, between the views of GitHub), which crashed
+		testReread(t, strings.Replace(page, `<div id="after"`, `<script id="s">1</script><div id="after"`, 1), true, func(doc *html.Node) (self, children []*html.Node) {
+			s := elementByID(doc, "s")
+			setAttr(s, "data-x", "1")
+			return []*html.Node{s}, []*html.Node{s}
+		})
+	})
 	t.Run("style sheet", func(t *testing.T) {
 		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
 			m := elementByID(doc, "main")
