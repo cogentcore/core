@@ -185,6 +185,12 @@ type Context struct {
 	// will not be generated.
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
 
+	// OnTransition, if set, is called with the transitions of the
+	// properties of elements that a restyle (as for a change of a class by
+	// a script) starts, for the app to dispatch their transitionend events
+	// when they end (as Google sign-in waits for, to show its next step).
+	OnTransition func(ts []Transition)
+
 	// WidgetHandlers is a list of handler functions for each Widget,
 	// called in sequential order for each widget that is created,
 	// after it has been configured by the existing handlers etc.

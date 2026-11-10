@@ -220,11 +220,17 @@ type declUpdate struct {
 	// freeChanged has the elements read again whose declarations (or
 	// those of their pseudo-elements) have changed.
 	freeChanged map[*html.Node]bool
+
+	// transitions are the transitions of the properties that changed.
+	transitions []Transition
 }
 
 // apply styles the widgets of the update again, and lays them out again
 // if needed.
 func (u *declUpdate) apply(c *Context) {
+	if c.OnTransition != nil && len(u.transitions) > 0 {
+		defer c.OnTransition(u.transitions)
+	}
 	for _, w := range u.widgets {
 		if bs := c.blocks[w]; bs != nil {
 			wb := w.AsWidget()
@@ -378,6 +384,9 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		props := changedProps(old[n], nw)
 		if len(props) == 0 {
 			continue
+		}
+		if oldDisplay[n] != "none" && c.displayOf(n) != "none" {
+			u.transitions = append(u.transitions, transitionsOf(n, nw, props)...)
 		}
 		if isFree(n) {
 			u.freeChanged[n] = true
