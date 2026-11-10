@@ -1203,3 +1203,39 @@ func TestBlockWidthFixedChild(t *testing.T) {
 			assert.InDelta(t, 400*dp, ws["c"].Geom.Size.Actual.Total.X, 2, "its child keeps its width")
 		})
 }
+
+// TestTextTransformAndTruncation tests text-transform, and the lines of
+// text clamped by -webkit-line-clamp and cut by text-overflow: ellipsis
+// (as the cards of the products in the results of google.com, whose
+// titles were not clamped, which made them much higher).
+func TestTextTransformAndTruncation(t *testing.T) {
+	long := strings.Repeat("words that do not fit ", 10)
+	widgetsByID(t, `<div style="width: 200px">`+
+		`<div id="up" style="text-transform: uppercase">Uitverkoop</div>`+
+		`<div id="cap" style="text-transform: capitalize">gesponsorde <b>pro</b>ducten</div>`+
+		`<div id="clamp" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden">`+long+`</div>`+
+		`<div id="cut" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">`+long+`</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			text := func(id string) *core.Text {
+				var tx *core.Text
+				ws[id].WalkDown(func(n tree.Node) bool {
+					if t, ok := n.(*core.Text); ok && tx == nil {
+						tx = t
+					}
+					return tree.Continue
+				})
+				require.NotNil(t, tx, id)
+				return tx
+			}
+			assert.Contains(t, text("up").Text, "UITVERKOOP")
+			assert.Contains(t, text("cap").Text, "Gesponsorde")
+			assert.Contains(t, text("cap").Text, "Pro</b>ducten", "the word continues in the next node")
+			assert.Equal(t, 2, text("clamp").Styles.Text.LineClamp)
+			line := text("up").Geom.Size.Actual.Content.Y // (one line)
+			assert.InDelta(t, 2*line, text("clamp").Geom.Size.Actual.Content.Y, 3, "two lines")
+			cut := text("cut")
+			assert.True(t, cut.Styles.Text.Ellipsis)
+			assert.LessOrEqual(t, cut.Geom.Size.Actual.Total.X, 201*dp, "cut to the width")
+			assert.Greater(t, cut.Geom.Size.Actual.Total.X, 100*dp)
+		})
+}

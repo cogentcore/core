@@ -132,7 +132,20 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return append(c.compileCSS(base+"-top", start), c.compileCSS(base+"-bottom", end)...)
 	case "display":
-		return op(func(st *cssState, s, ps *styles.Style) { st.display = lval })
+		d := legacyDisplay(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { st.display = d })
+	case "-webkit-line-clamp", "line-clamp":
+		n, err := strconv.Atoi(lval)
+		if lval == "none" || lval == "initial" {
+			n, err = 0, nil
+		}
+		if err != nil || n < 0 {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Text.LineClamp = n })
+	case "text-overflow":
+		e := lval == "ellipsis"
+		return op(func(st *cssState, s, ps *styles.Style) { s.Text.Ellipsis = e })
 	case "margin":
 		vals := expandSides(splitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {

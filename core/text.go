@@ -591,7 +591,7 @@ const contentSizingMeasure = 70
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	wraps := tx.Styles.Text.WhiteSpace.HasWordWrap()
+	wraps := tx.wrapsToWidth()
 	if wraps {
 		// as wide as it is on one line (its preferred width), within any Max
 		w := float32(1e6)
@@ -629,6 +629,10 @@ func (tx *Text) SizeUp() {
 // text: the width of its longest word if it wraps, or of its line if not.
 // It is cached for the text and its font size.
 func (tx *Text) minContentWidth() float32 {
+	if tx.cutsToWidth() {
+		// it is cut to its width, down to about its ellipsis
+		return min(tx.Styles.Font.Size.Dots, tx.Geom.Size.Actual.Content.X)
+	}
 	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || tx.Scene == nil || tx.Styles.Font.Size.Dots == 0 {
 		return tx.Geom.Size.Actual.Content.X
 	}
@@ -659,8 +663,20 @@ func longestWordWidth(sc *Scene, st *styles.Style, txt string) float32 {
 	return math32.Ceil(lines.Bounds.Size().X)
 }
 
+// wrapsToWidth returns whether the text is laid out in the width that it
+// is given: it wraps, or it is cut to it (see [Text.cutsToWidth]).
+func (tx *Text) wrapsToWidth() bool {
+	return tx.Styles.Text.WhiteSpace.HasWordWrap() || tx.cutsToWidth()
+}
+
+// cutsToWidth returns whether the text does not wrap and is cut to its
+// width with an ellipsis ([styles.Text.Ellipsis]).
+func (tx *Text) cutsToWidth() bool {
+	return tx.Styles.Text.Ellipsis && !tx.Styles.Text.WhiteSpace.HasWordWrap() && tx.Styles.Text.WhiteSpace != text.WhiteSpacePre
+}
+
 func (tx *Text) SizeDown(iter int) bool {
-	if !tx.Styles.Text.WhiteSpace.HasWordWrap() {
+	if !tx.wrapsToWidth() {
 		return false
 	}
 	sz := &tx.Geom.Size

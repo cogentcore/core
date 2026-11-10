@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -371,7 +373,7 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 		if !pre {
 			t = spaceRun.ReplaceAllString(t, " ")
 		}
-		return html.EscapeString(t)
+		return html.EscapeString(c.transformText(n, t))
 	case xhtml.ElementNode:
 		if c.displayOf(n) == "none" {
 			return ""
@@ -564,4 +566,66 @@ func (c *Context) fontSizePx(n *xhtml.Node) float32 {
 		}
 	}
 	return parent
+}
+
+// textTransform returns the text-transform of the element that the given
+// text node is in, which is inherited ("" for none).
+func (c *Context) textTransform(n *xhtml.Node) string {
+	for p := n.Parent; p != nil && p.Type == xhtml.ElementNode; p = p.Parent {
+		switch v := strings.ToLower(strings.TrimSpace(c.declaration(p, "text-transform"))); v {
+		case "", "inherit", "unset":
+			continue
+		case "none", "initial":
+			return ""
+		default:
+			return v
+		}
+	}
+	return ""
+}
+
+// transformText returns the given text of the given text node transformed
+// by its text-transform: uppercase, lowercase, or capitalize, which makes
+// the first letter of each word uppercase (as the headings of the results
+// of google.com, as "Gesponsorde Producten").
+func (c *Context) transformText(n *xhtml.Node, t string) string {
+	switch c.textTransform(n) {
+	case "uppercase":
+		return strings.ToUpper(t)
+	case "lowercase":
+		return strings.ToLower(t)
+	case "capitalize":
+		rs := []rune(t)
+		start := !continuesWord(n) // a word starts at the start of the text
+		for i, r := range rs {
+			if unicode.IsSpace(r) {
+				start = true
+				continue
+			}
+			if start && unicode.IsLetter(r) {
+				rs[i] = unicode.ToTitle(r)
+			}
+			start = false
+		}
+		return string(rs)
+	}
+	return t
+}
+
+// continuesWord returns whether the given text node continues a word that
+// the text before it in its parent ends with (as "<b>Ge</b>sponsord").
+func continuesWord(n *xhtml.Node) bool {
+	p := n.PrevSibling
+	for p != nil && p.Type == xhtml.CommentNode {
+		p = p.PrevSibling
+	}
+	if p == nil {
+		return false
+	}
+	t := nodeText(p)
+	if t == "" {
+		return false
+	}
+	r, _ := utf8.DecodeLastRuneInString(t)
+	return !unicode.IsSpace(r)
 }

@@ -259,10 +259,30 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 			if ds[i].invalid {
 				return ""
 			}
+			if prop == "display" {
+				return legacyDisplay(ds[i].Value)
+			}
 			return ds[i].Value
 		}
 	}
 	return ""
+}
+
+// legacyDisplay returns the display for the given value of the display
+// property, which is that of the prefixed legacy values: -webkit-box (as
+// with -webkit-line-clamp, in a column) is a block, and -webkit-flex flex.
+func legacyDisplay(v string) string {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "-webkit-box", "-moz-box":
+		return "block"
+	case "-webkit-inline-box", "-moz-inline-box":
+		return "inline-block"
+	case "-webkit-flex":
+		return "flex"
+	case "-webkit-inline-flex":
+		return "inline-flex"
+	}
+	return v
 }
 
 // lastDeclaration returns the property and value of the declaration of

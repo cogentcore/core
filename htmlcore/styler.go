@@ -209,6 +209,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			if ps != nil { // white-space and text-align are inherited in CSS
 				s.Text.WhiteSpace = ps.Text.WhiteSpace
 				s.Text.Align = ps.Text.Align
+				// the lines of the text of a block are clamped by it, and
+				// its text is cut with an ellipsis when it clips it
+				s.Text.LineClamp = ps.Text.LineClamp
+				s.Text.Ellipsis = ps.Text.Ellipsis && ps.Overflow.X != styles.OverflowVisible
 			}
 		}
 		if tag != "" && isText { // texts for elements (as pre) fill their blocks

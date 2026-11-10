@@ -41,6 +41,16 @@ type Text struct { //types:add
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace text.WhiteSpaces
 
+	// LineClamp (not inherited), if positive, is the most lines that the
+	// text has: the text after them is cut, and the last line ends with an
+	// ellipsis (…), as the -webkit-line-clamp property of CSS.
+	LineClamp int
+
+	// Ellipsis (not inherited) is whether text that does not wrap and is
+	// wider than its box is cut to fit in it, ending with an ellipsis (…),
+	// as text-overflow: ellipsis in CSS.
+	Ellipsis bool
+
 	// Direction specifies the default text direction, which can be overridden if the
 	// unicode text is typically written in a different direction.
 	Direction rich.Directions
@@ -98,6 +108,8 @@ func (ts *Text) SetText(tsty *text.Style) {
 	tsty.AlignV = ts.AlignV
 	tsty.LineHeight = ts.LineHeight
 	tsty.WhiteSpace = ts.WhiteSpace
+	tsty.LineClamp = ts.LineClamp
+	tsty.Ellipsis = ts.Ellipsis
 	tsty.Direction = ts.Direction
 	tsty.Indent = ts.Indent
 	tsty.Hanging = ts.Hanging
@@ -112,6 +124,8 @@ func (ts *Text) SetFromText(tsty *text.Style) {
 	ts.AlignV = tsty.AlignV
 	ts.LineHeight = tsty.LineHeight
 	ts.WhiteSpace = tsty.WhiteSpace
+	ts.LineClamp = tsty.LineClamp
+	ts.Ellipsis = tsty.Ellipsis
 	ts.Direction = tsty.Direction
 	ts.Indent = tsty.Indent
 	ts.Hanging = tsty.Hanging
