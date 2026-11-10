@@ -355,6 +355,11 @@ func (r *resolver) lineHeight() {
 	default:
 		if f, err := strconv.ParseFloat(lh, 32); err == nil {
 			s.Text.LineHeight = float32(f)
+		} else if f, ok := unitlessCalc(lh); ok {
+			// a number of calc() (as calc(1.25 / .875), the line height of
+			// the small text of Tailwind, which was taken to be in px: the
+			// text was 1.4px high, cut off by its boxes)
+			s.Text.LineHeight = f
 		} else if v, ok := st.env.length(lh, units.UnitEm); ok {
 			if v.Unit == units.UnitEm {
 				s.Text.LineHeight = v.Value / 100 // from %
@@ -366,6 +371,16 @@ func (r *resolver) lineHeight() {
 			}
 		}
 	}
+}
+
+// unitlessCalc returns the value of the given calc() expression of numbers
+// only (no lengths or percentages), and whether it is one.
+func unitlessCalc(v string) (float32, bool) {
+	inner, ok := strings.CutPrefix(strings.ToLower(strings.TrimSpace(v)), "calc(")
+	if !ok || strings.ContainsAny(inner, "abcdefghijklmnopqrstuvwxyz%") {
+		return 0, false
+	}
+	return calcPx(v)
 }
 
 // itemGrowth sets how the widget grows and shrinks in the formatting context

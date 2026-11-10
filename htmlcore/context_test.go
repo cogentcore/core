@@ -1138,3 +1138,16 @@ func TestSVGTransform(t *testing.T) {
 		}
 	}
 }
+
+// TestLineHeightCalc tests a line height of a calc() of numbers, as that of
+// the small text of Tailwind 4 (calc(1.25 / .875), through var()), which
+// is a number, not a length in px (the text was 1.4px high, cut off by its
+// boxes on fietsenwinkel.nl).
+func TestLineHeightCalc(t *testing.T) {
+	widgetsByID(t, `<style>:root { --lh: calc(1.25 / .875) } .text-sm { font-size: 14px; line-height: var(--tw-leading, var(--lh)) }</style>`+
+		`<p id="p" class="text-sm">text</p>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 1.25/0.875, ws["p"].Styles.Text.LineHeight, 0.01)
+			assert.InDelta(t, 20*dp, ws["p"].Geom.Size.Actual.Content.Y, 2, "one line of 20px")
+		})
+}
