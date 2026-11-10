@@ -5,7 +5,6 @@
 package htmlcore
 
 import (
-	"github.com/andybalholm/cascadia"
 	"io"
 	"net/http"
 	neturl "net/url"
@@ -13,7 +12,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
+
+	"github.com/andybalholm/cascadia"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -53,9 +56,14 @@ type Context struct {
 	MediaWidth float32
 
 	// MediaHeight, if positive, is the height of the viewport in CSS px (dp)
-	// that vh lengths are relative to; otherwise, they are relative to the
-	// height of the scene.
+	// that vh lengths (and percentage heights of the viewport) are
+	// relative to; otherwise, they are relative to the height of the scene.
+	// Whether the page used it is [Context.ViewportHeightUsed].
 	MediaHeight float32
+
+	// viewportHeightUsed is whether the page has used the height of the
+	// viewport (see [Context.ViewportHeightUsed]).
+	viewportHeightUsed atomic.Bool
 
 	// Zoom, if positive, is the zoom factor of the page, as in browsers:
 	// all of its sizes are multiplied by it (see
@@ -177,6 +185,12 @@ type Context struct {
 	// will not be generated.
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
 
+	// OnTransition, if set, is called with the transitions of the
+	// properties of elements that a restyle (as for a change of a class by
+	// a script) starts, for the app to dispatch their transitionend events
+	// when they end (as Google sign-in waits for, to show its next step).
+	OnTransition func(ts []Transition)
+
 	// WidgetHandlers is a list of handler functions for each Widget,
 	// called in sequential order for each widget that is created,
 	// after it has been configured by the existing handlers etc.
@@ -234,6 +248,19 @@ type pageState struct {
 	// and hinted those whose attributes have been added.
 	sorted, hinted map[*html.Node]bool
 
+	// customIndexes are the indexes of the custom properties of the
+	// elements with many declarations (see [Context.customDecl]).
+	customIndexes map[*html.Node]*customIndex
+
+	// fallback is why the last Reread or Restyle could not make its
+	// changes (see [Context.Fallback]).
+	fallback string
+
+	// varMemo has the values of the custom properties of elements, as
+	// they are inherited, for var() (see [Context.customProperty]). It is
+	// cleared when the declarations of any element change.
+	varMemo map[varKey]varValue
+
 	// cssOrder is the order of the last declaration added.
 	cssOrder int
 
@@ -259,10 +286,44 @@ type pageState struct {
 	// curContainer is the condition of the @container rule whose rules
 	// are being added, containerQueried has the elements with declarations
 	// in such rules, and containers has the frames of the containers by
-	// their elements (see [Context.containerMatches]).
+	// their elements (see [Context.containerMatches]); keptContainers has
+	// the sizes that they start with (see [Context.KeepContainerSizes]),
+	// and containerMu guards the sizes of the containers in containers.
 	curContainer     *containerCond
 	containerQueried map[*html.Node]bool
 	containers       map[*html.Node]*containerFrame
+	keptContainers   map[*html.Node]containerSizes
+	containerMu      sync.Mutex
+
+	// sheets has the style and link elements whose style sheets have
+	// been added, and rereads is the number of times that elements have
+	// been read again (see [Context.Reread]).
+	sheets  map[*html.Node]bool
+	rereads int
+
+	// sheetTexts are the texts of the style elements whose style sheets
+	// have been added, so that the rules added to them can be added (see
+	// [Context.addedStyle]), and recordOnly is set while they are, for
+	// their rules to be recorded but not applied to the elements, as
+	// [Context.Restyle] finds the declarations of the elements again.
+	sheetTexts map[*html.Node]string
+	recordOnly bool
+
+	// rules are the style rules that have been added, in order, by which
+	// the declarations of elements are found again when they change (see
+	// [Context.Restyle]), with ruleIndex, and pseudoRules those of the
+	// pseudo-elements; curRule is the index of the rule being added plus
+	// one. relational is whether a rule has a :has() selector, which
+	// selects elements by those after and in them.
+	rules       []*styleRule
+	ruleIndex   *ruleIndex
+	pseudoRules []*pseudoRule
+	curRule     int
+	relational  bool
+
+	// elementWidgets has the widgets that are styled by the declarations
+	// of each element (see [Context.Restyle]).
+	elementWidgets map[*html.Node][]core.Widget
 
 	// nodeWidgets has the widgets of the controls of forms.
 	nodeWidgets map[*html.Node]core.Widget
@@ -490,6 +551,12 @@ func (c *Context) applyStyleRules(node *html.Node, w core.Widget) {
 		node = nil // text nodes only inherit
 	}
 	wb := w.AsWidget()
+	if node != nil {
+		if c.elementWidgets == nil {
+			c.elementWidgets = map[*html.Node][]core.Widget{}
+		}
+		c.elementWidgets[node] = append(c.elementWidgets[node], w)
+	}
 	decls := c.declarations(node)
 	for _, d := range decls {
 		if strings.HasPrefix(d.Property, "paginate-") {
@@ -534,6 +601,16 @@ func (c *Context) NewPage() *Context {
 	n.StageSize = c.StageSize
 	n.Style = c.Style
 	return n
+}
+
+// ViewportHeightUsed returns whether the page that the context has read
+// used the height of the viewport ([Context.MediaHeight]): in vh lengths,
+// percentage heights of the viewport (as html and body of height: 100%),
+// or media queries of height, so that it is read again for another
+// height of its viewport (as the footer of google.com, which was below
+// the bottom of the viewport, as it was as high as the window).
+func (c *Context) ViewportHeightUsed() bool {
+	return c.viewportHeightUsed.Load()
 }
 
 // UserAgent is the User-Agent header of the requests of the default

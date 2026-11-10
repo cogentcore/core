@@ -507,7 +507,12 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 				gb.Stops = append(gb.Stops, stop)
 
 			default:
-				return fmt.Errorf("cannot process svg element %q", se.Name.Local)
+				// other elements in a gradient, as animate and
+				// animateTransform (of the spinners of GitHub), are not
+				// rendered, and do not make it invalid
+				if err := decoder.Skip(); err != nil {
+					return err
+				}
 			}
 		case xml.EndElement:
 			if se.Name.Local == "linearGradient" || se.Name.Local == "radialGradient" {

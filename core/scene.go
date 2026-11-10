@@ -119,6 +119,11 @@ type Scene struct { //core:no-new
 	// this is our own text shaper in case we don't have a render context
 	textShaper shaped.Shaper
 
+	// offscreen is the render context of a scene that is not in a window,
+	// as that of [Scene.PreLayout], which shares the DPI and the text shaper
+	// of the window of another scene.
+	offscreen *renderContext
+
 	// hasShown is whether this scene has been shown.
 	// This is used to ensure that [events.Show] is only sent once.
 	// It is atomic, unlike the flags, as [WidgetBase.AsyncLock]
@@ -277,7 +282,7 @@ func (sc *Scene) Init() {
 // This will be nil prior to actual rendering.
 func (sc *Scene) renderContext() *renderContext {
 	if sc.Stage == nil {
-		return nil
+		return sc.offscreen
 	}
 	sm := sc.Stage.mains.Load()
 	if sm == nil {

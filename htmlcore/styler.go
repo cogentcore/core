@@ -27,6 +27,11 @@ var browserStyles string
 // blockState is the state of a widget for laying out blocks,
 // mainly for collapsing margins.
 type blockState struct {
+	// ops are the style operations of the declarations of the element,
+	// and inherit those of the inherited properties of the inline
+	// elements that it is in (see [Context.inlineInheritedOps]).
+	ops, inherit []styleOp
+
 	// display is the CSS display of the element.
 	display string
 
@@ -73,6 +78,10 @@ type blockState struct {
 	// of the element in dots, before they collapse (as in the computed
 	// style of a browser).
 	marginTop, marginBottom float32
+
+	// noPointer is whether the element has pointer-events: none (which is
+	// inherited), unlike the widgets that get no events as they are hidden.
+	noPointer bool
 }
 
 // cssState has the values of a widget's declarations that are
@@ -85,6 +94,10 @@ type cssState struct {
 	hideText   bool // a large negative text-indent, which moves the text out of view
 	zeroScale  bool // a transform scales the box to nothing (as scaleX(0)), so it is not shown
 	clippedOut bool // a clip (or clip-path) to nothing hides it (see zeroAreaClip)
+
+	// intrinsicWidth and intrinsicHeight are the contain-intrinsic sizes:
+	// the sizes of the content of a box with size containment.
+	intrinsicWidth, intrinsicHeight *units.Value
 
 	// bgCurrentColor is whether the background color is currentcolor,
 	// the color of the element as it is styled (as the masked chevrons of
@@ -148,11 +161,13 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			trBg = parseColor(bg)
 		}
 	}
-	ops := c.compileDecls(decls)
-	inherit := c.inlineInheritedOps(node, wb)
+	// (in the state of the block, as they are compiled again when the
+	// declarations of the element change; see Context.Restyle)
+	bs.ops = c.compileDecls(decls)
+	bs.inherit = c.inlineInheritedOps(node, wb)
 	wb.FinalStyler(func(s *styles.Style) {
 		if bs.hidden { // after the abilities of the widget (as scrolling)
-			s.Abilities = 0
+			setHiddenAbilities(s)
 		}
 	})
 	wb.Styler(func(s *styles.Style) {
@@ -202,6 +217,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			if ps != nil { // white-space and text-align are inherited in CSS
 				s.Text.WhiteSpace = ps.Text.WhiteSpace
 				s.Text.Align = ps.Text.Align
+				// the lines of the text of a block are clamped by it, and
+				// its text is cut with an ellipsis when it clips it
+				s.Text.LineClamp = ps.Text.LineClamp
+				s.Text.Ellipsis = ps.Text.Ellipsis && ps.Overflow.X != styles.OverflowVisible
 			}
 		}
 		if tag != "" && isText { // texts for elements (as pre) fill their blocks
@@ -226,6 +245,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				env.vh = float64(uc.Vph / dp / 100)
 			}
 		}
+		if c.MediaHeight > 0 { // (of the viewport, not of the scene)
+			env.vh, env.fixedVh = float64(c.MediaHeight)/100, true
+		}
+		env.vhUsed = &c.viewportHeightUsed
 		env.rem = float64(c.rootFontSize())
 		env.ch = func() float64 { // of the font of the element as it is styled
 			em := env.em
@@ -252,18 +275,21 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				}
 			}
 		}
-		if ps != nil { // pointer-events is inherited
+		if pbs != nil { // pointer-events is inherited (not the hidden of visibility)
+			s.SetAbilities(pbs.noPointer, abilities.NoPointerEvents)
+		} else if ps != nil {
 			s.SetAbilities(ps.Abilities.HasFlag(abilities.NoPointerEvents), abilities.NoPointerEvents)
 		}
-		for _, op := range inherit {
+		for _, op := range bs.inherit {
 			op(st, s, ps)
 		}
-		for _, op := range ops {
+		for _, op := range bs.ops {
 			op(st, s, ps)
 		}
 		if node != nil {
 			st.display = c.displayOf(node)
 		}
+		bs.noPointer = s.Abilities.HasFlag(abilities.NoPointerEvents) // (as of pointer-events)
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
 		if node != nil && node.Type == html.ElementNode && st.display == "inline-block" && c.isInlineBox(node) {
 			if d := strings.TrimSpace(c.declaration(node, "display")); d == "" || d == "inline" {
@@ -397,4 +423,15 @@ func isButtonNode(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// setHiddenAbilities sets the abilities of a widget of an element with
+// visibility: hidden, which gets no events, but whose children get them
+// when they are visible (visibility: visible), as in CSS (as the items of
+// the other ways to sign in with two factors on GitHub, in a hidden list,
+// which could not be clicked), unlike those of an element that is clipped
+// out or not rendered at all (no abilities).
+func setHiddenAbilities(s *styles.Style) {
+	s.Abilities = 0
+	s.SetAbilities(true, abilities.NoPointerEvents)
 }

@@ -591,7 +591,7 @@ const contentSizingMeasure = 70
 func (tx *Text) SizeUp() {
 	tx.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &tx.Geom.Size
-	wraps := tx.Styles.Text.WhiteSpace.HasWordWrap()
+	wraps := tx.wrapsToWidth()
 	if wraps {
 		// as wide as it is on one line (its preferred width), within any Max
 		w := float32(1e6)
@@ -629,6 +629,10 @@ func (tx *Text) SizeUp() {
 // text: the width of its longest word if it wraps, or of its line if not.
 // It is cached for the text and its font size.
 func (tx *Text) minContentWidth() float32 {
+	if tx.cutsToWidth() {
+		// it is cut to its width, down to about its ellipsis
+		return min(tx.Styles.Font.Size.Dots, tx.Geom.Size.Actual.Content.X)
+	}
 	if !tx.Styles.Text.WhiteSpace.HasWordWrap() || tx.Scene == nil || tx.Styles.Font.Size.Dots == 0 {
 		return tx.Geom.Size.Actual.Content.X
 	}
@@ -636,24 +640,43 @@ func (tx *Text) minContentWidth() float32 {
 	if tx.minWordKey == key {
 		return tx.minWord
 	}
-	longest := ""
-	for _, w := range strings.Fields(string(tx.richText.Join())) {
-		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
-			longest = w
-		}
-	}
-	width := float32(0)
-	if longest != "" {
-		sty, tsty := tx.Styles.NewRichText()
-		lines := tx.Scene.TextShaper().WrapLines(rich.NewText(sty, []rune(longest)), sty, tsty, math32.Vec2(1e6, 1e6))
-		width = math32.Ceil(lines.Bounds.Size().X)
-	}
+	width := longestWordWidth(tx.Scene, &tx.Styles, string(tx.richText.Join()))
 	tx.minWordKey, tx.minWord = key, width
 	return width
 }
 
+// longestWordWidth returns the width of the longest word (by its number of
+// characters) of the given text in the given style, which is the
+// min-content width of the text when it wraps.
+func longestWordWidth(sc *Scene, st *styles.Style, txt string) float32 {
+	longest := ""
+	for _, w := range strings.Fields(txt) {
+		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
+			longest = w
+		}
+	}
+	if longest == "" || sc == nil || sc.TextShaper() == nil {
+		return 0
+	}
+	sty, tsty := st.NewRichText()
+	lines := sc.TextShaper().WrapLines(rich.NewText(sty, []rune(longest)), sty, tsty, math32.Vec2(1e6, 1e6))
+	return math32.Ceil(lines.Bounds.Size().X)
+}
+
+// wrapsToWidth returns whether the text is laid out in the width that it
+// is given: it wraps, or it is cut to it (see [Text.cutsToWidth]).
+func (tx *Text) wrapsToWidth() bool {
+	return tx.Styles.Text.WhiteSpace.HasWordWrap() || tx.cutsToWidth()
+}
+
+// cutsToWidth returns whether the text does not wrap and is cut to its
+// width with an ellipsis ([styles.Text.Ellipsis]).
+func (tx *Text) cutsToWidth() bool {
+	return tx.Styles.Text.Ellipsis && !tx.Styles.Text.WhiteSpace.HasWordWrap() && tx.Styles.Text.WhiteSpace != text.WhiteSpacePre
+}
+
 func (tx *Text) SizeDown(iter int) bool {
-	if !tx.Styles.Text.WhiteSpace.HasWordWrap() {
+	if !tx.wrapsToWidth() {
 		return false
 	}
 	sz := &tx.Geom.Size

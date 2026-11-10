@@ -398,6 +398,9 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 	if c.MediaHeight > 0 {
 		height = c.MediaHeight
 	}
+	if strings.Contains(f, "height") || strings.Contains(f, "aspect-ratio") || strings.Contains(f, "orientation") {
+		c.viewportHeightUsed.Store(true)
+	}
 	if !strings.Contains(f, ":") && strings.ContainsAny(f, "<>=") {
 		return mediaRangeMatches(f, width, height)
 	}

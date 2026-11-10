@@ -1112,3 +1112,288 @@ func TestGridFrColumns(t *testing.T) {
 			assert.InDelta(t, 200*dp, ws["e"].Geom.Size.Actual.Total.X, 3, "the rest shared")
 		})
 }
+
+// TestSVGTransform tests the CSS transforms of SVG elements as SVG
+// transforms: in px and degrees, and none for those that cannot be (as
+// translate(-.5em, 0) on bicycling.com, which logged errors).
+func TestSVGTransform(t *testing.T) {
+	env := NewContext().readEnv()
+	for _, c := range []struct {
+		css, svg string
+		ok       bool
+	}{
+		{"translate(-.5em, 0)", "translate(-8,0)", true},
+		{"translate(10px, 5px) rotate(45deg)", "translate(10,5) rotate(45)", true},
+		{"rotate(0.25turn) scale(2)", "rotate(90) scale(2)", true},
+		{"translateX(-1rem)", "translatex(-16)", true},
+		{"none", "none", true},
+		{"translate(-50%, -50%)", "", false},
+		{"translate3d(0, 0, 0)", "", false},
+		{"translate(calc(-1 * 3px))", "", false},
+	} {
+		got, ok := svgTransform(env, c.css)
+		assert.Equal(t, c.ok, ok, c.css)
+		if ok {
+			assert.Equal(t, c.svg, got, c.css)
+		}
+	}
+}
+
+// TestLineHeightCalc tests a line height of a calc() of numbers, as that of
+// the small text of Tailwind 4 (calc(1.25 / .875), through var()), which
+// is a number, not a length in px (the text was 1.4px high, cut off by its
+// boxes on fietsenwinkel.nl).
+func TestLineHeightCalc(t *testing.T) {
+	widgetsByID(t, `<style>:root { --lh: calc(1.25 / .875) } .text-sm { font-size: 14px; line-height: var(--tw-leading, var(--lh)) }</style>`+
+		`<p id="p" class="text-sm">text</p>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 1.25/0.875, ws["p"].Styles.Text.LineHeight, 0.01)
+			assert.InDelta(t, 20*dp, ws["p"].Geom.Size.Actual.Content.Y, 2, "one line of 20px")
+		})
+}
+
+// TestEmptyInlineRun tests that a run of inline content that is only empty
+// elements (as the span with a tabindex before the payload of the reCAPTCHA
+// challenge) makes no line, as in browsers: it pushed the challenge down.
+func TestEmptyInlineRun(t *testing.T) {
+	widgetsByID(t, `<div id="a"><span tabindex="0"></span><div id="b">text</div></div>`+
+		`<div id="c"><span>&nbsp;</span></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, ws["a"].Geom.Pos.Total.Y, ws["b"].Geom.Pos.Total.Y, 1, "no line before the block")
+			assert.Greater(t, ws["c"].Geom.Size.Actual.Content.Y, 10*dp, "a no-break space is content")
+		})
+}
+
+// TestFixedHeightOverflow tests that a box with a height and visible
+// overflow is of that height, with its content overflowing it (as the
+// instructions of the reCAPTCHA challenge, which made it too high for its
+// frame), and that the height of a table cell is a minimum.
+func TestFixedHeightOverflow(t *testing.T) {
+	widgetsByID(t, `<div id="w" style="height: 20px; padding: 10px"><div id="d" style="height: 50px">tall</div></div><div id="n">next</div>`+
+		`<table><tr><td id="td" style="height: 20px"><div style="height: 50px">cell</div></td></tr></table>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 40*dp, ws["w"].Geom.Size.Actual.Total.Y, 2, "the height and padding")
+			assert.InDelta(t, 50*dp, ws["d"].Geom.Size.Actual.Total.Y, 2, "the content keeps its height")
+			assert.InDelta(t, ws["w"].Geom.Pos.Total.Y+40*dp, ws["n"].Geom.Pos.Total.Y, 2, "the next box is after the height")
+			assert.Greater(t, ws["td"].Geom.Size.Actual.Total.Y, 49*dp, "the content of a cell grows it")
+		})
+}
+
+// TestBreakEmptyRow tests that a line break that ends an empty row of
+// inline widgets (as the second of two after the logo of google.com)
+// makes an empty line, as in browsers, and that a last one does not.
+func TestBreakEmptyRow(t *testing.T) {
+	widgetsByID(t, `<div id="a"><img width="20" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><br><br></div>`+
+		`<div id="b"><img width="20" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><br></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			ha, hb := ws["a"].Geom.Size.Actual.Total.Y, ws["b"].Geom.Size.Actual.Total.Y
+			assert.Greater(t, ha, hb+10*dp, "the second break makes a line")
+			assert.Less(t, hb, 30*dp, "a last break makes no line")
+		})
+}
+
+// TestBlockWidthFixedChild tests that a block of an auto width is as wide
+// as its containing block, which a wider child of a fixed width overflows,
+// as in CSS, and does not widen (as the blue instructions of the reCAPTCHA
+// challenge, which made it scroll in width in its frame).
+func TestBlockWidthFixedChild(t *testing.T) {
+	widgetsByID(t, `<div style="width: 300px"><div id="w" style="padding: 24px"><div id="c" style="width: 400px">x</div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 300*dp, ws["w"].Geom.Size.Actual.Total.X, 2, "the block is as wide as its container")
+			assert.InDelta(t, 400*dp, ws["c"].Geom.Size.Actual.Total.X, 2, "its child keeps its width")
+		})
+}
+
+// TestTextTransformAndTruncation tests text-transform, and the lines of
+// text clamped by -webkit-line-clamp and cut by text-overflow: ellipsis
+// (as the cards of the products in the results of google.com, whose
+// titles were not clamped, which made them much higher).
+func TestTextTransformAndTruncation(t *testing.T) {
+	long := strings.Repeat("words that do not fit ", 10)
+	widgetsByID(t, `<div style="width: 200px">`+
+		`<div id="up" style="text-transform: uppercase">Uitverkoop</div>`+
+		`<div id="cap" style="text-transform: capitalize">gesponsorde <b>pro</b>ducten</div>`+
+		`<div id="clamp" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden">`+long+`</div>`+
+		`<div id="cut" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">`+long+`</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			text := func(id string) *core.Text {
+				var tx *core.Text
+				ws[id].WalkDown(func(n tree.Node) bool {
+					if t, ok := n.(*core.Text); ok && tx == nil {
+						tx = t
+					}
+					return tree.Continue
+				})
+				require.NotNil(t, tx, id)
+				return tx
+			}
+			assert.Contains(t, text("up").Text, "UITVERKOOP")
+			assert.Contains(t, text("cap").Text, "Gesponsorde")
+			assert.Contains(t, text("cap").Text, "Pro</b>ducten", "the word continues in the next node")
+			assert.Equal(t, 2, text("clamp").Styles.Text.LineClamp)
+			line := text("up").Geom.Size.Actual.Content.Y // (one line)
+			assert.InDelta(t, 2*line, text("clamp").Geom.Size.Actual.Content.Y, 3, "two lines")
+			cut := text("cut")
+			assert.True(t, cut.Styles.Text.Ellipsis)
+			assert.LessOrEqual(t, cut.Geom.Size.Actual.Total.X, 201*dp, "cut to the width")
+			assert.Greater(t, cut.Geom.Size.Actual.Total.X, 100*dp)
+		})
+}
+
+// TestFlexWrapZeroBasisMinWidth tests that an item of flex: 1 1 0 with a
+// min-width in a row that wraps is in a line by its min-width, not by its
+// content, and grows to fill the line (as the content of the page of a
+// repository of GitHub, of min-width: 1px, beside which its sidebar did
+// not fit, so that it was below it).
+func TestFlexWrapZeroBasisMinWidth(t *testing.T) {
+	widgetsByID(t, `<div style="display: flex; flex-wrap: wrap; width: 600px">`+
+		`<div id="c" style="flex: 1 1 0; width: 100%; min-width: 1px"><div style="width: 500px">wide</div></div>`+
+		`<div id="p"><div style="width: 200px">pane</div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, ws["c"].Geom.Pos.Total.Y, ws["p"].Geom.Pos.Total.Y, 1, "on one line")
+			assert.InDelta(t, 400*dp, ws["c"].Geom.Size.Actual.Total.X, 2, "the rest of the line")
+		})
+}
+
+// TestVisibleInHidden tests that an element with visibility: visible in
+// one with visibility: hidden gets the events at it, as in CSS, and that
+// a hidden one does not (the other ways to sign in with two factors on
+// GitHub, items made visible in a hidden list, could not be clicked).
+func TestVisibleInHidden(t *testing.T) {
+	widgetsByID(t, `<ul id="list" style="visibility: hidden; padding: 0"><li id="vis" style="visibility: visible">shown</li><li id="hid">hidden</li></ul>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			center := func(id string) image.Point {
+				r := ws[id].Geom.TotalBBox
+				return image.Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
+			}
+			in := func(w core.Widget, id string) bool {
+				for wb := w.AsWidget(); wb != nil; {
+					if wb == ws[id] {
+						return true
+					}
+					p, ok := wb.Parent.(core.Widget)
+					if !ok {
+						return false
+					}
+					wb = p.AsWidget()
+				}
+				return false
+			}
+			sc := ws["list"].Scene
+			assert.True(t, in(sc.WidgetAt(center("vis")), "vis"), "the visible item gets the events")
+			hw := sc.WidgetAt(center("hid"))
+
+			assert.False(t, in(hw, "hid"), "the hidden item does not")
+		})
+}
+
+// TestZeroHeightFlexEnd tests that a flex row of a height of 0 is that high,
+// with its items at its end, above it, as in CSS (as the edition bar of
+// nytimes.com, which was as high as its content, over the logo below it).
+func TestZeroHeightFlexEnd(t *testing.T) {
+	widgetsByID(t, `<section id="s" style="display: flex; height: 0; align-items: flex-end"><div id="c"><div>Today's</div><div>Paper</div></div></section><div id="after">after</div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			s, c := ws["s"].Geom, ws["c"].Geom
+			assert.Less(t, s.Size.Actual.Total.Y, 2*dp, "of a height of 0")
+			assert.InDelta(t, s.Pos.Total.Y+s.Size.Actual.Total.Y, c.Pos.Total.Y+c.Size.Actual.Total.Y, 2, "its item ends at its end")
+			assert.InDelta(t, s.Pos.Total.Y+s.Size.Actual.Total.Y, ws["after"].Geom.Pos.Total.Y, 2, "the next block is right after it")
+		})
+}
+
+// TestGridMinmaxFrMin tests that a track of minmax(length, fr) is at least
+// the length (as the first, empty column of the grid of the results of
+// google.com, of minmax(64px, 1fr), which was narrower, so that the header
+// was to the left of where it is in browsers).
+func TestGridMinmaxFrMin(t *testing.T) {
+	widgetsByID(t, `<div id="g" style="display: grid; width: 560px; column-gap: 20px; grid-template-columns: minmax(64px, 1fr) repeat(8, 36px) minmax(0, 1fr)"><div id="i" style="grid-column: 2 / -1">header</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			x := ws["i"].Geom.Pos.Total.X - ws["g"].Geom.Pos.Total.X
+			// (at least: core grows it from its minimum by its share of the
+			// rest, where CSS takes the larger of them)
+			assert.GreaterOrEqual(t, x, 84*dp-1, "after the first column of at least 64px and its gap")
+		})
+}
+
+// TestGridRowAfterFixedHeight tests that a row of a grid is after the
+// height of the row before it, when its last cell has a smaller fixed
+// height (as the actions of the height of a line of the page headers of
+// github.com, after a title of two lines, which the description under it
+// overlapped).
+func TestGridRowAfterFixedHeight(t *testing.T) {
+	widgetsByID(t, `<div style="display: grid; width: 600px; grid-template-columns: auto auto auto auto 1fr; grid-template-areas: 'c c c c c' 'l b t r a' 'd d d d d'">`+
+		`<div id="t" style="grid-area: t; display: flex"><div><h1>a title</h1></div></div>`+
+		`<div style="grid-area: a; display: flex; height: 20px"><button>action</button></div>`+
+		`<div id="d" style="grid-area: d">the description under it</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			tb := ws["t"].Geom.Pos.Total.Y + ws["t"].Geom.Size.Actual.Total.Y
+			assert.GreaterOrEqual(t, ws["d"].Geom.Pos.Total.Y, tb-1, "the description is under the title")
+		})
+}
+
+// TestContainIntrinsicSize tests that a box with size containment is of its
+// contain-intrinsic size (as the rows of the file trees of GitHub pull
+// requests, of contain: strict and contain-intrinsic-height: auto 32px,
+// which were of no height, over each other), and that without size
+// containment the intrinsic size does nothing.
+func TestContainIntrinsicSize(t *testing.T) {
+	widgetsByID(t, `<div style="width: 200px">`+
+		`<div id="a" style="contain: strict; contain-intrinsic-height: auto 32px">a</div>`+
+		`<div id="b" style="contain: strict; contain-intrinsic-height: auto 32px">b</div>`+
+		`<div id="c" style="contain-intrinsic-height: 100px">c</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 32*dp, ws["a"].Geom.Size.Actual.Total.Y, 1)
+			assert.GreaterOrEqual(t, ws["b"].Geom.Pos.Total.Y, ws["a"].Geom.Pos.Total.Y+32*dp-1, "the rows are not over each other")
+			assert.Less(t, ws["c"].Geom.Size.Actual.Total.Y, 50*dp, "no containment")
+		})
+}
+
+// TestFixedTableColumns tests that the columns of a table with the fixed
+// layout are as wide as the pixel widths of its col elements (as the line
+// numbers of the diffs of GitHub, of width="52", which were narrower), and
+// that a visually hidden header (thead.sr-only, positioned and clipped)
+// is not a row of it.
+func TestFixedTableColumns(t *testing.T) {
+	widgetsByID(t, `<style>.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:rect(0 0 0 0)}</style>`+
+		`<table id="t" style="table-layout: fixed; width: 600px"><thead class="sr-only"><tr><th id="h">Original file line number</th><th>line</th></tr></thead>`+
+		`<colgroup><col width="52"><col></colgroup><tbody><tr><td id="n">1325</td><td id="l">cell image.Point</td></tr></tbody></table>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 52*dp, ws["n"].Geom.Size.Actual.Total.X, float64(2*dp), "the column of the line numbers")
+			assert.Nil(t, ws["h"], "the hidden header is not in the table")
+			assert.InDelta(t, ws["t"].Geom.Pos.Content.Y, ws["n"].Geom.Pos.Total.Y, float64(3*dp), "the first row is at the top")
+		})
+}
+
+// TestCustomPropertyIndex tests the custom properties of an element with
+// many declarations (whose custom properties are indexed, as those of the
+// root of nytimes.com): the last declaration of each is its value, and
+// those of an element in it override them.
+func TestCustomPropertyIndex(t *testing.T) {
+	var rules strings.Builder
+	for i := range 2 * minCustomIndex {
+		fmt.Fprintf(&rules, "--v%d: %dpx; ", i, i)
+	}
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>:root { `+rules.String()+` --w: 10px; --w: 20px }
+		#e { --v40: 5px }</style></head><body><div id="d" style="width: var(--w); height: var(--v40)">d</div>
+		<div id="e"><p id="f" style="height: var(--v40)">f</p></div></body></html>`))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	d := elementByID(doc, "d")
+	assert.Equal(t, "20px", ctx.ComputedValue(d, "width"))
+	assert.Equal(t, "40px", ctx.ComputedValue(d, "height"))
+	assert.Equal(t, "5px", ctx.ComputedValue(elementByID(doc, "f"), "height"))
+}
+
+// TestDisplayUnset tests that display: unset (and initial) is inline, which
+// a flex item is as a block (as the widgets of the masthead of
+// nytimes.com, which had no box, so that its ticker of width: 100% was as
+// wide as the row, over the logo).
+func TestDisplayUnset(t *testing.T) {
+	widgetsByID(t, `<section id="bar" style="display: flex; justify-content: space-between; width: 1000px">`+
+		`<div id="left">left</div><div id="w" style="display: unset"><div id="t" style="width: 100%; min-width: 105px">ticker</div></div></section>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			require.NotNil(t, ws["w"], "it has a box")
+			assert.Less(t, ws["t"].Geom.Size.Actual.Total.X, 200*dp, "the ticker is narrow")
+			assert.Greater(t, ws["t"].Geom.Pos.Total.X, ws["bar"].Geom.Pos.Total.X+800*dp, "at the end of the row")
+		})
+}

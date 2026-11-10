@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -250,6 +252,11 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		if str == "" || (strings.TrimSpace(str) == "" && !pre) {
 			return
 		}
+		if !pre && !hasInlineContent(str) {
+			// a run of only empty elements (as a span with a tabindex,
+			// before the payload of reCAPTCHA) makes no line, as in browsers
+			return
+		}
 		if !pre {
 			// Spaces at the start and end of the run are not shown, but
 			// those next to inline widgets are, as non-breaking spaces.
@@ -285,7 +292,12 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 	for n := first; ; n = n.NextSibling {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
 			// a line break in a row of widgets ends the row, and the
-			// widgets after it are in another row (each is aligned)
+			// widgets after it are in another row (each is aligned); one
+			// that ends an empty row (as the second of two after the logo
+			// of google.com) makes an empty line, as in browsers
+			if start && buf.Len() == 0 && !container.AsTree().HasChildren() {
+				buf.WriteString("&nbsp;")
+			}
 			flush(false)
 			start = true
 			container = newContainer()
@@ -331,6 +343,20 @@ func (c *Context) isPre(n *xhtml.Node) bool {
 	return false
 }
 
+// markupTag matches a tag of rich text markup.
+var markupTag = regexp.MustCompile(`<[^>]*>`)
+
+// hasInlineContent returns whether the given rich text markup has content
+// that makes a line: text other than collapsible white space (a no-break
+// space is content), or a line break.
+func hasInlineContent(markup string) bool {
+	if strings.Contains(markup, "<br") {
+		return true
+	}
+	text := html.UnescapeString(markupTag.ReplaceAllString(markup, ""))
+	return strings.Trim(text, " \t\n\r\f") != ""
+}
+
 // brSpace matches a line break with the white space after it.
 var brSpace = regexp.MustCompile(`(<br\s*/?>)[ \t\n\r\f]+`)
 
@@ -347,7 +373,7 @@ func (c *Context) inlineMarkup(n *xhtml.Node, pre bool) string {
 		if !pre {
 			t = spaceRun.ReplaceAllString(t, " ")
 		}
-		return html.EscapeString(t)
+		return html.EscapeString(c.transformText(n, t))
 	case xhtml.ElementNode:
 		if c.displayOf(n) == "none" {
 			return ""
@@ -540,4 +566,66 @@ func (c *Context) fontSizePx(n *xhtml.Node) float32 {
 		}
 	}
 	return parent
+}
+
+// textTransform returns the text-transform of the element that the given
+// text node is in, which is inherited ("" for none).
+func (c *Context) textTransform(n *xhtml.Node) string {
+	for p := n.Parent; p != nil && p.Type == xhtml.ElementNode; p = p.Parent {
+		switch v := strings.ToLower(strings.TrimSpace(c.declaration(p, "text-transform"))); v {
+		case "", "inherit", "unset":
+			continue
+		case "none", "initial":
+			return ""
+		default:
+			return v
+		}
+	}
+	return ""
+}
+
+// transformText returns the given text of the given text node transformed
+// by its text-transform: uppercase, lowercase, or capitalize, which makes
+// the first letter of each word uppercase (as the headings of the results
+// of google.com, as "Gesponsorde Producten").
+func (c *Context) transformText(n *xhtml.Node, t string) string {
+	switch c.textTransform(n) {
+	case "uppercase":
+		return strings.ToUpper(t)
+	case "lowercase":
+		return strings.ToLower(t)
+	case "capitalize":
+		rs := []rune(t)
+		start := !continuesWord(n) // a word starts at the start of the text
+		for i, r := range rs {
+			if unicode.IsSpace(r) {
+				start = true
+				continue
+			}
+			if start && unicode.IsLetter(r) {
+				rs[i] = unicode.ToTitle(r)
+			}
+			start = false
+		}
+		return string(rs)
+	}
+	return t
+}
+
+// continuesWord returns whether the given text node continues a word that
+// the text before it in its parent ends with (as "<b>Ge</b>sponsord").
+func continuesWord(n *xhtml.Node) bool {
+	p := n.PrevSibling
+	for p != nil && p.Type == xhtml.CommentNode {
+		p = p.PrevSibling
+	}
+	if p == nil {
+		return false
+	}
+	t := nodeText(p)
+	if t == "" {
+		return false
+	}
+	r, _ := utf8.DecodeLastRuneInString(t)
+	return !unicode.IsSpace(r)
 }

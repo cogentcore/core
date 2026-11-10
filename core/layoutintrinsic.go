@@ -41,6 +41,19 @@ func (fr *Frame) sizeUpIntrinsicFrame() {
 		sz.Actual.Content.X = max(sz.Actual.Content.X, math32.Ceil(prefw))
 		sz.SetTotalFromContent(&sz.Actual)
 	}
+	if fr.onlyFloats() && !fr.contained(math32.X) {
+		// the floats are its content, of which its width is (as the buttons
+		// of the bar of google.com, floats in boxes in a row, which were
+		// as wide as nothing)
+		w := math32.Ceil(prefw)
+		if sz.Max.X > 0 {
+			w = min(w, sz.Max.X)
+		}
+		if w > sz.Actual.Content.X {
+			sz.Actual.Content.X = w
+			sz.SetTotalFromContent(&sz.Actual)
+		}
+	}
 	if fr.Styles.ContentMinWidth && sz.Max.X > 0 && minw > sz.Max.X {
 		// as wide as its content needs to be (as a table in CSS)
 		sz.Max.X = math32.Ceil(minw)
@@ -204,6 +217,15 @@ func (fr *Frame) overflowWidth(iter int, maxSize float32) float32 {
 	}
 	excess := max(fr.layout.overflow.X-fr.Geom.Size.Internal.X, 0)
 	return min(maxSize, fr.layout.minContent+excess)
+}
+
+// contentGrower is a widget whose Max width is only the most that it grows
+// to, not a width that it starts from when it shrinks (see
+// [Frame.shrinkWidths]): it starts from its preferred width, as wide as its
+// content, as a text field does, so that the one with the longer text is
+// the wider one in a row of them.
+type contentGrower interface {
+	growsFromContent() bool
 }
 
 // growMaxWidth returns the total width of the Max of the given child

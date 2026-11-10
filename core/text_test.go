@@ -6,6 +6,7 @@ package core
 
 import (
 	"image/color"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/base/strcase"
@@ -14,6 +15,8 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
+	"cogentcore.org/core/text/text"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTextTypes(t *testing.T) {
@@ -210,4 +213,39 @@ func TestUpdateAllOtherWindow(t *testing.T) {
 		bd.Close()
 		rc.Unlock()
 	}
+}
+
+// TestTextTruncation tests that text that does not wrap with an Ellipsis is
+// cut to the width of its parent, and that text with a LineClamp has at
+// most that many lines, both ending with an ellipsis.
+func TestTextTruncation(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Min.X.Dp(150)
+		s.Max.X.Dp(150)
+		s.Overflow.X = styles.OverflowHidden
+	})
+	long := strings.Repeat("words that do not fit ", 8)
+	cut := NewText(fr).SetText(long)
+	cut.Styler(func(s *styles.Style) {
+		s.Text.WhiteSpace = text.WrapNever
+		s.Text.Ellipsis = true
+	})
+	clamped := NewText(fr).SetText(long)
+	clamped.Styler(func(s *styles.Style) {
+		s.Text.LineClamp = 2
+	})
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		w := fr.Geom.Size.Actual.Content.X
+		assert.LessOrEqual(t, cut.Geom.Size.Actual.Total.X, w+1, "cut to the width")
+		assert.Greater(t, cut.Geom.Size.Actual.Total.X, w/2, "with the text that fits")
+		assert.Len(t, cut.paintText.Lines, 1)
+		assert.True(t, cut.paintText.Truncated)
+		assert.Len(t, clamped.paintText.Lines, 2)
+		assert.True(t, clamped.paintText.Truncated)
+	})
 }

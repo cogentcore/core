@@ -22,8 +22,10 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -86,7 +88,11 @@ func TestVisibilityHidden(t *testing.T) {
 		func(ws map[string]*core.WidgetBase, dp float32) {
 			for _, id := range []string{"menu", "item"} {
 				assert.Zero(t, ws[id].Styles.Opacity, id)
-				assert.Zero(t, ws[id].Styles.Abilities, id)
+				// no abilities, and no events (but the children that are
+				// visible get them; see TestVisibleInHidden)
+				var hidden abilities.Abilities
+				hidden.SetFlag(true, abilities.NoPointerEvents)
+				assert.Equal(t, hidden, ws[id].Styles.Abilities, id)
 			}
 			assert.Greater(t, ws["after"].Geom.Pos.Total.Y, ws["menu"].Geom.Pos.Total.Y+40*dp, "it keeps its space")
 		})
@@ -428,6 +434,41 @@ func TestContainerUnits(t *testing.T) {
 			assert.InDelta(t, 364.3*840/984*dp, content.Y, 3)
 			assert.InDelta(t, 100*dp, ws["inline"].Geom.Size.Actual.Total.X, 2)
 		})
+}
+
+// TestKeepContainerSizes tests that the containers of a page that is read
+// again with the sizes of those of its last reading (see
+// [Context.KeepContainerSizes]) style the elements in them for those
+// sizes before they are laid out, not for the viewport, as the panels of
+// repositories of github.com, of font-size: 1cqw, which were shown much
+// larger each time that the scripts of the page changed it.
+func TestKeepContainerSizes(t *testing.T) {
+	src := `<div style="container-type: inline-size; width: 200px"><div id="text" style="font-size: 10cqw">text</div></div>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(src))
+	require.NoError(t, err)
+	fontSize := func(bd *core.Body) float32 {
+		var size float32
+		bd.WalkDown(func(k tree.Node) bool {
+			if wb := core.AsWidget(k); wb != nil && wb.Property("id") == "text" {
+				size = wb.Styles.Font.Size.Dots
+			}
+			return tree.Continue
+		})
+		return size
+	}
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var want float32
+	bd.RenderImage(func() {}, func() { want = fontSize(bd) })
+	require.NotZero(t, want)
+
+	again := ctx.NewPage()
+	again.KeepContainerSizes(ctx)
+	bd2 := core.NewBody()
+	require.NoError(t, ReadDocument(again, bd2, doc))
+	bd2.StyleTree() // before it is laid out
+	assert.InDelta(t, want, fontSize(bd2), 0.5, "10% of the width of its container, before it is laid out")
 }
 
 // TestSVGHeightAspect tests that an svg with a height and no width is as
@@ -1181,4 +1222,194 @@ func TestGridAutoFlowColumnRows(t *testing.T) {
 		assert.InDelta(t, y("a1"), y("b1"), 1)
 		assert.Greater(t, y("a2"), y("a1"))
 	})
+}
+
+// TestIframeBox tests the box of an iframe: 300 by 150 by default with a
+// border, of its width and height attributes, without a border for
+// frameborder="0", and of its styles, and that its children (for browsers
+// without frames) are not shown, and a percentage width with a height in
+// its style (as the captchas of DataDome). It had no box (as an inline element
+// without content), so the captchas of bot checks were not shown.
+func TestIframeBox(t *testing.T) {
+	src := `<div style="width: 800px"><iframe id="a" src="https://example.com/"></iframe><br>` +
+		`<iframe id="b" width="400" height="200" frameborder="0" src="x"></iframe><br>` +
+		`<iframe id="c" style="width: 500px; height: 100px; border: 0" src="y"><p>no frames</p></iframe><br>` +
+		`<iframe id="d" width="100%" height="100%" style="height: 300px" frameborder="0" src="z"></iframe></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		for _, id := range []string{"a", "b", "c", "d"} {
+			require.NotNil(t, ws[id], id)
+		}
+		size := func(id string) math32.Vector2 { return ws[id].Geom.Size.Actual.Total }
+		assert.InDelta(t, 304*dp, size("a").X, 1)
+		assert.InDelta(t, 154*dp, size("a").Y, 1)
+		assert.InDelta(t, 400*dp, size("b").X, 1)
+		assert.InDelta(t, 200*dp, size("b").Y, 1)
+		assert.InDelta(t, 500*dp, size("c").X, 1)
+		assert.InDelta(t, 100*dp, size("c").Y, 1)
+		assert.Equal(t, 0, ws["c"].NumChildren(), "its children are not shown")
+		// a percentage width (as the captchas of DataDome), and a height
+		// that is not only a minimum
+		assert.InDelta(t, 800*dp, size("d").X, 1)
+		assert.InDelta(t, 300*dp, size("d").Y, 1)
+	})
+}
+
+// TestInvalidDeclarationDropped tests that a declaration that is invalid
+// (a keyword of another engine's vendor prefix, or a size of
+// -webkit-fill-available, which is not laid out) is dropped, so that the
+// declaration of the same property before it applies, as in browsers (as
+// the height: 100vh of the captcha frames of DataDome for Safari, followed
+// by height: -webkit-fill-available, which were of no height).
+func TestInvalidDeclarationDropped(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div id="a" style="height: 300px; height: -webkit-fill-available">x</div>`+
+		`<div id="b" style="width: 300px; width: -moz-available">y</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 300*dp, ws["a"].Geom.Size.Actual.Total.Y, 4)
+			assert.InDelta(t, 300*dp, ws["b"].Geom.Size.Actual.Total.X, 4)
+		})
+}
+
+// TestViewportHeight tests that the percentage heights of the viewport
+// (html and body of height: 100%, in a flex column of height: 100%, as on
+// google.com) are of [Context.MediaHeight], not of the scene, which in a
+// browser is higher than the viewport of the page (with its toolbar and
+// tabs), so that its footer was below the viewport, with a scrollbar; and
+// that the context says that the page used the height of the viewport,
+// for it to be read again for another one, and not for a page that does
+// not.
+func TestViewportHeight(t *testing.T) {
+	src := `<html style="height: 100%; margin: 0"><body style="height: 100%; margin: 0"><div id="col" style="display: flex; flex-direction: column; height: 100%">` +
+		`<div style="height: 60px; flex-shrink: 0">head</div><div id="mid" style="height: calc(100% - 560px); min-height: 150px; flex-shrink: 0"></div>` +
+		`<div style="flex-grow: 1">main</div><div style="height: 40px; flex-shrink: 0">foot</div></div></body></html>`
+	ctx := NewContext()
+	ctx.MediaHeight = 500
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(ctx, bd, src))
+	ws := map[string]*core.WidgetBase{}
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			if id, ok := wb.Property("id").(string); ok {
+				ws[id] = wb
+			}
+		}
+		return tree.Continue
+	})
+	bd.RenderImage(func() {}, func() {
+		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
+		assert.InDelta(t, 500*dp, ws["col"].Geom.Size.Actual.Total.Y, 2)
+		assert.InDelta(t, 150*dp, ws["mid"].Geom.Size.Actual.Total.Y, 2, "calc(100% - 560px) of 500, at least 150")
+	})
+	assert.True(t, ctx.ViewportHeightUsed())
+
+	plain := NewContext()
+	plain.MediaHeight = 500
+	require.NoError(t, ReadHTMLString(plain, core.NewBody(), `<p style="height: 20px">text</p>`))
+	assert.False(t, plain.ViewportHeightUsed())
+}
+
+// TestGridAutoFillMinmax tests the tracks of repeat(auto-fill, minmax(180px,
+// 1fr)) (as of the cards of the example of htmlcore): as many as fit in the
+// width that the grid has (in a body of max-width: 720px, not the width of
+// the page), and all of the same width, also those that have no items, as
+// in CSS (the columns were as wide as their content).
+func TestGridAutoFillMinmax(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div style="max-width: 720px">`+
+		`<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px">`+
+		`<div id="a">The cards are in a grid, with one column in a narrow window.</div><div id="b">Short</div><div id="c">Medium text</div></div>`+
+		`<div style="display: grid; grid-template-columns: repeat(4, minmax(100px, 1fr)); gap: 12px">`+
+		`<div id="d">The cards are in a grid, with one column in a narrow window.</div><div id="e">Short</div></div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			w := (720 - 2*12) / 3.0 * dp // 3 tracks
+			for _, id := range []string{"a", "b", "c"} {
+				assert.InDelta(t, w, ws[id].Geom.Size.Actual.Total.X, 2, id)
+			}
+			w = (720 - 3*12) / 4.0 * dp // 4 tracks, 2 of them empty
+			for _, id := range []string{"d", "e"} {
+				assert.InDelta(t, w, ws[id].Geom.Size.Actual.Total.X, 2, id)
+			}
+		})
+}
+
+// TestFormControlSizes tests the sizes of form controls that their CSS
+// gives none, as in Chrome: a text input is as wide as its size in average
+// characters (20 by default; 153px for its font of 13.333px), and does not
+// grow in a row of controls (it was as wide as 40ch); a textarea is in a
+// monospace font, as wide as its cols; and a color input is a swatch of
+// 50 by 27px (it was a large button with a label). An input that its CSS
+// makes grow (as by flex-grow: 1, as the search field of pkg.go.dev) fills
+// its row.
+func TestFormControlSizes(t *testing.T) {
+	widgetsByID(t, `<div style="display: flex; align-items: center; gap: 8px; width: 800px">`+
+		`<input id="text" type="text"><input id="small" type="text" size="5"><input id="num" type="number" value="42">`+
+		`<input id="color" type="color" value="#008080"></div><textarea id="area" cols="30">a b</textarea>`+
+		`<div style="display: flex; width: 400px"><input id="grow" style="flex-grow: 1"></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			// 20 (or its size) characters of 0.55em of its font (of 13.333px)
+			chars := func(id string) float32 {
+				w := ws[id]
+				return w.Geom.Size.Actual.Content.X / (0.55 * w.Styles.UnitContext.FontEm)
+			}
+			assert.InDelta(t, 20, chars("text"), 0.5, "text")
+			assert.InDelta(t, 5, chars("small"), 0.5, "size 5")
+			assert.InDelta(t, 20, chars("num"), 0.5, "number")
+			assert.InDelta(t, 13.333*dp, ws["text"].Styles.Font.Size.Dots, 1, "the font of controls")
+			c := ws["color"].Geom.Size.Actual.Total
+			assert.InDelta(t, 50*dp, c.X, 2, "color")
+			assert.InDelta(t, 27*dp, c.Y, 2, "color")
+			assert.InDelta(t, 400*dp, ws["grow"].Geom.Size.Actual.Total.X, 3, "flex-grow")
+			a := ws["area"]
+			assert.Equal(t, rich.Monospace, a.Styles.Font.Family, "textarea font")
+			assert.InDelta(t, 30*0.6+1.15, a.Geom.Size.Actual.Content.X/a.Styles.UnitContext.FontEm, 0.5, "textarea cols")
+		})
+}
+
+// pngDataURL returns a data URL of a PNG image of the given size.
+func pngDataURL(w, h int) string {
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	var b bytes.Buffer
+	png.Encode(&b, img)
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(b.Bytes())
+}
+
+// TestImageTilePercentages tests an image in a run of inline content (in
+// the anonymous frame of the run) with a percentage height and top, which
+// are of its containing block (the block that the run is in), not of the
+// frame of the run, and that it is stretched to its box (object-fit: fill,
+// the default of CSS), as the tiles of the challenges of reCAPTCHA, images
+// of 300% by 300% at -100% in wrappers of 126px (of which only the first
+// row showed, with the wrong parts of the image).
+func TestImageTilePercentages(t *testing.T) {
+	src := pngDataURL(200, 100)
+	widgetsByID(t, `<div id="w" style="width: 126px; height: 126px; overflow: hidden; position: relative">`+
+		`<img id="i" src="`+src+`" style="position: relative; width: 300%; height: 300%; top: -100%; left: -200%"></div>`+
+		`<img id="contain" src="`+src+`" style="width: 50px; height: 50px; object-fit: contain">`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			w, i := ws["w"], ws["i"]
+			assert.InDelta(t, 378*dp, i.Geom.Size.Actual.Content.Y, 2, "300% of the height of the wrapper")
+			assert.InDelta(t, 378*dp, i.Geom.Size.Actual.Content.X, 2, "300% of its width")
+			assert.InDelta(t, -126*dp, i.Geom.Pos.Total.Y-w.Geom.Pos.Content.Y, 2, "top: -100% of the wrapper")
+			assert.InDelta(t, -252*dp, i.Geom.Pos.Total.X-w.Geom.Pos.Content.X, 2, "left: -200% of the wrapper")
+			assert.Equal(t, styles.FitFill, i.Styles.ObjectFit, "stretched to its box")
+			assert.Equal(t, styles.FitContain, ws["contain"].Styles.ObjectFit, "object-fit: contain")
+		})
+}
+
+// TestFlexWrapPercentBasis tests the items of a row that wraps with
+// percentage bases that do not grow (as the columns of Bootstrap, flex: 0
+// 0 25% and 75%, with box-sizing: border-box and padding), which are on one
+// line, as wide as their bases, not as their content (the column of 75%,
+// of cards that are wide on one line, wrapped below that of 25%, on
+// stella.nl).
+func TestFlexWrapPercentBasis(t *testing.T) {
+	cards := strings.Repeat(`<div style="width: 300px; flex: none">card</div>`, 4)
+	widgetsByID(t, `<div style="width: 800px"><div style="display: flex; flex-wrap: wrap">`+
+		`<div id="a" style="box-sizing: border-box; width: 100%; padding: 0 30px; flex: 0 0 25%; max-width: 25%">filters</div>`+
+		`<div id="b" style="box-sizing: border-box; width: 100%; padding: 0 30px; flex: 0 0 75%; max-width: 75%"><div style="display: flex; flex-wrap: wrap">`+cards+`</div></div>`+
+		`</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			a, b := ws["a"], ws["b"]
+			assert.InDelta(t, a.Geom.Pos.Total.Y, b.Geom.Pos.Total.Y, 1, "on one line")
+			assert.InDelta(t, 200*dp, a.Geom.Size.Actual.Total.X, 2, "25%")
+			assert.InDelta(t, 600*dp, b.Geom.Size.Actual.Total.X, 2, "75%")
+		})
 }

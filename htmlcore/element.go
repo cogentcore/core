@@ -46,6 +46,20 @@ var textBlockTags = map[string]bool{"pre": true, "p": true, "h1": true, "h2": tr
 	"h4": true, "h5": true, "h6": true, "hr": true, "dt": true, "dd": true, "figcaption": true,
 	"caption": true, "summary": true, "legend": true}
 
+// clippedRows returns whether the given rows of a table (a row group or
+// row) are positioned out of the table and clipped to nothing, as visually
+// hidden headers for screen readers (as the thead.sr-only of the diffs of
+// GitHub), which are then not in it, as in browsers, rather than a row of
+// its grid (of which only the clip would hide the text).
+func (c *Context) clippedRows(n *html.Node) bool {
+	pos := c.declaration(n, "position")
+	if pos != "absolute" && pos != "fixed" {
+		return false
+	}
+	return zeroAreaClip("clip", strings.TrimSpace(c.declaration(n, "clip"))) ||
+		zeroAreaClip("clip-path", strings.TrimSpace(c.declaration(n, "clip-path")))
+}
+
 // handleElement makes the widgets of the current node with the handler in
 // [Context.ElementHandlers] for its tag, if any, or else with the builder
 // of its kind.
@@ -60,6 +74,9 @@ func handleElement(ctx *Context) {
 	display := ctx.displayOf(ctx.Node)
 	if display == "none" && !documentTags[tag] {
 		return // not rendered, and neither are its children
+	}
+	if (tag == "thead" || tag == "tbody" || tag == "tfoot" || tag == "tr") && ctx.clippedRows(ctx.Node) {
+		return // (see clippedRows)
 	}
 	if display == "contents" && !boxTags[tag] {
 		// it has no box, and its children are in its parent
@@ -111,12 +128,15 @@ func handleElement(ctx *Context) {
 		// for monospaced text)
 		tf := New[core.TextField](ctx).SetText(ExtractText(ctx)).SetType(core.TextFieldOutlined)
 		cssFieldBorder(tf)
+		fieldWidth(ctx.Node, tf)
 		tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
 		newWidget = tf
 	case "svg":
 		handleSVG(ctx)
 	case "img":
 		newWidget = handleImage(ctx, tag)
+	case "iframe":
+		newWidget = handleIframe(ctx)
 	case "table":
 		newWidget = handleTable(ctx)
 	case "th", "td":
@@ -202,7 +222,10 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 	case isBlockDisplay(display) || tag == "body" || strings.HasPrefix(display, "inline-"):
 		if container, inline := ctx.isContainer(ctx.Node); container {
 			w := New[containerFrame](ctx)
-			w.inline = inline
+			w.inline, w.ctx = inline, ctx
+			if ks, ok := ctx.keptContainers[ctx.Node]; ok {
+				w.size, w.prev = ks.size, ks.prev
+			}
 			if ctx.containers == nil {
 				ctx.containers = map[*html.Node]*containerFrame{}
 			}

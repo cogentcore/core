@@ -132,7 +132,20 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return append(c.compileCSS(base+"-top", start), c.compileCSS(base+"-bottom", end)...)
 	case "display":
-		return op(func(st *cssState, s, ps *styles.Style) { st.display = lval })
+		d := legacyDisplay(lval)
+		return op(func(st *cssState, s, ps *styles.Style) { st.display = d })
+	case "-webkit-line-clamp", "line-clamp":
+		n, err := strconv.Atoi(lval)
+		if lval == "none" || lval == "initial" {
+			n, err = 0, nil
+		}
+		if err != nil || n < 0 {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.Text.LineClamp = n })
+	case "text-overflow":
+		e := lval == "ellipsis"
+		return op(func(st *cssState, s, ps *styles.Style) { s.Text.Ellipsis = e })
 	case "margin":
 		vals := expandSides(splitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
@@ -367,6 +380,32 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Contain = c })
+	case "contain-intrinsic-width", "contain-intrinsic-height", "contain-intrinsic-size":
+		// the lengths of the values, without auto (the size that a box
+		// last had, which is the length until it is laid out); none is no size
+		var vals []string
+		for _, f := range strings.Fields(lval) {
+			if f != "auto" {
+				vals = append(vals, f)
+			}
+		}
+		if len(vals) == 0 {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			length := func(v string) *units.Value {
+				if v == "none" {
+					return nil
+				}
+				return st.env.lengthPtr(v, units.UnitPw)
+			}
+			if prop != "contain-intrinsic-height" {
+				st.intrinsicWidth = length(vals[0])
+			}
+			if prop != "contain-intrinsic-width" {
+				st.intrinsicHeight = length(vals[len(vals)-1])
+			}
+		})
 	case "aspect-ratio":
 		r := cssAspectRatio(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.AspectRatio = r })
@@ -623,6 +662,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "grid-template-columns":
 		cols := gridColumns(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Columns = cols })
+	case "object-fit":
+		fit, ok := map[string]styles.ObjectFits{"fill": styles.FitFill, "contain": styles.FitContain, "cover": styles.FitCover,
+			"none": styles.FitNone, "scale-down": styles.FitScaleDown}[lval]
+		if !ok {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) { s.ObjectFit = fit })
 	case "opacity":
 		f, err := strconv.ParseFloat(lval, 32)
 		if err != nil {
@@ -646,6 +692,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 func zeroAreaClip(prop, v string) bool {
 	fn := "rect("
 	if prop == "clip-path" {
+		if strings.HasPrefix(v, "rect(") { // as clip (as rect(0 0 0 0) of the .sr-only of GitHub)
+			return zeroAreaClip("clip", v)
+		}
 		fn = "inset("
 	}
 	args, ok := strings.CutPrefix(v, fn)

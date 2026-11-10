@@ -15,6 +15,15 @@ import (
 // It keeps the most recently used images up to a total size in bytes,
 // and it is safe for concurrent use.
 //
+// The images of the current read of a page (see [ImageCache.NewRead]) are
+// not removed for others: when they do not all fit, the rest are not
+// cached, so that the next read finds most of them, not none (a plain
+// LRU, read in the same order each time, removes each image before the
+// next read gets to it, as the photos of nytimes.com, which were decoded
+// again in each of the reads of the page that its scripts make, in 4-7s).
+// The URLs of images that could not be gotten or decoded are kept too,
+// so that they are not tried again.
+//
 // The cached images are shared by all of the widgets that show them,
 // so they must not be modified. Images are only read when they are
 // rendered: [core.Image] and the resizing and cropping functions of
@@ -38,6 +47,13 @@ type ImageCache struct {
 
 	// bytes is the total size of the cached images.
 	bytes int
+
+	// read is the number of the current read (see [ImageCache.NewRead]).
+	read uint64
+
+	// failed has the URLs of the images that could not be gotten or
+	// decoded.
+	failed map[string]bool
 }
 
 // imageCacheEntry is an entry of [ImageCache.lru].
@@ -45,6 +61,7 @@ type imageCacheEntry struct {
 	url   string
 	image image.Image
 	bytes int
+	read  uint64 // the read that last used it
 }
 
 // NewImageCache returns a new [ImageCache] that keeps images up to
@@ -62,7 +79,36 @@ func (ic *ImageCache) Get(url string) image.Image {
 		return nil
 	}
 	ic.lru.MoveToFront(e)
-	return e.Value.(*imageCacheEntry).image
+	ent := e.Value.(*imageCacheEntry)
+	ent.read = ic.read
+	return ent.image
+}
+
+// NewRead starts a new read of a page, whose images are then kept over
+// those of the reads before it (see [ImageCache]).
+func (ic *ImageCache) NewRead() {
+	ic.mu.Lock()
+	defer ic.mu.Unlock()
+	ic.read++
+}
+
+// Failed returns whether the image of the given resolved URL could not be
+// gotten or decoded before (see [ImageCache.AddFailed]).
+func (ic *ImageCache) Failed(url string) bool {
+	ic.mu.Lock()
+	defer ic.mu.Unlock()
+	return ic.failed[url]
+}
+
+// AddFailed records that the image of the given resolved URL could not be
+// gotten or decoded, so that it is not tried again.
+func (ic *ImageCache) AddFailed(url string) {
+	ic.mu.Lock()
+	defer ic.mu.Unlock()
+	if ic.failed == nil {
+		ic.failed = map[string]bool{}
+	}
+	ic.failed[url] = true
 }
 
 // Add adds the given image for the given resolved URL to the cache,
@@ -78,10 +124,15 @@ func (ic *ImageCache) Add(url string, img image.Image) {
 	if n > ic.MaxBytes {
 		return
 	}
+	// the least recently used images that are not of the current read
 	for ic.bytes+n > ic.MaxBytes {
-		ic.remove(ic.lru.Back())
+		back := ic.lru.Back()
+		if back == nil || ic.read != 0 && back.Value.(*imageCacheEntry).read == ic.read {
+			return // (no room: the images of this read are kept)
+		}
+		ic.remove(back)
 	}
-	ic.images[url] = ic.lru.PushFront(&imageCacheEntry{url: url, image: img, bytes: n})
+	ic.images[url] = ic.lru.PushFront(&imageCacheEntry{url: url, image: img, bytes: n, read: ic.read})
 	ic.bytes += n
 }
 
@@ -90,6 +141,7 @@ func (ic *ImageCache) Reset() {
 	ic.mu.Lock()
 	defer ic.mu.Unlock()
 	clear(ic.images)
+	clear(ic.failed)
 	ic.lru.Init()
 	ic.bytes = 0
 }

@@ -6,7 +6,6 @@ package htmlcore
 
 import (
 	"bytes"
-	svgpkg "cogentcore.org/core/svg"
 	"image"
 	"io"
 	"log/slog"
@@ -15,6 +14,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"cogentcore.org/core/styles"
+	svgpkg "cogentcore.org/core/svg"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -131,7 +133,12 @@ func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
 			}
 			continue
 		case "transform": // CSS units, which SVG transforms do not have
-			v = cssTransformUnits.ReplaceAllString(v, "$1")
+			t, ok := svgTransform(c.readEnv(), v)
+			if !ok {
+				delete(style, d.Property) // (as an invalid declaration)
+				continue
+			}
+			v = t
 		}
 		style[d.Property] = v
 	}
@@ -140,7 +147,60 @@ func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
 
 // cssTransformUnits matches the units of the numbers of CSS transforms that
 // are the user units of SVG transforms (px, and deg for angles).
-var cssTransformUnits = regexp.MustCompile(`(-?[0-9.]+)(px|deg)\b`)
+// svgTransform returns the given CSS transform as an SVG transform, of
+// numbers in user units (px) and degrees, with the given lengths, or false
+// if it cannot be one (as for percentages, which are of the box of the
+// element, or calc): the SVG reader logged errors for the units of CSS (as
+// translate(-.5em, 0), whose e it read as an exponent, on bicycling.com).
+func svgTransform(env *lengthEnv, v string) (string, bool) {
+	v = strings.TrimSpace(v)
+	if strings.EqualFold(v, "none") {
+		return v, true
+	}
+	var out []string
+	for rest := v; rest != ""; {
+		p, e := strings.IndexByte(rest, '('), strings.IndexByte(rest, ')')
+		if p <= 0 || e < p {
+			return "", false
+		}
+		name := strings.ToLower(strings.TrimSpace(rest[:p]))
+		args := strings.FieldsFunc(rest[p+1:e], func(r rune) bool { return r == ',' || r == ' ' || r == '\t' })
+		rest = strings.TrimSpace(rest[e+1:])
+		nums := make([]string, len(args))
+		for i, a := range args {
+			var f float32
+			switch name {
+			case "rotate", "skew", "skewx", "skewy":
+				if _, err := strconv.ParseFloat(strings.TrimRight(a, "degradtun"), 32); err != nil {
+					return "", false
+				}
+				f = cssAngle(a)
+			case "scale", "scalex", "scaley", "matrix":
+				n, err := strconv.ParseFloat(a, 32)
+				if err != nil {
+					return "", false
+				}
+				f = float32(n)
+			case "translate", "translatex", "translatey":
+				px, ok := env.lengthPx(a)
+				if !ok {
+					if n, err := strconv.ParseFloat(a, 32); err == nil && n == 0 {
+						px, ok = 0, true
+					}
+				}
+				if !ok {
+					return "", false
+				}
+				f = px
+			default:
+				return "", false // (as translate3d, which SVG has not)
+			}
+			nums[i] = strconv.FormatFloat(float64(f), 'g', -1, 32)
+		}
+		out = append(out, name+"("+strings.Join(nums, ",")+")")
+	}
+	return strings.Join(out, " "), len(out) > 0
+}
 
 func handleImage(ctx *Context, tag string) core.Widget {
 	n := ctx.Node
@@ -241,6 +301,11 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		newWidget = svg
 	} else {
 		img = New[core.Image](ctx)
+		// stretched to its box, as for object-fit: fill, the default of
+		// CSS (it kept its aspect ratio, as the tiles of the challenges of
+		// reCAPTCHA, of the image of all of the tiles, which showed the
+		// wrong parts of it); before the styler of its CSS (object-fit)
+		img.Styler(func(s *styles.Style) { s.ObjectFit = styles.FitFill })
 		img.NaturalDp = true  // in CSS px (see core.Image.NaturalDp)
 		img.Density = density // of its srcset candidate
 		img.SetTooltip(alt)
@@ -296,9 +361,15 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 		if im := cache.Get(key); im != nil {
 			return im, nil
 		}
+		if cache.Failed(key) {
+			return nil, nil // (not tried again)
+		}
 	}
 	resp, err := getImage(ctx, src)
 	if err != nil {
+		if cache != nil {
+			cache.AddFailed(key)
+		}
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -306,6 +377,9 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 	if err != nil {
 		// browsers just do not show images that are not supported
 		slog.Debug("error loading image", "url", src, "err", err)
+		if cache != nil {
+			cache.AddFailed(key)
+		}
 		return nil, nil
 	}
 	if cache != nil {

@@ -1325,6 +1325,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		cell  image.Point
 		span  int
 		width float32
+		grow  float32
 	}
 	var spans, rowSpans []spanning
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
@@ -1363,9 +1364,9 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			msz := sz.Dim(ma) // main axis size dim: X, Y
 			mx := md.Size.Dim(ma)
 			if ma == math32.X && span > 1 { // sized below, over its columns
-				spans = append(spans, spanning{cidx, span, msz})
+				spans = append(spans, spanning{cidx, span, msz, grw.X})
 			} else if ma == math32.Y && rspan > 1 { // sized below, over its rows
-				rowSpans = append(rowSpans, spanning{cidx, rspan, msz})
+				rowSpans = append(rowSpans, spanning{cidx, rspan, msz, grw.Y})
 			} else {
 				mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
 			}
@@ -1374,17 +1375,8 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			sm += msz
 			cd.Size.SetDim(ma, sm) // Row, sum widths of all elements; Col, sum heights of all elements
 			gsz := grw.Dim(ma)
-			mx = md.Grow.Dim(ma)
-			mx = max(mx, gsz)
-			md.Grow.SetDim(ma, mx)
-			if ma == math32.X && span > 1 {
-				// all of the columns that it spans grow (as the columns
-				// of a grid of 1fr that cells span), not only the first
-				for k := 1; k < span; k++ {
-					if kd := li.cell(ma, mi+k, ci); kd != nil {
-						kd.Grow.SetDim(ma, max(kd.Grow.Dim(ma), gsz))
-					}
-				}
+			if ma != math32.X || span == 1 { // (the grow of spans is below)
+				md.Grow.SetDim(ma, max(md.Grow.Dim(ma), gsz))
 			}
 			sm = cd.Grow.Dim(ma)
 			sm += gsz
@@ -1392,16 +1384,44 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		}
 		return tree.Continue
 	})
-	// The columns that a cell spans are widened evenly to fit it.
+	// A growing cell that spans columns of which none grow makes them
+	// all grow (as the columns of a grid of 1fr that cells span), not
+	// only the first, but not columns that do not grow when others of
+	// them do: the grow of a span goes to the flexible columns, as in
+	// CSS (the empty auto columns of the page headers of github.com
+	// beside a title in minmax(0, 1fr), which were as wide as it).
+	growing := func(sp spanning) int {
+		n := 0
+		for c := range sp.span {
+			if li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Grow.X > 0 {
+				n++
+			}
+		}
+		return n
+	}
+	for _, sp := range spans {
+		if sp.grow > 0 && growing(sp) == 0 {
+			for c := range sp.span {
+				li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Grow.X = sp.grow
+			}
+		}
+	}
+	// The columns that a cell spans are widened to fit it: those of
+	// them that grow, or all of them evenly when none do.
 	for _, sp := range spans {
 		sum := li.Gap.X * float32(sp.span-1)
 		for c := range sp.span {
 			sum += li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Size.X
 		}
 		if extra := sp.width - sum; extra > 0 {
+			n := growing(sp)
 			for c := range sp.span {
 				cd := li.cell(math32.X, sp.cell.X+c, sp.cell.Y)
-				cd.Size.X += extra / float32(sp.span)
+				if n == 0 {
+					cd.Size.X += extra / float32(sp.span)
+				} else if cd.Grow.X > 0 {
+					cd.Size.X += extra / float32(n)
+				}
 			}
 		}
 	}
@@ -1993,6 +2013,9 @@ func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 			// to the same width, as for the flex basis of CSS
 			if mw := fr.growMaxWidth(cwb); mw > 0 {
 				p = mw
+				if cg, ok := cw.(contentGrower); ok && cg.growsFromContent() {
+					p = min(mw, ksz.prefWidth)
+				}
 			}
 		}
 		pref[c] = max(pref[c], p)
@@ -2099,11 +2122,34 @@ func (fr *Frame) frWidths(width float32) []float32 {
 	if n < 2 || width <= 0 {
 		return nil
 	}
+	// the columns that have no cells (as the empty tracks of
+	// repeat(auto-fill, minmax(180px, 1fr)) in CSS) grow as the others
+	// (all of its tracks are fr), so that the others are as wide as they
+	// are with them, as in CSS (they were sized to their content)
+	filled := make([]bool, n)
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		for c := cwb.Geom.Cell.X; c < min(cwb.Geom.Cell.X+max(fr.colSpan(cwb), 1), n); c++ {
+			filled[c] = true
+		}
+		return tree.Continue
+	})
 	grow := make([]float32, n)
+	emptyGrow := float32(0)
 	for c := range n {
 		grow[c] = li.cell(math32.X, c, 0).Grow.X
-		if grow[c] <= 0 {
-			return nil
+		if filled[c] {
+			if grow[c] <= 0 {
+				return nil
+			}
+			emptyGrow = max(emptyGrow, grow[c])
+		}
+	}
+	if emptyGrow <= 0 {
+		return nil
+	}
+	for c := range n {
+		if !filled[c] {
+			grow[c] = emptyGrow
 		}
 	}
 	minw := make([]float32, n)
@@ -2228,7 +2274,9 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			ksz.X = max(ksz.X, min(cwb.Geom.Size.preferred.X, fit))
 		}
 		if fb := cwb.Styles.FlexBasis.Dots; d == math32.X && fb > 0 {
-			// its basis, down to its min-content width (see [styles.Style.FlexBasis])
+			// its basis, down to its min-content width (see [styles.Style.FlexBasis]),
+			// which is of its border box for box-sizing: border-box
+			fb = max(fb-cwb.boxSizingSpace().X, 0)
 			ksz.X = min(max(fb+cwb.Geom.Size.Space.X, cwb.Geom.Size.minWidth), fit)
 		}
 		if d == math32.X && cwb.Styles.Grow.X > 0 && cwb.Styles.Max.X.Unit == units.UnitPw && cwb.Styles.Min.X.Unit == units.UnitPw {
@@ -2743,6 +2791,14 @@ func (fr *Frame) positionCellsGrid() {
 	})
 }
 
+// fixedSingleLine returns whether the frame is a row of one line (of the
+// given number of lines) whose height is fixed, so that its items that are
+// higher are aligned in it as they overflow it: its overflow is hidden in
+// the layout but not clipped (as a box of a fixed height in CSS).
+func (fr *Frame) fixedSingleLine(lines int) bool {
+	return lines <= 1 && fr.Styles.Overflow.Y == styles.OverflowHidden && fr.Styles.NoClip && fr.Styles.Max.Y.Dots > 0
+}
+
 func (fr *Frame) positionCellsMainX() {
 	// todo: can break apart further into Flex rows
 	gap := fr.layout.Gap
@@ -2775,8 +2831,12 @@ func (fr *Frame) positionCellsMainX() {
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
+			// the next line is after the height of this one, not of its
+			// last item (as the actions beside a title of two lines in
+			// the page headers of github.com, which the line under it
+			// overlapped)
 			pos.X = stPos.X
-			pos.Y += lastSz.Y + gap.Y
+			pos.Y += max(lastSz.Y, crosses[min(line, len(crosses)-1)]) + gap.Y
 			line++
 		}
 		if spaces != nil && line < len(spaces) {
@@ -2787,6 +2847,16 @@ func (fr *Frame) positionCellsMainX() {
 			}
 		}
 		cwb.positionWithinAllocMainX(pos, fr.Styles.Justify.Items, fr.Styles.Align.Items, crosses[min(line, len(crosses)-1)])
+		if fr.fixedSingleLine(len(crosses)) {
+			// an item higher than a row of a fixed height (its overflow is
+			// hidden in the layout, but not clipped) is aligned in the row,
+			// out of it, as in CSS (as the edition bar of nytimes.com, of a
+			// height of 0, with its content at its end, above it)
+			if extra := sz.Actual.Content.Y - cwb.Geom.Size.Actual.Total.Y; extra < 0 {
+				f := styles.AlignFactor(styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self))
+				cwb.Geom.RelPos.Y = pos.Y + math32.Floor(f*extra)
+			}
+		}
 		if baselines != nil && styles.ItemAlign(fr.Styles.Align.Items, cwb.Styles.Align.Self) == styles.Baseline {
 			// the baselines of the items of the line with text are at the
 			// same place, within the line; the others are at its end

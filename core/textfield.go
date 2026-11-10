@@ -173,6 +173,11 @@ type TextField struct { //core:embedder
 	// lineHeight is the line height cached during styling.
 	lineHeight float32
 
+	// minWordKey is the text and font size that minWord is for, the
+	// cached width of its longest word (see [TextField.minContentWidth]).
+	minWordKey string
+	minWord    float32
+
 	// cursorMu is the mutex for updating the cursor between blinker and field.
 	cursorMu sync.Mutex
 
@@ -1721,21 +1726,81 @@ func (tf *TextField) SizeUp() {
 	sz := &tf.Geom.Size
 	icsz := tf.iconsSize()
 	availSz := sz.Actual.Content.Sub(icsz)
-
+	wraps := tf.Styles.Text.WhiteSpace.HasWordWrap()
+	if wraps {
+		// as wide as its text on one line (its preferred width), within
+		// its Max; it wraps in the width that it is given (in SizeDown),
+		// as text does (it wrapped at its Min width, as the user agent of
+		// the settings of the web browser, which was many lines high)
+		w := float32(1e6)
+		if sz.Max.X > 0 {
+			w = sz.Max.X - icsz.X
+		}
+		if tf.Scene != nil && tf.Scene.hasFlag(sceneContentSizing) {
+			// a window (or dialog) sized to its content is not wider than
+			// a readable measure of text, as for text (see [Text.SizeUp])
+			m := units.Ch(contentSizingMeasure)
+			m.ToDots(&tf.Styles.UnitContext)
+			w = min(w, m.Dots-icsz.X)
+		}
+		availSz.X = max(availSz.X, w)
+	}
 	rsz := tf.configTextSize(availSz)
 	rsz.SetAdd(icsz)
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
+	if wraps {
+		sz.setIntrinsicWidths(tf.minContentWidth()+icsz.X, sz.Actual.Content.X)
+		// its Min is the width that it prefers to be at least, not one
+		// that it is never narrower than, which is that of its longest word
+		sz.minWidth = min(sz.minWidth, math32.Ceil(tf.minContentWidth()+icsz.X+sz.Space.X))
+	}
 	tf.lineHeight = tf.Styles.LineHeightDots()
 	if DebugSettings.LayoutTrace {
 		fmt.Println(tf, "TextField SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }
 
+// growsFromContent returns whether the text field starts from the width
+// of its text (on one line) when it is narrowed in a row, not from its
+// Max, which it does when its text wraps (see [contentGrower]).
+func (tf *TextField) growsFromContent() bool {
+	return tf.Styles.Text.WhiteSpace.HasWordWrap()
+}
+
+// textFieldMinWidth is the narrowest that a text field is, in ch, when it
+// has no words to be as wide as (see [TextField.minContentWidth]).
+const textFieldMinWidth = 4
+
+// minContentWidth returns the min-content width of the text of the text
+// field (without its icons): the width of its longest word (or of its
+// placeholder), and at least [textFieldMinWidth], within its style Min.
+func (tf *TextField) minContentWidth() float32 {
+	txt := string(tf.editText)
+	if len(txt) == 0 {
+		txt = tf.Placeholder
+	}
+	if tf.NoEcho {
+		txt = string(concealDots(len(tf.editText)))
+	}
+	key := fmt.Sprintf("%s\x00%g", txt, tf.Styles.Font.Size.Dots)
+	if tf.minWordKey != key {
+		tf.minWordKey, tf.minWord = key, longestWordWidth(tf.Scene, &tf.Styles, txt)
+	}
+	floor := units.Ch(textFieldMinWidth)
+	floor.ToDots(&tf.Styles.UnitContext)
+	return min(max(tf.minWord, floor.Dots), tf.styleMinDots().X)
+}
+
 func (tf *TextField) SizeDown(iter int) bool {
 	sz := &tf.Geom.Size
 	prevContent := sz.Actual.Content
 	sz.setInitContentMin(tf.styleMinDots())
+	if tf.Styles.Text.WhiteSpace.HasWordWrap() && sz.Alloc.Content.X < sz.Actual.Content.X {
+		// narrower than its Min when it is given less width, down to the
+		// width of its longest word, in which it wraps (as text does)
+		sz.Actual.Content.X = max(sz.Alloc.Content.X, sz.minWidth-sz.Space.X)
+	}
 	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content, sz.Max) // get before update
 	icsz := tf.iconsSize()
 	availSz := pgrow.Sub(icsz)

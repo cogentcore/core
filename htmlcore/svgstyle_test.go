@@ -43,7 +43,7 @@ func TestSVGPageStyles(t *testing.T) {
 	assert.Contains(t, s, `style="fill: #ff0000"`)
 	assert.NotContains(t, s, `fill="blue"`, "the style has precedence over the attribute")
 	assert.Contains(t, s, `style="display: none"`)
-	assert.Contains(t, s, `style="transform: translate(5, 0) rotate(0)"`)
+	assert.Contains(t, s, `style="transform: translate(5,0) rotate(0)"`)
 
 	var sw *core.SVG
 	b.WalkDown(func(n tree.Node) bool {

@@ -7,6 +7,7 @@ package shapedgt
 import (
 	"fmt"
 	"math"
+	"slices"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
@@ -37,10 +38,36 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 	return sh.WrapLinesBoundsCached(tx, defSty, tsty, size, nil)
 }
 
+// truncates returns whether text in the given style is cut with an
+// ellipsis when it has too many lines or does not fit on its line.
+func truncates(tsty *text.Style) bool {
+	return tsty.LineClamp > 0 || tsty.Ellipsis
+}
+
+// truncator returns the ellipsis (…) that ends the last line of text that is
+// cut (see [text.Style.LineClamp] and [text.Style.Ellipsis]), shaped in the
+// default style of the text. It reuses the buffers of shaping, so it is
+// shaped before the text is.
+func (sh *Shaper) truncator(defSty *rich.Style, tsty *text.Style) shaping.Output {
+	r := []rune("…")
+	outs := sh.ShapeTextOutput(rich.NewText(defSty, r), tsty, r)
+	if len(outs) == 0 {
+		return shaping.Output{}
+	}
+	o := outs[0]
+	o.Glyphs = slices.Clone(o.Glyphs)
+	return o
+}
+
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call. Returns new lines and number of truncations.
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) ([]shaping.Line, int) {
 	cfg, maxSize := wrapConfig(defSty, tsty, size)
+	if truncates(tsty) {
+		// (shaped first, as shaping reuses the buffers of the outputs)
+		outs = slices.Clone(outs)
+		cfg.Truncator = sh.truncator(defSty, tsty)
+	}
 	if lines, ok := singleLine(outs, txt, cfg, maxSize, !cfg.DisableTrailingWhitespaceTrim); ok {
 		return lines, 0
 	}
@@ -181,6 +208,14 @@ func wrapConfig(defSty *rich.Style, tsty *text.Style, size math32.Vector2) (shap
 	if brk == shaping.Never {
 		maxSize = 100000
 		nlines = 1
+		if tsty.Ellipsis && !dir.IsVertical() {
+			// it is cut to fit on one line, with an ellipsis, within words
+			brk = shaping.WhenNecessary
+			maxSize = int(size.X)
+		}
+	}
+	if tsty.LineClamp > 0 && (nlines <= 0 || tsty.LineClamp < nlines) {
+		nlines = tsty.LineClamp
 	}
 	// fmt.Println(brk, nlines, maxSize)
 	cfg := shaping.WrapConfig{

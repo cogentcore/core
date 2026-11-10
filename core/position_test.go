@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -324,6 +325,31 @@ func TestPositionTransparentContent(t *testing.T) {
 	assert.Equal(t, [3]uint32{0, 0x80, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the fill under the text")
 }
 
+// TestPositionTranslucentBackground tests that an absolute widget with a
+// translucent background (as the dimming overlay of a modal dialog) is
+// blended with the widgets that it overlaps, not with the background of
+// its parent, which made it opaque (the window of nytimes.com was gray
+// under its consent dialog).
+func TestPositionTranslucentBackground(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+	fill := fixedFrame(b, 200, 40)
+	fill.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.Red) })
+	over := NewFrame(b)
+	over.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Min.Set(units.Dp(200), units.Dp(40))
+		s.Background = colors.Uniform(color.RGBA{0, 0, 0, 64}) // (premultiplied: 25% black)
+	})
+	var pos image.Point
+	img := b.RenderImage(func() { pos = fill.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+	assert.InDelta(t, 191, r>>8, 2, "the red fill, darkened")
+	assert.Equal(t, [2]uint32{0, 0}, [2]uint32{g >> 8, bl >> 8})
+}
+
 // TestPositionPercentOfContainingBlock tests that the percentages of an
 // absolute widget (as of its margins) are of its containing block, as in
 // CSS, not of its parent (as the dot under the bookmark icon of
@@ -472,4 +498,43 @@ func TestSceneWidgetAt(t *testing.T) {
 		assert.Equal(t, Widget(under), at(hidden), "not the hidden one over it")
 		assert.Nil(t, b.Scene.WidgetAt(image.Pt(-10, -10)))
 	})
+}
+
+// TestRoundedNoClipBorder tests that the rounded border of a parent that
+// does not clip is not painted over by a child that fills it, with a
+// background or not (as the search box of the results of google.com, of
+// which only the top and bottom of the border were shown).
+func TestRoundedNoClipBorder(t *testing.T) {
+	for _, childBg := range []bool{false, true} {
+		b := NewBody()
+		b.Styler(func(s *styles.Style) { s.Padding.Set(units.Dp(20)) })
+		box := NewFrame(b)
+		box.Styler(func(s *styles.Style) {
+			s.Min.Set(units.Dp(400), units.Dp(48))
+			s.Border.Width.Set(units.Dp(2))
+			s.Border.Color.Set(colors.Uniform(colors.Black))
+			s.Border.Radius.Set(units.Dp(26))
+			s.Background = colors.Uniform(colors.White)
+			s.NoClip = true
+			s.Padding.Zero()
+		})
+		kid := NewFrame(box)
+		kid.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			if childBg {
+				s.Background = colors.Uniform(colors.White)
+				s.Border.Radius.Set(units.Dp(26))
+			}
+		})
+		var pos image.Point
+		img := b.RenderImage(func() {
+			bb := box.Geom.TotalBBox
+			// on the top left corner of the border, at 45 degrees
+			r := float32(bb.Dy()) / 2
+			d := r - (r-1)*0.7071
+			pos = image.Pt(bb.Min.X+int(d), bb.Min.Y+int(d))
+		})
+		r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+		assert.Less(t, (r+g+bl)/3>>8, uint32(128), "the corner of the border is shown (child background %v)", childBg)
+	}
 }

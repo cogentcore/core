@@ -62,6 +62,16 @@ type Style struct { //types:add
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace WhiteSpaces
 
+	// LineClamp (not inherited), if positive, is the most lines that the
+	// text has: the text after them is cut, and the last line ends with an
+	// ellipsis (…), as the -webkit-line-clamp property of CSS.
+	LineClamp int
+
+	// Ellipsis (not inherited) is whether text that does not wrap and is
+	// wider than its box is cut to fit in it, ending with an ellipsis (…),
+	// as text-overflow: ellipsis in CSS.
+	Ellipsis bool
+
 	// Direction specifies the default text direction, which can be overridden if the
 	// unicode text is typically written in a different direction.
 	Direction rich.Directions

@@ -251,9 +251,10 @@ func gridTracksAuto(v string, autoCount func(track string, fit bool) int) []stri
 // autoRepeatCount returns the number of tracks of the given track of a
 // repeat(auto-fit or auto-fill) of the grid of the given node: as many as
 // fit in its width at their minimum size (of minmax(), or their size), with
-// the column gap, as in CSS, of the width of the page when the grid has no
-// width of its own to go by (which a percentage minimum does not depend
-// on much), and at most as many as the grid has items for auto-fit, whose
+// the column gap, as in CSS, in the width that the grid has before it is
+// laid out (see [Context.availableWidth]: as the cards of
+// repeat(auto-fill, minmax(180px, 1fr)) in a body of max-width: 720px,
+// which were in 4 tracks for a page 800px wide, not 3), and at most as many as the grid has items for auto-fit, whose
 // empty tracks collapse (as the 3 cards of repeat(auto-fit, minmax(25%,
 // 1fr)) of edition.cnn.com, which were in one column).
 func (c *Context) autoRepeatCount(n *html.Node, track string, fit bool) int {
@@ -263,10 +264,7 @@ func (c *Context) autoRepeatCount(n *html.Node, track string, fit bool) int {
 		mn = strings.TrimSpace(mn)
 	}
 	env := c.readEnv()
-	width := c.mediaWidth()
-	if w, ok := env.lengthPx(strings.TrimSpace(c.declaration(n, "width"))); ok && w > 0 {
-		width = w
-	}
+	width := c.availableWidth(env, n)
 	gap := c.gridColumnGap(n, env)
 	size := float32(0)
 	if p, ok := strings.CutSuffix(mn, "%"); ok {
@@ -360,6 +358,16 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 				// repository grid of github.com, whose hidden panels
 				// widened their columns), and it overflows them
 				s.Contain = styles.ContainInlineSize
+			}
+			if mn != "0" && mn != "0px" && mn != "auto" {
+				if l, ok := env.length(mn, units.UnitPw); ok {
+					// the track is at least the length (as the first column
+					// of minmax(64px, 1fr) of the results of google.com,
+					// empty, which was narrower, so that the header was to
+					// the left of where it is in browsers)
+					s.Min.X = l
+					s.BoxSizing = styles.BoxBorderBox
+				}
 			}
 			track = mx
 		} else if l, ok := env.length(mx, units.UnitPw); ok {

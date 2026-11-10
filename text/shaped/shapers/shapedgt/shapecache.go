@@ -92,6 +92,7 @@ type wrapEntry struct {
 	truncateAfter int
 	policy        shaping.LineBreakPolicy
 	noTrim        bool
+	truncator     bool // whether the lines end with an ellipsis when cut
 	lines         []shaping.Line
 	truncated     int
 
@@ -335,6 +336,9 @@ func (sh *Shaper) WrapLinesCached(tx rich.Text, defSty *rich.Style, tsty *text.S
 // those of the entry, which were wrapped before and are not the caller's to change.
 func (sh *Shaper) wrapCached(tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2, adjust func(outs []shaping.Output)) ([]shaping.Line, int, *wrapEntry, bool) {
 	cfg, maxSize := wrapConfig(defSty, tsty, size)
+	if truncates(tsty) {
+		cfg.Truncator = sh.truncator(defSty, tsty) // (before the text is shaped)
+	}
 
 	// Texts that cannot be cached are shaped and wrapped every time.
 	if !cacheable(tx) {
@@ -483,7 +487,7 @@ func (se *shapeEntry) wrapEntry(cfg shaping.WrapConfig, maxSize int) *wrapEntry 
 // configuration and size, replacing the oldest one when it has maxWraps,
 // and returns it, or nil when wrappings with the configuration are not cached.
 func (se *shapeEntry) addWrap(cfg shaping.WrapConfig, maxSize int, lines []shaping.Line, truncated int) *wrapEntry {
-	we := wrapEntry{maxSize: maxSize, direction: cfg.Direction, truncateAfter: cfg.TruncateAfterLines, policy: cfg.BreakPolicy, noTrim: cfg.DisableTrailingWhitespaceTrim, lines: copyLines(lines), truncated: truncated}
+	we := wrapEntry{maxSize: maxSize, direction: cfg.Direction, truncateAfter: cfg.TruncateAfterLines, policy: cfg.BreakPolicy, noTrim: cfg.DisableTrailingWhitespaceTrim, truncator: len(cfg.Truncator.Glyphs) > 0, lines: copyLines(lines), truncated: truncated}
 	if !we.matches(cfg, maxSize) {
 		return nil
 	}
@@ -498,7 +502,7 @@ func (se *shapeEntry) addWrap(cfg shaping.WrapConfig, maxSize int, lines []shapi
 
 // matches returns whether the wrapped lines are for the given configuration and size.
 func (we *wrapEntry) matches(cfg shaping.WrapConfig, maxSize int) bool {
-	return we.maxSize == maxSize && we.direction == cfg.Direction && we.truncateAfter == cfg.TruncateAfterLines && we.policy == cfg.BreakPolicy && we.noTrim == cfg.DisableTrailingWhitespaceTrim && !cfg.TextContinues && len(cfg.Truncator.Glyphs) == 0
+	return we.maxSize == maxSize && we.direction == cfg.Direction && we.truncateAfter == cfg.TruncateAfterLines && we.policy == cfg.BreakPolicy && we.noTrim == cfg.DisableTrailingWhitespaceTrim && !cfg.TextContinues && we.truncator == (len(cfg.Truncator.Glyphs) > 0)
 }
 
 // copyLines returns a copy of the lines with their own outputs and glyphs.

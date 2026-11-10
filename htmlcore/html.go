@@ -55,6 +55,9 @@ func ReadDocument(ctx *Context, parent core.Widget, n *html.Node) error {
 		return readHTMLNode(ctx, parent, n)
 	}
 	ctx.readState = readState{}
+	if ctx.ImageCache != nil {
+		ctx.ImageCache.NewRead() // (its images are kept over the others)
+	}
 	// the style sheets of the new page are imported again, and it has its title
 	ctx.cssImports = nil
 	ctx.mediaUses, ctx.columnUses = nil, nil // of the new page

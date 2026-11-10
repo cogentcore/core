@@ -22,7 +22,9 @@ import (
 // size of a container changed, the elements in it are styled again and
 // laid out again (as for the screenshots of the platform features of
 // github.com). Before the first layout of a container, they are of the
-// viewport, as in CSS for an element that is in no container.
+// viewport, as in CSS for an element that is in no container, or of the
+// size that it had when the page was last read (see
+// [Context.KeepContainerSizes]).
 
 // containerFrame is the frame of an element that is a container.
 type containerFrame struct {
@@ -34,8 +36,39 @@ type containerFrame struct {
 
 	// size is the size of the content box of the container (in dots) in
 	// its last layout, which the elements in it are styled for, and prev
-	// is the size before it, for stopping sizes that alternate.
+	// is the size before it, for stopping sizes that alternate (set with
+	// the containerMu of ctx held, for [Context.KeepContainerSizes]).
 	size, prev math32.Vector2
+
+	// ctx is the context that read the container.
+	ctx *Context
+}
+
+// containerSizes are the sizes of a container (see [containerFrame]).
+type containerSizes struct {
+	size, prev math32.Vector2
+}
+
+// KeepContainerSizes sets the containers of the page that the context
+// reads, which is the document that the given context read, read again
+// (as after its scripts change it), to start with the sizes that they had
+// in its last layout, so that the elements in them are styled for those
+// first, not for the viewport until they are laid out (as the panels of
+// repositories of github.com, of font-size: 1cqw, which were shown at
+// the size of the viewport each time that the page was read again).
+// It can be called as the given context's page is laid out.
+func (c *Context) KeepContainerSizes(prev *Context) {
+	if prev == nil {
+		return
+	}
+	prev.containerMu.Lock()
+	defer prev.containerMu.Unlock()
+	c.keptContainers = make(map[*html.Node]containerSizes, len(prev.containers))
+	for n, cf := range prev.containers {
+		if cf.size.X > 0 {
+			c.keptContainers[n] = containerSizes{cf.size, cf.prev}
+		}
+	}
 }
 
 // isContainer returns whether the given element is a container, and
@@ -72,7 +105,9 @@ func (cf *containerFrame) SizeFinal() {
 	if !changed(sz, cf.size) || !changed(sz, cf.prev) && cf.prev != (math32.Vector2{}) {
 		return
 	}
+	cf.ctx.containerMu.Lock()
 	cf.prev, cf.size = cf.size, sz
+	cf.ctx.containerMu.Unlock()
 	cf.Defer(func() {
 		cf.Restyle()
 		cf.NeedsLayout()

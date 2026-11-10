@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html><head><style>
+*,:before,:after { box-sizing: border-box }
+body { margin: 0; font-family: sans-serif }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 30px }
+.row{flex-wrap:wrap;margin-left:-30px;margin-right:-30px;display:flex}
+.col-12,.col-md-6,.col-lg-4,.col-lg-8,.col-xl-3,.col-xl-4,.col-xl-9{position:relative;width:100%;padding-left:30px;padding-right:30px}
+.col-12{flex:0 0 100%;max-width:100%}
+@media (width>=768px){.col-md-6{flex:0 0 50%;max-width:50%}}
+@media (width>=992px){.col-lg-4{flex:0 0 33.3333%;max-width:33.3333%}.col-lg-8{flex:0 0 66.6667%;max-width:66.6667%}}
+@media (width>=1280px){.col-xl-3{flex:0 0 25%;max-width:25%}.col-xl-4{flex:0 0 33.3333%;max-width:33.3333%}.col-xl-9{flex:0 0 75%;max-width:75%}}
+.m-0{margin:0!important}
+.gutters-2{margin-left:-8px;margin-right:-8px}
+.gutters-2>[class*=col]{padding-left:8px;padding-right:8px;margin-bottom:16px}
+.row--equalized>*{flex-direction:column;display:flex}
+.row--equalized>*>*{flex:auto}
+.card { border: 1px solid #ccc; padding: 12px; background: #fff }
+.filters div { padding: 8px 0; border-bottom: 1px solid #ddd }
+</style></head><body><div class="container"><div class="row">
+<div class="col-12 col-lg-4 col-xl-3 filters"><div>Frametype</div><div>Motorpositie</div><div>Kleur</div></div>
+<div class="col-12 col-lg-8 col-xl-9"><div id="results"><div class="react-list-container"><div class="row row--equalized gutters-2 m-0"><div class="col-12 col-md-6 col-xl-4"><article class="card">Bike 0<p>Tot 150 km actieradius, middenmotor</p></article></div><div class="col-12 col-md-6 col-xl-4"><article class="card">Bike 1<p>Tot 150 km actieradius, middenmotor</p></article></div><div class="col-12 col-md-6 col-xl-4"><article class="card">Bike 2<p>Tot 150 km actieradius, middenmotor</p></article></div><div class="col-12 col-md-6 col-xl-4"><article class="card">Bike 3<p>Tot 150 km actieradius, middenmotor</p></article></div><div class="col-12 col-md-6 col-xl-4"><article class="card">Bike 4<p>Tot 150 km actieradius, middenmotor</p></article></div><div class="col-12 col-md-6 col-xl-4"><article class="card">Bike 5<p>Tot 150 km actieradius, middenmotor</p></article></div></div></div></div></div>
+</div></div></body></html>

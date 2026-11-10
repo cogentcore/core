@@ -56,6 +56,11 @@ type cssDecl struct {
 	// container is the condition of the @container rule that the
 	// declaration is in, if any (see [Context.containerMatches]).
 	container *containerCond
+
+	// rule is the index of the style rule of the declaration in the
+	// rules of the context plus one, or 0 if it is not of a rule (see
+	// [Context.Restyle]).
+	rule int
 }
 
 // rank returns the rank of the declaration in the cascade,
@@ -136,12 +141,17 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				continue
 			}
 			spec := specificity(sel)
-			if cs := compileSelector(sel); cs != nil {
+			cs := compileSelector(sel)
+			if cs != nil {
 				spec = cs.specificity
+				c.recordRule(root, sel, cs, rule.Declarations, origin, spec)
 			}
-			for _, n := range c.selectNodes(root, sel) {
-				c.addDecls(n, rule.Declarations, origin, spec)
+			if !c.recordOnly { // (see Context.addedStyle)
+				for _, n := range c.selectNodes(root, sel) {
+					c.addDecls(n, rule.Declarations, origin, spec)
+				}
 			}
+			c.curRule = 0
 		}
 	}
 }
@@ -149,11 +159,16 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 // addDecls adds the given declarations to the given node.
 func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOrigin, spec int) {
 	for _, d := range decls {
+		prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
+		if !validDeclaration(prop, value) {
+			continue // dropped, so that the declaration before it applies
+		}
 		c.cssOrder++
-		c.styles[n] = append(c.styles[n], &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)),
-			Value: c.absoluteURLs(strings.TrimSpace(d.Value)), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
-			container: c.curContainer})
+		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
+			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
+			container: c.curContainer, rule: c.curRule})
 	}
+	c.varMemo = nil
 	if c.curContainer != nil {
 		if c.containerQueried == nil {
 			c.containerQueried = map[*html.Node]bool{}
@@ -161,6 +176,36 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 		c.containerQueried[n] = true
 	}
 	delete(c.sorted, n)
+}
+
+// otherVendorValue matches a keyword of the vendor prefix of another
+// browser engine (as -moz-available), which is invalid in browsers of
+// WebKit and Blink, as Cogent Core is.
+var otherVendorValue = regexp.MustCompile(`(^|[\s,(])-(moz|ms|o)-[a-z]`)
+
+// validDeclaration returns whether a declaration of the given property
+// and value is valid, as in browsers, which drop the declarations that
+// are not when they are parsed, so that the declarations before them of
+// the same property apply (as height: 100vh before height:
+// -webkit-fill-available, of the captcha frames of DataDome for Safari,
+// which were of the height of no content). A size of
+// -webkit-fill-available is invalid here too, as it is not laid out, and
+// the declaration before it is meant as a fallback for it. Custom
+// properties and values with variables are only known when they are used.
+func validDeclaration(prop, value string) bool {
+	if strings.HasPrefix(prop, "--") || strings.Contains(value, "var(") {
+		return true
+	}
+	if otherVendorValue.MatchString(strings.ToLower(value)) {
+		return false
+	}
+	switch prop {
+	case "width", "height", "min-width", "min-height", "max-width", "max-height", "inline-size", "block-size":
+		if strings.Contains(strings.ToLower(value), "-webkit-fill-available") {
+			return false
+		}
+	}
+	return true
 }
 
 // addHint adds a declaration of a presentational attribute to the node.
@@ -217,10 +262,37 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 			if ds[i].invalid {
 				return ""
 			}
+			if prop == "display" {
+				return legacyDisplay(ds[i].Value)
+			}
 			return ds[i].Value
 		}
 	}
 	return ""
+}
+
+// legacyDisplay returns the display for the given value of the display
+// property, which is that of the prefixed legacy values: -webkit-box (as
+// with -webkit-line-clamp, in a column) is a block, and -webkit-flex flex;
+// unset and initial are inline.
+func legacyDisplay(v string) string {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "-webkit-box", "-moz-box":
+		return "block"
+	case "-webkit-inline-box", "-moz-inline-box":
+		return "inline-block"
+	case "-webkit-flex":
+		return "flex"
+	case "-webkit-inline-flex":
+		return "inline-flex"
+	case "unset", "initial":
+		// display is not inherited, so these are its initial value (as
+		// display: unset of the widgets of the masthead of nytimes.com, in
+		// a flex row, which had no box of its own, so that its ticker was
+		// as wide as the row, over the logo)
+		return "inline"
+	}
+	return v
 }
 
 // lastDeclaration returns the property and value of the declaration of
@@ -686,24 +758,99 @@ func (c *Context) substituteVars(n *html.Node, value string, visiting map[string
 // customProperty returns the value of the given custom property for the
 // given node, from it or the nearest ancestor that declares it.
 func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
+	// the values of the elements on the way to the one that has it are
+	// memoized (see varMemo), as they are looked up for each var() of
+	// each element, through all of the elements that it is in
+	var path []*html.Node
+	found := func(v varValue) (string, bool) {
+		if strings.Contains(v.value, "var(") {
+			return v.value, v.ok // (not substituted yet, so not memoized)
+		}
+		if c.varMemo == nil {
+			c.varMemo = map[varKey]varValue{}
+		}
+		for _, p := range path {
+			c.varMemo[varKey{p, name}] = v
+		}
+		return v.value, v.ok
+	}
 	for p := n; p != nil; p = p.Parent {
 		if p.Type != html.ElementNode {
 			continue
+		}
+		if v, ok := c.varMemo[varKey{p, name}]; ok {
+			return found(v)
 		}
 		ds := c.styles[p]
 		if !c.hinted[p] || !c.sorted[p] {
 			ds = c.declarations(p)
 		}
-		for i := len(ds) - 1; i >= 0; i-- {
-			if ds[i].Property == name {
-				if strings.EqualFold(strings.TrimSpace(ds[i].Value), "initial") {
-					return "", false // the guaranteed-invalid value, as when not set
-				}
-				return ds[i].Value, !ds[i].invalid
+		path = append(path, p)
+		if d := c.customDecl(p, ds, name); d != nil {
+			if strings.EqualFold(strings.TrimSpace(d.Value), "initial") {
+				return found(varValue{}) // the guaranteed-invalid value, as when not set
 			}
+			return found(varValue{d.Value, !d.invalid})
 		}
 	}
-	return "", false
+	return found(varValue{})
+}
+
+// varKey is the key of [Context.varMemo]: an element and the name of a
+// custom property.
+type varKey struct {
+	n    *html.Node
+	name string
+}
+
+// varValue is the value of a custom property of an element (see
+// [Context.customProperty]).
+type varValue struct {
+	value string
+	ok    bool
+}
+
+// customIndex is an index of the custom properties of the sorted
+// declarations of an element (see [Context.customDecl]).
+type customIndex struct {
+	ds []*cssDecl          // the declarations that it is of
+	m  map[string]*cssDecl // the last declaration of each custom property
+}
+
+// minCustomIndex is the number of declarations of an element from which
+// its custom properties are indexed.
+const minCustomIndex = 32
+
+// customDecl returns the last of the given sorted declarations of the
+// given element of the given property (a custom property), or nil. The
+// custom properties of elements with many declarations are indexed, as
+// they are looked up for each var() of the elements in them (as those of
+// the root of nytimes.com, hundreds of them, which took seconds to scan
+// in each read of its page). The index is made again when the
+// declarations are others (or more).
+func (c *Context) customDecl(n *html.Node, ds []*cssDecl, name string) *cssDecl {
+	if len(ds) < minCustomIndex {
+		for i := len(ds) - 1; i >= 0; i-- {
+			if ds[i].Property == name {
+				return ds[i]
+			}
+		}
+		return nil
+	}
+	idx := c.customIndexes[n]
+	if idx == nil || len(idx.ds) != len(ds) || &idx.ds[0] != &ds[0] {
+		idx = &customIndex{ds: ds, m: map[string]*cssDecl{}}
+		for _, d := range ds {
+			if strings.HasPrefix(d.Property, "--") {
+				idx.m[d.Property] = d
+			}
+		}
+		if c.customIndexes == nil {
+			c.customIndexes = map[*html.Node]*customIndex{}
+		}
+		c.customIndexes[n] = idx
+	}
+	return idx.m[name]
 }
 
 // displayOf returns the display of the given node, with the children of
@@ -822,11 +969,13 @@ func (c *Context) addStyleSheets(root *html.Node) {
 			case "template":
 				return
 			case "style":
+				c.recordSheet(n)
 				if c.mediaMatches(GetAttr(n, "media")) {
 					c.addStyleOrigin(nodeText(n), originAuthor)
 				}
 				return
 			case "link":
+				c.recordSheet(n)
 				if strings.EqualFold(GetAttr(n, "rel"), "stylesheet") && c.mediaMatches(GetAttr(n, "media")) {
 					c.addLinkedStyle(GetAttr(n, "href"))
 				}

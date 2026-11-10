@@ -52,6 +52,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	r.itemGrowth()
 	r.flexBasis()
 	r.sizes()
+	r.intrinsicSize()
 	r.flexBasisGrowth()
 	r.textAlign()
 	r.tableBorders()
@@ -69,7 +70,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	if bs.hidden {
 		s.Opacity = 0
-		s.Abilities = 0
+		setHiddenAbilities(s)
 	}
 	if st.clippedOut { // nothing of it is shown, nor gets events
 		s.Opacity = 0
@@ -80,6 +81,35 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	if st.hideText { // the text is not shown, and its box is (with its background)
 		s.Color = colors.Uniform(colors.Transparent)
+	}
+}
+
+// intrinsicSize sets the minimum size of a box with size containment in a
+// dimension to its contain-intrinsic size there, as the size of its
+// content, which is otherwise empty (as the rows of the file trees of
+// GitHub pull requests, of contain: strict and contain-intrinsic-height:
+// auto 32px, which were of no height, over each other).
+func (r *resolver) intrinsicSize() {
+	st, s := r.st, r.s
+	pad := sideDots(&s.Padding, r.dots)
+	border := sideDots(&s.Border.Width, r.dots)
+	set := func(v *units.Value, min *units.Value, extra float32) {
+		if v == nil {
+			return
+		}
+		d := r.dots(v)
+		if s.BoxSizing == styles.BoxBorderBox {
+			d += extra
+		}
+		if d > r.dots(min) {
+			*min = units.Dot(d)
+		}
+	}
+	if s.Contain == styles.ContainSize || s.Contain == styles.ContainInlineSize {
+		set(st.intrinsicWidth, &s.Min.X, pad.Left+pad.Right+border.Left+border.Right)
+	}
+	if s.Contain == styles.ContainSize {
+		set(st.intrinsicHeight, &s.Min.Y, pad.Top+pad.Bottom+border.Top+border.Bottom)
 	}
 }
 
@@ -272,6 +302,56 @@ func (r *resolver) replacedSize() {
 	}
 }
 
+// isIframe returns whether the element is an iframe.
+// fixedHeight returns whether the box is exactly of the given height set
+// in CSS, with overflow that is visible: one of a frame that does not clip
+// its children (as is the default), and not of a part of a table, whose
+// height is a minimum in CSS. The height is an absolute length (as px or
+// em), not a percentage, a length of the viewport or a calc(), as of the
+// containers of whole pages (as html and body), whose overflow is in the
+// scrolling of the page, which that of a fixed box is not. Its content is
+// only boxes (as the text of the instructions of reCAPTCHA, in a div), not
+// inline content, whose lines can wrap differently than in browsers
+// (it would overlap what is after the box when they do: the box grows).
+func (r *resolver) fixedHeight(h *units.Value) bool {
+	if _, ok := r.wb.This.(*core.Frame); !ok || !r.s.NoClip || h.Custom != nil {
+		return false
+	}
+	switch h.Unit {
+	case units.UnitDp, units.UnitPx, units.UnitRem, units.UnitEm, units.UnitEx, units.UnitCh,
+		units.UnitCm, units.UnitMm, units.UnitQ, units.UnitIn, units.UnitPc, units.UnitPt:
+	default:
+		return false
+	}
+	if tag := r.wb.Property("tag"); tag == "html" || tag == "body" {
+		return false
+	}
+	if r.node == nil {
+		return false
+	}
+	for ch := r.node.FirstChild; ch != nil; ch = ch.NextSibling {
+		switch ch.Type {
+		case html.TextNode:
+			if strings.TrimSpace(ch.Data) != "" {
+				return false
+			}
+		case html.ElementNode:
+			if d := r.c.displayOf(ch); d != "none" && r.c.isInlineLevel(ch) {
+				return false
+			}
+		}
+	}
+	switch r.st.display {
+	case "table", "inline-table", "table-row", "table-cell", "table-row-group", "table-header-group", "table-footer-group":
+		return false
+	}
+	return true
+}
+
+func (r *resolver) isIframe() bool {
+	return r.node != nil && r.node.Data == "iframe"
+}
+
 // percentUnit returns whether the given unit is a percentage of a size of
 // the parent or the element, which is not definite for a replaced element.
 func percentUnit(u units.Units) bool {
@@ -350,6 +430,11 @@ func (r *resolver) lineHeight() {
 	default:
 		if f, err := strconv.ParseFloat(lh, 32); err == nil {
 			s.Text.LineHeight = float32(f)
+		} else if f, ok := unitlessCalc(lh); ok {
+			// a number of calc() (as calc(1.25 / .875), the line height of
+			// the small text of Tailwind, which was taken to be in px: the
+			// text was 1.4px high, cut off by its boxes)
+			s.Text.LineHeight = f
 		} else if v, ok := st.env.length(lh, units.UnitEm); ok {
 			if v.Unit == units.UnitEm {
 				s.Text.LineHeight = v.Value / 100 // from %
@@ -361,6 +446,16 @@ func (r *resolver) lineHeight() {
 			}
 		}
 	}
+}
+
+// unitlessCalc returns the value of the given calc() expression of numbers
+// only (no lengths or percentages), and whether it is one.
+func unitlessCalc(v string) (float32, bool) {
+	inner, ok := strings.CutPrefix(strings.ToLower(strings.TrimSpace(v)), "calc(")
+	if !ok || strings.ContainsAny(inner, "abcdefghijklmnopqrstuvwxyz%") {
+		return 0, false
+	}
+	return calcPx(v)
 }
 
 // itemGrowth sets how the widget grows and shrinks in the formatting context
@@ -435,6 +530,15 @@ func (r *resolver) itemGrowth() {
 			// the rest fit in it, by its width)
 			s.Contain = styles.ContainInlineSize
 		}
+		if st.width == nil && s.Contain == styles.ContainNone && !s.MaxContentWidth && (st.display == "block" || st.display == "flow-root") &&
+			r.node != nil && r.node.Data != "body" && r.node.Data != "html" && r.c.hasFixedWidthChild(r.node) && r.c.inBlockFlow(r.node) {
+			// a block of an auto width in blocks in the flow is as wide as
+			// its containing block, which a child of a fixed width that is
+			// wider overflows, as in CSS, and does not widen (as the blue
+			// instructions of the reCAPTCHA challenge, with a div of 400px
+			// and padding, which overflowed its frame of 400px in width)
+			s.Contain = styles.ContainInlineSize
+		}
 	case st.display == "table-cell":
 		s.Shrink.X = 1 // the columns of a table fit in its width
 	case st.width == nil:
@@ -492,6 +596,14 @@ func (r *resolver) flexBasis() {
 	if node == nil || node.Parent == nil || st.flexGrow <= 0 {
 		return
 	}
+	if ps.IsFlexWrap() && st.minWidth != nil && r.s.Contain == styles.ContainNone {
+		// an item of a basis of 0 with a min-width (not auto) in a row
+		// that wraps is in a line by its min-width, not its content, which
+		// it grows from to fill the line, as in CSS (as the content of the
+		// page of a repository of GitHub, of flex: 1 1 0 and min-width:
+		// 1px, beside which its sidebar did not fit)
+		r.s.Contain = styles.ContainInlineSize
+	}
 	sum, n := float32(0), 0
 	for sib := node.Parent.FirstChild; sib != nil; sib = sib.NextSibling {
 		if sib.Type != html.ElementNode || !c.inFlexFlow(sib) {
@@ -532,6 +644,17 @@ func (r *resolver) flexBasisGrowth() {
 	if !zeroLength(st.flexBasis) {
 		if st.hasGrow && st.flexGrow > 0 {
 			s.Grow.X = st.flexGrow
+			return
+		}
+		if b := strings.TrimSpace(st.flexBasis); strings.HasSuffix(b, "%") && ps.IsFlexWrap() {
+			// in a row that wraps, an item that does not grow needs its
+			// basis in its line (its hypothetical main size in CSS), not
+			// its content (as the columns of Bootstrap, of flex: 0 0 75%,
+			// whose cards on one line made it wrap below the column of 25%
+			// beside it, on stella.nl)
+			if p, err := strconv.ParseFloat(strings.TrimSuffix(b, "%"), 32); err == nil {
+				s.FlexBasis = units.Pw(float32(p))
+			}
 			return
 		}
 		if strings.HasSuffix(strings.TrimSpace(st.flexBasis), "%") && !ps.IsFlexWrap() && s.Max.X.Unit == units.UnitPw {
@@ -659,6 +782,33 @@ func (c *Context) hasRigidItem(n *html.Node) bool {
 	return false
 }
 
+// hasFixedWidthChild returns whether the given element has a child element
+// with a fixed width, of an absolute length (as px or em), in the flow.
+func (c *Context) hasFixedWidthChild(n *html.Node) bool {
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode {
+			continue
+		}
+		switch strings.TrimSpace(c.declaration(k, "position")) {
+		case "absolute", "fixed":
+			continue
+		}
+		w := strings.ToLower(strings.TrimSpace(c.declaration(k, "width")))
+		if strings.ContainsAny(w, "(%") {
+			continue
+		}
+		for _, u := range []string{"px", "rem", "em"} {
+			if num, ok := strings.CutSuffix(w, u); ok {
+				if _, err := strconv.ParseFloat(num, 32); err == nil {
+					return true
+				}
+				break
+			}
+		}
+	}
+	return false
+}
+
 // inFlexFlow returns whether the given element is an item in the flow of
 // its flex container: it is displayed, and not absolute or fixed.
 func (c *Context) inFlexFlow(n *html.Node) bool {
@@ -702,6 +852,7 @@ func (r *resolver) sizes() {
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
+		isImage = isImage || r.isIframe() // (replaced elements)
 		if st.width.Unit == units.UnitPw && !isImage {
 			// A percentage of the width of the parent fills that much
 			// of it, which as a minimum would make a parent that is as
@@ -748,6 +899,28 @@ func (r *resolver) sizes() {
 	// shown in CSS, but it is clipped in core, so the height is only a
 	// minimum unless the overflow is clipped anyway.
 	parentDefinite := pbs == nil || pbs.definiteHeight
+	if pbs != nil && pbs.display == anonymousInline {
+		// An element in a run of inline content (as an image), in the
+		// anonymous frame of the run, whose height is that of its line:
+		// the percentages of its heights and of its top and bottom are of
+		// its containing block, the block that the run is in, as in CSS
+		// (as the tiles of the challenges of reCAPTCHA, images of height:
+		// 300% and top: -100% in wrappers of 126px, of which only the
+		// first row showed).
+		if cbh, ok := r.containingBlockHeight(); ok {
+			for _, h := range []**units.Value{&st.height, &st.minHeight, &st.maxHeight} {
+				if *h != nil && (*h).Unit == units.UnitPh {
+					v := units.Dp((*h).Value * cbh / 100)
+					*h = &v
+				}
+			}
+			for _, side := range []*units.Value{&s.Inset.Top, &s.Inset.Bottom} {
+				if side.Unit == units.UnitPh {
+					*side = units.Dp(side.Value * cbh / 100)
+				}
+			}
+		}
+	}
 	if pbs == nil && node != nil && node.Parent != nil && node.Parent.Data == "html" {
 		// The html element (which has no widget) has a definite height,
 		// taken to be that of the viewport, only when it has a height.
@@ -763,6 +936,7 @@ func (r *resolver) sizes() {
 		case pbs == nil:
 			// a percentage of the viewport (the containing block of the
 			// top element), not of the scene, which is as high as the page
+			c.viewportHeightUsed.Store(true)
 			v := (*h).Value
 			if c.MediaHeight > 0 {
 				*h = new(units.Value)
@@ -772,6 +946,20 @@ func (r *resolver) sizes() {
 				**h = units.Vh(v)
 			}
 		}
+	}
+	if r.isIframe() {
+		// an iframe is a replaced element, of 300 by 150 without a width
+		// or height (as of a percentage of a parent with an auto height),
+		// and exactly of its height, as its document scrolls in it
+		if st.width == nil {
+			s.Min.X = units.Dp(IframeDefaultWidth)
+			s.Max.X, s.Grow.X = s.Min.X, 0
+		}
+		if st.height == nil {
+			h := units.Dp(IframeDefaultHeight)
+			st.height = &h
+		}
+		defer func() { s.Max.Y = s.Min.Y }()
 	}
 	// (an aspect ratio makes the height follow the width, which is definite)
 	bs.definiteHeight = st.height != nil || s.AspectRatio > 0
@@ -808,6 +996,19 @@ func (r *resolver) sizes() {
 		s.Min.Y = mn
 		if s.Overflow.Y != styles.OverflowVisible {
 			s.Max.Y = mx
+		} else if r.fixedHeight(st.height) && st.minHeight == nil && st.maxHeight == nil {
+			// a box of a fixed height is of that height, and its content
+			// overflows it visibly (as the instructions of the reCAPTCHA
+			// challenge, whose text is higher than them): its overflow is
+			// hidden in the layout, but not clipped (NoClip)
+			if r.dots(&mx) <= 0 {
+				// a height of 0 (as the edition bar of nytimes.com, whose
+				// content hangs above it, aligned at its end), which is not
+				// a Max in core (that is none)
+				mx = units.Dot(0.001)
+			}
+			s.Max.Y = mx
+			s.Overflow.Y = styles.OverflowHidden
 		}
 		s.Grow.Y = 0
 	}
@@ -863,6 +1064,29 @@ func (r *resolver) sizes() {
 	if st.maxHeight != nil {
 		s.Max.Y = *st.maxHeight
 	}
+}
+
+// containingBlockHeight returns the height in px of the containing block
+// of the element of an anonymous frame of a run of inline content (the
+// block that the run is in), from its height in CSS, if that is an
+// absolute length.
+func (r *resolver) containingBlockHeight() (float32, bool) {
+	pw, _ := r.wb.Parent.(core.Widget)
+	for pw != nil {
+		pbs := r.c.blocks[pw]
+		if pbs == nil || pbs.display != anonymousInline {
+			break
+		}
+		pw, _ = pw.AsWidget().Parent.(core.Widget)
+	}
+	if pw == nil {
+		return 0, false
+	}
+	n, _ := pw.AsWidget().Property("node").(*html.Node)
+	if n == nil {
+		return 0, false
+	}
+	return r.st.env.lengthPx(strings.TrimSpace(r.c.declaration(n, "height")))
 }
 
 // textAlign aligns text and inline rows within their block for text-align.

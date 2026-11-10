@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"bytes"
 	"fmt"
+	"image/color"
 	"log/slog"
 	"mime/multipart"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -382,7 +384,14 @@ func handleInput(ctx *Context) core.Widget {
 		switch ityp {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			newWidget = New[core.Spinner](ctx).SetValue(fval)
+			sp := New[core.Spinner](ctx).SetValue(fval)
+			// a field of its value, as in browsers, which step it with
+			// the arrow keys (without the buttons of a spinner)
+			sp.SetType(core.TextFieldOutlined)
+			sp.SetLeadingIcon(icons.None).SetTrailingIcon(icons.None)
+			cssFieldBorder(&sp.TextField)
+			fieldWidth(ctx.Node, &sp.TextField)
+			newWidget = sp
 		case "checkbox", "radio":
 			// (SetState returns the WidgetBase, which is not the widget)
 			sw := New[core.Switch](ctx).SetType(core.SwitchCheckbox)
@@ -397,7 +406,7 @@ func handleInput(ctx *Context) core.Widget {
 		case "button", "submit":
 			newWidget = New[core.Button](ctx).SetText(val)
 		case "color":
-			newWidget = core.Bind(val, New[core.ColorButton](ctx))
+			newWidget = colorInput(ctx, val)
 		case "datetime":
 			newWidget = core.Bind(val, New[core.TimeInput](ctx))
 		case "file":
@@ -408,6 +417,7 @@ func handleInput(ctx *Context) core.Widget {
 			tf := New[core.TextField](ctx).SetText(val).SetType(core.TextFieldOutlined)
 			tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
 			cssFieldBorder(tf)
+			fieldWidth(ctx.Node, tf)
 			tf.FinalStyler(func(s *styles.Style) { s.SetTextWrap(false) }) // an input is one line
 
 			ctx.inputIcons(ctx.Node, tf)
@@ -415,6 +425,74 @@ func handleInput(ctx *Context) core.Widget {
 		}
 	}
 	return newWidget
+}
+
+// fieldWidth sets the width of the given text field of the given input or
+// textarea element to that of browsers when its CSS gives it none: of its
+// size (or cols for a textarea) in characters, 20 by default, of the
+// average width of a character of its font (0.55em, or 0.6em for the
+// monospace font of a textarea, with its scrollbar), and the height of a
+// textarea to its rows of text (2 by default). It does not
+// grow (as a core text field does), as in browsers, where a text input was
+// as wide as it could be, up to 40ch, in a row of controls (wider than the
+// 156px of Chrome).
+func fieldWidth(n *html.Node, tf *core.TextField) {
+	attr := "size"
+	if n.Data == "textarea" {
+		attr = "cols"
+	}
+	chars := 20
+	if v, err := strconv.Atoi(strings.TrimSpace(GetAttr(n, attr))); err == nil && v > 0 {
+		chars = v
+	}
+	rows := 0
+	if n.Data == "textarea" {
+		rows = 2
+		if v, err := strconv.Atoi(strings.TrimSpace(GetAttr(n, "rows"))); err == nil && v > 0 {
+			rows = v
+		}
+	}
+	w := units.Em(float32(chars) * 0.55)
+	if rows > 0 {
+		w = units.Em(float32(chars)*0.6 + 1.15) // and its scrollbar of 15px
+	}
+	// (before the styler of its CSS, which sets the width that it gives)
+	tf.Styler(func(s *styles.Style) {
+		if rows > 0 {
+			s.Min.Y = units.Em(float32(rows) * 1.2)
+		}
+		s.Min.X, s.Max.X = w, w
+		s.Grow.X = 0
+	})
+	// one that its CSS makes grow (as by flex-grow: 1, as the search field
+	// of pkg.go.dev, which fills the header) is not limited to it
+	tf.FinalStyler(func(s *styles.Style) {
+		if s.Grow.X > 0 && s.Max.X.Unit == w.Unit && s.Max.X.Value == w.Value {
+			s.Max.X = units.Value{}
+		}
+	})
+}
+
+// colorInput returns the widget of an input of type color with the given
+// value: a swatch of the color with a border, of the size of that of
+// browsers (50 by 27px in Chrome), which opens a color picker when it is
+// clicked (it was a large button of Cogent Core, with a label and icon).
+func colorInput(ctx *Context, val string) core.Widget {
+	cb := core.Bind(val, New[core.ColorButton](ctx))
+	cb.SetText("").SetIcon(icons.None)
+	// (before the styler of its CSS, which sets the sizes that it gives)
+	cb.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(48), units.Dp(25)) // (the content box, in CSS px)
+		s.Max = s.Min
+		s.Margin.Zero()
+		s.Padding.Zero()
+		s.BoxShadow, s.MaxBoxShadow = nil, nil // (the room of its shadow is around it)
+		s.Border.Width.Set(units.Dp(1))
+		s.Border.Color.Set(colors.Uniform(color.RGBA{0x76, 0x76, 0x76, 0xff}))
+		s.Border.Radius.Set(units.Dp(3))
+		s.MaxBorder = s.Border
+	})
+	return cb
 }
 
 // inputIcons makes the icons that are positioned over the given text input
