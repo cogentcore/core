@@ -1098,3 +1098,37 @@ func TestFloatOnlyItemWidth(t *testing.T) {
 		assert.InDelta(t, 48*dp, d.Geom.Size.Actual.Total.X, 1, "the float and the padding")
 	})
 }
+
+// TestLayoutGridSpanGrowFlexible tests that a growing cell that spans the
+// columns of a grid widens and grows only its growing columns, not the
+// others: of the columns auto auto minmax(0, 1fr) auto auto of the page
+// headers of github.com, with a description under them all, the empty
+// auto columns were as wide as the title in the flexible one.
+func TestLayoutGridSpanGrowFlexible(t *testing.T) {
+	b := NewBody()
+	g := NewFrame(b)
+	g.Styler(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 3
+		s.Gap.Zero()
+		s.Min.X.Dp(600)
+		s.Padding.Zero()
+	})
+	empty := func() *Frame {
+		f := NewFrame(g)
+		f.Styler(func(s *styles.Style) { s.Grow.Set(0, 0); s.Padding.Zero() })
+		return f
+	}
+	first := empty()
+	title := NewFrame(g)
+	title.Styler(func(s *styles.Style) { s.Grow.Set(1, 0) })
+	NewText(title).SetText("title")
+	empty()
+	desc := NewFrame(g)
+	desc.Styler(func(s *styles.Style) { s.ColSpan = 3; s.Grow.Set(1, 0) })
+	NewText(desc).SetText("a description that is wider than the title of this grid")
+	b.RenderImage(func() {
+		assert.Equal(t, float32(0), first.Geom.Size.Actual.Total.X, "the empty column")
+		assert.InDelta(t, g.Geom.Size.Actual.Content.X, title.Geom.Size.Actual.Total.X, 1, "the title is as wide as the grid")
+	})
+}

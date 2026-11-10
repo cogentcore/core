@@ -1325,6 +1325,7 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		cell  image.Point
 		span  int
 		width float32
+		grow  float32
 	}
 	var spans, rowSpans []spanning
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
@@ -1363,9 +1364,9 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			msz := sz.Dim(ma) // main axis size dim: X, Y
 			mx := md.Size.Dim(ma)
 			if ma == math32.X && span > 1 { // sized below, over its columns
-				spans = append(spans, spanning{cidx, span, msz})
+				spans = append(spans, spanning{cidx, span, msz, grw.X})
 			} else if ma == math32.Y && rspan > 1 { // sized below, over its rows
-				rowSpans = append(rowSpans, spanning{cidx, rspan, msz})
+				rowSpans = append(rowSpans, spanning{cidx, rspan, msz, grw.Y})
 			} else {
 				mx = max(mx, msz) // Col, max widths of all elements; Row, max heights of all elements
 			}
@@ -1374,17 +1375,8 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 			sm += msz
 			cd.Size.SetDim(ma, sm) // Row, sum widths of all elements; Col, sum heights of all elements
 			gsz := grw.Dim(ma)
-			mx = md.Grow.Dim(ma)
-			mx = max(mx, gsz)
-			md.Grow.SetDim(ma, mx)
-			if ma == math32.X && span > 1 {
-				// all of the columns that it spans grow (as the columns
-				// of a grid of 1fr that cells span), not only the first
-				for k := 1; k < span; k++ {
-					if kd := li.cell(ma, mi+k, ci); kd != nil {
-						kd.Grow.SetDim(ma, max(kd.Grow.Dim(ma), gsz))
-					}
-				}
+			if ma != math32.X || span == 1 { // (the grow of spans is below)
+				md.Grow.SetDim(ma, max(md.Grow.Dim(ma), gsz))
 			}
 			sm = cd.Grow.Dim(ma)
 			sm += gsz
@@ -1392,16 +1384,44 @@ func (fr *Frame) sizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 		}
 		return tree.Continue
 	})
-	// The columns that a cell spans are widened evenly to fit it.
+	// A growing cell that spans columns of which none grow makes them
+	// all grow (as the columns of a grid of 1fr that cells span), not
+	// only the first, but not columns that do not grow when others of
+	// them do: the grow of a span goes to the flexible columns, as in
+	// CSS (the empty auto columns of the page headers of github.com
+	// beside a title in minmax(0, 1fr), which were as wide as it).
+	growing := func(sp spanning) int {
+		n := 0
+		for c := range sp.span {
+			if li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Grow.X > 0 {
+				n++
+			}
+		}
+		return n
+	}
+	for _, sp := range spans {
+		if sp.grow > 0 && growing(sp) == 0 {
+			for c := range sp.span {
+				li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Grow.X = sp.grow
+			}
+		}
+	}
+	// The columns that a cell spans are widened to fit it: those of
+	// them that grow, or all of them evenly when none do.
 	for _, sp := range spans {
 		sum := li.Gap.X * float32(sp.span-1)
 		for c := range sp.span {
 			sum += li.cell(math32.X, sp.cell.X+c, sp.cell.Y).Size.X
 		}
 		if extra := sp.width - sum; extra > 0 {
+			n := growing(sp)
 			for c := range sp.span {
 				cd := li.cell(math32.X, sp.cell.X+c, sp.cell.Y)
-				cd.Size.X += extra / float32(sp.span)
+				if n == 0 {
+					cd.Size.X += extra / float32(sp.span)
+				} else if cd.Grow.X > 0 {
+					cd.Size.X += extra / float32(n)
+				}
 			}
 		}
 	}
