@@ -137,12 +137,13 @@ func handleCell(ctx *Context, tag string) core.Widget {
 	// the columns of a table with the fixed layout are as wide as its
 	// columns (col) say, not as its content, which wraps (as the diffs of
 	// Wikipedia, whose long lines are in columns of 48%)
-	fixed, fixedWeight, fixedPct := false, float32(0), float32(0)
+	// (and columns with widths in pixels are that wide)
+	fixed, fixedWeight, fixedPct, fixedPx := false, float32(0), float32(0), float32(0)
 	if table := ancestorTable(ctx.Node); table != nil && strings.EqualFold(strings.TrimSpace(ctx.declaration(table, "table-layout")), "fixed") {
 		fixed = true
-		cols := ctx.columnWidths(table)
+		cols, pxs := ctx.columnWidths(table)
 		start := cellColumn(ctx.Node)
-		allPct := true
+		allPct, allPx := true, true
 		for c := start; c < start+span; c++ {
 			if c < len(cols) && cols[c] > 0 {
 				fixedWeight += cols[c]
@@ -151,9 +152,17 @@ func handleCell(ctx *Context, tag string) core.Widget {
 				fixedWeight += 1
 				allPct = false
 			}
+			if c < len(pxs) && pxs[c] > 0 {
+				fixedPx += pxs[c]
+			} else {
+				allPx = false
+			}
 		}
 		if !allPct {
 			fixedPct = 0
+		}
+		if !allPx {
+			fixedPx = 0
 		}
 	}
 	w.FinalStyler(func(s *styles.Style) {
@@ -168,6 +177,11 @@ func handleCell(ctx *Context, tag string) core.Widget {
 			if fixedPct > 0 { // the percentage of the table of its columns
 				s.Min.X, s.Max.X = units.Pw(fixedPct), units.Pw(fixedPct)
 				s.BoxSizing = styles.BoxBorderBox
+			}
+			if fixedPx > 0 { // the width of its columns
+				s.Min.X, s.Max.X = units.Dp(fixedPx), units.Dp(fixedPx)
+				s.BoxSizing = styles.BoxBorderBox
+				s.Grow.X = 0
 			}
 		}
 		if span > 1 {
@@ -184,10 +198,11 @@ func handleCell(ctx *Context, tag string) core.Widget {
 }
 
 // columnWidths returns the widths of the columns of the given table from
-// its col elements (with span), as percentages, or 0 for those without
-// one (or with a width that is not a percentage).
-func (c *Context) columnWidths(table *html.Node) []float32 {
-	var ws []float32
+// its col elements (with span): as percentages, or 0 for those without
+// one (or with a width that is not a percentage), and in pixels (as
+// width="52" of the line numbers of the diffs of GitHub), or 0.
+func (c *Context) columnWidths(table *html.Node) ([]float32, []float32) {
+	var ws, pxs []float32
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
 		for k := n.FirstChild; k != nil; k = k.NextSibling {
@@ -206,20 +221,23 @@ func (c *Context) columnWidths(table *html.Node) []float32 {
 				if w == "" {
 					w = GetAttr(k, "width")
 				}
-				pct := float32(0)
+				pct, px := float32(0), float32(0)
 				if v, ok := strings.CutSuffix(w, "%"); ok {
 					if f, err := strconv.ParseFloat(v, 32); err == nil {
 						pct = float32(f)
 					}
+				} else if f, err := strconv.ParseFloat(strings.TrimSuffix(w, "px"), 32); err == nil && f > 0 {
+					px = float32(f)
 				}
 				for range span {
 					ws = append(ws, pct)
+					pxs = append(pxs, px)
 				}
 			}
 		}
 	}
 	walk(table)
-	return ws
+	return ws, pxs
 }
 
 // cellColumn returns the index of the first column of the given cell in

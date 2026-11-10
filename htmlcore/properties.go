@@ -380,6 +380,32 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Contain = c })
+	case "contain-intrinsic-width", "contain-intrinsic-height", "contain-intrinsic-size":
+		// the lengths of the values, without auto (the size that a box
+		// last had, which is the length until it is laid out); none is no size
+		var vals []string
+		for _, f := range strings.Fields(lval) {
+			if f != "auto" {
+				vals = append(vals, f)
+			}
+		}
+		if len(vals) == 0 {
+			return nil
+		}
+		return op(func(st *cssState, s, ps *styles.Style) {
+			length := func(v string) *units.Value {
+				if v == "none" {
+					return nil
+				}
+				return st.env.lengthPtr(v, units.UnitPw)
+			}
+			if prop != "contain-intrinsic-height" {
+				st.intrinsicWidth = length(vals[0])
+			}
+			if prop != "contain-intrinsic-width" {
+				st.intrinsicHeight = length(vals[len(vals)-1])
+			}
+		})
 	case "aspect-ratio":
 		r := cssAspectRatio(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.AspectRatio = r })
@@ -666,6 +692,9 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 func zeroAreaClip(prop, v string) bool {
 	fn := "rect("
 	if prop == "clip-path" {
+		if strings.HasPrefix(v, "rect(") { // as clip (as rect(0 0 0 0) of the .sr-only of GitHub)
+			return zeroAreaClip("clip", v)
+		}
 		fn = "inset("
 	}
 	args, ok := strings.CutPrefix(v, fn)

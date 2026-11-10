@@ -52,6 +52,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	r.itemGrowth()
 	r.flexBasis()
 	r.sizes()
+	r.intrinsicSize()
 	r.flexBasisGrowth()
 	r.textAlign()
 	r.tableBorders()
@@ -80,6 +81,35 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	if st.hideText { // the text is not shown, and its box is (with its background)
 		s.Color = colors.Uniform(colors.Transparent)
+	}
+}
+
+// intrinsicSize sets the minimum size of a box with size containment in a
+// dimension to its contain-intrinsic size there, as the size of its
+// content, which is otherwise empty (as the rows of the file trees of
+// GitHub pull requests, of contain: strict and contain-intrinsic-height:
+// auto 32px, which were of no height, over each other).
+func (r *resolver) intrinsicSize() {
+	st, s := r.st, r.s
+	pad := sideDots(&s.Padding, r.dots)
+	border := sideDots(&s.Border.Width, r.dots)
+	set := func(v *units.Value, min *units.Value, extra float32) {
+		if v == nil {
+			return
+		}
+		d := r.dots(v)
+		if s.BoxSizing == styles.BoxBorderBox {
+			d += extra
+		}
+		if d > r.dots(min) {
+			*min = units.Dot(d)
+		}
+	}
+	if s.Contain == styles.ContainSize || s.Contain == styles.ContainInlineSize {
+		set(st.intrinsicWidth, &s.Min.X, pad.Left+pad.Right+border.Left+border.Right)
+	}
+	if s.Contain == styles.ContainSize {
+		set(st.intrinsicHeight, &s.Min.Y, pad.Top+pad.Bottom+border.Top+border.Bottom)
 	}
 }
 

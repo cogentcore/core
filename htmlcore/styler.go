@@ -95,6 +95,10 @@ type cssState struct {
 	zeroScale  bool // a transform scales the box to nothing (as scaleX(0)), so it is not shown
 	clippedOut bool // a clip (or clip-path) to nothing hides it (see zeroAreaClip)
 
+	// intrinsicWidth and intrinsicHeight are the contain-intrinsic sizes:
+	// the sizes of the content of a box with size containment.
+	intrinsicWidth, intrinsicHeight *units.Value
+
 	// bgCurrentColor is whether the background color is currentcolor,
 	// the color of the element as it is styled (as the masked chevrons of
 	// the menus of MDN), which was transparent.

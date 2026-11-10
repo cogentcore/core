@@ -1329,3 +1329,36 @@ func TestGridRowAfterFixedHeight(t *testing.T) {
 			assert.GreaterOrEqual(t, ws["d"].Geom.Pos.Total.Y, tb-1, "the description is under the title")
 		})
 }
+
+// TestContainIntrinsicSize tests that a box with size containment is of its
+// contain-intrinsic size (as the rows of the file trees of GitHub pull
+// requests, of contain: strict and contain-intrinsic-height: auto 32px,
+// which were of no height, over each other), and that without size
+// containment the intrinsic size does nothing.
+func TestContainIntrinsicSize(t *testing.T) {
+	widgetsByID(t, `<div style="width: 200px">`+
+		`<div id="a" style="contain: strict; contain-intrinsic-height: auto 32px">a</div>`+
+		`<div id="b" style="contain: strict; contain-intrinsic-height: auto 32px">b</div>`+
+		`<div id="c" style="contain-intrinsic-height: 100px">c</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 32*dp, ws["a"].Geom.Size.Actual.Total.Y, 1)
+			assert.GreaterOrEqual(t, ws["b"].Geom.Pos.Total.Y, ws["a"].Geom.Pos.Total.Y+32*dp-1, "the rows are not over each other")
+			assert.Less(t, ws["c"].Geom.Size.Actual.Total.Y, 50*dp, "no containment")
+		})
+}
+
+// TestFixedTableColumns tests that the columns of a table with the fixed
+// layout are as wide as the pixel widths of its col elements (as the line
+// numbers of the diffs of GitHub, of width="52", which were narrower), and
+// that a visually hidden header (thead.sr-only, positioned and clipped)
+// is not a row of it.
+func TestFixedTableColumns(t *testing.T) {
+	widgetsByID(t, `<style>.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:rect(0 0 0 0)}</style>`+
+		`<table id="t" style="table-layout: fixed; width: 600px"><thead class="sr-only"><tr><th id="h">Original file line number</th><th>line</th></tr></thead>`+
+		`<colgroup><col width="52"><col></colgroup><tbody><tr><td id="n">1325</td><td id="l">cell image.Point</td></tr></tbody></table>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 52*dp, ws["n"].Geom.Size.Actual.Total.X, float64(2*dp), "the column of the line numbers")
+			assert.Nil(t, ws["h"], "the hidden header is not in the table")
+			assert.InDelta(t, ws["t"].Geom.Pos.Content.Y, ws["n"].Geom.Pos.Total.Y, float64(3*dp), "the first row is at the top")
+		})
+}
