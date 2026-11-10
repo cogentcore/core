@@ -6,6 +6,7 @@ package core
 
 import (
 	"errors"
+	"image"
 	"math/rand"
 	"testing"
 	"time"
@@ -272,4 +273,96 @@ func TestTextFieldEdited(t *testing.T) {
 	tf.editDone()
 	assert.False(t, tf.Edited(), "applied")
 	assert.Equal(t, "texts", tf.Text())
+}
+
+// TestTextFieldWidths tests that a text field with a long text is as wide
+// as its text on one line (its preferred width), within its Max, so that
+// it has one line when there is room for it, and that it is narrower than
+// its Min when it is given less width, down to the width of its longest
+// word, wrapping its text, as text does. (The user agent of the settings
+// of the web browser wrapped at its Min of 20ch, over many lines, in a
+// window with room for it.)
+func TestTextFieldWidths(t *testing.T) {
+	const long = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) CogentCore/1.0 Safari/537.36"
+	const short = "Mozilla/5.0 (Macintosh; Intel)"
+	const words = "the quick brown fox jumps over the lazy dog, again and again and again"
+	field := func(width float32, txt string) (tf *TextField, b *Body) {
+		b = NewBody()
+		fr := NewFrame(b)
+		if width > 0 {
+			fr.Styler(func(s *styles.Style) { s.Direction = styles.Column; s.Min.X.Dp(width); s.Max.X.Dp(width) })
+		}
+		tf = NewTextField(fr).SetText(txt)
+		return
+	}
+	lines := func(tf *TextField) float32 {
+		return tf.Geom.Size.Actual.Content.Y / tf.lineHeight
+	}
+	t.Run("short", func(t *testing.T) {
+		tf, b := field(0, short)
+		b.RenderImage(func() {}, func() {
+			assert.InDelta(t, 1, lines(tf), 0.3, "one line")
+			assert.Greater(t, tf.Geom.Size.Actual.Total.X, tf.styleMinDots().X, "wider than its Min, for its text")
+		})
+	})
+	t.Run("max", func(t *testing.T) {
+		tf, b := field(0, long)
+		b.RenderImage(func() {}, func() {
+			// as wide as its Max (the window is sized to it), wrapping in it
+			// (the width of its lines, which wrap within it)
+			assert.InDelta(t, tf.Geom.Size.Max.X, tf.Geom.Size.Actual.Content.X, 8)
+			assert.LessOrEqual(t, lines(tf), float32(4.3), "a few lines at its Max")
+		})
+	})
+	t.Run("narrow", func(t *testing.T) {
+		tf, b := field(120, words)
+		b.RenderImage(func() {}, func() {
+			w := tf.Geom.Size.Actual.Content.X
+			assert.Less(t, w, tf.styleMinDots().X, "narrower than its Min")
+			assert.GreaterOrEqual(t, w, tf.minContentWidth(), "not narrower than its longest word")
+			assert.Greater(t, lines(tf), float32(2.5), "wrapped")
+		})
+	})
+	t.Run("form", func(t *testing.T) {
+		// as in the settings window, which is sized to its content
+		b := NewBody()
+		st := &struct{ UserAgent string }{long}
+		NewForm(b).SetStruct(st)
+		b.RenderImage(func() {}, func() {
+			var tf *TextField
+			b.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+				if x, ok := cw.(*TextField); ok {
+					tf = x
+				}
+				return tf == nil
+			})
+			if assert.NotNil(t, tf) {
+				// (a form has no Max for its fields, which fill its width)
+				assert.Greater(t, tf.Geom.Size.Actual.Content.X, 1.5*tf.styleMinDots().X, "wider than its Min")
+				assert.LessOrEqual(t, lines(tf), float32(4.3), "a few lines")
+				// a window sized to it is not as wide as its text on one line
+				assert.Greater(t, tf.Geom.Size.prefWidth, float32(800))
+				m := units.Ch(contentSizingMeasure)
+				m.ToDots(&tf.Styles.UnitContext)
+				// (as wide as the measure, within which its text wraps, not as
+				// wide as the screen, as it is offered)
+				csz := float32(b.Scene.contentSize(image.Pt(4000, 4000)).X)
+				assert.Greater(t, csz, m.Dots, "as wide as a readable measure")
+				assert.Less(t, csz, m.Dots+200, "within a readable measure")
+			}
+		})
+	})
+}
+
+// TestTextFieldWidthsRow tests that text fields in a row (as of an inline
+// form) get the widths of their texts on one line when there is room.
+func TestTextFieldWidthsRow(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	a := NewTextField(fr).SetText("MacStandard")
+	d := NewTextField(fr).SetText("Standard Mac KeyMap")
+	b.RenderImage(func() {}, func() {
+		assert.InDelta(t, 1, d.Geom.Size.Actual.Content.Y/d.lineHeight, 0.3, "one line")
+		assert.Less(t, a.Geom.Size.Actual.Total.X, d.Geom.Size.Actual.Total.X, "the one with the shorter text is narrower")
+	})
 }

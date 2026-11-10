@@ -636,20 +636,27 @@ func (tx *Text) minContentWidth() float32 {
 	if tx.minWordKey == key {
 		return tx.minWord
 	}
+	width := longestWordWidth(tx.Scene, &tx.Styles, string(tx.richText.Join()))
+	tx.minWordKey, tx.minWord = key, width
+	return width
+}
+
+// longestWordWidth returns the width of the longest word (by its number of
+// characters) of the given text in the given style, which is the
+// min-content width of the text when it wraps.
+func longestWordWidth(sc *Scene, st *styles.Style, txt string) float32 {
 	longest := ""
-	for _, w := range strings.Fields(string(tx.richText.Join())) {
+	for _, w := range strings.Fields(txt) {
 		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
 			longest = w
 		}
 	}
-	width := float32(0)
-	if longest != "" {
-		sty, tsty := tx.Styles.NewRichText()
-		lines := tx.Scene.TextShaper().WrapLines(rich.NewText(sty, []rune(longest)), sty, tsty, math32.Vec2(1e6, 1e6))
-		width = math32.Ceil(lines.Bounds.Size().X)
+	if longest == "" || sc == nil || sc.TextShaper() == nil {
+		return 0
 	}
-	tx.minWordKey, tx.minWord = key, width
-	return width
+	sty, tsty := st.NewRichText()
+	lines := sc.TextShaper().WrapLines(rich.NewText(sty, []rune(longest)), sty, tsty, math32.Vec2(1e6, 1e6))
+	return math32.Ceil(lines.Bounds.Size().X)
 }
 
 func (tx *Text) SizeDown(iter int) bool {

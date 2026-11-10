@@ -206,6 +206,15 @@ func (fr *Frame) overflowWidth(iter int, maxSize float32) float32 {
 	return min(maxSize, fr.layout.minContent+excess)
 }
 
+// contentGrower is a widget whose Max width is only the most that it grows
+// to, not a width that it starts from when it shrinks (see
+// [Frame.shrinkWidths]): it starts from its preferred width, as wide as its
+// content, as a text field does, so that the one with the longer text is
+// the wider one in a row of them.
+type contentGrower interface {
+	growsFromContent() bool
+}
+
 // growMaxWidth returns the total width of the Max of the given child
 // (with its Space), as it is (or will be) for the content width of the
 // frame, which a parent-relative Max is relative to, or 0 if it has none.

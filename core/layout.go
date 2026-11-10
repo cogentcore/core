@@ -1993,6 +1993,9 @@ func (fr *Frame) shrinkWidths() (widths []float32, shrunk bool) {
 			// to the same width, as for the flex basis of CSS
 			if mw := fr.growMaxWidth(cwb); mw > 0 {
 				p = mw
+				if cg, ok := cw.(contentGrower); ok && cg.growsFromContent() {
+					p = min(mw, ksz.prefWidth)
+				}
 			}
 		}
 		pref[c] = max(pref[c], p)
