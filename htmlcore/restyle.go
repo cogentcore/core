@@ -201,7 +201,67 @@ func (c *Context) Restyle(changed []*html.Node) bool {
 	if len(changed) == 0 {
 		return true
 	}
-	root := rootNode(changed[0])
+	u, ok := c.updateDecls(changed, nil, nil)
+	if !ok {
+		return false
+	}
+	u.apply(c)
+	return true
+}
+
+// declUpdate is an update of the declarations of the elements of a page
+// (see [Context.updateDecls]): the widgets to style again, whether they
+// are to be laid out again, and the function that undoes it.
+type declUpdate struct {
+	widgets []core.Widget
+	layout  bool
+	undo    func()
+
+	// freeChanged has the elements read again whose declarations (or
+	// those of their pseudo-elements) have changed.
+	freeChanged map[*html.Node]bool
+}
+
+// apply styles the widgets of the update again, and lays them out again
+// if needed.
+func (u *declUpdate) apply(c *Context) {
+	for _, w := range u.widgets {
+		if bs := c.blocks[w]; bs != nil {
+			wb := w.AsWidget()
+			n := NodeOf(w)
+			bs.ops = c.compileDecls(c.declarations(n))
+			bs.inherit = c.inlineInheritedOps(n, wb)
+		}
+	}
+	for _, w := range u.widgets {
+		wb := w.AsWidget()
+		wb.StyleTree()
+		if u.layout {
+			wb.NeedsLayout()
+		}
+		wb.NeedsRender()
+	}
+}
+
+// updateDecls finds the declarations of the elements whose declarations
+// may change again (see [Context.Restyle]): the given changed elements,
+// those in them, and those after them (and those in them), and the given
+// whole elements and those in them. Those for which free returns true
+// (if not nil) are read again (see [Context.Reread]), so that their
+// declarations may change in any way; for the others, it returns false,
+// leaving the declarations as they were, if they change in a way that
+// their widgets can not be styled again for, and otherwise the widgets to
+// style again.
+func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Node) bool) (*declUpdate, bool) {
+	isFree := func(n *html.Node) bool { return free != nil && free(n) }
+	var root *html.Node
+	if len(changed) > 0 {
+		root = rootNode(changed[0])
+	} else if len(whole) > 0 {
+		root = rootNode(whole[0])
+	} else {
+		return &declUpdate{undo: func() {}}, true
+	}
 	// the elements whose declarations may change: those changed, those
 	// in them, and those after them (for the combinators of siblings),
 	// and those in them
@@ -224,16 +284,21 @@ func (c *Context) Restyle(changed []*html.Node) bool {
 		}
 		return true
 	}
+	for _, n := range whole {
+		if !add(n) {
+			return nil, false
+		}
+	}
 	for _, n := range changed {
 		if n == nil || n.Type != html.ElementNode || rootNode(n) != root {
-			return false
+			return nil, false
 		}
-		if n.Namespace != "" || inForeign(n) {
-			return false // svg and math, which are read differently
+		if (n.Namespace != "" || inForeign(n)) && !isFree(n) {
+			return nil, false // svg and math, which are read differently
 		}
 		for s := n; s != nil; s = s.NextSibling {
 			if !add(s) {
-				return false
+				return nil, false
 			}
 		}
 	}
@@ -243,7 +308,7 @@ func (c *Context) Restyle(changed []*html.Node) bool {
 		// the elements that :has() selectors select, which may be any,
 		// whose matches have changed
 		if !c.relationalChanges(root, add) {
-			return false
+			return nil, false
 		}
 	}
 	// the declarations as they were (all of them first, as those of an
@@ -272,6 +337,7 @@ func (c *Context) Restyle(changed []*html.Node) bool {
 		}
 	}
 	// the declarations as they are now
+	pseudoChanged := map[*html.Node]bool{}
 	for _, n := range order {
 		ds := c.matchDecls(n)
 		queried := false
@@ -295,51 +361,49 @@ func (c *Context) Restyle(changed []*html.Node) bool {
 			if kind == "after" {
 				od = saved[n].after
 			}
-			if !samePseudo(od, nd) {
-				undo()
-				return false // its pseudo-element, which may be a widget
+			if samePseudo(od, nd) {
+				continue
 			}
+			if !isFree(n) {
+				undo()
+				return nil, false // its pseudo-element, which may be a widget
+			}
+			c.setPseudo(n, kind, nd, len(nd) > 0)
+			pseudoChanged[n] = true
 		}
 	}
-	var widgets []core.Widget
-	layout := false
+	u := &declUpdate{undo: undo, freeChanged: pseudoChanged}
 	for _, n := range order {
 		nw := effectiveDecls(c.declarations(n))
 		props := changedProps(old[n], nw)
 		if len(props) == 0 {
 			continue
 		}
+		if isFree(n) {
+			u.freeChanged[n] = true
+			continue
+		}
 		ws := c.elementWidgets[n]
 		if c.displayOf(n) != oldDisplay[n] || (len(ws) == 0 && !c.undisplayed(n)) {
 			undo()
-			return false
+			return nil, false
 		}
 		for _, p := range props {
 			if !c.restylable(n, p) {
 				undo()
-				return false
+				return nil, false
 			}
-			layout = layout || !paintProperties[p]
+			u.layout = u.layout || !paintProperties[p]
 		}
-		widgets = append(widgets, ws...)
+		u.widgets = append(u.widgets, ws...)
 	}
-	for _, w := range widgets {
-		if bs := c.blocks[w]; bs != nil {
-			wb := w.AsWidget()
-			n := NodeOf(w)
-			bs.ops = c.compileDecls(c.declarations(n))
-			bs.inherit = c.inlineInheritedOps(n, wb)
+	for _, n := range whole {
+		if c.displayOf(n) != oldDisplay[n] {
+			undo()
+			return nil, false // it may not have a frame of its own
 		}
 	}
-	for _, w := range widgets {
-		wb := w.AsWidget()
-		wb.StyleTree()
-		if layout {
-			wb.NeedsLayout()
-		}
-		wb.NeedsRender()
-	}
-	return true
+	return u, true
 }
 
 // setPseudo sets the declarations of the given pseudo-element of the
@@ -349,6 +413,9 @@ func (c *Context) setPseudo(n *html.Node, kind string, ds []*cssDecl, has bool) 
 	if !has {
 		delete(c.pseudoStyles, key)
 		return
+	}
+	if c.pseudoStyles == nil {
+		c.pseudoStyles = map[pseudoKey][]*cssDecl{}
 	}
 	c.pseudoStyles[key] = ds
 }

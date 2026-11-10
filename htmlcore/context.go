@@ -276,6 +276,12 @@ type pageState struct {
 	keptContainers   map[*html.Node]containerSizes
 	containerMu      sync.Mutex
 
+	// sheets has the style and link elements whose style sheets have
+	// been added, and rereads is the number of times that elements have
+	// been read again (see [Context.Reread]).
+	sheets  map[*html.Node]bool
+	rereads int
+
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see
 	// [Context.Restyle]), with ruleIndex, and pseudoRules those of the

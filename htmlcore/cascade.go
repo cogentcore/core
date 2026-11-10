@@ -864,11 +864,13 @@ func (c *Context) addStyleSheets(root *html.Node) {
 			case "template":
 				return
 			case "style":
+				c.recordSheet(n)
 				if c.mediaMatches(GetAttr(n, "media")) {
 					c.addStyleOrigin(nodeText(n), originAuthor)
 				}
 				return
 			case "link":
+				c.recordSheet(n)
 				if strings.EqualFold(GetAttr(n, "rel"), "stylesheet") && c.mediaMatches(GetAttr(n, "media")) {
 					c.addLinkedStyle(GetAttr(n, "href"))
 				}
