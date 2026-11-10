@@ -38,6 +38,10 @@ type Video struct { //types:add
 	// on the web (where the video is a video element of the browser).
 	Controls bool
 
+	// Poster is the URL of an image to show before the video plays,
+	// on the web (where the video is a video element of the browser).
+	Poster string
+
 	// playback is the current playing, if any.
 	playback *Playback
 

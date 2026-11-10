@@ -93,7 +93,7 @@ func (im *Image) SizeUp() {
 	im.WidgetBase.SizeUp()
 	if im.Image != nil {
 		sz := &im.Geom.Size
-		obj := math32.FromPoint(im.Image.Bounds().Size())
+		obj := im.aspectSize(math32.FromPoint(im.Image.Bounds().Size()))
 		if dp := im.Styles.UnitContext.Dots(units.UnitDp); im.NaturalDp && dp > 0 {
 			obj = obj.MulScalar(dp)
 			if im.Density > 0 {
@@ -105,7 +105,7 @@ func (im *Image) SizeUp() {
 		if im.Styles.Min.Y.Value != 0 && im.Styles.Min.X.Value == 0 {
 			csz.X = math32.Floor((im.Styles.Min.Y.Dots / obj.Y) * obj.X)
 		} else if im.Styles.Min.X.Value != 0 && im.Styles.Min.Y.Value == 0 {
-			csz.Y = math32.Floor((im.Styles.Min.X.Dots / obj.X) * obj.Y)
+			csz.Y = im.roundHeight((im.Styles.Min.X.Dots / obj.X) * obj.Y)
 		} else if im.Styles.Min.X.Value == 0 && im.Styles.Min.Y.Value == 0 {
 			pwd := float32(0)
 			pwb := im.parentWidget()
@@ -115,7 +115,7 @@ func (im *Image) SizeUp() {
 			}
 			if pwd > 0 {
 				csz.X = min(obj.X, pwd)
-				csz.Y = math32.Floor((csz.X / obj.X) * obj.Y)
+				csz.Y = im.roundHeight((csz.X / obj.X) * obj.Y)
 			} else {
 				csz = obj
 			}
@@ -124,6 +124,27 @@ func (im *Image) SizeUp() {
 		sz.Actual.Content = osz
 		sz.SetTotalFromContent(&sz.Actual)
 	}
+}
+
+// aspectSize returns the given size of the image with the aspect ratio of
+// [styles.Style.AspectRatio], if it is set, which is the aspect of the box
+// of the image (as the aspect-ratio property of CSS, as for a video of
+// another aspect than its box, which then fits in the box by ObjectFit).
+func (im *Image) aspectSize(size math32.Vector2) math32.Vector2 {
+	if r := im.Styles.AspectRatio; r > 0 && size.X > 0 {
+		size.Y = size.X / r
+	}
+	return size
+}
+
+// roundHeight returns the given height of the image rounded down, or up
+// for an [styles.Style.AspectRatio], as the height of the aspect ratio of
+// other widgets is.
+func (im *Image) roundHeight(h float32) float32 {
+	if im.Styles.AspectRatio > 0 {
+		return math32.Ceil(h)
+	}
+	return math32.Floor(h)
 }
 
 // SizeDown sets the height of an image whose width is relative
@@ -139,9 +160,9 @@ func (im *Image) SizeDown(iter int) bool {
 		return redo
 	}
 	sz := &im.Geom.Size
-	obj := math32.FromPoint(im.Image.Bounds().Size())
+	obj := im.aspectSize(math32.FromPoint(im.Image.Bounds().Size()))
 	w := sz.Actual.Content.X
-	h := math32.Floor((w / obj.X) * obj.Y)
+	h := im.roundHeight((w / obj.X) * obj.Y)
 	if w <= 0 || sz.Actual.Content.Y == h {
 		return redo
 	}

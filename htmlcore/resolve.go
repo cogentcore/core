@@ -302,6 +302,35 @@ func (r *resolver) replacedSize() {
 	}
 }
 
+// isVideo returns whether the widget is the box of a video element that
+// is not an image (see handleVideo), which has its own size.
+func (r *resolver) isVideo() bool {
+	_, ok := r.wb.Property("video-size").(math32.Vector2)
+	return ok
+}
+
+// videoSize sets the size of the box of a video element, a replaced
+// element of the size of its video (see [VideoDefaultWidth] until it is
+// known), or of its aspect when only its width or height is set.
+func (r *resolver) videoSize() {
+	st, s := r.st, r.s
+	size := r.wb.Property("video-size").(math32.Vector2)
+	if size.X <= 0 || size.Y <= 0 {
+		size = math32.Vec2(VideoDefaultWidth, VideoDefaultHeight)
+	}
+	if s.AspectRatio <= 0 {
+		s.AspectRatio = size.X / size.Y
+	}
+	switch {
+	case st.width == nil && st.height == nil:
+		s.Min.X = units.Dp(size.X)
+		s.Max.X, s.Grow.X = s.Min.X, 0
+	case st.width == nil && st.height.Unit == units.UnitDp:
+		s.Min.X = units.Dp(st.height.Value * s.AspectRatio)
+		s.Max.X, s.Grow.X = s.Min.X, 0
+	}
+}
+
 // isIframe returns whether the element is an iframe.
 // fixedHeight returns whether the box is exactly of the given height set
 // in CSS, with overflow that is visible: one of a frame that does not clip
@@ -852,7 +881,7 @@ func (r *resolver) sizes() {
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
-		isImage = isImage || r.isIframe() // (replaced elements)
+		isImage = isImage || r.isIframe() || r.isVideo() // (replaced elements)
 		if st.width.Unit == units.UnitPw && !isImage {
 			// A percentage of the width of the parent fills that much
 			// of it, which as a minimum would make a parent that is as
@@ -960,6 +989,9 @@ func (r *resolver) sizes() {
 			st.height = &h
 		}
 		defer func() { s.Max.Y = s.Min.Y }()
+	}
+	if r.isVideo() {
+		r.videoSize()
 	}
 	// (an aspect ratio makes the height follow the width, which is definite)
 	bs.definiteHeight = st.height != nil || s.AspectRatio > 0

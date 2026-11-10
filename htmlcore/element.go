@@ -137,6 +137,8 @@ func handleElement(ctx *Context) {
 		newWidget = handleImage(ctx, tag)
 	case "iframe":
 		newWidget = handleIframe(ctx)
+	case "video":
+		newWidget = handleVideo(ctx)
 	case "table":
 		newWidget = handleTable(ctx)
 	case "th", "td":

@@ -48,6 +48,9 @@ func (v *Video) setAttributes(e js.Value) {
 	e.Set("muted", v.Muted)
 	e.Set("loop", v.Loop)
 	e.Set("controls", v.Controls)
+	if e.Get("poster").String() != v.Poster {
+		e.Set("poster", v.Poster)
+	}
 	// The canvas gets the events of the widget, unless the controls of
 	// the browser are shown.
 	pe := "none"
