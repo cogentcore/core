@@ -69,7 +69,7 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 	}
 	if bs.hidden {
 		s.Opacity = 0
-		s.Abilities = 0
+		setHiddenAbilities(s)
 	}
 	if st.clippedOut { // nothing of it is shown, nor gets events
 		s.Opacity = 0

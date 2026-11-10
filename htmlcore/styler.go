@@ -78,6 +78,10 @@ type blockState struct {
 	// of the element in dots, before they collapse (as in the computed
 	// style of a browser).
 	marginTop, marginBottom float32
+
+	// noPointer is whether the element has pointer-events: none (which is
+	// inherited), unlike the widgets that get no events as they are hidden.
+	noPointer bool
 }
 
 // cssState has the values of a widget's declarations that are
@@ -159,7 +163,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 	bs.inherit = c.inlineInheritedOps(node, wb)
 	wb.FinalStyler(func(s *styles.Style) {
 		if bs.hidden { // after the abilities of the widget (as scrolling)
-			s.Abilities = 0
+			setHiddenAbilities(s)
 		}
 	})
 	wb.Styler(func(s *styles.Style) {
@@ -267,7 +271,9 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 				}
 			}
 		}
-		if ps != nil { // pointer-events is inherited
+		if pbs != nil { // pointer-events is inherited (not the hidden of visibility)
+			s.SetAbilities(pbs.noPointer, abilities.NoPointerEvents)
+		} else if ps != nil {
 			s.SetAbilities(ps.Abilities.HasFlag(abilities.NoPointerEvents), abilities.NoPointerEvents)
 		}
 		for _, op := range bs.inherit {
@@ -279,6 +285,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if node != nil {
 			st.display = c.displayOf(node)
 		}
+		bs.noPointer = s.Abilities.HasFlag(abilities.NoPointerEvents) // (as of pointer-events)
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
 		if node != nil && node.Type == html.ElementNode && st.display == "inline-block" && c.isInlineBox(node) {
 			if d := strings.TrimSpace(c.declaration(node, "display")); d == "" || d == "inline" {
@@ -412,4 +419,15 @@ func isButtonNode(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// setHiddenAbilities sets the abilities of a widget of an element with
+// visibility: hidden, which gets no events, but whose children get them
+// when they are visible (visibility: visible), as in CSS (as the items of
+// the other ways to sign in with two factors on GitHub, in a hidden list,
+// which could not be clicked), unlike those of an element that is clipped
+// out or not rendered at all (no abilities).
+func setHiddenAbilities(s *styles.Style) {
+	s.Abilities = 0
+	s.SetAbilities(true, abilities.NoPointerEvents)
 }

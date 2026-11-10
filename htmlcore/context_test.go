@@ -1254,3 +1254,35 @@ func TestFlexWrapZeroBasisMinWidth(t *testing.T) {
 			assert.InDelta(t, 400*dp, ws["c"].Geom.Size.Actual.Total.X, 2, "the rest of the line")
 		})
 }
+
+// TestVisibleInHidden tests that an element with visibility: visible in
+// one with visibility: hidden gets the events at it, as in CSS, and that
+// a hidden one does not (the other ways to sign in with two factors on
+// GitHub, items made visible in a hidden list, could not be clicked).
+func TestVisibleInHidden(t *testing.T) {
+	widgetsByID(t, `<ul id="list" style="visibility: hidden; padding: 0"><li id="vis" style="visibility: visible">shown</li><li id="hid">hidden</li></ul>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			center := func(id string) image.Point {
+				r := ws[id].Geom.TotalBBox
+				return image.Pt((r.Min.X+r.Max.X)/2, (r.Min.Y+r.Max.Y)/2)
+			}
+			in := func(w core.Widget, id string) bool {
+				for wb := w.AsWidget(); wb != nil; {
+					if wb == ws[id] {
+						return true
+					}
+					p, ok := wb.Parent.(core.Widget)
+					if !ok {
+						return false
+					}
+					wb = p.AsWidget()
+				}
+				return false
+			}
+			sc := ws["list"].Scene
+			assert.True(t, in(sc.WidgetAt(center("vis")), "vis"), "the visible item gets the events")
+			hw := sc.WidgetAt(center("hid"))
+
+			assert.False(t, in(hw, "hid"), "the hidden item does not")
+		})
+}

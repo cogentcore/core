@@ -88,7 +88,11 @@ func TestVisibilityHidden(t *testing.T) {
 		func(ws map[string]*core.WidgetBase, dp float32) {
 			for _, id := range []string{"menu", "item"} {
 				assert.Zero(t, ws[id].Styles.Opacity, id)
-				assert.Zero(t, ws[id].Styles.Abilities, id)
+				// no abilities, and no events (but the children that are
+				// visible get them; see TestVisibleInHidden)
+				var hidden abilities.Abilities
+				hidden.SetFlag(true, abilities.NoPointerEvents)
+				assert.Equal(t, hidden, ws[id].Styles.Abilities, id)
 			}
 			assert.Greater(t, ws["after"].Geom.Pos.Total.Y, ws["menu"].Geom.Pos.Total.Y+40*dp, "it keeps its space")
 		})
