@@ -331,6 +331,13 @@ type Style struct { //types:add
 	// to [DefaultScrollbarWidth], and it is inherited.
 	ScrollbarWidth units.Value
 
+	// ScrollbarOverlay is whether the scrollbars of the element are
+	// rendered over its content, at its edges, without taking space from
+	// it, as the overlay scrollbars of macOS and of web browsers: content
+	// that overflows the element a little does not narrow it with them.
+	// It is not inherited.
+	ScrollbarOverlay bool
+
 	// IconSize specifies the size of icons in this widget, if it has icons.
 	// The default icon size is 1em for X and Y. This is inherited.
 	IconSize units.XY `display:"inline"`
