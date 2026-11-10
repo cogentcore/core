@@ -500,6 +500,15 @@ func (r *resolver) itemGrowth() {
 			// the rest fit in it, by its width)
 			s.Contain = styles.ContainInlineSize
 		}
+		if st.width == nil && s.Contain == styles.ContainNone && !s.MaxContentWidth && (st.display == "block" || st.display == "flow-root") &&
+			r.node != nil && r.node.Data != "body" && r.node.Data != "html" && r.c.hasFixedWidthChild(r.node) && r.c.inBlockFlow(r.node) {
+			// a block of an auto width in blocks in the flow is as wide as
+			// its containing block, which a child of a fixed width that is
+			// wider overflows, as in CSS, and does not widen (as the blue
+			// instructions of the reCAPTCHA challenge, with a div of 400px
+			// and padding, which overflowed its frame of 400px in width)
+			s.Contain = styles.ContainInlineSize
+		}
 	case st.display == "table-cell":
 		s.Shrink.X = 1 // the columns of a table fit in its width
 	case st.width == nil:
@@ -730,6 +739,33 @@ func (c *Context) hasRigidItem(n *html.Node) bool {
 		}
 		if shrink == 0 {
 			return true
+		}
+	}
+	return false
+}
+
+// hasFixedWidthChild returns whether the given element has a child element
+// with a fixed width, of an absolute length (as px or em), in the flow.
+func (c *Context) hasFixedWidthChild(n *html.Node) bool {
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode {
+			continue
+		}
+		switch strings.TrimSpace(c.declaration(k, "position")) {
+		case "absolute", "fixed":
+			continue
+		}
+		w := strings.ToLower(strings.TrimSpace(c.declaration(k, "width")))
+		if strings.ContainsAny(w, "(%") {
+			continue
+		}
+		for _, u := range []string{"px", "rem", "em"} {
+			if num, ok := strings.CutSuffix(w, u); ok {
+				if _, err := strconv.ParseFloat(num, 32); err == nil {
+					return true
+				}
+				break
+			}
 		}
 	}
 	return false

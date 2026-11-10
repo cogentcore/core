@@ -1191,3 +1191,15 @@ func TestBreakEmptyRow(t *testing.T) {
 			assert.Less(t, hb, 30*dp, "a last break makes no line")
 		})
 }
+
+// TestBlockWidthFixedChild tests that a block of an auto width is as wide
+// as its containing block, which a wider child of a fixed width overflows,
+// as in CSS, and does not widen (as the blue instructions of the reCAPTCHA
+// challenge, which made it scroll in width in its frame).
+func TestBlockWidthFixedChild(t *testing.T) {
+	widgetsByID(t, `<div style="width: 300px"><div id="w" style="padding: 24px"><div id="c" style="width: 400px">x</div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 300*dp, ws["w"].Geom.Size.Actual.Total.X, 2, "the block is as wide as its container")
+			assert.InDelta(t, 400*dp, ws["c"].Geom.Size.Actual.Total.X, 2, "its child keeps its width")
+		})
+}
