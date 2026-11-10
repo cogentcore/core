@@ -1239,3 +1239,18 @@ func TestTextTransformAndTruncation(t *testing.T) {
 			assert.Greater(t, cut.Geom.Size.Actual.Total.X, 100*dp)
 		})
 }
+
+// TestFlexWrapZeroBasisMinWidth tests that an item of flex: 1 1 0 with a
+// min-width in a row that wraps is in a line by its min-width, not by its
+// content, and grows to fill the line (as the content of the page of a
+// repository of GitHub, of min-width: 1px, beside which its sidebar did
+// not fit, so that it was below it).
+func TestFlexWrapZeroBasisMinWidth(t *testing.T) {
+	widgetsByID(t, `<div style="display: flex; flex-wrap: wrap; width: 600px">`+
+		`<div id="c" style="flex: 1 1 0; width: 100%; min-width: 1px"><div style="width: 500px">wide</div></div>`+
+		`<div id="p"><div style="width: 200px">pane</div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, ws["c"].Geom.Pos.Total.Y, ws["p"].Geom.Pos.Total.Y, 1, "on one line")
+			assert.InDelta(t, 400*dp, ws["c"].Geom.Size.Actual.Total.X, 2, "the rest of the line")
+		})
+}

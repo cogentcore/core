@@ -566,6 +566,14 @@ func (r *resolver) flexBasis() {
 	if node == nil || node.Parent == nil || st.flexGrow <= 0 {
 		return
 	}
+	if ps.IsFlexWrap() && st.minWidth != nil && r.s.Contain == styles.ContainNone {
+		// an item of a basis of 0 with a min-width (not auto) in a row
+		// that wraps is in a line by its min-width, not its content, which
+		// it grows from to fill the line, as in CSS (as the content of the
+		// page of a repository of GitHub, of flex: 1 1 0 and min-width:
+		// 1px, beside which its sidebar did not fit)
+		r.s.Contain = styles.ContainInlineSize
+	}
 	sum, n := float32(0), 0
 	for sib := node.Parent.FirstChild; sib != nil; sib = sib.NextSibling {
 		if sib.Type != html.ElementNode || !c.inFlexFlow(sib) {
