@@ -7,11 +7,13 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nThe playing itself is a [Playback], which other widgets can show too.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Muted", Doc: "Muted is whether the audio is not played."}, {Name: "Loop", Doc: "Loop is whether to play the video again from the start at its end."}, {Name: "playback", Doc: "playback is the current playing, if any."}, {Name: "mu", Doc: "mu protects frame and changed, which are set by the playback."}, {Name: "frame", Doc: "frame is the last frame of the playback, to render."}, {Name: "changed", Doc: "changed is whether frame has changed since it was last rendered."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nOn desktop platforms, the playing itself is a [Playback], which other\nwidgets can show too; on the web, the video is a video element of the\nbrowser, placed at the widget.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Muted", Doc: "Muted is whether the audio is not played."}, {Name: "Loop", Doc: "Loop is whether to play the video again from the start at its end."}, {Name: "Controls", Doc: "Controls is whether to show the playback controls of the browser,\non the web (where the video is a video element of the browser)."}, {Name: "playback", Doc: "playback is the current playing, if any."}, {Name: "mu", Doc: "mu protects frame and changed, which are set by the playback."}, {Name: "frame", Doc: "frame is the last frame of the playback, to render."}, {Name: "changed", Doc: "changed is whether frame has changed since it was last rendered."}}})
 
 // NewVideo returns a new [Video] with the given optional parent:
 // Video represents a video playback widget without any controls.
-// The playing itself is a [Playback], which other widgets can show too.
+// On desktop platforms, the playing itself is a [Playback], which other
+// widgets can show too; on the web, the video is a video element of the
+// browser, placed at the widget.
 func NewVideo(parent ...tree.Node) *Video { return tree.New[Video](parent...) }
 
 // SetMedia sets the [Video.Media]:
@@ -30,3 +32,8 @@ func (t *Video) SetMuted(v bool) *Video { t.Muted = v; return t }
 // SetLoop sets the [Video.Loop]:
 // Loop is whether to play the video again from the start at its end.
 func (t *Video) SetLoop(v bool) *Video { t.Loop = v; return t }
+
+// SetControls sets the [Video.Controls]:
+// Controls is whether to show the playback controls of the browser,
+// on the web (where the video is a video element of the browser).
+func (t *Video) SetControls(v bool) *Video { t.Controls = v; return t }

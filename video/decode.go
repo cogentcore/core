@@ -27,6 +27,9 @@ type decodeSink struct {
 }
 
 const (
+	// sampleRate is the rate of the decoded audio samples.
+	sampleRate = 44100
+
 	// frameBufferSize is the number of decoded video frames buffered ahead
 	// of playback. Frames can be large (33 MB for 4K RGBA), so this is kept
 	// small; the audio buffer covers the interleaving of the streams.

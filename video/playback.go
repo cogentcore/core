@@ -9,22 +9,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/speaker"
 )
-
-const (
-	// sampleRate is the rate of the audio samples played by the speaker.
-	sampleRate = 44100
-
-	// SpeakerSampleRate is the sample rate of the speaker.
-	SpeakerSampleRate beep.SampleRate = sampleRate
-)
-
-// speakerInit initializes the speaker once, for all playbacks.
-var speakerInit = sync.OnceValue(func() error {
-	return speaker.Init(SpeakerSampleRate, SpeakerSampleRate.N(time.Second/10))
-})
 
 // Playback plays a [Media], independent of any widget: it calls OnFrame
 // with each video frame at its time, and plays the audio on the speaker.
@@ -73,8 +58,8 @@ type Playback struct {
 	// of the playing yet.
 	pauseShift time.Duration
 
-	// audio is the control of the audio being played, if any.
-	audio *beep.Ctrl
+	// audio is the audio being played, if any.
+	audio *audio
 }
 
 // Play starts playing the media from the start, stopping any playing
@@ -99,17 +84,14 @@ func (p *Playback) Play() error {
 
 // start starts decoding the media, and playing its audio, if any.
 func (p *Playback) start(done chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
-	audio := !p.Muted && p.Media.HasAudio && speakerInit() == nil
-	frames, samples, errs, err := p.Media.Decode(p.Width, p.Height, audio, done)
-	if err != nil || !audio {
+	hasAudio := !p.Muted && p.Media.HasAudio && audioAvailable()
+	frames, samples, errs, err := p.Media.Decode(p.Width, p.Height, hasAudio, done)
+	if err != nil || !hasAudio {
 		return frames, samples, errs, err
 	}
-	ctrl := &beep.Ctrl{Streamer: streamSamples(samples)}
 	p.mu.Lock()
-	ctrl.Paused = p.paused
-	p.audio = ctrl
+	p.audio = playAudio(samples, p.paused)
 	p.mu.Unlock()
-	speaker.Play(ctrl)
 	return frames, samples, errs, nil
 }
 
@@ -233,12 +215,9 @@ func (p *Playback) Resume() {
 
 // setAudioPaused pauses or resumes the audio, with the lock held.
 func (p *Playback) setAudioPaused(paused bool) {
-	if p.audio == nil {
-		return
+	if p.audio != nil {
+		p.audio.setPaused(paused)
 	}
-	speaker.Lock()
-	p.audio.Paused = paused
-	speaker.Unlock()
 }
 
 // IsPlaying returns whether the media is playing, and not paused.
@@ -269,25 +248,4 @@ func (p *Playback) Stop() {
 	p.paused, p.pauseShift = false, 0
 	p.setAudioPaused(true)
 	p.audio = nil
-}
-
-// streamSamples returns a streamer of the audio samples from the given
-// channel. It does not wait for samples that are not decoded yet (which
-// would stop all of the sounds of the speaker), playing silence instead,
-// and it ends when the channel is closed.
-func streamSamples(samples <-chan [2]float64) beep.Streamer {
-	return beep.StreamerFunc(func(out [][2]float64) (int, bool) {
-		for i := range out {
-			select {
-			case s, ok := <-samples:
-				if !ok {
-					return i, i > 0
-				}
-				out[i] = s
-			default:
-				out[i] = [2]float64{}
-			}
-		}
-		return len(out), true
-	})
 }

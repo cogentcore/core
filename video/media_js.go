@@ -8,8 +8,9 @@ package video
 
 import "errors"
 
-// Media is an opened video file. Decoding video with FFmpeg is not
-// supported on the web, so [OpenMedia] always returns an error there.
+// Media is a video file. On the web, the browser plays it in a video
+// element (see [Video]), so it is not decoded here, and its size is set
+// once the browser has loaded it.
 type Media struct {
 
 	// Path is the path or URL of the media file.
@@ -29,10 +30,14 @@ type Media struct {
 	HasAudio bool
 }
 
-var errUnsupported = errors.New("video: decoding video is not supported on the web")
+var errUnsupported = errors.New("video: decoding video is not supported on the web, where the browser plays it")
 
-// OpenMedia returns an error, since decoding video is not supported on the web.
-func OpenMedia(fpath string, options map[string]string) (*Media, error) { return nil, errUnsupported }
+// OpenMedia returns the media at the given path or URL, which the browser
+// plays; its properties are not known until it has loaded it, and the
+// options are not used.
+func OpenMedia(fpath string, options map[string]string) (*Media, error) {
+	return &Media{Path: fpath, Options: options}, nil
+}
 
 // decoder is not supported on the web.
 type decoder struct{ scaleWidth, scaleHeight int }
