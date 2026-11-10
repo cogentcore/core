@@ -301,6 +301,14 @@ type pageState struct {
 	sheets  map[*html.Node]bool
 	rereads int
 
+	// sheetTexts are the texts of the style elements whose style sheets
+	// have been added, so that the rules added to them can be added (see
+	// [Context.addedStyle]), and recordOnly is set while they are, for
+	// their rules to be recorded but not applied to the elements, as
+	// [Context.Restyle] finds the declarations of the elements again.
+	sheetTexts map[*html.Node]string
+	recordOnly bool
+
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see
 	// [Context.Restyle]), with ruleIndex, and pseudoRules those of the

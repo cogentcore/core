@@ -57,6 +57,9 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 	if strings.Contains(sel, ":has(") {
 		c.relational = true
 	}
+	if c.recordOnly {
+		return // (see Context.addedStyle)
+	}
 	for _, n := range c.selectNodes(root, sel) {
 		key := pseudoKey{n, kind}
 		for _, d := range decls {

@@ -220,6 +220,35 @@ func TestReread(t *testing.T) {
 			return []*html.Node{s}, []*html.Node{s}
 		})
 	})
+	t.Run("style rule added", func(t *testing.T) {
+		// a rule added to a style sheet, as CSS-in-JS libraries add them
+		// (as emotion on nytimes.com), restyles the elements that it
+		// selects, keeping all of the widgets
+		styled := strings.Replace(page, `<style>`, `<style id="css">`, 1)
+		testReread(t, styled, true, func(doc *html.Node) (self, children []*html.Node) {
+			st := elementByID(doc, "css")
+			st.AppendChild(&html.Node{Type: html.TextNode, Data: ".item { background: red; height: 30px }"})
+			return nil, []*html.Node{st}
+		}, "top", "intro", "list", "i1", "i2", "para", "grid", "c1", "after")
+	})
+	t.Run("new style element", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			head := elementByID(doc, "intro").Parent.Parent.Parent.Parent.FirstChild
+			for head.Type != html.ElementNode {
+				head = head.NextSibling
+			}
+			appendHTML(t, head, `<style>.cell { background: orange }</style>`)
+			return nil, []*html.Node{head}
+		}, "top", "list", "i1", "grid", "c1", "c2", "after")
+	})
+	t.Run("style rule replaced", func(t *testing.T) {
+		styled := strings.Replace(page, `<style>`, `<style id="css">`, 1)
+		testReread(t, styled, false, func(doc *html.Node) (self, children []*html.Node) {
+			st := elementByID(doc, "css")
+			st.FirstChild.Data = ".item { background: red }"
+			return nil, []*html.Node{st}
+		})
+	})
 	t.Run("style sheet", func(t *testing.T) {
 		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
 			m := elementByID(doc, "main")

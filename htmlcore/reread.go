@@ -80,6 +80,68 @@ func (c *Context) recordSheet(n *html.Node) {
 		c.sheets = map[*html.Node]bool{}
 	}
 	c.sheets[n] = true
+	if n.DataAtom == atom.Style {
+		if c.sheetTexts == nil {
+			c.sheetTexts = map[*html.Node]string{}
+		}
+		c.sheetTexts[n] = nodeText(n)
+	}
+}
+
+// addedStyle adds the rules added to the given style element (or the
+// rules of the given new style element), whose text is that before with
+// more at its end, as CSS-in-JS libraries add them as a page is made (as
+// emotion on nytimes.com, for each part of the page, each of which read
+// the page again whole, which resized its elements each time). The rules
+// are recorded, not applied: the declarations of the elements are found
+// again with them (see [Context.updateDecls]). It returns false for
+// another change of the text of a style sheet, for which the page is
+// read again.
+func (c *Context) addedStyle(n *html.Node) bool {
+	text := nodeText(n)
+	old, ok := c.sheetTexts[n]
+	if !c.sheets[n] {
+		old, ok = "", true // a new style element
+	}
+	if !ok || !strings.HasPrefix(text, old) {
+		return false
+	}
+	c.recordSheet(n)
+	added := text[len(old):]
+	if strings.TrimSpace(added) == "" || !c.mediaMatches(GetAttr(n, "media")) {
+		return true
+	}
+	base := c.cssBase
+	c.cssBase = ""
+	c.recordOnly = true
+	c.addRules(rootNode(n), parseCSS(added), originAuthor)
+	c.recordOnly = false
+	c.cssBase = base
+	return true
+}
+
+// headChanged handles a change of the children of the given head element:
+// a new style element adds its rules (see [Context.addedStyle]), and the
+// other elements of the head are not rendered, except a link to a new
+// style sheet (which is gotten as the page is read again), for which it
+// returns false.
+func (c *Context) headChanged(head *html.Node) bool {
+	for k := head.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode || c.sheets[k] {
+			continue
+		}
+		switch k.DataAtom {
+		case atom.Style:
+			if !c.addedStyle(k) {
+				return false
+			}
+		case atom.Link:
+			if strings.EqualFold(GetAttr(k, "rel"), "stylesheet") {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Reread updates the widgets of the page that the context has read for
@@ -113,6 +175,7 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	selfDirty, childDirty := map[*html.Node]bool{}, map[*html.Node]bool{}
 	var changed []*html.Node // for the declarations of the elements after them
 	var roots []*html.Node
+	restyleAll := false // for rules added to style sheets (see addedStyle)
 	addChanged := func(n *html.Node, own bool) bool {
 		if n != nil && n.Type == html.CommentNode || !own && n != nil && n.Type == html.ElementNode && unshown(n) {
 			return true // (not rendered)
@@ -125,6 +188,26 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		}
 		if n == nil || n.Type != html.ElementNode {
 			return c.noChange("a change of the document itself")
+		}
+		if !own && n.DataAtom == atom.Style && c.sheets[n] {
+			if !c.addedStyle(n) {
+				return c.noChange("a change of the style sheet of " + describeNode(n) + " that is not an addition to it")
+			}
+			if root == nil {
+				root = rootNode(n)
+			}
+			restyleAll = true
+			return true
+		}
+		if !own && n.DataAtom == atom.Head {
+			if !c.headChanged(n) {
+				return c.noChange("a new style sheet linked in the head")
+			}
+			if root == nil {
+				root = rootNode(n)
+			}
+			restyleAll = true
+			return true
 		}
 		if root == nil {
 			root = rootNode(n)
@@ -169,8 +252,15 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		}
 		return false
 	}
-	if len(roots) == 0 {
+	if len(roots) == 0 && !restyleAll {
 		return true // (only elements that are not rendered changed)
+	}
+	if restyleAll {
+		// the declarations of all of the elements are found again, with
+		// the rules added to the style sheets, as for a restyle
+		if html := documentElement(root); html != nil {
+			changed = append(changed, html)
+		}
 	}
 	// the elements to read are not too many, have no new style sheets,
 	// and their widgets are all in their frames, which have only theirs
@@ -631,4 +721,17 @@ func outermost(ns []*html.Node) []*html.Node {
 		}
 	}
 	return out
+}
+
+// documentElement returns the root element (html) of the given document.
+func documentElement(doc *html.Node) *html.Node {
+	if doc == nil {
+		return nil
+	}
+	for k := doc.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type == html.ElementNode {
+			return k
+		}
+	}
+	return nil
 }

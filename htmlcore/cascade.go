@@ -146,8 +146,10 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				spec = cs.specificity
 				c.recordRule(root, sel, cs, rule.Declarations, origin, spec)
 			}
-			for _, n := range c.selectNodes(root, sel) {
-				c.addDecls(n, rule.Declarations, origin, spec)
+			if !c.recordOnly { // (see Context.addedStyle)
+				for _, n := range c.selectNodes(root, sel) {
+					c.addDecls(n, rule.Declarations, origin, spec)
+				}
 			}
 			c.curRule = 0
 		}

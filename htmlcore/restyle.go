@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // styleRule is a style rule that has been added to a context, with one
@@ -387,6 +388,9 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 	}
 	u := &declUpdate{undo: undo, freeChanged: pseudoChanged}
 	for _, n := range order {
+		if inHead(n) {
+			continue // (not rendered, as a style element that is added)
+		}
 		nw := effectiveDecls(c.declarations(n))
 		props := changedProps(old[n], nw)
 		if len(props) == 0 {
@@ -657,3 +661,13 @@ var restylableProperties = func() map[string]bool {
 	}
 	return m
 }()
+
+// inHead returns whether the given node is the head element or in it.
+func inHead(n *html.Node) bool {
+	for p := n; p != nil; p = p.Parent {
+		if p.Type == html.ElementNode && p.DataAtom == atom.Head {
+			return true
+		}
+	}
+	return false
+}
