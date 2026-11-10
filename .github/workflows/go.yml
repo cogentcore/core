@@ -16,7 +16,9 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    # 24.04, not latest (26.04), on which the images of the tests (as of
+    # text and emoji) are not the same as those of the testdata, made on 24.04
+    runs-on: ubuntu-24.04
     env:
       # the FFmpeg version required by the go-astiav version in go.mod (video)
       FFMPEG_VERSION: n9.0.2
