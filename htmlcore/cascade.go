@@ -756,16 +756,57 @@ func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
 		if !c.hinted[p] || !c.sorted[p] {
 			ds = c.declarations(p)
 		}
-		for i := len(ds) - 1; i >= 0; i-- {
-			if ds[i].Property == name {
-				if strings.EqualFold(strings.TrimSpace(ds[i].Value), "initial") {
-					return "", false // the guaranteed-invalid value, as when not set
-				}
-				return ds[i].Value, !ds[i].invalid
+		if d := c.customDecl(p, ds, name); d != nil {
+			if strings.EqualFold(strings.TrimSpace(d.Value), "initial") {
+				return "", false // the guaranteed-invalid value, as when not set
 			}
+			return d.Value, !d.invalid
 		}
 	}
 	return "", false
+}
+
+// customIndex is an index of the custom properties of the sorted
+// declarations of an element (see [Context.customDecl]).
+type customIndex struct {
+	ds []*cssDecl           // the declarations that it is of
+	m  map[string]*cssDecl // the last declaration of each custom property
+}
+
+// minCustomIndex is the number of declarations of an element from which
+// its custom properties are indexed.
+const minCustomIndex = 32
+
+// customDecl returns the last of the given sorted declarations of the
+// given element of the given property (a custom property), or nil. The
+// custom properties of elements with many declarations are indexed, as
+// they are looked up for each var() of the elements in them (as those of
+// the root of nytimes.com, hundreds of them, which took seconds to scan
+// in each read of its page). The index is made again when the
+// declarations are others (or more).
+func (c *Context) customDecl(n *html.Node, ds []*cssDecl, name string) *cssDecl {
+	if len(ds) < minCustomIndex {
+		for i := len(ds) - 1; i >= 0; i-- {
+			if ds[i].Property == name {
+				return ds[i]
+			}
+		}
+		return nil
+	}
+	idx := c.customIndexes[n]
+	if idx == nil || len(idx.ds) != len(ds) || &idx.ds[0] != &ds[0] {
+		idx = &customIndex{ds: ds, m: map[string]*cssDecl{}}
+		for _, d := range ds {
+			if strings.HasPrefix(d.Property, "--") {
+				idx.m[d.Property] = d
+			}
+		}
+		if c.customIndexes == nil {
+			c.customIndexes = map[*html.Node]*customIndex{}
+		}
+		c.customIndexes[n] = idx
+	}
+	return idx.m[name]
 }
 
 // displayOf returns the display of the given node, with the children of

@@ -248,6 +248,10 @@ type pageState struct {
 	// and hinted those whose attributes have been added.
 	sorted, hinted map[*html.Node]bool
 
+	// customIndexes are the indexes of the custom properties of the
+	// elements with many declarations (see [Context.customDecl]).
+	customIndexes map[*html.Node]*customIndex
+
 	// cssOrder is the order of the last declaration added.
 	cssOrder int
 

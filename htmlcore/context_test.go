@@ -1362,3 +1362,24 @@ func TestFixedTableColumns(t *testing.T) {
 			assert.InDelta(t, ws["t"].Geom.Pos.Content.Y, ws["n"].Geom.Pos.Total.Y, float64(3*dp), "the first row is at the top")
 		})
 }
+
+// TestCustomPropertyIndex tests the custom properties of an element with
+// many declarations (whose custom properties are indexed, as those of the
+// root of nytimes.com): the last declaration of each is its value, and
+// those of an element in it override them.
+func TestCustomPropertyIndex(t *testing.T) {
+	var rules strings.Builder
+	for i := range 2 * minCustomIndex {
+		fmt.Fprintf(&rules, "--v%d: %dpx; ", i, i)
+	}
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>:root { `+rules.String()+` --w: 10px; --w: 20px }
+		#e { --v40: 5px }</style></head><body><div id="d" style="width: var(--w); height: var(--v40)">d</div>
+		<div id="e"><p id="f" style="height: var(--v40)">f</p></div></body></html>`))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	d := elementByID(doc, "d")
+	assert.Equal(t, "20px", ctx.ComputedValue(d, "width"))
+	assert.Equal(t, "40px", ctx.ComputedValue(d, "height"))
+	assert.Equal(t, "5px", ctx.ComputedValue(elementByID(doc, "f"), "height"))
+}
