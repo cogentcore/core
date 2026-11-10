@@ -114,6 +114,7 @@ func TestRestyle(t *testing.T) {
 .wrap:has(.on) .target { width: 150px }
 .marked::before { content: "x" }
 .v { width: var(--w, 10px); height: 10px; background: red }
+.wv { --w: 90px }
 </style></head><body><div style="width: 400px">
 <div id="a" class="box">a</div>
 <div id="menu" class="menu"><div id="item" class="item box">item</div></div>
@@ -154,6 +155,15 @@ func TestRestyle(t *testing.T) {
 		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
 			v := elementByID(doc, "vars")
 			setAttr(v, "style", "--w: 70px")
+			return []*html.Node{v}
+		})
+	})
+	t.Run("custom property of a class", func(t *testing.T) {
+		// (of a style sheet, not of the style attribute, as the lookups of
+		// custom properties are memoized, see Context.varMemo)
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			v := elementByID(doc, "vars")
+			setAttr(v, "class", "wv")
 			return []*html.Node{v}
 		})
 	})

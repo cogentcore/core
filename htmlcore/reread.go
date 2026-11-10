@@ -541,6 +541,7 @@ func (rc *reconciler) remap(r *html.Node) {
 				delete(c.sorted, n)
 				delete(c.hinted, n)
 				delete(c.containers, n)
+				c.varMemo = nil
 			}
 			return tree.Continue
 		})

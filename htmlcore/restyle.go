@@ -333,6 +333,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		saved[n] = ns
 	}
 	undo := func() {
+		c.varMemo = nil
 		for n, ns := range saved {
 			c.styles[n], c.sorted[n], c.hinted[n] = ns.styles, ns.sorted, ns.hinted
 			if c.containerQueried != nil {
@@ -351,6 +352,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			queried = queried || d.container != nil
 		}
 		c.styles[n] = ds
+		c.varMemo = nil
 		delete(c.sorted, n)
 		delete(c.hinted, n) // its attributes are added again
 		if queried {

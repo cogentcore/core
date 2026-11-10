@@ -166,6 +166,7 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
 			container: c.curContainer, rule: c.curRule})
 	}
+	c.varMemo = nil
 	if c.curContainer != nil {
 		if c.containerQueried == nil {
 			c.containerQueried = map[*html.Node]bool{}
@@ -748,22 +749,56 @@ func (c *Context) substituteVars(n *html.Node, value string, visiting map[string
 // customProperty returns the value of the given custom property for the
 // given node, from it or the nearest ancestor that declares it.
 func (c *Context) customProperty(n *html.Node, name string) (string, bool) {
+	// the values of the elements on the way to the one that has it are
+	// memoized (see varMemo), as they are looked up for each var() of
+	// each element, through all of the elements that it is in
+	var path []*html.Node
+	found := func(v varValue) (string, bool) {
+		if strings.Contains(v.value, "var(") {
+			return v.value, v.ok // (not substituted yet, so not memoized)
+		}
+		if c.varMemo == nil {
+			c.varMemo = map[varKey]varValue{}
+		}
+		for _, p := range path {
+			c.varMemo[varKey{p, name}] = v
+		}
+		return v.value, v.ok
+	}
 	for p := n; p != nil; p = p.Parent {
 		if p.Type != html.ElementNode {
 			continue
+		}
+		if v, ok := c.varMemo[varKey{p, name}]; ok {
+			return found(v)
 		}
 		ds := c.styles[p]
 		if !c.hinted[p] || !c.sorted[p] {
 			ds = c.declarations(p)
 		}
+		path = append(path, p)
 		if d := c.customDecl(p, ds, name); d != nil {
 			if strings.EqualFold(strings.TrimSpace(d.Value), "initial") {
-				return "", false // the guaranteed-invalid value, as when not set
+				return found(varValue{}) // the guaranteed-invalid value, as when not set
 			}
-			return d.Value, !d.invalid
+			return found(varValue{d.Value, !d.invalid})
 		}
 	}
-	return "", false
+	return found(varValue{})
+}
+
+// varKey is the key of [Context.varMemo]: an element and the name of a
+// custom property.
+type varKey struct {
+	n    *html.Node
+	name string
+}
+
+// varValue is the value of a custom property of an element (see
+// [Context.customProperty]).
+type varValue struct {
+	value string
+	ok    bool
 }
 
 // customIndex is an index of the custom properties of the sorted

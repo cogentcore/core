@@ -252,6 +252,11 @@ type pageState struct {
 	// elements with many declarations (see [Context.customDecl]).
 	customIndexes map[*html.Node]*customIndex
 
+	// varMemo has the values of the custom properties of elements, as
+	// they are inherited, for var() (see [Context.customProperty]). It is
+	// cleared when the declarations of any element change.
+	varMemo map[varKey]varValue
+
 	// cssOrder is the order of the last declaration added.
 	cssOrder int
 
