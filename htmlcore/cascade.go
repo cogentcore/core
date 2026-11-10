@@ -271,7 +271,8 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 
 // legacyDisplay returns the display for the given value of the display
 // property, which is that of the prefixed legacy values: -webkit-box (as
-// with -webkit-line-clamp, in a column) is a block, and -webkit-flex flex.
+// with -webkit-line-clamp, in a column) is a block, and -webkit-flex flex;
+// unset and initial are inline.
 func legacyDisplay(v string) string {
 	switch strings.ToLower(strings.TrimSpace(v)) {
 	case "-webkit-box", "-moz-box":
@@ -282,6 +283,12 @@ func legacyDisplay(v string) string {
 		return "flex"
 	case "-webkit-inline-flex":
 		return "inline-flex"
+	case "unset", "initial":
+		// display is not inherited, so these are its initial value (as
+		// display: unset of the widgets of the masthead of nytimes.com, in
+		// a flex row, which had no box of its own, so that its ticker was
+		// as wide as the row, over the logo)
+		return "inline"
 	}
 	return v
 }

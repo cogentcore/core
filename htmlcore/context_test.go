@@ -1383,3 +1383,17 @@ func TestCustomPropertyIndex(t *testing.T) {
 	assert.Equal(t, "40px", ctx.ComputedValue(d, "height"))
 	assert.Equal(t, "5px", ctx.ComputedValue(elementByID(doc, "f"), "height"))
 }
+
+// TestDisplayUnset tests that display: unset (and initial) is inline, which
+// a flex item is as a block (as the widgets of the masthead of
+// nytimes.com, which had no box, so that its ticker of width: 100% was as
+// wide as the row, over the logo).
+func TestDisplayUnset(t *testing.T) {
+	widgetsByID(t, `<section id="bar" style="display: flex; justify-content: space-between; width: 1000px">`+
+		`<div id="left">left</div><div id="w" style="display: unset"><div id="t" style="width: 100%; min-width: 105px">ticker</div></div></section>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			require.NotNil(t, ws["w"], "it has a box")
+			assert.Less(t, ws["t"].Geom.Size.Actual.Total.X, 200*dp, "the ticker is narrow")
+			assert.Greater(t, ws["t"].Geom.Pos.Total.X, ws["bar"].Geom.Pos.Total.X+800*dp, "at the end of the row")
+		})
+}
