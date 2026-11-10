@@ -539,6 +539,17 @@ func (r *resolver) flexBasisGrowth() {
 			s.Grow.X = st.flexGrow
 			return
 		}
+		if b := strings.TrimSpace(st.flexBasis); strings.HasSuffix(b, "%") && ps.IsFlexWrap() {
+			// in a row that wraps, an item that does not grow needs its
+			// basis in its line (its hypothetical main size in CSS), not
+			// its content (as the columns of Bootstrap, of flex: 0 0 75%,
+			// whose cards on one line made it wrap below the column of 25%
+			// beside it, on stella.nl)
+			if p, err := strconv.ParseFloat(strings.TrimSuffix(b, "%"), 32); err == nil {
+				s.FlexBasis = units.Pw(float32(p))
+			}
+			return
+		}
 		if strings.HasSuffix(strings.TrimSpace(st.flexBasis), "%") && !ps.IsFlexWrap() && s.Max.X.Unit == units.UnitPw {
 			// an item that does not grow is as wide as its percentage
 			// basis (of the row less its gaps in core), not only up to

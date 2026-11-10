@@ -1112,3 +1112,29 @@ func TestGridFrColumns(t *testing.T) {
 			assert.InDelta(t, 200*dp, ws["e"].Geom.Size.Actual.Total.X, 3, "the rest shared")
 		})
 }
+
+// TestSVGTransform tests the CSS transforms of SVG elements as SVG
+// transforms: in px and degrees, and none for those that cannot be (as
+// translate(-.5em, 0) on bicycling.com, which logged errors).
+func TestSVGTransform(t *testing.T) {
+	env := NewContext().readEnv()
+	for _, c := range []struct {
+		css, svg string
+		ok       bool
+	}{
+		{"translate(-.5em, 0)", "translate(-8,0)", true},
+		{"translate(10px, 5px) rotate(45deg)", "translate(10,5) rotate(45)", true},
+		{"rotate(0.25turn) scale(2)", "rotate(90) scale(2)", true},
+		{"translateX(-1rem)", "translatex(-16)", true},
+		{"none", "none", true},
+		{"translate(-50%, -50%)", "", false},
+		{"translate3d(0, 0, 0)", "", false},
+		{"translate(calc(-1 * 3px))", "", false},
+	} {
+		got, ok := svgTransform(env, c.css)
+		assert.Equal(t, c.ok, ok, c.css)
+		if ok {
+			assert.Equal(t, c.svg, got, c.css)
+		}
+	}
+}

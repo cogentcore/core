@@ -2254,7 +2254,9 @@ func (fr *Frame) sizeDownWrap(iter int) bool {
 			ksz.X = max(ksz.X, min(cwb.Geom.Size.preferred.X, fit))
 		}
 		if fb := cwb.Styles.FlexBasis.Dots; d == math32.X && fb > 0 {
-			// its basis, down to its min-content width (see [styles.Style.FlexBasis])
+			// its basis, down to its min-content width (see [styles.Style.FlexBasis]),
+			// which is of its border box for box-sizing: border-box
+			fb = max(fb-cwb.boxSizingSpace().X, 0)
 			ksz.X = min(max(fb+cwb.Geom.Size.Space.X, cwb.Geom.Size.minWidth), fit)
 		}
 		if d == math32.X && cwb.Styles.Grow.X > 0 && cwb.Styles.Max.X.Unit == units.UnitPw && cwb.Styles.Min.X.Unit == units.UnitPw {

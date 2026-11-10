@@ -1389,3 +1389,23 @@ func TestImageTilePercentages(t *testing.T) {
 			assert.Equal(t, styles.FitContain, ws["contain"].Styles.ObjectFit, "object-fit: contain")
 		})
 }
+
+// TestFlexWrapPercentBasis tests the items of a row that wraps with
+// percentage bases that do not grow (as the columns of Bootstrap, flex: 0
+// 0 25% and 75%, with box-sizing: border-box and padding), which are on one
+// line, as wide as their bases, not as their content (the column of 75%,
+// of cards that are wide on one line, wrapped below that of 25%, on
+// stella.nl).
+func TestFlexWrapPercentBasis(t *testing.T) {
+	cards := strings.Repeat(`<div style="width: 300px; flex: none">card</div>`, 4)
+	widgetsByID(t, `<div style="width: 800px"><div style="display: flex; flex-wrap: wrap">`+
+		`<div id="a" style="box-sizing: border-box; width: 100%; padding: 0 30px; flex: 0 0 25%; max-width: 25%">filters</div>`+
+		`<div id="b" style="box-sizing: border-box; width: 100%; padding: 0 30px; flex: 0 0 75%; max-width: 75%"><div style="display: flex; flex-wrap: wrap">`+cards+`</div></div>`+
+		`</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			a, b := ws["a"], ws["b"]
+			assert.InDelta(t, a.Geom.Pos.Total.Y, b.Geom.Pos.Total.Y, 1, "on one line")
+			assert.InDelta(t, 200*dp, a.Geom.Size.Actual.Total.X, 2, "25%")
+			assert.InDelta(t, 600*dp, b.Geom.Size.Actual.Total.X, 2, "75%")
+		})
+}
