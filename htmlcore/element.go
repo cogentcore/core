@@ -111,6 +111,7 @@ func handleElement(ctx *Context) {
 		// for monospaced text)
 		tf := New[core.TextField](ctx).SetText(ExtractText(ctx)).SetType(core.TextFieldOutlined)
 		cssFieldBorder(tf)
+		fieldWidth(ctx.Node, tf)
 		tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
 		newWidget = tf
 	case "svg":

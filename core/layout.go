@@ -2102,11 +2102,34 @@ func (fr *Frame) frWidths(width float32) []float32 {
 	if n < 2 || width <= 0 {
 		return nil
 	}
+	// the columns that have no cells (as the empty tracks of
+	// repeat(auto-fill, minmax(180px, 1fr)) in CSS) grow as the others
+	// (all of its tracks are fr), so that the others are as wide as they
+	// are with them, as in CSS (they were sized to their content)
+	filled := make([]bool, n)
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		for c := cwb.Geom.Cell.X; c < min(cwb.Geom.Cell.X+max(fr.colSpan(cwb), 1), n); c++ {
+			filled[c] = true
+		}
+		return tree.Continue
+	})
 	grow := make([]float32, n)
+	emptyGrow := float32(0)
 	for c := range n {
 		grow[c] = li.cell(math32.X, c, 0).Grow.X
-		if grow[c] <= 0 {
-			return nil
+		if filled[c] {
+			if grow[c] <= 0 {
+				return nil
+			}
+			emptyGrow = max(emptyGrow, grow[c])
+		}
+	}
+	if emptyGrow <= 0 {
+		return nil
+	}
+	for c := range n {
+		if !filled[c] {
+			grow[c] = emptyGrow
 		}
 	}
 	minw := make([]float32, n)

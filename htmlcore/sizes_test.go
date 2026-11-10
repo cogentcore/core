@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1299,4 +1300,60 @@ func TestViewportHeight(t *testing.T) {
 	plain.MediaHeight = 500
 	require.NoError(t, ReadHTMLString(plain, core.NewBody(), `<p style="height: 20px">text</p>`))
 	assert.False(t, plain.ViewportHeightUsed())
+}
+
+// TestGridAutoFillMinmax tests the tracks of repeat(auto-fill, minmax(180px,
+// 1fr)) (as of the cards of the example of htmlcore): as many as fit in the
+// width that the grid has (in a body of max-width: 720px, not the width of
+// the page), and all of the same width, also those that have no items, as
+// in CSS (the columns were as wide as their content).
+func TestGridAutoFillMinmax(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div style="max-width: 720px">`+
+		`<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px">`+
+		`<div id="a">The cards are in a grid, with one column in a narrow window.</div><div id="b">Short</div><div id="c">Medium text</div></div>`+
+		`<div style="display: grid; grid-template-columns: repeat(4, minmax(100px, 1fr)); gap: 12px">`+
+		`<div id="d">The cards are in a grid, with one column in a narrow window.</div><div id="e">Short</div></div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			w := (720 - 2*12) / 3.0 * dp // 3 tracks
+			for _, id := range []string{"a", "b", "c"} {
+				assert.InDelta(t, w, ws[id].Geom.Size.Actual.Total.X, 2, id)
+			}
+			w = (720 - 3*12) / 4.0 * dp // 4 tracks, 2 of them empty
+			for _, id := range []string{"d", "e"} {
+				assert.InDelta(t, w, ws[id].Geom.Size.Actual.Total.X, 2, id)
+			}
+		})
+}
+
+// TestFormControlSizes tests the sizes of form controls that their CSS
+// gives none, as in Chrome: a text input is as wide as its size in average
+// characters (20 by default; 153px for its font of 13.333px), and does not
+// grow in a row of controls (it was as wide as 40ch); a textarea is in a
+// monospace font, as wide as its cols; and a color input is a swatch of
+// 50 by 27px (it was a large button with a label). An input that its CSS
+// makes grow (as by flex-grow: 1, as the search field of pkg.go.dev) fills
+// its row.
+func TestFormControlSizes(t *testing.T) {
+	widgetsByID(t, `<div style="display: flex; align-items: center; gap: 8px; width: 800px">`+
+		`<input id="text" type="text"><input id="small" type="text" size="5"><input id="num" type="number" value="42">`+
+		`<input id="color" type="color" value="#008080"></div><textarea id="area" cols="30">a b</textarea>`+
+		`<div style="display: flex; width: 400px"><input id="grow" style="flex-grow: 1"></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			// 20 (or its size) characters of 0.55em of its font (of 13.333px)
+			chars := func(id string) float32 {
+				w := ws[id]
+				return w.Geom.Size.Actual.Content.X / (0.55 * w.Styles.UnitContext.FontEm)
+			}
+			assert.InDelta(t, 20, chars("text"), 0.5, "text")
+			assert.InDelta(t, 5, chars("small"), 0.5, "size 5")
+			assert.InDelta(t, 20, chars("num"), 0.5, "number")
+			assert.InDelta(t, 13.333*dp, ws["text"].Styles.Font.Size.Dots, 1, "the font of controls")
+			c := ws["color"].Geom.Size.Actual.Total
+			assert.InDelta(t, 50*dp, c.X, 2, "color")
+			assert.InDelta(t, 27*dp, c.Y, 2, "color")
+			assert.InDelta(t, 400*dp, ws["grow"].Geom.Size.Actual.Total.X, 3, "flex-grow")
+			a := ws["area"]
+			assert.Equal(t, rich.Monospace, a.Styles.Font.Family, "textarea font")
+			assert.InDelta(t, 30*0.6+1.15, a.Geom.Size.Actual.Content.X/a.Styles.UnitContext.FontEm, 0.5, "textarea cols")
+		})
 }

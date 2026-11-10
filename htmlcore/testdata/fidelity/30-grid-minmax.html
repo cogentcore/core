@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html><head><style>
+body { font-family: sans-serif; max-width: 720px; margin: 16px auto; }
+.g { display: grid; gap: 12px; margin-bottom: 16px }
+.g div { border: 1px solid #ccc; padding: 8px }
+.fill { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) }
+.fit { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) }
+.four { grid-template-columns: repeat(4, minmax(180px, 1fr)) }
+.mm { grid-template-columns: minmax(100px, 1fr) minmax(100px, 2fr) }
+</style></head><body>
+<div class="g fill"><div>The cards are in a grid, with one column in a narrow window.</div><div>Short</div><div>A medium amount of text</div></div>
+<div class="g fit"><div>The cards are in a grid, with one column in a narrow window.</div><div>Short</div></div>
+<div class="g four"><div>The cards are in a grid, with one column in a narrow window.</div><div>Short</div><div>A medium amount of text</div></div>
+<div class="g mm"><div>one</div><div>two, which is twice as wide as one</div></div>
+</body></html>

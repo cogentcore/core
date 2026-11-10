@@ -189,8 +189,14 @@ func (sp *Spinner) Init() {
 		if sp.IsReadOnly() {
 			return
 		}
-		tree.AddInit(p, "lead-icon", i)
-		tree.AddInit(p, "trail-icon", i)
+		// (a spinner without buttons, as for an input of type number of
+		// htmlcore, has no icons)
+		if sp.LeadingIcon.IsSet() {
+			tree.AddInit(p, "lead-icon", i)
+		}
+		if sp.TrailingIcon.IsSet() {
+			tree.AddInit(p, "trail-icon", i)
+		}
 	})
 }
 
