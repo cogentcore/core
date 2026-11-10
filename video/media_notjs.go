@@ -12,17 +12,23 @@ import (
 	"fmt"
 	"image"
 	"math"
+	"time"
 
 	"github.com/asticode/go-astiav"
 )
 
 // Media is an opened video file, decoded with FFmpeg via go-astiav.
-// It records the properties of the file; each call to [Media.decode]
+// It records the properties of the file; each call to [Media.Decode]
 // opens the file again, so that the media can be played any number of times.
 type Media struct {
 
-	// Path is the path of the media file.
+	// Path is the path or URL of the media file (any URL that FFmpeg
+	// reads, as http and https).
 	Path string
+
+	// Options are the options of FFmpeg for opening the input, as
+	// user_agent and headers (as "Cookie: a=b\r\n") for http URLs.
+	Options map[string]string
 
 	// Width and Height are the inherent size of the video, in pixels.
 	Width, Height int
@@ -35,15 +41,17 @@ type Media struct {
 	HasAudio bool
 }
 
-// OpenMedia opens the media file at the given path and reads its properties.
-func OpenMedia(fpath string) (*Media, error) {
+// OpenMedia opens the media file at the given path or URL, with the given
+// options of FFmpeg for the input (see [Media.Options]), which can be nil,
+// and reads its properties.
+func OpenMedia(fpath string, options map[string]string) (*Media, error) {
 	// Open the file and find its streams, to read their properties.
-	d, err := openDecoder(fpath)
+	d, err := openDecoder(fpath, options, true)
 	if err != nil {
 		return nil, err
 	}
 	defer d.free()
-	m := &Media{Path: fpath, HasAudio: d.audio != nil}
+	m := &Media{Path: fpath, Options: options, HasAudio: d.audio != nil}
 	par := d.video.stream.CodecParameters()
 	m.Width, m.Height = par.Width(), par.Height()
 	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
@@ -75,17 +83,33 @@ type decoder struct {
 	// to interleaved float64 stereo samples at [sampleRate].
 	resampled *astiav.Frame
 	resampler *astiav.SoftwareResampleContext
+
+	// next is the time of the next video frame, for frames without
+	// a timestamp, and frameTime is the duration of a frame.
+	next, frameTime time.Duration
 }
 
-// openDecoder opens the media file at the given path, and opens a decoder
-// for its first video stream and its first audio stream, if any.
-func openDecoder(fpath string) (*decoder, error) {
+// openDecoder opens the media file at the given path with the given
+// options, and opens a decoder for its first video stream, and for its
+// first audio stream, if any and audio.
+func openDecoder(fpath string, options map[string]string, audio bool) (*decoder, error) {
 	// Open the file and read its stream info.
 	d := &decoder{input: astiav.AllocFormatContext()}
 	if d.input == nil {
 		return nil, errors.New("video: allocating format context failed")
 	}
-	if err := d.input.OpenInput(fpath, nil, nil); err != nil {
+	var dict *astiav.Dictionary
+	if len(options) > 0 {
+		dict = astiav.NewDictionary()
+		defer dict.Free()
+		for k, v := range options {
+			if err := dict.Set(k, v, 0); err != nil {
+				d.input.Free()
+				return nil, fmt.Errorf("video: setting option %s: %w", k, err)
+			}
+		}
+	}
+	if err := d.input.OpenInput(fpath, nil, dict); err != nil {
 		d.input.Free()
 		return nil, fmt.Errorf("video: opening %q: %w", fpath, err)
 	}
@@ -101,7 +125,9 @@ func openDecoder(fpath string) (*decoder, error) {
 		case astiav.MediaTypeVideo:
 			target = &d.video
 		case astiav.MediaTypeAudio:
-			target = &d.audio
+			if audio {
+				target = &d.audio
+			}
 		}
 		if target == nil || *target != nil {
 			continue
@@ -116,6 +142,10 @@ func openDecoder(fpath string) (*decoder, error) {
 	if d.video == nil {
 		d.free()
 		return nil, fmt.Errorf("video: no video stream in %q", fpath)
+	}
+	d.frameTime = time.Second / 30
+	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
+		d.frameTime = time.Duration(float64(time.Second) / fr.Float64())
 	}
 
 	// Allocate the packet and frames used for decoding.
@@ -174,12 +204,6 @@ func (d *decoder) free() {
 	}
 	d.input.CloseInput()
 	d.input.Free()
-}
-
-// decodeSink receives the decoded data; it returns false to stop decoding.
-type decodeSink struct {
-	video func(img *image.RGBA) bool
-	audio func(samples [][2]float64) bool
 }
 
 // run decodes the whole media, sending the results to the sink,
@@ -288,7 +312,13 @@ func (d *decoder) sendVideo(sink decodeSink) (bool, error) {
 	if err := d.scaled.Data().ToImage(img); err != nil {
 		return false, fmt.Errorf("video: copying frame: %w", err)
 	}
-	return sink.video(img), nil
+	t := d.next
+	if pts := f.Pts(); pts != astiav.NoPtsValue {
+		tb := d.video.stream.TimeBase()
+		t = time.Duration(float64(pts) * float64(time.Second) * float64(tb.Num()) / float64(tb.Den()))
+	}
+	d.next = t + d.frameTime
+	return sink.video(Frame{Image: img, Time: t}), nil
 }
 
 // sendAudio converts the decoded audio frame to stereo samples and sends them.

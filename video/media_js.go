@@ -6,17 +6,17 @@
 
 package video
 
-import (
-	"errors"
-	"image"
-)
+import "errors"
 
 // Media is an opened video file. Decoding video with FFmpeg is not
 // supported on the web, so [OpenMedia] always returns an error there.
 type Media struct {
 
-	// Path is the path of the media file.
+	// Path is the path or URL of the media file.
 	Path string
+
+	// Options are the options of FFmpeg for opening the input.
+	Options map[string]string
 
 	// Width and Height are the inherent size of the video, in pixels.
 	Width, Height int
@@ -32,18 +32,14 @@ type Media struct {
 var errUnsupported = errors.New("video: decoding video is not supported on the web")
 
 // OpenMedia returns an error, since decoding video is not supported on the web.
-func OpenMedia(fpath string) (*Media, error) { return nil, errUnsupported }
-
-// decodeSink receives the decoded data; it returns false to stop decoding.
-type decodeSink struct {
-	video func(img *image.RGBA) bool
-	audio func(samples [][2]float64) bool
-}
+func OpenMedia(fpath string, options map[string]string) (*Media, error) { return nil, errUnsupported }
 
 // decoder is not supported on the web.
 type decoder struct{ scaleWidth, scaleHeight int }
 
-func openDecoder(fpath string) (*decoder, error) { return nil, errUnsupported }
+func openDecoder(fpath string, options map[string]string, audio bool) (*decoder, error) {
+	return nil, errUnsupported
+}
 
 func (d *decoder) free() {}
 

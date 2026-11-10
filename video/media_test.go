@@ -17,15 +17,15 @@ import (
 // decodeFrames decodes the first n video frames of the media file,
 // scaled to the given size, along with the audio samples up to them.
 func decodeFrames(t *testing.T, fpath string, n, width, height int) ([]*image.RGBA, [][2]float64) {
-	d, err := openDecoder(fpath)
+	d, err := openDecoder(fpath, nil, true)
 	require.NoError(t, err)
 	defer d.free()
 	d.scaleWidth, d.scaleHeight = width, height
 	var frames []*image.RGBA
 	var samples [][2]float64
 	err = d.run(decodeSink{
-		video: func(img *image.RGBA) bool {
-			frames = append(frames, img)
+		video: func(f Frame) bool {
+			frames = append(frames, f.Image)
 			return len(frames) < n
 		},
 		audio: func(s [][2]float64) bool {
@@ -52,14 +52,14 @@ func colorful(img *image.RGBA) int {
 }
 
 func TestOpenMedia(t *testing.T) {
-	m, err := OpenMedia("../examples/video/countdown.mp4")
+	m, err := OpenMedia("../examples/video/countdown.mp4", nil)
 	require.NoError(t, err)
 	assert.Equal(t, 320, m.Width)
 	assert.Equal(t, 240, m.Height)
 	assert.InDelta(t, 29.97, m.FrameRate, 0.01)
 	assert.True(t, m.HasAudio)
 
-	_, err = OpenMedia("nonexistent.mp4")
+	_, err = OpenMedia("nonexistent.mp4", nil)
 	assert.Error(t, err)
 }
 
@@ -84,7 +84,7 @@ func TestDecodeScaled(t *testing.T) {
 
 func TestDecodeAll(t *testing.T) {
 	// Decode all of the frames to the end, including the decoder flush.
-	m, err := OpenMedia("../examples/video/countdown.mp4")
+	m, err := OpenMedia("../examples/video/countdown.mp4", nil)
 	require.NoError(t, err)
 	frames, samples := decodeFrames(t, m.Path, 1<<30, 32, 24)
 	assert.Greater(t, len(frames), 100)
