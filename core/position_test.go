@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -322,6 +323,31 @@ func TestPositionTransparentContent(t *testing.T) {
 	img := b.RenderImage(func() { pos = tx.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0, 0x80, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the fill under the text")
+}
+
+// TestPositionTranslucentBackground tests that an absolute widget with a
+// translucent background (as the dimming overlay of a modal dialog) is
+// blended with the widgets that it overlaps, not with the background of
+// its parent, which made it opaque (the window of nytimes.com was gray
+// under its consent dialog).
+func TestPositionTranslucentBackground(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+	fill := fixedFrame(b, 200, 40)
+	fill.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.Red) })
+	over := NewFrame(b)
+	over.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Top, s.Inset.Left = units.Dp(0), units.Dp(0)
+		s.InsetSet.Top, s.InsetSet.Left = true, true
+		s.Min.Set(units.Dp(200), units.Dp(40))
+		s.Background = colors.Uniform(color.RGBA{0, 0, 0, 64}) // (premultiplied: 25% black)
+	})
+	var pos image.Point
+	img := b.RenderImage(func() { pos = fill.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+	assert.InDelta(t, 191, r>>8, 2, "the red fill, darkened")
+	assert.Equal(t, [2]uint32{0, 0}, [2]uint32{g >> 8, bl >> 8})
 }
 
 // TestPositionPercentOfContainingBlock tests that the percentages of an

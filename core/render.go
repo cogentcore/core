@@ -814,7 +814,41 @@ func (wb *WidgetBase) RenderStandardBox() {
 		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
 		return
 	}
+	if bg := wb.translucentOverlapBackground(); bg != nil {
+		// A translucent background of a widget that is painted over the
+		// widgets that it overlaps (as the dimming overlay of a modal
+		// dialog, as the consent dialog of nytimes.com) is blended with
+		// them, not with the background of its parent, which made it
+		// opaque (the window was gray).
+		abg, fm := wb.Styles.ActualBackground, wb.Styles.FillMargin
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = bg, false
+		wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, colors.Uniform(colors.Transparent))
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
+		return
+	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// translucentOverlapBackground returns the background of the widget with
+// its opacity, if it is a translucent color and the widget is painted over
+// the widgets that it overlaps (see [WidgetBase.inTransparentOverlap]), or
+// nil otherwise.
+func (wb *WidgetBase) translucentOverlapBackground() image.Image {
+	u, ok := wb.Styles.Background.(*image.Uniform)
+	if !ok || colors.IsNil(u.C) || wb.Styles.StateLayer > 0 {
+		return nil
+	}
+	c := colors.AsRGBA(u.C)
+	if c.A == 255 && wb.Styles.Opacity >= 1 {
+		return nil
+	}
+	if !wb.inTransparentOverlap() {
+		return nil
+	}
+	if wb.Styles.Opacity < 1 {
+		return colors.Uniform(colors.ApplyOpacity(c, wb.Styles.Opacity))
+	}
+	return u
 }
 
 // inTransparentOverlap returns whether the widget is out of flow (see
