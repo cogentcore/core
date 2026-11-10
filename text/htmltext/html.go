@@ -175,7 +175,10 @@ func htmlToRich(spcstr []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 				FontStyleCSS(fs, nm, cssProps)
 			}
 			fstack.Push(fs)
-			if curSp.Len() == 0 && len(spstack) > 0 { // we started something but added nothing to it.
+			if curSp.Len() == 0 && len(spstack) > 0 && !startsSpecial(curSp) { // we started something but added nothing to it.
+				// (except a special, as a link, whose text is in elements in
+				// it, as <a href="..."><span>text</span></a>, which was not
+				// a link)
 				spstack.Pop()
 			}
 			if special != rich.Nothing {
@@ -268,4 +271,14 @@ func FontStyleCSS(fs *rich.Style, tag string, cssProps map[string]any) bool {
 	}
 	fs.FromProperties(nil, pmap, nil)
 	return true
+}
+
+// startsSpecial returns whether the given span starts a special (as a link),
+// with no text of its own yet.
+func startsSpecial(sp rich.Text) bool {
+	if len(sp) == 0 || len(sp[0]) == 0 {
+		return false
+	}
+	s := rich.RuneToSpecial(sp[0][0])
+	return s != rich.Nothing && s != rich.End
 }

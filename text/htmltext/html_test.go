@@ -125,3 +125,19 @@ func TestPlainText(t *testing.T) {
 	assert.True(t, isPlainText([]byte("Control+P, Meta+UpArrow")))
 	assert.False(t, isPlainText([]byte("a & b")))
 }
+
+// TestLinkNestedSpans tests that a link whose text is in elements in it
+// is a link, with all of its text (as the titles of the pull requests of
+// GitHub, of <a href="..."><span><span>title</span></span></a>, which could
+// not be clicked).
+func TestLinkNestedSpans(t *testing.T) {
+	src := `See <span style="font-weight:bold"><a href="/pull/1781"><span><span>the title</span></span> here</a></span> now`
+	tx, err := HTMLToRich([]byte(src), rich.NewStyle(), nil)
+	assert.NoError(t, err)
+	links := tx.GetLinks()
+	if assert.Len(t, links, 1) {
+		assert.Equal(t, "/pull/1781", links[0].URL)
+		assert.Equal(t, "the title here", links[0].Label)
+	}
+	assert.Equal(t, "See the title here now", string(tx.Join()))
+}

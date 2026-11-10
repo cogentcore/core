@@ -274,6 +274,7 @@ func (tx Text) SpecialRange(si int) textpos.Range {
 			if depth == 0 {
 				return textpos.Range{si, j}
 			}
+		case Nothing: // a span of text in the special, as of an element in it
 		default:
 			depth++
 		}
