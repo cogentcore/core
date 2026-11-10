@@ -2831,8 +2831,12 @@ func (fr *Frame) positionCellsMainX() {
 	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 		cidx := cwb.Geom.Cell
 		if cidx.X == 0 && idx > 0 {
+			// the next line is after the height of this one, not of its
+			// last item (as the actions beside a title of two lines in
+			// the page headers of github.com, which the line under it
+			// overlapped)
 			pos.X = stPos.X
-			pos.Y += lastSz.Y + gap.Y
+			pos.Y += max(lastSz.Y, crosses[min(line, len(crosses)-1)]) + gap.Y
 			line++
 		}
 		if spaces != nil && line < len(spaces) {

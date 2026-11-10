@@ -1313,3 +1313,19 @@ func TestGridMinmaxFrMin(t *testing.T) {
 			assert.GreaterOrEqual(t, x, 84*dp-1, "after the first column of at least 64px and its gap")
 		})
 }
+
+// TestGridRowAfterFixedHeight tests that a row of a grid is after the
+// height of the row before it, when its last cell has a smaller fixed
+// height (as the actions of the height of a line of the page headers of
+// github.com, after a title of two lines, which the description under it
+// overlapped).
+func TestGridRowAfterFixedHeight(t *testing.T) {
+	widgetsByID(t, `<div style="display: grid; width: 600px; grid-template-columns: auto auto auto auto 1fr; grid-template-areas: 'c c c c c' 'l b t r a' 'd d d d d'">`+
+		`<div id="t" style="grid-area: t; display: flex"><div><h1>a title</h1></div></div>`+
+		`<div style="grid-area: a; display: flex; height: 20px"><button>action</button></div>`+
+		`<div id="d" style="grid-area: d">the description under it</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			tb := ws["t"].Geom.Pos.Total.Y + ws["t"].Geom.Size.Actual.Total.Y
+			assert.GreaterOrEqual(t, ws["d"].Geom.Pos.Total.Y, tb-1, "the description is under the title")
+		})
+}
