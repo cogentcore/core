@@ -8,13 +8,11 @@ package video
 //go:generate core generate
 
 import (
-	"bytes"
-	"encoding/binary"
 	"image"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
-	"github.com/cogentcore/reisen"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 )
@@ -25,7 +23,7 @@ type Video struct { //types:add
 	core.WidgetBase
 
 	// Media is the video media.
-	Media *reisen.Media
+	Media *Media
 
 	// degrees of rotation to apply to the video images
 	// 90 = left 90, -90 = right 90
@@ -35,6 +33,9 @@ type Video struct { //types:add
 	Stop bool
 
 	frameBuffer <-chan *image.RGBA
+
+	// done is closed to stop the decoding of the current playing.
+	done chan struct{}
 
 	// last frame we have rendered
 	lastFrame *image.RGBA
@@ -56,9 +57,17 @@ func (v *Video) OnAdd() {
 
 func (v *Video) Destroy() {
 	v.Scene.DeleteDirectRender(v)
-	// v.Media.Destroy()
-	// todo: frameBuffer
+	v.Stop = true
+	v.stopDecoding()
 	v.WidgetBase.Destroy()
+}
+
+// stopDecoding stops the decoding of the current playing, if any.
+func (v *Video) stopDecoding() {
+	if v.done != nil {
+		close(v.done)
+		v.done = nil
+	}
 }
 
 // CurrentFrame returns the current frame (for rendering),
@@ -94,7 +103,7 @@ func (v *Video) Open(fpath string) error {
 		return err
 	}
 
-	media, err := reisen.NewMedia(fpath)
+	media, err := OpenMedia(fpath)
 	if err != nil {
 		return err
 	}
@@ -105,8 +114,10 @@ func (v *Video) Open(fpath string) error {
 // Play starts playing the video at the specified size. Values of 0
 // indicate to use the inherent size of the video for that dimension.
 func (v *Video) Play(width, height float32) error {
-	videoFPS, _ := v.Media.Streams()[0].FrameRate()
-
+	if v.Media == nil {
+		return errors.New("video: no media opened")
+	}
+	videoFPS := v.Media.FrameRate
 	if videoFPS == 0 || videoFPS > 100 {
 		videoFPS = 30
 	}
@@ -115,8 +126,9 @@ func (v *Video) Play(width, height float32) error {
 	// fmt.Println(videoFPS, spf)
 
 	// Start decoding streams.
-	var sampleSource <-chan [2]float64
-	frameBuffer, sampleSource, errChan, err := v.ReadVideoAndAudio()
+	v.stopDecoding()
+	v.done = make(chan struct{})
+	frameBuffer, sampleSource, errChan, err := v.ReadVideoAndAudio(int(width), int(height))
 
 	if err != nil {
 		return err
@@ -133,21 +145,14 @@ func (v *Video) Play(width, height float32) error {
 	v.NeedsRender()
 	// Start playing audio samples.
 	speaker.Play(v.StreamSamples(sampleSource))
-	_ = errChan
+	go func() {
+		for err := range errChan {
+			errors.Log(err)
+		}
+	}()
 
 	go func() {
 		for {
-			// todo: this is causing everything to stop on my sample video that
-			// has an error a ways into it -- maybe need a buffered chan or something?
-			// also see commented-out parts where it tries to send the errors
-			// or something?
-			// select {
-			// case err, ok := <-errChan:
-			// 	if ok {
-			// 		fmt.Println(err)
-			// 		// return err
-			// 	}
-			// default:
 			if v.Stop {
 				return
 			}
@@ -174,7 +179,11 @@ func (v *Video) Play(width, height float32) error {
 }
 
 const (
-	frameBufferSize                   = 1024
+	// frameBufferSize is the number of decoded video frames buffered ahead
+	// of playback. Frames can be large (33 MB for 4K RGBA), so this is kept
+	// small; the audio buffer covers the interleaving of the streams.
+	frameBufferSize = 30
+
 	sampleRate                        = 44100
 	channelCount                      = 2
 	bitDepth                          = 8
@@ -182,128 +191,56 @@ const (
 	SpeakerSampleRate beep.SampleRate = 44100
 )
 
-// ReadVideoAndAudio reads video and audio frames from the opened media and
-// sends the decoded data to che channels to be played.
-func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan error, error) {
+// ReadVideoAndAudio starts decoding the video and audio of the opened media,
+// in a separate goroutine that sends the decoded data to the returned channels
+// to be played. Video frames are scaled to the given size, where 0 for
+// a dimension means to keep the aspect ratio (both 0 = the inherent size).
+// Decoding errors are sent to the error channel, which is closed with the
+// others at the end of the media, or when the playing is stopped.
+func (v *Video) ReadVideoAndAudio(width, height int) (<-chan *image.RGBA, <-chan [2]float64, chan error, error) {
+	if v.Media == nil {
+		return nil, nil, nil, errors.New("video: no media opened")
+	}
+	d, err := openDecoder(v.Media.Path)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	d.scaleWidth, d.scaleHeight = width, height
 	frameBuffer := make(chan *image.RGBA, frameBufferSize)
 	sampleBuffer := make(chan [2]float64, sampleBufferSize)
-	errs := make(chan error)
-
-	err := v.Media.OpenDecode()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	videoStream := v.Media.VideoStreams()[0]
-	err = videoStream.Open()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	audioStream := v.Media.AudioStreams()[0]
-	err = audioStream.Open()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
+	errs := make(chan error, 1)
+	done := v.done
 
 	go func() {
-		for {
-			packet, gotPacket, err := v.Media.ReadPacket()
-
-			if err != nil {
-				go func(err error) {
-					errs <- err
-				}(err)
-			}
-
-			if !gotPacket {
-				break
-			}
-
-			switch packet.Type() {
-			case reisen.StreamVideo:
-				s := v.Media.Streams()[packet.StreamIndex()].(*reisen.VideoStream)
-				videoFrame, gotFrame, err := s.ReadVideoFrame()
-				_ = err
-
-				// note: this is causing a panic send on closed channel
-				// if err != nil {
-				// 	go func(err error) {
-				// 		errs <- err
-				// 	}(err)
-				// }
-
-				if !gotFrame {
-					break
+		defer func() {
+			d.free()
+			close(frameBuffer)
+			close(sampleBuffer)
+			close(errs)
+		}()
+		err := d.run(decodeSink{
+			video: func(img *image.RGBA) bool {
+				select {
+				case frameBuffer <- img:
+					return true
+				case <-done:
+					return false
 				}
-
-				if videoFrame == nil {
-					continue
-				}
-
-				frameBuffer <- videoFrame.Image()
-
-			case reisen.StreamAudio:
-				s := v.Media.Streams()[packet.StreamIndex()].(*reisen.AudioStream)
-				audioFrame, gotFrame, err := s.ReadAudioFrame()
-
-				// note: this is causing a panic send on closed channel
-				// if err != nil {
-				// 	go func(err error) {
-				// 		errs <- err
-				// 	}(err)
-				// }
-
-				if !gotFrame {
-					break
-				}
-
-				if audioFrame == nil {
-					continue
-				}
-
-				// Turn the raw byte data into
-				// audio samples of type [2]float64.
-				reader := bytes.NewReader(audioFrame.Data())
-
-				// See the README.md file for
-				// detailed scheme of the sample structure.
-				for reader.Len() > 0 {
-					sample := [2]float64{0, 0}
-					var result float64
-					err = binary.Read(reader, binary.LittleEndian, &result)
-
-					if err != nil {
-						go func(err error) {
-							errs <- err
-						}(err)
+			},
+			audio: func(samples [][2]float64) bool {
+				for _, s := range samples {
+					select {
+					case sampleBuffer <- s:
+					case <-done:
+						return false
 					}
-
-					sample[0] = result
-
-					err = binary.Read(reader, binary.LittleEndian, &result)
-
-					if err != nil {
-						go func(err error) {
-							errs <- err
-						}(err)
-					}
-
-					sample[1] = result
-					sampleBuffer <- sample
 				}
-			}
+				return true
+			},
+		})
+		if err != nil {
+			errs <- err
 		}
-
-		videoStream.Close()
-		audioStream.Close()
-		v.Media.CloseDecode()
-		close(frameBuffer)
-		close(sampleBuffer)
-		close(errs)
 	}()
 
 	return frameBuffer, sampleBuffer, errs, nil
