@@ -1151,3 +1151,43 @@ func TestLineHeightCalc(t *testing.T) {
 			assert.InDelta(t, 20*dp, ws["p"].Geom.Size.Actual.Content.Y, 2, "one line of 20px")
 		})
 }
+
+// TestEmptyInlineRun tests that a run of inline content that is only empty
+// elements (as the span with a tabindex before the payload of the reCAPTCHA
+// challenge) makes no line, as in browsers: it pushed the challenge down.
+func TestEmptyInlineRun(t *testing.T) {
+	widgetsByID(t, `<div id="a"><span tabindex="0"></span><div id="b">text</div></div>`+
+		`<div id="c"><span>&nbsp;</span></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, ws["a"].Geom.Pos.Total.Y, ws["b"].Geom.Pos.Total.Y, 1, "no line before the block")
+			assert.Greater(t, ws["c"].Geom.Size.Actual.Content.Y, 10*dp, "a no-break space is content")
+		})
+}
+
+// TestFixedHeightOverflow tests that a box with a height and visible
+// overflow is of that height, with its content overflowing it (as the
+// instructions of the reCAPTCHA challenge, which made it too high for its
+// frame), and that the height of a table cell is a minimum.
+func TestFixedHeightOverflow(t *testing.T) {
+	widgetsByID(t, `<div id="w" style="height: 20px; padding: 10px"><div id="d" style="height: 50px">tall</div></div><div id="n">next</div>`+
+		`<table><tr><td id="td" style="height: 20px"><div style="height: 50px">cell</div></td></tr></table>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 40*dp, ws["w"].Geom.Size.Actual.Total.Y, 2, "the height and padding")
+			assert.InDelta(t, 50*dp, ws["d"].Geom.Size.Actual.Total.Y, 2, "the content keeps its height")
+			assert.InDelta(t, ws["w"].Geom.Pos.Total.Y+40*dp, ws["n"].Geom.Pos.Total.Y, 2, "the next box is after the height")
+			assert.Greater(t, ws["td"].Geom.Size.Actual.Total.Y, 49*dp, "the content of a cell grows it")
+		})
+}
+
+// TestBreakEmptyRow tests that a line break that ends an empty row of
+// inline widgets (as the second of two after the logo of google.com)
+// makes an empty line, as in browsers, and that a last one does not.
+func TestBreakEmptyRow(t *testing.T) {
+	widgetsByID(t, `<div id="a"><img width="20" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><br><br></div>`+
+		`<div id="b"><img width="20" height="20" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><br></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			ha, hb := ws["a"].Geom.Size.Actual.Total.Y, ws["b"].Geom.Size.Actual.Total.Y
+			assert.Greater(t, ha, hb+10*dp, "the second break makes a line")
+			assert.Less(t, hb, 30*dp, "a last break makes no line")
+		})
+}

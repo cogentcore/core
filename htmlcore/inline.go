@@ -250,6 +250,11 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 		if str == "" || (strings.TrimSpace(str) == "" && !pre) {
 			return
 		}
+		if !pre && !hasInlineContent(str) {
+			// a run of only empty elements (as a span with a tabindex,
+			// before the payload of reCAPTCHA) makes no line, as in browsers
+			return
+		}
 		if !pre {
 			// Spaces at the start and end of the run are not shown, but
 			// those next to inline widgets are, as non-breaking spaces.
@@ -285,7 +290,12 @@ func (c *Context) readInlineRun(parent core.Widget, first, last *xhtml.Node) {
 	for n := first; ; n = n.NextSibling {
 		if container != parent && n.Type == xhtml.ElementNode && n.Data == "br" {
 			// a line break in a row of widgets ends the row, and the
-			// widgets after it are in another row (each is aligned)
+			// widgets after it are in another row (each is aligned); one
+			// that ends an empty row (as the second of two after the logo
+			// of google.com) makes an empty line, as in browsers
+			if start && buf.Len() == 0 && !container.AsTree().HasChildren() {
+				buf.WriteString("&nbsp;")
+			}
 			flush(false)
 			start = true
 			container = newContainer()
@@ -329,6 +339,20 @@ func (c *Context) isPre(n *xhtml.Node) bool {
 		}
 	}
 	return false
+}
+
+// markupTag matches a tag of rich text markup.
+var markupTag = regexp.MustCompile(`<[^>]*>`)
+
+// hasInlineContent returns whether the given rich text markup has content
+// that makes a line: text other than collapsible white space (a no-break
+// space is content), or a line break.
+func hasInlineContent(markup string) bool {
+	if strings.Contains(markup, "<br") {
+		return true
+	}
+	text := html.UnescapeString(markupTag.ReplaceAllString(markup, ""))
+	return strings.Trim(text, " \t\n\r\f") != ""
 }
 
 // brSpace matches a line break with the white space after it.

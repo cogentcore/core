@@ -273,6 +273,51 @@ func (r *resolver) replacedSize() {
 }
 
 // isIframe returns whether the element is an iframe.
+// fixedHeight returns whether the box is exactly of the given height set
+// in CSS, with overflow that is visible: one of a frame that does not clip
+// its children (as is the default), and not of a part of a table, whose
+// height is a minimum in CSS. The height is an absolute length (as px or
+// em), not a percentage, a length of the viewport or a calc(), as of the
+// containers of whole pages (as html and body), whose overflow is in the
+// scrolling of the page, which that of a fixed box is not. Its content is
+// only boxes (as the text of the instructions of reCAPTCHA, in a div), not
+// inline content, whose lines can wrap differently than in browsers
+// (it would overlap what is after the box when they do: the box grows).
+func (r *resolver) fixedHeight(h *units.Value) bool {
+	if _, ok := r.wb.This.(*core.Frame); !ok || !r.s.NoClip || h.Custom != nil {
+		return false
+	}
+	switch h.Unit {
+	case units.UnitDp, units.UnitPx, units.UnitRem, units.UnitEm, units.UnitEx, units.UnitCh,
+		units.UnitCm, units.UnitMm, units.UnitQ, units.UnitIn, units.UnitPc, units.UnitPt:
+	default:
+		return false
+	}
+	if tag := r.wb.Property("tag"); tag == "html" || tag == "body" {
+		return false
+	}
+	if r.node == nil {
+		return false
+	}
+	for ch := r.node.FirstChild; ch != nil; ch = ch.NextSibling {
+		switch ch.Type {
+		case html.TextNode:
+			if strings.TrimSpace(ch.Data) != "" {
+				return false
+			}
+		case html.ElementNode:
+			if d := r.c.displayOf(ch); d != "none" && r.c.isInlineLevel(ch) {
+				return false
+			}
+		}
+	}
+	switch r.st.display {
+	case "table", "inline-table", "table-row", "table-cell", "table-row-group", "table-header-group", "table-footer-group":
+		return false
+	}
+	return true
+}
+
 func (r *resolver) isIframe() bool {
 	return r.node != nil && r.node.Data == "iframe"
 }
@@ -877,6 +922,13 @@ func (r *resolver) sizes() {
 		s.Min.Y = mn
 		if s.Overflow.Y != styles.OverflowVisible {
 			s.Max.Y = mx
+		} else if r.fixedHeight(st.height) && st.minHeight == nil && st.maxHeight == nil {
+			// a box of a fixed height is of that height, and its content
+			// overflows it visibly (as the instructions of the reCAPTCHA
+			// challenge, whose text is higher than them): its overflow is
+			// hidden in the layout, but not clipped (NoClip)
+			s.Max.Y = mx
+			s.Overflow.Y = styles.OverflowHidden
 		}
 		s.Grow.Y = 0
 	}
