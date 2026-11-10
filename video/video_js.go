@@ -69,12 +69,16 @@ func (v *Video) setAttributes(e js.Value) {
 // metadataLoaded sets the size of the media once the browser knows it,
 // and updates the video, whose size can depend on it (as in a web page).
 func (v *Video) metadataLoaded(width, height int) {
-	if v.Media == nil || !v.AsyncLockIfShown() {
+	if v.Media == nil {
 		return
 	}
-	defer v.AsyncUnlock()
+	// (set even before the video is shown, which then styles it with it;
+	// the web is single-threaded)
 	v.Media.Width, v.Media.Height = width, height
-	v.Update()
+	if v.AsyncLockIfShown() {
+		v.Update()
+		v.AsyncUnlock()
+	}
 }
 
 // release removes the video element of the video.
