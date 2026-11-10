@@ -4,10 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>htmlcore example</title>
     <style>
+        body {
+            font-family: sans-serif;
+            max-width: 720px;
+            margin: 16px auto;
+        }
+
         #my-heading+p.red {
             color: red;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 8px 16px;
+        }
+
+        .card:hover {
+            background: #eef;
+        }
+
+        .card h4 {
+            margin: 4px 0;
+            color: teal;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+        }
+
+        @media (max-width: 500px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -15,14 +64,43 @@
 <body>
     <h1 style="color:blue">htmlcore</h1>
     <h3 id="my-heading">Made with <i>Cogent Core</i></h3>
-    <p class="red">This is a sample <b>HTML</b> <u>document</u> displayed using <code>htmlcore</code>.</p>
-    <button>Click me!</button>
-    <p>Go to the <a href="https://cogentcore.org/core">Cogent Core website</a></p>
-    <input type="text">
-    <input type="number">
-    <input type="color">
-    <input type="datetime">
-    <textarea>
+    <p class="red">This is a sample <b>HTML</b> <u>document</u> displayed using <code>htmlcore</code>, styled with CSS.</p>
+    <p>Go to the <a href="https://cogentcore.org/core">Cogent Core website</a>.</p>
+
+    <h2>Layout</h2>
+    <div class="cards">
+        <div class="card">
+            <h4>Grid</h4>
+            <p>The cards are in a grid, with one column in a narrow window (by a media query).</p>
+        </div>
+        <div class="card">
+            <h4>Hover</h4>
+            <p>Each card has a <code>:hover</code> style.</p>
+        </div>
+        <div class="card">
+            <h4>Flex</h4>
+            <p>The controls below are in a flex row.</p>
+        </div>
+    </div>
+
+    <h2>Table</h2>
+    <table>
+        <tr><th>Element</th><th>Widget</th></tr>
+        <tr><td>block elements</td><td>frames</td></tr>
+        <tr><td>inline content</td><td>text</td></tr>
+        <tr><td>controls</td><td>buttons, text fields, ...</td></tr>
+    </table>
+
+    <h2>Forms</h2>
+    <div class="row">
+        <button>Click me!</button>
+        <input type="text" placeholder="Text">
+        <input type="number" value="42">
+        <input type="color" value="#008080">
+        <input type="checkbox" checked> Checkbox
+    </div>
+    <p>
+        <textarea rows="7">
 package main
 
 import "fmt"
@@ -30,7 +108,8 @@ import "fmt"
 func main() {
     fmt.Println("Hello, world!")
 }
-    </textarea>
+        </textarea>
+    </p>
 </body>
 
 </html>
