@@ -1673,9 +1673,6 @@ func (fr *Frame) childSpace() math32.Vector2 {
 func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	sz := &fr.Geom.Size
 	sbw := math32.Ceil(fr.Styles.ScrollbarWidth.Dots)
-	if fr.Styles.ScrollbarOverlay {
-		sbw = 0 // the scrollbars take no space (they are over the content)
-	}
 	change := false
 	// The scene is being sized to fit its content, from no size,
 	// so it does not overflow: scrollbars would only make it bigger.
