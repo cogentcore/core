@@ -1299,3 +1299,17 @@ func TestZeroHeightFlexEnd(t *testing.T) {
 			assert.InDelta(t, s.Pos.Total.Y+s.Size.Actual.Total.Y, ws["after"].Geom.Pos.Total.Y, 2, "the next block is right after it")
 		})
 }
+
+// TestGridMinmaxFrMin tests that a track of minmax(length, fr) is at least
+// the length (as the first, empty column of the grid of the results of
+// google.com, of minmax(64px, 1fr), which was narrower, so that the header
+// was to the left of where it is in browsers).
+func TestGridMinmaxFrMin(t *testing.T) {
+	widgetsByID(t, `<div id="g" style="display: grid; width: 560px; column-gap: 20px; grid-template-columns: minmax(64px, 1fr) repeat(8, 36px) minmax(0, 1fr)"><div id="i" style="grid-column: 2 / -1">header</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			x := ws["i"].Geom.Pos.Total.X - ws["g"].Geom.Pos.Total.X
+			// (at least: core grows it from its minimum by its share of the
+			// rest, where CSS takes the larger of them)
+			assert.GreaterOrEqual(t, x, 84*dp-1, "after the first column of at least 64px and its gap")
+		})
+}

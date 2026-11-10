@@ -499,3 +499,42 @@ func TestSceneWidgetAt(t *testing.T) {
 		assert.Nil(t, b.Scene.WidgetAt(image.Pt(-10, -10)))
 	})
 }
+
+// TestRoundedNoClipBorder tests that the rounded border of a parent that
+// does not clip is not painted over by a child that fills it, with a
+// background or not (as the search box of the results of google.com, of
+// which only the top and bottom of the border were shown).
+func TestRoundedNoClipBorder(t *testing.T) {
+	for _, childBg := range []bool{false, true} {
+		b := NewBody()
+		b.Styler(func(s *styles.Style) { s.Padding.Set(units.Dp(20)) })
+		box := NewFrame(b)
+		box.Styler(func(s *styles.Style) {
+			s.Min.Set(units.Dp(400), units.Dp(48))
+			s.Border.Width.Set(units.Dp(2))
+			s.Border.Color.Set(colors.Uniform(colors.Black))
+			s.Border.Radius.Set(units.Dp(26))
+			s.Background = colors.Uniform(colors.White)
+			s.NoClip = true
+			s.Padding.Zero()
+		})
+		kid := NewFrame(box)
+		kid.Styler(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+			if childBg {
+				s.Background = colors.Uniform(colors.White)
+				s.Border.Radius.Set(units.Dp(26))
+			}
+		})
+		var pos image.Point
+		img := b.RenderImage(func() {
+			bb := box.Geom.TotalBBox
+			// on the top left corner of the border, at 45 degrees
+			r := float32(bb.Dy()) / 2
+			d := r - (r-1)*0.7071
+			pos = image.Pt(bb.Min.X+int(d), bb.Min.Y+int(d))
+		})
+		r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
+		assert.Less(t, (r+g+bl)/3>>8, uint32(128), "the corner of the border is shown (child background %v)", childBg)
+	}
+}

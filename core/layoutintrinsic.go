@@ -41,6 +41,19 @@ func (fr *Frame) sizeUpIntrinsicFrame() {
 		sz.Actual.Content.X = max(sz.Actual.Content.X, math32.Ceil(prefw))
 		sz.SetTotalFromContent(&sz.Actual)
 	}
+	if fr.onlyFloats() && !fr.contained(math32.X) {
+		// the floats are its content, of which its width is (as the buttons
+		// of the bar of google.com, floats in boxes in a row, which were
+		// as wide as nothing)
+		w := math32.Ceil(prefw)
+		if sz.Max.X > 0 {
+			w = min(w, sz.Max.X)
+		}
+		if w > sz.Actual.Content.X {
+			sz.Actual.Content.X = w
+			sz.SetTotalFromContent(&sz.Actual)
+		}
+	}
 	if fr.Styles.ContentMinWidth && sz.Max.X > 0 && minw > sz.Max.X {
 		// as wide as its content needs to be (as a table in CSS)
 		sz.Max.X = math32.Ceil(minw)

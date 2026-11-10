@@ -814,6 +814,25 @@ func (wb *WidgetBase) RenderStandardBox() {
 		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
 		return
 	}
+	if wb.inRoundedCorners() {
+		// A widget in the rounded corners of a parent that does not clip
+		// (whose radius is not in the bounds of the painter, as for a
+		// clipping one) does not fill its box with the background of the
+		// parent as a square over its corners, nor its own box without a
+		// background of its own (as the search box of the results of
+		// google.com, of which only the top and bottom of the border were
+		// shown, under the field in it with its background and radius).
+		abg, fm := wb.Styles.ActualBackground, wb.Styles.FillMargin
+		pabg := wb.parentActualBackground()
+		wb.Styles.FillMargin = false
+		if wb.Styles.Background == nil {
+			clear := colors.Uniform(colors.Transparent)
+			wb.Styles.ActualBackground, pabg = clear, clear
+		}
+		wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, pabg)
+		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
+		return
+	}
 	if bg := wb.translucentOverlapBackground(); bg != nil {
 		// A translucent background of a widget that is painted over the
 		// widgets that it overlaps (as the dimming overlay of a modal
@@ -827,6 +846,23 @@ func (wb *WidgetBase) RenderStandardBox() {
 		return
 	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// inRoundedCorners returns whether the widget is in the rounded corners of
+// its parent, when the parent does not clip its children.
+func (wb *WidgetBase) inRoundedCorners() bool {
+	p := wb.parentWidget()
+	if p == nil || !p.noClip() {
+		return false
+	}
+	r := p.Styles.Border.Radius.Dots()
+	radius := max(r.Top, r.Right, r.Bottom, r.Left)
+	if radius <= 0 {
+		return false
+	}
+	pb, b := p.Geom.TotalBBox, wb.Geom.TotalBBox
+	return float32(b.Min.Y-pb.Min.Y) < radius || float32(b.Min.X-pb.Min.X) < radius ||
+		float32(pb.Max.X-b.Max.X) < radius || float32(pb.Max.Y-b.Max.Y) < radius
 }
 
 // translucentOverlapBackground returns the background of the widget with

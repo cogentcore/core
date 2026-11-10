@@ -359,6 +359,16 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 				// widened their columns), and it overflows them
 				s.Contain = styles.ContainInlineSize
 			}
+			if mn != "0" && mn != "0px" && mn != "auto" {
+				if l, ok := env.length(mn, units.UnitPw); ok {
+					// the track is at least the length (as the first column
+					// of minmax(64px, 1fr) of the results of google.com,
+					// empty, which was narrower, so that the header was to
+					// the left of where it is in browsers)
+					s.Min.X = l
+					s.BoxSizing = styles.BoxBorderBox
+				}
+			}
 			track = mx
 		} else if l, ok := env.length(mx, units.UnitPw); ok {
 			s.Grow.X, s.Shrink.X = 1, 1

@@ -1073,3 +1073,28 @@ func TestLayoutPercentPaddingFirst(t *testing.T) {
 		assert.InDelta(t, 100*dp, box.Geom.Size.Actual.Total.Y, 3)
 	})
 }
+
+// TestFloatOnlyItemWidth tests that a box in a row whose only content is a
+// float is as wide as the float (as the buttons of the bar of google.com,
+// floats in boxes in a row, which were as wide as their padding).
+func TestFloatOnlyItemWidth(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(400)
+		s.Justify.Content = styles.End
+	})
+	d := NewFrame(row)
+	d.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Padding.Set(units.Dp(4))
+		s.Shrink.X = 1
+	})
+	NewFrame(d).Styler(func(s *styles.Style) {
+		s.Float = styles.FloatRight
+		s.Min.Set(units.Dp(40), units.Dp(40))
+	})
+	layoutAtWidth(b, 600, 400, func(dp float32) {
+		assert.InDelta(t, 48*dp, d.Geom.Size.Actual.Total.X, 1, "the float and the padding")
+	})
+}
