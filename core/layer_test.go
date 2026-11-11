@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
@@ -156,5 +157,55 @@ func assertSameImage(t *testing.T, want, got *image.RGBA) {
 	}
 	if bad > 0 {
 		t.Errorf("%d pixels differ", bad)
+	}
+}
+
+// TestLayerEvents tests that the widgets under the mouse are looked for only
+// in the layer of the scene (see sceneLayer) when one of the widgets in it is
+// under the mouse (as on a dialog of a web page), with the same widget getting
+// the events as when all of the widgets of the scene are gone through, and in
+// all of them when none of those in the layer is under it (as when the overlay
+// has no pointer events).
+func TestLayerEvents(t *testing.T) {
+	for _, noPointer := range []bool{false, true} {
+		b, video, dialog := layerTestScene(colors.Red)
+		overlay := AsWidget(dialog.Parent)
+		if noPointer {
+			overlay.Styler(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.NoPointerEvents)
+			})
+		}
+		sc := b.Scene
+		b.RenderImage(func() {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			em := &sc.Events
+			// the widget at the position from all of the widgets of the scene
+			all := func(pos image.Point) Widget {
+				em.mouseInBBox = nil
+				em.getMouseInBBox(sc, pos)
+				ws := sortByRenderLayer(em.mouseInBBox)
+				if len(ws) == 0 {
+					return nil
+				}
+				return ws[len(ws)-1]
+			}
+			vbb, dbb := video.Geom.TotalBBox, dialog.Geom.TotalBBox
+			onVideo := vbb.Min.Add(image.Pt(5, 5))
+			onDialog := dbb.Min.Add(image.Pt(5, 5))
+			elsewhere := image.Pt(dbb.Min.X-5, vbb.Max.Y+5)
+			for _, pos := range []image.Point{onVideo, onDialog, elsewhere} {
+				assert.Equal(t, all(pos), sc.WidgetAt(pos), "noPointer %v at %v", noPointer, pos)
+			}
+			assert.Equal(t, Widget(dialog), sc.WidgetAt(onDialog), "the dialog")
+			em.mouseInBBox = nil
+			em.getMouseInScene(sc, onVideo)
+			if noPointer {
+				assert.Equal(t, Widget(video), sc.WidgetAt(onVideo), "the video through the overlay")
+			} else {
+				assert.Equal(t, overlay.This, sc.WidgetAt(onVideo), "the overlay over the video")
+				assert.NotContains(t, em.mouseInBBox, Widget(video), "the video is not gone through")
+			}
+		})
 	}
 }

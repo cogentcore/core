@@ -75,6 +75,11 @@ type Events struct {
 	// Last item in the stack is the deepest nested widget (smallest BBox).
 	mouseInBBox []Widget
 
+	// layerOnly is whether [Events.getMouseInBBox] only goes into the
+	// widgets that are in the layer of the scene or have widgets in it (see
+	// [Events.getMouseInScene]).
+	layerOnly bool
+
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag.
 	hovers []Widget
 
@@ -361,7 +366,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 	}
 
 	em.mouseInBBox = nil
-	em.getMouseInBBox(sc, pos)
+	em.getMouseInScene(sc, pos)
 	em.mouseInBBox = sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
@@ -813,6 +818,9 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 			// is clickable (as a hidden checkbox over a button) gets events
 			return tree.Break
 		}
+		if em.layerOnly && !cwb.hasFlag(widgetInLayer) && !cwb.hasFlag(widgetHasLayer) {
+			return tree.Break // nothing of the layer in it
+		}
 		if !cwb.posInScBBox(pos) {
 			if cwb.noClip() {
 				// its children can be outside of it (as positioned ones,
@@ -839,6 +847,28 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 	})
 }
 
+// getMouseInScene adds the widgets of the scene under the given position to
+// [Events.mouseInBBox] (see [Events.getMouseInBBox]), only those in its layer
+// and the widgets that they are in if one of those in the layer is under it
+// (see [sceneLayer]), as on a dialog of a web page: the layer is rendered
+// over all of the other widgets, so one of them is on top, and the widgets
+// under it would not get the events (see [sortByRenderLayer]), so the
+// widgets of the page under it are not gone through.
+func (em *Events) getMouseInScene(sc *Scene, pos image.Point) {
+	if sc.layer.active {
+		em.layerOnly = true
+		em.getMouseInBBox(sc, pos)
+		em.layerOnly = false
+		for _, w := range em.mouseInBBox {
+			if w.AsWidget().hasFlag(widgetInLayer) {
+				return
+			}
+		}
+		em.mouseInBBox = em.mouseInBBox[:0]
+	}
+	em.getMouseInBBox(sc, pos)
+}
+
 // WidgetAt returns the widget that mouse events at the given position (in
 // the dots of the scene) go to first: the deepest one rendered on top
 // there (see [sortByRenderLayer]), as for elementFromPoint in the scripts
@@ -847,7 +877,7 @@ func (sc *Scene) WidgetAt(pos image.Point) Widget {
 	em := &sc.Events
 	saved := em.mouseInBBox
 	em.mouseInBBox = nil
-	em.getMouseInBBox(sc, pos)
+	em.getMouseInScene(sc, pos)
 	ws := sortByRenderLayer(em.mouseInBBox)
 	em.mouseInBBox = saved
 	if len(ws) == 0 {
