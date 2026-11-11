@@ -440,6 +440,13 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			return nil, c.noChange(fmt.Sprintf("%s of %s, which has no widget of its own", strings.Join(props, ", "), describeNode(n)))
 		}
 		for _, p := range props {
+			if p == "position" && inFlowPosition(old[n][p]) && inFlowPosition(nw[p]) {
+				// static and relative are both in the flow, so the widget
+				// is restyled for the change, with the layout (as for the
+				// images of npr.org as they load, hundreds of times)
+				u.layout = true
+				continue
+			}
 			if !c.restylable(n, p) {
 				undo()
 				return nil, c.noChange(fmt.Sprintf("%s of %s", p, describeNode(n)))
@@ -511,13 +518,18 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 		if n.Type != html.ElementNode {
 			return true
 		}
-		had := map[int]bool{}
-		for _, d := range c.styles[n] {
-			had[d.rule-1] = true
+		ds := c.styles[n]
+		had := func(i int) bool { // (without a map, as it is called for each rule)
+			for _, d := range ds {
+				if d.rule-1 == i {
+					return true
+				}
+			}
+			return false
 		}
 		for _, i := range rules {
 			r := c.rules[i]
-			if had[i] != (contains(r.root, n) && r.sel.sel.Match(n)) {
+			if had(i) != (contains(r.root, n) && r.sel.sel.Match(n)) {
 				return add(n)
 			}
 		}
@@ -831,6 +843,14 @@ func (c *Context) restylable(n *html.Node, prop string) bool {
 			prop == "top" || prop == "bottom" || prop == "left" || prop == "right" || prop == "inset"
 	}
 	return true
+}
+
+// inFlowPosition returns whether the given value of the position property
+// (as declared, "" for none) keeps an element in the flow of the layout of
+// its parent (static and relative, not absolute, fixed, or sticky).
+func inFlowPosition(v string) bool {
+	v = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(v), "!important"))
+	return v == "" || v == "static" || v == "relative" || v == "initial" || v == "unset" || v == "revert"
 }
 
 // arranged returns whether the given element is or is in a table, a grid,

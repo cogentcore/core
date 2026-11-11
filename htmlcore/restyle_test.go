@@ -113,6 +113,8 @@ func TestRestyle(t *testing.T) {
 .gone { display: none }
 .wrap:has(.on) .target { width: 150px }
 .wrap2:has(.on2) { width: 170px }
+.imagewrap.has-dims { height: 0; overflow: hidden; padding-bottom: 50%; position: relative }
+.imagewrap .pic { position: absolute; width: 100%; height: 100%; background: red }
 .marked::before { content: "x" }
 .v { width: var(--w, 10px); height: 10px; background: red }
 .wv { --w: 90px }
@@ -122,6 +124,7 @@ func TestRestyle(t *testing.T) {
 <div id="after" class="after box">after</div>
 <div class="wrap"><div id="target" class="target box">t</div><div id="trigger">x</div></div>
 <div id="wrap2" class="wrap2 box"><div><div id="trigger2">deep</div></div></div>
+<div style="width: 200px"><div id="imagewrap" class="imagewrap"><div id="pic" class="pic">pic</div></div></div>
 <div id="vars"><div id="v" class="v"></div></div>
 <p id="p">text <span id="span">span</span> more</p>
 </div></body></html>`
@@ -157,6 +160,15 @@ func TestRestyle(t *testing.T) {
 			})
 		})
 	}
+	// static to relative (as the images of npr.org as they load), with an
+	// absolute child that fills it
+	t.Run("position relative", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			w := elementByID(doc, "imagewrap")
+			setAttr(w, "class", "imagewrap has-dims")
+			return []*html.Node{w}
+		})
+	})
 	t.Run("has", func(t *testing.T) {
 		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
 			tr := elementByID(doc, "trigger")
