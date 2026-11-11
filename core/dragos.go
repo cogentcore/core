@@ -126,6 +126,9 @@ func (em *Events) dragToOS(e events.Event) bool {
 	}
 	rw := em.RenderWindow()
 	md, _ := em.dragData.(mimedata.Mimes)
+	if od, ok := em.drag.(osDragger); ok && md == nil {
+		md = od.osDragData()
+	}
 	if len(md) == 0 && len(em.dragFiles) == 0 {
 		return false
 	}
