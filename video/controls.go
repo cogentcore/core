@@ -133,11 +133,20 @@ func (c *Controls) SetPlayer(target core.Widget, player Player) *Controls {
 	tw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
 	})
-	tw.OnFirst(events.KeyChord, func(e events.Event) {
-		if c.This != nil && c.handleKey(e) {
-			e.SetHandled()
+	tw.OnShow(func(e events.Event) {
+		if c.This != nil {
+			c.focusTarget()
 		}
 	})
+	keys := func(e events.Event) {
+		if c.This != nil && !e.IsHandled() && c.handleKey(e) {
+			e.SetHandled()
+		}
+	}
+	// (first for the controls in it, as the first handlers are those of
+	// the widgets that the focus is in, and normal for itself)
+	tw.OnFirst(events.KeyChord, keys)
+	tw.OnKeyChord(keys)
 	c.Refresh()
 	return c
 }
@@ -243,7 +252,12 @@ func (c *Controls) handleKey(e events.Event) bool {
 	if e.HasAnyModifier(key.Shift, key.Control, key.Alt, key.Meta) {
 		return false
 	}
-	switch e.KeyCode() {
+	code := e.KeyCode()
+	if e.KeyRune() == ' ' {
+		// (the drivers send space as its character, of an unknown code)
+		code = key.CodeSpacebar
+	}
+	switch code {
 	case key.CodeSpacebar:
 		c.player.TogglePlay()
 	case key.CodeRightArrow:
@@ -315,6 +329,7 @@ func (c *Controls) SetTime(t time.Duration) {
 // stops there, or [controlsLeaveDelay] after it moves out of it, while the
 // video plays.
 func (c *Controls) mouseMoved(pos image.Point) {
+	c.focusTarget()
 	if !c.inZone(pos) {
 		if c.IsShown() && !c.shownAt.IsZero() {
 			c.shownAt = time.Time{}
@@ -353,10 +368,24 @@ func (c *Controls) hideAfter(delay time.Duration, shownAt time.Time) {
 	})
 }
 
+// focusTarget gives the focus to the video (quietly) if nothing in its
+// scene has the focus, as when the mouse moves over it or it is shown, so
+// that the keys of players (see [Controls.handleKey]) work at once.
+func (c *Controls) focusTarget() {
+	if tw := c.target.AsWidget(); tw.Scene != nil && !tw.Scene.ContainsFocus() {
+		tw.SetFocusQuiet()
+	}
+}
+
 // SetShown shows or hides the controls.
 func (c *Controls) SetShown(shown bool) {
 	if c.This == nil || c.StateIs(states.Invisible) == !shown {
 		return
+	}
+	if !shown && c.ContainsFocus() {
+		// the video gets the focus of a control (as a button that was
+		// clicked), which keys do not reach once it is hidden
+		c.target.AsWidget().SetFocusQuiet()
 	}
 	c.SetState(!shown, states.Invisible)
 	c.NeedsRender()

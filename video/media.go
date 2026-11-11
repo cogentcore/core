@@ -6,6 +6,11 @@ package video
 
 import "time"
 
+// Debug is whether to show the log messages of FFmpeg (warnings and errors
+// about the media, as "Could not update timestamps for skipped samples"),
+// which are not shown otherwise, as the errors are returned.
+var Debug = false
+
 // Media is a video file. On desktop platforms, it is decoded with FFmpeg
 // via go-astiav: OpenMedia records the properties of the file, and each call
 // to [Media.Decode] opens the file again, so that the media can be played

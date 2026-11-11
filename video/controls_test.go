@@ -217,3 +217,43 @@ func TestControlsKeys(t *testing.T) {
 		v.Stop()
 	})
 }
+
+func TestControlsKeysHidden(t *testing.T) {
+	b := core.NewBody()
+	v := NewVideo(b)
+	v.Controls = true
+	v.Muted = true
+	v.Loop = true
+	v.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(320)
+		s.Min.Y.Dp(240)
+	})
+	require.NoError(t, v.Open("testdata/short.mp4"))
+	b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		c := v.controls
+
+		// the video gets the focus when it is shown (or when the mouse moves
+		// over it), as nothing has it, so the keys work at once
+		assert.True(t, v.ContainsFocus(), "shown")
+
+		// a control that was clicked has the focus, and the controls hide:
+		// the video gets the focus, and space still plays and pauses it,
+		// and shows the controls
+		require.NoError(t, v.Play(0, 0))
+		c.play.SetFocus()
+		c.SetShown(false)
+		assert.False(t, c.ContainsFocus())
+		assert.True(t, v.ContainsFocus())
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		// (as the desktop driver sends it: the character, of an unknown code)
+		src.KeyChord(' ', key.CodeUnknown, 0)
+		time.Sleep(300 * time.Millisecond)
+		b.AsyncLock()
+		assert.True(t, v.isPaused(), "space paused it")
+		assert.True(t, c.IsShown(), "and showed the controls")
+		v.Stop()
+		b.AsyncUnlock()
+	})
+}

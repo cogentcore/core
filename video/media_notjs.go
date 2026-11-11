@@ -84,6 +84,13 @@ type decoder struct {
 // options, and opens a decoder for its first video stream, and for its
 // first audio stream, if any and audio.
 func openDecoder(fpath string, options map[string]string, audio bool) (*decoder, error) {
+	// The log messages of FFmpeg are only shown for Debug.
+	if Debug {
+		astiav.SetLogLevel(astiav.LogLevelWarning)
+	} else {
+		astiav.SetLogLevel(astiav.LogLevelQuiet)
+	}
+
 	// Open the file and read its stream info.
 	d := &decoder{input: astiav.AllocFormatContext()}
 	if d.input == nil {
