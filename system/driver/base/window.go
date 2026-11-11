@@ -234,6 +234,10 @@ func (w *Window[A]) StartDrag(data mimedata.Mimes, files []string, img image.Ima
 	return false // not supported by default
 }
 
+func (w *Window[A]) DragAccepted() bool {
+	return true // not known by default
+}
+
 func (w *Window[A]) SetTextInput(ti *system.TextInput) {
 	// no-op by default
 }

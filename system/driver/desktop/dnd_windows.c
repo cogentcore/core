@@ -312,6 +312,16 @@ static void setDragImage(IDataObject* obj, void* bgra, int w, int h) {
 	IDragSourceHelper_Release(helper);
 }
 
+// lastAccepted is whether the last drag was dropped onto a target that
+// accepted it, or canceled (see dragAccepted).
+static bool lastAccepted = true;
+
+// dragAccepted returns whether the last drag was accepted by a drop target,
+// or canceled, once it has ended.
+bool dragAccepted(void) {
+	return lastAccepted;
+}
+
 // startDrag drags the given files, or else the given multipart mime data
 // and text, from the given window, until the drop, with the given drag image.
 // It must be called on the main thread, with the left mouse button down.
@@ -359,7 +369,8 @@ void startDrag(HWND hwnd, char** files, int nfiles, void* mime, int mimelen, cha
 
 	dragActive = true;
 	DWORD effect = DROPEFFECT_NONE;
-	DoDragDrop(obj, &dropSource, allowed, &effect);
+	HRESULT hr = DoDragDrop(obj, &dropSource, allowed, &effect);
+	lastAccepted = hr != DRAGDROP_S_DROP || effect != DROPEFFECT_NONE; // (canceled, or taken)
 	dragActive = false;
 	IDataObject_Release(obj);
 

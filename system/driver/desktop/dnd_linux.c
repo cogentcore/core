@@ -265,9 +265,20 @@ static void sendButtonRelease(int rx, int ry) {
 	releaseErrors();
 }
 
+// lastAccepted is whether the last drag was dropped onto a target that
+// accepted it, or canceled (see dragAccepted).
+static bool lastAccepted = true;
+
+// dragAccepted returns whether the last drag was accepted by a drop target,
+// or canceled, once it has ended.
+bool dragAccepted(void) {
+	return lastAccepted;
+}
+
 // sourceEnd ends the pointer grab of a drag, sending the drop to the
 // target if drop is true and it accepts it, or else leaving it.
 static void sourceEnd(bool drop, int rx, int ry, Time t) {
+	lastAccepted = !drop || (src.target != None && src.accepted); // (before the button release)
 	XUngrabPointer(xd, CurrentTime);
 	XUngrabKeyboard(xd, CurrentTime);
 	src.active = false;

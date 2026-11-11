@@ -91,15 +91,13 @@ func (em *Events) InWindow(pos image.Point) bool {
 // It returns true if the event has been handled.
 func (em *Events) handleDragOS(e events.Event) bool {
 	et := e.Type()
-	if em.dragWindow != nil {
-		return em.handleWindowDrag(e)
-	}
 	if em.dragOS {
 		switch et {
 		case events.MouseDrag:
 			e.SetHandled()
 			return true
 		case events.MouseUp: // the OS drag has ended
+			em.dragOSDroppedNowhere(e)
 			em.dragOSEnd()
 			e.SetHandled()
 			return true
@@ -110,9 +108,6 @@ func (em *Events) handleDragOS(e events.Event) bool {
 	}
 	if et != events.MouseDrag || tree.IsNil(em.drag) {
 		return false
-	}
-	if em.dragToWindow(e) {
-		return true
 	}
 	return em.dragToOS(e)
 }
@@ -231,10 +226,16 @@ func (em *Events) handleExternalDrag(de *events.DragDrop) {
 	if targ != nil {
 		de.Target = targ
 		targ.AsWidget().HandleEvent(de)
-		return
+	} else {
+		for i := len(em.mouseInBBox) - 1; i >= 0 && !de.IsHandled(); i-- {
+			em.mouseInBBox[i].AsWidget().HandleEvent(de)
+		}
 	}
-	for i := len(em.mouseInBBox) - 1; i >= 0 && !de.IsHandled(); i-- {
-		em.mouseInBBox[i].AsWidget().HandleEvent(de)
+	if !de.IsHandled() {
+		// a tab dropped anywhere in the window goes into its tabs
+		if td, ok := de.Data.(*tabDrag); ok {
+			td.dropInScene(em.scene)
+		}
 	}
 }
 

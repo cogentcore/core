@@ -152,24 +152,51 @@ func TestTabsMoveTabTo(t *testing.T) {
 	assert.Same(t, b2.Scene, AsWidget(frame.Child(0)).Scene)
 }
 
-// TestTabsDragToWindowNot tests that a tab is not moved into a new window
-// when its tabs do not have [Tabs.DragToWindow], or it is their last tab.
-// (The drag into a new window itself needs a desktop platform.)
-func TestTabsDragToWindowNot(t *testing.T) {
+// TestTabsOSDragData tests that a tab is dragged by the operating system
+// out of its window only when its tabs have [Tabs.DragToWindow].
+func TestTabsOSDragData(t *testing.T) {
 	b := NewBody()
 	ts := newDragTabs(b, "A", "B")
 	_, tab := ts.TabAtIndex(0)
-	assert.Nil(t, tab.dragToWindow(events.NewMouse(events.MouseDrag, events.Left, image.Pt(-10, -10), 0)))
 	assert.Nil(t, tab.osDragData())
 	ts.DragToWindow = func(b *Body) *Tabs { return NewTabs(b).SetType(FunctionalTabs) }
-	ts.DeleteTabIndex(1)
-	assert.Nil(t, tab.dragToWindow(events.NewMouse(events.MouseDrag, events.Left, image.Pt(-10, -10), 0)))
-	assert.Equal(t, []string{"A"}, tabNames(t, ts))
-	// the last tab is dragged by the operating system, to the tabs of
-	// another window
 	md := tab.osDragData()
 	require.Len(t, md, 1)
 	assert.Equal(t, tabMimeType, md[0].Type)
+	assert.Equal(t, "A", string(md[0].Data))
+}
+
+// TestTabsDroppedNowhere tests that a tab dropped where nothing accepted it
+// (as onto the desktop) moves into a new window, initialized by
+// [Tabs.DragToWindow], and that the last tab does not (its window moves).
+func TestTabsDroppedNowhere(t *testing.T) {
+	b := NewBody("one")
+	ts := newDragTabs(b, "A", "B")
+	var nt *Tabs
+	ts.DragToWindow = func(nb *Body) *Tabs {
+		nt = NewTabs(nb).SetType(FunctionalTabs)
+		return nt
+	}
+	b.runAndShowNewWindow()
+	b.AsyncLock()
+	_, tab := ts.TabAtIndex(0)
+	end := events.NewMouse(events.MouseUp, events.Left, image.Pt(-50, -50), 0)
+	tab.droppedNowhere(end, image.Pt(300, 300))
+	require.NotNil(t, nt)
+	assert.Equal(t, []string{"B"}, tabNames(t, ts))
+	assert.Equal(t, []string{"A"}, tabNames(t, nt))
+	assert.NotNil(t, nt.DragToWindow, "the new tabs can be dragged too")
+	nw := nt.Scene.RenderWindow()
+	assert.NotNil(t, nw, "in a new window")
+	assert.NotSame(t, b.Scene.RenderWindow(), nw)
+	// the last tab does not move into another window
+	nt = nil
+	_, tab = ts.TabAtIndex(0)
+	tab.droppedNowhere(end, image.Pt(300, 300))
+	assert.Nil(t, nt)
+	assert.Equal(t, []string{"B"}, tabNames(t, ts))
+	b.Close()
+	b.AsyncUnlock()
 }
 
 // TestTabsTransferWindows tests that a tab dropped into the tabs of another
@@ -195,6 +222,8 @@ func TestTabsTransferWindows(t *testing.T) {
 	tabsDrop := &tabDrag{tabs: src, tab: tab}
 	// (a drop between X and Y, in the event loop of the second window)
 	tabsDrop.dropAt(dst, 1)
+	// (a drop onto the content of the window is not a second move)
+	tabsDrop.dropInScene(b1.Scene)
 	b2.AsyncUnlock()
 	assert.Eventually(t, func() bool {
 		b2.AsyncLock()
@@ -215,8 +244,8 @@ func TestTabsTransferWindows(t *testing.T) {
 	b2.AsyncUnlock()
 }
 
-// TestTabsDropIndex tests where the tabs under a position are (for a window
-// with a tab dropped onto them), and the index at which the tab goes.
+// TestTabsDropIndex tests the index at which a tab dropped onto the list of
+// tabs goes.
 func TestTabsDropIndex(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) { s.Min.X.Dp(500) }) // (one row of tabs)
@@ -224,15 +253,44 @@ func TestTabsDropIndex(t *testing.T) {
 	b.RenderImage(func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
-		assert.Nil(t, tabsAt(b.Scene, image.Pt(5, 5)), "not without DragToWindow")
-		ts.DragToWindow = func(b *Body) *Tabs { return nil }
 		_, tab := ts.TabAtIndex(1)
 		bb := tab.Geom.TotalBBox
 		mid := bb.Min.Add(bb.Size().Div(2))
-		assert.Same(t, ts, tabsAt(b.Scene, mid))
 		assert.Equal(t, 1, ts.dropIndex(mid.Sub(image.Pt(2, 0))))
 		assert.Equal(t, 2, ts.dropIndex(mid.Add(image.Pt(2, 0))))
 		assert.Equal(t, 3, ts.dropIndex(image.Pt(ts.getTabs().Geom.TotalBBox.Max.X-1, mid.Y)))
-		assert.Nil(t, tabsAt(b.Scene, image.Pt(mid.X, ts.getFrame().Geom.TotalBBox.Max.Y-2)), "not over the content")
 	})
+}
+
+// TestTabsDropInScene tests that a tab of another window dropped by the
+// operating system onto a window where nothing takes it (as onto the
+// content of a page) moves to the end of its tabs.
+func TestTabsDropInScene(t *testing.T) {
+	drag := func(b *Body) *Tabs { return NewTabs(b).SetType(FunctionalTabs) }
+	b1 := NewBody("one")
+	src := newDragTabs(b1, "A", "B")
+	src.DragToWindow = drag
+	b2 := NewBody("two")
+	NewText(b2).SetText("content")
+	dst := newDragTabs(b2, "X")
+	dst.DragToWindow = drag
+	b1.runAndShowNewWindow()
+	b2.runAndShowNewWindow()
+	b2.AsyncLock()
+	_, tab := src.TabAtIndex(1)
+	(&tabDrag{tabs: src, tab: tab}).dropInScene(b2.Scene)
+	b2.AsyncUnlock()
+	assert.Eventually(t, func() bool {
+		b2.AsyncLock()
+		defer b2.AsyncUnlock()
+		return dst.NumTabs() == 2
+	}, 5*time.Second, 10*time.Millisecond)
+	b2.AsyncLock()
+	assert.Equal(t, []string{"X", "B"}, tabNames(t, dst))
+	b2.Close()
+	b2.AsyncUnlock()
+	b1.AsyncLock()
+	assert.Equal(t, []string{"A"}, tabNames(t, src), "its window stays, with another tab")
+	b1.Close()
+	b1.AsyncUnlock()
 }

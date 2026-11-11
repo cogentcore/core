@@ -14,6 +14,7 @@ package desktop
 void registerDrag(HWND hwnd);
 void unregisterDrag(HWND hwnd);
 void startDrag(HWND hwnd, char** files, int nfiles, void* mime, int mimelen, char* text, int textlen, void* bgra, int imgw, int imgh);
+bool dragAccepted(void);
 */
 import "C"
 
@@ -45,6 +46,10 @@ func (w *Window) closeDrag() {
 	h := w.hwnd()
 	C.unregisterDrag(h)
 	deleteDragWindow(uintptr(unsafe.Pointer(h)))
+}
+
+func (w *Window) DragAccepted() bool {
+	return bool(C.dragAccepted())
 }
 
 func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {

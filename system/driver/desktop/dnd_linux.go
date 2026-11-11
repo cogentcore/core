@@ -15,6 +15,7 @@ void registerDrag(Window win);
 void unregisterDrag(Window win);
 void ungrabGLFW(Display* gd);
 bool startDrag(Window win, void* uris, int urislen, void* mime, int mimelen, void* text, int textlen);
+bool dragAccepted(void);
 */
 import "C"
 
@@ -60,6 +61,10 @@ func (w *Window) closeDrag() {
 	xw := w.xwindow()
 	C.unregisterDrag(xw)
 	deleteDragWindow(uintptr(xw))
+}
+
+func (w *Window) DragAccepted() bool {
+	return bool(C.dragAccepted())
 }
 
 func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {

@@ -231,26 +231,9 @@ func (ts *Tabs) dropIndex(pos image.Point) int {
 	return n
 }
 
-// tabsAt returns the tabs whose list of tabs is at the given position in
-// the given scene, into which tabs can be dragged from other windows (with
-// [Tabs.DragToWindow]), or nil.
-func tabsAt(sc *Scene, pos image.Point) *Tabs {
-	var found *Tabs
-	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		if !pos.In(cwb.Geom.TotalBBox) {
-			return tree.Break
-		}
-		if ts, ok := cw.(*Tabs); ok && ts.DragToWindow != nil && ts.Type.effective(ts) == FunctionalTabs &&
-			pos.In(ts.getTabs().Geom.TotalBBox) {
-			found = ts // (the deepest)
-		}
-		return tree.Continue
-	})
-	return found
-}
-
 // initStripDrop makes the given list of tabs a target of drops of tabs,
-// for [FunctionalTabs]: one dropped after the tabs goes to the end.
+// for [FunctionalTabs]: one dropped between tabs goes there, and one
+// dropped after them goes to the end (see [Tabs.dropIndex]).
 func (ts *Tabs) initStripDrop(w *Frame) {
 	w.On(events.DragEnter, func(e events.Event) { e.SetHandled() })
 	w.On(events.DragLeave, func(e events.Event) { e.SetHandled() })
@@ -260,7 +243,7 @@ func (ts *Tabs) initStripDrop(w *Frame) {
 			return
 		}
 		e.SetHandled()
-		td.dropAt(ts, ts.NumTabs())
+		td.dropAt(ts, ts.dropIndex(e.Pos()))
 	})
 	w.FinalStyler(func(s *styles.Style) {
 		s.SetAbilities(ts.Type.effective(ts) == FunctionalTabs, abilities.Droppable)
@@ -320,66 +303,82 @@ func draggingTab(sc *Scene) bool {
 // dragMovesDefault returns that a drag of a tab moves it (see [dragMover]).
 func (tb *Tab) dragMovesDefault() bool { return true }
 
-// osDragData returns the data of a drag of the last tab of tabs with
+// osDragData returns the data of a drag of a tab of tabs with
 // [Tabs.DragToWindow] that leaves its window, which the operating system
-// then drags, so that the tab can be dropped into the tabs of another
-// window of the app (see [osDragger]), and nil for other tabs, which move
-// into a new window instead (see [Tab.dragToWindow]).
+// then drags (see [osDragger]), to be dropped into the tabs of another
+// window of the app, or into a new window where nothing accepts it (see
+// [Tab.droppedNowhere]), and nil for other tabs.
 func (tb *Tab) osDragData() mimedata.Mimes {
 	ts := tb.tabs()
-	if ts == nil || ts.DragToWindow == nil || ts.NumTabs() != 1 {
+	if ts == nil || ts.DragToWindow == nil || ts.Type.effective(ts) != FunctionalTabs {
 		return nil
 	}
 	return mimedata.Mimes{{Type: tabMimeType, Data: []byte(tb.Name)}}
 }
 
-// dragToWindow moves the tab into a new window when it is dragged out of
-// its window, if its tabs have [Tabs.DragToWindow] and another tab (see
-// [windowDragger]). The window can then be dropped onto the tabs of
-// another window, to move the tab into them.
-func (tb *Tab) dragToWindow(e events.Event) *windowDrag {
+// droppedNowhere moves the tab into a new window when it was dragged out of
+// its window by the operating system and dropped where nothing accepted it
+// (as onto the desktop), at the given position on the screen, with its tab
+// under the drop, as in web browsers (see [osDropper]). The window of a last
+// tab moves there instead.
+func (tb *Tab) droppedNowhere(e events.Event, screen image.Point) {
 	ts := tb.tabs()
-	if ts == nil || ts.DragToWindow == nil || ts.Type.effective(ts) != FunctionalTabs || ts.NumTabs() < 2 {
-		return nil
+	if ts == nil || ts.DragToWindow == nil {
+		return
 	}
-	idx := tb.IndexInParent()
 	src := ts.Scene.RenderWindow()
-	if idx < 0 || src == nil || src.SystemWindow == nil {
-		return nil
+	idx := tb.IndexInParent()
+	if src == nil || src.SystemWindow == nil || idx < 0 {
+		return
 	}
-	// the place of the mouse in the tab, which stays under the mouse
+	dpr := screenPixelRatio(src.SystemWindow)
+	if ts.NumTabs() == 1 {
+		// the place of the press in the window goes to the drop
+		src.SystemWindow.SetPos(screen.Sub(scalePoint(e.StartPos(), 1/dpr)), nil)
+		return
+	}
+	// the place of the press in the tab, which goes to the drop, as in the
+	// new window (initialized as this one) the tabs start where they do here
 	in := e.StartPos().Sub(tb.Geom.TotalBBox.Min)
+	start := ts.getTabs().Geom.TotalBBox.Min
 	// (moved into the new tabs before their window runs)
 	bd := NewBody(tb.Name)
 	nt := ts.DragToWindow(bd)
 	if nt == nil {
-		return nil
+		return
 	}
 	if nt.DragToWindow == nil { // (so that it closes when its tab is dragged away)
 		nt.DragToWindow = ts.DragToWindow
 	}
-	at := ts.MoveTabTo(idx, nt, nt.NumTabs())
-	if at < 0 {
-		return nil
+	if ts.MoveTabTo(idx, nt, nt.NumTabs()) < 0 {
+		return
 	}
 	bd.RunWindow()
 	if win := bd.Scene.RenderWindow(); win != nil && win.SystemWindow != nil {
 		// of the size of the window of the tabs, as in web browsers
-		win.SystemWindow.SetSize(src.SystemWindow.Size())
+		pos := screen.Sub(scalePoint(start.Add(in), 1/dpr))
+		win.SystemWindow.SetGeometry(false, pos, src.SystemWindow.Size(), nil)
+		win.SystemWindow.Raise()
 	}
-	grab := &grabPoint{}
-	grab.set(in)
-	// (the new tab is laid out when the window is shown)
-	_, ntab := nt.TabAtIndex(at)
-	bd.OnShow(func(e events.Event) {
-		grab.set(ntab.Geom.TotalBBox.Min.Add(in))
-	})
-	return &windowDrag{body: bd, grab: grab.get, dock: func(sc *Scene, pos image.Point) bool {
-		dst := tabsAt(sc, pos)
-		if dst == nil {
-			return false
+}
+
+// dropInScene moves the dragged tab, dropped by the operating system where
+// nothing in the given scene took it (as onto the content of a page), into
+// the first tabs of the scene with [Tabs.DragToWindow], at their end, if
+// it is in another window, as in web browsers.
+func (td *tabDrag) dropInScene(sc *Scene) {
+	if td.tabs.Scene.RenderWindow() == sc.RenderWindow() {
+		return // (back in its own window)
+	}
+	var dst *Tabs
+	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if ts, ok := cw.(*Tabs); ok && dst == nil && ts.DragToWindow != nil && ts.Type.effective(ts) == FunctionalTabs {
+			dst = ts
+			return tree.Break
 		}
-		transferTab(sc.AsWidget(), nt, ntab, dst, dst.dropIndex(pos))
-		return true
-	}}
+		return dst == nil
+	})
+	if dst != nil {
+		td.dropAt(dst, dst.NumTabs())
+	}
 }
