@@ -220,6 +220,17 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		if own {
 			from = n.Parent
 		}
+		if from != nil && from.Type == html.ElementNode && !inHead(from) && c.undisplayed(from) && !hasNewSheet(c, from) {
+			// in an element that is not displayed, which has no widgets
+			// (as the video players of npr.org in its hidden dialogs,
+			// whose changes as they played read the page whole, as they
+			// were in main): its declarations are found again, and it is
+			// read when it is displayed (see Context.updateDecls)
+			if own {
+				changed = append(changed, n)
+			}
+			return true
+		}
 		r := c.rereadRoot(from)
 		if r == nil {
 			return c.noChange("no element of " + describeNode(from) + " can be read again alone")
@@ -252,7 +263,7 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		}
 		return false
 	}
-	if len(roots) == 0 && !restyleAll {
+	if len(roots) == 0 && !restyleAll && len(changed) == 0 {
 		return true // (only elements that are not rendered changed)
 	}
 	if restyleAll {
@@ -734,4 +745,16 @@ func documentElement(doc *html.Node) *html.Node {
 		}
 	}
 	return nil
+}
+
+// hasNewSheet returns whether the given element has a style sheet in it
+// (or is one) that has not been added to the page.
+func hasNewSheet(c *Context, n *html.Node) bool {
+	found := false
+	walkElements(n, func(k *html.Node) {
+		if (k.Data == "style" || k.Data == "link") && !c.sheets[k] {
+			found = true
+		}
+	})
+	return found
 }

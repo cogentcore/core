@@ -438,6 +438,9 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			u.freeChanged[n] = true
 			continue
 		}
+		if c.hiddenAbove(n, affected, oldDisplay) {
+			continue // not rendered, before and after
+		}
 		ws := c.elementWidgets[n]
 		if d := c.displayOf(n); d != oldDisplay[n] {
 			undo()
@@ -826,6 +829,19 @@ func subjectStart(sel string) int {
 func inForeign(n *html.Node) bool {
 	for p := n.Parent; p != nil; p = p.Parent {
 		if p.Type == html.ElementNode && (p.Namespace != "" || p.Data == "svg" || p.Data == "math") {
+			return true
+		}
+	}
+	return false
+}
+
+// hiddenAbove returns whether an element that the given element is in
+// has a display of none, and had one before the declarations of the given
+// affected elements changed (with the given displays before), so that the
+// given element was not rendered, nor is (see [Context.updateDecls]).
+func (c *Context) hiddenAbove(n *html.Node, affected map[*html.Node]bool, oldDisplay map[*html.Node]string) bool {
+	for p := n.Parent; p != nil && p.Type == html.ElementNode; p = p.Parent {
+		if c.displayOf(p) == "none" && (!affected[p] || oldDisplay[p] == "none") {
 			return true
 		}
 	}
