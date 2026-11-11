@@ -137,3 +137,18 @@ func TestVideoElementPlaced(t *testing.T) {
 	assert.False(t, e.Get("isConnected").Bool())
 	assert.NotContains(t, elements, v)
 }
+
+func TestVideoAutoplayBlocked(t *testing.T) {
+	// A video with sound plays muted, with the controls of the browser to
+	// turn it on, when the browser does not play it without a user gesture.
+	v := newVideo(t)
+	v.Muted = false
+	require.NoError(t, v.Play(0, 0))
+	waitFor(t, "playing", func() bool { return currentTime(v) > 0.1 })
+	e := elements[v]
+	if !e.Get("muted").Bool() {
+		t.Skip("this browser plays videos with sound without a user gesture")
+	}
+	assert.True(t, e.Get("controls").Bool())
+	assert.Equal(t, "auto", e.Get("style").Get("pointerEvents").String())
+}

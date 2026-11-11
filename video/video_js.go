@@ -103,19 +103,29 @@ func (v *Video) Play(width, height float32) error {
 	return nil
 }
 
-// play plays the video element, logging the error if the browser does
-// not play it (as for its autoplay policy, without a user gesture, for
-// a video that is not muted).
+// play plays the video element. Browsers only play a video with sound
+// after a user gesture (their autoplay policy), so if the browser does not
+// play it for that (NotAllowedError), it is played muted, with the controls
+// of the browser shown, with which the user can turn the sound on.
 func (v *Video) play(e js.Value) {
 	p := e.Call("play")
-	if p.Truthy() && p.Get("catch").Truthy() {
-		p.Call("catch", js.FuncOf(func(this js.Value, args []js.Value) any {
-			if len(args) > 0 {
-				fmt.Println("video: the browser did not play", v.Media.Path+":", args[0].Call("toString").String())
-			}
-			return nil
-		}))
+	if !p.Truthy() || !p.Get("catch").Truthy() {
+		return
 	}
+	p.Call("catch", js.FuncOf(func(this js.Value, args []js.Value) any {
+		if len(args) == 0 {
+			return nil
+		}
+		if args[0].Get("name").String() == "NotAllowedError" && !e.Get("muted").Bool() {
+			e.Set("muted", true)
+			e.Set("controls", true)
+			e.Get("style").Set("pointerEvents", "auto")
+			e.Call("play")
+			return nil
+		}
+		fmt.Println("video: the browser did not play", v.Media.Path+":", args[0].Call("toString").String())
+		return nil
+	}))
 }
 
 // Pause pauses the playing, if it is playing.
