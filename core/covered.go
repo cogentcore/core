@@ -42,9 +42,20 @@ func (wb *WidgetBase) isCovered() bool {
 // [WidgetBase.isCovered]), also by the opaque widgets in the layer of the
 // scene if seen is true.
 func (wb *WidgetBase) covered(seen bool) bool {
+	covered, _ := wb.coverage(seen)
+	return covered
+}
+
+// coverage returns whether the widget is covered (see [WidgetBase.covered]),
+// and the stacked widgets that are rendered over it in the image of the
+// scene (not in its layer) that paint over a part of it, in the order of
+// the tree: those that it paints over when it is rendered alone (as a
+// render group, as a playing video under the controls of a player of a
+// page), which are rendered again after it (see [WidgetBase.doNeedsRender]).
+func (wb *WidgetBase) coverage(seen bool) (bool, []Widget) {
 	bb := wb.Geom.TotalBBox
 	if bb.Empty() || wb.Scene == nil {
-		return false
+		return false, nil
 	}
 	ancestors := map[*WidgetBase]bool{}
 	var base *WidgetBase // the stacked widget that it is in, if any
@@ -64,6 +75,7 @@ func (wb *WidgetBase) covered(seen bool) bool {
 	// (if it is not in the layer itself)
 	layered := wb.Scene.layer.active && !wb.hasFlag(widgetInLayer)
 	covered := false
+	var over []Widget
 	wb.Scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb == base {
 			passed = true
@@ -82,12 +94,15 @@ func (wb *WidgetBase) covered(seen bool) bool {
 		if inLayer && !seen {
 			return tree.Break
 		}
-		if cwb.coversArea(bb, inLayer) >= half {
+		area := cwb.coversArea(bb, inLayer)
+		if area >= half {
 			covered = true
+		} else if area > 0 && !inLayer {
+			over = append(over, cw)
 		}
 		return tree.Break // (its children were looked at)
 	})
-	return covered
+	return covered, over
 }
 
 // coversArea returns the largest area of the given box that a box painted

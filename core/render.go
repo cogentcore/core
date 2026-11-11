@@ -388,13 +388,20 @@ func (wb *WidgetBase) doNeedsRender() {
 			// video under an absolute dialog of a page), but it is when they
 			// are in the layer of the scene (as a fixed dialog), which is
 			// composed over it (see [WidgetBase.isCovered] and [sceneLayer])
-			if cwb.isCovered() {
+			covered, over := cwb.coverage(false)
+			if covered {
 				return tree.Break
 			}
 			cw.RenderWidget()
 			// (with the widgets raised over it, as below)
 			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {
 				p.renderRaised()
+			}
+			// and the widgets that are over a part of it, which it painted
+			// over (as the controls of a player of a page over its playing
+			// video, which flickered as they were rendered again)
+			for _, ow := range over {
+				ow.RenderWidget()
 			}
 			return tree.Break
 		}

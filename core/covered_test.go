@@ -106,3 +106,49 @@ func TestRenderGroupCovered(t *testing.T) {
 		assert.Equal(t, n+1, tg.renders, "rendered once not covered")
 	})
 }
+
+// testOverlay is a frame that counts its renders.
+type testOverlay struct {
+	Frame
+	renders int
+}
+
+func (to *testOverlay) Render() {
+	to.renders++
+	to.Frame.Render()
+}
+
+// TestRenderGroupOverlay tests that the widgets that are over a part of a
+// widget rendered as a whole (as the controls of a player of a page over
+// its playing video) are rendered again after it, which it paints over.
+func TestRenderGroupOverlay(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(400), units.Dp(300)) })
+	box := NewFrame(b)
+	box.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionRelative
+		s.Min.Set(units.Dp(300), units.Dp(200))
+	})
+	tg := tree.New[testGroup](box)
+	tg.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(300), units.Dp(200)) })
+	child := NewText(tg).SetText("frame")
+	bar := tree.New[testOverlay](box)
+	bar.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Bottom = units.Zero()
+		s.Inset.Left = units.Zero()
+		s.InsetSet.Bottom = true
+		s.InsetSet.Left = true
+		s.Min.Set(units.Dp(300), units.Dp(30))
+		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))
+	})
+	b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		n, bn := tg.renders, bar.renders
+		child.NeedsRender()
+		b.Scene.doNeedsRender()
+		assert.Equal(t, n+1, tg.renders, "the group is rendered")
+		assert.Equal(t, bn+1, bar.renders, "and the bar over it after it")
+	})
+}
