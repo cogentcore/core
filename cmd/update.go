@@ -76,7 +76,8 @@ func installGoTool(t goTool) error {
 // (goimports, goalimports, and goalls), which it installs if they are not
 // installed. A tool built from a local source checkout is not replaced
 // unless the force option is set, and the check option only reports
-// which tools have updates.
+// which tools have updates. With the video option, it also updates FFmpeg
+// for the video package (see core setup -video).
 func Update(c *config.Config) error { //types:add
 	core, err := os.Executable()
 	if err != nil {
@@ -95,6 +96,11 @@ func Update(c *config.Config) error { //types:add
 	}
 	if err := updateBun(c); err != nil {
 		errs = append(errs, fmt.Errorf("bun: %w", err))
+	}
+	if c.Video && !c.Update.Check {
+		if err := setupFFmpeg(true); err != nil {
+			errs = append(errs, fmt.Errorf("FFmpeg: %w", err))
+		}
 	}
 	return errors.Join(errs...)
 }

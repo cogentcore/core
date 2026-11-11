@@ -19,8 +19,16 @@ import (
 // and the latest versions of the Go tools for developing with Cogent Core:
 // goimports, goalimports, and goalls (which core update keeps updated).
 // It only needs to be called once per system.
+//
+// With the video option, it also installs FFmpeg for the video package
+// (cogentcore.org/core/video), which it needs on desktop platforms.
 func Setup(c *config.Config) error { //types:add
 	err := setupPlatform()
+	if c.Video {
+		if verr := setupFFmpeg(false); verr != nil {
+			err = errors.Join(err, fmt.Errorf("FFmpeg: %w", verr))
+		}
+	}
 	for _, t := range goDevTools() {
 		logx.PrintlnWarn("installing " + t.name)
 		if terr := installGoTool(t); terr != nil {
