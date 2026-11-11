@@ -404,9 +404,34 @@ func packWindows(c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	// The DLLs of FFmpeg (and its license), if the app uses it, which are
+	// installed next to the executable of the app.
+	ffiles, err := ffmpegWindowsFiles()
+	if err != nil {
+		return err
+	}
 	wmd := &windowsInstallerData{
 		Name: c.Name,
 		Desc: c.About,
+	}
+	if len(ffiles) > 0 {
+		if err := os.MkdirAll(filepath.Join(ipath, "files"), 0777); err != nil {
+			return err
+		}
+		for _, f := range ffiles {
+			name := filepath.Base(f)
+			if name == "LICENSE.txt" {
+				name = "FFmpeg-LICENSE.txt"
+			}
+			b, err := os.ReadFile(f)
+			if err != nil {
+				return err
+			}
+			if err := os.WriteFile(filepath.Join(ipath, "files", name), b, 0666); err != nil {
+				return err
+			}
+			wmd.Files = append(wmd.Files, name)
+		}
 	}
 	err = windowsInstallerTmpl.Execute(fman, wmd)
 	fman.Close()
@@ -435,6 +460,11 @@ func packWindows(c *config.Config) error {
 type windowsInstallerData struct {
 	Name string
 	Desc string
+
+	// Files are the names of the files that are installed next to the
+	// executable of the app (the DLLs of FFmpeg, and its license), which
+	// are in the files directory of the installer.
+	Files []string
 }
 
 //go:embed windowsinstaller.go.tmpl

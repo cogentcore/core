@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -329,4 +330,36 @@ func download(url, file string) error {
 		return err
 	}
 	return f.Close()
+}
+
+// ffmpegWindowsFiles returns the files of FFmpeg to package with the app
+// in the current directory for Windows, if it uses FFmpeg (the video
+// package, without the novideo build tag): the DLLs of the FFmpeg of BtbN
+// in [ffmpegDir], which the app needs next to its executable, and the
+// license of FFmpeg (LGPL), which goes with them.
+func ffmpegWindowsFiles() ([]string, error) {
+	// (CGO_ENABLED, which is off by default for another platform, as the
+	// package of go-astiav is only cgo)
+	out, err := exec.Silent().SetEnv("GOOS", "windows").SetEnv("CGO_ENABLED", "1").Output("go", "list", "-deps", ".")
+	if err != nil {
+		return nil, fmt.Errorf("finding whether the app uses FFmpeg: %w", err)
+	}
+	if !slices.Contains(strings.Fields(out), "github.com/asticode/go-astiav") {
+		return nil, nil
+	}
+	dir := ffmpegDir()
+	dlls, _ := filepath.Glob(filepath.Join(dir, "bin", "*.dll"))
+	if len(dlls) == 0 {
+		return nil, errors.New("the app uses FFmpeg (the video package), whose DLLs are not installed: run core setup -video on Windows, or build the app with the novideo build tag")
+	}
+	if lic := filepath.Join(dir, "LICENSE.txt"); fileExists(lic) {
+		dlls = append(dlls, lic)
+	}
+	return dlls, nil
+}
+
+// fileExists returns whether the given file exists.
+func fileExists(file string) bool {
+	_, err := os.Stat(file)
+	return err == nil
 }

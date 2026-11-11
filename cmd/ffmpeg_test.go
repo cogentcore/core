@@ -6,6 +6,8 @@ package cmd
 
 import (
 	"archive/zip"
+	"go/parser"
+	"go/token"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -115,4 +117,61 @@ func TestSetFFmpegEnv(t *testing.T) {
 	case "windows":
 		assert.True(t, strings.HasPrefix(os.Getenv("PATH"), filepath.Join(dir, "bin")))
 	}
+}
+
+func TestWindowsInstallerTemplate(t *testing.T) {
+	// The installer is valid Go, with and without files of FFmpeg.
+	for _, files := range [][]string{nil, {"avutil-61.dll", "FFmpeg-LICENSE.txt"}} {
+		var b strings.Builder
+		require.NoError(t, windowsInstallerTmpl.Execute(&b, &windowsInstallerData{Name: "My App", Desc: "an app", Files: files}))
+		src := b.String()
+		_, err := parser.ParseFile(token.NewFileSet(), "installer.go", src, 0)
+		require.NoError(t, err, src)
+		for _, f := range files {
+			assert.Contains(t, src, `files.ReadFile("files/`+f+`")`)
+			assert.Contains(t, src, `dir+"\\`+f+`"`)
+		}
+		assert.Equal(t, files != nil, strings.Contains(src, "//go:embed files"))
+	}
+}
+
+func TestFFmpegWindowsFiles(t *testing.T) {
+	if testing.Short() {
+		t.Skip("lists the packages of an app")
+	}
+	// The Go environment stays that of the user while HOME (and so the
+	// cache directory of FFmpeg) is a temporary directory.
+	for _, name := range []string{"GOPATH", "GOMODCACHE", "GOCACHE", "GOENV"} {
+		out, err := exec.Command("go", "env", name).Output()
+		require.NoError(t, err)
+		t.Setenv(name, strings.TrimSpace(string(out)))
+	}
+	tmp := t.TempDir()
+	t.Setenv("HOME", tmp)
+	t.Setenv("XDG_CACHE_HOME", filepath.Join(tmp, ".cache"))
+	t.Setenv("LocalAppData", filepath.Join(tmp, "AppData"))
+	t.Chdir(filepath.Join("..", "examples", "video"))
+
+	// The video example uses FFmpeg, whose DLLs are not installed yet.
+	_, err := ffmpegWindowsFiles()
+	assert.ErrorContains(t, err, "core setup -video")
+
+	dir := ffmpegDir()
+	for _, f := range []string{"bin/avutil-61.dll", "bin/avcodec-63.dll", "bin/ffmpeg.exe", "LICENSE.txt"} {
+		require.NoError(t, os.MkdirAll(filepath.Dir(filepath.Join(dir, f)), 0777))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, f), []byte(f), 0666))
+	}
+	files, err := ffmpegWindowsFiles()
+	require.NoError(t, err)
+	var names []string
+	for _, f := range files {
+		names = append(names, filepath.Base(f))
+	}
+	assert.ElementsMatch(t, []string{"avutil-61.dll", "avcodec-63.dll", "LICENSE.txt"}, names, "the DLLs and license, not the programs")
+
+	// built without video, it does not use FFmpeg
+	t.Setenv("GOFLAGS", "-tags=novideo")
+	files, err = ffmpegWindowsFiles()
+	require.NoError(t, err)
+	assert.Empty(t, files)
 }
