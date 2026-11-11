@@ -257,3 +257,31 @@ func TestControlsKeysHidden(t *testing.T) {
 		b.AsyncUnlock()
 	})
 }
+
+func TestControlsHideAtStart(t *testing.T) {
+	// The controls, shown before the video plays, hide soon after it
+	// starts playing, without the mouse.
+	b := core.NewBody()
+	v := NewVideo(b)
+	v.Controls = true
+	v.Muted = true
+	v.Loop = true
+	v.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(320)
+		s.Min.Y.Dp(240)
+	})
+	require.NoError(t, v.Open("testdata/short.mp4"))
+	b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		c := v.controls
+		assert.True(t, c.IsShown(), "before it plays")
+		require.NoError(t, v.Play(0, 0))
+		assert.True(t, c.IsShown(), "when it starts")
+		b.AsyncUnlock()
+		time.Sleep(controlsHideDelay + 300*time.Millisecond)
+		b.AsyncLock()
+		assert.False(t, c.IsShown(), "soon after")
+		v.Stop()
+		b.AsyncUnlock()
+	})
+}

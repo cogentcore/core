@@ -187,6 +187,7 @@ func (c *Controls) Init() {
 		bt.Styler(func(s *styles.Style) {
 			s.Color = white
 			s.Padding.Set(units.Dp(4))
+			s.IconSize.Set(units.Em(1.5))
 		})
 		bt.OnClick(func(e events.Event) {
 			do()
@@ -303,6 +304,10 @@ func (c *Controls) Refresh() {
 	c.mute.Update()
 	if !p.IsPlaying() {
 		c.SetShown(true)
+	} else if c.IsShown() {
+		// hidden soon unless the mouse moves over them (as when it starts
+		// playing, as they are shown before)
+		c.hideAfter(controlsHideDelay, c.shownAt)
 	}
 	c.NeedsRender()
 }
