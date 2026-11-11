@@ -13,6 +13,8 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
@@ -130,6 +132,9 @@ func TestControlsZone(t *testing.T) {
 		assert.False(t, c.inZone(at(vb.Min.Y+10)), "the top")
 		assert.False(t, c.inZone(at((vb.Min.Y+vb.Max.Y)/2)), "the middle")
 		assert.True(t, c.inZone(at(vb.Max.Y-5)), "the bottom")
+		cb := c.Geom.TotalBBox
+		assert.True(t, c.inZone(at(cb.Min.Y+1)), "the top of the controls")
+		assert.False(t, c.inZone(at(cb.Min.Y-2)), "just above the controls")
 		assert.False(t, c.inZone(at(vb.Max.Y+5)), "below the video")
 
 		// moving over the middle of a playing video does not show them, and
@@ -147,6 +152,68 @@ func TestControlsZone(t *testing.T) {
 		time.Sleep(controlsLeaveDelay + 200*time.Millisecond)
 		b.AsyncLock()
 		assert.False(t, c.IsShown(), "after the delay")
+		v.Stop()
+	})
+}
+
+func TestControlsKeys(t *testing.T) {
+	b := core.NewBody()
+	v := NewVideo(b)
+	v.Controls = true
+	v.Muted = true
+	v.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(320)
+		s.Min.Y.Dp(240)
+	})
+	require.NoError(t, v.Open("testdata/short.mp4"))
+	b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		c := v.controls
+		assert.True(t, v.AbilityIs(abilities.Focusable), "for the keys")
+		press := func(code key.Codes) bool {
+			return c.handleKey(events.NewKey(events.KeyChord, 0, code, 0))
+		}
+		base := time.Duration(0)
+
+		// space plays and pauses
+		require.True(t, press(key.CodeSpacebar))
+		assert.True(t, v.IsPlaying())
+		waitUnlocked(t, b, v.hasFrame)
+		require.True(t, press(key.CodeSpacebar))
+		assert.True(t, v.isPaused())
+
+		// the arrows step frames and skip 10 seconds (to the end and back to
+		// the start of this 1 second video)
+		v.Seek(300 * time.Millisecond)
+		waitUnlocked(t, b, func() bool { return v.CurrentTime() == base+300*time.Millisecond })
+		require.True(t, press(key.CodeRightArrow))
+		waitUnlocked(t, b, func() bool { return v.CurrentTime() == base+400*time.Millisecond })
+		require.True(t, press(key.CodeLeftArrow))
+		waitUnlocked(t, b, func() bool { return v.CurrentTime() == base+300*time.Millisecond })
+		assert.True(t, v.isPaused())
+		require.True(t, press(key.CodeDownArrow))
+		waitUnlocked(t, b, func() bool { return v.CurrentTime() == 0 })
+		assert.True(t, c.IsShown(), "shown by the keys")
+
+		// other keys and modifiers are not those of players
+		assert.False(t, press(key.CodeA))
+		assert.False(t, c.handleKey(events.NewKey(events.KeyChord, 0, key.CodeRightArrow, key.Modifiers(1)<<key.Shift)))
+
+		// the keys also work when a control (as a slider) has the focus,
+		// as pressed in the window
+		v.Seek(300 * time.Millisecond)
+		waitUnlocked(t, b, func() bool { return v.CurrentTime() == base+300*time.Millisecond })
+		c.volume.SetFocus()
+		value := c.volume.Value
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		src.Key(events.KeyDown, 0, key.CodeLeftArrow, 0)
+		src.Key(events.KeyUp, 0, key.CodeLeftArrow, 0)
+		time.Sleep(300 * time.Millisecond)
+		b.AsyncLock()
+		assert.Equal(t, value, c.volume.Value, "not the volume")
+		assert.Equal(t, base+200*time.Millisecond, v.CurrentTime(), "a frame back")
 		v.Stop()
 	})
 }

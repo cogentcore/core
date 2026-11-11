@@ -168,6 +168,10 @@ func TestVideoSeekVolume(t *testing.T) {
 	v.Seek(600 * time.Millisecond)
 	waitFor(t, "the seek", func() bool { return v.CurrentTime() >= 590*time.Millisecond })
 	assert.False(t, v.IsPlaying())
+	v.StepFrame(1) // (of 30 frames per second, as the browser does not tell)
+	waitFor(t, "the step", func() bool { return v.CurrentTime() > 620*time.Millisecond })
+	assert.InDelta(t, 0.6+1.0/30, v.CurrentTime().Seconds(), 0.02)
+	assert.False(t, v.IsPlaying())
 	v.SkipBy(-10 * time.Second)
 	waitFor(t, "the skip", func() bool { return v.CurrentTime() == 0 })
 

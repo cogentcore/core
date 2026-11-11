@@ -199,3 +199,15 @@ func (v *Video) updateControls() {
 		c.Refresh()
 	}
 }
+
+// StepFrame pauses the video and shows its next frame, or the one before
+// it for a negative n.
+func (v *Video) StepFrame(n int) {
+	if v.playback == nil || v.playback.IsEnded() || (!v.IsPlaying() && !v.isPaused()) {
+		if errors.Log(v.Play(v.playSize[0], v.playSize[1])) != nil {
+			return
+		}
+	}
+	errors.Log(v.playback.StepFrame(n))
+	v.updateControls()
+}

@@ -116,6 +116,21 @@ func (p *Playback) Seek(t time.Duration) error {
 	return p.playFrom(max(t, 0), p.IsPaused())
 }
 
+// StepFrame shows the next frame of the media (or the one before it, for a
+// negative n), pausing it: the first frame after a time half a frame after
+// that of the frame shown (or one and a half before it), as a seek does.
+func (p *Playback) StepFrame(n int) error {
+	ft := p.frameTime()
+	t := p.Position() + ft/2
+	if n < 0 {
+		t = p.Position() - 3*ft/2
+	}
+	if d := p.Media.Duration; d > 0 && t > d {
+		return nil // (the last frame)
+	}
+	return p.playFrom(max(t, 0), true)
+}
+
 // Position returns the time in the media of the frame shown last (or the
 // time that it is played from, before its first frame is shown).
 func (p *Playback) Position() time.Duration {

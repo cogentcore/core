@@ -213,3 +213,28 @@ func TestPlaybackSeek(t *testing.T) {
 	p.SetMuted(false)
 	assert.False(t, p.Muted)
 }
+
+func TestPlaybackStepFrame(t *testing.T) {
+	// testdata/short.mp4 is 1 second: 10 frames at 10 per second.
+	m, err := OpenMedia("testdata/short.mp4", nil)
+	require.NoError(t, err)
+	fl := &frameLog{}
+	p := &Playback{Media: m, Muted: true, OnFrame: fl.add}
+	base := fl.timesBase(m)
+	require.NoError(t, p.Seek(500*time.Millisecond))
+	p.Pause()
+	require.Eventually(t, func() bool { return p.Position() == base+500*time.Millisecond && fl.len() > 0 }, 2*time.Second, 10*time.Millisecond)
+
+	// a frame forward and back, paused
+	n := fl.len()
+	require.NoError(t, p.StepFrame(1))
+	require.Eventually(t, func() bool { return fl.len() == n+1 }, 2*time.Second, 10*time.Millisecond)
+	assert.Equal(t, base+600*time.Millisecond, p.Position())
+	assert.True(t, p.IsPaused())
+	require.NoError(t, p.StepFrame(-1))
+	require.Eventually(t, func() bool { return fl.len() == n+2 }, 2*time.Second, 10*time.Millisecond)
+	assert.Equal(t, base+500*time.Millisecond, p.Position())
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, n+2, fl.len(), "one frame each")
+	p.Stop()
+}

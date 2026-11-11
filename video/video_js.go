@@ -288,3 +288,20 @@ func (v *Video) Render() {
 		v.Scene.Painter.BlitBox(v.Geom.Pos.Content, v.Geom.Size.Actual.Content, nil)
 	}
 }
+
+// StepFrame pauses the video and shows its next frame, or the one before
+// it for a negative n (of 30 frames per second, which the browser does not
+// tell, unless known from the media).
+func (v *Video) StepFrame(n int) {
+	e, ok := elements[v]
+	if !ok {
+		return
+	}
+	e.Call("pause")
+	ft := 1.0 / 30
+	if v.Media != nil && v.Media.FrameRate > 0 {
+		ft = 1 / v.Media.FrameRate
+	}
+	t := e.Get("currentTime").Float() + float64(n)*ft
+	e.Set("currentTime", max(t, 0))
+}

@@ -12,6 +12,8 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
@@ -32,6 +34,10 @@ type Player interface {
 
 	// SkipBy seeks the video by the given time from its current time.
 	SkipBy(d time.Duration)
+
+	// StepFrame pauses the video and shows its next frame, or the one
+	// before it for a negative n.
+	StepFrame(n int)
 
 	// CurrentTime returns the current time of the video.
 	CurrentTime() time.Duration
@@ -67,10 +73,11 @@ const (
 // skip forward 10 seconds, to mute, with the volume and the time.
 // They are a child of the widget of the video (their target), which must
 // be their containing block (positioned, as relative), and are shown while
-// the mouse moves over its bottom (see [Controls.inZone]), until 2.5
+// the mouse moves over them (see [Controls.inZone]), until 2.5
 // seconds after it stops there, or half a second after it moves out of the
 // bottom or leaves, and while the video is not playing. A click on the target (not on the
-// controls) plays and pauses the video. The target must be rendered as a
+// controls) plays and pauses the video, and gives it the focus, for the
+// keys of players (see [Controls.handleKey]). The target must be rendered as a
 // whole when the controls change (see [Video.RenderGroup]), as they are
 // partly transparent over the video.
 type Controls struct { //types:add
@@ -116,9 +123,20 @@ func (c *Controls) SetPlayer(target core.Widget, player Player) *Controls {
 		if c.This == nil || e.Pos().In(c.Geom.TotalBBox) {
 			return // (a click on the controls)
 		}
+		tw.SetFocus() // (for the keys)
 		c.player.TogglePlay()
 		c.Refresh()
 		e.SetHandled()
+	})
+	// the keys of players, when the video or its controls have the focus
+	// (first, before a control, as a slider, handles the arrows)
+	tw.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Focusable)
+	})
+	tw.OnFirst(events.KeyChord, func(e events.Event) {
+		if c.This != nil && c.handleKey(e) {
+			e.SetHandled()
+		}
 	})
 	c.Refresh()
 	return c
@@ -217,6 +235,35 @@ func (c *Controls) ChildBackground(child core.Widget) image.Image {
 	return colors.Uniform(color.Transparent)
 }
 
+// handleKey handles the keys of players, returning whether the given key
+// event is one of them: space plays and pauses, the right and left arrows
+// step a frame forward and back, and the up and down arrows skip 10 seconds
+// forward and back. The controls are shown as for the mouse.
+func (c *Controls) handleKey(e events.Event) bool {
+	if e.HasAnyModifier(key.Shift, key.Control, key.Alt, key.Meta) {
+		return false
+	}
+	switch e.KeyCode() {
+	case key.CodeSpacebar:
+		c.player.TogglePlay()
+	case key.CodeRightArrow:
+		c.player.StepFrame(1)
+	case key.CodeLeftArrow:
+		c.player.StepFrame(-1)
+	case key.CodeUpArrow:
+		c.player.SkipBy(10 * time.Second)
+	case key.CodeDownArrow:
+		c.player.SkipBy(-10 * time.Second)
+	default:
+		return false
+	}
+	c.Refresh()
+	c.shownAt = time.Now()
+	c.SetShown(true)
+	c.hideAfter(controlsHideDelay, c.shownAt)
+	return true
+}
+
 // Refresh updates the controls for the state of the player (with the
 // lock of the widgets held).
 func (c *Controls) Refresh() {
@@ -281,14 +328,15 @@ func (c *Controls) mouseMoved(pos image.Point) {
 }
 
 // inZone returns whether the given position of the mouse is in the bottom
-// of the video, where it shows the controls: one and a half times their
-// height, or 15% of the height of the video, whichever is more, up to half
-// of the height of the video.
+// of the video, where it shows the controls: the region of the controls
+// (or the bottom 15% of the video before they are laid out).
 func (c *Controls) inZone(pos image.Point) bool {
 	tb := c.target.AsWidget().Geom.TotalBBox
-	h := float32(tb.Dy())
-	zone := min(max(1.5*c.Geom.Size.Actual.Total.Y, 0.15*h), 0.5*h)
-	return pos.In(tb) && float32(pos.Y) >= float32(tb.Max.Y)-zone
+	top := float32(tb.Max.Y) - 0.15*float32(tb.Dy())
+	if cb := c.Geom.TotalBBox; !cb.Empty() {
+		top = float32(cb.Min.Y)
+	}
+	return pos.In(tb) && float32(pos.Y) >= top
 }
 
 // hideAfter hides the controls after the given delay, if they have not
