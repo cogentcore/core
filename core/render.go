@@ -383,6 +383,12 @@ func (wb *WidgetBase) doNeedsRender() {
 				dwb.setFlag(false, widgetChildNeedsRender)
 				return tree.Continue
 			})
+			// not when it is covered by widgets rendered over it, which it
+			// would paint over (as a playing video under a dialog of a
+			// page, see [WidgetBase.IsInvisible])
+			if cwb.isCovered() {
+				return tree.Break
+			}
 			cw.RenderWidget()
 			// (with the widgets raised over it, as below)
 			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {

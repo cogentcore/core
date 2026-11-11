@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,4 +56,50 @@ func TestIsInvisibleCovered(t *testing.T) {
 	check("transparent overlay", false, nil, 0, false)
 	check("overlay under it", false, black, -1, false)
 	check("hidden overlay", false, black, 0, true)
+}
+
+// testGroup is a widget rendered as a whole (as a video), which counts its
+// renders.
+type testGroup struct {
+	Frame
+	renders int
+}
+
+func (tg *testGroup) RenderGroup() bool { return true }
+
+func (tg *testGroup) Render() {
+	tg.renders++
+	tg.Frame.Render()
+}
+
+// TestRenderGroupCovered tests that a widget rendered as a whole (as a
+// video) is not rendered for a change in it while it is covered by a
+// widget rendered over it, which it would paint over (as the videos of the
+// search page of pexels.com, under the dialog of one of them), and is once
+// it is not.
+func TestRenderGroupCovered(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(400), units.Dp(300)) })
+	tg := tree.New[testGroup](b)
+	tg.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(200), units.Dp(100)) })
+	child := NewText(tg).SetText("time")
+	overlay := NewFrame(b)
+	overlay.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionFixed
+		s.Inset.Set(units.Zero())
+		s.InsetSet.Set(true)
+		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))
+	})
+	b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		n := tg.renders
+		child.NeedsRender()
+		b.Scene.doNeedsRender()
+		assert.Equal(t, n, tg.renders, "not rendered while covered")
+		overlay.SetState(true, states.Invisible)
+		child.NeedsRender()
+		b.Scene.doNeedsRender()
+		assert.Equal(t, n+1, tg.renders, "rendered once not covered")
+	})
 }
