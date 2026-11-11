@@ -587,48 +587,81 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 	}
 	// the rules whose :has() is in another compound are matched against
 	// the elements in those that match it (without its :has()), and their
-	// later siblings if a sibling combinator follows it
-	type ruleNode struct {
-		n *html.Node
-		i int
-	}
-	walked := map[ruleNode]bool{}
-	one := make([]int, 1)
-	var walkIn func(n *html.Node, i int) bool
-	walkIn = func(n *html.Node, i int) bool {
-		key := ruleNode{n, i}
-		if walked[key] {
-			return true
-		}
-		walked[key] = true
-		one[0] = i
-		if !check(n, one) {
-			return false
-		}
-		for k := n.FirstChild; k != nil; k = k.NextSibling {
-			if !walkIn(k, i) {
-				return false
-			}
-		}
-		return true
-	}
+	// later siblings if a sibling combinator follows it: the elements that
+	// match them are found first (in above), then the elements in each are
+	// walked once, matched only against the rules whose key they have
+	// (most of them are matched in the body, as of npr.org)
+	regions := map[*html.Node][]int{} // the rules of each
+	var regionOrder []*html.Node
 	above := func(h *html.Node) bool {
 		if h.Type != html.ElementNode {
 			return true
 		}
 		for _, i := range ix.hasAbove {
-			r := c.rules[i]
-			if !r.hasCompound.sel.Match(h) {
+			if c.rules[i].hasCompound.sel.Match(h) {
+				if _, ok := regions[h]; !ok {
+					regionOrder = append(regionOrder, h)
+				}
+				regions[h] = append(regions[h], i)
+			}
+		}
+		return true
+	}
+	walkRegions := func() bool {
+		inOuter := func(h *html.Node, i int) bool { // (walked with an outer region)
+			for p := h.Parent; p != nil; p = p.Parent {
+				if slices.Contains(regions[p], i) {
+					return true
+				}
+			}
+			return false
+		}
+		for _, h := range regionOrder {
+			var rules []int
+			for _, i := range regions[h] {
+				if !inOuter(h, i) {
+					rules = append(rules, i)
+				}
+			}
+			if len(rules) == 0 {
 				continue
 			}
+			sub := &ruleIndex{byID: map[string][]int{}, byClass: map[string][]int{}, byTag: map[string][]int{}}
+			siblings := false
+			for _, i := range rules {
+				r := c.rules[i]
+				siblings = siblings || r.hasSiblings
+				switch r.sel.keyKind {
+				case '#':
+					sub.byID[r.sel.key] = append(sub.byID[r.sel.key], i)
+				case '.':
+					sub.byClass[r.sel.key] = append(sub.byClass[r.sel.key], i)
+				case 't':
+					sub.byTag[r.sel.key] = append(sub.byTag[r.sel.key], i)
+				default:
+					sub.other = append(sub.other, i)
+				}
+			}
+			var walk func(n *html.Node) bool
+			walk = func(n *html.Node) bool {
+				if n.Type == html.ElementNode && !check(n, sub.candidates(n)) {
+					return false
+				}
+				for k := n.FirstChild; k != nil; k = k.NextSibling {
+					if !walk(k) {
+						return false
+					}
+				}
+				return true
+			}
 			for k := h.FirstChild; k != nil; k = k.NextSibling {
-				if !walkIn(k, i) {
+				if !walk(k) {
 					return false
 				}
 			}
-			if r.hasSiblings {
+			if siblings {
 				for k := h.NextSibling; k != nil; k = k.NextSibling {
-					if !walkIn(k, i) {
+					if !walk(k) {
 						return false
 					}
 				}
@@ -658,7 +691,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			}
 		}
 	}
-	return true
+	return walkRegions()
 }
 
 // hasCompound returns, for the given selector (of one complex selector)
