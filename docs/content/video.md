@@ -19,6 +19,29 @@ v.OnShow(func(e events.Event) {
 })
 ```
 
+## Controls
+
+Set `Controls` to show the standard playback controls over the bottom of the video, when the mouse is over them or the video is paused: back 10 seconds, play and pause, forward 10 seconds, mute, the volume, the time, and the position, which you can drag to seek. A click on the video plays and pauses it.
+
+```go
+v := video.NewVideo(b)
+v.Controls = true
+```
+
+## Keyboard shortcuts
+
+When a video has the focus, which a click on it gives it, the keys of video players control it:
+
+| Key | Action |
+|-----|--------|
+| Space | Play / pause |
+| Right arrow | One frame forward (pausing) |
+| Left arrow | One frame back (pausing) |
+| Up arrow | 10 seconds forward |
+| Down arrow | 10 seconds back |
+
+The same controls and keys are used on desktop platforms and on the web.
+
 Here is a screenshot of the [video example](https://github.com/cogentcore/core/tree/main/examples/video):
 
 ![Screenshot of the video example](media/video.jpg)
