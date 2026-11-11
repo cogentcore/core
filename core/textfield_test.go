@@ -366,3 +366,21 @@ func TestTextFieldWidthsRow(t *testing.T) {
 		assert.Less(t, a.Geom.Size.Actual.Total.X, d.Geom.Size.Actual.Total.X, "the one with the shorter text is narrower")
 	})
 }
+
+// TestTextFieldSetCursorPos tests that the cursor of a text field is put at
+// a position in its text (as for one that replaces another in which the
+// user was typing), within its text.
+func TestTextFieldSetCursorPos(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("hello world")
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tf.SetCursorPos(5)
+		assert.Equal(t, 5, tf.CursorPos())
+		tf.SetCursorPos(100)
+		assert.Equal(t, 11, tf.CursorPos(), "at most its end")
+		tf.SetCursorPos(-1)
+		assert.Equal(t, 0, tf.CursorPos())
+	})
+}
