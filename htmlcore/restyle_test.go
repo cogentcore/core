@@ -113,6 +113,8 @@ func TestRestyle(t *testing.T) {
 .gone { display: none }
 .wrap:has(.on) .target { width: 150px }
 .wrap2:has(.on2) { width: 170px }
+.hidden-modal { display: none }
+.icon.playing::before { content: "||" }
 .imagewrap.has-dims { height: 0; overflow: hidden; padding-bottom: 50%; position: relative }
 .imagewrap .pic { position: absolute; width: 100%; height: 100%; background: red }
 .marked::before { content: "x" }
@@ -124,6 +126,7 @@ func TestRestyle(t *testing.T) {
 <div id="after" class="after box">after</div>
 <div class="wrap"><div id="target" class="target box">t</div><div id="trigger">x</div></div>
 <div id="wrap2" class="wrap2 box"><div><div id="trigger2">deep</div></div></div>
+<section class="hidden-modal"><div><div id="icon" class="icon">i</div></div></section>
 <div style="width: 200px"><div id="imagewrap" class="imagewrap"><div id="pic" class="pic">pic</div></div></div>
 <div id="vars"><div id="v" class="v"></div></div>
 <p id="p">text <span id="span">span</span> more</p>
@@ -168,6 +171,24 @@ func TestRestyle(t *testing.T) {
 			setAttr(w, "class", "imagewrap has-dims")
 			return []*html.Node{w}
 		})
+	})
+	// a change of the ::before of an element in a hidden one (as the icons
+	// of the players in the hidden dialog of npr.org), not rendered
+	t.Run("pseudo in hidden", func(t *testing.T) {
+		ctx := NewContext()
+		doc, err := ParseHTML(ctx, strings.NewReader(page))
+		require.NoError(t, err)
+		bd := core.NewBody()
+		require.NoError(t, ReadDocument(ctx, bd, doc))
+		icon := elementByID(doc, "icon")
+		var ok bool
+		bd.RenderImage(func() {
+			bd.AsyncLock()
+			defer bd.AsyncUnlock()
+			setAttr(icon, "class", "icon playing")
+			ok = ctx.Restyle([]*html.Node{icon})
+		})
+		assert.True(t, ok, "restyled, with nothing to change")
 	})
 	t.Run("has", func(t *testing.T) {
 		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {

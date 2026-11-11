@@ -404,6 +404,14 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			if samePseudo(od, nd) {
 				continue
 			}
+			if c.undisplayed(n) {
+				// not rendered (as the icons of the video players of
+				// npr.org in a hidden dialog, which changed as they
+				// played, each time reading the page whole, as no element
+				// that they are in had widgets of its own)
+				c.setPseudo(n, kind, nd, len(nd) > 0)
+				continue
+			}
 			if !isFree(n) {
 				undo()
 				// its pseudo-element, which may be a widget
@@ -499,6 +507,26 @@ func samePseudo(a, b []*cssDecl) bool {
 	return true
 }
 
+// keyIn returns whether the given element has the key of the selector
+// (see [compiledSelector.key]), which every element that it selects has,
+// or it has none.
+func (cs *compiledSelector) keyIn(n *html.Node) bool {
+	switch cs.keyKind {
+	case '#':
+		return GetAttr(n, "id") == cs.key
+	case '.':
+		for _, cl := range strings.Fields(GetAttr(n, "class")) {
+			if cl == cs.key {
+				return true
+			}
+		}
+		return false
+	case 't':
+		return strings.EqualFold(n.Data, cs.key)
+	}
+	return true
+}
+
 // relationalChanges adds the elements that the rules of :has() selectors
 // select now, or did, to the elements whose declarations may change,
 // with add, returning false if there are too many of them. A change of an
@@ -529,7 +557,9 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 		}
 		for _, i := range rules {
 			r := c.rules[i]
-			if had(i) != (contains(r.root, n) && r.sel.sel.Match(n)) {
+			// (the key of its selector first, which most elements do not
+			// have, then its scope, after a match, as it walks up)
+			if had(i) != (r.sel.keyIn(n) && r.sel.sel.Match(n) && contains(r.root, n)) {
 				return add(n)
 			}
 		}
@@ -558,15 +588,21 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 	// the rules whose :has() is in another compound are matched against
 	// the elements in those that match it (without its :has()), and their
 	// later siblings if a sibling combinator follows it
-	walked := map[[2]any]bool{}
+	type ruleNode struct {
+		n *html.Node
+		i int
+	}
+	walked := map[ruleNode]bool{}
+	one := make([]int, 1)
 	var walkIn func(n *html.Node, i int) bool
 	walkIn = func(n *html.Node, i int) bool {
-		key := [2]any{n, i}
+		key := ruleNode{n, i}
 		if walked[key] {
 			return true
 		}
 		walked[key] = true
-		if !check(n, []int{i}) {
+		one[0] = i
+		if !check(n, one) {
 			return false
 		}
 		for k := n.FirstChild; k != nil; k = k.NextSibling {
