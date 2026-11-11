@@ -1096,6 +1096,27 @@ func TestTableFullWidthCell(t *testing.T) {
 		})
 }
 
+// TestFlexItemScrolls tests that a flex item whose height is that of its
+// flex container, which has a definite height, scrolls its content: one
+// that grows in a column, and one that is stretched across a row (as the
+// navigation and the page of the sites made with Cogent Core content, which
+// did not scroll).
+func TestFlexItemScrolls(t *testing.T) {
+	tall := `<div style="height: 1000px">tall</div>`
+	widgetsByID(t, `<div style="display: flex; flex-direction: column; height: 300px">`+
+		`<div style="height: 50px">top</div>`+
+		`<div id="main" style="flex: 1; display: flex; min-height: 0">`+
+		`<nav id="nav" style="width: 100px; overflow: auto">`+tall+`</nav>`+
+		`<div id="page" style="flex: 1; overflow: auto">`+tall+`</div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, id := range []string{"nav", "page"} {
+				fr := core.AsFrame(ws[id].This.(core.Widget))
+				assert.InDelta(t, 250*dp, ws[id].Geom.Size.Actual.Total.Y, 2, id)
+				assert.True(t, fr.HasScroll[math32.Y], "%s scrolls", id)
+			}
+		})
+}
+
 // TestGridOutOfFlowChild tests that a child of a grid that is out of its
 // flow (as a visually hidden heading) does not take a track, so the
 // children after it are in their tracks (as the 8fr and 5fr columns of
