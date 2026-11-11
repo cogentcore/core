@@ -91,6 +91,9 @@ func (em *Events) InWindow(pos image.Point) bool {
 // It returns true if the event has been handled.
 func (em *Events) handleDragOS(e events.Event) bool {
 	et := e.Type()
+	if em.dragWindow != nil {
+		return em.handleWindowDrag(e)
+	}
 	if em.dragOS {
 		switch et {
 		case events.MouseDrag:
@@ -107,6 +110,9 @@ func (em *Events) handleDragOS(e events.Event) bool {
 	}
 	if et != events.MouseDrag || tree.IsNil(em.drag) {
 		return false
+	}
+	if em.dragToWindow(e) {
+		return true
 	}
 	return em.dragToOS(e)
 }

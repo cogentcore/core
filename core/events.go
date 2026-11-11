@@ -178,6 +178,11 @@ type Events struct {
 	// dragCopyOffset is the offset of the sprite of the green plus from
 	// the drag sprite.
 	dragCopyOffset image.Point
+
+	// dragWindow is the new window that is moved with the mouse, after a
+	// drag left the window and its source moved its content into the new
+	// window (see [windowDragger]).
+	dragWindow *windowDrag
 }
 
 // dragMover is implemented by widgets with an option for whether dragging

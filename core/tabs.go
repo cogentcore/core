@@ -5,7 +5,9 @@
 package core
 
 import (
+	"image"
 	"log/slog"
+	"slices"
 	"sync"
 
 	"cogentcore.org/core/base/elide"
@@ -60,6 +62,26 @@ type Tabs struct {
 	// tabs will not render a close button and can not be closed.
 	CloseIcon icons.Icon
 
+	// DragToWindow, if set, makes a tab of [FunctionalTabs] that is
+	// dragged out of its window move into a new window, which then moves
+	// with the mouse until the drag ends, on desktop platforms, as in web
+	// browsers. It is called with the body of the new window, which it
+	// initializes as any new window of the app (as a new browser window),
+	// and returns the tabs in it that the tab is moved into (at their end),
+	// or nil to not move it. The last tab is not moved. Tabs of
+	// [FunctionalTabs] can always be dragged to other places in their
+	// tabs, and to other tabs of [FunctionalTabs] in the same window.
+	// See also [Tabs.MoveTabFunc].
+	DragToWindow func(b *Body) *Tabs
+
+	// MoveTabFunc is a function that is called when a tab has been moved
+	// from the given index, by dragging it or by [Tabs.MoveTabIndex], to
+	// the given index in the given tabs: these tabs, or other tabs (as
+	// those of a new window, for [Tabs.DragToWindow]). It can be used to
+	// keep any additional resources associated with the tabs in their order,
+	// and to move them to those of the other tabs.
+	MoveTabFunc func(from int, to *Tabs, at int)
+
 	// mu is a mutex protecting updates to tabs. Tabs can be driven
 	// programmatically and via user input so need extra protection.
 	mu sync.Mutex
@@ -77,8 +99,8 @@ const (
 
 	// FunctionalTabs indicates to render functional tabs
 	// like those in Google Chrome. These tabs take up less
-	// space and are the only kind that can be closed.
-	// They will also support being moved at some point.
+	// space and are the only kind that can be closed, and they
+	// can be dragged to new positions (see also [Tabs.DragToWindow]).
 	FunctionalTabs
 
 	// NavigationAuto indicates to render the tabs as either
@@ -148,6 +170,20 @@ func (ts *Tabs) Init() {
 					s.Grow.Set(1, 0)
 					s.Wrap = true
 				}
+			})
+			// a tab dropped after the tabs goes to the end
+			w.On(events.DragEnter, func(e events.Event) { e.SetHandled() })
+			w.On(events.DragLeave, func(e events.Event) { e.SetHandled() })
+			w.On(events.Drop, func(e events.Event) {
+				td, ok := e.(*events.DragDrop).Data.(*tabDrag)
+				if !ok {
+					return
+				}
+				e.SetHandled()
+				td.dropAt(ts, ts.NumTabs())
+			})
+			w.FinalStyler(func(s *styles.Style) {
+				s.SetAbilities(ts.Type.effective(ts) == FunctionalTabs, abilities.Droppable)
 			})
 			w.Updater(func() {
 				if !ts.NewTabButton {
@@ -427,6 +463,144 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	return true
 }
 
+// MoveTabIndex moves the tab at the given index to the given index (the
+// one that it then has), returning whether it was successful. The
+// selected tab stays selected.
+func (ts *Tabs) MoveTabIndex(from, to int) bool {
+	ts.mu.Lock()
+	fr := ts.getFrame()
+	tb := ts.getTabs()
+	n := len(fr.Children)
+	if from < 0 || from >= n || to < 0 || to >= n {
+		ts.mu.Unlock()
+		slog.Error("Tabs: index out of range for number of tabs", "from", from, "to", to, "numTabs", n)
+		return false
+	}
+	if from == to {
+		ts.mu.Unlock()
+		return true
+	}
+	moveChild(fr, from, to)
+	moveChild(tb, from, to)
+	switch top := fr.StackTop; {
+	case top == from:
+		fr.StackTop = to
+	case from < top && to >= top:
+		fr.StackTop--
+	case from > top && to <= top:
+		fr.StackTop++
+	}
+	ts.mu.Unlock()
+	ts.NeedsLayout()
+	if ts.MoveTabFunc != nil {
+		ts.MoveTabFunc(from, ts, to)
+	}
+	return true
+}
+
+// moveChild moves the child of the given node at the given index to the
+// other given index, without deleting it.
+func moveChild(n tree.Node, from, to int) {
+	nb := n.AsTree()
+	k := nb.Children[from]
+	nb.Children = slices.Delete(nb.Children, from, from+1)
+	nb.Children = slices.Insert(nb.Children, to, k)
+}
+
+// MoveTabTo moves the tab at the given index (its content and its button)
+// into the given other tabs, at the given index there, where it is
+// selected, returning the index that it has there, or -1 if it was not
+// moved. The tab next to it is selected in these tabs, as when it is
+// deleted, but it is not closed: [Tabs.CloseTabFunc] is not called, and
+// [Tabs.MoveTabFunc] is.
+func (ts *Tabs) MoveTabTo(idx int, other *Tabs, at int) int {
+	frame, tab := ts.TabAtIndex(idx)
+	if frame == nil || other == ts {
+		return -1
+	}
+	label, icon, tooltip := tab.Name, tab.Icon, tab.Tooltip
+	if f := ts.Scene.Events.focus; f != nil && (tree.Node(f) == frame || isParentOf(frame, f)) {
+		ts.Scene.Events.focusClear() // (not to send events to it here)
+	}
+
+	ts.mu.Lock()
+	fr := ts.getFrame()
+	tb := ts.getTabs()
+	nidx := -1
+	if len(fr.Children) > 1 {
+		nidx = idx
+		if fr.StackTop == idx {
+			nidx = max(idx-1, 0)
+		} else if fr.StackTop > idx {
+			nidx = fr.StackTop - 1
+		} else {
+			nidx = fr.StackTop
+		}
+	}
+	tb.DeleteChildAt(idx)
+	fr.StackTop = -1 // (selected again below)
+	ofr := other.getFrame()
+	at = min(max(at, 0), len(ofr.Children))
+	tree.MoveToParent(frame, ofr) // (at the end)
+	moveChild(ofr, len(ofr.Children)-1, at)
+	ts.mu.Unlock()
+	if nidx >= 0 {
+		ts.SelectTabIndex(nidx)
+	}
+	ts.NeedsLayout()
+
+	other.mu.Lock()
+	nt := other.insertTabButtonAt(label, at)
+	nt.SetIcon(icon)
+	nt.SetTooltip(tooltip)
+	if len(ofr.Children) > 1 && ofr.StackTop >= at {
+		ofr.StackTop++ // (it is after the new tab)
+	}
+	other.mu.Unlock()
+	other.SelectTabIndex(at)
+	other.Update()
+	if ts.MoveTabFunc != nil {
+		ts.MoveTabFunc(idx, other, at)
+	}
+	return at
+}
+
+// isParentOf returns whether the given node is in the given parent node.
+func isParentOf(parent tree.Node, n tree.Node) bool {
+	for p := n.AsTree().Parent; p != nil; p = p.AsTree().Parent {
+		if p == parent {
+			return true
+		}
+	}
+	return false
+}
+
+// tabDrag is the data of the drag of a tab.
+type tabDrag struct {
+	// tabs are the tabs of the dragged tab.
+	tabs *Tabs
+
+	// tab is the button of the dragged tab.
+	tab *Tab
+}
+
+// dropAt moves the dragged tab to the given index in the given tabs, into
+// which it was dropped: in its own tabs, it moves there (the index that it
+// then has), and from other tabs, it is inserted there.
+func (td *tabDrag) dropAt(ts *Tabs, at int) {
+	from := td.tab.IndexInParent()
+	if from < 0 {
+		return
+	}
+	if td.tabs == ts {
+		ts.MoveTabIndex(from, min(at, ts.NumTabs()-1))
+		return
+	}
+	if ts.Type.effective(ts) == FunctionalTabs {
+		td.tabs.MoveTabTo(from, ts, at)
+	}
+}
+
 // getTabs returns the [Frame] containing the tabs (the first element within us).
 // It configures the [Tabs] if necessary.
 func (ts *Tabs) getTabs() *Frame {
@@ -530,6 +704,40 @@ func (tb *Tab) Init() {
 
 	tb.SendClickOnEnter()
 
+	// FunctionalTabs can be dragged to other places
+	tb.FinalStyler(func(s *styles.Style) {
+		s.SetAbilities(tb.Type.effective(tb) == FunctionalTabs, abilities.Draggable, abilities.Droppable)
+	})
+	tb.On(events.DragStart, func(e events.Event) {
+		ts := tb.tabs()
+		if ts == nil || !tb.AbilityIs(abilities.Draggable) {
+			return
+		}
+		e.SetHandled()
+		tb.Scene.Events.DragStart(tb.This.(Widget), &tabDrag{tabs: ts, tab: tb}, e)
+	})
+	tb.On(events.DragEnter, func(e events.Event) {
+		if _, ok := tb.Scene.Events.dragData.(*tabDrag); ok {
+			tb.SetState(true, states.DragHovered)
+			tb.NeedsRender()
+			e.SetHandled()
+		}
+	})
+	tb.On(events.DragLeave, func(e events.Event) {
+		tb.SetState(false, states.DragHovered)
+		tb.NeedsRender()
+		e.SetHandled()
+	})
+	tb.On(events.Drop, func(e events.Event) {
+		td, ok := e.(*events.DragDrop).Data.(*tabDrag)
+		ts := tb.tabs()
+		if !ok || ts == nil {
+			return
+		}
+		e.SetHandled()
+		td.dropAt(ts, tb.IndexInParent())
+	})
+
 	tb.Maker(func(p *tree.Plan) {
 		if tb.maxChars > 0 { // TODO: find a better time to do this?
 			tb.Text = elide.Middle(tb.Text, tb.maxChars)
@@ -587,6 +795,49 @@ func (tb *Tab) Init() {
 			})
 		}
 	})
+}
+
+// dragMovesDefault returns that a drag of a tab moves it (see [dragMover]).
+func (tb *Tab) dragMovesDefault() bool { return true }
+
+// dragToWindow moves the tab into a new window when it is dragged out of
+// its window, if its tabs have [Tabs.DragToWindow] and another tab (see
+// [windowDragger]).
+func (tb *Tab) dragToWindow(e events.Event) (*Body, func() image.Point) {
+	ts := tb.tabs()
+	if ts == nil || ts.DragToWindow == nil || ts.Type.effective(ts) != FunctionalTabs || ts.NumTabs() < 2 {
+		return nil, nil
+	}
+	idx := tb.IndexInParent()
+	src := ts.Scene.RenderWindow()
+	if idx < 0 || src == nil || src.SystemWindow == nil {
+		return nil, nil
+	}
+	// the place of the mouse in the tab, which stays under the mouse
+	in := e.StartPos().Sub(tb.Geom.TotalBBox.Min)
+	// (moved into the new tabs before their window runs)
+	bd := NewBody(tb.Name)
+	nt := ts.DragToWindow(bd)
+	if nt == nil {
+		return nil, nil
+	}
+	at := ts.MoveTabTo(idx, nt, nt.NumTabs())
+	if at < 0 {
+		return nil, nil
+	}
+	bd.RunWindow()
+	if win := bd.Scene.RenderWindow(); win != nil && win.SystemWindow != nil {
+		// of the size of the window of the tabs, as in web browsers
+		win.SystemWindow.SetSize(src.SystemWindow.Size())
+	}
+	grab := &grabPoint{}
+	grab.set(in)
+	// (the new tab is laid out when the window is shown)
+	_, ntab := nt.TabAtIndex(at)
+	bd.OnShow(func(e events.Event) {
+		grab.set(ntab.Geom.TotalBBox.Min.Add(in))
+	})
+	return bd, grab.get
 }
 
 // tabs returns the parent [Tabs] of this [Tab].
