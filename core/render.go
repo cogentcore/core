@@ -840,7 +840,10 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	if wb.Styles.Background == nil && wb.inTransparentOverlap() {
+	// (no background, or a transparent one, as the controls of the video
+	// players of npr.org, which painted the black of the player over their
+	// video when they were rendered after it)
+	if (wb.Styles.Background == nil || transparentBackground(wb.Styles.Background)) && wb.inTransparentOverlap() {
 		// An absolute or fixed widget is painted over the widgets that it overlaps,
 		// so without a background of its own it does not paint that of its
 		// parent over them (its actual background is kept for its content),

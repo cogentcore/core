@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -151,4 +152,47 @@ func TestRenderGroupOverlay(t *testing.T) {
 		assert.Equal(t, n+1, tg.renders, "the group is rendered")
 		assert.Equal(t, bn+1, bar.renders, "and the bar over it after it")
 	})
+}
+
+// TestRenderGroupOverlayTransparent tests that an overlay with a
+// transparent background over all of a render group (as the controls of
+// the video players of npr.org), rendered again after it, does not paint
+// the background of its parent (the black of the player) over it.
+func TestRenderGroupOverlayTransparent(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(400), units.Dp(300)) })
+	player := NewFrame(b)
+	player.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionRelative
+		s.Min.Set(units.Dp(300), units.Dp(200))
+		s.Background = colors.Uniform(colors.Black)
+	})
+	tg := tree.New[testGroup](player)
+	tg.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(200))
+		s.Background = colors.Uniform(colors.White)
+	})
+	controls := NewFrame(player)
+	controls.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Set(units.Zero())
+		s.InsetSet.Set(true)
+		s.Background = colors.Uniform(colors.Transparent)
+	})
+	bar := NewFrame(controls)
+	bar.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionAbsolute
+		s.Inset.Bottom = units.Zero()
+		s.InsetSet.Bottom = true
+		s.Min.Set(units.Dp(300), units.Dp(30))
+		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))
+	})
+	var bb image.Rectangle
+	im := b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		bb = tg.Geom.TotalBBox
+	})
+	c := bb.Min.Add(bb.Size().Div(2))
+	assert.Equal(t, color.RGBA{255, 255, 255, 255}, colors.AsRGBA(im.At(c.X, c.Y)), "the group is seen through its overlay")
 }
