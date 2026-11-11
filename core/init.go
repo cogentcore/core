@@ -15,8 +15,11 @@ func init() {
 	TheApp.CogentCoreDataDir()            // ensure it exists
 	theWindowGeometrySaver.needToReload() // gets time stamp associated with open, so it doesn't re-open
 	theWindowGeometrySaver.open()
-	if TheApp.Platform() != system.Offscreen { // (not in tests)
+	if TheApp.Platform() != system.Offscreen {
 		// the sort orders of directories are shared by all apps
 		dirsort.DataDir = TheApp.CogentCoreDataDir()
+	} else {
+		// tests do not depend on the file manager of the machine
+		dirsort.Native = nil
 	}
 }

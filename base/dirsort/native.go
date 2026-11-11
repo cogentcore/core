@@ -23,6 +23,8 @@ import (
 //     defaults (see [linuxSort]).
 //   - Windows: none, as Explorer keeps the views of folders in the
 //     registry, in binary records ("shell bags") that are not documented.
+//
+// It can be set to nil for none, as core does in tests.
 var Native = func(dir string) (Sort, bool) {
 	dir = cleanDir(dir)
 	switch runtime.GOOS {

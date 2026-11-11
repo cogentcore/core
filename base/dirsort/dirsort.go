@@ -93,8 +93,10 @@ func For(dir string) Sort {
 	if s, ok := Saved(dir); ok {
 		return s
 	}
-	if s, ok := Native(dir); ok {
-		return s
+	if Native != nil {
+		if s, ok := Native(dir); ok {
+			return s
+		}
 	}
 	return Default
 }
