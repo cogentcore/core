@@ -1064,6 +1064,22 @@ func TestGridMinmaxZero(t *testing.T) {
 		})
 }
 
+// TestGridMinmaxZeroAuto tests that a column of minmax(0, auto) beside
+// another column has the rest of the width of the grid, whatever the
+// width of its content, which overflows it (as the documentation of
+// pkg.go.dev, beside its navigation of 21.5%, whose long lines of code
+// made the page wider than the window).
+func TestGridMinmaxZeroAuto(t *testing.T) {
+	long := strings.Repeat("x", 300)
+	widgetsByID(t, `<div id="grid" style="display: grid; grid-template-columns: 100px minmax(0, auto); width: 500px">`+
+		`<nav id="nav">nav</nav><article id="doc"><pre>`+long+`</pre></article></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 500*dp, ws["grid"].Geom.Size.Actual.Total.X, 2, "the grid")
+			assert.InDelta(t, 100*dp, ws["nav"].Geom.Size.Actual.Total.X, 2)
+			assert.InDelta(t, 400*dp, ws["doc"].Geom.Size.Actual.Total.X, 3, "the rest of the width")
+		})
+}
+
 // TestGridOutOfFlowChild tests that a child of a grid that is out of its
 // flow (as a visually hidden heading) does not take a track, so the
 // children after it are in their tracks (as the 8fr and 5fr columns of
