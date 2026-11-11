@@ -76,6 +76,7 @@ func (p *Playback) Play() error {
 	p.mu.Unlock()
 	frames, samples, errs, err := p.start(done)
 	if err != nil {
+		p.Stop() // (not playing)
 		return err
 	}
 	go p.run(done, frames, samples, errs)
