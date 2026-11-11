@@ -183,7 +183,7 @@ func TestLayerEvents(t *testing.T) {
 			// the widget at the position from all of the widgets of the scene
 			all := func(pos image.Point) Widget {
 				em.mouseInBBox = nil
-				em.getMouseInBBox(sc, pos)
+				em.getMouseInBBox(sc, pos, false)
 				ws := sortByRenderLayer(em.mouseInBBox)
 				if len(ws) == 0 {
 					return nil

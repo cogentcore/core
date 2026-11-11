@@ -75,11 +75,6 @@ type Events struct {
 	// Last item in the stack is the deepest nested widget (smallest BBox).
 	mouseInBBox []Widget
 
-	// layerOnly is whether [Events.getMouseInBBox] only goes into the
-	// widgets that are in the layer of the scene or have widgets in it (see
-	// [Events.getMouseInScene]).
-	layerOnly bool
-
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag.
 	hovers []Widget
 
@@ -803,7 +798,11 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 	})
 }
 
-func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
+// getMouseInBBox adds the widgets from the given one down that are under the
+// given position to [Events.mouseInBBox], in the order of the tree. If
+// layerOnly is true, it only goes into the widgets that are in the layer of
+// the scene or have widgets in it (see [Events.getMouseInScene]).
+func (em *Events) getMouseInBBox(w Widget, pos image.Point, layerOnly bool) {
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		// we do not handle disabled here so that
@@ -818,7 +817,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 			// is clickable (as a hidden checkbox over a button) gets events
 			return tree.Break
 		}
-		if em.layerOnly && !cwb.hasFlag(widgetInLayer) && !cwb.hasFlag(widgetHasLayer) {
+		if layerOnly && !cwb.hasFlag(widgetInLayer) && !cwb.hasFlag(widgetHasLayer) {
 			return tree.Break // nothing of the layer in it
 		}
 		if !cwb.posInScBBox(pos) {
@@ -833,13 +832,13 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 			em.mouseInBBox = append(em.mouseInBBox, cw)
 		}
 		if cwb.Parts != nil {
-			em.getMouseInBBox(cwb.Parts, pos)
+			em.getMouseInBBox(cwb.Parts, pos, layerOnly)
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					sb := ly.Scrolls[d]
-					em.getMouseInBBox(sb, pos)
+					em.getMouseInBBox(sb, pos, layerOnly)
 				}
 			}
 		}
@@ -856,9 +855,7 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 // widgets of the page under it are not gone through.
 func (em *Events) getMouseInScene(sc *Scene, pos image.Point) {
 	if sc.layer.active {
-		em.layerOnly = true
-		em.getMouseInBBox(sc, pos)
-		em.layerOnly = false
+		em.getMouseInBBox(sc, pos, true)
 		for _, w := range em.mouseInBBox {
 			if w.AsWidget().hasFlag(widgetInLayer) {
 				return
@@ -866,7 +863,7 @@ func (em *Events) getMouseInScene(sc *Scene, pos image.Point) {
 		}
 		em.mouseInBBox = em.mouseInBBox[:0]
 	}
-	em.getMouseInBBox(sc, pos)
+	em.getMouseInBBox(sc, pos, false)
 }
 
 // WidgetAt returns the widget that mouse events at the given position (in
