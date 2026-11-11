@@ -21,6 +21,7 @@ import (
 type styleRule struct {
 	root   *html.Node
 	sel    *compiledSelector
+	text   string // of its selector
 	decls  []*css.Declaration
 	origin cssOrigin
 	spec   int
@@ -83,7 +84,7 @@ type ruleIndex struct {
 func (c *Context) recordRule(root *html.Node, sel string, cs *compiledSelector, decls []*css.Declaration, origin cssOrigin, spec int) {
 	has := strings.Contains(sel, ":has(")
 	subject := has && strings.Index(sel, ":has(") >= subjectStart(sel)
-	r := &styleRule{root: root, sel: cs, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
+	r := &styleRule{root: root, sel: cs, text: sel, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
 	if has && !subject {
 		r.hasCompound, r.hasSiblings = hasCompound(sel)
 	}
@@ -210,6 +211,8 @@ type nodeStyles struct {
 	sorted, hinted, queried bool
 	before, after           []*cssDecl
 	hasBefore, hasAfter     bool
+	snap                    nodeSnap
+	hasSnap                 bool
 }
 
 // Restyle updates the styles of the widgets of the page that the context
@@ -360,6 +363,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		old[n] = effectiveDecls(c.declarations(n))
 		oldDisplay[n] = c.displayOf(n)
 		ns := &nodeStyles{styles: c.styles[n], sorted: c.sorted[n], hinted: c.hinted[n], queried: c.containerQueried[n]}
+		ns.snap, ns.hasSnap = c.snaps[n]
 		ns.before, ns.hasBefore = c.pseudoStyles[pseudoKey{n, "before"}]
 		ns.after, ns.hasAfter = c.pseudoStyles[pseudoKey{n, "after"}]
 		saved[n] = ns
@@ -373,6 +377,30 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			}
 			c.setPseudo(n, "before", ns.before, ns.hasBefore)
 			c.setPseudo(n, "after", ns.after, ns.hasAfter)
+			if c.snaps != nil {
+				if ns.hasSnap {
+					c.snaps[n] = ns.snap
+				} else {
+					delete(c.snaps, n)
+				}
+			}
+		}
+	}
+	// the states of the elements, with which their declarations are found
+	// (see Context.ReuseStyles)
+	if c.snaps != nil {
+		parents := map[*html.Node]bool{}
+		for _, n := range order {
+			if n.Parent != nil {
+				parents[n.Parent] = true
+			}
+		}
+		for p := range parents {
+			snapChildren(p, func(k *html.Node, s nodeSnap) {
+				if affected[k] {
+					c.snaps[k] = s
+				}
+			})
 		}
 	}
 	// the declarations as they are now
@@ -478,6 +506,11 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 	// then, which the scripts of a page may be changing meanwhile)
 	for _, n := range order {
 		c.declarations(n)
+	}
+	if html := documentElement(root); html != nil && affected[html] {
+		// all of the elements have been matched with all of the rules (as
+		// with those added to style sheets; see Context.ReuseStyles)
+		c.matchedRules = len(c.rules)
 	}
 	return u, true
 }

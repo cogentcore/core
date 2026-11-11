@@ -114,12 +114,24 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 	// nil parent means we are root, so we add user agent styles here
 	if n.Parent == nil {
 		ctx.Node = n
+		prev := ctx.reuseFrom
+		ctx.reuseFrom = nil // (not kept, with all of its widgets)
+		reuse := prev != nil && prev.snaps != nil && prev.snapRoot == n && prev.matchedRules == len(prev.rules)
+		ctx.deferMatch = reuse
 		ctx.addStyleOrigin(browserStyles, originUserAgent)
 		if ctx.Style != "" { // before the style sheets of the page, which override it
 			ctx.addStyleOrigin(ctx.Style, originAuthor)
 		}
 		restore := ctx.setCheckedAttrs(n)
 		ctx.addStyleSheets(n)
+		ctx.deferMatch = false
+		if reuse && !ctx.reuseMatches(n, prev) {
+			ctx.applyRules()
+		}
+		if ctx.snaps == nil || !reuse {
+			ctx.snapshot(n)
+		}
+		ctx.matchedRules = len(ctx.rules)
 		restore()
 		ctx.rootFont = 0
 		ctx.rootFontSize() // of this document, while ctx.Node is it
