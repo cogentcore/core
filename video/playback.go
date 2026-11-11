@@ -67,6 +67,9 @@ type Playback struct {
 
 	// position is the time in the media of the frame shown last.
 	position time.Duration
+
+	// ended is whether the current playing has ended (not for Loop).
+	ended bool
 }
 
 // Play starts playing the media from the start, stopping any playing
@@ -179,6 +182,11 @@ func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [
 				return
 			}
 			if !p.Loop {
+				p.mu.Lock()
+				if p.done == done {
+					p.ended = true
+				}
+				p.mu.Unlock()
 				if p.OnEnd != nil {
 					p.OnEnd()
 				}
@@ -313,11 +321,20 @@ func (p *Playback) setAudioPaused(paused bool) {
 	}
 }
 
-// IsPlaying returns whether the media is playing, and not paused.
+// IsPlaying returns whether the media is playing, and not paused,
+// nor ended.
 func (p *Playback) IsPlaying() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.done != nil && !p.paused
+	return p.done != nil && !p.paused && !p.ended
+}
+
+// IsEnded returns whether the playing has ended, at the end of the media
+// (not with Loop).
+func (p *Playback) IsEnded() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.ended
 }
 
 // IsPaused returns whether the playing is paused.
@@ -338,7 +355,7 @@ func (p *Playback) Stop() {
 	if p.paused {
 		close(p.resume)
 	}
-	p.paused, p.pauseShift = false, 0
+	p.paused, p.pauseShift, p.ended = false, 0, false
 	p.setAudioPaused(true)
 	p.audio = nil
 }

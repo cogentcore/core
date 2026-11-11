@@ -117,6 +117,8 @@ func TestPlaybackEnd(t *testing.T) {
 		t.Fatal("no end")
 	}
 	assert.Equal(t, 10, fl.len())
+	assert.True(t, p.IsEnded())
+	assert.False(t, p.IsPlaying())
 	assert.Equal(t, 900*time.Millisecond, fl.times[9]-fl.times[0])
 }
 

@@ -151,4 +151,35 @@ func TestVideoAutoplayBlocked(t *testing.T) {
 	}
 	assert.True(t, e.Get("controls").Bool())
 	assert.Equal(t, "auto", e.Get("style").Get("pointerEvents").String())
+
+	// it stays muted as it is drawn again (the attributes are only set
+	// when the fields of the video change)
+	v.setAttributes(e)
+	assert.True(t, e.Get("muted").Bool())
+	assert.True(t, v.Muted)
+}
+
+func TestVideoSeekVolume(t *testing.T) {
+	v := newVideo(t)
+	require.NoError(t, v.Play(0, 0))
+	waitFor(t, "the duration", func() bool { return v.Duration() > 0 })
+	assert.InDelta(t, 1.0, v.Duration().Seconds(), 0.05)
+	v.Pause()
+	v.Seek(600 * time.Millisecond)
+	waitFor(t, "the seek", func() bool { return v.CurrentTime() >= 590*time.Millisecond })
+	assert.False(t, v.IsPlaying())
+	v.SkipBy(-10 * time.Second)
+	waitFor(t, "the skip", func() bool { return v.CurrentTime() == 0 })
+
+	e := elements[v]
+	v.SetVolume(0.5)
+	assert.InDelta(t, 0.5, e.Get("volume").Float(), 0.01)
+	v.SetMuted(false)
+	assert.False(t, e.Get("muted").Bool())
+
+	// a change of the volume by the user (with the controls) is kept
+	e.Set("volume", 0.25)
+	waitFor(t, "the volume change", func() bool { return v.Volume() < 0.3 })
+	v.setAttributes(e)
+	assert.InDelta(t, 0.25, e.Get("volume").Float(), 0.01)
 }
