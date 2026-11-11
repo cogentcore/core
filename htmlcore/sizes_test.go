@@ -1432,3 +1432,20 @@ func TestPercentHeightInInsetAbsolute(t *testing.T) {
 		}
 	})
 }
+
+// TestScrollInHiddenBody tests that a fixed box that scrolls in a body of
+// overflow: hidden has scrollbars and scrolls, as the width of scrollbars
+// is not inherited in CSS (as the dialog of pexels.com, whose body is
+// hidden while it is open, and which did not scroll).
+func TestScrollInHiddenBody(t *testing.T) {
+	src := `<body style="overflow: hidden"><div id="overlay" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; overflow: auto">
+<div style="height: 3000px">tall</div></div></body>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		ov := ws["overlay"]
+		require.NotNil(t, ov)
+		assert.Greater(t, ov.Styles.ScrollbarWidth.Dots, float32(0), "it has scrollbars")
+		fr := core.AsFrame(ov.This.(core.Widget))
+		require.True(t, fr.HasScroll[math32.Y])
+		assert.Greater(t, fr.Scrolls[math32.Y].Max, float32(2000*dp), "it scrolls its content")
+	})
+}
