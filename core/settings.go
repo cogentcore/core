@@ -300,10 +300,6 @@ type AppearanceSettingsData struct { //types:add
 	// completion, this is the max number of items shown.
 	MenuMax int `default:"30" min:"5" step:"1"`
 
-	// column to sort by in FilePicker, and :up or :down for direction.
-	// Updated automatically via FilePicker
-	FilePickerSort string `display:"-"`
-
 	// length of inline elements to display for containers in Form widgets.
 	InlineLengths InlineLengths `display:"inline"`
 }

@@ -18,6 +18,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 
+	"cogentcore.org/core/base/dirsort"
 	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
@@ -290,9 +291,17 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		w.SetSlice(&fp.files)
 		w.SelectedField = "Name"
 		w.SelectedValue = fp.selectedFilename
-		if AppearanceSettings.FilePickerSort != "" {
-			w.SetSortFieldName(AppearanceSettings.FilePickerSort)
+		// sorted in the sort order of the directory, which the user sets for
+		// it, for all apps, by sorting by a column (see [dirsort.For])
+		w.SortFunc = fp.sortFiles
+		w.OnSort = func(field string, down bool) {
+			if by, ok := dirsort.Parse(field); ok {
+				errors.Log(dirsort.Set(fp.directory, dirsort.Sort{By: by.By, Down: down}))
+			}
 		}
+		w.Updater(func() {
+			w.SetSortFieldName(dirsort.For(fp.directory).String())
+		})
 		w.TableStyler = func(w Widget, s *styles.Style, row, col int) {
 			fn := fp.files[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
@@ -577,7 +586,6 @@ func (fp *FilePicker) fileSelect(idx int) {
 	if idx < 0 {
 		return
 	}
-	fp.saveSortSettings()
 	fi := fp.files[idx]
 	fp.selectedIndex = idx
 	fp.selectedFilename = fi.Name
@@ -620,15 +628,16 @@ func (fp *FilePicker) favoritesSelect(idx int) {
 	fp.updateFilesEvent()
 }
 
-// saveSortSettings saves current sorting preferences
-func (fp *FilePicker) saveSortSettings() {
-	sv := fp.filesTable
-	if sv == nil {
-		return
+// sortFiles sorts the files by the field of the given name, up or down,
+// in the order of [dirsort.Sort], and returns whether it is a field of it.
+func (fp *FilePicker) sortFiles(field string, down bool) bool {
+	s, ok := dirsort.Parse(field)
+	if !ok {
+		return false
 	}
-	AppearanceSettings.FilePickerSort = sv.SortFieldName()
-	// fmt.Printf("sort: %v\n", Settings.FilePickerSort)
-	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
+	s.Down = down
+	s.SortFiles(fp.files)
+	return true
 }
 
 // fileComplete finds the possible completions for the file field

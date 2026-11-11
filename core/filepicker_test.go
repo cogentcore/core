@@ -7,11 +7,14 @@ package core
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/dirsort"
 	"cogentcore.org/core/base/fileinfo"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFilePicker(t *testing.T) {
@@ -20,6 +23,48 @@ func TestFilePicker(t *testing.T) {
 	// current directory, which are shown by default.
 	NewFilePicker(b).SetFilename("testdata/file-picker/files/")
 	b.AssertRender(t, "file-picker/basic")
+}
+
+// TestFilePickerSort tests that the files of a directory are in its sort
+// order (see [dirsort.For]), and that sorting them by a column sets it.
+func TestFilePickerSort(t *testing.T) {
+	dir := t.TempDir()
+	t0 := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	for i, f := range []struct {
+		name string
+		size int
+	}{{"B.txt", 20}, {"a.txt", 10}, {"c.txt", 20}} {
+		fn := filepath.Join(dir, f.name)
+		os.WriteFile(fn, make([]byte, f.size), 0644)
+		mt := t0.Add(time.Duration(i) * time.Hour)
+		os.Chtimes(fn, mt, mt)
+	}
+	// (the times of files are all the same in tests)
+	assert.NoError(t, dirsort.Set(dir, dirsort.Sort{By: dirsort.Size, Down: true}))
+	b := NewBody()
+	fp := NewFilePicker(b).SetFilename(dir + string(filepath.Separator))
+	names := func() []string {
+		var ns []string
+		for _, fi := range fp.files {
+			ns = append(ns, fi.Name)
+		}
+		return ns
+	}
+	b.RenderImage(func() {}, func() {
+		tb := fp.filesTable
+		assert.Equal(t, "Size:down", tb.SortFieldName())
+		assert.Equal(t, []string{"c.txt", "B.txt", "a.txt"}, names(), "equal sizes by name, down")
+		size := slices.IndexFunc(tb.visibleFields, func(f reflect.StructField) bool { return f.Name == "Size" })
+		tb.SortColumn(size) // (as by clicking on its header, again: up)
+		assert.Equal(t, []string{"a.txt", "B.txt", "c.txt"}, names())
+		s, ok := dirsort.Saved(dir)
+		assert.True(t, ok)
+		assert.Equal(t, dirsort.Sort{By: dirsort.Size}, s, "set for the directory")
+		name := slices.IndexFunc(tb.visibleFields, func(f reflect.StructField) bool { return f.Name == "Name" })
+		tb.SortColumn(name)
+		tb.SortColumn(name) // (down)
+		assert.Equal(t, []string{"c.txt", "B.txt", "a.txt"}, names(), "ignoring case")
+	})
 }
 
 func TestFilePickerWatch(t *testing.T) {

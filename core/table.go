@@ -51,6 +51,16 @@ type Table struct {
 	// before the slice or items.
 	ShowField func(field reflect.StructField) bool `copier:"-" json:"-" xml:"-" display:"-"`
 
+	// SortFunc, if set, sorts the slice by the field of the given name, up
+	// (ascending) or down, instead of by the values of the field, and
+	// returns whether it did (else they are sorted by their values).
+	SortFunc func(field string, down bool) bool `copier:"-" json:"-" xml:"-" display:"-"`
+
+	// OnSort, if set, is called when the user sorts the slice by the field
+	// of the given name, up (ascending) or down, by clicking on the header
+	// of its column (see [Table.SortFieldName]).
+	OnSort func(field string, down bool) `copier:"-" json:"-" xml:"-" display:"-"`
+
 	// rowButton is the button at the end of each row, if any
 	// (see [Table.SetRowButton]).
 	rowButton *tableRowButton
@@ -602,8 +612,11 @@ func (tb *Table) SortSlice() {
 	if tb.sortIndex < 0 || tb.sortIndex >= len(tb.visibleFields) {
 		return
 	}
-	rawIndex := tb.visibleFields[tb.sortIndex].Index
-	reflectx.StructSliceSort(tb.Slice, rawIndex, !tb.sortDescending)
+	field := tb.visibleFields[tb.sortIndex]
+	if tb.SortFunc != nil && tb.SortFunc(field.Name, tb.sortDescending) {
+		return
+	}
+	reflectx.StructSliceSort(tb.Slice, field.Index, !tb.sortDescending)
 }
 
 // SortColumn sorts the slice for the given field index.
@@ -628,6 +641,10 @@ func (tb *Table) SortColumn(fieldIndex int) {
 
 	tb.sortIndex = fieldIndex
 	tb.SortSlice()
+	if tb.OnSort != nil && fieldIndex >= 0 && fieldIndex < len(tb.visibleFields) {
+		// (before it is updated, which can be for the new sort order)
+		tb.OnSort(tb.visibleFields[fieldIndex].Name, tb.sortDescending)
+	}
 	tb.Update()
 	if !tb.IsReadOnly() {
 		tb.SendChange()
