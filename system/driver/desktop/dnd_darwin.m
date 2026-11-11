@@ -18,6 +18,17 @@
 // as multipart MIME data
 static NSString* const cogentMimeType = @"org.cogentcore.mimedata";
 
+// lastDragAccepted is whether the last drag started by startDrag was
+// accepted by a drop target (see dragAccepted).
+static bool lastDragAccepted = true;
+
+// dragAccepted returns whether the last drag started by startDrag was
+// accepted by a drop target, once it has ended: not for one dropped where
+// nothing took it (or canceled with escape, which is not told apart).
+bool dragAccepted(void) {
+	return lastDragAccepted;
+}
+
 // CogentDragSource is the dragging source for drags started by startDrag.
 @interface CogentDragSource : NSObject <NSDraggingSource>
 @property (retain) NSWindow* window;
@@ -37,6 +48,7 @@ static NSString* const cogentMimeType = @"org.cogentcore.mimedata";
 // The view does not get the mouse up at the end of the drag, which GLFW
 // and Go need to end the mouse press, so we send it.
 - (void)draggingSession:(NSDraggingSession*)session endedAtPoint:(NSPoint)screenPoint operation:(NSDragOperation)operation {
+	lastDragAccepted = operation != NSDragOperationNone; // (before the mouse up)
 	NSWindow* win = [[self.window retain] autorelease];
 	self.window = nil;
 	if (win == nil || !macDragWindowOpen(win)) { // closed

@@ -166,7 +166,16 @@ func handleCell(ctx *Context, tag string) core.Widget {
 		}
 	}
 	w.FinalStyler(func(s *styles.Style) {
-		if pct > 0 {
+		switch {
+		case pct >= 100:
+			// all of the width that the other columns leave it, which is
+			// what browsers give it (as the text of the message boxes of
+			// Wikipedia, beside their icons, which were as wide as their
+			// tables, which were wider than the article, over the column
+			// beside it)
+			s.Grow.X, s.Shrink.X = 1e6, 1
+			s.Min.X.Zero()
+		case pct > 0:
 			s.Min.X, s.Max.X = units.Pw(pct), units.Pw(pct)
 			s.BoxSizing = styles.BoxBorderBox
 		}
@@ -190,7 +199,7 @@ func handleCell(ctx *Context, tag string) core.Widget {
 		if rspan > 1 {
 			s.RowSpan = rspan
 		}
-		if s.Grow.X > 0 && !fixed {
+		if s.Grow.X > 0 && !fixed && pct < 100 {
 			s.Grow.X = weight / float32(span)
 		}
 	})

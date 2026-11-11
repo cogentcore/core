@@ -60,6 +60,33 @@ type Tabs struct {
 	// tabs will not render a close button and can not be closed.
 	CloseIcon icons.Icon
 
+	// DragToWindow, if set, makes a tab of [FunctionalTabs] that is
+	// dragged out of its window move into a new window, which then moves
+	// with the mouse until the drag ends, on desktop platforms, as in web
+	// browsers. It is called with the body of the new window, which it
+	// initializes as any new window of the app (as a new browser window),
+	// and returns the tabs in it that the tab is moved into (at their end),
+	// or nil to not move it. The last tab is not moved. Tabs of
+	// [FunctionalTabs] can always be dragged to other places in their
+	// tabs, and to other tabs of [FunctionalTabs] in the same window.
+	// See also [Tabs.MoveTabFunc].
+	DragToWindow func(b *Body) *Tabs
+
+	// MoveTabFunc is a function that is called when a tab has been moved
+	// from the given index, by dragging it or by [Tabs.MoveTabIndex], to
+	// the given index in the given tabs: these tabs, or other tabs (as
+	// those of a new window, for [Tabs.DragToWindow]). It can be used to
+	// keep any additional resources associated with the tabs in their order,
+	// and to move them to those of the other tabs.
+	MoveTabFunc func(from int, to *Tabs, at int)
+
+	// MoveInFunc is a function that is called when a tab of other tabs
+	// has been moved into these tabs, at the given index, as by dragging it
+	// from another window (after [Tabs.MoveTabFunc] of the other tabs). It
+	// can be used to take on any additional resources associated with the
+	// tab, which are in its content.
+	MoveInFunc func(index int)
+
 	// mu is a mutex protecting updates to tabs. Tabs can be driven
 	// programmatically and via user input so need extra protection.
 	mu sync.Mutex
@@ -77,8 +104,8 @@ const (
 
 	// FunctionalTabs indicates to render functional tabs
 	// like those in Google Chrome. These tabs take up less
-	// space and are the only kind that can be closed.
-	// They will also support being moved at some point.
+	// space and are the only kind that can be closed, and they
+	// can be dragged to new positions (see also [Tabs.DragToWindow]).
 	FunctionalTabs
 
 	// NavigationAuto indicates to render the tabs as either
@@ -149,6 +176,7 @@ func (ts *Tabs) Init() {
 					s.Wrap = true
 				}
 			})
+			ts.initStripDrop(w)
 			w.Updater(func() {
 				if !ts.NewTabButton {
 					w.DeleteChildByName("new-tab-button")
@@ -276,7 +304,10 @@ func (ts *Tabs) insertTabButtonAt(label string, idx int) *Tab {
 	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetTooltip(label)
 	tab.maxChars = ts.maxChars
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabByName(tab.Name)
+		// (by its index, as another tab can have the same name)
+		if idx := tab.IndexInParent(); idx >= 0 {
+			ts.SelectTabIndex(idx)
+		}
 	})
 	fr := ts.getFrame()
 	if len(fr.Children) == 1 {
@@ -529,6 +560,8 @@ func (tb *Tab) Init() {
 	})
 
 	tb.SendClickOnEnter()
+
+	tb.initDrag()
 
 	tb.Maker(func(p *tree.Plan) {
 		if tb.maxChars > 0 { // TODO: find a better time to do this?

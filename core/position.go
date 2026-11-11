@@ -39,11 +39,28 @@ func (wb *WidgetBase) forFlowChildren(fun func(i int, cw Widget, cwb *WidgetBase
 	})
 }
 
+// FixedContainer is implemented by a widget in which the widgets with a
+// fixed position ([styles.PositionFixed]) are fixed in a widget other than
+// the scene, as a web page in a browser is in the viewport of its tab,
+// which does not scroll with it (as with the elements that are the
+// containing blocks of their fixed descendants in CSS, as with transforms).
+type FixedContainer interface {
+	// FixedViewport returns the widget that the fixed widgets in the widget
+	// are fixed in.
+	FixedViewport() Widget
+}
+
 // containingBlock returns the widget that the given out of flow
 // widget is positioned relative to: for absolute, the nearest widget
 // that it is in that is positioned (not static), or otherwise that
-// scrolls (as the document does in a browser); for fixed, the scene.
+// scrolls (as the document does in a browser); for fixed, the viewport of
+// the nearest [FixedContainer] that it is in, or else the scene.
 func (wb *WidgetBase) containingBlock() *WidgetBase {
+	if wb.Styles.Position == styles.PositionFixed {
+		if vp := wb.fixedViewport(); vp != nil {
+			return vp
+		}
+	}
 	if wb.Styles.Position == styles.PositionAbsolute {
 		var scroller *WidgetBase
 		for p := wb.parentWidget(); p != nil; p = p.parentWidget() {
@@ -62,6 +79,19 @@ func (wb *WidgetBase) containingBlock() *WidgetBase {
 		return wb.Scene.AsWidget()
 	}
 	return wb.parentWidget()
+}
+
+// fixedViewport returns the viewport of the nearest [FixedContainer] that
+// the widget is in, or nil.
+func (wb *WidgetBase) fixedViewport() *WidgetBase {
+	for p := wb.parentWidget(); p != nil; p = p.parentWidget() {
+		if fc, ok := p.This.(FixedContainer); ok {
+			if vp := fc.FixedViewport(); vp != nil {
+				return vp.AsWidget()
+			}
+		}
+	}
+	return nil
 }
 
 // paddingBox returns the position offset (from Pos.Total) and the size
@@ -127,7 +157,12 @@ func (wb *WidgetBase) setPosOutOfFlow(parPos math32.Vector2) {
 	off, cbsz := cb.paddingBox()
 	cbpos := cb.Geom.Pos.Total.Add(off).Add(cb.Geom.Scroll.Round()) // with its content
 	if wb.Styles.Position == styles.PositionFixed {
-		cbpos = off // relative to the scene, which does not scroll
+		// relative to the scene, or a viewport (as of a web page), which
+		// does not scroll with its content
+		cbpos = off
+		if cb != wb.Scene.AsWidget() {
+			cbpos = cb.Geom.Pos.Total.Add(off)
+		}
 	}
 	in := wb.Styles.Inset.Dots()
 	set := wb.Styles.InsetSet

@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -537,4 +538,37 @@ func TestRoundedNoClipBorder(t *testing.T) {
 		r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 		assert.Less(t, (r+g+bl)/3>>8, uint32(128), "the corner of the border is shown (child background %v)", childBg)
 	}
+}
+
+// testViewport is a frame whose fixed widgets are fixed in it
+// (see [FixedContainer]), as a web page in the viewport of its tab.
+type testViewport struct {
+	Frame
+}
+
+func (tv *testViewport) FixedViewport() Widget { return tv }
+
+// TestPositionFixedContainer tests that a fixed widget in a
+// [FixedContainer] is positioned and sized in its viewport, not in the
+// scene (as a web page in a browser tab whose content is all in a fixed
+// element of inset 0, whose top was cut off, behind the tabs).
+func TestPositionFixedContainer(t *testing.T) {
+	b := NewBody()
+	spacer := NewFrame(b)
+	spacer.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(300), units.Dp(100)) })
+	vp := tree.New[testViewport](b)
+	vp.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(300), units.Dp(200)) })
+	fixed := NewFrame(vp)
+	fixed.Styler(func(s *styles.Style) {
+		s.Position = styles.PositionFixed
+		s.Inset.Set(units.Zero())
+		s.InsetSet.Set(true)
+	})
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, vp.Geom.Pos.Total, fixed.Geom.Pos.Total, "at the viewport")
+		assert.InDelta(t, vp.Geom.Size.Actual.Total.Y, fixed.Geom.Size.Actual.Total.Y, 1, "as high as the viewport")
+		assert.Greater(t, fixed.Geom.Pos.Total.Y, float32(100), "below the spacer")
+	})
 }

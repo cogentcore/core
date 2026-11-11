@@ -352,11 +352,14 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 		mn, mx, _ := strings.Cut(inner, ",")
 		mx = strings.TrimSpace(mx)
 		if strings.HasSuffix(mx, "fr") || mx == "auto" {
-			if mn = strings.TrimSpace(mn); (mn == "0" || mn == "0px") && strings.HasSuffix(mx, "fr") && s.Contain == styles.ContainNone {
+			if mn = strings.TrimSpace(mn); (mn == "0" || mn == "0px") && s.Contain == styles.ContainNone {
 				// the content of a cell does not size its track, so the
 				// tracks share the width by their fr (as the cells of the
 				// repository grid of github.com, whose hidden panels
-				// widened their columns), and it overflows them
+				// widened their columns), or an auto track has the rest of
+				// it (as the documentation of pkg.go.dev, in minmax(0,
+				// auto), whose long lines of code made the page wider than
+				// the window), and it overflows them
 				s.Contain = styles.ContainInlineSize
 			}
 			if mn != "0" && mn != "0px" && mn != "auto" {

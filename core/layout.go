@@ -2543,9 +2543,34 @@ func (fr *Frame) SizeFinal() {
 	fr.layoutFloats()      // with the final sizes
 	fr.sizeFromChildrenFit(0, SizeFinalPass)
 	fr.growToAlloc()
+	fr.dropFittingScroll()
 	fr.sizeAspect(false) // for its final width
 	fr.styleSizeUpdate() // now that sizes are stable, ensure styling based on size is updated
 	fr.sizeFinalParts()
+}
+
+// dropFittingScroll turns off the scrolling in width of a frame with an
+// auto overflow whose content fits it once it has its final size (within
+// the rounding of sizes, as the width of a scrollbar that is rounded up,
+// up to a pixel and a half beyond it): rows that wrap deeper in it are
+// only sized to fit after it decides to scroll (see [Frame.ManageOverflow]),
+// as the row of links of the footer of pkg.go.dev, which made its page
+// scroll by a pixel or less. The space of the scrollbar is given to its
+// content.
+func (fr *Frame) dropFittingScroll() {
+	if !fr.HasScroll[math32.X] || fr.Styles.Overflow.X != styles.OverflowAuto {
+		return
+	}
+	maxSize, visSize, _ := fr.This.(Layouter).ScrollValues(math32.X)
+	if maxSize-visSize > 1.5 {
+		return
+	}
+	sz := &fr.Geom.Size
+	fr.HasScroll[math32.X] = false
+	fr.layout.ScrollSize.SetDim(math32.Y, 0)
+	fr.This.(Layouter).LayoutSpace()
+	sz.SetContentFromTotal(&sz.Actual)
+	sz.SetContentFromTotal(&sz.Alloc)
 }
 
 // sizeFinalChildren calls SizeFinal on all the children of this node

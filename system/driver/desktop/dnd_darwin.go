@@ -13,6 +13,7 @@ package desktop
 #include <stdlib.h>
 void registerDrag(void* nswin);
 bool startDrag(void* nswin, char** files, int nfiles, void* mime, int mimelen, void* text, int textlen, void* png, int pnglen, double imgw, double imgh);
+bool dragAccepted(void);
 */
 import "C"
 
@@ -43,6 +44,10 @@ func (w *Window) closeDrag() {
 //export macDragWindowOpen
 func macDragWindowOpen(nswin unsafe.Pointer) C.bool {
 	return dragWindow(uintptr(nswin)) != nil
+}
+
+func (w *Window) DragAccepted() bool {
+	return bool(C.dragAccepted())
 }
 
 func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image) bool {

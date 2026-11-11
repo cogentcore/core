@@ -1449,3 +1449,36 @@ func TestScrollInHiddenBody(t *testing.T) {
 		assert.Greater(t, fr.Scrolls[math32.Y].Max, float32(2000*dp), "it scrolls its content")
 	})
 }
+
+// TestScrollWrappingRowNoScroll tests that a box that scrolls does not
+// scroll in width for a row of items that wraps them, deeper in it, which
+// is wider than the box before it wraps them, which it only does after the
+// box decides whether to scroll (the content then fits it): the footer of
+// pkg.go.dev (as here) made its page scroll by less than a pixel, at any
+// width.
+func TestScrollWrappingRowNoScroll(t *testing.T) {
+	items := ""
+	for _, l := range []string{"Copyright", "Terms of Service", "Privacy Policy", "Report an Issue", "Theme Toggle", "Shortcuts Modal"} {
+		items += `<li class="go-Footer-listItem"><a href="#">` + l + `</a></li>`
+	}
+	src := `<html><head><style>
+*,:before,:after{box-sizing:border-box}
+ul{list-style:none;margin:0;padding:0}
+.go-Footer-bottom{align-items:center;border-top:1px solid gray;display:flex;margin:0 1.5rem;min-height:4.125rem}
+.go-Footer-listRow{display:flex;flex:1;flex-wrap:wrap;list-style:none;margin:0;padding:0;text-align:center}
+.go-Footer-listItem{align-items:center;display:flex;flex:1 100%;justify-content:center;margin:.4rem 0;padding:0 1rem}
+.go-Footer-listItem{flex:initial}
+.go-Footer-listItem+.go-Footer-listItem{border-left:1px solid gray}
+.go-Footer-googleLogo{align-self:flex-end;height:1.5rem;margin-bottom:1.3rem;text-align:right}
+.go-Footer-googleLogoImg{height:1.5rem;width:4.529rem}
+</style></head><body><div id="scroller" style="overflow: auto; width: 700px; height: 300px"><p>` + strings.Repeat("Some text of the page. ", 400) + `</p>` +
+		`<div class="go-Footer-bottom"><ul class="go-Footer-listRow">` + items + `</ul>` +
+		`<a class="go-Footer-googleLogo" href="#"><img class="go-Footer-googleLogoImg" height="24" width="72" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></a></div></div></body></html>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		fr := core.AsFrame(ws["scroller"].This.(core.Widget))
+		require.True(t, fr.HasScroll[math32.Y])
+		mx, vis, _ := fr.ScrollValues(math32.X)
+		assert.LessOrEqual(t, mx, vis, "its content fits its width")
+		assert.False(t, fr.HasScroll[math32.X], "no horizontal scrolling")
+	})
+}

@@ -83,7 +83,8 @@ const (
 	// of the mouse, such as the dragging of the widgets around it, however
 	// long the mouse is pressed before it moves. It is for controls for
 	// sliding, such as [core.Handle] and [core.Slider], unlike other
-	// sliding, such as the selection of text, which gives way to dragging.
+	// sliding, such as the selection of text, which gives way to dragging,
+	// except in a widget that has the focus, as a text field being edited.
 	SlidePriority
 
 	// NoPointerEvents means that it does not get the events of the mouse,

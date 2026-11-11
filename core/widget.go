@@ -390,6 +390,16 @@ func (wb *WidgetBase) setDescendantScenes(sc *Scene) {
 	if wb.Parts != nil {
 		set(wb.Parts.AsWidget())
 	}
+	// the scrollbars of a frame, which are not its children, are rendered
+	// with its scene (they were rendered in the scene of the page that a web
+	// page was read in, and not shown, once it was moved into its own)
+	if fr := AsFrame(wb.This); fr != nil {
+		for _, sb := range fr.Scrolls {
+			if sb != nil {
+				sb.Scene = sc
+			}
+		}
+	}
 }
 
 // SetScene sets the Scene pointer for this widget and all of its children.

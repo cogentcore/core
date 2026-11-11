@@ -741,6 +741,28 @@ func (tf *TextField) cursorStart() {
 	tf.NeedsRender()
 }
 
+// CursorPos returns the position of the cursor in the text, in runes.
+func (tf *TextField) CursorPos() int {
+	return tf.cursorPos
+}
+
+// SetCursorPos moves the cursor to the given position in the text, in runes
+// (within the text), as for a text field that replaces another in which the
+// user was typing (see [TextField.CursorPos]), keeping it in the part of the
+// text that is shown.
+func (tf *TextField) SetCursorPos(pos int) *TextField {
+	tf.cursorPos = min(max(pos, 0), len(tf.editText))
+	if tf.cursorPos < tf.dispRange.Start || tf.cursorPos > tf.dispRange.End {
+		tf.dispRange.Start = max(0, tf.cursorPos-tf.charWidth)
+		tf.dispRange.End = min(len(tf.editText), tf.dispRange.Start+tf.charWidth)
+	}
+	if tf.selectMode {
+		tf.selectRegionUpdate(tf.cursorPos)
+	}
+	tf.NeedsRender()
+	return tf
+}
+
 // SetCursorEnd moves the cursor to the end of the text, as for a text
 // field that replaces another in which the user was typing.
 func (tf *TextField) SetCursorEnd() *TextField {

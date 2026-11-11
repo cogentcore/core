@@ -233,6 +233,14 @@ type Window interface {
 	// It returns false if not supported on this platform.
 	StartDrag(data mimedata.Mimes, files []string, img image.Image) bool
 
+	// DragAccepted returns whether the last drag that the window started
+	// with [Window.StartDrag] was accepted by a drop target (as a window of
+	// any app that takes its data), once it has ended, with the release of
+	// the mouse button. It is false for a drag that was dropped where
+	// nothing accepted it (as onto the desktop), and it is true where that
+	// is not known, or the drag was canceled, where that is known.
+	DragAccepted() bool
+
 	// SetTextInput sets the state of text input in this window for the
 	// input method (IME) of the operating system, which sends the text
 	// being composed as [events.Composition] events. The focused text

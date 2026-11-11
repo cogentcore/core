@@ -1021,9 +1021,15 @@ func (r *resolver) sizes() {
 	// that of its containing block between them, as in CSS: the player of
 	// youtube.com, of height: 100% in its container of inset 0, was of no
 	// height)
-	bs.definiteHeight = st.height != nil || s.AspectRatio > 0 || insetHeight
+	// The height of a flex item is definite when that of its flex container
+	// is, and it is stretched across a row or grows in a column, so that it
+	// can scroll too (as the navigation and the page of the sites made with
+	// Cogent Core content, in a row that grows in a column of the height of
+	// the viewport, which did not scroll).
+	flexHeight := r.flexDefiniteHeight()
+	bs.definiteHeight = st.height != nil || s.AspectRatio > 0 || insetHeight || flexHeight
 	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
-		(st.height == nil && st.maxHeight == nil && !insetHeight && s.Overflow.Y != styles.OverflowVisible) {
+		(st.height == nil && st.maxHeight == nil && !insetHeight && !flexHeight && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
 	}
 	if s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed {
@@ -1247,4 +1253,26 @@ func isTextWidget(wb *core.WidgetBase) bool {
 // sideDots returns the given sides in dots, using the given function.
 func sideDots(v *sides.Values, dots func(v *units.Value) float32) sides.Floats {
 	return sides.NewFloats(dots(&v.Top), dots(&v.Right), dots(&v.Bottom), dots(&v.Left))
+}
+
+// flexDefiniteHeight returns whether the element is a flex item whose
+// height is definite, as in CSS: its flex container has a definite height,
+// and it is stretched across the row of a row container, or it grows in a
+// column container.
+func (r *resolver) flexDefiniteHeight() bool {
+	st, ps, pbs := r.st, r.ps, r.pbs
+	if ps == nil || pbs == nil || !pbs.definiteHeight || (pbs.display != "flex" && pbs.display != "inline-flex") {
+		return false
+	}
+	switch ps.Direction {
+	case styles.Row:
+		align := st.alignSelf
+		if align == "" || align == "auto" {
+			align = pbs.alignItems
+		}
+		return align == "" || align == "normal" || align == "stretch"
+	case styles.Column:
+		return st.flexGrow > 0
+	}
+	return false
 }

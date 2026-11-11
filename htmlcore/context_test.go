@@ -1064,6 +1064,59 @@ func TestGridMinmaxZero(t *testing.T) {
 		})
 }
 
+// TestGridMinmaxZeroAuto tests that a column of minmax(0, auto) beside
+// another column has the rest of the width of the grid, whatever the
+// width of its content, which overflows it (as the documentation of
+// pkg.go.dev, beside its navigation of 21.5%, whose long lines of code
+// made the page wider than the window).
+func TestGridMinmaxZeroAuto(t *testing.T) {
+	long := strings.Repeat("x", 300)
+	widgetsByID(t, `<div id="grid" style="display: grid; grid-template-columns: 100px minmax(0, auto); width: 500px">`+
+		`<nav id="nav">nav</nav><article id="doc"><pre>`+long+`</pre></article></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, 500*dp, ws["grid"].Geom.Size.Actual.Total.X, 2, "the grid")
+			assert.InDelta(t, 100*dp, ws["nav"].Geom.Size.Actual.Total.X, 2)
+			assert.InDelta(t, 400*dp, ws["doc"].Geom.Size.Actual.Total.X, 3, "the rest of the width")
+		})
+}
+
+// TestTableFullWidthCell tests that a cell of width: 100% in a table with
+// another column has the width that the other column leaves it, and that
+// the table, with margins, is as wide as its container, not wider (as the
+// message boxes of Wikipedia, which were wider than the article, covering
+// the column beside it).
+func TestTableFullWidthCell(t *testing.T) {
+	long := strings.Repeat("This article needs more citations for verification. ", 4)
+	widgetsByID(t, `<div id="col" style="width: 960px"><table id="tb" style="margin: 0 10%; border: 1px solid gray; border-left: 10px solid blue; box-sizing: border-box">`+
+		`<tr><td id="img" style="padding: 2px 8px">I</td><td id="txt" style="padding: 4px 8px; width: 100%">`+long+`</td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.InDelta(t, ws["col"].Geom.Size.Actual.Total.X, ws["tb"].Geom.Size.Actual.Total.X, 2, "the table with its margins")
+			assert.Less(t, ws["img"].Geom.Size.Actual.Total.X, 40*dp, "the other column")
+			assert.Greater(t, ws["txt"].Geom.Size.Actual.Total.X, 650*dp, "the rest of the width")
+		})
+}
+
+// TestFlexItemScrolls tests that a flex item whose height is that of its
+// flex container, which has a definite height, scrolls its content: one
+// that grows in a column, and one that is stretched across a row (as the
+// navigation and the page of the sites made with Cogent Core content, which
+// did not scroll).
+func TestFlexItemScrolls(t *testing.T) {
+	tall := `<div style="height: 1000px">tall</div>`
+	widgetsByID(t, `<div style="display: flex; flex-direction: column; height: 300px">`+
+		`<div style="height: 50px">top</div>`+
+		`<div id="main" style="flex: 1; display: flex; min-height: 0">`+
+		`<nav id="nav" style="width: 100px; overflow: auto">`+tall+`</nav>`+
+		`<div id="page" style="flex: 1; overflow: auto">`+tall+`</div></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, id := range []string{"nav", "page"} {
+				fr := core.AsFrame(ws[id].This.(core.Widget))
+				assert.InDelta(t, 250*dp, ws[id].Geom.Size.Actual.Total.Y, 2, id)
+				assert.True(t, fr.HasScroll[math32.Y], "%s scrolls", id)
+			}
+		})
+}
+
 // TestGridOutOfFlowChild tests that a child of a grid that is out of its
 // flow (as a visually hidden heading) does not take a track, so the
 // children after it are in their tracks (as the 8fr and 5fr columns of

@@ -40,6 +40,14 @@ type Toolbar struct {
 
 	// overflowButton is the widget to pull up the overflow menu.
 	overflowButton *Button
+
+	// MoveFunc, if set, makes the items of the toolbar draggable to other
+	// places in it: an item dropped onto another one moves to its place.
+	// It is called with the index of the item and the index that it then
+	// has, among the items of the toolbar (as made by its [WidgetBase.Maker]
+	// functions, not counting the overflow menu), to move whatever the
+	// items are made from accordingly, as the toolbar is then updated.
+	MoveFunc func(from, to int) `set:"-" json:"-" xml:"-"`
 }
 
 // ToolbarMaker is an interface that types can implement to make a toolbar plan.
@@ -51,6 +59,11 @@ type ToolbarMaker interface {
 func (tb *Toolbar) Init() {
 	tb.Frame.Init()
 	ToolbarStyles(tb)
+	styleItem := tb.OnChildAdded
+	tb.SetOnChildAdded(func(n tree.Node) {
+		styleItem(n)
+		tb.initItemDrag(n)
+	})
 	tb.FinalMaker(func(p *tree.Plan) { // must go at end
 		tree.AddAt(p, "overflow-menu", func(w *Button) {
 			ic := icons.MoreVert
