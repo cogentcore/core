@@ -363,9 +363,26 @@ func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
+	var again map[*WidgetBase]bool // (see below)
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
 			cwb.setFlag(false, widgetChildNeedsRender)
+			if a := cwb.seeThroughRoot(); a != nil {
+				// it would paint over its last render, so the widget that
+				// it is in with an opaque background is rendered again, with
+				// what is under it (once, for all of the widgets in it)
+				if !again[a] {
+					if again == nil {
+						again = map[*WidgetBase]bool{}
+					}
+					again[a] = true
+					a.This.(Widget).RenderWidget()
+					for p := a.parentWidget(); p != nil; p = p.parentWidget() {
+						p.renderRaised()
+					}
+				}
+				return tree.Break
+			}
 			cw.RenderWidget()
 			// the widgets in it that are raised to the widgets that it is in,
 			// which are not rendered now, are rendered over it
@@ -890,6 +907,41 @@ func (wb *WidgetBase) RenderStandardBox() {
 		return
 	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// seeThroughRoot returns, for a widget that does not paint an opaque
+// background and is painted over the widgets that it overlaps (see
+// [WidgetBase.inTransparentOverlap]), so that rendering it alone would paint
+// over its last render (as the anti-aliased text of the items of the
+// sidebar of MDN, of a transparent background, which grew bold as they were
+// hovered), the nearest widget that it is in that paints an opaque
+// background (or the top one), which is rendered again for it. It returns
+// nil for other widgets, and for those in the layer of the scene, which is
+// cleared as it is rendered again (see [sceneLayer]).
+func (wb *WidgetBase) seeThroughRoot() *WidgetBase {
+	if wb.hasFlag(widgetInLayer) || paintsOpaqueBackground(wb) || !wb.inTransparentOverlap() {
+		return nil
+	}
+	for p := wb.parentWidget(); p != nil; p = p.parentWidget() {
+		if paintsOpaqueBackground(p) || p.parentWidget() == nil {
+			return p
+		}
+	}
+	return nil
+}
+
+// paintsOpaqueBackground returns whether the widget paints an opaque
+// background over all of its box.
+func paintsOpaqueBackground(wb *WidgetBase) bool {
+	bg := wb.Styles.Background
+	if bg == nil || wb.Styles.Opacity < 1 || wb.Styles.Border.Radius.Dots() != (sides.Floats{}) {
+		return false
+	}
+	if u, ok := bg.(*image.Uniform); ok {
+		_, _, _, a := u.RGBA()
+		return a == 0xffff
+	}
+	return true // (as an image, or a gradient)
 }
 
 // inRoundedCorners returns whether the widget is in the rounded corners of

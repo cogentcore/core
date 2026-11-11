@@ -196,3 +196,78 @@ func TestRenderGroupOverlayTransparent(t *testing.T) {
 	c := bb.Min.Add(bb.Size().Div(2))
 	assert.Equal(t, color.RGBA{255, 255, 255, 255}, colors.AsRGBA(im.At(c.X, c.Y)), "the group is seen through its overlay")
 }
+
+// TestRenderTransparentOverlapAgain tests that a widget that does not
+// paint an opaque background and is painted over the widgets that it
+// overlaps, when it is rendered again alone (as for a change of its hover
+// state), is rendered with what is under it, not over the pixels of its
+// last render, which accumulated: the anti-aliased text of the items of
+// the sidebar of MDN (by a negative margin, with a transparent background)
+// and of the menus of Wikipedia (absolute) grew bold as they were hovered.
+func TestRenderTransparentOverlapAgain(t *testing.T) {
+	t.Run("negative margin", func(t *testing.T) {
+		testRenderAgain(t, func(b *Body) *Text {
+			NewText(b).SetText("before")
+			tx := NewText(b).SetText("Anchor positioning")
+			tx.Styler(func(s *styles.Style) {
+				s.Margin.Top = units.Dp(-2)
+				s.Background = colors.Uniform(colors.Transparent)
+			})
+			return tx
+		})
+	})
+	t.Run("absolute menu", func(t *testing.T) {
+		testRenderAgain(t, func(b *Body) *Text {
+			b.Styler(func(s *styles.Style) { s.Position = styles.PositionRelative })
+			NewText(b).SetText("under the menu")
+			menu := NewFrame(b)
+			menu.Styler(func(s *styles.Style) {
+				s.Position = styles.PositionAbsolute
+				s.Inset.Top, s.Inset.Left = units.Dp(10), units.Dp(10)
+				s.InsetSet.Top, s.InsetSet.Left = true, true
+				s.Background = colors.Uniform(colors.White)
+			})
+			tx := NewText(menu).SetText("Menu item")
+			tx.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.Transparent) })
+			return tx
+		})
+	})
+}
+
+// testRenderAgain renders the body that make makes, renders the text that
+// it returns again alone a few times, and tests that the text is as in a
+// fresh render.
+func testRenderAgain(t *testing.T, make func(b *Body) *Text) {
+	t.Helper()
+	newBody := func() (*Body, *Text) {
+		b := NewBody()
+		b.Styler(func(s *styles.Style) {
+			s.Min.Set(units.Dp(300), units.Dp(200))
+			s.Background = colors.Uniform(colors.White)
+		})
+		return b, make(b)
+	}
+	b, tx := newBody()
+	var bb image.Rectangle
+	again := func() {
+		rw := b.Scene.RenderWindow()
+		b.AsyncLock()
+		tx.NeedsRender()
+		bb = tx.Geom.TotalBBox
+		b.AsyncUnlock()
+		rw.waitRenderDone()
+		rw.renderWindow()
+		rw.waitRenderDone()
+	}
+	got := b.RenderImage(func() {}, again, again, again, again)
+	fresh, _ := newBody()
+	want := fresh.RenderImage()
+	assert.False(t, bb.Empty())
+	for y := bb.Min.Y; y < bb.Max.Y; y++ {
+		for x := bb.Min.X; x < bb.Max.X; x++ {
+			if g, w := got.RGBAAt(x, y), want.RGBAAt(x, y); g != w {
+				t.Fatalf("pixel %d,%d of the text rendered again is %v, not %v", x, y, g, w)
+			}
+		}
+	}
+}
