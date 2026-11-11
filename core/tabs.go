@@ -304,7 +304,10 @@ func (ts *Tabs) insertTabButtonAt(label string, idx int) *Tab {
 	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetTooltip(label)
 	tab.maxChars = ts.maxChars
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabByName(tab.Name)
+		// (by its index, as another tab can have the same name)
+		if idx := tab.IndexInParent(); idx >= 0 {
+			ts.SelectTabIndex(idx)
+		}
 	})
 	fr := ts.getFrame()
 	if len(fr.Children) == 1 {

@@ -5,6 +5,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"log/slog"
 	"slices"
@@ -138,6 +139,13 @@ func (ts *Tabs) attachTab(dt *detachedTab, at int) int {
 	ts.mu.Lock()
 	fr := ts.getFrame()
 	at = min(max(at, 0), len(fr.Children))
+	// its name is unique in these tabs, whose tabs are found by name
+	label := dt.label
+	for n := 2; fr.ChildByName(label) != nil; n++ {
+		label = fmt.Sprintf("%s-%d", dt.label, n)
+	}
+	dt.label = label
+	dt.frame.SetName(label)
 	fr.AddChild(dt.frame) // (in the scene of these tabs)
 	moveChild(fr, len(fr.Children)-1, at)
 	nt := ts.insertTabButtonAt(dt.label, at)

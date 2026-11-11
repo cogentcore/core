@@ -152,6 +152,31 @@ func TestTabsMoveTabTo(t *testing.T) {
 	assert.Same(t, b2.Scene, AsWidget(frame.Child(0)).Scene)
 }
 
+// TestTabsMoveTabSameName tests that a tab moved into tabs that have a tab
+// of the same name gets a unique name, and that clicking on either selects
+// it, not the other one.
+func TestTabsMoveTabSameName(t *testing.T) {
+	b := NewBody()
+	ts := newDragTabs(b, "A", "B")
+	b2 := NewBody()
+	other := newDragTabs(b2, "B", "X")
+	assert.Equal(t, 2, ts.MoveTabTo(1, other, 2))
+	assert.Equal(t, []string{"B", "X", "B-2"}, tabNames(t, other))
+	_, tab := other.TabAtIndex(2)
+	assert.Equal(t, "B", tab.Text, "its text is kept")
+	b2.AssertRender(t, "tabs/move-same-name", func() {
+		other.SelectTabIndex(0)
+		tab.Send(events.Click)
+		sel, one := selectedTab(other)
+		assert.Equal(t, "B-2", sel)
+		assert.True(t, one)
+		_, first := other.TabAtIndex(0)
+		first.Send(events.Click)
+		sel, _ = selectedTab(other)
+		assert.Equal(t, "B", sel)
+	})
+}
+
 // TestTabsOSDragData tests that a tab is dragged by the operating system
 // out of its window only when its tabs have [Tabs.DragToWindow].
 func TestTabsOSDragData(t *testing.T) {
