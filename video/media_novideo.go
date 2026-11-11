@@ -15,3 +15,9 @@ var errUnsupported = errors.New("video: this app is built without video (the nov
 func OpenMedia(fpath string, options map[string]string) (*Media, error) {
 	return nil, errUnsupported
 }
+
+// OpenSource returns an error, as the media of a Source is not decoded
+// here (see OpenMedia).
+func OpenSource(src Source) (*Media, error) {
+	return nil, errUnsupported
+}

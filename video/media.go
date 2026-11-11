@@ -4,7 +4,10 @@
 
 package video
 
-import "time"
+import (
+	"io"
+	"time"
+)
 
 // Debug is whether to show the log messages of FFmpeg (warnings and errors
 // about the media, as "Could not update timestamps for skipped samples"),
@@ -20,6 +23,10 @@ var Debug = false
 // and OpenMedia returns an error (for apps that do not need video, built
 // without the FFmpeg libraries).
 type Media struct {
+
+	// Source is the source of the media, instead of its Path, if set
+	// (as the MediaSource of a web page).
+	Source Source
 
 	// Path is the path or URL of the media file (any URL that FFmpeg
 	// reads, as http and https).
@@ -47,4 +54,19 @@ type Media struct {
 
 	// HasAudio is whether the media has an audio stream.
 	HasAudio bool
+}
+
+// Source is a source of the media of a [Media] other than a file or URL,
+// as the MediaSource of a web page (Media Source Extensions), whose media
+// is appended to it by the scripts of the page.
+type Source interface {
+	// Streams returns new readers of the byte streams of the media (as one
+	// for its video and one for its audio, each a fragmented MP4), from the
+	// given time: they block until more of the media is available, return
+	// io.EOF at its end, and are closed when the decoding stops (which
+	// must return a blocked read).
+	Streams(start time.Duration) ([]io.ReadCloser, error)
+
+	// Duration returns the duration of the media, or 0 if it is not known.
+	Duration() time.Duration
 }

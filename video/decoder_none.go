@@ -17,6 +17,10 @@ func openDecoder(fpath string, options map[string]string, audio bool) (*decoder,
 	return nil, errUnsupported
 }
 
+func openSourceDecoder(src Source, start time.Duration, audio bool) (*decoder, error) {
+	return nil, errUnsupported
+}
+
 func (d *decoder) free() {}
 
 func (d *decoder) seek(t time.Duration) error { return errUnsupported }

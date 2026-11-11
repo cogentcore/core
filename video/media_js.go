@@ -16,3 +16,9 @@ var errUnsupported = errors.New("video: decoding video is not supported on the w
 func OpenMedia(fpath string, options map[string]string) (*Media, error) {
 	return &Media{Path: fpath, Options: options}, nil
 }
+
+// OpenSource returns an error, as the media of a Source is not decoded
+// here (see OpenMedia).
+func OpenSource(src Source) (*Media, error) {
+	return nil, errUnsupported
+}
