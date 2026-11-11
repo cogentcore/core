@@ -384,6 +384,10 @@ func (wb *WidgetBase) doNeedsRender() {
 				return tree.Continue
 			})
 			cw.RenderWidget()
+			// (with the widgets raised over it, as below)
+			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {
+				p.renderRaised()
+			}
 			return tree.Break
 		}
 		cwb.setFlag(false, widgetChildNeedsRender)
