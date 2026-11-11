@@ -85,9 +85,9 @@ func (ts *Tabs) MoveTabTo(idx int, other *Tabs, at int) int {
 // detachedTab is a tab that has been removed from its tabs, to be added to
 // other tabs (see [Tabs.detachTab]).
 type detachedTab struct {
-	frame          *Frame
-	label, tooltip string
-	icon           icons.Icon
+	frame                *Frame
+	label, text, tooltip string
+	icon                 icons.Icon
 }
 
 // detachTab removes the tab at the given index, which moves to the given
@@ -98,7 +98,7 @@ func (ts *Tabs) detachTab(idx int, other *Tabs, at int) *detachedTab {
 	if frame == nil {
 		return nil
 	}
-	dt := &detachedTab{frame: frame, label: tab.Name, tooltip: tab.Tooltip, icon: tab.Icon}
+	dt := &detachedTab{frame: frame, label: tab.Name, text: tab.Text, tooltip: tab.Tooltip, icon: tab.Icon}
 	if f := ts.Scene.Events.focus; f != nil && (tree.Node(f) == frame || isParentOf(frame, f)) {
 		ts.Scene.Events.focusClear() // (not to send events to it here)
 	}
@@ -141,6 +141,9 @@ func (ts *Tabs) attachTab(dt *detachedTab, at int) int {
 	fr.AddChild(dt.frame) // (in the scene of these tabs)
 	moveChild(fr, len(fr.Children)-1, at)
 	nt := ts.insertTabButtonAt(dt.label, at)
+	if dt.text != "" { // (as shown, which may have changed from its label)
+		nt.SetText(dt.text)
+	}
 	nt.SetIcon(dt.icon)
 	nt.SetTooltip(dt.tooltip)
 	if len(fr.Children) > 1 && fr.StackTop >= at {
@@ -342,7 +345,13 @@ func (tb *Tab) droppedNowhere(e events.Event, screen image.Point) {
 	in := e.StartPos().Sub(tb.Geom.TotalBBox.Min)
 	start := ts.getTabs().Geom.TotalBBox.Min
 	// (moved into the new tabs before their window runs)
-	bd := NewBody(tb.Name)
+	// (titled as the tab is shown, not by its name, which is unique, as
+	// "New tab-4" for a tab of a web browser that was new)
+	title := tb.Text
+	if title == "" {
+		title = tb.Name
+	}
+	bd := NewBody(title)
 	nt := ts.DragToWindow(bd)
 	if nt == nil {
 		return
