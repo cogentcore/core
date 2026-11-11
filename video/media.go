@@ -31,6 +31,12 @@ type Media struct {
 	// or 0 if it is not known.
 	FrameRate float64
 
+	// Rotation is the rotation of the video for display, in degrees
+	// clockwise (0, 90, 180 or 270), from its metadata (as of the videos of
+	// phones). Its frames are turned by it, and Width and Height are of the
+	// turned frames.
+	Rotation int
+
 	// Duration is the duration of the media, or 0 if it is not known.
 	Duration time.Duration
 

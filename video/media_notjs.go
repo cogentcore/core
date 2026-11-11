@@ -30,6 +30,9 @@ func OpenMedia(fpath string, options map[string]string) (*Media, error) {
 	m := &Media{Path: fpath, Options: options, HasAudio: d.audio != nil}
 	par := d.video.stream.CodecParameters()
 	m.Width, m.Height = par.Width(), par.Height()
+	if m.Rotation = d.rotation; m.Rotation == 90 || m.Rotation == 270 {
+		m.Width, m.Height = m.Height, m.Width // (its frames are turned)
+	}
 	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
 		m.FrameRate = fr.Float64()
 	}
@@ -70,6 +73,11 @@ type decoder struct {
 	// start is the time to decode from (see [decoder.seek]): the frames
 	// and audio before it are dropped.
 	start time.Duration
+
+	// rotation is the rotation of the video for display (0, 90, 180 or 270
+	// degrees clockwise), from its display matrix (as of the videos of
+	// phones), by which its frames are turned.
+	rotation int
 }
 
 // openDecoder opens the media file at the given path with the given
@@ -129,6 +137,9 @@ func openDecoder(fpath string, options map[string]string, audio bool) (*decoder,
 	d.frameTime = time.Second / 30
 	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
 		d.frameTime = time.Duration(float64(time.Second) / fr.Float64())
+	}
+	if dm, ok := d.video.stream.CodecParameters().SideData().DisplayMatrix().Get(); ok {
+		d.rotation = ((int(math.Round(dm.Rotation()/90))%4 + 4) % 4) * 90
 	}
 
 	// Allocate the packet and frames used for decoding.
@@ -274,15 +285,25 @@ func (d *decoder) sendVideo(sink decodeSink) (bool, error) {
 		return true, nil
 	}
 
-	// (Re)create the scaler when the source format or size changes.
+	// (Re)create the scaler when the source format or size changes. The
+	// size to scale to is of the frame as it is shown (turned by its
+	// rotation), and so turned for scaling.
+	fw, fh := f.Width(), f.Height()
+	turned := d.rotation == 90 || d.rotation == 270
+	if turned {
+		fw, fh = fh, fw
+	}
 	w, h := d.scaleWidth, d.scaleHeight
 	switch {
 	case w <= 0 && h <= 0:
-		w, h = f.Width(), f.Height()
+		w, h = fw, fh
 	case w <= 0:
-		w = max(1, f.Width()*h/f.Height())
+		w = max(1, fw*h/fh)
 	case h <= 0:
-		h = max(1, f.Height()*w/f.Width())
+		h = max(1, fh*w/fw)
+	}
+	if turned {
+		w, h = h, w
 	}
 	if d.scaler == nil || d.scaler.SourceWidth() != f.Width() || d.scaler.SourceHeight() != f.Height() || d.scaler.SourcePixelFormat() != f.PixelFormat() {
 		if d.scaler != nil {
@@ -305,7 +326,38 @@ func (d *decoder) sendVideo(sink decodeSink) (bool, error) {
 	if err := d.scaled.Data().ToImage(img); err != nil {
 		return false, fmt.Errorf("video: copying frame: %w", err)
 	}
-	return sink.video(Frame{Image: img, Time: t}), nil
+	return sink.video(Frame{Image: rotateImage(img, d.rotation), Time: t}), nil
+}
+
+// rotateImage returns the given image turned clockwise by the given
+// rotation (0, 90, 180 or 270 degrees), which is the image itself for 0.
+func rotateImage(img *image.RGBA, rotation int) *image.RGBA {
+	if rotation == 0 {
+		return img
+	}
+	sw, sh := img.Rect.Dx(), img.Rect.Dy()
+	dw, dh := sw, sh
+	if rotation != 180 {
+		dw, dh = sh, sw
+	}
+	dst := image.NewRGBA(image.Rect(0, 0, dw, dh))
+	for y := 0; y < dh; y++ {
+		for x := 0; x < dw; x++ {
+			// the pixel of the source that is at (x, y) once it is turned
+			var sx, sy int
+			switch rotation {
+			case 90:
+				sx, sy = y, sh-1-x
+			case 180:
+				sx, sy = sw-1-x, sh-1-y
+			case 270:
+				sx, sy = sw-1-y, x
+			}
+			si, di := img.PixOffset(sx, sy), dst.PixOffset(x, y)
+			copy(dst.Pix[di:di+4], img.Pix[si:si+4])
+		}
+	}
+	return dst
 }
 
 // streamTime returns the time of the given timestamp of the given stream.

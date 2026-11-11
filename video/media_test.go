@@ -91,3 +91,45 @@ func TestDecodeAll(t *testing.T) {
 	seconds := float64(len(frames)) / m.FrameRate
 	assert.InDelta(t, seconds, float64(len(samples))/sampleRate, 0.5)
 }
+
+func TestRotation(t *testing.T) {
+	// testdata/rotated.mp4 is testdata/short.mp4 with a display matrix of a
+	// rotation of -90 (as ffprobe shows it; 90 clockwise), as of the
+	// videos of phones.
+	m, err := OpenMedia("testdata/rotated.mp4", nil)
+	require.NoError(t, err)
+	assert.Equal(t, 90, m.Rotation)
+	assert.Equal(t, 48, m.Width)
+	assert.Equal(t, 64, m.Height)
+
+	// its frames are those of the video turned clockwise
+	turned, err := m.FirstFrame(0, 0)
+	require.NoError(t, err)
+	assert.Equal(t, image.Rect(0, 0, 48, 64), turned.Bounds())
+	short, err := OpenMedia("testdata/short.mp4", nil)
+	require.NoError(t, err)
+	assert.Equal(t, 0, short.Rotation)
+	frame, err := short.FirstFrame(0, 0)
+	require.NoError(t, err)
+	assert.Equal(t, rotateImage(frame, 90).Pix, turned.Pix)
+
+	// scaled to a width of the turned frame
+	scaled, err := m.FirstFrame(24, 0)
+	require.NoError(t, err)
+	assert.Equal(t, image.Rect(0, 0, 24, 32), scaled.Bounds())
+}
+
+func TestRotateImage(t *testing.T) {
+	img := image.NewRGBA(image.Rect(0, 0, 3, 2))
+	img.Pix[img.PixOffset(0, 0)] = 1 // top left
+	img.Pix[img.PixOffset(2, 1)] = 2 // bottom right
+	r90 := rotateImage(img, 90)
+	assert.Equal(t, image.Rect(0, 0, 2, 3), r90.Bounds())
+	assert.Equal(t, uint8(1), r90.Pix[r90.PixOffset(1, 0)], "top left to top right")
+	assert.Equal(t, uint8(2), r90.Pix[r90.PixOffset(0, 2)], "bottom right to bottom left")
+	r180 := rotateImage(img, 180)
+	assert.Equal(t, uint8(1), r180.Pix[r180.PixOffset(2, 1)])
+	r270 := rotateImage(img, 270)
+	assert.Equal(t, uint8(1), r270.Pix[r270.PixOffset(0, 2)], "top left to bottom left")
+	assert.Same(t, img, rotateImage(img, 0))
+}
