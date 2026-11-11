@@ -383,9 +383,11 @@ func (wb *WidgetBase) doNeedsRender() {
 				dwb.setFlag(false, widgetChildNeedsRender)
 				return tree.Continue
 			})
-			// not when it is covered by widgets rendered over it, which it
-			// would paint over (as a playing video under a dialog of a
-			// page, see [WidgetBase.IsInvisible])
+			// not when it is covered by widgets rendered over it in the
+			// image of the scene, which it would paint over (as a playing
+			// video under an absolute dialog of a page), but it is when they
+			// are in the layer of the scene (as a fixed dialog), which is
+			// composed over it (see [WidgetBase.isCovered] and [sceneLayer])
 			if cwb.isCovered() {
 				return tree.Break
 			}
