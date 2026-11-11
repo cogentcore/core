@@ -1413,3 +1413,22 @@ func TestFlexWrapPercentBasis(t *testing.T) {
 			assert.InDelta(t, 600*dp, b.Geom.Size.Actual.Total.X, 2, "75%")
 		})
 }
+
+// TestPercentHeightInInsetAbsolute tests that a percentage height in an
+// absolute box whose height is set by its top and bottom insets is of
+// that height, as in CSS (as the player of youtube.com, of height: 100% in
+// its container of inset 0 over a box of a padding of the aspect of the
+// video, which was of no height, so that its video was not shown).
+func TestPercentHeightInInsetAbsolute(t *testing.T) {
+	src := `<div style="width: 400px"><div id="inner" style="position: relative; padding-top: 50%">
+<div id="abs" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0">
+<div id="player" style="display: block; width: 100%; height: 100%"><div id="container" style="position: relative; height: 100%">
+<div id="video" style="position: absolute; width: 100%; height: 100%"></div></div></div></div></div></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		for _, id := range []string{"abs", "player", "container", "video"} {
+			require.NotNil(t, ws[id], id)
+			assert.InDelta(t, 200*dp, ws[id].Geom.Size.Actual.Total.Y, 2, id)
+			assert.InDelta(t, 400*dp, ws[id].Geom.Size.Actual.Total.X, 2, id)
+		}
+	})
+}

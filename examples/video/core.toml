@@ -1,0 +1,6 @@
+ID = 'com.cogent.examples.video'
+About = 'An example of playing a video'
+
+[Web]
+  # the video is served with the app, which opens it from its relative URL
+  Files = ['deer.mp4']

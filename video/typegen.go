@@ -5,25 +5,59 @@ package video
 import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"github.com/cogentcore/reisen"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Stop", Doc: "setting this to true will stop the playing"}, {Name: "frameBuffer"}, {Name: "lastFrame", Doc: "last frame we have rendered"}, {Name: "frameTarg", Doc: "target frame number to be played"}, {Name: "framePlayed", Doc: "actual frame number displayed"}, {Name: "frameStop", Doc: "frame number to stop playing at, if > 0"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Controls", IDName: "controls", Doc: "Controls are the standard controls of a video player, as those of the\nvideo elements of browsers: a bar over the bottom of the video, partly\ntransparent, with the position (a slider, which seeks when it is\nchanged), buttons to skip back 10 seconds, to play and pause, and to\nskip forward 10 seconds, to mute, with the volume and the time.\nThey are a child of the widget of the video (their target), which must\nbe their containing block (positioned, as relative), and are shown while\nthe mouse moves over them (see [Controls.inZone]), until 2.5\nseconds after it stops there, or half a second after it moves out of the\nbottom or leaves, and while the video is not playing. A click on the target (not on the\ncontrols) plays and pauses the video, and gives it the focus, for the\nkeys of players (see [Controls.handleKey]). The target must be rendered as a\nwhole when the controls change (see [Video.RenderGroup]), as they are\npartly transparent over the video.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "player", Doc: "player is the player that the controls control."}, {Name: "target", Doc: "target is the widget of the video that the controls are over."}, {Name: "position"}, {Name: "play"}, {Name: "mute"}, {Name: "volume"}, {Name: "time"}, {Name: "shownAt", Doc: "shownAt is when the controls were last shown by the mouse moving."}, {Name: "second", Doc: "second is the second of the time that is shown."}}})
+
+// NewControls returns a new [Controls] with the given optional parent:
+// Controls are the standard controls of a video player, as those of the
+// video elements of browsers: a bar over the bottom of the video, partly
+// transparent, with the position (a slider, which seeks when it is
+// changed), buttons to skip back 10 seconds, to play and pause, and to
+// skip forward 10 seconds, to mute, with the volume and the time.
+// They are a child of the widget of the video (their target), which must
+// be their containing block (positioned, as relative), and are shown while
+// the mouse moves over them (see [Controls.inZone]), until 2.5
+// seconds after it stops there, or half a second after it moves out of the
+// bottom or leaves, and while the video is not playing. A click on the target (not on the
+// controls) plays and pauses the video, and gives it the focus, for the
+// keys of players (see [Controls.handleKey]). The target must be rendered as a
+// whole when the controls change (see [Video.RenderGroup]), as they are
+// partly transparent over the video.
+func NewControls(parent ...tree.Node) *Controls { return tree.New[Controls](parent...) }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video is a video player widget, with the standard playback controls over\nthe bottom of the video if [Video.Controls] is set.\nOn desktop platforms, the playing itself is a [Playback], which other\nwidgets can show too, and the controls are Cogent Core widgets\n(see controls_notjs.go); on the web, the video is a video element of the\nbrowser, placed at the widget, with the controls of the browser.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Muted", Doc: "Muted is whether the audio is not heard (see [Video.SetMuted])."}, {Name: "Loop", Doc: "Loop is whether to play the video again from the start at its end."}, {Name: "Controls", Doc: "Controls is whether to show the standard playback controls over the\nbottom of the video when the mouse is over it, or it is paused:\nplay and pause, back and forward 10 seconds, the position (which can\nbe dragged to seek), the volume, and the time."}, {Name: "Poster", Doc: "Poster is the URL of an image to show before the video plays,\non the web (where the video is a video element of the browser)."}, {Name: "playback", Doc: "playback is the current playing, if any."}, {Name: "playSize", Doc: "playSize is the size given to Play, for playing again."}, {Name: "volume", Doc: "volume is the volume of the audio, from 0 to 1 (0 is full volume,\nas the zero value; see [Video.SetVolume])."}, {Name: "controls", Doc: "controls are the controls, if shown (on desktop platforms)."}, {Name: "mu", Doc: "mu protects frame and changed, which are set by the playback."}, {Name: "frame", Doc: "frame is the last frame of the playback, to render."}, {Name: "changed", Doc: "changed is whether frame has changed since it was last rendered."}}})
 
 // NewVideo returns a new [Video] with the given optional parent:
-// Video represents a video playback widget without any controls.
-// See [Player] for a version with controls.
+// Video is a video player widget, with the standard playback controls over
+// the bottom of the video if [Video.Controls] is set.
+// On desktop platforms, the playing itself is a [Playback], which other
+// widgets can show too, and the controls are Cogent Core widgets
+// (see controls_notjs.go); on the web, the video is a video element of the
+// browser, placed at the widget, with the controls of the browser.
 func NewVideo(parent ...tree.Node) *Video { return tree.New[Video](parent...) }
 
 // SetMedia sets the [Video.Media]:
 // Media is the video media.
-func (t *Video) SetMedia(v *reisen.Media) *Video { t.Media = v; return t }
+func (t *Video) SetMedia(v *Media) *Video { t.Media = v; return t }
 
 // SetRotation sets the [Video.Rotation]:
 // degrees of rotation to apply to the video images
 // 90 = left 90, -90 = right 90
 func (t *Video) SetRotation(v float32) *Video { t.Rotation = v; return t }
 
-// SetStop sets the [Video.Stop]:
-// setting this to true will stop the playing
-func (t *Video) SetStop(v bool) *Video { t.Stop = v; return t }
+// SetLoop sets the [Video.Loop]:
+// Loop is whether to play the video again from the start at its end.
+func (t *Video) SetLoop(v bool) *Video { t.Loop = v; return t }
+
+// SetControls sets the [Video.Controls]:
+// Controls is whether to show the standard playback controls over the
+// bottom of the video when the mouse is over it, or it is paused:
+// play and pause, back and forward 10 seconds, the position (which can
+// be dragged to seek), the volume, and the time.
+func (t *Video) SetControls(v bool) *Video { t.Controls = v; return t }
+
+// SetPoster sets the [Video.Poster]:
+// Poster is the URL of an image to show before the video plays,
+// on the web (where the video is a video element of the browser).
+func (t *Video) SetPoster(v string) *Video { t.Poster = v; return t }

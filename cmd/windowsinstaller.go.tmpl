@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "embed"
+	{{if .Files}}"embed"{{else}}_ "embed"{{end}}
 	"os"
 
 	"cogentcore.org/core/events"
@@ -10,7 +10,13 @@ import (
 
 //go:embed app.exe
 var exe []byte
-
+{{if .Files}}
+// files are installed next to the executable of the app (the DLLs of
+// FFmpeg, and its license).
+//
+//go:embed files
+var files embed.FS
+{{end}}
 func main() {
 	b := core.NewBody("{{.Name}} Installer")
 	bt := core.NewButton(b).SetText("Install {{.Name}}")
@@ -20,6 +26,12 @@ func main() {
 		core.ErrorDialog(bt, err, "Error installing {{.Name}}")
 		err = os.WriteFile(dir+"\\{{.Name}}.exe", exe, 0666)
 		core.ErrorDialog(bt, err, "Error installing {{.Name}}")
+{{- range .Files}}
+		if data, err := files.ReadFile("files/{{.}}"); err == nil {
+			err = os.WriteFile(dir+"\\{{.}}", data, 0666)
+			core.ErrorDialog(bt, err, "Error installing {{$.Name}}")
+		}
+{{- end}}
 	})
 	b.RunMainWindow()
 }

@@ -71,3 +71,18 @@ func TestImageScrolled(t *testing.T) {
 		b.SystemEvents().Scroll(image.Pt(10, 10), math32.Vec2(2, 3))
 	})
 }
+
+// TestImageAspectRatio tests that the box of an image has the aspect ratio
+// of its style, if set, instead of that of the image, which fits in it.
+func TestImageAspectRatio(t *testing.T) {
+	b := NewBody()
+	img := NewImage(b)
+	img.SetImage(image.NewRGBA(image.Rect(0, 0, 100, 100)))
+	img.Styler(func(s *styles.Style) {
+		s.Min.X = units.Dot(200)
+		s.AspectRatio = 2
+	})
+	b.RenderImage(func() {}, func() {
+		assert.Equal(t, math32.Vec2(200, 100), img.Geom.Size.Actual.Content)
+	})
+}

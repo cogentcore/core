@@ -249,3 +249,11 @@ func TestTextTruncation(t *testing.T) {
 		assert.True(t, clamped.paintText.Truncated)
 	})
 }
+
+// TestTextLabel tests that the label of a text (as in the tree of an
+// inspector) is elided to 16 characters, on one line.
+func TestTextLabel(t *testing.T) {
+	tx := NewText().SetText("Real web pages for\ncomparing the rendering")
+	assert.Equal(t, "Real web pages …", tx.Label())
+	assert.Equal(t, "short", NewText().SetText("short").Label())
+}

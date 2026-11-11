@@ -346,6 +346,16 @@ func (sc *Scene) Render() {
 	sc.RenderStandardBox()
 }
 
+// renderGrouper is implemented by widgets that are rendered as a whole when
+// any widget in them needs to be rendered, if RenderGroup returns true,
+// instead of only that widget: those that leave a region of the scene
+// transparent for another source that is drawn under their partly
+// transparent content (as a video under its controls, see the video
+// package), which would otherwise be drawn over its previous rendering.
+type renderGrouper interface {
+	RenderGroup() bool
+}
+
 // doNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set. It only goes into the widgets
 // that have such nodes inside of them.
@@ -366,6 +376,25 @@ func (wb *WidgetBase) doNeedsRender() {
 		}
 		if !cwb.hasFlag(widgetChildNeedsRender) {
 			return tree.Break // nothing inside needs to be rendered
+		}
+		if rg, ok := cw.(renderGrouper); ok && rg.RenderGroup() {
+			// it is rendered as a whole (see renderGrouper)
+			cwb.WidgetWalkDown(func(dw Widget, dwb *WidgetBase) bool {
+				dwb.setFlag(false, widgetChildNeedsRender)
+				return tree.Continue
+			})
+			// not when it is covered by widgets rendered over it, which it
+			// would paint over (as a playing video under a dialog of a
+			// page, see [WidgetBase.IsInvisible])
+			if cwb.isCovered() {
+				return tree.Break
+			}
+			cw.RenderWidget()
+			// (with the widgets raised over it, as below)
+			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {
+				p.renderRaised()
+			}
+			return tree.Break
 		}
 		cwb.setFlag(false, widgetChildNeedsRender)
 		if ly := AsFrame(cw); ly != nil {

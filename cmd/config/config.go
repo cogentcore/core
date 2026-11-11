@@ -72,6 +72,12 @@ type Config struct { //types:add
 	// updated often.
 	AppGoSymlink bool
 
+	// Video installs (setup) or updates (update) FFmpeg, which the video
+	// package (cogentcore.org/core/video) needs on desktop platforms:
+	// with Homebrew on macOS, and as the prebuilt builds of BtbN on Linux
+	// and Windows, which the core command builds and runs apps with.
+	Video bool `cmd:"setup,update"`
+
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
 

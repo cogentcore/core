@@ -10,13 +10,13 @@ require (
 	github.com/alecthomas/chroma/v3 v3.0.0-alpha.5.0.20261015230651-e17ffc9bfce4
 	github.com/andybalholm/cascadia v1.3.3
 	github.com/anthonynsimon/bild v0.14.0
+	github.com/asticode/go-astiav v0.43.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/charmbracelet/x/ansi v0.11.9
 	github.com/charmbracelet/x/xpty v0.1.4
 	github.com/chewxy/math32 v1.11.2
 	github.com/clipperhouse/displaywidth v0.11.0
 	github.com/cogentcore/mvm v0.0.0-20261026193832-5ebd19c3fa21
-	github.com/cogentcore/reisen v0.0.0-20240814194831-4d884b6e7666
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
 	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
 	github.com/coreos/go-oidc/v3 v3.17.0
@@ -56,6 +56,7 @@ require (
 require (
 	codeberg.org/go-pdf/fpdf v0.11.1 // indirect
 	git.sr.ht/~sbinet/overlayfs v0.1.1 // indirect
+	github.com/asticode/go-astikit v0.42.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/x/conpty v0.2.0 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
@@ -63,7 +64,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2/v2 v2.7.1 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.9 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect

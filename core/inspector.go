@@ -74,12 +74,9 @@ func (is *Inspector) Init() {
 				s.Gap.Zero()
 			})
 			tree.AddChildAt(w, "tree", func(w *Tree) {
+				// (its nodes are as wide as the frame, which scrolls
+				// them when they are wider, as of long names)
 				is.treeWidget = w
-				w.SetTreeInit(func(tr *Tree) {
-					tr.Styler(func(s *styles.Style) {
-						s.Max.X.Em(20)
-					})
-				})
 				w.OnSelect(func(e events.Event) {
 					if len(w.SelectedNodes) == 0 {
 						return

@@ -60,6 +60,10 @@ type ComposerWeb struct {
 	// context pointer. It is used in [ComposerWeb.Compose].
 	active map[uint64]struct{}
 
+	// below contains the HTML elements that are under the canvases of the
+	// scenes (see [ComposerWeb.SetElementBelow]), keyed as active.
+	below map[uint64]struct{}
+
 	// DPR is the device pixel ratio, which defaults to 1 and should
 	// be set by the consumer of this type.
 	DPR float32
@@ -94,6 +98,7 @@ func ctxPointer(ctx any) uint64 {
 
 func (cw *ComposerWeb) Compose() {
 	cw.active = map[uint64]struct{}{}
+	cw.below = map[uint64]struct{}{}
 
 	for _, s := range cw.Sources {
 		s.Draw(cw)
@@ -108,13 +113,18 @@ func (cw *ComposerWeb) Compose() {
 	}
 
 	for i, s := range cw.Sources {
-		elem := cw.Elements[cw.Pointers[s]]
+		ptr := cw.Pointers[s]
+		elem := cw.Elements[ptr]
 		if elem.IsUndefined() {
 			continue
 		}
 		// Elements can get out of order (such as in xyzcore), so this
 		// ensures they are correctly ordered.
-		elem.Get("style").Set("z-index", i)
+		if _, ok := cw.below[ptr]; ok {
+			elem.Get("style").Set("z-index", -1)
+		} else {
+			elem.Get("style").Set("z-index", i)
+		}
 	}
 
 	// Only remove the loader after we have successfully rendered.
@@ -181,6 +191,15 @@ func (cw *ComposerWeb) SetElementContext(ctx any, elem js.Value) {
 	if !elem.Get("isConnected").Bool() {
 		js.Global().Get("document").Get("body").Call("appendChild", elem)
 	}
+}
+
+// SetElementBelow puts the HTML element for the given context value under
+// the canvases of the scenes, instead of over them, in the [Source.Draw] of
+// its source, so that a scene shows it where it is transparent, with the
+// widgets of the scene over it (as a video under its controls, whose
+// widget leaves its region of the scene transparent).
+func (cw *ComposerWeb) SetElementBelow(ctx any) {
+	cw.below[ctxPointer(ctx)] = struct{}{}
 }
 
 // SetElementGeom sets the geometry of the given element.

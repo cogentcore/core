@@ -1,0 +1,587 @@
+// Copyright (c) 2023, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+//go:build !js && !novideo
+
+package video
+
+import (
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"image"
+	"io"
+	"math"
+	"sync"
+	"time"
+
+	"github.com/asticode/go-astiav"
+)
+
+// OpenMedia opens the media file at the given path or URL, with the given
+// options of FFmpeg for the input (see [Media.Options]), which can be nil,
+// and reads its properties.
+func OpenMedia(fpath string, options map[string]string) (*Media, error) {
+	// Open the file and find its streams, to read their properties.
+	d, err := openDecoder(fpath, options, true)
+	if err != nil {
+		return nil, err
+	}
+	defer d.free()
+	m := &Media{Path: fpath, Options: options}
+	d.setProperties(m)
+	return m, nil
+}
+
+// OpenSource opens the media of the given [Source] (as the media of a
+// MediaSource of a web page), and reads its properties, which waits for
+// the start of its streams.
+func OpenSource(src Source) (*Media, error) {
+	d, err := openSourceDecoder(src, 0, true)
+	if err != nil {
+		return nil, err
+	}
+	defer d.free()
+	m := &Media{Source: src}
+	d.setProperties(m)
+	if du := src.Duration(); du > 0 {
+		m.Duration = du
+	}
+	return m, nil
+}
+
+// setProperties sets the properties of the given media from the decoder.
+func (d *decoder) setProperties(m *Media) {
+	m.HasAudio = d.audio != nil
+	par := d.video.stream.CodecParameters()
+	m.Width, m.Height = par.Width(), par.Height()
+	if m.Rotation = d.rotation; m.Rotation == 90 || m.Rotation == 270 {
+		m.Width, m.Height = m.Height, m.Width // (its frames are turned)
+	}
+	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
+		m.FrameRate = fr.Float64()
+	}
+	if du := d.inputs[0].fc.Duration(); du > 0 {
+		m.Duration = time.Duration(du) * time.Second / time.Duration(astiav.TimeBase)
+	}
+}
+
+// decodeStream is an opened decoder for one stream of a media file.
+type decodeStream struct {
+	stream *astiav.Stream
+	codec  *astiav.CodecContext
+
+	// in is the input that the stream is in.
+	in *input
+}
+
+// input is an input of a decoder: a media file (or URL), or a stream of
+// a [Source] (read through a custom IO context of FFmpeg).
+type input struct {
+	fc     *astiav.FormatContext
+	packet *astiav.Packet
+	frame  *astiav.Frame
+
+	// io and reader are of a stream of a Source.
+	io     *astiav.IOContext
+	reader io.ReadCloser
+}
+
+// free frees the input.
+func (in *input) free() {
+	for _, f := range []*astiav.Frame{in.frame} {
+		if f != nil {
+			f.Free()
+		}
+	}
+	if in.packet != nil {
+		in.packet.Free()
+	}
+	in.fc.CloseInput()
+	in.fc.Free()
+	if in.io != nil {
+		in.io.Free()
+	}
+	if in.reader != nil {
+		in.reader.Close()
+	}
+}
+
+// decoder decodes the video and audio streams of a media file, or of the
+// streams of a [Source] (each of which is an input).
+type decoder struct {
+	inputs       []*input
+	video, audio *decodeStream
+
+	// scaled is the decoded video frame converted to RGBA by scaler,
+	// at the size scaleWidth x scaleHeight (0 = inherent size).
+	scaled                  *astiav.Frame
+	scaler                  *astiav.SoftwareScaleContext
+	scaleWidth, scaleHeight int
+
+	// resampled is the decoded audio converted by resampler
+	// to interleaved float64 stereo samples at [sampleRate].
+	resampled *astiav.Frame
+	resampler *astiav.SoftwareResampleContext
+
+	// next is the time of the next video frame, for frames without
+	// a timestamp, and frameTime is the duration of a frame.
+	next, frameTime time.Duration
+
+	// start is the time to decode from (see [decoder.seek]): the frames
+	// and audio before it are dropped.
+	start time.Duration
+
+	// rotation is the rotation of the video for display (0, 90, 180 or 270
+	// degrees clockwise), from its display matrix (as of the videos of
+	// phones), by which its frames are turned.
+	rotation int
+}
+
+// setLogLevel sets the level of the log messages of FFmpeg, which are only
+// shown for Debug.
+func setLogLevel() {
+	if Debug {
+		astiav.SetLogLevel(astiav.LogLevelWarning)
+	} else {
+		astiav.SetLogLevel(astiav.LogLevelQuiet)
+	}
+}
+
+// openDecoder opens the media file at the given path with the given
+// options, and opens a decoder for its first video stream, and for its
+// first audio stream, if any and audio.
+func openDecoder(fpath string, options map[string]string, audio bool) (*decoder, error) {
+	setLogLevel()
+
+	// Open the file and read its stream info.
+	in := &input{fc: astiav.AllocFormatContext()}
+	if in.fc == nil {
+		return nil, errors.New("video: allocating format context failed")
+	}
+	var dict *astiav.Dictionary
+	if len(options) > 0 {
+		dict = astiav.NewDictionary()
+		defer dict.Free()
+		for k, v := range options {
+			if err := dict.Set(k, v, 0); err != nil {
+				in.fc.Free()
+				return nil, fmt.Errorf("video: setting option %s: %w", k, err)
+			}
+		}
+	}
+	if err := in.fc.OpenInput(fpath, nil, dict); err != nil {
+		in.fc.Free()
+		return nil, fmt.Errorf("video: opening %q: %w", fpath, err)
+	}
+	d := &decoder{inputs: []*input{in}}
+	if err := d.openStreams(audio); err != nil {
+		d.free()
+		return nil, fmt.Errorf("video: %w in %q", err, fpath)
+	}
+	return d, nil
+}
+
+// openSourceDecoder opens the streams of the given [Source] from the given
+// time, and opens a decoder for the first video stream in them, and for
+// the first audio stream, if any and audio.
+func openSourceDecoder(src Source, start time.Duration, audio bool) (*decoder, error) {
+	setLogLevel()
+	readers, err := src.Streams(start)
+	if err != nil {
+		return nil, err
+	}
+	d := &decoder{start: start}
+	for i, r := range readers {
+		in := &input{fc: astiav.AllocFormatContext(), reader: r}
+		if in.fc == nil {
+			r.Close()
+			d.free()
+			return nil, errors.New("video: allocating format context failed")
+		}
+		in.io, err = astiav.AllocIOContext(1<<16, false, r.Read, nil, nil)
+		if err != nil {
+			in.fc.Free()
+			r.Close()
+			d.free()
+			return nil, fmt.Errorf("video: allocating io context: %w", err)
+		}
+		in.fc.SetPb(in.io)
+		if err := in.fc.OpenInput("", nil, nil); err != nil {
+			in.io.Free()
+			in.fc.Free()
+			r.Close()
+			d.free()
+			return nil, fmt.Errorf("video: opening stream %d: %w", i, err)
+		}
+		d.inputs = append(d.inputs, in)
+	}
+	if err := d.openStreams(audio); err != nil {
+		d.free()
+		return nil, fmt.Errorf("video: %w in the streams", err)
+	}
+	return d, nil
+}
+
+// openStreams reads the stream info of the inputs, and opens a decoder for
+// their first video stream, and for their first audio stream, if any and
+// audio, with the packets and frames of the inputs.
+func (d *decoder) openStreams(audio bool) error {
+	for _, in := range d.inputs {
+		if err := in.fc.FindStreamInfo(nil); err != nil {
+			return fmt.Errorf("finding stream info: %w", err)
+		}
+		in.packet = astiav.AllocPacket()
+		in.frame = astiav.AllocFrame()
+		for _, s := range in.fc.Streams() {
+			var target **decodeStream
+			switch s.CodecParameters().MediaType() {
+			case astiav.MediaTypeVideo:
+				target = &d.video
+			case astiav.MediaTypeAudio:
+				if audio {
+					target = &d.audio
+				}
+			}
+			if target == nil || *target != nil {
+				continue
+			}
+			ds, err := openDecodeStream(s)
+			if err != nil {
+				return err
+			}
+			ds.in = in
+			*target = ds
+		}
+	}
+	if d.video == nil {
+		return errors.New("no video stream")
+	}
+	d.frameTime = time.Second / 30
+	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
+		d.frameTime = time.Duration(float64(time.Second) / fr.Float64())
+	}
+	if dm, ok := d.video.stream.CodecParameters().SideData().DisplayMatrix().Get(); ok {
+		d.rotation = ((int(math.Round(dm.Rotation()/90))%4 + 4) % 4) * 90
+	}
+
+	// Allocate the frames used for converting.
+	d.scaled = astiav.AllocFrame()
+	if d.audio != nil {
+		d.resampled = astiav.AllocFrame()
+		d.resampler = astiav.AllocSoftwareResampleContext()
+	}
+	return nil
+}
+
+// openDecodeStream opens a decoder for the given stream.
+func openDecodeStream(s *astiav.Stream) (*decodeStream, error) {
+	par := s.CodecParameters()
+	codec := astiav.FindDecoder(par.CodecID())
+	if codec == nil {
+		return nil, fmt.Errorf("video: no decoder for codec %s", par.CodecID())
+	}
+	cc := astiav.AllocCodecContext(codec)
+	if cc == nil {
+		return nil, errors.New("video: allocating codec context failed")
+	}
+	if err := par.ToCodecContext(cc); err != nil {
+		cc.Free()
+		return nil, fmt.Errorf("video: setting codec parameters: %w", err)
+	}
+	if err := cc.Open(codec, nil); err != nil {
+		cc.Free()
+		return nil, fmt.Errorf("video: opening codec %s: %w", par.CodecID(), err)
+	}
+	return &decodeStream{stream: s, codec: cc}, nil
+}
+
+// free frees all of the resources of the decoder.
+func (d *decoder) free() {
+	for _, f := range []*astiav.Frame{d.scaled, d.resampled} {
+		if f != nil {
+			f.Free()
+		}
+	}
+	if d.scaler != nil {
+		d.scaler.Free()
+	}
+	if d.resampler != nil {
+		d.resampler.Free()
+	}
+	for _, s := range []*decodeStream{d.video, d.audio} {
+		if s != nil {
+			s.codec.Free()
+		}
+	}
+	for _, in := range d.inputs {
+		in.free()
+	}
+}
+
+// run decodes the whole media, sending the results to the sink,
+// until the end of the media, an error, or the sink returns false.
+// The inputs (the streams of a Source) are decoded in parallel.
+func (d *decoder) run(sink decodeSink) error {
+	if len(d.inputs) == 1 {
+		return d.runInput(d.inputs[0], sink)
+	}
+	var wg sync.WaitGroup
+	errs := make([]error, len(d.inputs))
+	stop := make(chan struct{})
+	var once sync.Once
+	for i, in := range d.inputs {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// (each stops the others when the sink asks to stop, or it fails)
+			s := decodeSink{
+				video: func(f Frame) bool {
+					select {
+					case <-stop:
+						return false
+					default:
+					}
+					ok := sink.video(f)
+					if !ok {
+						once.Do(func() { close(stop) })
+					}
+					return ok
+				},
+				audio: func(ss [][2]float64) bool {
+					select {
+					case <-stop:
+						return false
+					default:
+					}
+					ok := sink.audio(ss)
+					if !ok {
+						once.Do(func() { close(stop) })
+					}
+					return ok
+				},
+			}
+			if errs[i] = d.runInput(in, s); errs[i] != nil {
+				once.Do(func() { close(stop) })
+			}
+		}()
+	}
+	wg.Wait()
+	return errors.Join(errs...)
+}
+
+// runInput decodes the given input, sending the results of its streams
+// to the sink, until its end, an error, or the sink returns false.
+func (d *decoder) runInput(in *input, sink decodeSink) error {
+	// Read packets and send them to the decoder of their stream.
+	for {
+		if err := in.fc.ReadFrame(in.packet); err != nil {
+			if errors.Is(err, astiav.ErrEof) {
+				break
+			}
+			return fmt.Errorf("video: reading packet: %w", err)
+		}
+		var s *decodeStream
+		switch idx := in.packet.StreamIndex(); {
+		case d.video.in == in && idx == d.video.stream.Index():
+			s = d.video
+		case d.audio != nil && d.audio.in == in && idx == d.audio.stream.Index():
+			s = d.audio
+		}
+		if s == nil {
+			in.packet.Unref()
+			continue
+		}
+		err := s.codec.SendPacket(in.packet)
+		in.packet.Unref()
+		if err != nil {
+			return fmt.Errorf("video: sending packet: %w", err)
+		}
+		if ok, err := d.receive(s, sink); !ok || err != nil {
+			return err
+		}
+	}
+
+	// Flush the frames remaining in the decoders.
+	for _, s := range []*decodeStream{d.video, d.audio} {
+		if s == nil || s.in != in {
+			continue
+		}
+		if err := s.codec.SendPacket(nil); err != nil {
+			return fmt.Errorf("video: flushing decoder: %w", err)
+		}
+		if ok, err := d.receive(s, sink); !ok || err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// receive receives all of the frames available from the decoder of
+// the given stream, and sends them to the sink. It returns false
+// if the sink asked to stop.
+func (d *decoder) receive(s *decodeStream, sink decodeSink) (bool, error) {
+	for {
+		if err := s.codec.ReceiveFrame(s.in.frame); err != nil {
+			if errors.Is(err, astiav.ErrEof) || errors.Is(err, astiav.ErrEagain) {
+				return true, nil
+			}
+			return false, fmt.Errorf("video: receiving frame: %w", err)
+		}
+		var ok bool
+		var err error
+		if s == d.video {
+			ok, err = d.sendVideo(sink)
+		} else {
+			ok, err = d.sendAudio(sink)
+		}
+		s.in.frame.Unref()
+		if !ok || err != nil {
+			return false, err
+		}
+	}
+}
+
+// sendVideo converts the decoded video frame to an RGBA image and sends it.
+func (d *decoder) sendVideo(sink decodeSink) (bool, error) {
+	// The time of the frame, which is dropped if it is before the start.
+	f := d.video.in.frame
+	t := d.next
+	if pts := f.Pts(); pts != astiav.NoPtsValue {
+		t = streamTime(d.video.stream, pts)
+	}
+	d.next = t + d.frameTime
+	if t < d.start {
+		return true, nil
+	}
+
+	// (Re)create the scaler when the source format or size changes. The
+	// size to scale to is of the frame as it is shown (turned by its
+	// rotation), and so turned for scaling.
+	fw, fh := f.Width(), f.Height()
+	turned := d.rotation == 90 || d.rotation == 270
+	if turned {
+		fw, fh = fh, fw
+	}
+	w, h := d.scaleWidth, d.scaleHeight
+	switch {
+	case w <= 0 && h <= 0:
+		w, h = fw, fh
+	case w <= 0:
+		w = max(1, fw*h/fh)
+	case h <= 0:
+		h = max(1, fh*w/fw)
+	}
+	if turned {
+		w, h = h, w
+	}
+	if d.scaler == nil || d.scaler.SourceWidth() != f.Width() || d.scaler.SourceHeight() != f.Height() || d.scaler.SourcePixelFormat() != f.PixelFormat() {
+		if d.scaler != nil {
+			d.scaler.Free()
+		}
+		var err error
+		d.scaler, err = astiav.CreateSoftwareScaleContext(f.Width(), f.Height(), f.PixelFormat(), w, h, astiav.PixelFormatRgba, astiav.NewSoftwareScaleContextFlags(astiav.SoftwareScaleContextFlagBilinear))
+		if err != nil {
+			d.scaler = nil
+			return false, fmt.Errorf("video: creating scaler: %w", err)
+		}
+		d.scaled.Unref()
+	}
+
+	// Convert the frame and copy it into a new image, which the sink keeps.
+	if err := d.scaler.ScaleFrame(f, d.scaled); err != nil {
+		return false, fmt.Errorf("video: scaling frame: %w", err)
+	}
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	if err := d.scaled.Data().ToImage(img); err != nil {
+		return false, fmt.Errorf("video: copying frame: %w", err)
+	}
+	return sink.video(Frame{Image: rotateImage(img, d.rotation), Time: t}), nil
+}
+
+// rotateImage returns the given image turned clockwise by the given
+// rotation (0, 90, 180 or 270 degrees), which is the image itself for 0.
+func rotateImage(img *image.RGBA, rotation int) *image.RGBA {
+	if rotation == 0 {
+		return img
+	}
+	sw, sh := img.Rect.Dx(), img.Rect.Dy()
+	dw, dh := sw, sh
+	if rotation != 180 {
+		dw, dh = sh, sw
+	}
+	dst := image.NewRGBA(image.Rect(0, 0, dw, dh))
+	for y := 0; y < dh; y++ {
+		for x := 0; x < dw; x++ {
+			// the pixel of the source that is at (x, y) once it is turned
+			var sx, sy int
+			switch rotation {
+			case 90:
+				sx, sy = y, sh-1-x
+			case 180:
+				sx, sy = sw-1-x, sh-1-y
+			case 270:
+				sx, sy = sw-1-y, x
+			}
+			si, di := img.PixOffset(sx, sy), dst.PixOffset(x, y)
+			copy(dst.Pix[di:di+4], img.Pix[si:si+4])
+		}
+	}
+	return dst
+}
+
+// streamTime returns the time of the given timestamp of the given stream.
+func streamTime(s *astiav.Stream, ts int64) time.Duration {
+	tb := s.TimeBase()
+	return time.Duration(float64(ts) * float64(time.Second) * float64(tb.Num()) / float64(tb.Den()))
+}
+
+// seek seeks the media to the key frame at or before the given time,
+// from which it is decoded, dropping the frames before the time.
+func (d *decoder) seek(t time.Duration) error {
+	d.start = t
+	if t <= 0 || len(d.inputs) != 1 || d.inputs[0].reader != nil {
+		return nil // (a Source starts its streams at the time)
+	}
+	ts := int64(t) * int64(astiav.TimeBase) / int64(time.Second)
+	if err := d.inputs[0].fc.SeekFrame(-1, ts, astiav.NewSeekFlags(astiav.SeekFlagBackward)); err != nil {
+		return fmt.Errorf("video: seeking to %v: %w", t, err)
+	}
+	return nil
+}
+
+// sendAudio converts the decoded audio frame to stereo samples and sends them.
+func (d *decoder) sendAudio(sink decodeSink) (bool, error) {
+	// The audio before the start is dropped.
+	af := d.audio.in.frame
+	if pts := af.Pts(); pts != astiav.NoPtsValue && streamTime(d.audio.stream, pts) < d.start {
+		return true, nil
+	}
+
+	// Resample into a new buffer of interleaved float64 stereo samples.
+	r := d.resampled
+	r.Unref()
+	r.SetChannelLayout(astiav.ChannelLayoutStereo)
+	r.SetSampleFormat(astiav.SampleFormatDbl)
+	r.SetSampleRate(sampleRate)
+	if err := d.resampler.ConvertFrame(af, r); err != nil {
+		return false, fmt.Errorf("video: resampling audio: %w", err)
+	}
+	n := r.NbSamples()
+	if n == 0 {
+		return true, nil
+	}
+	b, err := r.Data().Bytes(1)
+	if err != nil {
+		return false, fmt.Errorf("video: copying audio: %w", err)
+	}
+
+	// Turn the raw little-endian bytes into samples.
+	samples := make([][2]float64, min(n, len(b)/16))
+	for i := range samples {
+		samples[i][0] = math.Float64frombits(binary.LittleEndian.Uint64(b[16*i:]))
+		samples[i][1] = math.Float64frombits(binary.LittleEndian.Uint64(b[16*i+8:]))
+	}
+	return sink.audio(samples), nil
+}

@@ -42,7 +42,10 @@ const maxPatternTile = 2048
 // attr returns the value of the given attribute (property) of the pattern
 // or of the patterns that it refers to (with href), and whether it has it.
 func (g *Pattern) attr(sv *SVG, name string) (string, bool) {
-	for p, n := g, 0; p != nil && n < 10; n++ {
+	// (p is declared on its own, as goscript gives it the type of g in
+	// the loop, which is narrowed to a non-nil pattern in TypeScript)
+	p := g
+	for n := 0; p != nil && n < 10; n++ {
 		if v, ok := p.Properties[name]; ok {
 			return strings.TrimSpace(fmt.Sprint(v)), true
 		}
@@ -67,8 +70,11 @@ func (g *Pattern) ref(sv *SVG) *Pattern {
 
 // content returns the pattern with the children of the pattern (its own
 // or of the patterns that it refers to), and the one with its view box.
-func (g *Pattern) content(sv *SVG) (kids, vb *Pattern) {
-	for p, n := g, 0; p != nil && n < 10; n++ {
+func (g *Pattern) content(sv *SVG) (*Pattern, *Pattern) {
+	// (not in the init of the loop: see attr)
+	var kids, vb *Pattern
+	p := g
+	for n := 0; p != nil && n < 10; n++ {
 		if kids == nil && len(p.Children) > 0 {
 			kids = p
 		}
@@ -77,7 +83,7 @@ func (g *Pattern) content(sv *SVG) (kids, vb *Pattern) {
 		}
 		p = p.ref(sv)
 	}
-	return
+	return kids, vb
 }
 
 // length returns the value of the given attribute of the pattern as a

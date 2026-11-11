@@ -14,11 +14,19 @@ go install cogentcore.org/core@main
 core setup
 ```
 
+If you will use [[video]] in desktop apps, add `-video` to also install [FFmpeg](https://ffmpeg.org), which it uses to decode videos (with Homebrew on macOS, and as the prebuilt builds of [BtbN](https://github.com/BtbN/FFmpeg-Builds) on Linux and Windows, which the core command builds apps with). Apps that do not need video can be built without FFmpeg with the `novideo` build tag.
+
+```sh
+core setup -video
+```
+
 Later, you can update the Cogent Core command line tool and the tools that it uses (such as the [GoScript](https://github.com/s4wave/goscript) compiler and [bun](https://bun.sh) for the js platform) to their latest versions with the following command. Add `-check` to only see which tools have updates.
 
 ```sh
 core update
 ```
+
+Add `-video` to also update FFmpeg (see above).
 
 ## macOS
 

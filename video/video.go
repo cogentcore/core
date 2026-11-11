@@ -8,93 +8,101 @@ package video
 //go:generate core generate
 
 import (
-	"bytes"
-	"encoding/binary"
+	"fmt"
 	"image"
+	"image/color"
+	"sync"
 	"time"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"github.com/cogentcore/reisen"
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/speaker"
+	"cogentcore.org/core/styles"
 )
 
-// Video represents a video playback widget without any controls.
-// See [Player] for a version with controls.
+// Video is a video player widget, with the standard playback controls over
+// the bottom of the video if [Video.Controls] is set.
+// On desktop platforms, the playing itself is a [Playback], which other
+// widgets can show too, and the controls are Cogent Core widgets
+// (see controls_notjs.go); on the web, the video is a video element of the
+// browser, placed at the widget, with the controls of the browser.
 type Video struct { //types:add
-	core.WidgetBase
+	core.Frame
 
 	// Media is the video media.
-	Media *reisen.Media
+	Media *Media
 
 	// degrees of rotation to apply to the video images
 	// 90 = left 90, -90 = right 90
 	Rotation float32
 
-	// setting this to true will stop the playing
-	Stop bool
+	// Muted is whether the audio is not heard (see [Video.SetMuted]).
+	Muted bool `set:"-"`
 
-	frameBuffer <-chan *image.RGBA
+	// Loop is whether to play the video again from the start at its end.
+	Loop bool
 
-	// last frame we have rendered
-	lastFrame *image.RGBA
+	// Controls is whether to show the standard playback controls over the
+	// bottom of the video when the mouse is over it, or it is paused:
+	// play and pause, back and forward 10 seconds, the position (which can
+	// be dragged to seek), the volume, and the time.
+	Controls bool
 
-	// target frame number to be played
-	frameTarg int
+	// Poster is the URL of an image to show before the video plays,
+	// on the web (where the video is a video element of the browser).
+	Poster string
 
-	// actual frame number displayed
-	framePlayed int
+	// playback is the current playing, if any.
+	playback *Playback
 
-	// frame number to stop playing at, if > 0
-	frameStop int
+	// playSize is the size given to Play, for playing again.
+	playSize [2]float32
+
+	// volume is the volume of the audio, from 0 to 1 (0 is full volume,
+	// as the zero value; see [Video.SetVolume]).
+	volume float32
+
+	// controls are the controls, if shown (on desktop platforms).
+	controls *Controls
+
+	// mu protects frame and changed, which are set by the playback.
+	mu sync.Mutex
+
+	// frame is the last frame of the playback, to render.
+	frame *image.RGBA
+
+	// changed is whether frame has changed since it was last rendered.
+	changed bool
+}
+
+func (v *Video) Init() {
+	v.Frame.Init()
+	v.Styler(func(s *styles.Style) {
+		// the black of players around the video (as in its letterbox),
+		// and the containing block of the controls
+		s.Background = colors.Uniform(color.Black)
+		s.Position = styles.PositionRelative
+		s.Padding.Zero()
+		s.Gap.Zero()
+		s.Direction = styles.Column
+	})
+	v.initControls()
 }
 
 func (v *Video) OnAdd() {
-	v.WidgetBase.OnAdd()
+	v.Frame.OnAdd()
 	v.Scene.AddDirectRender(v)
 }
 
 func (v *Video) Destroy() {
+	v.Stop()
+	v.release()
 	v.Scene.DeleteDirectRender(v)
-	// v.Media.Destroy()
-	// todo: frameBuffer
-	v.WidgetBase.Destroy()
-}
-
-// CurrentFrame returns the current frame (for rendering),
-// and whether it is unchanged or not.
-func (v *Video) CurrentFrame() (*image.RGBA, bool) {
-	if !v.IsVisible() {
-		return nil, true
-	}
-	frame := v.lastFrame
-	unchanged := true
-	if v.framePlayed >= v.frameTarg && frame == nil {
-		return nil, true
-	}
-	newFrame, ok := <-v.frameBuffer
-	if !ok && frame == nil {
-		v.Stop = true
-		return nil, true
-	}
-	if ok {
-		frame = newFrame
-		v.lastFrame = frame
-		unchanged = false
-	}
-	v.framePlayed++
-	return frame, unchanged
+	v.Frame.Destroy()
 }
 
 // Open opens the video specified by the given filepath.
 func (v *Video) Open(fpath string) error {
-	// Initialize the audio speaker.
-	err := speaker.Init(sampleRate, SpeakerSampleRate.N(time.Second/10))
-	if err != nil {
-		return err
-	}
-
-	media, err := reisen.NewMedia(fpath)
+	media, err := OpenMedia(fpath, nil)
 	if err != nil {
 		return err
 	}
@@ -102,238 +110,36 @@ func (v *Video) Open(fpath string) error {
 	return nil
 }
 
-// Play starts playing the video at the specified size. Values of 0
-// indicate to use the inherent size of the video for that dimension.
-func (v *Video) Play(width, height float32) error {
-	videoFPS, _ := v.Media.Streams()[0].FrameRate()
-
-	if videoFPS == 0 || videoFPS > 100 {
-		videoFPS = 30
+// TogglePlay plays the video if it is paused, has ended, or has not
+// played yet, and pauses it if it is playing.
+func (v *Video) TogglePlay() {
+	switch {
+	case v.IsPlaying():
+		v.Pause()
+	case v.isPaused():
+		v.Resume()
+	default:
+		v.Play(v.playSize[0], v.playSize[1])
 	}
-	// seconds per frame for frame ticker
-	spf := time.Duration(float64(time.Second) / float64(videoFPS))
-	// fmt.Println(videoFPS, spf)
-
-	// Start decoding streams.
-	var sampleSource <-chan [2]float64
-	frameBuffer, sampleSource, errChan, err := v.ReadVideoAndAudio()
-
-	if err != nil {
-		return err
-	}
-
-	v.frameBuffer = frameBuffer
-
-	start := time.Now()
-	v.Stop = false
-	// todo: should set a v.frameStop target, and also get this as an arg
-	// to set for playing just a snippet.  probably need more general timestamp etc stuff there.
-	v.frameTarg = 0
-	v.framePlayed = 0
-	v.NeedsRender()
-	// Start playing audio samples.
-	speaker.Play(v.StreamSamples(sampleSource))
-	_ = errChan
-
-	go func() {
-		for {
-			// todo: this is causing everything to stop on my sample video that
-			// has an error a ways into it -- maybe need a buffered chan or something?
-			// also see commented-out parts where it tries to send the errors
-			// or something?
-			// select {
-			// case err, ok := <-errChan:
-			// 	if ok {
-			// 		fmt.Println(err)
-			// 		// return err
-			// 	}
-			// default:
-			if v.Stop {
-				return
-			}
-			d := time.Since(start)
-			td := time.Duration(v.frameTarg) * spf
-			shouldStop := v.frameStop > 0 && v.frameTarg >= v.frameStop
-			if d > td && !shouldStop {
-				v.AsyncLock()
-				v.frameTarg++
-				v.NeedsRender()
-				v.AsyncUnlock()
-			} else if v.frameTarg > v.framePlayed {
-				v.AsyncLock()
-				v.NeedsRender()
-				v.AsyncUnlock()
-			} else if shouldStop {
-				return
-			} else {
-				time.Sleep(td - d)
-			}
-		}
-	}()
-	return nil
 }
 
-const (
-	frameBufferSize                   = 1024
-	sampleRate                        = 44100
-	channelCount                      = 2
-	bitDepth                          = 8
-	sampleBufferSize                  = 32 * channelCount * bitDepth * 1024
-	SpeakerSampleRate beep.SampleRate = 44100
-)
-
-// ReadVideoAndAudio reads video and audio frames from the opened media and
-// sends the decoded data to che channels to be played.
-func (v *Video) ReadVideoAndAudio() (<-chan *image.RGBA, <-chan [2]float64, chan error, error) {
-	frameBuffer := make(chan *image.RGBA, frameBufferSize)
-	sampleBuffer := make(chan [2]float64, sampleBufferSize)
-	errs := make(chan error)
-
-	err := v.Media.OpenDecode()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	videoStream := v.Media.VideoStreams()[0]
-	err = videoStream.Open()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	audioStream := v.Media.AudioStreams()[0]
-	err = audioStream.Open()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	go func() {
-		for {
-			packet, gotPacket, err := v.Media.ReadPacket()
-
-			if err != nil {
-				go func(err error) {
-					errs <- err
-				}(err)
-			}
-
-			if !gotPacket {
-				break
-			}
-
-			switch packet.Type() {
-			case reisen.StreamVideo:
-				s := v.Media.Streams()[packet.StreamIndex()].(*reisen.VideoStream)
-				videoFrame, gotFrame, err := s.ReadVideoFrame()
-				_ = err
-
-				// note: this is causing a panic send on closed channel
-				// if err != nil {
-				// 	go func(err error) {
-				// 		errs <- err
-				// 	}(err)
-				// }
-
-				if !gotFrame {
-					break
-				}
-
-				if videoFrame == nil {
-					continue
-				}
-
-				frameBuffer <- videoFrame.Image()
-
-			case reisen.StreamAudio:
-				s := v.Media.Streams()[packet.StreamIndex()].(*reisen.AudioStream)
-				audioFrame, gotFrame, err := s.ReadAudioFrame()
-
-				// note: this is causing a panic send on closed channel
-				// if err != nil {
-				// 	go func(err error) {
-				// 		errs <- err
-				// 	}(err)
-				// }
-
-				if !gotFrame {
-					break
-				}
-
-				if audioFrame == nil {
-					continue
-				}
-
-				// Turn the raw byte data into
-				// audio samples of type [2]float64.
-				reader := bytes.NewReader(audioFrame.Data())
-
-				// See the README.md file for
-				// detailed scheme of the sample structure.
-				for reader.Len() > 0 {
-					sample := [2]float64{0, 0}
-					var result float64
-					err = binary.Read(reader, binary.LittleEndian, &result)
-
-					if err != nil {
-						go func(err error) {
-							errs <- err
-						}(err)
-					}
-
-					sample[0] = result
-
-					err = binary.Read(reader, binary.LittleEndian, &result)
-
-					if err != nil {
-						go func(err error) {
-							errs <- err
-						}(err)
-					}
-
-					sample[1] = result
-					sampleBuffer <- sample
-				}
-			}
-		}
-
-		videoStream.Close()
-		audioStream.Close()
-		v.Media.CloseDecode()
-		close(frameBuffer)
-		close(sampleBuffer)
-		close(errs)
-	}()
-
-	return frameBuffer, sampleBuffer, errs, nil
+// IsMuted returns whether the audio is not heard.
+func (v *Video) IsMuted() bool {
+	return v.Muted
 }
 
-// StreamSamples creates a new custom streamer for
-// playing audio samples provided by the source channel.
-//
-// See https://github.com/faiface/beep/wiki/Making-own-streamers
-// for reference.
-func (v *Video) StreamSamples(sampleSource <-chan [2]float64) beep.Streamer {
-	return beep.StreamerFunc(func(samples [][2]float64) (n int, ok bool) {
-		numRead := 0
+// SkipBy seeks the video by the given time from its position (back for
+// a negative time), as the -10 and +10 controls do.
+func (v *Video) SkipBy(d time.Duration) {
+	v.Seek(v.CurrentTime() + d)
+}
 
-		for i := 0; i < len(samples); i++ {
-			sample, ok := <-sampleSource
-
-			if !ok {
-				numRead = i + 1
-				break
-			}
-
-			samples[i] = sample
-			numRead++
-		}
-
-		if numRead < len(samples) {
-			return numRead, false
-		}
-
-		return numRead, true
-	})
+// formatTime returns the given time as the controls of players show it:
+// m:ss, or h:mm:ss for an hour or more.
+func formatTime(t time.Duration) string {
+	s := int(max(t, 0).Seconds())
+	if s >= 3600 {
+		return fmt.Sprintf("%d:%02d:%02d", s/3600, s/60%60, s%60)
+	}
+	return fmt.Sprintf("%d:%02d", s/60, s%60)
 }
