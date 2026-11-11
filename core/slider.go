@@ -562,14 +562,19 @@ func (sr *Slider) Render() {
 	} else {
 		prevbg := st.Background
 		prevsl := st.StateLayer
-		// use surrounding background with no state layer for surrounding box
-		st.Background = pabg
-		st.StateLayer = 0
-		st.ComputeActualBackground(pabg)
-		// surrounding box (needed to prevent it from rendering over itself)
-		sr.RenderStandardBox()
-		st.Background = prevbg
-		st.StateLayer = prevsl
+		if !transparentBackground(pabg) {
+			// use surrounding background with no state layer for surrounding box
+			st.Background = pabg
+			st.StateLayer = 0
+			st.ComputeActualBackground(pabg)
+			// surrounding box (needed to prevent it from rendering over itself)
+			sr.RenderStandardBox()
+			st.Background = prevbg
+			st.StateLayer = prevsl
+		}
+		// (no surrounding box over a transparent background, which would
+		// clear what is under it, as the video under its controls, whose
+		// widget renders them as a whole: see video.Controls.ChildBackground)
 		st.ComputeActualBackground(pabg)
 
 		trsz := sz.Dim(od) * sr.TrackSize
@@ -630,4 +635,15 @@ func (sr *Slider) ApplyScenePos() {
 	sr.Geom.Pos.Total.SetMin(scmax)
 	sr.setContentPosFromPos()
 	sr.setBBoxesFromAllocs()
+}
+
+// transparentBackground returns whether the given background is a fully
+// transparent color.
+func transparentBackground(bg image.Image) bool {
+	u, ok := bg.(*image.Uniform)
+	if !ok {
+		return false
+	}
+	_, _, _, a := u.RGBA()
+	return a == 0
 }

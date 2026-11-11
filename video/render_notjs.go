@@ -88,10 +88,10 @@ func (v *Video) RenderSource(op draw.Op) composer.Source {
 	}
 
 	// The controls of the scene, over the frame.
-	if c := v.controls; c != nil && c.bar.IsVisible() {
+	if c := v.controls; c != nil && c.IsVisible() {
 		if rd, ok := v.Scene.Renderer.(*rasterx.Renderer); ok {
 			vs.scene = rd.Image()
-			vs.controls = c.bar.Geom.TotalBBox.Intersect(visible)
+			vs.controls = c.Geom.TotalBBox.Intersect(visible)
 			vs.controlsPos = vs.controls.Min.Add(off)
 		}
 	}

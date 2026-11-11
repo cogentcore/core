@@ -61,8 +61,8 @@ type Video struct { //types:add
 	// as the zero value; see [Video.SetVolume]).
 	volume float32
 
-	// controls are the widgets of the controls, if shown.
-	controls *controls
+	// controls are the controls, if shown (on desktop platforms).
+	controls *Controls
 
 	// mu protects frame and changed, which are set by the playback.
 	mu sync.Mutex
@@ -121,6 +121,11 @@ func (v *Video) TogglePlay() {
 	default:
 		v.Play(v.playSize[0], v.playSize[1])
 	}
+}
+
+// IsMuted returns whether the audio is not heard.
+func (v *Video) IsMuted() bool {
+	return v.Muted
 }
 
 // SkipBy seeks the video by the given time from its position (back for

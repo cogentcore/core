@@ -147,6 +147,17 @@ func (p *Playback) SetVolume(volume float32) {
 	}
 }
 
+// Audio returns the volume of the audio, from 0 to 1, and whether it is
+// muted (see [Playback.SetVolume] and [Playback.SetMuted]).
+func (p *Playback) Audio() (volume float32, muted bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.Volume == 0 {
+		return 1, p.Muted
+	}
+	return p.Volume, p.Muted
+}
+
 // start starts decoding the media from the given time, and playing its
 // audio, if any (also when it is muted, so that it can be heard later).
 func (p *Playback) start(t time.Duration, done chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
@@ -156,7 +167,7 @@ func (p *Playback) start(t time.Duration, done chan struct{}) (<-chan Frame, <-c
 		return frames, samples, errs, err
 	}
 	p.mu.Lock()
-	p.audio = playAudio(samples, p.paused, p.Volume, p.Muted)
+	p.audio = playAudio(samples, p.paused, p.Volume, p.Muted) // (with the lock, as SetMuted)
 	p.mu.Unlock()
 	return frames, samples, errs, nil
 }

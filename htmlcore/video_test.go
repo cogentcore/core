@@ -17,8 +17,9 @@ import (
 	"golang.org/x/net/html"
 )
 
-// TestVideoBox tests that a video element is an image of its poster, of
-// 300 by 150 without one, as a replaced element, with the URL of its video.
+// TestVideoBox tests that a video element is a [VideoBox] with an image of
+// its poster, of the size of the poster, or of 300 by 150 without one, as a
+// replaced element (with its aspect for a width), with the URL of its video.
 func TestVideoBox(t *testing.T) {
 	src := `<div style="width: 800px"><video id="a" src="a.mp4"><p>no video</p></video><br>` +
 		`<video id="b" width="600"><source src="b.webm" type="video/webm"><source src="b.mp4"></video><br>` +
@@ -27,22 +28,25 @@ func TestVideoBox(t *testing.T) {
 	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
 		for _, id := range []string{"a", "b", "c", "d"} {
 			require.NotNil(t, ws[id], id)
-			_, isImage := ws[id].This.(*core.Image)
-			assert.True(t, isImage, id)
+			vb, ok := ws[id].This.(*VideoBox)
+			require.True(t, ok, id)
+			require.NotNil(t, vb.Image, id)
 		}
 		// (within the rounding and spacing of an img of the same size)
 		size := func(id string) math32.Vector2 { return ws[id].Geom.Size.Actual.Total }
 		assert.InDelta(t, 300*dp, size("a").X, 5)
 		assert.InDelta(t, 150*dp, size("a").Y, 5)
-		assert.Equal(t, 0, ws["a"].NumChildren(), "its children are not shown")
+		assert.Equal(t, 1, ws["a"].NumChildren(), "its children are not shown, only its image")
 		// the aspect ratio of the video (the default one, until it is known)
 		assert.InDelta(t, 600*dp, size("b").X, 5)
 		assert.InDelta(t, 300*dp, size("b").Y, 5)
 		assert.InDelta(t, 800*dp, size("c").X, 5)
 		assert.InDelta(t, 400*dp, size("c").Y, 5)
-		// the size of its poster
+		// the size of its poster, which its image fills
 		assert.InDelta(t, 40*dp, size("d").X, 5)
 		assert.InDelta(t, 20*dp, size("d").Y, 5)
+		d := ws["d"].This.(*VideoBox)
+		assert.Equal(t, d.Geom.Size.Actual.Content, d.Image.Geom.Size.Actual.Total)
 
 		assert.Equal(t, "a.mp4", VideoSourceOf(ws["a"].This.(core.Widget)))
 		assert.Equal(t, "b.webm", VideoSourceOf(ws["b"].This.(core.Widget)), "its first source")

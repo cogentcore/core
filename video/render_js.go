@@ -27,6 +27,7 @@ func (vs *videoSource) Draw(c composer.Composer) {
 	cw := c.(*composer.ComposerWeb)
 	e := vs.v.element()
 	cw.SetElementContext(vs.v.This, e)
+	cw.SetElementBelow(vs.v.This) // (under the canvas, see video_js.go)
 	cw.SetElementGeom(e, vs.rect.Min, vs.rect.Size())
 	cw.SetElementClip(e, vs.rect, vs.visible)
 }

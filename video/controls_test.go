@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/states"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,10 +30,14 @@ func TestVideoControls(t *testing.T) {
 	})
 	require.NoError(t, v.Open("testdata/short.mp4"))
 	b.RenderImage(func() {}, func() {
+		// with the lock of the widgets, as in the event loop, released
+		// while waiting for the playback
+		b.AsyncLock()
+		defer b.AsyncUnlock()
 		c := v.controls
 		require.NotNil(t, c, "the controls")
 		assert.Equal(t, icons.PlayArrow, c.play.Icon)
-		assert.False(t, c.bar.StateIs(states.Invisible), "shown before it plays")
+		assert.True(t, c.IsShown(), "shown before it plays")
 		assert.True(t, v.RenderGroup())
 
 		// it is decoded at the size that fits in its box, up to its own
@@ -48,7 +51,7 @@ func TestVideoControls(t *testing.T) {
 		require.NoError(t, v.Play(0, 0))
 		assert.Equal(t, 64, v.playback.Width)
 		assert.Equal(t, icons.Pause, c.play.Icon)
-		require.Eventually(t, v.hasFrame, 2*time.Second, 10*time.Millisecond)
+		waitUnlocked(t, b, v.hasFrame)
 
 		// the play button pauses and resumes it
 		c.play.Send(events.Click)
@@ -60,8 +63,8 @@ func TestVideoControls(t *testing.T) {
 		// the time, after a seek while paused
 		v.Pause()
 		v.Seek(600 * time.Millisecond)
-		require.Eventually(t, func() bool { return v.CurrentTime() >= 600*time.Millisecond }, 2*time.Second, 10*time.Millisecond)
-		v.updatePosition(v.CurrentTime())
+		waitUnlocked(t, b, func() bool { return v.CurrentTime() >= 600*time.Millisecond })
+		c.SetTime(v.CurrentTime())
 		assert.Equal(t, "0:00 / 0:01", c.time.Text)
 		assert.InDelta(t, 1.0, c.position.Max, 0.01)
 
@@ -76,13 +79,22 @@ func TestVideoControls(t *testing.T) {
 
 		// the controls hide after the mouse stops, while it plays
 		v.Resume()
-		v.setControlsShown(true)
-		v.setControlsShown(false)
-		assert.True(t, c.bar.StateIs(states.Invisible))
+		c.SetShown(true)
+		c.SetShown(false)
+		assert.False(t, c.IsShown())
 		v.Pause()
-		assert.False(t, c.bar.StateIs(states.Invisible), "shown when paused")
+		assert.True(t, c.IsShown(), "shown when paused")
 		v.Stop()
 	})
+}
+
+// waitUnlocked waits for the given condition with the lock of the widgets
+// of the given body released, as the playback shows its frames with it.
+func waitUnlocked(t *testing.T, b *core.Body, cond func() bool) {
+	t.Helper()
+	b.AsyncUnlock()
+	defer b.AsyncLock()
+	require.Eventually(t, cond, 2*time.Second, 10*time.Millisecond)
 }
 
 func TestFitRect(t *testing.T) {
@@ -96,4 +108,45 @@ func TestFormatTime(t *testing.T) {
 	assert.Equal(t, "0:00", formatTime(0))
 	assert.Equal(t, "1:05", formatTime(65*time.Second))
 	assert.Equal(t, "1:01:05", formatTime(time.Hour+65*time.Second))
+}
+
+func TestControlsZone(t *testing.T) {
+	b := core.NewBody()
+	v := NewVideo(b)
+	v.Controls = true
+	v.Muted = true
+	v.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(320)
+		s.Min.Y.Dp(240)
+	})
+	require.NoError(t, v.Open("testdata/short.mp4"))
+	b.RenderImage(func() {}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		c := v.controls
+		vb := v.Geom.TotalBBox
+		mid := image.Pt((vb.Min.X+vb.Max.X)/2, 0)
+		at := func(y int) image.Point { return image.Pt(mid.X, y) }
+		assert.False(t, c.inZone(at(vb.Min.Y+10)), "the top")
+		assert.False(t, c.inZone(at((vb.Min.Y+vb.Max.Y)/2)), "the middle")
+		assert.True(t, c.inZone(at(vb.Max.Y-5)), "the bottom")
+		assert.False(t, c.inZone(at(vb.Max.Y+5)), "below the video")
+
+		// moving over the middle of a playing video does not show them, and
+		// hides them soon after the mouse moves out of the bottom
+		v.Loop = true
+		require.NoError(t, v.Play(0, 0))
+		c.SetShown(false)
+		c.mouseMoved(at((vb.Min.Y + vb.Max.Y) / 2))
+		assert.False(t, c.IsShown())
+		c.mouseMoved(at(vb.Max.Y - 5))
+		assert.True(t, c.IsShown())
+		c.mouseMoved(at(vb.Min.Y + 10))
+		assert.True(t, c.IsShown(), "until the delay")
+		b.AsyncUnlock()
+		time.Sleep(controlsLeaveDelay + 200*time.Millisecond)
+		b.AsyncLock()
+		assert.False(t, c.IsShown(), "after the delay")
+		v.Stop()
+	})
 }

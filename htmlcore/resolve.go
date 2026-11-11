@@ -881,7 +881,7 @@ func (r *resolver) sizes() {
 		s.Min.X, s.Max.X = *st.width, *st.width
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
-		isImage = isImage || r.isIframe() || r.isVideo() // (replaced elements)
+		isImage = isImage || r.isIframe() // (replaced elements)
 		if st.width.Unit == units.UnitPw && !isImage {
 			// A percentage of the width of the parent fills that much
 			// of it, which as a minimum would make a parent that is as

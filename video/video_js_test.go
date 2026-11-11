@@ -121,8 +121,9 @@ func TestVideoElementPlaced(t *testing.T) {
 	assert.Equal(t, "320px", st.Get("width").String())
 	assert.Equal(t, "240px", st.Get("height").String())
 	assert.Equal(t, "", st.Get("clipPath").String())
-	assert.True(t, e.Get("controls").Bool())
-	assert.Equal(t, "auto", st.Get("pointerEvents").String(), "the controls get the events")
+	assert.False(t, e.Get("controls").Bool(), "not those of the browser")
+	assert.Equal(t, "none", st.Get("pointerEvents").String(), "the canvas gets the events")
+	assert.Equal(t, "-1", st.Get("zIndex").String(), "under the canvas")
 
 	// Scrolled half out of its parent, and then out of view.
 	e = draw(image.Rect(10, 140, 330, 260))
@@ -139,7 +140,7 @@ func TestVideoElementPlaced(t *testing.T) {
 }
 
 func TestVideoAutoplayBlocked(t *testing.T) {
-	// A video with sound plays muted, with the controls of the browser to
+	// A video with sound plays muted, with the controls to
 	// turn it on, when the browser does not play it without a user gesture.
 	v := newVideo(t)
 	v.Muted = false
@@ -149,8 +150,7 @@ func TestVideoAutoplayBlocked(t *testing.T) {
 	if !e.Get("muted").Bool() {
 		t.Skip("this browser plays videos with sound without a user gesture")
 	}
-	assert.True(t, e.Get("controls").Bool())
-	assert.Equal(t, "auto", e.Get("style").Get("pointerEvents").String())
+	assert.True(t, v.Muted)
 
 	// it stays muted as it is drawn again (the attributes are only set
 	// when the fields of the video change)

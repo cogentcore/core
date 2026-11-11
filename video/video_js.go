@@ -14,8 +14,10 @@ import (
 )
 
 // On the web, a [Video] is a video element of the browser, which decodes
-// and plays it (with its audio), placed over the canvas at the widget by
-// its render source (see render_js.go).
+// and plays it (with its audio), placed under the canvas at the widget by
+// its render source (see render_js.go), where the region of the video in the
+// scene is transparent (see [Video.Render]), so that its [Controls] are
+// over it, as on desktop platforms. The canvas gets the events.
 
 // elements are the video elements of the videos. A video keeps its element
 // while it exists, as the element has the state of the playing, and the
@@ -30,17 +32,9 @@ var applied = map[*Video]attributes{}
 
 // attributes are the attributes of a video element from its [Video].
 type attributes struct {
-	muted, loop, controls bool
-	volume                float32
+	muted, loop bool
+	volume      float32
 }
-
-// controls are the controls of a video, which are those of the browser
-// on the web (see [Video.Controls]).
-type controls struct{}
-
-// initControls does nothing on the web, where the controls are those of
-// the browser.
-func (v *Video) initControls() {}
 
 // element returns the video element of the video, making it the first time,
 // with the source of its media.
@@ -50,15 +44,30 @@ func (v *Video) element() js.Value {
 		e = js.Global().Get("document").Call("createElement", "video")
 		e.Set("playsInline", true)
 		e.Set("preload", "auto")
-		e.Get("style").Set("objectFit", "contain")
+		st := e.Get("style")
+		st.Set("objectFit", "contain")
+		st.Set("background", "black")   // (as players, around the video)
+		st.Set("pointerEvents", "none") // (the canvas gets the events)
 		e.Call("addEventListener", "loadedmetadata", js.FuncOf(func(this js.Value, args []js.Value) any {
 			go v.metadataLoaded(e.Get("videoWidth").Int(), e.Get("videoHeight").Int(), e.Get("duration").Float())
 			return nil
 		}))
-		// the changes of the volume by the user (with the controls)
+		// the changes of the volume (as by the autoplay policy)
 		e.Call("addEventListener", "volumechange", js.FuncOf(func(this js.Value, args []js.Value) any {
 			v.Muted, v.volume = e.Get("muted").Bool(), float32(e.Get("volume").Float())
 			applied[v] = v.attributes()
+			go v.refreshControls(false)
+			return nil
+		}))
+		// the controls show the state and time of the playing
+		for _, ev := range []string{"play", "playing", "pause", "ended", "durationchange"} {
+			e.Call("addEventListener", ev, js.FuncOf(func(this js.Value, args []js.Value) any {
+				go v.refreshControls(false)
+				return nil
+			}))
+		}
+		e.Call("addEventListener", "timeupdate", js.FuncOf(func(this js.Value, args []js.Value) any {
+			go v.refreshControls(true)
 			return nil
 		}))
 		elements[v] = e
@@ -77,20 +86,12 @@ func (v *Video) setAttributes(e js.Value) {
 		applied[v] = a
 		e.Set("muted", a.muted)
 		e.Set("loop", a.loop)
-		e.Set("controls", a.controls)
 		e.Set("volume", a.volume)
 	}
 	if e.Get("poster").String() != v.Poster {
 		e.Set("poster", v.Poster)
 	}
-	// The canvas gets the events of the widget, unless the controls of
-	// the browser are shown.
-	pe := "none"
-	if v.Controls {
-		pe = "auto"
-	}
 	st := e.Get("style")
-	st.Set("pointerEvents", pe)
 	tr := ""
 	if v.Rotation != 0 {
 		tr = fmt.Sprintf("rotate(%gdeg)", -v.Rotation)
@@ -118,7 +119,7 @@ func (v *Video) metadataLoaded(width, height int, duration float64) {
 
 // attributes returns the attributes of the video element from the video.
 func (v *Video) attributes() attributes {
-	return attributes{muted: v.Muted, loop: v.Loop, controls: v.Controls, volume: v.Volume()}
+	return attributes{muted: v.Muted, loop: v.Loop, volume: v.Volume()}
 }
 
 // release removes the video element of the video.
@@ -147,7 +148,7 @@ func (v *Video) Play(width, height float32) error {
 // play plays the video element. Browsers only play a video with sound
 // after a user gesture (their autoplay policy), so if the browser does not
 // play it for that (NotAllowedError), it is played muted, with the controls
-// of the browser shown, with which the user can turn the sound on.
+// shown, with which the user can turn the sound on.
 func (v *Video) play(e js.Value) {
 	p := e.Call("play")
 	if !p.Truthy() || !p.Get("catch").Truthy() {
@@ -158,9 +159,16 @@ func (v *Video) play(e js.Value) {
 			return nil
 		}
 		if args[0].Get("name").String() == "NotAllowedError" && !e.Get("muted").Bool() {
-			v.Muted, v.Controls = true, true
+			v.Muted = true
 			v.setAttributes(e)
 			e.Call("play")
+			go func() {
+				if !v.Controls && v.AsyncLockIfShown() {
+					v.Controls = true
+					v.Update()
+					v.AsyncUnlock()
+				}
+			}()
 			return nil
 		}
 		fmt.Println("video: the browser did not play", v.Media.Path+":", args[0].Call("toString").String())
@@ -246,5 +254,37 @@ func (v *Video) SetVolume(volume float32) {
 	v.volume = max(min(volume, 1), 1e-6)
 	if e, ok := elements[v]; ok {
 		v.setAttributes(e)
+	}
+}
+
+// refreshControls updates the controls for the state of the video element,
+// or only its time if timeOnly (from the events of the element).
+func (v *Video) refreshControls(timeOnly bool) {
+	if v.controls == nil || !v.AsyncLockIfShown() {
+		return
+	}
+	defer v.AsyncUnlock()
+	if c := v.controls; c != nil {
+		if timeOnly {
+			c.SetTime(v.CurrentTime())
+		} else {
+			c.Refresh()
+		}
+	}
+}
+
+// updateControls updates the controls for the state of the video.
+func (v *Video) updateControls() {
+	if c := v.controls; c != nil {
+		c.Refresh()
+	}
+}
+
+// Render renders the box of the video, whose content is left transparent,
+// for the video element under the canvas.
+func (v *Video) Render() {
+	v.Frame.Render()
+	if _, ok := elements[v]; ok {
+		v.Scene.Painter.BlitBox(v.Geom.Pos.Content, v.Geom.Size.Actual.Content, nil)
 	}
 }

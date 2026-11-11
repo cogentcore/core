@@ -192,3 +192,10 @@ func (v *Video) SetVolume(volume float32) {
 
 // release releases the resources of the video (none on desktop).
 func (v *Video) release() {}
+
+// updateControls updates the controls for the state of the video.
+func (v *Video) updateControls() {
+	if c := v.controls; c != nil {
+		c.Refresh()
+	}
+}
