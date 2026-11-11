@@ -48,6 +48,9 @@ func buildHTMLOnly(c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	if err := copyFiles(c); err != nil {
+		return err
+	}
 	return makeIcons(c)
 }
 

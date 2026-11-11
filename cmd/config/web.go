@@ -50,6 +50,12 @@ type Web struct { //types:add
 	// linking the app.
 	Image string
 
+	// Files are files and directories of the app (relative to its directory,
+	// with glob patterns) that are copied into the website at the same
+	// relative paths, so that the app can load them from relative URLs,
+	// such as videos (as in video.Video.Open("deer.mp4")) and other media.
+	Files []string
+
 	// Styles is a list of URLs to CSS stylesheets that are loaded in the HTML page.
 	// This is often used for custom fonts; see https://cogentcore.org/core/font.
 	Styles []string

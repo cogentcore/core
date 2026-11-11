@@ -54,6 +54,10 @@ func finishBuild(c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	err = copyFiles(c)
+	if err != nil {
+		return err
+	}
 	reportBundle(c, total, startup)
 	return nil
 }
