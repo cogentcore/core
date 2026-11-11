@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 )
@@ -382,5 +383,52 @@ func TestTextFieldSetCursorPos(t *testing.T) {
 		assert.Equal(t, 11, tf.CursorPos(), "at most its end")
 		tf.SetCursorPos(-1)
 		assert.Equal(t, 0, tf.CursorPos())
+	})
+}
+
+// TestTextFieldSlideOverDrag tests that sliding in a text field that has
+// the focus (to select its text, as it is edited) has priority over
+// dragging the widget that it is in (as a row of a tree table), and that
+// the widget is dragged from a text field that does not have the focus.
+func TestTextFieldSlideOverDrag(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Draggable) })
+	dragged := 0
+	row.On(events.DragStart, func(e events.Event) {
+		dragged++
+		row.Scene.Events.DragStart(row, "row", e)
+	})
+	tf := NewTextField(row).SetText("some text to select")
+	slide := func() {
+		b.AsyncLock()
+		bb := tf.Geom.TotalBBox
+		b.AsyncUnlock()
+		from := image.Pt(bb.Min.X+8, (bb.Min.Y+bb.Max.Y)/2)
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		ev.MouseButton(events.MouseDown, events.Left, from, 0)
+		time.Sleep(200 * time.Millisecond) // (past the time to start a drag)
+		for i := 1; i <= 8; i++ {
+			ev.MouseMove(from.Add(image.Pt(10*i, 0)))
+			time.Sleep(10 * time.Millisecond)
+		}
+		ev.MouseButton(events.MouseUp, events.Left, from.Add(image.Pt(80, 0)), 0)
+		time.Sleep(50 * time.Millisecond)
+	}
+	unfocus := func() {
+		b.AsyncLock()
+		b.Scene.Events.focusClear() // (the first text field of a window has it)
+		b.AsyncUnlock()
+	}
+	b.RenderImage(unfocus, slide, func() {
+		assert.Equal(t, 1, dragged, "dragged from a text field without the focus")
+		b.AsyncLock()
+		tf.SetFocus()
+		b.AsyncUnlock()
+	}, slide, func() {
+		assert.Equal(t, 1, dragged, "not dragged from the text field being edited")
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.True(t, tf.hasSelection(), "its text is selected")
 	})
 }

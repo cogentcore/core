@@ -375,6 +375,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 
 	var press, dragPress, slidePress, move, up, repeatClick Widget
 	slidePriority := false // see [abilities.SlidePriority]
+	// the widget that has the focus before the press (which may give it to
+	// another), in which sliding (as selecting the text of a text field that
+	// is being edited) has priority over dragging the widgets around it (as
+	// the rows of a tree table)
+	editing := em.focus
 	for i := n - 1; i >= 0; i-- {
 		w := em.mouseInBBox[i]
 		wb := w.AsWidget()
@@ -418,7 +423,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 					continue
 				}
 				slidePress = w
-				slidePriority = wb.AbilityIs(abilities.SlidePriority)
+				slidePriority = wb.AbilityIs(abilities.SlidePriority) || (!tree.IsNil(editing) && w == editing)
 			}
 			if repeatClick == nil && wb.Styles.Abilities.Is(abilities.RepeatClickable) {
 				repeatClick = w
