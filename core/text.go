@@ -12,6 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
@@ -464,9 +465,12 @@ func (tx *Text) copy() { //types:add
 	tx.selectReset()
 }
 
+// Label returns the text of the text, elided to 16 characters (as in the
+// tree of an inspector, where it was cut short by the panel), or its name
+// if it has no text.
 func (tx *Text) Label() string {
 	if tx.Text != "" {
-		return tx.Text
+		return elide.End(strings.Join(strings.Fields(tx.Text), " "), 16)
 	}
 	return tx.Name
 }
