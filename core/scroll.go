@@ -164,7 +164,13 @@ func (fr *Frame) positionScroll(d math32.Dims) {
 		return
 	}
 	if ssz.X <= 0 || ssz.Y <= 0 {
+		// a scrollbar of no width is not shown, but the frame still
+		// scrolls (by the wheel, as with scrollbar-width: none in CSS)
 		sb.SetState(true, states.Invisible)
+		sb.Max = maxSize
+		sb.SetVisiblePercent(visPct)
+		sb.SetValue(sb.Value) // keep in range
+		fr.This.(Layouter).SetScrollParams(d, sb)
 		return
 	}
 	sb.SetState(false, states.Invisible)

@@ -335,7 +335,7 @@ func (fr *Frame) LayoutFrame(size math32.Vector2) {
 // GetSize, DoLayout, Render.  Needed after Config.
 func (sc *Scene) LayoutRenderScene() {
 	sc.LayoutScene()
-	sc.RenderWidget()
+	sc.renderWhole()
 }
 
 func (sc *Scene) Render() {
@@ -363,9 +363,26 @@ func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
+	var again map[*WidgetBase]bool // (see below)
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		if cwb.hasFlag(widgetNeedsRender) {
 			cwb.setFlag(false, widgetChildNeedsRender)
+			if a := cwb.seeThroughRoot(); a != nil {
+				// it would paint over its last render, so the widget that
+				// it is in with an opaque background is rendered again, with
+				// what is under it (once, for all of the widgets in it)
+				if !again[a] {
+					if again == nil {
+						again = map[*WidgetBase]bool{}
+					}
+					again[a] = true
+					a.This.(Widget).RenderWidget()
+					for p := a.parentWidget(); p != nil; p = p.parentWidget() {
+						p.renderRaised()
+					}
+				}
+				return tree.Break
+			}
 			cw.RenderWidget()
 			// the widgets in it that are raised to the widgets that it is in,
 			// which are not rendered now, are rendered over it
@@ -383,16 +400,25 @@ func (wb *WidgetBase) doNeedsRender() {
 				dwb.setFlag(false, widgetChildNeedsRender)
 				return tree.Continue
 			})
-			// not when it is covered by widgets rendered over it, which it
-			// would paint over (as a playing video under a dialog of a
-			// page, see [WidgetBase.IsInvisible])
-			if cwb.isCovered() {
+			// not when it is covered by widgets rendered over it in the
+			// image of the scene, which it would paint over (as a playing
+			// video under an absolute dialog of a page), but it is when they
+			// are in the layer of the scene (as a fixed dialog), which is
+			// composed over it (see [WidgetBase.isCovered] and [sceneLayer])
+			covered, over := cwb.coverage(false)
+			if covered {
 				return tree.Break
 			}
 			cw.RenderWidget()
 			// (with the widgets raised over it, as below)
 			for p := cwb.parentWidget(); p != nil; p = p.parentWidget() {
 				p.renderRaised()
+			}
+			// and the widgets that are over a part of it, which it painted
+			// over (as the controls of a player of a page over its playing
+			// video, which flickered as they were rendered again)
+			for _, ow := range over {
+				ow.RenderWidget()
 			}
 			return tree.Break
 		}
@@ -541,6 +567,9 @@ func (wb *WidgetBase) StartRender() bool {
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
 	if wb.Scene == nil {
+		return false
+	}
+	if l := &wb.Scene.layer; l.mode != layerOff && !l.layerStart(wb.Scene, wb) {
 		return false
 	}
 	pc := &wb.Scene.Painter
@@ -828,7 +857,10 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	if wb.Styles.Background == nil && wb.inTransparentOverlap() {
+	// (no background, or a transparent one, as the controls of the video
+	// players of npr.org, which painted the black of the player over their
+	// video when they were rendered after it)
+	if (wb.Styles.Background == nil || transparentBackground(wb.Styles.Background)) && wb.inTransparentOverlap() {
 		// An absolute or fixed widget is painted over the widgets that it overlaps,
 		// so without a background of its own it does not paint that of its
 		// parent over them (its actual background is kept for its content),
@@ -875,6 +907,41 @@ func (wb *WidgetBase) RenderStandardBox() {
 		return
 	}
 	wb.Scene.Painter.StandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
+}
+
+// seeThroughRoot returns, for a widget that does not paint an opaque
+// background and is painted over the widgets that it overlaps (see
+// [WidgetBase.inTransparentOverlap]), so that rendering it alone would paint
+// over its last render (as the anti-aliased text of the items of the
+// sidebar of MDN, of a transparent background, which grew bold as they were
+// hovered), the nearest widget that it is in that paints an opaque
+// background (or the top one), which is rendered again for it. It returns
+// nil for other widgets, and for those in the layer of the scene, which is
+// cleared as it is rendered again (see [sceneLayer]).
+func (wb *WidgetBase) seeThroughRoot() *WidgetBase {
+	if wb.hasFlag(widgetInLayer) || paintsOpaqueBackground(wb) || !wb.inTransparentOverlap() {
+		return nil
+	}
+	for p := wb.parentWidget(); p != nil; p = p.parentWidget() {
+		if paintsOpaqueBackground(p) || p.parentWidget() == nil {
+			return p
+		}
+	}
+	return nil
+}
+
+// paintsOpaqueBackground returns whether the widget paints an opaque
+// background over all of its box.
+func paintsOpaqueBackground(wb *WidgetBase) bool {
+	bg := wb.Styles.Background
+	if bg == nil || wb.Styles.Opacity < 1 || wb.Styles.Border.Radius.Dots() != (sides.Floats{}) {
+		return false
+	}
+	if u, ok := bg.(*image.Uniform); ok {
+		_, _, _, a := u.RGBA()
+		return a == 0xffff
+	}
+	return true // (as an image, or a gradient)
 }
 
 // inRoundedCorners returns whether the widget is in the rounded corners of

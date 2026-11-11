@@ -996,6 +996,13 @@ func (r *resolver) sizes() {
 	if (st.overflowHidden[0] || s.Overflow.X == styles.OverflowVisible) &&
 		(st.overflowHidden[1] || s.Overflow.Y == styles.OverflowVisible) && (st.overflowHidden[0] || st.overflowHidden[1]) {
 		s.ScrollbarWidth.Zero() // hidden, not scrolled
+	} else if s.ScrollbarWidth.Value == 0 && (s.Overflow.X >= styles.OverflowAuto || s.Overflow.Y >= styles.OverflowAuto) {
+		// a box that scrolls has scrollbars, whose width is inherited in
+		// core but not in CSS: not the zero width of a box that it is in
+		// whose overflow is hidden (as the body of pexels.com while its
+		// dialog is open, whose overflow: auto overlay did not scroll)
+		s.ScrollbarWidth = styles.DefaultScrollbarWidth
+		s.ScrollbarWidth.ToDots(&s.UnitContext)
 	}
 	if s.Overflow.X >= styles.OverflowAuto && s.Shrink.X == 0 {
 		// a box that scrolls is as wide as its content, narrowed to fit

@@ -183,7 +183,7 @@ func (em *Events) handleExternalDrag(de *events.DragDrop) {
 		return
 	}
 	em.mouseInBBox = nil
-	em.getMouseInBBox(em.scene, de.Pos())
+	em.getMouseInBBox(em.scene, de.Pos(), false)
 	var hovs []Widget
 	for _, w := range em.mouseInBBox {
 		if w.AsWidget().AbilityIs(abilities.Droppable) {

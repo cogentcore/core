@@ -183,6 +183,26 @@ func TestReread(t *testing.T) {
 			return nil, []*html.Node{b}
 		}, "top", "list", "i1", "para", "after")
 	})
+	// the elements in one that is not displayed, in an element of more than
+	// can be read again (as the video players in the hidden dialogs of
+	// npr.org, in its main element), have no widgets to read again
+	inHidden := strings.Replace(page, `<div id="after"`, `<div id="big">`+strings.Repeat(`<span>x</span>`, maxReread)+
+		`<div id="dialog" class="hidden"><div id="d1" class="hidden">one</div><p id="d2">two</p></div></div><div id="after"`, 1)
+	t.Run("in hidden", func(t *testing.T) {
+		testReread(t, inHidden, true, func(doc *html.Node) (self, children []*html.Node) {
+			d1, d2 := elementByID(doc, "d1"), elementByID(doc, "d2")
+			setAttr(d1, "class", "item")
+			appendHTML(t, d2, `<b>more</b>`)
+			return []*html.Node{d1}, []*html.Node{d2}
+		}, "big", "list", "after")
+	})
+	t.Run("hidden shown", func(t *testing.T) {
+		testReread(t, inHidden, false, func(doc *html.Node) (self, children []*html.Node) {
+			d := elementByID(doc, "dialog")
+			setAttr(d, "class", "")
+			return []*html.Node{d}, nil
+		})
+	})
 	t.Run("html", func(t *testing.T) {
 		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
 			h := elementByID(doc, "top").Parent.Parent.Parent

@@ -361,7 +361,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 	}
 
 	em.mouseInBBox = nil
-	em.getMouseInBBox(sc, pos)
+	em.getMouseInScene(sc, pos)
 	em.mouseInBBox = sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
@@ -798,7 +798,11 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 	})
 }
 
-func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
+// getMouseInBBox adds the widgets from the given one down that are under the
+// given position to [Events.mouseInBBox], in the order of the tree. If
+// layerOnly is true, it only goes into the widgets that are in the layer of
+// the scene or have widgets in it (see [Events.getMouseInScene]).
+func (em *Events) getMouseInBBox(w Widget, pos image.Point, layerOnly bool) {
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 		// we do not handle disabled here so that
@@ -813,6 +817,9 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 			// is clickable (as a hidden checkbox over a button) gets events
 			return tree.Break
 		}
+		if layerOnly && !cwb.hasFlag(widgetInLayer) && !cwb.hasFlag(widgetHasLayer) {
+			return tree.Break // nothing of the layer in it
+		}
 		if !cwb.posInScBBox(pos) {
 			if cwb.noClip() {
 				// its children can be outside of it (as positioned ones,
@@ -825,18 +832,38 @@ func (em *Events) getMouseInBBox(w Widget, pos image.Point) {
 			em.mouseInBBox = append(em.mouseInBBox, cw)
 		}
 		if cwb.Parts != nil {
-			em.getMouseInBBox(cwb.Parts, pos)
+			em.getMouseInBBox(cwb.Parts, pos, layerOnly)
 		}
 		if ly := AsFrame(cw); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					sb := ly.Scrolls[d]
-					em.getMouseInBBox(sb, pos)
+					em.getMouseInBBox(sb, pos, layerOnly)
 				}
 			}
 		}
 		return tree.Continue
 	})
+}
+
+// getMouseInScene adds the widgets of the scene under the given position to
+// [Events.mouseInBBox] (see [Events.getMouseInBBox]), only those in its layer
+// and the widgets that they are in if one of those in the layer is under it
+// (see [sceneLayer]), as on a dialog of a web page: the layer is rendered
+// over all of the other widgets, so one of them is on top, and the widgets
+// under it would not get the events (see [sortByRenderLayer]), so the
+// widgets of the page under it are not gone through.
+func (em *Events) getMouseInScene(sc *Scene, pos image.Point) {
+	if sc.layer.active {
+		em.getMouseInBBox(sc, pos, true)
+		for _, w := range em.mouseInBBox {
+			if w.AsWidget().hasFlag(widgetInLayer) {
+				return
+			}
+		}
+		em.mouseInBBox = em.mouseInBBox[:0]
+	}
+	em.getMouseInBBox(sc, pos, false)
 }
 
 // WidgetAt returns the widget that mouse events at the given position (in
@@ -847,7 +874,7 @@ func (sc *Scene) WidgetAt(pos image.Point) Widget {
 	em := &sc.Events
 	saved := em.mouseInBBox
 	em.mouseInBBox = nil
-	em.getMouseInBBox(sc, pos)
+	em.getMouseInScene(sc, pos)
 	ws := sortByRenderLayer(em.mouseInBBox)
 	em.mouseInBBox = saved
 	if len(ws) == 0 {

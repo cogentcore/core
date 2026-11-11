@@ -116,6 +116,10 @@ type Scene struct { //core:no-new
 	// instead of rendering into the Scene Painter.
 	directRenders []Widget
 
+	// layer is the compositing layer of the scene, into which its fixed
+	// widgets are rendered (see [sceneLayer]).
+	layer sceneLayer
+
 	// this is our own text shaper in case we don't have a render context
 	textShaper shaped.Shaper
 
@@ -364,6 +368,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	sc.Painter.State.Init(sc.Painter.Paint, sz)
 	sc.Renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
+	sc.layer.resize(sc)
 
 	// sc.updateScene() // note: doing this every resize can be very expensive, and is unnec in general. really you just need a layout.
 	// The scene is restyled by its next update, before it is laid out, so

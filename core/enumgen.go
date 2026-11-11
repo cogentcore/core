@@ -725,16 +725,16 @@ func (i *TextFieldTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "TextFieldTypes")
 }
 
-var _widgetFlagsValues = []widgetFlags{0, 1, 2}
+var _widgetFlagsValues = []widgetFlags{0, 1, 2, 3, 4}
 
 // widgetFlagsN is the highest valid value for type widgetFlags, plus one.
-const widgetFlagsN widgetFlags = 3
+const widgetFlagsN widgetFlags = 5
 
-var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1, `ChildNeedsRender`: 2}
+var _widgetFlagsValueMap = map[string]widgetFlags{`ValueNewWindow`: 0, `NeedsRender`: 1, `ChildNeedsRender`: 2, `InLayer`: 3, `HasLayer`: 4}
 
-var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`, 2: `widgetChildNeedsRender is whether any widget inside of the widget, such as a child or a scrollbar, needs to be rendered on the next render iteration, so that the render iteration only goes into the parts of the tree that do.`}
+var _widgetFlagsDescMap = map[widgetFlags]string{0: `widgetValueNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [openValueDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button. Certain values such as [FileButton] may set this to true in their [InitValueButton] function.`, 1: `widgetNeedsRender is whether the widget needs to be rendered on the next render iteration.`, 2: `widgetChildNeedsRender is whether any widget inside of the widget, such as a child or a scrollbar, needs to be rendered on the next render iteration, so that the render iteration only goes into the parts of the tree that do.`, 3: `widgetInLayer is whether the widget was rendered into the layer of its scene (see [sceneLayer]) by the last render of the whole scene.`, 4: `widgetHasLayer is whether a widget inside of the widget was rendered into the layer of its scene (see [sceneLayer]) by the last render of the whole scene, while the widget itself was not.`}
 
-var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`, 2: `ChildNeedsRender`}
+var _widgetFlagsMap = map[widgetFlags]string{0: `ValueNewWindow`, 1: `NeedsRender`, 2: `ChildNeedsRender`, 3: `InLayer`, 4: `HasLayer`}
 
 // String returns the string representation of this widgetFlags value.
 func (i widgetFlags) String() string { return enums.BitFlagString(i, _widgetFlagsValues) }

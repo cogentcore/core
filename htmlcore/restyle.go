@@ -21,6 +21,7 @@ import (
 type styleRule struct {
 	root   *html.Node
 	sel    *compiledSelector
+	text   string // of its selector
 	decls  []*css.Declaration
 	origin cssOrigin
 	spec   int
@@ -33,6 +34,21 @@ type styleRule struct {
 
 	// relational is whether its selector has :has().
 	relational bool
+
+	// subjectHas is whether its :has() selectors are all in the compound
+	// of the elements that it selects (as .a:has(.b), not .a:has(.b) .c),
+	// so that it only selects other elements when the descendants or later
+	// siblings of an element change (see [Context.relationalChanges]).
+	subjectHas bool
+
+	// hasCompound is, for a rule whose :has() selectors are all in one
+	// compound that is not its subject (as .a:has(.b) .c), that compound
+	// without them (.a), and hasSiblings whether a sibling combinator
+	// follows it: the rule only selects other elements in the elements
+	// that match it whose descendants (or later siblings) change, and their
+	// later siblings if hasSiblings (see [Context.relationalChanges]).
+	hasCompound *compiledSelector
+	hasSiblings bool
 }
 
 // pseudoRule is a style rule of a ::before or ::after pseudo-element that
@@ -53,8 +69,10 @@ type ruleIndex struct {
 	byID, byClass, byTag map[string][]int
 	other                []int
 
-	// relational has the rules with :has() selectors.
-	relational []int
+	// relational has the rules with :has() selectors, except those whose
+	// :has() selectors are in their subject compound, in subjectHas, and
+	// those whose :has() selectors are in one other compound, in hasAbove.
+	relational, subjectHas, hasAbove []int
 
 	// n is the number of rules indexed.
 	n int
@@ -65,7 +83,12 @@ type ruleIndex struct {
 // [Context.Restyle]).
 func (c *Context) recordRule(root *html.Node, sel string, cs *compiledSelector, decls []*css.Declaration, origin cssOrigin, spec int) {
 	has := strings.Contains(sel, ":has(")
-	c.rules = append(c.rules, &styleRule{root: root, sel: cs, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has})
+	subject := has && strings.Index(sel, ":has(") >= subjectStart(sel)
+	r := &styleRule{root: root, sel: cs, text: sel, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
+	if has && !subject {
+		r.hasCompound, r.hasSiblings = hasCompound(sel)
+	}
+	c.rules = append(c.rules, r)
 	c.curRule = len(c.rules)
 	c.relational = c.relational || has
 }
@@ -90,7 +113,12 @@ func (c *Context) index() *ruleIndex {
 		default:
 			ix.other = append(ix.other, i)
 		}
-		if r.relational {
+		switch {
+		case r.subjectHas:
+			ix.subjectHas = append(ix.subjectHas, i)
+		case r.hasCompound != nil:
+			ix.hasAbove = append(ix.hasAbove, i)
+		case r.relational:
 			ix.relational = append(ix.relational, i)
 		}
 	}
@@ -183,6 +211,8 @@ type nodeStyles struct {
 	sorted, hinted, queried bool
 	before, after           []*cssDecl
 	hasBefore, hasAfter     bool
+	snap                    nodeSnap
+	hasSnap                 bool
 }
 
 // Restyle updates the styles of the widgets of the page that the context
@@ -318,7 +348,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 	if c.relational {
 		// the elements that :has() selectors select, which may be any,
 		// whose matches have changed
-		if !c.relationalChanges(root, add) {
+		if !c.relationalChanges(root, append(append([]*html.Node{}, changed...), whole...), add) {
 			return nil, c.noChange("the elements that :has() selects")
 		}
 	}
@@ -333,6 +363,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		old[n] = effectiveDecls(c.declarations(n))
 		oldDisplay[n] = c.displayOf(n)
 		ns := &nodeStyles{styles: c.styles[n], sorted: c.sorted[n], hinted: c.hinted[n], queried: c.containerQueried[n]}
+		ns.snap, ns.hasSnap = c.snaps[n]
 		ns.before, ns.hasBefore = c.pseudoStyles[pseudoKey{n, "before"}]
 		ns.after, ns.hasAfter = c.pseudoStyles[pseudoKey{n, "after"}]
 		saved[n] = ns
@@ -346,6 +377,30 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			}
 			c.setPseudo(n, "before", ns.before, ns.hasBefore)
 			c.setPseudo(n, "after", ns.after, ns.hasAfter)
+			if c.snaps != nil {
+				if ns.hasSnap {
+					c.snaps[n] = ns.snap
+				} else {
+					delete(c.snaps, n)
+				}
+			}
+		}
+	}
+	// the states of the elements, with which their declarations are found
+	// (see Context.ReuseStyles)
+	if c.snaps != nil {
+		parents := map[*html.Node]bool{}
+		for _, n := range order {
+			if n.Parent != nil {
+				parents[n.Parent] = true
+			}
+		}
+		for p := range parents {
+			snapChildren(p, func(k *html.Node, s nodeSnap) {
+				if affected[k] {
+					c.snaps[k] = s
+				}
+			})
 		}
 	}
 	// the declarations as they are now
@@ -377,6 +432,14 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			if samePseudo(od, nd) {
 				continue
 			}
+			if c.undisplayed(n) {
+				// not rendered (as the icons of the video players of
+				// npr.org in a hidden dialog, which changed as they
+				// played, each time reading the page whole, as no element
+				// that they are in had widgets of its own)
+				c.setPseudo(n, kind, nd, len(nd) > 0)
+				continue
+			}
 			if !isFree(n) {
 				undo()
 				// its pseudo-element, which may be a widget
@@ -403,6 +466,9 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			u.freeChanged[n] = true
 			continue
 		}
+		if c.hiddenAbove(n, affected, oldDisplay) {
+			continue // not rendered, before and after
+		}
 		ws := c.elementWidgets[n]
 		if d := c.displayOf(n); d != oldDisplay[n] {
 			undo()
@@ -413,6 +479,13 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			return nil, c.noChange(fmt.Sprintf("%s of %s, which has no widget of its own", strings.Join(props, ", "), describeNode(n)))
 		}
 		for _, p := range props {
+			if p == "position" && inFlowPosition(old[n][p]) && inFlowPosition(nw[p]) {
+				// static and relative are both in the flow, so the widget
+				// is restyled for the change, with the layout (as for the
+				// images of npr.org as they load, hundreds of times)
+				u.layout = true
+				continue
+			}
 			if !c.restylable(n, p) {
 				undo()
 				return nil, c.noChange(fmt.Sprintf("%s of %s", p, describeNode(n)))
@@ -433,6 +506,11 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 	// then, which the scripts of a page may be changing meanwhile)
 	for _, n := range order {
 		c.declarations(n)
+	}
+	if html := documentElement(root); html != nil && affected[html] {
+		// all of the elements have been matched with all of the rules (as
+		// with those added to style sheets; see Context.ReuseStyles)
+		c.matchedRules = len(c.rules)
 	}
 	return u, true
 }
@@ -465,45 +543,338 @@ func samePseudo(a, b []*cssDecl) bool {
 	return true
 }
 
+// keyIn returns whether the given element has the key of the selector
+// (see [compiledSelector.key]), which every element that it selects has,
+// or it has none.
+func (cs *compiledSelector) keyIn(n *html.Node) bool {
+	switch cs.keyKind {
+	case '#':
+		return GetAttr(n, "id") == cs.key
+	case '.':
+		for _, cl := range strings.Fields(GetAttr(n, "class")) {
+			if cl == cs.key {
+				return true
+			}
+		}
+		return false
+	case 't':
+		return strings.EqualFold(n.Data, cs.key)
+	}
+	return true
+}
+
 // relationalChanges adds the elements that the rules of :has() selectors
 // select now, or did, to the elements whose declarations may change,
-// with add, returning false if there are too many of them.
-func (c *Context) relationalChanges(root *html.Node, add func(n *html.Node) bool) bool {
-	rel := c.index().relational
-	if len(rel) == 0 {
+// with add, returning false if there are too many of them. A change of an
+// element (in changed) only changes what :has() matches for the elements
+// that it is in and their previous siblings (for :has(+ x) and :has(~ x)),
+// so those are the only ones that the rules whose :has() selectors are in
+// their subject compound are matched against. The others are matched
+// against all of the elements. (All of them for all of the rules, about
+// 600 of them, over the 5000 elements of npr.org, took long enough on each
+// read of the layout by its scripts that the page hung.)
+func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add func(n *html.Node) bool) bool {
+	ix := c.index()
+	if len(ix.relational) == 0 && len(ix.subjectHas) == 0 && len(ix.hasAbove) == 0 {
 		return true
 	}
-	var walk func(n *html.Node) bool
-	walk = func(n *html.Node) bool {
-		if n.Type == html.ElementNode {
-			had := map[int]bool{}
-			for _, d := range c.styles[n] {
-				had[d.rule-1] = true
+	check := func(n *html.Node, rules []int) bool {
+		if n.Type != html.ElementNode {
+			return true
+		}
+		ds := c.styles[n]
+		had := func(i int) bool { // (without a map, as it is called for each rule)
+			for _, d := range ds {
+				if d.rule-1 == i {
+					return true
+				}
 			}
-			for _, i := range rel {
+			return false
+		}
+		for _, i := range rules {
+			r := c.rules[i]
+			// (the key of its selector first, which most elements do not
+			// have, then its scope, after a match, as it walks up)
+			if had(i) != (r.sel.keyIn(n) && r.sel.sel.Match(n) && contains(r.root, n)) {
+				return add(n)
+			}
+		}
+		return true
+	}
+	if len(ix.relational) > 0 {
+		var walk func(n *html.Node) bool
+		walk = func(n *html.Node) bool {
+			if !check(n, ix.relational) {
+				return false
+			}
+			for k := n.FirstChild; k != nil; k = k.NextSibling {
+				if !walk(k) {
+					return false
+				}
+			}
+			return true
+		}
+		if !walk(root) {
+			return false
+		}
+	}
+	if len(ix.subjectHas) == 0 && len(ix.hasAbove) == 0 {
+		return true
+	}
+	// the rules whose :has() is in another compound are matched against
+	// the elements in those that match it (without its :has()), and their
+	// later siblings if a sibling combinator follows it: the elements that
+	// match them are found first (in above), then the elements in each are
+	// walked once, matched only against the rules whose key they have
+	// (most of them are matched in the body, as of npr.org)
+	regions := map[*html.Node][]int{} // the rules of each
+	var regionOrder []*html.Node
+	above := func(h *html.Node) bool {
+		if h.Type != html.ElementNode {
+			return true
+		}
+		for _, i := range ix.hasAbove {
+			if c.rules[i].hasCompound.sel.Match(h) {
+				if _, ok := regions[h]; !ok {
+					regionOrder = append(regionOrder, h)
+				}
+				regions[h] = append(regions[h], i)
+			}
+		}
+		return true
+	}
+	walkRegions := func() bool {
+		inOuter := func(h *html.Node, i int) bool { // (walked with an outer region)
+			for p := h.Parent; p != nil; p = p.Parent {
+				if slices.Contains(regions[p], i) {
+					return true
+				}
+			}
+			return false
+		}
+		for _, h := range regionOrder {
+			var rules []int
+			for _, i := range regions[h] {
+				if !inOuter(h, i) {
+					rules = append(rules, i)
+				}
+			}
+			if len(rules) == 0 {
+				continue
+			}
+			sub := &ruleIndex{byID: map[string][]int{}, byClass: map[string][]int{}, byTag: map[string][]int{}}
+			siblings := false
+			for _, i := range rules {
 				r := c.rules[i]
-				if had[i] != (contains(r.root, n) && r.sel.sel.Match(n)) {
-					if !add(n) {
+				siblings = siblings || r.hasSiblings
+				switch r.sel.keyKind {
+				case '#':
+					sub.byID[r.sel.key] = append(sub.byID[r.sel.key], i)
+				case '.':
+					sub.byClass[r.sel.key] = append(sub.byClass[r.sel.key], i)
+				case 't':
+					sub.byTag[r.sel.key] = append(sub.byTag[r.sel.key], i)
+				default:
+					sub.other = append(sub.other, i)
+				}
+			}
+			var walk func(n *html.Node) bool
+			walk = func(n *html.Node) bool {
+				if n.Type == html.ElementNode && !check(n, sub.candidates(n)) {
+					return false
+				}
+				for k := n.FirstChild; k != nil; k = k.NextSibling {
+					if !walk(k) {
 						return false
 					}
-					break
+				}
+				return true
+			}
+			for k := h.FirstChild; k != nil; k = k.NextSibling {
+				if !walk(k) {
+					return false
+				}
+			}
+			if siblings {
+				for k := h.NextSibling; k != nil; k = k.NextSibling {
+					if !walk(k) {
+						return false
+					}
 				}
 			}
 		}
-		for k := n.FirstChild; k != nil; k = k.NextSibling {
-			if !walk(k) {
-				return false
-			}
-		}
 		return true
 	}
-	return walk(root)
+	seen := map[*html.Node]bool{}
+	for _, ch := range changed {
+		if ch == nil {
+			continue
+		}
+		// (from its last sibling: those after it changed too)
+		last := ch
+		for last.NextSibling != nil {
+			last = last.NextSibling
+		}
+		for a := last; a != nil; a = a.Parent {
+			for s := a; s != nil; s = s.PrevSibling {
+				if seen[s] {
+					continue
+				}
+				seen[s] = true
+				if !check(s, ix.subjectHas) || !above(s) {
+					return false
+				}
+			}
+		}
+	}
+	return walkRegions()
+}
+
+// hasCompound returns, for the given selector (of one complex selector)
+// whose :has() selectors are all in one compound that is not its last,
+// that compound without them, compiled, and whether a sibling combinator
+// follows it, or nil if they are not (or it does not compile).
+func hasCompound(sel string) (*compiledSelector, bool) {
+	at := strings.Index(sel, ":has(")
+	combs := combinators(sel)
+	start, end, siblings := 0, len(sel), false
+	for _, cb := range combs {
+		switch {
+		case cb.at <= at:
+			start = cb.at + 1
+		case end == len(sel):
+			end = cb.start
+			fallthrough
+		default:
+			siblings = siblings || cb.sibling
+		}
+	}
+	if strings.Contains(sel[end:], ":has(") {
+		return nil, false
+	}
+	// the compound without its pseudo-classes that have :has() selectors
+	// (as :where(:not(:has(.c))) in .a.b:where(:not(:has(.c))) .x), which
+	// is what an element must match for them to matter
+	comp := sel[start:end]
+	var b strings.Builder
+	for k := 0; k < len(comp); {
+		if comp[k] != ':' || k+1 >= len(comp) || comp[k+1] == ':' {
+			b.WriteByte(comp[k])
+			k++
+			continue
+		}
+		// a pseudo-class, to the end of its arguments if it has any
+		e := k + 1
+		for e < len(comp) && (comp[e] == '-' || comp[e] == '_' || comp[e] >= 'a' && comp[e] <= 'z' || comp[e] >= 'A' && comp[e] <= 'Z' || comp[e] >= '0' && comp[e] <= '9') {
+			e++
+		}
+		if e < len(comp) && comp[e] == '(' {
+			depth := 0
+			for ; e < len(comp); e++ {
+				if comp[e] == '(' {
+					depth++
+				} else if comp[e] == ')' {
+					if depth--; depth == 0 {
+						e++
+						break
+					}
+				}
+			}
+		}
+		if !strings.Contains(comp[k:e], ":has(") {
+			b.WriteString(comp[k:e])
+		}
+		k = e
+	}
+	compound := strings.TrimSpace(b.String())
+	if compound == "" {
+		compound = "*"
+	}
+	cs := compileSelector(compound)
+	if cs == nil {
+		return nil, false
+	}
+	return cs, siblings
+}
+
+// combinator is a combinator of a selector, from the index of its first
+// character (start) to that of its last (at), which is a sibling
+// combinator (+ or ~) or not (a descendant or child one).
+type combinator struct {
+	start, at int
+	sibling   bool
+}
+
+// combinators returns the combinators of the given selector (of one
+// complex selector) that are not in parentheses, brackets or quotes, one
+// for each run of them (as " > ").
+func combinators(sel string) []combinator {
+	var combs []combinator
+	depth := 0
+	var quote byte
+	in := false // in a run of combinator characters
+	for i := 0; i < len(sel); i++ {
+		ch := sel[i]
+		isComb := false
+		switch {
+		case quote != 0:
+			if ch == '\\' {
+				i++
+			} else if ch == quote {
+				quote = 0
+			}
+		case ch == '"' || ch == '\'':
+			quote = ch
+		case ch == '\\':
+			i++
+		case ch == '(' || ch == '[':
+			depth++
+		case ch == ')' || ch == ']':
+			depth--
+		case depth == 0 && (ch == ' ' || ch == '>' || ch == '+' || ch == '~' || ch == '\t' || ch == '\n'):
+			isComb = true
+			if !in {
+				combs = append(combs, combinator{start: i, at: i})
+			}
+			if ch == '+' || ch == '~' {
+				combs[len(combs)-1].sibling = true
+			}
+			combs[len(combs)-1].at = i // (its last character)
+		}
+		in = isComb
+	}
+	return combs
+}
+
+// subjectStart returns the index in the given selector (of one complex
+// selector) of its last compound selector, the one of the elements that it
+// selects: after its last combinator that is not in parentheses, brackets
+// or quotes.
+func subjectStart(sel string) int {
+	combs := combinators(sel)
+	if len(combs) == 0 {
+		return 0
+	}
+	return combs[len(combs)-1].at + 1
 }
 
 // inForeign returns whether the given element is in an svg or math element.
 func inForeign(n *html.Node) bool {
 	for p := n.Parent; p != nil; p = p.Parent {
 		if p.Type == html.ElementNode && (p.Namespace != "" || p.Data == "svg" || p.Data == "math") {
+			return true
+		}
+	}
+	return false
+}
+
+// hiddenAbove returns whether an element that the given element is in
+// has a display of none, and had one before the declarations of the given
+// affected elements changed (with the given displays before), so that the
+// given element was not rendered, nor is (see [Context.updateDecls]).
+func (c *Context) hiddenAbove(n *html.Node, affected map[*html.Node]bool, oldDisplay map[*html.Node]string) bool {
+	for p := n.Parent; p != nil && p.Type == html.ElementNode; p = p.Parent {
+		if c.displayOf(p) == "none" && (!affected[p] || oldDisplay[p] == "none") {
 			return true
 		}
 	}
@@ -590,6 +961,14 @@ func (c *Context) restylable(n *html.Node, prop string) bool {
 			prop == "top" || prop == "bottom" || prop == "left" || prop == "right" || prop == "inset"
 	}
 	return true
+}
+
+// inFlowPosition returns whether the given value of the position property
+// (as declared, "" for none) keeps an element in the flow of the layout of
+// its parent (static and relative, not absolute, fixed, or sticky).
+func inFlowPosition(v string) bool {
+	v = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(v), "!important"))
+	return v == "" || v == "static" || v == "relative" || v == "initial" || v == "unset" || v == "revert"
 }
 
 // arranged returns whether the given element is or is in a table, a grid,

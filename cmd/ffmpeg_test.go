@@ -64,24 +64,26 @@ func TestInstallFFmpegArchive(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "linux stamp", strings.TrimSpace(string(b)))
 
-	// a zip of Windows
-	top = "ffmpeg-n9.0-latest-win64-lgpl-shared-9.0"
-	zipFile := filepath.Join(tmp, top+".zip")
-	f, err := os.Create(zipFile)
-	require.NoError(t, err)
-	zw := zip.NewWriter(f)
-	for _, name := range []string{"lib/pkgconfig/libavutil.pc", "bin/avutil-61.dll"} {
-		w, err := zw.Create(top + "/" + name)
+	// a zip of Windows, which the tar of Windows and macOS (bsdtar)
+	// extracts, and GNU tar does not (as on the Linux of CI)
+	version, _ := exec.Command("tar", "--version").CombinedOutput()
+	if strings.Contains(string(version), "bsdtar") {
+		top = "ffmpeg-n9.0-latest-win64-lgpl-shared-9.0"
+		zipFile := filepath.Join(tmp, top+".zip")
+		f, err := os.Create(zipFile)
 		require.NoError(t, err)
-		w.Write([]byte(name))
+		zw := zip.NewWriter(f)
+		for _, name := range []string{"lib/pkgconfig/libavutil.pc", "bin/avutil-61.dll"} {
+			w, err := zw.Create(top + "/" + name)
+			require.NoError(t, err)
+			w.Write([]byte(name))
+		}
+		require.NoError(t, zw.Close())
+		require.NoError(t, f.Close())
+		require.NoError(t, installFFmpegArchive(zipFile, dir, "windows stamp"))
+		assert.FileExists(t, filepath.Join(dir, "bin", "avutil-61.dll"))
+		assert.NoFileExists(t, filepath.Join(dir, "lib", "libavutil.so.61"), "replaced")
 	}
-	require.NoError(t, zw.Close())
-	require.NoError(t, f.Close())
-	if err := installFFmpegArchive(zipFile, dir, "windows stamp"); err != nil {
-		t.Skipf("tar cannot extract a zip here: %v", err)
-	}
-	assert.FileExists(t, filepath.Join(dir, "bin", "avutil-61.dll"))
-	assert.NoFileExists(t, filepath.Join(dir, "lib", "libavutil.so.61"), "replaced")
 
 	// an archive without pkg-config files is not installed
 	bad := filepath.Join(tmp, "bad")
@@ -89,7 +91,7 @@ func TestInstallFFmpegArchive(t *testing.T) {
 	badArchive := filepath.Join(tmp, "x.tar.xz")
 	require.NoError(t, exec.Command("tar", "-cJf", badArchive, "-C", bad, "x").Run())
 	assert.Error(t, installFFmpegArchive(badArchive, dir, "bad"))
-	assert.FileExists(t, filepath.Join(dir, "bin", "avutil-61.dll"), "kept")
+	assert.FileExists(t, filepath.Join(dir, "lib", "pkgconfig", "libavutil.pc"), "kept")
 }
 
 func TestSetFFmpegEnv(t *testing.T) {

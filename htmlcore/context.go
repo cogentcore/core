@@ -309,6 +309,22 @@ type pageState struct {
 	sheetTexts map[*html.Node]string
 	recordOnly bool
 
+	// reuseFrom is the context whose matches of the style rules are
+	// reused, deferMatch is set while the rules are recorded but not yet
+	// matched for that, reused is how they were (see
+	// [Context.ReuseStyles]), and snaps has the states of the elements
+	// with which their declarations were found.
+	reuseFrom  *Context
+	deferMatch bool
+	reused     string
+	snaps      map[*html.Node]nodeSnap
+	snapRoot   *html.Node
+
+	// matchedRules is the number of the rules that the declarations of
+	// all of the elements are from (not those recorded since, as those
+	// added to style sheets, whose elements were not matched again).
+	matchedRules int
+
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see
 	// [Context.Restyle]), with ruleIndex, and pseudoRules those of the
