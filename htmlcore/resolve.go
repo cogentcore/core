@@ -993,8 +993,6 @@ func (r *resolver) sizes() {
 	if r.isVideo() {
 		r.videoSize()
 	}
-	// (an aspect ratio makes the height follow the width, which is definite)
-	bs.definiteHeight = st.height != nil || s.AspectRatio > 0
 	if (st.overflowHidden[0] || s.Overflow.X == styles.OverflowVisible) &&
 		(st.overflowHidden[1] || s.Overflow.Y == styles.OverflowVisible) && (st.overflowHidden[0] || st.overflowHidden[1]) {
 		s.ScrollbarWidth.Zero() // hidden, not scrolled
@@ -1011,6 +1009,12 @@ func (r *resolver) sizes() {
 	// they make it (in its containing block), so it can scroll too.
 	insetHeight := (s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed) &&
 		s.InsetSet.Top && s.InsetSet.Bottom
+	// (an aspect ratio makes the height follow the width, which is
+	// definite, and the top and bottom of a box out of flow make its height
+	// that of its containing block between them, as in CSS: the player of
+	// youtube.com, of height: 100% in its container of inset 0, was of no
+	// height)
+	bs.definiteHeight = st.height != nil || s.AspectRatio > 0 || insetHeight
 	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
 		(st.height == nil && st.maxHeight == nil && !insetHeight && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
