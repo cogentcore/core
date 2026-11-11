@@ -112,6 +112,7 @@ func TestRestyle(t *testing.T) {
 .moved { transform: translateX(40px) }
 .gone { display: none }
 .wrap:has(.on) .target { width: 150px }
+.wrap2:has(.on2) { width: 170px }
 .marked::before { content: "x" }
 .v { width: var(--w, 10px); height: 10px; background: red }
 .wv { --w: 90px }
@@ -120,6 +121,7 @@ func TestRestyle(t *testing.T) {
 <div id="menu" class="menu"><div id="item" class="item box">item</div></div>
 <div id="after" class="after box">after</div>
 <div class="wrap"><div id="target" class="target box">t</div><div id="trigger">x</div></div>
+<div id="wrap2" class="wrap2 box"><div><div id="trigger2">deep</div></div></div>
 <div id="vars"><div id="v" class="v"></div></div>
 <p id="p">text <span id="span">span</span> more</p>
 </div></body></html>`
@@ -144,6 +146,17 @@ func TestRestyle(t *testing.T) {
 			return []*html.Node{a}
 		})
 	})
+	// :has() in the subject compound, of an ancestor (only the ancestors
+	// and their previous siblings are matched again, see relationalChanges)
+	for _, c := range []struct{ id, class string }{{"trigger2", "on2"}} {
+		t.Run("subject has "+c.class, func(t *testing.T) {
+			testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+				tr := elementByID(doc, c.id)
+				setAttr(tr, "class", c.class)
+				return []*html.Node{tr}
+			})
+		})
+	}
 	t.Run("has", func(t *testing.T) {
 		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
 			tr := elementByID(doc, "trigger")
@@ -188,4 +201,44 @@ func TestRestyle(t *testing.T) {
 			return []*html.Node{sp}
 		})
 	})
+}
+
+// TestSubjectStart tests the start of the subject compound of selectors,
+// after their last combinator outside of parentheses, brackets and quotes.
+func TestSubjectStart(t *testing.T) {
+	for sel, want := range map[string]string{
+		".a:has(.b)":             ".a:has(.b)",
+		".a:has(.b) .c":          ".c",
+		"div > .a:has(> .b ~ c)": ".a:has(> .b ~ c)",
+		`a[title="x y"]:has(b)`:  `a[title="x y"]:has(b)`,
+		".x + .y:not(:has(.z))":  ".y:not(:has(.z))",
+	} {
+		assert.Equal(t, want, sel[subjectStart(sel):], sel)
+	}
+}
+
+// TestHasCompound tests the compound of the :has() selectors of selectors
+// whose :has() is not in their subject, without them.
+func TestHasCompound(t *testing.T) {
+	for sel, want := range map[string]struct {
+		compound string
+		siblings bool
+	}{
+		".a:has(.b) .c":                 {".a", false},
+		"body:has(.modal.open) > .page": {"body", false},
+		".x .a:has(> .b ~ .c) + .d":     {".a", true},
+		":has(.b) .c":                   {"*", false},
+		".a:has(.b) .c:has(.d)":         {"", false}, // in two compounds
+		".a:not(:has(.b)) .c":           {".a", false},
+		".a.b:where(:not(:has(.c))) .x": {".a.b", false},
+	} {
+		cs, sib := hasCompound(sel)
+		if want.compound == "" {
+			assert.Nil(t, cs, sel)
+			continue
+		}
+		if assert.NotNil(t, cs, sel) {
+			assert.Equal(t, want.siblings, sib, sel)
+		}
+	}
 }

@@ -33,6 +33,21 @@ type styleRule struct {
 
 	// relational is whether its selector has :has().
 	relational bool
+
+	// subjectHas is whether its :has() selectors are all in the compound
+	// of the elements that it selects (as .a:has(.b), not .a:has(.b) .c),
+	// so that it only selects other elements when the descendants or later
+	// siblings of an element change (see [Context.relationalChanges]).
+	subjectHas bool
+
+	// hasCompound is, for a rule whose :has() selectors are all in one
+	// compound that is not its subject (as .a:has(.b) .c), that compound
+	// without them (.a), and hasSiblings whether a sibling combinator
+	// follows it: the rule only selects other elements in the elements
+	// that match it whose descendants (or later siblings) change, and their
+	// later siblings if hasSiblings (see [Context.relationalChanges]).
+	hasCompound *compiledSelector
+	hasSiblings bool
 }
 
 // pseudoRule is a style rule of a ::before or ::after pseudo-element that
@@ -53,8 +68,10 @@ type ruleIndex struct {
 	byID, byClass, byTag map[string][]int
 	other                []int
 
-	// relational has the rules with :has() selectors.
-	relational []int
+	// relational has the rules with :has() selectors, except those whose
+	// :has() selectors are in their subject compound, in subjectHas, and
+	// those whose :has() selectors are in one other compound, in hasAbove.
+	relational, subjectHas, hasAbove []int
 
 	// n is the number of rules indexed.
 	n int
@@ -65,7 +82,12 @@ type ruleIndex struct {
 // [Context.Restyle]).
 func (c *Context) recordRule(root *html.Node, sel string, cs *compiledSelector, decls []*css.Declaration, origin cssOrigin, spec int) {
 	has := strings.Contains(sel, ":has(")
-	c.rules = append(c.rules, &styleRule{root: root, sel: cs, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has})
+	subject := has && strings.Index(sel, ":has(") >= subjectStart(sel)
+	r := &styleRule{root: root, sel: cs, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
+	if has && !subject {
+		r.hasCompound, r.hasSiblings = hasCompound(sel)
+	}
+	c.rules = append(c.rules, r)
 	c.curRule = len(c.rules)
 	c.relational = c.relational || has
 }
@@ -90,7 +112,12 @@ func (c *Context) index() *ruleIndex {
 		default:
 			ix.other = append(ix.other, i)
 		}
-		if r.relational {
+		switch {
+		case r.subjectHas:
+			ix.subjectHas = append(ix.subjectHas, i)
+		case r.hasCompound != nil:
+			ix.hasAbove = append(ix.hasAbove, i)
+		case r.relational:
 			ix.relational = append(ix.relational, i)
 		}
 	}
@@ -318,7 +345,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 	if c.relational {
 		// the elements that :has() selectors select, which may be any,
 		// whose matches have changed
-		if !c.relationalChanges(root, add) {
+		if !c.relationalChanges(root, append(append([]*html.Node{}, changed...), whole...), add) {
 			return nil, c.noChange("the elements that :has() selects")
 		}
 	}
@@ -467,37 +494,251 @@ func samePseudo(a, b []*cssDecl) bool {
 
 // relationalChanges adds the elements that the rules of :has() selectors
 // select now, or did, to the elements whose declarations may change,
-// with add, returning false if there are too many of them.
-func (c *Context) relationalChanges(root *html.Node, add func(n *html.Node) bool) bool {
-	rel := c.index().relational
-	if len(rel) == 0 {
+// with add, returning false if there are too many of them. A change of an
+// element (in changed) only changes what :has() matches for the elements
+// that it is in and their previous siblings (for :has(+ x) and :has(~ x)),
+// so those are the only ones that the rules whose :has() selectors are in
+// their subject compound are matched against. The others are matched
+// against all of the elements. (All of them for all of the rules, about
+// 600 of them, over the 5000 elements of npr.org, took long enough on each
+// read of the layout by its scripts that the page hung.)
+func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add func(n *html.Node) bool) bool {
+	ix := c.index()
+	if len(ix.relational) == 0 && len(ix.subjectHas) == 0 && len(ix.hasAbove) == 0 {
 		return true
 	}
-	var walk func(n *html.Node) bool
-	walk = func(n *html.Node) bool {
-		if n.Type == html.ElementNode {
-			had := map[int]bool{}
-			for _, d := range c.styles[n] {
-				had[d.rule-1] = true
-			}
-			for _, i := range rel {
-				r := c.rules[i]
-				if had[i] != (contains(r.root, n) && r.sel.sel.Match(n)) {
-					if !add(n) {
-						return false
-					}
-					break
-				}
+	check := func(n *html.Node, rules []int) bool {
+		if n.Type != html.ElementNode {
+			return true
+		}
+		had := map[int]bool{}
+		for _, d := range c.styles[n] {
+			had[d.rule-1] = true
+		}
+		for _, i := range rules {
+			r := c.rules[i]
+			if had[i] != (contains(r.root, n) && r.sel.sel.Match(n)) {
+				return add(n)
 			}
 		}
+		return true
+	}
+	if len(ix.relational) > 0 {
+		var walk func(n *html.Node) bool
+		walk = func(n *html.Node) bool {
+			if !check(n, ix.relational) {
+				return false
+			}
+			for k := n.FirstChild; k != nil; k = k.NextSibling {
+				if !walk(k) {
+					return false
+				}
+			}
+			return true
+		}
+		if !walk(root) {
+			return false
+		}
+	}
+	if len(ix.subjectHas) == 0 && len(ix.hasAbove) == 0 {
+		return true
+	}
+	// the rules whose :has() is in another compound are matched against
+	// the elements in those that match it (without its :has()), and their
+	// later siblings if a sibling combinator follows it
+	walked := map[[2]any]bool{}
+	var walkIn func(n *html.Node, i int) bool
+	walkIn = func(n *html.Node, i int) bool {
+		key := [2]any{n, i}
+		if walked[key] {
+			return true
+		}
+		walked[key] = true
+		if !check(n, []int{i}) {
+			return false
+		}
 		for k := n.FirstChild; k != nil; k = k.NextSibling {
-			if !walk(k) {
+			if !walkIn(k, i) {
 				return false
 			}
 		}
 		return true
 	}
-	return walk(root)
+	above := func(h *html.Node) bool {
+		if h.Type != html.ElementNode {
+			return true
+		}
+		for _, i := range ix.hasAbove {
+			r := c.rules[i]
+			if !r.hasCompound.sel.Match(h) {
+				continue
+			}
+			for k := h.FirstChild; k != nil; k = k.NextSibling {
+				if !walkIn(k, i) {
+					return false
+				}
+			}
+			if r.hasSiblings {
+				for k := h.NextSibling; k != nil; k = k.NextSibling {
+					if !walkIn(k, i) {
+						return false
+					}
+				}
+			}
+		}
+		return true
+	}
+	seen := map[*html.Node]bool{}
+	for _, ch := range changed {
+		if ch == nil {
+			continue
+		}
+		// (from its last sibling: those after it changed too)
+		last := ch
+		for last.NextSibling != nil {
+			last = last.NextSibling
+		}
+		for a := last; a != nil; a = a.Parent {
+			for s := a; s != nil; s = s.PrevSibling {
+				if seen[s] {
+					continue
+				}
+				seen[s] = true
+				if !check(s, ix.subjectHas) || !above(s) {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+// hasCompound returns, for the given selector (of one complex selector)
+// whose :has() selectors are all in one compound that is not its last,
+// that compound without them, compiled, and whether a sibling combinator
+// follows it, or nil if they are not (or it does not compile).
+func hasCompound(sel string) (*compiledSelector, bool) {
+	at := strings.Index(sel, ":has(")
+	combs := combinators(sel)
+	start, end, siblings := 0, len(sel), false
+	for _, cb := range combs {
+		switch {
+		case cb.at <= at:
+			start = cb.at + 1
+		case end == len(sel):
+			end = cb.start
+			fallthrough
+		default:
+			siblings = siblings || cb.sibling
+		}
+	}
+	if strings.Contains(sel[end:], ":has(") {
+		return nil, false
+	}
+	// the compound without its pseudo-classes that have :has() selectors
+	// (as :where(:not(:has(.c))) in .a.b:where(:not(:has(.c))) .x), which
+	// is what an element must match for them to matter
+	comp := sel[start:end]
+	var b strings.Builder
+	for k := 0; k < len(comp); {
+		if comp[k] != ':' || k+1 >= len(comp) || comp[k+1] == ':' {
+			b.WriteByte(comp[k])
+			k++
+			continue
+		}
+		// a pseudo-class, to the end of its arguments if it has any
+		e := k + 1
+		for e < len(comp) && (comp[e] == '-' || comp[e] == '_' || comp[e] >= 'a' && comp[e] <= 'z' || comp[e] >= 'A' && comp[e] <= 'Z' || comp[e] >= '0' && comp[e] <= '9') {
+			e++
+		}
+		if e < len(comp) && comp[e] == '(' {
+			depth := 0
+			for ; e < len(comp); e++ {
+				if comp[e] == '(' {
+					depth++
+				} else if comp[e] == ')' {
+					if depth--; depth == 0 {
+						e++
+						break
+					}
+				}
+			}
+		}
+		if !strings.Contains(comp[k:e], ":has(") {
+			b.WriteString(comp[k:e])
+		}
+		k = e
+	}
+	compound := strings.TrimSpace(b.String())
+	if compound == "" {
+		compound = "*"
+	}
+	cs := compileSelector(compound)
+	if cs == nil {
+		return nil, false
+	}
+	return cs, siblings
+}
+
+// combinator is a combinator of a selector, from the index of its first
+// character (start) to that of its last (at), which is a sibling
+// combinator (+ or ~) or not (a descendant or child one).
+type combinator struct {
+	start, at int
+	sibling   bool
+}
+
+// combinators returns the combinators of the given selector (of one
+// complex selector) that are not in parentheses, brackets or quotes, one
+// for each run of them (as " > ").
+func combinators(sel string) []combinator {
+	var combs []combinator
+	depth := 0
+	var quote byte
+	in := false // in a run of combinator characters
+	for i := 0; i < len(sel); i++ {
+		ch := sel[i]
+		isComb := false
+		switch {
+		case quote != 0:
+			if ch == '\\' {
+				i++
+			} else if ch == quote {
+				quote = 0
+			}
+		case ch == '"' || ch == '\'':
+			quote = ch
+		case ch == '\\':
+			i++
+		case ch == '(' || ch == '[':
+			depth++
+		case ch == ')' || ch == ']':
+			depth--
+		case depth == 0 && (ch == ' ' || ch == '>' || ch == '+' || ch == '~' || ch == '\t' || ch == '\n'):
+			isComb = true
+			if !in {
+				combs = append(combs, combinator{start: i, at: i})
+			}
+			if ch == '+' || ch == '~' {
+				combs[len(combs)-1].sibling = true
+			}
+			combs[len(combs)-1].at = i // (its last character)
+		}
+		in = isComb
+	}
+	return combs
+}
+
+// subjectStart returns the index in the given selector (of one complex
+// selector) of its last compound selector, the one of the elements that it
+// selects: after its last combinator that is not in parentheses, brackets
+// or quotes.
+func subjectStart(sel string) int {
+	combs := combinators(sel)
+	if len(combs) == 0 {
+		return 0
+	}
+	return combs[len(combs)-1].at + 1
 }
 
 // inForeign returns whether the given element is in an svg or math element.
