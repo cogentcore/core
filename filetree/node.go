@@ -8,6 +8,7 @@ package filetree
 //go:generate core generate
 
 import (
+	"cogentcore.org/core/base/dirsort"
 	"fmt"
 	"io/fs"
 	"log"
@@ -303,61 +304,35 @@ func (fn *Node) RelativePath() string {
 	return fsx.RelativeFilePath(string(fn.Filepath), string(fn.FileRoot().Filepath))
 }
 
-// dirFileList returns the list of files in this directory,
-// sorted according to DirsOnTop and SortByModTime options
+// dirFileList returns the list of files in this directory, in its sort
+// order (see [dirsort.For]), with the directories first if DirsOnTop.
+// Those of an [fs.FS] are in the default sort order.
 func (fn *Node) dirFileList() []fs.FileInfo {
 	path := string(fn.Filepath)
 	var files []fs.FileInfo
 	var dirs []fs.FileInfo // for DirsOnTop mode
 	var di []fs.DirEntry
-	isFS := false
+	sort := dirsort.Default
 	if fn.FileRoot().FS == nil {
 		di = errors.Log1(os.ReadDir(path))
+		sort = dirsort.For(path)
 	} else {
-		isFS = true
 		di = errors.Log1(fs.ReadDir(fn.FileRoot().FS, path))
 	}
 	for _, d := range di {
-		info := errors.Log1(d.Info())
-		if fn.FileRoot().DirsOnTop {
-			if d.IsDir() {
-				dirs = append(dirs, info)
-			} else {
-				files = append(files, info)
-			}
+		info, err := d.Info()
+		if err != nil {
+			continue // (as one that was removed since it was read)
+		}
+		if fn.FileRoot().DirsOnTop && d.IsDir() {
+			dirs = append(dirs, info)
 		} else {
 			files = append(files, info)
 		}
 	}
-	doModSort := fn.FileRoot().SortByModTime
-	if doModSort {
-		doModSort = !fn.FileRoot().dirSortByName(core.Filename(path))
-	} else {
-		doModSort = fn.FileRoot().dirSortByModTime(core.Filename(path))
-	}
-
-	if fn.FileRoot().DirsOnTop {
-		if doModSort {
-			sortByModTime(dirs, isFS) // note: FS = ascending, otherwise descending
-			sortByModTime(files, isFS)
-		}
-		files = append(dirs, files...)
-	} else {
-		if doModSort {
-			sortByModTime(files, isFS)
-		}
-	}
-	return files
-}
-
-// sortByModTime sorts by _reverse_ mod time (newest first)
-func sortByModTime(files []fs.FileInfo, ascending bool) {
-	slices.SortFunc(files, func(a, b fs.FileInfo) int {
-		if ascending {
-			return a.ModTime().Compare(b.ModTime())
-		}
-		return b.ModTime().Compare(a.ModTime())
-	})
+	sort.SortInfos(dirs)
+	sort.SortInfos(files)
+	return append(dirs, files...)
 }
 
 func (fn *Node) setFileIcon() {
@@ -504,18 +479,19 @@ func (fn *Node) openDir() {
 	}
 }
 
-// sortBys determines how to sort the selected files in the directory.
-// Default is alpha by name, optionally can be sorted by modification time.
-func (fn *Node) sortBys(modTime bool) { //types:add
+// sortBys sets the sort order of the selected directories, by the given
+// field of their files, up (ascending) or down, which is their sort order
+// in all apps (see [dirsort.Set]).
+func (fn *Node) sortBys(by dirsort.Fields, down bool) { //types:add
 	fn.SelectedFunc(func(sn *Node) {
-		sn.sortBy(modTime)
+		sn.sortBy(dirsort.Sort{By: by, Down: down})
 	})
 }
 
-// sortBy determines how to sort the files in the directory -- default is alpha by name,
-// optionally can be sorted by modification time.
-func (fn *Node) sortBy(modTime bool) {
-	fn.FileRoot().setDirSortBy(fn.Filepath, modTime)
+// sortBy sets the sort order of the files in this directory, which is its
+// sort order in all apps (see [dirsort.Set]).
+func (fn *Node) sortBy(s dirsort.Sort) {
+	core.ErrorSnackbar(fn, dirsort.Set(string(fn.Filepath), s), "Could not save the sort order")
 	fn.Update()
 }
 

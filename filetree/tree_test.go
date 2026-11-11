@@ -10,7 +10,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"cogentcore.org/core/base/dirsort"
 	"cogentcore.org/core/core"
 )
 
@@ -47,4 +49,41 @@ func TestTreeReopen(t *testing.T) {
 		}
 		assert.Equal(t, []string{filepath.Join(root, "other"), filepath.Join(root, "same")}, paths)
 	})
+}
+
+// TestTreeDirSort tests that the files of a directory are listed in its
+// sort order (see [dirsort.For]), with the directories first, and that
+// sorting it by a field sets its sort order.
+func TestTreeDirSort(t *testing.T) {
+	root := t.TempDir()
+	t0 := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	for i, f := range []struct {
+		name string
+		size int
+	}{{"b.txt", 30}, {"A.txt", 10}, {"c.txt", 20}} {
+		fn := filepath.Join(root, f.name)
+		require.NoError(t, os.WriteFile(fn, make([]byte, f.size), 0o644))
+		mt := t0.Add(time.Duration(i) * time.Hour)
+		require.NoError(t, os.Chtimes(fn, mt, mt))
+	}
+	require.NoError(t, os.Mkdir(filepath.Join(root, "sub"), 0o755))
+	names := func(ft *Tree) []string {
+		var ns []string
+		for _, info := range ft.dirFileList() {
+			ns = append(ns, info.Name())
+		}
+		return ns
+	}
+	ft := NewTree(core.NewBody())
+	ft.NoWatch = true
+	ft.DirsOnTop = true
+	ft.OpenPath(root)
+	assert.Equal(t, []string{"sub", "A.txt", "b.txt", "c.txt"}, names(ft), "by name, up (ignoring case)")
+	require.NoError(t, dirsort.Set(root, dirsort.Sort{By: dirsort.Size, Down: true}))
+	assert.Equal(t, []string{"sub", "b.txt", "c.txt", "A.txt"}, names(ft))
+	ft.sortBy(dirsort.Sort{By: dirsort.ModTime, Down: true})
+	s, ok := dirsort.Saved(root)
+	assert.True(t, ok)
+	assert.Equal(t, dirsort.Sort{By: dirsort.ModTime, Down: true}, s)
+	assert.Equal(t, []string{"sub", "c.txt", "A.txt", "b.txt"}, names(ft))
 }

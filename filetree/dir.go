@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-// dirFlags are flags on directories: Open, SortBy, etc.
+// dirFlags are flags on directories: Open.
 // These flags are stored in the DirFlagMap for persistence.
 // This map is saved to a file, so these flags must be stored
 // as bit flags instead of a struct to ensure efficient serialization.
@@ -22,15 +22,16 @@ const (
 	// dirIsOpen means directory is open -- else closed
 	dirIsOpen dirFlags = iota
 
-	// dirSortByName means sort the directory entries by name.
-	// this overrides SortByModTime default on Tree if set.
+	// dirSortByName is no longer used: the sort order of a directory is
+	// that of [dirsort.For]. It is kept for the flags that were saved.
 	dirSortByName
 
-	// dirSortByModTime means sort the directory entries by modification time.
+	// dirSortByModTime is no longer used: the sort order of a directory is
+	// that of [dirsort.For]. It is kept for the flags that were saved.
 	dirSortByModTime
 )
 
-// DirFlagMap is a map for encoding open directories and sorting preferences.
+// DirFlagMap is a map for encoding open directories.
 // The strings are typically relative paths. Map access is protected by Mutex.
 type DirFlagMap struct {
 
@@ -75,41 +76,6 @@ func (dm *DirFlagMap) setOpen(path string, open bool) {
 	defer dm.Unlock()
 	df := dm.Map[path]
 	df.SetFlag(open, dirIsOpen)
-	dm.Map[path] = df
-}
-
-// sortByName returns true if path is sorted by name (default if not in map)
-func (dm *DirFlagMap) sortByName(path string) bool {
-	dm.init()
-	defer dm.Unlock()
-	if df, ok := dm.Map[path]; ok {
-		return df.HasFlag(dirSortByName)
-	}
-	return true
-}
-
-// sortByModTime returns true if path is sorted by mod time
-func (dm *DirFlagMap) sortByModTime(path string) bool {
-	dm.init()
-	defer dm.Unlock()
-	if df, ok := dm.Map[path]; ok {
-		return df.HasFlag(dirSortByModTime)
-	}
-	return false
-}
-
-// setSortBy sets the given directory's sort by option
-func (dm *DirFlagMap) setSortBy(path string, modTime bool) {
-	dm.init()
-	defer dm.Unlock()
-	df := dm.Map[path]
-	if modTime {
-		df.SetFlag(true, dirSortByModTime)
-		df.SetFlag(false, dirSortByName)
-	} else {
-		df.SetFlag(false, dirSortByModTime)
-		df.SetFlag(true, dirSortByName)
-	}
 	dm.Map[path] = df
 }
 

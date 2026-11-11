@@ -5,6 +5,7 @@
 package filetree
 
 import (
+	"cogentcore.org/core/base/dirsort"
 	"image"
 	"strings"
 
@@ -93,8 +94,13 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	core.NewFuncButton(m).SetFunc(fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
 		SetEnabled(fn.HasSelection() && fn.IsDir())
 
-	core.NewFuncButton(m).SetFunc(fn.sortBys).SetText("Sort by").
-		SetIcon(icons.Sort).SetEnabled(fn.HasSelection() && fn.IsDir())
+	sb := core.NewFuncButton(m).SetFunc(fn.sortBys)
+	sb.SetText("Sort by").SetIcon(icons.Sort).SetEnabled(fn.HasSelection() && fn.IsDir())
+	if fn.IsDir() { // (the current sort order of the directory)
+		s := dirsort.For(string(fn.Filepath))
+		sb.Args[0].SetValue(s.By)
+		sb.Args[1].SetValue(s.Down)
+	}
 
 	core.NewSeparator(m)
 
