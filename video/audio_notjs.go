@@ -7,10 +7,12 @@
 package video
 
 import (
+	"math"
 	"sync"
 	"time"
 
 	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/speaker"
 )
 
@@ -27,15 +29,36 @@ func audioAvailable() bool { return speakerInit() == nil }
 
 // audio is the audio of a playing on the speaker.
 type audio struct {
-	ctrl *beep.Ctrl
+	ctrl   *beep.Ctrl
+	volume *effects.Volume
 }
 
 // playAudio starts playing the given audio samples on the speaker,
-// paused if paused.
-func playAudio(samples <-chan [2]float64, paused bool) *audio {
+// paused if paused, at the given volume (see [Playback.Volume]), or muted.
+func playAudio(samples <-chan [2]float64, paused bool, volume float32, muted bool) *audio {
 	a := &audio{ctrl: &beep.Ctrl{Streamer: streamSamples(samples), Paused: paused}}
-	speaker.Play(a.ctrl)
+	a.volume = &effects.Volume{Streamer: a.ctrl, Base: 2}
+	a.setVolumeLocked(volume, muted)
+	speaker.Play(a.volume)
 	return a
+}
+
+// setVolume sets the volume of the audio (see [Playback.Volume]), or mutes it.
+func (a *audio) setVolume(volume float32, muted bool) {
+	speaker.Lock()
+	a.setVolumeLocked(volume, muted)
+	speaker.Unlock()
+}
+
+// setVolumeLocked sets the volume, with the lock of the speaker held, or
+// before it plays. The volume of beep is in powers of its base (2): a
+// volume of 1/2 is -1.
+func (a *audio) setVolumeLocked(volume float32, muted bool) {
+	if volume == 0 {
+		volume = 1
+	}
+	a.volume.Silent = muted || volume < 1e-3
+	a.volume.Volume = math.Log2(float64(volume))
 }
 
 // setPaused pauses or resumes the audio.

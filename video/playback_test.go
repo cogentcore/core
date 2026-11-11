@@ -31,6 +31,18 @@ func (fl *frameLog) add(f Frame) {
 	fl.at = append(fl.at, time.Now())
 }
 
+// timesBase returns the time of the first frame of the media (its start
+// time), which the times of its frames are relative to.
+func (fl *frameLog) timesBase(m *Media) time.Duration {
+	done := make(chan struct{})
+	defer close(done)
+	frames, _, _, err := m.Decode(16, 0, false, done)
+	if err != nil {
+		panic(err)
+	}
+	return (<-frames).Time
+}
+
 func (fl *frameLog) len() int {
 	fl.mu.Lock()
 	defer fl.mu.Unlock()
@@ -46,7 +58,6 @@ func newPlayback(t *testing.T, fl *frameLog) *Playback {
 func TestPlaybackTiming(t *testing.T) {
 	fl := &frameLog{}
 	p := newPlayback(t, fl)
-	start := time.Now()
 	require.NoError(t, p.Play())
 	assert.True(t, p.IsPlaying())
 	time.Sleep(500 * time.Millisecond)
@@ -58,7 +69,8 @@ func TestPlaybackTiming(t *testing.T) {
 	assert.InDelta(t, 15, n, 3)
 	for i := 1; i < n; i++ {
 		assert.Greater(t, fl.times[i], fl.times[i-1])
-		late := fl.at[i].Sub(start) - (fl.times[i] - fl.times[0])
+		// (from the first frame, when the time of the playing starts)
+		late := fl.at[i].Sub(fl.at[0]) - (fl.times[i] - fl.times[0])
 		assert.InDelta(t, 0, late.Seconds(), 0.05, "frame %d", i)
 	}
 
@@ -113,7 +125,6 @@ func TestPlaybackLoop(t *testing.T) {
 	require.NoError(t, err)
 	fl := &frameLog{}
 	p := &Playback{Media: m, Muted: true, Loop: true, OnFrame: fl.add}
-	start := time.Now()
 	require.NoError(t, p.Play())
 	time.Sleep(1550 * time.Millisecond)
 	p.Stop()
@@ -123,7 +134,7 @@ func TestPlaybackLoop(t *testing.T) {
 	n := fl.len()
 	assert.InDelta(t, 16, n, 2)
 	assert.Equal(t, fl.times[0], fl.times[10], "the first frame again")
-	assert.InDelta(t, 1.0, fl.at[10].Sub(start).Seconds(), 0.08)
+	assert.InDelta(t, 1.0, fl.at[10].Sub(fl.at[0]).Seconds(), 0.08)
 }
 
 func TestFirstFrame(t *testing.T) {
@@ -160,4 +171,43 @@ func TestOpenURL(t *testing.T) {
 	require.NotEmpty(t, agents)
 	assert.Equal(t, "test-agent", agents[0])
 	assert.Equal(t, "a=b", cookies[0])
+}
+
+func TestPlaybackSeek(t *testing.T) {
+	// testdata/short.mp4 is 1 second: 10 frames at 10 per second.
+	m, err := OpenMedia("testdata/short.mp4", nil)
+	require.NoError(t, err)
+	assert.InDelta(t, 1.0, m.Duration.Seconds(), 0.05)
+	fl := &frameLog{}
+	p := &Playback{Media: m, Muted: true, OnFrame: fl.add}
+
+	// Played from a time, its frames start there.
+	require.NoError(t, p.PlayFrom(500*time.Millisecond))
+	require.Eventually(t, func() bool { return fl.len() >= 3 }, 2*time.Second, 10*time.Millisecond)
+	assert.Equal(t, 500*time.Millisecond, fl.times[0]-fl.timesBase(m))
+	assert.Equal(t, fl.times[fl.len()-1], p.Position())
+
+	// A seek while paused shows the frame at the time, and stays paused.
+	p.Pause()
+	n := fl.len()
+	require.NoError(t, p.Seek(200*time.Millisecond))
+	require.Eventually(t, func() bool { return fl.len() == n+1 }, 2*time.Second, 10*time.Millisecond)
+	assert.Equal(t, 200*time.Millisecond, fl.times[n]-fl.timesBase(m))
+	assert.True(t, p.IsPaused())
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, n+1, fl.len(), "no more frames while paused")
+
+	// It plays on from there when resumed, and a seek past the end is to the end.
+	p.Resume()
+	require.Eventually(t, func() bool { return fl.len() >= n+3 }, 2*time.Second, 10*time.Millisecond)
+	assert.Equal(t, 300*time.Millisecond, fl.times[n+1]-fl.timesBase(m))
+	require.NoError(t, p.Seek(time.Hour))
+	assert.Equal(t, m.Duration, p.Position())
+	p.Stop()
+
+	// The volume and muting can change while it plays.
+	p.SetVolume(0.5)
+	assert.Equal(t, float32(0.5), p.Volume)
+	p.SetMuted(false)
+	assert.False(t, p.Muted)
 }

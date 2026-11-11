@@ -6,6 +6,8 @@
 
 package video
 
+import "time"
+
 // The decoder of FFmpeg is not used on the web (where the browser plays
 // videos) nor with the novideo build tag (see [Media]).
 
@@ -16,5 +18,7 @@ func openDecoder(fpath string, options map[string]string, audio bool) (*decoder,
 }
 
 func (d *decoder) free() {}
+
+func (d *decoder) seek(t time.Duration) error { return errUnsupported }
 
 func (d *decoder) run(sink decodeSink) error { return errUnsupported }

@@ -25,8 +25,12 @@ type Playback struct {
 	// size of the video).
 	Width, Height int
 
-	// Muted is whether the audio is not played.
+	// Muted is whether the audio is not heard (see [Playback.SetMuted]).
 	Muted bool
+
+	// Volume is the volume of the audio, from 0 to 1, where the zero value
+	// is full volume (see [Playback.SetVolume]).
+	Volume float32
 
 	// Loop is whether to play the media again from the start at its end.
 	Loop bool
@@ -60,21 +64,38 @@ type Playback struct {
 
 	// audio is the audio being played, if any.
 	audio *audio
+
+	// position is the time in the media of the frame shown last.
+	position time.Duration
 }
 
 // Play starts playing the media from the start, stopping any playing
 // before. The media is decoded in the background, so this returns after
 // opening it.
 func (p *Playback) Play() error {
+	return p.PlayFrom(0)
+}
+
+// PlayFrom starts playing the media from the given time, stopping any
+// playing before, as for [Playback.Play].
+func (p *Playback) PlayFrom(t time.Duration) error {
+	return p.playFrom(t, false)
+}
+
+// playFrom plays the media from the given time, paused if paused.
+func (p *Playback) playFrom(t time.Duration, paused bool) error {
 	if p.Media == nil {
 		return errors.New("video: no media to play")
 	}
 	p.Stop()
 	p.mu.Lock()
 	done := make(chan struct{})
-	p.done, p.paused = done, false
+	p.done, p.paused, p.position = done, paused, t
+	if paused {
+		p.pausedAt, p.resume = time.Now(), make(chan struct{})
+	}
 	p.mu.Unlock()
-	frames, samples, errs, err := p.start(done)
+	frames, samples, errs, err := p.start(t, done)
 	if err != nil {
 		p.Stop() // (not playing)
 		return err
@@ -83,15 +104,56 @@ func (p *Playback) Play() error {
 	return nil
 }
 
-// start starts decoding the media, and playing its audio, if any.
-func (p *Playback) start(done chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
-	hasAudio := !p.Muted && p.Media.HasAudio && audioAvailable()
-	frames, samples, errs, err := p.Media.Decode(p.Width, p.Height, hasAudio, done)
+// Seek plays the media from the given time (within its duration), keeping
+// it paused if it is paused, which then shows the frame at that time.
+func (p *Playback) Seek(t time.Duration) error {
+	if d := p.Media.Duration; d > 0 && t > d {
+		t = d
+	}
+	return p.playFrom(max(t, 0), p.IsPaused())
+}
+
+// Position returns the time in the media of the frame shown last (or the
+// time that it is played from, before its first frame is shown).
+func (p *Playback) Position() time.Duration {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.position
+}
+
+// SetMuted sets whether the audio is not heard, while it plays too.
+func (p *Playback) SetMuted(muted bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Muted = muted
+	if p.audio != nil {
+		p.audio.setVolume(p.Volume, p.Muted)
+	}
+}
+
+// SetVolume sets the volume of the audio, from 0 to 1, while it plays too.
+func (p *Playback) SetVolume(volume float32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Volume = min(max(volume, 0), 1)
+	if p.Volume == 0 { // (0 is full volume as the zero value)
+		p.Volume = 1e-6
+	}
+	if p.audio != nil {
+		p.audio.setVolume(p.Volume, p.Muted)
+	}
+}
+
+// start starts decoding the media from the given time, and playing its
+// audio, if any (also when it is muted, so that it can be heard later).
+func (p *Playback) start(t time.Duration, done chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
+	hasAudio := p.Media.HasAudio && audioAvailable()
+	frames, samples, errs, err := p.Media.DecodeFrom(t, p.Width, p.Height, hasAudio, done)
 	if err != nil || !hasAudio {
 		return frames, samples, errs, err
 	}
 	p.mu.Lock()
-	p.audio = playAudio(samples, p.paused)
+	p.audio = playAudio(samples, p.paused, p.Volume, p.Muted)
 	p.mu.Unlock()
 	return frames, samples, errs, nil
 }
@@ -123,21 +185,27 @@ func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [
 				return
 			}
 			var err error
-			if frames, samples, errs, err = p.start(done); err != nil {
+			if frames, samples, errs, err = p.start(0, done); err != nil {
 				p.error(err)
 				return
 			}
 			base, firstFrame = last, true
 			continue
 		}
+		// The first frame (as of a seek) is shown at once, also while
+		// paused, and the others at their times after it.
+		showNow := firstFrame && base == 0 // (not again in a loop)
 		if firstFrame {
 			first, firstFrame = f.Time, false
+			if showNow { // the time of the playing starts now
+				start = p.restart()
+			}
 		}
 		at := base + f.Time - first
-		last = at + time.Second/30
+		last = at + p.frameTime()
 
 		// Wait for its time, waiting longer while paused.
-		for {
+		for !showNow {
 			// (the start moves later by the time paused)
 			start = p.startAfterPauses(start)
 			p.mu.Lock()
@@ -166,8 +234,32 @@ func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [
 			return
 		default:
 		}
+		p.mu.Lock()
+		p.position = f.Time
+		p.mu.Unlock()
 		p.OnFrame(f)
 	}
+}
+
+// frameTime returns the duration of a frame of the media.
+func (p *Playback) frameTime() time.Duration {
+	if fr := p.Media.FrameRate; fr > 0 {
+		return time.Duration(float64(time.Second) / fr)
+	}
+	return time.Second / 30
+}
+
+// restart returns the time now as the start of the playing, from which
+// the time paused is counted again.
+func (p *Playback) restart() time.Time {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	now := time.Now()
+	p.pauseShift = 0
+	if p.paused {
+		p.pausedAt = now
+	}
+	return now
 }
 
 // startAfterPauses returns the given start of the playing moved later

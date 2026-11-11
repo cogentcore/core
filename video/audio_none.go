@@ -13,6 +13,10 @@ func audioAvailable() bool { return false }
 
 type audio struct{}
 
-func playAudio(samples <-chan [2]float64, paused bool) *audio { return &audio{} }
+func playAudio(samples <-chan [2]float64, paused bool, volume float32, muted bool) *audio {
+	return &audio{}
+}
+
+func (a *audio) setVolume(volume float32, muted bool) {}
 
 func (a *audio) setPaused(paused bool) {}

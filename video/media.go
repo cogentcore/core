@@ -4,6 +4,8 @@
 
 package video
 
+import "time"
+
 // Media is a video file. On desktop platforms, it is decoded with FFmpeg
 // via go-astiav: OpenMedia records the properties of the file, and each call
 // to [Media.Decode] opens the file again, so that the media can be played
@@ -28,6 +30,9 @@ type Media struct {
 	// FrameRate is the average number of video frames per second,
 	// or 0 if it is not known.
 	FrameRate float64
+
+	// Duration is the duration of the media, or 0 if it is not known.
+	Duration time.Duration
 
 	// HasAudio is whether the media has an audio stream.
 	HasAudio bool

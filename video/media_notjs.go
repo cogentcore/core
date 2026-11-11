@@ -33,6 +33,9 @@ func OpenMedia(fpath string, options map[string]string) (*Media, error) {
 	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
 		m.FrameRate = fr.Float64()
 	}
+	if du := d.input.Duration(); du > 0 {
+		m.Duration = time.Duration(du) * time.Second / time.Duration(astiav.TimeBase)
+	}
 	return m, nil
 }
 
@@ -63,6 +66,10 @@ type decoder struct {
 	// next is the time of the next video frame, for frames without
 	// a timestamp, and frameTime is the duration of a frame.
 	next, frameTime time.Duration
+
+	// start is the time to decode from (see [decoder.seek]): the frames
+	// and audio before it are dropped.
+	start time.Duration
 }
 
 // openDecoder opens the media file at the given path with the given
@@ -256,8 +263,18 @@ func (d *decoder) receive(s *decodeStream, sink decodeSink) (bool, error) {
 
 // sendVideo converts the decoded video frame to an RGBA image and sends it.
 func (d *decoder) sendVideo(sink decodeSink) (bool, error) {
-	// (Re)create the scaler when the source format or size changes.
+	// The time of the frame, which is dropped if it is before the start.
 	f := d.frame
+	t := d.next
+	if pts := f.Pts(); pts != astiav.NoPtsValue {
+		t = streamTime(d.video.stream, pts)
+	}
+	d.next = t + d.frameTime
+	if t < d.start {
+		return true, nil
+	}
+
+	// (Re)create the scaler when the source format or size changes.
 	w, h := d.scaleWidth, d.scaleHeight
 	switch {
 	case w <= 0 && h <= 0:
@@ -288,17 +305,36 @@ func (d *decoder) sendVideo(sink decodeSink) (bool, error) {
 	if err := d.scaled.Data().ToImage(img); err != nil {
 		return false, fmt.Errorf("video: copying frame: %w", err)
 	}
-	t := d.next
-	if pts := f.Pts(); pts != astiav.NoPtsValue {
-		tb := d.video.stream.TimeBase()
-		t = time.Duration(float64(pts) * float64(time.Second) * float64(tb.Num()) / float64(tb.Den()))
-	}
-	d.next = t + d.frameTime
 	return sink.video(Frame{Image: img, Time: t}), nil
+}
+
+// streamTime returns the time of the given timestamp of the given stream.
+func streamTime(s *astiav.Stream, ts int64) time.Duration {
+	tb := s.TimeBase()
+	return time.Duration(float64(ts) * float64(time.Second) * float64(tb.Num()) / float64(tb.Den()))
+}
+
+// seek seeks the media to the key frame at or before the given time,
+// from which it is decoded, dropping the frames before the time.
+func (d *decoder) seek(t time.Duration) error {
+	d.start = t
+	if t <= 0 {
+		return nil
+	}
+	ts := int64(t) * int64(astiav.TimeBase) / int64(time.Second)
+	if err := d.input.SeekFrame(-1, ts, astiav.NewSeekFlags(astiav.SeekFlagBackward)); err != nil {
+		return fmt.Errorf("video: seeking to %v: %w", t, err)
+	}
+	return nil
 }
 
 // sendAudio converts the decoded audio frame to stereo samples and sends them.
 func (d *decoder) sendAudio(sink decodeSink) (bool, error) {
+	// The audio before the start is dropped.
+	if pts := d.frame.Pts(); pts != astiav.NoPtsValue && streamTime(d.audio.stream, pts) < d.start {
+		return true, nil
+	}
+
 	// Resample into a new buffer of interleaved float64 stereo samples.
 	r := d.resampled
 	r.Unref()

@@ -48,9 +48,19 @@ const (
 // stops at the end of the media, at an error, which is sent to the error
 // channel, or when done is closed; all of the channels are closed then.
 func (m *Media) Decode(width, height int, audio bool, done <-chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
-	// Open the media again, for this decoding.
+	return m.DecodeFrom(0, width, height, audio, done)
+}
+
+// DecodeFrom is like [Media.Decode], starting at the given time of the
+// media: the frames and audio before it are not sent.
+func (m *Media) DecodeFrom(start time.Duration, width, height int, audio bool, done <-chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
+	// Open the media again, for this decoding, from its start.
 	d, err := openDecoder(m.Path, m.Options, audio)
 	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err := d.seek(start); err != nil {
+		d.free()
 		return nil, nil, nil, err
 	}
 	d.scaleWidth, d.scaleHeight = width, height
