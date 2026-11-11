@@ -52,7 +52,9 @@ func TestIsInvisibleCovered(t *testing.T) {
 	}
 	black := colors.Uniform(colors.Black)
 	check("opaque overlay", true, black, 0, false)
-	check("translucent overlay", true, colors.Uniform(colors.WithAF32(colors.Black, 0.5)), 0, false)
+	// (a fixed overlay is in the layer of the scene, through which a
+	// translucent one is seen, see sceneLayer)
+	check("translucent overlay", false, colors.Uniform(colors.WithAF32(colors.Black, 0.5)), 0, false)
 	check("transparent overlay", false, nil, 0, false)
 	check("overlay under it", false, black, -1, false)
 	check("hidden overlay", false, black, 0, true)
@@ -76,7 +78,8 @@ func (tg *testGroup) Render() {
 // video) is not rendered for a change in it while it is covered by a
 // widget rendered over it, which it would paint over (as the videos of the
 // search page of pexels.com, under the dialog of one of them), and is once
-// it is not.
+// it is not. The overlay is absolute, so it is not in the layer of the
+// scene (see sceneLayer), but in its image, which the group would paint over.
 func TestRenderGroupCovered(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(400), units.Dp(300)) })
@@ -85,7 +88,7 @@ func TestRenderGroupCovered(t *testing.T) {
 	child := NewText(tg).SetText("time")
 	overlay := NewFrame(b)
 	overlay.Styler(func(s *styles.Style) {
-		s.Position = styles.PositionFixed
+		s.Position = styles.PositionAbsolute
 		s.Inset.Set(units.Zero())
 		s.InsetSet.Set(true)
 		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))

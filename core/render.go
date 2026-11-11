@@ -335,7 +335,7 @@ func (fr *Frame) LayoutFrame(size math32.Vector2) {
 // GetSize, DoLayout, Render.  Needed after Config.
 func (sc *Scene) LayoutRenderScene() {
 	sc.LayoutScene()
-	sc.RenderWidget()
+	sc.renderWhole()
 }
 
 func (sc *Scene) Render() {
@@ -541,6 +541,9 @@ func (wb *WidgetBase) StartRender() bool {
 	}
 	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
 	if wb.Scene == nil {
+		return false
+	}
+	if l := &wb.Scene.layer; l.mode != layerOff && !l.layerStart(wb.Scene, wb) {
 		return false
 	}
 	pc := &wb.Scene.Painter

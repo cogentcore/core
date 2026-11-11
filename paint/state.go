@@ -134,6 +134,26 @@ func (rs *State) PushContext(sty *styles.Paint, bounds *render.Bounds) *render.C
 	return g
 }
 
+// PushStack pushes the contexts of the stack of the given other state above
+// its base context (their clipping and transforms) onto this one, so that the
+// rendering on this one continues within them, as for the rendering of a
+// part of a scene into another image (in which the widgets that it is in
+// pop them). See [State.PopStack].
+func (rs *State) PushStack(other *State) {
+	for _, g := range other.Stack[1:] {
+		rs.Stack = append(rs.Stack, g)
+		rs.pushes = append(rs.pushes, len(rs.Render))
+		rs.Render.Add(&render.ContextPush{Context: *g})
+	}
+}
+
+// PopStack pops all of the contexts of the stack above its base context.
+func (rs *State) PopStack() {
+	for len(rs.Stack) > 1 {
+		rs.PopContext()
+	}
+}
+
 // SetLayer sets the [render.Context.ClipMask], [render.Context.Mask], and
 // [render.Context.Opacity] of the context at the top of the stack (pushed
 // with [State.PushContext]), with which its rendering is composited as a

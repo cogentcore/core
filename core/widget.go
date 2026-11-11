@@ -268,6 +268,15 @@ const (
 	// a child or a scrollbar, needs to be rendered on the next render iteration,
 	// so that the render iteration only goes into the parts of the tree that do.
 	widgetChildNeedsRender
+
+	// widgetInLayer is whether the widget was rendered into the layer of its
+	// scene (see [sceneLayer]) by the last render of the whole scene.
+	widgetInLayer
+
+	// widgetHasLayer is whether a widget inside of the widget was rendered
+	// into the layer of its scene (see [sceneLayer]) by the last render of
+	// the whole scene, while the widget itself was not.
+	widgetHasLayer
 )
 
 // hasFlag returns whether the given flag is set.
