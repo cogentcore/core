@@ -7,7 +7,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Controls", IDName: "controls", Doc: "Controls are the standard controls of a video player, as those of the\nvideo elements of browsers: a bar over the bottom of the video, partly\ntransparent, with the position (a slider, which seeks when it is\nchanged), buttons to skip back 10 seconds, to play and pause, and to\nskip forward 10 seconds, to mute, with the volume and the time.\nThey are a child of the widget of the video (their target), which must\nbe their containing block (positioned, as relative), and are shown while\nthe mouse moves over its bottom (see [Controls.inZone]), until 2.5\nseconds after it stops there, or half a second after it moves out of the\nbottom or leaves, and while the video is not playing. A click on the target (not on the\ncontrols) plays and pauses the video. The target must be rendered as a\nwhole when the controls change (see [Video.RenderGroup]), as they are\npartly transparent over the video.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "player", Doc: "player is the player that the controls control."}, {Name: "target", Doc: "target is the widget of the video that the controls are over."}, {Name: "position"}, {Name: "play"}, {Name: "mute"}, {Name: "volume"}, {Name: "time"}, {Name: "shownAt", Doc: "shownAt is when the controls were last shown by the mouse moving."}, {Name: "second", Doc: "second is the second of the time that is shown."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Controls", IDName: "controls", Doc: "Controls are the standard controls of a video player, as those of the\nvideo elements of browsers: a bar over the bottom of the video, partly\ntransparent, with the position (a slider, which seeks when it is\nchanged), buttons to skip back 10 seconds, to play and pause, and to\nskip forward 10 seconds, to mute, with the volume and the time.\nThey are a child of the widget of the video (their target), which must\nbe their containing block (positioned, as relative), and are shown while\nthe mouse moves over them (see [Controls.inZone]), until 2.5\nseconds after it stops there, or half a second after it moves out of the\nbottom or leaves, and while the video is not playing. A click on the target (not on the\ncontrols) plays and pauses the video, and gives it the focus, for the\nkeys of players (see [Controls.handleKey]). The target must be rendered as a\nwhole when the controls change (see [Video.RenderGroup]), as they are\npartly transparent over the video.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "player", Doc: "player is the player that the controls control."}, {Name: "target", Doc: "target is the widget of the video that the controls are over."}, {Name: "position"}, {Name: "play"}, {Name: "mute"}, {Name: "volume"}, {Name: "time"}, {Name: "shownAt", Doc: "shownAt is when the controls were last shown by the mouse moving."}, {Name: "second", Doc: "second is the second of the time that is shown."}}})
 
 // NewControls returns a new [Controls] with the given optional parent:
 // Controls are the standard controls of a video player, as those of the
@@ -17,10 +17,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Controls", ID
 // skip forward 10 seconds, to mute, with the volume and the time.
 // They are a child of the widget of the video (their target), which must
 // be their containing block (positioned, as relative), and are shown while
-// the mouse moves over its bottom (see [Controls.inZone]), until 2.5
+// the mouse moves over them (see [Controls.inZone]), until 2.5
 // seconds after it stops there, or half a second after it moves out of the
 // bottom or leaves, and while the video is not playing. A click on the target (not on the
-// controls) plays and pauses the video. The target must be rendered as a
+// controls) plays and pauses the video, and gives it the focus, for the
+// keys of players (see [Controls.handleKey]). The target must be rendered as a
 // whole when the controls change (see [Video.RenderGroup]), as they are
 // partly transparent over the video.
 func NewControls(parent ...tree.Node) *Controls { return tree.New[Controls](parent...) }

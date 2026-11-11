@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/types"
 )
 
 // VideoBox is the box of a video element on desktop platforms (see
@@ -30,6 +31,12 @@ type VideoBox struct {
 	// Image shows the poster of the video, and its frames.
 	Image *core.Image
 }
+
+// (the type is registered when the package is initialized, as typegen
+// does, not when the first one is made, as when a page is read in another
+// goroutine, which would change the types while others read them)
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/htmlcore.VideoBox", IDName: "video-box",
+	Doc: "VideoBox is the box of a video element on desktop platforms.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &VideoBox{}})
 
 func (vb *VideoBox) Init() {
 	vb.Frame.Init()
