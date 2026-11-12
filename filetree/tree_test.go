@@ -13,7 +13,10 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/dirsort"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 )
 
 func TestTree(t *testing.T) {
@@ -86,4 +89,64 @@ func TestTreeDirSort(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, dirsort.Sort{By: dirsort.ModTime, Down: true}, s)
 	assert.Equal(t, []string{"sub", "c.txt", "A.txt", "b.txt"}, names(ft))
+}
+
+// TestTreeApp tests that clicking an app bundle (see [IsAppBundle]) does
+// not open it in the tree, and that double-clicking it opens it as an app,
+// with the mouse (clicks sent to the window), unless the tree shows apps
+// as directories ([Tree.AppsAsDirs]), in which case clicking opens it.
+func TestTreeApp(t *testing.T) {
+	root := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "Tool.app", "Contents"), 0o755))
+	prevBundles, prevOpen := AppBundles, openURL
+	t.Cleanup(func() { AppBundles, openURL = prevBundles, prevOpen })
+	AppBundles = true
+	var opened []string
+	openURL = func(url string) { opened = append(opened, url) }
+	b := core.NewBody()
+	ft := NewTree(b)
+	ft.NoWatch = true
+	ft.OpenPath(root)
+	var app *Node
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		app = AsNode(ft.Child(0))
+		require.NotNil(t, app)
+		assert.True(t, app.IsApp())
+		assert.Equal(t, icons.Apps, app.Branch.IconOff)
+	}, func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		click := func(n int) {
+			b.AsyncLock()
+			bb := app.Parts.Geom.TotalBBox
+			b.AsyncUnlock()
+			pt := bb.Min.Add(bb.Size().Div(2))
+			for range n {
+				src.MouseButton(events.MouseDown, events.Left, pt, 0)
+				src.MouseButton(events.MouseUp, events.Left, pt, 0)
+			}
+			time.Sleep(300 * time.Millisecond)
+		}
+		closed := func() bool {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			return app.Closed
+		}
+		click(1)
+		assert.True(t, closed(), "a click does not open an app")
+		assert.Empty(t, opened)
+		click(2)
+		assert.True(t, closed(), "a double click does not open an app in the tree")
+		assert.Equal(t, []string{fsx.FileURL(filepath.Join(string(ft.Filepath), "Tool.app"))}, opened)
+
+		b.AsyncLock()
+		ft.AppsAsDirs = true
+		assert.False(t, app.IsApp())
+		b.AsyncUnlock()
+		time.Sleep(600 * time.Millisecond) // (not a triple click)
+		click(1)
+		assert.False(t, closed(), "a click opens an app shown as a directory")
+		assert.Len(t, opened, 1)
+	})
 }

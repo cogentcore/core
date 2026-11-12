@@ -63,6 +63,11 @@ type Tree struct {
 	// return true to include, false to not.  This applies to files and directories alike.
 	FilterFunc func(path string, info fs.FileInfo) bool
 
+	// AppsAsDirs shows app bundles as directories, which open by clicking,
+	// instead of as apps, which open as apps by double-clicking
+	// (see [Node.IsApp]).
+	AppsAsDirs bool
+
 	// FS is the file system we are browsing, if it is an FS (nil = os filesystem)
 	FS fs.FS
 
