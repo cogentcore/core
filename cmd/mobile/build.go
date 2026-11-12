@@ -194,6 +194,12 @@ func goCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	var tags []string
 	if c.Build.Debug {
 		tags = append(tags, "debug")
+		// (with those of the platform, which -tags would replace)
+		for f := range strings.FieldsSeq(env["GOFLAGS"]) {
+			if ts, ok := strings.CutPrefix(f, "-tags="); ok {
+				tags = append(tags, strings.Split(ts, ",")...)
+			}
+		}
 	}
 	if len(tags) > 0 {
 		cargs = append(cargs, "-tags", strings.Join(tags, ","))
