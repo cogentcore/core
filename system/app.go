@@ -228,6 +228,12 @@ type App interface {
 // should be taken until a signal is sent.
 var OnSystemWindowCreated chan struct{}
 
+// HandleBack, if set, is called by the drivers for the back button or
+// gesture of the system (on Android), and returns whether it went back
+// within the app; otherwise the system handles it (leaving the app).
+// It is set by the core package (see core.handleBack).
+var HandleBack func() bool
+
 // Platforms are all the supported platforms for system
 type Platforms int32 //enums:enum
 

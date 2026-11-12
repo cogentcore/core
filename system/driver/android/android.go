@@ -369,9 +369,16 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			a.Event.WindowResize()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
-			// and lets the size event go through when we come back later
-			a.Win.SetSize(image.Point{})
-			a.Event.Window(events.WinMinimize)
+			// and lets the size event go through when we come back later.
+			// There is no window yet if the system window is destroyed while
+			// the app starts (as when it is started with the screen locked).
+			a.Mu.Lock()
+			win := a.Win
+			a.Mu.Unlock()
+			if win != nil {
+				win.SetSize(image.Point{})
+				a.Event.Window(events.WinMinimize)
+			}
 			a.DestroyGPU()
 		case <-activityDestroyed:
 			// TODO(kai): needed to stop crashing when changing orientation

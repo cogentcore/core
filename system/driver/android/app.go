@@ -53,7 +53,9 @@ func (a *App) InitGPU() {
 func (a *App) DestroyGPU() {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	a.Draw.Release()
+	if a.Draw != nil {
+		a.Draw.Release()
+	}
 	a.Draw = nil
 	a.Compose = nil
 }

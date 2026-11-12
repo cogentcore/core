@@ -29,6 +29,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/system"
 )
 
 //export keyboardTyped
@@ -62,9 +63,38 @@ func ProcessEvents(env *C.JNIEnv, q *C.AInputQueue) {
 		if C.AInputQueue_preDispatchEvent(q, e) != 0 {
 			continue
 		}
+		if handled, ok := processBack(e); ok {
+			C.AInputQueue_finishEvent(q, e, handled)
+			continue
+		}
 		ProcessEvent(env, e)
 		C.AInputQueue_finishEvent(q, e, 0)
 	}
+}
+
+// backHandled is whether the app handled the last down of the back key,
+// so that its up is handled too.
+var backHandled bool
+
+// processBack processes the given event if it is of the back key (the back
+// button or gesture of the system), returning whether the app handled it
+// (as a C.int for AInputQueue_finishEvent), and whether it is of the back
+// key. The app handles it if [system.HandleBack] goes back within the app,
+// on its down, which the up follows; otherwise the system handles both,
+// leaving the app.
+func processBack(e *C.AInputEvent) (C.int, bool) {
+	if C.AInputEvent_getType(e) != C.AINPUT_EVENT_TYPE_KEY || C.AKeyEvent_getKeyCode(e) != C.AKEYCODE_BACK {
+		return 0, false
+	}
+	if C.AKeyEvent_getAction(e) == C.AKEY_EVENT_ACTION_DOWN {
+		if C.AKeyEvent_getRepeatCount(e) == 0 {
+			backHandled = system.HandleBack != nil && system.HandleBack()
+		}
+	}
+	if backHandled {
+		return 1, true
+	}
+	return 0, true
 }
 
 // ProcessEvent processes an input queue event

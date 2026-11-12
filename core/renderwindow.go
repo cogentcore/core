@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -799,6 +801,15 @@ func (w *renderWindow) renderWindow() {
 
 	// now we go in the proper bottom-up order to generate the [render.Scene]
 	cp := w.SystemWindow.Composer()
+	// On mobile, the system window, with its drawer, is destroyed while
+	// the app is in the background, and it can be before the window is
+	// made (when the app starts with the screen off), so there is nothing
+	// to render to then (the composer is a nil pointer). The window is
+	// rendered again when it is shown.
+	if reflectx.IsNil(reflect.ValueOf(cp)) {
+		w.SystemWindow.Unlock()
+		return
+	}
 	cp.Start()
 	sm := &w.mains
 	n := sm.stack.Len()
