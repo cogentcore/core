@@ -682,11 +682,22 @@ func (ts *Tabs) handleTabKeys(e events.Event) {
 	default:
 		return
 	}
-	n := ts.NumTabs()
-	if n < 2 {
+	if ts.NumTabs() < 2 {
 		return
 	}
 	e.SetHandled()
+	ts.SelectTabDelta(delta)
+}
+
+// SelectTabDelta selects the tab the given number of tabs after the
+// current one (before it if negative), cycling around, and focuses it
+// (see [Tabs.focusTab]), as the keys for the next and previous tabs do
+// ([keymap.NextTab] and [keymap.PrevTab]).
+func (ts *Tabs) SelectTabDelta(delta int) {
+	n := ts.NumTabs()
+	if n == 0 {
+		return
+	}
 	cur, idx := ts.CurrentTab()
 	if fr, ok := cur.(*Frame); ok {
 		if em := ts.Events(); em != nil && !tree.IsNil(em.focus) && isParentOf(fr, em.focus) {
