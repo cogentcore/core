@@ -6,9 +6,7 @@ package filetree
 
 import (
 	"image"
-	"log/slog"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
@@ -95,7 +93,11 @@ func (lv *VCSLog) Init() {
 				SetTooltip("Checks out this revision").
 				OnClick(func(e events.Event) {
 					cmt := lv.Log[w.SelectedIndex]
-					errors.Log(lv.Repo.UpdateVersion(cmt.Rev))
+					if err := lv.Repo.UpdateVersion(cmt.Rev); err != nil {
+						core.ErrorSnackbar(lv, err, "Error checking out revision")
+						return
+					}
+					core.MessageSnackbar(lv, "Checked out revision "+cmt.Rev)
 				})
 		})
 		w.OnSelect(func(e events.Event) {
@@ -127,7 +129,7 @@ func (lv *VCSLog) Init() {
 			}
 			cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 			if err != nil {
-				slog.Error(err.Error())
+				core.ErrorSnackbar(lv, err, "Error getting commit info")
 				return
 			}
 			d := core.NewBody("Commit Info: " + cmt.Rev)

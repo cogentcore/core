@@ -219,3 +219,23 @@ func TestSvnOps(t *testing.T) {
 
 	assert.Error(t, repo.Add(path("missing.txt")), "with svn's message")
 }
+
+// TestGitErrors tests that the errors of git commands have the output of
+// git, which says what went wrong, as shown to the user in a snackbar.
+func TestGitErrors(t *testing.T) {
+	dir, _ := newGitTest(t)
+	repo, err := NewRepo("origin", dir)
+	require.NoError(t, err)
+	err = repo.UpdateVersion("no-such-revision")
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "no-such-revision", "the output of git")
+	}
+	err = repo.Add(filepath.Join(dir, "missing.txt"))
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "missing.txt", "the output of git")
+	}
+	err = repo.RevertFile(filepath.Join(dir, "missing.txt"))
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "missing.txt", "the output of git")
+	}
+}
