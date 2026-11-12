@@ -354,6 +354,17 @@ func (w *renderWindow) resized() {
 	rc.visible = true
 	w.flags.SetFlag(true, winResize)
 	w.mains.resize(rg)
+	// On mobile, the focused widget is kept in view, as when the
+	// virtual keyboard for typing into it shrinks the window, after it
+	// was scrolled into view for getting the focus.
+	if TheApp.SystemPlatform().IsMobile() {
+		if st := w.mains.top(); st != nil && st.Scene != nil {
+			if f := st.Scene.Events.focus; f != nil {
+				fw := f.AsWidget()
+				fw.Defer(func() { fw.ScrollToThis() })
+			}
+		}
+	}
 	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}

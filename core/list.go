@@ -1832,8 +1832,7 @@ func (lb *ListBase) SizeFinal() {
 	localIter := 0
 	for (lb.MakeIter < 2 || lb.VisibleRows != lg.visibleRows) && localIter < 2 {
 		if lb.VisibleRows != lg.visibleRows {
-			lb.VisibleRows = lg.visibleRows
-			lb.Update()
+			lb.setVisibleRows(lg.visibleRows)
 		} else {
 			lg.StyleTree()
 		}
@@ -1842,6 +1841,132 @@ func (lb *ListBase) SizeFinal() {
 		localIter++
 	}
 	lb.Frame.SizeFinal()
+}
+
+// setVisibleRows sets the number of visible rows and updates the list.
+// The item of a cell with the focus stays focused, as when the virtual
+// keyboard for typing into it shrinks the window: the rows are widgets
+// for the items from the [ListBase.StartIndex], which can change, so the
+// focus moves to the cell of the item in its row, after scrolling it into
+// view if it is no longer in the rows (see [ListBase.keepFocusedItem]).
+func (lb *ListBase) setVisibleRows(n int) {
+	idx, pos, foc := lb.focusedCell()
+	cursor := commitEdit(foc)
+	start := lb.StartIndex
+	lb.VisibleRows = n
+	lb.Update()
+	if foc != nil {
+		lb.keepFocusedItem(idx, pos, cursor, foc, true)
+	}
+	if lb.StartIndex != start {
+		// the scroll bar is set once laid out, before any scrolling
+		// to the cell of the focus
+		lb.Defer(lb.updateScroll)
+	}
+}
+
+// keepFocusedItem keeps the focus on the cell at the given position in
+// the row of the given slice index, which had the given focused widget,
+// with the given position of the cursor of a [TextField] (or -1),
+// after the rows were updated, as the rows are widgets for the items from
+// the [ListBase.StartIndex], which can change: if the item is no longer in
+// the rows, it is scrolled into view if scroll, or else (when scrolled
+// away from) its edit is completed and the focus is cleared; if its cell
+// is another widget, the focus moves there, without losing it in between,
+// which would hide the virtual keyboard, as for a new focus.
+func (lb *ListBase) keepFocusedItem(idx, pos, cursor int, foc Widget, scroll bool) {
+	em := lb.Events()
+	if em == nil || em.focus != foc {
+		return
+	}
+	if idx < lb.StartIndex || idx >= lb.StartIndex+lb.VisibleRows {
+		if !scroll {
+			em.setFocus(nil)
+			return
+		}
+		lb.ScrollToIndexNoUpdate(idx)
+		lb.Update()
+	}
+	cell := lb.cellOf(idx, pos)
+	if cell == nil {
+		return
+	}
+	if foc.AsTree().This == cell.This || (foc.AsTree().This != nil && isParentOf(cell.This.(Widget), foc)) {
+		return // the same cell
+	}
+	em.focus = nil // (without the focus lost event)
+	if foc.AsTree().This != nil {
+		foc.AsWidget().SetState(false, states.Focused)
+	}
+	lb.Defer(func() { // (once it is laid out, for scrolling to it)
+		lb.updateScroll()
+		if em.focus != nil {
+			return
+		}
+		cell := lb.cellOf(idx, pos)
+		if cell == nil {
+			return
+		}
+		cell.SetFocus()
+		if tf, ok := cell.This.(*TextField); ok && cursor >= 0 {
+			tf.cursorPos = min(cursor, len(tf.editText)) // where it was
+			tf.NeedsRender()
+		}
+	})
+}
+
+// cellOf returns the cell at the given position in the row of the given
+// slice index, or nil if it is not in the rows.
+func (lb *ListBase) cellOf(idx, pos int) *WidgetBase {
+	nw, _ := lb.This.(Lister).RowWidgetNs()
+	if lb.ListGrid == nil || idx < lb.StartIndex || idx >= lb.StartIndex+lb.VisibleRows || pos < 0 || pos >= nw {
+		return nil
+	}
+	k := nw*(idx-lb.StartIndex) + pos
+	if k >= lb.ListGrid.NumChildren() {
+		return nil
+	}
+	return lb.ListGrid.Child(k).(Widget).AsWidget()
+}
+
+// commitEdit completes any edit of the given focused widget of a cell,
+// a [TextField], before the rows are updated, which sets their values
+// from their items, which can be other items. It returns the position
+// of the cursor of the text field, or -1.
+func commitEdit(foc Widget) int {
+	tf, ok := foc.(*TextField)
+	if !ok {
+		return -1
+	}
+	if tf.edited {
+		tf.editDone()
+		tf.startCursor()
+	}
+	return tf.cursorPos
+}
+
+// focusedCell returns the slice index of the row of the cell of the grid
+// with the focus (or containing it), and the position of the cell in its
+// row, and the focused widget, which is nil if there is none in the grid.
+func (lb *ListBase) focusedCell() (idx, pos int, foc Widget) {
+	em := lb.Events()
+	if em == nil || tree.IsNil(em.focus) || lb.ListGrid == nil {
+		return
+	}
+	for n := em.focus.AsTree(); n != nil && n.This != lb.This; n = n.Parent.AsTree() {
+		if n.Parent == lb.ListGrid.This {
+			row, ok := n.Property(ListRowProperty).(int)
+			if !ok {
+				return
+			}
+			nw, _ := lb.This.(Lister).RowWidgetNs()
+			return row + lb.StartIndex, n.IndexInParent() - nw*row, em.focus
+		}
+		if n.Parent == nil {
+			return
+		}
+	}
+	return
 }
 
 //////// Search interface
@@ -2032,6 +2157,8 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		return
 	}
 	ls := lg.list()
+	idx, pos, foc := ls.focusedCell()
+	cursor := commitEdit(foc)
 	rht := lg.rowHeight
 	quo := sb.Value / rht
 	floor := math32.Floor(quo)
@@ -2043,11 +2170,14 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		// whose values are hidden, which are new, so they need to be
 		// styled and laid out
 		ls.Update()
-		return
+	} else {
+		ls.UpdateTree()
+		ls.NeedsRender()
+		// ls.NeedsLayout() // needed to recompute size after resize
 	}
-	ls.UpdateTree()
-	ls.NeedsRender()
-	// ls.NeedsLayout() // needed to recompute size after resize
+	if foc != nil {
+		ls.keepFocusedItem(idx, pos, cursor, foc, false)
+	}
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {

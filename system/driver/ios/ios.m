@@ -139,10 +139,27 @@ struct utsname sysInfo;
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 
+	// the keyboard is shown, hidden, or changes size (as for its predictions)
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardFrameChanged:)
+		name:UIKeyboardWillChangeFrameNotification object:nil];
+
 	UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] init];
 	pinchGesture.delegate = self;
 	[pinchGesture addTarget:self action: @selector(onPinch:)];
 	[self.view addGestureRecognizer:pinchGesture];
+}
+
+// keyboardFrameChanged sends the height of the part of the view that the
+// keyboard covers, in points, as it is shown, hidden, or changes size, so
+// that the app can be laid out above it, as with the safe area insets.
+- (void)keyboardFrameChanged:(NSNotification *)note {
+	CGRect end = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+	CGRect kb = [self.view convertRect:end fromView:nil];
+	CGFloat covered = self.view.bounds.origin.y + self.view.bounds.size.height - kb.origin.y;
+	if (kb.size.width <= 0 || kb.size.height <= 0 || covered < 0) {
+		covered = 0;
+	}
+	keyboardHeightChanged((int)covered);
 }
 
 - (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -221,6 +238,13 @@ static void sendTouches(int change, NSSet* touches) {
 
 - (BOOL)canBecomeFirstResponder {
     return YES;
+}
+
+// textFieldShouldReturn sends the return key (Done on single-line
+// keyboards), which the text field does not insert, as the Enter key.
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    keyboardTyped((char *)"\n");
+    return NO;
 }
 
 // The keyboard edits the text of this hidden text field, which is read

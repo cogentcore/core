@@ -42,6 +42,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
 )
 
@@ -130,12 +131,13 @@ func updateConfig(width, height, orientation int32) {
 	}
 	insets := C.getDevicePadding()
 	s := DisplayMetrics.ScreenScale
-	TheApp.Insets.Set(
+	safeInsets.Set(
 		int(insets.top)*s,
 		int(insets.right)*s,
 		int(insets.bottom)*s,
 		int(insets.left)*s,
 	)
+	setInsets()
 
 	TheApp.Scrn.DevicePixelRatio = float32(s) // TODO(kai): is this actually DevicePixelRatio?
 	TheApp.Scrn.PixelSize = image.Pt(int(width), int(height))
@@ -167,6 +169,35 @@ func updateConfig(width, height, orientation int32) {
 		// updates the color scheme when the Auto theme is used
 		TheApp.Event.Window(events.ScreenUpdate)
 	}
+}
+
+// safeInsets are the safe area insets of the screen, in pixels.
+var safeInsets sides.Sides[int]
+
+// keyboardHeight is the height of the bottom of the screen that the
+// virtual keyboard covers, in pixels, or 0 when it is hidden.
+var keyboardHeight int
+
+// setInsets sets the insets of the app to the [safeInsets], with the
+// bottom one at least the [keyboardHeight], so that the app is laid out
+// above the keyboard. It must be called with the lock of the app.
+func setInsets() {
+	TheApp.Insets = safeInsets
+	TheApp.Insets.Bottom = max(safeInsets.Bottom, keyboardHeight)
+}
+
+//export keyboardHeightChanged
+func keyboardHeightChanged(points C.int) {
+	TheApp.Mu.Lock()
+	h := int(points) * DisplayMetrics.ScreenScale
+	if h == keyboardHeight {
+		TheApp.Mu.Unlock()
+		return
+	}
+	keyboardHeight = h
+	setInsets()
+	TheApp.Mu.Unlock()
+	TheApp.Event.WindowResize()
 }
 
 //export lifecycleDead

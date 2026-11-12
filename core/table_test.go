@@ -168,3 +168,65 @@ func TestTableContextMenuSelect(t *testing.T) {
 		assert.Equal(t, []int{2}, selected(), "on another row")
 	})
 }
+
+// TestTableFocusShrink tests that the item of a focused text field of a
+// table stays focused and visible when the table gets fewer rows, as when
+// the virtual keyboard shrinks the window on mobile, with the text typed
+// before and after going to it, in order, not to the item that the
+// removed or rebound row shows.
+func TestTableFocusShrink(t *testing.T) {
+	type item struct{ Name string }
+	items := make([]item, 12)
+	b := NewBody()
+	ht := float32(600)
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(ht))
+		s.Max.Set(units.Dp(300), units.Dp(ht))
+	})
+	tb := NewTable(b).SetSlice(&items)
+	focusedItem := func() int {
+		idx, _, foc := tb.focusedCell()
+		if _, ok := foc.(*TextField); !ok {
+			return -1
+		}
+		return idx
+	}
+	last := 0
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		last = tb.StartIndex + tb.VisibleRows - 2 // the last fully visible one
+		tb.IndexGrabFocus(last)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, last, focusedItem())
+		_, _, foc := tb.focusedCell()
+		if tf, ok := foc.(*TextField); ok {
+			tf.HandleEvent(events.NewKey(events.KeyChord, 'a', key.CodeA, 0))
+			tf.HandleEvent(events.NewKey(events.KeyChord, 'b', key.CodeB, 0))
+		}
+		ht = 250
+		b.Restyle()
+		b.NeedsLayout()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Less(t, tb.VisibleRows, last, "fewer rows")
+		assert.Equal(t, last, focusedItem(), "the same item is focused")
+		assert.GreaterOrEqual(t, last, tb.StartIndex)
+		assert.Less(t, last, tb.StartIndex+tb.VisibleRows, "in view")
+		_, _, foc := tb.focusedCell()
+		if tf, ok := foc.(*TextField); ok {
+			tf.HandleEvent(events.NewKey(events.KeyChord, 'x', key.CodeX, 0))
+		}
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		_, _, foc := tb.focusedCell()
+		if tf, ok := foc.(*TextField); ok {
+			tf.editDone()
+		}
+		assert.Equal(t, "abx", items[last].Name, "typed into the focused item, at the end")
+	})
+}
