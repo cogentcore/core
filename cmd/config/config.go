@@ -146,7 +146,7 @@ type Build struct { //types:add
 	AndroidMinSDK int `default:"23" min:"23"`
 
 	// the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
-	AndroidTargetSDK int `default:"29"`
+	AndroidTargetSDK int `default:"35"`
 }
 
 type Pack struct { //types:add

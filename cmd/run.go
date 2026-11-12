@@ -34,6 +34,7 @@ func Run(c *config.Config) error { //types:add
 		os.Setenv("ANDROID_SERIAL", serial)
 		if arch := mobile.AndroidDeviceArch(serial); t.Arch == "*" && arch != "" {
 			t.Arch = arch
+			c.Build.Target[0] = t
 		}
 	}
 	if t.Arch == "*" {

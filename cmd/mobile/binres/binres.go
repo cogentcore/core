@@ -52,6 +52,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -308,9 +309,13 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 					}
 				}
 				q = append(q, ltoken{tkn, line})
-			case "activity", "intent-filter", "action", "category", "service", "meta-data":
-				// need android:exported="true" for activities in android sdk version 31 and above (still not working so testing with other things also set to exported)
-				if !skipSynthesize && targetSdkVersion >= 31 {
+			case "activity", "service":
+				// android:exported is required for activities and services
+				// (with intent filters) for target SDK versions 31 and above
+				hasExported := slices.ContainsFunc(tkn.Attr, func(a xml.Attr) bool {
+					return a.Name.Space == androidSchema && a.Name.Local == "exported"
+				})
+				if !skipSynthesize && targetSdkVersion >= 31 && !hasExported {
 					tkn.Attr = append(tkn.Attr,
 						xml.Attr{
 							Name: xml.Name{
@@ -668,11 +673,21 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 		resolve(el)
 	}
 
+	// The attributes of an element are sorted by their resource IDs, as
+	// aapt does, with those without one (no android: prefix) after them:
+	// Android looks up the attributes of the manifest in that order, so it
+	// does not find one that is out of order (as android:exported).
+	resID := func(attr *Attribute) uint32 {
+		if attr.NS != NoEntry && int(attr.Name) < len(bx.Map.rs) {
+			return uint32(bx.Map.rs[attr.Name])
+		}
+		return 0xFFFFFFFF
+	}
 	var asort func(*Element)
 	asort = func(el *Element) {
-		sort.Sort(byType(el.attrs))
-		sort.Sort(byNamespace(el.attrs))
-		sort.Sort(byName(el.attrs))
+		sort.SliceStable(el.attrs, func(i, j int) bool {
+			return resID(el.attrs[i]) < resID(el.attrs[j])
+		})
 		for _, child := range el.Children {
 			asort(child)
 		}
@@ -927,37 +942,6 @@ func poolTrim(s string) string {
 
 	return s[start:end]
 }
-
-// byNamespace sorts attributes based on string pool position of namespace.
-// Given that "android" always proceeds "" in the pool, this results in the
-// correct ordering of attributes.
-type byNamespace []*Attribute
-
-func (a byNamespace) Len() int { return len(a) }
-func (a byNamespace) Less(i, j int) bool {
-	return a[i].NS < a[j].NS
-}
-func (a byNamespace) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-
-// byType sorts attributes by the uint8 value of the type.
-type byType []*Attribute
-
-func (a byType) Len() int { return len(a) }
-func (a byType) Less(i, j int) bool {
-	return a[i].TypedValue.Type < a[j].TypedValue.Type
-}
-func (a byType) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-
-// byName sorts attributes that have matching types based on string pool position of name.
-type byName []*Attribute
-
-func (a byName) Len() int { return len(a) }
-func (a byName) Less(i, j int) bool {
-	return (a[i].TypedValue.Type == DataString || a[i].TypedValue.Type == DataIntDec) &&
-		(a[j].TypedValue.Type == DataString || a[j].TypedValue.Type == DataIntDec) &&
-		a[i].Name < a[j].Name
-}
-func (a byName) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 
 type lineReader struct {
 	off   int64
