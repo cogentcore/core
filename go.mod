@@ -35,7 +35,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
-	github.com/oliverbestmann/webgpu v1.37.3-0.20261112095824-9e9314ff3838
+	github.com/oliverbestmann/webgpu v1.38.0
 	github.com/pkg/sftp v1.13.12
 	github.com/sgtdi/fswatcher v1.3.0
 	github.com/stretchr/testify v1.11.1
@@ -76,11 +76,11 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.27 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
-	github.com/oliverbestmann/webgpu/libs-android v0.0.0-20260906104815-e05521a4bbbb // indirect
-	github.com/oliverbestmann/webgpu/libs-darwin v0.0.0-20260906104759-17c42a852178 // indirect
-	github.com/oliverbestmann/webgpu/libs-ios v0.0.0-20261112094144-2425638651e5 // indirect
-	github.com/oliverbestmann/webgpu/libs-linux v0.0.0-20260906104812-41e8774c38c4 // indirect
-	github.com/oliverbestmann/webgpu/libs-windows v0.0.0-20260628152801-f47d1b682eb8 // indirect
+	github.com/oliverbestmann/webgpu/libs-android v0.0.0-20261112101134-9fc0777bdf01 // indirect
+	github.com/oliverbestmann/webgpu/libs-darwin v0.0.0-20261112101121-f12e930cb707 // indirect
+	github.com/oliverbestmann/webgpu/libs-ios v0.0.0-20261112101124-0a18a0d4d894 // indirect
+	github.com/oliverbestmann/webgpu/libs-linux v0.0.0-20261112101129-823eab7d2391 // indirect
+	github.com/oliverbestmann/webgpu/libs-windows v0.0.0-20261112110423-e4fd7225cf83 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect

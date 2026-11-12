@@ -18,7 +18,7 @@ import (
 
 // webgpuLibsIOS is the Go module of the libraries of WebGPU for iOS,
 // which has those for the iOS simulator on arm64, selected with the
-// iossimulator build tag, since its version of 2026-11-12.
+// iossimulator build tag, since webgpu v1.38.0.
 const webgpuLibsIOS = "github.com/oliverbestmann/webgpu/libs-ios"
 
 // checkSimulatorWGPU returns an error if the libraries of WebGPU for iOS
@@ -34,7 +34,7 @@ func checkSimulatorWGPU(arch string) error {
 		return nil // (not used, or not downloaded yet: the build reports it)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "arm64-simulator")); err != nil {
-		return fmt.Errorf("the WebGPU libraries of the app (%s) have no library for the iOS simulator on arm64: update github.com/oliverbestmann/webgpu to a version after v1.37.2", webgpuLibsIOS)
+		return fmt.Errorf("the WebGPU libraries of the app (%s) have no library for the iOS simulator on arm64: update github.com/oliverbestmann/webgpu to v1.38.0 or later", webgpuLibsIOS)
 	}
 	return nil
 }
