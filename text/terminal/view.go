@@ -184,6 +184,14 @@ func (vw *View) keyChord(e events.Event) {
 		e.SetHandled()
 		return
 	}
+	if !vw.isGrid {
+		// the keys for the tabs that the terminal is in go to them, except
+		// in full-screen programs (the grid), which use them
+		core.TabKeys(vw, e)
+		if e.IsHandled() {
+			return
+		}
+	}
 	mods := e.Modifiers()
 	if mods.HasFlag(key.Meta) { // app shortcuts
 		return

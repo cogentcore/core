@@ -56,6 +56,8 @@
 | WinFocusNext |               |            |              |                 |                   |             |
 | WinClose |               |            |              |                 |                   |             |
 | WinSnapshot |               |            |              |                 |                   |             |
+| NextTab |               |            |              |                 |                   |             |
+| PrevTab |               |            |              |                 |                   |             |
 | New |               |            |              |                 |                   |             |
 | NewAlt1 |               |            |              |                 |                   |             |
 | NewAlt2 |               |            |              |                 |                   |             |
@@ -101,6 +103,8 @@
 | ---------------------------- | ------------- | ---------- | ------------ | --------------- | ----------------- | ----------- |
 | Shift+Tab | FocusPrev | FocusPrev | FocusPrev | FocusPrev | FocusPrev | FocusPrev |
 | Shift+F10 | ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu | ContextMenu |
+| Shift+RightArrow | NextTab | NextTab | NextTab | NextTab | NextTab | NextTab |
+| Shift+LeftArrow | PrevTab | PrevTab | PrevTab | PrevTab | PrevTab | PrevTab |
 
 
 ### Control

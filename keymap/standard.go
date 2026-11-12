@@ -8,6 +8,8 @@ package keymap
 // the lastest key functions bound to standard key chords.
 var StandardMaps = Maps{
 	{"MacStandard", "Standard Mac KeyMap", Map{
+		"Shift+RightArrow":    NextTab,
+		"Shift+LeftArrow":     PrevTab,
 		"UpArrow":             MoveUp,
 		"Meta+UpArrow":        MoveUp,
 		"Control+P":           MoveUp,
@@ -132,6 +134,8 @@ var StandardMaps = Maps{
 		"Control+X":           MultiB,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", Map{
+		"Shift+RightArrow":    NextTab,
+		"Shift+LeftArrow":     PrevTab,
 		"UpArrow":             MoveUp,
 		"Meta+UpArrow":        MoveUp,
 		"Control+P":           MoveUp,
@@ -267,6 +271,8 @@ var StandardMaps = Maps{
 		"Control+X":           MultiB,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", Map{
+		"Shift+RightArrow":    NextTab,
+		"Shift+LeftArrow":     PrevTab,
 		"UpArrow":             MoveUp,
 		"Alt+UpArrow":         MoveUp,
 		"Control+P":           MoveUp,
@@ -377,6 +383,8 @@ var StandardMaps = Maps{
 		"Control+X":           MultiB,
 	}},
 	{"LinuxStandard", "Standard Linux KeyMap", Map{
+		"Shift+RightArrow":    NextTab,
+		"Shift+LeftArrow":     PrevTab,
 		"UpArrow":             MoveUp,
 		"DownArrow":           MoveDown,
 		"RightArrow":          MoveRight,
@@ -465,6 +473,8 @@ var StandardMaps = Maps{
 		"Control+E":           MultiB,
 	}},
 	{"WindowsStandard", "Standard Windows KeyMap", Map{
+		"Shift+RightArrow":    NextTab,
+		"Shift+LeftArrow":     PrevTab,
 		"UpArrow":             MoveUp,
 		"DownArrow":           MoveDown,
 		"RightArrow":          MoveRight,
@@ -553,6 +563,8 @@ var StandardMaps = Maps{
 		"Control+E":           MultiB,
 	}},
 	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", Map{
+		"Shift+RightArrow":    NextTab,
+		"Shift+LeftArrow":     PrevTab,
 		"UpArrow":             MoveUp,
 		"DownArrow":           MoveDown,
 		"RightArrow":          MoveRight,
