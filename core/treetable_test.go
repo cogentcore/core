@@ -1125,3 +1125,102 @@ func TestTreeTableFocusShrink(t *testing.T) {
 		assert.Equal(t, "abx", tasks[last].Name, "typed into the item, at the end")
 	})
 }
+
+// TestTreeTableMultiSelect tests selecting several rows of an editable
+// tree table with clicks, sent to the window: with Shift from the last
+// clicked, and with Command, which do not edit the cells (as checking a
+// check box), and in the select mode, with plain clicks (taps on mobile),
+// which do not focus a text field (showing the keyboard on mobile).
+func TestTreeTableMultiSelect(t *testing.T) {
+	b := NewBody()
+	tasks := []*task{{Name: "A"}, {Name: "B"}, {Name: "C"}, {Name: "D"}}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	cellAt := func(row, col int) *WidgetBase {
+		for _, c := range tt.ListGrid.Children {
+			cw := AsWidget(c)
+			if cw.Property(ListRowProperty) == row && cw.Property(ListColProperty) == col {
+				return cw
+			}
+		}
+		return nil
+	}
+	selected := func() []int {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		return tt.SelectedIndexesList(false)
+	}
+	b.RenderImage(func() {}, func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		click := func(row, col int, mods key.Modifiers) {
+			b.AsyncLock()
+			bb := cellAt(row, col).Geom.TotalBBox
+			b.AsyncUnlock()
+			pt := image.Pt((bb.Min.X+bb.Max.X)/2, (bb.Min.Y+bb.Max.Y)/2) // (the text, or the check box)
+			src.MouseButton(events.MouseDown, events.Left, pt, mods)
+			src.MouseButton(events.MouseUp, events.Left, pt, mods)
+			time.Sleep(150 * time.Millisecond)
+		}
+		var shift, meta key.Modifiers
+		shift.SetFlag(true, key.Shift)
+		meta.SetFlag(true, key.Meta)
+		click(0, 0, 0)
+		assert.Equal(t, []int{0}, selected())
+		click(2, 0, shift)
+		assert.Equal(t, []int{0, 1, 2}, selected(), "Shift")
+		click(3, 1, meta) // (the check box of D)
+		assert.Equal(t, []int{0, 1, 2, 3}, selected(), "Command")
+		assert.False(t, tasks[3].Done, "not checked")
+
+		b.AsyncLock()
+		tt.SetSelectMode(true)
+		b.AsyncUnlock()
+		click(1, 0, 0)
+		assert.Equal(t, []int{0, 2, 3}, selected(), "a tap in the select mode")
+		b.AsyncLock()
+		_, isText := tt.Events().focus.(*TextField)
+		b.AsyncUnlock()
+		assert.False(t, isText, "no text field is focused")
+	})
+}
+
+// TestTreeTableMoveSelected tests moving several selected items together:
+// up and down among their siblings, keeping their order, blocked at the
+// first, and indenting them into the same item, and outdenting them.
+func TestTreeTableMoveSelected(t *testing.T) {
+	b := NewBody()
+	tasks := []*task{{Name: "A"}, {Name: "B"}, {Name: "C"}, {Name: "D"}}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		sel := func(rows ...int) {
+			tt.ResetSelectedIndexes()
+			for _, r := range rows {
+				tt.SelectIndex(r)
+			}
+			tt.SelectedIndex = rows[0]
+		}
+		selNames := func() []string {
+			var ns []string
+			for _, i := range tt.SelectedIndexesList(false) {
+				ns = append(ns, strings.TrimSpace(rowNames(tt)[i]))
+			}
+			return ns
+		}
+		sel(1, 2)
+		tt.MoveSelectedUp(1)
+		assert.Equal(t, []string{"B", "C", "A", "D"}, rowNames(tt))
+		assert.Equal(t, []string{"B", "C"}, selNames())
+		tt.MoveSelectedUp(0)
+		assert.Equal(t, []string{"B", "C", "A", "D"}, rowNames(tt), "blocked at the first")
+		tt.MoveSelectedDown(0)
+		tt.MoveSelectedDown(1)
+		assert.Equal(t, []string{"A", "D", "B", "C"}, rowNames(tt))
+		tt.IndentSelected(2)
+		assert.Equal(t, []string{"A", "D", "  B", "  C"}, rowNames(tt))
+		assert.Equal(t, []string{"B", "C"}, selNames())
+		tt.OutdentSelected(2)
+		assert.Equal(t, []string{"A", "D", "B", "C"}, rowNames(tt))
+		assert.Equal(t, []string{"B", "C"}, selNames())
+	})
+}

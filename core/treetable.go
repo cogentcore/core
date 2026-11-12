@@ -725,6 +725,132 @@ func (tt *TreeTable) moveItem(idx, delta int) {
 	}
 }
 
+// targets returns the items to move for the given row index: the selected
+// items (without those within another one), in order, if it is one of them,
+// or else its item.
+func (tt *TreeTable) targets(idx int) []reflect.Value {
+	if !tt.validIndex(idx) {
+		return nil
+	}
+	if tt.indexIsSelected(idx) && len(tt.SelectedIndexes) > 1 {
+		return tt.selectedTopItems()
+	}
+	return []reflect.Value{tt.rows[idx].item}
+}
+
+// movedItems updates after moving the given items, which are selected
+// (the first as the current one), and sends a change event.
+func (tt *TreeTable) movedItems(items []reflect.Value) {
+	tt.sortItems()
+	tt.updateRows()
+	tt.ResetSelectedIndexes()
+	tt.SelectedIndex = -1
+	for i := len(items) - 1; i >= 0; i-- {
+		if idx := tt.rowOf(items[i]); idx >= 0 {
+			tt.SelectIndex(idx)
+			tt.SelectedIndex = idx
+		}
+	}
+	if tt.SelectedIndex >= 0 {
+		tt.ScrollToIndexNoUpdate(tt.SelectedIndex)
+	}
+	tt.UpdateChange()
+}
+
+// IndentSelected indents the items to move for the given row index (see
+// [TreeTable.targets]): each moves into the item before it among its
+// siblings, so that consecutive items go into the same one.
+func (tt *TreeTable) IndentSelected(idx int) {
+	items := tt.targets(idx)
+	if len(items) <= 1 {
+		tt.Indent(idx)
+		return
+	}
+	if tt.childrenIndex == nil {
+		return
+	}
+	for _, item := range items {
+		r := tt.rowOf(item)
+		sl, k := tt.siblingsOf(r)
+		if k <= 0 {
+			continue
+		}
+		parent := itemAt(sl, k-1)
+		deleteItem(sl, k)
+		ch := tt.children(parent)
+		insertItem(ch, ch.Len(), item)
+		tt.setItemClosed(parent, false)
+		tt.updateRows()
+	}
+	tt.movedItems(items)
+}
+
+// OutdentSelected outdents the items to move for the given row index (see
+// [TreeTable.targets]): each moves out of its parent, after it, keeping
+// their order.
+func (tt *TreeTable) OutdentSelected(idx int) {
+	items := tt.targets(idx)
+	if len(items) <= 1 {
+		tt.Outdent(idx)
+		return
+	}
+	for i := len(items) - 1; i >= 0; i-- { // (the last first, for their order)
+		r := tt.rowOf(items[i])
+		if r < 0 || !tt.rows[r].parent.IsValid() {
+			continue
+		}
+		sl, k := tt.siblingsOf(r)
+		psl, pk := tt.siblingsOf(tt.rowOf(tt.rows[r].parent))
+		deleteItem(sl, k)
+		insertItem(psl, pk+1, items[i])
+		tt.updateRows()
+	}
+	tt.movedItems(items)
+}
+
+// MoveSelectedUp moves the items to move for the given row index (see
+// [TreeTable.targets]) before the previous one among their siblings,
+// unless it is one of them that cannot move.
+func (tt *TreeTable) MoveSelectedUp(idx int) {
+	tt.moveSelected(idx, -1)
+}
+
+// MoveSelectedDown moves the items to move for the given row index (see
+// [TreeTable.targets]) after the next one among their siblings,
+// unless it is one of them that cannot move.
+func (tt *TreeTable) MoveSelectedDown(idx int) {
+	tt.moveSelected(idx, 1)
+}
+
+// moveSelected moves the items to move for the given row index by one
+// place among their siblings, in the given direction.
+func (tt *TreeTable) moveSelected(idx, delta int) {
+	items := tt.targets(idx)
+	if len(items) <= 1 {
+		tt.moveItem(idx, delta)
+		return
+	}
+	moving := map[any]bool{}
+	for _, item := range items {
+		moving[item.Interface()] = true
+	}
+	order := items
+	if delta > 0 { // (the last first, so that they do not pass each other)
+		order = slices.Clone(items)
+		slices.Reverse(order)
+	}
+	for _, item := range order {
+		sl, k := tt.siblingsOf(tt.rowOf(item))
+		j := k + delta
+		if j < 0 || j >= sl.Len() || moving[itemAt(sl, j).Interface()] {
+			continue // (blocked, as are the next ones, by it)
+		}
+		reflect.Swapper(sl.Interface())(k, j)
+		tt.updateRows()
+	}
+	tt.movedItems(items)
+}
+
 // Duplicate inserts copies of the selected items after the last of them.
 func (tt *TreeTable) Duplicate() {
 	ixs := tt.SelectedIndexesList(true)
@@ -1341,16 +1467,16 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 		})
 		NewSeparator(m)
 		NewButton(m).SetText("Indent").SetIcon(icons.FormatIndentIncrease).OnClick(func(e events.Event) {
-			tt.Indent(idx)
+			tt.IndentSelected(idx)
 		})
 		NewButton(m).SetText("Outdent").SetIcon(icons.FormatIndentDecrease).OnClick(func(e events.Event) {
-			tt.Outdent(idx)
+			tt.OutdentSelected(idx)
 		})
 		NewButton(m).SetText("Move up").SetIcon(icons.ArrowUpward).OnClick(func(e events.Event) {
-			tt.MoveItemUp(idx)
+			tt.MoveSelectedUp(idx)
 		})
 		NewButton(m).SetText("Move down").SetIcon(icons.ArrowDownward).OnClick(func(e events.Event) {
-			tt.MoveItemDown(idx)
+			tt.MoveSelectedDown(idx)
 		})
 		NewSeparator(m)
 		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keymap.Copy).OnClick(func(e events.Event) {
@@ -1365,6 +1491,8 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 		NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).OnClick(func(e events.Event) {
 			tt.Duplicate()
 		})
+		NewSeparator(m)
+		tt.selectModeButton(m)
 	}
 	NewSeparator(m)
 	NewButton(m).SetText("Open all").SetIcon(icons.UnfoldMore).OnClick(func(e events.Event) {
@@ -1377,4 +1505,38 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 		tt.ShowIndexes = !tt.ShowIndexes
 		tt.Update()
 	})
+}
+
+// selectModeButton adds the button that starts or ends the select mode
+// ([ListBase.SelectMode]), in which taps on the rows select them, as for
+// selecting several items to move on mobile, to the given menu or toolbar.
+func (tt *TreeTable) selectModeButton(m Widget) *Button {
+	bt := NewButton(m)
+	bt.Updater(func() {
+		if tt.SelectMode {
+			bt.SetText("Done selecting").SetIcon(icons.Check).
+				SetTooltip("End selecting items by tapping (clicking) them")
+		} else {
+			bt.SetText("Select items").SetIcon(icons.Checklist).
+				SetTooltip("Select several items by tapping (clicking) them, as to move them together; on desktop, Shift and Command (Control) clicks do this too")
+		}
+	})
+	bt.OnClick(func(e events.Event) {
+		tt.SetSelectMode(!tt.SelectMode)
+	})
+	return bt
+}
+
+// SetSelectMode starts or ends the select mode ([ListBase.SelectMode]),
+// in which taps (clicks) on the rows select them, instead of editing them,
+// as for selecting several items on mobile. Starting it ends any editing.
+func (tt *TreeTable) SetSelectMode(on bool) *TreeTable {
+	tt.SelectMode = on
+	if on {
+		if em := tt.Events(); em != nil && tt.ContainsFocus() {
+			em.focusClear() // (completing an edit, and hiding the keyboard)
+		}
+	}
+	tt.Restyle()
+	return tt
 }

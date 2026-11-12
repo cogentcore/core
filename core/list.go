@@ -222,7 +222,10 @@ type ListBase struct { //core:no-new
 	// It uses a capture of up / down events to manipulate selection, not focus.
 	ReadOnlyKeyNav bool `default:"true"`
 
-	// SelectMode is whether to be in select rows mode or editing mode.
+	// SelectMode is whether to be in select rows mode or editing mode:
+	// clicks (taps) on the rows toggle their selection, instead of editing
+	// their cells, and the keys that move the selection extend it, as for
+	// selecting several rows on mobile. [keymap.CancelSelect] ends it.
 	SelectMode bool `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// DragMoves is whether dragging rows moves them by default, instead of
@@ -547,16 +550,25 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		oc := func(e events.Event) {
 			lb.focusReadOnly()
 			row, _, isValid := w.indexFromPixel(e.Pos())
-			if isValid {
-				lb.updateSelectRow(row, e.SelectMode())
-				lb.lastClick = row + lb.StartIndex
+			if !isValid {
+				return
 			}
+			mode := e.SelectMode()
+			if lb.SelectMode && mode == events.SelectOne {
+				mode = events.ExtendOne
+			}
+			if !lb.IsReadOnly() && (mode == events.ExtendOne || mode == events.ExtendContinuous) {
+				lb.clickSelectRow(row, mode) // (see MakeValue)
+				return
+			}
+			lb.updateSelectRow(row, e.SelectMode())
+			lb.lastClick = row + lb.StartIndex
 		}
 		w.OnClick(oc)
 		w.On(events.MouseDown, func(e events.Event) {
 			// value widgets such as text fields handle the clicks into them
 			// (the context menu selects for a right click, see contextSelectRow)
-			if lb.IsReadOnly() || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left {
+			if lb.IsReadOnly() || lb.SelectMode || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left {
 				return
 			}
 			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
@@ -603,6 +615,20 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 		row, _ := lb.widgetIndex(w)
 		lb.updateSelectRow(row, e.SelectMode())
 		lb.lastClick = row + lb.StartIndex
+	})
+	wb.OnClick(func(e events.Event) {
+		// a click with Shift or Command (Control), or any click in the
+		// select mode, as on mobile, selects rows, instead of editing a cell
+		mode := e.SelectMode()
+		if lb.SelectMode && mode == events.SelectOne {
+			mode = events.ExtendOne
+		}
+		if mode != events.ExtendOne && mode != events.ExtendContinuous {
+			return
+		}
+		e.SetHandled()
+		row, _ := lb.widgetIndex(w)
+		lb.clickSelectRow(row, mode)
 	})
 	wb.OnDoubleClick(lb.HandleEvent)
 	wb.On(events.ContextMenu, lb.HandleEvent)
@@ -1131,6 +1157,45 @@ func (lb *ListBase) updateSelectIndex(idx int, sel bool, selMode events.SelectMo
 	} else {
 		lb.SelectIndexEvent(idx, selMode)
 	}
+}
+
+// clickSelectRow updates the selection for a click on the given row in the
+// given mode: [events.ExtendOne] toggles its selection, and
+// [events.ExtendContinuous] selects the rows from the one last clicked to
+// it. Unlike [ListBase.SelectIndexEvent], the focus does not move to the
+// row, as to a text field in it, which would show the keyboard on mobile.
+func (lb *ListBase) clickSelectRow(row int, mode events.SelectModes) {
+	idx := row + lb.StartIndex
+	if row < 0 || idx >= lb.SliceSize {
+		return
+	}
+	switch mode {
+	case events.ExtendOne:
+		if lb.indexIsSelected(idx) {
+			lb.unselectIndex(idx)
+			if lb.SelectedIndex == idx {
+				lb.SelectedIndex = -1
+				for i := range lb.SelectedIndexes {
+					lb.SelectedIndex = max(lb.SelectedIndex, i)
+				}
+			}
+		} else {
+			lb.SelectIndex(idx)
+			lb.SelectedIndex = idx
+		}
+		lb.lastClick = idx
+	case events.ExtendContinuous:
+		from := lb.lastClick
+		if from < 0 || from >= lb.SliceSize {
+			from = max(lb.SelectedIndex, idx)
+		}
+		for i := min(from, idx); i <= max(from, idx); i++ {
+			lb.SelectIndex(i)
+		}
+		lb.SelectedIndex = idx
+	}
+	lb.Send(events.Select)
+	lb.Restyle()
 }
 
 // contextSelectRow selects the given row for a context menu on it: only
