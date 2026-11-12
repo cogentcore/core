@@ -126,3 +126,45 @@ func TestTableColumnWidths(t *testing.T) {
 		b.AsyncUnlock()
 	})
 }
+
+// TestTableContextMenuSelect tests that a right click (a context menu) on
+// a row of a read-only, multi-select table keeps the selection of several
+// rows when the row is one of them, and otherwise selects only that row.
+func TestTableContextMenuSelect(t *testing.T) {
+	b := NewBody()
+	tb := NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}, {"C", 3}})
+	tb.SetReadOnly(true)
+	tb.ReadOnlyMultiSelect = true
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tb.SelectIndexEvent(0, events.SelectOne)
+		tb.SelectIndexEvent(1, events.ExtendContinuous)
+	}, func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		rightClick := func(row int) {
+			b.AsyncLock()
+			n, _ := tb.RowWidgetNs()
+			pt := tb.ListGrid.Child(row * n).(Widget).AsWidget().Geom.ContentBBox.Min.Add(image.Pt(4, 4))
+			b.AsyncUnlock()
+			src.MouseButton(events.MouseDown, events.Right, pt, 0)
+			src.MouseButton(events.MouseUp, events.Right, pt, 0)
+			time.Sleep(200 * time.Millisecond)
+			src.Key(events.KeyDown, 0, key.CodeEscape, 0) // (closes the menu)
+			src.Key(events.KeyUp, 0, key.CodeEscape, 0)
+			time.Sleep(100 * time.Millisecond)
+		}
+		selected := func() []int {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			return tb.SelectedIndexesList(false)
+		}
+		rightClick(1)
+		assert.Equal(t, []int{0, 1}, selected(), "on a selected row")
+		b.AsyncLock()
+		assert.Equal(t, 1, tb.SelectedIndex)
+		b.AsyncUnlock()
+		rightClick(2)
+		assert.Equal(t, []int{2}, selected(), "on another row")
+	})
+}

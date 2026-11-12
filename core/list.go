@@ -554,7 +554,8 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		w.OnClick(oc)
 		w.On(events.MouseDown, func(e events.Event) {
 			// value widgets such as text fields handle the clicks into them
-			if lb.IsReadOnly() || e.SelectMode() != events.SelectOne {
+			// (the context menu selects for a right click, see contextSelectRow)
+			if lb.IsReadOnly() || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left {
 				return
 			}
 			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
@@ -564,7 +565,10 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		w.On(events.ContextMenu, func(e events.Event) {
 			// we must select the row on right click so that the context menu
 			// corresponds to the right row
-			oc(e)
+			lb.focusReadOnly()
+			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
+				lb.contextSelectRow(row)
+			}
 			lb.HandleEvent(e)
 		})
 		w.Updater(func() {
@@ -602,7 +606,10 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 	wb.OnDoubleClick(lb.HandleEvent)
 	wb.On(events.ContextMenu, lb.HandleEvent)
 	wb.OnFirst(events.ContextMenu, func(e events.Event) {
-		wb.Send(events.Select, e) // we must select the row for context menu actions
+		// we must select the row for context menu actions
+		lb.focusReadOnly()
+		row, _ := lb.widgetIndex(w)
+		lb.contextSelectRow(row)
 	})
 	if !lb.IsReadOnly() {
 		wb.OnInput(lb.HandleEvent)
@@ -1123,6 +1130,23 @@ func (lb *ListBase) updateSelectIndex(idx int, sel bool, selMode events.SelectMo
 	} else {
 		lb.SelectIndexEvent(idx, selMode)
 	}
+}
+
+// contextSelectRow selects the given row for a context menu on it: only
+// it, unless it is already selected, in which case the selection, as of
+// several rows, is kept (as in file managers), with the row as the
+// [ListBase.SelectedIndex], so that the context menu applies to all of them.
+func (lb *ListBase) contextSelectRow(row int) {
+	idx := row + lb.StartIndex
+	if row < 0 || idx >= lb.SliceSize {
+		return
+	}
+	lb.lastClick = idx
+	if lb.indexIsSelected(idx) {
+		lb.SelectedIndex = idx
+		return
+	}
+	lb.updateSelectIndex(idx, true, events.SelectOne)
 }
 
 // selectIndexQuiet selects only the given slice index, if it is not
