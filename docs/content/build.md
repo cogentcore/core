@@ -64,6 +64,8 @@ It installs the SDK in the standard place (`~/Library/Android/sdk` on macOS, `~/
 
 For an Android phone or tablet, turn on its developer options (tap Build number seven times in Settings, About phone), then turn on USB debugging in them, and connect it with a cable. Accept the prompt on the device to allow USB debugging from the computer; until then, `adb devices` lists it as unauthorized, and `core run android` says so and uses the emulator instead.
 
+Apps target Android 15 (API level 35) by default (`AndroidTargetSDK` in the `[Build]` section of `core.toml`; `AndroidMinSDK` is 23), so that current versions of Android do not warn that they are out of date, and they are drawn edge to edge, behind the system bars, which are filled with the background of the app. The APK is signed with both the v1 (JAR) and v2 APK signature schemes, which newer versions of Android require, and its native libraries are aligned for devices with 16 KB memory pages.
+
 On Android, the back button or gesture of the system goes back within the app, as the back button of the top bar of a full-window stage does, and closes a dialog or popup menu; it leaves the app only when there is nothing to go back to.
 
 ### Mobile apps
