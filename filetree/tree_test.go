@@ -5,6 +5,8 @@
 package filetree
 
 import (
+	"image"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/dirsort"
+	"cogentcore.org/core/base/fileinfo/apps"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -149,4 +152,38 @@ func TestTreeApp(t *testing.T) {
 		assert.False(t, closed(), "a click opens an app shown as a directory")
 		assert.Len(t, opened, 1)
 	})
+}
+
+// TestTreeOpenWith tests that the context menu of a file, but not of a
+// directory, has the items of [core.OpenWithMenuItems], when the system
+// has apps for text files.
+func TestTreeOpenWith(t *testing.T) {
+	root := t.TempDir()
+	file := filepath.Join(root, "b.txt")
+	require.NoError(t, os.WriteFile(file, []byte("b"), 0644))
+	require.NoError(t, os.Mkdir(filepath.Join(root, "sub"), 0750))
+	if as, _ := apps.For(file); len(as) == 0 {
+		t.Skip("no apps for text files on this system")
+	}
+	ft := NewTree(core.NewBody())
+	ft.NoWatch = true
+	ft.OpenPath(root)
+	items := func(name string) []string {
+		fn := AsNode(ft.ChildByName(name))
+		require.NotNil(t, fn)
+		fn.SelectEvent(events.SelectOne)
+		m := core.NewScene()
+		for _, menu := range fn.ContextMenus {
+			menu(m, image.Point{})
+		}
+		var its []string
+		for _, c := range m.Children {
+			if bt, ok := c.(*core.Button); ok {
+				its = append(its, bt.Text)
+			}
+		}
+		return its
+	}
+	assert.Subset(t, items("b.txt"), []string{"Open with", "Change default app"})
+	assert.NotContains(t, items("sub"), "Open with")
 }

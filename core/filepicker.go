@@ -338,6 +338,11 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			if TheApp.Platform() == system.Web {
 				open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 			}
+			if w.SelectedIndex >= 0 && w.SelectedIndex < len(fp.files) {
+				if fi := fp.files[w.SelectedIndex]; !fi.IsDir() {
+					OpenWithMenuItems(m, fi.Path)
+				}
+			}
 			NewSeparator(m)
 			NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
 				SetTooltip("Make a copy of the selected file").
