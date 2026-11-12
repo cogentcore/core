@@ -216,9 +216,7 @@ func (gr *GitRepo) Status(fname string) (FileStatus, string) {
 // Add adds the file to the repo
 func (gr *GitRepo) Add(fname string) error {
 	fname = relPath(gr, fname)
-	out, err := gr.RunFromDir("git", "add", fname)
-	if err != nil {
-		log.Println(string(out))
+	if _, err := gr.runErr("git", "add", fname); err != nil {
 		return err
 	}
 	gr.Lock()
@@ -245,43 +243,26 @@ func (gr *GitRepo) Move(oldpath, newpath string) error {
 
 // Delete removes the file from the repo; uses "force" option to ensure deletion
 func (gr *GitRepo) Delete(fname string) error {
-	out, err := gr.RunFromDir("git", "rm", "-f", relPath(gr, fname))
-	if err != nil {
-		log.Println(string(out))
-		fmt.Printf("%s\n", out)
-		return err
-	}
-	return nil
+	_, err := gr.runErr("git", "rm", "-f", relPath(gr, fname))
+	return err
 }
 
 // Delete removes the file from the repo
 func (gr *GitRepo) DeleteRemote(fname string) error {
-	out, err := gr.RunFromDir("git", "rm", "--cached", relPath(gr, fname))
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-	return nil
+	_, err := gr.runErr("git", "rm", "--cached", relPath(gr, fname))
+	return err
 }
 
 // CommitFile commits single file to repo staging
 func (gr *GitRepo) CommitFile(fname string, message string) error {
-	out, err := gr.RunFromDir("git", "commit", relPath(gr, fname), "-m", message)
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-	return nil
+	_, err := gr.runErr("git", "commit", relPath(gr, fname), "-m", message)
+	return err
 }
 
 // RevertFile reverts a single file to last commit of master
 func (gr *GitRepo) RevertFile(fname string) error {
-	out, err := gr.RunFromDir("git", "checkout", relPath(gr, fname))
-	if err != nil {
-		log.Println(string(out))
-		return err
-	}
-	return nil
+	_, err := gr.runErr("git", "checkout", relPath(gr, fname))
+	return err
 }
 
 // UpdateVersion sets the version of a package currently checked out via Git.
