@@ -10,7 +10,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -103,17 +102,12 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		if c.Build.Trimpath {
 			buildArgs = append(buildArgs, "-trimpath")
 		}
-		env := appleEnv[t.String()]
 		if t.OS == "iossimulator" {
-			// wgpu-native for the simulator, before that for devices
-			lib, err := simulatorWGPU(t.Arch)
-			if err != nil {
+			if err := checkSimulatorWGPU(t.Arch); err != nil {
 				return nil, err
 			}
-			env = maps.Clone(env)
-			env["CGO_LDFLAGS"] = "-L" + lib + " " + env["CGO_LDFLAGS"]
 		}
-		if err := goBuild(c, src, env, buildArgs...); err != nil {
+		if err := goBuild(c, src, appleEnv[t.String()], buildArgs...); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {

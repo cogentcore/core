@@ -5,120 +5,38 @@
 package mobile
 
 import (
-	"archive/zip"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
-	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/config"
 )
 
-// webgpuModule is the Go module of WebGPU, whose libraries of wgpu-native
-// for iOS are built for devices only, not for the simulator.
-const webgpuModule = "github.com/oliverbestmann/webgpu"
+// webgpuLibsIOS is the Go module of the libraries of WebGPU for iOS,
+// which has those for the iOS simulator on arm64, selected with the
+// iossimulator build tag, since its version of 2026-11-12.
+const webgpuLibsIOS = "github.com/oliverbestmann/webgpu/libs-ios"
 
-// wgpuVersionRE matches the version of wgpu-native in the update-wgpu.sh
-// script of the [webgpuModule], from which its libraries are.
-var wgpuVersionRE = regexp.MustCompile(`(?m)^VERSION="(v[0-9.]+)"`)
-
-// simulatorWGPU returns the directory of the static library of wgpu-native
-// for the iOS simulator on the given architecture, of the version of the
-// libraries of the [webgpuModule] used by the app in the current directory.
-// It is downloaded from the release of wgpu-native, once, into the cache
-// directory of the user. It is put first in the library search path of the
-// linker (CGO_LDFLAGS comes before the flags of the packages), instead of
-// that of the library for devices.
-func simulatorWGPU(arch string) (string, error) {
-	dir, err := exec.Output("go", "list", "-m", "-f", "{{.Dir}}", webgpuModule)
-	if err != nil || strings.TrimSpace(dir) == "" {
-		return "", fmt.Errorf("finding the module %s of the app: %w", webgpuModule, err)
+// checkSimulatorWGPU returns an error if the libraries of WebGPU for iOS
+// used by the app in the current directory do not have the one for the
+// iOS simulator on the given architecture (amd64 is always there).
+func checkSimulatorWGPU(arch string) error {
+	if arch != "arm64" {
+		return nil
 	}
-	script, err := os.ReadFile(filepath.Join(strings.TrimSpace(dir), "update-wgpu.sh"))
-	if err != nil {
-		return "", fmt.Errorf("finding the version of wgpu-native: %w", err)
+	dir, err := exec.Output("go", "list", "-m", "-f", "{{.Dir}}", webgpuLibsIOS)
+	dir = strings.TrimSpace(dir)
+	if err != nil || dir == "" {
+		return nil // (not used, or not downloaded yet: the build reports it)
 	}
-	m := wgpuVersionRE.FindSubmatch(script)
-	if m == nil {
-		return "", errors.New("finding the version of wgpu-native: no VERSION in update-wgpu.sh")
+	if _, err := os.Stat(filepath.Join(dir, "arm64-simulator")); err != nil {
+		return fmt.Errorf("the WebGPU libraries of the app (%s) have no library for the iOS simulator on arm64: update github.com/oliverbestmann/webgpu to a version after v1.37.2", webgpuLibsIOS)
 	}
-	version := string(m[1])
-	rarch := map[string]string{"arm64": "aarch64", "amd64": "x86_64"}[arch]
-	if rarch == "" {
-		return "", fmt.Errorf("no wgpu-native for the iOS simulator on %s", arch)
-	}
-	cache, err := os.UserCacheDir()
-	if err != nil {
-		return "", err
-	}
-	name := "wgpu-ios-" + rarch + "-simulator-release"
-	libDir := filepath.Join(cache, "cogentcore", "wgpu-native", version, name)
-	lib := filepath.Join(libDir, "libwgpu_native.a")
-	if _, err := os.Stat(lib); err == nil {
-		return libDir, nil
-	}
-	url := "https://github.com/gfx-rs/wgpu-native/releases/download/" + version + "/" + name + ".zip"
-	logx.PrintlnInfo("downloading", url)
-	if err := downloadZipFile(url, "lib/libwgpu_native.a", lib); err != nil {
-		return "", fmt.Errorf("downloading wgpu-native for the iOS simulator: %w", err)
-	}
-	return libDir, nil
-}
-
-// downloadZipFile downloads the zip file at the given URL and extracts
-// the file of the given name in it to the given path.
-func downloadZipFile(url, name, path string) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("%s: %s", url, resp.Status)
-	}
-	tmp, err := os.CreateTemp("", "wgpu-*.zip")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp.Name())
-	defer tmp.Close()
-	size, err := io.Copy(tmp, resp.Body)
-	if err != nil {
-		return err
-	}
-	zr, err := zip.NewReader(tmp, size)
-	if err != nil {
-		return err
-	}
-	f, err := zr.Open(name)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-	// written to a temporary file first, so that a partial one is not used
-	out, err := os.CreateTemp(filepath.Dir(path), ".lib-*")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(out.Name())
-	if _, err := io.Copy(out, f); err != nil {
-		out.Close()
-		return err
-	}
-	if err := out.Close(); err != nil {
-		return err
-	}
-	return os.Rename(out.Name(), path)
+	return nil
 }
 
 // simDevice is an iOS simulator device, as listed by simctl.
