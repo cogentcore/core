@@ -216,6 +216,40 @@ type MenuSearcher interface {
 	MenuSearch(items *[]ChooserItem)
 }
 
+// NewWindowFunc, if set, returns the body of a new window of the app, as
+// for its main window, made from the window of the given scene, which it
+// can take settings from, as a directory. The new window is run with the
+// size of the window from which it is made, below and to the right of it,
+// as in web browsers. It is called
+// by the New window item at the top of the Window menu of the standard
+// context menu of scenes, and by the [keymap.New] key when no widget handles
+// it, on desktop platforms.
+var NewWindowFunc func(from *Scene) *Body
+
+// canNewWindow returns whether a new window of the app can be made
+// (see [NewWindowFunc]).
+func canNewWindow() bool {
+	return NewWindowFunc != nil && !TheApp.Platform().IsMobile() && TheApp.Platform() != system.Web
+}
+
+// newWindowFrom makes and runs a new window of the app (see [NewWindowFunc])
+// from the window of the given scene.
+func newWindowFrom(sc *Scene) {
+	bd := NewWindowFunc(sc)
+	if bd == nil {
+		return
+	}
+	bd.RunWindow()
+	src := sc.RenderWindow()
+	win := bd.Scene.RenderWindow()
+	if src == nil || src.SystemWindow == nil || win == nil || win.SystemWindow == nil {
+		return
+	}
+	off := image.Pt(30, 30) // (in window manager units)
+	win.SystemWindow.SetGeometry(false, src.SystemWindow.Position(nil).Add(off), src.SystemWindow.Size(), nil)
+	win.SystemWindow.Raise()
+}
+
 // standardContextMenu adds standard context menu items for the [Scene].
 func (sc *Scene) standardContextMenu(m *Scene, pos image.Point) { //types:add
 	sdesc := "Search for text within all widgets in current scene."
@@ -261,6 +295,13 @@ func (sc *Scene) standardContextMenu(m *Scene, pos image.Point) { //types:add
 		return
 	}
 	NewButton(m).SetText("Window").SetMenu(func(m *Scene, pos image.Point) {
+		if canNewWindow() {
+			NewButton(m).SetText("New window").SetIcon(icons.NewWindow).SetKey(keymap.New).
+				OnClick(func(e events.Event) {
+					newWindowFrom(sc)
+				})
+			NewSeparator(m)
+		}
 		if sc.IsFullscreen() {
 			NewButton(m).SetText("Exit fullscreen").SetIcon(icons.Fullscreen).OnClick(func(e events.Event) {
 				sc.SetFullscreen(false)

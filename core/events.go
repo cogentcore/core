@@ -1624,6 +1624,11 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	case keymap.WinFocusNext:
 		e.SetHandled()
 		AllRenderWindows.focusNext()
+	case keymap.New:
+		if canNewWindow() {
+			e.SetHandled()
+			newWindowFrom(sc)
+		}
 	}
 	if !e.IsHandled() {
 		em.triggerShortcut(cs, e)
