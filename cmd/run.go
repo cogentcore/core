@@ -73,6 +73,8 @@ func Run(c *config.Config) error { //types:add
 			return Log(c)
 		}
 		return nil
+	case "iossimulator":
+		return mobile.RunSimulator(c)
 	case "ios":
 		if !c.Build.Debug {
 			return mobile.Install(c)

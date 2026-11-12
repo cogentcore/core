@@ -26,7 +26,9 @@ func Install(c *config.Config) error {
 		return exec.Run("adb", "install", "-r", filepath.Join(c.Build.Output, c.Name+".apk"))
 	case "ios":
 		return exec.Major().SetBuffer(false).Run("ios-deploy", "-b", filepath.Join(c.Build.Output, c.Name+".app"))
+	case "iossimulator":
+		return RunSimulator(c)
 	default:
-		return fmt.Errorf("mobile.Install only supports target platforms android and ios, but got %q", t.OS)
+		return fmt.Errorf("mobile.Install only supports target platforms android, ios and iossimulator, but got %q", t.OS)
 	}
 }
