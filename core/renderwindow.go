@@ -551,6 +551,14 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			}
 		case events.WinMinimize:
 			e.SetHandled()
+			// On mobile, the app goes into the background, where it is
+			// often closed, so the edits in progress, as in a text field,
+			// are completed, as when the focus leaves them.
+			if TheApp.SystemPlatform().IsMobile() {
+				if st := w.mains.top(); st != nil && st.Scene != nil {
+					st.Scene.Events.focusClear()
+				}
+			}
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			// if Platform().IsMobile() {

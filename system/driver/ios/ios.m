@@ -74,6 +74,10 @@ struct utsname sysInfo;
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	lifecycleAlive();
+	// a while for the app to complete the edits that were in progress,
+	// and to start any work on them, such as saving and syncing data,
+	// which ends it (see lifecycleBackground)
+	lifecycleBackground(beginBackgroundTask("background"));
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
@@ -395,6 +399,42 @@ void showKeyboard(int keyboardType) {
 
         BOOL ret = [view becomeFirstResponder];
     });
+}
+
+// activeBackgroundTasks has the background tasks that have not ended,
+// which end once: when their work is done, or when their time is up.
+static NSMutableSet<NSNumber *> *activeBackgroundTasks;
+
+// endTask ends the given background task, if it has not ended.
+static void endTask(UIBackgroundTaskIdentifier tid) {
+    @synchronized ([UIApplication class]) {
+        if (tid == UIBackgroundTaskInvalid || ![activeBackgroundTasks containsObject:@(tid)]) {
+            return;
+        }
+        [activeBackgroundTasks removeObject:@(tid)];
+    }
+    [[UIApplication sharedApplication] endBackgroundTask:tid];
+}
+
+uintptr_t beginBackgroundTask(char *name) {
+    NSString *nm = [NSString stringWithUTF8String:name];
+    __block UIBackgroundTaskIdentifier tid = UIBackgroundTaskInvalid;
+    @synchronized ([UIApplication class]) {
+        if (activeBackgroundTasks == nil) { // (kept: not autoreleased)
+            activeBackgroundTasks = [[NSMutableSet alloc] init];
+        }
+        tid = [[UIApplication sharedApplication] beginBackgroundTaskWithName:nm expirationHandler:^{
+            endTask(tid); // (the time is up)
+        }];
+        if (tid != UIBackgroundTaskInvalid) {
+            [activeBackgroundTasks addObject:@(tid)];
+        }
+    }
+    return (uintptr_t)tid;
+}
+
+void endBackgroundTask(uintptr_t tid) {
+    endTask((UIBackgroundTaskIdentifier)tid);
 }
 
 void hideKeyboard() {

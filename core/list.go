@@ -12,6 +12,7 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -1851,12 +1852,12 @@ func (lb *ListBase) SizeFinal() {
 // view if it is no longer in the rows (see [ListBase.keepFocusedItem]).
 func (lb *ListBase) setVisibleRows(n int) {
 	idx, pos, foc := lb.focusedCell()
-	cursor := commitEdit(foc)
+	ed := saveEdit(foc)
 	start := lb.StartIndex
 	lb.VisibleRows = n
 	lb.Update()
 	if foc != nil {
-		lb.keepFocusedItem(idx, pos, cursor, foc, true)
+		lb.keepFocusedItem(idx, pos, ed, foc, true)
 	}
 	if lb.StartIndex != start {
 		// the scroll bar is set once laid out, before any scrolling
@@ -1867,14 +1868,15 @@ func (lb *ListBase) setVisibleRows(n int) {
 
 // keepFocusedItem keeps the focus on the cell at the given position in
 // the row of the given slice index, which had the given focused widget,
-// with the given position of the cursor of a [TextField] (or -1),
-// after the rows were updated, as the rows are widgets for the items from
-// the [ListBase.StartIndex], which can change: if the item is no longer in
+// with the given edit in progress (see [saveEdit]), after the rows were
+// updated, as the rows are widgets for the items from the
+// [ListBase.StartIndex], which can change: if the item is no longer in
 // the rows, it is scrolled into view if scroll, or else (when scrolled
-// away from) its edit is completed and the focus is cleared; if its cell
-// is another widget, the focus moves there, without losing it in between,
-// which would hide the virtual keyboard, as for a new focus.
-func (lb *ListBase) keepFocusedItem(idx, pos, cursor int, foc Widget, scroll bool) {
+// away from, after its edit is completed) the focus is cleared; if its
+// cell is another widget, the focus moves there, without losing it in
+// between, which would hide the virtual keyboard, as for a new focus.
+// The edit continues in the cell (whose text the update set again).
+func (lb *ListBase) keepFocusedItem(idx, pos int, ed *cellEdit, foc Widget, scroll bool) {
 	em := lb.Events()
 	if em == nil || em.focus != foc {
 		return
@@ -1892,7 +1894,8 @@ func (lb *ListBase) keepFocusedItem(idx, pos, cursor int, foc Widget, scroll boo
 		return
 	}
 	if foc.AsTree().This == cell.This || (foc.AsTree().This != nil && isParentOf(cell.This.(Widget), foc)) {
-		return // the same cell
+		ed.restore(foc) // the same cell
+		return
 	}
 	em.focus = nil // (without the focus lost event)
 	if foc.AsTree().This != nil {
@@ -1908,9 +1911,8 @@ func (lb *ListBase) keepFocusedItem(idx, pos, cursor int, foc Widget, scroll boo
 			return
 		}
 		cell.SetFocus()
-		if tf, ok := cell.This.(*TextField); ok && cursor >= 0 {
-			tf.cursorPos = min(cursor, len(tf.editText)) // where it was
-			tf.NeedsRender()
+		if em.focus != nil { // (the text field in the cell, as in a tree table)
+			ed.restore(em.focus)
 		}
 	})
 }
@@ -1929,20 +1931,47 @@ func (lb *ListBase) cellOf(idx, pos int) *WidgetBase {
 	return lb.ListGrid.Child(k).(Widget).AsWidget()
 }
 
-// commitEdit completes any edit of the given focused widget of a cell,
-// a [TextField], before the rows are updated, which sets their values
-// from their items, which can be other items. It returns the position
-// of the cursor of the text field, or -1.
-func commitEdit(foc Widget) int {
+// cellEdit is the edit in progress in a [TextField] of a cell: its text
+// and cursor, which are kept when the rows are updated, which sets the
+// text of the cells from their items again, discarding any edit.
+type cellEdit struct {
+	text   []rune
+	cursor int
+	edited bool
+}
+
+// saveEdit returns the edit in progress in the given focused widget of a
+// cell, if it is a [TextField], or nil.
+func saveEdit(foc Widget) *cellEdit {
 	tf, ok := foc.(*TextField)
-	if !ok {
-		return -1
+	if !ok || tf.This == nil {
+		return nil
 	}
-	if tf.edited {
+	return &cellEdit{text: slices.Clone(tf.editText), cursor: tf.cursorPos, edited: tf.edited}
+}
+
+// restore continues the edit in the given widget, which is a [TextField]
+// of the cell of the same item.
+func (ed *cellEdit) restore(w Widget) {
+	tf, ok := w.(*TextField)
+	if ed == nil || !ok {
+		return
+	}
+	if ed.edited {
+		tf.editText = slices.Clone(ed.text)
+		tf.edited = true
+		tf.renderVisible = nil
+	}
+	tf.cursorPos = min(ed.cursor, len(tf.editText))
+	tf.NeedsRender()
+}
+
+// commitEdit completes any edit of the given focused widget of a cell,
+// a [TextField], as before the rows are scrolled away from its item.
+func commitEdit(foc Widget) {
+	if tf, ok := foc.(*TextField); ok && tf.edited {
 		tf.editDone()
-		tf.startCursor()
 	}
-	return tf.cursorPos
 }
 
 // focusedCell returns the slice index of the row of the cell of the grid
@@ -2158,10 +2187,13 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	}
 	ls := lg.list()
 	idx, pos, foc := ls.focusedCell()
-	cursor := commitEdit(foc)
 	rht := lg.rowHeight
 	quo := sb.Value / rht
 	floor := math32.Floor(quo)
+	if foc != nil && (idx < int(floor) || idx >= int(floor)+ls.VisibleRows) {
+		commitEdit(foc) // (scrolled away from, so it is completed)
+	}
+	ed := saveEdit(foc)
 	ls.StartIndex = int(floor)
 	lg.Geom.Scroll.Y = (floor - quo) * rht
 	ls.ApplyScenePos()
@@ -2176,7 +2208,7 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		// ls.NeedsLayout() // needed to recompute size after resize
 	}
 	if foc != nil {
-		ls.keepFocusedItem(idx, pos, cursor, foc, false)
+		ls.keepFocusedItem(idx, pos, ed, foc, false)
 	}
 }
 

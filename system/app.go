@@ -207,6 +207,15 @@ type App interface {
 	// HideVirtualKeyboard only has an effect on mobile platforms (iOS, Android, and Web).
 	HideVirtualKeyboard()
 
+	// BeginBackgroundTask asks the operating system to keep the app running
+	// for a while if it goes into the background (as when the user goes
+	// to the home screen or locks the phone), until the returned function
+	// is called, for finishing work such as saving or syncing data. It only
+	// has an effect on iOS, where the app has about 30 seconds; elsewhere,
+	// apps keep running in the background, or are not suspended anyway.
+	// The returned function must be called once the work is done.
+	BeginBackgroundTask(name string) (end func())
+
 	// IsDark returns whether the system color theme is dark (as oppposed to light).
 	IsDark() bool
 }

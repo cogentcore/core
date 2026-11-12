@@ -469,6 +469,12 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
+// valueChanger is a [Lister] that updates after the value of a cell in
+// the given row is changed by the user, before its change event is sent.
+type valueChanger interface {
+	valueChanged(row int)
+}
+
 func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
@@ -537,6 +543,9 @@ func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
 		if !tb.IsReadOnly() && !readOnlyTag {
 			wb.OnChange(func(e events.Event) {
 				tb.This.(Lister).UpdateMaxWidths()
+				if vc, ok := tb.This.(valueChanger); ok {
+					vc.valueChanged(i)
+				}
 				tb.SendChange()
 			})
 		}

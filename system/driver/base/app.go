@@ -211,6 +211,10 @@ func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	// no-op by default
 }
 
+func (a *App) BeginBackgroundTask(name string) (end func()) {
+	return func() {} // (not needed)
+}
+
 func (a *App) HideVirtualKeyboard() {
 	// no-op by default
 }

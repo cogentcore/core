@@ -31,6 +31,8 @@ UIEdgeInsets getDevicePadding();
 bool isDark();
 void showKeyboard(int keyboardType);
 void hideKeyboard();
+uintptr_t beginBackgroundTask(char *name);
+void endBackgroundTask(uintptr_t tid);
 */
 import "C"
 import (
@@ -38,6 +40,8 @@ import (
 	"log"
 	"log/slog"
 	"strings"
+	"sync"
+	"time"
 	"unsafe"
 
 	"cogentcore.org/core/events"
@@ -209,6 +213,17 @@ func lifecycleDead() {
 func lifecycleAlive() {
 }
 
+//export lifecycleBackground
+func lifecycleBackground(tid C.uintptr_t) {
+	// the app completes the edits that were in progress on minimizing
+	// (see core), which can start work that keeps it running in the
+	// background, with its own background task
+	if TheApp.Win != nil {
+		TheApp.Event.Window(events.WinMinimize)
+	}
+	time.AfterFunc(2*time.Second, func() { C.endBackgroundTask(tid) })
+}
+
 //export lifecycleVisible
 func lifecycleVisible() {
 	if TheApp.Win != nil {
@@ -226,6 +241,19 @@ func lifecycleFocused() {
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	C.showKeyboard(C.int(int32(typ)))
+}
+
+// BeginBackgroundTask asks iOS to keep the app running for a while in the
+// background, until the returned function is called (see
+// [system.App.BeginBackgroundTask]).
+func (a *App) BeginBackgroundTask(name string) (end func()) {
+	cn := C.CString(name)
+	defer C.free(unsafe.Pointer(cn))
+	tid := C.beginBackgroundTask(cn)
+	var once sync.Once
+	return func() {
+		once.Do(func() { C.endBackgroundTask(tid) })
+	}
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard

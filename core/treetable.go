@@ -469,8 +469,38 @@ func (tt *TreeTable) edited(item reflect.Value) {
 		tt.SelectIndexEvent(idx, events.SelectOne)
 	}
 	tt.UpdateChange()
-	if idx = tt.rowOf(item); idx >= 0 {
-		tt.IndexGrabFocus(idx)
+	// once shown, and after the rest of the handling of the event, as of
+	// the click on a button for a new item, which focuses the button
+	tt.Defer(func() {
+		if idx := tt.rowOf(item); idx >= 0 {
+			tt.IndexGrabFocus(idx)
+		}
+	})
+}
+
+// valueChanged sorts the items again after the value of a cell in the
+// given row is changed by the user, if they are sorted (as by a check box
+// for done items that go to the end), and if its item moves, selects it,
+// without moving the focus, which stays on its cell if it had it.
+func (tt *TreeTable) valueChanged(row int) {
+	idx := tt.StartIndex + row
+	if tt.sortIndex < 0 || !tt.validIndex(idx) {
+		return
+	}
+	item := tt.rows[idx].item
+	fidx, pos, foc := tt.focusedCell()
+	ed := saveEdit(foc) // (completed, as it changed)
+	tt.sortItems()
+	tt.updateRows()
+	nidx := tt.rowOf(item)
+	if nidx < 0 || nidx == idx {
+		return
+	}
+	tt.selectIndexQuiet(nidx) // (not moving the focus, as to a text field)
+	tt.ScrollToIndexNoUpdate(nidx)
+	tt.Update()
+	if foc != nil && fidx == idx {
+		tt.keepFocusedItem(nidx, pos, ed, foc, true)
 	}
 }
 
