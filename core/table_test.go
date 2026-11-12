@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -228,5 +229,37 @@ func TestTableFocusShrink(t *testing.T) {
 			tf.editDone()
 		}
 		assert.Equal(t, "abx", items[last].Name, "typed into the focused item, at the end")
+	})
+}
+
+// TestTableRowButtonBackground tests that the buttons of the rows (see
+// [Table.SetRowButton]) have the background of their own rows: that of
+// the selected row only for the button of that row.
+func TestTableRowButtonBackground(t *testing.T) {
+	type item struct{ Name string }
+	items := []item{{"a"}, {"b"}, {"c"}}
+	b := NewBody()
+	tb := NewTable(b).SetSlice(&items)
+	tb.SetRowButton(icons.Edit, "Edit", func(item any) {})
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tb.SelectIndex(0)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		lg := tb.ListGrid
+		var buttons []*Button
+		for _, c := range lg.Children {
+			if bt, ok := c.(*Button); ok && bt.Icon == icons.Edit {
+				buttons = append(buttons, bt)
+			}
+		}
+		if assert.GreaterOrEqual(t, len(buttons), 3) { // (and empty rows)
+			sel := lg.ChildBackground(buttons[0])
+			assert.Equal(t, lg.bgSelect, sel, "the selected row")
+			assert.NotEqual(t, sel, lg.ChildBackground(buttons[1]), "not the selected row")
+			assert.NotEqual(t, sel, lg.ChildBackground(buttons[2]), "not the selected row")
+		}
 	})
 }

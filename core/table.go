@@ -115,6 +115,10 @@ func (tb *Table) makeRowButton(p *tree.Plan, i int) {
 		return
 	}
 	tree.AddAt(p, "row-button-"+strconv.Itoa(i), func(w *Button) {
+		// its row, for its background (as selected; see
+		// [ListGrid.ChildBackground]) and selecting its row when focused
+		w.SetProperty(ListRowProperty, i)
+		w.SetProperty(ListColProperty, tb.numVisibleFields)
 		w.SetType(ButtonAction).SetIcon(rb.icon).SetTooltip(rb.tooltip)
 		w.OnClick(func(e events.Event) {
 			// the row has the item at the time of the click,

@@ -180,7 +180,17 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
+	TheApp.Mu.Lock()
+	changed := TheApp.Dark != bool(dark)
 	TheApp.Dark = bool(dark)
+	win := TheApp.Win
+	TheApp.Mu.Unlock()
+	// the app updates its colors for the change of the system theme, if it
+	// follows it, on a screen update (as when the system switches to dark
+	// mode while it runs)
+	if changed && win != nil {
+		TheApp.Event.Window(events.ScreenUpdate)
+	}
 }
 
 // windowConfig contains the window configuration information fetched from the native activity

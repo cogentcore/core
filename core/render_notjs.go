@@ -48,7 +48,7 @@ func (ps *paintSource) Draw(c composer.Composer) {
 func (ss *scrimSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
 	clr := colors.Uniform(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5))
-	cd.Drawer.Copy(image.Point{}, clr, ss.bbox, draw.Over, composer.Unchanged)
+	cd.Drawer.Copy(ss.bbox.Min, clr, ss.bbox, draw.Over, composer.Unchanged) // (at its place)
 }
 
 ////////  fillInsets
@@ -56,18 +56,19 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 // fillInsetsSource is a [composer.Source] implementation for fillInsets.
 type fillInsetsSource struct {
 	rbb, wbb image.Rectangle
+
+	// clr is the color to fill them with.
+	clr image.Image
 }
 
 func (ss *fillInsetsSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
-	clr := colors.Scheme.Surface
-
 	fill := func(x0, y0, x1, y1 int) {
 		r := image.Rect(x0, y0, x1, y1)
 		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
-		cd.Drawer.Copy(image.Point{}, clr, r, draw.Src, composer.Unchanged)
+		cd.Drawer.Copy(r.Min, ss.clr, r, draw.Src, composer.Unchanged)
 	}
 	rb := ss.rbb
 	wb := ss.wbb
@@ -77,7 +78,9 @@ func (ss *fillInsetsSource) Draw(c composer.Composer) {
 	fill(0, 0, rb.Min.X, wb.Max.Y)        // left
 }
 
-// fillInsets fills the window insets, if any, with [colors.Scheme.Surface].
+// fillInsets fills the window insets, if any (as behind the system bars
+// on mobile), with the background color of the body of the top window
+// scene, so that they match it, or else [colors.Scheme.Surface].
 func (w *renderWindow) fillInsets(cp composer.Composer) {
 	// render geom and window geom
 	rg := w.SystemWindow.RenderGeom()
@@ -88,5 +91,28 @@ func (w *renderWindow) fillInsets(cp composer.Composer) {
 	if wg == rg {
 		return
 	}
-	cp.Add(&fillInsetsSource{rbb: rg.Bounds(), wbb: wg.Bounds()}, w)
+	var clr image.Image = colors.Scheme.Surface
+	for _, st := range w.mains.stack.Values() {
+		if st.Type != WindowStage || st.Scene == nil {
+			continue
+		}
+		// that of its body, which is what is seen, or else that of the
+		// scene, if it is opaque (a transparent one would leave the
+		// background of the system window)
+		opaque := func(bg image.Image) bool {
+			u, ok := bg.(*image.Uniform)
+			if !ok {
+				return false
+			}
+			_, _, _, a := u.RGBA()
+			return a == 0xffff
+		}
+		if bg := st.Scene.Styles.ActualBackground; opaque(bg) {
+			clr = bg
+		}
+		if bd := st.Scene.Body; bd != nil && opaque(bd.Styles.ActualBackground) {
+			clr = bd.Styles.ActualBackground
+		}
+	}
+	cp.Add(&fillInsetsSource{rbb: rg.Bounds(), wbb: wg.Bounds(), clr: clr}, w)
 }

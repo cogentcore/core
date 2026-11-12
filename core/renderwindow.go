@@ -841,7 +841,8 @@ func (w *renderWindow) renderWindow() {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			cp.Add(ScrimSource(winScene.Geom.TotalBBox), &st.Scrim)
+			// (in the window, where the scene is drawn at its position)
+			cp.Add(ScrimSource(winScene.Geom.TotalBBox.Add(winScene.SceneGeom.Pos)), &st.Scrim)
 		}
 		st.Scene.addRenderSources(cp, draw.Over, false)
 		if DebugSettings.WindowRenderTrace {
