@@ -74,6 +74,10 @@ struct utsname sysInfo;
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	lifecycleAlive();
+	// a while for the app to complete the edits that were in progress,
+	// and to start any work on them, such as saving and syncing data,
+	// which ends it (see lifecycleBackground)
+	lifecycleBackground(beginBackgroundTask("background"));
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
@@ -139,10 +143,27 @@ struct utsname sysInfo;
     CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(render:)];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 
+	// the keyboard is shown, hidden, or changes size (as for its predictions)
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardFrameChanged:)
+		name:UIKeyboardWillChangeFrameNotification object:nil];
+
 	UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] init];
 	pinchGesture.delegate = self;
 	[pinchGesture addTarget:self action: @selector(onPinch:)];
 	[self.view addGestureRecognizer:pinchGesture];
+}
+
+// keyboardFrameChanged sends the height of the part of the view that the
+// keyboard covers, in points, as it is shown, hidden, or changes size, so
+// that the app can be laid out above it, as with the safe area insets.
+- (void)keyboardFrameChanged:(NSNotification *)note {
+	CGRect end = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+	CGRect kb = [self.view convertRect:end fromView:nil];
+	CGFloat covered = self.view.bounds.origin.y + self.view.bounds.size.height - kb.origin.y;
+	if (kb.size.width <= 0 || kb.size.height <= 0 || covered < 0) {
+		covered = 0;
+	}
+	keyboardHeightChanged((int)covered);
 }
 
 - (void)viewWillTransitionToSize:(CGSize)ptSize withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -221,6 +242,13 @@ static void sendTouches(int change, NSSet* touches) {
 
 - (BOOL)canBecomeFirstResponder {
     return YES;
+}
+
+// textFieldShouldReturn sends the return key (Done on single-line
+// keyboards), which the text field does not insert, as the Enter key.
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    keyboardTyped((char *)"\n");
+    return NO;
 }
 
 // The keyboard edits the text of this hidden text field, which is read
@@ -371,6 +399,42 @@ void showKeyboard(int keyboardType) {
 
         BOOL ret = [view becomeFirstResponder];
     });
+}
+
+// activeBackgroundTasks has the background tasks that have not ended,
+// which end once: when their work is done, or when their time is up.
+static NSMutableSet<NSNumber *> *activeBackgroundTasks;
+
+// endTask ends the given background task, if it has not ended.
+static void endTask(UIBackgroundTaskIdentifier tid) {
+    @synchronized ([UIApplication class]) {
+        if (tid == UIBackgroundTaskInvalid || ![activeBackgroundTasks containsObject:@(tid)]) {
+            return;
+        }
+        [activeBackgroundTasks removeObject:@(tid)];
+    }
+    [[UIApplication sharedApplication] endBackgroundTask:tid];
+}
+
+uintptr_t beginBackgroundTask(char *name) {
+    NSString *nm = [NSString stringWithUTF8String:name];
+    __block UIBackgroundTaskIdentifier tid = UIBackgroundTaskInvalid;
+    @synchronized ([UIApplication class]) {
+        if (activeBackgroundTasks == nil) { // (kept: not autoreleased)
+            activeBackgroundTasks = [[NSMutableSet alloc] init];
+        }
+        tid = [[UIApplication sharedApplication] beginBackgroundTaskWithName:nm expirationHandler:^{
+            endTask(tid); // (the time is up)
+        }];
+        if (tid != UIBackgroundTaskInvalid) {
+            [activeBackgroundTasks addObject:@(tid)];
+        }
+    }
+    return (uintptr_t)tid;
+}
+
+void endBackgroundTask(uintptr_t tid) {
+    endTask((UIBackgroundTaskIdentifier)tid);
 }
 
 void hideKeyboard() {

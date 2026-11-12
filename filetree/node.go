@@ -16,6 +16,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -118,15 +119,19 @@ func (fn *Node) Init() {
 		s.Gap.X.Em(0.4)
 	})
 	fn.Parts.OnClick(func(e events.Event) {
-		if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) {
+		// (an app opens by double-clicking; its arrow still opens it as a directory)
+		if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) && !fn.IsApp() {
 			fn.Open()
 		}
 	})
 	fn.Parts.OnDoubleClick(func(e events.Event) {
 		e.SetHandled()
-		if fn.IsDir() {
+		switch {
+		case fn.IsApp():
+			fn.OpenFileDefault() // (not OpenFile, which can open it in an editor)
+		case fn.IsDir():
 			fn.ToggleClose()
-		} else {
+		default:
 			fn.This.(Filer).OpenFile()
 		}
 	})
@@ -259,6 +264,28 @@ func (fn *Node) IsDir() bool {
 	return fn.Info.IsDir()
 }
 
+// AppBundles is whether directories named *.app are app bundles, which
+// are shown and opened as apps (see [Node.IsApp]): on macOS, as in the Finder.
+var AppBundles = runtime.GOOS == "darwin"
+
+// IsAppBundle returns whether the given path, which is a directory if
+// isDir, is an app bundle: a directory named *.app, when [AppBundles].
+func IsAppBundle(path string, isDir bool) bool {
+	return AppBundles && isDir && strings.EqualFold(filepath.Ext(path), ".app")
+}
+
+// IsApp returns whether the node is an app bundle (see [IsAppBundle]),
+// unless the tree shows them as directories ([Tree.AppsAsDirs]): it has
+// the icon of an app, and double-clicking opens it as an app, without
+// opening it in the tree, which its arrow does, for its files.
+func (fn *Node) IsApp() bool {
+	if !IsAppBundle(string(fn.Filepath), fn.IsDir()) {
+		return false
+	}
+	root := fn.FileRoot()
+	return root == nil || !root.AppsAsDirs
+}
+
 // IsIrregular  returns true if file is a special "Irregular" node
 func (fn *Node) IsIrregular() bool {
 	return (fn.Info.Mode & os.ModeIrregular) != 0
@@ -346,8 +373,12 @@ func (fn *Node) setFileIcon() {
 	}
 	fn.IconLeaf = fn.Info.Ic
 	if br := fn.Branch; br != nil {
-		if br.IconIndeterminate != fn.IconLeaf {
-			br.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(fn.IconLeaf)
+		on, off := icons.FolderOpen, icons.Folder
+		if fn.IsApp() {
+			on, off = icons.Apps, icons.Apps
+		}
+		if br.IconIndeterminate != fn.IconLeaf || br.IconOff != off {
+			br.SetIconOn(on).SetIconOff(off).SetIconIndeterminate(fn.IconLeaf)
 			br.UpdateTree()
 		}
 	}

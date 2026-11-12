@@ -74,8 +74,11 @@ func platformTags(platform string) []string {
 	switch platform {
 	case "android":
 		return []string{"android"}
-	case "ios", "iossimulator":
+	case "ios":
 		return []string{"ios"}
+	case "iossimulator":
+		// selects the libraries for the simulator, such as those of WebGPU
+		return []string{"ios", "iossimulator"}
 	case "macos":
 		return []string{"macos"}
 	case "maccatalyst":
@@ -183,7 +186,8 @@ func envInit(c *config.Config) (err error) {
 				"CC":          clang,
 				"CXX":         clangpp,
 				"CGO_ENABLED": "1",
-				"CGO_LDFLAGS": androidLDFlags(),
+				// (ELF segments aligned for devices with 16 KB pages)
+				"CGO_LDFLAGS": androidLDFlags() + " -Wl,-z,max-page-size=16384",
 			}
 			if arch == "arm" {
 				androidEnv[arch]["GOARM"] = "7"

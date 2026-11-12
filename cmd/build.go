@@ -43,7 +43,7 @@ func Build(c *config.Config) error { //types:add
 				return err
 			}
 		}
-		if platform.OS == "android" || platform.OS == "ios" {
+		if platform.OS == "android" || platform.OS == "ios" || platform.OS == "iossimulator" {
 			return mobile.Build(c)
 		}
 		if platform.OS == "wasm" || platform.OS == "js" {

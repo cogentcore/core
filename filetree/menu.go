@@ -74,6 +74,9 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	if core.TheApp.Platform() == system.Web {
 		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 	}
+	if fn.HasSelection() && !fn.IsDir() {
+		core.OpenWithMenuItems(m, string(fn.Filepath))
+	}
 
 	core.NewSeparator(m)
 

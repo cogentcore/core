@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -354,6 +356,17 @@ func (w *renderWindow) resized() {
 	rc.visible = true
 	w.flags.SetFlag(true, winResize)
 	w.mains.resize(rg)
+	// On mobile, the focused widget is kept in view, as when the
+	// virtual keyboard for typing into it shrinks the window, after it
+	// was scrolled into view for getting the focus.
+	if TheApp.SystemPlatform().IsMobile() {
+		if st := w.mains.top(); st != nil && st.Scene != nil {
+			if f := st.Scene.Events.focus; f != nil {
+				fw := f.AsWidget()
+				fw.Defer(func() { fw.ScrollToThis() })
+			}
+		}
+	}
 	if DebugSettings.WindowGeometryTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
@@ -540,6 +553,14 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			}
 		case events.WinMinimize:
 			e.SetHandled()
+			// On mobile, the app goes into the background, where it is
+			// often closed, so the edits in progress, as in a text field,
+			// are completed, as when the focus leaves them.
+			if TheApp.SystemPlatform().IsMobile() {
+				if st := w.mains.top(); st != nil && st.Scene != nil {
+					st.Scene.Events.focusClear()
+				}
+			}
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			// if Platform().IsMobile() {
@@ -780,6 +801,15 @@ func (w *renderWindow) renderWindow() {
 
 	// now we go in the proper bottom-up order to generate the [render.Scene]
 	cp := w.SystemWindow.Composer()
+	// On mobile, the system window, with its drawer, is destroyed while
+	// the app is in the background, and it can be before the window is
+	// made (when the app starts with the screen off), so there is nothing
+	// to render to then (the composer is a nil pointer). The window is
+	// rendered again when it is shown.
+	if reflectx.IsNil(reflect.ValueOf(cp)) {
+		w.SystemWindow.Unlock()
+		return
+	}
 	cp.Start()
 	sm := &w.mains
 	n := sm.stack.Len()
@@ -811,7 +841,8 @@ func (w *renderWindow) renderWindow() {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			cp.Add(ScrimSource(winScene.Geom.TotalBBox), &st.Scrim)
+			// (in the window, where the scene is drawn at its position)
+			cp.Add(ScrimSource(winScene.Geom.TotalBBox.Add(winScene.SceneGeom.Pos)), &st.Scrim)
 		}
 		st.Scene.addRenderSources(cp, draw.Over, false)
 		if DebugSettings.WindowRenderTrace {

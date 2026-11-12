@@ -19,23 +19,9 @@ import (
 // AndroidHome returns the absolute path of the selected Android SDK,
 // if one can be found.
 func AndroidHome() (string, error) {
-	androidHome := os.Getenv("ANDROID_HOME")
-	if androidHome == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
-		}
-		switch runtime.GOOS {
-		case "windows":
-			// See https://android.googlesource.com/platform/tools/adt/idea/+/85b4bfb7a10ad858a30ffa4003085b54f9424087/native/installer/win/setup_android_studio.nsi#100
-			androidHome = filepath.Join(home, "AppData", "Local", "Android", "sdk")
-		case "darwin":
-			// See https://android.googlesource.com/platform/tools/asuite/+/67e0cd9604379e9663df57f16a318d76423c0aa8/aidegen/lib/ide_util.py#88
-			androidHome = filepath.Join(home, "Library", "Android", "sdk")
-		default: // Linux, BSDs, etc.
-			// See LINUX_ANDROID_SDK_PATH in ide_util.py above.
-			androidHome = filepath.Join(home, "Android", "Sdk")
-		}
+	androidHome, err := AndroidHomePath()
+	if err != nil {
+		return "", err
 	}
 	if info, err := os.Stat(androidHome); err != nil {
 		return "", fmt.Errorf("%w; Android SDK was not found at %s", err, androidHome)
@@ -43,6 +29,30 @@ func AndroidHome() (string, error) {
 		return "", fmt.Errorf("%s is not a directory", androidHome)
 	}
 	return androidHome, nil
+}
+
+// AndroidHomePath returns the absolute path of the selected Android SDK,
+// whether or not it exists: ANDROID_HOME, or else the default location of
+// the SDK for the platform (that of Android Studio).
+func AndroidHomePath() (string, error) {
+	if androidHome := os.Getenv("ANDROID_HOME"); androidHome != "" {
+		return androidHome, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	switch runtime.GOOS {
+	case "windows":
+		// See https://android.googlesource.com/platform/tools/adt/idea/+/85b4bfb7a10ad858a30ffa4003085b54f9424087/native/installer/win/setup_android_studio.nsi#100
+		return filepath.Join(home, "AppData", "Local", "Android", "sdk"), nil
+	case "darwin":
+		// See https://android.googlesource.com/platform/tools/asuite/+/67e0cd9604379e9663df57f16a318d76423c0aa8/aidegen/lib/ide_util.py#88
+		return filepath.Join(home, "Library", "Android", "sdk"), nil
+	default: // Linux, BSDs, etc.
+		// See LINUX_ANDROID_SDK_PATH in ide_util.py above.
+		return filepath.Join(home, "Android", "Sdk"), nil
+	}
 }
 
 // AndroidAPIPath returns an android SDK platform directory within the configured SDK.

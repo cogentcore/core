@@ -81,6 +81,8 @@ var ArchsForOS = map[string][]string{
 	"linux":   {"386", "amd64", "arm", "arm64"},
 	"android": {"386", "amd64", "arm", "arm64"},
 	"ios":     {"arm64"},
+	// the iOS simulator, on the Mac with the same architecture
+	"iossimulator": {"arm64", "amd64"},
 }
 
 // supportedOS is a map containing all operating systems and whether they are supported by Cogent Core.
@@ -93,17 +95,19 @@ var supportedOS = map[string]bool{
 	"hurd":      false,
 	"illumos":   false,
 	"ios":       true,
-	"js":        true,
-	"wasm":      true,
-	"linux":     true,
-	"nacl":      false,
-	"netbsd":    false,
-	"openbsd":   false,
-	"plan9":     false,
-	"solaris":   false,
-	"wasip1":    false,
-	"windows":   true,
-	"zos":       false,
+	// iossimulator is the iOS simulator (GOOS ios), on macOS
+	"iossimulator": true,
+	"js":           true,
+	"wasm":         true,
+	"linux":        true,
+	"nacl":         false,
+	"netbsd":       false,
+	"openbsd":      false,
+	"plan9":        false,
+	"solaris":      false,
+	"wasip1":       false,
+	"windows":      true,
+	"zos":          false,
 }
 
 // supportedArch is a map containing all computer architectures and whether they are supported by Cogent Core.

@@ -78,6 +78,11 @@ type Config struct { //types:add
 	// and Windows, which the core command builds and runs apps with.
 	Video bool `cmd:"setup,update"`
 
+	// AndroidSim installs (setup) the Android SDK, with the Android
+	// emulator, and makes an Android virtual device for it (named Cogent),
+	// which core run android boots when no Android device is connected.
+	AndroidSim bool `cmd:"setup"`
+
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
 
@@ -141,7 +146,7 @@ type Build struct { //types:add
 	AndroidMinSDK int `default:"23" min:"23"`
 
 	// the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
-	AndroidTargetSDK int `default:"29"`
+	AndroidTargetSDK int `default:"35"`
 }
 
 type Pack struct { //types:add
@@ -226,7 +231,7 @@ func (c *Config) OnConfig(cmd string) error {
 	}
 	if c.Build.Output == "" && len(c.Build.Target) > 0 {
 		t := c.Build.Target[0]
-		if cmd == "pack" || t.OS == "wasm" || t.OS == "js" || t.OS == "android" || t.OS == "ios" {
+		if cmd == "pack" || t.OS == "wasm" || t.OS == "js" || t.OS == "android" || t.OS == "ios" || t.OS == "iossimulator" {
 			c.Build.Output = filepath.Join("bin", t.OS)
 		}
 	}

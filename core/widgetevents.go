@@ -430,9 +430,7 @@ func (wb *WidgetBase) handleWidgetStateFromFocus() {
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.ScrollToThis()
 			wb.SetState(true, states.Focused)
-			if !wb.IsReadOnly() && wb.Styles.VirtualKeyboard != styles.KeyboardNone {
-				TheApp.ShowVirtualKeyboard(wb.Styles.VirtualKeyboard)
-			}
+			wb.showVirtualKeyboard()
 		}
 	})
 	wb.OnFocusLost(func(e events.Event) {
@@ -443,6 +441,14 @@ func (wb *WidgetBase) handleWidgetStateFromFocus() {
 			TheApp.HideVirtualKeyboard()
 		}
 	})
+}
+
+// showVirtualKeyboard shows the virtual keyboard for the widget, which has
+// the focus, if it is editable (not read-only, with a keyboard).
+func (wb *WidgetBase) showVirtualKeyboard() {
+	if !wb.IsReadOnly() && wb.Styles.VirtualKeyboard != styles.KeyboardNone {
+		TheApp.ShowVirtualKeyboard(wb.Styles.VirtualKeyboard)
+	}
 }
 
 // handleWidgetStateFromAttend updates standard State flags based on Attend events

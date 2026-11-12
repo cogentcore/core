@@ -1343,6 +1343,12 @@ func (em *Events) setFocus(w Widget) bool {
 		if DebugSettings.FocusTrace {
 			fmt.Println(em.scene, "SetFocusEvent: Failed", w)
 		}
+		// Focusing the focused widget again (as by tapping it) shows its
+		// keyboard again, which can have been hidden while it kept the
+		// focus (as by Done on Android, when there is no next widget).
+		if !tree.IsNil(w) && w == em.focus && TheApp.SystemPlatform().IsMobile() {
+			w.AsWidget().showVirtualKeyboard()
+		}
 		return false
 	}
 	if !tree.IsNil(w) {
@@ -1624,6 +1630,11 @@ func (em *Events) managerKeyChordEvents(e events.Event) {
 	case keymap.WinFocusNext:
 		e.SetHandled()
 		AllRenderWindows.focusNext()
+	case keymap.New:
+		if canNewWindow() {
+			e.SetHandled()
+			newWindowFrom(sc)
+		}
 	}
 	if !e.IsHandled() {
 		em.triggerShortcut(cs, e)

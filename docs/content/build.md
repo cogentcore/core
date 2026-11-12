@@ -36,7 +36,53 @@ func main() {
 }
 ```
 
-For development on Android, you need to install [Android Studio](https://developer.android.com/studio), and for development on iOS, you need to install [XCode](https://apps.apple.com/us/app/xcode/id497799835?mt=12). For Android development, if you run into any errors with the Android NDK, you should ensure that it is [installed](https://developer.android.com/studio/projects/install-ndk#default-version). You may also need to add the Android tools [to your PATH](https://stackoverflow.com/a/29083170).
+For the setup for building for iOS and Android, and running apps in their simulators, see [Mobile](#mobile) below.
+
+## Mobile
+
+You can build for Android on all desktop platforms, and for iOS on macOS only. The `ID` in the `core.toml` of the app (such as `com.cogent.lists`) is its bundle ID on iOS and its package name on Android. It must be the same in every build, so that a new build replaces the installed app and keeps its data.
+
+### iOS
+
+For iOS, you need [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) (the full app, not only its command line tools that `core setup` installs), with the iOS platform installed in its settings (Components). Xcode includes the iOS simulator, so nothing else is needed for it.
+
+`core run iossimulator` builds the app for the iOS simulator and runs it there: in a simulator device that is booted, or else it boots the newest iPhone and opens the Simulator app to show it. Add `-d` to see the output of the app in the terminal. The app is built with the `iossimulator` build tag, which selects the WebGPU library for the simulator; that needs version 1.38.0 or later of `github.com/oliverbestmann/webgpu` in the `go.mod` of the app. `core build iossimulator` only builds it.
+
+For an iPhone or iPad, the app must be signed: sign in to your Apple account in Xcode (Settings, Accounts), which makes an "Apple Development" certificate, from which `core build ios` gets the ID of your team. On the device, turn on Developer Mode (Settings, Privacy & Security), connect it with a cable (or on the same network, once it is paired in Xcode), and trust the computer. `core install ios` installs the app with [ios-deploy](https://github.com/ios-control/ios-deploy) (`brew install ios-deploy`), as does `core run ios`, which can not start it without the debugger: `core run ios -d` also starts it, with its output in the terminal. The first time, you may need to trust your developer certificate on the device (Settings, General, VPN & Device Management).
+
+### Android
+
+For Android, you need the Android SDK, with its NDK (for building) and its platform tools (`adb`, for installing apps). `core setup -androidsim` installs all of that, without Android Studio, together with the Android emulator:
+
+```sh
+core setup -androidsim
+```
+
+It installs the SDK in the standard place (`~/Library/Android/sdk` on macOS, `~/Android/Sdk` on Linux, and `%LOCALAPPDATA%\Android\sdk` on Windows), or in `ANDROID_HOME` if that is set, where Android Studio also finds it, and it uses what is there already, so it also updates an existing SDK. It installs the command line tools of the SDK if they are not there, which need Java (a JDK of version 17 or later; on macOS, it installs the `openjdk` of Homebrew if there is none), then accepts the licenses of the SDK, and installs the platform tools, the emulator, a system image of the emulator for the architecture of the computer (arm64 on Apple silicon), and an NDK if there is none. Then it makes an Android virtual device for the emulator, named `Cogent`, with the keyboard of the computer enabled.
+
+`core run android` runs the app on an Android device that is connected (with USB debugging, below), or else it boots the emulator with the `Cogent` virtual device (or the first one, if there is no `Cogent` one), which keeps running after that, for the next runs. It builds the app only for the architecture of the device, which is faster than `core build android`, which builds it for all of them. When there are several devices, such as the emulator and a phone, it uses the phone, and says so; set `ANDROID_SERIAL` to the serial of another one (from `adb devices`) to use it instead. Add `-d` to see the output of the app (`adb logcat`, which `core log` also shows).
+
+For an Android phone or tablet, turn on its developer options (tap Build number seven times in Settings, About phone), then turn on USB debugging in them, and connect it with a cable. Accept the prompt on the device to allow USB debugging from the computer; until then, `adb devices` lists it as unauthorized, and `core run android` says so and uses the emulator instead.
+
+Apps target Android 15 (API level 35) by default (`AndroidTargetSDK` in the `[Build]` section of `core.toml`; `AndroidMinSDK` is 23), so that current versions of Android do not warn that they are out of date, and they are drawn edge to edge, behind the system bars, which are filled with the background of the app. The APK is signed with both the v1 (JAR) and v2 APK signature schemes, which newer versions of Android require, and its native libraries are aligned for devices with 16 KB memory pages.
+
+On Android, the back button or gesture of the system goes back within the app, as the back button of the top bar of a full-window stage does, and closes a dialog or popup menu; it leaves the app only when there is nothing to go back to.
+
+### Mobile apps
+
+An app runs the same on mobile platforms as on desktop ones, but it should adapt to small screens, touch, and the virtual keyboard. [Cogent Lists](https://github.com/cogentcore/cogent/tree/main/lists) is a prototype of how to specialize the functionality and flow of an app for mobile while sharing as much code as possible with its desktop version:
+
+* The app is a package (`lists`) with a `Mobile` setting, and two small main packages: `cmd/lists` for desktop platforms and `cmd/mobile` for mobile platforms (with its own `core.toml`), which also runs on desktop platforms, for trying the mobile layout there. All of the rest is shared, and the mobile layout only changes how the same widgets are arranged.
+
+* On desktop, the tree of lists, the items of the current list, and the form of an item are panels side by side. On mobile, each is in a full window, in turn (a full-window stage with a back button, which the Android back button also uses), and the table of the items shows only the main fields, with a button that opens the form of an item with all of them.
+
+* The tools that are in the top toolbar on desktop are at the bottom on mobile, where they are easy to reach, with the less common ones in its overflow menu.
+
+* Selecting several items, which takes Shift or Command with a mouse, is a select mode on mobile ("Select items"), in which taps select items without starting to edit them.
+
+* Edits are saved as soon as they are made, and synced right away on mobile, as an app is often closed just after it is used. When the app goes into the background, the edit in progress is completed, as when the focus leaves it, and [[doc:system.App.BeginBackgroundTask]] asks the system to keep the app running for a while to finish the sync (on iOS; on Android, apps keep running for a while in the background anyway).
+
+The app is laid out above the virtual keyboard while it is shown, and the focused widget is scrolled into view, so a text field that is edited is never under the keyboard. The return key of the keyboard (Done) works as Enter, completing the edit.
 
 ## Web index page
 
@@ -90,7 +136,7 @@ If you prefer `go generate`, you can add `//go:generate go run cogentcore.org/co
 
 ## Details
 
-You can build for Android on all desktop platforms, and for iOS on macOS only. Cross-compiling between desktop platforms is planned but not yet supported.
+Cross-compiling between desktop platforms is planned but not yet supported (see [Mobile](#mobile) for the mobile platforms).
 
 The file(s) produced by `core build` are `.exe` on Windows, `.app` on iOS, `.apk` on Android, `.wasm` (or `.js` for `js`) and associated `.html` and `.js` files on the web, and no extension on macOS and Linux. The file(s) are placed in the current directory for desktop platforms, and `bin/{platform}` for other platforms (eg: `bin/android`).
 

@@ -70,9 +70,13 @@ func (fn *Node) OpenFile() error {
 // OpenFileDefault opens file with default app for that file type (os defined)
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFileDefault() error {
-	core.TheApp.OpenURL(fsx.FileURL(string(fn.Filepath)))
+	openURL(fsx.FileURL(string(fn.Filepath)))
 	return nil
 }
+
+// openURL opens the given URL in its default app.
+// It is a variable for the tests, which do not open apps.
+var openURL = func(url string) { core.TheApp.OpenURL(url) }
 
 // duplicateFiles makes a copy of selected files
 func (fn *Node) duplicateFiles() { //types:add

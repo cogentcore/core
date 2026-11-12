@@ -180,7 +180,17 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
+	TheApp.Mu.Lock()
+	changed := TheApp.Dark != bool(dark)
 	TheApp.Dark = bool(dark)
+	win := TheApp.Win
+	TheApp.Mu.Unlock()
+	// the app updates its colors for the change of the system theme, if it
+	// follows it, on a screen update (as when the system switches to dark
+	// mode while it runs)
+	if changed && win != nil {
+		TheApp.Event.Window(events.ScreenUpdate)
+	}
 }
 
 // windowConfig contains the window configuration information fetched from the native activity
@@ -369,9 +379,16 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 			a.Event.WindowResize()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
-			// and lets the size event go through when we come back later
-			a.Win.SetSize(image.Point{})
-			a.Event.Window(events.WinMinimize)
+			// and lets the size event go through when we come back later.
+			// There is no window yet if the system window is destroyed while
+			// the app starts (as when it is started with the screen locked).
+			a.Mu.Lock()
+			win := a.Win
+			a.Mu.Unlock()
+			if win != nil {
+				win.SetSize(image.Point{})
+				a.Event.Window(events.WinMinimize)
+			}
 			a.DestroyGPU()
 		case <-activityDestroyed:
 			// TODO(kai): needed to stop crashing when changing orientation

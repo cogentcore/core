@@ -32,6 +32,7 @@ import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -307,9 +308,14 @@ public class GoNativeActivity extends NativeActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		load();
+		// the theme of the system is set before the native activity starts
+		// the app, so that it starts with it, and the system bars after it,
+		// when the window has its views
+		boolean dark = isDark(getResources().getConfiguration());
+		setDarkMode(dark);
 		super.onCreate(savedInstanceState);
 		setupEntry();
-		updateTheme(getResources().getConfiguration());
+		updateSystemBars(dark);
 
 		View view = findViewById(android.R.id.content).getRootView();
 		view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -409,8 +415,42 @@ public class GoNativeActivity extends NativeActivity {
 	}
 
 	protected void updateTheme(Configuration config) {
-		boolean dark = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+		boolean dark = isDark(config);
 		setDarkMode(dark);
+		updateSystemBars(dark);
+	}
+
+	// isDark returns whether the given configuration is in dark mode.
+	static boolean isDark(Configuration config) {
+		return (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+	}
+
+	// updateSystemBars makes the icons of the system bars (the status and
+	// navigation bars) dark in light mode when the app is drawn behind them
+	// (edge to edge), as Android 15 (API 35) does for apps that target it,
+	// so that they show on the light background of the app, which fills
+	// them, without the scrims that Android adds over them; otherwise the
+	// bars have their own dark background, with light icons.
+	void updateSystemBars(final boolean dark) {
+		if (Build.VERSION.SDK_INT < 35 || getApplicationInfo().targetSdkVersion < 35) {
+			return;
+		}
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				WindowInsetsController c = getWindow().getInsetsController();
+				if (c == null) {
+					return;
+				}
+				int light = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+						| WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+				c.setSystemBarsAppearance(dark ? 0 : light, light);
+				// no translucent scrims over the bars, as the icons contrast
+				// with the background of the app, which fills them
+				getWindow().setStatusBarContrastEnforced(false);
+				getWindow().setNavigationBarContrastEnforced(false);
+			}
+		});
 	}
 
 	private ScaleGestureDetector mScaleDetector;

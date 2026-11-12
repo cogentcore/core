@@ -5,12 +5,15 @@
 package mobile
 
 import (
+	"archive/zip"
+	"bytes"
 	"crypto/x509"
 	"encoding/pem"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -173,4 +176,51 @@ func diff(got, want string) (string, error) {
 		err = nil
 	}
 	return string(data), err
+}
+
+// TestWriterAlign tests that the contents of the files of an APK are
+// aligned to 4 bytes, and those of native libraries to 16 KB, for devices
+// with 16 KB pages.
+func TestWriterAlign(t *testing.T) {
+	block, _ := pem.Decode([]byte(debugCert))
+	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	buf := new(bytes.Buffer)
+	apkw := newWriter(buf, privKey)
+	files := []struct {
+		name string
+		size int
+	}{{"AndroidManifest.xml", 1001}, {"lib/arm64-v8a/libapp.so", 20003}, {"assets/a.txt", 7}, {"lib/x86_64/libapp.so", 5}}
+	for _, f := range files {
+		w, err := apkw.Create(f.name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := w.Write(make([]byte, f.size)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := apkw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	b := buf.Bytes()
+	zr, err := zip.NewReader(bytes.NewReader(b), int64(len(b)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range zr.File {
+		off, err := f.DataOffset()
+		if err != nil {
+			t.Fatal(err)
+		}
+		align := int64(4)
+		if strings.HasSuffix(f.Name, ".so") {
+			align = 16384
+		}
+		if off%align != 0 {
+			t.Errorf("%s: data at offset %d, not aligned to %d", f.Name, off, align)
+		}
+	}
 }

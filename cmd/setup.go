@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/config"
+	"cogentcore.org/core/cmd/mobile"
 )
 
 // Setup installs platform-specific dependencies for the current platform,
@@ -22,11 +23,18 @@ import (
 //
 // With the video option, it also installs FFmpeg for the video package
 // (cogentcore.org/core/video), which it needs on desktop platforms.
+// With the androidsim option, it also installs the Android SDK and makes
+// an Android virtual device for the emulator (see [mobile.SetupAndroidSim]).
 func Setup(c *config.Config) error { //types:add
 	err := setupPlatform()
 	if c.Video {
 		if verr := setupFFmpeg(false); verr != nil {
 			err = errors.Join(err, fmt.Errorf("FFmpeg: %w", verr))
+		}
+	}
+	if c.AndroidSim {
+		if aerr := mobile.SetupAndroidSim(); aerr != nil {
+			err = errors.Join(err, fmt.Errorf("Android emulator: %w", aerr))
 		}
 	}
 	for _, t := range goDevTools() {

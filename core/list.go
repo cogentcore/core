@@ -12,6 +12,7 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -221,7 +222,10 @@ type ListBase struct { //core:no-new
 	// It uses a capture of up / down events to manipulate selection, not focus.
 	ReadOnlyKeyNav bool `default:"true"`
 
-	// SelectMode is whether to be in select rows mode or editing mode.
+	// SelectMode is whether to be in select rows mode or editing mode:
+	// clicks (taps) on the rows toggle their selection, instead of editing
+	// their cells, and the keys that move the selection extend it, as for
+	// selecting several rows on mobile. [keymap.CancelSelect] ends it.
 	SelectMode bool `set:"-" copier:"-" json:"-" xml:"-"`
 
 	// DragMoves is whether dragging rows moves them by default, instead of
@@ -546,15 +550,25 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		oc := func(e events.Event) {
 			lb.focusReadOnly()
 			row, _, isValid := w.indexFromPixel(e.Pos())
-			if isValid {
-				lb.updateSelectRow(row, e.SelectMode())
-				lb.lastClick = row + lb.StartIndex
+			if !isValid {
+				return
 			}
+			mode := e.SelectMode()
+			if lb.SelectMode && mode == events.SelectOne {
+				mode = events.ExtendOne
+			}
+			if !lb.IsReadOnly() && (mode == events.ExtendOne || mode == events.ExtendContinuous) {
+				lb.clickSelectRow(row, mode) // (see MakeValue)
+				return
+			}
+			lb.updateSelectRow(row, e.SelectMode())
+			lb.lastClick = row + lb.StartIndex
 		}
 		w.OnClick(oc)
 		w.On(events.MouseDown, func(e events.Event) {
 			// value widgets such as text fields handle the clicks into them
-			if lb.IsReadOnly() || e.SelectMode() != events.SelectOne {
+			// (the context menu selects for a right click, see contextSelectRow)
+			if lb.IsReadOnly() || lb.SelectMode || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left {
 				return
 			}
 			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
@@ -564,7 +578,10 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		w.On(events.ContextMenu, func(e events.Event) {
 			// we must select the row on right click so that the context menu
 			// corresponds to the right row
-			oc(e)
+			lb.focusReadOnly()
+			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
+				lb.contextSelectRow(row)
+			}
 			lb.HandleEvent(e)
 		})
 		w.Updater(func() {
@@ -599,10 +616,27 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 		lb.updateSelectRow(row, e.SelectMode())
 		lb.lastClick = row + lb.StartIndex
 	})
+	wb.OnClick(func(e events.Event) {
+		// a click with Shift or Command (Control), or any click in the
+		// select mode, as on mobile, selects rows, instead of editing a cell
+		mode := e.SelectMode()
+		if lb.SelectMode && mode == events.SelectOne {
+			mode = events.ExtendOne
+		}
+		if mode != events.ExtendOne && mode != events.ExtendContinuous {
+			return
+		}
+		e.SetHandled()
+		row, _ := lb.widgetIndex(w)
+		lb.clickSelectRow(row, mode)
+	})
 	wb.OnDoubleClick(lb.HandleEvent)
 	wb.On(events.ContextMenu, lb.HandleEvent)
 	wb.OnFirst(events.ContextMenu, func(e events.Event) {
-		wb.Send(events.Select, e) // we must select the row for context menu actions
+		// we must select the row for context menu actions
+		lb.focusReadOnly()
+		row, _ := lb.widgetIndex(w)
+		lb.contextSelectRow(row)
 	})
 	if !lb.IsReadOnly() {
 		wb.OnInput(lb.HandleEvent)
@@ -1123,6 +1157,62 @@ func (lb *ListBase) updateSelectIndex(idx int, sel bool, selMode events.SelectMo
 	} else {
 		lb.SelectIndexEvent(idx, selMode)
 	}
+}
+
+// clickSelectRow updates the selection for a click on the given row in the
+// given mode: [events.ExtendOne] toggles its selection, and
+// [events.ExtendContinuous] selects the rows from the one last clicked to
+// it. Unlike [ListBase.SelectIndexEvent], the focus does not move to the
+// row, as to a text field in it, which would show the keyboard on mobile.
+func (lb *ListBase) clickSelectRow(row int, mode events.SelectModes) {
+	idx := row + lb.StartIndex
+	if row < 0 || idx >= lb.SliceSize {
+		return
+	}
+	switch mode {
+	case events.ExtendOne:
+		if lb.indexIsSelected(idx) {
+			lb.unselectIndex(idx)
+			if lb.SelectedIndex == idx {
+				lb.SelectedIndex = -1
+				for i := range lb.SelectedIndexes {
+					lb.SelectedIndex = max(lb.SelectedIndex, i)
+				}
+			}
+		} else {
+			lb.SelectIndex(idx)
+			lb.SelectedIndex = idx
+		}
+		lb.lastClick = idx
+	case events.ExtendContinuous:
+		from := lb.lastClick
+		if from < 0 || from >= lb.SliceSize {
+			from = max(lb.SelectedIndex, idx)
+		}
+		for i := min(from, idx); i <= max(from, idx); i++ {
+			lb.SelectIndex(i)
+		}
+		lb.SelectedIndex = idx
+	}
+	lb.Send(events.Select)
+	lb.Restyle()
+}
+
+// contextSelectRow selects the given row for a context menu on it: only
+// it, unless it is already selected, in which case the selection, as of
+// several rows, is kept (as in file managers), with the row as the
+// [ListBase.SelectedIndex], so that the context menu applies to all of them.
+func (lb *ListBase) contextSelectRow(row int) {
+	idx := row + lb.StartIndex
+	if row < 0 || idx >= lb.SliceSize {
+		return
+	}
+	lb.lastClick = idx
+	if lb.indexIsSelected(idx) {
+		lb.SelectedIndex = idx
+		return
+	}
+	lb.updateSelectIndex(idx, true, events.SelectOne)
 }
 
 // selectIndexQuiet selects only the given slice index, if it is not
@@ -1808,8 +1898,7 @@ func (lb *ListBase) SizeFinal() {
 	localIter := 0
 	for (lb.MakeIter < 2 || lb.VisibleRows != lg.visibleRows) && localIter < 2 {
 		if lb.VisibleRows != lg.visibleRows {
-			lb.VisibleRows = lg.visibleRows
-			lb.Update()
+			lb.setVisibleRows(lg.visibleRows)
 		} else {
 			lg.StyleTree()
 		}
@@ -1818,6 +1907,160 @@ func (lb *ListBase) SizeFinal() {
 		localIter++
 	}
 	lb.Frame.SizeFinal()
+}
+
+// setVisibleRows sets the number of visible rows and updates the list.
+// The item of a cell with the focus stays focused, as when the virtual
+// keyboard for typing into it shrinks the window: the rows are widgets
+// for the items from the [ListBase.StartIndex], which can change, so the
+// focus moves to the cell of the item in its row, after scrolling it into
+// view if it is no longer in the rows (see [ListBase.keepFocusedItem]).
+func (lb *ListBase) setVisibleRows(n int) {
+	idx, pos, foc := lb.focusedCell()
+	ed := saveEdit(foc)
+	start := lb.StartIndex
+	lb.VisibleRows = n
+	lb.Update()
+	if foc != nil {
+		lb.keepFocusedItem(idx, pos, ed, foc, true)
+	}
+	if lb.StartIndex != start {
+		// the scroll bar is set once laid out, before any scrolling
+		// to the cell of the focus
+		lb.Defer(lb.updateScroll)
+	}
+}
+
+// keepFocusedItem keeps the focus on the cell at the given position in
+// the row of the given slice index, which had the given focused widget,
+// with the given edit in progress (see [saveEdit]), after the rows were
+// updated, as the rows are widgets for the items from the
+// [ListBase.StartIndex], which can change: if the item is no longer in
+// the rows, it is scrolled into view if scroll, or else (when scrolled
+// away from, after its edit is completed) the focus is cleared; if its
+// cell is another widget, the focus moves there, without losing it in
+// between, which would hide the virtual keyboard, as for a new focus.
+// The edit continues in the cell (whose text the update set again).
+func (lb *ListBase) keepFocusedItem(idx, pos int, ed *cellEdit, foc Widget, scroll bool) {
+	em := lb.Events()
+	if em == nil || em.focus != foc {
+		return
+	}
+	if idx < lb.StartIndex || idx >= lb.StartIndex+lb.VisibleRows {
+		if !scroll {
+			em.setFocus(nil)
+			return
+		}
+		lb.ScrollToIndexNoUpdate(idx)
+		lb.Update()
+	}
+	cell := lb.cellOf(idx, pos)
+	if cell == nil {
+		return
+	}
+	if foc.AsTree().This == cell.This || (foc.AsTree().This != nil && isParentOf(cell.This.(Widget), foc)) {
+		ed.restore(foc) // the same cell
+		return
+	}
+	em.focus = nil // (without the focus lost event)
+	if foc.AsTree().This != nil {
+		foc.AsWidget().SetState(false, states.Focused)
+	}
+	lb.Defer(func() { // (once it is laid out, for scrolling to it)
+		lb.updateScroll()
+		if em.focus != nil {
+			return
+		}
+		cell := lb.cellOf(idx, pos)
+		if cell == nil {
+			return
+		}
+		cell.SetFocus()
+		if em.focus != nil { // (the text field in the cell, as in a tree table)
+			ed.restore(em.focus)
+		}
+	})
+}
+
+// cellOf returns the cell at the given position in the row of the given
+// slice index, or nil if it is not in the rows.
+func (lb *ListBase) cellOf(idx, pos int) *WidgetBase {
+	nw, _ := lb.This.(Lister).RowWidgetNs()
+	if lb.ListGrid == nil || idx < lb.StartIndex || idx >= lb.StartIndex+lb.VisibleRows || pos < 0 || pos >= nw {
+		return nil
+	}
+	k := nw*(idx-lb.StartIndex) + pos
+	if k >= lb.ListGrid.NumChildren() {
+		return nil
+	}
+	return lb.ListGrid.Child(k).(Widget).AsWidget()
+}
+
+// cellEdit is the edit in progress in a [TextField] of a cell: its text
+// and cursor, which are kept when the rows are updated, which sets the
+// text of the cells from their items again, discarding any edit.
+type cellEdit struct {
+	text   []rune
+	cursor int
+	edited bool
+}
+
+// saveEdit returns the edit in progress in the given focused widget of a
+// cell, if it is a [TextField], or nil.
+func saveEdit(foc Widget) *cellEdit {
+	tf, ok := foc.(*TextField)
+	if !ok || tf.This == nil {
+		return nil
+	}
+	return &cellEdit{text: slices.Clone(tf.editText), cursor: tf.cursorPos, edited: tf.edited}
+}
+
+// restore continues the edit in the given widget, which is a [TextField]
+// of the cell of the same item.
+func (ed *cellEdit) restore(w Widget) {
+	tf, ok := w.(*TextField)
+	if ed == nil || !ok {
+		return
+	}
+	if ed.edited {
+		tf.editText = slices.Clone(ed.text)
+		tf.edited = true
+		tf.renderVisible = nil
+	}
+	tf.cursorPos = min(ed.cursor, len(tf.editText))
+	tf.NeedsRender()
+}
+
+// commitEdit completes any edit of the given focused widget of a cell,
+// a [TextField], as before the rows are scrolled away from its item.
+func commitEdit(foc Widget) {
+	if tf, ok := foc.(*TextField); ok && tf.edited {
+		tf.editDone()
+	}
+}
+
+// focusedCell returns the slice index of the row of the cell of the grid
+// with the focus (or containing it), and the position of the cell in its
+// row, and the focused widget, which is nil if there is none in the grid.
+func (lb *ListBase) focusedCell() (idx, pos int, foc Widget) {
+	em := lb.Events()
+	if em == nil || tree.IsNil(em.focus) || lb.ListGrid == nil {
+		return
+	}
+	for n := em.focus.AsTree(); n != nil && n.This != lb.This; n = n.Parent.AsTree() {
+		if n.Parent == lb.ListGrid.This {
+			row, ok := n.Property(ListRowProperty).(int)
+			if !ok {
+				return
+			}
+			nw, _ := lb.This.(Lister).RowWidgetNs()
+			return row + lb.StartIndex, n.IndexInParent() - nw*row, em.focus
+		}
+		if n.Parent == nil {
+			return
+		}
+	}
+	return
 }
 
 //////// Search interface
@@ -2008,9 +2251,14 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		return
 	}
 	ls := lg.list()
+	idx, pos, foc := ls.focusedCell()
 	rht := lg.rowHeight
 	quo := sb.Value / rht
 	floor := math32.Floor(quo)
+	if foc != nil && (idx < int(floor) || idx >= int(floor)+ls.VisibleRows) {
+		commitEdit(foc) // (scrolled away from, so it is completed)
+	}
+	ed := saveEdit(foc)
 	ls.StartIndex = int(floor)
 	lg.Geom.Scroll.Y = (floor - quo) * rht
 	ls.ApplyScenePos()
@@ -2019,11 +2267,14 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 		// whose values are hidden, which are new, so they need to be
 		// styled and laid out
 		ls.Update()
-		return
+	} else {
+		ls.UpdateTree()
+		ls.NeedsRender()
+		// ls.NeedsLayout() // needed to recompute size after resize
 	}
-	ls.UpdateTree()
-	ls.NeedsRender()
-	// ls.NeedsLayout() // needed to recompute size after resize
+	if foc != nil {
+		ls.keepFocusedItem(idx, pos, ed, foc, false)
+	}
 }
 
 func (lg *ListGrid) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {

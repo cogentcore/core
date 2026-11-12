@@ -87,6 +87,16 @@ const (
 	WinFocusNext
 	WinClose
 	WinSnapshot
+
+	// NextTab selects the next tab of the tabs that the focus is in, after
+	// the last one the first, when no widget in them handles the key, which
+	// is bound to a navigation key with Shift: see [OfFallback].
+	NextTab
+
+	// PrevTab selects the previous tab of the tabs that the focus is in,
+	// before the first one the last, as [NextTab].
+	PrevTab
+
 	// Below are menu specific functions -- use these as shortcuts for menu buttons
 	// allows uniqueness of mapping and easy customization of all key buttons
 	New
@@ -155,18 +165,42 @@ func SetActiveMapName(mapnm MapName) {
 }
 
 // Of converts the given [key.Chord] into a keyboard function.
+// A navigation key with Shift is that navigation (selecting), unless it
+// is bound to another function that is not a fallback (see [OfFallback]).
 func Of(chord key.Chord) Functions {
 	f, ok := (*ActiveMap)[chord]
-	if ok {
+	if ok && !f.isFallback() {
 		return f
 	}
 	if strings.Contains(string(chord), "Shift+") {
 		nsc := key.Chord(strings.ReplaceAll(string(chord), "Shift+", ""))
-		if f, ok = (*ActiveMap)[nsc]; ok && f <= WordLeft { // automatically allow +Shift for nav
-			return f
+		if nf, nok := (*ActiveMap)[nsc]; nok && nf <= WordLeft { // automatically allow +Shift for nav
+			return nf
 		}
 	}
+	if ok {
+		return f
+	}
 	return None
+}
+
+// isFallback returns whether the key function is one that widgets fall back
+// to when no widget handles its key, which [Of] does not return for a
+// navigation key with Shift, which selects: see [OfFallback].
+func (kf Functions) isFallback() bool {
+	return kf == NextTab || kf == PrevTab
+}
+
+// OfFallback returns the key function of the given key chord, as [Of], or
+// the fallback function bound to it, such as [NextTab], which [Of] does not
+// return for a navigation key with Shift, which selects (as in text fields).
+// It is for widgets that handle the keys that no widget in them handled,
+// such as [core.Tabs] for [NextTab] and [PrevTab].
+func OfFallback(chord key.Chord) Functions {
+	if f, ok := (*ActiveMap)[chord]; ok && f.isFallback() {
+		return f
+	}
+	return Of(chord)
 }
 
 // MapItem records one element of the key map, which is used for organizing the map.

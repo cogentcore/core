@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"text/template"
 
 	"cogentcore.org/core/base/elide"
@@ -37,10 +38,21 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 
+	// only for the simulator: built for its SDK, without signing for devices
+	sim := !slices.ContainsFunc(targets, func(t config.Platform) bool { return t.OS != "iossimulator" })
+	sdk := "iphoneos"
+	if sim {
+		sdk = "iphonesimulator"
+	}
+
 	// Detect the team ID
-	teamID, err := detectTeamID()
-	if err != nil {
-		return nil, err
+	teamID := ""
+	if !sim {
+		var err error
+		teamID, err = detectTeamID()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	projPbxproj := new(bytes.Buffer)
@@ -90,6 +102,11 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		if c.Build.Trimpath {
 			buildArgs = append(buildArgs, "-trimpath")
 		}
+		if t.OS == "iossimulator" {
+			if err := checkSimulatorWGPU(t.Arch); err != nil {
+				return nil, err
+			}
+		}
 		if err := goBuild(c, src, appleEnv[t.String()], buildArgs...); err != nil {
 			return nil, err
 		}
@@ -113,16 +130,20 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 	}
 
 	// Build and move the release build to the output directory.
-	err = exec.Run("xcrun", "xcodebuild",
-		"-configuration", "Release",
-		"-project", tmpDir+"/main.xcodeproj",
-		"-allowProvisioningUpdates",
-		"DEVELOPMENT_TEAM="+teamID)
+	xargs := []string{"xcodebuild", "-configuration", "Release",
+		"-project", tmpDir + "/main.xcodeproj", "-sdk", sdk}
+	if sim {
+		xargs = append(xargs, "ARCHS="+archClang(targets[0].Arch), "CODE_SIGN_IDENTITY=-")
+	} else {
+		xargs = append(xargs, "-allowProvisioningUpdates", "DEVELOPMENT_TEAM="+teamID)
+	}
+	err := exec.Run("xcrun", xargs...)
 	if err != nil {
 		return nil, err
 	}
+	built := tmpDir + "/build/Release-" + sdk + "/main.app"
 
-	inm := filepath.Join(tmpDir+"/build/Release-iphoneos/main.app", "icon.icns")
+	inm := filepath.Join(built, "icon.icns")
 	fdsi, err := os.Create(inm)
 	if err != nil {
 		return nil, err
@@ -145,12 +166,12 @@ func goAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		return nil, err
 	}
 	output := filepath.Join(c.Build.Output, c.Name+".app")
-	exec.PrintCmd(fmt.Sprintf("mv %s %s", tmpDir+"/build/Release-iphoneos/main.app", output), nil)
+	exec.PrintCmd(fmt.Sprintf("mv %s %s", built, output), nil)
 	// if output already exists, remove.
 	if err := exec.RemoveAll(output); err != nil {
 		return nil, err
 	}
-	if err := os.Rename(tmpDir+"/build/Release-iphoneos/main.app", output); err != nil {
+	if err := os.Rename(built, output); err != nil {
 		return nil, err
 	}
 
@@ -347,7 +368,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
 				TargetAttributes = {
 					254BB83D1B1FD08900C56DE9 = {
 						CreatedOnToolsVersion = 6.3.1;
-						DevelopmentTeam = {{.TeamID}};
+						DevelopmentTeam = "{{.TeamID}}";
 					};
 				};
 			};

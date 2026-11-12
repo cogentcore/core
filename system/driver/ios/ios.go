@@ -31,6 +31,8 @@ UIEdgeInsets getDevicePadding();
 bool isDark();
 void showKeyboard(int keyboardType);
 void hideKeyboard();
+uintptr_t beginBackgroundTask(char *name);
+void endBackgroundTask(uintptr_t tid);
 */
 import "C"
 import (
@@ -38,10 +40,13 @@ import (
 	"log"
 	"log/slog"
 	"strings"
+	"sync"
+	"time"
 	"unsafe"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/system"
 )
 
@@ -130,12 +135,13 @@ func updateConfig(width, height, orientation int32) {
 	}
 	insets := C.getDevicePadding()
 	s := DisplayMetrics.ScreenScale
-	TheApp.Insets.Set(
+	safeInsets.Set(
 		int(insets.top)*s,
 		int(insets.right)*s,
 		int(insets.bottom)*s,
 		int(insets.left)*s,
 	)
+	setInsets()
 
 	TheApp.Scrn.DevicePixelRatio = float32(s) // TODO(kai): is this actually DevicePixelRatio?
 	TheApp.Scrn.PixelSize = image.Pt(int(width), int(height))
@@ -169,6 +175,35 @@ func updateConfig(width, height, orientation int32) {
 	}
 }
 
+// safeInsets are the safe area insets of the screen, in pixels.
+var safeInsets sides.Sides[int]
+
+// keyboardHeight is the height of the bottom of the screen that the
+// virtual keyboard covers, in pixels, or 0 when it is hidden.
+var keyboardHeight int
+
+// setInsets sets the insets of the app to the [safeInsets], with the
+// bottom one at least the [keyboardHeight], so that the app is laid out
+// above the keyboard. It must be called with the lock of the app.
+func setInsets() {
+	TheApp.Insets = safeInsets
+	TheApp.Insets.Bottom = max(safeInsets.Bottom, keyboardHeight)
+}
+
+//export keyboardHeightChanged
+func keyboardHeightChanged(points C.int) {
+	TheApp.Mu.Lock()
+	h := int(points) * DisplayMetrics.ScreenScale
+	if h == keyboardHeight {
+		TheApp.Mu.Unlock()
+		return
+	}
+	keyboardHeight = h
+	setInsets()
+	TheApp.Mu.Unlock()
+	TheApp.Event.WindowResize()
+}
+
 //export lifecycleDead
 func lifecycleDead() {
 	TheApp.FullDestroyGPU()
@@ -176,6 +211,17 @@ func lifecycleDead() {
 
 //export lifecycleAlive
 func lifecycleAlive() {
+}
+
+//export lifecycleBackground
+func lifecycleBackground(tid C.uintptr_t) {
+	// the app completes the edits that were in progress on minimizing
+	// (see core), which can start work that keeps it running in the
+	// background, with its own background task
+	if TheApp.Win != nil {
+		TheApp.Event.Window(events.WinMinimize)
+	}
+	time.AfterFunc(2*time.Second, func() { C.endBackgroundTask(tid) })
 }
 
 //export lifecycleVisible
@@ -195,6 +241,19 @@ func lifecycleFocused() {
 // ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	C.showKeyboard(C.int(int32(typ)))
+}
+
+// BeginBackgroundTask asks iOS to keep the app running for a while in the
+// background, until the returned function is called (see
+// [system.App.BeginBackgroundTask]).
+func (a *App) BeginBackgroundTask(name string) (end func()) {
+	cn := C.CString(name)
+	defer C.free(unsafe.Pointer(cn))
+	tid := C.beginBackgroundTask(cn)
+	var once sync.Once
+	return func() {
+		once.Do(func() { C.endBackgroundTask(tid) })
+	}
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard

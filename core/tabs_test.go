@@ -5,10 +5,15 @@
 package core
 
 import (
+	"image"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/styles/states"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -177,4 +182,69 @@ func TestTabsShowBeforeShown(t *testing.T) {
 	b.RenderImage()
 	assert.Equal(t, 0, early, "shown before its scene was")
 	assert.GreaterOrEqual(t, shows, 1)
+}
+
+// TestTabsKeys tests that the keys for the next and previous tabs
+// (Shift+RightArrow and Shift+LeftArrow), sent to the window, select them
+// when no widget in the tabs handles them: after a press in a tab whose
+// content is not focusable, which gives the tabs the focus, cycling around
+// and focusing the text field of a tab, which handles them (selecting),
+// and the button of another, which does not.
+func TestTabsKeys(t *testing.T) {
+	b := NewBody() // (loads the settings, with the key map, the first time)
+	prevMap := keymap.ActiveMapName
+	keymap.SetActiveMapName("MacStandard")
+	defer keymap.SetActiveMapName(prevMap)
+	ts := NewTabs(b)
+	f0, _ := ts.NewTab("Field")
+	tf := NewTextField(f0).SetText("text")
+	f1, _ := ts.NewTab("Text")
+	tx := NewText(f1).SetText("Not focusable")
+	f2, _ := ts.NewTab("Other")
+	bt := NewButton(f2).SetText("Button")
+	var shift key.Modifiers
+	shift.SetFlag(true, key.Shift)
+	current := func() int {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		_, idx := ts.CurrentTab()
+		return idx
+	}
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		ts.SelectTabIndex(1)
+	}, func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		press := func(code key.Codes) {
+			src.Key(events.KeyDown, 0, code, shift)
+			src.Key(events.KeyUp, 0, code, shift)
+			time.Sleep(100 * time.Millisecond)
+		}
+		b.AsyncLock()
+		pt := tx.Geom.TotalBBox.Min.Add(image.Pt(2, 2))
+		b.AsyncUnlock()
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(100 * time.Millisecond)
+		press(key.CodeRightArrow)
+		assert.Equal(t, 2, current(), "next")
+		press(key.CodeRightArrow)
+		assert.Equal(t, 0, current(), "next, around")
+		b.AsyncLock()
+		assert.True(t, tf.StateIs(states.Focused), "the text field of the tab is focused")
+		b.AsyncUnlock()
+		press(key.CodeRightArrow)
+		assert.Equal(t, 0, current(), "the text field handles it")
+		b.AsyncLock()
+		ts.Events().setFocusQuiet(ts) // (as by a press in the tabs)
+		b.AsyncUnlock()
+		press(key.CodeLeftArrow)
+		assert.Equal(t, 2, current(), "previous, around")
+		b.AsyncLock()
+		assert.True(t, bt.StateIs(states.Focused), "the button of the tab is focused")
+		b.AsyncUnlock()
+		press(key.CodeLeftArrow)
+		assert.Equal(t, 1, current(), "previous, from the button, which does not handle it")
+	})
 }

@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -124,5 +125,141 @@ func TestTableColumnWidths(t *testing.T) {
 		assert.NotContains(t, tb.ColumnWidths, "Name", "double click for automatic")
 		assert.InDelta(t, auto, tb.columnDots(0), 2)
 		b.AsyncUnlock()
+	})
+}
+
+// TestTableContextMenuSelect tests that a right click (a context menu) on
+// a row of a read-only, multi-select table keeps the selection of several
+// rows when the row is one of them, and otherwise selects only that row.
+func TestTableContextMenuSelect(t *testing.T) {
+	b := NewBody()
+	tb := NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}, {"C", 3}})
+	tb.SetReadOnly(true)
+	tb.ReadOnlyMultiSelect = true
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tb.SelectIndexEvent(0, events.SelectOne)
+		tb.SelectIndexEvent(1, events.ExtendContinuous)
+	}, func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		rightClick := func(row int) {
+			b.AsyncLock()
+			n, _ := tb.RowWidgetNs()
+			pt := tb.ListGrid.Child(row * n).(Widget).AsWidget().Geom.ContentBBox.Min.Add(image.Pt(4, 4))
+			b.AsyncUnlock()
+			src.MouseButton(events.MouseDown, events.Right, pt, 0)
+			src.MouseButton(events.MouseUp, events.Right, pt, 0)
+			time.Sleep(200 * time.Millisecond)
+			src.Key(events.KeyDown, 0, key.CodeEscape, 0) // (closes the menu)
+			src.Key(events.KeyUp, 0, key.CodeEscape, 0)
+			time.Sleep(100 * time.Millisecond)
+		}
+		selected := func() []int {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			return tb.SelectedIndexesList(false)
+		}
+		rightClick(1)
+		assert.Equal(t, []int{0, 1}, selected(), "on a selected row")
+		b.AsyncLock()
+		assert.Equal(t, 1, tb.SelectedIndex)
+		b.AsyncUnlock()
+		rightClick(2)
+		assert.Equal(t, []int{2}, selected(), "on another row")
+	})
+}
+
+// TestTableFocusShrink tests that the item of a focused text field of a
+// table stays focused and visible when the table gets fewer rows, as when
+// the virtual keyboard shrinks the window on mobile, with the text typed
+// before and after going to it, in order, not to the item that the
+// removed or rebound row shows.
+func TestTableFocusShrink(t *testing.T) {
+	type item struct{ Name string }
+	items := make([]item, 12)
+	b := NewBody()
+	ht := float32(600)
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(ht))
+		s.Max.Set(units.Dp(300), units.Dp(ht))
+	})
+	tb := NewTable(b).SetSlice(&items)
+	focusedItem := func() int {
+		idx, _, foc := tb.focusedCell()
+		if _, ok := foc.(*TextField); !ok {
+			return -1
+		}
+		return idx
+	}
+	last := 0
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		last = tb.StartIndex + tb.VisibleRows - 2 // the last fully visible one
+		tb.IndexGrabFocus(last)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, last, focusedItem())
+		_, _, foc := tb.focusedCell()
+		if tf, ok := foc.(*TextField); ok {
+			tf.HandleEvent(events.NewKey(events.KeyChord, 'a', key.CodeA, 0))
+			tf.HandleEvent(events.NewKey(events.KeyChord, 'b', key.CodeB, 0))
+		}
+		ht = 250
+		b.Restyle()
+		b.NeedsLayout()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Less(t, tb.VisibleRows, last, "fewer rows")
+		assert.Equal(t, last, focusedItem(), "the same item is focused")
+		assert.GreaterOrEqual(t, last, tb.StartIndex)
+		assert.Less(t, last, tb.StartIndex+tb.VisibleRows, "in view")
+		_, _, foc := tb.focusedCell()
+		if tf, ok := foc.(*TextField); ok {
+			tf.HandleEvent(events.NewKey(events.KeyChord, 'x', key.CodeX, 0))
+		}
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		_, _, foc := tb.focusedCell()
+		if tf, ok := foc.(*TextField); ok {
+			tf.editDone()
+		}
+		assert.Equal(t, "abx", items[last].Name, "typed into the focused item, at the end")
+	})
+}
+
+// TestTableRowButtonBackground tests that the buttons of the rows (see
+// [Table.SetRowButton]) have the background of their own rows: that of
+// the selected row only for the button of that row.
+func TestTableRowButtonBackground(t *testing.T) {
+	type item struct{ Name string }
+	items := []item{{"a"}, {"b"}, {"c"}}
+	b := NewBody()
+	tb := NewTable(b).SetSlice(&items)
+	tb.SetRowButton(icons.Edit, "Edit", func(item any) {})
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tb.SelectIndex(0)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		lg := tb.ListGrid
+		var buttons []*Button
+		for _, c := range lg.Children {
+			if bt, ok := c.(*Button); ok && bt.Icon == icons.Edit {
+				buttons = append(buttons, bt)
+			}
+		}
+		if assert.GreaterOrEqual(t, len(buttons), 3) { // (and empty rows)
+			sel := lg.ChildBackground(buttons[0])
+			assert.Equal(t, lg.bgSelect, sel, "the selected row")
+			assert.NotEqual(t, sel, lg.ChildBackground(buttons[1]), "not the selected row")
+			assert.NotEqual(t, sel, lg.ChildBackground(buttons[2]), "not the selected row")
+		}
 	})
 }

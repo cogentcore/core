@@ -207,6 +207,15 @@ type App interface {
 	// HideVirtualKeyboard only has an effect on mobile platforms (iOS, Android, and Web).
 	HideVirtualKeyboard()
 
+	// BeginBackgroundTask asks the operating system to keep the app running
+	// for a while if it goes into the background (as when the user goes
+	// to the home screen or locks the phone), until the returned function
+	// is called, for finishing work such as saving or syncing data. It only
+	// has an effect on iOS, where the app has about 30 seconds; elsewhere,
+	// apps keep running in the background, or are not suspended anyway.
+	// The returned function must be called once the work is done.
+	BeginBackgroundTask(name string) (end func())
+
 	// IsDark returns whether the system color theme is dark (as oppposed to light).
 	IsDark() bool
 }
@@ -218,6 +227,12 @@ type App interface {
 // thus this is no longer applicable. If it is non-nil, no actions with the window
 // should be taken until a signal is sent.
 var OnSystemWindowCreated chan struct{}
+
+// HandleBack, if set, is called by the drivers for the back button or
+// gesture of the system (on Android), and returns whether it went back
+// within the app; otherwise the system handles it (leaving the app).
+// It is set by the core package (see core.handleBack).
+var HandleBack func() bool
 
 // Platforms are all the supported platforms for system
 type Platforms int32 //enums:enum

@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -92,6 +93,11 @@ type Tabs struct {
 	mu sync.Mutex
 
 	tabs, frame *Frame
+
+	// lastFocus has the widgets that last had the focus in the frames of
+	// the tabs, when other tabs were selected with the keys for them,
+	// which get it back when their tabs are selected again with the keys.
+	lastFocus map[*Frame]Widget
 }
 
 // TabTypes are the different styling types of tabs.
@@ -157,6 +163,19 @@ func (ts *Tabs) Init() {
 			s.Direction = styles.Row
 		} else {
 			s.Direction = styles.Column
+		}
+	})
+
+	// The keys for the next and previous tabs ([keymap.NextTab] and
+	// [keymap.PrevTab]) select them when no widget in the tabs handles them,
+	// or the tabs have the focus themselves, which a press in them gives
+	// them, quietly, when no widget in them has the focus (as in a tab
+	// whose content is not focusable).
+	ts.On(events.KeyChord, ts.handleTabKeys)
+	ts.OnFinal(events.KeyChord, ts.handleTabKeys)
+	ts.On(events.MouseDown, func(e events.Event) {
+		if em := ts.Events(); em != nil && !ts.ContainsFocus() {
+			em.setFocusQuiet(ts.This.(Widget))
 		}
 	})
 
@@ -635,4 +654,92 @@ func (tb *Tab) Label() string {
 		return tb.Text
 	}
 	return tb.Name
+}
+
+// TabKeys gives the given key event to the tabs that the given widget is
+// in, innermost first, for the keys for the next and previous tabs
+// ([keymap.NextTab] and [keymap.PrevTab]), marking it as handled if they
+// select a tab. It is for widgets that would otherwise handle these keys
+// (as editors, for selecting), but leave them to the tabs, as terminals
+// do at their command line.
+func TabKeys(w Widget, e events.Event) {
+	for ts := tree.ParentByType[*Tabs](w); ts != nil && !e.IsHandled(); ts = tree.ParentByType[*Tabs](ts) {
+		ts.handleTabKeys(e)
+	}
+}
+
+// handleTabKeys selects the next or previous tab, after the last one the
+// first, for the keys for them ([keymap.NextTab] and [keymap.PrevTab]), and
+// focuses it (see [Tabs.focusTab]). With only one tab, the key is left for
+// any tabs that these are in.
+func (ts *Tabs) handleTabKeys(e events.Event) {
+	delta := 0
+	switch keymap.OfFallback(e.KeyChord()) {
+	case keymap.NextTab:
+		delta = 1
+	case keymap.PrevTab:
+		delta = -1
+	default:
+		return
+	}
+	if ts.NumTabs() < 2 {
+		return
+	}
+	e.SetHandled()
+	ts.SelectTabDelta(delta)
+}
+
+// SelectTabDelta selects the tab the given number of tabs after the
+// current one (before it if negative), cycling around, and focuses it
+// (see [Tabs.focusTab]), as the keys for the next and previous tabs do
+// ([keymap.NextTab] and [keymap.PrevTab]).
+func (ts *Tabs) SelectTabDelta(delta int) {
+	n := ts.NumTabs()
+	if n == 0 {
+		return
+	}
+	cur, idx := ts.CurrentTab()
+	if fr, ok := cur.(*Frame); ok {
+		if em := ts.Events(); em != nil && !tree.IsNil(em.focus) && isParentOf(fr, em.focus) {
+			if ts.lastFocus == nil {
+				ts.lastFocus = map[*Frame]Widget{}
+			}
+			ts.lastFocus[fr] = em.focus
+		}
+	}
+	fr := ts.SelectTabIndex(((idx+delta)%n + n) % n)
+	if em := ts.Events(); em != nil {
+		em.setFocusQuiet(ts.This.(Widget)) // (not in the hidden tab)
+	}
+	ts.Defer(func() { ts.focusTab(fr) }) // (once it is shown)
+}
+
+// focusTab focuses the given selected frame of a tab, once it is shown,
+// if the tabs still have the focus, which they get quietly when it is
+// selected: the widget that last had the focus in it (see
+// [Tabs.lastFocus]), or else its first focusable widget that is shown, or
+// else the tabs keep it, so that the keys for the tabs keep working.
+func (ts *Tabs) focusTab(fr *Frame) {
+	em := ts.Events()
+	if fr == nil || em == nil || em.focus != ts.This.(Widget) {
+		return // (focused elsewhere since)
+	}
+	if w := ts.lastFocus[fr]; w != nil && w.AsTree().This != nil && isParentOf(fr, w) {
+		w.AsWidget().SetFocus()
+		return
+	}
+	var foc Widget
+	fr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if foc != nil || !cwb.IsDisplayable() {
+			return tree.Break
+		}
+		if cwb.AbilityIs(abilities.Focusable) && !cwb.StateIs(states.Disabled) {
+			foc = cw
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	if foc != nil {
+		foc.AsWidget().SetFocus()
+	}
 }

@@ -76,19 +76,24 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"strings"
 )
 
 // newWriter returns a new Writer writing an APK file to w.
-// The APK will be signed with key.
+// The APK will be signed with key, with v1 (JAR) and v2 signatures
+// (see [signV2]), so it is written to w on [writer.Close].
 func newWriter(w io.Writer, priv *rsa.PrivateKey) *writer {
-	apkw := &writer{priv: priv}
-	apkw.w = zip.NewWriter(&countWriter{apkw: apkw, w: w})
+	apkw := &writer{priv: priv, out: w}
+	apkw.w = zip.NewWriter(&countWriter{apkw: apkw, w: &apkw.buf})
 	return apkw
 }
 
 // writer implements an APK file writer.
 type writer struct {
 	offset   int
+	entries  int          // the number of files created
+	buf      bytes.Buffer // the APK, before its v2 signature
+	out      io.Writer    // the signed APK
 	w        *zip.Writer
 	priv     *rsa.PrivateKey
 	manifest []manifestEntry
@@ -111,13 +116,26 @@ func (w *writer) Create(name string) (io.Writer, error) {
 }
 
 func (w *writer) create(name string) (io.Writer, error) {
-	// Align start of file contents by using Extra as padding.
+	// Align start of file contents by using Extra as padding: to 4 bytes,
+	// and native libraries, which are stored uncompressed, to 16 KB, for
+	// devices with 16 KB pages, which map them directly from the APK.
 	if err := w.w.Flush(); err != nil { // for exact offset
 		return nil, err
 	}
 	const fileHeaderLen = 30 // + filename + extra
 	start := w.offset + fileHeaderLen + len(name)
-	extra := (-start) & 3
+	if w.entries > 0 {
+		// the data descriptor of the previous file, which the zip writer
+		// writes when this one is created
+		const dataDescriptorLen = 16
+		start += dataDescriptorLen
+	}
+	w.entries++
+	align := 4
+	if strings.HasSuffix(name, ".so") {
+		align = 16384
+	}
+	extra := (-start) & (align - 1)
 
 	zipfw, err := w.w.CreateHeader(&zip.FileHeader{
 		Name:  name,
@@ -192,7 +210,11 @@ func (w *writer) Close() error {
 		return err
 	}
 
-	rsa, err := signPKCS7(rand.Reader, w.priv, cert.Bytes())
+	certDER, err := apkCertificate(rand.Reader, w.priv)
+	if err != nil {
+		return fmt.Errorf("apk: %v", err)
+	}
+	rsa, err := signPKCS7Cert(rand.Reader, w.priv, certDER, cert.Bytes())
 	if err != nil {
 		return fmt.Errorf("apk: %v", err)
 	}
@@ -204,7 +226,15 @@ func (w *writer) Close() error {
 		return err
 	}
 
-	return w.w.Close()
+	if err := w.w.Close(); err != nil {
+		return err
+	}
+	signed, err := signV2(w.buf.Bytes(), w.priv, certDER)
+	if err != nil {
+		return err
+	}
+	_, err = w.out.Write(signed)
+	return err
 }
 
 const manifestHeader = `Manifest-Version: 1.0
@@ -218,8 +248,12 @@ Created-By: 1.0 (Go)
 
 `
 
+// certHeader is the header of the v1 signature, which says that the APK
+// also has a v2 signature (see [signV2]), so that it is not accepted
+// without it on the versions of Android that verify it.
 const certHeader = `Signature-Version: 1.0
 Created-By: 1.0 (Go)
+X-Android-APK-Signed: 2
 `
 
 func (w *writer) clearCur() error {

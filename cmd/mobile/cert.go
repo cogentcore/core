@@ -22,19 +22,35 @@ import (
 // We prepare the certificate using the x509 package, read it back in
 // to our custom data type and then write it back out with the signature.
 func signPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error) {
-	const serialNumber = 0x5462c4dd // arbitrary
-	name := pkix.Name{CommonName: "gomobile"}
-
-	template := &x509.Certificate{
-		SerialNumber:       big.NewInt(serialNumber),
-		SignatureAlgorithm: x509.SHA1WithRSA,
-		Subject:            name,
-	}
-
-	b, err := x509.CreateCertificate(rand, template, template, priv.Public(), priv)
+	b, err := apkCertificate(rand, priv)
 	if err != nil {
 		return nil, err
 	}
+	return signPKCS7Cert(rand, priv, b, msg)
+}
+
+// apkCertSerial and apkCertName are the serial number and name of the
+// certificate of [apkCertificate].
+const apkCertSerial = 0x5462c4dd // arbitrary
+
+var apkCertName = pkix.Name{CommonName: "gomobile"}
+
+// apkCertificate returns the self-signed certificate (DER) of the given
+// key that signs APKs, in both their v1 (JAR) and v2 signatures.
+func apkCertificate(rand io.Reader, priv *rsa.PrivateKey) ([]byte, error) {
+	template := &x509.Certificate{
+		SerialNumber:       big.NewInt(apkCertSerial),
+		SignatureAlgorithm: x509.SHA1WithRSA,
+		Subject:            apkCertName,
+	}
+	return x509.CreateCertificate(rand, template, template, priv.Public(), priv)
+}
+
+// signPKCS7Cert is [signPKCS7] with the given certificate (DER) of
+// [apkCertificate].
+func signPKCS7Cert(rand io.Reader, priv *rsa.PrivateKey, b, msg []byte) ([]byte, error) {
+	const serialNumber = apkCertSerial
+	name := apkCertName
 
 	c := certificate{}
 	if _, err := asn1.Unmarshal(b, &c); err != nil {

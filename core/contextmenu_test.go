@@ -88,3 +88,63 @@ func TestContextMenuKey(t *testing.T) {
 		}
 	})
 }
+
+// TestNewWindow tests that the Window menu of the standard context menu
+// starts with New window, with the New key, when the app sets
+// [NewWindowFunc], and that the New key, sent to the window, makes a new
+// window with it, from the scene of the window.
+func TestNewWindow(t *testing.T) {
+	b := NewBody() // (loads the settings, with the key map, the first time)
+	NewText(b).SetText("Main")
+	prevMap := keymap.ActiveMapName
+	keymap.SetActiveMapName("MacStandard")
+	defer keymap.SetActiveMapName(prevMap)
+	var from *Scene
+	var made []*Body
+	NewWindowFunc = func(sc *Scene) *Body {
+		from = sc
+		nb := NewBody("New")
+		NewText(nb).SetText("New window")
+		made = append(made, nb)
+		return nb
+	}
+	defer func() { NewWindowFunc = nil }()
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		m := NewScene()
+		b.Scene.standardContextMenu(m, image.Point{})
+		var win *Button
+		for _, c := range m.Children {
+			if bt, ok := c.(*Button); ok && bt.Text == "Window" {
+				win = bt
+			}
+		}
+		require.NotNil(t, win)
+		wm := NewScene()
+		win.Menu(wm, image.Point{})
+		first, ok := wm.Child(0).(*Button)
+		require.True(t, ok)
+		assert.Equal(t, "New window", first.Text)
+		assert.Equal(t, keymap.New.Chord(), first.Shortcut)
+	}, func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		var meta key.Modifiers
+		meta.SetFlag(true, key.Meta)
+		src.Key(events.KeyDown, 'n', key.CodeN, meta)
+		src.Key(events.KeyUp, 'n', key.CodeN, meta)
+		assert.Eventually(t, func() bool {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			return len(made) == 1 && made[0].Scene.RenderWindow() != nil
+		}, 3*time.Second, 20*time.Millisecond, "a new window")
+		b.AsyncLock()
+		assert.Equal(t, b.Scene, from)
+		b.AsyncUnlock()
+		if len(made) == 1 {
+			made[0].AsyncLock()
+			made[0].Close()
+			made[0].AsyncUnlock()
+		}
+	})
+}
