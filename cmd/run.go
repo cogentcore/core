@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -23,6 +24,18 @@ func Run(c *config.Config) error { //types:add
 		return fmt.Errorf("expected 1 target platform, but got %d (%v)", len(c.Build.Target), c.Build.Target)
 	}
 	t := c.Build.Target[0]
+	if t.OS == "android" {
+		// the device to run on, whose architecture to build for, which the
+		// commands of adb then use
+		serial, err := mobile.AndroidDevice()
+		if err != nil {
+			return err
+		}
+		os.Setenv("ANDROID_SERIAL", serial)
+		if arch := mobile.AndroidDeviceArch(serial); t.Arch == "*" && arch != "" {
+			t.Arch = arch
+		}
+	}
 	if t.Arch == "*" {
 		if t.OS == "android" || t.OS == "ios" {
 			t.Arch = "arm64"
@@ -55,7 +68,8 @@ func Run(c *config.Config) error { //types:add
 	case "darwin", "windows", "linux":
 		return exec.Verbose().SetBuffer(false).Run(filepath.Join(c.Build.Output, filepath.Base(c.Build.Output)))
 	case "android":
-		err := exec.Run("adb", "install", "-r", filepath.Join(c.Build.Output, c.Name+".apk"))
+		adb := mobile.AndroidTool("adb")
+		err := exec.Run(adb, "install", "-r", filepath.Join(c.Build.Output, c.Name+".apk"))
 		if err != nil {
 			return fmt.Errorf("error installing app: %w", err)
 		}
@@ -65,7 +79,7 @@ func Run(c *config.Config) error { //types:add
 		// if c.Build.Debug {
 		// args = append(args, "-D")
 		// }
-		err = exec.Run("adb", args...)
+		err = exec.Run(adb, args...)
 		if err != nil {
 			return fmt.Errorf("error starting app: %w", err)
 		}

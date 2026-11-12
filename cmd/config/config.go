@@ -78,6 +78,11 @@ type Config struct { //types:add
 	// and Windows, which the core command builds and runs apps with.
 	Video bool `cmd:"setup,update"`
 
+	// AndroidSim installs (setup) the Android SDK, with the Android
+	// emulator, and makes an Android virtual device for it (named Cogent),
+	// which core run android boots when no Android device is connected.
+	AndroidSim bool `cmd:"setup"`
+
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
 
