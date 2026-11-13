@@ -133,6 +133,8 @@ func (fm *Form) Init() {
 		}
 		s.Display = styles.Grid
 		s.Grow.X = 1 // with the values, such as text fields, which fill it
+		// a margin at the right, as the values (text fields) fill it
+		s.Padding.Right = s.Gap.X
 		if fm.SizeClass() == SizeCompact {
 			s.Columns = 1
 		} else {

@@ -130,7 +130,8 @@ func TestFormTree(t *testing.T) {
 
 // TestFormTextFieldWidth tests that the text fields of a form have no max
 // width (not the 40ch of a TextField), so that they grow to the width of
-// the form, other than spinners, which have their own.
+// the form (with a margin at its right), other than spinners, which have
+// their own.
 func TestFormTextFieldWidth(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) { s.Min.X.Dp(1200) })
@@ -157,6 +158,7 @@ func TestFormTextFieldWidth(t *testing.T) {
 			assert.Zero(t, tf.Styles.Max.X.Value)
 			assert.Greater(t, tf.Geom.Size.Actual.Total.X, sp.Geom.Size.Actual.Total.X*2, "wider than 40ch")
 			assert.NotZero(t, sp.Styles.Max.X.Value, "a spinner has its own")
+			assert.Less(t, tf.Geom.TotalBBox.Max.X, fm.Geom.TotalBBox.Max.X-2, "a margin at the right of the form")
 		}
 	})
 }
