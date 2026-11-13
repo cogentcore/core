@@ -130,7 +130,12 @@ func (cs *Commands) Menu(m *core.Scene, run RunFunc) {
 	core.NewSeparator(m)
 	core.NewButton(m).SetText("Edit commands").SetIcon(icons.Edit).SetTooltip("Edit the commands and their categories").
 		OnClick(func(e events.Event) { cs.Edit(m) })
+	core.NewButton(m).SetText("Edit choosers").SetIcon(icons.List).SetTooltip(chooserTip).
+		OnClick(func(e events.Event) { cs.EditChoosers(m) })
 }
+
+// chooserTip is the tooltip of the buttons that edit the choosers.
+const chooserTip = "Edit the choosers of the values of arguments, such as git branches, which are the lines of the output of a shell command, and the arguments of commands that have them"
 
 // configEntry configures the given button, of the command bar or of a
 // menu, for the given entry: a category has the menu of its entries, and
@@ -415,6 +420,10 @@ func (cs *Commands) Edit(ctx core.Widget) {
 				w.OnClick(func(e events.Event) { cs.NewScript(w, "", "") })
 			})
 			tree.Add(p, func(w *core.Button) {
+				w.SetText("Choosers").SetIcon(icons.List).SetTooltip(chooserTip)
+				w.OnClick(func(e events.Event) { cs.EditChoosers(w) })
+			})
+			tree.Add(p, func(w *core.Button) {
 				w.SetText("Reset").SetIcon(icons.Reset).SetTooltip("Replace the commands with the standard ones")
 				w.OnClick(func(e events.Event) {
 					d := core.NewBody("Reset commands")
@@ -513,7 +522,7 @@ func (cs *Commands) NewDialog(ctx core.Widget, sc *SubCmd, run RunFunc) *core.Bo
 		s.Grow.Set(1, 0)
 	})
 	line.Updater(func() { line.SetText(html.EscapeString(sc.CommandLine(values))) })
-	fm := newForm(d, values)
+	fm := cs.chooserForm(ctx, d, values, cs.subCmdChoosers(sc))
 	fm.OnChange(func(e events.Event) { line.Update() })
 	fm.OnInput(func(e events.Event) { line.Update() })
 	d.AddTopBar(func(bar *core.Frame) {
@@ -533,6 +542,11 @@ func (cs *Commands) NewDialog(ctx core.Widget, sc *SubCmd, run RunFunc) *core.Bo
 			}
 			root, _ := splitCmd(sc.Cmd)
 			cs.macrosButton(p, d, ctx, root, sc, run)
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Choosers").SetIcon(icons.List)
+				w.SetTooltip("Set the choosers of the arguments, such as a git branch, whose values are chosen from the output of a shell command")
+				w.SetMenu(func(m *core.Scene, _ image.Point) { cs.choosersMenu(m, ctx, sc, fm) })
+			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Clear").SetIcon(icons.ClearAll).SetTooltip("Clear the flags and arguments")
 				w.OnClick(func(e events.Event) {
@@ -822,11 +836,30 @@ func live(w core.Widget) bool {
 // fields are wide (see [styleFormFields]), with the first one in focus
 // (see [focusForm]).
 func newForm(d *core.Body, values any) *core.Form {
+	return newChooserForm(d, values, nil)
+}
+
+// newChooserForm returns a form as [newForm], whose text fields have a
+// button with a menu of the values of their chooser, given by the given
+// function, if it is not nil, for those that have one.
+func newChooserForm(d *core.Body, values any, chooser func(tf *core.TextField)) *core.Form {
 	fm := core.NewForm(d)
-	styleFormFields(fm)
+	styleFormFields(fm, chooser)
 	fm.SetStruct(values)
 	focusForm(d, fm)
 	return fm
+}
+
+// chooserForm returns a form as [newForm] of the given values, whose text
+// fields have a button with a menu of the values of the chooser given by
+// the given function, for those that have one (see [Chooser]), run in the
+// directory of the given context widget.
+func (cs *Commands) chooserForm(ctx core.Widget, d *core.Body, values any, chooser chooserFunc) *core.Form {
+	return newChooserForm(d, values, func(tf *core.TextField) {
+		if field := formFieldName(tf); field != "" {
+			cs.addChooserButton(ctx, tf, field, chooser)
+		}
+	})
 }
 
 // FieldMinWidth is the minimum width of the text fields of the forms of
@@ -836,16 +869,20 @@ var FieldMinWidth float32 = 60
 
 // styleFormFields makes the text fields of the given form, and of its
 // inline forms (as of the arguments of a macro), at least [FieldMinWidth]
-// wide.
-func styleFormFields(fm *core.Form) {
+// wide, calling the given function with those of the form itself, if it
+// is not nil.
+func styleFormFields(fm *core.Form, textField func(tf *core.TextField)) {
 	fm.SetOnChildAdded(func(n tree.Node) {
 		switch w := n.(type) {
 		case *core.TextField:
 			w.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(FieldMinWidth)
 			})
+			if textField != nil {
+				textField(w)
+			}
 		case *core.Form:
-			styleFormFields(w)
+			styleFormFields(w, nil)
 		}
 	})
 }

@@ -296,7 +296,7 @@ func (cs *Commands) NewScriptPromptDialog(ctx core.Widget, root string, s *Scrip
 	form := s.FormStruct()
 	s.SetFormValues(form, cs.Args.ScriptValues(root, s))
 	line := commandLineText(d, func() string { return s.CommandLine(s.FormValues(form)) })
-	fm := newForm(d, form)
+	fm := cs.chooserForm(ctx, d, form, cs.scriptChoosers(s))
 	fm.OnChange(func(e events.Event) { line.Update() })
 	fm.OnInput(func(e events.Event) { line.Update() })
 	cs.scriptTopBar(d, ctx, root, s)
@@ -353,7 +353,7 @@ func (cs *Commands) NewScriptDialog(ctx core.Widget, root string, s, old *Script
 		s.Grow.Set(1, 1)
 	})
 	core.NewText(d).SetType(core.TextTitleSmall).SetText("Arguments")
-	core.NewText(d).SetType(core.TextSupporting).SetText("The arguments, $1, $2, and so on, in order, which are prompted for when the script runs: text, a switch (passed as its On value, or empty if it is off), or a file. Add one with Add argument at the top, or the context menu of the table (right-click).")
+	core.NewText(d).SetType(core.TextSupporting).SetText("The arguments, $1, $2, and so on, in order, which are prompted for when the script runs: text, a switch (passed as its On value, or empty if it is off), or a file. Text can have a chooser of its values, such as a git branch. Add one with Add argument at the top, or the context menu of the table (right-click).")
 	tb := core.NewTable(d).SetSlice(&es.Args)
 	d.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(func(p *tree.Plan) {

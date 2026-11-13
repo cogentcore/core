@@ -26,6 +26,10 @@ type Args struct {
 	// "true" for a switch that is on.
 	Scripts map[string]map[string]string
 
+	// Macros are the values of the arguments of the macros that are
+	// prompted for, by the key of the macro (see [macroKey]).
+	Macros map[string]*SubCmdArgs
+
 	// file is the file the arguments are saved in, which other processes
 	// (apps) share.
 	file sharedfile.File[argsData]
@@ -70,6 +74,7 @@ func OpenArgs(filename string) *Args {
 type argsData struct {
 	Cmds    map[string]*CmdArgs
 	Scripts map[string]map[string]string `json:",omitempty"`
+	Macros  map[string]*SubCmdArgs       `json:",omitempty"`
 }
 
 // syncLocked reads the file of the arguments if another process has
@@ -83,6 +88,21 @@ func (as *Args) syncLocked() {
 		as.Cmds = as.file.Data.Cmds
 	}
 	as.Scripts = as.file.Data.Scripts
+	as.Macros = as.file.Data.Macros
+}
+
+// updateLocked changes the arguments with the given function, and saves
+// them, with the file locked, after reading the changes of other
+// processes, under the mutex.
+func (as *Args) updateLocked(change func()) error {
+	return as.file.Update(func(d *argsData) {
+		if d.Cmds != nil {
+			as.Cmds = d.Cmds
+		}
+		as.Scripts, as.Macros = d.Scripts, d.Macros
+		change()
+		d.Cmds, d.Scripts, d.Macros = as.Cmds, as.Scripts, as.Macros
+	})
 }
 
 // get returns the arguments last used for the given subcommand, or nil.
@@ -104,10 +124,7 @@ func (as *Args) Set(sc *SubCmd, values any) error {
 	root, _ := splitCmd(sc.Cmd)
 	as.mu.Lock()
 	defer as.mu.Unlock()
-	return as.file.Update(func(d *argsData) {
-		if d.Cmds != nil {
-			as.Cmds = d.Cmds
-		}
+	return as.updateLocked(func() {
 		ca := as.Cmds[root]
 		if ca == nil {
 			ca = &CmdArgs{}
@@ -117,8 +134,6 @@ func (as *Args) Set(sc *SubCmd, values any) error {
 			ca.SubCmds = map[string]*SubCmdArgs{}
 		}
 		ca.SubCmds[sc.Name] = sa
-		d.Cmds = as.Cmds
-		as.Scripts = d.Scripts
 	})
 }
 
@@ -165,16 +180,56 @@ func (as *Args) SetScriptValues(root string, s *Script, values map[string]string
 	}
 	as.mu.Lock()
 	defer as.mu.Unlock()
-	return as.file.Update(func(d *argsData) {
-		if d.Cmds != nil {
-			as.Cmds = d.Cmds
-		}
-		as.Scripts = d.Scripts
+	return as.updateLocked(func() {
 		if as.Scripts == nil {
 			as.Scripts = map[string]map[string]string{}
 		}
 		as.Scripts[scriptKey(root, s)] = values
-		d.Cmds = as.Cmds
-		d.Scripts = as.Scripts
+	})
+}
+
+// macroKey returns the key of the given macro of the given command in the
+// [Args.Macros]: "git/commit/wip".
+func macroKey(root string, mc *Macro) string {
+	return root + "/" + mc.SubCmd + "/" + mc.Name
+}
+
+// MacroValues returns the values last used for the arguments of the given
+// macro of the given command that are prompted for, or nil if there are
+// none.
+func (as *Args) MacroValues(root string, mc *Macro) *SubCmdArgs {
+	if as == nil {
+		return nil
+	}
+	as.mu.Lock()
+	defer as.mu.Unlock()
+	as.syncLocked()
+	return as.Macros[macroKey(root, mc)]
+}
+
+// SetMacroValues sets the values last used for the arguments of the given
+// macro of the given command that are prompted for, of the given keys, to
+// those of the given ones, and saves them. Those without a value, such as
+// a switch that is off, are saved as empty, so that they are not those of
+// the macro when it is prompted for again.
+func (as *Args) SetMacroValues(root string, mc *Macro, sa *SubCmdArgs, keys map[string]bool) error {
+	if as == nil {
+		return nil
+	}
+	vals := &SubCmdArgs{Flags: map[string]string{}}
+	for k := range keys {
+		if k == argsField {
+			vals.Args = sa.Args
+		} else {
+			vals.Flags[k] = sa.Flags[k]
+		}
+	}
+	as.mu.Lock()
+	defer as.mu.Unlock()
+	return as.updateLocked(func() {
+		if as.Macros == nil {
+			as.Macros = map[string]*SubCmdArgs{}
+		}
+		as.Macros[macroKey(root, mc)] = vals
 	})
 }

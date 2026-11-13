@@ -52,6 +52,12 @@ type Cmd struct {
 	// in the menu of the command after its macros (see [Script]). They are
 	// kept when the command is parsed again.
 	Scripts []*Script `json:",omitempty"`
+
+	// Choosers are the names of the choosers of the arguments of the
+	// subcommands, set by the user, by the name of the subcommand and the
+	// key of the argument: "checkout Arguments" (see [Chooser]). They are
+	// kept when the command is parsed again.
+	Choosers map[string]string `json:",omitempty"`
 }
 
 // IsParsed returns whether the help of the command has been parsed: it
