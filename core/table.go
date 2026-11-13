@@ -823,9 +823,11 @@ func (tb *Table) SizeFinal() {
 	}
 	sh := tb.header
 	// the header of each column, with the handle after it, has the width
-	// of the column, with the gap after it, as the header has no gaps
+	// of the column, with the gap after it, as the header has no gaps;
+	// without rows, the cells are invisible, without widths, so the header
+	// keeps its own, of the names of the fields
 	_, idxOff := tb.This.(Lister).RowWidgetNs()
-	if sh == nil || sh.NumChildren() != idxOff+2*tb.numVisibleFields || sg.NumChildren() < idxOff+tb.numVisibleFields {
+	if sh == nil || tb.SliceSize == 0 || sh.NumChildren() != idxOff+2*tb.numVisibleFields || sg.NumChildren() < idxOff+tb.numVisibleFields {
 		return
 	}
 	gap := sg.Styles.Gap.X.Dots
