@@ -176,12 +176,12 @@ func Open(filename string) *Commands {
 	if cs.Version < 3 { // (the common subcommands were added)
 		addCommon(cs.Entries)
 	}
-	if cs.StandardVersion < standardVersion { // (the standard ones were added)
-		cs.Entries = addStandard(cs.Entries)
-		if cs.StandardVersion < 2 { // (and then the standard macros)
+	if cs.StandardVersion < standardVersion {
+		if cs.StandardVersion < 2 { // (the standard ones were added, and the standard macros)
+			cs.Entries = addStandard(cs.Entries)
 			cs.addStandardMacrosLocked()
 		}
-		if cs.StandardVersion < 3 { // (and then the standard choosers)
+		if cs.StandardVersion < 3 { // (only the standard choosers, not the entries again)
 			cs.addStandardChoosersLocked()
 		}
 		cs.StandardVersion = standardVersion
@@ -567,10 +567,10 @@ var standardCommon = map[string]string{
 }
 
 // standardVersion is the version of the [Standard] commands: the standard
-// entries are added to those of a file of an earlier version, which does
-// not have them (see [addStandard]), the [StandardMacros] to those of
-// a file before version 2, and the [StandardChoosers] to those of a file
-// before version 3.
+// entries (see [addStandard]) and the [StandardMacros] are added to those
+// of a file before version 2, which does not have them, and the
+// [StandardChoosers] to those of a file before version 3 (without adding
+// the standard entries again, which the user may have deleted).
 const standardVersion = 3
 
 // addCommon sets the [Entry.Common] subcommands of the given entries of the

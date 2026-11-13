@@ -107,6 +107,9 @@ func TestArgChoosers(t *testing.T) {
 	assert.Equal(t, "Git branch", cs4.ArgChooser(&SubCmd{Name: "switch", Cmd: "git switch"}, argsField))
 	assert.Len(t, cs4.choosers(), len(StandardChoosers()))
 	assert.Equal(t, standardVersion, cs4.StandardVersion)
+	cs4.mu.Lock()
+	assert.Len(t, cs4.Entries, 1, "the standard entries are not added again")
+	cs4.mu.Unlock()
 }
 
 // TestChooserForm tests the button of the chooser of a field of the form
