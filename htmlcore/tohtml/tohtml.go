@@ -15,6 +15,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -33,6 +34,7 @@ import (
 //   - "id": the HTML id, which is otherwise only set for headings.
 //   - "class": the HTML class.
 //   - "href" and "src": the corresponding HTML attributes.
+//   - "data-*": the data attributes of the element (as htmlcore sets them).
 //   - "html": HTML that is used for the widget and its children instead.
 func Widget(w core.Widget) ([]byte, error) {
 	b := &bytes.Buffer{}
@@ -59,7 +61,6 @@ var htmlElementNames = map[string]string{
 	"slider":     "input",
 	"meter":      "progress",
 	"chooser":    "div", // a select element can only contain option elements
-	"pre":        "textarea",
 	"switches":   "div",
 	"switch":     "input",
 	"splits":     "div",
@@ -97,6 +98,13 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 			if _, ok := pw.Property("tag").(string); ok || strings.HasPrefix(pw.Name, "inline-container") {
 				if err := e.Flush(); err != nil {
 					return err
+				}
+				// Text of a fixed width (as the marker of a list item) keeps it.
+				if width, mx := tx.Styles.Min.X, tx.Styles.Max.X; width.Value > 0 && mx.Value == width.Value && mx.Unit == width.Unit {
+					fmt.Fprintf(b, `<span style="display:inline-block;flex:none;width:%s">`, styles.ToCSSLength(&tx.Styles, width))
+					b.WriteString(textParagraphReplacer.Replace(tx.Text))
+					b.WriteString("</span>")
+					return nil
 				}
 				b.WriteString(textParagraphReplacer.Replace(tx.Text))
 				return nil
@@ -150,9 +158,23 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		addAttr(se, "alt", wb.Tooltip)
 		addAttr(se, "style", imageCSS(&wb.Styles))
 	default:
-		css := styles.ToCSS(&wb.Styles, idName, se.Name.Local) + growCSS(wb)
+		// An element of only inline text (as a paragraph in the browser
+		// style of htmlcore) has no layout of its own, so its text is inline.
+		cssID := idName
+		if inlineOnly(wb) {
+			cssID = "text"
+		}
+		css := styles.ToCSS(&wb.Styles, cssID, se.Name.Local) + growCSS(wb)
 		if _, ok := w.(*core.Button); ok && se.Name.Local == "a" {
 			css += ";text-decoration:none" // link button
+		}
+		// A widget of an inline element (as a span with a width) is a box.
+		if inlineElements[se.Name.Local] {
+			css += ";display:inline-block"
+		}
+		// The max size of a widget is that of its content box, as in core.
+		if wb.Styles.Max.X.Value > 0 || wb.Styles.Max.Y.Value > 0 {
+			css += ";box-sizing:content-box"
 		}
 		addAttr(se, "style", strings.TrimPrefix(css, ";"))
 	}
@@ -162,6 +184,7 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	if href, ok := wb.Property("href").(string); ok {
 		addAttr(se, "href", href)
 	}
+	addDataAttrs(se, wb)
 
 	handleChildren := true
 
@@ -254,11 +277,52 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 			return err
 		}
 	}
-	err = e.EncodeToken(xml.EndElement{se.Name})
+	err = e.EncodeToken(xml.EndElement{Name: se.Name})
 	if err != nil {
 		return err
 	}
 	return e.Flush()
+}
+
+// inlineElements are the HTML elements that are inline by default, which
+// are boxes ("inline-block") when they are widgets of their own.
+var inlineElements = map[string]bool{"span": true, "a": true, "b": true, "i": true, "em": true,
+	"strong": true, "code": true, "small": true, "label": true, "mark": true, "sub": true, "sup": true}
+
+// inlineOnly returns whether all of the children of the widget are inline
+// text: [core.Text] without a tag of its own and inline containers of it,
+// which [toHTML] writes as the content of the element.
+func inlineOnly(wb *core.WidgetBase) bool {
+	if _, ok := wb.Property("tag").(string); !ok || wb.NumChildren() == 0 {
+		return false
+	}
+	only := true
+	wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+		_, tagged := cwb.Property("tag").(string)
+		_, isText := cw.(*core.Text)
+		inline := !tagged && (isText || strings.HasPrefix(cwb.Name, "inline-container"))
+		if !inline {
+			only = false
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	return only
+}
+
+// addDataAttrs adds the data attributes of the widget, which are its
+// string properties with a data- prefix, in sorted order.
+func addDataAttrs(se *xml.StartElement, wb *core.WidgetBase) {
+	var names []string
+	for k, v := range wb.Properties {
+		if _, ok := v.(string); ok && strings.HasPrefix(k, "data-") {
+			names = append(names, k)
+		}
+	}
+	slices.Sort(names)
+	for _, k := range names {
+		addAttr(se, k, wb.Properties[k].(string))
+	}
 }
 
 // textParagraphReplacer removes paragraph tags within [core.Text.Text] in [Widget].
@@ -372,7 +436,10 @@ func growCSS(wb *core.WidgetBase) string {
 		main, cross = cross, main
 	}
 	css := fmt.Sprintf(";flex-grow:%g", main)
-	if cross > 0 {
+	switch {
+	case wb.Styles.Align.Self != styles.Auto: // as for auto margins in htmlcore
+		css += ";align-self:" + wb.Styles.Align.Self.String()
+	case cross > 0:
 		css += ";align-self:stretch"
 	}
 	return css

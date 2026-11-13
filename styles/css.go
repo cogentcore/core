@@ -28,6 +28,7 @@ func ToCSS(s *Style, idName, htmlName string) string {
 		}
 		parts = append(parts, key+":"+value)
 	}
+	length := func(v units.Value) string { return ToCSSLength(s, v) }
 
 	add("color", colorToCSS(s.Color))
 	add("background", colorToCSS(s.Background))
@@ -45,27 +46,29 @@ func ToCSS(s *Style, idName, htmlName string) string {
 		add("flex-grow", fmt.Sprintf("%g", s.Grow.Y))
 		add("justify-content", s.Justify.Content.String())
 		add("align-items", s.Align.Items.String())
-		add("columns", strconv.Itoa(s.Columns))
-		add("gap", s.Gap.X.StringCSSDp())
+		if s.Display == Grid && s.Columns > 0 {
+			add("grid-template-columns", fmt.Sprintf("repeat(%d,auto)", s.Columns))
+		}
+		add("gap", length(s.Gap.X))
 	}
-	add("min-width", s.Min.X.StringCSSDp())
-	add("min-height", s.Min.Y.StringCSSDp())
-	add("max-width", s.Max.X.StringCSSDp())
-	add("max-height", s.Max.Y.StringCSSDp())
+	add("min-width", length(s.Min.X))
+	add("min-height", length(s.Min.Y))
+	add("max-width", length(s.Max.X))
+	add("max-height", length(s.Max.Y))
 	if s.Grow == (math32.Vector2{}) {
-		add("width", s.Min.X.StringCSSDp())
-		add("height", s.Min.Y.StringCSSDp())
+		add("width", length(s.Min.X))
+		add("height", length(s.Min.Y))
 	}
-	add("padding-top", s.Padding.Top.StringCSSDp())
-	add("padding-right", s.Padding.Right.StringCSSDp())
-	add("padding-bottom", s.Padding.Bottom.StringCSSDp())
-	add("padding-left", s.Padding.Left.StringCSSDp())
-	add("margin-top", s.Margin.Top.StringCSSDp())
-	add("margin-right", s.Margin.Right.StringCSSDp())
-	add("margin-bottom", s.Margin.Bottom.StringCSSDp())
-	add("margin-left", s.Margin.Left.StringCSSDp())
+	add("padding-top", length(s.Padding.Top))
+	add("padding-right", length(s.Padding.Right))
+	add("padding-bottom", length(s.Padding.Bottom))
+	add("padding-left", length(s.Padding.Left))
+	add("margin-top", length(s.Margin.Top))
+	add("margin-right", length(s.Margin.Right))
+	add("margin-bottom", length(s.Margin.Bottom))
+	add("margin-left", length(s.Margin.Left))
 	if s.Font.Size.Value != 16 || s.Font.Size.Unit != units.UnitDp {
-		add("font-size", s.Font.Size.StringCSSDp())
+		add("font-size", length(s.Font.Size))
 	}
 	// todo:
 	// if s.Font.Family != "" && s.Font.Family != "Roboto" {
@@ -86,12 +89,24 @@ func ToCSS(s *Style, idName, htmlName string) string {
 	add("text-align", s.Text.Align.String())
 	if s.Border.Width.Top.Value > 0 {
 		add("border-style", s.Border.Style.Top.String())
-		add("border-width", s.Border.Width.Top.StringCSSDp())
+		add("border-width", length(s.Border.Width.Top))
 		add("border-color", colorToCSS(s.Border.Color.Top))
 	}
-	add("border-radius", s.Border.Radius.Top.StringCSSDp())
+	add("border-radius", length(s.Border.Radius.Top))
 
 	return strings.Join(parts, ";")
+}
+
+// ToCSSLength returns the CSS of the given length of the given [Style], as
+// in [ToCSS]: in px for a length in dots, which CSS does not have (as
+// htmlcore sets), using the unit context of the style, or as
+// [units.Value.StringCSSDp] otherwise.
+func ToCSSLength(s *Style, v units.Value) string {
+	if v.Unit == units.UnitDot {
+		px := math32.Round(s.UnitContext.FromDots(v.Value, units.UnitDp)*100) / 100
+		return strconv.FormatFloat(float64(px), 'g', -1, 32) + "px"
+	}
+	return v.StringCSSDp()
 }
 
 func colorToCSS(c image.Image) string {
