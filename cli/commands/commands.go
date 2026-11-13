@@ -76,7 +76,7 @@ func (en *Entry) Label() string {
 
 // version is the version of the format of the file of the [Commands]:
 // the parsed commands of other versions are parsed again.
-const version = 9
+const version = 10
 
 // Commands are the commands of the command bar, organized into categories
 // by the user, with the cache of the parsed help of commands, which are
@@ -377,8 +377,10 @@ func (cs *Commands) SubCmd(cmd string, reparse bool) (*SubCmd, error) {
 	}
 	sc.Name = name
 	// a subcommand whose help is that of the command (as of bun run -h)
-	// lists the subcommands of the command, not its own
-	if copiedSubCmds(sc, cm) {
+	// lists the subcommands of the command, not its own, and only one level
+	// of subcommands is nested (as git stash list), as deeper ones are not
+	// subcommands, but such as the output of a command run by its help
+	if copiedSubCmds(sc, cm) || strings.Contains(name, " ") {
 		sc.Cmds = nil
 	}
 	cs.addSharedFlags(root, sc)
@@ -492,7 +494,9 @@ func (cs *Commands) ParseAll() {
 		if name == "" {
 			subs = nil
 			for _, sc := range cm.SubCmds {
-				subs = append(subs, sc.Name)
+				if !strings.Contains(sc.Name, " ") { // (nested ones are below)
+					subs = append(subs, sc.Name)
+				}
 			}
 		}
 		for _, sub := range subs {

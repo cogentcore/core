@@ -559,3 +559,43 @@ func TestMergeFlags(t *testing.T) {
 	assert.Equal(t, []string{"-c:", "-v:test", "-run:"}, names)
 	assert.Equal(t, [][]string{{"go", "help", "testflag"}}, extraFlagHelp["go test"])
 }
+
+// TestHelpGuards tests the guards against running subcommands that do not
+// take -h or --help as help (as launchctl dumpstate, which dumped the
+// state of all of the processes, taken as subcommands, nested deeper
+// with each parse): their help subcommand only, help that must look like
+// help, a maximum size of help, and one level of nested subcommands.
+func TestHelpGuards(t *testing.T) {
+	for _, hc := range helpCommands([]string{"launchctl", "kill"}) {
+		assert.NotContains(t, hc, "-h")
+		assert.NotContains(t, hc, "--help")
+	}
+	assert.Contains(t, helpCommands([]string{"launchctl", "kill"}), []string{"launchctl", "help", "kill"})
+	assert.Contains(t, helpCommands([]string{"git", "commit"}), []string{"git", "commit", "-h"})
+
+	assert.False(t, isHelpOf("com.apple.mdworker = {\n\tstate = running\n}\n", []string{"launchctl", "dumpstate"}, []string{"launchctl", "dumpstate", "-h"}))
+	assert.True(t, isHelpOf("usage: git commit [<options>]\n", []string{"git", "commit"}, []string{"git", "commit", "-h"}))
+	assert.True(t, isHelpOf("Bootstraps a domain.\n\tbootstrap <domain-target>\n", []string{"launchctl", "bootstrap"}, []string{"launchctl", "help", "bootstrap"}))
+	assert.True(t, isHelpOf("anything", []string{"ls"}, []string{"ls", "--help"}), "a command")
+
+	if runtime.GOOS != "windows" {
+		assert.Equal(t, "", runHelp(t.TempDir(), []string{"/bin/sh", "-c", "head -c 300000 /dev/zero | tr '\\0' x"}), "too large")
+		assert.Equal(t, "usage: x\n", runHelp(t.TempDir(), []string{"/bin/sh", "-c", "echo usage: x"}))
+	}
+
+	cs := &Commands{Parsed: map[string]*Cmd{}}
+	prev := parseSub
+	parseSub = func(cmd string) (*SubCmd, error) {
+		sc := &SubCmd{Cmd: cmd, Source: cmd + " -h"}
+		sc.SetFromHelp("Usage: x\n\nCommands:\n  mdworker   a process\n  mds        another\n")
+		return sc, nil
+	}
+	t.Cleanup(func() { parseSub = prev })
+	cs.Parsed["x"] = &Cmd{Cmd: "x", SubCmds: []*SubCmd{{Name: "stash", Cmd: "x stash"}, {Name: "other", Cmd: "x other"}}}
+	sc, err := cs.SubCmd("x stash", false)
+	require.NoError(t, err)
+	assert.Len(t, sc.Cmds, 2, "nested subcommands")
+	sc, err = cs.SubCmd("x stash mdworker", false)
+	require.NoError(t, err)
+	assert.Empty(t, sc.Cmds, "no deeper")
+}

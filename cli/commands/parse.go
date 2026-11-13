@@ -22,6 +22,11 @@ import (
 // HelpTimeout is the time a help command can take before it is stopped.
 var HelpTimeout = 10 * time.Second
 
+// MaxHelpSize is the maximum size of the output of a help command, in
+// bytes: a larger output is not help, but that of a command that does not
+// take the help arguments as help, and runs.
+var MaxHelpSize = 256 << 10
+
 // ParseCmd returns the [Cmd] for the given command, such as git, parsed
 // from the output of its help commands (see [Parse]), with its subcommands
 // to be parsed when they are used, or else its one [MainName] subcommand,
@@ -63,7 +68,7 @@ func Parse(cmd string) (*SubCmd, error) {
 	doc, manDoc, usage := "", "", ""
 	for _, hc := range helpCommands(words) {
 		out := runHelp(dir, hc)
-		if strings.TrimSpace(out) == "" {
+		if strings.TrimSpace(out) == "" || !isHelpOf(out, words, hc) {
 			continue
 		}
 		cm := &SubCmd{Cmd: strings.Join(words, " "), Source: strings.Join(hc, " ")}
@@ -157,12 +162,34 @@ func cmdScore(cm *SubCmd) int {
 	return n
 }
 
+// isHelpOf returns whether the given output of the given help command of
+// the given command is help: that of -h or --help for a subcommand, which
+// may not take them as help and run (as launchctl dumpstate does), must
+// mention its usage, or its name.
+func isHelpOf(out string, words, hc []string) bool {
+	if len(words) < 2 || hc[0] == "man" || slices.Contains(hc, "help") {
+		return true
+	}
+	return strings.Contains(strings.ToLower(out), "usage") || strings.Contains(out, words[len(words)-1])
+}
+
+// noFlagHelp are the commands whose subcommands do not take -h or --help
+// as help, but run, so that only their help subcommand is used for the
+// help of their subcommands: launchctl dumpstate dumps the state of all of
+// the processes, and others act on services.
+var noFlagHelp = map[string]bool{
+	"launchctl": true,
+}
+
 // helpCommands returns the commands to get the help of the given command.
 func helpCommands(words []string) [][]string {
 	with := func(args ...string) []string {
 		return append(append([]string{}, words...), args...)
 	}
 	hcs := [][]string{with("-h"), with("--help")}
+	if len(words) > 1 && noFlagHelp[words[0]] {
+		hcs = nil
+	}
 	if len(words) > 1 {
 		hcs = append(hcs, append([]string{words[0], "help"}, words[1:]...))
 		hcs = append(hcs, []string{"man", strings.Join(words, "-")})
@@ -212,8 +239,8 @@ func runHelp(dir string, args []string) string {
 	c.Stdout, c.Stderr = &out, &out
 	err := c.Run()
 	var exitErr *exec.ExitError
-	if err != nil && !errors.As(err, &exitErr) {
-		return ""
+	if (err != nil && !errors.As(err, &exitErr)) || out.Len() > MaxHelpSize {
+		return "" // (not help, such as a dump of a command run by it)
 	}
 	return stripOverstrike(out.String())
 }

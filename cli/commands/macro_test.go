@@ -5,6 +5,7 @@
 package commands
 
 import (
+	"fmt"
 	"image"
 	"os"
 	"os/exec"
@@ -107,8 +108,9 @@ func TestMacros(t *testing.T) {
 	b, err := os.ReadFile(file)
 	require.NoError(t, err)
 	old := filepath.Join(t.TempDir(), "commands.json")
-	require.Contains(t, string(b), `"Version": 9`)
-	require.NoError(t, os.WriteFile(old, []byte(strings.Replace(string(b), `"Version": 9`, `"Version": 2`, 1)), 0o644))
+	cur := fmt.Sprintf(`"Version": %d`, version)
+	require.Contains(t, string(b), cur)
+	require.NoError(t, os.WriteFile(old, []byte(strings.Replace(string(b), cur, `"Version": 2`, 1)), 0o644))
 	cs2 := &Commands{file: sharedfile.File[commandsData]{Path: old}, Parsed: map[string]*Cmd{}}
 	cs2.reload()
 	require.NotNil(t, cs2.cached("git"))
