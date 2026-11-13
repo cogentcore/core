@@ -325,7 +325,7 @@ func TestMimeDataItems(t *testing.T) {
 	})
 	assert.Len(t, md, 9, "three items per file, including directories")
 	assert.Equal(t, []string{wt.path("sub"), wt.path("a.go"), wt.path("u.txt")}, filePaths(md))
-	assert.True(t, isNodeData(md))
+	assert.True(t, isNodeData(md, true))
 	assert.Equal(t, "package a\n", string(md[5].Data))
 
 	// clipboard data as copied from the tree

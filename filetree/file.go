@@ -92,7 +92,12 @@ func (fn *Node) duplicateFiles() { //types:add
 // duplicateFile creates a copy of given file -- only works for regular files, not
 // directories
 func (fn *Node) duplicateFile() error {
-	_, err := fn.Info.Duplicate()
+	var err error
+	if fn.isFS() {
+		_, err = fn.duplicatePath(string(fn.Filepath))
+	} else {
+		_, err = fn.Info.Duplicate()
+	}
 	if err == nil && fn.Parent != nil {
 		fnp := AsNode(fn.Parent)
 		fnp.Update()
@@ -136,14 +141,20 @@ func (fn *Node) DeleteFile() error {
 	if pari != nil {
 		parent = AsNode(pari)
 	}
+	wfs, err := fn.writeFS()
+	if err != nil {
+		return err
+	}
 	repo, _ := fn.Repo()
-	var err error
-	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
+	switch {
+	case wfs != nil:
+		err = wfs.RemoveAll(string(fn.Filepath))
+	case !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored:
 		err = repo.Delete(string(fn.Filepath))
 		if err != nil && fsx.Exists(string(fn.Filepath)) { // not in the repository (status not yet known)
 			err = fn.Info.Delete()
 		}
-	} else {
+	default:
 		err = fn.Info.Delete()
 	}
 	if err == nil {
@@ -171,9 +182,16 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		return nil
 	}
 	root := fn.FileRoot()
-	var err error
+	wfs, err := fn.writeFS()
+	if err != nil {
+		return err
+	}
 	orgpath := fn.Filepath
-	newpath, err = fn.Info.RenamePath(newpath) // the rename is done below
+	if wfs != nil {
+		newpath, err = fn.fsRenamePath(newpath)
+	} else {
+		newpath, err = fn.Info.RenamePath(newpath) // the rename is done below
+	}
 	if len(newpath) == 0 || err != nil {
 		return err
 	}
@@ -183,21 +201,28 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		}
 	}
 	repo, _ := fn.Repo()
-	if repo != nil && (fn.IsDir() || fn.Info.VCS >= vcs.Stored) {
+	switch {
+	case wfs != nil:
+		err = wfs.Rename(string(orgpath), newpath)
+	case repo != nil && (fn.IsDir() || fn.Info.VCS >= vcs.Stored):
 		err = repo.Move(string(orgpath), newpath)
 		if err != nil && fsx.Exists(string(orgpath)) { // not in the repository (status not yet known)
 			err = os.Rename(string(orgpath), newpath)
 		}
-	} else {
+	default:
 		err = os.Rename(string(orgpath), newpath)
 	}
-	if err == nil {
+	if err == nil && wfs != nil {
+		fn.Filepath = core.Filename(newpath)
+		err = fn.This.(Filer).GetFileInfo()
+	} else if err == nil {
 		err = fn.Info.InitFile(newpath)
+		fn.Filepath = core.Filename(fn.Info.Path)
 	}
 	if err == nil {
-		fn.Filepath = core.Filename(fn.Info.Path)
-		fn.SetName(fn.Info.Name)
-		fn.SetText(fn.Info.Name)
+		name := fn.baseOf(string(fn.Filepath))
+		fn.SetName(name)
+		fn.SetText(name)
 		if fn.IsDir() {
 			fn.movedDir(string(orgpath))
 		}
@@ -292,10 +317,16 @@ func (fn *Node) newFolder(foldername string) { //types:add
 	}
 	ppath := string(fn.Filepath)
 	if !fn.IsDir() {
-		ppath, _ = filepath.Split(ppath)
+		ppath = fn.dirOf(ppath)
 	}
-	np := filepath.Join(ppath, foldername)
-	err := os.MkdirAll(np, 0775)
+	np := fn.joinPath(ppath, foldername)
+	wfs, err := fn.writeFS()
+	switch {
+	case wfs != nil:
+		err = wfs.MkdirAll(np)
+	case err == nil:
+		err = os.MkdirAll(np, 0775)
+	}
 	if err != nil {
 		core.ErrorSnackbar(fn, err, "Error creating folder")
 		return
@@ -311,10 +342,10 @@ func (fn *Node) copyFileToDir(filename string) error {
 		return nil
 	}
 	ppath := string(fn.Filepath)
-	tpath := filepath.Join(ppath, filepath.Base(filename))
-	err := fsx.CopyPath(tpath, filename)
+	tpath := fn.joinPath(ppath, fn.baseOf(filename))
+	err := fn.copyPath(tpath, filename)
 	fn.FileRoot().UpdatePath(ppath)
-	if err != nil {
+	if err != nil || fn.isFS() {
 		return err
 	}
 	ofn, ok := fn.FileRoot().FindFile(filename)
