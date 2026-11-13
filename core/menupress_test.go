@@ -219,3 +219,32 @@ func TestMenuPressDragSubmenu(t *testing.T) {
 		assert.Equal(t, []string{"Y", "Plain"}, mt.clicked)
 	})
 }
+
+// TestMenuPressDragTooltip tests dragging into a submenu with a tooltip
+// shown on top of the menus (which crashed).
+func TestMenuPressDragTooltip(t *testing.T) {
+	mt := newMenuTest(t, func(mt *menuTest, m *Scene) {
+		mt.item(m, "Sub1", func(m *Scene) { mt.item(m, "X", nil) })
+		mt.item(m, "Plain", nil)
+	})
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	mt.b.AssertRender(t, "menu-press-drag-tooltip", func() {
+		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
+		btc := mt.center("Menu")
+		src.MouseButton(events.MouseDown, events.Left, btc, 0)
+		mt.wait("Sub1")
+		mt.b.AsyncLock()
+		tip := NewScene("tip")
+		NewText(tip).SetText("A tooltip")
+		NewPopupStage(TooltipStage, tip, mt.bt).Run()
+		mt.b.AsyncUnlock()
+		p := mt.center("Sub1")
+		src.MouseMove(p)
+		mt.wait("Sub1", "X")
+		p = mt.center("X")
+		src.MouseMove(p)
+		src.MouseButton(events.MouseUp, events.Left, p, 0)
+		mt.wait()
+		assert.Equal(t, []string{"X"}, mt.clicked)
+	})
+}

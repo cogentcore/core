@@ -306,6 +306,9 @@ func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 	}
 	pos := e.WindowPos()
 	chain := pm.menuChain()
+	if len(chain) == 0 {
+		return false
+	}
 	root := chain[len(chain)-1] // (opened by the pressed button)
 	// the menu under the pointer, if any, and the item there
 	idx := slices.IndexFunc(chain, func(s *Stage) bool {
@@ -376,11 +379,15 @@ func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 }
 
 // menuChain returns the menu stages at the top of the stack, from the top
-// one down: a menu and its submenus.
+// one down: a menu and its submenus, skipping the stages that ignore
+// events, such as the tooltip of an item.
 func (pm *stages) menuChain() []*Stage {
 	var chain []*Stage
 	for i := pm.stack.Len() - 1; i >= 0; i-- {
 		s := pm.stack.ValueByIndex(i)
+		if s.ignoreEvents {
+			continue
+		}
 		if s.Type != MenuStage {
 			break
 		}
@@ -413,20 +420,13 @@ func (pm *stages) parentMenuPress(top *Stage, e events.Event) bool {
 		return false
 	}
 	pos := e.WindowPos()
-	n := pm.stack.Len()
-	for i := n - 2; i >= 0; i-- {
-		s := pm.stack.ValueByIndex(i)
-		if s.Type != MenuStage {
-			return false
-		}
-		if s.ignoreEvents || s.Scene == nil || !pos.In(s.Scene.SceneGeom.Bounds()) {
+	chain := pm.menuChain()
+	for i := 1; i < len(chain); i++ {
+		s := chain[i]
+		if s.Scene == nil || !pos.In(s.Scene.SceneGeom.Bounds()) {
 			continue
 		}
-		var above []*Stage
-		for j := n - 1; j > i; j-- {
-			above = append(above, pm.stack.ValueByIndex(j))
-		}
-		for _, a := range above {
+		for _, a := range chain[:i] {
 			pm.deleteStage(a)
 		}
 		s.popupHandleEvent(e)
