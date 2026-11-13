@@ -90,7 +90,36 @@ func TestMDToHTML(t *testing.T) {
 y = 1
 \]</span></p>`},
 		{"### Control+Shift", `<h3 id="control-shift">Control+Shift</h3>`},
-		{"A $5 and $ 6 fee.", `<p>A $5 and $ 6 fee.</p>`},
+		{"A $5 and $6 fee.", `<p>A $5 and $6 fee.</p>`},
+		{"Faces $k = \\pm 1 $ here.", `<p>Faces <span class="math inline">\(k = \pm 1 \)</span> here.</p>`},
+		// figure captions get typographic punctuation, except in tags and math
+		{"![A \"b\" -- it's ''c'' <a href=\"x\">d</a> $x'$](a.png)", "<p><img src=\"a.png\" alt=\"A \u201cb\u201d \u2013 it\u2019s \u201cc\u201d &lt;a href=&quot;x&quot;&gt;d&lt;/a&gt; $x'$\"></p>"},
+		// pipes in math do not split table cells; currency does not start math
+		{"| a | b |\n|---|---|\n| $|\\psi\\rangle$ | $\\|x\\|$ |\n| $5 | $6 |", `<table>
+<thead>
+<tr>
+<th>a</th>
+<th>b</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math inline">\(|\psi\rangle\)</span></td>
+<td><span class="math inline">\(\|x\|\)</span></td>
+</tr>
+<tr>
+<td>$5</td>
+<td>$6</td>
+</tr>
+</tbody>
+</table>`},
+		// a $$ block is raw math, without markdown
+		{"Text\n$$\n- a_1 \\\\\n_b_ & c\n$$\nafter", "<p>Text</p>\n<p><span class=\"math display\">\\[\n- a_1 \\\\\n_b_ &amp; c\n\\]</span></p>\n<p>after</p>"},
+		{"A:\n$$x = 1$$\nso b.", "<p>A:</p>\n<p><span class=\"math display\">\\[x = 1\\]</span></p>\n<p>so b.</p>"},
+		// the attributes of an equation are only for its handlers
+		{"{id=\"eq_a\" title=\"A\"}\n$$\nx = 1\n$$", `<p><span class="math display">\[
+x = 1
+\]</span></p>`},
 	}
 	for _, tt := range tests {
 		assert.Equal(t, tt.want, strings.TrimSpace(string(MDToHTML(ctx, []byte(tt.md)))), tt.md)
