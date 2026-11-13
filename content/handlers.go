@@ -34,6 +34,7 @@ import (
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
 	"github.com/yuin/goldmark/ast"
+	east "github.com/yuin/goldmark/extension/ast"
 )
 
 // BindTextEditor is a function set to [cogentcore.org/core/mvmcore.BindTextEditor]
@@ -50,7 +51,7 @@ func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, no
 	if lbl == "" {
 		return false
 	}
-	if _, ok := node.FirstChild().(*ast.Image); ok { // image: its own label
+	if _, ok := node.FirstChild().(*ast.Image); ok || node.Kind() == east.KindTable { // own label
 		return false
 	}
 	if entering {
