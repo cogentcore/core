@@ -242,3 +242,22 @@ func TestScriptDialogs(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(launcher), "goal --all\n")
 }
+
+// TestEditorSelectedScript tests finding the script of the selected entry
+// of the editor of the commands, which it edits.
+func TestEditorSelectedScript(t *testing.T) {
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	ps := psgrep()
+	ens := []*Entry{{Name: "Text", Children: []*Entry{{Command: "grep"}, {Name: "psgrep", Script: ps}}}}
+	b := core.NewBody()
+	tt := core.NewTreeTable(b)
+	tt.SetItems(&ens)
+	b.AssertRender(t, "editor-selected-script", func() {
+		assert.Nil(t, selectedEntry(tt))
+		tt.SelectedIndex = 2 // (as a click does)
+		require.NotNil(t, selectedEntry(tt))
+		assert.Equal(t, ps, selectedEntry(tt).Script)
+		tt.SelectedIndex = 1
+		assert.Equal(t, "grep", selectedEntry(tt).Command)
+	})
+}

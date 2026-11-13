@@ -248,3 +248,31 @@ func TestMenuPressDragTooltip(t *testing.T) {
 		assert.Equal(t, []string{"X"}, mt.clicked)
 	})
 }
+
+// TestMenuItemContextMenu tests the context menu of an item of a menu,
+// which is opened on top of the menu by right-clicking the item, and whose
+// items can be clicked, such as to edit a script of the commands.
+func TestMenuItemContextMenu(t *testing.T) {
+	mt := newMenuTest(t, func(mt *menuTest, m *Scene) {
+		mt.item(m, "A", nil)
+		b := NewButton(m).SetText("B")
+		b.AddContextMenu(func(m *Scene, pos image.Point) { mt.item(m, "Edit B", nil) })
+	})
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	mt.b.AssertRender(t, "menu-item-context-menu", func() {
+		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
+		click := func(text string, but events.Buttons) {
+			p := mt.center(text)
+			src.MouseMove(p)
+			src.MouseButton(events.MouseDown, but, p, 0)
+			src.MouseButton(events.MouseUp, but, p, 0)
+		}
+		click("Menu", events.Left)
+		mt.wait("A")
+		click("B", events.Right)
+		mt.wait("A", "Edit B")
+		click("Edit B", events.Left)
+		mt.wait()
+		assert.Equal(t, []string{"Edit B"}, mt.clicked)
+	})
+}

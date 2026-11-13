@@ -351,6 +351,28 @@ func (cs *Commands) Edit(ctx core.Widget) {
 	tt.SetDragMoves(true)
 	tt.SetItems(&cs.Entries)
 	tt.OnChange(func(e events.Event) { cs.Changed(tt) })
+	// the script of an entry is edited in its own editor
+	selectedScript := func() *Script {
+		if en := selectedEntry(tt); en != nil {
+			return en.Script
+		}
+		return nil
+	}
+	editScript := func() bool {
+		s := selectedScript()
+		if s != nil {
+			cs.EditScript(tt, "", s)
+		}
+		return s != nil
+	}
+	tt.AddContextMenu(func(m *core.Scene, _ image.Point) {
+		if selectedScript() == nil {
+			return
+		}
+		core.NewSeparator(m)
+		core.NewButton(m).SetText("Edit script").SetIcon(icons.Code).OnClick(func(e events.Event) { editScript() })
+	})
+	tt.OnDoubleClick(func(e events.Event) { editScript() })
 	cs.views.Lock()
 	cs.views.editor = tt
 	cs.views.Unlock()
@@ -381,6 +403,14 @@ func (cs *Commands) Edit(ctx core.Widget) {
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				w.SetText("Edit script").SetIcon(icons.Edit).SetTooltip("Edit the script of the selected entry (or double-click it, or use its context menu)")
+				w.OnClick(func(e events.Event) {
+					if !editScript() {
+						core.MessageSnackbar(w, "Select the entry of a script to edit it")
+					}
+				})
+			})
+			tree.Add(p, func(w *core.Button) {
 				w.SetText("Add script").SetIcon(icons.Code).SetTooltip("Add a script at the end, written in its editor, for things that are more than a command line")
 				w.OnClick(func(e events.Event) { cs.NewScript(w, "", "") })
 			})
@@ -403,6 +433,20 @@ func (cs *Commands) Edit(ctx core.Widget) {
 		})
 	})
 	b.RunWindow()
+}
+
+// selectedEntry returns the selected entry of the given editor of the
+// commands, or nil if there is none.
+func selectedEntry(tt *core.TreeTable) *Entry {
+	rows := reflect.ValueOf(tt.Slice)
+	if rows.Kind() == reflect.Pointer {
+		rows = rows.Elem()
+	}
+	if i := tt.SelectedIndex; rows.Kind() == reflect.Slice && i >= 0 && i < rows.Len() {
+		en, _ := rows.Index(i).Interface().(*Entry)
+		return en
+	}
+	return nil
 }
 
 // RunDialog shows the form of the flags and arguments of the given

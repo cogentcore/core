@@ -353,7 +353,7 @@ func (cs *Commands) NewScriptDialog(ctx core.Widget, root string, s, old *Script
 		s.Grow.Set(1, 1)
 	})
 	core.NewText(d).SetType(core.TextTitleSmall).SetText("Arguments")
-	core.NewText(d).SetType(core.TextSupporting).SetText("The arguments, $1, $2, and so on, in order, which are prompted for when the script runs: text, a switch (passed as its On value, or empty if it is off), or a file.")
+	core.NewText(d).SetType(core.TextSupporting).SetText("The arguments, $1, $2, and so on, in order, which are prompted for when the script runs: text, a switch (passed as its On value, or empty if it is off), or a file. Add one with Add argument at the top, or the context menu of the table (right-click).")
 	tb := core.NewTable(d).SetSlice(&es.Args)
 	d.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
