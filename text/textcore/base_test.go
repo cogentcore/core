@@ -6,6 +6,7 @@ package textcore
 
 import (
 	"embed"
+	"image"
 	"testing"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // waitMarkup returns a function to pass to [core.Body.AssertRender] that
@@ -226,5 +228,37 @@ func TestEditorInput(t *testing.T) {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, 4, n)
 		assert.Equal(t, "Go\n\n", text)
+	})
+}
+
+// TestReadOnlyClear tests that the Kill key (Control+K, or Command+K on
+// macOS) clears a read-only editor, as its Clear context menu item, which
+// shows it, does.
+func TestReadOnlyClear(t *testing.T) {
+	b := core.NewBody()
+	ed := NewEditor(b)
+	ed.Lines.SetString("some output\nmore output\n")
+	ed.SetReadOnly(true)
+	b.AssertRender(t, "read-only-clear", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		m := core.NewScene()
+		for _, cm := range ed.ContextMenus {
+			cm(m, image.Point{})
+		}
+		var clear *core.Button
+		for _, kid := range m.Children {
+			if bt, ok := kid.(*core.Button); ok && bt.Text == "Clear" {
+				clear = bt
+			}
+		}
+		require.NotNil(t, clear)
+		assert.NotEmpty(t, clear.Shortcut, "the Kill key")
+
+		ctrl := key.Modifiers(0)
+		ctrl.SetFlag(true, key.Control)
+		ed.SetFocus()
+		ed.HandleEvent(events.NewKey(events.KeyChord, 'k', key.CodeK, ctrl))
+		assert.Equal(t, "\n", ed.Lines.String(), "one empty line")
 	})
 }
