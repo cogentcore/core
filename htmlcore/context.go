@@ -23,8 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/v2/ast"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -188,7 +187,7 @@ type Context struct {
 
 	// markdown is the goldmark converter of markdown for this context,
 	// made once on first use by [MDToHTML].
-	markdown     goldmark.Markdown
+	markdown     *Markdown
 	markdownOnce sync.Once
 
 	// OnTransition, if set, is called with the transitions of the

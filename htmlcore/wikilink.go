@@ -13,9 +13,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/system"
 
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/text"
 )
 
 // WikilinkHandler is a function that converts wikilink text to
@@ -93,17 +93,21 @@ func (wp wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		}
 		// TODO: we just treat broken wikilinks like plaintext for now, but we should
 		// make red links instead at some point
-		return ast.NewString(append(append([]byte{}, inside...), after...))
+		return newString(string(inside) + string(after))
 	}
-	link := ast.NewLink()
-	link.Destination = url
-	link.AppendChild(link, ast.NewString(append(label, after...)))
+	link := ast.NewLink(text.NewSingleLineValueFromString(string(url), text.IdentityDecoder))
+	link.AppendChild(newString(string(label) + string(after)))
 	return link
 }
 
 // getWikilinkText gets the wikilink text from the given raw text data starting with [[.
 // Inside contains the text inside the [[]], and after contains all of the text
 // after the ]] until there is a space or punctuation.
+// newString returns a text node with the given literal text.
+func newString(s string) *ast.Text {
+	return ast.NewText(text.NewSingleLineValueFromString(s, text.IdentityDecoder))
+}
+
 func getWikilinkText(data []byte) (inside, after []byte) {
 	i := 2
 	for ; i < len(data); i++ {

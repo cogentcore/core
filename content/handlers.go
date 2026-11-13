@@ -33,8 +33,8 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
-	"github.com/yuin/goldmark/ast"
-	east "github.com/yuin/goldmark/extension/ast"
+	"github.com/yuin/goldmark/v2/ast"
+	east "github.com/yuin/goldmark/v2/extension/ast"
 )
 
 // BindTextEditor is a function set to [cogentcore.org/core/mvmcore.BindTextEditor]

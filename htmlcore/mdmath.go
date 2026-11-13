@@ -6,11 +6,14 @@ package htmlcore
 
 import (
 	"bytes"
+	"io"
 
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/text"
-	"github.com/yuin/goldmark/util"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/renderer"
+	"github.com/yuin/goldmark/v2/renderer/html"
+	"github.com/yuin/goldmark/v2/text"
+	"github.com/yuin/goldmark/v2/util"
 )
 
 // kindMath is the kind of a [mathNode].
@@ -29,7 +32,14 @@ type mathNode struct {
 
 func (n *mathNode) Kind() ast.NodeKind { return kindMath }
 
-func (n *mathNode) Dump(source []byte, level int) { ast.DumpHelper(n, source, level, nil, nil) }
+func (n *mathNode) Dump(source []byte) *ast.NodeDump { return ast.NewNodeDump(n, nil) }
+
+// newMathNode returns a new [mathNode].
+func newMathNode(value []byte, display bool, seg text.Segment) *mathNode {
+	n := &mathNode{Value: value, Display: display, Segment: seg}
+	n.Init(n)
+	return n
+}
 
 // mathParser parses $inline$ math, on one line, and $$display$$ math,
 // which may span lines of a paragraph.
@@ -48,7 +58,7 @@ func (mathParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) a
 		return nil
 	}
 	block.Advance(i + 2)
-	return &mathNode{Value: append([]byte{}, rest[:i]...), Segment: text.NewSegment(seg.Start, seg.Start+i+2)}
+	return newMathNode(append([]byte{}, rest[:i]...), false, text.NewSegment(seg.Start, seg.Start+i+2))
 }
 
 // inlineMathEnd returns the index in s, the text after an opening $, of
@@ -90,7 +100,7 @@ func parseDisplayMath(block text.Reader) ast.Node {
 			buf = append(buf, line[:i]...)
 			_, end := block.PeekLine()
 			block.Advance(i + 2)
-			return &mathNode{Value: buf, Display: true, Segment: text.NewSegment(seg.Start, end.Start+i+2)}
+			return newMathNode(buf, true, text.NewSegment(seg.Start, end.Start+i+2))
 		}
 		buf = append(buf, line...)
 		block.AdvanceLine()
@@ -98,7 +108,8 @@ func parseDisplayMath(block text.Reader) ast.Node {
 }
 
 // renderMath renders a [mathNode].
-func renderMath(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+func renderMath(writer io.Writer, source []byte, node ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	w := writer.(util.BufWriter)
 	if !entering {
 		return ast.WalkContinue, nil
 	}
@@ -198,15 +209,16 @@ var kindMathBlock = ast.NewNodeKind("MathBlock")
 type mathBlock struct {
 	ast.BaseBlock
 
+	// lines are the raw lines of the math.
+	lines text.Lines
+
 	// closed is whether the closing $$ has been read.
 	closed bool
 }
 
 func (n *mathBlock) Kind() ast.NodeKind { return kindMathBlock }
 
-func (n *mathBlock) IsRaw() bool { return true }
-
-func (n *mathBlock) Dump(source []byte, level int) { ast.DumpHelper(n, source, level, nil, nil) }
+func (n *mathBlock) Dump(source []byte) *ast.NodeDump { return ast.NewNodeDump(n, nil) }
 
 // mathBlockParser parses a [mathBlock].
 type mathBlockParser struct{}
@@ -228,18 +240,19 @@ func (mathBlockParser) Open(parent ast.Node, reader text.Reader, pc parser.Conte
 	start := pos + 2
 	rest := line[start:]
 	n := &mathBlock{}
+	n.Init(n)
 	if e := bytes.Index(rest, []byte("$$")); e >= 0 {
 		// The math is on this line, which must have nothing after it.
 		if !util.IsBlank(rest[e+2:]) {
 			return nil, parser.NoChildren
 		}
-		n.Lines().Append(text.NewSegment(seg.Start+start, seg.Start+start+e))
+		n.lines.AppendSegment(text.NewSegment(seg.Start+start, seg.Start+start+e))
 		n.closed = true
 		reader.AdvanceToEOL()
 		return n, parser.Close
 	}
 	// The newline of the first line is kept, as gomarkdown did.
-	n.Lines().Append(text.NewSegment(seg.Start+start, seg.Stop))
+	n.lines.AppendSegment(text.NewSegment(seg.Start+start, seg.Stop))
 	reader.AdvanceToEOL()
 	return n, parser.NoChildren
 }
@@ -248,10 +261,8 @@ func (mathBlockParser) Open(parent ast.Node, reader text.Reader, pc parser.Conte
 // is not closed yet: an odd number of $$.
 func openDisplayMath(p *ast.Paragraph, source []byte) bool {
 	n := 0
-	lines := p.Lines()
-	for i := range lines.Len() {
-		seg := lines.At(i)
-		n += bytes.Count(seg.Value(source), []byte("$$"))
+	for _, seg := range p.Source() {
+		n += bytes.Count(seg.Bytes(source), []byte("$$"))
 	}
 	return n%2 == 1
 }
@@ -264,12 +275,12 @@ func (mathBlockParser) Continue(node ast.Node, reader text.Reader, pc parser.Con
 	line, seg := reader.PeekLine()
 	if e := bytes.Index(line, []byte("$$")); e >= 0 {
 		if e > 0 {
-			node.Lines().Append(text.NewSegment(seg.Start, seg.Start+e))
+			node.(*mathBlock).lines.AppendSegment(text.NewSegment(seg.Start, seg.Start+e))
 		}
 		reader.AdvanceToEOL()
 		return parser.Close
 	}
-	node.Lines().Append(seg)
+	node.(*mathBlock).lines.AppendSegment(seg)
 	reader.AdvanceToEOL()
 	return parser.Continue | parser.NoChildren
 }
@@ -282,16 +293,13 @@ func (mathBlockParser) CanAcceptIndentedLine() bool { return false }
 
 // renderMathBlock renders a [mathBlock]. Its attributes are only for the
 // [Context.AttributeHandlers] (as the label of an equation).
-func renderMathBlock(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+func renderMathBlock(writer io.Writer, source []byte, node ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	w := writer.(util.BufWriter)
 	if !entering {
 		return ast.WalkContinue, nil
 	}
 	w.WriteString(`<p><span class="math display">\[`)
-	lines := node.Lines()
-	for i := range lines.Len() {
-		seg := lines.At(i)
-		w.Write(util.EscapeHTML(seg.Value(source)))
-	}
+	node.(*mathBlock).lines.WriteTo(html.ContextTextWriter(rc), source)
 	w.WriteString("\\]</span></p>\n")
 	return ast.WalkContinue, nil
 }
