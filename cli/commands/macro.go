@@ -82,6 +82,21 @@ func (mc *Macro) same(o *Macro) bool {
 	return o != nil && mc.SubCmd == o.SubCmd && mc.Name == o.Name
 }
 
+// Macro returns the macro of the given command, such as git, with the
+// given subcommand ("commit", or [MainName]) and name, or nil if there is
+// none.
+func (cs *Commands) Macro(root, sub, name string) *Macro {
+	cm := cs.cached(root)
+	if cm == nil {
+		return nil
+	}
+	want := &Macro{SubCmd: sub, Name: name}
+	if i := slices.IndexFunc(cm.Macros, want.same); i >= 0 {
+		return cm.Macros[i]
+	}
+	return nil
+}
+
 // promptFlag is whether an argument of a [SubCmd.MacroStruct] is prompted
 // for when the macro runs, which is shown as a checkbox.
 type promptFlag bool
