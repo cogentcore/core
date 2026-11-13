@@ -95,10 +95,14 @@ func (cs *Commands) Bar(parent core.Widget, run RunFunc) *core.Toolbar {
 			tree.AddAt(p, fmt.Sprintf("entry-%p", en), func(w *core.Button) {
 				w.SetType(core.ButtonAction)
 				w.OnClick(func(e events.Event) {
-					if w.Menu == nil && !en.IsCategory() {
+					switch {
+					case en.Script != nil:
+						cs.RunScript(w, "", en.Script, run)
+					case w.Menu == nil && !en.IsCategory():
 						cs.RunDialog(w, en.Command, run)
 					}
 				})
+				cs.scriptContextMenu(w, "", func() *Script { return en.Script })
 				w.Updater(func() { cs.configEntry(w, en, run) })
 			})
 		}
@@ -138,6 +142,12 @@ func (cs *Commands) configEntry(w *core.Button, en *Entry, run RunFunc) {
 		w.SetMenu(func(m *core.Scene, _ image.Point) { cs.menu(m, en.Children, run) })
 		return
 	}
+	if en.Script != nil {
+		w.Menu = nil
+		configScript(w, en.Script)
+		w.SetText(en.Label())
+		return
+	}
 	cs.configCommand(w, en.Command, run)
 }
 
@@ -154,7 +164,7 @@ func (cs *Commands) configCommand(w *core.Button, cmd string, run RunFunc) {
 	root, name := splitCmd(cmd)
 	tip := cmd
 	if cm := cs.cached(root); cm != nil {
-		if name == "" && (cm.HasSubCmds() || len(cm.Macros) > 0) {
+		if name == "" && (cm.HasSubCmds() || len(cm.Macros) > 0 || len(cm.Scripts) > 0) {
 			w.SetTooltip(tooltip(root, cm.Doc))
 			w.SetMenu(func(m *core.Scene, _ image.Point) { cs.subCmdsMenu(m, root, run) })
 			return
@@ -206,14 +216,22 @@ func (cs *Commands) menu(m *core.Scene, ens []*Entry, run RunFunc) {
 			cs.configEntry(b, en, run)
 			continue
 		}
+		if s := en.Script; s != nil {
+			b := core.NewButton(m)
+			cs.configEntry(b, en, run)
+			cs.scriptContextMenu(b, "", func() *Script { return s })
+			b.OnClick(func(e events.Event) { cs.RunScript(b, "", s, run) })
+			continue
+		}
 		cs.commandButton(m, en.Label(), en.Command, run)
 	}
 }
 
 // subCmdsMenu adds the buttons of the subcommands of the given command,
 // such as git, to the given menu: those of the command, not the nested
-// ones (see [Commands.nestedMenu]), after its macros (see [Macro]), or
-// the command itself, if it has none. If the command has [Entry.Common]
+// ones (see [Commands.nestedMenu]), after its macros (see [Macro]) and
+// scripts (see [Script]), or the command itself, if it has none, followed
+// by a submenu to make and edit its scripts. If the command has [Entry.Common]
 // subcommands, they are in the menu, followed by a submenu of the others,
 // sorted by name. Otherwise, the subcommands of the first group (see
 // [SubCmd.Group]) are in the menu, and those of the others in submenus
@@ -224,6 +242,11 @@ func (cs *Commands) subCmdsMenu(m *core.Scene, root string, run RunFunc) {
 		return
 	}
 	cs.macrosMenu(m, cm, run)
+	cs.scriptsMenu(m, cm, run)
+	defer func() {
+		core.NewSeparator(m)
+		cs.editScriptsMenu(m, cm)
+	}()
 	if !cm.HasSubCmds() { // the command itself
 		// (its form, not the menu of its macros, which this is)
 		b := core.NewButton(m).SetText(label(root)).SetIcon(icons.Terminal).SetTooltip(tooltip(root, cm.Doc))
@@ -358,6 +381,10 @@ func (cs *Commands) Edit(ctx core.Widget) {
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
+				w.SetText("Add script").SetIcon(icons.Code).SetTooltip("Add a script at the end, written in its editor, for things that are more than a command line")
+				w.OnClick(func(e events.Event) { cs.NewScript(w, "", "") })
+			})
+			tree.Add(p, func(w *core.Button) {
 				w.SetText("Reset").SetIcon(icons.Reset).SetTooltip("Replace the commands with the standard ones")
 				w.OnClick(func(e events.Event) {
 					d := core.NewBody("Reset commands")
@@ -394,7 +421,7 @@ func (cs *Commands) RunDialog(ctx core.Widget, cmd string, run RunFunc) {
 		root, name := splitCmd(cmd)
 		cm, err := cs.Cmd(root, false)
 		var sc *SubCmd
-		if err == nil && !(name == "" && (cm.HasSubCmds() || len(cm.Macros) > 0)) {
+		if err == nil && !(name == "" && (cm.HasSubCmds() || len(cm.Macros) > 0 || len(cm.Scripts) > 0)) {
 			sc, err = cs.SubCmd(cmd, false)
 		}
 		cs.updateViews(nil)
@@ -497,6 +524,13 @@ func (cs *Commands) NewDialog(ctx core.Widget, sc *SubCmd, run RunFunc) *core.Bo
 				mc := &Macro{SubCmd: sc.Name, Values: sc.ArgsOf(values)}
 				d.Close()
 				runDialog(cs.NewMacroDialog(ctx, root, sc, mc, nil, run), ctx)
+			})
+		core.NewButton(bar).SetType(core.ButtonOutlined).SetText("New script").SetIcon(icons.Code).
+			SetTooltip("Make a script of the command, starting with this command line, in the menu of the command, for things that are more than a command line").
+			OnClick(func(e events.Event) {
+				root, _ := splitCmd(sc.Cmd)
+				d.Close()
+				cs.NewScript(ctx, root, NewScriptCode[:len(NewScriptCode)-1]+sc.CommandLine(values)+"\n")
 			})
 		d.AddOK(bar).SetText("Run").SetIcon(icons.PlayArrow).OnClick(func(e events.Event) {
 			if cs.Args != nil {

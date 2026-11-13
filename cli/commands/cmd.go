@@ -47,6 +47,11 @@ type Cmd struct {
 	// are at the top of the menu of the command (see [Macro]). They are
 	// kept when the command is parsed again.
 	Macros []*Macro `json:",omitempty"`
+
+	// Scripts are the scripts of the command, made by the user, which are
+	// in the menu of the command after its macros (see [Script]). They are
+	// kept when the command is parsed again.
+	Scripts []*Script `json:",omitempty"`
 }
 
 // IsParsed returns whether the help of the command has been parsed: it

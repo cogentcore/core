@@ -378,15 +378,15 @@ func TestSubCmdMenu(t *testing.T) {
 	}
 	m := core.NewScene()
 	cs.subCmdsMenu(m, "git", nil)
-	assert.Equal(t, []string{"Status", "Add", "More"}, texts(m))
+	assert.Equal(t, []string{"Status", "Add", "More", "Scripts"}, texts(m), "with the submenu of the scripts at the end")
 	more := core.NewScene()
-	m.Children[len(m.Children)-1].(*core.Button).Menu(more, image.Point{})
+	m.Children[len(m.Children)-3].(*core.Button).Menu(more, image.Point{}) // (before a separator)
 	assert.Equal(t, []string{"Archive", "Bisect"}, texts(more))
 
 	cs.Entries[0].Common = "" // by group
 	m = core.NewScene()
 	cs.subCmdsMenu(m, "git", nil)
-	assert.Equal(t, []string{"Add", "Bisect", "Status", "Ancillary"}, texts(m))
+	assert.Equal(t, []string{"Add", "Bisect", "Status", "Ancillary", "Scripts"}, texts(m))
 }
 
 // TestArgs tests saving the arguments last used for a subcommand, and
@@ -509,7 +509,7 @@ func TestBunLike(t *testing.T) {
 			texts = append(texts, b.Text)
 		}
 	}
-	assert.Equal(t, []string{"Run", "Test", "Install"}, texts)
+	assert.Equal(t, []string{"Run", "Test", "Install", "Scripts"}, texts)
 }
 
 // TestSharedFlags tests that the go subcommands whose usage names the build

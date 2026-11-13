@@ -48,21 +48,28 @@ type Entry struct {
 	// Children are the entries in the category.
 	Children []*Entry `display:"-"`
 
+	// Script is the script of an entry that is a script (see [Script]),
+	// rather than a command, which is edited in its own editor.
+	Script *Script `json:",omitempty" display:"-"`
+
 	// Closed is whether the category is closed in the editor.
 	Closed bool `display:"-" treetable:"closed"`
 }
 
 // IsCategory returns whether the entry is a category of commands: it has
-// children, or no command.
+// children, or no command or script.
 func (en *Entry) IsCategory() bool {
-	return len(en.Children) > 0 || en.Command == ""
+	return len(en.Children) > 0 || (en.Command == "" && en.Script == nil)
 }
 
-// Label returns the text shown for the entry: its name, or else the last
-// word of its command.
+// Label returns the text shown for the entry: its name, or else that of
+// its script, or the last word of its command.
 func (en *Entry) Label() string {
 	if en.Name != "" {
 		return en.Name
+	}
+	if en.Script != nil && en.Script.Name != "" {
+		return en.Script.Name
 	}
 	return cmp.Or(label(en.Command), "Commands")
 }
@@ -202,7 +209,8 @@ func (cs *Commands) syncLocked() bool {
 // mergeLocked merges the given data of the file into the commands, under
 // the mutex: the entries are those of the file, and the parsed commands
 // are merged with those parsed here. A file of another version only has
-// its macros taken (made by the user), and one of the first version none.
+// its macros and scripts taken (made by the user), and one of the first
+// version none.
 func (cs *Commands) mergeLocked(fc *commandsData) {
 	if fc.Version < 2 {
 		return
@@ -212,13 +220,13 @@ func (cs *Commands) mergeLocked(fc *commandsData) {
 	cs.Entries = fc.Entries
 	if fc.Version != version {
 		for root, fcm := range fc.Parsed {
-			if len(fcm.Macros) == 0 {
+			if len(fcm.Macros) == 0 && len(fcm.Scripts) == 0 {
 				continue
 			}
 			if cm := cs.Parsed[root]; cm != nil {
-				cm.Macros = fcm.Macros
+				cm.Macros, cm.Scripts = fcm.Macros, fcm.Scripts
 			} else {
-				cs.Parsed[root] = &Cmd{Cmd: root, Macros: fcm.Macros}
+				cs.Parsed[root] = &Cmd{Cmd: root, Macros: fcm.Macros, Scripts: fcm.Scripts}
 			}
 		}
 		return
@@ -319,7 +327,7 @@ func (cs *Commands) Cmd(cmd string, reparse bool) (*Cmd, error) {
 	}
 	err = cs.update(func() {
 		if old := cs.Parsed[cmd]; old != nil {
-			cm.Macros = old.Macros
+			cm.Macros, cm.Scripts = old.Macros, old.Scripts
 			for i, sc := range cm.SubCmds {
 				if osc := old.SubCmd(sc.Name); osc != nil && osc.IsParsed() && !sc.IsParsed() {
 					cm.SubCmds[i] = osc

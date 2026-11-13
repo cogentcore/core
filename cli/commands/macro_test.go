@@ -101,7 +101,7 @@ func TestMacros(t *testing.T) {
 	assert.Equal(t, "Git commit work", texts(m)[0])
 	m = core.NewScene()
 	cs.subCmdsMenu(m, "ls", nil)
-	assert.Equal(t, []string{"Ls long", "Ls"}, texts(m), "ls has a menu with its macros")
+	assert.Equal(t, []string{"Ls long", "Ls", "Scripts"}, texts(m), "ls has a menu with its macros")
 
 	// another process, with a file of another version
 	b, err := os.ReadFile(file)

@@ -21,6 +21,11 @@ type Args struct {
 	// Cmds are the arguments of the commands, by command: "git".
 	Cmds map[string]*CmdArgs
 
+	// Scripts are the values of the arguments of the scripts, by the key
+	// of the script (see [scriptKey]), and by the name of the argument:
+	// "true" for a switch that is on.
+	Scripts map[string]map[string]string
+
 	// file is the file the arguments are saved in, which other processes
 	// (apps) share.
 	file sharedfile.File[argsData]
@@ -63,7 +68,8 @@ func OpenArgs(filename string) *Args {
 
 // argsData are the data of the file of the [Args].
 type argsData struct {
-	Cmds map[string]*CmdArgs
+	Cmds    map[string]*CmdArgs
+	Scripts map[string]map[string]string `json:",omitempty"`
 }
 
 // syncLocked reads the file of the arguments if another process has
@@ -76,6 +82,7 @@ func (as *Args) syncLocked() {
 	if as.file.Data.Cmds != nil {
 		as.Cmds = as.file.Data.Cmds
 	}
+	as.Scripts = as.file.Data.Scripts
 }
 
 // get returns the arguments last used for the given subcommand, or nil.
@@ -111,6 +118,7 @@ func (as *Args) Set(sc *SubCmd, values any) error {
 		}
 		ca.SubCmds[sc.Name] = sa
 		d.Cmds = as.Cmds
+		as.Scripts = d.Scripts
 	})
 }
 
@@ -118,4 +126,55 @@ func (as *Args) Set(sc *SubCmd, values any) error {
 // (see [SubCmd.FormStruct]) to the arguments last used for it, if any.
 func (as *Args) SetValues(sc *SubCmd, values any) {
 	as.get(sc).SetValues(sc, values)
+}
+
+// scriptKey returns the key of the given script of the given command (""
+// for one of an entry) in the [Args.Scripts].
+func scriptKey(root string, s *Script) string {
+	return root + "/" + s.Name
+}
+
+// ScriptValues returns the values of the arguments last used for the given
+// script of the given command ("" for one of an entry), by name, which are
+// their defaults for those not used yet.
+func (as *Args) ScriptValues(root string, s *Script) map[string]string {
+	values := map[string]string{}
+	var last map[string]string
+	if as != nil {
+		as.mu.Lock()
+		as.syncLocked()
+		last = as.Scripts[scriptKey(root, s)]
+		as.mu.Unlock()
+	}
+	for _, a := range s.Args {
+		v, ok := last[a.Name]
+		if !ok {
+			v = a.Default
+		}
+		values[a.Name] = v
+	}
+	return values
+}
+
+// SetScriptValues sets the values of the arguments last used for the given
+// script of the given command ("" for one of an entry) to the given ones,
+// by name, and saves them.
+func (as *Args) SetScriptValues(root string, s *Script, values map[string]string) error {
+	if as == nil {
+		return nil
+	}
+	as.mu.Lock()
+	defer as.mu.Unlock()
+	return as.file.Update(func(d *argsData) {
+		if d.Cmds != nil {
+			as.Cmds = d.Cmds
+		}
+		as.Scripts = d.Scripts
+		if as.Scripts == nil {
+			as.Scripts = map[string]map[string]string{}
+		}
+		as.Scripts[scriptKey(root, s)] = values
+		d.Cmds = as.Cmds
+		d.Scripts = as.Scripts
+	})
 }
