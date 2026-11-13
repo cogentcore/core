@@ -387,6 +387,14 @@ func (st *Stage) runDialog() *Stage {
 			minx := int(ctx.Scene.Styles.UnitContext.Dp(400))
 			sz.X = max(sz.X, minx)
 		}
+		if st.MinSize != (math32.Vector2{}) {
+			uc := &ctx.Scene.Styles.UnitContext
+			sz.X = max(sz.X, int(math32.Ceil(uc.Dp(st.MinSize.X))))
+			sz.Y = max(sz.Y, int(math32.Ceil(uc.Dp(st.MinSize.Y))))
+			if screen := st.targetScreen(); screen != nil && st.NewWindow { // (fits in the screen)
+				sz = image.Pt(min(sz.X, screen.PixelSize.X*9/10), min(sz.Y, screen.PixelSize.Y*9/10))
+			}
+		}
 		sc.SceneGeom.Pos = sc.SceneGeom.Pos.Sub(sz.Div(2)) // center dialogs by default
 		sc.Events.startFocusFirst = true                   // popup dialogs always need focus
 		screen := st.targetScreen()
