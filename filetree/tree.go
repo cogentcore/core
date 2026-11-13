@@ -5,6 +5,7 @@
 package filetree
 
 import (
+	"cogentcore.org/core/base/dirsort"
 	"fmt"
 	"io/fs"
 	"os"
@@ -68,8 +69,19 @@ type Tree struct {
 	// (see [Node.IsApp]).
 	AppsAsDirs bool
 
-	// FS is the file system we are browsing, if it is an FS (nil = os filesystem)
+	// FS is the file system we are browsing, if it is an FS (nil = os filesystem).
+	// Its files can be changed, as those of the os, if it is a [WriteFS],
+	// and otherwise it is read-only.
 	FS fs.FS
+
+	// FSSort is the sort order of the directories of the [Tree.FS], other
+	// than those set with Sort by, which is by name by default. That of
+	// the directories of the os is shared by all apps (see [dirsort.For]).
+	FSSort dirsort.Sort
+
+	// fsSorts are the sort orders of the directories of the [Tree.FS] set
+	// with Sort by, by path.
+	fsSorts map[string]dirsort.Sort
 
 	// inOpenAll indicates whether we are in midst of an OpenAll call; nodes should open all dirs.
 	inOpenAll bool
@@ -182,7 +194,11 @@ func (ft *Tree) OpenPathFS(fsys fs.FS, path string) *Tree {
 // be called.
 func (ft *Tree) UpdatePath(path string) {
 	ft.NeedsRender()
-	path = filepath.Clean(path)
+	path = ft.cleanPath(path)
+	if path == ft.cleanPath(string(ft.Filepath)) { // (such as "." in an FS)
+		ft.Update()
+		return
+	}
 	ft.dirsTo(path)
 	if fn, ok := ft.FindFile(path); ok {
 		if fn.IsDir() {
@@ -190,7 +206,7 @@ func (ft *Tree) UpdatePath(path string) {
 			return
 		}
 	}
-	fpath, _ := filepath.Split(path)
+	fpath := ft.dirOf(path)
 	if fn, ok := ft.FindFile(fpath); ok {
 		fn.Update()
 		return

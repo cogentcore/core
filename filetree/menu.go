@@ -5,7 +5,6 @@
 package filetree
 
 import (
-	"cogentcore.org/core/base/dirsort"
 	"image"
 	"strings"
 
@@ -74,20 +73,21 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	if core.TheApp.Platform() == system.Web {
 		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 	}
-	if fn.HasSelection() && !fn.IsDir() {
+	if fn.HasSelection() && !fn.IsDir() && !fn.isFS() {
 		core.OpenWithMenuItems(m, string(fn.Filepath))
 	}
+	write := fn.HasSelection() && fn.canWrite()
 
 	core.NewSeparator(m)
 
 	core.NewFuncButton(m).SetFunc(fn.duplicateFiles).SetText("Duplicate").
-		SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())
+		SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(write)
 
 	core.NewFuncButton(m).SetFunc(fn.This.(Filer).DeleteFiles).SetText("Delete").
-		SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(fn.HasSelection())
+		SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(write)
 
 	core.NewFuncButton(m).SetFunc(fn.This.(Filer).RenameFiles).SetText("Rename").
-		SetIcon(icons.NewLabel).SetEnabled(fn.HasSelection())
+		SetIcon(icons.NewLabel).SetEnabled(write)
 
 	core.NewSeparator(m)
 
@@ -100,7 +100,7 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	sb := core.NewFuncButton(m).SetFunc(fn.sortBys)
 	sb.SetText("Sort by").SetIcon(icons.Sort).SetEnabled(fn.HasSelection() && fn.IsDir())
 	if fn.IsDir() { // (the current sort order of the directory)
-		s := dirsort.For(string(fn.Filepath))
+		s := fn.dirSort()
 		sb.Args[0].SetValue(s.By)
 		sb.Args[1].SetValue(s.Down)
 	}
@@ -108,33 +108,34 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	core.NewSeparator(m)
 
 	fb := core.NewFuncButton(m).SetFunc(fn.newFiles)
-	fb.SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection())
+	fb.SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection() && !fn.isFS())
 	fb.Args[1].SetValue(true) // todo: not working
 
 	core.NewFuncButton(m).SetFunc(fn.newFolders).SetText("New folder").
-		SetIcon(icons.CreateNewFolder).SetEnabled(fn.HasSelection())
+		SetIcon(icons.CreateNewFolder).SetEnabled(write)
 
 	core.NewSeparator(m)
 
 	fn.VCSContextMenu(m, pos)
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m).SetFunc(fn.removeFromExterns).
-		SetIcon(icons.Delete).SetEnabled(fn.HasSelection())
-
-	core.NewSeparator(m)
+	if !fn.isFS() {
+		core.NewFuncButton(m).SetFunc(fn.removeFromExterns).
+			SetIcon(icons.Delete).SetEnabled(fn.HasSelection())
+		core.NewSeparator(m)
+	}
 
 	core.NewFuncButton(m).SetFunc(fn.Copy).SetIcon(icons.Copy).
 		SetKey(keymap.Copy).SetEnabled(fn.HasSelection())
 
 	core.NewFuncButton(m).SetFunc(fn.Cut).SetIcon(icons.Cut).
-		SetKey(keymap.Cut).SetEnabled(fn.HasSelection())
+		SetKey(keymap.Cut).SetEnabled(write)
 
 	paste := core.NewFuncButton(m).SetFunc(fn.Paste).
-		SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(fn.HasSelection())
+		SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(write)
 
 	cb := fn.Events().Clipboard()
-	if cb != nil {
+	if cb != nil && write {
 		paste.SetState(cb.IsEmpty(), states.Disabled)
 	}
 }
