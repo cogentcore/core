@@ -14,6 +14,7 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
+	east "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/renderer/html"
@@ -55,7 +56,7 @@ func NewMarkdown(ctx *Context) goldmark.Markdown {
 func MDToHTML(ctx *Context, md []byte) []byte {
 	var buf bytes.Buffer
 	pc := parser.NewContext(parser.WithIDs(&headingIDs{values: map[string]bool{}}))
-	if err := NewMarkdown(ctx).Convert(md, &buf, parser.WithContext(pc)); err != nil {
+	if err := ctx.converter().Convert(md, &buf, parser.WithContext(pc)); err != nil {
 		core.ErrorSnackbar(nil, err)
 	}
 	htm := buf.Bytes()
@@ -65,6 +66,16 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 		htm = imageParagraph.ReplaceAll(htm, []byte("<p><img${1}${2}/></p>"))
 	}
 	return htm
+}
+
+// converter returns the goldmark converter of the context, made once on
+// first use, or a new one without Cogent Core extensions for a nil context.
+func (ctx *Context) converter() goldmark.Markdown {
+	if ctx == nil {
+		return NewMarkdown(nil)
+	}
+	ctx.markdownOnce.Do(func() { ctx.markdown = NewMarkdown(ctx) })
+	return ctx.markdown
 }
 
 // imageParagraph matches a paragraph with attributes that is just an image.
@@ -199,16 +210,23 @@ type hookRenderer struct {
 // hookKinds are the kinds of blocks that the [hookRenderer] handles.
 var hookKinds = []ast.NodeKind{ast.KindParagraph, ast.KindHeading, ast.KindFencedCodeBlock, ast.KindCodeBlock, ast.KindBlockquote, ast.KindList, ast.KindThematicBreak, ast.KindHTMLBlock}
 
-func (r *hookRenderer) Register(k ast.NodeKind, f renderer.NodeRendererFunc) { r.base[k] = f }
+// funcMap is a NodeRendererFuncRegisterer that records the functions.
+type funcMap map[ast.NodeKind]renderer.NodeRendererFunc
+
+func (m funcMap) Register(k ast.NodeKind, f renderer.NodeRendererFunc) { m[k] = f }
 
 func (r *hookRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	// The default renderer functions are called for blocks without handlers.
 	r.base = map[ast.NodeKind]renderer.NodeRendererFunc{}
-	html.NewRenderer(html.WithUnsafe()).RegisterFuncs(r)
+	html.NewRenderer(html.WithUnsafe()).RegisterFuncs(funcMap(r.base))
 	reg.Register(ast.KindFencedCodeBlock, r.renderCode)
 	reg.Register(ast.KindImage, r.renderImage)
 	reg.Register(ast.KindLink, r.renderLink)
 	reg.Register(kindMath, renderMath)
+	// Tables are rendered by the GFM table renderer.
+	tr := map[ast.NodeKind]renderer.NodeRendererFunc{}
+	extension.NewTableHTMLRenderer().RegisterFuncs(funcMap(tr))
+	reg.Register(east.KindTable, r.wrap(tr[east.KindTable]))
 	for _, k := range hookKinds {
 		if k == ast.KindFencedCodeBlock {
 			continue

@@ -23,6 +23,7 @@ var _ = register(func() {
 			"Hoverable":            reflect.ValueOf(p_cogentcore_org_core_styles_abilities.Hoverable),
 			"LongHoverable":        reflect.ValueOf(p_cogentcore_org_core_styles_abilities.LongHoverable),
 			"LongPressable":        reflect.ValueOf(p_cogentcore_org_core_styles_abilities.LongPressable),
+			"NoPointerEvents":      reflect.ValueOf(p_cogentcore_org_core_styles_abilities.NoPointerEvents),
 			"Pressable":            reflect.ValueOf(&p_cogentcore_org_core_styles_abilities.Pressable),
 			"RepeatClickable":      reflect.ValueOf(p_cogentcore_org_core_styles_abilities.RepeatClickable),
 			"Scrollable":           reflect.ValueOf(p_cogentcore_org_core_styles_abilities.Scrollable),
