@@ -175,3 +175,47 @@ func TestSubmenuParentClick(t *testing.T) {
 		assert.Equal(t, []string{"Plain"}, mt.clicked)
 	})
 }
+
+// TestMenuPressDragSubmenu tests dragging through submenus with the mouse
+// button pressed on the menu button: dragging over an item with a submenu
+// opens it, in place of another, and releasing over an item of a submenu,
+// or of the menu after dragging back into it, clicks it.
+func TestMenuPressDragSubmenu(t *testing.T) {
+	mt := newMenuTest(t, func(mt *menuTest, m *Scene) {
+		mt.item(m, "Sub1", func(m *Scene) { mt.item(m, "X", nil) })
+		mt.item(m, "Sub2", func(m *Scene) { mt.item(m, "Y", nil) })
+		mt.item(m, "Plain", nil)
+	})
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	mt.b.AssertRender(t, "menu-press-drag-submenu", func() {
+		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
+		drag := func(text string) image.Point {
+			p := mt.center(text)
+			src.MouseMove(p)
+			return p
+		}
+		btc := mt.center("Menu")
+		src.MouseButton(events.MouseDown, events.Left, btc, 0)
+		mt.wait("Sub1")
+		drag("Sub1")
+		mt.wait("Sub1", "X")
+		drag("Sub1") // stays open
+		mt.wait("Sub1", "X")
+		drag("Sub2")
+		mt.wait("Sub1", "Y")
+		p := drag("Y")
+		src.MouseButton(events.MouseUp, events.Left, p, 0)
+		mt.wait()
+		assert.Equal(t, []string{"Y"}, mt.clicked)
+
+		src.MouseButton(events.MouseDown, events.Left, btc, 0)
+		mt.wait("Sub1")
+		drag("Sub2")
+		mt.wait("Sub1", "Y")
+		p = drag("Plain") // closes the submenu
+		mt.wait("Sub1")
+		src.MouseButton(events.MouseUp, events.Left, p, 0)
+		mt.wait()
+		assert.Equal(t, []string{"Y", "Plain"}, mt.clicked)
+	})
+}
