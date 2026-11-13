@@ -160,11 +160,17 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	default:
 		// An element of only inline text (as a paragraph in the browser
 		// style of htmlcore) has no layout of its own, so its text is inline.
+		// A container of floats has block layout, as floats have no effect
+		// in a flex layout.
 		cssID := idName
-		if inlineOnly(wb) {
+		floats := hasFloats(wb)
+		if inlineOnly(wb) || floats {
 			cssID = "text"
 		}
 		css := styles.ToCSS(&wb.Styles, cssID, se.Name.Local) + growCSS(wb)
+		if floats {
+			css += ";display:flow-root" // a block that contains its floats
+		}
 		if _, ok := w.(*core.Button); ok && se.Name.Local == "a" {
 			css += ";text-decoration:none" // link button
 		}
@@ -278,6 +284,16 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		return err
 	}
 	return e.Flush()
+}
+
+// hasFloats returns whether any of the children of the widget float.
+func hasFloats(wb *core.WidgetBase) bool {
+	floats := false
+	wb.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
+		floats = cwb.Styles.Float != styles.FloatNone
+		return !floats
+	})
+	return floats
 }
 
 // inlineElements are the HTML elements that are inline by default, which
