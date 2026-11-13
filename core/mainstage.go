@@ -339,17 +339,27 @@ func (st *Stage) windowSize(initSz image.Point) image.Point {
 }
 
 // getValidContext ensures that the Context is non-nil and has a valid
-// Scene pointer, using CurrentRenderWindow if the current Context is not valid.
-// If CurrentRenderWindow is nil (should not happen), then it returns false and
-// the calling function must bail.
+// Scene pointer, using the top stage of the current render window if the
+// current Context is not valid, or else of the last main window that has one
+// (when the current window is closing). If there is none (should not happen),
+// then it returns false and the calling function must bail.
 func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
-		cw := getCurrentRenderWindow()
-		if cw == nil {
-			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
+		var top *Stage
+		if cw := getCurrentRenderWindow(); cw != nil {
+			top = cw.mains.top()
+		}
+		if top == nil { // the current window is closing, such as a dialog
+			ws := mainRenderWindows.windows()
+			for i := len(ws) - 1; i >= 0 && top == nil; i-- {
+				top = ws[i].mains.top()
+			}
+		}
+		if top == nil || top.Scene == nil {
+			slog.Error("Stage.Run: Context is nil and there is no window with a stage, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = cw.mains.top().Scene
+		st.Context = top.Scene
 	}
 	return true
 }
