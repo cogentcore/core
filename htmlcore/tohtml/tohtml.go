@@ -172,10 +172,6 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		if inlineElements[se.Name.Local] {
 			css += ";display:inline-block"
 		}
-		// The max size of a widget is that of its content box, as in core.
-		if wb.Styles.Max.X.Value > 0 || wb.Styles.Max.Y.Value > 0 {
-			css += ";box-sizing:content-box"
-		}
 		addAttr(se, "style", strings.TrimPrefix(css, ";"))
 	}
 	if class, ok := wb.Property("class").(string); ok {
@@ -347,6 +343,9 @@ func imageCSS(s *styles.Style) string {
 	}
 	if s.Max.Y.Value > 0 {
 		parts = append(parts, "max-height:"+s.Max.Y.StringCSSDp())
+	}
+	if s.ObjectFit != styles.FitFill {
+		parts = append(parts, "object-fit:"+s.ObjectFit.String())
 	}
 	return strings.Join(parts, ";")
 }
