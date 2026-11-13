@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/gomarkdown/markdown/ast"
+	"github.com/yuin/goldmark/ast"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )

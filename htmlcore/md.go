@@ -6,40 +6,59 @@ package htmlcore
 
 import (
 	"bytes"
-	"io"
 	"regexp"
+	"strconv"
+	"unicode"
 
 	"cogentcore.org/core/core"
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/ast"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/util"
 )
 
-var divRegex = regexp.MustCompile("<p(.*?)><div></p>")
-
-func MDToHTML(ctx *Context, md []byte) []byte {
-	// create markdown parser with extensions
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.Attributes | parser.Mmark
-	p := parser.NewWithExtensions(extensions)
-	prev := p.RegisterInline('[', nil)
-	p.RegisterInline('[', wikilink(ctx, prev))
-	// this allows div to work properly:
-	// https://github.com/gomarkdown/markdown/issues/5
-	md = bytes.ReplaceAll(md, []byte("</div>"), []byte("</div><!-- dummy -->"))
-	doc := p.Parse(md)
-
-	// create HTML renderer with extensions
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank
-	opts := html.RendererOptions{Flags: htmlFlags, RenderNodeHook: ctx.mdRenderHook}
-	renderer := html.NewRenderer(opts)
-
-	htm := markdown.Render(doc, renderer)
-	htm = bytes.ReplaceAll(htm, []byte("<p></div><!-- dummy --></p>"), []byte("</div>"))
-	// Every match of divRegex ends with this, and scanning for the regexp is slow.
-	if bytes.Contains(htm, []byte("><div></p>")) {
-		htm = replaceDivs(htm)
+// NewMarkdown returns a goldmark converter with the extensions used for
+// Cogent Core content: GitHub flavored markdown, heading ids, raw HTML,
+// block attributes in a {...} line before a block, links opening in a new
+// tab, and, if ctx is non-nil, wikilinks and its AttributeHandlers.
+func NewMarkdown(ctx *Context) goldmark.Markdown {
+	// The parser has the GFM syntax, heading ids, and block attributes.
+	popts := []parser.Option{
+		parser.WithAutoHeadingID(),
+		parser.WithAttribute(),
+		parser.WithBlockParsers(util.Prioritized(attrBlockParser{}, 50)),
+		parser.WithASTTransformers(util.Prioritized(attrTransformer{}, 100)),
+		parser.WithInlineParsers(util.Prioritized(mathParser{}, 500)),
 	}
+	if ctx != nil {
+		popts = append(popts, parser.WithInlineParsers(util.Prioritized(wikilinkParser{ctx}, 199)))
+	}
+
+	// The renderer writes raw HTML and the attributes of all blocks.
+	ropts := []renderer.Option{
+		html.WithUnsafe(),
+		renderer.WithNodeRenderers(util.Prioritized(&hookRenderer{ctx: ctx}, 100)),
+	}
+	return goldmark.New(
+		goldmark.WithExtensions(extension.GFM, extension.Typographer),
+		goldmark.WithParserOptions(popts...),
+		goldmark.WithRendererOptions(ropts...),
+	)
+}
+
+// MDToHTML converts the given markdown to HTML, using the given context
+// for wikilinks and attribute handlers.
+func MDToHTML(ctx *Context, md []byte) []byte {
+	var buf bytes.Buffer
+	pc := parser.NewContext(parser.WithIDs(&headingIDs{values: map[string]bool{}}))
+	if err := NewMarkdown(ctx).Convert(md, &buf, parser.WithContext(pc)); err != nil {
+		core.ErrorSnackbar(nil, err)
+	}
+	htm := buf.Bytes()
 	if bytes.Contains(htm, []byte("><img ")) {
 		// The attributes of a paragraph that is just an image, as
 		// {id="figure_one" style="height:10em"} before it, are of the image.
@@ -50,46 +69,6 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 
 // imageParagraph matches a paragraph with attributes that is just an image.
 var imageParagraph = regexp.MustCompile(`<p((?: [a-z-]+="[^"]*")+)><img((?: [a-z-]+="[^"]*")*) ?/?></p>`)
-
-// replaceDivs returns divRegex.ReplaceAll(htm, []byte("<div${1}>")): each
-// leftmost "<p" followed on its line by "><div></p>" up to the first one
-// becomes "<div" with the text between them. The regexp backtracks over the
-// lines of all of the HTML, which is slow under JavaScript.
-func replaceDivs(htm []byte) []byte {
-	const open, end = "<p", "><div></p>"
-	var out []byte
-	last, i := 0, 0
-	for {
-		// The next "<p" starts a match if its line has the end after it.
-		p := bytes.Index(htm[i:], []byte(open))
-		if p < 0 {
-			break
-		}
-		p += i
-		from := p + len(open)
-		line := htm[from:]
-		if nl := bytes.IndexByte(line, '\n'); nl >= 0 {
-			line = line[:nl]
-		}
-		e := bytes.Index(line, []byte(end))
-		if e < 0 {
-			i = from
-			continue
-		}
-
-		// The match is replaced by "<div" and the text between.
-		out = append(out, htm[last:p]...)
-		out = append(out, "<div"...)
-		out = append(out, line[:e]...)
-		out = append(out, '>')
-		last = from + e + len(end)
-		i = last
-	}
-	if out == nil {
-		return htm
-	}
-	return append(out, htm[last:]...)
-}
 
 // ReadMD reads MD (markdown) from the given bytes and adds corresponding
 // Cogent Core widgets to the given [core.Widget], using the given context.
@@ -106,67 +85,280 @@ func ReadMDString(ctx *Context, parent core.Widget, s string) error {
 	return ReadMD(ctx, parent, []byte(s))
 }
 
-func (ctx *Context) attrRenderHooks(attr *ast.Attribute, w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {
-	for tag, val := range attr.Attrs {
-		f, has := ctx.AttributeHandlers[tag]
-		if has {
-			b := f(ctx, w, node, entering, tag, string(val))
-			return ast.GoToNext, b
-		}
-	}
-	return ast.GoToNext, false
+// headingIDs generates heading ids as gomarkdown did: lowercase letters
+// and numbers, with a dash for each run of other characters between them.
+type headingIDs struct {
+	values map[string]bool
 }
 
-func (ctx *Context) mdRenderHook(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {
-	cont := node.AsContainer()
-	if cont != nil && cont.Attribute != nil {
-		return ctx.attrRenderHooks(cont.Attribute, w, node, entering)
+func (s *headingIDs) Generate(value []byte, kind ast.NodeKind) []byte {
+	var id []rune
+	dash := false
+	for _, r := range string(value) {
+		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			dash = true
+			continue
+		}
+		if dash && len(id) > 0 {
+			id = append(id, '-')
+		}
+		dash = false
+		id = append(id, unicode.ToLower(r))
 	}
-	leaf := node.AsLeaf()
-	if leaf != nil && leaf.Attribute != nil {
-		return ctx.attrRenderHooks(leaf.Attribute, w, node, entering)
+	res := string(id)
+	if res == "" {
+		res = "heading"
 	}
-	return ast.GoToNext, false
+	for i, base := 1, res; s.values[res]; i++ {
+		res = base + "-" + strconv.Itoa(i)
+	}
+	s.values[res] = true
+	return []byte(res)
+}
+
+func (s *headingIDs) Put(value []byte) { s.values[string(value)] = true }
+
+// kindAttrBlock is the kind of an [attrBlock].
+var kindAttrBlock = ast.NewNodeKind("AttrBlock")
+
+// attrBlock is a line with only {...} attributes, which apply to the
+// next block (the mmark / gomarkdown block attribute syntax).
+type attrBlock struct {
+	ast.BaseBlock
+}
+
+func (n *attrBlock) Kind() ast.NodeKind { return kindAttrBlock }
+
+func (n *attrBlock) Dump(source []byte, level int) { ast.DumpHelper(n, source, level, nil, nil) }
+
+// attrBlockParser parses a line of only {...} attributes into an [attrBlock].
+type attrBlockParser struct{}
+
+func (attrBlockParser) Trigger() []byte { return []byte{'{'} }
+
+func (attrBlockParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {
+	// The line must be the attributes alone.
+	line, _ := reader.PeekLine()
+	if len(bytes.TrimSpace(line)) < 2 || bytes.TrimSpace(line)[len(bytes.TrimSpace(line))-1] != '}' {
+		return nil, parser.NoChildren
+	}
+	l, pos := reader.Position()
+	attrs, ok := parser.ParseAttributes(reader)
+	rest, _ := reader.PeekLine()
+	if !ok || len(util.TrimRightSpace(rest)) != 0 {
+		reader.SetPosition(l, pos)
+		return nil, parser.NoChildren
+	}
+	reader.Advance(len(rest) - 1) // the parser advances past the newline
+	n := &attrBlock{}
+	for _, a := range attrs {
+		n.SetAttribute(a.Name, a.Value)
+	}
+	return n, parser.Close
+}
+
+func (attrBlockParser) Continue(node ast.Node, reader text.Reader, pc parser.Context) parser.State {
+	return parser.Close
+}
+
+func (attrBlockParser) Close(node ast.Node, reader text.Reader, pc parser.Context) {}
+
+func (attrBlockParser) CanInterruptParagraph() bool { return false }
+
+func (attrBlockParser) CanAcceptIndentedLine() bool { return false }
+
+// attrTransformer moves the attributes of each [attrBlock] to the next block.
+type attrTransformer struct{}
+
+func (attrTransformer) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
+	var blocks []ast.Node
+	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if entering && n.Kind() == kindAttrBlock {
+			blocks = append(blocks, n)
+		}
+		return ast.WalkContinue, nil
+	})
+	for _, n := range blocks {
+		if next := n.NextSibling(); next != nil {
+			for _, a := range n.Attributes() {
+				next.SetAttribute(a.Name, a.Value)
+			}
+		}
+		n.Parent().RemoveChild(n.Parent(), n)
+	}
+}
+
+// hookRenderer renders the blocks with attributes: it runs the
+// [Context.AttributeHandlers], and it writes all of the attributes of
+// code blocks on their code element, as gomarkdown did.
+type hookRenderer struct {
+	ctx  *Context
+	base map[ast.NodeKind]renderer.NodeRendererFunc
+}
+
+// hookKinds are the kinds of blocks that the [hookRenderer] handles.
+var hookKinds = []ast.NodeKind{ast.KindParagraph, ast.KindHeading, ast.KindFencedCodeBlock, ast.KindCodeBlock, ast.KindBlockquote, ast.KindList, ast.KindThematicBreak, ast.KindHTMLBlock}
+
+func (r *hookRenderer) Register(k ast.NodeKind, f renderer.NodeRendererFunc) { r.base[k] = f }
+
+func (r *hookRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	// The default renderer functions are called for blocks without handlers.
+	r.base = map[ast.NodeKind]renderer.NodeRendererFunc{}
+	html.NewRenderer(html.WithUnsafe()).RegisterFuncs(r)
+	reg.Register(ast.KindFencedCodeBlock, r.renderCode)
+	reg.Register(ast.KindImage, r.renderImage)
+	reg.Register(ast.KindLink, r.renderLink)
+	reg.Register(kindMath, renderMath)
+	for _, k := range hookKinds {
+		if k == ast.KindFencedCodeBlock {
+			continue
+		}
+		reg.Register(k, r.wrap(r.base[k]))
+	}
+}
+
+// runHandlers runs the attribute handler for the first attribute of
+// the node that has one, returning whether it handled the node.
+func (r *hookRenderer) runHandlers(w util.BufWriter, n ast.Node, entering bool) bool {
+	if r.ctx == nil || len(r.ctx.AttributeHandlers) == 0 {
+		return false
+	}
+	for _, a := range n.Attributes() {
+		if f, has := r.ctx.AttributeHandlers[string(a.Name)]; has {
+			return f(r.ctx, w, n, entering, string(a.Name), attrString(a.Value))
+		}
+	}
+	return false
+}
+
+func (r *hookRenderer) wrap(f renderer.NodeRendererFunc) renderer.NodeRendererFunc {
+	return func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if n.Attributes() != nil && r.runHandlers(w, n, entering) {
+			return ast.WalkContinue, nil
+		}
+		return f(w, source, n, entering)
+	}
+}
+
+// renderCode renders a fenced code block with all of its attributes.
+func (r *hookRenderer) renderCode(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if node.Attributes() != nil && r.runHandlers(w, node, entering) {
+		return ast.WalkContinue, nil
+	}
+	n := node.(*ast.FencedCodeBlock)
+	if !entering {
+		w.WriteString("</code></pre>\n")
+		return ast.WalkContinue, nil
+	}
+	w.WriteString("<pre><code")
+	if lang := n.Language(source); lang != nil {
+		w.WriteString(` class="language-`)
+		w.Write(util.EscapeHTML(lang))
+		w.WriteByte('"')
+	}
+	if n.Attributes() != nil {
+		html.RenderAttributes(w, n, nil)
+	}
+	w.WriteByte('>')
+	for i := 0; i < n.Lines().Len(); i++ {
+		line := n.Lines().At(i)
+		w.Write(util.EscapeHTML(line.Value(source)))
+	}
+	return ast.WalkContinue, nil
+}
+
+// renderImage renders an image with its alt text as written, including
+// any markdown or HTML in it (the caption of a figure), as gomarkdown did.
+func (r *hookRenderer) renderImage(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if !entering {
+		return ast.WalkContinue, nil
+	}
+	n := node.(*ast.Image)
+	w.WriteString(`<img src="`)
+	w.Write(util.EscapeHTML(util.URLEscape(n.Destination, true)))
+	w.WriteString(`" alt="`)
+	start, stop := -1, -1
+	ast.Walk(n, func(c ast.Node, entering bool) (ast.WalkStatus, error) {
+		var segs []text.Segment
+		switch c := c.(type) {
+		case *ast.Text:
+			segs = []text.Segment{c.Segment}
+		case *ast.RawHTML:
+			segs = c.Segments.Sliced(0, c.Segments.Len())
+		}
+		for _, sg := range segs {
+			if start < 0 || sg.Start < start {
+				start = sg.Start
+			}
+			stop = max(stop, sg.Stop)
+		}
+		return ast.WalkContinue, nil
+	})
+	if start >= 0 {
+		w.Write(util.EscapeHTML(source[start:stop]))
+	}
+	w.WriteByte('"')
+	if n.Title != nil {
+		w.WriteString(` title="`)
+		w.Write(util.EscapeHTML(n.Title))
+		w.WriteByte('"')
+	}
+	if n.Attributes() != nil {
+		html.RenderAttributes(w, n, html.ImageAttributeFilter)
+	}
+	w.WriteString(">")
+	return ast.WalkSkipChildren, nil
+}
+
+// renderLink renders a link, with target="_blank" for an absolute URL,
+// as gomarkdown did with HrefTargetBlank. The destination is not URL
+// escaped, since wikilink handlers return URLs with spaces.
+func (r *hookRenderer) renderLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	n := node.(*ast.Link)
+	if !entering {
+		w.WriteString("</a>")
+		return ast.WalkContinue, nil
+	}
+	w.WriteString(`<a href="`)
+	w.Write(util.EscapeHTML(n.Destination))
+	w.WriteByte('"')
+	if n.Title != nil {
+		w.WriteString(` title="`)
+		w.Write(util.EscapeHTML(n.Title))
+		w.WriteByte('"')
+	}
+	if bytes.Contains(n.Destination, []byte("://")) {
+		w.WriteString(` target="_blank"`)
+	}
+	if n.Attributes() != nil {
+		html.RenderAttributes(w, n, html.LinkAttributeFilter)
+	}
+	w.WriteByte('>')
+	return ast.WalkContinue, nil
+}
+
+// attrString returns the given attribute value as a string.
+func attrString(v any) string {
+	switch v := v.(type) {
+	case []byte:
+		return string(v)
+	case string:
+		return v
+	}
+	return ""
 }
 
 // MDGetAttr gets the given attribute from the given markdown node, returning ""
 // if the attribute is not found.
 func MDGetAttr(n ast.Node, attr string) string {
-	res := ""
-	cont := n.AsContainer()
-	leaf := n.AsLeaf()
-	if cont != nil {
-		if cont.Attribute != nil {
-			res = string(cont.Attribute.Attrs[attr])
-		}
-	} else if leaf != nil {
-		if leaf.Attribute != nil {
-			res = string(leaf.Attribute.Attrs[attr])
-		}
+	v, ok := n.AttributeString(attr)
+	if !ok {
+		return ""
 	}
-	return res
+	return attrString(v)
 }
 
 // MDSetAttr sets the given attribute on the given markdown node
 func MDSetAttr(n ast.Node, attr, value string) {
-	var attrs *ast.Attribute
-	cont := n.AsContainer()
-	leaf := n.AsLeaf()
-	if cont != nil {
-		attrs = cont.Attribute
-	} else if leaf != nil {
-		attrs = leaf.Attribute
-	}
-	if attrs == nil {
-		attrs = &ast.Attribute{}
-	}
-	if attrs.Attrs == nil {
-		attrs.Attrs = make(map[string][]byte)
-	}
-	attrs.Attrs[attr] = []byte(value)
-	if cont != nil {
-		cont.Attribute = attrs
-	} else if leaf != nil {
-		leaf.Attribute = attrs
-	}
+	n.SetAttributeString(attr, []byte(value))
 }
