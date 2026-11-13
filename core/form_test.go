@@ -127,3 +127,36 @@ func TestFormTree(t *testing.T) {
 		fm.SetStruct(child).Update()
 	})
 }
+
+// TestFormTextFieldWidth tests that the text fields of a form have no max
+// width (not the 40ch of a TextField), so that they grow to the width of
+// the form, other than spinners, which have their own.
+func TestFormTextFieldWidth(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.X.Dp(1200) })
+	st := &struct {
+		Name  string
+		Count int
+	}{Name: "name"}
+	fm := NewForm(b).SetStruct(st)
+	b.AssertRender(t, "form/text-field-width", func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		var tf *TextField
+		var sp *Spinner
+		fm.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+			switch w := cw.(type) {
+			case *TextField:
+				tf = w
+			case *Spinner:
+				sp = w
+			}
+			return true
+		})
+		if assert.NotNil(t, tf) && assert.NotNil(t, sp) {
+			assert.Zero(t, tf.Styles.Max.X.Value)
+			assert.Greater(t, tf.Geom.Size.Actual.Total.X, sp.Geom.Size.Actual.Total.X*2, "wider than 40ch")
+			assert.NotZero(t, sp.Styles.Max.X.Value, "a spinner has its own")
+		}
+	})
+}
