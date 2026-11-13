@@ -60,7 +60,6 @@ func New[T tree.NodeValue](ctx *Context) *T {
 			"TextTag":             reflect.ValueOf(p_cogentcore_org_core_htmlcore.TextTag),
 			"Transition":          reflect.ValueOf((*p_cogentcore_org_core_htmlcore.Transition)(nil)),
 			"UserAgent":           reflect.ValueOf(&p_cogentcore_org_core_htmlcore.UserAgent),
-			"VideoBox":            reflect.ValueOf((*p_cogentcore_org_core_htmlcore.VideoBox)(nil)),
 			"VideoDefaultHeight":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.VideoDefaultHeight),
 			"VideoDefaultWidth":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.VideoDefaultWidth),
 			"VideoSourceOf":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.VideoSourceOf),
