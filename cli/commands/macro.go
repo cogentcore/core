@@ -272,7 +272,7 @@ func (cs *Commands) RunMacro(ctx core.Widget, root string, mc *Macro, run RunFun
 		if len(mc.Prompts) == 0 {
 			cmdline := sc.ArgsCommandLine(mc.withPrompted(sc, nil, nil))
 			if !mc.Confirm {
-				run(cmdline)
+				cs.runMacroLine(root, mc, cmdline, run)
 				return
 			}
 			d := core.NewBody(mc.Label(root))
@@ -281,7 +281,7 @@ func (cs *Commands) RunMacro(ctx core.Widget, root string, mc *Macro, run RunFun
 			d.AddBottomBar(func(bar *core.Frame) {
 				d.AddCancel(bar)
 				d.AddOK(bar).SetText("Run").SetIcon(icons.PlayArrow).OnClick(func(e events.Event) {
-					run(cmdline)
+					cs.runMacroLine(root, mc, cmdline, run)
 				})
 			})
 			d.RunDialog(ctx)
@@ -289,6 +289,66 @@ func (cs *Commands) RunMacro(ctx core.Widget, root string, mc *Macro, run RunFun
 		}
 		runDialog(cs.NewPromptDialog(ctx, root, sc, mc, run), ctx)
 	})
+}
+
+// runMacroLine runs the given command line of the given macro of the
+// given command with the given function, recording it as that of the
+// macro for its [Commands.Name].
+func (cs *Commands) runMacroLine(root string, mc *Macro, cmdline string, run RunFunc) {
+	cs.names.Lock()
+	if cs.names.macros == nil {
+		cs.names.macros = map[string]string{}
+	}
+	cs.names.macros[cmdline] = strings.ToLower(mc.Label(root))
+	cs.names.Unlock()
+	run(cmdline)
+}
+
+// Name returns the name of the given command line, as for a tab of its
+// output: the label of the macro that it was run by, if any, in lowercase,
+// such as "git commit wip", or else its command and subcommand, such as
+// "git commit" or "git stash list", without its arguments, if its command
+// has been parsed, and otherwise its command and the words after it that
+// could be subcommands (up to two lowercase words, before any flag).
+func (cs *Commands) Name(cmdline string) string {
+	cs.names.Lock()
+	name, ok := cs.names.macros[cmdline]
+	cs.names.Unlock()
+	if ok {
+		return name
+	}
+	f := strings.Fields(cmdline)
+	if len(f) == 0 {
+		return ""
+	}
+	cm := cs.cached(f[0])
+	if cm == nil || !cm.IsParsed() {
+		words := f[:1]
+		for _, w := range f[1:] {
+			if len(words) == 3 || w[0] == '-' || strings.ContainsFunc(w, func(r rune) bool {
+				return !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-')
+			}) {
+				break
+			}
+			words = append(words, w)
+		}
+		return strings.Join(words, " ")
+	}
+	best := ""
+	for _, sc := range cm.SubCmds {
+		w := strings.Fields(sc.Name)
+		if sc.Name != MainName && len(w) > len(strings.Fields(best)) && len(w) < len(f) && slices.Equal(w, f[1:1+len(w)]) {
+			best = sc.Name
+		}
+		for _, sub := range sc.Cmds { // (not parsed yet)
+			_, sn := splitCmd(sub.Cmd)
+			w := strings.Fields(sn)
+			if len(w) > len(strings.Fields(best)) && len(w) < len(f) && slices.Equal(w, f[1:1+len(w)]) {
+				best = sn
+			}
+		}
+	}
+	return strings.TrimSpace(f[0] + " " + best)
 }
 
 // NewPromptDialog returns the body of the dialog that prompts for the
@@ -300,11 +360,12 @@ func (cs *Commands) NewPromptDialog(ctx core.Widget, root string, sc *SubCmd, mc
 	keys := mc.promptKeys()
 	values := sc.formStruct(keys)
 	mc.Values.SetValues(sc, values)
+	cs.Args.MacroValues(root, mc).SetValues(sc, values)
 	cmdline := func() string {
 		return sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(values), keys))
 	}
 	line := commandLineText(d, cmdline)
-	fm := newForm(d, values)
+	fm := cs.chooserForm(ctx, d, values, cs.subCmdChoosers(sc))
 	fm.OnChange(func(e events.Event) { line.Update() })
 	fm.OnInput(func(e events.Event) { line.Update() })
 	d.AddTopBar(func(bar *core.Frame) {
@@ -321,7 +382,8 @@ func (cs *Commands) NewPromptDialog(ctx core.Widget, root string, sc *SubCmd, mc
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Run").SetIcon(icons.PlayArrow).OnClick(func(e events.Event) {
-			run(cmdline())
+			errors.Log(cs.Args.SetMacroValues(root, mc, sc.ArgsOf(values), keys))
+			cs.runMacroLine(root, mc, cmdline(), run)
 		})
 	})
 	return d

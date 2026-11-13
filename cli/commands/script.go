@@ -64,6 +64,10 @@ type ScriptArg struct {
 	// On is the value passed for a switch that is on, such as --force, or
 	// "true" if it is empty; an empty string is passed if it is off.
 	On string `json:",omitempty"`
+
+	// Chooser is the chooser of the values of a text argument, such as a
+	// git branch, if any (see [Chooser]).
+	Chooser ChooserName `json:",omitempty"`
 }
 
 // ArgKinds are the kinds of values of the arguments of a [Script].

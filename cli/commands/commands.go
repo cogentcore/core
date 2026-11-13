@@ -99,6 +99,16 @@ type Commands struct {
 	// parsed when they are first used (see [Commands.SubCmd]).
 	Parsed map[string]*Cmd
 
+	// Choosers are the choosers of the values of arguments, such as a git
+	// branch (see [Chooser]).
+	Choosers []*Chooser
+
+	// Dir returns the directory that the commands run in from the given
+	// context widget, such as a command bar, in which the commands of the
+	// choosers run, if it is not nil: the current directory of the window
+	// of the app. It is the working directory otherwise.
+	Dir func(ctx core.Widget) string `json:"-"`
+
 	// Args are the arguments last used for the subcommands, which are saved
 	// in their own file.
 	Args *Args `json:"-"`
@@ -109,6 +119,15 @@ type Commands struct {
 
 	// mu protects the commands and the saving of the file.
 	mu sync.Mutex
+
+	// names are for the names of the command lines (see [Commands.Name]).
+	names struct {
+		sync.Mutex
+
+		// macros are the labels of the macros that ran the command lines,
+		// by command line (see [Commands.Name]).
+		macros map[string]string
+	}
 
 	// views are the command bars and the editor of the commands, which are
 	// updated when the commands change (see [Commands.Changed]).
@@ -152,6 +171,7 @@ func Open(filename string) *Commands {
 		cs.Entries = Standard()
 		cs.StandardVersion = standardVersion
 		cs.addStandardMacrosLocked()
+		cs.addStandardChoosersLocked()
 	}
 	if cs.Version < 3 { // (the common subcommands were added)
 		addCommon(cs.Entries)
@@ -160,6 +180,9 @@ func Open(filename string) *Commands {
 		cs.Entries = addStandard(cs.Entries)
 		if cs.StandardVersion < 2 { // (and then the standard macros)
 			cs.addStandardMacrosLocked()
+		}
+		if cs.StandardVersion < 3 { // (and then the standard choosers)
+			cs.addStandardChoosersLocked()
 		}
 		cs.StandardVersion = standardVersion
 	}
@@ -179,6 +202,7 @@ type commandsData struct {
 	StandardVersion int
 	Entries         []*Entry
 	Parsed          map[string]*Cmd
+	Choosers        []*Chooser `json:",omitempty"`
 
 	// merged is whether the data have been merged into the commands, or
 	// are theirs (as written): only data read from the file are merged.
@@ -187,7 +211,7 @@ type commandsData struct {
 
 // data returns the commands as the data of their file.
 func (cs *Commands) data() commandsData {
-	return commandsData{Version: cs.Version, StandardVersion: cs.StandardVersion, Entries: cs.Entries, Parsed: cs.Parsed}
+	return commandsData{Version: cs.Version, StandardVersion: cs.StandardVersion, Entries: cs.Entries, Parsed: cs.Parsed, Choosers: cs.Choosers}
 }
 
 // syncLocked reads the file of the commands if another process has
@@ -207,10 +231,10 @@ func (cs *Commands) syncLocked() bool {
 }
 
 // mergeLocked merges the given data of the file into the commands, under
-// the mutex: the entries are those of the file, and the parsed commands
-// are merged with those parsed here. A file of another version only has
-// its macros and scripts taken (made by the user), and one of the first
-// version none.
+// the mutex: the entries and the choosers are those of the file, and the
+// parsed commands are merged with those parsed here. A file of another
+// version only has its macros, scripts, and choosers taken (made by the
+// user), and one of the first version none.
 func (cs *Commands) mergeLocked(fc *commandsData) {
 	if fc.Version < 2 {
 		return
@@ -218,15 +242,16 @@ func (cs *Commands) mergeLocked(fc *commandsData) {
 	cs.Version = max(cs.Version, fc.Version)
 	cs.StandardVersion = max(cs.StandardVersion, fc.StandardVersion)
 	cs.Entries = fc.Entries
+	cs.Choosers = fc.Choosers
 	if fc.Version != version {
 		for root, fcm := range fc.Parsed {
-			if len(fcm.Macros) == 0 && len(fcm.Scripts) == 0 {
+			if len(fcm.Macros) == 0 && len(fcm.Scripts) == 0 && len(fcm.Choosers) == 0 {
 				continue
 			}
 			if cm := cs.Parsed[root]; cm != nil {
-				cm.Macros, cm.Scripts = fcm.Macros, fcm.Scripts
+				cm.Macros, cm.Scripts, cm.Choosers = fcm.Macros, fcm.Scripts, fcm.Choosers
 			} else {
-				cs.Parsed[root] = &Cmd{Cmd: root, Macros: fcm.Macros, Scripts: fcm.Scripts}
+				cs.Parsed[root] = &Cmd{Cmd: root, Macros: fcm.Macros, Scripts: fcm.Scripts, Choosers: fcm.Choosers}
 			}
 		}
 		return
@@ -327,7 +352,7 @@ func (cs *Commands) Cmd(cmd string, reparse bool) (*Cmd, error) {
 	}
 	err = cs.update(func() {
 		if old := cs.Parsed[cmd]; old != nil {
-			cm.Macros, cm.Scripts = old.Macros, old.Scripts
+			cm.Macros, cm.Scripts, cm.Choosers = old.Macros, old.Scripts, old.Choosers
 			for i, sc := range cm.SubCmds {
 				if osc := old.SubCmd(sc.Name); osc != nil && osc.IsParsed() && !sc.IsParsed() {
 					cm.SubCmds[i] = osc
@@ -543,9 +568,10 @@ var standardCommon = map[string]string{
 
 // standardVersion is the version of the [Standard] commands: the standard
 // entries are added to those of a file of an earlier version, which does
-// not have them (see [addStandard]), and the [StandardMacros] to those of
-// a file before version 2.
-const standardVersion = 2
+// not have them (see [addStandard]), the [StandardMacros] to those of
+// a file before version 2, and the [StandardChoosers] to those of a file
+// before version 3.
+const standardVersion = 3
 
 // addCommon sets the [Entry.Common] subcommands of the given entries of the
 // [Standard] commands that do not have them, for a file of a version from
