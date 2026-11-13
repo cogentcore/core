@@ -559,16 +559,23 @@ func (fn *Node) RelativePathFrom(fpath core.Filename) string {
 // dirsTo opens all the directories above the given filename, and returns the node
 // for element at given path (can be a file or directory itself -- not opened -- just returned)
 func (fn *Node) dirsTo(path string) (*Node, error) {
-	pth, err := filepath.Abs(path)
-	if err != nil {
+	pth := path
+	sep := string(filepath.Separator)
+	var err error
+	if fn.isFS() { // (paths within the FS, separated by /)
+		sep = "/"
+	} else if pth, err = filepath.Abs(path); err != nil {
 		log.Printf("filetree.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
 	rpath := fn.RelativePathFrom(core.Filename(pth))
+	if fn.isFS() {
+		rpath = filepath.ToSlash(rpath)
+	}
 	if rpath == "." {
 		return fn, nil
 	}
-	dirs := strings.Split(rpath, string(filepath.Separator))
+	dirs := strings.Split(rpath, sep)
 	cfn := fn
 	sz := len(dirs)
 	for i := 0; i < sz; i++ {

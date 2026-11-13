@@ -109,7 +109,11 @@ func (fn *Node) duplicateFile() error {
 // all files and subdirectories in that directory are also deleted.
 func (fn *Node) DeleteFiles() { //types:add
 	d := core.NewBody("Delete Files?")
-	core.NewText(d).SetType(core.TextSupporting).SetText("OK to delete file(s)? They are moved to the trash / recycle bin where available, and otherwise permanently deleted. If any selections are directories, all files and subdirectories in them are also deleted.")
+	text := "OK to delete file(s)? They are moved to the trash / recycle bin where available, and otherwise permanently deleted. If any selections are directories, all files and subdirectories in them are also deleted."
+	if fn.isFS() {
+		text = "OK to delete file(s)? They are permanently deleted. If any selections are directories, all files and subdirectories in them are also deleted."
+	}
+	core.NewText(d).SetType(core.TextSupporting).SetText(text)
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Delete Files").OnClick(func(e events.Event) {

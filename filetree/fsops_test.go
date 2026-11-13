@@ -5,6 +5,7 @@
 package filetree
 
 import (
+	"image"
 	"io/fs"
 	"maps"
 	"path"
@@ -242,4 +243,49 @@ func TestFSSort(t *testing.T) {
 	assert.Equal(t, dirsort.Sort{By: dirsort.ModTime}, sub.dirSort())
 	_, saved := dirsort.Saved("sub")
 	assert.False(t, saved, "not saved for the directory of the os")
+}
+
+// TestFSSubdirRoot tests finding the files of a tree of an FS opened at
+// one of its directories, whose paths start with it, rather than ".".
+func TestFSSubdirRoot(t *testing.T) {
+	m := &memFS{fstest.MapFS{
+		"top/sub/b.txt": {Data: []byte("b\n")},
+	}}
+	b := core.NewBody()
+	ft := NewTree(b)
+	ft.OpenPathFS(m, "top")
+	runTestWindow(t, b)
+	ft.AsyncLock()
+	defer ft.AsyncUnlock()
+	n := fsNode2(ft, "top/sub/b.txt")
+	require.NotNil(t, n, "found, opening its directory")
+	require.NoError(t, n.RenameFile("c.txt"))
+	assert.NotNil(t, m.MapFS["top/sub/c.txt"])
+	assert.NotNil(t, fsNode2(ft, "top/sub/c.txt"))
+}
+
+// TestFSMenu tests that the items of the context menu that change files
+// are enabled for a [WriteFS], and disabled for a read-only FS.
+func TestFSMenu(t *testing.T) {
+	for _, writable := range []bool{true, false} {
+		ft, _ := newFSTree(t, writable)
+		ft.AsyncLock()
+		n := fsNode2(ft, "sub")
+		n.Select()
+		m := core.NewScene()
+		n.contextMenu(m, image.Point{})
+		enabled := map[string]bool{}
+		for _, kid := range m.Children {
+			if fb, ok := kid.(*core.FuncButton); ok {
+				enabled[fb.Text] = !fb.IsDisabled()
+			}
+		}
+		ft.AsyncUnlock()
+		for _, item := range []string{"Duplicate", "Delete", "Rename", "New folder", "Paste"} {
+			assert.Equal(t, writable, enabled[item], "%s, writable: %v", item, writable)
+		}
+		assert.False(t, enabled["New file"], "not in an FS")
+		_, ok := enabled["Remove from externs"]
+		assert.False(t, ok, "not in an FS")
+	}
 }
