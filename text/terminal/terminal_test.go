@@ -195,6 +195,11 @@ func TestTerminalCd(t *testing.T) {
 	waitFor(t, b, "the directory", func() bool {
 		return hasOutputLine(tm, sub)
 	})
+	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+		got, err := filepath.EvalSymlinks(tm.WorkingDir())
+		require.NoError(t, err)
+		assert.Equal(t, sub, got, "that of the process of the shell, without shell integration")
+	}
 }
 
 func TestTerminalShellIntegration(t *testing.T) {
@@ -416,7 +421,7 @@ func TestTerminalFunc(t *testing.T) {
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(40), units.Em(10))
 	})
-	tm.Func =func(in, out *os.File) error {
+	tm.Func = func(in, out *os.File) error {
 		fmt.Fprintln(out, "ready")
 		rd := bufio.NewReader(in)
 		for {

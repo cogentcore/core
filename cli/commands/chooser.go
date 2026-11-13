@@ -40,6 +40,10 @@ type Chooser struct {
 	// pipes, as in git status --short | cut -c4-.
 	Command string `width:"50"`
 
+	// Empty is what an empty value means, if anything, which is shown in
+	// an empty field, such as "the current directory (.)".
+	Empty string `json:",omitempty" width:"30"`
+
 	// Doc is the documentation of the chooser.
 	Doc string `json:",omitempty" width:"40"`
 }
@@ -100,11 +104,22 @@ func StandardChoosers() []*Chooser {
 	return []*Chooser{
 		{Name: "Git branch", Command: "git branch --format='%(refname:short)'", Doc: "The local branches of the git repository"},
 		{Name: "Git remote branch", Command: "git branch --remotes --format='%(refname:short)'", Doc: "The branches of the remotes of the git repository, such as origin/main"},
-		{Name: "Git remote", Command: "git remote", Doc: "The remotes of the git repository, such as origin"},
+		{Name: "Git remote", Command: "git remote", Empty: "the remote of the current branch", Doc: "The remotes of the git repository, such as origin"},
 		{Name: "Git tag", Command: "git tag --sort=-creatordate", Doc: "The tags of the git repository, newest first"},
 		{Name: "Git changed file", Command: "git ls-files --modified --others --exclude-standard", Doc: "The files of the git repository that are changed or new (not ignored)"},
-		{Name: "Go package", Command: "go list ./...", Doc: "The Go packages in the current directory and below"},
+		{Name: "Go package", Command: goPackages, Empty: "the package in the current directory (.)", Doc: "The Go packages in the current directory (.), all of them (./...), and each one below it"},
 	}
+}
+
+// goPackages is the command of the standard Go package chooser: the
+// current directory, all of the packages below it, and the directory of
+// each one, relative to it.
+const goPackages = `echo .; echo ./...; go list -f '{{.Dir}}' ./... | sed -e "s|^$(pwd -P)/|./|" -e "s|^$PWD/|./|" -e "s|^$(pwd -P)\$|.|" -e "s|^$PWD\$|.|"`
+
+// oldStandardChoosers are the commands of earlier versions of the
+// [StandardChoosers], by name, which are updated to the current ones.
+var oldStandardChoosers = map[string][]string{
+	"Go package": {"go list ./..."},
 }
 
 // StandardChooserArgs are the choosers of the arguments of the subcommands
@@ -210,6 +225,7 @@ func (cs *Commands) addStandardChoosersLocked() {
 			cs.Choosers = append(cs.Choosers, c)
 		}
 	}
+	cs.updateStandardChoosersLocked()
 	for root, args := range StandardChooserArgs() {
 		cm := cs.Parsed[root]
 		if cm == nil {
@@ -222,6 +238,19 @@ func (cs *Commands) addStandardChoosersLocked() {
 		for k, name := range args {
 			if _, has := cm.Choosers[k]; !has && name != "" {
 				cm.Choosers[k] = name
+			}
+		}
+	}
+}
+
+// updateStandardChoosersLocked updates the [StandardChoosers] of earlier
+// versions (see [oldStandardChoosers]), which the user has not changed, to
+// the current ones, under the mutex.
+func (cs *Commands) updateStandardChoosersLocked() {
+	for _, c := range StandardChoosers() {
+		for i, o := range cs.Choosers {
+			if o.Name == c.Name && slices.Contains(oldStandardChoosers[c.Name], o.Command) {
+				cs.Choosers[i] = c
 			}
 		}
 	}
@@ -290,10 +319,11 @@ func (cs *Commands) addChooserButton(ctx core.Widget, tf *core.TextField, field 
 		ch := chooser(field)
 		if ch == nil {
 			if tf.TrailingIcon == icons.ArrowDropDown {
-				tf.TrailingIcon, tf.TrailingIconOnClick = icons.None, nil
+				tf.TrailingIcon, tf.TrailingIconOnClick, tf.Placeholder = icons.None, nil, ""
 			}
 			return
 		}
+		tf.SetPlaceholder(ch.Empty)
 		tf.SetTrailingIcon(icons.ArrowDropDown, func(e events.Event) {
 			cs.chooserMenu(ctx, tf, ch, tf.ContextMenuPos(e))
 		})

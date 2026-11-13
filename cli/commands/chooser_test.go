@@ -60,6 +60,19 @@ func TestChooserValues(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"new.txt"}, vals)
 
+	// the Go packages, relative to the directory
+	if _, err := exec.LookPath("go"); err == nil {
+		gdir := t.TempDir()
+		require.NoError(t, os.WriteFile(filepath.Join(gdir, "go.mod"), []byte("module x\n"), 0o644))
+		require.NoError(t, os.MkdirAll(filepath.Join(gdir, "sub", "y"), 0o755))
+		for f, pkg := range map[string]string{"x.go": "x", "sub/y/y.go": "y"} {
+			require.NoError(t, os.WriteFile(filepath.Join(gdir, f), []byte("package "+pkg+"\n"), 0o644))
+		}
+		vals, err = chs["Go package"].Values(gdir)
+		require.NoError(t, err)
+		assert.Equal(t, []string{".", "./...", "./sub/y"}, vals)
+	}
+
 	vals, err = (&Chooser{Command: "printf ' a \\n\\nb\\na\\n'"}).Values(dir)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"a", "b"}, vals, "trimmed, without empty lines and duplicates")
@@ -107,6 +120,13 @@ func TestArgChoosers(t *testing.T) {
 	assert.Equal(t, "Git branch", cs4.ArgChooser(&SubCmd{Name: "switch", Cmd: "git switch"}, argsField))
 	assert.Len(t, cs4.choosers(), len(StandardChoosers()))
 	assert.Equal(t, standardVersion, cs4.StandardVersion)
+
+	// a file of version 3 gets the new version of an old standard chooser
+	v3 := filepath.Join(t.TempDir(), "commands.json")
+	require.NoError(t, os.WriteFile(v3, []byte(`{"Version": 9, "StandardVersion": 3, "Entries": [], "Choosers": [{"Name": "Go package", "Command": "go list ./..."}, {"Name": "Mine", "Command": "ls"}]}`), 0o644))
+	cs5 := Open(v3)
+	assert.Equal(t, goPackages, cs5.Chooser("Go package").Command)
+	assert.Len(t, cs5.choosers(), 2, "only updated")
 	cs4.mu.Lock()
 	assert.Len(t, cs4.Entries, 1, "the standard entries are not added again")
 	cs4.mu.Unlock()
@@ -144,10 +164,16 @@ func TestChooserForm(t *testing.T) {
 		require.NotNil(t, args)
 		require.NotNil(t, message)
 		assert.False(t, args.TrailingIcon.IsSet())
+		assert.Equal(t, "", args.Placeholder)
 
 		require.NoError(t, cs.SetArgChooser(sc, argsField, "Git branch"))
 		fm.Update()
 		assert.Equal(t, icons.ArrowDropDown, args.TrailingIcon)
+		require.NoError(t, cs.SetArgChooser(sc, "--message", "Git remote"))
+		fm.Update()
+		assert.Equal(t, "the remote of the current branch", message.Placeholder, "what empty means")
+		require.NoError(t, cs.SetArgChooser(sc, "--message", ""))
+		fm.Update()
 		assert.False(t, message.TrailingIcon.IsSet())
 		ch := cs.Chooser("Git branch")
 		vals, err := ch.Values(cs.dir(d))
