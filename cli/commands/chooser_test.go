@@ -82,7 +82,7 @@ func TestArgChoosers(t *testing.T) {
 	assert.Equal(t, "Git branch", cs.ArgChooser(checkout, argsField), "standard")
 	require.NotNil(t, cs.Chooser("Git branch"))
 	assert.Nil(t, cs.Chooser(""))
-	require.NoError(t, cs.SetChoosers(append(cs.choosers(), &Chooser{Name: "Message", Command: "echo wip"})))
+	require.NoError(t, cs.SetChoosers(append(cs.choosers(), &Chooser{Name: "Message", Command: "echo wip"}), cs.ChooserArgs()))
 	require.NoError(t, cs.SetArgChooser(commit, "--message", "Message"))
 	require.NoError(t, cs.SetArgChooser(checkout, argsField, ""))
 
@@ -123,7 +123,7 @@ func TestChooserForm(t *testing.T) {
 	dir := testRepo(t)
 	cs := testCommands(t, filepath.Join(t.TempDir(), "commands.json"))
 	cs.Dir = func(core.Widget) string { return dir }
-	require.NoError(t, cs.SetChoosers(StandardChoosers()))
+	require.NoError(t, cs.SetChoosers(StandardChoosers(), nil))
 	sc := testCommit()
 	d := cs.NewDialog(nil, sc, func(string) {})
 	d.AssertRender(t, "chooser-form", func() {
@@ -236,4 +236,29 @@ func TestName(t *testing.T) {
 	} {
 		assert.Equal(t, name, cs.Name(cmdline), cmdline)
 	}
+}
+
+// TestChoosersDialog tests the editor of the choosers, with the table of
+// the choosers of the arguments, which are set from it.
+func TestChoosersDialog(t *testing.T) {
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	cs := testCommands(t, filepath.Join(t.TempDir(), "commands.json"))
+	require.NoError(t, cs.SetChoosers(StandardChoosers(), []*ChooserArg{
+		{Command: "git", SubCmd: "checkout", Arg: argsField, Chooser: "Git branch"},
+		{Command: "git", SubCmd: " stash  push ", Arg: "--message", Chooser: "Git tag"},
+		{Command: "ls", Arg: argsField, Chooser: "Git changed file"},
+		{Command: "git", SubCmd: "add", Arg: argsField}, // (no chooser)
+	}))
+	assert.Equal(t, []*ChooserArg{
+		{Command: "git", SubCmd: "checkout", Arg: argsField, Chooser: "Git branch"},
+		{Command: "git", SubCmd: "stash push", Arg: "--message", Chooser: "Git tag"},
+		{Command: "ls", Arg: argsField, Chooser: "Git changed file"},
+	}, cs.ChooserArgs())
+	assert.Equal(t, "Git changed file", cs.ArgChooser(&SubCmd{Name: MainName, Cmd: "ls"}, argsField))
+	assert.Equal(t, "Git tag", cs.ArgChooser(&SubCmd{Name: "stash push", Cmd: "git stash push"}, "--message"))
+
+	d := cs.NewChoosersDialog(nil)
+	d.AssertRender(t, "choosers-dialog")
+	require.NoError(t, cs.SetChoosers(cs.choosers(), cs.ChooserArgs()[1:]))
+	assert.Equal(t, "", cs.ArgChooser(&SubCmd{Name: "checkout", Cmd: "git checkout"}, argsField), "deleted")
 }

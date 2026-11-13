@@ -130,7 +130,12 @@ func (cs *Commands) Menu(m *core.Scene, run RunFunc) {
 	core.NewSeparator(m)
 	core.NewButton(m).SetText("Edit commands").SetIcon(icons.Edit).SetTooltip("Edit the commands and their categories").
 		OnClick(func(e events.Event) { cs.Edit(m) })
+	core.NewButton(m).SetText("Edit choosers").SetIcon(icons.List).SetTooltip(chooserTip).
+		OnClick(func(e events.Event) { cs.EditChoosers(m) })
 }
+
+// chooserTip is the tooltip of the buttons that edit the choosers.
+const chooserTip = "Edit the choosers of the values of arguments, such as git branches, which are the lines of the output of a shell command, and the arguments of commands that have them"
 
 // configEntry configures the given button, of the command bar or of a
 // menu, for the given entry: a category has the menu of its entries, and
@@ -413,6 +418,10 @@ func (cs *Commands) Edit(ctx core.Widget) {
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Add script").SetIcon(icons.Code).SetTooltip("Add a script at the end, written in its editor, for things that are more than a command line")
 				w.OnClick(func(e events.Event) { cs.NewScript(w, "", "") })
+			})
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Choosers").SetIcon(icons.List).SetTooltip(chooserTip)
+				w.OnClick(func(e events.Event) { cs.EditChoosers(w) })
 			})
 			tree.Add(p, func(w *core.Button) {
 				w.SetText("Reset").SetIcon(icons.Reset).SetTooltip("Replace the commands with the standard ones")

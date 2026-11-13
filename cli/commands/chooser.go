@@ -83,9 +83,9 @@ func (ch *Chooser) Values(dir string) ([]string, error) {
 type ChooserName string
 
 // Widget returns a chooser of the names of the choosers of the [Default]
-// commands.
+// commands, which can also be typed, as for a new one.
 func (cn *ChooserName) Widget() core.Value {
-	ch := core.NewChooser()
+	ch := core.NewChooser().SetEditable(true)
 	ch.Maker(func(p *tree.Plan) {}) // (keeps the chooser itself)
 	items := []core.ChooserItem{{Value: ChooserName(""), Text: "None", Tooltip: "Text, typed"}}
 	for _, c := range Default().choosers() {
@@ -199,12 +199,6 @@ func (cs *Commands) SetArgChooser(sc *SubCmd, argKey, name string) error {
 			cm.Choosers[chooserKey(sc, argKey)] = name
 		}
 	})
-}
-
-// SetChoosers sets the choosers of the commands to the given ones, and
-// saves them.
-func (cs *Commands) SetChoosers(chs []*Chooser) error {
-	return cs.update(func() { cs.Choosers = chs })
 }
 
 // addStandardChoosersLocked adds the [StandardChoosers] that the commands
@@ -383,6 +377,89 @@ func (cs *Commands) choosersMenu(m *core.Scene, ctx core.Widget, sc *SubCmd, fm 
 		OnClick(func(e events.Event) { cs.EditChoosers(ctx) })
 }
 
+// ChooserArg is the chooser of an argument of a subcommand of a command,
+// as edited in the editor of the choosers (see [Cmd.Choosers]).
+type ChooserArg struct {
+
+	// Command is the command: "git".
+	Command string
+
+	// SubCmd is the subcommand, its words after the command: "checkout",
+	// "stash push", or empty for the command itself.
+	SubCmd string `label:"Subcommand"`
+
+	// Arg is the argument: Arguments for the other arguments, such as
+	// files and branches, or the name of a flag with its dashes:
+	// "--set-upstream-to".
+	Arg string `label:"Argument"`
+
+	// Chooser is the chooser of the values of the argument.
+	Chooser ChooserName
+}
+
+// ChooserArgs returns the choosers of the arguments of the subcommands of
+// the commands, sorted.
+func (cs *Commands) ChooserArgs() []*ChooserArg {
+	cs.reload()
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+	var cas []*ChooserArg
+	for root, cm := range cs.Parsed {
+		for key, name := range cm.Choosers {
+			i := strings.LastIndex(key, " ")
+			if i < 0 {
+				continue
+			}
+			sub := key[:i]
+			if sub == MainName {
+				sub = ""
+			}
+			cas = append(cas, &ChooserArg{Command: root, SubCmd: sub, Arg: key[i+1:], Chooser: ChooserName(name)})
+		}
+	}
+	slices.SortFunc(cas, func(a, b *ChooserArg) int {
+		return strings.Compare(a.Command+" "+a.SubCmd+" "+a.Arg, b.Command+" "+b.SubCmd+" "+b.Arg)
+	})
+	return cas
+}
+
+// SetChoosers sets the choosers of the commands, and of the arguments of
+// their subcommands (in place of all of those they have), to the given
+// ones, and saves them. Those without a name or command, and arguments
+// without a command, argument, or chooser, are left out.
+func (cs *Commands) SetChoosers(chs []*Chooser, args []*ChooserArg) error {
+	chs = slices.DeleteFunc(slices.Clone(chs), func(c *Chooser) bool {
+		c.Name, c.Command = strings.TrimSpace(c.Name), strings.TrimSpace(c.Command)
+		return c.Name == "" || c.Command == ""
+	})
+	return cs.update(func() {
+		cs.Choosers = chs
+		for _, cm := range cs.Parsed {
+			cm.Choosers = nil
+		}
+		for _, ca := range args {
+			root := strings.TrimSpace(ca.Command)
+			sub := strings.Join(strings.Fields(ca.SubCmd), " ")
+			arg := strings.TrimSpace(ca.Arg)
+			if root == "" || arg == "" || ca.Chooser == "" {
+				continue
+			}
+			if sub == "" {
+				sub = MainName
+			}
+			cm := cs.Parsed[root]
+			if cm == nil {
+				cm = &Cmd{Cmd: root}
+				cs.Parsed[root] = cm
+			}
+			if cm.Choosers == nil {
+				cm.Choosers = map[string]string{}
+			}
+			cm.Choosers[sub+" "+arg] = string(ca.Chooser)
+		}
+	})
+}
+
 // EditChoosers opens the editor of the choosers of the commands, in the
 // context of the given widget (see [Commands.NewChoosersDialog]).
 func (cs *Commands) EditChoosers(ctx core.Widget) {
@@ -391,18 +468,24 @@ func (cs *Commands) EditChoosers(ctx core.Widget) {
 }
 
 // NewChoosersDialog returns the body of the editor of the choosers of the
-// commands, a table of their names, commands, and documentation, which
-// saves them.
+// commands: a table of their names, commands, and documentation, and a
+// table of the choosers of the arguments of the subcommands, which saves
+// them.
 func (cs *Commands) NewChoosersDialog(ctx core.Widget) *core.Body {
 	ctx = cs.context(ctx)
 	d := core.NewBody("Choosers")
-	core.NewText(d).SetType(core.TextSupporting).SetText("The values of an argument with a chooser, such as a git branch, are chosen from the lines of the output of its shell command, run in the directory of the commands. Set the chooser of an argument with Choosers at the top of the form of its command, or in the arguments of a script. Add one with Add chooser at the top, or the context menu of the table (right-click).")
+	core.NewText(d).SetType(core.TextSupporting).SetText("The values of an argument with a chooser, such as a git branch, are chosen from the lines of the output of its shell command, run in the directory of the commands, in a menu of the button of its text field. Add rows with the buttons at the top, or the context menu of a table (right-click).")
 	var chs []*Chooser
 	for _, c := range cs.choosers() {
 		nc := *c
 		chs = append(chs, &nc)
 	}
+	args := cs.ChooserArgs()
+	core.NewText(d).SetType(core.TextTitleSmall).SetText("Choosers")
 	tb := core.NewTable(d).SetSlice(&chs)
+	core.NewText(d).SetType(core.TextTitleSmall).SetText("Arguments")
+	core.NewText(d).SetType(core.TextSupporting).SetText("The choosers of the arguments of commands: the argument is Arguments for the other arguments, such as files and branches, or the name of a flag, such as --set-upstream-to. They can also be set with Choosers at the top of the form of a command, and those of scripts in their arguments.")
+	at := core.NewTable(d).SetSlice(&args)
 	d.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(func(p *tree.Plan) {
 			tree.Add(p, func(w *core.Button) {
@@ -410,6 +493,13 @@ func (cs *Commands) NewChoosersDialog(ctx core.Widget) *core.Body {
 				w.OnClick(func(e events.Event) {
 					chs = append(chs, &Chooser{Name: "Chooser"})
 					tb.Update()
+				})
+			})
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Add argument").SetIcon(icons.Add).SetTooltip("Add the chooser of an argument of a command at the end")
+				w.OnClick(func(e events.Event) {
+					args = append(args, &ChooserArg{Arg: argsField})
+					at.Update()
 				})
 			})
 			tree.Add(p, func(w *core.Button) {
@@ -434,11 +524,7 @@ func (cs *Commands) NewChoosersDialog(ctx core.Widget) *core.Body {
 	d.AddBottomBar(func(bar *core.Frame) {
 		d.AddCancel(bar)
 		d.AddOK(bar).SetText("Save").SetIcon(icons.Save).OnClick(func(e events.Event) {
-			chs = slices.DeleteFunc(chs, func(c *Chooser) bool {
-				c.Name, c.Command = strings.TrimSpace(c.Name), strings.TrimSpace(c.Command)
-				return c.Name == "" || c.Command == ""
-			})
-			if err := cs.SetChoosers(chs); err != nil {
+			if err := cs.SetChoosers(chs, args); err != nil {
 				core.ErrorSnackbar(ctx, err)
 				return
 			}
