@@ -47,3 +47,22 @@ func handleVideo(ctx *Context) core.Widget {
 	}
 	return v
 }
+
+// VideoBox is the box of a video element on desktop platforms (see
+// video_notjs.go). On the web, a video element is a [video.Video], so a
+// VideoBox is never made; it is here so that the package has the same
+// symbols on all platforms (as for the mvm symbols in mvmcore).
+type VideoBox struct {
+	core.Frame
+
+	// Image shows the poster of the video, and its frames.
+	Image *core.Image
+}
+
+// RenderGroup returns true, as on desktop platforms.
+func (vb *VideoBox) RenderGroup() bool { return true }
+
+// SetVideoSize sets the size of the video, as on desktop platforms.
+func (vb *VideoBox) SetVideoSize(width, height int) {
+	vb.SetProperty("video-size", math32.Vec2(float32(width), float32(height)))
+}
