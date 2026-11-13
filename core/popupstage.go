@@ -251,9 +251,17 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 
 	if e.HasPos() {
 		pos := e.WindowPos()
+		if top.pressOpened && pm.pressOpenedEvent(top, e) {
+			e.SetHandled()
+			return
+		}
 		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
 		if pos.In(ts.SceneGeom.Bounds()) {
 			top.popupHandleEvent(e)
+			e.SetHandled()
+			return
+		}
+		if pm.parentMenuPress(top, e) {
 			e.SetHandled()
 			return
 		}
@@ -278,4 +286,102 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 	} else { // typically focus, so handle even if not in bounds
 		top.popupHandleEvent(e) // could be set as Handled or not
 	}
+}
+
+// pressOpenedEvent handles the given event for the given top menu stage,
+// which was opened by pressing the mouse button on its context button,
+// which is still down (see [Stage.pressOpened]), returning whether it
+// handled it. Dragging over the menu hovers its items, and releasing the
+// mouse button over one of them clicks it. Releasing it over the context
+// button is a click on it, which leaves the menu open, and releasing it
+// anywhere else closes the menu.
+func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
+	pos := e.WindowPos()
+	inMenu := pos.In(top.Scene.SceneGeom.Bounds())
+	switch e.Type() {
+	case events.MouseDrag:
+		if inMenu {
+			top.popupHandleEvent(mouseClone(e, events.MouseMove))
+		}
+		return true
+	case events.MouseUp:
+		top.pressOpened = false
+		// the context button gets the release, ending its press
+		// (a click on it if it is over it, which leaves the menu open)
+		var ctx *WidgetBase
+		if top.Context != nil {
+			ctx = top.Context.AsWidget()
+		}
+		if ctx != nil && ctx.Scene != nil && ctx.Scene.Stage != nil {
+			ctx.Scene.Stage.popupHandleEvent(mouseClone(e, events.MouseUp))
+		}
+		// a release where it was pressed is a click on the context button,
+		// even over the menu, which can overlap it
+		d := pos.Sub(e.WindowStartPos())
+		dragged := max(abs(d.X), abs(d.Y)) > TimingSettings.DragStartDistance
+		switch {
+		case !dragged:
+		case inMenu: // a click on the item
+			top.popupHandleEvent(mouseClone(e, events.MouseDown))
+			top.popupHandleEvent(e)
+		case ctx == nil || !ctx.posInScBBox(pos.Sub(ctx.Scene.SceneGeom.Pos)):
+			top.closePopupAndBelow()
+		}
+		return true
+	}
+	return false
+}
+
+// parentMenuPress handles a mouse press on a menu below the given top menu
+// stage, in the menus of the same chain (such as the menu of a submenu),
+// returning whether it did: the menus above that menu are closed, and it
+// gets the press, so that its items can be clicked, such as to open
+// another submenu.
+func (pm *stages) parentMenuPress(top *Stage, e events.Event) bool {
+	if top.Type != MenuStage || e.Type() != events.MouseDown {
+		return false
+	}
+	pos := e.WindowPos()
+	n := pm.stack.Len()
+	for i := n - 2; i >= 0; i-- {
+		s := pm.stack.ValueByIndex(i)
+		if s.Type != MenuStage {
+			return false
+		}
+		if s.ignoreEvents || s.Scene == nil || !pos.In(s.Scene.SceneGeom.Bounds()) {
+			continue
+		}
+		var above []*Stage
+		for j := n - 1; j > i; j-- {
+			above = append(above, pm.stack.ValueByIndex(j))
+		}
+		for _, a := range above {
+			pm.deleteStage(a)
+		}
+		s.popupHandleEvent(e)
+		return true
+	}
+	return false
+}
+
+// abs returns the absolute value of the given int.
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+// mouseClone returns a copy of the given mouse event with the given type,
+// not handled, with the mouse button ([events.Event.NewFromClone] only
+// copies the base event).
+func mouseClone(e events.Event, typ events.Types) events.Event {
+	me, ok := e.(*events.Mouse)
+	if !ok {
+		return e.NewFromClone(typ)
+	}
+	c := *me
+	c.Typ = typ
+	c.ClearHandled()
+	return &c
 }
